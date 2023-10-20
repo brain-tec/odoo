@@ -78,6 +78,7 @@ import {
     EMAIL_REGEX,
     prepareUpdate,
     boundariesOut,
+    getFontSizeDisplayValue,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -259,6 +260,12 @@ export class OdooEditor extends EventTarget {
                 allowCommandVideo: true,
                 renderingClasses: [],
                 allowInlineAtRoot: false,
+                useResponsiveFontSizes: true,
+                showResponsiveFontSizesBadges: false,
+                // TODO probably move `getCSSVariableValue` and
+                // `convertNumericToUnit` as odoo-editor utils to avoid this
+                getCSSVariableValue: () => null,
+                convertNumericToUnit: x => x,
             },
             options,
         );
@@ -733,7 +740,14 @@ export class OdooEditor extends EventTarget {
                 // Otherwise, if we lost the selection in the editable, restore it.
                 this.historyResetLatestComputedSelection(true);
             }
-        })
+        });
+
+        const applyFontSizeREM = pxStrValue => {
+            const pxValue = parseFloat(pxStrValue);
+            const remValue = this.options.convertNumericToUnit(pxValue, "px", "rem");
+            this.execCommand("setFontSize", `${remValue}rem`);
+        };
+
         // Handle the font size input.
         if (fontSizeInput) {
             const debouncedOnInputChange = (() => {
@@ -742,42 +756,84 @@ export class OdooEditor extends EventTarget {
                     clearTimeout(handle);
                     handle = setTimeout(() => {
                         handle = null;
-                        setFontSize(fontSizeInput.value);
+                        const fontSize = parseInt(fontSizeInput.value);
+                        if (fontSize > 0) {
+                            if (!this.isSelectionInEditable()) {
+                                this.historyResetLatestComputedSelection(true);
+                            }
+                            applyFontSizeREM(fontSize);
+                            fontSizeInput.blur();
+                        }
                         resolve();
                     }, 50);
                 });
             })();
-            const setFontSize = fontSize => {
-                if (fontSize === 'default' || parseInt(fontSize) > 0) {
-                    if (!this.isSelectionInEditable()) {
-                        this.historyResetLatestComputedSelection(true);
-                    }
-                    this.execCommand('setFontSize', fontSize === 'default' ? undefined : parseInt(fontSize) + 'px');
-                    fontSizeInput.closest('#font-size').querySelectorAll('.show').forEach(el => {
-                        el.classList.remove('show'); // Close the dropdown.
-                        // Remove Popper's styles to ensure proper positioning
-                        // of the dropdown next time it opens.
-                        el.style.removeProperty('inset');
-                        el.style.removeProperty('transform');
-                    });
-                    fontSizeInput.blur();
-                }
-            }
             this.addDomListener(fontSizeInput, 'change', debouncedOnInputChange);
-            // Handle the font size dropdown.
-            const fontSizeDropdown = this.toolbar.querySelector('#font-size');
-            if (fontSizeDropdown) {
-                fontSizeDropdown.querySelectorAll('.dropdown-item').forEach(item => {
-                    this.addDomListener(item, 'mousedown', ev => setFontSize(ev.target.textContent));
-                    this.addDomListener(item, 'keydown', ev => {
-                        if (ev.key === 'Enter') {
-                            setFontSize(ev.target.textContent);
-                        }
-                    });
-                });
-            }
         }
+
+        // Handle the font size dropdown.
+        const fontSizeDropdown = this.toolbar.querySelector('#font-size');
+        if (fontSizeDropdown) {
+            this.computeFontSizeSelectorValues(fontSizeDropdown);
+
+            const applyFontSizeChoice = optionEl => {
+                if (!this.isSelectionInEditable()) {
+                    this.historyResetLatestComputedSelection(true);
+                }
+                if (this.options.useResponsiveFontSizes) {
+                    const fontSizeClassName = optionEl.dataset.applyClass;
+                    this.execCommand("setFontSize", undefined);
+                    this.execCommand("setFontSizeClassName", fontSizeClassName);
+                } else {
+                    applyFontSizeREM(optionEl.dataset.value);
+                }
+            };
+            fontSizeDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+                this.addDomListener(item, 'mousedown', ev => {
+                    applyFontSizeChoice(ev.currentTarget);
+                });
+                this.addDomListener(item, 'keydown', ev => {
+                    if (ev.key !== 'Enter') {
+                        return;
+                    }
+                    applyFontSizeChoice(ev.currentTarget);
+                });
+            });
+        }
+
         this._updateToolbar();
+    }
+
+    /**
+     * Sets the px value for every font size dropdown item.
+     */
+    computeFontSizeSelectorValues(fontSizeDropdownEl) {
+        fontSizeDropdownEl = fontSizeDropdownEl || this.toolbar.querySelector("#font-size");
+
+        let previousItem = null;
+        let previousValue = -1;
+        const style = this.document.defaultView.getComputedStyle(this.document.body);
+        for (const itemEl of fontSizeDropdownEl.querySelectorAll("[data-dynamic-value]")) {
+            const variableName = itemEl.dataset.dynamicValue;
+            const strValue = this.options.getCSSVariableValue(variableName, style);
+            const remValue = parseFloat(strValue);
+            const pxValue = this.options.convertNumericToUnit(remValue, "rem", "px");
+            // Change the text node value only to preserve the badge element
+            const roundedValue = Math.round(pxValue);
+            itemEl.dataset.value = roundedValue;
+            itemEl.firstChild.textContent = roundedValue;
+
+            // If same value as the previous one, hide the previous one
+            if (previousItem) {
+                previousItem.parentElement.classList.toggle('d-none', Math.abs(pxValue - previousValue) < 0.001);
+            }
+            previousItem = itemEl;
+            previousValue = pxValue;
+        }
+
+        for (const badgeEl of fontSizeDropdownEl.querySelectorAll(".o_we_font_size_badge")) {
+            badgeEl.classList.toggle("d-none", !this.options.showResponsiveFontSizesBadges);
+        }
     }
 
     resetContent(value) {
@@ -1973,7 +2029,9 @@ export class OdooEditor extends EventTarget {
                 if (!this.isSelectionInEditable()) {
                     this.historyResetLatestComputedSelection(true);
                 }
-                this.execCommand(buttonEl.dataset.call, buttonEl.dataset.arg1);
+                const arg1 = buttonEl.dataset.arg1;
+                const args = arg1 && arg1.split(",") || [];
+                this.execCommand(buttonEl.dataset.call, ...args);
 
                 ev.preventDefault();
                 this._updateToolbar();
@@ -3035,9 +3093,6 @@ export class OdooEditor extends EventTarget {
             }
         }
         if (sel.rangeCount) {
-            const closestStartContainer = closestElement(sel.getRangeAt(0).startContainer);
-            const selectionStartStyle = closestStartContainer && getComputedStyle(closestStartContainer);
-
             // queryCommandState does not take stylesheets into account
             for (const format of ['bold', 'italic', 'underline', 'strikeThrough', 'switchDirection']) {
                 const formatButton = this.toolbar.querySelector(`#${format.toLowerCase()}`);
@@ -3046,10 +3101,14 @@ export class OdooEditor extends EventTarget {
                 }
             }
 
-            const fontSizeValue = this.toolbar.querySelector('#fontSizeCurrentValue');
-            if (fontSizeValue) {
-                fontSizeValue.value = /\d+/.exec(selectionStartStyle.fontSize).pop();
+            const fontSizeEl = this.toolbar.querySelector("#fontSizeCurrentValue");
+            if (fontSizeEl) {
+                fontSizeEl.value = Math.round(getFontSizeDisplayValue(sel,
+                    this.options.getCSSVariableValue,
+                    this.options.convertNumericToUnit
+                ));
             }
+
             const table = getInSelection(this.document, 'table');
             const toolbarButton = this.toolbar.querySelector('.toolbar-edit-table');
             if (toolbarButton) {
@@ -3062,16 +3121,22 @@ export class OdooEditor extends EventTarget {
         const listUIClasses = {UL: 'fa-list-ul', OL: 'fa-list-ol', CL: 'fa-tasks'};
         const block = closestBlock(sel.anchorNode);
         let activeLabel = undefined;
-        for (const [style, tag, isList] of [
-            ['paragraph', 'P', false],
-            ['pre', 'PRE', false],
-            ['heading1', 'H1', false],
-            ['heading2', 'H2', false],
-            ['heading3', 'H3', false],
-            ['heading4', 'H4', false],
-            ['heading5', 'H5', false],
-            ['heading6', 'H6', false],
-            ['blockquote', 'BLOCKQUOTE', false],
+        for (const [style, cssSelector, isList] of [
+            ['paragraph', 'p:not(.small, .lead)', false],
+            ['pre', 'pre', false],
+            ['heading1', 'h1:not(.display-1, .display-2, .display-3, .display-4)', false],
+            ['heading2', 'h2', false],
+            ['heading3', 'h3', false],
+            ['heading4', 'h4', false],
+            ['heading5', 'h5', false],
+            ['heading6', 'h6', false],
+            ['display-1', 'h1.display-1', false],
+            ['display-2', 'h1.display-2', false],
+            ['display-3', 'h1.display-3', false],
+            ['display-4', 'h1.display-4', false],
+            ['blockquote', 'blockquote', false],
+            ['small', '.small', false],
+            ['light', '.lead', false],
             ['unordered', 'UL', true],
             ['ordered', 'OL', true],
             ['checklist', 'CL', true],
@@ -3081,8 +3146,8 @@ export class OdooEditor extends EventTarget {
                 button.classList.toggle('active', false);
             } else if (button) {
                 const isActive = isList
-                    ? block.tagName === 'LI' && getListMode(block.parentElement) === tag
-                    : block.tagName === tag;
+                    ? block.tagName === 'LI' && getListMode(block.parentElement) === cssSelector
+                    : block.matches(cssSelector);
                 button.classList.toggle('active', isActive);
 
                 if (!isList && isActive) {
@@ -3125,6 +3190,7 @@ export class OdooEditor extends EventTarget {
             this._positionToolbar();
         }
     }
+
     updateToolbarPosition() {
         if (
             this.autohideToolbar &&
@@ -3134,6 +3200,7 @@ export class OdooEditor extends EventTarget {
             this._positionToolbar();
         }
     }
+
     _positionToolbar() {
         const OFFSET = 10;
         let isBottom = false;

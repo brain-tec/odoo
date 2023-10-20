@@ -412,14 +412,11 @@ class Channel(models.Model):
         compute='_compute_members_counts')
     members_completed_count = fields.Integer('# Completed Attendees', compute='_compute_members_counts')
     members_invited_count = fields.Integer('# Invited Attendees', compute='_compute_members_counts')
-    # partner_ids and partner_all_ids implemented as compute/search instead of specifying the relation table
-    # directly, this is done because we want to exclude active=False records on the joining table
+    # partner_ids is implemented as compute/search instead of specifying the relation table
+    # directly because we want to exclude active=False records on the joining table
     partner_ids = fields.Many2many(
         'res.partner', string='Attendees', help="Enrolled partners in the course",
         compute="_compute_partners", search="_search_partner_ids")
-    partner_all_ids = fields.Many2many(
-        'res.partner', string='All Attendees', help="Partners in the course (both enrolled and invited)",
-        compute="_compute_partners", search="_search_partner_all_ids")
     # not stored access fields, depending on each user
     completed = fields.Boolean('Done', compute='_compute_user_statistics', compute_sudo=False)
     completion = fields.Integer('Completion', compute='_compute_user_statistics', compute_sudo=False)
@@ -427,10 +424,10 @@ class Channel(models.Model):
     has_requested_access = fields.Boolean(string='Access Requested', compute='_compute_has_requested_access', compute_sudo=False)
     is_member = fields.Boolean(
         string='Is Enrolled Attendee', help='Is the attendee actively enrolled.',
-        compute='_compute_membership_values', compute_sudo=False)
+        compute='_compute_membership_values', search="_search_is_member")
     is_member_invited = fields.Boolean(
         string='Is Invited Attendee', help='Is the invitation for this attendee pending.',
-        compute='_compute_membership_values', compute_sudo=False)
+        compute='_compute_membership_values', search="_search_is_member_invited")
     partner_has_new_content = fields.Boolean(compute='_compute_partner_has_new_content', compute_sudo=False)
     # karma generation
     karma_gen_channel_rank = fields.Integer(string='Course ranked', default=5)
@@ -468,18 +465,15 @@ class Channel(models.Model):
     @api.depends('channel_partner_all_ids', 'channel_partner_all_ids.member_status', 'channel_partner_all_ids.active')
     def _compute_partners(self):
         data = {
-            (slide_channel, member_status): partner_ids
-            for slide_channel, member_status, partner_ids in self.env['slide.channel.partner'].sudo()._read_group(
-                [('channel_id', 'in', self.ids)],
-                ['channel_id', 'member_status'],
+            slide_channel: partner_ids
+            for slide_channel, partner_ids in self.env['slide.channel.partner'].sudo()._read_group(
+                [('channel_id', 'in', self.ids), ('member_status', '!=', 'invited')],
+                ['channel_id'],
                 aggregates=['partner_id:array_agg']
             )
         }
-
         for slide_channel in self:
-            partner_ids = data.get((slide_channel, 'joined'), []) + data.get((slide_channel, 'ongoing'), []) + data.get((slide_channel, 'completed'), [])
-            slide_channel.partner_ids = partner_ids
-            slide_channel.partner_all_ids = partner_ids + data.get((slide_channel, 'invited'), [])
+            slide_channel.partner_ids = data.get(slide_channel, [])
 
     def _search_partner_ids(self, operator, value):
         if isinstance(value, int) and operator == 'in':
@@ -489,16 +483,6 @@ class Channel(models.Model):
                 [('partner_id', operator, value),
                  ('active', '=', True),
                  ('member_status', '!=', 'invited')],
-            )
-        )]
-
-    def _search_partner_all_ids(self, operator, value):
-        if isinstance(value, int) and operator == 'in':
-            value = [value]
-        return [(
-            'channel_partner_all_ids', '=', self.env['slide.channel.partner']._search(
-                [('partner_id', operator, value),
-                 ('active', '=', True)],
             )
         )]
 
@@ -533,26 +517,43 @@ class Channel(models.Model):
         for channel in self:
             channel.has_requested_access = channel.id in requested_cids
 
-    @api.depends('channel_partner_all_ids.partner_id', 'channel_partner_all_ids.member_status')
+    @api.depends('channel_partner_all_ids.partner_id', 'channel_partner_all_ids.member_status', 'channel_partner_all_ids.active')
     @api.depends_context('uid')
-    @api.model
     def _compute_membership_values(self):
         if self.env.user._is_public():
             self.is_member = False
             self.is_member_invited = False
             return
-
-        channel_partners = self.env['slide.channel.partner'].sudo().search([
-            ('channel_id', 'in', self.ids),
-            ('partner_id', '=', self.env.user.partner_id.id),
-        ])
-        active_channel_partners = channel_partners.filtered(
-            lambda channel_partner: channel_partner.member_status != 'invited')
-        invitation_pending_channels = (channel_partners - active_channel_partners).channel_id
-        active_channels = active_channel_partners.channel_id
+        data = {
+            member_status: channel_ids
+            for member_status, channel_ids in self.env['slide.channel.partner'].sudo()._read_group(
+                [('partner_id', '=', self.env.user.partner_id.id), ('channel_id', 'in', self.ids), ('active', '=', True)],
+                ['member_status'], ['channel_id:array_agg']
+            )
+        }
+        active_channels_ids = data.get('joined', []) + data.get('ongoing', []) + data.get('completed', [])
+        invitation_pending_channels_ids = data.get('invited', [])
         for channel in self:
-            channel.is_member = channel in active_channels
-            channel.is_member_invited = channel in invitation_pending_channels
+            channel.is_member = channel.id in active_channels_ids
+            channel.is_member_invited = channel.id in invitation_pending_channels_ids
+
+    def _search_is_member(self, operator, value):
+        if operator not in ['=', '!='] or not isinstance(value, bool):
+            raise NotImplementedError(_('Operation not supported'))
+        check_has_access = operator == '=' and value or operator == '!=' and not value
+        return [('id', 'in' if check_has_access else 'not in', self._search_is_member_channel_ids())]
+
+    def _search_is_member_invited(self, operator, value):
+        if operator not in ['=', '!='] or not isinstance(value, bool):
+            raise NotImplementedError(_('Operation not supported'))
+        check_has_access = operator == '=' and value or operator == '!=' and not value
+        return [('id', 'in' if check_has_access else 'not in', self._search_is_member_channel_ids(invited=True))]
+
+    def _search_is_member_channel_ids(self, invited=False):
+        return self.env['slide.channel.partner'].sudo()._read_group(
+            [('partner_id', '=', self.env.user.partner_id.id), ('member_status', '=' if invited else '!=', 'invited'), ('active', '=', True)],
+            aggregates=['channel_id:array_agg']
+        )[0][0]
 
     @api.depends('slide_ids.is_category')
     def _compute_category_and_slide_ids(self):
@@ -1227,7 +1228,7 @@ class Channel(models.Model):
         slide_category = options.get('slide_category')
         domain = [website.website_domain()]
         if my:
-            domain.append([('partner_ids', '=', self.env.user.partner_id.id)])
+            domain.append([('is_member', '=', True)])
         if search_tags:
             ChannelTag = self.env['slide.channel.tag']
             try:

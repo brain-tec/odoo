@@ -1623,11 +1623,19 @@
         </we-row>
     </div>
     <div data-js="OptionsTab" data-selector="theme-paragraph" data-no-check="true">
-        <we-input string="Font size"
-                  data-customize-website-variable="null"
-                  data-variable="font-size-base"
-                  data-unit="px"
-                  data-save-unit="rem"/>
+        <we-collapse>
+            <we-input string="Font size"
+                    data-customize-website-variable="null"
+                    data-variable="font-size-base"
+                    data-unit="px"
+                    data-save-unit="rem"/>
+            <we-input string="Small"
+                    class="o_we_sublevel_1"
+                    data-customize-website-variable="null"
+                    data-variable="small-font-size"
+                    data-unit="px"
+                    data-save-unit="rem"/>
+        </we-collapse>
         <we-fontfamilypicker string="Font family" data-variable="font"/>
         <!-- "× ": \u00D7\u2000 -->
         <we-input string="Line height"
@@ -1641,8 +1649,10 @@
     </div>
     <div data-js="OptionsTab" data-selector="theme-headings" data-no-check="true">
         <t t-set="heading_label">Heading</t>
+        <t t-set="display_label">Display</t>
         <we-collapse>
             <we-input string="Font size"
+                      title="Heading 1"
                       data-customize-website-variable="null"
                       data-variable="h1-font-size"
                       data-unit="px"
@@ -1654,9 +1664,18 @@
                           data-unit="px"
                           data-save-unit="rem"/>
             </t>
+            <!-- We don't use `display-font-sizes.5` and `display-font-sizes.6` -->
+            <t t-set="used_display_font_sizes" t-value="[1, 2, 3, 4]"/>
+            <t t-foreach="used_display_font_sizes" t-as="depth">
+                <we-input t-attf-string="#{display_label} #{depth}" class="o_we_sublevel_1"
+                          data-customize-website-variable="null"
+                          t-attf-data-variable="display-#{depth}-font-size"
+                          data-unit="px"
+                          data-save-unit="rem"/>
+            </t>
         </we-collapse>
         <we-collapse>
-            <we-row string="Font family">
+            <we-row string="Font family" title="Heading 1">
                 <we-fontfamilypicker data-variable="headings-font"/>
                 <we-button class="fa fa-fw fa-remove o_we_hover_danger o_we_link" title="Reset to Paragraph Font Family"
                     data-customize-website-variable="" data-variable="headings-font"
@@ -1670,10 +1689,19 @@
                         t-attf-data-remove-font="set-h#{depth}-font" data-no-preview="true"/>
                 </we-row>
             </t>
+            <t t-foreach="used_display_font_sizes" t-as="depth">
+                <we-row t-attf-string="#{display_label} #{depth}" class="o_we_sublevel_1">
+                    <we-fontfamilypicker t-attf-data-variable="display-#{depth}-font"/>
+                    <we-button class="fa fa-fw fa-remove o_we_hover_danger o_we_link" title="Reset to Headings Font Family"
+                        data-customize-website-variable="" t-attf-data-variable="display-#{depth}-font"
+                        t-attf-data-remove-font="set-display-#{depth}-font" data-no-preview="true"/>
+                </we-row>
+            </t>
         </we-collapse>
         <we-collapse>
             <!-- "× ": \u00D7\u2000 -->
             <we-input string="Line height"
+                      title="Heading 1"
                       data-customize-website-variable="null"
                       data-variable="headings-line-height"
                       data-fake-unit="× "/>
@@ -1683,9 +1711,15 @@
                           t-attf-data-variable="h#{depth}-line-height"
                           data-fake-unit="× "/>
             </t>
+            <t t-foreach="used_display_font_sizes" t-as="depth">
+                <we-input t-attf-string="#{display_label} #{depth}" class="o_we_sublevel_1"
+                          data-customize-website-variable="null"
+                          t-attf-data-variable="display-#{depth}-line-height"
+                          data-fake-unit="× "/>
+            </t>
         </we-collapse>
         <we-collapse>
-            <we-row string="Margins">
+            <we-row string="Margins" title="Heading 1">
                 <we-input title="Top" data-customize-website-variable="" data-variable="headings-margin-top" data-unit="px" data-save-unit="px"/>
                 <we-input title="Bottom" data-customize-website-variable="" data-variable="headings-margin-bottom" data-unit="px" data-save-unit="px"/>
             </we-row>
@@ -1693,6 +1727,12 @@
                 <we-row t-attf-string="#{heading_label} #{depth}" class="o_we_sublevel_1">
                     <we-input title="Top" data-customize-website-variable="" t-attf-data-variable="h#{depth}-margin-top" data-unit="px" data-save-unit="px"/>
                     <we-input title="Bottom" data-customize-website-variable="" t-attf-data-variable="h#{depth}-margin-bottom" data-unit="px" data-save-unit="px"/>
+                </we-row>
+            </t>
+            <t t-foreach="used_display_font_sizes" t-as="depth">
+                <we-row t-attf-string="#{display_label} #{depth}" class="o_we_sublevel_1">
+                    <we-input title="Top" data-customize-website-variable="" t-attf-data-variable="display-#{depth}-margin-top" data-unit="px" data-save-unit="px"/>
+                    <we-input title="Bottom" data-customize-website-variable="" t-attf-data-variable="display-#{depth}-margin-bottom" data-unit="px" data-save-unit="px"/>
                 </we-row>
             </t>
         </we-collapse>
