@@ -5,6 +5,7 @@ import datetime
 import logging
 import traceback
 from collections import defaultdict
+from uuid import uuid4
 
 from dateutil.relativedelta import relativedelta
 
@@ -54,6 +55,8 @@ WRITE_TRIGGERS = [
     'on_user_set',
 ]
 
+MAIL_TRIGGERS = ("on_message_received", "on_message_sent")
+
 CREATE_WRITE_SET = set(CREATE_TRIGGERS + WRITE_TRIGGERS)
 
 TIME_TRIGGERS = [
@@ -71,7 +74,8 @@ class BaseAutomation(models.Model):
     model_id = fields.Many2one(
         "ir.model", string="Model", required=True, ondelete="cascade", help="Model on which the automation rule runs."
     )
-    model_name = fields.Char(related="model_id.model", string="Model Name", readonly=True)
+    model_name = fields.Char(related="model_id.model", string="Model Name", readonly=True, inverse="_inverse_model_name")
+    model_is_mail_thread = fields.Boolean(related="model_id.is_mail_thread")
     action_server_ids = fields.One2many("ir.actions.server", "base_automation_id",
         context={'default_usage': 'base_automation'},
         string="Actions",
@@ -79,7 +83,18 @@ class BaseAutomation(models.Model):
         store=True,
         readonly=False,
     )
+    url = fields.Char(compute='_compute_url')
+    webhook_uuid = fields.Char(string="Webhook UUID", readonly=True, copy=False, default=lambda self: str(uuid4()))
+    record_getter = fields.Char(help="This code will be run to find on which record the automation rule should be run.\nExample: model.browse(payload.get('recordId')))")
+    log_webhook_calls = fields.Boolean(string="Log Calls", default=False)
     active = fields.Boolean(default=True, help="When unchecked, the rule is hidden and will not be executed.")
+
+    @api.constrains("trigger", "model_id")
+    def _check_trigger(self):
+        for automation in self:
+            if automation.trigger in MAIL_TRIGGERS and not automation.model_id.is_mail_thread:
+                raise exceptions.ValidationError(_("Mail event can not be configured on model %s. Only models with discussion feature can be used.", automation.model_id.name))
+
     trigger = fields.Selection(
         [
             ('on_stage_set', "Stage is set to"),
@@ -99,6 +114,11 @@ class BaseAutomation(models.Model):
             ('on_time', "Based on date field"),
             ('on_time_created', "After creation"),
             ('on_time_updated', "After last update"),
+
+            ("on_message_received", "A message was received from an external user"),
+            ("on_message_sent", "A message was sent to an external user"),
+
+            ('on_webhook', "On webhook"),
         ], string='Trigger',
         compute='_compute_trigger_and_trigger_field_ids', readonly=False, store=True, required=True)
     trg_selection_field_id = fields.Many2one(
@@ -189,6 +209,17 @@ class BaseAutomation(models.Model):
                       action_names=', '.join(failing_actions.mapped('name'))
                      )
                 )
+    @api.depends("trigger", "webhook_uuid")
+    def _compute_url(self):
+        for automation in self:
+            if automation.trigger != "on_webhook":
+                automation.url = ""
+            else:
+                automation.url = "%s/web/hook/%s" % (automation.get_base_url(), automation.webhook_uuid)
+
+    def _inverse_model_name(self):
+        for rec in self:
+            rec.model_id = self.env["ir.model"]._get(rec.model_name)
 
     @api.constrains('trigger', 'action_server_ids')
     def _check_trigger_state(self):
@@ -224,7 +255,6 @@ class BaseAutomation(models.Model):
         to_reset.trg_date_id = False
         for record in (self - to_reset):
             record.trg_date_id = record.trigger_field_ids
-
 
     @api.depends('trigger')
     def _compute_trg_date_range_data(self):
@@ -338,6 +368,8 @@ class BaseAutomation(models.Model):
             else:
                 automation.trigger_field_ids = False
                 continue
+            if automation.model_id.is_mail_thread and automation.trigger in MAIL_TRIGGERS:
+                continue
 
             automation.trigger_field_ids = self.env['ir.model.fields'].search(domain, limit=1)
             automation.trigger = False if not automation.trigger_field_ids else automation.trigger
@@ -393,6 +425,79 @@ class BaseAutomation(models.Model):
         self._update_registry()
         return res
 
+    def action_rotate_webhook_uuid(self):
+        for automation in self:
+            automation.webhook_uuid = str(uuid4())
+
+    def action_view_webhook_logs(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Webhook Logs'),
+            'res_model': 'ir.logging',
+            'view_mode': 'tree,form',
+            'domain': [('path', '=', "base_automation(%s)" % self.id)],
+        }
+
+    def _prepare_loggin_values(self, **values):
+        self.ensure_one()
+        defaults = {
+            'name': _("Webhook Log"),
+            'type': 'server',
+            'dbname': self._cr.dbname,
+            'level': 'INFO',
+            'path': "base_automation(%s)" % self.id,
+            'func': '',
+            'line': ''
+        }
+        defaults.update(**values)
+        return defaults
+
+    def _execute_webhook(self, payload):
+        """ Execute the webhook for the given payload.
+        The payload is a dictionnary that can be used by the `record_getter` to
+        identify the record on which the automation should be run.
+        """
+        self.ensure_one()
+        ir_logging_sudo = self.env['ir.logging'].sudo()
+
+        # info logging is done by the ir.http logger
+        msg = "Webhook #%s triggered with payload %s"
+        msg_args = (self.id, payload)
+        _logger.debug(msg, *msg_args)
+        if self.log_webhook_calls:
+            ir_logging_sudo.create(self._prepare_loggin_values(message=msg % msg_args))
+
+        record = self.env[self.model_name]
+        if self.record_getter:
+            try:
+                record = safe_eval.safe_eval(self.record_getter, self._get_eval_context(payload=payload))
+            except Exception as e: # noqa: BLE001
+                msg = "Webhook #%s could not be triggered because the record_getter failed:\n%s"
+                msg_args = (self.id, traceback.format_exc())
+                _logger.warning(msg, *msg_args)
+                if self.log_webhook_calls:
+                    ir_logging_sudo.create(self._prepare_loggin_values(message=msg % msg_args, level="ERROR"))
+                raise e
+
+        if not record.exists():
+            msg = "Webhook #%s could not be triggered because no record to run it on was found."
+            msg_args = (self.id)
+            _logger.warning(msg, *msg_args)
+            if self.log_webhook_calls:
+                ir_logging_sudo.create(self._prepare_loggin_values(message=msg % msg_args, level="ERROR"))
+            raise exceptions.ValidationError(_("No record to run the automation on was found."))
+
+        try:
+            return self._process(record)
+        except Exception as e: # noqa: BLE001
+            msg = "Webhook #%s failed with error:\n%s"
+            msg_args = (self.id, traceback.format_exc())
+            _logger.warning(msg, *msg_args)
+            if self.log_webhook_calls:
+                ir_logging_sudo.create(self._prepare_loggin_values(message=msg % msg_args, level="ERROR"))
+            raise e
+
     def _update_cron(self):
         """ Activate the cron job depending on whether there exists automation rules
         based on time conditions.  Also update its frequency according to
@@ -428,17 +533,23 @@ class BaseAutomation(models.Model):
         automations = self.with_context(active_test=True).sudo().search(domain)
         return automations.with_env(self.env)
 
-    def _get_eval_context(self):
+    def _get_eval_context(self, payload=None):
         """ Prepare the context used when evaluating python code
             :returns: dict -- evaluation context given to safe_eval
         """
-        return {
+        self.ensure_one()
+        model = self.env[self.model_name]
+        eval_context = {
             'datetime': safe_eval.datetime,
             'dateutil': safe_eval.dateutil,
             'time': safe_eval.time,
             'uid': self.env.uid,
             'user': self.env.user,
+            'model': model,
         }
+        if payload is not None:
+            eval_context['payload'] = payload
+        return eval_context
 
     def _get_cron_interval(self, automations=None):
         """ Return the expected time interval used by the cron, in minutes. """
@@ -490,7 +601,7 @@ class BaseAutomation(models.Model):
     def _process(self, records, domain_post=None):
         """ Process automation ``self`` on the ``records`` that have not been done yet. """
         # filter out the records on which self has already been done
-        automation_done = self._context['__action_done']
+        automation_done = self._context.get('__action_done', {})
         records_done = automation_done.get(self, records.browse())
         records -= records_done
         if not records:
@@ -722,9 +833,32 @@ class BaseAutomation(models.Model):
                 for field in automation_rule.on_change_field_ids:
                     Model._onchange_methods[field.name].append(method)
 
+            if automation_rule.model_id.is_mail_thread and automation_rule.trigger in MAIL_TRIGGERS:
+                def _message_post(self, *args, **kwargs):
+                    message = _message_post.origin(self, *args, **kwargs)
+                    # Don't execute automations for a message emitted during
+                    # the run of automations for a real message
+                    # Don't execute if we know already that a message is only internal
+                    message_sudo = message.sudo().with_context(active_test=False)
+                    if "__action_done"  in self.env.context or message_sudo.is_internal or message_sudo.subtype_id.internal:
+                        return message
+                    if message_sudo.message_type in ('notification', 'auto_comment', 'user_notification'):
+                        return message
+
+                    # always execute actions when the author is a customer
+                    mail_trigger = "on_message_received" if message_sudo.author_id.partner_share else "on_message_sent"
+                    automations = self.env['base.automation']._get_actions(self, [mail_trigger])
+                    for automation in automations.with_context(old_values=None):
+                        records = automation._filter_pre(self)
+                        automation._process(records)
+
+                    return message
+
+                patch(Model, "message_post", _message_post)
+
     def _unregister_hook(self):
         """ Remove the patches installed by _register_hook() """
-        NAMES = ['create', 'write', '_compute_field_value', 'unlink', '_onchange_methods']
+        NAMES = ['create', 'write', '_compute_field_value', 'unlink', '_onchange_methods', "message_post"]
         for Model in self.env.registry.values():
             for name in NAMES:
                 try:

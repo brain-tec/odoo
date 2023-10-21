@@ -21,7 +21,6 @@ export class MoOverview extends Component {
 
         this.state = useState({
             data: {},
-            isDone: false,
             showOptions: this.getDefaultConfig(),
         });
 
@@ -41,18 +40,21 @@ export class MoOverview extends Component {
             [this.activeId],
         );
         this.state.data = reportValues.data;
-        this.state.isDone = ['done', 'cancel'].some(doneState => reportValues.data?.summary?.state === doneState);
-        if (this.state.isDone) {
+        if (this.isProductionDone) {
             // Hide Availabilities / Receipts / Status columns when the MO is done.
             this.state.showOptions.availabilities = false;
             this.state.showOptions.receipts = false;
             this.state.showOptions.replenishments = false;
+            this.state.showOptions.unitCosts = true;
         }
         this.state.showOptions.uom = reportValues.context.show_uom;
         this.context = reportValues.context;
+        // Main MO's operations & byproducts are always unfolded by default.
         if (reportValues.data?.operations?.summary?.index) {
-            // Main MO's operations are always unfolded by default.
             this.unfoldedIds.add(reportValues.data.operations.summary.index);
+        }
+        if (reportValues.data?.byproducts?.summary?.index) {
+            this.unfoldedIds.add(reportValues.data.byproducts.summary.index);
         }
     }
 
@@ -69,18 +71,10 @@ export class MoOverview extends Component {
     }
 
     async onPrint() {
-        const reportName = `mrp.report_mo_overview?docids=${this.activeId}`
-                         + `&replenishments=${+this.state.showOptions.replenishments}`
-                         + `&availabilities=${+this.state.showOptions.availabilities}`
-                         + `&receipts=${+this.state.showOptions.receipts}`
-                         + `&moCosts=${+this.state.showOptions.moCosts}`
-                         + `&productCosts=${+this.state.showOptions.productCosts}`
-                         + `&unfoldedIds=${JSON.stringify(Array.from(this.unfoldedIds))}`;
-
         return this.actionService.doAction({
             type: "ir.actions.report",
             report_type: "qweb-pdf",
-            report_name: reportName,
+            report_name: this.reportName,
             report_file: "mrp.report_mo_overview",
         });
     }
@@ -97,8 +91,9 @@ export class MoOverview extends Component {
             replenishments: true,
             availabilities: true,
             receipts: true,
+            unitCosts: false,
             moCosts: true,
-            productCosts: true,
+            realCosts: true,
         };
     }
 
@@ -132,12 +127,49 @@ export class MoOverview extends Component {
         return this.state.showOptions.receipts;
     }
 
+    get showUnitCosts() {
+        return this.state.showOptions.unitCosts;
+    }
+
     get showMoCosts() {
         return this.state.showOptions.moCosts;
     }
 
-    get showProductCosts() {
-        return this.state.showOptions.productCosts;
+    get showRealCosts() {
+        return this.state.showOptions.realCosts;
+    }
+
+    get isProductionDone() {
+        return this.state.data?.summary?.state === "done";
+    }
+
+    get hasOperations() {
+        return this.state.data?.operations?.details?.length > 0;
+    }
+
+    get hasBreakdown() {
+        return this.state.data?.cost_breakdown?.length > 0;
+    }
+
+    get totalColspan() {
+        let colspan = 2;  // Name & Quantity
+        if (this.showReplenishments) colspan++;
+        if (this.showAvailabilities) colspan += 2;  // Free to use / On Hand & Reserved
+        if (this.showUom) colspan++;
+        if (this.showReceipts) colspan++;
+        if (this.showUnitCosts) colspan++;
+        return colspan;
+    }
+
+    get reportName() {
+        return `mrp.report_mo_overview?docids=${this.activeId}`
+            + `&replenishments=${+this.state.showOptions.replenishments}`
+            + `&availabilities=${+this.state.showOptions.availabilities}`
+            + `&receipts=${+this.state.showOptions.receipts}`
+            + `&unitCosts=${+this.state.showOptions.unitCosts}`
+            + `&moCosts=${+this.state.showOptions.moCosts}`
+            + `&realCosts=${+this.state.showOptions.realCosts}`
+            + `&unfoldedIds=${JSON.stringify(Array.from(this.unfoldedIds))}`;
     }
 }
 

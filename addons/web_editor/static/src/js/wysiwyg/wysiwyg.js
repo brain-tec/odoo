@@ -11,6 +11,8 @@ import * as OdooEditorLib from "@web_editor/js/editor/odoo-editor/src/OdooEditor
 import { Toolbar } from "@web_editor/js/editor/toolbar";
 import { LinkPopoverWidget } from '@web_editor/js/wysiwyg/widgets/link_popover_widget';
 import { AltDialog } from '@web_editor/js/wysiwyg/widgets/alt_dialog';
+import { ChatGPTPromptDialog } from '@web_editor/js/wysiwyg/widgets/chatgpt_prompt_dialog';
+import { ChatGPTAlternativesDialog } from '@web_editor/js/wysiwyg/widgets/chatgpt_alternatives_dialog';
 import { ImageCrop } from '@web_editor/js/wysiwyg/widgets/image_crop';
 
 import * as wysiwygUtils from "@web_editor/js/common/wysiwyg_utils";
@@ -1384,6 +1386,7 @@ export class Wysiwyg extends Component {
                 startNode: options.link,
             });
             if (!link) {
+                this.odooEditor.historyUnpauseSteps();
                 return
             }
             this._shouldDelayBlur = true;
@@ -1402,18 +1405,68 @@ export class Wysiwyg extends Component {
                         data.rel = 'ugc';
                     }
                     data.linkDialog.applyLinkToDom(data);
+                    this.odooEditor.historyUnpauseSteps();
                     this.odooEditor.historyStep();
                     const link = data.linkDialog.$link[0];
                     this.odooEditor.setContenteditableLink(link);
                     setSelection(link, 0, link, link.childNodes.length, false);
                     link.focus();
                 },
-                close: () => {
+                onClose: () => {
                     this.odooEditor.historyUnpauseSteps();
                     this.odooEditor.historyRevertUntil(historyStepIndex)
                 }
             });
         }
+    }
+    /**
+     * Open one of the ChatGPTDialogs to generate or modify content.
+     *
+     * @param {'prompt'|'alternatives'} [mode='prompt']
+     */
+    openChatGPTDialog(mode = 'prompt') {
+        const restore = preserveCursor(this.odooEditor.document);
+        const params = {
+            insert: content => {
+                this.odooEditor.historyPauseSteps();
+                const insertedNodes = this.odooEditor.execCommand('insert', content);
+                this.odooEditor.historyUnpauseSteps();
+                this.notification.add(_t('Your content was successfully generated.'), {
+                    title: _t('Content generated'),
+                    type: 'success',
+                });
+                this.odooEditor.historyStep();
+                // Add a frame around the inserted content to highlight it for 2
+                // seconds.
+                const start = insertedNodes?.length && closestElement(insertedNodes[0]);
+                const end = insertedNodes?.length && closestElement(insertedNodes[insertedNodes.length - 1]);
+                if (start && end) {
+                    const divContainer = this.odooEditor.editable.parentElement;
+                    let [parent, left] = [start.offsetParent, start.offsetLeft];
+                    while (parent && !parent.contains(divContainer)) {
+                        left += parent.offsetLeft;
+                        parent = parent.offsetParent;
+                    }
+                    const div = document.createElement('div');
+                    div.classList.add('o-chatgpt-content');
+                    div.style.left = `${left - 10}px`;
+                    div.style.top = `${start.offsetTop - 10}px`;
+                    div.style.width = `${Math.max(start.clientWidth, end.clientWidth) + 20}px`;
+                    div.style.height = `${end.offsetTop + end.clientHeight - start.offsetTop + 20}px`;
+                    divContainer.prepend(div);
+                    setTimeout(() => div.remove(), 2000);
+                }
+            },
+        };
+        if (mode === 'alternatives') {
+            params.originalText = this.odooEditor.document.getSelection().toString() || '';
+        }
+        this.odooEditor.document.getSelection().collapseToEnd();
+        this.env.services.dialog.add(
+            mode === 'prompt' ? ChatGPTPromptDialog : ChatGPTAlternativesDialog,
+            params,
+            { onClose: restore },
+        );
     }
     /**
      * Removes the current Link.
@@ -1725,6 +1778,10 @@ export class Wysiwyg extends Component {
                     });
                     break;
                 }
+                case 'open-chatgpt': {
+                    this.openChatGPTDialog(this.odooEditor.document.getSelection()?.isCollapsed ? 'prompt' : 'alternatives');
+                    break;
+                }
             }
         };
         if (!options.snippets) {
@@ -1738,6 +1795,7 @@ export class Wysiwyg extends Component {
     })
         $toolbar.find('#media-insert, #media-replace, #media-description').click(openTools);
         $toolbar.find('#create-link').click(openTools);
+        $toolbar.find('#open-chatgpt').click(openTools);
         $toolbar.find('#image-shape div, #fa-spin').click(e => {
             if (!this.lastMediaClicked) {
                 return;
@@ -2292,6 +2350,15 @@ export class Wysiwyg extends Component {
                     }
                 },
             },
+            {
+                category: _t('AI Tools'),
+                name: _t('ChatGPT'),
+                description: _t('Generate or transform content with AI.'),
+                fontawesome: 'fa-magic',
+                priority: 1,
+                isDisabled: () => !this.odooEditor.isSelectionInBlockRoot(),
+                callback: async () => this.openChatGPTDialog(),
+            },
         ];
         if (!editorOptions.inlineStyle) {
             commands.push(
@@ -2809,15 +2876,14 @@ export class Wysiwyg extends Component {
                             const remoteClient = { id: fromClientId, startTime: remoteStartTime };
                             if (isClientFirst(localClient, remoteClient)) {
                                 this._historySyncAtLeastOnce = true;
+                                this._historySyncFinished = true;
                             } else {
                                 this._resetCollabRequests();
                                 const response = await this._resetFromClient(fromClientId, this._lastCollaborationResetId);
-                                if (response !== REQUEST_ERROR) {
+                                if (response === REQUEST_ERROR) {
                                     return;
                                 }
-                                this.options.onHistoryResetFromSteps();
                             }
-                            this._historySyncFinished = true;
                         } else {
                             // Make both send their last step to each other to
                             // ensure they are in sync.
@@ -2825,17 +2891,21 @@ export class Wysiwyg extends Component {
                             this._setCollaborativeSelection(fromClientId);
                         }
 
-                        this.requestClient(fromClientId, 'get_client_name', undefined, { transport: 'rtc' }).then((clientName) => {
+                        const getClientNamePromise = this.requestClient(
+                            fromClientId, 'get_client_name', undefined, { transport: 'rtc' }
+                        ).then((clientName) => {
                             if (clientName === REQUEST_ERROR) return;
                             this.ptp.clientsInfos[fromClientId].clientName = clientName;
                             this.odooEditor.multiselectionRefresh();
                         });
-                        this.requestClient(fromClientId, 'get_client_avatar', undefined, { transport: 'rtc' }).then(clientAvatarUrl => {
+                        const getClientAvatar = this.requestClient(
+                            fromClientId, 'get_client_avatar', undefined, { transport: 'rtc' }
+                        ).then(clientAvatarUrl => {
                             if (clientAvatarUrl === REQUEST_ERROR) return;
                             this.ptp.clientsInfos[fromClientId].clientAvatarUrl = clientAvatarUrl;
                             this.odooEditor.multiselectionRefresh();
                         });
-
+                        await Promise.all([getClientAvatar, getClientNamePromise]);
                         break;
                     }
                     case 'oe_history_step':
@@ -3124,6 +3194,7 @@ export class Wysiwyg extends Component {
             this.odooEditor.onExternalHistorySteps(this._historyStepsBuffer);
             this._historyStepsBuffer = [];
         }
+        this.options.onHistoryResetFromSteps();
         this._setCollaborativeSelection(fromClientId);
     }
     async requestClient(clientId, requestName, requestPayload, params) {

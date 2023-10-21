@@ -81,7 +81,7 @@
         <record id="hr_timesheet_report_search" model="ir.ui.view">
             <field name="name">timesheets.analysis.report.search</field>
             <field name="model">timesheets.analysis.report</field>
-            <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_search_base"/>
+            <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_search"/>
             <field name="mode">primary</field>
             <field name="arch" type="xml">
                 <search position="attributes">

@@ -79,7 +79,6 @@ class BaseAutomationTestUi(HttpCase):
         self.assertEqual(base_auto.trg_field_ref_model_name, "test_base_automation.tag")
         self.assertEqual(base_auto.trg_field_ref, tag.id)
 
-
     def test_kanban_automation_view_stage_trigger(self):
         self._neutralize_preexisting_automations()
 
@@ -282,5 +281,14 @@ class BaseAutomationTestUi(HttpCase):
                 f"/web?debug=0#{_urlencode_kwargs(action=self.env.ref('base_automation.base_automation_act').id, view_type='form')}"
             ),
             "test_form_view_custom_reference_field",
+            login="admin",
+        )
+
+    def test_form_view_mail_triggers(self):
+        self.start_tour(
+            (
+                f"/web?debug=0#{_urlencode_kwargs(action=self.env.ref('base_automation.base_automation_act').id, view_type='form')}"
+            ),
+            "test_form_view_mail_triggers",
             login="admin",
         )
