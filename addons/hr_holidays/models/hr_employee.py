@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import datetime, date, time
@@ -308,7 +307,7 @@ class HrEmployee(models.Model):
     @api.model
     def get_public_holidays_data(self, date_start, date_end):
         self = self._get_contextual_employee()
-        employee_tz = pytz.timezone(self._get_tz() if self else self.env.user.tz)
+        employee_tz = pytz.timezone(self._get_tz() if self else self.env.user.tz or 'utc')
         public_holidays = self._get_public_holidays(date_start, date_end).sorted('date_from')
         return list(map(lambda bh: {
             'id': -bh.id,
@@ -446,7 +445,12 @@ class HrEmployee(models.Model):
 
         to_recheck_leaves_per_leave_type = defaultdict(lambda:
             defaultdict(lambda: {
-                'excess_days': 0,
+                'excess_days': defaultdict(lambda: {
+                    'amount': 0,
+                    'is_virtual': True,
+                }),
+                'total_virtual_excess': 0,
+                'total_real_excess': 0,
                 'exceeding_duration': 0,
                 'to_recheck_leaves': self.env['hr.leave']
             })
@@ -527,7 +531,10 @@ class HrEmployee(models.Model):
                             if not leave_duration:
                                 break
                         if round(leave_duration, 2) > 0:
-                            to_recheck_leaves_per_leave_type[employee][leave_type]['excess_days'] += leave_duration
+                            to_recheck_leaves_per_leave_type[employee][leave_type]['excess_days'][leave.date_to.date()] = {
+                                'amount': leave_duration,
+                                'is_virtual': leave.state != 'validate',
+                            }
                     else:
                         if leave_unit == 'hour':
                             allocated_time = leave.number_of_hours_display

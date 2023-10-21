@@ -2,7 +2,7 @@
 
 import { _t } from "@web/core/l10n/translation";
 import * as spreadsheet from "@odoo/o-spreadsheet";
-import { getFirstPivotFunction } from "../pivot_helpers";
+import { getFirstPivotFunction, getNumberOfPivotFormulas } from "../pivot_helpers";
 import { FILTER_DATE_OPTION, monthsOptions } from "@spreadsheet/assets_backend/constants";
 import { Domain } from "@web/core/domain";
 import { NO_RECORD_AT_THIS_POSITION } from "../pivot_model";
@@ -185,16 +185,81 @@ export class PivotUIPlugin extends spreadsheet.UIPlugin {
      * @returns {string|undefined}
      */
     getPivotIdFromPosition(position) {
-        const cell = this.getters.getCell(position);
-        const sheetId = position.sheetId;
+        const cell = this.getters.getCorrespondingFormulaCell(position);
         if (cell && cell.isFormula) {
-            const pivotFunction = getFirstPivotFunction(cell.content);
+            const pivotFunction = this.getters.getFirstPivotFunction(cell.content);
             if (pivotFunction) {
-                const content = astToFormula(pivotFunction.args[0]);
-                return this.getters.evaluateFormula(sheetId, content).toString();
+                return pivotFunction.args[0].toString();
             }
         }
         return undefined;
+    }
+
+    getFirstPivotFunction(formula) {
+        const pivotFunction = getFirstPivotFunction(formula);
+        if (!pivotFunction) {
+            return undefined;
+        }
+        const { functionName, args } = pivotFunction;
+        const evaluatedArgs = args.map((argAst) => {
+            if (argAst.type == "EMPTY") {
+                return undefined;
+            }
+            const argsString = astToFormula(argAst);
+            return this.getters.evaluateFormula(this.getters.getActiveSheetId(), argsString);
+        });
+        return { functionName, args: evaluatedArgs };
+    }
+
+    /**
+     * Returns the domain args of a pivot formula from a position.
+     * For all those formulas:
+     *
+     * =ODOO.PIVOT(1,"expected_revenue","stage_id",2,"city","Brussels")
+     * =ODOO.PIVOT.HEADER(1,"stage_id",2,"city","Brussels")
+     * =ODOO.PIVOT.HEADER(1,"stage_id",2,"city","Brussels","measure","expected_revenue")
+     *
+     * the result is the same: ["stage_id", 2, "city", "Brussels"]
+     *
+     * If the cell is the result of ODOO.PIVOT.TABLE, the result is the domain of the cell
+     * as if it was the individual pivot formula
+     *
+     * @param {{ col: number, row: number, sheetId: string }} position
+     * @returns {(string | number)[] | undefined}
+     */
+    getPivotDomainArgsFromPosition(position) {
+        const cell = this.getters.getCorrespondingFormulaCell(position);
+        if (!cell || !cell.isFormula || getNumberOfPivotFormulas(cell.content) === 0) {
+            return undefined;
+        }
+        const mainPosition = this.getters.getCellPosition(cell.id);
+        const { args, functionName } = this.getters.getFirstPivotFunction(cell.content);
+        if (functionName === "ODOO.PIVOT.TABLE") {
+            const pivotId = args[0];
+            const dataSource = this.getPivotDataSource(pivotId);
+            if (!this.getters.isExistingPivot(pivotId) || !dataSource.isReady()) {
+                return undefined;
+            }
+            const includeTotal = args[2];
+            const includeColumnHeaders = args[3];
+            const pivotCells = this.getPivotTableStructure(pivotId).getPivotCells(
+                includeTotal,
+                includeColumnHeaders
+            );
+            const pivotCol = position.col - mainPosition.col;
+            const pivotRow = position.row - mainPosition.row;
+            const pivotCell = pivotCells[pivotCol][pivotRow];
+            const domain = pivotCell.domain;
+            if (domain?.at(-2) === "measure") {
+                return domain.slice(0, -2);
+            }
+            return domain;
+        }
+        const domain = args.slice(functionName === "ODOO.PIVOT" ? 2 : 1);
+        if (domain.at(-2) === "measure") {
+            return domain.slice(0, -2);
+        }
+        return domain;
     }
 
     /**
@@ -249,6 +314,11 @@ export class PivotUIPlugin extends spreadsheet.UIPlugin {
         return dataSource.getPivotCellValue(measure, domain);
     }
 
+    getPivotTableStructure(pivotId) {
+        const dataSource = this.getters.getPivotDataSource(pivotId);
+        return dataSource.getTableStructure();
+    }
+
     /**
      * Get the filter impacted by a pivot formula's argument
      * @param {string} formula Formula of the pivot cell
@@ -256,21 +326,24 @@ export class PivotUIPlugin extends spreadsheet.UIPlugin {
      * @returns {Array<Object>}
      */
     getFiltersMatchingPivot(formula) {
-        const functionDescription = getFirstPivotFunction(formula);
+        const functionDescription = this.getters.getFirstPivotFunction(formula);
         if (!functionDescription) {
             return [];
         }
-        const sheetId = this.getters.getActiveSheetId();
         const { args } = functionDescription;
-        const evaluatedArgs = args
-            .map(astToFormula)
-            .map((arg) => this.getters.evaluateFormula(sheetId, arg));
-        if (evaluatedArgs.length <= 2) {
+        if (args.length <= 2) {
             return [];
         }
-        const pivotId = evaluatedArgs[0];
-        const argField = evaluatedArgs[evaluatedArgs.length - 2];
-        if (argField === "measure") {
+        const pivotId = args[0];
+        return this.getFiltersMatchingPivotArgs(pivotId, args);
+    }
+
+    /**
+     * Get the filter impacted by a pivot
+     */
+    getFiltersMatchingPivotArgs(pivotId, domainArgs) {
+        const argField = domainArgs[domainArgs.length - 2];
+        if (argField === "measure" || !argField) {
             return [];
         }
         const filters = this.getters.getGlobalFilters();
@@ -281,7 +354,7 @@ export class PivotUIPlugin extends spreadsheet.UIPlugin {
             const { field, aggregateOperator: time } = dataSource.parseGroupField(argField);
             const pivotFieldMatching = this.getters.getPivotFieldMatching(pivotId, filter.id);
             if (pivotFieldMatching && pivotFieldMatching.chain === field.name) {
-                let value = dataSource.getPivotHeaderValue(evaluatedArgs.slice(-2));
+                let value = dataSource.getPivotHeaderValue(domainArgs.slice(-2));
                 if (value === NO_RECORD_AT_THIS_POSITION) {
                     continue;
                 }
@@ -423,6 +496,7 @@ export class PivotUIPlugin extends spreadsheet.UIPlugin {
 PivotUIPlugin.getters = [
     "getPivotDataSource",
     "getAsyncPivotDataSource",
+    "getFirstPivotFunction",
     "getSelectedPivotId",
     "getPivotComputedDomain",
     "getDisplayedPivotHeaderValue",
@@ -430,5 +504,8 @@ PivotUIPlugin.getters = [
     "getPivotCellValue",
     "getPivotGroupByValues",
     "getFiltersMatchingPivot",
+    "getFiltersMatchingPivotArgs",
     "getPivotDataSourceId",
+    "getPivotTableStructure",
+    "getPivotDomainArgsFromPosition",
 ];

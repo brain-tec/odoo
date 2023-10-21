@@ -352,17 +352,17 @@ READ_GROUP_TIME_GRANULARITY = {
 
 # valid SQL aggregation functions
 READ_GROUP_AGGREGATE = {
-    'sum': lambda table, expr: f'SUM({expr})',
-    'avg': lambda table, expr: f'AVG({expr})',
-    'max': lambda table, expr: f'MAX({expr})',
-    'min': lambda table, expr: f'MIN({expr})',
-    'bool_and': lambda table, expr: f'BOOL_AND({expr})',
-    'bool_or': lambda table, expr: f'BOOL_OR({expr})',
-    'array_agg': lambda table, expr: f'ARRAY_AGG({expr} ORDER BY "{table}"."id")',
+    'sum': lambda table, expr: SQL('SUM(%s)', expr),
+    'avg': lambda table, expr: SQL('AVG(%s)', expr),
+    'max': lambda table, expr: SQL('MAX(%s)', expr),
+    'min': lambda table, expr: SQL('MIN(%s)', expr),
+    'bool_and': lambda table, expr: SQL('BOOL_AND(%s)', expr),
+    'bool_or': lambda table, expr: SQL('BOOL_OR(%s)', expr),
+    'array_agg': lambda table, expr: SQL('ARRAY_AGG(%s ORDER BY %s)', expr, SQL.identifier(table, 'id')),
     # 'recordset' aggregates will be post-processed to become recordsets
-    'recordset': lambda table, expr: f'ARRAY_AGG({expr} ORDER BY "{table}"."id")',
-    'count': lambda table, expr: f'COUNT({expr})',
-    'count_distinct': lambda table, expr: f'COUNT(DISTINCT {expr})',
+    'recordset': lambda table, expr: SQL('ARRAY_AGG(%s ORDER BY %s)', expr, SQL.identifier(table, 'id')),
+    'count': lambda table, expr: SQL('COUNT(%s)', expr),
+    'count_distinct': lambda table, expr: SQL('COUNT(DISTINCT %s)', expr),
 }
 
 READ_GROUP_DISPLAY_FORMAT = {
@@ -1860,28 +1860,25 @@ class BaseModel(metaclass=MetaModel):
         query = self._search(domain)
 
         fnames_to_flush = OrderedSet()
-        groupby_terms_map = {}  # {spec: <SQL expression>}
+
+        groupby_terms: dict[str, SQL] = {}
         for spec in groupby:
-            sql_expression, fnames_used = self._read_group_groupby(spec, query)
-            groupby_terms_map[spec] = SQL(sql_expression)
+            groupby_terms[spec], fnames_used = self._read_group_groupby(spec, query)
             fnames_to_flush.update(fnames_used)
 
-        select_terms = []  # [<SQL expression>,]
+        select_terms: list[SQL] = []
         for spec in aggregates:
-            sql_expression, fnames_used = self._read_group_select(spec, query)
-            select_terms.append(SQL(sql_expression))
+            sql_expr, fnames_used = self._read_group_select(spec, query)
+            select_terms.append(sql_expr)
             fnames_to_flush.update(fnames_used)
 
-        having_expression, having_params, fnames_used = self._read_group_having(having, query)
-        having_term = SQL(having_expression, *having_params)
+        sql_having, fnames_used = self._read_group_having(having, query)
         fnames_to_flush.update(fnames_used)
 
-        orderby_terms, extra_groupby_terms, fnames_used = self._read_group_orderby(order, groupby_terms_map, query)
-        orderby_terms = [SQL(term) for term in orderby_terms]
-        extra_groupby_terms = [SQL(term) for term in extra_groupby_terms]
+        sql_order, sql_extra_groupby, fnames_used = self._read_group_orderby(order, groupby_terms, query)
         fnames_to_flush.update(fnames_used)
 
-        groupby_terms = list(groupby_terms_map.values())
+        groupby_terms = list(groupby_terms.values())
 
         query_parts = [
             SQL("SELECT %s", SQL(", ").join(groupby_terms + select_terms)),
@@ -1890,11 +1887,13 @@ class BaseModel(metaclass=MetaModel):
         if query.where_clause:
             query_parts.append(SQL("WHERE %s", query.where_clause))
         if groupby_terms:
-            query_parts.append(SQL("GROUP BY %s", SQL(", ").join(groupby_terms + extra_groupby_terms)))
-        if having_term:
-            query_parts.append(SQL("HAVING %s", having_term))
-        if orderby_terms:
-            query_parts.append(SQL("ORDER BY %s", SQL(", ").join(orderby_terms)))
+            if sql_extra_groupby:
+                groupby_terms.append(sql_extra_groupby)
+            query_parts.append(SQL("GROUP BY %s", SQL(", ").join(groupby_terms)))
+        if sql_having:
+            query_parts.append(SQL("HAVING %s", sql_having))
+        if sql_order:
+            query_parts.append(SQL("ORDER BY %s", sql_order))
         if limit:
             query_parts.append(SQL("LIMIT %s", limit))
         if offset:
@@ -1927,13 +1926,12 @@ class BaseModel(metaclass=MetaModel):
         # return [(a1, b1, c1), (a2, b2, c2), ...]
         return list(zip(*column_result))
 
-    @api.model
-    def _read_group_select(self, aggregate_spec, query):
+    def _read_group_select(self, aggregate_spec: str, query: Query) -> tuple[SQL, list[str]]:
         """ Return a pair (<SQL expression>, [<field names used in SQL expression>])
         corresponding to the given aggregation.
         """
         if aggregate_spec == '__count':
-            return 'COUNT(*)', []
+            return SQL("COUNT(*)"), []
 
         fname, property_name, func = parse_read_group_spec(aggregate_spec)
 
@@ -1950,13 +1948,11 @@ class BaseModel(metaclass=MetaModel):
         if func == 'recordset' and not (field.relational or fname == 'id'):
             raise ValueError(f"Aggregate method {func!r} can be only used on relational field (or id) (for {aggregate_spec!r}).")
 
-        field_expression = self._inherits_join_calc(self._table, access_fname, query)
+        sql_field = self._field_to_sql(self._table, access_fname, query)
+        sql_expr = READ_GROUP_AGGREGATE[func](self._table, sql_field)
+        return sql_expr, [fname]
 
-        expression = READ_GROUP_AGGREGATE[func](self._table, field_expression)
-        return expression, [fname]
-
-    @api.model
-    def _read_group_groupby(self, groupby_spec, query):
+    def _read_group_groupby(self, groupby_spec: str, query: Query) -> tuple[SQL, list[str]]:
         """ Return a pair (<SQL expression>, [<field names used in SQL expression>])
         corresponding to the given groupby element.
         """
@@ -1967,10 +1963,8 @@ class BaseModel(metaclass=MetaModel):
         field = self._fields[fname]
 
         if property_name:
-            check_property_field_value_name(property_name)
             if field.type != "properties":
                 raise ValueError(f"Property set on a non properties field: {property_name!r}")
-
             access_fname = f"{fname}.{property_name}"
         else:
             access_fname = fname
@@ -1978,13 +1972,9 @@ class BaseModel(metaclass=MetaModel):
         if granularity and field.type not in ('datetime', 'date', 'properties'):
             raise ValueError(f"Granularity set on a no-datetime field or property: {groupby_spec!r}")
 
-        if not field.store and not field.inherited:  # TODO: should be manage by _inherits_join_calc
-            raise ValueError(f"Groupby on no-store field: {groupby_spec!r}")
-
-        field_expression = self._inherits_join_calc(self._table, access_fname, query)
+        sql_expr = self._field_to_sql(self._table, access_fname, query)
         if field.type == 'datetime' and self.env.context.get('tz') in pytz.all_timezones_set:
-            # TODO: `self.env.context.get('tz')` should be passed as args
-            field_expression = f"timezone('{self.env.context.get('tz')}', timezone('UTC', {field_expression}))"
+            sql_expr = SQL("timezone(%s, timezone('UTC', %s))", self.env.context['tz'], sql_expr)
 
         if field.type in ('datetime', 'date') or (field.type == 'properties' and granularity):
             if not granularity:
@@ -1992,67 +1982,66 @@ class BaseModel(metaclass=MetaModel):
             if granularity not in READ_GROUP_TIME_GRANULARITY:
                 raise ValueError(f"Granularity specification isn't correct: {granularity!r}")
 
-            # TODO: `granularity` should be passed as args
             if granularity == 'week':
                 # first_week_day: 0=Monday, 1=Tuesday, ...
                 first_week_day = int(get_lang(self.env).week_start) - 1
                 days_offset = first_week_day and 7 - first_week_day
-                field_expression = f"(date_trunc('week', {field_expression}::timestamp - INTERVAL '-{days_offset} DAY') + INTERVAL '-{days_offset} DAY')"
+                interval = f"-{days_offset} DAY"
+                sql_expr = SQL(
+                    "(date_trunc('week', %s::timestamp - INTERVAL %s) + INTERVAL %s)",
+                    sql_expr, interval, interval,
+                )
             else:
-                field_expression = f"date_trunc('{granularity}', {field_expression}::timestamp)"
+                sql_expr = SQL("date_trunc(%s, %s::timestamp)", granularity, sql_expr)
+
             if field.type == 'date':
-                field_expression += '::date'
+                sql_expr = SQL("%s::date", sql_expr)
+
         elif field.type == 'boolean':
-            field_expression = f"COALESCE({field_expression}, FALSE)"
+            sql_expr = SQL("COALESCE(%s, FALSE)", sql_expr)
 
-        return field_expression, [fname]
+        return sql_expr, [fname]
 
-    @api.model
-    def _read_group_having(self, having_domain, query):
-        """ Return (<SQL expression>, [<SQL expression parameter>], [<used field name>])
-        corresponding to the having domain.
+    def _read_group_having(self, having_domain: list, query: Query) -> tuple[SQL, list[str]]:
+        """ Return a pair (<SQL expression>, [<used field name>]) corresponding
+        to the having domain.
         """
         if not having_domain:
-            return "", [], []
+            return SQL(), []
 
-        # stack of [(sql_expr, params)]
-        stack = []
+        stack: list[SQL] = []
         fnames_used = []
         SUPPORTED = ('in', 'not in', '<', '>', '<=', '>=', '=', '!=')
         for item in reversed(having_domain):
             if item == '!':
-                expr, params = stack.pop()
-                stack.append((f'(NOT {expr})', params))
-            elif item in ('&', '|'):
-                expr1, params1 = stack.pop()
-                expr2, params2 = stack.pop()
-                operator = 'AND' if item == '&' else 'OR'
-                stack.append((f'({expr1} {operator} {expr2})', params1 + params2))
+                stack.append(SQL("(NOT %s)", stack.pop()))
+            elif item == '&':
+                stack.append(SQL("(%s AND %s)", stack.pop(), stack.pop()))
+            elif item == '|':
+                stack.append(SQL("(%s OR %s)", stack.pop(), stack.pop()))
             elif isinstance(item, (list, tuple)) and len(item) == 3:
                 left, operator, right = item
                 if operator not in SUPPORTED:
                     raise ValueError(f"Invalid having clause {item!r}: supported comparators are {SUPPORTED}")
-                expr, fnames = self._read_group_select(left, query)
-                stack.append((f'{expr} {operator} %s', [right]))
+                sql_left, fnames = self._read_group_select(left, query)
+                sql_operator = expression.SQL_OPERATORS[operator]
+                stack.append(SQL("%s %s %s", sql_left, sql_operator, right))
                 fnames_used.extend(fnames)
             else:
                 raise ValueError(f"Invalid having clause {item!r}: it should be a domain-like clause")
 
         while len(stack) > 1:
-            expr1, params1 = stack.pop()
-            expr2, params2 = stack.pop()
-            stack.append((f'({expr1} AND {expr2})', params1 + params2))
+            stack.append(SQL("(%s AND %s)", stack.pop(), stack.pop()))
 
-        expr, params = stack[0]
-        return expr, params, fnames_used
+        return stack[0], fnames_used
 
-    @api.model
-    def _read_group_orderby(self, order, groupby_terms, query):
-        """ Return ([<SQL expression>], [<SQL expression>], [<field names used>])
+    def _read_group_orderby(self, order: str, groupby_terms: dict[str, SQL],
+                            query: Query) -> tuple[SQL, SQL, list[str]]:
+        """ Return (<SQL expression>, <SQL expression>, [<field names used>])
         corresponding to the given order and groupby terms.
 
-        :param order: The order to use in SQL format
-        :param groupby_terms: The group by terms ({spec: sql_expression})
+        :param order: the order specification
+        :param groupby_terms: the group by terms mapping ({spec: sql_expression})
         :param query: The query we are building
         """
         if order:
@@ -2061,40 +2050,50 @@ class BaseModel(metaclass=MetaModel):
             order = ','.join(groupby_terms)
             traverse_many2one = False
 
+        if not order:
+            return SQL(), SQL(), []
+
         orderby_terms = []
         extra_groupby_terms = []
         fnames_used = []
-        if not order:
-            return orderby_terms, extra_groupby_terms, fnames_used
 
         for order_part in order.split(','):
             order_match = regex_order.match(order_part)
             if not order_match:
                 raise ValueError(f"Invalid order {order!r} for _read_group()")
-            order_term = order_match['term']
-            order_direction = (order_match['direction'] or 'ASC').upper()
-            order_nulls = (order_match['nulls'] or '').upper()
+            term = order_match['term']
+            direction = (order_match['direction'] or 'ASC').upper()
+            nulls = (order_match['nulls'] or '').upper()
 
-            if order_term not in groupby_terms:
+            sql_direction = SQL(direction) if direction in ('ASC', 'DESC') else SQL()
+            sql_nulls = SQL(nulls) if nulls in ('NULLS FIRST', 'NULLS LAST') else SQL()
+
+            if term not in groupby_terms:
                 try:
-                    sql_expression, fnames_used_select = self._read_group_select(order_term, query)
-                    fnames_used.extend(fnames_used_select)
-                    orderby_terms.append(f'{sql_expression} {order_direction} {order_nulls}')
-                    continue
+                    sql_expr, fnames = self._read_group_select(term, query)
                 except ValueError as e:
                     raise ValueError(f"Order term {order_part!r} is not a valid aggregate nor valid groupby") from e
+                orderby_terms.append(SQL("%s %s %s", sql_expr, sql_direction, sql_nulls))
+                fnames_used.extend(fnames)
+                continue
 
-            if traverse_many2one and order_term in self and self._fields[order_term].type == 'many2one':
-                # It will generated extra clause to add in the group by.
-                extra_order = self._generate_order_by(f'{order_term} {order_direction} {order_nulls}', query)
-                extra_order = extra_order.replace(' ORDER BY ', '')
-                orderby_terms.extend(order.strip() for order in extra_order.split(",") if order.strip())
-                extra_groupby_terms.extend(order.strip().split()[0] for order in extra_order.split(",") if order.strip())
+            field = self._fields.get(term)
+            if traverse_many2one and field and field.type == 'many2one':
+                # this generates an extra clause to add in the group by
+                sql_order = self._order_to_sql(f'{term} {direction} {nulls}', query)
+                orderby_terms.append(sql_order)
+                sql_order_str = self.env.cr.mogrify(sql_order).decode()
+                extra_groupby_terms.extend(
+                    SQL(order.strip().split()[0])
+                    for order in sql_order_str.split(",")
+                    if order.strip()
+                )
+
             else:
-                sql_expression = groupby_terms[order_term]
-                orderby_terms.append(SQL(f'%s {order_direction} {order_nulls}', sql_expression))
+                sql_expr = groupby_terms[term]
+                orderby_terms.append(SQL("%s %s %s", sql_expr, sql_direction, sql_nulls))
 
-        return orderby_terms, extra_groupby_terms, fnames_used
+        return SQL(", ").join(orderby_terms), SQL(", ").join(extra_groupby_terms), fnames_used
 
     @api.model
     def _read_group_check_field_access_rights(self, field_names):
@@ -2755,75 +2754,100 @@ class BaseModel(metaclass=MetaModel):
         :param fname: name of inherited field to reach
         :param query: query object on which the JOIN should be added
         :return: qualified name of field, to be used in SELECT clause
+
+        .. deprecated:: 17.0
+            Deprecated method, use _field_to_sql() instead
         """
+        warnings.warn("Deprecated method _inherits_join_calc(), _field_to_sql() instead", DeprecationWarning, 2)
+        sql = self._field_to_sql(alias, fname, query)
+        return self.env.cr.mogrify(sql).decode()
+
+    def _field_to_sql(self, alias: str, fname: str, query: (Query | None) = None) -> SQL:
+        """ Return an :class:`SQL` object that represents the value of the given
+        field from the given table alias, in the context of the given query.
+        The query object is necessary for inherited fields, many2one fields and
+        properties fields, where joins are added to the query.
+        """
+        full_fname = fname
         property_name = None
         if '.' in fname:
             fname, property_name = fname.split('.', 1)
-            check_property_field_value_name(property_name)
 
-        # INVARIANT: alias is the SQL alias of model._table in query
-        model, field = self, self._fields[fname]
-        while field.inherited:
+        field = self._fields[fname]
+        if field.inherited:
             # retrieve the parent model where field is inherited from
             parent_model = self.env[field.related_field.model_name]
             parent_fname = field.related.split('.')[0]
-            # JOIN parent_model._table AS parent_alias ON alias.parent_fname = parent_alias.id
-            parent_alias = query.left_join(
-                alias, parent_fname, parent_model._table, 'id', parent_fname,
-            )
-            model, alias, field = parent_model, parent_alias, field.related_field
+            # LEFT JOIN parent_model._table AS parent_alias ON alias.parent_fname = parent_alias.id
+            parent_alias = query.make_alias(alias, parent_fname)
+            query.add_join('LEFT JOIN', parent_alias, parent_model._table, SQL(
+                "%s = %s",
+                self._field_to_sql(alias, parent_fname, query),
+                SQL.identifier(parent_alias, 'id'),
+            ))
+            # delegate to the parent model
+            return parent_model._field_to_sql(parent_alias, full_fname, query)
+
+        if not field.store:
+            raise ValueError(f"Cannot convert field {field} to SQL")
 
         if field.type == 'many2many':
             # special case for many2many fields: prepare a query on the comodel
             # in order to reuse the mechanism _apply_ir_rules, then inject the
             # query as an extra condition of the left join
             comodel = self.env[field.comodel_name]
-            subquery = Query(self.env.cr, comodel._table)
-            comodel._apply_ir_rules(subquery)
-            # LEFT JOIN field_relation ON
-            #     alias.id = field_relation.field_column1
-            #     AND field_relation.field_column2 IN (subquery)
+            coquery = comodel._where_calc([], active_test=False)
+            comodel._apply_ir_rules(coquery)
+            # LEFT JOIN {field.relation} AS rel_alias ON
+            #     alias.id = rel_alias.{field.column1}
+            #     AND rel_alias.{field.column2} IN ({coquery})
             rel_alias = query.make_alias(alias, field.name)
             condition = SQL(
                 "%s = %s",
                 SQL.identifier(alias, 'id'),
                 SQL.identifier(rel_alias, field.column1),
             )
-            if subquery.where_clause:
+            if coquery.where_clause:
                 condition = SQL(
                     "%s AND %s IN %s",
                     condition,
                     SQL.identifier(rel_alias, field.column2),
-                    subquery.subselect(),
+                    coquery.subselect(),
                 )
             query.add_join("LEFT JOIN", rel_alias, field.relation, condition)
-            return '"%s"."%s"' % (rel_alias, field.column2)
+            return SQL.identifier(rel_alias, field.column2)
+
         elif field.translate and not self.env.context.get('prefetch_langs'):
+            sql_field = SQL.identifier(alias, fname)
             lang = self.env.lang or 'en_US'
             if lang == 'en_US':
-                return f'"{alias}"."{fname}"->>\'en_US\''
-            return f'COALESCE("{alias}"."{fname}"->>\'{lang}\', "{alias}"."{fname}"->>\'en_US\')'
-        elif field.type == 'properties' and property_name:
-            return self._inherits_join_calc_properties(alias, fname, query, property_name)
-        else:
-            return '"%s"."%s"' % (alias, fname)
+                return SQL("%s->>'en_US'", sql_field)
+            return SQL("COALESCE(%s->>%s, %s->>'en_US')", sql_field, lang, sql_field)
 
-    @api.model
-    def _inherits_join_calc_properties(self, alias, fname, query, property_name):
+        elif field.type == 'properties' and property_name:
+            return self._field_properties_to_sql(alias, fname, property_name, query)
+
+        return SQL.identifier(alias, fname)
+
+    def _field_properties_to_sql(self, alias: str, fname: str, property_name: str,
+                                 query: Query) -> SQL:
         definition = self.get_property_definition(f"{fname}.{property_name}")
-        property_sql = f""""{alias}"."{fname}" -> '{property_name}'"""
         property_type = definition.get('type')
-        property_alias = query.make_alias(alias, f'{fname}_{property_name}')
+
+        sql_field = self._field_to_sql(alias, fname, query)
+        sql_property = SQL("%s -> %s", sql_field, property_name)
 
         # JOIN on the JSON array
         if property_type in ('tags', 'many2many'):
-            property_sql = f'''
-                CASE
-                     WHEN jsonb_typeof({property_sql}) = 'array'
-                     THEN {property_sql}
-                     ELSE '[]'::jsonb
-                 END
-            '''
+            property_alias = query.make_alias(alias, f'{fname}_{property_name}')
+            sql_property = SQL(
+                """ CASE
+                        WHEN jsonb_typeof(%(property)s) = 'array'
+                        THEN %(property)s
+                        ELSE '[]'::jsonb
+                     END """,
+                property=sql_property,
+            )
             if property_type == 'tags':
                 # ignore invalid tags
                 tags = [tag[0] for tag in definition.get('tags') or []]
@@ -2848,61 +2872,66 @@ class BaseModel(metaclass=MetaModel):
             query.add_join(
                 "LEFT JOIN",
                 property_alias,
-                SQL(f"jsonb_array_elements({property_sql})"),
+                SQL("jsonb_array_elements(%s)", sql_property),
                 condition,
             )
 
-            return property_alias
+            return SQL.identifier(property_alias)
 
         elif property_type == 'selection':
             options = [option[0] for option in definition.get('selection') or ()]
 
             # check the existence of the option
+            property_alias = query.make_alias(alias, f'{fname}_{property_name}')
             query.add_join(
                 "LEFT JOIN",
                 property_alias,
                 SQL("(SELECT unnest(%s::text[]) %s)", options, SQL.identifier(property_alias)),
-                SQL(f"{property_sql}->>0 = %s", SQL.identifier(property_alias)),
+                SQL("%s->>0 = %s", sql_property, SQL.identifier(property_alias)),
             )
 
-            return property_alias
+            return SQL.identifier(property_alias)
 
         elif property_type == 'many2one':
             comodel = self.env.get(definition.get('comodel'))
             if comodel is None or comodel._transient or comodel._abstract:
                 # all value are false, because the model does not exist anymore
                 # (or is a transient model e.g.)
-                return 'FALSE'
+                return SQL('FALSE')
 
-            return f'''
-                CASE
-                    WHEN jsonb_typeof({property_sql}) = 'number'
-                     AND ({property_sql})::int IN (SELECT id FROM {comodel._table})
-                    THEN {property_sql}
-                    ELSE NULL
-                 END
-            '''
+            return SQL(
+                """ CASE
+                        WHEN jsonb_typeof(%(property)s) = 'number'
+                         AND (%(property)s)::int IN (SELECT id FROM %(table)s)
+                        THEN %(property)s
+                        ELSE NULL
+                     END """,
+                property=sql_property,
+                table=SQL.identifier(comodel._table),
+            )
 
         elif property_type == 'date':
-            return f'''
-                CASE
-                    WHEN jsonb_typeof({property_sql}) = 'string'
-                    THEN ({property_sql}->>0)::DATE
-                    ELSE NULL
-                 END
-            '''
+            return SQL(
+                """ CASE
+                        WHEN jsonb_typeof(%(property)s) = 'string'
+                        THEN (%(property)s->>0)::DATE
+                        ELSE NULL
+                     END """,
+                property=sql_property,
+            )
 
         elif property_type == 'datetime':
-            return f'''
-                CASE
-                    WHEN jsonb_typeof({property_sql}) = 'string'
-                    THEN to_timestamp({property_sql}->>0, 'YYYY-MM-DD HH24:MI:SS')
-                    ELSE NULL
-                 END
-            '''
+            return SQL(
+                """ CASE
+                        WHEN jsonb_typeof(%(property)s) = 'string'
+                        THEN to_timestamp(%(property)s->>0, 'YYYY-MM-DD HH24:MI:SS')
+                        ELSE NULL
+                     END """,
+                property=sql_property,
+            )
 
         # if the key is not present in the dict, fallback to false instead of none
-        return f"COALESCE({property_sql}, 'false')"
+        return SQL("COALESCE(%s, 'false')", sql_property)
 
     @api.model
     def get_property_definition(self, full_name):
@@ -2921,13 +2950,12 @@ class BaseModel(metaclass=MetaModel):
         target_model = self.env[self._fields[field.definition_record].comodel_name]
         self.env.cr.execute(SQL(
             """ SELECT definition
-                  FROM %s, jsonb_array_elements(%s) definition
-                 WHERE %s IS NOT NULL AND definition->>'name' = %s
+                  FROM %(table)s, jsonb_array_elements(%(field)s) definition
+                 WHERE %(field)s IS NOT NULL AND definition->>'name' = %(name)s
                  LIMIT 1 """,
-            SQL.identifier(target_model._table),
-            SQL.identifier(field.definition_record_field),
-            SQL.identifier(field.definition_record_field),
-            property_name,
+            table=SQL.identifier(target_model._table),
+            field=SQL.identifier(field.definition_record_field),
+            name=property_name,
         ))
         result = self.env.cr.dictfetchone()
         return result["definition"] if result else {}
@@ -2955,21 +2983,18 @@ class BaseModel(metaclass=MetaModel):
         query = SQL(
             """ WITH RECURSIVE __parent_store_compute(id, parent_path) AS (
                     SELECT row.id, concat(row.id, '/')
-                    FROM %s row
-                    WHERE row.%s IS NULL
+                    FROM %(table)s row
+                    WHERE row.%(parent)s IS NULL
                 UNION
                     SELECT row.id, concat(comp.parent_path, row.id, '/')
-                    FROM %s row, __parent_store_compute comp
-                    WHERE row.%s = comp.id
+                    FROM %(table)s row, __parent_store_compute comp
+                    WHERE row.%(parent)s = comp.id
                 )
-                UPDATE %s row SET parent_path = comp.parent_path
+                UPDATE %(table)s row SET parent_path = comp.parent_path
                 FROM __parent_store_compute comp
                 WHERE row.id = comp.id """,
-            SQL.identifier(self._table),
-            SQL.identifier(self._parent_name),
-            SQL.identifier(self._table),
-            SQL.identifier(self._parent_name),
-            SQL.identifier(self._table),
+            table=SQL.identifier(self._table),
+            parent=SQL.identifier(self._parent_name),
         )
         self.env.cr.execute(query)
         self.invalidate_model(['parent_path'])
@@ -3020,11 +3045,10 @@ class BaseModel(metaclass=MetaModel):
             _logger.debug("Table '%s': setting default value of new column %s to %r",
                           self._table, column_name, value)
             self._cr.execute(SQL(
-                "UPDATE %s SET %s = %s WHERE %s IS NULL",
-                SQL.identifier(self._table),
-                SQL.identifier(column_name),
-                value,
-                SQL.identifier(column_name),
+                "UPDATE %(table)s SET %(field)s = %(value)s WHERE %(field)s IS NULL",
+                table=SQL.identifier(self._table),
+                field=SQL.identifier(column_name),
+                value=value,
             ))
 
     @ormcache()
@@ -3571,18 +3595,17 @@ class BaseModel(metaclass=MetaModel):
                 else next((v for v in translations.values() if v is not None), None)
             self.invalidate_recordset([field_name])
             self._cr.execute(SQL(
-                """ UPDATE %s
-                    SET %s = NULLIF(
-                        jsonb_strip_nulls(%s || COALESCE(%s, '{}'::jsonb) || %s),
+                """ UPDATE %(table)s
+                    SET %(field)s = NULLIF(
+                        jsonb_strip_nulls(%(fallback)s || COALESCE(%(field)s, '{}'::jsonb) || %(value)s),
                         '{}'::jsonb)
-                    WHERE id = %s
+                    WHERE id = %(id)s
                 """,
-                SQL.identifier(self._table),
-                SQL.identifier(field_name),
-                Json({'en_US': translation_fallback}),
-                SQL.identifier(field_name),
-                Json(translations),
-                self.id,
+                table=SQL.identifier(self._table),
+                field=SQL.identifier(field_name),
+                fallback=Json({'en_US': translation_fallback}),
+                value=Json(translations),
+                id=self.id,
             ))
             self.modified([field_name])
         else:
@@ -3853,17 +3876,17 @@ class BaseModel(metaclass=MetaModel):
 
         if column_fields:
             # the query may involve several tables: we need fully-qualified names
-            select_terms = [f'"{self._table}"."id"']
+            sql_terms = [SQL.identifier(self._table, 'id')]
             for field in column_fields:
-                qname = self._inherits_join_calc(self._table, field.name, query)
+                sql = self._field_to_sql(self._table, field.name, query)
                 if field.type == 'binary' and (
                         context.get('bin_size') or context.get('bin_size_' + field.name)):
                     # PG 9.2 introduces conflicting pg_size_pretty(numeric) -> need ::cast
-                    qname = f'pg_size_pretty(length({qname})::bigint)'
-                select_terms.append(qname)
+                    sql = SQL("pg_size_pretty(length(%s)::bigint)", sql)
+                sql_terms.append(sql)
 
             # select the given columns from the rows in the query
-            self.env.cr.execute(query.select(*select_terms))
+            self.env.cr.execute(query.select(*sql_terms))
             rows = self.env.cr.fetchall()
 
             if not rows:
@@ -4433,11 +4456,10 @@ class BaseModel(metaclass=MetaModel):
                 # which fills the 'en_US' key of jsonb only when the old column value is NULL.
                 # The second param is for the real value {'fr_FR': 'French', 'nl_NL': 'Dutch'}
                 assignments.append(SQL(
-                    "%s = %s || COALESCE(%s, '{}'::jsonb) || %s",
-                    SQL.identifier(name),
-                    Json({} if 'en_US' in val.adapted else {'en_US': next(iter(val.adapted.values()))}),
-                    SQL.identifier(name),
-                    val,
+                    "%(field)s = %(fallback)s || COALESCE(%(field)s, '{}'::jsonb) || %(value)s",
+                    field=SQL.identifier(name),
+                    fallback=Json({} if 'en_US' in val.adapted else {'en_US': next(iter(val.adapted.values()))}),
+                    value=val,
                 ))
             else:
                 assignments.append(SQL('%s = %s', SQL.identifier(name), val))
@@ -4830,18 +4852,17 @@ class BaseModel(metaclass=MetaModel):
             return
 
         self._cr.execute(SQL(
-            """ UPDATE %s node
+            """ UPDATE %(table)s node
                 SET parent_path=concat((
                         SELECT parent.parent_path
-                        FROM %s parent
-                        WHERE parent.id=node.%s
+                        FROM %(table)s parent
+                        WHERE parent.id=node.%(parent)s
                     ), node.id, '/')
-                WHERE node.id IN %s
+                WHERE node.id IN %(ids)s
                 RETURNING node.id, node.parent_path """,
-            SQL.identifier(self._table),
-            SQL.identifier(self._table),
-            SQL.identifier(self._parent_name),
-            tuple(self.ids),
+            table=SQL.identifier(self._table),
+            parent=SQL.identifier(self._parent_name),
+            ids=tuple(self.ids),
         ))
 
         # update the cache of updated nodes, and determine what to recompute
@@ -4860,15 +4881,14 @@ class BaseModel(metaclass=MetaModel):
         parent_val = vals[self._parent_name]
         if parent_val:
             condition = SQL(
-                "(%s != %s OR %s IS NULL)",
-                SQL.identifier(self._parent_name),
-                parent_val,
-                SQL.identifier(self._parent_name),
+                "(%(parent)s != %(value)s OR %(parent)s IS NULL)",
+                parent=SQL.identifier(self._parent_name),
+                value=parent_val,
             )
         else:
             condition = SQL(
-                "%s IS NOT NULL",
-                SQL.identifier(self._parent_name),
+                "%(parent)s IS NOT NULL",
+                parent=SQL.identifier(self._parent_name),
             )
         self._cr.execute(SQL(
             "SELECT id FROM %s WHERE id IN %s AND %s",
@@ -4885,12 +4905,11 @@ class BaseModel(metaclass=MetaModel):
         # determine new prefix of parent_path
         cr.execute(SQL(
             """ SELECT parent.parent_path
-                FROM %s node, %s parent
-                WHERE node.id = %s AND parent.id = node.%s """,
-            SQL.identifier(self._table),
-            SQL.identifier(self._table),
-            self.ids[0],
-            SQL.identifier(self._parent_name),
+                FROM %(table)s node, %(table)s parent
+                WHERE node.id = %(id)s AND parent.id = node.%(parent)s """,
+            table=SQL.identifier(self._table),
+            parent=SQL.identifier(self._parent_name),
+            id=self.ids[0],
         ))
         prefix = cr.fetchone()[0] if cr.rowcount else ''
 
@@ -4902,18 +4921,17 @@ class BaseModel(metaclass=MetaModel):
 
         # update parent_path of all records and their descendants
         cr.execute(SQL(
-            """ UPDATE %s child
-                SET parent_path = concat(%s, substr(child.parent_path,
+            """ UPDATE %(table)s child
+                SET parent_path = concat(%(prefix)s, substr(child.parent_path,
                         length(node.parent_path) - length(node.id || '/') + 1))
-                FROM %s node
-                WHERE node.id IN %s
-                AND child.parent_path LIKE concat(node.parent_path, %s)
+                FROM %(table)s node
+                WHERE node.id IN %(ids)s
+                AND child.parent_path LIKE concat(node.parent_path, %(wildcard)s)
                 RETURNING child.id, child.parent_path """,
-            SQL.identifier(self._table),
-            prefix,
-            SQL.identifier(self._table),
-            tuple(self.ids),
-            '%',
+            table=SQL.identifier(self._table),
+            prefix=prefix,
+            ids=tuple(self.ids),
+            wildcard='%',
         ))
 
         # update the cache of updated nodes, and determine what to recompute
@@ -5084,98 +5102,122 @@ class BaseModel(metaclass=MetaModel):
         if domain:
             expression.expression(domain, self.sudo(), self._table, query)
 
-    @api.model
-    def _generate_m2o_order_by(self, alias, order_field, query, reverse_direction, seen):
+    def _order_to_sql(self, order: str, query: Query, alias: (str | None) = None,
+                      reverse: bool = False) -> SQL:
+        """ Return an :class:`SQL` object that represents the given ORDER BY
+        clause, without the ORDER BY keyword.
         """
-        Add possibly missing JOIN to ``query`` and generate the ORDER BY clause for m2o fields,
-        either native m2o fields or function/related fields that are stored, including
-        intermediate JOINs for inheritance if required.
-
-        :return: the qualified field name to use in an ORDER BY clause to sort by ``order_field``
-        """
-        field = self._fields[order_field]
-        if field.inherited:
-            # also add missing joins for reaching the table containing the m2o field
-            qualified_field = self._inherits_join_calc(alias, order_field, query)
-            alias, order_field = qualified_field.replace('"', '').split('.', 1)
-            field = field.base_field
-
-        assert field.type == 'many2one', 'Invalid field passed to _generate_m2o_order_by()'
-        if not field.store:
-            _logger.debug("Many2one function/related fields must be stored "
-                          "to be used as ordering fields! Ignoring sorting for %s.%s",
-                          self._name, order_field)
+        order = order or self._order
+        if not order:
             return []
+        self._check_qorder(order)
 
-        # figure out the applicable order_by for the m2o
-        dest_model = self.env[field.comodel_name]
-        m2o_order = dest_model._order
-        if not regex_order.match(m2o_order):
-            # _order is complex, can't use it here, so we default to _rec_name
-            m2o_order = dest_model._rec_name
+        alias = alias or self._table
 
-        # Join the dest m2o table if it's not joined yet. We use [LEFT] OUTER join here
-        # as we don't want to exclude results that have NULL values for the m2o
-        dest_alias = query.left_join(alias, order_field, dest_model._table, 'id', order_field)
-        return dest_model._generate_order_by_inner(dest_alias, m2o_order, query,
-                                                   reverse_direction, seen)
-
-    @api.model
-    def _generate_order_by_inner(self, alias, order_spec, query, reverse_direction=False, seen=None):
-        if seen is None:
-            seen = set()
-        self._check_qorder(order_spec)
-
-        order_by_elements = []
-        for order_part in order_spec.split(','):
+        terms = []
+        for order_part in order.split(','):
             order_match = regex_order.match(order_part)
-            order_field = order_match['field']
-            order_direction = (order_match['direction'] or '').upper()
-            order_nulls = (order_match['nulls'] or '').upper()
-            if reverse_direction:
-                order_direction = 'ASC' if order_direction == 'DESC' else 'DESC'
-                if order_nulls:
-                    order_nulls = 'NULLS LAST' if order_nulls == 'NULLS FIRST' else 'NULLS FIRST'
-            do_reverse = order_direction == 'DESC'
-
-            field = self._fields.get(order_field)
-            if not field:
-                raise ValueError("Invalid field %r on model %r" % (order_field, self._name))
+            field_name = order_match['field']
 
             property_name = order_match['property']
             if property_name:
-                check_property_field_value_name(property_name)
-                if field.type != 'properties':
-                    raise ValueError(f'Order a property ({property_name!r}) on a non-properties field ({field.name!r})')
+                field_name = f"{field_name}.{property_name}"
 
-            if order_field == 'id':
-                order_by_elements.append(f'"{alias}"."{order_field}" {order_direction} {order_nulls}')
-            else:
-                if field.inherited:
-                    field = field.base_field
-                if field.store and field.type == 'many2one':
-                    key = (field.model_name, field.comodel_name, order_field)
-                    if order_nulls:
-                        qname = self._inherits_join_calc(alias, order_field, query)
-                        if order_nulls == 'NULLS LAST':
-                            order_by_elements.append(f"{qname} IS NULL")
-                        elif order_nulls == 'NULLS FIRST':
-                            order_by_elements.append(f"{qname} IS NOT NULL")
-                    if key not in seen:
-                        seen.add(key)
-                        order_by_elements += self._generate_m2o_order_by(alias, order_field, query, do_reverse, seen)
-                elif field.store and field.column_type:
-                    qualifield_name = self._inherits_join_calc(alias, order_field, query)
-                    if field.type == 'boolean':
-                        qualifield_name = "COALESCE(%s, false)" % qualifield_name
-                    elif field.type == 'properties' and property_name:
-                        qualifield_name = f"({qualifield_name} -> '{property_name}')"
-                    order_by_elements.append(f"{qualifield_name} {order_direction} {order_nulls}")
-                else:
-                    _logger.warning("Model %r cannot be sorted on field %r (not a column)", self._name, order_field)
-                    continue  # ignore non-readable or "non-joinable" fields
+            direction = (order_match['direction'] or '').upper()
+            nulls = (order_match['nulls'] or '').upper()
+            if reverse:
+                direction = 'ASC' if direction == 'DESC' else 'DESC'
+                if nulls:
+                    nulls = 'NULLS LAST' if nulls == 'NULLS FIRST' else 'NULLS FIRST'
 
-        return order_by_elements
+            sql_direction = SQL(direction) if direction in ('ASC', 'DESC') else SQL()
+            sql_nulls = SQL(nulls) if nulls in ('NULLS FIRST', 'NULLS LAST') else SQL()
+
+            term = self._order_field_to_sql(alias, field_name, sql_direction, sql_nulls, query)
+            if term:
+                terms.append(term)
+
+        return SQL(", ").join(terms)
+
+    def _order_field_to_sql(self, alias: str, field_name: str, direction: SQL,
+                            nulls: SQL, query: Query) -> SQL:
+        """ Return an :class:`SQL` object that represents the ordering by the
+        given field.
+
+        :param direction: one of ``SQL("ASC")``, ``SQL("DESC")``, ``SQL()``
+        :param nulls: one of ``SQL("NULLS FIRST")``, ``SQL("NULLS LAST")``, ``SQL()``
+        """
+        full_name = field_name
+        property_name = None
+        if '.' in field_name:
+            field_name, property_name = field_name.split('.', 1)
+
+        field = self._fields.get(field_name)
+        if not field:
+            raise ValueError(f"Invalid field {field_name!r} on model {self._name!r}")
+
+        if property_name and field.type != 'properties':
+            raise ValueError(f'Order a property ({property_name!r}) on a non-properties field ({field_name!r})')
+
+        if field.inherited:
+            # delegate to the parent model via a join
+            parent_model = self.env[field.related_field.model_name]
+            parent_fname = field.related.split('.')[0]
+            parent_alias = query.make_alias(alias, parent_fname)
+            query.add_join('LEFT JOIN', parent_alias, parent_model._table, SQL(
+                "%s = %s",
+                self._field_to_sql(alias, parent_fname, query),
+                SQL.identifier(parent_alias, 'id'),
+            ))
+            return parent_model._order_field_to_sql(parent_alias, full_name, direction, nulls, query)
+
+        if not (field.store and field.column_type):
+            _logger.warning("Model %r cannot be sorted on field %r (not a column)", self._name, field_name)
+            return
+
+        if field.type == 'many2one':
+            seen = self.env.context.get('__m2o_order_seen', ())
+            if field in seen:
+                return
+            self = self.with_context(__m2o_order_seen=frozenset((field, *seen)))
+
+            # instead of ordering by the field's raw value, use the comodel's
+            # order on many2one values
+            terms = []
+            if nulls.code == 'NULLS FIRST':
+                terms.append(SQL("%s IS NOT NULL", self._field_to_sql(alias, field_name, query)))
+            elif nulls.code == 'NULLS LAST':
+                terms.append(SQL("%s IS NULL", self._field_to_sql(alias, field_name, query)))
+
+            # LEFT JOIN the comodel table, in order to include NULL values, too
+            comodel = self.env[field.comodel_name]
+            coalias = query.make_alias(alias, field_name)
+            query.add_join('LEFT JOIN', coalias, comodel._table, SQL(
+                "%s = %s",
+                self._field_to_sql(alias, field_name, query),
+                SQL.identifier(coalias, 'id'),
+            ))
+
+            # figure out the applicable order_by for the m2o
+            coorder = comodel._order
+            if not regex_order.match(coorder):
+                # _order is complex, can't use it here, so we default to _rec_name
+                coorder = comodel._rec_name
+
+            # delegate the order to the comodel
+            reverse = direction.code == 'DESC'
+            term = comodel._order_to_sql(coorder, query, alias=coalias, reverse=reverse)
+            if term:
+                terms.append(term)
+            return SQL(", ").join(terms)
+
+        sql_field = self._field_to_sql(alias, field_name, query)
+        if field.type == 'boolean':
+            sql_field = SQL("COALESCE(%s, FALSE)", sql_field)
+        elif field.type == 'properties' and property_name:
+            sql_field = SQL("(%s -> %s)", sql_field, property_name)
+
+        return SQL("%s %s %s", sql_field, direction, nulls)
 
     @api.model
     def _generate_order_by(self, order_spec, query):
@@ -5184,14 +5226,13 @@ class BaseModel(metaclass=MetaModel):
         a comma-separated list of valid field names, optionally followed by an ASC or DESC direction.
 
         :raise ValueError in case order_spec is malformed
-        """
-        order_by_clause = ''
-        order_spec = order_spec or self._order
-        if order_spec:
-            order_by_elements = self._generate_order_by_inner(self._table, order_spec, query)
-            if order_by_elements:
-                order_by_clause = ",".join(order_by_elements)
 
+        .. deprecated:: 17.0
+            Deprecated method, use _order_to_sql() instead
+        """
+        warnings.warn("Deprecated method _generate_order_by(), _order_to_sql() instead", DeprecationWarning, 2)
+        sql = self._order_to_sql(order_spec, query)
+        order_by_clause = self.env.cr.mogrify(sql).decode()
         return order_by_clause and (' ORDER BY %s ' % order_by_clause) or ''
 
     @api.model
@@ -5320,7 +5361,7 @@ class BaseModel(metaclass=MetaModel):
         self._apply_ir_rules(query, 'read')
 
         if order:
-            query.order = self._generate_order_by(order, query).replace('ORDER BY ', '')
+            query.order = self._order_to_sql(order, query)
         query.limit = limit
         query.offset = offset
 
@@ -5560,13 +5601,12 @@ class BaseModel(metaclass=MetaModel):
         while todo:
             # retrieve the respective successors of the nodes in 'todo'
             cr.execute(SQL(
-                "SELECT %s, %s FROM %s WHERE %s IN %s AND %s IS NOT NULL",
-                SQL.identifier(field.column1),
-                SQL.identifier(field.column2),
-                SQL.identifier(field.relation),
-                SQL.identifier(field.column1),
-                tuple(todo),
-                SQL.identifier(field.column2),
+                """ SELECT %(col1)s, %(col2)s FROM %(rel)s
+                    WHERE %(col1)s IN %(ids)s AND %(col2)s IS NOT NULL """,
+                rel=SQL.identifier(field.relation),
+                col1=SQL.identifier(field.column1),
+                col2=SQL.identifier(field.column2),
+                ids=tuple(todo),
             ))
             done.update(todo)
             todo.clear()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models
+from odoo import fields, models
 
 class ReportMoOverview(models.AbstractModel):
     _inherit = 'report.mrp.report_mo_overview'
@@ -53,18 +53,29 @@ class ReportMoOverview(models.AbstractModel):
             return self._format_receipt_date('expected', planned_date)
         return res
 
-    def _get_resupply_data(self, rules, rules_delay, quantity, uom_id, product, warehouse):
-        res = super()._get_resupply_data(rules, rules_delay, quantity, uom_id, product, warehouse)
+    def _get_resupply_data(self, rules, rules_delay, quantity, uom_id, product, production):
+        res = super()._get_resupply_data(rules, rules_delay, quantity, uom_id, product, production)
         if any(rule for rule in rules if rule.action == 'buy' and product.seller_ids):
             supplier = product._select_seller(quantity=quantity, uom_id=product.uom_id)
             if supplier:
                 return {
                     'delay': supplier.delay + rules_delay,
                     'cost': supplier.price * uom_id._compute_quantity(quantity, supplier.product_uom),
+                    'currency': supplier.currency_id,
                 }
         return res
 
-    def _get_replenishment_cost(self, product, quantity, uom_id, currency, move_in=False):
+    def _is_doc_in_done(self, doc_in):
+        if doc_in._name == 'purchase.order':
+            return doc_in.state == 'purchase' and all(move.state in ('done', 'cancel') for move in doc_in.order_line.move_ids)
+        return super()._is_doc_in_done(doc_in)
+
+    def _get_origin(self, move):
+        if move.purchase_line_id:
+            return move.purchase_line_id.order_id
+        return super()._get_origin(move)
+
+    def _get_replenishment_mo_cost(self, product, quantity, uom_id, currency, move_in=False):
         if move_in and move_in.purchase_line_id:
             po_line = move_in.purchase_line_id
             po = po_line.order_id
@@ -72,5 +83,6 @@ class ReportMoOverview(models.AbstractModel):
                 po_line.price_unit, currency=po.currency_id, quantity=uom_id._compute_quantity(quantity, move_in.purchase_line_id.product_uom),
                 product=po_line.product_id, partner=po.partner_id
             )['total_void']
+            price = po_line.currency_id._convert(price, currency, (move_in.company_id or self.env.company), fields.Date.today())
             return currency.round(price)
-        return super()._get_replenishment_cost(product, quantity, uom_id, currency, move_in)
+        return super()._get_replenishment_mo_cost(product, quantity, uom_id, currency, move_in)

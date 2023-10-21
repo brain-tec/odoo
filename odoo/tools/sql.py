@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 # pylint: disable=sql-injection
+from __future__ import annotations
 
 import enum
 import json
@@ -8,9 +9,11 @@ import logging
 import re
 from binascii import crc32
 from collections import defaultdict
-from typing import Iterable, Optional, Union
+from typing import Iterable, Union
 
 import psycopg2
+
+from .misc import named_to_positional_printf
 
 _schema = logging.getLogger('odoo.schema')
 
@@ -26,15 +29,18 @@ _CONFDELTYPES = {
 
 
 class SQL:
-    """ An object that wraps SQL code with its positional parameters, like::
+    """ An object that wraps SQL code with its parameters, like::
 
         sql = SQL("UPDATE TABLE foo SET a = %s, b = %s", 'hello', 42)
         cr.execute(sql)
 
-    The code is given as a format string, and the positional arguments are meant
-    to be merged into it using the string formatting operator. The wrapper is
-    designed to be composable: the positional parameters can be either actual
-    parameters or SQL objects themselves::
+    The code is given as a ``%``-format string, and supports either positional
+    arguments (with `%s`) or named arguments (with `%(name)s`). Escaped
+    characters (like ``"%%"``) are not supported, though. The arguments are
+    meant to be merged into the code using the `%` formatting operator.
+
+    The SQL wrapper is designed to be composable: the arguments can be either
+    actual parameters, or SQL objects themselves::
 
         sql = SQL(
             "UPDATE TABLE %s SET %s",
@@ -56,11 +62,18 @@ class SQL:
     __slots__ = ('__code', '__args')
 
     # pylint: disable=keyword-arg-before-vararg
-    def __new__(cls, code: Union[str, "SQL"] = "", /, *args):
+    def __new__(cls, code: (str | SQL) = "", /, *args, **kwargs):
         if isinstance(code, SQL):
             return code
-        # validate the format of code
-        code % tuple("" for arg in args)
+
+        # validate the format of code and parameters
+        if args and kwargs:
+            raise TypeError("SQL() takes either positional arguments, or named arguments")
+        if args:
+            code % tuple("" for arg in args)
+        elif kwargs:
+            code, args = named_to_positional_printf(code, kwargs)
+
         self = object.__new__(cls)
         self.__code = code
         self.__args = args
@@ -105,7 +118,7 @@ class SQL:
         yield self.code
         yield self.params
 
-    def join(self, args: Iterable) -> "SQL":
+    def join(self, args: Iterable) -> SQL:
         """ Join SQL objects or parameters with ``self`` as a separator. """
         args = list(args)
         # optimizations for special cases
@@ -122,7 +135,7 @@ class SQL:
         return SQL("%s" * len(items), *items)
 
     @classmethod
-    def identifier(cls, name: str, subname: Optional[str] = None) -> "SQL":
+    def identifier(cls, name: str, subname: (str | None) = None) -> SQL:
         """ Return an SQL object that represents an identifier. """
         assert IDENT_RE.match(name), f"{name!r} invalid for SQL.identifier()"
         if subname is None:

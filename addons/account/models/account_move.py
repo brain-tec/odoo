@@ -4294,15 +4294,16 @@ class AccountMove(models.Model):
 
         return rslt
 
-    def _get_pdf_and_send_invoice_vals(self, template):
+    def _get_pdf_and_send_invoice_vals(self, template, **kwargs):
         return {
             'mail_template_id': template.id,
             'move_ids': self.ids,
             'checkbox_send_mail': True,
             'checkbox_download': False,
+            **kwargs,
         }
 
-    def _generate_pdf_and_send_invoice(self, template, from_cron=True, allow_fallback_pdf=True):
+    def _generate_pdf_and_send_invoice(self, template, from_cron=True, allow_fallback_pdf=True, **kwargs):
         """ Generate the pdf for the current invoices and send them by mail using the send & print wizard.
 
         :param from_cron:   Flag indicating if the method is called from a cron. In that case, we avoid raising any
@@ -4310,20 +4311,23 @@ class AccountMove(models.Model):
         :param allow_fallback_pdf:  In case of error when generating the documents for invoices, generate a
                                     proforma PDF report instead.
         """
-        composer_vals = self._get_pdf_and_send_invoice_vals(template)
+        composer_vals = self._get_pdf_and_send_invoice_vals(template, **kwargs)
         composer = self.env['account.move.send'].create(composer_vals)
 
         # from_cron=True to log errors in chatter instead of raise
-        composer.action_send_and_print(from_cron=from_cron, allow_fallback_pdf=allow_fallback_pdf)
+        return composer.action_send_and_print(from_cron=from_cron, allow_fallback_pdf=allow_fallback_pdf)
 
-    def generate_pdf_and_send_invoice(self):
-        """ Calls `_generate_pdf_and_send_invoice` and returns the (pdf, filename)"""
-        template = self.env.ref(self._get_mail_template())
-        self.with_context(skip_invoice_sync=True)._generate_pdf_and_send_invoice(template)
-        if len(self) < 2:
+    def get_invoice_pdf_report_attachment(self):
+        if len(self) < 2 and self.invoice_pdf_report_id:
+            # if the Send & Print succeeded
             return self.invoice_pdf_report_id.raw, self.invoice_pdf_report_id.name
-        else:
-            return self.env['ir.actions.report']._render('account.account_invoices', self.ids)[0], "Invoices.pdf"
+        elif len(self) < 2 and self.message_main_attachment_id:
+            # if the Send & Print failed with fallback=True -> proforma PDF
+            return self.message_main_attachment_id.raw, self.message_main_attachment_id.name
+        # all other cases
+        pdf_content = self.env['ir.actions.report']._render('account.account_invoices', self.ids)[0]
+        pdf_name = self._get_invoice_report_filename() if len(self) == 1 else "Invoices.pdf"
+        return pdf_content, pdf_name
 
     def _get_invoice_report_filename(self, extension='pdf'):
         """ Get the filename of the generated invoice report with extension file. """

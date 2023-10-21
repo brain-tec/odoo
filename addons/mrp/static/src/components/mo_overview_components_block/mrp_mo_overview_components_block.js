@@ -4,6 +4,8 @@ import { Component, onWillUpdateProps, useState } from "@odoo/owl";
 import { useBus } from "@web/core/utils/hooks";
 import { MoOverviewLine } from "../mo_overview_line/mrp_mo_overview_line";
 import { MoOverviewOperationsBlock } from "../mo_overview_operations_block/mrp_mo_overview_operations_block";
+import { MoOverviewByproductsBlock } from "../mo_overview_byproducts_block/mrp_mo_overview_byproducts_block";
+import { SHOW_OPTIONS } from "../mo_overview_display_filter/mrp_mo_overview_display_filter";
 
 export class MoOverviewComponentsBlock extends Component {
     static template = "mrp.MoOverviewComponentsBlock";
@@ -81,6 +83,7 @@ export class MoOverviewComponentsBlock extends Component {
 MoOverviewComponentsBlock.components = {
     MoOverviewLine,
     MoOverviewOperationsBlock,
+    MoOverviewByproductsBlock,
     MoOverviewComponentsBlock,
 };
 MoOverviewComponentsBlock.props = {
@@ -94,17 +97,15 @@ MoOverviewComponentsBlock.props = {
         },
         optional: true,
     },
-    showOptions: {
+    byproducts: {
         type: Object,
         shape: {
-            uom: Boolean,
-            replenishments: Boolean,
-            availabilities: Boolean,
-            receipts: Boolean,
-            moCosts: Boolean,
-            productCosts: Boolean,
+            summary: Object,
+            details: Array,
         },
+        optional: true,
     },
+    showOptions: SHOW_OPTIONS,
 };
 MoOverviewComponentsBlock.defaultProps = {
     unfoldAll: false,

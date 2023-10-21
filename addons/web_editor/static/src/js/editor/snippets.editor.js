@@ -2,7 +2,6 @@
 
 import { Mutex } from "@web/core/utils/concurrency";
 import { clamp } from "@web/core/utils/numbers";
-import core from "@web/legacy/js/services/core";
 import Dialog from "@web/legacy/js/core/dialog";
 import dom from "@web/legacy/js/core/dom";
 import Widget from "@web/legacy/js/core/widget";
@@ -1968,8 +1967,6 @@ var SnippetsMenu = Widget.extend({
         // Needed as bootstrap stop the propagation of click events for dropdowns
         this.$document.on('mouseup.snippets_menu', '.dropdown-toggle', this._onClick);
 
-        core.bus.on('deactivate_snippet', this, this._onDeactivateSnippet);
-
         // Adapt overlay covering when the window is resized / content changes
         this.debouncedCoverUpdate = throttleForAnimation(() => {
             this.updateCurrentSnippetEditorOverlay();
@@ -2108,7 +2105,6 @@ var SnippetsMenu = Widget.extend({
         if (this.debouncedCoverUpdate) {
             this.debouncedCoverUpdate.cancel();
         }
-        core.bus.off('deactivate_snippet', this, this._onDeactivateSnippet);
         $(document.body).off('click', this._checkEditorToolbarVisibilityCallback);
         this.el.ownerDocument.body.classList.remove('editor_has_snippets');
         // Dispose BS tooltips.
@@ -2517,7 +2513,7 @@ var SnippetsMenu = Widget.extend({
             this.invisibleDOMMap = new Map();
             const $invisibleDOMPanelEl = $(this.invisibleDOMPanelEl);
             $invisibleDOMPanelEl.find('.o_we_invisible_entry').remove();
-            const isMobile = this.options.wysiwyg.websiteService?.context.isMobile;
+            const isMobile = this._isMobile();
             const invisibleSelector = `.o_snippet_invisible, ${isMobile ? '.o_snippet_mobile_invisible' : '.o_snippet_desktop_invisible'}`;
             const $selector = this.options.enableTranslation ? this.$body : globalSelector.all();
             let $invisibleSnippets = $selector.find(invisibleSelector).addBack(invisibleSelector);
@@ -3683,6 +3679,14 @@ var SnippetsMenu = Widget.extend({
         for (const el of tooltipTargetEls) {
             Tooltip.getInstance(el)?.hide();
         }
+    },
+    /**
+     * Returns whether the edited content is a mobile view content.
+     *
+     * @returns {boolean}
+     */
+    _isMobile() {
+        return weUtils.isMobileView(this.$body[0]);
     },
 
     //--------------------------------------------------------------------------

@@ -142,12 +142,13 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
                         on_user_set: "User is set",
                         on_tag_set: "Tag is added",
                         on_priority_set: "Priority is set to",
-                        on_create_or_write: "On save",
                         on_time: "Based on date field",
                         on_time_created: "After creation",
                         on_time_updated: "After last update",
+                        on_create_or_write: "On save",
                         on_unlink: "On deletion",
                         on_change: "On live update",
+                        on_webhook: "On webhook",
                     })
                 );
             },
@@ -298,7 +299,7 @@ registry.category("web_tour.tours").add("test_kanban_automation_view_time_trigge
                 );
                 assertEqual(
                     document.querySelector(".o_kanban_record .o_tag").innerText,
-                    "Date (res.partner)"
+                    "Date (Contact)"
                 );
             },
         },
@@ -449,11 +450,11 @@ registry.category("web_tour.tours").add("test_form_view_model_id", {
                 const triggerGroups = Array.from(this.$anchor[0].querySelectorAll("optgroup"));
                 assertEqual(
                     triggerGroups.map((el) => el.getAttribute("label")).join(" // "),
-                    "Values Updated // Timing Conditions // Custom"
+                    "Values Updated // Timing Conditions // Custom // External"
                 );
                 assertEqual(
                     triggerGroups.map((el) => el.innerText).join(" // "),
-                    "User is setOn save // Based on date fieldAfter creationAfter last update // On deletionOn live update"
+                    "User is set // Based on date fieldAfter creationAfter last update // On saveOn deletionOn live update // On webhook"
                 );
             },
         },
@@ -483,11 +484,11 @@ registry.category("web_tour.tours").add("test_form_view_model_id", {
                 const triggerGroups = Array.from(this.$anchor[0].querySelectorAll("optgroup"));
                 assertEqual(
                     triggerGroups.map((el) => el.getAttribute("label")).join(" // "),
-                    "Values Updated // Timing Conditions // Custom"
+                    "Values Updated // Timing Conditions // Custom // External"
                 );
                 assertEqual(
                     triggerGroups.map((el) => el.innerText).join(" // "),
-                    "Stage is set toUser is setTag is addedPriority is set toOn save // Based on date fieldAfter creationAfter last update // On deletionOn live update"
+                    "Stage is set toUser is setTag is addedPriority is set to // Based on date fieldAfter creationAfter last update // On saveOn deletionOn live update // On webhook"
                 );
             },
         },
@@ -548,5 +549,58 @@ registry.category("web_tour.tours").add("test_form_view_custom_reference_field",
             trigger: ".o_base_automation_kanban_view",
             isCheck: true,
         },
+    ],
+});
+
+registry.category("web_tour.tours").add("test_form_view_mail_triggers", {
+    test: true,
+    steps: () => [
+        {
+            trigger: ".o_field_widget[name='model_id'] input",
+            run: "text base.automation.lead.test",
+        },
+        {
+            trigger:
+                ".o_field_widget[name='model_id'] .dropdown-menu li a:contains(Automated Rule Test)",
+        },
+        {
+            trigger: ".o_field_widget[name='trigger'] select",
+            run() {
+                assertEqual(Array.from(this.$anchor[0].querySelectorAll("optgroup")).map(el => el.label).join(", "), "Values Updated, Timing Conditions, Custom, External")
+            }
+        },
+        {
+            trigger: ".o_field_widget[name='model_id'] input",
+            run: "text base.automation.lead.thread.test",
+        },
+        {
+            trigger:
+                ".o_field_widget[name='model_id'] .dropdown-menu li a:contains(Threaded Lead Test)",
+            run(helpers) {
+                waitOrmCalls = observeOrmCalls();
+                helpers.click(this.$anchor);
+                return nextTick();
+            },
+        },
+        {
+            trigger: "body",
+            async run() {
+                await waitOrmCalls();
+                await nextTick();
+            },
+        },
+        {
+            trigger: ".o_field_widget[name='trigger']",
+            run() {
+                assertEqual(Array.from(this.$anchor[0].querySelectorAll("select optgroup")).map(el => el.label).join(", "), "Values Updated, Email Events, Timing Conditions, Custom, External")
+            }
+        },
+        {
+            trigger: "button.o_form_button_cancel",
+        },
+        {
+            trigger: "body:not(:has(button.o_form_button_cancel)",
+            run() {}
+        }
     ],
 });
