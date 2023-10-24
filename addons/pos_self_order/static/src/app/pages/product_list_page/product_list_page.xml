@@ -12,23 +12,19 @@
                         t-ref="category_{{category.id}}"
                         t-attf-class="nav-link category-item flex-shrink-0 p-0"
                         t-attf-href="#scrollspy_{{category.id}}">
-                        <div t-if="category.has_image" class="ratio ratio-1x1 mb-1">
-                            <div class="placeholder-glow">
-                                <div class="placeholder w-100 h-100 bg-300 rounded"/>
+                        <div class="ratio ratio-1x1 mb-1">
+                            <div t-att-class="{'placeholder-glow': category.has_image}">
+                                <div class="w-100 h-100 bg-200 rounded d-flex align-items-center justify-content-center" t-att-class="{'placeholder': category.has_image}">
+                                    <small class="d-block fw-bold text-white text-center" t-esc="category.name"/>
+                                </div>
                             </div>
-                            <img class="rounded w-100 h-100"
+                            <img t-if="category.has_image"  class="rounded w-100 h-100"
                                 t-attf-src="/pos-self/get-category-image/{{ category.id }}"
                                 alt="Product image"
                                 loading="lazy"
                                 onerror="this.remove()" />
                         </div>
-                        <small
-                            class="d-block fw-bold text-center"
-                            t-att-class="{
-                                'py-2' : !category.has_image,
-                                'text-truncate' : category.has_image,
-                            }"
-                            t-esc="category.name"/>
+                        <small class="d-block fw-bold text-center" t-esc="category.name"/>
                     </a>
                 </nav>
 
@@ -62,12 +58,12 @@
                     t-attf-id="scrollspy_{{category.id}}"
                     t-attf-categId="{{category.id}}"
                     t-ref="productsWithCategory_{{category.id}}"
-                    class="product-list-category d-empty-none bg-view py-4 px-3 mb-3">
+                    class="product-list-category d-empty-none bg-view px-3 pb-4">
                     <t t-set="products" t-value="selfOrder.productsGroupedByCategory[category.id]" />
                     <t t-set="availableProducts" t-value="!state.searchInput ? products : getFilteredProducts(products)" />
                     <t t-set="nbrItem" t-value="availableProducts.length + nbrItem" />
                     <t t-if="availableProducts.length > 0">
-                        <h2 t-esc="category.name" class="mb-4 display-6 fw-bold"/>
+                        <h2 t-esc="category.name" class="pt-4 pb-2 px-3 mb-4 mx-n3 bg-200 display-6 fw-bold"/>
                         <div class="o-so-products-row">
                             <t t-foreach="availableProducts" t-as="product" t-key="product.id">
                                 <ProductCard product="product" currentProductCard="product.id === selfOrder.lastEditedProductId and currentProductCard"/>
