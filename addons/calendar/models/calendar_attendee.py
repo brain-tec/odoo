@@ -24,9 +24,9 @@ class Attendee(models.Model):
 
     STATE_SELECTION = [
         ('needsAction', 'Needs Action'),
-        ('tentative', 'Uncertain'),
-        ('declined', 'Declined'),
-        ('accepted', 'Accepted'),
+        ('tentative', 'Maybe'),
+        ('declined', 'No'),
+        ('accepted', 'Yes'),
     ]
 
     # event
@@ -40,7 +40,7 @@ class Attendee(models.Model):
     access_token = fields.Char('Invitation Token', default=_default_access_token)
     mail_tz = fields.Selection(_tz_get, compute='_compute_mail_tz', help='Timezone used for displaying time in the mail template')
     # state
-    state = fields.Selection(STATE_SELECTION, string='Status', readonly=True, default='needsAction')
+    state = fields.Selection(STATE_SELECTION, string='Status', default='needsAction')
     availability = fields.Selection(
         [('free', 'Available'), ('busy', 'Busy')], 'Available/Busy', readonly=True)
 
@@ -157,7 +157,7 @@ class Attendee(models.Model):
         for attendee in self:
             attendee.event_id.message_post(
                 author_id=attendee.partner_id.id,
-                body=_("%s has accepted the invitation") % (attendee.common_name),
+                body=_("%s has accepted the invitation", attendee.common_name),
                 subtype_xmlid="calendar.subtype_invitation",
             )
         return self.write({'state': 'accepted'})
@@ -167,7 +167,7 @@ class Attendee(models.Model):
         for attendee in self:
             attendee.event_id.message_post(
                 author_id=attendee.partner_id.id,
-                body=_("%s has declined the invitation") % (attendee.common_name),
+                body=_("%s has declined the invitation", attendee.common_name),
                 subtype_xmlid="calendar.subtype_invitation",
             )
         return self.write({'state': 'declined'})
