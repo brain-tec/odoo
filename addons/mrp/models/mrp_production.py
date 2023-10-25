@@ -11,6 +11,7 @@ from collections import defaultdict
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _, Command
+from odoo.addons.web.controllers.utils import clean_action
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_compare, float_round, float_is_zero, format_datetime
 from odoo.tools.misc import OrderedSet, format_date, groupby as tools_groupby
@@ -1371,6 +1372,8 @@ class MrpProduction(models.Model):
         self._set_lot_producing()
         if self.product_id.tracking == 'serial':
             self._set_qty_producing()
+        if self.picking_type_id.auto_print_generated_mrp_lot:
+            return self._autoprint_generated_lot(self.lot_producing_id)
 
     def action_confirm(self):
         self._check_company()
@@ -1967,47 +1970,78 @@ class MrpProduction(models.Model):
                 'state': 'done',
             })
 
+        report_actions = self._get_autoprint_done_report_actions()
         if self.env.context.get('skip_redirection'):
+            if report_actions:
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'do_multi_print',
+                    'params': {
+                        'reports': report_actions,
+                    }
+                }
             return True
-
+        another_action = False
         if not backorders:
             if self.env.context.get('from_workorder'):
-                return {
+                another_action = {
                     'type': 'ir.actions.act_window',
                     'res_model': 'mrp.production',
                     'views': [[self.env.ref('mrp.mrp_production_form_view').id, 'form']],
                     'res_id': self.id,
                     'target': 'main',
                 }
-            if self.user_has_groups('mrp.group_mrp_reception_report') and self.picking_type_id.auto_show_reception_report:
-                lines = self.move_finished_ids.filtered(lambda m: m.product_id.type == 'product' and m.state != 'cancel' and m.quantity_done and not m.move_dest_ids)
+            elif self.user_has_groups('mrp.group_mrp_reception_report'):
+                mos_to_show = self.filtered(lambda mo: mo.picking_type_id.auto_show_reception_report)
+                lines = mos_to_show.move_finished_ids.filtered(lambda m: m.product_id.type == 'product' and m.state != 'cancel' and m.quantity_done and not m.move_dest_ids)
                 if lines:
-                    if any(mo.show_allocation for mo in self):
-                        action = self.action_view_reception_report()
-                        return action
+                    if any(mo.show_allocation for mo in mos_to_show):
+                        another_action = mos_to_show.action_view_reception_report()
+            if report_actions:
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'do_multi_print',
+                    'params': {
+                        'reports': report_actions,
+                        'anotherAction': another_action,
+                    }
+                }
+            if another_action:
+                return another_action
             return True
         context = self.env.context.copy()
         context = {k: v for k, v in context.items() if not k.startswith('default_')}
         for k, v in context.items():
             if k.startswith('skip_'):
                 context[k] = False
-        action = {
+        another_action = {
             'res_model': 'mrp.production',
             'type': 'ir.actions.act_window',
             'context': dict(context, mo_ids_to_backorder=None)
         }
         if len(backorders) == 1:
-            action.update({
+            another_action.update({
+                'views': [[False, 'form']],
                 'view_mode': 'form',
                 'res_id': backorders[0].id,
             })
         else:
-            action.update({
+            another_action.update({
                 'name': _("Backorder MO"),
                 'domain': [('id', 'in', backorders.ids)],
+                'views': [[False, 'list'], [False, 'form']],
                 'view_mode': 'tree,form',
             })
-        return action
+        if report_actions:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'do_multi_print',
+                'params': {
+                    'reports': report_actions,
+                    'anotherAction': another_action,
+                }
+            }
+        return another_action
 
     def pre_button_mark_done(self):
         self._button_mark_done_sanity_checks()
@@ -2059,7 +2093,10 @@ class MrpProduction(models.Model):
         return action
 
     def action_view_reception_report(self):
-        return self.env["ir.actions.actions"]._for_xml_id("mrp.mrp_reception_action")
+        action = self.env["ir.actions.actions"]._for_xml_id("mrp.mrp_reception_action")
+        # default_production_ids needs to be first default_ key so the "print" button correctly works
+        action['context'] = dict({'default_production_ids': self.ids}, **self.env.context)
+        return action
 
     def action_view_mrp_production_unbuilds(self):
         self.ensure_one()
@@ -2580,3 +2617,75 @@ class MrpProduction(models.Model):
         if missing_lot_id_products:
             error_msg = _('You need to supply Lot/Serial Number for products:') + missing_lot_id_products
             raise UserError(error_msg)
+
+    def _get_autoprint_done_report_actions(self):
+        """ Reports to auto-print when MO is marked as done
+        """
+        report_actions = []
+        productions_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_done_production_order)
+        if productions_to_print:
+            action = self.env.ref("mrp.action_report_production_order").report_action(productions_to_print.ids, config=False)
+            clean_action(action, self.env)
+            report_actions.append(action)
+        productions_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_done_mrp_product_labels)
+        productions_by_print_formats = productions_to_print.grouped(lambda p: p.picking_type_id.mrp_product_label_to_print)
+        for print_format in productions_to_print.picking_type_id.mapped('mrp_product_label_to_print'):
+            labels_to_print = productions_by_print_formats.get(print_format)
+            if print_format == 'pdf':
+                action = self.env.ref("mrp.action_report_finished_product").report_action(labels_to_print.ids, config=False)
+                clean_action(action, self.env)
+                report_actions.append(action)
+            elif print_format == 'zpl':
+                action = self.env.ref("mrp.label_manufacture_template").report_action(labels_to_print.ids, config=False)
+                clean_action(action, self.env)
+                report_actions.append(action)
+        if self.user_has_groups('mrp.group_mrp_reception_report'):
+            reception_reports_to_print = self.filtered(
+                lambda p: p.picking_type_id.auto_print_mrp_reception_report
+                          and p.picking_type_id.code == 'mrp_operation'
+                          and p.move_finished_ids.move_dest_ids
+            )
+            if reception_reports_to_print:
+                action = self.env.ref('stock.stock_reception_report_action').report_action(reception_reports_to_print, config=False)
+                action['context'] = dict({'default_production_ids': reception_reports_to_print.ids}, **self.env.context)
+                clean_action(action, self.env)
+                report_actions.append(action)
+            reception_labels_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_mrp_reception_report_labels and p.picking_type_id.code == 'mrp_operation')
+            if reception_labels_to_print:
+                moves_to_print = reception_labels_to_print.move_finished_ids.move_dest_ids
+                if moves_to_print:
+                    # needs to be string to support python + js calls to report
+                    quantities = ','.join(str(qty) for qty in moves_to_print.mapped(lambda m: math.ceil(m.product_uom_qty)))
+                    data = {
+                        'docids': moves_to_print.ids,
+                        'quantity': quantities,
+                    }
+                    action = self.env.ref('stock.label_picking').report_action(moves_to_print, data=data, config=False)
+                    clean_action(action, self.env)
+                    report_actions.append(action)
+        if self.user_has_groups('stock.group_production_lot'):
+            productions_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_done_mrp_lot and p.move_finished_ids.move_line_ids.lot_id)
+            productions_by_print_formats = productions_to_print.grouped(lambda p: p.picking_type_id.done_mrp_lot_label_to_print)
+            for print_format in productions_to_print.picking_type_id.mapped('done_mrp_lot_label_to_print'):
+                lots_to_print = productions_by_print_formats.get(print_format)
+                lots_to_print = lots_to_print.move_finished_ids.move_line_ids.mapped('lot_id')
+                if print_format == 'pdf':
+                    action = self.env.ref("stock.action_report_lot_label").report_action(lots_to_print.ids, config=False)
+                    clean_action(action, self.env)
+                    report_actions.append(action)
+                elif print_format == 'zpl':
+                    action = self.env.ref("stock.label_lot_template").report_action(lots_to_print.ids, config=False)
+                    clean_action(action, self.env)
+                    report_actions.append(action)
+        return report_actions
+
+    def _autoprint_generated_lot(self, lot_id):
+        self.ensure_one()
+        if self.picking_type_id.generated_mrp_lot_label_to_print == 'pdf':
+            action = self.env.ref("stock.action_report_lot_label").report_action(lot_id.id, config=False)
+            clean_action(action, self.env)
+            return action
+        elif self.picking_type_id.generated_mrp_lot_label_to_print == 'zpl':
+            action = self.env.ref("stock.label_lot_template").report_action(lot_id.id, config=False)
+            clean_action(action, self.env)
+            return action

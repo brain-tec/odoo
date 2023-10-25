@@ -1,23 +1,21 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from werkzeug.exceptions import NotFound
-
 from odoo import api, fields, models, _
-from odoo.exceptions import AccessError, ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.osv import expression
 
-
 class ChannelMember(models.Model):
-    _name = 'discuss.channel.member'
-    _description = 'Listeners of a Channel'
-    _rec_names_search = ['partner_id', 'guest_id']
+    _name = "discuss.channel.member"
+    _description = "Channel Member"
+    _rec_names_search = ["channel_id", "partner_id", "guest_id"]
     _bypass_create_check = {}
 
     # identity
-    partner_id = fields.Many2one('res.partner', string='Recipient', ondelete='cascade', index=True)
-    guest_id = fields.Many2one(string="Guest", comodel_name='mail.guest', ondelete='cascade', readonly=True, index=True)
+    partner_id = fields.Many2one("res.partner", "Partner", ondelete="cascade", index=True)
+    guest_id = fields.Many2one("mail.guest", "Guest", ondelete="cascade", readonly=True, index=True)
+    is_self = fields.Boolean(compute="_compute_is_self", search="_search_is_self")
     # channel
-    channel_id = fields.Many2one('discuss.channel', string='Channel', ondelete='cascade', readonly=True, required=True)
+    channel_id = fields.Many2one("discuss.channel", "Channel", ondelete="cascade", readonly=True, required=True)
     # state
     custom_channel_name = fields.Char('Custom channel name')
     fetched_message_id = fields.Many2one('mail.message', string='Last Fetched')
@@ -38,7 +36,34 @@ class ChannelMember(models.Model):
             if any(user._is_public() for user in member.partner_id.user_ids):
                 raise ValidationError(_("Channel members cannot include public users."))
 
-    @api.depends('channel_id.message_ids', 'seen_message_id')
+    @api.depends_context("uid", "guest")
+    def _compute_is_self(self):
+        if not self:
+            return
+        current_partner, current_guest = self.env["res.partner"]._get_current_persona()
+        self.is_self = False
+        for member in self:
+            if current_partner and member.partner_id == current_partner:
+                member.is_self = True
+            if current_guest and member.guest_id == current_guest:
+                member.is_self = True
+
+    def _search_is_self(self, operator, operand):
+        is_in = (operator == "=" and operand) or (operator == "!=" and not operand)
+        current_partner, current_guest = self.env["res.partner"]._get_current_persona()
+        if is_in:
+            return [
+                '|',
+                ("partner_id", "=", current_partner.id) if current_partner else expression.FALSE_LEAF,
+                ("guest_id", "=", current_guest.id) if current_guest else expression.FALSE_LEAF,
+            ]
+        else:
+            return [
+                ("partner_id", "!=", current_partner.id) if current_partner else expression.TRUE_LEAF,
+                ("guest_id", "!=", current_guest.id) if current_guest else expression.TRUE_LEAF,
+            ]
+
+    @api.depends("channel_id.message_ids", "seen_message_id")
     def _compute_message_unread(self):
         if self.ids:
             self.env['mail.message'].flush_model()
@@ -64,10 +89,14 @@ class ChannelMember(models.Model):
         else:
             self.message_unread_counter = 0
 
-    @api.depends('partner_id', 'guest_id')
+    @api.depends("partner_id.name", "guest_id.name", "channel_id.display_name")
     def _compute_display_name(self):
-        for record in self:
-            record.display_name = record.partner_id.name or record.guest_id.name
+        for member in self:
+            member.display_name = _(
+                "“%(member_name)s” in “%(channel_name)s”",
+                member_name=member.partner_id.name or member.guest_id.name,
+                channel_name=member.channel_id.display_name,
+            )
 
     def init(self):
         self.env.cr.execute("CREATE UNIQUE INDEX IF NOT EXISTS discuss_channel_member_partner_unique ON %s (channel_id, partner_id) WHERE partner_id IS NOT NULL" % self._table)
@@ -79,57 +108,34 @@ class ChannelMember(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        """Similar access rule as the access rule of the mail channel.
-
-        It can not be implemented in XML, because when the record will be created, the
-        partner will be added in the channel and the security rule will always authorize
-        the creation.
-        """
-        if not self.env.is_admin() and not self.env.context.get('mail_create_bypass_create_check') is self._bypass_create_check:
-            for vals in vals_list:
-                if 'channel_id' in vals:
-                    channel_id = self.env['discuss.channel'].browse(vals['channel_id'])
-                    if not channel_id._can_invite(vals.get('partner_id')):
-                        raise AccessError(_('This user can not be added in this channel'))
+        if self.env.context.get("mail_create_bypass_create_check") is self._bypass_create_check:
+            self = self.sudo()
+        for vals in vals_list:
+            if "channel_id" not in vals:
+                raise UserError(
+                    _(
+                        "It appears you're trying to create a channel member, but it seems like you forgot to specify the related channel. "
+                        "To move forward, please make sure to provide the necessary channel information."
+                    )
+                )
+            channel = self.env["discuss.channel"].browse(vals["channel_id"])
+            if channel.channel_type == "chat" and len(channel.channel_member_ids) > 0:
+                raise UserError(
+                    _("Adding more members to this chat isn't possible; it's designed for just two people.")
+                )
         return super().create(vals_list)
 
     def write(self, vals):
         for channel_member in self:
-            for field_name in {'channel_id', 'partner_id', 'guest_id'}:
+            for field_name in ['channel_id', 'partner_id', 'guest_id']:
                 if field_name in vals and vals[field_name] != channel_member[field_name].id:
                     raise AccessError(_('You can not write on %(field_name)s.', field_name=field_name))
         return super().write(vals)
 
     def unlink(self):
-        self.sudo().rtc_session_ids.unlink()
+        # sudo: discuss.channel.rtc.session - cascade unlink of sessions for self member
+        self.sudo().rtc_session_ids.unlink()  # ensure unlink overrides are applied
         return super().unlink()
-
-    @api.model
-    def _get_as_sudo_from_context_or_raise(self, channel_id):
-        channel_member = self._get_as_sudo_from_context(channel_id=channel_id)
-        if not channel_member:
-            raise NotFound()
-        return channel_member
-
-    @api.model
-    def _get_as_sudo_from_context(self, channel_id):
-        """ Seeks a channel member matching the provided `channel_id` and the
-        current user or guest.
-
-        :param channel_id: The id of the channel of which the user/guest is
-            expected to be member.
-        :type channel_id: int
-        :return: A record set containing the channel member if found, or an
-            empty record set otherwise. In case of guest, the record is returned
-            with the 'guest' record in the context.
-        :rtype: discuss.channel.member
-        """
-        if self.env.uid and not self.env.user._is_public():
-            return self.env['discuss.channel.member'].sudo().search([('channel_id', '=', channel_id), ('partner_id', '=', self.env.user.partner_id.id)], limit=1)
-        guest = self.env['mail.guest']._get_guest_from_context()
-        if guest:
-            return guest.env['discuss.channel.member'].sudo().search([('channel_id', '=', channel_id), ('guest_id', '=', guest.id)], limit=1)
-        return self.env['discuss.channel.member'].sudo()
 
     def _notify_typing(self, is_typing):
         """ Broadcast the typing notification to channel members
@@ -155,9 +161,11 @@ class ChannelMember(models.Model):
                 data['thread'] = member.channel_id._channel_format(fields=fields.get('channel')).get(member.channel_id)
             if 'persona' in fields:
                 if member.partner_id:
-                    persona = member._get_partner_data(fields=fields.get('persona', {}).get('partner'))
+                    # sudo: res.partner - reading _get_partner_data related to a member is considered acceptable
+                    persona = member.sudo()._get_partner_data(fields=fields.get('persona', {}).get('partner'))
                     persona['type'] = "partner"
                 if member.guest_id:
+                    # sudo: mail.guest - reading _guest_format related to a member is considered acceptable
                     persona = member.guest_id.sudo()._guest_format(fields=fields.get('persona', {}).get('guest')).get(member.guest_id)
                 data['persona'] = persona
             members_formatted_data[member] = data

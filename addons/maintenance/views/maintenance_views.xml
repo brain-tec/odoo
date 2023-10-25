@@ -667,12 +667,14 @@
                     <field name="technician_user_id" class="oe_inline" domain="[('share', '=', False)]"/>
                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" class="oe_inline"/>
                 </group>
-                <group name="group_alias" invisible="not alias_domain" groups="base.group_no_one">
+                <group name="group_alias">
                     <label for="alias_name" string="Email Alias"/>
                     <div name="alias_def">
                         <field name="alias_id" class="oe_read_only oe_inline" string="Email Alias" required="0"/>
                         <div class="oe_edit_only oe_inline" name="edit_alias" style="display: inline;">
-                            <field name="alias_name" class="oe_inline"/>@<field name="alias_domain" class="oe_inline" readonly="1"/>
+                            <field name="alias_name" class="oe_inline"/>@
+                            <field name="alias_domain_id" class="oe_inline" placeholder="e.g. domain.com"
+                                   options="{'no_create': True, 'no_open': True}"/>
                         </div>
                     </div>
                 </group>
@@ -888,9 +890,9 @@
                         <div class="container">
                             <div class="row">
                                 <div class="col-6 o_kanban_card_manage_section o_kanban_manage_view">
-                                    <div role="menuitem" class="o_kanban_card_manage_title">
+                                    <h5 role="menuitem" class="o_kanban_card_manage_title">
                                         <span>Requests</span>
-                                    </div>
+                                    </h5>
                                     <div role="menuitem">
                                         <a name="%(hr_equipment_todo_request_action_from_dashboard)d" type="action">
                                             All
@@ -913,9 +915,9 @@
                                     </div>
                                 </div>
                                 <div class="col-6 o_kanban_card_manage_section o_kanban_manage_new">
-                                    <div role="menuitem" class="o_kanban_card_manage_title">
+                                    <h5 role="menuitem" class="o_kanban_card_manage_title">
                                         <span>Reporting</span>
-                                    </div>
+                                    </h5>
                                     <div role="menuitem">
                                         <a name="%(maintenance_request_action_reports)d" type="action" context="{'search_default_maintenance_team_id': id}">
                                         Maintenance Requests

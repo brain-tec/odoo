@@ -23,7 +23,7 @@ from odoo.addons.website.controllers import main
 from odoo.addons.website.controllers.form import WebsiteForm
 from odoo.addons.sale.controllers import portal as sale_portal
 from odoo.osv import expression
-from odoo.tools import lazy
+from odoo.tools import lazy, str2bool
 from odoo.tools.json import scriptsafe as json_scriptsafe
 
 _logger = logging.getLogger(__name__)
@@ -1293,9 +1293,13 @@ class WebsiteSale(payment_portal.PaymentPortal):
                         update_values['partner_invoice_id'] = partner_id
                         if kw.get('use_same'):
                             update_values['partner_shipping_id'] = partner_id
-                        elif not kw.get('callback') and not order.only_services:
+                        elif (
+                            order._is_public_order()
+                            and not kw.get('callback')
+                            and not order.only_services
+                        ):
                             # Now that the billing is set, if shipping is necessary
-                            # request the user to fill the shipping address
+                            # request the customer to fill the shipping address
                             kw['callback'] = '/shop/address'
                     elif address_mode == 'shipping':
                         update_values['partner_shipping_id'] = partner_id
@@ -1329,6 +1333,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 if not errors:
                     return request.redirect(kw.get('callback') or '/shop/confirm_order')
 
+        is_public_user = request.website.is_public_user()
         render_values = {
             'website_sale_order': order,
             'partner_id': partner_id,
@@ -1339,7 +1344,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
             'callback': kw.get('callback'),
             'only_services': order and order.only_services,
             'account_on_checkout': request.website.account_on_checkout,
-            'is_public_user': request.website.is_public_user()
+            'is_public_user': is_public_user,
+            'is_public_order': order._is_public_order(),
+            'use_same': is_public_user or ('use_same' in kw and str2bool(kw.get('use_same'))),
         }
         render_values.update(self._get_country_related_render_values(kw, render_values))
         return request.render("website_sale.address", render_values)
@@ -1690,6 +1697,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             'display_submit_button': False,  # The submit button is re-added outside the form.
             'transaction_route': f'/shop/payment/transaction/{order.id}',
             'landing_route': '/shop/payment/validate',
+            'sale_order_id': order.id,  # Allow Stripe to check if tokenization is required.
         }
         values = {**checkout_page_values, **payment_form_values}
         if request.website.enabled_delivery:
