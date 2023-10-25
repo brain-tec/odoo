@@ -2,14 +2,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
+import math
 import time
 from ast import literal_eval
 from datetime import date, timedelta
 from collections import defaultdict
-from markupsafe import escape
 
-from odoo import SUPERUSER_ID, _, api, fields, models
+from odoo import SUPERUSER_ID, _, api, Command, fields, models
 from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
+from odoo.addons.web.controllers.utils import clean_action
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, format_datetime, format_date, groupby
@@ -84,6 +85,49 @@ class PickingType(models.Model):
     auto_show_reception_report = fields.Boolean(
         "Show Reception Report at Validation",
         help="If this checkbox is ticked, Odoo will automatically show the reception report (if there are moves to allocate to) when validating.")
+    auto_print_delivery_slip = fields.Boolean(
+        "Auto Print Delivery Slip",
+        help="If this checkbox is ticked, Odoo will automatically print the delivery slip of a picking when it is validated.")
+    auto_print_return_slip = fields.Boolean(
+        "Auto Print Return Slip",
+        help="If this checkbox is ticked, Odoo will automatically print the return slip of a picking when it is validated.")
+
+    auto_print_product_labels = fields.Boolean(
+        "Auto Print Product Labels",
+        help="If this checkbox is ticked, Odoo will automatically print the product labels of a picking when it is validated.")
+    product_label_format = fields.Selection([
+        ('dymo', 'Dymo'),
+        ('2x7xprice', '2 x 7 with price'),
+        ('4x7xprice', '4 x 7 with price'),
+        ('4x12', '4 x 12'),
+        ('4x12xprice', '4 x 12 with price'),
+        ('zpl', 'ZPL Labels'),
+        ('zplxprice', 'ZPL Labels with price')], string="Product Label Format to auto-print", default='2x7xprice')
+    auto_print_lot_labels = fields.Boolean(
+        "Auto Print Lot/SN Labels",
+        help="If this checkbox is ticked, Odoo will automatically print the lot/SN labels of a picking when it is validated.")
+    lot_label_format = fields.Selection([
+        ('4x12_lots', '4 x 12 - One per lot/SN'),
+        ('4x12_units', '4 x 12 - One per unit'),
+        ('zpl_lots', 'ZPL Labels - One per lot/SN'),
+        ('zpl_units', 'ZPL Labels - One per unit')],
+        string="Lot Label Format to auto-print", default='4x12_lots')
+    auto_print_reception_report = fields.Boolean(
+        "Auto Print Reception Report",
+        help="If this checkbox is ticked, Odoo will automatically print the reception report of a picking when it is validated and has assigned moves.")
+    auto_print_reception_report_labels = fields.Boolean(
+        "Auto Print Reception Report Labels",
+        help="If this checkbox is ticked, Odoo will automatically print the reception report labels of a picking when it is validated.")
+    auto_print_packages = fields.Boolean(
+        "Auto Print Packages",
+        help="If this checkbox is ticked, Odoo will automatically print the packages and their contents of a picking when it is validated.")
+
+    auto_print_package_label = fields.Boolean(
+        "Auto Print Package Label",
+        help="If this checkbox is ticked, Odoo will automatically print the package label when \"Put in Pack\" button is used.")
+    package_label_to_print = fields.Selection(
+        [('pdf', 'PDF'), ('zpl', 'ZPL')],
+        "Package Label to Print", default='pdf')
 
     count_picking_draft = fields.Integer(compute='_compute_picking_count')
     count_picking_ready = fields.Integer(compute='_compute_picking_count')
@@ -1150,7 +1194,8 @@ class Picking(models.Model):
         pickings_to_backorder = self - pickings_not_to_backorder
         pickings_not_to_backorder.with_context(cancel_backorder=True)._action_done()
         pickings_to_backorder.with_context(cancel_backorder=False)._action_done()
-
+        report_actions = self._get_autoprint_report_actions()
+        another_action = False
         if self.user_has_groups('stock.group_reception_report'):
             pickings_show_report = self.filtered(lambda p: p.picking_type_id.auto_show_reception_report)
             lines = pickings_show_report.move_ids.filtered(lambda m: m.product_id.type == 'product' and m.state != 'cancel' and m.quantity_done and not m.move_dest_ids)
@@ -1166,7 +1211,18 @@ class Picking(models.Model):
                         ('product_id', 'in', lines.product_id.ids)], limit=1):
                     action = pickings_show_report.action_view_reception_report()
                     action['context'] = {'default_picking_ids': pickings_show_report.ids}
-                    return action
+                    if not report_actions:
+                        return action
+                    another_action = action
+        if report_actions:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'do_multi_print',
+                'params': {
+                    'reports': report_actions,
+                    'anotherAction': another_action,
+                }
+            }
         return True
 
     def action_set_quantities_to_reservation(self):
@@ -1306,7 +1362,7 @@ class Picking(models.Model):
                     'backorder_id': picking.id
                 })
                 picking.message_post(
-                    body=escape(_('The backorder %s has been created.')) % backorder_picking._get_html_link()
+                    body=_('The backorder %s has been created.', backorder_picking._get_html_link())
                 )
                 moves_to_backorder.write({'picking_id': backorder_picking.id})
                 moves_to_backorder.move_line_ids.package_level_id.write({'picking_id':backorder_picking.id})
@@ -1498,60 +1554,68 @@ class Picking(models.Model):
             return {}
 
     def _put_in_pack(self, move_line_ids, create_package_level=True):
-        package = False
-        for pick in self:
-            move_lines_to_pack = self.env['stock.move.line']
-            package = self.env['stock.quant.package'].create({})
+        self.ensure_one()
+        move_lines_to_pack = self.env['stock.move.line']
+        package = self.env['stock.quant.package'].create({})
+        precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        if float_is_zero(move_line_ids[0].qty_done, precision_digits=precision_digits):
+            for line in move_line_ids:
+                line.qty_done = line.reserved_uom_qty
 
-            precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-            if float_is_zero(move_line_ids[0].qty_done, precision_digits=precision_digits):
-                for line in move_line_ids:
-                    line.qty_done = line.reserved_uom_qty
-
-            for ml in move_line_ids:
-                if float_compare(ml.qty_done, ml.reserved_uom_qty,
-                                 precision_rounding=ml.product_uom_id.rounding) >= 0:
-                    move_lines_to_pack |= ml
-                else:
-                    quantity_left_todo = float_round(
-                        ml.reserved_uom_qty - ml.qty_done,
-                        precision_rounding=ml.product_uom_id.rounding,
-                        rounding_method='HALF-UP')
-                    done_to_keep = ml.qty_done
-                    new_move_line = ml.copy(
-                        default={'reserved_uom_qty': 0, 'qty_done': ml.qty_done})
-                    vals = {'reserved_uom_qty': quantity_left_todo, 'qty_done': 0.0}
-                    if pick.picking_type_id.code == 'incoming':
-                        if ml.lot_id:
-                            vals['lot_id'] = False
-                        if ml.lot_name:
-                            vals['lot_name'] = False
-                    ml.write(vals)
-                    new_move_line.write({'reserved_uom_qty': done_to_keep})
-                    move_lines_to_pack |= new_move_line
-            if not package.package_type_id:
-                package_type = move_lines_to_pack.move_id.product_packaging_id.package_type_id
-                if len(package_type) == 1:
-                    package.package_type_id = package_type
-            if len(move_lines_to_pack) == 1:
-                default_dest_location = move_lines_to_pack._get_default_dest_location()
-                move_lines_to_pack.location_dest_id = default_dest_location._get_putaway_strategy(
-                    product=move_lines_to_pack.product_id,
-                    quantity=move_lines_to_pack.reserved_uom_qty,
-                    package=package)
-            move_lines_to_pack.write({
-                'result_package_id': package.id,
+        for ml in move_line_ids:
+            if float_compare(ml.qty_done, ml.reserved_uom_qty, precision_rounding=ml.product_uom_id.rounding) >= 0:
+                move_lines_to_pack |= ml
+            else:
+                quantity_left_todo = float_round(
+                    ml.reserved_uom_qty - ml.qty_done,
+                    precision_rounding=ml.product_uom_id.rounding,
+                    rounding_method='HALF-UP')
+                done_to_keep = ml.qty_done
+                new_move_line = ml.copy(
+                    default={'reserved_uom_qty': 0, 'qty_done': ml.qty_done})
+                vals = {'reserved_uom_qty': quantity_left_todo, 'qty_done': 0.0}
+                if self.picking_type_id.code == 'incoming':
+                    if ml.lot_id:
+                        vals['lot_id'] = False
+                    if ml.lot_name:
+                        vals['lot_name'] = False
+                ml.write(vals)
+                new_move_line.write({'reserved_uom_qty': done_to_keep})
+                move_lines_to_pack |= new_move_line
+        package_type = move_lines_to_pack.move_id.product_packaging_id.package_type_id
+        if len(package_type) == 1:
+            package.package_type_id = package_type
+        if len(move_lines_to_pack) == 1:
+            default_dest_location = move_lines_to_pack._get_default_dest_location()
+            move_lines_to_pack.location_dest_id = default_dest_location._get_putaway_strategy(
+                product=move_lines_to_pack.product_id,
+                quantity=move_lines_to_pack.reserved_uom_qty,
+                package=package)
+        move_lines_to_pack.write({
+            'result_package_id': package.id,
+        })
+        if create_package_level:
+            self.env['stock.package_level'].create({
+                'package_id': package.id,
+                'picking_id': self.id,
+                'location_id': False,
+                'location_dest_id': move_lines_to_pack.mapped('location_dest_id').id,
+                'move_line_ids': [Command.set(move_lines_to_pack.ids)],
+                'company_id': self.company_id.id,
             })
-            if create_package_level:
-                package_level = self.env['stock.package_level'].create({
-                    'package_id': package.id,
-                    'picking_id': pick.id,
-                    'location_id': False,
-                    'location_dest_id': move_lines_to_pack.mapped('location_dest_id').id,
-                    'move_line_ids': [(6, 0, move_lines_to_pack.ids)],
-                    'company_id': pick.company_id.id,
-                })
         return package
+
+    def _post_put_in_pack_hook(self, package_id):
+        if package_id and self.picking_type_id.auto_print_package_label:
+            if self.picking_type_id.package_label_to_print == 'pdf':
+                action = self.env.ref("stock.action_report_quant_package_barcode_small").report_action(package_id.id, config=False)
+            elif self.picking_type_id.package_label_to_print == 'zpl':
+                action = self.env.ref("stock.label_package_template").report_action(package_id.id, config=False)
+            if action:
+                action.update({'close_on_report_download': True})
+                clean_action(action, self.env)
+                return action
+        return package_id
 
     def action_put_in_pack(self):
         self.ensure_one()
@@ -1578,7 +1642,8 @@ class Picking(models.Model):
             if move_line_ids:
                 res = self._pre_put_in_pack_hook(move_line_ids)
                 if not res:
-                    res = self._put_in_pack(move_line_ids)
+                    package = self._put_in_pack(move_line_ids)
+                    return self._post_put_in_pack_hook(package)
                 return res
             else:
                 raise UserError(_("Please add 'Done' quantities to the picking to create a new pack."))
@@ -1690,3 +1755,75 @@ class Picking(models.Model):
 
     def _get_report_lang(self):
         return self.move_ids and self.move_ids[0].partner_id.lang or self.partner_id.lang or self.env.lang
+
+    def _get_autoprint_report_actions(self):
+        report_actions = []
+        pickings_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_delivery_slip)
+        if pickings_to_print:
+            action = self.env.ref("stock.action_report_delivery").report_action(pickings_to_print.ids, config=False)
+            clean_action(action, self.env)
+            report_actions.append(action)
+        pickings_print_return_slip = self.filtered(lambda p: p.picking_type_id.auto_print_return_slip)
+        if pickings_print_return_slip:
+            action = self.env.ref("stock.return_label_report").report_action(pickings_print_return_slip.ids, config=False)
+            clean_action(action, self.env)
+            report_actions.append(action)
+
+        if self.user_has_groups('stock.group_reception_report'):
+            reception_reports_to_print = self.filtered(
+                lambda p: p.picking_type_id.auto_print_reception_report
+                          and p.picking_type_id.code != 'outgoing'
+                          and p.move_ids.move_dest_ids
+            )
+            if reception_reports_to_print:
+                action = self.env.ref('stock.stock_reception_report_action').report_action(reception_reports_to_print, config=False)
+                clean_action(action, self.env)
+                report_actions.append(action)
+            reception_labels_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_reception_report_labels and p.picking_type_id.code != 'outgoing')
+            if reception_labels_to_print:
+                moves_to_print = reception_labels_to_print.move_ids.move_dest_ids
+                if moves_to_print:
+                    # needs to be string to support python + js calls to report
+                    quantities = ','.join(str(qty) for qty in moves_to_print.mapped(lambda m: math.ceil(m.product_uom_qty)))
+                    data = {
+                        'docids': moves_to_print.ids,
+                        'quantity': quantities,
+                    }
+                    action = self.env.ref('stock.label_picking').report_action(moves_to_print, data=data, config=False)
+                    clean_action(action, self.env)
+                    report_actions.append(action)
+        pickings_print_product_label = self.filtered(lambda p: p.picking_type_id.auto_print_product_labels)
+        pickings_by_print_formats = pickings_print_product_label.grouped(lambda p: p.picking_type_id.product_label_format)
+        for print_format in pickings_print_product_label.picking_type_id.mapped("product_label_format"):
+            pickings = pickings_by_print_formats.get(print_format)
+            wizard = self.env['product.label.layout'].create({
+                'product_ids': pickings.move_ids.product_id.ids,
+                'move_ids': pickings.move_ids.ids,
+                'picking_quantity': 'picking',
+                'print_format': pickings.picking_type_id.product_label_format,
+            })
+            action = wizard.process()
+            if action:
+                clean_action(action, self.env)
+                report_actions.append(action)
+        if self.user_has_groups('stock.group_production_lot'):
+            pickings_print_lot_label = self.filtered(lambda p: p.picking_type_id.auto_print_lot_labels and p.move_line_ids.lot_id)
+            pickings_by_print_formats = pickings_print_lot_label.grouped(lambda p: p.picking_type_id.lot_label_format)
+            for print_format in pickings_print_lot_label.picking_type_id.mapped("lot_label_format"):
+                pickings = pickings_by_print_formats.get(print_format)
+                wizard = self.env['lot.label.layout'].create({
+                    'picking_ids': pickings.ids,
+                    'label_quantity': 'lots' if '_lots' in print_format else 'units',
+                    'print_format': '4x12' if '4x12' in print_format else 'zpl',
+                })
+                action = wizard.process()
+                if action:
+                    clean_action(action, self.env)
+                    report_actions.append(action)
+        if self.user_has_groups('stock.group_tracking_lot'):
+            pickings_print_packages = self.filtered(lambda p: p.picking_type_id.auto_print_packages and p.move_line_ids.result_package_id)
+            if pickings_print_packages:
+                action = self.env.ref("stock.action_report_picking_packages").report_action(pickings_print_packages.ids, config=False)
+                clean_action(action, self.env)
+                report_actions.append(action)
+        return report_actions

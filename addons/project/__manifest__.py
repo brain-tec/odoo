@@ -104,7 +104,6 @@
             'web/static/src/scss/mimetypes.scss',
             'web/static/src/scss/ui.scss',
             'web/static/src/legacy/scss/ui.scss',
-            'web/static/src/legacy/scss/modal.scss',
             'web/static/src/views/fields/translation_dialog.scss',
             'web/static/src/scss/fontawesome_overridden.scss',
 
@@ -140,7 +139,6 @@
             'web/static/src/legacy/js/libs/autocomplete.js',
             'web/static/src/legacy/js/libs/bootstrap.js',
             'web/static/src/legacy/js/libs/jquery.js',
-
             ('include', 'web._assets_bootstrap_backend'),
 
             'base/static/src/css/modules.css',
@@ -191,7 +189,6 @@
             'web_editor/static/src/js/common/**/*',
             'web_editor/static/src/js/editor/odoo-editor/src/utils/utils.js',
             'web_editor/static/src/js/wysiwyg/fonts.js',
-            'web_editor/static/src/xml/ace.xml',
 
             'web_editor/static/src/components/**/*',
             'web_editor/static/src/scss/web_editor.common.scss',

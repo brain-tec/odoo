@@ -17,13 +17,18 @@ export class SpreadsheetShareButton extends Component {
     static template = "spreadsheet.ShareButton";
     static components = { Dropdown, DropdownItem, CopyButton };
     static props = {
-        model: Model,
+        model: { type: Model, optional: true },
         onSpreadsheetShared: Function,
+        togglerClass: { type: String, optional: true },
     };
 
     setup() {
         this.copiedText = _t("Copied");
         this.state = useState({ url: undefined });
+    }
+
+    get togglerClass() {
+        return ["btn btn-light", this.props.togglerClass].join(" ");
     }
 
     async onOpened() {
