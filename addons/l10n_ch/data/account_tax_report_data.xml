@@ -149,18 +149,9 @@
 
     <record id="account_tax_report_line_calc_impot_base" model="account.tax.report.line">
         <field name="name">Base Impôt sur acquisitions de services</field>
-        <field name="formula">tax_ch_381A + tax_ch_382A + tax_ch_383A</field>
+        <field name="formula">tax_ch_382A + tax_ch_383A</field>
         <field name="sequence" eval="2"/>
         <field name="parent_id" ref="account_tax_report_line_calc_impot"/>
-        <field name="country_id" ref="base.ch"/>
-    </record>
-
-    <record id="account_tax_report_line_chtax_381a" model="account.tax.report.line">
-        <field name="name">381a Impots sur les acquisitions</field>
-        <field name="tag_name">381a Impots sur les acquisitions</field>
-        <field name="code">tax_ch_381A</field>
-        <field name="sequence" eval="1"/>
-        <field name="parent_id" ref="account_tax_report_line_calc_impot_base"/>
         <field name="country_id" ref="base.ch"/>
     </record>
 
@@ -234,14 +225,6 @@
         <field name="name">343b TVA due a 3.8% (TS) dès le 01.01.2024</field>
         <field name="tag_name">343b TVA due a 3.8% (TS) dès le 01.01.2024</field>
         <field name="sequence" eval="6"/>
-        <field name="parent_id" ref="account_tax_report_line_chtax_399"/>
-        <field name="country_id" ref="base.ch"/>
-    </record>
-
-    <record id="account_tax_report_line_chtax_381b" model="account.tax.report.line">
-        <field name="name">381b Impots sur les acquisitions</field>
-        <field name="tag_name">381b Impots sur les acquisitions</field>
-        <field name="sequence" eval="7"/>
         <field name="parent_id" ref="account_tax_report_line_chtax_399"/>
         <field name="country_id" ref="base.ch"/>
     </record>
