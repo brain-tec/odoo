@@ -26,6 +26,7 @@ import { LinkTools } from '@web_editor/js/wysiwyg/widgets/link_tools';
 import { touching, closest } from "@web/core/utils/ui";
 import { _t } from "@web/core/l10n/translation";
 import { renderToElement } from "@web/core/utils/render";
+import { RPCError } from "@web/core/network/rpc_service";
 
 let cacheSnippetTemplate = {};
 
@@ -2109,7 +2110,7 @@ var SnippetsMenu = Widget.extend({
         this.el.ownerDocument.body.classList.remove('editor_has_snippets');
         // Dispose BS tooltips.
         this.tooltips.dispose();
-        options.clearM2oRpcCache();
+        options.clearServiceCache();
     },
 
     //--------------------------------------------------------------------------
@@ -3460,15 +3461,15 @@ var SnippetsMenu = Widget.extend({
 
                     var $target = $toInsert;
 
-                        if ($target[0].classList.contains("o_snippet_drop_in_only")) {
-                            // If it's a "drop in only" snippet, after dropping
-                            // it, we modify it so that it's no longer a
-                            // draggable snippet but rather simple HTML code, as
-                            // if the element had been created with the editor.
-                            $target[0].classList.remove("o_snippet_drop_in_only");
-                            delete $target[0].dataset.snippet;
-                            delete $target[0].dataset.name;
-                        }
+                    if ($target[0].classList.contains("o_snippet_drop_in_only")) {
+                        // If it's a "drop in only" snippet, after dropping
+                        // it, we modify it so that it's no longer a
+                        // draggable snippet but rather simple HTML code, as
+                        // if the element had been created with the editor.
+                        $target[0].classList.remove("o_snippet_drop_in_only");
+                        delete $target[0].dataset.snippet;
+                        delete $target[0].dataset.name;
+                    }
 
                     this.options.wysiwyg.odooEditor.observerUnactive('dragAndDropCreateSnippet');
                     await this._scrollToSnippet($target, this.$scrollable);
@@ -3948,14 +3949,17 @@ var SnippetsMenu = Widget.extend({
                             _toMutex: true,
                             reloadWebClient: true,
                         });
-                    }).guardedCatch(reason => {
-                        reason.event.preventDefault();
-                        this.close();
-                        const message = markup(_t("Could not install module <strong>%s</strong>", escape(name)));
-                        self.notification.add(message, {
-                            type: 'danger',
-                            sticky: true,
-                        });
+                    }).catch(reason => {
+                        if (reason instanceof RPCError) {
+                            this.close();
+                            const message = markup(_t("Could not install module <strong>%s</strong>", escape(name)));
+                            self.notification.add(message, {
+                                type: 'danger',
+                                sticky: true,
+                            });
+                        } else {
+                            return Promise.reject(reason);
+                        }
                     });
                 },
             }, {

@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
+import { Deferred } from "@web/core/utils/concurrency";
 import { useAutofocus, useService } from '@web/core/utils/hooks';
 import { _t } from "@web/core/l10n/translation";
 import { WebsiteDialog } from '@website/components/dialog/dialog';
@@ -362,9 +363,6 @@ export class AddPageDialog extends Component {
         this.userService = useService('user');
 
         this.cssLinkEls = undefined;
-        if (this.props.ready) {
-            onMounted(() => this.props.ready());
-        }
         this.lastTabName = "";
 
         useSubEnv({
@@ -392,7 +390,8 @@ export class AddPageDialog extends Component {
 
     getCssLinkEls() {
         if (!this.cssLinkEls) {
-            this.cssLinkEls = new Promise(async resolve => {
+            this.cssLinkEls = new Deferred();
+            (async () => {
                 let contentDocument;
                 // Already in DOM ?
                 const pageIframeEl = document.querySelector("iframe.o_iframe");
@@ -405,8 +404,8 @@ export class AddPageDialog extends Component {
                     const html = await this.http.get(`/website/force/${this.props.websiteId}?path=/`, "text");
                     contentDocument = new DOMParser().parseFromString(html, "text/html");
                 }
-                resolve(contentDocument.head.querySelectorAll("link[type='text/css']"));
-            });
+                this.cssLinkEls.resolve(contentDocument.head.querySelectorAll("link[type='text/css']"));
+            })();
         }
         return this.cssLinkEls;
     }
@@ -414,10 +413,6 @@ export class AddPageDialog extends Component {
 AddPageDialog.props = {
     close: Function,
     onAddPage: {
-        type: Function,
-        optional: true,
-    },
-    ready: {
         type: Function,
         optional: true,
     },
