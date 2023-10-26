@@ -8,8 +8,14 @@ $o-base-color-palette: map-merge($o-base-color-palette, (
     'menu': 1, // o_cc1
     'menu-custom': null,
     'menu-border-color': null, // Default to classes used on the template
-    'header-boxed': null,
-    'header-boxed-custom': '200',
+    'header-sales_one': 2,
+    'header-sales_one-custom': null,
+    'header-sales_two': 5,
+    'header-sales_two-custom': null,
+    'header-sales_three': 2,
+    'header-sales_three-custom': null,
+    'header-sales_four': 1,
+    'header-sales_four-custom': null,
     'footer': 5, // o_cc5
     'footer-custom': null,
     'copyright': null,
@@ -2028,7 +2034,7 @@ $o-base-website-values-palette: (
 
     // Gradients
     'menu-gradient': null,
-    'header-boxed-gradient': null,
+    'menu-secondary-gradient': null,
     'footer-gradient': null,
     'copyright-gradient': null,
 
@@ -2037,8 +2043,8 @@ $o-base-website-values-palette: (
     'header-text-color': null,
     'header-links-style': 'default', // 'default' / 'fill' / 'outline' / 'pills' / 'block' / 'border-bottom'
     'logo-height': null, // Default to navbar height (see portal)
-    'hamburger-type': 'default', // 'default' / 'off-canvas'
     'hamburger-position': 'left', // 'left' / 'center' / 'right'
+    'hamburger-position-mobile': 'left', // 'left' / 'center' / 'right'
     'menu-border-width': null, // Default to classes used on the template
     'menu-border-style': solid, // Default to classes used on the template
     'menu-border-radius': null, // Default to classes used on the template

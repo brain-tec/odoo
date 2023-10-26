@@ -23,9 +23,9 @@ class AccountMoveSend(models.TransientModel):
     )
     account_peppol_edi_mode_info = fields.Char(compute='_compute_account_peppol_edi_mode_info')
 
-    def _get_wizard_values(self, move):
+    def _get_wizard_values(self):
         # EXTENDS 'account'
-        values = super()._get_wizard_values(move)
+        values = super()._get_wizard_values()
         values['send_peppol'] = self.checkbox_send_peppol
         return values
 
@@ -42,7 +42,6 @@ class AccountMoveSend(models.TransientModel):
     def _compute_checkbox_ubl_cii_xml(self):
         # extends 'account_edi_ubl_cii'
         super()._compute_checkbox_ubl_cii_xml()
-
         for wizard in self:
             if wizard.checkbox_send_peppol and wizard.enable_ubl_cii_xml and not wizard.checkbox_ubl_cii_xml:
                 wizard.checkbox_ubl_cii_xml = True
@@ -108,9 +107,14 @@ class AccountMoveSend(models.TransientModel):
 
         if all([self.checkbox_send_peppol, self.enable_peppol, self.enable_ubl_cii_xml, not self.checkbox_ubl_cii_xml]):
             self.checkbox_ubl_cii_xml = True
+        if self.checkbox_send_peppol and self.enable_peppol:
+            for move in self.move_ids:
+                if not move.peppol_move_state or move.peppol_move_state == 'ready':
+                    move.peppol_move_state = 'to_send'
 
         return super().action_send_and_print(force_synchronous=force_synchronous, allow_fallback_pdf=allow_fallback_pdf, **kwargs)
 
+    @api.model
     def _call_web_service_after_invoice_pdf_render(self, invoices_data):
         # Overrides 'account'
         super()._call_web_service_after_invoice_pdf_render(invoices_data)

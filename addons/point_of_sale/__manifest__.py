@@ -8,6 +8,7 @@
     'sequence': 40,
     'summary': 'User-friendly PoS interface for shops and restaurants',
     'depends': ['stock_account', 'barcodes', 'web_editor', 'digest'],
+    'uninstall_hook': 'uninstall_hook',
     'data': [
         'security/point_of_sale_security.xml',
         'security/ir.model.access.csv',
@@ -110,8 +111,6 @@
             'web/static/lib/owl/odoo_module.js',
             'web_editor/static/lib/html2canvas.js',
             'web/static/lib/zxing-library/zxing-library.js',
-            # FIXME POSREF legacy dependencies to remove
-            'web/static/src/legacy/js/promise_extension.js',
             # JS framework
             ('include', 'web._assets_core'),
             ('remove', 'web/static/src/core/errors/error_handlers.js'), # error handling in PoS is different from the webclient

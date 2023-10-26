@@ -20,9 +20,9 @@ class AccountMoveSend(models.TransientModel):
     checkbox_ubl_cii_label = fields.Char(compute='_compute_checkbox_ubl_cii_label')
     checkbox_ubl_cii_xml = fields.Boolean(compute='_compute_checkbox_ubl_cii_xml', store=True, readonly=False)
 
-    def _get_wizard_values(self, move):
+    def _get_wizard_values(self):
         # EXTENDS 'account'
-        values = super()._get_wizard_values(move)
+        values = super()._get_wizard_values()
         values['ubl_cii_xml'] = self.checkbox_ubl_cii_xml
         return values
 
@@ -180,6 +180,7 @@ class AccountMoveSend(models.TransientModel):
         reader_buffer.close()
         writer_buffer.close()
 
+    @api.model
     def _postprocess_invoice_ubl_xml(self, invoice, invoice_data):
         # Adding the PDF to the XML
         tree = etree.fromstring(invoice_data['ubl_cii_xml_attachment_values']['raw'])
@@ -220,6 +221,7 @@ class AccountMoveSend(models.TransientModel):
             cleanup_xml_node(tree), xml_declaration=True, encoding='UTF-8'
         )
 
+    @api.model
     def _link_invoice_documents(self, invoice, invoice_data):
         # EXTENDS 'account'
         super()._link_invoice_documents(invoice, invoice_data)

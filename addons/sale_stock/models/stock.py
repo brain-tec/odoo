@@ -36,6 +36,22 @@ class StockMove(models.Model):
         res = super()._get_source_document()
         return self.sale_line_id.order_id or res
 
+    def _get_sale_order_lines(self):
+        """ Return all possible sale order lines for one or multiple stock moves. """
+        def _get_origin_moves(move):
+            origin_moves = move.move_orig_ids
+            if origin_moves:
+                origin_moves += _get_origin_moves(origin_moves)
+            return origin_moves
+
+        def _get_destination_moves(move):
+            destination_moves = move.move_dest_ids
+            if destination_moves:
+                destination_moves += _get_destination_moves(destination_moves)
+            return destination_moves
+
+        return (self + _get_origin_moves(self) + _get_destination_moves(self)).sale_line_id
+
     def _assign_picking_post_process(self, new=False):
         super(StockMove, self)._assign_picking_post_process(new=new)
         if new:
@@ -90,7 +106,7 @@ class StockPicking(models.Model):
             sale_order = move.picking_id.sale_id
             # Creates new SO line only when pickings linked to a sale order and
             # for moves with qty. done and not already linked to a SO line.
-            if not sale_order or move.location_dest_id.usage != 'customer' or move.sale_line_id or not move.quantity_done:
+            if not sale_order or move.location_dest_id.usage != 'customer' or move.sale_line_id or not move.picked:
                 continue
             product = move.product_id
             so_line_vals = {
@@ -99,7 +115,7 @@ class StockPicking(models.Model):
                 'order_id': sale_order.id,
                 'product_id': product.id,
                 'product_uom_qty': 0,
-                'qty_delivered': move.quantity_done,
+                'qty_delivered': move.quantity,
                 'product_uom': move.product_uom.id,
             }
             if product.invoice_policy == 'delivery':

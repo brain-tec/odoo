@@ -156,6 +156,8 @@ class ProductTemplate(models.Model):
         comodel_name='product.tag',
         relation='product_tag_product_template_rel',
     )
+    # Properties
+    product_properties = fields.Properties('Properties', definition='categ_id.product_properties_definition', copy=True)
 
     def _compute_item_count(self):
         for template in self:
@@ -454,7 +456,7 @@ class ProductTemplate(models.Model):
 
     def _get_related_fields_variant_template(self):
         """ Return a list of fields present on template and variants models and that are related"""
-        return ['barcode', 'default_code', 'standard_price', 'volume', 'weight', 'packaging_ids']
+        return ['barcode', 'default_code', 'standard_price', 'volume', 'weight', 'packaging_ids', 'product_properties']
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -462,7 +464,7 @@ class ProductTemplate(models.Model):
         for vals in vals_list:
             self._sanitize_vals(vals)
         templates = super(ProductTemplate, self).create(vals_list)
-        if "create_product_product" not in self._context:
+        if self._context.get("create_product_product", True):
             templates._create_variant_ids()
 
         # This is needed to set given values to first variant after creation
@@ -484,7 +486,7 @@ class ProductTemplate(models.Model):
             if uom_id and uom_po_id and uom_id.category_id != uom_po_id.category_id:
                 vals['uom_po_id'] = uom_id.id
         res = super(ProductTemplate, self).write(vals)
-        if 'attribute_line_ids' in vals or (vals.get('active') and len(self.product_variant_ids) == 0):
+        if self._context.get("create_product_product", True) and 'attribute_line_ids' in vals or (vals.get('active') and len(self.product_variant_ids) == 0):
             self._create_variant_ids()
         if 'active' in vals and not vals.get('active'):
             self.with_context(active_test=False).mapped('product_variant_ids').write({'active': vals.get('active')})
@@ -672,7 +674,6 @@ class ProductTemplate(models.Model):
     def _create_variant_ids(self):
         if not self:
             return
-
         self.env.flush_all()
         Product = self.env["product.product"]
 

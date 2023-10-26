@@ -401,24 +401,13 @@ class SaleOrder(models.Model):
 
     @api.depends('currency_id', 'date_order', 'company_id')
     def _compute_currency_rate(self):
-        cache = {}
         for order in self:
-            order_date = order.date_order.date()
-            if not order.company_id:
-                order.currency_rate = order.currency_id.with_context(date=order_date).rate or 1.0
-                continue
-            elif not order.currency_id:
-                order.currency_rate = 1.0
-            else:
-                key = (order.company_id.id, order_date, order.currency_id.id)
-                if key not in cache:
-                    cache[key] = self.env['res.currency']._get_conversion_rate(
-                        from_currency=order.company_id.currency_id,
-                        to_currency=order.currency_id,
-                        company=order.company_id,
-                        date=order_date,
-                    )
-                order.currency_rate = cache[key]
+            order.currency_rate = self.env['res.currency']._get_conversion_rate(
+                from_currency=order.company_id.currency_id,
+                to_currency=order.currency_id,
+                company=order.company_id,
+                date=order.date_order.date(),
+            )
 
     @api.depends('company_id')
     def _compute_has_active_pricelist(self):
@@ -1188,13 +1177,13 @@ class SaleOrder(models.Model):
 
     def _nothing_to_invoice_error_message(self):
         return _(
-            "There is nothing to invoice!\n\n"
-            "Reason(s) of this behavior could be:\n"
-            "- You should deliver your products before invoicing them.\n"
-            "- You should modify the invoicing policy of your product: Open the product, go to the "
-            "\"Sales\" tab and modify invoicing policy from \"delivered quantities\" to \"ordered "
-            "quantities\". For Services, you should modify the Service Invoicing Policy to "
-            "'Prepaid'."
+            "Cannot create an invoice. No items are available to invoice.\n\n"
+            "To resolve this issue, please ensure that:\n"
+            "   \u2022 The products have been delivered before attempting to invoice them.\n"
+            "   \u2022 The invoicing policy of the product is configured correctly.\n\n"
+            "If you want to invoice based on ordered quantities instead:\n"
+            "   \u2022 For consumable or storable products, open the product, go to the 'General Information' tab and change the 'Invoicing Policy' from 'Delivered Quantities' to 'Ordered Quantities'.\n"
+            "   \u2022 For services (and other products), change the 'Invoicing Policy' to 'Prepaid/Fixed Price'.\n"
         )
 
     def _get_update_prices_lines(self):
@@ -1708,13 +1697,10 @@ class SaleOrder(models.Model):
         name = self.name
         if prefix:
             name = prefix + ": " + self.name
-        plan = self.env['account.analytic.plan'].sudo().search([
-            '|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)
-        ], limit=1)
+        plan = self.env['account.analytic.plan'].sudo().search([], limit=1)
         if not plan:
             plan = self.env['account.analytic.plan'].sudo().create({
                 'name': 'Default',
-                'company_id': self.company_id.id,
             })
         return {
             'name': name,

@@ -19,6 +19,11 @@ import {
     convertHslToRgb,
  } from '@web/core/utils/colors';
 import { renderToElement, renderToFragment } from "@web/core/utils/render";
+import {
+    applyTextHighlight,
+    removeTextHighlight,
+    drawTextHighlightSVG,
+} from "@website/js/text_processing";
 
 import { markup } from "@odoo/owl";
 
@@ -658,6 +663,12 @@ options.Class.include({
     /**
      * @see this.selectClass for parameters
      */
+    customizeWebsiteVariables: async function (previewMode, widgetValue, params) {
+        await this._customizeWebsite(previewMode, widgetValue, params, 'variables');
+    },
+    /**
+     * @see this.selectClass for parameters
+     */
     customizeWebsiteColor: async function (previewMode, widgetValue, params) {
         await this._customizeWebsite(previewMode, widgetValue, params, 'color');
     },
@@ -757,6 +768,16 @@ options.Class.include({
                 break;
             case 'variable':
                 await this._customizeWebsiteVariable(widgetValue, params);
+                break;
+            case "variables":
+                const defaultVariables = params.defaultVariables ?
+                    Object.fromEntries(params.defaultVariables.split(",")
+                        .map((variable) => variable.split(":").map(v => v.trim()))) :
+                    {};
+                const overriddenVariables = Object.fromEntries(widgetValue.split(",")
+                    .map((variable) => variable.split(":").map(v => v.trim())));
+                const variables = Object.assign(defaultVariables, overriddenVariables);
+                await this._customizeWebsiteVariables(variables, params.nullValue);
                 break;
             case 'color':
                 await this._customizeWebsiteColor(widgetValue, params);
@@ -1388,6 +1409,39 @@ options.registry.OptionsTab = options.Class.extend({
         this.trigger_up('request_save', {
             reload: false,
             action: 'website.theme_install_kanban_action',
+        });
+    },
+    /**
+     * @see this.selectClass for parameters
+     */
+    async addLanguage(previewMode, widgetValue, params) {
+        // Retrieve the website id to check by default the website checkbox in
+        // the dialog box 'action_view_base_language_install'
+        const websiteId = this.options.context.website_id;
+        const save = await new Promise((resolve) => {
+            Dialog.confirm(
+                this,
+                _t("Adding a language requires to leave the editor. This will save all your changes, are you sure you want to proceed?"),
+                {
+                    confirm_callback: () => resolve(true),
+                    cancel_callback: () => resolve(false),
+                }
+            );
+        });
+        if (!save) {
+            return;
+        }
+        this.trigger_up("request_save", {
+            reload: false,
+            action: "base.action_view_base_language_install",
+            options: {
+                additionalContext: {
+                    params: {
+                        website_id: websiteId,
+                        url_return: "[lang]",
+                    }
+                },
+            }
         });
     },
     /**
@@ -2175,7 +2229,13 @@ options.registry.collapse = options.Class.extend({
 options.registry.WebsiteLevelColor = options.Class.extend({
     specialCheckAndReloadMethodsNames: options.Class.prototype.specialCheckAndReloadMethodsNames
         .concat(['customizeWebsiteLayer2Color']),
-
+    /**
+     * @constructor
+     */
+    init() {
+        this._super(...arguments);
+        this._rpc = options.serviceCached(this.bindService("rpc"));
+    },
     /**
      * @see this.selectClass for parameters
      */
@@ -2218,6 +2278,24 @@ options.registry.WebsiteLevelColor = options.Class.extend({
         }
         return this._super(...arguments);
     },
+    /**
+     * @override
+     */
+    async _computeWidgetVisibility(widgetName, params) {
+        const _super = this._super.bind(this);
+        if (
+            [
+                "footer_language_selector_label_opt",
+                "footer_language_selector_opt",
+            ].includes(widgetName)
+        ) {
+            this._languages = await this._rpc.call("/website/get_languages");
+            if (this._languages.length === 1) {
+                return false;
+            }
+        }
+        return _super(...arguments);
+    },
 });
 
 options.registry.HeaderLayout = options.registry.WebsiteLevelColor.extend({
@@ -2243,6 +2321,36 @@ options.registry.HeaderLayout = options.registry.WebsiteLevelColor.extend({
     }
 });
 
+options.registry.HeaderElements = options.Class.extend({
+    /**
+     * @constructor
+     */
+    init() {
+        this._super(...arguments);
+        this._rpc = options.serviceCached(this.bindService("rpc"));
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    async _computeWidgetVisibility(widgetName, params) {
+        const _super = this._super.bind(this);
+        switch (widgetName) {
+            case "header_language_selector_opt":
+                this._languages = await this._rpc.call("/website/get_languages");
+                if (this._languages.length === 1) {
+                    return false;
+                }
+                break;
+        }
+        return _super(...arguments);
+    },
+});
+
 options.registry.HeaderNavbar = options.Class.extend({
     /**
      * Particular case: we want the option to be associated on the header navbar
@@ -2255,67 +2363,6 @@ options.registry.HeaderNavbar = options.Class.extend({
     init() {
         this._super(...arguments);
         this.setTarget(this.$target.closest('#wrapwrap > header'));
-    },
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    async updateUIVisibility() {
-        await this._super(...arguments);
-
-        // TODO improve this: this is a big hack so that the "no mobile
-        // hamburger" option is disabled if it is ever hidden (because of the
-        // selection of an hamburger template which is a foreign option). This
-        // should be done another way in another place somehow...
-        const noHamburgerWidget = this.findWidget('no_hamburger_opt');
-        const noHamburgerHidden = noHamburgerWidget.$el.hasClass('d-none');
-        if (noHamburgerHidden && noHamburgerWidget.isActive()) {
-            this.findWidget('default_hamburger_opt').enable();
-        }
-
-        // TODO improve this: this is a big hack so that the label of the
-        // hamburger option changes if the 'no_hamburger_opt' one is available
-        // (= in that case the option controls only the *mobile* hamburger).
-        const hamburgerTypeWidget = this.findWidget('header_hamburger_type_opt');
-        const labelEl = hamburgerTypeWidget.el.querySelector('we-title');
-        if (!this._originalHamburgerTypeLabel) {
-            this._originalHamburgerTypeLabel = labelEl.textContent;
-        }
-        labelEl.textContent = noHamburgerHidden
-            ? this._originalHamburgerTypeLabel
-            : _t("Mobile menu");
-    },
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    async start() {
-        await this._super(...arguments);
-        // TODO Remove in master.
-        const signInOptionEl = this.el.querySelector('[data-customize-website-views="portal.user_sign_in"]');
-        signInOptionEl.dataset.noPreview = 'true';
-    },
-    /**
-     * @private
-     */
-    async updateUI() {
-        await this._super(...arguments);
-        // For all header templates except those in the following array, change
-        // the title of the option to "Mobile Alignment" (instead of
-        // "Alignment") because it only impacts the mobile view.
-        if (!["'default'", "'hamburger'", "'sidebar'", "'magazine'", "'hamburger-full'", "'slogan'"]
-                .includes(weUtils.getCSSVariableValue("header-template"))) {
-            this.el.querySelector("[data-name='header_alignment_opt']").title =
-                _t("Mobile Alignment");
-        }
     },
 
     //--------------------------------------------------------------------------
@@ -2334,17 +2381,6 @@ options.registry.HeaderNavbar = options.Class.extend({
             case 'option_logo_height_scrolled': {
                 return !!this.$('.navbar-brand').length;
             }
-            case 'no_hamburger_opt': {
-                return !weUtils.getCSSVariableValue('header-template').includes('hamburger');
-            }
-        }
-        if (widgetName === 'header_alignment_opt') {
-            if (!this.$target[0].querySelector('.o_offcanvas_menu_toggler')) {
-                // If mobile menu is "Default", hides the alignment option for
-                // "hamburger full" and "magazine" header templates.
-                return !["'hamburger-full'", "'magazine'"].includes(weUtils.getCSSVariableValue('header-template'));
-            }
-            return true;
         }
         return this._super(...arguments);
     },
@@ -2848,6 +2884,24 @@ options.registry.HeaderBox = options.registry.Box.extend({
             return this.customizeWebsiteVariable(previewMode, defaultShadow, params);
         }
         return this._super(...arguments);
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    async _computeWidgetState(methodName, params) {
+        const value = await this._super(...arguments);
+        if (methodName === "selectStyle" && params.cssProperty === "border-width") {
+            // One-sided borders return "0px 0px 3px 0px", which prevents the
+            // option from being displayed properly. We only keep the affected
+            // border.
+            return value.replace(/(^|\s)0px/gi, "").trim() || value;
+        }
+        return value;
     },
 });
 
@@ -3419,6 +3473,10 @@ options.registry.WebsiteAnimate = options.Class.extend({
         this.isAnimatedText = this.$target.hasClass('o_animated_text');
         this.$optionsSection = this.$overlay.data('$optionsSection');
         this.$scrollingElement = $().getScrollingElement(this.ownerDocument);
+        if (this.isAnimatedText) {
+            this.$overlay[0].querySelectorAll(".o_handle")
+                .forEach(handle => handle.classList.add("pe-none"));
+        }
     },
     /**
      * @override
@@ -3669,6 +3727,135 @@ options.registry.WebsiteAnimate = options.Class.extend({
             } else {
                 imgEl.loading = 'eager';
             }
+        }
+    },
+});
+
+/**
+ * Allows edition of text "Highlight Effects" following this generic structure:
+ * `<span class="o_text_highlight">
+ *      <span class="o_text_highlight_item">
+ *          line1-textNode1 [line1-textNode2,...]
+ *          <svg.../>
+ *      </span>
+ *      [<br/>]
+ *      <span class="o_text_highlight_item">
+ *          line2-textNode1 [line2-textNode2,...]
+ *          <svg.../>
+ *      </span>
+ *      ...
+ * </span>`
+ * To correctly adapt each highlight unit when the text content is changed.
+ */
+options.registry.TextHighlight = options.Class.extend({
+    custom_events: Object.assign({}, options.Class.prototype.custom_events, {
+        "user_value_widget_opening": "_onWidgetOpening",
+    }),
+    /**
+     * @override
+     */
+    async start() {
+        await this._super(...arguments);
+        this.leftPanelEl = this.$overlay.data("$optionsSection")[0];
+        // Reduce overlay opacity for more highlight visibility on small text.
+        this.$overlay[0].style.opacity = "0.25";
+        this.$overlay[0].querySelectorAll(".o_handle")
+            .forEach(handle => handle.classList.add("pe-none"));
+    },
+    /**
+     * Move "Text Effect" options to the editor's toolbar.
+     *
+     * @override
+     */
+    onFocus() {
+        this.options.wysiwyg.toolbarEl.append(this.$el[0]);
+    },
+    /**
+     * @override
+     */
+    onBlur() {
+        this.leftPanelEl.appendChild(this.el);
+    },
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * Activates & deactivates the text highlight effect.
+     *
+     * @see this.selectClass for parameters
+     */
+    async setTextHighlight(previewMode, widgetValue, params) {
+        return widgetValue ? this._addTextHighlight(widgetValue)
+            : removeTextHighlight(this.$target[0]);
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Used to add a highlight SVG element to the targeted text node(s).
+     * This should also take in consideration a situation where many text nodes
+     * are separate e.g. `<p>first text content<br/>second text content...</p>`.
+     * To correctly handle those situations, every set of text nodes will be
+     * wrapped in a `.o_text_highlight_item` that contains its highlight SVG.
+     *
+     * @param {String} highlightID
+     * @private
+     */
+    _addTextHighlight(highlightID) {
+        const highlightEls = [...this.$target[0].querySelectorAll(".o_text_highlight_item svg")];
+        if (highlightEls.length) {
+            // If the text element has a highlight effect, we only need to
+            // change the SVG.
+            highlightEls.forEach(svg => {
+                svg.after(drawTextHighlightSVG(svg.parentElement, highlightID));
+                svg.remove();
+            });
+        } else {
+            applyTextHighlight(this.$target[0], highlightID);
+        }
+    },
+    /**
+     * @override
+     */
+    async _computeWidgetState(methodName, params) {
+        const value = await this._super(...arguments);
+        if (methodName === "selectStyle" && value === "currentColor") {
+            const style = window.getComputedStyle(this.$target[0]);
+            // The highlight default color is the text's "currentColor".
+            // This value should be handled correctly by the option.
+            return style.color;
+        }
+        return value;
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * To draw highlight SVGs for `<we-select/>` preview, we need to open the
+     * widget (we need correct size values from `getBoundingClientRect()`).
+     * This code will build the highlight preview the first time we open the
+     * `<we-select/>`.
+     *
+     * @private
+     */
+    _onWidgetOpening(ev) {
+        const target = ev.target;
+        // Only when there is no highlight SVGs.
+        if (target.getName() === "text_highlight_opt" && !target.el.querySelector("svg")) {
+            const weToggler = target.el.querySelector("we-toggler");
+            weToggler.classList.add("active");
+            [...target.el.querySelectorAll("we-button[data-set-text-highlight] div")].forEach(weBtnEl => {
+                weBtnEl.textContent = "Text";
+                // Get the text highlight linked to each `<we-button/>`
+                // and apply it to its text content.
+                weBtnEl.append(drawTextHighlightSVG(weBtnEl, weBtnEl.parentElement.dataset.setTextHighlight));
+            });
         }
     },
 });

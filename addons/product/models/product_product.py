@@ -101,8 +101,6 @@ class ProductProduct(models.Model):
     image_128 = fields.Image("Image 128", compute='_compute_image_128')
     can_image_1024_be_zoomed = fields.Boolean("Can Image 1024 be zoomed", compute='_compute_can_image_1024_be_zoomed')
     write_date = fields.Datetime(compute='_compute_write_date', store=True)
-    # Properties
-    product_properties = fields.Properties('Properties', definition='categ_id.product_properties_definition', copy=True)
 
     @api.depends('image_variant_1920', 'image_variant_1024')
     def _compute_can_image_variant_1024_be_zoomed(self):
@@ -356,7 +354,7 @@ class ProductProduct(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             self.product_tmpl_id._sanitize_vals(vals)
-        products = super(ProductProduct, self.with_context(create_product_product=True)).create(vals_list)
+        products = super(ProductProduct, self.with_context(create_product_product=False)).create(vals_list)
         # `_get_variant_id_for_combination` depends on existing variants
         self.env.registry.clear_cache()
         return products

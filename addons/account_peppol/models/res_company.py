@@ -43,6 +43,7 @@ class ResCompany(models.Model):
     account_peppol_migration_key = fields.Char(string="Migration Key")
     account_peppol_phone_number = fields.Char(
         string='Phone number (for validation)',
+        compute='_compute_account_peppol_phone_number', store=True, readonly=False,
         help='You will receive a verification code to this phone number',
     )
     account_peppol_proxy_state = fields.Selection(
@@ -55,8 +56,7 @@ class ResCompany(models.Model):
             ('rejected', 'Rejected'),
             ('canceled', 'Canceled'),
         ],
-        string='PEPPOL status',
-        compute='_compute_account_peppol_proxy_state', required=True, readonly=False, store=True, precompute=True,
+        string='PEPPOL status', required=True, default='not_registered',
     )
     is_account_peppol_participant = fields.Boolean(string='PEPPOL Participant')
     peppol_eas = fields.Selection(related='partner_id.peppol_eas', readonly=False)
@@ -73,7 +73,7 @@ class ResCompany(models.Model):
     # HELPER METHODS
     # -------------------------------------------------------------------------
 
-    def _sanitize_peppol_phone_number(self):
+    def _sanitize_peppol_phone_number(self, phone_number=None):
         self.ensure_one()
 
         error_message = _(
@@ -84,7 +84,10 @@ class ResCompany(models.Model):
         if not phonenumbers:
             raise ValidationError(error_message)
 
-        phone_number = self.account_peppol_phone_number
+        phone_number = phone_number or self.account_peppol_phone_number
+        if not phone_number:
+            return
+
         if not phone_number.startswith('+'):
             phone_number = f'+{phone_number}'
 
@@ -136,23 +139,17 @@ class ResCompany(models.Model):
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
-    @api.depends('is_account_peppol_participant')
-    def _compute_account_peppol_proxy_state(self):
-        for company in self:
-            if not company.account_peppol_proxy_state:
-                company.account_peppol_proxy_state = 'not_registered'
-
-    @api.depends('is_account_peppol_participant')
+    @api.depends('account_peppol_proxy_state')
     def _compute_peppol_purchase_journal_id(self):
         for company in self:
-            if company.is_account_peppol_participant and not company.peppol_purchase_journal_id:
+            if not company.peppol_purchase_journal_id and company.account_peppol_proxy_state not in ('not_registered', 'rejected'):
                 company.peppol_purchase_journal_id = self.env['account.journal'].search([
                     *self.env['account.journal']._check_company_domain(company),
                     ('type', '=', 'purchase'),
                 ], limit=1)
                 company.peppol_purchase_journal_id.is_peppol_journal = True
             else:
-                company.peppol_purchase_journal_id = False
+                company.peppol_purchase_journal_id = company.peppol_purchase_journal_id
 
     def _inverse_peppol_purchase_journal_id(self):
         for company in self:
@@ -170,6 +167,17 @@ class ResCompany(models.Model):
         for company in self:
             if not company.account_peppol_contact_email:
                 company.account_peppol_contact_email = company.email
+
+    @api.depends('phone')
+    def _compute_account_peppol_phone_number(self):
+        for company in self:
+            if not company.account_peppol_phone_number:
+                try:
+                    # precompute only if it's a valid phone number
+                    company._sanitize_peppol_phone_number(company.phone)
+                    company.account_peppol_phone_number = company.phone
+                except ValidationError:
+                    continue
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS

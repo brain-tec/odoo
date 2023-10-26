@@ -1,8 +1,7 @@
 import ast
 from collections import defaultdict
 from contextlib import contextmanager
-from datetime import date, timedelta
-from functools import lru_cache
+from datetime import date
 
 from odoo import api, fields, models, Command, _
 from odoo.exceptions import ValidationError, UserError
@@ -231,6 +230,7 @@ class AccountMoveLine(models.Model):
     amount_residual_currency = fields.Monetary(
         string='Residual Amount in Currency',
         compute='_compute_amount_residual', store=True,
+        group_operator=None,
         help="The residual amount on a journal item expressed in its currency (possibly not the "
              "company currency).",
     )
@@ -256,7 +256,7 @@ class AccountMoveLine(models.Model):
     )
     matching_number = fields.Char(
         string="Matching #",
-        compute='_compute_matching_number', store=True,
+        readonly=True,
         help="Matching number for this line, 'P' if it is only partially reconcile, or the name of "
              "the full reconcile if it exists.",
     )
@@ -385,12 +385,21 @@ class AccountMoveLine(models.Model):
         string='Discount amount in Currency',
         store=True,
         currency_field='currency_id',
+        group_operator=None,
     )
     # Discounted balance when the early payment discount is applied
     discount_balance = fields.Monetary(
         string='Discount Balance',
         store=True,
         currency_field='company_currency_id',
+    )
+
+    # === Payment Fields === #
+    # payment_date is the closest date to the date the aml was created between discount_date and date_maturity.
+    payment_date = fields.Date(
+        string='Payment Date',
+        compute='_compute_payment_date',
+        search='_search_payment_date',
     )
 
     # === Misc Information === #
@@ -433,6 +442,14 @@ class AccountMoveLine(models.Model):
             "Forbidden balance or account on non-accountable line"
         ),
     ]
+
+    @api.model
+    def get_views(self, views, options=None):
+        res = super().get_views(views, options)
+        if res['views'].get('list') and self.env['ir.ui.view'].browse(res['views']['list']['id']).name == "account.move.line.payment.tree":
+            # We dont want any additionnal action in the "account.move.line.payment.tree" view toolbar
+            res['views']['list']['toolbar']['action'] = []
+        return res
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -634,17 +651,9 @@ class AccountMoveLine(models.Model):
 
     @api.depends('currency_id', 'company_id', 'move_id.date')
     def _compute_currency_rate(self):
-        @lru_cache()
-        def get_rate(from_currency, to_currency, company, date):
-            return self.env['res.currency']._get_conversion_rate(
-                from_currency=from_currency,
-                to_currency=to_currency,
-                company=company,
-                date=date,
-            )
         for line in self:
             if line.currency_id:
-                line.currency_rate = get_rate(
+                line.currency_rate = self.env['res.currency']._get_conversion_rate(
                     from_currency=line.company_currency_id,
                     to_currency=line.currency_id,
                     company=line.company_id,
@@ -665,16 +674,6 @@ class AccountMoveLine(models.Model):
                 line.amount_currency = line.currency_id.round(line.balance * line.currency_rate)
             if line.currency_id == line.company_id.currency_id:
                 line.amount_currency = line.balance
-
-    @api.depends('full_reconcile_id.name', 'matched_debit_ids', 'matched_credit_ids')
-    def _compute_matching_number(self):
-        for record in self:
-            if record.full_reconcile_id:
-                record.matching_number = record.full_reconcile_id.name
-            elif record.matched_debit_ids or record.matched_credit_ids:
-                record.matching_number = 'P'
-            else:
-                record.matching_number = None
 
     @api.depends_context('order_cumulated_balance', 'domain_cumulated_balance')
     def _compute_cumulated_balance(self):
@@ -1120,6 +1119,38 @@ class AccountMoveLine(models.Model):
                     "company_id": line.company_id.id,
                 })
                 line.analytic_distribution = distribution or line.analytic_distribution
+
+    @api.depends('discount_date', 'date_maturity')
+    def _compute_payment_date(self):
+        for line in self:
+            line.payment_date = line.discount_date if line.discount_date and date.today() <= line.discount_date else line.date_maturity
+
+    def _search_payment_date(self, operator, value):
+        assert operator == '='
+        return [
+                '|',
+                '|',
+                '&', ('discount_date', '>=', str(date.today())), ('discount_date', '<=', value),
+                '&', ('discount_date', '<', str(date.today())), ('date_maturity', '<=', value),
+                '&', ('discount_date', '=', False), ('date_maturity', '<=', value),
+            ]
+
+    def action_register_payment(self):
+        ''' Open the account.payment.register wizard to pay the selected journal items.
+        :return: An action opening the account.payment.register wizard.
+        '''
+        return {
+            'name': _('Register Payment'),
+            'res_model': 'account.payment.register',
+            'view_mode': 'form',
+            'views': [[False, 'form']],
+            'context': {
+                'active_model': 'account.move.line',
+                'active_ids': self.ids,
+            },
+            'target': 'new',
+            'type': 'ir.actions.act_window',
+        }
 
     # -------------------------------------------------------------------------
     # INVERSE METHODS
@@ -2887,32 +2918,33 @@ class AccountMoveLine(models.Model):
             # distribution_on_each_plan corresponds to the proportion that is distributed to each plan to be able to
             # give the real amount when we achieve a 100% distribution
             distribution_on_each_plan = {}
-
-            for account_id, distribution in self.analytic_distribution.items():
-                line_values = self._prepare_analytic_distribution_line(float(distribution), account_id, distribution_on_each_plan)
+            for account_ids, distribution in self.analytic_distribution.items():
+                line_values = self._prepare_analytic_distribution_line(float(distribution), account_ids, distribution_on_each_plan)
                 if not self.currency_id.is_zero(line_values.get('amount')):
                     analytic_line_vals.append(line_values)
         return analytic_line_vals
 
-    def _prepare_analytic_distribution_line(self, distribution, account_id, distribution_on_each_plan):
+    def _prepare_analytic_distribution_line(self, distribution, account_ids, distribution_on_each_plan):
         """ Prepare the values used to create() an account.analytic.line upon validation of an account.move.line having
             analytic tags with analytic distribution.
         """
         self.ensure_one()
-        account_id = int(account_id)
-        account = self.env['account.analytic.account'].browse(account_id)
-        distribution_plan = distribution_on_each_plan.get(account.root_plan_id, 0) + distribution
+        account_field_values = {}
         decimal_precision = self.env['decimal.precision'].precision_get('Percentage Analytic')
-        if float_compare(distribution_plan, 100, precision_digits=decimal_precision) == 0:
-            amount = -self.balance * (100 - distribution_on_each_plan.get(account.root_plan_id, 0)) / 100.0
-        else:
-            amount = -self.balance * distribution / 100.0
-        distribution_on_each_plan[account.root_plan_id] = distribution_plan
+        amount = 0
+        for account in self.env['account.analytic.account'].browse(map(int, account_ids.split(","))):
+            distribution_plan = distribution_on_each_plan.get(account.root_plan_id, 0) + distribution
+            if float_compare(distribution_plan, 100, precision_digits=decimal_precision) == 0:
+                amount = -self.balance * (100 - distribution_on_each_plan.get(account.root_plan_id, 0)) / 100.0
+            else:
+                amount = -self.balance * distribution / 100.0
+            distribution_on_each_plan[account.root_plan_id] = distribution_plan
+            account_field_values[account.plan_id._column_name()] = account.id
         default_name = self.name or (self.ref or '/' + ' -- ' + (self.partner_id and self.partner_id.name or '/'))
         return {
             'name': default_name,
             'date': self.date,
-            'account_id': account_id,
+            **account_field_values,
             'partner_id': self.partner_id.id,
             'unit_amount': self.quantity,
             'product_id': self.product_id and self.product_id.id or False,
@@ -2922,7 +2954,7 @@ class AccountMoveLine(models.Model):
             'ref': self.ref,
             'move_line_id': self.id,
             'user_id': self.move_id.invoice_user_id.id or self._uid,
-            'company_id': account.company_id.id or self.company_id.id or self.env.company.id,
+            'company_id': self.company_id.id or self.env.company.id,
             'category': 'invoice' if self.move_id.is_sale_document() else 'vendor_bill' if self.move_id.is_purchase_document() else 'other',
         }
 
@@ -2948,13 +2980,22 @@ class AccountMoveLine(models.Model):
 
     def _all_reconciled_lines(self):
         reconciliation_lines = self.filtered(lambda x: x.account_id.reconcile or x.account_id.account_type in ('asset_cash', 'liability_credit_card'))
-        current_lines = reconciliation_lines
-        current_partials = self.env['account.partial.reconcile']
-        while current_lines:
-            current_partials = (current_lines.matched_debit_ids + current_lines.matched_credit_ids) - current_partials
-            current_lines = (current_partials.debit_move_id + current_partials.credit_move_id) - current_lines
-            reconciliation_lines += current_lines
-        return reconciliation_lines
+        self.env['account.partial.reconcile'].flush_model()
+        self.env.cr.execute("""
+            WITH RECURSIVE partials (current_id) AS (
+                    SELECT line.id
+                      FROM account_move_line line
+                     WHERE id = ANY(%s)
+
+                                                UNION
+
+                    SELECT CASE WHEN partial.debit_move_id = p.current_id THEN partial.credit_move_id ELSE partial.debit_move_id END
+                      FROM partials p
+                      JOIN account_partial_reconcile partial ON partial.debit_move_id = p.current_id OR partial.credit_move_id = p.current_id
+            )
+            SELECT current_id FROM partials;
+        """, [reconciliation_lines.ids])
+        return self.browse(r[0] for r in self.env.cr.fetchall())
 
     def _get_attachment_domains(self):
         self.ensure_one()

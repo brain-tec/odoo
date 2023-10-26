@@ -57,6 +57,17 @@ class Project(models.Model):
     partner_id = fields.Many2one(
         compute='_compute_partner_id', store=True, readonly=False)
     allocated_hours = fields.Float(copy=False)
+    billing_type = fields.Selection(
+        compute="_compute_billing_type",
+        selection=[
+            ('not_billable', 'not billable'),
+            ('manually', 'billed manually'),
+        ],
+        default='not_billable',
+        required=True,
+        readonly=False,
+        store=True,
+    )
 
     @api.model
     def _get_view(self, view_id=None, view_type='form', **options):
@@ -194,6 +205,10 @@ class Project(models.Model):
         non_billable_projects = self - billable_projects
         non_billable_projects.sale_order_line_count = 0
         non_billable_projects.sale_order_count = 0
+
+    @api.depends('allow_billable', 'allow_timesheets')
+    def _compute_billing_type(self):
+        self.filtered(lambda project: (not project.allow_billable or not project.allow_timesheets) and project.billing_type == 'manually').billing_type = 'not_billable'
 
     @api.constrains('sale_line_id')
     def _check_sale_line_type(self):
@@ -410,16 +425,9 @@ class Project(models.Model):
         costs_dict = {}
         total_revenues = {'invoiced': 0.0, 'to_invoice': 0.0}
         total_costs = {'billed': 0.0, 'to_bill': 0.0}
-        dict_rate_per_currency = {}
-        today = fields.Date.context_today(self)
         convert_company = self.company_id or self.env.company
         for timesheet_invoice_type, dummy, currency, amount, ids in aa_line_read_group:
-            if currency != self.currency_id:
-                rate = dict_rate_per_currency.get(currency.id, False)
-                if not rate:
-                    rate = currency._get_conversion_rate(currency, self.currency_id, convert_company, today)
-                    dict_rate_per_currency[currency.id] = rate
-                amount = self.currency_id.round(amount * rate)
+            amount = currency._convert(amount, self.currency_id, convert_company)
             invoice_type = timesheet_invoice_type
             cost = costs_dict.setdefault(invoice_type, {'billed': 0.0, 'to_bill': 0.0})
             revenue = revenues_dict.setdefault(invoice_type, {'invoiced': 0.0, 'to_invoice': 0.0})

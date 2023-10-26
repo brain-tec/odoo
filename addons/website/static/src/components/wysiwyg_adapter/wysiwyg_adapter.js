@@ -155,7 +155,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
 
         const $editableWindow = this.$editable[0].ownerDocument.defaultView;
         // Dropdown menu initialization: handle dropdown openings by hand
-        var $dropdownMenuToggles = $editableWindow.$('.o_mega_menu_toggle, #top_menu_container .dropdown-toggle');
+        var $dropdownMenuToggles = $editableWindow.$('.o_mega_menu_toggle, #o_main_nav .dropdown-toggle');
         $dropdownMenuToggles.removeAttr('data-bs-toggle').dropdown('dispose');
         $dropdownMenuToggles.on('click.wysiwyg_megamenu', ev => {
             this.odooEditor.observerUnactive();
@@ -356,6 +356,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
                 ...options.toolbarOptions,
                 showChecklist: false,
                 showAnimateText: true,
+                showTextHighlights: true,
             },
             context: this._context,
             editable: this.$editable,
@@ -988,7 +989,7 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         } else if (event.data.action) {
             callback = () => {
                 this.leaveEditMode({
-                    onLeave: () => this.action.doAction(event.data.action),
+                    onLeave: () => this.action.doAction(event.data.action, event.data.options || {}),
                     forceLeave: true,
                     reloadIframe: false,
                 });
