@@ -20,9 +20,9 @@ export class Persona extends Record {
     static get(data) {
         return super.get(data);
     }
-    /** @returns {import("models").Persona} */
+    /** @returns {import("models").Persona|import("models").Persona[]} */
     static insert(data) {
-        return super.insert(data);
+        return super.insert(...arguments);
     }
 
     update(data) {

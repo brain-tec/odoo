@@ -11,7 +11,7 @@ class ServerActions(models.Model):
     _inherit = ['ir.actions.server']
 
     state = fields.Selection(selection_add=[
-        ('sms', 'Send SMS Text Message'),
+        ('sms', 'Send SMS'), ('followers',),
     ], ondelete={'sms': 'cascade'})
     # SMS
     sms_template_id = fields.Many2one(
@@ -25,16 +25,6 @@ class ServerActions(models.Model):
         string='Send SMS As',
         compute='_compute_sms_method',
         readonly=False, store=True)
-
-    @api.depends('sms_template_id')
-    def _compute_name(self):
-        to_update = self.filtered(lambda action: action.state == 'sms')
-        for action in to_update:
-            action.name = _(
-                'Send SMS: %(template_name)s',
-                template_name=action.sms_template_id.name
-            )
-        super(ServerActions, self - to_update)._compute_name()
 
     @api.depends('state')
     def _compute_available_model_ids(self):

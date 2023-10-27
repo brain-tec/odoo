@@ -1,8 +1,6 @@
 /* @odoo-module */
 
-import { removeFromArrayWithPredicate } from "@mail/utils/common/arrays";
-
-import { markup, reactive } from "@odoo/owl";
+import { reactive } from "@odoo/owl";
 
 import { registry } from "@web/core/registry";
 
@@ -26,7 +24,7 @@ export class MailCoreCommon {
             this.busService.subscribe("ir.attachment/delete", (payload) => {
                 const { id: attachmentId, message: messageData } = payload;
                 if (messageData) {
-                    this.store.Message.insert({ ...messageData });
+                    this.store.Message.insert(messageData);
                 }
                 const attachment = this.store.Attachment.get(attachmentId);
                 if (attachment) {
@@ -37,10 +35,7 @@ export class MailCoreCommon {
                 const { id, message_id } = payload;
                 const message = this.store.Message.get(message_id);
                 if (message) {
-                    removeFromArrayWithPredicate(
-                        message.linkPreviews,
-                        (linkPreview) => linkPreview.id === id
-                    );
+                    message.linkPreviews.delete({ id });
                 }
             });
             this.busService.subscribe("mail.message/delete", (payload) => {
@@ -54,16 +49,7 @@ export class MailCoreCommon {
                 }
             });
             this.busService.subscribe("mail.message/notification_update", (payload) => {
-                payload.elements.map((message) => {
-                    this.store.Message.insert({
-                        ...message,
-                        body: markup(message.body),
-                        // implicit: failures are sent by the server at
-                        // initialization only if the current partner is
-                        // author of the message
-                        author: this.store.self,
-                    });
-                });
+                this.store.Message.insert(payload.elements, { html: true });
             });
             this.busService.subscribe("mail.message/toggle_star", (payload) => {
                 const { message_ids: messageIds, starred } = payload;
@@ -86,29 +72,8 @@ export class MailCoreCommon {
                 }
             });
             this.busService.subscribe("mail.record/insert", (payload) => {
-                if (payload.Thread) {
-                    this.store.Thread.insert(payload.Thread);
-                }
-                if (payload.Persona) {
-                    const personas = Array.isArray(payload.Persona)
-                        ? payload.Persona
-                        : [payload.Persona];
-                    for (const persona of personas) {
-                        this.store.Persona.insert(persona);
-                    }
-                }
-                const { LinkPreview: linkPreviews } = payload;
-                if (linkPreviews) {
-                    for (const linkPreview of linkPreviews) {
-                        this.store.LinkPreview.insert(linkPreview);
-                    }
-                }
-                const { Message: messageData } = payload;
-                if (messageData) {
-                    this.store.Message.insert({
-                        ...messageData,
-                        body: messageData.body ? markup(messageData.body) : messageData.body,
-                    });
+                for (const Model in payload) {
+                    this.store[Model].insert(payload[Model], { html: true });
                 }
             });
         });

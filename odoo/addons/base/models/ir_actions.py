@@ -3,16 +3,18 @@
 
 import odoo
 from odoo import api, fields, models, tools, _, Command
-from odoo.exceptions import MissingError, ValidationError, AccessError
+from odoo.exceptions import MissingError, ValidationError, AccessError, UserError
 from odoo.tools import frozendict
 from odoo.tools.safe_eval import safe_eval, test_python_expr
 from odoo.tools.float_utils import float_compare
 from odoo.http import request
-
 import base64
 from collections import defaultdict
-import functools
+from functools import partial, reduce
 import logging
+from operator import getitem
+import requests
+import json
 
 from pytz import timezone
 
@@ -400,6 +402,25 @@ class IrActionsActUrl(models.Model):
             "target", "url", "close",
         }
 
+WEBHOOK_SAMPLE_VALUES = {
+    "integer": 42,
+    "float": 42.42,
+    "monetary": 42.42,
+    "char": "Hello World",
+    "text": "Hello World",
+    "html": "<p>Hello World</p>",
+    "boolean": True,
+    "selection": "option1",
+    "date": "2020-01-01",
+    "datetime": "2020-01-01 00:00:00",
+    "binary": "<base64_data>",
+    "many2one": 47,
+    "many2many": [42, 47],
+    "one2many": [42, 47],
+    "reference": "res.partner,42",
+    None: "some_data",
+}
+
 
 class IrActionsServer(models.Model):
     """ Server actions model. Server action work on a base model and offer various
@@ -440,45 +461,40 @@ class IrActionsServer(models.Model):
 # To return an action, assign: action = {...}\n\n\n\n"""
 
     @api.model
-    def _default_update_field_id(self):
-        if self.model_id:
-            model_id = self.model_id.id
-        elif 'default_model_id' in self.env.context:
-            model_id = self.env.context['default_model_id']
-        else:
-            return False
+    def _default_update_path(self):
+        if not self.env.context.get('default_model_id'):
+            return ''
+        ir_model = self.env['ir.model'].browse(self.env.context['default_model_id'])
+        model = self.env[ir_model.model]
+        sensible_default_fields = ['partner_id', 'user_id', 'user_ids', 'stage_id', 'state', 'active']
+        for field_name in sensible_default_fields:
+            if field_name in model._fields:
+                return field_name
+        return ''
 
-        ir_model = self.env["ir.model"].browse(model_id)
-        if ir_model:
-            fields = self.env[ir_model.model]._fields
-            if 'state' in fields:
-                return ir_model.field_id.filtered(lambda ir_field: ir_field.name == 'state')
-            elif 'stage_id' in fields:
-                return ir_model.field_id.filtered(lambda ir_field: ir_field.name == 'stage_id')
-            elif 'priority' in fields:
-                return ir_model.field_id.filtered(lambda ir_field: ir_field.name == 'priority')
-
-    name = fields.Char(compute='_compute_name', store=True, readonly=False, required=True)
+    name = fields.Char(required=True)
     type = fields.Char(default='ir.actions.server')
     usage = fields.Selection([
         ('ir_actions_server', 'Server Action'),
         ('ir_cron', 'Scheduled Action')], string='Usage',
         default='ir_actions_server', required=True)
     state = fields.Selection([
-        ('code', 'Execute Python Code'),
-        ('object_create', 'Create a new Record'),
-        ('object_write', 'Update the Record'),
-        ('multi', 'Execute several actions')], string='Type',
-        default='code', required=True, copy=True,
+        ('object_write', 'Update Record'),
+        ('object_create', 'Create Record'),
+        ('code', 'Execute Code'),
+        ('webhook', 'Send Webhook Notification'),
+        ('multi', 'Execute Existing Actions')], string='Type',
+        default='object_write', required=True, copy=True,
         help="Type of server action. The following values are available:\n"
-             "- 'Execute Python Code': a block of python code that will be executed\n"
-             "- 'Create a new Record': create a new record with new values\n"
              "- 'Update a Record': update the values of a record\n"
-             "- 'Execute several actions': define an action that triggers several other server actions\n"
+             "- 'Create Activity': create an activity (Discuss)\n"
              "- 'Send Email': post a message, a note or send an email (Discuss)\n"
-             "- 'Add Followers': add followers to a record (Discuss)\n"
-             "- 'Create Next Activity': create an activity (Discuss)\n"
-             "- 'Send SMS Text Message': send SMS, log them on documents (SMS)")
+             "- 'Send SMS': send SMS, log them on documents (SMS)"
+             "- 'Add/Remove Followers': add or remove followers to a record (Discuss)\n"
+             "- 'Create Record': create a new record with new values\n"
+             "- 'Execute Code': a block of Python code that will be executed\n"
+             "- 'Send Webhook Notification': send a POST request to an external system, also known as a Webhook\n"
+             "- 'Execute Existing Actions': define an action that triggers several other server actions\n")
     # Generic
     sequence = fields.Integer(default=5,
                               help="When dealing with multiple actions, the execution order is "
@@ -498,7 +514,7 @@ class IrActionsServer(models.Model):
     # Create
     crud_model_id = fields.Many2one(
         'ir.model', string='Record to Create',
-        compute='_compute_crud_model_id', readonly=False, store=True,
+        compute='_compute_crud_relations', readonly=False, store=True,
         help="Specify which kind of record should be created. Set this field only to specify a different model than the base model.")
     crud_model_name = fields.Char(related='crud_model_id.model', string='Target Model Name', readonly=True)
     link_field_id = fields.Many2one(
@@ -508,8 +524,17 @@ class IrActionsServer(models.Model):
     groups_id = fields.Many2many('res.groups', 'ir_act_server_group_rel',
                                  'act_id', 'gid', string='Allowed Groups', help='Groups that can execute the server action. Leave empty to allow everybody.')
 
-    update_field_id = fields.Many2one('ir.model.fields', string='Field to Update', default=_default_update_field_id, ondelete='cascade')
-    update_related_model_id = fields.Many2one('ir.model', compute='_compute_update_related_model_id')
+    update_field_id = fields.Many2one('ir.model.fields', string='Field to Update', ondelete='cascade', compute='_compute_crud_relations', store=True, readonly=False)
+    update_path = fields.Char(string='Field to Update Path', help="Path to the field to update, e.g. 'partner_id.name'", default=_default_update_path)
+    update_related_model_id = fields.Many2one('ir.model', compute='_compute_crud_relations', store=True)
+    update_field_type = fields.Selection(related='update_field_id.ttype', readonly=True)
+    update_m2m_operation = fields.Selection([
+        ('add', 'Adding'),
+        ('remove', 'Removing'),
+        ('set', 'Setting it to'),
+        ('clear', 'Clearing it')
+    ], string='Many2many Operations', default='add')
+    update_boolean_value = fields.Selection([('true', 'Yes (True)'), ('false', "No (False)")], string='Boolean Value', default='true')
 
     value = fields.Text(help="For Python expressions, this field may hold a Python expression "
                              "that can use the same values as for the code field on the server action,"
@@ -518,8 +543,8 @@ class IrActionsServer(models.Model):
                              "For Static values, the value will be used directly without evaluation, e.g."
                              "`42` or `My custom name` or the selected record.")
     evaluation_type = fields.Selection([
-        ('value', 'Custom Value'),
-        ('equation', 'Python expression')
+        ('value', 'Update'),
+        ('equation', 'Compute')
     ], 'Value Type', default='value', change_default=True)
     resource_ref = fields.Reference(
         string='Record', selection='_selection_target_model', inverse='_set_resource_ref')
@@ -529,25 +554,37 @@ class IrActionsServer(models.Model):
     value_field_to_show = fields.Selection([
         ('value', 'value'),
         ('resource_ref', 'reference'),
+        ('update_boolean_value', 'update_boolean_value'),
         ('selection_value', 'selection_value'),
     ], compute='_compute_value_field_to_show')
+    # Webhook
+    webhook_url = fields.Char(string='Webhook URL', help="URL to send the POST request to.")
+    webhook_field_ids = fields.Many2many('ir.model.fields', 'ir_act_server_webhook_field_rel', 'server_id', 'field_id',
+                                         string='Webhook Fields',
+                                         help="Fields to send in the POST request. "
+                                              "The id and model of the record are always sent as '_id' and '_model'. "
+                                              "The name of the action that triggered the webhook is always sent as '_name'.")
+    webhook_sample_payload = fields.Text(string='Sample Payload', compute='_compute_webhook_sample_payload')
 
-    @api.depends('state', 'update_field_id', 'crud_model_id', 'value')
-    def _compute_name(self):
-        for action in self.filtered('state'):
-            if action.state == 'object_write':
-                action.name = _(
-                    "Update %(field_name)s",
-                    field_name=action.update_field_id.field_description
-                )
-            elif action.state == 'object_create':
-                action.name = _(
-                    "Create %(model_name)s with name %(value)s",
-                    model_name=action.crud_model_id.name,
-                    value=action.value
-                )
-            else:
-                action.name = dict(action._fields['state']._description_selection(self.env))[action.state]
+    @api.constrains('webhook_field_ids')
+    def _check_webhook_field_ids(self):
+        """Check that the selected fields don't have group restrictions"""
+        restricted_fields = dict()
+        for action in self:
+            Model = self.env[action.model_id.model]
+            for model_field in action.webhook_field_ids:
+                # you might think that the ir.model.field record holds references
+                # to the groups, but that's not the case - we need to field object itself
+                field = Model._fields[model_field.name]
+                if field.groups:
+                    restricted_fields.setdefault(action.name, []).append(model_field.field_description)
+        if restricted_fields:
+            restricted_field_per_action = "\n".join([f"{action}: {', '.join(f for f in fields)}" for action, fields in restricted_fields.items()])
+            raise ValidationError(_("Group-restricted fields cannot be included in "
+                                    "webhook payloads, as it could allow any user to "
+                                    "accidentally leak sensitive information. You will "
+                                    "have to remove the following fields from the webhook payload "
+                                    "in the following actions:\n %s", restricted_field_per_action))
 
     @api.depends('state')
     def _compute_available_model_ids(self):
@@ -556,11 +593,111 @@ class IrActionsServer(models.Model):
         )
         self.available_model_ids = allowed_models.ids
 
-    @api.onchange('model_id')
-    def _compute_crud_model_id(self):
-        invalid = self.filtered(lambda act: act.crud_model_id != act.model_id)
-        if invalid:
-            invalid.crud_model_id = False
+    @api.depends('model_id', 'update_path', 'state')
+    def _compute_crud_relations(self):
+        """ Compute the crud_model_id and update_field_id fields.
+
+        The crud_model_id is the model on which the action will create or update
+        records. In the case of record creation, it is the same as the main model
+        of the action. For record update, it will be the model linked to the last
+        field in the update_path.
+        This is only used for object_create and object_write actions.
+        The update_field_id is the field at the end of the update_path that will
+        be updated by the action - only used for object_write actions.
+        """
+        for action in self:
+            if action.model_id and action.state in ('object_write', 'object_create'):
+                if action.state == 'object_create':
+                    action.crud_model_id = action.model_id
+                    action.update_field_id = False
+                    action.update_path = False
+                elif action.state == 'object_write':
+                    if action.update_path:
+                        # we need to traverse relations to find the target model and field
+                        model, field, _ = action._traverse_path()
+                        action.crud_model_id = model
+                        action.update_field_id = field
+                        need_update_model = action.evaluation_type == 'value' and action.update_field_id and action.update_field_id.relation
+                        action.update_related_model_id = action.env["ir.model"]._get_id(field.relation) if need_update_model else False
+                    else:
+                        action.crud_model_id = action.model_id
+                        action.update_field_id = False
+            else:
+                action.crud_model_id = False
+                action.update_field_id = False
+                action.update_path = False
+
+    def _traverse_path(self, record=None):
+        """ Traverse the update_path to find the target model and field, and optionally
+        the target record of an action of type 'object_write'.
+
+        :param record: optional record to use as starting point for the path traversal
+        :return: a tuple (model, field, records) where model is the target model and field is the
+                 target field; if no record was provided, records is None, otherwise it is the
+                    recordset at the end of the path starting from the provided record
+        """
+        self.ensure_one()
+        path = self.update_path.split('.')
+        Model = self.env[self.model_id.model]
+        # sanity check: we're starting from a record that belongs to the model
+        if record and record._name != Model._name:
+            raise ValidationError(_("I have no idea how you *did that*, but you're trying to use a gibberish configuration: the model of the record on which the action is triggered is not the same as the model of the action."))
+        for field_name in path:
+            is_last_field = field_name == path[-1]
+            field = Model._fields[field_name]
+            if field.relational and not is_last_field:
+                Model = self.env[field.comodel_name]
+            elif not field.relational:
+                # sanity check: this should be the last field in the path
+                if not is_last_field:
+                    raise ValidationError(_("The path to the field to update contains a non-relational field (%s) that is not the last field in the path. You can't traverse non-relational fields (even in the quantum realm). Make sure only the last field in the path is non-relational.", field_name))
+                if isinstance(field, fields.Json):
+                    raise ValidationError(_("I'm sorry to say that JSON fields (such as %s) are currently not supported.", field_name))
+                elif field.readonly:
+                    raise ValidationError(_("The field to update (%s) is read-only. You can't update a read-only field - even when asking nicely.", field_name))
+        target_records = None
+        if record is not None:
+            target_records = reduce(getitem, path[:-1], record)
+        model_id = self.env['ir.model']._get(Model._name)
+        field_id = self.env['ir.model.fields']._get(Model._name, field_name)
+        return model_id, field_id, target_records
+
+    def _stringify_path(self):
+        """ Returns a string representation of the update_path, with the field names
+        separated by the `>` symbol."""
+        self.ensure_one()
+        path = self.update_path
+        if not path:
+            return ''
+        model = self.env[self.model_id.model]
+        pretty_path = []
+        for field_name in path.split('.'):
+            field = model._fields[field_name]
+            field_id = self.env['ir.model.fields']._get(model._name, field_name)
+            if field.relational:
+                model = self.env[field.comodel_name]
+            pretty_path.append(field_id.field_description)
+        return ' > '.join(pretty_path)
+
+    @api.depends('state', 'webhook_field_ids', 'name')
+    def _compute_webhook_sample_payload(self):
+        for action in self:
+            if action.state != 'webhook':
+                action.webhook_sample_payload = False
+                continue
+            payload = {
+                'id': 1,
+                '_model': self.model_id.model,
+                '_name': action.name,
+            }
+            sample_record = self.env[self.model_id.model].with_context(active_test=False).search([], limit=1)
+            for field in action.webhook_field_ids:
+                if sample_record:
+                    payload['id'] = sample_record.id
+                    payload.update(sample_record.read(self.webhook_field_ids.mapped('name'), load=None)[0])
+                else:
+                    payload[field.name] = WEBHOOK_SAMPLE_VALUES[field.ttype] if field.ttype in WEBHOOK_SAMPLE_VALUES else WEBHOOK_SAMPLE_VALUES[None]
+            action.webhook_sample_payload = json.dumps(payload, indent=4, sort_keys=True, default=str)
 
     @api.depends('model_id')
     def _compute_link_field_id(self):
@@ -595,7 +732,7 @@ class IrActionsServer(models.Model):
             fn = getattr(t, f'_run_action_{self.state}', None)\
               or getattr(t, f'run_action_{self.state}', None)
         if fn and fn.__name__.startswith('run_action_'):
-            fn = functools.partial(fn, self)
+            fn = partial(fn, self)
         return fn, multi
 
     def _register_hook(self):
@@ -642,7 +779,45 @@ class IrActionsServer(models.Model):
             for field, new_value in res.items():
                 record_cached[field] = new_value
         else:
-            self.env[self.model_id.model].browse(self._context.get('active_id')).write(res)
+            starting_record = self.env[self.model_id.model].browse(self._context.get('active_id'))
+            _, _, target_records = self._traverse_path(record=starting_record)
+            target_records.write(res)
+
+    def _run_action_webhook(self, eval_context=None):
+        """Send a post request with a read of the selected field on active_id."""
+        record = self.env[self.model_id.model].browse(self._context.get('active_id'))
+        url = self.webhook_url
+        if not record:
+            return
+        if not url:
+            raise UserError(_("I'll be happy to send a webhook for you, but you really need to give me a URL to reach out to..."))
+        vals = {
+            '_model': self.model_id.model,
+            '_id': record.id,
+            '_action': f'{self.name}(#{self.id})',
+        }
+        if self.webhook_field_ids:
+            # you might think we could use the default json serializer of the requests library
+            # but it will fail on many fields, e.g. datetime, date or binary
+            # so we use the json.dumps serializer instead with the str() function as default
+            vals.update(record.read(self.webhook_field_ids.mapped('name'), load=None)[0])
+        json_values = json.dumps(vals, sort_keys=True, default=str)
+        _logger.info("Webhook call to %s", url)
+        _logger.debug("POST JSON data for webhook call: %s", json_values)
+        try:
+            # 'send and forget' strategy, and avoid locking the user if the webhook
+            # is slow or non-functional (we still allow for a 1s timeout so that
+            # if we get a proper error response code like 400, 404 or 500 we can log)
+            response = requests.post(url, data=json_values, headers={'Content-Type': 'application/json'}, timeout=1)
+            response.raise_for_status()
+        except requests.exceptions.ReadTimeout:
+            _logger.warning("Webhook call timed out after 1s - it may or may not have failed. "
+                            "If this happens often, it may be a sign that the system you're "
+                            "trying to reach is slow or non-functional.")
+        except requests.exceptions.RequestException as e:
+            _logger.warning("Webhook call failed: %s", e)
+        except Exception as e:  # noqa: BLE001
+            raise UserError(_("Wow, your webhook call failed with a really unusual error: %s", e)) from e
 
     def _run_action_object_create(self, eval_context=None):
         """Create specified model object with specified name contained in value.
@@ -775,22 +950,15 @@ class IrActionsServer(models.Model):
                 )
         return res or False
 
-    @api.depends('update_field_id')
-    def _compute_update_related_model_id(self):
-        for action in self:
-            if action.evaluation_type == 'value' and action.update_field_id and action.update_field_id.relation:
-                relation = action.update_field_id.relation
-                action.update_related_model_id = action.env["ir.model"]._get_id(relation)
-            else:
-                action.update_related_model_id = False
-
     @api.depends('evaluation_type', 'update_field_id')
     def _compute_value_field_to_show(self):  # check if value_field_to_show can be removed and use ttype in xml view instead
         for action in self:
-            if action.update_field_id.ttype == 'many2one':
+            if action.update_field_id.ttype in ('many2one', 'many2many'):
                 action.value_field_to_show = 'resource_ref'
             elif action.update_field_id.ttype == 'selection':
                 action.value_field_to_show = 'selection_value'
+            elif action.update_field_id.ttype == 'boolean':
+                action.value_field_to_show = 'update_boolean_value'
             else:
                 action.value_field_to_show = 'value'
 
@@ -821,6 +989,18 @@ class IrActionsServer(models.Model):
             expr = action.value
             if action.evaluation_type == 'equation':
                 expr = safe_eval(action.value, eval_context)
+            elif action.update_field_id.ttype == 'many2many':
+                operation = action.update_m2m_operation
+                if operation == 'add':
+                    expr = [Command.link(int(action.value))]
+                elif operation == 'remove':
+                    expr = [Command.unlink(int(action.value))]
+                elif operation == 'set':
+                    expr = [Command.set([int(action.value)])]
+                elif operation == 'clear':
+                    expr = [Command.clear()]
+            elif action.update_field_id.ttype == 'boolean':
+                expr = action.update_boolean_value == 'true'
             elif action.update_field_id.ttype in ['many2one', 'integer']:
                 try:
                     expr = int(action.value)

@@ -14,10 +14,12 @@ class ServerActions(models.Model):
     _inherit = ['ir.actions.server']
 
     state = fields.Selection(
-        selection_add=[('mail_post', 'Send Email'),
-                       ('followers', 'Add Followers'),
-                       ('remove_followers', 'Remove Followers'),
-                       ('next_activity', 'Create Next Activity'),
+        selection_add=[
+            ('next_activity', 'Create Activity'),
+            ('mail_post', 'Send Email'),
+            ('followers', 'Add Followers'),
+            ('remove_followers', 'Remove Followers'),
+            ('object_create',),
         ],
         ondelete={'mail_post': 'cascade',
                   'followers': 'cascade',
@@ -77,34 +79,6 @@ class ServerActions(models.Model):
     activity_user_field_name = fields.Char(
         'User Field',
         compute='_compute_activity_info', readonly=False, store=True)
-
-    @api.depends('template_id', 'partner_ids', 'activity_summary')
-    def _compute_name(self):
-        to_update = self.filtered(
-            lambda action: action.state in {'mail_post', 'followers', 'remove_followers', 'next_activity'}
-        )
-        for action in to_update:
-            if action.state == 'mail_post':
-                action.name = _(
-                    'Send email: %(template_name)s',
-                    template_name=action.template_id.name
-                )
-            elif action.state == 'followers':
-                action.name = _(
-                    'Add followers: %(partner_names)s',
-                    partner_names=', '.join(action.partner_ids.mapped('name'))
-                )
-            elif action.state == 'remove_followers':
-                action.name = _(
-                    'Remove followers: %(partner_names)s',
-                    partner_names=', '.join(action.partner_ids.mapped('name'))
-                )
-            elif action.state == 'next_activity':
-                action.name = _(
-                    'Next activity: %(activity_name)s',
-                    activity_name=action.activity_summary or action.activity_type_id.name
-                )
-        super(ServerActions, self - to_update)._compute_name()
 
     @api.depends('state')
     def _compute_available_model_ids(self):

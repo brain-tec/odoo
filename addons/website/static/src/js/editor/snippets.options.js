@@ -19,6 +19,7 @@ import {
     convertHslToRgb,
  } from '@web/core/utils/colors';
 import { renderToElement, renderToFragment } from "@web/core/utils/render";
+import { browser } from "@web/core/browser/browser";
 import {
     applyTextHighlight,
     removeTextHighlight,
@@ -223,7 +224,7 @@ const FontFamilyPickerUserValueWidget = SelectUserValueWidget.extend({
         if (this.googleLocalFonts.length) {
             const googleLocalFontsEls = fontEls.splice(-this.googleLocalFonts.length);
             googleLocalFontsEls.forEach((el, index) => {
-                $(el).append(renderToElement('website.delete_google_font_btn', {
+                $(el).append(renderToFragment('website.delete_google_font_btn', {
                     index: index,
                     local: true,
                 }));
@@ -233,7 +234,7 @@ const FontFamilyPickerUserValueWidget = SelectUserValueWidget.extend({
         if (this.googleFonts.length) {
             const googleFontsEls = fontEls.splice(-this.googleFonts.length);
             googleFontsEls.forEach((el, index) => {
-                $(el).append(renderToElement('website.delete_google_font_btn', {
+                $(el).append(renderToFragment('website.delete_google_font_btn', {
                     index: index,
                 }));
             });
@@ -2742,9 +2743,10 @@ options.registry.anchor = options.Class.extend({
      * @param {Element} buttonEl
      */
     _buildClipboard(buttonEl) {
-        const clipboard = new ClipboardJS(buttonEl, {text: () => this._getAnchorLink()});
-        clipboard.on("success", () => {
-            const message = markup(_t("Anchor copied to clipboard<br>Link: %s", this._getAnchorLink()));
+        buttonEl.addEventListener("click", async (ev) => {
+            const anchorLink = this._getAnchorLink();
+            await browser.navigator.clipboard.writeText(anchorLink);
+            const message = markup(_t("Anchor copied to clipboard<br>Link: %s", anchorLink));
             this.notification.add(message, {
                 type: "success",
                 buttons: [{name: _t("Edit"), onClick: () => this._openAnchorDialog(buttonEl), primary: true}],

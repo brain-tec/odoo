@@ -46,23 +46,13 @@
                                         />
                                         <field name="trg_field_ref_model_name" invisible="1" />
                                         <field name="trg_field_ref_display_name" invisible="1" />
-                                        <field name="trigger_field_ids" invisible="1" />
-                                        <field name="trigger_field_ids" placeholder="Select fields..." class="oe_inline" groups="base.group_no_one"
-                                            options="{'no_open': True, 'no_create': True}"
-                                            domain="[('model_id', '=', model_id)]"
-                                            invisible="trigger != 'on_create_or_write'" widget="many2many_tags" />
-                                        <field name="on_change_field_ids" class="oe_inline" string="Trigger Fields" placeholder="Trigger fields..."
-                                            options="{'no_open': True, 'no_create': True}"
-                                            domain="[('model_id', '=', model_id)]"
-                                            invisible="trigger != 'on_change'" required="trigger == 'on_change'"
-                                            widget="many2many_tags"/>
                                         <field name="trg_date_id" class="oe_inline" string="Date Field"
                                             options="{'no_open': True, 'no_create': True}"
                                                 invisible="trigger != 'on_time'"
                                                 required="trigger in ['on_time', 'on_time_created', 'on_time_updated']"
                                         />
                                     </div>
-                                    <div class="text-muted" invisible="trigger != 'on_change'"><i class="fa fa-lightbulb-o"/> Automation rules that run on live updates will be executed every time the trigger fields change, <em>whether you save or not</em>.</div>
+                                    <div class="text-muted" invisible="trigger != 'on_change'"><i class="fa fa-warning"/> Automation rules triggered by UI changes will be executed <em>every time</em> the watched fields change, <em>whether you save or not</em>.</div>
                                 </div>
                                 <label for="url" string="URL" invisible="trigger != 'on_webhook'"/>
                                 <div invisible="trigger != 'on_webhook'">
@@ -73,17 +63,20 @@
                                         <button class="btn btn-seconadry" type="object" name="action_rotate_webhook_uuid" string="Rotate Secret" icon="fa-refresh" help="Change the URL's secret if you think the URL is no longer secure. You will have to update any automated system that calls this webhook to the new URL."/>
                                     </div>
                                 </div>
-                                <field name="log_webhook_calls" widget="boolean_toggle" invisible="trigger != 'on_webhook'"/>
-                                <field name="trg_date_id" class="oe_inline" string="Date Field"
-                                    options="{'no_open': True, 'no_create': True}"
-                                    invisible="trigger != 'on_time'"
-                                    required="trigger in ['on_time', 'on_time_created', 'on_time_updated']"/>
-                                <label for="trg_date_range" class="oe_inline" string="Delay"
-                                    invisible="trigger not in ['on_time', 'on_time_created', 'on_time_updated']"/>
-                                <div class="o_row oe_inline" invisible="trigger not in ['on_time', 'on_time_created', 'on_time_updated']" >
-                                    <field name="trg_date_range" required="trigger in ['on_time', 'on_time_created', 'on_time_updated']" />
-                                    <field name="trg_date_range_type" required="trigger in ['on_time', 'on_time_created', 'on_time_updated']" />
+                                <label for="trg_date_range" string="Delay" invisible="trigger not in ['on_time', 'on_time_created', 'on_time_updated']"/>
+                                <div class="d-flex flex-row gap-2" invisible="trigger not in ['on_time', 'on_time_created', 'on_time_updated']">
+                                    <field name="trg_date_range" class="oe_inline" required="trigger in ['on_time', 'on_time_created', 'on_time_updated']" />
+                                    <field name="trg_date_range_type" class="oe_inline" required="trigger in ['on_time', 'on_time_created', 'on_time_updated']" />
+                                    <span invisible="trigger != 'on_time_created'">after creation</span>
+                                    <span invisible="trigger != 'on_time_updated'">after last update</span>
+                                    <span invisible="trigger != 'on_time'">after</span>
+                                    <field name="trg_date_id" class="oe_inline" string="Date Field" placeholder="Select a date field..."
+                                        options="{'no_open': True, 'no_create': True}"
+                                        context="{'hide_model': 1}"
+                                        invisible="trigger != 'on_time'"
+                                        required="trigger in ['on_time', 'on_time_created', 'on_time_updated']"/>
                                 </div>
+                                <field name="log_webhook_calls" widget="boolean_toggle" invisible="trigger != 'on_webhook'"/>
                                 <field name="trg_date_calendar_id" class="oe_inline"
                                     options="{'no_open': True, 'no_create': True}"
                                     invisible="not trg_date_id or trg_date_range_type != 'day'"/>
@@ -91,22 +84,30 @@
                                 <div class="alert alert-info" role="alert" invisible="trigger not in ['on_time', 'on_time_created', 'on_time_updated'] or not least_delay_msg">
                                     <field name="least_delay_msg"/>
                                 </div>
-                                <field name="filter_pre_domain" class="oe_inline" widget="domain" groups="base.group_no_one"
+                                <field name="filter_pre_domain" widget="domain" groups="base.group_no_one"
                                        options="{'model': 'model_name', 'in_dialog': True}"
                                        invisible="trigger == 'on_webhook'"
                                 />
-                                <field name="filter_domain" class="oe_inline" widget="domain"
-                                    options="{'model': 'model_name', 'in_dialog': True}"
-                                    invisible="trigger not in ['on_create_or_write', 'on_change', 'on_unlink']"
+                                <label for="filter_domain" invisible="trigger not in ['on_create_or_write', 'on_change', 'on_unlink']"/>
+                                <label for="filter_domain" string="Extra Conditions" invisible="trigger not in ['on_time', 'on_time_created', 'on_time_updated']"/>
+                                <field name="filter_domain" nolabel="1" widget="domain"
+                                    options="{'model': 'model_name', 'in_dialog': False, 'foldable': True}"
+                                    invisible="trigger not in ['on_create_or_write', 'on_change', 'on_unlink', 'on_time', 'on_time_created', 'on_time_updated']"
                                 />
+                                <field name="trigger_field_ids" string="When updating" placeholder="Select fields..."
+                                    options="{'no_open': True, 'no_create': True}"
+                                    domain="[('model_id', '=', model_id)]"
+                                    context="{'hide_model': 1}"
+                                    invisible="trigger not in ['on_create_or_write', 'on_change']" widget="many2many_tags" />
                             </group>
                             <group>
                                 <label for="record_getter" string="Target Record" invisible="trigger != 'on_webhook'" />
                                 <div invisible="trigger != 'on_webhook'">
                                     <field name="record_getter" string="Target Record"/>
                                     <div>
-                                        <span colspan="2" class="text-muted"> Available variables: </span>
-                                        <ul colspan="2" class="text-muted">
+                                        <div  class="text-muted"><i class="fa fa-info-circle"/> The default target record getter will work out-of-the-box for any webhook coming from another Odoo instance.</div>
+                                        <span class="text-muted"> Available variables: </span>
+                                        <ul class="text-muted">
                                             <li><code>env</code>: environment on which the action is triggered</li>
                                             <li><code>model</code>: model of the record on which the action is triggered; is a void recordset</li>
                                             <li><code>time</code>, <code>datetime</code>, <code>dateutil</code>, <code>timezone</code>: useful Python libraries</li>
@@ -122,28 +123,30 @@
                                     name="action_server_ids"
                                     widget="one2many"
                                     class="o_base_automation_actions_field"
-                                    context="{'default_model_id': model_id, 'default_state': False, 'form_view_ref': 'base_automation.ir_actions_server_view_form_automation'}"
+                                    context="{'default_model_id': model_id, 'form_view_ref': 'base_automation.ir_actions_server_view_form_automation'}"
                                 >
                                     <kanban>
                                         <control>
-                                            <create string="Add a new action" />
+                                            <create string="Add an action" />
                                         </control>
                                         <templates>
                                             <t t-name="kanban-box">
                                                 <div class="oe_kanban_global_click row g-0 align-items-center">
-                                                    <div class="d-flex align-items-center gap-2">
+                                                    <div class="d-flex align-items-center gap-1">
                                                         <field name="sequence" widget="handle" class="px-1" />
                                                         <field name="state" invisible="1" />
                                                         <field name="evaluation_type" invisible="1" />
                                                         <field name="value" invisible="1" />
                                                         <field name="selection_value" invisible="1" />
                                                         <field name="value_field_to_show" invisible="1"/>
+                                                        <field name="update_field_type" invisible="1"/>
+                                                        <field name="update_m2m_operation" invisible="1"/>
 
                                                         <!-- Icon section -->
                                                         <i
                                                             data-name="server_action_icon"
                                                             t-att-title="record.state.value"
-                                                            class="fa"
+                                                            class="fa fa-fw"
                                                             t-att-class="{
                                                                 'code': 'fa-file-code-o',
                                                                 'object_create': 'fa-edit',
@@ -154,19 +157,32 @@
                                                                 'remove_followers': 'fa-user-times',
                                                                 'next_activity': 'fa-clock-o',
                                                                 'sms': 'fa-comments-o',
+                                                                'webhook': 'fa-paper-plane',
                                                             }[record.state.raw_value]"
                                                         />
                                                         <field name="name" class="text-truncate" />
                                                         <t invisible="state != 'object_write'">
-                                                            <code invisible="evaluation_type != 'equation'" t-esc="record.value.raw_value"/>
-                                                            <span invisible="evaluation_type == 'equation'" >
-                                                                <field name="selection_value" invisible="value_field_to_show != 'selection_value'" class="d-inline"/>
-                                                                <span invisible="value_field_to_show == 'selection_value'">
-                                                                    <span invisible="value == False or evaluation_type == False">"</span>
-                                                                    <field name="value" class="d-inline"/>
-                                                                    <span invisible="value == False or evaluation_type == False">"</span>
-                                                                </span>
-                                                            </span>
+                                                            <t invisible="not (update_field_type == 'many2many' and update_m2m_operation == 'clear') or evaluation_type != 'value'">
+                                                                <span>by clearing it</span>
+                                                            </t>
+                                                            <t invisible="not (update_field_type == 'many2many' and update_m2m_operation == 'add') or evaluation_type != 'value'">
+                                                                <span>by adding</span><field name="resource_ref"/>
+                                                            </t>
+                                                            <t invisible="not (update_field_type == 'many2many' and update_m2m_operation == 'remove') or evaluation_type != 'value'">
+                                                               <span>by removing</span><field name="resource_ref"/>
+                                                            </t>
+                                                            <t invisible="not (update_field_type == 'many2many' and update_m2m_operation == 'set') or evaluation_type != 'value'">
+                                                                <span>by setting it to</span><field name="resource_ref"/>
+                                                             </t>
+                                                            <t invisible="update_field_type == 'many2many' and evaluation_type == 'value'">
+                                                                <span invisible="evaluation_type != 'value'">to</span>
+                                                                <span invisible="evaluation_type != 'equation'">as</span>
+                                                                <field name="resource_ref" invisible="not (value_field_to_show == 'resource_ref' and evaluation_type == 'value')" />
+                                                                <field name="selection_value" invisible="not (value_field_to_show == 'selection_value' and evaluation_type == 'value')" class="d-inline"/>
+                                                                <field name="update_boolean_value" invisible="not (value_field_to_show == 'update_boolean_value' and evaluation_type == 'value')" class="d-inline"/>
+                                                                <em invisible="not (value_field_to_show == 'value' and evaluation_type == 'value')" t-out="record.value.raw_value" class="d-inline"/>
+                                                                <code invisible="not (evaluation_type == 'equation')" t-out="record.value.raw_value"/>
+                                                            </t>
                                                         </t>
                                                         <button type="delete" name="delete" class="btn fa fa-trash fa-xl px-3 ms-auto" title="Delete Action" />
                                                     </div>
@@ -175,6 +191,9 @@
                                         </templates>
                                     </kanban>
                                 </field>
+                            </page>
+                            <page string="Notes" name="notes">
+                                <field name="description" placeholder="Keep track of what this automation does and why it exists..."/>
                             </page>
                         </notebook>
                     </sheet>
@@ -277,7 +296,9 @@
             <field name="view_id" ref="view_base_automation_kanban"/>
             <field name="context">{'active_test': False}</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+                <img class="w-100 w-md-75"
+                src="/base_automation/static/img/automation.svg" />
+              <p>
                 Automate <em>everything</em> with Automation Rules
               </p><p>
                 Send an email when an object changes state, archive records

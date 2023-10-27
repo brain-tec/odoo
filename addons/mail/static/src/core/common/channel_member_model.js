@@ -17,9 +17,9 @@ export class ChannelMember extends Record {
     static get(data) {
         return super.get(data);
     }
-    /** @returns {import("models").ChannelMember} */
+    /** @returns {import("models").ChannelMember|import("models").ChannelMember[]} */
     static insert(data) {
-        return super.insert(data);
+        return super.insert(...arguments);
     }
 
     /** @type {number} */

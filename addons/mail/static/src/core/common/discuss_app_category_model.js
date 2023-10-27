@@ -8,9 +8,9 @@ export class DiscussAppCategory extends Record {
     static get(data) {
         return super.get(data);
     }
-    /** @returns {import("models").DiscussAppCategory} */
+    /** @returns {import("models").DiscussAppCategory|import("models").DiscussAppCategory[]} */
     static insert(data) {
-        return super.insert(data);
+        return super.insert(...arguments);
     }
 
     /** @type {string} */

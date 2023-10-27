@@ -1,8 +1,6 @@
 /* @odoo-module */
 
-import { removeFromArray, removeFromArrayWithPredicate } from "@mail/utils/common/arrays";
-
-import { markup, reactive } from "@odoo/owl";
+import { reactive } from "@odoo/owl";
 
 import { registry } from "@web/core/registry";
 
@@ -23,16 +21,7 @@ export class MailCoreWeb {
     setup() {
         this.messagingService.isReady.then(() => {
             this.rpc("/mail/load_message_failures", {}, { silent: true }).then((messages) => {
-                messages.map((messageData) =>
-                    this.store.Message.insert({
-                        ...messageData,
-                        body: messageData.body ? markup(messageData.body) : messageData.body,
-                        // implicit: failures are sent by the server at
-                        // initialization only if the current partner is
-                        // author of the message
-                        author: this.store.user,
-                    })
-                );
+                this.store.Message.insert(messages, { html: true });
                 this.store.failures.sort((f1, f2) => f2.lastMessage?.id - f1.lastMessage?.id);
             });
             this.busService.subscribe("mail.activity/updated", (payload) => {
@@ -52,8 +41,7 @@ export class MailCoreWeb {
                 }
             });
             this.busService.subscribe("mail.message/inbox", (payload) => {
-                const data = Object.assign(payload, { body: markup(payload.body) });
-                const message = this.store.Message.insert(data);
+                const message = this.store.Message.insert(payload, { html: true });
                 const inbox = this.store.discuss.inbox;
                 if (message.notIn(inbox.messages)) {
                     inbox.counter++;
@@ -82,17 +70,17 @@ export class MailCoreWeb {
                     const originThread = message.originThread;
                     if (originThread && message.isNeedaction) {
                         originThread.message_needaction_counter--;
-                        removeFromArrayWithPredicate(
-                            originThread.needactionMessages,
-                            ({ id }) => id === messageId
-                        );
+                        originThread.needactionMessages.delete({ id: messageId });
                     }
                     // move messages from Inbox to history
                     const partnerIndex = message.needaction_partner_ids.find(
                         (p) => p === this.store.user?.id
                     );
-                    removeFromArray(message.needaction_partner_ids, partnerIndex);
-                    removeFromArrayWithPredicate(inbox.messages, ({ id }) => id === messageId);
+                    const index = message.needaction_partner_ids.indexOf(partnerIndex);
+                    if (index >= 0) {
+                        message.needaction_partner_ids.splice(index, 1);
+                    }
+                    inbox.messages.delete({ id: messageId });
                     const history = this.store.discuss.history;
                     history.messages.add(message);
                 }

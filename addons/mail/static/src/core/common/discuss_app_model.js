@@ -37,9 +37,9 @@ export class DiscussApp extends Record {
     static get(data) {
         return super.get(data);
     }
-    /** @returns {import("models").DiscussApp} */
+    /** @returns {import("models").DiscussApp|import("models").DiscussApp[]} */
     static insert(data) {
-        return super.insert(data);
+        return super.insert(...arguments);
     }
 
     /** @type {'mailbox'|'all'|'channel'|'chat'|'livechat'} */

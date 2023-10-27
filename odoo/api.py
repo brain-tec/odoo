@@ -29,7 +29,7 @@ except ImportError:
     from decorator import decorator
 
 from .exceptions import AccessError, CacheMiss
-from .tools import frozendict, lazy_property, OrderedSet, Query, SQL, StackMap
+from .tools import clean_context, frozendict, lazy_property, OrderedSet, Query, SQL, StackMap
 from .tools.translate import _
 
 _logger = logging.getLogger(__name__)
@@ -556,7 +556,8 @@ class Environment(Mapping):
         """
         cr = self.cr if cr is None else cr
         uid = self.uid if user is None else int(user)
-        context = self.context if context is None else context
+        if context is None:
+            context = clean_context(self.context) if su and not self.su else self.context
         su = (user is None and self.su) if su is None else su
         return Environment(cr, uid, context, su)
 

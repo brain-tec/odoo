@@ -2,7 +2,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import date
+import json
 from psycopg2 import IntegrityError, ProgrammingError
+import requests
+from unittest.mock import patch
 
 import odoo
 from odoo.exceptions import UserError, ValidationError, AccessError
@@ -189,7 +192,7 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
         # Do: update partner name
         self.action.write({
             'state': 'object_write',
-            'update_field_id': self.res_partner_name_field.id,
+            'update_path': 'name',
             'value': 'TestNew',
         })
         run_res = self.action.with_context(self.context).run()
@@ -209,7 +212,7 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
             'model_id': self.res_country_model.id,
             'model_name': 'res.country',
             'state': 'object_write',
-            'update_field_id': self.res_country_name_position_field.id,
+            'update_path': 'name_position',
             'selection_value': selection_value.id,
         })
         action._set_selection_value()  # manual onchange
@@ -222,6 +225,111 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
         self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
         # Test: country updated
         self.assertEqual(self.test_country.name_position, 'after')
+
+    def test_36_crud_write_m2m_ops(self):
+        """ Test that m2m operations work as expected """
+        categ_1 = self.env['res.partner.category'].create({'name': 'TestCateg1'})
+        categ_2 = self.env['res.partner.category'].create({'name': 'TestCateg2'})
+        # set partner category
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'category_id',
+            'update_m2m_operation': 'set',
+            'resource_ref': categ_1,
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertIn(categ_1, self.test_partner.category_id, 'ir_actions_server: tag should have been set')
+
+        # add partner category
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'category_id',
+            'update_m2m_operation': 'add',
+            'resource_ref': categ_2,
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertIn(categ_2, self.test_partner.category_id, 'ir_actions_server: new tag should have been added')
+        self.assertIn(categ_1, self.test_partner.category_id, 'ir_actions_server: old tag should still be there')
+
+        # remove partner category
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'category_id',
+            'update_m2m_operation': 'remove',
+            'resource_ref': categ_1,
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertNotIn(categ_1, self.test_partner.category_id, 'ir_actions_server: tag should have been removed')
+        self.assertIn(categ_2, self.test_partner.category_id, 'ir_actions_server: tag should still be there')
+
+        # clear partner category
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'category_id',
+            'update_m2m_operation': 'clear',
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertFalse(self.test_partner.category_id, 'ir_actions_server: tags should have been cleared')
+
+    def test_37_field_path_traversal(self):
+        """ Test the update_path field traversal - allowing records to be updated along relational links """
+        # update the country's name via the partner
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'country_id.name',
+            'value': 'TestUpdatedCountry',
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertEqual(self.test_partner.country_id.name, 'TestUpdatedCountry', 'ir_actions_server: country name should have been updated through relation')
+
+        # input an invalid path
+        with self.assertRaises(ValidationError):
+            self.action.write({
+                'state': 'object_write',
+                'update_path': 'country_id.name.foo',
+                'value': 'DoesNotMatter',
+            })
+            self.action.flush_recordset(['update_path', 'update_field_id'])
+
+        # update a readonly field
+            self.action.write({
+                'state': 'object_write',
+                'update_path': 'country_id.id',
+                'value': 0,
+            })
+            self.action.flush_recordset(['update_path', 'update_field_id'])
+
+    def test_39_boolean_update(self):
+        """ Test that boolean fields can be updated """
+        # update the country's name via the partner
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'active',
+            'update_boolean_value': 'false',
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertFalse(self.test_partner.active, 'ir_actions_server: partner should have been deactivated')
+        self.action.write({
+            'state': 'object_write',
+            'update_path': 'active',
+            'update_boolean_value': 'true',
+        })
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: update record action correctly finished should return False')
+        # Test: partner updated
+        self.assertTrue(self.test_partner.active, 'ir_actions_server: partner should have been reactivated')
 
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.models')
     def test_40_multi(self):
@@ -245,9 +353,8 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
             'name': 'Subaction2',
             'sequence': 3,
             'model_id': self.res_partner_model.id,
-            'crud_model_id': self.res_partner_model.id,
             'state': 'object_write',
-            'update_field_id': self.res_partner_city_field.id,
+            'update_path': 'city',
             'value': 'RaoulettePoiluchette',
         })
         action4 = self.action.create({
@@ -364,6 +471,43 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
         self_demo.with_context(self.context).run()
         self.assertEqual(self.test_partner.date, date.today())
 
+    def test_90_webhook(self):
+        self.action.write({
+            'state': 'webhook',
+            'webhook_field_ids': [
+                Command.link(self.res_partner_name_field.id),
+                Command.link(self.res_partner_city_field.id),
+                Command.link(self.res_partner_country_field.id),
+                ],
+            'webhook_url': 'http://example.com/webhook',
+        })
+        # write a mock for the requests.post method that checks the data
+        # and returns a 200 response
+        num_requests = 0
+        def _patched_post(*args, **kwargs):
+            nonlocal num_requests
+            response = requests.Response()
+            response.status_code = 200 if num_requests == 0 else 400
+            self.assertEqual(args[0], 'http://example.com/webhook')
+            self.assertEqual(kwargs['data'], json.dumps({
+                '_action': "%s(#%s)" % (self.action.name, self.action.id),
+                '_id': self.test_partner.id,
+                '_model': self.test_partner._name,
+                'city': self.test_partner.city,
+                'country_id': self.test_partner.country_id.id,
+                'id': self.test_partner.id,
+                'name': self.test_partner.name,
+            }))
+            num_requests += 1
+            return response
+
+        with patch.object(requests, 'post', _patched_post), mute_logger('odoo.addons.base.models.ir_actions'):
+            # first run: 200
+            self.action.with_context(self.context).run()
+            # second run: 400, should *not* raise but
+            # should warn in logs (hence mute_logger)
+            self.action.with_context(self.context).run()
+        self.assertEqual(num_requests, 2)
 
 class TestCommonCustomFields(common.TransactionCase):
     MODEL = 'res.partner'
