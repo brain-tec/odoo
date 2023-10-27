@@ -25,10 +25,13 @@ export class Failure extends Record {
     static get(data) {
         return super.get(data);
     }
-    /** @returns {import("models").Failure} */
+    /** @returns {import("models").Failure|import("models").Failure[]} */
     static insert(data) {
+        return super.insert(...arguments);
+    }
+    static _insert() {
         /** @type {import("models").Failure} */
-        const failure = super.insert(data);
+        const failure = super._insert(...arguments);
         if (failure.notifications.length === 0) {
             failure.delete();
         } else {

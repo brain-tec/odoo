@@ -14,12 +14,9 @@ export class Attachment extends FileModelMixin(Record) {
     static get(data) {
         return super.get(data);
     }
-    /** @returns {import("models").Attachment} */
+    /** @returns {import("models").Attachment|import("models").Attachment[]} */
     static insert(data) {
-        if (!("id" in data)) {
-            throw new Error("Cannot insert attachment: id is missing in data");
-        }
-        return super.insert(data);
+        return super.insert(...arguments);
     }
     static new(data) {
         /** @type {import("models").Attachment} */

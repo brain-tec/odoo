@@ -36,6 +36,9 @@
         'web.assets_backend': [
             'mrp_subcontracting/static/src/components/**/*',
         ],
+        'web.assets_frontend': [
+            'mrp_subcontracting/static/src/scss/subcontracting_portal.scss',
+        ],
         'mrp_subcontracting.webclient': [
             ('include', 'web._assets_helpers'),
             ('include', 'web._assets_backend_helpers'),
@@ -84,7 +87,6 @@
             'web/static/lib/bootstrap/js/dist/tab.js',
             'web/static/lib/bootstrap/js/dist/toast.js',
             'web/static/lib/select2/select2.js',
-            'web/static/lib/clipboard/clipboard.js',
             'web/static/src/legacy/js/libs/autocomplete.js',
             'web/static/src/legacy/js/libs/bootstrap.js',
             'web/static/src/legacy/js/libs/jquery.js',

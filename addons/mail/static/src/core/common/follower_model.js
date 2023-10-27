@@ -10,9 +10,9 @@ export class Follower extends Record {
     static get(data) {
         return super.get(data);
     }
-    /** @returns {import("models").Follower} */
+    /** @returns {import("models").Follower|import("models").Follower[]} */
     static insert(data) {
-        return super.insert(data);
+        return super.insert(...arguments);
     }
 
     followedThread = Record.one("Thread");

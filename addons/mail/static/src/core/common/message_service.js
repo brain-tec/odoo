@@ -1,9 +1,6 @@
 /* @odoo-module */
 
-import { removeFromArrayWithPredicate } from "@mail/utils/common/arrays";
 import { convertBrToLineBreak, prettifyMessageContent } from "@mail/utils/common/format";
-
-import { markup } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
@@ -47,11 +44,7 @@ export class MessageService {
             message_id: message.id,
             partner_ids: validMentions?.partners?.map((partner) => partner.id),
         });
-        this.store.Message.insert(
-            Object.assign(messageData, {
-                body: messageData.body ? markup(messageData.body) : messageData.body,
-            })
-        );
+        this.store.Message.insert(messageData, { html: true });
         if (!message.isEmpty && this.store.hasLinkPreviewFeature) {
             this.rpc(
                 "/mail/link_preview",
@@ -64,9 +57,7 @@ export class MessageService {
     async delete(message) {
         if (message.isStarred) {
             this.store.discuss.starred.counter--;
-            removeFromArrayWithPredicate(this.store.discuss.starred.messages, (msg) =>
-                msg.eq(message)
-            );
+            this.store.discuss.starred.messages.delete(message);
         }
         message.body = "";
         message.attachments = [];
@@ -117,27 +108,6 @@ export class MessageService {
         validMentions.partners = partners;
         validMentions.threads = threads;
         return validMentions;
-    }
-
-    /**
-     * Create a transient message, i.e. a message which does not come
-     * from a member of the channel. Usually a log message, such as one
-     * generated from a command with ('/').
-     *
-     * @param {Object} data
-     */
-    createTransient(data) {
-        const { body, res_id, model } = data;
-        const lastMessageId = this.getLastMessageId();
-        return this.store.Message.insert({
-            author: this.store.odoobot,
-            body,
-            id: lastMessageId + 0.01,
-            is_note: true,
-            is_transient: true,
-            res_id,
-            model,
-        });
     }
 
     async toggleStar(message) {

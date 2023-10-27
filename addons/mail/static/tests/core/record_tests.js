@@ -5,6 +5,7 @@ import { BaseStore, makeStore } from "@mail/core/common/store_service";
 
 import { registry } from "@web/core/registry";
 import { clearRegistryWithCleanup, makeTestEnv } from "@web/../tests/helpers/mock_env";
+import { markup } from "@odoo/owl";
 
 const serviceRegistry = registry.category("services");
 
@@ -73,10 +74,8 @@ QUnit.test("Assign & Delete on fields with inverses", async (assert) => {
     }).register();
     const store = await start();
     const thread = store.Thread.insert("General");
-    const john = store.Member.insert("John");
-    const marc = store.Member.insert("Marc");
-    const hello = store.Message.insert("hello");
-    const world = store.Message.insert("world");
+    const [john, marc] = store.Member.insert(["John", "Marc"]);
+    const [hello, world] = store.Message.insert(["hello", "world"]);
     // Assign on fields should adapt inverses
     Object.assign(thread, { composer: {}, members: [["ADD", john]], messages: [hello, world] });
     assert.ok(thread.composer);
@@ -131,10 +130,22 @@ QUnit.test("Computed relational field", async (assert) => {
     }).register();
     const store = await start();
     const thread = store.Thread.insert("General");
-    const john = store.Persona.insert("John");
-    const marc = store.Persona.insert("Marc");
+    const [john, marc] = store.Persona.insert(["John", "Marc"]);
     Object.assign(thread, { members: [john, marc] });
     assert.ok(thread.admin.eq(john));
     thread.members.delete(john);
     assert.ok(thread.admin.eq(marc));
+});
+
+QUnit.test("Trusted insert on html field with { html: true }", async (assert) => {
+    (class Message extends Record {
+        static id = "body";
+        body = Record.attr("", { html: true });
+    }).register();
+    const store = await start();
+    const hello = store.Message.insert("<p>hello</p>", { html: true });
+    const world = store.Message.insert("<p>world</p>");
+    assert.ok(hello.body instanceof markup("").constructor);
+    assert.strictEqual(hello.body.toString(), "<p>hello</p>");
+    assert.strictEqual(world.body, "<p>world</p>");
 });

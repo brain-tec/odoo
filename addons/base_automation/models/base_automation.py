@@ -71,6 +71,7 @@ class BaseAutomation(models.Model):
     _description = 'Automation Rule'
 
     name = fields.Char(string="Automation Rule Name", required=True, translate=True)
+    description = fields.Html(string="Description")
     model_id = fields.Many2one(
         "ir.model", string="Model", required=True, ondelete="cascade", help="Model on which the automation rule runs."
     )
@@ -85,7 +86,8 @@ class BaseAutomation(models.Model):
     )
     url = fields.Char(compute='_compute_url')
     webhook_uuid = fields.Char(string="Webhook UUID", readonly=True, copy=False, default=lambda self: str(uuid4()))
-    record_getter = fields.Char(help="This code will be run to find on which record the automation rule should be run.\nExample: model.browse(payload.get('recordId')))")
+    record_getter = fields.Char(default="env[payload.get('_model')].browse(payload.get('id'))",
+                                help="This code will be run to find on which record the automation rule should be run.")
     log_webhook_calls = fields.Boolean(string="Log Calls", default=False)
     active = fields.Boolean(default=True, help="When unchecked, the rule is hidden and will not be executed.")
 
@@ -109,14 +111,14 @@ class BaseAutomation(models.Model):
             ('on_write', "On update"),  # deprecated, use 'on_create_or_write' instead
 
             ('on_unlink', "On deletion"),
-            ('on_change', "On live update"),
+            ('on_change', "On UI change"),
 
             ('on_time', "Based on date field"),
             ('on_time_created', "After creation"),
             ('on_time_updated', "After last update"),
 
-            ("on_message_received", "A message was received from an external user"),
-            ("on_message_sent", "A message was sent to an external user"),
+            ("on_message_received", "On incoming message"),
+            ("on_message_sent", "On outgoing message"),
 
             ('on_webhook', "On webhook"),
         ], string='Trigger',
@@ -152,9 +154,9 @@ class BaseAutomation(models.Model):
         string='Delay after trigger date',
         compute='_compute_trg_date_range_data',
         readonly=False, store=True,
-        help="""Delay after the trigger date.
-        You can put a negative number if you need a delay before the
-        trigger date, like sending a reminder 15 minutes before a meeting.""")
+        help="Delay after the trigger date. "
+        "You can put a negative number if you need a delay before the "
+        "trigger date, like sending a reminder 15 minutes before a meeting.")
     trg_date_range_type = fields.Selection(
         [('minutes', 'Minutes'), ('hour', 'Hours'), ('day', 'Days'), ('month', 'Months')],
         string='Delay type',
@@ -275,8 +277,8 @@ class BaseAutomation(models.Model):
         to_reset = self.filtered(lambda a: a.trigger not in ['on_priority_set', 'on_state_set'] or len(a.trigger_field_ids) != 1)
         to_reset.trg_selection_field_id = False
         for automation in (self - to_reset):
-            domain = [('field_id', 'in', automation.trigger_field_ids.ids)]
-            automation.trg_selection_field_id = self.env['ir.model.fields.selection'].search(domain, limit=1)
+            # always re-assign to an empty value to make sure we have no discrepencies
+            automation.trg_selection_field_id = self.env['ir.model.fields.selection']
 
     @api.depends('trigger', 'trigger_field_ids')
     def _compute_trg_field_ref(self):
@@ -285,16 +287,23 @@ class BaseAutomation(models.Model):
         for automation in (self - to_reset):
             relation = automation.trigger_field_ids.relation
             automation.trg_field_ref_model_name = relation
-            automation.trg_field_ref = self.env[relation].search([], limit=1)
+            # always re-assign to an empty value to make sure we have no discrepencies
+            automation.trg_field_ref = self.env[relation]
 
     @api.depends('trg_field_ref', 'trigger_field_ids')
     def _compute_trg_field_ref__model_and_display_names(self):
-        to_compute = self.filtered('trg_field_ref')
+        to_compute = self.filtered(lambda a: a.trg_field_ref is not False)
+        # wondering why we check based on 'is not'? Because the ref could be an empty recordset
+        # and we still need to introspec on the model in that case - not just ignore it
         to_reset = (self - to_compute)
         to_reset.trg_field_ref_model_name = False
         to_reset.trg_field_ref_display_name = False
         for automation in to_compute:
             relation = automation.trigger_field_ids.relation
+            if not relation:
+                automation.trg_field_ref_model_name = False
+                automation.trg_field_ref_display_name = False
+                continue
             resid = automation.trg_field_ref
             automation.trg_field_ref_model_name = relation
             automation.trg_field_ref_display_name = self.env[relation].browse(resid).display_name

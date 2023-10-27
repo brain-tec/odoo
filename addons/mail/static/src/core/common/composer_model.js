@@ -8,13 +8,9 @@ export class Composer extends Record {
     static get(data) {
         return super.get(data);
     }
-    /** @returns {import("models").Composer} */
+    /** @returns {import("models").Composer|import("models").Composer[]} */
     static insert(data) {
-        const { message, thread } = data;
-        if (Boolean(message) === Boolean(thread)) {
-            throw new Error("Composer shall have a thread xor a message.");
-        }
-        return super.insert(data);
+        return super.insert(...arguments);
     }
 
     attachments = Record.many("Attachment");

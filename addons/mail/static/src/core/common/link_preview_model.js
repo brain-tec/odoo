@@ -8,9 +8,9 @@ export class LinkPreview extends Record {
     static get(data) {
         return super.get(data);
     }
-    /** @returns {import("models").LinkPreview} */
+    /** @returns {import("models").LinkPreview|import("models").LinkPreview[]} */
     static insert(data) {
-        return super.insert(data);
+        return super.insert(...arguments);
     }
 
     /** @type {number} */

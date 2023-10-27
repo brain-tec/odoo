@@ -23,6 +23,7 @@ class View(models.Model):
 
     website_id = fields.Many2one('website', ondelete='cascade', string="Website")
     page_ids = fields.One2many('website.page', 'view_id')
+    controller_page_ids = fields.One2many('website.controller.page', 'view_id')
     first_page_id = fields.Many2one('website.page', string='Website Page', help='First page linked to this view', compute='_compute_first_page_id')
     track = fields.Boolean(string='Track', default=False, help="Allow to specify for one page of the website to be trackable or not")
     visibility = fields.Selection([('', 'All'), ('connected', 'Signed In'), ('restricted_group', 'Restricted Group'), ('password', 'With Password')], default='')
@@ -510,7 +511,7 @@ class View(models.Model):
             if 'email_to' not in form_values.keys():
                 continue
             elif not form_values['email_to'].attrib.get('value'):
-                form_values['email_to'].attrib['value'] = self.env.company.email
+                form_values['email_to'].attrib['value'] = self.env.company.email or ''
             has_cc = {'email_cc', 'email_bcc'} & form_values.keys()
             value = form_values['email_to'].attrib['value'] + (':email_cc' if has_cc else '')
             hash_value = hmac(self.sudo().env, 'website_form_signature', value)
