@@ -26,6 +26,11 @@ from .tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from .tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 from .tools.translate import html_translate, _
 from .tools.mimetypes import guess_mimetype
+<<<<<<< HEAD
+=======
+
+from odoo import SUPERUSER_ID
+>>>>>>> 6b9b598fbb29... [IMP] core: disable x2many manipulation as sudo for sensitive models
 from odoo.exceptions import CacheMiss
 
 DATE_LENGTH = len(date.today().strftime(DATE_FORMAT))
@@ -2889,6 +2894,13 @@ class _RelationalMulti(_Relational):
             assert not any(record_ids)
             return self.write_new(records_commands_list)
 
+    def _check_sudo_commands(self, comodel):
+        # if the model doesn't accept sudo commands
+        if not comodel._allow_sudo_commands:
+            # Then, disable sudo and reset the transaction origin user
+            return comodel.sudo(False).with_user(comodel.env.uid_origin)
+        return comodel
+
 
 class One2many(_RelationalMulti):
     """One2many field; the value of such a field is the recordset of all the
@@ -2997,6 +3009,7 @@ class One2many(_RelationalMulti):
 
         model = records_commands_list[0][0].browse()
         comodel = model.env[self.comodel_name].with_context(**self.context)
+        comodel = self._check_sudo_commands(comodel)
 
         ids = {rid for recs, cs in records_commands_list for rid in recs.ids}
         records = records_commands_list[0][0].browse(ids)
@@ -3098,6 +3111,7 @@ class One2many(_RelationalMulti):
         model = records_commands_list[0][0].browse()
         cache = model.env.cache
         comodel = model.env[self.comodel_name].with_context(**self.context)
+        comodel = self._check_sudo_commands(comodel)
 
         ids = {record.id for records, _ in records_commands_list for record in records}
         records = model.browse(ids)
@@ -3368,8 +3382,15 @@ class Many2many(_RelationalMulti):
         if not records_commands_list:
             return
 
+<<<<<<< HEAD
         comodel = records_commands_list[0][0].env[self.comodel_name].with_context(**self.context)
         cr = records_commands_list[0][0].env.cr
+=======
+        model = records_commands_list[0][0].browse()
+        comodel = model.env[self.comodel_name].with_context(**self.context)
+        comodel = self._check_sudo_commands(comodel)
+        cr = model.env.cr
+>>>>>>> 6b9b598fbb29... [IMP] core: disable x2many manipulation as sudo for sensitive models
 
         # determine old and new relation {x: ys}
         set = OrderedSet
@@ -3522,6 +3543,7 @@ class Many2many(_RelationalMulti):
 
         model = records_commands_list[0][0].browse()
         comodel = model.env[self.comodel_name].with_context(**self.context)
+        comodel = self._check_sudo_commands(comodel)
         new = lambda id_: id_ and NewId(id_)
 
         # determine old and new relation {x: ys}
