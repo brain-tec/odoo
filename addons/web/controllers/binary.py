@@ -15,13 +15,13 @@ except ImportError:
 
 import odoo
 import odoo.modules.registry
-from odoo import http, _
+from odoo import SUPERUSER_ID, _, http
+from odoo.addons.base.models.assetsbundle import ANY_UNIQUE
 from odoo.exceptions import AccessError, UserError
 from odoo.http import request, Response
 from odoo.tools import file_open, file_path, replace_exceptions
-from odoo.tools.mimetypes import guess_mimetype
 from odoo.tools.image import image_guess_size_from_field_name
-
+from odoo.tools.mimetypes import guess_mimetype
 
 _logger = logging.getLogger(__name__)
 
@@ -83,32 +83,55 @@ class Binary(http.Controller):
         res.headers['Content-Security-Policy'] = "default-src 'none'"
         return res
 
-    @http.route(['/web/assets/debug/<string:filename>',
-        '/web/assets/debug/<path:extra>/<string:filename>',
-        '/web/assets/<int:id>/<string:filename>',
-        '/web/assets/<int:id>-<string:unique>/<string:filename>',
-        '/web/assets/<int:id>-<string:unique>/<path:extra>/<string:filename>'], type='http', auth="public")
-    # pylint: disable=redefined-builtin,invalid-name
-    def content_assets(self, id=None, filename=None, unique=False, extra=None, nocache=False):
-        if not id:
-            domain = [('url', '!=', False)]
-            if extra:
-                domain += [('url', '=like', f'/web/assets/%/{extra}/{filename}')]
-            else:
-                domain += [
-                    ('url', '=like', f'/web/assets/%/{filename}'),
-                    ('url', 'not like', f'/web/assets/%/%/{filename}')
-                ]
+    @http.route([
+        '/web/assets/<string:unique>/<string:filename>'], type='http', auth="public")
+    def content_assets(self, filename=None, unique=ANY_UNIQUE, nocache=False, assets_params=None):
+        assets_params = assets_params or {}
+        assert isinstance(assets_params, dict)
+        debug_assets = unique == 'debug'
+        if unique in ('any', '%'):
+            unique = ANY_UNIQUE
+        attachment = None
+        if unique != 'debug':
+            url = request.env['ir.asset']._get_asset_bundle_url(filename, unique, assets_params)
+            assert not '%' in url
+            domain = [
+                ('public', '=', True),
+                ('url', '!=', False),
+                ('url', '=like', url),
+                ('res_model', '=', 'ir.ui.view'),
+                ('res_id', '=', 0),
+                ('create_uid', '=', SUPERUSER_ID),
+            ]
             attachment = request.env['ir.attachment'].sudo().search(domain, limit=1)
-            if not attachment:
-                raise request.not_found()
-            id = attachment.id
-        with replace_exceptions(UserError, by=request.not_found()):
-            record = request.env['ir.binary']._find_record(res_id=int(id))
-            stream = request.env['ir.binary']._get_stream_from(record, 'raw', filename)
-
+        if not attachment:
+            # try to generate one
+            try:
+                bundle_name, rtl, asset_type = request.env['ir.asset']._parse_bundle_name(filename, debug_assets)
+                css = asset_type == 'css'
+                js = asset_type == 'js'
+                bundle = request.env['ir.qweb']._get_asset_bundle(
+                    bundle_name,
+                    css=css,
+                    js=js,
+                    debug_assets=debug_assets,
+                    rtl=rtl,
+                    assets_params=assets_params,
+                )
+                # check if the version matches. If not, redirect to the last version
+                if not debug_assets and unique != ANY_UNIQUE and unique != bundle.get_version(asset_type):
+                    return request.redirect(bundle.get_link(asset_type))
+                if css and bundle.stylesheets:
+                    attachment = bundle.css()
+                elif js and bundle.javascripts:
+                    attachment = bundle.js()
+            except ValueError as e:
+                raise request.not_found() from e
+        if not attachment:
+            raise request.not_found()
+        stream = request.env['ir.binary']._get_stream_from(attachment, 'raw', filename)
         send_file_kwargs = {'as_attachment': False}
-        if unique:
+        if unique and unique != 'debug':
             send_file_kwargs['immutable'] = True
             send_file_kwargs['max_age'] = http.STATIC_CACHE_LONG
         if nocache:

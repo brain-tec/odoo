@@ -47,7 +47,7 @@ class PosOrder(models.Model):
 
     def _compute_tax_details(self):
         self.ensure_one()
-        taxes = sum([line.tax_ids.compute_all(line.price_unit, quantity=line.qty, product=line.product_id)['taxes']
+        taxes = sum([line.tax_ids.with_company(self.company_id).compute_all(line.price_unit, quantity=line.qty, product=line.product_id)['taxes']
                for line in self.lines], [])
         tax_percetanges = {tax['id']: tax['amount'] for tax in self.env['account.tax'].search([]).read(['amount'])}
         merged_tax_details = {}
@@ -69,8 +69,21 @@ class PosOrder(models.Model):
 
     @api.model
     def create_from_ui(self, orders, draft=False):
+        old_order_ids = []
+
+        for order in orders:
+            if order['data'].get('server_id'):
+                server_id = order['data'].get('server_id')
+                old_order = self.env['pos.order'].browse(server_id).read(['id', 'take_away'])
+                old_order_ids.append(old_order[0])
+
         orders = super().create_from_ui(orders, draft)
         order_ids = self.env['pos.order'].browse([order['id'] for order in orders])
+
+        if old_order_ids:
+            for order in old_order_ids:
+                if order['take_away']:
+                    order_ids.filtered(lambda o: o.id == order['id']).write({'take_away': True})
 
         if self.env.context.get('from_self') is not True:
             self._send_notification(order_ids)

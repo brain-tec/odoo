@@ -12,6 +12,9 @@
     ],
 
     'assets': {
+        'web.assets_tests': [
+            'test_assetsbundle/static/tests/test_css_error.js',
+        ],
         'test_assetsbundle.bundle2': [
             'test_assetsbundle/static/src/css/test_cssfile1.css',
         ],
@@ -58,6 +61,9 @@
         'test_assetsbundle.manifest_multi_module1': [],
         'test_assetsbundle.lazy_test_component': [
             'test_assetsbundle/static/tests/lazy_test_component/**/*',
+        ],
+        'test_assetsbundle.broken_xml': [
+            'test_assetsbundle/static/invalid_src/xml/invalid_xml.xml',
         ],
     },
     'license': 'LGPL-3',

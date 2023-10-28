@@ -86,14 +86,9 @@ export class Message extends Component {
         "messageSearch?",
         "className?",
         "showDates?",
-        "isFirstMessage?"
+        "isFirstMessage?",
     ];
     static template = "mail.Message";
-
-    /** @type {HTMLStyleElement} */
-    shadowStyle;
-    /** @type {ShadowRoot} */
-    shadowRoot;
 
     setup() {
         this.popover = usePopover(this.constructor.components.Popover, { position: "top" });
@@ -102,7 +97,6 @@ export class Message extends Component {
             isHovered: false,
             isClicked: false,
             expandOptions: false,
-            originalEmail: false,
             emailHeaderOpen: false,
             showTranslation: false,
         });
@@ -132,19 +126,6 @@ export class Message extends Component {
             },
             () => [this.props.messageEdition?.editingMessage]
         );
-        useEffect(
-            () => {
-                if (!this.shadowRoot) {
-                    return;
-                }
-                if (this.state.originalEmail) {
-                    this.shadowRoot.removeChild(this.shadowStyle);
-                } else {
-                    this.shadowRoot.insertBefore(this.shadowStyle, this.shadowRoot.firstChild);
-                }
-            },
-            () => [this.state.originalEmail]
-        );
         onPatched(() => {
             if (this.props.highlighted && this.root.el) {
                 this.root.el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -155,14 +136,14 @@ export class Message extends Component {
                 this.prepareMessageBody(this.messageBody.el);
             }
             if (this.shadowBody.el) {
-                this.shadowRoot = this.shadowBody.el.attachShadow({ mode: "open" });
+                const shadowRoot = this.shadowBody.el.attachShadow({ mode: "open" });
                 const body = document.createElement("span");
                 body.innerHTML =
                     this.props.messageSearch?.highlight(this.message.body) ?? this.message.body;
                 this.prepareMessageBody(body);
                 const color = cookie.get("color_scheme") === "dark" ? "white" : "black";
-                this.shadowStyle = document.createElement("style");
-                this.shadowStyle.innerHTML = `
+                const shadowStyle = document.createElement("style");
+                shadowStyle.innerHTML = `
                     * {
                         background-color: transparent !important;
                         color: ${color} !important;
@@ -177,8 +158,10 @@ export class Message extends Component {
                         background: ${this.constructor.SHADOW_HIGHLIGHT_COLOR} !important;
                     }
                 `;
-                this.shadowRoot.appendChild(this.shadowStyle);
-                this.shadowRoot.appendChild(body);
+                if (cookie.get("color_scheme") === "dark") {
+                    shadowRoot.appendChild(shadowStyle);
+                }
+                shadowRoot.appendChild(body);
             }
         });
     }
@@ -213,7 +196,8 @@ export class Message extends Component {
 
     get authorAvatarUrl() {
         if (
-            this.message.type === "email" &&
+            this.message.type &&
+            this.message.type.includes("email") &&
             !["partner", "guest"].includes(this.message.author?.type)
         ) {
             return url("/mail/static/src/img/email_icon.png");
@@ -385,12 +369,6 @@ export class Message extends Component {
             last_message_id: previousMessageId,
             allow_older: true,
         });
-    }
-
-    get originalEmailText() {
-        return this.state.originalEmail
-            ? _t("Don't show Original Email")
-            : _t("Show Original Email");
     }
 
     /**

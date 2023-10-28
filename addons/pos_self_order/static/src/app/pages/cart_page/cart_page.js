@@ -51,9 +51,6 @@ export class CartPage extends Component {
         const orderingMode = this.selfOrder.config.self_ordering_service_mode;
         const type = this.selfOrder.config.self_ordering_mode;
         const takeAway = this.selfOrder.currentOrder.take_away;
-        const mode = this.selfOrder.config.self_ordering_pay_after;
-        const order = this.selfOrder.currentOrder;
-        const isPaymentMethod = this.selfOrder.pos_payment_methods.length > 0;
 
         if (this.sendInProgress || !this.selfOrder.verifyCart()) {
             return;
@@ -64,33 +61,9 @@ export class CartPage extends Component {
             return;
         }
 
-        // in case of no payment methods available -> pay at cashier
-        if (!isPaymentMethod) {
-            let screenMode = "pay";
-
-            if (!order.isSavedOnServer) {
-                this.sendInProgress = true;
-                await this.selfOrder.sendDraftOrderToServer();
-                this.sendInProgress = false;
-                screenMode = mode === "meal" ? "order" : "pay";
-            }
-
-            this.router.navigate("confirmation", {
-                orderAccessToken: order.access_token,
-                screenMode: screenMode,
-            });
-            return;
-        }
-
-        if (orderingMode === "table" && !takeAway) {
-            if (type === "kiosk") {
-                this.router.navigate("stand_number");
-            } else {
-                this.router.navigate("payment");
-            }
-        } else {
-            this.router.navigate("payment");
-        }
+        this.sendInProgress = true;
+        await this.selfOrder.confirmOrder();
+        this.sendInProgress = false;
     }
 
     selectTable(table) {
@@ -152,7 +125,7 @@ export class CartPage extends Component {
         await this.selfOrder.getPricesFromServer();
     }
 
-    async changeQuantity(line, increase) {
+    async _changeQuantity(line, increase) {
         if (!increase && !this.canChangeQuantity(line)) {
             return;
         }
@@ -164,11 +137,14 @@ export class CartPage extends Component {
         increase ? line.qty++ : line.qty--;
         for (const cline of this.selfOrder.currentOrder.lines) {
             if (cline.combo_parent_uuid === line.uuid) {
-                this.changeQuantity(cline, increase);
+                this._changeQuantity(cline, increase);
             }
         }
+    }
+
+    async changeQuantity(line, increase) {
+        await this._changeQuantity(line, increase);
         await this.selfOrder.getPricesFromServer();
-        return;
     }
 
     clickOnLine(line) {

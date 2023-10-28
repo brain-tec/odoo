@@ -11,7 +11,7 @@ from odoo import _, api, fields, models, tools, Command
 from odoo.addons.base.models.avatar_mixin import get_hsl_from_seed
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
-from odoo.tools import html_escape
+from odoo.tools import html_escape, get_lang
 from odoo.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 
 _logger = logging.getLogger(__name__)
@@ -464,11 +464,11 @@ class Channel(models.Model):
           and use;
         """
         # get values from msg_vals or from message if msg_vals doen't exists
-        message_type = msg_vals.get('message_type', 'email') if msg_vals else message.message_type
+        message_type = msg_vals.get('message_type', 'comment') if msg_vals else message.message_type
         pids = msg_vals.get('partner_ids', []) if msg_vals else message.partner_ids.ids
 
-        # notify only user input (comment or incoming emails)
-        if message_type not in ('comment', 'email'):
+        # notify only user input (comment or incoming / outgoing emails)
+        if message_type not in ('comment', 'email', 'email_outgoing'):
             return []
         # notify only mailing lists or if mentioning recipients
         if not pids:
@@ -523,20 +523,20 @@ class Channel(models.Model):
     def _notify_thread(self, message, msg_vals=False, **kwargs):
         # link message to channel
         rdata = super()._notify_thread(message, msg_vals=msg_vals, **kwargs)
-
-        message_format_values = message.message_format()[0]
-        bus_notifications = self._channel_message_notifications(message, message_format_values)
+        message_format = message.message_format()[0]
+        if "temporary_id" in self.env.context:
+            message_format["temporary_id"] = self.env.context["temporary_id"]
         # Last interest and is_pinned are updated for a channel when posting a message.
         # So a notification is needed to update UI, and it should come before the
         # notification of the message itself to ensure the channel automatically opens.
-        bus_notifications.insert(0, [self, 'discuss.channel/last_interest_dt_changed', {
-            'id': self.id,
-            'isServerPinned': True,
-            'last_interest_dt': fields.Datetime.now(),
-        }])
-        # sudo: bus.bus - sending on safe channel (target channel or partner)
-        self.env['bus.bus'].sudo()._sendmany(bus_notifications)
-        if self.is_chat or self.channel_type == 'group':
+        payload = {"id": self.id, "isServerPinned": True, "last_interest_dt": fields.Datetime.now()}
+        bus_notifications = [
+            (self, "discuss.channel/last_interest_dt_changed", payload),
+            (self, "discuss.channel/new_message", {"id": self.id, "message": message_format}),
+        ]
+        # sudo: bus.bus - sending on safe channel (discuss.channel)
+        self.env["bus.bus"].sudo()._sendmany(bus_notifications)
+        if self.is_chat or self.channel_type == "group":
             self._notify_thread_by_web_push(message, rdata, msg_vals, **kwargs)
         return rdata
 
@@ -626,23 +626,6 @@ class Channel(models.Model):
                     notifications.append((partner, 'mail.record/insert', {"Thread": channel_info}))
         return notifications
 
-    def _channel_message_notifications(self, message, message_format=False):
-        """ Generate the bus notifications for the given message
-            :param message : the mail.message to sent
-            :returns list of bus notifications (tuple (bus_channe, message_content))
-        """
-        message_format = dict(message_format or message.message_format()[0])
-        if 'temporary_id' in self.env.context:
-            message_format['temporary_id'] = self.env.context['temporary_id']
-        notifications = []
-        for channel in self:
-            payload = {
-                'id': channel.id,
-                'message': message_format,
-            }
-            notifications.append((channel, 'discuss.channel/new_message', payload))
-        return notifications
-
     # ------------------------------------------------------------
     # INSTANT MESSAGING API
     # ------------------------------------------------------------
@@ -706,25 +689,27 @@ class Channel(models.Model):
         :return tuple(partner, guest):
         """
         self.ensure_one()
-        guest = None
+        guest = self.env["mail.guest"]
         member = self.env["discuss.channel.member"].search([("channel_id", "=", self.id), ("is_self", "=", True)])
         if member:
             return member.partner_id, member.guest_id
         if not self.env.user._is_public():
             self.add_members([self.env.user.partner_id.id], post_joined_message=post_joined_message)
-        elif self.env.user._is_public():
-            is_guest_known = self.env["mail.guest"]._get_guest_from_context()
-            country_id = self.env["res.country"].search([("code", "=", country_code)]).id
-            guest = self.env["mail.guest"]._find_or_create_for_channel(
-                channel=self,
-                country_id=country_id,
-                name=guest_name,
-                post_joined_message=post_joined_message,
-                timezone=timezone,
-            )
-            if not is_guest_known:
+        else:
+            guest = self.env["mail.guest"]._get_guest_from_context()
+            if not guest:
+                guest = self.env["mail.guest"].create(
+                    {
+                        "country_id": self.env["res.country"].search([("code", "=", country_code)]).id,
+                        "lang": get_lang(self.env).code,
+                        "name": guest_name,
+                        "timezone": timezone,
+                    }
+                ).sudo(False)
                 guest._set_auth_cookie()
-        return self.env.user.partner_id if not guest else None, guest
+                self = self.with_context(guest=guest)
+            self.add_members(guest_ids=guest.ids, post_joined_message=post_joined_message)
+        return self.env.user.partner_id if not guest else self.env["res.partner"], guest
 
     def _channel_info(self):
         """ Get the informations header for the current channels

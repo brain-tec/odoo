@@ -140,8 +140,9 @@ class StockMoveLine(models.Model):
         for record in self:
             if not record.quant_id or record.quantity:
                 continue
-            if float_compare(record.move_id.product_qty, record.move_id.quantity, record.move_id.product_uom.rounding) > 0:
-                record.quantity = max(0, min(record.quant_id.available_quantity, record.move_id.product_qty - record.move_id.quantity))
+            origin_move = record.move_id._origin
+            if float_compare(record.move_id.product_qty, origin_move.quantity, record.move_id.product_uom.rounding) > 0:
+                record.quantity = max(0, min(record.quant_id.available_quantity, record.move_id.product_qty - origin_move.quantity))
             else:
                 record.quantity = max(0, record.quant_id.available_quantity)
 
@@ -221,9 +222,8 @@ class StockMoveLine(models.Model):
         """
         res = {}
         if self.quantity and self.product_id.tracking == 'serial':
-            if float_compare(self.quantity_product_uom, 1.0, precision_rounding=self.product_id.uom_id.rounding) != 0:
-                message = _('You can only process 1.0 %s of products with unique serial number.', self.product_id.uom_id.name)
-                res['warning'] = {'title': _('Warning'), 'message': message}
+            if float_compare(self.quantity_product_uom, 1.0, precision_rounding=self.product_id.uom_id.rounding) != 0 and not float_is_zero(self.quantity_product_uom, precision_rounding=self.product_id.uom_id.rounding):
+                raise UserError(_('You can only process 1.0 %s of products with unique serial number.', self.product_id.uom_id.name))
         return res
 
     @api.onchange('result_package_id', 'product_id', 'product_uom_id', 'quantity')
