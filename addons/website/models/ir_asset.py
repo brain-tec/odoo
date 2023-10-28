@@ -15,12 +15,13 @@ class IrAsset(models.Model):
         params['website_id'] = self.env['website'].get_current_website(fallback=False).id
         return params
 
-    def _get_asset_extra(self, extra, website_id=None, **params):
-        extra = super()._get_asset_extra(extra, **params)
-        if extra == '%':
-            return extra
-        website_id_path = website_id and ('%s/' % website_id) or ''
-        return website_id_path + extra
+    def _get_asset_bundle_url(self, filename, unique, assets_params, ignore_params=False):
+        route_prefix = '/web/assets'
+        if ignore_params: # we dont care about website id, match both
+            route_prefix = '/web/assets%'
+        elif website_id := assets_params.get('website_id', None):
+            route_prefix = f'/web/assets/{website_id}'
+        return f'{route_prefix}/{unique}/{filename}'
 
     def _get_related_assets(self, domain, website_id=None, **params):
         if website_id:
