@@ -5,6 +5,20 @@ API_VERSION = '2019-05-16'  # The API version of Stripe implemented in this modu
 # Stripe proxy URL
 PROXY_URL = 'https://stripe.api.odoo.com/api/stripe/'
 
+# The codes of the payment methods to activate when Stripe is activated.
+DEFAULT_PAYMENT_METHODS_CODES = [
+    # Primary payment methods.
+    'card',
+    'paypal',
+    'bancontact',
+    'ideal',
+    # Brand payment methods.
+    'visa',
+    'mastercard',
+    'amex',
+    'discover',
+]
+
 # Mapping of payment method codes to Stripe codes.
 PAYMENT_METHODS_MAPPING = {
     'ach_direct_debit': 'us_bank_account',
@@ -12,6 +26,7 @@ PAYMENT_METHODS_MAPPING = {
     'becs_direct_debit': 'au_becs_debit',
     'afterpay': 'afterpay_clearpay',
     'clearpay': 'afterpay_clearpay',
+    'unknown': 'card',  # For express checkout.
 }
 
 # Mapping of transaction states to Stripe objects ({Payment,Setup}Intent, Refund) statuses.

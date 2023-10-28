@@ -14,9 +14,8 @@ class BusWebTests(odoo.tests.HttpCase):
           i.e. their hash has been recomputed and differ from the attachment's
         - The interface deals with those bus messages by displaying one notification
         """
-        db_name = self.env.registry.db_name
         # start from a clean slate
-        self.env['ir.attachment'].search([('name', 'ilike', 'web.assets_web%')]).unlink()
+        self.env['ir.attachment'].search([('name', 'ilike', 'web.assets_%')]).unlink()
         self.env.registry.clear_cache()
 
         sendones = []
@@ -28,8 +27,10 @@ class BusWebTests(odoo.tests.HttpCase):
 
         self.patch(type(self.env['bus.bus']), '_sendone', patched_sendone)
 
-        self.authenticate('admin', 'admin')
-        self.url_open('/web')
+        self.assertEqual(self.url_open('/web/assets/any/web.assets_web.min.js', allow_redirects=False).status_code, 200)
+        self.assertEqual(self.url_open('/web/assets/any/web.assets_web.min.css', allow_redirects=False).status_code, 200)
+        self.assertEqual(self.url_open('/web/assets/any/web.assets_backend.min.js', allow_redirects=False).status_code, 200)
+        self.assertEqual(self.url_open('/web/assets/any/web.assets_backend.min.css', allow_redirects=False).status_code, 200)
 
         # One sendone for each asset bundle and for each CSS / JS
         self.assertEqual(
