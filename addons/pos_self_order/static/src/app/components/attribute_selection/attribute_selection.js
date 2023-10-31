@@ -1,9 +1,10 @@
 /** @odoo-module */
 
-import { Component, useState } from "@odoo/owl";
+import { Component, onMounted, useRef, useState } from "@odoo/owl";
 import { ProductCustomAttribute } from "@point_of_sale/app/store/models/product_custom_attribute";
 import { useSelfOrder } from "@pos_self_order/app/self_order_service";
 import { attributeFlatter, attributeFormatter } from "@pos_self_order/app/utils";
+import { floatIsZero } from "@web/core/utils/numbers";
 
 export class AttributeSelection extends Component {
     static template = "pos_self_order.AttributeSelection";
@@ -14,6 +15,16 @@ export class AttributeSelection extends Component {
         this.numberOfAttributes = this.props.product.attributes.length;
         this.currentAttribute = 0;
 
+        this.gridsRef = {};
+        this.valuesRef = {};
+        for (const attr of this.props.product.attributes) {
+            this.gridsRef[attr.id] = useRef(`attribute_grid_${attr.id}`);
+            this.valuesRef[attr.id] = {};
+            for (const value of attr.values) {
+                this.valuesRef[attr.id][value.id] = useRef(`value_${attr.id}_${value.id}`);
+            }
+        }
+
         this.state = useState({
             showNext: false,
             showCustomInput: false,
@@ -22,6 +33,36 @@ export class AttributeSelection extends Component {
         this.selectedValues = useState(this.env.selectedValues);
 
         this.initAttribute();
+        onMounted(this.onMounted);
+    }
+
+    onMounted() {
+        for (const attr of Object.entries(this.valuesRef)) {
+            let classicValue = 0;
+            for (const valueRef of Object.values(attr[1])) {
+                if (valueRef.el) {
+                    const height = valueRef.el.parentNode.offsetHeight;
+                    if (classicValue === 0) {
+                        classicValue = height;
+                    } else {
+                        if (height !== classicValue || height > window.innerHeight * 0.18) {
+                            this.gridsRef[attr[0]].el.classList.remove(
+                                "row-cols-2",
+                                "row-cols-sm-3",
+                                "row-cols-md-4",
+                                "row-cols-xl-5",
+                                "row-cols-xxl-6"
+                            );
+                            this.gridsRef[attr[0]].el.classList.add("row-cols-1");
+                            for (const gridValueRef of Object.values(attr[1])) {
+                                gridValueRef.el.classList.remove("ratio", "ratio-16x9");
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     get showNextBtn() {
@@ -89,5 +130,23 @@ export class AttributeSelection extends Component {
         return attribute.display_type === "multi"
             ? this.selectedValues[attribute.id][value.id]
             : parseInt(this.selectedValues[attribute.id]) === value.id;
+    }
+
+    _getPriceExtra(value) {
+        const isTakeAway = this.selfOrder.take_away;
+        const priceExtra = isTakeAway
+            ? value.price_extra.display_price_default
+            : value.price_extra.display_price_alternative;
+        return priceExtra;
+    }
+
+    shouldShowPriceExtra(value) {
+        const priceExtra = this._getPriceExtra(value);
+        return !floatIsZero(priceExtra, this.selfOrder.config.currency_decimals);
+    }
+
+    getfPriceExtra(value) {
+        const priceExtra = this._getPriceExtra(value);
+        return this.selfOrder.formatMonetary(priceExtra);
     }
 }

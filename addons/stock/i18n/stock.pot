@@ -8518,6 +8518,13 @@ msgid ""
 msgstr ""
 
 #. module: stock
+#: model:ir.model.fields,help:stock.field_stock_move__picked
+msgid ""
+"This checkbox is just indicative, it doesn't validate or generate any "
+"product moves."
+msgstr ""
+
+#. module: stock
 #: model:ir.model.fields,help:stock.field_stock_rule__name
 msgid "This field will fill the packing origin and the name of its moves"
 msgstr ""
@@ -10039,7 +10046,7 @@ msgstr ""
 #, python-format
 msgid ""
 "You cannot validate a transfer if no quantities are reserved. To force the "
-"transfer, switch in edit mode and encode the done quantities."
+"transfer, encode quantities."
 msgstr ""
 
 #. module: stock
