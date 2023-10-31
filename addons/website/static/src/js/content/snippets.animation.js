@@ -21,6 +21,7 @@ import {
     switchTextHighlight,
     getCurrentTextHighlight,
 } from "@website/js/text_processing";
+import { touching } from "@web/core/utils/ui";
 
 // Initialize fallbacks for the use of requestAnimationFrame,
 // cancelAnimationFrame and performance.now()
@@ -1097,7 +1098,7 @@ registry.FullScreenHeight = publicWidget.Widget.extend({
         // Doing it that way allows to considerer fixed headers, hidden headers,
         // connected users, ...
         const firstContentEl = $('#wrapwrap > main > :first-child')[0]; // first child to consider the padding-top of main
-        const mainTopPos = firstContentEl.getBoundingClientRect().top + dom.closestScrollable(firstContentEl.parentNode).scrollTop;
+        const mainTopPos = firstContentEl.getBoundingClientRect().top + $(firstContentEl.parentNode).closestScrollable()[0].scrollTop;
         return (windowHeight - mainTopPos);
     },
 });
@@ -1263,7 +1264,17 @@ registry.BottomFixedElement = publicWidget.Widget.extend({
         if ((this.$scrollingElement[0].offsetHeight + this.$scrollingElement[0].scrollTop) >= (this.$scrollingElement[0].scrollHeight - 2)) {
             const buttonEls = [...this.$('a:visible, .btn:visible')];
             for (const el of $bottomFixedElements) {
-                const hiddenButtonEl = buttonEls.find(button => dom.areColliding(button, el));
+                const elRect = el.getBoundingClientRect();
+                const hiddenButtonEl = touching(buttonEls, {
+                    top: elRect.top,
+                    right: elRect.right,
+                    bottom: elRect.bottom,
+                    left: elRect.left,
+                    width: elRect.width,
+                    height: elRect.height,
+                    x: elRect.x,
+                    y: elRect.y,
+                });
                 if (hiddenButtonEl) {
                     if (el.classList.contains('o_bottom_fixed_element_move_up')) {
                         el.style.marginBottom = window.innerHeight - hiddenButtonEl.getBoundingClientRect().top + 5 + 'px';

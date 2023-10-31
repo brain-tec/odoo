@@ -74,7 +74,7 @@
                                 <field name="date" invisible="1"/>
                                 <field name="analytic_line_ids" context="{'tree_view_ref':'analytic.view_account_analytic_line_tree', 'default_general_account_id':account_id, 'default_name': name, 'default_date':date, 'amount': (debit or 0.0)-(credit or 0.0)}"/>
                             </page>
-                            <page string="Accounting documents">
+                            <page string="Accounting documents" name="page_accounting_documents">
                                 <label for="move_id" string="Journal Entry"/>
                                 <field name="move_id" readonly="1" nolabel="1"/>
                                 <group readonly="1" invisible="not statement_line_id">
@@ -1690,6 +1690,23 @@
             </field>
         </record>
 
+        <record id="action_open_sale_payment_items" model="ir.actions.act_window">
+            <field name="name">Customer Amounts to Settle</field>
+            <field name="res_model">account.move.line</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_move_line_payment_tree"/>
+            <field name="search_view_id" ref="view_account_move_line_payment_filter"/>
+            <field name="context">{'search_default_group_by_partner':1, 'expand':1}</field>
+            <field name="domain">[('parent_state', '=', 'posted'), ('amount_residual', '&lt;', 0), ('account_id.reconcile', '=', True), ('journal_id.type', '=', 'sale')]</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Amounts to settle
+                </p><p>
+                    Cool, it looks like you don't have any customer credit notes to pay.
+                </p>
+            </field>
+        </record>
+
         <record id="action_open_payment_items" model="ir.actions.act_window">
             <field name="name">Amounts to Settle</field>
             <field name="res_model">account.move.line</field>
@@ -1697,12 +1714,12 @@
             <field name="view_id" ref="view_move_line_payment_tree"/>
             <field name="search_view_id" ref="view_account_move_line_payment_filter"/>
             <field name="context">{'search_default_group_by_partner':1, 'expand':1}</field>
-            <field name="domain">[('parent_state', '=', 'posted'), ('amount_residual', '!=', 0), ('account_id.reconcile', '=', True)]</field>
+            <field name="domain">[('parent_state', '=', 'posted'), ('amount_residual', '&lt;', 0), ('account_id.reconcile', '=', True), ('journal_id.type', '=', 'purchase')]</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     Amounts to settle
                 </p><p>
-                    Cool, it looks like you don't have anything to pay either for vendor bills or for customer credit notes.
+                    Cool, it looks like you don't have any vendor bills to pay.
                 </p>
             </field>
         </record>
