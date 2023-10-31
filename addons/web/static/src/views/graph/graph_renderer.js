@@ -110,16 +110,16 @@ export class GraphRenderer extends Component {
     customTooltip(data, metaData, context) {
         const tooltipModel = context.tooltip;
         const { measure, measures, disableLinking, mode } = metaData;
-        this.rootRef.el.style.cursor = "";
+        this.containerRef.el.style.cursor = "";
         this.removeTooltips();
         if (tooltipModel.opacity === 0 || tooltipModel.dataPoints.length === 0) {
             return;
         }
         if (!disableLinking && mode !== "line") {
-            this.rootRef.el.style.cursor = "pointer";
+            this.containerRef.el.style.cursor = "pointer";
         }
         const chartAreaTop = this.chart.chartArea.top;
-        const viewContentTop = this.rootRef.el.getBoundingClientRect().top;
+        const viewContentTop = this.containerRef.el.getBoundingClientRect().top;
         const innerHTML = renderToString("web.GraphRenderer.CustomTooltip", {
             maxWidth: getMaxWidth(this.chart.chartArea),
             measure: measures[measure].string,
@@ -500,7 +500,7 @@ export class GraphRenderer extends Component {
      */
     getTooltipItems(data, metaData, tooltipModel) {
         const { allIntegers, domains, mode, groupBy } = metaData;
-        const sortedDataPoints = sortBy(tooltipModel.dataPoints, "yLabel", "desc");
+        const sortedDataPoints = sortBy(tooltipModel.dataPoints, "raw", "desc");
         const items = [];
         for (const item of sortedDataPoints) {
             const index = item.dataIndex;

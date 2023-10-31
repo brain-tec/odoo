@@ -62,14 +62,19 @@ export class SelfOrder extends Reactive {
     }
 
     async confirmOrder() {
-        const payAfter = this.config.self_ordering_pay_after;       // each, meal
-        const device = this.config.self_ordering_mode;              // kiosk, mobile
-        const service = this.config.self_ordering_service_mode;     // table, counter
-        const paymentMethods = this.pos_payment_methods;            // Stripe, Adyen, Online
+        const payAfter = this.config.self_ordering_pay_after; // each, meal
+        const device = this.config.self_ordering_mode; // kiosk, mobile
+        const service = this.config.self_ordering_service_mode; // table, counter
+        const paymentMethods = this.pos_payment_methods; // Stripe, Adyen, Online
         const order = this.currentOrder;
 
         // Stand number page will recall this function after the stand number is set
-        if (service === "table" && !order.take_away && device === "kiosk" && !order.table_stand_number) {
+        if (
+            service === "table" &&
+            !order.take_away &&
+            device === "kiosk" &&
+            !order.table_stand_number
+        ) {
             this.router.navigate("stand_number");
             return;
         }
@@ -206,9 +211,11 @@ export class SelfOrder extends Reactive {
     }
 
     initKioskData() {
-        this.ordering = true;
-        this.idleTimout = false;
+        if (this.pos_session && this.access_token) {
+            this.ordering = true;
+        }
 
+        this.idleTimout = false;
         window.addEventListener("click", (event) => {
             this.idleTimout && clearTimeout(this.idleTimout);
             this.idleTimout = setTimeout(() => {
@@ -551,7 +558,7 @@ export class SelfOrder extends Reactive {
             amount_tax: order.amount_tax,
             total_without_tax: order.amount_total - order.amount_tax,
             total_paid: order.amount_paid,
-            paymentlines: [{ name: "Bank", amount: order.amount_total }],
+            paymentlines: order.payment_lines,
             change: 0,
             tax_details: order.tax_details,
             name: order.pos_reference,
@@ -564,6 +571,8 @@ export class SelfOrder extends Reactive {
                 company: this.company,
                 trackingNumber: order.trackingNumber,
                 bigTrackingNumber: true,
+                pickingService: this.config.self_ordering_service_mode,
+                tableTracker: order.table_stand_number ?? false,
             },
             pos_qr_code:
                 this.company.point_of_sale_use_ticket_qr_code &&
