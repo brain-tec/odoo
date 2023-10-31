@@ -108,7 +108,8 @@ class StockMove(models.Model):
              "* Done: The product has been transferred and the transfer has been confirmed.")
     picked = fields.Boolean(
         'Picked', compute='_compute_picked', inverse='_inverse_picked',
-        store=True, readonly=False, copy=False, default=False)
+        store=True, readonly=False, copy=False, default=False,
+        help="This checkbox is just indicative, it doesn't validate or generate any product moves.")
 
     # used to record the product cost set by the user during a picking confirmation (when costing
     # method used is 'average price' or 'real'). Value given in company currency and in product uom.
@@ -612,6 +613,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         receipt_moves_to_reassign = self.env['stock.move']
         move_to_recompute_state = self.env['stock.move']
         move_to_confirm = self.env['stock.move']
+        move_to_check_dest_location = self.env['stock.move']
         if 'quantity' in vals:
             if any(move.state == 'cancel' for move in self):
                 raise UserError(_('You cannot change a cancelled stock move, create a new line instead.'))
@@ -643,10 +645,18 @@ Please change the quantity done or the rounding precision of your unit of measur
             self._set_date_deadline(vals.get('date_deadline'))
         if 'move_orig_ids' in vals:
             move_to_recompute_state |= self.filtered(lambda m: m.state not in ['draft', 'cance', 'done'])
-
+        if 'location_dest_id' in vals:
+            move_to_check_dest_location = self.filtered(lambda m: m.location_dest_id.id != vals.get('location_dest_id'))
         res = super(StockMove, self).write(vals)
         if move_to_recompute_state:
             move_to_recompute_state._recompute_state()
+        if move_to_check_dest_location:
+            for ml in move_to_check_dest_location.move_line_ids:
+                parent_path = [int(id) for id in ml.location_dest_id.parent_path.split('/')[:-1]]
+                if ml.move_id.location_dest_id.id in parent_path:
+                    continue
+                loc_dest = ml.move_id.location_dest_id._get_putaway_strategy(ml.product_id, ml.quantity_product_uom)
+                ml.location_dest_id = loc_dest
         if move_to_confirm:
             move_to_confirm._action_assign()
         if receipt_moves_to_reassign:
