@@ -192,7 +192,7 @@ class PosConfig(models.Model):
     @api.depends('company_id')
     def _compute_company_has_template(self):
         for config in self:
-            config.company_has_template = config.company_id.sudo()._existing_accounting() or config.company_id.chart_template
+            config.company_has_template = config.company_id.root_id.sudo()._existing_accounting() or config.company_id.chart_template
 
     def _compute_is_installed_account_accountant(self):
         account_accountant = self.env['ir.module.module'].sudo().search([('name', '=', 'account_accountant'), ('state', '=', 'installed')])
@@ -797,3 +797,6 @@ class PosConfig(models.Model):
             if pm.type == payment_type:
                 return pm
         return False
+
+    def _get_special_products_ids(self):
+        return [self.env.ref('point_of_sale.product_product_tip').id]

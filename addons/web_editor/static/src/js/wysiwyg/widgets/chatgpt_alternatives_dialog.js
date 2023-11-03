@@ -25,22 +25,25 @@ export class ChatGPTAlternativesDialog extends ChatGPTDialog {
     setup() {
         super.setup();
         this.state = useState({
-            selectedMessage: null,
+            ...this.state,
             conversationHistory: [{
                 role: 'system',
-                content: 'You are a helpful assistant, your goal is to help the user write alternatives to their text.',
-            },
-            {
-                role: 'user',
-                content:  'Consider the following text : \n' + this.props.originalText,
-            },
-            {
-                role: 'assistant',
-                content: 'Thanks for this text, what do you need me to do with it?',
+                content: 'The user wrote the following text:\n' +
+                    '<generated_text>' + this.props.originalText + '</generated_text>\n' +
+                    'Your goal is to help the user write alternatives to that text.\n' +
+                    'Conditions:\n' +
+                    '- You must respect the format (wrapping the alternative between <generated_text> and </generated_text>)\n' +
+                    '- Do not write HTML\n' +
+                    '- You must suggest one and only one alternative per answer\n' +
+                    '- Your answer must be different every time, never repeat yourself\n' +
+                    '- You must respect whatever extra conditions the user gives you\n',
             }],
             messages: [],
             alternativesMode: '',
+            messagesInProgress: 0,
+            currentBatchId: null,
         });
+        this._generationIndex = 0;
         this._generateAlternatives();
     }
 
@@ -50,48 +53,60 @@ export class ChatGPTAlternativesDialog extends ChatGPTDialog {
 
     switchAlternativesMode(ev) {
         this.state.alternativesMode = ev.currentTarget.getAttribute('data-mode');
-        this.state.messages = [];
-        this._generateAlternatives();
+        this._generateAlternatives(1);
     }
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
-    async _generateAlternatives() {
+    async _generateAlternatives(numberOfAlternatives = this.props.numberOfAlternatives) {
+        this.state.messagesInProgress = numberOfAlternatives;
+        const batchId = new Date().getTime();
+        this.state.currentBatchId = batchId;
         let wasError = false;
         let messageIndex = 0;
-        while (!wasError && messageIndex < this.props.numberOfAlternatives) {
+        while (!wasError && messageIndex < numberOfAlternatives && this.state.currentBatchId === batchId) {
+            this._generationIndex += 1;
             let query = messageIndex ? 'Write one alternative version of the original text.' : 'Try again another single version of the original text.';
             if (this.state.alternativesMode && !messageIndex) {
                 query += ` Make it more ${this.state.alternativesMode} than your last answer.`;
             }
-            query += messageIndex ? '' : 'The original text was : \n' + this.props.originalText;
             await this._generate(query, (content, isError) => {
-                if (isError) {
-                    wasError = true;
-                } else {
-                    this.state.conversationHistory.push({
-                        role: 'user',
-                        content: query,
-                    }, {
-                        role: 'assistant',
-                        content,
+                if (this.state.currentBatchId === batchId) {
+                    const alternative = content.replace(/.*<generated_text>/, '').replace(/<\/generated_text>.*/, '');
+                    if (isError) {
+                        wasError = true;
+                    } else {
+                        this.state.conversationHistory.push({
+                            role: 'user',
+                            content: query,
+                        }, {
+                            role: 'assistant',
+                            content,
+                        });
+                    }
+                    this.state.messages.push({
+                        author: 'assistant',
+                        text: alternative,
+                        isError,
+                        batchId,
+                        mode: this.state.alternativesMode,
+                        id: new Date().getTime(),
                     });
                 }
-                this.state.messages = [...this.state.messages, {
-                    author: 'assistant',
-                    text: content,
-                    isError,
-                }];
             }).catch(() => {
-                wasError = true;
-                this.state.messages = [];
+                if (this.state.currentBatchId === batchId) {
+                    wasError = true;
+                    this.state.messages = [];
+                }
             });
             messageIndex += 1;
+            this.state.messagesInProgress -= 1;
             if (wasError) {
                 break;
             }
         }
+        this.state.messagesInProgress = 0;
     }
 }
