@@ -2,27 +2,14 @@
 
 import { LinkTools } from '@web_editor/js/wysiwyg/widgets/link_tools';
 import { patch } from "@web/core/utils/patch";
-import { useService } from "@web/core/utils/hooks";
 
-import {status} from '@odoo/owl';
+import { onWillStart, status, useEffect } from '@odoo/owl';
 import wUtils from "@website/js/utils";
 import { debounce } from "@web/core/utils/timing";
 
 const LINK_DEBOUNCE = 1000;
 
 patch(LinkTools.prototype, {
-    setup() {
-        this.rpc = useService('rpc');
-        return super.setup(...arguments);
-    },
-    /**
-     *
-     * @override
-     */
-    onWillStart() {
-        this._adaptPageAnchor = debounce(this._adaptPageAnchor, LINK_DEBOUNCE);
-        return super.onWillStart(...arguments);
-    },
     /**
      * Allows the URL input to propose existing website pages.
      *
@@ -30,22 +17,32 @@ patch(LinkTools.prototype, {
      */
     async start() {
         var def = await super.start(...arguments);
-        const options = {
-            position: {
-                collision: 'flip flipfit',
-            },
-            classes: {
-                "ui-autocomplete": 'o_website_ui_autocomplete'
-            },
-            body: this.$editable[0].ownerDocument.body,
-            urlChosen: this._onAutocompleteClose.bind(this),
-            isDestroyed: () => status(this) === 'destroyed',
-        };
-        wUtils.autocompleteWithPages(this.rpc.bind(this), this.$el.find('input[name="url"]'), options);
         this._adaptPageAnchor();
         return def;
     },
 
+    setup() {
+        super.setup();
+        onWillStart(() => {
+            this._adaptPageAnchor = debounce(this._adaptPageAnchor, LINK_DEBOUNCE);
+        });
+        useEffect((container) => {
+            const input = container?.querySelector(`input[name="url"]`);
+            if (!input) {
+                return;
+            }
+            const options = {
+                classes: {
+                    "ui-autocomplete": 'o_website_ui_autocomplete'
+                },
+                body: this.$editable[0].ownerDocument.body,
+                urlChosen: this._onAutocompleteClose.bind(this),
+                isDestroyed: () => status(this) === 'destroyed',
+            };
+            const unmountAutocompleteWithPages = wUtils.autocompleteWithPages(input, options);
+            return () => unmountAutocompleteWithPages();
+            }, () => [this.linkComponentWrapperRef.el]);
+    },
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------

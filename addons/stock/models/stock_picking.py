@@ -635,6 +635,7 @@ class Picking(models.Model):
         - Ready: if the picking is ready to be sent so if:
           - (a) all quantities are reserved or if
           - (b) some quantities could be reserved and the shipping policy is "as soon as possible"
+          - (c) it's an incoming picking
         - Done: if the picking is done.
         - Cancelled: if the picking is cancelled
         '''
@@ -663,11 +664,14 @@ class Picking(models.Model):
                 else:
                     picking.state = 'done'
             else:
-                relevant_move_state = self.env['stock.move'].browse(picking_move_lines[picking_id])._get_relevant_state_among_moves()
-                if relevant_move_state == 'partially_available':
+                if picking.location_id.should_bypass_reservation() and all(m.procure_method == 'make_to_stock' for m in picking.move_ids):
                     picking.state = 'assigned'
                 else:
-                    picking.state = relevant_move_state
+                    relevant_move_state = self.env['stock.move'].browse(picking_move_lines[picking_id])._get_relevant_state_among_moves()
+                    if relevant_move_state == 'partially_available':
+                        picking.state = 'assigned'
+                    else:
+                        picking.state = relevant_move_state
 
     @api.depends('move_ids.state', 'move_ids.date', 'move_type')
     def _compute_scheduled_date(self):
@@ -1105,6 +1109,13 @@ class Picking(models.Model):
         self.package_level_ids.filtered(lambda p: not p.move_ids).unlink()
 
     def button_validate(self):
+        draft_picking = self.filtered(lambda p: p.state == 'draft')
+        draft_picking.action_confirm()
+        for move in draft_picking.move_ids:
+            if float_is_zero(move.quantity, precision_rounding=move.product_uom.rounding) and\
+               not float_is_zero(move.product_uom_qty, precision_rounding=move.product_uom.rounding):
+                move.quantity = move.product_uom_qty
+
         # Sanity checks.
         if not self.env.context.get('skip_sanity_check', False):
             self._sanity_check()
@@ -1229,7 +1240,7 @@ class Picking(models.Model):
                 continue
             if any(move.additional for move in picking.move_ids):
                 picking.action_confirm()
-        to_confirm = self.move_ids.filtered(lambda m: m.state == 'draft' and not m.product_uom_qty and m.quantity)
+        to_confirm = self.move_ids.filtered(lambda m: m.state == 'draft' and m.quantity)
         to_confirm._action_confirm()
 
     def _create_backorder(self):
