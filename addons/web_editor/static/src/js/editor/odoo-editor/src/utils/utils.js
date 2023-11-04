@@ -584,11 +584,11 @@ export function setSelection(
 ) {
     if (
         !anchorNode ||
-        !anchorNode.parentNode ||
-        !anchorNode.parentNode.closest('body') ||
+        !anchorNode.parentElement ||
+        !anchorNode.parentElement.closest('body') ||
         !focusNode ||
-        !focusNode.parentNode ||
-        !focusNode.parentNode.closest('body')
+        !focusNode.parentElement ||
+        !focusNode.parentElement.closest('body')
     ) {
         return null;
     }
@@ -875,7 +875,7 @@ export function preserveCursor(document) {
         replace = replace || new Map();
         cursorPos[0] = replace.get(cursorPos[0]) || cursorPos[0];
         cursorPos[2] = replace.get(cursorPos[2]) || cursorPos[2];
-        setSelection(...cursorPos);
+        setSelection(...cursorPos, false);
     };
 }
 
