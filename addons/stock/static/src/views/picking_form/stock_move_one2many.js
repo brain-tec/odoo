@@ -3,14 +3,26 @@
 import { registry } from "@web/core/registry";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { useEffect } from "@odoo/owl";
 
 export class MovesListRenderer extends ListRenderer {
     static recordRowTemplate = "stock.MovesListRenderer.RecordRow";
 
+    setup() {
+        super.setup();
+        useEffect(
+            () => {
+                this.keepColumnWidths = false;
+            },
+            () => [this.state.columns]
+        );
+    }
+
     processAllColumn(allColumns, list) {
         let cols = super.processAllColumn(...arguments);
         if (list.resModel === "stock.move") {
-            cols.push({
+            const index = cols.findLastIndex((col) => col.type === "button_group");
+            cols.splice(index, 0, {
                 type: 'opendetailsop',
                 id: `column_detailOp_${cols.length}`,
                 column_invisible: 'parent.state=="draft"',

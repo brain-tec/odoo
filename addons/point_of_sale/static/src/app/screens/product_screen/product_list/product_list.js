@@ -21,18 +21,17 @@ export class ProductsWidget extends Component {
             previousSearchWord: "",
             currentOffset: 0,
             loadingDemo: false,
-            isControlPanelThin: false,
+            height: 0,
         });
-        this.controlPanelRef = useRef("products-widget-control");
+        this.productsWidgetRef = useRef("products-widget");
         this.pos = usePos();
         this.ui = useState(useService("ui"));
         this.popup = useService("popup");
         this.notification = useService("pos_notification");
         this.orm = useService("orm");
         useEffect(() => {
-            // set the flag isControlPanelThin if the height of the control panel is less than 64px (approximate 4rem)
-            const controlPanel = this.controlPanelRef.el;
-            if (!controlPanel) {
+            const productsWidget = this.productsWidgetRef.el;
+            if (!productsWidget) {
                 return;
             }
             const observer = new ResizeObserver((entries) => {
@@ -40,12 +39,21 @@ export class ProductsWidget extends Component {
                     return;
                 }
                 const height = entries[0].contentRect.height;
-                this.state.isControlPanelThin = height < 64;
+                this.state.height = height;
             });
-            observer.observe(controlPanel);
+            observer.observe(productsWidget);
             return () => observer.disconnect();
         });
     }
+
+    getShowCategoryImages() {
+        return (
+            Object.values(this.pos.db.category_by_id).some((category) => category.has_image) &&
+            !this.ui.isSmall &&
+            this.state.height >= 720
+        );
+    }
+
     /**
      * @returns {import("@point_of_sale/app/generic_components/category_selector/category_selector").Category[]}
      */
@@ -58,7 +66,7 @@ export class ProductsWidget extends Component {
             .map((id) => this.pos.db.category_by_id[id])
             .map((category) => {
                 const isRootCategory = category.id === this.pos.db.root_category_id;
-                const hasSeparator =
+                const showSeparator =
                     !isRootCategory &&
                     [
                         ...this.pos.db.get_category_ancestors_ids(this.pos.selectedCategoryId),
@@ -68,21 +76,13 @@ export class ProductsWidget extends Component {
                     id: category.id,
                     name: !isRootCategory ? category.name : "",
                     icon: isRootCategory ? "fa-home fa-2x" : "",
-                    separator: hasSeparator ? "fa-caret-right" : "",
+                    separator: "fa-caret-right",
+                    showSeparator,
                     imageUrl:
                         category?.has_image &&
                         `/web/image?model=pos.category&field=image_128&id=${category.id}&unique=${category.write_date}`,
                 };
             });
-    }
-    get categoriesHasImages() {
-        const categories = this.getCategories();
-        for (const category of categories) {
-            if (category.imageUrl) {
-                return true;
-            }
-        }
-        return false;
     }
 
     get selectedCategoryId() {
@@ -103,7 +103,7 @@ export class ProductsWidget extends Component {
             list = db.get_product_by_category(this.selectedCategoryId);
         }
 
-        list = list.filter(product => !this.getProductListToNotDisplay().includes(product.id));
+        list = list.filter((product) => !this.getProductListToNotDisplay().includes(product.id));
         return list.sort(function (a, b) {
             return a.display_name.localeCompare(b.display_name);
         });

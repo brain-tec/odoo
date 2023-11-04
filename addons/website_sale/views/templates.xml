@@ -62,7 +62,7 @@
     </template>
 
     <template id="template_header_stretch" inherit_id="website.template_header_stretch">
-        <xpath expr="//t[@t-call='website.header_social_links_no_color']" position="before">
+        <xpath expr="//t[@t-call='website.placeholder_header_social_links']" position="before">
             <t t-call="website_sale.header_cart_link">
                 <t t-set="_icon" t-value="True"/>
                 <t t-set="_item_class" t-value="'border-start o_border_contrast'"/>
@@ -129,7 +129,7 @@
     </template>
 
     <template id="template_header_sales_four" inherit_id="website.template_header_sales_four">
-        <xpath expr="//t[@t-call='website.header_call_to_action_pill']" position="before">
+        <xpath expr="//t[@t-call='website.placeholder_header_call_to_action']" position="before">
             <t t-call="website_sale.header_cart_link">
                 <t t-set="_icon" t-value="True"/>
                 <t t-set="_link_class" t-value="'o_navlink_background_hover btn position-relative rounded-pill p-1 text-reset'"/>
@@ -2649,13 +2649,13 @@
     </template>
 
     <template id="sale_order_re_order_btn" inherit_id="sale.sale_order_portal_template" name="Sale Order Order Again">
-        <xpath expr="//t[@t-set='entries']/div/div" position="after">
-            <div t-if="request.website.enabled_portal_reorder_button and sale_order.with_user(request.env.user).sudo()._is_reorder_allowed()" class="list-group-item flex-grow-1">
-                <button class="btn btn-primary w-100 o_wsale_reorder_button" t-att-data-sale-order-id="sale_order.id">
+        <xpath expr="//t[@t-set='entries']/div/div/div[hasclass('o_download_pdf')]" position="before">
+            <t t-if="request.website.enabled_portal_reorder_button and sale_order.with_user(request.env.user).sudo()._is_reorder_allowed()">
+                <button class="btn btn-primary o_wsale_reorder_button w-100" t-att-data-sale-order-id="sale_order.id">
                     <i class="fa fa-rotate-right me-1"/>
                     Order Again
                 </button>
-            </div>
+            </t>
         </xpath>
     </template>
 </odoo>
