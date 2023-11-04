@@ -710,13 +710,6 @@ blockquote {
                     border-color: $-btn-primary-color;
                 }
             }
-
-            // Forms
-            @if ($-bg-color == $light and $-bg-color != $body-bg) {
-                --o-input-bg: #{$body-bg};
-                --o-input-border-color: var(--o-border-color);
-                --o-input-placeholder-color: #{rgba(color-contrast($body-bg), .5)};
-            }
         }
     }
 }
@@ -942,7 +935,7 @@ section, .oe_img_bg, [data-oe-shape-data] {
 
 // Autocomplete dropdowns
 .ui-autocomplete {
-    max-height: 50vh;
+    max-height: 45vh;
     overflow-y: auto;
     overflow-x: hidden;
 

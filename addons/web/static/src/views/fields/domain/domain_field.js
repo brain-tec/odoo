@@ -55,8 +55,16 @@ export class DomainField extends Component {
             }
         });
         onWillUpdateProps((nextProps) => {
-            this.isDebugEdited = this.isDebugEdited && this.props.readonly === nextProps.readonly;
-            if (!this.isDebugEdited) {
+            if (this.isDebugEdited) {
+                this.quickValidityCheck(nextProps).then((isValid) => {
+                    this.state.isValid = isValid;
+                    this.isDebugEdited = false; // will allow the count to be loaded if needed
+                    if (!isValid) {
+                        this.state.recordCount = 0;
+                        nextProps.record.setInvalidField(nextProps.name);
+                    }
+                });
+            } else {
                 this.checkProps(nextProps); // not awaited
             }
             if (nextProps.isFoldable) {
@@ -135,7 +143,7 @@ export class DomainField extends Component {
             throw new Error(`Invalid model: ${resModel}`);
         }
 
-        let promises;
+        let promises = [];
         const domain = this.getDomain(props);
         try {
             const tree = treeFromDomain(domain, { distributeNot: !this.env.debug });
