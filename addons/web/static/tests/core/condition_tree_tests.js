@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { Domain } from "@web/core/domain";
-import { evaluateExpr } from "@web/core/py_js/py";
+import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import {
     complexCondition,
     condition,
@@ -315,6 +315,14 @@ QUnit.test("expressionFromTree", function (assert) {
         {
             expressionTree: condition("foo", "in", 1),
             result: `foo in [1]`,
+        },
+        {
+            expressionTree: condition("foo", "in", expression("expr")),
+            result: `foo in expr`,
+        },
+        {
+            expressionTree: condition("foo_ids", "in", expression("expr")),
+            result: `set(foo_ids).intersection(expr)`,
         },
         {
             expressionTree: condition("y", "in", []),
@@ -836,23 +844,7 @@ QUnit.test("evaluation . expressionFromTree = contains . domainFromTree", functi
         },
     };
 
-    const record = { foo: 1, foo_ids: [1, 2], uid: 7, expr: "abc" };
-
-    function toBool(val) {
-        if (val instanceof Set) {
-            return Boolean(val.size);
-        }
-        if (Array.isArray(val)) {
-            return Boolean(val.length);
-        }
-        if (val === null) {
-            return false;
-        }
-        if (typeof val === "object") {
-            return Boolean(Object.keys(val).length);
-        }
-        return Boolean(val);
-    }
+    const record = { foo: 1, foo_ids: [1, 2], uid: 7, expr: "abc", expr2: [1] };
 
     const toTest = [
         condition("foo", "=", false),
@@ -881,10 +873,12 @@ QUnit.test("evaluation . expressionFromTree = contains . domainFromTree", functi
         condition("y", "not in", []),
         condition("y", "not in", [1]),
         condition("y", "not in", 1),
+        condition("foo", "in", expression("expr2")),
+        condition("foo_ids", "in", expression("expr2")),
     ];
     for (const tree of toTest) {
         assert.strictEqual(
-            toBool(evaluateExpr(expressionFromTree(tree, options), record)),
+            evaluateBooleanExpr(expressionFromTree(tree, options), record),
             new Domain(domainFromTree(tree)).contains(record)
         );
     }
