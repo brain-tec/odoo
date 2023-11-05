@@ -12,14 +12,18 @@ import { EventBus, reactive, useEffect, useRef } from "@odoo/owl";
 
 export const SIZES = { XS: 0, VSM: 1, SM: 2, MD: 3, LG: 4, XL: 5, XXL: 6 };
 
+function getFirstAndLastTabableElements(el) {
+    const tabableEls = getTabableElements(el);
+    return [tabableEls[0], tabableEls[tabableEls.length - 1]];
+}
+
 /**
  * This hook will set the UI active element
- * when the caller component will mount/unmount.
+ * when the caller component will mount/patch and
+ * only if the t-reffed element has some tabable elements.
  *
  * The caller component could pass a `t-ref` value of its template
  * to delegate the UI active element to another element than itself.
- * In that case, it is mandatory that the referenced element is fixed and
- * not dynamically attached in/detached from the DOM (e.g. with t-if directive).
  *
  * @param {string} refName
  */
@@ -28,12 +32,16 @@ export function useActiveElement(refName) {
         throw new Error("refName not given to useActiveElement");
     }
     const uiService = useService("ui");
-    const owner = useRef(refName);
-
-    let lastTabableEl, firstTabableEl;
+    const ref = useRef(refName);
 
     function trapFocus(e) {
-        switch (getActiveHotkey(e)) {
+        const hotkey = getActiveHotkey(e);
+        if (!["tab", "shift+tab"].includes(hotkey)) {
+            return;
+        }
+        const el = e.currentTarget;
+        const [firstTabableEl, lastTabableEl] = getFirstAndLastTabableElements(el);
+        switch (hotkey) {
             case "tab":
                 if (document.activeElement === lastTabableEl) {
                     firstTabableEl.focus();
@@ -54,20 +62,13 @@ export function useActiveElement(refName) {
     useEffect(
         (el) => {
             if (el) {
+                const [firstTabableEl] = getFirstAndLastTabableElements(el);
+                if (!firstTabableEl) {
+                    // no tabable elements: no need to trap focus nor become the UI active element
+                    return;
+                }
                 const oldActiveElement = document.activeElement;
                 uiService.activateElement(el);
-                const tabableEls = getTabableElements(el);
-                if (tabableEls.length === 0 && el.tabIndex < 0) {
-                    /**
-                     * It's possible that the active element is not a focusable element,
-                     * adding tabindex="-1" will allow the element to be focusable.
-                     * Note that, even if the default of tabIndex is -1, for the element to be
-                     * focusable it should be explicitly set.
-                     */
-                    el.tabIndex = -1;
-                }
-                firstTabableEl = tabableEls[0] || el;
-                lastTabableEl = tabableEls[tabableEls.length - 1] || el;
 
                 el.addEventListener("keydown", trapFocus);
 
@@ -95,7 +96,7 @@ export function useActiveElement(refName) {
                 };
             }
         },
-        () => [owner.el]
+        () => [ref.el]
     );
 }
 

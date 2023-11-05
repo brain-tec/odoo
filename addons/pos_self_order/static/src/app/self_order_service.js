@@ -45,6 +45,7 @@ export class SelfOrder extends Reactive {
         this.currentProduct = 0;
         this.attributeById = {};
         this.priceLoading = false;
+        this.rpcLoading = false;
         this.productByIds = {};
         this.paymentError = false;
         this.editedOrder = null;
@@ -431,6 +432,8 @@ export class SelfOrder extends Reactive {
     }
 
     handleErrorNotification(error, accessToken = []) {
+        this.rpcLoading = false;
+
         let message = _t("An error has occurred");
         let cleanOrders = false;
 
