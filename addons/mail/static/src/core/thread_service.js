@@ -112,6 +112,10 @@ export class ThreadService {
                 last_message_id: newestPersistentMessage.id,
             }).then(() => {
                 this.updateSeen(thread, newestPersistentMessage.id);
+            }).catch((e) => {
+                if (e.code !== 404) {
+                    throw e;
+                }
             });
         }
         if (thread.hasNeedactionMessages) {
@@ -1084,15 +1088,19 @@ export class ThreadService {
         if (!persona) {
             return DEFAULT_AVATAR;
         }
+        const urlParams = {};
+        if (persona.write_date) {
+            urlParams.unique = persona.write_date;
+        }
         if (persona.is_company === undefined && this.store.self?.user?.isInternalUser) {
             this.personaService.fetchIsCompany(persona);
         }
         if (thread?.model === "discuss.channel") {
             if (persona.type === "partner") {
-                return url(`/discuss/channel/${thread.id}/partner/${persona.id}/avatar_128`);
+                return url(`/discuss/channel/${thread.id}/partner/${persona.id}/avatar_128`, urlParams);
             }
             if (persona.type === "guest") {
-                return url(`/discuss/channel/${thread.id}/guest/${persona.id}/avatar_128`);
+                return url(`/discuss/channel/${thread.id}/guest/${persona.id}/avatar_128`, urlParams);
             }
         }
         if (persona.type === "partner" && persona?.id) {
@@ -1100,6 +1108,7 @@ export class ThreadService {
                 field: "avatar_128",
                 id: persona.id,
                 model: "res.partner",
+                ...urlParams,
             });
             return avatar;
         }
@@ -1108,6 +1117,7 @@ export class ThreadService {
                 field: "avatar_128",
                 id: persona.user.id,
                 model: "res.users",
+                ...urlParams,
             });
             return avatar;
         }
