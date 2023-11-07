@@ -14,7 +14,7 @@ const MOUSE_EVENTS = ["mouseover", "mouseenter", "mousedown", "mouseup", "click"
 const BLACKLISTED_MENUS = [
     "base.menu_theme_store", // Open a new tab
     "base.menu_third_party", // Open a new tab
-    "event_barcode.menu_event_registration_desk", // there's no way to come back from this menu (tablet mode)
+    "event.menu_event_registration_desk", // there's no way to come back from this menu (tablet mode)
     "hr_attendance.menu_hr_attendance_kiosk_no_user_mode", // same here (tablet mode)
     "account.menu_action_account_bank_journal_form", // Modal in an iFrame
 ];
@@ -96,7 +96,9 @@ async function waitForNextAnimationFrame() {
  */
 async function triggerClick(target, elDescription) {
     if (target) {
-        browser.console.log(`Clicking on: ${elDescription}`);
+        if (elDescription) {
+            browser.console.log(`Clicking on: ${elDescription}`);
+        }
     } else {
         throw new Error(`No element "${elDescription}" found.`);
     }
@@ -268,7 +270,7 @@ async function testFilters() {
         return;
     }
     // Open the search bar menu dropdown
-    await triggerClick(searchBarMenu, "Control Panel menu");
+    await triggerClick(searchBarMenu);
     const filterMenuButton = document.querySelector(
         ".o_control_panel .o_dropdown_container.o_filter_menu"
     );
@@ -356,10 +358,11 @@ async function testViews() {
 async function testMenuItem(element) {
     const menu = element.dataset.menuXmlid;
     const menuDescription = element.innerText.trim() + " " + menu;
-    browser.console.log(`Testing menu ${menuDescription}`);
     if (BLACKLISTED_MENUS.includes(menu)) {
+        browser.console.log(`Skipping blacklisted menu ${menuDescription}`);        
         return Promise.resolve(); // Skip black listed menus
     }
+    browser.console.log(`Testing menu ${menuDescription}`);
     testedMenus.push(menu);
     const startActionCount = actionCount;
     await triggerClick(element, `menu item "${element.innerText.trim()}"`);
@@ -460,8 +463,6 @@ async function _clickEverywhere(xmlId) {
     } finally {
         cleanup();
     }
-    console.log(testedApps);
-    console.log(testedMenus);
 }
 
 function clickEverywhere(xmlId, light) {
