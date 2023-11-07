@@ -207,7 +207,10 @@ var SnippetEditor = Widget.extend({
                 isCurrent: targetEl === this.$target[0],
             });
         }
+        // TODO In master differentiate device-based visibility.
+        this._toggleVisibilityStatusIgnoreDeviceVisibility = true;
         await this.toggleTargetVisibility(true);
+        this._toggleVisibilityStatusIgnoreDeviceVisibility = false;
     },
     /**
      * Notifies all the associated snippet options that the template which
@@ -885,6 +888,21 @@ var SnippetEditor = Widget.extend({
      * @param {boolean} [show]
      */
     _toggleVisibilityStatus: function (show) {
+        // TODO In master differentiate device-based visibility.
+        if (this._toggleVisibilityStatusIgnoreDeviceVisibility) {
+            if (this.$target[0].matches(".o_snippet_mobile_invisible, .o_snippet_desktop_invisible")) {
+                const isMobilePreview = weUtils.isMobileView(this.$target[0]);
+                const isMobileHidden = this.$target[0].classList.contains("o_snippet_mobile_invisible");
+                if (isMobilePreview === isMobileHidden) {
+                    // Preview mode and hidden type are the same.
+                    show = false;
+                } else {
+                    // Preview mode is not related to hidden type.
+                    delete this.$target[0].dataset.invisible;
+                    return false;
+                }
+            }
+        }
         if (show === undefined) {
             show = !this.isTargetVisible();
         }
@@ -4024,8 +4042,8 @@ var SnippetsMenu = Widget.extend({
             <we-input class="o_we_user_value_widget w-100 mx-1">
                 <div>
                     <input type="text" autocomplete="chrome-off" value="${snippetName}" class="text-start"/>
-                    <we-button class="o_we_confirm_btn o_we_text_success fa fa-check" title="${confirmText}"/>
-                    <we-button class="o_we_cancel_btn o_we_text_danger fa fa-times" title="${cancelText}"/>
+                    <we-button class="o_we_confirm_btn o_we_text_success fa fa-check" title="${confirmText}"></we-button>
+                    <we-button class="o_we_cancel_btn o_we_text_danger fa fa-times" title="${cancelText}"></we-button>
                 </div>
             </we-input>
         `);
@@ -4079,7 +4097,8 @@ var SnippetsMenu = Widget.extend({
      */
     _onMouseUp(ev) {
         const snippetEl = ev.target.closest('.oe_snippet');
-        if (snippetEl) {
+        if (snippetEl && !snippetEl.querySelector(".o_we_already_dragging")
+                    && !ev.target.matches(".o_rename_btn")) {
             this._showSnippetTooltip($(snippetEl));
         }
     },
