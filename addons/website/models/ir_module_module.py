@@ -406,14 +406,8 @@ class IrModuleModule(models.Model):
             request.update_context(apply_new_theme=True)
         self._theme_upgrade_upstream()
 
-        active_todo = self.env['ir.actions.todo'].search([('state', '=', 'open')], limit=1)
-        result = None
-        if active_todo:
-            result = active_todo.action_launch()
-        else:
-            result = website.button_go_website()
-        if result.get('tag') == 'website_preview' and result.get('context', {}).get('params'):
-            result['context']['params']['with_loader'] = True
+        result = website.button_go_website()
+        result['context']['params']['with_loader'] = True
         return result
 
     def button_remove_theme(self):
@@ -568,11 +562,17 @@ class IrModuleModule(models.Model):
 
             :param views: views for which model data must be created
         """
+        # The generated templates are set as noupdate in order to avoid that
+        # _process_end deletes them.
+        # In case some of them require an XML definition in the future,
+        # an upgrade script will be needed to temporarily make those
+        # records updatable.
         self.env['ir.model.data'].create([{
             'name': view.key.split('.')[1],
             'module': view.key.split('.')[0],
             'model': 'ir.ui.view',
             'res_id': view.id,
+            'noupdate': True,
         } for view in views])
 
     def _generate_primary_snippet_templates(self):
@@ -605,11 +605,6 @@ class IrModuleModule(models.Model):
             missing_create_values = [values for values in create_values if values['key'] not in existing_primary_template_keys]
             missing_records = self.env['ir.ui.view'].with_context(no_cow=True).create(missing_create_values)
             self._create_model_data(missing_records)
-
-            # Prevent deletion by _process_end
-            for values in create_values:
-                self.env['ir.model.data']._load_xmlid(values["key"])
-
             return len(missing_records)
 
         def get_create_vals(name, snippet_key, parent_wrap, new_wrap):
@@ -779,8 +774,5 @@ class IrModuleModule(models.Model):
             missing_records = View.create(missing_create_values)
             self._create_model_data(missing_records)
             _logger.info('Generated %s primary page templates for %r', len(missing_create_values), self.name)
-        # Prevent deletion by _process_end
-        for values in create_values:
-            self.env['ir.model.data']._load_xmlid(values['key'])
         if update_count:
             _logger.info('Updated %s primary page templates for %r', update_count, self.name)

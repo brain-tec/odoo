@@ -359,11 +359,8 @@ $-seen-urls: ();
 
 // Apply background color to the offcanvas menu
 .o_navbar_mobile {
-    $-menu-color: o-color('menu-custom') or o-color('menu');
-
-    @include o-bg-color($-menu-color);
-
     height: 100dvh;
+    background-color: o-color('menu-custom') or o-color('menu');
 }
 
 $-header-nav-link-height: $nav-link-height;
@@ -1031,10 +1028,6 @@ $-transition-duration: 200ms;
     }
 }
 
-$-hamburger-left: o-website-value('hamburger-position') == 'left';
-$-hamburger-center: o-website-value('hamburger-position') == 'center';
-$-hamburger-right: o-website-value('hamburger-position') == 'right';
-
 $zindex-website-header: $zindex-fixed !default;
 
 header {
@@ -1094,15 +1087,6 @@ header {
 
     #o_main_nav {
         flex-direction: inherit;
-    }
-
-    @include media-breakpoint-up(md) {
-        // Allow to center the logo, ignoring the toggler space
-        .o_navbar_toggler_container {
-            flex: 0 0 0;
-            min-width: 0;
-            direction: if($-hamburger-left, ltr, rtl);
-        }
     }
 
     nav.navbar {
