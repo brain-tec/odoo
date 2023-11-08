@@ -4311,6 +4311,13 @@ msgid "Create a new tax group"
 msgstr ""
 
 #. module: account
+#: model:ir.model.fields,help:account.field_account_report__use_sections
+msgid ""
+"Create a structured report with multiple sections for convenient navigation "
+"and simultaneous printing."
+msgstr ""
+
+#. module: account
 #: model_terms:ir.actions.act_window,help:account.action_move_in_invoice_type
 msgid "Create a vendor bill"
 msgstr ""
@@ -4673,12 +4680,7 @@ msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
-msgid "Cust. Payment"
-msgstr ""
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
-msgid "Cust. Payments"
+msgid "Customer Payment"
 msgstr ""
 
 #. module: account
@@ -10517,8 +10519,7 @@ msgstr ""
 #: model:ir.model,name:account.model_account_payment
 #: model:ir.model.fields,field_description:account.field_account_move__payment_ids
 #: model:ir.model.fields,field_description:account.field_account_payment__payment_ids
-#: model:ir.ui.menu,name:account.menu_action_account_payments_payable
-#: model:ir.ui.menu,name:account.menu_action_account_payments_receivable
+#: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_search
 #, python-format
 msgid "Payments"
@@ -15242,7 +15243,6 @@ msgstr ""
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_account_payments_payable
-#: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_search
 msgid "Vendor Payments"

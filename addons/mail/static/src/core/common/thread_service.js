@@ -100,6 +100,10 @@ export class ThreadService {
                 last_message_id: newestPersistentMessage.id,
             }).then(() => {
                 this.updateSeen(thread, newestPersistentMessage.id);
+            }).catch((e) => {
+                if (e.code !== 404) {
+                    throw e;
+                }
             });
         } else if (newestPersistentMessage) {
             this.updateSeen(thread);
@@ -620,13 +624,12 @@ export class ThreadService {
             typeof thread.id === "string"
                 ? `mail.box_${thread.id}`
                 : `discuss.channel_${thread.id}`;
-        this.store.discuss.activeTab = !this.ui.isSmall
-            ? "all"
-            : thread.model === "mail.box"
-            ? "mailbox"
-            : ["chat", "group"].includes(thread.type)
-            ? "chat"
-            : "channel";
+        this.store.discuss.activeTab =
+            !this.ui.isSmall || thread.model === "mail.box"
+                ? "main"
+                : ["chat", "group"].includes(thread.type)
+                ? "chat"
+                : "channel";
         if (pushState) {
             this.router.pushState({ active_id: activeId });
         }

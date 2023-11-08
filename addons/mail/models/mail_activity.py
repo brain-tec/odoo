@@ -185,12 +185,26 @@ class MailActivity(models.Model):
                 self.note = self.activity_type_id.default_note
 
     @api.model
-    def _calculate_date_deadline(self, activity_type):
-        # Date.context_today is correct because date_deadline is a Date and is meant to be
-        # expressed in user TZ
-        base = fields.Date.context_today(self)
-        if activity_type.delay_from == 'previous_activity' and 'activity_previous_deadline' in self.env.context:
+    def _calculate_date_deadline(self, activity_type, force_base_date=None):
+        """ Compute the activity deadline given its type, the force_base_date and the context.
+
+        The deadline is computed by adding the activity type delay to a base date defined as:
+        - the force_base_date
+        - or the activity_previous_deadline context value if the activity type delay_from is
+          previous_activity
+        - or the current date
+
+        :param activity_type: activity type
+        :param date force_base_date: if set, this force the base date for computation
+        """
+        if force_base_date:
+            # Date.context_today is correct because date_deadline is a Date and is meant to be
+            # expressed in user TZ
+            base = force_base_date
+        elif activity_type.delay_from == 'previous_activity' and 'activity_previous_deadline' in self.env.context:
             base = fields.Date.from_string(self.env.context.get('activity_previous_deadline'))
+        else:
+            base = fields.Date.context_today(self)
         return base + relativedelta(**{activity_type.delay_unit: activity_type.delay_count})
 
     @api.onchange('recommended_activity_type_id')
@@ -204,6 +218,9 @@ class MailActivity(models.Model):
             valid = super(MailActivity, self)._filter_access_rules(operation)
             if valid and valid == self:
                 return self
+        elif operation == 'read':
+            # Not in the ACL otherwise it would break the custom _search method
+            valid = self.sudo().filtered_domain([('user_id', '=', self.env.uid)])
         else:
             valid = self.env[self._name]
         return self._filter_access_rules_remaining(valid, operation, '_filter_access_rules')
@@ -214,6 +231,8 @@ class MailActivity(models.Model):
             valid = super(MailActivity, self)._filter_access_rules_python(operation)
             if valid and valid == self:
                 return self
+        elif operation == 'read':
+            valid = self.sudo().filtered_domain([('user_id', '=', self.env.uid)])
         else:
             valid = self.env[self._name]
         return self._filter_access_rules_remaining(valid, operation, '_filter_access_rules_python')
@@ -399,14 +418,17 @@ class MailActivity(models.Model):
             f'"{self._table}"."id"',
             f'"{self._table}"."res_model"',
             f'"{self._table}"."res_id"',
+            f'"{self._table}"."user_id"',
         )
         self.env.cr.execute(query_str, params)
         rows = self.env.cr.fetchall()
 
         # group res_ids by model, and determine accessible records
+        # Note: the user can read all activities assigned to him (see at the end of the method)
         model_ids = defaultdict(set)
-        for _id, res_model, res_id in rows:
-            model_ids[res_model].add(res_id)
+        for __, res_model, res_id, user_id in rows:
+            if user_id != self.env.uid:
+                model_ids[res_model].add(res_id)
 
         allowed_ids = defaultdict(set)
         for res_model, res_ids in model_ids.items():
@@ -419,8 +441,8 @@ class MailActivity(models.Model):
 
         activities = self.browse(
             id_
-            for id_, res_model, res_id in rows
-            if res_id in allowed_ids[res_model]
+            for id_, res_model, res_id, user_id in rows
+            if user_id == self.env.uid or res_id in allowed_ids[res_model]
         )
         return activities._as_query(order)
 
@@ -530,17 +552,20 @@ class MailActivity(models.Model):
             activity_attachments[activity_id].append(attachment['id'])
 
         for model, activity_data in self._classify_by_model().items():
-            records = self.env[model].browse(activity_data['record_ids'])
-            for record, activity in zip(records, activity_data['activities']):
+            # Allow user without access to the record to "mark as done" activities assigned to them. At the end of the
+            # method, the activity is unlinked or archived which ensure the user has enough right on the activities.
+            records_sudo = self.env[model].sudo().browse(activity_data['record_ids'])
+            for record_sudo, activity in zip(records_sudo, activity_data['activities']):
                 # extract value to generate next activities
                 if activity.chaining_type == 'trigger':
                     vals = activity.with_context(activity_previous_deadline=activity.date_deadline)._prepare_next_activity_values()
                     next_activities_values.append(vals)
 
                 # post message on activity, before deleting it
-                activity_message = record.message_post_with_source(
+                activity_message = record_sudo.message_post_with_source(
                     'mail.message_activity_done',
                     attachment_ids=attachment_ids,
+                    author_id=self.env.user.partner_id.id,
                     render_values={
                         'activity': activity,
                         'feedback': feedback,

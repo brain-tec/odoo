@@ -44,7 +44,16 @@ paymentForm.include({
         const radio = document.querySelector('input[name="o_payment_radio"]:checked');
         const inlineForm = this._getInlineForm(radio);
         const stripeInlineForm = inlineForm.querySelector('[name="o_stripe_element_container"]');
-        this.stripeInlineFormValues = JSON.parse(stripeInlineForm.dataset['inlineFormValues']);
+        this.stripeInlineFormValues = JSON.parse(
+            stripeInlineForm.dataset['stripeInlineFormValues']
+        );
+
+        // Instantiate Stripe object if needed.
+        this.stripeJS ??= Stripe(
+            this.stripeInlineFormValues['publishable_key'],
+            // The values required by Stripe Connect are inserted into the dataset.
+            new StripeOptions()._prepareStripeOptions(stripeInlineForm.dataset),
+        );
 
         // Instantiate the elements.
         let elementsOptions =  {
@@ -67,11 +76,6 @@ paymentForm.include({
             elementsOptions.mode = 'setup';
             elementsOptions.setupFutureUsage = 'off_session';
         }
-        this.stripeJS = Stripe(
-            this.stripeInlineFormValues['publishable_key'],
-            // The values required by Stripe Connect are inserted into the dataset.
-            new StripeOptions()._prepareStripeOptions(stripeInlineForm.dataset),
-        );
         this.stripeElements[paymentOptionId] = this.stripeJS.elements(elementsOptions);
 
         // Instantiate the payment element.
