@@ -372,28 +372,37 @@ class Company(models.Model):
 
         return main_company
 
-    @ormcache('tuple(self.env.companies.ids)', 'self.id')
+    @ormcache('tuple(self.env.companies.ids)', 'self.id', 'self.env.uid')
     def __accessible_branches(self):
         # Get branches of this company that the current user can use
         self.ensure_one()
-        children = self.search([('id', 'child_of', self.id)])
+
+        accessible_branch_ids = []
         accessible = self.env.companies
-        return (children & accessible).ids
+        current = self.sudo()
+        while current:
+            accessible_branch_ids.extend((current & accessible).ids)
+            current = current.child_ids
+
+        if not accessible_branch_ids and self.env.uid == SUPERUSER_ID:
+            # Accessible companies will always be the same for super user when called in a cron.
+            # Because of that, the intersection between them and self might be empty. The super user anyway always has
+            # access to all companies (as it bypasses the record rules), so we return the current company in this case.
+            return self.ids
+
+        return accessible_branch_ids
 
     def _accessible_branches(self):
         return self.browse(self.__accessible_branches())
 
     def _all_branches_selected(self):
-        """Return whether or all the branches of the main company are selected.
+        """Return whether or all the branches of the companies in self are selected.
 
         Is ``True`` if all the branches, and only those, are selected.
-        Can be used when some actions only make sense for a whole company regardless of the
+        Can be used when some actions only make sense for whole companies regardless of the
         branches.
         """
-        return (
-            len(self.env.companies.root_id) == 1
-            and self.env.companies == self.env['res.company'].sudo().search([('id', 'child_of', self.env.company.root_id.ids)])
-        )
+        return self == self.sudo().search([('id', 'child_of', self.root_id.ids)])
 
     def action_all_company_branches(self):
         self.ensure_one()
