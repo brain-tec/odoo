@@ -278,6 +278,7 @@ export class Wysiwyg extends Component {
         editorPlugins: [],
         useResponsiveFontSizes: true,
         showResponsiveFontSizesBadges: false,
+        showExtendedTextStylesOptions: false,
         getCSSVariableValue: weUtils.getCSSVariableValue,
         convertNumericToUnit: weUtils.convertNumericToUnit,
     };
@@ -456,6 +457,7 @@ export class Wysiwyg extends Component {
             foldSnippets: !!options.foldSnippets,
             useResponsiveFontSizes: options.useResponsiveFontSizes,
             showResponsiveFontSizesBadges: options.showResponsiveFontSizesBadges,
+            showExtendedTextStylesOptions: options.showExtendedTextStylesOptions,
             getCSSVariableValue: options.getCSSVariableValue,
             convertNumericToUnit: options.convertNumericToUnit,
         }, editorCollaborationOptions));
@@ -631,7 +633,10 @@ export class Wysiwyg extends Component {
                         $target.data('popover-widget-initialized', this.linkPopover);
                     })();
                 }
-                $target.focus();
+                // Setting the focus on the closest contenteditable element
+                // resets the selection inside that element if no selection
+                // exists.
+                $target.closest('[contenteditable=true]').focus();
                 if ($target.closest('#wrapwrap').length && this.snippetsMenu) {
                     this.toggleLinkTools({
                         forceOpen: true,
@@ -1416,7 +1421,6 @@ export class Wysiwyg extends Component {
                     this.odooEditor.historyUnpauseSteps();
                     this.odooEditor.historyStep();
                     const link = data.linkDialog.$link[0];
-                    this.odooEditor.setContenteditableLink(link);
                     setSelection(link, 0, link, link.childNodes.length, false);
                     link.focus();
                 },
@@ -2153,7 +2157,7 @@ export class Wysiwyg extends Component {
             this._updateMediaJustifyButton();
             this._updateFaResizeButtons();
         }
-        if (isInMedia) {
+        if (isInMedia && !this.options.onDblClickEditableMedia) {
             // Handle the media/link's tooltip.
             this.showTooltip = true;
             this.tooltipTimeouts.push(setTimeout(() => {

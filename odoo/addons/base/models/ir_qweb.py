@@ -24,7 +24,7 @@ which executes its directive but doesn't generate any output in and of
 itself.
 
 To create new XML template, please see :doc:`QWeb Templates documentation
-<https://www.odoo.com/documentation/master/developer/reference/frontend/qweb.html>`
+<https://www.odoo.com/documentation/17.0/developer/reference/frontend/qweb.html>`
 
 Rendering process
 =================
@@ -428,13 +428,15 @@ _SAFE_QWEB_OPCODES = _EXPR_OPCODES.union(to_opcodes([
     'RESUME',
     'CALL',
     'PRECALL',
-    'POP_JUMP_FORWARD_IF_FALSE',
     'PUSH_NULL',
-    'POP_JUMP_FORWARD_IF_TRUE', 'KW_NAMES',
+    'KW_NAMES',
     'FORMAT_VALUE', 'BUILD_STRING',
     'RETURN_GENERATOR',
-    'POP_JUMP_BACKWARD_IF_FALSE',
     'SWAP',
+    'POP_JUMP_FORWARD_IF_FALSE', 'POP_JUMP_FORWARD_IF_TRUE',
+    'POP_JUMP_BACKWARD_IF_FALSE', 'POP_JUMP_BACKWARD_IF_TRUE',
+    'POP_JUMP_FORWARD_IF_NONE', 'POP_JUMP_FORWARD_IF_NOT_NONE',
+    'POP_JUMP_BACKWARD_IF_NONE', 'POP_JUMP_BACKWARD_IF_NOT_NONE',
 ])) - _BLACKLIST
 
 
