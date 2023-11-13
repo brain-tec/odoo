@@ -125,6 +125,20 @@ openerp.account = function (instance) {
                         domain: [['type', '!=', 'view'], ['state', 'not in', ['close','cancelled']]],
                     },
                 },
+                book_taxes_back: {
+                    id: "book_taxes_back",
+                    index: 5,
+                    corresponding_property: "book_taxes_back",
+                    label: _t("Book taxes back"),
+                    required: true,
+                    readonly: true,
+                    tabindex: 15,
+                    constructor: instance.web.form.FieldBoolean,
+                    field_properties: {
+                        string: _t("Book taxes back"),
+                        type: "boolean",
+                    },
+                },
             };
         },
     
@@ -161,7 +175,7 @@ openerp.account = function (instance) {
             
             // Get operation templates
             deferred_promises.push(new instance.web.Model("account.statement.operation.template")
-                .query(['id','name','account_id','label','amount_type','amount','tax_id','analytic_account_id'])
+                .query(['id','name','account_id','label','amount_type','amount','tax_id','analytic_account_id','book_taxes_back'])
                 .all().then(function (data) {
                     _(data).each(function(preset){
                         self.presets[preset.id] = preset;
@@ -1309,6 +1323,8 @@ openerp.account = function (instance) {
                     displayValidState(false, _t("Keep open"));
                     createOpenBalance(_t("Open balance"));
                 }
+            } else {
+                createOpenBalance(_t("Create Write-off"));
             }
 
             // Show or hide partial reconciliation
@@ -1444,6 +1460,20 @@ openerp.account = function (instance) {
             var line_created_being_edited = self.get("line_created_being_edited");
             line_created_being_edited[0][elt.corresponding_property] = val.newValue;
             line_created_being_edited[0].currency_id = self.st_line.currency_id;
+    		
+    		//self.book_taxes_back_field.$el.parent().parent().hide()
+    		
+    		// set taxes readonly if book_taxes_back is set
+    		if (elt === self.book_taxes_back_field) {
+	            if (self.book_taxes_back_field.get("value") === true) {
+	                //self.tax_id_field.set({invisible: true})
+	                self.tax_id_field.$el.parent().parent().hide()
+	            }
+	            else {
+	            	//self.tax_id_field.set({invisible: false})
+	            	self.tax_id_field.$el.parent().parent().show()
+	            }
+	        }
     
             // Specific cases
             if (elt === self.account_id_field)
@@ -1451,45 +1481,124 @@ openerp.account = function (instance) {
     
             // Update tax line
             var deferred_tax = new $.Deferred();
-            if (elt === self.tax_id_field || elt === self.amount_field) {
+            if (elt === self.tax_id_field || elt === self.amount_field || elt === self.book_taxes_back_field) {
                 var amount = self.amount_field.get("value");
                 var tax_id = self.tax_id_field.get("value");
-                if (amount && tax_id) {
-                    deferred_tax = $.when(self.model_tax
-                        .call("compute_for_bank_reconciliation", [tax_id, amount]))
-                        .then(function(data){
-                            line_created_being_edited[0].amount_with_tax = line_created_being_edited[0].amount;
-                            line_created_being_edited[0].amount = (data.total.toFixed(3) === amount.toFixed(3) ? amount : data.total);
-                            var current_line_cursor = 1;
-                            $.each(data.taxes, function(index, tax){
-                                if (tax.amount !== 0.0) {
-                                    var tax_account_id = (amount > 0 ? tax.account_collected_id : tax.account_paid_id);
-                                    tax_account_id = tax_account_id !== false ? tax_account_id: line_created_being_edited[0].account_id;
-                                    line_created_being_edited[current_line_cursor] = {
-                                        id: line_created_being_edited[0].id,
-                                        account_id: tax_account_id,
-                                        account_num: self.map_account_id_code[tax_account_id],
-                                        label: tax.name,
-                                        amount: tax.amount,
-                                        no_remove_action: true,
-                                        currency_id: self.st_line.currency_id,
-                                        is_tax_line: true
-                                    };
-                                    current_line_cursor = current_line_cursor + 1;
-                                }
-                            });
-                        }
-                    );
+                var book_taxes_back = self.book_taxes_back_field.get("value");
+                line_created_being_edited[0].tax_id = false
+                if (book_taxes_back) {
+                	// tax_id does not have to be set
+                    if (amount) {
+	                    deferred_tax = $.when(self.model_tax
+	                        .call("compute_for_bank_reconciliation_book_taxes_back", [tax_id, amount, this.get("mv_lines_selected"), this.st_line, line_created_being_edited, line_created_being_edited[0], line_created_being_edited[0].account_id]))
+	                        .then(function(data){
+	                            //line_created_being_edited[0].amount_with_tax = line_created_being_edited[0].amount;
+	                            line_created_being_edited[0].amount_with_tax = data.total_line_created_being_edited;
+	                            line_created_being_edited[0].tax_id = data.tax_id;
+	                            line_created_being_edited[0].price_include = data.price_include;
+	                            line_created_being_edited[0].amount = (data.total.toFixed(3) === amount.toFixed(3) ? amount : data.total);
+	                            line_created_being_edited[0].partner_id = data.partner_id;
+	                            var current_line_cursor = 1;
+	                            if (data.taxes.length < 1) {
+		                            self.book_taxes_back_field.set_value(false);
+		                            alert('Cannot bock taxes automatically back. Info in move missing. You have to do it manually and to use the field Tax.');
+		                        };
+	                            $.each(data.taxes, function(index, tax){
+	                                if (tax.id) {
+	                                    var tax_account_id = (amount > 0 ? tax.account_collected_id : tax.account_paid_id);
+	                                    tax_account_id = tax_account_id !== false ? tax_account_id: line_created_being_edited[0].account_id;
+	                                    line_created_being_edited[current_line_cursor] = {
+	                                        id: line_created_being_edited[0].id,
+	                                        account_id: tax_account_id,
+	                                        account_num: self.map_account_id_code[tax_account_id],
+	                                        label: tax.name,
+	                                        amount: tax.amount,
+	                                        no_remove_action: true,
+	                                        currency_id: self.st_line.currency_id,
+	                                        is_tax_line: true,
+	                                        partner_id: tax.partner_id
+	                                    };
+	                                    current_line_cursor = current_line_cursor + 1;
+	                                } else {
+	                                	//{'account_id': 680, 'account_num': '4000', 'book_taxes_back': True, 'label': 'Skonto', 'currency_id': 6, 'amount': -4.21, 'amount_str': u'4,21\xa0CHF', 'id': 1, 'tax_id': 15}
+	                                
+	                                	//var tax_account_id = (amount > 0 ? tax.account_collected_id : tax.account_paid_id);
+	                                    //tax_account_id = tax_account_id !== false ? tax_account_id: line_created_being_edited[0].account_id;
+	                                    
+	                                    var amount_with_tax = tax.total_line_created_being_edited;
+	                            		//var amount = (tax.total.toFixed(3) === tax.amount.toFixed(3) ? tax.amount : tax.total);
+	                                    line_created_being_edited[current_line_cursor] = {
+	                                        id: line_created_being_edited[0].id,
+	                                        account_id: line_created_being_edited[0].account_id,
+	                                        account_num: line_created_being_edited[0].account_num,
+	                                        book_taxes_back: line_created_being_edited[0].book_taxes_back,
+	                                        label: line_created_being_edited[0].label,
+	                                        amount: tax.amount_netto_new,
+	                                        amount_str: tax.amount_netto_new_string,
+	                                        no_remove_action: true,
+	                                        currency_id: line_created_being_edited[0].currency_id,
+	                                        tax_id: tax.tax_id,
+	                                        price_include: tax.price_include,
+	                                        is_tax_line: false,
+	                                        amount_with_tax: amount_with_tax,
+	                                        partner_id: tax.partner_id,
+	                                        //amount: amount,	                                        
+	                                    };
+	                                    current_line_cursor = current_line_cursor + 1;
+	                                }
+	                            });
+	                        }
+	                    );
+	                } else {
+	                    line_created_being_edited.length = 1;
+	                    deferred_tax.resolve();
+	                }
                 } else {
-                    line_created_being_edited.length = 1;
-                    deferred_tax.resolve();
-                }
+	                if (amount && tax_id) {
+	                    deferred_tax = $.when(self.model_tax
+	                        .call("compute_for_bank_reconciliation", [tax_id, amount]))
+	                        .then(function(data){
+	                            line_created_being_edited[0].amount_with_tax = line_created_being_edited[0].amount;
+	                            line_created_being_edited[0].amount = (data.total.toFixed(3) === amount.toFixed(3) ? amount : data.total);
+	                            line_created_being_edited[0].tax_id = tax_id;
+	                            var current_line_cursor = 1;
+	                            $.each(data.taxes, function(index, tax){
+	                                if (tax.amount !== 0.0) {
+	                                    var tax_account_id = (amount > 0 ? tax.account_collected_id : tax.account_paid_id);
+	                                    tax_account_id = tax_account_id !== false ? tax_account_id: line_created_being_edited[0].account_id;
+	                                    line_created_being_edited[current_line_cursor] = {
+	                                        id: line_created_being_edited[0].id,
+	                                        account_id: tax_account_id,
+	                                        account_num: self.map_account_id_code[tax_account_id],
+	                                        label: tax.name,
+	                                        amount: tax.amount,
+	                                        no_remove_action: true,
+	                                        currency_id: self.st_line.currency_id,
+	                                        is_tax_line: true
+	                                    };
+	                                    current_line_cursor = current_line_cursor + 1;
+	                                }
+	                            });
+	                        }
+	                    );
+	                } else {
+	                    line_created_being_edited.length = 1;
+	                    deferred_tax.resolve();
+	                }
+	            }
             } else { deferred_tax.resolve(); }
     
             $.when(deferred_tax).then(function(){
                 // Format amounts
                 var rounding = 1/self.map_currency_id_rounding[self.st_line.currency_id];
                 $.each(line_created_being_edited, function(index, val) {
+                	// hack jool1
+                	if (self.book_taxes_back_field.get("value") && val.is_tax_line === false) {
+                		line_created_being_edited[index].account_id = line_created_being_edited[0].account_id
+                		line_created_being_edited[index].account_num = line_created_being_edited[0].account_num
+                		line_created_being_edited[index].label = line_created_being_edited[0].label
+                	}
+                
                     if (val.amount) {
                         line_created_being_edited[index].amount = Math.round(val.amount*rounding)/rounding;
                         line_created_being_edited[index].amount_str = self.formatCurrency(Math.abs(val.amount), val.currency_id);
@@ -1654,13 +1763,17 @@ openerp.account = function (instance) {
             var dict = {};
             if (dict['account_id'] === undefined)
                 dict['account_id'] = line.account_id;
+            if (line.price_include === undefined)
+                line.price_include = true;
             dict['name'] = line.label;
-            var amount = line.tax_id ? line.amount_with_tax: line.amount;
+            var amount = line.tax_id && line.price_include ? line.amount_with_tax: line.amount;
             if (amount > 0) dict['credit'] = amount;
             if (amount < 0) dict['debit'] = -1 * amount;
             if (line.tax_id) dict['account_tax_id'] = line.tax_id;
             if (line.is_tax_line) dict['is_tax_line'] = line.is_tax_line;
             if (line.analytic_account_id) dict['analytic_account_id'] = line.analytic_account_id;
+            if (line.book_taxes_back) dict['book_taxes_back'] = line.book_taxes_back;
+            if (line.partner_id) dict['partner_id'] = line.partner_id;
     
             return dict;
         },

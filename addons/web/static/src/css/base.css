@@ -1071,7 +1071,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  overflow: auto;
+  overflow: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 .openerp .oe_application .oe_breadcrumb_item:not(:last-child) {
   max-width: 7em;
@@ -1872,8 +1873,8 @@
 }
 .openerp .oe_form_sheet_width {
   min-width: 650px;
-  max-width: 860px;
-  margin: 0 auto;
+  max-width: auto;
+  margin: 0 15px; 
 }
 .openerp .oe_form_sheet {
   background: white;
@@ -1941,9 +1942,9 @@
 .openerp .oe_form div.oe_chatter {
   box-sizing: border-box;
   min-width: 682px;
-  max-width: 892px;
+  max-width: auto;
   margin: 0 auto;
-  padding: 16px 16px 48px;
+  padding: 17px 0px 48px;
 }
 .openerp .oe_form div.oe_form_configuration p, .openerp .oe_form div.oe_form_configuration ul, .openerp .oe_form div.oe_form_configuration ol {
   color: #aaa;

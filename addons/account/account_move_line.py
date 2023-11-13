@@ -68,9 +68,13 @@ class account_move_line(osv.osv):
             query_params['date_from'] = context['date_from']
             query_params['date_to'] = context['date_to']
             if initial_bal:
-                where_move_lines_by_date = " AND " +obj+".move_id IN (SELECT id FROM account_move WHERE date < %(date_from)s)"
+                # begin hack by abku1
+                #where_move_lines_by_date = " AND " + obj + ".move_id IN (SELECT id FROM account_move WHERE date < %(date_from)s)"
+                where_move_lines_by_date = " AND " +obj+".date < %(date_from)s"
             else:
-                where_move_lines_by_date = " AND " +obj+".move_id IN (SELECT id FROM account_move WHERE date >= %(date_from)s AND date <= %(date_to)s)"
+                #where_move_lines_by_date = " AND " + obj + ".move_id IN (SELECT id FROM account_move WHERE date >= %(date_from)s AND date <= %(date_to)
+                where_move_lines_by_date = " AND " +obj+".date >= %(date_from)s AND " +obj+ ".date <= %(date_to)s"
+                # end hack
 
         if state:
             if state.lower() not in ['all']:
@@ -1309,7 +1313,7 @@ class account_move_line(osv.osv):
         done = {}
         for line in self.browse(cr, uid, ids, context=context):
             err_msg = _('Move name (id): %s (%s)') % (line.move_id.name, str(line.move_id.id))
-            if line.move_id.state <> 'draft':
+            if line.move_id.state <> 'draft' and (not line.journal_id.entry_posted):
                 raise osv.except_osv(_('Error!'), _('You cannot do this modification on a confirmed entry. You can just change some non legal fields or you must unconfirm the journal entry first.\n%s.') % err_msg)
             if line.reconcile_id:
                 raise osv.except_osv(_('Error!'), _('You cannot do this modification on a reconciled entry. You can just change some non legal fields or you must unreconcile first.\n%s.') % err_msg)
@@ -1413,7 +1417,8 @@ class account_move_line(osv.osv):
             base_sign = 'base_sign'
             tax_sign = 'tax_sign'
             is_refund = ((total > 0 and tax_id.type_tax_use == 'sale') or (total < 0 and tax_id.type_tax_use != 'sale'))
-            if journal.type in ('purchase_refund', 'sale_refund') or (journal.type in ('cash', 'bank') and is_refund):
+            #if journal.type in ('purchase_refund', 'sale_refund') or (journal.type in ('cash', 'bank') and is_refund):
+            if journal.type in ('purchase_refund', 'sale_refund') or (journal.type in ('cash', 'bank') and is_refund) or (journal.type in ('cash', 'bank') and vals.get('book_taxes_back', False) and total > 0):
                 base_code = 'ref_base_code_id'
                 tax_code = 'ref_tax_code_id'
                 account_id = 'account_paid_id'

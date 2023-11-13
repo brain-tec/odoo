@@ -738,7 +738,7 @@ openerp.mail = function (session) {
                         var parsed_email = mail.ChatterUtils.parse_email(recipient[1]);
                         if (_.indexOf(email_addresses, parsed_email[1]) == -1) {
                             self.recipients.push({
-                                'checked': true,
+                                'checked': false,
                                 'partner_id': recipient[0],
                                 'full_name': recipient[1],
                                 'name': parsed_email[0],
