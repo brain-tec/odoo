@@ -672,8 +672,6 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
             # pylint: disable=bad-whitespace
             {'account_id': self.company_data['default_account_revenue'].id,     'debit': 0,     'credit': 12},
             {'account_id': self.company_data['default_account_receivable'].id,  'debit': 12,    'credit': 0},
-            {'account_id': self.company_data['default_account_stock_out'].id,   'debit': 0,     'credit': 0},
-            {'account_id': self.company_data['default_account_expense'].id,     'debit': 0,     'credit': 0},
         ])
 
     def test_avco_fully_owned_and_delivered_invoice_post_delivery(self):
@@ -700,8 +698,6 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
             # pylint: disable=bad-whitespace
             {'account_id': self.company_data['default_account_revenue'].id,     'debit': 0,     'credit': 24},
             {'account_id': self.company_data['default_account_receivable'].id,  'debit': 24,    'credit': 0},
-            {'account_id': self.company_data['default_account_stock_out'].id,   'debit': 0,     'credit': 0},
-            {'account_id': self.company_data['default_account_expense'].id,     'debit': 0,     'credit': 0},
         ])
 
     # -------------------------------------------------------------------------
@@ -1638,8 +1634,18 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         Post the invoice, add a credit note with option 'new draft inv'
         Post the second invoice
         COGS should be based on the delivered product
+
+        Note: This test will also ensure that a user who only has access to
+        account app can post such an invoice
         """
         self.product.categ_id.property_cost_method = 'fifo'
+
+        accountman = self.env['res.users'].create({
+            'name': 'Super Accountman',
+            'login': 'super_accountman',
+            'password': 'super_accountman',
+            'groups_id': [(6, 0, self.env.ref('account.group_account_invoice').ids)],
+        })
 
         in_moves = self.env['stock.move'].create([{
             'name': 'IN move @%s' % p,
@@ -1673,7 +1679,10 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         picking.button_validate()
 
         invoice01 = so._create_invoices()
-        invoice01.action_post()
+
+        # Clear the cache to ensure access rights
+        self.env.invalidate_all()
+        invoice01.with_user(accountman.id).action_post()
 
         move_reversal = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=invoice01.ids).create({
             'refund_method': 'modify',
@@ -1690,3 +1699,31 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
         self.assertEqual(cogs_aml.debit, 10)
         self.assertEqual(cogs_aml.credit, 0)
+
+    def test_fifo_edit_svl_without_reinvoice(self):
+        """Edit SVL move line after delivering. Check no reinvoicing occurs."""
+        self.product.categ_id.property_cost_method = 'fifo'
+        self.product.invoice_policy = 'delivery'
+        self.product.standard_price = 10
+        self.product.expense_policy = 'cost'
+
+        self._fifo_in_one_eight_one_ten()
+
+        # Create and confirm a sale order for 2@12
+        sale_order = self._so_and_confirm_two_units()
+        self.assertEqual(len(sale_order.order_line), 1)
+        self.assertEqual(sale_order.order_line.product_uom_qty, 2.0)
+
+        # Deliver one.
+        sale_order.picking_ids.move_ids.quantity_done = 2
+        sale_order.picking_ids.button_validate()
+        svl_am = sale_order.order_line.move_ids.stock_valuation_layer_ids.account_move_id
+        svl_am.button_draft()
+        svl_line = svl_am.line_ids.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
+
+        svl_line.write({'analytic_distribution': {sale_order.analytic_account_id.id: 100}})
+        svl_am.action_post()
+
+        # Check no reinvoice line addded to the sale order
+        self.assertEqual(len(sale_order.order_line), 1)
+        self.assertEqual(sale_order.order_line.product_uom_qty, 2.0)

@@ -2070,7 +2070,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
             with so_form.order_line.edit(0) as line:
                 line.product_uom_qty = 8
 
-        self.assertRecordValues(so.picking_ids.move_ids, [
+        self.assertRecordValues(so.picking_ids.sorted('id').move_ids, [
             {'product_id': self.component_f.id, 'location_dest_id': custo_location.id, 'quantity_done': 100, 'state': 'done'},
             {'product_id': self.component_g.id, 'location_dest_id': custo_location.id, 'quantity_done': 200, 'state': 'done'},
             {'product_id': self.component_f.id, 'location_dest_id': stock_location.id, 'quantity_done': 20, 'state': 'done'},
@@ -2238,3 +2238,94 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         cogs_aml = amls.filtered(lambda aml: aml.account_id == categ.property_account_expense_categ_id)
         self.assertEqual(cogs_aml.debit, 10)
         self.assertEqual(cogs_aml.credit, 0)
+
+    def test_kit_avco_amls_reconciliation(self):
+        self.stock_account_product_categ.property_cost_method = 'average'
+
+        compo01, compo02, kit = self.env['product.product'].create([{
+            'name': name,
+            'type': 'product',
+            'standard_price': price,
+            'categ_id': self.stock_account_product_categ.id,
+            'invoice_policy': 'delivery',
+        } for name, price in [
+            ('Compo 01', 10),
+            ('Compo 02', 20),
+            ('Kit', 0),
+        ]])
+
+        self.env['stock.quant']._update_available_quantity(compo01, self.company_data['default_warehouse'].lot_stock_id, 1)
+        self.env['stock.quant']._update_available_quantity(compo02, self.company_data['default_warehouse'].lot_stock_id, 1)
+
+        self.env['mrp.bom'].create({
+            'product_id': kit.id,
+            'product_tmpl_id': kit.product_tmpl_id.id,
+            'product_uom_id': kit.uom_id.id,
+            'product_qty': 1.0,
+            'type': 'phantom',
+            'bom_line_ids': [
+                (0, 0, {'product_id': compo01.id, 'product_qty': 1.0}),
+                (0, 0, {'product_id': compo02.id, 'product_qty': 1.0}),
+            ],
+        })
+
+        so = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                (0, 0, {
+                    'name': kit.name,
+                    'product_id': kit.id,
+                    'product_uom_qty': 1.0,
+                    'product_uom': kit.uom_id.id,
+                    'price_unit': 5,
+                    'tax_id': False,
+                })],
+        })
+        so.action_confirm()
+        so.picking_ids.move_line_ids.qty_done = 1
+        so.picking_ids.button_validate()
+
+        invoice = so._create_invoices()
+        invoice.action_post()
+
+        self.assertEqual(len(invoice.line_ids.filtered('reconciled')), 1)
+
+    def test_avoid_removing_kit_bom_in_use(self):
+        so = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                (0, 0, {
+                    'name': self.kit_1.name,
+                    'product_id': self.kit_1.id,
+                    'product_uom_qty': 1.0,
+                    'product_uom': self.kit_1.uom_id.id,
+                    'price_unit': 5,
+                    'tax_id': False,
+                })],
+        })
+        self.bom_kit_1.toggle_active()
+        self.bom_kit_1.toggle_active()
+
+        so.action_confirm()
+        with self.assertRaises(UserError):
+            self.bom_kit_1.toggle_active()
+        with self.assertRaises(UserError):
+            self.bom_kit_1.unlink()
+
+        for move in so.order_line.move_ids:
+            move.quantity_done = move.product_uom_qty
+        so.picking_ids.button_validate()
+
+        self.assertEqual(so.picking_ids.state, 'done')
+        with self.assertRaises(UserError):
+            self.bom_kit_1.toggle_active()
+        with self.assertRaises(UserError):
+            self.bom_kit_1.unlink()
+
+        invoice = so._create_invoices()
+        invoice.action_post()
+
+        self.assertEqual(invoice.state, 'posted')
+        self.bom_kit_1.toggle_active()
+        self.bom_kit_1.toggle_active()
+        self.bom_kit_1.unlink()

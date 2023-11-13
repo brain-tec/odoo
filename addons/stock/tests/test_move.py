@@ -1089,7 +1089,7 @@ class StockMove(TransactionCase):
             'name': "storage category"
         })
 
-        self.env['stock.location'].create({
+        shelf1_location = self.env['stock.location'].create({
             'name': 'shelf1',
             'usage': 'internal',
             'location_id': self.stock_location.id,
@@ -1100,6 +1100,8 @@ class StockMove(TransactionCase):
             'location_id': self.stock_location.id,
             'storage_category_id': storage_category.id,
         })
+
+        self.env['stock.quant']._update_available_quantity(self.product, shelf1_location, 1.0)
 
         # putaway from stock to child location with storage_category
         putaway = self.env['stock.putaway.rule'].create({
@@ -4613,6 +4615,36 @@ class StockMove(TransactionCase):
         immediate_wizard_form.process()
         self.assertEqual(receipt.state, 'done')
 
+    def test_immediate_validate_10_tracked_move_without_backorder(self):
+        """
+            Create a picking for a tracked product, validate it as an
+            immediate transfer, and ensure that the backorder wizard is
+            not triggered when the qty is reserved.
+        """
+        picking_type_internal = self.env.ref('stock.picking_type_internal')
+        picking_type_internal.use_create_lots = True
+        picking_type_internal.use_existing_lots = True
+        lot = self.env['stock.lot'].create({
+            'name': 'Lot 1',
+            'product_id': self.product_lot.id,
+            'company_id': self.env.company.id,
+        })
+        self.env['stock.quant']._update_available_quantity(self.product_lot, self.stock_location, 10, lot_id=lot)
+        picking_form = Form(self.env['stock.picking'])
+        picking_form.picking_type_id = picking_type_internal
+        with picking_form.move_ids_without_package.new() as move:
+            move.product_id = self.product_lot
+            move.product_uom_qty = 4
+        internal_transfer = picking_form.save()
+        internal_transfer.action_confirm()
+
+        immediate_wizard = internal_transfer.button_validate()
+        immediate_wizard_form = Form(
+            self.env[immediate_wizard['res_model']].with_context(immediate_wizard['context'])
+        ).save()
+        immediate_wizard_form.process()
+        self.assertEqual(internal_transfer.state, 'done')
+
     def test_set_quantity_done_1(self):
         move1 = self.env['stock.move'].create({
             'name': 'test_set_quantity_done_1',
@@ -5959,6 +5991,15 @@ class StockMove(TransactionCase):
         })
         self.assertEqual(move.product_uom, self.product.uom_id)
         self.assertEqual(move.move_line_ids.product_uom_id, self.product.uom_id)
+        uom_kg = self.env.ref('uom.product_uom_kgm')
+        product1 = self.env['product.product'].create({
+            'name': 'product1',
+            'type': 'product',
+            'uom_id': uom_kg.id,
+            'uom_po_id': uom_kg.id
+        })
+        move.product_id = product1
+        self.assertEqual(move.product_uom, product1.uom_id)
 
     def test_move_line_compute_locations(self):
         stock_location = self.env['stock.location'].create({
@@ -6046,3 +6087,43 @@ class StockMove(TransactionCase):
         self.assertEqual(receipt.state, 'done')
         self.assertEqual(len(receipt.move_line_ids), 1)
         self.assertEqual(receipt.move_line_ids.qty_done, 1)
+
+    def test_skip_putaway_if_dest_loc_set_by_user(self):
+        """
+        Suppose the putaway rules and storage categories enabled. On the
+        detailed operations, the user adds a new line, set a specific
+        destination location and then the done quantity. In such cases, since
+        the user has defined himself the destination location, we should not try
+        to apply any putaway rule that would override his choice.
+        """
+        self.env.user.write({'groups_id': [(4, self.env.ref('stock.group_stock_storage_categories').id)]})
+
+        child_location = self.stock_location.child_ids[0]
+        in_type = self.env.ref('stock.picking_type_in')
+
+        in_type.show_operations = True
+
+        receipt = self.env['stock.picking'].create({
+            'location_id': self.customer_location.id,
+            'location_dest_id': self.stock_location.id,
+            'picking_type_id': in_type.id,
+            'move_ids': [(0, 0, {
+                'name': self.product.name,
+                'location_id': self.customer_location.id,
+                'location_dest_id': self.stock_location.id,
+                'product_id': self.product.id,
+                'product_uom': self.product.uom_id.id,
+                'product_uom_qty': 2.0,
+            })],
+        })
+        receipt.action_confirm()
+
+        with Form(receipt) as receipt_form:
+            with receipt_form.move_line_nosuggest_ids.new() as line:
+                line.product_id = self.product
+                line.location_dest_id = child_location
+                line.qty_done = 2
+
+        self.assertRecordValues(receipt.move_ids.move_line_ids[-1], [
+            {'location_dest_id': child_location.id, 'product_id': self.product.id, 'qty_done': 2},
+        ])

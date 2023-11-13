@@ -199,8 +199,8 @@ export class ViewCompiler {
         this.id = 1;
         /** @type {Compiler[]} */
         this.compilers = [
-            { selector: "a[type],a[data-type]", fn: this.compileButton },
-            { selector: "button", fn: this.compileButton, doNotCopyAttributes: true },
+            { selector: "a[type]:not([data-bs-toggle]),a[data-type]:not([data-bs-toggle])", fn: this.compileButton },
+            { selector: "button:not([data-bs-toggle])", fn: this.compileButton, doNotCopyAttributes: true },
             { selector: "field", fn: this.compileField },
             { selector: "widget", fn: this.compileWidget },
         ];
@@ -366,6 +366,7 @@ export class ViewCompiler {
         field.setAttribute("name", `'${fieldName}'`);
         field.setAttribute("record", `props.record`);
         field.setAttribute("fieldInfo", `props.archInfo.fieldNodes['${fieldId}']`);
+        field.setAttribute("readonly", `props.archInfo.activeActions?.edit === false and !props.record.isNew`);
 
         if (el.hasAttribute("widget")) {
             field.setAttribute("type", `'${el.getAttribute("widget")}'`);

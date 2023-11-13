@@ -13,7 +13,7 @@ msgstr ""
 "POT-Creation-Date: 2023-02-02 17:05+0000\n"
 "PO-Revision-Date: 2023-02-03 07:06+0000\n"
 "Last-Translator: Larissa Manderfeld, 2023\n"
-"Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
+"Language-Team: German (https://app.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -1044,7 +1044,7 @@ msgstr ""
 #: model:account.group.template,name:l10n_be.be_group_69
 #: model:account.group.template,name:l10n_be.be_group_79
 msgid "Affectations et prélèvements"
-msgstr ""
+msgstr "Affectations et prélèvements"
 
 #. module: l10n_be
 #: model:account.group,name:l10n_be.1_be_group_660
@@ -1824,7 +1824,7 @@ msgstr "Eingefordertes, noch nicht eingezahltes Kapital"
 #: model:account.group,name:l10n_be.2_be_group_10
 #: model:account.group.template,name:l10n_be.be_group_10
 msgid "Capital"
-msgstr ""
+msgstr "Kapital"
 
 #. module: l10n_be
 #: model:account.group,name:l10n_be.1_be_group_410
@@ -2068,7 +2068,7 @@ msgstr ""
 #: model:account.group,name:l10n_be.2_be_group_400
 #: model:account.group.template,name:l10n_be.be_group_400
 msgid "Clients"
-msgstr ""
+msgstr "Kunden"
 
 #. module: l10n_be
 #: model:account.group,name:l10n_be.1_be_group_37
@@ -6337,8 +6337,8 @@ msgstr "V Abzugsfähig"
 
 #. module: l10n_be
 #: model:account.report,name:l10n_be.tax_report_vat
-msgid "VAT Report"
-msgstr "MwSt.-Bericht"
+msgid "VAT Return"
+msgstr "MwSt.-Erklärung"
 
 #. module: l10n_be
 #: model:account.account,name:l10n_be.1_a4512

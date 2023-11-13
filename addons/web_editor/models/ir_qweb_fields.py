@@ -77,7 +77,7 @@ class IrQWeb(models.AbstractModel):
 
         el.set('t-options', f"{{'snippet-key': {key!r}}}")
         view = self.env['ir.ui.view']._get(key).sudo()
-        name = view.name
+        name = el.attrib.pop('string', view.name)
         thumbnail = el.attrib.pop('t-thumbnail', "oe-thumbnail")
         # Forbid sanitize contains the specific reason:
         # - "true": always forbid
@@ -159,12 +159,13 @@ class Field(models.AbstractModel):
 
         if options['translate'] and field.type in ('char', 'text'):
             lang = record.env.lang or 'en_US'
-            if lang == 'en_US':
+            base_lang = record._get_base_lang()
+            if lang == base_lang:
                 attrs['data-oe-translation-state'] = 'translated'
             else:
-                value_en = record.with_context(lang='en_US')[field_name]
-                value_lang = record.with_context(lang=lang)[field_name]
-                attrs['data-oe-translation-state'] = 'translated' if value_en != value_lang else 'to_translate'
+                base_value = record.with_context(lang=base_lang)[field_name]
+                value = record[field_name]
+                attrs['data-oe-translation-state'] = 'translated' if base_value != value else 'to_translate'
 
         return attrs
 
@@ -185,7 +186,7 @@ class Integer(models.AbstractModel):
     def from_html(self, model, field, element):
         lang = self.user_lang()
         value = element.text_content().strip()
-        return int(value.replace(lang.thousands_sep, ''))
+        return int(value.replace(lang.thousands_sep or '', ''))
 
 
 class Float(models.AbstractModel):
@@ -197,7 +198,7 @@ class Float(models.AbstractModel):
     def from_html(self, model, field, element):
         lang = self.user_lang()
         value = element.text_content().strip()
-        return float(value.replace(lang.thousands_sep, '')
+        return float(value.replace(lang.thousands_sep or '', '')
                           .replace(lang.decimal_point, '.'))
 
 
@@ -500,7 +501,7 @@ class Image(models.AbstractModel):
             # force a complete load of the image data to validate it
             image.load()
         except Exception:
-            logger.exception("Failed to load remote image %r", url)
+            logger.warning("Failed to load remote image %r", url, exc_info=True)
             return None
 
         # don't use original data in case weird stuff was smuggled in, with
@@ -520,7 +521,7 @@ class Monetary(models.AbstractModel):
 
         value = element.find('span').text_content().strip()
 
-        return float(value.replace(lang.thousands_sep, '')
+        return float(value.replace(lang.thousands_sep or '', '')
                           .replace(lang.decimal_point, '.'))
 
 

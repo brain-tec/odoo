@@ -67,7 +67,7 @@ from .tools.translate import _, _lt
 _logger = logging.getLogger(__name__)
 _unlink = logging.getLogger(__name__ + '.unlink')
 
-regex_order = re.compile(r'^(\s*([a-z0-9:_]+|"[a-z0-9:_]+")(\.id)?(\s+(desc|asc))?(\s+(nulls first|nulls last))?\s*(,|$))+(?<!,)$', re.I)
+regex_order = re.compile(r'^(\s*([a-z0-9:_]+|"[a-z0-9:_]+")(\.id)?(\s+(desc|asc))?\s*(,|$))+(?<!,)$', re.I)
 regex_object_name = re.compile(r'^[a-z0-9_.]+$')
 regex_pg_name = re.compile(r'^[a-z_][a-z0-9_$]*$', re.I)
 regex_field_agg = re.compile(r'(\w+)(?::(\w+)(?:\((\w+)\))?)?')
@@ -1140,6 +1140,10 @@ class BaseModel(metaclass=MetaModel):
                     messages.append(dict(info, type='error', **PGERROR_TO_OE[e.pgcode](self, fg, info, e)))
                     # Failed to write, log to messages, rollback savepoint (to
                     # avoid broken transaction) and keep going
+                    errors += 1
+                except UserError as e:
+                    info = rec_data['info']
+                    messages.append(dict(info, type='error', message=str(e)))
                     errors += 1
                 except Exception as e:
                     _logger.debug("Error while loading record", exc_info=True)
@@ -2617,6 +2621,8 @@ class BaseModel(metaclass=MetaModel):
         for (key, definition, message) in self._sql_constraints:
             conname = '%s_%s' % (self._table, key)
             current_definition = tools.constraint_definition(cr, self._table, conname)
+            if len(conname) > 63 and not current_definition:
+                _logger.info("Constraint name %r has more than 63 characters", conname)
             if current_definition == definition:
                 continue
 
@@ -2656,7 +2662,8 @@ class BaseModel(metaclass=MetaModel):
                 # following specific properties:
                 #  - reading inherited fields should not bypass access rights
                 #  - copy inherited fields iff their original field is copied
-                self._add_field(name, field.new(
+                Field = type(field)
+                self._add_field(name, Field(
                     inherited=True,
                     inherited_field=field,
                     related=f"{parent_fname}.{name}",
@@ -2745,11 +2752,12 @@ class BaseModel(metaclass=MetaModel):
                 if not translate:
                     # patch the field definition by adding an override
                     _logger.debug("Patching %s.%s with translate=True", cls._name, name)
-                    fields_.append(fields_[0].new(translate=True))
+                    fields_.append(type(fields_[0])(translate=True))
             if len(fields_) == 1 and fields_[0]._direct and fields_[0].model_name == cls._name:
                 cls._fields[name] = fields_[0]
             else:
-                self._add_field(name, fields_[-1].new(_base_fields=fields_))
+                Field = type(fields_[-1])
+                self._add_field(name, Field(_base_fields=fields_))
 
         # 2. add manual fields
         if self.pool._init_modules:
@@ -2857,7 +2865,7 @@ class BaseModel(metaclass=MetaModel):
         :return: provided fields if fields is truthy (or the fields
           readable by the current user).
         :rtype: list
-        :raise AccessDenied: if the user is not allowed to access
+        :raise AccessError: if the user is not allowed to access
           the provided fields.
         """
         if self.env.su:
@@ -3002,6 +3010,10 @@ class BaseModel(metaclass=MetaModel):
         """
         self.ensure_one()
 
+        self.check_access_rights('write')
+        self.check_field_access_rights('write', [field_name])
+        self.check_access_rule('write')
+
         valid_langs = set(code for code, _ in self.env['res.lang'].get_installed()) | {'en_US'}
         missing_langs = set(translations) - valid_langs
         if missing_langs:
@@ -3028,9 +3040,6 @@ class BaseModel(metaclass=MetaModel):
         if field.related and not field.store:
             related_path, field_name = field.related.rsplit(".", 1)
             return self.mapped(related_path)._update_field_translations(field_name, translations, digest)
-        self.check_access_rights('write')
-        self.check_field_access_rights('write', [field_name])
-        self.check_access_rule('write')
 
         if field.translate is True:
             # falsy values (except emtpy str) are used to void the corresponding translation
@@ -3043,11 +3052,20 @@ class BaseModel(metaclass=MetaModel):
                 lang: translation if isinstance(translation, str) else None
                 for lang, translation in translations.items()
             }
+            if not translations:
+                return False
+
+            translation_fallback = translations['en_US'] if translations.get('en_US') is not None \
+                else translations[self.env.lang] if translations.get(self.env.lang) is not None \
+                else next((v for v in translations.values() if v is not None), None)
             self.invalidate_recordset([field_name])
             self._cr.execute(f'''
-                UPDATE {self._table} SET {field_name} = jsonb_strip_nulls({field_name} || %s) WHERE id = %s
-            ''', (Json(translations), self.id))
-            self.modified([field_name])
+                UPDATE "{self._table}"
+                SET "{field_name}" = NULLIF(
+                    jsonb_strip_nulls(%s || COALESCE("{field_name}", '{{}}'::jsonb) || %s),
+                    '{{}}'::jsonb)
+                WHERE id = %s
+            ''', (Json({'en_US': translation_fallback}), Json(translations), self.id))
         else:
             # Note:
             # update terms in 'en_US' will not change its value other translated values
@@ -3062,8 +3080,9 @@ class BaseModel(metaclass=MetaModel):
             if not old_translations:
                 return False
             new_translations = old_translations
+            old_value_en = old_translations.get('en_US')
             for lang, translation in translations.items():
-                old_value = new_translations.get(lang) or new_translations.get('en_US')
+                old_value = new_translations.get(lang, old_value_en)
                 if digest:
                     old_terms = field.get_trans_terms(old_value)
                     old_terms_digested2value = {digest(old_term): old_term for old_term in old_terms}
@@ -3074,7 +3093,13 @@ class BaseModel(metaclass=MetaModel):
                     }
                 new_translations[lang] = field.translate(translation.get, old_value)
             self.env.cache.update_raw(self, field, [new_translations], dirty=True)
-            self.modified([field_name])
+
+        # the following write is incharge of
+        # 1. mark field as modified
+        # 2. execute logics in the override `write` method
+        # 3. update write_date of the record if exists to support 't-cache'
+        # even if the value in cache is the same as the value written
+        self[field_name] = self[field_name]
         return True
 
     def get_field_translations(self, field_name, langs=None):
@@ -3112,6 +3137,11 @@ class BaseModel(metaclass=MetaModel):
         context['translation_show_source'] = callable(field.translate)
 
         return translations, context
+
+    def _get_base_lang(self):
+        """ Returns the base language of the record. """
+        self.ensure_one()
+        return 'en_US'
 
     def _read_format(self, fnames, load='_classic_read'):
         """Returns a list of dictionaries mapping field names to their values,
@@ -3536,6 +3566,11 @@ class BaseModel(metaclass=MetaModel):
         ir_model_data_unlink = Data
         ir_attachment_unlink = Attachment
 
+        # mark fields that depend on 'self' to recompute them after 'self' has
+        # been deleted (like updating a sum of lines after deleting one line)
+        with self.env.protecting(self._fields.values(), self):
+            self.modified(self._fields, before=True)
+
         for sub_ids in cr.split_for_in_conditions(self.ids):
             records = self.browse(sub_ids)
 
@@ -3546,11 +3581,6 @@ class BaseModel(metaclass=MetaModel):
 
             # Delete the records' properties.
             ir_property_unlink |= Property.search([('res_id', 'in', refs)])
-
-            # mark fields that depend on 'self' to recompute them after 'self' has
-            # been deleted (like updating a sum of lines after deleting one line)
-            with self.env.protecting(self._fields.values(), records):
-                self.modified(self._fields, before=True)
 
             query = f'DELETE FROM "{self._table}" WHERE id IN %s'
             cr.execute(query, (sub_ids,))
@@ -4188,12 +4218,7 @@ class BaseModel(metaclass=MetaModel):
         return records
 
     def _compute_field_value(self, field):
-        # This is for base automation, to have something to override to catch
-        # the changes of values for stored compute fields.
-        if isinstance(field.compute, str):
-            getattr(self, field.compute)()
-        else:
-            field.compute(self)
+        fields.determine(field.compute, self)
 
         if field.store and any(self._ids):
             # check constraints of the fields that have been computed
@@ -4355,6 +4380,17 @@ class BaseModel(metaclass=MetaModel):
             for data in to_create:
                 if data.get('xml_id') and not data['xml_id'].startswith(prefix):
                     _logger.warning("Creating record %s in module %s.", data['xml_id'], module)
+
+        if self.env.context.get('import_file'):
+            existing_modules = self.env['ir.module.module'].sudo().search([]).mapped('name')
+            for data in to_create:
+                xml_id = data.get('xml_id')
+                if xml_id:
+                    module_name, sep, record_id = xml_id.partition('.')
+                    if sep and module_name in existing_modules:
+                        raise UserError(
+                            _("The record %(xml_id)s has the module prefix %(module_name)s. This is the part before the '.' in the external id. Because the prefix refers to an existing module, the record would be deleted when the module is upgraded. Use either no prefix and no dot or a prefix that isn't an existing module. For example, __import__, resulting in the external id __import__.%(record_id)s.",
+                              xml_id=xml_id, module_name=module_name, record_id=record_id))
 
         # create records
         if to_create:
@@ -5839,7 +5875,7 @@ class BaseModel(metaclass=MetaModel):
         return self.id or 0
 
     def __repr__(self):
-        return f"{self._name}{self._ids}"
+        return f"{self._name}{self._ids!r}"
 
     def __hash__(self):
         return hash((self._name, frozenset(self._ids)))
@@ -6131,7 +6167,7 @@ class BaseModel(metaclass=MetaModel):
             fields = [self._fields[fname] for fname in fnames]
 
         for field in fields:
-            if field.compute:
+            if field.compute and field.store:
                 self._recompute_field(field)
 
     def _recompute_recordset(self, fnames=None):
@@ -6145,7 +6181,7 @@ class BaseModel(metaclass=MetaModel):
             fields = [self._fields[fname] for fname in fnames]
 
         for field in fields:
-            if field.compute:
+            if field.compute and field.store:
                 self._recompute_field(field, self._ids)
 
     def _recompute_field(self, field, ids=None):
@@ -6157,24 +6193,10 @@ class BaseModel(metaclass=MetaModel):
         if not ids:
             return
 
-        records = self.browse(ids)
-        if field.store:
-            # do not force recomputation on new records; those will be
-            # recomputed by accessing the field on the records
-            records = records.filtered('id')
-            try:
-                field.recompute(records)
-            except MissingError:
-                existing = records.exists()
-                field.recompute(existing)
-                # mark the field as computed on missing records, otherwise
-                # they remain forever in the todo list, and lead to an
-                # infinite loop...
-                for f in records.pool.field_computed[field]:
-                    self.env.remove_to_compute(f, records - existing)
-        else:
-            self.env.cache.invalidate([(field, records._ids)])
-            self.env.remove_to_compute(field, records)
+        # do not force recomputation on new records; those will be
+        # recomputed by accessing the field on the records
+        records = self.browse(tuple(id_ for id_ in ids if id_))
+        field.recompute(records)
 
     #
     # Generic onchange method

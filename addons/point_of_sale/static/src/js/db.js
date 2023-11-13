@@ -183,7 +183,7 @@ var PosDB = core.Class.extend({
         if (product.description_sale) {
             str += '|' + product.description_sale;
         }
-        str  = product.id + ':' + str.replace(/:/g,'') + '\n';
+        str  = product.id + ':' + str.replace(/[\n:]/g,'') + '\n';
         return str;
     },
     add_products: function(products){
@@ -225,16 +225,15 @@ var PosDB = core.Class.extend({
                 }
             }
             this.product_by_id[product.id] = product;
-            if(product.barcode){
+            if(product.barcode && product.active){
                 this.product_by_barcode[product.barcode] = product;
             }
         }
     },
-    add_packagings: function(product_packagings){
-        var self = this;
-        _.map(product_packagings, function (product_packaging) {
-            if (_.find(self.product_by_id, {'id': product_packaging.product_id[0]})) {
-                self.product_packaging_by_barcode[product_packaging.barcode] = product_packaging;
+    add_packagings: function(productPackagings){
+        productPackagings.forEach(productPackaging => {
+            if (productPackaging.product_id[0] in this.product_by_id) {
+                this.product_packaging_by_barcode[productPackaging.barcode] = productPackaging;
             }
         });
     },

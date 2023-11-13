@@ -2,6 +2,7 @@
 from odoo import api, fields, models, _, tools
 from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools.float_utils import float_is_zero
 from bisect import bisect_left
 from collections import defaultdict
 import re
@@ -93,7 +94,7 @@ class AccountAccount(models.Model):
     note = fields.Text('Internal Notes', tracking=True)
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True,
         default=lambda self: self.env.company)
-    tag_ids = fields.Many2many('account.account.tag', 'account_account_account_tag', string='Tags', help="Optional tags you may want to assign for custom reporting")
+    tag_ids = fields.Many2many('account.account.tag', 'account_account_account_tag', string='Tags', help="Optional tags you may want to assign for custom reporting", ondelete='restrict')
     group_id = fields.Many2one('account.group', compute='_compute_account_group', store=True, readonly=True,
                                help="Account prefixes can determine account groups.")
     root_id = fields.Many2one('account.root', compute='_compute_account_root', store=True)
@@ -459,6 +460,11 @@ class AccountAccount(models.Model):
         either 'debit' or 'credit', depending on which one of these two fields
         got assigned.
         """
+        # only set the opening debit/credit if the amount is not zero,
+        # otherwise return early
+        if float_is_zero(amount, precision_digits=2):
+            return
+
         self.company_id.create_op_move_if_non_existant()
         opening_move = self.company_id.account_opening_move_id
 
@@ -546,10 +552,10 @@ class AccountAccount(models.Model):
             {join} account_move_line aml
                 ON aml.account_id  = account.id
                 AND aml.partner_id = %s
-                AND account.deprecated = FALSE
                 AND account.company_id = aml.company_id
                 AND aml.date >= now() - interval '2 years'
               WHERE account.company_id = %s
+                AND account.deprecated = FALSE
                    {where_internal_group}
             GROUP BY account.id
             ORDER BY COUNT(aml.id) DESC, account.code
@@ -695,7 +701,7 @@ class AccountAccount(models.Model):
         if 'import_file' in self.env.context:
             code, name = self._split_code_name(name)
             return self.create({'code': code, 'name': name}).name_get()[0]
-        raise UserError(_("Please create new accounts from the Chart of Accounts menu."))
+        raise ValidationError(_("Please create new accounts from the Chart of Accounts menu."))
 
     def write(self, vals):
         # Do not allow changing the company_id when account_move_line already exist
@@ -780,6 +786,9 @@ class AccountAccount(models.Model):
             'label': _('Import Template for Chart of Accounts'),
             'template': '/account/static/xls/coa_import_template.xlsx'
         }]
+
+    def _merge_method(self, destination, source):
+        raise UserError(_("You cannot merge accounts."))
 
 
 class AccountGroup(models.Model):

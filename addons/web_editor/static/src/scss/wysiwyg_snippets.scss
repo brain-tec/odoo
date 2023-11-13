@@ -268,6 +268,28 @@
         }
     }
 
+    %o_we_sublevel > we-title::before {
+        content: "└"; // TODO The size and look of this depends on the
+                      // browser default font, we should use a SVG instead.
+        display: inline-block;
+        margin-right: 0.4em;
+
+        .o_rtl & {
+            transform: scaleX(-1);
+        }
+    }
+    @for $level from 1 through 3 {
+        .o_we_sublevel_#{$level} {
+            @extend %o_we_sublevel;
+
+            @if $level > 1 {
+                > we-title {
+                    padding-left: ($level - 1) * 0.6em;
+                }
+            }
+        }
+    }
+
     #snippets_menu {
         flex: 0 0 auto;
         display: flex;
@@ -421,6 +443,7 @@
                     @extend %we-generic-clickable;
                     cursor: pointer;
                     flex: 1 1 auto;
+                    padding: 0 $o-we-sidebar-content-field-button-group-button-spacing;
                     line-height: 17px;
                     text-align: center;
 
@@ -1629,7 +1652,12 @@
                     content: '\f0da';
                     position: static;
                     transform: none;
+
+                    .o_rtl & {
+                        transform: scaleX(-1);
+                    }
                 }
+
                 &.active {
 
                     &::after {
@@ -1655,24 +1683,6 @@
             }
             .o_we_collapse_toggler {
                 cursor: pointer;
-            }
-        }
-
-        %o_we_sublevel > we-title::before {
-            content: "└"; // TODO The size and look of this depends on the
-                          // browser default font, we should use a SVG instead.
-            display: inline-block;
-            margin-right: 0.4em;
-        }
-        @for $level from 1 through 3 {
-            .o_we_sublevel_#{$level} {
-                @extend %o_we_sublevel;
-
-                @if $level > 1 {
-                    > we-title {
-                        padding-left: ($level - 1) * 0.6em;
-                    }
-                }
             }
         }
 
@@ -1708,6 +1718,21 @@
 
             &:hover {
                 background-color: $o-we-sidebar-bg;
+            }
+        }
+
+        div.o_we_invisible_root_parent {
+            padding-bottom: 3px;
+        }
+
+        ul {
+            list-style: none;
+            padding-inline-start: 15px;
+            margin-bottom: $o-we-sidebar-content-field-spacing - 3px;
+
+            div.o_we_invisible_entry {
+                padding-top: 3px;
+                padding-bottom: 3px;
             }
         }
     }
@@ -2545,16 +2570,16 @@ we-button:hover .o_we_shape_animated_label > span {
 // GRID LAYOUT
 we-button.o_grid {
     min-width: fit-content;
-    padding-left: 3px !important;
-    padding-right: 3px !important;
+    padding-left: 4.5px !important;
+    padding-right: 4.5px !important;
 }
 
 we-select.o_grid we-toggler {
     width: fit-content !important;
 }
 
-we-button-group.o_grid {
-    min-width: fit-content !important;
+we-button-group.o_grid we-selection-items {
+    width: fit-content !important;
 }
 
 // Background grid.

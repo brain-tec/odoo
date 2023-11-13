@@ -145,7 +145,7 @@ class MrpUnbuild(models.Model):
         consume_moves = self._generate_consume_moves()
         consume_moves._action_confirm()
         produce_moves = self._generate_produce_moves()
-        produce_moves._action_confirm()
+        produce_moves.with_context(default_lot_id=False)._action_confirm()
 
         finished_moves = consume_moves.filtered(lambda m: m.product_id == self.product_id)
         consume_moves -= finished_moves
@@ -261,6 +261,7 @@ class MrpUnbuild(models.Model):
             'warehouse_id': location_dest_id.warehouse_id.id,
             'unbuild_id': self.id,
             'company_id': move.company_id.id,
+            'origin_returned_move_id': move.id,
         })
 
     def _generate_move_from_bom_line(self, product, product_uom, quantity, bom_line_id=False, byproduct_id=False):

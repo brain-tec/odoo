@@ -41,7 +41,7 @@ from contextlib import contextmanager, ExitStack
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 from itertools import zip_longest as izip_longest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from xmlrpc import client as xmlrpclib
 
 import requests
@@ -476,6 +476,7 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
                 if count != expected:
                     # add some info on caller to allow semi-automatic update of query count
                     frame, filename, linenum, funcname, lines, index = inspect.stack()[2]
+                    filename = filename.replace('\\', '/')
                     if "/odoo/addons/" in filename:
                         filename = filename.rsplit("/odoo/addons/", 1)[1]
                     if count > expected:
@@ -653,6 +654,12 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
             profile_session=self.profile_session,
             **kwargs)
 
+    def patch_requests(self):
+        # requests.get -> requests.api.request -> Session().request
+        # TBD: enable by default & set side_effect=NotImplementedError to force an error
+        p = patch('requests.Session.request', Mock(spec_set=[]))
+        self.addCleanup(p.stop)
+        return p.start()
 
 savepoint_seq = itertools.count()
 
@@ -715,6 +722,17 @@ class TransactionCase(BaseCase):
         self.addCleanup(envs.clear)
 
         self.addCleanup(self.registry.clear_caches)
+
+        # This prevents precommit functions and data from piling up
+        # until cr.flush is called in 'assertRaises' clauses
+        # (these are not cleared in self.env.clear or envs.clear)
+        cr = self.env.cr
+
+        def _reset(cb, funcs, data):
+            cb._funcs = funcs
+            cb.data = data
+        for callback in [cr.precommit, cr.postcommit, cr.prerollback, cr.postrollback]:
+            self.addCleanup(_reset, callback, collections.deque(callback._funcs), dict(callback.data))
 
         # flush everything in setUpClass before introducing a savepoint
         self.env.flush_all()
@@ -1158,13 +1176,18 @@ class ChromeBrowser:
             message += '\n' + stack
 
         log_type = type
-        self._logger.getChild('browser').log(
+        _logger = self._logger.getChild('browser')
+        _logger.log(
             self._TO_LEVEL.get(log_type, logging.INFO),
-            "%s", message # might still have %<x> characters
+            "%s%s",
+            "Error received after termination: " if self._result.done() else "",
+            message # might still have %<x> characters
         )
 
         if log_type == 'error':
             self.had_failure = True
+            if self._result.done():
+                return
             if not self.error_checker or self.error_checker(message):
                 self.take_screenshot()
                 self._save_screencast()
@@ -1197,23 +1220,23 @@ class ChromeBrowser:
 
                 if node_id:
                     self.take_screenshot("unsaved_form_")
-                    self._result.set_exception(ChromeBrowserException("""\
+                    msg = """\
 Tour finished with an open form view in edition mode.
 
 Form views in edition mode are automatically saved when the page is closed, \
-which leads to stray network requests and inconsistencies."""))
+which leads to stray network requests and inconsistencies."""
+                    if self._result.done():
+                        _logger.error("%s", msg)
+                    else:
+                        self._result.set_exception(ChromeBrowserException(msg))
                     return
 
-                try:
+                if not self._result.done():
                     self._result.set_result(True)
-                except Exception:
+                elif self._result.exception() is None:
                     # if the future was already failed, we're happy,
                     # otherwise swap for a new failed
-                    if self._result.exception() is None:
-                        self._result = Future()
-                        self._result.set_exception(ChromeBrowserException(
-                            "Tried to make the tour successful twice."
-                        ))
+                    _logger.error("Tried to make the tour successful twice.")
 
 
     def _handle_exception(self, exceptionDetails, timestamp):
@@ -1225,6 +1248,11 @@ which leads to stray network requests and inconsistencies."""))
         stack = ''.join(self._format_stack(exceptionDetails))
         if stack:
             message += '\n' + stack
+
+        if self._result.done():
+            self._logger.getChild('browser').error(
+                "Exception received after termination: %s", message)
+            return
 
         self.take_screenshot()
         self._save_screencast()
@@ -2847,7 +2875,12 @@ def tagged(*tags):
     """
     include = {t for t in tags if not t.startswith('-')}
     exclude = {t[1:] for t in tags if t.startswith('-')}
+
     def tags_decorator(obj):
         obj.test_tags = (getattr(obj, 'test_tags', set()) | include) - exclude
+        at_install = 'at_install' in obj.test_tags
+        post_install = 'post_install' in obj.test_tags
+        if not (at_install ^ post_install):
+            _logger.warning('A tests should be either at_install or post_install, which is not the case of %r', obj)
         return obj
     return tags_decorator

@@ -14,6 +14,15 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
 
     const { onMounted, onWillUnmount, useState } = owl;
 
+    /**
+     * ID getter to take into account falsy many2one value.
+     * @param {[id: number, display_name: string] | false} fieldVal many2one field value
+     * @returns {number | false}
+     */
+    function getId(fieldVal) {
+        return fieldVal && fieldVal[0];
+    }
+
     class SaleOrderManagementScreen extends ControlButtonsMixin(IndependentToOrderScreen) {
         setup() {
             super.setup();
@@ -74,6 +83,14 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
             SaleOrderFetcher.setPage(1);
             SaleOrderFetcher.fetch();
         }
+        _getSaleOrderOrigin(order) {
+            for (const line of order.get_orderlines()) {
+                if (line.sale_order_origin_id) {
+                    return line.sale_order_origin_id
+                }
+            }
+            return false;
+        }
         async _onClickSaleOrder(event) {
             const clickedOrder = event.detail;
             const { confirmed, payload: selectedOption } = await this.showPopup('SelectionPopup',
@@ -85,6 +102,21 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
             if(confirmed){
               let currentPOSOrder = this.env.pos.get_order();
               let sale_order = await this._getSaleOrder(clickedOrder.id);
+              const currentSaleOrigin = this._getSaleOrderOrigin(currentPOSOrder);
+              const currentSaleOriginId = currentSaleOrigin && currentSaleOrigin.id;
+
+              if (currentSaleOriginId) {
+                const linkedSO = await this._getSaleOrder(currentSaleOriginId);
+                if (
+                    getId(linkedSO.partner_id) !== getId(sale_order.partner_id) ||
+                    getId(linkedSO.partner_invoice_id) !== getId(sale_order.partner_invoice_id) ||
+                    getId(linkedSO.partner_shipping_id) !== getId(sale_order.partner_shipping_id)
+                ) {
+                    currentPOSOrder = this.env.pos.add_new_order();
+                    this.showNotification(this.env._t("A new order has been created."));
+                }
+              }
+
               try {
                 await this.env.pos.load_new_partners();
               }
@@ -104,6 +136,7 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
                 }
                 currentPOSOrder.set_partner(this.env.pos.db.get_partner_by_id(sale_order.partner_id[0]));
               }
+
               let orderFiscalPos = sale_order.fiscal_position_id ? this.env.pos.fiscal_positions.find(
                   (position) => position.id === sale_order.fiscal_position_id[0]
               )
@@ -157,18 +190,19 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
                         continue;
                     }
 
-                    let new_line = Orderline.create({}, {
+                    const line_values = {
                         pos: this.env.pos,
                         order: this.env.pos.get_order(),
                         product: this.env.pos.db.get_product_by_id(line.product_id[0]),
                         description: line.name,
                         price: line.price_unit,
                         tax_ids: orderFiscalPos ? undefined : line.tax_id,
-                        price_manually_set: true,
+                        price_manually_set: false,
                         sale_order_origin_id: clickedOrder,
                         sale_order_line_id: line,
                         customer_note: line.customer_note,
-                    });
+                    };
+                    let new_line = Orderline.create({}, line_values);
 
                     if (
                         new_line.get_product().tracking !== 'none' &&
@@ -198,7 +232,19 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
                     new_line.setQuantityFromSOL(line);
                     new_line.set_unit_price(line.price_unit);
                     new_line.set_discount(line.discount);
-                    this.env.pos.get_order().add_orderline(new_line);
+                    const product = this.env.pos.db.get_product_by_id(line.product_id[0]);
+                    const product_unit = product.get_unit();
+                    if (product_unit && !product.get_unit().is_pos_groupable) {
+                        //loop for value of quantity
+                        for (let j = 0; j < new_line.quantity; j++) {
+                            let splitted_line = Orderline.create({}, line_values);
+                            splitted_line.quantity = 1;
+                            this.env.pos.get_order().add_orderline(splitted_line);
+                        }
+                    }
+                    else {
+                        this.env.pos.get_order().add_orderline(new_line);
+                    }
                 }
               }
               else {
@@ -254,7 +300,7 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
                         order: this.env.pos.get_order(),
                         product: down_payment_product,
                         price: down_payment,
-                        price_manually_set: true,
+                        price_automatically_set: true,
                         sale_order_origin_id: clickedOrder,
                         down_payment_details: tab,
                     });
@@ -280,7 +326,7 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
             const sale_order = await this.rpc({
                 model: 'sale.order',
                 method: 'read',
-                args: [[id],['order_line', 'partner_id', 'pricelist_id', 'fiscal_position_id', 'amount_total', 'amount_untaxed', 'amount_unpaid']],
+                args: [[id],['order_line', 'partner_id', 'pricelist_id', 'fiscal_position_id', 'amount_total', 'amount_untaxed', 'amount_unpaid', 'partner_shipping_id', 'partner_invoice_id']],
                 context: this.env.session.user_context,
             });
 

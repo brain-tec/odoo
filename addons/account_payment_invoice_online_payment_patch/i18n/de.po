@@ -5,6 +5,7 @@
 # Translators:
 # Friederike Fasterling-Nesselbosch, 2023
 # Martin Trigaux, 2023
+# Larissa Manderfeld, 2023
 # 
 msgid ""
 msgstr ""
@@ -12,8 +13,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-01-26 13:32+0000\n"
 "PO-Revision-Date: 2023-02-02 12:22+0000\n"
-"Last-Translator: Martin Trigaux, 2023\n"
-"Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
+"Last-Translator: Larissa Manderfeld, 2023\n"
+"Language-Team: German (https://app.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -27,7 +28,7 @@ msgid ""
 "remove\"/><span class=\"d-none d-md-inline\"> Cancelled</span></span>"
 msgstr ""
 "<span class=\"badge rounded-pill text-bg-danger\"><i class=\"fa fa-fw fa-"
-"remove\"/><span class=\"d-none d-md-inline\"> Storniert</span></span>"
+"remove\"/><span class=\"d-none d-md-inline\"> Abgebrochen</span></span>"
 
 #. module: account_payment_invoice_online_payment_patch
 #: model_terms:ir.ui.view,arch_db:account_payment_invoice_online_payment_patch.portal_my_invoices_payment
@@ -38,7 +39,7 @@ msgid ""
 msgstr ""
 "<span class=\"badge rounded-pill text-bg-info\"><i class=\"fa fa-fw fa-"
 "clock-o\" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span "
-"class=\"d-none d-md-inline\"> Zahlung ausstehend</span></span>"
+"class=\"d-none d-md-inline\"> Warten auf Zahlung</span></span>"
 
 #. module: account_payment_invoice_online_payment_patch
 #: model_terms:ir.ui.view,arch_db:account_payment_invoice_online_payment_patch.portal_my_invoices_payment
@@ -57,8 +58,8 @@ msgid ""
 "<span class=\"badge rounded-pill text-bg-primary\"><i class=\"fa fa-fw fa-"
 "check\"/><span class=\"d-none d-md-inline\"> Authorized</span></span>"
 msgstr ""
-"<span class=\"badge rounded-pill text-bg-primary\"><i class=\"fa fa-fw fa-"
-"check\"/><span class=\"d-none d-md-inline\"> Authorisiert</span></span>"
+"<span class=\"badge badge-pill badge-primary\"><i class=\"fa fa-fw fa-"
+"check\"/><span class=\"d-none d-md-inline\"> Autorisiert</span></span>"
 
 #. module: account_payment_invoice_online_payment_patch
 #: model_terms:ir.ui.view,arch_db:account_payment_invoice_online_payment_patch.portal_my_invoices_payment
@@ -80,7 +81,7 @@ msgid ""
 msgstr ""
 "<span class=\"badge rounded-pill text-bg-success\"><i class=\"fa fa-fw fa-"
 "check\" aria-label=\"Reversed\" title=\"Reversed\" role=\"img\"/><span "
-"class=\"d-none d-md-inline\">Aufgehoben </span></span>"
+"class=\"d-none d-md-inline\"> Storniert</span></span>"
 
 #. module: account_payment_invoice_online_payment_patch
 #: model_terms:ir.ui.view,arch_db:account_payment_invoice_online_payment_patch.portal_my_invoices_payment
@@ -109,7 +110,7 @@ msgid ""
 msgstr ""
 "<span class=\"badge rounded-pill text-bg-warning\"><i class=\"fa fa-fw fa-"
 "remove\" aria-label=\"Cancelled\" title=\"Cancelled\" role=\"img\"/><span "
-"class=\"d-none d-md-inline\"> Storniert</span></span>"
+"class=\"d-none d-md-inline\"> Abgebrochen</span></span>"
 
 #. module: account_payment_invoice_online_payment_patch
 #: model_terms:ir.ui.view,arch_db:account_payment_invoice_online_payment_patch.portal_my_invoices_payment
@@ -123,19 +124,19 @@ msgstr ""
 #. module: account_payment_invoice_online_payment_patch
 #: model:ir.model,name:account_payment_invoice_online_payment_patch.model_res_config_settings
 msgid "Config Settings"
-msgstr "Konfiguration "
+msgstr "Konfigurationseinstellungen"
 
 #. module: account_payment_invoice_online_payment_patch
 #: model_terms:ir.ui.view,arch_db:account_payment_invoice_online_payment_patch.res_config_settings_view_form
 msgid "Invoice Online Payment"
-msgstr "Rechnung Online-Zahlung"
+msgstr "Online-Zahlung von Rechnungen"
 
 #. module: account_payment_invoice_online_payment_patch
 #: model:ir.model,name:account_payment_invoice_online_payment_patch.model_account_move
 msgid "Journal Entry"
-msgstr "Buchungssatz"
+msgstr "Journalbuchung"
 
 #. module: account_payment_invoice_online_payment_patch
 #: model:ir.model.fields,field_description:account_payment_invoice_online_payment_patch.field_res_config_settings__pay_invoices_online
 msgid "Pay Invoices Online"
-msgstr ""
+msgstr "Rechnungen online bezahlen"

@@ -57,16 +57,41 @@ export class FieldMany2OneMailingFilter extends Many2OneField {
             return;
         }
         const filterCount = this.props.record.data.mailing_filter_count;
-        document.querySelectorAll('.o_field_many2one_selection > .o_input_dropdown')[1].classList.toggle('d-none', !filterCount);
+        const dropdown = document.querySelector('.o_field_mailing_filter > .o_field_many2one_selection > .o_input_dropdown')
+        if (dropdown) {
+            dropdown.classList.toggle('d-none', !filterCount);
+        }
         // By default, domains in recordData are in string format, but adding / removing a leaf from domain widget converts
         // value into object, so we use 'Domain' class to convert them in same (string) format, allowing proper comparison.
-        const recordDomain = new Domain(this.props.record.data[this.props.domain_field] || []).toString();
-        const filterDomain = new Domain(this.props.record.data.mailing_filter_domain || []).toString();
+        let recordDomain;
+        let filterDomain;
+        try {
+            recordDomain = new Domain(this.props.record.data[this.props.domain_field] || []).toString();
+            filterDomain = new Domain(this.props.record.data.mailing_filter_domain || []).toString();
+        } catch {
+            // Don't raise a traceback if a domain set manually doesn't match the format expected.
+            // This can happen when we unfocus the domain editor
+            this.filter.canSaveFilter = false;
+            this.filter.canRemoveFilter = false;
+            return;
+        }
+
+        const modelFieldElement = this.props.model_field && document.querySelector(
+            `input#${this.props.model_field},div [name="${this.props.model_field}"]`);
+
+        let value = "";
+        if (modelFieldElement && modelFieldElement.tagName === "span") {
+            value = modelFieldElement.textContent;
+        } else if (modelFieldElement && modelFieldElement.tagName === "input") {
+            value = modelFieldElement.value;
+        }
+
         el.classList.toggle('d-none', recordDomain === '[]');
         this.filter.canSaveFilter = !this.props.record.data.mailing_filter_id
-            || !document.querySelector(`input#${this.props.model_field}`).value.length
+            || value.length
             || this.state.isFloating
             || filterDomain !== recordDomain;
+        this.filter.canRemoveFilter = !this.filter.canSaveFilter
     }
 
     // HANDLERS

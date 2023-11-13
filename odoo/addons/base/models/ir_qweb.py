@@ -359,6 +359,7 @@ structure.
 
 """
 
+import contextlib
 import fnmatch
 import io
 import logging
@@ -613,17 +614,27 @@ class IrQWeb(models.AbstractModel):
         # generate the template functions and the root function name
         def generate_functions():
             code, options, def_name = self._generate_code(template)
+            if self.env.context.get('profile'):
+                ref_value = None
+                with contextlib.suppress(ValueError, TypeError):
+                    ref_value = int(options.get('ref'))
+                profile_options = {
+                    'ref': ref_value,
+                    'ref_xml': options.get('ref_xml') and str(options['ref_xml']) or None,
+                }
+            else:
+                profile_options = None
             code = '\n'.join([
                 "def generate_functions():",
                 "    template_functions = {}",
                 indent_code(code, 1),
-                f"    template_functions['options'] = {options if self.env.context.get('profile') else None!r}",
+                f"    template_functions['options'] = {profile_options!r}",
                 "    return template_functions",
             ])
 
             try:
                 compiled = compile(code, f"<{ref}>", 'exec')
-                globals_dict = self._prepare_globals()
+                globals_dict = self.__prepare_globals()
                 globals_dict['__builtins__'] = globals_dict # So that unknown/unsafe builtins are never added.
                 unsafe_eval(compiled, globals_dict)
                 return globals_dict['generate_functions'](), def_name
@@ -891,7 +902,7 @@ class IrQWeb(models.AbstractModel):
             context['is_t_cache_disabled'] = True
         return self.with_context(**context)
 
-    def _prepare_globals(self):
+    def __prepare_globals(self):
         """ Prepare the global context that will sent to eval the qweb
         generated code.
         """

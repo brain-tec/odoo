@@ -12,12 +12,12 @@ import logging
 import os
 import time
 from collections import defaultdict
+from functools import wraps
 from hashlib import sha256
 from itertools import chain, repeat
 from markupsafe import Markup
 
 import babel.core
-import decorator
 import pytz
 from lxml import etree
 from lxml.builder import E
@@ -83,8 +83,7 @@ def _jsonable(o):
     except TypeError: return False
     else: return True
 
-@decorator.decorator
-def check_identity(fn, self):
+def check_identity(fn):
     """ Wrapped method should be an *action method* (called from a button
     type=object), and requires extra security to be executed. This decorator
     checks if the identity (password) has been checked in the last 10mn, and
@@ -92,32 +91,36 @@ def check_identity(fn, self):
 
     Prevents access outside of interactive contexts (aka with a request)
     """
-    if not request:
-        raise UserError(_("This method can only be accessed over HTTP"))
+    @wraps(fn)
+    def wrapped(self):
+        if not request:
+            raise UserError(_("This method can only be accessed over HTTP"))
 
-    if request.session.get('identity-check-last', 0) > time.time() - 10 * 60:
-        # update identity-check-last like github?
-        return fn(self)
+        if request.session.get('identity-check-last', 0) > time.time() - 10 * 60:
+            # update identity-check-last like github?
+            return fn(self)
 
-    w = self.sudo().env['res.users.identitycheck'].create({
-        'request': json.dumps([
-            { # strip non-jsonable keys (e.g. mapped to recordsets like binary_field_real_user)
-                k: v for k, v in self.env.context.items()
-                if _jsonable(v)
-            },
-            self._name,
-            self.ids,
-            fn.__name__
-        ])
-    })
-    return {
-        'type': 'ir.actions.act_window',
-        'res_model': 'res.users.identitycheck',
-        'res_id': w.id,
-        'name': _("Security Control"),
-        'target': 'new',
-        'views': [(False, 'form')],
-    }
+        w = self.sudo().env['res.users.identitycheck'].create({
+            'request': json.dumps([
+                { # strip non-jsonable keys (e.g. mapped to recordsets like binary_field_real_user)
+                    k: v for k, v in self.env.context.items()
+                    if _jsonable(v)
+                },
+                self._name,
+                self.ids,
+                fn.__name__
+            ])
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'res.users.identitycheck',
+            'res_id': w.id,
+            'name': _("Security Control"),
+            'target': 'new',
+            'views': [(False, 'form')],
+        }
+    wrapped.__has_check_identity = True
+    return wrapped
 
 #----------------------------------------------------------
 # Basic res.groups and res.users
@@ -149,6 +152,13 @@ class Groups(models.Model):
     @api.constrains('users')
     def _check_one_user_type(self):
         self.users._check_one_user_type()
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_settings_group(self):
+        classified = self.env['res.config.settings']._get_classified_fields()
+        for _name, _groups, implied_group in classified['group']:
+            if implied_group.id in self.ids:
+                raise ValidationError(_('You cannot delete a group linked with a settings field.'))
 
     @api.depends('category_id.name', 'name')
     def _compute_full_name(self):
@@ -646,10 +656,14 @@ class Users(models.Model):
         return res
 
     @api.ondelete(at_uninstall=True)
-    def _unlink_except_superuser(self):
+    def _unlink_except_master_data(self):
+        portal_user_template = self.env.ref('base.template_portal_user_id', False)
+        default_user_template = self.env.ref('base.default_user', False)
         if SUPERUSER_ID in self.ids:
             raise UserError(_('You can not remove the admin user as it is used internally for resources created by Odoo (updates, module installation, ...)'))
         self.clear_caches()
+        if (portal_user_template and portal_user_template in self) or (default_user_template and default_user_template in self):
+            raise UserError(_('Deleting the template users is not allowed. Deleting this profile will compromise critical functionalities.'))
 
     @api.model
     def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
@@ -1423,6 +1437,9 @@ class GroupsView(models.Model):
                         xml_by_category[category_name].append(E.newline())
                     xml_by_category[category_name].append(E.field(name=field_name, **attrs))
                     xml_by_category[category_name].append(E.newline())
+                    # add duplicate invisible field so default values are saved on create
+                    if attrs.get('groups') == 'base.group_no_one':
+                        xml0.append(E.field(name=field_name, **dict(attrs, invisible="1", groups='!base.group_no_one')))
 
                 else:
                     # application separator with boolean fields
@@ -1440,6 +1457,8 @@ class GroupsView(models.Model):
                             dest_group.append(E.field(name=field_name, invisible="1", **attrs))
                         else:
                             dest_group.append(E.field(name=field_name, **attrs))
+                        # add duplicate invisible field so default values are saved on create
+                        xml0.append(E.field(name=field_name, **dict(attrs, invisible="1", groups='!base.group_no_one')))
                         group_count += 1
                     xml4.append(E.group(*left_group))
                     xml4.append(E.group(*right_group))
@@ -1638,7 +1657,8 @@ class UsersView(models.Model):
             missing_implied_groups = missing_implied_groups.filtered(
                 lambda g:
                 g.category_id not in (group.category_id | categories_to_ignore) and
-                g not in current_groups_by_category[g.category_id]
+                g not in current_groups_by_category[g.category_id] and
+                (self.user_has_groups('base.group_no_one') or g.category_id)
             )
             if missing_implied_groups:
                 # prepare missing group message, by categories
@@ -1669,9 +1689,13 @@ class UsersView(models.Model):
                 values1[key] = val
 
         if 'groups_id' not in values and (add or rem):
+            added = self.env['res.groups'].sudo().browse(add)
+            added |= added.mapped('trans_implied_ids')
+            added_ids = added._ids
             # remove group ids in `rem` and add group ids in `add`
+            # do not remove groups that are added by implied
             values1['groups_id'] = list(itertools.chain(
-                zip(repeat(3), rem),
+                zip(repeat(3), [gid for gid in rem if gid not in added_ids]),
                 zip(repeat(4), add)
             ))
 
@@ -1837,7 +1861,9 @@ class CheckIdentity(models.TransientModel):
 
         request.session['identity-check-last'] = time.time()
         ctx, model, ids, method = json.loads(self.sudo().request)
-        return getattr(self.env(context=ctx)[model].browse(ids), method)()
+        method = getattr(self.env(context=ctx)[model].browse(ids), method)
+        assert getattr(method, '__has_check_identity', False)
+        return method()
 
 #----------------------------------------------------------
 # change password wizard

@@ -4,15 +4,16 @@
 # 
 # Translators:
 # Martin Trigaux, 2022
+# Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-15 12:44+0000\n"
+"POT-Creation-Date: 2023-04-14 05:52+0000\n"
 "PO-Revision-Date: 2022-09-22 05:55+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
-"Language-Team: Ukrainian (https://www.transifex.com/odoo/teams/41243/uk/)\n"
+"Last-Translator: Alina Lisnenko <alina.lisnenko@erp.co.ua>, 2023\n"
+"Language-Team: Ukrainian (https://app.transifex.com/odoo/teams/41243/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -44,7 +45,7 @@ msgstr "Виникла помилка під час надсилання лис�
 #: code:addons/snailmail/models/snailmail_letter.py:0
 #, python-format
 msgid "An error occurred when sending the document by post.<br>Error: %s"
-msgstr "Виникла помилка під час надсилання документу поштою.<br>Помилка: %s"
+msgstr "Виникла помилка під час надсилання документа поштою.<br>Помилка: %s"
 
 #. module: snailmail
 #. odoo-python
@@ -58,7 +59,7 @@ msgstr "Виникла невідома помилка. Будь ласка, з�
 #: code:addons/snailmail/static/src/components/snailmail_error/snailmail_error.xml:0
 #, python-format
 msgid "An unknown error occurred. Please contact our"
-msgstr "Виникла невідома помилка. Зв"
+msgstr "Виникла невідома помилка. Зв'яжіться з нашою"
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter__attachment_id
@@ -283,6 +284,13 @@ msgid "Information"
 msgstr "Інформація"
 
 #. module: snailmail
+#. odoo-python
+#: code:addons/snailmail/models/snailmail_letter.py:0
+#, python-format
+msgid "Invalid recipient name."
+msgstr "Недійсне ім'я одержувача"
+
+#. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter____last_update
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_format_error____last_update
 #: model:ir.model.fields,field_description:snailmail.field_snailmail_letter_missing_required_fields____last_update
@@ -369,7 +377,7 @@ msgstr "NO_PRICE_AVAILABLE"
 #: code:addons/snailmail/models/snailmail_letter.py:0
 #, python-format
 msgid "Not enough credits for Snail Mail"
-msgstr ""
+msgstr "Недостатньо кредитів для Snail Mail"
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_mail_notification__notification_type
@@ -414,7 +422,7 @@ msgstr "Партнер"
 #: code:addons/snailmail/models/snailmail_letter.py:0
 #, python-format
 msgid "Please use an A4 Paper format."
-msgstr ""
+msgstr "Використовуйте паперовий формат A4."
 
 #. module: snailmail
 #: model:ir.model.fields,field_description:snailmail.field_res_config_settings__snailmail_duplex
@@ -471,7 +479,7 @@ msgstr "Надіслано"
 #: code:addons/snailmail/models/snailmail_letter.py:0
 #, python-format
 msgid "Snail Mails are successfully sent"
-msgstr ""
+msgstr "Snail Mails успішно надіслано"
 
 #. module: snailmail
 #. odoo-python
@@ -693,7 +701,7 @@ msgid ""
 msgstr ""
 "Коли лист створено, статус стає \"Очікує\".\n"
 "Якщо лист надіслано, статус стає \"Надіслано\",\n"
-"Якщо ні, то він отримає стан \"Помилка\", і повідомлення про помилку з'явиться у полі \"Повідомлення про помилку\"."
+"Якщо ні, то він отримає статус \"Помилка\", і повідомлення про помилку з'явиться у полі \"Повідомлення про помилку\"."
 
 #. module: snailmail
 #: model_terms:ir.ui.view,arch_db:snailmail.snailmail_confirm_view

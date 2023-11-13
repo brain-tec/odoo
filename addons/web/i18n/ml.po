@@ -3,6 +3,8 @@
 # 	* web
 # 
 # Translators:
+# Hasna, 2023
+# Nikhil Krishnan, 2023
 # Niyas Raphy, 2023
 # 
 msgid ""
@@ -12,7 +14,7 @@ msgstr ""
 "POT-Creation-Date: 2023-02-02 10:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:55+0000\n"
 "Last-Translator: Niyas Raphy, 2023\n"
-"Language-Team: Malayalam (https://www.transifex.com/odoo/teams/41243/ml/)\n"
+"Language-Team: Malayalam (https://app.transifex.com/odoo/teams/41243/ml/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -84,6 +86,7 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
+#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
 #, python-format
 msgid "%s days ago"
 msgstr ""
@@ -304,12 +307,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
-"                                                   Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
+"                                               Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "<span id=\"line_tax_ids\">15.00%</span>"
+msgid "<span id=\"line_tax_ids\">Tax 15%</span>"
 msgstr ""
 
 #. module: web
@@ -324,7 +327,7 @@ msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "<span>5.000</span>"
+msgid "<span>5.00</span>"
 msgstr ""
 
 #. module: web
@@ -341,7 +344,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span>Invoice</span>\n"
-"                           <span>INV/2020/07/0003</span>"
+"                           <span>INV/2023/00003</span>"
 msgstr ""
 
 #. module: web
@@ -390,12 +393,12 @@ msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "<strong>Subtotal</strong>"
+msgid "<strong>Total</strong>"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
-msgid "<strong>Total</strong>"
+msgid "<strong>Untaxed Amount</strong>"
 msgstr ""
 
 #. module: web
@@ -479,14 +482,14 @@ msgstr ""
 #: code:addons/web/static/src/webclient/settings_form_view/fields/upgrade_dialog.xml:0
 #, python-format
 msgid "Access to all Enterprise Apps"
-msgstr ""
+msgstr "എല്ലാ എന്റർപ്രൈസ് ആപ്പുകളിലേക്കും പ്രവേശനം"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/ace/ace_field.js:0
 #, python-format
 msgid "Ace Editor"
-msgstr ""
+msgstr "ഏസ് എഡിറ്റർ"
 
 #. module: web
 #. odoo-javascript
@@ -515,7 +518,7 @@ msgstr ""
 #: code:addons/web/static/src/core/debug/debug_menu_items.js:0
 #, python-format
 msgid "Activate Assets Debugging"
-msgstr ""
+msgstr "അസറ്റ് ഡീബഗ്ഗിംഗ് സജീവമാക്കുക"
 
 #. module: web
 #. odoo-javascript
@@ -537,7 +540,7 @@ msgstr ""
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_dev_tool.xml:0
 #, python-format
 msgid "Activate the developer mode"
-msgstr ""
+msgstr "ഡെവലപ്പർ മോഡ് സജീവമാക്കുക"
 
 #. module: web
 #. odoo-javascript
@@ -608,7 +611,7 @@ msgstr ""
 #: code:addons/web/static/src/views/list/list_renderer.xml:0
 #, python-format
 msgid "Add a line"
-msgstr ""
+msgstr "ആഡ് ലൈൻ"
 
 #. module: web
 #. odoo-javascript
@@ -725,7 +728,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/core/dialog.js:0
 #, python-format
 msgid "Alert"
-msgstr ""
+msgstr "മുന്നറിയിപ്പ്"
 
 #. module: web
 #. odoo-javascript
@@ -738,7 +741,7 @@ msgstr ""
 #: code:addons/web/static/src/views/list/list_controller.xml:0
 #, python-format
 msgid "All"
-msgstr ""
+msgstr "എല്ലാം"
 
 #. module: web
 #. odoo-javascript
@@ -815,10 +818,12 @@ msgstr "അപ്ലൈ"
 #: code:addons/web/static/src/legacy/js/views/form/form_controller.js:0
 #: code:addons/web/static/src/legacy/js/views/list/list_controller.js:0
 #: code:addons/web/static/src/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/list/list_controller.js:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
 #, python-format
 msgid "Archive"
-msgstr ""
+msgstr "ആർക്കൈവ്"
 
 #. module: web
 #. odoo-javascript
@@ -826,7 +831,7 @@ msgstr ""
 #: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
 #, python-format
 msgid "Archive All"
-msgstr ""
+msgstr "ആർക്കൈവ് ഓൾ"
 
 #. module: web
 #. odoo-javascript
@@ -847,14 +852,8 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/form/form_controller.js:0
-#, python-format
-msgid "Are you sure that you want to archive all this record?"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/legacy/js/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/form/form_controller.js:0
 #, python-format
 msgid "Are you sure that you want to archive this record?"
 msgstr ""
@@ -864,7 +863,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/views/kanban/kanban_column.js:0
 #, python-format
 msgid "Are you sure that you want to remove this column ?"
-msgstr ""
+msgstr "ഈ കോളം നീക്കം ചെയ്യണമെന്ന് തീർച്ചയാണോ?"
 
 #. module: web
 #. odoo-javascript
@@ -872,7 +871,7 @@ msgstr ""
 #: code:addons/web/static/src/search/favorite_menu/favorite_menu.js:0
 #, python-format
 msgid "Are you sure that you want to remove this filter?"
-msgstr ""
+msgstr "ഈ ഫിൽട്ടർ നീക്കം ചെയ്യണമെന്ന് തീർച്ചയാണോ?"
 
 #. module: web
 #. odoo-javascript
@@ -887,7 +886,7 @@ msgstr ""
 #: code:addons/web/static/src/views/list/list_controller.js:0
 #, python-format
 msgid "Are you sure you want to delete these records?"
-msgstr ""
+msgstr "ഈ റെക്കോർഡുകൾ ഇല്ലാതാക്കണമെന്ന് തീർച്ചയാണോ?"
 
 #. module: web
 #. odoo-javascript
@@ -978,7 +977,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/name_and_signature.xml:0
 #, python-format
 msgid "Auto"
-msgstr ""
+msgstr "ഓട്ടോ"
 
 #. module: web
 #. odoo-javascript
@@ -998,7 +997,7 @@ msgstr ""
 #: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
 #, python-format
 msgid "Avatar"
-msgstr ""
+msgstr "അവതാർ"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__layout_background_image
@@ -1011,7 +1010,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/badge/badge_field.js:0
 #, python-format
 msgid "Badge"
-msgstr ""
+msgstr "ബാഡ്ജ്"
 
 #. module: web
 #. odoo-javascript
@@ -1019,7 +1018,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/badge_selection/badge_selection_field.js:0
 #, python-format
 msgid "Badges"
-msgstr ""
+msgstr "ബാഡ്ജുകൾ"
 
 #. module: web
 #. odoo-javascript
@@ -1075,7 +1074,7 @@ msgstr ""
 #: code:addons/web/static/src/views/view_button/view_button.xml:0
 #, python-format
 msgid "Button"
-msgstr ""
+msgstr "ബട്ടൺ"
 
 #. module: web
 #. odoo-javascript
@@ -1083,7 +1082,7 @@ msgstr ""
 #: code:addons/web/static/src/views/view_button/view_button.xml:0
 #, python-format
 msgid "Button Type:"
-msgstr ""
+msgstr "ബട്ടൺ തരം:"
 
 #. module: web
 #. odoo-javascript
@@ -1229,7 +1228,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Choose File"
-msgstr ""
+msgstr "ഫയൽ തിരഞ്ഞെടുക്കുക"
 
 #. module: web
 #. odoo-javascript
@@ -1281,7 +1280,6 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/legacy/xml/dialog.xml:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
-#: code:addons/web/static/src/views/form/form_controller.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_column_examples_dialog.xml:0
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
 #: code:addons/web/static/src/views/view_dialogs/form_view_dialog.xml:0
@@ -1301,7 +1299,7 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Colors"
-msgstr ""
+msgstr "നിറങ്ങൾ"
 
 #. module: web
 #. odoo-javascript
@@ -1317,7 +1315,7 @@ msgstr ""
 #: model:ir.model,name:web.model_res_company
 #, python-format
 msgid "Companies"
-msgstr ""
+msgstr "കമ്പനികൾ"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__company_id
@@ -1328,39 +1326,39 @@ msgstr "കമ്പനി"
 #: model:ir.model.fields,field_description:web.field_base_document_layout__company_details
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Company Details"
-msgstr ""
+msgstr "കമ്പനി വിശദാംശങ്ങൾ"
 
 #. module: web
 #: model:ir.model,name:web.model_base_document_layout
 msgid "Company Document Layout"
-msgstr ""
+msgstr "കമ്പനി ഡോക്യുമെന്റ് ലേഔട്ട്"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__logo
 msgid "Company Logo"
-msgstr ""
+msgstr "കമ്പനി ലോഗോ"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__name
 msgid "Company Name"
-msgstr ""
+msgstr "കമ്പനി പേര്"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__report_header
 msgid "Company Tagline"
-msgstr ""
+msgstr "കമ്പനി ടാഗ്‌ലൈൻ"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.frontend_layout
 msgid "Company name"
-msgstr ""
+msgstr "കമ്പനി പേര്"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/search/comparison_menu/comparison_menu.xml:0
 #, python-format
 msgid "Comparison"
-msgstr ""
+msgstr "താരതമ്യം"
 
 #. module: web
 #. odoo-javascript
@@ -1385,7 +1383,7 @@ msgstr ""
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.js:0
 #, python-format
 msgid "Confirmation"
-msgstr ""
+msgstr "സ്ഥിരീകരണം"
 
 #. module: web
 #. odoo-javascript
@@ -1409,7 +1407,7 @@ msgstr ""
 #: code:addons/web/static/src/views/view_button/view_button.xml:0
 #, python-format
 msgid "Context:"
-msgstr ""
+msgstr "കോണ്ടെക്സ്ട്ട്:"
 
 #. module: web
 #. odoo-javascript
@@ -1443,7 +1441,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/copy_clipboard/copy_clipboard_field.js:0
 #, python-format
 msgid "Copy"
-msgstr ""
+msgstr "കോപ്പി"
 
 #. module: web
 #. odoo-javascript
@@ -1578,15 +1576,10 @@ msgstr "രാജ്യം"
 #: code:addons/web/static/src/views/calendar/quick_create/calendar_quick_create.xml:0
 #: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
 #: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
-#: code:addons/web/static/src/views/form/form_controller.xml:0
-#: code:addons/web/static/src/views/form/form_controller.xml:0
-#: code:addons/web/static/src/views/kanban/kanban_controller.xml:0
 #: code:addons/web/static/src/views/kanban/kanban_renderer.js:0
-#: code:addons/web/static/src/views/list/list_controller.xml:0
-#: code:addons/web/static/src/views/view_dialogs/select_create_dialog.xml:0
 #, python-format
 msgid "Create"
-msgstr ""
+msgstr "ക്രീയേറ്റ്‌"
 
 #. module: web
 #. odoo-javascript
@@ -1658,7 +1651,7 @@ msgstr "ഉണ്ടാക്കിയത്"
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__create_date
 msgid "Created on"
-msgstr ""
+msgstr "സൃഷ്ടിച്ചത്"
 
 #. module: web
 #. odoo-javascript
@@ -1717,7 +1710,7 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login
 msgid "Database"
-msgstr ""
+msgstr "ഡാറ്റാബേസ്"
 
 #. module: web
 #. odoo-javascript
@@ -1744,7 +1737,7 @@ msgstr ""
 #: code:addons/web/static/src/views/calendar/calendar_controller.js:0
 #, python-format
 msgid "Day"
-msgstr ""
+msgstr "ദിവസം"
 
 #. module: web
 #. odoo-javascript
@@ -1773,14 +1766,14 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 #, python-format
 msgid "Decimal"
-msgstr ""
+msgstr "ദശാംശം"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/debug/profiling/profiling_item.xml:0
 #, python-format
 msgid "Default"
-msgstr ""
+msgstr "ഡീഫോൾട്"
 
 #. module: web
 #. odoo-javascript
@@ -1810,7 +1803,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/widgets/model_field_selector_popover.js:0
 #, python-format
 msgid "Default value"
-msgstr ""
+msgstr "ഡീഫോൾട് വാല്യൂ "
 
 #. module: web
 #. odoo-javascript
@@ -1819,7 +1812,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/field_tooltip.xml:0
 #, python-format
 msgid "Default:"
-msgstr ""
+msgstr "ഡിഫോൾട്ട്:"
 
 #. module: web
 #. odoo-javascript
@@ -1839,6 +1832,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/many2many_tags/tags_list.xml:0
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
+#: code:addons/web/static/src/views/fields/relational_utils.js:0
 #: code:addons/web/static/src/views/form/form_controller.js:0
 #: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
 #: code:addons/web/static/src/views/list/list_controller.js:0
@@ -1897,6 +1891,20 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_dev_tool.xml:0
+#, python-format
+msgid "Developer Tools"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/list/list_renderer.js:0
+#, python-format
+msgid "Different currencies cannot be aggregated"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/domain_selector_dialog/domain_selector_dialog.xml:0
 #: code:addons/web/static/src/legacy/js/fields/relational_fields.js:0
 #: code:addons/web/static/src/legacy/js/views/kanban/kanban_record.js:0
@@ -1907,7 +1915,6 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/views/fields/many2one/many2one_field.xml:0
-#: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/fields/translation_dialog.xml:0
 #: code:addons/web/static/src/views/form/form_controller.xml:0
@@ -1957,7 +1964,7 @@ msgstr ""
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__external_report_layout_id
 msgid "Document Template"
-msgstr ""
+msgstr "ഡോക്യുമെന്റ് ടെംപ്ലേറ്റ്"
 
 #. module: web
 #. odoo-javascript
@@ -2086,21 +2093,21 @@ msgstr "ഡ്യൂപ്ലിക്കേറ്റ്"
 #: code:addons/web/static/src/views/kanban/kanban_record_quick_create.xml:0
 #, python-format
 msgid "Edit"
-msgstr ""
+msgstr "എഡിറ്റ്"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/actions/debug_items.js:0
 #, python-format
 msgid "Edit Action"
-msgstr ""
+msgstr "എഡിറ്റ് ആക്ഷൻ"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/views/kanban/kanban_column.js:0
 #, python-format
 msgid "Edit Column"
-msgstr ""
+msgstr "കോളം എഡിറ്റ് ചെയ്യുക"
 
 #. module: web
 #. odoo-javascript
@@ -2108,14 +2115,14 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/domain/domain_field.xml:0
 #, python-format
 msgid "Edit Domain"
-msgstr ""
+msgstr "എഡിറ്റ് ഡൊമെയ്ൻ"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/debug_items.js:0
 #, python-format
 msgid "Edit SearchView"
-msgstr ""
+msgstr "സെർച്ച് വ്യൂ എഡിറ്റ് ചെയ്യുക"
 
 #. module: web
 #. odoo-javascript
@@ -2130,7 +2137,7 @@ msgstr ""
 #: code:addons/web/static/src/views/debug_items.js:0
 #, python-format
 msgid "Edit View: "
-msgstr ""
+msgstr "എഡിറ്റ് വ്യൂ: "
 
 #. module: web
 #. odoo-javascript
@@ -2144,7 +2151,7 @@ msgstr ""
 #: code:addons/web/static/src/views/kanban/kanban_renderer.js:0
 #, python-format
 msgid "Edit: %s"
-msgstr ""
+msgstr "എഡിറ്റ്: %s"
 
 #. module: web
 #. odoo-javascript
@@ -2182,7 +2189,7 @@ msgstr ""
 #: code:addons/web/static/src/webclient/settings_form_view/highlight_text/form_label_highlight_text.xml:0
 #, python-format
 msgid "Enterprise"
-msgstr ""
+msgstr "എന്റർപ്രൈസ്"
 
 #. module: web
 #. odoo-javascript
@@ -2265,8 +2272,8 @@ msgid "Exporting grouped data to csv is not supported."
 msgstr ""
 
 #. module: web
-#. odoo-javascript
 #. odoo-python
+#. odoo-javascript
 #: code:addons/web/controllers/export.py:0
 #: code:addons/web/controllers/export.py:0
 #: code:addons/web/static/src/legacy/js/widgets/data_export.js:0
@@ -2289,7 +2296,7 @@ msgstr ""
 #: code:addons/web/static/src/search/search_panel/search_panel.xml:0
 #, python-format
 msgid "FILTER"
-msgstr ""
+msgstr "ഫിൽറ്റർ"
 
 #. module: web
 #. odoo-javascript
@@ -2334,7 +2341,7 @@ msgstr ""
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 #, python-format
 msgid "Field:"
-msgstr ""
+msgstr "ഫീൽഡ്:"
 
 #. module: web
 #. odoo-javascript
@@ -2372,7 +2379,7 @@ msgstr ""
 #: code:addons/web/static/src/search/filter_menu/filter_menu.xml:0
 #, python-format
 msgid "Filters"
-msgstr ""
+msgstr "ഫിൽറ്റർ"
 
 #. module: web
 #. odoo-javascript
@@ -2396,7 +2403,7 @@ msgstr ""
 #: code:addons/web/static/src/views/kanban/kanban_renderer.xml:0
 #, python-format
 msgid "Fold"
-msgstr ""
+msgstr "ഫോൾഡ്"
 
 #. module: web
 #. odoo-javascript
@@ -2405,31 +2412,31 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Followed by"
-msgstr ""
+msgstr "ഫോള്ളോവ്ഡ് ബൈ"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/model_field_selector/model_field_selector.xml:0
 #, python-format
 msgid "Followed-by"
-msgstr ""
+msgstr "ഫോള്ളോവ്ഡ് ബൈ"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__font
 msgid "Font"
-msgstr ""
+msgstr "ഫോണ്ട്"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/font_selection/font_selection_field.js:0
 #, python-format
 msgid "Font Selection"
-msgstr ""
+msgstr "ഫോണ്ട് സെലക്ഷൻ"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Footer"
-msgstr ""
+msgstr "ഫൂട്ടർ"
 
 #. module: web
 #: model:ir.model.fields,help:web.field_base_document_layout__report_footer
@@ -2458,7 +2465,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/views/qweb/qweb_view.js:0
 #, python-format
 msgid "Freedom View"
-msgstr ""
+msgstr "ഫ്രീഡം വ്യൂ"
 
 #. module: web
 #. odoo-javascript
@@ -2525,7 +2532,7 @@ msgstr ""
 #: code:addons/web/static/src/views/graph/graph_view.js:0
 #, python-format
 msgid "Graph"
-msgstr ""
+msgstr "ഗ്രാഫ്"
 
 #. module: web
 #. odoo-javascript
@@ -2535,7 +2542,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Green"
-msgstr ""
+msgstr "പച്ച"
 
 #. module: web
 #. odoo-javascript
@@ -2567,7 +2574,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Hide in Kanban"
-msgstr ""
+msgstr "ഹൈഡ് ഇൻ കൺബൻ"
 
 #. module: web
 #. odoo-javascript
@@ -2630,7 +2637,7 @@ msgstr ""
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__id
 msgid "ID"
-msgstr ""
+msgstr "ഐഡി"
 
 #. module: web
 #. odoo-javascript
@@ -2659,18 +2666,12 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/image_url/image_url_field.xml:0
 #, python-format
 msgid "Image"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
-#, python-format
-msgid "In"
-msgstr ""
+msgstr "ചിത്രം"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
+#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
 #, python-format
 msgid "In %s days"
 msgstr ""
@@ -2697,7 +2698,7 @@ msgstr ""
 #: code:addons/web/static/src/core/debug/profiling/profiling_item.xml:0
 #, python-format
 msgid "Interval"
-msgstr ""
+msgstr "ഇടവേള"
 
 #. module: web
 #. odoo-javascript
@@ -2788,6 +2789,11 @@ msgid "Inviting..."
 msgstr ""
 
 #. module: web
+#: model:ir.model.fields,field_description:web.field_base_document_layout__is_company_details_empty
+msgid "Is Company Details Empty"
+msgstr ""
+
+#. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/debug/profiling/profiling_qweb.xml:0
 #, python-format
@@ -2835,7 +2841,7 @@ msgstr ""
 #: code:addons/web/controllers/session.py:0
 #, python-format
 msgid "Languages"
-msgstr ""
+msgstr "ഭാഷകൾ"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout____last_update
@@ -2845,7 +2851,7 @@ msgstr "അവസാനം അപ്ഡേറ്റ് ചെയ്തത്"
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "അവസാനം അപ്ഡേറ്റ് ചെയ്തത്"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__write_date
@@ -2869,7 +2875,7 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Layout"
-msgstr ""
+msgstr "ലേഔട്ട്"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__layout_background
@@ -2907,7 +2913,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/views/list/list_view.js:0
 #, python-format
 msgid "List"
-msgstr ""
+msgstr "ലിസ്റ്"
 
 #. module: web
 #. odoo-javascript
@@ -3053,7 +3059,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/many2one_barcode/many2one_barcode_field.js:0
 #, python-format
 msgid "Many2OneBarcode"
-msgstr ""
+msgstr "മെനി2വൺബാർകോഡ്"
 
 #. module: web
 #. odoo-javascript
@@ -3061,7 +3067,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 #, python-format
 msgid "Many2many"
-msgstr ""
+msgstr "മെനി2മെനി "
 
 #. module: web
 #. odoo-javascript
@@ -3070,7 +3076,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 #, python-format
 msgid "Many2one"
-msgstr ""
+msgstr "മെനി2വൺ"
 
 #. module: web
 #. odoo-javascript
@@ -3171,7 +3177,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 #, python-format
 msgid "Model"
-msgstr ""
+msgstr "മോഡൽ"
 
 #. module: web
 #. odoo-javascript
@@ -3185,12 +3191,12 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/field_tooltip.xml:0
 #, python-format
 msgid "Model:"
-msgstr ""
+msgstr "മോഡൽ:"
 
 #. module: web
 #: model:ir.model,name:web.model_ir_model
 msgid "Models"
-msgstr ""
+msgstr "മോഡൽസ്"
 
 #. module: web
 #. odoo-javascript
@@ -3200,7 +3206,7 @@ msgstr ""
 #: code:addons/web/static/src/views/view_button/view_button.xml:0
 #, python-format
 msgid "Modifiers:"
-msgstr ""
+msgstr "മോഡിഫയറുകൾ:"
 
 #. module: web
 #. odoo-javascript
@@ -3215,7 +3221,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/monetary/monetary_field.js:0
 #, python-format
 msgid "Monetary"
-msgstr ""
+msgstr "മോനിറ്ററി"
 
 #. module: web
 #. odoo-javascript
@@ -3270,9 +3276,14 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/views/basic/basic_model.js:0
 #: code:addons/web/static/src/views/form/form_controller.js:0
+#: code:addons/web/static/src/views/form/form_controller.xml:0
+#: code:addons/web/static/src/views/form/form_controller.xml:0
+#: code:addons/web/static/src/views/kanban/kanban_controller.xml:0
+#: code:addons/web/static/src/views/list/list_controller.xml:0
+#: code:addons/web/static/src/views/view_dialogs/select_create_dialog.xml:0
 #, python-format
 msgid "New"
-msgstr ""
+msgstr "പുതിയ"
 
 #. module: web
 #. odoo-javascript
@@ -3355,7 +3366,7 @@ msgstr ""
 #: code:addons/web/static/src/views/pivot/pivot_model.js:0
 #, python-format
 msgid "No"
-msgstr ""
+msgstr "ഇല്ല"
 
 #. module: web
 #. odoo-javascript
@@ -3461,7 +3472,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/properties/property_tags.js:0
 #, python-format
 msgid "No result"
-msgstr ""
+msgstr "നോ റിസൾട്ട് "
 
 #. module: web
 #. odoo-javascript
@@ -3535,7 +3546,7 @@ msgstr ""
 #: code:addons/web/static/src/views/view_button/view_button.xml:0
 #, python-format
 msgid "Object:"
-msgstr ""
+msgstr "ഒബ്ജക്റ്റ്:"
 
 #. module: web
 #. odoo-javascript
@@ -3544,14 +3555,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.brand_promotion_message
 #, python-format
 msgid "Odoo"
-msgstr ""
+msgstr "ഒഡൂ"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/apps.js:0
 #, python-format
 msgid "Odoo Apps will be available soon"
-msgstr ""
+msgstr "Odoo ആപ്പുകൾ ഉടൻ ലഭ്യമാകും"
 
 #. module: web
 #. odoo-javascript
@@ -3566,7 +3577,7 @@ msgstr ""
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
 #, python-format
 msgid "Odoo Error"
-msgstr ""
+msgstr "ഓടോ എറർ"
 
 #. module: web
 #. odoo-javascript
@@ -3574,7 +3585,7 @@ msgstr ""
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
 #, python-format
 msgid "Odoo Network Error"
-msgstr ""
+msgstr "ഓടോ നെറ്റ്‌വർക്ക് എറർ "
 
 #. module: web
 #. odoo-javascript
@@ -3588,7 +3599,7 @@ msgstr ""
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
 #, python-format
 msgid "Odoo Server Error"
-msgstr ""
+msgstr "ഓടോ സെർവർ എറർ"
 
 #. module: web
 #. odoo-javascript
@@ -3596,7 +3607,7 @@ msgstr ""
 #: code:addons/web/static/src/public/error_notifications.js:0
 #, python-format
 msgid "Odoo Session Expired"
-msgstr ""
+msgstr "ഓടോ സെഷൻ കാലഹരണപ്പെട്ടു"
 
 #. module: web
 #. odoo-javascript
@@ -3604,7 +3615,7 @@ msgstr ""
 #: code:addons/web/static/src/core/errors/error_dialogs.js:0
 #, python-format
 msgid "Odoo Warning"
-msgstr ""
+msgstr "ഓടോ വാണിംഗ് "
 
 #. module: web
 #. odoo-javascript
@@ -3718,7 +3729,7 @@ msgstr ""
 #: code:addons/web/static/src/webclient/debug_items.js:0
 #, python-format
 msgid "Open View"
-msgstr ""
+msgstr "ഓപ്പൺ വ്യൂ "
 
 #. module: web
 #. odoo-javascript
@@ -3820,17 +3831,17 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Pager"
-msgstr ""
+msgstr "പേജർ"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__paperformat_id
 msgid "Paper format"
-msgstr ""
+msgstr "പേപ്പർ ഫോർമാറ്റ്"
 
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__partner_id
 msgid "Partner"
-msgstr ""
+msgstr "പാർട്ണർ"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login
@@ -3889,7 +3900,7 @@ msgstr ""
 #: code:addons/web/static/src/views/graph/graph_controller.xml:0
 #, python-format
 msgid "Pie Chart"
-msgstr ""
+msgstr "പൈ ചാർട്ട്"
 
 #. module: web
 #. odoo-javascript
@@ -3905,7 +3916,7 @@ msgstr ""
 #: code:addons/web/static/src/views/pivot/pivot_view.js:0
 #, python-format
 msgid "Pivot"
-msgstr ""
+msgstr "പിവറ്റ്"
 
 #. module: web
 #. odoo-python
@@ -3933,6 +3944,7 @@ msgstr "ദയവായി ക്ഷമിക്കുക."
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/fields/relational_fields.js:0
 #: code:addons/web/static/src/legacy/js/views/list/list_renderer.js:0
+#: code:addons/web/static/src/views/list/list_renderer.js:0
 #, python-format
 msgid "Please click on the \"save\" button first"
 msgstr ""
@@ -3984,7 +3996,6 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/xml/base.xml:0
-#: code:addons/web/static/src/views/form/form_controller.xml:0
 #, python-format
 msgid "Please update translations of :"
 msgstr ""
@@ -4001,7 +4012,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "Please use the following communication for your payment : <b><span>\n"
-"                           INV/2020/07/0003</span></b>"
+"                           INV/2023/00003</span></b>"
 msgstr ""
 
 #. module: web
@@ -4031,7 +4042,7 @@ msgstr ""
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__preview
 msgid "Preview"
-msgstr ""
+msgstr "പ്രിവ്യൂ"
 
 #. module: web
 #: model:ir.actions.report,name:web.action_report_externalpreview
@@ -4075,7 +4086,7 @@ msgstr ""
 #: code:addons/web/static/src/search/utils/dates.js:0
 #, python-format
 msgid "Previous Year"
-msgstr ""
+msgstr "മുൻ വർഷം"
 
 #. module: web
 #. odoo-javascript
@@ -4095,7 +4106,7 @@ msgstr ""
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__primary_color
 msgid "Primary Color"
-msgstr ""
+msgstr "പ്രാഥമിക നിറം"
 
 #. module: web
 #. odoo-javascript
@@ -4112,7 +4123,7 @@ msgstr "പ്രിന്റ് "
 #: code:addons/web/static/src/legacy/js/components/action_menus.js:0
 #, python-format
 msgid "Printing options"
-msgstr ""
+msgstr "പ്രിന്റിംഗ് ഓപ്ഷനുകൾ"
 
 #. module: web
 #. odoo-javascript
@@ -4136,14 +4147,14 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/progress_bar/progress_bar_field.js:0
 #, python-format
 msgid "Progress Bar"
-msgstr ""
+msgstr "പ്രോഗ്രസ്സ് ബാർ"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 #, python-format
 msgid "Properties"
-msgstr ""
+msgstr "പ്രോപ്പർട്ടികൾ"
 
 #. module: web
 #. odoo-javascript
@@ -4167,7 +4178,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Purple"
-msgstr ""
+msgstr "പർപ്പിൾ"
 
 #. module: web
 #. odoo-javascript
@@ -4175,7 +4186,7 @@ msgstr ""
 #: code:addons/web/static/src/search/utils/dates.js:0
 #, python-format
 msgid "Q1"
-msgstr ""
+msgstr "ക്വാർട്ടർ 1"
 
 #. module: web
 #. odoo-javascript
@@ -4183,7 +4194,7 @@ msgstr ""
 #: code:addons/web/static/src/search/utils/dates.js:0
 #, python-format
 msgid "Q2"
-msgstr ""
+msgstr "ക്വാർട്ടർ 2"
 
 #. module: web
 #. odoo-javascript
@@ -4191,7 +4202,7 @@ msgstr ""
 #: code:addons/web/static/src/search/utils/dates.js:0
 #, python-format
 msgid "Q3"
-msgstr ""
+msgstr "ക്വാർട്ടർ 3"
 
 #. module: web
 #. odoo-javascript
@@ -4199,7 +4210,7 @@ msgstr ""
 #: code:addons/web/static/src/search/utils/dates.js:0
 #, python-format
 msgid "Q4"
-msgstr ""
+msgstr "ക്വാർട്ടർ 4"
 
 #. module: web
 #: model:ir.model.fields.selection,name:web.selection__ir_actions_act_window_view__view_mode__qweb
@@ -4212,7 +4223,7 @@ msgstr ""
 #: code:addons/web/static/src/search/utils/dates.js:0
 #, python-format
 msgid "Quarter"
-msgstr ""
+msgstr "ക്വാർട്ടർ"
 
 #. module: web
 #. odoo-javascript
@@ -4259,7 +4270,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/radio/radio_field.js:0
 #, python-format
 msgid "Radio"
-msgstr ""
+msgstr "റേഡിയോ"
 
 #. module: web
 #. odoo-javascript
@@ -4304,7 +4315,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/reference/reference_field.js:0
 #, python-format
 msgid "Reference"
-msgstr ""
+msgstr "റഫറൻസ്"
 
 #. module: web
 #. odoo-javascript
@@ -4370,7 +4381,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/search/search_bar/search_bar.xml:0
 #: code:addons/web/static/src/search/search_bar/search_bar.xml:0
-#: code:addons/web/static/src/views/fields/relational_utils.xml:0
+#: code:addons/web/static/src/views/fields/relational_utils.js:0
 #: code:addons/web/static/src/views/fields/relational_utils.xml:0
 #: code:addons/web/static/src/views/form/form_controller.xml:0
 #, python-format
@@ -4441,7 +4452,7 @@ msgstr ""
 #. module: web
 #: model:ir.model.fields,field_description:web.field_base_document_layout__report_layout_id
 msgid "Report Layout"
-msgstr ""
+msgstr "റിപ്പോർട്ട് ലേഔട്ട് "
 
 #. module: web
 #: model:ir.actions.report,name:web.action_report_layout_preview
@@ -4534,7 +4545,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 #, python-format
 msgid "Save"
-msgstr ""
+msgstr "സേവ്"
 
 #. module: web
 #. odoo-javascript
@@ -4544,7 +4555,7 @@ msgstr ""
 #: code:addons/web/static/src/views/view_dialogs/form_view_dialog.xml:0
 #, python-format
 msgid "Save & Close"
-msgstr ""
+msgstr "സേവ് & ക്ലോസ് "
 
 #. module: web
 #. odoo-javascript
@@ -4553,7 +4564,7 @@ msgstr ""
 #: code:addons/web/static/src/views/view_dialogs/form_view_dialog.xml:0
 #, python-format
 msgid "Save & New"
-msgstr ""
+msgstr "സേവ് & ന്യൂ "
 
 #. module: web
 #. odoo-javascript
@@ -4808,14 +4819,14 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/field_tooltip.xml:0
 #, python-format
 msgid "Selection:"
-msgstr ""
+msgstr "സെലക്ഷൻ:"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/email/email_field.xml:0
 #, python-format
 msgid "Send Email"
-msgstr ""
+msgstr "ഇമെയിൽ അയയ്ക്കുക"
 
 #. module: web
 #. odoo-javascript
@@ -4892,6 +4903,13 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/webclient/user_menu/user_menu_items.js:0
+#, python-format
+msgid "Shortcuts"
+msgstr "ഷോർട്ട്കട്ട് "
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
@@ -4912,7 +4930,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/fields/signature.js:0
 #, python-format
 msgid "Signature"
-msgstr ""
+msgstr "കയ്യൊപ്പ്"
 
 #. module: web
 #. odoo-javascript
@@ -5103,7 +5121,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 #, python-format
 msgid "Text"
-msgstr ""
+msgstr "ടെക്സ്റ്റ്"
 
 #. module: web
 #: model:ir.model.fields,help:web.field_base_document_layout__vat
@@ -5178,14 +5196,14 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
 #, python-format
 msgid "There was a problem while uploading your file"
-msgstr ""
+msgstr "നിങ്ങളുടെ ഫയൽ അപ്‌ലോഡ് ചെയ്യുമ്പോൾ ഒരു പ്രശ്നമുണ്ടായി"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/file_handler.js:0
 #, python-format
 msgid "There was a problem while uploading your file."
-msgstr ""
+msgstr "നിങ്ങളുടെ ഫയൽ അപ്‌ലോഡ് ചെയ്യുമ്പോൾ ഒരു പ്രശ്നമുണ്ടായി"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.neutralize_banner
@@ -5198,6 +5216,7 @@ msgstr ""
 #, python-format
 msgid "This date is in the future. Make sure this is what you expect."
 msgstr ""
+"ഈ തീയതി ഭാവിയിലാണ്. നിങ്ങൾ പ്രതീക്ഷിക്കുന്നത് ഇതാണ് എന്ന് ഉറപ്പാക്കുക."
 
 #. module: web
 #. odoo-javascript
@@ -5205,6 +5224,7 @@ msgstr ""
 #, python-format
 msgid "This date is on the future. Make sure it is what you expected."
 msgstr ""
+"ഈ തീയതി ഭാവിയിലാണ്. നിങ്ങൾ പ്രതീക്ഷിക്കുന്നത് ഇതാണ് എന്ന് ഉറപ്പാക്കുക."
 
 #. module: web
 #. odoo-javascript
@@ -5301,7 +5321,7 @@ msgstr ""
 #: code:addons/web/static/src/views/calendar/calendar_controller.xml:0
 #: code:addons/web/static/src/views/calendar/calendar_controller.xml:0
 #: code:addons/web/static/src/views/calendar/calendar_controller.xml:0
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
+#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
 #, python-format
 msgid "Today"
 msgstr "ഇന്ന്"
@@ -5325,10 +5345,10 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
+#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
 #, python-format
 msgid "Tomorrow"
-msgstr ""
+msgstr "നാളെ"
 
 #. module: web
 #. odoo-python
@@ -5345,7 +5365,7 @@ msgstr ""
 #: code:addons/web/static/src/views/pivot/pivot_model.js:0
 #, python-format
 msgid "Total"
-msgstr ""
+msgstr "ആകെ"
 
 #. module: web
 #. odoo-javascript
@@ -5464,8 +5484,8 @@ msgid "Uncaught Promise"
 msgstr ""
 
 #. module: web
-#. odoo-javascript
 #. odoo-python
+#. odoo-javascript
 #: code:addons/web/controllers/export.py:0
 #: code:addons/web/static/src/views/calendar/calendar_model.js:0
 #: code:addons/web/static/src/views/graph/graph_model.js:0
@@ -5594,7 +5614,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/many2many_binary/many2many_binary_field.xml:0
 #, python-format
 msgid "Uploaded"
-msgstr ""
+msgstr "അപ്‌ലോഡ് ചെയ്തു"
 
 #. module: web
 #. odoo-javascript
@@ -5602,7 +5622,7 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/many2many_binary/many2many_binary_field.xml:0
 #, python-format
 msgid "Uploading"
-msgstr ""
+msgstr "അപ്‌ലോഡ് ചെയ്യുന്നു"
 
 #. module: web
 #. odoo-javascript
@@ -5802,7 +5822,7 @@ msgstr ""
 #: code:addons/web/static/src/views/calendar/calendar_controller.js:0
 #, python-format
 msgid "Week"
-msgstr ""
+msgstr "ആഴ്ച"
 
 #. module: web
 #. odoo-javascript
@@ -5855,7 +5875,7 @@ msgstr ""
 #: code:addons/web/static/src/views/calendar/calendar_controller.js:0
 #, python-format
 msgid "Year"
-msgstr ""
+msgstr "വർഷം"
 
 #. module: web
 #. odoo-javascript
@@ -5865,7 +5885,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Yellow"
-msgstr ""
+msgstr "മഞ്ഞ"
 
 #. module: web
 #. odoo-javascript
@@ -5885,10 +5905,10 @@ msgstr "അതെ"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/fields/basic_fields.js:0
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
+#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.js:0
 #, python-format
 msgid "Yesterday"
-msgstr ""
+msgstr "ഇന്നലെ"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login_successful
@@ -5929,6 +5949,21 @@ msgstr ""
 #, python-format
 msgid ""
 "You may not believe it,<br />but the application is actually loading..."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/property_tags.js:0
+#, python-format
+msgid "You need to be able to edit parent first to add property tags"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
+#: code:addons/web/static/src/views/fields/properties/properties_field.js:0
+#, python-format
+msgid "You need to be able to edit parent first to configure property fields"
 msgstr ""
 
 #. module: web
@@ -6101,6 +6136,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/control_panel/search_utils.js:0
 #: code:addons/web/static/src/legacy/js/widgets/domain_selector.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #, python-format
 msgid "contains"
 msgstr ""
@@ -6114,20 +6150,6 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
-#, python-format
-msgid "days"
-msgstr "ദിവസം"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/fields/remaining_days/remaining_days_field.xml:0
-#, python-format
-msgid "days ago"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/domain_selector/domain_selector_operators.js:0
 #: code:addons/web/static/src/legacy/js/widgets/domain_selector.js:0
 #, python-format
@@ -6137,6 +6159,7 @@ msgstr ""
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/legacy/js/control_panel/search_utils.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #, python-format
 msgid "doesn't contain"
@@ -6190,7 +6213,7 @@ msgstr ""
 #: code:addons/web/static/src/views/calendar/calendar_common/calendar_common_popover.js:0
 #, python-format
 msgid "hour"
-msgstr ""
+msgstr "മണിക്കൂർ"
 
 #. module: web
 #. odoo-javascript
@@ -6297,6 +6320,7 @@ msgstr ""
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #, python-format
 msgid "is equal to"
 msgstr ""
@@ -6329,6 +6353,7 @@ msgstr ""
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #, python-format
 msgid "is not equal to"
 msgstr ""
@@ -6348,6 +6373,8 @@ msgstr ""
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #, python-format
 msgid "is not set"
 msgstr ""
@@ -6362,6 +6389,8 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/control_panel/search_utils.js:0
 #: code:addons/web/static/src/legacy/js/control_panel/search_utils.js:0
 #: code:addons/web/static/src/legacy/js/widgets/domain_selector.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
+#: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
 #: code:addons/web/static/src/search/filter_menu/custom_filter_item.js:0
@@ -6430,14 +6459,14 @@ msgstr ""
 #: code:addons/web/static/src/views/calendar/calendar_common/calendar_common_popover.js:0
 #, python-format
 msgid "minute"
-msgstr ""
+msgstr "മിനിറ്റ്"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/calendar/calendar_common/calendar_common_popover.js:0
 #, python-format
 msgid "minutes"
-msgstr ""
+msgstr "മിനുട്ടുകൾ"
 
 #. module: web
 #. odoo-javascript
@@ -6533,7 +6562,7 @@ msgstr ""
 #: code:addons/web/static/src/search/search_model.js:0
 #, python-format
 msgid "or"
-msgstr ""
+msgstr "അഥവാ"
 
 #. module: web
 #. odoo-javascript

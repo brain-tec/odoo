@@ -2616,8 +2616,7 @@ QUnit.module("Fields", (hooks) => {
         await click(buttons[0]);
         assert.verifySteps(["action"]);
 
-        await click(buttons[1]);
-        assert.verifySteps([]); // the second button is disabled, it can't be clicked
+        assert.ok(buttons[1].disabled); // the second button is disabled, it can't be clicked
 
         def.resolve();
         await nextTick();
@@ -3204,6 +3203,30 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
         });
 
+        await editInput(target, ".o_field_many2one input", "new partner");
+        await triggerEvent(target, ".o_field_many2one input", "blur");
+
+        assert.containsNone(target, ".modal", "should not display the create modal");
+        assert.strictEqual(
+            target.querySelector(".o_field_many2one input").value,
+            "",
+            "many2one value should cleared on focusout if many2one is no_create"
+        );
+    });
+
+    QUnit.test("no_create option on a many2one when can_create is absent", async function (assert) {
+        serverData.models.partner.fields.product_id.readonly = true;
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <sheet>
+                        <field name="product_id" options="{'no_create': 1}" readonly="0" />
+                    </sheet>
+                </form>`,
+        });
         await editInput(target, ".o_field_many2one input", "new partner");
         await triggerEvent(target, ".o_field_many2one input", "blur");
 
@@ -4078,7 +4101,7 @@ QUnit.module("Fields", (hooks) => {
         assert.containsNone(target, ".modal");
 
         assert.strictEqual(
-            target.querySelectorAll(".o_data_cell")[1].textContent,
+            target.querySelectorAll(".o_data_cell .o_input")[1].value,
             "test",
             "the partner name should have been updated to 'test'"
         );
@@ -4581,5 +4604,53 @@ QUnit.module("Fields", (hooks) => {
             target.querySelector(".o_field_widget[name=trululu] input").value,
             "aaa"
         );
+    });
+
+    QUnit.test("many2one field with kanban_view_ref attribute", async function (assert) {
+        registry.category("services").add("ui", {
+            start(env) {
+                Object.defineProperty(env, "isSmall", {
+                    value: true,
+                });
+                return {
+                    activeElement: document.body,
+                    activateElement() {},
+                    deactivateElement() {},
+                    bus: new owl.EventBus(),
+                    size: 0,
+                    isSmall: true,
+                };
+            },
+        });
+        serverData.views = {
+            "partner,98,kanban": `
+                <kanban>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div>
+                                <field name="display_name"/>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>`,
+        };
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: '<form><field name="trululu" kanban_view_ref="98"/></form>',
+            resId: 1,
+            mockRPC(route, { method, kwargs }) {
+                if (method === "get_views") {
+                    assert.step(JSON.stringify(kwargs.views));
+                }
+            },
+        });
+
+        await click(target, ".o_field_many2one input");
+        assert.verifySteps([
+            '[[100000001,"form"],[100000002,"search"]]',
+            '[[98,"kanban"],[false,"search"]]',
+        ]);
     });
 });

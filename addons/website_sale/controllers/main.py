@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from collections import defaultdict
-from itertools import product as cartesian_product
+
 import json
 import logging
 from datetime import datetime
@@ -128,6 +127,13 @@ class WebsiteSaleForm(WebsiteForm):
 
 
 class Website(main.Website):
+
+    def _login_redirect(self, uid, redirect=None):
+        # If we are logging in, clear the current pricelist to be able to find
+        # the pricelist that corresponds to the user afterwards.
+        request.session.pop('website_sale_current_pl', None)
+        return super()._login_redirect(uid, redirect=redirect)
+
     @http.route()
     def autocomplete(self, search_type=None, term=None, order=None, limit=5, max_nb_chars=999, options=None):
         options = options or {}
@@ -240,52 +246,7 @@ class WebsiteSale(http.Controller):
                                                                                order=self._get_search_order(post),
                                                                                options=options)
         search_result = details[0].get('results', request.env['product.template']).with_context(bin_size=True)
-        if attrib_set:
-            # Attributes value per attribute
-            attribute_values = request.env['product.attribute.value'].browse(attrib_set)
-            values_per_attribute = defaultdict(lambda: request.env['product.attribute.value'])
-            # In case we have only one value per attribute we can check for a combination using those attributes directly
-            multi_value_attribute = False
-            for value in attribute_values:
-                values_per_attribute[value.attribute_id] |= value
-                if len(values_per_attribute[value.attribute_id]) > 1:
-                    multi_value_attribute = True
 
-            def filter_template(template, attribute_values_list):
-                # Transform product.attribute.value to product.template.attribute.value
-                attribute_value_to_ptav = dict()
-                for ptav in template.attribute_line_ids.product_template_value_ids:
-                    attribute_value_to_ptav[ptav.product_attribute_value_id] = ptav.id
-                possible_combinations = False
-                for attribute_values in attribute_values_list:
-                    ptavs = request.env['product.template.attribute.value'].browse(
-                        [attribute_value_to_ptav[val] for val in attribute_values if val in attribute_value_to_ptav]
-                    )
-                    if len(ptavs) < len(attribute_values):
-                        # In this case the template is not compatible with this specific combination
-                        continue
-                    if len(ptavs) == len(template.attribute_line_ids):
-                        if template._is_combination_possible(ptavs):
-                            return True
-                    elif len(ptavs) < len(template.attribute_line_ids):
-                        if len(attribute_values_list) == 1:
-                            if any(template._get_possible_combinations(necessary_values=ptavs)):
-                                return True
-                        if not possible_combinations:
-                            possible_combinations = template._get_possible_combinations()
-                        if any(len(ptavs & combination) == len(ptavs) for combination in possible_combinations):
-                            return True
-                return False
-
-            # If multi_value_attribute is False we know that we have our final combination (or at least a subset of it)
-            if not multi_value_attribute:
-                possible_attrib_values_list = [attribute_values]
-            else:
-                # Cartesian product from dict keys and values
-                possible_attrib_values_list = [request.env['product.attribute.value'].browse([v.id for v in values]) for
-                                               values in cartesian_product(*values_per_attribute.values())]
-
-            search_result = search_result.filtered(lambda tmpl: filter_template(tmpl, possible_attrib_values_list))
         return fuzzy_search_term, product_count, search_result
 
     def _shop_get_query_url_kwargs(self, category, search, min_price, max_price, attrib=None, order=None, **post):
@@ -387,7 +348,9 @@ class WebsiteSale(http.Controller):
             domain = self._get_search_domain(search, category, attrib_values)
 
             # This is ~4 times more efficient than a search for the cheapest and most expensive products
-            from_clause, where_clause, where_params = Product._where_calc(domain).get_sql()
+            query = Product._where_calc(domain)
+            Product._apply_ir_rules(query, 'read')
+            from_clause, where_clause, where_params = query.get_sql()
             query = f"""
                 SELECT COALESCE(MIN(list_price), 0) * {conversion_rate}, COALESCE(MAX(list_price), 0) * {conversion_rate}
                   FROM {from_clause}
@@ -448,6 +411,8 @@ class WebsiteSale(http.Controller):
 
         products_prices = lazy(lambda: products._get_sales_prices(pricelist))
 
+        fiscal_position_id = website._get_current_fiscal_position_id(request.env.user.partner_id)
+
         values = {
             'search': fuzzy_search_term or search,
             'original_search': fuzzy_search_term and search,
@@ -472,6 +437,7 @@ class WebsiteSale(http.Controller):
             'products_prices': products_prices,
             'get_product_prices': lambda product: lazy(lambda: products_prices[product.id]),
             'float_round': tools.float_round,
+            'fiscal_position_id': fiscal_position_id,
         }
         if filter_by_price_enabled:
             values['min_price'] = min_price or available_min_price
@@ -549,6 +515,7 @@ class WebsiteSale(http.Controller):
         else:
             product_template.product_template_image_ids.unlink()
 
+    # TODO: remove in master as it is not called anymore.
     @http.route(['/shop/product/remove-image'], type='json', auth='user', website=True)
     def remove_product_image(self, image_res_model, image_res_id):
         """
@@ -618,6 +585,8 @@ class WebsiteSale(http.Controller):
         other_image = product_images[new_image_idx]
         source_field = hasattr(image_to_resequence, 'video_url') and image_to_resequence.video_url and 'video_url' or 'image_1920'
         target_field = hasattr(other_image, 'video_url') and other_image.video_url and 'video_url' or 'image_1920'
+        if target_field == 'video_url' and image_res_model == 'product.product':
+            raise ValidationError(_("Can not resequence a video at first position."))
         previous_data = other_image[target_field]
         other_image[source_field] = image_to_resequence[source_field]
         image_to_resequence[target_field] = previous_data
@@ -769,6 +738,7 @@ class WebsiteSale(http.Controller):
             'suggested_products': [],
         })
         if order:
+            values.update(order._get_website_sale_extra_values())
             order.order_line.filtered(lambda l: not l.product_id.active).unlink()
             values['suggested_products'] = order._cart_accessories()
             values.update(self._get_express_shop_payment_values(order))
@@ -977,12 +947,30 @@ class WebsiteSale(http.Controller):
         error = dict()
         error_message = []
 
-        # prevent name change if invoices exist
         if data.get('partner_id'):
-            partner = request.env['res.partner'].browse(int(data['partner_id']))
-            if partner.exists() and partner.name and not partner.sudo().can_edit_vat() and 'name' in data and (data['name'] or False) != (partner.name or False):
+            partner_su = request.env['res.partner'].sudo().browse(int(data['partner_id'])).exists()
+            name_change = partner_su and 'name' in data and data['name'] != partner_su.name
+            email_change = partner_su and 'email' in data and data['email'] != partner_su.email
+
+            # Prevent changing the billing partner name if invoices have been issued.
+            if mode[1] == 'billing' and name_change and not partner_su.can_edit_vat():
                 error['name'] = 'error'
-                error_message.append(_('Changing your name is not allowed once invoices have been issued for your account. Please contact us directly for this operation.'))
+                error_message.append(_(
+                    "Changing your name is not allowed once documents have been issued for your"
+                    " account. Please contact us directly for this operation."
+                ))
+
+            # Prevent change the partner name or email if it is an internal user.
+            if (name_change or email_change) and not all(partner_su.user_ids.mapped('share')):
+                error.update({
+                    'name': 'error' if name_change else None,
+                    'email': 'error' if email_change else None,
+                })
+                error_message.append(_(
+                    "If you are ordering for an external person, please place your order via the"
+                    " backend. If you wish to change your name or email address, please do so in"
+                    " the account settings or contact your administrator."
+                ))
 
         # Required fields from form
         required_fields = [f for f in (all_form_values.get('field_required') or '').split(',') if f]
@@ -993,7 +981,10 @@ class WebsiteSale(http.Controller):
 
         # error message for empty required fields
         for field_name in required_fields:
-            if not data.get(field_name):
+            val = data.get(field_name)
+            if isinstance(val, str):
+                val = val.strip()
+            if not val:
                 error[field_name] = 'missing'
 
         # email validation
@@ -1142,6 +1133,7 @@ class WebsiteSale(http.Controller):
                 # it returns Forbidden() instead the partner_id
                 if isinstance(partner_id, Forbidden):
                     return partner_id
+                fpos_before = order.fiscal_position_id
                 if mode[1] == 'billing':
                     order.partner_id = partner_id
                     # This is the *only* thing that the front end user will see/edit anyway when choosing billing address
@@ -1155,6 +1147,9 @@ class WebsiteSale(http.Controller):
                         request.website.sale_get_order(update_pricelist=True)
                 elif mode[1] == 'shipping':
                     order.partner_shipping_id = partner_id
+
+                if order.fiscal_position_id != fpos_before:
+                    order._recompute_taxes()
 
                 # TDE FIXME: don't ever do this
                 # -> TDE: you are the guy that did what we should never do in commit e6f038a
@@ -1280,6 +1275,7 @@ class WebsiteSale(http.Controller):
         :param dict custom_values: Optional custom values for the creation or edition.
         :return int: The id of the partner created or edited
         """
+        request.update_env(context=request.website.env.context)
         values = self.values_preprocess(partner_details)
 
         # Ensure that we won't write on unallowed fields.
@@ -1399,7 +1395,10 @@ class WebsiteSale(http.Controller):
         # check that cart is valid
         order = request.website.sale_get_order()
         redirection = self.checkout_redirection(order)
-        if redirection:
+        open_editor = request.params.get('open_editor') == 'true'
+        # Do not redirect if it is to edit
+        # (the information is transmitted via the "open_editor" parameter in the url)
+        if not open_editor and redirection:
             return redirection
 
         values = {
@@ -1469,7 +1468,7 @@ class WebsiteSale(http.Controller):
         return {
             'website_sale_order': order,
             'errors': [],
-            'partner': order.partner_id,
+            'partner': order.partner_invoice_id,
             'order': order,
             'payment_action_id': request.env.ref('payment.action_payment_provider').id,
             # Payment form common (checkout and manage) values
@@ -1546,7 +1545,7 @@ class WebsiteSale(http.Controller):
             order = request.env['sale.order'].sudo().browse(sale_order_id)
             assert order.id == request.session.get('sale_last_order_id')
 
-        tx = order.get_portal_last_transaction()
+        tx = order.get_portal_last_transaction() if order else order.env['payment.transaction']
 
         if not order or (order.amount_total and not tx):
             return request.redirect('/shop')
@@ -1631,6 +1630,7 @@ class WebsiteSale(http.Controller):
         attribute = request.env['product.attribute'].browse(attribute_id)
         if 'display_type' in options:
             attribute.write({'display_type': options['display_type']})
+            request.env['ir.qweb'].clear_caches()
 
     @http.route(['/shop/config/website'], type='json', auth='user')
     def _change_website_config(self, **options):
@@ -1742,7 +1742,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
         kwargs.update({
             'reference_prefix': None,  # Allow the reference to be computed based on the order
-            'partner_id': order_sudo.partner_id.id,
+            'partner_id': order_sudo.partner_invoice_id.id,
             'sale_order_id': order_id,  # Include the SO to allow Subscriptions to tokenize the tx
         })
         kwargs.pop('custom_create_values', None)  # Don't allow passing arbitrary create values
@@ -1793,19 +1793,34 @@ class CustomerPortal(portal.CustomerPortal):
         for line in sale_order.order_line:
             if line.display_type:
                 continue
+            if line._is_delivery():
+                continue
+            combination = line.product_id.product_template_attribute_value_ids | line.product_no_variant_attribute_value_ids
             res = {
                 'product_template_id': line.product_id.product_tmpl_id.id,
                 'product_id': line.product_id.id,
+                'combination': combination.ids,
+                'no_variant_attribute_values': [
+                    { # Same input format as provided by product configurator
+                        'value': ptav.id,
+                    } for ptav in line.product_no_variant_attribute_value_ids
+                ],
+                'product_custom_attribute_values': [
+                    { # Same input format as provided by product configurator
+                        'custom_product_template_attribute_value_id': pcav.custom_product_template_attribute_value_id.id,
+                        'custom_value': pcav.custom_value,
+                    } for pcav in line.product_custom_attribute_value_ids
+                ],
                 'type': line.product_id.type,
-                'name': line.product_id.name,
-                'description_sale': line.product_id.description_sale,
+                'name': line.name_short,
+                'description_sale': line.product_id.description_sale or '' + line._get_sale_order_line_multiline_description_variants(),
                 'qty': line.product_uom_qty,
                 'add_to_cart_allowed': line.with_user(request.env.user).sudo()._is_reorder_allowed(),
                 'has_image': bool(line.product_id.image_128),
             }
             if res['add_to_cart_allowed']:
                 res['combinationInfo'] = line.product_id.product_tmpl_id.with_context(**self._sale_reorder_get_line_context())\
-                    ._get_combination_info([], res['product_id'], res['qty'], pricelist)
+                    ._get_combination_info(combination, res['product_id'], res['qty'], pricelist)
             else:
                 res['combinationInfo'] = {}
             result['products'].append(res)

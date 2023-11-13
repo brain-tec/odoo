@@ -11,23 +11,23 @@
 # Egon Raamat <egon@avalah.ee>, 2022
 # Algo Kärp <algokarp@gmail.com>, 2022
 # Piia Paurson <piia@avalah.ee>, 2022
-# Triine Aavik <triine@avalah.ee>, 2022
 # Aveli Kannel <aveli@avalah.ee>, 2022
 # Martin Trigaux, 2022
 # Patrick-Jordan Kiudorv, 2022
-# Leaanika Randmets, 2022
 # Anna, 2023
 # Eneli Õigus <enelioigus@gmail.com>, 2023
-# Jana Jaakson, 2023
+# JanaAvalah, 2023
+# Triine Aavik <triine@avalah.ee>, 2023
+# Leaanika Randmets, 2023
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-02 10:33+0000\n"
+"POT-Creation-Date: 2023-09-15 09:36+0000\n"
 "PO-Revision-Date: 2022-09-22 05:46+0000\n"
-"Last-Translator: Jana Jaakson, 2023\n"
-"Language-Team: Estonian (https://www.transifex.com/odoo/teams/41243/et/)\n"
+"Last-Translator: Leaanika Randmets, 2023\n"
+"Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -1356,7 +1356,7 @@ msgstr "Töötaja kinnitaja järgi"
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__leave_validation_type__both
 msgid "By Employee's Approver and Time Off Officer"
-msgstr "Töötaja kinnitaja või puudumiste kinnitaja järgi"
+msgstr "Töötaja kinnitaja ja puudumiste kinnitaja järgi"
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__holiday_type
@@ -2267,6 +2267,13 @@ msgstr ""
 "                After this accrual's period: When the accrual is complete (a week, a month), and granted, you switch to next level if allocation date corresponds"
 
 #. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave_allocation.py:0
+#, python-format
+msgid "Incorrect state for new allocation"
+msgstr ""
+
+#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__message_is_follower
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_allocation__message_is_follower
 msgid "Is Follower"
@@ -2418,7 +2425,7 @@ msgstr "Jääk"
 #: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
 #, python-format
 msgid "Left:"
-msgstr "Vasak:"
+msgstr "Jääk:"
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -2872,7 +2879,7 @@ msgid ""
 "Number of days of the time off request according to your working schedule. "
 "Used for interface."
 msgstr ""
-"Puudumiste taotlemise päevade arv vastavalt teie töögraafikule. Kasutatakse "
+"Puudumiste taotlemise päevade arv vastavalt teie tööajale. Kasutatakse "
 "liidese jaoks."
 
 #. module: hr_holidays
@@ -2896,14 +2903,14 @@ msgid ""
 "Number of hours of the time off request according to your working schedule. "
 "Used for interface."
 msgstr ""
-"Puudumiste taotlemise tundide arv vastavalt teie töögraafikule. Kasutatakse "
+"Puudumiste taotlemise tundide arv vastavalt teie tööajale. Kasutatakse "
 "liidese jaoks."
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__message_needaction_counter
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_allocation__message_needaction_counter
-msgid "Number of messages which requires an action"
-msgstr "Tegutsemist nõudvate sõnumite arv"
+msgid "Number of messages requiring action"
+msgstr ""
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__message_has_error_counter
@@ -3015,6 +3022,13 @@ msgid "Open"
 msgstr "Avatud"
 
 #. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_employee.py:0
+#, python-format
+msgid "Operation not supported"
+msgstr "Toiming pole toetatud"
+
+#. module: hr_holidays
 #. odoo-javascript
 #: code:addons/hr_holidays/static/src/components/persona_im_status_icon/persona_im_status_icon.xml:0
 #: code:addons/hr_holidays/static/src/components/thread_icon/thread_icon.xml:0
@@ -3097,8 +3111,18 @@ msgid "Public"
 msgstr "Avalik"
 
 #. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/views/calendar/filter_panel/calendar_filter_panel.xml:0
+#, python-format
+msgid "Public Holiday"
+msgstr ""
+
+#. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/views/calendar/filter_panel/calendar_filter_panel.xml:0
 #: model:ir.actions.act_window,name:hr_holidays.open_view_public_holiday
 #: model:ir.ui.menu,name:hr_holidays.hr_holidays_public_time_off_menu_configuration
+#, python-format
 msgid "Public Holidays"
 msgstr "Riigipühad"
 
@@ -3487,14 +3511,20 @@ msgstr ""
 "Planeeritud: Tulevased tegevused"
 
 #. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/views/calendar/filter_panel/calendar_filter_panel.xml:0
 #: model:ir.model,name:hr_holidays.model_hr_leave_stress_day
+#, python-format
 msgid "Stress Day"
 msgstr "Ettevõtte kiired tööpäevad"
 
 #. module: hr_holidays
+#. odoo-javascript
+#: code:addons/hr_holidays/static/src/views/calendar/filter_panel/calendar_filter_panel.xml:0
 #: model:ir.actions.act_window,name:hr_holidays.hr_leave_stress_day_action
 #: model:ir.ui.menu,name:hr_holidays.hr_holidays_stress_day_menu_configuration
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_stress_day_view_search
+#, python-format
 msgid "Stress Days"
 msgstr "Ettevõtte kiired tööpäevad"
 
@@ -4431,6 +4461,14 @@ msgstr "Saate puudumisele valida alguskuupäeva ja lõppkuupäevan"
 #, python-format
 msgid "You can't manually archive/unarchive a time off."
 msgstr "Puudumisi ei saa manuaalselt arhiiveerida/arhiivist välja tuua."
+
+#. module: hr_holidays
+#. odoo-python
+#: code:addons/hr_holidays/models/hr_leave_allocation.py:0
+#, python-format
+msgid ""
+"You cannot archive an allocation which is in confirm or validate state."
+msgstr ""
 
 #. module: hr_holidays
 #. odoo-python

@@ -4,17 +4,17 @@
 # 
 # Translators:
 # Cécile Collart <cco@odoo.com>, 2022
-# Martin Trigaux, 2022
+# Martin Trigaux, 2023
 # Jolien De Paepe, 2023
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-15 12:45+0000\n"
+"POT-Creation-Date: 2023-04-14 05:53+0000\n"
 "PO-Revision-Date: 2022-09-22 05:55+0000\n"
 "Last-Translator: Jolien De Paepe, 2023\n"
-"Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
+"Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -509,7 +509,7 @@ msgstr "Couleur de fond"
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "Background Position"
-msgstr "Position de l'arrière-plan"
+msgstr "Position arrière-plan"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_base
@@ -540,7 +540,7 @@ msgstr "En-dessous"
 #: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Big section heading."
-msgstr "Titre d'une section importante."
+msgstr "Grand titre de section."
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
@@ -552,7 +552,7 @@ msgstr "Blobs"
 #: code:addons/web_editor/static/src/js/editor/snippets.editor.js:0
 #, python-format
 msgid "Block"
-msgstr "Bloquer"
+msgstr "Bloc"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
@@ -696,7 +696,7 @@ msgstr "Couleur"
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "Color filter"
-msgstr "Filtre de couleur"
+msgstr "Filtre couleur"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
@@ -949,7 +949,7 @@ msgstr "Ignorer l'enregistrement"
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_web_editor_converter_test_sub__display_name
 msgid "Display Name"
-msgstr "Afficher le nom"
+msgstr "Nom d'affichage"
 
 #. module: web_editor
 #. odoo-javascript
@@ -977,7 +977,7 @@ msgstr "Double"
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 #, python-format
 msgid "Double-click to edit"
-msgstr "Double-cliquer pour éditer "
+msgstr "Double-cliquer pour modifier "
 
 #. module: web_editor
 #. odoo-javascript
@@ -1025,19 +1025,19 @@ msgstr "EarlyBird"
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "Edit Link"
-msgstr "Éditer le lien"
+msgstr "Modifier le lien"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "Edit image"
-msgstr "Éditer l'image"
+msgstr "Modifier l'image"
 
 #. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #, python-format
 msgid "Edit media description"
-msgstr "Éditer la description du média"
+msgstr "Modifier la description du média"
 
 #. module: web_editor
 #. odoo-javascript
@@ -1050,14 +1050,6 @@ msgstr ""
 "Il n'est pas conseillé de modifier un fichier intégré via cet éditeur, car "
 "cela empêchera sa mise à jour lors des futures mises à niveau de "
 "l'application."
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
-#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Embed"
-msgstr "Intégrer"
 
 #. module: web_editor
 #. odoo-javascript
@@ -1086,6 +1078,13 @@ msgstr "Intégrer l'image dans le document."
 #, python-format
 msgid "Embed the youtube video in the document."
 msgstr "Intégrer la vidéo Youtube dans le document."
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "Empty quote"
+msgstr "Citation vide"
 
 #. module: web_editor
 #. odoo-javascript
@@ -1312,12 +1311,14 @@ msgstr "En-tête 6"
 #. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
+#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Heading 1"
 msgstr "Titre 1"
 
 #. module: web_editor
 #. odoo-javascript
+#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
 #: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Heading 2"
@@ -1326,9 +1327,31 @@ msgstr "Titre 2"
 #. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
+#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Heading 3"
 msgstr "Titre 3"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "Heading 4"
+msgstr "Titre 4"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "Heading 5"
+msgstr "Titre 5"
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "Heading 6"
+msgstr "Titre 6"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
@@ -1586,7 +1609,7 @@ msgstr "Insérer un média"
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #, python-format
 msgid "Insert or edit link"
-msgstr "Insérer ou éditer un lien"
+msgstr "Insérer ou modifier un lien"
 
 #. module: web_editor
 #. odoo-javascript
@@ -1746,6 +1769,14 @@ msgstr "Lien vers"
 
 #. module: web_editor
 #. odoo-javascript
+#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
+#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "List"
+msgstr "Liste"
+
+#. module: web_editor
+#. odoo-javascript
 #: code:addons/web_editor/static/src/components/media_dialog/file_selector.xml:0
 #, python-format
 msgid "Load more..."
@@ -1800,7 +1831,7 @@ msgstr "Moyen"
 #: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Medium section heading."
-msgstr "Titre d'une section moyenne."
+msgstr "Moyen titre de section."
 
 #. module: web_editor
 #. odoo-javascript
@@ -2031,24 +2062,9 @@ msgstr "Bloc de paragraphe."
 #. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
-#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Paste"
-msgstr "Coller"
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Paste as URL"
 msgstr "Coller en tant qu'URL"
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Paste as text"
-msgstr "Coller en tant que texte"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
@@ -2421,21 +2437,21 @@ msgstr "Saturation"
 #: model_terms:ir.ui.view,arch_db:web_editor.snippets
 #, python-format
 msgid "Save"
-msgstr "Sauvegarder"
+msgstr "Enregistrer"
 
 #. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/snippets.editor.js:0
 #, python-format
 msgid "Save and Install"
-msgstr "Sauvegarder et installer"
+msgstr "Enregistrer et installer"
 
 #. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
 #, python-format
 msgid "Save and Reload"
-msgstr "Sauvegarder et recharger"
+msgstr "Enregistrer et recharger"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippets
@@ -2514,6 +2530,7 @@ msgstr "Sélectionner un média"
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
 #: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
+#: model_terms:ir.ui.view,arch_db:web_editor.snippets
 #, python-format
 msgid "Separator"
 msgstr "Séparateur"
@@ -2587,13 +2604,6 @@ msgstr "Signature"
 
 #. module: web_editor
 #. odoo-javascript
-#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Simple text paste."
-msgstr "Coller comme texte simple."
-
-#. module: web_editor
-#. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
@@ -2642,7 +2652,7 @@ msgstr "Petit"
 #: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Small section heading."
-msgstr "Titre d'une petite section."
+msgstr "Petit titre de section."
 
 #. module: web_editor
 #. odoo-javascript
@@ -2801,6 +2811,17 @@ msgid "The datetime %s does not match the format %s"
 msgstr "La valeur datetime %s ne correspond pas au format %s"
 
 #. module: web_editor
+#. odoo-python
+#: code:addons/web_editor/controllers/main.py:0
+#, python-format
+msgid ""
+"The document was already saved from someone with a different history for "
+"model %r, field %r with id %r."
+msgstr ""
+"Le document a déjà été enregistré par quelqu'un ayant un historique "
+"différent pour le modèle %r, le champ %r avec l'identifiant %r."
+
+#. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/components/media_dialog/video_selector.js:0
 #, python-format
@@ -2873,7 +2894,7 @@ msgstr "Ce bloc est obsolète"
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 #, python-format
 msgid "This document is not saved!"
-msgstr "Ce document n'est pas sauvegardé !"
+msgstr "Ce document n'est pas enregistré !"
 
 #. module: web_editor
 #. odoo-javascript
@@ -2939,8 +2960,15 @@ msgid ""
 "To save a snippet, we need to save all your previous modifications and "
 "reload the page."
 msgstr ""
-"Pour sauver votre élément, nous devons sauvegarder tous vos changements "
+"Pour sauver votre élément, nous devons enregistrer tous vos changements "
 "précédents et recharger la page."
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "To-do"
+msgstr "À faire"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
