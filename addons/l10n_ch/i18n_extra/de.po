@@ -1998,7 +1998,7 @@ msgstr "MwSt. 7,7% auf Einkäufe B&S (NRZ)"
 #: model:account.tax,name:l10n_ch.1_vat_77_purchase_reverse
 #: model:account.tax.template,name:l10n_ch.vat_77_purchase_reverse
 msgid "TVA 7.7% sur achat service a l'etranger (reverse charge)"
-msgstr "VST 100%"
+msgstr "BZS 7.7% Bezugssteuer"
 
 #. module: l10n_ch
 #: model:account.tax,name:l10n_ch.1_vat_77_invest_incl
