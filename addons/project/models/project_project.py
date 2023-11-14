@@ -384,7 +384,7 @@ class Project(models.Model):
             self.date = False
 
     @api.model
-    def _map_tasks_default_valeus(self, task, project):
+    def _map_tasks_default_values(self, task, project):
         """ get the default value for the copied task on project duplication """
         return {
             'stage_id': task.stage_id.id,
@@ -404,7 +404,7 @@ class Project(models.Model):
             self = self.with_context(task_mapping=dict())
         for task in self.env['project.task'].browse(task_ids):
             # preserve task name and stage, normally altered during copy
-            defaults = self._map_tasks_default_valeus(task, project)
+            defaults = self._map_tasks_default_values(task, project)
             new_tasks |= task.copy(defaults)
         all_subtasks = new_tasks._get_all_subtasks()
         subtasks_not_displayed = all_subtasks.filtered(
@@ -764,7 +764,7 @@ class Project(models.Model):
         if self.allow_milestones:
             panel_data['milestones'] = self._get_milestones()
         if self._show_profitability():
-            profitability_items = self._get_profitability_items()
+            profitability_items = self.with_context(active_test=False)._get_profitability_items()
             if self._get_profitability_sequence_per_invoice_type() and profitability_items and 'revenues' in profitability_items and 'costs' in profitability_items:  # sort the data values
                 profitability_items['revenues']['data'] = sorted(profitability_items['revenues']['data'], key=lambda k: k['sequence'])
                 profitability_items['costs']['data'] = sorted(profitability_items['costs']['data'], key=lambda k: k['sequence'])
