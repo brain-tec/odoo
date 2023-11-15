@@ -262,7 +262,6 @@ class TestPacking(TestPackingCommon):
             location should trigger a wizard. This wizard applies the same destination
             location to all the move lines
         """
-        self.warehouse.in_type_id.show_reserved = True
         shelf1_location = self.env['stock.location'].create({
             'name': 'shelf1',
             'usage': 'internal',
@@ -436,11 +435,9 @@ class TestPacking(TestPackingCommon):
         # Settings of receipt.
         self.warehouse.in_type_id.show_operations = True
         self.warehouse.in_type_id.show_entire_packs = True
-        self.warehouse.in_type_id.show_reserved = True
         # Settings of internal transfer.
         self.warehouse.int_type_id.show_operations = True
         self.warehouse.int_type_id.show_entire_packs = True
-        self.warehouse.int_type_id.show_reserved = True
 
         # Creates two new locations for putaway.
         location_form = Form(self.env['stock.location'])
@@ -580,11 +577,9 @@ class TestPacking(TestPackingCommon):
         # Settings of receipt.
         self.warehouse.in_type_id.show_operations = True
         self.warehouse.in_type_id.show_entire_packs = True
-        self.warehouse.in_type_id.show_reserved = True
         # Settings of internal transfer.
         self.warehouse.int_type_id.show_operations = True
         self.warehouse.int_type_id.show_entire_packs = True
-        self.warehouse.int_type_id.show_reserved = True
 
         # Creates two new locations for putaway.
         location_form = Form(self.env['stock.location'])
@@ -1043,7 +1038,6 @@ class TestPacking(TestPackingCommon):
         """
         warehouse = self.stock_location.warehouse_id
         warehouse.reception_steps = "two_steps"
-        self.picking_type_in.show_reserved = True
         self.productA.weight = 1.0
         self.env.user.write({'groups_id': [(4, self.env.ref('stock.group_stock_storage_categories').id)]})
         self.env.user.write({'groups_id': [(4, self.env.ref('stock.group_stock_multi_locations').id)]})
@@ -1146,7 +1140,6 @@ class TestPacking(TestPackingCommon):
         """
         warehouse = self.stock_location.warehouse_id
         warehouse.reception_steps = "two_steps"
-        self.picking_type_in.show_reserved = True
         self.productA.weight = 1.0
         self.productB.weight = 1.0
         self.env.user.write({'groups_id': [(4, self.env.ref('stock.group_stock_storage_categories').id)]})
@@ -1606,3 +1599,31 @@ class TestPacking(TestPackingCommon):
         })
         picking_03.action_confirm()
         self.assertEqual(move_03.move_line_ids.result_package_id, pack_2)
+
+    def test_compute_hide_picking_type_multiple_records(self):
+        """
+        Create two pickings and compute their respective hide picking types together.
+        """
+        picking1 = self.env['stock.picking'].create({
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'picking_type_id': self.env.ref('stock.picking_type_out').id,
+        })
+        self.env['stock.move'].create({
+            'name': self.productA.name,
+            'product_id': self.productA.id,
+            'product_uom_qty': 10,
+            'product_uom': self.productA.uom_id.id,
+            'picking_id': picking1.id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+        })
+        picking1.action_confirm()
+        picking2 = self.env['stock.picking'].create({
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'picking_type_id': self.env.ref('stock.picking_type_out').id,
+        })
+        (picking1 | picking2).with_context(default_picking_type_id=self.ref('stock.picking_type_out'))._compute_hide_picking_type()
+        self.assertTrue(picking1.hide_picking_type)
+        self.assertFalse(picking2.hide_picking_type)
