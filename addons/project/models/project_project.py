@@ -23,30 +23,32 @@ class Project(models.Model):
     _systray_view = 'activity'
 
     def _compute_attached_docs_count(self):
-        self.env.cr.execute(
-            """
-            WITH docs AS (
-                 SELECT res_id as id, count(*) as count
-                   FROM ir_attachment
-                  WHERE res_model = 'project.project'
-                    AND res_id IN %(project_ids)s
-               GROUP BY res_id
+        docs_count = {}
+        if self.ids:
+            self.env.cr.execute(
+                """
+                WITH docs AS (
+                     SELECT res_id as id, count(*) as count
+                       FROM ir_attachment
+                      WHERE res_model = 'project.project'
+                        AND res_id IN %(project_ids)s
+                   GROUP BY res_id
 
-              UNION ALL
+                  UNION ALL
 
-                 SELECT t.project_id as id, count(*) as count
-                   FROM ir_attachment a
-                   JOIN project_task t ON a.res_model = 'project.task' AND a.res_id = t.id
-                  WHERE t.project_id IN %(project_ids)s
-               GROUP BY t.project_id
+                     SELECT t.project_id as id, count(*) as count
+                       FROM ir_attachment a
+                       JOIN project_task t ON a.res_model = 'project.task' AND a.res_id = t.id
+                      WHERE t.project_id IN %(project_ids)s
+                   GROUP BY t.project_id
+                )
+                SELECT id, sum(count)
+                  FROM docs
+              GROUP BY id
+                """,
+                {"project_ids": tuple(self.ids)}
             )
-            SELECT id, sum(count)
-              FROM docs
-          GROUP BY id
-            """,
-            {"project_ids": tuple(self.ids)}
-        )
-        docs_count = dict(self.env.cr.fetchall())
+            docs_count = dict(self.env.cr.fetchall())
         for project in self:
             project.doc_count = docs_count.get(project.id, 0)
 
@@ -205,7 +207,7 @@ class Project(models.Model):
         ('done', 'Done'),
     ], default='to_define', compute='_compute_last_update_status', store=True, readonly=False, required=True)
     last_update_color = fields.Integer(compute='_compute_last_update_color')
-    milestone_ids = fields.One2many('project.milestone', 'project_id')
+    milestone_ids = fields.One2many('project.milestone', 'project_id', copy=True)
     milestone_count = fields.Integer(compute='_compute_milestone_count', groups='project.group_project_milestone')
     milestone_count_reached = fields.Integer(compute='_compute_milestone_reached_count', groups='project.group_project_milestone')
     is_milestone_exceeded = fields.Boolean(compute="_compute_is_milestone_exceeded", search='_search_is_milestone_exceeded')
