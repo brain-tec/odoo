@@ -378,15 +378,21 @@ QUnit.module("Fields", (hooks) => {
                 arch: `
                     <form>
                         <sheet>
-                            <field name="trululu"/>
+                            <field name="int_field" />
+                            <field name="trululu" context="{'blip': int_field, 'blop': 3}"/>
                         </sheet>
                     </form>`,
-                mockRPC(route, { method }) {
+                mockRPC(route, { args, method, model, kwargs }) {
                     if (method === "get_formview_id") {
                         return Promise.resolve(false);
                     }
                     if (method === "web_save") {
                         assert.step("web_save");
+                    }
+                    if (method === "read" && model === "partner" && args[0][0] === 4) {
+                        assert.step(`read partner: ${args[1]}`);
+                        assert.strictEqual(kwargs.context.blip, 10);
+                        assert.strictEqual(kwargs.context.blop, 3);
                     }
                 },
             });
@@ -402,7 +408,7 @@ QUnit.module("Fields", (hooks) => {
 
             // save and close modal
             await clickSave(target.querySelectorAll(".modal")[1]);
-            assert.verifySteps(["web_save"]);
+            assert.verifySteps(["web_save", "read partner: display_name"]);
             // save form
             await clickSave(target);
             assert.verifySteps([]);
@@ -1587,6 +1593,12 @@ QUnit.module("Fields", (hooks) => {
 
     QUnit.test("standalone many2one field", async function (assert) {
         class Comp extends Component {
+            static components = { Record, Field };
+            static template = xml`
+                <Record resModel="'coucou'" fields="fields" fieldNames="['partner_id']" values="values" mode="'edit'" t-slot-scope="scope">
+                    <Field name="'partner_id'" record="scope.record" canOpen="false" />
+                </Record>
+            `;
             setup() {
                 this.fields = {
                     partner_id: {
@@ -1600,12 +1612,6 @@ QUnit.module("Fields", (hooks) => {
                 };
             }
         }
-        Comp.components = { Record, Field };
-        Comp.template = xml`
-            <Record resModel="'coucou'" fields="fields" fieldNames="['partner_id']" values="values" mode="'edit'" t-slot-scope="scope">
-                <Field name="'partner_id'" record="scope.record" canOpen="false" />
-            </Record>
-        `;
 
         await mount(Comp, target, {
             env: await makeTestEnv({
@@ -4572,21 +4578,16 @@ QUnit.module("Fields", (hooks) => {
                 </form>`,
             mockRPC(route, { method, kwargs }) {
                 if (method === "name_search") {
-                    return Promise.resolve([
-                        [1, false]
-                    ]);
+                    return Promise.resolve([[1, false]]);
                 }
             },
         });
 
         const input = target.querySelector(".o_field_many2one input");
         await click(input);
-        
+
         await triggerEvents(input, null, ["input", "change"]);
-        let dropdown = target.querySelector(".o_field_many2one[name='trululu'] .dropdown-menu")
-        assert.strictEqual(
-            dropdown.querySelector("a.dropdown-item").text,
-            "Unnamed"
-        );
+        const dropdown = target.querySelector(".o_field_many2one[name='trululu'] .dropdown-menu");
+        assert.strictEqual(dropdown.querySelector("a.dropdown-item").text, "Unnamed");
     });
 });

@@ -1186,7 +1186,7 @@ QUnit.module("Views", (hooks) => {
                     </tree>`,
                 mockRPC: async (route, args) => {
                     assert.step(args.method);
-                    if (route === "/web/dataset/call_button") {
+                    if (route.startsWith("/web/dataset/call_button")) {
                         return true;
                     }
                 },
@@ -8510,7 +8510,7 @@ QUnit.module("Views", (hooks) => {
             mockRPC(route, { method }) {
                 if (method === "web_save") {
                     assert.step("web_save");
-                } else if (route === "/web/dataset/call_button") {
+                } else if (route.startsWith("/web/dataset/call_button")) {
                     assert.step("call_button");
                     return true;
                 }
@@ -8705,7 +8705,7 @@ QUnit.module("Views", (hooks) => {
 
     QUnit.test("click on a button cell in a list view", async (assert) => {
         serverData.models.foo.records[0].foo = "bar";
-        await makeView({
+        const list = await makeView({
             type: "list",
             resModel: "foo",
             serverData,
@@ -8716,9 +8716,12 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
         });
 
-        // Need to set the line in edition.
-        await click(target, "td[name=foo]");
-        assert.strictEqual(window.getSelection().toString(), "bar");
+        patchWithCleanup(list.env.services.action, {
+            doActionButton: (action) => {
+                assert.step("doActionButton");
+                action.onClose();
+            },
+        });
 
         await click(target.querySelector(".o_data_cell.o_list_button"));
         assert.strictEqual(
@@ -8726,6 +8729,8 @@ QUnit.module("Views", (hooks) => {
             "bar",
             "Focus should have returned to the editable cell without throwing an error"
         );
+        assert.containsOnce(target, ".o_selected_row");
+        assert.verifySteps([]);
     });
 
     QUnit.test("click on a button in a list view", async function (assert) {
@@ -19497,7 +19502,7 @@ QUnit.module("Views", (hooks) => {
                 </tree>`,
 
             mockRPC: async (route, args) => {
-                if (route === "/web/dataset/call_button") {
+                if (route.startsWith("/web/dataset/call_button")) {
                     assert.step(args.method);
                     return true;
                 }
