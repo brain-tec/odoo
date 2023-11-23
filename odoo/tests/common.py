@@ -29,6 +29,8 @@ import unittest
 import warnings
 from collections import defaultdict, deque
 from concurrent.futures import Future, CancelledError, wait
+from typing import Callable
+
 try:
     from concurrent.futures import InvalidStateError
 except ImportError:
@@ -816,46 +818,26 @@ class SingleTransactionCase(BaseCase):
 class ChromeBrowserException(Exception):
     pass
 
-def fmap(future, map_fun):
-    """Maps a future's result through a callback.
-
-    Resolves to the application of ``map_fun`` to the result of ``future``.
-
-    .. warning:: this does *not* recursively resolve futures, if that's what
-                 you need see :func:`fchain`
-    """
-    fmap_future = Future()
-    @future.add_done_callback
-    def _(f):
+def run(gen_func):
+    def done(f):
         try:
-            fmap_future.set_result(map_fun(f.result()))
-        except Exception as e:
-            fmap_future.set_exception(e)
-    return fmap_future
+            try:
+                r = f.result()
+            except Exception as e:
+                f = coro.throw(e)
+            else:
+                f = coro.send(r)
+        except StopIteration:
+            return
 
-def fchain(future, next_callback):
-    """Chains a future's result to a new future through a callback.
+        assert isinstance(f, Future), f"coroutine must yield futures, got {f}"
+        f.add_done_callback(done)
 
-    Corresponds to the ``bind`` monadic operation (aka flatmap aka then...
-    kinda).
-    """
-    new_future = Future()
-    @future.add_done_callback
-    def _(f):
-        try:
-            n = next_callback(f.result())
-            @n.add_done_callback
-            def _(f):
-                try:
-                    new_future.set_result(f.result())
-                except Exception as e:
-                    new_future.set_exception(e)
-
-        except Exception as e:
-            new_future.set_exception(e)
-
-    return new_future
-
+    coro = gen_func()
+    try:
+        next(coro).add_done_callback(done)
+    except StopIteration:
+        return
 
 def save_test_file(test_name, content, prefix, extension='png', logger=_logger, document_type='Screenshot'):
     assert re.fullmatch(r'\w*_', prefix)
@@ -876,9 +858,10 @@ class ChromeBrowser:
     """ Helper object to control a Chrome headless process. """
     remote_debugging_port = 0  # 9222, change it in a non-git-tracked file
 
-    def __init__(self, test_class, headless=True):
+    def __init__(self, test_class, success_signal: Callable[[str], bool], headless: bool = True):
         self._logger = test_class._logger
         self.test_class = test_class
+        self.success_signal = success_signal
         if websocket is None:
             self._logger.warning("websocket-client module is not installed")
             raise unittest.SkipTest("websocket-client module is not installed")
@@ -1252,23 +1235,28 @@ class ChromeBrowser:
                         "Trying to set result to failed (%s) but found the future settled (%s)",
                         message, self._result
                     )
-        elif 'test successful' in message:
+        elif self.success_signal(message):
+            @run
+            def _get_heap():
+                yield self._websocket_send("HeapProfiler.collectGarbage", with_future=True)
+                r = yield self._websocket_send("Runtime.getHeapUsage", with_future=True)
+                _logger.info("heap %d (allocated %d)", r['usedSize'], r['totalSize'])
+
             if self.test_class.allow_end_on_form:
                 self._result.set_result(True)
                 return
 
-            qs = fchain(
-                self._websocket_send('DOM.getDocument', params={'depth': 0}, with_future=True),
-                lambda d: self._websocket_send("DOM.querySelector", params={
-                    'nodeId': d['root']['nodeId'],
-                    'selector': '.o_form_dirty',
-                }, with_future=True)
-            )
-            @qs.add_done_callback
-            def _qs_result(fut):
+            @run
+            def _check_form():
                 node_id = 0
+
                 with contextlib.suppress(Exception):
-                    node_id = fut.result()['nodeId']
+                    d = yield self._websocket_send('DOM.getDocument', params={'depth': 0}, with_future=True)
+                    form = yield self._websocket_send("DOM.querySelector", params={
+                        'nodeId': d['root']['nodeId'],
+                        'selector': '.o_form_dirty',
+                    }, with_future=True)
+                    node_id = form['nodeId']
 
                 if node_id:
                     self.take_screenshot("unsaved_form_")
@@ -1734,7 +1722,7 @@ class HttpCase(TransactionCase):
 
         return session
 
-    def browser_js(self, url_path, code, ready='', login=None, timeout=60, cookies=None, error_checker=None, watch=False, **kw):
+    def browser_js(self, url_path, code, ready='', login=None, timeout=60, cookies=None, error_checker=None, watch=False, success_signal=None, **kw):
         """ Test js code running in the browser
         - optionnally log as 'login'
         - load page given by url_path
@@ -1756,7 +1744,7 @@ class HttpCase(TransactionCase):
         if watch:
             _logger.warning('watch mode is only suitable for local testing')
 
-        browser = ChromeBrowser(type(self), headless=not watch)
+        browser = ChromeBrowser(type(self), headless=not watch, success_signal=success_signal or (lambda s: 'test successful' in s))
         try:
             self.authenticate(login, login, browser=browser)
             # Flush and clear the current transaction.  This is useful in case
@@ -1811,12 +1799,12 @@ class HttpCase(TransactionCase):
         optional delay between steps `step_delay`. Other arguments from
         `browser_js` can be passed as keyword arguments."""
         options = {
-            'stepDelay': step_delay if step_delay else 0,
+            'stepDelay': step_delay or 0,
             'keepWatchBrowser': kwargs.get('watch', False),
             'startUrl': url_path,
         }
-        code = kwargs.pop('code', "odoo.startTour('%s', %s)" % (tour_name, json.dumps(options)))
-        ready = kwargs.pop('ready', "odoo.isTourReady('%s')" % tour_name)
+        code = kwargs.pop('code', f"odoo.startTour({tour_name!r}, {json.dumps(options)})")
+        ready = kwargs.pop('ready', f"odoo.isTourReady({tour_name!r})")
         return self.browser_js(url_path=url_path, code=code, ready=ready, **kwargs)
 
     def profile(self, **kwargs):

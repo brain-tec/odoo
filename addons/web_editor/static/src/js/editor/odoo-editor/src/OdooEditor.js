@@ -34,7 +34,8 @@ import {
     isVisible,
     isHtmlContentSupported,
     rgbToHex,
-    isFontAwesome,
+    isIconElement,
+    ICON_SELECTOR,
     getInSelection,
     getDeepRange,
     getRowIndex,
@@ -3782,6 +3783,19 @@ export class OdooEditor extends EventTarget {
             rangeContent.lastChild.remove();
         }
 
+        const commonAncestorElement = closestElement(range.commonAncestorContainer);
+        if (commonAncestorElement && !isBlock(rangeContent.firstChild)) {
+            // Get the list of ancestor elements starting from the provided
+            // commonAncestorElement up to the block-level element.
+            const blockEl = closestBlock(commonAncestorElement);
+            const ancestorsList = [commonAncestorElement, ...ancestors(commonAncestorElement, blockEl)];
+            // Wrap rangeContent with clones of their ancestors to keep the styles.
+            for (const ancestor of ancestorsList) {
+                const clone = ancestor.cloneNode();
+                clone.append(...rangeContent.childNodes);
+                rangeContent.appendChild(clone);
+            }
+        }
         const dataHtmlElement = document.createElement('data');
         dataHtmlElement.append(rangeContent);
         const odooHtml = dataHtmlElement.innerHTML;
@@ -4294,8 +4308,7 @@ export class OdooEditor extends EventTarget {
         }
 
         // Remove Zero Width Spaces on Font awesome elements
-        const faSelector = 'i.fa,span.fa,i.fab,span.fab,i.fad,span.fad,i.far,span.far';
-        for (const el of element.querySelectorAll(faSelector)) {
+        for (const el of element.querySelectorAll(ICON_SELECTOR)) {
             cleanZWS(el);
         }
 
@@ -5060,7 +5073,7 @@ export class OdooEditor extends EventTarget {
         );
         // check and fix anchor node
         const closestAnchorNodeEl = closestElement(selection.anchorNode);
-        if (isFontAwesome(closestAnchorNodeEl)) {
+        if (isIconElement(closestAnchorNodeEl)) {
             shouldUpdateSelection = true;
             fixedSelection.anchorNode =
                 selectionDirection === DIRECTIONS.RIGHT
@@ -5076,7 +5089,7 @@ export class OdooEditor extends EventTarget {
         }
         // check and fix focus node
         const closestFocusNodeEl = closestElement(selection.focusNode);
-        if (isFontAwesome(closestFocusNodeEl)) {
+        if (isIconElement(closestFocusNodeEl)) {
             shouldUpdateSelection = true;
             fixedSelection.focusNode =
                 selectionDirection === DIRECTIONS.RIGHT
