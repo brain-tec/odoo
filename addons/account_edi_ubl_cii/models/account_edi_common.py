@@ -1,5 +1,5 @@
 from odoo import _, models, Command
-from odoo.tools import float_repr
+from odoo.tools import float_repr, find_xml_value
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.float_utils import float_round
 from odoo.tools.misc import formatLang
@@ -115,6 +115,11 @@ class AccountEdiCommon(models.AbstractModel):
         if xmlid and line.product_uom_id.id in xmlid:
             return UOM_TO_UNECE_CODE.get(xmlid[line.product_uom_id.id], 'C62')
         return 'C62'
+
+    def _find_value(self, xpath, tree):
+        # avoid 'TypeError: empty namespace prefix is not supported in XPath'
+        nsmap = {k: v for k, v in tree.nsmap.items() if k is not None}
+        return find_xml_value(xpath, tree, nsmap)
 
     # -------------------------------------------------------------------------
     # TAXES
@@ -681,10 +686,16 @@ class AccountEdiCommon(models.AbstractModel):
 
         # Set the values on the line_form
         invoice_line.quantity = inv_line_vals['quantity']
-        if inv_line_vals.get('product_uom_id'):
+        if not inv_line_vals.get('product_uom_id'):
+            logs.append(
+                _("Could not retrieve the unit of measure for line with label '%s'.", invoice_line.name))
+        elif not invoice_line.product_id:
+            # no product set on the line, no need to check uom compatibility
             invoice_line.product_uom_id = inv_line_vals['product_uom_id']
-        else:
-            logs.append(_("Could not retrieve the unit of measure for line with label '%s'.", invoice_line.name))
+        elif inv_line_vals['product_uom_id'].category_id == invoice_line.product_id.product_tmpl_id.uom_id.category_id:
+            # needed to check that the uom is compatible with the category of the product
+            invoice_line.product_uom_id = inv_line_vals['product_uom_id']
+
         invoice_line.price_unit = inv_line_vals['price_unit']
         invoice_line.discount = inv_line_vals['discount']
         invoice_line.tax_ids = inv_line_vals['taxes']
