@@ -223,7 +223,8 @@ class ProductTemplate(models.Model):
             template_price_vals = {
                 'price_reduce': price_reduce,
             }
-            if base_price:
+            if base_price and price_reduce:
+                # base_price will only be shown (strikethrough) if both prices are non zeros
                 template_price_vals['base_price'] = base_price
 
             res[template.id] = template_price_vals
@@ -276,13 +277,6 @@ class ProductTemplate(models.Model):
                 combination_info['price_extra'], product_taxes, taxes, company_id, pricelist,
                 product, partner
             )
-            base_unit_price = product._get_base_unit_price(list_price)
-            if pricelist.currency_id != product.currency_id:
-                base_unit_price = pricelist.currency_id._convert(
-                    base_unit_price,
-                    pricelist.currency_id,
-                    company_id,
-                    fields.Date.today())
             has_discounted_price = pricelist.currency_id.compare_amounts(list_price, price) == 1
             prevent_zero_price_sale = not price and current_website.prevent_zero_price_sale
 
@@ -293,7 +287,7 @@ class ProductTemplate(models.Model):
 
             combination_info.update(
                 base_unit_name=product.base_unit_name,
-                base_unit_price=product.base_unit_count and list_price / product.base_unit_count,
+                base_unit_price=product._get_base_unit_price(list_price),
                 price=price,
                 list_price=list_price,
                 price_extra=price_extra,
