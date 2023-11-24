@@ -155,6 +155,7 @@ class StockMove(models.Model):
     has_tracking = fields.Selection(related='product_id.tracking', string='Product with Tracking')
     quantity = fields.Float(
         'Quantity', compute='_compute_quantity', digits='Product Unit of Measure', inverse='_set_quantity', store=True)
+    # TODO: delete this field `show_operations`
     show_operations = fields.Boolean(related='picking_id.picking_type_id.show_operations')
     picking_code = fields.Selection(related='picking_id.picking_type_id.code', readonly=True)
     show_details_visible = fields.Boolean('Details Visible', compute='_compute_show_details_visible')
@@ -1767,7 +1768,8 @@ Please change the quantity done or the rounding precision of your unit of measur
                 precision_rounding=rounding,
                 rounding_method='HALF-UP')
             extra_move_vals = self._prepare_extra_move_vals(extra_move_quantity)
-            extra_move = self.copy(default=extra_move_vals).with_context(avoid_putaway_rules=True)
+            self = self.with_context(avoid_putaway_rules=True, extra_move_mode=True)
+            extra_move = self.copy(default=extra_move_vals)
             return extra_move.with_context(merge_extra=True, do_not_unreserve=True)._action_confirm(merge_into=self)
         return self
 
