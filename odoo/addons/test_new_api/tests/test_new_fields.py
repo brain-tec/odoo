@@ -505,6 +505,42 @@ class TestFields(TransactionCaseWithUserDemo):
         baz = foo.create({'name': 'baz', 'parent_id': bar.id})
         self.assertEqual(foo.display_name, 'foo(bar(baz()))')
 
+    def test_12_recursive_unlink(self):
+        order = self.env['test_new_api.recursive.order'].create({'value': 42})
+        line = self.env['test_new_api.recursive.line'].create({'order_id': order.id})
+        task = self.env['test_new_api.recursive.task'].create({'value': 42})
+        self.assertEqual(task.line_id, line)
+        self.assertEqual(line.task_ids, task)
+        self.assertTrue(line.task_number)
+
+        # Before deleting order, the following are marked to recompute:
+        #  - task.line_id (recursive, depends on task.line_id.order_id.value)
+        #  - line.task_number (implicitely depends on line.task_ids.line_id)
+        #
+        # If task.line_id is ever recomputed in order to mark line.task_number,
+        # its recomputed value will be lost in the cache invalidation, and
+        # there will be nothing left to write in the database afterwards!  This
+        # makes the call to unlink() crash in that case.
+        #
+        order.unlink()
+
+    def test_12_recursive_context_dependent(self):
+        a = self.env['test_new_api.recursive'].create({'name': 'A'})
+        b = self.env['test_new_api.recursive'].create({'name': 'B', 'parent': a.id})
+        c = self.env['test_new_api.recursive'].create({'name': 'C', 'parent': b.id})
+        d = self.env['test_new_api.recursive'].create({'name': 'D', 'parent': c.id})
+        self.assertEqual(a.context_dependent_name, 'A')
+        self.assertEqual(b.context_dependent_name, 'A / B')
+        self.assertEqual(c.context_dependent_name, 'A / B / C')
+        self.assertEqual(d.context_dependent_name, 'A / B / C / D')
+
+        # now let's swith to another context to update the dependency
+        a.with_context(bozo=42).name = 'A1'
+        self.assertEqual(a.context_dependent_name, 'A1')
+        self.assertEqual(b.context_dependent_name, 'A1 / B')
+        self.assertEqual(c.context_dependent_name, 'A1 / B / C')
+        self.assertEqual(d.context_dependent_name, 'A1 / B / C / D')
+
     def test_12_cascade(self):
         """ test computed field depending on computed field """
         message = self.env.ref('test_new_api.message_0_0')
