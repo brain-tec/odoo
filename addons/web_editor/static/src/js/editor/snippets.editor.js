@@ -8,6 +8,7 @@ import {Markup, confine} from "web.utils";
 import Widget from "web.Widget";
 import options from "web_editor.snippets.options";
 import SmoothScrollOnDrag from "web.smooth_scroll_on_drag";
+import {SIZES, MEDIAS_BREAKPOINTS} from "@web/core/ui/ui_service";
 import {getCSSVariableValue, shouldEditableMediaBeEditable} from "web_editor.utils";
 import * as gridUtils from "@web_editor/js/common/grid_layout_utils";
 import { sprintf, escape } from "@web/core/utils/strings";
@@ -224,7 +225,10 @@ var SnippetEditor = Widget.extend({
         for (var i in this.styles) {
             await this.styles[i].onBuilt();
         }
+        // TODO In master differentiate device-based visibility.
+        this._toggleVisibilityStatusIgnoreDeviceVisibility = true;
         await this.toggleTargetVisibility(true);
+        this._toggleVisibilityStatusIgnoreDeviceVisibility = false;
     },
     /**
      * Notifies all the associated snippet options that the template which
@@ -803,6 +807,18 @@ var SnippetEditor = Widget.extend({
      * @param {boolean} [show]
      */
     _toggleVisibilityStatus: function (show) {
+        // TODO In master differentiate device-based visibility.
+        if (this._toggleVisibilityStatusIgnoreDeviceVisibility) {
+            if (this.$target[0].matches(".o_snippet_mobile_invisible, .o_snippet_desktop_invisible")) {
+                const mobileViewThreshold = MEDIAS_BREAKPOINTS[SIZES.LG].minWidth;
+                const isMobilePreview = this.$target[0].ownerDocument.defaultView.frameElement.clientWidth < mobileViewThreshold;
+                const isMobileHidden = this.$target[0].classList.contains("o_snippet_mobile_invisible");
+                if (isMobilePreview === isMobileHidden) {
+                    // Preview mode and hidden type are the same.
+                    show = false;
+                }
+            }
+        }
         if (show === undefined) {
             show = !this.isTargetVisible();
         }
@@ -4381,9 +4397,17 @@ var SnippetsMenu = Widget.extend({
                 gridUtils._reloadLazyImages(gridItemEl);
             }
 
+            // TODO In future version use tool method to determine isMobilePreview.
+            const mobileViewThreshold = MEDIAS_BREAKPOINTS[SIZES.LG].minWidth;
+            const isMobilePreview = this.$body[0].ownerDocument.defaultView.frameElement.clientWidth < mobileViewThreshold;
             for (const invisibleOverrideEl of this.getEditableArea().find('.o_snippet_mobile_invisible, .o_snippet_desktop_invisible')) {
+                const isMobileHidden = invisibleOverrideEl.classList.contains("o_snippet_mobile_invisible");
                 invisibleOverrideEl.classList.remove('o_snippet_override_invisible');
-                invisibleOverrideEl.dataset.invisible = '1';
+                if (isMobilePreview === isMobileHidden) {
+                    invisibleOverrideEl.dataset.invisible = '1';
+                } else {
+                    delete invisibleOverrideEl.dataset.invisible;
+                }
             }
 
             // This is async but using the main editor mutex, currently locked.
