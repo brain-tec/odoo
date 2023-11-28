@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
@@ -23,9 +22,14 @@
 
         'views/account_move_views.xml',
         'views/crm_team_views.xml',
+        'views/delivery_carrier_views.xml',
         'views/digest_views.xml',
         'views/product_attribute_views.xml',
         'views/product_document_views.xml',
+        'views/product_image_views.xml',
+        'views/product_pricelist_views.xml',
+        'views/product_public_category_views.xml',
+        'views/product_ribbon_views.xml',
         'views/product_tag_views.xml',
         'views/product_views.xml',
         'views/sale_order_views.xml',
@@ -42,7 +46,6 @@
         'views/website_pages_views.xml',
         'views/website_sale_delivery_templates.xml',
         'views/website_sale_menus.xml',
-        'views/website_sale_delivery_views.xml',
         'views/variant_templates.xml',
     ],
     'demo': [
@@ -61,7 +64,10 @@
             'website_sale/static/src/scss/website_sale_delivery.scss',
             'website/static/lib/multirange/multirange_custom.scss',
             'sale/static/src/scss/sale_portal.scss',
+            'website_sale/static/src/js/payment_button.js',
+            'website_sale/static/src/js/payment_form.js',
             'website_sale/static/src/js/sale_variant_mixin.js',
+            'website_sale/static/src/js/terms_and_conditions_checkbox.js',
             'website_sale/static/src/js/variant_mixin.js',
             'website_sale/static/src/js/website_sale.js',
             'website_sale/static/src/xml/website_sale.xml',
@@ -69,7 +75,6 @@
             'website_sale/static/src/js/website_sale_price_range_option.js',
             'website_sale/static/src/js/website_sale_utils.js',
             'website_sale/static/src/xml/website_sale_utils.xml',
-            'website_sale/static/src/js/website_sale_payment.js',
             'website_sale/static/src/js/website_sale_recently_viewed.js',
             'website_sale/static/src/js/website_sale_tracking.js',
             'website/static/lib/multirange/multirange_custom.js',
