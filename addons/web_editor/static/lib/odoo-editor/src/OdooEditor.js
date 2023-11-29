@@ -157,6 +157,8 @@ export const CLIPBOARD_WHITELISTS = {
     styles: ['text-decoration', 'font-weight', 'background-color', 'color', 'font-style', 'text-decoration-line', 'font-size']
 };
 
+const EDITABLE_LINK_SELECTOR = 'a:not(.nav-link):not([contenteditable="false"])';
+
 function defaultOptions(defaultObject, object) {
     const newObject = Object.assign({}, defaultObject, object);
     for (const [key, value] of Object.entries(object)) {
@@ -291,6 +293,11 @@ export class OdooEditor extends EventTarget {
 
         // Set contenteditable before clone as FF updates the content at this point.
         this._activateContenteditable();
+
+        this._currentStep = {
+            selection: {},
+            mutations: [],
+        };
 
         this._setLinkZws();
 
@@ -762,7 +769,7 @@ export class OdooEditor extends EventTarget {
         if (!this._historyStepsActive) {
             return;
         }
-        this._setLinkZws();
+        this._resetLinkZws();
         this.sanitize();
         // check that not two unBreakables modified
         if (this._toRollback) {
@@ -785,6 +792,7 @@ export class OdooEditor extends EventTarget {
         if (this.options.onHistoryStep) {
             this.options.onHistoryStep(currentStep);
         }
+        this._setLinkZws();
         this._currentStep = {
             selection: {},
             mutations: [],
@@ -985,12 +993,12 @@ export class OdooEditor extends EventTarget {
                         }
                         this.idSet(nodeToRemove);
                     }
-                    if (mutation.nextId && this.idFind(mutation.nextId)) {
-                        const node = this.idFind(mutation.nextId);
-                        node && node.before(nodeToRemove);
-                    } else if (mutation.previousId && this.idFind(mutation.previousId)) {
-                        const node = this.idFind(mutation.previousId);
-                        node && node.after(nodeToRemove);
+                    const next = mutation.nextId && this.idFind(mutation.nextId);
+                    const previous = !(next && next.isConnected) && mutation.previousId && this.idFind(mutation.previousId);
+                    if (next && next.isConnected) {
+                        next && next.before(nodeToRemove);
+                    } else if (previous && previous.isConnected) {
+                        previous && previous.after(nodeToRemove);
                     } else {
                         const node = this.idFind(mutation.parentId);
                         node && node.append(nodeToRemove);
@@ -1358,7 +1366,7 @@ export class OdooEditor extends EventTarget {
         if (!selection.isCollapsed) {
             return;
         }
-        const linkInSelection = getInSelection(this.document, 'a');
+        const linkInSelection = getInSelection(this.document, EDITABLE_LINK_SELECTOR);
         const isLinkSelection = selection.anchorNode === linkInSelection;
         let commonAncestorContainer = selection.rangeCount && selection.getRangeAt(0).commonAncestorContainer;
         if (commonAncestorContainer) {
@@ -1371,13 +1379,13 @@ export class OdooEditor extends EventTarget {
             if (!block || !this.editable.contains(block)) {
                 block = this.editable;
             }
-            let links = [...block.querySelectorAll('a')];
+            let links = [...block.querySelectorAll(EDITABLE_LINK_SELECTOR)];
             // Consider the links at the edges of the sibling blocks, limiting
             // to the editable.
             if (this.editable.contains(block)) {
                 links.push(
-                    closestElement(previousLeaf(block, this.editable, true), 'a'),
-                    closestElement(nextLeaf(block, this.editable, true), 'a'),
+                    closestElement(previousLeaf(block, this.editable, true), EDITABLE_LINK_SELECTOR),
+                    closestElement(nextLeaf(block, this.editable, true), EDITABLE_LINK_SELECTOR),
                 );
             }
             const offset = selection.anchorOffset;
@@ -1389,15 +1397,14 @@ export class OdooEditor extends EventTarget {
                     // Only add the ZWS for simple (possibly styled) text links.
                     ![link, ...link.querySelectorAll('*')].some(isBlock)
                 ) {
-                    link.prepend(this._createLinkZws('start'));
+                    this._insertLinkZws('start', link);
                     // Only add the ZWS at the end if the link is in selection.
                     if (link === linkInSelection) {
-                        link.append(this._createLinkZws('end'));
+                        this._insertLinkZws('end', link);
                         link.classList.add('o_link_in_selection');
                         didAddZwsInLinkInSelection = true;
                     }
-                    const zwsAfter = this._createLinkZws('after');
-                    link.after(zwsAfter);
+                    const zwsAfter = this._insertLinkZws('after', link);
                     if (!zwsAfter.parentElement || !zwsAfter.parentElement.isContentEditable) {
                         zwsAfter.remove();
                     }
@@ -1766,8 +1773,10 @@ export class OdooEditor extends EventTarget {
         }
     }
     _resetLinkZws(element = this.editable) {
+        this.observerUnactive('_resetLinkZws');
         element.querySelectorAll('[data-o-link-zws]').forEach(zws => zws.remove());
         element.querySelectorAll('.o_link_in_selection').forEach(link => link.classList.remove('o_link_in_selection'));
+        this.observerActive('_resetLinkZws');
     }
     _activateContenteditable() {
         this.observerUnactive('_activateContenteditable');
@@ -2517,13 +2526,22 @@ export class OdooEditor extends EventTarget {
         }
         this.observer.takeRecords();
     }
-    _createLinkZws(side) {
+    _insertLinkZws(side, link) {
+        this.observerUnactive('_insertLinkZws');
         const span = document.createElement('span');
         span.setAttribute('data-o-link-zws', side);
         if (side !== 'end') {
             span.setAttribute('contenteditable', 'false');
         }
         span.textContent = '\u200B';
+        if (side === 'start') {
+            link.prepend(span);
+        } else if (side === 'end') {
+            link.append(span);
+        } else if (side === 'after') {
+            link.after(span);
+        }
+        this.observerActive('_insertLinkZws');
         return span;
     }
 
@@ -2822,7 +2840,7 @@ export class OdooEditor extends EventTarget {
         }
         if (selection.rangeCount && selection.getRangeAt(0)) {
             // Handle selection/navigation at the edges of links.
-            const link = getInSelection(this.document, 'a');
+            const link = getInSelection(this.document, EDITABLE_LINK_SELECTOR);
             if (link && selection.isCollapsed) {
                 // 1. If the selection starts or ends at the end of a link
                 //    (after the end zws), move the selection after the "after"
@@ -2835,14 +2853,13 @@ export class OdooEditor extends EventTarget {
                     // The selection is at the end of the link, ie. at offset
                     // max of the link, with no next leaf that is in the link.
                     endZws && selection.anchorOffset === nodeSize(selection.anchorNode) &&
-                    closestElement(selection.anchorNode, 'a') === link &&
-                    closestElement(nextLeaf(selection.anchorNode, this.editable), 'a') !== link
+                    closestElement(selection.anchorNode, EDITABLE_LINK_SELECTOR) === link &&
+                    closestElement(nextLeaf(selection.anchorNode, this.editable), EDITABLE_LINK_SELECTOR) !== link
                 );
                 if (isAtEndOfLink) {
                     let afterZws = link.nextElementSibling;
                     if (!afterZws) {
-                        afterZws = this._createLinkZws('after');
-                        link.after(afterZws);
+                        afterZws = this._insertLinkZws('after', link);
                     }
                     setSelection(
                         afterZws.nextSibling || afterZws.parentElement,
