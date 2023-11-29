@@ -199,8 +199,8 @@
         <field name="amount_type">percent</field>
         <field name="sequence" eval="0"/>
         <field name="chart_template_id" ref="l10nch_chart_template"/>
-        <field name="account_id" ref="ch_coa_2200"/>
-        <field name="refund_account_id" ref="ch_coa_2200"/>
+        <field name="account_id" ref="ch_coa_1170"/>
+        <field name="refund_account_id" ref="ch_coa_1170"/>
         <field name="type_tax_use">purchase</field>
             <field name="tag_ids" eval="[(6,0,[ref('vat_tag_400')])]"/>
         <field name="tax_group_id" ref="tax_group_vat_81"/>
@@ -241,8 +241,8 @@
         <field name="amount" eval="8.1"/>
         <field name="amount_type">percent</field>
         <field name="chart_template_id" ref="l10nch_chart_template"/>
-        <field name="account_id" ref="ch_coa_2200"/>
-        <field name="refund_account_id" ref="ch_coa_2200"/>
+        <field name="account_id" ref="ch_coa_1171"/>
+        <field name="refund_account_id" ref="ch_coa_1171"/>
         <field name="type_tax_use">purchase</field>
             <field name="tag_ids" eval="[(6,0,[ref('vat_tag_405')])]"/>
         <field name="tax_group_id" ref="tax_group_vat_81"/>
@@ -255,8 +255,8 @@
         <field name="amount_type">percent</field>
         <field name="sequence" eval="0"/>
         <field name="chart_template_id" ref="l10nch_chart_template"/>
-        <field name="account_id" ref="ch_coa_2200"/>
-        <field name="refund_account_id" ref="ch_coa_2200"/>
+        <field name="account_id" ref="ch_coa_1170"/>
+        <field name="refund_account_id" ref="ch_coa_1170"/>
         <field name="tag_ids" eval="[(6,0,[ref('vat_tag_383_a'),ref('vat_tag_383_b')])]"/>
         <field name="type_tax_use">purchase</field>
     </record>
