@@ -2113,8 +2113,7 @@ class MrpProduction(models.Model):
         if 'confirmed' in self.mapped('state'):
             production.move_raw_ids._adjust_procure_method()
             (production.move_raw_ids | production.move_finished_ids).write({'state': 'confirmed'})
-            production.workorder_ids._action_confirm()
-            production.state = 'confirmed'
+            production.action_confirm()
 
         self.with_context(skip_activity=True)._action_cancel()
         # set the new deadline of origin moves (stock to pre prod)
@@ -2179,6 +2178,7 @@ class MrpProduction(models.Model):
                     removed = self.env['stock.move.line'].search_count([
                         ('lot_id', '=', move_line.lot_id.id),
                         ('state', '=', 'done'),
+                        ('location_id.usage', '=', 'internal'),
                         ('location_dest_id.scrap_location', '=', True)
                     ])
                     unremoved = self.env['stock.move.line'].search_count([
