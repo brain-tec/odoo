@@ -63,7 +63,7 @@ PROJECT_TASK_WRITABLE_FIELDS = {
 
 CLOSED_STATES = {
     '1_done': 'Done',
-    '1_canceled': 'Canceled',
+    '1_canceled': 'Cancelled',
 }
 
 
@@ -362,7 +362,7 @@ class Task(models.Model):
             {'sequence': 4, 'name': _('This Month'), 'user_id': user_id, 'fold': False},
             {'sequence': 5, 'name': _('Later'), 'user_id': user_id, 'fold': False},
             {'sequence': 6, 'name': _('Done'), 'user_id': user_id, 'fold': True},
-            {'sequence': 7, 'name': _('Canceled'), 'user_id': user_id, 'fold': True},
+            {'sequence': 7, 'name': _('Cancelled'), 'user_id': user_id, 'fold': True},
         ]
 
     def _populate_missing_personal_stages(self):
@@ -532,6 +532,10 @@ class Task(models.Model):
 
     @api.depends('child_ids')
     def _compute_subtask_count(self):
+        if not any(self._ids):
+            for task in self:
+                task.subtask_count, task.closed_subtask_count = len(task.child_ids), len(task.child_ids.filtered(lambda r: r.state in CLOSED_STATES))
+            return
         total_and_closed_subtask_count_per_parent_id = {
             parent.id: (count, sum(s in CLOSED_STATES for s in states))
             for parent, states, count in self.env['project.task']._read_group(

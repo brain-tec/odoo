@@ -824,6 +824,10 @@ export class OdooEditor extends EventTarget {
      */
     computeFontSizeSelectorValues(fontSizeDropdownEl) {
         fontSizeDropdownEl = fontSizeDropdownEl || this.toolbar.querySelector("#font-size");
+        // On some screen size, the fontsize dropdown might be hidden.
+        if (!fontSizeDropdownEl) {
+            return;
+        }
 
         let previousItem = null;
         let previousValue = -1;
@@ -3761,7 +3765,8 @@ export class OdooEditor extends EventTarget {
                         td.remove();
                     }
                 }
-                for (const tr of tableClone.querySelectorAll('tr:not(:has(td))')) {
+                const trsWithoutTd = Array.from(tableClone.querySelectorAll('tr')).filter(row => !row.querySelector('td'));
+                for (const tr of trsWithoutTd) {
                     if (closestElement(tr, 'table') === tableClone) { // ignore nested
                         tr.remove();
                     }
