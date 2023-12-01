@@ -3626,7 +3626,8 @@ export class OdooEditor extends EventTarget {
                         td.remove();
                     }
                 }
-                for (const tr of tableClone.querySelectorAll('tr:not(:has(td))')) {
+                const trsWithoutTd = Array.from(tableClone.querySelectorAll('tr')).filter(row => !row.querySelector('td'));
+                for (const tr of trsWithoutTd) {
                     if (closestElement(tr, 'table') === tableClone) { // ignore nested
                         tr.remove();
                     }
@@ -4535,8 +4536,8 @@ export class OdooEditor extends EventTarget {
                 const container = link.parentElement;
                 const offset = childNodeIndex(link) + 1;
                 setSelection(container, offset, container, offset, false);
+                selection.collapseToEnd();
             }
-            selection.collapseToEnd();
         }
     }
 
