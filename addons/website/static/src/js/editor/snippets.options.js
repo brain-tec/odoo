@@ -2596,8 +2596,11 @@ options.registry.DeviceVisibility = options.Class.extend({
      * @override
      */
     async onTargetShow() {
-        if (this.$target[0].classList.contains('o_snippet_mobile_invisible')
-                || this.$target[0].classList.contains('o_snippet_desktop_invisible')) {
+        const isMobilePreview = weUtils.isMobileView(this.$target[0]);
+        const isMobileHidden = this.$target[0].classList.contains("o_snippet_mobile_invisible");
+        if ((this.$target[0].classList.contains('o_snippet_mobile_invisible')
+                || this.$target[0].classList.contains('o_snippet_desktop_invisible')
+            ) && isMobilePreview === isMobileHidden) {
             this.$target[0].classList.add('o_snippet_override_invisible');
         }
     },
@@ -3440,10 +3443,7 @@ options.registry.WebsiteAnimate = options.Class.extend({
         this.isAnimatedText = this.$target.hasClass('o_animated_text');
         this.$optionsSection = this.$overlay.data('$optionsSection');
         this.$scrollingElement = $().getScrollingElement(this.ownerDocument);
-        if (this.isAnimatedText) {
-            this.$overlay[0].querySelectorAll(".o_handle")
-                .forEach(handle => handle.classList.add("pe-none"));
-        }
+        this.$overlay[0].querySelector(".o_handles").classList.toggle("pe-none", this.isAnimatedText);
     },
     /**
      * @override
@@ -3726,8 +3726,7 @@ options.registry.TextHighlight = options.Class.extend({
         this.leftPanelEl = this.$overlay.data("$optionsSection")[0];
         // Reduce overlay opacity for more highlight visibility on small text.
         this.$overlay[0].style.opacity = "0.25";
-        this.$overlay[0].querySelectorAll(".o_handle")
-            .forEach(handle => handle.classList.add("pe-none"));
+        this.$overlay[0].querySelector(".o_handles").classList.add("pe-none");
     },
     /**
      * Move "Text Effect" options to the editor's toolbar.

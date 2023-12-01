@@ -398,14 +398,16 @@ class WebsiteSale(payment_portal.PaymentPortal):
                     max_price = max_price if max_price >= available_min_price else available_max_price
                     post['max_price'] = max_price
 
+        ProductTag = request.env['product.tag']
         if filter_by_tags_enabled and search_product:
-            ProductTag = request.env['product.tag']
             all_tags = ProductTag.search(
                 expression.AND([
                     [('product_ids.is_published', '=', True), ('visible_on_ecommerce', '=', True)],
                     website_domain
                 ])
             )
+        else:
+            all_tags = ProductTag
 
         categs_domain = [('parent_id', '=', False)] + website_domain
         if search:
@@ -1985,11 +1987,10 @@ class PaymentPortal(payment_portal.PaymentPortal):
             'currency_id': order_sudo.currency_id.id,
             'sale_order_id': order_id,  # Include the SO to allow Subscriptions to tokenize the tx
         })
-        total = order_sudo.amount_total + order_sudo.amount_delivery
         if not kwargs.get('amount'):
-            kwargs['amount'] = total
+            kwargs['amount'] = order_sudo.amount_total
 
-        if tools.float_compare(kwargs['amount'], total, precision_rounding=order_sudo.currency_id.rounding):
+        if tools.float_compare(kwargs['amount'], order_sudo.amount_total, precision_rounding=order_sudo.currency_id.rounding):
             raise ValidationError(_("The cart has been updated. Please refresh the page."))
 
         tx_sudo = self._create_transaction(

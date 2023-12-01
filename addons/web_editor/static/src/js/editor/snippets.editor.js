@@ -896,10 +896,6 @@ var SnippetEditor = Widget.extend({
                 if (isMobilePreview === isMobileHidden) {
                     // Preview mode and hidden type are the same.
                     show = false;
-                } else {
-                    // Preview mode is not related to hidden type.
-                    delete this.$target[0].dataset.invisible;
-                    return false;
                 }
             }
         }
@@ -1362,8 +1358,9 @@ var SnippetEditor = Widget.extend({
             // Defining the column grid area with its position.
             const gridProp = gridUtils._getGridProperties(rowEl);
 
-            const top = parseFloat(this.$target[0].style.top);
-            const left = parseFloat(this.$target[0].style.left);
+            const style = window.getComputedStyle(this.$target[0]);
+            const top = parseFloat(style.top);
+            const left = parseFloat(style.left);
 
             const rowStart = Math.round(top / (gridProp.rowSize + gridProp.rowGap)) + 1;
             const columnStart = Math.round(left / (gridProp.columnSize + gridProp.columnGap)) + 1;
@@ -4473,9 +4470,15 @@ var SnippetsMenu = Widget.extend({
                 gridUtils._reloadLazyImages(gridItemEl);
             }
 
+            const isMobilePreview = weUtils.isMobileView(this.$body[0]);
             for (const invisibleOverrideEl of this.getEditableArea().find('.o_snippet_mobile_invisible, .o_snippet_desktop_invisible')) {
+                const isMobileHidden = invisibleOverrideEl.classList.contains("o_snippet_mobile_invisible");
                 invisibleOverrideEl.classList.remove('o_snippet_override_invisible');
-                invisibleOverrideEl.dataset.invisible = '1';
+                if (isMobilePreview === isMobileHidden) {
+                    invisibleOverrideEl.dataset.invisible = '1';
+                } else {
+                    delete invisibleOverrideEl.dataset.invisible;
+                }
             }
 
             // This is async but using the main editor mutex, currently locked.
