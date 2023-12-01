@@ -35,7 +35,8 @@ class AccountEdiFormat(models.Model):
 
     def _is_compatible_with_journal(self, journal):
         if self.code == "in_ewaybill_1_03":
-            return journal.type in ("sale", "purchase")
+            # In the Invoice we have a button to send Ewaybill so not required to send it automatically.
+            return False
         return super()._is_compatible_with_journal(journal)
 
     def _is_enabled_by_default_on_journal(self, journal):
@@ -159,7 +160,7 @@ class AccountEdiFormat(models.Model):
                 odoobot = self.env.ref("base.partner_root")
                 invoices.message_post(author_id=odoobot.id, body=
                     Markup("%s<br/>%s:<br/>%s") %(
-                        _("Somehow this E-waybill has been canceled in the government portal before. You can verify by checking the details into the government (https://ewaybillgst.gov.in/Others/EBPrintnew.asp)"),
+                        _("Somehow this E-waybill has been cancelled in the government portal before. You can verify by checking the details into the government (https://ewaybillgst.gov.in/Others/EBPrintnew.asp)"),
                         _("Error"),
                         error_message
                     )
