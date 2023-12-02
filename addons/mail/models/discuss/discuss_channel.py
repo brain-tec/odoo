@@ -205,8 +205,17 @@ class Channel(models.Model):
 
             # find partners to add from channel_member_ids
             membership_ids_cmd = vals.get('channel_member_ids', [])
-            if any(cmd[0] != 0 for cmd in membership_ids_cmd):
-                raise ValidationError(_('Invalid value when creating a channel with memberships, only 0 is allowed.'))
+            for cmd in membership_ids_cmd:
+                if cmd[0] != 0:
+                    raise ValidationError(_('Invalid value when creating a channel with memberships, only 0 is allowed.'))
+                for field_name in cmd[2]:
+                    if field_name not in ["partner_id", "guest_id", "is_pinned"]:
+                        raise ValidationError(
+                            _(
+                                "Invalid field “%(field_name)s” when creating a channel with members.",
+                                field_name=field_name,
+                            )
+                        )
             membership_pids = [cmd[2]['partner_id'] for cmd in membership_ids_cmd if cmd[0] == 0]
 
             partner_ids_to_add = partner_ids
@@ -803,19 +812,19 @@ class Channel(models.Model):
                     info['is_pinned'] = member.is_pinned
                     info['last_interest_dt'] = fields.Datetime.to_string(member.last_interest_dt)
                     if member.rtc_inviting_session_id:
-                        info['rtc_inviting_session'] = {'id': member.rtc_inviting_session_id.id}
+                        info['rtcInvitingSession'] = {'id': member.rtc_inviting_session_id.id}
             # add members info
             if channel.channel_type != 'channel':
                 # avoid sending potentially a lot of members for big channels
                 # exclude chat and other small channels from this optimization because they are
                 # assumed to be smaller and it's important to know the member list for them
                 info['channelMembers'] = [('ADD', list(members_by_channel[channel]._discuss_channel_member_format().values()))]
-                info['seen_partners_info'] = sorted([{
+                info['seenInfos'] = sorted([{
                     'id': cp.id,
-                    'partner_id': cp.partner_id.id,
-                    'fetched_message_id': cp.fetched_message_id.id,
-                    'seen_message_id': cp.seen_message_id.id,
-                } for cp in members_by_channel[channel] if cp.partner_id], key=lambda p: p['partner_id'])
+                    'partner': {'id': cp.partner_id.id, 'type': "partner"},
+                    'lastFetchedMessage': {'id': cp.fetched_message_id.id} if cp.fetched_message_id else False,
+                    'lastSeenMessage': {'id': cp.seen_message_id.id} if cp.seen_message_id else False,
+                } for cp in members_by_channel[channel] if cp.partner_id], key=lambda p: p['partner']['id'])
             # add RTC sessions info
             info.update({
                 'invitedMembers': [('ADD', list(invited_members_by_channel[channel]._discuss_channel_member_format(fields={'id': True, 'channel': {}, 'persona': {'partner': {'id': True, 'name': True, 'im_status': True}, 'guest': {'id': True, 'name': True, 'im_status': True}}}).values()))],
@@ -1179,8 +1188,7 @@ class Channel(models.Model):
         """
         self.env['bus.bus']._sendone(partner_to, 'discuss.channel/transient_message', {
             'body': f"<span class='o_mail_notification'>{content}</span>",
-            'model': self._name,
-            'res_id': self.id,
+            'originThread': {'model': self._name, 'id': self.id},
         })
 
     def execute_command_help(self, **kwargs):
