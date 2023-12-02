@@ -90,7 +90,7 @@ export class Thread extends Component {
                     this.threadService.fetchMoreMessages(this.props.thread);
                 }
             },
-            { init: null }
+            { init: null, ready: false }
         );
         this.loadNewerState = useVisible(
             "load-newer",
@@ -99,7 +99,7 @@ export class Thread extends Component {
                     this.threadService.fetchMoreMessages(this.props.thread, "newer");
                 }
             },
-            { init: null }
+            { init: null, ready: false }
         );
         this.presentThresholdState = useVisible(
             "present-treshold",
@@ -241,9 +241,7 @@ export class Thread extends Component {
             saveScroll();
         };
         const applyScroll = () => {
-            if (this.state.mountedAndLoaded) {
-                loadedAndPatched = true;
-            } else {
+            if (!this.state.mountedAndLoaded) {
                 return;
             }
             // Use toRaw() to prevent scroll check from triggering renders.
@@ -278,6 +276,11 @@ export class Thread extends Component {
             newestPersistentMessage = thread.newestPersistentMessage;
             oldestPersistentMessage = thread.oldestPersistentMessage;
             loadNewer = thread.loadNewer;
+            if (!loadedAndPatched) {
+                loadedAndPatched = true;
+                this.loadOlderState.ready = true;
+                this.loadNewerState.ready = true;
+            }
         };
         onWillPatch(() => {
             if (!loadedAndPatched) {
@@ -329,7 +332,7 @@ export class Thread extends Component {
 
     async onClickPreferences() {
         const actionDescription = await this.orm.call("res.users", "action_get");
-        actionDescription.res_id = this.store.user.user.id;
+        actionDescription.res_id = this.store.self.user.id;
         this.env.services.action.doAction(actionDescription);
     }
 
@@ -371,14 +374,19 @@ export class Thread extends Component {
         if (this.props.thread.model === "mail.box") {
             return false;
         }
-        if (!prevMsg || prevMsg.type === "notification" || prevMsg.isEmpty || this.env.inChatter) {
+        if (
+            !prevMsg ||
+            prevMsg.message_type === "notification" ||
+            prevMsg.isEmpty ||
+            this.env.inChatter
+        ) {
             return false;
         }
 
         if (!msg.author?.eq(prevMsg.author)) {
             return false;
         }
-        if (msg.model !== prevMsg.model || msg.res_id !== prevMsg.res_id) {
+        if (!msg.originThread?.eq(prevMsg.originThread)) {
             return false;
         }
         if (msg.parentMessage) {
