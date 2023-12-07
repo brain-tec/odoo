@@ -409,7 +409,7 @@ class AccountMoveLine(models.Model):
     # === Misc Information === #
     blocked = fields.Boolean(
         string='No Follow-up',
-        default=False,
+        compute='_compute_blocked', store=True, readonly=False, precompute=True,
         help="You can check this box to mark this journal item as a litigation with the "
              "associated partner",
     )
@@ -460,6 +460,11 @@ class AccountMoveLine(models.Model):
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
+    @api.depends('journal_id.type')
+    def _compute_blocked(self):
+        for line in self:
+            line.blocked = line.journal_id and line.journal_id.type == 'general'
+
     @api.depends('move_id')
     def _compute_display_type(self):
         for line in self.filtered(lambda l: not l.display_type):
@@ -489,16 +494,14 @@ class AccountMoveLine(models.Model):
 
     @api.depends('product_id')
     def _compute_name(self):
-        for line in self:
+        for line in self.filtered(lambda l: l.move_id.inalterable_hash is False):
             if line.display_type == 'payment_term':
-                if not line.name:
-                    term_lines = line.move_id.line_ids.filtered(lambda l: l.display_type == 'payment_term') | line
-                    name = line.move_id.payment_reference or ''
-                    if len(term_lines) > 1:
-                        index = term_lines._ids.index(line.id) + 1
-                        name = _('%s installment #%s', name, index).lstrip()
-                    line.name = name
-                continue
+                term_lines = line.move_id.line_ids.filtered(lambda l: l.display_type == 'payment_term') | line
+                name = line.move_id.payment_reference or ''
+                if len(term_lines) > 1:
+                    index = term_lines._ids.index(line.id) + 1
+                    name = _('%s installment #%s', name, index).lstrip()
+                line.name = name
             if not line.product_id or line.display_type in ('line_section', 'line_note'):
                 continue
             if line.partner_id.lang:
