@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, Command, models, _
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import UserError, ValidationError, RedirectWarning
 from odoo.tools.misc import clean_context
 
 
@@ -164,7 +164,7 @@ class HrExpenseSheet(models.Model):
 
     # === Account fields === #
     payment_state = fields.Selection(
-        selection=lambda self: self.env["account.move"]._fields["payment_state"].selection,
+        selection=lambda self: self.env["account.move"]._fields["payment_state"]._description_selection(self.env),
         string="Payment Status",
         compute='_compute_from_account_move_ids', store=True, readonly=True,
         copy=False,
@@ -260,7 +260,7 @@ class HrExpenseSheet(models.Model):
     @api.depends('selectable_payment_method_line_ids')
     def _compute_payment_method_line_id(self):
         for sheet in self:
-            sheet.payment_method_line_id = sheet.selectable_payment_method_line_ids._origin[:1]
+            sheet.payment_method_line_id = sheet.selectable_payment_method_line_ids[:1]
 
     @api.depends('employee_journal_id', 'payment_method_line_id')
     def _compute_journal_id(self):
@@ -628,8 +628,11 @@ class HrExpenseSheet(models.Model):
         if any(not sheet.journal_id for sheet in self):
             raise UserError(_("Specify expense journal to generate accounting entries."))
 
-        if not self.employee_id.work_email:
-            raise UserError(_("The work email of the employee is required to post the expense report. Please add it on the employee form."))
+        missing_email_employees = self.filtered(lambda sheet: not sheet.employee_id.work_email).employee_id
+        if missing_email_employees:
+            action = self.env['ir.actions.actions']._for_xml_id('hr.open_view_employee_tree')
+            action['domain'] = [('id', 'in', missing_email_employees.ids)]
+            raise RedirectWarning(_("The work email of some employees is missing. Please add it on the employee form"), action, _("Show missing work email employees"))
 
     def _do_submit(self):
         self.write({'approval_state': 'submit'})
