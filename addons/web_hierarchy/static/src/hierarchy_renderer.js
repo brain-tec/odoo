@@ -3,7 +3,7 @@
 import { Component, useRef, onPatched } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 import { scrollTo } from "@web/core/utils/scrolling";
 
 import { HierarchyCard } from "./hierarchy_card";
@@ -62,17 +62,30 @@ export class HierarchyRenderer extends Component {
                 },
             });
         }
+        this.scrollTarget = "none";
+        useBus(this.props.model.bus, "hierarchyScrollTarget", (ev) => {
+            this.scrollTarget = ev.detail?.scrollTarget || "none";
+        });
         onPatched(this.onPatched);
     }
 
     onPatched() {
-        const row = this.rendererRef.el.querySelector(":scope .o_hierarchy_row:last-child");
-        if (row) {
-            const scrollable = this.env.isSmall ? document.querySelector(".o_hierarchy_view") : this.rendererRef.el.parentNode;
-            scrollable.classList.add(".o_hierarchy_auto-scroll");
-            scrollTo(row, { scrollable, isAnchor: true });
-            scrollable.classList.remove(".o_hierarchy_auto-scroll");
+        if (this.scrollTarget === "none") {
+            return;
         }
+        const row =
+            this.scrollTarget === "bottom"
+                ? this.rendererRef.el.querySelector(":scope .o_hierarchy_row:last-child")
+                : this.rendererRef.el
+                      .querySelector(
+                          `:scope .o_hierarchy_node[data-node-id="${this.scrollTarget}"]`
+                      )
+                      ?.closest(".o_hierarchy_row");
+        this.scrollTarget = "none";
+        if (!row) {
+            return;
+        }
+        scrollTo(row, { behavior: "smooth" });
     }
 
     get canDragAndDropRecord() {
