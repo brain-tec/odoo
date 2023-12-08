@@ -19,7 +19,8 @@ class PosConfig(models.Model):
 
     def get_tables_order_count_and_printing_changes(self):
         self.ensure_one()
-        tables = self.env['restaurant.table'].search([('floor_id.pos_config_ids', '=', self.id)])
+        floors = self.env['restaurant.floor'].search([('pos_config_ids', '=', self.id)])
+        tables = self.env['restaurant.table'].search([('floor_id', 'in', floors.ids)])
         domain = [('state', '=', 'draft'), ('table_id', 'in', tables.ids)]
 
         order_stats = self.env['pos.order']._read_group(domain, ['table_id'], ['__count'])
@@ -135,6 +136,14 @@ class PosConfig(models.Model):
         self._set_tips_after_payment_if_country_custom()
         self._link_same_non_cash_payment_methods_if_exists('point_of_sale.pos_config_main')
         self._ensure_cash_payment_method('MRCSH', _('Cash Restaurant'))
+        self._archive_shop()
+
+    def _archive_shop(self):
+        shop = self.env.ref('point_of_sale.pos_config_main', raise_if_not_found=False)
+        if shop:
+            session_count = self.env['pos.session'].search_count([('config_id', '=', shop.id)])
+            if session_count == 0:
+                shop.update({'active': False})
 
     def _setup_default_floor(self, pos_config):
         if not pos_config.floor_ids:
