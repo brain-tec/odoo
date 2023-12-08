@@ -20,7 +20,7 @@ QUnit.test("rendering when just one has received the message", async (assert) =>
             Command.create({ partner_id: partnerId_1 }),
             Command.create({ partner_id: partnerId_2 }),
         ],
-        channel_type: "chat", // only chat channel have seen notification
+        channel_type: "group",
     });
     const messageId = pyEnv["mail.message"].create({
         author_id: pyEnv.currentPartnerId,
@@ -54,7 +54,7 @@ QUnit.test("rendering when everyone have received the message", async (assert) =
             Command.create({ partner_id: partnerId_1 }),
             Command.create({ partner_id: partnerId_2 }),
         ],
-        channel_type: "chat",
+        channel_type: "group",
     });
     const messageId = pyEnv["mail.message"].create({
         author_id: pyEnv.currentPartnerId,
@@ -85,7 +85,7 @@ QUnit.test("rendering when just one has seen the message", async (assert) => {
             Command.create({ partner_id: partnerId_1 }),
             Command.create({ partner_id: partnerId_2 }),
         ],
-        channel_type: "chat",
+        channel_type: "group",
     });
     const messageId = pyEnv["mail.message"].create({
         author_id: pyEnv.currentPartnerId,
@@ -123,7 +123,7 @@ QUnit.test("rendering when just one has seen & received the message", async (ass
             Command.create({ partner_id: partnerId_1 }),
             Command.create({ partner_id: partnerId_2 }),
         ],
-        channel_type: "chat",
+        channel_type: "group",
     });
     const mesageId = pyEnv["mail.message"].create({
         author_id: pyEnv.currentPartnerId,
@@ -157,7 +157,7 @@ QUnit.test("rendering when just everyone has seen the message", async (assert) =
             Command.create({ partner_id: partnerId_1 }),
             Command.create({ partner_id: partnerId_2 }),
         ],
-        channel_type: "chat",
+        channel_type: "group",
     });
     const messageId = pyEnv["mail.message"].create({
         author_id: pyEnv.currentPartnerId,
@@ -202,6 +202,10 @@ QUnit.test("'channel_fetch' notification received is correctly handled", async (
     const channel = pyEnv["discuss.channel"].searchRead([["id", "=", channelId]])[0];
     // Simulate received channel fetched notification
     pyEnv["bus.bus"]._sendone(channel, "discuss.channel.member/fetched", {
+        id: pyEnv["discuss.channel.member"].search([
+            ["channel_id", "=", channelId],
+            ["partner_id", "=", partnerId],
+        ])[0],
         channel_id: channelId,
         last_message_id: 100,
         partner_id: partnerId,
@@ -234,6 +238,10 @@ QUnit.test("'channel_seen' notification received is correctly handled", async ()
     const channel = pyEnv["discuss.channel"].searchRead([["id", "=", channelId]])[0];
     // Simulate received channel seen notification
     pyEnv["bus.bus"]._sendone(channel, "discuss.channel.member/seen", {
+        id: pyEnv["discuss.channel.member"].search([
+            ["channel_id", "=", channelId],
+            ["partner_id", "=", partnerId],
+        ])[0],
         channel_id: channelId,
         last_message_id: 100,
         partner_id: partnerId,
@@ -268,6 +276,10 @@ QUnit.test(
         const channel = pyEnv["discuss.channel"].searchRead([["id", "=", channelId]])[0];
         // Simulate received channel fetched notification
         pyEnv["bus.bus"]._sendone(channel, "discuss.channel.member/fetched", {
+            id: pyEnv["discuss.channel.member"].search([
+                ["channel_id", "=", channelId],
+                ["partner_id", "=", partnerId],
+            ])[0],
             channel_id: channelId,
             last_message_id: 100,
             partner_id: partnerId,
@@ -276,6 +288,10 @@ QUnit.test(
 
         // Simulate received channel seen notification
         pyEnv["bus.bus"]._sendone(channel, "discuss.channel.member/seen", {
+            id: pyEnv["discuss.channel.member"].search([
+                ["channel_id", "=", channelId],
+                ["partner_id", "=", partnerId],
+            ])[0],
             channel_id: channelId,
             last_message_id: 100,
             partner_id: partnerId,

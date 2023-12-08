@@ -5,10 +5,13 @@ import { MockServer } from "@web/../tests/helpers/mock_server";
 
 patch(MockServer.prototype, {
     _mockDiscussChannelMember__getAsSudoFromContext(channelId) {
-        const guest = this._mockMailGuest__getGuestFromContext();
+        const [partner, guest] = this._mockResPartner__getCurrentPersona();
+        if (!partner && !guest) {
+            return;
+        }
         return this.pyEnv["discuss.channel.member"].searchRead([
             ["channel_id", "=", channelId],
-            guest ? ["guest_id", "=", guest.id] : ["partner_id", "=", this.pyEnv.currentPartnerId],
+            guest ? ["guest_id", "=", guest.id] : ["partner_id", "=", partner.id],
         ])[0];
     },
     /**
@@ -49,12 +52,7 @@ patch(MockServer.prototype, {
             }
             if (member.guest_id) {
                 const [guest] = this.getRecords("mail.guest", [["id", "=", member.guest_id]]);
-                persona = {
-                    id: guest.id,
-                    im_status: guest.im_status,
-                    name: guest.name,
-                    type: "guest",
-                };
+                persona = this._mockMailGuestGuestFormat([guest.id]).get(guest.id);
             }
             const data = {
                 thread: { id: member.channel_id, model: "discuss.channel" },
