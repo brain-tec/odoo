@@ -1,5 +1,7 @@
 /* @odoo-module */
 
+import { rpc } from "@web/core/network/rpc";
+
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 import { Command } from "@mail/../tests/helpers/command";
@@ -75,14 +77,14 @@ QUnit.test("Do not show channel when visitor is typing", async () => {
         livechat_channel_id: livechatChannelId,
         livechat_operator_id: pyEnv.currentPartnerId,
     });
-    const { env, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     openDiscuss();
     await contains(".o-mail-DiscussSidebarCategory", { count: 2 });
     await contains(".o-mail-DiscussSidebarCategory-livechat", { count: 0 });
     // simulate livechat visitor typing
     const channel = pyEnv["discuss.channel"].searchRead([["id", "=", channelId]])[0];
     await pyEnv.withGuest(guestId, () =>
-        env.services.rpc("/im_livechat/notify_typing", {
+        rpc("/im_livechat/notify_typing", {
             is_typing: true,
             uuid: channel.uuid,
         })
@@ -220,7 +222,7 @@ QUnit.test("Close from the bus", async () => {
 QUnit.test("Smiley face avatar for livechat item linked to a guest", async () => {
     const pyEnv = await startServer();
     const guestId = pyEnv["mail.guest"].create({ name: "Visitor 11" });
-    const channelId = pyEnv["discuss.channel"].create({
+    pyEnv["discuss.channel"].create({
         anonymous_name: "Visitor 11",
         channel_member_ids: [
             [0, 0, { partner_id: pyEnv.currentPartnerId }],
@@ -231,9 +233,12 @@ QUnit.test("Smiley face avatar for livechat item linked to a guest", async () =>
     });
     const { openDiscuss } = await start();
     openDiscuss();
+    const guest = pyEnv["mail.guest"].searchRead([["id", "=", guestId]])[0];
     await contains(
         `.o-mail-DiscussSidebarCategory-livechat + .o-mail-DiscussSidebarChannel img[data-src='${url(
-            `/discuss/channel/${channelId}/guest/${guestId}/avatar_128`
+            `/web/image?field=avatar_128&id=${guestId}&model=mail.guest&unique=${encodeURIComponent(
+                guest.write_date
+            )}`
         )}']`
     );
 });
@@ -251,9 +256,12 @@ QUnit.test("Partner profile picture for livechat item linked to a partner", asyn
     });
     const { openDiscuss } = await start();
     openDiscuss(channelId);
+    const partner = pyEnv["res.partner"].searchRead([["id", "=", partnerId]])[0];
     await contains(
         `.o-mail-DiscussSidebarCategory-livechat + .o-mail-DiscussSidebarChannel img[data-src='${url(
-            `/discuss/channel/${channelId}/partner/${partnerId}/avatar_128`
+            `/web/image?field=avatar_128&id=${partnerId}&model=res.partner&unique=${encodeURIComponent(
+                partner.write_date
+            )}`
         )}']`
     );
 });
@@ -462,10 +470,10 @@ QUnit.test("Message unread counter", async () => {
         channel_type: "livechat",
         livechat_operator_id: pyEnv.currentPartnerId,
     });
-    const { env, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     openDiscuss();
     pyEnv.withGuest(guestId, () =>
-        env.services.rpc("/im_livechat/chat_post", {
+        rpc("/im_livechat/chat_post", {
             message_content: "hu",
             uuid: pyEnv["discuss.channel"].searchRead([["id", "=", channelId]])[0].uuid,
         })

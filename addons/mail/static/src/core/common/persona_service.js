@@ -1,5 +1,6 @@
 /* @odoo-module */
 
+import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { useSequential } from "@mail/utils/common/hooks";
 import { markRaw } from "@odoo/owl";
@@ -17,7 +18,6 @@ export class PersonaService {
      */
     setup(env, services) {
         this.env = env;
-        this.rpc = services.rpc;
         this.orm = services.orm;
         /** @type {import("@mail/core/common/store_service").Store} */
         this.store = services["mail.store"];
@@ -30,47 +30,9 @@ export class PersonaService {
     }
 
     async updateGuestName(guest, name) {
-        await this.rpc("/mail/guest/update_name", {
+        await rpc("/mail/guest/update_name", {
             guest_id: guest.id,
             name,
-        });
-    }
-
-    async fetchIsCompany(persona) {
-        if (persona.type !== "partner") {
-            // non-partner persona are always considered as not a company
-            persona.is_company = false;
-            return;
-        }
-        this._sQueue.todo.add(persona.id);
-        await new Promise(setTimeout); // group synchronous request to fetch is_company
-        await this.sequential(async () => {
-            const ongoing = new Set();
-            if (this._sQueue.todo.size === 0) {
-                return;
-            }
-            // load 'todo' into 'ongoing'
-            this._sQueue.todo.forEach((id) => ongoing.add(id));
-            this._sQueue.todo.clear();
-            // fetch is_company
-            const partnerData = await this.orm.silent.read(
-                "res.partner",
-                [...ongoing],
-                ["is_company"],
-                {
-                    context: { active_test: false },
-                }
-            );
-            for (const { id, is_company } of partnerData) {
-                this.store.Persona.insert({ id, is_company, type: "partner" });
-                ongoing.delete(id);
-                this._sQueue.todo.delete(id);
-            }
-            for (const id of ongoing) {
-                // no is_company found => assumes persona is not a company
-                this.store.Persona.insert({ id, is_company: false, type: "partner" });
-                this._sQueue.todo.delete(id);
-            }
         });
     }
 
@@ -108,7 +70,7 @@ export class PersonaService {
 }
 
 export const personaService = {
-    dependencies: ["orm", "rpc", "mail.store"],
+    dependencies: ["orm", "mail.store"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {Partial<import("services").Services>} services

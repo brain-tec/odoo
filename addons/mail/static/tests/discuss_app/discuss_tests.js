@@ -1,5 +1,7 @@
 /* @odoo-module */
 
+import { rpc } from "@web/core/network/rpc";
+
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
 import { TEST_USER_IDS } from "@bus/../tests/helpers/test_constants";
@@ -8,7 +10,13 @@ import { Command } from "@mail/../tests/helpers/command";
 import { patchUiSize } from "@mail/../tests/helpers/patch_ui_size";
 import { start } from "@mail/../tests/helpers/test_utils";
 
-import { editInput, makeDeferred, nextTick, triggerHotkey } from "@web/../tests/helpers/utils";
+import {
+    editInput,
+    makeDeferred,
+    nextTick,
+    patchWithCleanup,
+    triggerHotkey,
+} from "@web/../tests/helpers/utils";
 import { click, contains, createFile, focus, insertText, scroll } from "@web/../tests/utils";
 import { Deferred } from "@web/core/utils/concurrency";
 
@@ -945,10 +953,13 @@ QUnit.test(
             },
         });
         openDiscuss();
-        env.services.bus_service.addEventListener("set_title_part", ({ detail: payload }) => {
-            assert.step("set_title_part");
-            assert.strictEqual(payload.part, "_chat");
-            assert.strictEqual(payload.title, "1 Message");
+        patchWithCleanup(env.services["title"], {
+            setParts(parts) {
+                if (parts._chat) {
+                    assert.step("set_title_part");
+                    assert.strictEqual(parts._chat, "1 Message");
+                }
+            },
         });
         const channel = pyEnv["discuss.channel"].searchRead([["id", "=", channelId]])[0];
         // simulate receiving a new message with odoo out-of-focused
@@ -974,10 +985,13 @@ QUnit.test("receive new chat message: out of odoo focus (notification, chat)", a
         },
     });
     openDiscuss();
-    env.services.bus_service.addEventListener("set_title_part", ({ detail: payload }) => {
-        assert.step("set_title_part");
-        assert.strictEqual(payload.part, "_chat");
-        assert.strictEqual(payload.title, "1 Message");
+    patchWithCleanup(env.services["title"], {
+        setParts(parts) {
+            if (parts._chat) {
+                assert.step("set_title_part");
+                assert.strictEqual(parts._chat, "1 Message");
+            }
+        },
     });
     const channel = pyEnv["discuss.channel"].searchRead([["id", "=", channelId]])[0];
     // simulate receiving a new message with odoo out-of-focused
@@ -1002,8 +1016,12 @@ QUnit.test("no out-of-focus notification on receiving self messages in chat", as
         },
     });
     openDiscuss();
-    env.services.bus_service.addEventListener("set_title_part", () => {
-        assert.step("set_title_part");
+    patchWithCleanup(env.services["title"], {
+        setParts(parts) {
+            if (parts._chat) {
+                assert.step("set_title_part");
+            }
+        },
     });
     const channel = pyEnv["discuss.channel"].searchRead([["id", "=", channelId]])[0];
     // simulate receiving a new message of self with odoo out-of-focused
@@ -1033,19 +1051,23 @@ QUnit.test("receive new chat messages: out of odoo focus (tab title)", async (as
         },
     });
     openDiscuss();
-    env.services.bus_service.addEventListener("set_title_part", ({ detail: payload }) => {
-        step++;
-        assert.step("set_title_part");
-        assert.strictEqual(payload.part, "_chat");
-        if (step === 1) {
-            assert.strictEqual(payload.title, "1 Message");
-        }
-        if (step === 2) {
-            assert.strictEqual(payload.title, "2 Messages");
-        }
-        if (step === 3) {
-            assert.strictEqual(payload.title, "3 Messages");
-        }
+    patchWithCleanup(env.services["title"], {
+        setParts(parts) {
+            if (!parts._chat) {
+                return;
+            }
+            step++;
+            assert.step("set_title_part");
+            if (step === 1) {
+                assert.strictEqual(parts._chat, "1 Message");
+            }
+            if (step === 2) {
+                assert.strictEqual(parts._chat, "2 Messages");
+            }
+            if (step === 3) {
+                assert.strictEqual(parts._chat, "3 Messages");
+            }
+        },
     });
     const channel_1 = pyEnv["discuss.channel"].searchRead([["id", "=", channelId_1]])[0];
     // simulate receiving a new message in chat 1 with odoo out-of-focused
@@ -1098,14 +1120,14 @@ QUnit.test("should auto-pin chat when receiving a new DM", async () => {
         ],
         channel_type: "chat",
     });
-    const { env, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     openDiscuss();
     await contains(".o-mail-DiscussSidebarCategory-chat");
     await contains(".o-mail-DiscussSidebarChannel", { count: 0, text: "Demo" });
 
     // simulate receiving the first message on channel 11
     pyEnv.withUser(userId, () =>
-        env.services.rpc("/mail/message/post", {
+        rpc("/mail/message/post", {
             post_data: { body: "new message", message_type: "comment" },
             thread_id: channelId,
             thread_model: "discuss.channel",
@@ -1474,7 +1496,7 @@ QUnit.test("new messages separator [REQUIRE FOCUS]", async () => {
         ["partner_id", "=", pyEnv.currentPartnerId],
     ]);
     pyEnv["discuss.channel.member"].write([memberId], { seen_message_id: lastMessageId });
-    const { env, openDiscuss } = await start();
+    const { openDiscuss } = await start();
     openDiscuss(channelId);
     await contains(".o-mail-Message", { count: 25 });
     await contains(".o-mail-Thread-newMessage hr + span", { count: 0, text: "New messages" });
@@ -1484,7 +1506,7 @@ QUnit.test("new messages separator [REQUIRE FOCUS]", async () => {
     $(".o-mail-Composer-input")[0].blur();
     // simulate receiving a message
     pyEnv.withUser(userId, () =>
-        env.services.rpc("/mail/message/post", {
+        rpc("/mail/message/post", {
             post_data: { body: "hu", message_type: "comment" },
             thread_id: channelId,
             thread_model: "discuss.channel",
@@ -1726,7 +1748,7 @@ QUnit.test("restore thread scroll position", async () => {
 });
 
 QUnit.test("Message shows up even if channel data is incomplete", async () => {
-    const { env, openDiscuss, pyEnv } = await start();
+    const { openDiscuss, pyEnv } = await start();
     openDiscuss();
     await contains(".o-mail-DiscussSidebarCategory-chat");
     await contains(".o-mail-DiscussSidebarChannel", { count: 0 });
@@ -1750,13 +1772,13 @@ QUnit.test("Message shows up even if channel data is incomplete", async () => {
         channel_type: "chat",
     });
     await pyEnv.withUser(correspondentUserId, () =>
-        env.services.rpc("/discuss/channel/notify_typing", {
+        rpc("/discuss/channel/notify_typing", {
             is_typing: true,
             channel_id: channelId,
         })
     );
     await pyEnv.withUser(correspondentUserId, () =>
-        env.services.rpc("/mail/message/post", {
+        rpc("/mail/message/post", {
             post_data: { body: "hello world", message_type: "comment" },
             thread_id: channelId,
             thread_model: "discuss.channel",

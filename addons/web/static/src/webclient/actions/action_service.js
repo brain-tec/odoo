@@ -5,6 +5,7 @@ import { browser } from "@web/core/browser/browser";
 import { makeContext } from "@web/core/context";
 import { useDebugCategory } from "@web/core/debug/debug_context";
 import { evaluateExpr } from "@web/core/py_js/py";
+import { rpc, rpcBus } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { Deferred, KeepLast } from "@web/core/utils/concurrency";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -137,7 +138,7 @@ function makeActionManager(env) {
     env.bus.addEventListener("CLEAR-CACHES", () => {
         actionCache = {};
     });
-    env.bus.addEventListener("RPC:RESPONSE", (ev) => {
+    rpcBus.addEventListener("RPC:RESPONSE", (ev) => {
         const { model, method } = ev.detail.data.params;
         if (model === "ir.actions.act_window" && UPDATE_METHODS.includes(method)) {
             actionCache = {};
@@ -204,7 +205,7 @@ function makeActionManager(env) {
             const key = `${JSON.stringify(actionRequest)},${JSON.stringify(additional_context)}`;
             let action;
             if (!actionCache[key]) {
-                actionCache[key] = env.services.rpc("/web/action/load", {
+                actionCache[key] = rpc("/web/action/load", {
                     action_id: actionRequest,
                     additional_context,
                 });
@@ -1076,12 +1077,7 @@ function makeActionManager(env) {
                 if (action.context) {
                     Object.assign(downloadContext, action.context);
                 }
-                ({ success, message } = await downloadReport(
-                    env.services.rpc,
-                    action,
-                    type,
-                    downloadContext
-                ));
+                ({ success, message } = await downloadReport(rpc, action, type, downloadContext));
             } finally {
                 env.services.ui.unblock();
             }
@@ -1121,7 +1117,7 @@ function makeActionManager(env) {
      * @returns {Promise<void>}
      */
     async function _executeServerAction(action, options) {
-        const runProm = env.services.rpc("/web/action/run", {
+        const runProm = rpc("/web/action/run", {
             action_id: action.id,
             context: makeContext([env.services.user.context, action.context]),
         });
@@ -1224,7 +1220,7 @@ function makeActionManager(env) {
                 }
                 args = args.concat(additionalArgs);
             }
-            const callProm = env.services.rpc(`/web/dataset/call_button/${params.resModel}/${params.name}`, {
+            const callProm = rpc(`/web/dataset/call_button/${params.resModel}/${params.name}`, {
                 args,
                 kwargs: { context },
                 method: params.name,
@@ -1442,16 +1438,7 @@ function makeActionManager(env) {
 }
 
 export const actionService = {
-    dependencies: [
-        "effect",
-        "localization",
-        "notification",
-        "router",
-        "rpc",
-        "title",
-        "ui",
-        "user",
-    ],
+    dependencies: ["effect", "localization", "notification", "router", "title", "ui", "user"],
     start(env) {
         return makeActionManager(env);
     },
