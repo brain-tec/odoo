@@ -292,6 +292,7 @@ export class ThreadService {
     async loadAround(thread, messageId) {
         if (!thread.messages.some(({ id }) => id === messageId)) {
             thread.isLoaded = false;
+            thread.scrollTop = undefined;
             const { messages } = await rpc(this.getFetchRoute(thread), {
                 ...this.getFetchParams(thread),
                 around: messageId,
@@ -309,8 +310,6 @@ export class ThreadService {
                 }
             }
             this._enrichMessagesWithTransient(thread);
-            // Give some time to the UI to update.
-            await new Promise((resolve) => setTimeout(() => requestAnimationFrame(resolve)));
         }
     }
 
@@ -696,7 +695,7 @@ export class ThreadService {
             thread.messages.push(tmpMsg);
             thread.seen_message_id = tmpMsg.id;
         }
-        const data = await rpc(this.getMessagePostRoute(thread), params);
+        const data = await rpc("/mail/message/post", params);
         tmpMsg?.delete();
         if (!data) {
             return;
@@ -762,44 +761,6 @@ export class ThreadService {
         };
     }
 
-    /**
-     * @param {import("models").Thread} thread
-     */
-    getMessagePostRoute(thread) {
-        return "/mail/message/post";
-    }
-
-    /**
-     * @param {import("models").Thread} thread
-     */
-    canLeave(thread) {
-        return (
-            ["channel", "group"].includes(thread.type) &&
-            !thread.message_needaction_counter &&
-            !thread.group_based_subscription
-        );
-    }
-    /**
-     *
-     * @param {import("models").Thread} thread
-     */
-    canUnpin(thread) {
-        return thread.type === "chat" && this.getCounter(thread) === 0;
-    }
-
-    /**
-     * @param {import("models").Thread} thread
-     */
-    getCounter(thread) {
-        if (thread.type === "mailbox") {
-            return thread.counter;
-        }
-        if (thread.isChatChannel) {
-            return thread.message_unread_counter || thread.message_needaction_counter;
-        }
-        return thread.message_needaction_counter;
-    }
-
     getDiscussSidebarCategoryCounter(categoryId) {
         return this.store.discuss[categoryId].threads.reduce((acc, channel) => {
             if (categoryId === "channels") {
@@ -819,19 +780,6 @@ export class ThreadService {
         await this.orm.call("ir.attachment", "register_as_main_attachment", [
             thread.mainAttachment.id,
         ]);
-    }
-
-    /**
-     * @param {import("models").Composer} composer
-     */
-    clearComposer(composer) {
-        composer.attachments.length = 0;
-        composer.textInputContent = "";
-        Object.assign(composer.selection, {
-            start: 0,
-            end: 0,
-            direction: "none",
-        });
     }
 
     /**
