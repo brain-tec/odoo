@@ -702,7 +702,7 @@ class MrpProduction(models.Model):
                 date_finished = date_finished + relativedelta(hours=1)
             production.date_finished = date_finished
 
-    @api.depends('company_id', 'bom_id', 'product_id', 'product_qty', 'product_uom_id', 'location_src_id', 'date_start')
+    @api.depends('company_id', 'bom_id', 'product_id', 'product_qty', 'product_uom_id', 'location_src_id')
     def _compute_move_raw_ids(self):
         for production in self:
             if production.state != 'draft':
@@ -872,7 +872,23 @@ class MrpProduction(models.Model):
             if not vals.get('procurement_group_id'):
                 procurement_group_vals = self._prepare_procurement_group_vals(vals)
                 vals['procurement_group_id'] = self.env["procurement.group"].create(procurement_group_vals).id
-        return super().create(vals_list)
+        res = super().create(vals_list)
+        # Make sure that the date passed in vals_list are taken into account and not modified by a compute
+        for rec, vals in zip(res, vals_list):
+            if (rec.move_raw_ids
+                and rec.move_raw_ids[0].date
+                and vals.get('date_start')
+                and rec.move_raw_ids[0].date != vals['date_start']):
+                rec.move_raw_ids.write({
+                    'date': vals['date_start'],
+                    'date_deadline': vals['date_start']
+                })
+            if (rec.move_finished_ids
+                and rec.move_finished_ids[0].date
+                and vals.get('date_finished')
+                and rec.move_finished_ids[0].date != vals['date_finished']):
+                rec.move_finished_ids.write({'date': vals['date_finished']})
+        return res
 
     def unlink(self):
         self.action_cancel()
@@ -1528,8 +1544,9 @@ class MrpProduction(models.Model):
             for move in finish_moves:
                 if not move.quantity_done:
                     move._set_quantity_done(float_round(order.qty_producing - order.qty_produced, precision_rounding=order.product_uom_id.rounding, rounding_method='HALF-UP'))
-                if move.has_tracking != 'none' and order.lot_producing_id:
-                    move.move_line_ids.lot_id = order.lot_producing_id
+                extra_vals = order._prepare_finished_extra_vals()
+                if extra_vals:
+                    move.move_line_ids.write(extra_vals)
             # workorder duration need to be set to calculate the price of the product
             for workorder in order.workorder_ids:
                 if workorder.state not in ('done', 'cancel'):
@@ -2296,3 +2313,9 @@ class MrpProduction(models.Model):
         if missing_lot_id_products:
             error_msg = _('You need to supply Lot/Serial Number for products:') + missing_lot_id_products
             raise UserError(error_msg)
+
+    def _prepare_finished_extra_vals(self):
+        self.ensure_one()
+        if self.lot_producing_id:
+            return {'lot_id' : self.lot_producing_id.id}
+        return {}
