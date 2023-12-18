@@ -32,12 +32,24 @@
             <field name="name">Switzerland VAT Form: grid 302 base</field>
             <field name="applicability">taxes</field>
         </record>
+        <record id="vat_tag_303_a" model="account.account.tag">
+            <field name="name">Switzerland VAT Form: grid 303 base</field>
+            <field name="applicability">taxes</field>
+        </record>
         <record id="vat_tag_311_a" model="account.account.tag">
             <field name="name">Switzerland VAT Form: grid 311 base</field>
             <field name="applicability">taxes</field>
         </record>
+        <record id="vat_tag_313_a" model="account.account.tag">
+            <field name="name">Switzerland VAT Form: grid 313 base</field>
+            <field name="applicability">taxes</field>
+        </record>
         <record id="vat_tag_342_a" model="account.account.tag">
             <field name="name">Switzerland VAT Form: grid 342 base</field>
+            <field name="applicability">taxes</field>
+        </record>
+        <record id="vat_tag_343_a" model="account.account.tag">
+            <field name="name">Switzerland VAT Form: grid 343 base</field>
             <field name="applicability">taxes</field>
         </record>
         <record id="vat_tag_381_a" model="account.account.tag">
@@ -48,16 +60,32 @@
             <field name="name">Switzerland VAT Form: grid 382 base</field>
             <field name="applicability">taxes</field>
         </record>
+        <record id="vat_tag_383_a" model="account.account.tag">
+            <field name="name">Switzerland VAT Form: grid 383 base</field>
+            <field name="applicability">taxes</field>
+        </record>
         <record id="vat_tag_302_b" model="account.account.tag">
             <field name="name">Switzerland VAT Form: grid 302 tax</field>
+            <field name="applicability">taxes</field>
+        </record>
+        <record id="vat_tag_303_b" model="account.account.tag">
+            <field name="name">Switzerland VAT Form: grid 303 tax</field>
             <field name="applicability">taxes</field>
         </record>
         <record id="vat_tag_311_b" model="account.account.tag">
             <field name="name">Switzerland VAT Form: grid 311 tax</field>
             <field name="applicability">taxes</field>
         </record>
+        <record id="vat_tag_313_b" model="account.account.tag">
+            <field name="name">Switzerland VAT Form: grid 313 tax</field>
+            <field name="applicability">taxes</field>
+        </record>
         <record id="vat_tag_342_b" model="account.account.tag">
             <field name="name">Switzerland VAT Form: grid 342 tax</field>
+            <field name="applicability">taxes</field>
+        </record>
+        <record id="vat_tag_343_b" model="account.account.tag">
+            <field name="name">Switzerland VAT Form: grid 343 tax</field>
             <field name="applicability">taxes</field>
         </record>
         <record id="vat_tag_381_b" model="account.account.tag">
@@ -65,6 +93,10 @@
             <field name="applicability">taxes</field>
         </record>
         <record id="vat_tag_382_b" model="account.account.tag">
+            <field name="name">Switzerland VAT Form: grid 382 tax</field>
+            <field name="applicability">taxes</field>
+        </record>
+        <record id="vat_tag_383_b" model="account.account.tag">
             <field name="name">Switzerland VAT Form: grid 382 tax</field>
             <field name="applicability">taxes</field>
         </record>
@@ -96,7 +128,7 @@
 
 
         <!--
-        #  TVA - Taxe sur la Valeur Ajoutée
+        #  TVA - Taxe sur la Valeur Ajoutée (pre-2024 rates change)
         -->
         <record model="account.tax.template" id="vat_25">
             <field name="name">TVA due a 2.5% (TR)</field>
