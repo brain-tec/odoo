@@ -77,6 +77,9 @@ function serviceCached(service) {
         },
     });
 }
+// Outdated snippets whose alert has been discarded.
+const controlledSnippets = new Set();
+const clearControlledSnippets = () => controlledSnippets.clear();
 /**
  * @param {HTMLElement} el
  * @param {string} [title]
@@ -1778,7 +1781,7 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
             options.getTemplate = wysiwyg.getColorpickerTemplate.bind(wysiwyg);
         }
         this.colorPaletteWrapper?.destroy();
-        const sidebarDocument = this.colorPaletteEl.ownerDocument; 
+        const sidebarDocument = this.colorPaletteEl.ownerDocument;
         if (!(this.colorPaletteEl instanceof sidebarDocument.defaultView.HTMLElement)) {
             // When inside an iframe, the element for mounting a component must
             // be an instance of the iframe's HTMLElement, or else target
@@ -4580,6 +4583,15 @@ registry.sizing = SnippetOptionWidget.extend({
                 return;
             }
 
+            // Locking the mutex during the resize. Started here to avoid
+            // empty returns.
+            let resizeResolve;
+            const prom = new Promise(resolve => resizeResolve = () => resolve());
+            self.trigger_up("snippet_edition_request", { exec: () => {
+                self.trigger_up("disable_loading_effect");
+                return prom;
+            }});
+
             // If we are in grid mode, add a background grid and place it in
             // front of the other elements.
             const rowEl = self.$target[0].parentNode;
@@ -4693,12 +4705,22 @@ registry.sizing = SnippetOptionWidget.extend({
 
                 self.options.wysiwyg.odooEditor.automaticStepActive('resizing');
 
+                // Freeing the mutex once the resizing is done.
+                resizeResolve();
+                self.trigger_up("enable_loading_effect");
+
                 if (directions.every(dir => dir.begin === dir.current)) {
                     return;
                 }
 
                 setTimeout(function () {
                     self.options.wysiwyg.odooEditor.historyStep();
+
+                    self.trigger_up("snippet_edition_request", { exec: async () => {
+                        await new Promise(resolve => {
+                            self.trigger_up("snippet_option_update", { onSuccess: () => resolve() });
+                        });
+                    }});
                 }, 0);
             };
             $body.on('mousemove', bodyMouseMove);
@@ -4978,10 +5000,6 @@ registry['sizing_x'] = registry.sizing.extend({
      * @override
      */
     async _notifyResizeChange() {
-        this.trigger_up("option_update", {
-            optionName: "layout_column",
-            name: "change_column_size",
-        });
         this.trigger_up('option_update', {
             optionName: 'StepsConnector',
             name: 'change_column_size',
@@ -5212,6 +5230,7 @@ registry.layout_column = SnippetOptionWidget.extend(ColumnLayoutMixin, {
      * @override
      */
     notify(name) {
+        // TODO: left in stable for compatibility. Remove this in master.
         if (name === "change_column_size") {
             this.updateUI();
         }
@@ -8791,20 +8810,80 @@ registry.many2one = SnippetOptionWidget.extend({
  * Allows to display a warning message on outdated snippets.
  */
 registry.VersionControl = SnippetOptionWidget.extend({
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * Replaces an outdated snippet by its new version.
+     */
+    async replaceSnippet() {
+        // Getting the new block version.
+        let newBlockEl;
+        const snippet = this.$target[0].dataset.snippet;
+        this.trigger_up("find_snippet_template", {
+            snippet: this.$target[0],
+            callback: (snippetTemplate) => {
+                newBlockEl = snippetTemplate.querySelector(`[data-snippet=${snippet}]`).cloneNode(true);
+            },
+        });
+        // Replacing the block.
+        this.options.wysiwyg.odooEditor.historyPauseSteps();
+        this.$target[0].classList.add("d-none"); // Hiding the block to replace it smoothly.
+        this.$target[0].insertAdjacentElement("beforebegin", newBlockEl);
+        // Initializing the new block as if it was dropped: the mutex needs to
+        // be free for that so we wait for it first.
+        this.options.wysiwyg.waitForEmptyMutexAction().then(async () => {
+            await this.options.wysiwyg.snippetsMenu.callPostSnippetDrop($(newBlockEl));
+            await new Promise(resolve => {
+                this.trigger_up("remove_snippet",
+                    {$snippet: this.$target, onSuccess: resolve, shouldRecordUndo: false}
+                );
+            });
+            this.options.wysiwyg.odooEditor.historyUnpauseSteps();
+            newBlockEl.classList.remove("oe_snippet_body");
+            this.options.wysiwyg.odooEditor.historyStep();
+        });
+    },
+    /**
+     * Allows to still access the options of an outdated block, despite the
+     * warning.
+     */
+    discardAlert() {
+        const alertEl = this.$el[0].querySelector("we-alert");
+        const optionsSectionEl = this.$overlay.data("$optionsSection")[0];
+        alertEl.remove();
+        optionsSectionEl.classList.remove("o_we_outdated_block_options");
+        // Preventing the alert to reappear at each render.
+        controlledSnippets.add(this.$target[0].dataset.snippet);
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
     /**
      * @override
      */
-    start: function () {
-        this.trigger_up('get_snippet_versions', {
-            snippetName: this.$target[0].dataset.snippet,
+    _renderCustomXML(uiFragment) {
+        const snippetName = this.$target[0].dataset.snippet;
+        // Do not display the alert if it was previously discarded.
+        if (controlledSnippets.has(snippetName)) {
+            return;
+        }
+        this.trigger_up("get_snippet_versions", {
+            snippetName: snippetName,
             onSuccess: snippetVersions => {
-                const isUpToDate = snippetVersions && ['vjs', 'vcss', 'vxml'].every(key => this.$target[0].dataset[key] === snippetVersions[key]);
+                const isUpToDate = snippetVersions && ["vjs", "vcss", "vxml"].every(key => this.$target[0].dataset[key] === snippetVersions[key]);
                 if (!isUpToDate) {
-                    this.$el.prepend(renderToElement('web_editor.outdated_block_message'));
+                    uiFragment.prepend(renderToElement("web_editor.outdated_block_message"));
+                    // Hide the other options, to only have the alert displayed.
+                    const optionsSectionEl = this.$overlay.data("$optionsSection")[0];
+                    optionsSectionEl.classList.add("o_we_outdated_block_options");
                 }
             },
         });
-        return this._super(...arguments);
     },
 });
 
@@ -9283,4 +9362,5 @@ export default {
     registry: registry,
     serviceCached,
     clearServiceCache,
+    clearControlledSnippets,
 };
