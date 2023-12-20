@@ -857,6 +857,7 @@ var SnippetEditor = Widget.extend({
 
             if (option.forceNoDeleteButton) {
                 this.$el.add($optionsSection).find('.oe_snippet_remove').addClass('d-none');
+                this.$el.add($optionsSection).find('.oe_snippet_clone').addClass('d-none');
             }
 
             if (option.displayOverlayOptions) {
@@ -1099,8 +1100,6 @@ var SnippetEditor = Widget.extend({
             this.trigger_up('deactivate_snippet', {$snippet: self.$target});
         }
 
-        const openModalEl = this.$target[0].closest('.modal');
-
         this.dropped = false;
         this._dropSiblings = {
             prev: self.$target.prev()[0],
@@ -1144,17 +1143,6 @@ var SnippetEditor = Widget.extend({
         // such cases.
         if (this.$target[0].classList.contains('s_website_form_field')) {
             const filterFunc = (i, el) => el.closest('form') === closestFormEl;
-            if ($selectorSiblings) {
-                $selectorSiblings = $selectorSiblings.filter(filterFunc);
-            }
-            if ($selectorChildren) {
-                $selectorChildren = $selectorChildren.filter(filterFunc);
-            }
-        }
-
-        // Remove the siblings/children outside the open popup.
-        if (openModalEl) {
-            const filterFunc = (i, el) => el.closest('.modal') === openModalEl;
             if ($selectorSiblings) {
                 $selectorSiblings = $selectorSiblings.filter(filterFunc);
             }
@@ -2353,6 +2341,7 @@ var SnippetsMenu = Widget.extend({
         if ($open.length) {
             $selectorSiblings = $open.find($selectorSiblings);
             $selectorChildren = $open.find($selectorChildren);
+            selectorGrids = new Set([...selectorGrids].filter(rowEl => $open[0].contains(rowEl)));
         }
 
         // Check if the drop zone should be horizontal or vertical
@@ -2396,7 +2385,7 @@ var SnippetsMenu = Widget.extend({
 
         // Firstly, add a dropzone after the clone (if we are not in grid mode).
         var $clone = this.$body.find('.oe_drop_clone');
-        if ($clone.length && $clone.closest('div.o_grid_mode').length === 0) {
+        if ($clone.length && !$clone[0].parentElement.classList.contains("o_grid_mode")) {
             var $neighbor = $clone.prev();
             if (!$neighbor.length) {
                 $neighbor = $clone.next();
@@ -2411,6 +2400,11 @@ var SnippetsMenu = Widget.extend({
                 };
             }
             self._insertDropzone($('<we-hook/>').insertAfter($clone), data.vertical, data.style, canBeSanitizedUnless);
+        }
+        // If a modal or a dropdown is open, add the grid of the clone in the
+        // grid selectors to still be able to drop where the drag started.
+        if ($clone.length && $open.length && $clone[0].parentElement.classList.contains("o_grid_mode")) {
+            selectorGrids.add($clone[0].parentElement);
         }
 
         if ($selectorChildren) {
