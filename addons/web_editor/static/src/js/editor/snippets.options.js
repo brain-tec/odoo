@@ -7002,7 +7002,8 @@ registry.ImageTools = ImageHandlerOption.extend({
         if (widgetName.startsWith('img-shape-color')) {
             const img = this._getImg();
             const shapeName = img.dataset.shape;
-            if (!shapeName) {
+            const shapeColors = img.dataset.shapeColors;
+            if (!shapeName || !shapeColors) {
                 return false;
             }
             const colors = img.dataset.shapeColors.split(';');
@@ -7215,6 +7216,7 @@ registry.ImageTools = ImageHandlerOption.extend({
                 delete img.dataset.hoverEffectColor;
                 delete img.dataset.hoverEffectStrokeWidth;
                 delete img.dataset.hoverEffectIntensity;
+                img.classList.remove("o_animate_on_hover");
                 return;
             }
             if (img.dataset.mimetype !== "image/svg+xml") {
