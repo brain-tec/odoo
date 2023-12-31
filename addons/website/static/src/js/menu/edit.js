@@ -161,6 +161,14 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     cancel: function (reload = true) {
         var self = this;
         var def = new Promise(function (resolve, reject) {
+            // TODO improve in master: the way we check if the page is dirty
+            // should match the fact the save will actually do something or not.
+            // Right now, this check checks the whole page, including the non
+            // editable parts, regardless of the fact something can be saved
+            // inside or not. It is also thus of course considering the page
+            // dirty too often by mistake since non editable parts can have
+            // their DOM changed without impacting the save (e.g. menus being
+            // folded into the "+" menu for example).
             if (!self.wysiwyg.isDirty()) {
                 resolve();
             } else {
@@ -306,16 +314,23 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             this.wysiwyg.odooEditor.automaticStepSkipStack();
 
             for (const record of records) {
-                const $savable = $(record.target).closest(this.savableSelector);
-
                 if (record.attributeName === 'contenteditable') {
                     continue;
                 }
+
+                const $savable = $(record.target).closest(this.savableSelector);
+                if (!$savable.length) {
+                    continue;
+                }
+
+                // Mark any savable element dirty if any tracked mutation occurs
+                // inside of it.
                 $savable.not('.o_dirty').each(function () {
                     if (!this.hasAttribute('data-oe-readonly')) {
                         this.classList.add('o_dirty');
                     }
                 });
+
                 if (this.options.processRecordsCallback) {
                     for (const el of $savable) {
                         this.options.processRecordsCallback(record, el);
