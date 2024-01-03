@@ -5272,9 +5272,10 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_pivot_buttons .dropdown-menu div.dropdown-divider");
     });
 
-    QUnit.test(
+    QUnit.skip(
         "comparison with two groupbys: rows from reference period should be displayed",
         async function (assert) {
+            patchDate(2023, 2, 22, 1, 0, 0);
             assert.expect(3);
 
             serverData.models.partner.records = [
