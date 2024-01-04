@@ -1,64 +1,16 @@
 /** @odoo-module */
 
-import { useThrottleForAnimation } from "./utils/timing";
-import {
-    EventBus,
-    onWillDestroy,
-    useChildSubEnv,
-    useComponent,
-    useEffect,
-    useRef,
-} from "@odoo/owl";
 import { localization } from "@web/core/l10n/localization";
 
 /**
- * @typedef {(popperElement: HTMLElement, solution: PositioningSolution) => void} PositionEventHandler
- */
-
-/**
- * @typedef PositioningControl
- * @property {() => void} lock prevents further positioning updates
- * @property {() => void} unlock allows further positioning updates
- */
-
-/**
- * @typedef Options
- * @property {HTMLElement} [container] container element
- * @property {number} [margin=0]
- *  margin in pixels between the popper and the target.
- * @property {Direction | Position} [position="bottom"]
- *  position of the popper relative to the target
- * @property {PositionEventHandler} [onPositioned]
- *  callback called everytime the popper has just been positioned
- *
- * @typedef {keyof DirectionsData} DirectionsDataKey
- * @typedef {{
- *  t: number;
- *  b: number;
- *  l: number;
- *  r: number;
- * }} DirectionsData
- *
- * @typedef {keyof VariantsData} VariantsDataKey
- * @typedef {{
- *  vs: number;
- *  vm: number;
- *  ve: number;
- *  hs: number;
- *  hm: number;
- *  he: number;
- * }} VariantsData
- *
  * @typedef {"top" | "left" | "bottom" | "right"} Direction
  * @typedef {"start" | "middle" | "end" | "fit"} Variant
  *
  * @typedef {{[direction in Direction]: string}} DirectionFlipOrder
- *  values are successive DirectionsDataKey represented as a single string
+ *  string values should match regex /^[tbrl]+$/m
  *
  * @typedef {{[variant in Variant]: string}} VariantFlipOrder
- *  values are successive VariantsDataKey represented as a single string
- *
- * @typedef {`${Direction}-${Variant}`} Position
+ *  string values should match regex /^[smef]+$/m
  *
  * @typedef {{
  *  top: number,
@@ -66,6 +18,13 @@ import { localization } from "@web/core/l10n/localization";
  *  direction: Direction,
  *  variant: Variant,
  * }} PositioningSolution
+ *
+ * @typedef ComputePositionOptions
+ * @property {HTMLElement | () => HTMLElement} [container] container element
+ * @property {number} [margin=0]
+ *  margin in pixels between the popper and the target.
+ * @property {Direction | `${Direction}-${Variant}`} [position="bottom"]
+ *  position of the popper relative to the target
  */
 
 /** @type {{[d: string]: Direction}} */
@@ -78,12 +37,6 @@ const DIRECTION_FLIP_ORDER = { top: "tbrl", right: "rltb", bottom: "btrl", left:
 const VARIANT_FLIP_ORDER = { start: "sme", middle: "mse", end: "ems", fit: "f" };
 /** @type DirectionFlipOrder */
 const FIT_FLIP_ORDER = { top: "tb", right: "rl", bottom: "bt", left: "lr" };
-
-/** @type {Options} */
-const DEFAULTS = {
-    margin: 0,
-    position: "bottom",
-};
 
 /**
  * @param {HTMLElement} popperEl
@@ -105,20 +58,30 @@ function getIFrame(popperEl, targetEl) {
  * The popper will stay at `margin` distance from its target. One could also
  * use the CSS margins of the popper element to achieve the same result.
  *
+ * Pre-condition: the popper element must have a fixed positioning
+ *                with top and left set to 0px.
+ *
  * @param {HTMLElement} popper
  * @param {HTMLElement} target
- * @param {Options} options
- * @param {HTMLIFrameElement} [iframe]
+ * @param {ComputePositionOptions} options
  * @returns {PositioningSolution} the best positioning solution, relative to
  *                                the containing block of the popper.
  *                                => can be applied to popper.style.(top|left)
  */
-function getBestPosition(popper, target, { container, margin, position }, iframe) {
+function computePosition(popper, target, { container, margin, position }) {
     // Retrieve directions and variants
-    const [directionKey, variantKey = "middle"] = position.split("-");
+    let [direction, variant = "middle"] = position.split("-");
+    if (localization.direction === "rtl") {
+        if (["left", "right"].includes(direction)) {
+            direction = direction === "left" ? "right" : "left";
+        } else if (["start", "end"].includes(variant)) {
+            // here direction is either "top" or "bottom"
+            variant = variant === "start" ? "end" : "start";
+        }
+    }
     const directions =
-        variantKey === "fit" ? FIT_FLIP_ORDER[directionKey] : DIRECTION_FLIP_ORDER[directionKey];
-    const variants = VARIANT_FLIP_ORDER[variantKey];
+        variant === "fit" ? FIT_FLIP_ORDER[direction] : DIRECTION_FLIP_ORDER[direction];
+    const variants = VARIANT_FLIP_ORDER[variant];
 
     // Retrieve container
     if (!container) {
@@ -137,24 +100,25 @@ function getBestPosition(popper, target, { container, margin, position }, iframe
         bottom: parseFloat(marginBottom),
     };
 
+    // IFrame
+    const shouldAccountForIFrame = popper.ownerDocument !== target.ownerDocument;
+    const iframe = shouldAccountForIFrame ? getIFrame(popper, target) : null;
+
     // Boxes
     const popBox = popper.getBoundingClientRect();
     const targetBox = target.getBoundingClientRect();
     const contBox = container.getBoundingClientRect();
-    const shouldAccountForIFrame = iframe && popper.ownerDocument !== target.ownerDocument;
-    const iframeBox = shouldAccountForIFrame ? iframe.getBoundingClientRect() : { top: 0, left: 0 };
+    const iframeBox = iframe?.getBoundingClientRect() ?? { top: 0, left: 0 };
 
     const containerIsHTMLNode = container === container.ownerDocument.firstElementChild;
 
     // Compute positioning data
-    /** @type {DirectionsData} */
     const directionsData = {
         t: iframeBox.top + targetBox.top - popMargins.bottom - margin - popBox.height,
         b: iframeBox.top + targetBox.bottom + popMargins.top + margin,
         r: iframeBox.left + targetBox.right + popMargins.left + margin,
         l: iframeBox.left + targetBox.left - popMargins.right - margin - popBox.width,
     };
-    /** @type {VariantsData} */
     const variantsData = {
         vf: iframeBox.left + targetBox.left,
         vs: iframeBox.left + targetBox.left + popMargins.left,
@@ -206,14 +170,8 @@ function getBestPosition(popper, target, { container, margin, position }, iframe
         }
 
         const positioning = vertical
-            ? {
-                  top: directionValue,
-                  left: variantValue,
-              }
-            : {
-                  top: variantValue,
-                  left: directionValue,
-              };
+            ? { top: directionValue, left: variantValue }
+            : { top: variantValue, left: directionValue };
         return {
             // Subtract the offsets of the containing block (relative to the
             // viewport). It can be done like that because the style top and
@@ -242,127 +200,34 @@ function getBestPosition(popper, target, { container, margin, position }, iframe
 }
 
 /**
- * This method will try to position the popper as requested (according to options).
- * If the requested position does not fit the container, other positions will be
- * tried in different direction and variant flip orders (depending on the requested position).
- * If no position is found that fits the container, the requested position stays used.
+ * Repositions the popper element relatively to the target element (according to options).
+ * The positioning strategy is always a fixed positioning with top and left.
  *
- * @deprecated too low level, will soon not be exported anymore, use usePosition instead
+ * The positioning solution is returned by the `computePosition` function.
+ * It will get applied to the popper element and then returned for convenience.
+ *
  * @param {HTMLElement} popper
  * @param {HTMLElement} target
- * @param {Options} options
- * @param {HTMLIFrameElement} [iframe]
+ * @param {ComputePositionOptions} options
+ * @returns {PositioningSolution} the applied positioning solution.
  */
-export function reposition(popper, target, options, iframe) {
-    let [directionKey, variantKey = "middle"] = options.position.split("-");
-    if (localization.direction === "rtl") {
-        if (["bottom", "top"].includes(directionKey)) {
-            if (variantKey !== "middle") {
-                variantKey = variantKey === "start" ? "end" : "start";
-            }
-        } else {
-            directionKey = directionKey === "left" ? "right" : "left";
-        }
-    }
-    options.position = [directionKey, variantKey].join("-");
-
+export function reposition(popper, target, options) {
     // Reset popper style
     popper.style.position = "fixed";
     popper.style.top = "0px";
     popper.style.left = "0px";
 
-    // Get best positioning solution and apply it
-    const position = getBestPosition(popper, target, options, iframe);
-    const { top, left, direction, variant } = position;
+    // Compute positioning solution
+    const solution = computePosition(popper, target, options);
+
+    // Apply it
+    const { top, left, direction, variant } = solution;
     popper.style.top = `${top}px`;
     popper.style.left = `${left}px`;
-
     if (variant === "fit") {
         const styleProperty = ["top", "bottom"].includes(direction) ? "width" : "height";
         popper.style[styleProperty] = target.getBoundingClientRect()[styleProperty] + "px";
     }
 
-    options.onPositioned?.(popper, position);
-}
-
-const POSITION_BUS = Symbol("position-bus");
-
-/**
- * Makes sure that the `popper` element is always
- * placed at `position` from the `target` element.
- * If doing so the `popper` element is clipped off `container`,
- * sensible fallback positions are tried.
- * If all of fallback positions are also clipped off `container`,
- * the original position is used.
- *
- * Note: The popper element should be indicated in your template
- *       with a t-ref reference matching the refName argument.
- *
- * @param {string} refName
- *  name of the reference to the popper element in the template.
- * @param {() => HTMLElement} getTarget
- * @param {Options} [options={}] the options to be used for positioning
- * @returns {PositioningControl}
- *  control object to lock/unlock the positioning.
- */
-export function usePosition(refName, getTarget, options = {}) {
-    const ref = useRef(refName);
-    let lock = false;
-    const update = () => {
-        const targetEl = getTarget();
-        if (!ref.el || !targetEl || lock) {
-            // No compute needed
-            return;
-        }
-
-        // Prepare
-        const iframe = getIFrame(ref.el, targetEl);
-        reposition(ref.el, targetEl, { ...DEFAULTS, ...options }, iframe);
-    };
-
-    const component = useComponent();
-    const bus = component.env[POSITION_BUS] || new EventBus();
-    bus.addEventListener("update", update);
-    onWillDestroy(() => bus.removeEventListener("update", update));
-
-    const isTopmost = !(POSITION_BUS in component.env);
-    if (isTopmost) {
-        useChildSubEnv({ [POSITION_BUS]: bus });
-    }
-
-    const throttledUpdate = useThrottleForAnimation(() => bus.trigger("update"));
-    useEffect(() => {
-        // Reposition
-        bus.trigger("update");
-
-        if (isTopmost) {
-            // Attach listeners to keep the positioning up to date
-            const scrollListener = (e) => {
-                if (ref.el?.contains(e.target)) {
-                    // In case the scroll event occurs inside the popper, do not reposition
-                    return;
-                }
-                throttledUpdate();
-            };
-            const targetDocument = getTarget()?.ownerDocument;
-            targetDocument?.addEventListener("scroll", scrollListener, { capture: true });
-            targetDocument?.addEventListener("load", throttledUpdate, { capture: true });
-            window.addEventListener("resize", throttledUpdate);
-            return () => {
-                targetDocument?.removeEventListener("scroll", scrollListener, { capture: true });
-                targetDocument?.removeEventListener("load", throttledUpdate, { capture: true });
-                window.removeEventListener("resize", throttledUpdate);
-            };
-        }
-    });
-
-    return {
-        lock: () => {
-            lock = true;
-        },
-        unlock: () => {
-            lock = false;
-            bus.trigger("update");
-        },
-    };
+    return solution;
 }

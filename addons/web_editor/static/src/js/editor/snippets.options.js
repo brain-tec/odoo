@@ -1694,8 +1694,10 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
         const prefix = this.options.dataAttributes.colorPrefix || 'bg';
         if (this._ccValue) {
             this.colorPreviewEl.style.backgroundColor = `var(--we-cp-o-cc${this._ccValue}-${prefix.replace(/-/, '')})`;
+            this.colorPreviewEl.style.backgroundImage = `var(--we-cp-o-cc${this._ccValue}-${prefix.replace(/-/, '')}-gradient)`;
         }
         if (this._value) {
+            this.colorPreviewEl.style.backgroundImage = 'none';
             if (isCSSColor(this._value)) {
                 this.colorPreviewEl.style.backgroundColor = this._value;
             } else if (weUtils.isColorGradient(this._value)) {
@@ -3541,8 +3543,14 @@ const SnippetOptionWidget = Widget.extend({
             const styles = getComputedStyle(this.$target[0]);
             bgImageParts = backgroundImageCssToParts(styles['background-image']);
             delete bgImageParts.gradient;
-            const combined = backgroundImagePartsToCss(bgImageParts);
             this.$target[0].style.setProperty('background-image', '');
+            if (!widgetValue || widgetValue === 'false') {
+                // If no background-color is being set and there is an image,
+                // combine it with the current color combination's gradient.
+                const styleBgImageParts = backgroundImageCssToParts(styles['background-image']);
+                bgImageParts.gradient = styleBgImageParts.gradient;
+            }
+            const combined = backgroundImagePartsToCss(bgImageParts);
             applyCSS.call(this, 'background-image', combined, styles);
         }
 
@@ -3993,22 +4001,8 @@ const SnippetOptionWidget = Widget.extend({
                 // as we want to know the final value of a property to properly
                 // update the UI.
                 this.$target[0].classList.add('o_we_force_no_transition');
-                const _restoreTransitions = () => this.$target[0].classList.remove('o_we_force_no_transition');
 
                 const styles = window.getComputedStyle(this.$target[0]);
-
-                if (params.withGradients && params.cssProperty === 'background-color') {
-                    // Check if there is a gradient, in that case this is the
-                    // value to be returned, we normally not allow color and
-                    // gradient at the same time (the option would remove one
-                    // if editing the other).
-                    const parts = backgroundImageCssToParts(styles['background-image']);
-                    if (parts.gradient) {
-                        _restoreTransitions();
-                        return parts.gradient;
-                    }
-                }
-
                 const cssProps = weUtils.CSS_SHORTHANDS[params.cssProperty] || [params.cssProperty];
                 const borderWidthCssProps = weUtils.CSS_SHORTHANDS['border-width'];
                 const cssValues = cssProps.map(cssProp => {
@@ -4037,13 +4031,24 @@ const SnippetOptionWidget = Widget.extend({
                     cssValues.pop();
                 }
 
-                _restoreTransitions();
+                let value = cssValues.join(' ');
+                if (params.withGradients && params.cssProperty === 'background-color') {
+                    // Check if there is a gradient, in that case this is the
+                    // value to be returned, we normally do not allow color and
+                    // gradient at the same time (the option would remove one
+                    // if editing the other).
+                    const parts = backgroundImageCssToParts(styles['background-image']);
+                    if (parts.gradient) {
+                        value = parts.gradient;
+                    }
+                }
 
-                const value = cssValues.join(' ');
+                this.$target[0].classList.remove('o_we_force_no_transition');
 
                 if (params.cssProperty === 'background-color' && params.withCombinations) {
                     if (usedCC) {
-                        const ccValue = weUtils.getCSSVariableValue(`o-cc${usedCC}-bg`).trim();
+                        const ccValue = weUtils.getCSSVariableValue(`o-cc${usedCC}-bg-gradient`).trim().replaceAll("'", '')
+                            || weUtils.getCSSVariableValue(`o-cc${usedCC}-bg`).trim();
                         if (weUtils.areCssValuesEqual(value, ccValue)) {
                             // Prevent to consider that a color is used as CC
                             // override in case that color is the same as the
@@ -4400,6 +4405,7 @@ const SnippetOptionWidget = Widget.extend({
         if (shouldRecordUndo) {
             this.options.wysiwyg.odooEditor.unbreakableStepUnactive();
         }
+        const useLoaderOnOptionPanel = ev.target.el.dataset.loaderOnOptionPanel;
         this.trigger_up('snippet_edition_request', {exec: async () => {
             // If some previous snippet edition in the mutex removed the target from
             // the DOM, the widget can be destroyed, in that case the edition request
@@ -4456,7 +4462,7 @@ const SnippetOptionWidget = Widget.extend({
             // Set timeout needed so that the user event which triggered the
             // option can bubble first.
             }));
-        }});
+        }, optionsLoader: useLoaderOnOptionPanel});
 
         if (ev.data.isSimulatedEvent) {
             // If the user value update was simulated through a trigger, we
@@ -4601,8 +4607,8 @@ registry.sizing = SnippetOptionWidget.extend({
             if (rowEl.classList.contains("o_grid_mode") && !isMobile) {
                 self.options.wysiwyg.odooEditor.observerUnactive('displayBackgroundGrid');
                 backgroundGridEl = gridUtils._addBackgroundGrid(rowEl, 0);
-                self.options.wysiwyg.odooEditor.observerActive('displayBackgroundGrid');
                 gridUtils._setElementToMaxZindex(backgroundGridEl, rowEl);
+                self.options.wysiwyg.odooEditor.observerActive('displayBackgroundGrid');
             }
 
             // For loop to handle the cases where it is ne, nw, se or sw. Since
@@ -5733,18 +5739,30 @@ registry.SnippetMove = SnippetOptionWidget.extend(ColumnLayoutMixin, {
             this._swapMobileOrders(widgetValue, siblingEls);
         } else {
             switch (widgetValue) {
-                case "prev":
-                    this.$target[0].previousElementSibling.before(this.$target[0]);
+                case "prev": {
+                    // Consider only visible elements.
+                    let prevEl = this.$target[0].previousElementSibling;
+                    while (prevEl && window.getComputedStyle(prevEl).display === "none") {
+                        prevEl = prevEl.previousElementSibling;
+                    }
+                    prevEl?.insertAdjacentElement("beforebegin", this.$target[0]);
                     if (isNavItem) {
                         $tabPane.prev().before($tabPane);
                     }
                     break;
-                case "next":
-                    this.$target[0].nextElementSibling.after(this.$target[0]);
+                }
+                case "next": {
+                    // Consider only visible elements.
+                    let nextEl = this.$target[0].nextElementSibling;
+                    while (nextEl && window.getComputedStyle(nextEl).display === "none") {
+                        nextEl = nextEl.nextElementSibling;
+                    }
+                    nextEl?.insertAdjacentElement("afterend", this.$target[0]);
                     if (isNavItem) {
                         $tabPane.next().after($tabPane);
                     }
                     break;
+                }
             }
             if (mobileOrder) {
                 for (const el of siblingEls) {
@@ -5798,13 +5816,34 @@ registry.SnippetMove = SnippetOptionWidget.extend(ColumnLayoutMixin, {
             }
             // On mobile, items' reordering is independent from desktop inside
             // a snippet (left or right), not at a higher level (up or down).
-            if (moveLeftOrRight && isMobileView && this._getItemMobileOrder(this.$target[0])) {
-                const firstOrLast = widgetName === "move_left_opt" ? "0" :
-                    this.$target[0].parentElement.children.length - 1;
-                return !this.$target[0].classList.contains(`order-${firstOrLast}`);
+            if (moveLeftOrRight && isMobileView) {
+                const targetMobileOrder = this._getItemMobileOrder(this.$target[0]);
+                if (targetMobileOrder) {
+                    const siblingEls = this.$target[0].parentElement.children;
+                    const orderModifier = widgetName === "move_left_opt" ? -1 : 1;
+                    let delta = 0;
+                    while (true) {
+                        delta += orderModifier;
+                        const nextOrderClass = `order-${parseInt(targetMobileOrder[1]) + delta}`;
+                        const siblingEl = [...siblingEls].find(el => el.classList.contains(nextOrderClass));
+                        if (!siblingEl) {
+                            break;
+                        }
+                        if (window.getComputedStyle(siblingEl).display === "none") {
+                            continue;
+                        }
+                        return true;
+                    }
+                    return false;
+                }
             }
-            const firstOrLastChild = moveUpOrLeft ? ":first-child" : ":last-child";
-            return !this.$target.is(firstOrLastChild);
+            // Consider only visible elements.
+            const direction = moveUpOrLeft ? "previousElementSibling" : "nextElementSibling";
+            let siblingEl = this.$target[0][direction];
+            while (siblingEl && window.getComputedStyle(siblingEl).display === "none") {
+                siblingEl = siblingEl[direction];
+            }
+            return !!siblingEl;
         }
         return this._super(...arguments);
     },
@@ -5817,10 +5856,18 @@ registry.SnippetMove = SnippetOptionWidget.extend(ColumnLayoutMixin, {
     _swapMobileOrders(widgetValue, siblingEls) {
         const targetMobileOrder = this._getItemMobileOrder(this.$target[0]);
         const orderModifier = widgetValue === "prev" ? -1 : 1;
-        const newOrderClass = `order-${parseInt(targetMobileOrder[1]) + orderModifier}`;
-        const comparedEl = [...siblingEls].find(el => el.classList.contains(newOrderClass));
-        this.$target[0].classList.replace(targetMobileOrder[0], newOrderClass);
-        comparedEl.classList.replace(newOrderClass, targetMobileOrder[0]);
+        let delta = 0;
+        while (true) {
+            delta += orderModifier;
+            const newOrderClass = `order-${parseInt(targetMobileOrder[1]) + delta}`;
+            const comparedEl = [...siblingEls].find(el => el.classList.contains(newOrderClass));
+            if (window.getComputedStyle(comparedEl).display === "none") {
+                continue;
+            }
+            this.$target[0].classList.replace(targetMobileOrder[0], newOrderClass);
+            comparedEl.classList.replace(newOrderClass, targetMobileOrder[0]);
+            break;
+        }
     },
     /**
      * @returns {Boolean}
@@ -7794,7 +7841,12 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
             this.$target.removeClass('oe_img_bg o_bg_img_center');
         }
         const combined = backgroundImagePartsToCss(parts);
-        this.$target.css('background-image', combined);
+        // We use selectStyle so that if when a background image is removed the
+        // remaining image matches the o_cc's gradient background, it can be
+        // removed too.
+        this.selectStyle(false, combined, {
+            cssProperty: 'background-image',
+        });
     },
 });
 
