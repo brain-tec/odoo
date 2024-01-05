@@ -576,7 +576,7 @@ export class OdooEditor extends EventTarget {
                     callback: () => {
                         let html = '\u200B<span contenteditable="false" class="o_stars o_three_stars">';
                         html += Array(3).fill().map(() => '<i class="fa fa-star-o"></i>').join('');
-                        html += '</span>';
+                        html += '</span>\u200B';
                         this.execCommand('insert', parseHTML(html));
                     },
                 },
@@ -589,7 +589,7 @@ export class OdooEditor extends EventTarget {
                     callback: () => {
                         let html = '\u200B<span contenteditable="false" class="o_stars o_five_stars">';
                         html += Array(5).fill().map(() => '<i class="fa fa-star-o"></i>').join('');
-                        html += '</span>';
+                        html += '</span>\u200B';
                         this.execCommand('insert', parseHTML(html));
                     },
                 },
@@ -3382,6 +3382,8 @@ export class OdooEditor extends EventTarget {
                     !closestElement(selection.anchorNode).closest('a') &&
                     selection.anchorNode.nodeType === Node.TEXT_NODE
                 ) {
+                    // Merge adjacent text nodes.
+                    selection.anchorNode.parentNode.normalize();
                     const textSliced = selection.anchorNode.textContent.slice(0, selection.anchorOffset);
                     const textNodeSplitted = textSliced.split(/\s/);
 
