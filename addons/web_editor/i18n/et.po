@@ -11,14 +11,15 @@
 # Arma Gedonsky <armagedonsky@hot.ee>, 2022
 # Eneli Õigus <enelioigus@gmail.com>, 2022
 # Andre Roomet <andreroomet@gmail.com>, 2022
-# Martin Trigaux, 2022
 # Piia Paurson <piia@avalah.ee>, 2022
 # Rivo Zängov <eraser@eraser.ee>, 2022
 # Triine Aavik <triine@avalah.ee>, 2022
 # Patrick-Jordan Kiudorv, 2022
-# Jana Jaakson, 2022
+# JanaAvalah, 2022
 # Leaanika Randmets, 2023
+# Martin Trigaux, 2023
 # Anna, 2023
+# Katrin Kampura, 2023
 # 
 msgid ""
 msgstr ""
@@ -26,8 +27,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-06-10 08:53+0000\n"
 "PO-Revision-Date: 2021-09-14 12:27+0000\n"
-"Last-Translator: Anna, 2023\n"
-"Language-Team: Estonian (https://www.transifex.com/odoo/teams/41243/et/)\n"
+"Last-Translator: Katrin Kampura, 2023\n"
+"Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -935,14 +936,6 @@ msgstr ""
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Embed"
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Embed Image"
 msgstr ""
@@ -966,6 +959,13 @@ msgstr ""
 #: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Embed the youtube video in the document."
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "Empty quote"
 msgstr ""
 
 #. module: web_editor
@@ -1197,6 +1197,27 @@ msgstr "Pealkiri 2"
 #, python-format
 msgid "Heading 3"
 msgstr "Pealkiri 3"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "Heading 4"
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "Heading 5"
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "Heading 6"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1549,6 +1570,13 @@ msgstr "Link"
 
 #. module: web_editor
 #. openerp-web
+#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "List"
+msgstr "Loend"
+
+#. module: web_editor
+#. openerp-web
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "Load more..."
@@ -1790,13 +1818,6 @@ msgstr "Paragrahvi plokk."
 #, python-format
 msgid "Paste as URL"
 msgstr "Kleebi URL'ina"
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Paste as text"
-msgstr "Kleebi tekstina"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
@@ -2338,13 +2359,6 @@ msgstr "Näita optimeeritud pilte"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Simple text paste."
-msgstr "Lihtsa teksti kleepimine."
-
-#. module: web_editor
-#. openerp-web
 #: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
@@ -2651,6 +2665,13 @@ msgid ""
 msgstr ""
 
 #. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "To-do"
+msgstr "To-do"
+
+#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "Toaster"
 msgstr "Röster"
@@ -2869,7 +2890,7 @@ msgstr "Ava"
 #: code:addons/web_editor/static/src/xml/ace.xml:0
 #, python-format
 msgid "Views and Assets bundles"
-msgstr ""
+msgstr "Vaadete ja varade kogumikud"
 
 #. module: web_editor
 #. openerp-web

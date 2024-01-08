@@ -77,16 +77,58 @@ var AttributeTranslateDialog = weDialog.extend({
             $input.on('change keyup', function () {
                 var value = $input.val();
                 $node.html(value).trigger('change', node);
-                if ($node.data('attribute')) {
-                    $node.data('$node').attr($node.data('attribute'), value).trigger('translate');
+                const $originalNode = $node.data('$node');
+                const nodeAttribute = $node.data('attribute');
+                if (nodeAttribute) {
+                    $originalNode.attr(nodeAttribute, value);
+                    if (nodeAttribute === 'value') {
+                        $originalNode[0].value = value;
+                    }
+                    $originalNode.trigger('translate');
                 } else {
-                    $node.data('$node').val(value).trigger('translate');
+                    $originalNode.val(value).trigger('translate');
                 }
                 $node.trigger('change');
+                $originalNode[0].classList.add('oe_translated');
             });
             $group.append($label).append($input);
         });
         return this._super.apply(this, arguments);
+    },
+});
+
+// Used to translate the text of `<select/>` options since it should not be
+// possible to interact with the content of `.o_translation_select` elements.
+const SelectTranslateDialog = weDialog.extend({
+    /**
+     * @constructor
+     */
+    init(parent, options) {
+        this._super(parent, {
+            ...options,
+            title: _t("Translate Selection Option"),
+            buttons: [
+                {text: _t("Close"), click: this.save}
+            ],
+        });
+        this.optionEl = this.options.targetEl;
+        this.translationObject = this.optionEl.closest('[data-oe-translation-id]');
+    },
+    /**
+     * @override
+     */
+    start() {
+        const inputEl = document.createElement('input');
+        inputEl.className = 'form-control my-3';
+        inputEl.value = this.optionEl.textContent;
+        inputEl.addEventListener('keyup', () => {
+            this.optionEl.textContent = inputEl.value;
+            const translationUpdated = inputEl.value !== this.optionEl.dataset.initialTranslationValue;
+            this.translationObject.classList.toggle('o_dirty', translationUpdated);
+            this.optionEl.classList.toggle('oe_translated', translationUpdated);
+        });
+        this.el.appendChild(inputEl);
+        return this._super(...arguments);
     },
 });
 
@@ -223,6 +265,12 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
 
                         translation[attr] = $trans[0];
                         $node.attr(attr, match[2]);
+                        // Using jQuery attr() to update the "value" will not change what appears in the
+                        // DOM and will not update the value property on inputs. We need to force the
+                        // right value instead of the original translation <span/>.
+                        if (attr === 'value') {
+                            $node[0].value = match[2];
+                        }
 
                         $node.addClass('o_translatable_attribute').data('translation', translation);
                     });
@@ -239,8 +287,11 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
 
                     translation['textContent'] = $trans[0];
                     $node.val(match[2]);
+                    // Update the text content of textarea too.
+                    $node[0].innerText = match[2];
 
-                    $node.addClass('o_translatable_text').data('translation', translation);
+                    $node.addClass('o_translatable_text').removeClass('o_text_content_invisible')
+                        .data('translation', translation);
                 });
                 $edited = $edited.add(textEdit);
 
@@ -254,6 +305,25 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                         });
                         $node = select2.container.find('input');
                     }
+                });
+
+                // Hack: we add a temporary element to handle option's text
+                // translations from the linked <select/>. The final values are
+                // copied to the original element right before save.
+                self.selectTranslationEls = [];
+                $editable.filter('[data-oe-translation-id] > select').each((index, select) => {
+                    const selectTranslationEl = document.createElement('div');
+                    selectTranslationEl.className = 'o_translation_select';
+                    const optionNames = [...select.options].map(option => option.text);
+                    optionNames.forEach(option => {
+                        const optionEl = document.createElement('div');
+                        optionEl.textContent = option;
+                        optionEl.dataset.initialTranslationValue = option;
+                        optionEl.className = 'o_translation_select_option';
+                        selectTranslationEl.appendChild(optionEl);
+                    });
+                    select.before(selectTranslationEl);
+                    self.selectTranslationEls.push(selectTranslationEl);
                 });
 
                 self.translations = [];
@@ -353,22 +423,36 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             _.each(translation, function (node, attr) {
                 var trans = self._getTranlationObject(node);
                 trans.value = (trans.value ? trans.value : $node.html()).replace(/[ \t\n\r]+/, ' ');
+                trans.state = node.dataset.oeTranslationState;
+                // If a node has an already translated attribute, we don't
+                // need to update its state, since it can be set again as
+                // "to_translate" by other attributes...
+                if ($node[0].dataset.oeTranslationState === 'translated') {
+                    return;
+                }
                 $node.attr('data-oe-translation-state', (trans.state || 'to_translate'));
             });
         });
 
-        this.$translations.prependEvent('mousedown.translator click.translator mouseup.translator', function (ev) {
-            if (ev.ctrlKey) {
-                return;
-            }
-            ev.preventDefault();
-            ev.stopPropagation();
-            if (ev.type !== 'mousedown') {
-                return;
-            }
+        this.$translations
+            .add(this._getEditableArea().filter('.o_translation_select_option'))
+            .prependEvent('mousedown.translator click.translator mouseup.translator', function (ev) {
+                if (ev.ctrlKey) {
+                    return;
+                }
+                ev.preventDefault();
+                ev.stopPropagation();
+                if (ev.type !== 'mousedown') {
+                    return;
+                }
 
-            new AttributeTranslateDialog(self, {}, ev.target).open();
-        });
+                const targetEl = ev.target;
+                if (targetEl.closest('.o_translation_select')) {
+                    new SelectTranslateDialog(self, {size: 'medium', targetEl}).open();
+                } else {
+                    new AttributeTranslateDialog(self, {}, ev.target).open();
+                }
+            });
     },
 
     //--------------------------------------------------------------------------
@@ -377,6 +461,19 @@ var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
 
     _onSave: function (ev) {
         ev.stopPropagation();
+        // Adapt translation values for `select` > `options`s and remove all
+        // temporary `.o_translation_select` elements.
+        for (const optionsEl of this.selectTranslationEls) {
+            const selectEl = optionsEl.nextElementSibling;
+            const translatedOptions = optionsEl.children;
+            const selectOptions = selectEl.tagName === 'SELECT' ? [...selectEl.options] : [];
+            if (selectOptions.length === translatedOptions.length) {
+                selectOptions.map((option, i) => {
+                    option.text = translatedOptions[i].textContent;
+                });
+            }
+            optionsEl.remove();
+        }
     },
 });
 

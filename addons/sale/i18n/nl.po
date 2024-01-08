@@ -14,7 +14,7 @@ msgstr ""
 "POT-Creation-Date: 2023-03-10 09:48+0000\n"
 "PO-Revision-Date: 2021-09-14 12:26+0000\n"
 "Last-Translator: Jolien De Paepe, 2023\n"
-"Language-Team: Dutch (https://www.transifex.com/odoo/teams/41243/nl/)\n"
+"Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -467,7 +467,7 @@ msgid ""
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        <t t-set=\"doc_name\" t-value=\"'offerte' if object.state in ('draft', 'sent') else 'orderbevestiging'\"/>\n"
+"        <t t-set=\"doc_name\" t-value=\"'offerte' if object.state in ('draft', 'sent') else 'order'\"/>\n"
 "        Hallo,\n"
 "        <br/><br/>\n"
 "        Je\n"
@@ -490,7 +490,7 @@ msgstr ""
 "        <br/>\n"
 "    </p>\n"
 "</div>\n"
-"            "
+"            <t t-set=\"doc_name\" t-value=\"'quotation' if object.state in ('draft', 'sent') else 'order'\"/>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -1292,7 +1292,7 @@ msgstr "Aanmaakdatum"
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 #: model_terms:ir.ui.view,arch_db:sale.view_sale_advance_payment_inv
 msgid "Create Invoice"
-msgstr "Maak factuur"
+msgstr "Factuur maken"
 
 #. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_invoice_salesteams
@@ -1323,7 +1323,7 @@ msgstr "Maak en bekijk factuur"
 #. module: sale
 #: model:ir.actions.act_window,name:sale.action_view_sale_advance_payment_inv
 msgid "Create invoices"
-msgstr "Maak facturen"
+msgstr "Facturen maken"
 
 #. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_invoice_salesteams
@@ -1438,7 +1438,7 @@ msgstr "Industrie klant"
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__access_url
 msgid "Customer Portal URL"
-msgstr "Klant portaal URL"
+msgstr "Klantenportaal URL"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__client_order_ref
@@ -1896,7 +1896,7 @@ msgstr "Ontbrekende verplichte velden op niet facturabele verkooporderregel."
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__res_config_settings__auth_signup_uninvited__b2c
 msgid "Free sign up"
-msgstr "Vrij registratie"
+msgstr "Vrije registratie"
 
 #. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_account_invoice_report_salesteam
@@ -1963,7 +1963,7 @@ msgstr "Bruto gewicht"
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_filter
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_line_filter
 msgid "Group By"
-msgstr "Groepeer op"
+msgstr "Groeperen op"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__has_message
@@ -2896,7 +2896,7 @@ msgstr "Betaal met"
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__res_company__sale_onboarding_payment_method__other
 msgid "Pay with another payment acquirer"
-msgstr "Betaal met een andere betalingsprovider"
+msgstr "Betaal met een andere betaalprovider"
 
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__res_company__sale_onboarding_payment_method__paypal
@@ -3979,7 +3979,7 @@ msgstr "Belastingtotalen Json"
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__tax_id
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 msgid "Taxes"
-msgstr "Btw"
+msgstr "BTW"
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_advance_payment_inv__deposit_taxes_id
@@ -4131,8 +4131,8 @@ msgid ""
 "The invoice is marked as paid and the payment is registered in the payment journal defined in the configuration of the payment acquirer.\n"
 "This mode is advised if you issue the final invoice at the order and not after the delivery."
 msgstr ""
-"De factuur wordt automatisch gegenereerd en is beschikbaar in het klantportaal wanneer de transactie wordt bevestigd door de betalingsprovider.\n"
-"De factuur is gemarkeerd als betaald en de betaling is geregistreerd in het betalingsdagboek dat is gedefinieerd in de configuratie van de betalingsprovider.\n"
+"De factuur wordt automatisch gegenereerd en is beschikbaar in het klantportaal wanneer de transactie wordt bevestigd door de betaalprovider.\n"
+"De factuur is gemarkeerd als betaald en de betaling is geregistreerd in het betalingsdagboek dat is gedefinieerd in de configuratie van de betaalprovider.\n"
 "Deze modus wordt aanbevolen als je de eindfactuur bij de order verstrekt en niet na de levering."
 
 #. module: sale

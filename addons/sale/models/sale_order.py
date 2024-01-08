@@ -116,14 +116,17 @@ class SaleOrder(models.Model):
         use_invoice_terms = self.env['ir.config_parameter'].sudo().get_param('account.use_invoice_terms')
         if use_invoice_terms and self.env.company.terms_type == "html":
             baseurl = html_keep_url(self._default_note_url() + '/terms')
-            return _('Terms & Conditions: %s', baseurl)
+            context = {'lang': self.partner_id.lang or self.env.user.lang}
+            note = _('Terms & Conditions: %s', baseurl)
+            del context
+            return note
         return use_invoice_terms and self.env.company.invoice_terms or ''
 
     @api.model
     def _get_default_team(self):
         return self.env['crm.team']._get_default_team_id()
 
-    @api.onchange('fiscal_position_id')
+    @api.onchange('fiscal_position_id', 'company_id')
     def _compute_tax_id(self):
         """
         Trigger the recompute of the taxes if the fiscal position is changed on the SO.
@@ -341,6 +344,7 @@ class SaleOrder(models.Model):
             else:
                 order.expected_date = False
 
+    @api.depends_context('lang')
     @api.depends('order_line.tax_id', 'order_line.price_unit', 'amount_total', 'amount_untaxed')
     def _compute_tax_totals_json(self):
         def compute_taxes(order_line):
@@ -455,7 +459,9 @@ class SaleOrder(models.Model):
         if self.env['ir.config_parameter'].sudo().get_param('account.use_invoice_terms'):
             if self.terms_type == 'html' and self.env.company.invoice_terms_html:
                 baseurl = html_keep_url(self.get_base_url() + '/terms')
+                context = {'lang': self.partner_id.lang or self.env.user.lang}
                 values['note'] = _('Terms & Conditions: %s', baseurl)
+                del context
             elif not is_html_empty(self.env.company.invoice_terms):
                 values['note'] = self.with_context(lang=self.partner_id.lang).env.company.invoice_terms
         if not self.env.context.get('not_self_saleperson') or not self.team_id:
@@ -672,7 +678,6 @@ class SaleOrder(models.Model):
                 'default_partner_shipping_id': self.partner_shipping_id.id,
                 'default_invoice_payment_term_id': self.payment_term_id.id or self.partner_id.property_payment_term_id.id or self.env['account.move'].default_get(['invoice_payment_term_id']).get('invoice_payment_term_id'),
                 'default_invoice_origin': self.name,
-                'default_user_id': self.user_id.id,
             })
         action['context'] = context
         return action

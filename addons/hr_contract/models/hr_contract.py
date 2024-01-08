@@ -68,7 +68,7 @@ class Contract(models.Model):
     currency_id = fields.Many2one(string="Currency", related='company_id.currency_id', readonly=True)
     permit_no = fields.Char('Work Permit No', related="employee_id.permit_no", readonly=False)
     visa_no = fields.Char('Visa No', related="employee_id.visa_no", readonly=False)
-    visa_expire = fields.Date('Visa Expire Date', related="employee_id.visa_expire", readonly=False)
+    visa_expire = fields.Date('Visa Expiration Date', related="employee_id.visa_expire", readonly=False)
     hr_responsible_id = fields.Many2one('res.users', 'HR Responsible', tracking=True,
         help='Person responsible for validating the employee\'s contracts.')
     calendar_mismatch = fields.Boolean(compute='_compute_calendar_mismatch')
@@ -173,8 +173,8 @@ class Contract(models.Model):
         contracts_to_close = self.search([
             ('state', '=', 'open'),
             '|',
-            ('date_end', '<=', fields.Date.to_string(date.today() + relativedelta(days=1))),
-            ('visa_expire', '<=', fields.Date.to_string(date.today() + relativedelta(days=1))),
+            ('date_end', '<=', fields.Date.to_string(date.today())),
+            ('visa_expire', '<=', fields.Date.to_string(date.today())),
         ])
 
         if contracts_to_close:
@@ -191,7 +191,7 @@ class Contract(models.Model):
         for contract in contract_ids:
             next_contract = self.search([
                 ('employee_id', '=', contract.employee_id.id),
-                ('state', 'not in', ['cancel', 'new']),
+                ('state', 'not in', ['cancel', 'draft']),
                 ('date_start', '>', contract.date_start)
             ], order="date_start asc", limit=1)
             if next_contract:
@@ -247,7 +247,9 @@ class Contract(models.Model):
 
         calendar = vals.get('resource_calendar_id')
         if calendar:
-            self.filtered(lambda c: c.state == 'open' or (c.state == 'draft' and c.kanban_state == 'done')).mapped('employee_id').write({'resource_calendar_id': calendar})
+            self.filtered(
+                lambda c: c.state == 'open' or (c.state == 'draft' and c.kanban_state == 'done' and c.employee_id.contracts_count == 1)
+            ).employee_id.resource_calendar_id = calendar
 
         if 'state' in vals and 'kanban_state' not in vals:
             self.write({'kanban_state': 'normal'})
@@ -259,7 +261,9 @@ class Contract(models.Model):
         contracts = super(Contract, self).create(vals)
         if vals.get('state') == 'open':
             contracts._assign_open_contract()
-        open_contracts = contracts.filtered(lambda c: c.state == 'open' or c.state == 'draft' and c.kanban_state == 'done')
+        open_contracts = contracts.filtered(
+            lambda c: c.state == 'open' or (c.state == 'draft' and c.kanban_state == 'done' and c.employee_id.contracts_count == 1)
+        )
         # sync contract calendar -> calendar employee
         for contract in open_contracts.filtered(lambda c: c.employee_id and c.resource_calendar_id):
             contract.employee_id.resource_calendar_id = contract.resource_calendar_id

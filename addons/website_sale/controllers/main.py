@@ -354,7 +354,7 @@ class WebsiteSale(http.Controller):
         if category:
             url = "/shop/category/%s" % slug(category)
 
-        pager = request.website.pager(url=url, total=product_count, page=page, step=ppg, scope=7, url_args=post)
+        pager = request.website.pager(url=url, total=product_count, page=page, step=ppg, scope=5, url_args=post)
         offset = pager['offset']
         products = search_product[offset:offset + ppg]
 
@@ -709,12 +709,30 @@ class WebsiteSale(http.Controller):
         error = dict()
         error_message = []
 
-        # prevent name change if invoices exist
         if data.get('partner_id'):
-            partner = request.env['res.partner'].browse(int(data['partner_id']))
-            if partner.exists() and partner.name and not partner.sudo().can_edit_vat() and 'name' in data and (data['name'] or False) != (partner.name or False):
+            partner_su = request.env['res.partner'].sudo().browse(int(data['partner_id'])).exists()
+            name_change = partner_su and 'name' in data and data['name'] != partner_su.name
+            email_change = partner_su and 'email' in data and data['email'] != partner_su.email
+
+            # Prevent changing the billing partner name if invoices have been issued.
+            if mode[1] == 'billing' and name_change and not partner_su.can_edit_vat():
                 error['name'] = 'error'
-                error_message.append(_('Changing your name is not allowed once invoices have been issued for your account. Please contact us directly for this operation.'))
+                error_message.append(_(
+                    "Changing your name is not allowed once documents have been issued for your"
+                    " account. Please contact us directly for this operation."
+                ))
+
+            # Prevent change the partner name or email if it is an internal user.
+            if (name_change or email_change) and not all(partner_su.user_ids.mapped('share')):
+                error.update({
+                    'name': 'error' if name_change else None,
+                    'email': 'error' if email_change else None,
+                })
+                error_message.append(_(
+                    "If you are ordering for an external person, please place your order via the"
+                    " backend. If you wish to change your name or email address, please do so in"
+                    " the account settings or contact your administrator."
+                ))
 
         # Required fields from form
         required_fields = [f for f in (all_form_values.get('field_required') or '').split(',') if f]
@@ -725,7 +743,10 @@ class WebsiteSale(http.Controller):
 
         # error message for empty required fields
         for field_name in required_fields:
-            if not data.get(field_name):
+            val = data.get(field_name)
+            if isinstance(val, str):
+                val = val.strip()
+            if not val:
                 error[field_name] = 'missing'
 
         # email validation
@@ -1034,8 +1055,8 @@ class WebsiteSale(http.Controller):
             )
         return {
             'website_sale_order': order,
-            'errors': [],
-            'partner': order.partner_id,
+            'errors': self._get_shop_payment_errors(order),
+            'partner': order.partner_invoice_id,
             'order': order,
             'payment_action_id': request.env.ref('payment.action_payment_acquirer').id,
             # Payment form common (checkout and manage) values
@@ -1050,6 +1071,15 @@ class WebsiteSale(http.Controller):
             'transaction_route': f'/shop/payment/transaction/{order.id}',
             'landing_route': '/shop/payment/validate',
         }
+
+    def _get_shop_payment_errors(self, order):
+        """ Check that there is no error that should block the payment.
+
+        :param sale.order order: The sales order to pay
+        :return: A list of errors (error_title, error_message)
+        :rtype: list[tuple]
+        """
+        return []
 
     @http.route('/shop/payment', type='http', auth='public', website=True, sitemap=False)
     def shop_payment(self, **post):
@@ -1109,6 +1139,12 @@ class WebsiteSale(http.Controller):
         else:
             order = request.env['sale.order'].sudo().browse(sale_order_id)
             assert order.id == request.session.get('sale_last_order_id')
+
+        errors = self._get_shop_payment_errors(order)
+        if errors:
+            first_error = errors[0]  # only display first error
+            error_msg = f"{first_error[0]}\n{first_error[1]}"
+            raise ValidationError(error_msg)
 
         if transaction_id:
             tx = request.env['payment.transaction'].sudo().browse(transaction_id)
@@ -1287,7 +1323,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
         kwargs.update({
             'reference_prefix': None,  # Allow the reference to be computed based on the order
-            'partner_id': order_sudo.partner_id.id,
+            'partner_id': order_sudo.partner_invoice_id.id,
             'sale_order_id': order_id,  # Include the SO to allow Subscriptions to tokenize the tx
         })
         kwargs.pop('custom_create_values', None)  # Don't allow passing arbitrary create values

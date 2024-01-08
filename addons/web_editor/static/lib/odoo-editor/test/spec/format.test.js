@@ -1,5 +1,5 @@
 import { isSelectionFormat } from '../../src/utils/utils.js';
-import { BasicEditor, testEditor, setTestSelection, Direction, nextTick, unformat } from '../utils.js';
+import { BasicEditor, testEditor, setTestSelection, Direction, nextTick, unformat, insertText } from '../utils.js';
 
 const bold = async editor => {
     await editor.execCommand('bold');
@@ -100,7 +100,7 @@ describe('Format', () => {
             await testEditor(BasicEditor, {
                 contentBefore: `<p>[a${strong(`b`)}</p><p>${strong(`c`)}d]e</p>`,
                 stepFunction: bold,
-                contentAfter: `<p>${strong(`[ab`)}</p><p>${strong(`cd]`)}e</p>`,
+                contentAfter: `<p>${strong(`[ab`)}</p><p>${strong(`cd`)}]e</p>`,
             });
         });
         it('should make a selection ending with bold text fully bold', async () => {
@@ -267,7 +267,7 @@ describe('Format', () => {
             await testEditor(BasicEditor, {
                 contentBefore: `<p>[a${em(`b`)}</p><p>${em(`c`)}d]e</p>`,
                 stepFunction: italic,
-                contentAfter: `<p>${em(`[ab`)}</p><p>${em(`cd]`)}e</p>`,
+                contentAfter: `<p>${em(`[ab`)}</p><p>${em(`cd`)}]e</p>`,
             });
         });
         it('should make a selection ending with italic text fully italic', async () => {
@@ -348,7 +348,7 @@ describe('Format', () => {
             await testEditor(BasicEditor, {
                 contentBefore: `<p>[a${u(`b`)}</p><p>${u(`c`)}d]e</p>`,
                 stepFunction: underline,
-                contentAfter: `<p>${u(`[ab`)}</p><p>${u(`cd]`)}e</p>`,
+                contentAfter: `<p>${u(`[ab`)}</p><p>${u(`cd`)}]e</p>`,
             });
         });
         it('should make a selection ending with underline text fully underline', async () => {
@@ -485,7 +485,7 @@ describe('Format', () => {
             await testEditor(BasicEditor, {
                 contentBefore: `<p>[a${s(`b`)}</p><p>${s(`c`)}d]e</p>`,
                 stepFunction: strikeThrough,
-                contentAfter: `<p>${s(`[ab`)}</p><p>${s(`cd]`)}e</p>`,
+                contentAfter: `<p>${s(`[ab`)}</p><p>${s(`cd`)}]e</p>`,
             });
         });
         it('should make a selection ending with strikeThrough text fully strikeThrough', async () => {
@@ -516,6 +516,22 @@ describe('Format', () => {
                 contentBefore: `<p style="text-decoration: line-through;">a[b]c</p>`,
                 stepFunction: strikeThrough,
                 contentAfter: `<p style="text-decoration: line-through;">a[b]c</p>`,
+            });
+        });
+        it('should insert before strikethrough', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: `<p>d[a${s('bc]<br><br>')}</p>`,
+                stepFunction: async editor => {
+                    insertText(editor, 'A');
+                },
+                contentAfter: `<p>dA[]${s(`<br><br>`)}</p>`,
+            });
+            await testEditor(BasicEditor, {
+                contentBefore: `<p>[a${s('bc]<br><br>')}</p>`,
+                stepFunction: async editor => {
+                    insertText(editor, 'A');
+                },
+                contentAfter: `<p>A[]${s(`<br><br>`)}</p>`,
             });
         });
     });
@@ -811,6 +827,15 @@ describe('Format', () => {
             });
         });
     });
+    describe('removeFormat', () => {
+        it('should remove the background image when clear the format', async () => {
+            await testEditor(BasicEditor, {
+                contentBefore: '<div><p><font class="text-gradient" style="background-image: linear-gradient(135deg, rgb(255, 204, 51) 0%, rgb(226, 51, 255) 100%);">[ab]</font></p></div>',
+                stepFunction: editor => editor.execCommand('removeFormat'),
+                contentAfter: '<div><p>[ab]</p></div>',
+            });
+        });
+    });
 });
 
 describe('setTagName', () => {
@@ -906,13 +931,6 @@ describe('setTagName', () => {
                 contentBefore: '<div>[ab]</div>',
                 stepFunction: editor => editor.execCommand('setTag', 'h1'),
                 contentAfter: '<div><h1>[ab]</h1></div>',
-            });
-        });
-        it('should remove the background image while turning a p>font into a heading 1>span', async () => {
-            await testEditor(BasicEditor, {
-                contentBefore: '<div><p><font class="text-gradient" style="background-image: linear-gradient(135deg, rgb(255, 204, 51) 0%, rgb(226, 51, 255) 100%);">[ab]</font></p></div>',
-                stepFunction: editor => editor.execCommand('setTag', 'h1'),
-                contentAfter: '<div><h1><span style="">[ab]</span></h1></div>',
             });
         });
         it('should turn three table cells with paragraph to table cells with heading 1', async () => {

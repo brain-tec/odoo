@@ -7,10 +7,12 @@
 # Boris Kodelja <boris@hbs.si>, 2022
 # matjaz k <matjaz@mentis.si>, 2022
 # Nejc G <nejc@luxim.si>, 2022
-# Jasmina Macur <jasmina@hbs.si>, 2022
 # Tadej Lupšina <tadej@hbs.si>, 2022
+# Jasmina Macur <jasmina@hbs.si>, 2022
 # Martin Trigaux, 2022
 # Matjaz Mozetic <m.mozetic@matmoz.si>, 2022
+# Tomaž Jug <tomaz@editor.si>, 2023
+# Katja Deržič, 2023
 # 
 msgid ""
 msgstr ""
@@ -18,8 +20,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-07-12 07:50+0000\n"
 "PO-Revision-Date: 2021-09-14 12:26+0000\n"
-"Last-Translator: Matjaz Mozetic <m.mozetic@matmoz.si>, 2022\n"
-"Language-Team: Slovenian (https://www.transifex.com/odoo/teams/41243/sl/)\n"
+"Last-Translator: Katja Deržič, 2023\n"
+"Language-Team: Slovenian (https://app.transifex.com/odoo/teams/41243/sl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -112,6 +114,11 @@ msgid ""
 "  - Timesheet: the quantity is the sum of hours recorded on tasks linked to this sale line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
+"Glede na nastavitev izdelka, se lahko dostavljena količina samodejno izračuna:\n"
+"-ročno: količina je nastavljena ročno na knjižbi\n"
+"-iz stroškov: količina je vsota količin iz knjiženih stroškov\n"
+"-iz časovnice: količina je vsota ur, zabeleženih na nalogah, povezanih s to knjižbo prodaje\n"
+"-iz premikov zalog: količina prihaja iz potrjenih komisioniranj\n"
 
 #. module: sale_stock
 #: model:ir.ui.menu,name:sale_stock.menu_aftersale
@@ -184,7 +191,7 @@ msgstr "Datum:"
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_res_users__property_warehouse_id
 msgid "Default Warehouse"
-msgstr ""
+msgstr "Privzeto skladišče"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.view_order_form_inherit_sale_stock
@@ -724,11 +731,9 @@ msgstr ""
 #: code:addons/sale_stock/models/sale_order.py:0
 #, python-format
 msgid ""
-"You cannot decrease the ordered quantity below the delivered quantity.\n"
-"Create a return first."
+"You cannot decrease the ordered quantity of a sale order line below its delivered quantity.\n"
+"Create a return in your inventory first."
 msgstr ""
-"Naročene količine ne morete zmanjšati pod dostavljene količine.\n"
-"Najprej ustvarite vračilo."
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.exception_on_so

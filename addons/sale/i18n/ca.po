@@ -15,16 +15,18 @@
 # Manel Fernandez Ramirez <manelfera@outlook.com>, 2021
 # Arnau Ros, 2021
 # Eugeni Chafer <eugeni@chafer.cat>, 2021
-# jabelchi, 2021
+# Josep Anton Belchi, 2021
 # Harcogourmet, 2022
 # Quim - eccit <quim@eccit.com>, 2022
 # ericrolo, 2022
 # Jonatan Gk, 2022
 # marcescu, 2022
 # eriiikgt, 2022
-# Desausoi Laurent, 2022
 # Mohamed Sallam, 2022
 # Ivan Espinola, 2022
+# Óscar Fonseca <tecnico@extreme-micro.com>, 2023
+# martioodo hola, 2023
+# Víctor Martínez <victor.martinez@tecnativa.com>, 2023
 # 
 msgid ""
 msgstr ""
@@ -32,8 +34,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-10 09:48+0000\n"
 "PO-Revision-Date: 2021-09-14 12:26+0000\n"
-"Last-Translator: Ivan Espinola, 2022\n"
-"Language-Team: Catalan (https://www.transifex.com/odoo/teams/41243/ca/)\n"
+"Last-Translator: Víctor Martínez <victor.martinez@tecnativa.com>, 2023\n"
+"Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -287,10 +289,10 @@ msgstr ""
 "        Hola,\n"
 "        <br/><br/>\n"
 "        <t t-set=\"transaction\" t-value=\"object.get_portal_last_transaction()\"/>\n"
-"        La vostra comanda <strong t-out=\"object.name or ''\">S00049</strong> que ascendeix a <strong t-out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ 10.00</strong>\n"
+"        La seva comanda <strong t-out=\"object.name or ''\">S00049</strong>d'import <strong t-out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ 10.00</strong>\n"
 "        <t t-if=\"object.state == 'sale' or (transaction and transaction.state in ('done', 'authorized'))\">\n"
-"            s'ha confirmat.<br/>\n"
-"            ¡Gràcies per la vostra confiança\n"
+"            ha sigut confirmada.<br/>\n"
+"            Gràcies per la vostra confiança!\n"
 "        </t>\n"
 "        <t t-elif=\"transaction and transaction.state == 'pending'\">\n"
 "            està pendent. Es confirmarà quan es rebi el pagament.\n"
@@ -299,7 +301,7 @@ msgstr ""
 "            </t>\n"
 "        </t>\n"
 "        <br/><br/>\n"
-"        No dubti a posar-se en contacte amb nosaltres si té alguna pregunta.\n"
+"        Pot respondre a aquest correu si té qualsevol consulta..\n"
 "        <br/><br/>\n"
 "    </p>\n"
 "<t t-if=\"hasattr(object, 'website_id') and object.website_id\">\n"
@@ -489,23 +491,23 @@ msgstr ""
 "        <t t-set=\"doc_name\" t-value=\"'pressupost' if object.state in ('draft', 'sent') else 'comanda'\"/>\n"
 "        Hola,\n"
 "        <br/><br/>\n"
-"       la teva\n"
+"       El seu\n"
 "        <t t-if=\"ctx.get('proforma')\">\n"
 "            Factura proforma per a <t t-out=\"doc_name or ''\">pressupost</t> <strong t-out=\"object.name or ''\">S00052</strong>\n"
 "            <t t-if=\"object.origin\">\n"
 "                (amb referència: <t t-out=\"object.origin or ''\"/> )\n"
 "            </t>\n"
-"            que ascendeix a <strong t-out=\"format_amount(object.amount_total, object.pricelist_id.currency_id) or ''\">$ 10.00</strong> està disponible.\n"
+"            d'import <strong t-out=\"format_amount(object.amount_total, object.pricelist_id.currency_id) or ''\">$ 10.00</strong> està disponible.\n"
 "        </t>\n"
 "        <t t-else=\"\">\n"
-"            <t t-out=\"doc_name or ''\">pressupost</t> <strong t-out=\"object.name or ''\"/>\n"
+"            pressupost <t t-out=\"doc_name or ''\">pressupost</t> <strong t-out=\"object.name or ''\"/>\n"
 "            <t t-if=\"object.origin\">\n"
 "                (amb referència: <t t-out=\"object.origin or ''\">S00052</t> )\n"
 "            </t>\n"
-"            que ascendeix a <strong t-out=\"format_amount(object.amount_total, object.pricelist_id.currency_id) or ''\">$ 10.00</strong> està llest per a la revisió.\n"
+"            d'import <strong t-out=\"format_amount(object.amount_total, object.pricelist_id.currency_id) or ''\">$ 10.00</strong>està llest per la vostra revisió.\n"
 "        </t>\n"
 "        <br/><br/>\n"
-"        No dubti a posar-se en contacte amb nosaltres si té alguna pregunta.\n"
+"        Pot respondre a aquest correu si té qualsevol dubte.\n"
 "        <br/>\n"
 "    </p>\n"
 "</div>\n"
@@ -4262,6 +4264,11 @@ msgid ""
 "- You should deliver your products before invoicing them.\n"
 "- You should modify the invoicing policy of your product: Open the product, go to the \"Sales\" tab and modify invoicing policy from \"delivered quantities\" to \"ordered quantities\". For Services, you should modify the Service Invoicing Policy to 'Prepaid'."
 msgstr ""
+"No hi ha res a facturar!\n"
+"\n"
+"La raó(es) d'aquest comportament podria ser:\n"
+"- Hauries de lliurar els teus productes abans de facturar-los.\n"
+"- Haureu de modificar la política de facturació del vostre producte: Obriu el producte, aneu a la pestanya \"Vendes\" i modifiqueu la política de facturació des de «quantitats lliurades» a «quantitats ordenades». Per als serveis, hauríeu de modificar la política de facturació del servei a «Prepagat»."
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -4828,6 +4835,9 @@ msgid ""
 "== 'pending') and 'Pending Order' or 'Order' }} (Ref {{ object.name or 'n/a'"
 " }})"
 msgstr ""
+"{{ object.company_id.name }} {{ (object.get_portal_last_transaction().state "
+"== 'pending') and 'Comanda pendent' or 'Comanda' }} (Ref {{ object.name or "
+"'n/a' }})"
 
 #. module: sale
 #: model:mail.template,subject:sale.email_template_edi_sale
@@ -4836,3 +4846,6 @@ msgid ""
 "(ctx.get('proforma') and 'Proforma' or 'Quotation') or 'Order' }} (Ref {{ "
 "object.name or 'n/a' }})"
 msgstr ""
+"{{ object.company_id.name }} {{ object.state in ('draft', 'sent') and "
+"(ctx.get('proforma') and 'Proforma' or 'Pressupost') or 'Comanda' }} (Ref {{"
+" object.name or 'n/a' }})"

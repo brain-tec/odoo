@@ -7,80 +7,81 @@ from odoo.exceptions import AccessError, UserError
 
 class TestCommonTimesheet(TransactionCase):
 
-    def setUp(self):
-        super(TestCommonTimesheet, self).setUp()
-
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env.user.tz = "Europe/Brussels"
         # Crappy hack to disable the rule from timesheet grid, if it exists
         # The registry doesn't contain the field timesheet_manager_id.
         # but there is an ir.rule about it, crashing during its evaluation
-        rule = self.env.ref('timesheet_grid.hr_timesheet_rule_approver_update', raise_if_not_found=False)
+        rule = cls.env.ref('timesheet_grid.hr_timesheet_rule_approver_update', raise_if_not_found=False)
         if rule:
             rule.active = False
 
         # customer partner
-        self.partner = self.env['res.partner'].create({
+        cls.partner = cls.env['res.partner'].create({
             'name': 'Customer Task',
             'email': 'customer@task.com',
             'phone': '42',
         })
 
-        self.analytic_account = self.env['account.analytic.account'].create({
+        cls.analytic_account = cls.env['account.analytic.account'].create({
             'name': 'Analytic Account for Test Customer',
-            'partner_id': self.partner.id,
+            'partner_id': cls.partner.id,
             'code': 'TEST'
         })
 
         # project and tasks
-        self.project_customer = self.env['project.project'].create({
+        cls.project_customer = cls.env['project.project'].create({
             'name': 'Project X',
             'allow_timesheets': True,
-            'partner_id': self.partner.id,
-            'analytic_account_id': self.analytic_account.id,
+            'partner_id': cls.partner.id,
+            'analytic_account_id': cls.analytic_account.id,
         })
-        self.task1 = self.env['project.task'].create({
+        cls.task1 = cls.env['project.task'].create({
             'name': 'Task One',
             'priority': '0',
             'kanban_state': 'normal',
-            'project_id': self.project_customer.id,
-            'partner_id': self.partner.id,
+            'project_id': cls.project_customer.id,
+            'partner_id': cls.partner.id,
         })
-        self.task2 = self.env['project.task'].create({
+        cls.task2 = cls.env['project.task'].create({
             'name': 'Task Two',
             'priority': '1',
             'kanban_state': 'done',
-            'project_id': self.project_customer.id,
+            'project_id': cls.project_customer.id,
         })
         # users
-        self.user_employee = self.env['res.users'].create({
+        cls.user_employee = cls.env['res.users'].create({
             'name': 'User Employee',
             'login': 'user_employee',
             'email': 'useremployee@test.com',
-            'groups_id': [(6, 0, [self.ref('hr_timesheet.group_hr_timesheet_user')])],
+            'groups_id': [(6, 0, [cls.env.ref('hr_timesheet.group_hr_timesheet_user').id])],
         })
-        self.user_employee2 = self.env['res.users'].create({
+        cls.user_employee2 = cls.env['res.users'].create({
             'name': 'User Employee 2',
             'login': 'user_employee2',
             'email': 'useremployee2@test.com',
-            'groups_id': [(6, 0, [self.ref('hr_timesheet.group_hr_timesheet_user')])],
+            'groups_id': [(6, 0, [cls.env.ref('hr_timesheet.group_hr_timesheet_user').id])],
         })
-        self.user_manager = self.env['res.users'].create({
+        cls.user_manager = cls.env['res.users'].create({
             'name': 'User Officer',
             'login': 'user_manager',
             'email': 'usermanager@test.com',
-            'groups_id': [(6, 0, [self.ref('hr_timesheet.group_timesheet_manager')])],
+            'groups_id': [(6, 0, [cls.env.ref('hr_timesheet.group_timesheet_manager').id])],
         })
         # employees
-        self.empl_employee = self.env['hr.employee'].create({
+        cls.empl_employee = cls.env['hr.employee'].create({
             'name': 'User Empl Employee',
-            'user_id': self.user_employee.id,
+            'user_id': cls.user_employee.id,
         })
-        self.empl_employee2 = self.env['hr.employee'].create({
+        cls.empl_employee2 = cls.env['hr.employee'].create({
             'name': 'User Empl Employee 2',
-            'user_id': self.user_employee2.id,
+            'user_id': cls.user_employee2.id,
         })
-        self.empl_manager = self.env['hr.employee'].create({
+        cls.empl_manager = cls.env['hr.employee'].create({
             'name': 'User Empl Officer',
-            'user_id': self.user_manager.id,
+            'user_id': cls.user_manager.id,
         })
 
 class TestTimesheet(TestCommonTimesheet):
@@ -527,3 +528,40 @@ class TestTimesheet(TestCommonTimesheet):
             'unit_amount': 8.0,
         })
         self.assertEqual(with_user_timesheet.user_id, self.user_employee, 'User Employee is set in timesheet.')
+
+    def test_create_timesheet_with_companyless_analytic_account(self):
+        """ This test ensures that a timesheet can be created on an analytic account whose company_id is set to False"""
+        self.project_customer.analytic_account_id.company_id = False
+        timesheet = self.env['account.analytic.line'].with_user(self.user_employee).create(
+            {'unit_amount': 1.0, 'project_id': self.project_customer.id})
+        self.assertEqual(timesheet.product_uom_id, self.project_customer.company_id.project_time_mode_id,
+                         "The product_uom_id of the timesheet should be equal to the project's company uom "
+                         "if the project's analytic account has no company_id")
+
+    def test_percentage_of_planned_hours(self):
+        """ Test the percentage of planned hours on a task. """
+        self.task1.planned_hours = round(11/60, 2)
+        self.assertEqual(self.task1.effective_hours, 0, 'No timesheet should be created yet.')
+        self.assertEqual(self.task1.progress, 0, 'No timesheet should be created yet.')
+        self.env['account.analytic.line'].create([
+            {
+                'name': 'Timesheet',
+                'project_id': self.project_customer.id,
+                'task_id': self.task1.id,
+                'unit_amount': 3/60,
+                'employee_id': self.empl_employee.id,
+            }, {
+                'name': 'Timesheet',
+                'project_id': self.project_customer.id,
+                'task_id': self.task1.id,
+                'unit_amount': 4/60,
+                'employee_id': self.empl_employee.id,
+            }, {
+                'name': 'Timesheet',
+                'project_id': self.project_customer.id,
+                'task_id': self.task1.id,
+                'unit_amount': 4/60,
+                'employee_id': self.empl_employee.id,
+            },
+        ])
+        self.assertEqual(self.task1.progress, 100, 'The percentage of planned hours should be 100%.')

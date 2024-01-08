@@ -31,9 +31,9 @@ class SaleOrder(models.Model):
 
     @api.model
     def _default_note_url(self):
-        website = self.env['website'].get_current_website()
-        if website:
-            return website.get_base_url()
+        website_id = self._context.get('website_id')
+        if website_id:
+            return self.env['website'].browse(website_id).get_base_url()
         return super()._default_note_url()
 
     @api.depends('order_line')
@@ -60,6 +60,13 @@ class SaleOrder(models.Model):
                 order.is_abandoned_cart = bool(order.date_order <= abandoned_datetime and order.partner_id != public_partner_id and order.order_line)
             else:
                 order.is_abandoned_cart = False
+
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+        super().onchange_partner_id()
+        for order in self:
+            if order.website_id:
+                order.payment_term_id = order.website_id.with_company(order.company_id).sale_get_payment_term(order.partner_id)
 
     def _search_abandoned_cart(self, operator, value):
         website_ids = self.env['website'].search_read(fields=['id', 'cart_abandoned_delay', 'partner_id'])

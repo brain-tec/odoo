@@ -391,7 +391,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         })
 
         purchase_order = self.env['purchase.order'].create({
-            'partner_id': self.env.ref('base.res_partner_3').id,
+            'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
             'order_line': [(0, 0, {
                 'name': super_product.name,
                 'product_id': super_product.id,
@@ -607,3 +607,64 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         self.env[res_dict['res_model']].with_context(res_dict['context']).process()
         backorder = picking.backorder_ids
         self.assertEqual(backorder.move_line_ids_without_package.location_dest_id.id, sub_loc_01.id)
+
+    def test_inventory_adjustments_with_po(self):
+        """ check that the quant created by a PO can be applied in an inventory adjustment correctly """
+        product = self.env['product.product'].create({
+            'name': 'Product A',
+            'type': 'product',
+        })
+        po_form = Form(self.env['purchase.order'])
+        po_form.partner_id = self.partner_a
+        with po_form.order_line.new() as line:
+            line.product_id = product
+            line.product_qty = 5
+        po = po_form.save()
+        po.button_confirm()
+        po.picking_ids.move_lines.quantity_done = 5
+        po.picking_ids.button_validate()
+        self.assertEqual(po.picking_ids.state, 'done')
+        quant = self.env['stock.quant'].search([('product_id', '=', product.id), ('location_id.usage', '=', 'internal')])
+        wizard = self.env['stock.inventory.adjustment.name'].create({'quant_ids': quant})
+        wizard.action_apply()
+        self.assertEqual(quant.quantity, 5)
+
+    def test_po_edit_after_receive(self):
+        self.po = self.env['purchase.order'].create(self.po_vals)
+        self.po.button_confirm()
+        self.po.picking_ids.move_lines.quantity_done = 5
+        self.po.picking_ids.button_validate()
+        self.assertEqual(self.po.picking_ids.move_lines.mapped('product_uom_qty'), [5.0, 5.0])
+        self.po.with_context(import_file=True).order_line[0].product_qty = 10
+        self.assertEqual(self.po.picking_ids.move_lines.mapped('product_uom_qty'), [5.0, 5.0, 5.0])
+
+    def test_receive_returned_product_without_po_update(self):
+        """
+        Receive again the returned qty, but with the option "Update PO" disabled
+        At the end, the received qty of the POL should be correct
+        """
+        po = self.env['purchase.order'].create(self.po_vals)
+        po.button_confirm()
+
+        receipt01 = po.picking_ids
+        receipt01.move_lines.quantity_done = 5
+        receipt01.button_validate()
+
+        wizard = Form(self.env['stock.return.picking'].with_context(active_ids=receipt01.ids, active_id=receipt01.id, active_model='stock.picking')).save()
+        wizard.product_return_moves.to_refund = False
+        res = wizard.create_returns()
+
+        return_pick = self.env['stock.picking'].browse(res['res_id'])
+        return_pick.move_lines.quantity_done = 5
+        return_pick.button_validate()
+
+        wizard = Form(self.env['stock.return.picking'].with_context(active_ids=return_pick.ids, active_id=return_pick.id, active_model='stock.picking')).save()
+        wizard.product_return_moves.to_refund = False
+        res = wizard.create_returns()
+
+        receipt02 = self.env['stock.picking'].browse(res['res_id'])
+        receipt02.move_lines.quantity_done = 5
+        receipt02.button_validate()
+
+        self.assertEqual(po.order_line[0].qty_received, 5)
+        self.assertEqual(po.order_line[1].qty_received, 5)

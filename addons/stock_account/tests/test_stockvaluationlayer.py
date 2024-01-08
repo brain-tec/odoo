@@ -582,6 +582,18 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         self.assertEqual(self.product1.quantity_svl, 10)
         self.assertEqual(self.product1.standard_price, 2)
 
+    def test_return_delivery_rounding(self):
+        self.product1.product_tmpl_id.categ_id.property_valuation = 'manual_periodic'
+        self.product1.write({"standard_price": 1})
+        self._make_in_move(self.product1, 1, unit_cost=13.13)
+        self._make_in_move(self.product1, 1, unit_cost=12.20)
+        move3 = self._make_out_move(self.product1, 2, create_picking=True)
+        move4 = self._make_return(move3, 2)
+
+        self.assertAlmostEqual(abs(move3.stock_valuation_layer_ids[0].value), abs(move4.stock_valuation_layer_ids[0].value))
+        self.assertAlmostEqual(self.product1.value_svl, 25.33)
+        self.assertEqual(self.product1.quantity_svl, 2)
+
 
 class TestStockValuationFIFO(TestStockValuationCommon):
     def setUp(self):
@@ -898,7 +910,7 @@ class TestStockValuationChangeCostMethod(TestStockValuationCommon):
         self.assertEqual(self.product1.value_svl, 190)
         self.assertEqual(self.product1.quantity_svl, 19)
 
-@tagged('post_install', '-at_install')
+@tagged('post_install', '-at_install', 'change_valuation')
 class TestStockValuationChangeValuation(TestStockValuationCommon):
     @classmethod
     def setUpClass(cls):
@@ -914,6 +926,12 @@ class TestStockValuationChangeValuation(TestStockValuationCommon):
             'property_stock_valuation_account_id': cls.stock_valuation_account.id,
             'property_stock_journal': cls.stock_journal.id,
         })
+
+    def _get_stock_account_balance(self, stock_valuation_layer):
+        """Return the accounting balance from the stock valuation account for the given SVL"""
+        stock_valuation_account = stock_valuation_layer.product_id.categ_id.property_stock_valuation_account_id
+        return stock_valuation_layer.account_move_id.line_ids.filtered(lambda line: line.account_id == stock_valuation_account).balance
+
 
     def test_standard_manual_to_auto_1(self):
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'standard'
@@ -938,6 +956,9 @@ class TestStockValuationChangeValuation(TestStockValuationCommon):
         # An accounting entry should only be created for the replenish now that the category is perpetual.
         self.assertEqual(len(self.product1.stock_valuation_layer_ids.mapped('account_move_id')), 1)
         self.assertEqual(len(self.product1.stock_valuation_layer_ids), 3)
+        # Check the entry's value
+        last_svl = self.product1.stock_valuation_layer_ids.sorted()[-1]
+        self.assertEqual(self._get_stock_account_balance(last_svl), self.product1.value_svl)
         for svl in self.product1.stock_valuation_layer_ids.sorted()[-2:]:
             self.assertEqual(svl.description, 'Valuation method change for product category All: from manual_periodic to real_time.')
 
@@ -972,6 +993,38 @@ class TestStockValuationChangeValuation(TestStockValuationCommon):
         # An accounting entry should only be created for the replenish now that the category is perpetual.
         self.assertEqual(len(self.product1.stock_valuation_layer_ids.mapped('account_move_id')), 1)
         self.assertEqual(len(self.product1.stock_valuation_layer_ids), 3)
+        # Check the entry's value
+        last_svl = self.product1.stock_valuation_layer_ids.sorted()[-1]
+        self.assertEqual(self._get_stock_account_balance(last_svl), self.product1.value_svl)
+
+    def test_standard_manual_to_auto_3(self):
+        self.product1.product_tmpl_id.categ_id.property_cost_method = 'standard'
+        self.product1.product_tmpl_id.categ_id.property_valuation = 'manual_periodic'
+        self.product1.product_tmpl_id.standard_price = 10
+        self._make_out_move(self.product1, 10, force_assign=True)
+
+        self.assertEqual(self.product1.value_svl, -100)
+        self.assertEqual(self.product1.quantity_svl, -10)
+        self.assertEqual(len(self.product1.stock_valuation_layer_ids.account_move_id), 0)
+        self.assertEqual(len(self.product1.stock_valuation_layer_ids), 1)
+
+        self.product1.product_tmpl_id.categ_id.write({
+            'property_stock_account_input_categ_id': self.stock_input_account.id,
+            'property_stock_account_output_categ_id': self.stock_output_account.id,
+            'property_stock_valuation_account_id': self.stock_valuation_account.id,
+            'property_stock_journal': self.stock_journal.id,
+            'property_valuation': 'real_time',
+        })
+        self.assertEqual(self.product1.value_svl, -100)
+        self.assertEqual(self.product1.quantity_svl, -10)
+        # An accounting entry should only be created for the replenish now that the category is perpetual.
+        self.assertEqual(len(self.product1.stock_valuation_layer_ids.account_move_id), 1)
+        self.assertEqual(len(self.product1.stock_valuation_layer_ids), 3)
+        # Check the entry's value
+        last_svl = self.product1.stock_valuation_layer_ids.sorted()[-1]
+        self.assertEqual(self._get_stock_account_balance(last_svl), self.product1.value_svl)
+        for svl in self.product1.stock_valuation_layer_ids.sorted()[-2:]:
+            self.assertEqual(svl.description, 'Valuation method change for product category All: from manual_periodic to real_time.')
 
     def test_standard_auto_to_manual_1(self):
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'standard'
@@ -1128,6 +1181,35 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon):
 
         return in_move.with_context(svl=True)
 
+    def _make_dropship_move(self, product, quantity, unit_cost=None):
+        dropshipped = self.env['stock.move'].create({
+            'name': 'dropship %s units' % str(quantity),
+            'product_id': product.id,
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': quantity,
+            'picking_type_id': self.picking_type_out.id,
+        })
+        if unit_cost:
+            dropshipped.price_unit = unit_cost
+        dropshipped._action_confirm()
+        dropshipped._action_assign()
+        dropshipped.move_line_ids.qty_done = quantity
+        dropshipped._action_done()
+        return dropshipped
+
+    def _make_return(self, move, quantity_to_return):
+        stock_return_picking = Form(self.env['stock.return.picking']\
+            .with_context(active_ids=[move.picking_id.id], active_id=move.picking_id.id, active_model='stock.picking'))
+        stock_return_picking = stock_return_picking.save()
+        stock_return_picking.product_return_moves.quantity = quantity_to_return
+        stock_return_picking_action = stock_return_picking.create_returns()
+        return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
+        return_pick.move_lines[0].move_line_ids[0].qty_done = quantity_to_return
+        return_pick._action_done()
+        return return_pick.move_lines
+
     def test_avco_and_credit_note(self):
         """
         When reversing an invoice that contains some anglo-saxo AML, the new anglo-saxo AML should have the same value
@@ -1165,3 +1247,89 @@ class TestAngloSaxonAccounting(AccountTestInvoicingCommon):
         self.assertEqual(len(anglo_lines), 2)
         self.assertEqual(abs(anglo_lines[0].balance), 10)
         self.assertEqual(abs(anglo_lines[1].balance), 10)
+
+    def test_dropship_return_accounts_1(self):
+        """
+        When returning a dropshipped move, make sure the correct accounts are used
+        """
+        # pylint: disable=bad-whitespace
+        self.product1.categ_id.property_cost_method = 'fifo'
+
+        move1 = self._make_dropship_move(self.product1, 2, unit_cost=10)
+        move2 = self._make_return(move1, 2)
+
+        # First: Input -> Valuation
+        # Second: Valuation -> Output
+        origin_svls = move1.stock_valuation_layer_ids.sorted('quantity', reverse=True)
+        # First: Output -> Valuation
+        # Second: Valuation -> Input
+        return_svls = move2.stock_valuation_layer_ids.sorted('quantity', reverse=True)
+        self.assertEqual(len(origin_svls), 2)
+        self.assertEqual(len(return_svls), 2)
+
+        acc_in, acc_out, acc_valuation = self.stock_input_account, self.stock_output_account, self.stock_valuation_account
+
+        # Dropshipping should be: Input -> Output
+        self.assertRecordValues(origin_svls[0].account_move_id.line_ids, [
+            {'account_id': acc_in.id,        'debit': 0,  'credit': 20},
+            {'account_id': acc_valuation.id, 'debit': 20, 'credit': 0},
+        ])
+        self.assertRecordValues(origin_svls[1].account_move_id.line_ids, [
+            {'account_id': acc_valuation.id, 'debit': 0,  'credit': 20},
+            {'account_id': acc_out.id,       'debit': 20, 'credit': 0},
+        ])
+        # Return should be: Output -> Input
+        self.assertRecordValues(return_svls[0].account_move_id.line_ids, [
+            {'account_id': acc_out.id,       'debit': 0,  'credit': 20},
+            {'account_id': acc_valuation.id, 'debit': 20, 'credit': 0},
+        ])
+        self.assertRecordValues(return_svls[1].account_move_id.line_ids, [
+            {'account_id': acc_valuation.id, 'debit': 0,  'credit': 20},
+            {'account_id': acc_in.id,        'debit': 20, 'credit': 0},
+        ])
+
+    def test_dropship_return_accounts_2(self):
+        """
+        When returning a dropshipped move, make sure the correct accounts are used
+        """
+        # pylint: disable=bad-whitespace
+        self.product1.categ_id.property_cost_method = 'fifo'
+
+        move1 = self._make_dropship_move(self.product1, 2, unit_cost=10)
+
+        # return to WH/Stock
+        stock_return_picking = Form(self.env['stock.return.picking']\
+            .with_context(active_ids=[move1.picking_id.id], active_id=move1.picking_id.id, active_model='stock.picking'))
+        stock_return_picking = stock_return_picking.save()
+        stock_return_picking.product_return_moves.quantity = 2
+        stock_return_picking.location_id = self.stock_location
+        stock_return_picking_action = stock_return_picking.create_returns()
+        return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
+        return_pick.move_lines[0].move_line_ids[0].qty_done = 2
+        return_pick._action_done()
+        move2 = return_pick.move_lines
+
+        # First: Input -> Valuation
+        # Second: Valuation -> Output
+        origin_svls = move1.stock_valuation_layer_ids.sorted('quantity', reverse=True)
+        # Only one: Output -> Valuation
+        return_svl = move2.stock_valuation_layer_ids
+        self.assertEqual(len(origin_svls), 2)
+        self.assertEqual(len(return_svl), 1)
+
+        acc_in, acc_out, acc_valuation = self.stock_input_account, self.stock_output_account, self.stock_valuation_account
+
+        # Dropshipping should be: Input -> Output
+        self.assertRecordValues(origin_svls[0].account_move_id.line_ids, [
+            {'account_id': acc_in.id,        'debit': 0,  'credit': 20},
+            {'account_id': acc_valuation.id, 'debit': 20, 'credit': 0},
+        ])
+        self.assertRecordValues(origin_svls[1].account_move_id.line_ids, [
+            {'account_id': acc_valuation.id, 'debit': 0,  'credit': 20},
+            {'account_id': acc_out.id,       'debit': 20, 'credit': 0},
+        ])
+        # Return should be: Output -> Valuation
+        self.assertRecordValues(return_svl.account_move_id.line_ids, [
+            {'account_id': acc_out.id,       'debit': 0,  'credit': 20},
+            {'account_id': acc_valuation.id, 'debit': 20, 'credit': 0},
+        ])

@@ -13,16 +13,25 @@ const TableOfContent = publicWidget.Widget.extend({
      */
     async start() {
         this._stripNavbarStyles();
+
+        // Those links will be recreated when entering edit mode, see
+        // `_generateNav`. No need to recreate those.
+        this.$target.find('.table_of_content_link:hidden').remove();
+
         await this._super(...arguments);
-        this.$scrollingElement = $().getScrollingElement();
+        this.$scrollingElement = this.$target.closest(".s_table_of_content").closestScrollable();
         this.previousPosition = -1;
         this._updateTableOfContentNavbarPosition();
-        extraMenuUpdateCallbacks.push(this._updateTableOfContentNavbarPosition.bind(this));
+
+        this.boundUpdateNavbar = this._updateTableOfContentNavbarPosition.bind(this);
+        extraMenuUpdateCallbacks.push(this.boundUpdateNavbar);
     },
     /**
      * @override
      */
     destroy() {
+        const indexOfCallback = extraMenuUpdateCallbacks.indexOf(this.boundUpdateNavbar);
+        extraMenuUpdateCallbacks.splice(indexOfCallback, 1);
         this.$target.css('top', '');
         this.$target.find('.s_table_of_content_navbar').css({top: '', maxHeight: ''});
         this._super(...arguments);

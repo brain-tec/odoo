@@ -327,7 +327,8 @@ class IrActionsReport(models.Model):
                 command_args.extend(['--disable-smart-shrinking'])
 
         # Add extra time to allow the page to render
-        command_args.extend(['--javascript-delay', '1000'])
+        delay = self.env['ir.config_parameter'].sudo().get_param('report.print_delay', '1000')
+        command_args.extend(['--javascript-delay', delay])
 
         if landscape:
             command_args.extend(['--orientation', 'landscape'])
@@ -357,7 +358,7 @@ class IrActionsReport(models.Model):
         layout = self.env['ir.ui.view'].browse(self.env['ir.ui.view'].get_view_id('web.minimal_layout'))
         base_url = IrConfig.get_param('report.url') or layout.get_base_url()
 
-        root = lxml.html.fromstring(html)
+        root = lxml.html.fromstring(html, parser=lxml.html.HTMLParser(encoding='utf-8'))
         match_klass = "//div[contains(concat(' ', normalize-space(@class), ' '), ' {} ')]"
 
         header_node = etree.Element('div', id='minimal_layout_report_headers')
@@ -798,7 +799,7 @@ class IrActionsReport(models.Model):
                 reader = PdfFileReader(stream)
                 writer.appendPagesFromReader(reader)
                 writer.write(result_stream)
-            except utils.PdfReadError:
+            except (utils.PdfReadError, TypeError, ValueError):
                 unreadable_streams.append(stream)
 
         return unreadable_streams
@@ -849,7 +850,7 @@ class IrActionsReport(models.Model):
         # assets are not in cache and must be generated. To workaround this issue, we manually
         # commit the writes in the `ir.attachment` table. It is done thanks to a key in the context.
         context = dict(self.env.context)
-        if not config['test_enable']:
+        if not config['test_enable'] and 'commit_assetsbundle' not in context:
             context['commit_assetsbundle'] = True
 
         # Disable the debug mode in the PDF rendering in order to not split the assets bundle
@@ -887,7 +888,8 @@ class IrActionsReport(models.Model):
         # - The report is not fully present in attachments.
         if save_in_attachment and not res_ids:
             _logger.info('The PDF report has been generated from attachments.')
-            self._raise_on_unreadable_pdfs(save_in_attachment.values(), stream_record)
+            if len(save_in_attachment) > 1:
+                self._raise_on_unreadable_pdfs(save_in_attachment.values(), stream_record)
             return self_sudo._post_pdf(save_in_attachment), 'pdf'
 
         if self.get_wkhtmltopdf_state() == 'install':

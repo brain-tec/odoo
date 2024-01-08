@@ -150,6 +150,8 @@ class Location(models.Model):
         view_by_wh = OrderedDict((wh.view_location_id.id, wh.id) for wh in warehouses)
         self.warehouse_id = False
         for loc in self:
+            if not loc.parent_path:
+                continue
             path = set(int(loc_id) for loc_id in loc.parent_path.split('/')[:-1])
             for view_location_id in view_by_wh:
                 if view_location_id in path:
@@ -376,8 +378,18 @@ class Location(models.Model):
             if self.storage_category_id.allow_new_product == "empty" and positive_quant:
                 return False
             # check if only allow same product
-            if self.storage_category_id.allow_new_product == "same" and positive_quant and positive_quant.product_id != product:
-                return False
+            if self.storage_category_id.allow_new_product == "same":
+                # In case it's a package, `product` is not defined, so try to get
+                # the package products from the context
+                product = product or self._context.get('products')
+                if (positive_quant and positive_quant.product_id != product) or len(product) > 1:
+                    return False
+                if self.env['stock.move.line'].search([
+                    ('product_id', '!=', product.id),
+                    ('state', 'not in', ('done', 'cancel')),
+                    ('location_dest_id', '=', self.id),
+                ], limit=1):
+                    return False
         return True
 
 

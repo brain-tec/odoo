@@ -486,6 +486,29 @@ class TestAccountMove(AccountTestInvoicingCommon):
             {'name': 'credit_line_1',            'debit': 0.0,       'credit': 1200.0,   'tax_ids': [],                                  'tax_line_id': False},
         ])
 
+    def test_misc_custom_tags(self):
+        tag = self.env['account.account.tag'].create({
+            'name': "test_misc_custom_tags",
+            'applicability': 'taxes',
+            'country_id': self.env.ref('base.us').id,
+        })
+        move_form = Form(self.env['account.move'].with_context(default_move_type='entry'))
+        with move_form.line_ids.new() as debit_line:
+            debit_line.name = 'debit_line'
+            debit_line.account_id = self.company_data['default_account_revenue']
+            debit_line.debit = 1000
+            debit_line.tax_tag_ids.add(tag)
+        with move_form.line_ids.new() as credit_line:
+            credit_line.name = 'credit_line'
+            credit_line.account_id = self.company_data['default_account_revenue']
+            credit_line.credit = 1000
+        move = move_form.save()
+        self.assertRecordValues(move.line_ids, [
+            # pylint: disable=bad-whitespace
+            {'debit': 1000.0,   'credit': 0.0,      'tax_tag_ids': tag.ids},
+            {'debit': 0.0,      'credit': 1000.0,   'tax_tag_ids': []},
+        ])
+
     def test_misc_prevent_unlink_posted_items(self):
         # You cannot remove journal items if the related journal entry is posted.
         self.test_move.action_post()
@@ -705,3 +728,40 @@ class TestAccountMove(AccountTestInvoicingCommon):
         # You can remove journal items if the related journal entry is draft.
         self.test_move.button_draft()
         self.assertTrue(self.test_move.line_ids.unlink())
+
+    def test_account_root_multiple_companies(self):
+        account = self.env['account.account'].create({
+            'name': 'account',
+            'code': 'ZZ',
+            'user_type_id': self.env.ref('account.data_account_type_current_assets').id,
+            'company_id': self.env.company.id,
+        })
+        other_company = self.env['res.company'].create({'name': 'other company'})
+        self.env['account.account'].create({
+            'name': 'other account',
+            'code': 'ZZ',
+            'user_type_id': self.env.ref('account.data_account_type_current_assets').id,
+            'company_id': other_company.id,
+        })
+        self.env['account.move'].create({
+            'move_type': 'entry',
+            'date': fields.Date.from_string('2016-01-01'),
+            'line_ids': [
+                (0, None, {
+                    'name': 'revenue line 1',
+                    'account_id': account.id,
+                    'debit': 500.0,
+                    'credit': 0.0,
+                }),
+                (0, None, {
+                    'name': 'revenue line 1',
+                    'account_id': self.company_data['default_account_tax_sale'].id,
+                    'debit': 0.0,
+                    'credit': 500.0,
+                }),
+            ]
+        })
+        balance = self.env["account.move.line"].read_group(
+            [("account_id", "=", account.id)], ["balance:sum"], ["account_root_id"]
+        )[0]["balance"]
+        self.assertEqual(balance, 500)

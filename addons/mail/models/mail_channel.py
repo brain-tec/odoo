@@ -237,6 +237,7 @@ class Channel(models.Model):
             all_emp_group = None
         if all_emp_group and all_emp_group in self:
             raise UserError(_('You cannot delete those groups, as the Whole Company group is required by other modules.'))
+        self.env['bus.bus']._sendmany([(channel, 'mail.channel/delete', {'id': channel.id}) for channel in self])
 
     def write(self, vals):
         result = super(Channel, self).write(vals)
@@ -379,8 +380,8 @@ class Channel(models.Model):
                 'members': [('insert', members_data)],
             })
         if invite_to_rtc_call:
-            if self.env.user._is_public() and 'guest' in self.env.context:
-                guest = self.env.context.get('guest')
+            guest = self.env['mail.guest']._get_guest_from_context()
+            if self.env.user._is_public() and guest:
                 partner = self.env['res.partner']
             else:
                 guest = self.env['mail.guest']
@@ -552,9 +553,9 @@ class Channel(models.Model):
                 groups[index] = (group_name, lambda partner: False, group_data)
         return groups
 
-    def _notify_thread(self, message, msg_vals=False, **kwargs):
+    def _notify_thread(self, message, msg_vals=False, notify_by_email=True, **kwargs):
         # link message to channel
-        rdata = super(Channel, self)._notify_thread(message, msg_vals=msg_vals, **kwargs)
+        rdata = super(Channel, self)._notify_thread(message, msg_vals=msg_vals, notify_by_email=notify_by_email, **kwargs)
 
         message_format_values = message.message_format()[0]
         bus_notifications = self._channel_message_notifications(message, message_format_values)
@@ -632,8 +633,9 @@ class Channel(models.Model):
 
     def _message_add_reaction_after_hook(self, message, content):
         self.ensure_one()
-        if self.env.user._is_public() and 'guest' in self.env.context:
-            guests = [('insert', {'id': self.env.context.get('guest').id})]
+        guest = self.env['mail.guest']._get_guest_from_context()
+        if self.env.user._is_public() and guest:
+            guests = [('insert', {'id': guest.id})]
             partners = []
         else:
             guests = []
@@ -653,8 +655,9 @@ class Channel(models.Model):
 
     def _message_remove_reaction_after_hook(self, message, content):
         self.ensure_one()
-        if self.env.user._is_public() and 'guest' in self.env.context:
-            guests = [('insert-and-unlink', {'id': self.env.context.get('guest').id})]
+        guest = self.env['mail.guest']._get_guest_from_context()
+        if self.env.user._is_public() and guest:
+            guests = [('insert-and-unlink', {'id': guest.id})]
             partners = []
         else:
             guests = []
@@ -1002,9 +1005,16 @@ class Channel(models.Model):
             if channel_partner.fetched_message_id.id == last_message_id:
                 # last message fetched by user is already up-to-date
                 return
-            channel_partner.write({
-                'fetched_message_id': last_message_id,
-            })
+            # Avoid serialization error when multiple tabs are opened.
+            query = """
+                UPDATE mail_channel_partner
+                SET fetched_message_id = %s
+                WHERE id IN (
+                    SELECT id FROM mail_channel_partner WHERE id = %s
+                    FOR NO KEY UPDATE SKIP LOCKED
+                )
+            """
+            self.env.cr.execute(query, (last_message_id, channel_partner.id))
             self.env['bus.bus']._sendone(channel, 'mail.channel.partner/fetched', {
                 'channel_id': channel.id,
                 'id': channel_partner.id,

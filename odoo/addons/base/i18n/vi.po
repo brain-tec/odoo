@@ -11,7 +11,8 @@
 # Vo Thanh Thuy, 2022
 # Hoàng Đình Hiếu, 2022
 # Thin Tran <trvathin@gmail.com>, 2022
-# Nancy Momoland <thanhnguyen.icsc@gmail.com>, 2022
+# Nancy Momoland <thanh.np2502@gmail.com>, 2023
+# Wil Odoo, 2023
 # Thi Huong Nguyen, 2023
 # 
 msgid ""
@@ -21,7 +22,7 @@ msgstr ""
 "POT-Creation-Date: 2022-01-24 09:03+0000\n"
 "PO-Revision-Date: 2021-09-14 12:18+0000\n"
 "Last-Translator: Thi Huong Nguyen, 2023\n"
-"Language-Team: Vietnamese (https://www.transifex.com/odoo/teams/41243/vi/)\n"
+"Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -14715,6 +14716,12 @@ msgid "Compute"
 msgstr "Tính toán"
 
 #. module: base
+#: code:addons/base/models/ir_model.py:0
+#, python-format
+msgid "Compute method cannot depend on field 'id'"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_sale_subscription_taxcloud
 msgid "Compute taxes with TaxCloud after automatic invoice creation."
 msgstr "Tính thuế với TaxCloud sau khi tạo hóa đơn tự động."
@@ -15142,6 +15149,12 @@ msgstr "Nhóm quốc gia"
 #: model:ir.model.fields,field_description:base.field_res_country__name
 msgid "Country Name"
 msgstr "Tên Quốc gia"
+
+#. module: base
+#: code:addons/base/models/res_country.py:0
+#, python-format
+msgid "Country code cannot be empty"
+msgstr ""
 
 #. module: base
 #: model:ir.model,name:base.model_res_country_state
@@ -17251,6 +17264,18 @@ msgstr "Lỗi"
 #: model:ir.model.fields,help:base.field_ir_model_constraint__message
 msgid "Error message returned when the constraint is violated."
 msgstr "Thông báo lỗi được trả về khi ràng buộc bị vi phạm."
+
+#. module: base
+#: code:addons/translate.py:0
+#, python-format
+msgid ""
+"Error while parsing view:\n"
+"\n"
+"%s"
+msgstr ""
+"Lỗi khi phân tích cú pháp chế độ xem:\n"
+"\n"
+"%s"
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:0
@@ -20578,6 +20603,18 @@ msgid "Invalid 'group by' parameter"
 msgstr "Tham số 'group by' không hợp lệ"
 
 #. module: base
+#: code:addons/template_inheritance.py:0
+#, python-format
+msgid "Invalid Expression while parsing xpath %r"
+msgstr "Biểu thức không hợp lệ khi phân tích cú pháp xpath %r"
+
+#. module: base
+#: code:addons/base/models/ir_default.py:0
+#, python-format
+msgid "Invalid JSON format in Default Value field."
+msgstr "Định dạng JSON không hợp lệ trong trường Giá trị mặc định."
+
+#. module: base
 #: code:addons/models.py:0
 #, python-format
 msgid "Invalid aggregation function %r."
@@ -21073,8 +21110,8 @@ msgstr "LGPL Version 3"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_lt_reports
-msgid "LT - Accounting Reports"
-msgstr "LT - Báo cáo kế toán"
+msgid "Lithuania - Accounting Reports"
+msgstr "Lithuania - Báo cáo kế toán"
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:0
@@ -29605,6 +29642,14 @@ msgstr "Giao hàng của bạn thông qua Fedex và theo dõi chúng trực tuy�
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery_ups
+msgid ""
+"This is the legacy integration with UPS that is no longer supported. Please "
+"install the new \"UPS Shipping\" module and uninstall this one as soon as "
+"possible. This integration will stop working in 2024."
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,summary:base.module_delivery_ups_rest
 msgid "Send your shippings through UPS and track them online"
 msgstr "Giao hàng của bạn thông qua UPS và theo dõi chúng trực tuyến"
 
@@ -30997,6 +31042,12 @@ msgstr "Thái Lan - Kế toán"
 #. module: base
 #: code:addons/base/models/res_users.py:0
 #, python-format
+msgid "The \"%s\" action cannot be selected as home action."
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/res_users.py:0
+#, python-format
 msgid "The \"App Switcher\" action cannot be selected as home action."
 msgstr "\"Trình chuyển đổi ứng dụng\" không thể chọn tác vụ tại trang chủ."
 
@@ -31082,8 +31133,8 @@ msgstr ""
 #. module: base
 #: code:addons/base/models/ir_module.py:0
 #, python-format
-msgid "The `base` module cannot be uninstalled"
-msgstr "Mô đun `base` không thể gỡ"
+msgid "Those modules cannot be uninstalled: %s"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_partner_category__active
@@ -31103,6 +31154,14 @@ msgstr ""
 "cách rõ ràng, ngay cả khi chúng được soạn thảo sau các điều khoản và điều "
 "kiện bán hàng tiêu chuẩn này. Để có hiệu lực, bất kỳ sự phủ định nào phải "
 "được đồng ý trước bằng văn bản."
+
+#. module: base
+#: code:addons/base/models/res_currency.py:0
+#, python-format
+msgid ""
+"The name for the current rate is empty.\n"
+"Please set it."
+msgstr ""
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_country_code_uniq
@@ -31153,7 +31212,6 @@ msgstr "Mã tiền tệ không được trùng!"
 #. module: base
 #: model:ir.model.fields,help:base.field_res_currency__inverse_rate
 #: model:ir.model.fields,help:base.field_res_currency_rate__company_rate
-#: model:ir.model.fields,help:base.field_res_currency_rate__inverse_company_rate
 msgid "The currency of rate 1 to the rate of the currency."
 msgstr "Đơn vị tiền tệ của tỷ giá 1 đối với tỷ giá của tiền tệ."
 
@@ -31450,8 +31508,9 @@ msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_currency_rate__rate
-msgid "The rate of the currency to the currency of rate 1"
-msgstr "Tỷ giá của tiền tệ này so với tiền tệ có tỷ giá là 1"
+#: model:ir.model.fields,help:base.field_res_currency_rate__inverse_company_rate
+msgid "The rate of the currency to the currency of rate 1 "
+msgstr "Tỷ giá của tiền tệ với tiền tệ của tỷ giá 1 "
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_currency__rate
@@ -32593,6 +32652,11 @@ msgstr "UNSPSC mã sản phẩm"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_ups
+msgid "UPS Shipping (Legacy)"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_delivery_ups_rest
 msgid "UPS Shipping"
 msgstr "Vận chuyển UPS"
 
@@ -34053,7 +34117,7 @@ msgstr "Worldline SIPS"
 #: code:addons/base/static/src/js/res_config_settings.js:0
 #, python-format
 msgid "Would you like to save your changes?"
-msgstr ""
+msgstr "Bạn có muốn lưu các thay đổi của mình không?"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_access__perm_write
@@ -34272,6 +34336,12 @@ msgid "You cannot deactivate the user you're currently logged in as."
 msgstr "Bạn không thể vô hiệu tài khoản mà bạn hiện tại đang đăng nhập."
 
 #. module: base
+#: code:addons/base/models/res_users.py:0
+#, python-format
+msgid "You cannot delete a group linked with a settings field."
+msgstr ""
+
+#. module: base
 #: code:addons/base/models/res_partner.py:0
 #, python-format
 msgid ""
@@ -34300,6 +34370,12 @@ msgstr ""
 "Bạn nên lưu trữ chúng sau khi lưu trữ người dùng được liên kết của họ.\n"
 "\n"
 "Người dùng đang hoạt động được liên kết: %(names)s"
+
+#. module: base
+#: code:addons/base/models/ir_config_parameter.py:0
+#, python-format
+msgid "You cannot delete the %s record."
+msgstr ""
 
 #. module: base
 #: code:addons/base/models/res_lang.py:0
@@ -34331,6 +34407,12 @@ msgid ""
 msgstr ""
 "Bạn không thể giảm số chữ số thập phân của một loại tiền tệ đã được sử dụng "
 "trên một mục nhập kế toán."
+
+#. module: base
+#: code:addons/base/models/ir_config_parameter.py:0
+#, python-format
+msgid "You cannot rename config parameters with keys %s"
+msgstr ""
 
 #. module: base
 #: code:addons/models.py:0
@@ -35109,3 +35191,9 @@ msgstr "năm"
 #: model:res.country,name:base.ax
 msgid "Åland Islands"
 msgstr "Quần đảo Åland"
+
+#. module: base
+#: code:addons/base/models/res_currency.py:0
+#, python-format
+msgid "This currency is set on a company and therefore cannot be deactivated."
+msgstr ""

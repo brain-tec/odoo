@@ -13,7 +13,6 @@
 # 3eec91a23d05c632ffac786ac42b81b8_b6fff7b <8985b7bc57db860af29969457dbb51b3_1018915>, 2021
 # Dick Nilsson <stesch99@gmail.com>, 2021
 # Robert Frykelius <robert.frykelius@linserv.se>, 2021
-# Jakob Krabbe <jakob.krabbe@vertel.se>, 2021
 # Kristoffer Grundström <lovaren@gmail.com>, 2021
 # deeman <da.jkpg@gmail.com>, 2021
 # Martin Wilderoth <martin.wilderoth@linserv.se>, 2021
@@ -30,6 +29,9 @@
 # Claes-Johan Dahlin, 2022
 # Robin Calvin, 2023
 # Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2023
+# Lasse L, 2023
+# Jakob Krabbe <jakob.krabbe@vertel.se>, 2023
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
@@ -37,8 +39,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-24 09:03+0000\n"
 "PO-Revision-Date: 2021-09-14 12:18+0000\n"
-"Last-Translator: Mikael Åkerberg <mikael.akerberg@mariaakerberg.com>, 2023\n"
-"Language-Team: Swedish (https://www.transifex.com/odoo/teams/41243/sv/)\n"
+"Last-Translator: Wil Odoo, 2024\n"
+"Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -14844,6 +14846,12 @@ msgid "Compute"
 msgstr "Beräkna"
 
 #. module: base
+#: code:addons/base/models/ir_model.py:0
+#, python-format
+msgid "Compute method cannot depend on field 'id'"
+msgstr "Beräkningsmetoden kan inte bero på fältet \"id"
+
+#. module: base
 #: model:ir.module.module,summary:base.module_sale_subscription_taxcloud
 msgid "Compute taxes with TaxCloud after automatic invoice creation."
 msgstr "Beräkna skatter med TaxCloud efter automatiskt skapande av fakturor."
@@ -15271,6 +15279,12 @@ msgstr "Landsgrupp"
 #: model:ir.model.fields,field_description:base.field_res_country__name
 msgid "Country Name"
 msgstr "Land"
+
+#. module: base
+#: code:addons/base/models/res_country.py:0
+#, python-format
+msgid "Country code cannot be empty"
+msgstr "Landskod får inte vara tom"
 
 #. module: base
 #: model:ir.model,name:base.model_res_country_state
@@ -17378,6 +17392,18 @@ msgstr "Fel"
 #: model:ir.model.fields,help:base.field_ir_model_constraint__message
 msgid "Error message returned when the constraint is violated."
 msgstr "Felmeddelande som returneras när begränsningen bryts."
+
+#. module: base
+#: code:addons/translate.py:0
+#, python-format
+msgid ""
+"Error while parsing view:\n"
+"\n"
+"%s"
+msgstr ""
+"Fel vid analys av vyn:\n"
+"\n"
+"%s"
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:0
@@ -20387,7 +20413,7 @@ msgstr "Branscher"
 #: model_terms:ir.ui.view,arch_db:base.res_partner_industry_view_form
 #: model_terms:ir.ui.view,arch_db:base.res_partner_industry_view_tree
 msgid "Industry"
-msgstr "Industri"
+msgstr "Bransch"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model__info
@@ -20695,6 +20721,18 @@ msgstr ""
 #, python-format
 msgid "Invalid 'group by' parameter"
 msgstr "Felaktig 'Gruppera efter'-parameter"
+
+#. module: base
+#: code:addons/template_inheritance.py:0
+#, python-format
+msgid "Invalid Expression while parsing xpath %r"
+msgstr "Ogiltigt uttryck vid analys av xpath %r"
+
+#. module: base
+#: code:addons/base/models/ir_default.py:0
+#, python-format
+msgid "Invalid JSON format in Default Value field."
+msgstr "Ogiltigt JSON-format i fältet Default Value."
 
 #. module: base
 #: code:addons/models.py:0
@@ -21194,8 +21232,8 @@ msgstr "LGPL version 3"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_lt_reports
-msgid "LT - Accounting Reports"
-msgstr "LT - Redovisningsrapporter"
+msgid "Lithuania - Accounting Reports"
+msgstr ""
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:0
@@ -29780,6 +29818,14 @@ msgstr "Skicka dina försändelser via Fedex och spåra dem online"
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery_ups
+msgid ""
+"This is the legacy integration with UPS that is no longer supported. Please "
+"install the new \"UPS Shipping\" module and uninstall this one as soon as "
+"possible. This integration will stop working in 2024."
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,summary:base.module_delivery_ups_rest
 msgid "Send your shippings through UPS and track them online"
 msgstr "Skicka dina försändelser via UPS och spåra dem online"
 
@@ -31172,6 +31218,12 @@ msgstr "Thailand - Bokföring"
 #. module: base
 #: code:addons/base/models/res_users.py:0
 #, python-format
+msgid "The \"%s\" action cannot be selected as home action."
+msgstr "Åtgärden \"%s\" kan inte väljas som hemåtgärd."
+
+#. module: base
+#: code:addons/base/models/res_users.py:0
+#, python-format
 msgid "The \"App Switcher\" action cannot be selected as home action."
 msgstr "Åtgärden \"App Switcher\" kan inte väljas som hemåtgärd."
 
@@ -31256,8 +31308,8 @@ msgstr ""
 #. module: base
 #: code:addons/base/models/ir_module.py:0
 #, python-format
-msgid "The `base` module cannot be uninstalled"
-msgstr "Modulen 'base' kan inte avinstalleras"
+msgid "Those modules cannot be uninstalled: %s"
+msgstr "Dessa moduler kan inte avinstalleras: %s"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_partner_category__active
@@ -31275,6 +31327,16 @@ msgstr ""
 "Kunden avstår uttryckligen från sina egna standardvillkor, även om dessa har"
 " utarbetats efter dessa standardförsäljningsvillkor. För att vara giltigt "
 "måste varje undantag uttryckligen överenskommas skriftligen i förväg."
+
+#. module: base
+#: code:addons/base/models/res_currency.py:0
+#, python-format
+msgid ""
+"The name for the current rate is empty.\n"
+"Please set it."
+msgstr ""
+"Namnet för den aktuella kursen är tomt.\n"
+"Vänligen ange det."
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_res_country_code_uniq
@@ -31324,7 +31386,6 @@ msgstr "Valutakoden måste vara unik!"
 #. module: base
 #: model:ir.model.fields,help:base.field_res_currency__inverse_rate
 #: model:ir.model.fields,help:base.field_res_currency_rate__company_rate
-#: model:ir.model.fields,help:base.field_res_currency_rate__inverse_company_rate
 msgid "The currency of rate 1 to the rate of the currency."
 msgstr "Valutan med kurs 1 till valutakursen."
 
@@ -31621,8 +31682,9 @@ msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_currency_rate__rate
-msgid "The rate of the currency to the currency of rate 1"
-msgstr "Valutans kurs i förhållande till valutan i kurs 1"
+#: model:ir.model.fields,help:base.field_res_currency_rate__inverse_company_rate
+msgid "The rate of the currency to the currency of rate 1 "
+msgstr "Kursen för valutan till valutan för kurs 1 "
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_currency__rate
@@ -32771,6 +32833,11 @@ msgstr "UNSPSC-produktkoder"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_ups
+msgid "UPS Shipping (Legacy)"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_delivery_ups_rest
 msgid "UPS Shipping"
 msgstr "UPS leveranser"
 
@@ -33519,7 +33586,7 @@ msgstr "Värde"
 #: code:addons/base/models/ir_fields.py:0
 #, python-format
 msgid "Value '%s' not found in selection field '%%(field)s'"
-msgstr "Värdet %s fanns inte i det valda fältet %%(field)S"
+msgstr "Värdet %s fanns inte i det valda fältet %%(field)s"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_property__value_binary
@@ -34444,6 +34511,12 @@ msgstr ""
 "Du kan inte avaktivera den användare som du för närvarande är inloggad som."
 
 #. module: base
+#: code:addons/base/models/res_users.py:0
+#, python-format
+msgid "You cannot delete a group linked with a settings field."
+msgstr "Du kan inte radera en grupp som är kopplad till ett inställningsfält."
+
+#. module: base
 #: code:addons/base/models/res_partner.py:0
 #, python-format
 msgid ""
@@ -34472,6 +34545,12 @@ msgstr ""
 "Du bör hellre arkivera dem efter att ha arkiverat den associerade användaren.\n"
 "\n"
 "Kopplade aktiva användare : %(names)s"
+
+#. module: base
+#: code:addons/base/models/ir_config_parameter.py:0
+#, python-format
+msgid "You cannot delete the %s record."
+msgstr "Du kan inte radera posten, %s ."
 
 #. module: base
 #: code:addons/base/models/res_lang.py:0
@@ -34503,6 +34582,12 @@ msgid ""
 msgstr ""
 "Du kan inte minska antalet decimaler i en valuta som redan används i en "
 "bokföringspost."
+
+#. module: base
+#: code:addons/base/models/ir_config_parameter.py:0
+#, python-format
+msgid "You cannot rename config parameters with keys %s"
+msgstr "Du kan inte byta namn på konfigurationsparametrar med nycklar %s"
 
 #. module: base
 #: code:addons/models.py:0
@@ -35283,3 +35368,10 @@ msgstr "år"
 #: model:res.country,name:base.ax
 msgid "Åland Islands"
 msgstr "Åland"
+
+#. module: base
+#: code:addons/base/models/res_currency.py:0
+#, python-format
+msgid "This currency is set on a company and therefore cannot be deactivated."
+msgstr ""
+"Denna valuta är inställd på ett företag och kan därför inte avaktiveras."

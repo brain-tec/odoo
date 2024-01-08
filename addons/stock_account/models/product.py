@@ -628,6 +628,11 @@ class ProductProduct(models.Model):
             debit_account_id = product_accounts[product.id]['stock_valuation'].id
             credit_account_id = product_accounts[product.id]['stock_input'].id
             value = out_stock_valuation_layer.value
+            if out_stock_valuation_layer.currency_id.compare_amounts(value, 0) < 0:
+                # Swap accounts makes a negative value in accounting
+                debit_account_id = product_accounts[product.id]['stock_output'].id
+                credit_account_id = product_accounts[product.id]['stock_valuation'].id
+
             move_vals = {
                 'journal_id': product_accounts[product.id]['stock_journal'].id,
                 'company_id': self.env.company.id,
@@ -693,6 +698,10 @@ class ProductProduct(models.Model):
         # If there's still quantity to invoice but we're out of candidates, we chose the standard
         # price to estimate the anglo saxon price unit.
         missing = qty_to_invoice - qty_valued
+        for sml in stock_moves.move_line_ids:
+            if not sml.owner_id or sml.owner_id == sml.company_id.partner_id:
+                continue
+            missing -= sml.product_uom_id._compute_quantity(sml.qty_done, self.uom_id, rounding_method='HALF-UP')
         if float_compare(missing, 0, precision_rounding=self.uom_id.rounding) > 0:
             valuation += self.standard_price * missing
 

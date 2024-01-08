@@ -5,6 +5,7 @@
 # Translators:
 # Martin Trigaux, 2021
 # Friederike Fasterling-Nesselbosch, 2022
+# Marianna Ciofani, 2023
 # Sergio Zanchetta <primes2h@gmail.com>, 2023
 # 
 msgid ""
@@ -14,7 +15,7 @@ msgstr ""
 "POT-Creation-Date: 2021-11-16 13:18+0000\n"
 "PO-Revision-Date: 2021-09-14 12:25+0000\n"
 "Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2023\n"
-"Language-Team: Italian (https://www.transifex.com/odoo/teams/41243/it/)\n"
+"Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -26,7 +27,7 @@ msgstr ""
 #: code:addons/pos_sale/static/src/xml/OrderManagementScreen/SaleOrderRow.xml:0
 #, python-format
 msgid "(left:"
-msgstr ""
+msgstr "(sinistra:"
 
 #. module: pos_sale
 #. openerp-web
@@ -103,7 +104,7 @@ msgstr "Cliente"
 #: code:addons/pos_sale/static/src/js/OrderManagementScreen/SaleOrderManagementScreen.js:0
 #, python-format
 msgid "Customer loading error"
-msgstr ""
+msgstr "Errore caricamento cliente"
 
 #. module: pos_sale
 #. openerp-web
@@ -123,7 +124,7 @@ msgstr "Consegnato da"
 #: code:addons/pos_sale/static/src/js/OrderManagementScreen/SaleOrderManagementScreen.js:0
 #, python-format
 msgid "Do you want to load the SN/Lots linked to the Sales Order?"
-msgstr ""
+msgstr "Vuoi caricare i NS/Lotti collegati all'ordine di vendita?"
 
 #. module: pos_sale
 #: model:product.product,name:pos_sale.default_downpayment_product
@@ -235,7 +236,7 @@ msgstr "Nessun prodotto di acconto"
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_crm_team__pos_sessions_open_count
 msgid "Open POS Sessions"
-msgstr "Apri Sessioni POS"
+msgstr "Apri sessioni POS"
 
 #. module: pos_sale
 #: model:ir.actions.act_window,name:pos_sale.pos_session_action_from_crm_team
@@ -259,7 +260,7 @@ msgstr "Linee d'ordine trasferite al punto vendita"
 #. module: pos_sale
 #: model:ir.model.fields.selection,name:pos_sale.selection__sale_report__state__paid
 msgid "Paid"
-msgstr "Pagata"
+msgstr "Pagato"
 
 #. module: pos_sale
 #. openerp-web
@@ -301,7 +302,7 @@ msgstr "Totale ordini POS"
 #. module: pos_sale
 #: model:ir.model.fields.selection,name:pos_sale.selection__sale_report__state__pos_done
 msgid "Posted"
-msgstr "Registrata"
+msgstr "Confermato"
 
 #. module: pos_sale
 #. openerp-web
@@ -344,7 +345,7 @@ msgstr "Preventivo / Ordine"
 #: code:addons/pos_sale/static/src/js/OrderManagementScreen/SaleOrderManagementScreen.js:0
 #, python-format
 msgid "SN/Lots Loading"
-msgstr ""
+msgstr "Caricamento NS/Lotti"
 
 #. module: pos_sale
 #. openerp-web
@@ -352,7 +353,7 @@ msgstr ""
 #: code:addons/pos_sale/static/src/xml/ProductScreen/Orderline.xml:0
 #, python-format
 msgid "SO"
-msgstr ""
+msgstr "Ordine di vendita"
 
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_pos_order__sale_order_count
@@ -367,7 +368,7 @@ msgstr "Vendite"
 #. module: pos_sale
 #: model:ir.model,name:pos_sale.model_sale_report
 msgid "Sales Analysis Report"
-msgstr "Resoconto di analisi delle vendite"
+msgstr "Resoconto di analisi vendite"
 
 #. module: pos_sale
 #. openerp-web
@@ -412,7 +413,7 @@ msgstr "Addetto vendite"
 #. module: pos_sale
 #: model_terms:ir.ui.view,arch_db:pos_sale.crm_team_view_kanban_dashboard
 msgid "Session Running"
-msgstr "Sessione in esecuzione"
+msgstr "Sessione in corso"
 
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_crm_team__pos_order_amount_total
@@ -422,7 +423,7 @@ msgstr "Importo vendite sessione"
 #. module: pos_sale
 #: model_terms:ir.ui.view,arch_db:pos_sale.crm_team_view_kanban_dashboard
 msgid "Sessions Running"
-msgstr "Sessioni in esecuzione"
+msgstr "Sessioni in corso"
 
 #. module: pos_sale
 #. openerp-web
@@ -430,7 +431,7 @@ msgstr "Sessioni in esecuzione"
 #: code:addons/pos_sale/static/src/xml/SetSaleOrderButton.xml:0
 #, python-format
 msgid "Set Sale Order"
-msgstr ""
+msgstr "Configura ordine di vendita"
 
 #. module: pos_sale
 #. openerp-web
@@ -447,11 +448,13 @@ msgid ""
 "Some of the products in your Sale Order are not available in POS, do you "
 "want to import them?"
 msgstr ""
+"Alcuni dei prodotti presenti nel tuo ordine di vendita non sono disponibili "
+"in POS, vuoi importarli?"
 
 #. module: pos_sale
 #: model:ir.model.fields,field_description:pos_sale.field_pos_order_line__sale_order_line_id
 msgid "Source Sale Order Line"
-msgstr ""
+msgstr "Riga ordine di vendita di origine"
 
 #. module: pos_sale
 #. openerp-web
@@ -472,21 +475,20 @@ msgid ""
 "The rate of the currency to the currency of rate applicable at the date of "
 "the order"
 msgstr ""
-"Il tasso di cambio per la valuta con cambio applicabile alla data "
-"dell'ordine"
+"Il tasso di cambio per la valuta con tasso applicabile alla data dell'ordine"
 
 #. module: pos_sale
 #. openerp-web
 #: code:addons/pos_sale/static/src/js/OrderManagementScreen/SaleOrderManagementScreen.js:0
 #, python-format
 msgid "There was a problem in loading the %s customer."
-msgstr ""
+msgstr "SI è verificato un problema durante il caricamento del cliente %s."
 
 #. module: pos_sale
 #: model:ir.model.fields,help:pos_sale.field_pos_config__crm_team_id
 #: model:ir.model.fields,help:pos_sale.field_pos_session__crm_team_id
 msgid "This Point of sale's sales will be related to this Sales Team."
-msgstr "Le vendite di questo POS verranno collegate a questo team."
+msgstr "Le vendite del POS verranno collegate al team."
 
 #. module: pos_sale
 #: model_terms:ir.ui.view,arch_db:pos_sale.pos_config_view_form_pos_sale
@@ -560,3 +562,5 @@ msgid ""
 "You have tried to charge a down payment of %s but only %s remains to be "
 "paid, %s will be applied to the purchase order line."
 msgstr ""
+"Hai provato a caricare un acconto per %s ma resta da pagare solo %s. Alla "
+"riga dell'ordine di acquisto verrà applicato %s. "

@@ -11,6 +11,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models, tools
 from odoo.tools import exception_to_unicode
 from odoo.tools.translate import _
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -80,11 +81,15 @@ class EventMailScheduler(models.Model):
     def _selection_template_model(self):
         return [('mail.template', 'Mail')]
 
+    def _selection_template_model_get_mapping(self):
+        return {'mail': 'mail.template'}
+
     @api.onchange('notification_type')
     def set_template_ref_model(self):
         mail_model = self.env['mail.template']
         if self.notification_type == 'mail':
-            self.template_ref = "{},{}".format('mail.template', mail_model.search([('model', '=', 'event.registration')], limit=1).id)
+            record = mail_model.search([('model', '=', 'event.registration')], limit=1)
+            self.template_ref = "{},{}".format('mail.template', record.id) if record else False
 
     event_id = fields.Many2one('event.event', string='Event', required=True, ondelete='cascade')
     sequence = fields.Integer('Display order')
@@ -144,6 +149,14 @@ class EventMailScheduler(models.Model):
                 scheduler.mail_state = 'scheduled'
             else:
                 scheduler.mail_state = 'running'
+
+    @api.constrains('notification_type', 'template_ref')
+    def _check_template_ref_model(self):
+        model_map = self._selection_template_model_get_mapping()
+        for record in self.filtered('template_ref'):
+            model = model_map[record.notification_type]
+            if record.template_ref._name != model:
+                raise ValidationError(_('The template which is referenced should be coming from %(model_name)s model.', model_name=model))
 
     def execute(self):
         for scheduler in self:
@@ -235,6 +248,7 @@ You receive this email because you are:
     @api.model
     def schedule_communications(self, autocommit=False):
         schedulers = self.search([
+            ('event_id.active', '=', True),
             ('mail_done', '=', False),
             ('scheduled_date', '<=', fields.Datetime.now())
         ])

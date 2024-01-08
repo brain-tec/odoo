@@ -243,7 +243,7 @@ class AccountReconcileModel(models.Model):
     match_partner_category_ids = fields.Many2many('res.partner.category', string='Only Those Partner Categories',
         help='The reconciliation model will only be applied to the selected customer/vendor categories.')
 
-    line_ids = fields.One2many('account.reconcile.model.line', 'model_id')
+    line_ids = fields.One2many('account.reconcile.model.line', 'model_id', copy=True)
     partner_mapping_line_ids = fields.One2many(string="Partner Mapping Lines",
                                                comodel_name='account.reconcile.model.partner.mapping',
                                                inverse_name='model_id',
@@ -643,6 +643,7 @@ class AccountReconcileModel(models.Model):
             AND move.state IN ('posted', 'posted_sent')
             AND account.reconcile IS TRUE
             AND aml.reconciled IS FALSE
+            AND (account.internal_type NOT IN ('receivable', 'payable') OR aml.payment_id IS NULL)
         '''
 
         # Add conditions to handle each of the statement lines we want to match
