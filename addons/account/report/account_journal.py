@@ -13,9 +13,9 @@ class ReportJournal(models.AbstractModel):
         if isinstance(journal_ids, int):
             journal_ids = [journal_ids]
 
-        move_state = ['draft', 'posted']
+        move_state = ['draft', 'posted', 'posted_sent']
         if target_move == 'posted':
-            move_state = ['posted']
+            move_state = ['posted', 'posted_sent']
 
         query_get_clause = self._get_query_get_clause(data)
         params = [tuple(move_state), tuple(journal_ids)] + query_get_clause[2]
@@ -30,9 +30,9 @@ class ReportJournal(models.AbstractModel):
         return self.env['account.move.line'].browse(ids)
 
     def _sum_debit(self, data, journal_id):
-        move_state = ['draft', 'posted']
+        move_state = ['draft', 'posted', 'posted_sent']
         if data['form'].get('target_move', 'all') == 'posted':
-            move_state = ['posted']
+            move_state = ['posted', 'posted_sent']
 
         query_get_clause = self._get_query_get_clause(data)
         params = [tuple(move_state), tuple(journal_id.ids)] + query_get_clause[2]
@@ -42,9 +42,9 @@ class ReportJournal(models.AbstractModel):
         return self.env.cr.fetchone()[0] or 0.0
 
     def _sum_credit(self, data, journal_id):
-        move_state = ['draft', 'posted']
+        move_state = ['draft', 'posted', 'posted_sent']
         if data['form'].get('target_move', 'all') == 'posted':
-            move_state = ['posted']
+            move_state = ['posted', 'posted_sent']
 
         query_get_clause = self._get_query_get_clause(data)
         params = [tuple(move_state), tuple(journal_id.ids)] + query_get_clause[2]
@@ -54,9 +54,9 @@ class ReportJournal(models.AbstractModel):
         return self.env.cr.fetchone()[0] or 0.0
 
     def _get_taxes(self, data, journal_id):
-        move_state = ['draft', 'posted']
+        move_state = ['draft', 'posted', 'posted_sent']
         if data['form'].get('target_move', 'all') == 'posted':
-            move_state = ['posted']
+            move_state = ['posted', 'posted_sent']
 
         query_get_clause = self._get_query_get_clause(data)
         params = [tuple(move_state), tuple(journal_id.ids)] + query_get_clause[2]

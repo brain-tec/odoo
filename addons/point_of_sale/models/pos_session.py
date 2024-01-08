@@ -181,7 +181,11 @@ class PosSession(models.Model):
     def _check_start_date(self):
         for record in self:
             company = record.config_id.journal_id.company_id
-            start_date = record.start_at.date()
+            # We need to convert 'start_at' datetime to the user timezone
+            # before converting it into a date. If not, it can lead to wrong
+            # results
+            start_at = fields.Datetime.context_timestamp(record, record.start_at)
+            start_date = start_at.date()
             if (company.period_lock_date and start_date <= company.period_lock_date) or (company.fiscalyear_lock_date and start_date <= company.fiscalyear_lock_date):
                 raise ValidationError(_("You cannot create a session before the accounting lock date."))
 

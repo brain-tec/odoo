@@ -12,7 +12,8 @@ class AccountMoveReversal(models.TransientModel):
     _description = 'Account Move Reversal'
     _check_company_auto = True
 
-    move_ids = fields.Many2many('account.move', 'account_move_reversal_move', 'reversal_id', 'move_id', domain=[('state', '=', 'posted')])
+    move_ids = fields.Many2many('account.move', 'account_move_reversal_move', 'reversal_id', 'move_id',
+                                domain=[('state', 'in', ['posted', 'posted_sent'])])
     new_move_ids = fields.Many2many('account.move', 'account_move_reversal_new_move', 'reversal_id', 'new_move_id')
     date_mode = fields.Selection(selection=[
             ('custom', 'Specific'),
@@ -76,7 +77,7 @@ class AccountMoveReversal(models.TransientModel):
         res = super(AccountMoveReversal, self).default_get(fields)
         move_ids = self.env['account.move'].browse(self.env.context['active_ids']) if self.env.context.get('active_model') == 'account.move' else self.env['account.move']
 
-        if any(move.state != "posted" for move in move_ids):
+        if any(move.state not in ["posted", "posted_sent"] for move in move_ids):
             raise UserError(_('You can only reverse posted moves.'))
         if 'company_id' in fields:
             res['company_id'] = move_ids.company_id.id or self.env.company.id

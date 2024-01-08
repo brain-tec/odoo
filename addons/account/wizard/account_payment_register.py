@@ -459,7 +459,7 @@ class AccountPaymentRegister(models.TransientModel):
             # Keep lines having a residual amount to pay.
             available_lines = self.env['account.move.line']
             for line in lines:
-                if line.move_id.state != 'posted':
+                if line.move_id.state not in ['posted', 'posted_sent']:
                     raise UserError(_("You can only register payment for posted journal entries."))
 
                 if line.account_internal_type not in ('receivable', 'payable'):

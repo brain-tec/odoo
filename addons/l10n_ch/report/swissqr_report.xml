@@ -81,7 +81,8 @@
                                 <span>Payable by</span>
                             </div>
                             <div class="swissqr_text content">
-                                <span t-field="o.partner_id.commercial_partner_id.name"/><br/>
+                                <t t-if="o.partner_id.parent_id.name"><span t-field="o.partner_id.parent_id.name"/><br/></t>
+                                <t t-if="o.partner_id.name"><span t-field="o.partner_id.name"/><br/></t>
                                 <span t-field="o.partner_id.street"/>
                                 <span t-field="o.partner_id.street2"/><br/>
                                 <t t-if="o.partner_id.country_id.code != 'CH'">
@@ -208,7 +209,8 @@
                                 <span>Payable by</span>
                             </div>
                             <div class="swissqr_text content">
-                                <span t-field="o.partner_id.commercial_partner_id.name"/><br/>
+                                <t t-if="o.partner_id.parent_id.name"><span t-field="o.partner_id.parent_id.name"/><br/></t>
+                                <t t-if="o.partner_id.name"><span t-field="o.partner_id.name"/><br/></t>
                                 <span t-field="o.partner_id.street"> </span>
                                 <span t-field="o.partner_id.street2"/><br/>
                                 <t t-if="o.partner_id.country_id.code != 'CH'">

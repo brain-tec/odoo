@@ -59,9 +59,14 @@ class ResPartner(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_active_pos_session(self):
-        running_sessions = self.env['pos.session'].sudo().search([('state', '!=', 'closed')])
-        if running_sessions:
-            raise UserError(
-                _("You cannot delete contacts while there are active PoS sessions. Close the session(s) %s first.")
-                % ", ".join(session.name for session in running_sessions)
-            )
+        # Modification to allow Contact's deletion with open sessions. We
+        # should only permit that when all current open sessions belong to
+        # pos.configs that are used in the TCPOS process, where POS orders
+        # are created automatically and not with the Odoo POS UI.
+        if not self._context.get('allow_edition'):
+            running_sessions = self.env['pos.session'].sudo().search([('state', '!=', 'closed')])
+            if running_sessions:
+                raise UserError(
+                    _("You cannot delete contacts while there are active PoS sessions. Close the session(s) %s first.")
+                    % ", ".join(session.name for session in running_sessions)
+                )

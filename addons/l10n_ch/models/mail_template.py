@@ -25,7 +25,8 @@ class MailTemplate(models.Model):
             res_ids = [res_ids]
             multi_mode = False
 
-        if self.model == 'account.move':
+        if self.model == 'account.move' and not self._context.get(
+                'skip_qr_isr_attachments'):
             for record in self.env[self.model].browse(res_ids):
                 inv_print_name = self._render_field('report_name', record.ids, compute_lang=True)[record.id]
                 new_attachments = []

@@ -459,13 +459,13 @@ class MrpProduction(models.Model):
         for production in self:
             if not production.state or not production.product_uom_id:
                 production.state = 'draft'
-            elif production.state == 'cancel' or (production.move_finished_ids and all(move.state == 'cancel' for move in production.move_finished_ids)):
+            elif production.state in ('cancel', 'done'):
+                production.state = production.state
+            elif production.move_finished_ids and all(move.state == 'cancel' for move in production.move_finished_ids):
                 production.state = 'cancel'
-            elif (
-                production.state == 'done'
-                or (production.move_raw_ids and all(move.state in ('cancel', 'done') for move in production.move_raw_ids))
-                and all(move.state in ('cancel', 'done') for move in production.move_finished_ids)
-            ):
+            elif production.move_raw_ids and all(move.state == 'cancel' for move in production.move_raw_ids):
+                production.state = 'cancel'
+            elif production.move_raw_ids and all(move.state == 'done' for move in production.move_raw_ids):
                 production.state = 'done'
             elif production.workorder_ids and all(wo_state in ('done', 'cancel') for wo_state in production.workorder_ids.mapped('state')):
                 production.state = 'to_close'

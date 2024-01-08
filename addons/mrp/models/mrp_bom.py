@@ -408,7 +408,7 @@ class MrpBomLine(models.Model):
     def _get_default_product_uom_id(self):
         return self.env['uom.uom'].search([], limit=1, order='id').id
 
-    product_id = fields.Many2one('product.product', 'Component', required=True, check_company=True)
+    product_id = fields.Many2one('product.product', 'Component', required=False, check_company=True)
     product_tmpl_id = fields.Many2one('product.template', 'Product Template', related='product_id.product_tmpl_id', store=True, index=True)
     company_id = fields.Many2one(
         related='bom_id.company_id', store=True, index=True, readonly=True)
@@ -418,7 +418,7 @@ class MrpBomLine(models.Model):
     product_uom_id = fields.Many2one(
         'uom.uom', 'Product Unit of Measure',
         default=_get_default_product_uom_id,
-        required=True,
+        required=False,
         help="Unit of Measure (Unit of Measure) is the unit of measurement for the inventory control", domain="[('category_id', '=', product_uom_category_id)]")
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
     sequence = fields.Integer(
