@@ -3,7 +3,7 @@
     'name': 'Czech - Accounting',
     'icon': '/account/static/description/l10n.png',
     'countries': ['cz'],
-    'version': '1.0',
+    'version': '1.1',
     'author': '26HOUSE (http://www.26house.com)',
     'website': 'https://www.odoo.com/documentation/master/applications/finance/fiscal_localizations.html',
     'category': 'Accounting/Localizations/Account Charts',
@@ -23,6 +23,7 @@ Tento modul definuje:
         'base_iban',
         'base_vat',
     ],
+    'auto_install': ['account'],
     'data': [
         'views/report_invoice.xml',
         'views/res_partner_views.xml',
