@@ -620,7 +620,7 @@ export class OdooEditor extends EventTarget {
                     callback: () => {
                         let html = '\u200B<span contenteditable="false" class="o_stars o_three_stars">';
                         html += Array(3).fill().map(() => '<i class="fa fa-star-o"></i>').join('');
-                        html += '</span>';
+                        html += '</span>\u200B';
                         this.execCommand('insert', parseHTML(this.document, html));
                     },
                 },
@@ -633,7 +633,7 @@ export class OdooEditor extends EventTarget {
                     callback: () => {
                         let html = '\u200B<span contenteditable="false" class="o_stars o_five_stars">';
                         html += Array(5).fill().map(() => '<i class="fa fa-star-o"></i>').join('');
-                        html += '</span>';
+                        html += '</span>\u200B';
                         this.execCommand('insert', parseHTML(this.document, html));
                     },
                 },
@@ -2914,19 +2914,33 @@ export class OdooEditor extends EventTarget {
      */
     _positionTableUi(element) {
         const tableUiContainerRect = this._tableUiContainer.getBoundingClientRect();
+        const isRtl = this.options.direction === 'rtl';
         const isRow = element.nodeName === 'TR';
         const ui = isRow ? this._rowUi : this._columnUi;
         const elementRect = element.getBoundingClientRect();
         const wrappedUi = ui.firstElementChild;
-        const table = getInSelection(this.document, 'table');
+        const table = closestElement(element, 'table');
+        const tableRect = table && table.getBoundingClientRect();
         const resetTableSize = ui.querySelector('.o_reset_table_size');
         if (table && !table.hasAttribute('style')) {
             resetTableSize.classList.add('d-none');
         } else {
             resetTableSize.classList.remove('d-none');
         }
-        ui.style.left = elementRect.left - tableUiContainerRect.left - (isRow ? wrappedUi.clientWidth : 0) + 'px';
-        ui.style.top = elementRect.top - tableUiContainerRect.top - (isRow ? 0 : wrappedUi.clientHeight) + 'px';
+
+        let left;
+        let top;
+        if (isRow && isRtl) {
+            left = tableRect.right - tableUiContainerRect.x;
+        } else if (isRow && !isRtl) {
+            left = elementRect.left - tableUiContainerRect.left - (isRow ? wrappedUi.clientWidth : 0);
+        } else {
+            left = elementRect.left - tableUiContainerRect.left - (isRow ? wrappedUi.clientWidth : 0);
+        }
+        top = elementRect.top - tableUiContainerRect.top - (isRow ? 0 : wrappedUi.clientHeight);
+
+        ui.style.left = left + 'px';
+        ui.style.top = top + 'px';
         wrappedUi.style[isRow ? 'height' : 'width'] = elementRect[isRow ? 'height' : 'width'] + 'px';
 
     }
@@ -3251,6 +3265,7 @@ export class OdooEditor extends EventTarget {
 
     _positionToolbar() {
         const OFFSET = 10;
+        const BASELINE_MARGIN = 5;
         let isBottom = false;
         // Toolbar display must not be none in order to calculate width and height.
         this.toolbar.classList.toggle('d-none', false);
@@ -3282,9 +3297,17 @@ export class OdooEditor extends EventTarget {
         const editorTopPos = Math.max(0, editorRect.top);
         const scrollX = document.defaultView.scrollX;
         const scrollY = document.defaultView.scrollY;
+        const rangeRects = [...range.getClientRects()];
+        // DOMRects on the same line might differ by a few pixels in their
+        // bottom value. We use BASELINE_MARGIN as threshold to differentiate
+        // between DOMRects on the same or different line.
+        const rangeSpansMultipleLines =
+            rangeRects.length > 1 && rangeRects.at(-1).bottom - rangeRects[0].bottom > BASELINE_MARGIN;
 
         // Get left position.
-        let left = correctedSelectionRect.left + OFFSET;
+        let left = isSelForward || rangeSpansMultipleLines ?
+            correctedSelectionRect.left - OFFSET :
+            correctedSelectionRect.right + OFFSET - toolbarWidth;
         // Ensure the toolbar doesn't overflow the editor on the left.
         left = Math.max(OFFSET, left);
         // Ensure the toolbar doesn't overflow the editor on the right.
@@ -3305,20 +3328,26 @@ export class OdooEditor extends EventTarget {
         top += parentContextRect.top;
         this.toolbar.style.top = scrollY + top + 'px';
 
-        // Position the arrow.
-        let arrowLeftPos = (isSelForward && !isSelectionPotentiallyBugged ? correctedSelectionRect.right : correctedSelectionRect.left) - left - OFFSET;
-        // Ensure the arrow doesn't overflow the toolbar on the left.
-        arrowLeftPos = Math.max(OFFSET, arrowLeftPos);
-        // Ensure the arrow doesn't overflow the toolbar on the right.
-        arrowLeftPos = Math.min(toolbarWidth - OFFSET - 20, arrowLeftPos);
-        this.toolbar.style.setProperty('--arrow-left-pos', arrowLeftPos + 'px');
-        const arrowTopPos = isBottom ? -17 : toolbarHeight - 3;
-        this.toolbar.classList.toggle('toolbar-bottom', isBottom);
-        this.toolbar.style.setProperty('--arrow-top-pos', arrowTopPos + 'px');
+        const hasArrow = !(rangeSpansMultipleLines || this.toolbar.classList.contains('oe-media'));
+        this.toolbar.classList.toggle('noarrow', !hasArrow);
 
-        // Calculate toolbar dimensions including the arrow.
-        const toolbarTop = Math.min(top , top + arrowTopPos);
-        const toolbarBottom = Math.max(top + toolbarHeight, top + arrowTopPos + 20);
+        let toolbarTop = top;
+        let toolbarBottom = top + toolbarHeight;
+        if (hasArrow) {
+            // Position the arrow.
+            let arrowLeftPos = (isSelForward && !isSelectionPotentiallyBugged ? correctedSelectionRect.right : correctedSelectionRect.left) - left - OFFSET;
+            // Ensure the arrow doesn't overflow the toolbar on the left.
+            arrowLeftPos = Math.max(OFFSET, arrowLeftPos);
+            // Ensure the arrow doesn't overflow the toolbar on the right.
+            arrowLeftPos = Math.min(toolbarWidth - OFFSET - 20, arrowLeftPos);
+            this.toolbar.style.setProperty('--arrow-left-pos', arrowLeftPos + 'px');
+            const arrowTopPos = isBottom ? -17 : toolbarHeight - 3;
+            this.toolbar.classList.toggle('toolbar-bottom', isBottom);
+            this.toolbar.style.setProperty('--arrow-top-pos', arrowTopPos + 'px');
+            // Calculate toolbar dimensions including the arrow.
+            toolbarTop = Math.min(top, top + arrowTopPos);
+            toolbarBottom = Math.max(toolbarBottom, top + arrowTopPos + 20);
+        }
 
         // Hide toolbar if it overflows the scroll container.
         const distToScrollContainer = Math.min(toolbarTop - scrollContainerRect.top,
@@ -5017,6 +5046,15 @@ export class OdooEditor extends EventTarget {
     _onTableMenuTogglerClick(ev) {
         const uiWrapper = ev.target.closest('.o_table_ui');
         uiWrapper.classList.toggle('o_open');
+
+        if (this.options.direction === 'rtl') {
+            const menuRowEl = this._tableUiContainer.querySelector('.o_row_ui .o_table_ui_menu')
+            const menuRowRect = menuRowEl.getBoundingClientRect();
+            menuRowEl.style.position = 'absolute';
+            menuRowEl.style.left = `-${menuRowRect.width}px`;
+            menuRowEl.style.margin = `0px`;
+        }
+
         if (uiWrapper.classList.contains('o_column_ui')) {
             const columnIndex = getColumnIndex(this._columnUiTarget);
             uiWrapper.querySelector('.o_move_left').classList.toggle('o_hide', columnIndex === 0);
