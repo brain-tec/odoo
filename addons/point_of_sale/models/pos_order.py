@@ -545,11 +545,11 @@ class PosOrder(models.Model):
     def _is_pos_order_paid(self):
         return float_is_zero(self._get_rounded_amount(self.amount_total) - self.amount_paid, precision_rounding=self.currency_id.rounding)
 
-    def _get_rounded_amount(self, amount):
+    def _get_rounded_amount(self, amount, force_round=False):
         # TODO: add support for mix of cash and non-cash payments when both cash_rounding and only_round_cash_method are True
         if self.config_id.cash_rounding \
-           and (not self.config_id.only_round_cash_method \
-           or any(p.payment_method_id.is_cash_count for p in self.payment_ids)):
+           and (force_round or (not self.config_id.only_round_cash_method \
+           or any(p.payment_method_id.is_cash_count for p in self.payment_ids))):
             amount = float_round(amount, precision_rounding=self.config_id.rounding_method.rounding, rounding_method=self.config_id.rounding_method.rounding_method)
         currency = self.currency_id
         return currency.round(amount) if currency else amount
@@ -700,7 +700,7 @@ class PosOrder(models.Model):
         rate = self.currency_id._get_conversion_rate(self.currency_id, company_currency, self.company_id, self.date_order)
 
         # Concert each order line to a dictionary containing business values. Also, prepare for taxes computation.
-        base_line_vals_list = self._prepare_tax_base_line_values(sign=sign)
+        base_line_vals_list = self._prepare_tax_base_line_values(sign=-1)
         tax_results = self.env['account.tax']._compute_taxes(base_line_vals_list)
 
         total_balance = 0.0
@@ -843,7 +843,11 @@ class PosOrder(models.Model):
                 move_lines.append(aml_values)
 
         # Make a move with all the lines.
-        reversal_entry = self.env['account.move'].with_context(default_journal_id=self.config_id.journal_id.id).create({
+        reversal_entry = self.env['account.move'].with_context(
+            default_journal_id=self.config_id.journal_id.id,
+            skip_invoice_sync=True,
+            skip_invoice_line_sync=True,
+        ).create({
             'journal_id': self.config_id.journal_id.id,
             'date': fields.Date.context_today(self),
             'ref': _('Reversal of POS closing entry %s for order %s from session %s', self.session_move_id.name, self.name, self.session_id.name),

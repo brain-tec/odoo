@@ -1901,8 +1901,6 @@ class BaseModel(metaclass=MetaModel):
             query_parts.append(SQL("OFFSET %s", offset))
 
         self._flush_search(domain, fnames_to_flush)
-        if fnames_to_flush:
-            self._read_group_check_field_access_rights(fnames_to_flush)
 
         self.env.cr.execute(SQL("\n").join(query_parts))
         # row_values: [(a1, b1, c1), (a2, b2, c2), ...]
@@ -2098,11 +2096,6 @@ class BaseModel(metaclass=MetaModel):
                 orderby_terms.append(SQL("%s %s %s", sql_expr, sql_direction, sql_nulls))
 
         return SQL(", ").join(orderby_terms), SQL(", ").join(extra_groupby_terms), fnames_used
-
-    @api.model
-    def _read_group_check_field_access_rights(self, field_names):
-        """ Check whether the given field names can be grouped or aggregated. """
-        self.check_field_access_rights('read', field_names)
 
     @api.model
     def _read_group_empty_value(self, spec):
@@ -4016,7 +4009,7 @@ class BaseModel(metaclass=MetaModel):
                 corecord = record.sudo()[name]
                 if corecord:
                     domain = corecord._check_company_domain(company)
-                    if domain and not corecord.filtered_domain(domain):
+                    if domain and not corecord.with_context(active_test=False).filtered_domain(domain):
                         inconsistencies.append((record, name, corecord))
             # The second part of the check (for property / company-dependent fields) verifies that the records
             # linked via those relation fields are compatible with the company that owns the property value, i.e.
@@ -4027,7 +4020,7 @@ class BaseModel(metaclass=MetaModel):
                 corecord = record.sudo()[name]
                 if corecord:
                     domain = corecord._check_company_domain(company)
-                    if domain and not corecord.filtered_domain(domain):
+                    if domain and not corecord.with_context(active_test=False).filtered_domain(domain):
                         inconsistencies.append((record, name, corecord))
 
         if inconsistencies:
