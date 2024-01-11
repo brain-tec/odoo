@@ -3,6 +3,7 @@
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { rpc } from "@web/core/network/rpc";
 import { Deferred } from "@web/core/utils/concurrency";
+import { renderToElement } from "@web/core/utils/render";
 import { useAutofocus, useService } from '@web/core/utils/hooks';
 import { _t } from "@web/core/l10n/translation";
 import { WebsiteDialog } from '@website/components/dialog/dialog';
@@ -110,6 +111,10 @@ export class AddPageTemplatePreview extends Component {
         template: Object,
         animationDelay: Number,
         firstRow: {
+            type: Boolean,
+            optional: true,
+        },
+        isCustom: {
             type: Boolean,
             optional: true,
         },
@@ -227,7 +232,25 @@ export class AddPageTemplatePreview extends Component {
                 holderEl.classList.add("o_ready");
             };
             adjustHeight();
+            if (this.props.isCustom) {
+                this.adaptCustomTemplate(wrapEl);
+            }
         });
+    }
+
+    adaptCustomTemplate(wrapEl) {
+        for (const sectionEl of wrapEl.querySelectorAll("section:not(.o_snippet_desktop_invisible)")) {
+            const style = window.getComputedStyle(sectionEl);
+            if (!style.height || style.display === 'none') {
+                const messageEl = renderToElement("website.AddPageTemplatePreviewDynamicMessage", {
+                    message: _t(
+                        "No preview for the %s block because it is dynamically rendered.",
+                        sectionEl.dataset.name
+                    ),
+                });
+                sectionEl.insertAdjacentElement("beforebegin", messageEl);
+            }
+        }
     }
 
     select() {
@@ -238,13 +261,17 @@ export class AddPageTemplatePreview extends Component {
         for (const previewEl of wrapEl.querySelectorAll(".o_new_page_snippet_preview")) {
             previewEl.remove();
         }
-        this.env.addPage(wrapEl.innerHTML);
+        this.env.addPage(wrapEl.innerHTML, this.props.template.name && _t("Copy of %s", this.props.template.name));
     }
 }
 
 export class AddPageTemplatePreviews extends Component {
     static template = "website.AddPageTemplatePreviews";
     static props = {
+        isCustom: {
+            type: Boolean,
+            optional: true,
+        },
         templates: {
             type: Array,
             element: Object,
@@ -389,7 +416,7 @@ export class AddPageDialog extends Component {
         this.lastTabName = "";
 
         useSubEnv({
-            addPage: sectionsArch => this.addPage(sectionsArch),
+            addPage: (sectionsArch, name) => this.addPage(sectionsArch, name),
             getCssLinkEls: () => this.getCssLinkEls(),
         });
     }
@@ -398,7 +425,7 @@ export class AddPageDialog extends Component {
         this.lastTabName = name;
     }
 
-    async addPage(sectionsArch) {
+    async addPage(sectionsArch, name) {
         const props = this.props;
         this.dialogs.add(AddPageConfirmDialog, {
             onAddPage: () => {
@@ -407,7 +434,7 @@ export class AddPageDialog extends Component {
             },
             websiteId: this.props.websiteId,
             sectionsArch: sectionsArch,
-            name: this.lastTabName,
+            name: name || this.lastTabName,
         });
     }
 

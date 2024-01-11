@@ -24,6 +24,7 @@
         <span class="placeholder position-absolute top-0 w-100 h-100 rounded" t-attf-style="animation-duration: #{props.animationDelay + 500}ms"/>
         <div class="o_button_area position-absolute top-0 w-100 h-100 d-flex align-items-center justify-content-center">
             <button class="btn btn-primary" t-on-click="select">Use this template</button>
+            <div t-if="props.template and props.template.name" class="o_page_name" t-out="props.template.name"/>
         </div>
     </div>
 </t>
@@ -32,6 +33,12 @@
     <t t-call="website.AddPageTemplatePreviewWrapper">
         <div class="mt-5 h1 text-center">Blank Page</div>
     </t>
+</t>
+
+<t t-name="website.AddPageTemplatePreviewDynamicMessage">
+    <section class="o_new_page_snippet_preview container h2">
+        <div class="alert alert-info" t-out="message"/>
+    </section>
 </t>
 
 <t t-name="website.AddPageTemplatePreview">
@@ -43,12 +50,18 @@
 <t t-name="website.AddPageTemplatePreviews">
     <div class="container-fluid py-3 py-xl-4">
         <div class="row g-0">
+            <div t-if="this.props.isCustom and !this.props.templates.length" class="col-12 alert alert-info d-flex">
+                <i class="fa fa-2x fa-info-circle me-3"/>
+                To add your page to this category, open the page properties: "Site -> Properties".<br/>
+                Then, in the Publish tab, enable "New Page Template".
+            </div>
             <t t-foreach="[...this.columns.entries()]" t-as="column" t-key="column[0]">
                 <div class="col-lg-4 col-12">
                     <t t-foreach="[...column[1].entries()]" t-as="template" t-key="template[0]">
                         <AddPageTemplateBlank t-if="template[1].isBlank" firstRow="template_first"/>
                         <AddPageTemplatePreview t-else="" template="template[1]" firstRow="template_first"
                             animationDelay="(column_index * 500) + (template_index * 350)"
+                            isCustom="this.props.isCustom"
                         />
                     </t>
                     <t t-if="column[1].length === 0">
@@ -88,7 +101,7 @@
                         t-att-class="{active: page_first}"
                     >
                         <AddPageTemplatePreviews t-if="page_first or page.isAccessed"
-                            templates="page.props.templates"
+                            templates="page.props.templates" isCustom="page.props.is_custom"
                         />
                     </div>
                 </t>
