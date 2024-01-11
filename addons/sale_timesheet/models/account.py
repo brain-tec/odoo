@@ -37,7 +37,7 @@ class AccountAnalyticLine(models.Model):
             ('is_service', '=', True),
             ('is_expense', '=', False),
             ('state', '=', 'sale'),
-            ('order_partner_id', 'child_of', self.commercial_partner_id.ids)
+            ('order_partner_id', 'child_of', self.sudo().commercial_partner_id.ids)
         ], super()._default_sale_line_domain()])
 
     @api.depends('commercial_partner_id')
@@ -126,7 +126,7 @@ class AccountAnalyticLine(models.Model):
             else:  # then pricing_type = 'employee_rate'
                 map_entry = self.project_id.sale_line_employee_ids.filtered(
                     lambda map_entry:
-                        map_entry.employee_id == self.employee_id
+                        map_entry.employee_id == (self.employee_id or self.env.user.employee_id)
                         and map_entry.sale_line_id.order_partner_id.commercial_partner_id == self.task_id.partner_id.commercial_partner_id
                 )
                 if map_entry:
