@@ -14,7 +14,7 @@ class TestMrpSerialMassProduce(TestMrpCommon):
         """
         mo = self.generate_mo()[0]
         self.assertEqual(mo.state, 'confirmed')
-        res = mo.action_serial_mass_produce_wizard()
+        res = mo.action_mass_produce()
         self.assertFalse(res)
 
     def test_smp_produce_all(self):
@@ -32,15 +32,14 @@ class TestMrpSerialMassProduce(TestMrpCommon):
             })._apply_inventory()
         mo.action_assign()
         # Open the wizard
-        action = mo.action_serial_mass_produce_wizard()
-        wizard = Form(self.env['stock.assign.serial'].with_context(**action['context']))
+        action = mo.action_mass_produce()
+        wizard_form = Form(self.env['mrp.batch.produce'].with_context(**action['context']))
         # Let the wizard generate all serial numbers
-        wizard.next_serial_number = "sn#1"
-        wizard.next_serial_count = count
-        action = wizard.save().generate_serial_numbers_production()
-        # Reload the wizard to apply generated serial numbers
-        wizard = Form(self.env['stock.assign.serial'].browse(action['res_id']))
-        wizard.save().apply()
+        wizard_form.lot_name = "sn#1"
+        wizard_form.lot_qty = count
+        wizard = wizard_form.save()
+        wizard.action_generate_production_text()
+        wizard.action_prepare()
         # Initial MO should have a backorder-sequenced name and be in to_close state
         self.assertTrue("-001" in mo.name)
         self.assertEqual(mo.state, "to_close")
@@ -63,14 +62,14 @@ class TestMrpSerialMassProduce(TestMrpCommon):
                 'location_id': mo.location_src_id.id,
             })._apply_inventory()
         mo.action_assign()
-        action = mo.action_serial_mass_produce_wizard()
-        wizard = Form(self.env['stock.assign.serial'].with_context(**action['context']))
-        wizard.next_serial_number = "sn#1"
-        wizard.next_serial_count = count - 1
-        action = wizard.save().generate_serial_numbers_production()
-        # Reload the wizard to create backorder (applying generated serial numbers)
-        wizard = Form(self.env['stock.assign.serial'].browse(action['res_id']))
-        wizard.save().create_backorder()
+        action = mo.action_mass_produce()
+        wizard = Form(self.env['mrp.batch.produce'].with_context(**action['context']))
+        wizard.lot_name = "sn#1"
+        wizard.lot_qty = count - 1
+        wizard = wizard.save()
+        wizard.action_generate_production_text()
+        wizard.action_prepare()
+
         # Last MO in sequence is the backorder
         bo = mo.procurement_group_id.mrp_production_ids[-1]
         self.assertEqual(bo.backorder_sequence, count)
@@ -109,15 +108,14 @@ class TestMrpSerialMassProduce(TestMrpCommon):
             })._apply_inventory()
         mo.action_assign()
         # Open the wizard
-        action = mo.action_serial_mass_produce_wizard()
-        wizard = Form(self.env['stock.assign.serial'].with_context(**action['context']))
+        action = mo.action_mass_produce()
+        wizard = Form(self.env['mrp.batch.produce'].with_context(**action['context']))
         # Let the wizard generate all serial numbers
-        wizard.next_serial_number = "sn#1"
-        wizard.next_serial_count = count
-        action = wizard.save().generate_serial_numbers_production()
-        # Reload the wizard to apply generated serial numbers
-        wizard = Form(self.env['stock.assign.serial'].browse(action['res_id']))
-        wizard.save().apply()
+        wizard.lot_name = "sn#1"
+        wizard.lot_qty = count
+        wizard = wizard.save()
+        wizard.action_generate_production_text()
+        wizard.action_prepare()
         # 1st & 2nd MO in sequence should have only 1 move lines (1 lot) for product_to_use_1 (2nd in bom)
         self.assertEqual(mo.procurement_group_id.mrp_production_ids[0].move_raw_ids[1].move_lines_count, 1)
         self.assertEqual(mo.procurement_group_id.mrp_production_ids[1].move_raw_ids[1].move_lines_count, 1)
@@ -221,15 +219,16 @@ class TestMrpSerialMassProduce(TestMrpCommon):
 
         mo.action_assign()
         # Open the wizard
-        action = mo.action_serial_mass_produce_wizard()
-        wizard = Form(self.env['stock.assign.serial'].with_context(**action['context']))
+        action = mo.action_mass_produce()
+
+        wizard = Form(self.env['mrp.batch.produce'].with_context(**action['context']))
         # Let the wizard generate all serial numbers
-        wizard.next_serial_number = "sn#3"
-        wizard.next_serial_count = 2
-        action = wizard.save().generate_serial_numbers_production()
+        wizard.lot_name = "sn#3"
+        wizard.lot_qty = 2
+        wizard = wizard.save()
+        wizard.action_generate_production_text()
         # Reload the wizard to apply generated serial numbers
-        wizard = Form(self.env['stock.assign.serial'].browse(action['res_id']))
-        wizard.save().apply()
+        wizard.action_prepare()
         # Initial MO should have a backorder-sequenced name and be in to_close state
         self.assertTrue("-001" in mo.name)
         self.assertEqual(mo.state, "to_close")
@@ -280,15 +279,15 @@ class TestMrpSerialMassProduce(TestMrpCommon):
         self.assertEqual(mo.state, 'confirmed')
 
         # Open the wizard
-        action = mo.action_serial_mass_produce_wizard()
-        wizard = Form(self.env['stock.assign.serial'].with_context(**action['context']))
+        action = mo.button_mark_done()
+        wizard = Form(self.env['mrp.batch.produce'].with_context(**action['context']))
         # Let the wizard generate all serial numbers
-        wizard.next_serial_number = "sn#1"
-        wizard.next_serial_count = mo.product_qty
-        action = wizard.save().generate_serial_numbers_production()
-        # Reload the wizard to apply generated serial numbers
-        wizard = Form(self.env['stock.assign.serial'].browse(action['res_id']))
-        wizard.save().apply()
+        wizard.lot_name = "sn#1"
+        wizard.lot_qty = mo.product_qty
+        wizard = wizard.save()
+        wizard.action_generate_production_text()
+        wizard.action_prepare()
+
         # Initial MO should have a backorder-sequenced name and be in to_close state
         self.assertTrue("-001" in mo.name)
         self.assertEqual(mo.state, "to_close")

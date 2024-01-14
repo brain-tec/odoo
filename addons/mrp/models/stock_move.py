@@ -135,13 +135,13 @@ class StockMove(models.Model):
         help="When activated, then the registration of consumption for that component is recorded manually exclusively.\n"
              "If not activated, and any of the components consumption is edited manually on the manufacturing order, Odoo assumes manual consumption also.")
 
-    @api.depends('state', 'product_id', 'operation_id')
+    @api.depends('product_id')
     def _compute_manual_consumption(self):
         for move in self:
             # when computed for new_id in onchange, use value from _origin
             if move != move._origin:
                 move.manual_consumption = move._origin.manual_consumption
-            elif move.state == 'draft':
+            else:
                 move.manual_consumption = move._is_manual_consumption()
 
     @api.depends('bom_line_id')
@@ -290,6 +290,17 @@ class StockMove(models.Model):
         return super().create(vals_list)
 
     def write(self, vals):
+        if 'product_id' in vals:
+            move_to_unlink = self.filtered(lambda m: m.product_id.id != vals.get('product_id'))
+            other_move = self - move_to_unlink
+            if move_to_unlink.production_id and move_to_unlink.state not in ['draft', 'cancel', 'done']:
+                moves_data = move_to_unlink.copy_data()
+                for move_data in moves_data:
+                    move_data.update({'product_id': vals.get('product_id')})
+                updated_product_move = self.create(moves_data)
+                updated_product_move._action_confirm()
+                move_to_unlink.unlink()
+                self = other_move + updated_product_move
         if self.env.context.get('force_manual_consumption'):
             vals['manual_consumption'] = True
         if 'product_uom_qty' in vals and 'move_line_ids' in vals:

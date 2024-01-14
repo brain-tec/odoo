@@ -35,6 +35,7 @@ export class HierarchyController extends Component {
         this.model = useModel(this.props.Model, {
             resModel: this.props.resModel,
             activeFields,
+            defaultOrderBy: this.props.archInfo.defaultOrder,
             fields,
             parentFieldName,
             childFieldName,
@@ -49,6 +50,7 @@ export class HierarchyController extends Component {
         useViewButtons(this.model, this.rootRef, {
             beforeExecuteAction: this.beforeExecuteActionButton.bind(this),
             afterExecuteAction: this.afterExecuteActionButton.bind(this),
+            reload: this.model.reload.bind(this.model),
         });
         this.searchBarToggler = useSearchBarToggler();
     }

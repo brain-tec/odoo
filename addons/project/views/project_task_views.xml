@@ -365,6 +365,7 @@
                     </div>
                     <group>
                         <group>
+                            <field name="display_in_project" invisible="1" force_save="1"/>
                             <field name="project_id"
                                    domain="[('active', '=', True), '|', ('company_id', '=', False), ('company_id', '=?', company_id)]"
                                    widget="project"
@@ -392,7 +393,7 @@
                                        groups="project.group_project_recurring_tasks"/>
                             </div>
                             <label for="repeat_interval" groups="project.group_project_recurring_tasks" invisible="not recurring_task" />
-                            <div invisible="not recurring_task" class="d-flex" groups="project.group_project_recurring_tasks">
+                            <div invisible="not recurring_task" class="d-flex" groups="project.group_project_recurring_tasks" name="repeat_intervals">
                                 <field name="repeat_interval" required="recurring_task"
                                        class="me-2" style="max-width: 2rem !important;" />
                                 <field name="repeat_unit" required="recurring_task"
@@ -587,7 +588,7 @@
                 >
                     <field name="color"/>
                     <field name="priority"/>
-                    <field name="stage_id" options='{"group_by_tooltip": {"description": "Description"}}'/>
+                    <field name="stage_id"/>
                     <field name="user_ids"/>
                     <field name="partner_id"/>
                     <field name="sequence"/>
@@ -768,9 +769,10 @@
                           color="stage_id" event_limit="5" hide_time="true"
                           event_open_popup="true" quick_create="0" show_unusual_days="True"
                           js_class="project_task_calendar"
-                          scales="month,year">
+                          scales="day,week,month,year">
                     <field name="allow_milestones" invisible="1" />
                     <field name="project_id" widget="project" invisible="context.get('default_project_id', False)"/>
+                    <field name="display_in_project" invisible="1"/>
                     <field name="subtask_count" invisible="1"/>
                     <field name="milestone_id" invisible="not allow_milestones or not milestone_id"/>
                     <field name="user_ids" widget="many2many_avatar_user" invisible="not user_ids"/>

@@ -13,11 +13,7 @@ from odoo.tools.misc import xlsxwriter
 
 class TableExporter(http.Controller):
 
-    @http.route('/web/pivot/check_xlsxwriter', type='json', auth='none')
-    def check_xlsxwriter(self):
-        return xlsxwriter is not None
-
-    @http.route('/web/pivot/export_xlsx', type='http', auth="user")
+    @http.route('/web/pivot/export_xlsx', type='http', auth="user", readonly=True)
     def export_xlsx(self, data, **kw):
         jdata = json.loads(data)
         output = io.BytesIO()

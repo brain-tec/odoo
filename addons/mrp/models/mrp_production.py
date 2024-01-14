@@ -238,7 +238,6 @@ class MrpProduction(models.Model):
     production_capacity = fields.Float(compute='_compute_production_capacity', help="Quantity that can be produced with the current stock of components")
     show_lot_ids = fields.Boolean('Display the serial number shortcut on the moves', compute='_compute_show_lot_ids')
     forecasted_issue = fields.Boolean(compute='_compute_forecasted_issue')
-    show_serial_mass_produce = fields.Boolean('Display the serial mass produce wizard action', compute='_compute_show_serial_mass_produce')
     show_allocation = fields.Boolean(
         compute='_compute_show_allocation',
         help='Technical Field used to decide whether the button "Allocation" should be displayed.')
@@ -246,6 +245,7 @@ class MrpProduction(models.Model):
     show_produce = fields.Boolean(compute='_compute_show_produce', help='Technical field to check if produce button can be shown')
     show_produce_all = fields.Boolean(compute='_compute_show_produce', help='Technical field to check if produce all button can be shown')
     is_outdated_bom = fields.Boolean("Outdated BoM", help="The BoM has been updated since creation of the MO")
+    is_delayed = fields.Boolean(compute='_compute_is_delayed', search='_search_is_delayed')
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per Company!'),
@@ -681,15 +681,6 @@ class MrpProduction(models.Model):
         for order in self:
             order.show_lot_ids = order.state != 'draft' and any(m.product_id.tracking != 'none' for m in order.move_raw_ids)
 
-    @api.depends('state', 'move_raw_ids')
-    def _compute_show_serial_mass_produce(self):
-        self.show_serial_mass_produce = False
-        for order in self:
-            if order.state in ['confirmed', 'progress', 'to_close'] and order.product_id.tracking == 'serial' and \
-                    float_compare(order.product_qty, 1, precision_rounding=order.product_uom_id.rounding) > 0 and \
-                    float_compare(order.qty_producing, order.product_qty, precision_rounding=order.product_uom_id.rounding) < 0:
-                order.show_serial_mass_produce = True
-
     @api.depends('state', 'move_finished_ids')
     def _compute_show_allocation(self):
         self.show_allocation = False
@@ -769,7 +760,7 @@ class MrpProduction(models.Model):
             else:
                 production.move_raw_ids = [Command.delete(move.id) for move in production.move_raw_ids.filtered(lambda m: m.bom_line_id)]
 
-    @api.depends('product_id', 'bom_id', 'product_qty', 'product_uom_id', 'location_dest_id', 'date_finished')
+    @api.depends('product_id', 'bom_id', 'product_qty', 'product_uom_id', 'location_dest_id', 'date_finished', 'move_dest_ids')
     def _compute_move_finished_ids(self):
         for production in self:
             if production.state != 'draft':
@@ -800,6 +791,28 @@ class MrpProduction(models.Model):
             qty_none_or_all = production.qty_producing in (0, production.product_qty)
             production.show_produce_all = state_ok and qty_none_or_all
             production.show_produce = state_ok and not qty_none_or_all
+
+    def _search_is_delayed(self, operator, value):
+        if operator not in ['=', '!='] or not isinstance(value, bool):
+            raise UserError(_('Operation not supported'))
+        if operator != '=':
+            value = not value
+        sub_query = self._search([
+            ('state', 'in', ['confirmed', 'progress', 'to_close']),
+            ('date_deadline', '!=', False),
+            '|',
+                ('date_deadline', '<', self._field_to_sql('mrp_production', 'date_finished')),
+                ('date_deadline', '<', fields.Datetime.now())
+        ])
+        return [('id', 'in' if value else 'not in', sub_query)]
+
+    @api.depends('delay_alert_date', 'state', 'date_deadline', 'date_finished')
+    def _compute_is_delayed(self):
+        for record in self:
+            record.is_delayed = bool(
+                record.state in ['confirmed', 'progress', 'to_close'] and (
+                    record.date_deadline and (record.date_deadline < datetime.datetime.now() or record.date_deadline < record.date_finished))
+            )
 
     @api.onchange('qty_producing', 'lot_producing_id')
     def _onchange_producing(self):
@@ -1539,7 +1552,7 @@ class MrpProduction(models.Model):
                 rounding = move.product_id.uom_id.rounding
                 # extra lines with non-zero qty picked
                 if move.product_id not in expected_qty_by_product and move.picked and not float_is_zero(quantity, precision_rounding=rounding):
-                    issues.append((order, move.product_id, 0.0, quantity))
+                    issues.append((order, move.product_id, quantity, 0.0))
                     continue
                 done_qty_by_product[move.product_id] += quantity if move.picked else 0.0
 
@@ -2078,13 +2091,17 @@ class MrpProduction(models.Model):
 
     def pre_button_mark_done(self):
         self._button_mark_done_sanity_checks()
+        productions_auto = set()
         for production in self:
-            if float_is_zero(production.qty_producing, precision_rounding=production.product_uom_id.rounding):
-                production._set_quantities()
+            if not float_is_zero(production.qty_producing, precision_rounding=production.product_uom_id.rounding):
+                continue
+            if production._auto_production_checks():
+                productions_auto.add(production.id)
+            else:
+                return production.action_mass_produce()
 
-        for production in self:
-            if float_is_zero(production.qty_producing, precision_rounding=production.product_uom_id.rounding):
-                raise UserError(_('The quantity to produce must be positive!'))
+        for production in self.env['mrp.production'].browse(productions_auto):
+            production._set_quantities()
 
         consumption_issues = self._get_consumption_issues()
         if consumption_issues:
@@ -2099,6 +2116,11 @@ class MrpProduction(models.Model):
         self._check_company()
         for order in self:
             order._check_sn_uniqueness()
+
+    def _auto_production_checks(self):
+        self.ensure_one()
+        return all(p.tracking == 'none' for p in self.move_raw_ids.product_id | self.move_finished_ids.product_id)\
+            or self.product_uom_qty == 1 or (self.product_id.tracking != 'serial' and self.reservation_state == 'assigned')
 
     def do_unreserve(self):
         (self.move_finished_ids | self.move_raw_ids).filtered(lambda x: x.state not in ('done', 'cancel'))._do_unreserve()
@@ -2212,36 +2234,16 @@ class MrpProduction(models.Model):
             'target': 'new',
         }
 
-    def action_serial_mass_produce_wizard(self, mark_as_done=False):
+    def action_mass_produce(self):
         self.ensure_one()
         self._check_company()
-        if self.state not in ['confirmed', 'progress', 'to_close']:
+        if self.state not in ['draft', 'confirmed', 'progress', 'to_close'] or\
+                self._auto_production_checks():
             return
-        if self.product_id.tracking != 'serial':
-            return
-        if self.state == 'confirmed' and self.reservation_state != 'assigned':
-            missing_components = {move.product_id for move in self.move_raw_ids if float_compare(move.quantity, move.product_uom_qty, precision_rounding=move.product_uom.rounding) < 0}
-            message = _("Make sure enough quantities of these components are reserved to do the production:\n")
-            message += "\n".join(component.name for component in missing_components)
-            raise UserError(message)
-        next_serial = self.env['stock.lot']._get_next_serial(self.company_id, self.product_id)
-        lot_components = {}
-        for move in self.move_raw_ids:
-            if move.product_id.tracking != 'lot':
-                continue
-            lot_ids = move.move_line_ids.lot_id.ids
-            if not lot_ids:
-                continue
-            lot_components.setdefault(move.product_id, set()).update(lot_ids)
-        multiple_lot_components = set([p for p, l in lot_components.items() if len(l) != 1])
-        action = self.env["ir.actions.actions"]._for_xml_id("mrp.act_assign_serial_numbers_production")
+
+        action = self.env["ir.actions.actions"]._for_xml_id("mrp.action_mrp_batch_produce")
         action['context'] = {
             'default_production_id': self.id,
-            'default_expected_qty': self.product_qty,
-            'default_next_serial_number': next_serial,
-            'default_next_serial_count': self.product_qty - self.qty_produced,
-            'default_multiple_lot_components_names': ",".join(c.display_name for c in multiple_lot_components) if multiple_lot_components else None,
-            'default_mark_as_done': mark_as_done,
         }
         return action
 
@@ -2516,7 +2518,8 @@ class MrpProduction(models.Model):
             if move.has_tracking != 'serial' or not move.picked:
                 continue
             for move_line in move.move_line_ids:
-                if not move_line.picked or float_is_zero(move_line.quantity, precision_rounding=move_line.product_uom_id.rounding):
+                if not move_line.picked or float_is_zero(move_line.quantity, precision_rounding=move_line.product_uom_id.rounding) or\
+                        not move_line.lot_id:
                     continue
                 message = _('The serial number %(number)s used for component %(component)s has already been consumed',
                     number=move_line.lot_id.name,

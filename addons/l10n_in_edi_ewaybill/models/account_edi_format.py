@@ -111,7 +111,7 @@ class AccountEdiFormat(models.Model):
         for line in move.invoice_line_ids.filtered(lambda line: not (line.display_type in ('line_section', 'line_note', 'rounding') or line.product_id.type == "service")):
             goods_line_is_available = True
             if line.product_id:
-                hsn_code = self._l10n_in_edi_extract_digits(line.product_id.l10n_in_hsn_code)
+                hsn_code = self._l10n_in_edi_extract_digits(line.l10n_in_hsn_code)
                 if not hsn_code:
                     error_message.append(_("HSN code is not set in product %s", line.product_id.name))
                 elif not re.match("^[0-9]+$", hsn_code):
@@ -154,7 +154,7 @@ class AccountEdiFormat(models.Model):
             if "312" in error_codes:
                 # E-waybill is already canceled
                 # this happens when timeout from the Government portal but IRN is generated
-                error_message = Markup("<br/>").join([Markup("[%s] %s") % (e.get("code"), e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code'))) for e in error])
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message"))) for e in error])
                 error = []
                 response = {"data": ""}
                 odoobot = self.env.ref("base.partner_root")
@@ -172,7 +172,7 @@ class AccountEdiFormat(models.Model):
                     "blocking_level": "error",
                 }
             elif error:
-                error_message = Markup("<br/>").join([Markup("[%s] %s") % (e.get("code"), e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code'))) for e in error])
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message"))) for e in error])
                 blocking_level = "error"
                 if "404" in error_codes:
                     blocking_level = "warning"
@@ -231,7 +231,7 @@ class AccountEdiFormat(models.Model):
                     "blocking_level": "error",
                 }
             elif error:
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message"))) for e in error])
                 blocking_level = "error"
                 if "404" in error_codes or "waiting" in error_codes:
                     blocking_level = "warning"
@@ -315,7 +315,7 @@ class AccountEdiFormat(models.Model):
                     "blocking_level": "error",
                 }
             elif error:
-                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message") or self._l10n_in_edi_ewaybill_get_error_message(e.get('code')))) for e in error])
+                error_message = "<br/>".join(["[%s] %s" % (e.get("code"), html_escape(e.get("message"))) for e in error])
                 blocking_level = "error"
                 if "404" in error_codes:
                     blocking_level = "warning"
@@ -472,7 +472,7 @@ class AccountEdiFormat(models.Model):
         tax_details_by_code = self._get_l10n_in_tax_details_by_line_code(line_tax_details.get("tax_details", {}))
         line_details = {
             "productName": line.product_id.name,
-            "hsnCode": extract_digits(line.product_id.l10n_in_hsn_code),
+            "hsnCode": extract_digits(line.l10n_in_hsn_code),
             "productDesc": line.name,
             "quantity": line.quantity,
             "qtyUnit": line.product_id.uom_id.l10n_in_code and line.product_id.uom_id.l10n_in_code.split("-")[0] or "OTH",
@@ -542,6 +542,12 @@ class AccountEdiFormat(models.Model):
                 return True
         return False
 
+    def _l10n_in_set_missing_error_message(self, response):
+        for error in response.get('error', []):
+            if error.get('code') and not error.get('message'):
+                error['message'] = self._l10n_in_edi_ewaybill_get_error_message(error.get('code'))
+        return response
+
     @api.model
     def _l10n_in_edi_ewaybill_connect_to_server(self, company, url_path, params):
         user_token = self.env["iap.account"].get("l10n_in_edi")
@@ -558,7 +564,8 @@ class AccountEdiFormat(models.Model):
         endpoint = self.env["ir.config_parameter"].sudo().get_param("l10n_in_edi_ewaybill.endpoint", default_endpoint)
         url = "%s%s" % (endpoint, url_path)
         try:
-            return jsonrpc(url, params=params, timeout=70)
+            response = jsonrpc(url, params=params, timeout=70)
+            return self._l10n_in_set_missing_error_message(response)
         except AccessError as e:
             _logger.warning("Connection error: %s", e.args[0])
             return {
