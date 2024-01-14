@@ -151,7 +151,6 @@ class Http(models.AbstractModel):
             return False
         if getattr(response, 'status_code', 0) != 200 or request.httprequest.headers.get('X-Disable-Tracking') == '1':
             return False
-
         template = False
         if hasattr(response, '_cached_page'):
             website_page, template = response._cached_page, response._cached_template
@@ -161,7 +160,7 @@ class Http(models.AbstractModel):
             template = response.qcontext.get('response_template')
 
         view = template and request.env['website'].get_template(template)
-        if view and view.track:
+        if not request.env.cr.readonly and view and view.track:
             request.env['website.visitor']._handle_webpage_dispatch(website_page)
 
         return False
@@ -231,10 +230,9 @@ class Http(models.AbstractModel):
         request.website = website.with_context(request.context)
 
     @classmethod
-    def _dispatch(cls, endpoint):
-        response = super()._dispatch(endpoint)
+    def _post_dispatch(cls, response):
+        super()._post_dispatch(response)
         cls._register_website_track(response)
-        return response
 
     @classmethod
     def _get_frontend_langs(cls):
@@ -322,13 +320,10 @@ class Http(models.AbstractModel):
             cls._auth_method_public()
         cls._frontend_pre_dispatch()
         cls._handle_debug()
-        request.params = request.get_http_params()
 
         website_page = cls._serve_page()
         if website_page:
             website_page.flatten()
-            cls._register_website_track(website_page)
-            cls._post_dispatch(website_page)
             return website_page
 
         redirect = cls._serve_redirect()

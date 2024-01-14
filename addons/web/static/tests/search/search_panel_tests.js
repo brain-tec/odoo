@@ -2,6 +2,7 @@
 
 import {
     click,
+    drag,
     getFixture,
     makeDeferred,
     nextTick,
@@ -3503,4 +3504,91 @@ QUnit.module("Search", (hooks) => {
             );
         }
     );
+
+    QUnit.test("search panel can be collapsed/expanded", async (assert) => {
+        const { TestComponent } = makeTestComponent();
+        await makeWithSearch({
+            serverData,
+            Component: TestComponent,
+            resModel: "partner",
+            searchViewId: false,
+        });
+
+        assert.containsOnce(target, ".o_search_panel");
+        assert.containsN(target, ".o_search_panel_section", 2);
+
+        await click(target.querySelector(".o_search_panel button"));
+        assert.containsNone(target, ".o_search_panel");
+        assert.containsOnce(target, ".o_search_panel_sidebar");
+        assert.strictEqual(target.querySelector(".o_search_panel_sidebar").textContent, " All ");
+
+        await click(target.querySelector(".o_search_panel_sidebar button"));
+        assert.containsOnce(target, ".o_search_panel");
+
+        await click(target.querySelectorAll(".o_search_panel_category_value header")[1]);
+        await click(target.querySelectorAll(".o_search_panel_filter_value input")[1]);
+
+        await click(target.querySelector(".o_search_panel button"));
+        assert.containsNone(target, ".o_search_panel");
+        assert.containsOnce(target, ".o_search_panel_sidebar");
+        assert.strictEqual(
+            target.querySelector(".o_search_panel_sidebar").textContent,
+            "asusteksilver"
+        );
+    });
+
+    QUnit.test("search panel collapse with multiple filter categories selected", async (assert) => {
+        serverData.views["partner,false,search"] = /* xml */ `
+            <search>
+                <searchpanel>
+                    <field name="company_id" enable_counters="1"/>
+                    <field name="category_id" select="multi" enable_counters="1"/>
+                    <field name="state" select="multi" enable_counters="1"/>
+                </searchpanel>
+            </search>`;
+        const { TestComponent } = makeTestComponent();
+        await makeWithSearch({
+            serverData,
+            Component: TestComponent,
+            resModel: "partner",
+            searchViewId: false,
+        });
+
+        assert.containsOnce(target, ".o_search_panel");
+        assert.containsN(target, ".o_search_panel_section", 3);
+
+        await click(target.querySelectorAll(".o_search_panel_category_value header")[1]);
+        await click(target.querySelectorAll(".o_search_panel_filter_value input")[1]);
+        await click(target.querySelectorAll(".o_search_panel_filter_value input")[2]);
+
+        await click(target.querySelector(".o_search_panel button"));
+        assert.containsNone(target, ".o_search_panel");
+        assert.containsOnce(target, ".o_search_panel_sidebar");
+        assert.strictEqual(
+            target.querySelector(".o_search_panel_sidebar").textContent,
+            "asusteksilverABC"
+        );
+    });
+
+    QUnit.test("search panel should be resizable", async function (assert) {
+        const { TestComponent } = makeTestComponent();
+        await makeWithSearch({
+            serverData,
+            Component: TestComponent,
+            resModel: "partner",
+            searchViewId: false,
+        });
+
+        const searchPanel = target.getElementsByClassName("o_search_panel")[0];
+        const resizeHandle = target.getElementsByClassName("o_search_panel_resize")[0];
+        const originalWidth = searchPanel.offsetWidth;
+
+        const { drop } = await drag(resizeHandle);
+        await drop(target, { x: 500 });
+
+        assert.ok(
+            searchPanel.offsetWidth - originalWidth > 0,
+            "width should be increased after resizing search panel"
+        );
+    });
 });

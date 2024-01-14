@@ -34,16 +34,11 @@ export function OR(...args) {
  */
 function updateFields(record, vals) {
     for (const [fieldName, value] of Object.entries(vals)) {
-        if (record instanceof BaseStore && record.storeReady && fieldName in record.Models) {
-            // "store[Model] =" is considered a Model.insert()
-            record[fieldName].insert(value);
+        const fieldDefinition = record.Model._fields.get(fieldName);
+        if (!fieldDefinition || Record.isAttr(fieldDefinition)) {
+            updateAttr(record, fieldName, value);
         } else {
-            const fieldDefinition = record.Model._fields.get(fieldName);
-            if (!fieldDefinition || Record.isAttr(fieldDefinition)) {
-                updateAttr(record, fieldName, value);
-            } else {
-                updateRelation(record, fieldName, value);
-            }
+            updateRelation(record, fieldName, value);
         }
     }
 }
@@ -170,6 +165,7 @@ function sortRecordList(recordListFullProxy, func) {
     }
 }
 
+/** @returns {import("models").Store} */
 export function makeStore(env) {
     Record.UPDATE = 0;
     const recordByLocalId = reactive(new Map());
@@ -1587,6 +1583,7 @@ export class Record {
      */
     _fields = new Map();
     __uses__ = markRaw(new RecordUses());
+    /** @returns {import("models").Store} */
     get _store() {
         return toRaw(this)._raw.Model._rawStore._proxy;
     }

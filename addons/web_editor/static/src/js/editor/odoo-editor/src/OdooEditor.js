@@ -80,6 +80,7 @@ import {
     prepareUpdate,
     boundariesOut,
     getFontSizeDisplayValue,
+    rightLeafOnlyNotBlockPath,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -872,6 +873,7 @@ export class OdooEditor extends EventTarget {
         if (this.editable.textContent === '' && this.options.placeholder) {
             this._makeHint(this.editable.firstChild, this.options.placeholder, true);
         }
+        this.multiselectionRefresh();
     }
 
     sanitize(target) {
@@ -1824,6 +1826,7 @@ export class OdooEditor extends EventTarget {
     }
 
     _drawClientSelection({ selection, color, clientId, clientName = this.options._t('Anonymous') }) {
+        this._multiselectionRemoveClient(clientId);
         let clientRects;
 
         let anchorNode = this.idFind(selection.anchorNodeOid);
@@ -1909,7 +1912,6 @@ export class OdooEditor extends EventTarget {
             caretElement.style.top = `${rect.y - containerRect.y}px`;
             caretElement.style.left = `${rect.right - containerRect.x}px`;
         }
-        this._multiselectionRemoveClient(clientId);
         this._selectionsContainer.append(caretElement, ...indicators);
     }
 
@@ -2040,12 +2042,16 @@ export class OdooEditor extends EventTarget {
                     // Only add the ZWS at the end if the link is in selection.
                     if (link === linkInSelection) {
                         this._insertLinkZws('end', link);
+                        this.observerUnactive('_setLinkZws_o_link_in_selection');
                         link.classList.add('o_link_in_selection');
+                        this.observerActive('_setLinkZws_o_link_in_selection');
                         didAddZwsInLinkInSelection = true;
                     }
                     const zwsAfter = this._insertLinkZws('after', link);
                     if (!zwsAfter.parentElement || !zwsAfter.parentElement.isContentEditable) {
+                        this.observerUnactive('_setLinkZws_zwsAfter_remove');
                         zwsAfter.remove();
+                        this.observerActive('_setLinkZws_zwsAfter_remove');
                     }
                 }
             }
@@ -2241,7 +2247,11 @@ export class OdooEditor extends EventTarget {
             fillEmpty(closestBlock(start));
         }
         fillEmpty(closestBlock(range.endContainer));
-        const joinWith = range.endContainer;
+        let joinWith = range.endContainer;
+        const rightLeaf = rightLeafOnlyNotBlockPath(joinWith).next().value;
+        if (rightLeaf && rightLeaf.nodeValue === ' ') {
+            joinWith = rightLeaf;
+        }
         // Rejoin blocks that extractContents may have split in two.
         while (
             doJoin &&

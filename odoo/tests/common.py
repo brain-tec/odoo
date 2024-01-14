@@ -81,7 +81,6 @@ except ImportError:
 
 _logger = logging.getLogger(__name__)
 
-
 # backward compatibility: Form was defined in this file
 def __getattr__(name):
     # pylint: disable=import-outside-toplevel
@@ -693,11 +692,55 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
         test_method = getattr(self, '_testMethodName', 'Unknown test method')
         if not hasattr(self, 'profile_session'):
             self.profile_session = profiler.make_session(test_method)
+        if 'db' not in kwargs:
+            kwargs['db'] = self.env.cr.dbname
         return profiler.Profiler(
             description='%s uid:%s %s %s' % (test_method, self.env.user.id, 'warm' if self.warm else 'cold', description),
-            db=self.env.cr.dbname,
             profile_session=self.profile_session,
             **kwargs)
+
+
+class Like:
+    """
+        A string-like object comparable to other strings but where the substring
+        '...' can match anything in the other string.
+
+        Example of usage:
+
+            self.assertEqual("SELECT field1, field2, field3 FROM model", Like('SELECT ... FROM model'))
+            self.assertIn(Like('Company ... (SF)'), ['TestPartner', 'Company 8 (SF)', 'SomeAdress'])
+            self.assertEqual([
+                'TestPartner',
+                'Company 8 (SF)',
+                'Anything else'
+            ], [
+                'TestPartner',
+                Like('Company ... (SF)'),
+                Like('...'),
+            ])
+
+        In case of mismatch, here is an example of error message
+
+            AssertionError: Lists differ: ['TestPartner', 'Company 8 (LA)', 'Anything else'] != ['TestPartner', ~Company ... (SF), ~...]
+
+            First differing element 1:
+            'Company 8 (LA)'
+            ~Company ... (SF)~
+
+            - ['TestPartner', 'Company 8 (LA)', 'Anything else']
+            + ['TestPartner', ~Company ... (SF), ~...]
+
+
+        """
+    def __init__(self, pattern):
+        self.pattern = pattern
+        self.regex = '.*'.join([re.escape(part.strip()) for part in self.pattern.split('...')])
+
+    def __eq__(self, other):
+        return re.fullmatch(self.regex, other.strip(), re.DOTALL)
+
+    def __repr__(self):
+        return repr(self.pattern)
 
 
 savepoint_seq = itertools.count()
@@ -1631,7 +1674,7 @@ class HttpCase(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         if cls.registry_test_mode:
-            cls.registry.enter_test_mode(cls.cr)
+            cls.registry.enter_test_mode(cls.cr, not hasattr(cls, 'readonly_enabled') or cls.readonly_enabled)
             cls.addClassCleanup(cls.registry.leave_test_mode)
 
         ICP = cls.env['ir.config_parameter']
@@ -1821,7 +1864,9 @@ class HttpCase(TransactionCase):
         sup = super()
         _profiler = sup.profile(**kwargs)
         def route_profiler(request):
-            return sup.profile(description=request.httprequest.full_path)
+            _route_profiler = sup.profile(description=request.httprequest.full_path, db=_profiler.db)
+            _profiler.sub_profilers.append(_route_profiler)
+            return _route_profiler
         return profiler.Nested(_profiler, patch('odoo.http.Request._get_profiler_context_manager', route_profiler))
 
     def make_jsonrpc_request(self, route, params=None, headers=None):

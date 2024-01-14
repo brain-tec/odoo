@@ -13,8 +13,27 @@ import {
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
 import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
+import { makeServerError, MockServer } from "@web/../tests/helpers/mock_server";
+import { HierarchyModel } from "@web_hierarchy/hierarchy_model";
+
 
 let serverData, target;
+
+async function enableFilters(hierarchy, filterNames = []) {
+    const filtersSet = new Set(filterNames);
+    const searchItems = hierarchy.env.searchModel.getSearchItems((si) => {
+        return !si.isActive && filtersSet.has(si.name);
+    });
+    for (const searchItem of searchItems) {
+        hierarchy.env.searchModel.toggleSearchItem(searchItem.id);
+    }
+    await nextTick();
+}
+
+async function clearFilters(hierarchy) {
+    hierarchy.env.searchModel.clearQuery();
+    await nextTick();
+}
 
 QUnit.module("Views", (hooks) => {
     hooks.beforeEach(() => {
@@ -120,7 +139,7 @@ QUnit.module("Views", (hooks) => {
             resModel: "hr.employee",
             serverData,
             async mockRPC(route, args) {
-                if (args.method === "read") {
+                if (args.method === "search_read") {
                     assert.step("get child data");
                 } else if (args.method === "read_group") {
                     assert.step("fetch descendants");
@@ -174,7 +193,7 @@ QUnit.module("Views", (hooks) => {
             serverData,
             viewId: 1,
             async mockRPC(route, args) {
-                if (args.method === "read") {
+                if (args.method === "search_read") {
                     assert.step("get child data with descendants");
                 }
             }
@@ -253,13 +272,85 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(target.querySelector(".o_hierarchy_parent_node_container").textContent, "Albert");
     });
 
+    QUnit.test(
+        "Add a custom domain leaf on default state of the view with a globalDomain and search default filters",
+        async function (assert) {
+            serverData.models["hr.employee"].records = [
+                { id: 1, name: "A", parent_id: false, child_ids: [] },
+                { id: 2, name: "B", parent_id: false, child_ids: [3, 4] },
+                { id: 3, name: "C", parent_id: false, child_ids: [] },
+                { id: 4, name: "D", parent_id: 2, child_ids: [5, 6] },
+                { id: 5, name: "E", parent_id: 4, child_ids: [] },
+                { id: 6, name: "F", parent_id: 4, child_ids: [] },
+            ];
+            const hierarchyView = await makeView({
+                type: "hierarchy",
+                resModel: "hr.employee",
+                serverData,
+                arch: serverData.views["hr.employee,false,hierarchy"],
+                searchViewArch: `
+                    <search>
+                        <filter name="exclude_third" domain="[['id', '!=', 3]]"/>
+                        <filter name="find_fifth" domain="[['id', '=', 5]]"/>
+                    </search>
+                `,
+                context: { search_default_exclude_third: true },
+                domain: [["id", "not in", [1, 6]]],
+            });
+            assert.containsN(target, ".o_hierarchy_row", 2);
+            assert.containsN(target, ".o_hierarchy_node", 2);
+            assert.deepEqual(
+                getNodesTextContent(target.querySelectorAll(".o_hierarchy_node_content")),
+                ["B", "DB"],
+                `A (and F) should be hidden by the globalDomain, C is hidden because of the search_default and
+                E (and F) are hidden because the custom domain leaf [['parent_id', '=', false]] is applied
+                since the view is in its "default state", D is shown because the query has only one result (B) so
+                its direct children are also fetched`
+            );
+            await clearFilters(hierarchyView);
+            assert.containsN(target, ".o_hierarchy_row", 1);
+            assert.containsN(target, ".o_hierarchy_node", 2);
+            assert.deepEqual(
+                getNodesTextContent(target.querySelectorAll(".o_hierarchy_node_content")),
+                ["B", "C"],
+                `C is now visible because the search_default was removed. E (and F) are still hidden because
+                the custom domain leaf [['parent_id', '=', false]] is also applied when the search query is
+                empty, D is hidden because the query now has more than one "root" record (B and C)`
+            );
+            await enableFilters(hierarchyView, ["find_fifth"]);
+            assert.containsN(target, ".o_hierarchy_row", 2);
+            assert.containsN(target, ".o_hierarchy_node", 3);
+            assert.deepEqual(
+                getNodesTextContent(target.querySelectorAll(".o_hierarchy_node_content")),
+                ["DB", "ED", "FD"],
+                `E is shown because it matches the query and the custom domain leaf [['parent_id', '=', false]]
+                is not applied since the view is not in its "default state", nor is the query empty. D and F are
+                shown since E was the only record matching the query, so its parent and siblings are fetched`
+            );
+            await clearFilters(hierarchyView);
+            await enableFilters(hierarchyView, ["exclude_third"]);
+            assert.deepEqual(
+                getNodesTextContent(target.querySelectorAll(".o_hierarchy_node_content")),
+                ["B", "DB"],
+                `Manually going back to the "default state" of the view should give the same result as the
+                first load.`
+            );
+        }
+    );
+
     QUnit.test("search record in hierarchy view", async function (assert) {
-        await makeView({
+        const hierarchyView = await makeView({
             type: "hierarchy",
             resModel: "hr.employee",
             serverData,
-            domain: [["id", "=", 4]], // simulate a search
+            arch: serverData.views["hr.employee,false,hierarchy"],
+            searchViewArch: `
+                <search>
+                    <filter name="test_filter" domain="[['id', '=', 4]]"/>
+                </search>
+            `,
         });
+        await enableFilters(hierarchyView, ["test_filter"]);
 
         assert.containsN(target, ".o_hierarchy_row", 2);
         assert.containsN(target, ".o_hierarchy_node", 2);
@@ -271,13 +362,19 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("search record in hierarchy view with child field name defined in the arch", async function (assert) {
-        await makeView({
+        const hierarchyView = await makeView({
             type: "hierarchy",
             resModel: "hr.employee",
             viewId: 1,
             serverData,
-            domain: [["id", "=", 4]], // simulate a search
+            arch: serverData.views["hr.employee,false,hierarchy"],
+            searchViewArch: `
+                <search>
+                    <filter name="test_filter" domain="[['id', '=', 4]]"/>
+                </search>
+            `,
         });
+        await enableFilters(hierarchyView, ["test_filter"]);
 
         assert.containsN(target, ".o_hierarchy_row", 2);
         assert.containsN(target, ".o_hierarchy_node", 2);
@@ -289,12 +386,18 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("fetch parent record", async function (assert) {
-        await makeView({
+        const hierarchyView = await makeView({
             type: "hierarchy",
             resModel: "hr.employee",
             serverData,
-            domain: [["id", "=", 4]], // simulate a search
+            arch: serverData.views["hr.employee,false,hierarchy"],
+            searchViewArch: `
+                <search>
+                    <filter name="test_filter" domain="[['id', '=', 4]]"/>
+                </search>
+            `,
         });
+        await enableFilters(hierarchyView, ["test_filter"]);
 
         assert.containsN(target, ".o_hierarchy_row", 2);
         assert.containsN(target, ".o_hierarchy_node", 2);
@@ -334,12 +437,19 @@ QUnit.module("Views", (hooks) => {
         serverData.models["hr.employee"].records.push(
             { id: 5, name: "Lisa", parent_id: 2, child_ids: []},
         );
-        await makeView({
+        const hierarchyView = await makeView({
             type: "hierarchy",
             resModel: "hr.employee",
             serverData,
-            domain: [["name", "ilike", "l"]], // simulate a search
+            arch: serverData.views["hr.employee,false,hierarchy"],
+            searchViewArch: `
+                <search>
+                    <filter name="test_filter" domain="[['name', 'ilike', 'l']]"/>
+                </search>
+            `,
         });
+        await enableFilters(hierarchyView, ["test_filter"]);
+
         assert.containsOnce(target, ".o_hierarchy_row");
         assert.containsN(target, ".o_hierarchy_node_container", 3);
         assert.deepEqual(
@@ -369,12 +479,19 @@ QUnit.module("Views", (hooks) => {
         serverData.models["hr.employee"].records.push(
             { id: 5, name: "Lisa", parent_id: 2, child_ids: []},
         );
-        await makeView({
+        const hierarchyView = await makeView({
             type: "hierarchy",
             resModel: "hr.employee",
             serverData,
-            domain: [["id", "in", [1, 2, 3, 4, 5]]], // simulate a search
+            arch: serverData.views["hr.employee,false,hierarchy"],
+            searchViewArch: `
+                <search>
+                    <filter name="test_filter" domain="[['id', 'in', [1, 2, 3, 4, 5]]]"/>
+                </search>
+            `,
         });
+        await enableFilters(hierarchyView, ["test_filter"]);
+
         assert.containsOnce(target, ".o_hierarchy_row");
         assert.containsN(target, ".o_hierarchy_node_container", 5);
         assert.containsN(target, ".o_hierarchy_node_container button .fa-chevron-up", 4);
@@ -395,12 +512,19 @@ QUnit.module("Views", (hooks) => {
             { id: 5, name: "Lisa", parent_id: 2, child_ids: []},
         );
         serverData.models["hr.employee"].records.find((rec) => rec.id === 2).child_ids.push(5);
-        await makeView({
+        const hierarchyView = await makeView({
             type: "hierarchy",
             resModel: "hr.employee",
             serverData,
-            domain: [["id", "in", [1, 2, 3, 4, 5]]], // simulate a search
+            arch: serverData.views["hr.employee,false,hierarchy"],
+            searchViewArch: `
+                <search>
+                    <filter name="test_filter" domain="[['id', 'in', [1, 2, 3, 4, 5]]]"/>
+                </search>
+            `,
         });
+        await enableFilters(hierarchyView, ["test_filter"]);
+
         assert.containsOnce(target, ".o_hierarchy_row");
         assert.containsN(target, ".o_hierarchy_node_container", 5);
         assert.containsN(target, ".o_hierarchy_node_container button .fa-chevron-up", 4);
@@ -487,6 +611,64 @@ QUnit.module("Views", (hooks) => {
         );
     });
 
+    QUnit.test("drag and drop record at an invalid position", async function (assert) {
+        assert.expect(8);
+        serverData.views["hr.employee,false,hierarchy"] = serverData.views["hr.employee,false,hierarchy"].replace("<hierarchy>", "<hierarchy draggable='1'>");
+        patchWithCleanup(HierarchyModel.prototype, {
+            async updateParentId(node, parentResId = false) {
+                return this.orm.call(this.resModel, "custom_update_parent_id", [node.resId], {
+                    parent_id: parentResId,
+                });
+            },
+            async updateParentNode() {
+                try {
+                    await super.updateParentNode(...arguments);
+                } catch (error) {
+                    assert.strictEqual(error.data.message, "Prevented update parent");
+                }
+            }
+        });
+        patchWithCleanup(MockServer.prototype, {
+            async _performRPC(route, args) {
+                if (args.method === "custom_update_parent_id") {
+                    throw makeServerError({
+                        type: "ValidationError",
+                        description: "Prevented update parent",
+                    });
+                }
+                return super._performRPC(route, args);
+            }
+        });
+        await makeView({
+            type: "hierarchy",
+            resModel: "hr.employee",
+            serverData,
+        });
+        assert.containsN(target, ".o_hierarchy_row", 2);
+        assert.containsN(target, ".o_hierarchy_node", 3);
+        assert.deepEqual(
+            getNodesTextContent(target.querySelectorAll(".o_hierarchy_node_content")),
+            ["Albert", "GeorgesAlbert", "JosephineAlbert"],
+        );
+
+        const nodeContainers = target.querySelectorAll(".o_hierarchy_node_container");
+        const georgesNodeContainer = nodeContainers[1];
+        assert.strictEqual(georgesNodeContainer.querySelector(".o_hierarchy_node_content").textContent, "GeorgesAlbert");
+
+        await dragAndDrop(
+            georgesNodeContainer.querySelector(".o_hierarchy_node"),
+            ".o_hierarchy_row:first-child"
+        );
+
+        assert.containsN(target, ".o_hierarchy_row", 2);
+        assert.containsN(target, ".o_hierarchy_node", 3);
+        assert.deepEqual(
+            getNodesTextContent(target.querySelectorAll(".o_hierarchy_node_content")),
+            ["Albert", "GeorgesAlbert", "JosephineAlbert"],
+            "The view should not have been modified since the position is invalid"
+        );
+    });
+
     QUnit.test("drag and drop record on sibling node", async function (assert) {
         serverData.views["hr.employee,false,hierarchy"] = serverData.views["hr.employee,false,hierarchy"].replace("<hierarchy>", "<hierarchy draggable='1'>");
         await makeView({
@@ -516,7 +698,7 @@ QUnit.module("Views", (hooks) => {
         assert.containsN(target, ".o_hierarchy_node", 4);
         assert.deepEqual(
             getNodesTextContent(target.querySelectorAll(".o_hierarchy_node_content")),
-            ["Albert", "JosephineAlbert", "LouisJosephine", "GeorgesJosephine"],
+            ["Albert", "JosephineAlbert", "GeorgesJosephine", "LouisJosephine"],
             "Georges should have Josephine as manager"
         );
     });
@@ -799,6 +981,61 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual(
             getNodesTextContent(rowsContent), ["A", "BA", "CA", "EC"],
             "B should be folded and C unfolded"
+        );
+    });
+
+    QUnit.test("drag and drop record and respect ordering", async function (assert) {
+        serverData.views["hr.employee,false,hierarchy"] = serverData.views[
+            "hr.employee,false,hierarchy"
+        ].replace("<hierarchy>", "<hierarchy default_order='name' draggable='1'>");
+        serverData.models["hr.employee"].records = [
+            { id: 1, name: "F", parent_id: false, child_ids: [] },
+            { id: 2, name: "E", parent_id: 6, child_ids: [] },
+            { id: 3, name: "D", parent_id: 6, child_ids: [] },
+            { id: 4, name: "C", parent_id: 6, child_ids: [] },
+            { id: 5, name: "B", parent_id: 6, child_ids: [] },
+            { id: 6, name: "A", parent_id: false, child_ids: [2, 3, 4, 5] },
+        ];
+        await makeView({
+            type: "hierarchy",
+            resModel: "hr.employee",
+            serverData,
+        });
+        assert.containsN(target, ".o_hierarchy_row", 1);
+        await click(target, ".o_hierarchy_node_button.btn-primary");
+
+        assert.containsN(target, ".o_hierarchy_row", 2);
+        assert.containsN(target, ".o_hierarchy_node", 6);
+        assert.deepEqual(
+            getNodesTextContent(target.querySelectorAll(".o_hierarchy_node_content")),
+            ["A", "F", "BA", "CA", "DA", "EA"]
+        );
+
+        let nodeContainers = target.querySelectorAll(".o_hierarchy_node_container");
+        let dNode = nodeContainers[4];
+
+        await dragAndDrop(dNode.querySelector(".o_hierarchy_node"), ".o_hierarchy_row:first-child");
+
+        assert.containsN(target, ".o_hierarchy_row", 2);
+        assert.containsN(target, ".o_hierarchy_node", 6);
+        assert.deepEqual(
+            getNodesTextContent(target.querySelectorAll(".o_hierarchy_node_content")),
+            ["A", "D", "F", "BA", "CA", "EA"]
+        );
+
+        nodeContainers = target.querySelectorAll(".o_hierarchy_node_container");
+        dNode = nodeContainers[1];
+
+        await dragAndDrop(
+            dNode.querySelector(".o_hierarchy_node"),
+            ":nth-child(2 of .o_hierarchy_row)"
+        );
+
+        assert.containsN(target, ".o_hierarchy_row", 2);
+        assert.containsN(target, ".o_hierarchy_node", 6);
+        assert.deepEqual(
+            getNodesTextContent(target.querySelectorAll(".o_hierarchy_node_content")),
+            ["A", "F", "BA", "CA", "DA", "EA"]
         );
     });
 
@@ -1101,4 +1338,118 @@ QUnit.module("Views", (hooks) => {
 
         assert.verifySteps([]);
     });
+
+    QUnit.test(
+        "can properly evaluate invisible elements in a hierarchy card",
+        async function (assert) {
+            await makeView({
+                type: "hierarchy",
+                resModel: "hr.employee",
+                serverData,
+                arch: `
+                    <hierarchy child_field="child_ids">
+                        <field name="child_ids" invisible="1"/>
+                        <templates>
+                            <t t-name="hierarchy-box">
+                                <div class="o_hierarchy_node_header">
+                                    <field name="name"/>
+                                </div>
+                                <div class="o_hierarchy_node_body">
+                                    <field name="parent_id"/>
+                                </div>
+                                <div invisible="not child_ids" class="o_children_text">
+                                    <p>withChildren</p>
+                                </div>
+                            </t>
+                        </templates>
+                    </hierarchy>
+                `,
+            });
+            assert.containsN(target, ".o_hierarchy_row", 2);
+            assert.containsN(target, ".o_hierarchy_node", 3);
+            const nodeContainers = target.querySelectorAll(".o_hierarchy_node_container");
+            const albertNode = nodeContainers[0];
+            const georgesNode = nodeContainers[1];
+            const josephineNode = nodeContainers[2];
+            assert.strictEqual(
+                albertNode.querySelector(".o_hierarchy_node_content").textContent,
+                "AlbertwithChildren"
+            );
+            assert.strictEqual(
+                georgesNode.querySelector(".o_hierarchy_node_content").textContent,
+                "GeorgesAlbert"
+            );
+            assert.strictEqual(
+                josephineNode.querySelector(".o_hierarchy_node_content").textContent,
+                "JosephineAlbertwithChildren"
+            );
+            assert.containsOnce(albertNode, ".o_children_text");
+            assert.containsNone(georgesNode, ".o_children_text");
+            assert.containsOnce(josephineNode, ".o_children_text");
+        }
+    );
+
+    QUnit.test(
+        "Reload the view with the same unfolded records when clicking with a view button",
+        async function (assert) {
+            const hierarchyView = await makeView({
+                type: "hierarchy",
+                resModel: "hr.employee",
+                serverData,
+                arch: `
+                    <hierarchy child_field="child_ids">
+                        <templates>
+                            <t t-name="hierarchy-box">
+                                <div class="o_hierarchy_node_header">
+                                    <field name="name"/>
+                                </div>
+                                <div class="o_hierarchy_node_body">
+                                    <field name="parent_id"/>
+                                </div>
+                                <button type="object" name="prefix_underscore">prefix</button>
+                            </t>
+                        </templates>
+                    </hierarchy>
+                `,
+            });
+            patchWithCleanup(hierarchyView.env.services.action, {
+                doActionButton({ resId, resModel, onClose }) {
+                    const record = serverData.models[resModel].records[resId - 1];
+                    record.name = "_" + record.name;
+                    onClose();
+                },
+            });
+            await click(target, ".o_hierarchy_node_button.btn-primary");
+            assert.containsN(target, ".o_hierarchy_row", 3);
+            assert.containsN(target, ".o_hierarchy_node", 4);
+            assert.deepEqual(
+                getNodesTextContent(target.querySelectorAll(".o_hierarchy_node_content")),
+                [
+                    "Albertprefix",
+                    "GeorgesAlbertprefix",
+                    "JosephineAlbertprefix",
+                    "LouisJosephineprefix",
+                ]
+            );
+            const nodeContainers = target.querySelectorAll(".o_hierarchy_node_container");
+            const georgesNode = nodeContainers[1];
+            assert.strictEqual(
+                georgesNode.querySelector(".o_hierarchy_node_content").textContent,
+                "GeorgesAlbertprefix"
+            );
+            await click(georgesNode, "button[name='prefix_underscore']");
+            assert.containsN(target, ".o_hierarchy_row", 3);
+            assert.containsN(target, ".o_hierarchy_node", 4);
+            assert.deepEqual(
+                getNodesTextContent(target.querySelectorAll(".o_hierarchy_node_content")),
+                [
+                    "Albertprefix",
+                    "_GeorgesAlbertprefix",
+                    "JosephineAlbertprefix",
+                    "LouisJosephineprefix",
+                ],
+                "The view should have reloaded the same data (with Louis)"
+            );
+        }
+    );
 });
