@@ -750,6 +750,33 @@ QUnit.module("Views", (hooks) => {
         assert.containsOnce(target, ".modal .o_form_view .o_field_widget[name=p]");
     });
 
+    QUnit.test("form with o2m having a selection field with fieldDependencies", async function (assert) {
+        class MyField extends CharField {}
+        fieldRegistry.add("my_widget", {
+            component: MyField,
+            fieldDependencies: [{ name: "state", type: "selection" }],
+        });
+        serverData.models.partner.records[1].p = [1];
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="p">
+                        <tree>
+                            <field name="foo" widget="my_widget"/>
+                        </tree>
+                    </field>
+                </form>`,
+            resId: 2,
+        });
+
+        assert.containsOnce(target, ".o_field_widget[name=p] .o_data_row");
+        await click(target.querySelector(".o_field_widget[name=p] .o_field_x2many_list_row_add a"));
+        assert.containsOnce(target, ".modal .o_form_view .o_field_widget[name=p]");
+    });
+
     QUnit.test("can edit o2m field from form when readonly in list view", async function (assert) {
         serverData.models.partner.records[0].product_ids = [37];
         const mockRPC = (route, { method, args }) => {
@@ -13831,4 +13858,47 @@ QUnit.module("Views", (hooks) => {
             );
         }
     );
+
+    QUnit.test("nested form view doesn't parasite the main one", async (assert) => {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="p">
+                        <form>
+                            <div name="button_box" attrs="{'invisible': [('crash','=',False)]}">
+                                <button name="somename" type="object" />
+                            </div>
+                            <field name="p">
+                                <form>
+                                    <footer>
+                                        <button name="someothername" type="object" />
+                                    </footer>
+                                </form>
+                                <tree><field name="display_name" /></tree>
+                            </field>
+                            <footer>
+                                <button name="somename" type="object" />
+                            </footer>
+                        </form>
+                        <tree>
+                            <field name="display_name" />
+                        </tree>
+                    </field>
+                </form>`,
+            resId: 2,
+        });
+        assert.containsOnce(target, ".o_form_view");
+        assert.containsNone(target, ".o-form-buttonbox");
+        await click(target, ".o_field_x2many_list_row_add a");
+        assert.containsOnce(target, ".modal .modal-footer button[name='somename']");
+        assert.containsNone(target, ".modal .modal-footer button[name='someothername']");
+        await click(target, ".modal .o_field_x2many_list_row_add a");
+        assert.containsOnce(
+            target,
+            ".modal:not(.o_inactive_modal) .modal-footer button[name='someothername']"
+        );
+    });
 });
