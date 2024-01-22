@@ -135,6 +135,7 @@ class Partner(models.Model):
     _inherit = ['format.address.mixin', 'image.mixin']
     _name = "res.partner"
     _order = "display_name ASC, id DESC"
+    _allow_sudo_commands = False
 
     def _default_category(self):
         return self.env['res.partner.category'].browse(self._context.get('category_id'))
@@ -967,7 +968,7 @@ class Partner(models.Model):
             'company_name': self.commercial_company_name or '',
         })
         for field in self._formatting_address_fields():
-            args[field] = getattr(self, field) or ''
+            args[field] = self[field] or ''
         if without_company:
             args['company_name'] = ''
         elif self.commercial_company_name:

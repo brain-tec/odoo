@@ -125,6 +125,7 @@ class ViewCustom(models.Model):
     _name = 'ir.ui.view.custom'
     _description = 'Custom View'
     _order = 'create_date desc'  # search(limit=1) should return the last customization
+    _allow_sudo_commands = False
 
     ref_id = fields.Many2one('ir.ui.view', string='Original View', index=True, required=True, ondelete='cascade')
     user_id = fields.Many2one('res.users', string='User', index=True, required=True, ondelete='cascade')
@@ -202,6 +203,7 @@ class View(models.Model):
     _name = 'ir.ui.view'
     _description = 'View'
     _order = "priority,name,id"
+    _allow_sudo_commands = False
 
     name = fields.Char(string='View Name', required=True)
     model = fields.Char(index=True)
@@ -950,7 +952,7 @@ actual arch.
                 # the node has been removed, stop processing here
                 return
 
-        elif tag in {item[0] for item in type(self.env['ir.ui.view']).type.selection}:
+        elif tag in {item[0] for item in self.env['ir.ui.view']._fields['type'].selection}:
             node_info['editable'] = False
 
         if name_manager.validate:
@@ -1125,7 +1127,7 @@ actual arch.
             elif not name:
                 self.handle_view_error(_("Button must have a name"))
             elif type_ == 'object':
-                func = getattr(type(name_manager.Model), name, None)
+                func = getattr(name_manager.Model, name, None)
                 if not func:
                     msg = _(
                         "%(action_name)s is not a valid action on %(model_name)s",
@@ -1141,7 +1143,7 @@ actual arch.
                     )
                     self.handle_view_error(msg)
                 try:
-                    inspect.signature(func).bind(self=name_manager.Model)
+                    inspect.signature(func).bind()
                 except TypeError:
                     msg = "%s on %s has parameters and cannot be called from a button"
                     self.handle_view_error(msg % (name, name_manager.Model._name), raise_exception=False)
