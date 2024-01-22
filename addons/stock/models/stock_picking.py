@@ -41,7 +41,7 @@ class PickingType(models.Model):
         help="This is the default destination location when you create a picking manually with this operation type. It is possible however to change it or that the routes put another location. If it is empty, it will check for the customer location on the partner. ")
     default_location_return_id = fields.Many2one('stock.location', 'Default returns location', check_company=True,
         help="This is the default location for returns created from a picking with this operation type.",
-        domain="[('return_location', '=', 'True')]")
+        domain="[('return_location', '=', True)]")
     code = fields.Selection([('incoming', 'Receipt'), ('outgoing', 'Delivery'), ('internal', 'Internal Transfer')], 'Type of Operation', required=True)
     return_picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type for Returns',
@@ -499,7 +499,7 @@ class Picking(models.Model):
     products_availability_state = fields.Selection([
         ('available', 'Available'),
         ('expected', 'Expected'),
-        ('late', 'Late')], compute='_compute_products_availability')
+        ('late', 'Late')], compute='_compute_products_availability', search='_search_products_availability_state')
 
     picking_properties = fields.Properties(
         'Properties',
@@ -728,6 +728,19 @@ class Picking(models.Model):
     def _compute_return_count(self):
         for picking in self:
             picking.return_count = len(picking.return_ids)
+
+    def _search_products_availability_state(self, operator, value):
+        def _get_comparison_date(move):
+            return move.picking_id.scheduled_date
+
+        if not value:
+            raise UserError(_('Search not supported without a value.'))
+
+        selected_picking_ids = []
+        for picking in self.env['stock.picking'].search([('state', 'not in', ('done', 'cancel', 'draft'))]):
+            if picking.move_ids._match_searched_availability(operator, value, _get_comparison_date):
+                selected_picking_ids.append(picking.id)
+        return [('id', 'in', selected_picking_ids)]
 
     def _get_show_allocation(self, picking_type_id):
         """ Helper method for computing "show_allocation" value.

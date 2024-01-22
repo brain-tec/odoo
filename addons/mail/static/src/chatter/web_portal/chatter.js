@@ -278,6 +278,10 @@ export class Chatter extends Component {
         this.onFollowerChanged(thread);
     }
 
+    onActivityChanged(thread) {
+        this.load(thread);
+    }
+
     async onClickFollow() {
         if (this.state.thread.id) {
             this._follow(this.state.thread);
@@ -297,6 +301,10 @@ export class Chatter extends Component {
         document.body.click(); // hack to close dropdown
         this.reloadParentView();
         this.load(thread, ["followers", "suggestedRecipients"]);
+    }
+
+    onSuggestedRecipientAdded(thread) {
+        this.load(thread, ["suggestedRecipients"]);
     }
 
     onPostCallback() {

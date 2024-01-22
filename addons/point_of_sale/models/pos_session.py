@@ -17,7 +17,7 @@ class PosSession(models.Model):
     _name = 'pos.session'
     _order = 'id desc'
     _description = 'Point of Sale Session'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', "pos.bus.mixin"]
 
     POS_SESSION_STATE = [
         ('opening_control', 'Opening Control'),  # method action_pos_session_open
@@ -33,7 +33,6 @@ class PosSession(models.Model):
         required=True,
         index=True)
     name = fields.Char(string='Session ID', required=True, readonly=True, default='/')
-    access_token = fields.Char('Security Token', copy=False)
     user_id = fields.Many2one(
         'res.users', string='Opened By',
         required=True,
@@ -1205,6 +1204,9 @@ class PosSession(models.Model):
             vals.append(self._get_combine_receivable_vals(payment_method, amounts['amount'], amounts['amount_converted']))
         for payment, amounts in split_receivables_pay_later.items():
             vals.append(self._get_split_receivable_vals(payment, amounts['amount'], amounts['amount_converted']))
+        # Entries related to 'pay_later' payment method- should not be excluded from follow-ups
+        for val in vals:
+            val['blocked'] = False
         MoveLine.create(vals)
         return data
 
@@ -1942,15 +1944,6 @@ class PosSession(models.Model):
 
         return record.id if record else None
 
-    def _ensure_access_token(self):
-        # Code taken from addons/portal/models/portal_mixin.py
-        if not self.access_token:
-            self.sudo().write({'access_token': secrets.token_hex(16)})
-        return self.access_token
-
-    def _get_bus_channel_name(self):
-        return f'pos_session-{self.id}-{self._ensure_access_token()}'
-
     def _get_partners_domain(self):
         return []
 
@@ -2064,12 +2057,16 @@ class PosSession(models.Model):
         convert.convert_file(self.env, 'point_of_sale', 'data/point_of_sale_onboarding.xml', None, mode='init', kind='data')
         shop_config = self.env.ref('point_of_sale.pos_config_main', raise_if_not_found=False)
         if shop_config and shop_config.active:
-            convert.convert_file(self.env, 'point_of_sale', 'data/point_of_sale_onboarding_main_config.xml', None, mode='init', kind='data')
-            if len(shop_config.session_ids.filtered(lambda s: s.state == 'opened')) == 0:
-                self.env['pos.session'].create({
-                    'config_id': shop_config.id,
-                    'user_id': self.env.ref('base.user_admin').id,
-                })
+            self._load_onboarding_main_config_data(shop_config)
+
+    @api.model
+    def _load_onboarding_main_config_data(self, shop_config):
+        convert.convert_file(self.env, 'point_of_sale', 'data/point_of_sale_onboarding_main_config.xml', None, mode='init', kind='data')
+        if len(shop_config.session_ids.filtered(lambda s: s.state == 'opened')) == 0:
+            self.env['pos.session'].create({
+                'config_id': shop_config.id,
+                'user_id': self.env.ref('base.user_admin').id,
+            })
 
     def _after_load_onboarding_data(self):
         config = self.env.ref('point_of_sale.pos_config_main', raise_if_not_found=False)

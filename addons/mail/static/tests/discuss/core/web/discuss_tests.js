@@ -5,12 +5,12 @@ import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 import { start } from "@mail/../tests/helpers/test_utils";
 
 import { triggerHotkey } from "@web/../tests/helpers/utils";
-import { click, contains, insertText } from "@web/../tests/utils";
+import { assertSteps, click, contains, insertText, step } from "@web/../tests/utils";
 
 QUnit.module("discuss");
 
-QUnit.test("can create a new channel [REQUIRE FOCUS]", async (assert) => {
-    await startServer();
+QUnit.test("can create a new channel [REQUIRE FOCUS]", async () => {
+    const pyEnv = await startServer();
     const { openDiscuss } = await start({
         mockRPC(route, params) {
             if (
@@ -21,25 +21,47 @@ QUnit.test("can create a new channel [REQUIRE FOCUS]", async (assert) => {
                     "/web/dataset/call_kw/discuss.channel/channel_create",
                 ].includes(route)
             ) {
-                assert.step(route);
+                step(`${route} - ${JSON.stringify(params)}`);
             }
         },
     });
-    openDiscuss();
+    await assertSteps(['/mail/action - {"init_messaging":true,"failures":true}']);
+    await openDiscuss();
+    await assertSteps([
+        '/mail/data - {"channels_as_member":true}',
+        '/mail/inbox/messages - {"limit":30}',
+    ]);
     await click(".o-mail-DiscussSidebar i[title='Add or join a channel']");
     await contains(".o-mail-DiscussSidebarChannel", { count: 0 });
     await insertText(".o-discuss-ChannelSelector input", "abc");
+    await assertSteps([
+        `/web/dataset/call_kw/discuss.channel/search_read - ${JSON.stringify({
+            model: "discuss.channel",
+            method: "search_read",
+            args: [],
+            kwargs: {
+                limit: 10,
+                domain: [
+                    ["channel_type", "=", "channel"],
+                    ["name", "ilike", "abc"],
+                ],
+                fields: ["name"],
+                context: { lang: "en", tz: "taht", uid: pyEnv.currentUserId },
+            },
+        })}`,
+    ]);
     await click(".o-discuss-ChannelSelector-suggestion");
     await contains(".o-mail-DiscussSidebarChannel");
     await contains(".o-mail-Discuss-content .o-mail-Message", { count: 0 });
-    assert.verifySteps([
-        "/mail/init_messaging",
-        "/mail/load_message_failures",
-        "/discuss/channels",
-        "/mail/inbox/messages",
-        "/web/dataset/call_kw/discuss.channel/search_read",
-        "/web/dataset/call_kw/discuss.channel/channel_create",
-        "/discuss/channel/messages",
+    const channelId = pyEnv["discuss.channel"].search([["name", "=", "abc"]]);
+    await assertSteps([
+        `/web/dataset/call_kw/discuss.channel/channel_create - ${JSON.stringify({
+            model: "discuss.channel",
+            method: "channel_create",
+            args: ["abc", null],
+            kwargs: { context: { lang: "en", tz: "taht", uid: pyEnv.currentUserId } },
+        })}`,
+        `/discuss/channel/messages - {"channel_id":${channelId},"limit":30}`,
     ]);
 });
 
@@ -77,30 +99,40 @@ QUnit.test("can join a chat conversation", async (assert) => {
                 route.startsWith("/discuss") ||
                 ["/web/dataset/call_kw/discuss.channel/channel_get"].includes(route)
             ) {
-                assert.step(route);
+                step(`${route} - ${JSON.stringify(params)}`);
             }
             if (route === "/web/dataset/call_kw/discuss.channel/channel_get") {
                 assert.equal(params.kwargs.partners_to[0], partnerId);
             }
         },
     });
-    openDiscuss();
+    await assertSteps(['/mail/action - {"init_messaging":true,"failures":true}']);
+    await openDiscuss();
+    await assertSteps([
+        '/mail/data - {"channels_as_member":true}',
+        '/mail/inbox/messages - {"limit":30}',
+    ]);
     await click(".o-mail-DiscussSidebar i[title='Start a conversation']");
     await contains(".o-mail-DiscussSidebarChannel", { count: 0 });
     await insertText(".o-discuss-ChannelSelector input", "mario");
     await click(".o-discuss-ChannelSelector-suggestion");
     await contains(".o-discuss-ChannelSelector-suggestion", { count: 0 });
     triggerHotkey("Enter");
+    await assertSteps([
+        `/web/dataset/call_kw/discuss.channel/channel_get - ${JSON.stringify({
+            model: "discuss.channel",
+            method: "channel_get",
+            args: [],
+            kwargs: {
+                partners_to: [partnerId],
+                context: { lang: "en", tz: "taht", uid: pyEnv.currentUserId },
+            },
+        })}`,
+    ]);
     await contains(".o-mail-DiscussSidebarChannel");
     await contains(".o-mail-Message", { count: 0 });
-    assert.verifySteps([
-        "/mail/init_messaging",
-        "/mail/load_message_failures",
-        "/discuss/channels",
-        "/mail/inbox/messages",
-        "/web/dataset/call_kw/discuss.channel/channel_get",
-        "/discuss/channel/messages",
-    ]);
+    const channelId = pyEnv["discuss.channel"].search([["name", "=", "Mitchell Admin, Mario"]]);
+    await assertSteps([`/discuss/channel/messages - {"channel_id":${channelId},"limit":30}`]);
 });
 
 QUnit.test("can create a group chat conversation", async () => {

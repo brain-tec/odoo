@@ -6075,6 +6075,7 @@ QUnit.module("Views", (hooks) => {
         assert.strictEqual(router.current.hash.id, 1);
         await click(target.querySelector(".o_pager_next"));
 
+        await nextTick();
         assert.containsOnce(target, ".o_notification_bar.bg-danger");
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
         assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "2");
@@ -14477,4 +14478,47 @@ QUnit.module("Views", (hooks) => {
             );
         }
     );
+
+    QUnit.test("nested form view doesn't parasite the main one", async (assert) => {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="p">
+                        <form>
+                            <div name="button_box" invisible="crash == True">
+                                <button name="somename" type="object" />
+                            </div>
+                            <field name="p">
+                                <form>
+                                    <footer>
+                                        <button name="someothername" type="object" />
+                                    </footer>
+                                </form>
+                                <tree><field name="display_name" /></tree>
+                            </field>
+                            <footer>
+                                <button name="somename" type="object" />
+                            </footer>
+                        </form>
+                        <tree>
+                            <field name="display_name" />
+                        </tree>
+                    </field>
+                </form>`,
+            resId: 2,
+        });
+        assert.containsOnce(target, ".o_form_view");
+        assert.containsNone(target, ".o-form-buttonbox");
+        await click(target, ".o_field_x2many_list_row_add a");
+        assert.containsOnce(target, ".modal .modal-footer button[name='somename']");
+        assert.containsNone(target, ".modal .modal-footer button[name='someothername']");
+        await click(target, ".modal .o_field_x2many_list_row_add a");
+        assert.containsOnce(
+            target,
+            ".modal:not(.o_inactive_modal) .modal-footer button[name='someothername']"
+        );
+    });
 });

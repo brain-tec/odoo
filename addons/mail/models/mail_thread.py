@@ -29,8 +29,10 @@ from odoo import _, api, exceptions, fields, models, tools, registry, SUPERUSER_
 from odoo.addons.mail.tools.web_push import push_to_end_point, DeviceUnreachableError
 from odoo.exceptions import MissingError, AccessError
 from odoo.osv import expression
-from odoo.tools import is_html_empty, html_escape, html2plaintext, parse_contact_from_email
-from odoo.tools.misc import clean_context, split_every
+from odoo.tools import (
+    is_html_empty, html_escape, html2plaintext, parse_contact_from_email,
+    clean_context, split_every, Query, SQL,
+)
 
 from requests import Session
 
@@ -391,27 +393,17 @@ class MailThread(models.AbstractModel):
 
         return super().get_empty_list_help(help_message)
 
-    def _flush_search(self, domain, fields=None, order=None, seen=None):
-        """ Override _flush_search in order to relax field groups security
-        check on `message_partner_ids`. Accept portal user to filter
-        threads by themselves as followers.
-        """
+    def _condition_to_sql(self, alias: str, fname: str, operator: str, value, query: Query) -> SQL:
         if self.env.su or self.user_has_groups('base.group_user'):
-            return super()._flush_search(domain, fields, order, seen)
-
-        domain = list(domain)
-        for i, leaf in enumerate(domain):
-            if len(leaf) != 3 or leaf[0] != 'message_partner_ids':
-                continue
-            user_partner = self.env.user.partner_id
-            allow_partner_ids = set((user_partner | user_partner.commercial_partner_id).ids)
-            operand = leaf[2] if isinstance(leaf[2], (list, tuple)) else [leaf[2]]
-            if not allow_partner_ids.issuperset(operand):
-                raise AccessError("Portal users can only filter threads by themselves as followers.")
-            # Replace the leaf with dummy leaf
-            domain[i] = expression.TRUE_LEAF
-
-        return super()._flush_search(domain, fields, order, seen)
+            return super()._condition_to_sql(alias, fname, operator, value, query)
+        if fname != 'message_partner_ids':
+            return super()._condition_to_sql(alias, fname, operator, value, query)
+        user_partner = self.env.user.partner_id
+        allow_partner_ids = set((user_partner | user_partner.commercial_partner_id).ids)
+        operand = value if isinstance(value, (list, tuple)) else [value]
+        if not allow_partner_ids.issuperset(operand):
+            raise AccessError("Portal users can only filter threads by themselves as followers.")
+        return super(MailThread, self.sudo())._condition_to_sql(alias, fname, operator, value, query)
 
     # ------------------------------------------------------
     # MODELS / CRUD HELPERS
@@ -763,7 +755,7 @@ class MailThread(models.AbstractModel):
                 bounced_record_done = bounced_record_done or (bounced_record and model.model == bounced_model and bounced_record in rec_bounce_w_email)
 
             # set record as bounced unless already done due to blacklist mixin
-            if bounced_record and not bounced_record_done and issubclass(type(bounced_record), self.pool['mail.thread']):
+            if bounced_record and not bounced_record_done and isinstance(bounced_record, self.pool['mail.thread']):
                 bounced_record._message_receive_bounce(bounced_email, bounced_partner)
 
             if bounced_partner and bounced_message:
@@ -1931,7 +1923,7 @@ class MailThread(models.AbstractModel):
           If no partner has been found and/or created for a given emails its
           matching partner is an empty record.
         """
-        if records and issubclass(type(records), self.pool['mail.thread']):
+        if records and isinstance(records, self.pool['mail.thread']):
             followers = records.mapped('message_partner_ids')
         else:
             followers = self.env['res.partner']
@@ -4449,20 +4441,6 @@ class MailThread(models.AbstractModel):
     # ------------------------------------------------------
     # CONTROLLERS
     # ------------------------------------------------------
-
-    def _get_mail_redirect_suggested_company(self):
-        """ Return the suggested company to be set on the context
-        in case of a mail redirection to the record. To avoid multi
-        company issues when clicking on a link sent by email, this
-        could be called to try setting the most suited company on
-        the allowed_company_ids in the context. This method can be
-        overridden, for example on the hr.leave model, where the
-        most suited company is the company of the leave type, as
-        specified by the ir.rule.
-        """
-        if 'company_id' in self:
-            return self.company_id
-        return False
 
     def _get_mail_thread_data_attachments(self):
         self.ensure_one()

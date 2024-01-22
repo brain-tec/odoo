@@ -548,7 +548,8 @@ QUnit.test("Reaction summary", async () => {
         model: "discuss.channel",
     });
     const { openDiscuss } = await start();
-    openDiscuss(channelId);
+    await openDiscuss(channelId);
+    await contains(".o-mail-Message", { text: "Hello world" });
     const partnerNames = ["Foo", "Bar", "FooBar", "Bob"];
     const expectedSummaries = [
         "Foo has reacted with 😅",
@@ -612,9 +613,9 @@ QUnit.test("basic rendering of message", async () => {
     await contains(".o-mail-Message .o-mail-Message-content", { text: "body" });
     const partner = pyEnv["res.partner"].searchRead([["id", "=", partnerId]])[0];
     await contains(
-        `.o-mail-Message .o-mail-Message-sidebar .o-mail-Message-avatarContainer img.cursor-pointer[data-src='${getOrigin()}/web/image?field=avatar_128&id=${partnerId}&model=res.partner&unique=${encodeURIComponent(
-            partner.write_date
-        )}']`
+        `.o-mail-Message .o-mail-Message-sidebar .o-mail-Message-avatarContainer img.cursor-pointer[data-src='${getOrigin()}/web/image/res.partner/${partnerId}/avatar_128?unique=${
+            DateTime.fromSQL(partner.write_date).ts
+        }']`
     );
     await contains(".o-mail-Message .o-mail-Message-header .o-mail-Message-author.cursor-pointer", {
         text: "Demo",
@@ -1346,7 +1347,7 @@ QUnit.test("Channel should be opened after clicking on its mention", async () =>
     const partnerId = pyEnv["res.partner"].create({});
     pyEnv["discuss.channel"].create({ name: "my-channel" });
     const { openFormView } = await start();
-    openFormView("res.partner", partnerId);
+    await openFormView("res.partner", partnerId);
     await click("button", { text: "Send message" });
     await insertText(".o-mail-Composer-input", "#");
     await click(".o-mail-Composer-suggestion strong", { text: "#my-channel" });

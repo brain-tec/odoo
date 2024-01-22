@@ -73,9 +73,6 @@ patch(MockServer.prototype, {
             const { search_term, after, before, limit } = args;
             return this._mockRouteMailMessageHistory(search_term, after, before, limit);
         }
-        if (route === "/mail/init_messaging") {
-            return this._mockRouteMailInitMessaging();
-        }
         if (route === "/mail/inbox/messages") {
             const { search_term, after, around, before, limit } = args;
             return this._mockRouteMailMessageInbox(search_term, after, before, around, limit);
@@ -98,9 +95,6 @@ patch(MockServer.prototype, {
                 );
             }
             return args;
-        }
-        if (route === "/mail/load_message_failures") {
-            return this._mockRouteMailLoadMessageFailures();
         }
         if (route === "/mail/message/post") {
             const finalData = {};
@@ -206,18 +200,6 @@ patch(MockServer.prototype, {
         return this._mockMailMessageMessageFormat(messageIds);
     },
     /**
-     * Simulates the `/mail/init_messaging` route.
-     *
-     * @private
-     * @returns {Object}
-     */
-    _mockRouteMailInitMessaging() {
-        if (this._mockMailGuest__getGuestFromContext() && this.pyEnv.currentUser?._is_public()) {
-            return this._mockMailGuest__initMessaging();
-        }
-        return this._mockResUsers_InitMessaging([this.pyEnv.currentUserId]);
-    },
-    /**
      * Simulates the `/mail/attachment/delete` route.
      *
      * @private
@@ -312,15 +294,6 @@ patch(MockServer.prototype, {
             return;
         }
         this._mockDiscussChannelMember_NotifyTyping([memberOfCurrentUser.id], is_typing);
-    },
-    /**
-     * Simulates the `/mail/load_message_failures` route.
-     *
-     * @private
-     * @returns {Object[]}
-     */
-    _mockRouteMailLoadMessageFailures() {
-        return this._mockResPartner_MessageFetchFailed(this.pyEnv.currentPartnerId);
     },
     /**
      * Simulates `/mail/link_preview` route.

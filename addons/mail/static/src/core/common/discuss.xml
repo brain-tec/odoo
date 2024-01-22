@@ -48,7 +48,7 @@
                     <div t-if="store.inPublicPage and !ui.isSmall" class="d-flex align-items-center">
                         <img class="o-mail-Discuss-selfAvatar mx-1 rounded-circle o_object_fit_cover flex-shrink-0" alt="Avatar" t-att-src="store.self.avatarUrl"/>
                         <div class="lead fw-bold flex-shrink-1 text-dark">
-                            <t t-if="store.self?.type === 'partner'" t-esc="store.self.name"/>
+                            <t t-if="store.self.type === 'partner'" t-esc="store.self.name"/>
                             <t t-else="">
                                 <AutoresizeInput
                                     className="'py-1'"
@@ -70,7 +70,7 @@
                 </div>
             </div>
         </div>
-        <div t-if="!thread and (!ui.isSmall or store.discuss.activeTab === 'main')" class="d-flex flex-grow-1 align-items-center justify-content-center w-100 bg-view">
+        <div t-if="!thread and (!ui.isSmall or store.discuss.activeTab === 'main') and store.discuss.hasRestoredThread" class="d-flex flex-grow-1 align-items-center justify-content-center w-100 bg-view">
             <h4 class="text-muted"><b><i>No conversation selected.</i></b></h4>
         </div>
     </div>

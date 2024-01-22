@@ -64,8 +64,8 @@ class ReportProjectTaskBurndownChart(models.AbstractModel):
         # Build the query on `project.task` with the domain fields that are linked to that model. This is done in order
         # to be able to reduce the number of treated records in the query by limiting them to the one corresponding to
         # the ids that are returned from this sub query.
-        self.env['project.task']._flush_search(task_specific_domain, fields=self.task_specific_fields)
         project_task_query = self.env['project.task']._where_calc(task_specific_domain)
+        self.env.flush_query(project_task_query.subselect())
         project_task_from_clause, project_task_where_clause, project_task_where_clause_params = project_task_query.get_sql()
 
         # Get the stage_id `ir.model.fields`'s id in order to inject it directly in the query and avoid having to join
@@ -80,7 +80,7 @@ class ReportProjectTaskBurndownChart(models.AbstractModel):
         interval = date_groupby.split(':')[1]
         sql_interval = '1 %s' % interval if interval != 'quarter' else '3 month'
 
-        simple_date_groupby_sql, __ = self._read_group_groupby(f"date:{interval}", main_query)
+        simple_date_groupby_sql = self._read_group_groupby(f"date:{interval}", main_query)
         # Removing unexistant table name from the expression
         simple_date_groupby_sql = self.env.cr.mogrify(simple_date_groupby_sql).decode()
         simple_date_groupby_sql = simple_date_groupby_sql.replace('"project_task_burndown_chart_report".', '')
@@ -246,7 +246,7 @@ class ReportProjectTaskBurndownChart(models.AbstractModel):
 
     def _read_group_select(self, aggregate_spec, query):
         if aggregate_spec == '__count':
-            return SQL("SUM(%s)", SQL.identifier(self._table, '__count')), []
+            return SQL("SUM(%s)", SQL.identifier(self._table, '__count'))
         return super()._read_group_select(aggregate_spec, query)
 
     def _read_group(self, domain, groupby=(), aggregates=(), having=(), offset=0, limit=None, order=None):

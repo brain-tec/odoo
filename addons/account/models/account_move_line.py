@@ -1689,15 +1689,18 @@ class AccountMoveLine(models.Model):
                 line._copy_data_extend_business_fields(values)
         return data_list
 
-    def _field_to_sql(self, alias: str, fname: str, query: (Query | None) = None) -> SQL:
+    def _field_to_sql(self, alias: str, fname: str, query: (Query | None) = None, flush: bool = True) -> SQL:
         if fname != 'payment_date':
-            return super()._field_to_sql(alias, fname, query)
+            return super()._field_to_sql(alias, fname, query, flush)
         return SQL("""
             CASE
-                 WHEN discount_date >= %(today)s THEN discount_date
-                 ELSE date_maturity
-            END
-        """, today=fields.Date.context_today(self))
+                 WHEN %(discount_date)s >= %(today)s THEN %(discount_date)s
+                 ELSE %(date_maturity)s
+            END""",
+            today=fields.Date.context_today(self),
+            discount_date=super()._field_to_sql(alias, "discount_date", query, flush),
+            date_maturity=super()._field_to_sql(alias, "date_maturity", query, flush),
+        )
 
     def _order_field_to_sql(self, alias: str, field_name: str, direction: SQL, nulls: SQL, query: Query) -> SQL:
         if field_name != 'payment_date':
@@ -1715,16 +1718,15 @@ class AccountMoveLine(models.Model):
         # Override in order to not read the complete move line table and use the index instead
         query = self._search(domain, limit=1)
         query.add_where('account.id = account_move_line.account_id')
-        query_str, query_param = query.select()
-        self.env.cr.execute(f"""
+        id_rows = self.env.execute_query(SQL("""
             SELECT account.root_id
               FROM account_account account,
-                   LATERAL ({query_str}) line
+                   LATERAL (%s) line
              WHERE account.company_id IN %s
-        """, query_param + [tuple(self.env.companies.ids)])
+        """, query.select(), tuple(self.env.companies.ids)))
         return {
             root.id: {'id': root.id, 'display_name': root.display_name}
-            for root in self.env['account.root'].browse(id for [id] in self.env.cr.fetchall())
+            for root in self.env['account.root'].browse(id_ for [id_] in id_rows)
         }
 
     # -------------------------------------------------------------------------
@@ -2519,7 +2521,6 @@ class AccountMoveLine(models.Model):
                 skip_invoice_sync=True,
                 skip_invoice_line_sync=True,
                 skip_account_move_synchronization=True,
-                check_move_validity=False,
             )\
             .create(full_reconcile_values_list)
 
@@ -3232,6 +3233,52 @@ class AccountMoveLine(models.Model):
         action['context'] = ctx
         return action
 
+    def action_add_from_catalog(self):
+        """ Will open the catalog view """
+        move = self.env['account.move'].browse(self.env.context.get('order_id'))
+        return move.action_add_from_catalog()
+
+    # -------------------------------------------------------------------------
+    # Catalog
+    # -------------------------------------------------------------------------
+    def _get_product_catalog_lines_data(self, **kwargs):
+        """
+        Return information about account_move_line in `self`.
+        If `self` is empty, this method returns only the default value(s) needed for the product
+        catalog. In this case, the quantity that equals 0.
+        Otherwise, it returns a quantity and a price based on the product of the move line(s) and whether
+        the product is read-only or not.
+        A product is considered read-only if the order is considered read-only or if `self` contains multiple records.
+        Note: This method cannot be called with multiple records that have different products linked.
+
+        :param products: Recordset of `product.product`.
+        :param dict kwargs: additional values given for inherited models.
+        :rtype: dict
+        :return: A dict with the following structure:
+            {
+                'quantity': float,
+                'price': float,
+                'readOnly': bool,
+                'min_qty': int, (optional)
+            }
+        """
+        if self:
+            self.product_id.ensure_one()
+            return {
+                **self[0].move_id._get_product_price_and_data(self[0].product_id),
+                'quantity': sum(
+                    self.mapped(
+                        lambda line: line.product_uom_id._compute_quantity(
+                            qty=line.quantity,
+                            to_unit=line.product_id.uom_id,
+                        )
+                    )
+                ),
+                'readOnly': self.move_id._is_readonly(),
+            }
+        return {
+            'quantity': 0,
+        }
     # -------------------------------------------------------------------------
     # TOOLING
     # -------------------------------------------------------------------------

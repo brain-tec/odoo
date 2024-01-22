@@ -1380,7 +1380,7 @@ Please change the quantity done or the rounding precision of your unit of measur
              ._action_assign()
         if new_push_moves:
             neg_push_moves = new_push_moves.filtered(lambda sm: float_compare(sm.product_uom_qty, 0, precision_rounding=sm.product_uom.rounding) < 0)
-            (new_push_moves - neg_push_moves)._action_confirm()
+            (new_push_moves - neg_push_moves).sudo()._action_confirm()
             # Negative moves do not have any picking, so we should try to merge it with their siblings
             neg_push_moves._action_confirm(merge_into=neg_push_moves.move_orig_ids.move_dest_ids)
 
@@ -1525,7 +1525,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         return self.env['stock.quant']._get_available_quantity(self.product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict, allow_negative=allow_negative)
 
     def _get_available_move_lines_in(self):
-        move_lines_in = self.move_orig_ids.filtered(lambda m: m.state == 'done').mapped('move_line_ids')
+        move_lines_in = self.move_orig_ids.move_dest_ids.move_orig_ids.filtered(lambda m: m.state == 'done').mapped('move_line_ids')
 
         def _keys_in_groupby(ml):
             return (ml.location_dest_id, ml.lot_id, ml.result_package_id, ml.owner_id)
@@ -2208,3 +2208,44 @@ Please change the quantity done or the rounding precision of your unit of measur
         if regex_findall(r'^([0-9]+\.?[0-9]*|\.[0-9]+)$', string):  # Number => Quantity.
             return {'quantity': float(string)}
         return False
+
+    def _match_searched_availability(self, operator, value, get_comparison_date):
+        def get_stock_moves(moves, state):
+            if state == 'available':
+                return moves.filtered(lambda m: m.forecast_availability == m.product_qty and not m.forecast_expected_date)
+            elif state == 'expected':
+                return moves.filtered(lambda m: m.forecast_availability == m.product_qty and m.forecast_expected_date and m.forecast_expected_date <= get_comparison_date(m))
+            elif state == 'late':
+                return moves.filtered(lambda m: m.forecast_availability == m.product_qty and m.forecast_expected_date and m.forecast_expected_date > get_comparison_date(m))
+            elif state == 'unavailable':
+                return moves if moves.filtered(lambda m: m.forecast_availability < m.product_qty) else self.env['stock.move']
+            else:
+                raise UserError(_('Selection not supported.'))
+
+        if not value:
+            raise UserError(_('Search not supported without a value.'))
+
+        # We consider an operation without any moves as always available since there is no goods to wait.
+        if len(self) == 0:
+            is_selected_available = any(val == 'available' for val in value) if isinstance(value, list) else value == 'available'
+            if is_selected_available == (operator in {'=', 'in'}):
+                return True
+            return False
+        moves = self
+        if operator == '=':
+            moves = get_stock_moves(moves, value)
+        elif operator == '!=':
+            moves = moves - get_stock_moves(moves, value)
+        elif operator == 'in':
+            search_moves = self.env['stock.move']
+            for state in value:
+                search_moves |= get_stock_moves(moves, state)
+            moves = search_moves
+        elif operator == 'not in':
+            search_moves = self.env['stock.move']
+            for state in value:
+                search_moves |= get_stock_moves(moves, state)
+            moves = self - search_moves
+        else:
+            raise UserError(_('Operation not supported'))
+        return len(moves) == len(self)

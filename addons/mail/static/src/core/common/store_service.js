@@ -1,10 +1,17 @@
 /* @odoo-module */
 
+import { BaseStore, makeStore, Record } from "@mail/core/common/record";
+
+import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
+import { user } from "@web/core/user";
+import { Deferred } from "@web/core/utils/concurrency";
 import { debounce } from "@web/core/utils/timing";
-import { Record, makeStore, BaseStore } from "./record";
+import { session } from "@web/session";
 
 export class Store extends BaseStore {
+    static FETCH_DATA_DEBOUNCE_DELAY = 1;
+
     /** @returns {import("models").Store|import("models").Store[]} */
     static insert() {
         return super.insert(...arguments);
@@ -186,6 +193,37 @@ export class Store extends BaseStore {
     settings = Record.one("Settings");
     openInviteThread = Record.one("Thread");
 
+    fetchDeferred = new Deferred();
+    fetchParams = {};
+    fetchReadonly = true;
+    fetchSilent = true;
+
+    async fetchData(params, { readonly = true, silent = true } = {}) {
+        Object.assign(this.fetchParams, params);
+        this.fetchReadonly = this.fetchReadonly && readonly;
+        this.fetchSilent = this.fetchSilent && silent;
+        const fetchDeferred = this.fetchDeferred;
+        this._fetchDataDebounced();
+        return fetchDeferred;
+    }
+
+    async _fetchDataDebounced() {
+        const fetchDeferred = this.fetchDeferred;
+        rpc(this.fetchReadonly ? "/mail/data" : "/mail/action", this.fetchParams, {
+            silent: this.fetchSilent,
+        }).then(
+            (data) => {
+                const recordsByModel = this.insert(data, { html: true });
+                fetchDeferred.resolve(recordsByModel);
+            },
+            (error) => fetchDeferred.reject(error)
+        );
+        this.fetchDeferred = new Deferred();
+        this.fetchParams = {};
+        this.fetchReadonly = true;
+        this.fetchSilent = true;
+    }
+
     /**
      * @template T
      * @param {T} dataByModelName
@@ -223,6 +261,10 @@ export class Store extends BaseStore {
 
     setup() {
         super.setup();
+        this._fetchDataDebounced = debounce(
+            this._fetchDataDebounced,
+            Store.FETCH_DATA_DEBOUNCE_DELAY
+        );
         this.updateBusSubscription = debounce(this.updateBusSubscription, 0); // Wait for thread fully inserted.
     }
 
@@ -256,7 +298,12 @@ export const storeService = {
     start(env, services) {
         const store = makeStore(env);
         store.discuss = { activeTab: "main" };
-        store.settings = {};
+        if (session.self) {
+            store.self = session.self;
+        } else {
+            store.self = { id: -1, type: "guest" };
+        }
+        store.settings = user.settings;
         Record.onChange(store.Thread, "records", () => store.updateBusSubscription());
         services.ui.bus.addEventListener("resize", () => {
             store.discuss.activeTab = "main";

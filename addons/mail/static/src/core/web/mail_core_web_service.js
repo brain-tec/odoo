@@ -2,7 +2,6 @@
 
 import { reactive } from "@odoo/owl";
 
-import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 
 export class MailCoreWeb {
@@ -21,9 +20,6 @@ export class MailCoreWeb {
 
     setup() {
         this.messagingService.isReady.then(() => {
-            rpc("/mail/load_message_failures", {}, { silent: true }).then((messages) => {
-                this.store.Message.insert(messages, { html: true });
-            });
             this.busService.subscribe("mail.activity/updated", (payload) => {
                 if (payload.activity_created) {
                     this.store.activityCounter++;
@@ -74,7 +70,7 @@ export class MailCoreWeb {
                     }
                     // move messages from Inbox to history
                     const partnerIndex = message.needaction_partner_ids.find(
-                        (p) => p === this.store.self?.id
+                        (p) => p === this.store.self.id
                     );
                     const index = message.needaction_partner_ids.indexOf(partnerIndex);
                     if (index >= 0) {

@@ -262,7 +262,6 @@ class Users(models.Model):
             "CannedResponse": self.env["mail.shortcode"].sudo().search_read([], ["source", "substitution"]),
             "Store": {
                 "companyName": self.env.company.name,
-                "current_user_id": self.id,
                 "discuss": {
                     "inbox": {"counter": self.partner_id._get_needaction_count(), "id": "inbox", "model": "mail.box"},
                     "starred": {"counter": self.env["mail.message"].search_count([("starred_partner_ids", "in", self.partner_id.ids)]), "id": "starred", "model": "mail.box"},
@@ -273,7 +272,6 @@ class Users(models.Model):
                 "menu_id": self.env["ir.model.data"]._xmlid_to_res_id("mail.menu_root_discuss"),
                 "mt_comment_id": self.env["ir.model.data"]._xmlid_to_res_id("mail.mt_comment"),
                 "odoobot": odoobot.sudo().mail_partner_format().get(odoobot),
-                "self": self.partner_id.mail_partner_format().get(self.partner_id),
                 "settings": self.env["res.users.settings"]._find_or_create_for_user(self)._res_users_settings_format(),
             },
         }

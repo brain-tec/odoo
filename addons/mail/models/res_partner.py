@@ -234,7 +234,6 @@ class Partner(models.Model):
             if 'user' in fields:
                 internal_users = partner.user_ids - partner.user_ids.filtered('share')
                 main_user = internal_users[0] if len(internal_users) > 0 else partner.user_ids[0] if len(partner.user_ids) > 0 else self.env['res.users']
-                data['notification_preference'] = main_user.notification_type
                 data['user'] = {
                     "id": main_user.id,
                     "isInternalUser": not main_user.share,
@@ -244,19 +243,6 @@ class Partner(models.Model):
             data['type'] = "partner"
             partners_format[partner] = data
         return partners_format
-
-    def _message_fetch_failed(self):
-        """Returns first 100 messages, sent by the current partner, that have errors, in
-        the format expected by the web client."""
-        self.ensure_one()
-        notifications = self.env['mail.notification'].search([
-            ('author_id', '=', self.id),
-            ('notification_status', 'in', ('bounce', 'exception')),
-            ('mail_message_id.message_type', '!=', 'user_notification'),
-            ('mail_message_id.model', '!=', False),
-            ('mail_message_id.res_id', '!=', 0),
-        ], limit=100)
-        return notifications.mail_message_id._message_notification_format()
 
     @api.model
     def get_mention_suggestions(self, search, limit=8):

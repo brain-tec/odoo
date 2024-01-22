@@ -436,7 +436,9 @@ def model_create_multi(method):
 
 def call_kw(model, name, args, kwargs):
     """ Invoke the given method ``name`` on the recordset ``model``. """
-    method = getattr(model, name)
+    method = getattr(model, name, None)
+    if not method:
+        raise AttributeError(f"The method '{name}' does not exist on the model '{model._name}'")
     api = getattr(method, '_api', None)
 
     if api:
@@ -485,11 +487,16 @@ class Environment(Mapping):
         """ Reset the transaction, see :meth:`Transaction.reset`. """
         self.transaction.reset()
 
-    def __new__(cls, cr, uid, context, su=False):
+    def __new__(cls, cr, uid, context, su=False, uid_origin=None):
         if uid == SUPERUSER_ID:
             su = True
+
+        # isinstance(uid, int) is to handle `RequestUID`
+        uid_origin = uid_origin or (uid if isinstance(uid, int) else None)
+        if uid_origin == SUPERUSER_ID:
+            uid_origin = None
+
         assert context is not None
-        args = (cr, uid, context, su)
 
         # determine transaction object
         transaction = cr.transaction
@@ -498,13 +505,13 @@ class Environment(Mapping):
 
         # if env already exists, return it
         for env in transaction.envs:
-            if env.args == args:
+            if (env.cr, env.uid, env.context, env.su, env.uid_origin) == (cr, uid, context, su, uid_origin):
                 return env
 
         # otherwise create environment, and add it in the set
         self = object.__new__(cls)
-        args = (cr, uid, frozendict(context), su)
-        self.cr, self.uid, self.context, self.su = self.args = args
+        self.cr, self.uid, self.context, self.su = self.args = (cr, uid, frozendict(context), su)
+        self.uid_origin = uid_origin
 
         self.transaction = self.all = transaction
         self.registry = transaction.registry
@@ -560,7 +567,7 @@ class Environment(Mapping):
         if context is None:
             context = clean_context(self.context) if su and not self.su else self.context
         su = (user is None and self.su) if su is None else su
-        return Environment(cr, uid, context, su)
+        return Environment(cr, uid, context, su, self.uid_origin)
 
     def ref(self, xml_id, raise_if_not_found=True):
         """ Return the record corresponding to the given ``xml_id``.
@@ -820,6 +827,28 @@ class Environment(Mapping):
             self._cache_key[field] = result
             return result
 
+    def flush_query(self, query: SQL):
+        """ Flush all the fields in the metadata of ``query``. """
+        fields_to_flush = tuple(query.to_flush)
+        if not fields_to_flush:
+            return
+
+        fnames_to_flush = defaultdict(OrderedSet)
+        for field in fields_to_flush:
+            fnames_to_flush[field.model_name].add(field.name)
+        for model_name, field_names in fnames_to_flush.items():
+            self[model_name].flush_model(field_names)
+
+    def execute_query(self, query: SQL) -> list[tuple]:
+        """ Execute the given query, fetch its result and it as a list of tuples
+        (or an empty list if no result to fetch).  The method automatically
+        flushes all the fields in the metadata of the query.
+        """
+        assert isinstance(query, SQL)
+        self.flush_query(query)
+        self.cr.execute(query)
+        return self.cr.fetchall() if self.cr.rowcount > 0 else []
+
 
 class Transaction:
     """ A object holding ORM data structures for a transaction. """
@@ -996,8 +1025,7 @@ class Cache(object):
             if record.pool.field_depends_context[field]:
                 # put the values under conventional context key values {'context_key': None},
                 # in order to ease the retrieval of those values to flush them
-                context_none = dict.fromkeys(record.pool.field_depends_context[field])
-                record = record.with_env(record.env(context=context_none))
+                record = record.with_env(record.env(context={}))
                 field_cache = self._set_field_cache(record, field)
                 field_cache[record._ids[0]] = value
         elif record.id in self._dirty.get(field, ()):
@@ -1044,8 +1072,7 @@ class Cache(object):
             if records.pool.field_depends_context[field]:
                 # put the values under conventional context key values {'context_key': None},
                 # in order to ease the retrieval of those values to flush them
-                context_none = dict.fromkeys(records.pool.field_depends_context[field])
-                records = records.with_env(records.env(context=context_none))
+                records = records.with_env(records.env(context={}))
                 field_cache = self._set_field_cache(records, field)
                 field_cache.update(zip(records._ids, values))
         else:
@@ -1259,7 +1286,7 @@ class Cache(object):
                 return
 
             # select the column for the given ids
-            query = Query(env.cr, model._table, model._table_query)
+            query = Query(env, model._table, model._table_sql)
             sql_id = SQL.identifier(model._table, 'id')
             sql_field = model._field_to_sql(model._table, field.name, query)
             if field.type == 'binary' and (

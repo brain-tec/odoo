@@ -304,12 +304,11 @@ class StockQuant(models.Model):
 
     def _read_group_select(self, aggregate_spec, query):
         if aggregate_spec == 'inventory_quantity:sum' and self.env.context.get('inventory_report_mode'):
-            return SQL("NULL"), []
+            return SQL("NULL")
         if aggregate_spec == 'available_quantity:sum':
-            sql_quantity, quantity_fnames = self._read_group_select('quantity:sum', query)
-            sql_reserved_quantity, reserved_quantity_fnames = self._read_group_select('reserved_quantity:sum', query)
-            sql_expr = SQL("%s - %s", sql_quantity, sql_reserved_quantity)
-            return sql_expr, quantity_fnames + reserved_quantity_fnames
+            sql_quantity = self._read_group_select('quantity:sum', query)
+            sql_reserved_quantity = self._read_group_select('reserved_quantity:sum', query)
+            return SQL("%s - %s", sql_quantity, sql_reserved_quantity)
         if aggregate_spec == 'inventory_quantity_auto_apply:sum':
             return self._read_group_select('quantity:sum', query)
         return super()._read_group_select(aggregate_spec, query)
@@ -1208,6 +1207,7 @@ class StockQuant(models.Model):
             'state': 'confirmed',
             'location_id': location_id.id,
             'location_dest_id': location_dest_id.id,
+            'restrict_partner_id':  self.owner_id.id,
             'is_inventory': True,
             'picked': True,
             'move_line_ids': [(0, 0, {

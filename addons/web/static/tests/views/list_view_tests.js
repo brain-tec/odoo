@@ -18226,30 +18226,6 @@ QUnit.module("Views", (hooks) => {
         assert.deepEqual([...getPagerValue(target), getPagerLimit(target)], [1, 2]);
     });
 
-    QUnit.test("list with group_by_no_leaf and group by", async function (assert) {
-        assert.expect(4);
-
-        await makeView({
-            type: "list",
-            resModel: "foo",
-            serverData,
-            arch: '<tree expand="1"><field name="foo"/></tree>',
-            groupBy: ["currency_id"],
-            context: { group_by_no_leaf: true },
-        });
-
-        const groups = target.querySelectorAll(".o_group_name");
-        const groupsRecords = [...target.querySelectorAll(".o_data_row .o_data_cell")];
-        assert.strictEqual(groups.length, 2, "There should be 2 groups");
-        assert.strictEqual(groups[0].textContent, "USD (3) ", "Second group should have 3 records");
-        assert.strictEqual(groups[1].textContent, "EUR (1) ", "First group should have 1 record");
-        assert.deepEqual(
-            groupsRecords.map((groupEl) => groupEl.textContent),
-            ["blip", "gnap", "blip", "yop"],
-            "Groups should contains correct records"
-        );
-    });
-
     QUnit.test("sort on a non sortable field with allow_order option", async function (assert) {
         serverData.models.foo.records = [{ bar: true }, { bar: false }, { bar: true }];
 
@@ -19847,5 +19823,29 @@ QUnit.module("Views", (hooks) => {
         assert.containsNone(target, ".o_view_nocontent");
         assert.containsOnce(target, ".o_data_row");
         assert.containsOnce(target, ".o_data_row.o_selected_row");
+    });
+
+    QUnit.test("Adding new record in list view with open form view button", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree editable="top" open_form_view="1"><field name="foo"/></tree>',
+            selectRecord: (resId, options) => {
+                assert.step(`switch to form - resId: ${resId} activeIds: ${options.activeIds}`);
+            },
+        });
+
+        await clickAdd();
+        assert.containsN(
+            target,
+            "td.o_list_record_open_form_view",
+            5,
+            "button to open form view should be present on each row"
+        );
+
+        await editInput(target, ".o_field_widget[name=foo] input", "new");
+        await click(target.querySelector("td.o_list_record_open_form_view"));
+        assert.verifySteps(["switch to form - resId: 5 activeIds: 5,1,2,3,4"]);
     });
 });

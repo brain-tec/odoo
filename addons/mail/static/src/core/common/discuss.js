@@ -14,7 +14,6 @@ import {
 
 import {
     Component,
-    onWillStart,
     onMounted,
     onWillUnmount,
     useChildSubEnv,
@@ -91,7 +90,6 @@ export class Discuss extends Component {
             },
             () => [this.store.discuss.inbox.counter]
         );
-        onWillStart(() => this.messaging.isReady);
         onMounted(() => (this.store.discuss.isActive = true));
         onWillUnmount(() => (this.store.discuss.isActive = false));
     }
@@ -121,7 +119,7 @@ export class Discuss extends Component {
 
     async renameGuest(name) {
         const newName = name.trim();
-        if (this.store.self?.name !== newName) {
+        if (this.store.self.name !== newName) {
             await this.personaService.updateGuestName(this.store.self, newName);
         }
     }

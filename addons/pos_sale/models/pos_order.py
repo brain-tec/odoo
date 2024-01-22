@@ -113,6 +113,36 @@ class PosOrder(models.Model):
             'domain': [('id', 'in', linked_orders.ids)],
         }
 
+    def _get_fields_for_order_line(self):
+        fields = super(PosOrder, self)._get_fields_for_order_line()
+        fields.extend([
+            'sale_order_origin_id',
+            'down_payment_details',
+            'sale_order_line_id',
+        ])
+        return fields
+
+    def _prepare_order_line(self, order_line):
+        order_line = super()._prepare_order_line(order_line)
+        if order_line.get('sale_order_origin_id'):
+            order_line['sale_order_origin_id'] = {
+                'id': order_line['sale_order_origin_id'][0],
+                'name': order_line['sale_order_origin_id'][1],
+            }
+        if order_line.get('sale_order_line_id'):
+            order_line['sale_order_line_id'] = {
+                'id': order_line['sale_order_line_id'][0],
+            }
+        return order_line
+
+    def _get_invoice_lines_values(self, line_values, pos_line):
+        inv_line_vals = super()._get_invoice_lines_values(line_values, pos_line)
+
+        if pos_line.sale_order_origin_id:
+            origin_line = pos_line.sale_order_line_id
+            origin_line._set_analytic_distribution(inv_line_vals)
+
+        return inv_line_vals
 
 class PosOrderLine(models.Model):
     _inherit = 'pos.order.line'
