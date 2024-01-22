@@ -743,7 +743,7 @@ class MailThread(models.AbstractModel):
                 bounced_record_done = bounced_record_done or (bounced_record and model.model == bounced_model and bounced_record in rec_bounce_w_email)
 
             # set record as bounced unless already done due to blacklist mixin
-            if bounced_record and not bounced_record_done and issubclass(type(bounced_record), self.pool['mail.thread']):
+            if bounced_record and not bounced_record_done and isinstance(bounced_record, self.pool['mail.thread']):
                 bounced_record._message_receive_bounce(bounced_email, bounced_partner)
 
             if bounced_partner and bounced_message:
@@ -1881,7 +1881,7 @@ class MailThread(models.AbstractModel):
           If no partner has been found and/or created for a given emails its
           matching partner is an empty record.
         """
-        if records and issubclass(type(records), self.pool['mail.thread']):
+        if records and isinstance(records, self.pool['mail.thread']):
             followers = records.mapped('message_partner_ids')
         else:
             followers = self.env['res.partner']
@@ -2883,6 +2883,25 @@ class MailThread(models.AbstractModel):
             'skip_existing',
             'subtitles',
         }
+
+    @api.model
+    def _is_notification_scheduled(self, notify_cheduled_date):
+        """ Helper to check if notification are about to be scheduled. Eases
+        overrides.
+
+        :param notify_scheduled_date: value of 'scheduled_date' given in
+          notification parameters: arbitrary datetime (as a date, datetime or
+          a string), may be void. See 'MailMail._parse_scheduled_datetime()';
+
+        :return bool: True if a valid datetime has been found and is in the
+          future; False otherwise.
+        """
+        if notify_cheduled_date:
+            parsed_datetime = self.env['mail.mail']._parse_scheduled_datetime(notify_cheduled_date)
+            notify_cheduled_date = parsed_datetime.replace(tzinfo=None) if parsed_datetime else False
+        return (
+            notify_cheduled_date and notify_cheduled_date > datetime.datetime.utcnow()
+        )
 
     def _raise_for_invalid_parameters(self, parameter_names, forbidden_names=None, restricting_names=None):
         """ Helper to warn about invalid parameters (or fields).
@@ -4163,20 +4182,6 @@ class MailThread(models.AbstractModel):
     # ------------------------------------------------------
     # CONTROLLERS
     # ------------------------------------------------------
-
-    def _get_mail_redirect_suggested_company(self):
-        """ Return the suggested company to be set on the context
-        in case of a mail redirection to the record. To avoid multi
-        company issues when clicking on a link sent by email, this
-        could be called to try setting the most suited company on
-        the allowed_company_ids in the context. This method can be
-        overridden, for example on the hr.leave model, where the
-        most suited company is the company of the leave type, as
-        specified by the ir.rule.
-        """
-        if 'company_id' in self:
-            return self.company_id
-        return False
 
     def _get_mail_thread_data_attachments(self):
         self.ensure_one()

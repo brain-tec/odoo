@@ -26,7 +26,13 @@ import {
     triggerHotkey,
 } from "@web/../tests/helpers/utils";
 
-import { contains, focus, insertText as webInsertText, scroll } from "@web/../tests/utils";
+import {
+    click as clickContains,
+    contains,
+    focus,
+    insertText as webInsertText,
+    scroll,
+} from "@web/../tests/utils";
 import { Deferred } from "@web/core/utils/concurrency";
 
 QUnit.module("discuss");
@@ -200,6 +206,29 @@ QUnit.test(
         await click(".o-mail-Composer button:contains(Send)");
         assert.containsN($, ".o-mail-Message", 2);
         assert.containsN($, ".o-mail-Message-header", 1); // just 1, because 2nd message is squashed
+    }
+);
+
+QUnit.test(
+    "Message of type notification in chatter should not have inline display",
+    async (assert) => {
+        const pyEnv = await startServer();
+        const partnerId = pyEnv["res.partner"].create({ name: "testPartner" });
+        pyEnv["mail.message"].create({
+            author_id: pyEnv.currentPartnerId,
+            body: "<p>Line 1</p><p>Line 2</p>",
+            model: "res.partner",
+            res_id: partnerId,
+            message_type: "notification",
+        });
+        const { openFormView } = await start();
+        await openFormView("res.partner", partnerId);
+        await contains(".o-mail-Message-body");
+        assert.notOk(
+            window
+                .getComputedStyle(document.querySelector(".o-mail-Message-body"), null)
+                .display.includes("inline")
+        );
     }
 );
 
@@ -1679,7 +1708,7 @@ QUnit.test(
 
 QUnit.test(
     "Retry loading more messages on failed load more messages should load more messages",
-    async (assert) => {
+    async () => {
         // first call needs to be successful as it is the initial loading of messages
         // second call comes from load more and needs to fail in order to show the error alert
         // any later call should work so that retry button and load more clicks would now work
@@ -1708,11 +1737,13 @@ QUnit.test(
             },
         });
         await openDiscuss(channelId);
+        await contains(".o-mail-Message", { count: 30 });
         messageFetchShouldFail = true;
-        await click("button:contains(Load More)");
+        await clickContains("button", { text: "Load More" });
+        await contains("button", { text: "Click here to retry" });
         messageFetchShouldFail = false;
-        await click("button:contains(Click here to retry)");
-        assert.containsN($, ".o-mail-Message", 60);
+        await clickContains("button", { text: "Click here to retry" });
+        await contains(".o-mail-Message", { count: 60 });
     }
 );
 
