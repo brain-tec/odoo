@@ -133,7 +133,7 @@ msgstr "<i class=\"fa fa-github text-github\" aria-label=\"Github\" title=\"Gith
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_pages_kanban_view
 msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-globe me-1\" title=\"เว็บไซต์\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_follow_us
@@ -903,7 +903,7 @@ msgstr "จำเป็น"
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_question__is_mandatory_answer
 msgid "Mandatory Answer"
-msgstr ""
+msgstr "คำตอบบังคับ"
 
 #. module: website_event
 #: model:event.question,title:website_event.event_0_question_0
@@ -979,7 +979,7 @@ msgstr "ไม่พบผลลัพธ์สำหรับ "
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_pages_kanban_view
 msgid "Not Published"
-msgstr ""
+msgstr "ไม่เผยแพร่"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form
@@ -1066,6 +1066,13 @@ msgstr "ประเภทคำถาม"
 #. odoo-python
 #: code:addons/website_event/models/event_question.py:0
 #, python-format
+msgid "Question cannot be linked to both an Event and an Event Type."
+msgstr ""
+
+#. module: website_event
+#. odoo-python
+#: code:addons/website_event/models/event_question.py:0
+#, python-format
 msgid "Question cannot belong to both the event category and itself."
 msgstr "คำถามต้องไม่อยู่ในทั้งหมวดหมู่อีเวนต์และตัวมันเอง"
 
@@ -1081,7 +1088,7 @@ msgstr "คำถาม"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.snippet_options
 msgid "Quotes"
-msgstr ""
+msgstr "คำคม"
 
 #. module: website_event
 #: model:event.question.answer,name:website_event.event_1_question_0_answer_2

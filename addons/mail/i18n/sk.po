@@ -15,12 +15,12 @@
 # Matus Krnac <matus.krnac@gmail.com>, 2023
 # Filip Hanes <filip.hanes@protonmail.com>, 2023
 # rastislav Brencic <rastislav.brencic99@gmail.com>, 2023
-# Jaroslav Bosansky <jaro.bosansky@ekoenergo.sk>, 2023
 # Jan Prokop, 2023
 # Martin Trigaux, 2023
 # Damian Brencic <brencicdamian12313@gmail.com>, 2023
 # Rastislav Brencic <rastislav.brencic@azet.sk>, 2023
 # Wil Odoo, 2023
+# Jaroslav Bosansky <jaro.bosansky@ekoenergo.sk>, 2024
 # Tomáš Píšek, 2024
 # 
 msgid ""
@@ -1353,7 +1353,7 @@ msgstr "Alias názov"
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_alias__alias_status
 msgid "Alias Status"
-msgstr ""
+msgstr "Stav aliasu"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_alias__alias_domain
@@ -1363,7 +1363,7 @@ msgstr "Doména aliasu"
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_alias__alias_status
 msgid "Alias status assessed on the last message received."
-msgstr ""
+msgstr "Stav aliasu posúdený pri poslednej doručenej správe."
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_alias__alias_model_id
@@ -5655,10 +5655,10 @@ msgstr ""
 
 #. module: mail
 #. odoo-javascript
-#: code:addons/mail/static/src/public/welcome_page.xml:0
+#: code:addons/mail/static/src/public/welcome_page.js:0
 #, python-format
-msgid "Logged as"
-msgstr ""
+msgid "Logged in as"
+msgstr "Prihlásený ako"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_email_server_form
