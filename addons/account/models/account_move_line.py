@@ -896,7 +896,7 @@ class AccountMoveLine(models.Model):
                 tax_ids = self.move_id.company_id.account_purchase_tax_id
         else:
             # Miscellaneous operation.
-            tax_ids = self.account_id.tax_ids
+            tax_ids = False if self.env.context.get('skip_computed_taxes') else self.account_id.tax_ids
 
         if self.company_id and tax_ids:
             tax_ids = tax_ids.filtered(lambda tax: tax.company_id == self.company_id)
@@ -1664,12 +1664,12 @@ class AccountMoveLine(models.Model):
             return aml.move_id.payment_id or aml.move_id.statement_line_id
 
         def get_odoo_rate(aml, other_aml, currency):
+            if not is_payment(aml) and is_payment(other_aml):
+                return get_accounting_rate(other_aml)
             if aml.move_id.is_invoice(include_receipts=True):
                 exchange_rate_date = aml.move_id.invoice_date
             else:
                 exchange_rate_date = aml.date
-            if not is_payment(aml) and is_payment(other_aml):
-                exchange_rate_date = other_aml.date
             return currency._get_conversion_rate(aml.company_currency_id, currency, aml.company_id, exchange_rate_date)
 
         def get_accounting_rate(aml):
