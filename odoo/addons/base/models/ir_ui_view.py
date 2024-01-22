@@ -17,13 +17,12 @@ from lxml import etree
 from lxml.etree import LxmlError
 from lxml.builder import E
 
-import odoo
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import ValidationError, AccessError, UserError
 from odoo.http import request
 from odoo.modules.module import get_resource_from_path
 from odoo.tools import config, ConstantMapping, get_diff, pycompat, apply_inheritance_specs, locate_node, str2bool
-from odoo.tools import safe_eval, lazy, lazy_property, frozendict
+from odoo.tools import lazy_property, frozendict, SQL
 from odoo.tools.convert import _fix_multiple_roots
 from odoo.tools.misc import file_path
 from odoo.tools.translate import xml_translate, TRANSLATED_ATTRS
@@ -71,6 +70,7 @@ class ViewCustom(models.Model):
     _description = 'Custom View'
     _order = 'create_date desc'  # search(limit=1) should return the last customization
     _rec_name = 'user_id'
+    _allow_sudo_commands = False
 
     ref_id = fields.Many2one('ir.ui.view', string='Original View', index=True, required=True, ondelete='cascade')
     user_id = fields.Many2one('res.users', string='User', index=True, required=True, ondelete='cascade')
@@ -146,6 +146,7 @@ class View(models.Model):
     _name = 'ir.ui.view'
     _description = 'View'
     _order = "priority,name,id"
+    _allow_sudo_commands = False
 
     name = fields.Char(string='View Name', required=True)
     model = fields.Char(index=True)
@@ -584,15 +585,15 @@ actual arch.
         self.check_access_rights('read')
         domain = self._get_inheriting_views_domain()
         e = expression(domain, self.env['ir.ui.view'])
-        from_clause, where_clause, where_params = e.query.get_sql()
-        assert from_clause == '"ir_ui_view"', f"Unexpected from clause: {from_clause}"
+        where_clause = e.query.where_clause
+        assert e.query.from_clause == SQL.identifier('ir_ui_view'), f"Unexpected from clause: {e.query.from_clause}"
 
-        self._flush_search(domain, fields=['inherit_id', 'priority', 'model', 'mode'])
-        query = f"""
+        self.flush_model(['inherit_id', 'priority', 'model', 'mode'])
+        query = SQL("""
             WITH RECURSIVE ir_ui_view_inherits AS (
                 SELECT id, inherit_id, priority, mode, model
                 FROM ir_ui_view
-                WHERE id IN %s AND ({where_clause})
+                WHERE id IN %(ids)s AND (%(where_clause)s)
             UNION
                 SELECT ir_ui_view.id, ir_ui_view.inherit_id, ir_ui_view.priority,
                        ir_ui_view.mode, ir_ui_view.model
@@ -600,13 +601,13 @@ actual arch.
                 INNER JOIN ir_ui_view_inherits parent ON parent.id = ir_ui_view.inherit_id
                 WHERE coalesce(ir_ui_view.model, '') = coalesce(parent.model, '')
                       AND ir_ui_view.mode = 'extension'
-                      AND ({where_clause})
+                      AND (%(where_clause)s)
             )
             SELECT
                 v.id, v.inherit_id, v.mode
             FROM ir_ui_view_inherits v
             ORDER BY v.priority, v.id
-        """
+        """, ids=tuple(self.ids), where_clause=where_clause)
         # ORDER BY v.priority, v.id:
         # 1/ sort by priority: abritrary value set by developers on some
         #    views to solve "dependency hell" problems and force a view
@@ -615,14 +616,12 @@ actual arch.
         # 2/ sort by view id: the order the views were inserted in the
         #    database. e.g. base views are placed before stock ones.
 
-        self.env.cr.execute(query, [tuple(self.ids)] + where_params + where_params)
-        rows = self.env.cr.fetchall()
-
+        rows = self.env.execute_query(query)
         views = self.browse(row[0] for row in rows)
 
         # optimization: fill in cache of inherit_id and mode
-        self.env.cache.update(views, type(self).inherit_id, [row[1] for row in rows])
-        self.env.cache.update(views, type(self).mode, [row[2] for row in rows])
+        self.env.cache.update(views, self._fields['inherit_id'], [row[1] for row in rows])
+        self.env.cache.update(views, self._fields['mode'], [row[2] for row in rows])
 
         # During an upgrade, we can only use the views that have been
         # fully upgraded already.
@@ -1242,7 +1241,7 @@ actual arch.
         if func is not None:
             return func(node, name_manager)
         # by default views are non-editable
-        return node.tag not in (item[0] for item in type(self).type.selection)
+        return node.tag not in (item[0] for item in self._fields['type'].selection)
 
     def _editable_tag_form(self, node, name_manager):
         return True
@@ -1464,7 +1463,7 @@ actual arch.
             elif not name:
                 self._raise_view_error(_("Button must have a name"), node)
             elif type_ == 'object':
-                func = getattr(type(name_manager.model), name, None)
+                func = getattr(name_manager.model, name, None)
                 if not func:
                     msg = _(
                         "%(action_name)s is not a valid action on %(model_name)s",
@@ -1480,7 +1479,7 @@ actual arch.
                     )
                     self._raise_view_error(msg, node)
                 try:
-                    inspect.signature(func).bind(self=name_manager.model)
+                    inspect.signature(func).bind()
                 except TypeError:
                     msg = "%s on %s has parameters and cannot be called from a button"
                     self._log_view_warning(msg % (name, name_manager.model._name), node)

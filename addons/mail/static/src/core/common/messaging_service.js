@@ -4,9 +4,7 @@ import { cleanTerm } from "@mail/utils/common/format";
 
 import { router } from "@web/core/browser/router";
 import { _t } from "@web/core/l10n/translation";
-import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
-import { user } from "@web/core/user";
 import { Deferred } from "@web/core/utils/concurrency";
 
 export class Messaging {
@@ -23,7 +21,6 @@ export class Messaging {
         this.store = services["mail.store"];
         this.orm = services.orm;
         this.isReady = new Deferred();
-        this.store.Persona.insert({ id: user.partnerId, type: "partner", isAdmin: user.isAdmin });
         this.store.discuss.inbox = {
             id: "inbox",
             model: "mail.box",
@@ -44,22 +41,24 @@ export class Messaging {
     }
 
     get initMessagingParams() {
-        return {};
+        return {
+            init_messaging: true,
+        };
     }
 
     /**
      * Import data received from init_messaging
      */
     async initialize() {
-        await rpc("/mail/init_messaging", this.initMessagingParams, { silent: true }).then(
-            this.initMessagingCallback.bind(this)
-        );
+        await this.store
+            .fetchData(this.initMessagingParams, { readonly: false })
+            .then(this.initMessagingCallback.bind(this));
     }
 
-    initMessagingCallback(data) {
-        this.store.insert(data);
+    initMessagingCallback() {
         this.store.discuss.isActive =
-            (data.menu_id && data.menu_id === router.current.hash?.menu_id) ||
+            this.store.discuss.isActive ||
+            (this.store.menu_id && this.store.menu_id === router.current.hash?.menu_id) ||
             router.hash?.action === "mail.action_discuss";
         this.isReady.resolve();
         this.store.isMessagingReady = true;

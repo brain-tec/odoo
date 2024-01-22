@@ -93,7 +93,7 @@ class TestDiscussFullPerformance(HttpCase):
             'anonymous_name': 'anon 1',
             'channel_id': im_livechat_channel.id,
             'previous_operator_id': self.users[0].partner_id.id,
-        })['id'])
+        })["Thread"]['id'])
         self.channel_livechat_1.with_user(self.users[1]).message_post(body="test")
         self.authenticate(None, None)
         with patch("odoo.http.GeoIP.country_code", new_callable=PropertyMock(return_value=self.env.ref('base.be').code)):
@@ -101,7 +101,7 @@ class TestDiscussFullPerformance(HttpCase):
                 'anonymous_name': 'anon 2',
                 'channel_id': im_livechat_channel.id,
                 'previous_operator_id': self.users[0].partner_id.id,
-            })['id'])
+            })["Thread"]['id'])
         guest_sudo = self.channel_livechat_2.channel_member_ids.filtered(lambda m: m.guest_id).guest_id.sudo()
         self.make_jsonrpc_request("/mail/message/post", {
             "post_data": {
@@ -136,14 +136,14 @@ class TestDiscussFullPerformance(HttpCase):
     @users('emp')
     @warmup
     def test_init_messaging(self):
-        """Test performance of `_init_messaging`."""
+        """Test performance of `init_messaging`."""
         self._setup_test()
         self.maxDiff = None
         self.env.flush_all()
         self.env.invalidate_all()
         self.authenticate(self.users[0].login, self.password)
         with self.assertQueryCount(emp=self._query_count):
-            init_messaging = self.make_jsonrpc_request("/mail/init_messaging")
+            init_messaging = self.make_jsonrpc_request("/mail/action", {"init_messaging": True})
         self.assertEqual(init_messaging, self._get_init_messaging_result())
 
     def _get_init_messaging_result(self):
@@ -165,7 +165,6 @@ class TestDiscussFullPerformance(HttpCase):
             ],
             "Store": {
                 "companyName": "YourCompany",
-                "current_user_id": self.users[0].id,
                 "discuss": {
                     "inbox": {"counter": 1, "id": "inbox", "model": "mail.box"},
                     "starred": {"counter": 1, "id": "starred", "model": "mail.box"},
@@ -185,29 +184,12 @@ class TestDiscussFullPerformance(HttpCase):
                     "im_status": "bot",
                     "is_company": False,
                     "name": "OdooBot",
-                    "notification_preference": False,
                     "out_of_office_date_end": False,
                     "type": "partner",
                     "user": False,
                     "write_date": fields.Datetime.to_string(self.user_root.partner_id.write_date),
                 },
                 "odoobotOnboarding": False,
-                "self": {
-                    "active": True,
-                    "email": "e.e@example.com",
-                    "id": self.users[0].partner_id.id,
-                    "im_status": "online",
-                    "is_company": False,
-                    "name": "Ernest Employee",
-                    "notification_preference": "inbox",
-                    "out_of_office_date_end": False,
-                    "type": "partner",
-                    "user": {
-                        "id": self.users[0].id,
-                        "isInternalUser": True,
-                    },
-                    "write_date": fields.Datetime.to_string(self.users[0].partner_id.write_date),
-                },
                 "settings": {
                     "id": self.env["res.users.settings"]._find_or_create_for_user(self.users[0]).id,
                     "is_discuss_sidebar_category_channel_open": True,
@@ -231,18 +213,18 @@ class TestDiscussFullPerformance(HttpCase):
     @users("emp")
     @warmup
     def test_discuss_channels(self):
-        """Test performance of `/discuss/channels`."""
+        """Test performance of `/mail/data` with `channels_as_member=True`."""
         self._setup_test()
         self.maxDiff = None
         self.env.flush_all()
         self.env.invalidate_all()
         self.authenticate(self.users[0].login, self.password)
         with self.assertQueryCount(emp=self._query_count_discuss_channels):
-            discuss_channels = self.make_jsonrpc_request("/discuss/channels")
+            discuss_channels = self.make_jsonrpc_request("/mail/data", {"channels_as_member": True})
         self.assertEqual(discuss_channels, self._get_discuss_channels_result())
 
     def _get_discuss_channels_result(self):
-        """Returns the result of a call to discuss/channels.
+        """Returns the result of a call to `/mail/data` with `channels_as_member=True`.
         The point of having a separate getter is to allow it to be overriden.
         """
         return {
@@ -290,7 +272,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "authorizedGroupFullName": self.group_user.full_name,
                 "anonymous_country": False,
                 "anonymous_name": False,
-                "avatarCacheKey": channel._get_avatar_cache_key(),
+                "avatarCacheKey": channel.avatar_cache_key,
                 "channel_type": "channel",
                 "channelMembers": [
                     [
@@ -312,7 +294,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "Ernest Employee",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "inbox",
                                         "user": {
                                             "id": self.users[0].id,
                                             "isInternalUser": True,
@@ -355,7 +336,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
-                "avatarCacheKey": channel._get_avatar_cache_key(),
+                "avatarCacheKey": channel.avatar_cache_key,
                 "channel_type": "channel",
                 "channelMembers": [
                     [
@@ -377,7 +358,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "Ernest Employee",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "inbox",
                                         "user": {
                                             "id": self.users[0].id,
                                             "isInternalUser": True,
@@ -420,7 +400,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
-                "avatarCacheKey": channel._get_avatar_cache_key(),
+                "avatarCacheKey": channel.avatar_cache_key,
                 "channel_type": "channel",
                 "channelMembers": [
                     [
@@ -442,7 +422,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "Ernest Employee",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "inbox",
                                         "user": {
                                             "id": self.users[0].id,
                                             "isInternalUser": True,
@@ -485,7 +464,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "authorizedGroupFullName": self.group_user.full_name,
                 "anonymous_country": False,
                 "anonymous_name": False,
-                "avatarCacheKey": channel._get_avatar_cache_key(),
+                "avatarCacheKey": channel.avatar_cache_key,
                 "channel_type": "channel",
                 "channelMembers": [
                     [
@@ -507,7 +486,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "Ernest Employee",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "inbox",
                                         "user": {
                                             "id": self.users[0].id,
                                             "isInternalUser": True,
@@ -611,7 +589,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "authorizedGroupFullName": self.group_user.full_name,
                 "anonymous_country": False,
                 "anonymous_name": False,
-                "avatarCacheKey": channel._get_avatar_cache_key(),
+                "avatarCacheKey": channel.avatar_cache_key,
                 "channel_type": "channel",
                 "channelMembers": [
                     [
@@ -633,7 +611,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "Ernest Employee",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "inbox",
                                         "user": {
                                             "id": self.users[0].id,
                                             "isInternalUser": True,
@@ -676,7 +653,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
-                "avatarCacheKey": channel._get_avatar_cache_key(),
+                "avatarCacheKey": channel.avatar_cache_key,
                 "channel_type": "group",
                 "channelMembers": [
                     [
@@ -698,7 +675,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "Ernest Employee",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "inbox",
                                         "user": {
                                             "id": self.users[0].id,
                                             "isInternalUser": True,
@@ -723,7 +699,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "test12",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "email",
                                         "user": {
                                             "id": self.users[12].id,
                                             "isInternalUser": True,
@@ -766,7 +741,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
-                "avatarCacheKey": channel._get_avatar_cache_key(),
+                "avatarCacheKey": channel.avatar_cache_key,
                 "channel_type": "chat",
                 "channelMembers": [
                     [
@@ -788,7 +763,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "Ernest Employee",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "inbox",
                                         "user": {
                                             "id": self.users[0].id,
                                             "isInternalUser": True,
@@ -813,7 +787,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "test14",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "email",
                                         "user": {
                                             "id": self.users[14].id,
                                             "isInternalUser": True,
@@ -856,7 +829,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
-                "avatarCacheKey": channel._get_avatar_cache_key(),
+                "avatarCacheKey": channel.avatar_cache_key,
                 "channel_type": "chat",
                 "channelMembers": [
                     [
@@ -878,7 +851,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "Ernest Employee",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "inbox",
                                         "user": {
                                             "id": self.users[0].id,
                                             "isInternalUser": True,
@@ -903,7 +875,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "test15",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "email",
                                         "user": {
                                             "id": self.users[15].id,
                                             "isInternalUser": True,
@@ -946,7 +917,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
-                "avatarCacheKey": channel._get_avatar_cache_key(),
+                "avatarCacheKey": channel.avatar_cache_key,
                 "channel_type": "chat",
                 "channelMembers": [
                     [
@@ -968,7 +939,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "Ernest Employee",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "inbox",
                                         "user": {
                                             "id": self.users[0].id,
                                             "isInternalUser": True,
@@ -993,7 +963,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "test2",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "email",
                                         "user": {
                                             "id": self.users[2].id,
                                             "isInternalUser": True,
@@ -1036,7 +1005,7 @@ class TestDiscussFullPerformance(HttpCase):
                 "authorizedGroupFullName": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
-                "avatarCacheKey": channel._get_avatar_cache_key(),
+                "avatarCacheKey": channel.avatar_cache_key,
                 "channel_type": "chat",
                 "channelMembers": [
                     [
@@ -1058,7 +1027,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "Ernest Employee",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "inbox",
                                         "user": {
                                             "id": self.users[0].id,
                                             "isInternalUser": True,
@@ -1083,7 +1051,6 @@ class TestDiscussFullPerformance(HttpCase):
                                         "name": "test3",
                                         "out_of_office_date_end": False,
                                         "type": "partner",
-                                        "notification_preference": "email",
                                         "user": {
                                             "id": self.users[3].id,
                                             "isInternalUser": True,
@@ -1132,7 +1099,7 @@ class TestDiscussFullPerformance(HttpCase):
                     "name": "India",
                 },
                 "anonymous_name": False,
-                "avatarCacheKey": channel._get_avatar_cache_key(),
+                "avatarCacheKey": channel.avatar_cache_key,
                 "channel_type": "livechat",
                 "channelMembers": [
                     [
@@ -1222,7 +1189,7 @@ class TestDiscussFullPerformance(HttpCase):
                     "name": "Belgium",
                 },
                 "anonymous_name": "anon 2",
-                "avatarCacheKey": channel._get_avatar_cache_key(),
+                "avatarCacheKey": channel.avatar_cache_key,
                 "channel_type": "livechat",
                 "channelMembers": [
                     [
@@ -1321,7 +1288,6 @@ class TestDiscussFullPerformance(HttpCase):
                     "id": user_2.partner_id.id,
                     "is_company": False,
                     "name": "test2",
-                    "notification_preference": "email",
                     "type": "partner",
                     "user": {"id": user_2.id, "isInternalUser": True},
                     "write_date": write_date_2,
@@ -1384,7 +1350,6 @@ class TestDiscussFullPerformance(HttpCase):
                     "id": user_0.partner_id.id,
                     "is_company": False,
                     "name": "Ernest Employee",
-                    "notification_preference": "inbox",
                     "type": "partner",
                     "user": {"id": user_0.id, "isInternalUser": True},
                     "write_date": write_date_0,
@@ -1429,7 +1394,6 @@ class TestDiscussFullPerformance(HttpCase):
                     "id": user_0.partner_id.id,
                     "is_company": False,
                     "name": "Ernest Employee",
-                    "notification_preference": "inbox",
                     "type": "partner",
                     "user": {"id": user_0.id, "isInternalUser": True},
                     "write_date": write_date_0,
@@ -1474,7 +1438,6 @@ class TestDiscussFullPerformance(HttpCase):
                     "id": user_0.partner_id.id,
                     "is_company": False,
                     "name": "Ernest Employee",
-                    "notification_preference": "inbox",
                     "type": "partner",
                     "user": {"id": user_0.id, "isInternalUser": True},
                     "write_date": write_date_0,
@@ -1519,7 +1482,6 @@ class TestDiscussFullPerformance(HttpCase):
                     "id": user_1.partner_id.id,
                     "is_company": False,
                     "name": "test1",
-                    "notification_preference": "email",
                     "type": "partner",
                     "user": {"id": user_1.id, "isInternalUser": True},
                     "write_date": write_date_1,

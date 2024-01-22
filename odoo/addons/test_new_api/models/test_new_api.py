@@ -1456,7 +1456,9 @@ class ComputeMember(models.Model):
 
 class User(models.Model):
     _name = _description = 'test_new_api.user'
+    _allow_sudo_commands = False
 
+    name = fields.Char()
     group_ids = fields.Many2many('test_new_api.group')
     group_count = fields.Integer(compute='_compute_group_count', store=True)
 
@@ -1468,7 +1470,9 @@ class User(models.Model):
 
 class Group(models.Model):
     _name = _description = 'test_new_api.group'
+    _allow_sudo_commands = False
 
+    name = fields.Char()
     user_ids = fields.Many2many('test_new_api.user')
 
 
@@ -1921,3 +1925,48 @@ class AnyTag(models.Model):
 
     name = fields.Char()
     child_ids = fields.Many2many('test_new_api.any.child')
+
+
+class CustomView(models.Model):
+    _name = _description = "test_new_api.custom.view"
+    _auto = False
+    _depends = {
+        'test_new_api.any.tag': ['name'],
+        'test_new_api.any.child': ['quantity'],
+    }
+
+    sum_quantity = fields.Integer()
+    tag_id = fields.Many2one('test_new_api.any.tag')
+
+    def init(self):
+        query = """
+            CREATE or REPLACE VIEW test_new_api_custom_view AS (
+                SELECT tag.id AS id, SUM(child.quantity) AS sum_quantity, tag.id AS tag_id
+                FROM test_new_api_any_child AS child
+                JOIN test_new_api_any_child_test_new_api_any_tag_rel AS rel ON rel.test_new_api_any_child_id = child.id
+                JOIN test_new_api_any_tag AS tag ON tag.id = rel.test_new_api_any_tag_id
+                GROUP BY tag.id
+            )
+        """
+        self.env.cr.execute(query)
+
+class CustomTableQuery(models.Model):
+    _name = _description = "test_new_api.custom.table_query"
+    _auto = False
+    _depends = {
+        'test_new_api.any.tag': ['name'],
+        'test_new_api.any.child': ['quantity'],
+    }
+
+    sum_quantity = fields.Integer()
+    tag_id = fields.Many2one('test_new_api.any.tag')
+
+    @property
+    def _table_query(self):
+        return """
+            SELECT tag.id AS id, SUM(child.quantity) AS sum_quantity, tag.id AS tag_id
+            FROM test_new_api_any_child AS child
+            JOIN test_new_api_any_child_test_new_api_any_tag_rel AS rel ON rel.test_new_api_any_child_id = child.id
+            JOIN test_new_api_any_tag AS tag ON tag.id = rel.test_new_api_any_tag_id
+            GROUP BY tag.id
+        """

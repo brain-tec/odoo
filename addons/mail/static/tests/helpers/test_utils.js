@@ -11,6 +11,7 @@ import { getWebClientReady } from "@mail/../tests/helpers/webclient_setup";
 import { browser } from "@web/core/browser/browser";
 import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
 import { registry } from "@web/core/registry";
+import { session } from "@web/session";
 import { registerCleanup } from "@web/../tests/helpers/cleanup";
 import {
     clearRegistryWithCleanup,
@@ -171,11 +172,22 @@ export async function start(param0 = {}) {
     });
     param0["target"] = target;
     const pyEnv = await getPyEnv();
-    patchUserWithCleanup({
-        userId: pyEnv.currentUserId,
+    const userSession = {
         name: pyEnv.currentUser?.name,
         partnerId: pyEnv.currentPartnerId,
-    });
+        userId: pyEnv.currentUserId,
+    };
+    if (!pyEnv.currentGuest && pyEnv.currentUser) {
+        const userSettings = pyEnv.mockServer._mockResUsersSettings_FindOrCreateForUser(
+            pyEnv.currentUser.id
+        );
+        const settings = pyEnv.mockServer._mockResUsersSettings_ResUsersSettingsFormat(
+            userSettings.id
+        );
+        Object.assign(userSession, { settings });
+    }
+    patchUserWithCleanup(userSession);
+    patchWithCleanup(session, { self: pyEnv.getSelfData() });
     if (browser.Notification && !browser.Notification.isPatched) {
         patchBrowserNotification("denied");
     }

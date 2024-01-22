@@ -16,9 +16,10 @@ patch(MockServer.prototype, {
      *
      * @private
      * @param {integer[]} ids
+     * @param {Object} context
      * @returns {Object}
      */
-    _mockResUsers_InitMessaging(ids) {
+    _mockResUsers_InitMessaging(ids, context) {
         const user = this.getRecords("res.users", [["id", "in", ids]])[0];
         const userSettings = this._mockResUsersSettings_FindOrCreateForUser(user.id);
         const channels = this._mockDiscussChannel__get_channels_as_member();
@@ -31,7 +32,6 @@ patch(MockServer.prototype, {
                 fields: ["source", "substitution"],
             }),
             Store: {
-                current_user_id: this.pyEnv.currentUserId,
                 discuss: {
                     inbox: {
                         counter: this._mockResPartner_GetNeedactionCount(user.partner_id),
@@ -54,11 +54,12 @@ patch(MockServer.prototype, {
                     .length,
                 menu_id: false, // not useful in QUnit tests
                 odoobot: this._mockResPartnerMailPartnerFormat(this.odoobotId).get(this.odoobotId),
-                self: this._mockResPartnerMailPartnerFormat(user.partner_id).get(user.partner_id),
                 settings: this._mockResUsersSettings_ResUsersSettingsFormat(userSettings.id),
             },
             Thread: this._mockDiscussChannelChannelInfo(
-                this._mockDiscussChannel__get_init_channels(user).map((channel) => channel.id)
+                this._mockDiscussChannel__get_init_channels(user, context).map(
+                    (channel) => channel.id
+                )
             ),
         };
     },

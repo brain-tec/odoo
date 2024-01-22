@@ -368,7 +368,7 @@ export class ThreadService {
     }
 
     pin(thread) {
-        if (thread.model !== "discuss.channel" || !this.store.self?.type === "partner") {
+        if (thread.model !== "discuss.channel" || this.store.self.type !== "partner") {
             return;
         }
         thread.is_pinned = true;
@@ -487,7 +487,6 @@ export class ThreadService {
     }
 
     async joinChannel(id, name) {
-        await this.env.services["mail.messaging"].isReady;
         await this.orm.call("discuss.channel", "add_members", [[id]], {
             partner_ids: [this.store.self.id],
         });
@@ -693,13 +692,13 @@ export class ThreadService {
     }) {
         const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
         const validMentions =
-            this.store.self?.type === "partner"
+            this.store.self.type === "partner"
                 ? this.messageService.getMentionsFromText(body, {
                       mentionedChannels,
                       mentionedPartners,
                   })
                 : undefined;
-        const partner_ids = validMentions?.partners.map((partner) => partner.id);
+        const partner_ids = validMentions?.partners.map((partner) => partner.id) ?? [];
         let recipientEmails = [];
         if (!isNote) {
             const recipientIds = thread.suggestedRecipients
@@ -708,7 +707,7 @@ export class ThreadService {
             recipientEmails = thread.suggestedRecipients
                 .filter((recipient) => recipient.checked && !recipient.persona)
                 .map((recipient) => recipient.email);
-            partner_ids?.push(...recipientIds);
+            partner_ids.push(...recipientIds);
         }
         return {
             context: {

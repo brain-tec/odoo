@@ -49,6 +49,7 @@ import { SampleServer } from "@web/model/sample_server";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { KanbanCompiler } from "@web/views/kanban/kanban_compiler";
 import { KanbanRecord } from "@web/views/kanban/kanban_record";
+import { contains } from "@web/../tests/utils";
 
 import {
     patchDialog,
@@ -72,6 +73,7 @@ import {
     toggleColumnActions,
     loadMore,
 } from "./helpers";
+import { getOrigin } from "@web/core/utils/urls";
 
 const serviceRegistry = registry.category("services");
 const viewWidgetRegistry = registry.category("view_widgets");
@@ -294,7 +296,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.module("KanbanView");
 
     QUnit.test("basic ungrouped rendering", async (assert) => {
-        assert.expect(6);
+        assert.expect(7);
 
         await makeView({
             type: "kanban",
@@ -321,6 +323,10 @@ QUnit.module("Views", (hooks) => {
 
         assert.hasClass(target.querySelector(".o_kanban_view"), "o_kanban_test");
         assert.hasClass(target.querySelector(".o_kanban_renderer"), "o_kanban_ungrouped");
+        assert.containsOnce(
+            target,
+            ".o_control_panel_main_buttons .d-none.d-xl-inline-flex button.o-kanban-button-new"
+        );
         assert.containsN(target, ".o_kanban_record:not(.o_kanban_ghost)", 4);
         assert.containsN(target, ".o_kanban_ghost", 6);
         assert.containsOnce(target, ".o_kanban_record:contains(gnap)");
@@ -437,7 +443,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("basic grouped rendering", async (assert) => {
-        assert.expect(17);
+        assert.expect(18);
 
         patchWithCleanup(KanbanRenderer.prototype, {
             setup() {
@@ -474,6 +480,10 @@ QUnit.module("Views", (hooks) => {
         });
         assert.hasClass(target.querySelector(".o_kanban_view"), "o_kanban_test");
         assert.hasClass(target.querySelector(".o_kanban_renderer"), "o_kanban_grouped");
+        assert.containsOnce(
+            target,
+            ".o_control_panel_main_buttons .d-none.d-xl-inline-flex button.o-kanban-button-new"
+        );
         assert.containsN(target, ".o_kanban_group", 2);
         assert.containsOnce(target, ".o_kanban_group:first-child .o_kanban_record");
         assert.containsN(target, ".o_kanban_group:nth-child(2) .o_kanban_record", 3);
@@ -9935,8 +9945,11 @@ QUnit.module("Views", (hooks) => {
                 </kanban>
             `,
             groupBy: ["bar"],
-            async mockRPC(route, { method }) {
-                assert.step(method || route);
+            async mockRPC(route, args) {
+                assert.step(args.method || route);
+                if (args.method === "web_read_group") {
+                    assert.step(JSON.stringify(args.kwargs.domain));
+                }
             },
         });
 
@@ -9951,13 +9964,16 @@ QUnit.module("Views", (hooks) => {
             // initial load
             "get_views",
             "web_read_group",
+            "[]",
             "read_progress_bar",
             "web_search_read",
             "web_search_read",
             "web_read_group", // recomputes aggregates
+            '["&",["bar","=",true],["foo","=","yop"]]', // perform read_group only on second column (bar=true)
             "web_search_read",
             // activate filter
             "web_read_group", // recomputes aggregates
+            '["&",["bar","=",true],["foo","=","gnap"]]', // perform read_group only on second column (bar=true)
             "web_search_read",
             // activate another filter (switching)
             "web_search_read",
@@ -10536,7 +10552,7 @@ QUnit.module("Views", (hooks) => {
 
         // since the field image is not set, kanban_image will generate an URL
         const imageOnRecord = target.querySelectorAll(
-            'img[data-src*="/web/image"][data-src*="&id=1"]'
+            `img[data-src="${getOrigin()}/web/image/partner/1/image"]`
         );
         assert.strictEqual(imageOnRecord.length, 1, "partner with image display image by url");
         assert.strictEqual(
@@ -10572,13 +10588,8 @@ QUnit.module("Views", (hooks) => {
             domain: [["id", "in", [1]]],
         });
 
-        assert.ok(
-            target
-                .querySelector(".o_kanban_record:not(.o_kanban_ghost) img")
-                .dataset.src.endsWith(
-                    "/web/image?model=partner&field=image&id=1&unique=1659688620000"
-                ),
-            "image src is the preview image given in option"
+        await contains(
+            `.o_kanban_record:not(.o_kanban_ghost) img[data-src='${getOrigin()}/web/image/partner/1/image?unique=1659688620000']`
         );
     });
 
@@ -10636,7 +10647,7 @@ QUnit.module("Views", (hooks) => {
         // -> for the record matching the ID, the base64 should be returned
         // -> for all the other records, the image should be displayed by url
         const imageOnRecord = target.querySelectorAll(
-            'img[data-src*="/web/image"][data-src*="&id=1"]'
+            `img[data-src="${getOrigin()}/web/image/partner/1/image"]`
         );
         assert.strictEqual(
             imageOnRecord.length,
@@ -10679,12 +10690,12 @@ QUnit.module("Views", (hooks) => {
         });
         assert.containsOnce(
             target,
-            'img[data-src*="/web/image"][data-src$="&id=1&unique="]',
+            `img[data-src="${getOrigin()}/web/image/partner/1/image"]`,
             "image url should contain id of set partner_id"
         );
         assert.containsOnce(
             target,
-            'img[data-src*="/web/image"][data-src$="&id=&unique="]',
+            `img[data-src="${getOrigin()}/web/image/partner/null/image"]`,
             "image url should contain an empty id if partner_id is not set"
         );
     });

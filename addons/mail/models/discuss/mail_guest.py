@@ -131,12 +131,9 @@ class MailGuest(models.Model):
         self.ensure_one()
         # sudo: res.partner - exposing OdooBot name and id
         odoobot = self.env.ref('base.partner_root').sudo()
-        # sudo: mail.guest - guest reading their own id/name/channels
-        guest_sudo = self.sudo()
         return {
             "Store": {
                 "companyName": self.env.company.name,
-                "current_user_id": False,
                 # sudo: ir.config_parameter: safe to check for existence of tenor api key
                 "hasGifPickerFeature": bool(self.env["ir.config_parameter"].sudo().get_param("discuss.tenor_api_key")),
                 "hasLinkPreviewFeature": self.env["mail.link.preview"]._is_link_preview_enabled(),
@@ -148,11 +145,6 @@ class MailGuest(models.Model):
                     "id": odoobot.id,
                     "name": odoobot.name,
                     "type": "partner",
-                },
-                "self": {
-                    "id": guest_sudo.id,
-                    "name": guest_sudo.name,
-                    "type": "guest",
                 },
             },
             "Thread": self.env["discuss.channel"]._get_init_channels()._channel_info(),

@@ -692,9 +692,11 @@ class Task(models.Model):
         has_default_name = bool(default.get('name', ''))
         if not has_default_name:
             default['name'] = _("%s (copy)", self.name)
+            default['child_ids'] = [child.copy({'name': _("%s (copy)", child.name)}).id for child in self.child_ids]
+        else:
+            default['child_ids'] = [child.copy({'name': child.name}).id for child in self.child_ids]
         if self.recurrence_id:
             default['recurrence_id'] = self.recurrence_id.copy().id
-        default['child_ids'] = [child.copy({'name': child.name}).id for child in self.child_ids]
         self_with_mail_context = self.with_context(mail_auto_subscribe_no_notify=True, mail_create_nosubscribe=True)
         task_copy = super(Task, self_with_mail_context).copy(default)
         if self.allow_task_dependencies:
@@ -1003,6 +1005,8 @@ class Task(models.Model):
         if len(self) == 1:
             handle_history_divergence(self, 'description', vals)
         portal_can_write = False
+        project_link_per_task_id = {}
+        partner_ids = []
         if self.env.user.has_group('base.group_portal') and not self.env.su:
             # Check if all fields in vals are in SELF_WRITABLE_FIELDS
             self._ensure_fields_are_accessible(vals.keys(), operation='write', check_group_user=False)
@@ -1132,6 +1136,20 @@ class Task(models.Model):
         if "personal_stage_type_id" in vals and not vals['personal_stage_type_id']:
             del vals['personal_stage_type_id']
 
+        # sends an email to the 'Task Creation' subtype subscribers
+        # When project_id is changed
+        if vals.get('project_id'):
+            project = self.env['project.project'].browse(vals.get('project_id'))
+            notification_subtype_id = self.env['ir.model.data']._xmlid_to_res_id('project.mt_project_task_new')
+            partner_ids = project.message_follower_ids.filtered(lambda follower: notification_subtype_id in follower.subtype_ids.ids).partner_id.ids
+            if partner_ids:
+                link_per_project_id = {}
+                for task in self:
+                    if task.project_id:
+                        project_link = link_per_project_id.get(task.project_id.id)
+                        if not project_link:
+                            project_link = link_per_project_id[task.project_id.id] = task.project_id._get_html_link(title=task.project_id.display_name)
+                        project_link_per_task_id[task.id] = project_link
         result = super().write(vals)
 
         if 'user_ids' in vals:
@@ -1160,6 +1178,20 @@ class Task(models.Model):
             self.filtered(lambda t: t.state != '04_waiting_normal').state = '01_in_progress'
 
         self._task_message_auto_subscribe_notify({task: task.user_ids - old_user_ids[task] - self.env.user for task in self})
+
+        if partner_ids:
+            for task in self:
+                project_link = project_link_per_task_id.get(task.id)
+                if project_link:
+                    body = _('Task Transferred from Project %s', project_link)
+                else:
+                    body = _('Task Converted from To-Do')
+                task.message_notify(
+                    body=body,
+                    partner_ids=partner_ids,
+                    email_layout_xmlid='mail.mail_notification_layout',
+                    record_name=task.display_name,
+               )
         return result
 
     def unlink(self):

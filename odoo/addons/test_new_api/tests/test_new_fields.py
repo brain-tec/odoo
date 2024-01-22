@@ -15,7 +15,7 @@ import psycopg2
 from odoo import models, fields, Command
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
-from odoo.tests import TransactionCase, tagged, Form
+from odoo.tests import TransactionCase, tagged, Form, users
 from odoo.tools import mute_logger, float_repr
 from odoo.tools.date_utils import add, subtract, start_of, end_of
 from odoo.tools.image import image_data_uri
@@ -3179,6 +3179,130 @@ class TestX2many(TransactionCase):
         })
         self.assertTrue(field.unlink())
 
+    @mute_logger('odoo.addons.base.models.ir_model')
+    @users('portal')
+    def test_sudo_commands(self):
+        """Test manipulating a x2many field using Commands with `sudo` or with another user (`with_user`)
+        is not allowed when the destination model is flagged `_allow_sudo_commands = False` and the transaction user
+        does not have the required access rights.
+
+        This test asserts an AccessError is raised
+        when a user attempts to pass Commands to a One2many and Many2many field
+        targeting a model flagged with `_allow_sudo_commands = False`
+        while using an environment with `sudo()` or `with_user(admin_user)`.
+
+        The `with_user` are edge cases in some business codes, where a more-priviledged user is used temporary
+        to perform an action, such as:
+        - `Documents.with_user(share.create_uid)`
+        - `request.env['sign.request'].with_user(contract.hr_responsible_id).sudo()`
+        """
+
+        admin_user = self.env.ref('base.user_admin')
+        my_user = self.env.user.sudo(False)
+
+        # 1. one2many field `res.partner.user_ids`
+        # Sanity checks
+        # `res.partner` must be flagged as `_allow_sudo_commands = False` otherwise the test is pointless
+        self.assertEqual(self.env['res.users']._allow_sudo_commands, False)
+        # in case the type of `res.partner.user_ids` changes in a future release.
+        # if `res.partner.user_ids` is no longer a one2many, this test must be adapted.
+        self.assertEqual(self.env['res.partner']._fields['user_ids'].type, 'one2many')
+        my_partner = my_user.partner_id
+
+        for Partner, my_partner in [
+            (self.env['res.partner'].with_user(admin_user), my_partner.with_user(admin_user)),
+            (self.env['res.partner'].sudo(), my_partner.sudo()),
+        ]:
+            # 1.0 Command.CREATE
+            # Case: a public/portal user creating a new users with arbitrary values
+            with self.assertRaisesRegex(AccessError, "not allowed to create 'User'"):
+                Partner.create({
+                    'name': 'foo',
+                    'user_ids': [Command.create({
+                        'login': 'foo',
+                        'password': 'foo',
+                    })],
+                })
+            # 1.1 Command.UPDATE
+            # Case: a public/portal updating his user to add himself a group
+            with self.assertRaisesRegex(AccessError, "not allowed to modify 'User'"):
+                my_partner.write({
+                    'user_ids': [Command.update(my_partner.user_ids[0].id, {
+                        'groups_id': [self.env.ref('base.group_system').id],
+                    })],
+                })
+            # 1.2 Command.DELETE
+            # Case: a public user deleting the public user to mess with the database
+            with self.assertRaisesRegex(AccessError, "not allowed to delete 'User'"):
+                my_partner.write({
+                    'user_ids': [Command.delete(my_partner.user_ids[0].id)],
+                })
+            # 1.3 Command.UNLINK
+            # Case: a public user unlinking the public partner and the public user to mess with the database
+            with self.assertRaisesRegex(AccessError, "not allowed to modify 'User'"):
+                my_partner.write({
+                    'user_ids': [Command.unlink(my_partner.user_ids[0].id)],
+                })
+            # 1.4 Command.LINK
+            # Case: a public/portal user changing the `partner_id` of an admin,
+            # to change the email address of the user and ask for a reset password.
+            with self.assertRaisesRegex(AccessError, "not allowed to modify 'User'"):
+                my_partner.write({
+                    'user_ids': [Command.link(admin_user.id)],
+                })
+            # 1.5 Command.CLEAR
+            # Case: a public user unlinking the public partner and the public user just to mess with the database
+            with self.assertRaisesRegex(AccessError, "not allowed to modify 'User'"):
+                my_partner.write({
+                    'user_ids': [Command.clear()],
+                })
+            # 1.6 Command.SET
+            # Case: a public/portal user changing the `partner_id` of an admin,
+            # to change the email address of the user and ask for a reset password.
+            with self.assertRaisesRegex(AccessError, "not allowed to modify 'User'"):
+                my_partner.write({
+                    'user_ids': [Command.set([admin_user.id])],
+                })
+
+        # 2. many2many field `test_new_api.discussion.participants`
+        # Sanity checks
+        # `test_new_api.user` must be flagged as `_allow_sudo_commands = False` otherwise the test is pointless
+        self.assertEqual(self.env['test_new_api.group']._allow_sudo_commands, False)
+        # in case the type of `test_new_api.discussion.participants` changes in a future release.
+        # if `test_new_api.discussion.participants` is no longer a many2many, this test must be adapted.
+        self.assertEqual(self.env['test_new_api.user']._fields['group_ids'].type, 'many2many')
+        public_group = self.env['test_new_api.group'].with_user(admin_user).create({
+            'name': 'public'
+        }).with_user(self.env.user)
+        my_user = self.env['test_new_api.user'].with_user(admin_user).create({
+            'name': 'foo',
+            'group_ids': [public_group.id],
+        }).with_user(self.env.user)
+
+        for User, my_user in [
+            (self.env['test_new_api.user'].with_user(admin_user), my_user.with_user(admin_user)),
+            (self.env['test_new_api.user'].sudo(), my_user.sudo()),
+        ]:
+            # 2.0 Command.CREATE
+            # Case: a public/portal user creating a new users with arbitrary values
+            with self.assertRaisesRegex(AccessError, "not allowed to create 'test_new_api.group'"):
+                User.create({
+                    'name': 'foo',
+                    'group_ids': [Command.create({})],
+                })
+            # 2.1 Command.UPDATE
+            # Case: a public/portal updating his user to add himself a group
+            with self.assertRaisesRegex(AccessError, "not allowed to modify 'test_new_api.group'"):
+                my_user.write({
+                    'group_ids': [Command.update(my_user.group_ids[0].id, {})],
+                })
+            # 2.2 Command.DELETE
+            # Case: a public user deleting the public user to mess with the database
+            with self.assertRaisesRegex(AccessError, "not allowed to delete 'test_new_api.group'"):
+                my_user.write({
+                    'group_ids': [Command.delete(my_user.group_ids[0].id)],
+                })
+
 
 class TestHtmlField(TransactionCase):
 
@@ -3982,354 +4106,6 @@ def update(model, *fnames):
         model._table,
         ", ".join('"{}" = %s'.format(column) for column in columns),
     )
-
-
-class TestSubqueries(TransactionCase):
-    """ Test the subqueries made by search() with relational fields. """
-    maxDiff = None
-
-    def test_and_many2one_with_subfield(self):
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            WHERE ("test_new_api_multi"."partner" IN (
-                SELECT "res_partner"."id"
-                FROM "res_partner"
-                WHERE (("res_partner"."name"::text LIKE %s)
-                   AND ("res_partner"."phone"::text LIKE %s)
-                )
-            ))
-            ORDER BY "test_new_api_multi"."id"
-        """]):
-            self.env['test_new_api.multi'].search([
-                ('partner.name', 'like', 'jack'),
-                ('partner.phone', 'like', '01234'),
-            ])
-
-    def test_or_many2one_with_subfield(self):
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            WHERE ("test_new_api_multi"."partner" IN (
-                SELECT "res_partner"."id"
-                FROM "res_partner"
-                WHERE (("res_partner"."name"::text LIKE %s)
-                    OR ("res_partner"."phone"::text LIKE %s)
-                )
-            ))
-            ORDER BY "test_new_api_multi"."id"
-        """]):
-            self.env['test_new_api.multi'].search([
-                '|',
-                    ('partner.name', 'like', 'jack'),
-                    ('partner.phone', 'like', '01234'),
-            ])
-
-    def test_not_and_many2one_with_subfield(self):
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            WHERE (("test_new_api_multi"."partner" NOT IN (
-                SELECT "res_partner"."id"
-                FROM "res_partner"
-                WHERE (("res_partner"."name"::text LIKE %s)
-                    AND ("res_partner"."phone"::text LIKE %s)
-                )
-            )) OR "test_new_api_multi"."partner" IS NULL)
-            ORDER BY "test_new_api_multi"."id"
-        """]):
-            self.env['test_new_api.multi'].search([
-                '!', '&',
-                    ('partner.name', 'like', 'jack'),
-                    ('partner.phone', 'like', '01234'),
-            ])
-
-    def test_not_or_many2one_with_subfield(self):
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            WHERE (("test_new_api_multi"."partner" NOT IN (
-                SELECT "res_partner"."id"
-                FROM "res_partner"
-                WHERE (("res_partner"."name"::text LIKE %s)
-                    OR ("res_partner"."phone"::text LIKE %s)
-                )
-            )) OR "test_new_api_multi"."partner" IS NULL)
-            ORDER BY "test_new_api_multi"."id"
-        """]):
-            self.env['test_new_api.multi'].search([
-                '!', '|',
-                    ('partner.name', 'like', 'jack'),
-                    ('partner.phone', 'like', '01234'),
-            ])
-
-    def test_or_autojoined_many2one_with_subfield(self):
-        self.patch(self.env['test_new_api.multi']._fields['partner'], 'auto_join', True)
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            LEFT JOIN "res_partner" AS "test_new_api_multi__partner"
-                ON ("test_new_api_multi"."partner" = "test_new_api_multi__partner"."id")
-            WHERE (
-                ("test_new_api_multi__partner"."name"::text LIKE %s)
-                OR ("test_new_api_multi__partner"."phone"::text LIKE %s)
-            )
-            ORDER BY "test_new_api_multi"."id"
-        """]):
-            self.env['test_new_api.multi'].search([
-                '|',
-                    ('partner.name', 'like', 'jack'),
-                    ('partner.phone', 'like', '01234'),
-            ])
-
-    def test_not_or_autojoined_many2one_with_subfield(self):
-        self.patch(self.env['test_new_api.multi']._fields['partner'], 'auto_join', True)
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            LEFT JOIN "res_partner" AS "test_new_api_multi__partner"
-                ON ("test_new_api_multi"."partner" = "test_new_api_multi__partner"."id")
-            WHERE (
-                "test_new_api_multi__partner"."id" IS NULL OR (
-                    NOT ((
-                        ("test_new_api_multi__partner"."name"::text LIKE %s)
-                        OR ("test_new_api_multi__partner"."phone"::text LIKE %s)
-                    ))
-                )
-            )
-            ORDER BY "test_new_api_multi"."id"
-        """]):
-            self.env['test_new_api.multi'].search([
-                '!', '|',
-                    ('partner.name', 'like', 'jack'),
-                    ('partner.phone', 'like', '01234'),
-            ])
-
-    def test_mixed_and_or_many2one_with_subfield(self):
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            WHERE ("test_new_api_multi"."partner" IN (
-                SELECT "res_partner"."id"
-                FROM "res_partner"
-                WHERE (
-                    ("res_partner"."email"::text LIKE %s)
-                    AND (("res_partner"."name"::text LIKE %s)
-                      OR ("res_partner"."phone"::text LIKE %s)
-                    )
-                )
-            ))
-            ORDER BY "test_new_api_multi"."id"
-        """]):
-            self.env['test_new_api.multi'].search([
-                ('partner.email', 'like', '@sgc.us'),
-                '|',
-                    ('partner.name', 'like', 'jack'),
-                    ('partner.phone', 'like', '01234'),
-            ])
-
-    def test_mixed_and_or_not_many2one_with_subfield(self):
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            WHERE (
-                (
-                    (
-                        ({many2one} IN (
-                            {subselect} WHERE ("res_partner"."function"::text LIKE %s)
-                        )) OR (({many2one} NOT IN (
-                            {subselect} WHERE (
-                                ("res_partner"."phone"::text LIKE %s)
-                                AND ("res_partner"."mobile"::text LIKE %s)
-                            )))
-                            OR "test_new_api_multi"."partner" IS NULL
-                        )
-                    ) AND ({many2one} IN (
-                        {subselect} WHERE (
-                            ("res_partner"."name"::text LIKE %s)
-                            OR ("res_partner"."email"::text LIKE %s)
-                        )
-                    ))
-                ) AND (({many2one} NOT IN (
-                    {subselect} WHERE ("res_partner"."website"::text LIKE %s)
-                    ))
-                    OR "test_new_api_multi"."partner" IS NULL
-                )
-            )
-            ORDER BY "test_new_api_multi"."id"
-        """.format(
-            many2one='"test_new_api_multi"."partner"',
-            subselect='SELECT "res_partner"."id" FROM "res_partner"',
-        )]):
-            # (function or not (phone and mobile)) and not website and (name or email)
-            self.env['test_new_api.multi'].search([
-                '&', '&',
-                    '|',
-                        ('partner.function', 'like', 'Colonel'),
-                        '!', '&',
-                            ('partner.phone', 'like', '+01'),
-                            ('partner.mobile', 'like', '+01'),
-                    '!', ('partner.website', 'like', 'sgc.us'),
-                    '|',
-                        ('partner.name', 'like', 'jack'),
-                        ('partner.email', 'like', '@sgc.us'),
-            ])
-
-    def test_and_one2many_with_subfield(self):
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            WHERE (("test_new_api_multi"."id" IN (
-                SELECT "test_new_api_multi_line"."multi"
-                FROM "test_new_api_multi_line"
-                WHERE ("test_new_api_multi_line"."name"::text LIKE %s)
-                      AND "test_new_api_multi_line"."multi" IS NOT NULL
-            )) AND ("test_new_api_multi"."id" IN (
-                SELECT "test_new_api_multi_line"."multi"
-                FROM "test_new_api_multi_line"
-                WHERE ("test_new_api_multi_line"."name"::text LIKE %s)
-                      AND "test_new_api_multi_line"."multi" IS NOT NULL
-            )))
-            ORDER BY "test_new_api_multi"."id"
-        """]):
-            self.env['test_new_api.multi'].search([
-                ('lines.name', 'like', 'x'),
-                ('lines.name', 'like', 'y'),
-            ])
-
-    def test_or_one2many_with_subfield(self):
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            WHERE ("test_new_api_multi"."id" IN (
-                SELECT "test_new_api_multi_line"."multi"
-                FROM "test_new_api_multi_line"
-                WHERE (("test_new_api_multi_line"."name"::text LIKE %s)
-                    OR ("test_new_api_multi_line"."name"::text LIKE %s)
-                ) AND "test_new_api_multi_line"."multi" IS NOT NULL
-            ))
-            ORDER BY "test_new_api_multi"."id"
-        """]):
-            self.env['test_new_api.multi'].search([
-                '|',
-                    ('lines.name', 'like', 'x'),
-                    ('lines.name', 'like', 'y'),
-            ])
-
-    def test_mixed_and_or_one2many_with_subfield(self):
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            WHERE (("test_new_api_multi"."id" IN (
-                SELECT "test_new_api_multi_line"."multi"
-                FROM "test_new_api_multi_line"
-                WHERE ("test_new_api_multi_line"."name"::text LIKE %s)
-                   AND "test_new_api_multi_line"."multi" IS NOT NULL)
-            ) AND ("test_new_api_multi"."id" IN (
-                SELECT "test_new_api_multi_line"."multi"
-                FROM "test_new_api_multi_line"
-                WHERE (("test_new_api_multi_line"."name"::text LIKE %s)
-                    OR ("test_new_api_multi_line"."name"::text LIKE %s)
-                ) AND "test_new_api_multi_line"."multi" IS NOT NULL
-            )))
-            ORDER BY "test_new_api_multi"."id"
-        """]):
-            self.env['test_new_api.multi'].search([
-                ('lines.name', 'like', 'x'),
-                '|',
-                    ('lines.name', 'like', 'y'),
-                    ('lines.name', 'like', 'z'),
-            ])
-
-    def test_and_many2many_with_subfield(self):
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            WHERE (EXISTS (
-                SELECT 1
-                FROM "test_new_api_multi_test_new_api_multi_tag_rel" AS "test_new_api_multi__tags"
-                WHERE "test_new_api_multi__tags"."test_new_api_multi_id" = "test_new_api_multi"."id"
-                AND "test_new_api_multi__tags"."test_new_api_multi_tag_id" IN (
-                    SELECT "test_new_api_multi_tag"."id"
-                    FROM "test_new_api_multi_tag"
-                    WHERE ("test_new_api_multi_tag"."name"::text LIKE %s)
-                )
-            ) AND EXISTS (
-                SELECT 1
-                FROM "test_new_api_multi_test_new_api_multi_tag_rel" AS "test_new_api_multi__tags"
-                WHERE "test_new_api_multi__tags"."test_new_api_multi_id" = "test_new_api_multi"."id"
-                AND "test_new_api_multi__tags"."test_new_api_multi_tag_id" IN (
-                    SELECT "test_new_api_multi_tag"."id"
-                    FROM "test_new_api_multi_tag"
-                    WHERE ("test_new_api_multi_tag"."name"::text LIKE %s)
-                )
-            ))
-            ORDER BY "test_new_api_multi"."id"
-        """]):
-            self.env['test_new_api.multi'].search([
-                ('tags.name', 'like', 'x'),
-                ('tags.name', 'like', 'y'),
-            ])
-
-    def test_or_many2many_with_subfield(self):
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            WHERE EXISTS (
-                SELECT 1
-                FROM "test_new_api_multi_test_new_api_multi_tag_rel" AS "test_new_api_multi__tags"
-                WHERE "test_new_api_multi__tags"."test_new_api_multi_id" = "test_new_api_multi"."id"
-                AND "test_new_api_multi__tags"."test_new_api_multi_tag_id" IN (
-                    SELECT "test_new_api_multi_tag"."id"
-                    FROM "test_new_api_multi_tag"
-                    WHERE (("test_new_api_multi_tag"."name"::text LIKE %s)
-                        OR ("test_new_api_multi_tag"."name"::text LIKE %s)
-                    )
-                )
-            )
-            ORDER BY "test_new_api_multi"."id"
-        """]):
-            self.env['test_new_api.multi'].search([
-                '|',
-                    ('tags.name', 'like', 'x'),
-                    ('tags.name', 'like', 'y'),
-            ])
-
-    def test_mixed_and_or_many2many_with_subfield(self):
-        with self.assertQueries(["""
-            SELECT "test_new_api_multi"."id"
-            FROM "test_new_api_multi"
-            WHERE (
-                EXISTS (
-                    SELECT 1
-                    FROM "test_new_api_multi_test_new_api_multi_tag_rel" AS "test_new_api_multi__tags"
-                    WHERE "test_new_api_multi__tags"."test_new_api_multi_id" = "test_new_api_multi"."id"
-                    AND "test_new_api_multi__tags"."test_new_api_multi_tag_id" IN (
-                        SELECT "test_new_api_multi_tag"."id"
-                        FROM "test_new_api_multi_tag"
-                        WHERE ("test_new_api_multi_tag"."name"::text LIKE %s)
-                    )
-                ) AND EXISTS (
-                    SELECT 1
-                    FROM "test_new_api_multi_test_new_api_multi_tag_rel" AS "test_new_api_multi__tags"
-                    WHERE "test_new_api_multi__tags"."test_new_api_multi_id" = "test_new_api_multi"."id"
-                    AND "test_new_api_multi__tags"."test_new_api_multi_tag_id" IN (
-                        SELECT "test_new_api_multi_tag"."id"
-                        FROM "test_new_api_multi_tag"
-                        WHERE (("test_new_api_multi_tag"."name"::text LIKE %s)
-                            OR ("test_new_api_multi_tag"."name"::text LIKE %s)
-                        )
-                    )
-                )
-            )
-            ORDER BY "test_new_api_multi"."id"
-        """]):
-            self.env['test_new_api.multi'].search([
-                ('tags.name', 'like', 'x'),
-                '|',
-                    ('tags.name', 'like', 'y'),
-                    ('tags.name', 'like', 'z'),
-            ])
 
 
 class TestComputeQueries(TransactionCase):

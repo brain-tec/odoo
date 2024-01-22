@@ -196,6 +196,7 @@ class ProductProduct(models.Model):
                 "is_pos_groupable": self.uom_id.is_pos_groupable,
                 "write_date": self.write_date.timestamp(),
                 "self_order_available": self.self_order_available,
+                "barcode": self.barcode,
             }
 
     def _get_self_order_data(self, pos_config: PosConfig) -> List[Dict]:
@@ -215,6 +216,6 @@ class ProductProduct(models.Model):
         config_self = self.env['pos.config'].sudo().search([('self_ordering_mode', '!=', 'nothing')])
         for config in config_self:
             if config.current_session_id and config.access_token:
-                self.env['bus.bus']._sendone(f'pos_config-{config.access_token}', 'PRODUCT_CHANGED', {
+                config._notify('PRODUCT_CHANGED', {
                     'product': self._get_product_for_ui(config)
                 })

@@ -68,7 +68,7 @@
                     </button>
                 </div>
                 <button t-if="props.close" class="o-mail-Chatter-close btn btn-secondary flex-shrink-0 ms-2" aria-label="Close" t-on-click="props.close">
-                    <i class="oi oi-large oi-close"/>
+                    <i class="oi oi-close"/>
                 </button>
             </div>
             <t t-if="state.composerType">
@@ -81,7 +81,7 @@
                     </div>
                 </t>
                 <t t-set="type" t-value="state.composerType === 'message' ? 'message' : 'note'"/>
-                <SuggestedRecipientsList t-if="props.hasFollowers and state.composerType !== 'note'" className="'px-3'" styleString="'margin-left:48px;'" thread="state.thread"/>
+                <SuggestedRecipientsList t-if="props.hasFollowers and state.composerType !== 'note'" className="'px-3'" styleString="'margin-left:48px;'" thread="state.thread" onSuggestedRecipientAdded.bind="onSuggestedRecipientAdded"/>
                 <Composer composer="state.thread.composer" autofocus="true" className="state.composerType === 'message' ? '' : 'pt-4'" mode="'extended'" onPostCallback.bind="onPostCallback" dropzoneRef="rootRef" type="state.composerType" t-key="props.threadId"/>
             </t>
         </div>
@@ -143,7 +143,7 @@
         </div>
         <t t-if="state.showActivities">
             <t t-foreach="activities" t-as="activity" t-key="activity.id">
-                <Activity data="activity" onUpdate.bind="load" reloadParentView.bind="reloadParentView"/>
+                <Activity data="activity" onActivityChanged.bind="onActivityChanged" reloadParentView.bind="reloadParentView"/>
             </t>
         </t>
     </div>
