@@ -35,6 +35,7 @@ import { tooltipService } from "@web/core/tooltip/tooltip_service";
 import { SIZES } from "@web/core/ui/ui_service";
 import { session } from "@web/session";
 import { CharField } from "@web/views/fields/char/char_field";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { FormController } from "@web/views/form/form_controller";
 import BasicModel from "web.BasicModel";
 import legacySession from "web.session";
@@ -13567,4 +13568,81 @@ QUnit.module("Views", (hooks) => {
             );
         }
     );
+
+    QUnit.test("nested form view doesn't parasite the main one", async (assert) => {
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `
+                <form>
+                    <field name="p">
+                        <form>
+                            <div name="button_box" attrs="{'invisible': [('crash','=',False)]}">
+                                <button name="somename" type="object" />
+                            </div>
+                            <field name="p">
+                                <form>
+                                    <footer>
+                                        <button name="someothername" type="object" />
+                                    </footer>
+                                </form>
+                                <tree><field name="display_name" /></tree>
+                            </field>
+                            <footer>
+                                <button name="somename" type="object" />
+                            </footer>
+                        </form>
+                        <tree>
+                            <field name="display_name" />
+                        </tree>
+                    </field>
+                </form>`,
+            resId: 2,
+        });
+        assert.containsOnce(target, ".o_form_view");
+        assert.containsNone(target, ".o-form-buttonbox");
+        await click(target, ".o_field_x2many_list_row_add a");
+        assert.containsOnce(target, ".modal .modal-footer button[name='somename']");
+        assert.containsNone(target, ".modal .modal-footer button[name='someothername']");
+        await click(target, ".modal .o_field_x2many_list_row_add a");
+        assert.containsOnce(
+            target,
+            ".modal:not(.o_inactive_modal) .modal-footer button[name='someothername']"
+        );
+    });
+
+    QUnit.test("an empty json object does not pass the required check", async function (assert) {
+        assert.expect(3);
+        serverData.models.partner.fields.json_field = { type: "json" };
+        class JsonField extends Component {
+            onChange(ev) {
+                this.props.update(JSON.parse(ev.target.value));
+            }
+        }
+        JsonField.props = standardFieldProps;
+        JsonField.supportedTypes = ["json"];
+        JsonField.template = xml`<span><input t-on-change="onChange"/></span>`;
+
+        fieldRegistry.add("json", JsonField);
+        const form = await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: `<form><field name="json_field" widget="json" required="1"/></form>`,
+        });
+
+        patchWithCleanup(form.env.services.notification, {
+            add: (message, params) => {
+                assert.strictEqual(message.toString(), "<ul><li>json_field</li></ul>");
+                assert.deepEqual(params, { title: "Invalid fields: ", type: "danger" });
+            },
+        });
+        await editInput(target, ".o_field_widget[name=json_field] input", "{}")
+        await clickSave(target);
+        assert.hasClass(
+            target.querySelector(".o_field_widget[name=json_field]"),
+            "o_field_invalid"
+        );
+    });
 });
