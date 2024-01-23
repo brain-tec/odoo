@@ -44,7 +44,6 @@ import { WarningDialog } from "@web/core/errors/error_dialogs";
 import { errorService } from "@web/core/errors/error_service";
 import { localization } from "@web/core/l10n/localization";
 import { registry } from "@web/core/registry";
-import { scrollerService } from "@web/core/scroller_service";
 import { tooltipService } from "@web/core/tooltip/tooltip_service";
 import { SIZES } from "@web/core/ui/ui_service";
 import { useService } from "@web/core/utils/hooks";
@@ -1625,8 +1624,6 @@ QUnit.module("Views", (hooks) => {
     QUnit.test(
         "notebook page is changing when an anchor is clicked from another page",
         async (assert) => {
-            serviceRegistry.add("scroller", scrollerService);
-
             const scrollableParent = document.createElement("div");
             scrollableParent.style.overflow = "auto";
             target.append(scrollableParent);
@@ -6047,11 +6044,11 @@ QUnit.module("Views", (hooks) => {
         });
 
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
-        assert.strictEqual(router.current.hash.id, 1);
+        assert.strictEqual(router.current.id, 1);
 
         await click(target.querySelector(".o_pager_next"));
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "2");
-        assert.strictEqual(router.current.hash.id, 2);
+        assert.strictEqual(router.current.id, 2);
     });
 
     QUnit.test("switching to non-existing record", async function (assert) {
@@ -6072,19 +6069,17 @@ QUnit.module("Views", (hooks) => {
 
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
         assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "3");
-        assert.strictEqual(router.current.hash.id, 1);
+        assert.strictEqual(router.current.id, 1);
         await click(target.querySelector(".o_pager_next"));
 
-        await nextTick();
-        assert.containsOnce(target, ".o_notification_bar.bg-danger");
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "1");
         assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "2");
-        assert.strictEqual(router.current.hash.id, 1);
+        assert.strictEqual(router.current.id, 1);
 
         await click(target.querySelector(".o_pager_next"));
         assert.strictEqual(target.querySelector(".o_pager_value").textContent, "2");
         assert.strictEqual(target.querySelector(".o_pager_limit").textContent, "2");
-        assert.strictEqual(router.current.hash.id, 2);
+        assert.strictEqual(router.current.id, 2);
     });
 
     QUnit.test("modifiers are reevaluated when creating new record", async function (assert) {
