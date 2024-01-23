@@ -26,23 +26,7 @@ export class ActivityMenu extends Component {
     }
 
     async fetchSystrayActivities() {
-        const groups = await this.env.services.orm.call("res.users", "systray_get_activities");
-        let total = 0;
-        for (const group of groups) {
-            total += group.total_count || 0;
-        }
-        this.store.activityCounter = total;
-        this.store.activityGroups = groups;
-        this.sortActivityGroups();
-    }
-
-    /**
-     * Sort by model ID ASC but always place the activity group for "mail.activity" model at the end (other activities).
-     */
-    sortActivityGroups() {
-        const getSortId = (activityGroup) =>
-            activityGroup.model === "mail.activity" ? Number.MAX_VALUE : activityGroup.id;
-        this.store.activityGroups.sort((g1, g2) => getSortId(g1) - getSortId(g2));
+        await this.store.fetchData({ systray_get_activities: true });
     }
 
     onBeforeOpen() {

@@ -189,6 +189,17 @@ export class Store extends BaseStore {
         sort: (f1, f2) => f2.lastMessage?.id - f1.lastMessage?.id,
     });
     activityCounter = 0;
+    activityGroups = Record.attr([], {
+        sort(g1, g2) {
+            /**
+             * Sort by model ID ASC but always place the activity group for "mail.activity" model at
+             * the end (other activities).
+             */
+            const getSortId = (activityGroup) =>
+                activityGroup.model === "mail.activity" ? Number.MAX_VALUE : activityGroup.id;
+            return getSortId(g1) - getSortId(g2);
+        },
+    });
     isMessagingReady = false;
     settings = Record.one("Settings");
     openInviteThread = Record.one("Thread");
@@ -209,6 +220,10 @@ export class Store extends BaseStore {
 
     async _fetchDataDebounced() {
         const fetchDeferred = this.fetchDeferred;
+        this.fetchParams.context = {
+            ...user.context,
+            ...this.fetchParams.context,
+        };
         rpc(this.fetchReadonly ? "/mail/data" : "/mail/action", this.fetchParams, {
             silent: this.fetchSilent,
         }).then(

@@ -278,8 +278,7 @@ class Users(models.Model):
         return values
 
     @api.model
-    @api.readonly
-    def systray_get_activities(self):
+    def _get_activity_groups(self):
         search_limit = int(self.env['ir.config_parameter'].sudo().get_param('mail.activity.systray.limit', 1000))
         activities = self.env["mail.activity"].search(
             [("user_id", "=", self.env.uid)], order='id desc', limit=search_limit)
