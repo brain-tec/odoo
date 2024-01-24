@@ -2569,7 +2569,7 @@ var SnippetsMenu = Widget.extend({
             // their descendant snippets.
             const rootInvisibleSnippetEls = [...$invisibleSnippets].filter(invisibleSnippetEl => {
                 const ancestorInvisibleEl = invisibleSnippetEl
-                                                 .parentElement.closest(".o_snippet_invisible");
+                                                 .parentElement.closest(invisibleSelector);
                 if (!ancestorInvisibleEl) {
                     return true;
                 }
@@ -4436,7 +4436,7 @@ var SnippetsMenu = Widget.extend({
         const $customizeTableBlock = $(QWeb.render('web_editor.toolbar.table-options'));
         this.options.wysiwyg.odooEditor.bindExecCommand($customizeTableBlock[0]);
         $(this.customizePanel).append($customizeTableBlock);
-        this._$removeFormatButton = this.options.wysiwyg.toolbar.$el.find('#removeFormat');
+        this._$removeFormatButton = this._$removeFormatButton || this.options.wysiwyg.toolbar.$el.find('#removeFormat');
         $title.append(this._$removeFormatButton);
         this._$toolbarContainer.append(this.options.wysiwyg.toolbar.$el);
 
