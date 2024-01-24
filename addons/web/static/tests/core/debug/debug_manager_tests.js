@@ -26,7 +26,7 @@ import {
     patchWithCleanup,
 } from "../../helpers/utils";
 import { createWebClient, doAction, getActionManagerServerData } from "../../webclient/helpers";
-import { openViewItem } from "@web/webclient/debug_items";
+import { openViewItem } from "@web/webclient/debug/debug_items";
 import {
     editSearchView,
     editView,
@@ -42,6 +42,7 @@ import { Component, xml } from "@odoo/owl";
 export class DebugMenuParent extends Component {
     static template = xml`<DebugMenu/>`;
     static components = { DebugMenu };
+    static props = ["*"];
     setup() {
         useOwnDebugContext({ categories: ["default", "custom"] });
     }
@@ -468,6 +469,7 @@ QUnit.module("DebugMenu", (hooks) => {
 
         class ToyController extends Component {
             static template = xml`<div class="o-toy-view"/>`;
+            static props = ["*"];
             setup() {
                 useSetupView();
             }
