@@ -1304,6 +1304,22 @@ class ComputeMember(models.Model):
             member.container_id = container.search([('name', '=', member.name)], limit=1)
 
 
+class User(models.Model):
+    _name = _description = 'test_new_api.user'
+    _allow_sudo_commands = False
+
+    name = fields.Char()
+    group_ids = fields.Many2many('test_new_api.group')
+
+
+class Group(models.Model):
+    _name = _description = 'test_new_api.group'
+    _allow_sudo_commands = False
+
+    name = fields.Char()
+    user_ids = fields.Many2many('test_new_api.user')
+
+
 class ComputeEditable(models.Model):
     _name = _description = 'test_new_api.compute_editable'
 
@@ -1418,3 +1434,13 @@ class TeamMember(models.Model):
     name = fields.Char('Name')
     team_id = fields.Many2one('test_new_api.team')
     parent_id = fields.Many2one('test_new_api.team', related='team_id.parent_id')
+
+
+class ModelAutovacuumed(models.Model):
+    _name = _description = 'test_new_api.autovacuumed'
+
+    expire_at = fields.Datetime('Expires at')
+
+    @api.autovacuum
+    def _gc(self):
+        self.search([('expire_at', '<', datetime.datetime.now() - datetime.timedelta(days=1))]).unlink()
