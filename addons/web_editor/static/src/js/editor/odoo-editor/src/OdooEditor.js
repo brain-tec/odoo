@@ -4182,7 +4182,7 @@ export class OdooEditor extends EventTarget {
         }
     }
 
-    cleanForSave(element = this.editable) {
+    cleanForSave(element = this.editable, editable = this.editable) {
         for (const hint of element.querySelectorAll('.oe-hint')) {
             hint.classList.remove('oe-hint', 'oe-command-temporary-hint');
             if (hint.classList.length === 0) {
@@ -4218,7 +4218,7 @@ export class OdooEditor extends EventTarget {
             node.replaceChildren();
         }
 
-        sanitize(element, this.editable);
+        sanitize(element, editable);
 
         // Remove contenteditable=false on elements
         for (const el of element.querySelectorAll('[contenteditable="false"]')) {
@@ -4237,7 +4237,7 @@ export class OdooEditor extends EventTarget {
         }
 
         // Clean custom selections
-        if (this.deselectTable() && hasValidSelection(this.editable)) {
+        if (this.deselectTable() && hasValidSelection(editable)) {
             this.document.getSelection().collapseToStart();
         }
     }
@@ -4495,6 +4495,12 @@ export class OdooEditor extends EventTarget {
             this.document.addEventListener('mousemove', resizeTable);
             this.document.addEventListener('mouseup', stopResizing);
             this.document.addEventListener('mouseleave', stopResizing);
+        }
+
+        // Handle emoji popover
+        const isEmojiPopover = document.querySelector('.o-EmojiPicker');
+        if (isEmojiPopover && ev.target !== isEmojiPopover) {
+            isEmojiPopover.remove();
         }
     }
 
