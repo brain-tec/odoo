@@ -103,8 +103,7 @@ export class SelectMenu extends Component {
     get canDeselect() {
         return (
             !this.props.required &&
-            this.selectedChoice !== undefined &&
-            this.selectedChoice !== null
+            this.selectedChoice !== undefined
         );
     }
 
@@ -150,7 +149,7 @@ export class SelectMenu extends Component {
 
     getItemClass(choice) {
         if (this.isOptionSelected(choice)) {
-            return "o_select_menu_item mb-1 o_select_active bg-primary text-light fw-bolder fst-italic";
+            return "o_select_menu_item mb-1 o_select_active bg-primary fw-bolder fst-italic";
         } else {
             return "o_select_menu_item mb-1";
         }
@@ -183,12 +182,8 @@ export class SelectMenu extends Component {
     }
 
     getSelectedChoice(props) {
-        if (props.value) {
-            const choices = [...props.choices, ...props.groups.flatMap((g) => g.choices)];
-            return choices.find((c) => c.value === props.value);
-        } else {
-            return undefined;
-        }
+        const choices = [...props.choices, ...props.groups.flatMap((g) => g.choices)];
+        return choices.find((c) => c.value === props.value);
     }
 
     onItemSelected(value) {
