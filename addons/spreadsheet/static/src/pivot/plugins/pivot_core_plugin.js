@@ -1,29 +1,21 @@
 /** @odoo-module */
-
+//@ts-check
 /**
  *
- * @typedef {Object} PivotDefinition
- * @property {Array<string>} colGroupBys
- * @property {Array<string>} rowGroupBys
- * @property {Array<string>} measures
- * @property {string} model
- * @property {Array} domain
- * @property {Object} context
- * @property {string} name
- * @property {string} id
- * @property {Object | null} sortedColumn
+ * @typedef {import("@spreadsheet").PivotDefinition} PivotDefinition
+ * @typedef {import("@spreadsheet").PivotRuntime} PivotRuntime
+ * @typedef {import("@spreadsheet").AllCoreCommand} AllCoreCommand
  *
- * @typedef {Object} Pivot
+ * @typedef {Object} LocalPivot
  * @property {string} id
- * @property {string} dataSourceId
  * @property {PivotDefinition} definition
- * @property {Object} fieldMatching
+ * @property {Record<string, FieldMatching>} fieldMatching
  *
  * @typedef {import("@spreadsheet/global_filters/plugins/global_filters_core_plugin").FieldMatching} FieldMatching
  * @typedef {import("../pivot_table.js").PivotCell} PivotCell
  */
 
-import { CorePlugin, helpers } from "@odoo/o-spreadsheet";
+import { helpers } from "@odoo/o-spreadsheet";
 import { makePivotFormula } from "../pivot_helpers";
 import { getMaxObjectId } from "@spreadsheet/helpers/helpers";
 import { SpreadsheetPivotTable } from "../pivot_table";
@@ -34,15 +26,27 @@ import { sprintf } from "@web/core/utils/strings";
 import { checkFilterFieldMatching } from "@spreadsheet/global_filters/helpers";
 import { Domain } from "@web/core/domain";
 import { deepCopy } from "@web/core/utils/objects";
+import { OdooCorePlugin } from "@spreadsheet/plugins";
 
 const { isDefined } = helpers;
 
-export class PivotCorePlugin extends CorePlugin {
+export class PivotCorePlugin extends OdooCorePlugin {
+    static getters = /** @type {const} */ ([
+        "getNextPivotId",
+        "getPivotDefinition",
+        "getPivotDisplayName",
+        "getPivotIds",
+        "getPivotName",
+        "isExistingPivot",
+        "getPivotFieldMatch",
+        "getPivotFieldMatching",
+        "getPivotModelDefinition",
+    ]);
     constructor(config) {
         super(config);
 
         this.nextId = 1;
-        /** @type {Object.<string, Pivot>} */
+        /** @type {Object.<string, LocalPivot>} */
         this.pivots = {};
         globalFiltersFieldMatchers["pivot"] = {
             getIds: () => this.getters.getPivotIds(),
@@ -53,6 +57,11 @@ export class PivotCorePlugin extends CorePlugin {
         };
     }
 
+    /**
+     * @param {AllCoreCommand} cmd
+     *
+     * @returns {string | string[]}
+     */
     allowDispatch(cmd) {
         switch (cmd.type) {
             case "RENAME_ODOO_PIVOT":
@@ -86,26 +95,26 @@ export class PivotCorePlugin extends CorePlugin {
     }
 
     /**
-     * Handle a spreadsheet command
+     * @param {AllCoreCommand} cmd
      *
-     * @param {Object} cmd Command
      */
     handle(cmd) {
         switch (cmd.type) {
             case "INSERT_PIVOT": {
                 const { sheetId, col, row, id, definition } = cmd;
-                /** @type { col: number, row: number } */
+                /** @type { { col: number, row: number } } */
                 const position = { col, row };
                 const { cols, rows, measures, rowTitle } = cmd.table;
                 const table = new SpreadsheetPivotTable(cols, rows, measures, rowTitle);
-                this._addPivot(id, definition);
+                const def = this._convertPivotDefinition(definition);
+                this._addPivot(id, def);
                 this._insertPivot(sheetId, position, id, table);
                 this.history.update("nextId", parseInt(id, 10) + 1);
                 break;
             }
             case "RE_INSERT_PIVOT": {
                 const { sheetId, col, row, id } = cmd;
-                /** @type { col: number, row: number } */
+                /** @type { { col: number, row: number } } */
                 const position = { col, row };
                 const { cols, rows, measures, rowTitle } = cmd.table;
                 const table = new SpreadsheetPivotTable(cols, rows, measures, rowTitle);
@@ -130,14 +139,7 @@ export class PivotCorePlugin extends CorePlugin {
                 break;
             }
             case "UPDATE_ODOO_PIVOT_DOMAIN": {
-                this.history.update(
-                    "pivots",
-                    cmd.pivotId,
-                    "definition",
-                    "searchParams",
-                    "domain",
-                    cmd.domain
-                );
+                this.history.update("pivots", cmd.pivotId, "definition", "domain", cmd.domain);
                 break;
             }
             case "ADD_GLOBAL_FILTER":
@@ -174,7 +176,7 @@ export class PivotCorePlugin extends CorePlugin {
 
     /**
      * @param {string} id
-     * @returns {string}
+     * @returns {Record<string, FieldMatching>}
      */
     getPivotFieldMatch(id) {
         return this.pivots[id].fieldMatching;
@@ -195,22 +197,31 @@ export class PivotCorePlugin extends CorePlugin {
      * @returns {PivotDefinition}
      */
     getPivotDefinition(id) {
-        const def = this.pivots[id].definition;
-        return {
-            colGroupBys: [...def.metaData.colGroupBys],
-            context: { ...def.searchParams.context },
-            domain: def.searchParams.domain,
-            id,
-            measures: [...def.metaData.activeMeasures],
-            model: def.metaData.resModel,
-            rowGroupBys: [...def.metaData.rowGroupBys],
-            name: def.name,
-            sortedColumn: def.metaData.sortedColumn ? { ...def.metaData.sortedColumn } : null,
-        };
+        return deepCopy(this.pivots[id].definition);
     }
 
+    /**
+     * @param {string} id
+     * @returns {PivotRuntime}
+     */
     getPivotModelDefinition(id) {
-        return this.pivots[id].definition;
+        const definition = this.getPivotDefinition(id);
+        return {
+            metaData: {
+                colGroupBys: definition.colGroupBys,
+                rowGroupBys: definition.rowGroupBys,
+                activeMeasures: definition.measures,
+                resModel: definition.model,
+                sortedColumn: definition.sortedColumn,
+            },
+            searchParams: {
+                groupBy: [],
+                orderBy: [],
+                domain: definition.domain,
+                context: definition.context,
+            },
+            name: definition.name,
+        };
     }
 
     /**
@@ -269,14 +280,32 @@ export class PivotCorePlugin extends CorePlugin {
     }
 
     /**
+     * @param {PivotRuntime} runtimeDefinition
+     *
+     * @returns {PivotDefinition}
+     */
+    _convertPivotDefinition(runtimeDefinition) {
+        return {
+            colGroupBys: runtimeDefinition.metaData.colGroupBys,
+            rowGroupBys: runtimeDefinition.metaData.rowGroupBys,
+            measures: runtimeDefinition.metaData.activeMeasures,
+            model: runtimeDefinition.metaData.resModel,
+            domain: runtimeDefinition.searchParams.domain,
+            context: runtimeDefinition.searchParams.context,
+            name: runtimeDefinition.name,
+            sortedColumn: runtimeDefinition.metaData.sortedColumn || null,
+        };
+    }
+
+    /**
      * @param {string} id
      * @param {PivotDefinition} definition
-     * @param {string} dataSourceId
+     * @param {Record<string, FieldMatching>} [fieldMatching]
      */
     _addPivot(id, definition, fieldMatching = undefined) {
         const pivots = { ...this.pivots };
         if (!fieldMatching) {
-            const model = definition.metaData.resModel;
+            const model = definition.model;
             fieldMatching = this.getters.getFieldMatchingForModel(model);
         }
         pivots[id] = {
@@ -386,8 +415,8 @@ export class PivotCorePlugin extends CorePlugin {
 
     /**
      * @param {string} sheetId
-     * @param {{ col: number, row: number }} position
      * @param {string} pivotId
+     * @param {{ col: number, row: number }} position
      * @param {PivotCell} pivotCell
      */
     _addPivotFormula(sheetId, pivotId, { col, row }, pivotCell) {
@@ -417,28 +446,9 @@ export class PivotCorePlugin extends CorePlugin {
     import(data) {
         if (data.pivots) {
             for (const [id, pivot] of Object.entries(data.pivots)) {
-                const definition = {
-                    metaData: {
-                        colGroupBys: pivot.colGroupBys,
-                        rowGroupBys: pivot.rowGroupBys,
-                        activeMeasures: pivot.measures.map((elt) => elt.field),
-                        resModel: pivot.model,
-                        sortedColumn: !pivot.sortedColumn
-                            ? undefined
-                            : {
-                                  groupId: pivot.sortedColumn.groupId,
-                                  measure: pivot.sortedColumn.measure,
-                                  order: pivot.sortedColumn.order,
-                              },
-                    },
-                    searchParams: {
-                        groupBy: [],
-                        orderBy: [],
-                        domain: pivot.domain,
-                        context: pivot.context,
-                    },
-                    name: pivot.name,
-                };
+                /** @type {PivotDefinition} */
+                const definition = deepCopy(pivot);
+                definition.measures = pivot.measures.map((elt) => elt.field);
                 this._addPivot(id, definition, pivot.fieldMatching);
             }
         }
@@ -452,7 +462,7 @@ export class PivotCorePlugin extends CorePlugin {
     export(data) {
         data.pivots = {};
         for (const id in this.pivots) {
-            data.pivots[id] = JSON.parse(JSON.stringify(this.getPivotDefinition(id)));
+            data.pivots[id] = deepCopy(this.getPivotDefinition(id));
             data.pivots[id].measures = data.pivots[id].measures.map((elt) => ({ field: elt }));
             data.pivots[id].fieldMatching = this.pivots[id].fieldMatching;
             data.pivots[id].domain = new Domain(data.pivots[id].domain).toJson();
@@ -460,15 +470,3 @@ export class PivotCorePlugin extends CorePlugin {
         data.pivotNextId = this.nextId;
     }
 }
-
-PivotCorePlugin.getters = [
-    "getNextPivotId",
-    "getPivotDefinition",
-    "getPivotDisplayName",
-    "getPivotIds",
-    "getPivotName",
-    "isExistingPivot",
-    "getPivotFieldMatch",
-    "getPivotFieldMatching",
-    "getPivotModelDefinition",
-];
