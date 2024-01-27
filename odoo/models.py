@@ -4117,6 +4117,8 @@ class BaseModel(metaclass=MetaModel):
         :param companies: the allowed companies for the related record
         :type companies: BaseModel or list or tuple or int or unquote
         """
+        if not companies:
+            return [('company_id', '=', False)]
         return ['|', ('company_id', '=', False), ('company_id', 'in', to_company_ids(companies))]
 
     def _check_company(self, fnames=None):
@@ -4861,6 +4863,9 @@ class BaseModel(metaclass=MetaModel):
         """ Create records from the stored field values in ``data_list``. """
         assert data_list
         cr = self.env.cr
+        lang = self.env.lang or 'en_US'
+        if lang != 'en_US' and not self.env['res.lang']._lang_get_id(lang):
+            raise UserError(_('Invalid language code: %s', lang))
 
         # insert rows in batches of maximum INSERT_BATCH_SIZE
         ids = []                                # ids of created records

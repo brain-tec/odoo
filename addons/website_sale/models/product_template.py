@@ -273,7 +273,7 @@ class ProductTemplate(models.Model):
         for template in self:
             price_reduce = sales_prices[template.id]
 
-            product_taxes = template.sudo().taxes_id.filtered(lambda t: t.company_id == t.env.company)
+            product_taxes = template.sudo().taxes_id.filtered(lambda t: t.company_id in t.env.company.parent_ids)
             taxes = fiscal_position.map_tax(product_taxes)
 
             base_price = None
@@ -423,6 +423,7 @@ class ProductTemplate(models.Model):
         product_or_template = product_or_template.with_context(**price_context)
 
         combination_info = {
+            'combination': combination,
             'product_id': product.id,
             'product_template_id': self.id,
             'display_name': display_name,

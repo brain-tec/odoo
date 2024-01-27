@@ -3565,7 +3565,10 @@ var SnippetsMenu = Widget.extend({
      */
     _registerDefaultTexts: function ($in) {
         if ($in === undefined) {
-            $in = this.$snippets.find('.oe_snippet_body');
+            // By default, we don't want the `o_default_snippet_text` class on
+            // custom snippets. Those are most likely already ready, we don't
+            // really need the auto-selection by the editor.
+            $in = this.$snippets.find('.oe_snippet_body:not(.s_custom_snippet)');
         }
 
         $in.find('*').addBack()
@@ -4435,7 +4438,8 @@ var SnippetsMenu = Widget.extend({
         const customizeTableBlock = renderToElement('web_editor.toolbar.table-options');
         this.options.wysiwyg.odooEditor.bindExecCommand(customizeTableBlock);
         $(this.customizePanel).append(customizeTableBlock);
-        $title.append(this._toolbarWrapperEl.querySelector('#removeFormat'));
+        this._removeFormatButton = this._removeFormatButton || this._toolbarWrapperEl.querySelector('#removeFormat');
+        $title.append(this._removeFormatButton);
         this._$toolbarContainer.append(this._toolbarWrapperEl);
 
         this._checkEditorToolbarVisibility();

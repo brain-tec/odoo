@@ -1768,9 +1768,12 @@ class _String(Field):
             return lang, lang[1:], '_en_US', 'en_US'
         return lang, 'en_US'
 
-    def _lang(self, env):
+    def _lang(self, env, validate=False):
+        """ Usually validate can be set to False for read, but should be set to True for write or fetch"""
         context = env.context
         lang = env.lang or 'en_US'
+        if validate and lang != 'en_US' and not env['res.lang']._lang_get_id(lang):
+            raise UserError(_('Invalid language code: %s', lang))
         if callable(self.translate) and (context.get('edit_translations') or context.get('check_translations')):
             lang = '_' + lang
         return lang
@@ -1791,13 +1794,14 @@ class _String(Field):
             dirty_records.flush_recordset([self.name])
 
         dirty = self.store and any(records._ids)
-        lang = records.env.lang or 'en_US'
+        lang = self._lang(records.env, validate=True)
 
         # not dirty fields
         if not dirty:
-            lang = self._lang(records.env)
             cache.update_raw(records, self, [{lang: cache_value} for _id in records._ids], dirty=False)
             return
+
+        assert not lang.startswith('_')
 
         # model translation
         if not callable(self.translate):
@@ -2910,7 +2914,8 @@ class _Relational(Field):
             else:
                 cid = "id" if self.model_name == "res.company" else "company_id"
             company_domain = env[self.comodel_name]._check_company_domain(companies=unquote(cid))
-            return f"({cid} and {company_domain} or []) + ({domain or []})"
+            no_company_domain = env[self.comodel_name]._check_company_domain(companies='')
+            return f"({cid} and {company_domain} or {no_company_domain}) + ({domain or []})"
         return domain
 
 
