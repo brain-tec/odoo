@@ -67,26 +67,15 @@ const ODOO_PIVOT = {
     compute: function (pivotId, measureName, ...domain) {
         pivotId = toString(pivotId);
         const measure = toString(measureName);
-        const args = domain.map(toString);
+        const domainArgs = domain.map(toString);
         assertPivotsExists(pivotId, this.getters);
         assertMeasureExist(pivotId, measure, this.getters);
-        assertDomainLength(args);
-        const value = this.getters.getPivotCellValue(pivotId, measure, args);
-        const field = this.getters.getPivotDataSource(pivotId).getField(measure);
-        let format = undefined;
-        if (field) {
-            switch (field.type) {
-                case "integer":
-                    format = "0";
-                    break;
-                case "float":
-                    format = "#,##0.00";
-                    break;
-                case "monetary":
-                    format = this.getters.getCompanyCurrencyFormat() || "#,##0.00";
-                    break;
-            }
+        assertDomainLength(domainArgs);
+        const value = this.getters.getPivotCellValue(pivotId, measure, domainArgs);
+        if (measure === "__count") {
+            return { value, format: "0" };
         }
+        const format = this.getters.getPivotFieldFormat(pivotId, measure);
         return { value, format };
     },
     returns: ["NUMBER", "STRING"],
@@ -102,53 +91,22 @@ const ODOO_PIVOT_HEADER = {
     category: "Odoo",
     compute: function (pivotId, ...domain) {
         pivotId = toString(pivotId);
-        const args = domain.map(toString);
+        const domainArgs = domain.map(toString);
         assertPivotsExists(pivotId, this.getters);
-        assertDomainLength(args);
-        const pivot = this.getters.getPivotDataSource(pivotId);
+        assertDomainLength(domainArgs);
+        const fieldName = domainArgs.at(-2);
+        const value = domainArgs.at(-1);
+        const format =
+            !fieldName || fieldName === "measure" || value === "false"
+                ? undefined
+                : this.getters.getPivotFieldFormat(pivotId, fieldName);
         return {
-            value: this.getters.getDisplayedPivotHeaderValue(pivotId, args, this.locale),
-            format: odooPivotHeaderFormat(pivot, args, this.locale),
+            value: this.getters.computeOdooPivotHeaderValue(pivotId, domainArgs, this.locale),
+            format,
         };
     },
     returns: ["NUMBER", "STRING"],
 };
-
-function odooPivotHeaderFormat(pivot, domains, locale) {
-    const len = domains.length;
-    if (!len) {
-        return undefined;
-    }
-    const fieldName = toString(domains[len - 2]);
-    const value = toString(domains[len - 1]);
-    if (fieldName === "measure" || value === "false") {
-        return undefined;
-    }
-    const { aggregateOperator, field } = pivot.parseGroupField(fieldName);
-    switch (field.type) {
-        case "integer":
-            return "0";
-        case "float":
-        case "monetary":
-            return "#,##0.00";
-        case "date":
-        case "datetime":
-            switch (aggregateOperator) {
-                case "day":
-                    return locale.dateFormat;
-                case "month":
-                    return "mmmm yyyy";
-                case "year":
-                    return "0";
-                case "week":
-                case "quarter":
-                    return undefined;
-            }
-            break;
-        default:
-            return undefined;
-    }
-}
 
 const ODOO_PIVOT_POSITION = {
     description: _t("Get the absolute ID of an element in the pivot"),
