@@ -6,6 +6,46 @@ import { MockServer } from "@web/../tests/helpers/mock_server";
 import { DISCUSS_ACTION_ID } from "../../test_constants";
 
 patch(MockServer.prototype, {
+    /** Simulates `_init_store_data` on `res.users`. */
+    _mockResUsers__init_store_data() {
+        const res = {
+            Store: {
+                action_discuss_id: DISCUSS_ACTION_ID,
+                hasGifPickerFeature: true,
+                hasLinkPreviewFeature: true,
+                hasMessageTranslationFeature: true,
+                odoobot: this._mockResPartnerMailPartnerFormat(this.odoobotId).get(this.odoobotId),
+            },
+        };
+        if (!this.pyEnv.currentUser._is_public()) {
+            const userSettings = this._mockResUsersSettings_FindOrCreateForUser(
+                this.pyEnv.currentUser.id
+            );
+            Object.assign(res.Store, {
+                self: {
+                    id: this.pyEnv.currentUser.partner_id,
+                    isAdmin: true, // mock server simplification
+                    isInternalUser: !this.pyEnv.currentUser.share,
+                    name: this.pyEnv.currentUser.name,
+                    notification_preference: this.pyEnv.currentUser.notification_type,
+                    type: "partner",
+                    userId: this.pyEnv.currentUser.id,
+                    write_date: this.pyEnv.currentUser.write_date,
+                },
+                settings: this._mockResUsersSettings_ResUsersSettingsFormat(userSettings.id),
+            });
+        } else if (this.pyEnv.currentGuest) {
+            Object.assign(res.Store, {
+                self: {
+                    id: this.pyEnv.currentGuest.id,
+                    name: this.pyEnv.currentGuest.name,
+                    type: "guest",
+                    write_date: this.pyEnv.currentGuest.write_date,
+                },
+            });
+        }
+        return res;
+    },
     /**
      * Simulates `_init_messaging` on `res.users`.
      *
@@ -16,7 +56,6 @@ patch(MockServer.prototype, {
      */
     _mockResUsers_InitMessaging(ids, context) {
         const user = this.getRecords("res.users", [["id", "in", ids]])[0];
-        const userSettings = this._mockResUsersSettings_FindOrCreateForUser(user.id);
         const channels = this._mockDiscussChannel__get_channels_as_member();
         const members = this.getRecords("discuss.channel.member", [
             ["channel_id", "in", channels.map((channel) => channel.id)],
@@ -27,8 +66,6 @@ patch(MockServer.prototype, {
                 fields: ["source", "substitution"],
             }),
             Store: {
-                action_discuss_id: DISCUSS_ACTION_ID,
-                current_user_id: this.pyEnv.currentUserId,
                 discuss: {
                     inbox: {
                         counter: this._mockResPartner_GetNeedactionCount(user.partner_id),
@@ -43,14 +80,9 @@ patch(MockServer.prototype, {
                         model: "mail.box",
                     },
                 },
-                hasGifPickerFeature: true,
-                hasLinkPreviewFeature: true,
-                hasMessageTranslationFeature: true,
                 initBusId: this.lastBusNotificationId,
                 initChannelsUnreadCounter: members.filter((member) => member.message_unread_counter)
                     .length,
-                odoobot: this._mockResPartnerMailPartnerFormat(this.odoobotId).get(this.odoobotId),
-                settings: this._mockResUsersSettings_ResUsersSettingsFormat(userSettings.id),
             },
             Thread: this._mockDiscussChannelChannelInfo(
                 this._mockDiscussChannel__get_init_channels(user, context).map(

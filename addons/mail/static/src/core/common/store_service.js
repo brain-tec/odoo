@@ -2,6 +2,7 @@
 
 import { BaseStore, makeStore, Record } from "@mail/core/common/record";
 
+import { router } from "@web/core/browser/router";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
@@ -56,6 +57,8 @@ export class Store extends BaseStore {
     /** @type {typeof import("@mail/core/common/volume_model").Volume} */
     Volume;
 
+    /** @type {number} */
+    action_discuss_id;
     lastChannelSubscription = "";
     /** This is the current logged partner / guest */
     self = Record.one("Persona");
@@ -73,13 +76,13 @@ export class Store extends BaseStore {
      * public page.
      */
     inPublicPage = false;
-    companyName = "";
     odoobot = Record.one("Persona");
     /** @type {boolean} */
     odoobotOnboarding;
     users = {};
-    internalUserGroupId = null;
-    /** @type {string} */
+    /** @type {number} */
+    internalUserGroupId;
+    /** @type {number} */
     mt_comment_id;
     /** @type {boolean} */
     hasMessageTranslationFeature;
@@ -188,19 +191,6 @@ export class Store extends BaseStore {
          */
         sort: (f1, f2) => f2.lastMessage?.id - f1.lastMessage?.id,
     });
-    activityCounter = 0;
-    activityGroups = Record.attr([], {
-        sort(g1, g2) {
-            /**
-             * Sort by model ID ASC but always place the activity group for "mail.activity" model at
-             * the end (other activities).
-             */
-            const getSortId = (activityGroup) =>
-                activityGroup.model === "mail.activity" ? Number.MAX_VALUE : activityGroup.id;
-            return getSortId(g1) - getSortId(g2);
-        },
-    });
-    isMessagingReady = false;
     settings = Record.one("Settings");
     openInviteThread = Record.one("Thread");
 
@@ -241,11 +231,11 @@ export class Store extends BaseStore {
 
     /**
      * @template T
-     * @param {T} dataByModelName
+     * @param {T} [dataByModelName={}]
      * @param {Object} [options={}]
      * @returns {{ [K in keyof T]: T[K] extends Array ? import("models").Models[K][] : import("models").Models[K] }}
      */
-    insert(dataByModelName, options = {}) {
+    insert(dataByModelName = {}, options = {}) {
         const store = this;
         return Record.MAKE_UPDATE(function storeInsert() {
             const res = {};
@@ -283,6 +273,9 @@ export class Store extends BaseStore {
         this.updateBusSubscription = debounce(this.updateBusSubscription, 0); // Wait for thread fully inserted.
     }
 
+    /** Provides an override point for when the store service has started. */
+    onStarted() {}
+
     updateBusSubscription() {
         const channelIds = [];
         const ids = Object.keys(this.Thread.records).sort(); // Ensure channels processed in same order.
@@ -296,7 +289,7 @@ export class Store extends BaseStore {
             }
         }
         const channels = JSON.stringify(channelIds);
-        if (this.isMessagingReady && this.lastChannelSubscription !== channels) {
+        if (this.lastChannelSubscription !== channels) {
             this.env.services["bus_service"].forceUpdateChannels();
         }
         this.lastChannelSubscription = channels;
@@ -313,12 +306,20 @@ export const storeService = {
     start(env, services) {
         const store = makeStore(env);
         store.discuss = { activeTab: "main" };
-        if (session.self) {
-            store.self = session.self;
-        } else {
-            store.self = { id: -1, type: "guest" };
+        store.insert(session.storeData);
+        /**
+         * Add defaults for `self` and `settings` because in livechat there could be no user and no
+         * guest yet (both undefined at init), but some parts of the code that loosely depend on
+         * these values will still be executed immediately. Providing a dummy default is enough to
+         * avoid crashes, the actual values being filled at livechat init when they are necessary.
+         */
+        store.self ??= { id: -1, type: "guest" };
+        store.settings ??= {};
+        const discussActionIds = ["mail.action_discuss"];
+        if (store.action_discuss_id) {
+            discussActionIds.push(store.action_discuss_id);
         }
-        store.settings = user.settings;
+        store.discuss.isActive ||= discussActionIds.includes(router.current.action);
         Record.onChange(store.Thread, "records", () => store.updateBusSubscription());
         services.ui.bus.addEventListener("resize", () => {
             store.discuss.activeTab = "main";
@@ -330,6 +331,7 @@ export const storeService = {
                 store.discuss.activeTab = store.discuss.thread.type;
             }
         });
+        store.onStarted();
         return store;
     },
 };

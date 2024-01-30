@@ -254,28 +254,60 @@ class Users(models.Model):
     # DISCUSS
     # ------------------------------------------------------------
 
-    def _init_messaging(self):
+    @api.model
+    def _init_store_data(self, store):
+        """Initialize the store of the user."""
+        # sudo: res.partner - exposing OdooBot data
+        odoobot = self.env.ref("base.partner_root").sudo()
+        xmlid_to_res_id = self.env["ir.model.data"]._xmlid_to_res_id
+        store.add({
+            "Store": {
+                "action_discuss_id": xmlid_to_res_id("mail.action_discuss"),
+                "hasLinkPreviewFeature": self.env["mail.link.preview"]._is_link_preview_enabled(),
+                "internalUserGroupId": self.env.ref("base.group_user").id,
+                "mt_comment_id": xmlid_to_res_id("mail.mt_comment"),
+                "odoobot": odoobot.mail_partner_format().get(odoobot),
+            },
+        })
+        guest = self.env["mail.guest"]._get_guest_from_context()
+        if not self.env.user._is_public():
+            settings = self.env["res.users.settings"]._find_or_create_for_user(self.env.user)
+            store.add({
+                "Store": {
+                    "self": {
+                        "id": self.env.user.partner_id.id,
+                        "isAdmin": self.env.user._is_admin(),
+                        "isInternalUser": not self.env.user.share,
+                        "name": self.env.user.partner_id.name,
+                        "notification_preference": self.env.user.notification_type,
+                        "type": "partner",
+                        "userId": self.env.user.id,
+                        "write_date": fields.Datetime.to_string(self.env.user.write_date),
+                    },
+                    "settings": settings._res_users_settings_format(),
+                },
+            })
+        elif guest:
+            store.add({"Store": {"self": {
+                "id": guest.id,
+                "name": guest.name,
+                "type": "guest",
+                "write_date": fields.Datetime.to_string(guest.write_date),
+            }}})
+
+    def _init_messaging(self, store):
         self.ensure_one()
         self = self.with_user(self)
-        odoobot = self.env.ref('base.partner_root')
-        values = {
+        store.add({
             "CannedResponse": self.env["mail.shortcode"].sudo().search_read([], ["source", "substitution"]),
             "Store": {
-                "action_discuss_id": self.env["ir.model.data"]._xmlid_to_res_id("mail.action_discuss"),
-                "companyName": self.env.company.name,
                 "discuss": {
                     "inbox": {"counter": self.partner_id._get_needaction_count(), "id": "inbox", "model": "mail.box"},
                     "starred": {"counter": self.env["mail.message"].search_count([("starred_partner_ids", "in", self.partner_id.ids)]), "id": "starred", "model": "mail.box"},
                 },
-                "hasLinkPreviewFeature": self.env["mail.link.preview"]._is_link_preview_enabled(),
                 "initBusId": self.env["bus.bus"].sudo()._bus_last_id(),
-                "internalUserGroupId": self.env.ref("base.group_user").id,
-                "mt_comment_id": self.env["ir.model.data"]._xmlid_to_res_id("mail.mt_comment"),
-                "odoobot": odoobot.sudo().mail_partner_format().get(odoobot),
-                "settings": self.env["res.users.settings"]._find_or_create_for_user(self)._res_users_settings_format(),
             },
-        }
-        return values
+        })
 
     @api.model
     def _get_activity_groups(self):

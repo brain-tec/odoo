@@ -4,13 +4,24 @@ from dateutil.relativedelta import relativedelta
 from unittest.mock import patch, PropertyMock
 
 from odoo import Command, fields
+from odoo.addons.mail.tools.discuss import StoreData
 from odoo.tests.common import users, tagged, HttpCase, warmup
 
 
 @tagged('post_install', '-at_install')
 class TestDiscussFullPerformance(HttpCase):
-    _query_count = 66
-    _query_count_discuss_channels = 69
+    # Queries for _query_count_init_store:
+    #     1: action_discuss_id
+    #     1: hasGifPickerFeature
+    #     1: hasLinkPreviewFeature
+    #     1: hasMessageTranslationFeature
+    #     1: internalUserGroupId
+    #     1: mt_comment_id
+    #     6: odoobot format
+    #     4: settings
+    _query_count_init_store = 16
+    _query_count = 49
+    _query_count_discuss_channels = 68
 
     def setUp(self):
         super().setUp()
@@ -135,6 +146,71 @@ class TestDiscussFullPerformance(HttpCase):
 
     @users('emp')
     @warmup
+    def test_init_store_data(self):
+        """Test performance of `init_messaging`."""
+        self._setup_test()
+        self.maxDiff = None
+        self.env.flush_all()
+        self.env.invalidate_all()
+        store = StoreData()
+        with self.assertQueryCount(emp=self._query_count_init_store):
+            self.env["res.users"].with_user(self.users[0])._init_store_data(store)
+        self.assertEqual(store.get_result(), self._get_init_store_data_result())
+
+    def _get_init_store_data_result(self):
+        """Returns the result of a call to init_messaging.
+        The point of having a separate getter is to allow it to be overriden.
+        """
+        xmlid_to_res_id = self.env["ir.model.data"]._xmlid_to_res_id
+        return {
+            "Store": {
+                "action_discuss_id": xmlid_to_res_id("mail.action_discuss"),
+                "hasGifPickerFeature": False,
+                "hasLinkPreviewFeature": True,
+                "hasMessageTranslationFeature": False,
+                "internalUserGroupId": self.env.ref("base.group_user").id,
+                "mt_comment_id": xmlid_to_res_id("mail.mt_comment"),
+                "odoobot": {
+                    "active": False,
+                    "email": "odoobot@example.com",
+                    "id": self.user_root.partner_id.id,
+                    "im_status": "bot",
+                    "is_company": False,
+                    "name": "OdooBot",
+                    "out_of_office_date_end": False,
+                    "type": "partner",
+                    "userId": False,
+                    "isInternalUser": False,
+                    "write_date": fields.Datetime.to_string(self.user_root.partner_id.write_date),
+                },
+                "self": {
+                    "id": self.users[0].partner_id.id,
+                    "isAdmin": False,
+                    "isInternalUser": True,
+                    "name": "Ernest Employee",
+                    "notification_preference": "inbox",
+                    "type": "partner",
+                    "userId": self.users[0].id,
+                    "write_date": fields.Datetime.to_string(self.users[0].partner_id.write_date),
+                },
+                "settings": {
+                    "id": self.env["res.users.settings"]._find_or_create_for_user(self.users[0]).id,
+                    "is_discuss_sidebar_category_channel_open": True,
+                    "is_discuss_sidebar_category_chat_open": True,
+                    "is_discuss_sidebar_category_livechat_open": True,
+                    "livechat_lang_ids": [],
+                    "livechat_username": False,
+                    "push_to_talk_key": False,
+                    "use_push_to_talk": False,
+                    "user_id": {"id": self.users[0].id},
+                    "voice_active_duration": 0,
+                    "volumes": [("ADD", [])],
+                },
+            },
+        }
+
+    @users('emp')
+    @warmup
     def test_init_messaging(self):
         """Test performance of `init_messaging`."""
         self._setup_test()
@@ -165,46 +241,13 @@ class TestDiscussFullPerformance(HttpCase):
                 },
             ],
             "Store": {
-                "action_discuss_id": self.env["ir.model.data"]._xmlid_to_res_id("mail.action_discuss"),
-                "companyName": "YourCompany",
                 "discuss": {
                     "inbox": {"counter": 1, "id": "inbox", "model": "mail.box"},
                     "starred": {"counter": 1, "id": "starred", "model": "mail.box"},
                 },
-                "hasGifPickerFeature": False,
-                "hasLinkPreviewFeature": True,
-                "hasMessageTranslationFeature": False,
                 "initBusId": self.env["bus.bus"].sudo()._bus_last_id(),
                 "initChannelsUnreadCounter": 1,
-                "internalUserGroupId": self.env.ref("base.group_user").id,
-                "mt_comment_id": self.env["ir.model.data"]._xmlid_to_res_id("mail.mt_comment"),
-                "odoobot": {
-                    "active": False,
-                    "email": "odoobot@example.com",
-                    "id": self.user_root.partner_id.id,
-                    "im_status": "bot",
-                    "is_company": False,
-                    "name": "OdooBot",
-                    "out_of_office_date_end": False,
-                    "type": "partner",
-                    "userId": False,
-                    "isInternalUser": False,
-                    "write_date": fields.Datetime.to_string(self.user_root.partner_id.write_date),
-                },
                 "odoobotOnboarding": False,
-                "settings": {
-                    "id": self.env["res.users.settings"]._find_or_create_for_user(self.users[0]).id,
-                    "is_discuss_sidebar_category_channel_open": True,
-                    "is_discuss_sidebar_category_chat_open": True,
-                    "is_discuss_sidebar_category_livechat_open": True,
-                    "livechat_lang_ids": [],
-                    "livechat_username": False,
-                    "push_to_talk_key": False,
-                    "use_push_to_talk": False,
-                    "user_id": {"id": self.users[0].id},
-                    "voice_active_duration": 0,
-                    "volumes": [["ADD", []]],
-                },
             },
             "Thread": [
                 self._expected_result_for_channel(self.channel_channel_group_1),
