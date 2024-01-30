@@ -402,6 +402,7 @@ class HolidaysType(models.Model):
                         'closest_allocation_expire': False,
                         'holds_changes': False,
                         'total_virtual_excess': 0,
+                        'virtual_excess_data': {},
                         'total_real_excess': 0,
                         'exceeding_duration': extra_data[employee][leave_type]['exceeding_duration'],
                         'request_unit': leave_type.request_unit,
@@ -412,8 +413,11 @@ class HolidaysType(models.Model):
                     },
                     leave_type.requires_allocation,
                     leave_type.id)
-                for excess_days in extra_data[employee][leave_type]['excess_days'].values():
+                for excess_date, excess_days in extra_data[employee][leave_type]['excess_days'].items():
                     amount = excess_days['amount']
+                    lt_info[1]['virtual_excess_data'].update({
+                        excess_date.strftime('%Y-%m-%d'): excess_days
+                    }),
                     lt_info[1]['virtual_leaves_taken'] += amount
                     lt_info[1]['virtual_remaining_leaves'] -= amount
                     lt_info[1]['total_virtual_excess'] += amount
@@ -486,7 +490,8 @@ class HolidaysType(models.Model):
                     'closest_allocation_duration': closest_allocation_duration,
                     'holds_changes': holds_changes,
                 })
-                allocation_data[employee].append(lt_info)
+                if not self.env.context.get('from_dashboard', False) or lt_info[1]['max_leaves']:
+                    allocation_data[employee].append(lt_info)
         for employee in allocation_data:
             for leave_type_data in allocation_data[employee]:
                 for key, value in leave_type_data[1].items():
