@@ -127,27 +127,15 @@ class MailGuest(models.Model):
         """
         self.env.cr.execute(query, (timezone, self.id))
 
-    def _init_messaging(self):
+    def _init_messaging(self, store):
         self.ensure_one()
-        # sudo: res.partner - exposing OdooBot name and id
-        odoobot = self.env.ref('base.partner_root').sudo()
-        return {
+        store.add({
             "Store": {
-                "companyName": self.env.company.name,
-                # sudo: ir.config_parameter: safe to check for existence of tenor api key
-                "hasGifPickerFeature": bool(self.env["ir.config_parameter"].sudo().get_param("discuss.tenor_api_key")),
-                "hasLinkPreviewFeature": self.env["mail.link.preview"]._is_link_preview_enabled(),
-                "hasMessageTranslationFeature": False,
                 # sudo: bus.bus: reading non-sensitive last id
                 "initBusId": self.env["bus.bus"].sudo()._bus_last_id(),
-                "odoobot": {
-                    "id": odoobot.id,
-                    "name": odoobot.name,
-                    "type": "partner",
-                },
             },
             "Thread": self.env["discuss.channel"]._get_init_channels()._channel_info(),
-        }
+        })
 
     def _guest_format(self, fields=None):
         if not fields:

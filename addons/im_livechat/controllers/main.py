@@ -11,6 +11,7 @@ from odoo.http import request
 from odoo.tools import replace_exceptions
 from odoo.addons.base.models.assetsbundle import AssetsBundle
 from odoo.addons.mail.models.discuss.mail_guest import add_guest_to_context
+from odoo.addons.mail.tools.discuss import StoreData
 
 
 class LivechatController(http.Controller):
@@ -183,12 +184,10 @@ class LivechatController(http.Controller):
             if guest:
                 channel_info['guest_token'] = guest._format_auth_cookie()
         channel_info.update(isLoaded=not persisted or not chatbot_script)
-        store = {}
-        request.env["ir.http"]._add_self_to_session_info(store)
-        return {
-            "Store": store,
-            "Thread": channel_info,
-        }
+        store = StoreData()
+        request.env["res.users"]._init_store_data(store)
+        store.add({"Thread": channel_info})
+        return store.get_result()
 
     def _post_feedback_message(self, channel, rating, reason):
         reason = Markup("<br>" + re.sub(r'\r\n|\r|\n', "<br>", reason) if reason else "")
