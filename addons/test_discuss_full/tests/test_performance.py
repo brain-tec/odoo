@@ -20,7 +20,7 @@ class TestDiscussFullPerformance(HttpCase):
     #     6: odoobot format
     #     4: settings
     _query_count_init_store = 16
-    _query_count = 49
+    _query_count = 48
     _query_count_discuss_channels = 68
 
     def setUp(self):
@@ -220,7 +220,7 @@ class TestDiscussFullPerformance(HttpCase):
         self.authenticate(self.users[0].login, self.password)
         self.env['res.lang']._lang_get_id('en_US')  # cache language for validation
         with self.assertQueryCount(emp=self._query_count):
-            init_messaging = self.make_jsonrpc_request("/mail/action", {"init_messaging": True})
+            init_messaging = self.make_jsonrpc_request("/mail/action", {"init_messaging": {}})
         self.assertEqual(init_messaging, self._get_init_messaging_result())
 
     def _get_init_messaging_result(self):
@@ -228,18 +228,6 @@ class TestDiscussFullPerformance(HttpCase):
         The point of having a separate getter is to allow it to be overriden.
         """
         return {
-            "CannedResponse": [
-                {
-                    "id": self.shortcodes[0].id,
-                    "source": "hello",
-                    "substitution": "Hello, how may I help you?",
-                },
-                {
-                    "id": self.shortcodes[1].id,
-                    "source": "bye",
-                    "substitution": "Thanks for your feedback. Goodbye!",
-                },
-            ],
             "Store": {
                 "discuss": {
                     "inbox": {"counter": 1, "id": "inbox", "model": "mail.box"},

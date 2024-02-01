@@ -10,6 +10,7 @@ import { cookie } from "@web/core/browser/cookie";
 import { Deferred } from "@web/core/utils/concurrency";
 import { triggerHotkey } from "@web/../tests/helpers/utils";
 import { assertSteps, click, contains, insertText, step } from "@web/../tests/utils";
+import { browser } from "@web/core/browser/browser";
 
 QUnit.module("livechat service");
 
@@ -28,7 +29,7 @@ QUnit.test("persisted session history", async () => {
         livechat_channel_id: livechatChannelId,
         livechat_operator_id: pyEnv.adminPartnerId,
     });
-    cookie.set(
+    browser.localStorage.setItem(
         "im_livechat.saved_state",
         JSON.stringify({ threadData: { id: channelId, model: "discuss.channel" }, persisted: true })
     );
@@ -101,16 +102,13 @@ QUnit.test("Only necessary requests are made when creating a new chat", async ()
             temporary_id: -1,
             persisted: true,
         })}`,
-        `/discuss/channel/fold - ${JSON.stringify({
-            channel_id: threadId,
-            state: "open",
-            state_count: 1,
-        })}`,
         `/mail/action - ${JSON.stringify({
-            init_messaging: true,
+            init_messaging: {
+                channel_types: ["livechat"],
+            },
             failures: true, // called because mail/core/web is loaded in qunit bundle
             systray_get_activities: true, // called because mail/core/web is loaded in qunit bundle
-            context: { lang: "en", tz: "taht", uid: pyEnv.currentUserId, is_for_livechat: true },
+            context: { lang: "en", tz: "taht", uid: pyEnv.currentUserId },
         })}`,
         `/mail/message/post - ${JSON.stringify({
             context: { lang: "en", tz: "taht", uid: pyEnv.currentUserId, temporary_id: 0.81 },
