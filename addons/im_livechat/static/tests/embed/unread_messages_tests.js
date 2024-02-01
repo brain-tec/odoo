@@ -9,7 +9,7 @@ import { loadDefaultConfig, start } from "@im_livechat/../tests/embed/helper/tes
 import { Command } from "@mail/../tests/helpers/command";
 
 import { assertSteps, contains, focus, step } from "@web/../tests/utils";
-import { cookie } from "@web/core/browser/cookie";
+import { browser } from "@web/core/browser/browser";
 
 QUnit.module("thread service");
 
@@ -28,7 +28,7 @@ QUnit.test("new message from operator displays unread counter", async () => {
         livechat_channel_id: livechatChannelId,
         livechat_operator_id: pyEnv.adminPartnerId,
     });
-    cookie.set(
+    browser.localStorage.setItem(
         "im_livechat.saved_state",
         JSON.stringify({ threadData: { id: channelId, model: "discuss.channel" }, persisted: true })
     );
@@ -43,10 +43,12 @@ QUnit.test("new message from operator displays unread counter", async () => {
     });
     await assertSteps([
         `/mail/action - ${JSON.stringify({
-            init_messaging: true,
+            init_messaging: {
+                channel_types: ["livechat"],
+            },
             failures: true, // called because mail/core/web is loaded in qunit bundle
             systray_get_activities: true, // called because mail/core/web is loaded in qunit bundle
-            context: { lang: "en", tz: "taht", uid: pyEnv.currentUserId, is_for_livechat: true },
+            context: { lang: "en", tz: "taht", uid: pyEnv.currentUserId },
         })}`,
     ]);
     // send after init_messaging because bus subscription is done after init_messaging
@@ -75,7 +77,7 @@ QUnit.test("focus on unread livechat marks it as read", async () => {
         livechat_channel_id: livechatChannelId,
         livechat_operator_id: pyEnv.adminPartnerId,
     });
-    cookie.set(
+    browser.localStorage.setItem(
         "im_livechat.saved_state",
         JSON.stringify({ threadData: { id: channelId, model: "discuss.channel" }, persisted: true })
     );
@@ -90,10 +92,12 @@ QUnit.test("focus on unread livechat marks it as read", async () => {
     });
     await assertSteps([
         `/mail/action - ${JSON.stringify({
-            init_messaging: true,
+            init_messaging: {
+                channel_types: ["livechat"],
+            },
             failures: true, // called because mail/core/web is loaded in qunit bundle
             systray_get_activities: true, // called because mail/core/web is loaded in qunit bundle
-            context: { lang: "en", tz: "taht", uid: pyEnv.currentUserId, is_for_livechat: true },
+            context: { lang: "en", tz: "taht", uid: pyEnv.currentUserId },
         })}`,
     ]);
     // send after init_messaging because bus subscription is done after init_messaging
