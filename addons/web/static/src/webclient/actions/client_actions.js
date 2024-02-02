@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
 import { router } from "@web/core/browser/router";
@@ -76,12 +74,11 @@ registry.category("actions").add("reload", reload);
 /**
  * Client action to go back home.
  */
-async function home(env) {
+async function home() {
     await new Promise((resolve) => {
         const waitForServer = (delay) => {
             browser.setTimeout(async () => {
-                env.services
-                    .rpc("/web/webclient/version_info", {})
+                rpc("/web/webclient/version_info", {})
                     .then(resolve)
                     .catch(() => waitForServer(250));
             }, delay);

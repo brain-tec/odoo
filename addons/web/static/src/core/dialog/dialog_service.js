@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "../registry";
 import { Component, markRaw, reactive, xml } from "@odoo/owl";
 import { WithEnv } from "../utils/components";
@@ -55,14 +53,12 @@ export const dialogService = {
             stack.push(subEnv);
             document.body.classList.add("modal-open");
 
-            if (env.isSmall) {
-                const scrollOrigin = { top: window.scrollY, left: window.scrollX };
-                subEnv.scrollToOrigin = () => {
-                    if (!stack.length) {
-                        window.scrollTo(scrollOrigin);
-                    }
-                };
-            }
+            const scrollOrigin = { top: window.scrollY, left: window.scrollX };
+            subEnv.scrollToOrigin = () => {
+                if (!stack.length) {
+                    window.scrollTo(scrollOrigin);
+                }
+            };
 
             const remove = overlay.add(
                 DialogWrapper,
