@@ -317,7 +317,7 @@
                     <field name="date"/>
                     <field name="date_maturity" string="Due Date"/>
                     <field name="discount_date" string="Discount Date"/>
-                    <field name="balance" string="Amount" filter_domain="['|', ('credit', '=', self), ('debit', '=', self)]"/>
+                    <field name="balance" string="Amount" filter_domain="['|', ('credit', '=', raw_value), ('debit', '=', raw_value)]"/>
                     <field name="account_id"/>
                     <field name="account_type"/>
                     <field name="partner_id"/>
@@ -874,7 +874,7 @@
                             <h1>
                                 <field name="name" invisible="name == '/' and not posted_before and not quick_edit_mode" readonly="state != 'draft'" placeholder="Draft"/>
 
-                                <span invisible="state != 'draft' or name != '/' or quick_edit_mode">Draft</span>
+                                <span invisible="state != 'draft' or name != '/' or posted_before or quick_edit_mode">Draft</span>
                             </h1>
                         </div>
                         <group>
