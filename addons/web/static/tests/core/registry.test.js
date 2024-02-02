@@ -1,9 +1,8 @@
-/** @odoo-module **/
-
 import { expect, test } from "@odoo/hoot";
+
 import { Registry } from "@web/core/registry";
 
-test("key set and get", () => {
+test`headless`("key set and get", () => {
     const registry = new Registry();
     const foo = {};
 
@@ -12,7 +11,7 @@ test("key set and get", () => {
     expect(registry.get("foo")).toBe(foo);
 });
 
-test("can set and get falsy values", () => {
+test`headless`("can set and get falsy values", () => {
     const registry = new Registry();
     registry.add("foo1", false);
     registry.add("foo2", 0);
@@ -27,7 +26,7 @@ test("can set and get falsy values", () => {
     expect(registry.get("foo5")).toBe(null);
 });
 
-test("can set and get falsy values with default value", () => {
+test`headless`("can set and get falsy values with default value", () => {
     const registry = new Registry();
     registry.add("foo1", false);
     registry.add("foo2", 0);
@@ -42,7 +41,7 @@ test("can set and get falsy values with default value", () => {
     expect(registry.get("foo5", 1)).toBe(null);
 });
 
-test("can get a default value when missing key", () => {
+test`headless`("can get a default value when missing key", () => {
     const registry = new Registry();
 
     expect(registry.get("missing", "default")).toBe("default");
@@ -50,12 +49,12 @@ test("can get a default value when missing key", () => {
     expect(registry.get("missing", false)).toBe(false);
 });
 
-test("throws if key is missing", () => {
+test`headless`("throws if key is missing", () => {
     const registry = new Registry();
     expect(() => registry.get("missing")).toThrow();
 });
 
-test("contains method", () => {
+test`headless`("contains method", () => {
     const registry = new Registry();
 
     registry.add("foo", 1);
@@ -64,7 +63,7 @@ test("contains method", () => {
     expect(registry.contains("bar")).toBe(false);
 });
 
-test("can set and get a value, with an order arg", () => {
+test`headless`("can set and get a value, with an order arg", () => {
     const registry = new Registry();
     const foo = {};
 
@@ -73,7 +72,7 @@ test("can set and get a value, with an order arg", () => {
     expect(registry.get("foo")).toBe(foo);
 });
 
-test("can get ordered list of elements", () => {
+test`headless`("can get ordered list of elements", () => {
     const registry = new Registry();
 
     registry
@@ -85,7 +84,7 @@ test("can get ordered list of elements", () => {
     expect(registry.getAll()).toEqual(["foo1", "foo2", "foo3", "foo5"]);
 });
 
-test("can get ordered list of entries", () => {
+test`headless`("can get ordered list of entries", () => {
     const registry = new Registry();
 
     registry
@@ -102,7 +101,7 @@ test("can get ordered list of entries", () => {
     ]);
 });
 
-test("getAll and getEntries returns shallow copies", () => {
+test`headless`("getAll and getEntries returns shallow copies", () => {
     const registry = new Registry();
 
     registry.add("foo1", "foo1");
@@ -125,7 +124,7 @@ test("getAll and getEntries returns shallow copies", () => {
     expect(registry.getEntries()).toEqual([["foo1", "foo1"]]);
 });
 
-test("can override element with sequence", () => {
+test`headless`("can override element with sequence", () => {
     const registry = new Registry();
 
     registry
@@ -139,7 +138,7 @@ test("can override element with sequence", () => {
     ]);
 });
 
-test("can override element with sequence 2 ", () => {
+test`headless`("can override element with sequence 2 ", () => {
     const registry = new Registry();
 
     registry
@@ -153,7 +152,7 @@ test("can override element with sequence 2 ", () => {
     ]);
 });
 
-test("can recursively open sub registry", () => {
+test`headless`("can recursively open sub registry", () => {
     const registry = new Registry();
 
     registry.category("sub").add("a", "b");

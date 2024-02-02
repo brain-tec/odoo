@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { _t } from "@web/core/l10n/translation";
 import { getBorderWhite, DEFAULT_BG, getColor, hexToRGBA } from "@web/core/colors/colors";
 import { formatFloat } from "@web/views/fields/formatters";
@@ -680,8 +678,10 @@ export class GraphRenderer extends Component {
         if (this.chart) {
             this.chart.destroy();
         }
-        const config = this.getChartConfig();
-        this.chart = new Chart(this.canvasRef.el, config);
+        if (this.canvasRef.el) {
+            const config = this.getChartConfig();
+            this.chart = new Chart(this.canvasRef.el, config);
+        }
     }
 
     /**
