@@ -9,7 +9,7 @@ import { patch } from "@web/core/utils/patch";
 const downloadFilesAction = messageActionsRegistry.get("download_files");
 patch(downloadFilesAction, {
     condition(component) {
-        return component.message.originThread.type !== "livechat" && super.condition(component);
+        return component.message.thread.channel_type !== "livechat" && super.condition(component);
     },
 });
 
@@ -18,7 +18,7 @@ patch(Thread.prototype, {
         return false;
     },
     get hasAttachmentPanel() {
-        return this.type !== "livechat" && super.hasAttachmentPanel;
+        return this.channel_type !== "livechat" && super.hasAttachmentPanel;
     },
 });
 

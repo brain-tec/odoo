@@ -352,7 +352,7 @@ class Website(models.Model):
     @api.model
     def get_theme_configurator_snippets(self, theme_name):
         return {
-            **get_manifest('theme_default')['configurator_snippets'],
+            **get_manifest('website')['configurator_snippets'],
             **get_manifest(theme_name).get('configurator_snippets', {}),
         }
 
@@ -427,7 +427,6 @@ class Website(models.Model):
         website = self.get_current_website()
         theme_name = kwargs['theme_name']
         theme = self.env['ir.module.module'].search([('name', '=', theme_name)])
-        theme._generate_primary_snippet_templates()
         redirect_url = theme.button_choose_theme()
 
         # Force to refresh env after install of module
