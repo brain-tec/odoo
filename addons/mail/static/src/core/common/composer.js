@@ -88,7 +88,7 @@ export class Composer extends Component {
         );
         this.store = useState(useService("mail.store"));
         this.attachmentUploader = useAttachmentUploader(
-            this.thread ?? this.props.composer.message.originThread,
+            this.thread ?? this.props.composer.message.thread,
             { composer: this.props.composer }
         );
         this.messageService = useState(useService("mail.message"));
@@ -192,7 +192,7 @@ export class Composer extends Component {
             return this.props.placeholder;
         }
         if (this.thread) {
-            if (this.thread.type === "channel") {
+            if (this.thread.channel_type === "channel") {
                 return _t("Message #%(thread name)s…", { "thread name": this.thread.displayName });
             }
             return _t("Message %(thread name)s…", { "thread name": this.thread.displayName });
@@ -266,9 +266,7 @@ export class Composer extends Component {
     }
 
     get thread() {
-        return (
-            this.props.messageToReplyTo?.message?.originThread ?? this.props.composer.thread ?? null
-        );
+        return this.props.messageToReplyTo?.message?.thread ?? this.props.composer.thread ?? null;
     }
 
     get allowUpload() {
@@ -495,7 +493,7 @@ export class Composer extends Component {
                 // args === { special: true } : click on 'discard'
                 const isDiscard = args.length === 0 || args[0]?.special;
                 // otherwise message is posted (args === [undefined])
-                if (!isDiscard && this.props.composer.thread.type === "mailbox") {
+                if (!isDiscard && this.props.composer.thread.model === "mail.box") {
                     this.notifySendFromMailbox();
                 }
                 this.clear();
@@ -587,7 +585,7 @@ export class Composer extends Component {
     async _sendMessage(value, postData) {
         const thread = this.props.composer.thread;
         await this.threadService.post(this.thread, value, postData);
-        if (thread.type === "mailbox") {
+        if (thread.model === "mail.box") {
             this.notifySendFromMailbox();
         }
         this.suggestion?.clearRawMentions();
