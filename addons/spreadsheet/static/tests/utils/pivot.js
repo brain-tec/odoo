@@ -18,18 +18,12 @@ import { createModelWithDataSource, waitForDataSourcesLoaded } from "./model";
 export async function insertPivotInSpreadsheet(model, params) {
     const archInfo = new PivotArchParser().parse(params.arch || getBasicPivotArch());
     const definition = {
-        metaData: {
-            colGroupBys: archInfo.colGroupBys,
-            rowGroupBys: archInfo.rowGroupBys,
-            activeMeasures: archInfo.activeMeasures,
-            resModel: params.resModel || "partner",
-        },
-        searchParams: {
-            domain: [],
-            context: {},
-            groupBy: [],
-            orderBy: [],
-        },
+        domain: [],
+        context: {},
+        measures: archInfo.activeMeasures,
+        model: params.resModel || "partner",
+        colGroupBys: archInfo.colGroupBys,
+        rowGroupBys: archInfo.rowGroupBys,
         name: "Partner Pivot",
     };
     const pivotId = model.getters.getNextPivotId();

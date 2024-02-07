@@ -6,49 +6,19 @@ import { sprintf } from "@web/core/utils/strings";
 import { PivotModel } from "@web/views/pivot/pivot_model";
 
 import { helpers, constants, EvaluationError } from "@odoo/o-spreadsheet";
-import { PERIODS } from "@spreadsheet/pivot/pivot_helpers";
 import { SpreadsheetPivotTable } from "@spreadsheet/pivot/pivot_table";
 import { pivotTimeAdapter } from "./pivot_time_adapters";
+import { OdooPivotDataSource } from "./pivot_runtime";
+import { parseGroupField } from "./pivot_helpers";
 
 const { toString, toNumber, toBoolean } = helpers;
 const { DEFAULT_LOCALE } = constants;
 
 /**
  * @typedef {import("@spreadsheet").Field} Field
- * @typedef {import("@spreadsheet/pivot/pivot_table").Row} Row
- * @typedef {import("@spreadsheet/pivot/pivot_table").Column} Column
+ * @typedef {import("@spreadsheet").SPTableColumn} SPTableColumn
+ * @typedef {import("@spreadsheet").SPTableRow} SPTableRow
  */
-
-/**
- * Parses the positional char (#), the field and operator string of pivot group.
- * e.g. "create_date:month"
- * @param {Record<string, Field | undefined>} allFields
- * @param {string} groupFieldString
- * @returns {{field: Field, aggregateOperator: string, isPositional: boolean}}
- */
-function parseGroupField(allFields, groupFieldString) {
-    let fieldName = groupFieldString;
-    let aggregateOperator = undefined;
-    const index = groupFieldString.indexOf(":");
-    if (index !== -1) {
-        fieldName = groupFieldString.slice(0, index);
-        aggregateOperator = groupFieldString.slice(index + 1);
-    }
-    const isPositional = fieldName.startsWith("#");
-    fieldName = isPositional ? fieldName.substring(1) : fieldName;
-    const field = allFields[fieldName];
-    if (field === undefined) {
-        throw new EvaluationError(sprintf(_t("Field %s does not exist"), fieldName));
-    }
-    if (["date", "datetime"].includes(field.type)) {
-        aggregateOperator = aggregateOperator || "month";
-    }
-    return {
-        isPositional,
-        field,
-        aggregateOperator,
-    };
-}
 
 const UNSUPPORTED_FIELD_TYPES = ["one2many", "binary", "html"];
 export const NO_RECORD_AT_THIS_POSITION = Symbol("NO_RECORD_AT_THIS_POSITION");
@@ -61,6 +31,33 @@ function throwUnsupportedFieldError(field) {
     throw new EvaluationError(
         sprintf(_t("Field %s is not supported because of its type (%s)"), field.string, field.type)
     );
+}
+
+/**
+ * @param {import("@spreadsheet").PivotDefinition} definition
+ * @param {Record<string, Field | undefined>} [fields]
+ *
+ * @returns {import("@spreadsheet").WebPivotModelParams}
+ */
+function definitionForPivotModel(definition, fields) {
+    return {
+        searchParams: {
+            domain: definition.domain,
+            context: definition.context,
+            groupBy: [],
+            orderBy: [],
+        },
+        metaData: {
+            sortedColumn: definition.sortedColumn,
+            activeMeasures: definition.measures,
+            resModel: definition.model,
+            colGroupBys: definition.colGroupBys,
+            rowGroupBys: definition.rowGroupBys,
+            fieldAttrs: {},
+            fields,
+        },
+        name: definition.name,
+    };
 }
 
 /**
@@ -114,86 +111,32 @@ export function toNormalizedPivotValue(field, groupValue, aggregateOperator) {
  */
 export class SpreadsheetPivotModel extends PivotModel {
     /**
-     * @param {import("@spreadsheet").PivotRuntime} params
+     * @param {import("@spreadsheet").WebPivotModelParams} params
      * @param {Object} services
      * @param {import("../data_sources/metadata_repository").MetadataRepository} services.metadataRepository
      */
     setup(params, services) {
-        // fieldAttrs is required, but not needed in Spreadsheet, so we define it as empty
-        (params.metaData.fieldAttrs = {}), super.setup(params);
+        /** This is necessary to ensure the compatibility with the PivotModel from web */
+        const p = definitionForPivotModel(params.definition, params.metaData.fields);
+        p.searchParams = {
+            ...p.searchParams,
+            ...params.searchParams,
+        };
+        super.setup(p);
 
         this.metadataRepository = services.metadataRepository;
 
-        /**
-         * Contains the domain of the values used during the evaluation of the formula =Pivot(...)
-         * Is used to know if a pivot cell is missing or not
-         * */
-
-        this._usedValueDomains = new Set();
-        /**
-         * Contains the domain of the headers used during the evaluation of the formula =Pivot.header(...)
-         * Is used to know if a pivot cell is missing or not
-         * */
-        this._usedHeaderDomains = new Set();
-
-        /**
-         * Display name of the model
-         */
-        this._modelLabel = params.metaData.modelLabel;
+        this.runtime = new OdooPivotDataSource(params.definition, this.metaData.fields);
     }
 
-    //--------------------------------------------------------------------------
-    // Metadata getters
-    //--------------------------------------------------------------------------
-
-    /**
-     * Get the display name of a group by
-     * @param {string} fieldName
-     * @returns {string}
-     */
-    getFormattedGroupBy(fieldName) {
-        const { field, aggregateOperator } = this.parseGroupField(fieldName);
-        return field.string + (aggregateOperator ? ` (${PERIODS[aggregateOperator]})` : "");
+    getDefinition() {
+        return this.runtime.definition;
     }
 
-    //--------------------------------------------------------------------------
-    // Cell missing
-    //--------------------------------------------------------------------------
-
-    /**
-     * Reset the used values and headers
-     */
-    clearUsedValues() {
-        this._usedHeaderDomains.clear();
-        this._usedValueDomains.clear();
-    }
-
-    /**
-     * Check if the given domain with the given measure has been used
-     */
-    isUsedValue(domain, measure) {
-        return this._usedValueDomains.has(measure + "," + domain.join());
-    }
-
-    /**
-     * Check if the given domain has been used
-     */
-    isUsedHeader(domain) {
-        return this._usedHeaderDomains.has(domain.join());
-    }
-
-    /**
-     * Indicate that the given domain has been used with the given measure
-     */
-    markAsValueUsed(domain, measure) {
-        this._usedValueDomains.add(measure + "," + domain.join());
-    }
-
-    /**
-     * Indicate that the given domain has been used
-     */
-    markAsHeaderUsed(domain) {
-        this._usedHeaderDomains.add(domain.join());
+    async load(searchParams) {
+        searchParams.groupBy = [];
+        searchParams.orderBy = [];
+        await super.load(searchParams);
     }
 
     //--------------------------------------------------------------------------
@@ -296,9 +239,9 @@ export class SpreadsheetPivotModel extends PivotModel {
         const cols = this._getSpreadsheetCols();
         const rows = this._getSpreadsheetRows(this.data.rowGroupTree);
         rows.push(rows.shift()); //Put the Total row at the end.
-        const measures = this.metaData.activeMeasures;
-        const rowTitle = this.metaData.rowGroupBys[0]
-            ? this.getFormattedGroupBy(this.metaData.rowGroupBys[0])
+        const measures = this.getDefinition().measures.map((measure) => measure.name);
+        const rowTitle = this.getDefinition().rows[0]
+            ? this.getDefinition().rows[0].displayName
             : "";
         return new SpreadsheetPivotTable(cols, rows, measures, rowTitle);
     }
@@ -468,10 +411,10 @@ export class SpreadsheetPivotModel extends PivotModel {
 
     /**
      * Get the row structure
-     * @returns {Row[]}
+     * @returns {SPTableRow[]}
      */
     _getSpreadsheetRows(tree) {
-        /**@type {Row[]}*/
+        /**@type {SPTableRow[]}*/
         let rows = [];
         const group = tree.root;
         const indent = group.labels.length;
@@ -493,12 +436,12 @@ export class SpreadsheetPivotModel extends PivotModel {
 
     /**
      * Get the col structure
-     * @returns {Column[][]}
+     * @returns {SPTableColumn[][]}
      */
     _getSpreadsheetCols() {
         const colGroupBys = this.metaData.fullColGroupBys;
         const height = colGroupBys.length;
-        const measureCount = this.metaData.activeMeasures.length;
+        const measureCount = this.getDefinition().measures.length;
         const leafCounts = this._getLeafCounts(this.data.colGroupTree);
 
         const headers = new Array(height).fill(0).map(() => []);
@@ -530,20 +473,20 @@ export class SpreadsheetPivotModel extends PivotModel {
 
         if (hasColGroupBys) {
             headers[headers.length - 1].forEach((cell) => {
-                this.metaData.activeMeasures.forEach((measureName) => {
+                this.getDefinition().measures.forEach((measure) => {
                     const measureCell = {
                         fields: [...cell.fields, "measure"],
-                        values: [...cell.values, measureName],
+                        values: [...cell.values, measure.name],
                         width: 1,
                     };
                     measureRow.push(measureCell);
                 });
             });
         }
-        this.metaData.activeMeasures.forEach((measureName) => {
+        this.getDefinition().measures.forEach((measure) => {
             const measureCell = {
                 fields: ["measure"],
-                values: [measureName],
+                values: [measure.name],
                 width: 1,
             };
             measureRow.push(measureCell);
@@ -556,7 +499,7 @@ export class SpreadsheetPivotModel extends PivotModel {
         headers[headers.length - 2].push({
             fields: [],
             values: [],
-            width: this.metaData.activeMeasures.length,
+            width: this.getDefinition().measures.length,
         });
 
         return headers;

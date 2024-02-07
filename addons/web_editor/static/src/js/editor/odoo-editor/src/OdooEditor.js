@@ -340,7 +340,7 @@ export class OdooEditor extends EventTarget {
         this.editable.setAttribute('dir', this.options.direction);
 
         // Set contenteditable before clone as FF updates the content at this point.
-        this._activateContenteditable();
+        this.activateContenteditable();
 
         this._currentStep = {
             selection: {},
@@ -1402,7 +1402,7 @@ export class OdooEditor extends EventTarget {
         // Clear current step from all previous changes.
         this._currentStep.mutations = [];
 
-        this._activateContenteditable();
+        this.activateContenteditable();
         this.historySetSelection(this._currentStep);
     }
     /**
@@ -2567,8 +2567,8 @@ export class OdooEditor extends EventTarget {
         element.querySelectorAll('.o_link_in_selection').forEach(link => link.classList.remove('o_link_in_selection'));
         this.observerActive('_resetLinkZws');
     }
-    _activateContenteditable() {
-        this.observerUnactive('_activateContenteditable');
+    activateContenteditable() {
+        this.observerUnactive('activateContenteditable');
         this.editable.setAttribute('contenteditable', this.options.isRootEditable);
 
         const editableAreas = this.options.getContentEditableAreas(this);
@@ -2587,7 +2587,7 @@ export class OdooEditor extends EventTarget {
         for (const element of this.options.getUnremovableElements()) {
             element.classList.add("oe_unremovable");
         }
-        this.observerActive('_activateContenteditable');
+        this.observerActive('activateContenteditable');
     }
     _stopContenteditable() {
         this.observerUnactive('_stopContenteditable');
@@ -4214,13 +4214,20 @@ export class OdooEditor extends EventTarget {
         // and the toolbar so we need to fix the selection to be based on the
         // editable children. Calling `getDeepRange` ensure the selection is
         // limited to the editable.
+        const containerSelector = '#wrap>*, .oe_structure>*, [contenteditable]';
+        const container =
+            (selection &&
+                closestElement(selection.anchorNode, containerSelector)) ||
+            // In case a suitable container could not be found then the
+            // selection is restricted inside the editable area.
+            this.editable;
         if (
-            selection.anchorNode === this.editable &&
-            selection.focusNode === this.editable &&
+            selection.anchorNode === container &&
+            selection.focusNode === container &&
             selection.anchorOffset === 0 &&
-            selection.focusOffset === [...this.editable.childNodes].length
+            selection.focusOffset === [...container.childNodes].length
         ) {
-            getDeepRange(this.editable, {select: true});
+            getDeepRange(container, {select: true});
             // The selection is changed in `getDeepRange` and will therefore
             // re-trigger the _onSelectionChange.
             return;
@@ -4580,7 +4587,7 @@ export class OdooEditor extends EventTarget {
         this._currentMouseState = ev.type;
         this._lastMouseClickPosition = [ev.x, ev.y];
 
-        this._activateContenteditable();
+        this.activateContenteditable();
 
         // Ignore any changes that might have happened before this point.
         this.observer.takeRecords();

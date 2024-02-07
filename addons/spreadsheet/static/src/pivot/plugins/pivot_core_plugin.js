@@ -3,7 +3,6 @@
 /**
  *
  * @typedef {import("@spreadsheet").PivotDefinition} PivotDefinition
- * @typedef {import("@spreadsheet").PivotRuntime} PivotRuntime
  * @typedef {import("@spreadsheet").AllCoreCommand} AllCoreCommand
  *
  * @typedef {Object} LocalPivot
@@ -12,7 +11,7 @@
  * @property {Record<string, FieldMatching>} fieldMatching
  *
  * @typedef {import("@spreadsheet/global_filters/plugins/global_filters_core_plugin").FieldMatching} FieldMatching
- * @typedef {import("../pivot_table.js").PivotCell} PivotCell
+ * @typedef {import("@spreadsheet").SPTableCell} SPTableCell
  */
 
 import { helpers } from "@odoo/o-spreadsheet";
@@ -52,7 +51,7 @@ export class PivotCorePlugin extends OdooCorePlugin {
             getDisplayName: (pivotId) => this.getters.getPivotName(pivotId),
             getTag: (pivotId) => sprintf(_t("Pivot #%s"), pivotId),
             getFieldMatching: (pivotId, filterId) => this.getPivotFieldMatching(pivotId, filterId),
-            getModel: (pivotId) => this.getPivotDefinition(pivotId).model,
+            getModel: (pivotId) => this.pivots[pivotId].definition.model,
         };
     }
 
@@ -105,8 +104,7 @@ export class PivotCorePlugin extends OdooCorePlugin {
                 const position = { col, row };
                 const { cols, rows, measures, rowTitle } = cmd.table;
                 const table = new SpreadsheetPivotTable(cols, rows, measures, rowTitle);
-                const def = this._convertPivotDefinition(definition);
-                this._addPivot(id, def);
+                this._addPivot(id, definition);
                 this._insertPivot(sheetId, position, id, table);
                 this.history.update("nextId", parseInt(id, 10) + 1);
                 break;
@@ -255,24 +253,6 @@ export class PivotCorePlugin extends OdooCorePlugin {
     }
 
     /**
-     * @param {PivotRuntime} runtimeDefinition
-     *
-     * @returns {PivotDefinition}
-     */
-    _convertPivotDefinition(runtimeDefinition) {
-        return {
-            colGroupBys: runtimeDefinition.metaData.colGroupBys,
-            rowGroupBys: runtimeDefinition.metaData.rowGroupBys,
-            measures: runtimeDefinition.metaData.activeMeasures,
-            model: runtimeDefinition.metaData.resModel,
-            domain: runtimeDefinition.searchParams.domain,
-            context: runtimeDefinition.searchParams.context,
-            name: runtimeDefinition.name,
-            sortedColumn: runtimeDefinition.metaData.sortedColumn || null,
-        };
-    }
-
-    /**
      * @param {string} id
      * @param {PivotDefinition} definition
      * @param {Record<string, FieldMatching>} [fieldMatching]
@@ -392,7 +372,7 @@ export class PivotCorePlugin extends OdooCorePlugin {
      * @param {string} sheetId
      * @param {string} pivotId
      * @param {{ col: number, row: number }} position
-     * @param {PivotCell} pivotCell
+     * @param {SPTableCell} pivotCell
      */
     _addPivotFormula(sheetId, pivotId, { col, row }, pivotCell) {
         const formula = pivotCell.isHeader ? "ODOO.PIVOT.HEADER" : "ODOO.PIVOT";
@@ -437,7 +417,7 @@ export class PivotCorePlugin extends OdooCorePlugin {
     export(data) {
         data.pivots = {};
         for (const id in this.pivots) {
-            data.pivots[id] = deepCopy(this.getPivotDefinition(id));
+            data.pivots[id] = deepCopy(this.pivots[id].definition);
             data.pivots[id].measures = data.pivots[id].measures.map((elt) => ({ field: elt }));
             data.pivots[id].fieldMatching = this.pivots[id].fieldMatching;
             data.pivots[id].domain = new Domain(data.pivots[id].domain).toJson();
