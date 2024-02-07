@@ -95,6 +95,34 @@ describe('List', () => {
                             `),
                         });
                     });
+                    it('should create a new unordered list if current node is inside a nav-item list', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<ul><li class="nav-item">a[]b</li></ul>',
+                            stepFunction: toggleUnorderedList,
+                            contentAfter: '<ul><li class="nav-item"><ul><li>a[]b</li></ul></li></ul>',
+                        });
+                    });
+                    it('should create a new unordered list if closestBlock is inside a nav-item list', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<ul><li class="nav-item"><div><p>a[]b</p></div></li></ul>',
+                            stepFunction: toggleUnorderedList,
+                            contentAfter: '<ul><li class="nav-item"><div><ul><li>a[]b</li></ul></div></li></ul>',
+                        });
+                    });
+                    it('should only keep dir attribute when converting a non Paragraph element', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<h1 dir="rtl" class="h1">a[]b</h1>',
+                            stepFunction: toggleUnorderedList,
+                            contentAfter: '<ul dir="rtl"><li><h1 dir="rtl" class="h1">a[]b</h1></li></ul>',
+                        });
+                    });
+                    it('should keep all attributes when converting a Paragraph element', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<p dir="rtl" class="text-uppercase">a[]b</p>',
+                            stepFunction: toggleUnorderedList,
+                            contentAfter: '<ul dir="rtl" class="text-uppercase"><li>a[]b</li></ul>',
+                        });
+                    });
                 });
                 describe('Remove', () => {
                     it('should turn an empty list into a paragraph', async () => {
@@ -302,6 +330,34 @@ describe('List', () => {
                                     </tbody>
                                 </table>
                             `),
+                        });
+                    });
+                    it('should create a new ordered list if current node is inside a nav-item list', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<ul><li class="nav-item">a[]b</li></ul>',
+                            stepFunction: toggleOrderedList,
+                            contentAfter: '<ul><li class="nav-item"><ol><li>a[]b</li></ol></li></ul>',
+                        });
+                    });
+                    it('should create a new ordered list if closestBlock is inside a nav-item list', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<ul><li class="nav-item"><div><h1>a[]b</h1></div></li></ul>',
+                            stepFunction: toggleOrderedList,
+                            contentAfter: '<ul><li class="nav-item"><div><ol><li><h1>a[]b</h1></li></ol></div></li></ul>',
+                        });
+                    });
+                    it('should only keep dir attribute when converting a non Paragraph element', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<h1 dir="rtl" class="h1">a[]b</h1>',
+                            stepFunction: toggleOrderedList,
+                            contentAfter: '<ol dir="rtl"><li><h1 dir="rtl" class="h1">a[]b</h1></li></ol>',
+                        });
+                    });
+                    it('should keep all attributes when converting a Paragraph element', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<p dir="rtl" class="text-uppercase">a[]b</p>',
+                            stepFunction: toggleOrderedList,
+                            contentAfter: '<ol dir="rtl" class="text-uppercase"><li>a[]b</li></ol>',
                         });
                     });
                 });
@@ -573,6 +629,38 @@ describe('List', () => {
                                     </tbody>
                                 </table>
                             `),
+                        });
+                    });
+                    it('should create a new checked list if current node is inside a nav-item list', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore: '<ul><li class="nav-item">a[]b</li></ul>',
+                            stepFunction: toggleCheckList,
+                            contentAfter: '<ul><li class="nav-item"><ul class="o_checklist"><li>a[]b</li></ul></li></ul>',
+                        });
+                    });
+                    it('should create a new checked list if closestBlock is inside a nav-item list', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore: '<ul><li class="nav-item"><div><p>a[]b</p></div></li></ul>',
+                            stepFunction: toggleCheckList,
+                            contentAfter: '<ul><li class="nav-item"><div><ul class="o_checklist"><li>a[]b</li></ul></div></li></ul>',
+                        });
+                    });
+                    it('should only keep dir attribute when converting a non Paragraph element', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore: '<h1 dir="rtl" class="h1">a[]b</h1>',
+                            stepFunction: toggleCheckList,
+                            contentAfter: '<ul class="o_checklist" dir="rtl"><li><h1 dir="rtl" class="h1">a[]b</h1></li></ul>',
+                        });
+                    });
+                    it('should keep all attributes when converting a Paragraph element', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore: '<p dir="rtl" class="text-uppercase">a[]b</p>',
+                            stepFunction: toggleCheckList,
+                            contentAfter: '<ul class="o_checklist text-uppercase" dir="rtl"><li>a[]b</li></ul>',
                         });
                     });
                 });
@@ -7319,6 +7407,18 @@ describe('List', () => {
                 </ol>`),
                 });
             });
+            it('should not indent a nav-item list', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<ul><li class="nav-item">a[]</li></ul>',
+                    stepFunction: indentList,
+                    contentAfter: '<ul><li class="nav-item">a[]</li></ul>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<ul><li class="nav-item"><div><p>a[]</p></div></li></ul>',
+                    stepFunction: indentList,
+                    contentAfter: '<ul><li class="nav-item"><div><p>a[]</p></div></li></ul>',
+                });
+            });
         });
         describe('with selection', () => {
             it('should indent the first element of a list', async () => {
@@ -7841,6 +7941,136 @@ describe('List', () => {
                             </li>
                             <li>[]c</li>
                         </ul>`),
+                });
+            });
+            it('should outdent a list inside a nav-item list', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <ul>
+                                    <li>a[]b</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    `),
+                    stepFunction: outdentList,
+                    contentAfter: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <p>a[]b</p>
+                            </li>
+                        </ul>
+                    `),
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <ol>
+                                    <li>a[]b</li>
+                                </ol>
+                            </li>
+                        </ul>
+                    `),
+                    stepFunction: outdentList,
+                    contentAfter: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <p>a[]b</p>
+                            </li>
+                        </ul>
+                    `),
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <ul class="o_checklist">
+                                    <li>a[]b</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    `),
+                    stepFunction: outdentList,
+                    contentAfter: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <p>a[]b</p>
+                            </li>
+                        </ul>
+                    `),
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <div>
+                                    <ul>
+                                        <li>a[]b</li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    `),
+                    stepFunction: outdentList,
+                    contentAfter: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <div>
+                                    <p>a[]b</p>
+                                </div>
+                            </li>
+                        </ul>
+                    `),
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <div>
+                                    <ol>
+                                        <li>
+                                            <h1>a[]b</h1>
+                                        </li>
+                                    </ol>
+                                </div>
+                            </li>
+                        </ul>
+                    `),
+                    stepFunction: outdentList,
+                    contentAfter: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <div>
+                                    <h1>a[]b</h1>
+                                </div>
+                            </li>
+                        </ul>
+                    `),
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <div>
+                                    <ul class="o_checklist">
+                                        <li>a[]b</li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    `),
+                    stepFunction: outdentList,
+                    contentAfter: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <div>
+                                    <p>a[]b</p>
+                                </div>
+                            </li>
+                        </ul>
+                    `),
                 });
             });
         });
