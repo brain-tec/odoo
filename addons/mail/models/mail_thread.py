@@ -4317,6 +4317,7 @@ class MailThread(models.AbstractModel):
         domain = [
             ("res_id", "=", self.id),
             ("res_model", "=", self._name),
+            ("partner_id", "!=", self.env.user.partner_id.id),
         ]
         if filter_recipients:
             subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
@@ -4461,7 +4462,7 @@ class MailThread(models.AbstractModel):
         return self.env['ir.attachment'].search([('res_id', '=', self.id), ('res_model', '=', self._name)], order='id desc')
 
     def _get_mail_thread_data(self, request_list):
-        res = {'hasWriteAccess': False, 'hasReadAccess': True}
+        res = {'hasWriteAccess': False, 'hasReadAccess': True, "id": self.id, "model": self._name}
         if not self:
             res['hasReadAccess'] = False
             return res

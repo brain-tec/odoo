@@ -40,53 +40,15 @@ patch(ThreadService.prototype, {
             thread_id: thread.id,
             thread_model: thread.model,
         });
-        thread.canPostOnReadonly = result.canPostOnReadonly;
-        thread.hasReadAccess = result.hasReadAccess;
-        thread.hasWriteAccess = result.hasWriteAccess;
-        if ("activities" in result) {
-            const existingIds = new Set();
-            for (const activity of result.activities) {
-                existingIds.add(this.store.Activity.insert(activity, { html: true }).id);
-            }
-            for (const activity of thread.activities) {
-                if (!existingIds.has(activity.id)) {
-                    this.activityService.delete(activity);
-                }
-            }
-        }
+        this.store.Thread.insert(result, { html: true });
         if ("attachments" in result) {
             Object.assign(thread, {
                 areAttachmentsLoaded: true,
-                attachments: result.attachments,
                 isLoadingAttachments: false,
             });
         }
-        if ("mainAttachment" in result) {
-            thread.mainAttachment = result.mainAttachment.id ? result.mainAttachment : undefined;
-        }
         if (!thread.mainAttachment && thread.attachmentsInWebClientView.length > 0) {
             this.setMainAttachmentFromIndex(thread, 0);
-        }
-        if ("followers" in result) {
-            if (result.selfFollower) {
-                thread.selfFollower = { thread, ...result.selfFollower };
-            }
-            thread.followersCount = result.followersCount;
-            Record.MAKE_UPDATE(() => {
-                for (const followerData of result.followers) {
-                    const follower = this.store.Follower.insert({
-                        thread,
-                        ...followerData,
-                    });
-                    if (follower.notEq(thread.selfFollower)) {
-                        thread.followers.add(follower);
-                    }
-                }
-            });
-            thread.recipientsCount = result.recipientsCount;
-            for (const recipientData of result.recipients) {
-                thread.recipients.add({ thread, ...recipientData });
-            }
         }
         if ("suggestedRecipients" in result) {
             this.insertSuggestedRecipients(thread, result.suggestedRecipients);
