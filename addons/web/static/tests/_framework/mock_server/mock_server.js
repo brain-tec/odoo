@@ -130,11 +130,7 @@ class MockServerBaseEnvironment {
         return this.server.env["res.users"].read(this.uid)[0];
     }
 
-    // Note: the following getters do not exist in the actual server environment
-    get partner() {
-        return this.server.env["res.partner"].read(this.partner_id)[0];
-    }
-
+    // Note: the following getter does not exist in the actual server environment
     get partner_id() {
         return session.partner_id;
     }
@@ -301,7 +297,7 @@ export class MockServer {
             }
 
             // Try to find a parent model method
-            for (const parentName of model._inherit) {
+            for (const parentName of safeSplit(model._inherit)) {
                 const parentModel = this.env[parentName];
                 if (typeof parentModel[method] === "function") {
                     const expectedLength = parentModel[method].length;
