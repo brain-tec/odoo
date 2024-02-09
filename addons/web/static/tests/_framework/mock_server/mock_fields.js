@@ -3,7 +3,8 @@ import { MockServerError } from "./mock_server_utils";
  * @typedef {{
  *  compute?: (() => void) | string;
  *  default?: RecordFieldValue | ((record: ModelRecord) => RecordFieldValue);
- *  group_operator?: GroupOperator;
+ *  aggregator?: Aggregator;
+ *  groupable: boolean;
  *  name: string;
  *  onChange?: (record: ModelRecord) => void;
  *  readonly: boolean;
@@ -33,7 +34,7 @@ import { MockServerError } from "./mock_server_utils";
  *  | "max"
  *  | "min"
  *  | "sum"
- * } GroupOperator
+ * } Aggregator
  *
  * @typedef {{
  *  __domain: string;
@@ -111,9 +112,10 @@ const makeFieldGenerator = (type, { groupOperator, requiredKeys = [] } = {}) => 
         searchable: true,
         sortable: true,
         store: true,
+        groupable: true,
     };
     if (groupOperator) {
-        defaultDef.group_operator = groupOperator;
+        defaultDef.aggregator = groupOperator;
     }
     if (type !== "generic") {
         defaultDef.type = type;
@@ -149,6 +151,12 @@ const makeFieldGenerator = (type, { groupOperator, requiredKeys = [] } = {}) => 
                 // By default: computed fields are readonly and not stored
                 fieldDefinition.readonly ??= true;
                 fieldDefinition.store ??= false;
+            }
+
+            // Remove aggregator for no-store expect related ones
+            if (!fullDef.store && !fullDef.related) {
+                fieldDefinition.aggregator ??= undefined;
+                fieldDefinition.groupable ??= false;
             }
 
             return Object.assign(fieldGetter, { [FIELD_SYMBOL]: true });

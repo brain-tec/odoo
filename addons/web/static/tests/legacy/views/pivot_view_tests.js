@@ -61,16 +61,29 @@ QUnit.module("Views", (hooks) => {
                             string: "Foo",
                             type: "integer",
                             searchable: true,
-                            group_operator: "sum",
+                            aggregator: "sum",
                         },
-                        bar: { string: "bar", type: "boolean", store: true, sortable: true },
-                        date: { string: "Date", type: "date", store: true, sortable: true },
+                        bar: {
+                            string: "bar",
+                            type: "boolean",
+                            store: true,
+                            sortable: true,
+                            groupable: true,
+                        },
+                        date: {
+                            string: "Date",
+                            type: "date",
+                            store: true,
+                            groupable: true,
+                            sortable: true,
+                        },
                         product_id: {
                             string: "Product",
                             type: "many2one",
                             relation: "product",
                             store: true,
                             sortable: true,
+                            groupable: true,
                         },
                         other_product_id: {
                             string: "Other Product",
@@ -78,6 +91,7 @@ QUnit.module("Views", (hooks) => {
                             relation: "product",
                             store: true,
                             sortable: true,
+                            groupable: true,
                         },
                         non_stored_m2o: {
                             string: "Non Stored M2O",
@@ -90,12 +104,13 @@ QUnit.module("Views", (hooks) => {
                             relation: "customer",
                             store: true,
                             sortable: true,
+                            groupable: true,
                         },
                         computed_field: {
                             string: "Computed and not stored",
                             type: "integer",
                             compute: true,
-                            group_operator: "sum",
+                            aggregator: "sum",
                         },
                         company_type: {
                             string: "Company Type",
@@ -107,11 +122,12 @@ QUnit.module("Views", (hooks) => {
                             searchable: true,
                             sortable: true,
                             store: true,
+                            groupable: true,
                         },
                         price_nonaggregatable: {
                             string: "Price non-aggregatable",
                             type: "monetary",
-                            group_operator: undefined,
+                            aggregator: undefined,
                             store: true,
                         },
                         ref: {
@@ -121,7 +137,7 @@ QUnit.module("Views", (hooks) => {
                                 ["product", "Product"],
                                 ["customer", "Customer"],
                             ],
-                            group_operator: "count_distinct",
+                            aggregator: "count_distinct",
                         },
                         properties: {
                             string: "Properties",
@@ -292,7 +308,7 @@ QUnit.module("Views", (hooks) => {
             serverData.models.partner.fields.bouh = {
                 string: "bouh",
                 type: "integer",
-                group_operator: "sum",
+                aggregator: "sum",
             };
 
             await makeView({
@@ -314,7 +330,7 @@ QUnit.module("Views", (hooks) => {
                 )
             ).map((e) => e.textContent);
 
-            assert.deepEqual(measures, ["bouh", "Foo", "Count"]);
+            assert.deepEqual(measures, ["bouh", "Computed and not stored", "Foo", "Count"]);
         }
     );
 
@@ -341,7 +357,7 @@ QUnit.module("Views", (hooks) => {
             string: "Foo",
             type: "integer",
             store: true,
-            group_operator: "sum",
+            aggregator: "sum",
         };
 
         await makeView({
@@ -416,7 +432,7 @@ QUnit.module("Views", (hooks) => {
                 string: "Fubar",
                 type: "integer",
                 store: false,
-                group_operator: "sum",
+                aggregator: "sum",
             };
 
             await makeView({
@@ -439,8 +455,9 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("pivot rendering with invisible attribute on field", async function (assert) {
         // when invisible, a field should neither be an active measure nor be a selectable measure
         Object.assign(serverData.models.partner.fields, {
-            foo: { string: "Foo", type: "integer", store: true, group_operator: "sum" },
-            foo2: { string: "Foo2", type: "integer", store: true, group_operator: "sum" },
+            foo: { string: "Foo", type: "integer", store: true, aggregator: "sum" },
+            foo2: { string: "Foo2", type: "integer", store: true, aggregator: "sum" },
+            computed_field: { aggregator: null },
         });
 
         await makeView({
@@ -536,7 +553,7 @@ QUnit.module("Views", (hooks) => {
     );
 
     QUnit.test(
-        "pivot view do not add number field without group_operator",
+        "pivot view do not add number field without aggregator",
         async function (assert) {
             await makeView({
                 type: "pivot",
@@ -926,6 +943,8 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("without measures, pivot view uses __count by default", async function (assert) {
+        serverData.models.partner.fields.computed_field.aggregator = undefined;
+        serverData.models.partner.fields.foo.aggregator = undefined;
         assert.expect(4);
 
         await makeView({
@@ -1467,8 +1486,7 @@ QUnit.module("Views", (hooks) => {
             }
 
             // Keep product_id but make it ungroupable
-            delete serverData.models.partner.fields.product_id.sortable;
-            delete serverData.models.partner.fields.product_id.store;
+            serverData.models.partner.fields.product_id.groupable = false;
 
             serverData.models.partner.records = [
                 {
@@ -2055,7 +2073,7 @@ QUnit.module("Views", (hooks) => {
         serverData.models.partner.fields.amount = {
             string: "Amount",
             type: "float",
-            group_operator: "sum",
+            aggregator: "sum",
         };
 
         let expectedContext;
@@ -2768,7 +2786,7 @@ QUnit.module("Views", (hooks) => {
         serverData.models.partner.fields.amount = {
             string: "Amount",
             type: "float",
-            group_operator: "sum",
+            aggregator: "sum",
         };
 
         await makeView({
@@ -2978,7 +2996,7 @@ QUnit.module("Views", (hooks) => {
         serverData.models.partner.fields.amount = {
             string: "Amount",
             type: "float",
-            group_operator: "sum",
+            aggregator: "sum",
         };
 
         await makeView({
@@ -3115,7 +3133,7 @@ QUnit.module("Views", (hooks) => {
             serverData.models.partner.fields.amount = {
                 string: "Amount",
                 type: "float",
-                group_operator: "sum",
+                aggregator: "sum",
             };
 
             await makeView({
@@ -3169,6 +3187,9 @@ QUnit.module("Views", (hooks) => {
     );
 
     QUnit.test("pivot still handles __count__ measure", async function (assert) {
+        serverData.models.partner.fields.computed_field.aggregator = undefined;
+        serverData.models.partner.fields.foo.aggregator = undefined;
+
         // for retro-compatibility reasons, the pivot view still handles
         // '__count__' measure.
         assert.expect(4);
@@ -3200,6 +3221,8 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("not use a many2one as a measure by default", async function (assert) {
+        serverData.models.partner.fields.computed_field.aggregator = undefined;
+        serverData.models.partner.fields.foo.aggregator = undefined;
         assert.expect(3);
 
         await makeView({
@@ -3391,6 +3414,7 @@ QUnit.module("Views", (hooks) => {
     );
 
     QUnit.test("pivot measures should be alphabetically sorted", async function (assert) {
+        serverData.models.partner.fields.computed_field.aggregator = undefined;
         assert.expect(1);
 
         // It's important to compare capitalized and lowercased words
@@ -3398,17 +3422,17 @@ QUnit.module("Views", (hooks) => {
         serverData.models.partner.fields.bouh = {
             string: "bouh",
             type: "integer",
-            group_operator: "sum",
+            aggregator: "sum",
         };
         serverData.models.partner.fields.modd = {
             string: "modd",
             type: "integer",
-            group_operator: "sum",
+            aggregator: "sum",
         };
         serverData.models.partner.fields.zip = {
             string: "Zip",
             type: "integer",
-            group_operator: "sum",
+            aggregator: "sum",
         };
 
         await makeView({
@@ -3490,6 +3514,8 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("rendering of pivot view with comparison", async function (assert) {
+        serverData.models.partner.fields.computed_field.aggregator = undefined;
+
         serverData.models.partner.records[0].date = "2016-12-15";
         serverData.models.partner.records[1].date = "2016-12-17";
         serverData.models.partner.records[2].date = "2016-11-22";
@@ -4569,7 +4595,7 @@ QUnit.module("Views", (hooks) => {
             type: "boolean",
             store: true,
             searchable: true,
-            group_operator: "bool_or",
+            aggregator: "bool_or",
         };
         serverData.models.partner.records = [
             { id: 1, bar: true, date: "2019-12-14" },

@@ -93,8 +93,8 @@ QUnit.module("Views", (hooks) => {
                     fields: {
                         foo: { string: "Foo", type: "char" },
                         bar: { string: "Bar", type: "boolean" },
-                        int_field: { string: "int_field", type: "integer", sortable: true },
-                        qux: { string: "my float", type: "float" },
+                        int_field: { string: "int_field", type: "integer", sortable: true, aggregator: "sum" },
+                        qux: { string: "my float", type: "float", aggregator: "sum" },
                         product_id: {
                             string: "something_id",
                             type: "many2one",
@@ -129,7 +129,7 @@ QUnit.module("Views", (hooks) => {
                             relation: "currency",
                             default: 1,
                         },
-                        salary: { string: "Monetary field", type: "monetary" },
+                        salary: { string: "Monetary field", type: "monetary", aggregator: "sum" },
                         properties: {
                             string: "Properties",
                             type: "properties",
@@ -12342,7 +12342,7 @@ QUnit.module("Views", (hooks) => {
             groupBy: ["date:day"],
             async mockRPC(route, args) {
                 if (args.method === "web_read_group") {
-                    assert.deepEqual(args.kwargs.fields, ["foo", "date"]);
+                    assert.deepEqual(args.kwargs.fields, []);
                     assert.deepEqual(args.kwargs.groupby, ["date:day"]);
                 }
                 assert.step(args.method);

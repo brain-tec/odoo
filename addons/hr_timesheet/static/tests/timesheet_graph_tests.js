@@ -22,13 +22,14 @@ QUnit.module('hr_timesheet', function (hooks) {
             models: {
                 'account.analytic.line': {
                     fields: {
-                        unit_amount: { string: "Unit Amount", type: "float", group_operator: "sum", store: true },
+                        unit_amount: { string: "Unit Amount", type: "float", aggregator: "sum", store: true },
                         project_id: {
                             string: "Project",
                             type: "many2one",
                             relation: "project.project",
                             store: true,
                             sortable: true,
+                            groupable: true,
                         },
                     },
                     records: [
@@ -45,6 +46,7 @@ QUnit.module('hr_timesheet', function (hooks) {
                             relation: "project.milestone",
                             store: true,
                             sortable: true,
+                            groupable: true,
                         },
                         project_id: {
                             string: "Project",
@@ -52,6 +54,7 @@ QUnit.module('hr_timesheet', function (hooks) {
                             relation: "project.project",
                             store: true,
                             sortable: true,
+                            groupable: true,
                         },
                     },
                     records: [

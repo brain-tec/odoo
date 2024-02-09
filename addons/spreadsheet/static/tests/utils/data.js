@@ -278,13 +278,14 @@ export function getBasicData() {
                     type: "integer",
                     store: true,
                     searchable: true,
-                    group_operator: "sum",
+                    aggregator: "sum",
                 },
                 bar: {
                     string: "Bar",
                     type: "boolean",
                     store: true,
                     sortable: true,
+                    groupable: true,
                     searchable: true,
                 },
                 name: {
@@ -292,6 +293,7 @@ export function getBasicData() {
                     type: "char",
                     store: true,
                     sortable: true,
+                    groupable: true,
                     searchable: true,
                 },
                 date: {
@@ -299,6 +301,7 @@ export function getBasicData() {
                     type: "date",
                     store: true,
                     sortable: true,
+                    groupable: true,
                     searchable: true,
                 },
                 create_date: {
@@ -306,6 +309,7 @@ export function getBasicData() {
                     type: "datetime",
                     store: true,
                     sortable: true,
+                    groupable: true,
                 },
                 active: { string: "Active", type: "bool", default: true, searchable: true },
                 product_id: {
@@ -314,6 +318,7 @@ export function getBasicData() {
                     relation: "product",
                     store: true,
                     sortable: true,
+                    groupable: true,
                     searchable: true,
                 },
                 tag_ids: {
@@ -322,6 +327,7 @@ export function getBasicData() {
                     relation: "tag",
                     store: true,
                     sortable: true,
+                    groupable: true,
                     searchable: true,
                 },
                 probability: {
@@ -329,13 +335,13 @@ export function getBasicData() {
                     type: "float",
                     searchable: true,
                     store: true,
-                    group_operator: "avg",
+                    aggregator: "avg",
                 },
                 field_with_array_agg: {
                     string: "field_with_array_agg",
                     type: "integer",
                     searchable: true,
-                    group_operator: "array_agg",
+                    aggregator: "array_agg",
                 },
                 currency_id: {
                     string: "Currency",
@@ -343,6 +349,7 @@ export function getBasicData() {
                     relation: "res.currency",
                     store: true,
                     sortable: true,
+                    groupable: true,
                     searchable: true,
                 },
                 pognon: {
@@ -351,7 +358,8 @@ export function getBasicData() {
                     currency_field: "currency_id",
                     store: true,
                     sortable: true,
-                    group_operator: "avg",
+                    aggregator: "avg",
+                    groupable: true,
                     searchable: true,
                 },
                 partner_properties: {
@@ -359,6 +367,7 @@ export function getBasicData() {
                     type: "properties",
                     store: true,
                     sortable: true,
+                    groupable: true,
                     searchable: true,
                     definition_record: "product_id",
                     definition_record_field: "properties_definitions",

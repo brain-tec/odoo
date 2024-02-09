@@ -149,19 +149,27 @@ export class SelectMenu extends Component {
         );
     }
 
+    async onBeforeOpen() {
+        if (this.state.searchValue.length) {
+            this.state.searchValue = "";
+            if (this.props.onInput) {
+                // This props can be used by the parent to fetch items dynamically depending
+                // the search value. It must be called with the empty search value.
+                await this.executeOnInput("");
+            }
+        }
+        this.filterOptions();
+    }
+
     onStateChanged(open) {
         this.isOpen = open;
-        this.inputRef.el?.focus();
-        this.menuRef.el?.addEventListener("scroll", (ev) => this.onScroll(ev));
-
-        if (!open) {
-            this.state.searchValue = "";
-            return;
-        }
-
-        const selectedElement = this.menuRef.el?.querySelectorAll(".o_select_active")[0];
-        if (selectedElement) {
-            scrollTo(selectedElement);
+        if (open) {
+            this.inputRef.el?.focus();
+            this.menuRef.el?.addEventListener("scroll", (ev) => this.onScroll(ev));
+            const selectedElement = this.menuRef.el?.querySelectorAll(".o_select_active")[0];
+            if (selectedElement) {
+                scrollTo(selectedElement);
+            }
         }
     }
 
@@ -174,9 +182,9 @@ export class SelectMenu extends Component {
 
     getItemClass(choice) {
         if (this.isOptionSelected(choice)) {
-            return "o_select_menu_item mb-1 o_select_active bg-primary fw-bolder fst-italic";
+            return "o_select_menu_item p-2 o_select_active bg-primary fw-bolder fst-italic";
         } else {
-            return "o_select_menu_item mb-1";
+            return "o_select_menu_item p-2";
         }
     }
 
