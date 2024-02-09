@@ -1,7 +1,6 @@
 /* @odoo-module */
 
 import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
-import { Record } from "@mail/core/common/record";
 import { prettifyMessageContent } from "@mail/utils/common/format";
 
 import { browser } from "@web/core/browser/browser";
@@ -123,7 +122,6 @@ export class ThreadService {
             ],
         ]);
         Object.assign(thread, {
-            needactionMessages: [],
             message_unread_counter: 0,
             message_needaction_counter: 0,
             seen_message_id: thread.newestPersistentNotEmptyOfAllMessage?.id,
@@ -227,32 +225,6 @@ export class ThreadService {
                         message.id > thread.newestPersistentMessage.id)
             );
             thread.messages.splice(startIndex, 0, ...filtered);
-            // feed needactions
-            // same for needaction messages, special case for mailbox:
-            // kinda "fetch new/more" with needactions on many origin threads at once
-            if (thread.eq(this.store.discuss.inbox)) {
-                Record.MAKE_UPDATE(() => {
-                    for (const message of fetched) {
-                        const thread = message.thread;
-                        if (thread && message.notIn(thread.needactionMessages)) {
-                            thread.needactionMessages.unshift(message);
-                        }
-                    }
-                });
-            } else {
-                const startNeedactionIndex =
-                    after === undefined
-                        ? 0
-                        : thread.messages.findIndex((message) => message.id === after);
-                const filteredNeedaction = fetched.filter(
-                    (message) =>
-                        message.isNeedaction &&
-                        (thread.needactionMessages.length === 0 ||
-                            message.id < thread.needactionMessages[0].id ||
-                            message.id > thread.needactionMessages.at(-1).id)
-                );
-                thread.needactionMessages.splice(startNeedactionIndex, 0, ...filteredNeedaction);
-            }
             Object.assign(thread, {
                 loadOlder:
                     after === undefined && fetched.length === FETCH_LIMIT
@@ -695,14 +667,18 @@ export class ThreadService {
                   })
                 : undefined;
         const partner_ids = validMentions?.partners.map((partner) => partner.id) ?? [];
-        let recipientEmails = [];
+        const recipientEmails = [];
+        const recipientAdditionalValues = {};
         if (!isNote) {
             const recipientIds = thread.suggestedRecipients
                 .filter((recipient) => recipient.persona && recipient.checked)
                 .map((recipient) => recipient.persona.id);
-            recipientEmails = thread.suggestedRecipients
+            thread.suggestedRecipients
                 .filter((recipient) => recipient.checked && !recipient.persona)
-                .map((recipient) => recipient.email);
+                .forEach((recipient) => {
+                    recipientEmails.push(recipient.email);
+                    recipientAdditionalValues[recipient.email] = recipient.defaultCreateValues;
+                });
             partner_ids.push(...recipientIds);
         }
         return {
@@ -718,6 +694,7 @@ export class ThreadService {
                 partner_ids,
                 subtype_xmlid: subtype,
                 partner_emails: recipientEmails,
+                partner_additional_values: recipientAdditionalValues,
             },
             thread_id: thread.id,
             thread_model: thread.model,

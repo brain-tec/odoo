@@ -5,7 +5,6 @@
 
 from collections import defaultdict
 from datetime import date, datetime, time
-from lxml import etree, html
 from operator import attrgetter
 from xmlrpc.client import MAXINT
 import ast
@@ -41,7 +40,6 @@ from .tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 from .tools.translate import html_translate, _
 from .tools.mimetypes import guess_mimetype
 
-from odoo import SUPERUSER_ID
 from odoo.exceptions import CacheMiss
 from odoo.osv import expression
 
@@ -189,7 +187,7 @@ class Field(MetaField('DummyField', (object,), {})):
     :param bool store: whether the field is stored in database
         (default:``True``, ``False`` for computed fields)
 
-    :param str group_operator: aggregate function used by :meth:`~odoo.models.Model.read_group`
+    :param str aggregator: aggregate function used by :meth:`~odoo.models.Model.read_group`
         when grouping on this field.
 
         Supported aggregate functions are:
@@ -319,7 +317,7 @@ class Field(MetaField('DummyField', (object,), {})):
     change_default = False              # whether the field may trigger a "user-onchange"
 
     related_field = None                # corresponding related field
-    group_operator = None               # operator for aggregating values
+    aggregator = None                   # operator for aggregating values
     group_expand = None                 # name of method to expand groups in read_group()
     prefetch = True                     # the prefetch group (False means no group)
 
@@ -475,6 +473,10 @@ class Field(MetaField('DummyField', (object,), {})):
             attrs['_depends'] = tuple(attrs.pop('depends'))
         if 'depends_context' in attrs:
             attrs['_depends_context'] = tuple(attrs.pop('depends_context'))
+
+        if 'group_operator' in attrs:
+            warnings.warn("Since Odoo 18, 'group_operator' is deprecated, use 'aggregator' instead", DeprecationWarning, 2)
+            attrs['aggregator'] = attrs.pop('group_operator')
 
         return attrs
 
@@ -719,26 +721,52 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def _search_related(self, records, operator, value):
         """ Determine the domain to search on field ``self``. """
-        return [(self.related, operator, value)]
+
+        # This should never happen to avoid bypassing security checks
+        # and should already be converted to (..., 'in', subquery)
+        assert operator not in ('any', 'not any')
+
+        # determine whether the related field can be null
+        if isinstance(value, (list, tuple)):
+            value_is_null = any(val is False or val is None for val in value)
+        else:
+            value_is_null = value is False or value is None
+
+        can_be_null = (  # (..., '=', False) or (..., 'not in', [truthy vals])
+            (operator not in expression.NEGATIVE_TERM_OPERATORS and value_is_null)
+            or (operator in expression.NEGATIVE_TERM_OPERATORS and not value_is_null)
+        )
+
+        def make_domain(path, model):
+            if '.' not in path:
+                return [(path, operator, value)]
+
+            prefix, suffix = path.split('.', 1)
+            field = model._fields[prefix]
+            comodel = model.env[field.comodel_name]
+
+            domain = [(prefix, 'in', comodel._search(make_domain(suffix, comodel)))]
+            if can_be_null and field.type == 'many2one' and not field.required:
+                return expression.OR([domain, [(prefix, '=', False)]])
+
+            return domain
+
+        model = records.env[self.model_name].with_context(active_test=False)
+        model = model.sudo(records.env.su or self.compute_sudo)
+
+        return make_domain(self.related, model)
 
     # properties used by setup_related() to copy values from related field
     _related_comodel_name = property(attrgetter('comodel_name'))
     _related_string = property(attrgetter('string'))
     _related_help = property(attrgetter('help'))
     _related_groups = property(attrgetter('groups'))
-    _related_group_operator = property(attrgetter('group_operator'))
+    _related_aggregator = property(attrgetter('aggregator'))
 
     @property
     def base_field(self):
         """ Return the base field of an inherited field, or ``self``. """
         return self.inherited_field.base_field if self.inherited_field else self
-
-    @property
-    def groupable(self):
-        """
-        Return whether the field may be used for grouping in :meth:`~odoo.models.BaseModel.read_group`.
-        """
-        return self.store and self.column_type
 
     #
     # Company-dependent fields
@@ -862,7 +890,6 @@ class Field(MetaField('DummyField', (object,), {})):
     _description_required = property(attrgetter('required'))
     _description_groups = property(attrgetter('groups'))
     _description_change_default = property(attrgetter('change_default'))
-    _description_group_operator = property(attrgetter('group_operator'))
     _description_default_export_compatible = property(attrgetter('default_export_compatible'))
     _description_exportable = property(attrgetter('exportable'))
 
@@ -873,9 +900,42 @@ class Field(MetaField('DummyField', (object,), {})):
     def _description_searchable(self):
         return bool(self.store or self.search)
 
-    @property
-    def _description_sortable(self):
-        return (self.column_type and self.store) or (self.inherited and self.related_field._description_sortable)
+    def _description_sortable(self, env):
+        if self.column_type and self.store:  # shortcut
+            return True
+
+        model = env[self.model_name]
+        query = model._as_query(ordered=False)
+        try:
+            model._order_field_to_sql(model._table, self.name, SQL(), SQL(), query)
+            return True
+        except (ValueError, AccessError):
+            return False
+
+    def _description_groupable(self, env):
+        if self.column_type and self.store:  # shortcut
+            return True
+
+        model = env[self.model_name]
+        query = model._as_query(ordered=False)
+        groupby = self.name if self.type not in ('date', 'datetime') else f"{self.name}:month"
+        try:
+            model._read_group_groupby(groupby, query)
+            return True
+        except (ValueError, AccessError):
+            return False
+
+    def _description_aggregator(self, env):
+        if not self.aggregator or self.column_type and self.store:  # shortcut
+            return self.aggregator
+
+        model = env[self.model_name]
+        query = model._as_query(ordered=False)
+        try:
+            model._read_group_select(f"{self.name}:{self.aggregator}", query)
+            return self.aggregator
+        except (ValueError, AccessError):
+            return None
 
     def _description_string(self, env):
         if self.string and env.lang:
@@ -1408,13 +1468,13 @@ class Integer(Field):
     type = 'integer'
     column_type = ('int4', 'int4')
 
-    group_operator = 'sum'
+    aggregator = 'sum'
 
     def _get_attrs(self, model_class, name):
         res = super()._get_attrs(model_class, name)
-        # The default group_operator is None for sequence fields
-        if 'group_operator' not in res and name == 'sequence':
-            res['group_operator'] = None
+        # The default aggregator is None for sequence fields
+        if 'aggregator' not in res and name == 'sequence':
+            res['aggregator'] = None
         return res
 
     def convert_to_column(self, value, record, values=None, validate=True):
@@ -1489,7 +1549,7 @@ class Float(Field):
 
     type = 'float'
     _digits = None                      # digits argument passed to class initializer
-    group_operator = 'sum'
+    aggregator = 'sum'
 
     def __init__(self, string=Default, digits=Default, **kwargs):
         super(Float, self).__init__(string=string, _digits=digits, **kwargs)
@@ -1558,7 +1618,7 @@ class Monetary(Field):
     column_type = ('numeric', 'numeric')
 
     currency_field = None
-    group_operator = 'sum'
+    aggregator = 'sum'
 
     def __init__(self, string=Default, currency_field=Default, **kwargs):
         super(Monetary, self).__init__(string=string, currency_field=currency_field, **kwargs)
@@ -3176,7 +3236,7 @@ class Many2oneReference(Integer):
     type = 'many2one_reference'
 
     model_field = None
-    group_operator = None
+    aggregator = None
 
     _related_model_field = property(attrgetter('model_field'))
 
@@ -4775,10 +4835,6 @@ class Many2many(_RelationalMulti):
                 self.relation, self.column2, comodel._table, 'id', self.ondelete,
                 model, self._module,
             )
-
-    @property
-    def groupable(self):
-        return self.store
 
     def read(self, records):
         context = {'active_test': False}

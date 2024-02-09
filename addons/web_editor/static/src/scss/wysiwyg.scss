@@ -428,7 +428,9 @@ body:not(.editor_has_snippets) {
 
 .oe_edited_link {
     position: relative;
-    display: inline-block;
+    &:not(.nav-link) {
+        display: inline-block;
+    }
     &::before {
         content: '';
         border: dashed 3px #01bad2;
@@ -533,9 +535,13 @@ img.o_we_selected_image {
         margin-bottom: 1rem;
         overflow-y: visible;
 
-        .dropdown-menu {
+        #style .dropdown-menu {
             max-height: 200px;
             overflow: auto;
+        }
+
+        .dropdown-menu {
+            overflow: visible;
 
             &.colorpicker-menu {
                 bottom: auto;

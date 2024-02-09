@@ -322,7 +322,7 @@ export class FloorScreen extends Component {
                     false
                 );
 
-                this.selectFloor(floor["restaurant.floor"][0]);
+                this.selectFloor(floor[0]);
                 this.pos.isEditMode = true;
             },
         });
@@ -346,12 +346,16 @@ export class FloorScreen extends Component {
                 },
             ]);
 
-            this.selectFloor(copyFloor["restaurant.floor"][0]);
+            this.selectFloor(copyFloor[0]);
             this.pos.isEditMode = true;
 
+            const tableToCreate = [];
             for (const table of tables) {
-                await this._createTableHelper(table, true);
+                const tableSerialized = table.serialize(true);
+                tableSerialized.floor_id = copyFloor[0].id;
+                tableToCreate.push(tableSerialized);
             }
+            await this.pos.data.create("restaurant.table", tableToCreate);
             return;
         }
         const selectedTables = this.selectedTables;
@@ -441,7 +445,7 @@ export class FloorScreen extends Component {
         for (const table of childrenTables) {
             table.update({ parent_id: parentTable });
         }
-        this.pos.updateTables(...this.childrenTables);
+        this.pos.updateTables(...childrenTables);
     }
     isLinkingDisabled() {
         return (

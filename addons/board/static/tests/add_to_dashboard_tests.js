@@ -55,7 +55,7 @@ QUnit.module("Board", (hooks) => {
                     int_field: {
                         string: "Integer field",
                         type: "integer",
-                        group_operator: "sum",
+                        aggregator: "sum",
                     },
                 },
                 records: [
@@ -92,6 +92,7 @@ QUnit.module("Board", (hooks) => {
         assert.expect(6);
 
         serverData.models.partner.fields.foo.sortable = true;
+        serverData.models.partner.fields.foo.groupable = true;
 
         serverData.views = {
             "partner,false,list": '<list><field name="foo"/></list>',

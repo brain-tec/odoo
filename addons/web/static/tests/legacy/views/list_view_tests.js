@@ -123,14 +123,14 @@ QUnit.module("Views", (hooks) => {
                             string: "int_field",
                             type: "integer",
                             sortable: true,
-                            group_operator: "sum",
+                            aggregator: "sum",
                         },
                         text: { string: "text field", type: "text" },
-                        qux: { string: "my float", type: "float" },
+                        qux: { string: "my float", type: "float", aggregator: "sum" },
                         m2o: { string: "M2O field", type: "many2one", relation: "bar" },
                         o2m: { string: "O2M field", type: "one2many", relation: "bar" },
                         m2m: { string: "M2M field", type: "many2many", relation: "bar" },
-                        amount: { string: "Monetary field", type: "monetary" },
+                        amount: { string: "Monetary field", type: "monetary", aggregator: "sum" },
                         amount_currency: {
                             string: "Monetary field (currency)",
                             type: "monetary",
@@ -1958,7 +1958,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test(
-        "basic grouped list rendering with a date field between two fields with a group_operator",
+        "basic grouped list rendering with a date field between two fields with a aggregator",
         async function (assert) {
             await makeView({
                 type: "list",
@@ -2155,7 +2155,7 @@ QUnit.module("Views", (hooks) => {
         serverData.models.foo.fields.value = {
             string: "Value",
             type: "integer",
-            group_operator: "sum",
+            aggregator: "sum",
         };
         for (const record of serverData.models.foo.records) {
             record.value = 1;
@@ -2297,7 +2297,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("deletion of record is disabled when groupby m2m field", async function (assert) {
         patchUserWithCleanup({ hasGroup: () => Promise.resolve(false) });
 
-        serverData.models.foo.fields.m2m.store = true;
+        serverData.models.foo.fields.m2m.groupable = true;
 
         await makeView({
             type: "list",
@@ -2653,7 +2653,7 @@ QUnit.module("Views", (hooks) => {
             Controller: CustomListController,
         });
 
-        serverData.models.foo.fields.foo.sortable = true;
+        serverData.models.foo.fields.foo.groupable = true;
 
         await makeView({
             type: "list",
@@ -3965,7 +3965,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("date field aggregates in grouped lists", async function (assert) {
-        // this test simulates a scenario where a date field has a group_operator
+        // this test simulates a scenario where a date field has a aggregator
         // and the web_read_group thus return a value for that field for each group
         await makeView({
             type: "list",
@@ -4457,11 +4457,11 @@ QUnit.module("Views", (hooks) => {
             });
             assert.verifySteps(["default order"]);
 
-            // we cannot sort by sort_field since it doesn't have a group_operator
+            // we cannot sort by sort_field since it doesn't have a aggregator
             await click(target.querySelector(".o_column_sortable[data-name='sort_field']"));
             assert.verifySteps([]);
 
-            // we can sort by int_field since it has a group_operator
+            // we can sort by int_field since it has a aggregator
             await click(target.querySelector(".o_column_sortable[data-name='int_field']"));
             assert.verifySteps(["int_field ASC"]);
 
@@ -8129,7 +8129,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("groupby node with a button", async function (assert) {
         assert.expect(17);
 
-        serverData.models.foo.fields.currency_id.sortable = true;
+        serverData.models.foo.fields.currency_id.groupable = true;
         const list = await makeView({
             type: "list",
             resModel: "foo",
@@ -18555,7 +18555,7 @@ QUnit.module("Views", (hooks) => {
     });
 
     QUnit.test("list view with default_group_by", async (assert) => {
-        serverData.models.foo.fields.m2m.store = true;
+        serverData.models.foo.fields.m2m.groupable = true;
 
         let readGroupCount = 0;
         await makeView({

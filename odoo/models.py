@@ -20,6 +20,7 @@
           - functional
 
 """
+from __future__ import annotations
 
 import collections
 import contextlib
@@ -41,7 +42,6 @@ from collections.abc import MutableMapping, Iterable
 from contextlib import closing
 from inspect import getmembers
 from operator import attrgetter, itemgetter
-from typing import Dict, List
 
 import babel
 import babel.dates
@@ -528,10 +528,7 @@ class BaseModel(metaclass=MetaModel):
     """
     __slots__ = ['env', '_ids', '_prefetch_ids']
 
-    env: api.Environment
-    _ids: tuple[int | NewId]
-    _prefetch_ids: Iterable[int | NewId]
-
+    _fields: dict[str, Field]
     _auto = False
     """Whether a database table should be created.
     If set to ``False``, override :meth:`~odoo.models.BaseModel.init`
@@ -1988,17 +1985,48 @@ class BaseModel(metaclass=MetaModel):
 
         field = self._fields[fname]
 
-        if property_name:
-            if field.type != "properties":
-                raise ValueError(f"Property set on a non properties field: {property_name!r}")
-            access_fname = f"{fname}.{property_name}"
-        else:
-            access_fname = fname
+        if field.type == 'properties':
+            sql_expr = self._read_group_groupby_properties(fname, property_name, query)
 
-        if granularity and field.type not in ('datetime', 'date', 'properties'):
+        elif property_name:
+            raise ValueError(f"Relation cannot be traverse expected for property field: {groupby_spec!r}")
+
+        elif granularity and field.type not in ('datetime', 'date', 'properties'):
             raise ValueError(f"Granularity set on a no-datetime field or property: {groupby_spec!r}")
 
-        sql_expr = self._field_to_sql(self._table, access_fname, query)
+        elif field.type == 'many2many':
+            alias = self._table
+            if field.related and not field.store:
+                __, field, alias = self._traverse_related_sql(alias, field, query)
+
+            # special case for many2many fields: prepare a query on the comodel
+            # in order to reuse the mechanism _apply_ir_rules, then inject the
+            # query as an extra condition of the left join
+            comodel = self.env[field.comodel_name]
+            coquery = comodel._where_calc([], active_test=False)
+            comodel._apply_ir_rules(coquery)
+            # LEFT JOIN {field.relation} AS rel_alias ON
+            #     alias.id = rel_alias.{field.column1}
+            #     AND rel_alias.{field.column2} IN ({coquery})
+            rel_alias = query.make_alias(alias, field.name)
+            condition = SQL(
+                "%s = %s",
+                SQL.identifier(alias, 'id'),
+                SQL.identifier(rel_alias, field.column1),
+            )
+            if coquery.where_clause:
+                condition = SQL(
+                    "%s AND %s IN %s",
+                    condition,
+                    SQL.identifier(rel_alias, field.column2),
+                    coquery.subselect(),
+                )
+            query.add_join("LEFT JOIN", rel_alias, field.relation, condition)
+            return SQL.identifier(rel_alias, field.column2)
+
+        else:
+            sql_expr = self._field_to_sql(self._table, fname, query)
+
         if field.type == 'datetime' and self.env.context.get('tz') in pytz.all_timezones_set:
             sql_expr = SQL("timezone(%s, timezone('UTC', %s))", self.env.context['tz'], sql_expr)
 
@@ -2714,8 +2742,8 @@ class BaseModel(metaclass=MetaModel):
             if name not in self._fields:
                 raise ValueError(f"Invalid field {field_name!r} on model {self._name!r}")
             field = self._fields[name]
-            if field.base_field.store and field.base_field.column_type and field.group_operator and field_spec not in annoted_groupby:
-                annoted_aggregates[name] = f"{name}:{field.group_operator}"
+            if field.base_field.store and field.base_field.column_type and field.aggregator and field_spec not in annoted_groupby:
+                annoted_aggregates[name] = f"{name}:{field.aggregator}"
 
         if orderby:
             new_terms = []
@@ -2770,6 +2798,30 @@ class BaseModel(metaclass=MetaModel):
 
         return rows_dict
 
+    def _traverse_related_sql(self, alias: str, field: Field, query: Query):
+        """ Traverse the related `field` and add needed join to the `query`. """
+        assert field.related and not field.store
+        if not (self.env.su or field.compute_sudo or field.inherited):
+            raise ValueError(f'Cannot convert {field} to SQL because it is not a sudoed related or inherited field')
+
+        model = self.sudo(self.env.su or field.compute_sudo)
+        *path_fnames, last_fname = field.related.split('.')
+        for path_fname in path_fnames:
+            path_field = model._fields[path_fname]
+            if path_field.type != 'many2one':
+                raise ValueError(f'Cannot convert {field} (related={field.related}) to SQL because {path_fname} is not a Many2one')
+
+            comodel = model.env[path_field.comodel_name]
+            coalias = query.make_alias(alias, path_fname)
+            query.add_join('LEFT JOIN', coalias, comodel._table, SQL(
+                "%s = %s",
+                model._field_to_sql(alias, path_fname, query),
+                SQL.identifier(coalias, 'id'),
+            ))
+            model, alias = comodel, coalias
+
+        return model, model._fields[last_fname], alias
+
     def _field_to_sql(self, alias: str, fname: str, query: (Query | None) = None, flush: bool = True) -> SQL:
         """ Return an :class:`SQL` object that represents the value of the given
         field from the given table alias, in the context of the given query.
@@ -2782,59 +2834,26 @@ class BaseModel(metaclass=MetaModel):
         result to make method :meth:`~odoo.api.Environment.execute_query` flush
         the field before executing the query.
         """
-        full_fname = fname
         property_name = None
         if '.' in fname:
             fname, property_name = fname.split('.', 1)
 
-        field = self._fields[fname]
-        if field.inherited:
-            # retrieve the parent model where field is inherited from
-            parent_model = self.env[field.related_field.model_name]
-            parent_fname = field.related.split('.')[0]
-            # LEFT JOIN parent_model._table AS parent_alias ON alias.parent_fname = parent_alias.id
-            parent_alias = query.make_alias(alias, parent_fname)
-            query.add_join('LEFT JOIN', parent_alias, parent_model._table, SQL(
-                "%s = %s",
-                self._field_to_sql(alias, parent_fname, query),
-                SQL.identifier(parent_alias, 'id'),
-            ))
-            # delegate to the parent model
-            return parent_model._field_to_sql(parent_alias, full_fname, query)
+        field = self._fields.get(fname)
+        if not field:
+            raise ValueError(f"Invalid field {fname!r} on model {self._name!r}")
 
-        if not field.store:
+        if field.related and not field.store:
+            model, field, alias = self._traverse_related_sql(alias, field, query)
+            return model._field_to_sql(alias, field.name, query)
+
+        if not field.store or not field.column_type:
             raise ValueError(f"Cannot convert field {field} to SQL")
 
-        if field.type == 'many2many':
-            # special case for many2many fields: prepare a query on the comodel
-            # in order to reuse the mechanism _apply_ir_rules, then inject the
-            # query as an extra condition of the left join
-            comodel = self.env[field.comodel_name]
-            coquery = comodel._where_calc([], active_test=False)
-            comodel._apply_ir_rules(coquery)
-            # LEFT JOIN {field.relation} AS rel_alias ON
-            #     alias.id = rel_alias.{field.column1}
-            #     AND rel_alias.{field.column2} IN ({coquery})
-            rel_alias = query.make_alias(alias, field.name)
-            condition = SQL(
-                "%s = %s",
-                SQL.identifier(alias, 'id'),
-                SQL.identifier(rel_alias, field.column1),
-            )
-            if coquery.where_clause:
-                condition = SQL(
-                    "%s AND %s IN %s",
-                    condition,
-                    SQL.identifier(rel_alias, field.column2),
-                    coquery.subselect(),
-                )
-            query.add_join("LEFT JOIN", rel_alias, field.relation, condition)
-            return SQL.identifier(rel_alias, field.column2)
-
         if field.type == 'properties' and property_name:
-            return self._field_properties_to_sql(alias, fname, property_name, query)
+            return SQL("%s -> %s", self._field_to_sql(alias, fname, query, flush), property_name)
 
         self.check_field_access_rights('read', [field.name])
+
         field_to_flush = field if flush and fname != 'id' else None
         sql_field = SQL.identifier(alias, fname, to_flush=field_to_flush)
 
@@ -2847,17 +2866,14 @@ class BaseModel(metaclass=MetaModel):
 
         return sql_field
 
-    def _field_properties_to_sql(self, alias: str, fname: str, property_name: str,
-                                 query: Query) -> SQL:
+    def _read_group_groupby_properties(self, fname: str, property_name: str, query: Query) -> SQL:
         definition = self.get_property_definition(f"{fname}.{property_name}")
         property_type = definition.get('type')
-
-        sql_field = self._field_to_sql(alias, fname, query)
-        sql_property = SQL("%s -> %s", sql_field, property_name)
+        sql_property = self._field_to_sql(self._table, f'{fname}.{property_name}', query)
 
         # JOIN on the JSON array
         if property_type in ('tags', 'many2many'):
-            property_alias = query.make_alias(alias, f'{fname}_{property_name}')
+            property_alias = query.make_alias(self._table, f'{fname}_{property_name}')
             sql_property = SQL(
                 """ CASE
                         WHEN jsonb_typeof(%(property)s) = 'array'
@@ -2900,7 +2916,7 @@ class BaseModel(metaclass=MetaModel):
             options = [option[0] for option in definition.get('selection') or ()]
 
             # check the existence of the option
-            property_alias = query.make_alias(alias, f'{fname}_{property_name}')
+            property_alias = query.make_alias(self._table, f'{fname}_{property_name}')
             query.add_join(
                 "LEFT JOIN",
                 property_alias,
@@ -3953,7 +3969,7 @@ class BaseModel(metaclass=MetaModel):
             if forbidden:
                 raise self.env['ir.rule']._make_access_error('read', forbidden)
 
-    def _determine_fields_to_fetch(self, field_names, ignore_when_in_cache=False) -> List["Field"]:
+    def _determine_fields_to_fetch(self, field_names, ignore_when_in_cache=False) -> list[Field]:
         """
         Return the fields to fetch from database among the given field names,
         and following the dependencies of computed fields. The method is used
@@ -5195,7 +5211,6 @@ class BaseModel(metaclass=MetaModel):
 
         return original_self.concat(*(data['record'] for data in data_list))
 
-    # TODO: ameliorer avec NULL
     @api.model
     def _where_calc(self, domain, active_test=True):
         """Computes the WHERE clause needed to implement an OpenERP domain.
@@ -5292,33 +5307,11 @@ class BaseModel(metaclass=MetaModel):
         :param direction: one of ``SQL("ASC")``, ``SQL("DESC")``, ``SQL()``
         :param nulls: one of ``SQL("NULLS FIRST")``, ``SQL("NULLS LAST")``, ``SQL()``
         """
-        full_name = field_name
-        property_name = None
-        if '.' in field_name:
-            field_name, property_name = field_name.split('.', 1)
-
-        field = self._fields.get(field_name)
+        # field_name can be a path (for properties by example)
+        fname = field_name.split('.', 1)[0] if '.' in field_name else field_name
+        field = self._fields.get(fname)
         if not field:
-            raise ValueError(f"Invalid field {field_name!r} on model {self._name!r}")
-
-        if property_name and field.type != 'properties':
-            raise ValueError(f'Order a property ({property_name!r}) on a non-properties field ({field_name!r})')
-
-        if field.inherited:
-            # delegate to the parent model via a join
-            parent_model = self.env[field.related_field.model_name]
-            parent_fname = field.related.split('.')[0]
-            parent_alias = query.make_alias(alias, parent_fname)
-            query.add_join('LEFT JOIN', parent_alias, parent_model._table, SQL(
-                "%s = %s",
-                self._field_to_sql(alias, parent_fname, query),
-                SQL.identifier(parent_alias, 'id'),
-            ))
-            return parent_model._order_field_to_sql(parent_alias, full_name, direction, nulls, query)
-
-        if not (field.store and field.column_type):
-            _logger.warning("Model %r cannot be sorted on field %r (not a column)", self._name, field_name)
-            return
+            raise ValueError(f"Invalid field {fname!r} on model {self._name!r}")
 
         if field.type == 'many2one':
             seen = self.env.context.get('__m2o_order_seen', ())
@@ -5329,12 +5322,9 @@ class BaseModel(metaclass=MetaModel):
             # figure out the applicable order_by for the m2o
             comodel = self.env[field.comodel_name]
             coorder = comodel._order
-            if not regex_order.match(coorder):
-                # _order is complex, can't use it here, so we default to _rec_name
-                coorder = comodel._rec_name
+            sql_field = self._field_to_sql(alias, field_name, query)
 
             if coorder == 'id':
-                sql_field = self._field_to_sql(alias, field_name, query)
                 return SQL("%s %s %s", sql_field, direction, nulls)
 
             # instead of ordering by the field's raw value, use the comodel's
@@ -5349,7 +5339,7 @@ class BaseModel(metaclass=MetaModel):
             coalias = query.make_alias(alias, field_name)
             query.add_join('LEFT JOIN', coalias, comodel._table, SQL(
                 "%s = %s",
-                self._field_to_sql(alias, field_name, query),
+                sql_field,
                 SQL.identifier(coalias, 'id'),
             ))
 
@@ -5363,8 +5353,6 @@ class BaseModel(metaclass=MetaModel):
         sql_field = self._field_to_sql(alias, field_name, query)
         if field.type == 'boolean':
             sql_field = SQL("COALESCE(%s, FALSE)", sql_field)
-        elif field.type == 'properties' and property_name:
-            sql_field = SQL("(%s -> %s)", sql_field, property_name)
 
         return SQL("%s %s %s", sql_field, direction, nulls)
 
@@ -5881,7 +5869,7 @@ class BaseModel(metaclass=MetaModel):
     #  - the global cache is only an index to "resolve" a record 'id'.
     #
 
-    def __init__(self, env, ids, prefetch_ids):
+    def __init__(self, env: api.Environment, ids: tuple[int | NewId], prefetch_ids: Iterable[int | NewId]):
         """ Create a recordset instance.
 
         :param env: an environment
@@ -6978,7 +6966,7 @@ class BaseModel(metaclass=MetaModel):
                     res['warning'].get('type') or "",
                 ))
 
-    def onchange(self, values: Dict, field_names: List[str], fields_spec: Dict):
+    def onchange(self, values: dict, field_names: list[str], fields_spec: dict):
         raise NotImplementedError("onchange() is implemented in module 'web'")
 
     def _get_placeholder_filename(self, field):

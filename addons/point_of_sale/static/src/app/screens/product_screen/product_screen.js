@@ -45,7 +45,7 @@ export class ProductScreen extends Component {
         this.pos = usePos();
         this.ui = useState(useService("ui"));
         this.dialog = useService("dialog");
-        this.notification = useService("pos_notification");
+        this.notification = useService("notification");
         this.numberBuffer = useService("number_buffer");
         this.state = useState({
             showProductReminder: false,
@@ -96,13 +96,17 @@ export class ProductScreen extends Component {
             },
             ...categoriesToDisplay.map((category) => {
                 return {
-                    ...pick(category, "id", "name", "color", "has_image"),
+                    ...pick(category, "id", "name", "color"),
                     showSeparator:
                         selectedCategory &&
                         [
                             ...selectedCategory.allParents.map((p) => p.id),
                             this.pos.selectedCategory.id,
                         ].includes(category.id),
+                    imgSrc:
+                        this.pos.config.show_category_images && category.has_image
+                            ? `/web/image?model=pos.category&field=image_128&id=${category.id}`
+                            : undefined,
                 };
             }),
         ];
@@ -435,7 +439,7 @@ export class ProductScreen extends Component {
                 3000
             );
         } else {
-            this.notification.add(_t('No more product found for "%s".', searchProductWord), 3000);
+            this.notification.add(_t('No more product found for "%s".', searchProductWord));
         }
         if (this.state.previousSearchWord === searchProductWord) {
             this.state.currentOffset += result.length;
