@@ -41,6 +41,7 @@ from contextlib import contextmanager, ExitStack
 from datetime import datetime
 from functools import lru_cache
 from itertools import zip_longest as izip_longest
+from passlib.context import CryptContext
 from unittest.mock import patch, _patch
 from xmlrpc import client as xmlrpclib
 
@@ -800,6 +801,15 @@ class TransactionCase(BaseCase):
 
         cls.env = api.Environment(cls.cr, odoo.SUPERUSER_ID, {})
 
+        # speedup CryptContext. Many user an password are done during tests, avoid spending time hasing password with many rounds
+        def _crypt_context(self):  # noqa: ARG001
+            return CryptContext(
+                ['pbkdf2_sha512', 'plaintext'],
+                pbkdf2_sha512__rounds=1,
+            )
+        cls._crypt_context_patcher = patch('odoo.addons.base.models.res_users.Users._crypt_context', _crypt_context)
+        cls.startClassPatcher(cls._crypt_context_patcher)
+
     def setUp(self):
         super().setUp()
 
@@ -1378,6 +1388,7 @@ which leads to stray network requests and inconsistencies."""
         'info': logging.INFO,
         'warning': logging.WARNING,
         'error': logging.ERROR,
+        'dir': logging.RUNBOT,
         # TODO: what do with
         # dir, dirxml, table, trace, clear, startGroup, startGroupCollapsed,
         # endGroup, assert, profile, profileEnd, count, timeEnd
@@ -1746,7 +1757,9 @@ class HttpCase(TransactionCase):
             # than this transaction.
             self.cr.flush()
             self.cr.clear()
-            uid = self.registry['res.users'].authenticate(session.db, user, password, {'interactive': False})
+            with patch('odoo.addons.base.models.res_users.Users._check_credentials', return_value=True):
+                # patching to speedup the check in case the password is hashed with many hashround + avoid to update the password
+                uid = self.registry['res.users'].authenticate(session.db, user, password, {'interactive': False})
             env = api.Environment(self.cr, uid, {})
             session.uid = uid
             session.login = user
