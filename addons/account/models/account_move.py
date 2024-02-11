@@ -296,6 +296,7 @@ class AccountMove(models.Model):
         comodel_name='account.payment.term',
         string='Payment Terms',
         compute='_compute_invoice_payment_term_id', store=True, readonly=False, precompute=True,
+        inverse='_inverse_invoice_payment_term_id',
         check_company=True,
     )
     needed_terms = fields.Binary(compute='_compute_needed_terms', exportable=False)
@@ -1834,9 +1835,16 @@ class AccountMove(models.Model):
             or m.journal_id.currency_id and m.currency_id != m.journal_id.currency_id
         ))
 
+    @api.onchange('payment_reference')
     def _inverse_payment_reference(self):
         self.line_ids._conditional_add_to_compute('name', lambda line: (
             line.display_type == 'payment_term'
+        ))
+
+    @api.onchange('invoice_payment_term_id')
+    def _inverse_invoice_payment_term_id(self):
+        self.line_ids._conditional_add_to_compute('name', lambda l: (
+            l.display_type == 'payment_term'
         ))
 
     def _inverse_name(self):
@@ -2442,6 +2450,9 @@ class AccountMove(models.Model):
             dirty_recs = eligible_recs.filtered(dirty_fname)
             return dirty_recs, dirty_fname
 
+        def filter_trivial(mapping):
+            return {k: v for k, v in mapping.items() if 'id' not in k}
+
         existing_before = existing()
         needed_before = needed()
         dirty_recs_before, dirty_fname = dirty()
@@ -2467,7 +2478,9 @@ class AccountMove(models.Model):
         }
 
         if needed_after == needed_before:
-            return
+            return  # do not modify user input if nothing changed in the needs
+        if not needed_before and (filter_trivial(existing_after) != filter_trivial(existing_before)):
+            return  # do not modify user input if already created manually
 
         to_delete = [
             line.id
@@ -4825,6 +4838,7 @@ class AccountMove(models.Model):
 
         disabled = container['records'].env.context.get(key, default) == target
         previous_values = {}
+        previous_envs = set(self.env.transaction.envs)
         if not disabled:  # it wasn't disabled yet, disable it now
             for env in self.env.transaction.envs:
                 previous_values[env] = env.context.get(key, EMPTY)
@@ -4836,6 +4850,9 @@ class AccountMove(models.Model):
                 if val != EMPTY:
                     env.context = frozendict({**env.context, key: val})
                 else:
+                    env.context = frozendict({k: v for k, v in env.context.items() if k != key})
+            for env in (self.env.transaction.envs - previous_envs):
+                if key in env.context:
                     env.context = frozendict({k: v for k, v in env.context.items() if k != key})
 
     # ------------------------------------------------------------
