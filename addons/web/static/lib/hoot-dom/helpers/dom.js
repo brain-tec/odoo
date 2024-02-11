@@ -61,12 +61,10 @@ const {
     console,
     document,
     Map,
-    matchMedia,
     Math,
     MutationObserver,
     Number,
     Object,
-    ontouchstart,
     Promise,
     Reflect,
     RegExp,
@@ -332,7 +330,7 @@ const matchesQuery = (query, width, height) =>
  */
 const matchesQueryPart = (query, width, height) => {
     if (/pointer:\s*coarse/.test(query)) {
-        return ontouchstart !== undefined;
+        return globalThis.ontouchstart !== undefined;
     }
     const minWidth = query.match(/min-width:\s*(\d+)/)?.[1];
     const maxWidth = query.match(/max-width:\s*(\d+)/)?.[1];
@@ -631,7 +629,7 @@ const NEXT_SIBLINGS = (node, selector) => {
 
 /** @type {Map<HTMLElement, { callbacks: Set<MutationCallback>, observer: MutationObserver }>} */
 const observers = new Map();
-let currentDimensions = {
+const currentDimensions = {
     width: null,
     height: null,
 };
