@@ -1,7 +1,7 @@
 /* @odoo-module */
 // @ts-check
 
-import { EventBus, markRaw } from "@odoo/owl";
+import { EventBus, markRaw, toRaw } from "@odoo/owl";
 import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
@@ -161,7 +161,7 @@ export class RelationalModel extends Model {
 
     exportState() {
         return {
-            config: this.config,
+            config: toRaw(this.config),
             specialDataCaches: this.specialDataCaches,
         };
     }
@@ -287,7 +287,13 @@ export class RelationalModel extends Model {
         }
         if (!config.isMonoRecord && this.root) {
             // always reset the offset to 0 when reloading from above
-            config.offset = 0;
+            const resetOffset = (config) => {
+                config.offset = 0;
+                for (const group of Object.values(config.groups || {})) {
+                    resetOffset(group.list);
+                }
+            };
+            resetOffset(config);
             if (!!config.groupBy.length !== !!currentGroupBy.length) {
                 // from grouped to ungrouped or the other way around -> force the limit to be reset
                 delete config.limit;
