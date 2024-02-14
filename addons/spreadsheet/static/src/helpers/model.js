@@ -57,7 +57,7 @@ export async function freezeOdooData(model) {
                     col,
                     row,
                 });
-                cell.content = evaluatedCell.formattedValue;
+                cell.content = evaluatedCell.value.toString();
                 if (evaluatedCell.format) {
                     cell.format = getItemId(evaluatedCell.format, data.formats);
                 }
@@ -104,11 +104,13 @@ export function getItemId(item, itemsDic) {
  * @returns {boolean}
  */
 function containsOdooFunction(content) {
-    if (!content || !content.startsWith("=") || !content.includes("ODOO.")) {
+    if (!content || !content.startsWith("=") || !content.toUpperCase().includes("ODOO.")) {
         return false;
     }
     const tokens = tokenize(content);
-    return tokens.some((token) => token.type === "FUNCTION" && token.value.startsWith("ODOO."));
+    return tokens.some(
+        (token) => token.type === "FUNCTION" && token.value.toUpperCase().startsWith("ODOO.")
+    );
 }
 
 function isLoaded(model) {
