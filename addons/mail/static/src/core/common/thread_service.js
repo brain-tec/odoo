@@ -532,7 +532,10 @@ export class ThreadService {
      * @param {import("models").Thread} thread
      * @param {boolean} pushState
      */
-    setDiscussThread(thread, pushState = true) {
+    setDiscussThread(thread, pushState) {
+        if (pushState === undefined) {
+            pushState = thread.localId !== this.store.discuss.thread?.localId;
+        }
         this.store.discuss.thread = thread;
         const activeId =
             typeof thread.id === "string"
@@ -667,7 +670,7 @@ export class ThreadService {
                 .filter((recipient) => recipient.checked && !recipient.persona)
                 .forEach((recipient) => {
                     recipientEmails.push(recipient.email);
-                    recipientAdditionalValues[recipient.email] = recipient.defaultCreateValues;
+                    recipientAdditionalValues[recipient.email] = recipient.create_values;
                 });
             partner_ids.push(...recipientIds);
         }
