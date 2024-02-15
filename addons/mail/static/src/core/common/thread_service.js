@@ -1,6 +1,5 @@
 /* @odoo-module */
 
-import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
 import { prettifyMessageContent } from "@mail/utils/common/format";
 
 import { browser } from "@web/core/browser/browser";
@@ -533,7 +532,10 @@ export class ThreadService {
      * @param {import("models").Thread} thread
      * @param {boolean} pushState
      */
-    setDiscussThread(thread, pushState = true) {
+    setDiscussThread(thread, pushState) {
+        if (pushState === undefined) {
+            pushState = thread.localId !== this.store.discuss.thread?.localId;
+        }
         this.store.discuss.thread = thread;
         const activeId =
             typeof thread.id === "string"
@@ -605,18 +607,9 @@ export class ThreadService {
                     mentionedPartners,
                 })
             );
-            const { emojis } = await loadEmoji();
             const recentEmojis = JSON.parse(
                 browser.localStorage.getItem("web.emoji.frequent") || "{}"
             );
-            const emojisInContent =
-                prettyContent.match(/\p{Emoji_Presentation}|\p{Emoji}\uFE0F/gu) ?? [];
-            for (const codepoints of emojisInContent) {
-                if (emojis.some((emoji) => emoji.codepoints === codepoints)) {
-                    recentEmojis[codepoints] ??= 0;
-                    recentEmojis[codepoints]++;
-                }
-            }
             browser.localStorage.setItem("web.emoji.frequent", JSON.stringify(recentEmojis));
             tmpMsg = this.store.Message.insert(
                 {
@@ -677,7 +670,7 @@ export class ThreadService {
                 .filter((recipient) => recipient.checked && !recipient.persona)
                 .forEach((recipient) => {
                     recipientEmails.push(recipient.email);
-                    recipientAdditionalValues[recipient.email] = recipient.defaultCreateValues;
+                    recipientAdditionalValues[recipient.email] = recipient.create_values;
                 });
             partner_ids.push(...recipientIds);
         }

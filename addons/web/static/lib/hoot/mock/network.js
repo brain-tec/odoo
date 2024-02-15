@@ -20,8 +20,6 @@ const {
     Worker,
     console,
     document,
-    fetch,
-    location,
 } = globalThis;
 
 //-----------------------------------------------------------------------------
@@ -77,7 +75,9 @@ const makeNetworkLogger = (prefix, title) => {
         }
         const color = `color: ${colorValue}`;
         const styles = [`${color}; font-weight: bold;`, color];
-        console.log(`${bullet} %c${prefix}#${id}%c<${title}>`, ...styles, await getData());
+        console.groupCollapsed(`${bullet} %c${prefix}#${id}%c<${title}>`, ...styles, await getData());
+        console.trace();
+        console.groupEnd();
     };
 
     const id = nextNetworkLogId++;
@@ -97,6 +97,7 @@ const makeNetworkLogger = (prefix, title) => {
 };
 
 const BODY_SYMBOL = Symbol("body");
+const DEFAULT_URL = "https://www.hoot.test/";
 const HEADER = {
     contentType: "Content-Type",
     json: "application/json",
@@ -134,6 +135,9 @@ export function enableNetworkLogs(toggle) {
 
 /** @type {typeof fetch} */
 export async function mockedFetch(input, init) {
+    if (!mockFetchFn) {
+        throw new Error("Can't make a request when fetch is not mocked");
+    }
     init ||= {};
     const method = init.method?.toUpperCase() || (init.body ? "POST" : "GET");
     const { logRequest, logResponse } = makeNetworkLogger(method, input);
@@ -144,7 +148,7 @@ export async function mockedFetch(input, init) {
     logRequest(() => (typeof init.body === "string" ? JSON.parse(init.body) : init));
 
     openRequestControllers.add(controller);
-    const result = await (mockFetchFn || fetch)(input, init);
+    const result = await mockFetchFn(input, init);
     openRequestControllers.delete(controller);
 
     /** @type {Headers} */
@@ -384,6 +388,11 @@ export class MockHistory {
         this.#stack[this.#index] = [data ?? null, url];
         this.#loc.assign(url);
     }
+
+    __clear() {
+        this.#index = 0;
+        this.#stack = [];
+    }
 }
 
 export class MockLocation {
@@ -459,11 +468,11 @@ export class MockLocation {
     }
 
     constructor() {
-        this.href = "https://www.hoot.test/";
+        this.href = DEFAULT_URL;
     }
 
     assign(url) {
-        this.#anchor.href = url;
+        this.href = url;
     }
 
     onReload(callback) {
@@ -477,11 +486,15 @@ export class MockLocation {
     }
 
     replace(url) {
-        this.#anchor.href = url;
+        this.href = url;
     }
 
     toString() {
         return this.#anchor.toString();
+    }
+
+    __clear() {
+        this.href = DEFAULT_URL;
     }
 }
 

@@ -1,55 +1,49 @@
-/** @odoo-module */
+import { beforeEach, describe, expect, test } from "@odoo/hoot";
+import { getService, makeMockEnv } from "@web/../tests/web_test_helpers";
 
-import { makeMockEnv, getService } from "@web/../tests/web_test_helpers";
-import { expect, test, beforeEach, afterEach } from "@odoo/hoot";
+describe.current.tags("headless");
 
 let titleService;
-let title;
 
 beforeEach(async () => {
-    title = document.title;
     await makeMockEnv();
-    titleService = await getService("title");
+    titleService = getService("title");
 });
 
-afterEach(() => {
-    document.title = title;
-});
-
-test.tags("headless")("simple title", () => {
+test("simple title", () => {
     titleService.setParts({ one: "Odoo" });
     expect(titleService.current).toBe("Odoo");
 });
 
-test.tags("headless")("add title part", () => {
+test("add title part", () => {
     titleService.setParts({ one: "Odoo", two: null });
     expect(titleService.current).toBe("Odoo");
     titleService.setParts({ three: "Import" });
     expect(titleService.current).toBe("Odoo - Import");
 });
 
-test.tags("headless")("modify title part", () => {
+test("modify title part", () => {
     titleService.setParts({ one: "Odoo" });
     expect(titleService.current).toBe("Odoo");
     titleService.setParts({ one: "Zopenerp" });
     expect(titleService.current).toBe("Zopenerp");
 });
 
-test.tags("headless")("delete title part", () => {
+test("delete title part", () => {
     titleService.setParts({ one: "Odoo" });
     expect(titleService.current).toBe("Odoo");
     titleService.setParts({ one: null });
     expect(titleService.current).toBe("");
 });
 
-test.tags("headless")("all at once", () => {
+test("all at once", () => {
     titleService.setParts({ one: "Odoo", two: "Import" });
     expect(titleService.current).toBe("Odoo - Import");
     titleService.setParts({ one: "Zopenerp", two: null, three: "Sauron" });
     expect(titleService.current).toBe("Zopenerp - Sauron");
 });
 
-test.tags("headless")("get title parts", () => {
+test("get title parts", () => {
     expect(titleService.current).toBe("");
     titleService.setParts({ one: "Odoo", two: "Import" });
     expect(titleService.current).toBe("Odoo - Import");
