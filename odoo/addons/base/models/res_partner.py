@@ -522,16 +522,24 @@ class Partner(models.Model):
             self.write(sync_vals)
             self._commercial_sync_to_children()
 
-    def _commercial_sync_to_children(self):
-        """ Handle sync of commercial fields to descendants """
-        commercial_partner = self.commercial_partner_id
-        sync_vals = commercial_partner._update_fields_values(self._commercial_fields())
+    def _collect_children_ids(self, children_ids):
+        """Collect and return all children."""
+        children_ids.append(self.id)
         sync_children = self.child_ids.filtered(lambda c: not c.is_company)
         for child in sync_children:
-            child._commercial_sync_to_children()
-        res = sync_children.write(sync_vals)
-        sync_children._compute_commercial_partner()
-        return res
+            child._collect_children_ids(children_ids)
+        return children_ids
+
+    def _commercial_sync_to_children(self, fields_to_update=None):
+        """ Handle sync of commercial fields to descendants """
+        children_to_sync = self.browse(self._collect_children_ids([]))
+
+        if not fields_to_update:
+            fields_to_update = self._commercial_fields()
+        commercial_partner = self.commercial_partner_id
+        sync_vals = commercial_partner._update_fields_values(fields_to_update)
+        # Perform write on a record set instead of separately on each one.
+        return children_to_sync.with_context(skip_commercial_children_sync=True).write(sync_vals)
 
     def _fields_sync(self, values):
         """ Sync commercial fields and address fields from company and to children after create/update,
@@ -553,13 +561,15 @@ class Partner(models.Model):
         if not self.child_ids:
             return
         # 2a. Commercial Fields: sync if commercial entity
+        commercial_fields = self._commercial_fields()
+        # Update only fields that have changed
+        fields_to_update = [field for field in commercial_fields if field in values]
         if self.commercial_partner_id == self:
-            commercial_fields = self._commercial_fields()
             if any(field in values for field in commercial_fields):
-                self._commercial_sync_to_children()
+                self._commercial_sync_to_children(fields_to_update)
         for child in self.child_ids.filtered(lambda c: not c.is_company):
             if child.commercial_partner_id != self.commercial_partner_id:
-                self._commercial_sync_to_children()
+                self._commercial_sync_to_children(fields_to_update)
                 break
         # 2b. Address fields: sync if address changed
         address_fields = self._address_fields()
@@ -634,10 +644,11 @@ class Partner(models.Model):
             result = super(Partner, self.sudo()).write({'is_company': vals.get('is_company')})
             del vals['is_company']
         result = result and super(Partner, self).write(vals)
-        for partner in self:
-            if any(u.has_group('base.group_user') for u in partner.user_ids if u != self.env.user):
-                self.env['res.users'].check_access_rights('write')
-            partner._fields_sync(vals)
+        if not self._context.get('skip_commercial_children_sync'):
+            for partner in self:
+                if any(u.has_group('base.group_user') for u in partner.user_ids if u != self.env.user):
+                    self.env['res.users'].check_access_rights('write')
+                partner._fields_sync(vals)
         return result
 
     @api.model_create_multi
