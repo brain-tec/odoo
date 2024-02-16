@@ -466,6 +466,7 @@ export function formatTechnical(
  * @param {"ms" | "s"} [unit]
  */
 export function formatTime(value, unit) {
+    value ||= 0;
     if (unit) {
         if (unit === "s") {
             value /= 1_000;
@@ -749,6 +750,9 @@ export function match(value, ...matchers) {
     }
     return matchers.some((matcher) => {
         if (typeof matcher === "function") {
+            if (value instanceof matcher) {
+                return true;
+            }
             matcher = new RegExp(matcher.name);
         }
         let strValue = String(value);

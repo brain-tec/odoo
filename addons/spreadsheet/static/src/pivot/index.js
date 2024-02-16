@@ -7,6 +7,7 @@ import { PivotCorePlugin } from "./plugins/pivot_core_plugin";
 import { PivotUIPlugin } from "./plugins/pivot_ui_plugin";
 
 import { SEE_RECORDS_PIVOT, SEE_RECORDS_PIVOT_VISIBLE } from "./pivot_actions";
+import { PivotOdooCorePlugin } from "./plugins/pivot_odoo_core_plugin";
 
 const { coreTypes, invalidateEvaluationCommands } = spreadsheet;
 
@@ -18,15 +19,16 @@ function identity(cmd) {
     return [cmd];
 }
 
+coreTypes.add("ADD_PIVOT");
 coreTypes.add("INSERT_PIVOT");
 coreTypes.add("RENAME_ODOO_PIVOT");
 coreTypes.add("REMOVE_PIVOT");
-coreTypes.add("RE_INSERT_PIVOT");
 coreTypes.add("UPDATE_ODOO_PIVOT_DOMAIN");
 coreTypes.add("DUPLICATE_PIVOT");
 
 invalidateEvaluationCommands.add("UPDATE_ODOO_PIVOT_DOMAIN");
 invalidateEvaluationCommands.add("REMOVE_PIVOT");
+invalidateEvaluationCommands.add("ADD_PIVOT");
 invalidateEvaluationCommands.add("INSERT_PIVOT");
 invalidateEvaluationCommands.add("RENAME_ODOO_PIVOT");
 
@@ -45,10 +47,10 @@ cellMenuRegistry.add("pivot_see_records", {
 });
 
 inverseCommandRegistry
+    .add("ADD_PIVOT", identity)
     .add("INSERT_PIVOT", identity)
     .add("RENAME_ODOO_PIVOT", identity)
     .add("REMOVE_PIVOT", identity)
-    .add("UPDATE_ODOO_PIVOT_DOMAIN", identity)
-    .add("RE_INSERT_PIVOT", identity);
+    .add("UPDATE_ODOO_PIVOT_DOMAIN", identity);
 
-export { PivotCorePlugin, PivotUIPlugin };
+export { PivotCorePlugin, PivotUIPlugin, PivotOdooCorePlugin };

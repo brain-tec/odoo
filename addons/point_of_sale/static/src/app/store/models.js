@@ -170,7 +170,9 @@ export class Orderline extends PosModel {
         this.saved_quantity = json.qty;
         this.uuid = json.uuid;
         this.skipChange = json.skip_change;
-        this.combo_line_id = json.combo_line_id;
+        this.combo_line_id = json.combo_line_id
+            ? this.pos.data["pos.combo.line"][json.combo_line_id]
+            : false;
 
         // FIXME rename to orderline_children_ids
         this.combo_line_ids = json.combo_line_ids;
@@ -1250,10 +1252,13 @@ export class Order extends PosModel {
             date: this.receiptDate,
             pos_qr_code:
                 this.pos.company.point_of_sale_use_ticket_qr_code &&
+                this.finalized &&
                 qrCodeSrc(
                     `${this.pos.base_url}/pos/ticket/validate?access_token=${this.access_token}`
                 ),
-            ticket_code: this.pos.company.point_of_sale_ticket_unique_code && this.ticketCode,
+            ticket_code: this.pos.company.point_of_sale_ticket_unique_code &&
+                this.finalized &&
+                this.ticketCode,
             base_url: this.pos.base_url,
             footer: this.pos.config.receipt_footer,
             // FIXME: isn't there a better way to handle this date?
@@ -1508,6 +1513,9 @@ export class Order extends PosModel {
     is_empty() {
         return this.orderlines.length === 0;
     }
+    get isBooked() {
+        return this.booked || !this.is_empty() || this.server_id;
+    }
     generate_unique_id() {
         // Generates a public identification number for the order.
         // The generated number must be unique and sequential. They are made 12 digit long
@@ -1683,7 +1691,7 @@ export class Order extends PosModel {
             attributes_prices[parentLine.id] = this.compute_child_lines(
                 parentLine.product,
                 parentLine.combo_line_ids.map((childLine) => {
-                    const comboLineCopy = { ...childLine.combo_line_id };
+                    const comboLineCopy = { ...childLine };
                     if (childLine.attribute_value_ids) {
                         comboLineCopy.configuration = {
                             attribute_value_ids: childLine.attribute_value_ids,
@@ -1700,7 +1708,7 @@ export class Order extends PosModel {
         combo_children_lines.forEach((line) => {
             line.set_unit_price(
                 attributes_prices[line.combo_parent_id.id].find(
-                    (item) => item.combo_line_id.id === line.combo_line_id.id
+                    (item) => item.comboLine.id === line.combo_line_id.id
                 ).price
             );
             self.fix_tax_included_price(line);

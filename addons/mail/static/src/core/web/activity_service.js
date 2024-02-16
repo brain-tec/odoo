@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { browser } from "@web/core/browser/browser";
@@ -117,10 +115,10 @@ export class ActivityService {
                 break;
             }
             case "RELOAD_CHATTER": {
-                const thread = this.env.services["mail.thread"].getThread(
-                    data.payload.model,
-                    data.payload.id
-                );
+                const thread = this.store.Thread.insert({
+                    model: data.payload.model,
+                    id: data.payload.id,
+                });
                 this.env.services["mail.thread"].fetchNewMessages(thread);
                 break;
             }

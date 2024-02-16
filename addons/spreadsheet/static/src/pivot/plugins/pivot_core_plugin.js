@@ -3,14 +3,9 @@
 /**
  *
  * @typedef {import("@spreadsheet").OdooPivotDefinition} OdooPivotDefinition
+ * @typedef {import("@spreadsheet").PivotDefinition} PivotDefinition
  * @typedef {import("@spreadsheet").AllCoreCommand} AllCoreCommand
  *
- * @typedef {Object} LocalPivot
- * @property {string} id
- * @property {OdooPivotDefinition} definition
- * @property {Record<string, FieldMatching>} fieldMatching
- *
- * @typedef {import("@spreadsheet/global_filters/plugins/global_filters_core_plugin").FieldMatching} FieldMatching
  * @typedef {import("@spreadsheet").SPTableCell} SPTableCell
  */
 
@@ -20,10 +15,6 @@ import { getMaxObjectId } from "@spreadsheet/helpers/helpers";
 import { SpreadsheetPivotTable } from "../pivot_table";
 import { CommandResult } from "../../o_spreadsheet/cancelled_reason";
 import { _t } from "@web/core/l10n/translation";
-import { globalFiltersFieldMatchers } from "@spreadsheet/global_filters/plugins/global_filters_core_plugin";
-import { sprintf } from "@web/core/utils/strings";
-import { checkFilterFieldMatching } from "@spreadsheet/global_filters/helpers";
-import { Domain } from "@web/core/domain";
 import { deepCopy } from "@web/core/utils/objects";
 import { OdooCorePlugin } from "@spreadsheet/plugins";
 
@@ -37,22 +28,13 @@ export class PivotCorePlugin extends OdooCorePlugin {
         "getPivotIds",
         "getPivotName",
         "isExistingPivot",
-        "getPivotFieldMatch",
-        "getPivotFieldMatching",
     ]);
     constructor(config) {
         super(config);
 
         this.nextId = 1;
-        /** @type {Object.<string, LocalPivot>} */
+        /** @type {Object.<string, PivotDefinition>} */
         this.pivots = {};
-        globalFiltersFieldMatchers["pivot"] = {
-            getIds: () => this.getters.getPivotIds(),
-            getDisplayName: (pivotId) => this.getters.getPivotName(pivotId),
-            getTag: (pivotId) => sprintf(_t("Pivot #%s"), pivotId),
-            getFieldMatching: (pivotId, filterId) => this.getPivotFieldMatching(pivotId, filterId),
-            getModel: (pivotId) => this.pivots[pivotId].definition.model,
-        };
     }
 
     /**
@@ -70,11 +52,17 @@ export class PivotCorePlugin extends OdooCorePlugin {
                     return CommandResult.EmptyName;
                 }
                 break;
-            case "INSERT_PIVOT":
+            case "ADD_PIVOT":
                 if (cmd.id !== this.nextId.toString()) {
                     return CommandResult.InvalidNextId;
                 }
                 break;
+            case "INSERT_PIVOT": {
+                if (!(cmd.id in this.pivots)) {
+                    return CommandResult.PivotIdNotFound;
+                }
+                break;
+            }
             case "DUPLICATE_PIVOT":
                 if (!(cmd.pivotId in this.pivots)) {
                     return CommandResult.PivotIdNotFound;
@@ -83,11 +71,6 @@ export class PivotCorePlugin extends OdooCorePlugin {
                     return CommandResult.InvalidNextId;
                 }
                 break;
-            case "ADD_GLOBAL_FILTER":
-            case "EDIT_GLOBAL_FILTER":
-                if (cmd.pivot) {
-                    return checkFilterFieldMatching(cmd.pivot);
-                }
         }
         return CommandResult.Success;
     }
@@ -98,28 +81,23 @@ export class PivotCorePlugin extends OdooCorePlugin {
      */
     handle(cmd) {
         switch (cmd.type) {
-            case "INSERT_PIVOT": {
-                const { sheetId, col, row, id, definition } = cmd;
-                /** @type { { col: number, row: number } } */
-                const position = { col, row };
-                const { cols, rows, measures, rowTitle } = cmd.table;
-                const table = new SpreadsheetPivotTable(cols, rows, measures, rowTitle);
-                this._addPivot(id, definition);
-                this._insertPivot(sheetId, position, id, table);
+            case "ADD_PIVOT": {
+                const { id, pivot } = cmd;
+                this._addPivot(id, pivot);
                 this.history.update("nextId", parseInt(id, 10) + 1);
                 break;
             }
-            case "RE_INSERT_PIVOT": {
-                const { sheetId, col, row, id } = cmd;
+            case "INSERT_PIVOT": {
+                const { sheetId, col, row, id, table } = cmd;
                 /** @type { { col: number, row: number } } */
                 const position = { col, row };
-                const { cols, rows, measures, rowTitle } = cmd.table;
-                const table = new SpreadsheetPivotTable(cols, rows, measures, rowTitle);
-                this._insertPivot(sheetId, position, id, table);
+                const { cols, rows, measures, rowTitle } = table;
+                const spTable = new SpreadsheetPivotTable(cols, rows, measures, rowTitle);
+                this._insertPivot(sheetId, position, id, spTable);
                 break;
             }
             case "RENAME_ODOO_PIVOT": {
-                this.history.update("pivots", cmd.pivotId, "definition", "name", cmd.name);
+                this.history.update("pivots", cmd.pivotId, "name", cmd.name);
                 break;
             }
             case "REMOVE_PIVOT": {
@@ -130,24 +108,15 @@ export class PivotCorePlugin extends OdooCorePlugin {
             }
             case "DUPLICATE_PIVOT": {
                 const { pivotId, newPivotId } = cmd;
-                const definition = deepCopy(this.pivots[pivotId].definition);
-                this._addPivot(newPivotId, definition);
+                const pivot = deepCopy(this.pivots[pivotId]);
+                this._addPivot(newPivotId, pivot);
                 this.history.update("nextId", parseInt(newPivotId, 10) + 1);
                 break;
             }
             case "UPDATE_ODOO_PIVOT_DOMAIN": {
-                this.history.update("pivots", cmd.pivotId, "definition", "domain", cmd.domain);
+                this.history.update("pivots", cmd.pivotId, "domain", cmd.domain);
                 break;
             }
-            case "ADD_GLOBAL_FILTER":
-            case "EDIT_GLOBAL_FILTER":
-                if (cmd.pivot) {
-                    this._setPivotFieldMatching(cmd.filter.id, cmd.pivot);
-                }
-                break;
-            case "REMOVE_GLOBAL_FILTER":
-                this._onFilterDeletion(cmd.id);
-                break;
         }
     }
 
@@ -168,15 +137,7 @@ export class PivotCorePlugin extends OdooCorePlugin {
      * @returns {string}
      */
     getPivotName(id) {
-        return _t(this.pivots[id].definition.name);
-    }
-
-    /**
-     * @param {string} id
-     * @returns {Record<string, FieldMatching>}
-     */
-    getPivotFieldMatch(id) {
-        return this.pivots[id].fieldMatching;
+        return _t(this.pivots[id].name);
     }
 
     /**
@@ -191,10 +152,10 @@ export class PivotCorePlugin extends OdooCorePlugin {
     /**
      * @param {string} id Id of the pivot
      *
-     * @returns {OdooPivotDefinition}
+     * @returns {PivotDefinition}
      */
     getPivotDefinition(id) {
-        return this.pivots[id].definition;
+        return this.pivots[id];
     }
 
     /**
@@ -217,57 +178,17 @@ export class PivotCorePlugin extends OdooCorePlugin {
         return pivotId in this.pivots;
     }
 
-    /**
-     * Get the current pivotFieldMatching on a pivot
-     *
-     * @param {string} pivotId
-     * @param {string} filterId
-     */
-    getPivotFieldMatching(pivotId, filterId) {
-        return this.pivots[pivotId].fieldMatching[filterId];
-    }
-
     // -------------------------------------------------------------------------
     // Private
     // -------------------------------------------------------------------------
 
     /**
-     * Sets the current pivotFieldMatching on a pivot
-     *
-     * @param {string} filterId
-     * @param {Record<string,FieldMatching>} pivotFieldMatches
-     */
-    _setPivotFieldMatching(filterId, pivotFieldMatches) {
-        const pivots = { ...this.pivots };
-        for (const [pivotId, fieldMatch] of Object.entries(pivotFieldMatches)) {
-            pivots[pivotId].fieldMatching[filterId] = fieldMatch;
-        }
-        this.history.update("pivots", pivots);
-    }
-
-    _onFilterDeletion(filterId) {
-        const pivots = { ...this.pivots };
-        for (const pivotId in pivots) {
-            this.history.update("pivots", pivotId, "fieldMatching", filterId, undefined);
-        }
-    }
-
-    /**
      * @param {string} id
-     * @param {OdooPivotDefinition} definition
-     * @param {Record<string, FieldMatching>} [fieldMatching]
+     * @param {PivotDefinition} pivot
      */
-    _addPivot(id, definition, fieldMatching = undefined) {
+    _addPivot(id, pivot) {
         const pivots = { ...this.pivots };
-        if (!fieldMatching) {
-            const model = definition.model;
-            fieldMatching = this.getters.getFieldMatchingForModel(model);
-        }
-        pivots[id] = {
-            id,
-            definition,
-            fieldMatching,
-        };
+        pivots[id] = pivot;
         this.history.update("pivots", pivots);
     }
 
@@ -401,10 +322,7 @@ export class PivotCorePlugin extends OdooCorePlugin {
     import(data) {
         if (data.pivots) {
             for (const [id, pivot] of Object.entries(data.pivots)) {
-                /** @type {OdooPivotDefinition} */
-                const definition = deepCopy(pivot);
-                definition.measures = pivot.measures.map((elt) => elt.field);
-                this._addPivot(id, definition, pivot.fieldMatching);
+                this._addPivot(id, deepCopy(pivot));
             }
         }
         this.nextId = data.pivotNextId || getMaxObjectId(this.pivots) + 1;
@@ -417,10 +335,7 @@ export class PivotCorePlugin extends OdooCorePlugin {
     export(data) {
         data.pivots = {};
         for (const id in this.pivots) {
-            data.pivots[id] = deepCopy(this.pivots[id].definition);
-            data.pivots[id].measures = data.pivots[id].measures.map((elt) => ({ field: elt }));
-            data.pivots[id].fieldMatching = this.pivots[id].fieldMatching;
-            data.pivots[id].domain = new Domain(data.pivots[id].domain).toJson();
+            data.pivots[id] = deepCopy(this.pivots[id]);
         }
         data.pivotNextId = this.nextId;
     }

@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { DEFAULT_AVATAR } from "@mail/core/common/persona_service";
 import { AttachmentList } from "@mail/core/common/attachment_list";
 import { Composer } from "@mail/core/common/composer";
@@ -202,7 +200,6 @@ export class Message extends Component {
             "o-squashed pb-1": this.props.squashed,
             "py-1": !this.props.squashed,
             "mt-2": !this.props.squashed && this.props.thread && !this.env.messageCard,
-            "px-3": !this.props.isInChatWindow && !this.env.messageCard,
             "px-2": this.props.isInChatWindow,
             "opacity-50": this.props.messageToReplyTo?.isNotSelected(
                 this.props.thread,
@@ -238,7 +235,7 @@ export class Message extends Component {
             return this.message.author.avatarUrl;
         }
 
-        return DEFAULT_AVATAR
+        return DEFAULT_AVATAR;
     }
 
     get expandText() {

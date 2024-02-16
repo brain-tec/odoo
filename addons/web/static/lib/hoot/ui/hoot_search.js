@@ -24,7 +24,7 @@ import { HootTagButton } from "./hoot_tag_button";
 // Global
 //-----------------------------------------------------------------------------
 
-const { Object } = globalThis;
+const { Boolean, localStorage, Object } = globalThis;
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -32,10 +32,10 @@ const { Object } = globalThis;
 
 /**
  *
- * @param {Record<string, boolean>} values
+ * @param {Record<string, number>} values
  */
 const formatIncludes = (values) =>
-    Object.entries(values).map(([id, value]) => (value ? id : `${EXCLUDE_PREFIX}${id}`));
+    Object.entries(values).map(([id, value]) => (value >= 0 ? id : `${EXCLUDE_PREFIX}${id}`));
 
 /**
  * @param {string} query
@@ -45,8 +45,185 @@ const getPattern = (query) => {
     return parseRegExp(normalize(query));
 };
 
+/**
+ * /!\ Requires "job" and "category" to be in scope
+ *
+ * @param {string} tagName
+ */
+const templateIncludeWidget = (tagName) => /* xml */ `
+    <t t-set="includeStatus" t-value="runnerState.includeSpecs[category][job.id] or 0" />
+    <t t-set="readonly" t-value="isReadonly(includeStatus)" />
+
+    <${tagName}
+        class="flex items-center gap-1 cursor-pointer select-none"
+        t-on-click="() => this.toggleInclude(category, job.id)"
+    >
+        <div
+            class="hoot-include-widget h-5 p-px flex items-center relative border rounded-full"
+            t-att-class="{
+                'border-muted': readonly,
+                'border-primary': !readonly,
+                'opacity-50': readonly,
+            }"
+            t-att-title="readonly and 'Cannot change because it depends on a tag modifier in the code'"
+            t-on-click.stop=""
+            t-on-change="(ev) => this.onIncludeChange(category, job.id, ev.target.value)"
+        >
+            <input
+                type="radio"
+                class="w-4 h-4 cursor-pointer appearance-none"
+                t-att-title="!readonly and 'Exclude'"
+                t-att-disabled="readonly"
+                t-att-name="job.id" value="exclude"
+                t-att-checked="includeStatus lt 0"
+            />
+            <input
+                type="radio"
+                class="w-4 h-4 cursor-pointer appearance-none"
+                t-att-disabled="readonly"
+                t-att-name="job.id" value="null"
+                t-att-checked="!includeStatus"
+            />
+            <input
+                type="radio"
+                class="w-4 h-4 cursor-pointer appearance-none"
+                t-att-title="!readonly and 'Include'"
+                t-att-disabled="readonly"
+                t-att-name="job.id" value="include"
+                t-att-checked="includeStatus gt 0"
+            />
+        </div>
+        <t t-if="isTag(job)">
+            <HootTagButton tag="job" inert="true" />
+        </t>
+        <t t-else="">
+            <span
+                class="flex items-center font-bold whitespace-nowrap overflow-hidden"
+                t-att-title="job.fullName"
+            >
+                <t t-foreach="getShortPath(job.path)" t-as="suite" t-key="suite.id">
+                    <span class="text-muted px-1" t-esc="suite.name" />
+                    <span class="font-normal">/</span>
+                </t>
+                <t t-set="isSet" t-value="job.id in runnerState.includeSpecs[category]" />
+                <span
+                    class="truncate px-1"
+                    t-att-class="{
+                        'font-extrabold': isSet,
+                        'text-pass': includeStatus gt 0,
+                        'text-fail': includeStatus lt 0,
+                        'text-muted': !isSet and hasIncludeValue,
+                        'text-primary': !isSet and !hasIncludeValue,
+                        'fst-italic': hasIncludeValue ? includeStatus lte 0 : includeStatus lt 0,
+                    }"
+                    t-esc="job.name"
+                />
+            </span>
+        </t>
+    </${tagName}>
+`;
+
 const EMPTY_SUITE = new Suite(null, "...", []);
 const R_QUERY_CONTENT = new RegExp(`^\\s*${EXCLUDE_PREFIX}?\\s*(.*)\\s*$`);
+const STORAGE_KEY = "hoot-latest-searches";
+
+// Template parts, because 16 levels of indent is a bit much
+
+const TEMPLATE_FILTERS_AND_CATEGORIES = /* xml */ `
+    <div class="flex mb-2">
+        <t t-if="state.query.trim()">
+            <button
+                class="flex items-center gap-1"
+                type="submit"
+                title="Run this filter"
+                t-on-pointerdown="() => this.updateParams(true)"
+            >
+                <h4 class="text-primary m-0">
+                    Filter using
+                    <t t-if="useRegExp">
+                        regular expression
+                    </t>
+                    <t t-else="">
+                        text
+                    </t>
+                </h4>
+                <t t-esc="wrappedQuery" />
+            </button>
+        </t>
+        <t t-else="">
+            <em class="text-muted ms-1">
+                Start typing to show filters...
+            </em>
+        </t>
+    </div>
+    <t t-foreach="categories" t-as="category" t-key="category">
+        <t t-if="state.categories[category].length">
+            <div class="flex flex-col mb-2">
+                <h4 class="text-primary font-bold flex items-center mb-2">
+                    <span class="w-full">
+                        <t t-esc="title(category)" />
+                        (<t t-esc="state.categories[category].length" />)
+                    </span>
+                </h4>
+                <ul class="flex flex-col overflow-y-auto gap-1">
+                    <t t-foreach="state.categories[category]" t-as="job" t-key="job.id">
+                        ${templateIncludeWidget("li")}
+                    </t>
+                </ul>
+            </div>
+        </t>
+    </t>
+`;
+
+const TEMPLATE_SEARCH_DASHBOARD = /* xml */ `
+    <div class="flex flex-col gap-4 sm:grid sm:grid-cols-3 sm:gap-0">
+        <div class="flex flex-col sm:px-4">
+            <h4 class="text-primary font-bold flex items-center mb-2">
+                <span class="w-full">
+                    Recent searches
+                </span>
+            </h4>
+            <ul class="flex flex-col overflow-y-auto gap-1">
+                <t t-foreach="getLatestSearches()" t-as="text" t-key="text_index">
+                    <li>
+                        <button
+                            class="w-full px-2 hover:bg-gray-300 dark:hover:bg-gray-700"
+                            type="button"
+                            t-on-click="() => this.setQuery(text)"
+                            t-esc="text"
+                        />
+                    </li>
+                </t>
+            </ul>
+        </div>
+        <div class="flex flex-col sm:px-4 border-muted sm:border-x">
+            <h4 class="text-primary font-bold flex items-center mb-2">
+                <span class="w-full">
+                    Available suites
+                </span>
+            </h4>
+            <ul class="flex flex-col overflow-y-auto gap-1">
+                <t t-foreach="getTop(env.runner.rootSuites)" t-as="job" t-key="job.id">
+                    <t t-set="category" t-value="'suites'" />
+                    ${templateIncludeWidget("li")}
+                </t>
+            </ul>
+        </div>
+        <div class="flex flex-col sm:px-4">
+            <h4 class="text-primary font-bold flex items-center mb-2">
+                <span class="w-full">
+                    Available tags
+                </span>
+            </h4>
+            <ul class="flex flex-col overflow-y-auto gap-1">
+                <t t-foreach="getTop(env.runner.tags)" t-as="job" t-key="job.id">
+                    <t t-set="category" t-value="'tags'" />
+                    ${templateIncludeWidget("li")}
+                </t>
+            </ul>
+        </div>
+    </div>
+`;
 
 //-----------------------------------------------------------------------------
 // Exports
@@ -89,6 +266,7 @@ export class HootSearch extends Component {
                         t-ref="search-input"
                         t-att-disabled="isRunning"
                         t-att-value="state.query"
+                        t-on-change="onSearchInputChange"
                         t-on-input="onSearchInputInput"
                         t-on-keydown="onSearchInputKeyDown"
                     />
@@ -123,104 +301,12 @@ export class HootSearch extends Component {
                     </label>
                 </div>
                 <t t-if="state.showDropdown">
-                    <div class="hoot-search-dropdown animate-slide-down bg-base text-base absolute mt-1 px-2 py-3 shadow rounded shadow z-10">
-                        <div class="flex mb-2">
-                            <t t-if="state.query.trim()">
-                                <button
-                                    class="flex items-center gap-1"
-                                    type="submit"
-                                    title="Run this filter"
-                                    t-on-pointerdown="() => this.updateParams(true)"
-                                >
-                                    <h4 class="text-primary m-0">
-                                        Filter using
-                                        <t t-if="useRegExp">
-                                            regular expression
-                                        </t>
-                                        <t t-else="">
-                                            text
-                                        </t>
-                                    </h4>
-                                    <t t-esc="wrappedQuery" />
-                                </button>
-                            </t>
-                            <t t-else="">
-                                <em class="text-muted ms-1">
-                                    Start typing to show filters...
-                                </em>
-                            </t>
-                        </div>
-                        <t t-foreach="categories" t-as="category" t-key="category">
-                            <t t-if="state.categories[category].length">
-                                <div class="flex flex-col mb-2">
-                                    <h4 class="text-primary font-bold flex items-center mb-2">
-                                        <span class="w-full">
-                                            <t t-esc="title(category)" />
-                                            (<t t-esc="state.categories[category].length" />)
-                                        </span>
-                                    </h4>
-                                    <ul class="flex flex-col overflow-y-auto gap-1">
-                                        <t t-foreach="state.categories[category]" t-as="job" t-key="job.id">
-                                            <t t-set="checked" t-value="runnerState.includeSpecs[category]" />
-                                            <li
-                                                class="flex items-center gap-1 cursor-pointer select-none"
-                                                t-on-click="() => this.toggleInclude(category, job.id)"
-                                            >
-                                                <div
-                                                    class="hoot-include-widget h-5 p-px flex items-center relative border border-primary rounded-full"
-                                                    t-on-click.stop=""
-                                                    t-on-change="(ev) => this.onIncludeChange(category, job.id, ev.target.value)"
-                                                >
-                                                    <input
-                                                        type="radio"
-                                                        class="w-4 h-4 cursor-pointer appearance-none"
-                                                        title="Exclude"
-                                                        t-att-name="job.id" value="exclude"
-                                                        t-att-checked="checked[job.id] === false"
-                                                    />
-                                                    <input
-                                                        type="radio"
-                                                        class="w-4 h-4 cursor-pointer appearance-none"
-                                                        t-att-name="job.id" value="null"
-                                                        t-att-checked="![true, false].includes(checked[job.id])"
-                                                    />
-                                                    <input
-                                                        type="radio"
-                                                        class="w-4 h-4 cursor-pointer appearance-none"
-                                                        title="Include"
-                                                        t-att-name="job.id" value="include"
-                                                        t-att-checked="checked[job.id] === true"
-                                                    />
-                                                </div>
-                                                <t t-if="isTag(job)">
-                                                    <HootTagButton tag="job" disabled="true" />
-                                                </t>
-                                                <t t-else="">
-                                                    <span class="hoot-path flex items-center font-bold whitespace-nowrap overflow-hidden" t-att-title="job.fullName">
-                                                        <t t-foreach="getShortPath(job.path)" t-as="suite" t-key="suite.id">
-                                                            <span class="text-muted px-1" t-esc="suite.name" />
-                                                            <span class="font-normal">/</span>
-                                                        </t>
-                                                        <t t-set="isSet" t-value="job.id in checked" />
-                                                        <span
-                                                            class="truncate px-1"
-                                                            t-att-class="{
-                                                                'font-extrabold': isSet,
-                                                                'text-pass': checked[job.id] === true,
-                                                                'text-fail': checked[job.id] === false,
-                                                                'text-muted': !isSet and hasIncludeValue,
-                                                                'text-primary': !isSet and !hasIncludeValue,
-                                                                'fst-italic': hasIncludeValue ? !checked[job.id] : checked[job.id] === false,
-                                                            }"
-                                                            t-esc="job.name"
-                                                        />
-                                                    </span>
-                                                </t>
-                                            </li>
-                                        </t>
-                                    </ul>
-                                </div>
-                            </t>
+                    <div class="hoot-search-dropdown animate-slide-down bg-base text-base absolute mt-1 p-3 shadow rounded shadow z-2">
+                        <t t-if="state.empty">
+                            ${TEMPLATE_SEARCH_DASHBOARD}
+                        </t>
+                        <t t-else="">
+                            ${TEMPLATE_FILTERS_AND_CATEGORIES}
                         </t>
                     </div>
                 </t>
@@ -252,6 +338,7 @@ export class HootSearch extends Component {
 
         runner.beforeAll(() => {
             this.state.categories = this.findSuggestions();
+            this.state.empty &&= !this.hasFilters();
         });
         runner.afterAll(() => {
             this.searchInputRef.el?.focus();
@@ -260,10 +347,9 @@ export class HootSearch extends Component {
         this.rootRef = useRef("root");
         this.searchInputRef = useRef("search-input");
         this.urlParams = subscribeToURLParams("debugTest");
+
+        const query = this.urlParams.filter || "";
         this.state = useState({
-            query: this.urlParams.filter || "",
-            disabled: false,
-            showDropdown: false,
             categories: {
                 /** @type {Suite[]} */
                 suites: [],
@@ -272,6 +358,10 @@ export class HootSearch extends Component {
                 /** @type {Test[]} */
                 tests: [],
             },
+            disabled: false,
+            empty: !query.trim(),
+            query,
+            showDropdown: false,
         });
         this.runnerState = useState(runner.state);
 
@@ -313,15 +403,15 @@ export class HootSearch extends Component {
     }
 
     getCategoryCounts() {
-        const checked = this.runnerState.includeSpecs;
+        const includeSpecs = this.runnerState.includeSpecs;
         const counts = [];
         for (const category of this.categories) {
             let include = 0;
             let exclude = 0;
-            for (const value of Object.values(checked[category])) {
-                if (value === true) {
+            for (const value of Object.values(includeSpecs[category])) {
+                if (value > 0) {
                     include++;
-                } else if (value === false) {
+                } else if (value < 0) {
                     exclude++;
                 }
             }
@@ -334,8 +424,16 @@ export class HootSearch extends Component {
 
     getHasIncludeValue() {
         return Object.values(this.runnerState.includeSpecs).some((values) =>
-            Object.values(values).includes(true)
+            Object.values(values).some((value) => value > 0)
         );
+    }
+
+    getLatestSearches() {
+        const strSearchItems = localStorage.getItem(STORAGE_KEY);
+        if (!strSearchItems) {
+            return [];
+        }
+        return JSON.parse(strSearchItems);
     }
 
     /**
@@ -351,24 +449,33 @@ export class HootSearch extends Component {
     }
 
     /**
+     * @param {Suite[] | Tag[]} items
+     */
+    getTop(items) {
+        return [...items].sort((a, b) => b.weight - a.weight).slice(0, 5);
+    }
+
+    hasFilters() {
+        return Boolean(
+            this.state.query.trim() ||
+                Object.values(this.runnerState.includeSpecs).some(
+                    (values) => Object.keys(values).length
+                )
+        );
+    }
+
+    /**
+     * @param {number} value
+     */
+    isReadonly(value) {
+        return value === 2 || value === -2;
+    }
+
+    /**
      * @param {unknown} item
      */
     isTag(item) {
         return item instanceof Tag;
-    }
-
-    /**
-     * @param {KeyboardEvent} ev
-     */
-    onDebugKeyDown(ev) {
-        switch (ev.key) {
-            case "Enter":
-            case " ": {
-                ev.preventDefault();
-                this.toggleDebug();
-                break;
-            }
-        }
     }
 
     /**
@@ -378,9 +485,9 @@ export class HootSearch extends Component {
      */
     onIncludeChange(categoryId, id, value) {
         if (value === "include" || value === "exclude") {
-            this.setInclude(categoryId, id, value === "include");
+            this.setInclude(categoryId, id, value === "include" ? +1 : -1);
         } else {
-            this.setInclude(categoryId, id, null);
+            this.setInclude(categoryId, id, 0);
         }
     }
 
@@ -395,7 +502,7 @@ export class HootSearch extends Component {
             ev.preventDefault();
             const elements = [
                 this.searchInputRef.el,
-                ...this.rootRef.el.querySelectorAll("input[type=radio]:checked"),
+                ...this.rootRef.el.querySelectorAll("input[type=radio]:checked:enabled"),
             ];
             let nextIndex = elements.indexOf(getActiveElement()) + inc;
             if (nextIndex >= elements.length) {
@@ -437,11 +544,23 @@ export class HootSearch extends Component {
         }
     }
 
+    onSearchInputChange() {
+        if (this.state.query) {
+            const latestSearches = this.getLatestSearches();
+            latestSearches.unshift(this.state.query);
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify([...new Set(latestSearches)].slice(0, 5))
+            );
+        }
+    }
+
     /**
      * @param {InputEvent} ev
      */
     onSearchInputInput(ev) {
         this.state.query = ev.target.value;
+        this.state.empty = !this.hasFilters();
 
         this.updateParams(true);
         this.updateSuggestions();
@@ -455,6 +574,7 @@ export class HootSearch extends Component {
             case "Backspace": {
                 if (ev.target.selectionStart === 0 && ev.target.selectionEnd === 0) {
                     this.uncheckLastCategory();
+                    this.state.empty = !this.hasFilters();
                 }
                 break;
             }
@@ -479,16 +599,30 @@ export class HootSearch extends Component {
     /**
      * @param {SearchCategory} categoryId
      * @param {string} id
-     * @param {boolean | null} [value]
+     * @param {number} [value]
      */
     setInclude(categoryId, id, value) {
-        if (typeof value === "boolean") {
+        if (value) {
             this.runnerState.includeSpecs[categoryId][id] = value;
         } else {
             delete this.runnerState.includeSpecs[categoryId][id];
+            if (!this.hasFilters()) {
+                this.state.empty = true;
+            }
         }
 
         this.updateParams(false);
+    }
+
+    /**
+     * @param {string} query
+     */
+    setQuery(query) {
+        this.state.query = query;
+        this.state.empty = false;
+
+        this.updateParams(true);
+        this.updateSuggestions();
     }
 
     toggleDebug() {
@@ -509,8 +643,15 @@ export class HootSearch extends Component {
     uncheckLastCategory() {
         const checked = this.runnerState.includeSpecs;
         for (const category of [...this.categories].reverse()) {
-            if (Object.keys(checked[category]).length) {
-                checked[category] = {};
+            let foundItemToUncheck = false;
+            for (const [key, value] of Object.entries(checked[category])) {
+                if (this.isReadonly(value)) {
+                    continue;
+                }
+                foundItemToUncheck = true;
+                delete checked[category][key];
+            }
+            if (foundItemToUncheck) {
                 this.updateParams();
                 return true;
             }
@@ -548,12 +689,15 @@ export class HootSearch extends Component {
      */
     toggleInclude(categoryId, id) {
         const currentValue = this.runnerState.includeSpecs[categoryId][id];
-        if (currentValue === true) {
-            this.setInclude(categoryId, id, false);
-        } else if (currentValue === false) {
-            this.setInclude(categoryId, id, null);
+        if (currentValue > 1 || currentValue < -1) {
+            return; // readonly
+        }
+        if (currentValue > 0) {
+            this.setInclude(categoryId, id, -1);
+        } else if (currentValue < 0) {
+            this.setInclude(categoryId, id, 0);
         } else {
-            this.setInclude(categoryId, id, true);
+            this.setInclude(categoryId, id, +1);
         }
     }
 }

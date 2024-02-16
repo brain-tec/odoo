@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { useAttachmentUploader } from "@mail/core/common/attachment_uploader_hook";
 import { ActivityMailTemplate } from "@mail/core/web/activity_mail_template";
 import { ActivityMarkAsDone } from "@mail/core/web/activity_markasdone_popover";
@@ -113,9 +111,9 @@ export class Activity extends Component {
     }
 
     get thread() {
-        return this.threadService.getThread(
-            this.props.activity.res_model,
-            this.props.activity.res_id
-        );
+        return this.env.services["mail.store"].Thread.insert({
+            model: this.props.activity.res_model,
+            id: this.props.activity.res_id,
+        });
     }
 }

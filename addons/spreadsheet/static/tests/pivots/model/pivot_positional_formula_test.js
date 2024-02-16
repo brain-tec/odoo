@@ -111,11 +111,11 @@ QUnit.module("spreadsheet > positional pivot formula", {}, () => {
         const spreadsheetData = {
             pivots: {
                 1: {
+                    type: "ODOO",
                     colGroupBys: ["foo"],
                     rowGroupBys: ["bar"],
                     domain: [],
-                    id: "1",
-                    measures: [{ field: "probability" }],
+                    measures: ["probability"],
                     model: "partner",
                     sortedColumn: {
                         groupId: [[], [1]],
@@ -149,11 +149,11 @@ QUnit.module("spreadsheet > positional pivot formula", {}, () => {
         const spreadsheetData = {
             pivots: {
                 1: {
+                    type: "ODOO",
                     colGroupBys: ["foo"],
                     rowGroupBys: ["bar"],
                     domain: [],
-                    id: "1",
-                    measures: [{ field: "probability" }],
+                    measures: ["probability"],
                     model: "partner",
                     sortedColumn: {
                         groupId: [[], [1]],
@@ -187,10 +187,10 @@ QUnit.module("spreadsheet > positional pivot formula", {}, () => {
         const spreadsheetData = {
             pivots: {
                 1: {
+                    type: "ODOO",
                     colGroupBys: ["foo"],
                     domain: [],
-                    id: "1",
-                    measures: [{ field: "probability" }],
+                    measures: ["probability"],
                     model: "partner",
                     rowGroupBys: ["bar"],
                     name: "Partners by Foo",
@@ -226,10 +226,10 @@ QUnit.module("spreadsheet > positional pivot formula", {}, () => {
         const spreadsheetData = {
             pivots: {
                 1: {
+                    type: "ODOO",
                     colGroupBys: ["foo"],
                     domain: [],
-                    id: "1",
-                    measures: [{ field: "probability" }],
+                    measures: ["probability"],
                     model: "partner",
                     rowGroupBys: ["bar"],
                     name: "Partners by Foo",
@@ -265,11 +265,11 @@ QUnit.module("spreadsheet > positional pivot formula", {}, () => {
         const spreadsheetData = {
             pivots: {
                 1: {
+                    type: "ODOO",
                     rowGroupBys: ["product_id"],
                     colGroupBys: [],
                     domain: [],
-                    id: "1",
-                    measures: [{ field: "probability" }, { field: "foo" }],
+                    measures: ["probability", "foo"],
                     model: "partner",
                     sortedColumn: {
                         groupId: [[], []],
@@ -299,10 +299,10 @@ QUnit.module("spreadsheet > positional pivot formula", {}, () => {
         const spreadsheetData = {
             pivots: {
                 1: {
+                    type: "ODOO",
                     colGroupBys: [],
                     domain: [],
-                    id: "1",
-                    measures: [{ field: "probability" }, { field: "foo" }],
+                    measures: ["probability", "foo"],
                     model: "partner",
                     rowGroupBys: ["product_id"],
                     sortedColumn: {
