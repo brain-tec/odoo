@@ -249,10 +249,10 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
                 ],
                 pivots: {
                     1: {
-                        id: 1,
+                        type: "ODOO",
                         colGroupBys: ["foo"],
                         domain: [],
-                        measures: [{ field: "probability", operator: "avg" }],
+                        measures: ["probability"],
                         model: "partner",
                         rowGroupBys: ["bar"],
                         context: {
@@ -306,16 +306,16 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
             ],
             pivots: {
                 1: {
-                    id: 1,
+                    type: "ODOO",
                     colGroupBys: ["foo"],
                     domain: [],
-                    measures: [{ field: "probability", operator: "avg" }],
+                    measures: ["probability"],
                     model: "partner",
                     rowGroupBys: ["bar"],
                     context: {},
                 },
                 2: {
-                    id: 2,
+                    type: "ODOO",
                     colGroupBys: ["bar"],
                     domain: [],
                     measures: [{ field: "probability", operator: "max" }],
@@ -343,10 +343,10 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
         const spreadsheetData = {
             pivots: {
                 1: {
-                    id: 1,
+                    type: "ODOO",
                     colGroupBys: ["foo"],
                     domain: [],
-                    measures: [{ field: "probability", operator: "avg" }],
+                    measures: ["probability"],
                     model: "partner",
                     rowGroupBys: ["bar"],
                 },
@@ -380,18 +380,18 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
             sheets: [{ id: "sheet1" }],
             pivots: {
                 1: {
-                    id: 1,
+                    type: "ODOO",
                     colGroupBys: ["foo"],
                     domain: [],
-                    measures: [{ field: "probability", operator: "avg" }],
+                    measures: ["probability"],
                     model: "partner",
                     rowGroupBys: ["bar"],
                 },
                 2: {
-                    id: 2,
+                    type: "ODOO",
                     colGroupBys: ["foo"],
                     domain: [],
-                    measures: [{ field: "probability", operator: "avg" }],
+                    measures: ["probability"],
                     model: "partner",
                     rowGroupBys: ["bar"],
                 },
@@ -418,10 +418,10 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
             sheets: [{ id: "sheet1" }],
             pivots: {
                 1: {
-                    id: 1,
+                    type: "ODOO",
                     colGroupBys: ["foo"],
                     domain: [],
-                    measures: [{ field: "probability", operator: "avg" }],
+                    measures: ["probability"],
                     model: "partner",
                     rowGroupBys: ["bar"],
                 },
@@ -455,10 +455,10 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
             ],
             pivots: {
                 1: {
-                    id: 1,
+                    type: "ODOO",
                     colGroupBys: ["product_id"],
                     domain: [],
-                    measures: [{ field: "probability", operator: "avg" }],
+                    measures: ["probability"],
                     model: "partner",
                     rowGroupBys: [],
                 },
@@ -611,10 +611,10 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
         const spreadsheetData = {
             pivots: {
                 1: {
-                    id: "1",
+                    type: "ODOO",
                     colGroupBys: ["foo"],
                     domain: [],
-                    measures: [{ field: "probability" }],
+                    measures: ["probability"],
                     model: "partner",
                     rowGroupBys: ["bar"],
                     sortedColumn: {
@@ -642,10 +642,10 @@ QUnit.module("spreadsheet > pivot plugin", {}, () => {
         const spreadsheetData = {
             pivots: {
                 1: {
-                    id: "1",
+                    type: "ODOO",
                     colGroupBys: [],
                     domain: '[("foo", "=", uid)]',
-                    measures: [{ field: "probability" }],
+                    measures: ["probability"],
                     model: "partner",
                     rowGroupBys: [],
                     name: "A pivot",

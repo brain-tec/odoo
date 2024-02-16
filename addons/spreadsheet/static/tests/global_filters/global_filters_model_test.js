@@ -1104,10 +1104,10 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                 ],
                 pivots: {
                     1: {
-                        id: 1,
+                        type: "ODOO",
                         colGroupBys: ["foo"],
                         domain: [],
-                        measures: [{ field: "probability", operator: "avg" }],
+                        measures: ["probability"],
                         model: "partner",
                         rowGroupBys: ["bar"],
                         context: {},
@@ -1156,10 +1156,10 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                 ],
                 pivots: {
                     1: {
-                        id: 1,
+                        type: "ODOO",
                         colGroupBys: ["foo"],
                         domain: [],
-                        measures: [{ field: "probability", operator: "avg" }],
+                        measures: ["probability"],
                         model: "partner",
                         rowGroupBys: ["bar"],
                         context: {},
@@ -1202,10 +1202,10 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
             ],
             pivots: {
                 1: {
-                    id: 1,
+                    type: "ODOO",
                     colGroupBys: ["foo"],
                     domain: [],
-                    measures: [{ field: "probability", operator: "avg" }],
+                    measures: ["probability"],
                     model: "partner",
                     rowGroupBys: ["bar"],
                     context: {},
@@ -1245,10 +1245,10 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
             const spreadsheetData = {
                 pivots: {
                     1: {
-                        id: 1,
+                        type: "ODOO",
                         colGroupBys: ["foo"],
                         domain: [],
-                        measures: [{ field: "probability", operator: "avg" }],
+                        measures: ["probability"],
                         model: "partner",
                         rowGroupBys: ["bar"],
                         context: {},
@@ -1292,10 +1292,10 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
             const spreadsheetData = {
                 pivots: {
                     1: {
-                        id: 1,
+                        type: "ODOO",
                         colGroupBys: ["foo"],
                         domain: [],
-                        measures: [{ field: "probability", operator: "avg" }],
+                        measures: ["probability"],
                         model: "partner",
                         rowGroupBys: ["bar"],
                         context: {},

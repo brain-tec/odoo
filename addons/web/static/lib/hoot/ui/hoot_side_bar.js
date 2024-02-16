@@ -14,6 +14,7 @@ import { HootJobButtons } from "./hoot_job_buttons";
  *
  * @typedef {{
  *  reporting: import("../hoot_utils").Reporting;
+ *  statusFilter: import("./setup_hoot_ui").StatusFilter | null;
  * }} HootSideBarCounterProps
  *
  * @typedef {{
@@ -66,13 +67,33 @@ export class HootSideBarSuite extends Component {
     }
 }
 
-/**
- * @extends {Component<HootSideBarCounterProps, import("../hoot").Environment>}
- */
+/** @extends {Component<HootSideBarCounterProps, import("../hoot").Environment>} */
 export class HootSideBarCounter extends Component {
-    static props = { reporting: Object };
+    static props = {
+        reporting: Object,
+        statusFilter: [String, { value: null }],
+    };
 
-    static template = xml`<span class="text-primary" t-esc="props.reporting.tests" />`;
+    static template = xml`
+        <t t-set="info" t-value="getCounterInfo()" />
+        <span t-att-class="info[1] ? info[0] : 'text-muted'" t-esc="info[1]" />
+    `;
+
+    getCounterInfo() {
+        const { reporting, statusFilter } = this.props;
+        switch (statusFilter) {
+            case "failed":
+                return ["text-fail", reporting.failed];
+            case "passed":
+                return ["text-pass", reporting.passed];
+            case "skipped":
+                return ["text-skip", reporting.skipped];
+            case "todo":
+                return ["text-todo", reporting.todo];
+            default:
+                return ["text-primary", reporting.tests];
+        }
+    }
 }
 
 /**
@@ -84,7 +105,10 @@ export class HootSideBar extends Component {
     static props = {};
 
     static template = xml`
-        <div class="${HootSideBar.name} flex-col w-64 h-full overflow-x-hidden overflow-y-auto resize-x shadow bg-gray-200 dark:bg-gray-800 z-1 hidden md:flex">
+        <div
+            class="${HootSideBar.name} flex-col w-64 h-full overflow-x-hidden overflow-y-auto resize-x shadow bg-gray-200 dark:bg-gray-800 z-1 hidden md:flex"
+            t-on-click="onClick"
+        >
             <ul>
                 <t t-foreach="state.items" t-as="item" t-key="item.id">
                     <li class="flex items-center h-7 animate-slide-down">
@@ -109,7 +133,7 @@ export class HootSideBar extends Component {
                                 <HootJobButtons job="item" />
                             </t>
                             <t t-else="">
-                                <HootSideBarCounter reporting="item.reporting" />
+                                <HootSideBarCounter reporting="item.reporting" statusFilter="uiState.statusFilter" />
                             </t>
                         </button>
                     </li>
@@ -139,6 +163,17 @@ export class HootSideBar extends Component {
 
             this.computeItems();
         });
+    }
+
+    /**
+     * @param {PointerEvent} ev
+     */
+    onClick(ev) {
+        if (!ev.target.closest("button")) {
+            // Unselect suite when clicking outside of a suite & in the side bar
+            this.uiState.selectedSuiteId = null;
+            this.uiState.resultsPage = 0;
+        }
     }
 
     computeItems() {

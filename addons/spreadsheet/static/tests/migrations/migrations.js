@@ -80,6 +80,7 @@ QUnit.test("Global filters: pivot fields is correctly added", (assert) => {
         pivots: {
             1: {
                 name: "test",
+                measures: [],
             },
         },
     };
@@ -149,9 +150,11 @@ QUnit.test("Pivot name default is model name", (assert) => {
             1: {
                 name: "Name",
                 model: "Model",
+                measures: [],
             },
             2: {
                 model: "Model",
+                measures: [],
             },
         },
     };
@@ -191,6 +194,7 @@ QUnit.test("fieldMatchings are moved from filters to their respective datasource
         pivots: {
             1: {
                 name: "Name",
+                measures: [],
             },
         },
         lists: {
@@ -257,6 +261,7 @@ QUnit.test("fieldMatchings offsets are correctly preserved after migration", (as
         pivots: {
             1: {
                 name: "Name",
+                measures: [],
             },
         },
         lists: {
@@ -374,6 +379,28 @@ QUnit.test("group year/quarter/month filters to a single filter type", (assert) 
             defaultValue: "last_week",
         },
     ]);
+});
+
+QUnit.test("Pivot are migrated from 6 to 8", (assert) => {
+    const data = {
+        pivots: {
+            1: {
+                name: "Name",
+                model: "Model",
+                measures: [],
+                fieldMatching: { 1: { chain: "foo", type: "char" } },
+            },
+        },
+    };
+    const migratedData = migrate(data);
+    assert.strictEqual(Object.values(migratedData.pivots).length, 1);
+    assert.deepEqual(migratedData.pivots["1"], {
+        type: "ODOO",
+        fieldMatching: { 1: { chain: "foo", type: "char" } },
+        name: "Name",
+        model: "Model",
+        measures: [],
+    });
 });
 
 QUnit.test("Odoo version is exported", (assert) => {
