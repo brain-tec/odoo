@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { BaseStore, makeStore, Record } from "@mail/core/common/record";
 import { reactive } from "@odoo/owl";
 
@@ -60,7 +58,7 @@ export class Store extends BaseStore {
 
     /** @type {number} */
     action_discuss_id;
-    lastChannelSubscription = "";
+    lastChannelSubscription = "[]";
     /** This is the current logged partner / guest */
     self = Record.one("Persona");
     /**
@@ -325,7 +323,11 @@ export class Store extends BaseStore {
         const ids = Object.keys(this.Thread.records).sort(); // Ensure channels processed in same order.
         for (const id of ids) {
             const thread = this.Thread.records[id];
-            if (thread.model === "discuss.channel" && !thread.isTransient) {
+            if (
+                thread.model === "discuss.channel" &&
+                !thread.isTransient &&
+                thread.fetchChannelInfoState === "fetched"
+            ) {
                 channelIds.push(id);
                 if (!thread.hasSelfAsMember) {
                     this.env.services["bus_service"].addChannel(`discuss.channel_${thread.id}`);

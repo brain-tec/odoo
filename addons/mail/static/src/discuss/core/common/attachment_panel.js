@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { DateSection } from "@mail/core/common/date_section";
 import { ActionPanel } from "@mail/discuss/core/common/action_panel";
 import { AttachmentList } from "@mail/core/common/attachment_list";
@@ -31,8 +29,8 @@ export class AttachmentPanel extends Component {
                 this.threadService.fetchMoreAttachments(nextProps.thread);
             }
         });
-        const loadOlderState = useVisible("load-older", () => {
-            if (loadOlderState.isVisible) {
+        useVisible("load-older", (isVisible) => {
+            if (isVisible) {
                 this.threadService.fetchMoreAttachments(this.props.thread);
             }
         });

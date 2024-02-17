@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { Component, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
@@ -24,8 +22,8 @@ export class FollowerList extends Component {
         this.action = useService("action");
         this.messaging = useState(useService("mail.messaging"));
         this.threadService = useState(useService("mail.thread"));
-        this.loadMoreState = useVisible("load-more", () => {
-            if (this.loadMoreState.isVisible) {
+        useVisible("load-more", (isVisible) => {
+            if (isVisible) {
                 this.threadService.loadMoreFollowers(this.props.thread);
             }
         });

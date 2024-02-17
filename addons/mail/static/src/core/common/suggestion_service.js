@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { partnerCompareRegistry } from "@mail/core/common/partner_compare";
 import { cleanTerm } from "@mail/utils/common/format";
 
@@ -162,10 +160,6 @@ export class SuggestionService {
         const mainSuggestionList = [];
         const extraSuggestionList = [];
         for (const partner of partners) {
-            if (partner.eq(this.store.odoobot)) {
-                // ignore archived partners (except OdooBot)
-                continue;
-            }
             if (!partner.name) {
                 continue;
             }

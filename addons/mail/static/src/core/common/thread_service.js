@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { prettifyMessageContent } from "@mail/utils/common/format";
 
 import { browser } from "@web/core/browser/browser";
@@ -398,7 +396,7 @@ export class ThreadService {
 
         if (partnerId) {
             const partner = this.store.Persona.insert({ id: partnerId, type: "partner" });
-            if (!partner.user) {
+            if (!partner.userId) {
                 const [userId] = await this.orm.silent.search(
                     "res.users",
                     [["partner_id", "=", partnerId]],

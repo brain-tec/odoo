@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { cleanTerm } from "@mail/utils/common/format";
 import { registry } from "@web/core/registry";
 
@@ -10,6 +8,21 @@ import { registry } from "@web/core/registry";
  *     (partner1: Partner, partner2: Partner, { env: OdooEnv, searchTerm: string, thread?: Thread , context?: Object}) => number|undefined
  */
 export const partnerCompareRegistry = registry.category("mail.partner_compare");
+
+partnerCompareRegistry.add(
+    "mail.archived-last-except-odoobot",
+    (p1, p2) => {
+        const p1active = p1.active || p1.eq(p1._store.odoobot);
+        const p2active = p2.active || p2.eq(p2._store.odoobot);
+        if (!p1active && p2active) {
+            return 1;
+        }
+        if (!p2active && p1active) {
+            return -1;
+        }
+    },
+    { sequence: 5 }
+);
 
 partnerCompareRegistry.add(
     "mail.internal-users",
