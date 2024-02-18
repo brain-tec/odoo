@@ -1,6 +1,6 @@
 import { expect, test } from "@odoo/hoot";
 import { queryAll, queryOne } from "@odoo/hoot-dom";
-import { animationFrame, Deferred } from "@odoo/hoot-mock";
+import { Deferred, animationFrame } from "@odoo/hoot-mock";
 import {
     clickSave,
     contains,
@@ -11,10 +11,8 @@ import {
     models,
     mountView,
     onRpc,
-    patchWithCleanup,
+    serverState,
 } from "@web/../tests/web_test_helpers";
-
-import { user } from "@web/core/user";
 
 class Currency extends models.Model {
     digits = fields.Integer({ string: "Digits" });
@@ -219,40 +217,41 @@ test.tags("desktop")("char field in editable list view", async () => {
 test("char field translatable", async () => {
     Partner._fields.name = fields.Char({ string: "Name", translate: true });
 
-    patchWithCleanup(user, { lang: "en_US" });
-    await makeMockServer({ multi_lang: true });
+    serverState.lang = "en_US";
+    serverState.multiLang = true;
+
     await mountView({ type: "form", resModel: "res.partner", resId: 1 });
 
     let call_get_field_translations = 0;
     onRpc(async (route, params) => {
         if (route === "/web/dataset/call_kw/res.lang/get_installed") {
-            return Promise.resolve([
+            return [
                 ["en_US", "English"],
                 ["fr_BE", "French (Belgium)"],
                 ["es_ES", "Spanish"],
-            ]);
+            ];
         }
         if (route === "/web/dataset/call_kw/res.partner/get_field_translations") {
             if (call_get_field_translations === 0) {
                 call_get_field_translations = 1;
-                return Promise.resolve([
+                return [
                     [
                         { lang: "en_US", source: "yop", value: "yop" },
                         { lang: "fr_BE", source: "yop", value: "yop français" },
                         { lang: "es_ES", source: "yop", value: "yop español" },
                     ],
                     { translation_type: "char", translation_show_source: false },
-                ]);
+                ];
             }
             if (call_get_field_translations === 1) {
-                return Promise.resolve([
+                return [
                     [
                         { lang: "en_US", source: "bar", value: "bar" },
                         { lang: "fr_BE", source: "bar", value: "yop français" },
                         { lang: "es_ES", source: "bar", value: "bar" },
                     ],
                     { translation_type: "char", translation_show_source: false },
-                ]);
+                ];
             }
         }
         if (route === "/web/dataset/call_kw/res.partner/update_field_translations") {
@@ -264,7 +263,7 @@ test("char field translatable", async () => {
                 }
             );
             Partner._records[0].name = "bar";
-            return Promise.resolve(true);
+            return true;
         }
     });
     expect("[name=name] input").toHaveClass("o_field_translate");
@@ -318,7 +317,9 @@ test("translation dialog should close if field is not there anymore", async () =
     // this can happen for example if the user click the back button of the browser.
     Partner._fields.name = fields.Char({ string: "Name", translate: true });
 
-    patchWithCleanup(user, { lang: "en_US" });
+    serverState.lang = "en_US";
+    serverState.multiLang = true;
+
     await makeMockServer({ multi_lang: true });
     await mountView({
         type: "form",
@@ -336,21 +337,21 @@ test("translation dialog should close if field is not there anymore", async () =
     });
     onRpc(async (route) => {
         if (route === "/web/dataset/call_kw/res.lang/get_installed") {
-            return Promise.resolve([
+            return [
                 ["en_US", "English"],
                 ["fr_BE", "French (Belgium)"],
                 ["es_ES", "Spanish"],
-            ]);
+            ];
         }
         if (route === "/web/dataset/call_kw/res.partner/get_field_translations") {
-            return Promise.resolve([
+            return [
                 [
                     { lang: "en_US", source: "yop", value: "yop" },
                     { lang: "fr_BE", source: "yop", value: "valeur français" },
                     { lang: "es_ES", source: "yop", value: "yop español" },
                 ],
                 { translation_type: "char", translation_show_source: false },
-            ]);
+            ];
         }
     });
     expect("[name=name] input").toHaveClass("o_field_translate");
@@ -372,19 +373,20 @@ test("html field translatable", async () => {
     expect.assertions(5);
     Partner._fields.name = fields.Char({ string: "Name", translate: true });
 
-    patchWithCleanup(user, { lang: "en_US" });
-    await makeMockServer({ multi_lang: true });
+    serverState.lang = "en_US";
+    serverState.multiLang = true;
+
     await mountView({ type: "form", resModel: "res.partner", resId: 1 });
 
     onRpc(async (route, params) => {
         if (route === "/web/dataset/call_kw/res.lang/get_installed") {
-            return Promise.resolve([
+            return [
                 ["en_US", "English"],
                 ["fr_BE", "French (Belgium)"],
-            ]);
+            ];
         }
         if (route === "/web/dataset/call_kw/res.partner/get_field_translations") {
-            return Promise.resolve([
+            return [
                 [
                     {
                         lang: "en_US",
@@ -411,7 +413,7 @@ test("html field translatable", async () => {
                     translation_type: "char",
                     translation_show_source: true,
                 },
-            ]);
+            ];
         }
 
         if (route === "/web/dataset/call_kw/res.partner/update_field_translations") {
@@ -421,7 +423,7 @@ test("html field translatable", async () => {
                     message: "the new translation value should be written",
                 }
             );
-            return Promise.resolve(true);
+            return true;
         }
     });
 

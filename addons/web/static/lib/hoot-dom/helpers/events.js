@@ -147,7 +147,6 @@ const getEventConstructor = (eventType) => {
 
         // Keyboard events
         case "keydown":
-        case "keypress":
         case "keyup":
             return [KeyboardEvent, mapKeyboardEvent];
 
@@ -215,7 +214,7 @@ const getPosition = (element, options) => {
 
     if (!isString && !relative && !Number.isNaN(posX) && !Number.isNaN(posY)) {
         // Absolute position
-        return toEventPosition(posX, posY);
+        return toEventPosition(posX, posY, position);
     }
 
     const { x, y, width, height } = getRect(element);
@@ -266,7 +265,7 @@ const getPosition = (element, options) => {
         }
     }
 
-    return toEventPosition(clientX, clientY);
+    return toEventPosition(clientX, clientY, position);
 };
 
 /**
@@ -337,9 +336,9 @@ const logEvents = (actionName) => {
         console.groupCollapsed(message, ...messageColors);
         console.dir(event);
         console.log(event.target);
-        console.groupEnd(message);
+        console.groupEnd();
     }
-    console.groupEnd(...groupName);
+    console.groupEnd();
     return events;
 };
 
@@ -347,10 +346,13 @@ const logEvents = (actionName) => {
  * @param {KeyStrokes} keyStrokes
  * @returns {KeyboardEventInit}
  */
-const parseKeyStroke = (keyStrokes) =>
+const parseKeyStrokes = (keyStrokes) =>
     (isIterable(keyStrokes) ? [...keyStrokes] : [keyStrokes])
-        .flatMap((keyStroke) => keyStroke.split(/[,+]+/))
-        .map((key) => ({ key: KEY_ALIASES[key.toLowerCase()] || key }));
+        .flatMap((keyStroke) => keyStroke.split(/\s*[,+]\s*/))
+        .map((key) => {
+            const lower = key.toLowerCase();
+            return { key: lower.length === 1 ? key : KEY_ALIASES[lower] || key };
+        });
 
 /**
  * @param {Event} ev
@@ -421,16 +423,16 @@ const removeChangeTargetListeners = () => {
  * @param {number} x
  * @param {number} y
  */
-const toEventPosition = (x, y) => {
-    x ||= 0;
-    y ||= 0;
+const toEventPosition = (clientX, clientY, position) => {
+    clientX ||= 0;
+    clientY ||= 0;
     return {
-        clientX: x,
-        clientY: y,
-        pageX: x,
-        pageY: y,
-        screenX: x,
-        screenY: y,
+        clientX,
+        clientY,
+        pageX: position?.pageX ?? clientX,
+        pageY: position?.pageY ?? clientY,
+        screenX: position?.screenX ?? clientX,
+        screenY: position?.screenY ?? clientY,
     };
 };
 
@@ -500,11 +502,26 @@ const triggerFocus = (target) => {
     if (previous === target) {
         return events;
     }
+    const hasFocus = document.hasFocus();
     if (previous !== target.ownerDocument.body) {
-        events.push(dispatch(previous, "blur", { relatedTarget: target }));
+        if (!hasFocus) {
+            previous.blur();
+        }
+        const blurEvent = dispatch(previous, "blur", { relatedTarget: target });
+        events.push(blurEvent);
+        if (hasFocus && !isPrevented(blurEvent)) {
+            previous.blur();
+        }
     }
     if (isNodeFocusable(target)) {
-        events.push(dispatch(target, "focus", { relatedTarget: previous }));
+        if (!hasFocus) {
+            target.focus();
+        }
+        const focusEvent = dispatch(target, "focus", { relatedTarget: previous });
+        events.push(focusEvent);
+        if (hasFocus && !isPrevented(focusEvent)) {
+            target.focus();
+        }
         if (!isNil(target.selectionStart) && !isNil(target.selectionEnd)) {
             target.selectionStart = target.selectionEnd = target.value.length;
         }
@@ -581,6 +598,8 @@ const _fill = (target, value, options) => {
             dataTransfer.items.add(file);
         }
         target.files = dataTransfer.files;
+
+        events.push(dispatch(target, "change"));
     } else {
         if (options?.instantly) {
             // Simulates filling the clipboard with the value (can be from external source)
@@ -602,12 +621,12 @@ const _fill = (target, value, options) => {
                 events.push(dispatch(target, "compositionend"));
             }
         }
-    }
 
-    registerForChange(target, initialValue);
+        registerForChange(target, initialValue);
 
-    if (options?.confirm) {
-        events.push(_press(target, { key: "Enter" }));
+        if (options?.confirm) {
+            events.push(_press(target, { key: "Enter" }));
+        }
     }
 
     return events;
@@ -686,13 +705,6 @@ const _keyDown = (target, eventInit) => {
                     }
                 }
             }
-        }
-
-        // Trigger 'keypress' event for printable characters
-        if (!ctrlKey && /^[\w ]$/.test(key)) {
-            const keyPressEvent = dispatch(target, "keypress", eventInit);
-            events.push(keyPressEvent);
-            prevented = isPrevented(keyPressEvent);
         }
     }
 
@@ -799,14 +811,14 @@ const _keyUp = (target, eventInit) => {
         if (getTag(target) === "button" && target.type === "button") {
             /**
              * Special action: button 'Enter'
-             *  On: unprevented 'Enter' keydown & keypress on a <button type="button"/>
+             *  On: unprevented 'Enter' keydown on a <button type="button"/>
              *  Do: triggers a 'click' event on the button
              */
             events.push(...triggerClick(target, { button: 0 }));
         } else if ((parentForm = target.closest("form"))) {
             /**
              * Special action: form 'Enter'
-             *  On: unprevented 'Enter' keydown & keypress on any element that
+             *  On: unprevented 'Enter' keydown on any element that
              *      is not a <button type="button"/> in a form element
              *  Do: triggers a 'submit' event on the form
              */
@@ -816,7 +828,7 @@ const _keyUp = (target, eventInit) => {
     if (eventInit.key === " " && getTag(target) === "input" && target.type === "checkbox") {
         /**
          * Special action: input[type=checkbox] 'Space'
-         *  On: unprevented ' ' keydown & keypress on an <input type="checkbox"/>
+         *  On: unprevented ' ' keydown on an <input type="checkbox"/>
          *  Do: triggers a 'click' event on the input
          */
         events.push(...triggerClick(target, { button: 0 }));
@@ -923,26 +935,47 @@ const _select = (target, value) => {
             `error when calling \`select()\`: no option found with value "${values.join(", ")}"`
         );
     }
-    const events = dispatch(target, "change");
+    const events = [dispatch(target, "change")];
     return events;
 };
 
+const DEPRECATED_EVENT_PROPERTIES = {
+    keyCode: "key",
+    which: "key",
+};
+const DEPRECATED_EVENTS = {
+    keypress: "keydown",
+    mousewheel: "wheel",
+};
 const DOUBLE_CLICK_DELAY = 500;
 const KEY_ALIASES = {
+    // case insensitive aliases
     alt: "Alt",
-    caps: "Shift",
-    cmd: "Meta",
-    command: "Meta",
+    arrowdown: "ArrowDown",
+    arrowleft: "ArrowLeft",
+    arrowright: "ArrowRight",
+    arrowup: "ArrowUp",
+    backspace: "Backspace",
     control: "Control",
-    ctrl: "Control",
-    del: "Delete",
     delete: "Delete",
-    esc: "Escape",
+    enter: "Enter",
     escape: "Escape",
     meta: "Meta",
     shift: "Shift",
-    space: " ",
     tab: "Tab",
+
+    // Other aliases
+    caps: "Shift",
+    cmd: "Meta",
+    command: "Meta",
+    ctrl: "Control",
+    del: "Delete",
+    down: "ArrowDown",
+    esc: "Escape",
+    left: "ArrowLeft",
+    right: "ArrowRight",
+    space: " ",
+    up: "ArrowUp",
     win: "Meta",
 };
 const LOG_COLORS = {
@@ -951,7 +984,6 @@ const LOG_COLORS = {
     lightBlue: "#9bbbdc",
     reset: "inherit",
 };
-const SPECIAL_EVENTS = ["blur", "focus", "select", "submit"];
 let allowLogs = false;
 /** @type {Event[]} */
 let currentEvents = [];
@@ -1215,12 +1247,12 @@ export function dblclick(target, options) {
 }
 
 /**
- * Creates a new {@link Event} of the given type and dispatches it on the given
+ * Creates a new DOM {@link Event} of the given type and dispatches it on the given
  * {@link Target}.
  *
  * Note that this function is free of side-effects and does not trigger any other
- * event or special action (except the functions related to the event type, such
- * as `blur()` for the `"blur"` event).
+ * event or special action. It also only supports standard DOM events, and will
+ * crash when trying to dispatch a non-standard or deprecated event.
  *
  * @template {EventType} T
  * @param {EventTarget} target
@@ -1231,16 +1263,31 @@ export function dblclick(target, options) {
  *  dispatch(document.querySelector("input"), "paste"); // Dispatches a "paste" event on the given <input>
  */
 export function dispatch(target, type, eventInit) {
+    if (type in DEPRECATED_EVENTS) {
+        throw new HootDomError(
+            `cannot dispatch "${type}" event: this event type is deprecated, use "${DEPRECATED_EVENTS[type]}" instead`
+        );
+    }
+    if (type !== type.toLowerCase()) {
+        throw new HootDomError(
+            `cannot dispatch "${type}" event: this event type is either non-standard or deprecated`
+        );
+    }
+    if (eventInit && typeof eventInit === "object") {
+        for (const key in eventInit) {
+            if (key in DEPRECATED_EVENT_PROPERTIES) {
+                throw new HootDomError(
+                    `cannot dispatch "${type}" event: property "${key}" is deprecated, use "${DEPRECATED_EVENT_PROPERTIES[key]}" instead`
+                );
+            }
+        }
+    }
+
     const [Constructor, processParams] = getEventConstructor(type);
     const event = new Constructor(type, processParams({ ...eventInit, target }));
 
     target.dispatchEvent(event);
     currentEvents.push(event);
-
-    // Check special methods
-    if (!event.defaultPrevented && SPECIAL_EVENTS.includes(type)) {
-        target[type]();
-    }
 
     return event;
 }
@@ -1489,7 +1536,6 @@ export function hover(target, options) {
  *
  * The event sequence is as follow:
  *  - `keydown`
- *  - `keypress`
  *
  * Additional actions will be performed depending on the key pressed:
  * - `Tab`: focus next (or previous with `shift`) focusable element;
@@ -1507,7 +1553,7 @@ export function hover(target, options) {
  *  keyDown(" "); // Space key
  */
 export function keyDown(keyStrokes) {
-    const eventInits = parseKeyStroke(keyStrokes);
+    const eventInits = parseKeyStrokes(keyStrokes);
     for (const eventInit of eventInits) {
         _keyDown(getActiveElement(), eventInit);
     }
@@ -1527,7 +1573,7 @@ export function keyDown(keyStrokes) {
  *  keyUp("Enter");
  */
 export function keyUp(keyStrokes) {
-    const eventInits = parseKeyStroke(keyStrokes).reverse();
+    const eventInits = parseKeyStrokes(keyStrokes);
     for (const eventInit of eventInits) {
         _keyUp(getActiveElement(), eventInit);
     }
@@ -1658,7 +1704,6 @@ export function pointerUp(target, options) {
  *
  * The event sequence is as follow:
  *  - `keydown`
- *  - `keypress`
  *  - `keyup`
  *
  * @param {KeyStrokes} keyStrokes
@@ -1672,7 +1717,7 @@ export function pointerUp(target, options) {
  *  keyDown(["ctrl", "v"]); // Pastes current clipboard content
  */
 export function press(keyStrokes) {
-    const eventInits = parseKeyStroke(keyStrokes);
+    const eventInits = parseKeyStrokes(keyStrokes);
     const activeElement = getActiveElement();
 
     for (const eventInit of eventInits) {
@@ -1783,16 +1828,16 @@ export function scroll(target, position, options) {
     /** @type {ScrollToOptions} */
     const scrollOptions = {};
     const [x, y] = parsePosition(position);
-    if (x !== null) {
+    if (!Number.isNaN(x)) {
         scrollOptions.left = x;
     }
-    if (y !== null) {
+    if (!Number.isNaN(y)) {
         scrollOptions.top = y;
     }
     const element = getFirstTarget(target, { ...options, scrollable: true });
     /** @type {Event[]} */
     if (!hasTouch()) {
-        dispatch(target, "wheel");
+        dispatch(element, "wheel");
     }
     element.scrollTo(scrollOptions);
     dispatch(element, "scroll");
