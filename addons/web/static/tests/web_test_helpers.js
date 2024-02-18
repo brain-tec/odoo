@@ -32,18 +32,22 @@ export { findComponent, mountWithCleanup } from "./_framework/component_test_hel
 export { contains } from "./_framework/dom_test_helpers";
 export {
     getService,
-    makeMockEnv,
     makeDialogMockEnv,
+    makeMockEnv,
     mockService,
 } from "./_framework/env_test_helpers";
 export { Command } from "./_framework/mock_server/mock_model";
 export {
     MockServer,
+    defineActions,
+    defineMenus,
     defineModels,
+    defineParams,
     getServerWebSockets,
     makeMockServer,
     onRpc,
 } from "./_framework/mock_server/mock_server";
+export { serverState } from "./_framework/mock_server_state.hoot";
 export { patchWithCleanup } from "./_framework/patch_test_helpers";
 export {
     deleteFavorite,
@@ -77,7 +81,6 @@ export {
     toggleSearchBarMenu,
     validateSearch,
 } from "./_framework/search_test_helpers";
-export { constants } from "./_framework/test_constants.hoot";
 export {
     clickButton,
     clickCancel,
@@ -90,6 +93,7 @@ export {
     mountView,
     mountViewInDialog,
 } from "./_framework/view_test_helpers";
+export { useTestClientAction } from "./_framework/webclient_test_helpers";
 
 export function defineWebModels() {
     return defineModels(webModels);
