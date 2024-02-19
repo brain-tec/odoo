@@ -12,16 +12,15 @@ import requests
 from lxml import etree, html
 from psycopg2 import sql
 from werkzeug import urls
-from werkzeug.datastructures import OrderedMultiDict
 from werkzeug.exceptions import NotFound
 
-from odoo import api, fields, models, tools, http, release, registry
-from odoo.addons.http_routing.models.ir_http import RequestUID, slugify, url_for
+from odoo import api, fields, models, tools, release, registry
+from odoo.addons.http_routing.models.ir_http import slugify, url_for, url_localized
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo.addons.website.tools import similarity_score, text_from_html, get_base_domain
 from odoo.addons.portal.controllers.portal import pager
 from odoo.addons.iap.tools import iap_tools
-from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.http import request
 from odoo.modules.module import get_manifest
 from odoo.osv.expression import AND, OR, FALSE_DOMAIN
@@ -1021,49 +1020,6 @@ class Website(models.Model):
         return dependencies
 
     # ----------------------------------------------------------
-    # Languages
-    # ----------------------------------------------------------
-
-    def _get_alternate_languages(self, canonical_params):
-        self.ensure_one()
-
-        if not self._is_canonical_url(canonical_params=canonical_params):
-            # no hreflang on non-canonical pages
-            return []
-
-        languages = self.language_ids
-        if len(languages) <= 1:
-            # no hreflang if no alternate language
-            return []
-
-        langs = []
-        shorts = []
-
-        self_prefetch_langs = self.with_context(prefetch_langs=True)
-        for lg in languages:
-            lg_codes = lg.code.split('_')
-            short = lg_codes[0]
-            shorts.append(short)
-            langs.append({
-                'hreflang': ('-'.join(lg_codes)).lower(),
-                'short': short,
-                'href': self_prefetch_langs._get_canonical_url_localized(lang=lg, canonical_params=canonical_params),
-            })
-
-        # if there is only one region for a language, use only the language code
-        for lang in langs:
-            if shorts.count(lang['short']) == 1:
-                lang['hreflang'] = lang['short']
-
-        # add the default
-        langs.append({
-            'hreflang': 'x-default',
-            'href': self._get_canonical_url_localized(lang=self.default_lang_id, canonical_params=canonical_params),
-        })
-
-        return langs
-
-    # ----------------------------------------------------------
     # Utilities
     # ----------------------------------------------------------
 
@@ -1468,57 +1424,14 @@ class Website(models.Model):
             path = url_for(path, self.default_lang_id.url_code)
         return self.get_client_action(path, mode_edit)
 
-    def _get_canonical_url_localized(self, lang, canonical_params):
-        """Returns the canonical URL for the current request with translatable
-        elements appropriately translated in `lang`.
-
-        If it is not possible to rebuild a path, use the current one instead.
-
-        `url_quote_plus` is applied on the returned path.
-        """
-        self.ensure_one()
-        try:
-            # Re-match the controller where the request path routes.
-            rule, args = self.env['ir.http']._match(request.httprequest.path)
-            for key, val in list(args.items()):
-                if isinstance(val, models.BaseModel):
-                    if isinstance(val._uid, RequestUID):
-                        args[key] = val = val.with_user(request.uid)
-                    if val.env.context.get('lang') != lang.code:
-                        args[key] = val = val.with_context(lang=lang.code)
-                    if self.env.context.get('prefetch_langs'):
-                        args[key] = val = val.with_context(prefetch_langs=True)
-
-            router = http.root.get_db_router(request.db).bind('')
-            path = router.build(rule.endpoint, args)
-        except (NotFound, AccessError, MissingError):
-            # The build method returns a quoted URL so convert in this case for consistency.
-            path = urls.url_quote_plus(request.httprequest.path, safe='/')
-        if lang != self.default_lang_id:
-            path = f'/{lang.url_code}{path if path != "/" else ""}'
-        canonical_query_string = f'?{urls.url_encode(canonical_params)}' if canonical_params else ''
-        return self.get_base_url() + path + canonical_query_string
-
-    def _get_canonical_url(self, canonical_params):
-        """Returns the canonical URL for the current request."""
-        self.ensure_one()
-        lang = getattr(request, 'lang', self.env['ir.http']._get_default_lang())
-        return self._get_canonical_url_localized(lang=lang, canonical_params=canonical_params)
-
-    def _is_canonical_url(self, canonical_params):
+    def _is_canonical_url(self):
         """Returns whether the current request URL is canonical."""
         self.ensure_one()
-        # Compare OrderedMultiDict because the order is important, there must be
-        # only one canonical and not params permutations.
-        params = request.httprequest.args
-        canonical_params = canonical_params or OrderedMultiDict()
-        if params != canonical_params:
-            return False
         # Compare URL at the first routing iteration because it's the one with
         # the language in the path. It is important to also test the domain of
         # the current URL.
         current_url = request.httprequest.url_root[:-1] + request.httprequest.environ['REQUEST_URI']
-        canonical_url = self._get_canonical_url_localized(lang=request.lang, canonical_params=None)
+        canonical_url = url_localized(lang_code=request.lang._get_cached('code'), canonical_domain=self.get_base_url())
         # A request path with quotable characters (such as ",") is never
         # canonical because request.httprequest.base_url is always unquoted,
         # and canonical url is always quoted, so it is never possible to tell

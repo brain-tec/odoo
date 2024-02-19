@@ -22,10 +22,11 @@ import odoo
 from odoo import api, models, exceptions, tools, http
 from odoo.addons.base.models import ir_http
 from odoo.addons.base.models.ir_http import RequestUID
-from odoo.addons.base.models.ir_qweb import QWebException
+from odoo.addons.base.models.ir_qweb import keep_query, QWebException
+from odoo.exceptions import AccessError, MissingError
 from odoo.http import request, HTTPRequest, Response
 from odoo.osv import expression
-from odoo.tools import config, ustr, pycompat
+from odoo.tools import ustr, pycompat
 
 _logger = logging.getLogger(__name__)
 
@@ -128,6 +129,61 @@ def unslug_url(s):
 # Language tools
 # ------------------------------------------------------------
 
+
+def url_localized(url=None, lang_code=None, canonical_domain=None, prefetch_langs=False, force_default_lang=False):
+    """ Returns the given URL adapted for the given lang, meaning that:
+    1. It will have the lang suffixed to it
+    2. The model converter parts will be translated
+
+    If it is not possible to rebuild a path, use the current one instead.
+    `url_quote_plus` is applied on the returned path.
+
+    It will also force the canonical domain is requested.
+    Eg:
+    - `_get_url_localized(lang_fr, '/shop/my-phone-14')` will return
+        `/fr/shop/mon-telephone-14`
+    - `_get_url_localized(lang_fr, '/shop/my-phone-14', True)` will return
+        `<base_url>/fr/shop/mon-telephone-14`
+    """
+    if not lang_code:
+        lang = request.lang
+    else:
+        lang = request.env['res.lang']._lang_get(lang_code)
+
+    if not url:
+        qs = keep_query()
+        url = request.httprequest.path + ('?%s' % qs if qs else '')
+
+    # '/shop/furn-0269-chaise-de-bureau-noire-17?' to
+    # '/shop/furn-0269-chaise-de-bureau-noire-17', otherwise -> 404
+    url, sep, qs = url.partition('?')
+
+    try:
+        # Re-match the controller where the request path routes.
+        rule, args = request.env['ir.http']._match(url)
+        for key, val in list(args.items()):
+            if isinstance(val, models.BaseModel):
+                if isinstance(val._uid, RequestUID):
+                    args[key] = val = val.with_user(request.uid)
+                if val.env.context.get('lang') != lang.code:
+                    args[key] = val = val.with_context(lang=lang._get_cached('code'))
+                if prefetch_langs:
+                    args[key] = val = val.with_context(prefetch_langs=True)
+        router = http.root.get_db_router(request.db).bind('')
+        path = router.build(rule.endpoint, args)
+    except (NotFound, AccessError, MissingError):
+        # The build method returns a quoted URL so convert in this case for consistency.
+        path = werkzeug.urls.url_quote_plus(url, safe='/')
+    if force_default_lang or lang != request.env['ir.http']._get_default_lang():
+        path = f'/{lang._get_cached("url_code")}{path if path != "/" else ""}'
+
+    if canonical_domain:
+        # canonical URLs should not have qs
+        return werkzeug.urls.url_join(canonical_domain, path)
+
+    return path + sep + qs
+
+
 def url_lang(path_or_uri, lang_code=None):
     ''' Given a relative URL, make it absolute and add the required lang or
         remove useless lang.
@@ -149,9 +205,13 @@ def url_lang(path_or_uri, lang_code=None):
     # relative URL with either a path or a force_lang
     if url and not url.netloc and not url.scheme and (url.path or force_lang):
         location = werkzeug.urls.url_join(request.httprequest.path, location)
-        lang_url_codes = [url_code for _, url_code, *_ in Lang.get_available()]
+        lang_url_codes = [lg['url_code'] for lg in Lang.get_frontend_langs()]
         lang_code = pycompat.to_text(lang_code or request.context['lang'])
-        lang_url_code = Lang._lang_code_to_urlcode(lang_code)
+
+        # lang_code might be `[lang]`, special case for lang switcher
+        lang_code_record = Lang._lang_get(lang_code)
+        lang_url_code = lang_code_record and lang_code_record._get_cached('url_code') or None
+
         lang_url_code = lang_url_code if lang_url_code in lang_url_codes else lang_code
         if (len(lang_url_codes) > 1 or force_lang) and is_multilang_url(location, lang_url_codes):
             loc, sep, qs = location.partition('?')
@@ -175,34 +235,31 @@ def url_lang(path_or_uri, lang_code=None):
     return location
 
 
-def url_for(url_from, lang_code=None, no_rewrite=False):
+def url_for(url_from, lang_code=None):
     ''' Return the url with the rewriting applied.
         Nothing will be done for absolute URL, invalid URL, or short URL from 1 char.
 
         :param url_from: The URL to convert.
         :param lang_code: Must be the lang `code`. It could also be something
                           else, such as `'[lang]'` (used for url_return).
-        :param no_rewrite: don't try to match route with website.rewrite.
     '''
-    new_url = False
-    rewrite = not no_rewrite
-    # don't try to match route if we know that no rewrite has been loaded.
-    routing = getattr(request, 'website_routing', None)  # not modular, but not overridable
-    if not request.env['ir.http']._rewrite_len(routing):
-        rewrite = False
-
     path, _, qs = (url_from or '').partition('?')
-
-    if (rewrite and path and (
+    routing = getattr(request, 'website_routing', None)  # not modular, but not overridable
+    if (
+        path
+        # don't try to match route if we know that no rewrite has been loaded.
+        and request.env['ir.http']._rewrite_len(routing)
+        and (
             len(path) > 1
             and path.startswith('/')
             and '/static/' not in path
             and not path.startswith('/web/')
-    )):
-        new_url, _ = request.env['ir.http'].url_rewrite(path)
-        new_url = new_url if not qs else new_url + '?%s' % qs
+        )
+    ):
+        url_from, _ = request.env['ir.http'].url_rewrite(path)
+        url_from = url_from if not qs else url_from + '?%s' % qs
 
-    return url_lang(new_url or url_from, lang_code=lang_code)
+    return url_lang(url_from, lang_code=lang_code)
 
 
 def is_multilang_url(local_url, lang_url_codes=None):
@@ -213,7 +270,7 @@ def is_multilang_url(local_url, lang_url_codes=None):
         2. If not matching 1., everything not under /static/ or /web/ will be translatable
     '''
     if not lang_url_codes:
-        lang_url_codes = [url_code for _, url_code, *_ in request.env['res.lang'].get_available()]
+        lang_url_codes = [lg['url_code'] for lg in request.env['res.lang'].get_frontend_langs()]
     spath = local_url.split('/')
     # if a language is already in the path, remove it
     if spath[1] in lang_url_codes:
@@ -332,19 +389,15 @@ class IrHttp(models.AbstractModel):
         """
         return ['web']
 
-    @classmethod
-    def _get_frontend_langs(cls):
-        return [code for code, _ in request.env['res.lang'].get_installed()]
-
-    @classmethod
-    def get_nearest_lang(cls, lang_code):
+    @api.model
+    def get_nearest_lang(self, lang_code):
         """ Try to find a similar lang. Eg: fr_BE and fr_FR
             :param lang_code: the lang `code` (en_US)
         """
         if not lang_code:
             return None
 
-        lang_codes = cls._get_frontend_langs()
+        lang_codes = [lg['code'] for lg in self.env['res.lang'].get_frontend_langs()]
         if lang_code in lang_codes:
             return lang_code
 
@@ -433,9 +486,9 @@ class IrHttp(models.AbstractModel):
         real_env = request.env
         try:
             request.registry['ir.http']._auth_method_public()  # it calls update_env
-            nearest_url_lang = cls.get_nearest_lang(request.env['res.lang']._lang_get_code(url_lang_str))
-            cookie_lang = cls.get_nearest_lang(request.httprequest.cookies.get('frontend_lang'))
-            context_lang = cls.get_nearest_lang(real_env.context.get('lang'))
+            nearest_url_lang = request.env['ir.http'].get_nearest_lang(request.env['res.lang']._lang_get_code(url_lang_str))
+            cookie_lang = request.env['ir.http'].get_nearest_lang(request.httprequest.cookies.get('frontend_lang'))
+            context_lang = request.env['ir.http'].get_nearest_lang(real_env.context.get('lang'))
             default_lang = cls._get_default_lang()
             request.lang = request.env['res.lang']._lang_get(
                 nearest_url_lang or cookie_lang or context_lang or default_lang._get_cached('code')
