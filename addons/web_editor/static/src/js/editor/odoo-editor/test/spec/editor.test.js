@@ -5300,18 +5300,37 @@ X[]
                 describe('color', () => {
                     it('should apply a color to some characters and a table', async () => {
                         await testEditor(BasicEditor, {
-                            contentBefore: '<p>a[bc</p><table><tbody><tr>' +
-                                                '<td>a]b</td>' +
-                                                '<td>cd</td>' +
-                                                '<td>ef</td>' +
-                                            '</tr></tbody></table>',
+                            contentBefore: unformat(`
+                                <p>a[bc</p>
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td>a]b</td>
+                                            <td>cd</td>
+                                            <td>ef</td>
+                                        </tr>
+                                    </tbody>
+                                </table>`),
                             stepFunction: async editor => editor.execCommand('applyColor', 'aquamarine', 'color'),
-                            contentAfterEdit: '<p>a<font style="color: aquamarine;">[bc</font></p>' +
-                                            '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">a]b</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">cd</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">ef</td>' +
-                                            '</tr></tbody></table>',
+                            contentAfterEdit: unformat(`
+                                <p>
+                                    a<font style="color: aquamarine;">[bc</font>
+                                </p>
+                                <table class="o_selected_table">
+                                    <tbody>
+                                        <tr>
+                                            <td class="o_selected_td">
+                                                <font style="color: aquamarine;">a]b</font>
+                                            </td>
+                                            <td class="o_selected_td">
+                                                <font style="color: aquamarine;">cd</font>
+                                            </td>
+                                            <td class="o_selected_td">
+                                                <font style="color: aquamarine;">ef</font>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>`),
                         });
                     });
                     it('should apply a color to a table and some characters', async () => {
@@ -5322,12 +5341,23 @@ X[]
                                                 '<td>e[f</td>' +
                                             '</tr></tbody></table><p>a]bc</p>',
                             stepFunction: async editor => editor.execCommand('applyColor', 'aquamarine', 'color'),
-                            contentAfterEdit: '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">ab</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">cd</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">e[f</td>' +
-                                            '</tr></tbody></table>' +
-                                            '<p><font style="color: aquamarine;">a]</font>bc</p>',
+                            contentAfterEdit: unformat(`
+                                <table class="o_selected_table">
+                                    <tbody><tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ab</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">cd</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">e[f</font>
+                                        </td>
+                                    </tr></tbody>
+                                </table>
+                                <p>
+                                    <font style="color: aquamarine;">a]</font>bc
+                                </p>`),
                         });
                     });
                     it('should apply a color to some characters, a table and some more characters', async () => {
@@ -5340,13 +5370,26 @@ X[]
                                         '</tr></tbody></table>' +
                                         '<p>a]bc</p>',
                             stepFunction: async editor => editor.execCommand('applyColor', 'aquamarine', 'color'),
-                            contentAfterEdit: '<p>a<font style="color: aquamarine;">[bc</font></p>' +
-                                            '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">ab</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">cd</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">ef</td>' +
-                                            '</tr></tbody></table>' +
-                                            '<p><font style="color: aquamarine;">a]</font>bc</p>',
+                            contentAfterEdit: unformat(`
+                                <p>
+                                    a<font style="color: aquamarine;">[bc</font>
+                                </p>
+                                <table class="o_selected_table">
+                                    <tbody><tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ab</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">cd</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ef</font>
+                                        </td>
+                                    </tr></tbody>
+                                </table>
+                                <p>
+                                    <font style="color: aquamarine;">a]</font>bc
+                                </p>`),
                         });
                     });
                     it('should apply a color to some characters, a table, some more characters and another table', async () => {
@@ -5364,18 +5407,39 @@ X[]
                                             '<td>ef</td>' +
                                         '</tr></tbody></table>',
                             stepFunction: async editor => editor.execCommand('applyColor', 'aquamarine', 'color'),
-                            contentAfterEdit: '<p>a<font style="color: aquamarine;">[bc</font></p>' +
-                                            '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">ab</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">cd</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">ef</td>' +
-                                            '</tr></tbody></table>' +
-                                            '<p><font style="color: aquamarine;">abc</font></p>' +
-                                            '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">a]b</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">cd</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">ef</td>' +
-                                            '</tr></tbody></table>',
+                            contentAfterEdit: unformat(`
+                                <p>
+                                    a<font style="color: aquamarine;">[bc</font>
+                                </p>
+                                <table class="o_selected_table">
+                                    <tbody><tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ab</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">cd</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ef</font>
+                                        </td>
+                                    </tr></tbody>
+                                </table>
+                                <p>
+                                    <font style="color: aquamarine;">abc</font>
+                                </p>
+                                <table class="o_selected_table">
+                                    <tbody><tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">a]b</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">cd</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ef</font>
+                                        </td>
+                                    </tr></tbody>
+                                </table>`),
                         });
                     });
                     it('should apply a color to some characters, a table, some more characters, another table and some more characters', async () => {
@@ -5394,19 +5458,38 @@ X[]
                                         '</tr></tbody></table>' +
                                         '<p>a]bc</p>',
                             stepFunction: async editor => editor.execCommand('applyColor', 'aquamarine', 'color'),
-                            contentAfterEdit: '<p>a<font style="color: aquamarine;">[bc</font></p>' +
-                                            '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">ab</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">cd</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">ef</td>' +
-                                            '</tr></tbody></table>' +
-                                            '<p><font style="color: aquamarine;">abc</font></p>' +
-                                            '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">ab</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">cd</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">ef</td>' +
-                                            '</tr></tbody></table>' +
-                                            '<p><font style="color: aquamarine;">a]</font>bc</p>',
+                            contentAfterEdit: unformat(`
+                                <p>
+                                    a<font style="color: aquamarine;">[bc</font>
+                                </p>
+                                <table class="o_selected_table">
+                                    <tbody><tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ab</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">cd</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ef</font>
+                                        </td>
+                                    </tr></tbody>
+                                </table>
+                                <p><font style="color: aquamarine;">abc</font></p>
+                                <table class="o_selected_table">
+                                    <tbody><tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ab</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">cd</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ef</font>
+                                        </td>
+                                    </tr></tbody>
+                                </table>
+                                <p><font style="color: aquamarine;">a]</font>bc</p>`),
                         });
                     });
                 });
@@ -5821,11 +5904,18 @@ X[]
                                             '<td>ef</td>' +
                                         '</tr></tbody></table>',
                             stepFunction: async editor => editor.execCommand('applyColor', 'aquamarine', 'color'),
-                            contentAfterEdit: '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">a[b</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">c]d</td>' +
-                                                '<td>ef</td>' +
-                                            '</tr></tbody></table>',
+                            contentAfterEdit: unformat(`
+                                <table class="o_selected_table">
+                                    <tbody><tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">a[b</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">c]d</font>
+                                        </td>
+                                        <td>ef</td>
+                                    </tr></tbody>
+                                </table>`),
                         });
                     });
                     it('should apply a color to a whole row', async () => {
@@ -5836,11 +5926,25 @@ X[]
                                             '<td>e]f</td>' +
                                         '</tr><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table>',
                             stepFunction: async editor => editor.execCommand('applyColor', 'aquamarine', 'color'),
-                            contentAfterEdit: '<table class="o_selected_table"><tbody><tr>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">a[b</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">cd</td>' +
-                                                '<td class="o_selected_td" style="color: aquamarine;">e]f</td>' +
-                                            '</tr><tr><td>ab</td><td>cd</td><td>ef</td></tr></tbody></table>',
+                            contentAfterEdit: unformat(`
+                                <table class="o_selected_table">
+                                    <tbody><tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">a[b</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">cd</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">e]f</font>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>ab</td>
+                                        <td>cd</td>
+                                        <td>ef</td>
+                                    </tr></tbody>
+                                </table>`),
                         });
                     });
                     it('should apply a color to a whole column', async () => {
@@ -5863,23 +5967,30 @@ X[]
                                             '</tr>' +
                                         '</tbody></table>',
                             stepFunction: async editor => editor.execCommand('applyColor', 'aquamarine', 'color'),
-                            contentAfterEdit: '<table class="o_selected_table"><tbody>' +
-                                                '<tr>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">a[b</td>' +
-                                                    '<td>cd</td>' +
-                                                    '<td>ef</td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">ab</td>' +
-                                                    '<td>cd</td>' +
-                                                    '<td>ef</td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">a]b</td>' +
-                                                    '<td>cd</td>' +
-                                                    '<td>ef</td>' +
-                                                '</tr>' +
-                                            '</tbody></table>',
+                            contentAfterEdit: unformat(`
+                                <table class="o_selected_table">
+                                    <tbody><tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">a[b</font>
+                                        </td>
+                                        <td>cd</td>
+                                        <td>ef</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ab</font>
+                                        </td>
+                                        <td>cd</td>
+                                        <td>ef</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">a]b</font>
+                                        </td>
+                                        <td>cd</td>
+                                        <td>ef</td>
+                                    </tr></tbody>
+                                </table>`),
                         });
                     });
                     it('should apply a color from (0,0) to (1,1) in a 3x3 table', async () => {
@@ -5902,23 +6013,32 @@ X[]
                                             '</tr>' +
                                         '</tbody></table>',
                             stepFunction: async editor => editor.execCommand('applyColor', 'aquamarine', 'color'),
-                            contentAfterEdit: '<table class="o_selected_table"><tbody>' +
-                                                '<tr>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">a[b</td>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">cd</td>' +
-                                                    '<td>ef</td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">ab</td>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">c]d</td>' +
-                                                    '<td>ef</td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td>ab</td>' +
-                                                    '<td>cd</td>' +
-                                                    '<td>ef</td>' +
-                                                '</tr>' +
-                                            '</tbody></table>',
+                            contentAfterEdit: unformat(`
+                                <table class="o_selected_table">
+                                    <tbody><tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">a[b</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">cd</font>
+                                        </td>
+                                        <td>ef</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ab</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">c]d</font>
+                                        </td>
+                                        <td>ef</td>
+                                    </tr>
+                                    <tr>
+                                        <td>ab</td>
+                                        <td>cd</td>
+                                        <td>ef</td>
+                                    </tr></tbody>
+                                </table>`),
                         });
                     });
                     it('should apply a color to a whole table', async () => {
@@ -5941,23 +6061,42 @@ X[]
                                             '</tr>' +
                                         '</tbody></table>',
                             stepFunction: async editor => editor.execCommand('applyColor', 'aquamarine', 'color'),
-                            contentAfterEdit: '<table class="o_selected_table"><tbody>' +
-                                                '<tr>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">a[b</td>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">cd</td>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">ef</td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">ab</td>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">cd</td>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">ef</td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">ab</td>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">cd</td>' +
-                                                    '<td class="o_selected_td" style="color: aquamarine;">e]f</td>' +
-                                                '</tr>' +
-                                            '</tbody></table>',
+                            contentAfterEdit: unformat(`
+                                <table class="o_selected_table">
+                                    <tbody><tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">a[b</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">cd</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ef</font>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ab</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">cd</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ef</font>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">ab</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">cd</font>
+                                        </td>
+                                        <td class="o_selected_td">
+                                            <font style="color: aquamarine;">e]f</font>
+                                        </td>
+                                    </tr></tbody>
+                                </table>`),
                         });
                     });
                 });
@@ -6097,6 +6236,22 @@ X[]
                     contentAfter: '<p>ab<span class="a">\u200B[]</span></p><p>cd</p>',
                     // Final state: '<p>ab<span class="a">\u200B</span></p><p>[]cd</p>'
                 });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>ab<span class="a">\u200B[]</span></p><p><span class="b">\u200B</span></p>',
+                    stepFunction: async editor => {
+                        await triggerEvent(editor.editable, 'keydown', { key: 'ArrowRight'});
+                    },
+                    contentAfter: '<p>ab<span class="a">\u200B[]</span></p><p><span class="b">\u200B</span></p>',
+                    // Final state: '<p>ab<span class="a">\u200B</span></p><p><span class="b">[]\u200B</span></p>'
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>ab<span class="a">[]\u200B</span></p><p><span class="b">\u200B</span></p>',
+                    stepFunction: async editor => {
+                        await triggerEvent(editor.editable, 'keydown', { key: 'ArrowRight'});
+                    },
+                    contentAfter: '<p>ab<span class="a">\u200B[]</span></p><p><span class="b">\u200B</span></p>',
+                    // Final state: '<p>ab<span class="a">\u200B</span></p><p><span class="b">[]\u200B</span></p>'
+                });
             });
             it('should select a zws', async () => {
                 await testEditor(BasicEditor, {
@@ -6132,6 +6287,14 @@ X[]
                     },
                     contentAfter: '<p>a[b<span class="a">\u200B]</span>cd</p>',
                     // Final state: '<p>a[b<span class="a">\u200B</span>c]d</p>'
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>a[b]<span class="a">\u200B</span></p><p><span class="b">\u200B</span></p>',
+                    stepFunction: async editor => {
+                        await triggerEvent(editor.editable, 'keydown', { key: 'ArrowRight', shiftKey: true });
+                    },
+                    contentAfter: '<p>a[b<span class="a">\u200B]</span></p><p><span class="b">\u200B</span></p>',
+                    // Final state: '<p>a[b<span class="a">\u200B</span></p><p><span class="b">]\u200B</span></p>'
                 });
             });
             it('should select a zws (3)', async () => {
@@ -6286,6 +6449,22 @@ X[]
                         await triggerEvent(editor.editable, 'keydown', { key: 'ArrowLeft'});
                     },
                     contentAfter: '<p>ab<span class="a">[]\u200B</span>cd</p>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p><span class="a">\u200B</span></p><p><span class="b">[]\u200B</span>ab</p>',
+                    stepFunction: async editor => {
+                        await triggerEvent(editor.editable, 'keydown', { key: 'ArrowLeft'});
+                    },
+                    contentAfter: '<p><span class="a">\u200B</span></p><p><span class="b">[]\u200B</span>ab</p>',
+                    // Final state: '<p><span class="a">\u200B[]</span></p><p><span class="b">\u200B</span>ab</p>'
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p><span class="a">\u200B</span></p><p><span class="b">\u200B[]</span></p>',
+                    stepFunction: async editor => {
+                        await triggerEvent(editor.editable, 'keydown', { key: 'ArrowLeft'});
+                    },
+                    contentAfter: '<p><span class="a">\u200B</span></p><p><span class="b">[]\u200B</span></p>',
+                    // Final state: '<p><span class="a">\u200B[]</span></p><p><span class="a">\u200B</span></p>'
                 });
             });
             it('should select a zws backwards', async () => {
