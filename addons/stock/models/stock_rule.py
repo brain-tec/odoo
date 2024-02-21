@@ -100,12 +100,13 @@ class StockRule(models.Model):
              "With 'Automatic No Step Added', the location is replaced in the original move.")
     rule_message = fields.Html(compute='_compute_action_message')
 
-    def copy(self, default=None):
-        self.ensure_one()
+    def copy_data(self, default=None):
         default = dict(default or {})
+        vals_list = super().copy_data(default=default)
         if 'name' not in default:
-            default['name'] = _("%s (copy)", self.name)
-        return super().copy(default=default)
+            for rule, vals in zip(self, vals_list):
+                vals['name'] = _("%s (copy)", rule.name)
+        return vals_list
 
     @api.onchange('picking_type_id')
     def _onchange_picking_type(self):
@@ -321,6 +322,10 @@ class StockRule(models.Model):
                 if len(partners) == 1:
                     partner = partners
                 move_dest.partner_id = self.location_src_id.warehouse_id.partner_id or self.company_id.partner_id
+
+        # If the quantity is negative the move should be considered as a refund
+        if float_compare(product_qty, 0.0, precision_rounding=product_uom.rounding) < 0:
+            values['to_refund'] = True
 
         move_values = {
             'name': name[:2000],

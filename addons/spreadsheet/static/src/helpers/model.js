@@ -5,12 +5,10 @@ import { DataSources } from "@spreadsheet/data_sources/data_sources";
 import { parse, helpers, iterateAstNodes } from "@odoo/o-spreadsheet";
 import { migrate } from "@spreadsheet/o_spreadsheet/migration";
 import { isLoadingError } from "@spreadsheet/o_spreadsheet/errors";
-import { _t } from "@web/core/l10n/translation";
 import { loadBundle } from "@web/core/assets";
 import { OdooSpreadsheetModel } from "@spreadsheet/model";
 
-const { toCartesian, UuidGenerator, createEmptySheet } = helpers;
-const uuidGenerator = new UuidGenerator();
+const { formatValue, isDefined, toCartesian } = helpers;
 
 /**
  * @typedef {import("@spreadsheet").OdooSpreadsheetModel} OdooSpreadsheetModel
@@ -85,10 +83,7 @@ export async function freezeOdooData(model) {
             }
         }
     }
-    if (model.getters.getGlobalFilters().length === 0) {
-        return data;
-    }
-    data.sheets.push(exportGlobalFiltersToSheet(model, data));
+    exportGlobalFiltersToSheet(model, data);
     return data;
 }
 
@@ -97,26 +92,16 @@ export async function freezeOdooData(model) {
  * @returns {object}
  */
 function exportGlobalFiltersToSheet(model, data) {
-    const styles = Object.entries(data.styles);
-    data.styles[styles.length + 1] = { bold: true };
-
-    const cells = {};
-    cells["A1"] = { content: _t("Filter"), style: styles.length + 1 };
-    cells["B1"] = { content: _t("Value"), style: styles.length + 1 };
-    let row = 2;
+    model.getters.exportSheetWithActiveFilters(data);
+    const locale = model.getters.getLocale();
     for (const filter of data.globalFilters) {
         const content = model.getters.getFilterDisplayValue(filter.label);
-        cells[`A${row}`] = { content: filter.label };
-        cells[`B${row}`] = { content };
-        filter["value"] = content;
-        row++;
+        filter["value"] = content
+            .flat()
+            .filter(isDefined)
+            .map(({ value, format }) => formatValue(value, { format, locale }))
+            .join(", ");
     }
-    return {
-        ...createEmptySheet(uuidGenerator.uuidv4(), _t("Active Filters")),
-        cells,
-        colNumber: 2,
-        rowNumber: model.getters.getGlobalFilters().length + 1,
-    };
 }
 
 /**

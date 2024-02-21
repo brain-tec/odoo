@@ -455,10 +455,13 @@ class SaleOrder(models.Model):
             order_lines = order.order_line.filtered(lambda x: not x.display_type)
 
             if order.company_id.tax_calculation_rounding_method == 'round_globally':
-                tax_results = self.env['account.tax']._compute_taxes([
-                    line._convert_to_tax_base_line_dict()
-                    for line in order_lines
-                ])
+                tax_results = self.env['account.tax']._compute_taxes(
+                    [
+                        line._convert_to_tax_base_line_dict()
+                        for line in order_lines
+                    ],
+                    order.company_id,
+                )
                 totals = tax_results['totals']
                 amount_untaxed = totals.get(order.currency_id, {}).get('amount_untaxed', 0.0)
                 amount_tax = totals.get(order.currency_id, {}).get('amount_tax', 0.0)
@@ -652,6 +655,7 @@ class SaleOrder(models.Model):
             order.tax_totals = self.env['account.tax']._prepare_tax_totals(
                 [x._convert_to_tax_base_line_dict() for x in order_lines],
                 order.currency_id or order.company_id.currency_id,
+                order.company_id,
             )
 
     @api.depends('state')
@@ -777,14 +781,17 @@ class SaleOrder(models.Model):
         return super().create(vals_list)
 
     def copy_data(self, default=None):
-        if default is None:
-            default = {}
-        if 'order_line' not in default:
-            default['order_line'] = [
-                Command.create(line.copy_data()[0])
-                for line in self.order_line.filtered(lambda l: not l.is_downpayment)
-            ]
-        return super().copy_data(default)
+        default = dict(default or {})
+        default_has_no_order_line = 'order_line' not in default
+        default.setdefault('order_line', [])
+        vals_list = super().copy_data(default=default)
+        if default_has_no_order_line:
+            for order, vals in zip(self, vals_list):
+                vals['order_line'] = [
+                    Command.create(line_vals)
+                    for line_vals in order.order_line.filtered(lambda l: not l.is_downpayment).copy_data()
+                ]
+        return vals_list
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_draft_or_cancel(self):

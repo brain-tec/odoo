@@ -50,13 +50,12 @@ class SaleOrder(models.Model):
         self.ensure_one()
         return self.env['sale.order.line']
 
-    @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
-        order = super(SaleOrder, self).copy(default)
-        reward_lines = order.order_line.filtered('is_reward_line')
+        new_orders = super().copy(default)
+        reward_lines = new_orders.order_line.filtered('is_reward_line')
         if reward_lines:
             reward_lines.unlink()
-        return order
+        return new_orders
 
     def action_confirm(self):
         for order in self:
@@ -175,7 +174,7 @@ class SaleOrder(models.Model):
             # To compute the discountable amount we get the fixed tax amount and
             # subtract it from the order total. This way fixed taxes will not be discounted
             tax_data['taxes'] = tax_data['taxes'].filtered(lambda t: t.amount_type == 'fixed')
-            tax_results = self.env['account.tax']._compute_taxes([tax_data])
+            tax_results = self.env['account.tax']._compute_taxes([tax_data], self.company_id)
             totals = list(tax_results['totals'].values())[0]
             discountable += line.price_total - totals['amount_tax']
             taxes = line.tax_id.filtered(lambda t: t.amount_type != 'fixed')
