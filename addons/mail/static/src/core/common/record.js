@@ -1,5 +1,6 @@
 import { onChange } from "@mail/utils/common/misc";
 import { markRaw, markup, reactive, toRaw } from "@odoo/owl";
+import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
 
 export const modelRegistry = registry.category("discuss.model");
@@ -51,6 +52,18 @@ function updateAttr(record, fieldName, value) {
     // ensure each field write goes through the proxy exactly once to trigger reactives
     const targetRecord = record._proxyUsed.has(fieldName) ? record : record._proxy;
     let shouldChange = record[fieldName] !== value;
+    if (fieldDefinition?.type === "datetime" && value) {
+        if (!(value instanceof luxon.DateTime)) {
+            value = deserializeDateTime(value);
+        }
+        shouldChange = !record[fieldName]?.equals(value);
+    }
+    if (fieldDefinition?.type === "date" && value) {
+        if (!(value instanceof luxon.DateTime)) {
+            value = deserializeDate(value);
+        }
+        shouldChange = !record[fieldName]?.equals(value);
+    }
     let newValue = value;
     if (fieldDefinition?.html && Record.trusted) {
         shouldChange =
@@ -1463,7 +1476,7 @@ export class Record {
      * @param {Function} [param1.compute] if set, the value of this relational field is declarative and
      *   is computed automatically. All reactive accesses recalls that function. The context of
      *   the function is the record. Returned value is new value assigned to this field.
-     * * @property {boolean} [eager=false] when field is computed, determines whether the computation
+     * @param {boolean} [param1.eager=false] when field is computed, determines whether the computation
      *   of this field is eager or lazy. By default, fields are computed lazily, which means that
      *   they are computed when dependencies change AND when this field is being used. In eager mode,
      *   the field is immediately (re-)computed when dependencies changes, which matches the built-in
@@ -1487,7 +1500,7 @@ export class Record {
      * @param {Function} [param1.compute] if set, the value of this relational field is declarative and
      *   is computed automatically. All reactive accesses recalls that function. The context of
      *   the function is the record. Returned value is new value assigned to this field.
-     * @property {boolean} [eager=false] when field is computed, determines whether the computation
+     * @param {boolean} [param1.eager=false] when field is computed, determines whether the computation
      *   of this field is eager or lazy. By default, fields are computed lazily, which means that
      *   they are computed when dependencies change AND when this field is being used. In eager mode,
      *   the field is immediately (re-)computed when dependencies changes, which matches the built-in
@@ -1499,7 +1512,7 @@ export class Record {
      *   from the relation.
      * @param {() => void} [param1.onUpdate] function that is called when the field value is updated.
      *   This is called at least once at record creation.
-     * @property {(r1: import("models").Models[M], r2: import("models").Models[M]) => number} [sort] if defined, this field
+     * @param {(r1: import("models").Models[M], r2: import("models").Models[M]) => number} [param1.sort] if defined, this field
      *   is automatically sorted by this function.
      * @returns {import("models").Models[M][]}
      */
@@ -1519,7 +1532,7 @@ export class Record {
      * @param {Function} [param1.compute] if set, the value of this attr field is declarative and
      *   is computed automatically. All reactive accesses recalls that function. The context of
      *   the function is the record. Returned value is new value assigned to this field.
-     * @property {boolean} [eager=false] when field is computed, determines whether the computation
+     * @param {boolean} [param1.eager=false] when field is computed, determines whether the computation
      *   of this field is eager or lazy. By default, fields are computed lazily, which means that
      *   they are computed when dependencies change AND when this field is being used. In eager mode,
      *   the field is immediately (re-)computed when dependencies changes, which matches the built-in
@@ -1528,12 +1541,14 @@ export class Record {
      *   Useful to automatically markup when the insert is trusted.
      * @param {() => void} [param1.onUpdate] function that is called when the field value is updated.
      *   This is called at least once at record creation.
-     * @property {(Object, Object) => number} [sort] if defined, this field is automatically sorted
+     * @param {(Object, Object) => number} [param1.sort] if defined, this field is automatically sorted
      *   by this function.
+     * @param {'datetime'|'date'} [param1.type] if defined, automatically transform to a
+     * specific type.
      * @returns {T}
      */
-    static attr(def, { compute, eager = false, html, onUpdate, sort } = {}) {
-        return [ATTR_SYM, { compute, default: def, eager, html, onUpdate, sort }];
+    static attr(def, { compute, eager = false, html, onUpdate, sort, type } = {}) {
+        return [ATTR_SYM, { compute, default: def, eager, html, onUpdate, sort, type }];
     }
     /** @returns {Record|Record[]} */
     static insert(data, options = {}) {
@@ -1566,7 +1581,6 @@ export class Record {
         return recordFullProxy;
     }
     /**
-     * @param {Object} data
      * @returns {Record}
      */
     static preinsert(data) {

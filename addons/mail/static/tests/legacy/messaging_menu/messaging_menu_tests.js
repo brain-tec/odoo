@@ -3,6 +3,7 @@
 import { rpc } from "@web/core/network/rpc";
 
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
+import { deserializeDateTime } from "@web/core/l10n/dates";
 
 import { Command } from "@mail/../tests/helpers/command";
 import { patchBrowserNotification } from "@mail/../tests/helpers/patch_notifications";
@@ -13,8 +14,6 @@ import { browser } from "@web/core/browser/browser";
 import { getOrigin } from "@web/core/utils/urls";
 import { makeDeferred, patchWithCleanup, triggerHotkey } from "@web/../tests/helpers/utils";
 import { assertSteps, click, contains, insertText, step, triggerEvents } from "@web/../tests/utils";
-
-const { DateTime } = luxon;
 
 QUnit.module("messaging menu");
 
@@ -76,7 +75,7 @@ QUnit.test("rendering with OdooBot has a request (default)", async () => {
     await contains(
         `.o-mail-NotificationItem img[data-src='${getOrigin()}/web/image/res.partner/${
             pyEnv.odoobotId
-        }/avatar_128?unique=${DateTime.fromSQL(odoobot.write_date).ts}']`
+        }/avatar_128?unique=${deserializeDateTime(odoobot.write_date).ts}']`
     );
     await contains(".o-mail-NotificationItem", { text: "OdooBot has a request" });
 });
@@ -167,7 +166,7 @@ QUnit.test("rendering with PWA installation request", async () => {
     await contains(
         `.o-mail-NotificationItem img[data-src='${getOrigin()}/web/image/res.partner/${
             pyEnv.odoobotId
-        }/avatar_128?unique=${DateTime.fromSQL(odoobot.write_date).ts}']`
+        }/avatar_128?unique=${deserializeDateTime(odoobot.write_date).ts}']`
     );
     await contains(".o-mail-NotificationItem-name", { text: "OdooBot has a suggestion" });
     await contains(".o-mail-NotificationItem-text", {
@@ -1144,4 +1143,28 @@ QUnit.test("can open messaging menu even if channels are not fetched", async () 
     await contains(".o-mail-DiscussSystray", { text: "No conversation yet..." });
     def.resolve();
     await contains(".o-mail-NotificationItem", { text: "General" });
+});
+
+QUnit.test("Latest needaction is shown in thread preview", async () => {
+    const pyEnv = await startServer();
+    for (let i = 1; i <= 2; i++) {
+        const messageId = pyEnv["mail.message"].create({
+            body: `message ${i}`,
+            message_type: "comment",
+            model: "res.partner",
+            needaction: true,
+            needaction_partner_ids: [pyEnv.currentPartnerId],
+            res_id: pyEnv.currentPartnerId,
+        });
+        pyEnv["mail.notification"].create({
+            mail_message_id: messageId,
+            notification_status: "sent",
+            notification_type: "inbox",
+            res_partner_id: pyEnv.currentPartnerId,
+        });
+    }
+    await start();
+    await click(".o_menu_systray i[aria-label='Messages']");
+    await contains(".o-mail-NotificationItem", { text: pyEnv.currentPartner.name });
+    await contains(".o-mail-NotificationItem", { text: "You: message 2" });
 });
