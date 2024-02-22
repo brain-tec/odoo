@@ -778,10 +778,7 @@ export async function paste() {
  * @returns {boolean}
  */
 export function strictEqual(a, b) {
-    if (Number.isNaN(a) && Number.isNaN(b)) {
-        return true;
-    }
-    return a === b;
+    return Number.isNaN(a) ? Number.isNaN(b) : a === b;
 }
 
 /**
@@ -804,7 +801,7 @@ export function title(string) {
 
 /** @type {EventTarget["addEventListener"]} */
 export function useWindowListener(type, callback, options) {
-    return useExternalListener(windowTarget, type, callback, options);
+    return useExternalListener(windowTarget, type, (ev) => ev.isTrusted && callback(ev), options);
 }
 
 export class HootError extends Error {

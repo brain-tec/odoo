@@ -79,6 +79,7 @@ const {
     Math,
     performance,
     Promise,
+    removeEventListener,
     Set,
     setTimeout,
     window,
@@ -160,6 +161,22 @@ const suppressConsole = (reason) => {
     });
 };
 
+/**
+ * @param {Event} ev
+ */
+const warnUserEvent = (ev) => {
+    if (!ev.isTrusted) {
+        return;
+    }
+
+    console.warn(
+        `User event detected: "${ev.type}"\n\n`,
+        `Note that this kind of interaction can interfere with the current test and should be avoided.`
+    );
+
+    removeEventListener(ev.type, warnUserEvent);
+};
+
 const ORINAL_CONSOLE_METHODS = {
     error: console.error,
     warn: console.warn,
@@ -171,6 +188,7 @@ const ORINAL_CONSOLE_METHODS = {
 
 export class TestRunner {
     // Properties
+    aborted = false;
     /** @type {boolean | Test | Suite} */
     debug = false;
     /** @type {Suite[]} */
@@ -315,7 +333,7 @@ export class TestRunner {
             this.addSuite([], suiteName, () => this.addSuite(config, otherNames, fn));
             return;
         }
-        const { suite: parentSuite } = this.getCurrent();
+        const parentSuite = this.#suiteStack.at(-1);
         if (typeof fn !== "function") {
             throw suiteError(
                 { name: suiteName, parent: parentSuite },
@@ -369,7 +387,7 @@ export class TestRunner {
         if (!name) {
             throw new HootError(`a test name must not be empty, got ${name}`);
         }
-        const { suite: parentSuite } = this.getCurrent();
+        const parentSuite = this.#suiteStack.at(-1);
         if (!parentSuite) {
             throw testError({ name, parent: null }, `cannot register a test outside of a suite.`);
         }
@@ -511,6 +529,52 @@ export class TestRunner {
             return;
         }
         this.__beforeEach(...callbacks);
+    }
+
+    /**
+     * @template T
+     * @template {(previous: T | null) => T} F
+     * @param {F} instanceGetter
+     * @param {() => any} [afterCallback]
+     * @returns {F}
+     */
+    createJobScopedGetter(instanceGetter, afterCallback) {
+        /** @type {F} */
+        const getInstance = () => {
+            const currentJob = this.state.currentTest || this.#suiteStack.at(-1) || this;
+            if (!instances.has(currentJob)) {
+                let parentInstance;
+                let current = currentJob;
+                while (current !== this) {
+                    current = current.parent || this;
+                    if (instances.has(current)) {
+                        parentInstance = instances.get(current);
+                        break;
+                    }
+                }
+
+                if (canRegisterAfterCallback) {
+                    this.after(() => {
+                        instances.delete(currentJob);
+
+                        if (afterCallback) {
+                            canRegisterAfterCallback = false;
+                            afterCallback();
+                            canRegisterAfterCallback = true;
+                        }
+                    });
+                }
+
+                instances.set(currentJob, instanceGetter(parentInstance));
+            }
+            return instances.get(currentJob);
+        };
+
+        /** @type {Map<Job, T>} */
+        const instances = new Map();
+        let canRegisterAfterCallback = true;
+
+        return getInstance;
     }
 
     /**
@@ -682,8 +746,13 @@ export class TestRunner {
         const [addTestDone, flushTestDone] = batch((test) => this.state.done.push(test), 10);
         this.__afterAll(
             flushTestDone,
+            // Catch errors
             on(window, "error", (ev) => this.#onError(ev)),
             on(window, "unhandledrejection", (ev) => this.#onError(ev)),
+            // Warn user events
+            on(window, "pointermove", warnUserEvent),
+            on(window, "pointerdown", warnUserEvent),
+            on(window, "keydown", warnUserEvent),
             watchListeners(window, document, document.head, document.body)
         );
         this.__beforeEach(this.fixture.setup);
@@ -797,7 +866,7 @@ export class TestRunner {
                     );
                 }
             }).then(() => {
-                test.lastResults.aborted = true;
+                this.aborted = true;
                 this.debug = false; // Remove debug mode to let the runner stop
             });
 
@@ -823,15 +892,6 @@ export class TestRunner {
                 for (const callbackRegistry of callbackChain) {
                     await callbackRegistry.call("after-test", test);
                 }
-
-                if (this.config.bail) {
-                    if (!test.config.skip && !lastResults.pass) {
-                        this.#failed++;
-                    }
-                    if (this.#failed >= this.config.bail) {
-                        return this.stop();
-                    }
-                }
             });
 
             if (suppressErrors) {
@@ -854,6 +914,14 @@ export class TestRunner {
                 logger.error(`Test "${test.fullName}" failed:\n${failReason}`);
             }
 
+            if (this.config.bail) {
+                if (!test.config.skip && !lastResults.pass) {
+                    this.#failed++;
+                }
+                if (this.#failed >= this.config.bail) {
+                    return this.stop();
+                }
+            }
             if (!test.config.multi || test.visited === test.config.multi) {
                 addTestDone(test);
                 nextJob();
@@ -870,9 +938,12 @@ export class TestRunner {
 
     async stop() {
         this.#currentJobs = [];
-        this.#resolveCurrent();
         this.state.status = "done";
         this.totalTime = formatTime(performance.now() - this.#startTime);
+
+        if (this.#resolveCurrent !== noop) {
+            return this.#resolveCurrent();
+        }
 
         while (this.#missedCallbacks.length) {
             await this.#missedCallbacks.shift()();
