@@ -208,6 +208,11 @@ export class Thread extends Record {
     isAdmin = false;
     loadOlder = false;
     loadNewer = false;
+    isCorrespondentOdooBot = Record.attr(undefined, {
+        compute() {
+            return this.correspondent2?.eq(this._store.odoobot);
+        },
+    });
     isLoadingAttachments = false;
     isLoadedDeferred = new Deferred();
     isLoaded = false;
@@ -441,13 +446,15 @@ export class Thread extends Record {
         return [...this.messages].reverse().find((msg) => Number.isInteger(msg.id));
     }
 
-    get newestPersistentNotEmptyOfAllMessage() {
-        const allPersistentMessages = this.allMessages.filter(
-            (message) => Number.isInteger(message.id) && !message.isEmpty
-        );
-        allPersistentMessages.sort((m1, m2) => m2.id - m1.id);
-        return allPersistentMessages[0];
-    }
+    newestPersistentNotEmptyOfAllMessage = Record.one("Message", {
+        compute() {
+            const allPersistentMessages = this.allMessages.filter(
+                (message) => Number.isInteger(message.id) && !message.isEmpty
+            );
+            allPersistentMessages.sort((m1, m2) => m2.id - m1.id);
+            return allPersistentMessages[0];
+        },
+    });
 
     get oldestPersistentMessage() {
         return this.messages.find((msg) => Number.isInteger(msg.id));
