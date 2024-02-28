@@ -311,16 +311,13 @@ class IrFieldsConverter(models.AbstractModel):
     @api.model
     def _str_to_selection(self, model, field, value):
         # get untranslated values
-        env = self.with_context(lang=None).env
-        selection = field.get_description(env)['selection']
-
-        for item, label in selection:
-            label = ustr(label)
-            labels = [label] + self._get_translations(('selection', 'model', 'code'), label)
-            # case insensitive comparaison of string to allow to set the value even if the given 'value' param is not
-            # exactly (case sensitive) the same as one of the selection item.
-            if value.lower() == str(item).lower() or any(value.lower() == label.lower() for label in labels):
-                return item, []
+        for lang in self.env["res.lang"].search([]).mapped("code"):
+            env = self.with_context(lang=lang).env
+            selection = field.get_description(env)['selection']
+            for item, label in selection:
+                label = ustr(label)
+                if value.lower() == item.lower() or value.lower() == label.lower():
+                    return item, []
 
         if field.name in self._context.get('import_skip_records', []):
             return None, []
