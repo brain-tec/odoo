@@ -2032,7 +2032,7 @@ export function setTagName(el, newTagName) {
         return el;
     }
     const n = document.createElement(newTagName);
-    if (paragraphRelatedElements.includes(el.nodeName)) {
+    if (el.nodeName !== 'LI') {
         const attributes = el.attributes;
         for (const attr of attributes) {
             n.setAttribute(attr.name, attr.value);
@@ -2678,6 +2678,20 @@ export function pxToFloat(sizeString) {
     return parseFloat(sizeString.replace('px', ''));
 }
 
+/**
+ * Returns position of a range in form of object (end
+ * position of a range in case of non-collapsed range).
+ *
+ * @param {HTMLElement} el element for which range postion will be calculated
+ * @param {Document} document
+ * @param {Object} [options]
+ * @param {Number} [options.marginRight] right margin to be considered
+ * @param {Number} [options.marginBottom] bottom margin to be considered
+ * @param {Number} [options.marginTop] top margin to be considered
+ * @param {Number} [options.marginLeft] left margin to be considered
+ * @param {Function} [options.getContextFromParentRect] to get context rect from parent
+ * @returns {Object | undefined}
+ */
 export function getRangePosition(el, document, options = {}) {
     const selection = document.getSelection();
     if (!selection.rangeCount) return;
