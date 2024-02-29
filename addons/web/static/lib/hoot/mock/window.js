@@ -98,7 +98,7 @@ const mockEventListeners = (target) => {
     /** @type {addEventListener} */
     const mockedAddEventListener = (type, callback, options) => {
         const listeners = listenerMap.get(target);
-        if (listeners) {
+        if (listeners && !R_OWL_SYNTHETIC_LISTENER.test(String(callback))) {
             if (options?.once) {
                 const originalCallback = callback;
                 callback = (...args) => {
@@ -151,6 +151,8 @@ const unregisterListener = (listeners, type, callback) => {
     }
 };
 
+const R_OWL_SYNTHETIC_LISTENER = /\bnativeToSyntheticEvent\b/;
+
 // Early export: needed for mockHistory
 export const mockLocation = new MockLocation();
 
@@ -176,27 +178,27 @@ const DOCUMENT_MOCK_DESCRIPTORS = {
     },
 };
 const WINDOW_MOCK_DESCRIPTORS = {
-    Date: { value: MockDate },
+    Date: { value: MockDate, writable: false },
     Math: { value: MockMath },
     Notification: { value: MockNotification },
-    Request: { value: MockRequest },
-    Response: { value: MockResponse },
+    Request: { value: MockRequest, writable: false },
+    Response: { value: MockResponse, writable: false },
     SharedWorker: { value: MockSharedWorker },
     WebSocket: { value: MockWebSocket },
     Worker: { value: MockWorker },
     XMLHttpRequest: { value: MockXMLHttpRequest },
-    cancelAnimationFrame: { value: mockedCancelAnimationFrame },
-    clearInterval: { value: mockedClearInterval },
-    clearTimeout: { value: mockedClearTimeout },
-    fetch: { value: mockedFetch },
+    cancelAnimationFrame: { value: mockedCancelAnimationFrame, writable: false },
+    clearInterval: { value: mockedClearInterval, writable: false },
+    clearTimeout: { value: mockedClearTimeout, writable: false },
+    fetch: { value: mockedFetch, writable: false },
     history: { value: mockHistory },
-    localStorage: { value: mockLocalStorage },
+    localStorage: { value: mockLocalStorage, writable: false },
     matchMedia: { value: mockedMatchMedia },
     navigator: { value: mockNavigator },
-    requestAnimationFrame: { value: mockedRequestAnimationFrame },
-    sessionStorage: { value: mockSessionStorage },
-    setInterval: { value: mockedSetInterval },
-    setTimeout: { value: mockedSetTimeout },
+    requestAnimationFrame: { value: mockedRequestAnimationFrame, writable: false },
+    sessionStorage: { value: mockSessionStorage, writable: false },
+    setInterval: { value: mockedSetInterval, writable: false },
+    setTimeout: { value: mockedSetTimeout, writable: false },
 };
 
 //-----------------------------------------------------------------------------

@@ -3,10 +3,7 @@
 import { nextTick, patchDate } from "@web/../tests/helpers/utils";
 import { CommandResult } from "@spreadsheet/o_spreadsheet/cancelled_reason";
 import { Model, DispatchResult, helpers, tokenize } from "@odoo/o-spreadsheet";
-import {
-    createModelWithDataSource,
-    waitForDataSourcesLoaded,
-} from "@spreadsheet/../tests/utils/model";
+import { createModelWithDataSource } from "@spreadsheet/../tests/utils/model";
 import { getBasicPivotArch } from "@spreadsheet/../tests/utils/data";
 import { createSpreadsheetWithPivotAndList } from "@spreadsheet/../tests/utils/pivot_list";
 import {
@@ -49,6 +46,7 @@ import { migrate } from "@spreadsheet/o_spreadsheet/migration";
 import { toRangeData } from "../utils/zones";
 import { PivotUIGlobalFilterPlugin } from "@spreadsheet/pivot/index";
 import { getEvaluatedCell } from "../utils/getters";
+import { waitForDataLoaded } from "@spreadsheet/helpers/model";
 const { DateTime } = luxon;
 const { toZone } = helpers;
 
@@ -67,6 +65,10 @@ const LAST_YEAR_LEGACY_FILTER = {
 };
 
 const DEFAULT_FIELD_MATCHINGS = {
+    "PIVOT#1": { chain: "date", type: "date" },
+};
+
+const DEFAULT_LIST_FIELD_MATCHINGS = {
     1: { chain: "date", type: "date" },
 };
 
@@ -87,7 +89,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
             pivot: DEFAULT_FIELD_MATCHINGS,
         });
         assert.equal(model.getters.getGlobalFilters().length, 1);
-        const computedDomain = model.getters.getPivotComputedDomain("1");
+        const computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(computedDomain.length, 3);
         assert.equal(computedDomain[0], "&");
     });
@@ -97,9 +99,9 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
         async function (assert) {
             const { model } = await createSpreadsheetWithPivotAndList();
             assert.equal(model.getters.getGlobalFilters().length, 0);
-            await addGlobalFilter(model, LAST_YEAR_GLOBAL_FILTER, { pivot: { 1: {} } });
+            await addGlobalFilter(model, LAST_YEAR_GLOBAL_FILTER, { pivot: { "PIVOT#1": {} } });
             assert.equal(model.getters.getGlobalFilters().length, 1);
-            const computedDomain = model.getters.getPivotComputedDomain("1");
+            const computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
             assert.deepEqual(computedDomain, []);
         }
     );
@@ -115,7 +117,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
         result = await removeGlobalFilter(model, gf.id);
         assert.deepEqual(result, DispatchResult.Success);
         assert.equal(model.getters.getGlobalFilters().length, 0);
-        const computedDomain = model.getters.getPivotComputedDomain("1");
+        const computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.deepEqual(computedDomain, []);
     });
 
@@ -135,7 +137,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
     QUnit.test("A global filter with an empty field can be evaluated", async function (assert) {
         const { model } = await createSpreadsheetWithPivotAndList();
         await addGlobalFilter(model, THIS_YEAR_GLOBAL_FILTER);
-        const domain = model.getters.getPivotComputedDomain(1);
+        const domain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.deepEqual(domain, []);
     });
 
@@ -195,21 +197,21 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
     QUnit.test(
         "Adding new DataSource will set its fieldMatching according to other ones with the same model",
         async function (assert) {
-            const { model } = await createSpreadsheetWithPivot();
+            const { model, pivotId } = await createSpreadsheetWithPivot();
             await addGlobalFilter(model, THIS_YEAR_GLOBAL_FILTER, {
                 pivot: {
-                    1: { chain: "created_on", type: "date", offset: 1 },
+                    [pivotId]: { chain: "created_on", type: "date", offset: 1 },
                 },
             });
             const filterId = THIS_YEAR_GLOBAL_FILTER.id;
 
-            let fieldMatching = model.getters.getPivotFieldMatching("1", filterId);
+            let fieldMatching = model.getters.getPivotFieldMatching(pivotId, filterId);
             assert.equal(fieldMatching.chain, "created_on");
             assert.equal(fieldMatching.type, "date");
             assert.equal(fieldMatching.offset, 1);
 
-            await insertPivotInSpreadsheet(model, { arch: getBasicPivotArch() });
-            fieldMatching = model.getters.getPivotFieldMatching("2", filterId);
+            await insertPivotInSpreadsheet(model, "PIVOT#2", { arch: getBasicPivotArch() });
+            fieldMatching = model.getters.getPivotFieldMatching("PIVOT#2", filterId);
             assert.equal(fieldMatching.chain, "created_on");
             assert.equal(fieldMatching.type, "date");
             assert.equal(fieldMatching.offset, undefined);
@@ -235,7 +237,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
             const { model } = await createSpreadsheetWithPivot();
             await addGlobalFilter(model, THIS_YEAR_GLOBAL_FILTER, {
                 pivot: {
-                    1: { chain: "created_on", type: "date", offset: 1 },
+                    "PIVOT#1": { chain: "created_on", type: "date", offset: 1 },
                 },
             });
             const filterId = THIS_YEAR_GLOBAL_FILTER.id;
@@ -249,7 +251,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
         const { model } = await createSpreadsheetWithPivotAndList();
         await addGlobalFilter(model, LAST_YEAR_GLOBAL_FILTER, {
             pivot: DEFAULT_FIELD_MATCHINGS,
-            list: DEFAULT_FIELD_MATCHINGS,
+            list: DEFAULT_LIST_FIELD_MATCHINGS,
         });
         const gf = model.getters.getGlobalFilters()[0];
         let result = await setGlobalFilterValue(model, {
@@ -268,7 +270,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
         assert.deepEqual(result, DispatchResult.Success);
         assert.deepEqual(model.getters.getGlobalFilterValue(gf.id).period, "march");
         assert.deepEqual(model.getters.getGlobalFilterValue(gf.id).yearOffset, 0);
-        const computedDomain = model.getters.getPivotComputedDomain("1");
+        const computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(computedDomain.length, 3);
         const listDomain = model.getters.getListComputedDomain("1");
         assert.equal(listDomain.length, 3);
@@ -280,11 +282,11 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
         insertChartInSpreadsheet(model);
         const chartId = model.getters.getOdooChartIds()[0];
         await addGlobalFilter(model, LAST_YEAR_GLOBAL_FILTER, {
-            pivot: { 1: { chain: "date", type: "date" } },
+            pivot: { "PIVOT#1": { chain: "date", type: "date" } },
             list: { 1: { chain: "date", type: "date" } },
             chart: { [chartId]: { chain: "date", type: "date" } },
         });
-        const pivotDomain = model.getters.getPivotComputedDomain("1");
+        const pivotDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.deepEqual(pivotDomain[0], "&");
         assert.deepEqual(pivotDomain[1], ["date", ">=", "2021-01-01"]);
         assert.deepEqual(pivotDomain[2], ["date", "<=", "2021-12-31"]);
@@ -302,9 +304,9 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
         patchDate(2022, 6, 14, 0, 0, 0);
         const { model } = await createSpreadsheetWithPivot();
         await addGlobalFilter(model, THIS_YEAR_GLOBAL_FILTER, {
-            pivot: { 1: { chain: "date", type: "date", offset: 1 } },
+            pivot: { "PIVOT#1": { chain: "date", type: "date", offset: 1 } },
         });
-        const pivotDomain = model.getters.getPivotComputedDomain("1");
+        const pivotDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.deepEqual(pivotDomain[0], "&");
         assert.deepEqual(pivotDomain[1], ["date", ">=", "2023-01-01"]);
         assert.deepEqual(pivotDomain[2], ["date", "<=", "2023-12-31"]);
@@ -446,7 +448,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
             },
             {
                 pivot: {
-                    1: {
+                    "PIVOT#1": {
                         field: "foo",
                         type: "char",
                     },
@@ -458,7 +460,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
             id: filter.id,
             value: undefined,
         });
-        const computedDomain = model.getters.getPivotComputedDomain("1");
+        const computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(computedDomain.length, 0, "it should not have updated the pivot domain");
     });
 
@@ -1164,7 +1166,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                 modelName: "product",
                 defaultValue: [41],
             },
-            { pivot: { 1: { chain: "product_id", type: "many2one" } } }
+            { pivot: { "PIVOT#1": { chain: "product_id", type: "many2one" } } }
         );
         assert.equal(getCellValue(model, "A3"), "xphone");
         assert.equal(getCellValue(model, "B3"), "");
@@ -1213,7 +1215,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                     }
                 },
             });
-            await waitForDataSourcesLoaded(model);
+            await waitForDataLoaded(model);
             assert.verifySteps([
                 "partner/read_group",
                 "partner/read_group",
@@ -1266,7 +1268,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                     }
                 },
             });
-            await waitForDataSourcesLoaded(model);
+            await waitForDataLoaded(model);
             assert.verifySteps(["partner/read_group"]);
             assert.equal(getCellValue(model, "A1"), "");
         }
@@ -1302,7 +1304,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                 }
             },
         });
-        await waitForDataSourcesLoaded(model);
+        await waitForDataLoaded(model);
         assert.verifySteps([
             "partner/read_group",
             "partner/read_group",
@@ -1629,37 +1631,39 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
             defaultValue: "last_week",
             rangeType: "relative",
         };
-        await addGlobalFilter(model, filter, { pivot: { 1: { chain: "date", type: "date" } } });
-        let computedDomain = model.getters.getPivotComputedDomain("1");
+        await addGlobalFilter(model, filter, {
+            pivot: { "PIVOT#1": { chain: "date", type: "date" } },
+        });
+        let computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(getDateDomainDurationInDays(computedDomain), 7);
         assertDateDomainEqual(assert, "date", "2022-05-10", "2022-05-16", computedDomain);
 
         await setGlobalFilterValue(model, { id: "42", value: "year_to_date" });
-        computedDomain = model.getters.getPivotComputedDomain("1");
+        computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assertDateDomainEqual(assert, "date", "2022-01-01", "2022-05-16", computedDomain);
 
         await setGlobalFilterValue(model, { id: "42", value: "last_month" });
-        computedDomain = model.getters.getPivotComputedDomain("1");
+        computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(getDateDomainDurationInDays(computedDomain), 30);
         assertDateDomainEqual(assert, "date", "2022-04-17", "2022-05-16", computedDomain);
 
         await setGlobalFilterValue(model, { id: "42", value: "last_three_months" });
-        computedDomain = model.getters.getPivotComputedDomain("1");
+        computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(getDateDomainDurationInDays(computedDomain), 90);
         assertDateDomainEqual(assert, "date", "2022-02-16", "2022-05-16", computedDomain);
 
         await setGlobalFilterValue(model, { id: "42", value: "last_six_months" });
-        computedDomain = model.getters.getPivotComputedDomain("1");
+        computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(getDateDomainDurationInDays(computedDomain), 180);
         assertDateDomainEqual(assert, "date", "2021-11-18", "2022-05-16", computedDomain);
 
         await setGlobalFilterValue(model, { id: "42", value: "last_year" });
-        computedDomain = model.getters.getPivotComputedDomain("1");
+        computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(getDateDomainDurationInDays(computedDomain), 365);
         assertDateDomainEqual(assert, "date", "2021-05-17", "2022-05-16", computedDomain);
 
         await setGlobalFilterValue(model, { id: "42", value: "last_three_years" });
-        computedDomain = model.getters.getPivotComputedDomain("1");
+        computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(getDateDomainDurationInDays(computedDomain), 3 * 365);
         assertDateDomainEqual(assert, "date", "2019-05-18", "2022-05-16", computedDomain);
     });
@@ -1677,38 +1681,38 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
             rangeType: "relative",
         };
         await addGlobalFilter(model, filter, {
-            pivot: { 1: { chain: "date", type: "date", offset: -1 } },
+            pivot: { "PIVOT#1": { chain: "date", type: "date", offset: -1 } },
         });
-        let computedDomain = model.getters.getPivotComputedDomain("1");
+        let computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(getDateDomainDurationInDays(computedDomain), 7);
         assertDateDomainEqual(assert, "date", "2022-05-03", "2022-05-09", computedDomain);
 
         await setGlobalFilterValue(model, { id: "42", value: "year_to_date" });
-        computedDomain = model.getters.getPivotComputedDomain("1");
+        computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assertDateDomainEqual(assert, "date", "2021-01-01", "2021-05-16", computedDomain);
 
         await setGlobalFilterValue(model, { id: "42", value: "last_month" });
-        computedDomain = model.getters.getPivotComputedDomain("1");
+        computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(getDateDomainDurationInDays(computedDomain), 30);
         assertDateDomainEqual(assert, "date", "2022-03-18", "2022-04-16", computedDomain);
 
         await setGlobalFilterValue(model, { id: "42", value: "last_three_months" });
-        computedDomain = model.getters.getPivotComputedDomain("1");
+        computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(getDateDomainDurationInDays(computedDomain), 90);
         assertDateDomainEqual(assert, "date", "2021-11-18", "2022-02-15", computedDomain);
 
         await setGlobalFilterValue(model, { id: "42", value: "last_six_months" });
-        computedDomain = model.getters.getPivotComputedDomain("1");
+        computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(getDateDomainDurationInDays(computedDomain), 180);
         assertDateDomainEqual(assert, "date", "2021-05-22", "2021-11-17", computedDomain);
 
         await setGlobalFilterValue(model, { id: "42", value: "last_year" });
-        computedDomain = model.getters.getPivotComputedDomain("1");
+        computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(getDateDomainDurationInDays(computedDomain), 365);
         assertDateDomainEqual(assert, "date", "2020-05-17", "2021-05-16", computedDomain);
 
         await setGlobalFilterValue(model, { id: "42", value: "last_three_years" });
-        computedDomain = model.getters.getPivotComputedDomain("1");
+        computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.equal(getDateDomainDurationInDays(computedDomain), 3 * 365);
         assertDateDomainEqual(assert, "date", "2016-05-18", "2019-05-17", computedDomain);
     });
@@ -1738,9 +1742,11 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
             from: "2022-01-01",
             to: "2022-05-16",
         };
-        await addGlobalFilter(model, filter, { pivot: { 1: { chain: "date", type: "date" } } });
+        await addGlobalFilter(model, filter, {
+            pivot: { "PIVOT#1": { chain: "date", type: "date" } },
+        });
         await setGlobalFilterValue(model, { id: "42", value });
-        const computedDomain = model.getters.getPivotComputedDomain("1");
+        const computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assertDateDomainEqual(assert, "date", "2022-01-01", "2022-05-16", computedDomain);
     });
 
@@ -1759,9 +1765,11 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                 from: "2022-01-01",
                 to: "2022-05-16",
             };
-            await addGlobalFilter(model, filter, { pivot: { 1: { chain: "date", type: "date" } } });
+            await addGlobalFilter(model, filter, {
+                pivot: { "PIVOT#1": { chain: "date", type: "date" } },
+            });
             await setGlobalFilterValue(model, { id: "42", value });
-            const computedDomain = model.getters.getPivotComputedDomain("1");
+            const computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
             assertDateDomainEqual(assert, "date", "2022-01-01", "2022-05-16", computedDomain);
         }
     );
@@ -1781,9 +1789,11 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                 from: "2022-01-01",
                 to: undefined,
             };
-            await addGlobalFilter(model, filter, { pivot: { 1: { chain: "date", type: "date" } } });
+            await addGlobalFilter(model, filter, {
+                pivot: { "PIVOT#1": { chain: "date", type: "date" } },
+            });
             await setGlobalFilterValue(model, { id: "42", value });
-            const computedDomain = model.getters.getPivotComputedDomain("1");
+            const computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
             assert.deepEqual(computedDomain, [["date", ">=", "2022-01-01"]]);
         }
     );
@@ -1801,9 +1811,11 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
             from: undefined,
             to: "2022-05-16",
         };
-        await addGlobalFilter(model, filter, { pivot: { 1: { chain: "date", type: "date" } } });
+        await addGlobalFilter(model, filter, {
+            pivot: { "PIVOT#1": { chain: "date", type: "date" } },
+        });
         await setGlobalFilterValue(model, { id: "42", value });
-        const computedDomain = model.getters.getPivotComputedDomain("1");
+        const computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
         assert.deepEqual(computedDomain, [["date", "<=", "2022-05-16"]]);
     });
 
@@ -1842,12 +1854,12 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                 defaultValue: "this_year",
             };
             await addGlobalFilter(model, filter, {
-                pivot: { 1: { chain: "date", type: "date", offset: 0 } },
+                pivot: { "PIVOT#1": { chain: "date", type: "date", offset: 0 } },
             });
-            let computedDomain = model.getters.getPivotComputedDomain("1");
+            let computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
             assertDateDomainEqual(assert, "date", "2022-01-01", "2022-12-31", computedDomain);
             model.dispatch("CLEAR_GLOBAL_FILTER_VALUE", { id: filter.id });
-            computedDomain = model.getters.getPivotComputedDomain("1");
+            computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
             assert.deepEqual(computedDomain, []);
         }
     );
@@ -1866,12 +1878,12 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                 defaultsToCurrentPeriod: true,
             };
             await addGlobalFilter(model, filter, {
-                pivot: { 1: { chain: "date", type: "date", offset: 0 } },
+                pivot: { "PIVOT#1": { chain: "date", type: "date", offset: 0 } },
             });
-            let computedDomain = model.getters.getPivotComputedDomain("1");
+            let computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
             assertDateDomainEqual(assert, "date", "2022-01-01", "2022-12-31", computedDomain);
             model.dispatch("CLEAR_GLOBAL_FILTER_VALUE", { id: filter.id });
-            computedDomain = model.getters.getPivotComputedDomain("1");
+            computedDomain = model.getters.getPivotComputedDomain("PIVOT#1");
             assert.deepEqual(computedDomain, []);
         }
     );
@@ -1940,7 +1952,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                     label: "relational filter",
                 },
                 {
-                    pivot: { 1: { chain: "product_id", type: "many2one" } },
+                    pivot: { "PIVOT#1": { chain: "product_id", type: "many2one" } },
                 }
             );
             await addGlobalFilter(
@@ -1953,7 +1965,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                     defaultValue: "this_month",
                 },
                 {
-                    pivot: { 1: { chain: "date", type: "date" } },
+                    pivot: { "PIVOT#1": { chain: "date", type: "date" } },
                 }
             );
             const relationalFilters1 = getFiltersMatchingPivot(
@@ -2009,7 +2021,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                     label: "relational filter",
                 },
                 {
-                    pivot: { 1: { chain: "product_id", type: "many2one" } },
+                    pivot: { "PIVOT#1": { chain: "product_id", type: "many2one" } },
                 }
             );
             await addGlobalFilter(
@@ -2022,7 +2034,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                     rangeType: "fixedPeriod",
                 },
                 {
-                    pivot: { 1: { chain: "product_id", type: "many2one" } },
+                    pivot: { "PIVOT#1": { chain: "product_id", type: "many2one" } },
                 }
             );
             const filters = getFiltersMatchingPivot(
@@ -2051,7 +2063,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                     type: "relation",
                     defaultValue: [],
                 },
-                { pivot: { 1: { chain: "product_id", type: "many2one" } } }
+                { pivot: { "PIVOT#1": { chain: "product_id", type: "many2one" } } }
             );
             const filters = getFiltersMatchingPivot(model, getCellFormula(model, "B3"));
             assert.deepEqual(filters, [
@@ -2081,7 +2093,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                     type: "relation",
                     defaultValue: [],
                 },
-                { pivot: { 1: { chain: "product_id", type: "many2one" } } }
+                { pivot: { "PIVOT#1": { chain: "product_id", type: "many2one" } } }
             );
             const filters = getFiltersMatchingPivot(model, getCellFormula(model, "B3"));
             assert.deepEqual(filters, [
@@ -2131,7 +2143,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
                     type: "relation",
                     defaultValue: [],
                 },
-                { pivot: { 1: { chain: "product_id", type: "many2one" } } }
+                { pivot: { "PIVOT#1": { chain: "product_id", type: "many2one" } } }
             );
             const filters = getFiltersMatchingPivot(model, getCellFormula(model, "B3"));
             assert.deepEqual(filters, []);
@@ -2186,7 +2198,9 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
 
     QUnit.test("field matching is removed when list is deleted", async function (assert) {
         const { model } = await createSpreadsheetWithList();
-        await addGlobalFilter(model, LAST_YEAR_GLOBAL_FILTER, { list: DEFAULT_FIELD_MATCHINGS });
+        await addGlobalFilter(model, LAST_YEAR_GLOBAL_FILTER, {
+            list: DEFAULT_LIST_FIELD_MATCHINGS,
+        });
         const [listId] = model.getters.getListIds();
         const [filter] = model.getters.getGlobalFilters();
         const matching = {
@@ -2268,7 +2282,7 @@ QUnit.module("spreadsheet > Global filters model", {}, () => {
             defaultValue: {},
         });
         const resultPivot = await addGlobalFilter(model, filter("fake1"), {
-            pivot: { 1: { offset: -2 } },
+            pivot: { "PIVOT#1": { offset: -2 } },
         });
         assert.deepEqual(resultPivot.reasons, [CommandResult.InvalidFieldMatch]);
         const resultList = await addGlobalFilter(model, filter("fake2"), {

@@ -302,7 +302,7 @@ const getStyleValues = (node, keys) => {
 /**
  *
  * @param {Node} node
- * @param {Record<string, string>} styleDef
+ * @param {Record<string, string | RegExp>} styleDef
  */
 const hasStyle = (node, styleDef) => {
     const nodeStyle = getStyle(node);
@@ -310,7 +310,7 @@ const hasStyle = (node, styleDef) => {
         return false;
     }
     for (const [prop, value] of Object.entries(styleDef)) {
-        if (nodeStyle[prop] !== value) {
+        if (!regexMatchOrStrictEqual(nodeStyle[prop], value)) {
             return false;
         }
     }
@@ -330,6 +330,13 @@ const matcherModifierError = (modifier, message) =>
  */
 const parseStyle = (styleString) =>
     Object.fromEntries(styleString.split(";").map((prop) => prop.split(":").map((v) => v.trim())));
+
+/**
+ * @param {unknown} value
+ * @param {string | RegExp} matcher
+ */
+const regexMatchOrStrictEqual = (value, matcher) =>
+    matcher instanceof RegExp ? matcher.test(value) : strictEqual(value, matcher);
 
 /**
  * @param {Assertion} assertion
@@ -1244,51 +1251,6 @@ export class Matchers {
     }
 
     /**
-     * Expects the received {@link Target} to contain the given {@link Target}.
-     *
-     * @param {Target} target
-     * @param {ExpectOptions} [options]
-     * @example
-     *  expect("ul").toContain(queryOne("li"));
-     */
-    toContain(target, options) {
-        this.#saveStack();
-
-        ensureArguments([
-            [target, ["string", "node", "node[]"]],
-            [options, ["object", null]],
-        ]);
-
-        const nodes = queryAll(target);
-        return this.#resolve({
-            name: "toContain",
-            acceptedType: ["string", "node", "node[]"],
-            transform: queryAll,
-            predicate: each((node) => nodes.every((n) => node.contains(n))),
-            message: (pass) =>
-                options?.message ||
-                (pass
-                    ? `%elements% [contain!do not contain] ${formatHumanReadable(nodes)}`
-                    : `expected %elements%[! not] to contain the given value`),
-            details: (actual) => {
-                const contained = [];
-                const missing = [];
-                for (const node of nodes) {
-                    if (actual.some((n) => n.contains(node))) {
-                        contained.push(node);
-                    } else {
-                        missing.push(node);
-                    }
-                }
-                return [
-                    [Markup.green("Contained:"), contained],
-                    [Markup.red("Missing:"), missing],
-                ];
-            },
-        });
-    }
-
-    /**
      * Expects the received {@link Target} to have the given attribute set on
      * itself, and for that attribute value to match the given `value` if any.
      *
@@ -1319,10 +1281,7 @@ export class Matchers {
                     return node.hasAttribute(attribute);
                 }
                 const attrValue = getNodeAttribute(node, attribute);
-                if (value instanceof RegExp) {
-                    return value.test(attrValue);
-                }
-                return strictEqual(attrValue, value);
+                return regexMatchOrStrictEqual(attrValue, value);
             }),
             message: (pass) =>
                 options?.message ||
@@ -1467,10 +1426,7 @@ export class Matchers {
                 if (!expectsValue) {
                     return isNil(propValue);
                 }
-                if (value instanceof RegExp) {
-                    return value.test(propValue);
-                }
-                return strictEqual(propValue, value);
+                return regexMatchOrStrictEqual(propValue, value);
             }),
             message: (pass) =>
                 options?.message ||
@@ -1498,7 +1454,7 @@ export class Matchers {
     /**
      * Expects the received {@link Target} to have the given class name(s).
      *
-     * @param {string | string[]} style
+     * @param {string | Record<string, string, RegExp>} style
      * @param {ExpectOptions} [options]
      * @example
      *  expect("button").toHaveStyle({ color: "red" });
@@ -1568,12 +1524,7 @@ export class Matchers {
                 if (!expectsText) {
                     return nodeText.length > 0;
                 }
-                return texts.every((text) => {
-                    if (text instanceof RegExp) {
-                        return text.test(nodeText);
-                    }
-                    return strictEqual(nodeText, text);
-                });
+                return texts.every((text) => regexMatchOrStrictEqual(nodeText, text));
             }),
             message: (pass) =>
                 options?.message ||
@@ -1639,12 +1590,7 @@ export class Matchers {
                     }
                     nodeValue = node.value;
                 }
-                return values.every((value) => {
-                    if (value instanceof RegExp) {
-                        return value.test(nodeValue);
-                    }
-                    return strictEqual(nodeValue, value);
-                });
+                return values.every((value) => regexMatchOrStrictEqual(nodeValue, value));
             }),
             message: (pass) =>
                 options?.message ||
