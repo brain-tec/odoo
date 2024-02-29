@@ -1898,6 +1898,8 @@ class _String(Field):
                     matches = get_close_matches(old_term_text, text2terms, 1, 0.9)
                     if matches:
                         closest_term = get_close_matches(old_term, text2terms[matches[0]], 1, 0)[0]
+                        if closest_term in translation_dictionary:
+                            continue
                         old_is_text = is_text(old_term)
                         closest_is_text = is_text(closest_term)
                         if old_is_text or not closest_is_text:
@@ -2697,6 +2699,7 @@ class Selection(Field):
 
     def __init__(self, selection=Default, string=Default, **kwargs):
         super(Selection, self).__init__(selection=selection, string=string, **kwargs)
+        self._selection = dict(selection) if isinstance(selection, list) else None
 
     def setup_nonrelated(self, model):
         super().setup_nonrelated(model)
@@ -2707,6 +2710,7 @@ class Selection(Field):
         # selection must be computed on related field
         field = self.related_field
         self.selection = lambda model: field._description_selection(model.env)
+        self._selection = None
 
     def _get_attrs(self, model_class, name):
         attrs = super()._get_attrs(model_class, name)
@@ -2722,9 +2726,8 @@ class Selection(Field):
         if not self._base_fields:
             return
 
-        # determine selection (applying 'selection_add' extensions)
+        # determine selection (applying 'selection_add' extensions) as a dict
         values = None
-        labels = {}
 
         for field in self._base_fields:
             # We cannot use field.selection or field.selection_add here
@@ -2734,14 +2737,12 @@ class Selection(Field):
                     _logger.warning("%s: selection attribute will be ignored as the field is related", self)
                 selection = field.args['selection']
                 if isinstance(selection, list):
-                    if values is not None and values != [kv[0] for kv in selection]:
+                    if values is not None and list(values) != [kv[0] for kv in selection]:
                         _logger.warning("%s: selection=%r overrides existing selection; use selection_add instead", self, selection)
-                    values = [kv[0] for kv in selection]
-                    labels = dict(selection)
+                    values = dict(selection)
                     self.ondelete = {}
                 else:
                     values = None
-                    labels = {}
                     self.selection = selection
                     self.ondelete = None
 
@@ -2754,8 +2755,9 @@ class Selection(Field):
                 assert values is not None, \
                     "%s: selection_add=%r on non-list selection %r" % (self, selection_add, self.selection)
 
+                values_add = {kv[0]: (kv[1] if len(kv) > 1 else None) for kv in selection_add}
                 ondelete = field.args.get('ondelete') or {}
-                new_values = [kv[0] for kv in selection_add if kv[0] not in values]
+                new_values = [key for key in values_add if key not in values]
                 for key in new_values:
                     ondelete.setdefault(key, 'set null')
                 if self.required and new_values and 'set null' in ondelete.values():
@@ -2790,16 +2792,18 @@ class Selection(Field):
                             "'set [value]', 'cascade' or a callable" % (self, val, key)
                         )
 
-                values = merge_sequences(values, [kv[0] for kv in selection_add])
-                labels.update(kv for kv in selection_add if len(kv) == 2)
+                values = {
+                    key: values_add.get(key) or values[key]
+                    for key in merge_sequences(values, values_add)
+                }
                 self.ondelete.update(ondelete)
 
         if values is not None:
-            self.selection = [(value, labels[value]) for value in values]
-
-        if isinstance(self.selection, list):
-            assert all(isinstance(v, str) for v, _ in self.selection), \
+            self.selection = list(values.items())
+            assert all(isinstance(key, str) for key in values), \
                 "Field %s with non-str value in selection" % self
+
+        self._selection = values
 
     def _selection_modules(self, model):
         """ Return a mapping from selection values to modules defining each value. """
@@ -2852,9 +2856,9 @@ class Selection(Field):
         return super(Selection, self).convert_to_column(value, record, values, validate)
 
     def convert_to_cache(self, value, record, validate=True):
-        if not validate:
+        if not validate or self._selection is None:
             return value or None
-        if value in self.get_values(record.env):
+        if value in self._selection:
             return value
         if not value:
             return None

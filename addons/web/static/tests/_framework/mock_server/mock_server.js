@@ -3,6 +3,7 @@ import { mockFetch, mockWebSocket } from "@odoo/hoot-mock";
 import { assets } from "@web/core/assets";
 import { registry } from "@web/core/registry";
 import { isIterable } from "@web/core/utils/arrays";
+import { deepCopy, isObject } from "@web/core/utils/objects";
 import { serverState } from "../mock_server_state.hoot";
 import { fetchModelDefinitions } from "../module_set.hoot";
 import { patchWithCleanup } from "../patch_test_helpers";
@@ -13,7 +14,6 @@ import {
     getRecordQualifier,
     safeSplit,
 } from "./mock_server_utils";
-import { deepCopy, isObject } from "@web/core/utils/objects";
 
 const { fetch: realFetch } = globals;
 
@@ -95,6 +95,24 @@ const authenticateUser = (user) => {
 };
 
 /**
+ * @param {unknown} error
+ */
+const ensureError = (error) => (error instanceof Error ? error : new Error(error));
+
+const getCurrentParams = createJobScopedGetter(
+    /**
+     * @param {ServerParams} previous
+     */
+    (previous) => ({
+        ...previous,
+        actions: deepCopy(previous?.actions || {}),
+        menus: deepCopy(previous?.menus || []),
+        models: [...(previous?.models || [])], // own instance getters, no need to deep copy
+        routes: [...(previous?.routes || [])], // functions, no need to deep copy
+    })
+);
+
+/**
  * @param {string} modelName
  */
 const modelNotFoundError = (modelName, consequence) => {
@@ -157,14 +175,6 @@ class MockServerBaseEnvironment {
     }
 }
 
-const getCurrentParams = createJobScopedGetter((previous) => ({
-    ...previous,
-    actions: deepCopy(previous?.actions || {}),
-    menus: deepCopy(previous?.menus || []),
-    models: [...(previous?.models || [])], // own instance getters, no need to deep copy
-    routes: [...(previous?.routes || [])], // functions, no need to deep copy
-}));
-
 const DEFAULT_MENU = {
     id: 99999,
     appID: 1,
@@ -221,8 +231,8 @@ export class MockServer {
     /** @type {Record<string, [RegExp, string[], RouteCallback]>} */
     routes = {};
     started = false;
-    /** @type {Record<string, OrmCallback[]>} */
-    ormListeners = { "*": [] };
+    /** @type {[string, OrmCallback][]>} */
+    ormListeners = [];
 
     // WebSocket connections
     /** @type {import("@odoo/hoot-mock").ServerWebSocket[]} */
@@ -384,6 +394,20 @@ export class MockServer {
         }
 
         return this;
+    }
+
+    /**
+     * @param {string} method
+     */
+    findOrmListeners(method) {
+        /** @type {OrmCallback[]} */
+        const callbacks = [];
+        for (const [listenerMethod, callback] of this.ormListeners) {
+            if (listenerMethod === method || listenerMethod === "*") {
+                callbacks.unshift(callback);
+            }
+        }
+        return callbacks;
     }
 
     /**
@@ -706,10 +730,7 @@ export class MockServer {
         } else if (!method) {
             method = "*";
         }
-        if (!this.ormListeners[method]) {
-            this.ormListeners[method] = [];
-        }
-        this.ormListeners[method].push(callback);
+        this.ormListeners.push([method, callback]);
     }
 
     /**
@@ -837,8 +858,12 @@ export class MockServer {
 
         let result;
         // Check own routes
-        for (const fn of [...(this.ormListeners[params.method] || []), ...this.ormListeners["*"]]) {
-            result ??= await fn.call(this, route, params);
+        for (const fn of this.findOrmListeners(params.method)) {
+            try {
+                result ??= await fn.call(this, route, params);
+            } catch (error) {
+                return ensureError(error);
+            }
             if (result !== undefined && result !== null) {
                 break;
             }
@@ -847,7 +872,7 @@ export class MockServer {
         try {
             result ??= await this.callOrm(params);
         } catch (error) {
-            return error;
+            return ensureError(error);
         }
         return result;
     }

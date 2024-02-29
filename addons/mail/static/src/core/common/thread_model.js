@@ -150,6 +150,11 @@ export class Thread extends Record {
         }
         return this.message_needaction_counter;
     }
+    isCorrespondentOdooBot = Record.attr(undefined, {
+        compute() {
+            return this.correspondent?.eq(this._store.odoobot);
+        },
+    });
     isLoadingAttachments = false;
     isLoadedDeferred = new Deferred();
     isLoaded = Record.attr(false, {
@@ -420,13 +425,15 @@ export class Thread extends Record {
         return [...this.messages].reverse().find((msg) => Number.isInteger(msg.id));
     }
 
-    get newestPersistentNotEmptyOfAllMessage() {
-        const allPersistentMessages = this.allMessages.filter(
-            (message) => Number.isInteger(message.id) && !message.isEmpty
-        );
-        allPersistentMessages.sort((m1, m2) => m2.id - m1.id);
-        return allPersistentMessages[0];
-    }
+    newestPersistentNotEmptyOfAllMessage = Record.one("Message", {
+        compute() {
+            const allPersistentMessages = this.allMessages.filter(
+                (message) => Number.isInteger(message.id) && !message.isEmpty
+            );
+            allPersistentMessages.sort((m1, m2) => m2.id - m1.id);
+            return allPersistentMessages[0];
+        },
+    });
 
     get oldestPersistentMessage() {
         return this.messages.find((msg) => Number.isInteger(msg.id));
@@ -464,7 +471,7 @@ export class Thread extends Record {
     }
 
     get persistentMessages() {
-        return this.messages.filter((message) => !message.isTransient);
+        return this.messages.filter((message) => !message.is_transient);
     }
 
     get prefix() {
