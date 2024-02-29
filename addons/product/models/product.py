@@ -378,12 +378,16 @@ class ProductProduct(models.Model):
 
     def write(self, values):
         self.product_tmpl_id._sanitize_vals(values)
+        needs_invalidation = False
+        if "active" in values and any(rec.active != values["active"] for rec in self):
+            # `_get_first_possible_variant_id` depends on variants active state
+            needs_invalidation = True
         res = super(ProductProduct, self).write(values)
         if 'product_template_attribute_value_ids' in values:
             # `_get_variant_id_for_combination` depends on `product_template_attribute_value_ids`
-            self.clear_caches()
-        elif 'active' in values:
-            # `_get_first_possible_variant_id` depends on variants active state
+            needs_invalidation = True
+
+        if needs_invalidation:
             self.clear_caches()
         return res
 
