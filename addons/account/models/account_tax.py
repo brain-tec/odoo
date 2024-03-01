@@ -387,7 +387,7 @@ class AccountTax(models.Model):
         # mapping each child tax to its parent group
         all_taxes = self.env['account.tax']
         groups_map = {}
-        for tax in self.sorted(key=lambda r: r.sequence):
+        for tax in self.sorted(key=lambda r: (r.sequence, r._origin.id)):
             if tax.amount_type == 'group':
                 flattened_children = tax.children_tax_ids.flatten_taxes_hierarchy()
                 all_taxes += flattened_children
@@ -544,7 +544,7 @@ class AccountTax(models.Model):
                     base = recompute_base(base, incl_fixed_amount, incl_percent_amount, incl_division_amount)
                     incl_fixed_amount = incl_percent_amount = incl_division_amount = 0
                     store_included_tax_total = True
-                if tax.price_include or self._context.get('force_price_include'):
+                if self._context.get('force_price_include', tax.price_include):
                     if tax.amount_type == 'percent':
                         incl_percent_amount += tax.amount * sum_repartition_factor
                     elif tax.amount_type == 'division':
