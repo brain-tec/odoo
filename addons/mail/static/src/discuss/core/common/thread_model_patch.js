@@ -1,8 +1,7 @@
-import { Record } from "@mail/core/common/record";
 import { Thread } from "@mail/core/common/thread_model";
 
 import { rpc } from "@web/core/network/rpc";
-import { Deferred } from "@web/core/utils/concurrency";
+import { Mutex } from "@web/core/utils/concurrency";
 import { patch } from "@web/core/utils/patch";
 import { imageUrl } from "@web/core/utils/urls";
 import { _t } from "@web/core/l10n/translation";
@@ -11,15 +10,9 @@ import { _t } from "@web/core/l10n/translation";
 const threadPatch = {
     setup() {
         super.setup();
+        this.fetchChannelMutex = new Mutex();
         this.fetchChannelInfoDeferred = undefined;
-        this.fetchChannelInfoState = Record.attr("not_fetched", {
-            /** @this {import("models").Thread} */
-            onUpdate() {
-                if (this.fetchChannelInfoState === "fetched") {
-                    this._store.updateBusSubscription();
-                }
-            },
-        });
+        this.fetchChannelInfoState = "not_fetched";
     },
     get SETTINGS() {
         return [
@@ -83,30 +76,18 @@ const threadPatch = {
         return super.avatarUrl;
     },
     async fetchChannelInfo() {
-        if (this.fetchChannelInfoState === "fetched") {
-            return this.fetchChannelInfoDeferred ?? Promise.resolve(this);
-        }
-        if (this.fetchChannelInfoStateState === "fetching") {
-            return this.fetchChannelInfoDeferred;
-        }
-        this.fetchChannelInfoState = "fetching";
-        this.fetchChannelInfoDeferred = new Deferred();
-        rpc("/discuss/channel/info", { channel_id: this.id }).then(
-            (channelData) => {
-                this.fetchChannelInfoState = "fetched";
-                if (channelData) {
-                    this._store.Thread.insert(channelData);
-                } else {
-                    this.delete();
-                }
-                this.fetchChannelInfoDeferred.resolve(channelData ? this : undefined);
-            },
-            (error) => {
-                this.fetchChannelInfoState = "not_fetched";
-                this.fetchChannelInfoDeferred.reject(error);
+        return this.fetchChannelMutex.exec(async () => {
+            if (!(this.localId in this._store.Thread.records)) {
+                return; // channel was deleted in-between two calls
             }
-        );
-        return this.fetchChannelInfoDeferred;
+            const data = await rpc("/discuss/channel/info", { channel_id: this.id });
+            if (data) {
+                this.update(data);
+            } else {
+                this.delete();
+            }
+            return data ? this : undefined;
+        });
     },
     incrementUnreadCounter() {
         this.message_unread_counter++;

@@ -548,9 +548,6 @@ export class ThreadService {
         if (pushState) {
             router.pushState({ active_id: activeId });
         }
-        if (!thread.is_pinned) {
-            thread.isLocallyPinned = true;
-        }
     }
 
     /**
@@ -693,13 +690,16 @@ export class ThreadService {
     }
 
     getDiscussSidebarCategoryCounter(categoryId) {
-        return this.store.discuss[categoryId].threads.reduce((acc, channel) => {
-            if (categoryId === "channels") {
-                return channel.message_needaction_counter > 0 ? acc + 1 : acc;
-            } else {
-                return channel.message_unread_counter > 0 ? acc + 1 : acc;
-            }
-        }, 0);
+        return this.store.DiscussAppCategory.get({ id: categoryId }).threads.reduce(
+            (acc, channel) => {
+                if (categoryId === "channels") {
+                    return channel.message_needaction_counter > 0 ? acc + 1 : acc;
+                } else {
+                    return channel.message_unread_counter > 0 ? acc + 1 : acc;
+                }
+            },
+            0
+        );
     }
 
     /**
