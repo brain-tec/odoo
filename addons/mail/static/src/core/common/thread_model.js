@@ -84,10 +84,6 @@ export class Thread extends Record {
     }
     channelMembers = Record.many("ChannelMember", {
         onDelete: (r) => r.delete(),
-        /** @this {import("models").Thread} */
-        onUpdate() {
-            this._store.updateBusSubscription();
-        },
     });
     rtcSessions = Record.many("RtcSession", {
         /** @this {import("models").Thread} */
@@ -106,6 +102,17 @@ export class Thread extends Record {
             this._store.discuss.ringingThreads.delete(this);
         },
     });
+    toggleBusSubscription = Record.attr(false, {
+        compute() {
+            return (
+                this.model === "discuss.channel" &&
+                this.selfMember?.memberSince >= this._store.env.services.bus_service.startedAt
+            );
+        },
+        onUpdate() {
+            this._store.updateBusSubscription();
+        },
+    });
     invitedMembers = Record.many("ChannelMember");
     composer = Record.one("Composer", {
         compute: () => ({}),
@@ -122,6 +129,16 @@ export class Thread extends Record {
     custom_channel_name;
     /** @type {string} */
     description;
+    displayToSelf = Record.attr(false, {
+        compute() {
+            return (
+                this.is_pinned || (["channel", "group"].includes(this.type) && this.hasSelfAsMember)
+            );
+        },
+        onUpdate() {
+            this.onPinStateUpdated();
+        },
+    });
     followers = Record.many("Follower", {
         /** @this {import("models").Thread} */
         onAdd(r) {
@@ -172,9 +189,7 @@ export class Thread extends Record {
     is_pinned = Record.attr(undefined, {
         /** @this {import("models").Thread} */
         onUpdate() {
-            if (!this.is_pinned && this.eq(this._store.discuss.thread)) {
-                this._store.discuss.thread = undefined;
-            }
+            this.onPinStateUpdated();
         },
     });
     mainAttachment = Record.one("Attachment");
@@ -209,6 +224,9 @@ export class Thread extends Record {
     name;
     /** @type {number|false} */
     seen_message_id;
+    selfMember = Record.one("ChannelMember", {
+        inverse: "threadAsSelf",
+    });
     /** @type {'open' | 'folded' | 'closed'} */
     state;
     status = "new";
@@ -270,7 +288,11 @@ export class Thread extends Record {
     /** @type {luxon.DateTime} */
     mute_until_dt = Record.attr(undefined, { type: "datetime" });
     /** @type {Boolean} */
-    isLocallyPinned = false;
+    isLocallyPinned = Record.attr(false, {
+        onUpdate() {
+            this.onPinStateUpdated();
+        },
+    });
     /** @type {"not_fetched"|"pending"|"fetched"} */
     fetchMembersState = "not_fetched";
 
@@ -294,6 +316,10 @@ export class Thread extends Record {
 
     get areAllMembersLoaded() {
         return this.memberCount === this.channelMembers.length;
+    }
+
+    get busChannel() {
+        return `${this.model}_${this.id}`;
     }
 
     get followersFullyLoaded() {
@@ -354,13 +380,6 @@ export class Thread extends Record {
             );
         }
         return this.name;
-    }
-
-    get displayToSelf() {
-        return (
-            this.is_pinned ||
-            (["channel", "group"].includes(this.channel_type) && this.hasSelfAsMember)
-        );
     }
 
     /** @type {import("models").Persona[]} */
@@ -439,12 +458,10 @@ export class Thread extends Record {
         return this.messages.find((msg) => Number.isInteger(msg.id));
     }
 
+    onPinStateUpdated() {}
+
     get hasSelfAsMember() {
         return Boolean(this.selfMember);
-    }
-
-    get selfMember() {
-        return this.channelMembers.find((member) => member.persona.eq(this._store.self));
     }
 
     get invitationLink() {

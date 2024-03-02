@@ -70,6 +70,7 @@ class AccountMove(models.Model):
     _sequence_index = "journal_id"
     _rec_names_search = ['name', 'partner_id.name', 'ref']
     _systray_view = 'activity'
+    _mailing_enabled = True
 
     @property
     def _sequence_monthly_regex(self):
@@ -4888,6 +4889,9 @@ class AccountMove(models.Model):
     # MAIL.THREAD
     # ------------------------------------------------------------
 
+    def _mailing_get_default_domain(self, mailing):
+        return ['&', ('move_type', '=', 'out_invoice'), ('state', '=', 'posted')]
+
     @api.model
     def message_new(self, msg_dict, custom_values=None):
         # EXTENDS mail mail.thread
@@ -5045,7 +5049,7 @@ class AccountMove(models.Model):
         if self.invoice_date_due and self.payment_state not in ('in_payment', 'paid'):
             subtitles.append(_('%(amount)s due\N{NO-BREAK SPACE}%(date)s',
                            amount=format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang')),
-                           date=format_date(self.env, self.invoice_date_due, date_format='short', lang_code=render_context.get('lang'))
+                           date=format_date(self.env, self.invoice_date_due, lang_code=render_context.get('lang'))
                           ))
         else:
             subtitles.append(format_amount(self.env, self.amount_total, self.currency_id, lang_code=render_context.get('lang')))
