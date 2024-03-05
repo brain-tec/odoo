@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { App } from "@odoo/owl";
+import { App, Component, xml } from "@odoo/owl";
 import { defineRootNode, getActiveElement } from "@web/../lib/hoot-dom/helpers/dom";
 import { setupEventActions } from "@web/../lib/hoot-dom/helpers/events";
 import { HootError } from "../hoot_utils";
@@ -39,6 +39,8 @@ const FIXTURE_STYLE = [
     `top: ${FIXTURE_OFFSET}px`,
 ].join(";");
 
+const destroyed = new WeakSet();
+
 customElements.define("hoot-fixture", class HootFixture extends HTMLElement {});
 
 //-----------------------------------------------------------------------------
@@ -57,6 +59,18 @@ export function makeFixtureManager(runner) {
         shouldPrepareNextFixture = true;
         fixture.remove();
         fixture = null;
+    };
+
+    /**
+     * @param {App | Component} target
+     */
+    const destroy = (target) => {
+        const app = target instanceof App ? target : target.__owl__.app;
+        if (destroyed.has(app)) {
+            return;
+        }
+        destroyed.add(app);
+        app.destroy();
     };
 
     const getFixture = () => {
@@ -88,6 +102,13 @@ export function makeFixtureManager(runner) {
             throw new HootError(`Cannot mount on a custom target before the fixture is created.`);
         }
 
+        if (typeof ComponentClass === "string") {
+            ComponentClass = class extends Component {
+                static props = {};
+                static template = xml`${ComponentClass}`;
+            };
+        }
+
         const app = new App(ComponentClass, {
             name: `TEST: ${ComponentClass.name}`,
             test: true,
@@ -95,7 +116,7 @@ export function makeFixtureManager(runner) {
             ...config,
         });
 
-        runner.after(() => app.destroy());
+        runner.after(() => destroy(app));
 
         return app.mount(target || getFixture());
     };
@@ -129,5 +150,6 @@ export function makeFixtureManager(runner) {
         setup: setupFixture,
         get: getFixture,
         mount: mountOnFixture,
+        destroy,
     };
 }

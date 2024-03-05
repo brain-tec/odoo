@@ -65,6 +65,7 @@ const {
     MutationObserver,
     Number,
     Object,
+    parseFloat,
     Promise,
     Reflect,
     RegExp,
@@ -192,7 +193,7 @@ const isNodeDisplayed = (node) => {
     if (!isInDOM(element)) {
         return false;
     }
-    if (isRootElement(element) || element.offsetParent) {
+    if (isRootElement(element) || element.offsetParent || element.closest("svg")) {
         return true;
     }
     // `position=fixed` elements in Chrome do not have an `offsetParent`
@@ -340,19 +341,19 @@ const matchesQueryPart = (query, width, height) => {
                 break;
             }
             case "max-height": {
-                result = height <= parseInt(value);
+                result = height <= parseFloat(value);
                 break;
             }
             case "max-width": {
-                result = width <= parseInt(value);
+                result = width <= parseFloat(value);
                 break;
             }
             case "min-height": {
-                result = height >= parseInt(value);
+                result = height >= parseFloat(value);
                 break;
             }
             case "min-width": {
-                result = width >= parseInt(value);
+                result = width >= parseFloat(value);
                 break;
             }
             case "orientation": {
@@ -816,6 +817,10 @@ export function getActiveElement(node) {
     return activeElement;
 }
 
+export function getCurrentDimensions() {
+    return currentDimensions;
+}
+
 export function getDefaultRootNode() {
     return getDefaultRoot();
 }
@@ -866,7 +871,7 @@ export function getFocusableElements(parent) {
 export function getHeight(dimensions) {
     if (dimensions) {
         for (const prop of ["h", "height"]) {
-            const value = parseInt(dimensions[prop]);
+            const value = parseFloat(dimensions[prop]);
             if (!Number.isNaN(value)) {
                 return value;
             }
@@ -1026,7 +1031,7 @@ export function getStyle(node) {
 export function getWidth(dimensions) {
     if (dimensions) {
         for (const prop of ["w", "width"]) {
-            const value = parseInt(dimensions[prop]);
+            const value = parseFloat(dimensions[prop]);
             if (!Number.isNaN(value)) {
                 return value;
             }
@@ -1050,7 +1055,7 @@ export function getWindow(node) {
 export function getX(position) {
     if (position) {
         for (const prop of ["x", "left", "clientX", "pageX", "screenX"]) {
-            const value = parseInt(position[prop]);
+            const value = parseFloat(position[prop]);
             if (!Number.isNaN(value)) {
                 return value;
             }
@@ -1066,7 +1071,7 @@ export function getX(position) {
 export function getY(position) {
     if (position) {
         for (const prop of ["y", "top", "clientY", "pageY", "screenY"]) {
-            const value = parseInt(position[prop]);
+            const value = parseFloat(position[prop]);
             if (!Number.isNaN(value)) {
                 return value;
             }
@@ -1202,7 +1207,7 @@ export function isInDOM(target) {
             return true;
         }
         target = target.parentNode;
-        if (target.host) {
+        if (target?.host) {
             target = target.host.parentNode;
         }
     }
@@ -1648,12 +1653,13 @@ export function registerPseudoClass(pseudoClass, predicate) {
  * @param {number} height
  */
 export function setDimensions(width, height) {
-    Object.assign(currentDimensions, { width, height });
     const defaultRoot = getDefaultRoot();
     if (!Number.isNaN(width)) {
+        currentDimensions.width = width;
         defaultRoot.style.setProperty("width", `${width}px`, "important");
     }
     if (!Number.isNaN(height)) {
+        currentDimensions.height = height;
         defaultRoot.style.setProperty("height", `${height}px`, "important");
     }
 }
@@ -1687,13 +1693,13 @@ export function useFixture() {}
  * @see {@link waitUntil}
  * @param {Target} target
  * @param {QueryOptions & WaitOptions} [options]
- * @returns {Promise<Node[]>}
+ * @returns {Promise<Node>}
  * @example
  *  const button = await waitFor(`button`);
  *  button.click();
  */
 export function waitFor(target, options) {
-    return waitUntil(() => queryAll(target, options)[0], {
+    return waitUntil(() => queryFirst(target, options), {
         message: `Could not find elements matching "${target}" within %timeout% milliseconds`,
         ...options,
     });
