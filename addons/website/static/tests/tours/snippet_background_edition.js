@@ -60,6 +60,10 @@ function checkAndUpdateBackgroundColor({
 }) {
     const steps = [
         wTourUtils.changeBackgroundColor(),
+        {
+            content: "Switch back to theme tab from custom tab",
+            trigger: ".colorpicker button[data-target='color-combinations']", // Switch back to theme tab
+        },
     ];
 
     addCheck(steps, checkCC, checkNoCC, 'cc', true);
@@ -267,10 +271,9 @@ switchTo('gradient'),
     updateStep: {
         trigger: '.colorpicker .o_slider_multi input.active',
         content: 'Move step',
-        run: () => {
-            const slider = $('.colorpicker .o_slider_multi input.active');
-            slider.val(45);
-            slider.trigger('click');
+        run(helpers) {
+            this.anchor.value = 45;
+            helpers.click();
         },
     },
     checkGradient: 'linear-gradient(135deg, rgb(203, 94, 238) 0%, rgb(203, 94, 238) 45%, rgb(75, 225, 236) 100%)',
