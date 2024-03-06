@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 import { assignDefined } from "@mail/utils/common/misc";
 import { Command, constants, fields, models } from "@web/../tests/web_test_helpers";
 import { serializeDateTime, today } from "@web/core/l10n/dates";
@@ -257,9 +255,10 @@ export class DiscussChannel extends models.ServerModel {
      *
      * @param {number[]} [partnersTo=[]]
      * @param {boolean} [pin]
+     * @param {boolean} [force_open=false]
      * @param {KwArgs<{ partners_to: number[]; pin: boolean }>} [kwargs]
      */
-    channel_get(partnersTo, pin, kwargs = {}) {
+    channel_get(partnersTo, pin, force_open = false, kwargs = {}) {
         partnersTo = kwargs.partners_to || partnersTo || [];
         if (partnersTo.length === 0) {
             return false;
