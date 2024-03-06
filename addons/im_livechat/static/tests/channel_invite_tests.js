@@ -1,5 +1,3 @@
-/* @odoo-module */
-
 import { startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 import { Command } from "@mail/../tests/helpers/command";
@@ -28,7 +26,7 @@ QUnit.test("Can invite a partner to a livechat channel", async () => {
         livechat_operator_id: pyEnv.currentPartnerId,
     });
     const { openDiscuss } = await start();
-    openDiscuss(channelId);
+    await openDiscuss(channelId);
     await click("button[title='Add Users']");
     await click("input", {
         parent: [".o-discuss-ChannelInvitation-selectable", { text: "James" }],
