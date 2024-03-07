@@ -21,6 +21,43 @@ class TestSubcontractingBasic(TransactionCase):
         self.assertTrue(company2.subcontracting_location_id)
         self.assertTrue(self.env.company.subcontracting_location_id != company2.subcontracting_location_id)
 
+    def test_duplicating_warehouses_recreates_their_routes_and_operation_types(self):
+        """ Duplicating a warehouse should result in the creation of new routes and operation types.
+        Not reusing the existing routes and operation types"""
+        wh_original = self.env['stock.warehouse'].search([], limit=1)
+        wh_copy = wh_original.copy(default={'name': 'Dummy Warehouse (copy)', 'code': 'Dummy'})
+
+        # Check if warehouse routes got RECREATED (instead of reused)
+        route_types = [
+            "route_ids",
+            "pbm_route_id",
+            "subcontracting_route_id",
+            "crossdock_route_id",
+            "reception_route_id",
+            "delivery_route_id"
+        ]
+        for route_type in route_types:
+            original_route_set = wh_original[route_type]
+            copy_route_set = wh_copy[route_type]
+            error_message = f"At least one {route_type} (route) got reused on duplication (should have been recreated)"
+            self.assertEqual(len(original_route_set & copy_route_set), 0, error_message)
+
+        # Check if warehouse operation types (picking.type) got RECREATED (instead of reused)
+        operation_types = [
+            "subcontracting_type_id",
+            "subcontracting_resupply_type_id",
+            "pick_type_id",
+            "pack_type_id",
+            "out_type_id",
+            "in_type_id",
+            "int_type_id"
+        ]
+        for operation_type in operation_types:
+            original_type_set = wh_original[operation_type]
+            copy_type_set = wh_copy[operation_type]
+            error_message = f"At least one {operation_type} (operation_type) got reused on duplication (should have been recreated)"
+            self.assertEqual(len(original_type_set & copy_type_set), 0, error_message)
+
 
 @tagged('post_install', '-at_install')
 class TestSubcontractingFlows(TestMrpSubcontractingCommon):
@@ -749,7 +786,6 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         finished_lots = self.env['stock.lot'].create([{
             'name': 'lot_%s' % number,
             'product_id': self.finished.id,
-            'company_id': self.env.company.id,
         } for number in range(3)])
 
         with Form(self.env['stock.picking']) as picking_form:
@@ -784,7 +820,6 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         new_lot = self.env['stock.lot'].create({
             'name': 'lot_alter',
             'product_id': self.finished.id,
-            'company_id': self.env.company.id,
         })
         action = picking_receipt.move_ids.action_show_details()
         self.assertEqual(action['name'], 'Detailed Operations', "The subcontract record components wizard shouldn't be available now.")
@@ -1003,12 +1038,10 @@ class TestSubcontractingTracking(TransactionCase):
         lot_id = self.env['stock.lot'].create({
             'name': 'lot1',
             'product_id': self.finished_product.id,
-            'company_id': self.env.company.id,
         })
         serial_id = self.env['stock.lot'].create({
             'name': 'lot1',
             'product_id': self.comp1_sn.id,
-            'company_id': self.env.company.id,
         })
 
         action = picking_receipt.action_record_components()
@@ -1112,7 +1145,6 @@ class TestSubcontractingTracking(TransactionCase):
         lot_comp2 = self.env['stock.lot'].create({
             'name': 'lot_comp2',
             'product_id': self.comp2.id,
-            'company_id': self.env.company.id,
         })
         serials_finished = []
         serials_comp1 = []
@@ -1120,12 +1152,10 @@ class TestSubcontractingTracking(TransactionCase):
             serials_finished.append(self.env['stock.lot'].create({
                 'name': 'serial_fin_%s' % i,
                 'product_id': self.finished_product.id,
-                'company_id': self.env.company.id,
             }))
             serials_comp1.append(self.env['stock.lot'].create({
                 'name': 'serials_comp1_%s' % i,
                 'product_id': self.comp1_sn.id,
-                'company_id': self.env.company.id,
             }))
 
         for i in range(todo_nb):
@@ -1187,7 +1217,6 @@ class TestSubcontractingTracking(TransactionCase):
         finished_lot, component_lot = self.env['stock.lot'].create([{
             'name': 'lot_%s' % product.name,
             'product_id': product.id,
-            'company_id': self.env.company.id,
         } for product in [finished_product, component]])
 
         self.env['stock.quant']._update_available_quantity(component, self.env.ref('stock.stock_location_stock'), todo_nb, lot_id=component_lot)
@@ -1259,7 +1288,6 @@ class TestSubcontractingTracking(TransactionCase):
         finished_serials = self.env['stock.lot'].create([{
             'name': 'sn_%s' % str(i),
             'product_id': finished_product.id,
-            'company_id': self.env.company.id,
         } for i in range(todo_nb)])
 
         self.env['stock.quant']._update_available_quantity(component, self.env.ref('stock.stock_location_stock'), todo_nb)
@@ -1375,27 +1403,22 @@ class TestSubcontractingPortal(TransactionCase):
         lot1 = self.env['stock.lot'].with_user(self.portal_user).create({
             'name': 'lot1',
             'product_id': self.finished_product.id,
-            'company_id': self.env.company.id,
         })
         lot2 = self.env['stock.lot'].with_user(self.portal_user).create({
             'name': 'lot2',
             'product_id': self.finished_product.id,
-            'company_id': self.env.company.id,
         })
         serial1 = self.env['stock.lot'].with_user(self.portal_user).create({
             'name': 'lot1',
             'product_id': self.comp1_sn.id,
-            'company_id': self.env.company.id,
         })
         serial2 = self.env['stock.lot'].with_user(self.portal_user).create({
             'name': 'lot2',
             'product_id': self.comp1_sn.id,
-            'company_id': self.env.company.id,
         })
         serial3 = self.env['stock.lot'].with_user(self.portal_user).create({
             'name': 'lot3',
             'product_id': self.comp1_sn.id,
-            'company_id': self.env.company.id,
         })
         action = picking_receipt.with_user(self.portal_user).with_context({'is_subcontracting_portal': 1}).move_ids.action_show_details()
         mo = self.env['mrp.production'].with_user(self.portal_user).browse(action['res_id'])

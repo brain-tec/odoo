@@ -74,7 +74,7 @@ const { console, DataTransfer, document, Math, Object, String, Touch, TypeError 
 
 /**
  * @param {EventTarget} target
- * @param {string[]} eventSequence
+ * @param {EventType[]} eventSequence
  * @param {EventInit} eventInit
  */
 const dispatchEventSequence = (target, eventSequence, eventInit) => {
@@ -88,6 +88,20 @@ const dispatchEventSequence = (target, eventSequence, eventInit) => {
         }
     }
     return false;
+};
+
+/**
+ * @param {Iterable<Event>} events
+ * @param {EventType} eventType
+ * @param {EventInit} eventInit
+ */
+const dispatchRelatedEvents = (events, eventType, eventInit) => {
+    for (const event of events) {
+        if (!event.target || isPrevented(event)) {
+            break;
+        }
+        dispatch(event.target, eventType, eventInit);
+    }
 };
 
 /**
@@ -405,14 +419,18 @@ const logEvents = (actionName) => {
 
 /**
  * @param {KeyStrokes} keyStrokes
+ * @param {KeyboardEventInit} [options]
  * @returns {KeyboardEventInit}
  */
-const parseKeyStrokes = (keyStrokes) =>
+const parseKeyStrokes = (keyStrokes, options) =>
     (isIterable(keyStrokes) ? [...keyStrokes] : [keyStrokes])
         .flatMap((keyStroke) => keyStroke.split(/\s*[,+]\s*/))
         .map((key) => {
             const lower = key.toLowerCase();
-            return { key: lower.length === 1 ? key : KEY_ALIASES[lower] || key };
+            return {
+                ...options,
+                key: lower.length === 1 ? key : KEY_ALIASES[lower] || key,
+            };
         });
 
 /**
@@ -761,12 +779,11 @@ const _hover = (target, options) => {
                 ["pointerout", !hasTouch() && "mouseout"],
                 leaveEventInit
             );
-            for (const element of getDifferentParents(current, previous)) {
-                dispatchEventSequence(
-                    element,
-                    ["pointerleave", !hasTouch() && "mouseleave"],
-                    leaveEventInit
-                );
+            const leaveEvents = getDifferentParents(current, previous).map((element) =>
+                dispatch(element, "pointerleave", leaveEventInit)
+            );
+            if (!hasTouch()) {
+                dispatchRelatedEvents(leaveEvents, "mouseleave", leaveEventInit);
             }
         }
     }
@@ -790,12 +807,11 @@ const _hover = (target, options) => {
                     ["pointerover", !hasTouch() && "mouseover"],
                     enterEventInit
                 );
-                for (const element of getDifferentParents(previous, current)) {
-                    dispatchEventSequence(
-                        element,
-                        ["pointerenter", !hasTouch() && "mouseenter"],
-                        enterEventInit
-                    );
+                const enterEvents = getDifferentParents(previous, current).map((element) =>
+                    dispatch(element, "pointerenter", enterEventInit)
+                );
+                if (!hasTouch()) {
+                    dispatchRelatedEvents(enterEvents, "mouseenter", enterEventInit);
                 }
             }
             dispatchEventSequence(
@@ -1700,12 +1716,13 @@ export function hover(target, options) {
  *  element.
  *
  * @param {KeyStrokes} keyStrokes
+ * @param {KeyboardEventInit} [options]
  * @returns {Event[]}
  * @example
  *  keyDown(" "); // Space key
  */
-export function keyDown(keyStrokes) {
-    const eventInits = parseKeyStrokes(keyStrokes);
+export function keyDown(keyStrokes, options) {
+    const eventInits = parseKeyStrokes(keyStrokes, options);
     for (const eventInit of eventInits) {
         _keyDown(getActiveElement(), eventInit);
     }
@@ -1720,12 +1737,13 @@ export function keyDown(keyStrokes) {
  *  - `keyup`
  *
  * @param {KeyStrokes} keyStrokes
+ * @param {KeyboardEventInit} [options]
  * @returns {Event[]}
  * @example
  *  keyUp("Enter");
  */
-export function keyUp(keyStrokes) {
-    const eventInits = parseKeyStrokes(keyStrokes);
+export function keyUp(keyStrokes, options) {
+    const eventInits = parseKeyStrokes(keyStrokes, options);
     for (const eventInit of eventInits) {
         _keyUp(getActiveElement(), eventInit);
     }
@@ -1841,6 +1859,7 @@ export function pointerUp(target, options) {
  *  - `keyup`
  *
  * @param {KeyStrokes} keyStrokes
+ * @param {KeyboardEventInit} [options]
  * @returns {Event[]}
  * @example
  *  pointerDown("button[type=submit]"); // Moves focus to <button>
@@ -1850,8 +1869,8 @@ export function pointerUp(target, options) {
  * @example
  *  keyDown(["ctrl", "v"]); // Pastes current clipboard content
  */
-export function press(keyStrokes) {
-    const eventInits = parseKeyStrokes(keyStrokes);
+export function press(keyStrokes, options) {
+    const eventInits = parseKeyStrokes(keyStrokes, options);
     const activeElement = getActiveElement();
 
     for (const eventInit of eventInits) {
