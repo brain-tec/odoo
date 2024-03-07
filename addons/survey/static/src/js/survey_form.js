@@ -105,6 +105,15 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
     _onKeyDown: function (event) {
         var self = this;
 
+        if (['one_page', 'page_per_section'].includes(self.options.questionsLayout) && !self.options.isStartScreen) {
+            if (this.$("input").is(":focus") && event.key === "Enter") {
+                event.preventDefault();
+            }
+            if (!(event.ctrlKey || event.metaKey) || event.key !== "Enter") {
+                return;
+            }
+        }
+
         // If user is answering a text input, do not handle keydown
         // CTRL+enter will force submission (meta key for Mac)
         if ((this.$("textarea").is(":focus") || this.$('input').is(':focus')) &&
@@ -161,7 +170,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
         const $target = $(event.currentTarget);
         const $choiceItemGroup = $target.closest('.o_survey_form_choice');
 
-        this._applyCommentAreaVisibility($target);
+        this._applyCommentAreaVisibility($choiceItemGroup);
         const isQuestionComplete = this._checkConditionalQuestionsConfiguration($target, $choiceItemGroup);
         if (isQuestionComplete && this.options.usersCanGoBack) {
             const isLastQuestion = this.$('button[value="finish"]').length !== 0;
@@ -185,7 +194,11 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
      * @param {Event} ev
      */
     _onChoiceImgClick: function (ev) {
-        ev.preventDefault();
+        if (!uiUtils.isSmall()) {
+            // On large screen, it prevents the answer to be selected as the user only want to enlarge the image.
+            // We don't do it on small device as it can be hard to click outside the picture to select the answer.
+            ev.preventDefault();
+        }
         this.imgZoomer = new SurveyImageZoomer({
             sourceImage: $(ev.currentTarget).attr('src')
         });
@@ -263,7 +276,10 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
     _updateEnterButtonText: function (event) {
         const $target = event.target;
         const isTextbox = event.type === "focusin" && $target.tagName.toLowerCase() === 'textarea';
-        const text = !isTextbox ? _t('or press Enter') : isMac ? _t("or press ⌘+Enter") : _t("or press CTRL+Enter");
+        let text = _t("or press Enter");
+        if (['one_page', 'page_per_section'].includes(this.options.questionsLayout) || isTextbox) {
+            text = isMac ? _t("or press ⌘+Enter") : _t("or press CTRL+Enter");
+        }
         $('#enter-tooltip').text(text);
     },
 
