@@ -267,6 +267,11 @@ class AccountChartTemplate(models.AbstractModel):
             return (
                 tax.amount_type != template.get('amount_type', 'percent')
                 or tax.amount != template.get('amount', 0)
+                or (
+                    len(tax.repartition_line_ids) != len(template.get('repartition_line_ids', []))
+                    # Taxes that don't have repartition lines in their templates get theirs created by default
+                    and len(template.get('repartition_line_ids', [])) != 0
+                )
             )
 
         obsolete_xmlid = set()
@@ -427,6 +432,7 @@ class AccountChartTemplate(models.AbstractModel):
             This allows to define all the data before the records even exist in the database.
             """
             fields = ((model._fields[k], k, v) for k, v in values.items() if k in model._fields)
+            failed_fields = []
             for field, fname, value in fields:
                 if not value:
                     values[fname] = False
@@ -438,7 +444,7 @@ class AccountChartTemplate(models.AbstractModel):
                         values[fname] = self.ref(value).id if value not in ('', 'False', 'None') else False
                     except ValueError as e:
                         _logger.warning("Failed when trying to recover %s for field=%s", value, field)
-                        raise e
+                        failed_fields.append(fname)
                 elif field.type in ('one2many', 'many2many') and isinstance(value[0], (list, tuple)):
                     for i, (command, _id, *last_part) in enumerate(value):
                         if last_part:
@@ -459,6 +465,8 @@ class AccountChartTemplate(models.AbstractModel):
                         for v in value.split(',')
                         if v
                     ])]
+            for fname in failed_fields:
+                del values[fname]
             return values
 
         def defer(all_data):
@@ -956,7 +964,7 @@ class AccountChartTemplate(models.AbstractModel):
         return parents
 
     def _get_tag_mapper(self, country_id):
-        tags = {x.name: x.id for x in self.env['account.account.tag'].search([
+        tags = {x.name: x.id for x in self.env['account.account.tag'].with_context(active_test=False).search([
             ('applicability', '=', 'taxes'),
             ('country_id', '=', country_id),
         ])}

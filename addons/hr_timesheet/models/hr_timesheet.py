@@ -11,13 +11,16 @@ from odoo.osv import expression
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
-    @api.model
-    def _get_favorite_project_id(self, employee_id=False):
+    def _get_favorite_project_id_domain(self, employee_id=False):
         employee_id = employee_id or self.env.user.employee_id.id
-        last_timesheet_ids = self.search([
+        return [
             ('employee_id', '=', employee_id),
             ('project_id', '!=', False),
-        ], limit=5)
+        ]
+
+    @api.model
+    def _get_favorite_project_id(self, employee_id=False):
+        last_timesheet_ids = self.search(self._get_favorite_project_id_domain(employee_id), limit=5)
         if len(last_timesheet_ids.project_id) == 1:
             return last_timesheet_ids.project_id.id
         return False
@@ -95,7 +98,7 @@ class AccountAnalyticLine(models.Model):
             if timesheet.project_id:
                 timesheet.partner_id = timesheet.task_id.partner_id or timesheet.project_id.partner_id
 
-    @api.depends('task_id')
+    @api.depends('task_id.project_id')
     def _compute_project_id(self):
         for line in self:
             if not line.task_id.project_id or line.project_id == line.task_id.project_id:
@@ -104,10 +107,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.depends('project_id')
     def _compute_task_id(self):
-        for line in self:
-            if line.project_id and line.project_id == line.task_id.project_id:
-                continue
-            line.task_id = False
+        self.filtered(lambda t: not t.project_id).task_id = False
 
     @api.onchange('project_id')
     def _onchange_project_id(self):
