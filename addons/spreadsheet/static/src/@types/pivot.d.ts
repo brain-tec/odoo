@@ -1,8 +1,8 @@
-import { MetadataRepository } from "@spreadsheet/data_sources/metadata_repository";
 import { OdooPivotRuntimeDefinition } from "@spreadsheet/pivot/pivot_runtime";
 import { ORM } from "@web/core/orm_service";
 import { PivotMeasure } from "@spreadsheet/pivot/pivot_runtime";
 import { SpreadsheetPivotTable } from "@spreadsheet/pivot/pivot_table";
+import { ServerData } from "@spreadsheet/data_sources/server_data";
 
 declare module "@spreadsheet" {
     interface SortedColumn {
@@ -130,7 +130,7 @@ declare module "@spreadsheet" {
     }
 
     export interface PivotModelServices {
-        metadataRepository: MetadataRepository;
+        serverData: ServerData
         orm: ORM;
     }
 }

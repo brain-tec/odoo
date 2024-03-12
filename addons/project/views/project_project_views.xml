@@ -80,7 +80,7 @@
                             <field name="label_tasks" string="Name of the Tasks" placeholder="e.g. Tasks"/>
                             <field name="partner_id" widget="res_partner_many2one"/>
                             <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
                         </group>
                         <group>
                             <field name="active" invisible="1"/>
@@ -599,6 +599,7 @@
         <!-- Please update both act_window when modifying one (open_view_project_all or open_view_project_all_group_stage) as one or the other is used in the menu menu_project -->
         <record id="open_view_project_all" model="ir.actions.act_window">
             <field name="name">Projects</field>
+            <field name="path">project</field>
             <field name="res_model">project.project</field>
             <field name="domain">[]</field>
             <field name="context">{'display_milestone_deadline': True}</field>
