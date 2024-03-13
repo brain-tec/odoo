@@ -769,7 +769,7 @@ class AccountMove(models.Model):
 
     @api.depends('posted_before', 'state', 'journal_id', 'date', 'move_type', 'payment_id')
     def _compute_name(self):
-        self = self.sorted(lambda m: (m.date, m.ref or '', m.id))
+        self = self.sorted(lambda m: (m.date, m.ref or '', m._origin.id))
 
         for move in self:
             move_has_name = move.name and move.name != '/'
@@ -1304,7 +1304,7 @@ class AccountMove(models.Model):
                             taxes = self.env['account.tax'].browse(grouping_dict['tax_ids'][0][2])
 
                         kwargs['base_lines'].append(self.env['account.tax']._convert_to_tax_base_line_dict(
-                            None,
+                            grouping_dict,
                             partner=move.partner_id,
                             currency=move.currency_id,
                             taxes=taxes,

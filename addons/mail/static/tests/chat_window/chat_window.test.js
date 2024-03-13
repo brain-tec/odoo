@@ -3,7 +3,7 @@ const test = QUnit.test; // QUnit.test()
 
 import { rpc } from "@web/core/network/rpc";
 
-import { startServer } from "@bus/../tests/helpers/mock_python_environment";
+import { serverState, startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 import {
     CHAT_WINDOW_END_GAP_WIDTH,
@@ -35,7 +35,7 @@ test("Mobile: chat window shouldn't open automatically after receiving a new mes
     const userId = pyEnv["res.users"].create({ partner_id: partnerId });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
         channel_type: "chat",
@@ -60,7 +60,7 @@ test('chat window: post message on channel with "CTRL-Enter" keyboard shortcut f
     const pyEnv = await startServer();
     pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ fold_state: "open", partner_id: pyEnv.currentPartnerId }),
+            Command.create({ fold_state: "open", partner_id: serverState.partnerId }),
         ],
     });
     patchUiSize({ size: SIZES.SM });
@@ -80,14 +80,14 @@ test("Message post in chat window of chatter should log a note", async () => {
         body: "A needaction message to have it in messaging menu",
         author_id: pyEnv.odoobotId,
         needaction: true,
-        needaction_partner_ids: [pyEnv.currentPartnerId],
+        needaction_partner_ids: [serverState.partnerId],
         res_id: partnerId,
     });
     pyEnv["mail.notification"].create({
         mail_message_id: messageId,
         notification_status: "sent",
         notification_type: "inbox",
-        res_partner_id: pyEnv.currentPartnerId,
+        res_partner_id: serverState.partnerId,
     });
     await start();
     await click(".o_menu_systray i[aria-label='Messages']");
@@ -177,7 +177,7 @@ test("Mobile: opening a chat window should not update channel state on the serve
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ fold_state: "closed", partner_id: pyEnv.currentPartnerId }),
+            Command.create({ fold_state: "closed", partner_id: serverState.partnerId }),
         ],
     });
     patchUiSize({ size: SIZES.SM });
@@ -185,20 +185,20 @@ test("Mobile: opening a chat window should not update channel state on the serve
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-NotificationItem");
     await click(".o-mail-ChatWindow");
-    const [member] = pyEnv["discuss.channel.member"].searchRead([
+    const [member] = pyEnv["discuss.channel.member"].search_read([
         ["channel_id", "=", channelId],
-        ["partner_id", "=", pyEnv.currentPartnerId],
+        ["partner_id", "=", serverState.partnerId],
     ]);
     assert.strictEqual(member.fold_state, "closed");
 });
 
-test("chat window: fold", async (assert) => {
+test("chat window: fold", async () => {
     const pyEnv = await startServer();
     pyEnv["discuss.channel"].create({});
     await start({
         mockRPC(route, args) {
             if (route === "/discuss/channel/fold") {
-                assert.step(`channel_fold/${args.state}`);
+                step(`channel_fold/${args.state}`);
             }
         },
     });
@@ -206,26 +206,26 @@ test("chat window: fold", async (assert) => {
     await click("button i[aria-label='Messages']");
     await click(".o-mail-NotificationItem");
     await contains(".o-mail-ChatWindow .o-mail-Thread");
-    assert.verifySteps(["channel_fold/open"]);
+    await assertSteps(["channel_fold/open"]);
 
     // Fold chat window
     await click(".o-mail-ChatWindow-command[title='Fold']");
     await contains(".o-mail-ChatWindow .o-mail-Thread", { count: 0 });
-    assert.verifySteps(["channel_fold/folded"]);
+    await assertSteps(["channel_fold/folded"]);
 
     // Unfold chat window
     await click(".o-mail-ChatWindow-command[title='Open']");
     await contains(".o-mail-ChatWindow .o-mail-Thread");
-    assert.verifySteps(["channel_fold/open"]);
+    await assertSteps(["channel_fold/open"]);
 });
 
-test("chat window: open / close", async (assert) => {
+test("chat window: open / close", async () => {
     const pyEnv = await startServer();
     pyEnv["discuss.channel"].create({});
     await start({
         mockRPC(route, args) {
             if (route === "/discuss/channel/fold") {
-                assert.step(`channel_fold/${args.state}`);
+                step(`channel_fold/${args.state}`);
             }
         },
     });
@@ -233,17 +233,17 @@ test("chat window: open / close", async (assert) => {
     await contains(".o-mail-ChatWindow", { count: 0 });
     await click(".o-mail-NotificationItem");
     await contains(".o-mail-ChatWindow");
-    assert.verifySteps(["channel_fold/open"]);
+    await assertSteps(["channel_fold/open"]);
 
     await click(".o-mail-ChatWindow-command[title='Close Chat Window']");
     await contains(".o-mail-ChatWindow", { count: 0 });
-    assert.verifySteps(["channel_fold/closed"]);
+    await assertSteps(["channel_fold/closed"]);
 
     // Reopen chat window
     await click("button i[aria-label='Messages']");
     await click(".o-mail-NotificationItem");
     await contains(".o-mail-ChatWindow");
-    assert.verifySteps(["channel_fold/open"]);
+    await assertSteps(["channel_fold/open"]);
 });
 
 test("open chat on very narrow device should work", async (assert) => {
@@ -261,7 +261,7 @@ test("Mobile: closing a chat window should not update channel state on the serve
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ fold_state: "open", partner_id: pyEnv.currentPartnerId }),
+            Command.create({ fold_state: "open", partner_id: serverState.partnerId }),
         ],
     });
     patchUiSize({ size: SIZES.SM });
@@ -271,24 +271,24 @@ test("Mobile: closing a chat window should not update channel state on the serve
     await contains(".o-mail-ChatWindow");
     await click("[title='Close Chat Window']");
     await contains(".o-mail-ChatWindow", { count: 0 });
-    const [member] = pyEnv["discuss.channel.member"].searchRead([
+    const [member] = pyEnv["discuss.channel.member"].search_read([
         ["channel_id", "=", channelId],
-        ["partner_id", "=", pyEnv.currentPartnerId],
+        ["partner_id", "=", serverState.partnerId],
     ]);
     assert.strictEqual(member.fold_state, "open");
 });
 
-test("chat window: close on ESCAPE", async (assert) => {
+test("chat window: close on ESCAPE", async () => {
     const pyEnv = await startServer();
     pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ fold_state: "open", partner_id: pyEnv.currentPartnerId }),
+            Command.create({ fold_state: "open", partner_id: serverState.partnerId }),
         ],
     });
     await start({
         mockRPC(route, args) {
             if (route === "/discuss/channel/fold") {
-                assert.step(`channel_fold/${args.state}`);
+                step(`channel_fold/${args.state}`);
             }
         },
     });
@@ -296,7 +296,7 @@ test("chat window: close on ESCAPE", async (assert) => {
     await focus(".o-mail-Composer-input");
     triggerHotkey("Escape");
     await contains(".o-mail-ChatWindow", { count: 0 });
-    assert.verifySteps(["channel_fold/closed"]);
+    await assertSteps(["channel_fold/closed"]);
 });
 
 test("Close composer suggestions in chat window with ESCAPE does not also close the chat window", async () => {
@@ -309,7 +309,7 @@ test("Close composer suggestions in chat window with ESCAPE does not also close 
     pyEnv["discuss.channel"].create({
         name: "general",
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId, fold_state: "open" }),
+            Command.create({ partner_id: serverState.partnerId, fold_state: "open" }),
             Command.create({ partner_id: partnerId }),
         ],
     });
@@ -325,7 +325,7 @@ test("Close emoji picker in chat window with ESCAPE does not also close the chat
     pyEnv["discuss.channel"].create({
         name: "general",
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId, fold_state: "open" }),
+            Command.create({ partner_id: serverState.partnerId, fold_state: "open" }),
         ],
     });
     await start();
@@ -481,27 +481,19 @@ test("focus next visible chat window when closing current chat window with ESCAP
         {
             name: "General",
             channel_member_ids: [
-                [
-                    0,
-                    0,
-                    {
-                        fold_state: "open",
-                        partner_id: pyEnv.currentPartnerId,
-                    },
-                ],
+                Command.create({
+                    fold_state: "open",
+                    partner_id: serverState.partnerId,
+                }),
             ],
         },
         {
             name: "MyTeam",
             channel_member_ids: [
-                [
-                    0,
-                    0,
-                    {
-                        fold_state: "open",
-                        partner_id: pyEnv.currentPartnerId,
-                    },
-                ],
+                Command.create({
+                    fold_state: "open",
+                    partner_id: serverState.partnerId,
+                }),
             ],
         },
     ]);
@@ -564,40 +556,28 @@ test("chat window: TAB cycle with 3 open chat windows [REQUIRE FOCUS]", async (a
         {
             name: "General",
             channel_member_ids: [
-                [
-                    0,
-                    0,
-                    {
-                        fold_state: "open",
-                        partner_id: pyEnv.currentPartnerId,
-                    },
-                ],
+                Command.create({
+                    fold_state: "open",
+                    partner_id: serverState.partnerId,
+                }),
             ],
         },
         {
             name: "MyTeam",
             channel_member_ids: [
-                [
-                    0,
-                    0,
-                    {
-                        fold_state: "open",
-                        partner_id: pyEnv.currentPartnerId,
-                    },
-                ],
+                Command.create({
+                    fold_state: "open",
+                    partner_id: serverState.partnerId,
+                }),
             ],
         },
         {
             name: "MyProject",
             channel_member_ids: [
-                [
-                    0,
-                    0,
-                    {
-                        fold_state: "open",
-                        partner_id: pyEnv.currentPartnerId,
-                    },
-                ],
+                Command.create({
+                    fold_state: "open",
+                    partner_id: serverState.partnerId,
+                }),
             ],
         },
     ]);
@@ -636,15 +616,11 @@ test("new message separator is shown in a chat window of a chat on receiving new
     const userId = pyEnv["res.users"].create({ name: "Foreigner user", partner_id: partnerId });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            [
-                0,
-                0,
-                {
-                    fold_state: "open",
-                    is_pinned: false,
-                    partner_id: pyEnv.currentPartnerId,
-                },
-            ],
+            Command.create({
+                fold_state: "open",
+                is_pinned: false,
+                partner_id: serverState.partnerId,
+            }),
             Command.create({ partner_id: partnerId }),
         ],
         channel_type: "chat",
@@ -656,7 +632,7 @@ test("new message separator is shown in a chat window of a chat on receiving new
     });
     const [memberId] = pyEnv["discuss.channel.member"].search([
         ["channel_id", "=", channelId],
-        ["partner_id", "=", pyEnv.currentPartnerId],
+        ["partner_id", "=", serverState.partnerId],
     ]);
     pyEnv["discuss.channel.member"].write([memberId], { seen_message_id: messageId });
     await start();
@@ -682,7 +658,7 @@ test("new message separator is shown in chat window of chat on receiving new mes
     });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
         channel_type: "chat",
@@ -701,7 +677,7 @@ test("new message separator is shown in chat window of chat on receiving new mes
             init_messaging: {},
             failures: true,
             systray_get_activities: true,
-            context: { lang: "en", tz: "taht", uid: pyEnv.currentUserId },
+            context: { lang: "en", tz: "taht", uid: serverState.userId },
         })}`,
     ]);
     // send after init_messaging because bus subscription is done after init_messaging
@@ -722,7 +698,7 @@ test("chat window should open when receiving a new DM", async () => {
     const userId = pyEnv["res.users"].create({ partner_id: partnerId });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ is_pinned: false, partner_id: pyEnv.currentPartnerId }),
+            Command.create({ is_pinned: false, partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
         channel_type: "chat",
@@ -744,7 +720,7 @@ test("chat window should not open when receiving a new DM from odoobot", async (
     const userId = pyEnv["res.users"].create({ partner_id: pyEnv.odoobotId });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ is_pinned: false, partner_id: pyEnv.currentPartnerId }),
+            Command.create({ is_pinned: false, partner_id: serverState.partnerId }),
             Command.create({ partner_id: pyEnv.odoobotId }),
         ],
         channel_type: "chat",
@@ -765,14 +741,10 @@ test("chat window should scroll to the newly posted message just after posting i
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            [
-                0,
-                0,
-                {
-                    fold_state: "open",
-                    partner_id: pyEnv.currentPartnerId,
-                },
-            ],
+            Command.create({
+                fold_state: "open",
+                partner_id: serverState.partnerId,
+            }),
         ],
     });
     for (let i = 0; i < 10; i++) {
@@ -799,14 +771,10 @@ test("chat window should remain folded when new message is received", async () =
     });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            [
-                0,
-                0,
-                {
-                    fold_state: "folded",
-                    partner_id: pyEnv.currentPartnerId,
-                },
-            ],
+            Command.create({
+                fold_state: "folded",
+                partner_id: serverState.partnerId,
+            }),
             Command.create({ partner_id: partnerId }),
         ],
         channel_type: "chat",
@@ -901,14 +869,10 @@ test("focusing a chat window of a chat should make new message separator disappe
     const channelId = pyEnv["discuss.channel"].create({
         name: "test",
         channel_member_ids: [
-            [
-                0,
-                0,
-                {
-                    fold_state: "open",
-                    partner_id: pyEnv.currentPartnerId,
-                },
-            ],
+            Command.create({
+                fold_state: "open",
+                partner_id: serverState.partnerId,
+            }),
             Command.create({ partner_id: partnerId }),
         ],
         channel_type: "chat",
@@ -922,7 +886,7 @@ test("focusing a chat window of a chat should make new message separator disappe
     ]);
     const [memberId] = pyEnv["discuss.channel.member"].search([
         ["channel_id", "=", channelId],
-        ["partner_id", "=", pyEnv.currentPartnerId],
+        ["partner_id", "=", serverState.partnerId],
     ]);
     pyEnv["discuss.channel.member"].write([memberId], { seen_message_id: messageId });
     await start();
@@ -1055,7 +1019,7 @@ test("Chat window in mobile are not foldable", async () => {
     const pyEnv = await startServer();
     pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ fold_state: "open", partner_id: pyEnv.currentPartnerId }),
+            Command.create({ fold_state: "open", partner_id: serverState.partnerId }),
         ],
     });
     patchUiSize({ size: SIZES.SM });
@@ -1073,7 +1037,7 @@ test("Server-synced chat windows should not open at page load on mobile", async 
         channel_member_ids: [
             Command.create({
                 fold_state: "open",
-                partner_id: pyEnv.currentPartnerId,
+                partner_id: serverState.partnerId,
             }),
         ],
     });
@@ -1116,7 +1080,7 @@ test("keyboard navigation ArrowUp/ArrowDown on message action dropdown in chat w
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
     pyEnv["mail.message"].create({
-        author_id: pyEnv.currentPartnerId,
+        author_id: serverState.partnerId,
         body: "not empty",
         model: "discuss.channel",
         res_id: channelId,
@@ -1138,7 +1102,7 @@ test("Close dropdown in chat window with ESCAPE does not also close the chat win
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
     pyEnv["mail.message"].create({
-        author_id: pyEnv.currentPartnerId,
+        author_id: serverState.partnerId,
         body: "not empty",
         model: "discuss.channel",
         res_id: channelId,
@@ -1154,34 +1118,34 @@ test("Close dropdown in chat window with ESCAPE does not also close the chat win
     await contains(".o-mail-ChatWindow");
 });
 
-test("hiding/swapping hidden chat windows does not update server state", async (assert) => {
+test("hiding/swapping hidden chat windows does not update server state", async () => {
     patchUiSize({ size: SIZES.MD }); // only 2 chat window can be opened at a time
     const pyEnv = await startServer();
     pyEnv["discuss.channel"].create([{ name: "General" }, { name: "Sales" }, { name: "D&D" }]);
     await start({
         mockRPC(route, args) {
             if (route === "/discuss/channel/fold") {
-                const [channel] = pyEnv["discuss.channel"].searchRead([
+                const [channel] = pyEnv["discuss.channel"].search_read([
                     ["id", "=", args.channel_id],
                 ]);
-                assert.step(`${channel.name} - ${args.state}`);
+                step(`${channel.name} - ${args.state}`);
             }
         },
     });
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-NotificationItem", { text: "General" });
     await contains(".o-mail-ChatWindow", { text: "General" });
-    assert.verifySteps(["General - open"]);
+    await assertSteps(["General - open"]);
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-NotificationItem", { text: "Sales" });
     await contains(".o-mail-ChatWindow", { text: "Sales" });
-    assert.verifySteps(["Sales - open"]);
+    await assertSteps(["Sales - open"]);
     // Sales chat window will be hidden since there is not enough space for the
     // D&D one but Sales fold state should not be updated.
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-NotificationItem", { text: "D&D" });
     await contains(".o-mail-ChatWindow", { text: "D&D" });
-    assert.verifySteps(["D&D - open"]);
+    await assertSteps(["D&D - open"]);
     // D&D chat window will be hidden since there is not enough space for the
     // Sales one, the server should not be notified as the state is up to date.
     await click(".o-mail-ChatWindowHiddenToggler");
@@ -1190,5 +1154,5 @@ test("hiding/swapping hidden chat windows does not update server state", async (
         visible: true,
     });
     await contains(".o-mail-ChatWindow", { text: "Sales" });
-    assert.verifySteps([]);
+    await assertSteps([]);
 });

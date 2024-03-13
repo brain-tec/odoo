@@ -1,31 +1,31 @@
 const test = QUnit.test; // QUnit.test()
 
-import { startServer } from "@bus/../tests/helpers/mock_python_environment";
+import { serverState, startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 import { Command } from "@mail/../tests/helpers/command";
 import { openDiscuss, start } from "@mail/../tests/helpers/test_utils";
 
 import { rpc } from "@web/core/network/rpc";
-import { click, contains, insertText } from "@web/../tests/utils";
+import { assertSteps, click, contains, insertText, step } from "@web/../tests/utils";
 
 QUnit.module("composer (patch)");
 
-test("Can execute help command on livechat channels", async (assert) => {
+test("Can execute help command on livechat channels", async () => {
     const pyEnv = await startServer();
     const guestId = pyEnv["mail.guest"].create({ name: "Visitor 11" });
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: "Visitor 11",
         channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
-        livechat_operator_id: pyEnv.currentPartnerId,
+        livechat_operator_id: serverState.partnerId,
     });
     await start({
         mockRPC(route, args, originalMockRPC) {
             if (args.method === "execute_command_help") {
-                assert.step("execute_command_help");
+                step("execute_command_help");
                 return true;
             }
             return originalMockRPC(route, args);
@@ -34,7 +34,7 @@ test("Can execute help command on livechat channels", async (assert) => {
     await openDiscuss(channelId);
     await insertText(".o-mail-Composer-input", "/help");
     await click(".o-mail-Composer-send:enabled");
-    assert.verifySteps(["execute_command_help"]);
+    await assertSteps(["execute_command_help"]);
 });
 
 test('Receives visitor typing status "is typing"', async () => {
@@ -43,16 +43,16 @@ test('Receives visitor typing status "is typing"', async () => {
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: "Visitor 20",
         channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
-        livechat_operator_id: pyEnv.currentPartnerId,
+        livechat_operator_id: serverState.partnerId,
     });
     await start();
     await openDiscuss(channelId);
     await contains(".o-discuss-Typing", { text: "" });
-    const channel = pyEnv["discuss.channel"].searchRead([["id", "=", channelId]])[0];
+    const channel = pyEnv["discuss.channel"].search_read([["id", "=", channelId]])[0];
     // simulate receive typing notification from livechat visitor "is typing"
     pyEnv.withGuest(guestId, () =>
         rpc("/im_livechat/notify_typing", {
@@ -69,11 +69,11 @@ test('display canned response suggestions on typing ":"', async () => {
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: "Mario",
         channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
-        livechat_operator_id: pyEnv.currentPartnerId,
+        livechat_operator_id: serverState.partnerId,
     });
     pyEnv["mail.shortcode"].create({
         source: "hello",
@@ -93,11 +93,11 @@ test("use a canned response", async () => {
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: "Mario",
         channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
-        livechat_operator_id: pyEnv.currentPartnerId,
+        livechat_operator_id: serverState.partnerId,
     });
     pyEnv["mail.shortcode"].create({
         source: "hello",
@@ -119,11 +119,11 @@ test("use a canned response some text", async () => {
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: "Mario",
         channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
-        livechat_operator_id: pyEnv.currentPartnerId,
+        livechat_operator_id: serverState.partnerId,
     });
     pyEnv["mail.shortcode"].create({
         source: "hello",
@@ -146,11 +146,11 @@ test("add an emoji after a canned response", async () => {
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: "Visitor 20",
         channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
-        livechat_operator_id: pyEnv.currentPartnerId,
+        livechat_operator_id: serverState.partnerId,
     });
     pyEnv["mail.shortcode"].create({
         source: "hello",

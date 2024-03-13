@@ -1,6 +1,6 @@
 const test = QUnit.test; // QUnit.test()
 
-import { startServer } from "@bus/../tests/helpers/mock_python_environment";
+import { serverState, startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 import { Command } from "@mail/../tests/helpers/command";
 import { openDiscuss, start } from "@mail/../tests/helpers/test_utils";
@@ -28,17 +28,17 @@ test("Rendering of visitor banner", async () => {
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: `Visitor #${visitorId}`,
         channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
-        livechat_operator_id: pyEnv.currentPartnerId,
+        livechat_operator_id: serverState.partnerId,
         livechat_visitor_id: visitorId,
     });
     await start();
     await openDiscuss(channelId);
     await contains("img.o-website_livechat-VisitorBanner-avatar");
-    const guest = pyEnv["mail.guest"].searchRead([["id", "=", guestId]])[0];
+    const guest = pyEnv["mail.guest"].search_read([["id", "=", guestId]])[0];
     await contains(
         `img.o-website_livechat-VisitorBanner-avatar[data-src='${url(
             `/web/image/mail.guest/${guestId}/avatar_128?unique=${
@@ -69,11 +69,11 @@ test("Livechat with non-logged visitor should show visitor banner", async () => 
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: "Visitor #11",
         channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ guest_id: guestId }),
         ],
         channel_type: "livechat",
-        livechat_operator_id: pyEnv.currentPartnerId,
+        livechat_operator_id: serverState.partnerId,
         livechat_visitor_id: visitorId,
     });
     await start();
@@ -96,11 +96,11 @@ test("Livechat with logged visitor should show visitor banner", async () => {
     });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
-            [0, 0, { partner_id: partnerId }],
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: partnerId }),
         ],
         channel_type: "livechat",
-        livechat_operator_id: pyEnv.currentPartnerId,
+        livechat_operator_id: serverState.partnerId,
         livechat_visitor_id: visitorId,
     });
     await start();
@@ -115,11 +115,11 @@ test("Livechat without visitor should not show visitor banner", async () => {
     const channelId = pyEnv["discuss.channel"].create({
         anonymous_name: "Visitor #11",
         channel_member_ids: [
-            [0, 0, { partner_id: pyEnv.currentPartnerId }],
-            [0, 0, { partner_id: partnerId }],
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: partnerId }),
         ],
         channel_type: "livechat",
-        livechat_operator_id: pyEnv.currentPartnerId,
+        livechat_operator_id: serverState.partnerId,
     });
     await start();
     await openDiscuss(channelId);

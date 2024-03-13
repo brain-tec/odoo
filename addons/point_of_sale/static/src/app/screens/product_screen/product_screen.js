@@ -95,26 +95,20 @@ export class ProductScreen extends Component {
             ? [...selectedCategory.child_id]
             : this.pos.models["pos.category"].filter((category) => !category.parent_id);
     }
-    getChildCategoriesInfo(selectedCategory) {
-        return this.getCategoriesInfo(this.getChildCategories(selectedCategory), selectedCategory);
-    }
     getCategoriesAndSub() {
         return this.getAncestorsAndCurrent().flatMap((category) =>
             this.getChildCategoriesInfo(category)
         );
     }
 
-    getCategoriesInfo(categories, selectedCategory) {
-        return categories.map((category) => ({
+    getChildCategoriesInfo(selectedCategory) {
+        return this.getChildCategories(selectedCategory).map((category) => ({
             ...pick(category, "id", "name", "color"),
             imgSrc:
                 this.pos.config.show_category_images && category.has_image
                     ? `/web/image?model=pos.category&field=image_128&id=${category.id}`
                     : undefined,
-            isSelected:
-                selectedCategory &&
-                this.getAncestorsAndCurrent().includes(category) &&
-                !this.ui.isSmall,
+            isSelected: this.getAncestorsAndCurrent().includes(category) && !this.ui.isSmall,
             isChildren: this.getChildCategories(this.pos.selectedCategory).includes(category),
         }));
     }
@@ -346,15 +340,7 @@ export class ProductScreen extends Component {
         let list = [];
 
         if (this.searchWord !== "") {
-            const product = this.pos.selectedCategory?.id
-                ? this.getProductsByCategory(this.pos.selectedCategory.id)
-                : this.pos.models["product.product"].getAll();
-            if (!product) {
-                return list;
-            }
-            list = fuzzyLookup(unaccent(this.searchWord, false), product, (product) =>
-                unaccent(product.searchString, false)
-            );
+            list = this.getProductsBySearchWord(this.searchWord);
         } else if (this.pos.selectedCategory?.id) {
             list = this.getProductsByCategory(this.pos.selectedCategory.id);
         } else {
@@ -368,6 +354,22 @@ export class ProductScreen extends Component {
         return this.searchWord !== ""
             ? list
             : list.sort((a, b) => a.display_name.localeCompare(b.display_name));
+    }
+
+    getProductsBySearchWord(searchWord) {
+        const products = this.pos.selectedCategory?.id
+            ? this.getProductsByCategory(this.pos.selectedCategory.id)
+            : this.pos.models["product.product"].getAll();
+
+        const fuzzyMatches = fuzzyLookup(unaccent(searchWord, false), products, (product) =>
+            unaccent(product.searchString, false)
+        );
+
+        const barcodeMatches = products.filter(
+            (product) => product.barcode && product.barcode.includes(searchWord)
+        );
+
+        return Array.from(new Set([...barcodeMatches, ...fuzzyMatches]));
     }
 
     getProductsByCategory(categoryId) {

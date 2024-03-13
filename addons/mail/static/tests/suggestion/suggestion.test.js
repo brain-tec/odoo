@@ -1,14 +1,14 @@
 /** @odoo-module alias=@mail/../tests/suggestion/suggestion_tests default=false */
 const test = QUnit.test; // QUnit.test()
 
-import { startServer } from "@bus/../tests/helpers/mock_python_environment";
+import { serverState, startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 import { Composer } from "@mail/core/common/composer";
 import { Command } from "@mail/../tests/helpers/command";
 import { openDiscuss, openFormView, start } from "@mail/../tests/helpers/test_utils";
 
 import { makeDeferred, nextTick, patchWithCleanup } from "@web/../tests/helpers/utils";
-import { click, contains, insertText } from "@web/../tests/utils";
+import { assertSteps, click, contains, insertText, step } from "@web/../tests/utils";
 
 QUnit.module("suggestion", {
     async beforeEach() {
@@ -35,7 +35,7 @@ test('display partner mention suggestions on typing "@"', async () => {
     const channelId = pyEnv["discuss.channel"].create({
         name: "general",
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId_1 }),
             Command.create({ partner_id: partnerId_2 }),
         ],
@@ -60,7 +60,7 @@ test('post a first message then display partner mention suggestions on typing "@
     const channelId = pyEnv["discuss.channel"].create({
         name: "general",
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId_1 }),
             Command.create({ partner_id: partnerId_2 }),
         ],
@@ -76,9 +76,9 @@ test('post a first message then display partner mention suggestions on typing "@
 });
 
 test('display partner mention suggestions on typing "@" in chatter', async () => {
-    const pyEnv = await startServer();
+    await startServer();
     await start();
-    await openFormView("res.partner", pyEnv.currentPartnerId);
+    await openFormView("res.partner", serverState.partnerId);
     await click("button", { text: "Send message" });
     await insertText(".o-mail-Composer-input", "@");
     await contains(".o-mail-Composer-suggestion strong", { text: "Mitchell Admin" });
@@ -93,7 +93,7 @@ test("show other channel member in @ mention", async () => {
     const channelId = pyEnv["discuss.channel"].create({
         name: "general",
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
     });
@@ -112,7 +112,7 @@ test("select @ mention insert mention text in composer", async () => {
     const channelId = pyEnv["discuss.channel"].create({
         name: "general",
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
     });
@@ -132,7 +132,7 @@ test("select @ mention closes suggestions", async () => {
     const channelId = pyEnv["discuss.channel"].create({
         name: "general",
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
     });
@@ -173,7 +173,7 @@ test("mention a channel", async () => {
     await contains(".o-mail-Composer-input", { value: "#General " });
 });
 
-test("Channel suggestions do not crash after rpc returns", async (assert) => {
+test("Channel suggestions do not crash after rpc returns", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "general" });
     const deferred = makeDeferred();
@@ -181,7 +181,7 @@ test("Channel suggestions do not crash after rpc returns", async (assert) => {
         async mockRPC(args, params, originalFn) {
             if (params.method === "get_mention_suggestions") {
                 const res = await originalFn(args, params);
-                assert.step("get_mention_suggestions");
+                step("get_mention_suggestions");
                 deferred.resolve();
                 return res;
             }
@@ -194,7 +194,7 @@ test("Channel suggestions do not crash after rpc returns", async (assert) => {
     await nextTick();
     insertText(".o-mail-Composer-input", "f");
     await deferred;
-    assert.verifySteps(["get_mention_suggestions"]);
+    await assertSteps(["get_mention_suggestions"]);
 });
 
 test("Suggestions are shown after delimiter was used in text (@)", async () => {
@@ -240,7 +240,7 @@ test("display partner mention when typing more than 2 words if they match", asyn
         },
     ]);
     await start();
-    await openFormView("res.partner", pyEnv.currentPartnerId);
+    await openFormView("res.partner", serverState.partnerId);
     await click("button", { text: "Send message" });
     await insertText(".o-mail-Composer-input", "@My ");
     await contains(".o-mail-Composer-suggestion strong", { count: 3 });
@@ -264,18 +264,18 @@ test("Internal user should be displayed first", async () => {
         {
             is_active: true,
             partner_id: partnerIds[1], // B
-            res_id: pyEnv.currentPartnerId,
+            res_id: serverState.partnerId,
             res_model: "res.partner",
         },
         {
             is_active: true,
             partner_id: partnerIds[3], // D
-            res_id: pyEnv.currentPartnerId,
+            res_id: serverState.partnerId,
             res_model: "res.partner",
         },
     ]);
     await start();
-    await openFormView("res.partner", pyEnv.currentPartnerId);
+    await openFormView("res.partner", serverState.partnerId);
     await click("button", { text: "Send message" });
     await insertText(".o-mail-Composer-input", "@Person ");
     await contains(":nth-child(1 of .o-mail-Composer-suggestion) strong", { text: "Person D" });
@@ -294,13 +294,13 @@ test("Current user that is a follower should be considered as such", async () =>
     pyEnv["mail.followers"].create([
         {
             is_active: true,
-            partner_id: pyEnv.currentPartnerId,
-            res_id: pyEnv.currentPartnerId,
+            partner_id: serverState.partnerId,
+            res_id: serverState.partnerId,
             res_model: "res.partner",
         },
     ]);
     await start();
-    await openFormView("res.partner", pyEnv.currentPartnerId);
+    await openFormView("res.partner", serverState.partnerId);
     await click("button", { text: "Send message" });
     await insertText(".o-mail-Composer-input", "@");
     await contains(".o-mail-Composer-suggestion", { count: 4 });
