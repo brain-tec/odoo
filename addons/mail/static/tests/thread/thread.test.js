@@ -3,7 +3,7 @@ const test = QUnit.test; // QUnit.test()
 
 import { rpc } from "@web/core/network/rpc";
 
-import { startServer } from "@bus/../tests/helpers/mock_python_environment";
+import { serverState, startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 import { Command } from "@mail/../tests/helpers/command";
 import { openDiscuss, openFormView, start } from "@mail/../tests/helpers/test_utils";
@@ -280,7 +280,7 @@ test("mark channel as fetched when a new message is loaded and as seen when focu
     const channelId = pyEnv["discuss.channel"].create({
         name: "test",
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
         channel_type: "chat",
@@ -308,7 +308,7 @@ test("mark channel as fetched when a new message is loaded and as seen when focu
             init_messaging: {},
             failures: true,
             systray_get_activities: true,
-            context: { lang: "en", tz: "taht", uid: pyEnv.currentUserId },
+            context: { lang: "en", tz: "taht", uid: serverState.userId },
         })}`,
     ]);
     // send after init_messaging because bus subscription is done after init_messaging
@@ -334,7 +334,7 @@ test("mark channel as fetched and seen when a new message is loaded if composer 
     const channelId = pyEnv["discuss.channel"].create({
         name: "test",
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
     });
@@ -346,7 +346,7 @@ test("mark channel as fetched and seen when a new message is loaded if composer 
                 );
             } else if (route === "/discuss/channel/set_last_seen_message") {
                 assert.strictEqual(args.channel_id, channelId);
-                assert.step("rpc:set_last_seen_message");
+                step("rpc:set_last_seen_message");
             }
         },
     });
@@ -361,7 +361,7 @@ test("mark channel as fetched and seen when a new message is loaded if composer 
         })
     );
     await contains(".o-mail-Message");
-    assert.verifySteps(["rpc:set_last_seen_message"]);
+    await assertSteps(["rpc:set_last_seen_message"]);
 });
 
 test("should scroll to bottom on receiving new message if the list is initially scrolled to bottom (asc order)", async () => {
@@ -370,7 +370,7 @@ test("should scroll to bottom on receiving new message if the list is initially 
     const userId = pyEnv["res.users"].create({ name: "Foreigner user", partner_id: partnerId });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
     });
@@ -404,7 +404,7 @@ test("should not scroll on receiving new message if the list is initially scroll
     const userId = pyEnv["res.users"].create({ name: "Foreigner user", partner_id: partnerId });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
     });
@@ -480,7 +480,7 @@ test("no new messages separator on posting message (some message history)", asyn
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ message_unread_counter: 0, partner_id: pyEnv.currentPartnerId }),
+            Command.create({ message_unread_counter: 0, partner_id: serverState.partnerId }),
         ],
         channel_type: "channel",
         name: "General",
@@ -492,7 +492,7 @@ test("no new messages separator on posting message (some message history)", asyn
     });
     const [memberId] = pyEnv["discuss.channel.member"].search([
         ["channel_id", "=", channelId],
-        ["partner_id", "=", pyEnv.currentPartnerId],
+        ["partner_id", "=", serverState.partnerId],
     ]);
     pyEnv["discuss.channel.member"].write([memberId], { seen_message_id: messageId });
     await start();
@@ -515,7 +515,7 @@ test("new messages separator on receiving new message [REQUIRE FOCUS]", async ()
     });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ message_unread_counter: 0, partner_id: pyEnv.currentPartnerId }),
+            Command.create({ message_unread_counter: 0, partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
         channel_type: "channel",
@@ -528,7 +528,7 @@ test("new messages separator on receiving new message [REQUIRE FOCUS]", async ()
     });
     const [memberId] = pyEnv["discuss.channel.member"].search([
         ["channel_id", "=", channelId],
-        ["partner_id", "=", pyEnv.currentPartnerId],
+        ["partner_id", "=", serverState.partnerId],
     ]);
     pyEnv["discuss.channel.member"].write([memberId], { seen_message_id: messageId });
     await start();
@@ -557,7 +557,7 @@ test("no new messages separator on posting message (no message history)", async 
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ message_unread_counter: 0, partner_id: pyEnv.currentPartnerId }),
+            Command.create({ message_unread_counter: 0, partner_id: serverState.partnerId }),
         ],
         channel_type: "channel",
         name: "General",
@@ -583,7 +583,7 @@ test("Mention a partner with special character (e.g. apostrophe ')", async () =>
     const channelId = pyEnv["discuss.channel"].create({
         name: "test",
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
     });
@@ -615,7 +615,7 @@ test("mention 2 different partners that have the same name", async () => {
     const channelId = pyEnv["discuss.channel"].create({
         name: "test",
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId_1 }),
             Command.create({ partner_id: partnerId_2 }),
         ],
@@ -707,7 +707,7 @@ test("Post a message containing an email address followed by a mention on anothe
     const channelId = pyEnv["discuss.channel"].create({
         name: "test",
         channel_member_ids: [
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
     });
@@ -767,7 +767,7 @@ test("first unseen message should be directly preceded by the new message separa
         name: "General",
         channel_member_ids: [
             Command.create({ partner_id: partnerId }),
-            Command.create({ partner_id: pyEnv.currentPartnerId }),
+            Command.create({ partner_id: serverState.partnerId }),
         ],
     });
     pyEnv["mail.message"].create([
@@ -816,14 +816,14 @@ test("chat window header should not have unread counter for non-channel thread",
         body: "not empty",
         model: "res.partner",
         needaction: true,
-        needaction_partner_ids: [pyEnv.currentPartnerId],
+        needaction_partner_ids: [serverState.partnerId],
         res_id: partnerId,
     });
     pyEnv["mail.notification"].create({
         mail_message_id: messageId,
         notification_status: "sent",
         notification_type: "inbox",
-        res_partner_id: pyEnv.currentPartnerId,
+        res_partner_id: serverState.partnerId,
     });
     await start();
     await click(".o_menu_systray i[aria-label='Messages']");
@@ -831,7 +831,7 @@ test("chat window header should not have unread counter for non-channel thread",
     await contains(".o-mail-ChatWindow-counter", { count: 0, text: "1" });
 });
 
-test("[technical] opening a non-channel chat window should not call channel_fold", async (assert) => {
+test("[technical] opening a non-channel chat window should not call channel_fold", async () => {
     // channel_fold should not be called when opening non-channels in chat
     // window, because there is no server sync of fold state for them.
     const pyEnv = await startServer();
@@ -841,21 +841,21 @@ test("[technical] opening a non-channel chat window should not call channel_fold
         body: "not empty",
         model: "res.partner",
         needaction: true,
-        needaction_partner_ids: [pyEnv.currentPartnerId],
+        needaction_partner_ids: [serverState.partnerId],
         res_id: partnerId,
     });
     pyEnv["mail.notification"].create({
         mail_message_id: messageId,
         notification_status: "sent",
         notification_type: "inbox",
-        res_partner_id: pyEnv.currentPartnerId,
+        res_partner_id: serverState.partnerId,
     });
     await start({
         async mockRPC(route, args) {
             if (route.includes("channel_fold")) {
                 const message =
                     "should not call channel_fold when opening a non-channel chat window";
-                assert.step(message);
+                step(message);
                 console.error(message);
                 throw Error(message);
             }
@@ -869,13 +869,13 @@ test("[technical] opening a non-channel chat window should not call channel_fold
     await contains(".o-mail-ChatWindow");
 });
 
-test("Thread messages are only loaded once", async (assert) => {
+test("Thread messages are only loaded once", async () => {
     const pyEnv = await startServer();
     const channelIds = pyEnv["discuss.channel"].create([{ name: "General" }, { name: "Sales" }]);
     await start({
         mockRPC(route, args, originalRPC) {
             if (route === "/discuss/channel/messages") {
-                assert.step(`load messages - ${args["channel_id"]}`);
+                step(`load messages - ${args["channel_id"]}`);
             }
             return originalRPC(route, args);
         },
@@ -899,7 +899,7 @@ test("Thread messages are only loaded once", async (assert) => {
     await contains(".o-mail-Message-content", { text: "Message on channel2" });
     await click(":nth-child(1 of .o-mail-DiscussSidebarChannel)");
     await contains(".o-mail-Message-content", { text: "Message on channel1" });
-    assert.verifySteps([`load messages - ${channelIds[0]}`, `load messages - ${channelIds[1]}`]);
+    await assertSteps([`load messages - ${channelIds[0]}`, `load messages - ${channelIds[1]}`]);
 });
 
 test("Opening thread with needaction messages should mark all messages of thread as read", async (assert) => {
@@ -909,7 +909,7 @@ test("Opening thread with needaction messages should mark all messages of thread
     const { env } = await start({
         mockRPC(route, args) {
             if (args.model === "mail.message" && args.method === "mark_all_as_read") {
-                assert.step("mark-all-messages-as-read");
+                step("mark-all-messages-as-read");
                 assert.deepEqual(args.args[0], [
                     ["model", "=", "discuss.channel"],
                     ["res_id", "=", channelId],
@@ -928,13 +928,13 @@ test("Opening thread with needaction messages should mark all messages of thread
         needaction: true,
         model: "discuss.channel",
         res_id: channelId,
-        needaction_partner_ids: [pyEnv.currentPartnerId],
+        needaction_partner_ids: [serverState.partnerId],
     });
     pyEnv["mail.notification"].create({
         mail_message_id: messageId,
         notification_status: "sent",
         notification_type: "inbox",
-        res_partner_id: pyEnv.currentPartnerId,
+        res_partner_id: serverState.partnerId,
     });
     // simulate receiving a new needaction message
     const [formattedMessage] = await env.services.orm.call("mail.message", "message_format", [
@@ -945,16 +945,16 @@ test("Opening thread with needaction messages should mark all messages of thread
     await click("button", { text: "General" });
     await contains(".o-discuss-badge", { count: 0 });
     await contains("button", { text: "Inbox", contains: [".badge", { count: 0 }] });
-    assert.verifySteps(["mark-all-messages-as-read"]);
+    await assertSteps(["mark-all-messages-as-read"]);
 });
 
-test("[technical] Opening thread without needaction messages should not mark all messages of thread as read", async (assert) => {
+test("[technical] Opening thread without needaction messages should not mark all messages of thread as read", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
     await start({
         mockRPC(route, args) {
             if (args.model === "mail.message" && args.method === "mark_all_as_read") {
-                assert.step("mark-all-messages-as-read");
+                step("mark-all-messages-as-read");
             }
         },
     });
@@ -970,7 +970,7 @@ test("[technical] Opening thread without needaction messages should not mark all
     });
     await click("button", { text: "General" });
     await nextTick();
-    assert.verifySteps([]);
+    await assertSteps([]);
 });
 
 test("can be marked as read while loading", async function () {
@@ -978,7 +978,7 @@ test("can be marked as read while loading", async function () {
     const partnerId = pyEnv["res.partner"].create({ name: "Demo" });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
-            Command.create({ message_unread_counter: 1, partner_id: pyEnv.currentPartnerId }),
+            Command.create({ message_unread_counter: 1, partner_id: serverState.partnerId }),
             Command.create({ partner_id: partnerId }),
         ],
         channel_type: "chat",
@@ -1009,17 +1009,17 @@ test("New message separator not appearing after showing composer on thread", asy
     pyEnv["mail.message"].create([
         {
             model: "res.partner",
-            res_id: pyEnv.currentPartnerId,
+            res_id: serverState.partnerId,
             body: "Message on partner",
         },
         {
             model: "res.partner",
-            res_id: pyEnv.currentPartnerId,
+            res_id: serverState.partnerId,
             body: "Message on partner",
         },
     ]);
     await start();
-    await openFormView("res.partner", pyEnv.currentPartnerId);
+    await openFormView("res.partner", serverState.partnerId);
     await contains("button", { text: "Log note" });
     await contains(".o-mail-Thread-newMessage", { count: 0 });
     await click("button", { text: "Log note" });

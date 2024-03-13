@@ -1,8 +1,8 @@
 /** @odoo-module alias=@mail/../tests/core/out_of_focus_tests default=false */
 const test = QUnit.test; // QUnit.test()
 
+import { serverState, startServer } from "@bus/../tests/helpers/mock_python_environment";
 import { makeFakePresenceService } from "@bus/../tests/helpers/mock_services";
-import { startServer } from "@bus/../tests/legacy/helpers/mock_python_environment";
 
 import { start } from "@mail/../tests/helpers/test_utils";
 
@@ -13,7 +13,7 @@ QUnit.module("out of focus");
 test("Spaces in notifications are not encoded", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ channel_type: "chat" });
-    const channel = pyEnv["discuss.channel"].searchRead([["id", "=", channelId]])[0];
+    const channel = pyEnv["discuss.channel"].search_read([["id", "=", channelId]])[0];
     await start({
         async mockRPC(route, args, originalRpc) {
             if (route === "/mail/action" && args.init_messaging) {
@@ -31,7 +31,7 @@ test("Spaces in notifications are not encoded", async () => {
             init_messaging: {},
             failures: true,
             systray_get_activities: true,
-            context: { lang: "en", tz: "taht", uid: pyEnv.currentUserId },
+            context: { lang: "en", tz: "taht", uid: serverState.userId },
         })}`,
     ]);
     // send after init_messaging because bus subscription is done after init_messaging

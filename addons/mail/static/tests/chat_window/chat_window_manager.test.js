@@ -1,7 +1,7 @@
 /** @odoo-module alias=@mail/../tests/chat_window/chat_window_manager_tests default=false */
 const test = QUnit.test; // QUnit.test()
 
-import { startServer } from "@bus/../tests/helpers/mock_python_environment";
+import { serverState, startServer } from "@bus/../tests/helpers/mock_python_environment";
 
 import {
     CHAT_WINDOW_END_GAP_WIDTH,
@@ -12,7 +12,7 @@ import { Command } from "@mail/../tests/helpers/command";
 import { patchUiSize } from "@mail/../tests/helpers/patch_ui_size";
 import { start } from "@mail/../tests/helpers/test_utils";
 
-import { click, contains } from "@web/../tests/utils";
+import { assertSteps, click, contains, step } from "@web/../tests/utils";
 
 QUnit.module("chat window manager");
 
@@ -21,17 +21,17 @@ test("chat window does not fetch messages if hidden", async (assert) => {
     const [channeId1, channelId2, channelId3] = pyEnv["discuss.channel"].create([
         {
             channel_member_ids: [
-                Command.create({ fold_state: "open", partner_id: pyEnv.currentPartnerId }),
+                Command.create({ fold_state: "open", partner_id: serverState.partnerId }),
             ],
         },
         {
             channel_member_ids: [
-                Command.create({ fold_state: "open", partner_id: pyEnv.currentPartnerId }),
+                Command.create({ fold_state: "open", partner_id: serverState.partnerId }),
             ],
         },
         {
             channel_member_ids: [
-                Command.create({ fold_state: "open", partner_id: pyEnv.currentPartnerId }),
+                Command.create({ fold_state: "open", partner_id: serverState.partnerId }),
             ],
         },
     ]);
@@ -66,7 +66,7 @@ test("chat window does not fetch messages if hidden", async (assert) => {
     await start({
         mockRPC(route, args) {
             if (route === "/discuss/channel/messages") {
-                assert.step("fetch_messages");
+                step("fetch_messages");
             }
         },
     });
@@ -75,7 +75,7 @@ test("chat window does not fetch messages if hidden", async (assert) => {
     await contains(".o-mail-Message-content", { text: "Orange" });
     await contains(".o-mail-Message-content", { count: 0, text: "Apple" });
     await contains(".o-mail-Message-content", { text: "Banana" });
-    assert.verifySteps(["fetch_messages", "fetch_messages"]);
+    await assertSteps(["fetch_messages", "fetch_messages"]);
 });
 
 test("click on hidden chat window should fetch its messages", async (assert) => {
@@ -83,17 +83,17 @@ test("click on hidden chat window should fetch its messages", async (assert) => 
     const [channeId1, channelId2, channelId3] = pyEnv["discuss.channel"].create([
         {
             channel_member_ids: [
-                Command.create({ fold_state: "open", partner_id: pyEnv.currentPartnerId }),
+                Command.create({ fold_state: "open", partner_id: serverState.partnerId }),
             ],
         },
         {
             channel_member_ids: [
-                Command.create({ fold_state: "open", partner_id: pyEnv.currentPartnerId }),
+                Command.create({ fold_state: "open", partner_id: serverState.partnerId }),
             ],
         },
         {
             channel_member_ids: [
-                Command.create({ fold_state: "open", partner_id: pyEnv.currentPartnerId }),
+                Command.create({ fold_state: "open", partner_id: serverState.partnerId }),
             ],
         },
     ]);
@@ -128,7 +128,7 @@ test("click on hidden chat window should fetch its messages", async (assert) => 
     await start({
         mockRPC(route, args) {
             if (route === "/discuss/channel/messages") {
-                assert.step("fetch_messages");
+                step("fetch_messages");
             }
         },
     });
@@ -137,13 +137,13 @@ test("click on hidden chat window should fetch its messages", async (assert) => 
     await contains(".o-mail-Message-content", { text: "Banana" });
     await contains(".o-mail-Message-content", { text: "Orange" });
     await contains(".o-mail-Message-content", { count: 0, text: "Apple" });
-    assert.verifySteps(["fetch_messages", "fetch_messages"]);
+    await assertSteps(["fetch_messages", "fetch_messages"]);
     await click(".o-mail-ChatWindowHiddenToggler");
     await click(".o-mail-ChatWindowHiddenMenu-item .o-mail-ChatWindow-command[title='Open']");
     await contains(".o-mail-Message-content", { text: "Banana" });
     await contains(".o-mail-Message-content", { text: "Apple" });
     await contains(".o-mail-Message", { count: 0, text: "Orange" });
-    assert.verifySteps(["fetch_messages"]);
+    await assertSteps(["fetch_messages"]);
 });
 
 test("closing the last visible chat window should unhide the first hidden one", async (assert) => {
