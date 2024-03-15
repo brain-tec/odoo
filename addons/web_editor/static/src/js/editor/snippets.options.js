@@ -4511,8 +4511,8 @@ registry.sizing = SnippetOptionWidget.extend({
             self.options.wysiwyg.odooEditor.automaticStepUnactive('resizing');
 
             const cursor = $handle.css('cursor') + '-important';
-            const $body = $(this.ownerDocument.body);
-            $body.addClass(cursor);
+            const $iframeWindow = $(this.ownerDocument.defaultView);
+            $iframeWindow[0].document.body.classList.add(cursor);
 
             const bodyMouseMove = function (ev) {
                 ev.preventDefault();
@@ -4557,9 +4557,9 @@ registry.sizing = SnippetOptionWidget.extend({
                 }
             };
             const bodyMouseUp = function () {
-                $body.off('mousemove', bodyMouseMove);
-                $body.off('mouseup', bodyMouseUp);
-                $body.removeClass(cursor);
+                $iframeWindow.off("mousemove", bodyMouseMove);
+                $iframeWindow.off("mouseup", bodyMouseUp);
+                $iframeWindow[0].document.body.classList.remove(cursor);
                 $handle.removeClass('o_active');
 
                 // If we are in grid mode, removes the background grid.
@@ -4593,8 +4593,8 @@ registry.sizing = SnippetOptionWidget.extend({
                     self.options.wysiwyg.odooEditor.historyStep();
                 }, 0);
             };
-            $body.on('mousemove', bodyMouseMove);
-            $body.on('mouseup', bodyMouseUp);
+            $iframeWindow.on("mousemove", bodyMouseMove);
+            $iframeWindow.on("mouseup", bodyMouseUp);
         });
 
         for (const [key, value] of Object.entries(resizeValues)) {
@@ -6049,7 +6049,6 @@ registry.ImageTools = ImageHandlerOption.extend({
      * @see this.selectClass for parameters
      */
     async crop() {
-        this.trigger_up('hide_overlay');
         this.trigger_up('disable_loading_effect');
         const img = this._getImg();
         new weWidgets.ImageCropWidget(this, img, {mimetype: this._getImageMimetype(img)}).appendTo(this.$el[0].ownerDocument.body);
