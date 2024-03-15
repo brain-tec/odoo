@@ -232,15 +232,15 @@ export class OdooPivot extends OdooViewsDataSource {
     }
 }
 
-class OdooPivotRuntimeDefinition extends PivotRuntimeDefinition {
+export class OdooPivotRuntimeDefinition extends PivotRuntimeDefinition {
     /**
      * @param {OdooPivotDefinition} definition
      * @param {Fields} fields
      */
     constructor(definition, fields) {
         super(definition, fields);
-        /** @type {Array} */
-        this._domain = definition.domain;
+        /** @type {Domain} */
+        this._domain = new Domain(definition.domain);
         /** @type {Object} */
         this._context = definition.context;
         /** @type {string} */
