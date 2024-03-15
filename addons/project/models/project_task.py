@@ -33,6 +33,7 @@ PROJECT_TASK_READABLE_FIELDS = {
     'portal_user_names',
     'user_ids',
     'display_parent_task_button',
+    'current_user_same_company_partner',
     'allow_milestones',
     'milestone_id',
     'has_late_and_unreached_milestone',
@@ -255,6 +256,7 @@ class Task(models.Model):
 
     # Project sharing fields
     display_parent_task_button = fields.Boolean(compute='_compute_display_parent_task_button', compute_sudo=True)
+    current_user_same_company_partner = fields.Boolean(compute='_compute_current_user_same_company_partner', compute_sudo=True)
 
     # recurrence fields
     recurring_task = fields.Boolean(string="Recurrent")
@@ -640,6 +642,11 @@ class Task(models.Model):
         for task in self:
             task.display_parent_task_button = task.parent_id in accessible_parent_tasks
 
+    def _compute_current_user_same_company_partner(self):
+        commercial_partner_id = self.env.user.partner_id.commercial_partner_id
+        for task in self:
+            task.current_user_same_company_partner = task.partner_id and commercial_partner_id == task.partner_id.commercial_partner_id
+
     def _get_group_pattern(self):
         return {
             'tags_and_users': r'\s([#@]%s[^\s]+)',
@@ -953,7 +960,7 @@ class Task(models.Model):
             if vals.get('user_ids'):
                 vals['date_assign'] = fields.Datetime.now()
                 if not (vals.get('parent_id') or project_id or self._context.get('default_project_id')):
-                    user_ids = self._fields['user_ids'].convert_to_cache(vals.get('user_ids', []), self)
+                    user_ids = self._fields['user_ids'].convert_to_cache(vals.get('user_ids', []), self.env['project.task'])
                     if self.env.user.id not in list(user_ids) + [SUPERUSER_ID]:
                         vals['user_ids'] = [Command.set(list(user_ids) + [self.env.user.id])]
 
@@ -1884,7 +1891,11 @@ class Task(models.Model):
     def action_redirect_to_project_task_form(self):
         return {
             'type': 'ir.actions.act_url',
-            'url': '/web#model=project.task&id=%s&action=%s&view_type=form' % (self.id, self.env.ref('project.action_view_my_task').id),
+            'url': '/web#model=project.task&id=%s&active_id=1&menu_id=%s&action=%s&view_type=form' % (
+                self.id,
+                self.env.ref('project.menu_project_management_all_tasks').id,
+                self.env.ref('project.act_project_project_2_project_task_all').id,
+            ),
             'target': 'new',
         }
 
