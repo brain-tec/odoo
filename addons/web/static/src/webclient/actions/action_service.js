@@ -80,7 +80,7 @@ export async function clearUncommittedChanges(env) {
 export const standardActionServiceProps = {
     action: Object, // prop added by _getActionInfo
     actionId: { type: Number, optional: true }, // prop added by _getActionInfo
-    className: String, // prop added by the ActionContainer
+    className: { type: String, optional: true }, // prop added by the ActionContainer
     globalState: { type: Object, optional: true }, // prop added by _updateUI
     state: { type: Object, optional: true }, // prop added by _updateUI
 };
@@ -208,7 +208,7 @@ export function makeActionManager(env, router = _router) {
 
             // If the current action doesn't have a multi-record view, we don't need to add the
             // last controller to the breadcrumb controllers
-            if (action.views.every((view) => view[1] === "form" || view[1] === "search")) {
+            if (action.views?.every((view) => view[1] === "form" || view[1] === "search")) {
                 return bcControllers;
             }
             controllers.at(-1).displayName = action.display_name || action.name || "";

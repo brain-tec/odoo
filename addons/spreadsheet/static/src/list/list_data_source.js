@@ -85,6 +85,7 @@ export class ListDataSource extends OdooViewsDataSource {
                     spec[field.name] = {};
                     spec[field.currency_field] = {
                         fields: {
+                            ...spec[field.currency_field]?.fields,
                             name: {}, // currency code
                             symbol: {},
                             decimal_places: {},
@@ -95,7 +96,12 @@ export class ListDataSource extends OdooViewsDataSource {
                 case "many2one":
                 case "many2many":
                 case "one2many":
-                    spec[field.name] = { fields: { display_name: {} } };
+                    spec[field.name] = {
+                        fields: {
+                            display_name: {},
+                            ...spec[field.name]?.fields,
+                        },
+                    };
                     break;
                 default:
                     spec[field.name] = field;
@@ -110,7 +116,7 @@ export class ListDataSource extends OdooViewsDataSource {
      * @returns {number}
      */
     getIdFromPosition(position) {
-        this._assertDataIsLoaded();
+        this.assertIsValid();
         const record = this.data[position];
         return record ? record.id : undefined;
     }
@@ -120,7 +126,7 @@ export class ListDataSource extends OdooViewsDataSource {
      * @returns {string}
      */
     getListHeaderValue(fieldName) {
-        this._assertDataIsLoaded();
+        this.assertIsValid();
         const field = this.getField(fieldName);
         return field ? field.string : fieldName;
     }
@@ -131,7 +137,7 @@ export class ListDataSource extends OdooViewsDataSource {
      * @returns {string|number|undefined}
      */
     getListCellValue(position, fieldName) {
-        this._assertDataIsLoaded();
+        this.assertIsValid();
         if (position >= this.maxPositionFetched) {
             this.increaseMaxPosition(position + 1);
             // A reload is needed because the asked position is not already loaded.
@@ -196,7 +202,7 @@ export class ListDataSource extends OdooViewsDataSource {
      * @returns {import("@spreadsheet/currency/currency_data_source").Currency | undefined}
      */
     getListCurrency(position, currencyFieldName) {
-        this._assertDataIsLoaded();
+        this.assertIsValid();
         const currency = this.data[position]?.[currencyFieldName];
         if (!currency) {
             return undefined;

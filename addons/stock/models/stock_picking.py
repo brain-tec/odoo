@@ -271,7 +271,7 @@ class PickingType(models.Model):
 
     @api.onchange('code')
     def _onchange_picking_code(self):
-        if self.code == 'internal' and not self.user_has_groups('stock.group_stock_multi_locations'):
+        if self.code == 'internal' and not self.env.user.has_group('stock.group_stock_multi_locations'):
             return {
                 'warning': {
                     'message': _('You need to activate storage locations to be able to do internal operation types.')
@@ -563,7 +563,7 @@ class Picking(models.Model):
 
     @api.depends('move_line_ids', 'picking_type_id.use_create_lots', 'picking_type_id.use_existing_lots', 'state')
     def _compute_show_lots_text(self):
-        group_production_lot_enabled = self.user_has_groups('stock.group_production_lot')
+        group_production_lot_enabled = self.env.user.has_group('stock.group_production_lot')
         for picking in self:
             if not picking.move_line_ids and not picking.picking_type_id.use_create_lots:
                 picking.show_lots_text = False
@@ -697,7 +697,7 @@ class Picking(models.Model):
     @api.depends('state', 'move_ids', 'picking_type_id')
     def _compute_show_allocation(self):
         self.show_allocation = False
-        if not self.user_has_groups('stock.group_reception_report'):
+        if not self.env.user.has_group('stock.group_reception_report'):
             return
         for picking in self:
             picking.show_allocation = picking._get_show_allocation(picking.picking_type_id)
@@ -798,19 +798,6 @@ class Picking(models.Model):
                     'title': ("Warning for %s") % partner.name,
                     'message': partner.picking_warn_msg
                 }}
-
-    @api.onchange('location_id', 'location_dest_id')
-    def _onchange_locations(self):
-        (self.move_ids | self.move_ids_without_package).update({
-            "location_id": self.location_id,
-            "location_dest_id": self.location_dest_id
-        })
-        if self._origin.location_id != self.location_id and any(line.quantity for line in self.move_ids.move_line_ids):
-            return {'warning': {
-                    'title': 'Locations to update',
-                    'message': _("You might want to update the locations of this transfer's operations")
-                    }
-            }
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -1136,7 +1123,7 @@ class Picking(models.Model):
         pickings_to_backorder.with_context(cancel_backorder=False)._action_done()
         report_actions = self._get_autoprint_report_actions()
         another_action = False
-        if self.user_has_groups('stock.group_reception_report'):
+        if self.env.user.has_group('stock.group_reception_report'):
             pickings_show_report = self.filtered(lambda p: p.picking_type_id.auto_show_reception_report)
             lines = pickings_show_report.move_ids.filtered(lambda m: m.product_id.type == 'product' and m.state != 'cancel' and m.quantity and not m.move_dest_ids)
             if lines:
@@ -1510,7 +1497,11 @@ class Picking(models.Model):
                 return action
         return package_id
 
-    def _package_move_lines(self):
+    def _package_move_lines(self, batch_pack=False):
+        # in theory, the picking_type should always be the same (i.e. for batch transfers),
+        # but customizations may bypass it and cause unexpected behavior so we avoid allowing those situations
+        if len(self.picking_type_id) > 1:
+            raise UserError(_("You cannot pack products into the same package when they are from different transfers with different operation types."))
         quantity_move_line_ids = self.move_line_ids.filtered(
             lambda ml:
                 float_compare(ml.quantity, 0.0, precision_rounding=ml.product_uom_id.rounding) > 0 and
@@ -1595,7 +1586,7 @@ class Picking(models.Model):
         }
 
     def action_open_label_type(self):
-        if self.user_has_groups('stock.group_production_lot') and self.move_line_ids.lot_id:
+        if self.env.user.has_group('stock.group_production_lot') and self.move_line_ids.lot_id:
             view = self.env.ref('stock.picking_label_type_form')
             return {
                 'name': _('Choose Type of Labels To Print'),
@@ -1655,7 +1646,7 @@ class Picking(models.Model):
             clean_action(action, self.env)
             report_actions.append(action)
 
-        if self.user_has_groups('stock.group_reception_report'):
+        if self.env.user.has_group('stock.group_reception_report'):
             reception_reports_to_print = self.filtered(
                 lambda p: p.picking_type_id.auto_print_reception_report
                           and p.picking_type_id.code != 'outgoing'
@@ -1692,7 +1683,7 @@ class Picking(models.Model):
             if action:
                 clean_action(action, self.env)
                 report_actions.append(action)
-        if self.user_has_groups('stock.group_production_lot'):
+        if self.env.user.has_group('stock.group_production_lot'):
             pickings_print_lot_label = self.filtered(lambda p: p.picking_type_id.auto_print_lot_labels and p.move_line_ids.lot_id)
             pickings_by_print_formats = pickings_print_lot_label.grouped(lambda p: p.picking_type_id.lot_label_format)
             for print_format in pickings_print_lot_label.picking_type_id.mapped("lot_label_format"):
@@ -1706,7 +1697,7 @@ class Picking(models.Model):
                 if action:
                     clean_action(action, self.env)
                     report_actions.append(action)
-        if self.user_has_groups('stock.group_tracking_lot'):
+        if self.env.user.has_group('stock.group_tracking_lot'):
             pickings_print_packages = self.filtered(lambda p: p.picking_type_id.auto_print_packages and p.move_line_ids.result_package_id)
             if pickings_print_packages:
                 action = self.env.ref("stock.action_report_picking_packages").report_action(pickings_print_packages.ids, config=False)

@@ -394,7 +394,7 @@ class MailThread(models.AbstractModel):
         return super().get_empty_list_help(help_message)
 
     def _condition_to_sql(self, alias: str, fname: str, operator: str, value, query: Query) -> SQL:
-        if self.env.su or self.user_has_groups('base.group_user'):
+        if self.env.su or self.env.user._is_internal():
             return super()._condition_to_sql(alias, fname, operator, value, query)
         if fname != 'message_partner_ids':
             return super()._condition_to_sql(alias, fname, operator, value, query)
@@ -2131,7 +2131,7 @@ class MailThread(models.AbstractModel):
             # use sudo as record access is not always granted (notably when replying
             # a notification) -> final check is done at message creation level
             msg_values['record_name'] = self.sudo().display_name
-        if body_is_html and self.user_has_groups("base.group_user"):
+        if body_is_html and self.env.user._is_internal():
             _logger.warning("Posting HTML message using body_is_html=True, use a Markup object instead (user: %s)",
                 self.env.user.id)
             body = Markup(body)
@@ -3439,9 +3439,7 @@ class MailThread(models.AbstractModel):
         if check_tracking:
             tracking_values = self.env['mail.tracking.value'].sudo().search(
                 [('mail_message_id', '=', message.id)]
-            ).filtered(
-                lambda track: not track.field_groups or self.env.is_superuser() or self.user_has_groups(track.field_groups)
-            )
+            )._filter_tracked_field_access(self.env)
             if tracking_values and hasattr(record_wlang, '_track_filter_for_display'):
                 tracking_values = record_wlang._track_filter_for_display(tracking_values)
             tracking = [
@@ -4064,7 +4062,12 @@ class MailThread(models.AbstractModel):
         if message.subtype_id and message.subtype_id.description:
             tracking_message = return_line + message.subtype_id.description + return_line
 
-        for value in message.sudo().tracking_value_ids.filtered(lambda tracking: not tracking.field_groups):
+        def _free_access(tracking):
+            model = self.env[tracking.mail_message_id.model]
+            field = model._fields.get(tracking.field_id.name)
+            return field and not field.groups
+
+        for value in message.sudo().tracking_value_ids.filtered(_free_access):
             if value.field_id.ttype == 'boolean':
                 old_value = str(bool(value.old_value_integer))
                 new_value = str(bool(value.new_value_integer))

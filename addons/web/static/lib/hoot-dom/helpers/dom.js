@@ -758,6 +758,11 @@ customPseudoClasses
             return !matches(node, content);
         };
     })
+    .set("only", () => {
+        return function only(node, i, nodes) {
+            return nodes.length === 1;
+        };
+    })
     .set("scrollable", () => {
         return function scrollable(node) {
             return isNodeScrollable(node);
@@ -787,7 +792,12 @@ let rCustomPseudoClass = compilePseudoClassRegex();
 // Exports
 //-----------------------------------------------------------------------------
 
-export function cleanupObservers() {
+export function cleanupDOM() {
+    // Dimensions
+    currentDimensions.width = null;
+    currentDimensions.height = null;
+
+    // Observers
     const remainingObservers = observers.size;
     if (remainingObservers) {
         console.warn(`${remainingObservers} observers still running`);
@@ -1295,10 +1305,7 @@ export function mockedMatchMedia(query) {
     return {
         addEventListener: (type, callback) => window.addEventListener("resize", callback),
         get matches() {
-            let { width, height } = currentDimensions;
-            width ||= window.innerWidth;
-            height ||= window.innerHeight;
-            return matchesQuery(query, width, height);
+            return matchesQuery(query, window.innerWidth, window.innerHeight);
         },
         media: query,
         get onchange() {
@@ -1667,11 +1674,11 @@ export function setDimensions(width, height) {
     const defaultRoot = getDefaultRoot();
     if (!Number.isNaN(width)) {
         currentDimensions.width = width;
-        defaultRoot.style.setProperty("width", `${width}px`, "important");
+        defaultRoot.style?.setProperty("width", `${width}px`, "important");
     }
     if (!Number.isNaN(height)) {
         currentDimensions.height = height;
-        defaultRoot.style.setProperty("height", `${height}px`, "important");
+        defaultRoot.style?.setProperty("height", `${height}px`, "important");
     }
 }
 

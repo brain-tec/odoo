@@ -1,5 +1,6 @@
 import {
     check,
+    clear,
     click,
     drag,
     edit,
@@ -106,6 +107,14 @@ export function contains(target, options) {
             await animationFrame();
         },
         /**
+         * @param {FillOptions} [options]
+         */
+        clear: async (options) => {
+            await focusCurrent();
+            clear({ confirm: true, ...options });
+            await animationFrame();
+        },
+        /**
          * @param {PointerOptions & KeyModifierOptions} [options]
          */
         click: async (options) => {
@@ -174,14 +183,14 @@ export function contains(target, options) {
          * @param {PointerOptions} [options]
          */
         dragAndDrop: async (target, options) => {
-            const from = await nodePromise;
+            const [from, to] = await Promise.all([nodePromise, waitFor(target)]);
             const { drop, moveTo } = drag(from);
             await dragEffectDelay();
 
             hover(from, DRAG_TOLERANCE_PARAMS);
             await dragEffectDelay();
 
-            moveTo(target, options);
+            moveTo(to, options);
             await dragEffectDelay();
 
             drop();
@@ -233,8 +242,7 @@ export function contains(target, options) {
          * @param {InputValue} value
          */
         select: async (value) => {
-            await focusCurrent();
-            select(value);
+            select(value, { target: await nodePromise });
             await animationFrame();
         },
         /**

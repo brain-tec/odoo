@@ -47,7 +47,7 @@ class MrpProduction(models.Model):
 
     @api.model
     def _get_default_is_locked(self):
-        return not self.user_has_groups('mrp.group_unlocked_by_default')
+        return not self.env.user.has_group('mrp.group_unlocked_by_default')
 
     name = fields.Char('Reference', default='New', copy=False, readonly=True)
     priority = fields.Selection(
@@ -102,6 +102,7 @@ class MrpProduction(models.Model):
         readonly=False, required=True, precompute=True,
         domain="[('usage','=','internal')]",
         help="Location where the system will stock the finished products.")
+    location_final_id = fields.Many2one('stock.location', 'Final Location from procurement')
     date_deadline = fields.Datetime(
         'Deadline', copy=False, store=True, readonly=True, compute='_compute_date_deadline',
         help="Informative date allowing to define when the manufacturing order should be processed at the latest to fulfill delivery on time.")
@@ -661,7 +662,7 @@ class MrpProduction(models.Model):
     @api.depends('state', 'move_finished_ids')
     def _compute_show_allocation(self):
         self.show_allocation = False
-        if not self.user_has_groups('mrp.group_mrp_reception_report'):
+        if not self.env.user.has_group('mrp.group_mrp_reception_report'):
             return
         for mo in self:
             if not mo.picking_type_id:
@@ -970,7 +971,6 @@ class MrpProduction(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('mrp.mrp_bom_form_action')
         action['view_mode'] = 'form'
         action['views'] = [(False, 'form')]
-        action['target'] = 'new'
 
         bom_lines_vals, byproduct_vals, operations_vals = self._get_bom_values()
         action['context'] = {
@@ -1108,7 +1108,9 @@ class MrpProduction(models.Model):
         for production in self:
             if production.product_id in production.bom_id.byproduct_ids.mapped('product_id'):
                 raise UserError(_("You cannot have %s  as the finished product and in the Byproducts", self.product_id.name))
-            moves.append(production._get_move_finished_values(production.product_id.id, production.product_qty, production.product_uom_id.id))
+            finished_move_values = production._get_move_finished_values(production.product_id.id, production.product_qty, production.product_uom_id.id)
+            finished_move_values['location_final_id'] = self.location_final_id.id
+            moves.append(finished_move_values)
             for byproduct in production.bom_id.byproduct_ids:
                 if byproduct._skip_byproduct_line(production.product_id):
                     continue
@@ -2033,7 +2035,7 @@ class MrpProduction(models.Model):
                     'res_id': self.id,
                     'target': 'main',
                 }
-            elif self.user_has_groups('mrp.group_mrp_reception_report'):
+            elif self.env.user.has_group('mrp.group_mrp_reception_report'):
                 mos_to_show = self.filtered(lambda mo: mo.picking_type_id.auto_show_reception_report)
                 lines = mos_to_show.move_finished_ids.filtered(lambda m: m.product_id.type == 'product' and m.state != 'cancel' and m.picked and not m.move_dest_ids)
                 if lines:
@@ -2677,7 +2679,7 @@ class MrpProduction(models.Model):
                 action = self.env.ref("mrp.label_manufacture_template").report_action(labels_to_print.ids, config=False)
                 clean_action(action, self.env)
                 report_actions.append(action)
-        if self.user_has_groups('mrp.group_mrp_reception_report'):
+        if self.env.user.has_group('mrp.group_mrp_reception_report'):
             reception_reports_to_print = self.filtered(
                 lambda p: p.picking_type_id.auto_print_mrp_reception_report
                           and p.picking_type_id.code == 'mrp_operation'
@@ -2701,7 +2703,7 @@ class MrpProduction(models.Model):
                     action = self.env.ref('stock.label_picking').report_action(moves_to_print, data=data, config=False)
                     clean_action(action, self.env)
                     report_actions.append(action)
-        if self.user_has_groups('stock.group_production_lot'):
+        if self.env.user.has_group('stock.group_production_lot'):
             productions_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_done_mrp_lot and p.move_finished_ids.move_line_ids.lot_id)
             productions_by_print_formats = productions_to_print.grouped(lambda p: p.picking_type_id.done_mrp_lot_label_to_print)
             for print_format in productions_to_print.picking_type_id.mapped('done_mrp_lot_label_to_print'):
@@ -2750,7 +2752,7 @@ class MrpProduction(models.Model):
 
     def action_open_label_type(self):
         move_line_ids = self.move_finished_ids.mapped('move_line_ids')
-        if self.user_has_groups('stock.group_production_lot') and move_line_ids.lot_id:
+        if self.env.user.has_group('stock.group_production_lot') and move_line_ids.lot_id:
             view = self.env.ref('stock.picking_label_type_form')
             return {
                 'name': _('Choose Type of Labels To Print'),

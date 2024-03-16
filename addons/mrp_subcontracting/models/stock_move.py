@@ -48,7 +48,7 @@ class StockMove(models.Model):
         for move in self:
             if not move.is_subcontract:
                 continue
-            if self.env.user.has_group('base.group_portal'):
+            if self.env.user._is_portal():
                 move.show_details_visible = any(not p._has_been_recorded() for p in move._get_subcontract_production())
                 continue
             productions = move._get_subcontract_production()
@@ -166,7 +166,7 @@ class StockMove(models.Model):
                 'show_lots_m2o': self.has_tracking != 'none',
                 'show_lots_text': False,
             })
-        elif self.env.user.has_group('base.group_portal'):
+        elif self.env.user._is_portal():
             action['views'] = [(self.env.ref('mrp_subcontracting.mrp_subcontracting_view_stock_move_operations').id, 'form')]
         return action
 
@@ -176,7 +176,7 @@ class StockMove(models.Model):
         tree_view = self.env.ref('mrp_subcontracting.mrp_subcontracting_move_tree_view')
         form_view = self.env.ref('mrp_subcontracting.mrp_subcontracting_move_form_view')
         ctx = dict(self._context, search_default_by_product=True)
-        if self.env.user.has_group('base.group_portal'):
+        if self.env.user._is_portal():
             form_view = self.env.ref('mrp_subcontracting.mrp_subcontracting_portal_move_form_view')
             ctx.update(no_breadcrumbs=False)
         return {
@@ -228,7 +228,7 @@ class StockMove(models.Model):
         self.ensure_one()
         production = self._get_subcontract_production()[-1:]
         view = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_form_view')
-        if self.env.user.has_group('base.group_portal'):
+        if self.env.user._is_portal():
             view = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_portal_form_view')
         return {
             'name': _('Subcontract'),
@@ -281,6 +281,12 @@ class StockMove(models.Model):
         vals['location_id'] = self.location_id.id
         return vals
 
+    def _prepare_procurement_values(self):
+        res = super()._prepare_procurement_values()
+        if self.raw_material_production_id.subcontractor_id:
+            res['warehouse_id'] = self.picking_type_id.warehouse_id
+        return res
+
     def _split(self, qty, restrict_partner_id=False):
         self.ensure_one()
         new_move_vals = super()._split(qty=qty, restrict_partner_id=restrict_partner_id)
@@ -327,7 +333,7 @@ class StockMove(models.Model):
                 break
 
     def _check_access_if_subcontractor(self, vals):
-        if self.env.user.has_group('base.group_portal') and not self.env.su:
+        if self.env.user._is_portal() and not self.env.su:
             if vals.get('state') == 'done':
                 raise AccessError(_("Portal users cannot create a stock move with a state 'Done' or change the current state to 'Done'."))
 

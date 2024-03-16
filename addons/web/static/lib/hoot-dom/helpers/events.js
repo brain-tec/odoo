@@ -52,6 +52,8 @@ import {
  *
  * @typedef {import("./dom").QueryOptions} QueryOptions
  *
+ * @typedef {{ target: Target }} SelectOptions
+ *
  * @typedef {"bottom" | "left" | "right" | "top"} Side
  *
  * @typedef {import("./dom").Target} Target
@@ -228,6 +230,8 @@ const getEventConstructor = (eventType) => {
             return [DragEvent, mapBubblingEvent];
 
         // Input events
+        case "beforeinput":
+            return [InputEvent, mapCancelableInputEvent];
         case "input":
             return [InputEvent, mapInputEvent];
 
@@ -454,12 +458,12 @@ const registerForChange = (target, initialValue, confirmNow) => {
         removeChangeTargetListeners();
 
         if (target.value !== initialValue) {
-            dispatch(target, "change");
+            afterNextDispatch = () => dispatch(target, "change");
         }
     };
 
-    const isInput = getTag(target) === "input";
-    if (isInput) {
+    const canTriggerEnter = getTag(target) === "input";
+    if (canTriggerEnter) {
         changeTargetListeners.push(
             on(target, "keydown", (ev) => !isPrevented(ev) && ev.key === "Enter" && triggerChange())
         );
@@ -472,13 +476,11 @@ const registerForChange = (target, initialValue, confirmNow) => {
 
     if (confirmNow) {
         // Triggers confirm action right away
-        if (isInput) {
+        if (canTriggerEnter) {
             _press(target, { key: "Enter" });
         } else {
-            const parent = target.parentElement || getDocument(target).body;
-            _click(parent, {
-                position: { x: 1, y: 1 },
-                relative: true,
+            _click(getDocument(target).body, {
+                position: { x: 0, y: 0 },
             });
         }
     }
@@ -523,7 +525,9 @@ const removeChangeTargetListeners = () => {
  * @param {HTMLElement | null} target
  */
 const setPointerDownTarget = (target) => {
-    runTime.previousPointerDownTarget = runTime.currentPointerDownTarget;
+    if (runTime.currentPointerDownTarget) {
+        runTime.previousPointerDownTarget = runTime.currentPointerDownTarget;
+    }
     runTime.currentPointerDownTarget = target;
     runTime.canStartDrag = false;
 };
@@ -537,7 +541,14 @@ const setPointerTarget = (target, options) => {
     runTime.currentPointerTarget = target;
 
     if (runTime.currentPointerTarget !== runTime.previousPointerTarget && runTime.canStartDrag) {
-        runTime.isDragging = true;
+        /**
+         * Special action: drag start
+         *  On: unprevented 'pointerdown' on a draggable element (DESKTOP ONLY)
+         *  Do: triggers a 'dragstart' event
+         */
+        const dragStartEvent = dispatch(runTime.previousPointerTarget, "dragstart");
+
+        runTime.isDragging = !isPrevented(dragStartEvent);
         runTime.canStartDrag = false;
     }
 
@@ -703,22 +714,37 @@ const _click = (target, options) => {
 const _fill = (target, value, options) => {
     const initialValue = target.value;
 
-    if (getTag(target) === "input" && target.type === "file") {
-        const dataTransfer = new DataTransfer();
-        const files = ensureArray(value);
-        if (files.length > 1 && !target.multiple) {
-            throw new HootDomError(`input[type="file"] does not support multiple files`);
-        }
-        for (const file of files) {
-            if (!(file instanceof File)) {
-                throw new TypeError(`file input only accept 'File' objects`);
-            }
-            dataTransfer.items.add(file);
-        }
-        target.files = dataTransfer.files;
+    if (getTag(target) === "input") {
+        switch (target.type) {
+            case "file": {
+                const dataTransfer = new DataTransfer();
+                const files = ensureArray(value);
+                if (files.length > 1 && !target.multiple) {
+                    throw new HootDomError(`input[type="file"] does not support multiple files`);
+                }
+                for (const file of files) {
+                    if (!(file instanceof File)) {
+                        throw new TypeError(`file input only accept 'File' objects`);
+                    }
+                    dataTransfer.items.add(file);
+                }
+                target.files = dataTransfer.files;
 
-        dispatch(target, "change");
-        return;
+                dispatch(target, "change");
+                return;
+            }
+            case "range": {
+                const numberValue = Number(value);
+                if (Number.isNaN(numberValue)) {
+                    throw new TypeError(`input[type="range"] only accept 'number' values`);
+                }
+
+                target.value = String(numberValue);
+                dispatch(target, "input");
+                dispatch(target, "change");
+                return;
+            }
+        }
     }
 
     if (options?.instantly) {
@@ -942,6 +968,10 @@ const _keyDown = (target, eventInit) => {
                 // Get selection from window
                 const text = globalThis.getSelection().toString();
                 globalThis.navigator.clipboard.writeTextSync(text);
+
+                dispatch(target, "copy", {
+                    clipboardData: eventInit.dataTransfer || new DataTransfer(),
+                });
             }
             break;
         }
@@ -973,6 +1003,10 @@ const _keyDown = (target, eventInit) => {
                 nextValue = value;
 
                 inputType = "insertFromPaste";
+
+                dispatch(target, "paste", {
+                    clipboardData: eventInit.dataTransfer || new DataTransfer(),
+                });
             }
             break;
         }
@@ -989,6 +1023,10 @@ const _keyDown = (target, eventInit) => {
 
                 nextValue = deleteSelection(target);
                 inputType = "deleteByCut";
+
+                dispatch(target, "cut", {
+                    clipboardData: eventInit.dataTransfer || new DataTransfer(),
+                });
             }
             break;
         }
@@ -996,7 +1034,7 @@ const _keyDown = (target, eventInit) => {
 
     if (target.value !== nextValue) {
         target.value = nextValue;
-        dispatch(target, "input", {
+        dispatchEventSequence(target, ["beforeinput", "input"], {
             data: inputData,
             inputType,
         });
@@ -1070,13 +1108,7 @@ const _pointerDown = (target, options) => {
     triggerFocus(target);
 
     if (eventInit.button === 0 && !hasTouch() && runTime.currentPointerDownTarget.draggable) {
-        /**
-         * Special action: drag start
-         *  On: unprevented 'pointerdown' on a draggable element (DESKTOP ONLY)
-         *  Do: triggers a 'dragstart' event
-         */
-        const dragStartEvent = dispatch(target, "dragstart", eventInit);
-        runTime.canStartDrag = !isPrevented(dragStartEvent);
+        runTime.canStartDrag = true;
     } else if (eventInit.button === 2) {
         /**
          * Special action: context menu
@@ -1131,6 +1163,9 @@ const _pointerUp = (target, options) => {
     }
 
     setPointerDownTarget(null);
+    if (runTime.currentPointerDownTimeout) {
+        globalThis.clearTimeout(runTime.currentPointerDownTimeout);
+    }
     runTime.currentPointerDownTimeout = globalThis.setTimeout(() => {
         // Use `globalThis.setTimeout` to potentially make use of the mock timeouts
         // since the events run in the same temporal context as the tests
@@ -1214,6 +1249,8 @@ const LOG_COLORS = {
     lightBlue: "#9bbbdc",
     reset: "inherit",
 };
+/** @type {(() => void) | null} */
+let afterNextDispatch = null;
 let allowLogs = false;
 /** @type {Event[]} */
 let currentEvents = [];
@@ -1324,6 +1361,14 @@ const mapNonCancelableTouchEvent = (eventInit) => ({
 
 // Keyboard & input event mappers
 // ------------------------------
+
+/**
+ * @param {InputEventInit} [eventInit]
+ */
+const mapCancelableInputEvent = (eventInit) => ({
+    ...mapInputEvent(eventInit),
+    cancelable: true,
+});
 
 /**
  * @param {InputEventInit} [eventInit]
@@ -1509,6 +1554,12 @@ export function dispatch(target, type, eventInit) {
 
     target.dispatchEvent(event);
     currentEvents.push(event);
+
+    if (afterNextDispatch) {
+        const callback = afterNextDispatch;
+        afterNextDispatch = null;
+        callback();
+    }
 
     return event;
 }
@@ -1904,6 +1955,22 @@ export function setInputFiles(files) {
 }
 
 /**
+ * @param {Target} target
+ * @param {number} value
+ * @param {PointerOptions} options
+ */
+export function setInputRange(target, value, options) {
+    const element = getFirstTarget(target, options);
+
+    _implicitHover(element, options);
+    _pointerDown(element, options);
+    _fill(element, value);
+    _pointerUp(element, options);
+
+    return logEvents("setInputRange");
+}
+
+/**
  * @param {HTMLElement} fixture
  */
 export function setupEventActions(fixture) {
@@ -1989,18 +2056,26 @@ export function scroll(target, position, options) {
  *  - `change`
  *
  * @param {string | number | (string | number)[]} value
+ * @param {SelectOptions} [options]
  * @returns {Event[]}
  * @example
  *  click("select[name=country]"); // Focuses <select> element
  *  select("belgium"); // Selects the <option value="belgium"> element
  */
-export function select(value) {
-    const element = getActiveElement();
+export function select(value, options) {
+    const element = options?.target ? getFirstTarget(options.target) : getActiveElement();
     if (!hasTagName(element, "select")) {
         throw new HootDomError(`cannot call \`select()\`: target should be a <select> element`);
     }
 
+    if (options?.target) {
+        _implicitHover(element);
+        _pointerDown(element);
+    }
     _select(element, value);
+    if (options?.target) {
+        _pointerUp(element);
+    }
 
     return logEvents("select");
 }

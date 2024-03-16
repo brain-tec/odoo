@@ -152,8 +152,9 @@ test("chat window: basic rendering", async () => {
         text: "There are no messages in this conversation.",
     });
     await click("[title='Open Actions Menu']");
-    await contains(".o-mail-ChatWindow-command", { count: 11 });
+    await contains(".o-mail-ChatWindow-command", { count: 12 });
     await contains("[title='Search Messages']");
+    await contains("[title='Rename']");
     await contains("[title='Pinned Messages']");
     await contains("[title='Show Attachments']");
     await contains("[title='Add Users']");
@@ -584,10 +585,10 @@ test("chat window: TAB cycle with 3 open chat windows [REQUIRE FOCUS]", async ()
         message: "should have enough space to open 3 chat windows simultaneously",
     });
     await start();
-    // FIXME: assumes ordering: General, MyTeam, MyProject
+    // FIXME: assumes ordering: MyProject, MyTeam, General
     await contains(".o-mail-ChatWindow .o-mail-Composer-input", { count: 3 });
     await focus(".o-mail-Composer-input", {
-        parent: [".o-mail-ChatWindow", { text: "General" }],
+        parent: [".o-mail-ChatWindow", { text: "MyProject" }],
     });
     triggerHotkey("Tab");
     await contains(".o-mail-ChatWindow", {
@@ -596,12 +597,12 @@ test("chat window: TAB cycle with 3 open chat windows [REQUIRE FOCUS]", async ()
     });
     triggerHotkey("Tab");
     await contains(".o-mail-ChatWindow", {
-        text: "MyProject",
+        text: "General",
         contains: [".o-mail-Composer-input:focus"],
     });
     triggerHotkey("Tab");
     await contains(".o-mail-ChatWindow", {
-        text: "General",
+        text: "MyProject",
         contains: [".o-mail-Composer-input:focus"],
     });
 });
