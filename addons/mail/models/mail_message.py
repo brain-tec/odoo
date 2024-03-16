@@ -289,7 +289,7 @@ class Message(models.Model):
             return super()._search(domain, offset, limit, order, access_rights_uid)
 
         # Non-employee see only messages with a subtype and not internal
-        if not self.env['res.users'].has_group('base.group_user'):
+        if not self.env.user._is_internal():
             domain = self._get_search_domain_share() + domain
 
         # make the search query with the default rules
@@ -406,7 +406,7 @@ class Message(models.Model):
         super().check_access_rule(operation)
 
         # Non employees see only messages with a subtype (aka, not internal logs)
-        if not self.env['res.users'].has_group('base.group_user'):
+        if not self.env.user._is_internal():
             self._cr.execute('''SELECT DISTINCT message.id, message.subtype_id, subtype.internal
                                 FROM "%s" AS message
                                 LEFT JOIN "mail_message_subtype" as subtype
@@ -919,7 +919,7 @@ class Message(models.Model):
                 'personas': [{'id': guest.id, 'name': guest.name, 'type': "guest"} for guest in reactions.guest_id] + [{'id': partner.id, 'name': partner.name, 'type': "partner"} for partner in reactions.partner_id],
                 'message': {'id': message_sudo.id},
             } for content, reactions in reactions_per_content.items()]
-            allowed_tracking_ids = message_sudo.tracking_value_ids.filtered(lambda tracking: not tracking.field_groups or self.env.is_superuser() or self.user_has_groups(tracking.field_groups))
+            allowed_tracking_ids = message_sudo.tracking_value_ids._filter_tracked_field_access(self.env)
             displayed_tracking_ids = allowed_tracking_ids
             if record_sudo and hasattr(record_sudo, '_track_filter_for_display'):
                 displayed_tracking_ids = record_sudo._track_filter_for_display(displayed_tracking_ids)

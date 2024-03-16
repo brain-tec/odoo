@@ -312,27 +312,33 @@ export class MockHistory {
      */
     constructor(location) {
         this.#loc = location;
+        this.pushState(null, "", this.#loc.href);
     }
 
     /** @type {typeof History.prototype.back} */
     back() {
         this.#index = Math.max(0, this.#index - 1);
         this.#loc.assign(this.#stack[this.#index][1]);
+        this.#dispatchPopState();
     }
 
     /** @type {typeof History.prototype.forward} */
     forward() {
         this.#index = Math.min(this.#stack.length - 1, this.#index + 1);
         this.#loc.assign(this.#stack[this.#index][1]);
+        this.#dispatchPopState();
     }
 
     /** @type {typeof History.prototype.go} */
     go(delta) {
         this.#index = Math.max(0, Math.min(this.#stack.length - 1, this.#index + delta));
+        this.#loc.assign(this.#stack[this.#index][1]);
+        this.#dispatchPopState();
     }
 
     /** @type {typeof History.prototype.pushState} */
     pushState(data, unused, url) {
+        this.#stack = this.#stack.slice(0, this.#index + 1);
         this.#index = this.#stack.push([data ?? null, url]) - 1;
         this.#loc.assign(url);
     }
@@ -343,9 +349,14 @@ export class MockHistory {
         this.#loc.assign(url);
     }
 
+    #dispatchPopState() {
+        window.dispatchEvent(new PopStateEvent("popstate", { state: this.state }));
+    }
+
     __clear() {
         this.#index = 0;
         this.#stack = [];
+        this.pushState(null, "", this.#loc.href);
     }
 }
 
@@ -679,9 +690,7 @@ export class MockXMLHttpRequest extends EventTarget {
 
     abort() {}
 
-    upload = {
-        addEventListener: () => {},
-    };
+    upload = new MockXMLHttpRequestUpload();
 
     get response() {
         return this.#response;
@@ -724,6 +733,22 @@ export class MockXMLHttpRequest extends EventTarget {
         this.#headers[name] = value;
     }
     getResponseHeader() {}
+}
+
+export class MockXMLHttpRequestUpload extends EventTarget {
+    constructor() {
+        super(...arguments);
+
+        makePublicListeners(this, [
+            "abort",
+            "error",
+            "load",
+            "loadend",
+            "loadstart",
+            "progress",
+            "timeout",
+        ]);
+    }
 }
 
 export class ServerWebSocket extends EventTarget {

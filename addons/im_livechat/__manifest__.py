@@ -20,7 +20,6 @@ Help your customers with this chat, and analyse their feedback.
     'data': [
         "security/im_livechat_channel_security.xml",
         "security/ir.model.access.csv",
-        "data/discuss_shortcode_data.xml",
         "data/mail_templates.xml",
         "data/im_livechat_channel_data.xml",
         "data/im_livechat_chatbot_data.xml",
@@ -52,7 +51,6 @@ Help your customers with this chat, and analyse their feedback.
         "demo/im_livechat_channel/im_livechat_session_9.xml",
         "demo/im_livechat_channel/im_livechat_session_10.xml",
         "demo/im_livechat_channel/im_livechat_session_11.xml",
-        "demo/discuss_shortcode/discuss_shortcode_demo.xml",
     ],
     'depends': ["mail", "rating", "digest", "utm"],
     'installable': True,
@@ -100,6 +98,7 @@ Help your customers with this chat, and analyse their feedback.
             'web/static/lib/odoo_ui_icons/style.css',
             'web/static/src/scss/ui.scss',
             ('remove', 'web/static/src/core/browser/title_service.js'),
+            'mail/static/src/model/**/*',
             'mail/static/src/core/common/**/*',
             'mail/static/src/discuss/core/common/*',
             'mail/static/src/discuss/call/common/**',
