@@ -114,6 +114,9 @@
             <field name="user_ids" position="replace">
                 <field name="portal_user_names" string="Assignees"/>
             </field>
+            <field name="partner_id" position="attributes">
+                <attribute name="column_invisible">0</attribute>
+            </field>
         </field>
     </record>
 
@@ -314,6 +317,11 @@
         <field name="view_mode">kanban,tree,form</field>
         <field name="search_view_id" ref="project.project_sharing_project_task_view_search"/>
         <field name="domain">[('project_id', '=', active_id), ('display_in_project', '=', True)]</field>
+        <field name="context">{
+            'default_project_id': active_id,
+            'active_id_chatter': active_id,
+            'delete': false,
+        }</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No tasks found. Let's create one!
