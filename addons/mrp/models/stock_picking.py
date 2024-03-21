@@ -21,10 +21,6 @@ class StockPickingType(models.Model):
         help="Allow to create new lot/serial numbers for the components",
         default=False,
     )
-    use_auto_consume_components_lots = fields.Boolean(
-        string="Consume Reserved Lots/Serial Numbers automatically",
-        help="Allow automatic consumption of tracked components that are reserved",
-    )
 
     auto_print_done_production_order = fields.Boolean(
         "Auto Print Done Production Order",
@@ -113,7 +109,9 @@ class StockPicking(models.Model):
     @api.depends('group_id')
     def _compute_mrp_production_ids(self):
         for picking in self:
-            picking.production_ids = picking.group_id.mrp_production_ids | picking.move_ids.move_dest_ids.raw_material_production_id
+            production_ids = picking.group_id.mrp_production_ids | picking.move_ids.move_dest_ids.raw_material_production_id
+            # Filter out unwanted MO types
+            picking.production_ids = production_ids.filtered(lambda p: p.picking_type_id.active)
             picking.production_count = len(picking.production_ids)
 
     def action_detailed_operations(self):

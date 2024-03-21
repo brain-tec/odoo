@@ -1,7 +1,6 @@
 import { prettifyMessageContent } from "@mail/utils/common/format";
 import { rpcWithEnv } from "@mail/utils/common/misc";
 
-import { browser } from "@web/core/browser/browser";
 import { router } from "@web/core/browser/router";
 import { _t } from "@web/core/l10n/translation";
 /** @type {ReturnType<import("@mail/utils/common/misc").rpcWithEnv>} */
@@ -69,7 +68,9 @@ export class ThreadService {
                 .then(() => new Promise(setTimeout))
                 .then(() => this.markAsRead(thread));
         }
-        thread.seen_message_id = newestPersistentMessage?.id ?? false;
+        if (thread.selfMember) {
+            thread.selfMember.seen_message_id = newestPersistentMessage;
+        }
         if (
             thread.message_unread_counter > 0 &&
             thread.model === "discuss.channel" &&
@@ -80,7 +81,7 @@ export class ThreadService {
                 last_message_id: newestPersistentMessage.id,
             })
                 .then(() => {
-                    this.updateSeen(thread, newestPersistentMessage.id);
+                    this.updateSeen(thread, newestPersistentMessage);
                 })
                 .catch((e) => {
                     if (e.code !== 404) {
@@ -95,8 +96,8 @@ export class ThreadService {
         }
     }
 
-    updateSeen(thread, lastSeenId = thread.newestPersistentNotEmptyOfAllMessage?.id) {
-        const lastReadIndex = thread.messages.findIndex((message) => message.id === lastSeenId);
+    updateSeen(thread, lastSeen = thread.newestPersistentNotEmptyOfAllMessage) {
+        const lastReadIndex = thread.messages.findIndex((message) => message.eq(lastSeen));
         let newNeedactionCounter = 0;
         let newUnreadCounter = 0;
         for (const message of thread.messages.slice(lastReadIndex + 1)) {
@@ -107,8 +108,10 @@ export class ThreadService {
                 newUnreadCounter++;
             }
         }
+        if (thread.selfMember) {
+            thread.selfMember.seen_message_id = lastSeen;
+        }
         Object.assign(thread, {
-            seen_message_id: lastSeenId,
             message_needaction_counter: newNeedactionCounter,
             message_unread_counter: newUnreadCounter,
         });
@@ -121,10 +124,12 @@ export class ThreadService {
                 ["res_id", "=", thread.id],
             ],
         ]);
+        if (thread.selfMember) {
+            thread.selfMember.seen_message_id = thread.newestPersistentNotEmptyOfAllMessage;
+        }
         Object.assign(thread, {
             message_unread_counter: 0,
             message_needaction_counter: 0,
-            seen_message_id: thread.newestPersistentNotEmptyOfAllMessage?.id,
         });
     }
 
@@ -164,7 +169,7 @@ export class ThreadService {
      */
     async fetchMessages(thread, { after, before } = {}) {
         thread.status = "loading";
-        if (thread.type === "chatter" && !thread.id) {
+        if (!["mail.box", "discuss.channel"].includes(thread.model) && !thread.id) {
             thread.isLoaded = true;
             return [];
         }
@@ -459,12 +464,14 @@ export class ThreadService {
             partner_ids: [this.store.self.id],
         });
         const thread = this.store.Thread.insert({
+            channel_type: "channel",
             id,
             model: "discuss.channel",
             name,
-            channel_type: "channel",
-            channel: { avatarCacheKey: "hello" },
         });
+        if (!thread.avatarCacheKey) {
+            thread.avatarCacheKey = "hello";
+        }
         this.open(thread);
         return thread;
     }
@@ -585,7 +592,7 @@ export class ThreadService {
         if (parentId) {
             params.post_data.parent_id = parentId;
         }
-        if (thread.type === "chatter") {
+        if (thread.model !== "discuss.channel") {
             params.thread_id = thread.id;
             params.thread_model = thread.model;
         } else {
@@ -606,10 +613,6 @@ export class ThreadService {
                     mentionedPartners,
                 })
             );
-            const recentEmojis = JSON.parse(
-                browser.localStorage.getItem("web.emoji.frequent") || "{}"
-            );
-            browser.localStorage.setItem("web.emoji.frequent", JSON.stringify(recentEmojis));
             tmpMsg = this.store.Message.insert(
                 {
                     ...tmpData,
@@ -620,11 +623,13 @@ export class ThreadService {
                 { html: true }
             );
             thread.messages.push(tmpMsg);
-            thread.seen_message_id = tmpMsg.id;
+            if (thread.selfMember) {
+                thread.selfMember.seen_message_id = tmpMsg;
+            }
         }
         const data = await rpc("/mail/message/post", params);
-        tmpMsg?.delete();
         if (!data) {
+            tmpMsg?.delete();
             return;
         }
         if (data.id in this.store.Message.records) {
@@ -632,6 +637,12 @@ export class ThreadService {
         }
         const message = this.store.Message.insert(data, { html: true });
         thread.messages.add(message);
+        if (thread.selfMember?.seen_message_id?.id < message.id) {
+            thread.selfMember.seen_message_id = message;
+        }
+        // Only delete the temporary message now that seen_message_id is updated
+        // to avoid flickering.
+        tmpMsg?.delete();
         if (message.hasLink && this.store.hasLinkPreviewFeature) {
             rpc("/mail/link_preview", { message_id: data.id }, { silent: true });
         }

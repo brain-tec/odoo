@@ -39,7 +39,7 @@ class HrEmployeeBase(models.AbstractModel):
     work_email = fields.Char('Work Email', compute="_compute_work_contact_details", store=True, inverse='_inverse_work_contact_details')
     email = fields.Char(related="user_id.email")
     work_contact_id = fields.Many2one('res.partner', 'Work Contact', copy=False)
-    work_location_id = fields.Many2one('hr.work.location', 'Work Location')
+    work_location_id = fields.Many2one('hr.work.location', 'Work Location', domain="[('address_id', '=', address_id)]")
     user_id = fields.Many2one('res.users')
     share = fields.Boolean(related='user_id.share')
     resource_id = fields.Many2one('resource.resource')
@@ -202,21 +202,31 @@ class HrEmployeeBase(models.AbstractModel):
                 employee.mobile_phone = employee.work_contact_id.mobile
                 employee.work_email = employee.work_contact_id.email
 
+    def _create_work_contacts(self):
+        if any(employee.work_contact_id for employee in self):
+            raise UserError(_('Some employee already have a work contact'))
+        work_contacts = self.env['res.partner'].create([{
+            'email': employee.work_email,
+            'mobile': employee.mobile_phone,
+            'name': employee.name,
+            'image_1920': employee.image_1920,
+            'company_id': employee.company_id.id
+        } for employee in self])
+        for employee, work_contact in zip(self, work_contacts):
+            employee.work_contact_id = work_contact
+
     def _inverse_work_contact_details(self):
+        employees_without_work_contact = self.env['hr.employee']
         for employee in self:
             if not employee.work_contact_id:
-                employee.work_contact_id = self.env['res.partner'].sudo().create({
-                    'email': employee.work_email,
-                    'mobile': employee.mobile_phone,
-                    'name': employee.name,
-                    'image_1920': employee.image_1920,
-                    'company_id': employee.company_id.id
-                })
+                employees_without_work_contact += employee
             else:
                 employee.work_contact_id.sudo().write({
                     'email': employee.work_email,
                     'mobile': employee.mobile_phone,
                 })
+        if employees_without_work_contact:
+            employees_without_work_contact.sudo()._create_work_contacts()
 
     @api.depends('company_id')
     def _compute_address_id(self):

@@ -17,19 +17,19 @@
                             <a t-if="invite_preview" t-attf-href="/slides/#{channel.id}?#{keep_query('invite_hash', 'invite_partner_id')}" class="text-truncate d-block"><span t-esc="channel.name"/></a>
                             <a t-else="" t-att-href="'/slides/%s' % slug(channel)" class="text-truncate d-block"><span t-esc="channel.name"/></a>
                         </li>
-                        <li t-att-class="breadcrumb_class" t-att-aria-current="'page' and search_category" t-if="search_category">
-                            <a t-if="invite_preview" t-attf-href="/slides/#{channel.id}/category/#{search_category.id}?#{keep_query('invite_hash', 'invite_partner_id')}"><span t-esc="search_category.name"/></a>
-                            <a t-else="" t-attf-href="/slides/#{slug(channel)}/category/#{slug(search_category)}"><span t-esc="search_category.name"/></a>
+                        <li t-att-class="breadcrumb_class" t-if="search_category">
+                            <a t-if="invite_preview" t-attf-href="/slides/#{channel.id}/category/#{search_category.id}?#{keep_query('invite_hash', 'invite_partner_id')}" aria-current='page'><span t-esc="search_category.name"/></a>
+                            <a t-else="" t-attf-href="/slides/#{slug(channel)}/category/#{slug(search_category)}" aria-current='page'><span t-esc="search_category.name"/></a>
                         </li>
-                        <li t-att-class="breadcrumb_class" t-att-aria-current="'page' and search_tag" t-if="search_tag">
-                            <a t-att-href="'/slides/%s/tag/%s' % (slug(channel), slug(search_tag))"><span t-esc="search_tag.name"/></a>
+                        <li t-att-class="breadcrumb_class" t-if="search_tag">
+                            <a t-att-href="'/slides/%s/tag/%s' % (slug(channel), slug(search_tag))" aria-current='page'><span t-esc="search_tag.name"/></a>
                         </li>
-                        <li t-att-class="breadcrumb_class" t-att-aria-current="'page' and search_uncategorized" t-if="search_uncategorized">
-                            <a t-if="invite_preview" t-attf-href="/slides/#{channel.id}?uncategorized=1&amp;#{keep_query('invite_hash', 'invite_partner_id')}">Uncategorized</a>
-                            <a t-else="" t-attf-href="/slides/#{slug(channel)}?uncategorized=1">Uncategorized</a>
+                        <li t-att-class="breadcrumb_class" t-if="search_uncategorized">
+                            <a t-if="invite_preview" t-attf-href="/slides/#{channel.id}?uncategorized=1&amp;#{keep_query('invite_hash', 'invite_partner_id')}"  aria-current='page'>Uncategorized</a>
+                            <a t-else="" t-attf-href="/slides/#{slug(channel)}?uncategorized=1" aria-current='page'>Uncategorized</a>
                         </li>
-                        <li t-att-class="breadcrumb_class" t-att-aria-current="'page' and search_slide_category" t-if="search_slide_category">
-                            <a t-att-href="'/slides/%s?slide_category=%s' % (slug(channel), search_slide_category)"><span t-esc="slide_categories[search_slide_category]"/></a>
+                        <li t-att-class="breadcrumb_class" t-if="search_slide_category">
+                            <a t-att-href="'/slides/%s?slide_category=%s' % (slug(channel), search_slide_category)" aria-current='page'><span t-esc="slide_categories.get('search_slide_category', '-')"/></a>
                         </li>
                         <li t-if="slide" class="breadcrumb-item fw-bold">
                             <a t-att-href="'/slides/slide/%s' % slug(slide)"><span t-esc="slide.name"/></a>
@@ -65,19 +65,19 @@
                                     t-attf-href="/slides/#{channel.id if invite_preview else slug(channel)}?#{keep_query('invite_hash', 'invite_partner_id') if invite_preview else ''}">
                                     &#9492;<span class="ms-1" t-esc="channel.name"/>
                                 </a>
-                                <a t-att-class="dropdown_class" t-att-aria-current="'page' and search_category" t-if="search_category"
+                                <a t-att-class="dropdown_class" aria-current="page" t-if="search_category"
                                     t-attf-href="/slides/#{channel.id if invite_preview else slug(channel)}/category/#{search_category.id if invite_preview else slug(search_category)}?#{keep_query('invite_hash', 'invite_partner_id') if invite_preview else ''}">
                                     &#9492;<span class="ms-1" t-esc="search_category.name"/>
                                 </a>
-                                <a t-att-class="dropdown_class" t-att-aria-current="'page' and search_tag" t-if="search_tag" t-att-href="'/slides/%s/tag/%s' % (slug(channel), slug(search_tag))">
+                                <a t-att-class="dropdown_class" aria-current="page" t-if="search_tag" t-att-href="'/slides/%s/tag/%s' % (slug(channel), slug(search_tag))">
                                     &#9492;<span class="ms-1" t-esc="search_tag.name"/>
                                 </a>
-                                <a t-att-class="dropdown_class" t-att-aria-current="'page' and search_uncategorized" t-if="search_uncategorized"
+                                <a t-att-class="dropdown_class" aria-current="page" t-if="search_uncategorized"
                                     t-attf-href="/slides/#{channel.id if invite_preview else slug(channel)}?uncategorized=1&amp;#{keep_query('invite_hash', 'invite_partner_id') if invite_preview else ''}">
                                     &#9492;<span class="ms-1">Uncategorized</span>
                                 </a>
-                                <a t-att-class="dropdown_class" t-att-aria-current="'page' and search_slide_category" t-if="search_slide_category" t-att-href="'/slides/%s?slide_category=%s' % (slug(channel), search_slide_category)">
-                                    &#9492;<span class="ms-1" t-esc="slide_categories[search_slide_category]"/>
+                                <a t-att-class="dropdown_class" aria-current="page" t-if="search_slide_category" t-att-href="'/slides/%s?slide_category=%s' % (slug(channel), search_slide_category)">
+                                    &#9492;<span class="ms-1" t-esc="slide_categories.get('search_slide_category', '-')"/>
                                 </a>
                                  <a t-if="slide" class="dropdown-item active" t-att-href="'/slides/slide/%s' % (slug(slide))">
                                     &#9492;<span class="ms-1" t-esc="slide.name"/>
@@ -213,7 +213,7 @@
                                             </t>
                                         </t>
                                         <a t-if="channel.can_upload"
-                                            class="o_wslides_js_channel_tag_add border badge text-bg-light fw-normal py-1 m-1 o_not_editable"
+                                            class="o_wslides_js_channel_tag_add border badge text-bg-light fw-normal m-1 o_not_editable"
                                             role="button"
                                             aria-label="Add Tag"
                                             href="#"
@@ -407,7 +407,7 @@
                 <i class="fa fa-times"/>
             </button>
             <div class="d-flex align-items-center pt-3">
-                <span t-attf-class="o_wslides_channel_completion_completed badge rounded-pill text-bg-success py-1 px-2 mx-auto #{'d-none' if not channel.completed else ''}">
+                <span t-attf-class="o_wslides_channel_completion_completed badge rounded-pill text-bg-success mx-auto #{'d-none' if not channel.completed else ''}">
                     <i class="fa fa-check"/> Completed
                 </span>
                 <div t-attf-class="o_wslides_channel_completion_progressbar #{'d-none' if channel.completed else 'd-flex'} w-100 align-items-center">
@@ -530,7 +530,7 @@
                         <span>Asking Question</span>
                     </div>
                     <div class="d-flex flex-row">
-                        <span class="badge fw-bold px-2 py-1 m-1 text-bg-warning">
+                        <span class="badge fw-bold m-1 text-bg-warning">
                             <i class="fa fa-fw fa-flag"/> 10 xp
                         </span>
                     </div>
@@ -547,7 +547,7 @@
                         <span>Answering Questions</span>
                     </div>
                     <div class="d-flex flex-row">
-                        <span class="badge text-bg-info badge-arrow-right fw-normal px-2 py-1 m-1">New</span>
+                        <span class="badge text-bg-info badge-arrow-right fw-normal m-1">New</span>
                     </div>
                 </li>
             </ul>
@@ -578,7 +578,7 @@
                         <span>Logic</span>
                     </div>
                     <div class="d-flex flex-row">
-                        <span class="badge text-bg-success fw-normal px-2 py-1 m-1">Preview</span>
+                        <span class="badge text-bg-success fw-normal m-1">Preview</span>
                     </div>
                 </li>
             </ul>
@@ -603,22 +603,22 @@
 
         <div class="d-flex flex-row o_not_editable align-items-center">
             <a name="o_wslides_list_slide_add_quizz" t-if="channel.can_upload and not slide.question_ids" t-attf-href="/slides/slide/#{slug(slide)}?quiz_quick_create" aria-label="Add quiz">
-                <span class="badge text-bg-light badge-hide border fw-normal px-2 py-1 m-1">Add Quiz</span>
+                <span class="badge text-bg-light badge-hide border fw-normal m-1">Add Quiz</span>
             </a>
             <a t-if="channel.can_upload" href="#" name="o_wslides_slide_toggle_is_preview" aria-label="Preview">
-                <span t-att-data-slide-id="slide.id" t-attf-class="o_wslides_js_slide_toggle_is_preview badge #{'text-bg-success' if slide.is_preview else 'text-bg-light badge-hide border'} fw-normal px-2 py-1 m-1"><span>Preview</span></span>
+                <span t-att-data-slide-id="slide.id" t-attf-class="o_wslides_js_slide_toggle_is_preview badge #{'text-bg-success' if slide.is_preview else 'text-bg-light badge-hide border'} fw-normal m-1"><span>Preview</span></span>
             </a>
             <t t-elif="slide.is_preview and not channel.is_member">
-                <span class="badge text-bg-success fw-normal px-2 py-1 m-1"><span>Preview</span></span>
+                <span class="badge text-bg-success fw-normal m-1"><span>Preview</span></span>
             </t>
-            <span t-if="slide.is_new_slide and not channel_progress[slide.id].get('completed')" class="badge text-bg-info badge-arrow-right fw-normal px-2 py-1 m-1">
+            <span t-if="slide.is_new_slide and not channel_progress[slide.id].get('completed')" class="badge text-bg-info badge-arrow-right fw-normal m-1">
                 New
             </span>
-            <span t-if="slide.question_ids" t-att-class="'badge fw-bold px-2 py-1 m-1 %s' % ('text-bg-success' if channel_progress[slide.id].get('completed') else 'text-bg-warning')">
+            <span t-if="slide.question_ids" t-att-class="'badge fw-bold m-1 %s' % ('text-bg-success' if channel_progress[slide.id].get('completed') else 'text-bg-warning')">
                 <i t-attf-class="fa fa-fw #{'fa-check' if channel_progress[slide.id].get('completed') else 'fa-flag'}"/>
                 <t t-esc="channel_progress[slide.id].get('quiz_karma_won', 0) if channel_progress[slide.id].get('completed') else channel_progress[slide.id].get('quiz_karma_gain', 0)"/> xp
             </span>
-            <span class="badge text-bg-danger fw-normal px-2 py-1 m-1" t-if="not slide.website_published">Unpublished</span>
+            <span class="badge text-bg-danger fw-normal m-1" t-if="not slide.website_published">Unpublished</span>
         </div>
 
         <div t-if="channel.is_member or channel.can_publish" class="pt-2 pb-2 border-start ms-2 me-2 ps-2 d-flex flex-row align-items-center o_wslides_slides_list_slide_controls o_not_editable">
@@ -765,7 +765,7 @@
                     </t>
                 </t>
                 <a t-if="channel.can_upload"
-                    class="o_wslides_js_channel_tag_add border badge text-bg-light fw-normal py-1 m-1"
+                    class="o_wslides_js_channel_tag_add border badge text-bg-light fw-normal m-1"
                     role="button"
                     aria-label="Add Tag"
                     href="#"

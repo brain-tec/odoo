@@ -255,7 +255,7 @@
                                         <input class="form-check-input pe-none" type="radio" name="Online Events" t-att-checked="is_active"/>
                                         <label class="form-check-label" for="Online Events">Online Events</label>
                                     </div>
-                                    <span t-out="country['country_id_count']" class="badge rounded-pill px-2 text-bg-light ms-auto"/>
+                                    <span t-out="country['country_id_count']" class="badge rounded-pill text-bg-light ms-auto"/>
                                 </a>
                             </t>
                         </li>
@@ -335,7 +335,7 @@
                             <div class="d-flex flex-wrap gap-1 small">
                                 <t t-foreach="event.tag_ids.filtered(lambda tag: tag.category_id.website_id == website or not tag.category_id.website_id)" t-as="tag">
                                     <span t-if="tag.color"
-                                        t-attf-class="badge rounded-pill px-2 p-1 #{'o_badge_color_%s' % tag.color if tag.color else 'text-bg-light'}">
+                                        t-attf-class="badge rounded-pill #{'o_badge_color_%s' % tag.color if tag.color else 'text-bg-light'}">
                                         <t t-out="tag.name"/>
                                     </span>
                                 </t>
@@ -349,7 +349,8 @@
                             </small>
                         </div>
                         <!-- Location -->
-                        <div class="d-flex align-items-center">
+                        <t t-set="has_city_or_country" t-value="event.address_id.sudo().city or event.address_id.sudo().country_id"/>
+                        <div t-if="not event.address_id or has_city_or_country" class="d-flex align-items-center">
                             <i class="fa fa-map-marker me-2" title="Location"/>
                             <small t-if="event.address_id" class="o_not_editable fw-bold" itemprop="location" t-out="event.address_id" t-options="{'widget': 'contact', 'fields': ['city'], 'no_marker': 'true'}"/>
                             <small t-else="" class="o_not_editable fw-bold" itemprop="location">Online event</small>

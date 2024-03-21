@@ -85,7 +85,9 @@ test("Do not show channel when visitor is typing", async () => {
     rpc = rpcWithEnv(env);
     await openDiscuss();
     await contains(".o-mail-DiscussSidebarCategory", { count: 2 });
-    await contains(".o-mail-DiscussSidebarCategory-livechat", { count: 0 });
+    await contains(".o-mail-DiscussSidebarCategory-livechat + .o-mail-DiscussSidebarChannel", {
+        count: 0,
+    });
     // simulate livechat visitor typing
     const channel = pyEnv["discuss.channel"].search_read([["id", "=", channelId]])[0];
     await withGuest(guestId, () =>
@@ -96,7 +98,9 @@ test("Do not show channel when visitor is typing", async () => {
     );
     // weak test, no guaranteed that we waited long enough for the livechat to potentially appear
     await tick();
-    await contains(".o-mail-DiscussSidebarCategory-livechat", { count: 0 });
+    await contains(".o-mail-DiscussSidebarCategory-livechat + .o-mail-DiscussSidebarChannel", {
+        count: 0,
+    });
 });
 
 test("Smiley face avatar for livechat item linked to a guest", async () => {
@@ -373,4 +377,21 @@ test("unknown livechat can be displayed and interacted with", async () => {
     });
     await contains(".o-mail-DiscussSidebarCategory-livechat", { count: 0 });
     await contains(".o-mail-DiscussSidebarChannel", { count: 0 });
+});
+
+test("Local sidebar category state is shared between tabs", async () => {
+    const pyEnv = await startServer();
+    pyEnv["discuss.channel"].create({
+        channel_type: "livechat",
+        livechat_operator_id: serverState.user,
+    });
+    const env1 = await start({ asTab: true });
+    const env2 = await start({ asTab: true });
+    await openDiscuss(undefined, { target: env1 });
+    await openDiscuss(undefined, { target: env2 });
+    await contains(".o-mail-DiscussSidebarCategory-livechat .oi-chevron-down", { target: env1 });
+    await contains(".o-mail-DiscussSidebarCategory-livechat .oi-chevron-down", { target: env2 });
+    await click(".o-mail-DiscussSidebarCategory-livechat .btn", { target: env1 });
+    await contains(".o-mail-DiscussSidebarCategory-livechat .oi-chevron-right", { target: env1 });
+    await contains(".o-mail-DiscussSidebarCategory-livechat .oi-chevron-right", { target: env2 });
 });
