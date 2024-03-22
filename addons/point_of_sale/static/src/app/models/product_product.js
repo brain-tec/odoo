@@ -42,6 +42,10 @@ export class ProductProduct extends Base {
         return this.attribute_line_ids.some((line) => line.attribute_id);
     }
 
+    isCombo() {
+        return this.combo_ids.length;
+    }
+
     get isScaleAvailable() {
         return true;
     }
@@ -72,27 +76,6 @@ export class ProductProduct extends Base {
         for (const category of categories) {
             current.push(category.id);
             getParent(category);
-        }
-
-        return current;
-    }
-
-    get childPosCategIds() {
-        const current = [];
-        const categories = this.pos_categ_ids;
-
-        const getChild = (categ) => {
-            if (categ.child_id) {
-                for (const child of categ.child_id) {
-                    current.push(child.id);
-                    getChild(child);
-                }
-            }
-        };
-
-        for (const category of categories) {
-            current.push(category.id);
-            getChild(category);
         }
 
         return current;
@@ -183,7 +166,7 @@ export class ProductProduct extends Base {
     }
 
     get searchString() {
-        const fields = ["display_name", "description_sale"];
+        const fields = ["display_name", "description_sale", "description"];
         return fields
             .map((field) => this[field] || "")
             .filter(Boolean)
