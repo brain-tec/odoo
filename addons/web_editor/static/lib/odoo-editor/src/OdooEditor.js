@@ -837,7 +837,10 @@ export class OdooEditor extends EventTarget {
                     toremove.remove();
                 }
             } else if (record.type === 'add') {
-                let node = this.idFind(record.oid) || this.unserializeNode(record.node);
+                let node = this.idFind(record.oid) || (record.node && this.unserializeNode(record.node));
+                if (!node) {
+                    continue;
+                }
                 if (this._collabClientId) {
                     const fakeNode = document.createElement('fake-el');
                     fakeNode.appendChild(node);
@@ -990,6 +993,9 @@ export class OdooEditor extends EventTarget {
                 case 'remove': {
                     let nodeToRemove = this.idFind(mutation.id);
                     if (!nodeToRemove) {
+                        if (!mutation.node) {
+                            continue;
+                        }
                         nodeToRemove = this.unserializeNode(mutation.node);
                         const fakeNode = document.createElement('fake-el');
                         fakeNode.appendChild(nodeToRemove);
@@ -2665,7 +2671,7 @@ export class OdooEditor extends EventTarget {
                         // Since the unit test Event is not trusted by the browser, we don't
                         // need to undo the char during the unit tests.
                         // @see https://developer.mozilla.org/en-US/docs/Web/API/Event/isTrusted
-                        this._applyRawCommand('oDeleteBackward');
+                        this._protect(() => this._applyRawCommand('oDeleteBackward'));
                     }
                     if (latestSelectionInsideEmptyTag) {
                         // Restore the selection inside the empty Element.
