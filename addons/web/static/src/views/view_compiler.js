@@ -10,8 +10,9 @@ import { toStringExpression, BUTTON_CLICK_PARAMS } from "./utils";
 /**
  * @typedef Compiler
  * @property {string} selector
- * @property {string} [class]
  * @property {(el: Element, params: Record<string, any>) => Element} fn
+ * @property {string} [class]
+ * @property {boolean} [doNotCopyAttributes]
  */
 
 import { xml } from "@odoo/owl";
@@ -250,6 +251,7 @@ export class ViewCompiler {
         const root = this.templates[key].cloneNode(true);
         const child = this.compileNode(root, params);
         const newRoot = createElement("t", [child]);
+        newRoot.setAttribute("t-translation", "off");
         return newRoot;
     }
 

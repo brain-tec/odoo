@@ -70,10 +70,6 @@ class Project(models.Model):
     def _get_default_favorite_user_ids(self):
         return [(6, 0, [self.env.uid])]
 
-    @api.model
-    def _read_group_stage_ids(self, stages, domain, order):
-        return self.env['project.project.stage'].search([], order=order)
-
     name = fields.Char("Name", index='trigram', required=True, tracking=True, translate=True, default_export_compatible=True)
     description = fields.Html(help="Description to provide more information and context about this project")
     active = fields.Boolean(default=True,
@@ -163,7 +159,7 @@ class Project(models.Model):
 
     # Not `required` since this is an option to enable in project settings.
     stage_id = fields.Many2one('project.project.stage', string='Stage', ondelete='restrict', groups="project.group_project_stages",
-        tracking=True, index=True, copy=False, default=_default_stage_id, group_expand='_read_group_stage_ids')
+        tracking=True, index=True, copy=False, default=_default_stage_id, group_expand='_read_group_expand_full')
 
     update_ids = fields.One2many('project.update', 'project_id')
     last_update_id = fields.Many2one('project.update', string='Last Update', copy=False)
@@ -870,27 +866,27 @@ class Project(models.Model):
     @api.model
     def _create_analytic_account_from_values(self, values):
         company = self.env['res.company'].browse(values.get('company_id', False))
-        project_plan, _other_plans = self.env['account.analytic.plan']._get_all_plans()
+        project_plan_id = int(self.env['ir.config_parameter'].sudo().get_param('analytic.analytic_plan_projects'))
+
+        if not project_plan_id:
+            project_plan, _other_plans = self.env['account.analytic.plan']._get_all_plans()
+            project_plan_id = project_plan.id
+
         analytic_account = self.env['account.analytic.account'].create({
             'name': values.get('name', _('Unknown Analytic Account')),
             'company_id': company.id,
             'partner_id': values.get('partner_id'),
-            'plan_id': project_plan.id,
+            'plan_id': project_plan_id,
         })
         return analytic_account
 
     def _create_analytic_account(self):
         for project in self:
-            company_id = project.company_id.id
-            project_plan, _other_plans = self.env['account.analytic.plan']._get_all_plans()
-            analytic_account = self.env['account.analytic.account'].create({
+            project.analytic_account_id = self._create_analytic_account_from_values({
+                'company_id': project.company_id.id,
                 'name': project.name,
-                'company_id': company_id,
-                'partner_id': project.partner_id.id,
-                'plan_id': project_plan.id,
-                'active': True,
+                'partner_id': project.partner_id.id
             })
-            project.write({'analytic_account_id': analytic_account.id})
 
     def _get_projects_to_make_billable_domain(self):
         return [('partner_id', '!=', False)]
