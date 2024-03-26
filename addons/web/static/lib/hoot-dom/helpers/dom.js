@@ -61,18 +61,19 @@ import { HootDomError, getTag, isFirefox, isIterable, parseRegExp } from "../hoo
 
 const {
     Boolean,
+    cancelAnimationFrame,
     clearTimeout,
-    console,
+    console: { warn: $warn },
     document,
     Map,
-    Math,
+    Math: { floor: $floor },
     MutationObserver,
-    Number,
-    Object,
-    parseFloat,
+    Number: { isInteger: $isInteger, isNaN: $isNaN, parseInt: $parseInt, parseFloat: $parseFloat },
+    Object: { keys: $keys, values: $values },
     Promise,
-    Reflect,
+    Reflect: { ownKeys: $ownKeys },
     RegExp,
+    requestAnimationFrame,
     Set,
     setTimeout,
 } = globalThis;
@@ -345,19 +346,19 @@ const matchesQueryPart = (query, width, height) => {
                 break;
             }
             case "max-height": {
-                result = height <= parseFloat(value);
+                result = height <= $parseFloat(value);
                 break;
             }
             case "max-width": {
-                result = width <= parseFloat(value);
+                result = width <= $parseFloat(value);
                 break;
             }
             case "min-height": {
-                result = height >= parseFloat(value);
+                result = height >= $parseFloat(value);
                 break;
             }
             case "min-width": {
-                result = width >= parseFloat(value);
+                result = width >= $parseFloat(value);
                 break;
             }
             case "orientation": {
@@ -539,7 +540,7 @@ const parseSelector = (selector) => {
  *
  * @param {string} val
  */
-const pixelValueToNumber = (val) => Number(val.endsWith("px") ? val.slice(0, -2) : val);
+const pixelValueToNumber = (val) => $parseFloat(val.endsWith("px") ? val.slice(0, -2) : val);
 
 /**
  * @param {Node[]} nodes
@@ -706,8 +707,8 @@ customPseudoClasses
         };
     })
     .set("eq", (content) => {
-        const index = Number(content);
-        if (!Number.isInteger(index)) {
+        const index = $parseInt(content);
+        if (!$isInteger(index)) {
             throw selectorError("eq", `expected index to be an integer (got ${content})`);
         }
         return function eq(node, i) {
@@ -800,7 +801,7 @@ export function cleanupDOM() {
     // Observers
     const remainingObservers = observers.size;
     if (remainingObservers) {
-        console.warn(`${remainingObservers} observers still running`);
+        $warn(`${remainingObservers} observers still running`);
         for (const { observer } of observers.values()) {
             observer.disconnect();
         }
@@ -879,7 +880,7 @@ export function getFocusableElements(parent) {
     }
     const withTabIndexZero = byTabIndex[0] || [];
     delete byTabIndex[0];
-    return [...Object.values(byTabIndex).flat(), ...withTabIndexZero];
+    return [...$values(byTabIndex).flat(), ...withTabIndexZero];
 }
 
 /**
@@ -889,8 +890,8 @@ export function getFocusableElements(parent) {
 export function getHeight(dimensions) {
     if (dimensions) {
         for (const prop of ["h", "height"]) {
-            const value = parseFloat(dimensions[prop]);
-            if (!Number.isNaN(value)) {
+            const value = $parseFloat(dimensions[prop]);
+            if (!$isNaN(value)) {
                 return value;
             }
         }
@@ -1055,8 +1056,8 @@ export function getStyle(node) {
 export function getWidth(dimensions) {
     if (dimensions) {
         for (const prop of ["w", "width"]) {
-            const value = parseFloat(dimensions[prop]);
-            if (!Number.isNaN(value)) {
+            const value = $parseFloat(dimensions[prop]);
+            if (!$isNaN(value)) {
                 return value;
             }
         }
@@ -1079,8 +1080,8 @@ export function getWindow(node) {
 export function getX(position) {
     if (position) {
         for (const prop of ["x", "left", "clientX", "pageX", "screenX"]) {
-            const value = parseFloat(position[prop]);
-            if (!Number.isNaN(value)) {
+            const value = $parseFloat(position[prop]);
+            if (!$isNaN(value)) {
                 return value;
             }
         }
@@ -1095,8 +1096,8 @@ export function getX(position) {
 export function getY(position) {
     if (position) {
         for (const prop of ["y", "top", "clientY", "pageY", "screenY"]) {
-            const value = parseFloat(position[prop]);
-            if (!Number.isNaN(value)) {
+            const value = $parseFloat(position[prop]);
+            if (!$isNaN(value)) {
                 return value;
             }
         }
@@ -1167,7 +1168,7 @@ export function isEmpty(value) {
             return isEmpty(getNodeContent(value));
         }
         if (!isIterable(value)) {
-            value = Object.keys(value);
+            value = $keys(value);
         }
         return [...value].length === 0;
     }
@@ -1509,7 +1510,7 @@ export function queryAll(target, options) {
     }
 
     const count = nodes.length;
-    if (Number.isInteger(exact) && count !== exact) {
+    if ($isInteger(exact) && count !== exact) {
         const s = count === 1 ? "" : "s";
         const strPrefix = prefixes.length ? ` ${and(prefixes)}` : "";
         const strSelector = typeof target === "string" ? `(selector: "${target}")` : "";
@@ -1622,7 +1623,7 @@ export function queryOne(target, options) {
     if (target.raw) {
         return queryOne(String.raw(...arguments));
     }
-    if (Number.isInteger(options?.exact)) {
+    if ($isInteger(options?.exact)) {
         throw new HootDomError(
             `cannot call \`queryOne\` with 'exact'=${options.exact}: did you mean to use \`queryAll\`?`
         );
@@ -1672,11 +1673,11 @@ export function registerPseudoClass(pseudoClass, predicate) {
  */
 export function setDimensions(width, height) {
     const defaultRoot = getDefaultRoot();
-    if (!Number.isNaN(width)) {
+    if (!$isNaN(width)) {
         currentDimensions.width = width;
         defaultRoot.style?.setProperty("width", `${width}px`, "important");
     }
-    if (!Number.isNaN(height)) {
+    if (!$isNaN(height)) {
         currentDimensions.height = height;
         defaultRoot.style?.setProperty("height", `${height}px`, "important");
     }
@@ -1697,7 +1698,7 @@ export function toSelector(node, options) {
     if (node.classList?.length) {
         parts.class = `.${[...node.classList].join(".")}`;
     }
-    return options?.object ? parts : Object.values(parts).join("");
+    return options?.object ? parts : $values(parts).join("");
 }
 
 /**
@@ -1771,25 +1772,44 @@ export async function waitUntil(predicate, options) {
         return result;
     }
 
-    let disconnect = () => {};
+    let disconnect;
+    let handle;
+    let timeoutId;
     return new Promise((resolve, reject) => {
-        const timeout = Math.floor(options?.timeout ?? 1_000);
-        let message = options?.message || `'waitUntil' timed out after %timeout% milliseconds`;
-        if (typeof message === "function") {
-            message = message();
-        }
-        const timeoutId = setTimeout(
-            () => reject(new HootDomError(message.replace("%timeout%", String(timeout)))),
-            timeout
-        );
-        disconnect = observe(getDefaultRoot(), () => {
+        const runCheck = () => {
+            if (handle) {
+                cancelAnimationFrame(handle);
+            }
             const result = predicate();
             if (result) {
                 resolve(result);
-                clearTimeout(timeoutId);
+            } else {
+                handle = requestAnimationFrame(runCheck);
             }
-        });
-    }).finally(disconnect);
+        };
+
+        const timeout = $floor(options?.timeout ?? 200);
+        timeoutId = setTimeout(() => {
+            let message = options?.message || `'waitUntil' timed out after %timeout% milliseconds`;
+            if (typeof message === "function") {
+                message = message();
+            }
+            reject(new HootDomError(message.replace("%timeout%", String(timeout))));
+        }, timeout);
+
+        disconnect = observe(getDefaultRoot(), runCheck);
+        runCheck();
+    }).finally(() => {
+        if (disconnect) {
+            disconnect();
+        }
+        if (handle) {
+            cancelAnimationFrame(handle);
+        }
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+    });
 }
 
 /**
@@ -1805,7 +1825,7 @@ export async function waitUntil(predicate, options) {
  *  afterEach(watchKeys(window, ["odoo"]));
  */
 export function watchKeys(target, whiteList) {
-    const acceptedKeys = new Set([...Reflect.ownKeys(target), ...(whiteList || [])]);
+    const acceptedKeys = new Set([...$ownKeys(target), ...(whiteList || [])]);
 
     /**
      * @param {boolean} [cleanup=true]
@@ -1814,8 +1834,8 @@ export function watchKeys(target, whiteList) {
         if (!isInDOM(target)) {
             return;
         }
-        const keysDiff = Reflect.ownKeys(target).filter(
-            (key) => isNaN(key) && !acceptedKeys.has(key)
+        const keysDiff = $ownKeys(target).filter(
+            (key) => $isNaN($parseFloat(key)) && !acceptedKeys.has(key)
         );
         if (keysDiff.length) {
             if (cleanup) {
@@ -1823,7 +1843,7 @@ export function watchKeys(target, whiteList) {
                     delete target[key];
                 }
             } else {
-                console.warn(
+                $warn(
                     `${target.constructor.name} has`,
                     keysDiff.length,
                     `unexpected keys:`,

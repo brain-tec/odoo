@@ -32,7 +32,8 @@ import { Test } from "./test";
 /**
  *
  * @typedef {{
- *  aborted: boolean;
+ *  aborted?: boolean;
+ *  debug?: boolean;
  * }} AfterTestOptions
  *
  * @typedef {import("../hoot_utils").ArgumentType} ArgumentType
@@ -80,7 +81,23 @@ import { Test } from "./test";
 // Global
 //-----------------------------------------------------------------------------
 
-const { Boolean, Error, Object, Promise, TypeError, performance } = globalThis;
+const {
+    Array: { isArray: $isArray },
+    Boolean,
+    Error,
+    Object: {
+        assign: $assign,
+        create: $create,
+        fromEntries: $fromEntries,
+        entries: $entries,
+        keys: $keys,
+    },
+    Promise,
+    TypeError,
+    performance,
+} = globalThis;
+/** @type {Performance["now"]} */
+const $now = performance.now.bind(performance);
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -91,7 +108,7 @@ const { Boolean, Error, Object, Promise, TypeError, performance } = globalThis;
  * @param {AfterTestOptions} options
  */
 const afterTest = (test, options) => {
-    currentResult.duration = performance.now() - currentResult.ts;
+    currentResult.duration = $now() - currentResult.ts;
 
     // Steps
     if (currentResult.steps.length) {
@@ -198,7 +215,9 @@ const afterTest = (test, options) => {
 
     test.parent.reporting.add(report);
 
-    currentResult = null;
+    if (!options?.debug) {
+        currentResult = null;
+    }
 };
 
 /**
@@ -307,6 +326,19 @@ const formatStack = (stack) => {
 };
 
 /**
+ * @param {Iterable<any> | Record<any, any>} object
+ */
+const getLength = (object) => {
+    if (typeof object === "string" || $isArray(object)) {
+        return object.length;
+    }
+    if (isIterable(object)) {
+        return [...object].length;
+    }
+    return $keys(object).length;
+};
+
+/**
  * @param {Node} node
  * @param {string[]} keys
  * @returns {Record<string, string>}
@@ -316,7 +348,7 @@ const getStyleValues = (node, keys) => {
     if (!nodeStyle) {
         return {};
     }
-    return Object.fromEntries(
+    return $fromEntries(
         keys.map((key) => [
             key,
             key.includes("-") ? nodeStyle.getPropertyValue(key) : nodeStyle[key],
@@ -330,13 +362,36 @@ const getStyleValues = (node, keys) => {
  * @param {Record<string, string | RegExp>} styleDef
  */
 const hasStyle = (node, styleDef) => {
-    const nodeStyle = getStyleValues(node, Object.keys(styleDef));
-    for (const [prop, value] of Object.entries(styleDef)) {
+    const nodeStyle = getStyleValues(node, $keys(styleDef));
+    for (const [prop, value] of $entries(styleDef)) {
         if (!regexMatchOrStrictEqual(nodeStyle[prop], value)) {
             return false;
         }
     }
     return true;
+};
+
+/**
+ * @param {Iterable<any> | Record<any, any>} object
+ * @param {any} item
+ * @returns {boolean}
+ */
+const includes = (object, item) => {
+    if (typeof object === "string") {
+        return object.includes(item);
+    }
+    if ($isArray(object)) {
+        // Standard case: array
+        return object.some((i) => deepEqual(i, item));
+    }
+    if (isIterable(object)) {
+        // Iterables: cast to array
+        return includes([...object], item);
+    }
+    if ($isArray(item) && item.length === 2) {
+        return includes($entries(object), item);
+    }
+    return includes($keys(object), item);
 };
 
 /**
@@ -351,7 +406,7 @@ const matcherModifierError = (modifier, message) =>
  * @returns {Record<string, string>}
  */
 const parseStyle = (styleString) =>
-    Object.fromEntries(styleString.split(";").map((prop) => prop.split(":").map((v) => v.trim())));
+    $fromEntries(styleString.split(";").map((prop) => prop.split(":").map((v) => v.trim())));
 
 /**
  * @param {unknown} value
@@ -424,7 +479,7 @@ export function makeExpect(params) {
         return new Matchers(received, {}, params.headless);
     }
 
-    const enrichedExpect = Object.assign(expect, {
+    const enrichedExpect = $assign(expect, {
         assertions,
         errors,
         extend,
@@ -449,13 +504,13 @@ export class Assertion {
     /** @type {Modifiers<false>} */
     modifiers = { not: false, rejects: false, resolves: false };
     pass = false;
-    ts = performance.now();
+    ts = $now();
 
     /**
      * @param {Partial<Assertion>} values
      */
     constructor(values) {
-        Object.assign(this, values);
+        $assign(this, values);
     }
 }
 
@@ -466,7 +521,7 @@ export class Assertion {
  */
 export class Matchers {
     /** @type {Record<string, (...args: any[]) => MatcherSpecifications>} */
-    static registry = Object.create(null);
+    static registry = $create(null);
 
     /** @type {A} */
     #actual = null;
@@ -490,7 +545,7 @@ export class Matchers {
         this.#headless = headless;
         this.#modifiers = modifiers;
 
-        for (const [fnName, fn] of Object.entries(this.constructor.registry)) {
+        for (const [fnName, fn] of $entries(this.constructor.registry)) {
             const resolve = this.#resolve.bind(this);
             const saveStack = this.#saveStack.bind(this);
             this[fnName] = {
@@ -513,7 +568,7 @@ export class Matchers {
      *
      * @returns {Omit<Matchers<R, A, Async>, "not">}
      * @example
-     *  expect(false).not.toBeTruthy();
+     *  expect([1]).not.toBeEmpty();
      * @example
      *  expect("foo").not.toBe("bar");
      */
@@ -774,31 +829,6 @@ export class Matchers {
     }
 
     /**
-     * Expects the received value to resolve to a truthy expression.
-     *
-     * @param {ExpectOptions} [options]
-     * @example
-     *  expect(true).toBeTruthy();
-     * @example
-     *  expect([]).toBeTruthy();
-     */
-    toBeTruthy(options) {
-        this.#saveStack();
-
-        ensureArguments([[options, ["object", null]]]);
-
-        return this.#resolve({
-            name: "toBeTruthy",
-            acceptedType: "any",
-            predicate: Boolean,
-            message: (pass) =>
-                options?.message ||
-                (pass ? `%actual% is[! not] truthy` : `expected value[! not] to be truthy`),
-            details: (actual) => [[Markup.red("Received:"), actual]],
-        });
-    }
-
-    /**
      * Expects the received value to be strictly between `min` (inclusive) and
      * `max` (exclusive).
      *
@@ -895,6 +925,90 @@ export class Matchers {
     }
 
     /**
+     * Expects the received value to have a length of the given `length`.
+     *
+     * Received value can be a string, an iterable or an object.
+     *
+     * @param {number} length
+     * @param {ExpectOptions} options
+     * @example
+     *  expect("foo").toHaveLength(3);
+     * @example
+     *  expect([1, 2, 3]).toHaveLength(3);
+     * @example
+     *  expect({ foo: 1, bar: 2 }).toHaveLength(2);
+     * @example
+     *  expect(new Set([1, 2])).toHaveLength(2);
+     */
+    toHaveLength(length, options) {
+        this.#saveStack();
+
+        ensureArguments([
+            [length, "integer"],
+            [options, ["object", null]],
+        ]);
+
+        return this.#resolve({
+            name: "toHaveLength",
+            acceptedType: ["string", "array", "object"],
+            predicate: (actual) => getLength(actual) === length,
+            message: (pass) =>
+                options?.message ||
+                (pass
+                    ? `%actual% has[! not] a length of ${formatHumanReadable(length)}`
+                    : `expected value[! not] to have the given length`),
+            details: (actual) => [
+                [Markup.green("Expected length:"), length],
+                [Markup.red("Received:"), getLength(actual)],
+            ],
+        });
+    }
+
+    /**
+     * Expects the received value to include an `item` of a given shape.
+     *
+     * Received value can be an iterable or an object (in case it is an object,
+     * the `item` should be a key or a tuple representing an entry in that object).
+     *
+     * Note that it is NOT a strict comparison: the item will be matched for deep
+     * equality against each item of the iterable.
+     *
+     * @param {keyof R | R[number]} item
+     * @param {ExpectOptions} options
+     * @example
+     *  expect([1, 2, 3]).toInclude(2);
+     * @example
+     *  expect({ foo: 1, bar: 2 }).toInclude("foo");
+     * @example
+     *  expect({ foo: 1, bar: 2 }).toInclude(["foo", 1]);
+     * @example
+     *  expect(new Set([{ foo: 1 }, { bar: 2 }])).toInclude({ bar: 2 });
+     */
+    toInclude(item, options) {
+        this.#saveStack();
+
+        ensureArguments([
+            [item, "any"],
+            [options, ["object", null]],
+        ]);
+
+        return this.#resolve({
+            name: "toInclude",
+            acceptedType: ["string", "any[]", "object"],
+            predicate: (actual) => includes(actual, item),
+            message: (pass) =>
+                options?.message ||
+                (pass
+                    ? `%actual% [includes!does not include] ${formatHumanReadable(item)}`
+                    : `expected object[! not] to include the given item`),
+            details: (actual) => [
+                [Markup.green("Object:"), actual],
+                [Markup.red("Item:"), item],
+            ],
+        });
+    }
+
+    /**
      * Expects the received value to match the given matcher (string or RegExp).
      *
      * @param {import("../hoot_utils").Matcher} matcher
@@ -924,44 +1038,6 @@ export class Matchers {
             details: (actual) => [
                 [Markup.green("Matcher:"), matcher],
                 [Markup.red("Received:"), actual],
-            ],
-        });
-    }
-
-    /**
-     * Expects the received value to satisfy the given predicate, taking the received
-     * value as argument.
-     *
-     * @param {(received: R) => boolean} predicate
-     * @param {ExpectOptions} [options]
-     * @example
-     *  expect("foo").toSatisfy((value) => typeof value === "string");
-     * @example
-     *  expect(false).not.toSatisfy(Boolean);
-     */
-    toSatisfy(predicate, options) {
-        this.#saveStack();
-
-        ensureArguments([
-            [predicate, "function"],
-            [options, ["object", null]],
-        ]);
-
-        return this.#resolve({
-            name: "toSatisfy",
-            acceptedType: "any",
-            predicate,
-            message: (pass) =>
-                options?.message ||
-                (pass
-                    ? `%actual% [satisfies!does not satisfy] the predicate ${formatHumanReadable(
-                          predicate
-                      )}`
-                    : `expected value[! not] to satisfy the predicate`),
-            details: (actual) => [
-                [Markup.green("Expected:"), true],
-                [Markup.red("Received:"), actual],
-                [Markup.text("Predicate:"), predicate],
             ],
         });
     }
@@ -1516,11 +1592,11 @@ export class Matchers {
                 options?.message ||
                 (pass
                     ? `%elements% have the expected style values for ${and(
-                          ...Object.keys(styleDef).map(formatHumanReadable)
+                          ...$keys(styleDef).map(formatHumanReadable)
                       )}`
                     : `expected %elements% [to have all!not to have any] of the given style properties`),
             details: (actual) => {
-                const styleValues = getStyleValues(actual[0], Object.keys(styleDef));
+                const styleValues = getStyleValues(actual[0], $keys(styleDef));
                 return [
                     [Markup.green("Expected:"), styleDef],
                     [Markup.red("Received:"), styleValues],
@@ -1763,5 +1839,5 @@ export class TestResult {
     pass = true;
     /** @type {string[]} */
     steps = [];
-    ts = performance.now();
+    ts = $now();
 }

@@ -1612,15 +1612,16 @@ class Website(models.Model):
         """
         fuzzy_term = False
         search_details = self._search_get_details(search_type, order, options)
-        count, results = self._search_exact(search_details, search, limit, order)
-        if count > 0:
-            return count, results, fuzzy_term
         if search and options.get('allowFuzzy', True):
             fuzzy_term = self._search_find_fuzzy_term(search_details, search)
             if fuzzy_term:
                 count, results = self._search_exact(search_details, fuzzy_term, limit, order)
                 if fuzzy_term.lower() == search.lower():
                     fuzzy_term = False
+            else:
+                count, results = self._search_exact(search_details, search, limit, order)
+        else:
+            count, results = self._search_exact(search_details, search, limit, order)
         return count, results, fuzzy_term
 
     def _search_exact(self, search_details, search, limit, order):
@@ -1700,6 +1701,43 @@ class Website(models.Model):
                 words.add(word)
         return best_word
 
+    def _search_get_indirect_fields(self, fields, model):
+        """
+        Returns the list of indirect fields amongst the requested fields.
+
+        :param fields: list of field names to be searched
+        :param model: model within which to search
+        :return: dict of indirect field details per indirect field name
+        """
+        # Are considered valid indirect fields, fields that belong to the
+        # comodel behind a relational direct field.
+        indirect_fields = {}
+        for field in fields:
+            if '.' not in field:
+                continue
+            direct, indirect = field.split('.')
+            if direct not in model._fields:
+                continue
+            direct_field = model._fields[direct]
+            comodel_name = direct_field.comodel_name
+            if comodel_name not in self.env:
+                continue
+            comodel_fields = self.env[comodel_name]._fields
+            cofield = None
+            if '_description_relation_field' in dir(direct_field):
+                # One2many field's comodel reference to the model's id.
+                cofield = direct_field._description_relation_field
+                if cofield not in comodel_fields:
+                    continue
+            if indirect in comodel_fields:
+                indirect_fields[field] = {
+                    'direct': direct,
+                    'indirect': indirect,
+                    'comodel': self.env[comodel_name],
+                    'cofield': cofield,
+                }
+        return indirect_fields
+
     def _trigram_enumerate_words(self, search_details, search, limit):
         """
         Browses through all words that need to be compared to the search term.
@@ -1719,7 +1757,8 @@ class Website(models.Model):
             if search_detail.get('requires_sudo'):
                 model = model.sudo()
             domain = search_detail['base_domain'].copy()
-            fields = set(fields).intersection(model._fields)
+            direct_fields = set(fields).intersection(model._fields)
+            indirect_fields = self._search_get_indirect_fields(fields, model)
 
             query = Query(self.env.cr, model._table, model._table_query)
 
@@ -1729,8 +1768,39 @@ class Website(models.Model):
                     search=unaccent(SQL('%s', search)),
                     field=unaccent(model._field_to_sql(model._table, field, query)),
                     )
-                for field in fields
+                for field in direct_fields
             ]
+            indirect_similarities = []
+            for field_info in indirect_fields.values():
+                direct = field_info['direct']
+                direct_field = model._fields[direct]
+                comodel = field_info['comodel']
+                coalias = query.make_alias(model._table, direct)
+                cofield = field_info['cofield']
+                if cofield:
+                    # One2many's comodel references the model's id.
+                    query.add_join('LEFT JOIN', coalias, comodel._table, SQL("%s = %s",
+                        SQL.identifier(model._table, 'id'),
+                        SQL.identifier(coalias, cofield),
+                    ))
+                elif 'relation' in dir(direct_field):
+                    # Many2many's relation holds the model's id in column1 and
+                    # the comodel's record id in column2.
+                    rel_alias = coalias
+                    query.add_join('LEFT JOIN', rel_alias, direct_field.relation, SQL("%s = %s",
+                        SQL.identifier(model._table, 'id'),
+                        SQL.identifier(rel_alias, direct_field.column1),
+                    ))
+                    coalias = query.make_alias(coalias, direct_field.column2)
+                    query.add_join('LEFT JOIN', coalias, comodel._table, SQL("%s = %s",
+                        SQL.identifier(rel_alias, direct_field.column2),
+                        SQL.identifier(coalias, 'id'),
+                    ))
+                indirect_similarities.append(SQL("word_similarity(%(search)s, %(field)s)",
+                    search=unaccent(SQL('%s', search)),
+                    field=unaccent(comodel._field_to_sql(coalias, field_info['indirect'], query)),
+                ))
+            similarities.extend(indirect_similarities)
             best_similarity = SQL('GREATEST(%(similarities)s)', similarities=SQL(', ').join(similarities))
 
             # Filter unpublished records for portal and public user for
@@ -1746,7 +1816,6 @@ class Website(models.Model):
 
             query.order = '_best_similarity desc'
             query.limit = 1000
-
             self.env.cr.execute(query.select(
                 SQL.identifier(model._table, 'id'),
                 SQL('%s AS _best_similarity', best_similarity),
@@ -1754,12 +1823,19 @@ class Website(models.Model):
             ids = {row[0] for row in self.env.cr.fetchall() if row[1] and row[1] >= similarity_threshold}
             domain.append([('id', 'in', list(ids))])
             domain = AND(domain)
-            records = model.search_read(domain, fields, limit=limit)
+            records = model.search_read(domain, direct_fields, limit=limit)
             for record in records:
                 for field, value in record.items():
                     if isinstance(value, str):
                         value = value.lower()
                         yield from re.findall(match_pattern, value)
+            if indirect_fields:
+                records = model.search(domain, limit=limit)
+                for indirect_field in indirect_fields:
+                    for value in records.mapped(indirect_field):
+                        if isinstance(value, str):
+                            value = value.lower()
+                            yield from re.findall(match_pattern, value)
 
     def _basic_enumerate_words(self, search_details, search, limit):
         """
@@ -1780,7 +1856,9 @@ class Website(models.Model):
                 model = model.sudo()
             domain = search_detail['base_domain'].copy()
             fields_domain = []
-            fields = set(fields).intersection(model._fields)
+            direct_fields = set(fields).intersection(model._fields)
+            indirect_fields = self._search_get_indirect_fields(fields, model)
+            fields = direct_fields.union(indirect_fields)
             for field in fields:
                 fields_domain.append([(field, '=ilike', '%s%%' % first)])
                 fields_domain.append([(field, '=ilike', '%% %s%%' % first)])
@@ -1788,7 +1866,7 @@ class Website(models.Model):
             domain.append(OR(fields_domain))
             domain = AND(domain)
             perf_limit = 1000
-            records = model.search_read(domain, fields, limit=perf_limit)
+            records = model.search_read(domain, direct_fields, limit=perf_limit)
             if len(records) == perf_limit:
                 # Exact match might have been missed because the fetched
                 # results are limited for performance reasons.
@@ -1804,3 +1882,10 @@ class Website(models.Model):
                         for word in re.findall(match_pattern, value):
                             if word[0] == search[0]:
                                 yield word.lower()
+            if indirect_fields:
+                records = model.search(domain, limit=limit)
+                for indirect_field in indirect_fields:
+                    for value in records.mapped(indirect_field):
+                        if isinstance(value, str):
+                            value = value.lower()
+                            yield from re.findall(match_pattern, value)

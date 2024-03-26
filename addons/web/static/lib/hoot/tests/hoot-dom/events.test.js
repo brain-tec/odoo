@@ -1,11 +1,12 @@
 /** @odoo-module */
 
-import { Component, xml } from "@odoo/owl";
+import { Component, mount, xml } from "@odoo/owl";
 import {
     clear,
     click,
     dblclick,
     drag,
+    edit,
     fill,
     hover,
     keyDown,
@@ -599,6 +600,59 @@ describe(parseUrl(import.meta.url), () => {
         expect("input").toHaveValue("john@doe.com");
     });
 
+    test("edit on empty value", async () => {
+        await mountOnFixture(/* xml */ `<input type="text" />`);
+
+        click("input");
+
+        monitorEvents("input", formatKeyBoardEvent);
+
+        expect("input").not.toHaveValue();
+
+        edit("test value");
+
+        expect("input").toHaveValue("test value");
+        expect([
+            ...[..."test value"].flatMap((char) => [
+                `keydown:${char}`,
+                `beforeinput`,
+                `input`,
+                `keyup:${char}`,
+            ]),
+        ]).toVerifySteps();
+    });
+
+    test("edit on existing value", async () => {
+        await mountOnFixture(/* xml */ `<input type="text" value="Test" />`);
+
+        click("input");
+
+        monitorEvents("input", formatKeyBoardEvent);
+
+        expect("input").toHaveValue("Test");
+
+        edit(" value");
+
+        expect("input").toHaveValue(" value");
+        expect([
+            // Clear
+            "keydown:a.ctrl",
+            "select",
+            "keyup:a.ctrl",
+            "keydown:Backspace",
+            "beforeinput",
+            "input",
+            "keyup:Backspace",
+            // Fill
+            ...[..." value"].flatMap((char) => [
+                `keydown:${char}`,
+                `beforeinput`,
+                `input`,
+                `keyup:${char}`,
+            ]),
+        ]).toVerifySteps();
+    });
+
     test("setInputFiles: single file", async () => {
         await mountOnFixture(/* xml */ `<input type="file" />`);
         const file1 = new File([""], "file1.txt");
@@ -973,7 +1027,7 @@ describe(parseUrl(import.meta.url), () => {
     });
 
     test("special keys modifiers: Windows", async () => {
-        mockUserAgent("Windows");
+        mockUserAgent("windows");
 
         await mountOnFixture(/* xml */ `<input />`);
 
@@ -999,7 +1053,7 @@ describe(parseUrl(import.meta.url), () => {
     });
 
     test("special keys modifiers: Mac", async () => {
-        mockUserAgent("Macintosh");
+        mockUserAgent("mac");
 
         await mountOnFixture(/* xml */ `<input />`);
 
@@ -1009,11 +1063,11 @@ describe(parseUrl(import.meta.url), () => {
 
         press("alt");
 
-        expect(["keydown:Alt.ctrl", "keyup:Alt.ctrl"]).toVerifySteps();
+        expect(["keydown:Alt.alt", "keyup:Alt.alt"]).toVerifySteps();
 
         press("ctrl");
 
-        expect(["keydown:Control.meta", "keyup:Control.meta"]).toVerifySteps();
+        expect(["keydown:Control.ctrl", "keyup:Control.ctrl"]).toVerifySteps();
 
         press("meta");
 
