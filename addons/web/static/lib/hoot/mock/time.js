@@ -19,21 +19,41 @@ import { isNil } from "../hoot_utils";
 //-----------------------------------------------------------------------------
 
 const {
-    Date,
-    Error,
-    Math,
-    Promise,
     cancelAnimationFrame,
     clearInterval,
     clearTimeout,
+    Date,
+    Error,
+    Math: { ceil: $ceil, max: $max },
+    performance,
+    Promise,
     requestAnimationFrame,
     setInterval,
     setTimeout,
 } = globalThis;
+const { now: $now, UTC: $UTC } = Date;
+/** @type {Performance["now"]} */
+const $performanceNow = performance.now.bind(performance);
 
 //-----------------------------------------------------------------------------
 // Internal
 //-----------------------------------------------------------------------------
+
+/**
+ * @param {Iterable<[string, [() => any, number, number]]>} values
+ */
+const addToTimerStack = (values) => {
+    if (!targetTime) {
+        return;
+    }
+    for (const [internalId, [callback, init, delay]] of values) {
+        const timeout = init + delay;
+        if (timeout <= targetTime) {
+            timerStack.push([callback, timeout, internalId]);
+        }
+    }
+    timerStack.sort((a, b) => a[1] - b[1]);
+};
 
 /**
  * @param {number} id
@@ -42,7 +62,7 @@ const animationToId = (id) => ID_PREFIX.animation + String(id);
 
 const getDateParams = () => [
     ...dateParams.slice(0, -1),
-    dateParams.at(-1) + (Date.now() - dateTimeStamp) + timeOffset,
+    dateParams.at(-1) + ($now() - dateTimeStamp) + timeOffset,
 ];
 
 /**
@@ -80,7 +100,7 @@ const idToTimeout = (id) => Number(id.slice(ID_PREFIX.timeout.length));
  */
 const intervalToId = (id) => ID_PREFIX.interval + String(id);
 
-const now = () => performance.now() + timeOffset;
+const now = () => $performanceNow() + timeOffset;
 
 /**
  * @param {string | DateSpecs} dateSpecs
@@ -105,7 +125,7 @@ const parseDateParams = (dateSpecs) => {
  */
 const setDateParams = (newDateParams) => {
     dateParams = newDateParams;
-    dateTimeStamp = Date.now();
+    dateTimeStamp = $now();
     timeOffset = 0;
 };
 
@@ -126,11 +146,14 @@ const DEFAULT_TIMEZONE = +1;
 
 /** @type {Map<string, [() => any, number, number]>} */
 const timers = new Map();
+/** @type {[() => any, number, string][]} */
+const timerStack = [];
 
 let allowTimers = true;
 let dateParams = DEFAULT_DATE;
-let dateTimeStamp = Date.now();
+let dateTimeStamp = $now();
 let frameDelay = 1000 / 60;
+let targetTime = 0;
 /** @type {string | number} */
 let timeZone = DEFAULT_TIMEZONE;
 let timeOffset = 0;
@@ -138,6 +161,13 @@ let timeOffset = 0;
 //-----------------------------------------------------------------------------
 // Exports
 //-----------------------------------------------------------------------------
+
+/**
+ * @param {number} [frameCount]
+ */
+export async function advanceFrame(frameCount) {
+    return advanceTime(frameDelay * $max(1, frameCount));
+}
 
 /**
  * Advances the current time by the given amount of milliseconds. This will
@@ -149,36 +179,31 @@ let timeOffset = 0;
  * @returns {Promise<number>} time consumed by timers (in ms).
  */
 export async function advanceTime(ms) {
-    const results = [];
-    const sortedTimers = [...timers.values()]
-        .map(([handler, init, delay]) => [handler, init + delay])
-        .sort((a, b) => a[1] - b[1]);
-    const baseMs = ms;
-    const baseTs = performance.now();
+    const baseTime = now();
+    let remainingMs = ms;
+    targetTime = baseTime + ms;
 
-    for (const [handler, timeout] of sortedTimers) {
-        const currentTs = baseTs + timeOffset;
-        if (timeout <= currentTs) {
-            // Should have already been triggered
-            // => simply triggers the handler
-            results.push(handler());
-        } else if (timeout <= currentTs + ms) {
-            // Will trigger after ms diff
-            // => advances time
-            const diff = timeout - currentTs;
-            timeOffset += diff;
-            ms = Math.max(ms - diff, 0);
-            results.push(handler());
+    addToTimerStack(timers.entries());
+
+    while (timerStack.length) {
+        const [handler, timeout, id] = timerStack.shift();
+        const diff = $max(timeout - baseTime, 0);
+        remainingMs -= diff;
+        timeOffset += diff;
+        if (timers.has(id)) {
+            handler(timeout);
         }
     }
 
-    timeOffset += ms;
+    targetTime = 0;
+    if (remainingMs > 0) {
+        timeOffset += remainingMs;
+    }
 
     // Waits for callbacks to execute
-    await Promise.all(results);
-    await delay(1);
+    await animationFrame();
 
-    return baseMs;
+    return ms;
 }
 
 /**
@@ -282,14 +307,21 @@ export function mockedRequestAnimationFrame(callback) {
         return 0;
     }
 
-    const handler = () => {
+    /**
+     * @param {number} delta
+     */
+    const handler = (delta) => {
         mockedCancelAnimationFrame(handle);
-        return callback(now() - animationValues[1]);
+        return callback(delta ?? now() - animationValues[1]);
     };
 
     const animationValues = [handler, now(), frameDelay];
     const handle = requestAnimationFrame(handler);
-    timers.set(animationToId(handle), animationValues);
+    const internalId = animationToId(handle);
+    timers.set(internalId, animationValues);
+
+    addToTimerStack([[internalId, animationValues]]);
+
     return handle;
 }
 
@@ -314,7 +346,11 @@ export function mockedSetInterval(callback, ms, ...args) {
 
     const intervalValues = [handler, now(), ms];
     const intervalId = setInterval(handler, ms);
-    timers.set(intervalToId(intervalId), intervalValues);
+    const internalId = intervalToId(intervalId);
+    timers.set(internalId, intervalValues);
+
+    addToTimerStack([[internalId, intervalValues]]);
+
     return intervalId;
 }
 
@@ -335,7 +371,11 @@ export function mockedSetTimeout(callback, ms, ...args) {
 
     const timeoutValues = [handler, now(), ms];
     const timeoutId = setTimeout(handler, ms);
-    timers.set(timeoutToId(timeoutId), timeoutValues);
+    const internalId = timeoutToId(timeoutId);
+    timers.set(internalId, timeoutValues);
+
+    addToTimerStack([[internalId, timeoutValues]]);
+
     return timeoutId;
 }
 
@@ -375,8 +415,8 @@ export async function runAllTimers(preventTimers = false) {
         allowTimers = false;
     }
 
-    const endts = Math.max(...[...timers.values()].map(([, init, delay]) => init + delay));
-    const ms = await advanceTime(Math.ceil(endts - now()));
+    const endts = $max(...[...timers.values()].map(([, init, delay]) => init + delay));
+    const ms = await advanceTime($ceil(endts - now()));
 
     if (preventTimers) {
         allowTimers = true;
@@ -459,7 +499,7 @@ export class MockDate extends Date {
             for (let i = 0; i < params.length; i++) {
                 args[i] ??= params[i];
             }
-            super(Date.UTC(...args));
+            super($UTC(...args));
         }
     }
 
@@ -474,6 +514,6 @@ export class MockDate extends Date {
     }
 
     static now() {
-        return new this().getTime() + (Date.now() - dateTimeStamp) + timeOffset;
+        return new this().getTime() + ($now() - dateTimeStamp) + timeOffset;
     }
 }

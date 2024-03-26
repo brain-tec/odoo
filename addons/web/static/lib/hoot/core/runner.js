@@ -49,7 +49,6 @@ import { EXCLUDE_PREFIX, setParams, urlParams } from "./url";
  * @typedef {import("./job").JobConfig} JobConfig
  *
  * @typedef {{
- *  browser?: import("../mock/navigator").Browser;
  *  icon?: string;
  *  label: string;
  *  platform?: import("../mock/navigator").Platform;
@@ -83,10 +82,17 @@ import { EXCLUDE_PREFIX, setParams, urlParams } from "./url";
 
 const {
     clearTimeout,
-    console,
+    console: { warn: $warn, error: $error },
     document,
     Map,
-    Math,
+    Math: { floor: $floor },
+    Object: {
+        assign: $assign,
+        defineProperties: $defineProperties,
+        entries: $entries,
+        freeze: $freeze,
+        fromEntries: $fromEntries,
+    },
     performance,
     Promise,
     removeEventListener,
@@ -94,6 +100,8 @@ const {
     setTimeout,
     window,
 } = globalThis;
+/** @type {Performance["now"]} */
+const $now = performance.now.bind(performance);
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -142,7 +150,6 @@ const getDefaultPresets = () =>
         [
             "desktop",
             {
-                browser: "chrome",
                 icon: "fa-desktop",
                 label: "Desktop",
                 platform: "linux",
@@ -153,7 +160,6 @@ const getDefaultPresets = () =>
         [
             "mobile",
             {
-                browser: "chrome",
                 icon: "fa-mobile",
                 label: "Mobile",
                 platform: "android",
@@ -166,7 +172,9 @@ const getDefaultPresets = () =>
 const noop = () => {};
 
 const restoreConsole = () => {
-    Object.assign(console, ORINAL_CONSOLE_METHODS);
+    logger.ignoreErrors = false;
+
+    $assign(globalThis.console, ORINAL_CONSOLE_METHODS);
 };
 
 /**
@@ -177,7 +185,7 @@ const shuffle = (array) => {
     const copy = [...array];
     let randIndex;
     for (let i = 0; i < copy.length; i++) {
-        randIndex = Math.floor(internalRandom() * copy.length);
+        randIndex = $floor(internalRandom() * copy.length);
         [copy[i], copy[randIndex]] = [copy[randIndex], copy[i]];
     }
     return copy;
@@ -186,7 +194,7 @@ const shuffle = (array) => {
 /**
  * @param {string} reason
  */
-const suppressConsole = (reason) => {
+const suppressConsoleErrors = (reason) => {
     /**
      * @param {string} label
      * @param {string} color
@@ -194,13 +202,15 @@ const suppressConsole = (reason) => {
     const suppressedMethod = (label, color) => {
         const groupName = [`%c[${label}]%c suppressed by ${reason}`, `color: ${color}`, ""];
         return (...args) => {
-            console.group(...groupName);
-            console.log(...args);
-            console.groupEnd(...groupName);
+            logger.group(...groupName);
+            logger.log(...args);
+            logger.groupEnd(...groupName);
         };
     };
 
-    Object.assign(console, {
+    logger.ignoreErrors = true;
+
+    $assign(globalThis.console, {
         error: suppressedMethod("ERROR", "#9f1239"),
         warn: suppressedMethod("WARNING", "#f59e0b"),
     });
@@ -214,7 +224,7 @@ const warnUserEvent = (ev) => {
         return;
     }
 
-    console.warn(
+    logger.warn(
         `User event detected: "${ev.type}"\n\n`,
         `Note that this kind of interaction can interfere with the current test and should be avoided.`
     );
@@ -223,8 +233,8 @@ const warnUserEvent = (ev) => {
 };
 
 const ORINAL_CONSOLE_METHODS = {
-    error: console.error,
-    warn: console.warn,
+    error: $error,
+    warn: $warn,
 };
 
 //-----------------------------------------------------------------------------
@@ -329,8 +339,8 @@ export class TestRunner {
         const initialConfig = { ...DEFAULT_CONFIG, ...config };
         const reactiveConfig = reactive({ ...initialConfig, ...urlParams }, () => {
             setParams(
-                Object.fromEntries(
-                    Object.entries(this.config).map(([key, value]) => [
+                $fromEntries(
+                    $entries(this.config).map(([key, value]) => [
                         key,
                         deepEqual(value, initialConfig[key]) ? null : value,
                     ])
@@ -602,36 +612,26 @@ export class TestRunner {
         const getInstance = () => {
             const currentJob = this.state.currentTest || this.#suiteStack.at(-1) || this;
             if (!instances.has(currentJob)) {
-                let parentInstance;
-                let current = currentJob;
-                while (current !== this) {
-                    current = current.parent || this;
-                    if (instances.has(current)) {
-                        parentInstance = instances.get(current);
-                        break;
-                    }
-                }
+                const parentInstance = [...instances.values()].at(-1);
+                instances.set(currentJob, instanceGetter(parentInstance));
 
-                if (canRegisterAfterCallback) {
+                if (canCallAfter) {
                     this.after(() => {
                         instances.delete(currentJob);
 
-                        if (afterCallback) {
-                            canRegisterAfterCallback = false;
-                            afterCallback();
-                            canRegisterAfterCallback = true;
-                        }
+                        canCallAfter = false;
+                        afterCallback?.();
+                        canCallAfter = true;
                     });
                 }
-
-                instances.set(currentJob, instanceGetter(parentInstance));
             }
+
             return instances.get(currentJob);
         };
 
         /** @type {Map<Job, T>} */
         const instances = new Map();
-        let canRegisterAfterCallback = true;
+        let canCallAfter = true;
 
         return getInstance;
     }
@@ -788,7 +788,7 @@ export class TestRunner {
         this.state.status = "running";
 
         this.#prepareRunner();
-        this.#startTime = performance.now();
+        this.#startTime = $now();
 
         // Config log
         const table = { ...toRaw(this.config) };
@@ -814,7 +814,7 @@ export class TestRunner {
             }
         }
 
-        const { debugTest, fps, watchkeys } = this.config;
+        const { fps, watchkeys } = this.config;
 
         // Register default hooks
         const [addTestDone, flushTestDone] = batch((test) => this.state.done.push(test), 10);
@@ -824,9 +824,9 @@ export class TestRunner {
             on(window, "error", (ev) => this.#onError(ev)),
             on(window, "unhandledrejection", (ev) => this.#onError(ev)),
             // Warn user events
-            !debugTest && on(window, "pointermove", warnUserEvent),
-            !debugTest && on(window, "pointerdown", warnUserEvent),
-            !debugTest && on(window, "keydown", warnUserEvent),
+            !this.debug && on(window, "pointermove", warnUserEvent),
+            !this.debug && on(window, "pointerdown", warnUserEvent),
+            !this.debug && on(window, "keydown", warnUserEvent),
             watchListeners(window, document, document.documentElement, document.head, document.body)
         );
         this.__beforeEach(this.fixture.setup);
@@ -909,7 +909,7 @@ export class TestRunner {
             // (and not in debug).
             const suppressErrors = test.config.todo && !this.debug;
             if (suppressErrors) {
-                suppressConsole("test.todo");
+                suppressConsoleErrors("test.todo");
             }
 
             // Before test
@@ -926,7 +926,7 @@ export class TestRunner {
             // ! keep the smallest stack trace possible:
             // !    TestRunner.start() > Test.run() > Error
             const testPromise = Promise.resolve(test.run());
-            const timeout = Math.floor(test.config.timeout || this.config.timeout);
+            const timeout = $floor(test.config.timeout || this.config.timeout);
             const timeoutPromise = new Promise((resolve, reject) => {
                 // Set abort signal
                 this.#rejectCurrent = reject;
@@ -1015,7 +1015,7 @@ export class TestRunner {
     async stop() {
         this.#currentJobs = [];
         this.state.status = "done";
-        this.totalTime = formatTime(performance.now() - this.#startTime);
+        this.totalTime = formatTime($now() - this.#startTime);
 
         if (this.#resolveCurrent !== noop) {
             return this.#resolveCurrent();
@@ -1214,7 +1214,7 @@ export class TestRunner {
          *  test.config({ multi: 100 })("non-deterministic test", async () => { ... });
          */
         const configure = (...configs) => {
-            Object.assign(currentConfig, ...configs);
+            $assign(currentConfig, ...configs);
 
             return taggedFn;
         };
@@ -1227,7 +1227,7 @@ export class TestRunner {
         };
 
         let currentConfig = { tags: [] };
-        Object.defineProperties(taggedFn, {
+        $defineProperties(taggedFn, {
             config: { get: configure },
             debug: { get: () => addTags("debug") },
             multi: { get: () => (count) => configure({ multi: count }) },
@@ -1239,7 +1239,7 @@ export class TestRunner {
         });
 
         if (getCurrent) {
-            Object.defineProperties(taggedFn, {
+            $defineProperties(taggedFn, {
                 current: { get: () => this.#createCurrentConfigurators(getCurrent) },
             });
         }
@@ -1254,9 +1254,8 @@ export class TestRunner {
         if (preset.tags?.length) {
             this.#include("tags", preset.tags, true);
         }
-        const { browser, platform } = preset;
-        if (browser || platform) {
-            mockUserAgent(browser, platform);
+        if (preset.platform) {
+            mockUserAgent(preset.platform);
         }
 
         if (typeof preset.touch === "boolean") {
@@ -1330,7 +1329,7 @@ export class TestRunner {
         };
 
         /** @type {CurrentConfigurators} */
-        const currentConfigurators = Object.freeze({
+        const currentConfigurators = $freeze({
             config: configureCurrent,
             debug: () => addTagsToCurrent("debug"),
             multi: (count) => configureCurrent({ multi: count }),
@@ -1410,7 +1409,7 @@ export class TestRunner {
      */
     #isImplicitlyExcluded(job) {
         // By tag name
-        for (const [tagName, status] of Object.entries(this.state.includeSpecs.tags)) {
+        for (const [tagName, status] of $entries(this.state.includeSpecs.tags)) {
             if (status < 0 && job.tags.some((tag) => tag.name === tagName)) {
                 return true;
             }
@@ -1431,7 +1430,7 @@ export class TestRunner {
      */
     #isImplicitlyIncluded(job) {
         // By tag name
-        for (const [tagName, status] of Object.entries(this.state.includeSpecs.tags)) {
+        for (const [tagName, status] of $entries(this.state.includeSpecs.tags)) {
             if (status > 0 && job.tags.some((tag) => tag.name === tagName)) {
                 return true;
             }

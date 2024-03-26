@@ -11,8 +11,8 @@ describe(parseUrl(import.meta.url), () => {
         runner.describe("a suite", () => {});
         runner.describe("another suite", () => {});
 
-        expect(runner.suites.size).toBe(2);
-        expect(runner.tests.size).toBe(0);
+        expect(runner.suites).toHaveLength(2);
+        expect(runner.tests).toHaveLength(0);
         for (const suite of runner.suites.values()) {
             expect(suite).toMatch(Suite);
         }
@@ -35,8 +35,8 @@ describe(parseUrl(import.meta.url), () => {
             runner.test("test 3", () => {});
         });
 
-        expect(runner.suites.size).toBe(2);
-        expect(runner.tests.size).toBe(3);
+        expect(runner.suites).toHaveLength(2);
+        expect(runner.tests).toHaveLength(3);
     });
 
     test("should not have duplicate suites", () => {
@@ -61,11 +61,9 @@ describe(parseUrl(import.meta.url), () => {
     });
 
     test("can register test tags", async () => {
-        console.warn = (message) => expect.step(message);
-
         const runner = new TestRunner();
         runner.describe("suite", () => {
-            let testFn = runner.test.debug.only.skip; // 3
+            let testFn = runner.test.debug.only; // 2
             for (let i = 1; i <= 10; i++) {
                 // 10
                 testFn = testFn.tags`Tag-${i}`;
@@ -74,10 +72,7 @@ describe(parseUrl(import.meta.url), () => {
             testFn("tagged test", () => {});
         });
 
-        expect(runner.tags.size).toBe(13);
-        expect(runner.tests.values().next().value.tags.length).toBe(13);
-        expect([
-            `%c[HOOT]%c test "suite/tagged test" is explicitly included but marked as skipped: "skip" modifier has been ignored`,
-        ]).toVerifySteps();
+        expect(runner.tags).toHaveLength(12);
+        expect(runner.tests.values().next().value.tags).toHaveLength(12);
     });
 });

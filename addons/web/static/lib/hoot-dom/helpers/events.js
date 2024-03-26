@@ -5,6 +5,7 @@ import {
     getActiveElement,
     getDocument,
     getNextFocusableElement,
+    getNodeValue,
     getPreviousFocusableElement,
     getRect,
     getWindow,
@@ -22,6 +23,8 @@ import {
 } from "./dom";
 
 /**
+ * @typedef {"blur" | "enter" | "tab" | false} ConfirmAction
+ *
  * @typedef {{
  *  cancel: () => Event[];
  *  drop: (to?: Target, options?: PointerOptions) => Event[];
@@ -35,7 +38,7 @@ import {
  * @typedef {keyof HTMLElementEventMap | keyof WindowEventMap} EventType
  *
  * @typedef {{
- *  confirm?: boolean;
+ *  confirm?: ConfirmAction;
  *  composition?: boolean;
  *  instantly?: boolean;
  * }} FillOptions
@@ -68,7 +71,20 @@ import {
 // Global
 //-----------------------------------------------------------------------------
 
-const { console, DataTransfer, document, Math, Object, String, Touch, TypeError } = globalThis;
+const {
+    console: { dir: $dir, groupCollapsed: $groupCollapsed, groupEnd: $groupEnd, log: $log },
+    DataTransfer,
+    document,
+    Math: { ceil: $ceil },
+    Object: { assign: $assign, values: $values },
+    String,
+    Touch,
+    TypeError,
+} = globalThis;
+/** @type {Document["createRange"]} */
+const $createRange = document.createRange.bind(document);
+/** @type {Document["hasFocus"]} */
+const $hasFocus = document.hasFocus.bind(document);
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -299,7 +315,7 @@ const getPosition = (element, options) => {
         if (positions.includes("left")) {
             clientX -= 1;
         } else if (positions.includes("right")) {
-            clientX += Math.ceil(width) + 1;
+            clientX += $ceil(width) + 1;
         } else {
             clientX += width / 2;
         }
@@ -308,7 +324,7 @@ const getPosition = (element, options) => {
         if (positions.includes("top")) {
             clientY -= 1;
         } else if (positions.includes("bottom")) {
-            clientY += Math.ceil(height) + 1;
+            clientY += $ceil(height) + 1;
         } else {
             clientY += height / 2;
         }
@@ -356,8 +372,6 @@ const hasTagName = (node, ...tagNames) => tagNames.includes(getTag(node));
 const hasTouch = () =>
     globalThis.ontouchstart !== undefined || globalThis.matchMedia("(pointer:coarse)").matches;
 
-const isMacOS = () => /Mac/i.test(globalThis.navigator.userAgent);
-
 /**
  * @param {unknown} value
  */
@@ -378,7 +392,7 @@ const logEvents = (actionName) => {
         return events;
     }
     const groupName = [`${actionName}: dispatched`, events.length, `events`];
-    console.groupCollapsed(...groupName);
+    $groupCollapsed(...groupName);
     for (const event of events) {
         /** @type {(keyof typeof LOG_COLORS)[]} */
         const colors = ["blue"];
@@ -402,7 +416,7 @@ const logEvents = (actionName) => {
             if (targetParts.class) {
                 colors.push("lightBlue");
             }
-            const targetString = Object.values(targetParts)
+            const targetString = $values(targetParts)
                 .map((part) => `%c${part}%c`)
                 .join("");
             message += ` @${targetString}`;
@@ -412,12 +426,12 @@ const logEvents = (actionName) => {
             `color: ${LOG_COLORS.reset}`,
         ]);
 
-        console.groupCollapsed(message, ...messageColors);
-        console.dir(event);
-        console.log(event.target);
-        console.groupEnd();
+        $groupCollapsed(message, ...messageColors);
+        $dir(event);
+        $log(event.target);
+        $groupEnd();
     }
-    console.groupEnd();
+    $groupEnd();
     return events;
 };
 
@@ -451,9 +465,9 @@ const registerFileInput = ({ target }) => {
 /**
  * @param {EventTarget} target
  * @param {string} initialValue
- * @param {boolean} confirmNow
+ * @param {ConfirmAction} confirmAction
  */
-const registerForChange = (target, initialValue, confirmNow) => {
+const registerForChange = (target, initialValue, confirmAction) => {
     const triggerChange = () => {
         removeChangeTargetListeners();
 
@@ -462,11 +476,19 @@ const registerForChange = (target, initialValue, confirmNow) => {
         }
     };
 
-    const canTriggerEnter = getTag(target) === "input";
-    if (canTriggerEnter) {
-        changeTargetListeners.push(
-            on(target, "keydown", (ev) => !isPrevented(ev) && ev.key === "Enter" && triggerChange())
-        );
+    confirmAction &&= confirmAction.toLowerCase();
+    if (confirmAction === "enter") {
+        if (getTag(target) === "input") {
+            changeTargetListeners.push(
+                on(
+                    target,
+                    "keydown",
+                    (ev) => !isPrevented(ev) && ev.key === "Enter" && triggerChange()
+                )
+            );
+        } else {
+            throw new HootDomError(`"enter" confirm action is only supported on <input/> elements`);
+        }
     }
 
     changeTargetListeners.push(
@@ -474,14 +496,20 @@ const registerForChange = (target, initialValue, confirmNow) => {
         on(target, "change", removeChangeTargetListeners)
     );
 
-    if (confirmNow) {
-        // Triggers confirm action right away
-        if (canTriggerEnter) {
-            _press(target, { key: "Enter" });
-        } else {
+    switch (confirmAction) {
+        case "blur": {
             _click(getDocument(target).body, {
                 position: { x: 0, y: 0 },
             });
+            break;
+        }
+        case "enter": {
+            _press(target, { key: "Enter" });
+            break;
+        }
+        case "tab": {
+            _press(target, { key: "Tab" });
+            break;
         }
     }
 };
@@ -493,18 +521,10 @@ const registerForChange = (target, initialValue, confirmNow) => {
 const registerSpecialKey = (eventInit, toggle) => {
     switch (eventInit.key) {
         case "Alt":
-            if (isMacOS()) {
-                specialKeys.ctrlKey = toggle;
-            } else {
-                specialKeys.altKey = toggle;
-            }
+            specialKeys.altKey = toggle;
             break;
         case "Control":
-            if (isMacOS()) {
-                specialKeys.metaKey = toggle;
-            } else {
-                specialKeys.ctrlKey = toggle;
-            }
+            specialKeys.ctrlKey = toggle;
             break;
         case "Meta":
             specialKeys.metaKey = toggle;
@@ -649,7 +669,7 @@ const triggerFocus = (target) => {
     if (previous !== target.ownerDocument.body) {
         // If document is focused, this will trigger a trusted "blur" event
         previous.blur();
-        if (!document.hasFocus()) {
+        if (!$hasFocus()) {
             // When document is not focused: manually trigger a "blur" event
             dispatch(previous, "blur", { relatedTarget: target });
         }
@@ -659,7 +679,7 @@ const triggerFocus = (target) => {
 
         // If document is focused, this will trigger a trusted "focus" event
         target.focus();
-        if (!document.hasFocus()) {
+        if (!$hasFocus()) {
             // When document is not focused: manually trigger a "focus" event
             dispatch(target, "focus", { relatedTarget: previous });
         }
@@ -716,6 +736,12 @@ const _fill = (target, value, options) => {
 
     if (getTag(target) === "input") {
         switch (target.type) {
+            case "color": {
+                target.value = String(value);
+                dispatch(target, "input");
+                dispatch(target, "change");
+                return;
+            }
             case "file": {
                 const dataTransfer = new DataTransfer();
                 const files = ensureArray(value);
@@ -950,7 +976,7 @@ const _keyDown = (target, eventInit) => {
                     dispatch(target, "select");
                 } else {
                     const selection = globalThis.getSelection();
-                    const range = document.createRange();
+                    const range = $createRange();
                     range.selectNodeContents(target);
                     selection.removeAllRanges();
                     selection.addRange(range);
@@ -1674,7 +1700,9 @@ export function edit(value, options) {
         throw new HootDomError(`cannot call \`edit()\`: target should be editable`);
     }
 
-    _clear(element);
+    if (getNodeValue(element)) {
+        _clear(element);
+    }
     _fill(element, value, options);
 
     return logEvents("edit");
@@ -1935,61 +1963,6 @@ export function press(keyStrokes, options) {
 }
 
 /**
- * Gives the given {@link File} list to the current file input. This helper only
- * works if a file input has been previously interacted with (by clicking on it).
- *
- * @param {MaybeIterable<File>} files
- */
-export function setInputFiles(files) {
-    if (!runTime.currentFileInput) {
-        throw new HootDomError(
-            `cannot call \`setInputFiles()\`: no file input has been interacted with`
-        );
-    }
-
-    _fill(runTime.currentFileInput, files);
-
-    runTime.currentFileInput = null;
-
-    return logEvents("setInputFiles");
-}
-
-/**
- * @param {Target} target
- * @param {number} value
- * @param {PointerOptions} options
- */
-export function setInputRange(target, value, options) {
-    const element = getFirstTarget(target, options);
-
-    _implicitHover(element, options);
-    _pointerDown(element, options);
-    _fill(element, value);
-    _pointerUp(element, options);
-
-    return logEvents("setInputRange");
-}
-
-/**
- * @param {HTMLElement} fixture
- */
-export function setupEventActions(fixture) {
-    if (runTime.currentPointerDownTimeout) {
-        globalThis.clearTimeout(runTime.currentPointerDownTimeout);
-    }
-
-    removeChangeTargetListeners();
-
-    fixture.addEventListener("click", registerFileInput, { capture: true });
-
-    // Runtime global variables
-    Object.assign(runTime, getDefaultRunTimeValue());
-
-    // Special keys
-    Object.assign(specialKeys, getDefaultSpecialKeysValue());
-}
-
-/**
  * Performs a resize event sequence on the given {@link Target}.
  *
  * The event sequence is as follow:
@@ -2078,6 +2051,61 @@ export function select(value, options) {
     }
 
     return logEvents("select");
+}
+
+/**
+ * Gives the given {@link File} list to the current file input. This helper only
+ * works if a file input has been previously interacted with (by clicking on it).
+ *
+ * @param {MaybeIterable<File>} files
+ */
+export function setInputFiles(files) {
+    if (!runTime.currentFileInput) {
+        throw new HootDomError(
+            `cannot call \`setInputFiles()\`: no file input has been interacted with`
+        );
+    }
+
+    _fill(runTime.currentFileInput, files);
+
+    runTime.currentFileInput = null;
+
+    return logEvents("setInputFiles");
+}
+
+/**
+ * @param {Target} target
+ * @param {number} value
+ * @param {PointerOptions} options
+ */
+export function setInputRange(target, value, options) {
+    const element = getFirstTarget(target, options);
+
+    _implicitHover(element, options);
+    _pointerDown(element, options);
+    _fill(element, value);
+    _pointerUp(element, options);
+
+    return logEvents("setInputRange");
+}
+
+/**
+ * @param {HTMLElement} fixture
+ */
+export function setupEventActions(fixture) {
+    if (runTime.currentPointerDownTimeout) {
+        globalThis.clearTimeout(runTime.currentPointerDownTimeout);
+    }
+
+    removeChangeTargetListeners();
+
+    fixture.addEventListener("click", registerFileInput, { capture: true });
+
+    // Runtime global variables
+    $assign(runTime, getDefaultRunTimeValue());
+
+    // Special keys
+    $assign(specialKeys, getDefaultSpecialKeysValue());
 }
 
 /**

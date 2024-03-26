@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { queryAll, queryAllAttributes, queryAllTexts, queryFirst } from "@odoo/hoot-dom";
+import { queryAll, queryAllAttributes, queryAllTexts } from "@odoo/hoot-dom";
 import { animationFrame, mockTimeZone, runAllTimers } from "@odoo/hoot-mock";
 import { Component, useState, xml } from "@odoo/owl";
 
@@ -186,7 +186,7 @@ test("building a domain with an invalid path", async () => {
     expect(getCurrentPath()).toBe("fooooooo");
     expect(".o_model_field_selector_warning").toHaveCount(1);
     expect(".o_model_field_selector_warning").toHaveAttribute("title", "Invalid field chain");
-    expect(getOperatorOptions().length).toBe(1);
+    expect(getOperatorOptions()).toHaveLength(1);
     expect(getCurrentOperator()).toBe("=");
     expect(getCurrentValue()).toBe("abc");
 
@@ -206,7 +206,7 @@ test("building a domain with an invalid path (2)", async () => {
     });
 
     expect(getCurrentPath()).toBe("bloup");
-    expect(isNotSupportedPath()).toBeTruthy();
+    expect(isNotSupportedPath()).toBe(true);
     expect(getCurrentOperator()).toBe("=");
     expect(getCurrentValue()).toBe("abc");
 
@@ -231,7 +231,7 @@ test("building a domain with an invalid path (3)", async () => {
     });
 
     expect(getCurrentPath()).toBe("bloup");
-    expect(isNotSupportedPath()).toBeTruthy();
+    expect(isNotSupportedPath()).toBe(true);
     expect(getCurrentOperator()).toBe("=");
     expect(getCurrentValue()).toBe("abc");
 
@@ -252,13 +252,13 @@ test("building a domain with an invalid operator", async () => {
     expect(getCurrentPath()).toBe("Foo");
     expect(".o_model_field_selector_warning").toHaveCount(0);
     expect(getCurrentOperator()).toBe(`"!!!!=!!!!"`);
-    expect(isNotSupportedOperator()).toBeTruthy();
+    expect(isNotSupportedOperator()).toBe(true);
     expect(getCurrentValue()).toBe("abc");
 
     await clearNotSupported();
     expect(getCurrentPath()).toBe("Foo");
     expect(".o_model_field_selector_warning").toHaveCount(0);
-    expect(getOperatorOptions().length).toBe(8);
+    expect(getOperatorOptions()).toHaveLength(8);
     expect(getCurrentOperator()).toBe("=");
     expect(getCurrentValue()).toBe("abc");
 });
@@ -305,7 +305,7 @@ test("building a domain with a m2o without following the relation", async () => 
         },
     });
     expect([]).toVerifySteps();
-    expect(isNotSupportedValue()).toBeTruthy();
+    expect(isNotSupportedValue()).toBe(true);
 
     await clearNotSupported();
     expect([`[("product_id", "ilike", "")]`]).toVerifySteps();
@@ -324,7 +324,7 @@ test("editing a domain with `parent` key", async () => {
     expect.assertions(2);
 
     expect(getCurrentValue()).toBe("parent.foo");
-    expect(isNotSupportedValue()).toBeTruthy();
+    expect(isNotSupportedValue()).toBe(true);
 });
 
 test("edit a domain with the debug textarea", async () => {
@@ -336,7 +336,7 @@ test("edit a domain with the debug textarea", async () => {
         isDebugMode: true,
         update(domain, fromDebug) {
             expect(domain).toBe(newDomain);
-            expect(fromDebug).toBeTruthy();
+            expect(fromDebug).toBe(true);
         },
     });
 
@@ -359,7 +359,7 @@ test("set [(1, '=', 1)] or [(0, '=', 1)] as domain with the debug textarea", asy
         isDebugMode: true,
         update(domain, fromDebug) {
             expect(domain).toBe(newDomain);
-            expect(fromDebug).toBeTruthy();
+            expect(fromDebug).toBe(true);
         },
     });
 
@@ -606,12 +606,12 @@ test("debug input in model field selector popover", async () => {
     }
     await mountWithCleanup(Parent);
     await openModelFieldSelectorPopover();
-    await contains(".o_model_field_selector_debug").edit("a");
+    await contains(".o_model_field_selector_debug").edit("a", { confirm: "tab" });
     await contains(".o_model_field_selector_popover_close").click();
     expect([`[("a", "=", 1)]`]).toVerifySteps();
     expect(getCurrentPath()).toBe("a");
     expect(".o_model_field_selector_warning").toHaveCount(1);
-    expect(getOperatorOptions().length).toBe(1);
+    expect(getOperatorOptions()).toHaveLength(1);
     expect(getCurrentOperator()).toBe("=");
     expect(getCurrentValue()).toBe("1");
     expect(SELECTORS.debugArea).toHaveValue(`[("a", "=", 1)]`);
@@ -631,12 +631,12 @@ test("between operator", async () => {
     expect(getCurrentOperator()).toBe("is between");
     expect(".o_datetime_input").toHaveCount(2);
 
-    await contains(queryFirst(".o_datetime_input")).edit("2023-01-02 00:00:00");
+    await contains(".o_datetime_input:first").edit("2023-01-02 00:00:00");
     expect([
         `["&", ("datetime", ">=", "2023-01-02 00:00:00"), ("datetime", "<=", "2023-01-10 00:00:00")]`,
     ]).toVerifySteps();
 
-    await contains(queryAll(".o_datetime_input")[1]).edit("2023-01-08 00:00:00");
+    await contains(".o_datetime_input:eq(1)").edit("2023-01-08 00:00:00");
     expect([
         `["&", ("datetime", ">=", "2023-01-02 00:00:00"), ("datetime", "<=", "2023-01-08 00:00:00")]`,
     ]).toVerifySteps();
@@ -1216,7 +1216,7 @@ test("Edit the value for field char and an operator in", async () => {
     expect(queryAllTexts(SELECTORS.tag)).toEqual([`"a"`, `"b"`, `uid`, `"c"`]);
     expect([`[("foo", "in", ["a", "b", uid, "c"])]`]).toVerifySteps();
 
-    await contains(queryAll(".o_tag .o_delete")[2]).click();
+    await contains(".o_tag .o_delete:eq(2)").click();
     expect(queryAllTexts(SELECTORS.tag)).toEqual([`a`, `b`, `c`]);
     expect([`[("foo", "in", ["a", "b", "c"])]`]).toVerifySteps();
 
@@ -1602,7 +1602,6 @@ test("many2one field and operator =/!= (edit)", async () => {
 
     await editValue("xph", { confirm: false });
     await runAllTimers();
-    await animationFrame();
     expect(".dropdown-menu").toHaveCount(1);
     expect(queryAllTexts(".dropdown-menu li")).toEqual(["xphone"]);
     expect(getCurrentOperator()).toBe("=");
@@ -1626,6 +1625,7 @@ test("many2one field and operator =/!= (edit)", async () => {
     expect([`[("product_id", "!=", False)]`]).toVerifySteps();
 
     await editValue("xpa", { confirm: false });
+    await runAllTimers();
     await contains(".dropdown-menu li").click();
     expect(getCurrentOperator()).toBe("!=");
     expect(getCurrentValue()).toBe("xpad");
@@ -1643,7 +1643,7 @@ test("many2one field on record with falsy display_name", async () => {
 
     await contains(".o-autocomplete--input").click();
 
-    expect(queryFirst("a.dropdown-item")).toHaveText("Unnamed", {
+    expect("a.dropdown-item:first").toHaveText("Unnamed", {
         message: "should have a Unnamed as fallback of many2one display_name",
     });
 });
@@ -1661,7 +1661,6 @@ test("many2one field and operator in/not in (edit)", async () => {
     expect(".dropdown-menu").toHaveCount(0);
     await contains(SELECTORS.valueEditor + " input").fill("x", { confirm: false });
     await runAllTimers();
-    await animationFrame();
     expect(".dropdown-menu").toHaveCount(1);
     expect(queryAllTexts(".dropdown-menu li")).toEqual(["xpad"]);
 
@@ -1837,7 +1836,6 @@ test("many2many field: operator =/!=/in/not in (edit)", async () => {
 
     await contains(SELECTORS.valueEditor + " input").fill("x", { confirm: false });
     await runAllTimers();
-    await animationFrame();
     expect(".dropdown-menu").toHaveCount(1);
     expect(queryAllTexts(".dropdown-menu li")).toEqual(["xpad"]);
 

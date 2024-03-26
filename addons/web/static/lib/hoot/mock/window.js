@@ -32,7 +32,22 @@ import {
 // Global
 //-----------------------------------------------------------------------------
 
-const { console, document, innerHeight, innerWidth, Object, outerHeight, outerWidth } = globalThis;
+const {
+    console,
+    document,
+    innerHeight,
+    innerWidth,
+    Object: {
+        assign: $assign,
+        defineProperty: $defineProperty,
+        entries: $entries,
+        getOwnPropertyDescriptor: $getOwnPropertyDescriptor,
+        getPrototypeOf: $getPrototypeOf,
+        hasOwn: $hasOwn,
+    },
+    outerHeight,
+    outerWidth,
+} = globalThis;
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -43,10 +58,10 @@ const { console, document, innerHeight, innerWidth, Object, outerHeight, outerWi
  * @param {Record<string, PropertyDescriptor>} descriptors
  */
 const applyPropertyDescriptors = (target, descriptors) => {
-    for (const [property, rawDescriptor] of Object.entries(descriptors)) {
+    for (const [property, rawDescriptor] of $entries(descriptors)) {
         const owner = findPropertyOwner(target, property);
         originalDescriptors.push({
-            descriptor: Object.getOwnPropertyDescriptor(owner, property),
+            descriptor: $getOwnPropertyDescriptor(owner, property),
             owner,
             property,
             target,
@@ -55,7 +70,7 @@ const applyPropertyDescriptors = (target, descriptors) => {
         if ("value" in descriptor) {
             descriptor.writable = false;
         }
-        Object.defineProperty(owner, property, descriptor);
+        $defineProperty(owner, property, descriptor);
     }
 };
 
@@ -79,10 +94,10 @@ const findOriginalDescriptor = (target, property) => {
  * @returns {any}
  */
 const findPropertyOwner = (object, property) => {
-    if (Object.hasOwn(object, property)) {
+    if ($hasOwn(object, property)) {
         return object;
     }
-    const prototype = Object.getPrototypeOf(object);
+    const prototype = $getPrototypeOf(object);
     if (prototype) {
         return findPropertyOwner(prototype, property);
     }
@@ -106,7 +121,7 @@ const mockEventListeners = (target) => {
                     return originalCallback(...args);
                 };
             }
-            registerListener(listeners, type, callback);
+            registerListener(listeners, type, callback, options);
         }
         return addEventListener.call(target, type, callback, options);
     };
@@ -128,12 +143,14 @@ const mockEventListeners = (target) => {
  * @param {EventTarget} target
  * @param {string} type
  * @param {EventListener} callback
+ * @param {AddEventListenerOptions} options
  */
-const registerListener = (listeners, type, callback) => {
+const registerListener = (listeners, type, callback, options) => {
     if (!listeners[type]) {
         listeners[type] = new Set();
     }
     listeners[type].add(callback);
+    optionsMap.set(callback, options);
 };
 
 /**
@@ -158,7 +175,9 @@ export const mockLocation = new MockLocation();
 
 /** @type {{ descriptor: PropertyDescriptor; owner: any; property: string; target: any }[]} */
 const originalDescriptors = [];
+/** @type {Map<EventTarget, Record<string, Set<EventListener>>} */
 const listenerMap = new Map();
+const optionsMap = new WeakMap();
 
 const mockCookie = new MockCookie();
 const mockHistory = new MockHistory(mockLocation);
@@ -224,16 +243,16 @@ export function cleanupWindow() {
     mockTitle = "";
 
     // Console
-    Object.assign(console, originalConsole);
+    $assign(console, originalConsole);
 
     // Listeners
     for (const [target, listeners] of listenerMap) {
         if (!isInDOM(target)) {
             continue;
         }
-        for (const [type, callbacks] of Object.entries(listeners)) {
+        for (const [type, callbacks] of $entries(listeners)) {
             for (const callback of callbacks) {
-                target.removeEventListener(type, callback);
+                target.removeEventListener(type, callback, optionsMap.get(callback));
             }
         }
     }
@@ -253,9 +272,9 @@ export function getTitle() {
  */
 export function mockTouch(setTouch) {
     if (setTouch) {
-        window.ontouchstart ||= null;
+        globalThis.ontouchstart ||= null;
     } else {
-        delete window.ontouchstart;
+        delete globalThis.ontouchstart;
     }
 }
 
@@ -290,7 +309,7 @@ export function setTitle(value) {
  */
 export function unpatchWindow() {
     for (const { descriptor, owner, property } of originalDescriptors) {
-        Object.defineProperty(owner, property, descriptor);
+        $defineProperty(owner, property, descriptor);
     }
     originalDescriptors.length = 0;
 }
