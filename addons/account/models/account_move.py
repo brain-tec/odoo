@@ -3550,7 +3550,8 @@ class AccountMove(models.Model):
             }[self.move_type]
             name += ' '
         if not self.name or self.name == '/':
-            name += '(* %s)' % str(self.id)
+            if self.id:
+                name += '(* %s)' % str(self.id)
         else:
             name += self.name
             if self.env.context.get('input_full_display_name'):
@@ -3929,7 +3930,7 @@ class AccountMove(models.Model):
     def _link_bill_origin_to_purchase_orders(self, timeout=10):
         for move in self.filtered(lambda m: m.move_type in self.get_purchase_types()):
             references = [move.invoice_origin] if move.invoice_origin else []
-            move._find_and_set_purchase_orders(references, move.partner_id.id, move.amount_total, timeout)
+            move._find_and_set_purchase_orders(references, move.partner_id.id, move.amount_total, timeout=timeout)
         return self
 
     # -------------------------------------------------------------------------
