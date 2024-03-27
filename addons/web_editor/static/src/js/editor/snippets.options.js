@@ -1169,7 +1169,11 @@ const UnitUserValueWidget = UserValueWidget.extend({
         if (!params.unit) {
             return isSuperActive;
         }
-        return isSuperActive && this._floatToStr(parseFloat(this._value)) !== '0';
+        return isSuperActive && (
+            this._floatToStr(parseFloat(this._value)) !== '0'
+            // Or is a composite value.
+            || !!this._value.match(/\d+\s+\d+/)
+        );
     },
     /**
      * @override
@@ -1311,16 +1315,26 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
             case $.ui.keyCode.UP:
             case $.ui.keyCode.DOWN: {
                 const input = ev.currentTarget;
-                let value = parseFloat(input.value || input.placeholder);
-                if (isNaN(value)) {
-                    value = 0.0;
+                let parts = (input.value || input.placeholder).match(/-?\d+\.\d+|-?\d+/g);
+                if (!parts) {
+                    parts = [input.value || input.placeholder];
                 }
-                let step = parseFloat(params.step);
-                if (isNaN(step)) {
-                    step = 1.0;
-                }
-                value += (ev.which === $.ui.keyCode.UP ? step : -step);
-                input.value = this._floatToStr(value);
+                input.value = parts.map(part => {
+                    let value = parseFloat(part);
+                    if (isNaN(value)) {
+                        value = 0.0;
+                    }
+                    let step = parseFloat(params.step);
+                    if (isNaN(step)) {
+                        step = 1.0;
+                    }
+                    value += (ev.which === $.ui.keyCode.UP ? step : -step);
+                    if (parts.length > 1 && value < 0) {
+                        // No negative for composite values.
+                        value = 0.0;
+                    }
+                    return this._floatToStr(value);
+                }).join(" ");
                 // We need to know if the change event will be triggered or not.
                 // Change is triggered if there has been a "natural" input event
                 // from the user. Since we are triggering a "fake" input event,
@@ -3353,10 +3367,14 @@ const SnippetOptionWidget = Widget.extend({
         }
 
         let hasUserValue = false;
-        for (let i = cssProps.length - 1; i > 0; i--) {
-            hasUserValue = applyCSS.call(this, cssProps[i], values.pop(), styles) || hasUserValue;
+        const applyAllCSS = (values) => {
+            for (let i = cssProps.length - 1; i > 0; i--) {
+                hasUserValue = applyCSS.call(this, cssProps[i], values.pop(), styles) || hasUserValue;
+            }
+            hasUserValue = applyCSS.call(this, cssProps[0], values.join(' '), styles) || hasUserValue;
         }
-        hasUserValue = applyCSS.call(this, cssProps[0], values.join(' '), styles) || hasUserValue;
+
+        applyAllCSS([...values]);
 
         function applyCSS(cssProp, cssValue, styles) {
             const forceStyle = (typeof params.forceStyle !== 'undefined');
@@ -3371,6 +3389,13 @@ const SnippetOptionWidget = Widget.extend({
 
         if (params.extraClass) {
             this.$target.toggleClass(params.extraClass, hasUserValue);
+            if (hasUserValue) {
+                // Might have changed because of the class.
+                for (const cssProp of cssProps) {
+                    this.$target[0].style.removeProperty(cssProp);
+                }
+                applyAllCSS(values);
+            }
         }
 
         _restoreTransitions();
