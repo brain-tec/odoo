@@ -60,6 +60,13 @@ class TestSubcontractingBasic(TransactionCase):
             error_message = f"At least one {operation_type} (operation_type) got reused on duplication (should have been recreated)"
             self.assertEqual(len(original_type_set & copy_type_set), 0, error_message)
 
+    def test_warehouse_subcontracting_resupply_type_code(self):
+        """ Assert that default operation code of resupply subcontractors is 'internal'. """
+        warehouse = self.env['stock.warehouse'].create({
+            'name': 'Warehouse',
+            'code': 'MYWH'
+        })
+        self.assertEqual(warehouse.subcontracting_resupply_type_id.code, 'internal')
 
 @tagged('post_install', '-at_install')
 class TestSubcontractingFlows(TestMrpSubcontractingCommon):
@@ -998,6 +1005,37 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         self.assertEqual(bom_data['lines']['leftover_capacity'], 1)
         self.assertEqual(bom_data['lines']['leftover_date'], '01/16/2024')
 
+    def test_change_partner_subcontracting_location(self):
+        """On creating a subcontrating picking, the destination location of the picking is equal to
+        the subcontracting location of the contact if specified. Otherwise, it will be equal to the
+        default warehouse subcontracting location.
+        """
+        custom_subcontract_location = self.env['stock.location'].create({
+            'name': 'custom partner location',
+            'location_id': self.env.ref('stock.stock_location_locations_partner').id,
+            'usage': 'internal',
+            'company_id': self.env.company.id,
+            'is_subcontracting_location': True,
+        })
+        subcontractor = self.env['res.partner'].create({'name': 'subcontractor'})
+
+        def create_picking(subcontractor):
+            picking_form = Form(self.env['stock.picking'])
+            picking_form.picking_type_id = self.warehouse.subcontracting_resupply_type_id
+            picking_form.partner_id = subcontractor
+            with picking_form.move_ids_without_package.new() as move:
+                move.product_id = self.comp1
+                move.product_uom_qty = 1.0
+            picking = picking_form.save()
+            picking.action_confirm()
+            return picking
+
+        picking_with_default_location = create_picking(subcontractor)
+        self.assertEqual(picking_with_default_location.location_dest_id, self.warehouse.subcontracting_resupply_type_id.default_location_dest_id)
+
+        subcontractor.property_stock_subcontractor = custom_subcontract_location.id
+        picking_with_custom_location = create_picking(subcontractor)
+        self.assertEqual(picking_with_custom_location.location_dest_id, custom_subcontract_location)
 
 @tagged('post_install', '-at_install')
 class TestSubcontractingTracking(TransactionCase):
