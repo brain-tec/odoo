@@ -82,11 +82,6 @@ export class PosOrderline extends Base {
         return qtyStr;
     }
 
-    get pos() {
-        //REVIEW - will this works with self order ?
-        return this.models["pos.store"].getFirst().pos;
-    }
-
     get company() {
         return this.models["res.company"].getFirst();
     }
@@ -195,8 +190,13 @@ export class PosOrderline extends Base {
         const quant =
             typeof quantity === "number" ? quantity : parseFloat("" + (quantity ? quantity : 0));
 
-        if (this.refunded_orderline_id?.uuid in this.pos.lineToRefund) {
-            const refundDetails = this.pos.lineToRefund[this.refunded_orderline_id.uuid];
+        const allLineToRefundUuids = this.models["pos.order"].reduce((acc, order) => {
+            Object.assign(acc, order.uiState.lineToRefund);
+            return acc;
+        }, {});
+
+        if (this.refunded_orderline_id?.uuid in allLineToRefundUuids) {
+            const refundDetails = allLineToRefundUuids[this.refunded_orderline_id.uuid];
             const maxQtyToRefund = refundDetails.line.qty - refundDetails.line.refunded_qty;
             if (quant > 0) {
                 return {
@@ -643,7 +643,7 @@ export class PosOrderline extends Base {
         this.price_extra = parseFloat(price_extra) || 0.0;
     }
     getNote() {
-        return this.note;
+        return this.note || "";
     }
     setNote(note) {
         this.note = note;
