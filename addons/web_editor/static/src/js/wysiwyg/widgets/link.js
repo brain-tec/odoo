@@ -39,8 +39,8 @@ export class Link extends Component {
     linkComponentWrapperRef = useRef("linkComponentWrapper");
     colorsData = [
         {type: '', label: _t("Link"), btnPreview: 'link'},
-        {type: 'primary', label: _t("Primary"), btnPreview: 'primary'},
-        {type: 'secondary', label: _t("Secondary"), btnPreview: 'secondary'},
+        {type: 'primary', label: _t("Button Primary"), btnPreview: 'primary'},
+        {type: 'secondary', label: _t("Button Secondary"), btnPreview: 'secondary'},
         {type: 'custom', label: _t("Custom"), btnPreview: 'custom'},
         // Note: by compatibility the dialog should be able to remove old
         // colors that were suggested like the BS status colors or the
@@ -103,7 +103,7 @@ export class Link extends Component {
      */
     async start() {
         this._setSelectOptionFromLink();
-
+        this.buttonOptsCollapseEl = this.linkComponentWrapperRef.el.querySelector('#o_link_dialog_button_opts_collapse');
         this._updateOptionsUI();
 
         this.$el[0].querySelector('#o_link_dialog_label_input').value = this.state.originalText;
