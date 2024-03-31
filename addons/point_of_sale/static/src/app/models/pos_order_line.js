@@ -400,7 +400,15 @@ export class PosOrderline extends Base {
             taxes = getTaxesAfterFiscalPosition(taxes, order.fiscal_position_id, this.models);
         }
 
-        const taxesData = getTaxesValues(taxes, priceUnit, 1, product, this.company, this.currency);
+        const taxesData = getTaxesValues(
+            taxes,
+            priceUnit,
+            1,
+            product,
+            this.company._product_default_values,
+            this.company,
+            this.currency
+        );
         if (this.config.iface_tax_included === "total") {
             return taxesData.total_included;
         } else {
@@ -473,6 +481,7 @@ export class PosOrderline extends Base {
             priceUnitAfterDiscount,
             qty,
             product,
+            this.company._product_default_values,
             this.company,
             this.currency
         );
@@ -481,16 +490,17 @@ export class PosOrderline extends Base {
             priceUnit,
             qty,
             product,
+            this.company._product_default_values,
             this.company,
             this.currency
         );
 
         // Tax details.
         const taxDetails = {};
-        for (const taxValues of taxesData.tax_values_list) {
-            taxDetails[taxValues.taxId] = {
-                amount: taxValues.tax_amount_factorized,
-                base: taxValues.display_base,
+        for (const taxData of taxesData.taxes_data) {
+            taxDetails[taxData.taxId] = {
+                amount: taxData.tax_amount_factorized,
+                base: taxData.display_base,
             };
         }
 
@@ -501,7 +511,7 @@ export class PosOrderline extends Base {
             priceWithoutTaxBeforeDiscount: taxesDataBeforeDiscount.total_excluded,
             tax: taxesData.total_included - taxesData.total_excluded,
             taxDetails: taxDetails,
-            taxValuesList: taxesData.tax_values_list,
+            taxesData: taxesData.taxes_data,
         };
     }
 
@@ -515,6 +525,8 @@ export class PosOrderline extends Base {
             price = getPriceUnitAfterFiscalPosition(
                 taxes,
                 price,
+                product,
+                this.company._product_default_values,
                 order.fiscal_position_id,
                 this.models
             );
