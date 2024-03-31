@@ -1,27 +1,53 @@
 /** @odoo-module */
 
-import {
-    adapt_price_unit_to_another_taxes,
-    computeSingleLineTaxes,
-    eval_taxes_computation_prepare_context,
-} from "@account/helpers/account_tax";
+import { accountTaxHelpers } from "@account/helpers/account_tax";
 
-export const getPriceUnitAfterFiscalPosition = (taxes, priceUnit, fiscalPosition, models) => {
+export const getPriceUnitAfterFiscalPosition = (
+    taxes,
+    priceUnit,
+    product,
+    productDefaultValues,
+    fiscalPosition,
+    models
+) => {
     if (!fiscalPosition) {
         return priceUnit;
     }
 
     const newTaxes = getTaxesAfterFiscalPosition(taxes, fiscalPosition, models);
-    return adapt_price_unit_to_another_taxes(priceUnit, taxes, newTaxes);
+    return accountTaxHelpers.adapt_price_unit_to_another_taxes(
+        priceUnit,
+        accountTaxHelpers.eval_taxes_computation_prepare_product_values(
+            productDefaultValues,
+            product
+        ),
+        taxes,
+        newTaxes
+    );
 };
 
-export const getTaxesValues = (taxes, priceUnit, quantity, product, company, currency) => {
-    const evalContext = eval_taxes_computation_prepare_context(priceUnit, quantity, {
-        product: product,
-        rounding_method: company.tax_calculation_rounding_method,
-        precision_rounding: currency.rounding,
-    });
-    return computeSingleLineTaxes(taxes, evalContext);
+export const getTaxesValues = (
+    taxes,
+    priceUnit,
+    quantity,
+    product,
+    productDefaultValues,
+    company,
+    currency
+) => {
+    const evalContext = accountTaxHelpers.eval_taxes_computation_prepare_context(
+        priceUnit,
+        quantity,
+        accountTaxHelpers.eval_taxes_computation_prepare_product_values(
+            productDefaultValues,
+            product
+        ),
+        {
+            rounding_method: company.tax_calculation_rounding_method,
+            precision_rounding: currency.rounding,
+        }
+    );
+    return accountTaxHelpers.computeSingleLineTaxes(taxes, evalContext);
 };
 
 export const getTaxesAfterFiscalPosition = (taxes, fiscalPosition, models) => {
