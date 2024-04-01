@@ -6,12 +6,15 @@ import {
     getNodeAttribute,
     getNodeText,
     getNodeValue,
+    getNodeRect,
     getStyle,
     isCheckable,
     isDisplayed,
     isEmpty,
+    isNode,
     isVisible,
     queryAll,
+    queryRect,
 } from "@web/../lib/hoot-dom/helpers/dom";
 import { isFirefox, isIterable } from "@web/../lib/hoot-dom/hoot_dom_utils";
 import {
@@ -46,6 +49,9 @@ import { Test } from "./test";
  *  message?: string;
  * }} ExpectOptions
  *
+ * @typedef {import("@odoo/hoot-dom").Dimensions} Dimensions
+ * @typedef {import("@odoo/hoot-dom").Position} Position
+ * @typedef {import("@odoo/hoot-dom").QueryRectOptions} QueryRectOptions
  * @typedef {import("@odoo/hoot-dom").QueryTextOptions} QueryTextOptions
  * @typedef {import("@odoo/hoot-dom").Target} Target
  */
@@ -85,13 +91,7 @@ const {
     Array: { isArray: $isArray },
     Boolean,
     Error,
-    Object: {
-        assign: $assign,
-        create: $create,
-        fromEntries: $fromEntries,
-        entries: $entries,
-        keys: $keys,
-    },
+    Object: { assign: $assign, fromEntries: $fromEntries, entries: $entries, keys: $keys },
     Promise,
     TypeError,
     performance,
@@ -248,7 +248,7 @@ const assertions = (expected) => {
  * @param {Test} test
  */
 const beforeTest = (test) => {
-    test.results.push(new TestResult());
+    test.results.push(new TestResult(test));
 
     // Must be retrieved from the list to be proxified
     currentResult = test.results.at(-1);
@@ -279,11 +279,6 @@ const errors = (expected) => {
     ensureArguments([[expected, "integer"]]);
 
     currentResult.expectedErrors = expected;
-};
-
-/** @type {(typeof Matchers)["extend"]} */
-const extend = (matcher) => {
-    return Matchers.extend(matcher);
 };
 
 /**
@@ -482,7 +477,6 @@ export function makeExpect(params) {
     const enrichedExpect = $assign(expect, {
         assertions,
         errors,
-        extend,
         step,
     });
     const expectHooks = {
@@ -520,11 +514,6 @@ export class Assertion {
  * @template [Async=false]
  */
 export class Matchers {
-    /** @type {Record<string, (...args: any[]) => MatcherSpecifications>} */
-    static registry = $create(null);
-
-    /** @type {A} */
-    #actual = null;
     /** @type {R} */
     #received = null;
     #headless = false;
@@ -544,18 +533,6 @@ export class Matchers {
         this.#received = received;
         this.#headless = headless;
         this.#modifiers = modifiers;
-
-        for (const [fnName, fn] of $entries(this.constructor.registry)) {
-            const resolve = this.#resolve.bind(this);
-            const saveStack = this.#saveStack.bind(this);
-            this[fnName] = {
-                [fnName](...args) {
-                    saveStack();
-                    const result = fn(...args);
-                    return resolve({ ...result, name: fnName });
-                },
-            }[fnName];
-        }
     }
 
     //-------------------------------------------------------------------------
@@ -900,7 +877,7 @@ export class Matchers {
             predicate: (actual) => {
                 if (strictEqual(actual, expected)) {
                     logger.warn(
-                        `Called \`'toEqual()\` on strictly equal values. Did you mean to use \`toBe()\`?`
+                        `Called \`'toEqual()\` on strictly equal values in "${currentResult.test.fullName}". Did you mean to use \`toBe()\`?`
                     );
                     return true;
                 }
@@ -1565,6 +1542,62 @@ export class Matchers {
     }
 
     /**
+     * Expects the {@link DOMRect} of the received {@link Target} to match the given
+     * `rect` object.
+     *
+     * The `rect` object can either be:
+     * - a {@link DOMRect} object,
+     * - a CSS selector string (to get the rect of the *only* matching element),
+     * - a node.
+     *
+     * If the resulting `rect` value is a node, then both nodes' rects will be compared.
+     *
+     * @param {Partial<DOMRect> | Target} rect
+     * @param {ExpectOptions & QueryRectOptions} options
+     * @example
+     *  expect("button").toHaveRect({ x: 20, width: 100, height: 50 });
+     * @example
+     *  expect("button").toHaveRect(".container");
+     */
+    toHaveRect(rect, options) {
+        this.#saveStack();
+
+        ensureArguments([
+            [rect, ["object", "string", "node", "node[]"]],
+            [options, ["object", null]],
+        ]);
+
+        let refRect;
+        if (typeof rect === "string" || isNode(rect)) {
+            refRect = queryRect(rect, options);
+        } else {
+            refRect = rect;
+        }
+
+        const entries = $entries(refRect);
+        return this.#resolve({
+            name: "toHaveRect",
+            acceptedType: ["string", "node", "node[]"],
+            transform: queryAll,
+            predicate: each((node) => {
+                const nodeRect = getNodeRect(node, options);
+                return entries.every(([key, value]) => strictEqual(nodeRect[key], value));
+            }),
+            message: (pass) =>
+                options?.message ||
+                (pass
+                    ? `%elements% have the expected DOM rect of ${formatHumanReadable(rect)}`
+                    : `expected %elements% to have the given DOM rect`),
+            details: (actual) => {
+                return [
+                    [Markup.green("Expected:"), rect],
+                    [Markup.red("Received:"), getNodeRect(actual[0], options)],
+                ];
+            },
+        });
+    }
+
+    /**
      * Expects the received {@link Target} to have the given class name(s).
      *
      * @param {string | Record<string, string | RegExp>} style
@@ -1806,25 +1839,6 @@ export class Matchers {
             currentStack = new Error().stack;
         }
     }
-
-    /**
-     * Extends the available matchers methods with a given function.
-     *
-     * @param {(...args: any[]) => MatcherSpecifications<any>} matcher
-     */
-    static extend(matcher) {
-        ensureArguments([[matcher, "function"]]);
-
-        const { name } = matcher;
-        if (!name) {
-            throw new TypeError(`matcher must be a named function`);
-        }
-        if (this.registry[name]) {
-            throw new HootError(`a matcher with the name "${name}" already exists`);
-        }
-
-        this.registry[name] = matcher;
-    }
 }
 
 export class TestResult {
@@ -1840,4 +1854,11 @@ export class TestResult {
     /** @type {string[]} */
     steps = [];
     ts = $now();
+
+    /**
+     * @param {Test} test
+     */
+    constructor(test) {
+        this.test = test;
+    }
 }
