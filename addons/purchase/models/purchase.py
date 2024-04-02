@@ -961,7 +961,7 @@ class ProcurementRule(models.Model):
     def _get_purchase_order_date(self, product_id, product_qty, product_uom, values, partner, schedule_date):
         """Return the datetime value to use as Order Date (``date_order``) for the
            Purchase Order created to satisfy the given procurement. """
-        seller = product_id._select_seller(
+        seller = product_id.with_context(force_company=self.company_id.id)._select_seller(
             partner_id=partner,
             quantity=product_qty,
             date=fields.Date.to_string(schedule_date),
@@ -990,7 +990,7 @@ class ProcurementRule(models.Model):
     @api.multi
     def _prepare_purchase_order_line(self, product_id, product_qty, product_uom, values, po, supplier):
         procurement_uom_po_qty = product_uom._compute_quantity(product_qty, product_id.uom_po_id)
-        seller = product_id._select_seller(
+        seller = product_id.with_context(force_company=self.company_id.id)._select_seller(
             partner_id=supplier.name,
             quantity=procurement_uom_po_qty,
             date=po.date_order and po.date_order[:10],
