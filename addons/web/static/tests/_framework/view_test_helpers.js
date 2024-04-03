@@ -1,3 +1,4 @@
+import { expect, formatXML } from "@odoo/hoot";
 import { waitFor } from "@odoo/hoot-dom";
 import { Component, useSubEnv, xml } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -35,35 +36,6 @@ import { MockServer } from "./mock_server/mock_server";
 //-----------------------------------------------------------------------------
 // Internals
 //-----------------------------------------------------------------------------
-
-/**
- *
- * @param {string} base
- * @param {SelectorOptions} [params]
- */
-const buildSelector = (base, params) => {
-    let selector = base;
-    params ||= {};
-    if (params.id) {
-        selector += `#${params.id}`;
-    }
-    if (params.class) {
-        selector += `.${params.class}`;
-    }
-    if (params.modifier) {
-        selector += `:${params.modifier}`;
-    }
-    if (params.text) {
-        selector += `:contains(${params.text})`;
-    }
-    if (params.index) {
-        selector += `:eq(${params.index})`;
-    }
-    if (params.target) {
-        selector += ` ${params.target}`;
-    }
-    return selector;
-};
 
 /**
  * @param {MountViewParams} params
@@ -135,6 +107,35 @@ class ViewDialog extends Component {
 //-----------------------------------------------------------------------------
 
 /**
+ *
+ * @param {string} base
+ * @param {SelectorOptions} [params]
+ */
+export function buildSelector(base, params) {
+    let selector = base;
+    params ||= {};
+    if (params.id) {
+        selector += `#${params.id}`;
+    }
+    if (params.class) {
+        selector += `.${params.class}`;
+    }
+    if (params.modifier) {
+        selector += `:${params.modifier}`;
+    }
+    if (params.text) {
+        selector += `:contains(${params.text})`;
+    }
+    if ("index" in params) {
+        selector += `:eq(${params.index})`;
+    }
+    if (params.target) {
+        selector += ` ${params.target}`;
+    }
+    return selector;
+}
+
+/**
  * @param {SelectorOptions} [options]
  */
 export async function clickButton(options) {
@@ -146,13 +147,6 @@ export async function clickButton(options) {
  */
 export async function clickCancel(options) {
     await contains(buildSelector(`.o_form_button_cancel:enabled`, options)).click();
-}
-
-/**
- * @param {SelectorOptions} [options]
- */
-export async function clickKanbanCard(options) {
-    await contains(buildSelector(`.o_kanban_record`, options)).click();
 }
 
 /**
@@ -185,13 +179,6 @@ export function fieldInput(name, options) {
 }
 
 /**
- * @param {SelectorOptions} options
- */
-export function kanbanCard(options) {
-    return contains(buildSelector(`.o_kanban_record`, options));
-}
-
-/**
  * @param {MountViewParams} params
  */
 export async function mountViewInDialog(params) {
@@ -219,4 +206,19 @@ export async function mountView(params) {
         env: params.env || getMockEnv() || (await makeMockEnv({ config })),
         props: parseViewProps(params),
     });
+}
+
+/**
+ * @param {string} value
+ */
+export function expectMarkup(value) {
+    return {
+        /**
+         * @param {string} expected
+         * @param {object} [options]
+         */
+        toBe(expected, options) {
+            expect(formatXML(value, options)).toBe(formatXML(expected, options));
+        },
+    };
 }

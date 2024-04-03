@@ -295,9 +295,7 @@ export class RecordList extends Array {
                     );
                 }
                 // Attempt an unimplemented array method call
-                const array = [
-                    ...recordList._proxyInternal[Symbol.iterator].call(recordListFullProxy),
-                ];
+                const array = [...recordList[Symbol.iterator].call(recordListFullProxy)];
                 return array[name]?.bind(array);
             },
             /** @param {RecordList<R>} recordListProxy */
@@ -582,5 +580,12 @@ export class RecordList extends Array {
         for (const localId of recordListFullProxy.data) {
             yield recordListFullProxy._store.recordByLocalId.get(localId);
         }
+    }
+    /** @param {number} index */
+    at(index) {
+        // this custom implement of "at" is slightly faster than auto-calling unimplement array method
+        const recordList = toRaw(this)._raw;
+        const recordListFullProxy = recordList._.downgradeProxy(recordList, this);
+        return recordListFullProxy._store.recordByLocalId.get(recordListFullProxy.data.at(index));
     }
 }
