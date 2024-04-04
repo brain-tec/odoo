@@ -97,7 +97,8 @@ class EventRegistration(models.Model):
     def _synchronize_so_line_values(self, so_line):
         if so_line:
             return {
-                'partner_id': False if self.env.user._is_public() else so_line.order_id.partner_id.id,
+                # Avoid registering public users but respect the portal workflows
+                'partner_id': False if self.env.user._is_public() and self.env.user.partner_id == so_line.order_id.partner_id else so_line.order_id.partner_id.id,
                 'event_id': so_line.event_id.id,
                 'event_ticket_id': so_line.event_ticket_id.id,
                 'sale_order_id': so_line.order_id.id,
@@ -128,6 +129,6 @@ class EventRegistration(models.Model):
         res.update({
             'payment_status': self.payment_status,
             'payment_status_value': dict(self._fields['payment_status']._description_selection(self.env))[self.payment_status],
-            'has_to_pay': not self.is_paid,
+            'has_to_pay': self.payment_status == 'to_pay',
         })
         return res

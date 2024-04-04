@@ -142,7 +142,7 @@ class Project(models.Model):
     @api.depends('pricing_type', 'allow_timesheets', 'allow_billable', 'sale_line_employee_ids', 'sale_line_employee_ids.employee_id')
     def _compute_warning_employee_rate(self):
         projects = self.filtered(lambda p: p.allow_billable and p.allow_timesheets and p.pricing_type == 'employee_rate')
-        employees = self.env['account.analytic.line'].read_group([('task_id', 'in', projects.task_ids.ids)], ['employee_id', 'project_id'], ['employee_id', 'project_id'], ['employee_id', 'project_id'], lazy=False)
+        employees = self.env['account.analytic.line'].read_group([('task_id', 'in', projects.task_ids.ids)], ['employee_id', 'project_id'], ['employee_id', 'project_id'], lazy=False)
         dict_project_employee = defaultdict(list)
         for line in employees:
             dict_project_employee[line['project_id'][0]] += [line['employee_id'][0]] if line['employee_id'] else []
@@ -387,14 +387,14 @@ class Project(models.Model):
                 margin_color = profitability['margin'] > 0 and 'green' or 'red'
             data += [{
                 'name': _("Revenues"),
-                'value': format_amount(self.env, profitability['revenues'], self.env.company.currency_id)
+                'value': format_amount(self.env, profitability['revenues'], self.company_id.currency_id)
             }, {
                 'name': _("Costs"),
-                'value': format_amount(self.env, profitability['costs'], self.env.company.currency_id)
+                'value': format_amount(self.env, profitability['costs'], self.company_id.currency_id)
             }, {
                 'name': _("Margin"),
                 'color': margin_color,
-                'value': format_amount(self.env, profitability['margin'], self.env.company.currency_id)
+                'value': format_amount(self.env, profitability['margin'], self.company_id.currency_id)
             }]
         return {
             'action': self.allow_billable and self.allow_timesheets and "action_view_timesheet",

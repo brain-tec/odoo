@@ -65,15 +65,16 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
             for (const keyValue of urlParams.split('&')) {
                 const [key, value] = keyValue.split('=');
                 if (value && key !== 'search') {
-                    this.options[key] = value;
+                    // Decode URI parameters: revert + to space then decodeURIComponent.
+                    this.options[decodeURIComponent(key.replace(/\+/g, '%20'))] = decodeURIComponent(value.replace(/\+/g, '%20'));
                 }
             }
         }
         const pathParts = urlPath.split('/');
         for (const index in pathParts) {
-            const value = pathParts[index];
+            const value = decodeURIComponent(pathParts[index]);
             if (index > 0 && /-[0-9]+$/.test(value)) { // is sluggish
-                this.options[pathParts[index - 1]] = value;
+                this.options[decodeURIComponent(pathParts[index - 1])] = value;
             }
         }
 
@@ -154,6 +155,7 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
             delete this._menuScrollAndResizeHandler;
         }
 
+        let pageScrollHeight = null;
         const $prevMenu = this.$menu;
         this.$el.toggleClass('dropdown show', !!res);
         if (res && this.limit) {
@@ -171,6 +173,17 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
                 fuzzySearch: res['fuzzy_search'],
                 widget: this,
             }));
+
+            // TODO adapt directly in the template in master
+            const mutedItemTextEl = this.$menu.find('span.dropdown-item-text.text-muted')[0];
+            if (mutedItemTextEl) {
+                const newItemTextEl = document.createElement('span');
+                newItemTextEl.classList.add('dropdown-item-text');
+                mutedItemTextEl.after(newItemTextEl);
+                mutedItemTextEl.classList.remove('dropdown-item-text');
+                newItemTextEl.appendChild(mutedItemTextEl);
+            }
+
             this.$menu.css('min-width', this.autocompleteMinWidth);
 
             // Handle the case where the searchbar is in a mega menu by making
@@ -193,6 +206,7 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
                 }
             }
 
+            pageScrollHeight = document.querySelector("#wrapwrap").scrollHeight;
             this.$el.append(this.$menu);
 
             this.$el.find('button.extra_link').on('click', function (event) {
@@ -209,6 +223,22 @@ publicWidget.registry.searchBar = publicWidget.Widget.extend({
 
         if ($prevMenu) {
             $prevMenu.remove();
+        }
+        // Adjust the menu's position based on the scroll height.
+        if (res && this.limit) {
+            this.el.classList.remove("dropup");
+            const wrapwrapEl = document.querySelector("#wrapwrap");
+            if (wrapwrapEl.scrollHeight > pageScrollHeight) {
+                // If the menu overflows below the page, we reduce its height.
+                this.$menu[0].style.maxHeight = "40vh";
+                this.$menu[0].style.overflowY = "auto";
+                // We then recheck if the menu still overflows below the page.
+                if (wrapwrapEl.scrollHeight > pageScrollHeight) {
+                    // If the menu still overflows below the page after its height
+                    // has been reduced, we position it above the input.
+                    this.el.classList.add("dropup");
+                }
+            }
         }
     },
 

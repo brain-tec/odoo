@@ -9,6 +9,7 @@ from odoo.addons.base.tests.common import MockSmtplibCase
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger
+from odoo.tools import config
 
 
 @tagged('mail_server')
@@ -143,7 +144,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
             self.assertEqual(mail_server.from_filter, False, 'No notifications email set, must be forced to spoof the FROM')
             self.assertEqual(mail_from, 'test@unknown_domain.com')
 
-    @mute_logger('odoo.models.unlink')
+    @mute_logger('odoo.models.unlink', 'odoo.addons.base.models.ir_mail_server')
     def test_mail_server_send_email(self):
         IrMailServer = self.env['ir.mail_server']
         default_bounce_adress = self.env['ir.mail_server']._get_default_bounce_address()
@@ -223,6 +224,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
         )
 
         # Test that the mail from / recipient envelop are encoded using IDNA
+        self.server_domain.from_filter = 'ééééééé.com'
         self.env['ir.config_parameter'].sudo().set_param('mail.catchall.domain', 'ééééééé.com')
         with self.mock_smtplib_connection():
             message = self._build_email(mail_from='test@ééééééé.com')
@@ -234,7 +236,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
             smtp_from='bounce@xn--9caaaaaaa.com',
             smtp_to_list=['dest@xn--example--i1a.com'],
             message_from='test@=?utf-8?b?w6nDqcOpw6nDqcOpw6k=?=.com',
-            from_filter=False,
+            from_filter='ééééééé.com',
         )
 
         # Test the case when the "mail.default.from" contains a full email address and not just the local part
@@ -251,6 +253,34 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
             smtp_to_list=['dest@xn--example--i1a.com'],
             message_from='"Name" <test@custom_domain.com>',
             from_filter='custom_domain.com',
+        )
+
+        # Test when forcing the mail server and when smtp_encryption is "starttls"
+        self.server_domain.smtp_encryption = "starttls"
+        self.server_domain.from_filter = "test.com"
+        with self.mock_smtplib_connection():
+            message = self._build_email(mail_from='specific_user@test.com')
+            IrMailServer.send_email(message, mail_server_id=self.server_domain.id)
+
+        self.connect_mocked.assert_called_once()
+        self.assert_email_sent_smtp(
+            smtp_from='specific_user@test.com',
+            message_from='specific_user@test.com',
+            from_filter='test.com',
+        )
+
+        # miss-configured database, no mail servers from filter
+        # match the user / notification email
+        self.env['ir.mail_server'].search([]).from_filter = "random.domain"
+        with self.mock_smtplib_connection():
+            message = self._build_email(mail_from='specific_user@test.com')
+            IrMailServer.send_email(message)
+
+        self.connect_mocked.assert_called_once()
+        self.assert_email_sent_smtp(
+            smtp_from='test@custom_domain.com',
+            message_from='"specific_user" <test@custom_domain.com>',
+            from_filter='random.domain',
         )
 
     @mute_logger('odoo.models.unlink')
@@ -322,7 +352,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
         )
 
     @mute_logger('odoo.models.unlink')
-    @patch.dict("odoo.tools.config.options", {"from_filter": "test.com"})
+    @patch.dict(config.options, {"from_filter": "test.com"})
     def test_mail_server_binary_arguments_domain(self):
         """Test the configuration provided in the odoo-bin arguments.
 
@@ -374,7 +404,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
         )
 
     @mute_logger('odoo.models.unlink')
-    @patch.dict("odoo.tools.config.options", {"from_filter": "test.com"})
+    @patch.dict(config.options, {"from_filter": "test.com"})
     def test_mail_server_binary_arguments_domain_smtp_session(self):
         """Test the configuration provided in the odoo-bin arguments.
 
@@ -417,7 +447,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
         )
 
     @mute_logger('odoo.models.unlink')
-    @patch.dict('odoo.tools.config.options', {'from_filter': 'test.com'})
+    @patch.dict(config.options, {'from_filter': 'test.com'})
     def test_mail_server_mail_default_from_filter(self):
         """Test that the config parameter "mail.default.from_filter" overwrite the odoo-bin
         argument "--from-filter"

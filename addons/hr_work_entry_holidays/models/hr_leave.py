@@ -9,6 +9,7 @@ from odoo.exceptions import ValidationError
 from odoo.osv.expression import AND
 from odoo.tools import format_date
 
+
 class HrLeaveType(models.Model):
     _inherit = 'hr.leave.type'
 
@@ -190,8 +191,8 @@ Contracts:
         return super()._get_leaves_on_public_holiday().filtered(
             lambda l: l.holiday_status_id.work_entry_type_id.code not in ['LEAVE110', 'LEAVE280'])
 
-    def action_validate(self):
-        super(HrLeave, self).action_validate()
+    def _validate_leave_request(self):
+        super(HrLeave, self)._validate_leave_request()
         self.sudo()._cancel_work_entry_conflict()  # delete preexisting conflicting work_entries
         return True
 
@@ -218,26 +219,23 @@ Contracts:
             Override this method to get number of days according to the contract's calendar
             at the time of the leave.
         """
-        days = super(HrLeave, self)._get_number_of_days(date_from, date_to, employee_id)
         if employee_id:
             employee = self.env['hr.employee'].browse(employee_id)
             # Use sudo otherwise base users can't compute number of days
-            contracts = employee.sudo()._get_contracts(date_from, date_to, states=['open'])
+            contracts = employee.sudo()._get_contracts(date_from, date_to, states=['open', 'close'])
             contracts |= employee.sudo()._get_incoming_contracts(date_from, date_to)
             calendar = contracts[:1].resource_calendar_id if contracts else None # Note: if len(contracts)>1, the leave creation will crash because of unicity constaint
-            # We force the company in the domain as we are more than likely in a compute_sudo
-            domain = [('company_id', 'in', self.env.company.ids + self.env.context.get('allowed_company_ids', []))]
+            domain = [('company_id', '=', employee.company_id.id)]
             result = employee._get_work_days_data_batch(date_from, date_to, calendar=calendar, domain=domain)[employee.id]
             if self.request_unit_half and result['hours'] > 0:
                 result['days'] = 0.5
             return result
-
-        return days
+        return super(HrLeave, self)._get_number_of_days(date_from, date_to, employee_id)
 
     def _get_calendar(self):
         self.ensure_one()
         if self.date_from and self.date_to:
-            contracts = self.employee_id.sudo()._get_contracts(self.date_from, self.date_to, states=['open'])
+            contracts = self.employee_id.sudo()._get_contracts(self.date_from, self.date_to, states=['open', 'close'])
             contracts |= self.employee_id.sudo()._get_incoming_contracts(self.date_from, self.date_to)
             contract_calendar = contracts[:1].resource_calendar_id if contracts else None
             return contract_calendar or self.employee_id.resource_calendar_id or self.env.company.resource_calendar_id

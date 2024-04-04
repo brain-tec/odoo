@@ -14,7 +14,6 @@ from odoo import http, tools, _
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo.addons.website_profile.controllers.main import WebsiteProfile
-from odoo.addons.portal.controllers.portal import _build_url_w_params
 
 from odoo.exceptions import UserError
 from odoo.http import request
@@ -230,7 +229,7 @@ class WebsiteForum(WebsiteProfile):
                 type='http', auth="public", website=True, sitemap=False)
     def old_question(self, forum, question, **post):
         # Compatibility pre-v14
-        return request.redirect(_build_url_w_params("/forum/%s/%s" % (slug(forum), slug(question)), request.params), code=301)
+        return request.redirect("/forum/%s/%s" % (slug(forum), slug(question)), code=301)
 
     @http.route(['''/forum/<model("forum.forum"):forum>/<model("forum.post", "[('forum_id','=',forum.id),('parent_id','=',False),('can_view', '=', True)]"):question>'''],
                 type='http', auth="public", website=True, sitemap=True)
@@ -567,7 +566,7 @@ class WebsiteForum(WebsiteProfile):
     # -----------------------------------
 
     @http.route(['/forum/<model("forum.forum"):forum>/user/<int:user_id>'], type='http', auth="public", website=True)
-    def view_user_forum_profile(self, forum, user_id, forum_origin, **post):
+    def view_user_forum_profile(self, forum, user_id, forum_origin='/forum', **post):
         return request.redirect('/profile/user/' + str(user_id) + '?forum_id=' + str(forum.id) + '&forum_origin=' + str(forum_origin))
 
     def _prepare_user_profile_values(self, user, **post):
@@ -638,7 +637,7 @@ class WebsiteForum(WebsiteProfile):
                 down_votes = rec['vote_count']
 
         # Votes which given by users on others questions and answers.
-        vote_ids = Vote.search([('user_id', '=', user.id)])
+        vote_ids = Vote.search([('user_id', '=', user.id), ('forum_id', 'in', forums.ids)])
 
         # activity by user.
         comment = Data._xmlid_lookup('mail.mt_comment')[2]

@@ -429,7 +429,7 @@ class TestPreview(TransactionCase):
             {'id': 'somevalue', 'name': 'somevalue', 'string': 'Some Value', 'required': True, 'fields': [], 'type': 'integer', 'model_name': 'base_import.tests.models.preview'},
             {'id': 'othervalue', 'name': 'othervalue', 'string': 'Other Variable', 'required': False, 'fields': [], 'type': 'integer', 'model_name': 'base_import.tests.models.preview'},
         ])
-        self.assertEqual(result['preview'], ['foo', '1', '2'])
+        self.assertEqual(result['preview'], [['foo', 'bar', 'aux'], ['1', '3', '5'], ['2', '4', '6']])
 
 
 class test_convert_import_data(TransactionCase):
@@ -477,6 +477,35 @@ class test_convert_import_data(TransactionCase):
                 'separator': ',',
                 'has_headers': True
             }
+        )
+
+        # if results empty, no errors
+        self.assertItemsEqual(results['messages'], [])
+
+    def test_date_fields_no_options(self):
+        import_wizard = self.env['base_import.import'].with_context(lang='de_DE').create({
+            'res_model': 'res.partner',
+            'file': 'name,date,create_date\n'
+                    '"foo","15.10.2023","15.10.2023 15:15:15"\n'.encode('utf-8'),
+            'file_type': 'text/csv',
+        })
+
+        opts = {
+            'date_format': '',
+            'datetime_format': '',
+            'quoting': '"',
+            'separator': ',',
+            'float_decimal_separator': '.',
+            'float_thousand_separator': ',',
+            'has_headers': True
+        }
+        result_parse = import_wizard.parse_preview({**opts})
+
+        opts = result_parse['options']
+        results = import_wizard.execute_import(
+            ['name', 'date', 'create_date'],
+            [],
+            {**opts}
         )
 
         # if results empty, no errors

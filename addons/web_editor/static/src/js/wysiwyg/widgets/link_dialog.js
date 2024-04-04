@@ -10,6 +10,7 @@ const _DialogLinkWidget = Link.extend({
     template: 'wysiwyg.widgets.link',
     events: _.extend({}, Link.prototype.events || {}, {
         'change [name="link_style_color"]': '_onTypeChange',
+        'input input[name="label"]': '_adaptPreview',
     }),
 
     /**
@@ -84,6 +85,12 @@ const _DialogLinkWidget = Link.extend({
      */
     _doStripDomain: function () {
         return this.$('#o_link_dialog_url_strip_domain').prop('checked');
+    },
+    /**
+     * @override
+     */
+    _getIsNewWindowFormRow() {
+        return this.$('input[name="is_new_window"]').closest('.form-group');
     },
     /**
      * @override
@@ -175,6 +182,7 @@ const _DialogLinkWidget = Link.extend({
     _onURLInput: function () {
         this._super(...arguments);
         this.$('#o_link_dialog_url_input').closest('.form-group').removeClass('o_has_error').find('.form-control, .custom-select').removeClass('is-invalid');
+        this._adaptPreview();
     },
 });
 

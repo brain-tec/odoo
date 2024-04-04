@@ -110,9 +110,8 @@ class Meeting(models.Model):
          ('busy', 'Busy')], 'Show as', default='busy', required=True,
         help="If the time is shown as 'busy', this event will be visible to other people with either the full \
         information or simply 'busy' written depending on its privacy. Use this option to let other people know \
-        that you are unavailable during that period of time. \n If the time is shown as 'free', this event won't \
-        be visible to other people at all. Use this option to let other people know that you are available during \
-        that period of time.")
+        that you are unavailable during that period of time. \n If the event is shown as 'free', other users know \
+        that you are available during that period of time.")
     is_highlighted = fields.Boolean(
         compute='_compute_is_highlighted', string='Is the Event Highlighted')
     is_organizer_alone = fields.Boolean(compute='_compute_is_organizer_alone', string="Is the Organizer Alone",
@@ -277,6 +276,19 @@ class Meeting(models.Model):
             if event.allday:
                 event.stop -= timedelta(seconds=1)
 
+    @api.onchange('start_date', 'stop_date')
+    def _onchange_date(self):
+        """ This onchange is required for cases where the stop/start is False and we set an allday event.
+            The inverse method is not called in this case because start_date/stop_date are not used in any
+            compute/related, so we need an onchange to set the start/stop values in the form view
+        """
+        for event in self:
+            if event.stop_date and event.start_date:
+                event.with_context(is_calendar_event_new=True).write({
+                    'start': fields.Datetime.from_string(event.start_date).replace(hour=8),
+                    'stop': fields.Datetime.from_string(event.stop_date).replace(hour=18),
+                })
+
     def _inverse_dates(self):
         """ This method is used to set the start and stop values of all day events.
             The calendar view needs date_start and date_stop values to display correctly the allday events across
@@ -335,6 +347,7 @@ class Meeting(models.Model):
         recurrence_fields = self._get_recurrent_fields()
         false_values = {field: False for field in recurrence_fields}  # computes need to set a value
         defaults = self.env['calendar.recurrence'].default_get(recurrence_fields)
+        default_rrule_values = self.recurrence_id.default_get(recurrence_fields)
         for event in self:
             if event.recurrency:
                 event.update(defaults)  # default recurrence values are needed to correctly compute the recurrence params
@@ -344,6 +357,7 @@ class Meeting(models.Model):
                     for field in recurrence_fields
                     if event.recurrence_id[field]
                 }
+                rrule_values = rrule_values or default_rrule_values
                 event.update({**false_values, **event_values, **rrule_values})
             else:
                 event.update(false_values)
@@ -359,6 +373,9 @@ class Meeting(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        # Prevent sending update notification when _inverse_dates is called
+        self = self.with_context(is_calendar_event_new=True)
+
         vals_list = [  # Else bug with quick_create when we are filter on an other user
             dict(vals, user_id=self.env.user.id) if not 'user_id' in vals else vals
             for vals in vals_list
@@ -424,7 +441,12 @@ class Meeting(models.Model):
         if not self.env.context.get('dont_notify'):
             events._setup_alarms()
 
-        return events
+        return events.with_context(is_calendar_event_new=False)
+
+    def _compute_field_value(self, field):
+        if field.compute_sudo:
+            return super(Meeting, self.with_context(prefetch_fields=False))._compute_field_value(field)
+        return super()._compute_field_value(field)
 
     def _read(self, fields):
         if self.env.is_system():
@@ -468,9 +490,11 @@ class Meeting(models.Model):
             update_alarms = True
 
         time_fields = self.env['calendar.event']._get_time_fields()
-        if any([values.get(key) for key in time_fields]) or 'alarm_ids' in values:
+        if any([values.get(key) for key in time_fields]):
             update_alarms = True
             update_time = True
+        if 'alarm_ids' in values:
+            update_alarms = True
 
         if (not recurrence_update_setting or recurrence_update_setting == 'self_only' and len(self) == 1) and 'follow_recurrence' not in values:
             if any({field: values.get(field) for field in time_fields if field in values}):
@@ -521,7 +545,7 @@ class Meeting(models.Model):
             (current_attendees - previous_attendees)._send_mail_to_attendees(
                 self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False)
             )
-        if 'start' in values:
+        if not self.env.context.get('is_calendar_event_new') and 'start' in values:
             start_date = fields.Datetime.to_datetime(values.get('start'))
             # Only notify on future events
             if start_date and start_date >= fields.Datetime.now():
@@ -556,7 +580,7 @@ class Meeting(models.Model):
         if not self.env.su and private_fields:
             # display public and confidential events
             domain = AND([domain, ['|', ('privacy', '!=', 'private'), ('user_id', '=', self.env.user.id)]])
-            self.env['bus.bus']._sendone(self.env.user.partner_id, 'mail.simple_notification', {
+            self.env['bus.bus']._sendone(self.env.user.partner_id, 'simple_notification', {
                 'title': _('Private Event Excluded'),
                 'message': _('Grouping by %s is not allowed on private events.', ', '.join([self._fields[field_name].string for field_name in private_fields]))
             })
@@ -607,6 +631,11 @@ class Meeting(models.Model):
 
         removed_partner_ids = []
         added_partner_ids = []
+
+        # if commands are just integers, assume they are ids with the intent to `Command.set`
+        if partner_commands and isinstance(partner_commands[0], int):
+            partner_commands = [Command.set(partner_commands)]
+
         for command in partner_commands:
             op = command[0]
             if op in (2, 3):  # Remove partner
@@ -702,7 +731,7 @@ class Meeting(models.Model):
         self.ensure_one()
         if recurrence_update_setting == 'all_events':
             self.recurrence_id.calendar_event_ids.write({'active': False})
-        elif recurrence_update_setting == 'future_events':
+        elif recurrence_update_setting == 'future_events' and self.recurrence_id:
             detached_events = self.recurrence_id._stop_at(self)
             detached_events.write({'active': False})
 
@@ -873,7 +902,7 @@ class Meeting(models.Model):
                 if not start_update:
                     # Apply the same shift for start
                     start = base_time_values['start'] + (stop_update - self.stop)
-                    start_date = base_time_values['start_date'] + (stop_update.date() - self.stop.date())
+                    start_date = base_time_values['start'].date() + (stop_update.date() - self.stop.date())
                     update_dict.update({'start': start, 'start_date': start_date})
                 stop = base_time_values['stop'] + (stop_update - self.stop)
                 stop_date = base_time_values['stop'].date() + (stop_update.date() - self.stop.date())
@@ -922,7 +951,8 @@ class Meeting(models.Model):
             events = self
         attendee = events.attendee_ids.filtered(lambda x: x.partner_id == self.env.user.partner_id)
         if status == 'accepted':
-            return attendee.do_accept()
+            all_events = recurrence_update_setting == 'all_events'
+            return attendee.with_context(all_events=all_events).do_accept()
         if status == 'declined':
             return attendee.do_decline()
         return attendee.do_tentative()
@@ -1041,6 +1071,7 @@ class Meeting(models.Model):
             for attendee in meeting.attendee_ids:
                 attendee_add = event.add('attendee')
                 attendee_add.value = u'MAILTO:' + (attendee.email or u'')
+            event.add('organizer').value = u'MAILTO:' + (meeting.user_id.email or u'')
             result[meeting.id] = cal.serialize().encode('utf-8')
 
         return result

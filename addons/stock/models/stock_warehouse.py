@@ -329,6 +329,7 @@ class Warehouse(models.Model):
 
         for picking_type, values in data.items():
             if self[picking_type]:
+                self[picking_type].sudo().sequence_id.update(sequence_data[picking_type])
                 self[picking_type].update(values)
             else:
                 data[picking_type].update(create_data[picking_type])
@@ -395,6 +396,7 @@ class Warehouse(models.Model):
                     'company_id': self.company_id.id,
                     'action': 'pull',
                     'auto': 'manual',
+                    'propagate_carrier': True,
                     'route_id': self._find_global_route('stock.route_warehouse0_mto', _('Make To Order')).id
                 },
                 'update_values': {

@@ -135,6 +135,7 @@
             t-ref="input"
             t-on-change="_onInputChange"
             t-on-click="_onInputClick"
+            autocomplete="off"
         />
         <span t-if="props.warn_future and state.warning" class="fa fa-exclamation-triangle text-danger o_tz_warning o_datepicker_warning">
             <t>This date is on the future. Make sure it is what you expected.</t>
@@ -1360,13 +1361,13 @@
         <div class="o_attachment_wrap">
             <t t-set="ext" t-value="file.name.replace(/^.*\./, '')"/>
             <div class="o_image_box float-left" t-att-data-id="file.id">
-                <a t-att-href="url" t-att-title="'Download ' + file.name" aria-label="Download">
+                <a t-att-href="url" t-att-title="'Download ' + file.name" aria-label="Download" target="_blank">
                     <span class="o_image o_hover" t-att-data-mimetype="mimetype" t-att-data-ext="ext" role="img"/>
                 </a>
             </div>
 
             <div class="caption">
-                <a class="ml4" t-att-href="url" t-att-title="'Download ' + file.name"><t t-esc='file.name'/></a>
+                <a class="ml4" t-att-href="url" t-att-title="'Download ' + file.name" target="_blank"><t t-esc='file.name'/></a>
             </div>
             <div class="caption small">
                 <a class="ml4 small text-uppercase" t-att-href="url" t-att-title="'Download ' + file.name"><b><t t-esc='ext'/></b></a>

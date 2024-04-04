@@ -101,7 +101,7 @@
                             <a role="button" t-attf-href="/jobs/apply/#{job.id}" class="btn btn-primary btn-lg float-right">Apply Now!</a>
                         </div>
                         <h1 t-field="job.name"/>
-                        <h5 class="font-weight-light" t-field="job.address_id" t-options='{
+                        <h5 class="font-weight-light o_not_editable" t-field="job.address_id" t-options='{
                             "widget": "contact",
                             "fields": ["city"],
                             "no_tag_br": True
@@ -461,6 +461,7 @@
     <field name="name">Thank you (Recruitment)</field>
     <field name="type">qweb</field>
     <field name="key">website_hr_recruitment.thankyou</field>
+    <field name="cache_time">0</field>
     <field name="arch" type="xml">
         <t name="Thank you (Recruitment)" t-name="website_hr_recruitment.thankyou">
             <t t-call="website.layout">

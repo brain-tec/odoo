@@ -1019,6 +1019,49 @@ QUnit.module('relational_fields', {
         form.destroy();
     });
 
+    QUnit.test('clickable statusbar with readonly modifier set to false is editable', async function (assert) {
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `<form string="Partners">
+                    <header><field name="product_id" widget="statusbar" options="{'clickable': true}" attrs="{'readonly': false}"/></header>
+                </form>`,
+        });
+
+        assert.containsN(form, '.o_statusbar_status button', 2);
+        assert.containsNone(form, '.o_statusbar_status button.disabled');
+        form.destroy();
+    });
+
+    QUnit.test('clickable statusbar with readonly modifier set to true is not editable', async function (assert) {
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `<form string="Partners">
+                    <header><field name="product_id" widget="statusbar" options="{'clickable': true}" attrs="{'readonly': true}"/></header>
+                </form>`,
+        });
+
+        assert.containsN(form, '.o_statusbar_status button.disabled', 2);
+        form.destroy();
+    });
+
+    QUnit.test('non-clickable statusbar with readonly modifier set to false is not editable', async function (assert) {
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `<form string="Partners">
+                    <header><field name="product_id" widget="statusbar" options="{'clickable': false}" attrs="{'readonly': false}"/></header>
+                </form>`,
+        });
+
+        assert.containsN(form, '.o_statusbar_status button.disabled', 2);
+        form.destroy();
+    });
+
     QUnit.module('FieldSelection');
 
     QUnit.test('widget selection in a list view', async function (assert) {
@@ -2281,6 +2324,68 @@ QUnit.module('relational_fields', {
         form.destroy();
     });
 
+    QUnit.test('radio field is editable in an editable form', async function (assert) {
+        assert.expect(2);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form edit="1">' +
+                    '<field name="product_id" widget="radio"/>' +
+                '</form>',
+        });
+
+        assert.containsN(form, '.o_field_radio input:enabled', 2,
+            "the field should be editable");
+
+        await testUtils.form.clickSave(form);
+
+        assert.containsN(form, '.o_field_radio input:enabled', 2,
+            "the field should be editable");
+
+        form.destroy();
+    });
+
+    QUnit.test('radio field is not editable in a readonly form', async function (assert) {
+        assert.expect(1);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form edit="0">' +
+                    '<field name="product_id" widget="radio"/>' +
+                '</form>',
+            viewOptions: {
+               mode: 'readonly',
+            },
+        });
+
+        assert.containsN(form, '.o_field_radio input:disabled', 2,
+            "the field should not be editable");
+
+        form.destroy();
+    });
+
+    QUnit.test('radio field is not editable with a readonly modifier', async function (assert) {
+        assert.expect(1);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<field name="product_id" widget="radio" readonly="1"/>' +
+                '</form>',
+        });
+
+        assert.containsN(form, '.o_field_radio input:disabled', 2,
+            "the field should not be editable");
+
+        form.destroy();
+    });
+
     QUnit.test('fieldradio change value by onchange', async function (assert) {
         assert.expect(4);
 
@@ -2915,6 +3020,60 @@ QUnit.module('relational_fields', {
             '/web/dataset/call_kw/turtle/read',
         ]);
 
+        form.destroy();
+    });
+
+    QUnit.test('widget many2many_binary required', async function (assert) {
+        assert.expect(5);
+        this.data['ir.attachment'] = {
+            fields: {
+                name: {string:"Name", type: "char"},
+                mimetype: {string: "Mimetype", type: "char"},
+            },
+            records: [{
+                id: 17,
+                name: 'Marley&Me.jpg',
+                mimetype: 'jpg',
+            }],
+        };
+        this.data.turtle.fields.picture_ids = {
+            string: "Pictures",
+            type: "many2many",
+            relation: 'ir.attachment',
+        };
+        this.data.turtle.fields.attachment_ids = {
+            string: "Files",
+            type: "many2many",
+            relation: 'ir.attachment',
+        };
+        this.data.turtle.records[0].picture_ids = [17];
+        this.data.turtle.records[0].attachment_ids = [17];
+
+        var form = await createView({
+            View: FormView,
+            model: 'turtle',
+            data: this.data,
+            arch:`<form string="Turtles">
+                    <group>
+                        <field name="picture_ids" widget="many2many_binary" options="{'accepted_file_extensions': 'image/*'}"/>
+                        <field name="attachment_ids" widget="many2many_binary" required="1"/>
+                    </group>
+                </form>`,
+            archs: {
+                'ir.attachment,false,list': '<tree string="Pictures"><field name="name"/></tree>',
+            },
+            mockRPC: function (route, { method }) {
+                assert.step(method);
+                return this._super.apply(this, arguments);
+            },
+            res_id: 1,
+        });
+        assert.verifySteps(['read', 'read'], 'We should read the attachments');
+        await testUtils.form.clickEdit(form);
+        await testUtils.dom.click(form.$(".oe_fileupload.o_field_widget[name='attachment_ids'] .o_attachment_delete"));
+        await testUtils.form.clickSave(form);
+        assert.verifySteps([], "No save should be performed");
+        assert.strictEqual(form.$('.o_field_invalid').length, 2, 'An invalid field should be present in the view')
         form.destroy();
     });
 

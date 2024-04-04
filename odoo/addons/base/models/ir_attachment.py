@@ -13,7 +13,7 @@ import uuid
 from collections import defaultdict
 from PIL import Image
 
-from odoo import api, fields, models, tools, _
+from odoo import api, fields, models, SUPERUSER_ID, tools, _
 from odoo.exceptions import AccessError, ValidationError, MissingError, UserError
 from odoo.tools import config, human_size, ustr, html_escape, ImageProcess, str2bool
 from odoo.tools.mimetypes import guess_mimetype
@@ -114,6 +114,7 @@ class IrAttachment(models.Model):
 
     @api.model
     def _file_read(self, fname):
+        assert isinstance(self, IrAttachment)
         full_path = self._full_path(fname)
         try:
             with open(full_path, 'rb') as f:
@@ -124,6 +125,7 @@ class IrAttachment(models.Model):
 
     @api.model
     def _file_write(self, bin_value, checksum):
+        assert isinstance(self, IrAttachment)
         fname, full_path = self._get_path(bin_value, checksum)
         if not os.path.exists(full_path):
             try:
@@ -142,6 +144,7 @@ class IrAttachment(models.Model):
 
     def _mark_for_gc(self, fname):
         """ Add ``fname`` in a checklist for the filestore garbage collection. """
+        assert isinstance(self, IrAttachment)
         fname = re.sub('[.]', '', fname).strip('/\\')
         # we use a spooldir: add an empty file in the subdirectory 'checklist'
         full_path = os.path.join(self._full_path('checklist'), fname)
@@ -155,6 +158,7 @@ class IrAttachment(models.Model):
     @api.autovacuum
     def _gc_file_store(self):
         """ Perform the garbage collection of the filestore. """
+        assert isinstance(self, IrAttachment)
         if self._storage() != 'file':
             return
 
@@ -246,10 +250,15 @@ class IrAttachment(models.Model):
                 self._file_delete(fname)
 
     def _get_datas_related_values(self, data, mimetype):
+        checksum = self._compute_checksum(data)
+        try:
+            index_content = self._index(data, mimetype, checksum=checksum)
+        except TypeError:
+            index_content = self._index(data, mimetype)
         values = {
             'file_size': len(data),
-            'checksum': self._compute_checksum(data),
-            'index_content': self._index(data, mimetype),
+            'checksum': checksum,
+            'index_content': index_content,
             'store_fname': False,
             'db_datas': data,
         }
@@ -303,10 +312,10 @@ class IrAttachment(models.Model):
 
     def _postprocess_contents(self, values):
         ICP = self.env['ir.config_parameter'].sudo().get_param
-        supported_subtype = ICP('base.image_autoresize_extensions', 'png,jpeg,gif,bmp,tif').split(',')
+        supported_subtype = ICP('base.image_autoresize_extensions', 'png,jpeg,bmp,tiff').split(',')
 
         mimetype = values['mimetype'] = self._compute_mimetype(values)
-        _type, _subtype = mimetype.split('/')
+        _type, _, _subtype = mimetype.partition('/')
         is_image_resizable = _type == 'image' and _subtype in supported_subtype
         if is_image_resizable and (values.get('datas') or values.get('raw')):
             is_raw = values.get('raw')
@@ -320,16 +329,15 @@ class IrAttachment(models.Model):
                         img = ImageProcess(False, verify_resolution=False)
                         img.image = Image.open(io.BytesIO(values['raw']))
                         img.original_format = (img.image.format or '').upper()
-                        fn_quality = img.image_quality
                     else:  # datas
                         img = ImageProcess(values['datas'], verify_resolution=False)
-                        fn_quality = img.image_base64
 
                     w, h = img.image.size
                     nw, nh = map(int, max_resolution.split('x'))
                     if w > nw or h > nh:
-                        img.resize(nw, nh)
+                        img = img.resize(nw, nh)
                         quality = int(ICP('base.image_autoresize_quality', 80))
+                        fn_quality = img.image_quality if is_raw else img.image_base64
                         values[is_raw and 'raw' or 'datas'] = fn_quality(quality=quality)
                 except UserError as e:
                     # Catch error during test where we provide fake image
@@ -356,7 +364,7 @@ class IrAttachment(models.Model):
         return values
 
     @api.model
-    def _index(self, bin_data, file_type):
+    def _index(self, bin_data, file_type, checksum=None):
         """ compute the index content of the given binary data.
             This is a python implementation of the unix command 'strings'.
             :param bin_data : datas in binary form
@@ -627,7 +635,7 @@ class IrAttachment(models.Model):
                 ))
 
             # 'check()' only uses res_model and res_id from values, and make an exists.
-            # We can group the values by model, res_id to make only one query when 
+            # We can group the values by model, res_id to make only one query when
             # creating multiple attachments on a single record.
             record_tuple = (values.get('res_model'), values.get('res_id'))
             record_tuple_set.add(record_tuple)
@@ -664,3 +672,14 @@ class IrAttachment(models.Model):
         domain = [('type', '=', 'binary'), ('url', '=', url)] + (extra_domain or [])
         fieldNames = ['__last_update', 'datas', 'mimetype'] + (extra_fields or [])
         return self.search_read(domain, fieldNames, order=order, limit=1)
+
+    @api.model
+    def regenerate_assets_bundles(self):
+        self.search([
+            ('public', '=', True),
+            ("url", "=like", "/web/assets/%"),
+            ('res_model', '=', 'ir.ui.view'),
+            ('res_id', '=', 0),
+            ('create_uid', '=', SUPERUSER_ID),
+        ]).unlink()
+        self.clear_caches()

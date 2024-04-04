@@ -32,6 +32,10 @@ import {
     getCursorDirection,
     DIRECTIONS,
     isBlock,
+    CTYPES,
+    getState,
+    restoreState,
+    enforceWhitespace,
 } from '../../src/utils/utils.js';
 import { BasicEditor, testEditor } from '../utils.js';
 
@@ -1039,7 +1043,7 @@ describe('Utils', () => {
         it('should find all traversed nodes in nested range', async () => {
             await testEditor(BasicEditor, {
                 contentBefore:
-                    '<p><span>ab[</span>cd</p><div><p><span><b>e</b><i>f]g</i>h</span></p></div>',
+                    '<p><span class="a">ab[</span>cd</p><div><p><span class="b"><b>e</b><i>f]g</i>h</span></p></div>',
                 stepFunction: editor => {
                     const editable = editor.editable;
                     const ab = editable.firstChild.firstChild.firstChild;
@@ -1091,7 +1095,7 @@ describe('Utils', () => {
         });
         it('should find that a text node is fully selected', async () => {
             await testEditor(BasicEditor, {
-                contentBefore: '<p><span>ab</span>[cd]</p>',
+                contentBefore: '<p><span class="a">ab</span>[cd]</p>',
                 stepFunction: editor => {
                     const editable = editor.editable;
                     const result = getSelectedNodes(editable);
@@ -1116,7 +1120,7 @@ describe('Utils', () => {
         it('should find all selected nodes in nested range', async () => {
             await testEditor(BasicEditor, {
                 contentBefore:
-                    '<p><span>ab[</span>cd</p><div><p><span><b>e</b><i>f]g</i>h</span></p></div>',
+                    '<p><span class="a">ab[</span>cd</p><div><p><span class="b"><b>e</b><i>f]g</i>h</span></p></div>',
                 stepFunction: editor => {
                     const editable = editor.editable;
                     const cd = editable.firstChild.lastChild;
@@ -1234,6 +1238,27 @@ describe('Utils', () => {
                 window.chai
                     .expect([anchorNode, anchorOffset, focusNode, focusOffset])
                     .to.eql([p1.firstChild, 0, p1.firstChild, 11]);
+            });
+            it('should not correct a triple click on collapse', () => {
+                const [p1, div] = insertTestHtml('<p>abc def ghi</p><div><p>jkl mno pqr</p></div>');
+                const p2 = div.firstChild;
+                const range = document.createRange();
+                range.setStart(p2, 0);
+                range.setEnd(p2, 0);
+                const result = getDeepRange(p1.parentElement, {
+                    range,
+                    select: true,
+                    correctTripleClick: true,
+                });
+                const { startContainer, startOffset, endContainer, endOffset } = result;
+                window.chai
+                    .expect([startContainer, startOffset, endContainer, endOffset])
+                    .to.eql([p2.firstChild, 0, p2.firstChild, 0]);
+                const { anchorNode, anchorOffset, focusNode, focusOffset } =
+                    document.getSelection();
+                window.chai
+                    .expect([anchorNode, anchorOffset, focusNode, focusOffset])
+                    .to.eql([p2.firstChild, 0, p2.firstChild, 0]);
             });
             it('should limit the selection to the title text (nested)', () => {
                 const [p] = insertTestHtml(
@@ -1436,13 +1461,10 @@ describe('Utils', () => {
             splitTextNode(cd, 1);
             const d = cd;
             const result = splitAroundUntil(d, p.childNodes[1]);
-            window.chai.expect(result.every(node => node.tagName === 'FONT')).to.be.ok;
+            window.chai.expect(result.tagName === 'FONT').to.be.ok;
             window.chai.expect(p.outerHTML).to.eql(
                 '<p>a<font>b<span>c</span></font><font><span>d</span></font><font><span>e</span>f</font>g</p>'
             );
-            window.chai.expect(result[0]).to.eql(p.childNodes[2]);
-            // "before" split happened so "after" split is not in the DOM anymore:
-            window.chai.expect(result[1].parentElement).to.eql(null);
         });
         it('should split a slice of text from its inline ancestry', () => {
             const [p] = insertTestHtml('<p>a<font>b<span>cdefg</span>h</font>i</p>');
@@ -1457,27 +1479,306 @@ describe('Utils', () => {
             splitTextNode(cd, 1);
             const d = cd;
             const result = splitAroundUntil([d, d.nextSibling.nextSibling], p.childNodes[1]);
-            window.chai.expect(result.every(node => node.tagName === 'FONT')).to.be.ok;
+            window.chai.expect(result.tagName === 'FONT').to.be.ok;
             window.chai.expect(p.outerHTML).to.eql(
                 '<p>a<font>b<span>c</span></font><font><span>def</span></font><font><span>g</span>h</font>i</p>'
             );
-            window.chai.expect(result[0]).to.eql(p.childNodes[2]);
-            // "before" split happened so "after" split is not in the DOM anymore:
-            window.chai.expect(result[1].parentElement).to.eql(null);
+        });
+        it('should split from a textNode that has no siblings', () => {
+            const [p] = insertTestHtml('<p>a<font>b<span>cde</span>f</font>g</p>');
+            const font = p.querySelector('font');
+            const cde = p.querySelector('span').firstChild;
+            const result = splitAroundUntil(cde, font);
+            // debugger
+            window.chai.expect(result.tagName === 'FONT' && result !== font).to.be.ok;
+            window.chai.expect(p.outerHTML).to.eql('<p>a<font>b</font><font><span>cde</span></font><font>f</font>g</p>');
         });
         it('should not do anything (nothing to split)', () => {
-            const [p] = insertTestHtml('<p>a<font>b<span>cde</span>f</font>g</p>');
-            const cde = p.childNodes[1].childNodes[1].firstChild;
-            const result = splitAroundUntil(cde, p.childNodes[1]);
-            window.chai.expect(result.every(node => node === undefined)).to.be.ok;
-            window.chai.expect(p.outerHTML).to.eql('<p>a<font>b<span>cde</span>f</font>g</p>');
+            const [p] = insertTestHtml('<p>a<font><span>bcd</span></font>e</p>');
+            const bcd = p.querySelector('span').firstChild;
+            const result = splitAroundUntil(bcd, p.childNodes[1]);
+            window.chai.expect(result === p.childNodes[1]).to.be.ok;
+            window.chai.expect(p.outerHTML).to.eql('<p>a<font><span>bcd</span></font>e</p>');
         });
+
     });
 
     describe('CleanUp Html', () => {
         it('should not affect future tests => clean', () => {
             const res = cleanTestHtml();
             window.chai.expect(res).to.be.true;
+        });
+    });
+
+    //------------------------------------------------------------------------------
+    // Prepare / Save / Restore state utilities
+    //------------------------------------------------------------------------------
+
+    describe('State preservation utilities', () => {
+        describe('getState', () => {
+            it('should recognize invisible space to the right', () => {
+                // We'll be looking to the right while standing at `a[] `.
+                const [p] = insertTestHtml('<p>a </p>');
+                splitTextNode(p.firstChild, 1); // "a"" "
+                window.chai.expect(p.childNodes.length).to.eql(2);
+                const position = [p, 1]; // `<p>"a"[]" "</p>`
+                window.chai.expect(getState(...position, DIRECTIONS.RIGHT)).to.eql({
+                    // We look to the right of "a" (`a[] `):
+                    node: p.firstChild, // "a"
+                    direction: DIRECTIONS.RIGHT,
+                    // The browser strips the space away so we ignore it and see
+                    // `</p>`: the closing tag from the inside.
+                    cType: CTYPES.BLOCK_INSIDE,
+                });
+            });
+            it('should recognize invisible space to the right (among consecutive space within content)', () => {
+                // We'll be looking to the right while standing at `a [] `. The
+                // first space is visible, the rest isn't.
+                const [p] = insertTestHtml('<p>a  b</p>');
+                splitTextNode(p.firstChild, 2); // "a "" b"
+                window.chai.expect(p.childNodes.length).to.eql(2);
+                const position = [p, 1]; // `<p>"a "[]" b"</p>`
+                window.chai.expect(getState(...position, DIRECTIONS.RIGHT)).to.eql({
+                    // We look to the right of "a " (`a []`):
+                    node: p.firstChild, // "a "
+                    direction: DIRECTIONS.RIGHT,
+                    // The browser strips the space away so we ignore it and see
+                    // "b": visible content.
+                    cType: CTYPES.CONTENT,
+                });
+            });
+            it('should recognize visible space to the left (followed by consecutive space within content)', () => {
+                // We'll be looking to the left while standing at `[] b`. The
+                // first space is visible, the rest isn't.
+                const [p] = insertTestHtml('<p>a  b</p>');
+                splitTextNode(p.firstChild, 2); // "a "" b"
+                window.chai.expect(p.childNodes.length).to.eql(2);
+                const position = [p, 1]; // `<p>"a "[]" b"</p>`
+                window.chai.expect(getState(...position, DIRECTIONS.LEFT)).to.eql({
+                    // We look to the left of " b" (`[] b`):
+                    node: p.lastChild, // "a"
+                    direction: DIRECTIONS.LEFT,
+                    // Left of " b" we see visible space that we should
+                    // preserve.
+                    cType: CTYPES.SPACE,
+                });
+            });
+            it('should recognize invisible space to the left (nothing after)', () => {
+                // We'll be looking to the left while standing at ` [] `.
+                const [p] = insertTestHtml('<p> </p>');
+                p.append(document.createTextNode('')); // " """
+                window.chai.expect(getState(p, 1, DIRECTIONS.LEFT)).to.eql({
+                    // We look to the left of " " (` []`):
+                    node: p.lastChild, // ""
+                    direction: DIRECTIONS.LEFT,
+                    // The browser strips the space away so we ignore it and see
+                    // `<p>`: the opening tag from the inside.
+                    cType: CTYPES.BLOCK_INSIDE,
+                });
+            });
+            it('should recognize invisible space to the left (more space after)', () => {
+                // We'll be looking to the left while standing at ` [] `.
+                const [p] = insertTestHtml('<p>    </p>');
+                splitTextNode(p.firstChild, 1); // " ""   "
+                window.chai.expect(getState(p, 1, DIRECTIONS.LEFT)).to.eql({
+                    // We look to the left of "   " (` []   `):
+                    node: p.lastChild, // "   ".
+                    direction: DIRECTIONS.LEFT,
+                    // The browser strips the space away so we ignore it and see
+                    // `<p>`: the opening tag from the inside.
+                    cType: CTYPES.BLOCK_INSIDE,
+                });
+            });
+            it('should recognize invisible space to the left (br after)', () => {
+                // We'll be looking to the left while standing at ` [] `.
+                const [p] = insertTestHtml('<p> <br></p>');
+                window.chai.expect(getState(p, 1, DIRECTIONS.LEFT)).to.eql({
+                    // We look to the left of the br element (` []<br>`):
+                    node: p.lastChild, // `<br>`.
+                    direction: DIRECTIONS.LEFT,
+                    // The browser strips the space away so we ignore it and see
+                    // `<p>`: the opening tag from the inside.
+                    cType: CTYPES.BLOCK_INSIDE,
+                });
+            });
+        });
+        describe('restoreState', () => {
+            it('should restore invisible space to the left (looking right)', () => {
+                // We'll be restoring the state of "a []" in `<p>a </p>`.
+                const [p] = insertTestHtml('<p>a b</p>');
+                splitTextNode(p.firstChild, 2); // "a ""b"
+                const rule = restoreState({
+                    // We look to the right of "a " (`a []b`) to see if we need
+                    // to preserve the space at the end of "a ":
+                    node: p.firstChild, // "a "
+                    direction: DIRECTIONS.RIGHT,
+                    // The DOM used to be `<p>a </p>` so to the right of "a " we
+                    // used to see `</p>`: the closing tag from the inside.
+                    cType: CTYPES.BLOCK_INSIDE,
+                });
+                // Now looking to the right of "a " we see "b", which is content
+                // and makes the formerly invisible space visible. We should get
+                // back a rule that will enforce the invisibility of the space.
+                window.chai.expect(rule.spaceVisibility).to.be.false;
+            });
+            it('should restore visible space to the left (looking right) (among consecutive space within content)', () => {
+                // We'll be restoring the state of "a []" in `<p>a  b</p>`.
+                // The first space is visible, the rest isn't.
+                const [p] = insertTestHtml('<p>a  </p>');
+                splitTextNode(p.firstChild, 2); // "a "" "
+                const rule = restoreState({
+                    // We look to the right of "a " (`a []`) to see if we need
+                    // to preserve the space at the end of "a ":
+                    node: p.firstChild, // "a "
+                    direction: DIRECTIONS.RIGHT,
+                    // The DOM used to be `<p>a  b</p>` so to the right of "a " we
+                    // used to see "b" which is visible content.
+                    cType: CTYPES.CONTENT,
+                });
+                // Now looking to the right of "a " we see `</p>`: the closing
+                // tag, from the inside. This makes the formerly visible space
+                // invisible. We should get back a rule that will enforce the
+                // visibility of the space.
+                window.chai.expect(rule.spaceVisibility).to.be.true;
+            });
+            it('should restore visible space to the right (looking left) (followed by consecutive space within content)', () => {
+                // We'll be restoring the state of "[] b" in `<p>a  b</p>`.
+                // The first space is visible, the rest isn't.
+                const [p] = insertTestHtml('<p>a  </p>');
+                splitTextNode(p.firstChild, 2); // "a "" "
+                const rule = restoreState({
+                    // We look to the left of " " (`[] `) to see if we need
+                    // to preserve the space of " ":
+                    node: p.lastChild, // " "
+                    direction: DIRECTIONS.LEFT,
+                    // The DOM used to be `<p>a  b</p>` so to the left of " b" we
+                    // used to see " " which is visible space.
+                    cType: CTYPES.SPACE,
+                });
+                // Now looking to the left of " " we see " " which is now
+                // invisible. This means the space we're examining is also still
+                // invisible. Since it should be invisible, we should get back a
+                // rule that will enforce the invisibility of the space (but no
+                // rule would work as well).
+                window.chai.expect(rule.spaceVisibility).not.to.be.true;
+            });
+            it('should restore invisible space to the right (looking left) (nothing after)', () => {
+                // We'll be restoring the state of " []" in `<p> </p>`.
+                const [p] = insertTestHtml('<p>a </p>');
+                splitTextNode(p.firstChild, 1); // "a"" "
+                const rule = restoreState({
+                    // We look to the left of " " (`a[] `) to see if we need
+                    // to preserve the space of " ":
+                    node: p.lastChild, // " "
+                    direction: DIRECTIONS.LEFT,
+                    // The DOM used to be `<p> </p>` so to the left of " " we
+                    // used to see `<p>`: the opening tag from the inside.
+                    cType: CTYPES.BLOCK_INSIDE,
+                });
+                // Now looking to the left of " " we see "a", which is content
+                // but since it's to the left of our space it has no incidence
+                // on its visibility. Either way it should be invisible so we
+                // should get back a rule that will enforce the invisibility of
+                // the space (but no rule would work as well).
+                window.chai.expect(rule.spaceVisibility).not.to.be.true;
+            });
+            it('should restore invisible space to the right (looking left) (more space after)', () => {
+                // We'll be restoring the state of " []   " in `<p>    </p>`.
+                const [p] = insertTestHtml('<p>a    </p>');
+                splitTextNode(p.firstChild, 2); // "a ""   "
+                const rule = restoreState({
+                    // We look to the left of "   " (`a []   `) to see if we need
+                    // to preserve the space of "   ":
+                    node: p.lastChild, // "   "
+                    direction: DIRECTIONS.LEFT,
+                    // The DOM used to be `<p>    </p>` so to the left of "   "
+                    // we used to see `<p>`: the opening tag from the inside.
+                    cType: CTYPES.BLOCK_INSIDE,
+                });
+                // Now looking to the left of "   " we see "a", which is content
+                // but since it's to the left of our space it has no incidence
+                // on its visibility. Either way it should be invisible so we
+                // should get back a rule that will enforce the invisibility of
+                // the space (but no rule would work as well).
+                window.chai.expect(rule.spaceVisibility).not.to.be.true;
+            });
+            it('should restore invisible space to the right (looking left) (br after)', () => {
+                // We'll be restoring the state of " []<br>" in `<p> []<br></p>`.
+                const [p] = insertTestHtml('<p>a <br></p>');
+                const rule = restoreState({
+                    // We look to the left of `<br>` (`a []<br>`):
+                    node: p.lastChild, // `<br>`
+                    direction: DIRECTIONS.LEFT,
+                    // The DOM used to be `<p> <br></p>` so to the left of
+                    // `<br>` we used to see `<p>`: the opening tag from the
+                    // inside.
+                    cType: CTYPES.BLOCK_INSIDE,
+                });
+                // Now looking to the left of `<br>` we see "a", which is
+                // content but since it's to the left of our space it has no
+                // incidence on its visibility. Either way it should be
+                // invisible so we should get back a rule that will enforce the
+                // invisibility of the space (but no rule would work as well).
+                window.chai.expect(rule.spaceVisibility).not.to.be.true;
+            });
+        });
+        describe('enforceWhitespace', () => {
+            it('should enforce invisible space to the left', () => {
+                // We'll be making the space between "a" and "b" invisible.
+                const [p] = insertTestHtml('<p>a b</p>');
+                splitTextNode(p.firstChild, 2); // "a ""b"
+                // We look to the left while standing at "a []":
+                enforceWhitespace(p, 1, DIRECTIONS.LEFT, { spaceVisibility: false });
+                window.chai.expect(p.innerHTML).to.eql('ab');
+            });
+            it('should restore visible space to the left (among consecutive space within content)', () => {
+                // We'll be making the first space after "a" visible.
+                const [p] = insertTestHtml('<p>a  </p>');
+                splitTextNode(p.firstChild, 2); // "a "" "
+                // We look to the left while standing at "a []":
+                enforceWhitespace(p, 1, DIRECTIONS.LEFT, { spaceVisibility: true });
+                window.chai.expect(p.innerHTML).to.eql('a&nbsp; ');
+            });
+            it('should not enforce already invisible space to the right (followed by consecutive space within content)', () => {
+                // We'll be keeping the last (invisible) space after "a" (we
+                // could remove it but we don't need to - mostly we should not
+                // make it visible).
+                const [p] = insertTestHtml('<p>a  </p>');
+                splitTextNode(p.firstChild, 2); // "a "" "
+                // We look to the left while standing at "a []":
+                enforceWhitespace(p, 0, DIRECTIONS.RIGHT, { spaceVisibility: false });
+                window.chai.expect(p.innerHTML).to.eql('a  ');
+            });
+            it('should not enforce already invisible space to the right (nothing after)', () => {
+                // We'll be keeping the invisible space after "a" (we could
+                // remove it but we don't need to - mostly we should not make it
+                // visible).
+                const [p] = insertTestHtml('<p>a </p>');
+                splitTextNode(p.firstChild, 1); // "a"" "
+                // We look to the right while standing at "a[]":
+                enforceWhitespace(p, 0, DIRECTIONS.RIGHT, { spaceVisibility: false });
+                window.chai.expect(p.innerHTML).to.eql('a ');
+            });
+            it('should not enforce already invisible space to the left (more space after)', () => {
+                // We'll be keeping the invisible space after "a" (we could
+                // remove it but we don't need to - mostly we should not make it
+                // visible).
+                const [p] = insertTestHtml('<p>a    </p>');
+                splitTextNode(p.firstChild, 1); // "a""    "
+                // We look to the right while standing at "a[]":
+                enforceWhitespace(p, 0, DIRECTIONS.RIGHT, { spaceVisibility: false });
+                window.chai.expect(p.innerHTML).to.eql('a    ');
+            });
+            it('should not enforce already invisible space to the left (br after)', () => {
+                // We'll be keeping the invisible space after "a" (we could
+                // remove it but we don't need to - mostly we should not make it
+                // visible).
+                const [p] = insertTestHtml('<p>a <br></p>');
+                splitTextNode(p.firstChild, 1); // "a"" "
+                // We look to the right while standing at "a[]":
+                enforceWhitespace(p, 0, DIRECTIONS.RIGHT, { spaceVisibility: false });
+                window.chai.expect(p.innerHTML).to.eql('a <br>');
+            });
         });
     });
 });

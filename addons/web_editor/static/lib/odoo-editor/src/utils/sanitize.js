@@ -10,10 +10,15 @@ import {
     moveNodes,
     preserveCursor,
     isFontAwesome,
-    isMediaElement,
     getDeepRange,
     isUnbreakable,
-    isUnremovable
+    closestElement,
+    getUrlsInfosInString,
+    isVoidElement,
+    unwrapContents,
+    padLinkWithZws,
+    getTraversedNodes,
+    ZERO_WIDTH_CHARS_REGEX,
 } from './utils.js';
 
 const NOT_A_NUMBER = /[^\d]/g;
@@ -75,15 +80,35 @@ export function areSimilarElements(node, node2) {
     );
 }
 
+function shouldPreserveCursor(node, root) {
+    const selection = root.ownerDocument.getSelection();
+    return node.isConnected && selection &&
+        selection.anchorNode && root.contains(selection.anchorNode) &&
+        selection.focusNode && root.contains(selection.focusNode);
+}
+
 class Sanitize {
     constructor(root) {
         this.root = root;
+        const rootClosestBlock = closestBlock(root);
+        if (rootClosestBlock) {
+            // Remove unique ids from checklists. These will be renewed afterwards.
+            for (const node of rootClosestBlock.querySelectorAll('[id^=checklist-id-]')) {
+                node.removeAttribute('id');
+            }
+        }
         this.parse(root);
+        if (rootClosestBlock) {
+            // Ensure unique ids on checklists and stars.
+            for (const node of rootClosestBlock.querySelectorAll('.o_checklist > li')) {
+                node.setAttribute('id', `checklist-id-${Math.floor(new Date() * Math.random())}`);
+            }
+        }
     }
 
     parse(node) {
         node = closestBlock(node);
-        if (['UL', 'OL'].includes(node.tagName)) {
+        if (node && ['UL', 'OL'].includes(node.tagName)) {
             node = node.parentElement;
         }
         this._parse(node);
@@ -97,8 +122,7 @@ class Sanitize {
                 !isUnbreakable(node)
             ) {
                 getDeepRange(this.root, { select: true });
-                const restoreCursor = node.isConnected &&
-                    preserveCursor(this.root.ownerDocument);
+                const restoreCursor = shouldPreserveCursor(node, this.root) && preserveCursor(this.root.ownerDocument);
                 const nodeP = node.previousSibling;
                 moveNodes(...endPos(node.previousSibling), node);
                 if (restoreCursor) {
@@ -107,12 +131,15 @@ class Sanitize {
                 node = nodeP;
             }
 
+            const sel = this.root.ownerDocument.getSelection();
+            const anchor = sel && this.root.ownerDocument.getSelection().anchorNode;
+            const anchorEl = anchor && closestElement(anchor);
             // Remove zero-width spaces added by `fillEmpty` when there is
             // content and the selection is not next to it.
-            const anchor = this.root.ownerDocument.getSelection().anchorNode;
             if (
                 node.nodeType === Node.TEXT_NODE &&
                 node.textContent.includes('\u200B') &&
+                node.parentElement.hasAttribute('oe-zws-empty-inline') &&
                 (
                     node.textContent.length > 1 ||
                     // There can be multiple ajacent text nodes, in which case
@@ -128,8 +155,7 @@ class Sanitize {
                 !isBlock(node.parentElement) &&
                 anchor !== node
             ) {
-                const restoreCursor = node.isConnected &&
-                    preserveCursor(this.root.ownerDocument);
+                const restoreCursor = shouldPreserveCursor(node, this.root) && preserveCursor(this.root.ownerDocument);
                 node.textContent = node.textContent.replace('\u200B', '');
                 node.parentElement.removeAttribute("oe-zws-empty-inline");
                 if (restoreCursor) {
@@ -144,8 +170,7 @@ class Sanitize {
                 isEmptyBlock(node)
             ) {
                 const parent = node.parentElement;
-                const restoreCursor = node.isConnected &&
-                    preserveCursor(this.root.ownerDocument);
+                const restoreCursor = shouldPreserveCursor(node, this.root) && preserveCursor(this.root.ownerDocument);
                 node.remove();
                 fillEmpty(parent);
                 if (restoreCursor) {
@@ -169,14 +194,73 @@ class Sanitize {
             // Ensure elements which should not contain any content are tagged
             // contenteditable=false to avoid any hiccup.
             if (
-                (isMediaElement(node) || node.tagName === 'HR') &&
+                isVoidElement(node) &&
                 node.getAttribute('contenteditable') !== 'false'
             ) {
                 node.setAttribute('contenteditable', 'false');
             }
 
-            if (node.firstChild) {
-                this._parse(node.firstChild);
+            // Remove empty class/style attributes.
+            for (const attributeName of ['class', 'style']) {
+                if (node.nodeType === Node.ELEMENT_NODE && node.hasAttribute(attributeName) && !node.getAttribute(attributeName)) {
+                    node.removeAttribute(attributeName);
+                }
+            }
+
+            let firstChild = node.firstChild;
+            // Unwrap the contents of SPAN and FONT elements without attributes.
+            if (['SPAN', 'FONT'].includes(node.nodeName) && !node.hasAttributes()) {
+                getDeepRange(this.root, { select: true });
+                const restoreCursor = shouldPreserveCursor(node, this.root) && preserveCursor(this.root.ownerDocument);
+                firstChild = unwrapContents(node)[0];
+                if (restoreCursor) {
+                    restoreCursor();
+                }
+            }
+
+            if (firstChild) {
+                this._parse(firstChild);
+            }
+
+            // Remove link ZWNBSP not in selection
+            if (
+                node.nodeType === Node.TEXT_NODE &&
+                node.textContent.includes('\uFEFF') &&
+                !closestElement(node, 'a') &&
+                !getTraversedNodes(this.root).includes(node)
+            ) {
+                const startsWithLegitZws = node.textContent.startsWith('\uFEFF') && node.previousSibling && node.previousSibling.nodeName === 'A';
+                const endsWithLegitZws = node.textContent.endsWith('\uFEFF') && node.nextSibling && node.nextSibling.nodeName === 'A';
+                let newText = node.textContent.replace(/\uFEFF/g, '');
+                if (startsWithLegitZws) {
+                    newText = '\uFEFF' + newText;
+                }
+                if (endsWithLegitZws) {
+                    newText = newText + '\uFEFF';
+                }
+                if (newText !== node.textContent) {
+                    // We replace the text node with a new text node with the
+                    // update text rather than just changing the text content of
+                    // the node because these two methods create different
+                    // mutations and at least the tour system breaks if all we
+                    // send here is a text content change.
+                    const newTextNode = document.createTextNode(newText);
+                    node.before(newTextNode);
+                    node.remove();
+                    node = newTextNode;
+                }
+            }
+
+            // Update link URL if label is a new valid link.
+            if (node.nodeName === 'A') {
+                if (anchorEl === node) {
+                    const linkLabel = node.innerText.replace(ZERO_WIDTH_CHARS_REGEX, '');
+                    const urlInfo = getUrlsInfosInString(linkLabel);
+                    if (urlInfo.length && urlInfo[0].label === linkLabel && !node.href.startsWith('mailto:') && urlInfo[0].url !== node.href) {
+                        node.setAttribute('href', urlInfo[0].url);
+                    }
+                }
+                padLinkWithZws(this.root, node);
             }
             node = node.nextSibling;
         }

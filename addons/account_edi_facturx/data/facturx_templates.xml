@@ -21,6 +21,10 @@
                         <ram:SellerAssignedID
                             t-if="line.product_id and line.product_id.default_code"
                             t-esc="line.product_id.default_code"/>
+                        <!-- TODO:
+                        <ram:Name t-esc="line.product_id.name or line.name"/>
+                        <ram:Description t-esc="line.name" t-if="line.name != line.product_id.name"/>
+                        -->
                         <ram:Name t-esc="line.name"/>
                     </ram:SpecifiedTradeProduct>
 
@@ -29,7 +33,7 @@
                         <!-- Line information, with discount and unit price separate -->
                         <ram:GrossPriceProductTradePrice>
                             <ram:ChargeAmount
-                                t-esc="format_monetary(line.price_unit, record.currency_id)"/>
+                                t-esc="format_monetary(line_vals['gross_price_total_unit'], record.currency_id)"/>
 
                             <!-- Discount. -->
                             <ram:AppliedTradeAllowanceCharge t-if="line.discount">
@@ -76,11 +80,21 @@
                 xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"
                 xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
                 <!-- Contact. -->
-                <ram:Name t-if="partner.name" t-esc="partner.name"/>
+                <ram:Name t-if="partner.display_name" t-esc="partner.display_name"/>
 
                 <ram:SpecifiedLegalOrganization t-if="SpecifiedLegalOrganization">
                     <ram:ID t-esc="SpecifiedLegalOrganization"/>
                 </ram:SpecifiedLegalOrganization>
+
+                <ram:DefinedTradeContact>
+                    <ram:PersonName t-esc="partner.name"/>
+                    <ram:TelephoneUniversalCommunication t-if="partner.phone or partner.mobile">
+                        <ram:CompleteNumber t-esc="partner.phone or partner.mobile"/>
+                    </ram:TelephoneUniversalCommunication>
+                    <ram:EmailURIUniversalCommunication t-if="partner.email">
+                        <ram:URIID schemeID='SMTP' t-esc="partner.email"/>
+                    </ram:EmailURIUniversalCommunication>
+                </ram:DefinedTradeContact>
 
                 <!-- Address. -->
                 <ram:PostalTradeAddress>
@@ -105,7 +119,7 @@
                 -->
                 <rsm:ExchangedDocumentContext>
                     <ram:GuidelineSpecifiedDocumentContextParameter>
-                        <ram:ID>urn:cen.eu:en16931:2017</ram:ID>
+                        <ram:ID>urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended</ram:ID>
                     </ram:GuidelineSpecifiedDocumentContextParameter>
                 </rsm:ExchangedDocumentContext>
 
@@ -149,7 +163,7 @@
                         <ram:BuyerTradeParty>
                             <!-- Address. -->
                             <t t-call="account_edi_facturx.account_invoice_partner_facturx_export">
-                                <t t-set="partner" t-value="record.commercial_partner_id"/>
+                                <t t-set="partner" t-value="record.partner_id"/>
                                 <t t-set="SpecifiedLegalOrganization" t-value="buyer_specified_legal_organization"/>
                             </t>
 

@@ -143,6 +143,38 @@ class ResourceCalendarLeaves(models.Model):
             'company_id': employee_id.company_id.id,
         }
 
+    def _generate_public_time_off_timesheets(self, employees):
+        timesheet_vals_list = []
+        work_hours_data = self._work_time_per_day()
+        timesheet_read_group = self.env['account.analytic.line'].read_group(
+            [('global_leave_id', 'in', self.ids), ('employee_id', 'in', employees.ids)],
+            ['date:array_agg'],
+            ['employee_id']
+        )
+        timesheet_dates_per_employee_id = {
+            res['employee_id'][0]: res['date']
+            for res in timesheet_read_group
+        }
+        for leave in self:
+            for employee in employees:
+                if employee.resource_calendar_id != leave.calendar_id:
+                    continue
+                work_hours_list = work_hours_data[leave.id]
+                timesheet_dates = timesheet_dates_per_employee_id.get(employee.id, [])
+                for index, (day_date, work_hours_count) in enumerate(work_hours_list):
+                    generate_timesheet = day_date not in timesheet_dates
+                    if not generate_timesheet:
+                        continue
+                    timesheet_vals = leave._timesheet_prepare_line_values(
+                        index,
+                        employee,
+                        work_hours_list,
+                        day_date,
+                        work_hours_count
+                    )
+                    timesheet_vals_list.append(timesheet_vals)
+        return self.env['account.analytic.line'].sudo().create(timesheet_vals_list)
+
     @api.model_create_multi
     def create(self, vals_list):
         results = super(ResourceCalendarLeaves, self).create(vals_list)
@@ -162,5 +194,5 @@ class ResourceCalendarLeaves(models.Model):
         result = super(ResourceCalendarLeaves, self).write(vals)
         if global_time_off_updated:
             global_time_offs_with_leave_timesheet = global_time_off_updated.filtered(lambda r: not r.resource_id and r.calendar_id.company_id.internal_project_id and r.calendar_id.company_id.leave_timesheet_task_id)
-            global_time_offs_with_leave_timesheet._timesheet_create_lines()
+            global_time_offs_with_leave_timesheet.sudo()._timesheet_create_lines()
         return result

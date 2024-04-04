@@ -8,6 +8,7 @@ var websiteNavbarData = require('website.navbar');
 var Dialog = require('web.Dialog');
 
 const { registry } = require("@web/core/registry");
+const { isMediaElement } = require('@web_editor/../lib/odoo-editor/src/utils/utils');
 
 var _t = core._t;
 
@@ -51,7 +52,8 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         });
         this.oeStructureSelector = '#wrapwrap .oe_structure[data-oe-xpath][data-oe-id]';
         this.oeFieldSelector = '#wrapwrap [data-oe-field]';
-        this.oeCoverSelector = '#wrapwrap .s_cover[data-res-model], #wrapwrap .o_record_cover_container[data-res-model]';
+        this.oeRecordCoverSelector = "#wrapwrap .o_record_cover_container[data-res-model]";
+        this.oeCoverSelector = `#wrapwrap .s_cover[data-res-model], ${this.oeRecordCoverSelector}`;
         if (options.savableSelector) {
             this.savableSelector = options.savableSelector;
         } else {
@@ -125,7 +127,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         };
         if (!this.wysiwyg.isDirty()) {
             destroy();
-            window.location.reload();
+            if (reload) {
+                window.location.reload();
+            }
             return;
         }
         this.wysiwyg.__edition_will_stopped_already_done = true; // TODO adapt in master, see above
@@ -157,6 +161,14 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     cancel: function (reload = true) {
         var self = this;
         var def = new Promise(function (resolve, reject) {
+            // TODO improve in master: the way we check if the page is dirty
+            // should match the fact the save will actually do something or not.
+            // Right now, this check checks the whole page, including the non
+            // editable parts, regardless of the fact something can be saved
+            // inside or not. It is also thus of course considering the page
+            // dirty too often by mistake since non editable parts can have
+            // their DOM changed without impacting the save (e.g. menus being
+            // folded into the "+" menu for example).
             if (!self.wysiwyg.isDirty()) {
                 resolve();
             } else {
@@ -302,16 +314,28 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             this.wysiwyg.odooEditor.automaticStepSkipStack();
 
             for (const record of records) {
-                const $savable = $(record.target).closest(this.savableSelector);
-
                 if (record.attributeName === 'contenteditable') {
                     continue;
                 }
+
+                const $savable = $(record.target).closest(this.savableSelector);
+                if (!$savable.length) {
+                    continue;
+                }
+
+                // Mark any savable element dirty if any tracked mutation occurs
+                // inside of it.
                 $savable.not('.o_dirty').each(function () {
                     if (!this.hasAttribute('data-oe-readonly')) {
                         this.classList.add('o_dirty');
                     }
                 });
+
+                if (this.options.processRecordsCallback) {
+                    for (const el of $savable) {
+                        this.options.processRecordsCallback(record, el);
+                    }
+                }
             }
         };
         this.observer = new MutationObserver(processRecords);
@@ -339,14 +363,58 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         $('body').addClass('editor_started');
     },
 
-    _getContentEditableAreas () {
-        return $(this.savableSelector).not('input, [data-oe-readonly],[data-oe-type="monetary"],[data-oe-many2one-id], [data-oe-field="arch"]:empty').filter((_, el) => {
-            return !$(el).closest('.o_not_editable').length;
-        }).toArray();
+    _getContentEditableAreas() {
+        const $savableZones = $(this.savableSelector);
+        const $editableSavableZones = $savableZones
+            .not('input, [data-oe-readonly], ' +
+                 '[data-oe-type="monetary"], [data-oe-many2one-id], [data-oe-field="arch"]:empty')
+            .filter((_, el) => {
+                // The whole record cover is considered editable by the editor,
+                // which makes it possible to add content (text, images,...)
+                // from the text tools. To fix this issue, we need to reduce the
+                // editable area to its editable fields only, but first, we need
+                // to remove the cover along with its descendants from the
+                // initial editable zones.
+                return !$(el).closest('.o_not_editable').length && !el.closest(this.oeRecordCoverSelector);
+            });
+
+        // TODO migrate in master. This stable fix restores the possibility to
+        // edit the company team snippet images on subsequent editions. Indeed
+        // this badly relied on the contenteditable="true" attribute being on
+        // those images but it is rightfully lost after the first save. Later,
+        // the o_editable_media class system was implemented and the class was
+        // added in the snippet template but this did not solve existing
+        // snippets in user databases.
+        let $extraEditableZones = $editableSavableZones.find('.s_company_team .o_not_editable *')
+            .filter((i, el) => isMediaElement(el) || el.tagName === 'IMG');
+
+        // To make sure the selection remains bounded to the active tab,
+        // each tab is made non editable while keeping its nested
+        // oe_structure editable. This avoids having a selection range span
+        // over all further inactive tabs when using Chrome.
+        // grep: .s_tabs
+        $extraEditableZones = $extraEditableZones.add($editableSavableZones.find('.tab-pane > .oe_structure'))
+            .add(document.querySelectorAll(`${this.oeRecordCoverSelector} [data-oe-field]:not([data-oe-field="arch"])`));
+
+        return $editableSavableZones.add($extraEditableZones).toArray();
     },
 
     _getReadOnlyAreas () {
-        return [];
+        // To make sure the selection remains bounded to the active tab,
+        // each tab is made non editable while keeping its nested
+        // oe_structure editable. This avoids having a selection range span
+        // over all further inactive tabs when using Chrome.
+        // grep: .s_tabs
+        return [...document.querySelectorAll('.tab-pane > .oe_structure')].map(el => el.parentNode);
+    },
+    _getUnremovableElements () {
+        // TODO adapt in master: this was added as a fix to target some elements
+        // to be unremovable. This fix had to be reverted but to keep things
+        // stable, this still had to return the same thing: a NodeList. This
+        // code here seems the only (?) way to create a static empty NodeList.
+        // In master, this should return an array as it seems intended by the
+        // library caller anyway.
+        return document.querySelectorAll('.a:not(.a)');
     },
     /**
      * Call preventDefault of an event.
@@ -362,7 +430,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * @private
      */
     _addEditorMessages: function () {
-        const $editable = this._targetForEdition().find('.oe_structure.oe_empty, [data-oe-type="html"]');
+        const $editable = this._targetForEdition()
+            .find('.oe_structure.oe_empty, [data-oe-type="html"]')
+            .filter(':o_editable');
         this.$editorMessageElements = $editable
             .not('[data-editor-message]')
             .attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
@@ -434,6 +504,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             bindLinkTool: true,
             showEmptyElementHint: false,
             getReadOnlyAreas: this._getReadOnlyAreas.bind(this),
+            getUnremovableElements: this._getUnremovableElements.bind(this),
         }, collaborationConfig);
         return wysiwygLoader.createWysiwyg(this,
             Object.assign(params, this.wysiwygOptions),
@@ -453,91 +524,101 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         };
         return [
             {
-                groupName: 'Website',
-                title: 'Alert',
-                description: 'Insert an alert snippet.',
+                groupName: _t('Website'),
+                title: _t('Alert'),
+                description: _t('Insert an alert snippet.'),
                 fontawesome: 'fa-info',
+                isDisabled: () => !this.wysiwyg.odooEditor.isSelectionInBlockRoot(),
                 callback: () => {
                     snippetCommandCallback('.oe_snippet_body[data-snippet="s_alert"]');
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Rating',
-                description: 'Insert a rating snippet.',
+                groupName: _t('Website'),
+                title: _t('Rating'),
+                description: _t('Insert a rating snippet.'),
                 fontawesome: 'fa-star-half-o',
+                isDisabled: () => !this.wysiwyg.odooEditor.isSelectionInBlockRoot(),
                 callback: () => {
                     snippetCommandCallback('.oe_snippet_body[data-snippet="s_rating"]');
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Card',
-                description: 'Insert a card snippet.',
+                groupName: _t('Website'),
+                title: _t('Card'),
+                description: _t('Insert a card snippet.'),
                 fontawesome: 'fa-sticky-note',
+                isDisabled: () => !this.wysiwyg.odooEditor.isSelectionInBlockRoot(),
                 callback: () => {
                     snippetCommandCallback('.oe_snippet_body[data-snippet="s_card"]');
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Share',
-                description: 'Insert a share snippet.',
+                groupName: _t('Website'),
+                title: _t('Share'),
+                description: _t('Insert a share snippet.'),
                 fontawesome: 'fa-share-square-o',
+                isDisabled: () => !this.wysiwyg.odooEditor.isSelectionInBlockRoot(),
                 callback: () => {
                     snippetCommandCallback('.oe_snippet_body[data-snippet="s_share"]');
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Text Highlight',
-                description: 'Insert a text Highlight snippet.',
+                groupName: _t('Website'),
+                title: _t('Text Highlight'),
+                description: _t('Insert a text Highlight snippet.'),
                 fontawesome: 'fa-sticky-note',
+                isDisabled: () => !this.wysiwyg.odooEditor.isSelectionInBlockRoot(),
                 callback: () => {
                     snippetCommandCallback('.oe_snippet_body[data-snippet="s_text_highlight"]');
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Chart',
-                description: 'Insert a chart snippet.',
+                groupName: _t('Website'),
+                title: _t('Chart'),
+                description: _t('Insert a chart snippet.'),
                 fontawesome: 'fa-bar-chart',
+                isDisabled: () => !this.wysiwyg.odooEditor.isSelectionInBlockRoot(),
                 callback: () => {
                     snippetCommandCallback('.oe_snippet_body[data-snippet="s_chart"]');
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Progress Bar',
-                description: 'Insert a progress bar snippet.',
+                groupName: _t('Website'),
+                title: _t('Progress Bar'),
+                description: _t('Insert a progress bar snippet.'),
                 fontawesome: 'fa-spinner',
+                isDisabled: () => !this.wysiwyg.odooEditor.isSelectionInBlockRoot(),
                 callback: () => {
                     snippetCommandCallback('.oe_snippet_body[data-snippet="s_progress_bar"]');
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Badge',
-                description: 'Insert a badge snippet.',
+                groupName: _t('Website'),
+                title: _t('Badge'),
+                description: _t('Insert a badge snippet.'),
                 fontawesome: 'fa-tags',
+                isDisabled: () => !this.wysiwyg.odooEditor.isSelectionInBlockRoot(),
                 callback: () => {
                     snippetCommandCallback('.oe_snippet_body[data-snippet="s_badge"]');
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Blockquote',
-                description: 'Insert a blockquote snippet.',
+                groupName: _t('Website'),
+                title: _t('Blockquote'),
+                description: _t('Insert a blockquote snippet.'),
                 fontawesome: 'fa-quote-left',
+                isDisabled: () => !this.wysiwyg.odooEditor.isSelectionInBlockRoot(),
                 callback: () => {
                     snippetCommandCallback('.oe_snippet_body[data-snippet="s_blockquote"]');
                 },
             },
             {
-                groupName: 'Website',
-                title: 'Separator',
-                description: 'Insert an horizontal separator sippet.',
+                groupName: _t('Website'),
+                title: _t('Separator'),
+                description: _t('Insert an horizontal separator sippet.'),
                 fontawesome: 'fa-minus',
+                isDisabled: () => !this.wysiwyg.odooEditor.isSelectionInBlockRoot(),
                 callback: () => {
                     snippetCommandCallback('.oe_snippet_body[data-snippet="s_hr"]');
                 },

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, _
+from odoo import models, api, _
 from odoo.exceptions import AccessError
 
 
 class IrTranslation(models.Model):
     _inherit = 'ir.translation'
 
+    @api.model_create_multi
     def create(self, vals_list):
         translations = super().create(vals_list)
         translations._check_is_dynamic()
@@ -22,7 +23,7 @@ class IrTranslation(models.Model):
         # if we don't modify translation of at least a model that inherits from mail.render.mixin, we ignore it
         # translation.name can be a path, and so not in the pool, so type(None) will exclude these translations.
         translations_for_mail_render_mixin = self.filtered(
-            lambda translation: issubclass(type(self.env.get(translation.name.split(',')[0])), self.pool['mail.render.mixin'])
+            lambda translation: isinstance(self.env.get(translation.name.split(',')[0]), self.pool['mail.render.mixin'])
         )
         if not translations_for_mail_render_mixin:
             return

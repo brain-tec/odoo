@@ -9,10 +9,16 @@ from lxml import etree, html
 from odoo import api, models, _
 from odoo.osv import expression
 from odoo.exceptions import AccessError, ValidationError
+from odoo.addons.base.models.ir_ui_view import MOVABLE_BRANDING
 
 _logger = logging.getLogger(__name__)
 
-EDITING_ATTRIBUTES = ['data-oe-model', 'data-oe-id', 'data-oe-field', 'data-oe-xpath', 'data-note-id']
+EDITING_ATTRIBUTES = MOVABLE_BRANDING + [
+    'data-oe-type',
+    'data-oe-expression',
+    'data-oe-translation-id',
+    'data-note-id'
+]
 
 
 class IrUiView(models.Model):
@@ -27,6 +33,25 @@ class IrUiView(models.Model):
                 values['editable'] = False
 
         return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+
+    def _get_cleaned_non_editing_attributes(self, attributes):
+        """
+        Returns a new mapping of attributes -> value without the parts that are
+        not meant to be saved (branding, editing classes, ...). Note that
+        classes are meant to be cleaned on the client side before saving as
+        mostly linked to the related options (so we are not supposed to know
+        which to remove here).
+
+        :param attributes: a mapping of attributes -> value
+        :return: a new mapping of attributes -> value
+        """
+        attributes = {k: v for k, v in attributes if k not in EDITING_ATTRIBUTES}
+        if 'class' in attributes:
+            classes = attributes['class'].split()
+            attributes['class'] = ' '.join([c for c in classes if c != 'o_editable'])
+        if attributes.get('contenteditable') == 'true':
+            del attributes['contenteditable']
+        return attributes
 
     #------------------------------------------------------
     # Save from html
@@ -74,7 +99,7 @@ class IrUiView(models.Model):
         arch = etree.Element('data')
         xpath = etree.Element('xpath', expr="//*[hasclass('oe_structure')][@id='{}']".format(el.get('id')), position="replace")
         arch.append(xpath)
-        attributes = {k: v for k, v in el.attrib.items() if k not in EDITING_ATTRIBUTES}
+        attributes = self._get_cleaned_non_editing_attributes(el.attrib.items())
         structure = etree.Element(el.tag, attrib=attributes)
         structure.text = el.text
         xpath.append(structure)
@@ -127,6 +152,10 @@ class IrUiView(models.Model):
             return False
         return all(self._are_archs_equal(arch1, arch2) for arch1, arch2 in zip(arch1, arch2))
 
+    @api.model
+    def _get_allowed_root_attrs(self):
+        return ['style', 'class']
+
     def replace_arch_section(self, section_xpath, replacement, replace_tail=False):
         # the root of the arch section shouldn't actually be replaced as it's
         # not really editable itself, only the content truly is editable.
@@ -142,7 +171,7 @@ class IrUiView(models.Model):
         root.text = replacement.text
 
         # We need to replace some attrib for styles changes on the root element
-        for attribute in ('style', 'class'):
+        for attribute in self._get_allowed_root_attrs():
             if attribute in replacement.attrib:
                 root.attrib[attribute] = replacement.attrib[attribute]
 
@@ -217,6 +246,9 @@ class IrUiView(models.Model):
 
     @api.model
     def _view_get_inherited_children(self, view):
+        if self._context.get('no_primary_children', False):
+            original_hierarchy = self._context.get('__views_get_original_hierarchy', [])
+            return view.inherit_children_ids.filtered(lambda extension: extension.mode != 'primary' or extension.id in original_hierarchy)
         return view.inherit_children_ids
 
     @api.model
@@ -235,7 +267,7 @@ class IrUiView(models.Model):
     @api.model
     def _views_get(self, view_id, get_children=True, bundles=False, root=True, visited=None):
         """ For a given view ``view_id``, should return:
-                * the view itself
+                * the view itself (starting from its top most parent)
                 * all views inheriting from it, enabled or not
                   - but not the optional children of a non-enabled child
                 * all views called from it (via t-call)
@@ -249,7 +281,9 @@ class IrUiView(models.Model):
 
         if visited is None:
             visited = []
+        original_hierarchy = self._context.get('__views_get_original_hierarchy', [])
         while root and view.inherit_id:
+            original_hierarchy.append(view.id)
             view = view.inherit_id
 
         views_to_return = view
@@ -339,7 +373,14 @@ class IrUiView(models.Model):
         name = self._find_available_name(name, used_names)
 
         # html to xml to add '/' at the end of self closing tags like br, ...
-        xml_arch = etree.tostring(html.fromstring(arch), encoding='utf-8')
+        arch_tree = html.fromstring(arch)
+        attributes = self._get_cleaned_non_editing_attributes(arch_tree.attrib.items())
+        for attr in arch_tree.attrib:
+            if attr in attributes:
+                arch_tree.attrib[attr] = attributes[attr]
+            else:
+                del arch_tree.attrib[attr]
+        xml_arch = etree.tostring(arch_tree, encoding='utf-8')
         new_snippet_view_values = {
             'name': name,
             'key': full_snippet_key,

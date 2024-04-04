@@ -260,13 +260,25 @@ class Website(models.Model):
                 vals['domain'] = 'https://%s' % vals['domain']
             vals['domain'] = vals['domain'].rstrip('/')
 
+    # TODO: rename in master
     @api.ondelete(at_uninstall=False)
     def _unlink_except_last_remaining_website(self):
         website = self.search([('id', 'not in', self.ids)], limit=1)
         if not website:
             raise UserError(_('You must keep at least one website.'))
+        default_website = self.env.ref('website.default_website', raise_if_not_found=False)
+        if default_website and default_website in self:
+            raise UserError(_("You cannot delete default website %s. Try to change its settings instead", default_website.name))
 
     def unlink(self):
+        self._remove_attachments_on_website_unlink()
+
+        companies = self.company_id
+        res = super().unlink()
+        companies._compute_website_id()
+        return res
+
+    def _remove_attachments_on_website_unlink(self):
         # Do not delete invoices, delete what's strictly necessary
         attachments_to_unlink = self.env['ir.attachment'].search([
             ('website_id', 'in', self.ids),
@@ -276,10 +288,6 @@ class Website(models.Model):
             ('url', 'ilike', '.assets\\_'),
         ])
         attachments_to_unlink.unlink()
-        companies = self.company_id
-        res = super(Website, self).unlink()
-        companies._compute_website_id()
-        return res
 
     def create_and_redirect_configurator(self):
         self._force()
@@ -457,10 +465,19 @@ class Website(models.Model):
                         rendered_snippets.append(rendered_snippet)
                 except ValueError as e:
                     logger.warning(e)
-            page_view_id.save(value=''.join(rendered_snippets), xpath="(//div[hasclass('oe_structure')])[last()]")
+            page_view_id.save(value=f'<div class="oe_structure">{"".join(rendered_snippets)}</div>',
+                              xpath="(//div[hasclass('oe_structure')])[last()]")
 
         def set_images(images):
+            names = self.env['ir.model.data'].search([
+                ('name', '=ilike', f'configurator\\_{website.id}\\_%'),
+                ('module', '=', 'website'),
+                ('model', '=', 'ir.attachment')
+            ]).mapped('name')
             for name, url in images.items():
+                extn_identifier = 'configurator_%s_%s' % (website.id, name.split('.')[1])
+                if extn_identifier in names:
+                    continue
                 try:
                     response = requests.get(url, timeout=3)
                     response.raise_for_status()
@@ -476,7 +493,7 @@ class Website(models.Model):
                         'public': True,
                     })
                     self.env['ir.model.data'].create({
-                        'name': 'configurator_%s_%s' % (website.id, name.split('.')[1]),
+                        'name': extn_identifier,
                         'module': 'website',
                         'model': 'ir.attachment',
                         'res_id': attachment.id,
@@ -748,7 +765,7 @@ class Website(models.Model):
         key_copy = string
         inc = 0
         domain_static = self.get_current_website().website_domain()
-        while self.env['website.page'].with_context(active_test=False).sudo().search([('key', '=', key_copy)] + domain_static):
+        while self.env['ir.ui.view'].with_context(active_test=False).sudo().search([('key', '=', key_copy)] + domain_static):
             inc += 1
             key_copy = string + (inc and "-%s" % inc or "")
         return key_copy
@@ -916,6 +933,15 @@ class Website(models.Model):
 
     @api.model
     def get_current_website(self, fallback=True):
+        """ The current website is returned in the following order:
+        - the website forced in session `force_website_id`
+        - the website set in context
+        - (if frontend or fallback) the website matching the request's "domain"
+        - arbitrary the first website found in the database if `fallback` is set
+          to `True`
+        - empty browse record
+        """
+        is_frontend_request = request and getattr(request, 'is_frontend', False)
         if request and request.session.get('force_website_id'):
             website_id = self.browse(request.session['force_website_id']).exists()
             if not website_id:
@@ -927,6 +953,20 @@ class Website(models.Model):
         website_id = self.env.context.get('website_id')
         if website_id:
             return self.browse(website_id)
+
+        if not is_frontend_request and not fallback:
+            # It's important than backend requests with no fallback requested
+            # don't go through
+            return self.browse(False)
+
+        # Reaching this point means that:
+        # - We didn't find a website in the session or in the context.
+        # - And we are either:
+        #   - in a frontend context
+        #   - in a backend context (or early in the dispatch stack) and a
+        #     fallback website is requested.
+        # We will now try to find a website matching the request host/domain (if
+        # there is one on request) or return a random one.
 
         # The format of `httprequest.host` is `domain:port`
         domain_name = request and request.httprequest.host or ''
@@ -1146,7 +1186,6 @@ class Website(models.Model):
         """
 
         router = http.root.get_db_router(request.db)
-        # Force enumeration to be performed as public user
         url_set = set()
 
         sitemap_endpoint_done = set()
@@ -1160,7 +1199,7 @@ class Website(models.Model):
                 func = rule.endpoint.routing['sitemap']
                 if func is False:
                     continue
-                for loc in func(self.env, rule, query_string):
+                for loc in func(self.with_context(lang=self.default_lang_id.code).env, rule, query_string):
                     yield loc
                 continue
 
@@ -1196,7 +1235,7 @@ class Website(models.Model):
 
                     for rec in converter.generate(uid=self.env.uid, dom=query, args=val):
                         newval.append(val.copy())
-                        newval[-1].update({name: rec})
+                        newval[-1].update({name: rec.with_context(lang=self.default_lang_id.code)})
                 values = newval
 
             for value in values:
@@ -1236,7 +1275,11 @@ class Website(models.Model):
         if domain is None:
             domain = []
         domain += self.get_current_website().website_domain()
+        domain = AND([domain, [('url', '!=', False)]])
         pages = self.env['website.page'].sudo().search(domain, order=order, limit=limit)
+        # TODO In 16.0 remove condition on _filter_duplicate_pages.
+        if self.env.context.get('_filter_duplicate_pages'):
+            pages = pages._get_most_specific_pages()
         return pages
 
     def search_pages(self, needle=None, limit=None):
@@ -1438,6 +1481,9 @@ class Website(models.Model):
             match = re.search('<([^>]*class="[^>]*)>', snippet_template_html)
             snippet_occurences.append(match.group())
 
+        if self._check_snippet_used(snippet_occurences, asset_type, asset_version):
+            return True
+
         # As well as every snippet dropped in html fields
         self.env.cr.execute(sql.SQL(" UNION ").join(
             sql.SQL("SELECT regexp_matches({}, {}, 'g') FROM {}").format(
@@ -1446,10 +1492,11 @@ class Website(models.Model):
                 sql.Identifier(table)
             ) for table, column in html_fields
         ), {'snippet_regex': f'<([^>]*data-snippet="{snippet_id}"[^>]*)>'})
-        results = self.env.cr.fetchall()
-        for r in results:
-            snippet_occurences.append(r[0][0])
 
+        snippet_occurences = [r[0][0] for r in self.env.cr.fetchall()]
+        return self._check_snippet_used(snippet_occurences, asset_type, asset_version)
+
+    def _check_snippet_used(self, snippet_occurences, asset_type, asset_version):
         for snippet in snippet_occurences:
             if asset_version == '000':
                 if f'data-v{asset_type}' not in snippet:
@@ -1547,16 +1594,15 @@ class Website(models.Model):
         """
         fuzzy_term = False
         search_details = self._search_get_details(search_type, order, options)
+        count, results = self._search_exact(search_details, search, limit, order)
+        if count > 0:
+            return count, results, fuzzy_term
         if search and options.get('allowFuzzy', True):
             fuzzy_term = self._search_find_fuzzy_term(search_details, search)
             if fuzzy_term:
                 count, results = self._search_exact(search_details, fuzzy_term, limit, order)
                 if fuzzy_term.lower() == search.lower():
                     fuzzy_term = False
-            else:
-                count, results = self._search_exact(search_details, search, limit, order)
-        else:
-            count, results = self._search_exact(search_details, search, limit, order)
         return count, results, fuzzy_term
 
     def _search_exact(self, search_details, search, limit, order):
@@ -1647,7 +1693,7 @@ class Website(models.Model):
         :param limit: maximum number of records fetched per model to build the word list
         :return: yields words
         """
-        match_pattern = r'[\w-]{%s,}' % min(4, len(search) - 3)
+        match_pattern = r'[\w./-]{%s,}' % min(4, len(search) - 3)
         similarity_threshold = 0.3
         for search_detail in search_details:
             model_name, fields = search_detail['model'], search_detail['search_fields']
@@ -1658,40 +1704,92 @@ class Website(models.Model):
             fields = set(fields).intersection(model._fields)
 
             unaccent = get_unaccent_sql_wrapper(self.env.cr)
-            similarities = [sql.SQL("word_similarity({search}, {field})").format(
-                search=unaccent(sql.Placeholder('search')),
-                # Specific handling for website.page that inherits its arch_db and name fields
-                # TODO make more generic
-                field=unaccent(sql.SQL("{table}.{field}").format(
-                    table=sql.Identifier((self.env['ir.ui.view'] if field == 'arch_db' or (field == 'name' and 'arch_db' in fields) else model)._table),
-                    field=sql.Identifier(field)
-                ))
-            ) for field in fields]
+
+            # Specific handling for fields being actually part of another model
+            # through the `inherits` mechanism.
+            # It gets the list of fields requested to search upon and that are
+            # actually not part of the requested model itself but part of a
+            # `inherits` model:
+            #     {
+            #       'name': {
+            #           'table': 'ir_ui_view',
+            #           'fname': 'view_id',
+            #       },
+            #       'url': {
+            #           'table': 'ir_ui_view',
+            #           'fname': 'view_id',
+            #       },
+            #       'another_field': {
+            #           'table': 'another_table',
+            #           'fname': 'record_id',
+            #       },
+            #     }
+            inherits_fields = {
+                inherits_model_fname: {
+                    'table': self.env[inherits_model_name]._table,
+                    'fname': inherits_field_name,
+                }
+                for inherits_model_name, inherits_field_name in model._inherits.items()
+                for inherits_model_fname in self.env[inherits_model_name]._fields.keys()
+                if inherits_model_fname in fields
+            }
+
+            similarities = []
+            for field in fields:
+                # Field might belong to another model (`inherits` mechanism)
+                table = inherits_fields[field]['table'] if field in inherits_fields else model._table
+                similarities.append(
+                    sql.SQL("word_similarity({search}, {field})").format(
+                        search=unaccent(sql.Placeholder('search')),
+                        field=unaccent(sql.SQL("{table}.{field}").format(
+                            table=sql.Identifier(table),
+                            field=sql.Identifier(field)
+                        ))
+                    )
+                )
+
             best_similarity = sql.SQL('GREATEST({similarities})').format(
                 similarities=sql.SQL(', ').join(similarities)
             )
 
+            where_clause = sql.SQL("")
+            # Filter unpublished records for portal and public user for
+            # performance.
+            # TODO: Same for `active` field?
+            filter_is_published = (
+                'is_published' in model._fields
+                and model._fields['is_published'].base_field.model_name == model_name
+                and not self.env.user.has_group('base.group_user')
+            )
+            if filter_is_published:
+                where_clause = sql.SQL("WHERE is_published")
+
             from_clause = sql.SQL("FROM {table}").format(table=sql.Identifier(model._table))
-            # Specific handling for website.page that inherits its arch_db and name fields
-            # TODO make more generic
-            if 'arch_db' in fields:
+            # Specific handling for fields being actually part of another model
+            # through the `inherits` mechanism.
+            for table_to_join in {
+                field['table']: field['fname'] for field in inherits_fields.values()
+            }.items():  # Removes duplicate inherits model
                 from_clause = sql.SQL("""
                     {from_clause}
-                    LEFT JOIN {view_table} ON {table}.view_id = {view_table}.id
+                    LEFT JOIN {inherits_table} ON {table}.{inherits_field} = {inherits_table}.id
                 """).format(
                     from_clause=from_clause,
                     table=sql.Identifier(model._table),
-                    view_table=sql.Identifier(self.env['ir.ui.view']._table),
+                    inherits_table=sql.Identifier(table_to_join[0]),
+                    inherits_field=sql.Identifier(table_to_join[1]),
                 )
             query = sql.SQL("""
                 SELECT {table}.id, {best_similarity} AS _best_similarity
                 {from_clause}
+                {where_clause}
                 ORDER BY _best_similarity desc
                 LIMIT 1000
             """).format(
                 table=sql.Identifier(model._table),
                 best_similarity=best_similarity,
                 from_clause=from_clause,
+                where_clause=where_clause,
             )
             self.env.cr.execute(query, {'search': search})
             ids = {row[0] for row in self.env.cr.fetchall() if row[1] and row[1] >= similarity_threshold}
@@ -1727,20 +1825,31 @@ class Website(models.Model):
                         search=unaccent(sql.Placeholder('search')),
                         field=unaccent(sql.SQL('value'))
                     )
-                    names = ['%s,%s' % (model._name, field) for field in fields]
-                    query = sql.SQL("""
-                        SELECT res_id, {similarity} AS _similarity
-                        FROM ir_translation
+                    where_clause = """
                         WHERE lang = {lang}
                         AND name = ANY({names})
                         AND type = 'model'
                         AND value IS NOT NULL
+                    """
+                    if filter_is_published:
+                        # TODO: This should also filter out unpublished records
+                        # if this `is_published` field is not part of the model
+                        # table directly but part of an `inherits` table.
+                        where_clause += f"AND res_id in (SELECT id FROM {model._table} WHERE is_published) "
+                    where_clause = sql.SQL(where_clause).format(
+                        lang=sql.Placeholder('lang'),
+                        names=sql.Placeholder('names'),
+                    )
+                    names = ['%s,%s' % (model._name, field) for field in fields]
+                    query = sql.SQL("""
+                        SELECT res_id, {similarity} AS _similarity
+                        FROM ir_translation
+                        {where_clause}
                         ORDER BY _similarity desc
                         LIMIT 1000
                     """).format(
                         similarity=similarity,
-                        lang=sql.Placeholder('lang'),
-                        names=sql.Placeholder('names'),
+                        where_clause=where_clause,
                     )
                 self.env.cr.execute(query, {'lang': self.env.lang, 'names': names, 'search': search})
                 ids.update(row[0] for row in self.env.cr.fetchall() if row[1] and row[1] >= similarity_threshold)
@@ -1763,7 +1872,7 @@ class Website(models.Model):
         :param limit: maximum number of records fetched per model to build the word list
         :return: yields words
         """
-        match_pattern = r'[\w-]{%s,}' % min(4, len(search) - 3)
+        match_pattern = r'[\w./-]{%s,}' % min(4, len(search) - 3)
         first = escape_psql(search[0])
         for search_detail in search_details:
             model_name, fields = search_detail['model'], search_detail['search_fields']
@@ -1779,7 +1888,14 @@ class Website(models.Model):
                 fields_domain.append([(field, '=ilike', '%%>%s%%' % first)]) # HTML
             domain.append(OR(fields_domain))
             domain = AND(domain)
-            records = model.search_read(domain, fields, limit=1000)
+            perf_limit = 1000
+            records = model.search_read(domain, fields, limit=perf_limit)
+            if len(records) == perf_limit:
+                # Exact match might have been missed because the fetched
+                # results are limited for performance reasons.
+                exact_records, _ = model._search_fetch(search_detail, search, 1, None)
+                if exact_records:
+                    yield search
             for record in records:
                 for field, value in record.items():
                     if isinstance(value, str):

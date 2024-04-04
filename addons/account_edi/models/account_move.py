@@ -5,6 +5,7 @@ from collections import defaultdict
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools import frozendict
 
 
 class AccountMove(models.Model):
@@ -241,9 +242,6 @@ class AccountMove(models.Model):
         '''
         self.ensure_one()
 
-        def _serialize_python_dictionary(vals):
-            return '-'.join(str(vals[k]) for k in sorted(vals.keys()))
-
         def default_grouping_key_generator(tax_values):
             return {'tax': tax_values['tax_id']}
 
@@ -287,12 +285,15 @@ class AccountMove(models.Model):
                 invoice_lines_tax_values_dict[invoice_line] = []
                 rate = abs(invoice_line.balance) / abs(invoice_line.amount_currency) if invoice_line.amount_currency else 0.0
                 for tax_res in taxes_res['taxes']:
+                    tax_amount = tax_res['amount'] * rate
+                    if self.company_id.tax_calculation_rounding_method == 'round_per_line':
+                        tax_amount = invoice_line.company_currency_id.round(tax_amount)
                     invoice_lines_tax_values_dict[invoice_line].append({
                         'base_line_id': invoice_line,
                         'tax_id': self.env['account.tax'].browse(tax_res['id']),
                         'tax_repartition_line_id': self.env['account.tax.repartition.line'].browse(tax_res['tax_repartition_line_id']),
                         'base_amount': sign * invoice_line.company_currency_id.round(tax_res['base'] * rate),
-                        'tax_amount': sign * invoice_line.company_currency_id.round(tax_res['amount'] * rate),
+                        'tax_amount': sign * tax_amount,
                         'base_amount_currency': sign * tax_res['base'],
                         'tax_amount_currency': sign * tax_res['amount'],
                     })
@@ -399,7 +400,7 @@ class AccountMove(models.Model):
 
             for tax_values in tax_values_list:
                 grouping_key = grouping_key_generator(tax_values)
-                serialized_grouping_key = _serialize_python_dictionary(grouping_key)
+                serialized_grouping_key = frozendict(grouping_key)
                 key_by_tax[tax_values['tax_id']] = serialized_grouping_key
 
                 # Add to invoice line global tax amounts.
@@ -451,15 +452,19 @@ class AccountMove(models.Model):
     def _update_payments_edi_documents(self):
         ''' Update the edi documents linked to the current journal entries. These journal entries must be linked to an
         account.payment of an account.bank.statement.line. This additional method is needed because the payment flow is
-        not the same as the invoice one. Indeed, the edi documents must be updated when the reconciliation with some
-        invoices is changing.
+        not the same as the invoice one. Indeed, the edi documents must be created when the payment is fully reconciled
+        with invoices.
         '''
+        payments = self.filtered(lambda move: move.payment_id or move.statement_line_id)
         edi_document_vals_list = []
-        for payment in self:
-            edi_formats = payment._get_reconciled_invoices().journal_id.edi_format_ids + payment.edi_document_ids.edi_format_id
-            edi_formats = self.env['account.edi.format'].browse(edi_formats.ids) # Avoid duplicates
+        to_remove = self.env['account.edi.document']
+        for payment in payments:
+            edi_formats = payment._get_reconciled_invoices().journal_id.edi_format_ids | payment.edi_document_ids.edi_format_id
             for edi_format in edi_formats:
+                # Only recreate document when cancelled before.
                 existing_edi_document = payment.edi_document_ids.filtered(lambda x: x.edi_format_id == edi_format)
+                if existing_edi_document.state == 'sent':
+                    continue
 
                 if edi_format._is_required_for_payment(payment):
                     if existing_edi_document:
@@ -475,14 +480,11 @@ class AccountMove(models.Model):
                             'state': 'to_send',
                         })
                 elif existing_edi_document:
-                    existing_edi_document.write({
-                        'state': False,
-                        'error': False,
-                        'blocking_level': False,
-                    })
+                    to_remove |= existing_edi_document
 
+        to_remove.unlink()
         self.env['account.edi.document'].create(edi_document_vals_list)
-        self.edi_document_ids._process_documents_no_web_services()
+        payments.edi_document_ids._process_documents_no_web_services()
 
     def _is_ready_to_be_sent(self):
         # OVERRIDE
@@ -552,6 +554,7 @@ class AccountMove(models.Model):
         res = super().button_draft()
 
         self.edi_document_ids.write({'error': False, 'blocking_level': False})
+        self.edi_document_ids.filtered(lambda doc: doc.state == 'to_send').unlink()
 
         return res
 
@@ -560,6 +563,7 @@ class AccountMove(models.Model):
         '''
         to_cancel_documents = self.env['account.edi.document']
         for move in self:
+            move._check_fiscalyear_lock_date()
             is_move_marked = False
             for doc in move.edi_document_ids:
                 if doc.edi_format_id._needs_web_services() \
@@ -616,6 +620,9 @@ class AccountMove(models.Model):
     ####################################################
     # Business operations
     ####################################################
+
+    def button_process_edi_web_services(self):
+        self.action_process_edi_web_services(with_commit=False)
 
     def action_process_edi_web_services(self, with_commit=True):
         docs = self.edi_document_ids.filtered(lambda d: d.state in ('to_send', 'to_cancel') and d.blocking_level != 'error')
@@ -675,40 +682,6 @@ class AccountMoveLine(models.Model):
         # there is at least one reconciled invoice to the payment. Then, we need to update the state of the edi
         # documents during the reconciliation.
         all_lines = self + self.matched_debit_ids.debit_move_id + self.matched_credit_ids.credit_move_id
-        payments = all_lines.move_id.filtered(lambda move: move.payment_id or move.statement_line_id)
-
-        invoices_per_payment_before = {pay: pay._get_reconciled_invoices() for pay in payments}
         res = super().reconcile()
-        invoices_per_payment_after = {pay: pay._get_reconciled_invoices() for pay in payments}
-
-        changed_payments = self.env['account.move']
-        for payment, invoices_after in invoices_per_payment_after.items():
-            invoices_before = invoices_per_payment_before[payment]
-
-            if set(invoices_after.ids) != set(invoices_before.ids):
-                changed_payments |= payment
-        changed_payments._update_payments_edi_documents()
-
-        return res
-
-    def remove_move_reconcile(self):
-        # OVERRIDE
-        # When a payment has been sent to the government, it usually contains some information about reconciled
-        # invoices. If the user breaks a reconciliation, the related payments must be cancelled properly and then, a new
-        # electronic document must be generated.
-        all_lines = self + self.matched_debit_ids.debit_move_id + self.matched_credit_ids.credit_move_id
-        payments = all_lines.move_id.filtered(lambda move: move.payment_id or move.statement_line_id)
-
-        invoices_per_payment_before = {pay: pay._get_reconciled_invoices() for pay in payments}
-        res = super().remove_move_reconcile()
-        invoices_per_payment_after = {pay: pay._get_reconciled_invoices() for pay in payments}
-
-        changed_payments = self.env['account.move']
-        for payment, invoices_after in invoices_per_payment_after.items():
-            invoices_before = invoices_per_payment_before[payment]
-
-            if set(invoices_after.ids) != set(invoices_before.ids):
-                changed_payments |= payment
-        changed_payments._update_payments_edi_documents()
-
+        all_lines.move_id._update_payments_edi_documents()
         return res

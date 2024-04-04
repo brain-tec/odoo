@@ -213,10 +213,15 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             // The order that will contain the refund orderlines.
             // Use the destinationOrder from props if the order to refund has the same
             // customer as the destinationOrder.
-            const destinationOrder =
-                this.props.destinationOrder && customer === this.props.destinationOrder.get_client()
-                    ? this.props.destinationOrder
-                    : this.env.pos.add_new_order({ silent: true });
+            const destinationOrder = this._setDestinationOrder(this.props.destinationOrder, customer);
+            //Add a check too see if the fiscal position exist in the pos
+            if (order.fiscal_position_not_found) {
+                this.showPopup('ErrorPopup', {
+                    title: this.env._t('Fiscal Position not found'),
+                    body: this.env._t('The fiscal position used in the original order is not loaded. Make sure it is loaded by adding it in the pos configuration.')
+                });
+                return;
+            }
 
             // Add orderline for each toRefundDetail to the destinationOrder.
             for (const refundDetail of allToRefundDetails) {
@@ -226,6 +231,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                 refundDetail.destinationOrderUid = destinationOrder.uid;
             }
 
+            destinationOrder.fiscal_position = order.fiscal_position;
             // Set the customer to the destinationOrder.
             if (customer && !destinationOrder.get_client()) {
                 destinationOrder.set_client(customer);
@@ -233,6 +239,14 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
             }
 
             this._onCloseScreen();
+        }
+        _setDestinationOrder(order, customer) {
+            if(order && customer === order.get_client() && !this.env.pos.doNotAllowRefundAndSales())
+                return order;
+            else if(this.env.pos.get_order() && !this.env.pos.get_order().orderlines.length)
+                return this.env.pos.get_order();
+            else
+                return this.env.pos.add_new_order({ silent: true });
         }
         //#endregion
         //#region PUBLIC METHODS
@@ -374,7 +388,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
 
             const toRefundDetail = this._getToRefundDetail(orderline);
             const refundableQty = orderline.get_quantity() - orderline.refunded_qty;
-            if (this.env.pos.isProductQtyZero(refundableQty - 1)) {
+            if (this.env.pos.isProductQtyZero(refundableQty - 1) && toRefundDetail.qty === 0) {
                 toRefundDetail.qty = 1;
             }
         }
@@ -404,6 +418,7 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                         orderPartnerId,
                         tax_ids: orderline.get_taxes().map(tax => tax.id),
                         discount: orderline.discount,
+                        pack_lot_lines: orderline.pack_lot_lines ? orderline.pack_lot_lines.models.map(lot => lot.export_as_JSON()) : false,
                     },
                     destinationOrderUid: false,
                 };
@@ -437,15 +452,17 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
          */
         _prepareRefundOrderlineOptions(toRefundDetail) {
             const { qty, orderline } = toRefundDetail;
+            const draftPackLotLines = orderline.pack_lot_lines ? { modifiedPackLotLines: [], newPackLotLines: orderline.pack_lot_lines} : false;
             return {
                 quantity: -qty,
                 price: orderline.price,
-                extras: { price_manually_set: true },
+                extras: { price_automatically_set: true },
                 merge: false,
                 refunded_orderline_id: orderline.id,
                 tax_ids: orderline.tax_ids,
                 discount: orderline.discount,
-            }
+                draftPackLotLines: draftPackLotLines
+            };
         }
         _setOrder(order) {
             this.env.pos.set_order(order);
@@ -568,8 +585,9 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
                     args: [idsNotInCache],
                     context: this.env.session.user_context,
                 });
-                // Check for missing products and load them in the PoS
+                // Check for missing products and partners and load them in the PoS
                 await this.env.pos._loadMissingProducts(fetchedOrders);
+                await this.env.pos._loadMissingPartners(fetchedOrders);
                 // Cache these fetched orders so that next time, no need to fetch
                 // them again, unless invalidated. See `_onInvoiceOrder`.
                 fetchedOrders.forEach((order) => {

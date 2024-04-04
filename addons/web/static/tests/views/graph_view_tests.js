@@ -1920,7 +1920,7 @@ QUnit.module("Views", (hooks) => {
     QUnit.test("process default view description", async function (assert) {
         assert.expect(1);
         const propsFromArch = new GraphArchParser().parse();
-        assert.deepEqual(propsFromArch, { fields: {}, fieldAttrs: {}, groupBy: [] });
+        assert.deepEqual(propsFromArch, { fields: {}, fieldAttrs: {}, groupBy: [], measures: [] });
     });
 
     QUnit.test("process simple arch (no field tag)", async function (assert) {
@@ -1934,6 +1934,7 @@ QUnit.module("Views", (hooks) => {
             fields,
             fieldAttrs: {},
             groupBy: [],
+            measures: [],
             mode: "line",
             order: "ASC",
         });
@@ -1945,6 +1946,7 @@ QUnit.module("Views", (hooks) => {
             fields,
             fieldAttrs: {},
             groupBy: [],
+            measures: [],
             stacked: false,
             title: "Title",
         });
@@ -1972,8 +1974,30 @@ QUnit.module("Views", (hooks) => {
                 fighters: { string: "FooFighters" },
             },
             measure: "revenue",
+            measures: ["revenue"],
             groupBy: ["date:day", "foo"],
             mode: "pie",
+        });
+    });
+
+    QUnit.test("process arch with non stored field tags of type measure ", async function (assert) {
+        assert.expect(1);
+        const fields = serverData.models.foo.fields;
+        fields.revenue.store = false;
+        const arch = `
+            <graph>
+                 <field name="product_id"/>
+                <field name="revenue" type="measure"/>
+                <field name="foo" type="measure"/>
+            </graph>
+        `;
+        const propsFromArch = new GraphArchParser().parse(arch, fields);
+        assert.deepEqual(propsFromArch, {
+            fields,
+            fieldAttrs: {},
+            measure: "foo",
+            measures: ["revenue", "foo"],
+            groupBy: ["product_id"],
         });
     });
 
@@ -2553,6 +2577,25 @@ QUnit.module("Views", (hooks) => {
         });
         checkLegend(assert, graph, "Product");
         assert.strictEqual(getYAxeLabel(graph), "Product");
+    });
+
+    QUnit.test("non store fields defined on the arch are present in the measures", async function (assert) {
+        serverData.models.foo.fields.revenue.store = false;
+        const graph = await makeView({
+            serverData,
+            type: "graph",
+            resModel: "foo",
+            arch: `<graph>
+                <field name="product_id"/>
+                <field name="revenue" type="measure"/>
+                <field name="foo" type="measure"/>
+            </graph>`,
+        });
+        await toggleMenu(graph, "Measures");
+        assert.deepEqual(
+            Array.from(graph.el.querySelectorAll(".o_menu_item")).map(e => e.innerText.trim()),
+            ["Foo", "Revenue", "Count"],
+        );
     });
 
     QUnit.test(
@@ -3636,5 +3679,39 @@ QUnit.module("Views", (hooks) => {
         checkModeIs(assert, graph, "bar");
         checkLabels(assert, graph, ["Undefined", "red"]);
         checkLegend(assert, graph, "Revenue");
+    });
+
+    QUnit.test("order='desc' on arch", async function (assert) {
+        const graph = await makeView({
+            serverData,
+            type: "graph",
+            resModel: "foo",
+            arch: `
+                <graph order="desc">
+                    <field name="date"/>
+                </graph>
+            `,
+        });
+        checkDatasets(assert, graph, ["data", "label"], {
+            data: [2, 2, 2, 1, 1],
+            label: "Count",
+        });
+    });
+
+    QUnit.test("order='asc' on arch", async function (assert) {
+        const graph = await makeView({
+            serverData,
+            type: "graph",
+            resModel: "foo",
+            arch: `
+                <graph order="asc">
+                    <field name="date"/>
+                </graph>
+            `,
+        });
+        checkDatasets(assert, graph, ["data", "label"], {
+            data: [1, 1, 2, 2, 2],
+            label: "Count",
+        });
     });
 });

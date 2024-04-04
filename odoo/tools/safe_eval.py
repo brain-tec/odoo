@@ -17,6 +17,7 @@ condition/math builtins.
 import dis
 import functools
 import logging
+import sys
 import types
 from opcode import HAVE_ARGUMENT, opmap, opname
 from types import CodeType
@@ -37,8 +38,35 @@ __all__ = ['test_expr', 'safe_eval', 'const_eval']
 # lp:703841), does import time.
 _ALLOWED_MODULES = ['_strptime', 'math', 'time']
 
-_UNSAFE_ATTRIBUTES = ['f_builtins', 'f_globals', 'f_locals', 'gi_frame', 'gi_code',
-                      'co_code', 'func_globals']
+# Mock __import__ function, as called by cpython's import emulator `PyImport_Import` inside
+# timemodule.c, _datetimemodule.c and others.
+# This function does not actually need to do anything, its expected side-effect is to make the
+# imported module available in `sys.modules`. The _ALLOWED_MODULES are imported below to make it so.
+def _import(name, globals=None, locals=None, fromlist=None, level=-1):
+    if name not in sys.modules:
+        raise ImportError(f'module {name} should be imported before calling safe_eval()')
+
+for module in _ALLOWED_MODULES:
+    __import__(module)
+
+
+_UNSAFE_ATTRIBUTES = {
+    # Frames
+    'f_builtins', 'f_code', 'f_globals', 'f_locals',
+    # Python 2 functions
+    'func_code', 'func_globals',
+    # Code object
+    'co_code',
+    # Tracebacks
+    'tb_frame',
+    # Generators
+    'gi_code', 'gi_frame', 'g_yieldfrom'
+    # Coroutines
+    'cr_await', 'cr_code', 'cr_frame',
+    # Coroutine generators
+    'ag_await', 'ag_code', 'ag_frame',
+}
+
 
 def to_opcodes(opnames, _opmap=opmap):
     for x in opnames:
@@ -66,6 +94,10 @@ _CONST_OPCODES = set(to_opcodes([
     # 3.6: literal map with constant keys https://bugs.python.org/issue27140
     'BUILD_CONST_KEY_MAP',
     'LIST_EXTEND', 'SET_UPDATE',
+    # 3.11 replace DUP_TOP, DUP_TOP_TWO, ROT_TWO, ROT_THREE, ROT_FOUR
+    'COPY', 'SWAP',
+    # Added in 3.11 https://docs.python.org/3/whatsnew/3.11.html#new-opcodes
+    'RESUME',
 ])) - _BLACKLIST
 
 # operations which are both binary and inplace, same order as in doc'
@@ -88,6 +120,8 @@ _EXPR_OPCODES = _CONST_OPCODES.union(to_opcodes([
     'DICT_MERGE', 'DICT_UPDATE',
     # Basically used in any "generator literal"
     'GEN_START',  # added in 3.10 but already removed from 3.11.
+    # Added in 3.11, replacing all BINARY_* and INPLACE_*
+    'BINARY_OP',
 ])) - _BLACKLIST
 
 _SAFE_OPCODES = _EXPR_OPCODES.union(to_opcodes([
@@ -114,6 +148,26 @@ _SAFE_OPCODES = _EXPR_OPCODES.union(to_opcodes([
     'LOAD_GLOBAL',
 
     'RERAISE', 'JUMP_IF_NOT_EXC_MATCH',
+
+    # Following opcodes were Added in 3.11
+    # replacement of opcodes CALL_FUNCTION, CALL_FUNCTION_KW, CALL_METHOD
+    'PUSH_NULL', 'PRECALL', 'CALL', 'KW_NAMES',
+    # replacement of POP_JUMP_IF_TRUE and POP_JUMP_IF_FALSE
+    'POP_JUMP_FORWARD_IF_FALSE', 'POP_JUMP_FORWARD_IF_TRUE',
+    'POP_JUMP_BACKWARD_IF_FALSE', 'POP_JUMP_BACKWARD_IF_TRUE',
+    # special case of the previous for IS NONE / IS NOT NONE
+    'POP_JUMP_FORWARD_IF_NONE', 'POP_JUMP_BACKWARD_IF_NONE',
+    'POP_JUMP_FORWARD_IF_NOT_NONE', 'POP_JUMP_BACKWARD_IF_NOT_NONE',
+    #replacement of JUMP_ABSOLUTE
+    'JUMP_BACKWARD',
+    #replacement of JUMP_IF_NOT_EXC_MATCH
+    'CHECK_EXC_MATCH',
+    # new opcodes
+    'RETURN_GENERATOR',
+    'PUSH_EXC_INFO',
+    'NOP',
+    'FORMAT_VALUE', 'BUILD_STRING'
+
 ])) - _BLACKLIST
 
 _logger = logging.getLogger(__name__)
@@ -234,16 +288,6 @@ def expr_eval(expr):
     c = test_expr(expr, _EXPR_OPCODES)
     return unsafe_eval(c)
 
-def _import(name, globals=None, locals=None, fromlist=None, level=-1):
-    if globals is None:
-        globals = {}
-    if locals is None:
-        locals = {}
-    if fromlist is None:
-        fromlist = []
-    if name in _ALLOWED_MODULES:
-        return __import__(name, globals, locals, level)
-    raise ImportError(name)
 _BUILTINS = {
     '__import__': _import,
     'True': True,

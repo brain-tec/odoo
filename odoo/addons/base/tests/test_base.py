@@ -5,9 +5,11 @@ import ast
 
 from odoo import SUPERUSER_ID, Command
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
+from odoo.tests import tagged
 from odoo.tests.common import TransactionCase, BaseCase
 from odoo.tools import mute_logger
 from odoo.tools.safe_eval import safe_eval, const_eval, expr_eval
+from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 
 
 class TestSafeEval(BaseCase):
@@ -73,7 +75,8 @@ SAMPLES = [
 ]
 
 
-class TestBase(TransactionCase):
+@tagged('res_partner')
+class TestBase(TransactionCaseWithUserDemo):
 
     def _check_find_or_create(self, test_string, expected_name, expected_email, check_partner=False, should_create=False):
         partner = self.env['res.partner'].find_or_create(test_string)
@@ -88,12 +91,13 @@ class TestBase(TransactionCase):
     def test_00_res_partner_name_create(self):
         res_partner = self.env['res.partner']
         parse = res_partner._parse_partner_name
-        for text, name, mail in SAMPLES:
-            self.assertEqual((name, mail.lower()), parse(text))
-            partner_id, dummy = res_partner.name_create(text)
-            partner = res_partner.browse(partner_id)
-            self.assertEqual(name or mail.lower(), partner.name)
-            self.assertEqual(mail.lower() or False, partner.email)
+        for text, expected_name, expected_mail in SAMPLES:
+            with self.subTest(text=text):
+                self.assertEqual((expected_name, expected_mail.lower()), parse(text))
+                partner_id, dummy = res_partner.name_create(text)
+                partner = res_partner.browse(partner_id)
+                self.assertEqual(expected_name or expected_mail.lower(), partner.name)
+                self.assertEqual(expected_mail.lower() or False, partner.email)
 
         # name_create supports default_email fallback
         partner = self.env['res.partner'].browse(
@@ -511,7 +515,7 @@ class TestBase(TransactionCase):
         with self.assertRaises(RedirectWarning):
             test_partner.with_user(self.env.ref('base.user_admin')).toggle_active()
         with self.assertRaises(ValidationError):
-            test_partner.with_user(self.env.ref('base.user_demo')).toggle_active()
+            test_partner.with_user(self.user_demo).toggle_active()
 
         # Can archive the user but the partner stays active
         test_user.toggle_active()
@@ -563,6 +567,14 @@ class TestPartnerRecursion(TransactionCase):
         """ multi-write on several partners in same hierarchy must not trigger a false cycle detection """
         ps = self.p1 + self.p2 + self.p3
         self.assertTrue(ps.write({'phone': '123456'}))
+
+    def test_111_res_partner_recursion_infinite_loop(self):
+        """ The recursion check must not loop forever """
+        self.p2.parent_id = False
+        self.p3.parent_id = False
+        self.p1.parent_id = self.p2
+        with self.assertRaises(ValidationError):
+            (self.p3|self.p2).write({'parent_id': self.p1.id})
 
 
 class TestParentStore(TransactionCase):
@@ -663,6 +675,35 @@ class TestGroups(TransactionCase):
         a = self.env['res.groups'].with_context(lang='en_US').create({'name': 'A'})
         b = a.copy()
         self.assertFalse(a.name == b.name)
+
+    def test_apply_groups(self):
+        a = self.env['res.groups'].create({'name': 'A'})
+        b = self.env['res.groups'].create({'name': 'B'})
+        c = self.env['res.groups'].create({'name': 'C', 'implied_ids': [Command.set(a.ids)]})
+
+        # C already implies A, we want both B+C to imply A
+        (b + c)._apply_group(a)
+
+        self.assertIn(a, b.implied_ids)
+        self.assertIn(a, c.implied_ids)
+
+    def test_remove_groups(self):
+        u = self.env['res.users'].create({'login': 'u', 'name': 'U'})
+
+        a = self.env['res.groups'].create({'name': 'A', 'users': [Command.set(u.ids)]})
+        b = self.env['res.groups'].create({'name': 'B', 'users': [Command.set(u.ids)]})
+        c = self.env['res.groups'].create({'name': 'C', 'implied_ids': [Command.set(a.ids)]})
+
+        # C already implies A, we want none of B+C to imply A
+        (b + c)._remove_group(a)
+
+        self.assertNotIn(a, b.implied_ids)
+        self.assertNotIn(a, c.implied_ids)
+
+        # Since B didn't imply A, removing A from the implied groups of (B+C)
+        # should not remove user U from A, even though C implied A, since C does
+        # not have U as a user
+        self.assertIn(u, a.users)
 
 
 class TestUsers(TransactionCase):

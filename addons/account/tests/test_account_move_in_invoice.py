@@ -125,6 +125,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'amount_tax': 168.0,
             'amount_total': 1128.0,
         }
+        (cls.tax_armageddon + cls.tax_armageddon.children_tax_ids).write({'type_tax_use': 'purchase'})
 
     def setUp(self):
         super(TestAccountMoveInInvoiceOnchanges, self).setUp()
@@ -848,6 +849,37 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'amount_total': 1384.0,
         })
 
+    def test_compute_cash_rounding_lines(self):
+        cash_rounding_add_invoice_line = self.env['account.cash.rounding'].create({
+            'name': 'Add invoice line Rounding Down',
+            'rounding': .1,
+            'strategy': 'add_invoice_line',
+            'profit_account_id': self.company_data['default_account_revenue'].id,
+            'loss_account_id': self.company_data['default_account_expense'].id,
+            'rounding_method': 'DOWN',
+        })
+        move = self.env['account.move'].create({
+            'move_type': 'in_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_date': '2019-01-01',
+            'invoice_cash_rounding_id': cash_rounding_add_invoice_line.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'line',
+                    'price_unit': 295,
+                }),
+                Command.create({
+                    'name': 'cost',
+                    'price_unit': 280.33,
+                }),
+                Command.create({
+                    'name': 'cost neg',
+                    'price_unit': -280.33,
+                }),
+            ],
+        })
+        self.assertFalse(move.line_ids.filtered(lambda line: line.is_rounding_line))
+
     def test_in_invoice_line_onchange_cash_rounding_1(self):
         # Test 'add_invoice_line' rounding
         move_form = Form(self.invoice)
@@ -1224,24 +1256,32 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
                 'amount_currency': -800.0,
                 'debit': 0.0,
                 'credit': 800.0,
+                'tax_tag_invert': True,
+                'tax_base_amount': 0.0,
             },
             {
                 **self.product_line_vals_2,
                 'amount_currency': -160.0,
                 'debit': 0.0,
                 'credit': 160.0,
+                'tax_tag_invert': True,
+                'tax_base_amount': 0.0,
             },
             {
                 **self.tax_line_vals_1,
                 'amount_currency': -144.0,
                 'debit': 0.0,
                 'credit': 144.0,
+                'tax_tag_invert': True,
+                'tax_base_amount': 960.0,
             },
             {
                 **self.tax_line_vals_2,
                 'amount_currency': -24.0,
                 'debit': 0.0,
                 'credit': 24.0,
+                'tax_tag_invert': True,
+                'tax_base_amount': 160.0,
             },
             {
                 **self.term_line_vals_1,
@@ -1250,6 +1290,8 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
                 'debit': 1128.0,
                 'credit': 0.0,
                 'date_maturity': move_reversal.date,
+                'tax_tag_invert': False,
+                'tax_base_amount': 0.0,
             },
         ], {
             **self.move_vals,
@@ -1276,24 +1318,32 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
                 'amount_currency': -800.0,
                 'debit': 0.0,
                 'credit': 800.0,
+                'tax_tag_invert': True,
+                'tax_base_amount': 0,
             },
             {
                 **self.product_line_vals_2,
                 'amount_currency': -160.0,
                 'debit': 0.0,
                 'credit': 160.0,
+                'tax_tag_invert': True,
+                'tax_base_amount': 0,
             },
             {
                 **self.tax_line_vals_1,
                 'amount_currency': -144.0,
                 'debit': 0.0,
                 'credit': 144.0,
+                'tax_tag_invert': True,
+                'tax_base_amount': 960.0,
             },
             {
                 **self.tax_line_vals_2,
                 'amount_currency': -24.0,
                 'debit': 0.0,
                 'credit': 24.0,
+                'tax_tag_invert': True,
+                'tax_base_amount': 160.0,
             },
             {
                 **self.term_line_vals_1,
@@ -1302,6 +1352,8 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
                 'debit': 1128.0,
                 'credit': 0.0,
                 'date_maturity': move_reversal.date,
+                'tax_tag_invert': False,
+                'tax_base_amount': 0,
             },
         ], {
             **self.move_vals,
@@ -1896,6 +1948,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'company_id': self.company_data['company'].id,
         })
         self.env.company.account_cash_basis_base_account_id = tax_base_amount_account
+        self.env.company.tax_exigibility = True
         tax_tags = defaultdict(dict)
         for line_type, repartition_type in [(l, r) for l in ('invoice', 'refund') for r in ('base', 'tax')]:
             tax_tags[line_type][repartition_type] = self.env['account.account.tag'].create({
@@ -2015,3 +2068,59 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
 
         # Assert the tax line is recreated for the tax
         self.assertIn(tax, self.invoice.line_ids.tax_line_id)
+
+    def test_invoice_sent_to_additional_partner(self):
+        """
+        Make sure that when an invoice is a partner to a partner who is not
+        the invoiced customer, they receive a link containing an access token,
+        allowing them to view the invoice without needing to log in.
+        """
+
+        invoice = self.init_invoice(
+            'out_invoice', partner=self.partner_a, invoice_date='2023-04-17', amounts=[100])
+        invoice.action_post()
+
+        # add a follower to the invoice
+        self.partner_b.email = 'partner_b@example.com'
+        invoice.message_subscribe(self.partner_b.ids)
+
+        # Create a partner not related to the invoice
+        additional_partner = self.env['res.partner'].create({
+            'name': "Additional Partner",
+            'email': "additional@example.com",
+        })
+
+        # Send the invoice
+        action = invoice.with_context(discard_logo_check=True).action_invoice_sent()
+        action_context = action['context']
+
+        # Create the email using the wizard and add the additional partner as a recipient
+        invoice_send_wizard = self.env['account.invoice.send'].with_context(
+            action_context,
+            active_ids=[invoice.id]
+        ).create({'is_print': False})
+        invoice_send_wizard.partner_ids |= additional_partner
+
+        # prevent mail.mail record from being deleted after being sent.
+        invoice_send_wizard.template_id.auto_delete = False
+
+        # send the invoice
+        invoice_send_wizard.send_and_print_action()
+
+        # Find the email sent to the additional partner
+        additional_partner_mail = self.env['mail.mail'].search([
+            ('res_id', '=', invoice.id),
+            ('recipient_ids', '=', additional_partner.id)
+        ])
+        self.assertTrue(additional_partner_mail)
+        self.assertIn('access_token=', additional_partner_mail.body_html,
+                      "The additional partner should be sent the link including the token")
+
+        # Find the email sent to the followers
+        follower_mail = self.env['mail.mail'].search([
+            ('res_id', '=', invoice.id),
+            ('recipient_ids', '=', self.partner_b.id)
+        ])
+        self.assertTrue(follower_mail)
+        self.assertNotIn('access_token=', follower_mail.body_html,
+                      "The followers should not bet sent the access token by default")

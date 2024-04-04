@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import datetime as dt
+from datetime import datetime as dt, time
 from datetime import timedelta as td
 from freezegun import freeze_time
 
@@ -248,6 +248,64 @@ class TestReorderingRule(TransactionCase):
         self.assertTrue(purchase_order, 'No purchase order created.')
         self.assertEqual(len(purchase_order.order_line), 1, 'Not enough purchase order lines created.')
         purchase_order.button_confirm()
+
+    def test_reordering_rule_triggered_two_times(self):
+        """
+        A product P wth RR 0-0-1.
+        Confirm a delivery with 1 x P -> PO created for it.
+        Confirm a second delivery, with 1 x P again:
+        - The PO should be updated
+        - The qty to order of the RR should be zero
+        """
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.id)], limit=1)
+        stock_location = warehouse.lot_stock_id
+        out_type = warehouse.out_type_id
+        customer_location = self.env.ref('stock.stock_location_customers')
+
+        rr = self.env['stock.warehouse.orderpoint'].create({
+            'location_id': stock_location.id,
+            'product_id': self.product_01.id,
+            'product_min_qty': 0,
+            'product_max_qty': 0,
+            'qty_multiple': 1,
+        })
+
+        delivery = self.env['stock.picking'].create({
+            'picking_type_id': out_type.id,
+            'location_id': stock_location.id,
+            'location_dest_id': customer_location.id,
+            'move_lines': [(0, 0, {
+                'name': self.product_01.name,
+                'product_id': self.product_01.id,
+                'product_uom_qty': 1,
+                'product_uom': self.product_01.uom_id.id,
+                'location_id': stock_location.id,
+                'location_dest_id': customer_location.id,
+            })]
+        })
+        delivery.action_confirm()
+
+        pol = self.env['purchase.order.line'].search([('product_id', '=', self.product_01.id)])
+        self.assertEqual(pol.product_qty, 1.0)
+        self.assertEqual(rr.qty_to_order, 0.0)
+
+        delivery = self.env['stock.picking'].create({
+            'picking_type_id': out_type.id,
+            'location_id': stock_location.id,
+            'location_dest_id': customer_location.id,
+            'move_lines': [(0, 0, {
+                'name': self.product_01.name,
+                'product_id': self.product_01.id,
+                'product_uom_qty': 1,
+                'product_uom': self.product_01.uom_id.id,
+                'location_id': stock_location.id,
+                'location_dest_id': customer_location.id,
+            })]
+        })
+        delivery.action_confirm()
+
+        self.assertEqual(pol.product_qty, 2.0)
+        self.assertEqual(rr.qty_to_order, 0.0)
 
     def test_replenish_report_1(self):
         """Tests the auto generation of manual orderpoints.
@@ -688,3 +746,265 @@ class TestReorderingRule(TransactionCase):
         self.assertRecordValues(orderpoint, [
             {'qty_forecast': 0, 'qty_to_order': 0},
         ])
+
+    def test_decrease_qty_multi_step_receipt(self):
+        """
+        Two-steps receipt. An orderpoint generates a move from Input to Stock
+        with 5 x Product01 and a purchase order to fulfill the need of that SM.
+        Then, the user decreases the qty on the PO and confirms it. The existing
+        SM should be updated and another one should be created (from Vendors to
+        Input, for the PO)
+        """
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse.reception_steps = 'two_steps'
+        input_location_id = warehouse.wh_input_stock_loc_id.id
+        stock_location_id = warehouse.lot_stock_id.id
+        customer_location_id = self.ref('stock.stock_location_customers')
+        supplier_location_id = self.ref('stock.stock_location_suppliers')
+
+        self.product_01.description = 'Super Note'
+
+        op = self.env['stock.warehouse.orderpoint'].create({
+            'name': self.product_01.name,
+            'location_id': stock_location_id,
+            'product_id': self.product_01.id,
+            'product_min_qty': 0,
+            'product_max_qty': 0,
+            'trigger': 'manual',
+        })
+
+        out_move = self.env['stock.move'].create({
+            'name': self.product_01.name,
+            'product_id': self.product_01.id,
+            'product_uom': self.product_01.uom_id.id,
+            'product_uom_qty': 5,
+            'location_id': stock_location_id,
+            'location_dest_id': customer_location_id,
+        })
+        out_move._action_confirm()
+
+        op.action_replenish()
+
+        moves = self.env['stock.move'].search([('id', '!=', out_move.id), ('product_id', '=', self.product_01.id)])
+        self.assertRecordValues(moves, [
+            {'location_id': input_location_id, 'location_dest_id': stock_location_id, 'product_uom_qty': 5}
+        ])
+
+        purchase = self.env['purchase.order'].search([('partner_id', '=', self.partner.id)], order="id desc", limit=1)
+        with Form(purchase) as form:
+            with form.order_line.edit(0) as line:
+                line.product_qty = 4
+        purchase.button_confirm()
+
+        moves = self.env['stock.move'].search([('id', '!=', out_move.id), ('product_id', '=', self.product_01.id)], order='id desc')
+        self.assertRecordValues(moves, [
+            {'location_id': supplier_location_id, 'location_dest_id': input_location_id, 'product_qty': 4},
+            {'location_id': input_location_id, 'location_dest_id': stock_location_id, 'product_qty': 4},
+        ])
+
+    def test_decrease_qty_multi_step_receipt02(self):
+        """
+        Two-steps receipt. An orderpoint generates a move from Input to Stock
+        with 4 x Product01 and a purchase order to fulfill the need of that SM.
+        Then, the user increases and decreases the qty on the PO. The existing
+        SMs should be updated.
+        """
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse.reception_steps = 'two_steps'
+        input_location_id = warehouse.wh_input_stock_loc_id.id
+        stock_location_id = warehouse.lot_stock_id.id
+        supplier_location_id = self.ref('stock.stock_location_suppliers')
+
+        self.product_01.description = False
+
+        op = self.env['stock.warehouse.orderpoint'].create({
+            'name': self.product_01.name,
+            'location_id': stock_location_id,
+            'product_id': self.product_01.id,
+            'product_min_qty': 4,
+            'product_max_qty': 4,
+            'trigger': 'manual',
+        })
+        op.action_replenish()
+
+        purchase = self.env['purchase.order'].search([('partner_id', '=', self.partner.id)], order="id desc", limit=1)
+        with Form(purchase) as form:
+            with form.order_line.edit(0) as line:
+                line.product_qty = 10
+        purchase.button_confirm()
+
+        moves = self.env['stock.move'].search([('product_id', '=', self.product_01.id)], order='id desc')
+        self.assertRecordValues(moves, [
+            {'location_id': input_location_id, 'location_dest_id': stock_location_id, 'product_qty': 6},
+            {'location_id': supplier_location_id, 'location_dest_id': input_location_id, 'product_qty': 10},
+            {'location_id': input_location_id, 'location_dest_id': stock_location_id, 'product_qty': 4},
+        ])
+
+        with Form(purchase) as form:
+            with form.order_line.edit(0) as line:
+                line.product_qty = 1
+
+        moves = self.env['stock.move'].search([('product_id', '=', self.product_01.id)], order='id desc')
+        self.assertRecordValues(moves, [
+            {'location_id': input_location_id, 'location_dest_id': stock_location_id, 'product_qty': 1},
+            {'location_id': supplier_location_id, 'location_dest_id': input_location_id, 'product_qty': 1},
+            {'location_id': input_location_id, 'location_dest_id': stock_location_id, 'product_qty': 0},
+        ])
+
+    def test_add_line_to_existing_draft_po(self):
+        """
+        Days to purchase = 10
+        Two products P1, P2 from the same supplier
+        Several use cases, each time we run the RR one by one. Then, according
+        to the dates and the configuration, it should use the existing PO or not
+        """
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+
+        self.env.company.days_to_purchase = 10
+        expected_order_date = dt.combine(dt.today() + td(days=10), time(12))
+        expected_delivery_date = expected_order_date + td(days=1.0)
+
+        product_02 = self.env['product.product'].create({
+            'name': 'Super Product',
+            'type': 'product',
+            'seller_ids': [(0, 0, {'name': self.partner.id})],
+        })
+
+        op_01, op_02 = self.env['stock.warehouse.orderpoint'].create([{
+            'warehouse_id': warehouse.id,
+            'location_id': warehouse.lot_stock_id.id,
+            'product_id': p.id,
+            'product_min_qty': 1,
+            'product_max_qty': 0,
+        } for p in [self.product_01, product_02]])
+
+        op_01.action_replenish()
+        po01 = self.env['purchase.order'].search([], order='id desc', limit=1)
+        self.assertEqual(po01.date_order, expected_order_date)
+
+        op_02.action_replenish()
+        self.assertEqual(po01.date_order, expected_order_date)
+        self.assertRecordValues(po01.order_line, [
+            {'product_id': self.product_01.id, 'date_planned': expected_delivery_date},
+            {'product_id': product_02.id, 'date_planned': expected_delivery_date},
+        ])
+
+        # Reset and try another flow
+        po01.button_cancel()
+        op_01.action_replenish()
+        po02 = self.env['purchase.order'].search([], order='id desc', limit=1)
+        self.assertNotEqual(po02, po01)
+
+        with freeze_time(dt.today() + td(days=1)):
+            op_02.invalidate_cache(fnames=['lead_days_date'], ids=op_02.ids)
+            op_02.action_replenish()
+            self.assertEqual(po02.date_order, expected_order_date)
+            self.assertRecordValues(po02.order_line, [
+                {'product_id': self.product_01.id, 'date_planned': expected_delivery_date},
+                {'product_id': product_02.id, 'date_planned': expected_delivery_date + td(days=1)},
+            ])
+
+        # Restrict the merge with POs that have their order deadline in [today - 2 days, today + 2 days]
+        self.env['ir.config_parameter'].set_param('purchase_stock.delta_days_merge', '2')
+
+        # Reset and try with a second RR executed in the dates range (-> should still use the existing PO)
+        po02.button_cancel()
+        op_01.action_replenish()
+        po03 = self.env['purchase.order'].search([], order='id desc', limit=1)
+        self.assertNotEqual(po03, po02)
+
+        with freeze_time(dt.today() + td(days=2)):
+            op_02.invalidate_cache(fnames=['lead_days_date'], ids=op_02.ids)
+            op_02.action_replenish()
+            self.assertEqual(po03.date_order, expected_order_date)
+            self.assertRecordValues(po03.order_line, [
+                {'product_id': self.product_01.id, 'date_planned': expected_delivery_date},
+                {'product_id': product_02.id, 'date_planned': expected_delivery_date + td(days=2)},
+            ])
+
+        # Reset and try with a second RR executed after the dates range (-> should not use the existing PO)
+        po03.button_cancel()
+        op_01.action_replenish()
+        po04 = self.env['purchase.order'].search([], order='id desc', limit=1)
+        self.assertNotEqual(po04, po03)
+
+        with freeze_time(dt.today() + td(days=3)):
+            op_02.invalidate_cache(fnames=['lead_days_date'], ids=op_02.ids)
+            op_02.action_replenish()
+            self.assertEqual(po04.order_line.product_id, self.product_01, 'There should be only a line for product 01')
+            po05 = self.env['purchase.order'].search([], order='id desc', limit=1)
+            self.assertNotEqual(po05, po04, 'A new PO should be generated')
+            self.assertEqual(po05.order_line.product_id, product_02)
+
+    def test_update_po_line_without_purchase_access_right(self):
+        """ Test that a user without purchase access right can update a PO line from picking."""
+        # create a user with only inventory access right
+        user = self.env['res.users'].create({
+            'name': 'Inventory Manager',
+            'login': 'inv_manager',
+            'groups_id': [(6, 0, [self.env.ref('stock.group_stock_user').id])]
+        })
+        product = self.env['product.product'].create({
+            'name': 'Storable Product',
+            'type': 'product',
+            'seller_ids': [(0, 0, {'name': self.partner.id})],
+        })
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        self.env['stock.warehouse.orderpoint'].create({
+            'warehouse_id': warehouse.id,
+            'location_id': warehouse.lot_stock_id.id,
+            'product_id': product.id,
+            'product_min_qty': 5,
+            'product_max_qty': 0,
+        })
+        # run the scheduler
+        self.env['procurement.group'].run_scheduler()
+        # check that the PO line is created
+        po_line = self.env['purchase.order.line'].search([('product_id', '=', product.id)])
+        self.assertEqual(len(po_line), 1, 'There should be only one PO line')
+        self.assertEqual(po_line.product_qty, 5, 'The PO line quantity should be 5')
+        # Update the po line from the picking
+        picking = self.env['stock.picking'].with_user(user).create({
+            'location_id': warehouse.lot_stock_id.id,
+            'location_dest_id': self.env.ref('stock.stock_location_customers').id,
+            'picking_type_id': warehouse.out_type_id.id,
+            'move_lines': [(0, 0, {
+                'name': product.name,
+                'product_id': product.id,
+                'product_uom': product.uom_id.id,
+                'product_uom_qty': 1,
+                'location_id': warehouse.lot_stock_id.id,
+                'location_dest_id': self.env.ref('stock.stock_location_customers').id,
+            })]
+        })
+        picking.with_user(user).action_assign()
+        # check that the PO line quantity has been updated
+        self.assertEqual(po_line.product_qty, 6, 'The PO line quantity should be 6')
+
+    def test_set_supplier_in_orderpoint(self):
+        """
+        Test that qty_to_order is correctly computed when setting the supplier in an orderpoint
+        Have a product with a uom in Kg and a purchase uom in Tonne (the purchase UOM should be bigger that the UOM)
+        and a supplier with a min_qty of 6T
+        Create an orderpoint with a min_qty of 500Kg and a max_qty of 0Kg
+        Set the supplier in the orderpoint and check that the qty_to_order is correctly updated to 6000Kg
+        """
+        product = self.env['product.product'].create({
+            'name': 'Storable Product',
+            'type': 'product',
+            'uom_id': self.env.ref('uom.product_uom_categ_kgm').uom_ids[3].id,
+            'uom_po_id': self.env.ref('uom.product_uom_categ_kgm').uom_ids[4].id,
+            'seller_ids': [(0, 0, {'name': self.partner.id, 'min_qty': 6})],
+        })
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        orderpoint = self.env['stock.warehouse.orderpoint'].create({
+            'warehouse_id': warehouse.id,
+            'location_id': warehouse.lot_stock_id.id,
+            'product_id': product.id,
+            'product_min_qty': 500,
+            'product_max_qty': 0,
+        })
+        product.seller_ids.with_context(orderpoint_id=orderpoint.id).action_set_supplier()
+        self.assertEqual(orderpoint.supplier_id, product.seller_ids, 'The supplier should be set in the orderpoint')
+        self.assertEqual(orderpoint.product_uom, product.uom_id, 'The orderpoint uom should be the same as the product uom')
+        self.assertEqual(orderpoint.qty_to_order, 6000)

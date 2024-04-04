@@ -69,11 +69,21 @@ class MailTemplate(models.Model):
                                         help="Sidebar action to make this template available on records "
                                              "of the related document model")
 
+    # access
+    can_write = fields.Boolean(compute='_compute_can_write',
+                               help='The current user can edit the template.')
+
     # Overrides of mail.render.mixin
     @api.depends('model')
     def _compute_render_model(self):
         for template in self:
             template.render_model = template.model
+
+    @api.depends_context('uid')
+    def _compute_can_write(self):
+        writable_templates = self._filter_access_rules('write')
+        for template in self:
+            template.can_write = template in writable_templates
 
     # ------------------------------------------------------------
     # CRUD
@@ -166,7 +176,7 @@ class MailTemplate(models.Model):
             partner_to = values.pop('partner_to', '')
             if partner_to:
                 # placeholders could generate '', 3, 2 due to some empty field values
-                tpl_partner_ids = [int(pid) for pid in partner_to.split(',') if pid]
+                tpl_partner_ids = [int(pid.strip()) for pid in partner_to.split(',') if (pid and pid.strip().isdigit())]
                 partner_ids += self.env['res.partner'].sudo().browse(tpl_partner_ids).exists().ids
             results[res_id]['partner_ids'] = partner_ids
         return results

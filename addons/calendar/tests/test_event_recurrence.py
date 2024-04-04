@@ -7,6 +7,7 @@ from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
 from odoo.tests.common import TransactionCase
+from freezegun import freeze_time
 
 
 class TestRecurrentEvents(TransactionCase):
@@ -215,7 +216,7 @@ class TestCreateRecurrentEvents(TestRecurrentEvents):
             'rrule_type': 'weekly',
             'mon': True,
             'count': '2',
-            'event_tz': 'US/Eastern',  # DST change on 2002/10/27
+            'event_tz': 'America/New_York',  # DST change on 2002/10/27
         })
         recurrence = self.env['calendar.recurrence'].search([('base_event_id', '=', self.event.id)])
         self.assertEventDates(recurrence.calendar_event_ids, [
@@ -225,9 +226,9 @@ class TestCreateRecurrentEvents(TestRecurrentEvents):
 
     def test_ambiguous_dst_time_winter(self):
         """ Test hours stays the same, regardless of DST changes """
-        eastern = pytz.timezone('US/Eastern')
+        eastern = pytz.timezone('America/New_York')
         dt = eastern.localize(datetime(2002, 10, 20, 1, 30, 00)).astimezone(pytz.utc).replace(tzinfo=None)
-        # Next occurence happens at 1:30am on 27th Oct 2002 which happened twice in the US/Eastern
+        # Next occurence happens at 1:30am on 27th Oct 2002 which happened twice in the America/New_York
         # timezone when the clocks where put back at the end of Daylight Saving Time
         self.event.start = dt
         self.event.stop = dt + relativedelta(hours=1)
@@ -236,7 +237,7 @@ class TestCreateRecurrentEvents(TestRecurrentEvents):
             'rrule_type': 'weekly',
             'sun': True,
             'count': '2',
-            'event_tz': 'US/Eastern'  # DST change on 2002/4/7
+            'event_tz': 'America/New_York'  # DST change on 2002/4/7
         })
         events = self.event.recurrence_id.calendar_event_ids
         self.assertEqual(events.mapped('duration'), [1, 1])
@@ -247,10 +248,10 @@ class TestCreateRecurrentEvents(TestRecurrentEvents):
 
     def test_ambiguous_dst_time_spring(self):
         """ Test hours stays the same, regardless of DST changes """
-        eastern = pytz.timezone('US/Eastern')
+        eastern = pytz.timezone('America/New_York')
         dt = eastern.localize(datetime(2002, 3, 31, 2, 30, 00)).astimezone(pytz.utc).replace(tzinfo=None)
         # Next occurence happens 2:30am on 7th April 2002 which never happened at all in the
-        # US/Eastern timezone, as the clocks where put forward at 2:00am skipping the entire hour
+        # America/New_York timezone, as the clocks where put forward at 2:00am skipping the entire hour
         self.event.start = dt
         self.event.stop = dt + relativedelta(hours=1)
         self.event._apply_recurrence_values({
@@ -258,7 +259,7 @@ class TestCreateRecurrentEvents(TestRecurrentEvents):
             'rrule_type': 'weekly',
             'sun': True,
             'count': '2',
-            'event_tz': 'US/Eastern'  # DST change on 2002/4/7
+            'event_tz': 'America/New_York'  # DST change on 2002/4/7
         })
         events = self.event.recurrence_id.calendar_event_ids
         self.assertEqual(events.mapped('duration'), [1, 1])
@@ -286,6 +287,51 @@ class TestCreateRecurrentEvents(TestRecurrentEvents):
         self.assertEventDates(events, [
             (datetime(2020, 3, 23, 0, 0), datetime(2020, 3, 23, 23, 59)),
             (datetime(2020, 3, 30, 0, 0), datetime(2020, 3, 30, 23, 59)),
+        ])
+
+    @freeze_time('2023-03-27')
+    def test_backward_pass_dst(self):
+        """
+            When we apply the rule to compute the period of the recurrence,
+            we take an earlier date (in `_get_start_of_period` method).
+            However, it is possible that this earlier date has a different DST.
+            This causes time difference problems.
+        """
+        # In Europe/Brussels: 26 March 2023 from winter to summer (from no DST to DST)
+        # We are in the case where we create a recurring event after the time change (there is the DST).
+        timezone = 'Europe/Brussels'
+        tz = pytz.timezone(timezone)
+        dt = tz.localize(datetime(2023, 3, 27, 9, 0, 00)).astimezone(pytz.utc).replace(tzinfo=None)
+        self.event.start = dt
+        self.event.stop = dt + relativedelta(hours=1)
+
+        # Check before apply the recurrence
+        self.assertEqual(self.event.start, datetime(2023, 3, 27, 7, 0, 00)) # Because 2023-03-27 in Europe/Brussels is UTC+2
+
+        self.event._apply_recurrence_values({
+            'rrule_type': 'monthly', # Because we will take the first day of the month (jump back)
+            'interval': 1,
+            'end_type': 'count',
+            'count': 2, # To have the base event and the unique recurrence event
+            'month_by': 'date',
+            'day': 27,
+            'event_tz': timezone,
+        })
+
+        # What we expect:
+        #   - start date of base event: datetime(2023, 3, 27, 7, 0, 00)
+        #   - start date of the unique recurrence event: datetime(2023, 4, 27, 7, 0, 00)
+
+        # With the FIX, we replace the following lines with
+        # `events = self.event.recurrence_id.calendar_event_ids`
+        recurrence = self.env['calendar.recurrence'].search([('base_event_id', '=', self.event.id)])
+        events = recurrence.calendar_event_ids
+        self.assertEqual(len(events), 2, "It should have 2 events in the recurrence")
+        self.assertIn(self.event, events)
+
+        self.assertEventDates(events, [
+            (datetime(2023, 3, 27, 7, 00), datetime(2023, 3, 27, 8, 00)),
+            (datetime(2023, 4, 27, 7, 00), datetime(2023, 4, 27, 8, 00)),
         ])
 
 
@@ -384,6 +430,19 @@ class TestUpdateRecurrentEvents(TestRecurrentEvents):
             (datetime(2019, 10, 26, 1, 0), datetime(2019, 10, 29, 18, 0)),
             (datetime(2019, 11, 2, 1, 0), datetime(2019, 11, 5, 18, 0)),
             (datetime(2019, 11, 9, 1, 0), datetime(2019, 11, 12, 18, 0)),
+        ])
+
+    def test_shift_stop_all(self):
+        # testing the case where we only want to update the stop time
+        event = self.events[0]
+        event.write({
+            'recurrence_update': 'all_events',
+            'stop': event.stop + relativedelta(hours=1),
+        })
+        self.assertEventDates(event.recurrence_id.calendar_event_ids, [
+            (datetime(2019, 10, 22, 2, 0), datetime(2019, 10, 24, 19, 0)),
+            (datetime(2019, 10, 29, 2, 0), datetime(2019, 10, 31, 19, 0)),
+            (datetime(2019, 11, 5, 2, 0), datetime(2019, 11, 7, 19, 0)),
         ])
 
     def test_change_week_day_rrule(self):

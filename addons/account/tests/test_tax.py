@@ -14,6 +14,16 @@ class TestTaxCommon(AccountTestInvoicingCommon):
         cls.currency_data['currency'].rounding = 1.0
         cls.currency_no_decimal = cls.currency_data['currency']
         cls.company_data_2 = cls.setup_company_data('company_2', currency_id=cls.currency_no_decimal.id)
+
+        cls.currency_5_round = cls.env['res.currency'].create({
+            'name': 'Platinum Coin',
+            'symbol': 'P$',
+            'rounding': 0.05,
+            'position': 'after',
+            'currency_unit_label': 'Platinum',
+            'currency_subunit_label': 'Palladium',
+        })
+        cls.company_data_3 = cls.setup_company_data('company_3', currency_id=cls.currency_5_round.id)
         cls.env.user.company_id = cls.company_data['company']
 
         cls.fixed_tax = cls.env['account.tax'].create({
@@ -130,7 +140,7 @@ class TestTaxCommon(AccountTestInvoicingCommon):
             'amount': 0,
         })
 
-        cls.tax_5_percent = cls.env['account.tax'].with_company(cls.company_data['company']).create({
+        cls.tax_5_percent = cls.env['account.tax'].with_company(cls.company_data_3['company']).create({
             'name': "test_5_percent",
             'amount_type': 'percent',
             'amount': 5,
@@ -846,7 +856,8 @@ class TestTax(TestTaxCommon):
         )
 
     def test_rounding_tax_included_round_per_line_03(self):
-        ''' Test the rounding of a 8% and 0% price included tax in an invoice having 8 * 15.55 as line.
+        ''' Test the rounding of a 8% and 0% price included tax in an invoice having 8 * 15.55 as line
+        and a sequence that is solely dependent on the ID, as the tax sequence is identical.
         The decimal precision is set to 2.
         '''
         self.tax_0_percent.company_id.currency_id.rounding = 0.01
@@ -863,8 +874,8 @@ class TestTax(TestTaxCommon):
             [
                 # base , amount
                 # -------------
-                (115.19, 9.21),
                 (115.19, 0.00),
+                (115.19, 9.21),
                 # -------------
             ],
             res1

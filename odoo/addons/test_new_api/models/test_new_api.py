@@ -517,6 +517,13 @@ class OrderLine(models.Model):
     order_id = fields.Many2one('test_new_api.order', required=True, ondelete='cascade')
     product = fields.Char()
     reward = fields.Boolean()
+    has_been_rewarded = fields.Char(compute='_compute_has_been_rewarded', store=True)
+
+    @api.depends('reward')
+    def _compute_has_been_rewarded(self):
+        for rec in self:
+            if rec.reward:
+                rec.has_been_rewarded = 'Yes'
 
     def unlink(self):
         # also delete associated reward lines
@@ -843,6 +850,7 @@ class MonetaryRelated(models.Model):
     monetary_id = fields.Many2one('test_new_api.monetary_base')
     currency_id = fields.Many2one('res.currency', related='monetary_id.base_currency_id')
     amount = fields.Monetary(related='monetary_id.amount')
+    total = fields.Monetary()
 
 
 class MonetaryCustom(models.Model):
@@ -1320,6 +1328,22 @@ class ComputeMember(models.Model):
             member.container_id = container.search([('name', '=', member.name)], limit=1)
 
 
+class User(models.Model):
+    _name = _description = 'test_new_api.user'
+    _allow_sudo_commands = False
+
+    name = fields.Char()
+    group_ids = fields.Many2many('test_new_api.group')
+
+
+class Group(models.Model):
+    _name = _description = 'test_new_api.group'
+    _allow_sudo_commands = False
+
+    name = fields.Char()
+    user_ids = fields.Many2many('test_new_api.user')
+
+
 class ComputeEditable(models.Model):
     _name = _description = 'test_new_api.compute_editable'
 
@@ -1436,3 +1460,31 @@ class Prisoner(models.Model):
 
     name = fields.Char('Name')
     ship_ids = fields.Many2many('test_new_api.ship', 'test_new_api_crew', 'prisoner_id', 'ship_id')
+
+
+class Team(models.Model):
+    _name = 'test_new_api.team'
+    _description = 'Odoo Team'
+
+    name = fields.Char()
+    parent_id = fields.Many2one('test_new_api.team')
+    member_ids = fields.One2many('test_new_api.team.member', 'team_id')
+
+
+class TeamMember(models.Model):
+    _name = 'test_new_api.team.member'
+    _description = 'Odoo Developer'
+
+    name = fields.Char('Name')
+    team_id = fields.Many2one('test_new_api.team')
+    parent_id = fields.Many2one('test_new_api.team', related='team_id.parent_id')
+
+
+class ModelAutovacuumed(models.Model):
+    _name = _description = 'test_new_api.autovacuumed'
+
+    expire_at = fields.Datetime('Expires at')
+
+    @api.autovacuum
+    def _gc(self):
+        self.search([('expire_at', '<', datetime.datetime.now() - datetime.timedelta(days=1))]).unlink()

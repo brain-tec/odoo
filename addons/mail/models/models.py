@@ -54,7 +54,7 @@ class BaseModel(models.AbstractModel):
                 tracking = self.env['mail.tracking.value'].create_tracking_values(initial_value, new_value, col_name, col_info, tracking_sequence, self._name)
                 if tracking:
                     if tracking['field_type'] == 'monetary':
-                        tracking['currency_id'] = getattr(self, col_info.get('currency_field', ''), self.company_id.currency_id).id
+                        tracking['currency_id'] = self[col_info['currency_field']].id
                     tracking_value_ids.append([0, 0, tracking])
                 changes.add(col_name)
 
@@ -73,14 +73,20 @@ class BaseModel(models.AbstractModel):
             recipient_ids, email_to, email_cc = [], False, False
             if 'partner_id' in record and record.partner_id:
                 recipient_ids.append(record.partner_id.id)
-            elif 'email_normalized' in record and record.email_normalized:
-                email_to = record.email_normalized
-            elif 'email_from' in record and record.email_from:
-                email_to = record.email_from
-            elif 'partner_email' in record and record.partner_email:
-                email_to = record.partner_email
-            elif 'email' in record and record.email:
-                email_to = record.email
+            else:
+                found_email = False
+                if 'email_from' in record and record.email_from:
+                    found_email = record.email_from
+                elif 'partner_email' in record and record.partner_email:
+                    found_email = record.partner_email
+                elif 'email' in record and record.email:
+                    found_email = record.email
+                elif 'email_normalized' in record and record.email_normalized:
+                    found_email = record.email_normalized
+                if found_email:
+                    email_to = ','.join(tools.email_normalize_all(found_email))
+                if not email_to:  # keep value to ease debug / trace update
+                    email_to = found_email
             res[record.id] = {'partner_ids': recipient_ids, 'email_to': email_to, 'email_cc': email_cc}
         return res
 
@@ -107,7 +113,8 @@ class BaseModel(models.AbstractModel):
         :param records: DEPRECATED, self should be a valid record set or an
           empty recordset if a generic reply-to is required;
         :param company: used to compute company name part of the from name; provide
-          it if already known, otherwise fall back on user company;
+          it if already known, otherwise use records company it they all belong to the same company
+          and fall back on user's company in mixed companies environments;
         :param doc_names: dict(res_id, doc_name) used to compute doc name part of
           the from name; provide it if already known to avoid queries, otherwise
           name_get on document will be performed;
@@ -132,6 +139,9 @@ class BaseModel(models.AbstractModel):
                 if not doc_names:
                     doc_names = dict((rec.id, rec.display_name) for rec in _records)
 
+                if not company and 'company_id' in self and len(self.company_id) == 1:
+                    company = self.company_id
+
                 mail_aliases = self.env['mail.alias'].sudo().search([
                     ('alias_parent_model_id.model', '=', model),
                     ('alias_parent_thread_id', 'in', res_ids),
@@ -151,7 +161,7 @@ class BaseModel(models.AbstractModel):
                 result[res_id] = self._notify_get_reply_to_formatted_email(
                     result_email[res_id],
                     doc_names.get(res_id) or '',
-                    company or self.env.company
+                    company
                 )
 
         left_ids = set(_res_ids) - set(result_email)
@@ -246,3 +256,21 @@ class BaseModel(models.AbstractModel):
         return {
             'X-Odoo-Objects': "%s-%s" % (self._name, self.id),
         }
+
+    # ------------------------------------------------------
+    # CONTROLLERS
+    # ------------------------------------------------------
+
+    def _get_mail_redirect_suggested_company(self):
+        """ Return the suggested company to be set on the context
+        in case of a mail redirection to the record. To avoid multi
+        company issues when clicking on a link sent by email, this
+        could be called to try setting the most suited company on
+        the allowed_company_ids in the context. This method can be
+        overridden, for example on the hr.leave model, where the
+        most suited company is the company of the leave type, as
+        specified by the ir.rule.
+        """
+        if 'company_id' in self:
+            return self.company_id
+        return False

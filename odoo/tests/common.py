@@ -32,7 +32,7 @@ from collections import defaultdict
 from contextlib import contextmanager, ExitStack
 from datetime import datetime, date
 from itertools import zip_longest as izip_longest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from xmlrpc import client as xmlrpclib
 
 import requests
@@ -153,6 +153,8 @@ def new_test_user(env, login='', groups='base.group_user', context=None, **kwarg
 
     return env['res.users'].with_context(**context).create(create_values)
 
+def loaded_demo_data(env):
+    return bool(env.ref('base.user_demo', raise_if_not_found=False))
 
 class RecordCapturer:
     def __init__(self, model, domain):
@@ -321,7 +323,9 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
     """ Subclass of TestCase for Odoo-specific code. This class is abstract and
     expects self.registry, self.cr and self.uid to be initialized by subclasses.
     """
-    if sys.version_info < (3, 8):
+
+    _python_version = sys.version_info
+    if _python_version < (3, 8):
         # Partial backport of bpo-24412, merged in CPython 3.8
         _class_cleanups = []
 
@@ -469,6 +473,9 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
                     self.env.user.flush()
                     self.env.cr.flush()
 
+        if not self.warm:
+            return
+
         self.assertEqual(
             len(actual_queries), len(expected),
             "\n---- actual queries:\n%s\n---- expected queries:\n%s" % (
@@ -497,7 +504,7 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
         """
         if self.warm:
             # mock random in order to avoid random bus gc
-            with self.subTest(), patch('random.random', lambda: 1):
+            with patch('random.random', lambda: 1):
                 login = self.env.user.login
                 expected = counters.get(login, default)
                 if flush:
@@ -512,11 +519,14 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
                 if count != expected:
                     # add some info on caller to allow semi-automatic update of query count
                     frame, filename, linenum, funcname, lines, index = inspect.stack()[2]
+                    filename = filename.replace('\\', '/')
                     if "/odoo/addons/" in filename:
                         filename = filename.rsplit("/odoo/addons/", 1)[1]
                     if count > expected:
                         msg = "Query count more than expected for user %s: %d > %d in %s at %s:%s"
-                        self.fail(msg % (login, count, expected, funcname, filename, linenum))
+                        # add a subtest in order to continue the test_method in case of failures
+                        with self.subTest():
+                            self.fail(msg % (login, count, expected, funcname, filename, linenum))
                     else:
                         logger = logging.getLogger(type(self).__module__)
                         msg = "Query count less than expected for user %s: %d < %d in %s at %s:%s"
@@ -648,7 +658,6 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
         # Because lxml.attrib is an ordereddict for which order is important
         # to equality, even though *we* don't care
         self.assertEqual(dict(n1.attrib), dict(n2.attrib), msg)
-
         self.assertEqual((n1.text or u'').strip(), (n2.text or u'').strip(), msg)
         self.assertEqual((n1.tail or u'').strip(), (n2.tail or u'').strip(), msg)
 
@@ -677,15 +686,116 @@ class BaseCase(unittest.TestCase, metaclass=MetaCase):
     def assertHTMLEqual(self, original, expected):
         return self._assertXMLEqual(original, expected, 'html')
 
-    def profile(self, **kwargs):
+    def profile(self, description='', **kwargs):
         test_method = getattr(self, '_testMethodName', 'Unknown test method')
         if not hasattr(self, 'profile_session'):
             self.profile_session = profiler.make_session(test_method)
         return profiler.Profiler(
-            description='%s %s %s' % (test_method, self.env.user.name, 'warm' if self.warm else 'cold'),
+            description='%s uid:%s %s %s' % (test_method, self.env.user.id, 'warm' if self.warm else 'cold', description),
             db=self.env.cr.dbname,
             profile_session=self.profile_session,
             **kwargs)
+
+    def _callSetUp(self):
+        # This override is aimed at providing better error logs inside tests.
+        # First, we want errors to be logged whenever they appear instead of
+        # after the test, as the latter makes debugging harder and can even be
+        # confusing in the case of subtests.
+        #
+        # When a subtest is used inside a test, (1) the recovered traceback is
+        # not complete, and (2) the error is delayed to the end of the test
+        # method. There is unfortunately no simple way to hook inside a subtest
+        # to fix this issue. The method TestCase.subTest uses the context
+        # manager _Outcome.testPartExecutor as follows:
+        #
+        #     with self._outcome.testPartExecutor(self._subtest, isTest=True):
+        #         yield
+        #
+        # This context manager is actually also used for the setup, test method,
+        # teardown, cleanups. If an error occurs during any one of those, it is
+        # simply appended in TestCase._outcome.errors, and the latter is
+        # consumed at the end calling _feedErrorsToResult.
+        #
+        # The TestCase._outcome is set just before calling _callSetUp. This
+        # method is actually executed inside a testPartExecutor. Replacing it
+        # here ensures that all errors will be caught.
+        # See https://github.com/odoo/odoo/pull/107572 for more info.
+        self._outcome.errors = _ErrorCatcher(self)
+        super()._callSetUp()
+
+    def patch_requests(self):
+        # requests.get -> requests.api.request -> Session().request
+        # TBD: enable by default & set side_effect=NotImplementedError to force an error
+        p = patch('requests.Session.request', Mock(spec_set=[]))
+        self.addCleanup(p.stop)
+        return p.start()
+
+class _ErrorCatcher(list):
+    """ This extends a list where errors are appended whenever they occur. The
+    purpose of this class is to feed the errors directly to the output, instead
+    of letting them accumulate until the test is over. It also improves the
+    traceback to make it easier to debug.
+    """
+    __slots__ = ['test']
+
+    def __init__(self, test):
+        super().__init__()
+        self.test = test
+
+    def append(self, error):
+        exc_info = error[1]
+        if exc_info is not None:
+            exception_type, exception, tb = exc_info
+            tb = self._complete_traceback(tb)
+            exc_info = (exception_type, exception, tb)
+        self.test._feedErrorsToResult(self.test._outcome.result, [(error[0], exc_info)])
+
+    def _complete_traceback(self, initial_tb):
+        Traceback = type(initial_tb)
+
+        # make the set of frames in the traceback
+        tb_frames = set()
+        tb = initial_tb
+        while tb:
+            tb_frames.add(tb.tb_frame)
+            tb = tb.tb_next
+        tb = initial_tb
+
+        # find the common frame by searching the last frame of the current_stack present in the traceback.
+        current_frame = inspect.currentframe()
+        common_frame = None
+        while current_frame:
+            if current_frame in tb_frames:
+                common_frame = current_frame  # we want to find the last frame in common
+            current_frame = current_frame.f_back
+
+        if not common_frame:  # not really useful but safer
+            _logger.warning('No common frame found with current stack, displaying full stack')
+            tb = initial_tb
+        else:
+            # remove the tb_frames untile the common_frame is reached (keep the current_frame tb since the line is more accurate)
+            while tb and tb.tb_frame != common_frame:
+                tb = tb.tb_next
+
+        # add all current frame elements under the common_frame to tb
+        current_frame = common_frame.f_back
+        while current_frame:
+            tb = Traceback(tb, current_frame, current_frame.f_lasti, current_frame.f_lineno)
+            current_frame = current_frame.f_back
+
+        # remove traceback root part (odoo_bin, main, loading, ...), as
+        # everything under the testCase is not useful. Using '_callTestMethod',
+        # '_callSetUp', '_callTearDown', '_callCleanup' instead of the test
+        # method since the error does not comme especially from the test method.
+        while tb:
+            code = tb.tb_frame.f_code
+            if pathlib.PurePath(code.co_filename).name == 'case.py' and code.co_name in ('_callTestMethod', '_callSetUp', '_callTearDown', '_callCleanup'):
+                return tb.tb_next
+            tb = tb.tb_next
+
+        _logger.warning('No root frame found, displaying full stacks')
+        return initial_tb  # this shouldn't be reached
+
 
 savepoint_seq = itertools.count()
 
@@ -727,11 +837,24 @@ class TransactionCase(BaseCase):
         # restore environments after the test to avoid invoking flush() with an
         # invalid environment (inexistent user id) from another test
         envs = self.env.all.envs
+        for env in list(envs):
+            self.addCleanup(env.clear)
+        # restore the set of known environments as it was at setUp
         self.addCleanup(envs.update, list(envs))
         self.addCleanup(envs.clear)
 
         self.addCleanup(self.registry.clear_caches)
-        self.addCleanup(self.env.clear)
+
+        # This prevents precommit functions and data from piling up
+        # until cr.flush is called in 'assertRaises' clauses
+        # (these are not cleared in self.env.clear or envs.clear)
+        cr = self.env.cr
+
+        def _reset(cb, funcs, data):
+            cb._funcs = funcs
+            cb.data = data
+        for callback in [cr.precommit, cr.postcommit, cr.prerollback, cr.postrollback]:
+            self.addCleanup(_reset, callback, collections.deque(callback._funcs), dict(callback.data))
 
         # flush everything in setUpClass before introducing a savepoint
         self.env['base'].flush()
@@ -783,6 +906,20 @@ class SingleTransactionCase(BaseCase):
 
 class ChromeBrowserException(Exception):
     pass
+
+def save_test_file(test_name, content, prefix, extension='png', logger=_logger, document_type='Screenshot', date_format="%Y%m%d_%H%M%S_%f"):
+    assert re.fullmatch(r'\w*_', prefix)
+    assert re.fullmatch(r'[a-z]+', extension)
+    assert re.fullmatch(r'\w+', test_name)
+    now = datetime.now().strftime(date_format)
+    screenshots_dir = pathlib.Path(odoo.tools.config['screenshots']) / get_db_name() / 'screenshots'
+    screenshots_dir.mkdir(parents=True, exist_ok=True)
+    fname = f'{prefix}{now}_{test_name}.{extension}'
+    full_path = screenshots_dir / fname
+
+    with full_path.open('wb') as f:
+        f.write(content)
+    logger.runbot(f'{document_type} in: {full_path}')
 
 
 class ChromeBrowser():
@@ -1004,7 +1141,7 @@ class ChromeBrowser():
         raise unittest.SkipTest("Error during Chrome headless connection")
 
     def _open_websocket(self):
-        self.ws = websocket.create_connection(self.ws_url)
+        self.ws = websocket.create_connection(self.ws_url, suppress_origin=True)
         if self.ws.getstatus() != 101:
             raise unittest.SkipTest("Cannot connect to chrome dev tools")
         self.ws.settimeout(0.01)
@@ -1194,7 +1331,11 @@ class ChromeBrowser():
                     duration = end_time - self.screencast_frames[i]['timestamp']
                     concat_file.write("file '%s'\nduration %s\n" % (frame_file_path, duration))
                 concat_file.write("file '%s'" % frame_file_path)  # needed by the concat plugin
-            r = subprocess.run([ffmpeg_path, '-intra', '-f', 'concat','-safe', '0', '-i', concat_script_path, '-pix_fmt', 'yuv420p', outfile])
+            try:
+                subprocess.run([ffmpeg_path, '-f', 'concat', '-safe', '0', '-i', concat_script_path, '-pix_fmt', 'yuv420p', '-g', '0', outfile], check=True)
+            except subprocess.CalledProcessError:
+                self._logger.error('Failed to encode screencast.')
+                return
             self._logger.log(25, 'Screencast in: %s', outfile)
         else:
             outfile = outfile.strip('.mp4')
@@ -1219,7 +1360,8 @@ class ChromeBrowser():
         _id = self._websocket_send('Network.deleteCookies', params=params)
         return self._websocket_wait_id(_id)
 
-    def _wait_ready(self, ready_code, timeout=60):
+    def _wait_ready(self, ready_code=None, timeout=60):
+        ready_code = ready_code or "document.readyState === 'complete'"
         self._logger.info('Evaluate ready code "%s"', ready_code)
         awaited_result = {'type': 'boolean', 'value': True}
         # catch errors in ready code to prevent opening error dialogs
@@ -1430,6 +1572,11 @@ class Transport(xmlrpclib.Transport):
         return super().request(*args, **kwargs)
 
 
+class No404Filter(logging.Filter):
+    def filter(self, record):
+        return werkzeug.exceptions.NotFound.description not in record.getMessage()
+
+
 class HttpCase(TransactionCase):
     """ Transactional HTTP TestCase with url_open and Chrome headless helpers. """
     registry_test_mode = True
@@ -1592,7 +1739,6 @@ class HttpCase(TransactionCase):
 
             # Needed because tests like test01.js (qunit tests) are passing a ready
             # code = ""
-            ready = ready or "document.readyState === 'complete'"
             self.assertTrue(self.browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
 
             error = False
@@ -1622,10 +1768,24 @@ class HttpCase(TransactionCase):
         """Wrapper for `browser_js` to start the given `tour_name` with the
         optional delay between steps `step_delay`. Other arguments from
         `browser_js` can be passed as keyword arguments."""
+        no_404_filter = No404Filter()
+        http_logger = logging.getLogger('odoo.http')
+        http_logger.addFilter(no_404_filter)
+        self.addCleanup(http_logger.removeFilter, no_404_filter)
         step_delay = ', %s' % step_delay if step_delay else ''
         code = kwargs.pop('code', "odoo.startTour('%s'%s)" % (tour_name, step_delay))
         ready = kwargs.pop('ready', "odoo.__DEBUG__.services['web_tour.tour'].tours['%s'].ready" % tour_name)
         return self.browser_js(url_path=url_path, code=code, ready=ready, **kwargs)
+
+    def profile(self, **kwargs):
+        """
+        for http_case, also patch _get_profiler_context_manager in order to profile all requests
+        """
+        sup = super()
+        _profiler = sup.profile(**kwargs)
+        def route_profiler(request):
+            return sup.profile(description=request.httprequest.full_path)
+        return profiler.Nested(_profiler, patch('odoo.http.Request._get_profiler_context_manager', route_profiler))
 
 
 # kept for backward compatibility
@@ -1642,7 +1802,7 @@ class HttpSavepointCase(HttpCase):
 def users(*logins):
     """ Decorate a method to execute it once for each given user. """
     @decorator
-    def wrapper(func, *args, **kwargs):
+    def _users(func, *args, **kwargs):
         self = args[0]
         old_uid = self.uid
         try:
@@ -1663,7 +1823,7 @@ def users(*logins):
         finally:
             self.uid = old_uid
 
-    return wrapper
+    return _users
 
 
 @decorator
@@ -2669,6 +2829,10 @@ def tagged(*tags):
         include = {t for t in tags if not t.startswith('-')}
         exclude = {t[1:] for t in tags if t.startswith('-')}
         obj.test_tags = (getattr(obj, 'test_tags', set()) | include) - exclude # todo remove getattr in master since we want to limmit tagged to BaseCase and always have +standard tag
+        at_install = 'at_install' in obj.test_tags
+        post_install = 'post_install' in obj.test_tags
+        if not (at_install ^ post_install):
+            _logger.warning('A tests should be either at_install or post_install, which is not the case of %r', obj)
         return obj
     return tags_decorator
 

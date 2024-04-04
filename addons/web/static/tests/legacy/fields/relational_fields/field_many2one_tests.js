@@ -2053,8 +2053,7 @@ QUnit.module('fields', {}, function () {
             await testUtils.dom.click(form.$('.o_external_button'));
             await testUtils.dom.click($('button:contains("Just do it !")'));
             assert.verifySteps(['action']);
-            await testUtils.dom.click($('button:contains("Just don\'t do it !")'));
-            assert.verifySteps([]); // the second button is disabled, it can't be clicked
+            assert.ok($('button:contains("Just don\'t do it !")').get(0).disabled);
 
             await testUtils.dom.click($('.modal .btn-secondary:contains(Discard)'));
             await testUtils.dom.click(form.$('.o_external_button'));
@@ -3872,6 +3871,39 @@ QUnit.module('fields', {}, function () {
 
             list.destroy();
         });
+
+        QUnit.test("clearing a many2one value before focusing out", async function (assert) {
+            assert.expect(2);
+
+            const form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: `<form><field name="product_id"/></form>`,
+            });
+
+            form.$('.o_field_many2one input').focus().val('xp').trigger('input').trigger('keyup');
+            await testUtils.nextTick();
+            form.$('.o_field_many2one input').focus().val('').trigger('input');
+            await testUtils.nextTick();
+
+            await testUtils.dom.triggerEvents(form.$('.o_field_many2one input'), [$.Event('keydown', {
+                which: $.ui.keyCode.ESCAPE,
+                keyCode: $.ui.keyCode.ESCAPE,
+            })]);
+
+            form.$('.o_field_many2one input').trigger('focusout');
+            await testUtils.nextTick();
+
+            form.$('.o_field_many2one input').trigger('blur');
+            await testUtils.nextTick();
+
+            assert.equal(form.$('.o_field_many2one input').val(), "");
+            assert.containsNone(document.body, '.modal');
+
+            form.destroy();
+        });
+
     });
 });
 });

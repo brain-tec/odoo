@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.stock.tests.test_packing import TestPackingCommon
+from odoo.exceptions import UserError
 
 
 class TestPacking(TestPackingCommon):
@@ -76,3 +77,84 @@ class TestPacking(TestPackingCommon):
         # default weight was set.
         pack_wiz = self.env['choose.delivery.package'].with_context(pack_action_ctx).create({})
         self.assertEqual(pack_wiz.shipping_weight, 13.5)
+
+    def test_send_to_shipper_without_sale_order(self):
+        """
+            Check we can validate delivery with a delivery carrier set when it isn't linked to a sale order
+        """
+        self.env['stock.quant']._update_available_quantity(self.product_aw, self.stock_location, 20.0)
+
+        picking_ship = self.env['stock.picking'].create({
+            'partner_id': self.env['res.partner'].create({'name': 'A partner'}).id,
+            'picking_type_id': self.warehouse.out_type_id.id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'carrier_id': self.test_carrier.id
+        })
+        self.env['stock.move.line'].create({
+            'product_id': self.product_aw.id,
+            'product_uom_id': self.uom_kg.id,
+            'picking_id': picking_ship.id,
+            'qty_done': 5,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id
+        })
+
+        self.assertEqual(picking_ship.state, 'draft', 'Delivery state should be draft.')
+        self.assertFalse(picking_ship.sale_id.id, 'Sale order shouldn\'t be set')
+        picking_ship.action_confirm()
+        picking_ship.button_validate()
+        self.assertEqual(picking_ship.state, 'done')
+
+    def test_batch_picking_delivery(self):
+        """
+            Check that when Put in Pack is called for batch pickings (i.e. faked with multi-record action
+            calling to avoid extra batch+delivery module for just a test) then:
+             - Same delivery carrier = works
+             - Different delivery carriers = UserError
+        """
+        self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 4.0)
+        another_test_carrier_product = self.env['product.product'].create({
+            'name': 'Another test carrier product',
+            'type': 'service',
+        })
+        test_carrier = self.env['delivery.carrier'].create({
+            'name': 'Another Test carrier',
+            'delivery_type': 'fixed',
+            'product_id': another_test_carrier_product.id,
+        })
+
+        delivery_1 = self.env['stock.picking'].create({
+            'partner_id': self.env['res.partner'].create({'name': 'A partner'}).id,
+            'picking_type_id': self.warehouse.out_type_id.id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'carrier_id': self.test_carrier.id
+        })
+        ml_1 = self.env['stock.move.line'].create({
+            'product_id': self.productA.id,
+            'product_uom_id': self.productA.uom_id.id,
+            'picking_id': delivery_1.id,
+            'qty_done': 1,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id
+        })
+
+        # Test that differing carrier + put in pack = UserError
+        delivery_2 = delivery_1.copy({'carrier_id': test_carrier.id})
+        ml_1.copy({'picking_id': delivery_2.id, 'qty_done': 1})
+        # recreate the `action_put_in_pack`` steps so we don't have to add test to new module for batch pickings
+        # to use batch version of method (which bypass the ensure_one() check in the stock_picking action)
+        move_lines_to_pack = (delivery_1 | delivery_2)._package_move_lines()
+        self.assertEqual(len(move_lines_to_pack), 2, 'There should be move lines that can be "put in pack"')
+        with self.assertRaises(UserError):
+            delivery_1._pre_put_in_pack_hook(move_lines_to_pack)
+
+        # Test that same carrier + put in pack = OK!
+        delivery_2.carrier_id = delivery_1.carrier_id
+        move_lines_to_pack = (delivery_1 | delivery_2)._package_move_lines()
+        self.assertEqual(len(move_lines_to_pack), 2, 'There should be move lines that can be "put in pack"')
+        delivery_1._pre_put_in_pack_hook(move_lines_to_pack)
+        package = delivery_1._put_in_pack(move_lines_to_pack)
+        self.assertEqual(delivery_1.move_line_ids.result_package_id, package, 'Delivery 1 moves should have been put in package.')
+        self.assertEqual(delivery_2.move_line_ids.result_package_id, package, 'Delivery 2 moves should have been put in package.')

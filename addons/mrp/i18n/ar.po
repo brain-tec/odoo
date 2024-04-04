@@ -7,7 +7,8 @@
 # Martin Trigaux, 2021
 # Paul Andrawes, 2021
 # Mustafa J. Kadhem <safi2266@gmail.com>, 2022
-# Malaz Abuidris <msea@odoo.com>, 2022
+# Wil Odoo, 2023
+# Malaz Abuidris <msea@odoo.com>, 2023
 # 
 msgid ""
 msgstr ""
@@ -15,8 +16,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-24 08:19+0000\n"
 "PO-Revision-Date: 2021-09-14 12:24+0000\n"
-"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2022\n"
-"Language-Team: Arabic (https://www.transifex.com/odoo/teams/41243/ar/)\n"
+"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2023\n"
+"Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -1097,6 +1098,8 @@ msgid ""
 "Component Lots must be unique for mass production. Please review reservation"
 " for:\n"
 msgstr ""
+"يجب أن تكون مجموعات المكونات فريدة للإنتاج الجماعي. يرجى مراجعة الحجز لـ : "
+"\n"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__components_availability
@@ -2461,7 +2464,7 @@ msgstr "قم بقفل أمر التصنيع لمنع التغييرات لما �
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter_productivity__loss_id
 #: model_terms:ir.ui.view,arch_db:mrp.oee_search_view
 msgid "Loss Reason"
-msgstr "سبب الخسارة"
+msgstr "سبب الضياع "
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_stock_production_lot
@@ -2537,7 +2540,7 @@ msgid ""
 "Make sure enough quantities of these components are reserved to carry on "
 "production:\n"
 msgstr ""
-"تأكد من أنه يتم حفظ كميات كافية من تلك المكونات للاستمرار في عملية الإنتاج: "
+"تأكد من أنه يتم حجز كميات كافية من تلك المكونات للاستمرار في عملية الإنتاج: "
 "\n"
 
 #. module: mrp
@@ -2968,6 +2971,16 @@ msgstr ""
 "ننصح بحذف مركز العمل عوضاً عن ذلك. "
 
 #. module: mrp
+#: code:addons/mrp/models/product.py:0 code:addons/mrp/models/product.py:0
+#, python-format
+msgid ""
+"Note that product(s): '%s' is/are still linked to active Bill of Materials, "
+"which means that the product can still be used on it/them."
+msgstr ""
+"يرجى العلم بأن المنتج (المنتجات): \"%s\" مرتبط/مرتبطة بقائمة مواد نشطة، مما "
+"يعني أن المنتج يمكن استخدامه فيها. "
+
+#. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_bom__message_needaction_counter
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__message_needaction_counter
 #: model:ir.model.fields,field_description:mrp.field_mrp_unbuild__message_needaction_counter
@@ -3024,6 +3037,10 @@ msgid ""
 "multiplied by two. However, note that both time before and after production "
 "will only be counted once. "
 msgstr ""
+"عدد القطع (في قائمة مواد المنتج) التي يمكن إنتاجها بشكل موازٍ (في نفس الوقت)"
+" في مركز العمل هذا. على سبيل المثال: السعة هي 5 وتحتاج إلى إنتاج 10 وحدات، "
+"ستم مضاعفة وقت العملية المذكور في قائمة المواد، ولكن يرجى العلم بأنه سيتم "
+"حساب الوقت قبل وبعد الإنتاج مرة واحدة فقط. "
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__product_qty
@@ -3032,6 +3049,8 @@ msgid ""
 "If the BOM contains operations, make sure the work center capacity is "
 "accurate. "
 msgstr ""
+"يجب أن تكون هذه أصغر كمية يمكن إنتاج المنتج فيها. إذا كانت قائمة المواد "
+"تحتوي على العمليات، تأكد من أن سعة مركز العمل دقيقة. "
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__mrp_production_source_count
@@ -4132,8 +4151,8 @@ msgid ""
 "Some product moves have already been confirmed, this manufacturing order "
 "can't be completely cancelled. Are you still sure you want to process ?"
 msgstr ""
-"لقد تم تأكيد بعض حركات المنتجات بالفعل، ولذلك لا ينمكن إلغاء أمر التصنيع هذا"
-" تماماً. هل أنت متأكد من رغبتك في المتابعة؟ "
+"لقد تم تأكيد بعض حركات المنتجات بالفعل، ولذلك لا يمكن إلغاء أمر التصنيع هذا "
+"تماماً. هل أنت متأكد من رغبتك في المتابعة؟ "
 
 #. module: mrp
 #: code:addons/mrp/models/mrp_production.py:0
@@ -4465,6 +4484,21 @@ msgid "The capacity must be strictly positive."
 msgstr "يجب أن تكون السعة قيمة موجبة. "
 
 #. module: mrp
+#: code:addons/mrp/models/mrp_production.py:0
+#, python-format
+msgid "The component %s should not be the same as the product to produce."
+msgstr "يجب ألا يكون المكون %s نفس المنتج المراد إنتاجه. "
+
+#. module: mrp
+#: code:addons/mrp/models/mrp_bom.py:0
+#, python-format
+msgid ""
+"The current configuration is incorrect because it would create a cycle "
+"between these products: %s."
+msgstr ""
+"التهيئة الحالية غير صحيحة لأنها ستتسبب في إنشاء حلقة بين هذه المنتجات: %s. "
+
+#. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_document__res_model
 msgid "The database object this attachment will be attached to."
 msgstr "كائن قاعدة البيانات التي سيُرفق به هذا المرفق."
@@ -4555,6 +4589,8 @@ msgid ""
 "The selected serial number does not correspond to the one used in the "
 "manufacturing order, please select another one."
 msgstr ""
+"لا يتوافق الرقم التسلسلي المحدد مع الرقم التسلسلي المستخدَم في أمر التصنيع. "
+"يرجى تحديد غيره. "
 
 #. module: mrp
 #: code:addons/mrp/models/mrp_production.py:0

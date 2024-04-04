@@ -12,6 +12,7 @@ from odoo.tests.common import tagged, HttpCase, users
 from odoo.tools import mute_logger
 
 
+@tagged('mail_thread')
 class TestChatterTweaks(TestMailCommon, TestRecipients):
 
     @classmethod
@@ -38,6 +39,14 @@ class TestChatterTweaks(TestMailCommon, TestRecipients):
         self.test_record.with_user(self.user_employee).with_context({'mail_create_nosubscribe': True, 'mail_post_autofollow': True}).message_post(
             body='Test Body', message_type='comment', subtype_xmlid='mail.mt_comment', partner_ids=[self.partner_1.id, self.partner_2.id])
         self.assertEqual(self.test_record.message_follower_ids.mapped('partner_id'), original.mapped('partner_id') | self.partner_1 | self.partner_2)
+
+    @mute_logger('odoo.addons.mail.models.mail_mail')
+    def test_chatter_context_cleaning(self):
+        """ Test default keys are not propagated to message creation as it may
+        induce wrong values for some fields, like parent_id. """
+        parent = self.env['res.partner'].create({'name': 'Parent'})
+        partner = self.env['res.partner'].with_context(default_parent_id=parent.id).create({'name': 'Contact'})
+        self.assertFalse(partner.message_ids[-1].parent_id)
 
     def test_chatter_mail_create_nolog(self):
         """ Test disable of automatic chatter message at create """
@@ -272,11 +281,17 @@ class TestDiscuss(TestMailCommon, TestRecipients):
         self.assertEqual(len(remaining_message), 0, "Test message should have been deleted")
 
 
-@tagged('-at_install', 'post_install')
-class TestMultiCompany(HttpCase):
+@tagged('-at_install', 'post_install', 'multi_company')
+class TestMultiCompany(TestMailCommon, HttpCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls._activate_multi_company()
 
     def test_redirect_to_records(self):
-
+        """ Test redirection and cids computation when involving multi company
+        rules. """
         self.company_A = self.env['res.company'].create({
             'name': 'Company A',
             'user_ids': [(4, self.ref('base.user_admin'))],
@@ -299,6 +314,10 @@ class TestMultiCompany(HttpCase):
 
         path = url_parse(response.url).path
         self.assertEqual(path, '/web/login')
+
+        decoded_fragment = url_decode(url_parse(response.url).fragment)
+        self.assertTrue("cids" in decoded_fragment)
+        self.assertEqual(decoded_fragment['cids'], str(self.multi_company_record.company_id.id))
 
         self.authenticate('admin', 'admin')
 
@@ -332,3 +351,49 @@ class TestMultiCompany(HttpCase):
         action = url_decode(fragment)['action']
 
         self.assertEqual(action, 'mail.action_discuss')
+
+    def test_redirect_to_records_nothread(self):
+        """ Test no thread models and redirection """
+        nothreads = self.env['mail.test.nothread'].create([
+            {
+                'company_id': company.id,
+                'name': f'Test with {company.name}',
+            }
+            for company in (self.company_admin, self.company_2, self.env['res.company'])
+        ])
+
+        # when being logged, cids should be based on current user's company unless
+        # there is an access issue (not tested here, see 'test_redirect_to_records')
+        self.authenticate(self.user_admin.login, self.user_admin.login)
+        for test_record in nothreads:
+            for user_company in self.company_admin, self.company_2:
+                with self.subTest(record_name=test_record.name, user_company=user_company):
+                    self.user_admin.write({'company_id': user_company.id})
+                    response = self.url_open(
+                        f'/mail/view?model={test_record._name}&res_id={test_record.id}',
+                        timeout=15
+                    )
+                    self.assertEqual(response.status_code, 200)
+
+                    decoded_fragment = url_decode(url_parse(response.url).fragment)
+                    self.assertTrue("cids" in decoded_fragment)
+                    self.assertEqual(decoded_fragment['cids'], str(user_company.id))
+
+        # when being not logged, cids should be added based on
+        # '_get_mail_redirect_suggested_company'
+        self.authenticate(None, None)
+        for test_record in nothreads:
+            with self.subTest(record_name=test_record.name, user_company=user_company):
+                self.user_admin.write({'company_id': user_company.id})
+                response = self.url_open(
+                    f'/mail/view?model={test_record._name}&res_id={test_record.id}',
+                    timeout=15
+                )
+                self.assertEqual(response.status_code, 200)
+
+                decoded_fragment = url_decode(url_parse(response.url).fragment)
+                if test_record.company_id:
+                    self.assertIn('cids', decoded_fragment)
+                    self.assertEqual(decoded_fragment['cids'], str(test_record.company_id.id))
+                else:
+                    self.assertNotIn('cids', decoded_fragment)
