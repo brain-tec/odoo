@@ -134,7 +134,7 @@
         // Drop a form builder snippet and configure it
         {
             content: "Drop the form snippet",
-            trigger: '#oe_snippets .oe_snippet:has(.s_website_form) .oe_snippet_thumbnail',
+            trigger: '#oe_snippets .oe_snippet .oe_snippet_thumbnail[data-snippet=s_website_form]',
             run: 'drag_and_drop_native :iframe #wrap',
         }, {
             content: "Select form by clicking on an input field",
@@ -581,12 +581,45 @@
         ...addCustomField("date", "text", "field E", false),
         ...selectFieldByLabel("field D"),
         ...selectButtonByData('data-set-visibility-dependency="field E"'),
-        ...selectButtonByData('data-select-data-attribute="set"'),
+        ...selectButtonByData('data-select-data-attribute="after"'),
+        {
+            content: "Enter a date in the date input",
+            trigger: "[data-name='hidden_condition_additional_date'] input",
+            run: "edit 03/28/2017",
+        },
         ...wTourUtils.clickOnSave(),
         {
-            content: "Click to open the date picker popover from field E",
+            content: "Enter an invalid date in field E",
             trigger: `:iframe ${triggerFieldByLabel("field E")} input`,
-            run: "click",
+            run() {
+                this.anchor.value = "25071981";
+                this.anchor.dispatchEvent(new InputEvent("input", {bubbles: true}));
+                // Adds a delay to let the input code run.
+                setTimeout(() => {
+                    this.anchor.classList.add("invalidDate");
+                }, 500);
+            },
+        },
+        {
+            content: "Enter an valid date in field E",
+            trigger: `:iframe ${triggerFieldByLabel("field E")} input.invalidDate`,
+            run() {
+                this.anchor.classList.remove("invalidDate");
+                this.anchor.value = "07/25/1981";
+                this.anchor.dispatchEvent(new InputEvent("input", {bubbles: true}));
+                // Adds a delay to let the input code run.
+                setTimeout(() => {
+                    this.anchor.classList.add("validDate");
+                }, 500);
+            },
+        },
+        {
+            content: "Click to open the date picker popover from field E",
+            trigger: `:iframe ${triggerFieldByLabel("field E")} input.validDate`,
+            run(actions) {
+                this.anchor.classList.remove("validDate");
+                actions.click();
+            },
         },
         {
             content: "Select today's date from the date picker",
@@ -687,7 +720,7 @@
         // only be sent if one of the checkbox is checked.
         {
             content: "Add the form snippet",
-            trigger: '#oe_snippets .oe_snippet:has(.s_website_form) .oe_snippet_thumbnail',
+            trigger: '#oe_snippets .oe_snippet .oe_snippet_thumbnail[data-snippet=s_website_form]',
             run: 'drag_and_drop_native :iframe #wrap',
         }, {
             content: "Select the form by clicking on an input field",
@@ -699,9 +732,7 @@
                 // The next steps will be about removing non essential required
                 // fields. For the robustness of the test, check that amount
                 // of field stays the same.
-                const requiredFields = document.querySelectorAll(
-                    "[data-snippet] .s_website_form_required"
-                );
+                const requiredFields = this.anchor.closest("[data-snippet]").querySelectorAll(".s_website_form_required");
                 if (requiredFields.length !== NB_NON_ESSENTIAL_REQUIRED_FIELDS_IN_DEFAULT_FORM) {
                     console.error('The amount of required fields seems to have changed');
                 }

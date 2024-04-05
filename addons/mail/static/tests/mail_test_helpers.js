@@ -51,13 +51,14 @@ import {
 import { cancelAllTimers } from "@odoo/hoot-mock";
 import { after, before, getFixture } from "@odoo/hoot";
 import { registry } from "@web/core/registry";
-import { authenticate } from "@web/../tests/_framework/mock_server/mock_server";
+import { authenticate, defineParams } from "@web/../tests/_framework/mock_server/mock_server";
 import { session } from "@web/session";
 import { DEFAULT_MAIL_VIEW_ID } from "./mock_server/mock_models/constants";
 import { parseViewProps } from "@web/../tests/_framework/view_test_helpers";
 import { mailGlobal } from "@mail/utils/common/misc";
 import { useServiceProtectMethodHandling } from "@web/core/utils/hooks";
-import { DISCUSS_ACTION_ID } from "./mock_server/mail_mock_server";
+import { DISCUSS_ACTION_ID, authenticateGuest } from "./mock_server/mail_mock_server";
+import { Component, onRendered, onWillDestroy, status } from "@odoo/owl";
 
 before(prepareRegistriesWithCleanup);
 export const registryNamesToCloneWithCleanup = [];
@@ -71,6 +72,7 @@ useServiceProtectMethodHandling.fn = useServiceProtectMethodHandling.mocked; // 
 //-----------------------------------------------------------------------------
 
 export function defineMailModels() {
+    defineParams({ suite: "mail" }, "replace");
     return defineModels({ ...webModels, ...busModels, ...mailModels });
 }
 
@@ -243,15 +245,31 @@ async function addSwitchTabDropdownItem(rootTarget, tabTarget) {
 
 let NEXT_ENV_ID = 1;
 
-export async function start({ asTab = false } = {}) {
+export async function start({ asTab = false, authenticateAs, env: pEnv } = {}) {
     if (!MockServer.current) {
         await startServer();
     }
     let target = getFixture();
     const pyEnv = MockServer.current.env;
+    if (authenticateAs !== undefined) {
+        if (authenticateAs === false) {
+            // no authentication => new guest
+            const guestId = pyEnv["mail.guest"].create({});
+            authenticateGuest(pyEnv["mail.guest"].read(guestId)[0]);
+        } else if (authenticateAs._name === "mail.guest") {
+            authenticateGuest(authenticateAs);
+        } else {
+            authenticate(authenticateAs.login, authenticateAs.password);
+        }
+    } else if ("res.users" in pyEnv) {
+        if (pyEnv.cookie.get("dgid")) {
+            // already authenticated as guest
+        } else {
+            const adminUser = pyEnv["res.users"].search_read([["id", "=", serverState.userId]])[0];
+            authenticate(adminUser.login, adminUser.password);
+        }
+    }
     if ("res.users" in pyEnv) {
-        const adminUser = pyEnv["res.users"].search_read([["id", "=", serverState.userId]])[0];
-        authenticate(adminUser.login, adminUser.password);
         /** @type {import("mock_models").ResUsers} */
         const ResUsers = pyEnv["res.users"];
         patchWithCleanup(session, {
@@ -510,4 +528,57 @@ export function prepareRegistriesWithCleanup() {
     registryNamesToCloneWithCleanup.forEach((registryName) =>
         cloneRegistryWithCleanup(registry.category(registryName))
     );
+}
+
+const observeRenderResults = new Map();
+let nextObserveRenderResults = 0;
+/**
+ * Patch component `onWillRender` to track amount of renders.
+ * This only prepares with the patching. To effectively observe the amount of renders,
+ * should call @see observeRenders
+ * Having both function allow to track renders as side-effect on specific actions, rather
+ * than aggregate all renders including setup: as this value requires some thinking on
+ * which render comes from what, usually the less with brief explanations the better.
+ */
+export function prepareObserveRenders() {
+    patchWithCleanup(Component.prototype, {
+        setup(...args) {
+            onRendered(() => {
+                for (const result of observeRenderResults.values()) {
+                    if (!result.has(this.constructor)) {
+                        result.set(this.constructor, 0);
+                    }
+                    result.set(this.constructor, result.get(this.constructor) + 1);
+                }
+            });
+            onWillDestroy(() => {
+                for (const result of observeRenderResults.values()) {
+                    // owl could invoke onrendered and cancel immediately to re-render, so should compensate
+                    if (result.has(this.constructor) && status(this) === "cancelled") {
+                        result.set(this.constructor, result.get(this.constructor) - 1);
+                    }
+                }
+            });
+            return super.setup(...args);
+        },
+    });
+    after(() => observeRenderResults.clear());
+}
+
+/**
+ * This function tracks renders of components.
+ * Should be prepared before mounting affected components with @see prepareObserveRenders
+ * This function returns a function to stop observing, which itself returns
+ * a Map of amount of renders per component. Key of map is Component constructor.
+ *
+ * @returns {() => Map<Component.constructor, number>}
+ */
+export function observeRenders() {
+    const id = nextObserveRenderResults++;
+    observeRenderResults.set(id, new Map());
+    return () => {
+        const result = observeRenderResults.get(id);
+        observeRenderResults.delete(id);
+        return result;
+    };
 }

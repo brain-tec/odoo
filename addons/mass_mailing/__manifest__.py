@@ -97,7 +97,7 @@
             ('include', 'web.assets_frontend'),
             ('after', 'web/static/lib/bootstrap/scss/_variables.scss', 'mass_mailing/static/src/scss/mass_mailing.ui.scss'),
             ('include', 'web_editor.backend_assets_wysiwyg'),
-            ('include', 'web_editor.assets_legacy_wysiwyg'),
+            ('include', 'mass_mailing.assets_snippets_menu'),
 
             'mass_mailing/static/src/scss/mass_mailing_mail.scss',
         ],
@@ -149,8 +149,10 @@
             'mass_mailing/static/src/snippets/s_showcase/options.js',
             'mass_mailing/static/src/snippets/s_rating/options.js'
         ],
-        'web_editor.assets_legacy_wysiwyg': [
+        'mass_mailing.assets_snippets_menu': [
+            ('include', 'web_editor.assets_snippets_menu'),
             'mass_mailing/static/src/js/snippets.editor.js',
+            'mass_mailing/static/src/xml/mass_mailing.editor.xml',
         ],
         'web.assets_frontend': [
             'mass_mailing/static/src/js/tours/**/*',

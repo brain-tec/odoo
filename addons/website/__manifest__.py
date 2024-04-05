@@ -223,7 +223,6 @@
         ],
         'web_editor.assets_wysiwyg': [
             'website/static/src/js/editor/editor.js',
-            '/website/static/src/components/wysiwyg_adapter/toolbar_patch.js',
             'website/static/src/xml/web_editor.xml',
         ],
         'website.assets_wysiwyg': [
@@ -275,14 +274,15 @@
         ],
         'website.assets_all_wysiwyg': [
             ('include', 'web_editor.assets_wysiwyg'),
-            ('include', 'web_editor.assets_legacy_wysiwyg'),
+            ('include', 'web_editor.assets_snippets_menu'),
             ('include', 'website.assets_wysiwyg'),
         ],
         'website.backend_assets_all_wysiwyg': [
             ('include', 'web_editor.backend_assets_wysiwyg'),
-            ('include', 'web_editor.assets_legacy_wysiwyg'),
+            ('include', 'web_editor.assets_snippets_menu'),
             ('include', 'website.assets_wysiwyg'),
             'website/static/src/components/wysiwyg_adapter/wysiwyg_adapter.js',
+            'website/static/src/components/wysiwyg_adapter/wysiwyg_adapter.xml',
             'website/static/src/snippets/s_embed_code/options.js',
         ],
         'web_editor.assets_media_dialog': [
