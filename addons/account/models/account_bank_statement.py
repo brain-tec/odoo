@@ -252,36 +252,44 @@ class AccountBankStatement(models.Model):
 
     def write(self, values):
         res = super(AccountBankStatement, self).write(values)
-        if values.get('date') or values.get('journal'):
-            # If we are changing the date or journal of a bank statement, we have to change its previous_statement_id. This is done
-            # automatically using the compute function, but we also have to change the previous_statement_id of records that were
-            # previously pointing toward us and records that were pointing towards our new previous_statement_id. This is done here
-            # by marking those record as needing to be recomputed.
-            # Note that marking the field is not enough as we also have to recompute all its other fields that are depending on 'previous_statement_id'
-            # hence the need to call modified afterwards.
-            to_recompute = self.search([('previous_statement_id', 'in', self.ids), ('id', 'not in', self.ids), ('journal_id', 'in', self.mapped('journal_id').ids)])
-            if to_recompute:
-                self.env.add_to_compute(self._fields['previous_statement_id'], to_recompute)
-                to_recompute.modified(['previous_statement_id'])
-            next_statements_to_recompute = self.search([('previous_statement_id', 'in', [st.previous_statement_id.id for st in self]), ('id', 'not in', self.ids), ('journal_id', 'in', self.mapped('journal_id').ids)])
-            if next_statements_to_recompute:
-                self.env.add_to_compute(self._fields['previous_statement_id'], next_statements_to_recompute)
-                next_statements_to_recompute.modified(['previous_statement_id'])
+        # Skip computations that rely on previous_statement_id in Cash Management journals.
+        if hasattr(self.env['account.journal'], 'cash_management_journal') and \
+                not any(self.mapped('journal_id.cash_management_journal')) or not \
+                hasattr(self.env['account.journal'], 'cash_management_journal'):
+            if values.get('date') or values.get('journal'):
+                # If we are changing the date or journal of a bank statement, we have to change its previous_statement_id. This is done
+                # automatically using the compute function, but we also have to change the previous_statement_id of records that were
+                # previously pointing toward us and records that were pointing towards our new previous_statement_id. This is done here
+                # by marking those record as needing to be recomputed.
+                # Note that marking the field is not enough as we also have to recompute all its other fields that are depending on 'previous_statement_id'
+                # hence the need to call modified afterwards.
+                to_recompute = self.search([('previous_statement_id', 'in', self.ids), ('id', 'not in', self.ids), ('journal_id', 'in', self.mapped('journal_id').ids)])
+                if to_recompute:
+                    self.env.add_to_compute(self._fields['previous_statement_id'], to_recompute)
+                    to_recompute.modified(['previous_statement_id'])
+                next_statements_to_recompute = self.search([('previous_statement_id', 'in', [st.previous_statement_id.id for st in self]), ('id', 'not in', self.ids), ('journal_id', 'in', self.mapped('journal_id').ids)])
+                if next_statements_to_recompute:
+                    self.env.add_to_compute(self._fields['previous_statement_id'], next_statements_to_recompute)
+                    next_statements_to_recompute.modified(['previous_statement_id'])
         return res
 
     @api.model_create_multi
     def create(self, values):
         res = super(AccountBankStatement, self).create(values)
-        # Upon bank stmt creation, it is possible that the statement is inserted between two other statements and not at the end
-        # In that case, we have to search for statement that are pointing to the same previous_statement_id as ourselve in order to
-        # change their previous_statement_id to us. This is done by marking the field 'previous_statement_id' to be recomputed for such records.
-        # Note that marking the field is not enough as we also have to recompute all its other fields that are depending on 'previous_statement_id'
-        # hence the need to call modified afterwards.
-        # The reason we are doing this here and not in a compute field is that it is not easy to write dependencies for such field.
-        next_statements_to_recompute = self.search([('previous_statement_id', 'in', [st.previous_statement_id.id for st in res]), ('id', 'not in', res.ids), ('journal_id', 'in', res.journal_id.ids)])
-        if next_statements_to_recompute:
-            self.env.add_to_compute(self._fields['previous_statement_id'], next_statements_to_recompute)
-            next_statements_to_recompute.modified(['previous_statement_id'])
+        # Skip computations that rely on previous_statement_id in Cash Management journals.
+        if hasattr(self.env['account.journal'], 'cash_management_journal') and \
+                not res.journal_id.cash_management_journal or not \
+                hasattr(self.env['account.journal'], 'cash_management_journal'):
+            # Upon bank stmt creation, it is possible that the statement is inserted between two other statements and not at the end
+            # In that case, we have to search for statement that are pointing to the same previous_statement_id as ourselve in order to
+            # change their previous_statement_id to us. This is done by marking the field 'previous_statement_id' to be recomputed for such records.
+            # Note that marking the field is not enough as we also have to recompute all its other fields that are depending on 'previous_statement_id'
+            # hence the need to call modified afterwards.
+            # The reason we are doing this here and not in a compute field is that it is not easy to write dependencies for such field.
+            next_statements_to_recompute = self.search([('previous_statement_id', 'in', [st.previous_statement_id.id for st in res]), ('id', 'not in', res.ids), ('journal_id', 'in', res.journal_id.ids)])
+            if next_statements_to_recompute:
+                self.env.add_to_compute(self._fields['previous_statement_id'], next_statements_to_recompute)
+                next_statements_to_recompute.modified(['previous_statement_id'])
         return res
 
     @api.depends('line_ids.is_reconciled')
