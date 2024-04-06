@@ -675,11 +675,11 @@
                         <!-- Post -->
                         <button name="action_post" string="Post" class="oe_highlight"
                                 type="object" groups="account.group_account_invoice" data-hotkey="q"
-                                context="{'validate_analytic': True}"
+                                context="{'validate_analytic': True, 'disable_abnormal_invoice_detection': False}"
                                 invisible="hide_post_button or move_type != 'entry'"/>
                         <button name="action_post" string="Confirm" class="oe_highlight"
                                 type="object" groups="account.group_account_invoice" data-hotkey="q"
-                                context="{'validate_analytic': True}"
+                                context="{'validate_analytic': True, 'disable_abnormal_invoice_detection': False}"
                                 invisible="hide_post_button or move_type == 'entry' or display_inactive_currency_warning"/>
                         <!-- Send (only invoices) -->
                         <button name="action_invoice_sent"
@@ -1487,6 +1487,8 @@
                     <filter name="open" string="Unpaid" domain="[('state', '=', 'posted'), ('payment_state', 'in', ('not_paid', 'partial'))]"/>
                     <!-- in_payment & paid -->
                     <filter name="closed" string="Paid" domain="[('state', '=', 'posted'), ('payment_state', 'in', ('in_payment', 'paid'))]"/>
+                    <!-- reversed -->
+                    <filter name="reversed" string="Reversed" domain="[('state', '=', 'posted'), ('payment_state', '=', 'reversed')]"/>
                     <!-- overdue -->
                     <filter name="late" string="Overdue" domain="[
                         ('invoice_date_due', '&lt;', time.strftime('%Y-%m-%d')),

@@ -140,13 +140,15 @@ class SaleOrder(models.Model):
         string="Invoice Address",
         compute='_compute_partner_invoice_id',
         store=True, readonly=False, required=True, precompute=True,
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        index='btree_not_null')
     partner_shipping_id = fields.Many2one(
         comodel_name='res.partner',
         string="Delivery Address",
         compute='_compute_partner_shipping_id',
         store=True, readonly=False, required=True, precompute=True,
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",)
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        index='btree_not_null')
 
     fiscal_position_id = fields.Many2one(
         comodel_name='account.fiscal.position',
@@ -942,6 +944,12 @@ class SaleOrder(models.Model):
             self.action_lock()
 
         return True
+
+    def _should_be_locked(self):
+        self.ensure_one()
+        # Public user can confirm SO, so we check the group on any record creator.
+        user = self[:1].create_uid
+        return user and user.sudo().has_group('sale.group_auto_done_setting')
 
     def _can_be_confirmed(self):
         self.ensure_one()
