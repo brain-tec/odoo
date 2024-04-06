@@ -1678,7 +1678,7 @@ class AccountMove(models.Model):
             draft_invoices = self.browse()
         else:
             draft_invoices = self.filtered(lambda m:
-                m.is_invoice()
+                m.is_purchase_document()
                 and m.state == 'draft'
                 and m.amount_total
                 and not (m.partner_id.ignore_abnormal_invoice_date and m.partner_id.ignore_abnormal_invoice_amount)
@@ -1755,7 +1755,7 @@ class AccountMove(models.Model):
                 not move.partner_id.ignore_abnormal_invoice_amount
                 and not (amount_mean - wiggle_room_amount <= move.amount_total <= amount_mean + wiggle_room_amount)
             ) and _(
-                "The amount for %(partner_name)s appears unusual. Based your historical data, the expected amount is %(mean)s (± %(wiggle)s).\n"
+                "The amount for %(partner_name)s appears unusual. Based on your historical data, the expected amount is %(mean)s (± %(wiggle)s).\n"
                 "Please verify if this amount is accurate.",
                 partner_name=move.partner_id.display_name,
                 mean=move.currency_id.format(amount_mean),
@@ -4348,7 +4348,11 @@ class AccountMove(models.Model):
         if moves_with_payments:
             moves_with_payments.payment_id.action_post()
         other_moves = self - moves_with_payments
-        if other_moves.filtered(lambda m: m.abnormal_amount_warning or m.abnormal_date_warning):
+        # Disabled by default to avoid breaking automated action flow
+        if (
+            not self.env.context.get('disable_abnormal_invoice_detection', True)
+            and other_moves.filtered(lambda m: m.abnormal_amount_warning or m.abnormal_date_warning)
+        ):
             return {
                 'name': _("Confirm Entries"),
                 'type': 'ir.actions.act_window',
