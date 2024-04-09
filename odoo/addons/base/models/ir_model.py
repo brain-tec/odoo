@@ -1964,6 +1964,7 @@ class IrModelAccess(models.Model):
     def group_names_with_access(self, model_name, access_mode):
         """ Return the names of visible groups which have been granted
             ``access_mode`` on the model ``model_name``.
+
            :rtype: list
         """
         assert access_mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
@@ -1980,6 +1981,25 @@ class IrModelAccess(models.Model):
           ORDER BY c.name, g.name NULLS LAST
         """, [lang, lang, model_name])
         return [('%s/%s' % x) if x[0] else x[1] for x in self._cr.fetchall()]
+
+    @api.model
+    @tools.ormcache('model_name', 'access_mode')
+    def _get_access_groups(self, model_name, access_mode='read'):
+        """ Return the group expression object that represents the users who
+        have ``access_mode`` to the model ``model_name``.
+        """
+        assert access_mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
+        model = self.env['ir.model']._get(model_name)
+        accesses = self.sudo().search([
+            (f'perm_{access_mode}', '=', True), ('model_id', '=', model.id),
+        ])
+
+        group_definitions = self.env['res.groups']._get_group_definitions()
+        if not accesses:
+            return group_definitions.empty
+        if not all(access.group_id for access in accesses):  # there is some global access
+            return group_definitions.universe
+        return group_definitions.from_ids(accesses.group_id.ids)
 
     # The context parameter is useful when the method translates error messages.
     # But as the method raises an exception in that case,  the key 'lang' might
@@ -2214,13 +2234,25 @@ class IrModelData(models.Model):
             vals['name'] = "%s_%s" % (model.name, rand)
         return vals_list
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super().create(vals_list)
+        if any(vals.get('model') == 'res.groups' for vals in vals_list):
+            self.env.registry.clear_cache('groups')
+        return res
+
     def write(self, values):
         self.env.registry.clear_cache()  # _xmlid_lookup
-        return super().write(values)
+        res = super().write(values)
+        if values.get('model') == 'res.groups':
+            self.env.registry.clear_cache('groups')
+        return res
 
     def unlink(self):
         """ Regular unlink method, but make sure to clear the caches. """
         self.env.registry.clear_cache()  # _xmlid_lookup
+        if self and any(data.model == 'res.groups' for data in self.exists()):
+            self.env.registry.clear_cache('groups')
         return super(IrModelData, self).unlink()
 
     def _lookup_xmlids(self, xml_ids, model):
@@ -2292,6 +2324,9 @@ class IrModelData(models.Model):
 
         # update loaded_xmlids
         self.pool.loaded_xmlids.update("%s.%s" % row[:2] for row in rows)
+
+        if any(row[2] == 'res.groups' for row in rows):
+            self.env.registry.clear_cache('groups')
 
     # NOTE: this method is overriden in web_studio; if you need to make another
     #  override, make sure it is compatible with the one that is there.
