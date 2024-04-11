@@ -60,7 +60,7 @@ class AccountAnalyticLine(models.Model):
         compute='_compute_project_id', store=True, readonly=False)
     user_id = fields.Many2one(compute='_compute_user_id', store=True, readonly=False)
     employee_id = fields.Many2one('hr.employee', "Employee", domain=_domain_employee_id, context={'active_test': False},
-        help="Define an 'hourly cost' on the employee to track the cost of their time.")
+        index=True, help="Define an 'hourly cost' on the employee to track the cost of their time.")
     job_title = fields.Char(related='employee_id.job_title')
     department_id = fields.Many2one('hr.department', "Department", compute='_compute_department_id', store=True, compute_sudo=True)
     manager_id = fields.Many2one('hr.employee', "Manager", related='employee_id.parent_id', store=True)
@@ -84,9 +84,14 @@ class AccountAnalyticLine(models.Model):
         return False
 
     def _compute_readonly_timesheet(self):
-        readonly_timesheets = self.filtered(lambda timesheet: timesheet._is_readonly())
-        readonly_timesheets.readonly_timesheet = True
-        (self - readonly_timesheets).readonly_timesheet = False
+        # Since the mrp_module gives write access to portal user on timesheet, we check that the user is an internal one before giving the write access.
+        # It is not supposed to be needed, since portal user are not supposed to have access to the views using this field, but better be safe than sorry
+        if not self.env.user.has_group('base.group_user'):
+            self.readonly_timesheet = True
+        else:
+            readonly_timesheets = self.filtered(lambda timesheet: timesheet._is_readonly())
+            readonly_timesheets.readonly_timesheet = True
+            (self - readonly_timesheets).readonly_timesheet = False
 
     def _compute_encoding_uom_id(self):
         for analytic_line in self:
