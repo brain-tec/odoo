@@ -353,7 +353,7 @@ test("open 2 different chat windows: enough screen width [REQUIRE FOCUS]", async
     });
 });
 
-test("open 3 different chat windows: not enough screen width", async () => {
+test("open 3 different chat windows: not enough screen width [REQUIRE FOCUS]", async () => {
     const pyEnv = await startServer();
     pyEnv["discuss.channel"].create([
         { name: "Channel_1" },
@@ -718,7 +718,7 @@ test("chat window should open when receiving a new DM", async () => {
     await contains(".o-mail-ChatWindowContainer");
     withUser(userId, () =>
         rpc("/mail/message/post", {
-            post_data: { body: "new message", message_type: "comment" },
+            post_data: { body: "Hi, are you here?", message_type: "comment" },
             thread_id: channelId,
             thread_model: "discuss.channel",
         })
@@ -746,7 +746,7 @@ test("chat window should not open when receiving a new DM from odoobot", async (
     await contains(".o-mail-ChatWindowContainer");
     withUser(userId, () =>
         rpc("/mail/message/post", {
-            post_data: { body: "new message", message_type: "comment" },
+            post_data: { body: "Hello, I'm new", message_type: "comment" },
             thread_id: channelId,
             thread_model: "discuss.channel",
         })
@@ -1084,7 +1084,7 @@ test("Open chat window of new inviter", async () => {
     });
 });
 
-test("keyboard navigation ArrowUp/ArrowDown on message action dropdown in chat window", async () => {
+test("keyboard navigation ArrowUp/ArrowDown on message action dropdown in chat window [REQUIRE FOCUS]", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
     pyEnv["mail.message"].create({

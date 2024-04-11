@@ -1068,6 +1068,7 @@ test("chat should be sorted by last activity time [REQUIRE FOCUS]", async () => 
     // post a new message on the last channel
     await insertText(".o-mail-Composer-input[placeholder='Message Demo…']", "Blabla");
     await click(".o-mail-Composer-send:enabled");
+    await contains(".o-mail-Message", { text: "Blabla" });
     await contains(
         ".o-mail-DiscussSidebarChannel",
         { text: "Demo" },
@@ -1147,7 +1148,7 @@ test("Do no channel_info after unpin", async () => {
     await assertSteps([]);
 });
 
-test("Group unread counter up to date after mention is marked as seen", async () => {
+test("Group unread counter up to date after mention is marked as seen [REQUIRE FOCUS]", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Chuck" });
     const channelId = pyEnv["discuss.channel"].create({
@@ -1194,7 +1195,7 @@ test("Unpinning channel closes its chat window", async () => {
     await contains(".o-mail-ChatWindow", { count: 0, text: "Sales" });
 });
 
-test("Update channel data via bus notification", async () => {
+test("Update channel data via bus notification [REQUIRE FOCUS]", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
         name: "Sales",
