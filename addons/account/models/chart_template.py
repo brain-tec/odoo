@@ -318,8 +318,14 @@ class AccountChartTemplate(models.AbstractModel):
                         if xmlid in xmlid2tax:
                             obsolete_xmlid.add(xmlid)
                             oldtax = xmlid2tax[xmlid]
-                            if unique_tax_name_key(oldtax) in unique_tax_name_keys:
-                                oldtax.name = f"[old] {oldtax.name}"
+                        else:
+                            oldtax = current_taxes.filtered(
+                                lambda t: t.name == values.get('name')\
+                                      and t.type_tax_use == values.get('type_tax_use')\
+                                      and t.tax_scope == values.get('tax_scope', False)
+                            )
+                        if unique_tax_name_key(oldtax) in unique_tax_name_keys:
+                            oldtax.name = f"[old] {oldtax.name}"
                     else:
                         repartition_lines = values.get('repartition_line_ids')
                         values.clear()
@@ -604,7 +610,7 @@ class AccountChartTemplate(models.AbstractModel):
                 *self.env['account.tax']._check_company_domain(company),
                 ('type_tax_use', 'in', ('purchase', 'all'))], limit=1).id
         # Display caba fields if there are caba taxes
-        if not company.parent_id and self.env['account.tax'].search([('tax_exigibility', '=', 'on_payment')]):
+        if not company.parent_id and self.env['account.tax'].search_count([('tax_exigibility', '=', 'on_payment')], limit=1):
             company.tax_exigibility = True
 
         for field, model in {

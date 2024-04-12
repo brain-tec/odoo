@@ -189,11 +189,6 @@ class AccountJournal(models.Model):
         check_company=True,
         string="Journal Groups")
 
-    secure_sequence_id = fields.Many2one('ir.sequence',
-        help='Sequence to use to ensure the securisation of data',
-        check_company=True,
-        readonly=True, copy=False)
-
     available_payment_method_ids = fields.Many2many(
         comodel_name='account.payment.method',
         compute='_compute_available_payment_method_ids'
@@ -397,7 +392,7 @@ class AccountJournal(models.Model):
     @api.constrains('company_id')
     def _check_company_consistency(self):
         for company, journals in groupby(self, lambda journal: journal.company_id):
-            if self.env['account.move'].search([
+            if self.env['account.move'].search_count([
                 ('journal_id', 'in', [journal.id for journal in journals]),
                 '!', ('company_id', 'child_of', company.id)
             ], limit=1):
