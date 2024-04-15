@@ -1,4 +1,3 @@
-import { DEFAULT_AVATAR } from "@mail/core/common/persona_service";
 import { AND, Record } from "@mail/core/common/record";
 import { prettifyMessageContent } from "@mail/utils/common/format";
 import { compareDatetime, rpcWithEnv } from "@mail/utils/common/misc";
@@ -428,7 +427,7 @@ export class Thread extends Record {
     }
 
     get avatarUrl() {
-        return this.module_icon ?? DEFAULT_AVATAR;
+        return this.module_icon ?? this.store.DEFAULT_AVATAR;
     }
 
     get allowDescription() {
@@ -930,6 +929,18 @@ export class Thread extends Record {
         this.setAsDiscussThread();
     }
 
+    openChatWindow(replaceNewMessageChatWindow) {
+        const chatWindow = this.store.ChatWindow.insert({
+            folded: false,
+            thread: this,
+            replaceNewMessageChatWindow,
+        });
+        chatWindow.autofocus++;
+        this.state = "open";
+        chatWindow.notifyState();
+        return chatWindow;
+    }
+
     pin() {
         if (this.model !== "discuss.channel" || this.store.self.type !== "partner") {
             return;
@@ -994,7 +1005,7 @@ export class Thread extends Record {
             mentionedPartners,
             thread: this,
         });
-        const tmpId = this.store.env.services["mail.message"].getNextTemporaryId();
+        const tmpId = this.store.getNextTemporaryId();
         params.context = { ...user.context, ...params.context, temporary_id: tmpId };
         if (parentId) {
             params.post_data.parent_id = parentId;
@@ -1015,7 +1026,7 @@ export class Thread extends Record {
             }
             const prettyContent = await prettifyMessageContent(
                 body,
-                this.store.env.services["mail.message"].getMentionsFromText(body, {
+                this.store.getMentionsFromText(body, {
                     mentionedChannels,
                     mentionedPartners,
                 })

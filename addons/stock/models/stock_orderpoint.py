@@ -494,7 +494,8 @@ class StockWarehouseOrderpoint(models.Model):
         if self.env.context.get('written_after'):
             domain = expression.AND([domain, [('write_date', '>=', self.env.context.get('written_after'))]])
         move = self.env['stock.move'].search(domain, limit=1)
-        if move.picking_id and any(move.warehouse_id != self.warehouse_id for move in move):
+        if ((move.location_id.warehouse_id and move.location_id.warehouse_id != self.warehouse_id)
+            or move.location_id.usage == 'transit') and move.picking_id:
             action = self.env.ref('stock.stock_picking_action_picking_type')
             return {
                 'type': 'ir.actions.client',
@@ -504,7 +505,7 @@ class StockWarehouseOrderpoint(models.Model):
                     'message': '%s',
                     'links': [{
                         'label': move.picking_id.name,
-                        'url': f'#action={action.id}&id={move.picking_id.id}&model=stock.picking&view_type=form'
+                        'url': f'/web#action={action.id}&id={move.picking_id.id}&model=stock.picking&view_type=form'
                     }],
                     'sticky': False,
                 }
