@@ -21,9 +21,7 @@ export class MessagingMenu extends Component {
         this.discussSystray = useDiscussSystray();
         this.store = useState(useService("mail.store"));
         this.hasTouch = hasTouch;
-        this.messagingService = useState(useService("mail.messaging"));
         this.notification = useState(useService("mail.notification.permission"));
-        this.chatWindowService = useState(useService("mail.chat_window"));
         this.action = useService("action");
         this.installPrompt = useState(useService("installPrompt"));
         this.ui = useState(useService("ui"));
@@ -39,7 +37,7 @@ export class MessagingMenu extends Component {
     }
 
     beforeOpen() {
-        this.messagingService.isReady.then(() => {
+        this.store.isReady.then(() => {
             if (
                 !this.store.discuss.inbox.isLoaded &&
                 this.store.discuss.inbox.status !== "loading" &&
@@ -147,7 +145,7 @@ export class MessagingMenu extends Component {
         if (this.ui.isSmall || this.env.inDiscussApp) {
             this.state.addingChat = true;
         } else {
-            this.chatWindowService.openNewMessage({ openMessagingMenuOnClose: true });
+            this.store.openNewMessage({ openMessagingMenuOnClose: true });
             this.dropdown.close();
         }
     }

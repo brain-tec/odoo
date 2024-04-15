@@ -1,4 +1,3 @@
-import { DEFAULT_AVATAR } from "@mail/core/common/persona_service";
 import { AttachmentList } from "@mail/core/common/attachment_list";
 import { Composer } from "@mail/core/common/composer";
 import { ImStatus } from "@mail/core/common/im_status";
@@ -114,8 +113,6 @@ export class Message extends Component {
         this.messageActions = useMessageActions();
         this.store = useState(useService("mail.store"));
         this.shadowBody = useRef("shadowBody");
-        this.messageService = useState(useService("mail.message"));
-        this.attachmentService = useService("mail.attachment");
         this.dialog = useService("dialog");
         this.ui = useState(useService("ui"));
         this.openReactionMenu = this.openReactionMenu.bind(this);
@@ -239,7 +236,7 @@ export class Message extends Component {
             return this.message.author.avatarUrl;
         }
 
-        return DEFAULT_AVATAR;
+        return this.store.DEFAULT_AVATAR;
     }
 
     get expandText() {
@@ -381,7 +378,7 @@ export class Message extends Component {
                 message,
                 messageComponent: Message,
                 prompt: _t("Are you sure you want to delete this message?"),
-                onConfirm: () => this.messageService.delete(message),
+                onConfirm: () => message.remove(),
             },
             { context: this }
         );
@@ -394,7 +391,7 @@ export class Message extends Component {
     }
 
     async onClickAttachmentUnlink(attachment) {
-        await this.attachmentService.delete(toRaw(attachment));
+        await toRaw(attachment).remove();
     }
 
     onClickMarkAsUnread() {
@@ -478,13 +475,13 @@ export class Message extends Component {
 
     enterEditMode() {
         const message = toRaw(this.props.message);
-        const messageContent = convertBrToLineBreak(message.body);
+        const text = convertBrToLineBreak(message.body);
         message.composer = {
             mentionedPartners: message.recipients,
-            textInputContent: messageContent,
+            text,
             selection: {
-                start: messageContent.length,
-                end: messageContent.length,
+                start: text.length,
+                end: text.length,
                 direction: "none",
             },
         };

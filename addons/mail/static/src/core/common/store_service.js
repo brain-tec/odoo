@@ -1,4 +1,4 @@
-import { rpcWithEnv } from "@mail/utils/common/misc";
+import { assignDefined, compareDatetime, rpcWithEnv } from "@mail/utils/common/misc";
 import { Store as BaseStore, makeStore, Record } from "@mail/core/common/record";
 import { reactive } from "@odoo/owl";
 
@@ -11,12 +11,19 @@ import { Deferred } from "@web/core/utils/concurrency";
 import { debounce } from "@web/core/utils/timing";
 import { session } from "@web/session";
 import { _t } from "@web/core/l10n/translation";
-import { prettifyMessageContent } from "@mail/utils/common/format";
+import { cleanTerm, prettifyMessageContent } from "@mail/utils/common/format";
 import { escape } from "@web/core/utils/strings";
+import { browser } from "@web/core/browser/browser";
 
 export class Store extends BaseStore {
     static FETCH_DATA_DEBOUNCE_DELAY = 1;
     FETCH_LIMIT = 30;
+    DEFAULT_AVATAR = "/mail/static/src/img/smiley/avatar.jpg";
+    CHAT_WINDOW_END_GAP_WIDTH = 10; // for a single end, multiply by 2 for left and right together.
+    CHAT_WINDOW_INBETWEEN_WIDTH = 5;
+    CHAT_WINDOW_WIDTH = 360; // same value as $o-mail-ChatWindow-width
+    CHAT_WINDOW_HIDDEN_WIDTH = 55;
+    isReady = new Deferred();
 
     /** @returns {import("models").Store|import("models").Store[]} */
     static insert() {
@@ -187,6 +194,40 @@ export class Store extends BaseStore {
 
     cannedReponses = this.makeCachedFetchData({ canned_responses: true });
 
+    get initMessagingParams() {
+        return {
+            init_messaging: {},
+        };
+    }
+
+    get visibleChatWindows() {
+        return this.discuss.chatWindows.filter((chatWindow) => !chatWindow.hidden);
+    }
+
+    get hiddenChatWindows() {
+        return this.discuss.chatWindows.filter((chatWindow) => chatWindow.hidden);
+    }
+
+    get maxVisibleChatWindows() {
+        const startGap = this.env.services.ui.isSmall
+            ? 0
+            : this.hiddenChatWindows.length > 0
+            ? this.CHAT_WINDOW_END_GAP_WIDTH + this.CHAT_WINDOW_HIDDEN_WIDTH
+            : this.CHAT_WINDOW_END_GAP_WIDTH;
+        const endGap = this.env.services.ui.isSmall ? 0 : this.CHAT_WINDOW_END_GAP_WIDTH;
+        const available = browser.innerWidth - startGap - endGap;
+        const maxAmountWithoutHidden = Math.max(
+            1,
+            Math.floor(available / (this.CHAT_WINDOW_WIDTH + this.CHAT_WINDOW_INBETWEEN_WIDTH))
+        );
+        return maxAmountWithoutHidden;
+    }
+
+    closeNewMessage() {
+        const newMessageChatWindow = this.discuss.chatWindows.find(({ thread }) => !thread);
+        newMessageChatWindow?.close();
+    }
+
     /**
      * @returns {Deferred}
      */
@@ -197,6 +238,12 @@ export class Store extends BaseStore {
         const fetchDeferred = this.fetchDeferred;
         this._fetchDataDebounced();
         return fetchDeferred;
+    }
+
+    /** Import data received from init_messaging */
+    async initialize() {
+        await this.fetchData(this.initMessagingParams, { readonly: false });
+        this.isReady.resolve();
     }
 
     /**
@@ -306,7 +353,25 @@ export class Store extends BaseStore {
     }
 
     /** Provides an override point for when the store service has started. */
-    onStarted() {}
+    onStarted() {
+        this.discuss.inbox = {
+            id: "inbox",
+            model: "mail.box",
+            name: _t("Inbox"),
+        };
+        this.discuss.starred = {
+            id: "starred",
+            model: "mail.box",
+            name: _t("Starred"),
+            counter: 0,
+        };
+        this.discuss.history = {
+            id: "history",
+            model: "mail.box",
+            name: _t("History"),
+            counter: 0,
+        };
+    }
 
     /**
      * Search and fetch for a partner with a given user or partner id.
@@ -341,6 +406,41 @@ export class Store extends BaseStore {
         }, 0);
     }
 
+    /** @returns {number} */
+    getLastMessageId() {
+        return Object.values(this.Message.records).reduce(
+            (lastMessageId, message) => Math.max(lastMessageId, message.id),
+            0
+        );
+    }
+
+    getMentionsFromText(body, { mentionedChannels = [], mentionedPartners = [] } = {}) {
+        if (this.self.type !== "partner") {
+            // mentions are not supported for guests
+            return {};
+        }
+        const validMentions = {};
+        const partners = [];
+        const threads = [];
+        for (const partner of mentionedPartners) {
+            const index = body.indexOf(`@${partner.name}`);
+            if (index === -1) {
+                continue;
+            }
+            partners.push(partner);
+        }
+        for (const thread of mentionedChannels) {
+            const index = body.indexOf(`#${thread.displayName}`);
+            if (index === -1) {
+                continue;
+            }
+            threads.push(thread);
+        }
+        validMentions.partners = partners;
+        validMentions.threads = threads;
+        return validMentions;
+    }
+
     /**
      * Get the parameters to pass to the message post route.
      */
@@ -356,7 +456,7 @@ export class Store extends BaseStore {
         const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
         const validMentions =
             this.self.type === "partner"
-                ? this.env.services["mail.message"].getMentionsFromText(body, {
+                ? this.getMentionsFromText(body, {
                       mentionedChannels,
                       mentionedPartners,
                   })
@@ -394,6 +494,10 @@ export class Store extends BaseStore {
             thread_id: thread.id,
             thread_model: thread.model,
         };
+    }
+
+    getNextTemporaryId() {
+        return this.getLastMessageId() + 0.01;
     }
 
     /**
@@ -450,6 +554,19 @@ export class Store extends BaseStore {
         }
     }
 
+    /**
+     * List of known partner ids with a direct chat, ordered
+     * by most recent interest (1st item being the most recent)
+     *
+     * @returns {[integer]}
+     */
+    getRecentChatPartnerIds() {
+        return Object.values(this.Thread.records)
+            .filter((thread) => thread.channel_type === "chat" && thread.correspondent)
+            .sort((a, b) => compareDatetime(b.lastInterestDt, a.lastInterestDt) || b.id - a.id)
+            .map((thread) => thread.correspondent.id);
+    }
+
     async joinChannel(id, name) {
         await this.env.services.orm.call("discuss.channel", "add_members", [[id]], {
             partner_ids: [this.self.id],
@@ -481,6 +598,23 @@ export class Store extends BaseStore {
         chat?.open();
     }
 
+    openDocument({ id, model }) {
+        this.env.services.action.doAction({
+            type: "ir.actions.act_window",
+            res_model: model,
+            views: [[false, "form"]],
+            res_id: id,
+        });
+    }
+
+    openNewMessage({ openMessagingMenuOnClose } = {}) {
+        if (this.discuss.chatWindows.some(({ thread }) => !thread)) {
+            // New message chat window is already opened.
+            return;
+        }
+        this.ChatWindow.insert(assignDefined({}, { openMessagingMenuOnClose }));
+    }
+
     /**
      * @param {string} searchTerm
      * @param {Thread} thread
@@ -497,6 +631,42 @@ export class Store extends BaseStore {
             loadMore: messages.length === this.FETCH_LIMIT,
             messages: this.Message.insert(messages, { html: true }),
         };
+    }
+
+    async searchPartners(searchStr = "", limit = 10) {
+        const partners = [];
+        const searchTerm = cleanTerm(searchStr);
+        for (const localId in this.Persona.records) {
+            const persona = this.Persona.records[localId];
+            if (persona.type !== "partner") {
+                continue;
+            }
+            const partner = persona;
+            // todo: need to filter out non-user partners (there was a user key)
+            // also, filter out inactive partners
+            if (partner.name && cleanTerm(partner.name).includes(searchTerm)) {
+                partners.push(partner);
+                if (partners.length >= limit) {
+                    break;
+                }
+            }
+        }
+        if (!partners.length) {
+            const partnersData = await this.env.services.orm.silent.call(
+                "res.partner",
+                "im_search",
+                [searchTerm, limit]
+            );
+            this.Persona.insert(partnersData);
+        }
+        return partners;
+    }
+
+    async unstarAll() {
+        // apply the change immediately for faster feedback
+        this.discuss.starred.counter = 0;
+        this.discuss.starred.messages = [];
+        await this.env.services.orm.call("mail.message", "unstar_all");
     }
 }
 Store.register();
@@ -530,6 +700,7 @@ export const storeService = {
                 store.discuss.activeTab = store.discuss.thread.channel_type;
             }
         });
+        store.initialize();
         store.onStarted();
         return store;
     },
