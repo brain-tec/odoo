@@ -119,6 +119,14 @@ class Website(models.Model):
         required=True,
         default='small',
     )
+    ecommerce_access = fields.Selection(
+        selection=[
+            ('everyone', "All users"),
+            ('logged_in', "Logged in users"),
+        ],
+        required=True,
+        default='everyone',
+    )
     product_page_grid_columns = fields.Integer(default=2)
 
     prevent_zero_price_sale = fields.Boolean(string="Hide 'Add To Cart' when price = 0")
@@ -247,7 +255,8 @@ class Website(models.Model):
 
         # no GeoIP or no pricelist for this country
         if not pricelists:
-            pricelists = pricelists.browse(website_pricelist_ids).filtered(check_pricelist)
+            pricelists = pricelists.browse(website_pricelist_ids).filtered(
+                lambda pl: check_pricelist(pl) and not (country_code and pl.country_group_ids))
 
         # if logged in, add partner pl (which is `property_product_pricelist`, might not be website compliant)
         if not self.env.user._is_public():
@@ -678,3 +687,9 @@ class Website(models.Model):
         if current_step:
             return next(step for step in steps if current_step in step[0])[1]
         return steps
+
+    def has_ecommerce_access(self):
+        """ Return whether the current user is allowed to access eCommerce-related content. """
+        return not (self.env.user._is_public() and self.ecommerce_access == 'logged_in')
+
+
