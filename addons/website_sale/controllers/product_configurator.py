@@ -23,7 +23,7 @@ class WebsiteSaleProductConfiguratorController(WebsiteSale):
 
         already_configured = bool(combination)
         if not force_dialog and not has_optional_products and (
-            not product.has_configurable_attributes or already_configured
+            product.product_variant_count <= 1 or already_configured
         ):
             # The modal is not shown if there are no optional products and
             # the main product either has no variants or is already configured
@@ -111,7 +111,10 @@ class WebsiteSaleProductConfiguratorController(WebsiteSale):
                 product_id=main_product['product_id'],
                 add_qty=main_product['quantity'],
                 product_custom_attribute_values=main_product['product_custom_attribute_values'],
-                no_variant_attribute_values=main_product['no_variant_attribute_values'],
+                no_variant_attribute_value_ids=[
+                    int(ptav_data['value'])
+                    for ptav_data in main_product['no_variant_attribute_values']
+                ],
                 **kwargs
             )
 
@@ -127,7 +130,10 @@ class WebsiteSaleProductConfiguratorController(WebsiteSale):
                         set_qty=option['quantity'],
                         linked_line_id=option_parent[parent_unique_id],
                         product_custom_attribute_values=option['product_custom_attribute_values'],
-                        no_variant_attribute_values=option['no_variant_attribute_values'],
+                        no_variant_attribute_value_ids=[
+                            int(ptav_data['value'])
+                            for ptav_data in option['no_variant_attribute_values']
+                        ],
                         **kwargs
                     )
                     option_parent[option['unique_id']] = option_values['line_id']

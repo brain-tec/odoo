@@ -135,6 +135,7 @@ class PosSession(models.Model):
             'pos.payment.method': {
                 'domain': ['|', ('active', '=', False), ('active', '=', True)],
                 'fields': ['id', 'name', 'is_cash_count', 'use_payment_terminal', 'split_transactions', 'type', 'image', 'sequence', 'payment_method_type', 'default_qr'],
+                'context': {**self.env.context},
             },
             'pos.printer': {
                 'domain': [('id', 'in', config_id.printer_ids.ids)],
@@ -226,6 +227,7 @@ class PosSession(models.Model):
             'uom.uom': {
                 'domain': [],
                 'fields': ['id', 'name', 'category_id', 'factor_inv', 'factor', 'is_pos_groupable', 'uom_type', 'rounding'],
+                'context': {**self.env.context},
             },
             'uom.category': {
                 'domain': lambda data: [('uom_ids', 'in', [uom['category_id'] for uom in data['uom.uom']])],
@@ -1912,8 +1914,7 @@ class PosSession(models.Model):
         ])
 
     def get_onboarding_data(self):
-        response = self.load_data(['pos.category', 'product.product'], True)
-        response['data']['pos.order'] = self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'draft')]).export_for_ui()
+        response = self.load_data(['pos.category', 'product.product', 'pos.order'], True)
         return response['data']
 
     def _get_attributes_by_ptal_id(self):
