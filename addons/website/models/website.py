@@ -194,7 +194,9 @@ class Website(models.Model):
         Checks if the website menu contains a record like url.
         :return: True if the menu contains a record like url
         """
-        return any(self.env['website.menu'].browse(self._get_menu_ids()).filtered(lambda menu: re.search(r"[/](([^/=?&]+-)?[0-9]+)([/]|$)", menu.url)))
+        return any(self.env['website.menu'].browse(self._get_menu_ids()).filtered(
+            lambda menu: re.search(r"[/](([^/=?&]+-)?[0-9]+)([/]|$)", menu.url) or menu.group_ids
+        ))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -652,7 +654,7 @@ class Website(models.Model):
 
         if translated_ratio > 0.8:
             try:
-                database_id = request.env['ir.config_parameter'].sudo().get_param('database.uuid')
+                database_id = self.env['ir.config_parameter'].sudo().get_param('database.uuid')
                 response = self._OLG_api_rpc('/api/olg/1/generate_placeholder', {
                     'placeholders': list(generated_content.keys()),
                     'lang': website.default_lang_id.name,
