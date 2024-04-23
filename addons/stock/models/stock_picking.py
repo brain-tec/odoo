@@ -61,7 +61,7 @@ class PickingType(models.Model):
         help="If this is checked, you will be able to choose the Lots/Serial Numbers. You can also decide to not put lots in this operation type.  This means it will create stock with no lot or not put a restriction on the lot taken. ")
     print_label = fields.Boolean(
         'Print Label', compute="_compute_print_label", store=True, readonly=False,
-        help="If this checkbox is ticked, label will be print in this operation.")
+        help="Check this box if you want to generate shipping label in this operation.")
     # TODO: delete this field `show_operations`
     show_operations = fields.Boolean(
         'Show Detailed Operations', default=False,
@@ -416,7 +416,8 @@ class Picking(models.Model):
         help="Scheduled time for the first part of the shipment to be processed. Setting manually a value here would set it as expected date for all the stock moves.")
     date_deadline = fields.Datetime(
         "Deadline", compute='_compute_date_deadline', store=True,
-        help="Date Promise to the customer on the top level document (SO/PO)")
+        help="In case of outgoing flow, validate the transfer before this date to allow to deliver at promised date to the customer.\n\
+        In case of incoming flow, validate the transfer before this date in order to have these products in stock at the date promised by the supplier")
     has_deadline_issue = fields.Boolean(
         "Is late", compute='_compute_has_deadline_issue', store=True, default=False,
         help="Is late or will be late depending on the deadline and scheduled date")
@@ -936,6 +937,7 @@ class Picking(models.Model):
                 'default_company_id': self.company_id.id,
                 'show_lots_text': self.show_lots_text,
                 'picking_code': self.picking_type_code,
+                'create': self.state not in ('done', 'cancel'),
             }
         }
 
