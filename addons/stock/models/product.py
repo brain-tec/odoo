@@ -706,7 +706,7 @@ class ProductTemplate(models.Model):
         default=lambda self: self.env['stock.route'].search_count([('product_selectable', '=', True)]))
     route_ids = fields.Many2many(
         'stock.route', 'stock_route_product', 'product_id', 'route_id', 'Routes',
-        domain=[('product_selectable', '=', True)],
+        domain=[('product_selectable', '=', True)], depends_context=['company', 'allowed_companies'],
         help="Depending on the modules installed, this will allow you to define the route of the product: whether it will be bought, manufactured, replenished on order, etc.")
     nbr_moves_in = fields.Integer(compute='_compute_nbr_moves', compute_sudo=False, help="Number of incoming stock moves in the past 12 months")
     nbr_moves_out = fields.Integer(compute='_compute_nbr_moves', compute_sudo=False, help="Number of outgoing stock moves in the past 12 months")
@@ -912,10 +912,10 @@ class ProductTemplate(models.Model):
             ], limit=1)
             if existing_done_move_lines:
                 raise UserError(_("You can not change the type of a product that was already used."))
-            existing_reserved_move_lines = self.env['stock.move.line'].search([
+            existing_reserved_move_lines = self.env['stock.move.line'].sudo().search([
                 ('product_id', 'in', self.mapped('product_variant_ids').ids),
                 ('state', 'in', ['partially_available', 'assigned']),
-            ])
+            ], limit=1)
             if existing_reserved_move_lines:
                 raise UserError(_("You can not change the type of a product that is currently reserved on a stock move. If you need to change the type, you should first unreserve the stock move."))
         if 'type' in vals and vals['type'] != 'product' and any(p.type == 'product' and not float_is_zero(p.qty_available, precision_rounding=p.uom_id.rounding) for p in self):
@@ -940,6 +940,8 @@ class ProductTemplate(models.Model):
 
     # Be aware that the exact same function exists in product.product
     def action_open_quants(self):
+        if 'product_variant' in self.env.context:
+            return self.env['product.product'].browse(self.env.context['default_product_id']).action_open_quants()
         return self.product_variant_ids.filtered(lambda p: p.active or p.qty_available != 0).action_open_quants()
 
     def action_update_quantity_on_hand(self):
