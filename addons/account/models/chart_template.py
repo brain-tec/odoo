@@ -240,8 +240,9 @@ class AccountChartTemplate(models.AbstractModel):
                 lang = self._get_untranslatable_fields_target_language(company.chart_template, company)
                 translated_code = self._get_field_translation(journal_data, 'code', lang)
                 if 'code' in journal_data:
+                    journal_code = translated_code or journal_data['code']
                     journal = self.env['account.journal'].with_context(active_test=False).search([
-                        ('code', 'in', (journal_data['code'], translated_code)),
+                        ('code', '=', journal_code),
                         ('company_id', '=', company.id),
                     ])
                 # Try to match by journal name to avoid conflict in the unique constraint on the mail alias
@@ -341,6 +342,8 @@ class AccountChartTemplate(models.AbstractModel):
                             }])
                             account = existing_account
 
+                    # Prevents overriding user setting & raising a partial reconcile error.
+                    values.pop('reconcile', None)
                     # on existing accounts, only tag_ids are to be updated using default data
                     if account and 'tag_ids' in data[model_name][xmlid]:
                         data[model_name][xmlid] = {'tag_ids': data[model_name][xmlid]['tag_ids']}
