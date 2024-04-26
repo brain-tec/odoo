@@ -172,7 +172,7 @@ wTourUtils.clickOnSnippet(snippets[1]),
 {
     content: "Drag the 'Banner' snippet to the end of the page",
     trigger: ":iframe .o_overlay_move_options .o_move_handle",
-    run: "drag_and_drop_native :iframe #wrapwrap footer",
+    run: "drag_and_drop :iframe #wrapwrap footer",
 },
 ...checkEyesIconAfterSave(false),
 {
@@ -187,7 +187,13 @@ wTourUtils.registerWebsitePreviewTour("conditional_visibility_5", {
     test: true,
     url: "/",
 }, () => [
-    wTourUtils.dragNDrop(snippets[0]),
+    {
+        // TODO: use wTourUtils.dragNdrop() instead
+        trigger: `#oe_snippets .oe_snippet[name="Text - Image"].o_we_draggable .oe_snippet_thumbnail:not(.o_we_already_dragging)`,
+        extra_trigger: ".o_website_preview.editor_enable.editor_has_snippets",
+        content: "Drag the Text - Image building block and drop it at the bottom of the page.",
+        run: "drag_and_drop :iframe .oe_drop_zone:last",
+    },
     {
         content: "Click on the image of the dragged snippet",
         trigger: ":iframe .s_text_image img",
