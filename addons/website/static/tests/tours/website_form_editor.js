@@ -29,6 +29,7 @@ odoo.define('website.tour.form_editor', function (require) {
         });
     }
 
+    // TODO: in master only keep the conversion of the double quotes character.
     // Replace all `"` character by `&quot;`, all `'` character by `&apos;` and
     // all "`" character by `&lsquo;`.
     const getQuotesEncodedName = function (name) {
@@ -996,6 +997,125 @@ odoo.define('website.tour.form_editor', function (require) {
             content: "Check that the recipient email is updated",
             trigger: 'form:has(input[name="email_to"][value="after.change@mail.com"])',
             run: () => null, // it's a check.
+        },
+    ]);
+
+    // Check that the editable form content is actually editable.
+    tour.register("website_form_editable_content", {
+        test: true,
+        url: "/",
+    }, [{
+            content: "Enter edit mode",
+            trigger: "a[data-action=edit]",
+        },
+        {
+            content: "Add a new 'Form' snippet",
+            trigger: "#oe_snippets .oe_snippet[name=Form] .oe_snippet_thumbnail",
+            run: "drag_and_drop #wrap",
+        },
+        {
+            content: "Check that a form field is not editable",
+            extra_trigger: ".s_website_form_field",
+            trigger: "section.s_website_form input",
+            run: function () {
+                if (this.$anchor[0].isContentEditable) {
+                    console.error("A form field should not be editable.");
+                }
+            },
+        },
+        {
+            content: "Go back to blocks",
+            trigger: ".o_we_add_snippet_btn",
+        },
+        {
+            content: "Add a new 'Columns' snippet",
+            trigger: "#oe_snippets .oe_snippet[name=Columns] .oe_snippet_thumbnail",
+            run: "drag_and_drop #wrapwrap footer",
+        },
+        {
+            content: "Select the first column",
+            trigger: ".s_three_columns .row > :nth-child(1)",
+        },
+        {
+            content: "Drag and drop the selected column inside the form",
+            trigger: ".o_overlay_move_options .ui-draggable-handle",
+            run: "drag_and_drop section.s_website_form",
+        },
+        {
+            content: "Click on the text inside the dropped form column",
+            trigger: "section.s_website_form h3.card-title",
+            run: "dblclick",
+        },
+        {   // Simulate a user interaction with the editable content.
+            content: "Update the text inside the form column",
+            trigger: "section.s_website_form h3.card-title",
+            run: "keydown 65 66 67",
+        },
+        {
+            content: "Check that the new text value was correctly set",
+            trigger: "section.s_website_form h3:containsExact(ABC)",
+            run: () => null, // it's a check
+        },
+        {   content: "Remove the dropped column",
+            trigger: ".oe_overlay.oe_active .oe_snippet_remove",
+            run: "click",
+        },
+        {
+            content: "Save the changes",
+            trigger: "button[data-action=save]",
+            run: "click",
+        },
+    ]);
+
+    tour.register("website_form_special_characters", {
+        test: true,
+    }, [
+        {
+            content: "Enter edit mode",
+            trigger: "a[data-action=edit]",
+        }, {
+            content: "Check that we are in edit mode",
+            trigger: "#oe_snippets.o_loaded",
+            run: () => null,
+        }, {
+            content: "Drop the form snippet",
+            trigger: "#oe_snippets .oe_snippet:has(.s_website_form) .oe_snippet_thumbnail",
+            run: "drag_and_drop #wrap",
+        }, {
+            content: "Select form by clicking on an input field",
+            extra_trigger: ".s_website_form_field",
+            trigger: "section.s_website_form input",
+        },
+        ...addCustomField("char", "text", `Test1"'`, false),
+        ...addCustomField("char", "text", 'Test2`\\', false),
+        {
+            content: "Save the page",
+            trigger: "button[data-action=save]",
+        },
+        {
+            content: "Wait for page reload",
+            trigger: "body:not(.editor_enable) [data-snippet='s_website_form']",
+        },
+        ...essentialFieldsForDefaultFormFillInSteps,
+        {
+            content: "Complete 'Your Question' field",
+            trigger: "textarea[name='description']",
+            run: "text test",
+        }, {
+            content: "Complete the first added field",
+            trigger: "input[name='Test1&quot;&apos;']",
+            run: "text test1",
+        }, {
+            content: "Complete the second added field",
+            trigger: "input[name='Test2&lsquo;&bsol;']",
+            run: "text test2",
+        }, {
+            content: "Click on 'Submit'",
+            trigger: "a.s_website_form_send",
+        }, {
+            content: "Check the form was again sent (success page without form)",
+            trigger: "body:not(:has([data-snippet='s_website_form'])) .fa-check-circle",
+            run: () => null,
         },
     ]);
 
