@@ -115,6 +115,8 @@
         'views/neutralize_views.xml',
         'wizard/base_language_install_views.xml',
         'wizard/website_robots.xml',
+        # Replaces a post_init_hook that should be run on upgrade too.
+        'data/update_theme_images.xml',
     ],
     'demo': [
         'data/website_demo.xml',
@@ -149,7 +151,6 @@
             'website/static/src/js/http_cookie.js',
             'website/static/src/xml/website.xml',
             'website/static/src/xml/website.background.video.xml',
-            'website/static/src/xml/website.share.xml',
             'website/static/src/js/text_processing.js',
         ],
         'web.assets_frontend_minimal': [
