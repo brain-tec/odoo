@@ -1,17 +1,30 @@
-import { MEDIAS_BREAKPOINTS, utils as uiUtils } from "@web/core/ui/ui_service";
-export { SIZES } from "@web/core/ui/ui_service";
-export * from "./mail_test_helpers_contains";
 import { busModels } from "@bus/../tests/bus_test_helpers";
+import { mailGlobal } from "@mail/utils/common/misc";
+import { after, before, getFixture } from "@odoo/hoot";
+import { Component, onRendered, onWillDestroy, status } from "@odoo/owl";
+import { getMockEnv, restoreRegistry } from "@web/../tests/_framework/env_test_helpers";
+import { authenticate, defineParams } from "@web/../tests/_framework/mock_server/mock_server";
+import { parseViewProps } from "@web/../tests/_framework/view_test_helpers";
 import {
     MockServer,
     defineModels,
+    getService,
+    makeMockEnv,
     makeMockServer,
     mountWithCleanup,
     patchWithCleanup,
     serverState,
     webModels,
 } from "@web/../tests/web_test_helpers";
+import { browser } from "@web/core/browser/browser";
+import { registry } from "@web/core/registry";
+import { MEDIAS_BREAKPOINTS, utils as uiUtils } from "@web/core/ui/ui_service";
+import { useServiceProtectMethodHandling } from "@web/core/utils/hooks";
+import { session } from "@web/session";
+import { WebClient } from "@web/webclient/webclient";
+import { DISCUSS_ACTION_ID, authenticateGuest } from "./mock_server/mail_mock_server";
 import { Base } from "./mock_server/mock_models/base";
+import { DEFAULT_MAIL_VIEW_ID } from "./mock_server/mock_models/constants";
 import { DiscussChannel } from "./mock_server/mock_models/discuss_channel";
 import { DiscussChannelMember } from "./mock_server/mock_models/discuss_channel_member";
 import { DiscussChannelRtcSession } from "./mock_server/mock_models/discuss_channel_rtc_session";
@@ -23,8 +36,8 @@ import { M2xAvatarUser } from "./mock_server/mock_models/m2x_avatar_user";
 import { MailActivity } from "./mock_server/mock_models/mail_activity";
 import { MailActivitySchedule } from "./mock_server/mock_models/mail_activity_schedule";
 import { MailActivityType } from "./mock_server/mock_models/mail_activity_type";
-import { MailComposeMessage } from "./mock_server/mock_models/mail_composer_message";
 import { MailCannedResponse } from "./mock_server/mock_models/mail_canned_response";
+import { MailComposeMessage } from "./mock_server/mock_models/mail_composer_message";
 import { MailFollowers } from "./mock_server/mock_models/mail_followers";
 import { MailGuest } from "./mock_server/mock_models/mail_guest";
 import { MailLinkPreview } from "./mock_server/mock_models/mail_link_preview";
@@ -41,24 +54,8 @@ import { ResPartner } from "./mock_server/mock_models/res_partner";
 import { ResUsers } from "./mock_server/mock_models/res_users";
 import { ResUsersSettings } from "./mock_server/mock_models/res_users_settings";
 import { ResUsersSettingsVolumes } from "./mock_server/mock_models/res_users_settings_volumes";
-import { WebClient } from "@web/webclient/webclient";
-import { browser } from "@web/core/browser/browser";
-import {
-    getMockEnv,
-    makeMockEnv,
-    restoreRegistry,
-} from "@web/../tests/_framework/env_test_helpers";
-import { cancelAllTimers } from "@odoo/hoot-mock";
-import { after, before, getFixture } from "@odoo/hoot";
-import { registry } from "@web/core/registry";
-import { authenticate, defineParams } from "@web/../tests/_framework/mock_server/mock_server";
-import { session } from "@web/session";
-import { DEFAULT_MAIL_VIEW_ID } from "./mock_server/mock_models/constants";
-import { parseViewProps } from "@web/../tests/_framework/view_test_helpers";
-import { mailGlobal } from "@mail/utils/common/misc";
-import { useServiceProtectMethodHandling } from "@web/core/utils/hooks";
-import { DISCUSS_ACTION_ID, authenticateGuest } from "./mock_server/mail_mock_server";
-import { Component, onRendered, onWillDestroy, status } from "@odoo/owl";
+export { SIZES } from "@web/core/ui/ui_service";
+export * from "./mail_test_helpers_contains";
 
 before(prepareRegistriesWithCleanup);
 export const registryNamesToCloneWithCleanup = [];
@@ -126,8 +123,8 @@ export function registerArchs(newArchs) {
 }
 
 export async function openDiscuss(activeId, { target } = {}) {
-    const env = target ?? getMockEnv();
-    await env.services.action.doAction({
+    const actionService = target?.services.action ?? getService("action");
+    await actionService.doAction({
         context: { active_id: activeId },
         id: DISCUSS_ACTION_ID,
         tag: "mail.action_discuss",
@@ -161,7 +158,6 @@ export async function openListView(resModel, params) {
 }
 
 export async function openView({ res_model, res_id, views, ...params }) {
-    const env = getMockEnv();
     const [[viewId, type]] = views;
     const action = {
         res_model,
@@ -180,7 +176,7 @@ export async function openView({ res_model, res_id, views, ...params }) {
         viewId: params?.arch || viewId,
         ...params,
     });
-    await env.services.action.doAction(action, { props: options });
+    await getService("action").doAction(action, { props: options });
 }
 /** @type {import("@web/../tests/_framework/mock_server/mock_server").MockServerEnvironment} */
 let pyEnv;
@@ -245,21 +241,28 @@ async function addSwitchTabDropdownItem(rootTarget, tabTarget) {
 
 let NEXT_ENV_ID = 1;
 
-export async function start({ asTab = false, authenticateAs, env: pEnv } = {}) {
+/**
+ * @param {{
+ *  asTab?: boolean;
+ *  authenticateAs?: any | { login: string; password: string; };
+ *  env?: Partial<OdooEnv>;
+ * }} [options]
+ */
+export async function start(options) {
     if (!MockServer.current) {
         await startServer();
     }
     let target = getFixture();
-    const pyEnv = MockServer.current.env;
-    if (authenticateAs !== undefined) {
-        if (authenticateAs === false) {
+    const pyEnv = MockServer.env;
+    if (options?.authenticateAs !== undefined) {
+        if (options.authenticateAs === false) {
             // no authentication => new guest
             const guestId = pyEnv["mail.guest"].create({});
             authenticateGuest(pyEnv["mail.guest"].read(guestId)[0]);
-        } else if (authenticateAs._name === "mail.guest") {
-            authenticateGuest(authenticateAs);
+        } else if (options.authenticateAs._name === "mail.guest") {
+            authenticateGuest(options.authenticateAs);
         } else {
-            authenticate(authenticateAs.login, authenticateAs.password);
+            authenticate(options.authenticateAs.login, options.authenticateAs.password);
         }
     } else if ("res.users" in pyEnv) {
         if (pyEnv.cookie.get("dgid")) {
@@ -276,48 +279,32 @@ export async function start({ asTab = false, authenticateAs, env: pEnv } = {}) {
             storeData: ResUsers._init_store_data(),
         });
     }
+    const envId = NEXT_ENV_ID++;
+    const envOptions = { ...options?.env, envId };
     let env;
-    if (asTab) {
+
+    mailGlobal.elligibleEnvs.add(envId);
+
+    if (options?.asTab) {
         restoreRegistry(registry);
         const rootTarget = target;
         target = document.createElement("div");
         target.style.width = "100%";
         rootTarget.appendChild(target);
         addSwitchTabDropdownItem(rootTarget, target);
-        const envId = NEXT_ENV_ID++;
-        mailGlobal.elligibleEnvs.add(envId);
-        env = await makeMockEnv({ envId }, { makeNew: true });
+        env = await makeMockEnv(envOptions, { makeNew: true });
     } else {
-        const envId = NEXT_ENV_ID++;
-        mailGlobal.elligibleEnvs.add(envId);
-        try {
-            env = await makeMockEnv({ envId });
-        } catch {
-            env = Object.assign(getMockEnv(), { envId });
+        env = getMockEnv();
+        if (env) {
+            Object.assign(env, envOptions);
+        } else {
+            env = await makeMockEnv(envOptions);
         }
     }
-    const wc = await mountWithCleanup(WebClient, { target, env });
-    // Let fixture behave like web client, so it has expected display flex for scrollable
-    target.classList.add("o_web_client");
-    target.style.display = "flex";
-    target.style.position = "fixed";
-    target.style.overflow = "auto";
-    target.style.top = "30px"; // just a bit so HOOT toolbar can be interacted while tests are running
-    target.style.height = "calc(100% - 30px)";
-    target.style.bottom = "0";
-    target.style.left = "0";
-    target.style.transform = "unset";
+    await mountWithCleanup(WebClient, { target, env });
     after(() => {
-        target.classList.remove("o_web_client");
-        target.style.display = "";
-        target.style.position = "";
-        target.style.overflow = "";
-        target.style.top = "";
-        target.style.left = "";
-        cancelAllTimers(); // prevent any RPCs at end of test
         mailGlobal.elligibleEnvs.clear();
     });
-    odoo.__WOWL_DEBUG__ = { root: wc };
     return Object.assign(getMockEnv(), { target });
 }
 

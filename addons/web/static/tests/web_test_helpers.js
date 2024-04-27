@@ -12,9 +12,6 @@ import { ResGroups } from "./_framework/mock_server/mock_models/res_groups";
 import { ResPartner } from "./_framework/mock_server/mock_models/res_partner";
 import { ResUsers } from "./_framework/mock_server/mock_models/res_users";
 import { defineModels } from "./_framework/mock_server/mock_server";
-import { translatedTerms, translationLoaded } from "@web/core/l10n/translation";
-
-translatedTerms[translationLoaded] = true;
 
 /**
  * @typedef {import("./_framework/mock_server/mock_fields").FieldType} FieldType
@@ -69,18 +66,21 @@ export {
 export { Command } from "./_framework/mock_server/mock_model";
 export {
     MockServer,
+    authenticate,
     defineActions,
     defineMenus,
     defineModels,
     defineParams,
-    getServerWebSockets,
+    logout,
     makeMockServer,
     onRpc,
     stepAllNetworkCalls,
+    withUser,
 } from "./_framework/mock_server/mock_server";
 export { makeServerError } from "./_framework/mock_server/mock_server_utils";
 export { serverState } from "./_framework/mock_server_state.hoot";
-export { patchDate, patchTimeZone, patchWithCleanup } from "./_framework/patch_test_helpers";
+export { configureModuleSet } from "./_framework/module_set.hoot";
+export { patchWithCleanup } from "./_framework/patch_test_helpers";
 export { preventResizeObserverError } from "./_framework/resize_observer_error_catcher";
 export {
     deleteFavorite,
@@ -95,6 +95,7 @@ export {
     getVisibleButtons,
     isItemSelected,
     isOptionSelected,
+    mountWithSearch,
     openAddCustomFilterDialog,
     pagerNext,
     pagerPrevious,
@@ -121,6 +122,7 @@ export {
     clickModalButton,
     clickSave,
     clickViewButton,
+    expectMarkup,
     fieldInput,
     mountView,
     mountViewInDialog,
