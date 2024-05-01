@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import ast
@@ -6,6 +5,7 @@ import json
 
 from odoo import _, api, fields, models
 from odoo.osv import expression
+
 
 class LoyaltyReward(models.Model):
     _name = 'loyalty.reward'
@@ -204,9 +204,11 @@ class LoyaltyReward(models.Model):
     @api.depends('reward_type', 'discount_applicability', 'discount_mode')
     def _compute_is_global_discount(self):
         for reward in self:
-            reward.is_global_discount = reward.reward_type == 'discount' and\
-                                        reward.discount_applicability == 'order' and\
-                                        reward.discount_mode == 'percent'
+            reward.is_global_discount = (
+                reward.reward_type == 'discount'
+                and reward.discount_applicability == 'order'
+                and reward.discount_mode in ['per_order', 'percent']
+            )
 
     @api.depends_context('uid')
     @api.depends("reward_type")
