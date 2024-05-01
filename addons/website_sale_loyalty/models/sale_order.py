@@ -7,11 +7,10 @@ from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.osv import expression
-from odoo.tools import float_is_zero
 
 
 class SaleOrder(models.Model):
-    _inherit = "sale.order"
+    _inherit = 'sale.order'
 
     # List of disabled rewards for automatic claim
     disabled_auto_rewards = fields.Many2many("loyalty.reward", relation="sale_order_disabled_auto_rewards_rel")
@@ -211,12 +210,16 @@ class SaleOrder(models.Model):
                 ('program_id.trigger', '=', 'with_code'),
                 '&', ('program_id.trigger', '=', 'auto'), ('program_id.applies_on', '=', 'future'),
         ])
-        total_is_zero = float_is_zero(self.amount_total, precision_digits=2)
+        total_is_zero = self.currency_id.is_zero(self.amount_total)
         global_discount_reward = self._get_applied_global_discount()
         for coupon in loyality_cards:
             points = self._get_real_points_for_coupon(coupon)
             for reward in coupon.program_id.reward_ids:
-                if reward.is_global_discount and global_discount_reward and global_discount_reward.discount >= reward.discount:
+                if (
+                    reward.is_global_discount
+                    and global_discount_reward
+                    and self._best_global_discount_already_applied(global_discount_reward, reward)
+                ):
                     continue
                 if reward.reward_type == 'discount' and total_is_zero:
                     continue
