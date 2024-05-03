@@ -58,12 +58,12 @@ class ir_cron(models.Model):
     cron_name = fields.Char('Name', compute='_compute_cron_name', store=True)
     user_id = fields.Many2one('res.users', string='Scheduler User', default=lambda self: self.env.user, required=True)
     active = fields.Boolean(default=True)
-    interval_number = fields.Integer(default=1, help="Repeat every x.")
+    interval_number = fields.Integer(default=1, help="Repeat every x.", required=True)
     interval_type = fields.Selection([('minutes', 'Minutes'),
                                       ('hours', 'Hours'),
                                       ('days', 'Days'),
                                       ('weeks', 'Weeks'),
-                                      ('months', 'Months')], string='Interval Unit', default='months')
+                                      ('months', 'Months')], string='Interval Unit', default='months', required=True)
     numbercall = fields.Integer(string='Number of Calls', default=1, help='How many times the method is called,\na negative number indicates no limit.')
     doall = fields.Boolean(string='Repeat Missed', help="Specify if missed occurrences should be executed when the server restarts.")
     nextcall = fields.Datetime(string='Next Execution Date', required=True, default=fields.Datetime.now, help="Next planned execution date for this job.")
