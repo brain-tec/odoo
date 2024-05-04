@@ -10,14 +10,10 @@ from unittest.mock import patch
 class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
 
-        cls.internal_user = cls.env['res.users'].create({
-            'name': 'Internal User',
-            'login': 'internal.user@test.odoo.com',
-            'email': 'internal.user@test.odoo.com',
-        })
+        cls.internal_user = cls._create_new_internal_user(login='internal.user@test.odoo.com')
 
         cls.supplier_partner = cls.env['res.partner'].create({
             'name': 'Your Supplier',
@@ -27,6 +23,11 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
 
         cls.journal = cls.company_data['default_journal_purchase']
         cls.attachment_number = 0
+
+    @classmethod
+    def default_env_context(cls):
+        # OVERRIDE
+        return {}
 
     def _create_dummy_pdf_attachment(self):
         self.attachment_number += 1
@@ -127,7 +128,7 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon):
 
         following_partners = invoice.message_follower_ids.mapped('partner_id')
         self.assertEqual(following_partners, self.env.user.partner_id)
-        self.assertRegex(invoice.name, 'BILL/\d{4}/\d{2}/0001')
+        self.assertRegex(invoice.name, r'BILL/\d{4}/\d{2}/0001')
 
     def test_supplier_invoice_forwarded_by_internal_user_without_supplier(self):
         """ In this test, the bill was forwarded by an employee,
