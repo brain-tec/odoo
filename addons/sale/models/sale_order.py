@@ -382,11 +382,14 @@ class SaleOrder(models.Model):
             if not order.partner_id:
                 order.fiscal_position_id = False
                 continue
+            fpos_id_before = order.fiscal_position_id.id
             key = (order.company_id.id, order.partner_id.id, order.partner_shipping_id.id)
             if key not in cache:
                 cache[key] = self.env['account.fiscal.position'].with_company(
                     order.company_id
-                )._get_fiscal_position(order.partner_id, order.partner_shipping_id)
+                )._get_fiscal_position(order.partner_id, order.partner_shipping_id).id
+            if fpos_id_before != cache[key] and order.order_line:
+                order.show_update_fpos = True
             order.fiscal_position_id = cache[key]
 
     @api.depends('partner_id')
@@ -1186,6 +1189,13 @@ class SaleOrder(models.Model):
         """
         self.ensure_one()
 
+        txs_to_be_linked = self.transaction_ids.filtered(
+            lambda tx: (
+                tx.state in ('pending', 'authorized')
+                or tx.state == 'done' and not (tx.payment_id and tx.payment_id.is_reconciled)
+            )
+        )
+
         values = {
             'ref': self.client_order_ref or '',
             'move_type': 'out_invoice',
@@ -1202,7 +1212,7 @@ class SaleOrder(models.Model):
             'invoice_payment_term_id': self.payment_term_id.id,
             'invoice_user_id': self.user_id.id,
             'payment_reference': self.reference,
-            'transaction_ids': [Command.set(self.transaction_ids.ids)],
+            'transaction_ids': [Command.set(txs_to_be_linked.ids)],
             'company_id': self.company_id.id,
             'invoice_line_ids': [],
             'user_id': self.user_id.id,
