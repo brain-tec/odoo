@@ -1,4 +1,6 @@
 import io
+
+from markupsafe import Markup
 from unittest.mock import patch
 
 from odoo import Command
@@ -110,7 +112,8 @@ def test_get_data(self, template_code):
         }
     }
 
-def _tax_vals(name, amount, tax_tag_id=None, children_tax_xmlids=None, active=True):
+
+def _tax_vals(name, amount, tax_tag_id=None, children_tax_xmlids=None, active=True, tax_scope="consu"):
     tag_command = [Command.set([tax_tag_id])] if tax_tag_id else None
     tax_vals = {
         'name': name,
@@ -118,6 +121,7 @@ def _tax_vals(name, amount, tax_tag_id=None, children_tax_xmlids=None, active=Tr
         'amount_type': 'percent' if not children_tax_xmlids else 'group',
         'tax_group_id': 'tax_group_taxes',
         'active': active,
+        'tax_scope': tax_scope
     }
     if children_tax_xmlids:
         tax_vals.update({'children_tax_ids': [Command.set(children_tax_xmlids)]})
@@ -379,6 +383,11 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             data['account.tax']['test_tax_1_template']['amount'] = 40
             return data
 
+        def local_get_data2(self, template_code):
+            data = test_get_data(self, template_code)
+            data['account.tax']['test_tax_1_template']['amount'] = 15
+            return data
+
         tax_1_existing = self.env['account.tax'].search([('company_id', '=', self.company.id), ('name', '=', "Tax 1")])
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False)
@@ -386,6 +395,16 @@ class TestChartTemplate(AccountTestInvoicingCommon):
         tax_1_new = self.env['account.tax'].search([('company_id', '=', self.company.id), ('name', '=', "Tax 1")])
         self.assertEqual(tax_1_old, tax_1_existing, "Old tax still exists but with a different name.")
         self.assertEqual(len(tax_1_new), 1, "New tax have been created with the original name.")
+
+        with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data2, autospec=True):
+            self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False)
+        tax_1_old_first = self.env['account.tax'].search([('company_id', '=', self.company.id), ('name', '=', "[old] Tax 1")])
+        tax_1_old_second = self.env['account.tax'].search([('company_id', '=', self.company.id), ('name', '=', "[old1] Tax 1")])
+        tax_1_latest = self.env['account.tax'].search([('company_id', '=', self.company.id), ('name', '=', "Tax 1")])
+
+        self.assertEqual(tax_1_old, tax_1_old_first, "Old renamed tax is still the same.")
+        self.assertEqual(tax_1_old_second, tax_1_new, "Outdated tax is renamed again.")
+        self.assertEqual(len(tax_1_latest), 1, "New tax have been created with the original name.")
 
     def test_update_taxes_multi_company(self):
         """ In a multi-company environment all companies should be correctly updated."""
@@ -761,14 +780,14 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             'no_translation.test_chart_template_company_test_free_account_group.name@fr_BE': 'Free Account Group account/FR',  # fallback to account
             'tax_group_taxes.name@en_US': 'Taxes',
             'tax_group_taxes.name@fr_BE': 'Taxes FR',
-            'test_tax_1_template.description@en_US': 'Tax 1 Description',
-            'test_tax_1_template.description@fr_BE': 'Tax 1 Description translation2/FR',
+            'test_tax_1_template.description@en_US': Markup('<p>Tax 1 Description</p>'),
+            'test_tax_1_template.description@fr_BE': Markup('Tax 1 Description translation2/FR'),
             'test_tax_1_template.name@en_US': 'Tax 1',
             'test_tax_1_template.name@fr_BE': 'Tax 1 FR',
             'translation.test_chart_template_company_test_free_account.name@en_US': 'Free Account',
             'translation.test_chart_template_company_test_free_account.name@fr_BE': 'Free Account FR_BE',  # do not use generic lang
-            'translation.test_chart_template_company_test_free_tax.description@en_US': 'Free Tax Description',
-            'translation.test_chart_template_company_test_free_tax.description@fr_BE': 'Free Tax Description FR',
+            'translation.test_chart_template_company_test_free_tax.description@en_US': Markup('<p>Free Tax Description</p>'),
+            'translation.test_chart_template_company_test_free_tax.description@fr_BE': Markup('<p>Free Tax Description</p>'),
             'translation.test_chart_template_company_test_free_tax.name@en_US': 'Free Tax',
             'translation.test_chart_template_company_test_free_tax.name@fr_BE': 'Free Tax FR',
         })
