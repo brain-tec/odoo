@@ -1,5 +1,3 @@
-/** @odoo-module */
-
 export function clickNextOrder() {
     return [
         {
@@ -25,15 +23,15 @@ export function clickContinueOrder() {
 export function setEmail(email) {
     return [
         {
-            trigger: ".receipt-screen .input-email input",
+            trigger: ".receipt-screen .input-group input",
             run: `edit ${email}`,
         },
     ];
 }
-export function clickSend(isHighlighted = true) {
+export function clickSend() {
     return [
         {
-            trigger: `.receipt-screen .input-email .send${isHighlighted ? ".highlight" : ""}`,
+            trigger: `.receipt-screen .input-group button`,
         },
     ];
 }
@@ -80,7 +78,7 @@ export function totalAmountContains(value) {
 export function emailIsSuccessful() {
     return [
         {
-            trigger: `.receipt-screen .notice .successful`,
+            trigger: `.receipt-screen .notice .text-success`,
             run: () => {},
         },
     ];
