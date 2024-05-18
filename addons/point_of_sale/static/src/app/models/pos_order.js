@@ -27,6 +27,10 @@ export class PosOrder extends Base {
         this.last_order_preparation_change = vals.last_order_preparation_change
             ? JSON.parse(vals.last_order_preparation_change)
             : {};
+        this.tracking_number =
+            vals.tracking_number && !isNaN(parseInt(vals.tracking_number))
+                ? vals.tracking_number
+                : ((this.session.id % 10) * 100 + (this.sequence_number % 100)).toString();
 
         if (!vals.lines) {
             this.lines = [];
@@ -168,6 +172,7 @@ export class PosOrder extends Base {
                         hours,
                         minutes,
                     },
+                    tracking_number: this.tracking_number,
                 };
                 const receipt = renderToElement("point_of_sale.OrderChangeReceipt", {
                     changes: printingChanges,
