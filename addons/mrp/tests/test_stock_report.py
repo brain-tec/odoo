@@ -17,11 +17,15 @@ class TestMrpStockReports(TestReportsCommon):
         })
         product_chococake = self.env['product.product'].create({
             'name': 'Choco Cake',
-            'type': 'product',
+            'is_storable': True,
         })
         product_double_chococake = self.env['product.product'].create({
             'name': 'Double Choco Cake',
-            'type': 'product',
+            'is_storable': True,
+        })
+        byproduct = self.env['product.product'].create({
+            'name': 'by-product',
+            'is_storable': True,
         })
 
         # Creates two BOM: one creating a regular slime, one using regular slimes.
@@ -34,6 +38,8 @@ class TestMrpStockReports(TestReportsCommon):
             'bom_line_ids': [
                 (0, 0, {'product_id': product_chocolate.id, 'product_qty': 4}),
             ],
+            'byproduct_ids':
+                [(0, 0, {'product_id': byproduct.id, 'product_qty': 2})],
         })
         bom_double_chococake = self.env['mrp.bom'].create({
             'product_id': product_double_chococake.id,
@@ -87,6 +93,17 @@ class TestMrpStockReports(TestReportsCommon):
         self.assertEqual(draft_production_qty['in'], 0)
         self.assertEqual(draft_production_qty['out'], 0)
 
+        mo_form = Form(mo_1)
+        mo_form.qty_producing = 10
+        mo_form.save()
+        mo_1.move_byproduct_ids.quantity = 18
+        mo_1.button_mark_done()
+
+        self.env.flush_all()  # flush to correctly build report
+        report_values = self.env['report.mrp.report_mo_overview']._get_report_data(mo_1.id)['byproducts']['details'][0]
+        self.assertEqual(report_values['name'], byproduct.name)
+        self.assertEqual(report_values['quantity'], 18)
+
     def test_report_forecast_2_production_backorder(self):
         """ Creates a manufacturing order and produces half the quantity.
         Then creates a backorder and checks the report.
@@ -97,7 +114,7 @@ class TestMrpStockReports(TestReportsCommon):
         # Configures a product.
         product_apple_pie = self.env['product.product'].create({
             'name': 'Apple Pie',
-            'type': 'product',
+            'is_storable': True,
         })
         product_apple = self.env['product.product'].create({
             'name': 'Apple',
@@ -159,7 +176,7 @@ class TestMrpStockReports(TestReportsCommon):
         """
         product_banana = self.env['product.product'].create({
             'name': 'Banana',
-            'type': 'product',
+            'is_storable': True,
         })
         product_chocolate = self.env['product.product'].create({
             'name': 'Chocolate',
