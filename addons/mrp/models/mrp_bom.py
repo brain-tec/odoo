@@ -32,11 +32,11 @@ class MrpBom(models.Model):
     product_tmpl_id = fields.Many2one(
         'product.template', 'Product',
         check_company=True, index=True,
-        domain="[('type', 'in', ['product', 'consu'])]", required=True)
+        domain="[('type', '=', 'consu')]", required=True)
     product_id = fields.Many2one(
         'product.product', 'Product Variant',
         check_company=True, index=True,
-        domain="['&', ('product_tmpl_id', '=', product_tmpl_id), ('type', 'in', ['product', 'consu'])]",
+        domain="['&', ('product_tmpl_id', '=', product_tmpl_id), ('type', '=', 'consu')]",
         help="If a product variant is defined the BOM is available only for this product.")
     bom_line_ids = fields.One2many('mrp.bom.line', 'bom_id', 'BoM Lines', copy=True)
     byproduct_ids = fields.One2many('mrp.bom.byproduct', 'bom_id', 'By-products', copy=True)
@@ -229,7 +229,7 @@ class MrpBom(models.Model):
                 domain.append(('id', '!=', self.id.origin))
             number_of_bom_of_this_product = self.env['mrp.bom'].search_count(domain)
             if number_of_bom_of_this_product:  # add a reference to the bom if there is already a bom for this product
-                self.code = _("%s (new) %s", self.product_tmpl_id.name, number_of_bom_of_this_product)
+                self.code = _("%(product_name)s (new) %(number_of_boms)s", product_name=self.product_tmpl_id.name, number_of_boms=number_of_bom_of_this_product)
 
     @api.model_create_multi
     def create(self, vals_list):

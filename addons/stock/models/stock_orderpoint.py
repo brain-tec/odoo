@@ -46,7 +46,7 @@ class StockWarehouseOrderpoint(models.Model):
         'product.product', 'Product',
         domain=("[('product_tmpl_id', '=', context.get('active_id', False))] if context.get('active_model') == 'product.template' else"
             " [('id', '=', context.get('default_product_id', False))] if context.get('default_product_id') else"
-            " [('type', '=', 'product')]"),
+            " [('is_storable', '=', True)]"),
         ondelete='cascade', required=True, check_company=True)
     product_category_id = fields.Many2one('product.category', name='Product Category', related='product_id.categ_id', store=True)
     product_uom = fields.Many2one(
@@ -210,7 +210,11 @@ class StockWarehouseOrderpoint(models.Model):
     def action_stock_replenishment_info(self):
         self.ensure_one()
         action = self.env['ir.actions.actions']._for_xml_id('stock.action_stock_replenishment_info')
-        action['name'] = _('Replenishment Information for %s in %s', self.product_id.display_name, self.warehouse_id.display_name)
+        action['name'] = _(
+            'Replenishment Information for %(product)s in %(warehouse)s',
+            product=self.product_id.display_name,
+            warehouse=self.warehouse_id.display_name,
+        )
         res = self.env['stock.replenishment.info'].create({
             'orderpoint_id': self.id,
         })
@@ -637,7 +641,7 @@ class StockWarehouseOrderpoint(models.Model):
         return timezone(self.company_id.partner_id.tz or 'UTC').localize(datetime.combine(self.lead_days_date, time(12))).astimezone(UTC).replace(tzinfo=None)
 
     def _get_orderpoint_products(self):
-        return self.env['product.product'].search([('type', '=', 'product'), ('stock_move_ids', '!=', False)])
+        return self.env['product.product'].search([('is_storable', '=', True), ('stock_move_ids', '!=', False)])
 
     def _get_orderpoint_locations(self):
         return self.env['stock.location'].search([('replenish_location', '=', True)])

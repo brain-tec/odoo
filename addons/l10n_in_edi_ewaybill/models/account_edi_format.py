@@ -117,7 +117,7 @@ class AccountEdiFormat(models.Model):
                     error_message.append(_("HSN code is not set in product %s", line.product_id.name))
                 elif not re.match("^[0-9]+$", hsn_code):
                     error_message.append(_(
-                        "Invalid HSN Code (%s) in product %s", hsn_code, line.product_id.name
+                        "Invalid HSN Code (%(hsn_code)s) in product %(product)s", hsn_code=hsn_code, product=line.product_id.name,
                     ))
             else:
                 error_message.append(_("product is required to get HSN code"))
@@ -499,9 +499,9 @@ class AccountEdiFormat(models.Model):
         extract_digits = self._l10n_in_edi_extract_digits
         tax_details_by_code = self._get_l10n_in_tax_details_by_line_code(line_tax_details.get("tax_details", {}))
         line_details = {
-            "productName": line.product_id.name,
+            "productName": line.product_id.name or line.name,
             "hsnCode": extract_digits(line.l10n_in_hsn_code),
-            "productDesc": line.name,
+            "productDesc": line.product_id.display_name,
             "quantity": line.quantity,
             "qtyUnit": line.product_id.uom_id.l10n_in_code and line.product_id.uom_id.l10n_in_code.split("-")[0] or "OTH",
             "taxableAmount": self._l10n_in_round_value(line.balance * sign),

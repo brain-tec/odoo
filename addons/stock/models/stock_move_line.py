@@ -5,7 +5,7 @@ from collections import Counter, defaultdict
 
 from odoo import _, api, fields, tools, models, Command
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import OrderedSet, groupby
+from odoo.tools import OrderedSet, format_list, groupby
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
 
 
@@ -202,7 +202,11 @@ class StockMoveLine(models.Model):
                                                              '|', ('company_id', '=', False), ('company_id', '=', self.company_id.id)])
                         quants = lots.quant_ids.filtered(lambda q: q.quantity != 0 and q.location_id.usage in ['customer', 'internal', 'transit'])
                         if quants:
-                            message = _('Serial number (%s) already exists in location(s): %s. Please correct the serial number encoded.', self.lot_name, ', '.join(quants.location_id.mapped('display_name')))
+                            message = _(
+                                'Serial number (%(serial_number)s) already exists in location(s): %(location_list)s. Please correct the serial number encoded.',
+                                serial_number=self.lot_name,
+                                location_list=format_list(self.env, quants.location_id.mapped('display_name'))
+                            )
                 elif self.lot_id:
                     counter = Counter([line.lot_id.id for line in move_lines_to_check])
                     if counter.get(self.lot_id.id) and counter[self.lot_id.id] > 1:
@@ -337,7 +341,7 @@ class StockMoveLine(models.Model):
             if move:
                 reservation = not move._should_bypass_reservation()
             else:
-                reservation = product.type == 'product' and not location.should_bypass_reservation()
+                reservation = product.is_storable and not location.should_bypass_reservation()
             if move_line.quantity and reservation:
                 self.env.context.get('reserved_quant', self.env['stock.quant'])._update_reserved_quantity(
                     product, location, move_line.quantity_product_uom, lot_id=move_line.lot_id, package_id=move_line.package_id, owner_id=move_line.owner_id)
@@ -348,7 +352,7 @@ class StockMoveLine(models.Model):
 
         for ml, vals in zip(mls, vals_list):
             if ml.state == 'done':
-                if ml.product_id.type == 'product':
+                if ml.product_id.is_storable:
                     Quant = self.env['stock.quant']
                     quantity = ml.product_uom_id._compute_quantity(ml.quantity, ml.move_id.product_id.uom_id, rounding_method='HALF-UP')
                     in_date = None
@@ -406,7 +410,7 @@ class StockMoveLine(models.Model):
         # reserve the maximum possible.
         if updates or 'quantity' in vals:
             for ml in self:
-                if ml.product_id.type != 'product' or ml.state == 'done':
+                if not ml.product_id.is_storable or ml.state == 'done':
                     continue
                 if 'quantity' in vals or 'product_uom_id' in vals:
                     new_ml_uom = updates.get('product_uom_id', ml.product_uom_id)
@@ -436,7 +440,7 @@ class StockMoveLine(models.Model):
         mls = self.env['stock.move.line']
         if updates or 'quantity' in vals:
             next_moves = self.env['stock.move']
-            mls = self.filtered(lambda ml: ml.move_id.state == 'done' and ml.product_id.type == 'product')
+            mls = self.filtered(lambda ml: ml.move_id.state == 'done' and ml.product_id.is_storable)
             if not updates:  # we can skip those where quantity is already good up to UoM rounding
                 mls = mls.filtered(lambda ml: not float_is_zero(ml.quantity - vals['quantity'], precision_rounding=ml.product_uom_id.rounding))
             for ml in mls:
@@ -525,10 +529,10 @@ class StockMoveLine(models.Model):
             precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
             quantity = float_round(ml.quantity, precision_digits=precision_digits, rounding_method='HALF-UP')
             if float_compare(uom_qty, quantity, precision_digits=precision_digits) != 0:
-                raise UserError(_('The quantity done for the product "%s" doesn\'t respect the rounding precision '
-                                  'defined on the unit of measure "%s". Please change the quantity done or the '
+                raise UserError(_('The quantity done for the product "%(product)s" doesn\'t respect the rounding precision '
+                                  'defined on the unit of measure "%(unit)s". Please change the quantity done or the '
                                   'rounding precision of your unit of measure.',
-                                  ml.product_id.display_name, ml.product_uom_id.name))
+                                  product=ml.product_id.display_name, unit=ml.product_uom_id.name))
 
             quantity_float_compared = float_compare(ml.quantity, 0, precision_rounding=ml.product_uom_id.rounding)
             if quantity_float_compared > 0:
@@ -604,7 +608,7 @@ class StockMoveLine(models.Model):
         package = quants_value.get('package', self.package_id)
         owner = quants_value.get('owner', self.owner_id)
         available_qty = 0
-        if self.product_id.type != 'product' or float_is_zero(quantity, precision_rounding=self.product_uom_id.rounding):
+        if not self.product_id.is_storable or float_is_zero(quantity, precision_rounding=self.product_uom_id.rounding):
             return 0, False
         if action == "available":
             available_qty, in_date = self.env['stock.quant']._update_available_quantity(self.product_id, location, quantity, lot_id=lot, package_id=package, owner_id=owner, in_date=in_date)

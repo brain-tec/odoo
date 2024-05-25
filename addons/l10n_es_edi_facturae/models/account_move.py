@@ -299,7 +299,7 @@ class AccountMove(models.Model):
             invoice_line_values.update({
                 'FileReference': self._l10n_es_edi_facturae_get_filename().split('.')[0][:20],
                 'FileDate': fields.Date.context_today(self),
-                'ItemDescription': line.name,
+                'ItemDescription': line.product_id.display_name or line.name,
                 'Quantity': line.quantity,
                 'UnitOfMeasure': line.product_uom_id.l10n_es_edi_facturae_uom_code,
                 'UnitPriceWithoutTax': line.currency_id.round(price_before_discount / line.quantity if line.quantity else 0.),
@@ -667,7 +667,7 @@ class AccountMove(models.Model):
                     tax_ids.append(tax_incl)
                     line_vals['price_unit'] *= (1.0 + float(tax_rate) / 100.0)
                 else:
-                    logs.append(_("Could not retrieve the tax: %s %% for line '%s'.", tax_rate, line_vals.get('name', "")))
+                    logs.append(_("Could not retrieve the tax: %(tax_rate)s %% for line '%(line)s'.", tax_rate=tax_rate, line=line_vals.get('name', "")))
 
         return logs
 
