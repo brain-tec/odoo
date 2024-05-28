@@ -9,10 +9,6 @@ export class MailMessage extends models.ServerModel {
     author_id = fields.Generic({ default: () => serverState.partnerId });
     is_discussion = fields.Boolean({ string: "Discussion" });
     is_note = fields.Boolean({ string: "Note" });
-    needaction_partner_ids = fields.Many2many({
-        relation: "res.partner",
-        string: "Partners with Need Action",
-    });
     pinned_at = fields.Generic({ default: false });
 
     /** @param {DomainListRepr} [domain] */
@@ -53,9 +49,6 @@ export class MailMessage extends models.ServerModel {
         for (const message of messages) {
             this.write([message.id], {
                 needaction: false,
-                needaction_partner_ids: message.needaction_partner_ids.filter(
-                    (partnerId) => partnerId !== this.env.user.partner_id
-                ),
             });
         }
         const [partner] = ResPartner.read(this.env.user.partner_id);
@@ -200,14 +193,13 @@ export class MailMessage extends models.ServerModel {
                 Object.assign(response, { thread });
             }
             if (for_current_user) {
-                const needactionPartnerIds = allNotifications
+                const notifications_partners = allNotifications
                     .filter((notification) => !notification.is_read)
                     .map((notification) => notification.res_partner_id);
-                response["needaction_partner_ids"] = needactionPartnerIds;
-                response["starredPersonas"] = message.starred_partner_ids.map((id) => ({
-                    id,
-                    type: "partner",
-                }));
+                response["needaction"] = notifications_partners.includes(this.env.user?.partner_id);
+                response["starred"] = message.starred_partner_ids?.includes(
+                    this.env.user?.partner_id
+                );
                 const trackingValues = MailTrackingValue._filter([
                     ["id", "in", message.tracking_value_ids],
                 ]);
@@ -255,9 +247,6 @@ export class MailMessage extends models.ServerModel {
         for (const message of messages) {
             this.write([message.id], {
                 needaction: false,
-                needaction_partner_ids: message.needaction_partner_ids.filter(
-                    (partnerId) => partnerId !== this.env.user.partner_id
-                ),
             });
             const [partner] = ResPartner.read(this.env.user.partner_id);
             BusBus._sendone(partner, "mail.message/mark_as_read", {
