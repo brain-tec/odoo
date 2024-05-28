@@ -126,7 +126,6 @@ export class Message extends Record {
     is_transient;
     linkPreviews = Record.many("LinkPreview", { inverse: "message", onDelete: (r) => r.delete() });
     /** @type {number[]} */
-    needaction_partner_ids = [];
     parentMessage = Record.one("Message");
     /**
      * When set, this temporary/pending message failed message post, and the
@@ -141,7 +140,7 @@ export class Message extends Record {
     thread = Record.one("Thread");
     threadAsNeedaction = Record.one("Thread", {
         compute() {
-            if (this.isNeedaction) {
+            if (this.needaction) {
                 return this.thread;
             }
         },
@@ -149,7 +148,6 @@ export class Message extends Record {
     threadAsNewest = Record.one("Thread");
     /** @type {DateTime} */
     scheduledDatetime = Record.attr(undefined, { type: "datetime" });
-    starredPersonas = Record.many("Persona");
     onlyEmojis = Record.attr(false, {
         compute() {
             const div = document.createElement("div");
@@ -182,6 +180,9 @@ export class Message extends Record {
     create_date = Record.attr(undefined, { type: "datetime" });
     /** @type {luxon.DateTime} */
     write_date = Record.attr(undefined, { type: "datetime" });
+    /** @type {undefined|Boolean} */
+    needaction;
+    starred = false;
 
     /**
      * We exclude the milliseconds because datetime string from the server don't
@@ -246,18 +247,7 @@ export class Message extends Record {
         eager: true,
     });
 
-    get isStarred() {
-        return this.store.self.in(this.starredPersonas);
-    }
-
     isPending = false;
-
-    get isNeedaction() {
-        return (
-            this.store.self.type === "partner" &&
-            this.needaction_partner_ids.includes(this.store.self.id)
-        );
-    }
 
     get hasActions() {
         return !this.is_transient;
@@ -308,8 +298,7 @@ export class Message extends Record {
         },
         /** @this {import("models").Message} */
         onUpdate() {
-            if (this.isEmpty && this.isStarred) {
-                this.starredPersonas.delete(this.store.self);
+            if (this.isEmpty && this.starred) {
                 const starred = this.store.discuss.starred;
                 starred.counter--;
                 starred.messages.delete(this);
@@ -436,7 +425,7 @@ export class Message extends Record {
     }
 
     async unfollow() {
-        if (this.isNeedaction) {
+        if (this.needaction) {
             await this.setDone();
         }
         const thread = this.thread;
