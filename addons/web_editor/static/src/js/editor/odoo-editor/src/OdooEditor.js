@@ -2347,12 +2347,7 @@ export class OdooEditor extends EventTarget {
      */
     _applyRawCommand(method, ...args) {
         const sel = this.document.getSelection();
-        if (
-            !(SELECTIONLESS_COMMANDS.includes(method) && args.length) && (
-                !this.editable.contains(sel.anchorNode) ||
-                (sel.anchorNode !== sel.focusNode && !this.editable.contains(sel.focusNode))
-            )
-        ) {
+        if (!(SELECTIONLESS_COMMANDS.includes(method) && args.length) && !this.isSelectionInEditable(sel)) {
             // Do not apply commands out of the editable area.
             return false;
         }
@@ -3748,7 +3743,7 @@ export class OdooEditor extends EventTarget {
         // inserting the printed representation of the character.
         if (/^.$/u.test(ev.key) && !ev.ctrlKey && !ev.metaKey && (isMacOS() || !ev.altKey)) {
             const selection = this.document.getSelection();
-            if (selection && !selection.isCollapsed) {
+            if (selection && !selection.isCollapsed && this.isSelectionInEditable(selection)) {
                 this.deleteRange(selection);
             }
         }
@@ -4438,7 +4433,6 @@ export class OdooEditor extends EventTarget {
 
             if (isMouseInsideCheckboxBox) {
                 toggleClass(node, 'o_checked');
-                ev.preventDefault();
                 this.historyStep();
                 if (!document.getSelection().isCollapsed) {
                     this._updateToolbar(true);
