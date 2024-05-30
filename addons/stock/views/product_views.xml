@@ -114,7 +114,7 @@
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='detailed_type']" position="after">
+                <xpath expr="//field[@name='type']" position="after">
                     <label for="is_storable" class="oe_inline" invisible="type != 'consu'"/>
                     <div class="o_row w-100" invisible="type != 'consu'">
                         <field name="is_storable"/>
@@ -538,7 +538,7 @@
             <field name="model">product.product</field>
             <field name="priority" eval="100"/>
             <field name="arch" type="xml">
-                <tree sample="1" js_class="stock_report_list_view">
+                <tree sample="1" js_class="stock_report_list_view" duplicate="0">
                     <header>
                         <button name="%(action_inventory_at_date)d" invisible="((context.get('inventory_mode') and not context.get('inventory_report_mode')) or context.get('no_at_date'))" string="Inventory at Date" type="action" class="btn-primary ms-1" display="always"/>
                     </header>
