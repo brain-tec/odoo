@@ -29,7 +29,7 @@ class ChannelMember(models.Model):
     custom_channel_name = fields.Char('Custom channel name')
     fetched_message_id = fields.Many2one('mail.message', string='Last Fetched', index="btree_not_null")
     seen_message_id = fields.Many2one('mail.message', string='Last Seen', index="btree_not_null")
-    new_message_separator = fields.Integer(help="Message id before which the separator should be displayed", default=0)
+    new_message_separator = fields.Integer(help="Message id before which the separator should be displayed", default=0, required=True)
     message_unread_counter = fields.Integer('Unread Messages Counter', compute='_compute_message_unread', compute_sudo=True)
     fold_state = fields.Selection([('open', 'Open'), ('folded', 'Folded'), ('closed', 'Closed')], string='Conversation Fold State', default='closed')
     custom_notifications = fields.Selection(
@@ -415,6 +415,53 @@ class ChannelMember(models.Model):
             channel_data['invitedMembers'] = [('ADD', list(members._discuss_channel_member_format(fields={'id': True, 'channel': {}, 'persona': {'partner': {'id': True, 'name': True, 'im_status': True}, 'guest': {'id': True, 'name': True, 'im_status': True}}}).values()))]
             self.env['bus.bus']._sendone(self.channel_id, 'mail.record/insert', {'Thread': channel_data})
         return members
+
+    def _mark_as_read(self, last_message_id, sync=False):
+        """
+        Mark channel as read by updating the seen message id of the current
+        member as well as its new message separator.
+
+        :param last_message_id: the id of the message to be marked as read.
+        :param sync: wether the new message separator and the unread counter in
+            the UX will sync to their server values.
+        """
+        self.ensure_one()
+        domain = [
+            ("model", "=", "discuss.channel"),
+            ("res_id", "=", self.channel_id.id),
+            ("id", "<=", last_message_id),
+        ]
+        last_message = self.env['mail.message'].search(domain, order="id DESC", limit=1)
+        if not last_message:
+            return
+        self._set_last_seen_message(last_message)
+        self._set_new_message_separator(last_message.id + 1, sync=sync)
+
+    def _set_last_seen_message(self, message, notify=True):
+        """
+        Set the last seen message of the current member.
+
+        :param message: the message to set as last seen message.
+        :param notify: whether to send a bus notification relative to the new
+            last seen message.
+        """
+        self.ensure_one()
+        if self.seen_message_id.id >= message.id:
+            return
+        self.fetched_message_id = max(self.fetched_message_id.id, message.id)
+        self.seen_message_id = message.id
+        self.last_seen_dt = fields.Datetime.now()
+        if not notify:
+            return
+        target = self.partner_id or self.guest_id
+        if self.channel_id.channel_type in self.channel_id._types_allowing_seen_infos():
+            target = self.channel_id
+        self.env["bus.bus"]._sendone(target, "mail.record/insert", {
+            "ChannelMember": {
+                "id": self.id,
+                "seen_message_id": {"id": message.id},
+            }
+        })
 
     def _set_new_message_separator(self, message_id, sync=False):
         """
