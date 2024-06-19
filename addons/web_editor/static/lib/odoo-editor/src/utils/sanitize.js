@@ -60,7 +60,8 @@ export function areSimilarElements(node, node2) {
         isNotNoneValue(getComputedStyle(node, ':before').getPropertyValue('content')) ||
         isNotNoneValue(getComputedStyle(node, ':after').getPropertyValue('content')) ||
         isNotNoneValue(getComputedStyle(node2, ':before').getPropertyValue('content')) ||
-        isNotNoneValue(getComputedStyle(node2, ':after').getPropertyValue('content'))
+        isNotNoneValue(getComputedStyle(node2, ':after').getPropertyValue('content')) ||
+        isFontAwesome(node) || isFontAwesome(node2)
     ) {
         return false;
     }
@@ -263,10 +264,15 @@ class Sanitize {
                     // the node because these two methods create different
                     // mutations and at least the tour system breaks if all we
                     // send here is a text content change.
-                    const newTextNode = document.createTextNode(newText);
-                    node.before(newTextNode);
+                    let replacement;
+                    if (newText.length) {
+                        replacement = document.createTextNode(newText);
+                        node.before(replacement);
+                    } else {
+                        replacement = node.parentElement;
+                    }
                     node.remove();
-                    node = newTextNode;
+                    node = replacement; // The node has been removed, update the reference.
                 }
             }
 
@@ -279,7 +285,7 @@ class Sanitize {
                         node.setAttribute('href', urlInfo[0].url);
                     }
                 }
-                padLinkWithZws(this.root, node);
+                padLinkWithZws(node);
             }
             node = node.nextSibling;
         }

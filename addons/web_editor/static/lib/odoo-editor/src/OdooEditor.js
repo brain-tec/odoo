@@ -442,6 +442,7 @@ export class OdooEditor extends EventTarget {
 
         // sanitize and mark current position as sanitized
         sanitize(commonAncestor);
+        this._resetLinkInSelection();
         this._pluginCall('sanitizeElement', [commonAncestor]);
         this.options.onPostSanitize(commonAncestor);
     }
@@ -1424,7 +1425,7 @@ export class OdooEditor extends EventTarget {
         let range = getDeepRange(this.editable, { sel, correctTripleClick: true });
         if (!range) return;
         for (const node of descendants(closestBlock(range.commonAncestorContainer))) {
-            if (node.nodeType === Node.TEXT_NODE && node.textContent === '\uFEFF') {
+            if (node.nodeType === Node.TEXT_NODE && [...node.textContent].every(char => char === '\uFEFF')) {
                 const restore = prepareUpdate(...leftPos(node));
                 node.remove();
                 restore(); // Make sure to make <br>s visible if needed.
@@ -2796,19 +2797,7 @@ export class OdooEditor extends EventTarget {
             // re-trigger the _onSelectionChange.
             return;
         }
-        // Apply the o_link_in_selection class if the selection is in a single
-        // link, remove it otherwise.
-        const [anchorLink, focusLink] = [selection.anchorNode, selection.focusNode]
-            .map(node => closestElement(node, 'a:not(.btn)'));
-        const singleLinkInSelection = anchorLink === focusLink && anchorLink;
-        if (singleLinkInSelection && isLinkEligibleForZwnbsp(singleLinkInSelection)) {
-            singleLinkInSelection.classList.add('o_link_in_selection');
-        }
-        for (const link of this.editable.querySelectorAll('.o_link_in_selection')) {
-            if (link !== singleLinkInSelection) {
-                link.classList.remove('o_link_in_selection');
-            }
-        };
+        this._resetLinkInSelection();
         // Compute the current selection on selectionchange but do not record it. Leave
         // that to the command execution or the 'input' event handler.
         this._computeHistorySelection();
@@ -2826,7 +2815,25 @@ export class OdooEditor extends EventTarget {
             this.options.onCollaborativeSelectionChange(this.getCurrentCollaborativeSelection());
         }
     }
-
+    /**
+     * Apply the o_link_in_selection class if the selection is in a single link,
+     * remove it otherwise.
+     */
+    _resetLinkInSelection() {
+        const selection = this.document.getSelection();
+        const [anchorLink, focusLink] = [selection.anchorNode, selection.focusNode]
+            .map(node => closestElement(node, 'a:not(.btn)'));
+        const singleLinkInSelection = anchorLink === focusLink && anchorLink &&
+            this.editable.contains(anchorLink) && isLinkEligibleForZwnbsp(anchorLink) && anchorLink;
+        if (singleLinkInSelection) {
+            singleLinkInSelection.classList.add('o_link_in_selection');
+        }
+        for (const link of this.editable.querySelectorAll('.o_link_in_selection')) {
+            if (link !== singleLinkInSelection) {
+                link.classList.remove('o_link_in_selection');
+            }
+        };
+    }
     /**
      * Returns true if the current selection is inside the editable.
      *
