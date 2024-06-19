@@ -201,14 +201,14 @@ function insert(editor, data, isText = true) {
     selection.removeAllRanges();
     const newRange = new Range();
     let lastPosition;
-    if (currentNode.nodeName === 'A' && isLinkEligibleForZwnbsp(currentNode)) {
-        padLinkWithZws(editor.editable, currentNode);
+    if (currentNode.nodeName === 'A' && editor.editable.contains(currentNode) && isLinkEligibleForZwnbsp(currentNode)) {
+        padLinkWithZws(currentNode);
         currentNode = currentNode.nextSibling;
         lastPosition = getDeepestPosition(...rightPos(currentNode));
     } else {
         lastPosition = rightPos(currentNode);
     }
-    if (lastPosition[0] === editor.editable) {
+    if (!editor.options.allowInlineAtRoot && lastPosition[0] === editor.editable) {
         // Correct the position if it happens to be in the editable root.
         lastPosition = getDeepestPosition(...lastPosition);
     }
