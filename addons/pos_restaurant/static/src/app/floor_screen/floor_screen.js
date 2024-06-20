@@ -107,10 +107,11 @@ export class FloorScreen extends Component {
         return oToTrans ? [oToTrans.table_id.id] : [];
     }
     async onWillStart() {
+        this.pos.searchProductWord = "";
         const table = this.pos.selectedTable;
         const tableByIds = this.pos.models["restaurant.table"].getAllBy("id");
         if (table) {
-            const orders = this.pos.get_order_list();
+            const orders = this.pos.get_open_orders();
             const tableOrders = orders.filter(
                 (order) => order.table_id?.id === table.id && !order.finalized
             );
@@ -620,7 +621,7 @@ export class FloorScreen extends Component {
                 return;
             }
 
-            const orderList = [...this.pos.get_order_list()];
+            const orderList = [...this.pos.get_open_orders()];
             for (const order of orderList) {
                 if (activeFloor.table_ids.includes(order.tableId)) {
                     this.pos.removeOrder(order, false);
@@ -661,7 +662,7 @@ export class FloorScreen extends Component {
             if (response) {
                 for (const id of originalSelectedTableIds) {
                     //remove order not send to server
-                    for (const order of this.pos.get_order_list()) {
+                    for (const order of this.pos.get_open_orders()) {
                         if (order.table_id == id) {
                             this.pos.removeOrder(order, false);
                         }
