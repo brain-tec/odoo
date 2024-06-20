@@ -87,7 +87,7 @@ Unicode True
 
 Name '${DISPLAY_NAME}'
 Caption "${PRODUCT_NAME} ${VERSION} Setup"
-OutFile "odoo_setup_${VERSION}.exe"
+OutFile "${TOOLSDIR}\server\odoo_setup_${VERSION}.exe"
 SetCompressor /SOLID /FINAL lzma
 ShowInstDetails hide
 
@@ -213,31 +213,23 @@ Section $(TITLE_Odoo_Server) SectionOdoo_Server
 
     # Installing winpython
     SetOutPath "$INSTDIR\python"
-    ${If} ${RunningX64}
-        File /r /x "__pycache__" "${TOOLSDIR}\WinPy64\python-${PYTHONVERSION}.amd64\*"
-    ${Else}
-        File /r /x "__pycache__" "${TOOLSDIR}\WinPy32\python-${PYTHONVERSION}\*"
-    ${EndIf}
+    File /r /x "__pycache__" "${TOOLSDIR}\WinPy64\python-${PYTHONVERSION}.amd64\*"
 
     SetOutPath "$INSTDIR\nssm"
     File /r /x "src" "${TOOLSDIR}\nssm-2.24\*"
 
     SetOutPath "$INSTDIR\server"
-    File /r /x "wkhtmltopdf" /x "enterprise" "..\..\*"
+    File /r /x "wkhtmltopdf" /x "enterprise" "${TOOLSDIR}\server\*"
 
     SetOutPath "$INSTDIR\vcredist"
     File /r "${TOOLSDIR}\vcredist\*.exe"
 
     # Install Visual C redistribuable files
     DetailPrint "Installing Visual C++ redistributable files"
-    ${If} ${RunningX64}
-        nsExec::Exec '"$INSTDIR\vcredist\vc_redist.x64.exe" /q'
-    ${Else}
-        nsExec::Exec '"$INSTDIR\vcredist\vc_redist.x86.exe" /q'
-    ${EndIf}
+    nsExec::Exec '"$INSTDIR\vcredist\vc_redist.x64.exe" /q'
 
     SetOutPath "$INSTDIR\thirdparty"
-    File /r "${STATIC_PATH}\wkhtmltopdf\*"
+    File /r "${TOOLSDIR}\wkhtmltopdf\*"
 
     # If there is a previous install of the Odoo Server, keep the login/password from the config file
     WriteIniStr "$INSTDIR\server\odoo.conf" "options" "db_host" $TextPostgreSQLHostname
@@ -256,15 +248,9 @@ Section $(TITLE_Odoo_Server) SectionOdoo_Server
 
     DetailPrint "Installing Windows service"
     nsExec::ExecTOLog '"$INSTDIR\python\python.exe" "$INSTDIR\server\odoo-bin" --stop-after-init -c "$INSTDIR\server\odoo.conf" --logfile "$INSTDIR\server\odoo.log" -s'
-    ${If} ${RunningX64}
-      nsExec::ExecToLog '"$INSTDIR\nssm\win64\nssm.exe" install ${SERVICENAME} "$INSTDIR\python\python.exe"'
-      nsExec::ExecToLog '"$INSTDIR\nssm\win64\nssm.exe" set ${SERVICENAME} AppDirectory "$\"$INSTDIR\python$\""'
-      nsExec::ExecToLog '"$INSTDIR\nssm\win64\nssm.exe" set ${SERVICENAME} AppParameters "\"$INSTDIR\server\odoo-bin\" -c "\"$INSTDIR\server\odoo.conf\"'
-    ${Else}
-      nsExec::ExecToLog '"$INSTDIR\nssm\win32\nssm.exe" install ${SERVICENAME} "$INSTDIR\python\python.exe" '
-      nsExec::ExecToLog '"$INSTDIR\nssm\win32\nssm.exe" set ${SERVICENAME} AppDirectory "$\"$INSTDIR\python$\""'
-      nsExec::ExecToLog '"$INSTDIR\nssm\win32\nssm.exe" set ${SERVICENAME} AppParameters "\"$INSTDIR\server\odoo-bin\" -c "\"$INSTDIR\server\odoo.conf\"'
-    ${EndIf}
+    nsExec::ExecToLog '"$INSTDIR\nssm\win64\nssm.exe" install ${SERVICENAME} "$INSTDIR\python\python.exe"'
+    nsExec::ExecToLog '"$INSTDIR\nssm\win64\nssm.exe" set ${SERVICENAME} AppDirectory "$\"$INSTDIR\python$\""'
+    nsExec::ExecToLog '"$INSTDIR\nssm\win64\nssm.exe" set ${SERVICENAME} AppParameters "\"$INSTDIR\server\odoo-bin\" -c "\"$INSTDIR\server\odoo.conf\"'
 
     Call RestartOdooService
 SectionEnd
@@ -275,17 +261,13 @@ Section $(TITLE_PostgreSQL) SectionPostgreSQL
     VAR /GLOBAL postgresql_exe_filename
     VAR /GLOBAL postgresql_url
 
-    ${If} ${RunningX64}
-        StrCpy $postgresql_exe_filename "postgresql-12.4-1-windows-x64.exe"
-    ${Else}
-        StrCpy $postgresql_exe_filename "postgresql-10.14-1-windows.exe"
-    ${EndIf}
+    StrCpy $postgresql_exe_filename "postgresql-12.4-1-windows-x64.exe"
 
     StrCpy $postgresql_url "https://get.enterprisedb.com/postgresql/$postgresql_exe_filename"
     nsExec::Exec 'net user openpgsvc /delete'
 
     DetailPrint "Downloading PostgreSQl"
-    inetc::get "$postgresql_url" "$TEMP/$postgresql_exe_filename" /POPUP
+    NScurl::http get "$postgresql_url" "$TEMP/$postgresql_exe_filename" /PAGE /END
     pop $0
 
     ReadRegStr $0 HKLM "System\CurrentControlSet\Control\ComputerName\ActiveComputerName" "ComputerName"
@@ -358,16 +340,10 @@ SectionEnd
 
 Function .onInit
     VAR /GLOBAL previous_install_dir
-    ${If} ${RunningX64}
-        SetRegView 64
-    ${EndIf}
+    SetRegView 64
     ReadRegStr $previous_install_dir HKLM "${REGISTRY_KEY}" "Install_Dir"
     ${If} $previous_install_dir == ""
-        ${If} ${RunningX64}
-            StrCpy $INSTDIR "$PROGRAMFILES64\Odoo ${VERSION}"
-        ${Else}
-            StrCpy $INSTDIR "$PROGRAMFILES\Odoo ${VERSION}"
-        ${EndIf}
+        StrCpy $INSTDIR "$PROGRAMFILES64\Odoo ${VERSION}"
         WriteRegStr HKLM "${REGISTRY_KEY}" "Install_dir" "$INSTDIR"
     ${EndIf}
 
