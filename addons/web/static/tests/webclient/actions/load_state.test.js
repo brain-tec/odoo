@@ -106,6 +106,15 @@ defineActions([
         ],
     },
     {
+        id: 5,
+        xml_id: "action_5",
+        name: "Create a Partner",
+        res_model: "partner",
+        target: "new",
+        type: "ir.actions.act_window",
+        views: [[false, "form"]],
+    },
+    {
         id: 1001,
         tag: "__test__client__action__",
         target: "main",
@@ -333,7 +342,7 @@ describe(`new urls`, () => {
 
     test(`correctly sends additional context`, async () => {
         // %2C is a URL-encoded comma
-        redirect("/odoo/4/action-1001?active_ids=4%2C8");
+        redirect("/odoo/4/action-1001");
         logHistoryInteractions();
         onRpc("/web/action/load", async (request) => {
             expect.step("/web/action/load");
@@ -342,7 +351,7 @@ describe(`new urls`, () => {
                 action_id: 1001,
                 context: {
                     active_id: 4, // aditional context
-                    active_ids: [4, 8], // aditional context
+                    active_ids: [4], // aditional context
                     lang: "en", // user context
                     tz: "taht", // user context
                     uid: 7, // user context
@@ -352,15 +361,12 @@ describe(`new urls`, () => {
         });
 
         await mountWebClient();
-        expect(browser.location.href).toBe(
-            "http://example.com/odoo/4/action-1001?active_ids=4%2C8",
-            {
-                message: "url did not change",
-            }
-        );
+        expect(browser.location.href).toBe("http://example.com/odoo/4/action-1001", {
+            message: "url did not change",
+        });
         expect([
             "/web/action/load",
-            "Update the state without updating URL, nextState: actionStack,action,active_id,active_ids",
+            "Update the state without updating URL, nextState: actionStack,action,active_id",
         ]).toVerifySteps();
     });
 
@@ -515,7 +521,7 @@ describe(`new urls`, () => {
         ]).toVerifySteps();
     });
 
-    test(`properly load client actions with updateResId`, async () => {
+    test(`properly load client actions with updateActionState`, async () => {
         class ClientAction extends Component {
             static template = xml`<ControlPanel/><div class="o_client_action_test">Hello World</div>`;
             static props = ["*"];
@@ -524,7 +530,7 @@ describe(`new urls`, () => {
 
             setup() {
                 onMounted(() => {
-                    this.props.updateResId(12);
+                    this.props.updateActionState({ resId: 12 });
                 });
             }
         }
@@ -1226,6 +1232,56 @@ describe(`new urls`, () => {
             "Partners Action 28",
             "First record",
         ]);
+    });
+
+    test(`don't load controllers when load action new`, async () => {
+        stepAllNetworkCalls();
+        redirect("/odoo/action-3/2");
+        Partner._views["form,false"] = /* xml */ `
+            <form string="Partner">
+                <sheet>
+                    <a href="http://example.com/odoo/action-5" class="clickMe">clickMe</a>
+                    <group>
+                        <field name="display_name"/>
+                        <field name="foo"/>
+                    </group>
+                </sheet>
+            </form>
+        `;
+        await mountWebClient();
+        expect(`.o_form_view`).toHaveCount(1);
+        expect(queryAllTexts(".breadcrumb-item, .o_breadcrumb .active")).toEqual([
+            "Partners",
+            "Second record",
+        ]);
+        expect([
+            "/web/webclient/translations",
+            "/web/webclient/load_menus",
+            "/web/action/load",
+            "get_views",
+            "web_read",
+        ]).toVerifySteps();
+        expect(browser.location.href).toBe("http://example.com/odoo/action-3/2", {
+            message: "url did not change",
+        });
+
+        // Open the dialog
+        await contains(`.clickMe`).click();
+        await animationFrame();
+        expect(`.o_dialog .o_form_view`).toHaveCount(1);
+        expect(["/web/action/load", "get_views", "onchange"]).toVerifySteps();
+        expect(browser.location.href).toBe("http://example.com/odoo/action-3/2", {
+            message: "url did not change",
+        });
+
+        // Close te dialog
+        await contains(`.o_dialog .o_form_button_cancel`).click();
+
+        // Go back to the multi-record view
+        await contains(`.breadcrumb-item`).click();
+        await animationFrame();
+        expect(`.o_list_view`).toHaveCount(1);
+        expect(["web_search_read", "has_group"]).toVerifySteps();
     });
 });
 
