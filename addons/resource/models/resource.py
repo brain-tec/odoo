@@ -162,7 +162,7 @@ class ResourceCalendar(models.Model):
             company_id = res.get('company_id', self.env.company.id)
             company = self.env['res.company'].browse(company_id)
             company_attendance_ids = company.resource_calendar_id.attendance_ids
-            if company_attendance_ids:
+            if not company.resource_calendar_id.two_weeks_calendar and company_attendance_ids:
                 res['attendance_ids'] = [
                     (0, 0, {
                         'name': attendance.name,
@@ -216,7 +216,7 @@ class ResourceCalendar(models.Model):
 
     @api.depends('company_id')
     def _compute_attendance_ids(self):
-        for calendar in self.filtered(lambda c: not c._origin or c._origin.company_id != c.company_id):
+        for calendar in self.filtered(lambda c: not c._origin or c._origin.company_id != c.company_id and c.company_id):
             company_calendar = calendar.company_id.resource_calendar_id
             calendar.write({
                 'two_weeks_calendar': company_calendar.two_weeks_calendar,
@@ -382,14 +382,16 @@ class ResourceCalendar(models.Model):
         """ Return the attendance intervals in the given datetime range.
             The returned intervals are expressed in specified tz or in the resource's timezone.
         """
-        self.ensure_one()
-        resources = self.env['resource.resource'] if not resources else resources
         assert start_dt.tzinfo and end_dt.tzinfo
         self.ensure_one()
         combine = datetime.combine
         required_tz = tz
 
-        resources_list = list(resources) + [self.env['resource.resource']]
+        if not resources:
+            resources = self.env['resource.resource']
+            resources_list = [resources]
+        else:
+            resources_list = list(resources) + [self.env['resource.resource']]
         resource_ids = [r.id for r in resources_list]
         domain = domain if domain is not None else []
         domain = expression.AND([domain, [
@@ -469,15 +471,18 @@ class ResourceCalendar(models.Model):
         """ Return the leave intervals in the given datetime range.
             The returned intervals are expressed in specified tz or in the calendar's timezone.
         """
-        resources = self.env['resource.resource'] if not resources else resources
         assert start_dt.tzinfo and end_dt.tzinfo
         self.ensure_one()
 
-        # for the computation, express all datetimes in UTC
-        resources_list = list(resources) + [self.env['resource.resource']]
+        if not resources:
+            resources = self.env['resource.resource']
+            resources_list = [resources]
+        else:
+            resources_list = list(resources) + [self.env['resource.resource']]
         resource_ids = [r.id for r in resources_list]
         if domain is None:
             domain = [('time_type', '=', 'leave')]
+        # for the computation, express all datetimes in UTC
         domain = domain + [
             ('calendar_id', 'in', [False, self.id]),
             ('resource_id', 'in', resource_ids),
@@ -515,7 +520,7 @@ class ResourceCalendar(models.Model):
             resources = self.env['resource.resource']
             resources_list = [resources]
         else:
-            resources_list = list(resources)
+            resources_list = list(resources) + [self.env['resource.resource']]
 
         attendance_intervals = self._attendance_intervals_batch(start_dt, end_dt, resources, tz=tz)
         leave_intervals = self._leave_intervals_batch(start_dt, end_dt, resources, domain, tz=tz)
@@ -580,8 +585,11 @@ class ResourceCalendar(models.Model):
         @return dict with hours of attendance in each day between `from_datetime` and `to_datetime`
         """
         self.ensure_one()
-        resources = self.env['resource.resource'] if not resources else resources
-        resources_list = list(resources) + [self.env['resource.resource']]
+        if not resources:
+            resources = self.env['resource.resource']
+            resources_list = [resources]
+        else:
+            resources_list = list(resources) + [self.env['resource.resource']]
         # total hours per day:  retrieve attendances with one extra day margin,
         # in order to compute the total hours on the first and last days
         from_full = from_datetime - timedelta(days=1)

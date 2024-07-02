@@ -3,10 +3,11 @@
 # 	* hr
 # 
 # Translators:
-# Martin Trigaux, 2021
 # Cécile Collart <cco@odoo.com>, 2021
-# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2021
-# Braulio D. López Vázquez <bdl@odoo.com>, 2022
+# Braulio D. López Vázquez <bdl@odoo.com>, 2023
+# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2024
+# Martin Trigaux, 2024
+# Fernanda Alvarez, 2024
 # 
 msgid ""
 msgstr ""
@@ -14,8 +15,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-09-14 10:28+0000\n"
 "PO-Revision-Date: 2021-09-14 12:22+0000\n"
-"Last-Translator: Braulio D. López Vázquez <bdl@odoo.com>, 2022\n"
-"Language-Team: Spanish (Mexico) (https://www.transifex.com/odoo/teams/41243/es_MX/)\n"
+"Last-Translator: Fernanda Alvarez, 2024\n"
+"Language-Team: Spanish (Mexico) (https://app.transifex.com/odoo/teams/41243/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -256,7 +257,7 @@ msgstr "Alcance los objetivos de ventas mensuales"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__message_needaction
 #: model:ir.model.fields,field_description:hr.field_hr_job__message_needaction
 msgid "Action Needed"
-msgstr "Acción requerida"
+msgstr "Se requiere una acción"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__active
@@ -284,7 +285,7 @@ msgstr "Actividad"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Decoración de actividad de excepción"
+msgstr "Decoración de la actividad de excepción"
 
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_config_plan
@@ -432,7 +433,7 @@ msgstr "Archivar"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_departure_wizard__archive_private_address
 msgid "Archive Private Address"
-msgstr "Archivar dirección privada"
+msgstr "Archivar dirección particular"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
@@ -708,7 +709,7 @@ msgstr "Empresas"
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_search
 #: model_terms:ir.ui.view,arch_db:hr.view_job_filter
 msgid "Company"
-msgstr "Empresas"
+msgstr "Empresa"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__company_country_id
@@ -804,7 +805,7 @@ msgstr "Crear un nuevo departamento"
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Create content that will help our users on a daily basis"
-msgstr "Crear contenido que ayude a nuestros usuarios diariamente"
+msgstr "Crear contenido que ayude a nuestros usuarios a diario"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form
@@ -1302,7 +1303,7 @@ msgstr "Icono de Font Awesome ej. fa-tasks"
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee_base__employee_type__freelance
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee_public__employee_type__freelance
 msgid "Freelancer"
-msgstr "Freelancer"
+msgstr "Trabajador independiente"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -1345,7 +1346,7 @@ msgstr "Experiencia en Google Adwords"
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__certificate__graduate
 msgid "Graduate"
-msgstr "Licenciado"
+msgstr "Egresado"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -1473,7 +1474,7 @@ msgstr "Icono"
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr "Icono para indicar una actividad de excepción."
+msgstr "Icono que indica una actividad de excepción."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__identification_id
@@ -1542,7 +1543,7 @@ msgstr "Imagen 512"
 #: code:addons/hr/models/hr_employee.py:0
 #, python-format
 msgid "Import Template for Employees"
-msgstr "Importar plantillas para empleados"
+msgstr "Plantilla de importación para empleados"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_job_filter
@@ -1695,7 +1696,7 @@ msgstr "Actividades atrasadas"
 #: model_terms:ir.ui.view,arch_db:hr.plan_wizard
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Launch Plan"
-msgstr "Lanzar plan"
+msgstr "Iniciar plan"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -1716,7 +1717,7 @@ msgstr "Cohabitante legal"
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.action_hr_job
 msgid "Let's create a job position."
-msgstr "Vamos a crear un puesto de trabajo."
+msgstr "Creemos un puesto de trabajo."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
@@ -2075,8 +2076,8 @@ msgid ""
 "application."
 msgstr ""
 "NIP que se utiliza para el registro de entrada/salida en el modo quiosco de "
-"la aplicación de Asistencias (si se habilita en Configuración) y para "
-"cambiar el cajero en la aplicación de Punto de venta."
+"la aplicación Asistencias (si se habilita en Configuración) y para cambiar "
+"el cajero en la aplicación Punto de venta."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__parent_id
@@ -2087,7 +2088,7 @@ msgstr "Departamento padre"
 #: model:ir.model.fields,help:hr.field_hr_employee__user_partner_id
 #: model:ir.model.fields,help:hr.field_hr_employee_public__user_partner_id
 msgid "Partner-related data of the user"
-msgstr "Datos de usuario relacionados al partner"
+msgstr "Datos relacionados al contacto del usuario"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2254,12 +2255,12 @@ msgstr "Presente pero inactivo"
 #: model:ir.actions.report,name:hr.hr_employee_print_badge
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Print Badge"
-msgstr "Imprimir insignia"
+msgstr "Imprimir credencial"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 msgid "Private Address"
-msgstr "Dirección privada"
+msgstr "Dirección particular"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__private_city
@@ -2388,7 +2389,7 @@ msgstr "Empleado relacionado"
 #. module: hr
 #: model:ir.model.fields,help:hr.field_res_partner__employee_ids
 msgid "Related employees based on their private address"
-msgstr "Empleados relacionados según su dirección privada"
+msgstr "Empleados relacionados según su dirección particular"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__user_id
@@ -2621,7 +2622,7 @@ msgstr "Calle..."
 #: model_terms:hr.job,website_description:hr.job_marketing
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Strong analytical skills"
-msgstr "Fuertes habilidades analíticas"
+msgstr "Habilidades analíticas avanzadas"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__employee_type__student
@@ -2919,8 +2920,8 @@ msgstr "Permiso de trabajo válido para Bélgica"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__visa_expire
 #: model:ir.model.fields,field_description:hr.field_res_users__visa_expire
-msgid "Visa Expire Date"
-msgstr "Fecha de vencimiento de visa"
+msgid "Visa Expiration Date"
+msgstr "Fecha de vencimiento de la visa"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__visa_no
@@ -2999,7 +3000,7 @@ msgstr "Dirección laboral"
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__work_email
 #: model:ir.model.fields,field_description:hr.field_res_users__work_email
 msgid "Work Email"
-msgstr "Correo electrónico laboral"
+msgstr "Correo de trabajo"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
@@ -3032,7 +3033,7 @@ msgstr "Ubicaciones de trabajo"
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__mobile_phone
 #: model:ir.model.fields,field_description:hr.field_res_users__mobile_phone
 msgid "Work Mobile"
-msgstr "Teléfono celular laboral"
+msgstr "Teléfono de trabajo"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
@@ -3130,7 +3131,7 @@ msgstr "departamento"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
 msgid "e.g. John Doe"
-msgstr "Por ejemplo, John Doe"
+msgstr "Por ejemplo, Juan Pérez"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_plan_view_form

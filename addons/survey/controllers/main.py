@@ -359,7 +359,9 @@ class Survey(http.Controller):
                     'page_number': page_ids.index(survey_data['page'].id) + (1 if survey_sudo.progression_mode == 'number' else 0)
                 })
             elif survey_sudo.questions_layout == 'page_per_question':
-                page_ids = survey_sudo.question_ids.ids
+                page_ids = (answer_sudo.predefined_question_ids.ids
+                            if not answer_sudo.is_session_answer and survey_sudo.questions_selection == 'random'
+                            else survey_sudo.question_ids.ids)
                 survey_progress = request.env.ref('survey.survey_progression')._render({
                     'survey': survey_sudo,
                     'page_ids': page_ids,
@@ -574,7 +576,7 @@ class Survey(http.Controller):
         access_data = self._get_access_data(survey_token, answer_token, ensure_token=False, check_partner=False)
         if access_data['validity_code'] is not True and (
                 access_data['has_survey_access'] or
-                access_data['validity_code'] not in ['token_required', 'survey_closed', 'survey_void']):
+                access_data['validity_code'] not in ['token_required', 'survey_closed', 'survey_void', 'answer_deadline']):
             return self._redirect_with_error(access_data, access_data['validity_code'])
 
         survey_sudo, answer_sudo = access_data['survey_sudo'], access_data['answer_sudo']

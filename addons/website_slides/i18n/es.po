@@ -7,10 +7,11 @@
 # Pascual Lorente, 2021
 # Sergio Pinilla Ávila <serjudo@gmail.com>, 2021
 # Jeffrey Sorsby, 2022
-# Daniel Blanco <daniel@blancomartin.com.ar>, 2022
-# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2022
+# Daniel Blanco <daniel@blancomartin.cl>, 2022
 # Jonatan Gk, 2022
 # marcescu, 2022
+# Larissa Manderfeld, 2023
+# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2024
 # 
 msgid ""
 msgstr ""
@@ -18,13 +19,13 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-10-05 10:53+0000\n"
 "PO-Revision-Date: 2021-09-14 12:29+0000\n"
-"Last-Translator: marcescu, 2022\n"
-"Language-Team: Spanish (https://www.transifex.com/odoo/teams/41243/es/)\n"
+"Last-Translator: Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2024\n"
+"Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_partner__completed_slides_count
@@ -3952,6 +3953,12 @@ msgid "Only JPG, PNG, PDF, files types are supported"
 msgstr "Solo son compatibles los tipos de archivo JPG, PNG y PDF"
 
 #. module: website_slides
+#: code:addons/website_slides/controllers/mail.py:0
+#, python-format
+msgid "Only a single review can be posted per course."
+msgstr "Solo se puede publicar una valoración por curso."
+
+#. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel_invite__lang
 msgid ""
 "Optional translation language (ISO code) to select when sending out an "
@@ -5009,7 +5016,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_tag_tree
 #, python-format
 msgid "Tags"
-msgstr "Categorías"
+msgstr "Etiquetas"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
@@ -5730,6 +5737,16 @@ msgstr "XP"
 #, python-format
 msgid "Yes"
 msgstr "Sí"
+
+#. module: website_slides
+#: code:addons/website_slides/wizard/slide_channel_invite.py:0
+#, python-format
+msgid ""
+"You are not allowed to add members to this course. Please contact the course"
+" responsible or an administrator."
+msgstr ""
+"No tiene permitido agregar miembros a este curso. Contacte al responsable "
+"del curso o a un administrador."
 
 #. module: website_slides
 #. openerp-web

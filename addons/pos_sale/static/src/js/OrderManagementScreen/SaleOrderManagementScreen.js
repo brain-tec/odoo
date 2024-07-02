@@ -3,6 +3,7 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
 
     const { sprintf } = require('web.utils');
     const { parse } = require('web.field_utils');
+    const { _t } = require('@web/core/l10n/translation');
     const { useContext } = owl.hooks;
     const { useListener } = require('web.custom_hooks');
     const ControlButtonsMixin = require('point_of_sale.ControlButtonsMixin');
@@ -83,11 +84,6 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
             if(confirmed){
               let currentPOSOrder = this.env.pos.get_order();
               let sale_order = await this._getSaleOrder(clickedOrder.id);
-              try {
-                await this.env.pos.load_new_partners();
-              }
-              catch (error){
-              }
               let order_partner = this.env.pos.db.get_partner_by_id(sale_order.partner_id[0])
               if(order_partner){
                 currentPOSOrder.set_client(order_partner);
@@ -160,7 +156,7 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
                         pos: this.env.pos,
                         order: this.env.pos.get_order(),
                         product: this.env.pos.db.get_product_by_id(line.product_id[0]),
-                        description: line.name,
+                        description: line.product_id[1],
                         price: line.price_unit,
                         tax_ids: orderFiscalPos ? undefined : line.tax_id,
                         price_manually_set: true,
@@ -168,6 +164,8 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
                         sale_order_line_id: line,
                         customer_note: line.customer_note,
                     });
+
+                    this.env.pos.get_order().set_orderline_options(new_line, line);
 
                     if (
                         new_line.get_product().tracking !== 'none' &&
@@ -215,7 +213,11 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
                             'total': lines[i].price_total,
                         };
                     }
-                    let down_payment_product = this.env.pos.db.get_product_by_id(this.env.pos.config.down_payment_product_id[0])
+                    let down_payment_product = this.env.pos.db.get_product_by_id(this.env.pos.config.down_payment_product_id[0]);
+                    if (!down_payment_product) {
+                        await this.env.pos._addProducts([this.env.pos.config.down_payment_product_id[0]]);
+                        down_payment_product = this.env.pos.db.get_product_by_id(this.env.pos.config.down_payment_product_id[0]);
+                    }
                     let down_payment_tax = this.env.pos.taxes_by_id[down_payment_product.taxes_id] || false ;
                     let down_payment;
                     if (down_payment_tax) {
@@ -233,13 +235,23 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
                         down_payment = down_payment * parse.float(payload) / 100;
                     }
 
+                    if (down_payment > sale_order.amount_unpaid) {
+                        const errorBody = sprintf(
+                            this.env._t("You have tried to charge a down payment of %s but only %s remains to be paid, %s will be applied to the purchase order line."),
+                            this.env.pos.format_currency(down_payment),
+                            this.env.pos.format_currency(sale_order.amount_unpaid),
+                            sale_order.amount_unpaid > 0 ? this.env.pos.format_currency(sale_order.amount_unpaid) : this.env.pos.format_currency(0),
+                        );
+                        await this.showPopup('ErrorPopup', { title: _t('Error amount too high'), body: errorBody });
+                        down_payment = sale_order.amount_unpaid > 0 ? sale_order.amount_unpaid : 0;
+                    }
 
                     let new_line = new models.Orderline({}, {
                         pos: this.env.pos,
                         order: this.env.pos.get_order(),
                         product: down_payment_product,
                         price: down_payment,
-                        price_manually_set: true,
+                        price_automatically_set: true,
                         sale_order_origin_id: clickedOrder,
                         down_payment_details: tab,
                     });
@@ -263,15 +275,24 @@ odoo.define('pos_sale.SaleOrderManagementScreen', function (require) {
         }
 
         async _getSaleOrder(id) {
-            let sale_order = await this.rpc({
+            const sale_order = await this.rpc({
                 model: 'sale.order',
                 method: 'read',
                 args: [[id],['order_line', 'partner_id', 'pricelist_id', 'fiscal_position_id', 'amount_total', 'amount_untaxed']],
                 context: this.env.session.user_context,
-              });
+            });
 
-            let sale_lines = await this._getSOLines(sale_order[0].order_line);
-            sale_order[0].order_line = sale_lines;
+            const saleOrdersAmountUnpaid = await this.rpc({
+                model: 'sale.order',
+                method: 'get_order_amount_unpaid',
+                args: [[id]],
+                context: this.env.session.user_context,
+            });
+            sale_order[0].amount_unpaid = saleOrdersAmountUnpaid[sale_order[0].id];
+
+            const sale_lines = await this._getSOLines(sale_order[0].order_line);
+            const promo_products_to_remove = this.env.pos.promo_programs ? this.env.pos.promo_programs.flatMap(program => program.promo_code_usage === 'no_code_needed' ? program.discount_line_product_id[0] : []) : [];
+            sale_order[0].order_line = sale_lines.filter(line => !promo_products_to_remove.includes(line.product_id[0]));
 
             return sale_order[0];
         }

@@ -4,7 +4,7 @@ import math
 
 from odoo import api, fields, models, _
 from odoo.tools import float_is_zero
-from odoo.tools.misc import formatLang, format_date
+from odoo.tools.misc import formatLang, format_date, str2bool
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -642,7 +642,7 @@ class AccountBankStatementLine(models.Model):
 
     @api.model
     def _prepare_counterpart_move_line_vals(self, counterpart_vals, move_line=None):
-        ''' Prepare values to create a new account.move.line move_line.
+        r''' Prepare values to create a new account.move.line move_line.
         By default, without specified 'counterpart_vals' or 'move_line', the counterpart line is
         created using the suspense account. Otherwise, this method is also called during the
         reconciliation to prepare the statement line's journal entry. In that case,
@@ -874,6 +874,12 @@ class AccountBankStatementLine(models.Model):
             vals['currency_id'] = (journal.currency_id or journal.company_id.currency_id).id
             if 'date' not in vals:
                 vals['date'] = statement.date
+
+            # Avoid having the same foreign_currency_id as currency_id.
+            journal_currency = journal.currency_id or journal.company_id.currency_id
+            if vals.get('foreign_currency_id') == journal_currency.id:
+                vals['foreign_currency_id'] = None
+                vals['amount_currency'] = 0.0
 
             # Hack to force different account instead of the suspense account.
             counterpart_account_ids.append(vals.pop('counterpart_account_id', None))
@@ -1276,7 +1282,9 @@ class AccountBankStatementLine(models.Model):
     def _find_or_create_bank_account(self):
         bank_account = self.env['res.partner.bank'].search(
             [('company_id', '=', self.company_id.id), ('acc_number', '=', self.account_number)])
-        if not bank_account:
+        if not bank_account and not str2bool(
+            self.env['ir.config_parameter'].sudo().get_param("account.skip_create_bank_account_on_reconcile")
+        ):
             bank_account = self.env['res.partner.bank'].create({
                 'acc_number': self.account_number,
                 'partner_id': self.partner_id.id,

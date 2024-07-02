@@ -4,6 +4,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError, RedirectWarning
 from odoo.tools.misc import formatLang, format_date
+from odoo.tools.sql import column_exists, create_column
 
 INV_LINES_PER_STUB = 9
 
@@ -44,6 +45,16 @@ class AccountPayment(models.Model):
     )
     payment_method_line_id = fields.Many2one(index=True)
 
+    def _auto_init(self):
+        """
+        Create compute stored field check_number
+        here to avoid MemoryError on large databases.
+        """
+        if not column_exists(self.env.cr, 'account_payment', 'check_number'):
+            create_column(self.env.cr, 'account_payment', 'check_number', 'varchar')
+
+        return super()._auto_init()
+
     @api.constrains('check_number', 'journal_id')
     def _constrains_check_number(self):
         payment_checks = self.filtered('check_number')
@@ -60,7 +71,7 @@ class AccountPayment(models.Model):
               JOIN account_journal journal ON journal.id = move.journal_id,
                    account_payment other_payment
               JOIN account_move other_move ON other_move.id = other_payment.move_id
-             WHERE payment.check_number::INTEGER = other_payment.check_number::INTEGER
+             WHERE payment.check_number::BIGINT = other_payment.check_number::BIGINT
                AND move.journal_id = other_move.journal_id
                AND payment.id != other_payment.id
                AND payment.id IN %(ids)s
@@ -142,7 +153,7 @@ class AccountPayment(models.Model):
                     JOIN account_move move ON movE.id = payment.move_id
                    WHERE journal_id = %(journal_id)s
                    AND payment.check_number IS NOT NULL
-                ORDER BY payment.check_number::INTEGER DESC
+                ORDER BY payment.check_number::BIGINT DESC
                    LIMIT 1
             """, {
                 'journal_id': self.journal_id.id,

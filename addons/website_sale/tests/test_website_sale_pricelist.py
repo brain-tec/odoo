@@ -4,11 +4,12 @@ from unittest.mock import patch
 
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo, HttpCaseWithUserPortal
 from odoo.addons.website.tools import MockRequest
+from odoo.addons.website_sale.tests.common import TestWebsiteSaleCommon
 from odoo.tests import tagged
-from odoo.tests.common import HttpCase, TransactionCase
+from odoo.tests.common import TransactionCase
 from odoo.tools import DotDict
 
-''' /!\/!\
+r''' /!\/!\
 Calling `get_pricelist_available` after setting `property_product_pricelist` on
 a partner will not work as expected. That field will change the output of
 `get_pricelist_available` but modifying it will not invalidate the cache.
@@ -28,7 +29,7 @@ Try to keep one call to `get_pricelist_available` by test method.
 
 
 @tagged('post_install', '-at_install')
-class TestWebsitePriceList(TransactionCase):
+class TestWebsitePriceList(TestWebsiteSaleCommon):
 
     # Mock nedded because request.session doesn't exist during test
     def _get_pricelist_available(self, show_visible=False):

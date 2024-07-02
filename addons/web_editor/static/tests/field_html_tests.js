@@ -277,7 +277,7 @@ QUnit.module('web_editor', {}, function () {
         });
 
         QUnit.test('colorpicker', async function (assert) {
-            assert.expect(6);
+            assert.expect(10);
 
             var form = await testUtils.createView({
                 View: FormView,
@@ -290,6 +290,7 @@ QUnit.module('web_editor', {}, function () {
             });
 
             await testUtils.form.clickEdit(form);
+            await new Promise(resolve => setTimeout(resolve, 50));
             var $field = form.$('.oe_form_field[name="body"]');
 
             // select the text
@@ -307,11 +308,25 @@ QUnit.module('web_editor', {}, function () {
                 const openingProm = new Promise(resolve => {
                     $colorpicker.one('shown.bs.dropdown', () => resolve());
                 });
-                await testUtils.dom.click($colorpicker.find('button:first'));
+                await testUtils.dom.click($colorpicker.find('.dropdown-toggle:first'));
                 return openingProm;
             }
 
-            await new Promise((resolve)=>setTimeout(resolve, 50));
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            await openColorpicker('#toolbar .note-back-color-preview');
+            assert.ok($('.note-back-color-preview').hasClass('show'),
+                "should display the color picker");
+
+            // Test that toolbar and colorpicker are hidden after bluring the toolbar.
+            Wysiwyg.setRange(pText, 1, pText, 1);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            assert.ok(document.querySelector('#toolbar').style.visibility === 'hidden', "toolbar should be hidden");
+            assert.containsNone($, ".dropdown-menu.show", "all dropdowns should be closed");
+
+            Wysiwyg.setRange(pText, 1, pText, 10);
+            await new Promise(resolve => setTimeout(resolve, 50));
+
             await openColorpicker('#toolbar .note-back-color-preview');
             assert.ok($('.note-back-color-preview').hasClass('show'),
                 "should display the color picker");
@@ -327,10 +342,10 @@ QUnit.module('web_editor', {}, function () {
 
             var fontElement = $field.find('.note-editable font')[0];
             var rangeControl = {
-                sc: fontElement,
+                sc: fontElement.firstChild,
                 so: 0,
-                ec: fontElement,
-                eo: 1,
+                ec: fontElement.firstChild,
+                eo: 9,
             };
             range = Wysiwyg.getRange();
             assert.deepEqual(_.pick(range, 'sc', 'so', 'ec', 'eo'), rangeControl,
@@ -345,8 +360,28 @@ QUnit.module('web_editor', {}, function () {
             await testUtils.dom.click($('#toolbar .note-back-color-preview .o_we_color_btn.bg-o-color-3'));
 
             assert.strictEqual($field.find('.note-editable').html(),
-                '<p>t<font style="background-color: rgb(0, 255, 255);">oto t</font><font style="" class="bg-o-color-3">oto to</font>to</p><p>tata</p>',
+                '<p>t<font style="background-color: rgb(0, 255, 255);">oto t</font><font class="bg-o-color-3">oto to</font>to</p><p>tata</p>',
                 "should have rendered the field correctly in edit");
+
+            // Select the whole paragraph.
+            const paragraph = $('.note-editable p:first-child')[0];
+            rangeControl = {
+                sc: paragraph.firstChild,
+                so: 0,
+                ec: paragraph.lastChild,
+                eo: 2,
+            };
+            Wysiwyg.setRange(rangeControl.sc, rangeControl.so, rangeControl.ec, rangeControl.eo);
+
+            await openColorpicker('#toolbar .note-fore-color-preview');
+            await $('#toolbar .note-fore-color-preview .o_we_color_btn.bg-o-color-2').mouseenter();
+            await $('#toolbar .note-fore-color-preview .o_we_color_btn.bg-o-color-2').mouseleave();
+            await $('#toolbar .note-fore-color-preview .o_we_color_btn.bg-o-color-3').mouseenter();
+            await $('#toolbar .note-fore-color-preview .o_we_color_btn.bg-o-color-3').mouseleave();
+
+            range = Wysiwyg.getRange();
+            assert.deepEqual(_.pick(range, 'sc', 'so', 'ec', 'eo'), rangeControl,
+                "shouldn't reset the previous selection on quick hovering on colors");
 
             form.destroy();
         });
@@ -574,6 +609,67 @@ QUnit.module('web_editor', {}, function () {
             form.destroy();
         });
 
+        QUnit.test('media dialog: undo icon to icon change', async function (assert) {
+            assert.expect(2);
+
+            this.data['note.note'].records[0].body ='<p><span class="fa fa-3x rounded bg-primary m-3 fa-times-circle"></span></p>'
+
+            var form = await testUtils.createView({
+                View: FormView,
+                model: 'note.note',
+                data: this.data,
+                arch: '<form>' +
+                    '<field name="body" widget="html" style="height: 100px"/>' +
+                    '</form>',
+                res_id: 1,
+                mockRPC: function (route, args) {
+                    if (args.model === 'ir.attachment') {
+                        return Promise.resolve([]);
+                    }
+                    if (route.indexOf('/web_unsplash/fetch_images') === 0) {
+                        return Promise.resolve();
+                    }
+                    return this._super(route, args);
+                },
+            });
+            const promise = new Promise((resolve) => _formResolveTestPromise = resolve);
+            await testUtils.form.clickEdit(form);
+            await promise;
+
+            // the dialog load some xml assets
+            var defMediaDialog = testUtils.makeTestPromise();
+            testUtils.mock.patch(MediaDialog, {
+                init: function () {
+                    this._super.apply(this, arguments);
+                    this.opened(defMediaDialog.resolve.bind(defMediaDialog));
+                }
+            });
+
+            var pText = document.querySelector('.note-editable p span');
+            Wysiwyg.setRange(pText, 0, pText, 0);
+            const wysiwyg = $('.note-editable').data('wysiwyg');
+            defMediaDialog = testUtils.makeTestPromise();
+            wysiwyg.openMediaDialog();
+
+            // load static xml file (dialog, media dialog, unsplash image widget)
+            await defMediaDialog;
+            document.querySelector('.modal .tab-content .tab-pane').classList.remove('fade'); // to be sync in test
+            await testUtils.dom.click(document.querySelector('.modal a[aria-controls="editor-media-icon"]'));
+            await testUtils.dom.click(document.querySelector('.modal #editor-media-icon .font-icons-icon.fa-glass'));
+
+            assert.strictEqual(wysiwyg.getValue(),
+                '<p><span class="fa fa-3x rounded bg-primary m-3 fa-glass"></span></p>',
+                "should have the new icon in the dom.");
+
+            await wysiwyg.odooEditor.execCommand('undo');
+            assert.strictEqual(wysiwyg.getValue(),
+                '<p><span class="fa fa-3x rounded bg-primary m-3 fa-times-circle"></span></p>',
+                "should have the first icon in the dom.");
+            
+            testUtils.mock.unpatch(MediaDialog);
+            form.destroy();
+        });
+
         QUnit.test('link dialog - external link - no edit', async function (assert) {
             assert.expect(2);
 
@@ -604,8 +700,8 @@ QUnit.module('web_editor', {}, function () {
                 }
             });
 
-            let pText = $field.find('.note-editable p').first().contents()[0];
-            Wysiwyg.setRange(pText.firstChild, 0, pText.firstChild, pText.firstChild.length);
+            let pText = $field.find('.note-editable p a')[0];
+            Wysiwyg.setRange(pText.firstChild, 0, pText.lastChild, pText.lastChild.length);
             await testUtils.dom.triggerEvent($('#toolbar #create-link'), 'click');
             // load static xml file (dialog, link dialog)
             await defLinkDialog;
@@ -653,8 +749,8 @@ QUnit.module('web_editor', {}, function () {
                 }
             });
 
-            let pText = $field.find('.note-editable p').first().contents()[0];
-            Wysiwyg.setRange(pText.firstChild, 0, pText.firstChild, pText.firstChild.length);
+            let pText = $field.find('.note-editable p a')[0];
+            Wysiwyg.setRange(pText.firstChild, 0, pText.lastChild, pText.lastChild.length);
             await testUtils.dom.triggerEvent($('#toolbar #create-link'), 'click');
             // load static xml file (dialog, link dialog)
             await defLinkDialog;
@@ -668,6 +764,61 @@ QUnit.module('web_editor', {}, function () {
             assert.strictEqual($field.children('.o_readonly').html(),
                 '<p><a href="' + window.location.href.replace(/&/g, "&amp;") + '/test">This website</a></p>',
                 "the link shouldn't change");
+
+            testUtils.mock.unpatch(LinkDialog);
+            form.destroy();
+        });
+
+        QUnit.test('link dialog - test preview', async function (assert) {
+            assert.expect(4);
+
+            const form = await testUtils.createView({
+                View: FormView,
+                model: 'note.note',
+                data: this.data,
+                arch: '<form>' +
+                    '<field name="body" widget="html" style="height: 100px"/>' +
+                    '</form>',
+                res_id: 3,
+            });
+            let $field = form.$('.oe_form_field[name="body"]');
+            assert.strictEqual($field.children('.o_readonly').html(),
+                '<p><a href="' + window.location.href.replace(/&/g, "&amp;") + '/test">This website</a></p>',
+                "should have rendered a div with correct content in readonly");
+
+            const promise = new Promise((resolve) => _formResolveTestPromise = resolve);
+            await testUtils.form.clickEdit(form);
+            await promise;
+            $field = form.$('.oe_form_field[name="body"]');
+            // the dialog load some xml assets
+            const defLinkDialog = testUtils.makeTestPromise();
+            testUtils.mock.patch(LinkDialog, {
+                init: function () {
+                    this._super.apply(this, arguments);
+                    this.opened(defLinkDialog.resolve.bind(defLinkDialog));
+                }
+            });
+
+
+            let pText = $field.find('.note-editable p a')[0];
+            Wysiwyg.setRange(pText.firstChild, 0, pText.lastChild, pText.lastChild.length);
+            await testUtils.dom.triggerEvent($('#toolbar #create-link'), 'click');
+            // load static xml file (dialog, link dialog)
+            await defLinkDialog;
+            $('.modal .tab-content .tab-pane').removeClass('fade'); // to be sync in test
+            const $labelInputField = $('input#o_link_dialog_label_input');
+            const $linkPreview = $('a#link-preview');
+            assert.strictEqual($labelInputField.val().replaceAll('\ufeff', ''), 'This website',
+                "The label input field should match the link's content");
+            assert.strictEqual($linkPreview.text().replaceAll('\ufeff', ''), 'This website',
+                "Link label in preview should match label input field");
+            await testUtils.fields.editAndTrigger($labelInputField, "New label", ['input']);
+            await testUtils.nextTick();
+            assert.strictEqual($linkPreview.text(), "New label",
+                "Preview should be updated on label input field change");
+            await testUtils.dom.click($('.modal .modal-footer button:contains(Save)'));
+
+            await testUtils.form.clickSave(form);
 
             testUtils.mock.unpatch(LinkDialog);
             form.destroy();

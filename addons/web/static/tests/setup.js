@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-import core from "web.core";
+import LegacyBus from "web.Bus";
 import session from "web.session";
-import { _t } from "web.core";
+import { _t, qweb } from "web.core";
 import { browser, makeRAMLocalStorage } from "@web/core/browser/browser";
 import { patchWithCleanup } from "@web/../tests/helpers/utils";
 import { legacyProm } from "web.test_legacy";
@@ -135,16 +135,14 @@ function patchBrowserWithCleanup() {
     );
 }
 
-function patchLegacyCoreBus() {
+function patchLegacyBus() {
     // patch core.bus.on to automatically remove listners bound on the legacy bus
     // during a test (e.g. during the deployment of a service)
-    const originalOn = core.bus.on.bind(core.bus);
-    const originalOff = core.bus.off.bind(core.bus);
-    patchWithCleanup(core.bus, {
+    patchWithCleanup(LegacyBus.prototype, {
         on() {
-            originalOn(...arguments);
+            this._super(...arguments);
             registerCleanup(() => {
-                originalOff(...arguments);
+                this.off(...arguments);
             });
         },
     });
@@ -222,7 +220,7 @@ export async function setupTests() {
         prepareLegacyRegistriesWithCleanup();
         forceLocaleAndTimezoneWithCleanup();
         patchBrowserWithCleanup();
-        patchLegacyCoreBus();
+        patchLegacyBus();
         patchOdoo();
         patchSessionInfo();
     });
@@ -243,6 +241,10 @@ export async function setupTests() {
     // as well to make sure images won't trigger a GET request on the
     // server.
     removeUnwantedAttrsFromTemplates(doc, ['alt', 'src']);
+    // at this point, templates might already be loaded in qweb, so remove unwanted attrs there
+    for (const template of Object.values(qweb.templates)) {
+        removeUnwantedAttrsFromTemplates(template, ["alt", "src"]);
+    }
     const owlTemplates = [];
     for (let child of doc.querySelectorAll("templates > [owl]")) {
         child.removeAttribute("owl");

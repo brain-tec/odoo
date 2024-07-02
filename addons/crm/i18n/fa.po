@@ -9,13 +9,16 @@
 # سید محمد آذربرا <mohammadazarbara98@gmail.com>, 2022
 # Hamid Reza Kaveh <hamidrkp@riseup.net>, 2022
 # M.Hossein S.Farvashani <Farvashani@gmail.com>, 2022
-# Far Har <fhari1234@gmail.com>, 2022
+# F Hariri <fhari1234@gmail.com>, 2022
 # Maziar Niaki <maziarmn@gmail.com>, 2022
 # Hamid Darabi, 2022
 # Martin Trigaux, 2022
 # Hamed Mohammadi <hamed@dehongi.com>, 2022
 # Mohammad Tahmasebi <hit.tah75@gmail.com>, 2022
-# Hanna Kheradroosta, 2022
+# fardin mardani <fmardani0@gmail.com>, 2023
+# Ali Abdollahi, 2023
+# Hamid Ahmadimoghaddam, 2023
+# Hanna Kheradroosta, 2024
 # 
 msgid ""
 msgstr ""
@@ -23,8 +26,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-10-05 10:53+0000\n"
 "PO-Revision-Date: 2021-09-14 12:21+0000\n"
-"Last-Translator: Hanna Kheradroosta, 2022\n"
-"Language-Team: Persian (https://www.transifex.com/odoo/teams/41243/fa/)\n"
+"Last-Translator: Hanna Kheradroosta, 2024\n"
+"Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -77,7 +80,7 @@ msgstr "%(assigned)s سرنخ به تیم %(team_name)s اختصاص داده ش
 #: code:addons/crm/models/crm_lead.py:0
 #, python-format
 msgid "%(attach_name)s (from %(lead_name)s)"
-msgstr ""
+msgstr "%(attach_name)s (از %(lead_name)s)"
 
 #. module: crm
 #: code:addons/crm/models/crm_team.py:0
@@ -96,7 +99,7 @@ msgstr "%(members_assigned)s سرنخ تخصیص یافته بین %(member_coun
 #: code:addons/crm/models/res_config_settings.py:0
 #, python-format
 msgid "%s and %s"
-msgstr ""
+msgstr "%s و %s"
 
 #. module: crm
 #: code:addons/crm/models/crm_lead.py:0
@@ -182,7 +185,7 @@ msgstr ""
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_kanban_view_leads
 msgid "<span class=\"bg-danger\">Lost</span>"
-msgstr ""
+msgstr "<span class=\"bg-danger\">از دست رفته</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -224,7 +227,7 @@ msgstr ""
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_form
 msgid "<span class=\"o_stat_text\"> Leads</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\"> سرنخ‌ها</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -1650,7 +1653,7 @@ msgstr "یادداشت‌های داخلی"
 #. module: crm
 #: model:ir.model.fields,help:crm.field_res_config_settings__crm_auto_assignment_interval_type
 msgid "Interval type between each cron run (e.g. each 2 days or each 2 hours)"
-msgstr ""
+msgstr "بازه بین هر اجرای کرون (به عنوان مثال هر 2 روز یا هر 2 ساعت)"
 
 #. module: crm
 #: code:addons/crm/models/res_config_settings.py:0
@@ -1791,7 +1794,7 @@ msgstr "تخصیص سرنخ درخواست شده توسط %(user_name)s"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__assignment_max
 msgid "Lead Average Capacity"
-msgstr ""
+msgstr "ظرفیت متوسط سرنخ"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
@@ -2455,7 +2458,7 @@ msgstr "تعداد خطاها"
 msgid ""
 "Number of interval type between each cron run (e.g. each 2 days or each 4 "
 "days)"
-msgstr ""
+msgstr "تعداد نوع بازه بین هر اجرا کرون (به عنوان مثال هر 2 روز یا هر 4 روز)"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team__lead_all_assigned_month_count
@@ -2993,7 +2996,7 @@ msgstr "تیم فروش"
 #. module: crm
 #: model:ir.model,name:crm.model_crm_team_member
 msgid "Sales Team Member"
-msgstr ""
+msgstr "عضو تیم فروش"
 
 #. module: crm
 #: code:addons/crm/models/crm_lead.py:0
@@ -3027,7 +3030,7 @@ msgstr "فروشندگان"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__phone_sanitized
 msgid "Sanitized Number"
-msgstr ""
+msgstr "شماره معتبر شده"
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lead_action_my_activities

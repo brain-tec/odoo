@@ -4,10 +4,12 @@
 # 
 # Translators:
 # InfernalLV <karlisdreizis@gmail.com>, 2022
-# ievaputnina <ievai.putninai@gmail.com>, 2022
 # Arnis Putniņš <arnis@allegro.lv>, 2022
 # Martin Trigaux, 2022
 # Anzelika Adejanova, 2022
+# ievaputnina <ievai.putninai@gmail.com>, 2023
+# Lauris Nonbergs, 2023
+# Will Sensors, 2024
 # 
 msgid ""
 msgstr ""
@@ -15,8 +17,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-11-16 13:19+0000\n"
 "PO-Revision-Date: 2021-09-14 12:20+0000\n"
-"Last-Translator: Anzelika Adejanova, 2022\n"
-"Language-Team: Latvian (https://www.transifex.com/odoo/teams/41243/lv/)\n"
+"Last-Translator: Will Sensors, 2024\n"
+"Language-Team: Latvian (https://app.transifex.com/odoo/teams/41243/lv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -47,7 +49,7 @@ msgstr ""
 #: code:addons/base_import/static/src/legacy/js/import_action.js:0
 #, python-format
 msgid "Additional Fields"
-msgstr ""
+msgstr "Papildus Lauki"
 
 #. module: base_import
 #. openerp-web
@@ -82,7 +84,7 @@ msgstr "Bāze"
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_import
 msgid "Base Import"
-msgstr ""
+msgstr "Bāzes Imports"
 
 #. module: base_import
 #: model:ir.model,name:base_import.model_base_import_mapping
@@ -132,7 +134,7 @@ msgstr ""
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__column_name
 msgid "Column Name"
-msgstr ""
+msgstr "Kolonnas Vārds"
 
 #. module: base_import
 #. openerp-web
@@ -140,7 +142,7 @@ msgstr ""
 #: code:addons/base_import/static/src/legacy/js/import_action.js:0
 #, python-format
 msgid "Comma"
-msgstr ""
+msgstr "Komats"
 
 #. module: base_import
 #. openerp-web
@@ -162,7 +164,7 @@ msgstr ""
 #: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
 #, python-format
 msgid "Create new values"
-msgstr ""
+msgstr "Izveidot jaunas vērtības"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__create_uid
@@ -224,7 +226,7 @@ msgstr "Datubāzes ID"
 #: code:addons/base_import/static/src/legacy/js/import_action.js:0
 #, python-format
 msgid "Date Format:"
-msgstr ""
+msgstr "Datuma formāts:"
 
 #. module: base_import
 #. openerp-web
@@ -301,6 +303,22 @@ msgstr "Kodējums:"
 #: code:addons/base_import/models/base_import.py:0
 #, python-format
 msgid "Error Parsing Date [%s:L%d]: %s"
+msgstr ""
+
+#. module: base_import
+#: code:addons/base_import/models/base_import.py:0
+#, python-format
+msgid ""
+"Error while importing records: Text Delimiter should be a single character."
+msgstr ""
+
+#. module: base_import
+#: code:addons/base_import/models/base_import.py:0
+#, python-format
+msgid ""
+"Error while importing records: all rows should be of the same size, but the "
+"title row has %d entries while the first row has %d. You may need to change "
+"the separator character."
 msgstr ""
 
 #. module: base_import
@@ -816,7 +834,7 @@ msgstr "Kāda vērtība"
 #: code:addons/base_import/static/src/legacy/js/import_action.js:0
 #, python-format
 msgid "Space"
-msgstr ""
+msgstr "Atstarpe"
 
 #. module: base_import
 #. openerp-web
@@ -1044,7 +1062,7 @@ msgstr "Bez nosaukuma"
 #: code:addons/base_import/static/src/legacy/xml/base_import.xml:0
 #, python-format
 msgid "Upload File"
-msgstr ""
+msgstr "Augšupielādēt failu"
 
 #. module: base_import
 #. openerp-web
@@ -1173,6 +1191,22 @@ msgstr ""
 #, python-format
 msgid "out of"
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"        Cien. <t t-out=\"object.partner_id.name or ''\">Azure Interior</t><br><br>\n"
+"        Paldies par Jūsu maksājumu.\n"
+"        Šeit ir Jūsu maksājuma kvīts <span style=\"font-weight:bold;\" t-out=\"(object.name or '').replace('/','-') or ''\">BNK1-2021-05-0002</span> par summu\n"
+"       <span style=\"font-weight:bold;\" t-out=\"format_amount(object.amount, object.currency_id) or ''\"> 10,00 USD</span> apmērā no <t t-out=\"object.company_id.name or ''\">Jūsu uzņēmuma</t>.\n"
+"       <br><br>\n"
+"        Ja Jums rodas kādi jautājumi, sazinieties ar mums.\n"
+"       <br><br>\n"
+"        Ar sveicieniem,\n"
+"        <t t-if=\"not is_html_empty(user.signature)\">\n"
+"            <br><br>\n"
+"            <t t-out=\"user.signature or ''\">--<br>Mitchell admin</t>\n"
+"        </t>\n"
+"    </p>\n"
+"</div>"
 
 #. module: base_import
 #: code:addons/base_import/models/base_import.py:0

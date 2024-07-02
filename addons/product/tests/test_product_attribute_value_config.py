@@ -4,6 +4,7 @@
 import time
 from psycopg2 import IntegrityError
 
+from odoo import Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
@@ -14,6 +15,7 @@ class TestProductAttributeValueCommon(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super(TestProductAttributeValueCommon, cls).setUpClass()
+        cls.env.company.country_id = cls.env.ref('base.us')
 
         cls.computer = cls.env['product.template'].create({
             'name': 'Super Computer',
@@ -696,3 +698,17 @@ class TestProductAttributeValueConfig(TestProductAttributeValueCommon):
         product.action_unarchive()
         self.assertTrue(product.active, 'The product should be unarchived.')
         self.assertEqual(product_attribut.number_related_products, 0, 'The product attribute must not have an associated product')
+
+    def test_copy_extra_prices_of_product_attribute_values(self):
+        """
+        Check that the extra price of attributes are copied along the duplication of a product.
+        """
+        product_template = self.computer
+        extra_prices = product_template.attribute_line_ids.product_template_value_ids.mapped(
+            'price_extra'
+        )
+        copied_template = product_template.copy()
+        copied_extra_prices = copied_template.attribute_line_ids.product_template_value_ids.mapped(
+            'price_extra'
+        )
+        self.assertEqual(extra_prices, copied_extra_prices)

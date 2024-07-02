@@ -148,10 +148,15 @@ class AccountMove(models.Model):
                     tax_dict['base_amount'] = base_amount - tax_dict['rounding_euros']
 
             if not reverse_charge_refund:
-                tax_dict['base_amount'] = abs(tax_dict['base_amount'])
-                tax_dict['base_amount_currency'] = abs(tax_dict['base_amount_currency'])
-                tax_dict['tax_amount'] = abs(tax_dict['tax_amount'])
-                tax_dict['tax_amount_currency'] = abs(tax_dict['tax_amount_currency'])
+                balance_multiplicator = -1 if self.is_inbound() else 1
+                if tax_dict['base_amount'] != 0:  # We shouldn't change 0 into -0
+                    tax_dict['base_amount'] *= balance_multiplicator
+                if tax_dict['base_amount_currency'] != 0:
+                    tax_dict['base_amount_currency'] *= balance_multiplicator
+                if tax_dict['tax_amount'] != 0:
+                    tax_dict['tax_amount'] *= balance_multiplicator
+                if tax_dict['tax_amount_currency'] != 0:
+                    tax_dict['tax_amount_currency'] *= balance_multiplicator
         return tax_details
 
     def _prepare_fatturapa_export_values(self):
@@ -205,6 +210,54 @@ class AccountMove(models.Model):
         def format_alphanumeric(text_to_convert):
             return text_to_convert.encode('latin-1', 'replace').decode('latin-1') if text_to_convert else False
 
+        def get_vat_values(partner):
+            """ Generate the VAT and country code needed by l10n_it_edi XML export.
+
+                VAT number:
+                If there is a VAT number and the partner is not in EU and San Marino, then the exported value is 'OO99999999999'
+                If there is a VAT number and the partner is in EU or San Marino, then remove the country prefix
+                If there is no VAT and the partner is not in Italy, then the exported value is '0000000'
+                If there is no VAT and the partner is in Italy, the VAT is not set and Codice Fiscale will be relevant in the XML.
+                If there is no VAT and no Codice Fiscale, the invoice is not even exported, so this case is not handled.
+
+                Country:
+                First, take the country configured on the partner.
+                If there's a codice fiscale and no country, the country is 'IT'.
+            """
+            europe = self.env.ref('base.europe', raise_if_not_found=False)
+            in_eu = europe and partner.country_id and partner.country_id in europe.country_ids
+            is_sm = partner.country_code == 'SM'
+
+            normalized_vat = partner.vat
+            normalized_country = partner.country_code
+            has_vat = partner.vat and not partner.vat in ['/', 'NA']
+            if has_vat:
+                normalized_vat = partner.vat.replace(' ', '')
+                if in_eu:
+                    # If the partner is from the EU, the country-code prefix of the VAT must be taken away
+                    if not normalized_vat[:2].isdecimal():
+                        normalized_vat = normalized_vat[2:]
+                # If customer is from San Marino
+                elif is_sm:
+                    normalized_vat = normalized_vat if normalized_vat[:2].isdecimal() else normalized_vat[2:]
+                # The Tax Agency arbitrarily decided that non-EU VAT are not interesting,
+                # so this default code is used instead
+                # Detect the country code from the partner country instead
+                else:
+                    normalized_vat = 'OO99999999999'
+
+            # If it has a codice fiscale (and no country), it's an Italian partner
+            if not normalized_country and partner.l10n_it_codice_fiscale:
+                normalized_country = 'IT'
+            # If customer has not VAT
+            elif not has_vat and partner.country_id and partner.country_id.code != 'IT':
+                normalized_vat = '0000000'
+
+            return {
+                'vat': normalized_vat,
+                'country_code': normalized_country,
+            }
+
         formato_trasmissione = "FPA12" if self._is_commercial_partner_pa() else "FPR12"
 
         # Flags
@@ -244,6 +297,10 @@ class AccountMove(models.Model):
         seller = company if not is_self_invoice else partner
         codice_destinatario = (
             (is_self_invoice and company.partner_id.l10n_it_pa_index)
+            # San Marino is externally integrated with the SdI.
+            # The country as a whole has a single fixed Destination Code (i.e. "2R4GTO8").
+            # https://www.agenziaentrate.gov.it/portale/documents/20143/3788702/Modifiche+ProvvedimentonSanMarino+0248717-2021.pdf/429b5571-17b9-0cce-7f62-f79cf53086d7
+            or (partner.country_code == 'SM' and '2R4GTO8')
             or partner.l10n_it_pa_index
             or (partner.country_id.code == 'IT' and '0000000')
             or 'XXXXXXX')
@@ -305,6 +362,8 @@ class AccountMove(models.Model):
             'rc_refund': reverse_charge_refund,
             'invoice_lines': invoice_lines,
             'conversion_rate': conversion_rate,
+            'buyer_info': get_vat_values(buyer),
+            'seller_info': get_vat_values(seller),
         }
         return template_values
 

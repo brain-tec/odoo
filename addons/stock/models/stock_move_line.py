@@ -199,9 +199,10 @@ class StockMoveLine(models.Model):
 
     @api.onchange('result_package_id', 'product_id', 'product_uom_id', 'qty_done')
     def _onchange_putaway_location(self):
-        if not self.id and self.user_has_groups('stock.group_stock_multi_locations') and self.product_id and self.qty_done:
+        default_dest_location = self._get_default_dest_location()
+        if not self.id and self.user_has_groups('stock.group_stock_multi_locations') and self.product_id and self.qty_done \
+                and self.location_dest_id == default_dest_location:
             qty_done = self.product_uom_id._compute_quantity(self.qty_done, self.product_id.uom_id)
-            default_dest_location = self._get_default_dest_location()
             self.location_dest_id = default_dest_location.with_context(exclude_sml_ids=self.ids)._get_putaway_strategy(
                 self.product_id, quantity=qty_done, package=self.result_package_id,
                 packaging=self.move_id.product_packaging_id)
@@ -212,17 +213,17 @@ class StockMoveLine(models.Model):
         self = self.with_context(do_not_unreserve=True)
         for package, smls in groupby(self, lambda sml: sml.result_package_id):
             smls = self.env['stock.move.line'].concat(*smls)
-            excluded_smls = smls
+            excluded_smls = set(smls.ids)
             if package.package_type_id:
-                best_loc = smls.move_id.location_dest_id.with_context(exclude_sml_ids=excluded_smls.ids, products=smls.product_id)._get_putaway_strategy(self.env['product.product'], package=package)
+                best_loc = smls.move_id.location_dest_id.with_context(exclude_sml_ids=excluded_smls, products=smls.product_id)._get_putaway_strategy(self.env['product.product'], package=package)
                 smls.location_dest_id = smls.package_level_id.location_dest_id = best_loc
             elif package:
                 used_locations = set()
                 for sml in smls:
                     if len(used_locations) > 1:
                         break
-                    sml.location_dest_id = sml.move_id.location_dest_id.with_context(exclude_sml_ids=excluded_smls.ids)._get_putaway_strategy(sml.product_id, quantity=sml.product_uom_qty)
-                    excluded_smls -= sml
+                    sml.location_dest_id = sml.move_id.location_dest_id.with_context(exclude_sml_ids=excluded_smls)._get_putaway_strategy(sml.product_id, quantity=sml.product_uom_qty)
+                    excluded_smls.discard(sml.id)
                     used_locations.add(sml.location_dest_id)
                 if len(used_locations) > 1:
                     smls.location_dest_id = smls.move_id.location_dest_id
@@ -230,17 +231,20 @@ class StockMoveLine(models.Model):
                     smls.package_level_id.location_dest_id = smls.location_dest_id
             else:
                 for sml in smls:
-                    sml.location_dest_id = sml.move_id.location_dest_id.with_context(exclude_sml_ids=excluded_smls.ids)._get_putaway_strategy(
-                        sml.product_id, quantity=sml.product_uom_qty, packaging=sml.move_id.product_packaging_id,
+                    qty = max(sml.product_uom_qty, sml.qty_done)
+                    putaway_loc_id = sml.move_id.location_dest_id.with_context(exclude_sml_ids=excluded_smls)._get_putaway_strategy(
+                        sml.product_id, quantity=qty, packaging=sml.move_id.product_packaging_id,
                     )
-                    excluded_smls -= sml
+                    if putaway_loc_id != sml.location_dest_id:
+                        sml.location_dest_id = putaway_loc_id
+                    excluded_smls.discard(sml.id)
 
     def _get_default_dest_location(self):
         if not self.user_has_groups('stock.group_stock_storage_categories'):
             return self.location_dest_id[:1]
         if self.env.context.get('default_location_dest_id'):
             return self.env['stock.location'].browse([self.env.context.get('default_location_dest_id')])
-        return (self.move_id.location_dest_id or self.picking_id.location_dest_id or self.location_dest_id)[0]
+        return (self.move_id.location_dest_id or self.picking_id.location_dest_id or self.location_dest_id)[:1]
 
     def _get_putaway_additional_qty(self):
         addtional_qty = {}
@@ -288,16 +292,23 @@ class StockMoveLine(models.Model):
             else:
                 create_move(move_line)
 
+        moves_to_update = mls.filtered(
+            lambda ml:
+            ml.move_id and
+            ml.qty_done and (
+                ml.move_id.state == 'done' or (
+                    ml.move_id.picking_id and
+                    ml.move_id.picking_id.immediate_transfer
+                ))
+        ).move_id
+        for move in moves_to_update:
+            move.with_context(avoid_putaway_rules=True).product_uom_qty = move.quantity_done
+
         for ml, vals in zip(mls, vals_list):
-            if ml.move_id and \
-                    ml.move_id.picking_id and \
-                    ml.move_id.picking_id.immediate_transfer and \
-                    ml.move_id.state != 'done' and \
-                    'qty_done' in vals:
-                ml.move_id.product_uom_qty = ml.move_id.quantity_done
+            if self.env.context.get('import_file') and ml.product_uom_qty and not ml.move_id._should_bypass_reservation():
+                raise UserError(_("It is not allowed to import reserved quantity, you have to use the quantity directly."))
+
             if ml.state == 'done':
-                if 'qty_done' in vals:
-                    ml.move_id.product_uom_qty = ml.move_id.quantity_done
                 if ml.product_id.type == 'product':
                     Quant = self.env['stock.quant']
                     quantity = ml.product_uom_id._compute_quantity(ml.qty_done, ml.move_id.product_id.uom_id,rounding_method='HALF-UP')
@@ -361,9 +372,11 @@ class StockMoveLine(models.Model):
         if updates or 'product_uom_qty' in vals:
             for ml in self.filtered(lambda ml: ml.state in ['partially_available', 'assigned'] and ml.product_id.type == 'product'):
 
-                if 'product_uom_qty' in vals:
-                    new_product_uom_qty = ml.product_uom_id._compute_quantity(
-                        vals['product_uom_qty'], ml.product_id.uom_id, rounding_method='HALF-UP')
+                if 'product_uom_qty' in vals or 'product_uom_id' in vals:
+                    new_ml_uom = updates.get('product_uom_id', ml.product_uom_id)
+                    new_product_uom_qty = new_ml_uom._compute_quantity(
+                        vals.get('product_uom_qty', ml.product_uom_qty), ml.product_id.uom_id, rounding_method='HALF-UP')
+
                     # Make sure `product_uom_qty` is not negative.
                     if float_compare(new_product_uom_qty, 0, precision_rounding=ml.product_id.uom_id.rounding) < 0:
                         raise UserError(_('Reserving a negative quantity is not allowed.'))
@@ -474,7 +487,11 @@ class StockMoveLine(models.Model):
             if ml.product_id.type == 'product' and ml.move_id and not ml.move_id._should_bypass_reservation(ml.location_id) and not float_is_zero(ml.product_qty, precision_digits=precision):
                 self.env['stock.quant']._update_reserved_quantity(ml.product_id, ml.location_id, -ml.product_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id, strict=True)
         moves = self.mapped('move_id')
+        package_levels = self.package_level_id
         res = super(StockMoveLine, self).unlink()
+        package_levels = package_levels.filtered(lambda pl: not (pl.move_line_ids or pl.move_ids))
+        if package_levels:
+            package_levels.unlink()
         if moves:
             # Add with_prefetch() to set the _prefecht_ids = _ids
             # because _prefecht_ids generator look lazily on the cache of move_id
@@ -552,7 +569,7 @@ class StockMoveLine(models.Model):
             raise UserError(_('You need to supply a Lot/Serial Number for product: \n - ') +
                               '\n - '.join(mls_tracked_without_lot.mapped('product_id.display_name')))
         ml_to_create_lot = self.env['stock.move.line'].browse(ml_ids_to_create_lot)
-        ml_to_create_lot._create_and_assign_production_lot()
+        ml_to_create_lot.with_context(bypass_reservation_update=True)._create_and_assign_production_lot()
 
         mls_to_delete = self.env['stock.move.line'].browse(ml_ids_to_delete)
         mls_to_delete.unlink()
@@ -675,6 +692,7 @@ class StockMoveLine(models.Model):
             product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True
         )
         if quantity > available_quantity:
+            quantity = quantity - available_quantity
             # We now have to find the move lines that reserved our now unavailable quantity. We
             # take care to exclude ourselves and the move lines were work had already been done.
             outdated_move_lines_domain = [
@@ -834,4 +852,5 @@ class StockMoveLine(models.Model):
             'picking_type_id': self.picking_id.picking_type_id.id,
             'restrict_partner_id': self.picking_id.owner_id.id,
             'company_id': self.picking_id.company_id.id,
+            'partner_id': self.picking_id.partner_id.id,
         }

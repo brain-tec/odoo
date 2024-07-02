@@ -192,12 +192,13 @@ class PosOrder(models.Model):
             order.add_payment(return_payment_vals)
 
     def _prepare_invoice_line(self, order_line):
+        name = order_line.product_id.get_product_multiline_description_sale()
         return {
             'product_id': order_line.product_id.id,
             'quantity': order_line.qty if self.amount_total >= 0 else -order_line.qty,
             'discount': order_line.discount,
             'price_unit': order_line.price_unit,
-            'name': order_line.full_product_name or order_line.product_id.display_name,
+            'name': name,
             'tax_ids': [(6, 0, order_line.tax_ids_after_fiscal_position.ids)],
             'product_uom_id': order_line.product_uom_id.id,
         }
@@ -206,7 +207,7 @@ class PosOrder(models.Model):
         invoice_lines = []
         for line in self.lines:
             invoice_lines.append((0, None, self._prepare_invoice_line(line)))
-            if line.order_id.pricelist_id.discount_policy == 'without_discount' and line.price_unit != line.product_id.lst_price:
+            if line.order_id.pricelist_id.discount_policy == 'without_discount' and float_compare(line.price_unit, line.product_id.lst_price, precision_rounding=self.currency_id.rounding) < 0:
                 invoice_lines.append((0, None, {
                     'name': _('Price discount from %s -> %s',
                               float_repr(line.product_id.lst_price, self.currency_id.decimal_places),
@@ -248,7 +249,7 @@ class PosOrder(models.Model):
     is_total_cost_computed = fields.Boolean(compute='_compute_is_total_cost_computed',
         help="Allows to know if all the total cost of the order lines have already been computed")
     lines = fields.One2many('pos.order.line', 'order_id', string='Order Lines', states={'draft': [('readonly', False)]}, readonly=True, copy=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True)
+    company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True, index=True)
     pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', required=True, states={
                                    'draft': [('readonly', False)]}, readonly=True)
     partner_id = fields.Many2one('res.partner', string='Customer', change_default=True, index=True, states={'draft': [('readonly', False)], 'paid': [('readonly', False)]})
@@ -266,7 +267,7 @@ class PosOrder(models.Model):
     invoice_group = fields.Boolean(related="config_id.module_account", readonly=False)
     state = fields.Selection(
         [('draft', 'New'), ('cancel', 'Cancelled'), ('paid', 'Paid'), ('done', 'Posted'), ('invoiced', 'Invoiced')],
-        'Status', readonly=True, copy=False, default='draft')
+        'Status', readonly=True, copy=False, default='draft', index=True)
 
     account_move = fields.Many2one('account.move', string='Invoice', readonly=True, copy=False, index=True)
     picking_ids = fields.One2many('stock.picking', 'pos_order_id')
@@ -277,7 +278,7 @@ class PosOrder(models.Model):
 
     note = fields.Text(string='Internal Notes')
     nb_print = fields.Integer(string='Number of Print', readonly=True, copy=False, default=0)
-    pos_reference = fields.Char(string='Receipt Number', readonly=True, copy=False)
+    pos_reference = fields.Char(string='Receipt Number', readonly=True, copy=False, index=True)
     sale_journal = fields.Many2one('account.journal', related='session_id.config_id.journal_id', string='Sales Journal', store=True, readonly=True, ondelete='restrict')
     fiscal_position_id = fields.Many2one(
         comodel_name='account.fiscal.position', string='Fiscal Position',
@@ -361,7 +362,7 @@ class PosOrder(models.Model):
             if order.is_total_cost_computed:
                 order.margin = sum(order.lines.mapped('margin'))
                 amount_untaxed = order.currency_id.round(sum(line.price_subtotal for line in order.lines))
-                order.margin_percent = not float_is_zero(amount_untaxed, order.currency_id.rounding) and order.margin / amount_untaxed or 0
+                order.margin_percent = not float_is_zero(amount_untaxed, precision_rounding=order.currency_id.rounding) and order.margin / amount_untaxed or 0
             else:
                 order.margin = 0
                 order.margin_percent = 0
@@ -600,7 +601,7 @@ class PosOrder(models.Model):
             'journal_id': self.session_id.config_id.invoice_journal_id.id,
             'move_type': 'out_invoice' if self.amount_total >= 0 else 'out_refund',
             'ref': self.name,
-            'partner_id': self.partner_id.id,
+            'partner_id': self.partner_id.address_get(['invoice'])['invoice'],
             'partner_bank_id': self._get_partner_bank_id(),
             # considering partner's sale pricelist's currency
             'currency_id': self.pricelist_id.currency_id.id,
@@ -613,15 +614,18 @@ class PosOrder(models.Model):
             if self.config_id.cash_rounding and (not self.config_id.only_round_cash_method or any(p.payment_method_id.is_cash_count for p in self.payment_ids))
             else False
         }
+        if self.refunded_order_ids.account_move:
+            vals['ref'] = _('Reversal of: %s', self.refunded_order_ids.account_move.name)
+            vals['reversed_entry_id'] = self.refunded_order_ids.account_move.id
         if self.note:
             vals.update({'narration': self.note})
         return vals
+
     def action_pos_order_invoice(self):
         self.write({'to_invoice': True})
-        res = self._generate_pos_order_invoice()
         if self.company_id.anglo_saxon_accounting and self.session_id.update_stock_at_closing and not self.to_ship:
             self._create_order_picking()
-        return res
+        return self._generate_pos_order_invoice()
 
     def _generate_pos_order_invoice(self):
         moves = self.env['account.move']
@@ -669,7 +673,7 @@ class PosOrder(models.Model):
             invoice_receivables = self.account_move.line_ids.filtered(lambda line: line.account_id == receivable_account and not line.reconciled)
             if invoice_receivables:
                 payment_receivables = payment_moves.mapped('line_ids').filtered(lambda line: line.account_id == receivable_account and line.partner_id)
-                (invoice_receivables | payment_receivables).sudo().with_company(self.company_id).reconcile()
+                (invoice_receivables | payment_receivables).sorted(key=lambda l: l.amount_currency).sudo().with_company(self.company_id).reconcile()
 
     @api.model
     def create_from_ui(self, orders, draft=False):
@@ -855,7 +859,7 @@ class PosOrder(models.Model):
             'partner_id': order.partner_id.id,
             'user_id': order.user_id.id,
             'sequence_number': order.sequence_number,
-            'creation_date': order.date_order.astimezone(timezone),
+            'creation_date': str(order.date_order.astimezone(timezone)),
             'fiscal_position_id': order.fiscal_position_id.id,
             'to_invoice': order.to_invoice,
             'to_ship': order.to_ship,
@@ -1045,6 +1049,7 @@ class PosOrderLine(models.Model):
             'customer_note': orderline.customer_note,
             'refunded_qty': orderline.refunded_qty,
             'refunded_orderline_id': orderline.refunded_orderline_id,
+            'full_product_name': orderline.full_product_name,
         }
 
     def export_for_ui(self):
@@ -1134,7 +1139,7 @@ class PosOrderLine(models.Model):
         for line in self.filtered(lambda l: not l.is_total_cost_computed):
             product = line.product_id
             if line._is_product_storable_fifo_avco() and stock_moves:
-                product_cost = product._compute_average_price(0, line.qty, stock_moves.filtered(lambda ml: ml.product_id == product))
+                product_cost = product._compute_average_price(0, line.qty, line._get_stock_moves_to_consider(stock_moves, product))
             else:
                 product_cost = product.standard_price
             line.total_cost = line.qty * product.cost_currency_id._convert(
@@ -1146,11 +1151,15 @@ class PosOrderLine(models.Model):
             )
             line.is_total_cost_computed = True
 
+    def _get_stock_moves_to_consider(self, stock_moves, product):
+        self.ensure_one()
+        return stock_moves.filtered(lambda ml: ml.product_id.id == product.id)
+
     @api.depends('price_subtotal', 'total_cost')
     def _compute_margin(self):
         for line in self:
             line.margin = line.price_subtotal - line.total_cost
-            line.margin_percent = not float_is_zero(line.price_subtotal, line.currency_id.rounding) and line.margin / line.price_subtotal or 0
+            line.margin_percent = not float_is_zero(line.price_subtotal, precision_rounding=line.currency_id.rounding) and line.margin / line.price_subtotal or 0
 
 
 class PosOrderLineLot(models.Model):

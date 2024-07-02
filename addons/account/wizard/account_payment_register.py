@@ -354,7 +354,7 @@ class AccountPaymentRegister(models.TransientModel):
             else:
                 wizard.partner_bank_id = None
 
-    @api.depends('payment_type', 'journal_id')
+    @api.depends('payment_type', 'journal_id', 'currency_id')
     def _compute_payment_method_line_fields(self):
         for wizard in self:
             wizard.available_payment_method_line_ids = wizard.journal_id._get_available_payment_method_lines(wizard.payment_type)
@@ -391,13 +391,8 @@ class AccountPaymentRegister(models.TransientModel):
             if wizard.source_currency_id == wizard.currency_id:
                 # Same currency.
                 wizard.amount = wizard.source_amount_currency
-            elif wizard.currency_id == wizard.company_id.currency_id:
-                # Payment expressed on the company's currency.
-                wizard.amount = wizard.source_amount
             else:
-                # Foreign currency on payment different than the one set on the journal entries.
-                amount_payment_currency = wizard.company_id.currency_id._convert(wizard.source_amount, wizard.currency_id, wizard.company_id, wizard.payment_date or fields.Date.today())
-                wizard.amount = amount_payment_currency
+                wizard.amount = wizard.source_currency_id._convert(wizard.source_amount_currency, wizard.currency_id, wizard.company_id, wizard.payment_date or fields.Date.today())
 
     @api.depends('amount')
     def _compute_payment_difference(self):
@@ -483,7 +478,7 @@ class AccountPaymentRegister(models.TransientModel):
             if len(lines.company_id) > 1:
                 raise UserError(_("You can't create payments for entries belonging to different companies."))
             if len(set(available_lines.mapped('account_internal_type'))) > 1:
-                raise UserError(_("You can't register payments for journal items being either all inbound, either all outbound."))
+                raise UserError(_("You can't register payments for both inbound and outbound moves at the same time."))
 
             res['line_ids'] = [(6, 0, available_lines.ids)]
 

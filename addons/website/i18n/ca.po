@@ -10,20 +10,23 @@
 # Sandra Franch <sandra.franch@upc.edu>, 2021
 # Manel Fernandez Ramirez <manelfera@outlook.com>, 2021
 # Martin Trigaux, 2021
-# Carles Antoli <carlesantoli@hotmail.com>, 2021
 # Eric Antones <eantones@users.noreply.github.com>, 2021
 # RGB Consulting <odoo@rgbconsulting.com>, 2021
-# Quim - eccit <quim@eccit.com>, 2021
-# M Palau <mpalau@tda.ad>, 2021
 # Arnau Ros, 2021
 # Harcogourmet, 2022
 # ericrolo, 2022
 # Jonatan Gk, 2022
 # marcescu, 2022
-# Óscar Fonseca <tecnico@extreme-micro.com>, 2022
 # eriiikgt, 2022
 # Josep Sànchez <papapep@gmx.com>, 2022
 # Josep Anton Belchi, 2022
+# jabiri7, 2022
+# Ivan Espinola, 2023
+# Óscar Fonseca <tecnico@pyming.com>, 2023
+# martioodo hola, 2023
+# Carles Antoli <carlesantoli@hotmail.com>, 2023
+# M Palau <mpalau@tda.ad>, 2023
+# Quim - eccit <quim@eccit.com>, 2023
 # 
 msgid ""
 msgstr ""
@@ -31,8 +34,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-10 06:07+0000\n"
 "PO-Revision-Date: 2021-09-14 12:27+0000\n"
-"Last-Translator: Josep Anton Belchi, 2022\n"
-"Language-Team: Catalan (https://www.transifex.com/odoo/teams/41243/ca/)\n"
+"Last-Translator: Quim - eccit <quim@eccit.com>, 2023\n"
+"Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -51,6 +54,12 @@ msgstr "Afegiu imatges"
 #: model_terms:website.page,arch_db:website.bs_debug_page
 msgid "\" alert with a"
 msgstr "\" alerta amb"
+
+#. module: website
+#: code:addons/website/models/website_rewrite.py:0
+#, python-format
+msgid "\"URL from\" can not be empty."
+msgstr ""
 
 #. module: website
 #: code:addons/website/models/website_rewrite.py:0
@@ -659,14 +668,10 @@ msgstr "<b>Diapositiva</b> aquest botó per canviar la mida de la columna."
 #: model_terms:ir.ui.view,arch_db:website.view_edit_robots
 msgid ""
 "<br/><br/>\n"
-"                    Example of rule:<br/>\n"
-"                    <code class=\"ml-4\">Disallow: /web/login</code><br/>\n"
-"                    <code class=\"ml-4\">Allow: *</code>"
+"                    Example of rule:<br/>"
 msgstr ""
 "<br/><br/>\n"
-"                    Exemple de regla:<br/>\n"
-"                    <code class=\"ml-4\">No permetre: /web/login</code><br/>\n"
-"                    <code class=\"ml-4\">Permet: *</code>"
+"Exemple de regla:<br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -1469,6 +1474,8 @@ msgid ""
 "A Google Map error occurred. Make sure to read the key configuration popup "
 "carefully."
 msgstr ""
+"S'ha produït un error de Google Map. Assegureu-vos de llegir la finestra "
+"emergent de configuració de la clau amb cura."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_text_image
@@ -2376,7 +2383,7 @@ msgstr "Bloquejar"
 #: code:addons/website/static/src/js/menu/edit.js:0
 #, python-format
 msgid "Blockquote"
-msgstr ""
+msgstr "Cita en bloc"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_big_icons_subtitles
@@ -3973,6 +3980,15 @@ msgid "Do not activate"
 msgstr "No activar"
 
 #. module: website
+#. openerp-web
+#: code:addons/website/static/src/xml/website.editor.xml:0
+#, python-format
+msgid ""
+"Do not copy/paste code you do not understand, this could put your data at "
+"risk."
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
 msgid ""
 "Do you need specific information? Our specialists will help you with "
@@ -4279,7 +4295,7 @@ msgstr "Habilitar la funció de creació de formularis per a aquest model."
 #: code:addons/website/static/src/xml/website.editor.xml:0
 #, python-format
 msgid "Enable the right google map APIs in your google account"
-msgstr ""
+msgstr "Activa les API correctes del mapa de google al compte de google"
 
 #. module: website
 #. openerp-web
@@ -5062,6 +5078,16 @@ msgid ""
 msgstr ""
 
 #. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/backend/res_config_settings.js:0
+#: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
+#, python-format
+msgid ""
+"Google doesn't need to be pinged anymore. It will automatically fetch your "
+"/sitemap.xml."
+msgstr ""
+
+#. module: website
 #: model:ir.model.fields,help:website.field_res_config_settings__google_search_console
 #: model:ir.model.fields,help:website.field_website__google_search_console
 msgid "Google key, or Enable to access first reply"
@@ -5572,6 +5598,15 @@ msgstr ""
 
 #. module: website
 #. openerp-web
+#: code:addons/website/static/src/snippets/s_embed_code/options.js:0
+#, python-format
+msgid ""
+"If you need to add analytics or marketing tags, inject code in your <head> "
+"or <body> instead. The option is in the \"Theme\" tab."
+msgstr ""
+
+#. module: website
+#. openerp-web
 #: code:addons/website/static/src/snippets/s_image_gallery/options.js:0
 #: model:ir.model.fields,field_description:website.field_website_visitor__partner_image
 #: model_terms:ir.ui.view,arch_db:website.searchbar_input_snippet_options
@@ -5730,70 +5765,70 @@ msgstr "Entrades"
 #: code:addons/website/static/src/js/menu/edit.js:0
 #, python-format
 msgid "Insert a badge snippet."
-msgstr ""
+msgstr "Insereix un fragment d'insígnia."
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/js/menu/edit.js:0
 #, python-format
 msgid "Insert a blockquote snippet."
-msgstr ""
+msgstr "Insereix un fragment de cita en bloc."
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/js/menu/edit.js:0
 #, python-format
 msgid "Insert a card snippet."
-msgstr ""
+msgstr "Insereix un retall de targeta."
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/js/menu/edit.js:0
 #, python-format
 msgid "Insert a chart snippet."
-msgstr ""
+msgstr "Insereix un fragment de diagrama."
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/js/menu/edit.js:0
 #, python-format
 msgid "Insert a progress bar snippet."
-msgstr ""
+msgstr "Insereix un fragment de barra de progrés."
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/js/menu/edit.js:0
 #, python-format
 msgid "Insert a rating snippet."
-msgstr ""
+msgstr "Insereix un fragment de puntuació."
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/js/menu/edit.js:0
 #, python-format
 msgid "Insert a share snippet."
-msgstr ""
+msgstr "Insereix un fragment de compartició."
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/js/menu/edit.js:0
 #, python-format
 msgid "Insert a text Highlight snippet."
-msgstr ""
+msgstr "Insereix un fragment de ressaltat del text."
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/js/menu/edit.js:0
 #, python-format
 msgid "Insert an alert snippet."
-msgstr ""
+msgstr "Insereix un fragment d'alerta."
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/js/menu/edit.js:0
 #, python-format
 msgid "Insert an horizontal separator sippet."
-msgstr ""
+msgstr "Insereix un fragment de separador horitzontal."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_table_of_content
@@ -6589,7 +6624,7 @@ msgstr "Accions principals"
 #: code:addons/website/static/src/xml/website.editor.xml:0
 #, python-format
 msgid "Make sure billing is enabled"
-msgstr ""
+msgstr "Assegura que la facturació està activada"
 
 #. module: website
 #. openerp-web
@@ -6599,6 +6634,9 @@ msgid ""
 "Make sure to wait if errors keep being shown: sometimes enabling an API "
 "allows to use it immediately but Google keeps triggering errors for a while"
 msgstr ""
+"Assegureu-vos d'esperar si es continuen mostrant els errors: a vegades "
+"l'activació d'una API permet utilitzar-lo immediatament, però Google "
+"continua provocant errors durant un temps"
 
 #. module: website
 #. openerp-web
@@ -6606,6 +6644,7 @@ msgstr ""
 #, python-format
 msgid "Make sure your settings are properly configured:"
 msgstr ""
+"Assegureu-vos que la vostra configuració estigui correctament configurada:"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
@@ -6632,14 +6671,14 @@ msgstr "Gestiona aquesta pàgina"
 #: code:addons/website/static/src/xml/website.editor.xml:0
 #, python-format
 msgid "Maps JavaScript API"
-msgstr ""
+msgstr "Mapa l'API de JavaScript"
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/xml/website.editor.xml:0
 #, python-format
 msgid "Maps Static API"
-msgstr ""
+msgstr "Mapes API estàtica"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
@@ -6794,7 +6833,7 @@ msgstr "Mig"
 #: code:addons/website/static/src/js/editor/snippets.options.js:0
 #, python-format
 msgid "Min-Height"
-msgstr ""
+msgstr "Mín. alçada"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_blockquote_options
@@ -6816,6 +6855,13 @@ msgstr "Minuts"
 #, python-format
 msgid "Mobile"
 msgstr "Mòbil"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/editor/snippets.options.js:0
+#, python-format
+msgid "Mobile Alignment"
+msgstr "Alineament mòbil."
 
 #. module: website
 #. openerp-web
@@ -7581,7 +7627,7 @@ msgstr "Sobre El Contingut"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Paddings"
-msgstr ""
+msgstr "Separacions"
 
 #. module: website
 #: code:addons/website/models/website.py:0
@@ -7794,6 +7840,13 @@ msgid "Pay"
 msgstr "Paga"
 
 #. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Phone Number"
+msgstr "Número de telèfon"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
 msgid "Phones"
 msgstr "Telèfons"
@@ -7830,7 +7883,7 @@ msgstr "Indicador de posició"
 #: code:addons/website/static/src/xml/website.editor.xml:0
 #, python-format
 msgid "Places API"
-msgstr ""
+msgstr "API de llocs"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
@@ -8781,7 +8834,7 @@ msgstr "Seqüència"
 #: code:addons/website/static/src/xml/website.editor.xml:0
 #, python-format
 msgid "Serve font from Google servers"
-msgstr ""
+msgstr "Serviu el tipus de lletra dels servidors de Google"
 
 #. module: website
 #: model:ir.model,name:website.model_ir_actions_server
@@ -9273,6 +9326,13 @@ msgid "Sub Menus"
 msgstr "Sub menús"
 
 #. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Subject"
+msgstr "Assumpte"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
 #: model_terms:ir.ui.view,arch_db:website.s_website_form
 #: model_terms:website.page,arch_db:website.contactus_page
@@ -9753,7 +9813,7 @@ msgstr "No hi han dades disponibles actualment."
 #: code:addons/website/static/src/snippets/s_website_form/options.js:0
 #, python-format
 msgid "There is no field available for this option."
-msgstr ""
+msgstr "No hi ha cap camp disponible per a aquesta opció."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -9847,10 +9907,22 @@ msgstr ""
 
 #. module: website
 #. openerp-web
+#: code:addons/website/static/src/js/editor/snippets.options.js:0
+#, python-format
+msgid ""
+"This font already exists, you can only add it as a local font to replace the"
+" server version."
+msgstr ""
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/editor/snippets.options.js:0
 #: code:addons/website/static/src/xml/website.editor.xml:0
 #, python-format
 msgid "This font is hosted and served to your visitors by Google servers"
 msgstr ""
+"Aquest tipus de lletra està allotjat i servit als vostres visitants pels "
+"servidors de Google"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -9902,6 +9974,13 @@ msgstr "Aquesta pàgina s'està al menú <b>%s</b>"
 #: model_terms:ir.ui.view,arch_db:website.one_page_line
 msgid "This page will be published on {{ date_formatted }}"
 msgstr "Aquesta pàgina es publicarà a {{ date_formatted }}"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/menu/translate.js:0
+#, python-format
+msgid "This translation is not editable."
+msgstr "Aquesta traducció no és editable."
 
 #. module: website
 #. openerp-web
@@ -10148,6 +10227,20 @@ msgstr "Transició"
 #, python-format
 msgid "Translate Attribute"
 msgstr "Traduir l'atribut"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/menu/translate.js:0
+#, python-format
+msgid "Translate Selection Option"
+msgstr "Opció de traducció de la selecció"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/menu/translate.js:0
+#, python-format
+msgid "Translate header in the text. Menu is generated automatically."
+msgstr "Tradueix la capçalera en el text. El menú es genera automàticament."
 
 #. module: website
 #. openerp-web
@@ -11298,7 +11391,7 @@ msgstr "Podeu editar colors i fons a característiques de ressaltat."
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline
 msgid "You can edit, duplicate..."
-msgstr ""
+msgstr "Podeu editar, duplicar..."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -11321,33 +11414,51 @@ msgstr "No pots tenir dos usuaris amb el mateix inici de sessió!"
 #, python-format
 msgid "You can only use template prefixed by dynamic_filter_template_ "
 msgstr ""
+"Només podeu utilitzar la plantilla prefixada per dynamicfiltertemplate"
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/snippets/s_website_form/options.js:0
 #, python-format
 msgid "You can't duplicate a model field."
-msgstr ""
+msgstr "No podeu duplicar un camp de model."
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/snippets/s_website_form/options.js:0
 #, python-format
 msgid "You can't duplicate the submit button of the form."
-msgstr ""
+msgstr "No podeu duplicar el botó d'enviament del formulari."
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/snippets/s_website_form/options.js:0
 #, python-format
 msgid "You can't remove a field that is required by the model itself."
-msgstr ""
+msgstr "No podeu eliminar un camp que requereix el propi model."
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/snippets/s_website_form/options.js:0
 #, python-format
 msgid "You can't remove the submit button of the form"
+msgstr "No podeu eliminar el botó d'enviament del formulari"
+
+#. module: website
+#: code:addons/website/models/website.py:0
+#, python-format
+msgid ""
+"You cannot delete default website %s. Try to change its settings instead"
+msgstr ""
+"No podeu suprimir el lloc web per defecte %s. Intenta canviar la seva "
+"configuració"
+
+#. module: website
+#: code:addons/website/models/website_menu.py:0
+#, python-format
+msgid ""
+"You cannot delete this website menu as this serves as the default parent "
+"menu for new websites (e.g., /shop, /event, ...)."
 msgstr ""
 
 #. module: website
@@ -11360,7 +11471,7 @@ msgstr "No tens permisos suficients per realitzar aquesta acció"
 #: code:addons/website/models/mixins.py:0
 #, python-format
 msgid "You do not have the rights to publish/unpublish"
-msgstr ""
+msgstr "No teniu drets per publicar/despublicar"
 
 #. module: website
 #. openerp-web
@@ -11384,18 +11495,18 @@ msgstr ""
 #: code:addons/website/models/res_config_settings.py:0
 #, python-format
 msgid "You haven't defined your domain"
-msgstr ""
+msgstr "No heu definit el vostre domini"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid "You may opt-out of a third-party's use of cookies by visiting the"
-msgstr ""
+msgstr "Podeu optar per no utilitzar les galetes d'un tercer visitant el"
 
 #. module: website
 #: code:addons/website/models/website.py:0
 #, python-format
 msgid "You must keep at least one website."
-msgstr ""
+msgstr "Heu de mantenir almenys un lloc web."
 
 #. module: website
 #. openerp-web
@@ -11419,14 +11530,14 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_searchbar
 msgid "You will get results from blog posts, products, etc"
-msgstr ""
+msgstr "Obtindreu resultats de les entrades del blog, productes, etc"
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/components/configurator/configurator.xml:0
 #, python-format
 msgid "You'll be able to create your pages later on."
-msgstr ""
+msgstr "Podreu crear les vostres pàgines més endavant."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -11441,10 +11552,36 @@ msgid "Your Client ID:"
 msgstr "ID del teu client"
 
 #. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Your Company"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_template
 msgid ""
 "Your Dynamic Snippet will be displayed here... This message is displayed "
 "because you did not provided both a filter and a template to use.<br/>"
+msgstr ""
+"El vostre fragment dinàmic es mostrarà aquí... Aquest missatge es mostra "
+"perquè no heu proporcionat tant un filtre com una plantilla a "
+"utilitzar.<br/>"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Your Email"
+msgstr "El vostre correu electrònic"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/snippets/s_embed_code/000.js:0
+#, python-format
+msgid ""
+"Your Embed Code snippet doesn't have anything to display. Click on Edit to "
+"modify it."
 msgstr ""
 
 #. module: website
@@ -11452,6 +11589,20 @@ msgstr ""
 #: code:addons/website/static/src/xml/website.backend.xml:0
 #, python-format
 msgid "Your Measurement ID:"
+msgstr ""
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Your Name"
+msgstr "El vostre nom"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Your Question"
 msgstr ""
 
 #. module: website
@@ -11474,6 +11625,8 @@ msgid ""
 "Your experience may be degraded if you discard those cookies, but the "
 "website will still work."
 msgstr ""
+"La vostra experiència pot ser degradada si descarteu aquestes galetes, però "
+"el lloc web continuarà funcionant."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.list_hybrid
@@ -11732,7 +11885,7 @@ msgstr "eLearning"
 #: code:addons/website/controllers/form.py:0
 #, python-format
 msgid "email"
-msgstr ""
+msgstr "correu electrònic"
 
 #. module: website
 #. openerp-web
@@ -11907,6 +12060,14 @@ msgstr "maçoneria, graella"
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "menu, pricing"
 msgstr "menú, preu"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/snippets/s_website_form/options.js:0
+#: code:addons/website/static/src/xml/website_form_editor.xml:0
+#, python-format
+msgid "no value"
+msgstr "sense valor"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view

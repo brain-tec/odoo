@@ -82,19 +82,27 @@ class ResCompany(models.Model):
     @api.constrains('l10n_it_has_eco_index',
                     'l10n_it_eco_index_office',
                     'l10n_it_eco_index_number',
-                    'l10n_it_eco_index_share_capital',
-                    'l10n_it_eco_index_sole_shareholder',
                     'l10n_it_eco_index_liquidation_state')
     def _check_eco_admin_index(self):
         for record in self:
-            if not record.l10n_it_has_eco_index:
-                continue
-            if not record.l10n_it_eco_index_office\
-               or not record.l10n_it_eco_index_number\
-               or not record.l10n_it_eco_index_share_capital\
-               or not record.l10n_it_eco_index_sole_shareholder\
-               or not record.l10n_it_eco_index_liquidation_state:
+            if (record.l10n_it_has_eco_index
+                and (not record.l10n_it_eco_index_office
+                     or not record.l10n_it_eco_index_number
+                     or not record.l10n_it_eco_index_liquidation_state)):
                 raise ValidationError(_("All fields about the Economic and Administrative Index must be completed."))
+
+    @api.constrains('l10n_it_has_eco_index',
+                    'l10n_it_eco_index_share_capital',
+                    'l10n_it_eco_index_sole_shareholder')
+    def _check_eco_incorporated(self):
+        """ If the business is incorporated, both these fields must be present.
+            We don't know whether the business is incorporated, but in any case the fields
+            must be both present or not present. """
+        for record in self:
+            if (record.l10n_it_has_eco_index
+                and bool(record.l10n_it_eco_index_share_capital) ^ bool(record.l10n_it_eco_index_sole_shareholder)):
+                raise ValidationError(_("If one of Share Capital or Sole Shareholder is present, "
+                                        "then they must be both filled out."))
 
     @api.constrains('l10n_it_has_tax_representative',
                     'l10n_it_tax_representative_partner_id')
@@ -108,3 +116,9 @@ class ResCompany(models.Model):
                 raise ValidationError(_("Your tax representative partner must have a tax number."))
             if not record.l10n_it_tax_representative_partner_id.country_id:
                 raise ValidationError(_("Your tax representative partner must have a country."))
+
+    @api.onchange("l10n_it_has_tax_representative")
+    def _onchange_l10n_it_has_tax_represeentative(self):
+        for company in self:
+            if not company.l10n_it_has_tax_representative:
+                company.l10n_it_tax_representative_partner_id = False

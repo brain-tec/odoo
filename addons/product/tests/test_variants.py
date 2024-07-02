@@ -552,6 +552,40 @@ class TestVariantsNoCreate(common.TestProductCommon):
         # no_variant attribute should not appear on the variant
         self.assertNotIn(self.size_S, template.product_variant_ids.product_template_attribute_value_ids.product_attribute_value_id)
 
+    def test_unarchive_multiple_products_with_variants(self):
+        product_attribut = self.env['product.attribute'].create({
+            'name': 'Color',
+            'sequence': 1,
+            'create_variant': 'dynamic',
+        })
+        attr_value = self.env['product.attribute.value'].create({
+            'name': 'Blue',
+            'attribute_id': product_attribut.id,
+            'sequence': 1,
+        })
+        first_product = self.env['product.template'].create({
+            'name': 'Sofa',
+            'attribute_line_ids': [(0, 0, {
+                'attribute_id': product_attribut.id,
+                'value_ids': [(6, 0, [attr_value.id])],
+            })]
+        })
+        second_product = first_product.copy({
+            'product_variant_ids': [(0, 0, {
+            'name': 'Sofa',
+            })]
+        })
+
+        products = first_product + second_product
+        products.action_archive()
+        self.assertFalse(first_product.active)
+        self.assertFalse(second_product.active)
+        self.assertFalse(second_product.product_variant_ids)
+        products.action_unarchive()
+        # check products should be unarchived successfully.
+        self.assertTrue(first_product.active)
+        self.assertTrue(second_product.active)
+        self.assertTrue(second_product.product_variant_ids)
 
 class TestVariantsManyAttributes(common.TestAttributesCommon):
 
@@ -1014,6 +1048,8 @@ class TestVariantsArchive(common.TestProductCommon):
         Product._revert_method('unlink')
 
     def test_name_search_dynamic_attributes(self):
+        # To be able to test dynamic variant "variants" feature must be set up
+        self.env.user.write({'groups_id': [(4, self.env.ref('product.group_product_variant').id)]})
         dynamic_attr = self.env['product.attribute'].create({
             'name': 'Dynamic',
             'create_variant': 'dynamic',
@@ -1166,6 +1202,19 @@ class TestVariantsArchive(common.TestProductCommon):
         self.assertTrue(product_white.active)
 
         Product._revert_method('unlink')
+
+    def test_set_barcode(self):
+        tmpl = self.product_0.product_tmpl_id
+        tmpl.barcode = '123'
+        self.assertEqual(tmpl.barcode, '123')
+        self.assertEqual(self.product_0.barcode, '123')
+
+        tmpl.toggle_active()
+
+        tmpl.barcode = '456'
+        tmpl.invalidate_cache(fnames=['barcode'], ids=tmpl.ids)
+        self.assertEqual(tmpl.barcode, '456')
+        self.assertEqual(self.product_0.barcode, '456')
 
     def _update_color_vars(self, ptal):
         self.ptal_color = ptal

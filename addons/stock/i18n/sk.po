@@ -3,7 +3,7 @@
 # 	* stock
 # 
 # Translators:
-# sakodoo <sak@odoo.com>, 2022
+# SAKodoo <sak@odoo.com>, 2022
 # Filip Matúšek <filip.matusek@26house.com>, 2022
 # Michal Matus <misko.matus@gmail.com>, 2022
 # Pavol Krnáč <pavol.krnac@ekoenergo.sk>, 2022
@@ -13,10 +13,12 @@
 # karolína schusterová <karolina.schusterova@vdp.sk>, 2022
 # Jan Prokop, 2022
 # Jaroslav Bosansky <jaro.bosansky@ekoenergo.sk>, 2022
-# Rastislav Brencic <rastislav.brencic@azet.sk>, 2022
 # Viktor Dicer, 2022
 # Martin Trigaux, 2022
 # Filip Hanes <filip.hanes@protonmail.com>, 2022
+# Rastislav Brencic <rastislav.brencic@azet.sk>, 2023
+# Wil Odoo, 2023
+# Aleš Fiala <f.ales1@seznam.cz>, 2024
 # 
 msgid ""
 msgstr ""
@@ -24,8 +26,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-11-16 13:18+0000\n"
 "PO-Revision-Date: 2021-09-14 12:26+0000\n"
-"Last-Translator: Filip Hanes <filip.hanes@protonmail.com>, 2022\n"
-"Language-Team: Slovak (https://www.transifex.com/odoo/teams/41243/sk/)\n"
+"Last-Translator: Aleš Fiala <f.ales1@seznam.cz>, 2024\n"
+"Language-Team: Slovak (https://app.transifex.com/odoo/teams/41243/sk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -962,7 +964,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock.report_reception_body
 #, python-format
 msgid "Assign All"
-msgstr ""
+msgstr "Priradiť všetko"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking__owner_id
@@ -1310,6 +1312,12 @@ msgstr "Zmeniť množstvo produktu"
 #: model:ir.model.fields,help:stock.field_stock_move_line__move_id
 msgid "Change to a better name"
 msgstr "Zmeň názov na vhodnejší"
+
+#. module: stock
+#: code:addons/stock/models/stock_quant.py:0
+#, python-format
+msgid "Changing %s is restricted, you can't do this operation."
+msgstr ""
 
 #. module: stock
 #: code:addons/stock/models/product_strategy.py:0
@@ -2908,6 +2916,12 @@ msgid "Gives the sequence of this line when displaying the warehouses."
 msgstr ""
 
 #. module: stock
+#: code:addons/stock/models/stock_rule.py:0
+#, python-format
+msgid "Global Visibility Days"
+msgstr ""
+
+#. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.stock_move_line_view_search
 #: model_terms:ir.ui.view,arch_db:stock.stock_reorder_report_search
@@ -3389,16 +3403,25 @@ msgid "Invalid domain left operand %s"
 msgstr ""
 
 #. module: stock
-#: code:addons/stock/models/product.py:0
+#: code:addons/stock/models/product.py:0 code:addons/stock/models/product.py:0
 #, python-format
 msgid "Invalid domain operator %s"
 msgstr ""
 
 #. module: stock
+#: code:addons/stock/models/product.py:0 code:addons/stock/models/product.py:0
+#, python-format
+msgid "Invalid domain right operand '%s'. It must be of type Integer/Float"
+msgstr "Neplatný pravý operand domény '%s'. Musí být typu Integer/Float"
+
+#. module: stock
 #: code:addons/stock/models/product.py:0
 #, python-format
-msgid "Invalid domain right operand %s"
+msgid ""
+"Invalid rule's configuration, the following rule causes an endless loop: %s"
 msgstr ""
+"Neplatné nastavení pravidla, následující pravidlo způsobuje nekonečnou "
+"smyčku: %s"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_quant__inventory_quantity_auto_apply
@@ -3579,6 +3602,15 @@ msgid "Is quantity done editable"
 msgstr "Je realizované množstvo editovateľné"
 
 #. module: stock
+#: code:addons/stock/models/stock_move_line.py:0
+#, python-format
+msgid ""
+"It is not allowed to import reserved quantity, you have to use the quantity "
+"directly."
+msgstr ""
+"Není povoleno importovat rezervované množství, musíte použít množství přímo."
+
+#. module: stock
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
 msgid ""
@@ -3589,8 +3621,20 @@ msgstr "Nie je možné rezervovať viac produktov z %s ako máte na sklade."
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
 msgid ""
-"It is not possible to unreserve more products of %s than you have in stock."
-msgstr "Nie je možné odrezervovať viac produktov z %s ako máte na sklade."
+"It is not possible to reserve more products of %s than you have in stock.\n"
+"\n"
+"You can fix the discrepancies by clicking on the button below.\n"
+"The correction will remove the reservation of the impacted operations on all companies.\n"
+"If the error persists, or you see this message appear often, please submit a Support Ticket at https://www.odoo.com/help"
+msgstr ""
+
+#. module: stock
+#: code:addons/stock/models/stock_quant.py:0
+#, python-format
+msgid ""
+"It is not possible to unreserve more products of %s than you have in stock.\n"
+"Please contact your system administrator to rectify this issue."
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__move_type
@@ -4494,6 +4538,12 @@ msgid "No Message"
 msgstr "Žiadna správa"
 
 #. module: stock
+#: code:addons/stock/models/stock_quant.py:0
+#, python-format
+msgid "No Stock On Hand"
+msgstr ""
+
+#. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__product_template__tracking__none
 msgid "No Tracking"
 msgstr "Žiadne sledovanie"
@@ -4561,12 +4611,6 @@ msgstr "Zdrojová lokácia nie je zadefinovaná pre pravidlo: %s!"
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.stock_move_action
 msgid "No stock move found"
-msgstr ""
-
-#. module: stock
-#: code:addons/stock/models/stock_quant.py:0
-#, python-format
-msgid "No Stock On Hand"
 msgstr ""
 
 #. module: stock
@@ -5925,6 +5969,16 @@ msgstr "Kvanty"
 #. module: stock
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
+msgid ""
+"Quants are auto-deleted when appropriate. If you must manually delete them, "
+"please ask a stock manager to do it."
+msgstr ""
+"Množství se v případě potřeby automaticky odstraní. Pokud je musíte "
+"odstranit ručně, požádejte o to správce skladu."
+
+#. module: stock
+#: code:addons/stock/models/stock_quant.py:0
+#, python-format
 msgid "Quants cannot be created for consumables or services."
 msgstr "Kvanty nemôžu byť vytvorené pre spotrebný materiál alebo služby."
 
@@ -6473,7 +6527,7 @@ msgstr "Chyba doručenia SMS"
 #. module: stock
 #: model_terms:res.company,invoice_terms_html:stock.res_company_1
 msgid "STANDARD TERMS AND CONDITIONS OF SALE"
-msgstr ""
+msgstr "Štandardné obchodné podmienky predaja"
 
 #. module: stock
 #. openerp-web
@@ -7521,14 +7575,14 @@ msgid "The forecasted stock on the"
 msgstr ""
 
 #. module: stock
-#: model:ir.model.constraint,message:stock.constraint_stock_location_inventory_freq_nonneg
-msgid "The inventory frequency (days) for a location must be non-negative"
+#: code:addons/stock/models/stock_orderpoint.py:0
+#, python-format
+msgid "The inter-warehouse transfers have been generated"
 msgstr ""
 
 #. module: stock
-#: code:addons/stock/models/stock_production_lot.py:0
-#, python-format
-msgid "The lot name must contain at least one digit."
+#: model:ir.model.constraint,message:stock.constraint_stock_location_inventory_freq_nonneg
+msgid "The inventory frequency (days) for a location must be non-negative"
 msgstr ""
 
 #. module: stock
@@ -7831,6 +7885,26 @@ msgid ""
 "better solution could be to archive the product and create a new one "
 "instead."
 msgstr ""
+
+#. module: stock
+#: code:addons/stock/models/product.py:0
+#, python-format
+msgid ""
+"This product's company cannot be changed as long as there are quantities of "
+"it belonging to another company."
+msgstr ""
+"Společnost tohoto produktu nelze změnit, pokud existuje množství patřící "
+"jiné společnosti."
+
+#. module: stock
+#: code:addons/stock/models/product.py:0
+#, python-format
+msgid ""
+"This product's company cannot be changed as long as there are stock moves of"
+" it belonging to another company."
+msgstr ""
+"Společnost tohoto produktu nelze změnit, pokud existují skladové přesuny "
+"patřící jiné společnosti."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_change_product_qty__new_quantity
@@ -8213,6 +8287,11 @@ msgid "Unit of Measure"
 msgstr "Merná jednotka"
 
 #. module: stock
+#: model:ir.model.fields,field_description:stock.field_product_replenish__product_uom_id
+msgid "Unit of measure"
+msgstr "Merná jednotka"
+
+#. module: stock
 #: model:product.product,uom_name:stock.product_cable_management_box
 #: model:product.template,uom_name:stock.product_cable_management_box_product_template
 msgid "Units"
@@ -8232,11 +8311,6 @@ msgstr "Merné jednotky"
 #: model:ir.ui.menu,name:stock.product_uom_menu
 msgid "Units of Measures"
 msgstr "Merné jednotky"
-
-#. module: stock
-#: model:ir.model.fields,field_description:stock.field_product_replenish__product_uom_id
-msgid "Unity of measure"
-msgstr "Merná jednotka"
 
 #. module: stock
 #: code:addons/stock/models/stock_quant.py:0
@@ -8597,6 +8671,11 @@ msgid "Website communication history"
 msgstr "História komunikácie webstránok"
 
 #. module: stock
+#: model:ir.model.fields,field_description:stock.field_stock_storage_category__weight_uom_name
+msgid "Weight unit"
+msgstr ""
+
+#. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_package_type__weight_uom_name
 msgid "Weight unit of measure label"
 msgstr "Označenie mernej jednotky váhy"
@@ -8677,6 +8756,9 @@ msgid ""
 " Odoo generates a procurement to bring the forecasted quantity to the Max "
 "Quantity."
 msgstr ""
+"Keď virtuálny sklad klesne pod Min množstvo špecifikované pre toto pole, "
+"Odoo vygeneruje obstarávanie pre prinesenie predpokladaného množstva na Max "
+"množstvo."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_warehouse_orderpoint__product_max_qty
@@ -8822,6 +8904,12 @@ msgstr ""
 "potrebujete zmeniť typ, najprv zrušte rezerváciu na skladovom pohybe."
 
 #. module: stock
+#: code:addons/stock/models/product.py:0
+#, python-format
+msgid "You can not change the type of a product that was already used."
+msgstr ""
+
+#. module: stock
 #: code:addons/stock/models/stock_move_line.py:0
 #, python-format
 msgid ""
@@ -8868,6 +8956,12 @@ msgstr "Miesto nemôžete archivovať %s ako to používa váš sklad %s"
 msgid ""
 "You cannot cancel a stock move that has been set to 'Done'. Create a return "
 "in order to reverse the moves which took place."
+msgstr ""
+
+#. module: stock
+#: code:addons/stock/models/stock_move.py:0
+#, python-format
+msgid "You cannot change a cancelled stock move, create a new line instead."
 msgstr ""
 
 #. module: stock
@@ -8936,6 +9030,22 @@ msgstr ""
 "rozdeliť to isté balenie na dve lokácie."
 
 #. module: stock
+#: code:addons/stock/models/stock_picking.py:0
+#, python-format
+msgid ""
+"You cannot pack products into the same package when they are from both "
+"immediate and planned transfers."
+msgstr ""
+
+#. module: stock
+#: code:addons/stock/models/stock_picking.py:0
+#, python-format
+msgid ""
+"You cannot pack products into the same package when they are from different "
+"transfers with different operation types."
+msgstr ""
+
+#. module: stock
 #: code:addons/stock/models/stock_move.py:0
 #, python-format
 msgid ""
@@ -8954,8 +9064,8 @@ msgstr "Nemôžete rozdeliť koncept pohybu. Najskôr musí byť potvrdený."
 #. module: stock
 #: code:addons/stock/models/stock_move.py:0
 #, python-format
-msgid "You cannot split a stock move that has been set to 'Done'."
-msgstr "Nemôžete rozdeliť skladový pohyb ktorý bol nastavený na \"Hotovo\"."
+msgid "You cannot split a stock move that has been set to 'Done' or 'Cancel'."
+msgstr ""
 
 #. module: stock
 #: code:addons/stock/models/stock_quant.py:0
@@ -9011,6 +9121,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock.view_backorder_confirmation
 msgid "You have processed less products than the initial demand."
 msgstr "Spracovali ste menej produktov ako bol počiatočný dopyt."
+
+#. module: stock
+#: code:addons/stock/models/res_config_settings.py:0
+#, python-format
+msgid ""
+"You have product(s) in stock that have lot/serial number tracking enabled. \n"
+"Switch off tracking on all the products before switching off this setting."
+msgstr ""
 
 #. module: stock
 #: code:addons/stock/models/product.py:0

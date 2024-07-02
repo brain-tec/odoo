@@ -9,15 +9,20 @@
 # Zahed Alfak <tamass4116@gmail.com>, 2022
 # arya sadeghi <aryasadeghy@gmail.com>, 2022
 # Hamid Reza Kaveh <hamidrkp@riseup.net>, 2022
-# Far Har <fhari1234@gmail.com>, 2022
+# F Hariri <fhari1234@gmail.com>, 2022
 # Arash Sardari <arashss77@gmail.com>, 2022
 # Hamid Darabi, 2022
 # M.Hossein S.Farvashani <Farvashani@gmail.com>, 2022
 # Mohsen Mohammadi <iammohsen.123@gmail.com>, 2022
 # Hamed Mohammadi <hamed@dehongi.com>, 2022
 # Martin Trigaux, 2022
-# Hanna Kheradroosta, 2022
 # Mohammad Tahmasebi <hit.tah75@gmail.com>, 2022
+# Yousef Shadmanesh <y.shadmanesh@gmail.com>, 2023
+# Ali Reza Feizi Derakhshi, 2023
+# fardin mardani <fmardani0@gmail.com>, 2023
+# Hamid Ahmadimoghaddam, 2024
+# Hanna Kheradroosta, 2024
+# Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2024
 # 
 msgid ""
 msgstr ""
@@ -25,8 +30,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-11-16 13:18+0000\n"
 "PO-Revision-Date: 2021-09-14 12:26+0000\n"
-"Last-Translator: Mohammad Tahmasebi <hit.tah75@gmail.com>, 2022\n"
-"Language-Team: Persian (https://www.transifex.com/odoo/teams/41243/fa/)\n"
+"Last-Translator: Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2024\n"
+"Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -235,7 +240,7 @@ msgstr ""
 #: code:addons/stock/models/stock_rule.py:0
 #, python-format
 msgid "+ %d day(s)"
-msgstr ""
+msgstr "+ %d روز"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_stock_rule
@@ -890,7 +895,7 @@ msgstr "اجازه محصول جدید"
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_storage_category__allow_new_product__mixed
 msgid "Allow mixed products"
-msgstr ""
+msgstr "محصولات مختلط جایز باشد"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_orderpoint__allowed_location_ids
@@ -1180,7 +1185,7 @@ msgstr "قبل از تاریخ برنامه ریزی شده"
 msgid ""
 "Below text serves as a suggestion and doesn’t engage Odoo S.A. "
 "responsibility."
-msgstr ""
+msgstr "متن زیر یک پیشنهاد است و مسئولیتی برای شرکت اودوو ایجاد نمی‌کند. "
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__res_partner__picking_warn__block
@@ -1350,6 +1355,12 @@ msgstr "تغییر تعداد محصول"
 #: model:ir.model.fields,help:stock.field_stock_move_line__move_id
 msgid "Change to a better name"
 msgstr "تغییر به نام بهتر"
+
+#. module: stock
+#: code:addons/stock/models/stock_quant.py:0
+#, python-format
+msgid "Changing %s is restricted, you can't do this operation."
+msgstr ""
 
 #. module: stock
 #: code:addons/stock/models/product_strategy.py:0
@@ -1903,7 +1914,7 @@ msgstr "مشتری"
 #: model:ir.model.fields,field_description:stock.field_product_product__sale_delay
 #: model:ir.model.fields,field_description:stock.field_product_template__sale_delay
 msgid "Customer Lead Time"
-msgstr ""
+msgstr "زمان تحویل مشتری"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_partner__property_stock_customer
@@ -1925,7 +1936,7 @@ msgstr "موجودی چرخه ای"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_dhl
 msgid "DHL Express Connector"
-msgstr ""
+msgstr "کانکتور DHL Express"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_report_stock_quantity__date
@@ -2965,6 +2976,12 @@ msgid "Gives the sequence of this line when displaying the warehouses."
 msgstr "دنباله این خط را هنگام نمایش انبارها می دهد."
 
 #. module: stock
+#: code:addons/stock/models/stock_rule.py:0
+#, python-format
+msgid "Global Visibility Days"
+msgstr ""
+
+#. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.search_product_lot_filter
 #: model_terms:ir.ui.view,arch_db:stock.stock_move_line_view_search
 #: model_terms:ir.ui.view,arch_db:stock.stock_reorder_report_search
@@ -3453,15 +3470,22 @@ msgid "Invalid domain left operand %s"
 msgstr ""
 
 #. module: stock
-#: code:addons/stock/models/product.py:0
+#: code:addons/stock/models/product.py:0 code:addons/stock/models/product.py:0
 #, python-format
 msgid "Invalid domain operator %s"
 msgstr "اپراتور دامنه نامعتبر %s"
 
 #. module: stock
+#: code:addons/stock/models/product.py:0 code:addons/stock/models/product.py:0
+#, python-format
+msgid "Invalid domain right operand '%s'. It must be of type Integer/Float"
+msgstr ""
+
+#. module: stock
 #: code:addons/stock/models/product.py:0
 #, python-format
-msgid "Invalid domain right operand %s"
+msgid ""
+"Invalid rule's configuration, the following rule causes an endless loop: %s"
 msgstr ""
 
 #. module: stock
@@ -3643,6 +3667,14 @@ msgid "Is quantity done editable"
 msgstr "آیا مقدار انجام شده قابل ویرایش است"
 
 #. module: stock
+#: code:addons/stock/models/stock_move_line.py:0
+#, python-format
+msgid ""
+"It is not allowed to import reserved quantity, you have to use the quantity "
+"directly."
+msgstr ""
+
+#. module: stock
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
 msgid ""
@@ -3653,8 +3685,20 @@ msgstr "امکان رزرو محصولات %s بیشتر از آنچه در ان
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
 msgid ""
-"It is not possible to unreserve more products of %s than you have in stock."
-msgstr "امکان لغو رزرو محصولات %s بیشتر از آنچه در انبار دارید وجود ندارد."
+"It is not possible to reserve more products of %s than you have in stock.\n"
+"\n"
+"You can fix the discrepancies by clicking on the button below.\n"
+"The correction will remove the reservation of the impacted operations on all companies.\n"
+"If the error persists, or you see this message appear often, please submit a Support Ticket at https://www.odoo.com/help"
+msgstr ""
+
+#. module: stock
+#: code:addons/stock/models/stock_quant.py:0
+#, python-format
+msgid ""
+"It is not possible to unreserve more products of %s than you have in stock.\n"
+"Please contact your system administrator to rectify this issue."
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__move_type
@@ -4147,7 +4191,7 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse__mto_pull_id
 msgid "MTO rule"
-msgstr ""
+msgstr "قاعده ساخت به سفارش"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking__message_main_attachment_id
@@ -4562,6 +4606,12 @@ msgid "No Message"
 msgstr "بدون پیام"
 
 #. module: stock
+#: code:addons/stock/models/stock_quant.py:0
+#, python-format
+msgid "No Stock On Hand"
+msgstr "عدم موجودی در دست"
+
+#. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__product_template__tracking__none
 msgid "No Tracking"
 msgstr "بدون رهگیری"
@@ -4630,12 +4680,6 @@ msgstr "هیچ مکان منبعی در قانون موجودی تعریف نش�
 #: model_terms:ir.actions.act_window,help:stock.stock_move_action
 msgid "No stock move found"
 msgstr "هیچ انتقال موجودی پیدا نشد"
-
-#. module: stock
-#: code:addons/stock/models/stock_quant.py:0
-#, python-format
-msgid "No Stock On Hand"
-msgstr ""
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_picking_form
@@ -4979,7 +5023,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock.stock_move_line_view_search
 #: model_terms:ir.ui.view,arch_db:stock.view_move_search
 msgid "Outgoing"
-msgstr ""
+msgstr "خروجی"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_product_product_replenishment
@@ -5703,7 +5747,7 @@ msgstr "محصولات: %(location)s"
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_rule__group_propagation_option__propagate
 msgid "Propagate"
-msgstr ""
+msgstr "انتشار"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__propagate_cancel
@@ -5713,12 +5757,12 @@ msgstr ""
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_rule_form
 msgid "Propagation"
-msgstr ""
+msgstr "انتشار"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_rule__group_propagation_option
 msgid "Propagation of Procurement Group"
-msgstr ""
+msgstr "انتشار گروه تدارکات"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_rule__propagate_carrier
@@ -5728,27 +5772,27 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_rule__action__pull_push
 msgid "Pull & Push"
-msgstr ""
+msgstr "کشش و رانش"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_rule__action__pull
 msgid "Pull From"
-msgstr ""
+msgstr "کشش از"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_stock_rule
 msgid "Pull Rule"
-msgstr ""
+msgstr "قاعده کشش"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_stock_rule
 msgid "Push Rule"
-msgstr ""
+msgstr "قاعده رانش"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_rule__action__push
 msgid "Push To"
-msgstr ""
+msgstr "رانش به"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
@@ -5997,6 +6041,14 @@ msgstr ""
 #. module: stock
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
+msgid ""
+"Quants are auto-deleted when appropriate. If you must manually delete them, "
+"please ask a stock manager to do it."
+msgstr ""
+
+#. module: stock
+#: code:addons/stock/models/stock_quant.py:0
+#, python-format
 msgid "Quants cannot be created for consumables or services."
 msgstr ""
 
@@ -6148,13 +6200,13 @@ msgstr "بخش های باقی مانده از برداشت تا حدی پردا
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_removal
 msgid "Removal"
-msgstr ""
+msgstr "حذف"
 
 #. module: stock
 #: model:ir.model,name:stock.model_product_removal
 #: model:ir.model.fields,field_description:stock.field_stock_location__removal_strategy_id
 msgid "Removal Strategy"
-msgstr ""
+msgstr "استراتژی برداشت"
 
 #. module: stock
 #: code:addons/stock/models/stock_quant.py:0
@@ -6211,7 +6263,7 @@ msgstr "جایگزین"
 #. module: stock
 #: model:stock.location.route,name:stock.route_warehouse0_mto
 msgid "Replenish on Order (MTO)"
-msgstr ""
+msgstr "پر کردن به سفارش (ساخت به سفارش)"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_product_replenish
@@ -6548,7 +6600,7 @@ msgstr "خطای تحویل پیامک"
 #. module: stock
 #: model_terms:res.company,invoice_terms_html:stock.res_company_1
 msgid "STANDARD TERMS AND CONDITIONS OF SALE"
-msgstr ""
+msgstr "شرایط و ضوابط فروش"
 
 #. module: stock
 #. openerp-web
@@ -7569,6 +7621,9 @@ msgid ""
 "order to be valid, any derogation must be expressly agreed to in advance in "
 "writing."
 msgstr ""
+"مشتری به وضوح شرایط و ضوابط خود را لغو می‌کند، حتی اگر پس از شرایط و ضوابط "
+"فروش تدوین شده باشند. برای اینکه این لغو کردن معتبر باشد باید از قبل به صورت"
+" مکتوب با آن موافقت شده باشد."
 
 #. module: stock
 #: model:ir.model.constraint,message:stock.constraint_stock_warehouse_orderpoint_product_location_check
@@ -7621,15 +7676,15 @@ msgid "The forecasted stock on the"
 msgstr "موجودی پیش بینی شده در"
 
 #. module: stock
+#: code:addons/stock/models/stock_orderpoint.py:0
+#, python-format
+msgid "The inter-warehouse transfers have been generated"
+msgstr ""
+
+#. module: stock
 #: model:ir.model.constraint,message:stock.constraint_stock_location_inventory_freq_nonneg
 msgid "The inventory frequency (days) for a location must be non-negative"
 msgstr "فرکانس موجودی (روزها) برای یک مکان باید غیرمنفی باشد"
-
-#. module: stock
-#: code:addons/stock/models/stock_production_lot.py:0
-#, python-format
-msgid "The lot name must contain at least one digit."
-msgstr ""
 
 #. module: stock
 #: model:ir.model.constraint,message:stock.constraint_stock_warehouse_warehouse_name_uniq
@@ -7934,6 +7989,22 @@ msgstr ""
 "این محصول حداقل در یک جابجایی موجودی مورد استفاده قرار گرفته است. تغییر نوع "
 "محصول توصیه نمی شود زیرا ممکن است منجر به ناهماهنگی شود. راه حل بهتر می "
 "تواند آرشیو کردن محصول و ایجاد یک محصول جدید باشد."
+
+#. module: stock
+#: code:addons/stock/models/product.py:0
+#, python-format
+msgid ""
+"This product's company cannot be changed as long as there are quantities of "
+"it belonging to another company."
+msgstr ""
+
+#. module: stock
+#: code:addons/stock/models/product.py:0
+#, python-format
+msgid ""
+"This product's company cannot be changed as long as there are stock moves of"
+" it belonging to another company."
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_change_product_qty__new_quantity
@@ -8322,6 +8393,11 @@ msgid "Unit of Measure"
 msgstr "واحد اندازه گیری"
 
 #. module: stock
+#: model:ir.model.fields,field_description:stock.field_product_replenish__product_uom_id
+msgid "Unit of measure"
+msgstr "واحد اندازه‌گیری"
+
+#. module: stock
 #: model:product.product,uom_name:stock.product_cable_management_box
 #: model:product.template,uom_name:stock.product_cable_management_box_product_template
 msgid "Units"
@@ -8343,11 +8419,6 @@ msgid "Units of Measures"
 msgstr "واحدهای اندازه گیری"
 
 #. module: stock
-#: model:ir.model.fields,field_description:stock.field_product_replenish__product_uom_id
-msgid "Unity of measure"
-msgstr "وحدت اندازه گیری"
-
-#. module: stock
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
 msgid "Unknown Pack"
@@ -8367,7 +8438,7 @@ msgstr "باز کردن قفل"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_quant_package_form
 msgid "Unpack"
-msgstr ""
+msgstr "بازکردن بسته‌بندی"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking__message_unread
@@ -8691,7 +8762,7 @@ msgstr "هشدار برای موجودی"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__group_stock_picking_wave
 msgid "Wave Transfers"
-msgstr ""
+msgstr "انتقالات موج"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking__website_message_ids
@@ -8706,6 +8777,11 @@ msgstr "پیام‌های وب‌سایت"
 #: model:ir.model.fields,help:stock.field_stock_scrap__website_message_ids
 msgid "Website communication history"
 msgstr "تاریخچه ارتباط با وبسایت"
+
+#. module: stock
+#: model:ir.model.fields,field_description:stock.field_stock_storage_category__weight_uom_name
+msgid "Weight unit"
+msgstr "واحد اندازه‌گیری وزن"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_package_type__weight_uom_name
@@ -8943,6 +9019,12 @@ msgstr ""
 "رزرو کنید."
 
 #. module: stock
+#: code:addons/stock/models/product.py:0
+#, python-format
+msgid "You can not change the type of a product that was already used."
+msgstr ""
+
+#. module: stock
 #: code:addons/stock/models/stock_move_line.py:0
 #, python-format
 msgid ""
@@ -8997,6 +9079,12 @@ msgid ""
 msgstr ""
 "شما نمی توانید انتقال موجودی را که روی \"انجام شد\" تنظیم شده است لغو کنید. "
 "برای معکوس کردن انتقال انجام شده یک بازگشت ایجاد کنید."
+
+#. module: stock
+#: code:addons/stock/models/stock_move.py:0
+#, python-format
+msgid "You cannot change a cancelled stock move, create a new line instead."
+msgstr ""
 
 #. module: stock
 #: code:addons/stock/models/stock_picking.py:0
@@ -9070,6 +9158,22 @@ msgstr ""
 "همان بسته را به دو مکان تقسیم کنید."
 
 #. module: stock
+#: code:addons/stock/models/stock_picking.py:0
+#, python-format
+msgid ""
+"You cannot pack products into the same package when they are from both "
+"immediate and planned transfers."
+msgstr ""
+
+#. module: stock
+#: code:addons/stock/models/stock_picking.py:0
+#, python-format
+msgid ""
+"You cannot pack products into the same package when they are from different "
+"transfers with different operation types."
+msgstr ""
+
+#. module: stock
 #: code:addons/stock/models/stock_move.py:0
 #, python-format
 msgid ""
@@ -9089,10 +9193,8 @@ msgstr ""
 #. module: stock
 #: code:addons/stock/models/stock_move.py:0
 #, python-format
-msgid "You cannot split a stock move that has been set to 'Done'."
+msgid "You cannot split a stock move that has been set to 'Done' or 'Cancel'."
 msgstr ""
-"شما نمی توانید یک جابجایی موجودی را که روی \"انجام شد\" تنظیم شده است تقسیم "
-"کنید."
 
 #. module: stock
 #: code:addons/stock/models/stock_quant.py:0
@@ -9154,6 +9256,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock.view_backorder_confirmation
 msgid "You have processed less products than the initial demand."
 msgstr "شما محصولات کمتری نسبت به تقاضای اولیه پردازش کرده اید."
+
+#. module: stock
+#: code:addons/stock/models/res_config_settings.py:0
+#, python-format
+msgid ""
+"You have product(s) in stock that have lot/serial number tracking enabled. \n"
+"Switch off tracking on all the products before switching off this setting."
+msgstr ""
 
 #. module: stock
 #: code:addons/stock/models/product.py:0
@@ -9240,7 +9350,7 @@ msgstr "شما باید یک سری/سریال برای محصولات %s ارا
 #. module: stock
 #: model_terms:res.company,invoice_terms_html:stock.res_company_1
 msgid "You should update this document to reflect your T&amp;C."
-msgstr ""
+msgstr "شما باید این سند را به‌روزرسانی کنید تا T&C شما را منعکس کند."
 
 #. module: stock
 #: code:addons/stock/models/stock_warehouse.py:0
@@ -9279,7 +9389,7 @@ msgstr ""
 #: code:addons/stock/models/stock_quant.py:0
 #, python-format
 msgid "Your stock is currently empty"
-msgstr ""
+msgstr "در حال حاضر انبار شما خالی است"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__product_label_layout__print_format__zpl

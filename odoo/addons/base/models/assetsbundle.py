@@ -102,8 +102,8 @@ class AssetNotFound(AssetError):
 
 class AssetsBundle(object):
     rx_css_import = re.compile("(@import[^;{]+;?)", re.M)
-    rx_preprocess_imports = re.compile("""(@import\s?['"]([^'"]+)['"](;?))""")
-    rx_css_split = re.compile("\/\*\! ([a-f0-9-]+) \*\/")
+    rx_preprocess_imports = re.compile(r"""(@import\s?['"]([^'"]+)['"](;?))""")
+    rx_css_split = re.compile(r"\/\*\! ([a-f0-9-]+) \*\/")
 
     TRACKED_BUNDLES = ['web.assets_common', 'web.assets_backend']
 
@@ -668,8 +668,8 @@ class AssetsBundle(object):
                 rtlcss = misc.find_in_path('rtlcss.cmd')
             except IOError:
                 rtlcss = 'rtlcss'
-        cmd = [rtlcss, '-']
 
+        cmd = [rtlcss, '-c', get_resource_path("base", "data/rtlcss.json"), '-']
 
         try:
             rtlcss = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)

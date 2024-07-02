@@ -11,9 +11,11 @@
 # Rémi CAZENAVE, 2021
 # Sebastien LANGE, 2021
 # Thomas Deleval <thd@odoo.com>, 2021
-# Grégory Schreiner <gregory@mokatourisme.fr>, 2022
+# Grégory Schreiner <gregory@mokatourisme.fr>, 2021
 # Cécile Collart <cco@odoo.com>, 2022
-# Jolien De Paepe, 2022
+# Moka Tourisme <hello@mokatourisme.fr>, 2023
+# Jolien De Paepe, 2023
+# Manon Rondou, 2024
 # 
 msgid ""
 msgstr ""
@@ -21,8 +23,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-11-16 13:19+0000\n"
 "PO-Revision-Date: 2021-09-14 12:25+0000\n"
-"Last-Translator: Jolien De Paepe, 2022\n"
-"Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
+"Last-Translator: Manon Rondou, 2024\n"
+"Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -162,11 +164,11 @@ msgid ""
 "                                        Extra Price\n"
 "                                    </span>"
 msgstr ""
-"<span attrs=\"{'invisible': [('pricelist_item_count', '=', 1)]}\">\n"
-"                                        Liste de prix\n"
+"<span attrs=\"{'invisible': [('pricelist_item_count', '>', 1)]}\">\n"
+"                                        Règle de prix\n"
 "                                    </span>\n"
-"                                    <span attrs=\"{'invisible': [('pricelist_item_count', '!=', 1)]}\">\n"
-"                                        Listes de prix\n"
+"                                    <span attrs=\"{'invisible': [('pricelist_item_count', '<=', 1)]}\">\n"
+"                                        Règles de prix\n"
 "                                    </span>"
 
 #. module: product
@@ -207,7 +209,7 @@ msgid ""
 "<strong>Save</strong> this page and come back\n"
 "                                    here to set up the feature."
 msgstr ""
-"<strong>Sauvegardez</strong> cette page et revenez ici\n"
+"<strong>Enregistrez</strong> cette page et revenez ici\n"
 "                                    pour configurer la fonctionnalité."
 
 #. module: product
@@ -216,7 +218,10 @@ msgid ""
 "<strong>Warning</strong>: adding or deleting attributes\n"
 "                        will delete and recreate existing variants and lead\n"
 "                        to the loss of their possible customizations."
-msgstr "<strong/>"
+msgstr ""
+"<strong>Avertissement</strong>: l'ajout ou la suppression des attributs\n"
+"                        supprimeront et recréeront des variantes existantes et entraîneront \n"
+"la perte de leurs éventuelles personnalisations."
 
 #. module: product
 #: model:ir.model.constraint,message:product.constraint_product_product_barcode_uniq
@@ -233,7 +238,7 @@ msgid ""
 msgstr ""
 "Une description du produit que vous souhaitez communiquer à vos clients. "
 "Cette description sera copiée sur chaque bon de commande, bon de livraison "
-"et note de crédit/facture client"
+"et avoir/facture client"
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
@@ -290,7 +295,7 @@ msgstr "Activités"
 #: model:ir.model.fields,field_description:product.field_product_product__activity_exception_decoration
 #: model:ir.model.fields,field_description:product.field_product_template__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Activité d'exception de décoration"
+msgstr "Activité exception décoration"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__activity_state
@@ -873,12 +878,12 @@ msgstr "Définissez les listes de prix des fournisseurs."
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
 msgid "Define your volume unit of measure"
-msgstr "Définissez l'unité de mesure de votre volume"
+msgstr "Définir l'unité de mesure de votre volume"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
 msgid "Define your weight unit of measure"
-msgstr "Définissez votre unité de mesure de poids"
+msgstr "Définir votre unité de mesure de poids"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_supplierinfo__delay
@@ -918,7 +923,7 @@ msgstr "Détermine l'ordre d'affichage"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_label_layout_form
 msgid "Discard"
-msgstr "Annuler"
+msgstr "Ignorer"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__compute_price__percentage
@@ -963,7 +968,7 @@ msgstr "Remises"
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__display_name
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__display_name
 msgid "Display Name"
-msgstr "Afficher Nom"
+msgstr "Nom d'affichage"
 
 #. module: product
 #. openerp-web
@@ -1179,7 +1184,7 @@ msgstr "Générer le rapport de liste de prix"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
 msgid "Get product pictures using Barcode"
-msgstr "Obtenez les images des articles utilisant le code-barres"
+msgstr "Obtenir des images de produits utilisant le code-barres"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__packaging_ids
@@ -1435,7 +1440,7 @@ msgstr "Est une variante de produit"
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__is_custom
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__is_custom
 msgid "Is custom value"
-msgstr "Est une valeur caractéristique"
+msgstr "Est une valeur personnalisable"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_weight_in_lbs__0
@@ -1845,7 +1850,7 @@ msgstr "Pourcentage du prix"
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__pills
 msgid "Pills"
-msgstr "Pilules"
+msgstr "Boutons carrés"
 
 #. module: product
 #. openerp-web
@@ -2510,11 +2515,11 @@ msgstr ""
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_surcharge
 msgid ""
-"Specify the fixed amount to add or substract(if negative) to the amount "
+"Specify the fixed amount to add or subtract(if negative) to the amount "
 "calculated with the discount."
 msgstr ""
-"Indique le montant fixe à ajouter (ou à soustraire, si négatif) au montant "
-"calculé avec cette remise."
+"Indiquez le montant fixe à ajouter au (ou, si négatif, à soustraire du) "
+"montant calculé avec la remise."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_max_margin
@@ -2709,7 +2714,7 @@ msgstr ""
 #: code:addons/product/models/product.py:0
 #, python-format
 msgid "The product variant must be a variant of the product template."
-msgstr ""
+msgstr "La variante du produit doit être une variante du modèle de produit."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__min_qty
@@ -2721,6 +2726,12 @@ msgstr ""
 "La quantité à acheter auprès de ce fournisseur pour bénéficier du prix, "
 "exprimée dans l'unité de mesure du produit du fournisseur, sinon aucune, "
 "dans l'unité de mesure par défaut du produit."
+
+#. module: product
+#: code:addons/product/models/product_pricelist.py:0
+#, python-format
+msgid "The rounding method must be strictly positive."
+msgstr "La méthode d'arrondi doit être strictement positive."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__lst_price
@@ -3328,10 +3339,12 @@ msgstr ""
 #, python-format
 msgid ""
 "You cannot delete the value %s because it is used on the following products:\n"
-"%s"
+"%s\n"
+" If the value has been associated to a product in the past, you will not be able to delete it."
 msgstr ""
-"Vous ne pouvez pas supprimer la valeur %s car elle est utilisée sur les produits suivants :\n"
-"%s"
+"Vous ne pouvez pas supprimer la valeur %s car elle est utilisée pour les produits suivants :\n"
+"%s\n"
+" Si la valeur a été associée à un produit dans le passé, vous ne pourrez pas la supprimer."
 
 #. module: product
 #: code:addons/product/models/product.py:0
@@ -3359,10 +3372,10 @@ msgstr ""
 #. module: product
 #: code:addons/product/models/product_attribute.py:0
 #, python-format
-msgid ""
-"You cannot move the attribute %s from the product %s to the product %s."
+msgid "You cannot delete value %s because it was used in some products."
 msgstr ""
-"Vous ne pouvez pas déplacer l'attribut %s du produit %s vers le produit %s."
+"Vous ne pouvez pas supprimer la valeur %s, parce qu'elle était utilisée pour"
+" certains produits."
 
 #. module: product
 #: code:addons/product/models/product_pricelist.py:0
@@ -3373,6 +3386,14 @@ msgid ""
 msgstr ""
 "Vous ne pouvez pas désactiver une règle de liste de prix. Veuillez plutôt la"
 " supprimer ou archiver sa liste de prix."
+
+#. module: product
+#: code:addons/product/models/product_attribute.py:0
+#, python-format
+msgid ""
+"You cannot move the attribute %s from the product %s to the product %s."
+msgstr ""
+"Vous ne pouvez pas déplacer l'attribut %s du produit %s vers le produit %s."
 
 #. module: product
 #: code:addons/product/models/product_attribute.py:0

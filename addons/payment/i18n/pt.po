@@ -16,6 +16,10 @@
 # Manuela Silva <mmsrs@sky.com>, 2022
 # Reinaldo Ramos <reinaldo.ramos@arxi.pt>, 2022
 # Nuno Silva <nuno.silva@arxi.pt>, 2022
+# a75f12d3d37ea5bf159c4b3e85eb30e7_0fa6927, 2023
+# Peter Lawrence Romão <peterromao@yahoo.co.uk>, 2024
+# Samuel Afonso, 2024
+# Maitê Dietze, 2024
 # 
 msgid ""
 msgstr ""
@@ -23,8 +27,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-10 14:27+0000\n"
 "PO-Revision-Date: 2021-09-14 12:24+0000\n"
-"Last-Translator: Nuno Silva <nuno.silva@arxi.pt>, 2022\n"
-"Language-Team: Portuguese (https://www.transifex.com/odoo/teams/41243/pt/)\n"
+"Last-Translator: Maitê Dietze, 2024\n"
+"Language-Team: Portuguese (https://app.transifex.com/odoo/teams/41243/pt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -678,7 +682,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:payment.selection__payment_acquirer__state__disabled
 #: model_terms:ir.ui.view,arch_db:payment.payment_acquirer_form
 msgid "Disabled"
-msgstr ""
+msgstr "Desabilitado"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.transaction_status
@@ -877,6 +881,8 @@ msgid ""
 "If you believe that it is an error, please contact the website "
 "administrator."
 msgstr ""
+"Se achar que se trata de um erro, entre em contato com o administrador do "
+"site."
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_acquirer__image_128
@@ -1158,7 +1164,7 @@ msgstr "Confirmar"
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.onboarding_payment_acquirer_step
 msgid "Online Payments"
-msgstr ""
+msgstr "Pagamentos online"
 
 #. module: payment
 #: model:ir.model.fields.selection,name:payment.selection__payment_transaction__operation__online_direct
@@ -1344,7 +1350,7 @@ msgstr "Métodos de Pagamento"
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_link_wizard__description
 msgid "Payment Ref"
-msgstr ""
+msgstr "Ref. de pagamento"
 
 #. module: payment
 #: model:ir.model,name:payment.model_payment_refund_wizard
@@ -1583,7 +1589,7 @@ msgstr "Modelo de documento relacionado"
 #. module: payment
 #: model:payment.acquirer,name:payment.payment_acquirer_sepa_direct_debit
 msgid "SEPA Direct Debit"
-msgstr ""
+msgstr "Débito Direto SEPA"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.view_account_journal_form
@@ -1775,7 +1781,7 @@ msgstr ""
 #: code:addons/payment/controllers/portal.py:0
 #, python-format
 msgid "The access token is invalid."
-msgstr ""
+msgstr "O token de acesso é inválido."
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_token__acquirer_ref

@@ -13,14 +13,15 @@ import logging
 import os
 import time
 from collections import defaultdict
+from functools import wraps
 from hashlib import sha256
 from itertools import chain, repeat
 
-import decorator
 import passlib.context
 import pytz
 from lxml import etree
 from lxml.builder import E
+from passlib.context import CryptContext as _CryptContext
 from psycopg2 import sql
 
 from odoo import api, fields, models, tools, SUPERUSER_ID, _, Command
@@ -34,10 +35,48 @@ from odoo.tools import partition, collections, frozendict, lazy_property, image_
 
 _logger = logging.getLogger(__name__)
 
+class CryptContext:
+    def __init__(self, *args, **kwargs):
+        self.__obj__ = _CryptContext(*args, **kwargs)
+
+    @property
+    def encrypt(self):
+        # deprecated alias
+        return self.hash
+
+    @property
+    def copy(self):
+        return self.__obj__.copy
+
+    @property
+    def hash(self):
+        return self.__obj__.hash
+
+    @property
+    def identify(self):
+        return self.__obj__.identify
+
+    @property
+    def verify(self):
+        return self.__obj__.verify
+
+    @property
+    def verify_and_update(self):
+        return self.__obj__.verify_and_update
+
+    def schemes(self):
+        return self.__obj__.schemes()
+
+    def update(self, **kwargs):
+        if kwargs.get("schemes"):
+            assert isinstance(kwargs["schemes"], str) or all(isinstance(s, str) for s in kwargs["schemes"])
+        return self.__obj__.update(**kwargs)
+
+
 # Only users who can modify the user (incl. the user herself) see the real contents of these fields
 USER_PRIVATE_FIELDS = []
 
-DEFAULT_CRYPT_CONTEXT = passlib.context.CryptContext(
+DEFAULT_CRYPT_CONTEXT = CryptContext(
     # kdf which can be verified by the context. The default encryption kdf is
     # the first of the list
     ['pbkdf2_sha512', 'plaintext'],
@@ -46,6 +85,7 @@ DEFAULT_CRYPT_CONTEXT = passlib.context.CryptContext(
     # algorithm. Passlib 1.6 supports an `auto` value which deprecates any
     # algorithm but the default, but Ubuntu LTS only provides 1.5 so far.
     deprecated=['plaintext'],
+    pbkdf2_sha512__rounds=600_000,
 )
 
 concat = chain.from_iterable
@@ -94,8 +134,7 @@ def _jsonable(o):
     except TypeError: return False
     else: return True
 
-@decorator.decorator
-def check_identity(fn, self):
+def check_identity(fn):
     """ Wrapped method should be an *action method* (called from a button
     type=object), and requires extra security to be executed. This decorator
     checks if the identity (password) has been checked in the last 10mn, and
@@ -103,32 +142,36 @@ def check_identity(fn, self):
 
     Prevents access outside of interactive contexts (aka with a request)
     """
-    if not request:
-        raise UserError(_("This method can only be accessed over HTTP"))
+    @wraps(fn)
+    def wrapped(self):
+        if not request:
+            raise UserError(_("This method can only be accessed over HTTP"))
 
-    if request.session.get('identity-check-last', 0) > time.time() - 10 * 60:
-        # update identity-check-last like github?
-        return fn(self)
+        if request.session.get('identity-check-last', 0) > time.time() - 10 * 60:
+            # update identity-check-last like github?
+            return fn(self)
 
-    w = self.sudo().env['res.users.identitycheck'].create({
-        'request': json.dumps([
-            { # strip non-jsonable keys (e.g. mapped to recordsets like binary_field_real_user)
-                k: v for k, v in self.env.context.items()
-                if _jsonable(v)
-            },
-            self._name,
-            self.ids,
-            fn.__name__
-        ])
-    })
-    return {
-        'type': 'ir.actions.act_window',
-        'res_model': 'res.users.identitycheck',
-        'res_id': w.id,
-        'name': _("Security Control"),
-        'target': 'new',
-        'views': [(False, 'form')],
-    }
+        w = self.sudo().env['res.users.identitycheck'].create({
+            'request': json.dumps([
+                { # strip non-jsonable keys (e.g. mapped to recordsets like binary_field_real_user)
+                    k: v for k, v in self.env.context.items()
+                    if _jsonable(v)
+                },
+                self._name,
+                self.ids,
+                fn.__name__
+            ])
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'res.users.identitycheck',
+            'res_id': w.id,
+            'name': _("Security Control"),
+            'target': 'new',
+            'views': [(False, 'form')],
+        }
+    wrapped.__has_check_identity = True
+    return wrapped
 
 #----------------------------------------------------------
 # Basic res.groups and res.users
@@ -139,6 +182,7 @@ class Groups(models.Model):
     _description = "Access Groups"
     _rec_name = 'full_name'
     _order = 'name'
+    _allow_sudo_commands = False
 
     name = fields.Char(required=True, translate=True)
     users = fields.Many2many('res.users', 'res_groups_users_rel', 'gid', 'uid')
@@ -161,6 +205,13 @@ class Groups(models.Model):
     def _check_one_user_type(self):
         self.users._check_one_user_type()
 
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_settings_group(self):
+        classified = self.env['res.config.settings']._get_classified_fields()
+        for _name, _groups, implied_group in classified['group']:
+            if implied_group.id in self.ids:
+                raise ValidationError(_('You cannot delete a group linked with a settings field.'))
+
     @api.depends('category_id.name', 'name')
     def _compute_full_name(self):
         # Important: value must be stored in environment of group, not group1!
@@ -173,11 +224,7 @@ class Groups(models.Model):
     def _search_full_name(self, operator, operand):
         lst = True
         if isinstance(operand, bool):
-            domains = [[('name', operator, operand)], [('category_id.name', operator, operand)]]
-            if operator in expression.NEGATIVE_TERM_OPERATORS == (not operand):
-                return expression.AND(domains)
-            else:
-                return expression.OR(domains)
+            return [('name', operator, operand)]
         if isinstance(operand, str):
             lst = False
             operand = [operand]
@@ -187,7 +234,9 @@ class Groups(models.Model):
             group_name = values.pop().strip()
             category_name = values and '/'.join(values).strip() or group_name
             group_domain = [('name', operator, lst and [group_name] or group_name)]
-            category_domain = [('category_id.name', operator, lst and [category_name] or category_name)]
+            category_ids = self.env['ir.module.category'].sudo()._search(
+                [('name', operator, [category_name] if lst else category_name)])
+            category_domain = [('category_id', 'in', category_ids)]
             if operator in expression.NEGATIVE_TERM_OPERATORS and not values:
                 category_domain = expression.OR([category_domain, [('category_id', '=', False)]])
             if (operator in expression.NEGATIVE_TERM_OPERATORS) == (not values):
@@ -260,6 +309,7 @@ class Users(models.Model):
     _description = 'Users'
     _inherits = {'res.partner': 'partner_id'}
     _order = 'name, login'
+    _allow_sudo_commands = False
 
     @property
     def SELF_READABLE_FIELDS(self):
@@ -340,7 +390,7 @@ class Users(models.Model):
         # automatically encrypted at startup: look for passwords which don't
         # match the "extended" MCF and pass those through passlib.
         # Alternative: iterate on *all* passwords and use CryptContext.identify
-        cr.execute("""
+        cr.execute(r"""
         SELECT id, password FROM res_users
         WHERE password IS NOT NULL
           AND password !~ '^\$[^$]+\$[^$]+\$.'
@@ -475,6 +525,14 @@ class Users(models.Model):
         action_open_website = self.env.ref('base.action_open_website', raise_if_not_found=False)
         if action_open_website and any(user.action_id.id == action_open_website.id for user in self):
             raise ValidationError(_('The "App Switcher" action cannot be selected as home action.'))
+        # Prevent using reload actions.
+        # We use sudo() because  "Access rights" admins can't read action models
+        for user in self.sudo():
+            if user.action_id.type == "ir.actions.client":
+                action = self.env["ir.actions.client"].browse(user.action_id.id)  # magic
+                if action.tag == "reload":
+                    raise ValidationError(_('The "%s" action cannot be selected as home action.', action.name))
+
 
     @api.constrains('groups_id')
     def _check_one_user_type(self):
@@ -619,6 +677,9 @@ class Users(models.Model):
     def _unlink_except_superuser(self):
         if SUPERUSER_ID in self.ids:
             raise UserError(_('You can not remove the admin user as it is used internally for resources created by Odoo (updates, module installation, ...)'))
+        user_admin = self.env.ref('base.user_admin', raise_if_not_found=False)
+        if user_admin and user_admin in self:
+            raise UserError(_('You cannot delete the admin user because it is utilized in various places (such as security configurations,...). Instead, archive it.'))
         self.clear_caches()
 
     @api.model
@@ -678,6 +739,10 @@ class Users(models.Model):
     @api.model
     def _get_login_domain(self, login):
         return [('login', '=', login)]
+
+    @api.model
+    def _get_email_domain(self, email):
+        return [('email', '=', email)]
 
     @api.model
     def _get_login_order(self):
@@ -899,6 +964,10 @@ class Users(models.Model):
             'target': 'current',
         }
 
+    def _is_internal(self):
+        self.ensure_one()
+        return not self.share
+
     def _is_public(self):
         self.ensure_one()
         return self.has_group('base.group_public')
@@ -927,7 +996,7 @@ class Users(models.Model):
         Requires a CryptContext as deprecation and upgrade notices are used
         internally
         """
-        return DEFAULT_CRYPT_CONTEXT
+        return DEFAULT_CRYPT_CONTEXT.copy()
 
     @contextlib.contextmanager
     def _assert_can_auth(self):
@@ -1123,7 +1192,7 @@ class UsersImplied(models.Model):
                 user = self.new(values)
                 gs = user.groups_id._origin
                 gs = gs | gs.trans_implied_ids
-                values['groups_id'] = type(self).groups_id.convert_to_write(gs, user)
+                values['groups_id'] = self._fields['groups_id'].convert_to_write(gs, user)
         return super(UsersImplied, self).create(vals_list)
 
     def write(self, values):
@@ -1564,7 +1633,9 @@ class CheckIdentity(models.TransientModel):
 
         request.session['identity-check-last'] = time.time()
         ctx, model, ids, method = json.loads(self.sudo().request)
-        return getattr(self.env(context=ctx)[model].browse(ids), method)()
+        method = getattr(self.env(context=ctx)[model].browse(ids), method)
+        assert getattr(method, '__has_check_identity', False)
+        return method()
 
 #----------------------------------------------------------
 # change password wizard
@@ -1673,6 +1744,7 @@ class APIKeysUser(models.Model):
 class APIKeys(models.Model):
     _name = _description = 'res.users.apikeys'
     _auto = False # so we can have a secret column
+    _allow_sudo_commands = False
 
     name = fields.Char("Description", required=True, readonly=True)
     user_id = fields.Many2one('res.users', index=True, required=True, readonly=True, ondelete="cascade")

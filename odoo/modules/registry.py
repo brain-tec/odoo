@@ -89,7 +89,7 @@ class Registry(Mapping):
                     odoo.modules.reset_modules_state(db_name)
                     raise
             except Exception:
-                _logger.error('Failed to load registry')
+                _logger.exception('Failed to load registry')
                 del cls.registries[db_name]     # pylint: disable=unsupported-delete-operation
                 raise
 
@@ -535,8 +535,8 @@ class Registry(Mapping):
         env = odoo.api.Environment(cr, SUPERUSER_ID, {})
         table2model = {
             model._table: name
-            for name, model in env.items()
-            if not model._abstract and model.__class__._table_query is None
+            for name, model in env.registry.items()
+            if not model._abstract and model._table_query is None
         }
         missing_tables = set(table2model).difference(existing_tables(cr, table2model))
 

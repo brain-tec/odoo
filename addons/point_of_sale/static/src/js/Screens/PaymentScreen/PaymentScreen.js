@@ -30,6 +30,13 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             this.error = false;
         }
 
+        mounted() {
+            this.env.pos.on('change:selectedClient', this.render, this);
+        }
+        willUnmount() {
+            this.env.pos.off('change:selectedClient', null, this);
+        }
+
         showMaxValueError() {
             this.showPopup('ErrorPopup', {
                 title: this.env._t('Maximum value reached'),
@@ -212,6 +219,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             let syncedOrderBackendIds = [];
 
             try {
+                this.env.services.ui.block()
                 if (this.currentOrder.is_to_invoice()) {
                     syncedOrderBackendIds = await this.env.pos.push_and_invoice_order(
                         this.currentOrder
@@ -220,6 +228,8 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
                     syncedOrderBackendIds = await this.env.pos.push_single_order(this.currentOrder);
                 }
             } catch (error) {
+                // unblock the UI before showing the error popup
+                this.env.services.ui.unblock();
                 if (error.code == 700 || error.code == 701)
                     this.error = true;
 
@@ -229,6 +239,9 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
                     // then it is an error when invoicing. Besides, _handlePushOrderError was
                     // introduce to handle invoicing error logic.
                     await this._handlePushOrderError(error);
+                    if ('server_ids' in error) {
+                        syncedOrderBackendIds = error.server_ids;
+                    }
                 } else {
                     // We don't block for connection error. But we rethrow for any other errors.
                     if (isConnectionError(error)) {
@@ -240,6 +253,8 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
                         throw error;
                     }
                 }
+            } finally {
+                this.env.services.ui.unblock()
             }
             if (syncedOrderBackendIds.length && this.currentOrder.wait_for_push_order()) {
                 const result = await this._postPushOrderResolve(
@@ -283,6 +298,18 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
                     title: this.env._t('Empty Order'),
                     body: this.env._t(
                         'There must be at least one product in your order before it can be validated and invoiced.'
+                    ),
+                });
+                return false;
+            }
+
+            if (this.currentOrder.electronic_payment_in_progress()) {
+                this.showPopup('ErrorPopup', {
+                    title: this.env._t('Pending Electronic Payments'),
+                    body: this.env._t(
+                        'There is at least one pending electronic payment.\n' +
+                        'Please finish the payment with the terminal or ' +
+                        'cancel it then remove the payment line.'
                     ),
                 });
                 return false;

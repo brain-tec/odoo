@@ -65,9 +65,21 @@
                             </ram:ApplicableTradeTax>
                         </t>
 
+                        <!-- Allowance/Charge on the line -->
+                        <t t-foreach="line_vals.get('allowance_charge_vals_list')" t-as="allowance_charge_vals">
+                            <ram:SpecifiedTradeAllowanceCharge>
+                                <ram:ChargeIndicator>
+                                    <udt:Indicator t-esc="allowance_charge_vals['indicator']"/>
+                                </ram:ChargeIndicator>
+                                <ram:ActualAmount t-esc="format_monetary(allowance_charge_vals['amount'], 2)"/>
+                                <ram:ReasonCode t-esc="allowance_charge_vals['reason_code']"/>
+                                <ram:Reason t-esc="allowance_charge_vals['reason']"/>
+                            </ram:SpecifiedTradeAllowanceCharge>
+                        </t>
+
                         <!-- Subtotal. -->
                         <ram:SpecifiedTradeSettlementLineMonetarySummation>
-                            <ram:LineTotalAmount t-out="format_monetary(line.price_subtotal, 2)"/>
+                            <ram:LineTotalAmount t-esc="format_monetary(line_vals['line_total_amount'], 2)"/>
                         </ram:SpecifiedTradeSettlementLineMonetarySummation>
 
                     </ram:SpecifiedLineTradeSettlement>
@@ -80,7 +92,7 @@
                 xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"
                 xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
                 <!-- Contact. -->
-                <ram:Name t-out="partner.name"/>
+                <ram:Name t-out="partner.display_name"/>
                 <ram:SpecifiedLegalOrganization t-if="specified_legal_organization_val">
                     <ram:ID t-att-schemeID="str('0002')"
                             t-out="specified_legal_organization_val"/>
@@ -173,7 +185,7 @@
                         <ram:BuyerTradeParty>
                             <!-- Address. -->
                             <t t-call="account_edi_ubl_cii.account_invoice_partner_facturx_export_22">
-                                <t t-set="partner" t-value="record.commercial_partner_id"/>
+                                <t t-set="partner" t-value="record.partner_id"/>
                                 <t t-set="specified_legal_organization_val" t-value="buyer_specified_legal_organization"/>
                             </t>
 
@@ -271,12 +283,12 @@
                         <!-- Summary. -->
                         <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
                             <ram:LineTotalAmount
-                                t-out="format_monetary(record.amount_untaxed, 2)"/>
+                                t-esc="format_monetary(tax_basis_total_amount, 2)"/>
                             <ram:TaxBasisTotalAmount
-                                t-out="format_monetary(record.amount_untaxed, 2)"/>
+                                t-esc="format_monetary(tax_basis_total_amount, 2)"/>
                             <ram:TaxTotalAmount
                                 t-att-currencyID="currency.name"
-                                t-out="format_monetary(record.amount_tax, 2)"/>
+                                t-esc="format_monetary(tax_total_amount, 2)"/>
                             <ram:GrandTotalAmount
                                 t-out="format_monetary(record.amount_total, 2)"/>
                             <ram:TotalPrepaidAmount

@@ -8,7 +8,6 @@
 # Alberto Poljak <albertopoljak@gmail.com>, 2022
 # Ana-Maria Olujić <ana-maria.olujic@slobodni-programi.hr>, 2022
 # Igor Krizanovic <krizanovic.igor@gmail.com>, 2022
-# Vladimir Vrgoč, 2022
 # 0ba0ac30481a756f36528ba6f9a4317e_6443a87 <52eefe24349934c364624ef40611b7a3_1010754>, 2022
 # Marko Carević <marko.carevic@live.com>, 2022
 # Mario Jureša <mario.juresa@uvid.hr>, 2022
@@ -20,10 +19,15 @@
 # Ivica Dimjašević <ivica.dimjasevic@storm.hr>, 2022
 # Martin Trigaux, 2022
 # Tina Milas, 2022
-# Hrvoje Sić <hrvoje.sic@gmail.com>, 2022
+# hrvoje sić <hrvoje.sic@gmail.com>, 2022
 # Vladimir Olujić <olujic.vladimir@storm.hr>, 2022
 # Matej Mijoč, 2022
 # Bole <bole@dajmi5.com>, 2022
+# Matija Gudlin, 2023
+# Carlo Štefanac, 2023
+# Vladimir Vrgoč, 2024
+# etoimene, 2024
+# Gordana Bilas, 2024
 # 
 msgid ""
 msgstr ""
@@ -31,8 +35,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-24 08:19+0000\n"
 "PO-Revision-Date: 2021-09-14 12:24+0000\n"
-"Last-Translator: Bole <bole@dajmi5.com>, 2022\n"
-"Language-Team: Croatian (https://www.transifex.com/odoo/teams/41243/hr/)\n"
+"Last-Translator: Gordana Bilas, 2024\n"
+"Language-Team: Croatian (https://app.transifex.com/odoo/teams/41243/hr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -410,7 +414,7 @@ msgstr "<strong>Radni centar: </strong>"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.stock_warn_insufficient_qty_unbuild_form_view
 msgid "? This may lead to inconsistencies in your inventory."
-msgstr ""
+msgstr "To može dovesti do nedosljednosti u vašem zalihi."
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_bom_form_view
@@ -716,12 +720,12 @@ msgstr "Stavke sastavnice od sastavnice na koju se odnose"
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_production_backorder_line
 msgid "Backorder Confirmation Line"
-msgstr ""
+msgstr "Potvrda stavke zaostalog naloga"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production_backorder__mrp_production_backorder_line_ids
 msgid "Backorder Confirmation Lines"
-msgstr ""
+msgstr "Potvrda stavki zaostalog naloga"
 
 #. module: mrp
 #: code:addons/mrp/models/mrp_production.py:0
@@ -993,7 +997,7 @@ msgstr "Otkazano"
 #: code:addons/mrp/models/mrp_production.py:0
 #, python-format
 msgid "Cannot delete a manufacturing order in done state."
-msgstr ""
+msgstr "Ne može se obrisati proizvodni nalog koji je napravljen."
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__capacity
@@ -1039,7 +1043,7 @@ msgstr "Kontrolni zbroj/SHA1"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__time_stop
 msgid "Cleanup Time"
-msgstr ""
+msgstr "Vrijeme za čišćenje"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__code
@@ -1231,7 +1235,7 @@ msgstr ""
 #: code:addons/mrp/static/src/js/mrp_field_one2many_with_copy.js:0
 #, python-format
 msgid "Copy Existing Operations"
-msgstr ""
+msgstr "Kopiraj postojeću operaciju"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_routing_workcenter_copy_to_bom_tree_view
@@ -1282,6 +1286,9 @@ msgid ""
 "Create a backorder if you expect to process the remaining products later. Do"
 " not create a backorder if you will not process the remaining products."
 msgstr ""
+"Kreirajte zaostali nalog ako želite obraditi preostale količine kasnije (u "
+"novom skl. dokumentu). Ukoliko nećete obraditi preostale količine nemojte "
+"kreirati zaostali nalog."
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_production_report
@@ -1313,7 +1320,7 @@ msgstr "Kreiraj nalog za ostatak"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
 msgid "Create customizable worksheets for your quality checks"
-msgstr ""
+msgstr "Kreiraj prilagođene radne listove za svoje provjere kvalitete"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_stock_move__created_production_id
@@ -2537,7 +2544,7 @@ msgstr "Ručno trajanje"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_product_template_form_inherited
 msgid "Manuf. Lead Time"
-msgstr ""
+msgstr "Pripremno vrijeme proizvodnje"
 
 #. module: mrp
 #: code:addons/mrp/models/stock_warehouse.py:0
@@ -3370,7 +3377,7 @@ msgstr "Ispis"
 #: code:addons/mrp/static/src/xml/mrp.xml:0
 #, python-format
 msgid "Print All Variants"
-msgstr ""
+msgstr "Ispiši sve varijante"
 
 #. module: mrp
 #. openerp-web
@@ -3828,6 +3835,12 @@ msgid "Responsible User"
 msgstr "Odgovorna osoba"
 
 #. module: mrp
+#: code:addons/mrp/models/stock_quant.py:0
+#, python-format
+msgid "Return to Inventory"
+msgstr ""
+
+#. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__routing_line_ids
 msgid "Routing Lines"
 msgstr "Stavke ruta"
@@ -3853,7 +3866,7 @@ msgstr "Greška u slanju SMSa"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.res_config_settings_view_form
 msgid "Schedule manufacturing orders earlier to avoid delays"
-msgstr ""
+msgstr "Zakažite naloge za proizvodnju ranije kako biste izbjegli kašnjenja"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__date_planned_start
@@ -4424,6 +4437,20 @@ msgid "The capacity must be strictly positive."
 msgstr "Kapacitet mora striktno biti pozitivan."
 
 #. module: mrp
+#: code:addons/mrp/models/mrp_production.py:0
+#, python-format
+msgid "The component %s should not be the same as the product to produce."
+msgstr ""
+
+#. module: mrp
+#: code:addons/mrp/models/mrp_bom.py:0
+#, python-format
+msgid ""
+"The current configuration is incorrect because it would create a cycle "
+"between these products: %s."
+msgstr ""
+
+#. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_document__res_model
 msgid "The database object this attachment will be attached to."
 msgstr "Objekt u bazi na koji će ovaj privitak biti pridružen."
@@ -4634,7 +4661,7 @@ msgstr "Vrijeme"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__time_efficiency
 msgid "Time Efficiency"
-msgstr ""
+msgstr "Vremenska efikasnost"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__time_ids
@@ -4956,7 +4983,7 @@ msgstr "Otključati"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_res_config_settings__group_unlocked_by_default
 msgid "Unlock Manufacturing Orders"
-msgstr ""
+msgstr "Otključajte nalog za proizvodnju"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
@@ -5552,6 +5579,9 @@ msgid ""
 "                        Create a backorder if you expect to process the remaining quantities later.<br/>\n"
 "                        Do not create a backorder if you will not process the remaining products."
 msgstr ""
+"Unijeli ste manje serijskih brojeva od količine za obraditi.<br/>\n"
+"                        Kreirajte zaostali nalog ako želite obraditi preostale količine kasnije (u novom skl. dokumentu). <br/>\n"
+"                        Ukoliko nećete obraditi preostale količine nemojte kreirati zaostali nalog."
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_immediate_production
@@ -5626,6 +5656,14 @@ msgstr "Proizveli ste manje od inicijalne potrebe"
 #: code:addons/mrp/models/mrp_unbuild.py:0
 #, python-format
 msgid "You should provide a lot number for the final product."
+msgstr ""
+
+#. module: mrp
+#: code:addons/mrp/models/stock_quant.py:0
+#, python-format
+msgid ""
+"You should update the components quantity instead of directly updating the "
+"quantity of the kit product."
 msgstr ""
 
 #. module: mrp

@@ -2,11 +2,13 @@
 import datetime
 import json
 import logging
+import math
+import os
 import random
 import select
 import threading
 import time
-from psycopg2 import InterfaceError
+from psycopg2 import InterfaceError, sql
 
 import odoo
 import odoo.service.server as servermod
@@ -18,6 +20,24 @@ _logger = logging.getLogger(__name__)
 
 # longpolling timeout connection
 TIMEOUT = 50
+
+# custom function to call instead of NOTIFY postgresql command (opt-in)
+ODOO_NOTIFY_FUNCTION = os.environ.get('ODOO_NOTIFY_FUNCTION')
+
+
+def get_notify_payload_max_length(default=8000):
+    try:
+        length = int(os.environ.get('ODOO_NOTIFY_PAYLOAD_MAX_LENGTH', default))
+    except ValueError:
+        _logger.warning("ODOO_NOTIFY_PAYLOAD_MAX_LENGTH has to be an integer, "
+                        "defaulting to %d bytes", default)
+        length = default
+    return length
+
+
+# max length in bytes for the NOTIFY query payload
+NOTIFY_PAYLOAD_MAX_LENGTH = get_notify_payload_max_length()
+
 
 #----------------------------------------------------------
 # Bus
@@ -37,6 +57,26 @@ def channel_with_db(dbname, channel):
     if isinstance(channel, str):
         return (dbname, channel)
     return channel
+
+
+def get_notify_payloads(channels):
+    """
+    Generates the json payloads for the imbus NOTIFY.
+    Splits recursively payloads that are too large.
+
+    :param list channels:
+    :return: list of payloads of json dumps
+    :rtype: list[str]
+    """
+    if not channels:
+        return []
+    payload = json_dump(channels)
+    if len(channels) == 1 or len(payload.encode()) < NOTIFY_PAYLOAD_MAX_LENGTH:
+        return [payload]
+    else:
+        pivot = math.ceil(len(channels) / 2)
+        return (get_notify_payloads(channels[:pivot]) +
+                get_notify_payloads(channels[pivot:]))
 
 
 class ImBus(models.Model):
@@ -77,7 +117,16 @@ class ImBus(models.Model):
             @self.env.cr.postcommit.add
             def notify():
                 with odoo.sql_db.db_connect('postgres').cursor() as cr:
-                    cr.execute("notify imbus, %s", (json_dump(list(channels)),))
+                    if ODOO_NOTIFY_FUNCTION:
+                        query = sql.SQL("SELECT {}('imbus', %s)").format(sql.Identifier(ODOO_NOTIFY_FUNCTION))
+                    else:
+                        query = "NOTIFY imbus, %s"
+                    payloads = get_notify_payloads(list(channels))
+                    if len(payloads) > 1:
+                        _logger.info("The imbus notification payload was too large, "
+                                     "it's been split into %d payloads.", len(payloads))
+                    for payload in payloads:
+                        cr.execute(query, (payload,))
 
     @api.model
     def _sendone(self, channel, notification_type, message):
@@ -218,11 +267,12 @@ class ImDispatch:
         self.started = True
         return self
 
-dispatch = None
+
+# Partially undo a2ed3d3d5bdb6025a1ba14ad557a115a86413e65
+# IMDispatch has a lazy start, so we could initialize it anyway
+# And this avoids the Bus unavailable error messages
+dispatch = ImDispatch()
 stop_event = threading.Event()
-if not odoo.multi_process or odoo.evented:
-    # We only use the event dispatcher in threaded and gevent mode
-    dispatch = ImDispatch()
-    if servermod.server:
-        servermod.server.on_stop(stop_event.set)
-        servermod.server.on_stop(dispatch.wakeup_workers)
+if servermod.server:
+    servermod.server.on_stop(stop_event.set)
+    servermod.server.on_stop(dispatch.wakeup_workers)

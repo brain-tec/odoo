@@ -137,7 +137,7 @@ def ensure_db(redirect='/web/database/selector'):
         url_redirect = werkzeug.urls.url_parse(r.base_url)
         if r.query_string:
             # in P3, request.query_string is bytes, the rest is text, can't mix them
-            query_string = iri_to_uri(r.query_string)
+            query_string = iri_to_uri(r.query_string.decode())
             url_redirect = url_redirect.replace(query=query_string)
         request.session.db = db
         abort_and_redirect(url_redirect.to_url())
@@ -367,7 +367,7 @@ def xml2json_from_elementtree(el, preserve_whitespaces=False):
     return res
 
 class HomeStaticTemplateHelpers(object):
-    """
+    r"""
     Helper Class that wraps the reading of static qweb templates files
     and xpath inheritance applied to those templates
     /!\ Template inheritance order is defined by ir.module.module natural order
@@ -991,7 +991,6 @@ class WebClient(http.Controller):
         :param lang: the language of the user
         :return:
         """
-        request.disable_db = False
 
         if mods:
             mods = mods.split(',')
@@ -1030,22 +1029,6 @@ class WebClient(http.Controller):
     def benchmarks(self, mod=None, **kwargs):
         return request.render('web.benchmark_suite')
 
-
-class Proxy(http.Controller):
-
-    @http.route('/web/proxy/post/<path:path>', type='http', auth='user', methods=['GET'])
-    def post(self, path):
-        """Effectively execute a POST request that was hooked through user login"""
-        with request.session.load_request_data() as data:
-            if not data:
-                raise werkzeug.exceptions.BadRequest()
-            from werkzeug.test import Client
-            base_url = request.httprequest.base_url
-            query_string = request.httprequest.query_string
-            client = Client(http.root, werkzeug.wrappers.Response)
-            headers = {'X-Openerp-Session-Id': request.session.sid}
-            return client.post('/' + path, base_url=base_url, query_string=query_string,
-                               headers=headers, data=data)
 
 class Database(http.Controller):
 
@@ -1199,7 +1182,6 @@ class Session(http.Controller):
     def get_session_info(self):
         request.session.check_security()
         request.uid = request.session.uid
-        request.disable_db = False
         return request.env['ir.http'].session_info()
 
     @http.route('/web/session/authenticate', type='json', auth="none")
@@ -1408,10 +1390,11 @@ class Binary(http.Controller):
         '/web/assets/<int:id>-<string:unique>/<string:filename>',
         '/web/assets/<int:id>-<string:unique>/<path:extra>/<string:filename>'], type='http', auth="public")
     def content_assets(self, id=None, filename=None, unique=None, extra=None, **kw):
+        domain = [('url', '!=', False)]
         if extra:
-            domain = [('url', '=like', f'/web/assets/%/{extra}/{filename}')]
+            domain += [('url', '=like', f'/web/assets/%/{extra}/{filename}')]
         else:
-            domain = [
+            domain += [
                 ('url', '=like', f'/web/assets/%/{filename}'),
                 ('url', 'not like', f'/web/assets/%/%/{filename}')
             ]
@@ -1812,7 +1795,7 @@ class ExportFormat(object):
         model, fields, ids, domain, import_compat = \
             operator.itemgetter('model', 'fields', 'ids', 'domain', 'import_compat')(params)
 
-        Model = request.env[model].with_context(**params.get('context', {}))
+        Model = request.env[model].with_context(import_compat=import_compat, **params.get('context', {}))
         if not Model._is_an_ordinary_table():
             fields = [field for field in fields if field['name'] != 'id']
 
@@ -1826,7 +1809,7 @@ class ExportFormat(object):
         if not import_compat and groupby:
             groupby_type = [Model._fields[x.split(':')[0]].type for x in groupby]
             domain = [('id', 'in', ids)] if ids else domain
-            groups_data = Model.read_group(domain, [x if x != '.id' else 'id' for x in field_names], groupby, lazy=False)
+            groups_data = Model.with_context(active_test=False).read_group(domain, [x if x != '.id' else 'id' for x in field_names], groupby, lazy=False)
 
             # read_group(lazy=False) returns a dict only for final groups (with actual data),
             # not for intermediary groups. The full group tree must be re-constructed.
@@ -1836,7 +1819,6 @@ class ExportFormat(object):
 
             response_data = self.from_group_data(fields, tree)
         else:
-            Model = Model.with_context(import_compat=import_compat)
             records = Model.browse(ids) if ids else Model.search(domain, offset=0, limit=False, order=False)
 
             export_data = records.export_data(field_names).get('datas',[])
@@ -2045,11 +2027,7 @@ class ReportController(http.Controller):
                 'message': "Odoo Server Error",
                 'data': se
             }
-            res = werkzeug.wrappers.Response(
-                json.dumps(error),
-                status=500,
-                headers=[("Content-Type", "application/json")]
-            )
+            res = request.make_response(html_escape(json.dumps(error)))
             raise werkzeug.exceptions.InternalServerError(response=res) from e
 
     @http.route(['/report/check_wkhtmltopdf'], type='json', auth="user")

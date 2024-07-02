@@ -15,7 +15,7 @@ msgstr ""
 "POT-Creation-Date: 2021-09-14 10:29+0000\n"
 "PO-Revision-Date: 2021-09-14 12:27+0000\n"
 "Last-Translator: Jolien De Paepe, 2022\n"
-"Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
+"Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -107,7 +107,7 @@ msgstr "Réservation de stand réussie !"
 #: code:addons/website_event_booth/controllers/event_booth.py:0
 #, python-format
 msgid "Booth registration failed. Please try again."
-msgstr ""
+msgstr "Échec de la réservation du stand. Veuillez réessayer."
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration
@@ -123,7 +123,7 @@ msgstr "Stands sur Site web"
 #: code:addons/website_event_booth/controllers/event_booth.py:0
 #, python-format
 msgid "Booths should belong to the same category."
-msgstr ""
+msgstr "Les stands doivent appartenir à la même catégorie."
 
 #. module: website_event_booth
 #: model_terms:ir.ui.view,arch_db:website_event_booth.event_booth_registration

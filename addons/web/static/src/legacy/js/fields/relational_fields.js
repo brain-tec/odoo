@@ -427,7 +427,7 @@ var FieldMany2One = AbstractField.extend({
         var self = this;
         return {
             res_model: this.field.relation,
-            domain: this.record.getDomain({fieldName: this.name}),
+            domain: this.record.getDomain(this.recordParams),
             context: _.extend({}, this.record.getContext(this.recordParams), context || {}),
             _createContext: this._createContext.bind(this),
             dynamicFilters: dynamicFilters || [],
@@ -642,6 +642,10 @@ var FieldMany2One = AbstractField.extend({
         }
 
         if (this.lastNameSearch) {
+            this.lastNameSearch.catch((reason) => {
+                // the last rpc name_search will be aborted, so we want to ignore its rejection
+                reason.event.preventDefault();
+            })
             this.lastNameSearch.abort(false)
         }
         this.lastNameSearch = this._rpc({
@@ -2038,6 +2042,7 @@ var FieldOne2Many = FieldX2Many.extend({
                     operation: 'CREATE',
                     position: this.editable || data.forceEditable,
                     context: data.context,
+                    isDirty: data.isDirty,
                 }, {
                     allowWarning: data.allowWarning
                 }).then(function () {
@@ -2377,6 +2382,13 @@ var FieldMany2ManyBinaryMultiFiles = AbstractField.extend({
         this.metadata = {};
     },
 
+    /**
+     * @override
+     * @returns {boolean}
+     */
+    isSet: function () {
+        return !!this.value && this.value.count;
+    },
     destroy: function () {
         this._super();
         $(window).off(this.fileupload_id);
@@ -3156,6 +3168,9 @@ var FieldStatus = AbstractField.extend({
         } catch (_) {
             this.isClickable = !!this.nodeOptions.clickable;
         }
+
+        const isReadonly = this.record.evalModifiers(this.attrs.modifiers).readonly;
+        this.isClickable = this.isClickable && !isReadonly;
     },
 
     //--------------------------------------------------------------------------

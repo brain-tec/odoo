@@ -8,15 +8,17 @@
 # marcescu, 2022
 # Leonardo J. Caballero G. <leonardocaballero@gmail.com>, 2022
 # Martin Trigaux, 2022
+# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2023
+# Larissa Manderfeld, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-16 13:18+0000\n"
+"POT-Creation-Date: 2023-10-05 14:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:25+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
-"Language-Team: Spanish (https://www.transifex.com/odoo/teams/41243/es/)\n"
+"Last-Translator: Larissa Manderfeld, 2024\n"
+"Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -261,7 +263,7 @@ msgstr "Separación de la cuenta"
 #: code:addons/pos_restaurant/static/src/js/Screens/ProductScreen/ControlButtons/TableGuestsButton.js:0
 #, python-format
 msgid "Blocked action"
-msgstr ""
+msgstr "Acción bloqueada"
 
 #. module: pos_restaurant
 #. openerp-web
@@ -279,6 +281,18 @@ msgstr "Azul"
 #, python-format
 msgid "CANCELLED"
 msgstr "CANCELADO"
+
+#. module: pos_restaurant
+#: code:addons/pos_restaurant/models/pos_config.py:0
+#, python-format
+msgid "Cash %s"
+msgstr "Efectivo %s"
+
+#. module: pos_restaurant
+#: code:addons/pos_restaurant/models/pos_config.py:0
+#, python-format
+msgid "Cash Bar"
+msgstr "Efectivo del bar"
 
 #. module: pos_restaurant
 #: model:product.product,name:pos_restaurant.pos_food_cheeseburger
@@ -440,7 +454,7 @@ msgstr "Diseño del Piso"
 #: code:addons/pos_restaurant/models/pos_restaurant.py:0
 #, python-format
 msgid "Floor: %s - PoS Config: %s \n"
-msgstr "Piso: %s - Configuración de PdV: %s \n"
+msgstr "Piso: %s - Configuración de TPV: %s \n"
 
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_config_view_form_inherit_restaurant
@@ -1203,8 +1217,8 @@ msgid ""
 "This order is not yet synced to server. Make sure it is synced then try "
 "again."
 msgstr ""
-"Esta comanda no está sincronizada con el servidor. Asegúrese de que esté "
-"sincronizada e inténtelo de nuevo."
+"Este pedido no está sincronizado con el servidor. Asegúrese de que esté "
+"sincronizado, e inténtelo de nuevo."
 
 #. module: pos_restaurant
 #. openerp-web
@@ -1248,7 +1262,7 @@ msgstr "Total:"
 #: code:addons/pos_restaurant/static/src/xml/Screens/ProductScreen/ControlButtons/TransferOrderButton.xml:0
 #, python-format
 msgid "Transfer"
-msgstr "Albarán"
+msgstr "Transferir"
 
 #. module: pos_restaurant
 #. openerp-web
@@ -1333,7 +1347,7 @@ msgstr "Unidades"
 #: code:addons/pos_restaurant/static/src/js/Screens/TipScreen.js:0
 #, python-format
 msgid "Unsynced order"
-msgstr "Comanda no sincronizada."
+msgstr "Pedido no sincronizado"
 
 #. module: pos_restaurant
 #: model:ir.model.fields,help:pos_restaurant.field_restaurant_floor__sequence
@@ -1391,7 +1405,7 @@ msgstr "Amarillo"
 #: code:addons/pos_restaurant/static/src/js/Screens/ProductScreen/ControlButtons/TableGuestsButton.js:0
 #, python-format
 msgid "You cannot put a number that exceeds %s "
-msgstr ""
+msgstr "No puede poner un número que exceda %s "
 
 #. module: pos_restaurant
 #: code:addons/pos_restaurant/models/pos_restaurant.py:0
@@ -1410,8 +1424,8 @@ msgid ""
 "You cannot remove a table that is used in a PoS session, close the "
 "session(s) first."
 msgstr ""
-"No se puede quitar una mesa que se está usando en una sesión de PdV, primero"
-" debe de cerrar esa(s) sesión(es)."
+"No se puede eliminar una mesa que se está usando en una sesión de TPV. "
+"Cierre la/s sesión/es primero."
 
 #. module: pos_restaurant
 #. openerp-web

@@ -25,7 +25,7 @@ def _is_l10n_ch_postal(account_ref):
         ref_subparts = account_ref.split('-')
         account_ref = ref_subparts[0] + ref_subparts[1].rjust(6, '0') + ref_subparts[2]
 
-    if re.match('\d+$', account_ref or ''):
+    if re.match(r'\d+$', account_ref or ''):
         account_ref_without_check = account_ref[:-1]
         return mod10r(account_ref_without_check) == account_ref
     return False
@@ -332,7 +332,7 @@ class ResPartnerBank(models.Model):
         """
         return reference \
                and len(reference) == 27 \
-               and re.match('\d+$', reference) \
+               and re.match(r'\d+$', reference) \
                and reference == mod10r(reference[:-1])
 
     @api.model
@@ -348,9 +348,7 @@ class ResPartnerBank(models.Model):
 
     def _eligible_for_qr_code(self, qr_method, debtor_partner, currency):
         if qr_method == 'ch_qr':
-
             return self.acc_type == 'iban' and \
-                   self.partner_id.country_id.code == 'CH' and \
                    (not debtor_partner or debtor_partner.country_id.code in ('CH', 'LI')) \
                    and currency.name in ('EUR', 'CHF')
 

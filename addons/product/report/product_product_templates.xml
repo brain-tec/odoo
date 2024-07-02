@@ -123,7 +123,7 @@
                         <t t-else="">
                             <strong class="o_label_price_small" t-field="product.list_price" t-options="{'widget': 'monetary', 'label_price': True}"/>
                         </t>
-                        <div class="o_label_extra_data">
+                        <div t-if="False" class="o_label_extra_data">
                             <t t-out="extra_html"/>
                         </div>
                     </div>
@@ -152,7 +152,7 @@
                                 <t t-foreach="range(rows)" t-as="row">
                                     <tr>
                                         <t t-foreach="range(columns)" t-as="column">
-                                            <t t-if="not current_quantity and quantity">
+                                            <t t-if="not current_quantity and quantity and not (current_data and current_data[1])">
                                                 <t t-set="current_data" t-value="quantity.popitem()"/>
                                                 <t t-set="product" t-value="current_data[0]"/>
                                                 <t t-set="barcode_and_qty" t-value="current_data[1].pop()"/>

@@ -5,6 +5,7 @@ import time
 
 from odoo.tests.common import TransactionCase, Form
 from odoo.tools import mute_logger
+from odoo import Command
 
 
 class TestSaleMrpProcurement(TransactionCase):
@@ -234,3 +235,111 @@ class TestSaleMrpProcurement(TransactionCase):
 
         mo = self.env['mrp.production'].search([('product_id', '=', product.id)], order='id desc', limit=1)
         self.assertIn(so.name, mo.origin)
+
+    def test_so_reordering_rule(self):
+        Orderpoint = self.env['stock.warehouse.orderpoint']
+
+        # mulitple variant product
+        car = self.env['product.template'].create({
+            'name': 'Car',
+        })
+        color_attribute = self.env['product.attribute'].create({'name': 'Color', 'sequence': 1})
+        color_red = self.env['product.attribute.value'].create({
+            'name': 'Red',
+            'attribute_id': color_attribute.id,
+            'sequence': 1,
+        })
+        color_blue = self.env['product.attribute.value'].create({
+            'name': 'Blue',
+            'attribute_id': color_attribute.id,
+            'sequence': 2,
+        })
+        self.env['product.template.attribute.line'].create({
+            'product_tmpl_id': car.id,
+            'attribute_id': color_attribute.id,
+            'value_ids': [(6, 0, [color_red.id, color_blue.id])],
+        })
+        mrp_prod = car.product_variant_id
+
+        component_prod = self.env['product.product'].create({
+            'name': 'Component 1',
+            'type': 'product',
+        })
+
+        bom = self.env['mrp.bom'].create([{
+            'product_tmpl_id': mrp_prod.product_tmpl_id.id,
+            'product_id': mrp_prod.id,
+            'product_qty': 1,
+            'type': 'normal',
+            'bom_line_ids': [
+                (0, 0, {'product_id': component_prod.id, 'product_qty': 2}),
+            ],
+        }])
+
+        customer = self.env['res.partner'].create({
+            'name': 'customer',
+        })
+
+        self.env['sale.order'].create({
+            'partner_id': customer.id,
+            'order_line': [
+                (0, 0, {
+                    'product_id': mrp_prod.id,
+                    'product_uom_qty': 3,
+                })],
+        }).action_confirm()
+        Orderpoint._get_orderpoint_action()
+
+        # change product type to Kit
+        mrp_prod.orderpoint_ids.unlink()
+        bom.type = 'phantom'
+
+        self.env['sale.order'].create({
+            'partner_id': customer.id,
+            'order_line': [
+                (0, 0, {
+                    'product_id': mrp_prod.id,
+                    'product_uom_qty': 3,
+                })],
+        }).action_confirm()
+
+        Orderpoint._get_orderpoint_action()
+        orderpoint_kit = Orderpoint.search([('product_id', '=', mrp_prod.id)])
+        orderpoint_component = Orderpoint.search([('product_id', '=', component_prod.id)])
+
+        self.assertFalse(orderpoint_kit)
+        self.assertEqual(orderpoint_component.qty_to_order, 3*2)
+        # only exclude the kit variant
+        self.assertIn(car.product_variant_id.id, Orderpoint._product_exclude_list())
+        self.assertNotIn((car.product_variant_ids - car.product_variant_id).id, Orderpoint._product_exclude_list())
+
+    def test_sale_mrp_avoid_multiple_pickings(self):
+        """
+        Test sale of multiple products. Avoid multiple pickings being
+        generated when we are not in 3 steps manufacturing.
+        """
+
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse.sam_loc_id = warehouse.lot_stock_id
+
+        so = self.env['sale.order'].create({
+            'partner_id': self.env['res.partner'].create({'name': 'My Partner'}).id,
+            'order_line': [
+                Command.create({
+                    'name': 'sol_p1',
+                    'product_id': self.env['product.product'].create({'name': 'p1'}).id,
+                    'product_uom_qty': 1,
+                    'product_uom': self.env.ref('uom.product_uom_unit').id,
+                }),
+                Command.create({
+                    'name': 'sol_p2',
+                    'product_id': self.env['product.product'].create({'name': 'p2'}).id,
+                    'product_uom_qty': 1,
+                    'product_uom': self.env.ref('uom.product_uom_unit').id,
+                }),
+            ],
+        })
+
+        so.action_confirm()
+        self.assertEqual(len(so.picking_ids), 1)
+        self.assertEqual(so.picking_ids.picking_type_id, warehouse.out_type_id)

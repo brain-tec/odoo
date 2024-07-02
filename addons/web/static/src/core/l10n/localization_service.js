@@ -11,7 +11,7 @@ const { Settings } = luxon;
 
 /** @type {[RegExp, string][]} */
 const NUMBERING_SYSTEMS = [
-    [/^ar-(sa|001)$/i, "arab"],
+    [/^ar-(sa|sy|001)$/i, "arab"],
     [/^bn/i, "beng"],
     [/^bo/i, "tibt"],
     // [/^fa/i, "Farsi (Persian)"], // No numberingSystem found in Intl
@@ -27,10 +27,10 @@ export const localizationService = {
     start: async (env, { user }) => {
         // add "data-toolip" to the list of translatable attributes in owl templates
         owl.config.translatableAttributes.push("data-tooltip");
-
+        const locale = document.documentElement.getAttribute("lang") || "";
         const cacheHashes = session.cache_hashes || {};
         const translationsHash = cacheHashes.translations || new Date().getTime().toString();
-        const lang = user.lang || null;
+        const lang = user.lang || locale.replace(/-/g, "_");
         const translationURL = session.translationURL || "/web/webclient/translations";
         let url = `${translationURL}/${translationsHash}`;
         if (lang) {

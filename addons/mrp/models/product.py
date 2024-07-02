@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import collections
 from datetime import timedelta
 from itertools import groupby
 import operator as py_operator
@@ -31,7 +32,7 @@ class ProductTemplate(models.Model):
     produce_delay = fields.Float(
         'Manufacturing Lead Time', default=0.0,
         help="Average lead time in days to manufacture this product. In the case of multi-level BOM, the manufacturing lead times of the components will be added.")
-    is_kits = fields.Boolean(compute='_compute_is_kits', compute_sudo=False)
+    is_kits = fields.Boolean(compute='_compute_is_kits', compute_sudo=True)
 
     def _compute_bom_count(self):
         for product in self:
@@ -48,7 +49,7 @@ class ProductTemplate(models.Model):
         super()._compute_show_qty_status_button()
         for template in self:
             if template.is_kits:
-                template.show_on_hand_qty_status_button = True
+                template.show_on_hand_qty_status_button = template.product_variant_count <= 1
                 template.show_forecasted_qty_status_button = False
 
     def _compute_used_in_bom_count(self):
@@ -78,7 +79,7 @@ class ProductTemplate(models.Model):
         action['domain'] = [('state', '=', 'done'), ('product_tmpl_id', 'in', self.ids)]
         action['context'] = {
             'graph_measure': 'product_uom_qty',
-            'time_ranges': {'field': 'date_planned_start', 'range': 'last_365_days'}
+            'search_default_filter_plan_date': 1,
         }
         return action
 
@@ -111,7 +112,7 @@ class ProductProduct(models.Model):
         compute='_compute_used_in_bom_count', compute_sudo=False)
     mrp_product_qty = fields.Float('Manufactured',
         compute='_compute_mrp_product_qty', compute_sudo=False)
-    is_kits = fields.Boolean(compute="_compute_is_kits", compute_sudo=False)
+    is_kits = fields.Boolean(compute="_compute_is_kits", compute_sudo=True)
 
     def _compute_bom_count(self):
         for product in self:
@@ -213,20 +214,27 @@ class ProductProduct(models.Model):
         # compute kit quantities
         for product in bom_kits:
             bom_sub_lines = bom_sub_lines_per_kit[product]
+            # group lines by component
+            bom_sub_lines_grouped = collections.defaultdict(list)
+            for info in bom_sub_lines:
+                bom_sub_lines_grouped[info[0].product_id].append(info)
             ratios_virtual_available = []
             ratios_qty_available = []
             ratios_incoming_qty = []
             ratios_outgoing_qty = []
             ratios_free_qty = []
-            for bom_line, bom_line_data in bom_sub_lines:
-                component = bom_line.product_id.with_context(mrp_compute_quantities=qties).with_prefetch(prefetch_component_ids)
-                if component.type != 'product' or float_is_zero(bom_line_data['qty'], precision_rounding=bom_line.product_uom_id.rounding):
-                    # As BoMs allow components with 0 qty, a.k.a. optionnal components, we simply skip those
-                    # to avoid a division by zero. The same logic is applied to non-storable products as those
-                    # products have 0 qty available.
-                    continue
-                uom_qty_per_kit = bom_line_data['qty'] / bom_line_data['original_qty']
-                qty_per_kit = bom_line.product_uom_id._compute_quantity(uom_qty_per_kit, bom_line.product_id.uom_id, round=False, raise_if_failure=False)
+
+            for component, bom_sub_lines in bom_sub_lines_grouped.items():
+                component = component.with_context(mrp_compute_quantities=qties).with_prefetch(prefetch_component_ids)
+                qty_per_kit = 0
+                for bom_line, bom_line_data in bom_sub_lines:
+                    if component.type != 'product' or float_is_zero(bom_line_data['qty'], precision_rounding=bom_line.product_uom_id.rounding):
+                        # As BoMs allow components with 0 qty, a.k.a. optionnal components, we simply skip those
+                        # to avoid a division by zero. The same logic is applied to non-storable products as those
+                        # products have 0 qty available.
+                        continue
+                    uom_qty_per_kit = bom_line_data['qty'] / bom_line_data['original_qty']
+                    qty_per_kit += bom_line.product_uom_id._compute_quantity(uom_qty_per_kit, bom_line.product_id.uom_id, round=False, raise_if_failure=False)
                 if not qty_per_kit:
                     continue
                 rounding = component.uom_id.rounding
@@ -271,7 +279,7 @@ class ProductProduct(models.Model):
         # bom specific to this variant or global to template or that contains the product as a byproduct
         action['context'] = {
             'default_product_tmpl_id': template_ids[0],
-            'default_product_id': self.ids[0],
+            'default_product_id': self.env.user.has_group('product.group_product_variant') and self.ids[0] or False,
         }
         action['domain'] = ['|', '|', ('byproduct_ids.product_id', 'in', self.ids), ('product_id', 'in', self.ids), '&', ('product_id', '=', False), ('product_tmpl_id', 'in', template_ids)]
         return action

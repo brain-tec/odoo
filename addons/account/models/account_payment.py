@@ -14,7 +14,7 @@ class AccountPayment(models.Model):
     _check_company_auto = True
 
     def _get_default_journal(self):
-        ''' Retrieve the default journal for the account.payment.
+        r''' Retrieve the default journal for the account.payment.
         /!\ This method will not override the method in 'account.move' because the ORM
         doesn't allow overriding methods using _inherits. Then, this method will be called
         manually in 'create' and 'new'.
@@ -179,28 +179,35 @@ class AccountPayment(models.Model):
         '''
         self.ensure_one()
 
-        liquidity_lines = self.env['account.move.line']
-        counterpart_lines = self.env['account.move.line']
-        writeoff_lines = self.env['account.move.line']
+        # liquidity_lines, counterpart_lines, writeoff_lines
+        lines = [self.env['account.move.line'] for _dummy in range(3)]
 
         for line in self.move_id.line_ids:
             if line.account_id in self._get_valid_liquidity_accounts():
-                liquidity_lines += line
-            elif line.account_id.internal_type in ('receivable', 'payable') or line.partner_id == line.company_id.partner_id:
-                counterpart_lines += line
+                lines[0] += line  # liquidity_lines
+            elif line.account_id.internal_type in ('receivable', 'payable') or line.account_id == line.company_id.transfer_account_id:
+                lines[1] += line  # counterpart_lines
             else:
-                writeoff_lines += line
+                lines[2] += line  # writeoff_lines
 
-        return liquidity_lines, counterpart_lines, writeoff_lines
+        # In some case, there is no liquidity or counterpart line (after changing an outstanding account on the journal for example)
+        # In that case, and if there is one writeoff line, we take this line and set it as liquidity/counterpart line
+        if len(lines[2]) == 1:
+            for i in (0, 1):
+                if not lines[i]:
+                    lines[i] = lines[2]
+                    lines[2] -= lines[2]
+
+        return lines
 
     def _get_valid_liquidity_accounts(self):
         return (
-            self.journal_id.default_account_id,
-            self.payment_method_line_id.payment_account_id,
-            self.journal_id.company_id.account_journal_payment_debit_account_id,
-            self.journal_id.company_id.account_journal_payment_credit_account_id,
-            self.journal_id.inbound_payment_method_line_ids.payment_account_id,
-            self.journal_id.outbound_payment_method_line_ids.payment_account_id,
+            self.journal_id.default_account_id |
+            self.payment_method_line_id.payment_account_id |
+            self.journal_id.company_id.account_journal_payment_debit_account_id |
+            self.journal_id.company_id.account_journal_payment_credit_account_id |
+            self.journal_id.inbound_payment_method_line_ids.payment_account_id |
+            self.journal_id.outbound_payment_method_line_ids.payment_account_id
         )
 
     def _prepare_payment_display_name(self):
@@ -418,7 +425,7 @@ class AccountPayment(models.Model):
             else:
                 pay.payment_method_line_id = False
 
-    @api.depends('payment_type', 'journal_id')
+    @api.depends('payment_type', 'journal_id', 'currency_id')
     def _compute_payment_method_line_fields(self):
         for pay in self:
             pay.available_payment_method_line_ids = pay.journal_id._get_available_payment_method_lines(pay.payment_type)
@@ -532,9 +539,10 @@ class AccountPayment(models.Model):
             self.reconciled_statements_count = 0
             return
 
-        self.env['account.move'].flush()
-        self.env['account.move.line'].flush()
-        self.env['account.partial.reconcile'].flush()
+        self.env['account.payment'].flush(fnames=['move_id', 'outstanding_account_id'])
+        self.env['account.move'].flush(fnames=['move_type', 'payment_id', 'statement_line_id'])
+        self.env['account.move.line'].flush(fnames=['move_id', 'account_id', 'statement_line_id'])
+        self.env['account.partial.reconcile'].flush(fnames=['debit_move_id', 'credit_move_id'])
 
         self._cr.execute('''
             SELECT
@@ -580,7 +588,6 @@ class AccountPayment(models.Model):
                 ARRAY_AGG(DISTINCT counterpart_line.statement_id) AS statement_ids
             FROM account_payment payment
             JOIN account_move move ON move.id = payment.move_id
-            JOIN account_journal journal ON journal.id = move.journal_id
             JOIN account_move_line line ON line.move_id = move.id
             JOIN account_account account ON account.id = line.account_id
             JOIN account_partial_reconcile part ON
@@ -637,6 +644,8 @@ class AccountPayment(models.Model):
         for pay in self:
             if not pay.payment_method_line_id:
                 raise ValidationError(_("Please define a payment method line on your payment."))
+            elif pay.payment_method_line_id.journal_id and pay.payment_method_line_id.journal_id != pay.journal_id:
+                raise ValidationError(_("The selected payment method is not available for this payment, please select the payment method again."))
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS

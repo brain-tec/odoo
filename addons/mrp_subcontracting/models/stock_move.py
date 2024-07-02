@@ -6,6 +6,7 @@ from collections import defaultdict
 from odoo import fields, models, _
 from odoo.exceptions import UserError
 from odoo.tools.float_utils import float_compare, float_is_zero
+from odoo.tools.misc import OrderedSet
 
 
 class StockMove(models.Model):
@@ -117,12 +118,18 @@ class StockMove(models.Model):
         return super(StockMove, self - move_untouchable)._set_quantities_to_reservation()
 
     def _action_cancel(self):
+        productions_to_cancel_ids = OrderedSet()
         for move in self:
             if move.is_subcontract:
                 active_production = move.move_orig_ids.production_id.filtered(lambda p: p.state not in ('done', 'cancel'))
                 moves = self.env.context.get('moves_todo')
                 if not moves or active_production not in moves.move_orig_ids.production_id:
-                    active_production.with_context(skip_activity=True).action_cancel()
+                    productions_to_cancel_ids.update(active_production.ids)
+
+        if productions_to_cancel_ids:
+            productions_to_cancel = self.env['mrp.production'].browse(productions_to_cancel_ids)
+            productions_to_cancel.with_context(skip_activity=True).action_cancel()
+
         return super()._action_cancel()
 
     def _action_confirm(self, merge=True, merge_into=False):
@@ -157,7 +164,7 @@ class StockMove(models.Model):
         res |= super(StockMove, self - move_to_not_merge)._action_confirm(merge=merge, merge_into=merge_into)
         if subcontract_details_per_picking:
             self.env['stock.picking'].concat(*list(subcontract_details_per_picking.keys())).action_assign()
-        return res
+        return res.exists()
 
     def _action_record_components(self):
         self.ensure_one()
@@ -239,3 +246,12 @@ class StockMove(models.Model):
                         'mo_id': production.id,
                         'product_qty': production.product_uom_qty - quantity_to_remove
                     }).change_prod_qty()
+
+    def _is_subcontract_return(self):
+        self.ensure_one()
+        subcontracting_location = self.picking_id.partner_id.with_company(self.company_id).property_stock_subcontractor
+        return (
+                not self.is_subcontract
+                and self.origin_returned_move_id.is_subcontract
+                and self.location_dest_id.id == subcontracting_location.id
+        )

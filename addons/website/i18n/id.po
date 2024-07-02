@@ -12,7 +12,7 @@
 # Rizky Fajar Ryanda <rizky.rikuverse@gmail.com>, 2022
 # Rachmat Aditiya <raditiya@me.com>, 2022
 # Febrasari Almania <febrasari.almania@gmail.com>, 2022
-# oon arfiandwi <oon.arfiandwi@gmail.com>, 2022
+# oon arfiandwi (OonID) <oon.arfiandwi@gmail.com>, 2022
 # Abdi Pratama <abdipro@gmail.com>, 2022
 # William Surya Permana <zarambie_game@yahoo.com>, 2022
 # Ikhsanul Wirsa <iwirsa02@outlook.co.id>, 2022
@@ -26,7 +26,8 @@
 # Wahyu Setiawan <wahyusetiaaa@gmail.com>, 2022
 # arfa simoncelli, 2022
 # Martin Trigaux, 2022
-# Abe Manyo, 2022
+# Wil Odoo, 2023
+# Abe Manyo, 2024
 # 
 msgid ""
 msgstr ""
@@ -34,8 +35,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-10 06:07+0000\n"
 "PO-Revision-Date: 2021-09-14 12:27+0000\n"
-"Last-Translator: Abe Manyo, 2022\n"
-"Language-Team: Indonesian (https://www.transifex.com/odoo/teams/41243/id/)\n"
+"Last-Translator: Abe Manyo, 2024\n"
+"Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -54,6 +55,12 @@ msgstr "Tambahkan gambar"
 #: model_terms:website.page,arch_db:website.bs_debug_page
 msgid "\" alert with a"
 msgstr "\" beritahu dengan"
+
+#. module: website
+#: code:addons/website/models/website_rewrite.py:0
+#, python-format
+msgid "\"URL from\" can not be empty."
+msgstr "\"URL dari\" tidak boleh kosong."
 
 #. module: website
 #: code:addons/website/models/website_rewrite.py:0
@@ -659,14 +666,10 @@ msgstr "<b>Geser</b> tombol ini untuk mengubah ukuran kolom."
 #: model_terms:ir.ui.view,arch_db:website.view_edit_robots
 msgid ""
 "<br/><br/>\n"
-"                    Example of rule:<br/>\n"
-"                    <code class=\"ml-4\">Disallow: /web/login</code><br/>\n"
-"                    <code class=\"ml-4\">Allow: *</code>"
+"                    Example of rule:<br/>"
 msgstr ""
 "<br/><br/>\n"
-"                    Contoh aturan:<br/>\n"
-"                    <code class=\"ml-4\">Tidak izinkan: /web/login</code><br/>\n"
-"                    <code class=\"ml-4\">Izinkan: *</code>"
+"                    Contoh peraturan:<br/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -2055,7 +2058,7 @@ msgstr "Dan subtitle yang hebat"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Animate"
-msgstr ""
+msgstr "Animasikan"
 
 #. module: website
 #. openerp-web
@@ -3977,6 +3980,17 @@ msgid "Do not activate"
 msgstr ""
 
 #. module: website
+#. openerp-web
+#: code:addons/website/static/src/xml/website.editor.xml:0
+#, python-format
+msgid ""
+"Do not copy/paste code you do not understand, this could put your data at "
+"risk."
+msgstr ""
+"Jangan menyalin/menempel kode yang Anda tidak pahami, ini dapat membawa "
+"risiko untuk data Anda."
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
 msgid ""
 "Do you need specific information? Our specialists will help you with "
@@ -4905,7 +4919,7 @@ msgstr "Get in touch"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "GitHub"
-msgstr ""
+msgstr "GitHub"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__social_github
@@ -5060,6 +5074,18 @@ msgid ""
 "will be possible only up to mid 2023. After that, those services won't work "
 "anymore, at all."
 msgstr ""
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/backend/res_config_settings.js:0
+#: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
+#, python-format
+msgid ""
+"Google doesn't need to be pinged anymore. It will automatically fetch your "
+"/sitemap.xml."
+msgstr ""
+"Google tidak perlu diping lagi. Google akan secara otomatis mengambil "
+"/sitemap.xml. Anda."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_res_config_settings__google_search_console
@@ -5331,6 +5357,13 @@ msgstr "Sembunyikan untuk"
 
 #. module: website
 #. openerp-web
+#: code:addons/website/static/src/snippets/s_popup/000.js:0
+#, python-format
+msgid "Hide the cookies bar"
+msgstr "Sembunyikan kolom cookies"
+
+#. module: website
+#. openerp-web
 #: code:addons/website/static/src/xml/website.pageProperties.xml:0
 #, python-format
 msgid "Hide this page from search results"
@@ -5433,7 +5466,7 @@ msgstr ""
 #: code:addons/website/static/src/xml/website.backend.xml:0
 #, python-format
 msgid "How to get my Measurement ID"
-msgstr ""
+msgstr "Bagaimana cara mendapatkan Measurement ID saya"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_google_map_options
@@ -5566,6 +5599,15 @@ msgid ""
 msgstr ""
 "Jika Anda membuang edit saat ini, semua perubahan yang belum di-save akan "
 "hilang. Anda dapat membatalkan ini untuk kembali ke mode edit."
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/snippets/s_embed_code/options.js:0
+#, python-format
+msgid ""
+"If you need to add analytics or marketing tags, inject code in your <head> "
+"or <body> instead. The option is in the \"Theme\" tab."
+msgstr ""
 
 #. module: website
 #. openerp-web
@@ -6818,6 +6860,13 @@ msgstr "Ponsel"
 #. openerp-web
 #: code:addons/website/static/src/js/editor/snippets.options.js:0
 #, python-format
+msgid "Mobile Alignment"
+msgstr "Alignment Mobile "
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/editor/snippets.options.js:0
+#, python-format
 msgid "Mobile menu"
 msgstr "Menu Mobile"
 
@@ -7797,6 +7846,13 @@ msgid "Pay"
 msgstr "Bayar"
 
 #. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Phone Number"
+msgstr "Nomor Telepon"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
 msgid "Phones"
 msgstr "Telepon"
@@ -7907,7 +7963,7 @@ msgstr "Preset"
 #: code:addons/website/static/src/xml/website.xml:0
 #, python-format
 msgid "Press"
-msgstr ""
+msgstr "Tekan"
 
 #. module: website
 #. openerp-web
@@ -8932,6 +8988,13 @@ msgid "Show reCaptcha Policy"
 msgstr "Tunjukkan Kebijakan reCaptcha"
 
 #. module: website
+#. openerp-web
+#: code:addons/website/static/src/snippets/s_popup/000.js:0
+#, python-format
+msgid "Show the cookies bar"
+msgstr "Tunjukkan kolom cookies"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Sidebar"
 msgstr "Sidebar"
@@ -9279,6 +9342,13 @@ msgid "Sub Menus"
 msgstr "Sub Menu"
 
 #. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Subject"
+msgstr "Judul"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
 #: model_terms:ir.ui.view,arch_db:website.s_website_form
 #: model_terms:website.page,arch_db:website.contactus_page
@@ -9541,6 +9611,14 @@ msgstr "Nama yang dipilih sudah ada"
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "The company this website belongs to"
 msgstr "Perusahaan milik website ini"
+
+#. module: website
+#: code:addons/website/wizard/portal_wizard.py:0
+#, python-format
+msgid ""
+"The contact \"%s\" has the same email as an existing user (%s) and has "
+"access to the same website."
+msgstr ""
 
 #. module: website
 #. openerp-web
@@ -9841,6 +9919,18 @@ msgstr ""
 
 #. module: website
 #. openerp-web
+#: code:addons/website/static/src/js/editor/snippets.options.js:0
+#, python-format
+msgid ""
+"This font already exists, you can only add it as a local font to replace the"
+" server version."
+msgstr ""
+"Font ini sudah tersedia, Anda hanya dapat menambahkannya sebagai font lokal "
+"untuk mengganti versi server."
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/editor/snippets.options.js:0
 #: code:addons/website/static/src/xml/website.editor.xml:0
 #, python-format
 msgid "This font is hosted and served to your visitors by Google servers"
@@ -9897,6 +9987,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.one_page_line
 msgid "This page will be published on {{ date_formatted }}"
 msgstr ""
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/menu/translate.js:0
+#, python-format
+msgid "This translation is not editable."
+msgstr "Terjemahan ini tidak dapat diedit."
 
 #. module: website
 #. openerp-web
@@ -10120,7 +10217,7 @@ msgstr "Lacak"
 #: code:addons/website/static/src/xml/track_page.xml:0
 #, python-format
 msgid "Track Visitor"
-msgstr ""
+msgstr "Lacak Pengunjung"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -10143,6 +10240,20 @@ msgstr "Transisi"
 #, python-format
 msgid "Translate Attribute"
 msgstr "Terjemahkan Atribut"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/menu/translate.js:0
+#, python-format
+msgid "Translate Selection Option"
+msgstr "Terjemahkan Opsi Pilihan"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/menu/translate.js:0
+#, python-format
+msgid "Translate header in the text. Menu is generated automatically."
+msgstr "Terjemahkan header di teks. Menu dibuat secara otomatis."
 
 #. module: website
 #. openerp-web
@@ -10630,7 +10741,7 @@ msgstr "Tampilan Visibilitas Password"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_menu__group_ids
 msgid "Visible Groups"
-msgstr ""
+msgstr "Kelompok-Kelompok yang Terlihat"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options_conditional_visibility
@@ -11343,6 +11454,25 @@ msgid "You can't remove the submit button of the form"
 msgstr "Anda tidak boleh menghapus tombol submit pada formulir."
 
 #. module: website
+#: code:addons/website/models/website.py:0
+#, python-format
+msgid ""
+"You cannot delete default website %s. Try to change its settings instead"
+msgstr ""
+"Anda tidak dapat menghapus website default %s. Alih-alih coba untuk "
+"mengganti pengaturannya"
+
+#. module: website
+#: code:addons/website/models/website_menu.py:0
+#, python-format
+msgid ""
+"You cannot delete this website menu as this serves as the default parent "
+"menu for new websites (e.g., /shop, /event, ...)."
+msgstr ""
+"Anda tidak dapat menghapus menu website ini karena berfungsi sebagai menu "
+"parent default untuk website baru (contoh, /shop, /event, ...)."
+
+#. module: website
 #: code:addons/website/controllers/backend.py:0
 #, python-format
 msgid "You do not have sufficient rights to perform that action."
@@ -11425,7 +11555,7 @@ msgstr "Anda masih dapat membuat halaman Anda nanti."
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "YouTube"
-msgstr ""
+msgstr "YouTube"
 
 #. module: website
 #. openerp-web
@@ -11433,6 +11563,13 @@ msgstr ""
 #, python-format
 msgid "Your Client ID:"
 msgstr ""
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Your Company"
+msgstr "Perusahaan Anda"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_template
@@ -11445,10 +11582,42 @@ msgstr ""
 
 #. module: website
 #. openerp-web
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Your Email"
+msgstr "Email Anda"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/snippets/s_embed_code/000.js:0
+#, python-format
+msgid ""
+"Your Embed Code snippet doesn't have anything to display. Click on Edit to "
+"modify it."
+msgstr ""
+"Potongan Embed Code Anda tidak memiliki apapun untuk ditampilkan. Klik pada "
+"Edit untuk memodifikasinya."
+
+#. module: website
+#. openerp-web
 #: code:addons/website/static/src/xml/website.backend.xml:0
 #, python-format
 msgid "Your Measurement ID:"
 msgstr ""
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Your Name"
+msgstr "Nama Anda"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/form_editor_registry.js:0
+#, python-format
+msgid "Your Question"
+msgstr "Pertanyaan Anda"
 
 #. module: website
 #. openerp-web
@@ -11719,7 +11888,7 @@ msgstr "e.g. De Brouckere, Brussels, Belgium"
 #. module: website
 #: model:ir.ui.menu,name:website.menu_website_dashboard
 msgid "eCommerce Dashboard"
-msgstr ""
+msgstr "Dashboard eCommerce"
 
 #. module: website
 #: model:website.configurator.feature,name:website.feature_module_elearning
@@ -12258,7 +12427,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "⌙ Users"
-msgstr ""
+msgstr "⌙ User"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options_background_options

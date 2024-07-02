@@ -5,6 +5,9 @@
 # Translators:
 # Mads Søndergaard, 2022
 # Martin Trigaux, 2022
+# Sanne Kristensen <sanne@vkdata.dk>, 2023
+# lhmflexerp <lhm@flexerp.dk>, 2024
+# Sammi Iversen <sammi@vkdata.dk>, 2024
 # 
 msgid ""
 msgstr ""
@@ -12,8 +15,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-10-05 10:55+0000\n"
 "PO-Revision-Date: 2021-09-14 12:24+0000\n"
-"Last-Translator: Martin Trigaux, 2022\n"
-"Language-Team: Danish (https://www.transifex.com/odoo/teams/41243/da/)\n"
+"Last-Translator: Sammi Iversen <sammi@vkdata.dk>, 2024\n"
+"Language-Team: Danish (https://app.transifex.com/odoo/teams/41243/da/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -66,6 +69,16 @@ msgstr "<i class=\"fa fa-pencil\"/> Redigér"
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
 msgstr "<i title=\"Dokumentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.portal_my_details
+msgid "<option value=\"\">Country...</option>"
+msgstr "<option value=\"\">Land...</option>"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.portal_my_details
+msgid "<option value=\"\">select...</option>"
+msgstr "<option value=\"\">vælg</option>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details
@@ -363,11 +376,6 @@ msgstr "Kunne ikke gemme filen <strong>%s</strong>"
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details
 msgid "Country"
 msgstr "Land"
-
-#. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details
-msgid "Country..."
-msgstr "Land..."
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__create_uid
@@ -794,7 +802,7 @@ msgstr "Portal bruger konfiguration"
 #. module: portal
 #: model:mail.template,name:portal.mail_template_data_portal_welcome
 msgid "Portal: User Invite"
-msgstr ""
+msgstr "Portal: Brugerinvitation"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_record_sidebar
@@ -849,7 +857,7 @@ msgstr "Relateret dokument model"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
 msgid "Revoke Access"
-msgstr ""
+msgstr "Tilbagekald adgang"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -1242,7 +1250,7 @@ msgstr ""
 #. module: portal
 #: model:mail.template,subject:portal.mail_template_data_portal_welcome
 msgid "Your account at {{ object.user_id.company_id.name }}"
-msgstr ""
+msgstr "Din konto hos {{ object.user_id.company_id.name }}"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_contact
@@ -1280,7 +1288,7 @@ msgstr "Kommentarer"
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 #, python-format
 msgid "full access"
-msgstr ""
+msgstr "fuld adgang"
 
 #. module: portal
 #. openerp-web
@@ -1312,11 +1320,6 @@ msgstr "kodeord"
 #: model:ir.model,name:portal.model_res_users_apikeys_description
 msgid "res.users.apikeys.description"
 msgstr "res.users.apikeys.description"
-
-#. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.portal_my_details
-msgid "select..."
-msgstr "vælg...."
 
 #. module: portal
 #. openerp-web

@@ -7,6 +7,8 @@ import { clear, insertAndReplace, link, replace, unlink, unlinkAll } from '@mail
 import { OnChange } from '@mail/model/model_onchange';
 import { addLink, escapeAndCompactTextContent, parseAndTransform } from '@mail/js/utils';
 
+import session from "web.session";
+
 function factory(dependencies) {
 
     class ComposerView extends dependencies['mail.model'] {
@@ -169,6 +171,9 @@ function factory(dependencies) {
                 case 'mail.partner':
                     Object.assign(updateData, { mentionedPartners: link(this.activeSuggestedRecord) });
                     break;
+                case 'mail.canned_response':
+                    Object.assign(updateData, { cannedResponses: link(this.activeSuggestedRecord) });
+                    break;
             }
             this.composer.update(updateData);
         }
@@ -298,6 +303,7 @@ function factory(dependencies) {
                 if (this.threadView && this.threadView.replyingToMessageView && this.threadView.thread !== this.messaging.inbox) {
                     postData.parent_id = this.threadView.replyingToMessageView.message.id;
                 }
+                params.context = Object.assign(params.context || {}, session.user_context);
                 const chatter = this.chatter;
                 const { threadView = {} } = this;
                 const { thread: chatterThread } = this.chatter || {};
@@ -425,6 +431,7 @@ function factory(dependencies) {
             let data = {
                 body: body,
                 attachment_ids: composer.attachments.concat(this.messageViewInEditing.message.attachments).map(attachment => attachment.id),
+                attachment_tokens: composer.attachments.concat(this.messageViewInEditing.message.attachments).map(attachment => attachment.accessToken),
             };
             try {
                 composer.update({ isPostingMessage: true });
@@ -748,9 +755,11 @@ function factory(dependencies) {
             body = this._generateEmojisOnHtml(body);
             return {
                 attachment_ids: this.composer.attachments.map(attachment => attachment.id),
+                attachment_tokens: this.composer.attachments.map(attachment => attachment.accessToken),
                 body,
                 message_type: 'comment',
                 partner_ids: this.composer.recipients.map(partner => partner.id),
+                canned_response_ids: this.composer.cannedResponses.map(response => response.id),
             };
         }
 

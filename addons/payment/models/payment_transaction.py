@@ -130,16 +130,18 @@ class PaymentTransaction(models.Model):
 
     @api.depends('invoice_ids')
     def _compute_invoices_count(self):
-        self.env.cr.execute(
-            '''
-            SELECT transaction_id, count(invoice_id)
-            FROM account_invoice_transaction_rel
-            WHERE transaction_id IN %s
-            GROUP BY transaction_id
-            ''',
-            [tuple(self.ids)]
-        )
-        tx_data = dict(self.env.cr.fetchall())  # {id: count}
+        tx_data = {}
+        if self.ids:
+            self.env.cr.execute(
+                '''
+                SELECT transaction_id, count(invoice_id)
+                FROM account_invoice_transaction_rel
+                WHERE transaction_id IN %s
+                GROUP BY transaction_id
+                ''',
+                [tuple(self.ids)]
+            )
+            tx_data = dict(self.env.cr.fetchall())  # {id: count}
         for tx in self:
             tx.invoices_count = tx_data.get(tx.id, 0)
 
@@ -180,7 +182,8 @@ class PaymentTransaction(models.Model):
             # Duplicate partner values
             partner = self.env['res.partner'].browse(values['partner_id'])
             values.update({
-                'partner_name': partner.name,
+                # Use the parent partner as fallback if the invoicing address has no name.
+                'partner_name': partner.name or partner.parent_id.name,
                 'partner_lang': partner.lang,
                 'partner_email': partner.email,
                 'partner_address': payment_utils.format_partner_address(
@@ -923,7 +926,7 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
 
         payment_method_line = self.acquirer_id.journal_id.inbound_payment_method_line_ids\
-            .filtered(lambda l: l.code == self.provider)
+            .filtered(lambda l: l.payment_acquirer_id == self.acquirer_id)
         payment_values = {
             'amount': abs(self.amount),  # A tx may have a negative amount, but a payment must >= 0
             'payment_type': 'inbound' if self.amount > 0 else 'outbound',

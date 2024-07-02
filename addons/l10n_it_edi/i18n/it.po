@@ -539,12 +539,12 @@ msgstr "Notifica esito: %s<br/>%s"
 #: model:ir.model.fields,field_description:l10n_it_edi.field_res_partner__l10n_it_pa_index
 #: model:ir.model.fields,field_description:l10n_it_edi.field_res_users__l10n_it_pa_index
 msgid "PA index"
-msgstr "Indice PA"
+msgstr "Codice univoco"
 
 #. module: l10n_it_edi
 #: model:ir.model.constraint,message:l10n_it_edi.constraint_res_partner_l10n_it_pa_index
 msgid "PA index must have between 6 and 7 characters."
-msgstr "L'Indice PA deve avere 6-7 caratteri"
+msgstr "Il codice univoco deve avere 6/7 caratteri"
 
 #. module: l10n_it_edi
 #: model_terms:ir.ui.view,arch_db:l10n_it_edi.account_invoice_it_FatturaPA_export
@@ -567,6 +567,12 @@ msgstr "Il server email PEC deve essere di tipo IMAP."
 #: model:ir.model.fields,field_description:l10n_it_edi.field_fetchmail_server__l10n_it_is_pec
 msgid "PEC server"
 msgstr "Server PEC"
+
+#. module: l10n_it_edi
+#: code:addons/l10n_it_edi/models/account_edi_format.py:0
+#, python-format
+msgid "Partner not found, useful informations from XML file:"
+msgstr "Partner non trovato, informazioni dal file XML:"
 
 #. module: l10n_it_edi
 #: model:ir.model.fields.selection,name:l10n_it_edi.selection__res_company__l10n_it_eco_index_sole_shareholder__sm
@@ -855,12 +861,6 @@ msgstr "Informazioni di Trasporto dal file XML:"
 #: model:ir.model.fields,field_description:l10n_it_edi.field_account_tax__l10n_it_vat_due_date
 msgid "VAT due date"
 msgstr "Data scadenza IVA"
-
-#. module: l10n_it_edi
-#: code:addons/l10n_it_edi/models/account_edi_format.py:0
-#, python-format
-msgid "Vendor not found, useful informations from XML file:"
-msgstr "Fornitore non trovato, informazioni dal file XML:"
 
 #. module: l10n_it_edi
 #: code:addons/l10n_it_edi/models/account_edi_format.py:0

@@ -3,8 +3,8 @@
 # 	* im_livechat_mail_bot
 # 
 # Translators:
-# Martin Trigaux, 2021
-# Friederike Fasterling-Nesselbosch, 2022
+# Martin Trigaux, 2023
+# Larissa Manderfeld, 2024
 # 
 msgid ""
 msgstr ""
@@ -12,8 +12,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-07-12 07:50+0000\n"
 "PO-Revision-Date: 2021-09-14 12:23+0000\n"
-"Last-Translator: Friederike Fasterling-Nesselbosch, 2022\n"
-"Language-Team: German (https://www.transifex.com/odoo/teams/41243/de/)\n"
+"Last-Translator: Larissa Manderfeld, 2024\n"
+"Language-Team: German (https://app.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -25,16 +25,20 @@ msgstr ""
 #, python-format
 msgid ""
 "Good, you can customize canned responses in the live chat "
-"application.<br/><br/><b>It's the end of this overview</b>, enjoy "
-"discovering Odoo!"
+"application.<br/><br/><b>It's the end of this overview</b>, you can now "
+"<b>close this conversation</b> or start the tour again with typing <span "
+"class=\"o_odoobot_command\">start the tour</span>. Enjoy discovering Odoo!"
 msgstr ""
-"Gut, Sie können Antwortvorlagen in der Livechat app personalisieren.<br/>\n"
-"<br/><b>Das ist das Ende des Rundgangs</b>, viel spass dabei, Odoo zu entdecken!"
+"Gut, in der Livechat-App können Sie die vorformulierten Antworten "
+"anpassen.<br/><br/><b>Das ist das Ende dieses Überblicks</b>, Sie können "
+"<b>diese Konversation nun schließen</b> oder die Tour erneut starten, indem "
+"Sie <span class=\"o_odoobot_command\">Tour starten</span> eingeben. Viel "
+"Spaß beim Entdecken von Odoo!"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_mail_bot
 msgid "Mail Bot"
-msgstr "Mail Bot"
+msgstr "Mailbot"
 
 #. module: im_livechat_mail_bot
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
@@ -44,28 +48,28 @@ msgid ""
 "class=\"o_odoobot_command\">:</span> and wait for the propositions. Select "
 "one of them and press enter."
 msgstr ""
-"Sie sind sich nicht sicher, was Sie tun. Bitte, tippen Sie <span "
+"Ich bin mir nicht sicher, was Sie tun. Bitte tippen Sie <span "
 "class=\"o_odoobot_command\">:</span> und warten Sie auf die Vorschläge. "
-"Wählen Sie einen von ihnen aus und drücken Sie die Eingabetaste."
+"Wählen Sie einen von ihnen aus und drücken Sie Enter."
 
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields,field_description:im_livechat_mail_bot.field_res_users__odoobot_state
 msgid "OdooBot Status"
-msgstr "OdooBot Status"
+msgstr "OdooBot-Status"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model.fields.selection,name:im_livechat_mail_bot.selection__res_users__odoobot_state__onboarding_canned
 msgid "Onboarding canned"
-msgstr "Onboarding Vorformuliert"
+msgstr "Einführung vorformuliert"
 
 #. module: im_livechat_mail_bot
 #: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
 #, python-format
 msgid ""
-"That's me! 🎉<br/>Try typing <span class=\"o_odoobot_command\">:</span> to "
+"Wonderful! 😇<br/>Try typing <span class=\"o_odoobot_command\">:</span> to "
 "use canned responses."
 msgstr ""
-"Das bin ich! 🎉<br/>Tippen Sie <span class=\"o_odoobot_command\">:</span> um "
+"Wundervoll! 😇<br/>Tippen Sie <span class=\"o_odoobot_command\">:</span>, um "
 "vorformulierte Antworten zu verwenden."
 
 #. module: im_livechat_mail_bot

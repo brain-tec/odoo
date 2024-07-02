@@ -32,6 +32,7 @@
         'data/website_data.xml',
         'data/website_visitor_cron.xml',
         'data/digest_data.xml',
+        'data/update_theme_images.xml',
         'views/assets.xml',
         'views/website_templates.xml',
         'views/website_navbar_templates.xml',
@@ -112,7 +113,6 @@
         'data/website_demo.xml',
     ],
     'application': True,
-    'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',
     'assets': {
         'web.assets_frontend': [
@@ -134,15 +134,20 @@
             # to archive and not load that JS file if we have to create a 001.js
             # and the DB has no snippet using the 000.js left.
             'website/static/src/snippets/s_map/000.js',
+            # Stable fix, will be replaced by an `ir.asset` in master to be able
+            # to clean `<script>` tags in embed code snippets in edit mode.
+            'website/static/src/snippets/s_embed_code/000.js',
         ],
         'web.assets_frontend_minimal': [
             'website/static/src/js/content/inject_dom.js',
             'website/static/src/js/content/auto_hide_menu.js',
+            'website/static/src/js/content/adapt_content.js',
         ],
         'web.assets_frontend_lazy': [
             # Remove assets_frontend_minimal
             ('remove', 'website/static/src/js/content/inject_dom.js'),
             ('remove', 'website/static/src/js/content/auto_hide_menu.js'),
+            ('remove', 'website/static/src/js/content/adapt_content.js'),
         ],
         'web._assets_primary_variables': [
             'website/static/src/scss/primary_variables.scss',

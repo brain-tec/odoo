@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from markupsafe import Markup
+from datetime import datetime, timedelta
+from urllib.parse import urlparse
 
 from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import UserError, AccessError
 from odoo.tools.safe_eval import safe_eval, time
-from odoo.tools.misc import find_in_path
+from odoo.tools.misc import find_in_path, format_datetime, ustr
 from odoo.tools import config, is_html_empty, parse_version
-from odoo.sql_db import TestCursor
 from odoo.http import request
 from odoo.osv.expression import NEGATIVE_TERM_OPERATORS, FALSE_DOMAIN
 
@@ -24,13 +25,17 @@ import json
 from lxml import etree
 from contextlib import closing
 from reportlab.graphics.barcode import createBarcodeDrawing
-from PyPDF2 import PdfFileWriter, PdfFileReader, utils
+from PyPDF2 import PdfFileWriter, PdfFileReader
 from collections import OrderedDict
 from collections.abc import Iterable
 from PIL import Image, ImageFile
 # Allow truncated images
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
+try:
+    from PyPDF2.errors import PdfReadError
+except ImportError:
+    from PyPDF2.utils import PdfReadError
 
 _logger = logging.getLogger(__name__)
 
@@ -87,6 +92,7 @@ class IrActionsReport(models.Model):
     _table = 'ir_act_report_xml'
     _sequence = 'ir_actions_id_seq'
     _order = 'name'
+    _allow_sudo_commands = False
 
     name = fields.Char(translate=True)
     type = fields.Char(default='ir.actions.report')
@@ -252,6 +258,16 @@ class IrActionsReport(models.Model):
     def get_paperformat(self):
         return self.paperformat_id or self.env.company.paperformat_id
 
+    def _get_layout(self):
+        layout = self.env.ref('web.minimal_layout', False)
+        if not layout:
+            return None
+        return self.env['ir.ui.view'].browse(self.env['ir.ui.view'].get_view_id('web.minimal_layout'))
+
+    def _get_report_url(self, layout=None):
+        report_url = self.env['ir.config_parameter'].sudo().get_param('report.url')
+        return report_url or (layout or self._get_layout() or self).get_base_url()
+
     @api.model
     def _build_wkhtmltopdf_args(
             self,
@@ -273,13 +289,6 @@ class IrActionsReport(models.Model):
         command_args = ['--disable-local-file-access']
         if set_viewport_size:
             command_args.extend(['--viewport-size', landscape and '1024x1280' or '1280x1024'])
-
-        # Passing the cookie to wkhtmltopdf in order to resolve internal links.
-        try:
-            if request:
-                command_args.extend(['--cookie', 'session_id', request.session.sid])
-        except AttributeError:
-            pass
 
         # Less verbose error messages
         command_args.extend(['--quiet'])
@@ -327,6 +336,10 @@ class IrActionsReport(models.Model):
             if paperformat_id.disable_shrinking:
                 command_args.extend(['--disable-smart-shrinking'])
 
+        # Add extra time to allow the page to render
+        delay = self.env['ir.config_parameter'].sudo().get_param('report.print_delay', '1000')
+        command_args.extend(['--javascript-delay', delay])
+
         if landscape:
             command_args.extend(['--orientation', 'landscape'])
 
@@ -346,16 +359,14 @@ class IrActionsReport(models.Model):
         :type specific_paperformat_args: dictionary of prioritized paperformat values.
         :return: bodies, header, footer, specific_paperformat_args
         '''
-        IrConfig = self.env['ir.config_parameter'].sudo()
 
         # Return empty dictionary if 'web.minimal_layout' not found.
-        layout = self.env.ref('web.minimal_layout', False)
+        layout = self._get_layout()
         if not layout:
             return {}
-        layout = self.env['ir.ui.view'].browse(self.env['ir.ui.view'].get_view_id('web.minimal_layout'))
-        base_url = IrConfig.get_param('report.url') or layout.get_base_url()
+        base_url = self._get_report_url(layout=layout)
 
-        root = lxml.html.fromstring(html)
+        root = lxml.html.fromstring(html, parser=lxml.html.HTMLParser(encoding='utf-8'))
         match_klass = "//div[contains(concat(' ', normalize-space(@class), ' '), ' {} ')]"
 
         header_node = etree.Element('div', id='minimal_layout_report_headers')
@@ -454,6 +465,27 @@ class IrActionsReport(models.Model):
 
         files_command_args = []
         temporary_files = []
+
+        # Passing the cookie to wkhtmltopdf in order to resolve internal links.
+        session_sid = None
+        try:
+            if request:
+                session_sid = request.session.sid
+        except AttributeError:
+            pass
+        else:
+            expiration = datetime.now() + timedelta(hours=1)
+            # Use format_datetime to force locale
+            expiration = format_datetime(self.env, expiration, "UTC", "E, d-M-Y H:m:s z", "en_US")
+            base_url = self._get_report_url()
+            domain = urlparse(base_url).hostname
+            cookie = f'session_id={session_sid}; HttpOnly; expires={expiration}; domain={domain}; path=/;'
+            cookie_jar_file_fd, cookie_jar_file_path = tempfile.mkstemp(suffix='.txt', prefix='report.cookie_jar.tmp.')
+            temporary_files.append(cookie_jar_file_path)
+            with closing(os.fdopen(cookie_jar_file_fd, 'wb')) as cookie_jar_file:
+                cookie_jar_file.write(cookie.encode())
+            command_args.extend(['--cookie-jar', cookie_jar_file_path])
+
         if header:
             head_file_fd, head_file_path = tempfile.mkstemp(suffix='.html', prefix='report.header.tmp.')
             with closing(os.fdopen(head_file_fd, 'wb')) as head_file:
@@ -484,6 +516,7 @@ class IrActionsReport(models.Model):
             wkhtmltopdf = [_get_wkhtmltopdf_bin()] + command_args + files_command_args + paths + [pdf_report_path]
             process = subprocess.Popen(wkhtmltopdf, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = process.communicate()
+            err = ustr(err)
 
             if process.returncode not in [0, 1]:
                 if process.returncode == -11:
@@ -778,7 +811,7 @@ class IrActionsReport(models.Model):
         else:
             try:
                 result = self._merge_pdfs(streams)
-            except utils.PdfReadError:
+            except (PdfReadError, NotImplementedError):
                 raise UserError(_("One of the documents you are trying to merge is encrypted"))
 
         # We have to close the streams after PdfFileWriter's call to write()
@@ -795,7 +828,7 @@ class IrActionsReport(models.Model):
                 reader = PdfFileReader(stream)
                 writer.appendPagesFromReader(reader)
                 writer.write(result_stream)
-            except utils.PdfReadError:
+            except (PdfReadError, TypeError, ValueError, NotImplementedError):
                 unreadable_streams.append(stream)
 
         return unreadable_streams
@@ -846,7 +879,7 @@ class IrActionsReport(models.Model):
         # assets are not in cache and must be generated. To workaround this issue, we manually
         # commit the writes in the `ir.attachment` table. It is done thanks to a key in the context.
         context = dict(self.env.context)
-        if not config['test_enable']:
+        if not config['test_enable'] and 'commit_assetsbundle' not in context:
             context['commit_assetsbundle'] = True
 
         # Disable the debug mode in the PDF rendering in order to not split the assets bundle
@@ -884,7 +917,8 @@ class IrActionsReport(models.Model):
         # - The report is not fully present in attachments.
         if save_in_attachment and not res_ids:
             _logger.info('The PDF report has been generated from attachments.')
-            self._raise_on_unreadable_pdfs(save_in_attachment.values(), stream_record)
+            if len(save_in_attachment) > 1:
+                self._raise_on_unreadable_pdfs(save_in_attachment.values(), stream_record)
             return self_sudo._post_pdf(save_in_attachment), 'pdf'
 
         if self.get_wkhtmltopdf_state() == 'install':

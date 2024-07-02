@@ -41,6 +41,9 @@ function factory(dependencies) {
             device.start();
             const data = await this.async(() => this.env.services.rpc({
                 route: '/mail/init_messaging',
+                params: {
+                    context: this.env.session.user_context,
+                },
             }, { shadow: true }));
             await this.async(() => this._init(data));
             if (this.messaging.autofetchPartnerImStatus) {
@@ -185,7 +188,7 @@ function factory(dependencies) {
                         name: "leave",
                     },
                     {
-                        channel_types: ['channel', 'chat'],
+                        channel_types: ['channel', 'chat', 'group'],
                         help: this.env._t("List users in the current channel"),
                         methodName: 'execute_command_who',
                         name: "who",

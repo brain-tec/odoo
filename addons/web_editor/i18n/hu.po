@@ -9,8 +9,9 @@
 # Istvan <leki69@gmail.com>, 2021
 # krnkris, 2021
 # Tamás Németh <ntomasz81@gmail.com>, 2022
-# Martin Trigaux, 2022
-# Tamás Dombos, 2022
+# Bognár István <f-b-i@freemail.hu>, 2023
+# Martin Trigaux, 2023
+# Tamás Dombos, 2023
 # 
 msgid ""
 msgstr ""
@@ -18,8 +19,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-06-10 08:53+0000\n"
 "PO-Revision-Date: 2021-09-14 12:27+0000\n"
-"Last-Translator: Tamás Dombos, 2022\n"
-"Language-Team: Hungarian (https://www.transifex.com/odoo/teams/41243/hu/)\n"
+"Last-Translator: Tamás Dombos, 2023\n"
+"Language-Team: Hungarian (https://app.transifex.com/odoo/teams/41243/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -309,7 +310,7 @@ msgstr "Dokumentum beszúrása"
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "Aden"
-msgstr ""
+msgstr "Aden"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
@@ -407,7 +408,7 @@ msgstr "Képarány"
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_web_editor_assets
 msgid "Assets Utils"
-msgstr ""
+msgstr "Eszközök segédprogram"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_attachment
@@ -490,7 +491,7 @@ msgstr "Nagy címsor beszúrása"
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "Blobs"
-msgstr ""
+msgstr "Foltok"
 
 #. module: web_editor
 #. openerp-web
@@ -538,7 +539,7 @@ msgstr "Szegély szélessége"
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "Brannan"
-msgstr ""
+msgstr "Brannan"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
@@ -550,7 +551,7 @@ msgstr "Fényerő"
 #: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Bulleted list"
-msgstr "Listajeles felsorolás"
+msgstr "Listajeles lista"
 
 #. module: web_editor
 #. openerp-web
@@ -934,14 +935,6 @@ msgstr ""
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Embed"
-msgstr "Beágyazás"
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Embed Image"
 msgstr "Kép beágyazása"
@@ -966,6 +959,13 @@ msgstr "Kép beágyazása a dokumentumba."
 #, python-format
 msgid "Embed the youtube video in the document."
 msgstr "Youtube videó beágyazása a dokumentumba."
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "Empty quote"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1201,6 +1201,27 @@ msgstr "Címsor 3"
 
 #. module: web_editor
 #. openerp-web
+#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "Heading 4"
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "Heading 5"
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "Heading 6"
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "Hide Dailymotion logo"
@@ -1394,7 +1415,7 @@ msgstr "Videó beszúrása"
 #: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Insert an horizontal rule separator."
-msgstr "Vízszintes beszúrása"
+msgstr "Vízszintes elválasztó beszúrása"
 
 #. module: web_editor
 #. openerp-web
@@ -1552,6 +1573,13 @@ msgstr "Hivatkozás erre"
 
 #. module: web_editor
 #. openerp-web
+#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "List"
+msgstr "Lista"
+
+#. module: web_editor
+#. openerp-web
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "Load more..."
@@ -1602,7 +1630,7 @@ msgstr "Közepes"
 #: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Medium section heading."
-msgstr "Közepes szakasz címsor"
+msgstr "Közepes címsor"
 
 #. module: web_editor
 #. openerp-web
@@ -1793,13 +1821,6 @@ msgstr "Bekezdés blokk"
 #, python-format
 msgid "Paste as URL"
 msgstr "Beillesztés URL-ként"
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Paste as text"
-msgstr "Beillesztés szövegként"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
@@ -2337,13 +2358,6 @@ msgstr "Optimalizált képek mutatása"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Simple text paste."
-msgstr "Egyszerű szöveg beszúrása"
-
-#. module: web_editor
-#. openerp-web
 #: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
@@ -2391,7 +2405,7 @@ msgstr "Kicsi"
 #: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Small section heading."
-msgstr "Kis szakasz címsor"
+msgstr "Kis címsor"
 
 #. module: web_editor
 #. openerp-web
@@ -2663,6 +2677,13 @@ msgstr ""
 "módosítást, és újratölteni az oldalt. "
 
 #. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
+#, python-format
+msgid "To-do"
+msgstr ""
+
+#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "Toaster"
 msgstr ""
@@ -2721,7 +2742,7 @@ msgstr "Aláhúzás"
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #, python-format
 msgid "Toggle unordered list"
-msgstr "Listajeles felsorolás"
+msgstr "Listajeles lista"
 
 #. module: web_editor
 #. openerp-web

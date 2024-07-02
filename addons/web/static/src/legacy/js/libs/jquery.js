@@ -159,11 +159,15 @@ $.fn.extend({
     compensateScrollbar(add = true, isScrollElement = true, cssProperty = 'padding-right') {
         for (const el of this) {
             // Compensate scrollbar
+            const scrollableEl = isScrollElement ? el : $(el).parent().closestScrollable()[0];
+            const isRTL = scrollableEl.matches(".o_rtl");
+            if (isRTL) {
+                cssProperty = cssProperty.replace("right", "left");
+            }
             el.style.removeProperty(cssProperty);
             if (!add) {
                 return;
             }
-            const scrollableEl = isScrollElement ? el : $(el).parent().closestScrollable()[0];
             const style = window.getComputedStyle(el);
             const borderLeftWidth = parseInt(style.borderLeftWidth.replace('px', ''));
             const borderRightWidth = parseInt(style.borderRightWidth.replace('px', ''));
@@ -195,6 +199,20 @@ $.fn.extend({
             }
         }
         return $baseScrollingElement;
+    },
+    /**
+     * @returns {jQuery}
+     */
+    getScrollingTarget(contextItem = window.document) {
+        const $scrollingElement = contextItem instanceof Element
+            ? $(contextItem)
+            : contextItem instanceof jQuery
+            ? contextItem
+            : $().getScrollingElement(contextItem);
+        const document = $scrollingElement[0].ownerDocument;
+        return $scrollingElement.is(document.scrollingElement)
+            ? $(document.defaultView)
+            : $scrollingElement;
     },
     /**
      * @return {boolean}

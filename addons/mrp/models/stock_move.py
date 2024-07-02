@@ -105,7 +105,7 @@ class StockMoveLine(models.Model):
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
-    created_production_id = fields.Many2one('mrp.production', 'Created Production Order', check_company=True)
+    created_production_id = fields.Many2one('mrp.production', 'Created Production Order', check_company=True, index=True)
     production_id = fields.Many2one(
         'mrp.production', 'Production Order for finished products', check_company=True, index=True)
     raw_material_production_id = fields.Many2one(
@@ -173,7 +173,7 @@ class StockMove(models.Model):
         for move in self:
             move.order_finished_lot_ids = move.raw_material_production_id.lot_producing_id
 
-    @api.depends('raw_material_production_id.is_locked', 'production_id.is_locked')
+    @api.depends('raw_material_production_id', 'production_id')
     def _compute_is_locked(self):
         super(StockMove, self)._compute_is_locked()
         for move in self:
@@ -243,11 +243,25 @@ class StockMove(models.Model):
         return defaults
 
     def write(self, vals):
-        if 'product_uom_qty' in vals and 'move_line_ids' in vals:
-            # first update lines then product_uom_qty as the later will unreserve
-            # so possibly unlink lines
-            move_line_vals = vals.pop('move_line_ids')
-            super().write({'move_line_ids': move_line_vals})
+        if 'product_uom_qty' in vals:
+            if 'move_line_ids' in vals:
+                # first update lines then product_uom_qty as the later will unreserve
+                # so possibly unlink lines
+                move_line_vals = vals.pop('move_line_ids')
+                super().write({'move_line_ids': move_line_vals})
+            procurement_requests = []
+            for move in self:
+                if move.raw_material_production_id.state != 'confirmed' \
+                        or not float_is_zero(move.product_uom_qty, precision_rounding=move.product_uom.rounding) \
+                        or move.procure_method != 'make_to_order':
+                    continue
+                values = move._prepare_procurement_values()
+                origin = move._prepare_procurement_origin()
+                procurement_requests.append(self.env['procurement.group'].Procurement(
+                    move.product_id, vals['product_uom_qty'], move.product_uom,
+                    move.location_id, move.rule_id and move.rule_id.name or "/",
+                    origin, move.company_id, values))
+            self.env['procurement.group'].run(procurement_requests)
         return super().write(vals)
 
     def _action_assign(self):
@@ -260,6 +274,7 @@ class StockMove(models.Model):
 
     def _action_confirm(self, merge=True, merge_into=False):
         moves = self.action_explode()
+        merge_into = merge_into and merge_into.action_explode()
         # we go further with the list of ids potentially changed by action_explode
         return super(StockMove, moves)._action_confirm(merge=merge, merge_into=merge_into)
 
@@ -279,24 +294,27 @@ class StockMove(models.Model):
             if not bom:
                 moves_ids_to_return.add(move.id)
                 continue
-            if move.picking_id.immediate_transfer:
+            if move.picking_id.immediate_transfer or float_is_zero(move.product_uom_qty, precision_rounding=move.product_uom.rounding):
                 factor = move.product_uom._compute_quantity(move.quantity_done, bom.product_uom_id) / bom.product_qty
             else:
                 factor = move.product_uom._compute_quantity(move.product_uom_qty, bom.product_uom_id) / bom.product_qty
             boms, lines = bom.sudo().explode(move.product_id, factor, picking_type=bom.picking_type_id)
             for bom_line, line_data in lines:
-                if move.picking_id.immediate_transfer:
+                if move.picking_id.immediate_transfer or float_is_zero(move.product_uom_qty, precision_rounding=move.product_uom.rounding):
                     phantom_moves_vals_list += move._generate_move_phantom(bom_line, 0, line_data['qty'])
                 else:
                     phantom_moves_vals_list += move._generate_move_phantom(bom_line, line_data['qty'], 0)
             # delete the move with original product which is not relevant anymore
             moves_ids_to_unlink.add(move.id)
 
-        self.env['stock.move'].browse(moves_ids_to_unlink).sudo().unlink()
         if phantom_moves_vals_list:
             phantom_moves = self.env['stock.move'].create(phantom_moves_vals_list)
             phantom_moves._adjust_procure_method()
             moves_ids_to_return |= phantom_moves.action_explode().ids
+        move_to_unlink = self.env['stock.move'].browse(moves_ids_to_unlink).sudo()
+        move_to_unlink.quantity_done = 0
+        move_to_unlink._action_cancel()
+        move_to_unlink.unlink()
         return self.env['stock.move'].browse(moves_ids_to_return)
 
     def action_show_details(self):
@@ -347,13 +365,22 @@ class StockMove(models.Model):
         if bom_line.product_id.type in ['product', 'consu']:
             vals = self.copy_data(default=self._prepare_phantom_move_values(bom_line, product_qty, quantity_done))
             if self.state == 'assigned':
-                vals['state'] = 'assigned'
+                for v in vals:
+                    v['state'] = 'assigned'
         return vals
 
     @api.model
     def _consuming_picking_types(self):
         res = super()._consuming_picking_types()
         res.append('mrp_operation')
+        return res
+
+    def _filter_by_product(self, prod):
+        res = super()._filter_by_product(prod)
+        for sm in self:
+            bom = sm.bom_line_id.bom_id
+            if bom.type == 'phantom' and (bom.product_id == prod or (not bom.product_id and bom.product_tmpl_id == prod.product_tmpl_id)):
+                res |= sm
         return res
 
     def _get_backorder_move_vals(self):
@@ -405,7 +432,11 @@ class StockMove(models.Model):
 
     @api.model
     def _prepare_merge_moves_distinct_fields(self):
-        return super()._prepare_merge_moves_distinct_fields() + ['created_production_id', 'cost_share', 'bom_line_id']
+        res = super()._prepare_merge_moves_distinct_fields()
+        res += ['created_production_id', 'cost_share']
+        if self.bom_line_id and ("phantom" in self.bom_line_id.bom_id.mapped('type')):
+            res.append('bom_line_id')
+        return res
 
     @api.model
     def _prepare_merge_negative_moves_excluded_distinct_fields(self):
@@ -477,9 +508,9 @@ class StockMove(models.Model):
     def _update_candidate_moves_list(self, candidate_moves_list):
         super()._update_candidate_moves_list(candidate_moves_list)
         for production in self.mapped('raw_material_production_id'):
-            candidate_moves_list.append(production.move_raw_ids)
+            candidate_moves_list.append(production.move_raw_ids.filtered(lambda m: m.product_id in self.product_id))
         for production in self.mapped('production_id'):
-            candidate_moves_list.append(production.move_finished_ids)
+            candidate_moves_list.append(production.move_finished_ids.filtered(lambda m: m.product_id in self.product_id))
 
     def _multi_line_quantity_done_set(self, quantity_done):
         if self.raw_material_production_id:

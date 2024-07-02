@@ -9,6 +9,7 @@
     }
     /* "h4 + p" selector is necessary when P is ejected outside of H4 */
     h4, h4 + p {
+        margin-bottom: 0;
         color: #999999;
         font-weight: 700;
         text-transform: uppercase;
@@ -16,10 +17,12 @@
     h4 + p {
         font-size: 1.5rem;
     }
+    p, ul {
+        margin-bottom: 0;
+    }
 }
 .o_boxed_footer {
     margin-top: 200px;
-    white-space: nowrap;
     border-top: 3px solid $o-default-report-secondary-color;
     ul {
         margin: 4px 0;
