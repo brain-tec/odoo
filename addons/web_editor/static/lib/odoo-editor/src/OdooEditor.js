@@ -65,6 +65,9 @@ import {
     ZERO_WIDTH_CHARS_REGEX,
     getAdjacentCharacter,
     isLinkEligibleForZwnbsp,
+    setCursorStart,
+    paragraphRelatedElements,
+    isUnbreakable,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -1439,8 +1442,25 @@ export class OdooEditor extends EventTarget {
         });
         if (!range) return;
         let { startContainer: start, startOffset, endContainer: end, endOffset } = range;
+        const startTr = closestElement(start, 'tr');
+        const endTr = closestElement(end, 'tr');
+        const startTrCells = startTr && [...startTr.cells];
+        const endTrCells = endTr && [...endTr.cells];
+        const startTable = closestElement(start, 'table');
+        const endTable = closestElement(end, 'table');
+        const shouldRemoveStartTr =
+            startTable && firstLeaf(startTable) === firstLeaf(start) &&
+            (!startTable.contains(end) || lastLeaf(startTable) === lastLeaf(end));
+        const shouldRemoveEndTr =
+            endTable && lastLeaf(endTable) === lastLeaf(end) &&
+            (!endTr.contains(start) || (firstLeaf(startTable) === firstLeaf(start)));
         const startBlock = closestBlock(start);
         const endBlock = closestBlock(end);
+        // Delete <br> if selection ends in an last empty <td> tag of <tr>.
+        // eg. `<td>]<br></td>`
+        if (shouldRemoveEndTr && end.nodeName === 'TD' && isEmptyBlock(end)) {
+            end.firstChild.remove();
+        }
         // Do not join blocks in the following cases:
         // 1. start and end share a common ancestor block with the range
         // 2. selection spans multiple TDs
@@ -1452,7 +1472,6 @@ export class OdooEditor extends EventTarget {
             && (startBlock.tagName !== 'TD' && endBlock.tagName !== 'TD')
             && !(firstLeaf(startBlock) === start && lastLeaf(endBlock) === end);
         let next = nextLeaf(end, this.editable);
-        const splitEndTd = closestElement(end, 'td') && end.nextSibling;
 
         // Get the boundaries of the range so as to get the state to restore.
         if (end.nodeType === Node.TEXT_NODE) {
@@ -1467,6 +1486,9 @@ export class OdooEditor extends EventTarget {
             ...boundariesOut(start).slice(0, 2),
             ...boundariesOut(end).slice(2, 4),
             { allowReenter: false, label: 'deleteRange' });
+
+        let startTd = closestElement(start, 'td');
+        const endTd = closestElement(end, 'td');
 
         // Let the DOM split and delete the range.
         const contents = range.extractContents();
@@ -1484,30 +1506,21 @@ export class OdooEditor extends EventTarget {
             closestBlock(range.endContainer).after(n);
             n.textContent = '';
         });
-        // Restore table contents removed by extractContents.
-        const tds = [...contents.querySelectorAll('td')].filter(n => !closestElement(n, 'table'));
-        let currentFragmentTr, currentTr;
-        const currentTd = closestElement(range.endContainer, 'td');
-        tds.forEach((td, i) => {
-            const parentFragmentTr = closestElement(td, 'tr');
-            // Skip the first and the last partially selected TD.
-            if (i && !(splitEndTd && i === tds.length - 1)) {
-                if (parentFragmentTr && parentFragmentTr !== currentFragmentTr && currentTr && [...parentFragmentTr.querySelectorAll('td')].every(td => tds.includes(td))) {
-                    currentTr.after(parentFragmentTr);
-                    currentTr = parentFragmentTr;
-                    parentFragmentTr.textContent = '';
-                } else {
-                    if (parentFragmentTr !== currentFragmentTr) {
-                        currentTr = currentTr
-                            ? currentTr.nextElementSibling
-                            : closestElement(range.endContainer, 'tr').nextElementSibling;
-                    }
-                    currentTr ? currentTr.prepend(td) : currentTd.after(td);
-                    td.textContent = '';
-                }
+        // Restore first and last TR's contents removed by extractContents.
+        const tds = [...contents.querySelectorAll('td')].filter(n => (
+            (startTrCells && !shouldRemoveStartTr && startTrCells.includes(n)) ||
+            (endTrCells && !shouldRemoveEndTr && endTrCells.includes(n))
+        ));
+        for (const td of tds) {
+            if (startTrCells && startTrCells.includes(td)) {
+                startTd.after(td);
+                startTd = td;
+            } else {
+                endTd.before(td);
             }
-            currentFragmentTr = parentFragmentTr;
-        });
+            td.textContent = '';
+            fillEmpty(td);
+        }
         this.observerFlush();
         this._toRollback = false; // Errors caught with observerFlush were already handled.
         // If the end container was fully selected, extractContents may have
@@ -1519,12 +1532,18 @@ export class OdooEditor extends EventTarget {
             const parent = end.parentNode;
             end.remove();
             end = parent;
+            if (
+                (end.nodeName === 'TD' && !shouldRemoveEndTr) ||
+                (paragraphRelatedElements.includes(end.nodeName) &&
+                    end.previousSibling && isUnbreakable(end.previousSibling))
+            ) {
+                fillEmpty(end);
+            }
         }
+        // To remove the table when fully selected the block should not be
+        // considered visible in order to remove it.
+        const noBlocks = shouldRemoveStartTr ? false : true;
         // Same with the start container
-        const table = closestElement(start, 'table');
-        // For selection starting at the beginning of the table and ending outside the
-        // table, the block should not be considered visible in order to remove the table.
-        const noBlocks = (table && firstLeaf(table) === start && !table.contains(end)) ? false : true;
         while (
             start &&
             isRemovableInvisible(start, noBlocks) &&
@@ -1533,6 +1552,12 @@ export class OdooEditor extends EventTarget {
             const parent = start.parentNode;
             start.remove();
             start = parent;
+        }
+        if (start === this.editable && !start.hasChildNodes()) {
+            const p = document.createElement('p');
+            start.appendChild(p);
+            setCursorStart(p);
+            start = p;
         }
         // Ensure empty blocks be given a <br> child.
         if (start) {
@@ -2620,6 +2645,16 @@ export class OdooEditor extends EventTarget {
                     insertText(selection, ev.data === null ? ev.dataTransfer.getData('text/plain') : ev.data);
                     selection.collapseToEnd();
                 }
+                // Firefox does not remove trailing <br> on insertText in an
+                // empty line.
+                const focusNode = selection.focusNode;
+                if (
+                    focusNode.nextSibling &&
+                    focusNode.nextSibling.nodeName === 'BR' &&
+                    lastLeaf(focusNode.parentElement) === focusNode.nextSibling
+                ) {
+                    focusNode.nextSibling.remove();
+                }
                 // Check for url after user insert a space so we won't transform an incomplete url.
                 if (
                     ev.data &&
@@ -3105,6 +3140,18 @@ export class OdooEditor extends EventTarget {
 
     _onMouseup(ev) {
         this._currentMouseState = ev.type;
+
+        const selection = document.getSelection();
+        if (selection.rangeCount > 1) {
+            // Firefox selection in table works with multiple ranges.
+            const startRange = getDeepRange(this.editable, { range: selection.getRangeAt(0) });
+            const endRange = getDeepRange(this.editable, { range: selection.getRangeAt(selection.rangeCount - 1) });
+            const range = document.createRange();
+            range.setStart(startRange.startContainer, 0);
+            range.setEnd(endRange.startContainer, nodeSize(endRange.startContainer));
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
 
         this._fixFontAwesomeSelection();
     }
