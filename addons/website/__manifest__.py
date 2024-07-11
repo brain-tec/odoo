@@ -114,6 +114,7 @@
         'views/res_partner_views.xml',
         'views/neutralize_views.xml',
         'wizard/base_language_install_views.xml',
+        'wizard/blocked_third_party_domains.xml',
         'wizard/website_robots.xml',
         # Replaces a post_init_hook that should be run on upgrade too.
         'data/update_theme_images.xml',
@@ -139,7 +140,6 @@
             'website/static/src/components/autocomplete_with_pages/*',
             'website/static/src/js/tours/tour_utils.js',
             'website/static/src/js/content/website_root.js',
-            'website/static/src/js/widgets/dialog.js',
             'website/static/src/js/content/compatibility.js',
             'website/static/src/js/content/menu.js',
             'website/static/src/js/content/snippets.animation.js',
@@ -151,7 +151,9 @@
             'website/static/src/js/http_cookie.js',
             'website/static/src/xml/website.xml',
             'website/static/src/xml/website.background.video.xml',
+            'website/static/src/xml/website.cookies_warning.xml',
             'website/static/src/js/text_processing.js',
+            'website/static/src/snippets/observing_cookie_mixin.js',
         ],
         'web.assets_frontend_minimal': [
             'website/static/src/js/content/inject_dom.js',

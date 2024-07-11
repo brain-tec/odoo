@@ -4,6 +4,7 @@ import re
 import logging
 
 from collections import OrderedDict
+from urllib3.util import parse_url
 
 from odoo import models
 from odoo.http import request
@@ -34,7 +35,7 @@ class IrQWeb(models.AbstractModel):
     # assume cache will be invalidated by third party on write to ir.ui.view
     def _get_template_cache_keys(self):
         """ Return the list of context keys to use for caching ``_compile``. """
-        return super()._get_template_cache_keys() + ['website_id']
+        return super()._get_template_cache_keys() + ['website_id', 'cookies_allowed']
 
     def _prepare_frontend_environment(self, values):
         """ Update the values and context with website specific value
@@ -43,9 +44,9 @@ class IrQWeb(models.AbstractModel):
         irQweb = super()._prepare_frontend_environment(values)
 
         current_website = request.website
+        editable = irQweb.env.user.has_group('website.group_website_designer')
         has_group_restricted_editor = irQweb.env.user.has_group('website.group_website_restricted_editor')
-        editable = has_group_restricted_editor
-        translatable = editable and irQweb.env.context.get('lang') != irQweb.env['ir.http']._get_default_lang().code
+        translatable = has_group_restricted_editor and irQweb.env.context.get('lang') != irQweb.env['ir.http']._get_default_lang().code
         editable = editable and not translatable
 
         if has_group_restricted_editor and irQweb.env.user.has_group('website.group_multi_website'):
@@ -85,9 +86,16 @@ class IrQWeb(models.AbstractModel):
             if editable:
                 # in edit mode add branding on ir.ui.view tag nodes
                 irQweb = irQweb.with_context(inherit_branding=True)
-            elif has_group_restricted_editor and not translatable:
+            elif has_group_restricted_editor:
                 # will add the branding on fields (into values)
                 irQweb = irQweb.with_context(inherit_branding_auto=True)
+
+        # Avoid cache inconsistencies: if the cookies have been accepted, the
+        # DOM structure should reflect it after a reload and not be stuck in its
+        # previous state (see the part related to cookies in
+        # `_post_processing_att`).
+        is_allowed_optional_cookies = request.env['ir.http']._is_allowed_cookie('optional')
+        irQweb = irQweb.with_context(cookies_allowed=is_allowed_optional_cookies)
 
         return irQweb
 
@@ -109,6 +117,52 @@ class IrQWeb(models.AbstractModel):
 
         if not website:
             return atts
+
+        if (
+            website.cookies_bar
+            and website.block_third_party_domains
+            and not self.env.context.get('cookies_allowed')
+            and not request.env.user.has_group('website.group_website_restricted_editor')
+        ):
+            # If the cookie banner is activated, 3rd-party embedded iframes and
+            # scripts should be controlled. As such:
+            # - 'domains' is a watchlist on the iframe/script's src itself,
+            # - 'classes' is a watchlist on container elements in which iframes
+            # are/could be built on the fly client-side for some reason.
+            cookies_watchlist = {
+                'domains': website.blocked_third_party_domains.split('\n'),
+                'classes': {
+                    's_map',
+                    's_instagram_page',
+                    'o_facebook_page',
+                    'o_background_video',
+                    'media_iframe_video',
+                },
+            }
+            remove_src = False
+            if tagName in ('iframe', 'script'):
+                src_host = parse_url((atts.get('src') or '').lower()).host
+                if src_host:
+                    remove_src = any(
+                        # "www.example.com" and "example.com" should block both.
+                        src_host == domain.removeprefix('www.')
+                        # "domain.com" should block "subdomain.domain.com", but
+                        # not "(subdomain.)mydomain.com".
+                        or src_host.endswith('.' + domain.removeprefix('www.'))
+                        for domain in cookies_watchlist['domains']
+                    )
+            if (
+                remove_src
+                or cookies_watchlist['classes'].intersection((atts.get('class') or '').split(' '))
+            ):
+                atts['data-need-cookies-approval'] = 'true'
+                # Case class in watchlist: we stop here. The element could
+                # contain an iframe created on the fly client-side. It is marked
+                # now so that the iframe can be marked later when created.
+                # Case iframe/script's src in watchlist: we adapt the src.
+                if 'src' in atts:
+                    atts['data-nocookie-src'] = atts['src']
+                    atts['src'] = 'about:blank'
 
         name = self.URL_ATTRS.get(tagName)
         if request:

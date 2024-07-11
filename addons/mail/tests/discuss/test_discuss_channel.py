@@ -148,6 +148,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                                     "create_date": fields.Datetime.to_string(member.create_date),
                                     "fetched_message_id": False,
                                     "id": member.id,
+                                    "last_seen_dt": False,
                                     "persona": {"id": self.test_partner.id, "type": "partner"},
                                     "seen_message_id": False,
                                     "thread": {"id": channel.id, "model": "discuss.channel"},
@@ -198,6 +199,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                                     "create_date": fields.Datetime.to_string(member.create_date),
                                     "fetched_message_id": False,
                                     "id": member.id,
+                                    "last_seen_dt": False,
                                     "persona": {"id": self.test_partner.id, "type": "partner"},
                                     "seen_message_id": False,
                                     "thread": {"id": channel.id, "model": "discuss.channel"},
@@ -752,7 +754,7 @@ class TestChannelInternals(MailCommon, HttpCase):
             - OR we have access to the channel
         """
         self.authenticate(self.user_employee.login, self.user_employee.login)
-        self.assertEqual(self.make_jsonrpc_request("/mail/action", {"init_messaging": {}})["Store"]['discuss']['starred']['counter'], 0)
+        self.assertEqual(self.make_jsonrpc_request("/mail/action", {"init_messaging": {}})["Store"]['starred']['counter'], 0)
         test_group = self.env['discuss.channel'].create({
             'name': 'Private Channel',
             'channel_type': 'group',
@@ -761,14 +763,14 @@ class TestChannelInternals(MailCommon, HttpCase):
 
         test_group_own_message = test_group.with_user(self.user_employee.id).message_post(body='TestingMessage')
         test_group_own_message.write({'starred_partner_ids': [(6, 0, self.partner_employee.ids)]})
-        self.assertEqual(self.make_jsonrpc_request("/mail/action", {"init_messaging": {}})["Store"]['discuss']['starred']['counter'], 1)
+        self.assertEqual(self.make_jsonrpc_request("/mail/action", {"init_messaging": {}})["Store"]['starred']['counter'], 1)
 
         test_group_message = test_group.message_post(body='TestingMessage')
         test_group_message.write({'starred_partner_ids': [(6, 0, self.partner_employee.ids)]})
-        self.assertEqual(self.make_jsonrpc_request("/mail/action", {"init_messaging": {}})["Store"]['discuss']['starred']['counter'], 2)
+        self.assertEqual(self.make_jsonrpc_request("/mail/action", {"init_messaging": {}})["Store"]['starred']['counter'], 2)
 
         test_group.write({'channel_partner_ids': False})
-        self.assertEqual(self.make_jsonrpc_request("/mail/action", {"init_messaging": {}})["Store"]['discuss']['starred']['counter'], 1)
+        self.assertEqual(self.make_jsonrpc_request("/mail/action", {"init_messaging": {}})["Store"]['starred']['counter'], 1)
 
     def test_multi_company_chat(self):
         self.assertEqual(self.env.user.company_id, self.company_admin)

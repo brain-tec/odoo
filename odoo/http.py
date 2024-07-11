@@ -197,8 +197,9 @@ from .modules.module import get_manifest
 from .modules.registry import Registry
 from .service import security, model as service_model
 from .tools import (config, consteq, date_utils, file_path, get_lang,
-                    parse_version, profiler, submap, unique, ustr)
+                    parse_version, profiler, unique, ustr)
 from .tools.func import filter_kwargs, lazy_property
+from .tools.misc import submap
 from .tools._vendor import sessions
 from .tools._vendor.useragents import UserAgent
 
@@ -549,16 +550,27 @@ class Stream:
         with open(self.path, 'rb') as file:
             return file.read()
 
-    def get_response(self, as_attachment=None, immutable=None, **send_file_kwargs):
+    def get_response(
+        self,
+        as_attachment=None,
+        immutable=None,
+        content_security_policy="default-src 'none'",
+        **send_file_kwargs
+    ):
         """
         Create the corresponding :class:`~Response` for the current stream.
 
-        :param bool as_attachment: Indicate to the browser that it
+        :param bool|None as_attachment: Indicate to the browser that it
             should offer to save the file instead of displaying it.
-        :param bool immutable: Add the ``immutable`` directive to the
-            ``Cache-Control`` response header, allowing intermediary
-            proxies to aggressively cache the response. This option
-            also set the ``max-age`` directive to 1 year.
+        :param bool|None immutable: Add the ``immutable`` directive to
+            the ``Cache-Control`` response header, allowing intermediary
+            proxies to aggressively cache the response. This option also
+            set the ``max-age`` directive to 1 year.
+        :param str|None content_security_policy: Optional value for the
+            ``Content-Security-Policy`` (CSP) header. This header is
+            used by browsers to allow/restrict the downloaded resource
+            to itself perform new http requests. By default CSP is set
+            to ``"default-scr 'none'"`` which restrict all requests.
         :param send_file_kwargs: Other keyword arguments to send to
             :func:`odoo.tools._vendor.send_file.send_file` instead of
             the stream sensitive values. Discouraged.
@@ -602,6 +614,10 @@ class Stream:
                     send_file_kwargs['use_x_sendfile'] = True
 
             res = _send_file(self.path, **send_file_kwargs)
+        res.headers['X-Content-Type-Options'] = 'nosniff'
+
+        if content_security_policy:  # see also Application.set_csp()
+            res.headers['Content-Security-Policy'] = content_security_policy
 
             if 'X-Sendfile' in res.headers:
                 res.headers['X-Accel-Redirect'] = x_accel_redirect
@@ -990,10 +1006,10 @@ class Session(collections.abc.MutableMapping):
     #
     # Session methods
     #
-    def authenticate(self, dbname, login=None, password=None):
+    def authenticate(self, dbname, credential):
         """
         Authenticate the current user with the given db, login and
-        password. If successful, store the authentication parameters in
+        credential. If successful, store the authentication parameters in
         the current session, unless multi-factor-auth (MFA) is
         activated. In that case, that last part will be done by
         :ref:`finalize`.
@@ -1012,10 +1028,11 @@ class Session(collections.abc.MutableMapping):
         }
 
         registry = Registry(dbname)
-        pre_uid = registry['res.users'].authenticate(dbname, login, password, wsgienv)
+        auth_info = registry['res.users'].authenticate(dbname, credential, wsgienv)
+        pre_uid = auth_info['uid']
 
         self.uid = None
-        self.pre_login = login
+        self.pre_login = credential['login']
         self.pre_uid = pre_uid
 
         with registry.cursor() as cr:
@@ -1023,7 +1040,7 @@ class Session(collections.abc.MutableMapping):
 
             # if 2FA is disabled we finalize immediately
             user = env['res.users'].browse(pre_uid)
-            if not user._mfa_url():
+            if auth_info.get('mfa') == 'skip' or not user._mfa_url():
                 self.finalize(env)
 
         if request and request.session is self and request.db == dbname:
@@ -1032,7 +1049,7 @@ class Session(collections.abc.MutableMapping):
             # request env needs to be able to access the latest changes from the auth layers
             request.env.cr.commit()
 
-        return pre_uid
+        return auth_info
 
     def finalize(self, env):
         """
@@ -1756,6 +1773,7 @@ class Request:
             filepath = werkzeug.security.safe_join(directory, path)
             res = Stream.from_path(filepath, public=True).get_response(
                 max_age=0 if 'assets' in self.session.debug else STATIC_CACHE,
+                content_security_policy=None,
             )
             root.set_csp(res)
             return res
