@@ -906,7 +906,7 @@ class Project(models.Model):
 
     @api.model
     def _get_values_analytic_account_batch(self, project_vals):
-        project_plan_id = int(self.env['ir.config_parameter'].sudo().get_param('analytic.analytic_plan_projects'))
+        project_plan_id = int(self.env['ir.config_parameter'].sudo().get_param('analytic.project_plan'))
 
         if not project_plan_id:
             project_plan, _other_plans = self.env['account.analytic.plan']._get_all_plans()
@@ -1024,7 +1024,7 @@ class Project(models.Model):
         super()._thread_to_store(store, request_list=request_list, **kwargs)
         if "followers" in request_list:
             store.add(
-                "Thread",
+                "mail.thread",
                 {
                     "collaborator_ids": [
                         {"id": partner.id, "type": "partner"}
