@@ -135,9 +135,7 @@ For more specific needs, you may also assign custom-defined actions
             # depends on BS variables, can't be loaded in assets_primary or assets_secondary
             'mail/static/src/scss/variables/derived_variables.scss',
             'mail/static/src/scss/*.scss',
-            'mail/static/lib/**/*',
-            ('remove', 'mail/static/lib/odoo_sfu/odoo_sfu.js'),
-            ('remove', 'mail/static/lib/lame/lame.js'),
+            'mail/static/lib/selfie_segmentation/selfie_segmentation.js',
             'mail/static/src/js/**/*',
             'mail/static/src/model/**/*',
             'mail/static/src/core/common/**/*',
@@ -148,7 +146,6 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/**/public_web/**/*',
             'mail/static/src/**/web_portal/**/*',
             'mail/static/src/**/web/**/*',
-            ('remove', 'mail/static/src/core/web/wysiwyg.js'),
             ('remove', 'mail/static/src/**/*.dark.scss'),
             # discuss (loaded last to fix dependencies)
             ('remove', 'mail/static/src/discuss/**/*'),
@@ -164,9 +161,6 @@ For more specific needs, you may also assign custom-defined actions
         ],
         'web.assets_backend_lazy': [
             'mail/static/src/views/web/activity/**',
-        ],
-        'web_editor.backend_assets_wysiwyg': [
-            'mail/static/src/core/web/wysiwyg.js',
         ],
         "web.assets_web_dark": [
             'mail/static/src/**/*.dark.scss',
