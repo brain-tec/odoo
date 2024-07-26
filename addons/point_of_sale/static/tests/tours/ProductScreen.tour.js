@@ -2,13 +2,19 @@
 
 import * as PaymentScreen from "@point_of_sale/../tests/tours/helpers/PaymentScreenTourMethods";
 import * as Dialog from "@point_of_sale/../tests/tours/helpers/DialogTourMethods";
+import * as PartnerList from "@point_of_sale/../tests/tours/helpers/PartnerListTourMethods";
 import * as ProductScreen from "@point_of_sale/../tests/tours/helpers/ProductScreenTourMethods";
+import * as ProductScreenPartnerList from "@point_of_sale/../tests/tours/helpers/ProductScreenPartnerListTourMethods";
 import * as Chrome from "@point_of_sale/../tests/tours/helpers/ChromeTourMethods";
 import * as ReceiptScreen from "@point_of_sale/../tests/tours/helpers/ReceiptScreenTourMethods";
 import { registry } from "@web/core/registry";
 import * as Order from "@point_of_sale/../tests/tours/helpers/generic_components/OrderWidgetMethods";
 import * as ProductConfiguratorPopup from "@point_of_sale/../tests/tours/helpers/ProductConfiguratorTourMethods";
-import { inLeftSide, scan_barcode } from "@point_of_sale/../tests/tours/helpers/utils";
+import {
+    inLeftSide,
+    scan_barcode,
+    selectButton,
+} from "@point_of_sale/../tests/tours/helpers/utils";
 
 registry.category("web_tour.tours").add("ProductScreenTour", {
     test: true,
@@ -254,5 +260,35 @@ registry.category("web_tour.tours").add("CheckProductInformation", {
                 trigger: ".section-financials :contains('Margin')",
                 run: () => {},
             },
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("PosCustomerAllFieldsDisplayed", {
+    test: true,
+    url: "/pos/ui",
+    steps: () =>
+        [
+            Dialog.confirm("Open session"),
+            ProductScreen.clickPartnerButton(),
+            PartnerList.checkContactValues(
+                "John Doe",
+                "1 street of astreet",
+                "1234567890",
+                "0987654321",
+                "john@doe.com"
+            ),
+            selectButton("Ok"),
+            ProductScreen.goBackToMainScreen(),
+
+            // Check searches
+            ProductScreenPartnerList.searchCustomerValueAndClear("John Doe"),
+            ProductScreenPartnerList.searchCustomerValueAndClear("1 street of astreet"),
+            ProductScreenPartnerList.searchCustomerValueAndClear("99999"),
+            ProductScreenPartnerList.searchCustomerValueAndClear("Acity"),
+            ProductScreenPartnerList.searchCustomerValueAndClear("United States"),
+            ProductScreenPartnerList.searchCustomerValueAndClear("1234567890"),
+            ProductScreenPartnerList.searchCustomerValueAndClear("0987654321"),
+            ProductScreen.clickPartnerButton(),
+            PartnerList.searchCustomerValue("john@doe.com"),
         ].flat(),
 });
