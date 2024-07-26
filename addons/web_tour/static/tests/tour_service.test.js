@@ -1140,3 +1140,80 @@ test("Tour backward when the pointed element disappear", async () => {
     await animationFrame();
     expect(".o_tour_pointer").toHaveCount(0);
 });
+
+test("Tour started by the URL", async () => {
+    registry.category("web_tour.tours").add("tour1", {
+        sequence: 10,
+        steps: () => [
+            { trigger: "button.foo", run: "click" },
+            { trigger: "button.bar", run: "click" },
+        ],
+    });
+
+    browser.location.href = `${browser.location.origin}?tour=tour1`;
+
+    class Dummy extends Component {
+        static props = ["*"];
+        state = useState({ bool: true });
+        static components = {};
+        static template = xml`
+            <button class="foo w-100" t-if="state.bool" t-on-click="() => { state.bool = false; }">Foo</button>
+            <button class="bar w-100" t-if="!state.bool">Bar</button>
+        `;
+    }
+
+    await mountWithCleanup(Dummy);
+
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(1);
+
+    await contains("button.foo").click();
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(1);
+
+    await contains("button.bar").click();
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(0);
+
+});
+
+test("Log a warning if step ignored", async () => {
+    patchWithCleanup(console, {
+        warn: (msg) => expect.step(msg),
+    });
+
+    registry.category("web_tour.tours").add("tour1", {
+        sequence: 10,
+        steps: () => [
+            { trigger: "button.foo", run: "click" },
+            { trigger: "button.bar" },
+            { trigger: "button.bar", run: "click" },
+        ],
+    });
+
+    class Dummy extends Component {
+        static props = ["*"];
+        state = useState({ bool: true });
+        static components = {};
+        static template = xml`
+            <button class="foo w-100" t-if="state.bool" t-on-click="() => { state.bool = false; }">Foo</button>
+            <button class="bar w-100" t-if="!state.bool">Bar</button>
+        `;
+    }
+
+    await mountWithCleanup(Dummy);
+
+    getService("tour_service").startTour("tour1", { mode: "manual" });
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(1);
+
+    await contains("button.foo").click();
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(1);
+
+    await contains("button.bar").click();
+    await animationFrame();
+    expect(".o_tour_pointer").toHaveCount(0);
+
+    expect.verifySteps(["Step 'button.bar' ignored because no 'run'"]);
+});
