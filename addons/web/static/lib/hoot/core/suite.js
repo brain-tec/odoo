@@ -29,13 +29,32 @@ export class Suite extends Job {
     /** @type {(Suite | Test)[]} */
     jobs = [];
     reporting = createReporting();
-    weight = 0;
 
-    increaseWeight() {
-        this.weight++;
-        if (this.parent) {
-            this.parent.increaseWeight();
+    totalSuiteCount = 0;
+    totalTestCount = 0;
+
+    get weight() {
+        return this.totalTestCount;
+    }
+
+    addJob(job) {
+        this.jobs.push(job);
+
+        if (job instanceof Suite) {
+            this.increaseSuiteCount();
+        } else {
+            this.increaseTestCount();
         }
+    }
+
+    increaseSuiteCount() {
+        this.totalSuiteCount++;
+        this.parent?.increaseSuiteCount();
+    }
+
+    increaseTestCount() {
+        this.totalTestCount++;
+        this.parent?.increaseTestCount();
     }
 
     resetIndex() {
@@ -51,16 +70,26 @@ export class Suite extends Job {
     }
 
     /**
+     * @param {Job[]} jobs
+     */
+    setCurrentJobs(jobs) {
+        this.currentJobs = jobs;
+        this.currentJobIndex = 0;
+    }
+
+    /**
      * @override
      * @type {Job["willRunAgain"]}
      */
     willRunAgain(child) {
-        let count = this.runCount;
-        if (this.currentJobs.at(-1) === child) {
-            count++;
-        }
-        if (count < (this.config.multi || 1)) {
-            return true;
+        if (this.config.multi) {
+            let count = this.runCount;
+            if (this.currentJobs.at(-1) === child) {
+                count++;
+            }
+            if (count < this.config.multi) {
+                return true;
+            }
         }
         return Boolean(this.parent?.willRunAgain(this));
     }
