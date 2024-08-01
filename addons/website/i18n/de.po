@@ -5384,6 +5384,13 @@ msgstr "Ausblenden für"
 
 #. module: website
 #. openerp-web
+#: code:addons/website/static/src/snippets/s_popup/000.js:0
+#, python-format
+msgid "Hide the cookies bar"
+msgstr "Die Cookies-Leiste ausblenden"
+
+#. module: website
+#. openerp-web
 #: code:addons/website/static/src/xml/website.pageProperties.xml:0
 #, python-format
 msgid "Hide this page from search results"
@@ -9025,6 +9032,13 @@ msgid "Show reCaptcha Policy"
 msgstr "reCaptcha-Richtlinie anzeigen"
 
 #. module: website
+#. openerp-web
+#: code:addons/website/static/src/snippets/s_popup/000.js:0
+#, python-format
+msgid "Show the cookies bar"
+msgstr "Die Cookies-Leiste einblenden"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Sidebar"
 msgstr "Seitenleiste"
@@ -9650,6 +9664,16 @@ msgstr "Der gewählte Name existiert bereits"
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "The company this website belongs to"
 msgstr "Das Unternehmen, zu dem diese Website gehört"
+
+#. module: website
+#: code:addons/website/wizard/portal_wizard.py:0
+#, python-format
+msgid ""
+"The contact \"%s\" has the same email as an existing user (%s) and has "
+"access to the same website."
+msgstr ""
+"Der Kontakt „%s“ hat dieselbe E-Mail-Adresse wie ein bereits bestehender "
+"Benutzer (%s) und hat Zugriff auf dieselbe Website."
 
 #. module: website
 #. openerp-web

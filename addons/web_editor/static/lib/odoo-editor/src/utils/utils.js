@@ -510,11 +510,13 @@ export function insertSelectionChars(anchorNode, anchorOffset, focusNode, focusO
  * the selection.
  *
  * @param {Element} root
- * @param {Selection} [sel] if undefined, the current selection is used.
- * @param {boolean} [doFormat=false] if true, the HTML is formatted.
+ * @param {Object} [options={}]
+ * @param {Selection} [options.selection] if undefined, the current selection is used.
+ * @param {boolean} [options.doFormat] if true, the HTML is formatted.
+ * @param {boolean} [options.includeOids] if true, the HTML is formatted.
  */
-export function logSelection(root, sel, doFormat = false) {
-    sel = sel || root.ownerDocument.getSelection();
+export function logSelection(root, options = {}) {
+    const sel = options.selection || root.ownerDocument.getSelection();
     if (!root.contains(sel.anchorNode) || !root.contains(sel.focusNode)) {
         console.warn('The selection is not contained in the root.');
         return;
@@ -524,6 +526,9 @@ export function logSelection(root, sel, doFormat = false) {
     let anchorClone, focusClone;
     const cloneTree = node => {
         const clone = node.cloneNode();
+        if (options.includeOids) {
+            clone.oid = node.oid;
+        }
         anchorClone = anchorClone || (node === sel.anchorNode && clone);
         focusClone = focusClone || (node === sel.focusNode && clone);
         for (const child of node.childNodes || []) {
@@ -540,7 +545,7 @@ export function logSelection(root, sel, doFormat = false) {
     rootClone.removeAttribute('data-last-history-steps');
 
     // Format the HTML by splitting and indenting to highlight the structure.
-    if (doFormat) {
+    if (options.doFormat) {
         const formatHtml = (node, spaces = 0) => {
             node.before(document.createTextNode('\n' + ' '.repeat(spaces)));
             for (const child of [...node.childNodes]) {
@@ -548,6 +553,13 @@ export function logSelection(root, sel, doFormat = false) {
             }
             if (node.nodeType !== Node.TEXT_NODE) {
                 node.appendChild(document.createTextNode('\n' + ' '.repeat(spaces)));
+            }
+            if (options.includeOids) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    node.textContent += ` (${node.oid})`;
+                } else {
+                    node.setAttribute('oid', node.oid);
+                }
             }
         }
         formatHtml(rootClone);
@@ -673,10 +685,64 @@ export function getTraversedNodes(editable, range = getDeepRange(editable)) {
     do {
         node = iterator.nextNode();
     } while (node && node !== range.startContainer);
+    if (
+        node &&
+        node.nodeType === Node.ELEMENT_NODE &&
+        node.childNodes.length &&
+        range.startOffset &&
+        node.childNodes[range.startOffset - 1].nodeName === "BR"
+    ) {
+        // Handle the cases:
+        // <p>ab<br>[</p><p>cd</p>] => [p2, cd]
+        // <p>ab<br>[<br>cd</p><p>ef</p>] => [br2, cd, p2, ef]
+        const targetBr = node.childNodes[range.startOffset - 1];
+        while (node != targetBr) {
+            node = iterator.nextNode();
+        }
+        node = iterator.nextNode();
+    }
+    if (
+        node &&
+        !range.collapsed &&
+        node === range.startContainer &&
+        range.startOffset === nodeSize(node) &&
+        node.nextSibling &&
+        node.nextSibling.nodeName === "BR"
+    ) {
+        // Handle the case: <p>ab[<br>cd</p><p>ef</p>] => [br, cd, p2, ef]
+        node = iterator.nextNode();
+    }
     const traversedNodes = new Set([node, ...descendants(node)]);
     while (node && node !== range.endContainer) {
         node = iterator.nextNode();
-        node && traversedNodes.add(node);
+        if (node) {
+            if (
+                !(
+                    // Handle the case: [<p>ab</p><p>cd<br>]ef</p> => [ab, p2, cd, br]
+                    node === range.endContainer &&
+                    range.endOffset === 0 &&
+                    !range.collapsed &&
+                    node.previousSibling &&
+                    node.previousSibling.nodeName === "BR"
+                )
+            ) {
+                traversedNodes.add(node);
+            }
+        }
+    }
+    if (node) {
+        // Handle the cases:
+        // [<p>ab</p><p>cd<br>]</p> => [ab, p2, cd, br]
+        // [<p>ab</p><p>cd<br>]<br>ef</p> => [ab, p2, cd, br1]
+        for (const descendant of descendants(node)) {
+            if (
+                descendant.parentElement === node &&
+                childNodeIndex(descendant) >= range.endOffset
+            ) {
+                break;
+            }
+            traversedNodes.add(descendant);
+        }
     }
     return [...traversedNodes];
 }
@@ -1112,26 +1178,24 @@ export const formatSelection = (editor, formatName, {applyStyle, formatProps} = 
     }
 }
 export const isLinkEligibleForZwnbsp = link => {
-    return !(
-        link.textContent.trim() === '' ||
-        [link, ...link.querySelectorAll('*')].some(isBlock) ||
+    return link.isContentEditable && !(
+        [link, ...link.querySelectorAll('*')].some(el => el.nodeName === 'IMG' || isBlock(el)) ||
         link.matches('nav a, a.nav-link')
-    )
+    );
 }
 /**
  * Take a link and pad it with non-break zero-width spaces to ensure that it is
  * always possible to place the cursor at its inner and outer edges.
  *
- * @param {HTMLElement} editable
  * @param {HTMLAnchorElement} link
  */
-export const padLinkWithZws = (editable, link) => {
+export const padLinkWithZws = link => {
     if (!isLinkEligibleForZwnbsp(link)) {
         // Only add the ZWNBSP for simple (possibly styled) text links, and
         // never in a nav.
         return;
     }
-    const selection = editable.ownerDocument.getSelection();
+    const selection = link.ownerDocument.getSelection() || {};
     const { anchorOffset, focusOffset } = selection;
     let extraAnchorOffset = 0;
     let extraFocusOffset = 0;
@@ -1386,7 +1450,7 @@ export function isUnbreakable(node) {
     }
     return (
         isUnremovable(node) || // An unremovable node is always unbreakable.
-        ['THEAD', 'TBODY', 'TFOOT', 'TR', 'TH', 'TD', 'SECTION', 'DIV'].includes(node.tagName) ||
+        ['TABLE', 'THEAD', 'TBODY', 'TFOOT', 'TR', 'TH', 'TD', 'SECTION', 'DIV'].includes(node.tagName) ||
         node.hasAttribute('t') ||
         (node.nodeType === Node.ELEMENT_NODE &&
             (node.nodeName === 'T' ||
@@ -1477,7 +1541,7 @@ export function getInSelection(document, selector) {
 
 // This is a list of "paragraph-related elements", defined as elements that
 // behave like paragraphs.
-const paragraphRelatedElements = [
+export const paragraphRelatedElements = [
     'P',
     'H1',
     'H2',

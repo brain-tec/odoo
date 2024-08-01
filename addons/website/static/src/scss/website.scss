@@ -1250,7 +1250,7 @@ header {
                             padding-right: $nav-link-padding-x;
                             padding-left: $nav-link-padding-x;
                         }
-                        .dropdown-menu {
+                        .dropdown-menu:not(.o_mega_menu) {
                             position: absolute;
                         }
                     }
@@ -1657,6 +1657,11 @@ $ribbon-padding: 100px;
     }
 }
 
+.o_cookies_bar_toggle {
+    gap: 0.5rem;
+    pointer-events: auto;
+}
+
 .o_website_btn_loading {
     cursor: wait;
     opacity: $btn-disabled-opacity;
@@ -1737,7 +1742,7 @@ input[value*="data-oe-translation-id"] {
 .o_wanim_overflow_x_hidden {
     overflow-x: hidden !important;
 
-    &.o_rtl {
+    &.o_rtl, .o_rtl {
         // Fix for Chrome and Edge bug: resolves slow/stuck scrolling during
         // left-overflowing animations on RTL web pages. Note: using overflow on
         // the main element hides animated elements outside of it (e.g. "Framed"

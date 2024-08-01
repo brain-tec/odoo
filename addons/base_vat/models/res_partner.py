@@ -34,17 +34,16 @@ _ref_vat = {
     'co': _('CO213123432-1 or CO213.123.432-1'),
     'cy': 'CY10259033P',
     'cz': 'CZ12345679',
-    'de': 'DE123456788',
+    'de': _('DE123456788 or 12/345/67890'),
     'dk': 'DK12345674',
     'do': _('DO1-01-85004-3 or 101850043'),
     'ec': 'EC1792060346-001',
     'ee': 'EE123456780',
-    'el': 'EL12345670',
     'es': 'ESA12345674',
     'fi': 'FI12345671',
     'fr': 'FR23334175221',
     'gb': _('GB123456782 or XI123456782'),
-    'gr': 'GR12345670',
+    'gr': 'EL123456783',
     'hu': _('HU12345676 or 12345678-1-11 or 8071592153'),
     'hr': 'HR01234567896',  # Croatia, contributed by Milan Tribuson
     'ie': 'IE1234567FA',
@@ -689,13 +688,19 @@ class ResPartner(models.Model):
         if len(vat) not in (15, 16) or not vat[0:15].isdecimal() or not vat[-1].isdecimal():
             return False
 
-        # VAT is only digits and of the right length, check the Luhn checksum.
-        try:
-            luhn.validate(vat[0:9])
-        except (InvalidFormat, InvalidChecksum):
-            return False
+        if len(vat) == 15:
+            # VAT is only digits and of the right length, check the Luhn checksum.
+            try:
+                luhn.validate(vat[0:9])
+            except (InvalidFormat, InvalidChecksum):
+                return False
 
         return True
+
+    def check_vat_de(self, vat):
+        is_valid_vat = stdnum.util.get_cc_module("de", "vat").is_valid
+        is_valid_stnr = stdnum.util.get_cc_module("de", "stnr").is_valid
+        return is_valid_vat(vat) or is_valid_stnr(vat)
 
     def format_vat_eu(self, vat):
         # Foreign companies that trade with non-enterprises in the EU

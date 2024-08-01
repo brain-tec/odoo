@@ -328,8 +328,10 @@ class PaymentTransaction(models.Model):
         if any(tx.state != 'done' for tx in self):
             raise ValidationError(_("Only confirmed transactions can be refunded."))
 
+        payment_utils.check_rights_on_recordset(self)
         for tx in self:
-            tx._send_refund_request(amount_to_refund)
+            # In sudo mode because we need to be able to read on acquirer fields.
+            tx.sudo()._send_refund_request(amount_to_refund)
 
     #=== BUSINESS METHODS - PAYMENT FLOW ===#
 
@@ -926,7 +928,7 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
 
         payment_method_line = self.acquirer_id.journal_id.inbound_payment_method_line_ids\
-            .filtered(lambda l: l.code == self.provider)
+            .filtered(lambda l: l.payment_acquirer_id == self.acquirer_id)
         payment_values = {
             'amount': abs(self.amount),  # A tx may have a negative amount, but a payment must >= 0
             'payment_type': 'inbound' if self.amount > 0 else 'outbound',

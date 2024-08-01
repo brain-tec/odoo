@@ -46,7 +46,7 @@ class StockMove(models.Model):
             price_unit = line.price_unit
             if line.taxes_id:
                 qty = line.product_qty or 1
-                price_unit = line.taxes_id.with_context(round=False).compute_all(price_unit, currency=line.order_id.currency_id, quantity=qty)['total_void']
+                price_unit = line.taxes_id.with_context(round=False).compute_all(price_unit, currency=line.order_id.currency_id, quantity=qty, product=self.product_id)['total_void']
                 price_unit = float_round(price_unit / qty, precision_digits=price_unit_prec)
             if line.product_uom.id != line.product_id.uom_id.id:
                 price_unit *= line.product_uom.factor / line.product_id.uom_id.factor
@@ -230,6 +230,11 @@ class Orderpoint(models.Model):
     def _compute_qty(self):
         """ Extend to add more depends values """
         return super()._compute_qty()
+
+    @api.depends('product_id.purchase_order_line_ids.product_qty', 'product_id.purchase_order_line_ids.state')
+    def _compute_qty_to_order(self):
+        """ Extend to add more depends values """
+        return super()._compute_qty_to_order()
 
     @api.depends('supplier_id')
     def _compute_lead_days(self):

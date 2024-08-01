@@ -7,6 +7,7 @@
 # Yenthe Van Ginneken <yenthespam@gmail.com>, 2021
 # Wil Odoo, 2023
 # Jolien De Paepe, 2024
+# Manon Rondou, 2024
 # Erwin van der Ploeg <erwin@odooexperts.nl>, 2024
 # 
 msgid ""
@@ -16599,7 +16600,7 @@ msgstr "Toon de font awesome marker niet"
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_todo__state__done
 #: model:ir.model.fields.selection,name:base.selection__res_company__base_onboarding_company_state__done
 msgid "Done"
-msgstr "Gereed"
+msgstr "Afgehandeld"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.form_res_users_key_show
@@ -18368,6 +18369,12 @@ msgstr "Frankrijk  - Boekhouding"
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_reports
 msgid "France - Accounting Reports"
 msgstr "Frankrijk - Boekhoudkundige rapporten"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_fr_invoice_addr
+msgid "France - Adding Mandatory Invoice Mentions (Decree no. 2022-1299)"
+msgstr ""
+"Frankrijk - Verplichte factuurvermeldingen toevoegen (Decreet nr. 2022-1299)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_fec
@@ -34707,7 +34714,7 @@ msgstr "documentatie"
 #: model:ir.model.fields.selection,name:base.selection__base_language_install__state__done
 #: model:ir.model.fields.selection,name:base.selection__base_module_update__state__done
 msgid "done"
-msgstr "gereed"
+msgstr "afgehandeld"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_category_form

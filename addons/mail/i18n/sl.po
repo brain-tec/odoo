@@ -899,7 +899,7 @@ msgstr ""
 #: code:addons/mail/models/res_partner.py:0
 #, python-format
 msgid "An email is required for find_or_create to work"
-msgstr ""
+msgstr "Za delovanje funkcije find_or_create je potreben e-poštni naslov"
 
 #. module: mail
 #. openerp-web
@@ -3664,7 +3664,7 @@ msgstr "Pridružitev kanalu"
 #: code:addons/mail/static/src/components/rtc_controller/rtc_controller.xml:0
 #, python-format
 msgid "Join Video Call"
-msgstr ""
+msgstr "Pridruži se video klicu"
 
 #. module: mail
 #: model:ir.actions.act_window,name:mail.mail_channel_action_view
@@ -6059,7 +6059,7 @@ msgstr ""
 #: code:addons/mail/static/src/js/views/activity/activity_controller.js:0
 #, python-format
 msgid "Search: %s"
-msgstr ""
+msgstr "Iskanje: %s"
 
 #. module: mail
 #. openerp-web
@@ -6262,7 +6262,7 @@ msgstr ""
 #: code:addons/mail/static/src/components/chat_window_header/chat_window_header.js:0
 #, python-format
 msgid "Shift right"
-msgstr ""
+msgstr "Premaknite v desno"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_mail__description
@@ -7796,6 +7796,14 @@ msgid ""
 msgstr ""
 "Tej predlogi lahko pripnete datoteke, ki bodo dodane vsej e-pošti nastali iz"
 " te predloge"
+
+#. module: mail
+#: code:addons/mail/models/ir_attachment.py:0
+#, python-format
+msgid ""
+"You may not unlink or modify the content of attachments from other people's "
+"messages"
+msgstr ""
 
 #. module: mail
 #. openerp-web

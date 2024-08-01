@@ -2245,7 +2245,7 @@ msgstr ""
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_production_lot__delivery_count
 msgid "Delivery order count"
-msgstr "Contagem de ordens de entrega"
+msgstr "Total de pedidos de entrega"
 
 #. module: stock
 #: code:addons/stock/models/stock_production_lot.py:0
@@ -5545,7 +5545,7 @@ msgstr "Operações de processo em transferências de ondas"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Process transfers in batch per worker"
-msgstr "Processar transferências em lote por trabalhador"
+msgstr "Processar transferências em lote por prestador de serviços"
 
 #. module: stock
 #: model:ir.model,name:stock.model_procurement_group
@@ -6354,7 +6354,7 @@ msgstr "Reposição"
 #. module: stock
 #: model:stock.location.route,name:stock.route_warehouse0_mto
 msgid "Replenish on Order (MTO)"
-msgstr "Reabastecer no pedido (sob demanda)"
+msgstr "Reposição por pedido (sob demanda)"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_product_replenish
@@ -6763,7 +6763,7 @@ msgstr "Ordens de Sucata"
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_stock_scrap
 msgid "Scrap products"
-msgstr "Produtos de sucata"
+msgstr "Sucatear produtos"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__scrapped

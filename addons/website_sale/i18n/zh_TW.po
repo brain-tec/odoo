@@ -128,7 +128,7 @@ msgid ""
 "                                    <span>Return to Cart</span>"
 msgstr ""
 "<i class=\"fa fa-chevron-left\"/>\n"
-"                                    <span>回到購物車</span>"
+"                                    <span>返回購物車</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.payment_footer
@@ -1504,7 +1504,7 @@ msgstr "電郵"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Email Template"
-msgstr "Email範本"
+msgstr "電郵範本"
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_mail_compose_message

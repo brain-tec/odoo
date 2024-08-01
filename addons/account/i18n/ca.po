@@ -25,15 +25,16 @@
 # oscaryuu, 2022
 # Harcogourmet, 2022
 # Quim - eccit <quim@eccit.com>, 2022
-# martioodo hola, 2023
 # Martin Trigaux, 2023
-# Óscar Fonseca <tecnico@pyming.com>, 2023
 # Ivan Espinola, 2023
 # Víctor Martínez <victor.martinez@tecnativa.com>, 2023
 # xean, 2023
 # PaolaEras, 2024
-# Santiago Payà <santiagopim@gmail.com>, 2024
 # Josep Anton Belchi, 2024
+# Óscar Fonseca <tecnico@pyming.com>, 2024
+# martioodo hola, 2024
+# Santiago Payà <santiagopim@gmail.com>, 2024
+# Estudi TIC, 2024
 # 
 msgid ""
 msgstr ""
@@ -41,7 +42,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-02-18 09:52+0000\n"
 "PO-Revision-Date: 2021-09-14 12:18+0000\n"
-"Last-Translator: Josep Anton Belchi, 2024\n"
+"Last-Translator: Estudi TIC, 2024\n"
 "Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -264,6 +265,15 @@ msgstr "30% ara, resta 60 Days"
 #: model:account.payment.term,name:account.account_payment_term_45days
 msgid "45 Days"
 msgstr "45 dies"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
+msgid ""
+"<br/>\n"
+"                            on this account:"
+msgstr ""
+"<br/>\n"
+"                            en aquest compte:"
 
 #. module: account
 #: model:mail.template,body_html:account.email_template_edi_credit_note
@@ -1926,6 +1936,7 @@ msgstr "Activa per crear el rebut de venda"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account_tag__active
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__active
+#: model:ir.model.fields,field_description:account.field_account_fiscal_position_tax__tax_dest_active
 #: model:ir.model.fields,field_description:account.field_account_incoterms__active
 #: model:ir.model.fields,field_description:account.field_account_journal__active
 #: model:ir.model.fields,field_description:account.field_account_payment_term__active
@@ -4268,6 +4279,11 @@ msgid "Counterpart Entries"
 msgstr "Entrades de contrapartida"
 
 #. module: account
+#: model:ir.model.fields,help:account.field_res_company__multi_vat_foreign_country_ids
+msgid "Countries for which the company has a VAT number"
+msgstr "Països per als quals l'empresa té un número d'IVA"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_account_tag__country_id
 #: model:ir.model.fields,field_description:account.field_account_chart_template__country_id
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__country_id
@@ -4637,6 +4653,7 @@ msgstr "Creat el"
 #. module: account
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #: code:addons/account/wizard/accrued_orders.py:0
+#: model:ir.model.fields,field_description:account.field_account_analytic_account__credit
 #: model:ir.model.fields,field_description:account.field_account_move_line__credit
 #: model_terms:ir.ui.view,arch_db:account.report_journal
 #, python-format
@@ -5078,6 +5095,7 @@ msgstr ""
 #. module: account
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #: code:addons/account/wizard/accrued_orders.py:0
+#: model:ir.model.fields,field_description:account.field_account_analytic_account__debit
 #: model:ir.model.fields,field_description:account.field_account_move_line__debit
 #: model_terms:ir.ui.view,arch_db:account.report_journal
 #, python-format
@@ -5764,6 +5782,12 @@ msgid "Dynamic Reports"
 msgstr "Informes Dinàmics"
 
 #. module: account
+#: model:ir.model.fields,help:account.field_account_tax_repartition_line__tag_ids_domain
+msgid "Dynamic domain used for the tag that can be set on tax"
+msgstr ""
+"Domini dinàmic utilitzat per a l'etiqueta que es pot establir en impostos"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__module_l10n_eu_oss
 msgid "EU Intra-community Distance Selling"
 msgstr "Venda a distància intracomunitària de la UE"
@@ -6185,6 +6209,7 @@ msgstr "Períodes fiscals"
 #: model:ir.model.fields,field_description:account.field_account_invoice_report__fiscal_position_id
 #: model:ir.model.fields,field_description:account.field_account_move__fiscal_position_id
 #: model:ir.model.fields,field_description:account.field_account_payment__fiscal_position_id
+#: model:ir.model.fields,field_description:account.field_res_company__fiscal_position_ids
 #: model:ir.model.fields,field_description:account.field_res_partner__property_account_position_id
 #: model:ir.model.fields,field_description:account.field_res_users__property_account_position_id
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_filter
@@ -6352,6 +6377,11 @@ msgstr "Moneda Estrangera"
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__foreign_vat
 msgid "Foreign Tax ID"
 msgstr "NIF Fiscal Estranger"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_res_company__multi_vat_foreign_country_ids
+msgid "Foreign VAT countries"
+msgstr "Països amb IVA estrangers"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__foreign_vat_header_mode
@@ -7328,8 +7358,12 @@ msgstr "Intrastat"
 #. module: account
 #: code:addons/account/models/partner.py:0
 #, python-format
-msgid "Invalid \"Zip Range\", please configure it properly."
-msgstr "\"Rang de codi postal\" invalid, si us plau, configuri-ho apropiadament."
+msgid ""
+"Invalid \"Zip Range\", You have to configure both \"From\" and \"To\" values"
+" for the zip range and \"To\" should be greater than \"From\"."
+msgstr ""
+"L'interval de Codi Postal invàlid. Has de configurar \"Des de\" i \"Fins\" "
+"amb valors de \"Fins\" majors que els de \"Des de\"."
 
 #. module: account
 #: code:addons/account/models/company.py:0
@@ -8810,6 +8844,11 @@ msgid "Memo:"
 msgstr "Circular:"
 
 #. module: account
+#: model:ir.model,name:account.model_base_partner_merge_automatic_wizard
+msgid "Merge Partner Wizard"
+msgstr "Assistent per a fusionar contactes"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__message_has_error
 #: model:ir.model.fields,field_description:account.field_account_account_template__message_has_error
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__message_has_error
@@ -10064,6 +10103,14 @@ msgid "Partner should be set"
 msgstr "La parella hauria d' estar establerta"
 
 #. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid "Partners that are used in hashed entries cannot be merged."
+msgstr ""
+"No és possible fusionar els contactes que es fan servir en assentaments amb "
+"hash."
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Pay your bills in one-click using Euro SEPA Service"
 msgstr "Paga les vostres factures en un clic usant el servei Euro SEPA"
@@ -10451,16 +10498,6 @@ msgstr ""
 #, python-format
 msgid "Please define a payment method line on your payment."
 msgstr "Si us plau, definiu una línia de pagament al vostre pagament."
-
-#. module: account
-#: code:addons/account/models/account_payment.py:0
-#, python-format
-msgid ""
-"The selected payment method is not available for this payment, please select"
-" the payment method again."
-msgstr ""
-"El mètode de pagament seleccionat no està disponible per a aquest pagament. "
-"Seleccioneu si us plau un altre mètode de pagament."
 
 #. module: account
 #: code:addons/account/models/chart_template.py:0
@@ -12138,6 +12175,7 @@ msgid "Set active to false to hide the Journal without removing it."
 msgstr "Estableix actiu per ocultar el diari sense eliminar- lo."
 
 #. module: account
+#: model:ir.model.fields,help:account.field_account_fiscal_position_tax__tax_dest_active
 #: model:ir.model.fields,help:account.field_account_tax__active
 #: model:ir.model.fields,help:account.field_account_tax_template__active
 msgid "Set active to false to hide the tax without removing it."
@@ -13866,6 +13904,14 @@ msgid "The company this distribution line belongs to."
 msgstr "La companyia a la que pertany aquesta línia de distribució."
 
 #. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
+"The country of the foreign VAT number could not be detected. Please assign a"
+" country to the fiscal position or set a country group"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_tax_group__country_id
 msgid "The country for which this tax group is applicable."
 msgstr "El país pel qual s'aplica aquest grup d'impostos."
@@ -14520,6 +14566,16 @@ msgid ""
 msgstr ""
 "El compte de destí seleccionat està establert per a usar una moneda específica. Totes les entrades transferits a aquesta moneda es convertiràn en aquesta moneda, causant\n"
 "                        la pèrdua de qualsevol quantitat de moneda exterior preexistent."
+
+#. module: account
+#: code:addons/account/models/account_payment.py:0
+#, python-format
+msgid ""
+"The selected payment method is not available for this payment, please select"
+" the payment method again."
+msgstr ""
+"El mètode de pagament seleccionat no està disponible per a aquest pagament. "
+"Seleccioneu si us plau un altre mètode de pagament."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
@@ -16275,7 +16331,7 @@ msgstr ""
 "No podeu crear pagaments per entrades que pertanyen a diferents empreses."
 
 #. module: account
-#: code:addons/account/models/account_payment_method.py:0
+#: code:addons/account/models/account_journal.py:0
 #, python-format
 msgid ""
 "You can't have two payment method lines of the same payment type (%s) and "
@@ -16328,11 +16384,10 @@ msgstr ""
 #: code:addons/account/wizard/account_payment_register.py:0
 #, python-format
 msgid ""
-"You can't register payments for journal items being either all inbound, "
-"either all outbound."
+"You can't register payments for both inbound and outbound moves at the same "
+"time."
 msgstr ""
-"No es poden registrar els pagaments per als elements de diari que estiguin "
-"lligats, ja sigui sense sortida."
+"No podeu enregistrar pagaments per ambdós ingressos i pagaments alhora."
 
 #. module: account
 #: code:addons/account/models/account_analytic_line.py:0
@@ -16397,6 +16452,14 @@ msgstr ""
 #: code:addons/account/models/partner.py:0
 #, python-format
 msgid ""
+"You cannot create a fiscal position with a country outside of the selected "
+"country group."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
 "You cannot create a fiscal position with a foreign VAT within your fiscal "
 "country without assigning it a state."
 msgstr ""
@@ -16452,6 +16515,8 @@ msgid ""
 "You cannot delete this account tag (%s), it is used on the chart of account "
 "definition."
 msgstr ""
+"No podeu eliminar aquesta etiqueta de compte (%s), és utilitzada en la "
+"definició del pla de comptes."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -16555,6 +16620,12 @@ msgid ""
 msgstr ""
 "No pots tenir més d'un compte amb les orelles de l'any actual com a tipus. "
 "(comptes: %s)"
+
+#. module: account
+#: code:addons/account/models/account_account.py:0
+#, python-format
+msgid "You cannot merge accounts."
+msgstr "No podeu fusionar comptes."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -16674,7 +16745,7 @@ msgstr ""
 "reconciliació parcial segueixen pendents."
 
 #. module: account
-#: code:addons/account/models/account_account.py:0
+#: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "You cannot switch the type of a posted document."
 msgstr "No podeu modificar l'estat d'un document publicat."
@@ -17112,6 +17183,11 @@ msgid ""
 msgstr ""
 "es reserva el dret de sol·licitar un pagament d'interès fix per import del "
 "10% de l'import restant."
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_tax_repartition_line__tag_ids_domain
+msgid "tag domain"
+msgstr "Domini de l'etiqueta"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0

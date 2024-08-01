@@ -23,6 +23,12 @@ import {
 } from './utils.js';
 
 const NOT_A_NUMBER = /[^\d]/g;
+
+function hasPseudoElementContent (node, pseudoSelector) {
+    const content = getComputedStyle(node, pseudoSelector).getPropertyValue('content');
+    return content && content !== 'none';
+}
+
 export function areSimilarElements(node, node2) {
     if (
         !node ||
@@ -54,7 +60,8 @@ export function areSimilarElements(node, node2) {
         isNotNoneValue(getComputedStyle(node, ':before').getPropertyValue('content')) ||
         isNotNoneValue(getComputedStyle(node, ':after').getPropertyValue('content')) ||
         isNotNoneValue(getComputedStyle(node2, ':before').getPropertyValue('content')) ||
-        isNotNoneValue(getComputedStyle(node2, ':after').getPropertyValue('content'))
+        isNotNoneValue(getComputedStyle(node2, ':after').getPropertyValue('content')) ||
+        isFontAwesome(node) || isFontAwesome(node2)
     ) {
         return false;
     }
@@ -217,7 +224,12 @@ class Sanitize {
 
             let firstChild = node.firstChild;
             // Unwrap the contents of SPAN and FONT elements without attributes.
-            if (['SPAN', 'FONT'].includes(node.nodeName) && !node.hasAttributes()) {
+            if (
+                ['SPAN', 'FONT'].includes(node.nodeName)
+                && !node.hasAttributes()
+                && !hasPseudoElementContent(node, "::before")
+                && !hasPseudoElementContent(node, "::after")
+            ) {
                 getDeepRange(this.root, { select: true });
                 const restoreCursor = shouldPreserveCursor(node, this.root) && preserveCursor(this.root.ownerDocument);
                 firstChild = unwrapContents(node)[0];
@@ -252,10 +264,15 @@ class Sanitize {
                     // the node because these two methods create different
                     // mutations and at least the tour system breaks if all we
                     // send here is a text content change.
-                    const newTextNode = document.createTextNode(newText);
-                    node.before(newTextNode);
+                    let replacement;
+                    if (newText.length) {
+                        replacement = document.createTextNode(newText);
+                        node.before(replacement);
+                    } else {
+                        replacement = node.parentElement;
+                    }
                     node.remove();
-                    node = newTextNode;
+                    node = replacement; // The node has been removed, update the reference.
                 }
             }
 
@@ -268,7 +285,7 @@ class Sanitize {
                         node.setAttribute('href', urlInfo[0].url);
                     }
                 }
-                padLinkWithZws(this.root, node);
+                padLinkWithZws(node);
             }
             node = node.nextSibling;
         }

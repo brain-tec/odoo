@@ -65,6 +65,9 @@ import {
     ZERO_WIDTH_CHARS_REGEX,
     getAdjacentCharacter,
     isLinkEligibleForZwnbsp,
+    setCursorStart,
+    paragraphRelatedElements,
+    isUnbreakable,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -442,6 +445,7 @@ export class OdooEditor extends EventTarget {
 
         // sanitize and mark current position as sanitized
         sanitize(commonAncestor);
+        this._resetLinkInSelection();
         this._pluginCall('sanitizeElement', [commonAncestor]);
         this.options.onPostSanitize(commonAncestor);
     }
@@ -1424,7 +1428,7 @@ export class OdooEditor extends EventTarget {
         let range = getDeepRange(this.editable, { sel, correctTripleClick: true });
         if (!range) return;
         for (const node of descendants(closestBlock(range.commonAncestorContainer))) {
-            if (node.nodeType === Node.TEXT_NODE && node.textContent === '\uFEFF') {
+            if (node.nodeType === Node.TEXT_NODE && [...node.textContent].every(char => char === '\uFEFF')) {
                 const restore = prepareUpdate(...leftPos(node));
                 node.remove();
                 restore(); // Make sure to make <br>s visible if needed.
@@ -1438,6 +1442,29 @@ export class OdooEditor extends EventTarget {
         });
         if (!range) return;
         let { startContainer: start, startOffset, endContainer: end, endOffset } = range;
+        const startTr = closestElement(start, 'tr');
+        const endTr = closestElement(end, 'tr');
+        const startTrCells = startTr && [...startTr.cells];
+        const endTrCells = endTr && [...endTr.cells];
+        const startTable = closestElement(start, 'table');
+        const endTable = closestElement(end, 'table');
+        let startTd = closestElement(start, 'td');
+        const endTd = closestElement(end, 'td');
+        const endTableLeaf = lastLeaf(endTable);
+        // Delete <br> if selection ends in an last empty <td> tag of <tr>.
+        // eg. `<td>]<br></td>` or `<td>abc]<br></td>`.
+        if (endTable &&
+            endTableLeaf.nodeName === 'BR' &&
+            (endTableLeaf === lastLeaf(end) || end.nextElementSibling === endTableLeaf)
+        ) {
+            endTableLeaf.remove();
+        }
+        const shouldRemoveStartTr =
+            startTable && firstLeaf(startTable) === firstLeaf(start) &&
+            (!startTable.contains(end) || lastLeaf(startTable) === lastLeaf(end));
+        const shouldRemoveEndTr =
+            endTable && lastLeaf(endTable) === lastLeaf(end) &&
+            (!endTr.contains(start) || (firstLeaf(startTable) === firstLeaf(start)));
         const startBlock = closestBlock(start);
         const endBlock = closestBlock(end);
         // Do not join blocks in the following cases:
@@ -1451,7 +1478,6 @@ export class OdooEditor extends EventTarget {
             && (startBlock.tagName !== 'TD' && endBlock.tagName !== 'TD')
             && !(firstLeaf(startBlock) === start && lastLeaf(endBlock) === end);
         let next = nextLeaf(end, this.editable);
-        const splitEndTd = closestElement(end, 'td') && end.nextSibling;
 
         // Get the boundaries of the range so as to get the state to restore.
         if (end.nodeType === Node.TEXT_NODE) {
@@ -1483,30 +1509,21 @@ export class OdooEditor extends EventTarget {
             closestBlock(range.endContainer).after(n);
             n.textContent = '';
         });
-        // Restore table contents removed by extractContents.
-        const tds = [...contents.querySelectorAll('td')].filter(n => !closestElement(n, 'table'));
-        let currentFragmentTr, currentTr;
-        const currentTd = closestElement(range.endContainer, 'td');
-        tds.forEach((td, i) => {
-            const parentFragmentTr = closestElement(td, 'tr');
-            // Skip the first and the last partially selected TD.
-            if (i && !(splitEndTd && i === tds.length - 1)) {
-                if (parentFragmentTr && parentFragmentTr !== currentFragmentTr && currentTr && [...parentFragmentTr.querySelectorAll('td')].every(td => tds.includes(td))) {
-                    currentTr.after(parentFragmentTr);
-                    currentTr = parentFragmentTr;
-                    parentFragmentTr.textContent = '';
-                } else {
-                    if (parentFragmentTr !== currentFragmentTr) {
-                        currentTr = currentTr
-                            ? currentTr.nextElementSibling
-                            : closestElement(range.endContainer, 'tr').nextElementSibling;
-                    }
-                    currentTr ? currentTr.prepend(td) : currentTd.after(td);
-                    td.textContent = '';
-                }
+        // Restore first and last TR's contents removed by extractContents.
+        const tds = [...contents.querySelectorAll('td')].filter(n => (
+            (startTrCells && !shouldRemoveStartTr && startTrCells.includes(n)) ||
+            (endTrCells && !shouldRemoveEndTr && endTrCells.includes(n))
+        ));
+        for (const td of tds) {
+            if (startTrCells && startTrCells.includes(td)) {
+                startTd.after(td);
+                startTd = td;
+            } else {
+                endTd.before(td);
             }
-            currentFragmentTr = parentFragmentTr;
-        });
+            td.textContent = '';
+            fillEmpty(td);
+        }
         this.observerFlush();
         this._toRollback = false; // Errors caught with observerFlush were already handled.
         // If the end container was fully selected, extractContents may have
@@ -1518,12 +1535,18 @@ export class OdooEditor extends EventTarget {
             const parent = end.parentNode;
             end.remove();
             end = parent;
+            if (
+                (end.nodeName === 'TD' && !shouldRemoveEndTr) ||
+                (paragraphRelatedElements.includes(end.nodeName) &&
+                    end.previousSibling && isUnbreakable(end.previousSibling))
+            ) {
+                fillEmpty(end);
+            }
         }
+        // To remove the table when fully selected the block should not be
+        // considered visible in order to remove it.
+        const noBlocks = shouldRemoveStartTr ? false : true;
         // Same with the start container
-        const table = closestElement(start, 'table');
-        // For selection starting at the beginning of the table and ending outside the
-        // table, the block should not be considered visible in order to remove the table.
-        const noBlocks = (table && firstLeaf(table) === start && !table.contains(end)) ? false : true;
         while (
             start &&
             isRemovableInvisible(start, noBlocks) &&
@@ -1532,6 +1555,12 @@ export class OdooEditor extends EventTarget {
             const parent = start.parentNode;
             start.remove();
             start = parent;
+        }
+        if (start === this.editable && !start.hasChildNodes()) {
+            const p = document.createElement('p');
+            start.appendChild(p);
+            setCursorStart(p);
+            start = p;
         }
         // Ensure empty blocks be given a <br> child.
         if (start) {
@@ -1670,10 +1699,7 @@ export class OdooEditor extends EventTarget {
      */
     _applyRawCommand(method, ...args) {
         const sel = this.document.getSelection();
-        if (
-            !this.editable.contains(sel.anchorNode) ||
-            (sel.anchorNode !== sel.focusNode && !this.editable.contains(sel.focusNode))
-        ) {
+        if (!this.isSelectionInEditable(sel)) {
             // Do not apply commands out of the editable area.
             return false;
         }
@@ -1716,6 +1742,7 @@ export class OdooEditor extends EventTarget {
      * @returns {?}
      */
     _applyCommand(...args) {
+        this._checkStepUnbreakable = true;
         this._recordHistorySelection(true);
         const result = this._protect(() => this._applyRawCommand(...args));
         this.historyStep();
@@ -2545,18 +2572,45 @@ export class OdooEditor extends EventTarget {
             ev.inputType === 'insertText' &&
             ev.data === null &&
             this._lastBeforeInputType === 'insertParagraph';
+        const isCompositionEvent =
+            ev.inputType === "insertCompositionText" ||
+            (ev.inputType === "insertText" &&
+                (this.keyboardType === KEYBOARD_TYPES.VIRTUAL ||
+                    this.isMobile));
+        if (isCompositionEvent) {
+            this._fromCompositionText = true;
+        }
         if (this.keyboardType === KEYBOARD_TYPES.PHYSICAL || !wasCollapsed) {
-            if (ev.inputType === 'deleteContentBackward') {
+            // Most deletion cases in complex HTML like Bootstrap etc can end
+            // with a wrong result if done by the contenteditable itself.
+            // Intervene as soon as the selection was not collapsed, except
+            // while composing. In that case the composition should be left
+            // alone unless the selection was spanning different blocks.
+            const anchorNode = this.idFind(anchorNodeOid);
+            const focusNode = this.idFind(focusNodeOid);
+            const wasSelectingAcrossDifferentBlocks =
+                anchorNode &&
+                focusNode &&
+                closestBlock(anchorNode) !== closestBlock(focusNode);
+            const shouldInterveneForDeletion =
+                !this._fromCompositionText ||
+                wasSelectingAcrossDifferentBlocks;
+            if (ev.inputType === 'deleteContentBackward' && shouldInterveneForDeletion) {
                 this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
                 this._applyCommand('oDeleteBackward');
-            } else if (ev.inputType === 'deleteContentForward' || isChromeDeleteforward) {
+            } else if (
+                (ev.inputType === 'deleteContentForward' || isChromeDeleteforward) &&
+                shouldInterveneForDeletion
+            ) {
                 this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
                 this._applyCommand('oDeleteForward');
-            } else if (ev.inputType === 'insertParagraph' || isChromeInsertParagraph) {
+            } else if (
+                (ev.inputType === 'insertParagraph' || isChromeInsertParagraph)
+            ) {
                 this._compositionStep();
                 this.historyRollback();
                 ev.preventDefault();
@@ -2564,17 +2618,18 @@ export class OdooEditor extends EventTarget {
                     this._applyCommand('oShiftEnter');
                 }
             } else if (['insertText', 'insertCompositionText'].includes(ev.inputType)) {
-                // insertCompositionText, courtesy of Samsung keyboard.
                 const selection = this.document.getSelection();
-                // Detect that text was selected and change behavior only if it is the case,
-                // since it is the only text insertion case that may cause problems.
-                const wasTextSelected = anchorNodeOid !== focusNodeOid || anchorOffset !== focusOffset;
                 // Unit tests events are not trusted by the browser,
                 // the insertText has to be done manualy.
                 const isUnitTests = !ev.isTrusted && this.testMode;
                 // we cannot trust the browser to keep the selection inside empty tags.
                 const latestSelectionInsideEmptyTag = this._isLatestComputedSelectionInsideEmptyInlineTag();
-                if (wasTextSelected || isUnitTests || latestSelectionInsideEmptyTag) {
+                const shouldInterveneForInsertion = !wasCollapsed && shouldInterveneForDeletion;
+                if (
+                    shouldInterveneForInsertion ||
+                    latestSelectionInsideEmptyTag ||
+                    isUnitTests
+                ) {
                     ev.preventDefault();
                     if (!isUnitTests) {
                         // First we need to undo the character inserted by the browser.
@@ -2613,9 +2668,10 @@ export class OdooEditor extends EventTarget {
                     // Remove added space
                     textNodeSplitted.pop();
                     const potentialUrl = textNodeSplitted.pop();
-                    const lastWordMatch = potentialUrl.match(URL_REGEX_WITH_INFOS);
-
-                    if (lastWordMatch) {
+                    if (
+                        potentialUrl &&
+                        potentialUrl.match(URL_REGEX_WITH_INFOS)
+                    ) {
                         const matches = getUrlsInfosInString(textSliced);
                         const match = matches[matches.length - 1];
                         const cloneRange = selection.getRangeAt(0).cloneRange();
@@ -2635,8 +2691,9 @@ export class OdooEditor extends EventTarget {
             } else {
                 this.historyStep();
             }
-        } else if (ev.inputType === 'insertCompositionText') {
-            this._fromCompositionText = true;
+        }
+        if (!isCompositionEvent) {
+            this._fromCompositionText = false;
         }
     }
 
@@ -2652,7 +2709,7 @@ export class OdooEditor extends EventTarget {
         // inserting the printed representation of the character.
         if (/^.$/u.test(ev.key) && !ev.ctrlKey && !ev.metaKey && (isMacOS() || !ev.altKey)) {
             const selection = this.document.getSelection();
-            if (selection && !selection.isCollapsed) {
+            if (selection && !selection.isCollapsed && this.isSelectionInEditable(selection)) {
                 this.deleteRange(selection);
             }
         }
@@ -2662,7 +2719,7 @@ export class OdooEditor extends EventTarget {
             // deleteBackward input event with a collapsed selection in front of
             // a contentEditable="false" (eg: font awesome).
             const selection = this.document.getSelection();
-            if (selection.isCollapsed) {
+            if (selection.isCollapsed && !this._fromCompositionText) {
                 ev.preventDefault();
                 this._applyCommand('oDeleteBackward');
             }
@@ -2768,19 +2825,7 @@ export class OdooEditor extends EventTarget {
             // re-trigger the _onSelectionChange.
             return;
         }
-        // Apply the o_link_in_selection class if the selection is in a single
-        // link, remove it otherwise.
-        const [anchorLink, focusLink] = [selection.anchorNode, selection.focusNode]
-            .map(node => closestElement(node, 'a:not(.btn)'));
-        const singleLinkInSelection = anchorLink === focusLink && anchorLink;
-        if (singleLinkInSelection && isLinkEligibleForZwnbsp(singleLinkInSelection)) {
-            singleLinkInSelection.classList.add('o_link_in_selection');
-        }
-        for (const link of this.editable.querySelectorAll('.o_link_in_selection')) {
-            if (link !== singleLinkInSelection) {
-                link.classList.remove('o_link_in_selection');
-            }
-        };
+        this._resetLinkInSelection();
         // Compute the current selection on selectionchange but do not record it. Leave
         // that to the command execution or the 'input' event handler.
         this._computeHistorySelection();
@@ -2798,7 +2843,25 @@ export class OdooEditor extends EventTarget {
             this.options.onCollaborativeSelectionChange(this.getCurrentCollaborativeSelection());
         }
     }
-
+    /**
+     * Apply the o_link_in_selection class if the selection is in a single link,
+     * remove it otherwise.
+     */
+    _resetLinkInSelection() {
+        const selection = this.document.getSelection();
+        const [anchorLink, focusLink] = [selection.anchorNode, selection.focusNode]
+            .map(node => closestElement(node, 'a:not(.btn)'));
+        const singleLinkInSelection = anchorLink === focusLink && anchorLink &&
+            this.editable.contains(anchorLink) && isLinkEligibleForZwnbsp(anchorLink) && anchorLink;
+        if (singleLinkInSelection) {
+            singleLinkInSelection.classList.add('o_link_in_selection');
+        }
+        for (const link of this.editable.querySelectorAll('.o_link_in_selection')) {
+            if (link !== singleLinkInSelection) {
+                link.classList.remove('o_link_in_selection');
+            }
+        };
+    }
     /**
      * Returns true if the current selection is inside the editable.
      *
@@ -3070,6 +3133,18 @@ export class OdooEditor extends EventTarget {
 
     _onMouseup(ev) {
         this._currentMouseState = ev.type;
+
+        const selection = document.getSelection();
+        if (selection.rangeCount > 1) {
+            // Firefox selection in table works with multiple ranges.
+            const startRange = getDeepRange(this.editable, { range: selection.getRangeAt(0) });
+            const endRange = getDeepRange(this.editable, { range: selection.getRangeAt(selection.rangeCount - 1) });
+            const range = document.createRange();
+            range.setStart(startRange.startContainer, 0);
+            range.setEnd(endRange.startContainer, nodeSize(endRange.startContainer));
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
 
         this._fixFontAwesomeSelection();
     }

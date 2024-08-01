@@ -6962,7 +6962,7 @@ msgstr "This"
 #: code:addons/mail/static/src/xml/activity_view.xml:0
 #, python-format
 msgid "This action will send an email."
-msgstr ""
+msgstr "การดำเนินการนี้จะส่งอีเมล"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_partner_view_form_inherit_mail
@@ -7911,6 +7911,15 @@ msgid ""
 "from this template"
 msgstr ""
 "คุณสามารถแนบไฟล์เข้ากับเทมเพลตนี้เพื่อเพิ่มลงในอีเมลทั้งหมดที่สร้างจากเทมเพลตนี้ได้"
+
+#. module: mail
+#: code:addons/mail/models/ir_attachment.py:0
+#, python-format
+msgid ""
+"You may not unlink or modify the content of attachments from other people's "
+"messages"
+msgstr ""
+"คุณไม่สามารถยกเลิกการเชื่อมโยงหรือแก้ไขเนื้อหาของไฟล์แนบจากข้อความของบุคคลอื่น"
 
 #. module: mail
 #. openerp-web

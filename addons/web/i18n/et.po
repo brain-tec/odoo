@@ -22,6 +22,7 @@
 # Leaanika Randmets, 2023
 # JanaAvalah, 2023
 # Anna, 2023
+# Siim Raasuke, 2024
 # 
 msgid ""
 msgstr ""
@@ -29,7 +30,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-24 08:20+0000\n"
 "PO-Revision-Date: 2021-09-14 12:27+0000\n"
-"Last-Translator: Anna, 2023\n"
+"Last-Translator: Siim Raasuke, 2024\n"
 "Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -755,7 +756,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/js/views/form/form_controller.js:0
 #, python-format
 msgid "Are you sure that you want to archive this record?"
-msgstr ""
+msgstr "Kas olete kindel, et soovite selle kirje arhiveerida?"
 
 #. module: web
 #. openerp-web
@@ -1893,7 +1894,7 @@ msgstr "Ekspordi formaat:"
 #: code:addons/web/controllers/main.py:0
 #, python-format
 msgid "Exporting grouped data to csv is not supported."
-msgstr ""
+msgstr "Rühmitatud andmete eksportimine CSV-faili ei ole toetatud."
 
 #. module: web
 #. openerp-web
@@ -3072,7 +3073,7 @@ msgstr "Ava vaade"
 #: code:addons/web/static/src/core/debug/debug_menu.xml:0
 #, python-format
 msgid "Open developer tools"
-msgstr ""
+msgstr "Ava arendaja tööriistad"
 
 #. module: web
 #. openerp-web
@@ -4279,6 +4280,8 @@ msgid ""
 "The operation was interrupted. This usually means that the current operation"
 " is taking too much time."
 msgstr ""
+"Toiming katkestati. See tavaliselt tähendab, et praegune toiming võtab liiga"
+" kaua aega."
 
 #. module: web
 #. openerp-web
@@ -4331,7 +4334,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "This date is on the future. Make sure it is what you expected."
-msgstr ""
+msgstr "See kuupäev on tulevikus. Veenduge, et see on see, mida te ootasite."
 
 #. module: web
 #. openerp-web
@@ -4388,6 +4391,8 @@ msgid ""
 "Timezone Mismatch : This timezone is different from that of your browser.\n"
 "Please, set the same timezone as your browser's to avoid time discrepancies in your system."
 msgstr ""
+"Ajavööndi mittevastavus: See ajavöönd erineb teie brauseri omast.\n"
+"Palun seadke oma süsteemi ajavöönd samaks nagu teie brauseril, et vältida ajalisi erinevusi süsteemis."
 
 #. module: web
 #. openerp-web
@@ -4483,6 +4488,7 @@ msgstr "URL"
 msgid ""
 "Unable to find Wkhtmltopdf on this system. The report will be shown in html."
 msgstr ""
+"Wkhtmltopdf ei ole sellel süsteemil leitav. Raport kuvatakse HTML-formaadis."
 
 #. module: web
 #. openerp-web
@@ -4619,7 +4625,7 @@ msgstr ""
 #: code:addons/web/static/src/legacy/xml/base.xml:0
 #, python-format
 msgid "Upgrade to future versions"
-msgstr ""
+msgstr "Uuendage tuleviku versioonidesse"
 
 #. module: web
 #. openerp-web
@@ -4942,6 +4948,8 @@ msgid ""
 "You need to start Odoo with at least two workers to print a pdf version of "
 "the reports."
 msgstr ""
+" \n"
+"PDF-aruannete printimiseks peate käivitama Odoo vähemalt kahe töötajaga."
 
 #. module: web
 #. openerp-web
@@ -4959,7 +4967,7 @@ msgstr ""
 #: code:addons/web/static/src/public/error_notifications.js:0
 #, python-format
 msgid "Your Odoo session expired. The current page is about to be refreshed."
-msgstr ""
+msgstr "Teie Odoo sessioon on aegunud. Praegust lehte värskendatakse."
 
 #. module: web
 #. openerp-web
@@ -4969,6 +4977,8 @@ msgid ""
 "Your installation of Wkhtmltopdf seems to be broken. The report will be "
 "shown in html."
 msgstr ""
+"Teie Wkhtmltopdf installatsioon tundub olevat katki. Raport kuvatakse HTML "
+"formaadis."
 
 #. module: web
 #. openerp-web

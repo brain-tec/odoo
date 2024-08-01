@@ -811,13 +811,7 @@ class Picking(models.Model):
         )
         if not moves:
             raise UserError(_('Nothing to check the availability for.'))
-        # If a package level is done when confirmed its location can be different than where it will be reserved.
-        # So we remove the move lines created when confirmed to set quantity done to the new reserved ones.
-        package_level_done = self.mapped('package_level_ids').filtered(lambda pl: pl.is_done and pl.state == 'confirmed')
-        package_level_done.write({'is_done': False})
         moves._action_assign()
-        package_level_done.write({'is_done': True})
-
         return True
 
     def action_cancel(self):
@@ -948,7 +942,7 @@ class Picking(models.Model):
                         for ml in move_lines_in_package_level:
                             ml.package_level_id = ml.move_id.package_level_id.id
 
-                        move_lines_without_package_level.package_level_id: package_level_ids[0]
+                        move_lines_without_package_level.package_level_id = package_level_ids[0]
                         for pl in package_level_ids:
                             pl.location_dest_id = self._get_entire_pack_location_dest(pl.move_line_ids) or picking.location_dest_id.id
 

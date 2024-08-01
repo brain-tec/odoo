@@ -48,7 +48,7 @@ msgstr "“來源網址”不可留空。"
 #: code:addons/website/models/website_rewrite.py:0
 #, python-format
 msgid "\"URL to\" can not be empty."
-msgstr "\"網址到\" 不能為空."
+msgstr "「前往網址」不可留空。"
 
 #. module: website
 #: code:addons/website/models/website_rewrite.py:0
@@ -655,8 +655,7 @@ msgid ""
 "<font style=\"font-size: 14px;\">Created in 2021, the company is young and "
 "dynamic. Discover the composition of the team and their skills.</font>"
 msgstr ""
-"<font style=\"font-size: 14px;\">Created in 2021, the company is young and "
-"dynamic. Discover the composition of the team and their skills.</font>"
+"<font style=\"font-size: 14px;\">公司成立於 2021 年，年輕而充滿活力。 了解團隊的組成及各人技能。</font>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -1047,9 +1046,7 @@ msgstr ""
 msgid ""
 "<small id=\"emailHelp\" class=\"form-text text-muted\">Form field help "
 "text</small>"
-msgstr ""
-"<small id=\"emailHelp\" class=\"form-text text-muted\">Form field help "
-"text</small>"
+msgstr "<small id=\"emailHelp\" class=\"form-text text-muted\">表單欄位說明文字</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -2102,7 +2099,7 @@ msgstr "資產使用"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_ir_asset__copy_ids
 msgid "Assets using a copy of me"
-msgstr "Assets using a copy of me"
+msgstr "使用我的副本的資產"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
@@ -2178,7 +2175,7 @@ msgstr "防彈少年團底色"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_popup_options
 msgid "Backdrop"
-msgstr "Backdrop"
+msgstr "背景"
 
 #. module: website
 #. openerp-web
@@ -3978,8 +3975,7 @@ msgstr "Doughnut"
 #, python-format
 msgid ""
 "Drag the <b>%s</b> building block and drop it at the bottom of the page."
-msgstr ""
-"Drag the <b>%s</b> building block and drop it at the bottom of the page."
+msgstr "拖曳「<b>%s</b>」內容區塊，放置在頁面最底部。"
 
 #. module: website
 #. openerp-web
@@ -4450,7 +4446,7 @@ msgstr "特色"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_options_template
 msgid "Fetched elements"
-msgstr "Fetched elements"
+msgstr "已讀取元素"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_snippet_filter__field_names
@@ -4494,7 +4490,7 @@ msgstr "填充"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_tabs_options
 msgid "Fill and justify"
-msgstr "Fill and justify"
+msgstr "填充和對齊"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_snippet_filter__filter_id
@@ -5228,6 +5224,13 @@ msgstr "隱藏"
 #: model_terms:ir.ui.view,arch_db:website.s_popup_options
 msgid "Hide For"
 msgstr "Hide For"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/snippets/s_popup/000.js:0
+#, python-format
+msgid "Hide the cookies bar"
+msgstr "隱藏 Cookie 通知列"
 
 #. module: website
 #. openerp-web
@@ -7184,7 +7187,7 @@ msgstr "請留意，某些第三方服務可能會在你的瀏覽器安裝額外
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.show_website_info
 msgid "Note: To hide this page, uncheck it from the top Customize menu."
-msgstr "注意: 要隱藏此頁面，可從上方自訂選單取消勾選."
+msgstr "註：要隱藏此頁面，請在頂部的「自訂」選單中取消選取它。"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
@@ -7563,7 +7566,7 @@ msgstr "頁面代碼，用於告訴 IAP website_service 應為哪個頁面產生
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_website_page__copy_ids
 msgid "Page using a copy of me"
-msgstr "Page using a copy of me"
+msgstr "使用我的副本的頁面"
 
 #. module: website
 #. openerp-web
@@ -8035,7 +8038,7 @@ msgstr "單選按鈕"
 #: code:addons/website/static/src/js/menu/edit.js:0
 #, python-format
 msgid "Rating"
-msgstr "點評"
+msgstr "評分"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_gallery_options
@@ -8806,6 +8809,13 @@ msgid "Show reCaptcha Policy"
 msgstr "顯示 reCaptcha 策略"
 
 #. module: website
+#. openerp-web
+#: code:addons/website/static/src/snippets/s_popup/000.js:0
+#, python-format
+msgid "Show the cookies bar"
+msgstr "顯示 Cookie 通知列"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Sidebar"
 msgstr "側邊欄"
@@ -9412,6 +9422,14 @@ msgid "The company this website belongs to"
 msgstr "這個網站的所屬公司"
 
 #. module: website
+#: code:addons/website/wizard/portal_wizard.py:0
+#, python-format
+msgid ""
+"The contact \"%s\" has the same email as an existing user (%s) and has "
+"access to the same website."
+msgstr ""
+
+#. module: website
 #. openerp-web
 #: code:addons/website/static/src/js/editor/snippets.editor.js:0
 #, python-format
@@ -9949,7 +9967,7 @@ msgstr "從上到下"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_menus_logos
 msgid "Tops"
-msgstr "頂部"
+msgstr "上衣"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_visitor__page_count
@@ -10129,7 +10147,7 @@ msgstr "符合這些篩選條件的網址會用 CDN 根網址改寫"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_rewrite__url_to
 msgid "URL to"
-msgstr "網址到"
+msgstr "前往網址"
 
 #. module: website
 #. openerp-web
@@ -11170,7 +11188,7 @@ msgstr "不可刪除預設網站 %s。請嘗試更改其設定"
 msgid ""
 "You cannot delete this website menu as this serves as the default parent "
 "menu for new websites (e.g., /shop, /event, ...)."
-msgstr ""
+msgstr "你不可刪除此網站選單，因為它用作新網站的預設母項選單（例如 /shop、/event 等）。"
 
 #. module: website
 #: code:addons/website/controllers/backend.py:0

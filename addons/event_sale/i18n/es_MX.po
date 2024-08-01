@@ -109,7 +109,7 @@ msgstr ""
 #. module: event_sale
 #: model:ir.actions.act_window,name:event_sale.event_configurator_action
 msgid "Configure an event"
-msgstr "Programar un evento"
+msgstr "Configurar un evento"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.view_event_registration_editor_form
@@ -195,7 +195,7 @@ msgstr "Registro de evento"
 #. module: event_sale
 #: model:ir.actions.act_window,name:event_sale.action_sale_order_event_registration
 msgid "Event Registrations"
-msgstr "Registro de eventos"
+msgstr "Registros al evento"
 
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_event_type_ticket
