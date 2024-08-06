@@ -42,6 +42,7 @@
 # Joakim Weckman, 2023
 # Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2023
 # Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
+# Jessica Jakara, 2024
 # Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
 # 
 msgid ""
@@ -7215,6 +7216,9 @@ msgid ""
 "Invalid \"Zip Range\", You have to configure both \"From\" and \"To\" values"
 " for the zip range and \"To\" should be greater than \"From\"."
 msgstr ""
+"Virheellinen \"postinumeroalue\". Sinun on määritettävä \"mistä\"-  "
+"\"mihin\"-arvot postinumeron alueelle ja \"mihin\" on oltava suurempi kuin "
+"\"mistä\"."
 
 #. module: account
 #: code:addons/account/models/company.py:0
@@ -8889,6 +8893,12 @@ msgstr "Kiellä verosaldo"
 msgid "Negative value of amount field if payment_type is outbound"
 msgstr ""
 "Summa-kentän negatiivinen arvo, jos maksutyyppi (payment_type) on outbound"
+
+#. module: account
+#: code:addons/account/models/account_tax.py:0
+#, python-format
+msgid "Nested group of taxes are not allowed."
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_bank_statement__state__open
@@ -13663,6 +13673,16 @@ msgid "The company this distribution line belongs to."
 msgstr "Yritys, jolle tämä jakorivi kuuluu."
 
 #. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
+"The country of the foreign VAT number could not be detected. Please assign a"
+" country to the fiscal position or set a country group"
+msgstr ""
+"Ulkomaisen alv-numeron maata ei voitu havaita. Määritä maa verokannalle tai "
+"aseta maaryhmä"
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_tax_group__country_id
 msgid "The country for which this tax group is applicable."
 msgstr "Maa, johon tätä veroryhmää sovelletaan."
@@ -16132,6 +16152,14 @@ msgid ""
 "journal items."
 msgstr ""
 "Et voi vaihtaa omistajayritystä tilille, jolla jo on päiväkirjavientejä."
+
+#. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
+"You cannot create a fiscal position with a country outside of the selected "
+"country group."
+msgstr "Et voi luoda verokantaa, jonka maa ei kuulu valittuun maaryhmään."
 
 #. module: account
 #: code:addons/account/models/partner.py:0
