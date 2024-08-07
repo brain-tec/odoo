@@ -2846,7 +2846,7 @@ msgstr "Saldo"
 #: code:addons/account/static/src/js/account_selection.js:0
 #, python-format
 msgid "Balance Sheet"
-msgstr "Lembar Saldo"
+msgstr "Neraca Keuangan"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_bank_statement__balance_end
@@ -8929,6 +8929,12 @@ msgstr "Negate Tax Balance"
 #: model:ir.model.fields,help:account.field_account_payment__amount_signed
 msgid "Negative value of amount field if payment_type is outbound"
 msgstr "Value negatif untuk field jumlah bila payment_type outbound"
+
+#. module: account
+#: code:addons/account/models/account_tax.py:0
+#, python-format
+msgid "Nested group of taxes are not allowed."
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_bank_statement__state__open
