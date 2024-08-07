@@ -652,6 +652,8 @@ msgid ""
 "Consumables are physical products for which you don't manage the inventory "
 "level: they are always available."
 msgstr ""
+"Forbrugsvarer er fysiske produkter, for hvilke du ikke administrerer "
+"lagerniveauet: de er altid tilgængelige."
 
 #. module: product
 #: model:ir.model,name:product.model_res_partner
@@ -675,7 +677,7 @@ msgstr "Indeholdt kvantitet"
 #. module: product
 #: model:ir.model.constraint,message:product.constraint_product_packaging_positive_qty
 msgid "Contained Quantity should be positive."
-msgstr ""
+msgstr "Indeholdt mængde skal være positiv."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_packaging_form_view
@@ -952,7 +954,7 @@ msgstr "Vis navn"
 #: code:addons/product/static/src/xml/pricelist_report.xml:0
 #, python-format
 msgid "Display Pricelist"
-msgstr ""
+msgstr "Vis prisliste"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__display_type
@@ -1047,12 +1049,12 @@ msgstr "Givent regelnavn for denne prislistelinje"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_label_layout__extra_html
 msgid "Extra Content"
-msgstr ""
+msgstr "Ekstra indhold"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid "Extra Fee"
-msgstr ""
+msgstr "Ekstra gebyr"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__price_extra
@@ -1154,12 +1156,12 @@ msgstr "Generer Prisliste"
 #. module: product
 #: model:ir.actions.server,name:product.action_product_template_price_list_report
 msgid "Generate Pricelist Report"
-msgstr ""
+msgstr "Generer prislisterapport"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
 msgid "Get product pictures using Barcode"
-msgstr ""
+msgstr "Få produktbilleder ved hjælp af stregkode"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__packaging_ids
@@ -1540,6 +1542,8 @@ msgid ""
 "Looking for a custom bamboo stain to match existing furniture? Contact us "
 "for a quote."
 msgstr ""
+"Leder du efter en skræddersyet bambusbejdse, der matcher eksisterende "
+"møbler? Kontakt os for et tilbud."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__message_main_attachment_id
@@ -1640,7 +1644,7 @@ msgstr "Navn"
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__create_variant__no_variant
 msgid "Never (option)"
-msgstr ""
+msgstr "Aldrig (valgmulighed)"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__activity_calendar_event_id
@@ -1673,6 +1677,8 @@ msgid ""
 "No product to print, if the product is archived please unarchive it before "
 "printing its label."
 msgstr ""
+"Intet produkt at udskrive, hvis produktet er arkiveret, bedes du fjerne det "
+"fra arkivet, før du udskriver dets etiket."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
@@ -1694,7 +1700,7 @@ msgstr "Bemærk:"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__number_related_products
 msgid "Number Related Products"
-msgstr ""
+msgstr "Antal relaterede produkter"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__message_needaction_counter
@@ -2354,7 +2360,7 @@ msgstr "Rækker"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__rule_tip
 msgid "Rule Tip"
-msgstr ""
+msgstr "Regel tip"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -2386,7 +2392,7 @@ msgstr "Salgspris"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__lst_price
 msgid "Sales Price"
-msgstr ""
+msgstr "Salgspris"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__select
@@ -2557,13 +2563,13 @@ msgstr ""
 #: code:addons/product/models/product_template.py:0
 #, python-format
 msgid "The Internal Reference '%s' already exists."
-msgstr ""
+msgstr "Den interne reference '%s' eksisterer allerede."
 
 #. module: product
 #: code:addons/product/models/product_template.py:0
 #, python-format
 msgid "The Type of this product doesn't match the Detailed Type"
-msgstr ""
+msgstr "Typen af ​​dette produkt matcher ikke den detaljerede type"
 
 #. module: product
 #: code:addons/product/models/product_attribute.py:0
@@ -2615,6 +2621,8 @@ msgid ""
 "The minimum height is 65 cm, and for standing work the maximum height "
 "position is 125 cm."
 msgstr ""
+"Minimumshøjden er 65 cm, og ved stående arbejde er den maksimale "
+"højdeposition 125 cm."
 
 #. module: product
 #: code:addons/product/models/product_pricelist.py:0
@@ -2677,7 +2685,7 @@ msgstr ""
 #: code:addons/product/models/product_pricelist.py:0
 #, python-format
 msgid "The rounding method must be strictly positive."
-msgstr ""
+msgstr "Afrundingsmetoden skal udelukkende være positiv."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__lst_price
@@ -2725,6 +2733,9 @@ msgid ""
 "to no possible variant. Please archive or delete your product directly if "
 "intended."
 msgstr ""
+"Denne konfiguration af produktattributter, værdier og ekskluderinger ville "
+"ikke føre til nogen mulig variant. Venligst arkivér eller slet dit produkt "
+"direkte, hvis det er meningen."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__price_extra
@@ -2814,7 +2825,7 @@ msgstr "Type af undtagelsesaktivitet registreret "
 #: code:addons/product/wizard/product_label_layout.py:0
 #, python-format
 msgid "Unable to find report template for %s format"
-msgstr ""
+msgstr "Kan ikke finde rapportskabelon for %s format"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_supplierinfo_form_view
@@ -2917,7 +2928,7 @@ msgstr "Enhed"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Upsell & Cross-Sell"
-msgstr ""
+msgstr "Mersalg og krydssalg"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__is_used_on_products
@@ -2945,7 +2956,7 @@ msgstr "Værdi"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_line__value_count
 msgid "Value Count"
-msgstr ""
+msgstr "Værditælling"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__price_extra
@@ -3133,6 +3144,8 @@ msgid ""
 "We pay special attention to detail, which is why our desks are of a superior"
 " quality."
 msgstr ""
+"Vi er særligt opmærksomme på detaljerne, og derfor er vores skriveborde af "
+"en overlegen kvalitet."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__weight

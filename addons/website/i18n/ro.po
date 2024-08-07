@@ -4461,12 +4461,12 @@ msgstr "Instalarea nu a reușit \"%s\""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
 msgid "Farm Friendly Chicken Supreme"
-msgstr ""
+msgstr "Ferma Friendly Chicken Supreme"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__favicon
 msgid "Favicon"
-msgstr ""
+msgstr "Favicon"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_three_columns
@@ -5305,7 +5305,7 @@ msgstr "Ascundeți pentru"
 #: code:addons/website/static/src/snippets/s_popup/000.js:0
 #, python-format
 msgid "Hide the cookies bar"
-msgstr ""
+msgstr "Ascundeți bara de cookie-uri"
 
 #. module: website
 #. openerp-web
@@ -6813,7 +6813,7 @@ msgstr "Mobil"
 #: code:addons/website/static/src/js/editor/snippets.options.js:0
 #, python-format
 msgid "Mobile Alignment"
-msgstr ""
+msgstr "Aliniere mobilă"
 
 #. module: website
 #. openerp-web
@@ -12416,7 +12416,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "⌙ Users"
-msgstr ""
+msgstr "⌙ Utilizatori"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options_background_options
