@@ -168,6 +168,10 @@ class MrpProduction(models.Model):
         'stock.move', 'production_id', 'Finished Products', readonly=False,
         compute='_compute_move_finished_ids', store=True, copy=False,
         domain=[('scrapped', '=', False)])
+    # technical field: inverse field for `stock.move.raw_material_production_id`
+    all_move_raw_ids = fields.One2many('stock.move', 'raw_material_production_id')
+    # technical field: inverse field for `stock.move.production_id`
+    all_move_ids = fields.One2many('stock.move', 'production_id')
     move_byproduct_ids = fields.One2many('stock.move', compute='_compute_move_byproduct_ids', inverse='_set_move_byproduct_ids')
     finished_move_line_ids = fields.One2many(
         'stock.move.line', compute='_compute_lines', inverse='_inverse_lines', string="Finished Product"
@@ -1388,6 +1392,18 @@ class MrpProduction(models.Model):
         self._set_lot_producing()
         if self.product_id.tracking == 'serial':
             self._set_qty_producing()
+            if self.warehouse_id.manufacture_steps != 'mrp_one_step':
+                is_waiting = self.picking_ids.filtered(
+                    lambda p: p.picking_type_id == self.warehouse_id.pbm_type_id
+                    and p.state not in ('done', 'cancel')
+                )
+                if is_waiting:
+                    moves_to_reset = self.move_raw_ids.filtered(
+                        lambda move: not (move.manual_consumption and move.picked)
+                        and move.product_id.type == 'product'
+                    )
+                    moves_to_reset.picked = False
+                    moves_to_reset.quantity = 0.0
         if self.picking_type_id.auto_print_generated_mrp_lot:
             return self._autoprint_generated_lot(self.lot_producing_id)
 
