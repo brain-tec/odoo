@@ -5,6 +5,7 @@ import random
 import re
 
 from odoo import api, Command, fields, models, _
+from odoo.addons.mail.tools.discuss import Store
 
 
 class ImLivechatChannel(models.Model):
@@ -59,7 +60,7 @@ class ImLivechatChannel(models.Model):
 
     def _are_you_inside(self):
         for channel in self:
-            channel.are_you_inside = bool(self.env.uid in [u.id for u in channel.user_ids])
+            channel.are_you_inside = self.env.user in channel.user_ids
 
     @api.depends('user_ids.im_status')
     def _compute_available_operator_ids(self):
@@ -102,16 +103,12 @@ class ImLivechatChannel(models.Model):
     def action_join(self):
         self.ensure_one()
         self.user_ids = [Command.link(self.env.user.id)]
-        self.env.user._bus_send_store(
-            "LivechatChannel", {"id": self.id, "name": self.name, "hasSelfAsMember": True}
-        )
+        self.env.user._bus_send_store(self, fields=["are_you_inside", "name"])
 
     def action_quit(self):
         self.ensure_one()
         self.user_ids = [Command.unlink(self.env.user.id)]
-        self.env.user._bus_send_store(
-            "LivechatChannel", {"id": self.id, "name": self.name, "hasSelfAsMember": False}
-        )
+        self.env.user._bus_send_store(self, fields=["are_you_inside", "name"])
 
     def action_view_rating(self):
         """ Action to display the rating relative to the channel, so all rating of the
@@ -332,6 +329,11 @@ class ImLivechatChannel(models.Model):
             info['options'] = self._get_channel_infos()
             info['options']["default_username"] = username
         return info
+
+    def _to_store(self, store: Store, /, *, fields=None):
+        if fields is None:
+            fields = []
+        store.add(self._name, self._read_format(fields))
 
 
 class ImLivechatChannelRule(models.Model):
