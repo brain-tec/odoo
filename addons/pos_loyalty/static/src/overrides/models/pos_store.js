@@ -288,7 +288,7 @@ patch(PosStore.prototype, {
             return _t(
                 "Gift Card: %s\nBalance: %s",
                 code,
-                this.env.utils.formatCurrency(coupon.balance)
+                this.env.utils.formatCurrency(coupon.points)
             );
         }
         return true;
@@ -605,7 +605,7 @@ patch(PosStore.prototype, {
                 ],
             });
         } catch (error) {
-            if (!(error instanceof InvalidDomainError)) {
+            if (!(error instanceof InvalidDomainError || error instanceof TypeError)) {
                 throw error;
             }
             const index = this.models["loyalty.reward"].indexOf(reward);
