@@ -21,13 +21,14 @@ import {
     setupWebClientRegistries,
 } from "./../helpers";
 import { errorService } from "@web/core/errors/error_service";
-import { router, startRouter } from "@web/core/browser/router";
+import { router, routerBus, startRouter } from "@web/core/browser/router";
 
 import { Component, onMounted, xml } from "@odoo/owl";
 import { redirect } from "@web/core/utils/urls";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
+import { makeServerError } from "@web/../tests/legacy/helpers/mock_server";
 
 function getBreadCrumbTexts(target) {
     return getNodesTextContent(target.querySelectorAll(".breadcrumb-item, .o_breadcrumb .active"));
@@ -687,10 +688,7 @@ QUnit.module("ActionManager", (hooks) => {
             await click(target.querySelector(".o_control_panel .breadcrumb a"));
             assert.containsOnce(target, ".o_list_view");
             assert.containsNone(target, ".o_form_view");
-            assert.verifySteps([
-                "Update the state without updating URL, nextState: actionStack,resId,action,globalState",
-                "web_search_read",
-            ]);
+            assert.verifySteps(["web_search_read"]);
             await nextTick(); // pushState is debounced
             assert.strictEqual(browser.location.href, "http://example.com/odoo/action-3");
             assert.verifySteps(["pushState http://example.com/odoo/action-3"]);
@@ -963,10 +961,7 @@ QUnit.module("ActionManager", (hooks) => {
             assert.containsN(target, ".o_list_view .o_data_row", 1);
             await nextTick(); // pushState is debounced
             assert.strictEqual(browser.location.href, "http://example.com/odoo/action-3");
-            assert.verifySteps([
-                "Update the state without updating URL, nextState: actionStack,resId,action,globalState",
-                "pushState http://example.com/odoo/action-3",
-            ]);
+            assert.verifySteps(["pushState http://example.com/odoo/action-3"]);
         }
     );
 
@@ -1019,6 +1014,34 @@ QUnit.module("ActionManager", (hooks) => {
             "url did not change"
         );
         assert.verifySteps([], "pushState was not called");
+    });
+
+    QUnit.test("all actions crashes", async (assert) => {
+        assert.expectErrors();
+        redirect("/odoo/m-partner/2/m-partner/1");
+        logHistoryInteractions(assert);
+        setupWebClientRegistries();
+
+        const mockRPC = async function (route, { method }) {
+            assert.step(method || route);
+            if (method === "web_read") {
+                throw makeServerError();
+            }
+        };
+        const env = await makeTestEnv({ serverData, mockRPC });
+
+        await mount(WebClient, getFixture(), { env });
+        await nextTick();
+        await nextTick();
+        assert.verifySteps([
+            "/web/webclient/load_menus",
+            "/web/action/load_breadcrumbs",
+            "get_views",
+            "web_read",
+            "web_read",
+        ]);
+        assert.verifyErrors(["Odoo Server Error", "Odoo Server Error"]);
+        assert.strictEqual(target.querySelector(".o_action_manager").childElementCount, 0);
     });
 
     QUnit.test(
@@ -1115,6 +1138,100 @@ QUnit.module("ActionManager", (hooks) => {
         await nextTick();
         assert.containsOnce(target, ".o_list_view");
         assert.verifySteps(["web_search_read", "pushState http://example.com/odoo/action-3"]);
+    });
+
+    QUnit.test("properly load previous action when error", async function (assert) {
+        // In this test, the _getActionParams, will not return m-partner as an actionRequest
+        // because, there is not id, or an action on the session storage.
+        // So it will try to perform the previous action : action-3 with id 1.
+        // This one will give an error, and it should directly try the previous one : action-3
+        assert.expectErrors();
+        redirect("/odoo/action-3/1/m-partner");
+        logHistoryInteractions(assert);
+        setupWebClientRegistries();
+        let webReadLoad = 0;
+        const mockRPC = async function (route, { method }) {
+            assert.step(method || route);
+            if (method === "web_read") {
+                webReadLoad++;
+                throw makeServerError();
+            }
+        };
+        const env = await makeTestEnv({ serverData, mockRPC });
+
+        await mount(WebClient, getFixture(), { env });
+        await nextTick();
+        await nextTick();
+        assert.containsOnce(target, ".o_list_view");
+        assert.expectErrors(["my error"]);
+        assert.verifySteps([
+            "/web/webclient/load_menus",
+            "/web/action/load_breadcrumbs",
+            "/web/action/load",
+            "get_views",
+            "web_read",
+            "web_search_read",
+            "pushState http://example.com/odoo/action-3",
+        ]);
+        assert.strictEqual(webReadLoad, 1);
+    });
+
+    QUnit.test("properly reload dynamic actions from sessionStorage", async function (assert) {
+        patchWithCleanup(browser.sessionStorage, {
+            setItem(key, value) {
+                assert.step(`set ${key}-${value}`);
+                super.setItem(key, value);
+            },
+            getItem(key) {
+                const res = super.getItem(key);
+                assert.step(`get ${key}-${res}`);
+                return res;
+            },
+        });
+
+        const webClient = await createWebClient({
+            serverData,
+            mockRPC(route) {
+                if (route === "/web/dataset/call_button/partner/object") {
+                    return {
+                        type: "ir.actions.act_window",
+                        res_model: "partner",
+                        views: [[1, "kanban"]],
+                    };
+                }
+            },
+        });
+
+        await doAction(webClient, {
+            type: "ir.actions.act_window",
+            res_model: "partner",
+            res_id: 1,
+            views: [[false, "form"]],
+        });
+
+        assert.containsOnce(target, ".o_form_view");
+
+        await click(target, ".o_statusbar_buttons .btn-secondary[type='object']");
+        await nextTick();
+        await nextTick();
+
+        assert.containsOnce(target, ".o_kanban_view");
+        assert.verifySteps([
+            'set current_action-{"type":"ir.actions.act_window","res_model":"partner","res_id":1,"views":[[false,"form"]]}',
+            'set current_action-{"type":"ir.actions.act_window","res_model":"partner","views":[[1,"kanban"]],"context":{"lang":"en","tz":"taht","uid":7,"active_model":"partner","active_id":1,"active_ids":[1]}}',
+        ]);
+
+        assert.strictEqual(browser.location.href, "http://example.com/odoo/m-partner/1/m-partner");
+
+        // Emulate a Reload
+        routerBus.trigger("ROUTE_CHANGE");
+        await nextTick();
+        await nextTick();
+        assert.containsOnce(target, ".o_kanban_view");
+        assert.verifySteps([
+            'get current_action-{"type":"ir.actions.act_window","res_model":"partner","views":[[1,"kanban"]],"context":{"lang":"en","tz":"taht","uid":7,"active_model":"partner","active_id":1,"active_ids":[1]}}',
+            'set current_action-{"type":"ir.actions.act_window","res_model":"partner","views":[[1,"kanban"]],"context":{"lang":"en","tz":"taht","uid":7,"active_model":"partner","active_id":1,"active_ids":[1]}}',
+        ]);
     });
 
     QUnit.module("Load State: legacy urls");
