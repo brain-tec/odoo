@@ -96,13 +96,6 @@ export class Store extends BaseStore {
     hasMessageTranslationFeature;
     imStatusTrackedPersonas = Record.many("Persona", {
         inverse: "storeAsTrackedImStatus",
-        /** @this {import("models").Store} */
-        onUpdate() {
-            this.env.services["im_status"].registerToImStatus(
-                "res.partner",
-                this.imStatusTrackedPersonas.map((p) => p.id)
-            );
-        },
     });
     hasLinkPreviewFeature = true;
     // messaging menu
@@ -304,15 +297,13 @@ export class Store extends BaseStore {
                     views: [[false, "form"]],
                     res_id: id,
                 })
-            ).then(() => {
-                if (!this.env.isSmall) {
-                    thread.open(true, { autofocus: false });
-                }
-            });
+            ).then(() => this.onLinkFollowed(thread));
             return true;
         }
         return false;
     }
+
+    onLinkFollowed(fromThread) {}
 
     setup() {
         super.setup();
