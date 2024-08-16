@@ -77,10 +77,11 @@ class PurchaseOrderLine(models.Model):
     display_type = fields.Selection([
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
+    is_downpayment = fields.Boolean()
 
     _sql_constraints = [
         ('accountable_required_fields',
-            "CHECK(display_type IS NOT NULL OR (product_id IS NOT NULL AND product_uom IS NOT NULL AND date_planned IS NOT NULL))",
+            "CHECK(display_type IS NOT NULL OR is_downpayment OR (product_id IS NOT NULL AND product_uom IS NOT NULL AND date_planned IS NOT NULL))",
             "Missing required fields on accountable purchase order line."),
         ('non_accountable_null_fields',
             "CHECK(display_type IS NULL OR (product_id IS NULL AND price_unit = 0 AND product_uom_qty = 0 AND product_uom IS NULL AND date_planned is NULL))",
@@ -581,6 +582,7 @@ class PurchaseOrderLine(models.Model):
             'price_unit': self.currency_id._convert(self.price_unit, aml_currency, self.company_id, date, round=False),
             'tax_ids': [(6, 0, self.taxes_id.ids)],
             'purchase_line_id': self.id,
+            'is_downpayment': self.is_downpayment,
         }
         if self.analytic_distribution and not self.display_type:
             res['analytic_distribution'] = self.analytic_distribution
@@ -685,3 +687,7 @@ class PurchaseOrderLine(models.Model):
             'res_id': self.order_id.id,
             'view_mode': 'form',
         }
+
+    def _merge_po_line(self, rfq_line):
+        self.product_qty += rfq_line.product_qty
+        self.price_unit = min(self.price_unit, rfq_line.price_unit)

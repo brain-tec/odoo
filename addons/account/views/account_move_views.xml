@@ -24,7 +24,7 @@
                             <page string="Information" name="information">
                                 <group>
                                     <group string="Amount">
-                                        <field name="account_id" options="{'no_create': True}" domain="[('company_id', 'parent_of', company_id), ('deprecated', '=', False)]" readonly="1"/>
+                                        <field name="account_id" options="{'no_create': True}" domain="[('deprecated', '=', False)]" readonly="1"/>
                                         <field name="debit" readonly="1"/>
                                         <field name="credit" readonly="1"/>
                                         <field name="balance" readonly="1"/>
@@ -168,7 +168,7 @@
                     <field name="company_id" groups="base.group_multi_company" readonly="1" optional="hide"/>
                     <field name="journal_id" readonly="1" options='{"no_open":True}' optional="hide"/>
                     <field name="move_name" string="Journal Entry" widget="open_move_widget"/>
-                    <field name="account_id" options="{'no_open': True, 'no_create': True}" domain="[('company_id', 'parent_of', company_id), ('deprecated', '=', False)]" groups="account.group_account_readonly"/>
+                    <field name="account_id" options="{'no_open': True, 'no_create': True}" domain="[('deprecated', '=', False)]" groups="account.group_account_readonly"/>
                     <field name="partner_id" optional="show" readonly="move_type != 'entry'"/>
                     <field name="ref" optional="hide" readonly="False"/>
                     <field name="product_id" readonly="1" optional="hide"/>
@@ -1087,7 +1087,7 @@
                                                context="{'partner_id': partner_id, 'move_type': parent.move_type}"
                                                groups="account.group_account_readonly"
                                                options="{'no_quick_create': True}"
-                                               domain="[('deprecated', '=', False), ('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance')), ('company_id', 'parent_of', parent.company_id)]"
+                                               domain="[('deprecated', '=', False), ('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance'))]"
                                                required="display_type not in ('line_note', 'line_section')"/>
                                         <field name="analytic_distribution" widget="analytic_distribution"
                                                groups="analytic.group_analytic_accounting"
@@ -1108,12 +1108,11 @@
                                                options="{'no_create': True}"
                                                optional="show"/>
                                         <field name="price_subtotal"
-                                               string="Tax excl."/>
+                                               column_invisible="parent.move_type not in ['in_invoice', 'in_refund', 'in_receipt'] and parent.company_price_include == 'tax_included'"
+                                               string="Amount"/>
                                         <field name="price_total"
-                                               string="Tax incl."
-                                               column_invisible="parent.tax_calculation_rounding_method == 'round_globally'"
-                                               optional="hide"/>
-
+                                               column_invisible="parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] or parent.company_price_include == 'tax_excluded'"
+                                               string="Amount"/>
                                         <!-- Others fields -->
                                         <field name="partner_id" column_invisible="True"/>
                                         <field name="currency_id" column_invisible="True"/>
@@ -1137,8 +1136,12 @@
                                                                         <field class="fw-bold" name="product_id"/>
                                                                     </div>
                                                                     <div class="col-auto fw-bold float-end text-end">
-                                                                        <field name="price_subtotal"/>
-                                                                        <field name="price_total" t-if="tax_calculation_rounding_method == 'round_per_line'"/>
+                                                                        <field name="price_subtotal"
+                                                                               t-if="['in_invoice', 'in_refund', 'in_receipt'].includes(record.move_type.raw_value)"
+                                                                               string="Amount"/>
+                                                                        <field name="price_total"
+                                                                               t-if="!['in_invoice', 'in_refund', 'in_receipt'].includes(record.move_type.raw_value)"
+                                                                               string="Amount"/>
                                                                     </div>
                                                                 </div>
                                                                 <div class="text-muted">
@@ -1165,6 +1168,7 @@
                                         <field name="currency_id"/>
                                         <field name="company_currency_id"/>
                                         <field name="display_type" force_save="1"/>
+                                        <field name="move_type"/>
                                     </kanban>
 
                                     <!-- Form view to cover mobile use -->
@@ -1179,7 +1183,7 @@
                                                 <label for="name" string="Description" invisible="display_type in ('line_note', 'line_section')"/>
                                                 <label for="name" string="Section" invisible="display_type != 'line_section'"/>
                                                 <label for="name" string="Note" invisible="display_type != 'line_note'"/>
-                                                <field name="name" widget="text"/>
+                                                <field name="name" widget="text" nolabel="1"/>
                                                 <field name="quantity"/>
                                                 <field name="product_uom_category_id" invisible="1"/>
                                                 <field name="product_uom_id" groups="uom.group_uom"/>
@@ -1187,17 +1191,17 @@
                                                 <field name="discount" string="Disc.%"/>
                                             </group>
                                             <group>
-                                                <field name="account_id" domain="[('company_id', 'parent_of', company_id), ('deprecated', '=', False)]" options="{'no_create': True}" context="{'partner_id': partner_id, 'move_type': parent.move_type}"/>
+                                                <field name="account_id" domain="[('deprecated', '=', False)]" options="{'no_create': True}" context="{'partner_id': partner_id, 'move_type': parent.move_type}"/>
                                                 <field name="tax_ids" widget="many2many_tags"/>
                                                 <field name="analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting"/>
                                             </group>
                                             <group>
                                                 <field name="price_subtotal"
-                                                       string="Tax excl."/>
+                                                       invisible="parent.move_type not in ['in_invoice', 'in_refund', 'in_receipt'] and parent.company_price_include == 'tax_included'"
+                                                       string="Amount"/>
                                                 <field name="price_total"
-                                                       string="Tax incl."
-                                                       invisible="tax_calculation_rounding_method == 'round_globally'"
-                                                       optional="hide"/>
+                                                       invisible="parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] or parent.company_price_include == 'tax_excluded'"
+                                                       string="Amount"/>
                                             </group>
                                         </sheet>
                                     </form>
@@ -1242,7 +1246,7 @@
                                         <field name="account_id"
                                                invisible="display_type in ('line_section', 'line_note')"
                                                required="display_type not in ('line_section', 'line_note')"
-                                               domain="[('company_id', 'parent_of', parent.company_id), ('deprecated', '=', False)]" />
+                                               domain="[('deprecated', '=', False)]" />
                                         <field name="partner_id"
                                                optional="show"
                                                domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]"
@@ -1325,7 +1329,7 @@
                                     <!-- Form view to cover mobile use -->
                                     <form>
                                       <group>
-                                        <field name="account_id" domain="[('company_id', 'parent_of', parent.company_id), ('deprecated', '=', False)]"/>
+                                        <field name="account_id" domain="[('deprecated', '=', False)]"/>
                                         <field name="partner_id" domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]"/>
                                         <field name="name"/>
                                         <field name="analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting"/>

@@ -63,6 +63,9 @@
                 <t t-snippet="website.s_call_to_action" string="Call to Action" group="content">
                     <keywords>CTA</keywords>
                 </t>
+                <t t-snippet="website.s_cta_box" string="Box Call to Action" group="content">
+                    <keywords>CTA, button, btn, action, engagement, link, offer, appeal, call to action, prompt, interact, trigger</keywords>
+                </t>
                 <t t-snippet="website.s_product_catalog" string="Pricelist" group="content">
                     <keywords>menu, pricing</keywords>
                 </t>
@@ -95,6 +98,9 @@
                 <t t-snippet="website.s_tabs" string="Tabs" group="content"/>
                 <t t-snippet="website.s_timeline" string="Timeline" group="content"/>
                 <t t-snippet="website.s_process_steps" string="Steps" t-forbid-sanitize="true" group="content"/>
+                <t t-snippet="website.s_numbers_showcase" string="Numbers Showcase" group="content">
+                    <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, performance, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results, analytics, cta, call to action, button</keywords>
+                </t>
 
                 <!-- Images group -->
                 <t t-snippet="website.s_picture" string="Title - Image" group="images">
@@ -108,6 +114,9 @@
                 </t>
                 <t t-snippet="website.s_images_wall" string="Images Wall" group="images"/>
                 <t t-snippet="website.s_parallax" string="Parallax" group="images"/>
+                <t t-snippet="website.s_unveil" string="Unveil" group="images">
+                    <keywords>reveal, showcase, launch, presentation, announcement, content, picture, photo, illustration, media, visual, article, combination</keywords>
+                </t>
 
                 <!-- People group -->
                 <t t-snippet="website.s_company_team" string="Team" group="people">

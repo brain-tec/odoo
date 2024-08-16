@@ -10,14 +10,16 @@ export class ChatGPTPlugin extends Plugin {
     static name = "chatgpt";
     static dependencies = ["selection", "history", "dom", "sanitize"];
     static resources = (p) => ({
-        toolbarCategory: [
-            {
-                id: "ai",
-                sequence: 50,
-            },
-            { id: "translate", sequence: 110 },
-        ],
+        toolbarCategory: {
+            id: "ai",
+            sequence: 50,
+        },
         toolbarItems: [
+            {
+                id: "translate",
+                category: "ai",
+                Component: LanguageSelector,
+            },
             {
                 id: "chatgpt",
                 category: "ai",
@@ -27,11 +29,7 @@ export class ChatGPTPlugin extends Plugin {
                 icon: "fa-magic",
                 name: "chatgpt",
                 label: _t("Generate or transform content with AI."),
-            },
-            {
-                id: "translate",
-                category: "translate",
-                Component: LanguageSelector,
+                text: "AI",
             },
         ],
 
