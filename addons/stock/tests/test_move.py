@@ -5212,6 +5212,23 @@ class StockMove(TransactionCase):
         self.assertFalse(quant_scrap.reserved_quantity)
         self.assertFalse(quant_scrap.quantity)
 
+    def test_scrap_12_qty_in_sublocation(self):
+        """ Checks that if a product is only available in a sublocation, then trying to validate a scrap order from a
+            parent location should trigger the insufficient quantity warning.
+        """
+        # 10 units are available in Stock/Shelf, none in Stock directly
+        subloc = self.stock_location.child_ids[0]
+        self.env['stock.quant']._update_available_quantity(self.product, subloc, 10)
+
+        with Form(self.env['stock.scrap']) as scrap_form:
+            scrap_form.product_id = self.product
+            scrap_form.scrap_qty = 5
+            scrap_form.location_id = self.stock_location
+            scrap = scrap_form.save()
+
+        warning = scrap.action_validate()
+        self.assertEqual(warning.get('res_model'), 'stock.warn.insufficient.qty.scrap', "Should trigger the warning as no qty in location")
+
     def test_in_date_1(self):
         """ Check that moving a tracked quant keeps the incoming date.
         """
@@ -6742,3 +6759,35 @@ class StockMove(TransactionCase):
         })
         line2.quant_id = quant
         self.assertEqual(move.move_line_ids[1].quantity, 1.0)
+
+    def test_free_reservation(self):
+        """ Checks that the free_reservation uses the latest move line when the picking or date are equal.
+        """
+        self.env['stock.quant']._update_available_quantity(self.product, self.stock_location, 5)
+        # Create two moves using the all available quantity and reserve them
+        move_1, move_2 = self.env['stock.move'].create([{
+            'name': 'New move',
+            'product_id': self.product.id,
+            'product_uom_qty': qty,
+            'product_uom': self.product.uom_id.id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+        } for qty in [2, 3]])
+        (move_1 | move_2)._action_confirm()
+        (move_1 | move_2)._action_assign()
+
+        self.assertEqual(move_1.date, move_2.date)
+        self.assertEqual(move_1.state, 'assigned')
+        self.assertEqual(move_2.state, 'assigned')
+
+        # Create a scrap order, that will remove some on the available quantity
+        with Form(self.env['stock.scrap']) as scrap_form:
+            scrap_form.product_id = self.product
+            scrap_form.scrap_qty = 2
+            scrap_form.location_id = self.stock_location
+            scrap = scrap_form.save()
+        scrap.action_validate()
+
+        # Since both moves have the same date, ensure that the reservation is changed on the latest created
+        self.assertEqual(move_1.state, 'assigned')
+        self.assertEqual(move_2.state, 'partially_available')
