@@ -246,10 +246,10 @@ class AccountMove(models.Model):
         index='btree_not_null',
     )
     hide_post_button = fields.Boolean(compute='_compute_hide_post_button', readonly=True)
-    to_check = fields.Boolean(
-        string='To Check',
+    checked = fields.Boolean(
+        string='Checked',
         tracking=True,
-        help="If this checkbox is ticked, it means that the user was not sure of all the related "
+        help="If this checkbox is not ticked, it means that the user was not sure of all the related "
              "information at the time of the creation of the move and that the move needs to be "
              "checked again.",
     )
@@ -454,6 +454,11 @@ class AccountMove(models.Model):
         compute='_compute_amount', store=True, readonly=True,
         currency_field='company_currency_id',
     )
+    amount_untaxed_in_currency_signed = fields.Monetary(
+        string="Untaxed Amount Signed Currency",
+        compute='_compute_amount', store=True, readonly=True,
+        currency_field='currency_id',
+    )
     amount_tax_signed = fields.Monetary(
         string='Tax Signed',
         compute='_compute_amount', store=True, readonly=True,
@@ -487,6 +492,14 @@ class AccountMove(models.Model):
         compute='_compute_payment_state', store=True, readonly=True,
         copy=False,
         tracking=True,
+    )
+    status_in_payment = fields.Selection(
+        selection=PAYMENT_STATE_SELECTION + [
+            ('draft', "Draft"),
+            ('cancel', "Cancelled"),
+        ],
+        compute='_compute_status_in_payment',
+        copy=False,
     )
     amount_total_words = fields.Char(
         string="Amount total in words",
@@ -642,11 +655,11 @@ class AccountMove(models.Model):
 
     def _auto_init(self):
         super()._auto_init()
-        if not index_exists(self.env.cr, 'account_move_to_check_idx'):
+        if not index_exists(self.env.cr, 'account_move_checked_idx'):
             self.env.cr.execute("""
-                CREATE INDEX account_move_to_check_idx
+                CREATE INDEX account_move_checked_idx
                           ON account_move(journal_id)
-                       WHERE to_check = true
+                       WHERE checked = false
             """)
         if not index_exists(self.env.cr, 'account_move_payment_idx'):
             self.env.cr.execute("""
@@ -1020,6 +1033,7 @@ class AccountMove(models.Model):
             move.amount_total = sign * total_currency
             move.amount_residual = -sign * total_residual_currency
             move.amount_untaxed_signed = -total_untaxed
+            move.amount_untaxed_in_currency_signed = -total_untaxed_currency
             move.amount_tax_signed = -total_tax
             move.amount_total_signed = abs(total) if move.move_type == 'entry' else -total
             move.amount_residual_signed = total_residual
@@ -1116,6 +1130,11 @@ class AccountMove(models.Model):
                         new_pmt_state = 'partial'
 
             invoice.payment_state = new_pmt_state
+
+    @api.depends('payment_state', 'state')
+    def _compute_status_in_payment(self):
+        for move in self:
+            move.status_in_payment = move.state if move.state in ('draft', 'cancel') else move.payment_state
 
     @api.depends('invoice_payment_term_id', 'invoice_date', 'currency_id', 'amount_total_in_currency_signed', 'invoice_date_due')
     def _compute_needed_terms(self):
@@ -4391,6 +4410,9 @@ class AccountMove(models.Model):
             if move.line_ids.account_id.filtered(lambda account: account.deprecated) and not self._context.get('skip_account_deprecation_check'):
                 validation_msgs.add(_("A line of this move is using a deprecated account, you cannot post it."))
 
+            # If the field autocheck_on_post is set, we want the checked field on the move to be checked
+            move.checked = move.journal_id.autocheck_on_post
+
         if validation_msgs:
             msg = "\n".join([line for line in validation_msgs])
             raise UserError(msg)
@@ -4735,7 +4757,7 @@ class AccountMove(models.Model):
 
     def button_set_checked(self):
         for move in self:
-            move.to_check = False
+            move.checked = True
 
     def button_draft(self):
         if any(move.state not in ('cancel', 'posted') for move in self):
@@ -4860,7 +4882,7 @@ class AccountMove(models.Model):
             ('state', '=', 'draft'),
             ('date', '<=', fields.Date.context_today(self)),
             ('auto_post', '!=', 'no'),
-            ('to_check', '=', False),
+            '|', ('checked', '=', True), ('journal_id.autocheck_on_post', '=', True)
         ], limit=100)
 
         try:  # try posting in batch
@@ -4872,7 +4894,7 @@ class AccountMove(models.Model):
                     with self.env.cr.savepoint():
                         move._post()
                 except UserError as e:
-                    move.to_check = True
+                    move.checked = False
                     msg = _('The move could not be posted for the following reason: %(error_message)s', error_message=e)
                     move.message_post(body=msg, message_type='comment')
 
@@ -4981,6 +5003,49 @@ class AccountMove(models.Model):
 
     def is_outbound(self, include_receipts=True):
         return self.move_type in self.get_outbound_types(include_receipts)
+
+    def _get_installments_data(self):
+        self.ensure_one()
+        term_lines = self.line_ids.filtered(lambda l: l.display_type == 'payment_term')
+        return term_lines._get_installments_data()
+
+    def get_next_installment_due(self):
+        self.ensure_one()
+        return next((x for x in self._get_installments_data() if not x['reconciled']), None)
+
+    def get_amount_overdue(self):
+        self.ensure_one()
+        return sum(
+            x['amount_residual_currency_unsigned']
+            for x in self._get_installments_data()
+            if x['type'] == 'overdue'
+        )
+
+    def _get_invoice_portal_extra_values(self):
+        self.ensure_one()
+        installment = self.get_next_installment_due()
+        amount_overdue = self.get_amount_overdue()
+        show_payment_info = (
+            self.payment_state not in ('paid', 'in_payment', 'reversed') and self.move_type == 'out_invoice'
+        )
+        show_amount_overdue = show_payment_info and amount_overdue and amount_overdue != self.amount_residual
+        show_installment = (
+            show_payment_info
+            and installment
+            and installment['type'] != 'early_payment_discount'
+            and installment['amount_residual_currency_unsigned'] != self.amount_residual
+        )
+        return {
+            'invoice': self,
+            'amount_paid': self.amount_total - self.amount_residual,
+            'amount_due': self.amount_residual,
+            'show_installment': show_installment or show_amount_overdue,
+            'show_payment_info': show_payment_info,
+            'amount_next_installment': installment['amount_residual_currency_unsigned'] if show_installment else 0.0,
+            'date_next_installment': installment['date_maturity'] if show_installment else None,
+            'name_next_installment': f"{self.name}-{installment['number']}" if show_installment else "",
+            'amount_overdue': amount_overdue if show_amount_overdue else 0.0,
+        }
 
     def _get_accounting_date(self, invoice_date, has_tax, lock_dates=None):
         """Get correct accounting date for previous periods, taking tax lock date and affected journal into account.

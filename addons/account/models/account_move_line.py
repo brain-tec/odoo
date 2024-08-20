@@ -497,14 +497,18 @@ class AccountMoveLine(models.Model):
             else:
                 line.currency_id = line.currency_id or line.company_id.currency_id
 
-    @api.depends('product_id')
+    @api.depends('product_id', 'move_id.ref')
     def _compute_name(self):
         term_by_move = (self.move_id.line_ids | self).filtered(lambda l: l.display_type == 'payment_term').sorted(lambda l: l.date_maturity if l.date_maturity else date.max).grouped('move_id')
         for line in self.filtered(lambda l: l.move_id.inalterable_hash is False):
             if line.display_type == 'payment_term':
                 term_lines = term_by_move.get(line.move_id, self.env['account.move.line'])
                 n_terms = len(line.move_id.invoice_payment_term_id.line_ids)
-                name = line.move_id.payment_reference or ''
+                if line.move_id.payment_reference and line.move_id.ref:
+                    name = f'{line.move_id.ref} - {line.move_id.payment_reference}'
+                else:
+                    name = line.move_id.payment_reference or ''
+
                 if n_terms > 1:
                     index = term_lines._ids.index(line.id) if line in term_lines else len(term_lines)
                     name = _('%(name)s installment #%(number)s', name=name, number=index + 1).lstrip()
@@ -1180,7 +1184,7 @@ class AccountMoveLine(models.Model):
             ]
 
     def action_payment_items_register_payment(self):
-        return self.action_register_payment({'force_group_payment': True})
+        return self.action_register_payment(ctx={'default_group_payment': True})
 
     def action_register_payment(self, ctx=None):
         ''' Open the account.payment.register wizard to pay the selected journal items.
@@ -3039,6 +3043,13 @@ class AccountMoveLine(models.Model):
         """ Undo a reconciliation """
         (self.matched_debit_ids + self.matched_credit_ids).unlink()
 
+    def action_unreconcile_match_entries(self):
+        """ This method will do the unreconcile action in the list view of the moves """
+        active_ids = self._context.get('active_ids')
+        if active_ids:
+            move_lines = self.env['account.move.line'].browse(active_ids)._all_reconciled_lines()
+            move_lines.remove_move_reconcile()
+
     def _reconcile_marked(self):
         """Process the pending reconciliation of entries marked (i.e. uring imports).
 
@@ -3133,6 +3144,69 @@ class AccountMoveLine(models.Model):
             'company_id': self.company_id.id or self.env.company.id,
             'category': 'invoice' if self.move_id.is_sale_document() else 'vendor_bill' if self.move_id.is_purchase_document() else 'other',
         }
+
+    # -------------------------------------------------------------------------
+    # INSTALLMENTS
+    # -------------------------------------------------------------------------
+
+    def _get_installments_data(self, payment_currency=None, payment_date=None):
+        move = self.move_id
+        move.ensure_one()
+
+        payment_date = payment_date or fields.Date.context_today(self)
+
+        term_lines = self.sorted(key=lambda line: (line.date_maturity, line.date))
+        sign = move.direction_sign
+        installments = []
+        first_installment_mode = False
+        current_installment_mode = False
+        for i, line in enumerate(term_lines, start=1):
+            installment = {
+                'number': i,
+                'line': line,
+                'date_maturity': line.date_maturity or line.date,
+                'amount_residual_currency': line.amount_residual_currency,
+                'amount_residual': line.amount_residual,
+                'amount_residual_currency_unsigned': -sign * line.amount_residual_currency,
+                'amount_residual_unsigned': -sign * line.amount_residual,
+                'type': 'other',
+                'reconciled': line.reconciled,
+            }
+            installments.append(installment)
+
+            # Already reconciled.
+            if line.reconciled:
+                continue
+
+            # Early payment discount.
+            # In that case, we want to report the difference of the epd and display it on the UI.
+            if move._is_eligible_for_early_payment_discount(payment_currency or line.currency_id, payment_date):
+                installment.update({
+                    'amount_residual_currency': line.discount_amount_currency,
+                    'amount_residual': line.discount_balance,
+                    'amount_residual_currency_unsigned': -sign * line.discount_amount_currency,
+                    'amount_residual_unsigned': -sign * line.discount_balance,
+                    'type': 'early_payment_discount',
+                })
+                continue
+
+            # Installments.
+            # In case of overdue, all of them are sum as a default amount to be paid.
+            # The next installment is added for the difference.
+            if line.display_type == 'payment_term':
+                if (line.date_maturity or line.date) < payment_date:
+                    # Collect all overdue installments.
+                    first_installment_mode = current_installment_mode = 'overdue'
+                elif not first_installment_mode:
+                    # Suggest the next installment in case of no overdue.
+                    first_installment_mode = 'next'
+                    current_installment_mode = 'next'
+                elif current_installment_mode == 'overdue':
+                    # After an overdue, just add the next installment for the difference.
+                    current_installment_mode = 'next'
+                installment['type'] = current_installment_mode
+
+        return installments
 
     # -------------------------------------------------------------------------
     # MISC
