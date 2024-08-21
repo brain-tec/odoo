@@ -56,7 +56,7 @@ export class ListPlugin extends Plugin {
                     dispatch("TOGGLE_LIST", { mode: "UL" });
                 },
                 icon: "fa-list-ul",
-                name: "Bulleted list",
+                title: _t("Bulleted list"),
                 isFormatApplied: isListActive("UL"),
             },
             {
@@ -66,7 +66,7 @@ export class ListPlugin extends Plugin {
                     dispatch("TOGGLE_LIST", { mode: "OL" });
                 },
                 icon: "fa-list-ol",
-                name: "Numbered list",
+                title: _t("Numbered list"),
                 isFormatApplied: isListActive("OL"),
             },
             {
@@ -76,7 +76,7 @@ export class ListPlugin extends Plugin {
                     dispatch("TOGGLE_LIST", { mode: "CL" });
                 },
                 icon: "fa-check-square-o",
-                name: "Checklist",
+                title: _t("Checklist"),
                 isFormatApplied: isListActive("CL"),
             },
         ],
