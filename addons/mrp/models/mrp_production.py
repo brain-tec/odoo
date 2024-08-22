@@ -1380,6 +1380,18 @@ class MrpProduction(models.Model):
         self._set_lot_producing()
         if self.product_id.tracking == 'serial':
             self._set_qty_producing()
+            if self.warehouse_id.manufacture_steps != 'mrp_one_step':
+                is_waiting = self.picking_ids.filtered(
+                    lambda p: p.picking_type_id == self.warehouse_id.pbm_type_id
+                    and p.state not in ('done', 'cancel')
+                )
+                if is_waiting:
+                    moves_to_reset = self.move_raw_ids.filtered(
+                        lambda move: not (move.manual_consumption and move.picked)
+                        and move.product_id.is_storable
+                    )
+                    moves_to_reset.picked = False
+                    moves_to_reset.quantity = 0.0
         if self.picking_type_id.auto_print_generated_mrp_lot:
             return self._autoprint_generated_lot(self.lot_producing_id)
 
@@ -1864,7 +1876,7 @@ class MrpProduction(models.Model):
             ml_by_move = []
             product_uom = initial_move.product_id.uom_id
             if not initial_move.picked:
-                for move_line in initial_move.move_line_ids:
+                for move_line in initial_move.move_line_ids.sorted(key=lambda ml: ml._sorting_move_lines()):
                     available_qty = move_line.product_uom_id._compute_quantity(move_line.quantity, product_uom, rounding_method="HALF-UP")
                     if float_compare(available_qty, 0, precision_rounding=product_uom.rounding) <= 0:
                         continue
