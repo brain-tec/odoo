@@ -47,8 +47,9 @@ import { EXCLUDE_PREFIX, setParams, urlParams } from "./url";
  *
  * @typedef {{
  *  count: number;
+ *  message: string;
  *  name: string;
- * }} GlobalErrorReport
+ * }} GlobalIssueReport
  *
  * @typedef {Suite | Test} Job
  *
@@ -225,7 +226,10 @@ const handleConsoleIssues = (test, shouldSuppress) => {
             };
         };
 
-        const originalMethods = { ...globalThis.console };
+        const originalMethods = {
+            error: globalThis.console.error,
+            warn: globalThis.console.warn,
+        };
         $assign(globalThis.console, {
             error: suppressIssueLogger("ERROR", "#9f1239"),
             warn: suppressIssueLogger("WARNING", "#f59e0b"),
@@ -303,9 +307,13 @@ export class Runner {
          */
         done: new Set(),
         /**
-         * @type {Record<string, GlobalErrorReport>}
+         * @type {Record<string, GlobalIssueReport>}
          */
         globalErrors: {},
+        /**
+         * @type {Record<string, GlobalIssueReport>}
+         */
+        globalWarnings: {},
         /**
          * Dictionnary containing whether a job is included or excluded from the
          * current run. Values are numbers defining priority:
@@ -341,8 +349,8 @@ export class Runner {
     suites = new Map();
     /** @type {Suite[]} */
     suiteStack = [];
-    /** @type {Set<Tag>} */
-    tags = new Set();
+    /** @type {Map<string, Tag>} */
+    tags = new Map();
     /** @type {Map<string, Test>} */
     tests = new Map();
     /** @type {string | RegExp} */
@@ -539,7 +547,7 @@ export class Runner {
         let test = markRaw(new Test(parentSuite, name, config, runFn));
         const originalTest = this.tests.get(test.id);
         if (originalTest) {
-            if (originalTest.run) {
+            if (this.dry || originalTest.run) {
                 throw testError(
                     { name, parent: parentSuite },
                     `a test with that name already exists in the suite "${parentSuite.name}"`
@@ -695,6 +703,9 @@ export class Runner {
         const [width, height] = preset.size;
         if (width !== innerWidth || height !== innerHeight) {
             if (lastPresetWarn !== presetId) {
+                this._handleGlobalWarning(
+                    "viewport size does not match the expected size for the current preset"
+                );
                 logger.warn(
                     `viewport size does not match the expected size for the "${preset.label}" preset`,
                     `\n> expected:`,
@@ -704,7 +715,8 @@ export class Runner {
                     `\n> current:`,
                     innerWidth,
                     "x",
-                    innerHeight
+                    innerHeight,
+                    `\n\nHint: you can use the "device toolbar" in your devtools to manually set the size of your viewport`
                 );
             }
             lastPresetWarn = presetId;
@@ -1180,7 +1192,7 @@ export class Runner {
         let skip = false;
         let ignoreSkip = false;
         for (const tag of job.tags) {
-            this.tags.add(tag);
+            this.tags.set(tag.name, tag);
             switch (tag.name) {
                 case Tag.DEBUG:
                     if (typeof this.debug !== "boolean" && this.debug !== job) {
@@ -1226,11 +1238,11 @@ export class Runner {
     /**
      * @param {keyof Runner["config"]} configKey
      * @param {keyof Runner["state"]["includeSpecs"]} specKey
-     * @param {Iterable<string>} valuesIter
+     * @param {Map<string, any>} valuesMap
      */
-    _checkUrlValidity(configKey, specKey, valuesIter) {
+    _checkUrlValidity(configKey, specKey, valuesMap) {
         const values = this.state.includeSpecs[specKey];
-        const availableValues = new Set(valuesIter);
+        const availableValues = new Set(valuesMap.keys());
         for (const [key, incLevel] of Object.entries(values)) {
             if (Math.abs(incLevel) === INCLUDE_LEVEL.url && !availableValues.has(key)) {
                 delete values[key];
@@ -1482,13 +1494,13 @@ export class Runner {
 
         // Cleanup invalid IDs and tags from URL
         if (this.config.suite) {
-            this._checkUrlValidity("suite", "suites", this.suites.keys());
+            this._checkUrlValidity("suite", "suites", this.suites);
         }
         if (this.config.tag) {
             this._checkUrlValidity("tag", "tags", this.tags);
         }
         if (this.config.test) {
-            this._checkUrlValidity("test", "tests", this.tests.keys());
+            this._checkUrlValidity("test", "tests", this.tests);
         }
 
         this._populateState = true;
@@ -1583,6 +1595,24 @@ export class Runner {
                 count: 1,
                 message: error.message,
                 name: error.constructor.name || error.name,
+            };
+        }
+        return false;
+    }
+
+    /**
+     * @param {string} message
+     */
+    _handleGlobalWarning(message) {
+        const { globalWarnings } = this.state;
+        const key = message;
+        if (globalWarnings[key]) {
+            globalWarnings[key].count++;
+        } else {
+            globalWarnings[key] = {
+                count: 1,
+                message,
+                name: "warning",
             };
         }
         return false;
