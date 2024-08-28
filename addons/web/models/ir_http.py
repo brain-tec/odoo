@@ -40,6 +40,12 @@ class Http(models.AbstractModel):
         return any(bot in user_agent for bot in cls.bots)
 
     @classmethod
+    def _sanitize_cookies(cls, cookies):
+        super()._sanitize_cookies(cookies)
+        if cids := cookies.get('cids'):
+            cookies['cids'] = '-'.join(cids.split(','))
+
+    @classmethod
     def _handle_debug(cls):
         debug = request.httprequest.args.get('debug')
         if debug is not None:
@@ -177,6 +183,7 @@ class Http(models.AbstractModel):
             'is_public': user._is_public(),
             'is_website_user': user._is_public() if session_uid else False,
             'user_id': user.id if session_uid else False,
+            'uid': user.id if session_uid else False,
             'is_frontend': True,
             'profile_session': request.session.profile_session,
             'profile_collectors': request.session.profile_collectors,
