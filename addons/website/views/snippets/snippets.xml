@@ -65,6 +65,9 @@
                 <t t-snippet="website.s_key_benefits" string="Key benefits" group="columns">
                     <keywords>promotion, characteristic, quality, highlights, specs, advantages, functionalities, features, exhibit, details, capabilities, attributes, promotion, headline, content, overiew, spotlight</keywords>
                 </t>
+                <t t-snippet="website.s_freegrid" string="Free grid" group="columns">
+                    <keywords>description, containers, layouts, structures, multi-columns, modules, boxes, content, picture, photo, illustration, media, visual, article, story, combination, showcase, announcement, reveal, trendy, design, shape, geometric, engage, call to action, cta, button</keywords>
+                </t>
 
                 <!-- Content group -->
                 <t t-snippet="website.s_text_image" string="Text - Image" group="content">
@@ -574,7 +577,7 @@
         </we-select>
     </div>
 
-    <div id="so_block_align" data-selector=".s_alert, .s_card, .s_blockquote, .s_text_highlight">
+    <div id="so_block_align" data-selector=".s_alert, .s_blockquote, .s_text_highlight">
         <we-button-group string="Alignment" data-dependencies="!so_width_100">
             <we-button class="fa fa-fw fa-align-left" title="Left" data-select-class="me-auto"/>
             <we-button class="fa fa-fw fa-align-center" title="Center" data-select-class="mx-auto"/>
