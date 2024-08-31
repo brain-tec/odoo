@@ -75,6 +75,7 @@ _ref_vat = {
     'sk': 'SK2022749619',
     'sm': 'SM24165',
     'tr': _('TR1234567890 (VERGINO) or TR17291716060 (TCKIMLIKNO)'),  # Levent Karakas @ Eska Yazilim A.S.
+    'uy': _("'219999830019' (should be 12 digits)"),
     've': 'V-12345678-1, V123456781, V-12.345.678-1',
     'xi': 'XI123456782',
     'sa': _('310175397400003 [Fifteen digits, first and last digits should be "3"]')
@@ -820,10 +821,16 @@ class ResPartner(models.Model):
             if values.get('vat'):
                 country_id = values.get('country_id')
                 values['vat'] = self._fix_vat_number(values['vat'], country_id)
-        return super(ResPartner, self).create(vals_list)
+        res = super().create(vals_list)
+        if self.env.context.get('import_file'):
+            res.env.remove_to_compute(self._fields['vies_valid'], res)
+        return res
 
     def write(self, values):
         if values.get('vat') and len(self.mapped('country_id')) == 1:
             country_id = values.get('country_id', self.country_id.id)
             values['vat'] = self._fix_vat_number(values['vat'], country_id)
-        return super(ResPartner, self).write(values)
+        res = super().write(values)
+        if self.env.context.get('import_file'):
+            self.env.remove_to_compute(self._fields['vies_valid'], self)
+        return res
