@@ -3,9 +3,10 @@
 
 from collections import defaultdict
 from dateutil.relativedelta import relativedelta
-from odoo import api, Command, fields, models
+from odoo import _, api, Command, fields, models
 from odoo.osv import expression
 from odoo.tools import float_compare, float_round, float_is_zero, OrderedSet
+from odoo.exceptions import ValidationError
 
 
 class StockMoveLine(models.Model):
@@ -155,6 +156,28 @@ class StockMoveLine(models.Model):
             del aggregated_move_lines[move_line]
 
         return aggregated_move_lines
+
+    def _prepare_stock_move_vals(self):
+        move_vals = super()._prepare_stock_move_vals()
+        if self.env['product.product'].browse(move_vals['product_id']).is_kits:
+            move_vals['location_id'] = self.location_id.id
+            move_vals['location_dest_id'] = self.location_dest_id.id
+        return move_vals
+
+    def _get_linkable_moves(self):
+        """ Don't linke move lines with kit products to moves with dissimilar locations so that
+        post `action_explode()` move lines will have accurate location data.
+        """
+        self.ensure_one()
+        if self.product_id and self.product_id.is_kits:
+            moves = self.picking_id.move_ids.filtered(lambda move:
+                move.product_id == self.product_id and
+                move.location_id == self.location_id and
+                move.location_dest_id == self.location_dest_id
+            )
+            return sorted(moves, key=lambda m: m.quantity < m.product_qty, reverse=True)
+        else:
+            return super()._get_linkable_moves()
 
 
 class StockMove(models.Model):
@@ -321,6 +344,12 @@ class StockMove(models.Model):
         if self.raw_material_production_id and not self.manual_consumption and self.picked and self.product_uom and \
            float_compare(self.product_uom_qty, self.quantity, precision_rounding=self.product_uom.rounding) != 0:
             self.manual_consumption = True
+
+    @api.constrains('quantity', 'raw_material_production_id')
+    def _check_negative_quantity(self):
+        for move in self:
+            if move.raw_material_production_id and float_compare(move.quantity, 0, precision_rounding=move.product_uom.rounding) < 0:
+                raise ValidationError(_("Please enter a positive quantity."))
 
     @api.model
     def default_get(self, fields_list):
