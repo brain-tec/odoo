@@ -1,6 +1,8 @@
-import Widget from "@web_editor/js/core/widget";
+import publicWidget from "@web/legacy/js/public/public_widget";
 import testUtils from "@web/../tests/legacy_tests/helpers/test_utils";
 import { renderToString } from "@web/core/utils/render";
+
+const Widget = publicWidget.Widget;
 
 QUnit.module('core', {}, function () {
 
@@ -323,97 +325,6 @@ QUnit.module('core', {}, function () {
     });
 
     QUnit.module('Widget, and async stuff');
-
-    QUnit.test("alive(alive)", async function (assert) {
-        assert.expect(1);
-
-        var widget = new (Widget.extend({}));
-
-        await widget.start()
-            .then(function () {return widget.alive(Promise.resolve()) ;})
-            .then(function () { assert.ok(true); });
-
-        widget.destroy();
-    });
-
-    QUnit.test("alive(dead)", function (assert) {
-        assert.expect(1);
-        var widget = new (Widget.extend({}));
-
-        return new Promise(function (resolve, reject) {
-            widget.start()
-            .then(function () {
-                // destroy widget
-                widget.destroy();
-                var promise = Promise.resolve();
-                // leave time for alive() to do its stuff
-                promise.then(function () {
-                    return Promise.resolve();
-                }).then(function () {
-                    assert.ok(true);
-                    resolve();
-                });
-                // ensure that widget.alive() refuses to resolve or reject
-                return widget.alive(promise);
-            }).then(function () {
-                reject();
-                assert.ok(false, "alive() should not terminate by default");
-            }).catch(function() {
-                reject();
-                assert.ok(false, "alive() should not terminate by default");
-            });
-        });
-    });
-
-    QUnit.test("alive(alive, true)", async function (assert) {
-        assert.expect(1);
-        var widget = new (Widget.extend({}));
-        await widget.start()
-            .then(function () { return widget.alive(Promise.resolve(), true); })
-            .then(function () { assert.ok(true); });
-        widget.destroy();
-    });
-
-    QUnit.test("alive(dead, true)", function (assert) {
-        assert.expect(1);
-        var done = assert.async();
-
-        var widget = new (Widget.extend({}));
-
-        widget.start()
-        .then(function () {
-            // destroy widget
-            widget.destroy();
-            return widget.alive(Promise.resolve(), true);
-        }).then(function () {
-            assert.ok(false, "alive(p, true) should fail its promise");
-            done();
-        }, function () {
-            assert.ok(true, "alive(p, true) should fail its promise");
-            done();
-        });
-    });
-
-    QUnit.test("calling do_hide on a widget destroyed before being rendered", async function (assert) {
-        assert.expect(1);
-
-        const MyWidget = Widget.extend({
-            willStart() {
-                return new Promise(() => {});
-            }
-        });
-
-        const widget = new MyWidget();
-        widget.appendTo(document.createDocumentFragment());
-        widget.destroy();
-
-        // those calls should not crash
-        widget.do_hide();
-        widget.do_show();
-        widget.do_toggle(true);
-
-        assert.ok(true);
-    });
 
     QUnit.test('start is not called when widget is destroyed', function (assert) {
         assert.expect(0);
