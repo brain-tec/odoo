@@ -400,7 +400,6 @@ export class LinkPlugin extends Plugin {
             }
             this.shared.domInsert(link);
             this.shared.setCursorEnd(link);
-            this.dispatch("ADD_STEP");
             return link;
         }
     }
@@ -525,6 +524,7 @@ export class LinkPlugin extends Plugin {
                 textNodeToReplace.splitText(match[0].length);
                 selection.anchorNode.parentElement.replaceChild(link, textNodeToReplace);
                 this.shared.setCursorStart(nodeForSelectionRestore);
+                this.dispatch("ADD_STEP");
             }
         }
     }

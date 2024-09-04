@@ -356,6 +356,7 @@ class StockRule(models.Model):
             'picking_type_id': self.picking_type_id.id,
             'group_id': group_id,
             'route_ids': [(4, route.id) for route in values.get('route_ids', [])],
+            'never_product_template_attribute_value_ids': values.get('never_product_template_attribute_value_ids'),
             'warehouse_id': self.warehouse_id.id,
             'date': date_scheduled,
             'date_deadline': False if self.group_propagation_option == 'fixed' else date_deadline,
@@ -564,7 +565,9 @@ class ProcurementGroup(models.Model):
         moves_domain = [
             ('state', 'in', ['confirmed', 'partially_available']),
             ('product_uom_qty', '!=', 0.0),
-            ('reservation_date', '<=', fields.Date.today())
+            '|',
+                ('reservation_date', '<=', fields.Date.today()),
+                ('picking_type_id.reservation_method', '=', 'at_confirm'),
         ]
         if company_id:
             moves_domain = expression.AND([[('company_id', '=', company_id)], moves_domain])
