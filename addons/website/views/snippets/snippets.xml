@@ -60,6 +60,9 @@
                 <t t-snippet="website.s_striped_center_top" string="Striped Center Top" group="intro">
                     <keywords>hero, jumbotron, headline, header, intro, home, content, picture, photo, illustration, media, visual, article, combination, trendy, pattern, design</keywords>
                 </t>
+                <t t-snippet="website.s_motto" string="Motto" group="intro">
+                    <keywords>cite, slogan, tagline, mantra, catchphrase, statements, sayings, comments, mission, citations, maxim, quotes, principle</keywords>
+                </t>
 
                 <!-- Columns group -->
                 <t t-snippet="website.s_three_columns" string="Columns" group="columns">
@@ -73,6 +76,9 @@
                 </t>
                 <t t-snippet="website.s_freegrid" string="Free grid" group="columns">
                     <keywords>description, containers, layouts, structures, multi-columns, modules, boxes, content, picture, photo, illustration, media, visual, article, story, combination, showcase, announcement, reveal, trendy, design, shape, geometric, engage, call to action, cta, button</keywords>
+                </t>
+                <t t-snippet="website.s_key_images" string="Key Images" group="columns">
+                    <keywords>columns, gallery, pictures, photos, media, text, content, album, showcase, visuals, portfolio, arrangement, collection, visual-grid, split, alignment, added value</keywords>
                 </t>
 
                 <!-- Content group -->
@@ -150,6 +156,9 @@
                 <t t-snippet="website.s_parallax" string="Parallax" group="images"/>
                 <t t-snippet="website.s_unveil" string="Unveil" group="images">
                     <keywords>reveal, showcase, launch, presentation, announcement, content, picture, photo, illustration, media, visual, article, combination</keywords>
+                </t>
+                <t t-snippet="website.s_image_title" string="Image Title" group="images">
+                    <keywords>headline, header, content, picture, photo, illustration, media, visual, combination</keywords>
                 </t>
 
                 <!-- People group -->
