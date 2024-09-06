@@ -474,6 +474,36 @@ class TestSaleOrderDownPayment(TestSaleCommon):
 
         self._assert_invoice_lines_values(invoice.line_ids, expected)
 
+    def test_analytic_distribution_zero_line(self):
+        # do not add 0 price_unit lines and do not create analytic distributions for them
+        analytic_plan = self.env['account.analytic.plan'].create({'name': 'Plan Test'})
+        an_acc_01 = str(self.env['account.analytic.account'].create({'name': 'Account 01', 'plan_id': analytic_plan.id}).id)
+        an_acc_02 = str(self.env['account.analytic.account'].create({'name': 'Account 02', 'plan_id': analytic_plan.id}).id)
+        self.sale_order.order_line[0].tax_id = self.tax_15
+        self.sale_order.order_line[0].analytic_distribution = {an_acc_01: 50, an_acc_02: 50}
+        self.sale_order.order_line[1].tax_id = self.tax_10
+        self.sale_order.order_line[1].analytic_distribution = {an_acc_01: 50, an_acc_02: 50}
+        self.sale_order.order_line[2].tax_id = self.tax_10
+        self.sale_order.order_line[2].analytic_distribution = {an_acc_01: 50, an_acc_02: 50}
+        self.sale_order.order_line[2].price_unit = - self.sale_order.order_line[1].price_unit
+        self.make_downpayment()
+        invoice = self.sale_order.invoice_ids
+        down_pay_amt = self.sale_order.amount_total / 2
+        # ruff: noqa: E271, E272
+        expected = [
+            # keys
+            ['account_id',               'tax_ids',               'balance',    'price_total', 'analytic_distribution'       ],
+            # base lines
+            [self.revenue_account.id,    self.tax_15.ids,         -100,         115,           {an_acc_01: 50, an_acc_02: 50}],
+            [self.revenue_account.id,    self.env['account.tax'], -100,         100,           False                         ],
+            # taxes
+            [self.tax_account.id,        self.env['account.tax'], -15,          0,             False                         ],
+            # receivable
+            [self.receivable_account.id, self.env['account.tax'], down_pay_amt, 0,             False                         ],
+        ]
+
+        self._assert_invoice_lines_values(invoice.line_ids, expected)
+
     def test_tax_fixed_amount_analytic_distribution(self):
         analytic_plan = self.env['account.analytic.plan'].create({'name': 'Plan Test'})
         an_acc_01 = str(self.env['account.analytic.account'].create({'name': 'Account 01', 'plan_id': analytic_plan.id}).id)
@@ -640,7 +670,7 @@ class TestSaleOrderDownPayment(TestSaleCommon):
             # keys
             ['account_id',               'tax_ids',    'balance', 'price_total'],
             # line section
-            [[],                         [],           0.0,       0.0          ],
+            [False,                      [],           0.0,       0.0          ],
             # down payment
             [self.revenue_account.id,    tax_21_a.ids, 82.64,     100.0        ],
             [self.revenue_account.id,    tax_21_b.ids, 82.64,     100.0        ],
@@ -668,7 +698,7 @@ class TestSaleOrderDownPayment(TestSaleCommon):
             [self.revenue_account.id,    tax_21_a.ids, -1000.0,   1210.0       ],
             [self.revenue_account.id,    tax_21_b.ids, -1000.0,   1210.0       ],
             # line section
-            [[],                         [],           0.0,       0.0          ],
+            [False,                      [],           0.0,       0.0          ],
             # down payment
             [self.revenue_account.id,    tax_21_a.ids, 82.64,     -100.0       ],
             [self.revenue_account.id,    tax_21_b.ids, 82.64,     -100.0       ],
@@ -744,7 +774,7 @@ class TestSaleOrderDownPayment(TestSaleCommon):
             # keys
             ['account_id',               'tax_ids',    'balance', 'price_total'],
             # line section
-            [[],                         [],           0.0,       0.0          ],
+            [False,                      [],           0.0,       0.0          ],
             # down payment
             [self.revenue_account.id,    tax_24_a.ids, 80.65,     100.0        ],
             [self.revenue_account.id,    tax_24_b.ids, 80.65,     100.0        ],
@@ -772,7 +802,7 @@ class TestSaleOrderDownPayment(TestSaleCommon):
             [self.revenue_account.id,    tax_24_a.ids, -1000.0,   1240.0       ],
             [self.revenue_account.id,    tax_24_b.ids, -1000.0,   1240.0       ],
             # line section
-            [[],                         [],            0.0,      0.0          ],
+            [False,                      [],            0.0,      0.0          ],
             # down payment
             [self.revenue_account.id,    tax_24_a.ids,  80.65,    -100.0       ],
             [self.revenue_account.id,    tax_24_b.ids,  80.65,    -100.0       ],
@@ -883,7 +913,7 @@ class TestSaleOrderDownPayment(TestSaleCommon):
             [self.revenue_account.id,   tax_25_b.ids,  -968.0,    1210.0       ],
             [self.revenue_account.id,   tax_25_c.ids,  -968.0,    1210.0       ],
             # line section
-            [[],                        [],            0.0,       0.0          ],
+            [False,                     [],            0.0,       0.0          ],
             # down payment
             [self.revenue_account.id,    tax_21_a.ids, 82.64,    -100.0       ],
             [self.revenue_account.id,    tax_21_b.ids, 82.64,    -100.0       ],
@@ -1008,7 +1038,7 @@ class TestSaleOrderDownPayment(TestSaleCommon):
             # base lines
             [self.revenue_account.id,   self.tax_15.ids,    -100.0,             115.0],
             # line section
-            [[],                        [],                 0.0,                0.0],
+            [False,                     [],                 0.0,                0.0],
             # down payment
             [self.revenue_account.id,   self.tax_15.ids,    43.48,              -50.0],
             # taxes

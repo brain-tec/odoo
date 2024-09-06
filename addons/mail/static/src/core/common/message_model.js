@@ -40,7 +40,7 @@ export class Message extends Record {
         }
     }
 
-    attachments = Record.many("Attachment", { inverse: "message" });
+    attachment_ids = Record.many("Attachment", { inverse: "message" });
     author = Record.one("Persona");
     body = Record.attr("", { html: true });
     composer = Record.one("Composer", { inverse: "message", onDelete: (r) => r.delete() });
@@ -238,9 +238,6 @@ export class Message extends Record {
             }
             return this.author.eq(this.store.self);
         },
-        // FIXME necessary to not trigger double-rendering of messages
-        // lazy-compute on-the-fly notifies the current reactive again
-        eager: true,
     });
 
     isPending = false;
@@ -286,7 +283,7 @@ export class Message extends Record {
     }
 
     get hasTextContent() {
-        return /*(this.editDate && this.attachments.length) || */ !this.isBodyEmpty;
+        return /*(this.editDate && this.attachment_ids.length) || */ !this.isBodyEmpty;
     }
 
     isEmpty = Record.attr(false, {
@@ -294,7 +291,7 @@ export class Message extends Record {
         compute() {
             return (
                 this.isBodyEmpty &&
-                this.attachments.length === 0 &&
+                this.attachment_ids.length === 0 &&
                 this.trackingValues.length === 0 &&
                 !this.subtype_description
             );
@@ -404,9 +401,11 @@ export class Message extends Record {
             mentionedPartners,
         });
         const data = await rpc("/mail/message/update_content", {
-            attachment_ids: attachments.concat(this.attachments).map((attachment) => attachment.id),
+            attachment_ids: attachments
+                .concat(this.attachment_ids)
+                .map((attachment) => attachment.id),
             attachment_tokens: attachments
-                .concat(this.attachments)
+                .concat(this.attachment_ids)
                 .map((attachment) => attachment.access_token),
             body: await prettifyMessageContent(body, validMentions),
             message_id: this.id,
@@ -438,7 +437,7 @@ export class Message extends Record {
             message_id: this.id,
         });
         this.body = "";
-        this.attachments = [];
+        this.attachment_ids = [];
     }
 
     async setDone() {

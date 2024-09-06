@@ -5,8 +5,9 @@ import logging
 from collections import defaultdict, namedtuple
 from dateutil.relativedelta import relativedelta
 
-from odoo import SUPERUSER_ID, _, api, fields, models, registry
+from odoo import SUPERUSER_ID, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
+from odoo.modules.registry import Registry
 from odoo.osv import expression
 from odoo.tools import float_compare, float_is_zero
 from odoo.tools.misc import split_every
@@ -556,7 +557,10 @@ class ProcurementGroup(models.Model):
         # ones of the company. This is not useful as a regular user since there is a record
         # rule to filter out the rules based on the company.
         if self.env.su and values.get('company_id'):
-            domain_company = ['|', ('company_id', '=', False), ('company_id', 'child_of', values['company_id'].ids)]
+            company_ids = set(values.get('company_id').ids)
+            if values.get('route_ids'):
+                company_ids |= set(values['route_ids'].company_id.ids)
+            domain_company = ['|', ('company_id', '=', False), ('company_id', 'child_of', list(company_ids))]
             domain = expression.AND([domain, domain_company])
         return domain
 
@@ -606,7 +610,7 @@ class ProcurementGroup(models.Model):
         we run functions as SUPERUSER to avoid intercompanies and access rights issues. """
         try:
             if use_new_cursor:
-                cr = registry(self._cr.dbname).cursor()
+                cr = Registry(self._cr.dbname).cursor()
                 self = self.with_env(self.env(cr=cr))  # TDE FIXME
 
             self._run_scheduler_tasks(use_new_cursor=use_new_cursor, company_id=company_id)

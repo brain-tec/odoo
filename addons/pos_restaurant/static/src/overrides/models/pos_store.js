@@ -35,14 +35,14 @@ patch(PosStore.prototype, {
             this.getTableOrderCount();
         }
     },
-    afterOrderDeletion() {
+    async onDeleteOrder(order) {
         if (
             this.config.module_pos_restaurant &&
             this.mainScreen.component.name !== "TicketScreen"
         ) {
-            return this.showScreen("FloorScreen");
+            this.showScreen("FloorScreen");
         }
-        return super.afterOrderDeletion();
+        return super.onDeleteOrder(...arguments);
     },
     async getTableOrderCount() {
         const result = await this.data.call(
@@ -129,9 +129,6 @@ patch(PosStore.prototype, {
                 // We check that it's in ReceiptScreen because we want to keep the order if it's in a tipping state
                 this.removeOrder(order);
             }
-            this.setSelectedCategory(
-                (this.config.start_category && this.config.iface_start_categ_id?.[0]) || 0
-            );
             this.showScreen("FloorScreen", { floor: table?.floor });
         }
     },

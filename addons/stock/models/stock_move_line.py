@@ -327,13 +327,15 @@ class StockMoveLine(models.Model):
             if move_line.move_id or not move_line.picking_id:
                 continue
             if move_line.picking_id.state != 'done':
-                moves = move_line.picking_id.move_ids.filtered(lambda x: x.product_id == move_line.product_id)
-                moves = sorted(moves, key=lambda m: m.quantity < m.product_qty, reverse=True)
+                moves = move_line._get_linkable_moves()
                 if moves:
-                    move_line.write({
+                    vals = {
                         'move_id': moves[0].id,
                         'picking_id': moves[0].picking_id.id,
-                    })
+                    }
+                    if moves[0].picked:
+                        vals['picked'] = True
+                    move_line.write(vals)
                 else:
                     create_move(move_line)
             else:
@@ -772,12 +774,11 @@ class StockMoveLine(models.Model):
                 break
 
         move_line_to_unlink = self.env['stock.move.line'].browse(to_unlink_candidate_ids)
-        if self.env['ir.config_parameter'].sudo().get_param('stock.break_mto'):
-            for m in (move_line_to_unlink.move_id | move_to_reassign):
-                m.write({
-                    'procure_method': 'make_to_stock',
-                    'move_orig_ids': [Command.clear()]
-                })
+        for m in (move_line_to_unlink.move_id | move_to_reassign):
+            m.write({
+                'procure_method': 'make_to_stock',
+                'move_orig_ids': [Command.clear()]
+            })
         move_line_to_unlink.unlink()
         move_to_reassign._action_assign()
 
@@ -997,3 +998,8 @@ class StockMoveLine(models.Model):
                 'message': _("The inventory adjustments have been reverted."),
             }
         }
+
+    def _get_linkable_moves(self):
+        self.ensure_one()
+        moves = self.picking_id.move_ids.filtered(lambda x: x.product_id == self.product_id)
+        return sorted(moves, key=lambda m: m.quantity < m.product_qty, reverse=True)
