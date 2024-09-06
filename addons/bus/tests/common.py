@@ -76,7 +76,7 @@ class WebsocketCase(HttpCase):
         if 'timeout' not in kwargs:
             kwargs['timeout'] = 5
         ws = websocket.create_connection(
-            type(self)._WEBSOCKET_URL, *args, **kwargs
+            self._WEBSOCKET_URL, *args, **kwargs
         )
         if ping_after_connect:
             ws.ping()
@@ -115,6 +115,7 @@ class WebsocketCase(HttpCase):
         notifications are available. Usefull since the bus is not able to do
         it during tests.
         """
+        self.env.cr.precommit.run()  # trigger the creation of bus.bus records
         channels = [
             hashable(channel_with_db(self.registry.db_name, c)) for c in channels
         ]
