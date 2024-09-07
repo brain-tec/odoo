@@ -1713,7 +1713,7 @@ class MrpProduction(models.Model):
                 if workorder.state not in ('done', 'cancel'):
                     workorder.duration_expected = workorder._get_duration_expected()
                 if workorder.duration == 0.0:
-                    workorder.duration = workorder.duration_expected * order.qty_producing / order.product_qty
+                    workorder.duration = workorder.duration_expected
                     workorder.duration_unit = round(workorder.duration / max(workorder.qty_produced, 1), 2)
             order._cal_price(moves_to_do_by_order[order.id])
         moves_to_finish = self.move_finished_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
@@ -1978,7 +1978,8 @@ class MrpProduction(models.Model):
             # Adapt quantities produced
             for workorder in production.workorder_ids.sorted('id'):
                 initial_workorder_remaining_qty.append(max(initial_qty - workorder.qty_reported_from_previous_wo - workorder.qty_produced, 0))
-                workorder.qty_produced = min(workorder.qty_produced, workorder.qty_production)
+                if workorder.production_id.id not in self.env.context.get('mo_ids_to_backorder', []):
+                    workorder.qty_produced = min(workorder.qty_produced, workorder.qty_production)
             workorders_len = len(production.workorder_ids)
             for index, workorder in enumerate(bo.workorder_ids):
                 remaining_qty = initial_workorder_remaining_qty[index % workorders_len]
@@ -2141,7 +2142,8 @@ class MrpProduction(models.Model):
                 return self.with_context(always_backorder_mo_ids=mo_ids_always)._action_generate_backorder_wizard(mos_ask)
             elif mo_ids_always:
                 # we have to pass all the MOs that the nevers/no issue MOs are also passed to be "mark done" without a backorder
-                return self.with_context(skip_backorder=True, mo_ids_to_backorder=mo_ids_always).button_mark_done()
+                res = self.with_context(skip_backorder=True, mo_ids_to_backorder=mo_ids_always).button_mark_done()
+                return res if self._should_return_records() else True
         return True
 
     def _button_mark_done_sanity_checks(self):
@@ -2153,6 +2155,10 @@ class MrpProduction(models.Model):
         self.ensure_one()
         return all(p.tracking == 'none' for p in self.move_raw_ids.product_id | self.move_finished_ids.product_id)\
             or self.product_uom_qty == 1 or (self.product_id.tracking != 'serial' and self.reservation_state in ('assigned', 'confirmed', 'waiting'))
+
+    def _should_return_records(self):
+        # Meant to be overriden for flows that don't want to be redirected to the backend e.g. barcode
+        return True
 
     def do_unreserve(self):
         (self.move_finished_ids | self.move_raw_ids).filtered(lambda x: x.state not in ('done', 'cancel'))._do_unreserve()
