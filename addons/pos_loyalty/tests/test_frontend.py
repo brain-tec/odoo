@@ -350,6 +350,20 @@ class TestUi(TestPointOfSaleHttpCommon):
         reward_orderline = self.main_pos_config.current_session_id.order_ids[-1].lines.filtered(lambda line: line.is_reward_line)
         self.assertEqual(len(reward_orderline.ids), 0, msg='Reference: Order4_no_reward. Last order should have no reward line.')
 
+        # Part 3
+        partner_ddd = self.env['res.partner'].create({'name': 'Test Partner DDD'})
+        self.env['loyalty.card'].create({
+            'partner_id': partner_ddd.id,
+            'program_id': loyalty_program.id,
+            'points': 100,
+        })
+
+        self.start_tour(
+            "/pos/web?config_id=%d" % self.main_pos_config.id,
+            "PosLoyaltyChangeRewardQty",
+            login="pos_user",
+        )
+
     def test_loyalty_free_product_zero_sale_price_loyalty_program(self):
         # In this program, each $ spent gives 1 point.
         # 5 points can be used to get a free whiteboard pen.
@@ -2131,3 +2145,28 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'PosComboCheapestRewardProgram', login="pos_user")
+
+    def test_customer_loyalty_points_displayed(self):
+        """
+        Verify that the loyalty points of a customer are well displayed.
+        This test will only work on big screens because the balance column is not shown when 'ui.isSmall == True'.
+        """
+        self.env['loyalty.program'].search([]).write({'active': False})
+
+        john_doe = self.env['res.partner'].create({'name': 'John Doe'})
+
+        loyalty_program = self.create_programs([('Loyalty P', 'loyalty')])['Loyalty P']
+        self.env['loyalty.card'].create({
+            'partner_id': john_doe.id,
+            'program_id': loyalty_program.id,
+            'points': 0
+        })
+
+        self.product_a.write({
+            'list_price': 100,
+            'available_in_pos': True,
+            'taxes_id': False,
+        })
+
+        self.main_pos_config.open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, "CustomerLoyaltyPointsDisplayed", login="pos_user")
