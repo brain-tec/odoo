@@ -106,6 +106,9 @@
                 <t t-snippet="website.s_mockup_image" string="Mockup Image" group="content">
                     <keywords>CTA, button, btn, action, engagement, link, offer, appeal, call to action, prompt, interact, trigger, mockup</keywords>
                 </t>
+                <t t-snippet="website.s_cta_mockups" string="Call to Action Mockups" group="content">
+                    <keywords>CTA, button, btn, action, engagement, link, offer, appeal, call to action, prompt, interact, trigger, mockups</keywords>
+                </t>
                 <t t-snippet="website.s_image_hexagonal" string="Image Hexagonal" group="content">
                     <keywords>content, picture, photo, illustration, media, visual, article, story, combination, more, hexagon, geometric</keywords>
                 </t>
@@ -143,6 +146,9 @@
                 </t>
                 <t t-snippet="website.s_numbers_list" string="Numbers list" group="content">
                     <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, performance, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results, analytics, cta, call to action, button</keywords>
+                </t>
+                <t t-snippet="website.s_numbers_grid" string="Numbers Grid" group="content">
+                    <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, performance, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results</keywords>
                 </t>
                 <t t-snippet="website.s_features" string="Features" group="content">
                     <keywords>promotion, characteristic, quality</keywords>
