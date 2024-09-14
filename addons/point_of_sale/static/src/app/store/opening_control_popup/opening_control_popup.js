@@ -11,8 +11,8 @@ class CustomDialog extends Dialog {
     onEscape() {}
 }
 
-export class CashOpeningPopup extends Component {
-    static template = "point_of_sale.CashOpeningPopup";
+export class OpeningControlPopup extends Component {
+    static template = "point_of_sale.OpeningControlPopup";
     static components = { Input, Dialog: CustomDialog };
     static props = {
         close: Function,
@@ -35,7 +35,7 @@ export class CashOpeningPopup extends Component {
         this.pos.session.state = "opened";
         this.pos.data.call(
             "pos.session",
-            "set_cashbox_pos",
+            "set_opening_control",
             [this.pos.session.id, parseFloat(this.state.openingCash), this.state.notes],
             {},
             true
@@ -66,5 +66,8 @@ export class CashOpeningPopup extends Component {
             return;
         }
         this.state.notes = "";
+    }
+    get cashMethodCount() {
+        return this.pos.config.payment_method_ids.filter((pm) => pm.is_cash_count).length;
     }
 }

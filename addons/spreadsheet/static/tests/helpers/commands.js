@@ -4,7 +4,7 @@ import * as spreadsheet from "@odoo/o-spreadsheet";
 import { waitForDataLoaded } from "@spreadsheet/helpers/model";
 import { animationFrame } from "@odoo/hoot-mock";
 
-const { toCartesian, toZone, lettersToNumber } = spreadsheet.helpers;
+const { toCartesian, toZone, lettersToNumber, deepCopy } = spreadsheet.helpers;
 
 /**
  * @typedef {import("@spreadsheet").GlobalFilter} GlobalFilter
@@ -50,6 +50,8 @@ export async function removeGlobalFilter(model, id) {
 
 /**
  * Edit a global filter and ensure the data sources are completely reloaded
+ * @param {Model} model
+ * @param {CmdGlobalFilter} filter
  */
 export async function editGlobalFilter(model, filter) {
     const result = model.dispatch("EDIT_GLOBAL_FILTER", { filter });
@@ -256,4 +258,11 @@ export function cut(model, xc) {
  */
 export function paste(model, range, pasteOption) {
     return model.dispatch("PASTE", { target: [toZone(range)], pasteOption });
+}
+
+export function updatePivotMeasureDisplay(model, pivotId, measureId, display) {
+    const measures = deepCopy(model.getters.getPivotCoreDefinition(pivotId)).measures;
+    const measure = measures.find((m) => m.id === measureId);
+    measure.display = display;
+    updatePivot(model, pivotId, { measures });
 }

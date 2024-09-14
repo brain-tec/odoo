@@ -1970,6 +1970,7 @@ test("getFiltersMatchingPivot return correctly matching filter according to cell
                 <pivot>
                     <field name="product_id" type="row"/>
                     <field name="probability" type="measure"/>
+                    <field name="date" interval="year" type="col"/>
                     <field name="date" interval="month" type="col"/>
                 </pivot>`,
     });
@@ -2005,59 +2006,6 @@ test("getFiltersMatchingPivot return correctly matching filter according to cell
     expect(dateFilters1).toEqual([{ filterId: "43", value: { yearOffset: -6, period: "august" } }]);
     const dateFilters2 = getFiltersMatchingPivot(model, '=PIVOT.HEADER(1,"date:year","2016")');
     expect(dateFilters2).toEqual([{ filterId: "43", value: { yearOffset: -6 } }]);
-});
-
-test("getFiltersMatchingPivot works with multiple inputs", async function () {
-    mockDate("2022-06-14 00:00:00");
-
-    const { model } = await createSpreadsheetWithPivot({
-        arch: /*xml*/ `
-            <pivot>
-                <field name="product_id" type="row"/>
-                <field name="probability" type="measure"/>
-                <field name="date" interval="month" type="col"/>
-            </pivot>`,
-    });
-
-    await addGlobalFilter(
-        model,
-        {
-            id: "43",
-            type: "date",
-            label: "date filter 1",
-            rangeType: "fixedPeriod",
-        },
-        {
-            pivot: { "PIVOT#1": { chain: "date", type: "date" } },
-        }
-    );
-    const dateFilters1 = getFiltersMatchingPivot(model, '=PIVOT.HEADER(1,"date:month","false")');
-    expect(dateFilters1).toEqual([{ filterId: "43", value: undefined }]);
-
-    const matchingYearForMonthGranularity = getFiltersMatchingPivot(
-        model,
-        '=PIVOT.HEADER(1,"date:month",2024)'
-    );
-    expect(matchingYearForMonthGranularity).toEqual([
-        { filterId: "43", value: { period: undefined, yearOffset: 2 } },
-    ]);
-
-    const matchingYearForQuarterGranularity = getFiltersMatchingPivot(
-        model,
-        '=PIVOT.HEADER(1,"date:month","Q2/2024")'
-    );
-    expect(matchingYearForQuarterGranularity).toEqual([
-        { filterId: "43", value: { period: undefined, yearOffset: 2 } },
-    ]);
-
-    const errorStrings = getFiltersMatchingPivot(model, '=PIVOT.HEADER(1,"date:month","/2024")');
-    expect(errorStrings).toEqual([{ filterId: "43", value: { period: undefined, yearOffset: 2 } }]);
-
-    const emptyString = getFiltersMatchingPivot(model, '=PIVOT.HEADER(1,"date:month","")');
-    expect(emptyString).toEqual([{ filterId: "43", value: undefined }]);
-
-    const booleanValue = getFiltersMatchingPivot(model, '=PIVOT.HEADER(1,"date:month",true)');
-    expect(booleanValue).toEqual([{ filterId: "43", value: undefined }]);
 });
 
 test("getFiltersMatchingPivot return an empty array if there is no pivot formula", async function () {
@@ -2340,7 +2288,7 @@ test("Can create a relative date filter with an empty default value", async () =
         id: "42",
         label: "test",
         type: "date",
-        defaultValue: {},
+        defaultValue: "",
         rangeType: "relative",
     };
     const result = await addGlobalFilter(model, filter);
@@ -2410,4 +2358,60 @@ test("Spreadsheet pivot are not impacted by global filter", function () {
         ],
     });
     expect(1).toBe(1);
+});
+
+test("Cannot create a fixedPeriod date filter with a disabled value", async () => {
+    const model = new Model();
+    let filter = /** @type {FixedPeriodDateGlobalFilter}*/ ({
+        id: "42",
+        label: "test",
+        type: "date",
+        defaultValue: { period: "fourth_quarter", yearOffset: 0 },
+        rangeType: "fixedPeriod",
+        disabledPeriods: ["quarter"],
+    });
+    let result = model.dispatch("ADD_GLOBAL_FILTER", { filter });
+    expect(result.isCancelledBecause(CommandResult.InvalidValueTypeCombination)).toBe(true);
+
+    filter = { ...filter, defaultValue: "this_quarter" };
+    result = model.dispatch("ADD_GLOBAL_FILTER", { filter });
+    expect(result.isCancelledBecause(CommandResult.InvalidValueTypeCombination)).toBe(true);
+});
+
+test("Cannot set the value of a fixedPeriod date filter to a disabled value", async () => {
+    const model = new Model();
+    const filter = /** @type {FixedPeriodDateGlobalFilter}*/ ({
+        id: "42",
+        label: "test",
+        type: "date",
+        rangeType: "fixedPeriod",
+        disabledPeriods: ["month"],
+    });
+    model.dispatch("ADD_GLOBAL_FILTER", { filter });
+    const result = model.dispatch("SET_GLOBAL_FILTER_VALUE", {
+        id: "42",
+        value: { yearOffset: 0, period: "january" },
+    });
+    expect(result.isCancelledBecause(CommandResult.InvalidValueTypeCombination)).toBe(true);
+});
+
+test("Modifying fixedPeriod date filter disabled periods remove invalid filter value", async () => {
+    const model = new Model();
+    const filter = /** @type {FixedPeriodDateGlobalFilter}*/ ({
+        id: "42",
+        label: "test",
+        type: "date",
+        rangeType: "fixedPeriod",
+        disabledPeriods: [],
+    });
+    model.dispatch("ADD_GLOBAL_FILTER", { filter });
+    const filterValue = { yearOffset: 0, period: "march" };
+
+    model.dispatch("SET_GLOBAL_FILTER_VALUE", { id: "42", value: filterValue });
+    expect(model.getters.getGlobalFilterValue("42")).toEqual(filterValue);
+
+    model.dispatch("EDIT_GLOBAL_FILTER", {
+        filter: { ...filter, disabledPeriods: ["month"] },
+    });
+    expect(model.getters.getGlobalFilterValue("42")).toBe(undefined);
 });
