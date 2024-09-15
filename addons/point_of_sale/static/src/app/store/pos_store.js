@@ -51,7 +51,7 @@ export class PosStore extends Reactive {
         "printer",
         "action",
         "alert",
-        "sound",
+        "mail.sound_effects",
     ];
     constructor() {
         super();
@@ -72,7 +72,6 @@ export class PosStore extends Reactive {
             pos_data,
             action,
             alert,
-            sound,
         }
     ) {
         this.env = env;
@@ -85,7 +84,7 @@ export class PosStore extends Reactive {
         this.data = pos_data;
         this.action = action;
         this.alert = alert;
-        this.sound = sound;
+        this.sound = env.services["mail.sound_effects"];
         this.notification = notification;
         this.unwatched = markRaw({});
         this.pushOrderMutex = new Mutex();
@@ -126,6 +125,7 @@ export class PosStore extends Reactive {
         this.selectedPartner = null;
         this.selectedCategory = null;
         this.searchProductWord = "";
+        this.mainProductVariant = {};
         this.ready = new Promise((resolve) => {
             this.markReady = resolve;
         });
@@ -287,6 +287,7 @@ export class PosStore extends Reactive {
 
             for (let i = 0; i < nbrProduct - 1; i++) {
                 products[i].available_in_pos = false;
+                this.mainProductVariant[products[i].id] = products[nbrProduct - 1];
             }
         }
     }
