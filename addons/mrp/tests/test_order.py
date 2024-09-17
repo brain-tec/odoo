@@ -352,6 +352,7 @@ class TestMrpOrder(TestMrpCommon):
         production_form.product_uom_id = self.product_6.uom_id
         production = production_form.save()
         self.assertEqual(production.workorder_ids.duration_expected, 90)
+        self.assertEqual([production.date_finished], production.move_finished_ids.mapped('date'))
         mo_form = Form(production)
         mo_form.product_qty = 3
         production = mo_form.save()
@@ -4470,5 +4471,5 @@ class TestTourMrpOrder(HttpCase):
         self.start_tour(url, "test_manufacturing_and_byproduct_sm_to_sml_synchronization", login="admin", timeout=100)
         self.assertEqual(mo.move_raw_ids.quantity, 7)
         self.assertEqual(mo.move_raw_ids.move_line_ids.quantity, 7)
-        self.assertEqual(mo.move_byproduct_ids.quantity, 7)
+        self.assertEqual(mo.move_byproduct_ids.quantity, 8)
         self.assertEqual(len(mo.move_byproduct_ids.move_line_ids), 2)
