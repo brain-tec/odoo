@@ -352,6 +352,7 @@ class TestMrpOrder(TestMrpCommon):
         production_form.product_uom_id = self.product_6.uom_id
         production = production_form.save()
         self.assertEqual(production.workorder_ids.duration_expected, 90)
+        self.assertEqual([production.date_finished], production.move_finished_ids.mapped('date'))
         mo_form = Form(production)
         mo_form.product_qty = 3
         production = mo_form.save()
@@ -1763,6 +1764,12 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(mos.move_finished_ids.mapped('quantity'), [1] * 3)
 
     def test_components_availability(self):
+        def check_availability_state(state):
+            self.assertEqual(mo.components_availability_state, state)
+            MO = self.env['mrp.production']
+            self.assertIn(mo, MO.search([('components_availability_state', '=', state)]))
+            self.assertNotIn(mo, MO.search([('components_availability_state', '!=', state)]))
+
         self.bom_2.unlink()  # remove the kit bom of product_5
         now = fields.Datetime.now()
         mo_form = Form(self.env['mrp.production'])
@@ -1792,25 +1799,34 @@ class TestMrpOrder(TestMrpCommon):
 
         mo.invalidate_recordset(['components_availability', 'components_availability_state'])
         self.assertEqual(mo.components_availability, f'Exp {format_date(self.env, tommorrow)}')
-        self.assertEqual(mo.components_availability_state, 'late')
+        check_availability_state('late')
 
         mo.date_start = after_tommorrow
 
         self.assertEqual(mo.components_availability, f'Exp {format_date(self.env, tommorrow)}')
         self.assertEqual(mo.components_availability_state, 'expected')
+        check_availability_state('expected')
 
-        (move1 | move2 | move3).picked = True
-        (move1 | move2 | move3)._action_done()
+        (move1 | move2).picked = True
+        (move1 | move2)._action_done()
+
+        # Still expected because move3 not yet done
+        self.assertEqual(mo.components_availability, f'Exp {format_date(self.env, tommorrow)}')
+        self.assertEqual(mo.components_availability_state, 'expected')
+        check_availability_state('expected')
+
+        move3.picked = True
+        move3._action_done()
 
         mo.invalidate_recordset(['components_availability', 'components_availability_state'])
         self.assertEqual(mo.components_availability, 'Available')
-        self.assertEqual(mo.components_availability_state, 'available')
+        check_availability_state('available')
 
         mo.action_assign()
 
         self.assertEqual(mo.reservation_state, 'assigned')
         self.assertEqual(mo.components_availability, 'Available')
-        self.assertEqual(mo.components_availability_state, 'available')
+        check_availability_state('available')
 
 
     def test_immediate_validate_6(self):
@@ -4473,4 +4489,4 @@ class TestTourMrpOrder(HttpCase):
         self.assertEqual(mo.move_raw_ids.quantity, 7)
         self.assertEqual(mo.move_raw_ids.move_line_ids.quantity, 7)
         self.assertEqual(mo.move_byproduct_ids.quantity, 7)
-        self.assertEqual(len(mo.move_byproduct_ids.move_line_ids), 2)
+        self.assertEqual(len(mo.move_byproduct_ids.move_line_ids), 1)
