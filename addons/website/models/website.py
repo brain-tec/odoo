@@ -853,6 +853,8 @@ class Website(models.Model):
         try:
             # TODO: Remove this try/except, safety net because it was merged
             #       to close to OXP.
+            fallback_create_missing_industry_image('s_intro_pill_default_image', 'library_image_10')
+            fallback_create_missing_industry_image('s_intro_pill_default_image_2', 'library_image_14')
             fallback_create_missing_industry_image('s_banner_default_image_2', 's_image_text_default_image')
             fallback_create_missing_industry_image('s_banner_default_image_3', 's_product_list_default_image_1')
             fallback_create_missing_industry_image('s_striped_top_default_image', 's_picture_default_image')
@@ -2014,3 +2016,17 @@ class Website(models.Model):
                         if isinstance(value, str):
                             value = value.lower()
                             yield from re.findall(match_pattern, value)
+
+    def _allConsentsGranted(self):
+        """
+        Checks if all (cookies) consents have been granted. Note that in the
+        case no cookies bar has been enabled, this considers that full consent
+        has been immediately given. Indeed, in that case, we suppose that the
+        user implemented his own consent behavior through custom code / app.
+        That custom code / app is able to override this function as desired and
+        xpath the `tracking_code_config` script in `website.layout`.
+
+        :return: True if all consents have been granted, False otherwise
+        """
+        self.ensure_one()
+        return not self.cookies_bar or self.env['ir.http']._is_allowed_cookie('optional')

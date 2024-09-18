@@ -460,11 +460,12 @@ class TestBatchPicking(TransactionCase):
         self.assertFalse(all_pickings.batch_id)
 
         all_pickings.action_confirm()
-        # Now Picking 1 and 3 should be batched together, while Picking 2 is still in no batch.
+        # Now Picking 1 and 3 should be batched together, while Picking 2 is added to its own batch.
         self.assertTrue(picking_out_1.batch_id)
         self.assertTrue(picking_out_3.batch_id)
         self.assertEqual(picking_out_1.batch_id.id, picking_out_3.batch_id.id)
-        self.assertFalse(picking_out_2.batch_id)
+        self.assertTrue(picking_out_2.batch_id)
+        self.assertNotEqual(picking_out_2.batch_id.id, picking_out_1.batch_id.id)
         # If Picking 1 is validated without Picking 3, Picking 1 should be removed from the batch
         picking_out_1.move_ids.write({'quantity': 10, 'picked': True})
         picking_out_1.button_validate()
@@ -1176,7 +1177,7 @@ class TestBatchPickingSynchronization(HttpCase):
         })
 
         action_id = self.env.ref('stock_picking_batch.stock_picking_batch_menu').action
-        url = f'/web#model=stock.picking.batch&view_type=form&action={action_id.id}&id={batch.id}'
+        url = f'/odoo/action-{action_id.id}/{batch.id}'
         self.start_tour(url, "test_stock_picking_batch_sm_to_sml_synchronization", login="admin", timeout=100)
         self.assertEqual(batch.picking_ids.move_ids.quantity, 7)
         self.assertEqual(batch.picking_ids.move_ids.move_line_ids.quantity, 7)

@@ -953,7 +953,8 @@ export function getDeepRange(editable, { range, sel, splitText, select, correctT
         (!beforeEnd ||
             (beforeEnd.nodeType === Node.TEXT_NODE &&
                 !isVisibleTextNode(beforeEnd) &&
-                !isZWS(beforeEnd)))
+                !isZWS(beforeEnd))) &&
+        !closestElement(endLeaf, 'table')
     ) {
         const previous = previousLeaf(endLeaf, editable, true);
         if (previous && closestElement(previous).isContentEditable) {
@@ -3160,11 +3161,12 @@ export function getRangePosition(el, document, options = {}) {
         offset.left = marginLeft;
     }
 
-    if (options.parentContextRect) {
-        offset.left += options.parentContextRect.left;
-        offset.top += options.parentContextRect.top;
+    if (options.getContextFromParentRect) {
+        const parentContextRect = options.getContextFromParentRect();
+        offset.left += parentContextRect.left;
+        offset.top += parentContextRect.top;
         if (isRtl) {
-            offset.right += options.parentContextRect.left;
+            offset.right += parentContextRect.left;
         }
     }
 

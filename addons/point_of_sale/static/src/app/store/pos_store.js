@@ -129,6 +129,11 @@ export class PosStore extends Reactive {
         this.ready = new Promise((resolve) => {
             this.markReady = resolve;
         });
+        this.isScaleScreenVisible = false;
+        this.scaleData = null;
+        this.scaleWeight = 0;
+        this.scaleTare = 0;
+        this.totalPriceOnScale = 0;
 
         // FIXME POSREF: the hardwareProxy needs the pos and the pos needs the hardwareProxy. Maybe
         // the hardware proxy should just be part of the pos service?
@@ -768,14 +773,26 @@ export class PosStore extends Reactive {
         // This actions cannot be handled inside pos_order.js or pos_order_line.js
         if (values.product_id.to_weight && this.config.iface_electronic_scale && configure) {
             if (values.product_id.isScaleAvailable) {
-                const weight = await makeAwaitable(this.env.services.dialog, ScaleScreen, {
-                    product: values.product_id,
-                    taxIncluded: this.config.iface_tax_included === "total",
-                });
+                this.isScaleScreenVisible = true;
+                this.scaleData = {
+                    productName: values.product_id?.display_name,
+                    uomName: values.product_id.uom_id?.name,
+                    uomRounding: values.product_id.uom_id?.rounding,
+                    productPrice: this.getProductPrice(values.product_id),
+                };
+                const weight = await makeAwaitable(
+                    this.env.services.dialog,
+                    ScaleScreen,
+                    this.scaleData
+                );
                 if (!weight) {
                     return;
                 }
                 values.qty = weight;
+                this.isScaleScreenVisible = false;
+                this.scaleWeight = 0;
+                this.scaleTare = 0;
+                this.totalPriceOnScale = 0;
             } else {
                 await values.product_id._onScaleNotAvailable();
             }
@@ -871,6 +888,12 @@ export class PosStore extends Reactive {
         } else {
             this.selectedCategory = this.models["pos.category"].get(categoryId);
         }
+    }
+    setScaleWeight(weight) {
+        this.scaleWeight = weight;
+    }
+    setScaleTare(tare) {
+        this.scaleTare = tare;
     }
 
     /**
@@ -1355,18 +1378,18 @@ export class PosStore extends Reactive {
         const baseUrl = this.session._base_url;
         return order.export_for_printing(baseUrl, headerData);
     }
-    async printReceipt() {
-        const isPrinted = await this.printer.print(
+    async printReceipt(order = this.get_order()) {
+        await this.printer.print(
             OrderReceipt,
             {
-                data: this.orderExportForPrinting(this.get_order()),
+                data: this.orderExportForPrinting(order),
                 formatCurrency: this.env.utils.formatCurrency,
             },
             { webPrintFallback: true }
         );
-        if (isPrinted) {
-            this.get_order()._printed = true;
-        }
+        const nbrPrint = order.nb_print;
+        await this.data.write("pos.order", [order.id], { nb_print: nbrPrint + 1 });
+        return true;
     }
     getOrderChanges(skipped = false, order = this.get_order()) {
         return getOrderChanges(order, skipped, this.orderPreparationCategories);
@@ -1493,8 +1516,12 @@ export class PosStore extends Reactive {
         this.dialog.add(FormViewDialog, {
             resModel: "pos.order",
             resId: order.id,
-            onRecordSaved: (record) => {
-                this.data.read("pos.order", [record.evalContext.id]);
+            onRecordSaved: async (record) => {
+                await this.data.read("pos.order", [record.evalContext.id]);
+                await this.data.read(
+                    "pos.payment",
+                    order.payment_ids.map((p) => p.id)
+                );
                 this.action.doAction({
                     type: "ir.actions.act_window_close",
                 });
