@@ -1,6 +1,5 @@
 import { expect, mountOnFixture, test } from "@odoo/hoot";
 import {
-    clear,
     click,
     hover,
     keyDown,
@@ -10,7 +9,6 @@ import {
     queryAllTexts,
     queryAllValues,
     queryFirst,
-    queryOne,
 } from "@odoo/hoot-dom";
 import { Deferred, animationFrame, mockDate, mockTimeZone } from "@odoo/hoot-mock";
 import { Component, onWillUpdateProps, xml } from "@odoo/owl";
@@ -155,9 +153,11 @@ test.tags`desktop`("navigation with facets", async () => {
     expect(queryFirst`.o_searchview input`).toBeFocused();
 
     keyDown("ArrowLeft"); // press left to focus the facet
+    await animationFrame();
     expect(queryFirst`.o_searchview .o_searchview_facet`).toBeFocused();
 
     keyDown("ArrowRight"); // press right to focus the input
+    await animationFrame();
     expect(queryFirst`.o_searchview input`).toBeFocused();
 });
 
@@ -177,18 +177,22 @@ test.tags`desktop`("navigation with facets (2)", async () => {
 
     // press left to focus the rightmost facet
     keyDown("ArrowLeft");
+    await animationFrame();
     expect(queryFirst`.o_searchview .o_searchview_facet:nth-child(2)`).toBeFocused();
 
     // press left to focus the leftmost facet
     keyDown("ArrowLeft");
+    await animationFrame();
     expect(queryFirst`.o_searchview .o_searchview_facet:nth-child(1)`).toBeFocused();
 
     // press left to focus the input
     keyDown("ArrowLeft");
+    await animationFrame();
     expect(queryFirst`.o_searchview input`).toBeFocused();
 
     // press left to focus the leftmost facet
     keyDown("ArrowRight");
+    await animationFrame();
     expect(queryFirst`.o_searchview .o_searchview_facet:nth-child(1)`).toBeFocused();
 });
 
@@ -204,6 +208,7 @@ test("search date and datetime fields. Support of timezones", async () => {
     // Date case
     await editSearch("07/15/1983");
     keyDown("ArrowDown");
+    await animationFrame();
     keyDown("Enter");
     await animationFrame();
     expect(getFacetTexts().map((str) => str.replace(/\s+/g, " "))).toEqual(["Birthday 07/15/1983"]);
@@ -211,10 +216,12 @@ test("search date and datetime fields. Support of timezones", async () => {
 
     // Close Facet
     click(`.o_searchview_facet .o_facet_remove`);
+    await animationFrame();
 
     // DateTime case
     await editSearch("07/15/1983 00:00:00");
     keyDown("ArrowDown");
+    await animationFrame();
     keyDown("Enter");
     await animationFrame();
     expect(getFacetTexts().map((str) => str.replace(/\s+/g, " "))).toEqual([
@@ -303,9 +310,11 @@ test("select an autocomplete field with `context` key", async () => {
     // 'r' key to filter on bar "First Record"
     await editSearch("record");
     keyDown("ArrowDown");
+    await animationFrame();
     keyDown("ArrowRight");
     await animationFrame();
     keyDown("ArrowDown");
+    await animationFrame();
     keyDown("Enter");
     await animationFrame();
     expect(getFacetTexts().map((str) => str.replace(/\s+/g, " "))).toEqual(["Bar First record"]);
@@ -316,10 +325,13 @@ test("select an autocomplete field with `context` key", async () => {
     // 'r' key to filter on bar "Second Record"
     await editSearch("record");
     keyDown("ArrowDown");
+    await animationFrame();
     keyDown("ArrowRight");
     await animationFrame();
     keyDown("ArrowDown");
+    await animationFrame();
     keyDown("ArrowDown");
+    await animationFrame();
     keyDown("Enter");
     await animationFrame();
     expect(getFacetTexts().map((str) => str.replace(/\s+/g, " "))).toEqual([
@@ -418,7 +430,7 @@ test("open search view autocomplete on paste value using mouse", async () => {
 
     // Simulate paste text through the mouse.
     await navigator.clipboard.writeText("ABC");
-    pointerDown(".o_searchview input");
+    await pointerDown(".o_searchview input");
     press(["ctrl", "v"]);
     await animationFrame();
     expect(`.o_searchview_autocomplete`).toHaveCount(1);
@@ -611,8 +623,9 @@ test("checks that an arrowDown always selects an item", async () => {
     });
     await editSearch("rec");
     await contains(".o_expand").click();
-    click(".o_expand"); // no wait
+    await click(".o_expand"); // don't wait for a frame
     hover(`.o_searchview_autocomplete li.o_menu_item.o_indent:last-child`);
+    await animationFrame();
     keyDown("ArrowDown");
     await animationFrame();
     expect(".focus").toHaveCount(1);
@@ -631,8 +644,9 @@ test("checks that an arrowUp always selects an item", async () => {
     });
     await editSearch("rec");
     await contains(".o_expand").click();
-    click(".o_expand"); // no wait
+    await click(".o_expand"); // don't wait for a frame
     hover(`.o_searchview_autocomplete li.o_menu_item.o_indent:last-child`);
+    await animationFrame();
     keyDown("ArrowUp");
     await animationFrame();
     expect(".focus").toHaveCount(1);
@@ -704,12 +718,17 @@ test("check kwargs of a rpc call with a domain", async () => {
     expect(`.o_searchview_autocomplete li`).toHaveCount(3);
 
     keyDown("ArrowDown");
+    await animationFrame();
     keyDown("ArrowDown");
+    await animationFrame();
     keyDown("ArrowRight");
     await animationFrame();
     keyDown("ArrowDown");
+    await animationFrame();
     keyDown("ArrowDown");
+    await animationFrame();
     keyDown("ArrowDown");
+    await animationFrame();
     keyDown("Enter");
     await animationFrame();
     expect(searchBar.env.searchModel.domain).toEqual([["company", "=", 5]]);
@@ -859,8 +878,7 @@ test("search a property", async () => {
     expect(queryAllTexts`.o_searchview_input_container li`).toEqual(["Search Properties"]);
 
     // search for a partner, and expand the many2many property
-    click(`.o_searchview_input`);
-    clear();
+    await contains(`.o_searchview_input`).clear();
     await editSearch("Bo");
     await contains(".o_expand").click();
     await contains("li:nth-child(3) .o_expand").click();
@@ -1053,35 +1071,34 @@ test("search a property", async () => {
     ]);
 
     // test the navigation with keyboard
-    click(`.o_searchview_input`);
-    clear();
+    await contains(`.o_searchview_input`).clear();
     await editSearch("Bo");
     expect(`.o_menu_item.focus`).toHaveText("Search Properties");
     // unfold the properties field
     keyDown("ArrowRight");
     await animationFrame();
     expect(`.o_menu_item.focus`).toHaveText("Search Properties");
-    expect(queryAll(".fa-caret-down", { root: queryOne`.o_menu_item.focus` })).toHaveCount(1);
+    expect(".o_menu_item.focus:only .fa-caret-down").toHaveCount(1);
     // move on the many2one property
     keyDown("ArrowRight");
     await animationFrame();
     expect(`.o_menu_item.focus`).toHaveText("My Partner (Bar 1)");
-    expect(queryAll(".fa-caret-right", { root: queryOne`.o_menu_item.focus` })).toHaveCount(1);
+    expect(".o_menu_item.focus:only .fa-caret-right").toHaveCount(1);
     // move on the many2many property
     keyDown("ArrowDown");
     await animationFrame();
     expect(`.o_menu_item.focus`).toHaveText("My Partners (Bar 1)");
-    expect(queryAll(".fa-caret-right", { root: queryOne`.o_menu_item.focus` })).toHaveCount(1);
+    expect(".o_menu_item.focus:only .fa-caret-right").toHaveCount(1);
     // move on the many2one property again
     keyDown("ArrowUp");
     await animationFrame();
     expect(`.o_menu_item.focus`).toHaveText("My Partner (Bar 1)");
-    expect(queryAll(".fa-caret-right", { root: queryOne`.o_menu_item.focus` })).toHaveCount(1);
+    expect(".o_menu_item.focus:only .fa-caret-right").toHaveCount(1);
     // unfold the many2one
     keyDown("ArrowRight");
     await animationFrame();
     expect(`.o_menu_item.focus`).toHaveText("My Partner (Bar 1)");
-    expect(queryAll(".fa-caret-down", { root: queryOne`.o_menu_item.focus` })).toHaveCount(1);
+    expect(".o_menu_item.focus:only .fa-caret-down").toHaveCount(1);
     // select the first many2one
     keyDown("ArrowRight");
     await animationFrame();
@@ -1090,22 +1107,22 @@ test("search a property", async () => {
     keyDown("ArrowLeft");
     await animationFrame();
     expect(`.o_menu_item.focus`).toHaveText("My Partner (Bar 1)");
-    expect(queryAll(".fa-caret-down", { root: queryOne`.o_menu_item.focus` })).toHaveCount(1);
+    expect(".o_menu_item.focus:only .fa-caret-down").toHaveCount(1);
     // fold the parent
     keyDown("ArrowLeft");
     await animationFrame();
     expect(`.o_menu_item.focus`).toHaveText("My Partner (Bar 1)");
-    expect(queryAll(".fa-caret-right", { root: queryOne`.o_menu_item.focus` })).toHaveCount(1);
+    expect(".o_menu_item.focus:only .fa-caret-right").toHaveCount(1);
     // go up on the properties field
     keyDown("ArrowLeft");
     await animationFrame();
     expect(`.o_menu_item.focus`).toHaveText("Search Properties");
-    expect(queryAll(".fa-caret-down", { root: queryOne`.o_menu_item.focus` })).toHaveCount(1);
+    expect(".o_menu_item.focus:only .fa-caret-down").toHaveCount(1);
     // fold the properties field
     keyDown("ArrowLeft");
     await animationFrame();
     expect(`.o_menu_item.focus`).toHaveText("Search Properties");
-    expect(queryAll(".fa-caret-right", { root: queryOne`.o_menu_item.focus` })).toHaveCount(1);
+    expect(".o_menu_item.focus:only .fa-caret-right").toHaveCount(1);
 });
 
 test("search a property: definition record id in the context", async () => {
@@ -1320,6 +1337,7 @@ test("edit a field", async () => {
 
     await editSearch("def");
     keyDown("ArrowDown");
+    await animationFrame();
     keyDown("Enter"); // select
     await animationFrame();
     expect(getFacetTexts()).toEqual(["Foo\nabc\nor\ndef"]);
