@@ -54,7 +54,7 @@ test.tags`desktop`("breadcrumbs", async () => {
     expect(breadcrumbItems[1]).toHaveClass("active");
 
     getService("action").restore = (jsId) => expect.step(jsId);
-    click(breadcrumbItems[0]);
+    await click(breadcrumbItems[0]);
     expect.verifySteps(["controller_7"]);
 });
 
@@ -75,13 +75,13 @@ test("view switcher", async () => {
     const views = queryAll`.o_switch_view`;
     expect(views[0]).toHaveAttribute("data-tooltip", "List");
     expect(views[0]).toHaveClass("active");
-    expect(queryAll(`.oi-view-list`, { root: views[0] })).toHaveCount(1);
+    expect(`.o_switch_view:eq(0) .oi-view-list`).toHaveCount(1);
     expect(views[1]).toHaveAttribute("data-tooltip", "Kanban");
     expect(views[1]).not.toHaveClass("active");
-    expect(queryAll(`.oi-view-kanban`, { root: views[1] })).toHaveCount(1);
+    expect(`.o_switch_view:eq(1) .oi-view-kanban`).toHaveCount(1);
 
     getService("action").switchView = (viewType) => expect.step(viewType);
-    click(views[1]);
+    await click(views[1]);
     expect.verifySteps(["kanban"]);
 });
 
