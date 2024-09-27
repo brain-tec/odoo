@@ -18,8 +18,8 @@ export class PosOrder extends Base {
     setup(vals) {
         super.setup(vals);
 
-        if (!this.session_id && !this.finalized) {
-            this.update({ session_id: this.session.id });
+        if (!this.session_id && typeof this.id === "string") {
+            this.update({ session_id: this.session });
         }
 
         // Data present in python model
@@ -124,10 +124,7 @@ export class PosOrder extends Base {
             // FIXME: isn't there a better way to handle this date?
             shippingDate:
                 this.shipping_date && formatDate(DateTime.fromJSDate(new Date(this.shipping_date))),
-            headerData: {
-                ...headerData,
-                trackingNumber: this.tracking_number,
-            },
+            headerData: headerData,
             screenName: "ReceiptScreen",
         };
     }
