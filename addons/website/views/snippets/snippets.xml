@@ -152,20 +152,11 @@
                 <t t-snippet="website.s_cta_box" string="Box Call to Action" group="content">
                     <keywords>CTA, button, btn, action, engagement, link, offer, appeal, call to action, prompt, interact, trigger</keywords>
                 </t>
-                <t t-snippet="website.s_pricelist_boxed" string="Pricelist Boxed" group="content">
-                    <keywords>menu, pricing, shop, table, cart, product, cost, charges, fees, tarifs, prices, expenses</keywords>
-                </t>
                 <t t-snippet="website.s_striped" string="Striped section" group="content">
                     <keywords>hero, jumbotron, headline, header, intro, home, content, picture, photo, illustration, media, visual, article, combination, trendy, pattern, design</keywords>
                 </t>
                 <t t-snippet="website.s_cta_card" string="Card Call to Action" group="content">
                     <keywords>CTA, button, btn, action, engagement, link, offer, appeal, call to action, prompt, interact, trigger, items, checklists, entries, sequences, bullets, points, list, group, benefits, features, advantages</keywords>
-                </t>
-                <t t-snippet="website.s_pricelist_cafe" string="Pricelist cafe" group="content">
-                    <keywords>menu, pricing, shop, table, cart, product, cost, charges, fees, tarifs, prices, expenses, columns</keywords>
-                </t>
-                <t t-snippet="website.s_product_catalog" string="Pricelist" group="content">
-                    <keywords>menu, pricing</keywords>
                 </t>
                 <t t-snippet="website.s_searchbar" string="Search" t-forbid-sanitize="form" group="content"/>
                 <t t-snippet="website.s_color_blocks_2" string="Big Boxes" group="content">
@@ -300,9 +291,18 @@
                 <t t-snippet="website.s_faq_horizontal" string="Topics List" group="text">
                     <keywords>questions, answers, common answers, common questions, faq, help, support, information, knowledge, guide, troubleshooting, assistance, QA, terms of services</keywords>
                 </t>
+                <t t-snippet="website.s_product_catalog" string="Pricelist" group="text">
+                    <keywords>menu, pricing</keywords>
+                </t>
+                <t t-snippet="website.s_pricelist_cafe" string="Pricelist cafe" group="text">
+                    <keywords>menu, pricing, shop, table, cart, product, cost, charges, fees, tarifs, prices, expenses, columns</keywords>
+                </t>
+                <t t-snippet="website.s_pricelist_boxed" string="Pricelist Boxed" group="text">
+                    <keywords>menu, pricing, shop, table, cart, product, cost, charges, fees, tarifs, prices, expenses</keywords>
+                </t>
 
                 <!-- Contact & Forms group -->
-                <t t-snippet="website.s_website_form" string="Form" t-forbid-sanitize="form" t-thumbnail="/website/static/src/img/snippets_thumbs/s_website_form.svg" group="contact_and_forms"/>
+                <t t-snippet="website.s_title_form" string="Title - Form" t-forbid-sanitize="form" t-thumbnail="/website/static/src/img/snippets_thumbs/s_website_form.svg" group="contact_and_forms"/>
                 <t t-snippet="website.s_opening_hours" string="Opening Hours" group="contact_and_forms"/>
                 <t t-snippet="website.s_contact_info" string="Contact Info" group="contact_and_forms"/>
 
@@ -384,6 +384,14 @@
                 <t t-snippet="website.s_blockquote" string="Blockquote" t-thumbnail="/website/static/src/img/snippets_thumbs/s_blockquote.svg">
                     <keywords>cite</keywords>
                 </t>
+                <!--
+                Note: this inner snippet is still allowed to be dropped as a
+                main snippet. Indeed, this handles the fact that the snippet
+                was previously a main one and can still be in old databases, but
+                also in some apps templates. It was just chosen to not suggest
+                it in the snippets modal anymore, and just *used* as an inner
+                snippet by other snippets in there.
+                -->
                 <t t-snippet="website.s_website_form" string="Form" t-thumbnail="/website/static/src/img/snippets_thumbs/s_website_form.svg" t-forbid-sanitize="form"/>
                 <t t-snippet="website.s_countdown" string="Countdown" t-thumbnail="/website/static/src/img/snippets_thumbs/s_countdown.svg">
                     <keywords>celebration, launch</keywords>
