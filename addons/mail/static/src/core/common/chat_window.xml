@@ -65,7 +65,7 @@
             </t>
             <t t-call="mail.ChatWindow.dropdownAction">
                 <t t-set="action" t-value="threadActions.actions.at(-1)"/>
-                <t t-set="itemClass" t-value="'me-1'"/>
+                <t t-set="itemClass" t-value="ui.isSmall ? 'mx-2' : 'me-1'"/>
             </t>
         </div>
         <div t-if="!props.chatWindow.folded or ui.isSmall" class="bg-100 d-flex flex-column h-100 overflow-auto position-relative" t-ref="content">
@@ -88,12 +88,12 @@
 </t>
 
 <t t-name="mail.ChatWindow.dropdownAction">
-    <button class="o-mail-ChatWindow-command btn d-flex p-2 opacity-75 opacity-100-hover" t-att-class="itemClass" t-att-title="action.name" t-on-click.stop="() => action.onSelect()"><i t-att-class="action.icon"/></button>
+    <button class="o-mail-ChatWindow-command btn d-flex p-2 opacity-75 opacity-100-hover" t-att-class="ui.isSmall ? 'border' : ''" t-attf-class="{{ itemClass }}" t-att-title="action.name" t-on-click.stop="() => action.onSelect()"><i t-att-class="ui.isSmall ? 'fa-lg' : ''" t-attf-class="{{ action.icon }}"/></button>
 </t>
 
 <t t-name="mail.ChatWindow.headerContent">
     <div t-if="thread" class="o-mail-ChatWindow-threadAvatar my-0" t-attf-class="{{ threadActions.actions.length > 4 ? 'ms-1' : 'ms-3' }} me-1">
-        <img class="rounded" t-att-src="thread.avatarUrl" alt="Thread Image"/>
+        <img class="rounded o_object_fit_cover" t-att-src="thread.avatarUrl" alt="Thread Image"/>
     </div>
     <ThreadIcon t-if="thread and thread.channel_type === 'chat' and thread.correspondent" thread="thread"/>
     <div t-if="!state.editingName" class="text-truncate fw-bold border border-transparent me-1 my-0" t-att-title="props.chatWindow.displayName" t-esc="props.chatWindow.displayName" t-att-class="thread ? 'ms-1' : 'ms-3'"/>
