@@ -500,9 +500,17 @@ export function makeDraggableHook(hookParams) {
                 state.willDrag = false;
 
                 // Compute scrollable parent
-                [ctx.current.scrollParentX, ctx.current.scrollParentY] = getScrollParents(
-                    ctx.current.container
-                );
+                const isDocumentScrollingElement = ctx.current.container
+                    === ctx.current.container.ownerDocument.scrollingElement;
+                // If the container is the "ownerDocument.scrollingElement",
+                // there is no need to get the scroll parent as it is the
+                // scrollable element itself.
+                // TODO: investigate if "getScrollParents" should not consider
+                // the "ownerDocument.scrollingElement" directly.
+                [ctx.current.scrollParentX, ctx.current.scrollParentY] =
+                    isDocumentScrollingElement
+                    ? [ctx.current.container, ctx.current.container]
+                    : getScrollParents(ctx.current.container);
 
                 updateRects();
                 const { x, y, width, height } = ctx.current.elementRect;
@@ -579,6 +587,15 @@ export function makeDraggableHook(hookParams) {
                 const { x: pointerX, y: pointerY } = ctx.pointer;
                 const xRect = ctx.current.scrollParentXRect;
                 const yRect = ctx.current.scrollParentYRect;
+
+                // "getBoundingClientRect()"" (used in "getRect()") gives the
+                // distance from the element's top to the viewport, excluding
+                // scroll position. Only the "document.scrollingElement" element
+                // ("<html>") accounts for scrollTop.
+                const scrollParentYEl = ctx.current.scrollParentY;
+                if (scrollParentYEl === ctx.current.container.ownerDocument.scrollingElement) {
+                    yRect.y += scrollParentYEl.scrollTop;
+                }
 
                 const { direction, speed, threshold } = ctx.edgeScrolling;
                 const correctedSpeed = (speed / 16) * deltaTime;
@@ -683,8 +700,12 @@ export function makeDraggableHook(hookParams) {
                 // https://bugzilla.mozilla.org/show_bug.cgi?id=1352061
                 // https://bugzilla.mozilla.org/show_bug.cgi?id=339293
                 safePrevent(ev);
-                if (document.activeElement && !document.activeElement.contains(ev.target)) {
-                    document.activeElement.blur();
+                let activeElement = document.activeElement;
+                while (activeElement?.nodeName === "IFRAME") {
+                    activeElement = activeElement.contentDocument.activeElement;
+                }
+                if (activeElement && !activeElement.contains(ev.target)) {
+                    activeElement.blur();
                 }
 
                 const { currentTarget, pointerId, target } = ev;
