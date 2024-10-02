@@ -15,7 +15,7 @@ const MEDIA_SELECTOR = `${ICON_SELECTOR} , .o_image, .media_iframe_video`;
 
 export class MediaPlugin extends Plugin {
     static name = "media";
-    static dependencies = ["selection", "history", "dom"];
+    static dependencies = ["selection", "history", "dom", "dialog"];
     static shared = ["savePendingImages"];
     /** @type { (p: MediaPlugin) => Record<string, any> } */
     static resources = (p) => {
@@ -130,8 +130,7 @@ export class MediaPlugin extends Plugin {
         }
     }
 
-    onSaveMediaDialog(element, { node, restoreSelection }) {
-        restoreSelection();
+    onSaveMediaDialog(element, { node }) {
         if (!element) {
             // @todo @phoenix to remove
             throw new Error("Element is required: onSaveMediaDialog");
@@ -155,17 +154,12 @@ export class MediaPlugin extends Plugin {
         // Collapse selection after the inserted/replaced element.
         const [anchorNode, anchorOffset] = rightPos(element);
         this.shared.setSelection({ anchorNode, anchorOffset });
-
         this.dispatch("ADD_STEP");
     }
 
     openMediaDialog(params = {}) {
-        const selection = this.shared.getEditableSelection();
-        const restoreSelection = () => {
-            this.shared.setSelection(selection);
-        };
         const { resModel, resId, field, type } = this.recordInfo;
-        this.services.dialog.add(MediaDialog, {
+        this.shared.addDialog(MediaDialog, {
             resModel,
             resId,
             useMediaLibrary: !!(
@@ -174,9 +168,8 @@ export class MediaPlugin extends Plugin {
             ), // @todo @phoenix: should be removed and moved to config.mediaModalParams
             media: params.node,
             save: (element) => {
-                this.onSaveMediaDialog(element, { node: params.node, restoreSelection });
+                this.onSaveMediaDialog(element, { node: params.node });
             },
-            close: restoreSelection,
             onAttachmentChange: this.config.onAttachmentChange || (() => {}),
             noVideos: !!this.config.disableVideo,
             noImages: !!this.config.disableImage,

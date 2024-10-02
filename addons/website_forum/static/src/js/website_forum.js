@@ -147,7 +147,6 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
             var editorKarma = $textarea.data('karma') || 0; // default value for backward compatibility
             var $form = $textarea.closest('form');
             var hasFullEdit = parseInt($("#karma").val()) >= editorKarma;
-
             var options = {
                 toolbarTemplate: 'website_forum.web_editor_toolbar',
                 toolbarOptions: {
@@ -169,6 +168,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
                     // TODO: Make this more robust.
                     res_id: +window.location.pathname.split('-').slice(-1)[0].split('/')[0],
                 },
+                value: $textarea.get(0).getAttribute("content"),
                 resizable: true,
                 userGeneratedContent: true,
                 height: 350,

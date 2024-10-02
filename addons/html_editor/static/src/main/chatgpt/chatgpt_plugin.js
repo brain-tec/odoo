@@ -8,7 +8,7 @@ import { LanguageSelector } from "./language_selector";
 
 export class ChatGPTPlugin extends Plugin {
     static name = "chatgpt";
-    static dependencies = ["selection", "history", "dom", "sanitize"];
+    static dependencies = ["selection", "history", "dom", "sanitize", "dialog"];
     /** @type { (p: ChatGPTPlugin) => Record<string, any> } */
     static resources = (p) => ({
         toolbarCategory: {
@@ -41,6 +41,7 @@ export class ChatGPTPlugin extends Plugin {
         powerboxItems: {
             name: _t("ChatGPT"),
             description: _t("Generate or transform content with AI."),
+            searchKeywords: [_t("AI")],
             category: "ai",
             fontawesome: "fa-magic",
             action(dispatch) {
@@ -61,8 +62,6 @@ export class ChatGPTPlugin extends Plugin {
 
     openDialog(params = {}) {
         const selection = this.shared.getEditableSelection();
-        const cursors = this.shared.preserveSelection();
-        const onClose = cursors.restore;
         const dialogParams = {
             insert: (content) => {
                 const insertedNodes = this.shared.domInsert(content);
@@ -108,27 +107,26 @@ export class ChatGPTPlugin extends Plugin {
         // collapse to end
         const sanitize = this.shared.sanitize;
         if (selection.isCollapsed) {
-            this.services.dialog.add(
-                ChatGPTPromptDialog,
-                { ...dialogParams, sanitize },
-                { onClose }
-            );
+            this.shared.addDialog(ChatGPTPromptDialog, { ...dialogParams, sanitize });
         } else {
-            const range = new Range();
-            range.setStart(selection.startContainer, selection.startOffset);
-            range.setEnd(selection.endContainer, selection.endOffset);
-            const originalText = range.toString() || "";
-            this.services.dialog.add(
+            const originalText = selection.textContent() || "";
+            this.shared.addDialog(
                 params.language ? ChatGPTTranslateDialog : ChatGPTAlternativesDialog,
-                { ...dialogParams, originalText, sanitize },
-                { onClose }
+                { ...dialogParams, originalText, sanitize }
             );
         }
         if (this.services.ui.isSmall) {
-            // If the dialog is opened on a small screen, remove all selection
-            // because the selection can be seen through the dialog on some devices.
             // TODO: Find a better way and avoid modifying range
-            this.document.getSelection()?.removeAllRanges();
+            // HACK: In the case of opening through dropdown:
+            // - when dropdown open, it keep the element focused before the open
+            // - when opening the dialog through the dropdown, the dropdown closes
+            // - upon close, the generic code of the dropdown sets focus on the kept element (in our case, the editable)
+            // - we need to remove the range after the generic code of the dropdown is triggered so we hack it by removing the range in the next tick
+            Promise.resolve().then(() => {
+                // If the dialog is opened on a small screen, remove all selection
+                // because the selection can be seen through the dialog on some devices.
+                this.document.getSelection()?.removeAllRanges();
+            });
         }
     }
 }

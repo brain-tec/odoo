@@ -66,6 +66,7 @@ publicWidget.registry.websiteProfileEditor = publicWidget.Widget.extend({
                 res_model: "res.users",
                 res_id: parseInt(this.el.querySelector("input[name=user_id]").value),
             },
+            value: textareaEl.getAttribute("content"),
             resizable: true,
             userGeneratedContent: true,
         };

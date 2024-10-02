@@ -3,7 +3,7 @@
 import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
-    dragNDrop,
+    insertSnippet,
     goToTheme,
     registerWebsitePreviewTour,
 } from "@website/js/tours/tour_utils";
@@ -67,7 +67,7 @@ registerWebsitePreviewTour('rte_translator', {
     run: "click",
 }, {
     content: "click on Use this template",
-    trigger: ".o_page_template button.btn-primary",
+    trigger: ".o_page_template .o_button_area",
     run: "click",
 }, {
     content: "insert file name",
@@ -99,7 +99,7 @@ registerWebsitePreviewTour('rte_translator', {
     run: "click",
 }, {
     content: "click on Use this template",
-    trigger: ".o_page_template button.btn-primary",
+    trigger: ".o_page_template .o_button_area",
     run: "click",
 }, {
     content: "insert page name",
@@ -117,7 +117,7 @@ registerWebsitePreviewTour('rte_translator', {
 {
     trigger: "body:not(:has(.modal))",
 },
-...dragNDrop({
+...insertSnippet({
     id: "s_cover",
     name: "Cover",
     groupName: "Intro",

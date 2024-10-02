@@ -179,6 +179,7 @@ test("restore a selection when you are not in the editable shouldn't move the fo
                 {
                     category: "widget",
                     name: "Test",
+                    description: "Test",
                     action() {
                         p.showOverlay();
                     },
@@ -217,5 +218,6 @@ test("set a collapse selection in a contenteditable false should move it after t
         anchorNode: queryOne("span[contenteditable='false']"),
         anchorOffset: 1,
     });
+    editor.shared.focusEditable();
     expect(getContent(el)).toBe(`<p>ab<span contenteditable="false">cd</span>[]ef</p>`);
 });

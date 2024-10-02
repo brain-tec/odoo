@@ -9,6 +9,7 @@ import {
     Component,
     onMounted,
 } from "@odoo/owl";
+import { localization } from "@web/core/l10n/localization";
 
 export class RenameCustomSnippetDialog extends Component {
     static template = "web_editor.RenameCustomSnippetDialog";
@@ -39,6 +40,7 @@ export class AddSnippetDialog extends Component {
         snippets: Object,
         groupSelected: String,
         optionsSnippets: String,
+        frontendDirection: String,
         installModule: Function,
         addSnippet: Function,
         deleteCustomSnippet: Function,
@@ -71,6 +73,7 @@ export class AddSnippetDialog extends Component {
                 });
             }
             this.iframeDocument.documentElement.classList.add("o_add_snippets_preview");
+            this.iframeDocument.body.style.setProperty("direction", localization.direction);
             await this.insertStyle().then(() => {
                 this.iframeRef.el.classList.add("show");
             });
@@ -144,6 +147,7 @@ export class AddSnippetDialog extends Component {
         this.iframeDocument.body.innerHTML = "";
         const rowEl = document.createElement("div");
         rowEl.classList.add("row", "g-0", "o_snippets_preview_row");
+        rowEl.style.setProperty("direction", this.props.frontendDirection);
         const leftColEl = document.createElement("div");
         leftColEl.classList.add("col-lg-6");
         rowEl.appendChild(leftColEl);
@@ -174,7 +178,7 @@ export class AddSnippetDialog extends Component {
             }
             clonedSnippetEl.classList.remove("oe_snippet_body");
             const snippetPreviewWrapEl = document.createElement("div");
-            snippetPreviewWrapEl.classList.add("o_snippet_preview_wrap", "position-relative", "fade");
+            snippetPreviewWrapEl.classList.add("o_snippet_preview_wrap", "position-relative", "d-none");
             snippetPreviewWrapEl.dataset.snippetId = snippet.name;
             snippetPreviewWrapEl.dataset.snippetKey = snippet.key;
             snippetPreviewWrapEl.appendChild(clonedSnippetEl);
@@ -258,11 +262,14 @@ export class AddSnippetDialog extends Component {
                         resolve();
                     } else {
                         imgEl.onload = () => resolve();
+                        // If the image could not be loaded, we still want the
+                        // "d-none" class to be removed.
+                        imgEl.onerror = () => resolve();
                     }
                 });
             }));
 
-            snippetPreviewWrapEl.classList.add("show");
+            snippetPreviewWrapEl.classList.remove("d-none");
         };
     }
     /**
