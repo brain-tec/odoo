@@ -1,24 +1,26 @@
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
 import { DynamicPlaceholderPopover } from "@web/views/fields/dynamic_placeholder_popover";
+import { withSequence } from "@html_editor/utils/resource";
 
 export class DynamicPlaceholderPlugin extends Plugin {
     static name = "dynamic_placeholder";
     static dependencies = ["overlay", "selection", "history", "dom", "qweb"];
     static shared = ["updateDphDefaultModel"];
-    /** @type { (p: DynamicPlaceholderPlugin) => Record<string, any> } */
-    static resources = (p) => ({
-        powerboxCategory: { id: "marketing_tools", name: _t("Marketing Tools"), sequence: 60 },
+    resources = {
+        powerboxCategory: withSequence(60, { id: "marketing_tools", name: _t("Marketing Tools") }),
         powerboxItems: {
+            id: "dynamic_placeholder",
             name: _t("Dynamic Placeholder"),
             description: _t("Insert a field"),
             category: "marketing_tools",
-            fontawesome: "fa-magic",
+            fontawesome: "fa-hashtag",
             action(dispatch) {
                 dispatch("OPEN_DYNAMIC_PLACEHOLDER");
             },
         },
-    });
+        powerButtons: ["dynamic_placeholder"],
+    };
     setup() {
         this.defaultResModel = this.config.dynamicPlaceholderResModel;
 

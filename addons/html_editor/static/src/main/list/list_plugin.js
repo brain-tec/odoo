@@ -22,6 +22,7 @@ import { _t } from "@web/core/l10n/translation";
 import { compareListTypes, createList, insertListAfter, isListItem } from "./utils";
 import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
 import { getListMode, switchListMode } from "@html_editor/utils/list";
+import { withSequence } from "@html_editor/utils/resource";
 
 function isListActive(listMode) {
     return (selection) => {
@@ -33,17 +34,15 @@ function isListActive(listMode) {
 export class ListPlugin extends Plugin {
     static name = "list";
     static dependencies = ["tabulation", "split", "selection", "delete", "dom"];
-    /** @type { (p: ListPlugin) => Record<string, any> } */
-    static resources = (p) => ({
-        handle_delete_backward: { callback: p.handleDeleteBackward.bind(p), sequence: 10 },
-        handle_delete_range: { callback: p.handleDeleteRange.bind(p) },
-        handle_tab: { callback: p.handleTab.bind(p), sequence: 10 },
-        handle_shift_tab: { callback: p.handleShiftTab.bind(p), sequence: 10 },
-        split_element_block: { callback: p.handleSplitBlock.bind(p) },
-        toolbarCategory: {
+    resources = {
+        handle_delete_backward: this.handleDeleteBackward.bind(this),
+        handle_delete_range: this.handleDeleteRange.bind(this),
+        handle_tab: this.handleTab.bind(this),
+        handle_shift_tab: this.handleShiftTab.bind(this),
+        split_element_block: this.handleSplitBlock.bind(this),
+        toolbarCategory: withSequence(30, {
             id: "list",
-            sequence: 30,
-        },
+        }),
         toolbarItems: [
             {
                 id: "bulleted_list",
@@ -78,6 +77,7 @@ export class ListPlugin extends Plugin {
         ],
         powerboxItems: [
             {
+                id: "bulleted_list",
                 name: _t("Bulleted list"),
                 description: _t("Create a simple bulleted list"),
                 category: "structure",
@@ -87,6 +87,7 @@ export class ListPlugin extends Plugin {
                 },
             },
             {
+                id: "numbered_list",
                 name: _t("Numbered list"),
                 description: _t("Create a list with numbering"),
                 category: "structure",
@@ -96,6 +97,7 @@ export class ListPlugin extends Plugin {
                 },
             },
             {
+                id: "checklist",
                 name: _t("Checklist"),
                 description: _t("Track tasks with a checklist"),
                 category: "structure",
@@ -107,8 +109,9 @@ export class ListPlugin extends Plugin {
             },
         ],
         hints: [{ selector: "LI", text: _t("List") }],
-        onInput: { handler: p.onInput.bind(p) },
-    });
+        onInput: this.onInput.bind(this),
+        powerButtons: ["bulleted_list", "numbered_list", "checklist"],
+    };
 
     setup() {
         this.addDomListener(this.editable, "touchstart", this.onPointerdown);

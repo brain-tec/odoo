@@ -31,7 +31,7 @@ function columnisAvailable(numberOfColumns) {
 export class ColumnPlugin extends Plugin {
     static name = "column";
     static dependencies = ["selection"];
-    static resources = () => ({
+    resources = {
         isUnremovable: isUnremovableColumn,
         powerboxItems: [
             {
@@ -85,7 +85,8 @@ export class ColumnPlugin extends Plugin {
                 text: _t("Empty column"),
             },
         ],
-    });
+        showPowerButtons: (selection) => !closestElement(selection.anchorNode, ".o_text_columns"),
+    };
 
     handleCommand(command, payload) {
         switch (command) {
