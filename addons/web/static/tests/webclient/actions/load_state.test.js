@@ -10,6 +10,7 @@ import {
     getService,
     makeMockEnv,
     models,
+    mountWebClient,
     mountWithCleanup,
     onRpc,
     patchWithCleanup,
@@ -21,7 +22,7 @@ import {
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { WebClient } from "@web/webclient/webclient";
-import { router, routerBus, startRouter } from "@web/core/browser/router";
+import { router, routerBus } from "@web/core/browser/router";
 import { redirect } from "@web/core/utils/urls";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { _t } from "@web/core/l10n/translation";
@@ -51,19 +52,6 @@ function logHistoryInteractions() {
             return super.pushState(state, _, url);
         },
     });
-}
-
-/**
- * @param {{ env: import("@web/env").OdooEnv }} [options]
- */
-async function mountWebClient(options) {
-    await mountWithCleanup(WebClient, options);
-    // Wait for visual changes caused by a potential loadState
-    await animationFrame();
-    // wait for BlankComponent
-    await animationFrame();
-    // wait for the regular rendering
-    await animationFrame();
 }
 
 defineActions([
@@ -216,7 +204,6 @@ beforeEach(() => {
         origin: "http://example.com",
     });
     redirect("/odoo");
-    startRouter();
 });
 
 describe(`new urls`, () => {
