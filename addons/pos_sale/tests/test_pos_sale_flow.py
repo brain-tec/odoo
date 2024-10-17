@@ -6,6 +6,7 @@ from uuid import uuid4
 from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
 from odoo.tests import Form
 from odoo import fields
+from odoo.tools import format_date
 
 @odoo.tests.tagged('post_install', '-at_install')
 class TestPoSSale(TestPointOfSaleHttpCommon):
@@ -351,11 +352,11 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
             'note': 'Customer note 1',
             'order_line': [(0, 0, {
-                'product_id': self.whiteboard_pen.id,
+                'product_id': self.whiteboard_pen.product_variant_id.id,
                 'name': self.whiteboard_pen.name,
                 'product_uom_qty': 1,
                 'product_uom': self.whiteboard_pen.uom_id.id,
-                'price_unit': self.whiteboard_pen.lst_price,
+                'price_unit': self.whiteboard_pen.product_variant_id.lst_price,
             }), (0, 0, {
                 'name': 'Customer note 2',
                 'display_type': 'line_note',
@@ -381,15 +382,15 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'pricelist_id': partner_1.property_product_pricelist.id,
             'lines': [(0, 0, {
                 'name': "OL/0001",
-                'product_id': self.desk_pad.id,
-                'price_unit': self.desk_pad.lst_price,
+                'product_id': self.desk_pad.product_variant_id.id,
+                'price_unit': self.desk_pad.product_variant_id.lst_price,
                 'discount': 0.0,
                 'qty': 1.0,
                 'tax_ids': [],
-                'price_subtotal': self.desk_pad.lst_price,
-                'price_subtotal_incl': self.desk_pad.lst_price,
+                'price_subtotal': self.desk_pad.product_variant_id.lst_price,
+                'price_subtotal_incl': self.desk_pad.product_variant_id.lst_price,
             })],
-            'amount_total': self.desk_pad.lst_price,
+            'amount_total': self.desk_pad.product_variant_id.lst_price,
             'amount_tax': 0.0,
             'amount_paid': 0.0,
             'amount_return': 0.0,
@@ -491,7 +492,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         sale_order = self.env['sale.order'].create({
             'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
             'order_line': [(0, 0, {
-                'product_id': self.whiteboard_pen.id,
+                'product_id': self.whiteboard_pen.product_variant_id.id,
                 'name': self.whiteboard_pen.name,
                 'product_uom_qty': 1,
                 'price_unit': 100,
@@ -587,6 +588,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         down_payment_invoices = so.invoice_ids
         down_payment_invoices.action_post()
         self.main_pos_config.down_payment_product_id = self.env.ref("pos_sale.default_downpayment_product")
+        self.main_pos_config.down_payment_product_id.write({'active': True})
         self.main_pos_config.open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PoSSaleOrderWithDownpayment', login="accountman")
 
@@ -665,6 +667,10 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.assertEqual(invoice_pdf_content.count('Product A'), 1)
         self.assertEqual(invoice_pdf_content.count('Product B'), 1)
         self.assertEqual(invoice_pdf_content.count('Product C'), 1)
+
+        for order_line in sale_order.order_line.filtered(lambda l: l.product_id == self.downpayment_product):
+            order_line = order_line.with_context(lang=partner_test.lang)
+            self.assertIn(format_date(order_line.env, order_line.order_id.date_order), order_line.name)
 
     def test_settle_so_with_pos_downpayment(self):
         so = self.env['sale.order'].create({
