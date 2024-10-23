@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from xmlrpc.client import dumps, loads
+import re
 import xmlrpc.client
 
 from werkzeug.wrappers import Response
@@ -9,6 +10,7 @@ from odoo.service import wsgi_server
 from odoo.fields import Date, Datetime
 from odoo.tools import lazy
 
+XML_INVALID = re.compile('[\x00-\x08\x0B\x0C\x0F-\x1F]')
 
 class OdooMarshaller(xmlrpc.client.Marshaller):
 
@@ -33,6 +35,11 @@ class OdooMarshaller(xmlrpc.client.Marshaller):
         v = value._value
         return self.dispatch[type(v)](self, v, write)
     dispatch[lazy] = dump_lazy
+
+    def dump_unicode(self, value, write):
+        value = XML_INVALID.sub('', value)
+        return super(OdooMarshaller, self).dump_unicode(value, write)
+    dispatch[str] = dump_unicode
 
 
 # monkey-patch xmlrpc.client's marshaller
