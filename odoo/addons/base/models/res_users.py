@@ -634,12 +634,6 @@ class ResUsers(models.Model):
         LIMIT 1
         """, tuple(group_ids), user_condition)))
 
-    def toggle_active(self):
-        for user in self:
-            if not user.active and not user.partner_id.active:
-                user.partner_id.toggle_active()
-        super().toggle_active()
-
     def onchange(self, values, field_names, fields_spec):
         # Hacky fix to access fields in `SELF_READABLE_FIELDS` in the onchange logic.
         # Put field values in the cache.
@@ -722,9 +716,8 @@ class ResUsers(models.Model):
             raise UserError(_("You cannot deactivate the user you're currently logged in as."))
 
         if values.get('active'):
-            for user in self:
-                if not user.active and not user.partner_id.active:
-                    user.partner_id.toggle_active()
+            # unarchive partners before unarchiving the users
+            self.partner_id.action_unarchive()
         if self == self.env.user:
             writeable = self.SELF_WRITEABLE_FIELDS
             for key in list(values):
@@ -1177,7 +1170,7 @@ class ResUsers(models.Model):
         the current request is in debug mode.
         """
         self.ensure_one()
-        if not (self.env.su or self == self.env.user or self._has_group('base.group_user')):
+        if not (self.env.su or self == self.env.user or self.env.user._has_group('base.group_user')):
             # this prevents RPC calls from non-internal users to retrieve
             # information about other users
             raise AccessError(_("You can ony call user.has_group() with your current user."))
@@ -2075,7 +2068,7 @@ class ResUsers(models.Model):  # noqa: F811
     def fields_get(self, allfields=None, attributes=None):
         res = super().fields_get(allfields, attributes=attributes)
         # add reified groups fields
-        for app, kind, gs, category_name in self.env['res.groups'].sudo().get_groups_by_application():
+        for app, kind, gs, _category_name in self.env['res.groups'].sudo().get_groups_by_application():
             if kind == 'selection':
                 # 'User Type' should not be 'False'. A user is either 'employee', 'portal' or 'public' (required).
                 selection_vals = [(False, '')]

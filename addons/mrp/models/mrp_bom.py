@@ -247,7 +247,7 @@ class MrpBom(models.Model):
         relevant_fields = ['bom_line_ids', 'byproduct_ids', 'product_tmpl_id', 'product_id', 'product_qty']
         if any(field_name in vals for field_name in relevant_fields):
             self._set_outdated_bom_in_productions()
-        if 'sequence' in vals and self and self[-1].id == self._prefetch_ids[-1]:
+        if 'sequence' in vals and self and self[-1].id == list(self._prefetch_ids)[-1]:
             self.browse(self._prefetch_ids)._check_bom_cycle()
         return res
 
@@ -282,9 +282,13 @@ class MrpBom(models.Model):
             raise UserError(_("You cannot create a new Bill of Material from here."))
         return super(MrpBom, self).name_create(name)
 
-    def toggle_active(self):
-        self.with_context({'active_test': False}).operation_ids.toggle_active()
-        return super().toggle_active()
+    def action_archive(self):
+        self.with_context(active_test=False).operation_ids.action_archive()
+        return super().action_archive()
+
+    def action_unarchive(self):
+        self.with_context(active_test=False).operation_ids.action_unarchive()
+        return super().action_unarchive()
 
     @api.depends('code')
     def _compute_display_name(self):

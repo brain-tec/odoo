@@ -15,7 +15,7 @@ from odoo.addons.phone_validation.tools import phone_validation
 from odoo.exceptions import UserError, AccessError
 from odoo.osv import expression
 from odoo.tools.translate import _
-from odoo.tools import date_utils, email_split, is_html_empty, groupby, parse_contact_from_email, SQL
+from odoo.tools import date_utils, email_normalize_all, is_html_empty, groupby, parse_contact_from_email, SQL
 from odoo.tools.misc import get_lang
 
 from . import crm_stage
@@ -86,7 +86,7 @@ PLS_UPDATE_BATCH_STEP = 5000
 
 
 class CrmLead(models.Model):
-    _description = "Lead/Opportunity"
+    _description = "Lead"
     _order = "priority desc, id desc"
     _inherit = ['mail.thread.cc',
                 'mail.thread.blacklist',
@@ -475,7 +475,7 @@ class CrmLead(models.Model):
             email_state = False
             if lead.email_from:
                 email_state = 'incorrect'
-                for email in email_split(lead.email_from):
+                for email in email_normalize_all(lead.email_from):
                     if mail_validation.mail_validate(email):
                         email_state = 'correct'
                         break
@@ -982,17 +982,19 @@ class CrmLead(models.Model):
     # ACTIONS
     # ------------------------------------------------------------
 
-    def toggle_active(self):
-        """ When archiving: mark probability as 0. When re-activating
-        update probability again, for leads and opportunities. """
-        res = super().toggle_active()
-        activated = self.filtered(lambda lead: lead.active)
-        archived = self.filtered(lambda lead: not lead.active)
+    def action_archive(self):
+        """ When archiving: mark probability as 0."""
+        res = super().action_archive()
+        self.write({'probability': 0, 'automated_probability': 0})
+        return res
+
+    def action_unarchive(self):
+        """ When re-activating update probability again, for leads and opportunities. """
+        activated = self.filtered(lambda rec: not rec.active)
+        res = super().action_unarchive()
         if activated:
             activated.write({'lost_reason_id': False})
             activated._compute_probabilities()
-        if archived:
-            archived.write({'probability': 0, 'automated_probability': 0})
         return res
 
     def action_set_lost(self, **additional_values):
@@ -1755,8 +1757,9 @@ class CrmLead(models.Model):
             return self.env['crm.lead']
 
         domain = []
-        for normalized_email in [tools.email_normalize(email) for email in tools.email_split(email)]:
-            domain.append(('email_normalized', '=', normalized_email))
+        normalized_emails = email_normalize_all(email)
+        if normalized_emails:
+            domain.append(('email_normalized', 'in', normalized_emails))
         if partner:
             domain.append(('partner_id', '=', partner.id))
 
@@ -2427,7 +2430,7 @@ class CrmLead(models.Model):
         # get current frequencies related to the target leads
         leads_frequency_values_by_team = dict((team_id, []) for team_id in team_ids)
         leads_pls_fields = set()  # ensure to keep each field unique (can have multiple tag_id leads_values_dict)
-        for lead_id, values in leads_values_dict.items():
+        for values in leads_values_dict.values():
             team_id = values.get('team_id', 0)  # If team_id is unset, consider it as team 0
             lead_frequency_values = {'count': 1}
             for field, value in values['values']:

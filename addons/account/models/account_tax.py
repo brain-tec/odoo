@@ -348,7 +348,7 @@ class AccountTax(models.Model):
         if not self.is_used:
             return
 
-        old_line_values_dict = ast.literal_eval(old_values_str)
+        old_line_values_dict = ast.literal_eval(old_values_str or '{}')
         new_line_values_dict = ast.literal_eval(new_values_str)
 
         # Categorize the lines that were added/removed/modified
@@ -1459,7 +1459,7 @@ class AccountTax(models.Model):
                     amounts['base_lines'].append(base_line)
 
         # Round 'total_per_tax'.
-        for (tax, currency, _is_refund), amounts in total_per_tax.items():
+        for (_tax, currency, _is_refund), amounts in total_per_tax.items():
             amounts['raw_tax_amount_currency'] = currency.round(amounts['raw_tax_amount_currency'])
             amounts['raw_tax_amount'] = company.currency_id.round(amounts['raw_tax_amount'])
             amounts['raw_base_amount_currency'] = currency.round(amounts['raw_base_amount_currency'])
@@ -1956,7 +1956,7 @@ class AccountTax(models.Model):
 
             # Get all involved taxes in the tax group.
             involved_taxes = self.env['account.tax']
-            for base_line, taxes_data in values['base_line_x_taxes_data']:
+            for _base_line, taxes_data in values['base_line_x_taxes_data']:
                 for tax_data in taxes_data:
                     involved_taxes |= tax_data['tax']
 
