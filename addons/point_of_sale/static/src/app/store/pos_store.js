@@ -407,6 +407,7 @@ export class PosStore extends Reactive {
 
     async afterProcessServerData() {
         const openOrders = this.data.models["pos.order"].filter((order) => !order.finalized);
+        this.syncAllOrders();
 
         if (!this.config.module_pos_restaurant) {
             this.selectedOrderUuid = openOrders.length
@@ -670,8 +671,8 @@ export class PosStore extends Reactive {
         // It will return an instance of pos.pack.operation.lot
         // ---
         // This actions cannot be handled inside pos_order.js or pos_order_line.js
-        if (values.product_id.isTracked() && configure) {
-            const code = opts.code;
+        const code = opts.code;
+        if (values.product_id.isTracked() && (configure || code)) {
             let pack_lot_ids = {};
             const packLotLinesToEdit =
                 (!values.product_id.isAllowOnlyOneLot() &&
