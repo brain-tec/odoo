@@ -911,9 +911,11 @@ class MailCase(MockEmail):
              'active': partner.active,
              'is_follower': partner in record.message_partner_ids if record else False,
              'groups': partner.user_ids.groups_id.ids,
+             'lang': partner.lang,
              'notif': partner.user_ids.notification_type or 'email',
              'share': partner.partner_share,
              'type': 'user' if partner.user_ids and not partner.partner_share else partner.user_ids and 'portal' or 'customer',
+             'uid': partner.user_ids[0].id if partner.user_ids else False,
              'ushare': all(user.share for user in partner.user_ids) if partner.user_ids else False,
             } for partner in partners
         ]
@@ -1456,7 +1458,6 @@ class MailCommon(common.TransactionCase, MailCase):
             * description: English:    Lang Chatter Model (depends on test_record._name)
                            translated: Spanish Model Description
           * module
-            * _('NotificationButtonTitle') -> SpanishNotificationButtonTitle (used as link button name in layout)
             * _('View %s') -> SpanishView %s
           * template
             * body: English:    <p>EnglishBody for <t t-out="object.name"/></p> (depends on test_template.body)
@@ -1478,10 +1479,6 @@ class MailCommon(common.TransactionCase, MailCase):
             cls.env['ir.model']._get(test_record._name).with_context(lang=lang_code).name = 'Spanish Model Description'
 
         # Translate some code strings used in mailing
-        code_translations.python_translations[('test_mail', 'es_ES')] = {
-            **code_translations.python_translations[('test_mail', 'es_ES')],
-            'NotificationButtonTitle': 'SpanishButtonTitle'
-        }
         code_translations.python_translations[('mail', 'es_ES')] = {
             **code_translations.python_translations[('mail', 'es_ES')],
             'View %s': 'SpanishView %s'
