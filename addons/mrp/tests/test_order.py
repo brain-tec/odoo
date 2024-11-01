@@ -3433,8 +3433,8 @@ class TestMrpOrder(TestMrpCommon):
         mo_backorder.button_plan()
 
         self.assertEqual(mo_backorder.workorder_ids[0].state, 'cancel')
-        self.assertEqual(mo_backorder.workorder_ids[1].state, 'waiting')
-        self.assertEqual(mo_backorder.workorder_ids[2].state, 'pending')
+        self.assertEqual(mo_backorder.workorder_ids[1].state, 'ready')
+        self.assertEqual(mo_backorder.workorder_ids[2].state, 'ready')
         self.assertFalse(mo_backorder.workorder_ids[0].date_start)
         self.assertEqual(mo_backorder.workorder_ids[1].date_start, datetime(2023, 3, 1, 12, 0))
         self.assertEqual(mo_backorder.workorder_ids[2].date_start, datetime(2023, 3, 1, 12, 45))
@@ -4280,6 +4280,32 @@ class TestMrpOrder(TestMrpCommon):
         move_2 = production_4.move_raw_ids.filtered(lambda m: m.product_id == self.product_2)
         self.assertRecordValues(move_2.move_line_ids, [{'quantity': 0.5, 'lot_id': False}])
         self.assertRecordValues(move_1.move_line_ids, [{'quantity': 1, 'lot_id': False}])
+
+    def test_batch_production_04(self):
+        """ Test that splitting a MO correctly computes the duration of the workorders. """
+        self.product_5.tracking = 'serial'
+        self.bom_2.bom_line_ids.unlink()
+        self.bom_2.operation_ids.write({
+            'workcenter_id': self.workcenter_2.id,
+            'time_cycle_manual': 60,
+        })
+        mo_form = Form(self.env['mrp.production'])
+        mo_form.bom_id = self.bom_2
+        mo_form.product_qty = 2
+        mo = mo_form.save()
+        mo.action_confirm()
+        mo.button_plan()
+        self.assertEqual(mo.workorder_ids.duration_expected, 120)
+
+        batch_produce_action = mo.button_mark_done()
+        batch_produce = Form(self.env['mrp.batch.produce'].with_context(**batch_produce_action['context']))
+        batch_produce.lot_name = "00001"
+        batch_produce = batch_produce.save()
+        batch_produce.action_generate_production_text()
+        batch_produce.action_prepare()
+
+        productions = mo.procurement_group_id.mrp_production_ids
+        self.assertListEqual(productions.workorder_ids.mapped('duration_expected'), [60, 60])
 
     def test_multi_edit_start_date_wo(self):
         """
