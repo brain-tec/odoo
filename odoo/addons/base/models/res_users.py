@@ -591,13 +591,23 @@ class ResUsers(models.Model):
         action_open_website = self.env.ref('base.action_open_website', raise_if_not_found=False)
         if action_open_website and any(user.action_id.id == action_open_website.id for user in self):
             raise ValidationError(_('The "App Switcher" action cannot be selected as home action.'))
-        # Prevent using reload actions.
         # We use sudo() because  "Access rights" admins can't read action models
         for user in self.sudo():
             if user.action_id.type == "ir.actions.client":
+                # Prevent using reload actions.
                 action = self.env["ir.actions.client"].browse(user.action_id.id)  # magic
                 if action.tag == "reload":
                     raise ValidationError(_('The "%s" action cannot be selected as home action.', action.name))
+
+            elif user.action_id.type == "ir.actions.act_window":
+                # Restrict actions that include 'active_id' in their context.
+                action = self.env["ir.actions.act_window"].browse(user.action_id.id)  # magic
+                if not action.context:
+                    continue
+                if "active_id" in action.context:
+                    raise ValidationError(
+                        _('The action "%s" cannot be set as the home action because it requires a record to be selected beforehand.', action.name)
+                    )
 
 
     @api.constrains('groups_id')
@@ -850,7 +860,7 @@ class ResUsers(models.Model):
         if lang not in langs:
             lang = request.best_lang if request else None
             if lang not in langs:
-                lang = self.env.user.company_id.partner_id.lang
+                lang = self.env.user.with_context(prefetch_fields=False).company_id.partner_id.lang
                 if lang not in langs:
                     lang = DEFAULT_LANG
                     if lang not in langs:
@@ -2366,10 +2376,10 @@ class ResUsersApikeys(models.Model):
         if self.env.is_system():
             return
         if not date:
-            raise UserError(_("The API key must have an expiration date"))
+            raise ValidationError(_("The API key must have an expiration date"))
         max_duration = max(group.api_key_duration for group in self.env.user.groups_id) or 1.0
         if date > datetime.datetime.now() + datetime.timedelta(days=max_duration):
-            raise UserError(_("You cannot exceed %(duration)s days.", duration=max_duration))
+            raise ValidationError(_("You cannot exceed %(duration)s days.", duration=max_duration))
 
     def _generate(self, scope, name, expiration_date):
         """Generates an api key.
@@ -2461,6 +2471,11 @@ class ResUsersApikeysDescription(models.TransientModel):
                 'message': error.args[0]
             }
             return {'warning': warning}
+
+    def create(self, vals_list):
+        res = super().create(vals_list)
+        self.env['res.users.apikeys']._check_expiration_date(res.expiration_date)
+        return res
 
     @check_identity
     def make_key(self):
