@@ -99,11 +99,11 @@ class StockWarehouseOrderpoint(models.Model):
 
     @api.depends('warehouse_id')
     def _compute_allowed_location_ids(self):
-        loc_domain = [('usage', 'in', ('internal', 'view'))]
         # We want to keep only the locations
         #  - strictly belonging to our warehouse
         #  - not belonging to any warehouses
         for orderpoint in self:
+            loc_domain = [('usage', 'in', ('internal', 'view'))]
             other_warehouses = self.env['stock.warehouse'].search([('id', '!=', orderpoint.warehouse_id.id)])
             for view_location_id in other_warehouses.mapped('view_location_id'):
                 loc_domain = expression.AND([loc_domain, ['!', ('id', 'child_of', view_location_id.id)]])
@@ -462,7 +462,7 @@ class StockWarehouseOrderpoint(models.Model):
                     ploc_per_day[(lead_days, loc)].add(product.id)
 
         # recompute virtual_available with lead days
-        today = fields.datetime.now().replace(hour=23, minute=59, second=59)
+        today = fields.Datetime.now().replace(hour=23, minute=59, second=59)
         for (days, loc), product_ids in ploc_per_day.items():
             products = self.env['product.product'].browse(product_ids)
             qties = products.with_context(

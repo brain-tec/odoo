@@ -74,7 +74,7 @@
             'point_of_sale/static/src/scss/pos_dashboard.scss',
             'point_of_sale/static/src/backend/tours/point_of_sale.js',
             'point_of_sale/static/src/backend/pos_kanban_view/*',
-            'point_of_sale/static/src/app/utils/hooks.js',
+            'point_of_sale/static/src/app/hooks/hooks.js',
         ],
         'web.assets_tests': [
             'barcodes/static/tests/legacy/helpers.js',
@@ -87,7 +87,7 @@
             'point_of_sale/static/src/app/models/utils/indexed_db.js',
             'point_of_sale/static/src/app/models/data_service_options.js',
             'point_of_sale/static/src/utils.js',
-            'point_of_sale/static/src/app/models/data_service.js',
+            'point_of_sale/static/src/app/services/data_service.js',
             'point_of_sale/static/tests/unit/**/*',
         ],
 

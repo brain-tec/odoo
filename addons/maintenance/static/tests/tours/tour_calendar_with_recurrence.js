@@ -1,5 +1,3 @@
-/** @odoo-module **/
-
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("test_dblclick_event_from_calendar", {
@@ -66,6 +64,10 @@ registry.category("web_tour.tours").add("test_drag_and_drop_event_in_calendar", 
             content: "Select monthly display",
             trigger: ".o_scale_button_month",
             run: "click",
+        },
+        {
+            trigger: '.fc-dayGridMonth-view',
+            isCheck: true,
         },
         {
             content: "Move event to 15th of the month",
