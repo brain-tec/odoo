@@ -57,6 +57,7 @@ from odoo.tools import (
     ormcache, partition, Query, split_every, unique,
     SQL, sql,
 )
+from odoo.tools.constants import GC_UNLINK_LIMIT, PREFETCH_MAX
 from odoo.tools.lru import LRU
 from odoo.tools.misc import LastOrderedSet, ReversedIterable, unquote
 from odoo.tools.translate import _, LazyTranslate
@@ -64,13 +65,13 @@ from odoo.tools.translate import _, LazyTranslate
 from . import fields
 from . import decorators as api
 from .commands import Command
-from .fields import Field
+from .fields import Field, determine
 from .fields_misc import Id
 from .fields_temporal import Datetime
 from .fields_textual import Char
 
 from .identifiers import NewId
-from .utils import OriginIds, expand_ids, check_pg_name, check_object_name, check_property_field_value_name, origin_ids, PREFETCH_MAX, READ_GROUP_ALL_TIME_GRANULARITY, READ_GROUP_TIME_GRANULARITY, READ_GROUP_NUMBER_GRANULARITY
+from .utils import OriginIds, expand_ids, check_pg_name, check_object_name, check_property_field_value_name, origin_ids, READ_GROUP_ALL_TIME_GRANULARITY, READ_GROUP_TIME_GRANULARITY, READ_GROUP_NUMBER_GRANULARITY
 from odoo.osv import expression
 
 import typing
@@ -102,7 +103,6 @@ regex_read_group_spec = re.compile(r'(\w+)(\.(\w+))?(?::(\w+))?$')  # For _read_
 regex_camel_case = re.compile(r'(?<=[^_])([A-Z])')
 
 AUTOINIT_RECALCULATE_STORED_FIELDS = 1000
-GC_UNLINK_LIMIT = 100_000
 
 INSERT_BATCH_SIZE = 100
 UPDATE_BATCH_SIZE = 100
@@ -147,12 +147,14 @@ def fix_import_export_id_paths(fieldname):
     return fixed_external_id.split('/')
 
 
-def to_company_ids(companies):
-    if isinstance(companies, BaseModel):
-        return companies.ids
-    elif isinstance(companies, (list, tuple, str)):
-        return companies
-    return [companies]
+def to_record_ids(arg) -> list[int]:
+    """ Return the record ids of ``arg``, which may be a recordset, an integer or a list of integers. """
+    if isinstance(arg, BaseModel):
+        return arg.ids
+    elif isinstance(arg, int):
+        return [arg] if arg else []
+    else:
+        return [id_ for id_ in arg if id_]
 
 
 def check_company_domain_parent_of(self, companies):
@@ -163,7 +165,7 @@ def check_company_domain_parent_of(self, companies):
     if isinstance(companies, str):
         return ['|', ('company_id', '=', False), ('company_id', 'parent_of', companies)]
 
-    companies = [id for id in to_company_ids(companies) if id]
+    companies = to_record_ids(companies)
     if not companies:
         return [('company_id', '=', False)]
 
@@ -181,7 +183,7 @@ def check_companies_domain_parent_of(self, companies):
     if isinstance(companies, str):
         return [('company_ids', 'parent_of', companies)]
 
-    companies = [id_ for id_ in to_company_ids(companies) if id_]
+    companies = to_record_ids(companies)
     if not companies:
         return []
 
@@ -818,7 +820,7 @@ class BaseModel(metaclass=MetaModel):
         methods = []
         for attr, func in getmembers(cls, is_constraint):
             if callable(func._constrains):
-                func = wrap(func, func._constrains(self))
+                func = wrap(func, func._constrains(self.sudo()))
             for name in func._constrains:
                 field = cls._fields.get(name)
                 if not field:
@@ -4160,7 +4162,7 @@ class BaseModel(metaclass=MetaModel):
             return [('company_id', '=', False)]
         if isinstance(companies, str):
             return [('company_id', 'in', unquote(f'{companies} + [False]'))]
-        return [('company_id', 'in', to_company_ids(companies) + [False])]
+        return [('company_id', 'in', to_record_ids(companies) + [False])]
 
     def _check_company(self, fnames=None):
         """ Check the companies of the values of the given field names.
@@ -5121,7 +5123,7 @@ class BaseModel(metaclass=MetaModel):
         return records
 
     def _compute_field_value(self, field):
-        fields.determine(field.compute, self)
+        determine(field.compute, self)
 
         if field.store and any(self._ids):
             # check constraints of the fields that have been computed
