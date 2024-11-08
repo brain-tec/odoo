@@ -249,23 +249,20 @@ class MetaModel(api.Meta):
                     setattr(self, name, field)
                     field.__set_name__(self, name)
 
-            add('id', Id(automatic=True))
-            add_default('display_name', Char(
-                string='Display Name', automatic=True,
-                compute='_compute_display_name',
-                search='_search_display_name',
-            ))
+            # make sure `id` field is still a `fields.Id`
+            if not isinstance(self.id, Id):
+                raise TypeError(f"Field {self.id} is not an instance of fields.Id")
 
             if attrs.get('_log_access', self._auto):
                 from .fields_relational import Many2one  # noqa: PLC0415
                 add_default('create_uid', Many2one(
-                    'res.users', string='Created by', automatic=True, readonly=True))
+                    'res.users', string='Created by', readonly=True))
                 add_default('create_date', Datetime(
-                    string='Created on', automatic=True, readonly=True))
+                    string='Created on', readonly=True))
                 add_default('write_uid', Many2one(
-                    'res.users', string='Last Updated by', automatic=True, readonly=True))
+                    'res.users', string='Last Updated by', readonly=True))
                 add_default('write_date', Datetime(
-                    string='Last Updated on', automatic=True, readonly=True))
+                    string='Last Updated on', readonly=True))
 
 
 # special columns automatically created by the ORM
@@ -563,6 +560,13 @@ class BaseModel(metaclass=MetaModel):
     "maximum number of transient records, unlimited if ``0``"
     _transient_max_hours = lazy_classproperty(lambda _: config.get('transient_age_limit'))
     "maximum idle lifetime (in hours), unlimited if ``0``"
+
+    id = Id()
+    display_name = Char(
+        string='Display Name',
+        compute='_compute_display_name',
+        search='_search_display_name',
+    )
 
     def _valid_field_parameter(self, field, name):
         """ Return whether the given parameter name is valid for the field. """
