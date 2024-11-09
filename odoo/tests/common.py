@@ -372,6 +372,8 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
     def uid(self, user):
         """ Set the uid by changing the test's environment. """
         self.env = self.env(user=user)
+        # set the updated environment as the default one
+        self.env.transaction.default_env = self.env
 
     def ref(self, xid):
         """ Returns database ID for the provided :term:`external identifier`,
@@ -1950,7 +1952,7 @@ class HttpCase(TransactionCase):
             # patching to speedup the check in case the password is hashed with many hashround + avoid to update the password
             with patch('odoo.addons.base.models.res_users.ResUsersPatchedInTest._check_credentials', new=patched_check_credentials):
                 credential = {'login': user, 'password': password, 'type': 'password'}
-                auth_info = self.registry['res.users'].authenticate(session.db, credential, {'interactive': False})
+                auth_info = self.env['res.users'].authenticate(credential, {'interactive': False})
             uid = auth_info['uid']
             env = api.Environment(self.cr, uid, {})
             session.uid = uid

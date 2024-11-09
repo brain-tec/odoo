@@ -57,15 +57,10 @@ class Environment(Mapping):
         """ Reset the transaction, see :meth:`Transaction.reset`. """
         self.transaction.reset()
 
-    def __new__(cls, cr, uid, context, su=False, uid_origin=None):
+    def __new__(cls, cr, uid, context, su=False):
         assert isinstance(cr, BaseCursor)
         if uid == SUPERUSER_ID:
             su = True
-
-        # isinstance(uid, int) is to handle `RequestUID`
-        uid_origin = uid_origin or (uid if isinstance(uid, int) else None)
-        if uid_origin == SUPERUSER_ID:
-            uid_origin = None
 
         # determine transaction object
         transaction = cr.transaction
@@ -74,12 +69,12 @@ class Environment(Mapping):
 
         # if env already exists, return it
         for env in transaction.envs:
-            if (env.cr, env.uid, env.su, env.uid_origin, env.context) == (cr, uid, su, uid_origin, context):
+            if env.cr is cr and env.uid == uid and env.su == su and env.context == context:
                 return env
 
         # otherwise create environment, and add it in the set
         self = object.__new__(cls)
-        self.cr, self.uid, self.su, self.uid_origin = cr, uid, su, uid_origin
+        self.cr, self.uid, self.su = cr, uid, su
         self.context = frozendict(context)
         self.transaction = transaction
         self.registry = transaction.registry
@@ -89,6 +84,9 @@ class Environment(Mapping):
         self._protected = transaction.protected
 
         transaction.envs.add(self)
+        # the default transaction's environment is the first one with a valid uid
+        if transaction.default_env is None and uid and isinstance(uid, int):
+            transaction.default_env = self
         return self
 
     #
@@ -137,7 +135,7 @@ class Environment(Mapping):
         if context is None:
             context = clean_context(self.context) if su and not self.su else self.context
         su = (user is None and self.su) if su is None else su
-        return Environment(cr, uid, context, su, self.uid_origin)
+        return Environment(cr, uid, context, su)
 
     def ref(self, xml_id, raise_if_not_found=True):
         """ Return the record corresponding to the given ``xml_id``.
@@ -486,13 +484,15 @@ class Environment(Mapping):
 
 class Transaction:
     """ A object holding ORM data structures for a transaction. """
-    __slots__ = ('_Transaction__file_open_tmp_paths', 'cache', 'envs', 'protected', 'registry', 'tocompute')
+    __slots__ = ('_Transaction__file_open_tmp_paths', 'cache', 'default_env', 'envs', 'protected', 'registry', 'tocompute')
 
-    def __init__(self, registry):
+    def __init__(self, registry: Registry):
         self.registry = registry
         # weak set of environments
-        self.envs = WeakSet()
+        self.envs: WeakSet[Environment] = WeakSet()
         self.envs.data = OrderedSet()  # make the weakset OrderedWeakSet
+        # default environment (for flushing)
+        self.default_env: Environment | None = None
         # cache for all records
         self.cache = Cache()
         # fields to protect {field: ids}
@@ -504,14 +504,8 @@ class Transaction:
 
     def flush(self):
         """ Flush pending computations and updates in the transaction. """
-        env_to_flush = None
-        for env in self.envs:
-            if isinstance(env.uid, int) or env.uid is None:
-                env_to_flush = env
-                if env.uid is not None:
-                    break
-        if env_to_flush is not None:
-            env_to_flush.flush_all()
+        if self.default_env is not None:
+            self.default_env.flush_all()
 
     def clear(self):
         """ Clear the caches and pending computations and updates in the translations. """
