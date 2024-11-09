@@ -21,7 +21,7 @@ import { pick } from "@web/core/utils/objects";
 describe.current.tags("desktop");
 defineMailModels();
 
-test("can create a new channel [REQUIRE FOCUS]", async () => {
+test("can create a new channel", async () => {
     const pyEnv = await startServer();
     onRpcBefore((route, args) => {
         if (
@@ -43,7 +43,7 @@ test("can create a new channel [REQUIRE FOCUS]", async () => {
     });
     await start();
     await assertSteps([
-        `/mail/action - ${JSON.stringify({
+        `/mail/data - ${JSON.stringify({
             init_messaging: {},
             failures: true,
             systray_get_activities: true,
@@ -112,7 +112,7 @@ test("can make a DM chat", async () => {
     });
     await start();
     await assertSteps([
-        `/mail/action - ${JSON.stringify({
+        `/mail/data - ${JSON.stringify({
             init_messaging: {},
             failures: true,
             systray_get_activities: true,

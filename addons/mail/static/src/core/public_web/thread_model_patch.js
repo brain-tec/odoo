@@ -16,10 +16,13 @@ patch(Thread.prototype, {
     },
 
     _computeDiscussAppCategory() {
+        if (this.parent_channel_id) {
+            return;
+        }
         if (["group", "chat"].includes(this.channel_type)) {
             return this.store.discuss.chats;
         }
-        if (this.channel_type === "channel" && !this.parent_channel_id) {
+        if (this.channel_type === "channel") {
             return this.store.discuss.channels;
         }
     },
@@ -36,9 +39,6 @@ patch(Thread.prototype, {
      * @param {import("models").Message} message
      */
     notifyMessageToUser(message) {
-        if (this.isCorrespondentOdooBot) {
-            return;
-        }
         const channel_notifications =
             this.custom_notifications || this.store.settings.channel_notifications;
         if (

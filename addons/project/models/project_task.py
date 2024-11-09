@@ -287,9 +287,7 @@ class ProjectTask(models.Model):
 
     # Quick creation shortcuts
     display_name = fields.Char(
-        compute='_compute_display_name',
         inverse='_inverse_display_name',
-        search='_search_display_name',
         help="""Use these keywords in the title to set new tasks:\n
             #tags Set tags on the task
             @user Assign the task to a user
@@ -298,10 +296,14 @@ class ProjectTask(models.Model):
     )
     link_preview_name = fields.Char(compute='_compute_link_preview_name', export_string_translation=False)
 
-    _sql_constraints = [
-        ('recurring_task_has_no_parent', 'CHECK (NOT (recurring_task IS TRUE AND parent_id IS NOT NULL))', "A subtask cannot be recurrent."),
-        ('private_task_has_no_parent', 'CHECK (NOT (project_id IS NULL AND parent_id IS NOT NULL))', "A private task cannot have a parent."),
-    ]
+    _recurring_task_has_no_parent = models.Constraint(
+        'CHECK (NOT (recurring_task IS TRUE AND parent_id IS NOT NULL))',
+        'A subtask cannot be recurrent.',
+    )
+    _private_task_has_no_parent = models.Constraint(
+        'CHECK (NOT (project_id IS NULL AND parent_id IS NOT NULL))',
+        'A private task cannot have a parent.',
+    )
 
     @api.constrains('company_id', 'partner_id')
     def _ensure_company_consistency_with_partner(self):

@@ -608,7 +608,7 @@ test("basic rendering", async () => {
     });
     await start();
     await contains(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
-    expect($('.o_menu_systray .dropdown-toggle:has(i[aria-label="Messages"])')[0]).not.toHaveClass(
+    expect('.o_menu_systray .dropdown-toggle:has(i[aria-label="Messages"]):first').not.toHaveClass(
         "show"
     );
     await contains(".o_menu_systray i[aria-label='Messages']");
@@ -626,7 +626,7 @@ test("basic rendering", async () => {
     await contains(".o-mail-MessagingMenu div.text-muted", { text: "No conversation yet..." });
     await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
     await contains(".o-dropdown--menu", { count: 0 });
-    expect($('.o_menu_systray .dropdown-toggle:has(i[aria-label="Messages"])')[0]).not.toHaveClass(
+    expect('.o_menu_systray .dropdown-toggle:has(i[aria-label="Messages"]):first').not.toHaveClass(
         "show"
     );
 });
@@ -1066,7 +1066,7 @@ test("can open messaging menu even if messaging is not initialized", async () =>
     patchBrowserNotification("default");
     await startServer();
     const def = new Deferred();
-    onRpcBefore("/mail/action", async (args) => {
+    onRpcBefore("/mail/data", async (args) => {
         if (args.init_messaging) {
             await def;
         }

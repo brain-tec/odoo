@@ -7,7 +7,7 @@ import { registry } from "@web/core/registry";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { deduceUrl, random5Chars, uuidv4, getOnNotified, Counter } from "@point_of_sale/utils";
 import { Reactive } from "@web/core/utils/reactive";
-import { HWPrinter } from "@point_of_sale/app/printer/hw_printer";
+import { HWPrinter } from "@point_of_sale/app/utils/printer/hw_printer";
 import { ConnectionAbortedError, ConnectionLostError, RPCError } from "@web/core/network/rpc";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
 import { _t } from "@web/core/l10n/translation";
@@ -22,7 +22,7 @@ import {
     makeAwaitable,
     ask,
     makeActionAwaitable,
-} from "@point_of_sale/app/store/make_awaitable_dialog";
+} from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { PartnerList } from "../screens/partner_list/partner_list";
 import { ScaleScreen } from "../screens/scale_screen/scale_screen";
 import { computeComboItems } from "../models/utils/compute_combo_items";
@@ -1795,8 +1795,8 @@ export class PosStore extends Reactive {
             qr = await this.data.call("pos.payment.method", "get_qr_code", [
                 [payment.payment_method_id.id],
                 payment.amount,
-                payment.pos_order_id.name,
-                payment.pos_order_id.name,
+                payment.pos_order_id.name + " " + payment.pos_order_id.tracking_number,
+                "",
                 this.currency.id,
                 payment.pos_order_id.partner_id?.id,
             ]);

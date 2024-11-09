@@ -1,7 +1,7 @@
 import { Dialog } from "@web/core/dialog/dialog";
 import { Component, useState, onMounted } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
-import { ProductCard } from "@point_of_sale/app/generic_components/product_card/product_card";
+import { ProductCard } from "@point_of_sale/app/components/product_card/product_card";
 import { floatIsZero } from "@web/core/utils/numbers";
 
 export class ComboConfiguratorPopup extends Component {
@@ -96,7 +96,7 @@ export class ComboConfiguratorPopup extends Component {
                 this.state.configuration[combo_item.id] = payload;
             } else {
                 // Do not select the product if configuration popup is cancelled.
-                this.state.combo[combo_item.id] = 0;
+                this.state.combo[combo_item.combo_id.id] = 0;
             }
         }
     }
