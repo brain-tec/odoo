@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
 from odoo import models, fields, api, _, Command
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools.misc import format_date, formatLang
-from odoo.tools import create_index
 from odoo.tools import SQL
 
 
@@ -198,22 +195,8 @@ class AccountPayment(models.Model):
         'CHECK(amount >= 0.0)',
         'The payment amount cannot be negative.',
     )
-
-    def init(self):
-        super().init()
-        create_index(
-            self.env.cr,
-            indexname='account_payment_journal_id_company_id_idx',
-            tablename='account_payment',
-            expressions=['journal_id', 'company_id']
-        )
-        create_index(
-            self.env.cr,
-            indexname='account_payment_unmatched_idx',
-            tablename='account_payment',
-            expressions=['journal_id', 'company_id'],
-            where="NOT is_matched OR is_matched IS NULL"
-        )
+    _journal_id_company_id_idx = models.Index("(journal_id, company_id)")
+    _unmatched_idx = models.Index("(journal_id, company_id) WHERE is_matched IS NOT TRUE")
 
     # -------------------------------------------------------------------------
     # HELPERS
@@ -390,18 +373,20 @@ class AccountPayment(models.Model):
             if payment.journal_id.company_id not in payment.company_id.parent_ids:
                 payment.company_id = (payment.journal_id.company_id or self.env.company)._accessible_branches()[:1]
 
-    @api.depends('invoice_ids.payment_state')
+    @api.depends('invoice_ids.payment_state', 'move_id.line_ids.amount_residual')
     def _compute_state(self):
         accounting_installed = self.env['account.move']._get_invoice_in_payment_state() == 'in_payment'
         for payment in self:
             if not payment.state:
                 payment.state = 'draft'
-            if (
-                (not payment.outstanding_account_id or not accounting_installed)
-                and payment.invoice_ids
-                and all(invoice.payment_state == 'paid' for invoice in payment.invoice_ids)
-            ):
-                payment.state = 'paid'
+            if payment.state == 'in_process':  # in_process --> paid
+                if payment.outstanding_account_id and accounting_installed:
+                    move = payment.move_id
+                    liquidity, _counterpart, _writeoff = payment._seek_for_lines()
+                    if move and move.currency_id.is_zero(sum(liquidity.mapped('amount_residual'))):
+                        payment.state = 'paid'
+                elif payment.invoice_ids and all(invoice.payment_state == 'paid' for invoice in payment.invoice_ids):
+                    payment.state = 'paid'
 
     @api.depends('move_id.line_ids.amount_residual', 'move_id.line_ids.amount_residual_currency', 'move_id.line_ids.account_id', 'state')
     def _compute_reconciliation_status(self):
