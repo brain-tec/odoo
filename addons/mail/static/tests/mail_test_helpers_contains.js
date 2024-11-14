@@ -5,9 +5,6 @@ import { queryAll, queryFirst } from "@odoo/hoot-dom";
 import { Deferred, tick } from "@odoo/hoot-mock";
 import { isMacOS } from "@web/core/browser/feature_detection";
 import { isVisible } from "@web/core/utils/ui";
-import { step as webStep, assertSteps as webAssertSteps } from "@web/../tests/web_test_helpers";
-export const step = webStep;
-export const assertSteps = webAssertSteps;
 
 /** @param {EventInit} [args] */
 const mapBubblingEvent = (args) => ({ ...args, bubbles: true });
