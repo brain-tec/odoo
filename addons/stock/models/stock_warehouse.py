@@ -23,6 +23,7 @@ ROUTE_NAMES = {
 
 
 class StockWarehouse(models.Model):
+    _name = 'stock.warehouse'
     _description = "Warehouse"
     _order = 'sequence,id'
     _check_company_auto = True
@@ -455,7 +456,7 @@ class StockWarehouse(models.Model):
                 'depends': ['delivery_steps'],
                 'create_values': {
                     'active': True,
-                    'procure_method': 'mts_else_mto',
+                    'procure_method': 'make_to_order',
                     'company_id': self.company_id.id,
                     'action': 'pull',
                     'auto': 'manual',
