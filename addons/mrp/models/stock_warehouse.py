@@ -7,7 +7,7 @@ from odoo.tools import split_every
 
 
 class StockWarehouse(models.Model):
-    _inherit = ['stock.warehouse']
+    _inherit = 'stock.warehouse'
 
     manufacture_to_resupply = fields.Boolean(
         'Manufacture to Resupply', default=True,
@@ -126,7 +126,7 @@ class StockWarehouse(models.Model):
             'manufacture_mto_pull_id': {
                 'depends': ['manufacture_steps', 'manufacture_to_resupply'],
                 'create_values': {
-                    'procure_method': 'mts_else_mto',
+                    'procure_method': 'make_to_order',
                     'company_id': self.company_id.id,
                     'action': 'pull',
                     'auto': 'manual',
@@ -281,7 +281,7 @@ class StockWarehouse(models.Model):
 
 
 class StockWarehouseOrderpoint(models.Model):
-    _inherit = ["stock.warehouse.orderpoint"]
+    _inherit = "stock.warehouse.orderpoint"
 
     @api.constrains('product_id')
     def check_product_is_not_kit(self):
