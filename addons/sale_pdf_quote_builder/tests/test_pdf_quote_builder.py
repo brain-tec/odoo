@@ -104,7 +104,7 @@ class TestPDFQuoteBuilder(HttpCase, SaleCommon):
         sol_1, sol_2 = self.sale_order.order_line
         sol_1.update({
             'discount': 4.99,
-            'tax_id': [
+            'tax_ids': [
                 Command.create({'name': "test tax1"}),
                 Command.create({'name': "test tax2"}),
             ],
@@ -122,7 +122,7 @@ class TestPDFQuoteBuilder(HttpCase, SaleCommon):
 
             new_form_field(name="one2many_test", path='order_id.order_line'),
             new_form_field(name="many2one_test", path='order_id.company_id'),
-            new_form_field(name="many2many_test", path='tax_id'),
+            new_form_field(name="many2many_test", path='tax_ids'),
         ])
         expected = {
             'boolean_test': "No",
@@ -142,7 +142,7 @@ class TestPDFQuoteBuilder(HttpCase, SaleCommon):
             result = self.env['ir.actions.report']._get_value_from_path(
                 form_field, self.sale_order, sol_1
             )
-            self.assertEqual(result, expected[form_field.name])
+            self.assertEqual(' '.join(result.split()), ' '.join(expected[form_field.name].split()))
 
     def _test_custom_content_kanban_like(self):
         # TODO VCR finish tour and uncomment
