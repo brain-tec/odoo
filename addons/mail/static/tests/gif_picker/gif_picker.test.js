@@ -11,10 +11,17 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
-import { describe, test } from "@odoo/hoot";
-import { onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { describe, expect, test } from "@odoo/hoot";
+import {
+    asyncStep,
+    getService,
+    onRpc,
+    patchWithCleanup,
+    waitForSteps,
+} from "@web/../tests/web_test_helpers";
 
 import { GifPicker } from "@mail/discuss/gif_picker/common/gif_picker";
+import { animationFrame } from "@odoo/hoot-dom";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -101,6 +108,34 @@ test("Composer GIF button should open the GIF picker", async () => {
     await contains(".o-discuss-GifPicker");
 });
 
+test("Not loading of GIF categories when feature is not available", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "" });
+    let isFeatureEnabled = true;
+    onRpc("/discuss/gif/categories", () => {
+        asyncStep("/discuss/gif/categories");
+        if (isFeatureEnabled) {
+            return rpc.categories;
+        }
+    });
+    await start();
+    await openDiscuss(channelId);
+    const store = getService("mail.store");
+    store.hasGifPickerFeature = false;
+    isFeatureEnabled = false;
+    await click("button[title='Add GIFs']");
+    await contains(".o-discuss-GifPicker");
+    await animationFrame();
+    expect.verifySteps([]); // no "/discuss/gif/categories"
+    await click("button[title='Add GIFs']");
+    await contains(".o-discuss-GifPicker", { count: 0 });
+    store.hasGifPickerFeature = true;
+    isFeatureEnabled = true;
+    await click("button[title='Add GIFs']");
+    await contains(".o-discuss-GifPicker");
+    await waitForSteps(["/discuss/gif/categories"]);
+});
+
 test("Searching for a GIF", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "" });
@@ -124,6 +159,37 @@ test("Open a GIF category trigger the search for the category", async () => {
     await click("img[data-src='https://media.tenor.com/6uIlQAHIkNoAAAAM/cry.gif']");
     await contains(".o-discuss-Gif", { count: 2 });
     await contains("input[placeholder='Search for a GIF']", { value: "cry" });
+});
+
+test("Can have GIF categories with same name", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "" });
+    onRpc("/discuss/gif/categories", () => {
+        return {
+            locale: "en",
+            tags: [
+                {
+                    searchterm: "duplicate",
+                    path: "/v2/search?q=duplicate&locale=en&component=categories&contentfilter=low",
+                    image: "https://media.tenor.com/BiseY2UXovAAAAAM/duplicate.gif",
+                    name: "#duplicate",
+                },
+                {
+                    searchterm: "duplicate",
+                    path: "/v2/search?q=duplicate&locale=en&component=categories&contentfilter=low",
+                    image: "https://media.tenor.com/BiseY2UXovAAAAAM/duplicate.gif",
+                    name: "#duplicate",
+                },
+            ],
+        };
+    });
+    onRpc("/discuss/gif/search", () => rpc.search);
+    await start();
+    await openDiscuss(channelId);
+    await click("button[title='Add GIFs']");
+    await contains("img[data-src='https://media.tenor.com/BiseY2UXovAAAAAM/duplicate.gif']", {
+        count: 2,
+    });
 });
 
 test("Reopen GIF category list when going back", async () => {
