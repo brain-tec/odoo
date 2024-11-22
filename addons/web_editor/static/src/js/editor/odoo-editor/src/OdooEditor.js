@@ -2483,7 +2483,7 @@ export class OdooEditor extends EventTarget {
             // Do not apply commands out of the editable area.
             return false;
         }
-        if (!sel.isCollapsed && BACKSPACE_FIRST_COMMANDS.includes(method)) {
+        if (!sel.isCollapsed && (BACKSPACE_FIRST_COMMANDS.includes(method) || this.powerbox.isOpen)) {
             let range = getDeepRange(this.editable, {sel, splitText: true, select: true, correctTripleClick: true});
             if (range &&
                 range.startContainer === range.endContainer &&
@@ -4225,6 +4225,15 @@ export class OdooEditor extends EventTarget {
             // The _onSelectionChange handler is going to be triggered again.
             return;
         }
+        if (
+            selection.isCollapsed && anchorNode &&
+            anchorNode.nodeName === "DIV" && anchorNode.innerHTML.trim() === "" &&
+            this.isSelectionInEditable(selection)
+        ) {
+            this._fixSelectionInEmptyDiv(selection);
+            // The _onSelectionChange handler is going to be triggered again.
+            return;
+        }
         let appliedCustomSelection = false;
         if (selection.rangeCount && selection.getRangeAt(0)) {
             appliedCustomSelection = this._handleSelectionInTable();
@@ -4648,6 +4657,14 @@ export class OdooEditor extends EventTarget {
             // Remove selection as a fallback.
             selection.removeAllRanges();
         }
+    }
+
+    _fixSelectionInEmptyDiv(selection){
+        const p = this.document.createElement("p");
+        const br = this.document.createElement("br");
+        p.appendChild(br);
+        selection.anchorNode.appendChild(p);
+        setSelection(p, 0);
     }
 
     _onMouseup(ev) {
