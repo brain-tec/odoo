@@ -425,7 +425,7 @@ class Website(models.Model):
         :param url: the url to check
         :return: True if the url has to be indexed, False otherwise
         """
-        return get_base_domain(url, True) == get_base_domain(self.domain, True)
+        return get_base_domain(url.lower(), True) == get_base_domain(self.domain.lower(), True)
 
     # ----------------------------------------------------------
     # Configurator
@@ -1027,7 +1027,7 @@ class Website(models.Model):
             fallback_create_missing_industry_image('s_carousel_intro_default_image_1', 's_cover_default_image')
             fallback_create_missing_industry_image('s_carousel_intro_default_image_2', 's_image_text_default_image')
             fallback_create_missing_industry_image('s_carousel_intro_default_image_3', 's_text_image_default_image')
-
+            fallback_create_missing_industry_image('s_website_form_overlay_default_image', 's_cover_default_image')
             fallback_create_missing_industry_image('s_framed_intro_default_image', 's_cover_default_image')
             fallback_create_missing_industry_image('s_wavy_grid_default_image_1', 's_cover_default_image')
             fallback_create_missing_industry_image('s_wavy_grid_default_image_2', 's_image_text_default_image')
