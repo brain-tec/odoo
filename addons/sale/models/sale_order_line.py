@@ -893,7 +893,7 @@ class SaleOrderLine(models.Model):
         for line in self:
             amount_invoiced = 0.0
             for invoice_line in line._get_invoice_lines():
-                if invoice_line.move_id.state == 'posted':
+                if invoice_line.move_id.state == 'posted' or invoice_line.move_id.payment_state == 'invoicing_legacy':
                     invoice_date = invoice_line.move_id.invoice_date or fields.Date.today()
                     if invoice_line.move_id.move_type == 'out_invoice':
                         amount_invoiced += invoice_line.currency_id._convert(invoice_line.price_subtotal, line.currency_id, line.company_id, invoice_date)
@@ -1232,7 +1232,7 @@ class SaleOrderLine(models.Model):
 
     def _get_partner_display(self):
         self.ensure_one()
-        commercial_partner = self.order_partner_id.commercial_partner_id
+        commercial_partner = self.sudo().order_partner_id.commercial_partner_id
         return f'({commercial_partner.ref or commercial_partner.name})'
 
     def _additional_name_per_id(self):
