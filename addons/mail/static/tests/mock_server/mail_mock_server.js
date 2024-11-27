@@ -305,23 +305,16 @@ async function discuss_channel_messages(request) {
     /** @type {import("mock_models").MailMessage} */
     const MailMessage = this.env["mail.message"];
 
-    const {
-        after,
-        around,
-        before,
-        channel_id,
-        limit = 30,
-        search_term,
-    } = await parseRequestParams(request);
+    const { channel_id, fetch_params = {} } = await parseRequestParams(request);
     const domain = [
         ["res_id", "=", channel_id],
         ["model", "=", "discuss.channel"],
         ["message_type", "!=", "user_notification"],
     ];
-    const res = MailMessage._message_fetch(domain, search_term, before, after, around, limit);
+    const res = MailMessage._message_fetch(domain, makeKwArgs(fetch_params));
     const { messages } = res;
     delete res.messages;
-    if (!around) {
+    if (!fetch_params.around) {
         MailMessage.set_message_done(messages.map((message) => message.id));
     }
     return {
@@ -465,9 +458,12 @@ async function discuss_channel_mark_as_read(request) {
     return DiscussChannelMember._mark_as_read([memberId], last_message_id, sync);
 }
 
-registerRoute("/discuss/channel/mark_as_unread", discuss_channel_mark_as_unread);
+registerRoute(
+    "/discuss/channel/set_new_message_separator",
+    discuss_channel_set_new_message_separator
+);
 /** @type {RouteCallback} */
-async function discuss_channel_mark_as_unread(request) {
+async function discuss_channel_set_new_message_separator(request) {
     const { channel_id, message_id } = await parseRequestParams(request);
     const [partner, guest] = this.env["res.partner"]._get_current_persona();
     const [memberId] = this.env["discuss.channel.member"].search([
@@ -495,9 +491,9 @@ async function discuss_history_messages(request) {
     /** @type {import("mock_models").MailNotification} */
     const MailNotification = this.env["mail.notification"];
 
-    const { after, around, before, limit = 30, search_term } = await parseRequestParams(request);
+    const { fetch_params = {} } = await parseRequestParams(request);
     const domain = [["needaction", "=", false]];
-    const res = MailMessage._message_fetch(domain, search_term, before, after, around, limit);
+    const res = MailMessage._message_fetch(domain, makeKwArgs(fetch_params));
     const { messages } = res;
     delete res.messages;
     const messagesWithNotification = messages.filter((message) => {
@@ -524,9 +520,9 @@ async function discuss_inbox_messages(request) {
     /** @type {import("mock_models").MailMessage} */
     const MailMessage = this.env["mail.message"];
 
-    const { after, around, before, limit = 30, search_term } = await parseRequestParams(request);
+    const { fetch_params = {} } = await parseRequestParams(request);
     const domain = [["needaction", "=", true]];
-    const res = MailMessage._message_fetch(domain, search_term, before, after, around, limit);
+    const res = MailMessage._message_fetch(domain, makeKwArgs(fetch_params));
     const { messages } = res;
     delete res.messages;
     return {
@@ -832,9 +828,9 @@ async function discuss_starred_messages(request) {
     /** @type {import("mock_models").MailMessage} */
     const MailMessage = this.env["mail.message"];
 
-    const { after, before, limit = 30, search_term } = await parseRequestParams(request);
+    const { fetch_params = {} } = await parseRequestParams(request);
     const domain = [["starred_partner_ids", "in", [this.env.user.partner_id]]];
-    const res = MailMessage._message_fetch(domain, search_term, before, after, false, limit);
+    const res = MailMessage._message_fetch(domain, makeKwArgs(fetch_params));
     const { messages } = res;
     delete res.messages;
     return {
@@ -872,14 +868,13 @@ async function mail_thread_messages(request) {
     /** @type {import("mock_models").MailMessage} */
     const MailMessage = this.env["mail.message"];
 
-    const { after, around, before, limit, search_term, thread_id, thread_model } =
-        await parseRequestParams(request);
+    const { fetch_params = {}, thread_id, thread_model } = await parseRequestParams(request);
     const domain = [
         ["res_id", "=", thread_id],
         ["model", "=", thread_model],
         ["message_type", "!=", "user_notification"],
     ];
-    const res = MailMessage._message_fetch(domain, search_term, before, after, around, limit);
+    const res = MailMessage._message_fetch(domain, makeKwArgs(fetch_params));
     const { messages } = res;
     delete res.messages;
     MailMessage.set_message_done(messages.map((message) => message.id));

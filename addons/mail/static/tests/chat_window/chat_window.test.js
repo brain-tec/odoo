@@ -20,10 +20,12 @@ import {
 import { describe, expect, test } from "@odoo/hoot";
 import { queryFirst } from "@odoo/hoot-dom";
 import { mockDate, tick } from "@odoo/hoot-mock";
+import { EventBus } from "@odoo/owl";
 import {
     asyncStep,
     Command,
     getService,
+    patchWithCleanup,
     serverState,
     waitForSteps,
     withUser,
@@ -99,14 +101,14 @@ test("Message post in chat window of chatter should log a note", async () => {
     await contains(".o-mail-ChatWindow");
     await contains(".o-mail-Message", {
         text: "A needaction message to have it in messaging menu",
-        contains: [".o-mail-Message-bubble.o-blue"], // colored bubble = "Send message" mode
+        contains: [".o-mail-Message-bubble"], // bubble = "Send message" mode
     });
     await contains(".o-mail-Composer [placeholder='Log an internal note…']");
     await insertText(".o-mail-ChatWindow .o-mail-Composer-input", "Test");
     triggerHotkey("control+Enter");
     await contains(".o-mail-Message", {
         text: "Test",
-        contains: [".o-mail-Message-bubble:not(.o-blue)"], // non-colored bubble = "Log note" mode
+        contains: [".o-mail-Message-bubble", { count: 0 }], // no bubble = "Log note" mode
     });
 });
 
@@ -1080,4 +1082,29 @@ test("Bigger chat windows is locally persistent (saved in local storage)", async
     await click("button:contains(Large windows)");
     await contains(".o-mail-ChatWindow.o-large");
     expect(browser.localStorage.getItem("mail.user_setting.chat_window_big")).toBe(null);
+});
+
+test("open channel in chat window from push notification", async () => {
+    patchWithCleanup(window.navigator, {
+        serviceWorker: Object.assign(new EventBus(), { register: () => Promise.resolve() }),
+    });
+    const pyEnv = await startServer();
+    const [channelId] = pyEnv["discuss.channel"].create([
+        { name: "General" },
+        {
+            name: "Sales",
+            channel_member_ids: [
+                Command.create({ partner_id: serverState.partnerId, fold_state: "open" }),
+            ],
+        },
+    ]);
+    await start();
+    await contains(".o-mail-ChatWindow", { text: "Sales" });
+    await contains(".o-mail-ChatWindow", { text: "General", count: 0 });
+    browser.navigator.serviceWorker.dispatchEvent(
+        new MessageEvent("message", {
+            data: { action: "OPEN_CHANNEL", data: { id: channelId } },
+        })
+    );
+    await contains(".o-mail-ChatWindow", { text: "General" });
 });

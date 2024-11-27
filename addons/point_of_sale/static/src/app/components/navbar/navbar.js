@@ -9,7 +9,7 @@ import {
     SaleDetailsButton,
     handleSaleDetails,
 } from "@point_of_sale/app/components/navbar/sale_details_button/sale_details_button";
-import { Component, onMounted, useState } from "@odoo/owl";
+import { Component, onMounted, useState, useExternalListener } from "@odoo/owl";
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
 import { Input } from "@point_of_sale/app/components/inputs/input/input";
 import { isBarcodeScannerSupported } from "@web/core/barcode/barcode_video_scanner";
@@ -18,6 +18,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { deduceUrl } from "@point_of_sale/utils";
 import { user } from "@web/core/user";
 import { OrderTabs } from "@point_of_sale/app/components/order_tabs/order_tabs";
+import { _t } from "@web/core/l10n/translation";
 
 export class Navbar extends Component {
     static template = "point_of_sale.Navbar";
@@ -45,6 +46,26 @@ export class Navbar extends Component {
         onMounted(async () => {
             this.isSystemUser = await user.hasGroup("base.group_system");
         });
+        useExternalListener(document, "keydown", this.handleKeydown.bind(this));
+    }
+
+    handleKeydown(event) {
+        if (
+            !this.ui.isSmall &&
+            this.inputRef &&
+            document.activeElement !== this.inputRef.el &&
+            !this.pos.getOrder()?.getSelectedOrderline() &&
+            this.noOpenDialogs() &&
+            event.key.length == 1
+        ) {
+            this.inputRef.el.focus();
+            this.inputRef.el.value = event.key;
+            event.preventDefault();
+        }
+    }
+
+    noOpenDialogs() {
+        return document.querySelectorAll(".modal-dialog, .debug-widget").length === 0;
     }
     onClickScan() {
         if (!this.pos.scanning) {
@@ -71,6 +92,13 @@ export class Navbar extends Component {
         return `/scoped_app?app_id=point_of_sale&app_name=${encodeURIComponent(
             this.pos.config.display_name
         )}&path=${encodeURIComponent(`pos/ui?config_id=${this.pos.config.id}`)}`;
+    }
+
+    async reloadProducts() {
+        this.dialog.add(SyncPopup, {
+            title: _t("Reload Products"),
+            confirm: (fullReload) => this.pos.reloadData(fullReload),
+        });
     }
 
     toggleProductView() {
@@ -126,17 +154,5 @@ export class Navbar extends Component {
 
     async showSaleDetails() {
         await handleSaleDetails(this.pos, this.hardwareProxy, this.dialog);
-    }
-
-    onSyncNotificationClick() {
-        if (this.pos.data.network.offline) {
-            this.pos.data.network.warningTriggered = false;
-        }
-
-        if (this.pos.data.network.unsyncData.length > 0) {
-            this.dialog.add(SyncPopup, {
-                confirm: () => this.pos.data.syncData(),
-            });
-        }
     }
 }

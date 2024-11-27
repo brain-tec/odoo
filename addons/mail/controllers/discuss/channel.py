@@ -48,7 +48,7 @@ class ChannelController(http.Controller):
 
     @http.route("/discuss/channel/messages", methods=["POST"], type="jsonrpc", auth="public")
     @add_guest_to_context
-    def discuss_channel_messages(self, channel_id, search_term=None, before=None, after=None, limit=30, around=None):
+    def discuss_channel_messages(self, channel_id, fetch_params=None):
         channel = request.env["discuss.channel"].search([("id", "=", channel_id)])
         if not channel:
             raise NotFound()
@@ -57,11 +57,9 @@ class ChannelController(http.Controller):
             ("model", "=", "discuss.channel"),
             ("message_type", "!=", "user_notification"),
         ]
-        res = request.env["mail.message"]._message_fetch(
-            domain, search_term=search_term, before=before, after=after, around=around, limit=limit
-        )
+        res = request.env["mail.message"]._message_fetch(domain, **(fetch_params or {}))
         messages = res.pop("messages")
-        if not request.env.user._is_public() and not around:
+        if not request.env.user._is_public() and not (fetch_params or {}).get("around"):
             messages.set_message_done()
         return {
             **res,
@@ -89,9 +87,9 @@ class ChannelController(http.Controller):
             return  # ignore if the member left in the meantime
         member._mark_as_read(last_message_id, sync=sync)
 
-    @http.route("/discuss/channel/mark_as_unread", methods=["POST"], type="jsonrpc", auth="public")
+    @http.route("/discuss/channel/set_new_message_separator", methods=["POST"], type="jsonrpc", auth="public")
     @add_guest_to_context
-    def discuss_channel_mark_as_unread(self, channel_id, message_id):
+    def discuss_channel_set_new_message_separator(self, channel_id, message_id):
         member = request.env["discuss.channel.member"].search([
             ("channel_id", "=", channel_id),
             ("is_self", "=", True),
