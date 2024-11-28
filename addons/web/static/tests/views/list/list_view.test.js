@@ -12776,6 +12776,40 @@ test(`add a new row in grouped editable="bottom" list`, async () => {
     expect(`.o_data_row`).toHaveCount(5);
 });
 
+test("editable grouped list: fold group with edited row", async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: '<list editable="top"><field name="foo"/></list>',
+        groupBy: ["bar"],
+    });
+
+    await contains(".o_group_header").click();
+    expect(".o_data_row .o_data_cell").toHaveText("blip");
+    await contains(".o_data_row .o_data_cell").click();
+    await contains(".o_selected_row [name=foo] input").edit("some change");
+    await contains(".o_group_header").click();
+    await contains(".o_group_header").click();
+    expect(".o_data_row .o_data_cell").toHaveText("some change");
+});
+
+test("editable grouped list: add row with edited row", async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: '<list editable="bottom"><field name="foo"/></list>',
+        groupBy: ["bar"],
+    });
+
+    await contains(".o_group_header").click();
+    expect(".o_data_row").toHaveCount(1);
+    await contains(".o_data_row .o_data_cell").click();
+    await contains(".o_selected_row [name=foo] input").edit("some change");
+    await contains(".o_group_field_row_add a").click();
+    expect(".o_data_row").toHaveCount(2);
+    expect(".o_data_row:first .o_data_cell").toHaveText("some change");
+});
+
 test(`add and discard a line through keyboard navigation without crashing`, async () => {
     await mountView({
         resModel: "foo",
@@ -16126,4 +16160,29 @@ test("open record, with invalid record in list", async () => {
     await contains(".o_data_cell").click();
 
     expect(".o_form_view").toHaveCount(1);
+});
+
+test('select records range with shift click on several page', async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+        <tree limit="3">
+            <field name="foo"/>
+            <field name="int_field"/>
+        </tree>`,
+    });
+
+    await contains(`.o_data_row:eq(0) .o_list_record_selector input`).click();
+    expect(`.o_data_row:eq(0) .o_list_record_selector input`).toBeChecked();
+
+
+    expect(`.o_list_selection_box .o_list_select_domain`).toHaveCount(0);
+    expect(`.o_list_selection_box`).toHaveText("1\nselected");
+    expect(`.o_data_row .o_list_record_selector input:checked`).toHaveCount(1);
+    // click the pager next button
+    await contains(".o_pager_next").click();
+    // shift click the first record of the second page
+    await contains(`.o_data_row .o_list_record_selector input`).click({ shiftKey: true });
+    expect(`.o_list_selection_box`).toHaveText("1\nselected\n Select all 4");
 });
