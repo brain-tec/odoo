@@ -24,19 +24,19 @@ export function assertCartAmounts({taxes = false, untaxed = false, total = false
     }
     if (untaxed) {
         steps.push({
-            content: 'Check if the tax is correct',
+            content: 'Check if the subtotal is correct',
             trigger: `tr#order_total_untaxed .oe_currency_value:contains(/^${untaxed}$/)`,
         });
     }
     if (total) {
         steps.push({
-            content: 'Check if the tax is correct',
+            content: 'Check if the total is correct',
             trigger: `tr#order_total .oe_currency_value:contains(/^${total}$/)`,
         });
     }
     if (delivery) {
         steps.push({
-            content: 'Check if the tax is correct',
+            content: 'Check if the delivery is correct',
             trigger: `tr#order_delivery .oe_currency_value:contains(/^${delivery}$/)`,
         });
     }
@@ -65,32 +65,32 @@ export function assertProductPrice(attribute, value, productName) {
     };
 }
 
-export function fillAdressForm(adressParams = {
-    name: "John Doe",
-    phone: "123456789",
-    email: "johndoe@gmail.com",
-    street: "1 rue de la paix",
-    city: "Paris",
-    zip: "75000"
-}) {
-    let steps = [];
+export function fillAdressForm(
+    adressParams = {
+        name: "John Doe",
+        phone: "123456789",
+        email: "johndoe@gmail.com",
+        street: "1 rue de la paix",
+        city: "Paris",
+        zip: "75000",
+    }
+) {
+    const steps = [];
+    for (const arg of ["name", "phone", "email", "street", "city", "zip"]) {
+        steps.push({
+            content: `Address filling ${arg}`,
+            trigger: `form.checkout_autoformat input[name=${arg}]`,
+            run: `edit ${adressParams[arg]}`,
+        });
+    }
     steps.push({
-        content: "Address filling",
-        trigger: 'form.checkout_autoformat',
-        run() {
-            document.querySelector('input[name="name"]').value = adressParams.name;
-            document.querySelector('input[name="phone"]').value = adressParams.phone;
-            document.querySelector('input[name="email"]').value = adressParams.email;
-            document.querySelector('input[name="street"]').value = adressParams.street;
-            document.querySelector('input[name="city"]').value = adressParams.city;
-            document.querySelector('input[name="zip"]').value = adressParams.zip;
-            document.querySelectorAll("#o_country_id option")[1].selected = true;
-        }
+        trigger: "#o_country_id",
+        run: "selectByLabel Belgium",
     });
     steps.push({
         content: "Continue checkout",
-        trigger: '#save_address',
-        run: 'click',
+        trigger: "#save_address",
+        run: "click",
     });
     return steps;
 }
