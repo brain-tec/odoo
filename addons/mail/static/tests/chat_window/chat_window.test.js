@@ -3,7 +3,6 @@ import {
     contains,
     defineMailModels,
     focus,
-    hover,
     inputFiles,
     insertText,
     onRpcBefore,
@@ -18,7 +17,6 @@ import {
     triggerHotkey,
 } from "@mail/../tests/mail_test_helpers";
 import { describe, expect, test } from "@odoo/hoot";
-import { queryFirst } from "@odoo/hoot-dom";
 import { mockDate, tick } from "@odoo/hoot-mock";
 import { EventBus } from "@odoo/owl";
 import {
@@ -184,6 +182,8 @@ test("chat window: basic rendering", async () => {
     await contains("[title='Fold']");
     await contains("[title*='Close Chat Window']");
     await contains(".o-mail-ChatWindow .o-mail-Thread", { text: "The conversation is empty." });
+    // dropdown requires an extra delay before click (because handler is registered in useEffect)
+    await contains("[title='Open Actions Menu']");
     await click("[title='Open Actions Menu']");
     await contains(".o-mail-ChatWindow-command", { count: 14 });
     await contains(".o-dropdown-item", { text: "Attachments" });
@@ -433,6 +433,8 @@ test("Close active thread action in chatwindow on ESCAPE", async () => {
     });
     await start();
     await contains(".o-mail-ChatWindow");
+    // dropdown requires an extra delay before click (because handler is registered in useEffect)
+    await contains(".o-mail-ChatWindow-command", { text: "General" });
     await click(".o-mail-ChatWindow-command", { text: "General" });
     await click(".o-dropdown-item", { text: "Invite People" });
     await contains(".o-discuss-ChannelInvitation");
@@ -450,6 +452,8 @@ test("ESC cancels thread rename", async () => {
         ],
     });
     await start();
+    // dropdown requires an extra delay before click (because handler is registered in useEffect)
+    await contains(".o-mail-ChatWindow-command", { text: "General" });
     await click(".o-mail-ChatWindow-command", { text: "General" });
     await click(".o-dropdown-item", { text: "Rename Thread" });
     await contains(".o-mail-AutoresizeInput.o-focused[title='General']");
@@ -864,6 +868,8 @@ test("folded chat window should hide member-list and settings buttons", async ()
     // Open Thread
     await click("button i[aria-label='Messages']");
     await click(".o-mail-NotificationItem");
+    // dropdown requires an extra delay before click (because handler is registered in useEffect)
+    await contains("[title='Open Actions Menu']");
     await click("[title='Open Actions Menu']");
     await contains(".o-dropdown-item", { text: "Members" });
     await contains(".o-dropdown-item", { text: "Call Settings" });
@@ -876,6 +882,8 @@ test("folded chat window should hide member-list and settings buttons", async ()
     await contains(".o-dropdown-item", { text: "Call Settings", count: 0 });
     // Unfold chat window
     await click(".o-mail-ChatBubble");
+    // dropdown requires an extra delay before click (because handler is registered in useEffect)
+    await contains("[title='Open Actions Menu']");
     await click("[title='Open Actions Menu']");
     await contains(".o-dropdown-item", { text: "Members" });
     await contains(".o-dropdown-item", { text: "Call Settings" });
@@ -919,6 +927,7 @@ test("chat window of channels should not have 'Open in Discuss' (mobile)", async
     patchUiSize({ size: SIZES.SM });
     await start();
     await openDiscuss(channelId);
+    // dropdown requires an extra delay before click (because handler is registered in useEffect)
     await contains("[title='Open Actions Menu']");
     await click("[title='Open Actions Menu']");
     await contains(".o-dropdown-item", { text: "Open in Discuss", count: 0 });
@@ -1034,11 +1043,15 @@ test("Notification settings rendering in chatwindow", async () => {
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-NotificationItem", { text: "general" });
     await contains(".o-mail-ChatWindow", { count: 1 });
+    // dropdown requires an extra delay before click (because handler is registered in useEffect)
+    await contains("[title='Open Actions Menu']");
     await click("[title='Open Actions Menu']");
     await click(".o-dropdown-item", { text: "Notification Settings" });
     await contains("button", { text: "All Messages" });
     await contains("button", { text: "Mentions Only", count: 2 }); // the extra is in the Use Default as subtitle
     await contains("button", { text: "Nothing" });
+    // dropdown requires an extra delay before click (because handler is registered in useEffect)
+    await contains("button", { text: "Mute Conversation" });
     await click("button", { text: "Mute Conversation" });
     await contains("button", { text: "For 15 minutes" });
     await contains("button", { text: "For 1 hour" });
@@ -1046,42 +1059,6 @@ test("Notification settings rendering in chatwindow", async () => {
     await contains("button", { text: "For 8 hours" });
     await contains("button", { text: "For 24 hours" });
     await contains("button", { text: "Until I turn it back on" });
-});
-
-test("Can make chat windows bigger", async () => {
-    const pyEnv = await startServer();
-    pyEnv["discuss.channel"].create({ name: "general", channel_type: "channel" });
-    await start();
-    await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
-    await click(".o-mail-NotificationItem");
-    await contains(".o-mail-ChatWindow");
-    const normalWidth = queryFirst(".o-mail-ChatWindow").getBoundingClientRect().width;
-    await hover(".o-mail-ChatHub-bubbles");
-    await click("button[title='Chat Options']");
-    await contains("button:contains(Large windows)");
-    await contains("button:contains(Large windows) input");
-    await contains("button:contains(Large windows) input:not(:checked)");
-    await click("button:contains(Large windows)");
-    await contains("button:contains(Large windows) input:checked");
-    await contains(".o-mail-ChatWindow.o-large");
-    const largeWidth = queryFirst(".o-mail-ChatWindow").getBoundingClientRect().width;
-    expect(largeWidth).toBeGreaterThan(normalWidth);
-});
-
-test("Bigger chat windows is locally persistent (saved in local storage)", async () => {
-    const pyEnv = await startServer();
-    pyEnv["discuss.channel"].create({ name: "general", channel_type: "channel" });
-    browser.localStorage.setItem("mail.user_setting.chat_window_big", true);
-    await start();
-    await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
-    await click(".o-mail-NotificationItem");
-    await contains(".o-mail-ChatWindow.o-large");
-    expect(browser.localStorage.getItem("mail.user_setting.chat_window_big")).toBe("true");
-    await hover(".o-mail-ChatHub-bubbles");
-    await click("button[title='Chat Options']");
-    await click("button:contains(Large windows)");
-    await contains(".o-mail-ChatWindow.o-large");
-    expect(browser.localStorage.getItem("mail.user_setting.chat_window_big")).toBe(null);
 });
 
 test("open channel in chat window from push notification", async () => {

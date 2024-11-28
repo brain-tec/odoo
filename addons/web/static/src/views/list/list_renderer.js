@@ -450,7 +450,6 @@ export class ListRenderer extends Component {
             res_id: resId,
             type: "ir.actions.act_window",
             views: [[false, "form"]],
-            flags: { mode: "edit" },
         });
     }
 
@@ -934,7 +933,7 @@ export class ListRenderer extends Component {
         return {
             offset: list.offset,
             limit: list.limit,
-            total: list.isGrouped ? list.count : group.count,
+            total: list.count,
             onUpdate: async ({ offset, limit }) => {
                 await list.load({ limit, offset });
                 this.render(true);
@@ -1644,10 +1643,7 @@ export class ListRenderer extends Component {
     }
 
     showGroupPager(group) {
-        return (
-            !group.isFolded &&
-            group.list.limit < (group.list.isGrouped ? group.list.count : group.count)
-        );
+        return !group.isFolded && group.list.limit < group.list.count;
     }
 
     /**
