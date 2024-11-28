@@ -13700,7 +13700,7 @@ QUnit.module("Views", (hooks) => {
             "o_readonly_modifier"
         );
 
-        await click(target.querySelector(".o_selected_row .o_field_many2one"));
+        await click(target.querySelector(".o_selected_row .o_field_many2one input"));
         assert.strictEqual(
             document.activeElement,
             target.querySelector(".o_selected_row .o_field_many2one input")
@@ -16600,6 +16600,48 @@ QUnit.module("Views", (hooks) => {
         await editInput(target, '.o_selected_row [name="foo"] input', "pla");
         await clickSave(target);
         assert.containsN(target, ".o_data_row", 5);
+    });
+
+    QUnit.test("editable grouped list: fold group with edited row", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree editable="top"><field name="foo"/></tree>',
+            groupBy: ["bar"],
+        });
+
+        await click(target.querySelector(".o_group_header"));
+        assert.strictEqual(target.querySelector(".o_data_row .o_data_cell").innerText, "blip");
+        await click(target.querySelector(".o_data_row .o_data_cell"));
+        await editInput(target, ".o_selected_row [name=foo] input", "some change");
+        await click(target.querySelector(".o_group_header"));
+        await click(target.querySelector(".o_group_header"));
+        assert.strictEqual(
+            target.querySelector(".o_data_row .o_data_cell").innerText,
+            "some change"
+        );
+    });
+
+    QUnit.test("editable grouped list: add row with edited row", async function (assert) {
+        await makeView({
+            type: "list",
+            resModel: "foo",
+            serverData,
+            arch: '<tree editable="bottom"><field name="foo"/></tree>',
+            groupBy: ["bar"],
+        });
+
+        await click(target.querySelector(".o_group_header"));
+        assert.containsOnce(target, ".o_data_row");
+        await click(target.querySelector(".o_data_row .o_data_cell"));
+        await editInput(target, ".o_selected_row [name=foo] input", "some change");
+        await click(target.querySelector(".o_group_field_row_add a"));
+        assert.containsN(target, ".o_data_row", 2);
+        assert.strictEqual(
+            target.querySelector(".o_data_row .o_data_cell").innerText,
+            "some change"
+        );
     });
 
     QUnit.test(
