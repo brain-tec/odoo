@@ -33,7 +33,6 @@
         ],
         'web.assets_backend': [
             'mrp_subcontracting/static/src/components/**/*',
-            'mrp_subcontracting/static/src/views/**/*',
             'mrp_subcontracting/static/src/subcontracting_portal/move_list_view.js',
         ],
         'web.assets_frontend': [
@@ -55,7 +54,6 @@
             'web/static/src/core/color_picker/color_picker.scss',
             'web/static/src/scss/mimetypes.scss',
             'web/static/src/scss/ui.scss',
-            'web/static/src/legacy/scss/ui.scss',
             'web/static/src/views/fields/translation_dialog.scss',
             'web/static/src/scss/fontawesome_overridden.scss',
 
@@ -127,8 +125,6 @@
             'web/static/src/webclient/actions/reports/*.xml',
 
             'web/static/src/env.js',
-
-            'web/static/src/legacy/scss/fields.scss',
 
             'base/static/src/scss/res_partner.scss',
 
