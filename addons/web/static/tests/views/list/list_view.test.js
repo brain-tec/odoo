@@ -16446,3 +16446,78 @@ test("two pages, go page 2, record deleted meanwhile (grouped case)", async () =
     expect(".o_data_row").toHaveCount(3);
     expect(".o_group_header .o_pager").toHaveCount(0);
 });
+
+test("open record, with invalid record in list", async () => {
+    // in this scenario, the record is already invalid in db, so we should be allowed to
+    // leave it
+    Foo._records[0].foo = false;
+    Foo._views = {
+        form: `<form><field name="foo"/><field name="int_field"/></form>`,
+        list: `<list><field name="foo" required="1"/><field name="int_field"/></list>`,
+        search: `<search/>`,
+    };
+
+    mockService("notification", {
+        add() {
+            throw new Error("should not display a notification");
+        },
+    });
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction({
+        res_model: "foo",
+        type: "ir.actions.act_window",
+        views: [
+            [false, "list"],
+            [false, "form"],
+        ],
+    });
+
+    await contains(".o_data_cell").click();
+
+    expect(".o_form_view").toHaveCount(1);
+});
+
+test("Open record in new tab on ctrl+click and middleclick", async () => {
+    await mountView({
+        type: "list",
+        resModel: "res.partner",
+        actionMenus: {},
+        arch: `
+            <list>
+                <field name="name" />
+            </list>`,
+        selectRecord(resId, options) {
+            expect.step(`open record - newWindow: ${options.newWindow}`);
+        },
+    });
+    await contains(".o_data_cell").click({ ctrlKey: true });
+    expect.verifySteps(["open record - newWindow: true"]);
+    getFixture()
+        .querySelector(".o_data_cell")
+        .dispatchEvent(new PointerEvent("auxclick", { button: 1 }));
+    await animationFrame();
+    expect.verifySteps(["open record - newWindow: true"]);
+});
+
+test("Open record in new tab on ctrl+click and middleclick for an editable list", async () => {
+    await mountView({
+        type: "list",
+        resModel: "res.partner",
+        actionMenus: {},
+        arch: `
+            <list editable="bottom" open_form_view="true">
+                <field name="name" />
+            </list>`,
+        selectRecord(resId, options) {
+            expect.step(`open record - newWindow: ${options.newWindow}`);
+        },
+    });
+    await contains(".o_list_record_open_form_view").click({ ctrlKey: true });
+    expect.verifySteps(["open record - newWindow: true"]);
+    getFixture()
+        .querySelector(".o_list_record_open_form_view")
+        .dispatchEvent(new PointerEvent("auxclick", { button: 1 }));
+    await animationFrame();
+    expect.verifySteps(["open record - newWindow: true"]);
+});
