@@ -284,8 +284,10 @@ class AccountAccount(models.Model):
     def _check_company_consistency(self):
         if accounts_without_company := self.filtered(lambda a: not a.sudo().company_ids):
             raise ValidationError(
-                _("The following accounts must be assigned to at least one company:")
-                + "\n" + "\n".join(f"- {account.display_name}" for account in accounts_without_company)
+                self.env._(
+                    "The following accounts must be assigned to at least one company:\n%(accounts)s",
+                    accounts="\n".join(f"- {account.display_name}" for account in accounts_without_company),
+                ),
             )
         if self.filtered(lambda a: a.account_type == 'asset_cash' and len(a.company_ids) > 1):
             raise ValidationError(_("Bank & Cash accounts cannot be shared between companies."))
@@ -1438,7 +1440,7 @@ class AccountGroup(models.Model):
     name = fields.Char(required=True, translate=True)
     code_prefix_start = fields.Char(compute='_compute_code_prefix_start', readonly=False, store=True, precompute=True)
     code_prefix_end = fields.Char(compute='_compute_code_prefix_end', readonly=False, store=True, precompute=True)
-    company_id = fields.Many2one('res.company', required=True, readonly=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', required=True, readonly=True, default=lambda self: self.env.company.root_id)
 
     _check_length_prefix = models.Constraint(
         "CHECK(char_length(COALESCE(code_prefix_start, '')) = char_length(COALESCE(code_prefix_end, '')))",
