@@ -85,7 +85,15 @@ class StockPickingBatch(models.Model):
         for batch in self:
             estimated_shipping_weight = 0
             estimated_shipping_volume = 0
-            for move in self.picking_ids.move_ids:
+            # packs
+            for pack in self.move_line_ids.result_package_id:
+                p_type = pack.package_type_id
+                estimated_shipping_weight += pack.shipping_weight
+                if p_type:
+                    estimated_shipping_weight += p_type.base_weight or 0
+                    estimated_shipping_volume += (p_type.packaging_length * p_type.width * p_type.height) / 1000.0**3
+            # move without packs
+            for move in self.picking_ids.move_ids_without_package:
                 estimated_shipping_weight += move.product_id.weight * move.product_qty
                 estimated_shipping_volume += move.product_id.volume * move.product_qty
             batch.estimated_shipping_weight = estimated_shipping_weight
@@ -262,14 +270,7 @@ class StockPickingBatch(models.Model):
         """
         self.ensure_one()
         if self.state not in ('done', 'cancel'):
-            move_line_ids = self.picking_ids[0]._package_move_lines(batch_pack=True)
-            if move_line_ids:
-                res = move_line_ids.picking_id[0]._pre_put_in_pack_hook(move_line_ids)
-                if res:
-                    return res
-                package = move_line_ids.picking_id._put_in_pack(move_line_ids)
-                return move_line_ids.picking_id[0]._post_put_in_pack_hook(package)
-            raise UserError(_("Please add 'Done' quantities to the batch picking to create a new pack."))
+            return self.move_line_ids.action_put_in_pack()
 
     def action_view_reception_report(self):
         action = self.picking_ids[0].action_view_reception_report()

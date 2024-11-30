@@ -59,7 +59,7 @@ class StockPickingType(models.Model):
     @api.model
     def _is_auto_wave_grouped(self):
         self.ensure_one()
-        return any(self[key] for key in self._get_wave_group_by_keys())
+        return self.auto_batch and any(self[key] for key in self._get_wave_group_by_keys())
 
     @api.model
     def _get_batch_group_by_keys(self):
@@ -289,11 +289,6 @@ class StockPicking(models.Model):
         if self.picking_type_id.batch_group_by_dest_loc and self.location_dest_id:
             description_items.append(self.location_dest_id.display_name)
         return ', '.join(description_items)
-
-    def _package_move_lines(self, batch_pack=False, move_lines_to_pack=False):
-        if batch_pack:
-            return super(StockPicking, self.batch_id.picking_ids if self.batch_id else self)._package_move_lines(batch_pack, move_lines_to_pack)
-        return super()._package_move_lines(batch_pack, move_lines_to_pack)
 
     def assign_batch_user(self, user_id):
         if not user_id:
