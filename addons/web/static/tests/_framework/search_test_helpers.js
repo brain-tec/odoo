@@ -215,9 +215,9 @@ export async function toggleFavoriteMenu() {
 /**
  * @param {string} text
  */
-export async function deleteFavorite(text) {
+export async function editFavorite(text) {
     await ensureSearchBarMenu();
-    await contains(`.o_favorite_menu .o_menu_item:contains(/^${text}$/) i.fa-trash-o`).click();
+    await contains(`.o_favorite_menu .o_menu_item:contains(/^${text}$/) i.fa-pencil`).click();
 }
 
 export async function toggleSaveFavorite() {
@@ -277,7 +277,12 @@ export async function validateSearch() {
  * @param {import("./mock_server/mock_server").ViewType} viewType
  */
 export async function switchView(viewType) {
-    await contains(`button.o_switch_view.o_${viewType}`).click();
+    if (getMockEnv().isSmall) {
+        await contains(".o_cp_switch_buttons .dropdown-toggle").click();
+        await contains(`.dropdown-item:contains(${viewType.toUpperCase()})`).click();
+    } else {
+        await contains(`button.o_switch_view.o_${viewType}`).click();
+    }
 }
 
 //-----------------------------------------------------------------------------
