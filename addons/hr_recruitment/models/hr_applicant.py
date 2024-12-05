@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime
 
 from odoo import api, fields, models, tools
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools.translate import _
 
@@ -347,6 +347,8 @@ class Applicant(models.Model):
         ], ['ids:array_agg(id)'], groupby=['res_id'])
         attachments_by_candidate = {e['res_id']: e['ids'] for e in attachments_result}
         for applicant in applicants:
+            if applicant.company_id != applicant.candidate_id.company_id:
+                raise ValidationError(_("You cannot create an applicant in a different company than the candidate"))
             candidate_id = applicant.candidate_id.id
             if candidate_id not in attachments_by_candidate:
                 continue
@@ -397,6 +399,11 @@ class Applicant(models.Model):
             for applicant in self:
                 if applicant.job_id.date_to:
                     applicant.candidate_id.availability = applicant.job_id.date_to + relativedelta(days=1)
+
+        if vals.get("company_id") and not self.env.context.get('do_not_propagate_company', False):
+            self.candidate_id.with_context(do_not_propagate_company=True).write({"company_id": vals["company_id"]})
+            self.candidate_id.applicant_ids.with_context(do_not_propagate_company=True).write({"company_id": vals["company_id"]})
+
         return res
 
     def get_empty_list_help(self, help_message):
@@ -581,7 +588,7 @@ class Applicant(models.Model):
         # do not want to explicitly set user_id to False; however we do not
         # want the gateway user to be responsible if no other responsible is
         # found.
-        self = self.with_context(default_user_id=False)
+        self = self.with_context(default_user_id=False, mail_notify_author=True)  # Allows sending stage updates to the author
         stage = False
         if custom_values and 'job_id' in custom_values:
             stage = self.env['hr.job'].browse(custom_values['job_id'])._get_first_stage()
