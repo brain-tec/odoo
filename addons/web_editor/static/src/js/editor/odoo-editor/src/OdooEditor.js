@@ -3521,9 +3521,24 @@ export class OdooEditor extends EventTarget {
             if (!node.matches || node.matches(CLIPBOARD_BLACKLISTS.remove.join(','))) {
                 node.remove();
             } else {
-                // Unwrap the illegal node's contents.
-                for (const unwrappedNode of unwrapContents(node)) {
-                    this._cleanForPaste(unwrappedNode);
+                let childNodes;
+                if (node.nodeName === 'DIV' && [...node.childNodes].every(n => !isBlock(n))) {
+                    // Convert <div> to <p> to preserve the inline structure
+                    // while maintaining block-level behaviour.
+                    const dir = node.getAttribute('dir');
+                    const p = this.document.createElement('p');
+                    if (dir) {
+                        p.setAttribute('dir', dir);
+                    }
+                    p.append(...node.childNodes);
+                    node.replaceWith(p);
+                    childNodes = p.childNodes;
+                } else {
+                    // Unwrap the illegal node's contents.
+                    childNodes = unwrapContents(node);
+                }
+                for (const child of childNodes) {
+                    this._cleanForPaste(child);
                 }
             }
         } else if (node.nodeType !== Node.TEXT_NODE) {
@@ -3940,15 +3955,16 @@ export class OdooEditor extends EventTarget {
             // just its rows.
             rangeContent = tableClone;
         }
-        const table = closestElement(range.startContainer, 'table');
-        if (rangeContent.firstChild.nodeName === 'TABLE' && table) {
+        const startTable = closestElement(range.startContainer, 'table');
+        if (rangeContent.firstChild.nodeName === 'TABLE' && startTable) {
             // Make sure the full leading table is copied.
-            rangeContent.firstChild.after(table.cloneNode(true));
+            rangeContent.firstChild.after(startTable.cloneNode(true));
             rangeContent.firstChild.remove();
         }
-        if (rangeContent.lastChild.nodeName === 'TABLE') {
+        const endTable = closestElement(range.endContainer, 'table');
+        if (rangeContent.lastChild.nodeName === 'TABLE' && endTable) {
             // Make sure the full trailing table is copied.
-            rangeContent.lastChild.before(closestElement(range.endContainer, 'table').cloneNode(true));
+            rangeContent.lastChild.before(endTable.cloneNode(true));
             rangeContent.lastChild.remove();
         }
 
