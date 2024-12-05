@@ -2067,13 +2067,11 @@ export class OdooEditor extends EventTarget {
     bindExecCommand(element) {
         for (const buttonEl of element.querySelectorAll('[data-call]')) {
             buttonEl.addEventListener('click', ev => {
-                if (!this.isSelectionInEditable()) {
-                    this.historyResetLatestComputedSelection(true);
-                }
                 const arg1 = buttonEl.dataset.arg1;
                 const args = arg1 && arg1.split(",") || [];
                 this.execCommand(buttonEl.dataset.call, ...args);
 
+                this.historyResetLatestComputedSelection(true);
                 ev.preventDefault();
                 this._updateToolbar();
             });
@@ -3238,9 +3236,21 @@ export class OdooEditor extends EventTarget {
                     : 'none';
             }
 
+            const selectionText = sel.toString().replace(/\s+/g, "");
             const translateDropdown = this.toolbar.querySelector('#translate');
             if (translateDropdown) {
-                translateDropdown.style.display = sel.isCollapsed ? 'none' : '';
+                const translateDropdownBtn = translateDropdown.querySelector('.btn');
+                if (sel.isCollapsed) {
+                    translateDropdown.style.display = 'none';
+                } else {
+                    translateDropdown.style.display = '';
+                    translateDropdownBtn.classList[!selectionText ? 'add' : 'remove']('disabled');
+                }
+            }
+
+            const chatGptBtn = this.toolbar.querySelector('#open-chatgpt.btn');
+            if (chatGptBtn && !sel.isCollapsed) {
+                chatGptBtn.classList[!selectionText ? 'add' : 'remove']('disabled');
             }
         }
         this.updateColorpickerLabels();
@@ -3539,9 +3549,24 @@ export class OdooEditor extends EventTarget {
             if (!node.matches || node.matches(CLIPBOARD_BLACKLISTS.remove.join(','))) {
                 node.remove();
             } else {
-                // Unwrap the illegal node's contents.
-                for (const unwrappedNode of unwrapContents(node)) {
-                    this._cleanForPaste(unwrappedNode);
+                let childNodes;
+                if (node.nodeName === 'DIV' && [...node.childNodes].every(n => !isBlock(n))) {
+                    // Convert <div> to <p> to preserve the inline structure
+                    // while maintaining block-level behaviour.
+                    const dir = node.getAttribute('dir');
+                    const p = this.document.createElement('p');
+                    if (dir) {
+                        p.setAttribute('dir', dir);
+                    }
+                    p.append(...node.childNodes);
+                    node.replaceWith(p);
+                    childNodes = p.childNodes;
+                } else {
+                    // Unwrap the illegal node's contents.
+                    childNodes = unwrapContents(node);
+                }
+                for (const child of childNodes) {
+                    this._cleanForPaste(child);
                 }
             }
         } else if (node.nodeType !== Node.TEXT_NODE) {
@@ -3987,15 +4012,16 @@ export class OdooEditor extends EventTarget {
             // just its rows.
             rangeContent = tableClone;
         }
-        const table = closestElement(range.startContainer, 'table');
-        if (rangeContent.firstChild.nodeName === 'TABLE' && table) {
+        const startTable = closestElement(range.startContainer, 'table');
+        if (rangeContent.firstChild.nodeName === 'TABLE' && startTable) {
             // Make sure the full leading table is copied.
-            rangeContent.firstChild.after(table.cloneNode(true));
+            rangeContent.firstChild.after(startTable.cloneNode(true));
             rangeContent.firstChild.remove();
         }
-        if (rangeContent.lastChild.nodeName === 'TABLE') {
+        const endTable = closestElement(range.endContainer, 'table');
+        if (rangeContent.lastChild.nodeName === 'TABLE' && endTable) {
             // Make sure the full trailing table is copied.
-            rangeContent.lastChild.before(closestElement(range.endContainer, 'table').cloneNode(true));
+            rangeContent.lastChild.before(endTable.cloneNode(true));
             rangeContent.lastChild.remove();
         }
 
@@ -4180,21 +4206,25 @@ export class OdooEditor extends EventTarget {
             ev.preventDefault();
             ev.stopPropagation();
             this.execCommand('bold');
+            this.historyResetLatestComputedSelection(true);
         } else if (IS_KEYBOARD_EVENT_ITALIC(ev)) {
             // Ctrl-I
             ev.preventDefault();
             ev.stopPropagation();
             this.execCommand('italic');
+            this.historyResetLatestComputedSelection(true);
         } else if (IS_KEYBOARD_EVENT_UNDERLINE(ev)) {
             // Ctrl-U
             ev.preventDefault();
             ev.stopPropagation();
             this.execCommand('underline');
+            this.historyResetLatestComputedSelection(true);
         } else if (IS_KEYBOARD_EVENT_STRIKETHROUGH(ev)) {
             // Ctrl-5 / Ctrl-shift-(
             ev.preventDefault();
             ev.stopPropagation();
             this.execCommand('strikeThrough');
+            this.historyResetLatestComputedSelection(true);
         } else if (IS_KEYBOARD_EVENT_LEFT_ARROW(ev) || IS_KEYBOARD_EVENT_RIGHT_ARROW(ev)) {
             const isRTL = this.options.direction === 'rtl';
             const previousName = isRTL ? 'next' : 'previous';
