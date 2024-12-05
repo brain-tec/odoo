@@ -70,6 +70,10 @@ export function makeTemplateFactory(name, factory) {
 
             // Patch "getTemplates" to access local cache
             exports.getTemplate = function mockedGetTemplate(name) {
+                if (!this) {
+                    // Used outside of Owl.
+                    return getTemplate(name);
+                }
                 const rawTemplate = getTemplate(name) || this.rawTemplates[name];
                 if (typeof rawTemplate === "function" && !(rawTemplate instanceof Element)) {
                     return rawTemplate;
