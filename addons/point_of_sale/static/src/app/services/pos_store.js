@@ -377,7 +377,8 @@ export class PosStore extends WithLazyGetterTrap {
             if (order && (await this._onBeforeDeleteOrder(order))) {
                 if (
                     typeof order.id === "number" &&
-                    Object.keys(order.last_order_preparation_change).length > 0
+                    Object.keys(order.last_order_preparation_change).length > 0 &&
+                    !order.isTransferedOrder
                 ) {
                     await this.sendOrderInPreparation(order, true);
                 }
@@ -1145,7 +1146,7 @@ export class PosStore extends WithLazyGetterTrap {
                 context,
             });
             const missingRecords = await this.data.missingRecursive(data);
-            const newData = this.models.loadData(missingRecords);
+            const newData = this.models.loadData(this.models, missingRecords);
 
             for (const line of newData["pos.order.line"]) {
                 const refundedOrderLine = line.refunded_orderline_id;

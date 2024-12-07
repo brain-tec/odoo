@@ -32,7 +32,7 @@ class ChatbotCase(chatbot_common.ChatbotCase):
 
     def test_chatbot_is_forward_operator_child(self):
         self.assertEqual([step.is_forward_operator_child for step in self.chatbot_script.script_step_ids],
-                         [False, False, False, False, False, False, False, True, True, True, False, False, False, False],
+                         [False, False, False, False, False, False, False, True, True, False, True, False, False, False, False],
                          "Steps 'step_no_one_available', 'step_no_operator_dispatch', 'step_just_leaving'"
                          "should be flagged as forward operator child.")
 
@@ -40,7 +40,7 @@ class ChatbotCase(chatbot_common.ChatbotCase):
         self.chatbot_script.script_step_ids.invalidate_recordset(['is_forward_operator_child'])
 
         self.assertEqual([step.is_forward_operator_child for step in self.chatbot_script.script_step_ids],
-                         [False, False, False, False, False, False, False, True, False, False, False, False, False, False],
+                         [False, False, False, False, False, False, False, True, False, False, False, False, False, False, False],
                          "Only step 'step_no_one_available' should be flagged as forward operator child.")
 
     def test_chatbot_steps(self):
@@ -108,3 +108,26 @@ class ChatbotCase(chatbot_common.ChatbotCase):
         welcome_steps = self.chatbot_script._get_welcome_steps()
         self.assertEqual(len(welcome_steps), 1)
         self.assertEqual(welcome_steps, self.chatbot_script.script_step_ids[0])
+
+    def test_chatbot_not_invited_to_rtc_calls(self):
+        data = self.make_jsonrpc_request(
+            "/im_livechat/get_session",
+            {
+                "anonymous_name": "Test Visitor",
+                "channel_id": self.livechat_channel.id,
+                "chatbot_script_id": self.chatbot_script.id,
+            },
+        )
+        discuss_channel = (
+            self.env["discuss.channel"].sudo().browse(data["discuss.channel"][0]["id"])
+        )
+        self.assertEqual(discuss_channel.livechat_operator_id, self.chatbot_script.operator_partner_id)
+        discuss_channel.add_members(partner_ids=self.env.user.partner_id.ids)
+        self_member = discuss_channel.channel_member_ids.filtered(lambda m: m.is_self)
+        bot_member = discuss_channel.channel_member_ids.filtered(
+            lambda m: m.partner_id == self.chatbot_script.operator_partner_id
+        )
+        guest_member = discuss_channel.channel_member_ids.filtered(lambda m: bool(m.guest_id))
+        self_member._rtc_join_call()
+        self.assertTrue(guest_member.rtc_inviting_session_id)
+        self.assertFalse(bot_member.rtc_inviting_session_id)
