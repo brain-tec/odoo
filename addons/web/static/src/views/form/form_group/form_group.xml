@@ -16,7 +16,7 @@
         <div t-if="props.slots and props.slots.title" t-attf-class="g-col-sm-{{ props.maxCols }}">
             <t t-slot="title" />
         </div>
-        <div t-foreach="getRows()" t-as="row" t-key="row_index" class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0" t-if="row.isVisible">
+        <t t-foreach="getRows()" t-as="row" t-key="row_index" t-if="row.isVisible">
             <t t-foreach="row" t-as="cell" t-key="cell_index">
 
                 <t t-if="cell.subType === 'item_component'">
@@ -25,7 +25,7 @@
 
                 <t t-else="">
                     <div
-                        class="o_cell"
+                        class="o_cell o_cell_custom"
                         t-attf-style="{{ cell.itemSpan > 1 ? 'grid-column: span ' + cell.itemSpan + ';' : '' }}"
                         t-attf-class="{{ cell.subType === 'label' ? 'o_wrap_label text-break text-900' : null }}"
                         t-if="cell.isVisible">
@@ -34,7 +34,7 @@
                 </t>
 
             </t>
-        </div>
+        </t>
     </div>
 </t>
 
