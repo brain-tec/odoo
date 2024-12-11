@@ -25,6 +25,7 @@ import {
     useChildSubEnv,
     xml,
     reactive,
+    status,
 } from "@odoo/owl";
 import { downloadReport, getReportUrl } from "./reports/utils";
 import { omit, pick, shallowEqual } from "@web/core/utils/objects";
@@ -437,23 +438,21 @@ export function makeActionManager(env, router = _router) {
     function _getBreadcrumbs(stack) {
         return stack
             .filter((controller) => controller.action.tag !== "menu")
-            .map((controller) => {
-                return {
-                    jsId: controller.jsId,
-                    get name() {
-                        return controller.displayName;
-                    },
-                    get isFormView() {
-                        return controller.props?.type === "form";
-                    },
-                    get url() {
-                        return stateToUrl(controller.state);
-                    },
-                    onSelected() {
-                        restore(controller.jsId);
-                    },
-                };
-            });
+            .map((controller) => ({
+                jsId: controller.jsId,
+                get name() {
+                    return controller.displayName;
+                },
+                get isFormView() {
+                    return controller.props?.type === "form";
+                },
+                get url() {
+                    return stateToUrl(controller.state);
+                },
+                onSelected() {
+                    restore(controller.jsId);
+                },
+            }));
     }
 
     /**
@@ -909,6 +908,19 @@ export function makeActionManager(env, router = _router) {
                 if (this.isMounted) {
                     // the error occurred on the controller which is
                     // already in the DOM, so simply show the error
+                    Promise.reject(error);
+                    return;
+                }
+                if (!this.isMounted && status(this) === "mounted") {
+                    // The error occured during an onMounted hook of one of the components.
+                    env.bus.trigger("ACTION_MANAGER:UPDATE", {
+                        id: ++id,
+                        Component: BlankComponent,
+                        componentProps: {
+                            onMounted: () => {},
+                            withControlPanel: action.type === "ir.actions.act_window",
+                        },
+                    });
                     Promise.reject(error);
                     return;
                 }
@@ -1440,6 +1452,7 @@ export function makeActionManager(env, router = _router) {
      * @params {boolean} [options.isEmbeddedAction] set to true if the action request is an
      *  embedded action. This allows to do the necessary context cleanup and avoid infinite
      *  recursion.
+     * @params {boolean} [options.newWindow] set to true to open the action in a new tab/window.
      * @returns {Promise<void>}
      */
     async function doActionButton(params, { isEmbeddedAction, newWindow } = {}) {
@@ -1588,6 +1601,8 @@ export function makeActionManager(env, router = _router) {
      *
      * @param {ViewType} viewType
      * @param {Object} [props={}]
+     * @params {Object} [options={}]
+     * @params {boolean} [options.newWindow] set to true to open the action in a new tab/window.
      * @throws {ViewNotFoundError} if the viewType is not found on the current action
      * @returns {Promise<Number>}
      */
