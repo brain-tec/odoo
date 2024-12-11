@@ -47,7 +47,7 @@ class TestRecruitmentProcess(TestHrCommon):
             ('name', '=', 'resume.pdf'),
             ('res_model', '=', self.env['hr.applicant']._name),
             ('res_id', '=', applicant.id)])
-        self.assertEqual(applicant.partner_name, 'Application for the post of Jr.application Programmer.', 'Applicant name does not match.')
+        self.assertEqual(applicant.partner_name, 'Mr. Richard Anderson', 'Applicant name does not match.')
         self.assertEqual(applicant.stage_id, self.env.ref('hr_recruitment.stage_job0'),
             "Stage should be 'New' and is '%s'." % (applicant.stage_id.name))
         self.assertTrue(resume_ids, 'Resume is not attached.')
@@ -126,3 +126,20 @@ class TestRecruitmentProcess(TestHrCommon):
 
         self.assertEqual(applicant2.partner_name, 'John Doe')
         self.assertFalse(applicant2.email_from)
+
+    def test_email_application_multi_company(self):
+        """ Make sure that receiving emails for jobs in companies different from self.env.company work. """
+        other_company = self.env['res.company'].create({'name': 'Other Company'})
+        job_developer = self.env['hr.job'].create({
+            'name': 'Experienced Developer (Other Company)',
+            'company_id': other_company.id,
+        })
+
+        with file_open('hr_recruitment/tests/resume.eml', 'rb') as request_file:
+            request_message = request_file.read()
+        self.env['mail.thread'].message_process('hr.applicant', request_message, custom_values={"job_id": job_developer.id})
+
+        # Make sure the candidate and applicant are created in the right company
+        applicant = self.env['hr.applicant'].search([('email_from', 'ilike', 'Richard_Anderson@yahoo.com')], limit=1)
+        self.assertEqual(applicant.company_id, other_company, 'Applicant should be created in the right company')
+        self.assertEqual(applicant.candidate_id.company_id, other_company, 'Candidate should be created in the right company')
