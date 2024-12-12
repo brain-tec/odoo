@@ -6,6 +6,7 @@ import * as NumberPopup from "@point_of_sale/../tests/generic_helpers/number_pop
 import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import * as SelectionPopup from "@point_of_sale/../tests/generic_helpers/selection_popup_util";
 import { registry } from "@web/core/registry";
+import { negate } from "@point_of_sale/../tests/generic_helpers/utils";
 
 registry.category("web_tour.tours").add("PosHrTour", {
     steps: () =>
@@ -51,7 +52,7 @@ registry.category("web_tour.tours").add("PosHrTour", {
             // order for employee 2
             ProductScreen.addOrderline("Desk Pad", "1"),
             ProductScreen.totalAmountIs("1.98"),
-            Chrome.clickMenuOption("Orders"),
+            Chrome.clickOrders(),
             TicketScreen.nthRowContains(2, "Pos Employee2", false),
 
             // order for employee 1
@@ -61,7 +62,7 @@ registry.category("web_tour.tours").add("PosHrTour", {
             Chrome.createFloatingOrder(),
             ProductScreen.addOrderline("Desk Pad", "1"),
             ProductScreen.totalAmountIs("1.98"),
-            Chrome.clickMenuOption("Orders"),
+            Chrome.clickOrders(),
             TicketScreen.nthRowContains(2, "Pos Employee2", false),
             TicketScreen.nthRowContains(3, "Pos Employee1", false),
 
@@ -76,7 +77,7 @@ registry.category("web_tour.tours").add("PosHrTour", {
             Chrome.createFloatingOrder(),
             ProductScreen.addOrderline("Desk Pad", "1", "8"),
             ProductScreen.totalAmountIs("8.0"),
-            Chrome.clickMenuOption("Orders"),
+            Chrome.clickOrders(),
             TicketScreen.nthRowContains(4, "Mitchell Admin", false),
 
             // Close register should be accessible by the admin user.
@@ -118,5 +119,21 @@ registry.category("web_tour.tours").add("CashierCanSeeProductInfo", {
             ProductScreen.clickInfoProduct("product_a"),
             Dialog.confirm("Ok"),
             Dialog.isNot(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("CashierCannotClose", {
+    steps: () =>
+        [
+            Chrome.clickBtn("Open Register"),
+            PosHr.loginScreenIsShown(),
+            PosHr.clickLoginButton(),
+            SelectionPopup.has("Test Employee 3", { run: "click" }),
+            Dialog.confirm("Open Register"),
+            Chrome.clickMenuButton(),
+            {
+                trigger: negate(".close-button"),
+            },
+            PosHr.cashierNameIs("Test Employee 3"),
         ].flat(),
 });
