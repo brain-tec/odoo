@@ -65,8 +65,8 @@ $o-mail-DiscussSidebarChannel-borderOpacity: .1;
 
 .o-mail-DiscussSidebarChannel-threadIcon {
     font-size: xx-small;
-    width: 13px;
-    height: 13px;
+    width: 14px;
+    height: 14px;
 }
 
 .o-mail-DiscussSidebarChannel-indicatorCompact {
@@ -111,4 +111,6 @@ $o-mail-DiscussSidebarChannel-borderOpacity: .1;
 
 .o-mail-DiscussSidebarSubchannel svg {
     color: var(--mail-DiscussSidebarSubchannel-svgColor, $gray-300);
+    left: 26px;
+    transform: scaleX(1) #{"/* rtl:scaleX(-1) */"};
 }
