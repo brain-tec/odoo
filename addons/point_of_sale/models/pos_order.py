@@ -915,6 +915,9 @@ class PosOrder(models.Model):
                 (invoice_receivables | payment_receivables).sudo().with_company(self.company_id).reconcile()
         return payment_moves
 
+    def _get_open_order(self, order):
+        return self.env["pos.order"].search([('uuid', '=', order.get('uuid'))], limit=1)
+
     @api.model
     def sync_from_ui(self, orders):
         """ Create and update Orders from the frontend PoS application.
@@ -932,18 +935,15 @@ class PosOrder(models.Model):
         order_ids = []
         session_ids = set({order.get('session_id') for order in orders})
         for order in orders:
-            existing_draft_order = self.env["pos.order"].search(
-                ['&', ('id', '=', order.get('id', False)), ('state', '=', 'draft')], limit=1) if isinstance(order.get('id'), int) else False
+            existing_order = self._get_open_order(order)
 
             if len(self._get_refunded_orders(order)) > 1:
                 raise ValidationError(_('You can only refund products from the same order.'))
 
-            if existing_draft_order:
-                order_ids.append(self._process_order(order, existing_draft_order))
-            else:
-                existing_orders = self.env['pos.order'].search([('pos_reference', '=', order.get('name', False))])
-                if all(not self._is_the_same_order(order, existing_order) for existing_order in existing_orders):
-                    order_ids.append(self._process_order(order, False))
+            if existing_order and existing_order.state == 'draft':
+                order_ids.append(self._process_order(order, existing_order))
+            elif not existing_order:
+                order_ids.append(self._process_order(order, False))
 
         # Sometime pos_orders_ids can be empty.
         pos_order_ids = self.env['pos.order'].browse(order_ids)
@@ -1297,19 +1297,29 @@ class PosOrderLine(models.Model):
 
     @api.model
     def get_existing_lots(self, company_id, product_id):
+        """
+        Return the lots that are still available in the given company.
+        The lot is available if its quantity in the corresponding stock_quant and pos stock location is > 0.
+        """
         self.check_access_rights('read')
         self.check_access_rule('read')
-        existing_lots_sudo = self.sudo().env['stock.lot'].search([
+        pos_config = self.env['pos.config'].browse(self._context.get('config_id'))
+        if not pos_config:
+            raise UserError(_('No PoS configuration found'))
+
+        src_loc = pos_config.picking_type_id.default_location_src_id
+        src_loc_quants = self.sudo().env['stock.quant'].search([
             '|',
             ('company_id', '=', False),
             ('company_id', '=', company_id),
             ('product_id', '=', product_id),
+            ('location_id', '=', src_loc.id),
         ])
+        available_lots = src_loc_quants.\
+            filtered(lambda q: float_compare(q.quantity, 0, precision_rounding=q.product_id.uom_id.rounding) > 0).\
+            mapped('lot_id')
 
-        if existing_lots_sudo and existing_lots_sudo[0].product_id.tracking == 'serial':
-            existing_lots_sudo = existing_lots_sudo.filtered(lambda l: float_compare(l.product_qty, 1, precision_rounding=l.product_uom_id.rounding) >= 0)
-
-        return existing_lots_sudo.read(['id', 'name'])
+        return available_lots.read(['id', 'name'])
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_order_state(self):
