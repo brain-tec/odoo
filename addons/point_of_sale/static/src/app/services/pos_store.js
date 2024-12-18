@@ -251,7 +251,7 @@ export class PosStore extends WithLazyGetterTrap {
         this.config = this.data.models["pos.config"].getFirst();
         this.company = this.data.models["res.company"].getFirst();
         this.user = this.data.models["res.users"].getFirst();
-        this.currency = this.data.models["res.currency"].getFirst();
+        this.currency = this.config.currency_id;
         this.pickingType = this.data.models["stock.picking.type"].getFirst();
         this.models = this.data.models;
 
@@ -1741,16 +1741,11 @@ export class PosStore extends WithLazyGetterTrap {
 
         let existingLots = [];
         try {
-            existingLots = await this.data.call(
-                "pos.order.line",
-                "get_existing_lots",
-                [this.company.id, product.id],
-                {
-                    context: {
-                        config_id: this.config.id,
-                    },
-                }
-            );
+            existingLots = await this.data.call("pos.order.line", "get_existing_lots", [
+                this.company.id,
+                this.config.id,
+                product.id,
+            ]);
             if (!canCreateLots && (!existingLots || existingLots.length === 0)) {
                 this.dialog.add(AlertDialog, {
                     title: _t("No existing serial/lot number"),
