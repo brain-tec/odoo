@@ -9,6 +9,7 @@ from psycopg2 import Error
 
 from odoo import _, api, fields, models, SUPERUSER_ID
 from odoo.exceptions import UserError, ValidationError
+from odoo.fields import Domain
 from odoo.osv import expression
 from odoo.tools import SQL, check_barcode_encoding, format_list, groupby
 from odoo.tools.float_utils import float_compare, float_is_zero
@@ -177,12 +178,9 @@ class StockQuant(models.Model):
             quant.last_count_date = date_by_quant.get((quant.location_id.id, quant.package_id.id, quant.product_id.id, quant.lot_id.id, quant.owner_id.id))
 
     def _search(self, domain, *args, **kwargs):
-        domain = [
-            ['lot_id', 'any', [line]]
-            if line and isinstance(line, (list, tuple)) and isinstance(line[0], str) and line[0].startswith('lot_properties.')
-            else line
-            for line in domain
-        ]
+        domain = Domain(domain).map_conditions(
+            lambda condition: Domain('lot_id', 'any', [condition]) if condition.field_expr.startswith('lot_properties.') else condition
+        )
         return super()._search(domain, *args, **kwargs)
 
     @api.depends('inventory_quantity')
@@ -624,7 +622,7 @@ class StockQuant(models.Model):
     def check_lot_id(self):
         for quant in self:
             if quant.lot_id.product_id and quant.lot_id.product_id != quant.product_id:
-                raise ValidationError(_('The Lot/Serial number (%s) is linked to another product.', quant.location_id.name))
+                raise ValidationError(_('The Lot/Serial number (%s) is linked to another product.', quant.lot_id.name))
 
     @api.model
     def _get_removal_strategy(self, product_id, location_id):
