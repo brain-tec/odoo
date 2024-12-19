@@ -655,7 +655,8 @@ class PosOrder(models.Model):
             line_ids_commands = []
             rate = invoice.invoice_currency_rate
             sign = invoice.direction_sign
-            difference_currency = sign * (self.amount_paid - invoice.amount_total)
+            amount_paid = (-1 if self.amount_total < 0.0 else 1) * self.amount_paid
+            difference_currency = sign * (amount_paid - invoice.amount_total)
             difference_balance = invoice.company_currency_id.round(difference_currency / rate) if rate else 0.0
             if not self.currency_id.is_zero(difference_currency):
                 rounding_line = invoice.line_ids.filtered(lambda line: line.display_type == 'rounding' and not line.tax_line_id)
@@ -1381,13 +1382,13 @@ class PosOrderLine(models.Model):
         return super().write(values)
 
     @api.model
-    def get_existing_lots(self, company_id, product_id):
+    def get_existing_lots(self, company_id, config_id, product_id):
         """
         Return the lots that are still available in the given company.
         The lot is available if its quantity in the corresponding stock_quant and pos stock location is > 0.
         """
         self.check_access('read')
-        pos_config = self.env['pos.config'].browse(self._context.get('config_id'))
+        pos_config = self.env['pos.config'].browse(config_id)
         if not pos_config:
             raise UserError(_('No PoS configuration found'))
 

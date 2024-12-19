@@ -240,7 +240,7 @@ class MailMail(models.Model):
         ]
         if 'filters' in self._context:
             domain.extend(self._context['filters'])
-        batch_size = int(self.env['ir.config_parameter'].sudo().get_param('mail.mail.queue.batch.size', batch_size))
+        batch_size = int(self.env['ir.config_parameter'].sudo().get_param('mail.mail.queue.batch.size', batch_size)) or batch_size
         send_ids = self.search(domain, limit=batch_size if not ids else batch_size * 10).ids
         if not ids:
             ids_done = set()
@@ -420,6 +420,7 @@ class MailMail(models.Model):
                     'Unknown error when evaluating mail headers (received %r): %s',
                     self.headers, e,
                 )
+        headers['X-Odoo-Message-Id'] = self.message_id
         headers.setdefault('Return-Path', self.record_alias_domain_id.bounce_email or self.env.company.bounce_email)
 
         # prepare recipients: use email_to if defined then check recipient_ids
