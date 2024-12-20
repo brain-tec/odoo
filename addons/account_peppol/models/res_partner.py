@@ -108,6 +108,7 @@ class ResPartner(models.Model):
         return etree.fromstring(response.content)
 
     @api.model
+    @handle_demo
     def _check_peppol_participant_exists(self, participant_info, edi_identification, check_company=False):
         participant_identifier = participant_info.findtext('{*}ParticipantIdentifier')
         service_metadata = participant_info.find('.//{*}ServiceMetadataReference')
@@ -184,7 +185,6 @@ class ResPartner(models.Model):
     # BUSINESS ACTIONS
     # -------------------------------------------------------------------------
 
-    @handle_demo
     def button_account_peppol_check_partner_endpoint(self, company=None):
         """ A basic check for whether a participant is reachable at the given
         Peppol participant ID - peppol_eas:peppol_endpoint (ex: '9999:test')
@@ -205,8 +205,6 @@ class ResPartner(models.Model):
             self.peppol_eas,
             self_partner.invoice_edi_format
         )
-        if self_partner.peppol_verification_state == 'valid':
-            self_partner.invoice_sending_method = 'peppol'
 
         self._log_verification_state_update(company, old_value, self_partner.peppol_verification_state)
         return False
