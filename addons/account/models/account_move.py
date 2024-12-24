@@ -1293,7 +1293,7 @@ class AccountMove(models.Model):
             move.invoice_outstanding_credits_debits_widget = False
             move.invoice_has_outstanding = False
 
-            if move.state != 'posted' \
+            if move.state not in {'draft', 'posted'} \
                     or move.payment_state not in ('not_paid', 'partial') \
                     or not move.is_invoice(include_receipts=True):
                 continue
@@ -1365,7 +1365,7 @@ class AccountMove(models.Model):
         for move in self:
             payments_widget_vals = {'title': _('Less Payment'), 'outstanding': False, 'content': []}
 
-            if move.state == 'posted' and move.is_invoice(include_receipts=True):
+            if move.state in {'draft', 'posted'} and move.is_invoice(include_receipts=True):
                 reconciled_vals = []
                 reconciled_partials = move.sudo()._get_all_reconciled_invoice_partials()
                 for reconciled_partial in reconciled_partials:
@@ -4099,6 +4099,11 @@ class AccountMove(models.Model):
                     attachments_by_invoice[attachment] |= invoice
                 else:
                     attachments_by_invoice[attachment] = invoice
+                if not attachment.res_id:
+                    attachment.write({
+                        'res_id': invoice.id,
+                        'res_model': invoice._name,
+                    })
 
         file_data_list = attachments._unwrap_edi_attachments()
         attachments_by_invoice = {}
@@ -5315,7 +5320,7 @@ class AccountMove(models.Model):
             else 'account.email_template_edi_invoice'
         )
 
-    def _notify_get_recipients_groups(self, message, model_description, msg_vals=None):
+    def _notify_get_recipients_groups(self, message, model_description, msg_vals=False):
         groups = super()._notify_get_recipients_groups(message, model_description, msg_vals=msg_vals)
         self.ensure_one()
 
@@ -6060,8 +6065,9 @@ class AccountMove(models.Model):
         attachments_in_invoices = self.env['ir.attachment']
         for attachment in move_per_decodable_attachment:
             attachments_in_invoices += attachment
-        # Unlink the unused attachments
-        (attachments - attachments_in_invoices).unlink()
+        # Unlink the unused attachments (prevents storing marketing images sent with emails)
+        if self._context.get('from_alias'):
+            (attachments - attachments_in_invoices).unlink()
         return move_per_decodable_attachment
 
     def _creation_subtype(self):
@@ -6104,7 +6110,7 @@ class AccountMove(models.Model):
                                                    force_email_company=False, force_email_lang=False):
         # EXTENDS mail mail.thread
         render_context = super()._notify_by_email_prepare_rendering_context(
-            message, msg_vals, model_description=model_description,
+            message, msg_vals=msg_vals, model_description=model_description,
             force_email_company=force_email_company, force_email_lang=force_email_lang
         )
         record = render_context['record']
