@@ -5873,6 +5873,22 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_bh
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Bahrain in Odoo.\n"
+"===========================================================================\n"
+"Bahrain accounting basic charts and localization.\n"
+"\n"
+"Activates:\n"
+" - Chart of Accounts\n"
+" - Taxes\n"
+" - Tax reports\n"
+" - Fiscal Positions\n"
+" - States\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_be
 msgid ""
 "\n"
@@ -5952,6 +5968,19 @@ msgid ""
 "Agrega una nomenclatura contable para Honduras. También incluye impuestos y la\n"
 "moneda Lempira. -- Adds accounting chart for Honduras. It also includes taxes\n"
 "and the Lempira currency."
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_lb_account
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Lebanon in Odoo.\n"
+"==============================================================================\n"
+"Lebanon accounting basic charts,taxes and localization.\n"
+"Activates:\n"
+"* Chart of Accounts\n"
+"* Taxes\n"
+"* Fiscal Positions\n"
 msgstr ""
 
 #. module: base
@@ -9474,6 +9503,7 @@ msgid ""
 "Account holder name, in case it is different than the name of the Account "
 "Holder"
 msgstr ""
+"Kontoholders navn, hvis det er forskjellig fra navnet på kontoholderen."
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_accounting
@@ -11284,6 +11314,11 @@ msgid "Bahamas"
 msgstr "Bahamas"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_bh
+msgid "Bahrain - Accounting"
+msgstr ""
+
+#. module: base
 #: model:res.country,name:base.bh
 msgid "Bahrain"
 msgstr "Bahrain"
@@ -11345,7 +11380,7 @@ msgstr "Bankkonto"
 #: model:ir.model.fields,help:base.field_res_partner_bank__acc_type
 msgid ""
 "Bank account type: Normal or IBAN. Inferred from the bank account number."
-msgstr ""
+msgstr "Bankkontotype: Normal eller IBAN. Utledet fra bankkontonummeret."
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_res_bank_form
@@ -11683,6 +11718,8 @@ msgid ""
 "Below text serves as a suggestion and doesn’t engage Odoo S.A. "
 "responsibility."
 msgstr ""
+"Nedenstående tekst fungerer som et forslag og medfører ikke Odoo S.A.s "
+"ansvar."
 
 #. module: base
 #: model:res.country,name:base.bj
@@ -20408,6 +20445,11 @@ msgid "Lebanon"
 msgstr "Libanon"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_lb_account
+msgid "Lebanon - Accounting"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__ledger
 msgid "Ledger  28  431.8 x 279.4 mm"
 msgstr "Ledger  28  431.8 x 279.4 mm"
@@ -21560,7 +21602,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_base_partner_merge_automatic_wizard
 msgid "Merge Partner Wizard"
-msgstr ""
+msgstr "Slå sammen partnerveiviseren."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.base_partner_merge_automatic_wizard_form
@@ -23793,6 +23835,7 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:base.action_partner_customer_form
 msgid "Odoo helps you easily track all activities related to a customer."
 msgstr ""
+"Odoo hjelper deg enkelt med å spore alle aktiviteter relatert til en kunde."
 
 #. module: base
 #: model_terms:ir.actions.act_window,help:base.action_partner_supplier_form
@@ -27478,7 +27521,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner_bank__sanitized_acc_number
 msgid "Sanitized Account Number"
-msgstr ""
+msgstr "Sanitert kontonummer."
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_lang__week_start__6
@@ -27953,6 +27996,11 @@ msgid ""
 "emails are compromised. Once verified, you can activate the ability to send "
 "money."
 msgstr ""
+"Å sende falske fakturaer med et svindelkontonummer er en vanlig phishing-"
+"praksis. For å beskytte deg selv, bør du alltid verifisere nye "
+"bankkontonumre, helst ved å ringe leverandøren, da phishing vanligvis skjer "
+"når e-postene deres er kompromittert. Når kontonummeret er verifisert, kan "
+"du aktivere muligheten til å sende penger."
 
 #. module: base
 #: model:res.country,name:base.sn
@@ -31721,6 +31769,9 @@ msgid ""
 "\n"
 "Sorry, %s doesn't have '%s' access to:"
 msgstr ""
+"Oi. Ser ut som du har møtt et område uten tilgang.\n"
+"\n"
+"Beklager, %s har ikke \"%s\" tilgang til:"
 
 #. module: base
 #: model:res.country,name:base.ua
@@ -33711,6 +33762,8 @@ msgstr "Du bør prøve andre søkekriterier."
 #: model_terms:res.company,invoice_terms_html:base.main_company
 msgid "You should update this document to reflect your T&amp;C."
 msgstr ""
+"Du bør oppdatere dette dokumentet for å gjenspeile din vilkår og "
+"betingelser."
 
 #. module: base
 #. odoo-python

@@ -11,8 +11,8 @@
 # Wil Odoo, 2024
 # Odoo哥 <vnsoft.he@gmail.com>, 2024
 # Jeffery CHEN <jeffery9@gmail.com>, 2024
-# Chloe Wang, 2024
 # Raymond Yu <cl_yu@hotmail.com>, 2024
+# Chloe Wang, 2024
 # 
 msgid ""
 msgstr ""
@@ -20,7 +20,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-02-26 12:42+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Raymond Yu <cl_yu@hotmail.com>, 2024\n"
+"Last-Translator: Chloe Wang, 2024\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -9134,6 +9134,22 @@ msgstr ""
 "来源：https://www.paragraf.rs/propisi/pravilnik-o-kontnom-okviru-sadrzini-racuna-za-privredna-drustva-zadruge.html\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_bh
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Bahrain in Odoo.\n"
+"===========================================================================\n"
+"Bahrain accounting basic charts and localization.\n"
+"\n"
+"Activates:\n"
+" - Chart of Accounts\n"
+" - Taxes\n"
+" - Tax reports\n"
+" - Fiscal Positions\n"
+" - States\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_be
 msgid ""
 "\n"
@@ -9266,6 +9282,26 @@ msgstr ""
 "Agrega una nomenclatura contable para Honduras.还包括税收和伦皮拉货币。\n"
 "货币 Lempira。 -- 添加洪都拉斯会计图表。还包括税收\n"
 "和伦皮拉货币。"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_lb_account
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Lebanon in Odoo.\n"
+"==============================================================================\n"
+"Lebanon accounting basic charts,taxes and localization.\n"
+"Activates:\n"
+"* Chart of Accounts\n"
+"* Taxes\n"
+"* Fiscal Positions\n"
+msgstr ""
+"\n"
+"这是在 Odoo 中管理黎巴嫩会计账目的基本模块。\n"
+"==============================================================================\n"
+"黎巴嫩会计基本账目、税项，以及本地化功能。\n"
+"* 会计账目总表\n"
+"* 税项\n"
+"* 财务规则\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_lu
@@ -10549,6 +10585,28 @@ msgid ""
 "Payment' wizard. An error message will appear if no valid mandate is\n"
 "available for generating a payment on the selected invoice.\n"
 msgstr ""
+"\n"
+"该模块可生成符合 SEPA Direct Debit (SDD) 标准的 XML 文件（符合\n"
+"08.001.02 规范）发送给您的银行，以便\n"
+"收取一组付款。\n"
+"\n"
+"要使用这种付款方式，客户必须首先\n"
+"向公司交回委托书，同意使用直接借记。\n"
+"该同意书必须在 Odoo 中编码为 \"客户委托书\"。\n"
+"\n"
+"您还需要满足以下要求，才能正确\n"
+"生成 SDD 文件：\n"
+"- 您的公司账户必须设置为有效的 IBAN 号码\n"
+"- 贵公司必须已获得债权人标识符（可在 \"设置\"-\"常规设置\"-\"会计 \"部分进行设置）\n"
+"- 贵公司必须定义了接收 SDD 付款的日记账（同样在会计模块的 \"设置 \"中定义）\n"
+"- 生成付款的每个客户都必须有一个有效的 IBAN 账号。\n"
+"\n"
+"如果其中任何一项要求未满足，Odoo 会通知您。\n"
+"\n"
+"要为未结发票登记付款，您可以使用专用的\n"
+"\"SEPA 直接借记 \"选项在 \"注册付款 \"向导中\n"
+"选择银行账户。如果没有有效授权，为所选发票生成付款时\n"
+"则会出现错误信息。\n"
 
 #. module: base
 msgid ""
@@ -15765,6 +15823,11 @@ msgstr "工牌编号"
 #: model:res.country,name:base.bs
 msgid "Bahamas"
 msgstr "巴哈马"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_bh
+msgid "Bahrain - Accounting"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.bh
@@ -25027,6 +25090,11 @@ msgstr "了解更多"
 #: model:res.country,name:base.lb
 msgid "Lebanon"
 msgstr "黎巴嫩"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_lb_account
+msgid "Lebanon - Accounting"
+msgstr "黎巴嫩 - 会计"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__ledger
@@ -36659,7 +36727,7 @@ msgstr "这是管理会计科目表和香港本地化的基本模块"
 msgid ""
 "This is the base module to manage chart of accounts and localization for the"
 " Bangladesh "
-msgstr "这是管理孟加拉会计账目总表及本地化的基本模块"
+msgstr "这是管理孟加拉会计账目总表及本地化的基本模块 "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_pk
@@ -36951,7 +37019,10 @@ msgid ""
 "This module contains tests related to web studio. Those are\n"
 "present in a separate module as it contains models used only to perform\n"
 "tests independently to functional aspects of other models. "
-msgstr "该模块包含与网络工作室相关的测试。那些是存在于一个单独的模块中，因为它包含仅用于执行的模型独立于其他模型的功能方面进行测试。"
+msgstr ""
+"该模块包含与网络工作室相关的测试。那些\n"
+"是存在于一个单独的模块中，因为它包含仅用于\n"
+"执行的模型独立于其他模型的功能方面进行测试。 "
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_website_modules

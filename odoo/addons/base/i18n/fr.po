@@ -9091,6 +9091,22 @@ msgstr ""
 "        Source : https://www.paragraf.rs/propisi/pravilnik-o-kontnom-okviru-sadrzini-racuna-za-privredna-drustva-zadruge.html\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_bh
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Bahrain in Odoo.\n"
+"===========================================================================\n"
+"Bahrain accounting basic charts and localization.\n"
+"\n"
+"Activates:\n"
+" - Chart of Accounts\n"
+" - Taxes\n"
+" - Tax reports\n"
+" - Fiscal Positions\n"
+" - States\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_be
 msgid ""
 "\n"
@@ -9226,6 +9242,27 @@ msgstr ""
 "Agrega una nomenclatura contable para Honduras. También incluye impuestos y la\n"
 "moneda Lempira. -- Ajoute un plan comptable pour le Honduras. Il inclut également les taxes\n"
 "et la devise Lempira."
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_lb_account
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Lebanon in Odoo.\n"
+"==============================================================================\n"
+"Lebanon accounting basic charts,taxes and localization.\n"
+"Activates:\n"
+"* Chart of Accounts\n"
+"* Taxes\n"
+"* Fiscal Positions\n"
+msgstr ""
+"\n"
+"Module de base pour la gestion du plan comptable du Liban dans Odoo.\n"
+"==============================================================================\n"
+"Localisation et plan comptable du Liban.\n"
+"Active :\n"
+"* Le plan comptable\n"
+"* Les impôts\n"
+"* Les positions fiscales\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_lu
@@ -10502,6 +10539,28 @@ msgid ""
 "Payment' wizard. An error message will appear if no valid mandate is\n"
 "available for generating a payment on the selected invoice.\n"
 msgstr ""
+"\n"
+"Ce module vous permet de générer des fichiers XML conformes au SEPA Direct Debit (SDD) (conformes à\n"
+"la spécification pain.008.001.02) et de les envoyer à votre banque pour\n"
+"percevoir une série de paiements.\n"
+"\n"
+"Pour pouvoir bénéficier de ce mode de paiement, le client doit d'abord\n"
+"renvoyer un mandat à la société, dans lequel il donne son accord pour l'utilisation de la domiciliation.\n"
+"Ce consentement doit avoir été encodé en tant que \"mandat du client\" dans Odoo.\n"
+"\n"
+"Vous devez également remplir les conditions suivantes pour\n"
+"générer correctement un fichier SDD :\n"
+"- Votre compte d'entreprise doit être associé à un numéro IBAN valide.\n"
+"- Votre entreprise doit avoir reçu un identifiant créancier (vous pouvez effectuer cette opération dans Paramètres - Paramètres généraux - section Comptabilité).\n"
+"- Votre entreprise doit avoir défini un journal pour recevoir les paiements SDD (là encore, dans les \"paramètres\" du module de comptabilité).\n"
+"- Chaque client pour lequel vous générez un paiement doit avoir un numéro de compte IBAN valide.\n"
+"\n"
+"Odoo vous informera si l'une de ces conditions n'est pas remplie.\n"
+"\n"
+"Pour effectuer un paiement pour des factures ouvertes, vous pouvez utiliser l'option\n"
+"\"SEPA Direct Debit\" en sélectionnant un compte bancaire dans l'assistant \"Enregistrer\n"
+"un paiement\". Un message d'erreur apparaîtra si aucun mandat valide\n"
+"n'est disponible pour générer un paiement pour la facture sélectionnée.\n"
 
 #. module: base
 msgid ""
@@ -15950,6 +16009,11 @@ msgstr "ID badge"
 #: model:res.country,name:base.bs
 msgid "Bahamas"
 msgstr "Bahamas"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_bh
+msgid "Bahrain - Accounting"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.bh
@@ -25566,6 +25630,11 @@ msgid "Lebanon"
 msgstr "Liban"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_lb_account
+msgid "Lebanon - Accounting"
+msgstr "Liban - Comptabilité"
+
+#. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__ledger
 msgid "Ledger  28  431.8 x 279.4 mm"
 msgstr "Format livre 28 431,8 x 279.4 mm"
@@ -33189,7 +33258,7 @@ msgstr "Rapport"
 #. module: base
 #: model:ir.model,name:base.model_ir_actions_report
 msgid "Report Action"
-msgstr "Signaler l'action"
+msgstr "Action de rapport"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_report__report_file
@@ -34070,8 +34139,7 @@ msgstr "Planifiez et gérez la maintenance des machines et des outils. "
 #: model:ir.module.module,summary:base.module_industry_fsm_sale
 msgid "Schedule and track onsite operations, invoice time and material"
 msgstr ""
-"Planifiez et suivez les interventions sur site, facturez le temps et le "
-"matériel"
+"Planifiez et suivez les services sur site, facturez le temps et le matériel"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_industry_fsm
@@ -34640,7 +34708,7 @@ msgstr "Marges sur les services dans les commandes"
 #: model:res.partner.category,name:base.res_partner_category_11
 #: model_terms:ir.ui.view,arch_db:base.user_groups_view
 msgid "Services"
-msgstr "Interventions"
+msgstr "Services"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_profile__session

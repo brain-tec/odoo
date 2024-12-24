@@ -9128,6 +9128,22 @@ msgstr ""
 "Source: https://www.paragraf.rs/propisi/pravilnik-o-kontnom-okviru-sadrzini-racuna-za-privredna-drustva-zadruge.html\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_bh
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Bahrain in Odoo.\n"
+"===========================================================================\n"
+"Bahrain accounting basic charts and localization.\n"
+"\n"
+"Activates:\n"
+" - Chart of Accounts\n"
+" - Taxes\n"
+" - Tax reports\n"
+" - Fiscal Positions\n"
+" - States\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_be
 msgid ""
 "\n"
@@ -9259,6 +9275,27 @@ msgstr ""
 "Agrega una nomenclatura contable para Honduras. También incluye impuestos y la\n"
 "moneda Lempira. -- Adds accounting chart for Honduras. It also includes taxes\n"
 "and the Lempira currency."
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_lb_account
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Lebanon in Odoo.\n"
+"==============================================================================\n"
+"Lebanon accounting basic charts,taxes and localization.\n"
+"Activates:\n"
+"* Chart of Accounts\n"
+"* Taxes\n"
+"* Fiscal Positions\n"
+msgstr ""
+"\n"
+"這是在 Odoo 中管理黎巴嫩會計賬目的基礎模組。\n"
+"==============================================================================\n"
+"黎巴嫩會計基本賬目、稅項，以及本地化功能。\n"
+"啟動：\n"
+"- 會計賬目總表\n"
+"- 稅項\n"
+"- 財務規則\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_lu
@@ -10531,6 +10568,28 @@ msgid ""
 "Payment' wizard. An error message will appear if no valid mandate is\n"
 "available for generating a payment on the selected invoice.\n"
 msgstr ""
+"\n"
+"This module enables the generation of SEPA Direct Debit (SDD)-compliant XML files (consistent\n"
+"with pain.008.001.02 specification) to send to your bank in order to\n"
+"collect a set of payments.\n"
+"\n"
+"To be eligible for this payment method, a customer must have first\n"
+"returned a mandate to the company, giving their consent to use direct debit.\n"
+"This consent must have been encoded as a 'customer mandate' in Odoo.\n"
+"\n"
+"You also need to meet the following requirements in order to properly\n"
+"generate an SDD file:\n"
+"- Your company account must be set to a valid IBAN number\n"
+"- Your company must have been given a creditor identifier (this can be done in Settings - General Settings - Accounting section)\n"
+"- Your company must have defined a journal to receive SDD payments (again, in 'settings' of accounting module)\n"
+"- Every customer for whom you generate a payment must have a valid IBAN account number.\n"
+"\n"
+"Odoo will let you know if any of these requirements are not satisfied.\n"
+"\n"
+"To register a payment for open invoices, you can use the dedicated\n"
+"'SEPA Direct Debit' option by selecting a bank account in the 'Register\n"
+"Payment' wizard. An error message will appear if no valid mandate is\n"
+"available for generating a payment on the selected invoice.\n"
 
 #. module: base
 msgid ""
@@ -15758,6 +15817,11 @@ msgid "Bahamas"
 msgstr "巴哈馬"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_bh
+msgid "Bahrain - Accounting"
+msgstr ""
+
+#. module: base
 #: model:res.country,name:base.bh
 msgid "Bahrain"
 msgstr "巴林"
@@ -18033,7 +18097,7 @@ msgid ""
 "Could not load your certificate / private key. \n"
 "%s"
 msgstr ""
-"無法加載您的證書/私鑰。\n"
+"未能載入你的憑證/私鑰。\n"
 "%s"
 
 #. module: base
@@ -25040,6 +25104,11 @@ msgstr "瞭解更多"
 #: model:res.country,name:base.lb
 msgid "Lebanon"
 msgstr "黎巴嫩"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_lb_account
+msgid "Lebanon - Accounting"
+msgstr "黎巴嫩 - 會計"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__ledger
@@ -32498,7 +32567,7 @@ msgstr "服務端動作存在循環調用"
 #: model:ir.model.fields,field_description:base.field_res_users__ref
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 msgid "Reference"
-msgstr "客戶成功案例"
+msgstr "參考"
 
 #. module: base
 #. odoo-python
@@ -33405,7 +33474,7 @@ msgstr "銷售工時表"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_timesheet_enterprise
 msgid "Sales Timesheet: Invoicing"
-msgstr "銷售工時表: 應收憑單"
+msgstr "銷售工時表：開立發票"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_timesheet_enterprise_holidays
@@ -40138,7 +40207,7 @@ msgstr "完成"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 msgid "e.g. \"B2B\", \"VIP\", \"Consulting\", ..."
-msgstr "例如,\"B2B\"、\"VIP\"、\"諮詢\"......"
+msgstr "例：「B2B」、「VIP」、「諮詢」⋯"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_category_form

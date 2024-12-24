@@ -29,10 +29,10 @@
 # JanaAvalah, 2024
 # Tairi Tiimann, 2024
 # Anna, 2024
-# Stevin Lilla, 2024
 # Siim Raasuke, 2024
 # Karin Eelma, 2024
 # Katrin Kampura, 2024
+# Stevin Lilla, 2024
 # 
 msgid ""
 msgstr ""
@@ -40,7 +40,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-02-26 12:42+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Katrin Kampura, 2024\n"
+"Last-Translator: Stevin Lilla, 2024\n"
 "Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -6861,6 +6861,8 @@ msgid ""
 "\n"
 "Search planning slots by skill\n"
 msgstr ""
+"\n"
+"Otsi planeeritavait aegu oskuste põhjal\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_event_sale
@@ -6877,6 +6879,8 @@ msgid ""
 "\n"
 "Sell your event booths and track payments on sale orders.\n"
 msgstr ""
+"\n"
+"Müü oma ürituse kabiine ja jälgi makseid müügitellimustelt.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_digest
@@ -7583,6 +7587,22 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_bh
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Bahrain in Odoo.\n"
+"===========================================================================\n"
+"Bahrain accounting basic charts and localization.\n"
+"\n"
+"Activates:\n"
+" - Chart of Accounts\n"
+" - Taxes\n"
+" - Tax reports\n"
+" - Fiscal Positions\n"
+" - States\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_be
 msgid ""
 "\n"
@@ -7679,6 +7699,19 @@ msgstr ""
 "Agrega una nomenclatura contable para Honduras. También incluye impuestos y la\n"
 "moneda Lempira. -- Adds accounting chart for Honduras. It also includes taxes\n"
 "and the Lempira currency."
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_lb_account
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Lebanon in Odoo.\n"
+"==============================================================================\n"
+"Lebanon accounting basic charts,taxes and localization.\n"
+"Activates:\n"
+"* Chart of Accounts\n"
+"* Taxes\n"
+"* Fiscal Positions\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_lu
@@ -8384,6 +8417,9 @@ msgid ""
 "This module allows users to more easily identify subcontracting orders when applying landed costs,\n"
 "by also displaying the associated picking reference in the search view.\n"
 msgstr ""
+"\n"
+"See moodul võimaldab kasutajatel paremini ära tunda allhankeid, kui lisatakse maaletoomiskulusid,\n"
+"näidates korje siiret otsingu vaates.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_mrp_landed_costs
@@ -9736,6 +9772,8 @@ msgid ""
 "%(xmlid)s is of type %(xmlid_model)s, expected a subclass of "
 "ir.actions.actions"
 msgstr ""
+"%(xmlid)s on mudeli %(xmlid_model)s tüüp, oodatud on subclass "
+"ir.actions.actions"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
@@ -9807,7 +9845,7 @@ msgstr "%p - samaväärne AM-ga või PM-ga.\""
 #: code:addons/base/models/ir_mail_server.py:0
 #, python-format
 msgid "%s (Dedicated Outgoing Mail Server):"
-msgstr ""
+msgstr "%s (Seadistatud väljuvate kirjade server):"
 
 #. module: base
 #. odoo-python
@@ -10048,7 +10086,7 @@ msgstr "Kolmanda osapoole maksu arvutamine"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_external_tax
 msgid "3rd Party Tax Calculation for Sale"
-msgstr ""
+msgstr "Müügiks 3nda osapoole maksude arvutamise moodul"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_lang_form
@@ -11209,7 +11247,7 @@ msgstr "Mitmeid Ladina-Ameerika riike hõlmav makseteenuse pakkuja."
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_xendit
 msgid "A payment provider for Indonesian and the Philippines."
-msgstr ""
+msgstr "Makseteenus Indoneesias ja Filipiinidel."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_custom
@@ -13157,6 +13195,8 @@ msgid ""
 "Authenticate by using SSL certificates, belonging to your domain name. \n"
 "SSL certificates allow you to authenticate your mail server for the entire domain name."
 msgstr ""
+"Autenti kasutades SSL sertifikaate, mis kuuluvad teie domeenile.\n"
+"SSL sertifikaadid võimaldavad teil autentida meili serveri kogu domeenile."
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_mail_server__smtp_authentication
@@ -13425,6 +13465,11 @@ msgstr "Märgi ID"
 #: model:res.country,name:base.bs
 msgid "Bahamas"
 msgstr "Bahama saared"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_bh
+msgid "Bahrain - Accounting"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.bh
@@ -22770,6 +22815,11 @@ msgid "Lebanon"
 msgstr "Liibanon"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_lb_account
+msgid "Lebanon - Accounting"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__ledger
 msgid "Ledger  28  431.8 x 279.4 mm"
 msgstr "Ledger  28  431.8 x 279.4 mm"
@@ -29255,7 +29305,7 @@ msgstr "Nõutud"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__res_users_settings_ids
 msgid "Res Users Settings"
-msgstr ""
+msgstr "Res Users sätted"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_crm_partner_assign

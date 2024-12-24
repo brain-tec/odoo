@@ -6728,7 +6728,7 @@ msgstr ""
 "\n"
 "Ứng dụng này kiểm soát thời gian nghỉ phép của nhân viên công ty bạn. Nó cho phép nhân viên xin nghỉ phép. Sau đó, quản lý có thể xem xét đơn và phê duyệt hoặc từ chối chúng. Nhờ đó, bạn có thể kiểm soát tổng thể kế hoạch nghỉ phép cho công ty hoặc bộ phận của mình.\n"
 "\n"
-"Bạn có thể định cấu hình một số loại nghỉ phép (ốm, nghỉ có lương, ...) và phân bổ thời gian nghỉ phép cho nhân viên hoặc bộ phận một cách nhanh chóng bằng cách sử dụng phân bổ nghỉ phép. Nhân viên cũng có thể yêu cầu thêm ngày nghỉ bằng cách gửi đơn xin phân bổ thời gian nghỉ phép mới. Việc này sẽ làm tăng tổng số ngày nghỉ còn lại cho loại nghỉ phép đó (nếu yêu cầu được chấp nhận).\n"
+"Bạn có thể định cấu hình một số loại nghỉ phép (ốm, nghỉ có lương, ...) và phân bổ thời gian nghỉ phép cho nhân viên hoặc bộ phận một cách nhanh chóng bằng cách sử dụng phân bổ thời gian nghỉ phép. Nhân viên cũng có thể yêu cầu thêm ngày nghỉ bằng cách gửi đơn xin phân bổ thời gian nghỉ phép mới. Việc này sẽ làm tăng tổng số ngày nghỉ còn lại cho loại nghỉ phép đó (nếu yêu cầu được chấp nhận).\n"
 "\n"
 "Bạn có thể theo dõi nghỉ phép theo nhiều cách khác nhau bằng các báo cáo sau:\n"
 "\n"
@@ -9131,6 +9131,22 @@ msgstr ""
 "Nguồn: https://www.paragraf.rs/propisi/pravilnik-o-kontnom-okviru-sadrzini-racuna-za-privredna-drustva-zadruge.html\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_bh
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Bahrain in Odoo.\n"
+"===========================================================================\n"
+"Bahrain accounting basic charts and localization.\n"
+"\n"
+"Activates:\n"
+" - Chart of Accounts\n"
+" - Taxes\n"
+" - Tax reports\n"
+" - Fiscal Positions\n"
+" - States\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_be
 msgid ""
 "\n"
@@ -9263,6 +9279,28 @@ msgstr ""
 "Agrega una nomenclatura contable para Honduras. También incluye impuestos y la\n"
 "moneda Lempira. -- Bổ sung hệ thống tài khoản dành cho Honduras. Bao gồm cả thuế\n"
 "và đồng nội tệ Lempira."
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_lb_account
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Lebanon in Odoo.\n"
+"==============================================================================\n"
+"Lebanon accounting basic charts,taxes and localization.\n"
+"Activates:\n"
+"* Chart of Accounts\n"
+"* Taxes\n"
+"* Fiscal Positions\n"
+msgstr ""
+"\n"
+"Đây là phân hệ cơ sở để quản lý hệ thống tài khoản cho Liban trong Odoo.\n"
+"===================================================================================\n"
+"\n"
+"Hệ thống tài khoản cơ bản, thuế, và bản địa cho Liban.\n"
+"Kích hoạt:\n"
+"* Hệ thống tài khoản\n"
+"* Thuế\n"
+"* Vị trí tài chính\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_lu
@@ -10538,6 +10576,26 @@ msgid ""
 "Payment' wizard. An error message will appear if no valid mandate is\n"
 "available for generating a payment on the selected invoice.\n"
 msgstr ""
+"\n"
+"Phân hệ này cho phép tạo các tệp XML tuân thủ Ghi nợ trực tiếp SEPA (SDD) (phù hợp với quy định kỹ thuật pain.008.001.02) để gửi đến ngân hàng của bạn nhằm thu một tập hợp các khoản thanh toán.\n"
+"\n"
+"Để đủ điều kiện sử dụng phương thức thanh toán này, trước tiên, khách hàng phải\n"
+"gửi lại giấy ủy quyền cho công ty, đồng ý sử dụng ghi nợ trực tiếp.\n"
+"Sự đồng ý này phải được mã hóa dưới dạng 'ủy quyền của khách hàng' trong Odoo.\n"
+"\n"
+"Bạn cũng cần đáp ứng các yêu cầu sau để\n"
+"tạo tệp SDD đúng cách:\n"
+"- Tài khoản công ty của bạn phải được đặt thành số IBAN hợp lệ\n"
+"- Công ty của bạn phải được cấp mã định danh chủ nợ (có thể thực hiện việc này trong phần Cài đặt - Cài đặt chung - Kế toán)\n"
+"- Công ty của bạn phải xác định nhật ký để nhận thanh toán SDD (vẫn trong phần 'cài đặt' của phân hệ kế toán)\n"
+"- Mỗi khách hàng mà bạn tạo thanh toán phải có số tài khoản IBAN hợp lệ.\n"
+"\n"
+"Odoo sẽ thông báo cho bạn nếu bất kỳ yêu cầu nào trong số các yêu cầu trên không được đáp ứng.\n"
+"\n"
+"Để ghi nhận thanh toán cho các hóa đơn chưa thanh toán, bạn có thể sử dụng tùy chọn\n"
+"'Ghi nợ trực tiếp SEPA' riêng bằng cách chọn tài khoản ngân hàng trong công cụ 'Ghi nhận\n"
+"thanh toán'. Một thông báo lỗi sẽ xuất hiện nếu không có uỷ quyền hợp lệ\n"
+"nào khả dụng để tạo thanh toán cho hóa đơn đã chọn.\n"
 
 #. module: base
 msgid ""
@@ -15934,6 +15992,11 @@ msgstr "ID huy hiệu"
 #: model:res.country,name:base.bs
 msgid "Bahamas"
 msgstr "Bahamas"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_bh
+msgid "Bahrain - Accounting"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.bh
@@ -24754,7 +24817,7 @@ msgstr "Ngày khóa không thể đảo ngược"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_partner_merge_automatic_wizard__group_by_is_company
 msgid "Is Company"
-msgstr "Là công ty"
+msgstr "Công ty"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__is_company_details_empty
@@ -25472,6 +25535,11 @@ msgstr "Tìm hiểu thêm"
 #: model:res.country,name:base.lb
 msgid "Lebanon"
 msgstr "Lebanon"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_lb_account
+msgid "Lebanon - Accounting"
+msgstr "Leban - Kế toán"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__ledger
@@ -34768,7 +34836,7 @@ msgstr "Sint Maarten (Dutch part)"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__size
 msgid "Size"
-msgstr "Quy mô"
+msgstr "Kích thước"
 
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_ir_model_fields_size_gt_zero
@@ -37907,7 +37975,7 @@ msgstr "Đến"
 #: model:ir.model.fields.selection,name:base.selection__res_users_deletion__state__todo
 #: model_terms:ir.ui.view,arch_db:base.config_wizard_step_view_search
 msgid "To Do"
-msgstr "Cần làm"
+msgstr "Việc cần làm"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module__state__to_install
@@ -37944,7 +38012,7 @@ msgstr "Việc cần làm"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_actions_todo_tree
 msgid "Todo"
-msgstr "Cần làm"
+msgstr "Việc cần làm"
 
 #. module: base
 #: model:res.country,name:base.tg

@@ -9,6 +9,7 @@ from odoo import SUPERUSER_ID, _, api, fields, models, registry
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import float_compare, float_is_zero, html_escape
+from odoo.sql_db import BaseCursor
 from odoo.tools.misc import split_every
 
 _logger = logging.getLogger(__name__)
@@ -261,7 +262,7 @@ class StockRule(models.Model):
                 if float_compare(qty_needed, 0, precision_rounding=procurement.product_id.uom_id.rounding) <= 0:
                     procure_method = 'make_to_order'
                     for move in procurement.values.get('group_id', self.env['procurement.group']).stock_move_ids:
-                        if move.product_id != procurement.product_id:
+                        if move.product_id != procurement.product_id or move.state == 'cancel':
                             continue
                         elif move.rule_id == rule and float_compare(move.product_uom_qty, 0, precision_rounding=move.product_uom.rounding) > 0:
                             procure_method = move.procure_method
@@ -377,7 +378,10 @@ class StockRule(models.Model):
         delays = defaultdict(float)
         delay = sum(self.filtered(lambda r: r.action in ['pull', 'pull_push']).mapped('delay'))
         delays['total_delay'] += delay
-        global_visibility_days = self.env['ir.config_parameter'].sudo().get_param('stock.visibility_days')
+        global_visibility_days = (
+            not self.env.context.get('ignore_global_visibility_days') and
+            self.env['ir.config_parameter'].sudo().get_param('stock.visibility_days')
+        )
         if global_visibility_days:
             delays['total_delay'] += int(global_visibility_days)
         if self.env.context.get('bypass_delay_description'):
@@ -672,6 +676,7 @@ class ProcurementGroup(models.Model):
         we run functions as SUPERUSER to avoid intercompanies and access rights issues. """
         try:
             if use_new_cursor:
+                assert isinstance(self._cr, BaseCursor)
                 cr = registry(self._cr.dbname).cursor()
                 self = self.with_env(self.env(cr=cr))  # TDE FIXME
 
