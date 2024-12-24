@@ -5,6 +5,7 @@
 # Translators:
 # Jumshud Sultanov <cumshud@gmail.com>, 2024
 # erpgo translator <jumshud@erpgo.az>, 2024
+# shahriyar rzayev, 2024
 # Nurlan Farajov <coolinuxoid@gmail.com>, 2024
 # 
 msgid ""
@@ -1452,7 +1453,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_media_list_options
 msgid "Add Media"
-msgstr ""
+msgstr "Media əlavə edin"
 
 #. module: website
 #. odoo-javascript
@@ -2134,7 +2135,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Big Icons Subtitles"
-msgstr ""
+msgstr "Böyük İkonlar Altyazılar"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_ir_model_fields__website_form_blacklisted
@@ -3144,6 +3145,8 @@ msgid ""
 "Created in 2021, the company is young and dynamic. Discover the composition "
 "of the team and their skills."
 msgstr ""
+"2021-ci ildə yaradılmış şirkət gənc və dinamikdir. Komandanın tərkibini və "
+"bacarıqlarını kəşf edin."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_ir_asset__create_date
@@ -3609,7 +3612,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_images_subtitles
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 msgid "Discover our team"
-msgstr ""
+msgstr "Komandamızı kəşf edin"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -4214,7 +4217,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.snippets
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
 msgid "Facebook"
-msgstr ""
+msgstr "Facebook"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website__social_facebook
@@ -5354,7 +5357,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Image Menu"
-msgstr ""
+msgstr "Şəkil Menyu"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_media_list_options
@@ -5380,7 +5383,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Images Subtitles"
-msgstr ""
+msgstr "Şəkillər Altyazılar"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -6244,7 +6247,7 @@ msgstr "Digər Vebsaytlara linklər"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Little Icons"
-msgstr ""
+msgstr "Kiçik Nişanlar"
 
 #. module: website
 #: model:website.configurator.feature,name:website.feature_module_live_chat
@@ -6292,7 +6295,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Logos"
-msgstr ""
+msgstr "Loqolar"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
@@ -6721,7 +6724,7 @@ msgstr "Əvvəlkinə Keç"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Multi Menus"
-msgstr ""
+msgstr "Çox menyular"
 
 #. module: website
 #: model:ir.model,name:website.model_website_multi_mixin
@@ -7065,7 +7068,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Odoo Menu"
-msgstr ""
+msgstr "Odoo Menyu"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.show_website_info
@@ -9306,7 +9309,7 @@ msgstr "Mətn Düzləndirmə"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
 msgid "Text Color"
-msgstr ""
+msgstr "Lentə yazı rəngi"
 
 #. module: website
 #. odoo-javascript
@@ -9478,7 +9481,7 @@ msgstr "Seçilmiş şablonlar zavod parametrlərinə qaytarılacaq."
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_images_subtitles
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 msgid "The team"
-msgstr ""
+msgstr "Komanda"
 
 #. module: website
 #. odoo-javascript
@@ -10823,7 +10826,7 @@ msgstr "Veb sayt Parametrləri"
 #. module: website
 #: model:ir.model,name:website.model_website_snippet_filter
 msgid "Website Snippet Filter"
-msgstr ""
+msgstr "Vebsayt Snippet Filteri"
 
 #. module: website
 #: model:ir.model,name:website.model_theme_website_menu

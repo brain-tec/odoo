@@ -5,6 +5,7 @@
 # Translators:
 # sergeiruzkiicode <sergei.ruzki@icode.by>, 2022
 # Oleksandr Voznyi <oleksandr.voznyi@gmail.com>, 2022
+# 6da4f49c4b78e697e34b24b2a66289f5, 2022
 # Sergo S, 2022
 # GulShar Mungatova <mungatova@gmail.com>, 2022
 # Evgeny Kemerov <sintezz777@gmail.com>, 2022
@@ -20,7 +21,6 @@
 # Elena Da, 2023
 # Sergey Vernyayev, 2023
 # ILMIR <karamov@it-projects.info>, 2024
-# 6da4f49c4b78e697e34b24b2a66289f5, 2024
 # Ꚁemetron <d.v.selitsky@gmail.com>, 2024
 # valmasone, 2024
 # Yuriy Ney <k_wizard@mail.ru>, 2024
@@ -13116,6 +13116,8 @@ msgid ""
 "Azure Interior brings honesty and seriousness to wood industry while helping"
 " customers deal with trees, flowers and fungi."
 msgstr ""
+"Azure Interior делает работу с деревом честной и ответственной, помогая "
+"клиентам ухаживать за деревьями, цветами и грибами."
 
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_B
@@ -13711,6 +13713,9 @@ msgid ""
 "                notably for selling mouse traps. With that trick he cut\n"
 "                IT budget by almost half within the last 2 years."
 msgstr ""
+"Брэндон работает в IT-сфере <b>уже 10 лет</b>. Он особенно \n"
+"                 известен своим нестандартным подходом, который позволил \n"
+"                 сократить IT-бюджет почти вдвое за последние 2 года."
 
 #. module: base
 #: model:res.country,name:base.br
@@ -13725,7 +13730,7 @@ msgstr "Бразилия - Бухгалтерские отчеты"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_br
 msgid "Brazilian - Accounting"
-msgstr "Бразилия - учет"
+msgstr "Бразилия — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_renting_sign
@@ -14110,7 +14115,7 @@ msgstr "Канада"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ca
 msgid "Canada - Accounting"
-msgstr "Канада - отчеты"
+msgstr "Канада — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ca_check_printing
@@ -14277,6 +14282,13 @@ msgid ""
 "(San Francisco) in its entirety and does not include any costs relating to "
 "the legislation of the country in which the client is located."
 msgstr ""
+"В некоторых странах действует практика удержания налога у источника с суммы "
+"счёта в соответствии с местным законодательством. Уплата таких налогов "
+"осуществляется клиентом в налоговые органы. Компания «My Company (San "
+"Francisco)» ни при каких обстоятельствах не несёт ответственности за "
+"расходы, связанные с законодательными требованиями других стран. Сумма счёта"
+" должна быть полностью оплачена компании «My Company (San Francisco)» и не "
+"включает в себя расходы, связанные с законодательством страны клиента."
 
 #. module: base
 #: model:res.country,name:base.td
@@ -14612,6 +14624,9 @@ msgid ""
 "                notably for selling mouse traps. With that trick he cut\n"
 "                IT budget by almost half within the last 2 years."
 msgstr ""
+"Коллин Диаз работает в IT-сфере уже <b>10 лет</b>. Он особенно известен \n"
+"                  своими нестандартными решениями, благодаря которым удалось \n"
+"                  сократить IT-бюджет почти наполовину за последние 2 года."
 
 #. module: base
 #: model:res.country,name:base.co
@@ -14626,7 +14641,7 @@ msgstr "Колумбия - Бухгалтерский учет"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_co_reports
 msgid "Colombian - Accounting Reports"
-msgstr "Колумбия - Бухгалтерские отчеты"
+msgstr "Колумбия — Бухгалтерские отчеты"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_co_pos
@@ -15277,7 +15292,7 @@ msgstr "Коста-Рика"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_cr
 msgid "Costa Rica - Accounting"
-msgstr "Коста Рика - Учет"
+msgstr "Коста-Рика — Бухгалтерия"
 
 #. module: base
 #. odoo-python
@@ -16446,7 +16461,7 @@ msgstr "Дания"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_dk
 msgid "Denmark - Accounting"
-msgstr "Дания - Бухучет"
+msgstr "Дания — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_dk_reports
@@ -17005,6 +17020,8 @@ msgstr "Готово!"
 #: model:res.partner,website_short_description:base.res_partner_address_3
 msgid "Douglas Fletcher is a mighty functional consultant at Deco Addict"
 msgstr ""
+"Дуглас Флетчер — ведущий эксперт по функциональному консалтингу в компании "
+"Deco Addict"
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_address_3
@@ -17013,6 +17030,9 @@ msgid ""
 "    notably for selling mouse traps. With that trick he cut\n"
 "    IT budget by almost half within the last 2 years."
 msgstr ""
+"Дуглас Флетчер работает в IT-сфере уже <b>10 лет</b>. Он особенно известен \n"
+"       своими нестандартными решениями, которые позволили \n"
+"       сократить IT-бюджет почти наполовину за последние 2 года."
 
 #. module: base
 #: model:res.partner.title,shortcut:base.res_partner_title_doctor
@@ -18218,7 +18238,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_fedex
 msgid "Fedex Shipping (Legacy)"
-msgstr ""
+msgstr "FedEx Доставка (устаревший)"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_fr_fec
@@ -18749,7 +18769,7 @@ msgstr "Число с плавающей точкой"
 #. module: base
 #: model:res.partner,website_short_description:base.res_partner_address_4
 msgid "Floyd Steward is a mighty analyst at Deco Addict."
-msgstr ""
+msgstr "Флойд Стюард — выдающийся аналитик компании Deco Addict."
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_address_4
@@ -18758,6 +18778,9 @@ msgid ""
 "    notably for selling mouse traps. With that trick he cut\n"
 "    IT budget by almost half within the last 2 years."
 msgstr ""
+"Флойд Стюард работает в IT-сфере уже <b>10 лет</b>. Он особенно \n"
+"    известен своими креативными подходами, которые позволили \n"
+"    сократить IT-бюджет почти наполовину за последние 2 года."
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__report_paperformat__format__folio
@@ -18895,12 +18918,13 @@ msgstr "Франция - Учет"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_reports
 msgid "France - Accounting Reports"
-msgstr "Франция - бухгалтерская отчетность"
+msgstr "Франция — Бухгалтерские отчеты"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_invoice_addr
 msgid "France - Adding Mandatory Invoice Mentions (Decree no. 2022-1299)"
 msgstr ""
+"Франция — Добавление обязательных реквизитов на счетах (Декрет № 2022-1299)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_fec
@@ -19377,6 +19401,10 @@ msgid ""
 "                IT budget by almost half within the last 2 years.\n"
 "                Famous Senior Consultant."
 msgstr ""
+"Гордон Оуэнс работает в IT-сфере уже <b>10 лет</b>. Он особенно \n"
+"                 известен своими нестандартными решениями, которые позволили\n"
+"                 сократить IT-бюджет почти наполовину за последние 2 года. \n"
+"                 Известный старший консультант."
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_act_window_view__view_mode__graph
@@ -19505,7 +19533,7 @@ msgstr "Гватемала"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_gt
 msgid "Guatemala - Accounting"
-msgstr "Гватемала - Учет"
+msgstr "Гватемала — Бухгалтерия"
 
 #. module: base
 #: model:res.country,name:base.gg
@@ -19939,7 +19967,7 @@ msgstr "Гондурас"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_hn
 msgid "Honduras - Accounting"
-msgstr "Гондурас - Бухгалтерский учёт"
+msgstr "Гондурас — Бухгалтерия"
 
 #. module: base
 #: model:res.country,name:base.hk
@@ -19949,7 +19977,7 @@ msgstr "Гонконг"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_hk
 msgid "Hong Kong - Accounting"
-msgstr "Гонконг - Бухучет"
+msgstr "Гонконг — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_hk_hr_payroll
@@ -20238,6 +20266,10 @@ msgid ""
 "services of a debt recovery company. All legal expenses will be payable by "
 "the client."
 msgstr ""
+"Если платеж остаётся неоплаченным более 60 дней с момента установленной "
+"даты, компания «My Company (San Francisco)» вправе обратиться к услугам "
+"службы взыскания задолженности. Все связанные с этим юридические расходы "
+"подлежат оплате клиентом."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model_fields__group_expand
@@ -20615,6 +20647,9 @@ msgid ""
 "registered office within 8 days of the delivery of the goods or the "
 "provision of the services."
 msgstr ""
+"Для рассмотрения претензии компания «My Company (San Francisco)» должна быть"
+" уведомлена об этом заказным письмом, отправленным на её юридический адрес, "
+"в течение 8 дней с момента доставки товара или оказания услуги."
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_iap
@@ -20689,7 +20724,7 @@ msgstr "Управление продажами и складом в Индии"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in
 msgid "Indian - Accounting"
-msgstr "Индия - Учет"
+msgstr "Индия — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_reports
@@ -20774,7 +20809,7 @@ msgstr "Индонезия E-faktur"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_id
 msgid "Indonesian - Accounting"
-msgstr "Индонезия - Бухучет"
+msgstr "Индонезия — Бухгалтерия"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.res_partner_industry_action
@@ -21447,17 +21482,17 @@ msgstr "Италия"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_it
 msgid "Italy - Accounting"
-msgstr "Италия - Учет"
+msgstr "Италия — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_it_reports
 msgid "Italy - Accounting Reports"
-msgstr "Италия - Бухгалтерские отчеты"
+msgstr "Италия — Бухгалтерские отчеты"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_it_edi
 msgid "Italy - E-invoicing"
-msgstr "Италия - электронные платежные документы"
+msgstr "Италия — Электронное выставление счетов"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_it_edi_pa
@@ -23715,7 +23750,7 @@ msgstr "Монголия"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mn
 msgid "Mongolia - Accounting"
-msgstr "Монголия - Бухучет"
+msgstr "Монголия — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mn_reports
@@ -23814,6 +23849,11 @@ msgid ""
 "required by the client to appear as a third party in the context of any "
 "claim for damages filed against the client by an end consumer."
 msgstr ""
+"Компания «My Company (San Francisco)» делает всё возможное, чтобы "
+"предоставлять качественные услуги в согласованные сроки. Однако её "
+"обязательства не гарантируют конкретного результата. Также компания не может"
+" быть привлечена клиентом в качестве третьей стороны в спорах с конечными "
+"потребителями."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_attachment_search
@@ -23938,7 +23978,7 @@ msgstr "Нидерланды"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_nl
 msgid "Netherlands - Accounting"
-msgstr "Нидерланды - Учет"
+msgstr "Нидерланды — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_nl_reports
@@ -24066,6 +24106,8 @@ msgid ""
 "Nicole is <b>author of several books</b>, including Amazon best seller\n"
 "                \"How Azure and Odoo will change the business world!\"."
 msgstr ""
+"Николь является <b>автором нескольких книг</b>, включая бестселлер Amazon \n"
+"               «Как Azure и Odoo изменят мир бизнеса!»."
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_address_16
@@ -24076,6 +24118,11 @@ msgid ""
 "                from 1 to 55 employees mostly by reselling services on\n"
 "                Odoo."
 msgstr ""
+"Николь работает в IT-сфере <b>уже 20 лет</b>. Она \n"
+"                 разрабатывает программное обеспечение для создания веб-сайтов. \n"
+"                 В 30 лет она продала свою первую компанию и смогла вырастить \n"
+"                 Azure Interior с 1 до 55 сотрудников, главным образом благодаря перепродаже \n"
+"                 услуг на платформе Odoo."
 
 #. module: base
 #: model:res.country,name:base.ne
@@ -25672,6 +25719,8 @@ msgid ""
 "Odoo is unable to merge the generated PDFs because of {num_errors} corrupted"
 " file(s)"
 msgstr ""
+"Odoo не может объединить PDF-файлы из-за {num_errors} повреждённых "
+"файла(ов)."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_sequence__padding
@@ -26287,6 +26336,11 @@ msgid ""
 "due. My Company (San Francisco) will be authorized to suspend any provision "
 "of services without prior warning in the event of late payment."
 msgstr ""
+"Счета подлежат оплате в течение 21 рабочего дня, если иное не указано в "
+"счёте или заказе. В случае просрочки оплаты компания «My Company (San "
+"Francisco)» имеет право начислить фиксированный штраф в размере 10% от "
+"оставшейся суммы. Кроме того, компания вправе приостановить оказание услуг "
+"без предварительного уведомления до урегулирования задолженности."
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_ir_mail_server_search
@@ -27069,7 +27123,7 @@ msgstr "Польша"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_pl
 msgid "Poland - Accounting"
-msgstr "Польша - Бухгалтерский учёт"
+msgstr "Польша — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_pl_reports
@@ -28701,7 +28755,7 @@ msgstr "Румыния"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ro
 msgid "Romania - Accounting"
-msgstr "Румыния - Учет"
+msgstr "Румыния — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ro_saft
@@ -29204,7 +29258,7 @@ msgstr "Саудовская Аравия - Электронное выстав�
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_edi_pos
 msgid "Saudi Arabia - E-invoicing (Simplified)"
-msgstr ""
+msgstr "Саудовская Аравия — Электронные счета (Упрощённые)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_pos
@@ -29635,6 +29689,9 @@ msgid ""
 " install the new \"Fedex Shipping\" module and uninstall this one as soon as"
 " possible. This integration will stop working in 2024"
 msgstr ""
+"Это устаревшая интеграция с FedEx, которая больше не поддерживается. "
+"Установите новый модуль «FedEx Shipping» и удалите этот как можно скорее. "
+"Эта интеграция прекратит работу в 2024 году"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_delivery_ups_rest
@@ -30005,12 +30062,12 @@ msgstr "Сингапур"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sg
 msgid "Singapore - Accounting"
-msgstr "Сингапур - Учет"
+msgstr "Сингапур — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sg_reports
 msgid "Singapore - Accounting Reports"
-msgstr "Сингапур - Бухгалтерские Отчёты"
+msgstr "Сингапур — Бухгалтерские отчеты"
 
 #. module: base
 #: model:res.country,name:base.sx
@@ -30227,7 +30284,7 @@ msgstr "Южная Африка"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_za
 msgid "South Africa - Accounting"
-msgstr "Южная Африка - Бухучет"
+msgstr "Южная Африка — Бухгалтерия"
 
 #. module: base
 #: model:res.country.group,name:base.south_america
@@ -30865,7 +30922,7 @@ msgstr "Швейцария"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ch
 msgid "Switzerland - Accounting"
-msgstr "Швейцария - Учет"
+msgstr "Швейцария — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ch_reports
@@ -31316,7 +31373,7 @@ msgstr "Таиланд"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_th
 msgid "Thailand - Accounting"
-msgstr "Таиланд - Учет"
+msgstr "Таиланд — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_th_reports
@@ -31347,6 +31404,8 @@ msgid ""
 "The action \"%s\" cannot be set as the home action because it requires a "
 "record to be selected beforehand."
 msgstr ""
+"Действие «%s» нельзя установить в качестве домашнего, так как оно требует "
+"предварительного выбора записи."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_country__code
@@ -31365,6 +31424,9 @@ msgid ""
 "The Jackson Group brings honesty and seriousness to wood industry while "
 "helping customers deal with trees, flowers and fungi."
 msgstr ""
+"Группа Jackson объединяет честность и преданность делу, привнося "
+"профессионализм в деревообрабатывающую отрасль и помогая клиентам бережно и "
+"эффективно работать с деревьями, цветами и грибами."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_lang__url_code
@@ -32839,6 +32901,10 @@ msgid ""
 "                IT budget by almost half within the last 2 years.\n"
 "                Famous Managing Partner."
 msgstr ""
+"Тони Роудс работает в IT-сфере уже <b>10 лет</b>. Он особенно \n"
+"                 известен своими нестандартными решениями, которые позволили\n"
+"                 сократить IT-бюджет почти наполовину за последние 2 года. \n"
+"                 Известный управляющий партнёр."
 
 #. module: base
 #. odoo-python
@@ -33025,17 +33091,17 @@ msgstr "Тунис"
 #. module: base
 #: model:res.country,name:base.tr
 msgid "Türkiye"
-msgstr ""
+msgstr "Турция"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_tr
 msgid "Türkiye - Accounting"
-msgstr ""
+msgstr "Турция — Бухгалтерия"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_tr_reports
 msgid "Türkiye - Accounting Reports"
-msgstr ""
+msgstr "Турция — Бухгалтерские отчеты"
 
 #. module: base
 #: model:res.country,name:base.tm
@@ -34181,7 +34247,7 @@ msgstr "Просмотр сеансов livechat для ведущих"
 #. odoo-python
 #: code:addons/base/models/ir_actions_report.py:0
 msgid "View Problematic Record(s)"
-msgstr ""
+msgstr "Просмотреть проблемные записи"
 
 #. module: base
 #. odoo-python
@@ -34312,6 +34378,9 @@ msgid ""
 "enhancing solutions through the use of advanced software for our clients "
 "worldwide. At Lumber Inc we bring operational experience combined..."
 msgstr ""
+"Мы — консалтинговая компания в сфере технологий, создающая эффективные "
+"решения с использованием передового программного обеспечения. В Lumber Inc "
+"мы соединяем опыт и..."
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_18
@@ -34320,6 +34389,9 @@ msgid ""
 " <br> <br>\n"
 "At Lumber Inc we bring operational experience combined with technological acumen. We understand that any software that supports business operations needs to be designed in such a way that facilitates the execution of critical operational processes, and serves as a tool to the users rather than a barrier. Our approach is focused on the process first, ensuring that it contributes to the goals of the company, we then optimize it, and design the software solutions to best support it."
 msgstr ""
+"Мы — консалтинговая и стратегическая компания в сфере технологий, создающая инновационные решения, которые повышают ценность бизнеса с использованием передового программного обеспечения для клиентов по всему миру.\n"
+"<br><br>\n"
+"В Lumber Inc мы сочетаем практический операционный опыт с глубокой технической экспертизой. Мы понимаем, что программное обеспечение для поддержки бизнес-процессов должно быть спроектировано так, чтобы облегчать выполнение ключевых операций и становиться полезным инструментом для пользователей, а не препятствием. Наш подход строится на глубоком анализе процессов: мы оцениваем их с учётом целей компании, оптимизируем, а затем разрабатываем программные решения, которые идеально поддерживают эти процессы."
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_web
@@ -34709,6 +34781,9 @@ msgid ""
 "Wood Corner brings honesty and seriousness to wood industry while helping "
 "customers deal with trees, flowers and fungi."
 msgstr ""
+"Wood Corner объединяет честность и преданность делу, привнося "
+"профессионализм в деревообрабатывающую отрасль и помогая клиентам бережно и "
+"эффективно работать с деревьями, цветами и грибами."
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_work_entry
@@ -35071,6 +35146,9 @@ msgid ""
 "You cannot delete the admin user because it is utilized in various places "
 "(such as security configurations,...). Instead, archive it."
 msgstr ""
+"Вы не можете удалить пользователя-администратора, так как он используется в "
+"различных местах (например, в настройках безопасности). Вместо этого "
+"архивируйте его."
 
 #. module: base
 #. odoo-python
@@ -35103,6 +35181,8 @@ msgid ""
 "You cannot reduce the number of decimal places of a currency already used on"
 " an accounting entry."
 msgstr ""
+"Нельзя уменьшить количество десятичных знаков для валюты, которая уже "
+"использовалась в бухгалтерских проводках."
 
 #. module: base
 #. odoo-python
