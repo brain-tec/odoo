@@ -32,7 +32,7 @@ echo  "alias read_mode='sudo mount -o remount,ro / && sudo mount -o remount,ro /
 echo  "alias install='sudo mount -o remount,rw / && sudo mount -o remount,rw /root_bypass_ramdisks; sudo chroot /root_bypass_ramdisks/; mount -t proc proc /proc'" | tee -a ~/.bashrc /home/pi/.bashrc
 echo  "alias blackbox='ls /dev/serial/by-path/'" | tee -a ~/.bashrc /home/pi/.bashrc
 echo  "alias nano='write_mode; sudo nano -l'" | tee -a /home/pi/.bashrc
-echo  "alias vim='write_mode; sudo vim'" | tee -a /home/pi/.bashrc
+echo  "alias vim='write_mode; sudo vim -u /home/pi/.vimrc'" | tee -a /home/pi/.bashrc
 echo  "alias odoo_luxe='printf \" ______\n< Luxe >\n ------\n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\ \n                ||----w |\n                ||     ||\n\"'" | tee -a ~/.bashrc /home/pi/.bashrc
 echo  "alias odoo_start='sudo systemctl start odoo'" >> /home/pi/.bashrc
 echo  "alias odoo_stop='sudo systemctl stop odoo'" >> /home/pi/.bashrc
@@ -127,6 +127,7 @@ PKGS_TO_INSTALL="
     python3-dev \
     python3-docutils \
     python3-geoip2 \
+    python3-jinja2 \
     python3-ldap \
     python3-libsass \
     python3-lxml \
@@ -221,6 +222,7 @@ groupadd usbusers
 usermod -a -G usbusers odoo
 usermod -a -G lp odoo
 usermod -a -G input lightdm
+usermod -a -G pi odoo
 mkdir -v /var/log/odoo
 chown odoo:odoo /var/log/odoo
 chown odoo:odoo -R /home/pi/odoo/
