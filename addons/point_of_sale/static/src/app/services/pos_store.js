@@ -256,6 +256,7 @@ export class PosStore extends WithLazyGetterTrap {
         this.currency = this.config.currency_id;
         this.pickingType = this.data.models["stock.picking.type"].getFirst();
         this.models = this.data.models;
+        this.models["pos.session"].getFirst().login_number = parseInt(odoo.login_number);
 
         // Check cashier
         this.checkPreviousLoggedCashier();
@@ -1991,9 +1992,7 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     async onTicketButtonClick() {
-        if (this.isTicketScreenShown) {
-            this.closeScreen();
-        } else {
+        if (!this.isTicketScreenShown) {
             if (this.config.shouldLoadOrders) {
                 try {
                     this.setLoadingOrderState(true);
