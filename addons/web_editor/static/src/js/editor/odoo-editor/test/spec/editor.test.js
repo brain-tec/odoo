@@ -157,6 +157,14 @@ describe('Editor', () => {
                 });
             });
         });
+        describe('Sanitize ZWS', () => {
+            it('should remove zws while preserving the selection', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p><font data-oe-zws-empty-inline="" style="color: rgb(255, 0, 0);">&ZeroWidthSpace;a[]</font></p>',
+                    contentAfter: '<p><font style="color: rgb(255, 0, 0);">a[]</font></p>',
+                })
+            })
+        })
     });
     describe('deleteForward', () => {
         describe('Selection collapsed', () => {
@@ -3912,6 +3920,11 @@ X[]
                         stepFunction: pressEnter,
                         contentAfter: '<div><a>ab</a><br><br>[]</div>',
                     });
+                    await testEditor(BasicEditor, {
+                        contentBefore: '<div><a style="display: block;">ab[]</a></div>',
+                        stepFunction: pressEnter,
+                        contentAfter: '<div><a style="display: block;">ab</a>[]<br></div>'
+                    })
                     await testEditor(BasicEditor, {
                         contentBefore: '<div><a>ab[]</a>cd</div>',
                         stepFunction: pressEnter,
