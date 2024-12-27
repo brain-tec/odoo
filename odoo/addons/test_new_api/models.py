@@ -969,6 +969,22 @@ class ComputeMember(models.Model):
             member.container_id = container.search([('name', '=', member.name)], limit=1)
 
 
+class User(models.Model):
+    _name = _description = 'test_new_api.user'
+    _allow_sudo_commands = False
+
+    name = fields.Char()
+    group_ids = fields.Many2many('test_new_api.group')
+
+
+class Group(models.Model):
+    _name = _description = 'test_new_api.group'
+    _allow_sudo_commands = False
+
+    name = fields.Char()
+    user_ids = fields.Many2many('test_new_api.user')
+
+
 class TriggerLeft(models.Model):
     _name = 'test_new_api.trigger.left'
     _description = 'model with a related many2one'
