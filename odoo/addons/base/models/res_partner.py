@@ -133,7 +133,7 @@ class Partner(models.Model):
     _description = 'Contact'
     _inherit = ['format.address.mixin', 'avatar.mixin']
     _name = "res.partner"
-    _order = "display_name ASC, id DESC"
+    _order = "display_name"
     _allow_sudo_commands = False
 
     def _default_category(self):
