@@ -61,7 +61,6 @@ class IrAsset(models.Model):
     _name = 'ir.asset'
     _description = 'Asset'
     _order = 'sequence, id'
-    _allow_sudo_commands = False
 
     @api.model_create_multi
     def create(self, vals_list):
