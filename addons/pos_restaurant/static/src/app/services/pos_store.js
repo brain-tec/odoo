@@ -149,7 +149,7 @@ patch(PosStore.prototype, {
 
         if (
             this.getOrder()?.finalized &&
-            ![ReceiptScreen, TipScreen].includes([this.mainScreen.component])
+            ![ReceiptScreen, TipScreen].includes(this.mainScreen.component)
         ) {
             this.addNewOrder();
         }
@@ -518,6 +518,26 @@ patch(PosStore.prototype, {
     getTableFromElement(el) {
         return this.models["restaurant.table"].get(
             [...el.classList].find((c) => c.includes("tableId")).split("-")[1]
+        );
+    },
+    startTransferOrder() {
+        this.isOrderTransferMode = true;
+        const orderUuid = this.getOrder().uuid;
+        this.getOrder().setBooked(true);
+        this.showScreen("FloorScreen");
+        document.addEventListener(
+            "click",
+            async (ev) => {
+                this.isOrderTransferMode = false;
+                const tableElement = ev.target.closest(".table");
+                if (!tableElement) {
+                    return;
+                }
+                const table = this.getTableFromElement(tableElement);
+                await this.transferOrder(orderUuid, table);
+                this.setTableFromUi(table);
+            },
+            { once: true }
         );
     },
     prepareOrderTransfer(order, destinationTable) {
