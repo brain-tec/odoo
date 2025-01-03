@@ -348,9 +348,6 @@ class PosSession(models.Model):
         """
         self.ensure_one()
 
-        if ref_prefix is None:
-            ref_prefix = _("Order")
-
         sequence_num = int(self.order_seq_id._next())
 
         YY = fields.Datetime.now().strftime('%y')
@@ -358,7 +355,7 @@ class PosSession(models.Model):
         SSS = f"{self.id:03}"
         F = 0  # -> means server-generated pos_reference
         OOOO = f"{sequence_num:04}"
-        order_ref = f"{ref_prefix} {YY}{LL}-{SSS}-{F}{OOOO}"
+        order_ref = f"{ref_prefix} {YY}{LL}-{SSS}-{F}{OOOO}" if ref_prefix else f"{YY}{LL}-{SSS}-{F}{OOOO}"
 
         return order_ref, sequence_num, tracking_prefix + f"{sequence_num:03}"
 
@@ -1545,16 +1542,13 @@ class PosSession(models.Model):
         new_amounts['amount_converted'] += amount_converted
 
         # consider base_amount if present
-        if not amounts_to_add.get('base_amount') == None:
+
+        if amounts_to_add.get('base_amount'):
             base_amount = amounts_to_add.get('base_amount')
-            if self.is_in_company_currency or force_company_currency:
-                base_amount_converted = base_amount
-            else:
-                base_amount_converted = self._amount_converter(base_amount, date, round)
 
             # update base_amount and base_amount_converted
             new_amounts['base_amount'] += base_amount
-            new_amounts['base_amount_converted'] += base_amount_converted
+            new_amounts['base_amount_converted'] += base_amount
 
         return new_amounts
 
