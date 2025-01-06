@@ -2295,8 +2295,6 @@ class TestX2many(common.TransactionCase):
         })
         self.assertTrue(field.unlink())
 
-<<<<<<< HEAD
-=======
     def test_custom_m2m_related(self):
         # this checks the ondelete of a related many2many field
         model_id = self.env['ir.model']._get_id('res.partner')
@@ -2436,7 +2434,6 @@ class TestX2many(common.TransactionCase):
                     'group_ids': [(2, my_user.group_ids[0].id)],
                 })
 
->>>>>>> 6b9b598fbb29... [IMP] core: disable x2many manipulation as sudo for sensitive models
 
 class TestHtmlField(common.TransactionCase):
 
