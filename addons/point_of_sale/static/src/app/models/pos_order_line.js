@@ -146,7 +146,7 @@ export class PosOrderline extends Base {
         const lotLinesToRemove = [];
 
         for (const lotLine of this.pack_lot_ids) {
-            const modifiedLotName = modifiedPackLotLines[lotLine.uuid];
+            const modifiedLotName = modifiedPackLotLines[lotLine.id];
             if (modifiedLotName) {
                 lotLine.lot_name = modifiedLotName;
             } else {
@@ -156,7 +156,7 @@ export class PosOrderline extends Base {
 
         // Remove those that needed to be removed.
         for (const lotLine of lotLinesToRemove) {
-            this.pack_lot_ids = this.pack_lot_ids.filter((pll) => pll.uuid !== lotLine.uuid);
+            this.pack_lot_ids = this.pack_lot_ids.filter((pll) => pll.id !== lotLine.id);
         }
 
         for (const newLotLine of newPackLotLines) {
@@ -321,14 +321,18 @@ export class PosOrderline extends Base {
             // don't merge discounted orderlines
             this.get_discount() === 0 &&
             floatIsZero(price - order_line_price - orderline.get_price_extra(), this.currency) &&
-            !(
-                this.product_id.tracking === "lot" &&
-                (this.pickingType.use_create_lots || this.pickingType.use_existing_lots)
-            ) &&
+            !this.isLotTracked() &&
             this.full_product_name === orderline.full_product_name &&
             isSameCustomerNote &&
             !this.refunded_orderline_id &&
             !orderline.isPartOfCombo()
+        );
+    }
+
+    isLotTracked() {
+        return (
+            this.product_id.tracking === "lot" &&
+            (this.pickingType.use_create_lots || this.pickingType.use_existing_lots)
         );
     }
 
@@ -342,6 +346,9 @@ export class PosOrderline extends Base {
     merge(orderline) {
         this.order_id.assert_editable();
         this.set_quantity(this.get_quantity() + orderline.get_quantity());
+        this.update({
+            pack_lot_ids: [["link", ...orderline.pack_lot_ids]],
+        });
     }
 
     set_unit_price(price) {
