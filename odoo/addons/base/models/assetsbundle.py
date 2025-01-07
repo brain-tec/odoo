@@ -27,6 +27,8 @@ from odoo.tools import func, misc
 import logging
 _logger = logging.getLogger(__name__)
 
+EXTENSIONS = (".js", ".css", ".scss", ".sass", ".less")
+
 
 class CompileError(RuntimeError): pass
 def rjsmin(script):
