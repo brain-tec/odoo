@@ -20,7 +20,6 @@ from odoo.exceptions import ValidationError, AccessError, UserError
 from odoo.http import request
 from odoo.models import check_method_name
 from odoo.modules.module import get_resource_from_path
-from odoo.osv.expression import expression
 from odoo.tools import config, lazy_property, frozendict, SQL
 from odoo.tools.convert import _fix_multiple_roots
 from odoo.tools.misc import file_path, get_diff, ConstantMapping
@@ -357,7 +356,7 @@ actual arch.
             try:
                 # verify the view is valid xml and that the inheritance resolves
                 if view.inherit_id:
-                    view_arch = etree.fromstring(view.arch)
+                    view_arch = etree.fromstring(view.arch or '<data/>')
                     view._valid_inheritance(view_arch)
                 combined_arch = view._get_combined_arch()
                 if view.type == 'qweb':
@@ -590,11 +589,10 @@ actual arch.
         """
         if not self.ids:
             return self.browse()
-        self.browse().check_access('read')
         domain = self._get_inheriting_views_domain()
-        e = expression(domain, self.env['ir.ui.view'])
-        where_clause = e.query.where_clause
-        assert e.query.from_clause == SQL.identifier('ir_ui_view'), f"Unexpected from clause: {e.query.from_clause}"
+        query = self._search(domain)
+        where_clause = query.where_clause
+        assert query.from_clause == SQL.identifier('ir_ui_view'), f"Unexpected from clause: {query.from_clause}"
 
         self.flush_model(['inherit_id', 'priority', 'model', 'mode'])
         query = SQL("""
