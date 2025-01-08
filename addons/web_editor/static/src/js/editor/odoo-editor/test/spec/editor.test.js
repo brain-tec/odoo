@@ -3955,6 +3955,11 @@ X[]
                         contentAfter: '<div><a>ab</a><br><br>[]</div>',
                     });
                     await testEditor(BasicEditor, {
+                        contentBefore: '<div><a style="display: block;">ab[]</a></div>',
+                        stepFunction: pressEnter,
+                        contentAfter: '<div><a style="display: block;">ab</a>[]<br></div>'
+                    })
+                    await testEditor(BasicEditor, {
                         contentBefore: '<div><a>ab[]</a>cd</div>',
                         stepFunction: pressEnter,
                         contentAfter: '<div><a>ab</a><br>[]cd</div>',
@@ -7968,6 +7973,19 @@ X[]
                         await simulateMouseClick(editor, firstTable, true);
                     },
                     contentAfter: '<table></table><p>[]<br></p><table></table>'
+                });
+            });
+            it('should reset selection on mousedown on empty editable', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<p>[<br>]</p>',
+                    stepFunction: async editor => {
+                        const paragraph = editor.editable.querySelector('p');
+                        await triggerEvent(paragraph, 'mousedown');
+                        await nextTick();
+                        await triggerEvent(paragraph, 'mouseup');
+                        triggerEvent(paragraph, 'click');
+                    },
+                    contentAfter: '<p>[]<br></p>'
                 });
             });
         });
