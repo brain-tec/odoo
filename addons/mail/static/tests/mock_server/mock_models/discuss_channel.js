@@ -138,11 +138,12 @@ export class DiscussChannel extends models.ServerModel {
                 })
             );
             BusBus._sendone(partner, "discuss.channel/joined", {
-                channel: {
+                channel_id: channel.id,
+                data: new mailDataHelpers.Store(this.browse(channel.id), {
                     ...this._channel_basic_info([channel.id]),
                     is_pinned: true,
                     model: "discuss.channel",
-                },
+                }).get_result(),
                 invited_by_user_id: this.env.uid,
             });
         }
@@ -235,7 +236,6 @@ export class DiscussChannel extends models.ServerModel {
         const [data] = this._read_format(
             ids,
             [
-                "allow_public_upload",
                 "avatar_cache_key", // mock server simplification
                 "channel_type",
                 "create_uid",
@@ -439,7 +439,6 @@ export class DiscussChannel extends models.ServerModel {
                 "ADD",
                 makeKwArgs({ extra: true })
             );
-            res.allow_public_upload = channel.allow_public_upload;
             store.add(this.browse(channel.id), res);
         }
     }

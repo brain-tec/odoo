@@ -555,7 +555,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         last_interest_dt = fields.Datetime.to_string(channel.last_interest_dt)
         if channel == self.channel_general:
             return {
-                "allow_public_upload": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "authorizedGroupFullName": self.group_user.full_name,
@@ -574,13 +573,13 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "is_pinned": True,
                 "last_interest_dt": last_interest_dt,
+                "livechat_operator_id": False,
                 "livechatChannel": False,
                 "member_count": len(self.group_user.users),
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "mute_until_dt": False,
                 "name": "general",
-                "operator": False,
                 "parent_channel_id": False,
                 "rtcSessions": [["ADD", []]],
                 "state": "closed",
@@ -590,7 +589,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             }
         if channel == self.channel_channel_public_1:
             return {
-                "allow_public_upload": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "authorizedGroupFullName": False,
@@ -609,13 +607,13 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "is_pinned": True,
                 "last_interest_dt": last_interest_dt,
+                "livechat_operator_id": False,
                 "livechatChannel": False,
                 "member_count": 5,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 1,
                 "mute_until_dt": False,
                 "name": "public channel 1",
-                "operator": False,
                 "parent_channel_id": False,
                 "rtcSessions": [["ADD", []]],
                 "state": "closed",
@@ -625,7 +623,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             }
         if channel == self.channel_channel_public_2:
             return {
-                "allow_public_upload": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "authorizedGroupFullName": False,
@@ -644,13 +641,13 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "is_pinned": True,
                 "last_interest_dt": last_interest_dt,
+                "livechat_operator_id": False,
                 "livechatChannel": False,
                 "member_count": 5,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "mute_until_dt": False,
                 "name": "public channel 2",
-                "operator": False,
                 "parent_channel_id": False,
                 "rtcSessions": [["ADD", []]],
                 "state": "closed",
@@ -660,7 +657,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             }
         if channel == self.channel_channel_group_1:
             return {
-                "allow_public_upload": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "authorizedGroupFullName": self.group_user.full_name,
@@ -679,13 +675,13 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "is_pinned": True,
                 "last_interest_dt": last_interest_dt,
+                "livechat_operator_id": False,
                 "livechatChannel": False,
                 "member_count": 5,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "mute_until_dt": False,
                 "name": "group restricted channel 1",
-                "operator": False,
                 "parent_channel_id": False,
                 # sudo: discuss.channel.rtc.session - reading a session in a test file
                 "rtcInvitingSession": member_2.sudo().rtc_session_ids.id,
@@ -698,7 +694,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             }
         if channel == self.channel_channel_group_2:
             return {
-                "allow_public_upload": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "authorizedGroupFullName": self.group_user.full_name,
@@ -717,13 +712,13 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "is_pinned": True,
                 "last_interest_dt": last_interest_dt,
+                "livechat_operator_id": False,
                 "livechatChannel": False,
                 "member_count": 5,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "mute_until_dt": False,
                 "name": "group restricted channel 2",
-                "operator": False,
                 "parent_channel_id": False,
                 "rtcSessions": [["ADD", []]],
                 "state": "closed",
@@ -733,7 +728,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             }
         if channel == self.channel_group_1:
             return {
-                "allow_public_upload": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "authorizedGroupFullName": False,
@@ -752,13 +746,13 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "is_pinned": True,
                 "last_interest_dt": False,
+                "livechat_operator_id": False,
                 "livechatChannel": False,
                 "member_count": 2,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "mute_until_dt": False,
                 "name": "",
-                "operator": False,
                 "parent_channel_id": False,
                 "rtcSessions": [["ADD", []]],
                 "state": "closed",
@@ -768,7 +762,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             }
         if channel == self.channel_chat_1:
             return {
-                "allow_public_upload": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "authorizedGroupFullName": False,
@@ -787,13 +780,13 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "is_pinned": True,
                 "last_interest_dt": False,
+                "livechat_operator_id": False,
                 "livechatChannel": False,
                 "member_count": 2,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "mute_until_dt": False,
                 "name": "Ernest Employee, test14",
-                "operator": False,
                 "parent_channel_id": False,
                 "rtcSessions": [["ADD", []]],
                 "state": "open",
@@ -803,7 +796,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             }
         if channel == self.channel_chat_2:
             return {
-                "allow_public_upload": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "authorizedGroupFullName": False,
@@ -823,12 +815,12 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_pinned": True,
                 "last_interest_dt": False,
                 "livechatChannel": False,
+                "livechat_operator_id": False,
                 "member_count": 2,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "mute_until_dt": False,
                 "name": "Ernest Employee, test15",
-                "operator": False,
                 "parent_channel_id": False,
                 "rtcSessions": [["ADD", []]],
                 "state": "closed",
@@ -838,7 +830,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             }
         if channel == self.channel_chat_3:
             return {
-                "allow_public_upload": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "authorizedGroupFullName": False,
@@ -857,13 +848,13 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "is_pinned": True,
                 "last_interest_dt": False,
+                "livechat_operator_id": False,
                 "livechatChannel": False,
                 "member_count": 2,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "mute_until_dt": False,
                 "name": "Ernest Employee, test2",
-                "operator": False,
                 "parent_channel_id": False,
                 "rtcSessions": [["ADD", []]],
                 "state": "closed",
@@ -873,7 +864,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             }
         if channel == self.channel_chat_4:
             return {
-                "allow_public_upload": False,
                 "anonymous_country": False,
                 "anonymous_name": False,
                 "authorizedGroupFullName": False,
@@ -892,13 +882,13 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "is_pinned": True,
                 "last_interest_dt": False,
+                "livechat_operator_id": False,
                 "livechatChannel": False,
                 "member_count": 2,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "mute_until_dt": False,
                 "name": "Ernest Employee, test3",
-                "operator": False,
                 "parent_channel_id": False,
                 "rtcSessions": [["ADD", []]],
                 "state": "closed",
@@ -908,7 +898,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             }
         if channel == self.channel_livechat_1:
             return {
-                "allow_public_upload": False,
                 "anonymous_country": self.env.ref("base.in").id,
                 "anonymous_name": False,
                 "authorizedGroupFullName": False,
@@ -927,13 +916,13 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "is_pinned": True,
                 "last_interest_dt": last_interest_dt,
+                "livechat_operator_id": {"id": self.users[0].partner_id.id, "type": "partner"},
                 "livechatChannel": self.im_livechat_channel.id,
                 "member_count": 2,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "mute_until_dt": False,
                 "name": "test1 Ernest Employee",
-                "operator": {"id": self.users[0].partner_id.id, "type": "partner"},
                 "parent_channel_id": False,
                 "rtcSessions": [["ADD", []]],
                 "state": "closed",
@@ -943,7 +932,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             }
         if channel == self.channel_livechat_2:
             return {
-                "allow_public_upload": False,
                 "anonymous_country": self.env.ref("base.be").id,
                 "anonymous_name": "anon 2",
                 "authorizedGroupFullName": False,
@@ -962,13 +950,13 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "is_editable": True,
                 "is_pinned": True,
                 "last_interest_dt": last_interest_dt,
+                "livechat_operator_id": {"id": self.users[0].partner_id.id, "type": "partner"},
                 "livechatChannel": self.im_livechat_channel.id,
                 "member_count": 2,
                 "message_needaction_counter_bus_id": bus_last_id,
                 "message_needaction_counter": 0,
                 "mute_until_dt": False,
                 "name": "anon 2 Ernest Employee",
-                "operator": {"id": self.users[0].partner_id.id, "type": "partner"},
                 "parent_channel_id": False,
                 "rtcSessions": [["ADD", []]],
                 "state": "closed",
