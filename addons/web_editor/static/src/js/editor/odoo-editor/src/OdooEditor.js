@@ -801,6 +801,7 @@ export class OdooEditor extends EventTarget {
                         handle = null;
                         const fontSize = parseInt(fontSizeInput.value);
                         if (fontSize > 0) {
+                            getDeepRange(this.editable, { correctTripleClick: true, select: true });
                             if (!this.isSelectionInEditable()) {
                                 this.historyResetLatestComputedSelection(true);
                             }
@@ -2282,8 +2283,30 @@ export class OdooEditor extends EventTarget {
             }
         }
 
-        setSelection(start, nodeSize(start));
         const startLi = closestElement(start, 'li');
+        const endLi = closestElement(end, 'li');
+        let isBlockRemovable = false;
+        if (
+            startLi &&
+            endLi &&
+            (!startLi.textContent || isZWS(startLi)) &&
+            getListMode(startLi.parentElement) !== getListMode(endLi.parentElement)
+        ) {
+            const isNested = closestElement(startLi, '.oe-nested')
+            const nodeToRemove = isNested ? isNested : startLi.parentNode;
+            endLi.parentElement.prepend(startLi);
+            isEmptyBlock(nodeToRemove) && nodeToRemove.remove();
+            if (endLi.textContent && start.parentElement) {
+                start = start.parentElement;
+                start.removeChild(start.firstChild);
+                isBlockRemovable = true;
+                setSelection(endLi, 0);
+            } else {
+                setSelection(startLi, nodeSize(startLi));
+            }
+        } else {
+            setSelection(start, nodeSize(start));
+        }
         // Uncheck a list item with empty text in multi-list selection.
         if (startLi && startLi.classList.contains('o_checked') &&
             ['\u200B', ''].includes(startLi.textContent) && closestElement(end, 'li') !== startLi) {
@@ -2308,7 +2331,8 @@ export class OdooEditor extends EventTarget {
         // Same with the start container
         while (
             start &&
-            !isBlock(start) && isRemovableInvisible(start) &&
+            (!isBlock(start) || isBlockRemovable) &&
+            isRemovableInvisible(start) &&
             !(endIsStart && start.contains(range.startContainer))
         ) {
             const parent = start.parentNode;
@@ -2326,10 +2350,12 @@ export class OdooEditor extends EventTarget {
         }
         fillEmpty(closestBlock(range.endContainer));
         range = getDeepRange(this.editable, { sel });
-        let joinWith = range.endContainer;
-        const rightLeaf = rightLeafOnlyNotBlockPath(joinWith).next().value;
-        if (rightLeaf && rightLeaf.nodeValue === ' ') {
-            joinWith = rightLeaf;
+        let joinWith = !isBlockRemovable && range.endContainer;
+        if (joinWith) {
+            const rightLeaf = rightLeafOnlyNotBlockPath(joinWith).next().value;
+            if (rightLeaf && rightLeaf.nodeValue === ' ') {
+                joinWith = rightLeaf;
+            }
         }
         // Rejoin blocks that extractContents may have split in two.
         while (
@@ -4865,6 +4891,16 @@ export class OdooEditor extends EventTarget {
 
         // Ignore any changes that might have happened before this point.
         this.observer.takeRecords();
+
+        // Reset selection when editable is empty.
+        const selection = this.document.getSelection();
+        if (!selection.isCollapsed) {
+            const range = selection.getRangeAt(0);
+            const rangeContentChildNodes = range.cloneContents().childNodes;
+            if (rangeContentChildNodes.length === 1 && rangeContentChildNodes[0].nodeName === 'BR') {
+                setSelection(selection.anchorNode, 0, selection.anchorNode, 0);
+            }
+        }
 
         const node = ev.target;
         // handle checkbox lists
