@@ -163,6 +163,26 @@ registry.category("web_tour.tours").add("ProductScreenTour", {
         ].flat(),
 });
 
+registry.category("web_tour.tours").add("FloatingOrderTour", {
+    checkDelay: 50,
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            ProductScreen.orderIsEmpty(),
+            ProductScreen.clickDisplayedProduct("Desk Organizer", true, "1.0", "5.10"),
+            ProductScreen.clickDisplayedProduct("Desk Organizer", true, "2.0", "10.20"),
+            ProductScreen.productCardQtyIs("Desk Organizer", "2.0"),
+            Chrome.createFloatingOrder(),
+            ProductScreen.clickDisplayedProduct("Letter Tray", true, "1.0", "5.28"),
+            ProductScreen.clickDisplayedProduct("Letter Tray", true, "2.0", "10.56"),
+            ProductScreen.selectFloatingOrder(0),
+            ProductScreen.productCardQtyIs("Desk Organizer", "2.0"),
+            ProductScreen.isShown(),
+            ProductScreen.selectFloatingOrder(1),
+            ProductScreen.productCardQtyIs("Letter Tray", "2.0"),
+        ].flat(),
+});
+
 registry.category("web_tour.tours").add("FiscalPositionNoTax", {
     checkDelay: 50,
     steps: () =>
@@ -379,15 +399,7 @@ registry.category("web_tour.tours").add("PosCategoriesOrder", {
         [
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
-            {
-                trigger: '.category-button:eq(0) > span:contains("AAA")',
-            },
-            {
-                trigger: '.category-button:eq(1) > span:contains("AAB")',
-            },
-            {
-                trigger: '.category-button:eq(2) > span:contains("AAC")',
-            },
+            ProductScreen.verifyCategorySequence(["AAA", "AAB", "AAC"]),
             {
                 trigger: '.category-button:eq(1) > span:contains("AAB")',
                 run: "click",
@@ -455,5 +467,37 @@ registry.category("web_tour.tours").add("ProductSearchTour", {
             ProductScreen.searchProduct("TESTPROD2"),
             ProductScreen.productIsDisplayed("Test Product 1").map(negateStep),
             ProductScreen.productIsDisplayed("Test Product 2"),
+        ].flat(),
+});
+registry.category("web_tour.tours").add("SortOrderlinesByCategories", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            // Verify categories sequence
+            ProductScreen.verifyCategorySequence(["Misc test", "Chair test"]),
+
+            // Add products category wise
+            ProductScreen.selectCategoryAndAddProduct("Misc test", "Product_1 Category sequence 1"),
+            ProductScreen.selectCategoryAndAddProduct(
+                "Chair test",
+                "Product_11 Category sequence 2"
+            ),
+            ProductScreen.selectCategoryAndAddProduct("Misc test", "Product_2 Category sequence 1"),
+            ProductScreen.selectCategoryAndAddProduct(
+                "Chair test",
+                "Product_22 Category sequence 2"
+            ),
+
+            ProductScreen.clickReview(),
+
+            // Verify orderlines sequence
+            ProductScreen.verifyOrderlineSequence([
+                "Product_1 Category sequence 1",
+                "Product_2 Category sequence 1",
+                "Product_11 Category sequence 2",
+                "Product_22 Category sequence 2",
+            ]),
         ].flat(),
 });
