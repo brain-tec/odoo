@@ -344,6 +344,8 @@ class AccountMove(models.Model):
         copy=False,
         store=True,
         compute='_compute_delivery_date',
+        precompute=True,
+        readonly=False,
     )
     show_delivery_date = fields.Boolean(compute='_compute_show_delivery_date')
     invoice_payment_term_id = fields.Many2one(
@@ -1019,6 +1021,10 @@ class AccountMove(models.Model):
             )
             invoice.currency_id = currency
 
+    def _get_invoice_currency_rate_date(self):
+        self.ensure_one()
+        return self.invoice_date or fields.Date.context_today(self)
+
     @api.depends('currency_id', 'company_currency_id', 'company_id', 'invoice_date')
     def _compute_invoice_currency_rate(self):
         for move in self:
@@ -1028,7 +1034,7 @@ class AccountMove(models.Model):
                         from_currency=move.company_currency_id,
                         to_currency=move.currency_id,
                         company=move.company_id,
-                        date=move.invoice_date or fields.Date.context_today(move),
+                        date=move._get_invoice_currency_rate_date(),
                     )
                 else:
                     move.invoice_currency_rate = 1
@@ -3338,6 +3344,16 @@ class AccountMove(models.Model):
             fields_spec = {key: val for key, val in fields_spec.items() if key != 'line_ids'}
         return super().onchange(values, field_names, fields_spec)
 
+    @api.model
+    def _get_view(self, view_id=None, view_type='form', **options):
+        arch, view = super()._get_view(view_id, view_type, **options)
+        if view_type == 'form':
+            if name_node := arch.xpath("""//field[@name="name"][@invisible="name == '/' and not posted_before and not quick_edit_mode"]"""):
+                name_node[0].set('invisible', "not (name or name_placeholder or quick_edit_mode)")
+            if draft_node := arch.xpath("""//span[@invisible="name == '/' and not posted_before and not quick_edit_mode"]"""):
+                draft_node[0].set('invisible', "name or name_placeholder or quick_edit_mode")
+        return arch, view
+
     # -------------------------------------------------------------------------
     # RECONCILIATION METHODS
     # -------------------------------------------------------------------------
@@ -3690,7 +3706,12 @@ class AccountMove(models.Model):
             price_untaxed = self.currency_id.round(
                 remaining_amount / (((1.0 - discount_percentage / 100.0) * (taxes.amount / 100.0)) + 1.0))
         else:
-            price_untaxed = taxes.with_context(force_price_include=True).compute_all(remaining_amount)['total_excluded']
+            tax_results = taxes.with_context(force_price_include=True).compute_all(remaining_amount)
+            price_untaxed = tax_results['total_excluded'] - sum(
+                tax_data['amount']
+                for tax_data in tax_results['taxes']
+                if tax_data['is_reverse_charge']
+            )
         return {'account_id': account_id, 'tax_ids': taxes.ids, 'price_unit': price_untaxed}
 
     @api.onchange('quick_edit_mode', 'journal_id', 'company_id')
