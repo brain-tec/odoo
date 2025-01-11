@@ -13,7 +13,6 @@ from odoo.addons.point_of_sale.tests.common_setup_methods import setup_product_c
 from datetime import date, timedelta
 from odoo.addons.point_of_sale.tests.common import archive_products
 from odoo.exceptions import UserError
-from odoo.addons.point_of_sale.models.pos_config import PosConfig
 
 _logger = logging.getLogger(__name__)
 
@@ -588,6 +587,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'pos_basic_order_01_multi_payment_and_change', login="pos_user")
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'pos_basic_order_02_decimal_order_quantity', login="pos_user")
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'pos_basic_order_03_tax_position', login="pos_user")
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'FloatingOrderTour', login="pos_user")
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ProductScreenTour', login="pos_user")
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenTour', login="pos_user")
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ReceiptScreenTour', login="pos_user")
@@ -1607,18 +1607,6 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ProductSearchTour', login="pos_user")
-
-    def test_customer_search_more(self):
-        partner_test_a = self.env["res.partner"].create({"name": "APartner"})
-        self.env["res.partner"].create({"name": "BPartner", "zip": 1111})
-
-        def mocked_get_limited_partners_loading(self):
-            return [(partner_test_a.id,)]
-
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        with patch.object(PosConfig, 'get_limited_partners_loading', mocked_get_limited_partners_loading):
-            self.main_pos_config.with_user(self.pos_user).open_ui()
-            self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'SearchMoreCustomer', login="pos_user")
 
     def test_sort_orderlines_by_product_categoryies(self):
         """ Test to ensure orderlines are added to the cart in the correct order based on their categories"""
