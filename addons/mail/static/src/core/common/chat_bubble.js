@@ -17,7 +17,7 @@ class ChatBubblePreview extends Component {
     }
 
     get previewContent() {
-        const lastMessage = this.thread?.newestPersistentNotEmptyOfAllMessage;
+        const lastMessage = this.thread?.newestPersistentOfAllMessage;
         if (!lastMessage) {
             return false;
         }
@@ -36,7 +36,7 @@ export class ChatBubble extends Component {
 
     setup() {
         super.setup();
-        this.store = useState(useService("mail.store"));
+        this.store = useService("mail.store");
         const popoverRef = useChildRef();
         this.popover = usePopover(ChatBubblePreview, {
             animation: false,
