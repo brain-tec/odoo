@@ -25,7 +25,6 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'is_storable': True,
             'available_in_pos': True,
             'uom_id': self.env.ref('uom.product_uom_gram').id,
-            'uom_po_id': self.env.ref('uom.product_uom_gram').id,
             'lst_price': 10.0,
         })
         self.location = self.env['stock.location'].create({
@@ -303,15 +302,8 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
 
     def test_pos_not_groupable_product(self):
         #Create a UoM Category that is not pos_groupable
-        uom_category = self.env['uom.category'].create({
-            'name': 'Test',
-            'is_pos_groupable': False,
-        })
         uom = self.env['uom.uom'].create({
             'name': 'Test',
-            'category_id': uom_category.id,
-            'uom_type': 'reference',
-            'rounding': 0.01
         })
         product_a = self.env['product.product'].create({
             'name': 'Product A',
@@ -319,7 +311,6 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'is_storable': True,
             'lst_price': 10.0,
             'uom_id': uom.id,
-            'uom_po_id': uom.id,
         })
         #create a sale order with product_a
         sale_order = self.env['sale.order'].create({
@@ -883,8 +874,10 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.repair1.action_repair_start()
         self.repair1.action_repair_end()
         self.repair1.action_create_sale_order()
+        self.assertEqual(len(self.product_1.stock_move_ids.ids), 2, "There should be 2 stock moves for the product created by the repair order")
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PosRepairSettleOrder', login="pos_user")
+        self.assertEqual(len(self.product_1.stock_move_ids.ids), 2, "Paying for the order in PoS should not create new stock moves")
 
     def test_downpayment_invoice(self):
         """This test check that users that don't have the pos user group can invoice downpayments"""
