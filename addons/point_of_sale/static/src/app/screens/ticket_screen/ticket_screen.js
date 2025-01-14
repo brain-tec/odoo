@@ -24,6 +24,8 @@ import { fuzzyLookup } from "@web/core/utils/search";
 import { useTrackedAsync } from "@point_of_sale/app/hooks/hooks";
 import { OrderDisplay } from "@point_of_sale/app/components/order_display/order_display";
 import { BarcodeVideoScanner } from "@web/core/barcode/barcode_video_scanner";
+import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
+import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/number_popup";
 
 const NBR_BY_PAGE = 30;
 const { DateTime } = luxon;
@@ -70,6 +72,7 @@ export class TicketScreen extends Component {
         });
 
         this.state = useState({
+            nbrByPage: NBR_BY_PAGE,
             page: 1,
             nbrPage: 1,
             filter: null,
@@ -87,6 +90,20 @@ export class TicketScreen extends Component {
             // Show updated list of synced orders when going back to the screen.
             this.onFilterSelected(this.state.filter);
         });
+    }
+    async onClickPageNbr() {
+        const nbr = await makeAwaitable(this.dialog, NumberPopup, {
+            title: _t("Number by page"),
+            isValid: (value) => value > 0 && value <= 100,
+        });
+
+        if (nbr && !isNaN(nbr)) {
+            this.state.nbrByPage = parseInt(nbr);
+            this.state.page = 1;
+            if (this.state.filter == "SYNCED") {
+                await this._fetchSyncedOrders();
+            }
+        }
     }
     onPresetSelected(preset) {
         if (this.state.selectedPreset === preset) {
@@ -284,7 +301,10 @@ export class TicketScreen extends Component {
                 discount: refundLine.discount,
                 tax_ids: refundLine.tax_ids.map((tax) => ["link", tax]),
                 refunded_orderline_id: refundLine,
-                pack_lot_ids: refundLine.pack_lot_ids.map((packLot) => ["link", packLot]),
+                pack_lot_ids: refundLine.pack_lot_ids.map((packLot) => [
+                    "create",
+                    { lot_name: packLot.lot_name },
+                ]),
                 price_type: "automatic",
             });
             lines.push(line);
@@ -393,14 +413,14 @@ export class TicketScreen extends Component {
 
         if (this.state.filter === "SYNCED") {
             return sortOrders(orders).slice(
-                (this.state.page - 1) * NBR_BY_PAGE,
-                this.state.page * NBR_BY_PAGE
+                (this.state.page - 1) * this.state.nbrByPage,
+                this.state.page * this.state.nbrByPage
             );
         } else {
             this.pos.screenState.ticketSCreen.totalCount = orders.length;
             return sortOrders(orders, true).slice(
-                (this.state.page - 1) * NBR_BY_PAGE,
-                this.state.page * NBR_BY_PAGE
+                (this.state.page - 1) * this.state.nbrByPage,
+                this.state.page * this.state.nbrByPage
             );
         }
     }
@@ -485,14 +505,14 @@ export class TicketScreen extends Component {
         };
     }
     getNbrPages() {
-        return Math.ceil(this.pos.screenState.ticketSCreen.totalCount / NBR_BY_PAGE);
+        return Math.ceil(this.pos.screenState.ticketSCreen.totalCount / this.state.nbrByPage);
     }
     getPageNumber() {
         if (!this.pos.screenState.ticketSCreen.totalCount) {
             return `0/0`;
         } else {
-            return `${(this.state.page - 1) * NBR_BY_PAGE + 1}-${Math.min(
-                this.state.page * NBR_BY_PAGE,
+            return `${(this.state.page - 1) * this.state.nbrByPage + 1}-${Math.min(
+                this.state.page * this.state.nbrByPage,
                 this.pos.screenState.ticketSCreen.totalCount
             )} / ${this.pos.screenState.ticketSCreen.totalCount}`;
         }
@@ -749,7 +769,7 @@ export class TicketScreen extends Component {
             {
                 config_id,
                 domain,
-                limit: 30,
+                limit: this.state.nbrByPage,
                 offset,
             }
         );

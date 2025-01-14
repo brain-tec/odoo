@@ -780,7 +780,7 @@ class DiscussChannel(models.Model):
         # The current client code might be setting the key to True on sending
         # message but it is only useful when targeting customers in chatter.
         # This value should simply be set to False in channels no matter what.
-        return super(DiscussChannel, self.with_context(mail_create_nosubscribe=True, mail_post_autofollow=False)).message_post(message_type=message_type, **kwargs)
+        return super(DiscussChannel, self.with_context(mail_post_autofollow_author_skip=True, mail_post_autofollow=False)).message_post(message_type=message_type, **kwargs)
 
     def _message_post_after_hook(self, message, msg_vals):
         # Automatically set the message posted by the current user as seen for themselves.
@@ -1119,6 +1119,11 @@ class DiscussChannel(models.Model):
         on the channel """
         return ["chat", "group"]
 
+    def _types_allowing_unfollow(self):
+        """ Return the channel types which allow leaving the channel, channel will be unpinned
+        otherwise """
+        return ["channel", "group"]
+
     def channel_fetched(self):
         """ Broadcast the channel_fetched notification to channel members
         """
@@ -1354,7 +1359,7 @@ class DiscussChannel(models.Model):
         return msg
 
     def execute_command_leave(self, **kwargs):
-        if self.channel_type in ('channel', 'group'):
+        if self.channel_type in self._types_allowing_unfollow():
             self.action_unfollow()
         else:
             self.channel_pin(False)

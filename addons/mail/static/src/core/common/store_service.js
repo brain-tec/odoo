@@ -11,6 +11,7 @@ import { user } from "@web/core/user";
 import { Deferred, Mutex } from "@web/core/utils/concurrency";
 import { debounce } from "@web/core/utils/timing";
 import { session } from "@web/session";
+import { browser } from "@web/core/browser/browser";
 
 /**
  * @typedef {{isSpecial: boolean, channel_types: string[], label: string, displayName: string, description: string}} SpecialMention
@@ -131,6 +132,26 @@ export class Store extends BaseStore {
             init_messaging: {},
         };
     }
+
+    isNotificationPermissionDismissed = Record.attr(false, {
+        compute() {
+            return (
+                browser.localStorage.getItem("mail.user_setting.push_notification_dismissed") ===
+                "true"
+            );
+        },
+        /** @this {import("models").DiscussApp} */
+        onUpdate() {
+            if (this.isNotificationPermissionDismissed) {
+                browser.localStorage.setItem(
+                    "mail.user_setting.push_notification_dismissed",
+                    "true"
+                );
+            } else {
+                browser.localStorage.removeItem("mail.user_setting.push_notification_dismissed");
+            }
+        },
+    });
 
     messagePostMutex = new Mutex();
 
@@ -488,9 +509,7 @@ export class Store extends BaseStore {
             postData.special_mentions = validMentions.specialMentions;
         }
         const params = {
-            context: {
-                mail_post_autofollow: !isNote && thread.hasWriteAccess,
-            },
+            // Changed in 18.2+: finally get rid of autofollow, following should be done manually
             post_data: postData,
             thread_id: thread.id,
             thread_model: thread.model,
