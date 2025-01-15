@@ -102,7 +102,8 @@ class PosSession(models.Model):
             response[model]['relations'] = {}
 
         for name, params in model_fields.items():
-            if name not in response[model]['fields'] and len(response[model]['fields']) != 0:
+            fields_count = len(response[model]['fields'])
+            if (fields_count and name not in response[model]['fields']) or (params.manual and not fields_count):
                 continue
 
             if params.comodel_name:
@@ -1238,7 +1239,7 @@ class PosSession(models.Model):
         accounts = all_lines.mapped('account_id')
         lines_by_account = [all_lines.filtered(lambda l: l.account_id == account and not l.reconciled) for account in accounts if account.reconcile]
         for lines in lines_by_account:
-            lines.reconcile()
+            lines.with_context(no_cash_basis=True).reconcile()
 
 
         for payment_method, lines in payment_method_to_receivable_lines.items():
