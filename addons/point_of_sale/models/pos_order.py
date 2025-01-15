@@ -104,17 +104,14 @@ class PosOrder(models.Model):
 
     def _prepare_combo_line_uuids(self, order_vals):
         acc = {}
-        for line in order_vals['lines']:
-            if line[0] not in [0, 1]:
-                continue
+        lines = [line[2] for line in order_vals['lines'] if line[0] in [0, 1]]
 
-            line = line[2]
-            if line.get('combo_line_ids'):
-                filtered_lines = list(filter(lambda l: l[0] in [0, 1] and l[2].get('id') and l[2].get('id') in line.get('combo_line_ids'), order_vals['lines']))
+        for line in lines:
+            if combo_line_ids := line.get('combo_line_ids'):
                 if line['uuid'] in acc:
-                    acc[line['uuid']].append([l[2]['uuid'] for l in filtered_lines])
+                    acc[line['uuid']].append([l['uuid'] for l in lines if l.get('id') in combo_line_ids])
                 else:
-                    acc[line['uuid']] = [l[2]['uuid'] for l in filtered_lines]
+                    acc[line['uuid']] = [l['uuid'] for l in lines if l.get('id') in combo_line_ids]
 
             line['combo_line_ids'] = False
             line['combo_parent_id'] = False
@@ -353,7 +350,7 @@ class PosOrder(models.Model):
 
     @api.depends('lines.refunded_qty', 'lines.qty')
     def _compute_has_refundable_lines(self):
-        digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        digits = self.env['decimal.precision'].precision_get('Product Unit')
         for order in self:
             order.has_refundable_lines = any([float_compare(line.qty, line.refunded_qty, digits) > 0 for line in order.lines])
 
@@ -1005,7 +1002,13 @@ class PosOrder(models.Model):
         if receivable_account.reconcile:
             invoice_receivables = self.account_move.line_ids.filtered(lambda line: line.account_id == receivable_account and not line.reconciled)
             if invoice_receivables:
-                payment_receivables = payment_moves.mapped('line_ids').filtered(lambda line: line.account_id == receivable_account and line.partner_id)
+                credit_line_ids = payment_moves._context.get('credit_line_ids', None)
+                payment_receivables = payment_moves.mapped('line_ids').filtered(
+                    lambda line: (
+                        (credit_line_ids and line.id in credit_line_ids) or
+                        (not credit_line_ids and line.account_id == receivable_account and line.partner_id)
+                    )
+                )
                 (invoice_receivables | payment_receivables).sudo().with_company(self.company_id).reconcile()
         return payment_moves
 
@@ -1287,7 +1290,7 @@ class PosOrderLine(models.Model):
         string="Custom Values",
         store=True, readonly=False)
     price_unit = fields.Float(string='Unit Price', digits=0)
-    qty = fields.Float('Quantity', digits='Product Unit of Measure', default=1)
+    qty = fields.Float('Quantity', digits='Product Unit', default=1)
     price_subtotal = fields.Float(string='Tax Excl.', digits=0,
         readonly=True, required=True)
     price_subtotal_incl = fields.Float(string='Tax Incl.', digits=0,
@@ -1307,7 +1310,7 @@ class PosOrderLine(models.Model):
     tax_ids = fields.Many2many('account.tax', string='Taxes', readonly=True)
     tax_ids_after_fiscal_position = fields.Many2many('account.tax', compute='_get_tax_ids_after_fiscal_position', string='Taxes to Apply')
     pack_lot_ids = fields.One2many('pos.pack.operation.lot', 'pos_order_line_id', string='Lot/serial Number')
-    product_uom_id = fields.Many2one('uom.uom', string='Product UoM', related='product_id.uom_id')
+    product_uom_id = fields.Many2one('uom.uom', string='Product Unit', related='product_id.uom_id')
     currency_id = fields.Many2one('res.currency', related='order_id.currency_id')
     full_product_name = fields.Char('Full Product Name')
     customer_note = fields.Char('Customer Note')
