@@ -317,6 +317,9 @@ class HrApplicant(models.Model):
         applicants = super().create(vals_list)
         applicants.sudo().interviewer_ids._create_recruitment_interviewers()
 
+        department_manager_partner = applicants.department_id.manager_id._get_related_partners()
+        applicants.message_unsubscribe(partner_ids=department_manager_partner.ids)
+
         if (applicants.interviewer_ids.partner_id - self.env.user.partner_id):
             for applicant in applicants:
                 interviewers_to_notify = applicant.interviewer_ids.partner_id - self.env.user.partner_id
@@ -702,10 +705,9 @@ class HrApplicant(models.Model):
         return super(HrApplicant, self.with_context(just_unarchived=True)).action_archive()
 
     def action_unarchive(self):
-        active_applicants = super(HrApplicant, self.with_context(just_unarchived=True)).action_unarchive()
-        if active_applicants:
-            active_applicants.reset_applicant()
-        return active_applicants
+        res = super(HrApplicant, self.with_context(just_unarchived=True)).action_unarchive()
+        self.reset_applicant()
+        return res
 
     def action_send_email(self):
         return {
