@@ -4,17 +4,19 @@
 from threading import Thread, Event
 
 from odoo.addons.hw_drivers.main import drivers, iot_devices
+from odoo.addons.hw_drivers.tools.helpers import toggleable
+
 from odoo.tools.lru import LRU
 
 
 class DriverMetaClass(type):
+    priority = -1
+
     def __new__(cls, clsname, bases, attrs):
         newclass = super(DriverMetaClass, cls).__new__(cls, clsname, bases, attrs)
-        if hasattr(newclass, 'priority'):
-            newclass.priority += 1
-        else:
-            newclass.priority = 0
-        drivers.append(newclass)
+        newclass.priority += 1
+        if clsname != 'Driver':
+            drivers.append(newclass)
         return newclass
 
 
@@ -47,11 +49,11 @@ class Driver(Thread, metaclass=DriverMetaClass):
         """
         return False
 
+    @toggleable
     def action(self, data):
         """Helper function that calls a specific action method on the device.
 
-        :param data: the `_actions` key mapped to the action method we want to call
-        :type data: string
+        :param dict data: the `_actions` key mapped to the action method we want to call
         """
         self._actions[data.get('action', '')](data)
 
