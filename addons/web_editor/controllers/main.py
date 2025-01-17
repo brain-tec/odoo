@@ -19,6 +19,9 @@ from odoo.modules.module import get_resource_path, get_module_path
 
 logger = logging.getLogger(__name__)
 
+EXTENSIONS = {".js", ".css", ".scss", ".sass", ".less"}
+
+
 class Web_Editor(http.Controller):
     #------------------------------------------------------
     # Backend snippet
@@ -360,6 +363,9 @@ class Web_Editor(http.Controller):
                 for i in range(0, len(bundle_data[1])):
                     url = bundle_data[1][i]
                     url_info = url_infos[url]
+
+                    if url and all(not url.lower().endswith(ext) for ext in EXTENSIONS):
+                        continue
 
                     content = None
                     if url_info["customized"]:
