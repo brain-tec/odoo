@@ -61,10 +61,10 @@ class ResPartner(models.Model):
     def _mail_get_partners(self, introspect_fields=False):
         return dict((partner.id, partner) for partner in self)
 
-    def _message_get_suggested_recipients(self):
-        recipients = super()._message_get_suggested_recipients()
-        self._message_add_suggested_recipient(recipients, partner=self, reason=_('Partner Profile'))
-        return recipients
+    def _message_add_suggested_recipients(self):
+        email_to_lst, partners = super()._message_add_suggested_recipients()
+        partners += self
+        return email_to_lst, partners
 
     def _message_get_default_recipients(self):
         return {
@@ -286,13 +286,15 @@ class ResPartner(models.Model):
         ])
 
     @api.model
-    def _search_mention_suggestions(self, domain, limit):
+    def _search_mention_suggestions(self, domain, limit, extra_domain=None):
         domain_is_user = expression.AND([[('user_ids', '!=', False)], [('user_ids.active', '=', True)], domain])
         priority_conditions = [
             expression.AND([domain_is_user, [('partner_share', '=', False)]]),  # Search partners that are internal users
             domain_is_user,  # Search partners that are users
             domain,  # Search partners that are not users
         ]
+        if extra_domain:
+            priority_conditions.append(extra_domain)
         partners = self.env['res.partner']
         for domain in priority_conditions:
             remaining_limit = limit - len(partners)

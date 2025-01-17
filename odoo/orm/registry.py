@@ -195,9 +195,9 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self.test_lock: threading.RLock | None = None
 
         # field dependencies
-        self.field_depends: Collector[Field, tuple[Field, ...]] = Collector()
-        self.field_depends_context: Collector[Field, tuple[str, ...]] = Collector()
-        self.field_inverses: Collector[Field, tuple[Field, ...]] = Collector()
+        self.field_depends: Collector[Field, Field] = Collector()
+        self.field_depends_context: Collector[Field, str] = Collector()
+        self.field_inverses: Collector[Field, Field] = Collector()
 
         # company dependent
         self.many2one_company_dependents: Collector[str, tuple[Field, ...]] = Collector()  # {model_name: (field1, field2, ...)}
@@ -695,8 +695,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
                     method = 'btree'
                     where = f'{column_expression} IS NOT NULL' if index == 'btree_not_null' else ''
                 try:
-                    with cr.savepoint(flush=False):
-                        sql.create_index(cr, indexname, tablename, [expression], method, where)
+                    sql.create_index(cr, indexname, tablename, [expression], method, where)
                 except psycopg2.OperationalError:
                     _schema.error("Unable to add index for %s", self)
 

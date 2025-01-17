@@ -71,6 +71,8 @@ export class Store extends BaseStore {
     Persona;
     /** @type {typeof import("@mail/core/common/country_model").Country} */
     ["res.country"];
+    /** @type {typeof import("@mail/core/common/res_groups_model").ResGroups} */
+    ["res.groups"];
     /** @type {typeof import("@mail/core/common/settings_model").Settings} */
     Settings;
     /** @type {typeof import("@mail/core/common/thread_model").Thread} */
@@ -382,22 +384,9 @@ export class Store extends BaseStore {
             ev.preventDefault();
             this.openChat({ partnerId: id });
             return true;
-        } else if (ev.target.tagName === "A" && model && id) {
-            ev.preventDefault();
-            Promise.resolve(
-                this.env.services.action.doAction({
-                    type: "ir.actions.act_window",
-                    res_model: model,
-                    views: [[false, "form"]],
-                    res_id: id,
-                })
-            ).then(() => this.onLinkFollowed(thread));
-            return true;
         }
         return false;
     }
-
-    onLinkFollowed(fromThread) {}
 
     setup() {
         super.setup();
