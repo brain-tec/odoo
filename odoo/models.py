@@ -258,6 +258,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     _depends = {}               # dependencies of models backed up by sql views
                                 # {model_name: field_names, ...}
 
+    _allow_sudo_commands = True
+
     # default values for _transient_vacuum()
     _transient_check_count = 0
     _transient_max_count = lazy_classproperty(lambda _: config.get('osv_memory_count_limit'))

@@ -2328,6 +2328,13 @@ class _RelationalMulti(_Relational):
                 result[0][2].append(record.id)
         return result
 
+    def _check_sudo_commands(self, comodel):
+        # if the model doesn't accept sudo commands
+        if not comodel._allow_sudo_commands:
+            # Then, disable sudo and reset the transaction origin user
+            return comodel.sudo(comodel.env.uid_origin)
+        return comodel
+
     def convert_to_onchange(self, value, record, names):
         # return the recordset value as a list of commands; the commands may
         # give all fields values, the client is responsible for figuring out
@@ -2518,6 +2525,7 @@ class One2many(_RelationalMulti):
 
     def write(self, records, value):
         comodel = records.env[self.comodel_name].with_context(**self.context)
+        comodel = self._check_sudo_commands(comodel)
         inverse = self.inverse_name
         vals_list = []                  # vals for lines to create in batch
 
@@ -2780,6 +2788,7 @@ class Many2many(_RelationalMulti):
 
         cr = records.env.cr
         comodel = records.env[self.comodel_name]
+        comodel = self._check_sudo_commands(comodel)
 
         # determine old links (set of pairs (id1, id2))
         clauses, params, tables = comodel.env['ir.rule'].domain_get(comodel._name)
