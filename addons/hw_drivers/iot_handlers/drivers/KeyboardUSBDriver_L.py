@@ -83,17 +83,16 @@ class KeyboardUSBDriver(Driver):
         return {'status': status, 'messages': ''}
 
     @classmethod
-    def send_layouts_list(cls):
-        server = helpers.get_odoo_server_url()
-        if server:
-            server = server + '/iot/keyboard_layouts'
-            try:
-                response = requests.post(
-                    server, data={'available_layouts': json.dumps(cls.available_layouts)}, timeout=5
-                )
-                response.raise_for_status()
-            except requests.exceptions.RequestException:
-                _logger.exception('Could not reach configured server to send available layouts')
+    @helpers.require_db
+    def send_layouts_list(cls, server_url=None):
+        try:
+            response = requests.post(
+                server_url + '/iot/keyboard_layouts',
+                data={'available_layouts': json.dumps(cls.available_layouts)}, timeout=5
+            )
+            response.raise_for_status()
+        except requests.exceptions.RequestException:
+            _logger.exception('Could not reach configured server to send available layouts')
 
     @classmethod
     def load_layouts_list(cls):
@@ -119,10 +118,11 @@ class KeyboardUSBDriver(Driver):
         try:
             manufacturer = util.get_string(self.dev, self.dev.iManufacturer)
             product = util.get_string(self.dev, self.dev.iProduct)
-            return re.sub(r"[^\w \-+/*&]", '', "%s - %s" % (manufacturer, product))
+            if manufacturer and product:
+                return re.sub(r"[^\w \-+/*&]", '', "%s - %s" % (manufacturer, product))
         except ValueError as e:
             _logger.warning(e)
-            return 'Unknown input device'
+        return 'Unknown input device'
 
     def run(self):
         try:

@@ -17,6 +17,7 @@ from odoo import models, fields, Command
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 from odoo.addons.base.tests.test_expression import TransactionExpressionCase
 from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
+from odoo.fields import Domain
 from odoo.tests import TransactionCase, tagged, Form, users
 from odoo.tools import mute_logger, float_repr
 from odoo.tools.date_utils import add, subtract, start_of, end_of
@@ -597,6 +598,13 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         self.env.flush_all()
         self.registry.setup_models(self.cr)
         self.assertEqual(self.registry.field_depends[Model.full_name], ('name1', 'name2'))
+
+    def test_12_one2many_reference_domain(self):
+        model = self.env['test_new_api.inverse_m2o_ref']
+        o2m_field = model._fields['model_ids']
+        self.assertEqual(o2m_field.get_comodel_domain(model), Domain('const', '=', True) & Domain('res_model', '=', model._name))
+        o2m_field = model._fields['model_computed_ids']
+        self.assertEqual(o2m_field.get_comodel_domain(model), Domain.TRUE)
 
     def test_13_inverse(self):
         """ test inverse computation of fields """
@@ -4585,6 +4593,20 @@ class TestComputeQueries(TransactionCase):
             record = model.create({'foo': 'Foo', 'bar': 'Bar'})
         self.assertEqual(record.foo, 'Bar')
         self.assertEqual(record.bar, 'Bar')
+
+    def test_x2many_computed_inverse(self):
+        record = self.env['test_new_api.compute.inverse'].create(
+            {'child_ids': [Command.create({'foo': 'child'})]},
+        )
+        self.assertEqual(
+            len(record.child_ids), 1,
+            f"Should be a single record: {record.child_ids!r}",
+        )
+        self.assertTrue(
+            record.child_ids.id,
+            f"Should be database records: {record.child_ids!r}",
+        )
+        self.assertEqual(record.foo, 'has one child')
 
     def test_multi_create(self):
         model = self.env['test_new_api.foo']
