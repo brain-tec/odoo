@@ -422,17 +422,17 @@ def load_certificate():
 
 
 def delete_iot_handlers():
-    """
-    Delete all the drivers and interfaces
-    This is needed to avoid conflicts
-    with the newly downloaded drivers
+    """Delete all drivers, interfaces and libs if any.
+    This is needed to avoid conflicts with the newly downloaded drivers.
     """
     try:
-        for directory in ['drivers', 'interfaces', 'lib']:
-            iot_handlers = file_path(f'hw_drivers/iot_handlers/{directory}')
-            for file in Path(iot_handlers).iterdir():
-                if file.is_file():
-                    unlink_file(f"odoo/addons/hw_drivers/iot_handlers/{directory}/{file.name}")
+        iot_handlers = Path(file_path(f'hw_drivers/iot_handlers'))
+        filenames = [
+            f"odoo/addons/hw_drivers/iot_handlers/{file.relative_to(iot_handlers)}"
+            for file in iot_handlers.glob('**/*')
+            if file.is_file()
+        ]
+        unlink_file(*filenames)
         _logger.info("Deleted old IoT handlers")
     except OSError:
         _logger.exception('Failed to delete old IoT handlers')
@@ -440,12 +440,15 @@ def delete_iot_handlers():
 
 @toggleable
 @require_db
-def download_iot_handlers(auto=True):
-    """Get the drivers from the configured Odoo server"""
-    server = get_odoo_server_url()
+def download_iot_handlers(auto=True, server_url=None):
+    """Get the drivers from the configured Odoo server
+
+    :param auto: If True, the download will depend on the parameter set in the database
+    :param server_url: The URL of the connected Odoo database (provided by decorator).
+    """
     try:
         response = requests.post(
-            server + '/iot/get_handlers', data={'mac': get_mac_address(), 'auto': auto}, timeout=8
+            server_url + '/iot/get_handlers', data={'mac': get_mac_address(), 'auto': auto}, timeout=8
         )
         response.raise_for_status()
     except requests.exceptions.RequestException:
@@ -523,11 +526,12 @@ def read_file_first_line(filename):
             return f.readline().strip('\n')
 
 
-def unlink_file(filename):
+def unlink_file(*filenames):
     with writable():
-        path = path_file(filename)
-        if path.exists():
-            path.unlink()
+        for filename in filenames:
+            path = path_file(filename)
+            if path.exists():
+                path.unlink()
 
 
 def write_file(filename, text, mode='w'):
