@@ -1680,6 +1680,33 @@ test(`notebook page is changing when an anchor is clicked from another page`, as
     expect(`#anchor2`).toBeVisible();
 });
 
+test(`have a link to an id in the DOM, and open a form view with a node with that id`, async () => {
+    await mountWithCleanup(`
+        <div>
+            <a class="my_link" href="#my_special_id">My link</a>
+        </div>
+    `);
+    expect(".my_link").toHaveAttribute("href", "#my_special_id");
+
+    await mountView({
+        resModel: "partner",
+        type: "form",
+        arch: `
+            <form>
+                <notebook>
+                    <page string="A page">
+                        <div id="my_special_id">Something</div>
+                    </page>
+                </notebook>
+            </form>
+        `,
+        resId: 1,
+    });
+
+    expect(".o_form_view").toHaveCount(1);
+    expect("#my_special_id").toHaveCount(1);
+});
+
 test(`invisible attrs on group are re-evaluated on field change`, async () => {
     await mountView({
         resModel: "partner",
@@ -12489,7 +12516,7 @@ test(`preserve current scroll position on form view while closing dialog`, async
 
     window.scrollTo({ top: 265, left: 0 });
     expect(window.scrollY).toBe(265, { message: "Should have scrolled 265 px vertically" });
-    expect(window.screenLeft).toBe(0, { message: "Should be 0 px from left as it is" });
+    expect(window.scrollX).toBe(0, { message: "Should be 0 px from left as it is" });
 
     // click on m2o field
     await contains(".o_field_many2one input").click();
@@ -12502,7 +12529,7 @@ test(`preserve current scroll position on form view while closing dialog`, async
     await contains(".modal .modal-header .oi-arrow-left").click();
 
     expect(window.scrollY).toBe(265, { message: "Should have scrolled 265 px vertically" });
-    expect(window.screenLeft).toBe(0, { message: "Should be 0 px from left as it is" });
+    expect(window.scrollX).toBe(0, { message: "Should be 0 px from left as it is" });
 });
 
 test.tags("mobile");
