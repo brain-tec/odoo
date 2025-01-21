@@ -57,7 +57,10 @@ export class SplitBillScreen extends Component {
             } else {
                 this.qtyTracker[line.uuid] += 1;
             }
-
+            // We need this split for decimal quantities (e.g. 0.5 kg)
+            if (this.qtyTracker[line.uuid] > line.getQuantity()) {
+                this.qtyTracker[line.uuid] = line.getQuantity();
+            }
             this.priceTracker[line.uuid] =
                 (line.getPriceWithTax() / line.qty) * this.qtyTracker[line.uuid];
             this.setLineQtyStr(line);
@@ -133,7 +136,6 @@ export class SplitBillScreen extends Component {
         newOrder.uiState.splittedOrderUuid = curOrderUuid;
         newOrder.originalSplittedOrder = originalOrder;
 
-        let sentQty = {};
         // Create lines for the new order
         const lineToDel = [];
         for (const line of originalOrder.lines) {
@@ -150,15 +152,20 @@ export class SplitBillScreen extends Component {
                     true
                 );
 
-                const orderedQty =
-                    originalOrder.last_order_preparation_change.lines[line.preparationKey]
-                        ?.quantity || 0;
-                sentQty = { ...sentQty, ...this._getSentQty(line, newLine, orderedQty) };
                 if (line.getQuantity() === this.qtyTracker[line.uuid]) {
                     lineToDel.push(line);
                 } else {
-                    line.qty = line.getQuantity() - this.qtyTracker[line.uuid];
+                    const newQty = line.getQuantity() - this.qtyTracker[line.uuid];
+                    line.update({ qty: newQty });
                 }
+
+                this.pos.handlePreparationHistory(
+                    originalOrder.last_order_preparation_change.lines,
+                    newOrder.last_order_preparation_change.lines,
+                    line,
+                    newLine,
+                    this.qtyTracker[line.uuid]
+                );
             }
         }
 
@@ -166,19 +173,7 @@ export class SplitBillScreen extends Component {
             line.delete();
         }
 
-        Object.keys(originalOrder.last_order_preparation_change.lines).forEach(
-            (linePreparationKey) => {
-                originalOrder.last_order_preparation_change.lines[linePreparationKey]["quantity"] =
-                    sentQty[linePreparationKey];
-            }
-        );
-        newOrder.updateLastOrderChange();
-        Object.keys(newOrder.last_order_preparation_change.lines).forEach((linePreparationKey) => {
-            newOrder.last_order_preparation_change.lines[linePreparationKey]["quantity"] =
-                sentQty[linePreparationKey];
-        });
-        this.pos.addPendingOrder([originalOrder.id, newOrder.id]);
-
+        await this.pos.syncAllOrders({ orders: [originalOrder, newOrder] });
         originalOrder.customer_count -= 1;
         originalOrder.setScreenData({ name: "ProductScreen" });
         this.pos.selectedOrderUuid = null;
