@@ -13,15 +13,17 @@
         'views/public_readonly_spreadsheet_templates.xml',
     ],
     'assets': {
-        'spreadsheet.dependencies': [
-            'web/static/lib/Chart/Chart.js',
-            'web/static/lib/chartjs-adapter-luxon/chartjs-adapter-luxon.js',
+        'web.chartjs_lib' : [
             'spreadsheet/static/lib/chartjs-chart-geo/chartjs-chart-geo.js',
+        ],
+        'spreadsheet.dependencies': [
+            ('include', 'web.chartjs_lib'),
         ],
         'spreadsheet.o_spreadsheet': [
             'web/static/src/views/graph/graph_model.js',
             'web/static/src/views/pivot/pivot_model.js',
             'web/static/src/polyfills/clipboard.js',
+            ('include', 'spreadsheet.dependencies'),
             'spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js',
             'spreadsheet/static/src/**/*.js',
             # Load all o_spreadsheet templates first to allow to inherit them
