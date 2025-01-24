@@ -24,6 +24,7 @@ export class PosOrder extends Base {
 
         // Data present in python model
         this.date_order = vals.date_order || serializeDateTime(luxon.DateTime.now());
+        this.nb_print = vals.nb_print || 0;
         this.to_invoice = vals.to_invoice || false;
         this.shipping_date = vals.shipping_date || false;
         this.state = vals.state || "draft";
@@ -713,7 +714,10 @@ export class PosOrder extends Base {
     }
 
     get_total_without_tax() {
-        return this.taxTotals.order_sign * this.taxTotals.base_amount_currency;
+        const base_amount =
+            this.taxTotals.base_amount_currency +
+            (this.taxTotals.cash_rounding_base_amount_currency || 0.0);
+        return this.taxTotals.order_sign * base_amount;
     }
 
     _get_ignored_product_ids_total_discount() {
