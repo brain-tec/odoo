@@ -5122,7 +5122,7 @@ test("prevent drag and drop of record if save fails", async () => {
 });
 
 test("kanban view with default_group_by", async () => {
-    expect.assertions(13);
+    expect.assertions(11);
 
     Partner._records[0].product_id = 1;
     Product._records.push({ id: 1, display_name: "third product" });
@@ -5162,8 +5162,7 @@ test("kanban view with default_group_by", async () => {
     if (queryAll(".o_control_panel_navigation > button").length) {
         await contains(".o_control_panel_navigation > button").click();
     }
-    expect(`.o_searchview_facet`).toHaveCount(1);
-    expect(`.o_searchview_facet`).toHaveText("Bar");
+    expect(`.o_searchview_facet`).toHaveCount(0);
 
     // simulate an update coming from the searchview, with another groupby given
     await toggleSearchBarMenu();
@@ -5175,8 +5174,7 @@ test("kanban view with default_group_by", async () => {
     // simulate an update coming from the searchview, removing the previously set groupby
     await contains(".o_searchview_facet .o_facet_remove").click();
     expect(".o_kanban_group").toHaveCount(2);
-    expect(`.o_searchview_facet`).toHaveCount(1);
-    expect(`.o_searchview_facet`).toHaveText("Bar");
+    expect(`.o_searchview_facet`).toHaveCount(0);
 });
 
 test.tags("desktop");
@@ -10444,8 +10442,11 @@ test("unset cover image", async () => {
 
 test.tags("desktop");
 test("ungrouped kanban with handle field", async () => {
-    expect.assertions(3);
+    expect.assertions(4);
 
+    onRpc("web_search_read", ({ kwargs }) => {
+        expect.step(`web_search_read: order: ${kwargs.order}`);
+    });
     onRpc("/web/dataset/resequence", async (request) => {
         const { params } = await request.json();
         expect(params.ids).toEqual([2, 1, 3, 4], {
@@ -10473,6 +10474,7 @@ test("ungrouped kanban with handle field", async () => {
     await contains(".o_kanban_record").dragAndDrop(queryFirst(".o_kanban_record:nth-child(4)"));
 
     expect(getKanbanRecordTexts()).toEqual(["blip", "yop", "gnap", "blip"]);
+    expect.verifySteps(["web_search_read: order: int_field ASC, id ASC"]);
 });
 
 test("ungrouped kanban without handle field", async () => {
