@@ -6,7 +6,7 @@ import { floatIsZero } from "@web/core/utils/numbers";
 import { renderToElement } from "@web/core/utils/render";
 import { registry } from "@web/core/registry";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { deduceUrl, random5Chars, uuidv4, Counter } from "@point_of_sale/utils";
+import { deduceUrl, random5Chars, uuidv4, Counter, lte } from "@point_of_sale/utils";
 import { HWPrinter } from "@point_of_sale/app/utils/printer/hw_printer";
 import { ConnectionAbortedError, ConnectionLostError, RPCError } from "@web/core/network/rpc";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
@@ -1562,7 +1562,7 @@ export class PosStore extends WithLazyGetterTrap {
         order = this.getOrder(),
         printBillActionTriggered = false,
     } = {}) {
-        await this.printer.print(
+        const result = await this.printer.print(
             OrderReceipt,
             {
                 order,
@@ -1570,7 +1570,7 @@ export class PosStore extends WithLazyGetterTrap {
             },
             { webPrintFallback: true }
         );
-        if (!printBillActionTriggered) {
+        if (!printBillActionTriggered && result) {
             const nbrPrint = order.nb_print;
             await this.data.write("pos.order", [order.id], { nb_print: nbrPrint + 1 });
         }
@@ -2256,6 +2256,21 @@ export class PosStore extends WithLazyGetterTrap {
         );
 
         return Array.from(new Set([...exactMatches, ...fuzzyMatches]));
+    }
+
+    getPaymentMethodDisplayText(pm, order) {
+        const { cash_rounding, only_round_cash_method } = this.config;
+        const amount = order.getDefaultAmountDueToPayIn(pm);
+        const fmtAmount = this.env.utils.formatCurrency(amount, false);
+        if (
+            lte(amount, 0, { decimals: this.currency.decimal_places }) ||
+            !cash_rounding ||
+            (only_round_cash_method && pm.type !== "cash")
+        ) {
+            return pm.name;
+        } else {
+            return `${pm.name} (${fmtAmount})`;
+        }
     }
 }
 
