@@ -5740,7 +5740,10 @@ test(`pager, ungrouped, with count limit reached, edit pager`, async () => {
 
     expectedCountLimit = 5;
     await contains(`.o_pager_value`).click();
-    await contains(`input.o_pager_value`).edit("2-4");
+    // FIXME: we have to click out instead of confirming, because somehow if the
+    // web_search_read calls come back too fast when pressing "Enter", another
+    // RPC is triggered right after.
+    await contains(`input.o_pager_value`).edit("2-4", { confirm: "blur" });
     expect(`.o_data_row`).toHaveCount(3);
     expect(`.o_pager_value`).toHaveText("2-4");
     expect(`.o_pager_limit`).toHaveText("4+");
@@ -5748,7 +5751,7 @@ test(`pager, ungrouped, with count limit reached, edit pager`, async () => {
 
     expectedCountLimit = 15;
     await contains(`.o_pager_value`).click();
-    await contains(`input.o_pager_value`).edit("2-14");
+    await contains(`input.o_pager_value`).edit("2-14", { confirm: "blur" });
     expect(`.o_data_row`).toHaveCount(4);
     expect(`.o_pager_value`).toHaveText("2-5");
     expect(`.o_pager_limit`).toHaveText("5");
@@ -15943,6 +15946,8 @@ test(`list view with default_group_by`, async () => {
                 return expect(kwargs.groupby).toEqual(["m2m"]);
             case 3:
                 return expect(kwargs.groupby).toEqual(["bar"]);
+            case 4:
+                return expect(kwargs.groupby).toEqual(["bar"]);
         }
     });
 
@@ -15953,6 +15958,11 @@ test(`list view with default_group_by`, async () => {
             <list default_group_by="bar">
                 <field name="bar"/>
             </list>
+        `,
+        searchViewArch: `
+            <search>
+                <filter name="my_filter" string="My Filter" domain="[('id', '>', 1)]"/>
+            </search>
         `,
     });
     expect(`.o_list_renderer table`).toHaveClass("o_list_table_grouped");
@@ -15976,6 +15986,11 @@ test(`list view with default_group_by`, async () => {
     expect(`.o_searchview_facet`).toHaveCount(1);
     expect(`.o_searchview_facet`).toHaveText("Bar");
     expect.verifySteps(["web_read_group3"]);
+
+    await toggleMenuItem("My Filter");
+    expect(`.o_searchview_facet`).toHaveCount(2);
+    expect(queryAllTexts(`.o_searchview_facet`)).toEqual(["Bar", "My Filter"]);
+    expect.verifySteps(["web_read_group4"]);
 });
 
 test(`list view with multi-fields default_group_by`, async () => {
