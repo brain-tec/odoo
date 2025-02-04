@@ -1153,12 +1153,20 @@ const removeStyle = (node, styleName, item) => {
 };
 const getOrCreateSpan = (node, ancestors) => {
     const span = ancestors.find((element) => element.tagName === 'SPAN' && element.isConnected);
+    const lastInlineAncestor = ancestors.findLast((element) => !isBlock(element) && element.isConnected);
     if (span) {
         return span;
     } else {
         const span = document.createElement('span');
-        node.after(span);
-        span.append(node);
+        // Apply font span above current inline top ancestor so that 
+        // the font style applies to the other style tags as well.
+        if (lastInlineAncestor) {
+            lastInlineAncestor.after(span);
+            span.append(lastInlineAncestor);
+        } else {
+            node.after(span);
+            span.append(node);
+        }
         return span;
     }
 }
@@ -1587,7 +1595,7 @@ export function isUnbreakable(node) {
                 node.getAttribute('t-value') ||
                 node.getAttribute('t-out') ||
                 node.getAttribute('t-raw'))) ||
-        node.matches(".oe_unbreakable, a.btn, a[role='tab'], a[role='button']")
+        node.matches(".oe_unbreakable, a.btn, a[role='tab'], a[role='button'], li.nav-item")
     );
 }
 
