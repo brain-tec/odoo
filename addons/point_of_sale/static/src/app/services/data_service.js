@@ -33,7 +33,6 @@ export class PosData extends Reactive {
         this.records = {};
         this.opts = new DataServiceOptions();
         this.channels = [];
-        this.onNotified = getOnNotified(this.bus, odoo.access_token);
 
         this.network = {
             warningTriggered: false,
@@ -42,6 +41,7 @@ export class PosData extends Reactive {
             unsyncData: [],
         };
 
+        this.initializeWebsocket();
         await this.intializeDataRelation();
         browser.addEventListener("online", () => {
             if (this.network.offline) {
@@ -59,9 +59,12 @@ export class PosData extends Reactive {
         this.bus.addEventListener("connect", this.reconnectWebSocket.bind(this));
     }
 
-    reconnectWebSocket() {
+    initializeWebsocket() {
         this.onNotified = getOnNotified(this.bus, odoo.access_token);
+    }
 
+    reconnectWebSocket() {
+        this.initializeWebsocket();
         const channels = [...this.channels];
         this.channels = [];
         while (channels.length) {
@@ -242,15 +245,12 @@ export class PosData extends Reactive {
 
     async loadInitialData() {
         let localData = await this.getCachedServerDataFromIndexedDB();
-        const session = localData["pos.session"]?.[0];
+        const session = localData?.["pos.session"]?.[0];
 
-        if (session && session.id !== odoo.pos_session_id) {
-            await this.resetIndexedDB();
-            window.location.reload();
-            return {};
-        }
-
-        if (navigator.onLine && session?.state !== "opened") {
+        if (
+            (navigator.onLine && session?.state !== "opened") ||
+            session?.id !== odoo.pos_session_id
+        ) {
             try {
                 const limitedLoading = this.isLimitedLoading();
                 const serverDate = localData["pos.session"]?.[0]?._data_server_date;
