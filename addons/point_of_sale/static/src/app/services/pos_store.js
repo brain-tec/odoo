@@ -122,7 +122,6 @@ export class PosStore extends WithLazyGetterTrap {
             create: new Set(),
         };
 
-        this.synch = { status: "connected", pending: 0 };
         this.hardwareProxy = hardware_proxy;
         this.hiddenProductIds = new Set();
         this.selectedOrderUuid = null;
@@ -382,7 +381,7 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     get session() {
-        return this.data.models["pos.session"].getFirst();
+        return this.data.models["pos.session"].get(odoo.pos_session_id);
     }
 
     async processServerData() {
@@ -1194,9 +1193,7 @@ export class PosStore extends WithLazyGetterTrap {
     getPendingOrder() {
         const orderToCreate = this.models["pos.order"].filter(
             (order) =>
-                this.pendingOrder.create.has(order.id) &&
-                (order.lines.length > 0 ||
-                    order.payment_ids.some((p) => p.payment_method_id.type === "pay_later"))
+                this.pendingOrder.create.has(order.id) && this.shouldCreatePendingOrder(order)
         );
         const orderToUpdate = this.models["pos.order"].readMany(
             Array.from(this.pendingOrder.write)
@@ -1210,6 +1207,13 @@ export class PosStore extends WithLazyGetterTrap {
             orderToCreate,
             orderToUpdate,
         };
+    }
+
+    shouldCreatePendingOrder(order) {
+        return (
+            order.lines.length > 0 ||
+            order.payment_ids.some((p) => p.payment_method_id.type === "pay_later")
+        );
     }
 
     getOrderIdsToDelete() {
@@ -1561,9 +1565,11 @@ export class PosStore extends WithLazyGetterTrap {
             },
             { webPrintFallback: true }
         );
-        if (!printBillActionTriggered && result) {
-            const nbrPrint = order.nb_print;
-            await this.data.write("pos.order", [order.id], { nb_print: nbrPrint + 1 });
+        if (!printBillActionTriggered) {
+            order.nb_print += 1;
+            if (typeof order.id === "number" && result) {
+                await this.data.write("pos.order", [order.id], { nb_print: order.nb_print });
+            }
         }
         return true;
     }
@@ -1607,6 +1613,11 @@ export class PosStore extends WithLazyGetterTrap {
         }
     }
     async sendOrderInPreparationUpdateLastChange(o, cancelled = false) {
+        // Always display a "ConnectionLostError" when the user tries to send an order to the kitchen while offline
+        if (this.data.network.offline) {
+            this.data.network.warningTriggered = false;
+            throw new ConnectionLostError();
+        }
         this.addPendingOrder([o.id]);
         const uuid = o.uuid;
         const orders = await this.syncAllOrders({ orders: [o] });
@@ -1677,9 +1688,10 @@ export class PosStore extends WithLazyGetterTrap {
             }
 
             if (changes.noteUpdate.length) {
+                const { noteUpdateTitle, printNoteUpdateData = true } = orderChange;
                 orderData.changes = {
-                    title: _t("NOTE UPDATE"),
-                    data: changes.noteUpdate,
+                    title: noteUpdateTitle || _t("NOTE UPDATE"),
+                    data: printNoteUpdateData ? changes.noteUpdate : [],
                 };
                 const result = await this.printOrderChanges(orderData, printer);
                 if (!result.successful) {
@@ -1708,6 +1720,18 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     async printOrderChanges(data, printer) {
+        const dataChanges = data.changes?.data;
+        if (dataChanges && dataChanges.some((c) => c.group)) {
+            const groupedData = dataChanges.reduce((acc, c) => {
+                const { name = "", index = -1 } = c.group || {};
+                if (!acc[name]) {
+                    acc[name] = { name, index, data: [] };
+                }
+                acc[name].data.push(c);
+                return acc;
+            }, {});
+            data.changes.groupedData = Object.values(groupedData).sort((a, b) => a.index - b.index);
+        }
         const receipt = renderToElement("point_of_sale.OrderChangeReceipt", {
             data: data,
         });

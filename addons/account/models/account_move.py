@@ -1668,7 +1668,7 @@ class AccountMove(models.Model):
             else:
                 move.invoice_filter_type_domain = False
 
-    @api.depends('commercial_partner_id')
+    @api.depends('commercial_partner_id', 'company_id')
     def _compute_bank_partner_id(self):
         for move in self:
             if move.is_inbound():
@@ -5189,6 +5189,10 @@ class AccountMove(models.Model):
             'url': f'/account/download_invoice_documents/{",".join(map(str, self.ids))}/pdf',
             'target': target,
         }
+
+    def action_print_pdf(self):
+        self.ensure_one()
+        return self.env.ref('account.account_invoices').report_action(self.id)
 
     def preview_invoice(self):
         self.ensure_one()
