@@ -151,6 +151,9 @@ class PosOrder(models.Model):
         self.ensure_one()
         self.payment_ids.unlink()
 
+    def _compute_amount_paid(self):
+        return sum(self.payment_ids.mapped('amount'))
+
     def _process_payment_lines(self, pos_order, order, pos_session, draft):
         """Create account.bank.statement.lines from the dictionary given to the parent function.
 
@@ -168,7 +171,7 @@ class PosOrder(models.Model):
         prec_acc = order.currency_id.decimal_places
 
         # Recompute amount paid because we don't trust the client
-        order.amount_paid = sum(order.payment_ids.mapped('amount'))
+        order.amount_paid = order._compute_amount_paid()
 
         if not draft and not float_is_zero(pos_order['amount_return'], prec_acc):
             cash_payment_method = pos_session.payment_method_ids.filtered('is_cash_count')[:1]
@@ -192,7 +195,7 @@ class PosOrder(models.Model):
         :return: A list of python dictionaries (see '_prepare_base_line_for_taxes_computation' in account.tax).
         """
         self.ensure_one()
-        return self.lines._prepare_tax_base_line_values()
+        return self.lines._prepare_tax_base_line_values() or []
 
     @api.model
     def _get_invoice_lines_values(self, line_values, pos_order_line):
@@ -212,7 +215,7 @@ class PosOrder(models.Model):
 
         :return: A list of Command.create to fill 'invoice_line_ids' when calling account.move.create.
         """
-        line_values_list = self._prepare_tax_base_line_values()
+        line_values_list = self.with_context(invoicing=True)._prepare_tax_base_line_values()
         invoice_lines = []
         for line_values in line_values_list:
             line = line_values['record']
@@ -743,6 +746,7 @@ class PosOrder(models.Model):
         vals = {
             'invoice_origin': self.name,
             'pos_refunded_invoice_ids': pos_refunded_invoice_ids,
+            'pos_order_ids': self.ids,
             'journal_id': self.session_id.config_id.invoice_journal_id.id,
             'move_type': 'out_invoice' if self.amount_total >= 0 else 'out_refund',
             'ref': self.name,
@@ -957,7 +961,7 @@ class PosOrder(models.Model):
             move_vals = order._prepare_invoice_vals()
             new_move = order._create_invoice(move_vals)
 
-            order.write({'account_move': new_move.id, 'state': 'done'})
+            order.state = 'done'
             new_move.sudo().with_company(order.company_id).with_context(skip_invoice_sync=True)._post()
 
             moves += new_move
@@ -1111,7 +1115,7 @@ class PosOrder(models.Model):
         """Create a new payment for the order"""
         self.ensure_one()
         self.env['pos.payment'].create(data)
-        self.amount_paid = sum(self.payment_ids.mapped('amount'))
+        self.amount_paid = self._compute_amount_paid()
 
     def _prepare_refund_values(self, current_session):
         self.ensure_one()
@@ -1619,55 +1623,54 @@ class PosOrderLine(models.Model):
                 line.margin = line.price_subtotal - line.total_cost
                 line.margin_percent = not float_is_zero(line.price_subtotal, precision_rounding=line.currency_id.rounding) and line.margin / line.price_subtotal or 0
 
+    def _prepare_base_line_for_taxes_computation(self):
+        self.ensure_one()
+        commercial_partner = self.order_id.partner_id.commercial_partner_id
+        fiscal_position = self.order_id.fiscal_position_id
+        line = self.with_company(self.order_id.company_id)
+        account = line.product_id._get_product_accounts()['income'] or self.order_id.config_id.journal_id.default_account_id
+        if not account:
+            raise UserError(_(
+                "Please define income account for this product: '%(product)s' (id:%(id)d).",
+                product=line.product_id.name, id=line.product_id.id,
+            ))
+
+        if fiscal_position:
+            account = fiscal_position.map_account(account)
+
+        is_refund_order = line.order_id.amount_total < 0.0
+        is_refund_line = line.qty * line.price_unit < 0
+
+        product_name = line.product_id \
+            .with_context(lang=line.order_id.partner_id.lang or self.env.user.lang) \
+            .get_product_multiline_description_sale()
+
+        return {
+            **self.env['account.tax']._prepare_base_line_for_taxes_computation(
+                line,
+                partner_id=commercial_partner,
+                currency_id=self.order_id.currency_id,
+                rate=self.order_id.currency_rate,
+                product_id=line.product_id,
+                tax_ids=line.tax_ids_after_fiscal_position,
+                price_unit=line.price_unit,
+                quantity=line.qty * (-1 if is_refund_order else 1),
+                discount=line.discount,
+                account_id=account,
+                is_refund=is_refund_line,
+                sign=1 if is_refund_order else -1,
+            ),
+            'uom_id': line.product_uom_id,
+            'name': product_name,
+        }
+
     def _prepare_tax_base_line_values(self):
         """ Convert pos order lines into dictionaries that would be used to compute taxes later.
 
         :param sign: An optional parameter to force the sign of amounts.
         :return: A list of python dictionaries (see '_prepare_base_line_for_taxes_computation' in account.tax).
         """
-        base_line_vals_list = []
-        for line in self:
-            commercial_partner = self.order_id.partner_id.commercial_partner_id
-            fiscal_position = self.order_id.fiscal_position_id
-            line = line.with_company(self.order_id.company_id)
-            account = line.product_id._get_product_accounts()['income'] or self.order_id.config_id.journal_id.default_account_id
-            if not account:
-                raise UserError(_(
-                    "Please define income account for this product: '%(product)s' (id:%(id)d).",
-                    product=line.product_id.name, id=line.product_id.id,
-                ))
-
-            if fiscal_position:
-                account = fiscal_position.map_account(account)
-
-            is_refund_order = line.order_id.amount_total < 0.0
-            is_refund_line = line.qty * line.price_unit < 0
-
-            product_name = line.product_id\
-                .with_context(lang=line.order_id.partner_id.lang or self.env.user.lang)\
-                .get_product_multiline_description_sale()
-
-            base_line_vals_list.append(
-                {
-                    **self.env['account.tax']._prepare_base_line_for_taxes_computation(
-                        line,
-                        partner_id=commercial_partner,
-                        currency_id=self.order_id.currency_id,
-                        rate=self.order_id.currency_rate,
-                        product_id=line.product_id,
-                        tax_ids=line.tax_ids_after_fiscal_position,
-                        price_unit=line.price_unit,
-                        quantity=line.qty * (-1 if is_refund_order else 1),
-                        discount=line.discount,
-                        account_id=account,
-                        is_refund=is_refund_line,
-                        sign=1 if is_refund_order else -1,
-                    ),
-                    'uom_id': line.product_uom_id,
-                    'name': product_name,
-                }
-            )
-        return base_line_vals_list
+        return [line._prepare_base_line_for_taxes_computation() for line in self]
 
     def unlink(self):
         for line in self:
