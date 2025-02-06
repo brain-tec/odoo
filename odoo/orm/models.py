@@ -558,7 +558,7 @@ class BaseModel(metaclass=MetaModel):
     """dependencies of models backed up by SQL views
     ``{model_name: field_names}``, where ``field_names`` is an iterable.
     This is only used to determine the changes to flush to database before
-    executing ``search()`` or ``read_group()``. It won't be used for cache
+    executing any search/read operations. It won't be used for cache
     invalidation or recomputing fields.
     """
 
@@ -2630,28 +2630,9 @@ class BaseModel(metaclass=MetaModel):
                 row['__domain'] &= Domain(fullname, '=', row[fullname])
 
     @api.model
-    def _read_group_get_annotated_groupby(self, groupby, lazy):
-        groupby = [groupby] if isinstance(groupby, str) else groupby
-        lazy_groupby = groupby[:1] if lazy else groupby
-
-        annotated_groupby = {}  # Key as the name in the result, value as the explicit groupby specification
-        for group_spec in lazy_groupby:
-            field_name, property_name, granularity = parse_read_group_spec(group_spec)
-            if field_name not in self._fields:
-                raise ValueError(f"Invalid field {field_name!r} on model {self._name!r}")
-            field = self._fields[field_name]
-            if property_name and field.type != 'properties':
-                raise ValueError(f"Property name {property_name!r} has to be used on a property field.")
-            if field.type in ('date', 'datetime'):
-                annotated_groupby[group_spec] = f"{field_name}:{granularity or 'month'}"
-            else:
-                annotated_groupby[group_spec] = group_spec
-        return annotated_groupby
-
-    @api.model
     @api.readonly
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        """Get the list of records in list view grouped by the given ``groupby`` fields.
+        """Deprecated - Get the list of records in list view grouped by the given ``groupby`` fields.
 
         :param list domain: :ref:`A search domain <reference/orm/domains>`. Use an empty
                      list to match all records.
@@ -2689,7 +2670,10 @@ class BaseModel(metaclass=MetaModel):
         :rtype: [{'field_name_1': value, ...}, ...]
         :raise AccessError: if user is not allowed to access requested information
         """
-
+        warnings.warn(
+            "Since 19.0, read_group is deprecated. Please use _read_group in the backend code or web_read_group for a complete formatted result",
+            DeprecationWarning,
+        )
         groupby = [groupby] if isinstance(groupby, str) else groupby
         lazy_groupby = groupby[:1] if lazy else groupby
 
@@ -2697,7 +2681,21 @@ class BaseModel(metaclass=MetaModel):
         # - Modify `groupby` default value 'month' into specific groupby specification
         # - Modify `fields` into aggregates specification of _read_group
         # - Modify the order to be compatible with the _read_group specification
-        annotated_groupby = self._read_group_get_annotated_groupby(groupby, lazy=lazy)
+        groupby = [groupby] if isinstance(groupby, str) else groupby
+        lazy_groupby = groupby[:1] if lazy else groupby
+
+        annotated_groupby = {}  # Key as the name in the result, value as the explicit groupby specification
+        for group_spec in lazy_groupby:
+            field_name, property_name, granularity = parse_read_group_spec(group_spec)
+            if field_name not in self._fields:
+                raise ValueError(f"Invalid field {field_name!r} on model {self._name!r}")
+            field = self._fields[field_name]
+            if property_name and field.type != 'properties':
+                raise ValueError(f"Property name {property_name!r} has to be used on a property field.")
+            if field.type in ('date', 'datetime'):
+                annotated_groupby[group_spec] = f"{field_name}:{granularity or 'month'}"
+            else:
+                annotated_groupby[group_spec] = group_spec
 
         annotated_aggregates = {  # Key as the name in the result, value as the explicit aggregate specification
             f"{lazy_groupby[0].split(':')[0]}_count" if lazy and len(lazy_groupby) == 1 else '__count': '__count',
@@ -3339,7 +3337,7 @@ class BaseModel(metaclass=MetaModel):
         # registry classes; the purpose of this attribute is to behave as a
         # cache of [c for c in cls.mro() if not is_registry_class(c))], which
         # is heavily used in function fields.resolve_mro()
-        cls._model_classes = tuple(c for c in cls.mro() if getattr(c, 'pool', None) is None)
+        cls._model_classes__ = tuple(c for c in cls.mro() if getattr(c, 'pool', None) is None)
 
         # 1. determine the proper fields of the model: the fields defined on the
         # class and magic fields, not the inherited or custom ones
@@ -3352,7 +3350,7 @@ class BaseModel(metaclass=MetaModel):
 
         # collect the definitions of each field (base definition + overrides)
         definitions = defaultdict(list)
-        for klass in reversed(cls._model_classes):
+        for klass in reversed(cls._model_classes__):
             # this condition is an optimization of is_definition_class(klass)
             if isinstance(klass, MetaModel):
                 for field in klass._field_definitions:
@@ -3417,7 +3415,7 @@ class BaseModel(metaclass=MetaModel):
         assert not cls._table_object_definitions, "cls is a registry model"
         cls._table_objects = frozendict({
             cons.full_name(self): cons
-            for klass in reversed(cls._model_classes)
+            for klass in reversed(cls._model_classes__)
             if isinstance(klass, MetaModel)
             for cons in klass._table_object_definitions
         })
@@ -6246,7 +6244,7 @@ class BaseModel(metaclass=MetaModel):
         recordsets are guaranteed to be part of the same prefetch-set.
 
         Provides a convenience method to partition existing recordsets without
-        the overhead of a :meth:`~.read_group`, but performs no aggregation.
+        the overhead of a :meth:`~._read_group`, but performs no aggregation.
 
         .. note:: unlike :func:`itertools.groupby`, does not care about input
                   ordering, however the tradeoff is that it can not be lazy
