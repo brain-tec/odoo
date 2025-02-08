@@ -341,50 +341,6 @@ patch(PosStore.prototype, {
             this.showScreen("FloorScreen");
         }
     },
-    async recordSynchronisation(data) {
-        await super.recordSynchronisation(...arguments);
-        if (data.records["pos.order"]?.length > 0) {
-            // Verify if there is only 1 order by table.
-            const orderByTableId = this.models["pos.order"].reduce((acc, order) => {
-                // Floating order doesn't need to be verified.
-                if (!order.finalized && order.table_id?.id) {
-                    acc[order.table_id.id] = acc[order.table_id.id] || [];
-                    acc[order.table_id.id].push(order);
-                }
-                return acc;
-            }, {});
-
-            for (const orders of Object.values(orderByTableId)) {
-                if (orders.length > 1) {
-                    // The only way to get here is if there is several waiters on the same table.
-                    // In this case we take orderline of the local order and we add it to the synced order.
-                    const syncedOrder = orders.find((order) => typeof order.id === "number");
-                    const localOrders = orders.find((order) => typeof order.id !== "number");
-
-                    let watcher = 0;
-                    while (localOrders.lines.length > 0) {
-                        if (watcher > 1000) {
-                            break;
-                        }
-
-                        const line = localOrders.lines.pop();
-                        line.update({ order_id: syncedOrder });
-                        line.setDirty();
-                        watcher++;
-                    }
-
-                    // Remove local orders from the local database.
-                    if (this.getOrder()?.id === localOrders.id) {
-                        this.setOrder(syncedOrder);
-                        this.addPendingOrder([syncedOrder.id]);
-                    }
-
-                    localOrders.delete();
-                }
-            }
-            this.computeTableCount();
-        }
-    },
     async closingSessionNotification(data) {
         await super.closingSessionNotification(...arguments);
         this.computeTableCount(data);
@@ -497,7 +453,9 @@ patch(PosStore.prototype, {
             this.currentFloor = this.config.floor_ids?.length > 0 ? this.config.floor_ids[0] : null;
         }
 
-        return await super.afterProcessServerData(...arguments);
+        const data = await super.afterProcessServerData(...arguments);
+        this.restoreSampleDataState();
+        return data;
     },
     //@override
     addNewOrder(data = {}) {
@@ -564,6 +522,7 @@ patch(PosStore.prototype, {
         return super.getDefaultSearchDetails();
     },
     async setTable(table, orderUuid = null) {
+        this.deviceSync.readDataFromServer();
         let currentOrder = table
             .getOrders()
             .find((order) => (orderUuid ? order.uuid === orderUuid : !order.finalized));
@@ -673,7 +632,7 @@ patch(PosStore.prototype, {
         } else if (order) {
             if (!this.isOrderTransferMode) {
                 this.syncAllOrders({ orders: [order] });
-            } else {
+            } else if (order && this.previousScreen !== "ReceiptScreen") {
                 await this.syncAllOrders({ orders: [order] });
             }
         }
@@ -819,19 +778,14 @@ patch(PosStore.prototype, {
         return course;
     },
     async fireCourse(course) {
-        const order = this.getOrder();
-        if (!order || !course || course.fired) {
-            return false;
-        }
+        const order = course.order_id;
         course.fired = true;
-        this.addPendingOrder([order.id]);
         order.deselectCourse();
-        await this.syncAllOrders();
-        course = this.models["restaurant.order.course"].getBy("uuid", course.uuid);
-        await this._onCourseFired(course);
+        await this.sendOrderInPreparation(order, { firedCourseId: course.id, byPassPrint: true });
+        await this.printCourseTicket(course);
         return true;
     },
-    async _onCourseFired(course) {
+    async printCourseTicket(course) {
         try {
             const changes = {
                 new: [],
@@ -881,5 +835,36 @@ patch(PosStore.prototype, {
         }
         order.selectCourse(destCourse);
         order.recomputeOrderData();
+    },
+    async loadSampleData() {
+        if (this.config.module_pos_restaurant) {
+            const data = { screen: "ProductScreen" };
+            const table_number = this.getOrder()?.table_id?.table_number;
+            if (table_number) {
+                data.tableNumber = table_number;
+            }
+            sessionStorage.setItem("posPreSampleDataLoadState", JSON.stringify(data));
+        }
+        return super.loadSampleData();
+    },
+    restoreSampleDataState() {
+        if (this.config.module_pos_restaurant) {
+            let parsedState = sessionStorage.getItem("posPreSampleDataLoadState");
+            if (!parsedState) {
+                return;
+            }
+            try {
+                sessionStorage.removeItem("posPreSampleDataLoadState");
+                parsedState = JSON.parse(parsedState);
+                const { tableNumber, screen } = parsedState;
+                if (tableNumber) {
+                    this.searchOrder(tableNumber);
+                } else if (screen) {
+                    this.showScreen(screen);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
     },
 });
