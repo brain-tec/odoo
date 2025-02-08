@@ -308,12 +308,15 @@ export class PosStore extends WithLazyGetterTrap {
         return this.data.models["pos.session"].getFirst();
     }
 
+    get company() {
+        return this.data.models["res.company"].getFirst();
+    }
+
     async processServerData() {
         // These fields should be unique for the pos_config
         // and should not change during the session, so we can
         // safely take the first element.this.models
         this.config = this.data.models["pos.config"].getFirst();
-        this.company = this.data.models["res.company"].getFirst();
         this.user = this.data.models["res.users"].getFirst();
         this.currency = this.config.currency_id;
         this.pickingType = this.data.models["stock.picking.type"].getFirst();
@@ -1129,10 +1132,7 @@ export class PosStore extends WithLazyGetterTrap {
 
     getPendingOrder() {
         const orderToCreate = this.models["pos.order"].filter(
-            (order) =>
-                this.pendingOrder.create.has(order.id) &&
-                (order.lines.length > 0 ||
-                    order.payment_ids.some((p) => p.payment_method_id.type === "pay_later"))
+            (order) => this.pendingOrder.create.has(order.id) && order.hasItemsOrPayLater
         );
         const orderToUpdate = this.models["pos.order"].readMany(
             Array.from(this.pendingOrder.write)
