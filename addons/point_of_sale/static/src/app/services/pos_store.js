@@ -307,12 +307,15 @@ export class PosStore extends WithLazyGetterTrap {
         return this.data.models["pos.session"].get(odoo.pos_session_id);
     }
 
+    get company() {
+        return this.data.models["res.company"].getFirst();
+    }
+
     async processServerData() {
         // These fields should be unique for the pos_config
         // and should not change during the session, so we can
         // safely take the first element.this.models
         this.config = this.data.models["pos.config"].getFirst();
-        this.company = this.data.models["res.company"].getFirst();
         this.user = this.data.models["res.users"].getFirst();
         this.currency = this.config.currency_id;
         this.pickingType = this.data.models["stock.picking.type"].getFirst();
@@ -1474,8 +1477,13 @@ export class PosStore extends WithLazyGetterTrap {
         if (name === "ProductScreen") {
             this.getOrder()?.deselectOrderline();
         }
-        this.previousScreen = this.mainScreen.component?.name;
         const component = registry.category("pos_screens").get(name);
+        if (
+            (component.updatePreviousScreen ?? true) &&
+            (this.mainScreen.component?.updatePreviousScreen ?? true)
+        ) {
+            this.previousScreen = this.mainScreen.component?.name;
+        }
         this.mainScreen = { component, props };
         // Save the screen to the order so that it is shown again when the order is selected.
         if (component.storeOnOrder ?? true) {
