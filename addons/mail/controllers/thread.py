@@ -1,3 +1,5 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from datetime import datetime
 from markupsafe import Markup
 from werkzeug.exceptions import NotFound
@@ -5,9 +7,7 @@ from werkzeug.exceptions import NotFound
 from odoo import http
 from odoo.http import request
 from odoo.tools import frozendict
-from odoo.tools import email_normalize
-from odoo.addons.mail.models.discuss.mail_guest import add_guest_to_context
-from odoo.addons.mail.tools.discuss import Store
+from odoo.addons.mail.tools.discuss import add_guest_to_context, Store
 
 
 class ThreadController(http.Controller):
@@ -197,8 +197,20 @@ class ThreadController(http.Controller):
         # sudo: mail.message - access is checked in _get_with_access and _can_edit_message
         message = message.sudo()
         body = Markup(body) if body else body  # may contain HTML such as @mentions
-        guest.env[message.model].browse([message.res_id])._message_update_content(
-            message, body=body, attachment_ids=attachment_ids, partner_ids=partner_ids
+        thread = guest.env[message.model].browse(message.res_id)
+        update_data = {
+            "attachment_ids": attachment_ids,
+            "body": body,
+            "partner_ids": partner_ids,
+            **kwargs,
+        }
+        thread._message_update_content(
+            message,
+            **{
+                key: value
+                for key, value in update_data.items()
+                if key in thread._get_allowed_message_update_params()
+            }
         )
         return Store(message, for_current_user=True).get_result()
 
