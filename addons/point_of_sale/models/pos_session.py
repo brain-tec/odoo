@@ -129,7 +129,7 @@ class PosSession(models.Model):
     def _load_pos_data_models(self, config_id):
         return ['pos.config', 'pos.preset', 'resource.calendar.attendance', 'pos.order', 'pos.order.line', 'pos.pack.operation.lot', 'pos.payment', 'pos.payment.method', 'pos.printer',
             'pos.bill', 'res.company', 'account.tax', 'account.tax.group', 'product.template', 'product.product', 'pos.category', 'product.attribute', 'product.attribute.custom.value',
-            'product.template.attribute.line', 'product.template.attribute.value', 'product.combo', 'product.combo.item', 'res.users', 'res.partner', 'product.uom',
+            'product.template.attribute.line', 'product.template.attribute.value', 'product.template.attribute.exclusion', 'product.combo', 'product.combo.item', 'res.users', 'res.partner', 'product.uom',
             'decimal.precision', 'uom.uom', 'res.country', 'res.country.state', 'res.lang', 'product.pricelist', 'product.pricelist.item', 'product.category',
             'account.cash.rounding', 'account.fiscal.position', 'account.fiscal.position.tax', 'stock.picking.type', 'res.currency', 'pos.note', 'product.tag', 'ir.module.module']
 
@@ -1106,11 +1106,7 @@ class PosSession(models.Model):
         outstanding_account = payment_method.outstanding_account_id
         destination_account = self._get_receivable_account(payment_method)
 
-        if float_compare(amounts['amount'], 0, precision_rounding=self.currency_id.rounding) < 0:
-            # revert the accounts because account.payment doesn't accept negative amount.
-            outstanding_account, destination_account = destination_account, outstanding_account
-
-        account_payment = self.env['account.payment'].create({
+        account_payment = self.env['account.payment'].with_context(pos_payment=True).create({
             'amount': abs(amounts['amount']),
             'journal_id': payment_method.journal_id.id,
             'force_outstanding_account_id': outstanding_account.id,
@@ -1120,6 +1116,14 @@ class PosSession(models.Model):
             'pos_session_id': self.id,
             'company_id': self.company_id.id,
         })
+
+        if float_compare(amounts['amount'], 0, precision_rounding=self.currency_id.rounding) < 0:
+            # revert the accounts because account.payment doesn't accept negative amount.
+            account_payment.write({
+                'outstanding_account_id': account_payment.destination_account_id,
+                'destination_account_id': account_payment.outstanding_account_id,
+            })
+
         account_payment.action_post()
 
         diff_amount_compare_to_zero = self.currency_id.compare_amounts(diff_amount, 0)
