@@ -74,6 +74,10 @@ export class Message extends Record {
     });
     /** @type {number|string} */
     id;
+    /** @type {Array[Array[string]]} */
+    incoming_email_cc;
+    /** @type {Array[Array[string]]} */
+    incoming_email_to;
     /** @type {boolean} */
     is_discussion;
     /** @type {boolean} */
@@ -462,9 +466,13 @@ export class Message extends Record {
     }
 
     async toggleStar() {
-        await this.store.env.services.orm.silent.call("mail.message", "toggle_message_starred", [
-            [this.id],
-        ]);
+        this.store.insert(
+            await this.store.env.services.orm.silent.call(
+                "mail.message",
+                "toggle_message_starred",
+                [[this.id]]
+            )
+        );
     }
 
     async unfollow() {

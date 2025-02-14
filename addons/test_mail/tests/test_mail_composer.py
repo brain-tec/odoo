@@ -1064,7 +1064,7 @@ class TestComposerInternals(TestMailComposer):
 
                 # creation values are taken
                 if composition_mode == 'comment' and not batch_mode:
-                    self.assertEqual(composer.notified_bcc, self.partner_employee_2.name)
+                    self.assertEqual(composer.notified_bcc, self.partner_employee_2)
                 else:
                     self.assertFalse(composer.notified_bcc)
                 self.assertEqual(composer.partner_ids, base_recipients)
@@ -2973,6 +2973,8 @@ class TestComposerResultsMass(TestMailComposer):
                                             ],
                                             'body_content': exp_body,
                                             'email_from': self.partner_employee_2.email_formatted,
+                                            # profit from this test to check references are set to message_id in mailing emails
+                                            'references_message_id_check': True,
                                             'subject': exp_subject,
                                         },
                                         fields_values={
