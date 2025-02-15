@@ -278,7 +278,7 @@ class Website(models.Model):
         :return: True if the menu contains a record like url
         """
         return any(self.env['website.menu'].browse(self._get_menu_ids()).filtered(
-            lambda menu: (menu.url and re.search(r"[/](([^/=?&]+-)?[0-9]+)([/]|$)", menu.url)) or menu.group_ids
+            lambda menu: re.search(r"[/](([^/=?&]+-)?[0-9]+)([/]|$)", menu.url) or menu.group_ids
         ))
 
     @api.model_create_multi
@@ -1038,6 +1038,8 @@ class Website(models.Model):
             fallback_create_missing_industry_image('s_wavy_grid_default_image_2', 's_image_text_default_image')
             fallback_create_missing_industry_image('s_wavy_grid_default_image_3', 's_text_image_default_image')
             fallback_create_missing_industry_image('s_wavy_grid_default_image_4', 's_carousel_default_image_1')
+            fallback_create_missing_industry_image('s_timeline_images_default_image_1', 's_media_list_default_image_1')
+            fallback_create_missing_industry_image('s_timeline_images_default_image_2', 's_media_list_default_image_2')
 
         except Exception:
             pass

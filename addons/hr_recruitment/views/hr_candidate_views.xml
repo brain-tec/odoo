@@ -190,6 +190,7 @@
                 <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
                 <group expand="0" string="Group By">
                     <filter string="Manager" name="group_by_manager" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter string="Properties" name="group_by_candidate_properties" context="{'group_by': 'candidate_properties'}"/>
                 </group>
             </search>
         </field>
@@ -199,7 +200,7 @@
         <field name="name">Send Email</field>
         <field name="model_id" ref="hr_recruitment.model_hr_candidate"/>
         <field name="binding_model_id" ref="hr_recruitment.model_hr_candidate"/>
-        <field name="binding_view_types">list</field>
+        <field name="binding_view_types">list,kanban</field>
         <field name="state">code</field>
         <field name="code">action = records.action_send_email()</field>
     </record>
