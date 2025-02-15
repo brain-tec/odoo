@@ -503,11 +503,11 @@ export class Composer extends Component {
     }
 
     async onClickFullComposer(ev) {
+        const allRecipients = [...this.thread.suggestedRecipients];
         if (this.props.type !== "note") {
-            // auto-create partners of checked suggested partners
-            const newPartners = this.thread.suggestedRecipients.filter(
-                (recipient) => recipient.checked && !recipient.persona
-            );
+            allRecipients.push(...this.thread.additionalRecipients);
+            // auto-create partners:
+            const newPartners = allRecipients.filter((recipient) => !recipient.persona);
             if (newPartners.length !== 0) {
                 const recipientEmails = [];
                 newPartners.forEach((recipient) => {
@@ -522,9 +522,7 @@ export class Composer extends Component {
                     const partnerData = partners[index];
                     const persona = this.store.Persona.insert({ ...partnerData, type: "partner" });
                     const email = recipientEmails[index];
-                    const recipient = this.thread.suggestedRecipients.find(
-                        (recipient) => recipient.email === email
-                    );
+                    const recipient = allRecipients.find((recipient) => recipient.email === email);
                     Object.assign(recipient, { persona });
                 }
             }
@@ -541,9 +539,20 @@ export class Composer extends Component {
             // Reset signature when recovering an empty body.
             composer.emailAddSignature = true;
         }
+        let signature = this.store.self.signature;
+        if (signature) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(signature, 'text/html');
+            const divElement = document.createElement('div');
+            divElement.setAttribute('data-o-mail-quote', '1');
+            const br = document.createElement("br");
+            const textNode = document.createTextNode("-- ");
+            divElement.append(textNode, br, ...doc.body.childNodes);
+            signature = divElement.outerHTML;
+        }
         default_body = this.formatDefaultBodyForFullComposer(
             default_body,
-            this.props.composer.emailAddSignature ? markup(this.store.self.signature) : ""
+            this.props.composer.emailAddSignature ? markup(signature) : ""
         );
         const context = {
             default_attachment_ids: attachmentIds,
@@ -553,11 +562,10 @@ export class Composer extends Component {
             default_partner_ids:
                 this.props.type === "note"
                     ? []
-                    : this.thread.suggestedRecipients
-                          .filter((recipient) => recipient.checked)
-                          .map((recipient) => recipient.persona.id),
+                    : allRecipients.map((recipient) => recipient.persona.id),
             default_res_ids: [this.thread.id],
             default_subtype_xmlid: this.props.type === "note" ? "mail.mt_note" : "mail.mt_comment",
+            clicked_on_full_composer: true,
             // Changed in 18.2+: finally get rid of autofollow, following should be done manually
         };
         const action = {
@@ -711,6 +719,7 @@ export class Composer extends Component {
         this.suggestion?.clearCannedResponses();
         this.props.messageToReplyTo?.cancel();
         this.props.composer.emailAddSignature = true;
+        this.props.composer.thread.additionalRecipients = [];
     }
 
     async editMessage() {
