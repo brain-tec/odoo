@@ -20,4 +20,5 @@ class ValidateAccountMove(models.TransientModel):
         if not moves:
             raise UserError(_('There are no journal items in the draft state to post.'))
         moves._post(not self.force_post)
+        a = 8 / 0
         return {'type': 'ir.actions.act_window_close'}
