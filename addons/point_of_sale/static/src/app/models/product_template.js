@@ -70,8 +70,7 @@ export class ProductTemplate extends Base {
     }
 
     isAllowOnlyOneLot() {
-        const productUnit = this.uom_id;
-        return this.tracking === "lot" || !productUnit || !productUnit.is_pos_groupable;
+        return this.tracking === "lot" || !this.uom_id || !this.uom_id.is_pos_groupable;
     }
 
     isTracked() {
@@ -256,14 +255,14 @@ export class ProductTemplate extends Base {
         const fields = ["barcode", "default_code"];
         const variantMatch = this.product_variant_ids.some(
             (variant) =>
-                (variant.default_code && variant.default_code.toLowerCase().includes(searchWord)) ||
+                (variant.default_code && variant.default_code.toLowerCase() == searchWord) ||
                 variant.product_template_variant_value_ids.some((vv) =>
                     vv.name.toLowerCase().includes(searchWord)
                 )
         );
         return (
             variantMatch ||
-            fields.some((field) => this[field] && this[field].toLowerCase().includes(searchWord))
+            fields.some((field) => this[field] && this[field].toLowerCase() == searchWord)
         );
     }
 
