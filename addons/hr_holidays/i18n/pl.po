@@ -3,7 +3,8 @@
 # 	* hr_holidays
 # 
 # Translators:
-# Wil Odoo, 2024
+# Andrzej Gerasimuk, 2025
+# Wil Odoo, 2025
 # Marta Wacławek, 2025
 # 
 msgid ""
@@ -55,13 +56,13 @@ msgstr "!important; font-size: 8px; min-width: 18px\"&gt;"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 msgid "%(allocation_name)s (from %(date_from)s to %(date_to)s)"
-msgstr ""
+msgstr "%(allocation_name)s (od %(date_from)s do %(date_to)s)"
 
 #. module: hr_holidays
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 msgid "%(allocation_name)s (from %(date_from)s to No Limit)"
-msgstr ""
+msgstr "%(allocation_name)s (od %(date_from)s do bez limitu)"
 
 #. module: hr_holidays
 #. odoo-python
@@ -128,7 +129,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 msgid "%(name)s: %(duration)s"
-msgstr ""
+msgstr "%(name)s: %(duration)s"
 
 #. module: hr_holidays
 #. odoo-python
@@ -716,7 +717,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 msgid "Allocation of %(leave_type)s: %(amount).2f %(unit)s to %(target)s"
-msgstr ""
+msgstr "Przydział %(leave_type)s: %(amount).2f %(unit)s do %(target)s"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_level__week_day
@@ -3136,7 +3137,7 @@ msgstr "Wyświetlanie dnia drugiego miesiąca"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 msgid "Second approval request for %(allocation_type)s"
-msgstr ""
+msgstr "Drugie zatwierdzenie wniosku dla %(allocation_type)s"
 
 #. module: hr_holidays
 #. odoo-python
@@ -4614,7 +4615,7 @@ msgstr "od %(date_from)s do %(date_to)s - %(state)s"
 #. odoo-javascript
 #: code:addons/hr_holidays/static/src/leave_stats/leave_stats.xml:0
 msgid "hour(s)"
-msgstr ""
+msgstr "godziny"
 
 #. module: hr_holidays
 #. odoo-javascript

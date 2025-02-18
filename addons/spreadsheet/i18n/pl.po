@@ -7758,7 +7758,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/currency/formulas.js:0
 msgid "The company to take the exchange rate from."
-msgstr ""
+msgstr "Firma, od której pobierany jest kurs wymiany."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -8176,6 +8176,8 @@ msgid ""
 "The field (%(fieldValue)s) must be one of %(dimRowDB)s or must be a number "
 "between 1 and %s inclusive."
 msgstr ""
+"Pole (%(fieldValue)s) musi być jednym z %(dimRowDB)s lub musi być liczbą od "
+"1 do %s włącznie."
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -11150,7 +11152,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/spreadsheet/static/src/pivot/pivot_model.js:0
 msgid "Unable to fetch the label of %(id)s of model %(model)s"
-msgstr ""
+msgstr "Nie można pobrać etykiety %(id)s modelu %(model)s"
 
 #. module: spreadsheet
 #. odoo-javascript

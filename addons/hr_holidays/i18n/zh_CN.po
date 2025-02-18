@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Wil Odoo, 2024
+# Chloe Wang, 2025
 # 
 msgid ""
 msgstr ""
@@ -11,7 +12,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-12-24 15:31+0000\n"
 "PO-Revision-Date: 2024-12-24 16:06+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Chloe Wang, 2025\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -330,7 +331,7 @@ msgstr "<span class=\"text-muted\">从 </span>"
 msgid ""
 "<span>The allocated days cannot be used, because the allocation is set to "
 "finish in the past.</span>"
-msgstr ""
+msgstr "<span>所分配的天数无法使用，因为分配的期间设定为在过去时间已完成。</span>"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
@@ -710,7 +711,7 @@ msgstr "分配类别"
 msgid ""
 "Allocation must be \"To Approve\" or \"Second Approval\" in order to approve"
 " it."
-msgstr ""
+msgstr "分配的状态必须为“批准”或“第二批准”，才可进行批准。"
 
 #. module: hr_holidays
 #. odoo-python
@@ -1697,7 +1698,7 @@ msgstr "结束日期"
 msgid ""
 "End date has been updated because the employee will leave the company on "
 "%(departure_date)s."
-msgstr ""
+msgstr "结束日期已更新，因为员工将于%(departure_date)s离开公司。"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_type__employee_requests__yes
@@ -2094,7 +2095,7 @@ msgstr "没付款"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_type__is_used
 msgid "Is Used"
-msgstr ""
+msgstr "已使用"
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__first_month__jan
@@ -2709,7 +2710,7 @@ msgstr "仅"
 msgid ""
 "Only %s's Time Off Approver, a time off Officer/Responsible or Administrator"
 " can approve or refuse allocation requests."
-msgstr ""
+msgstr "只有%s的休假审批人、休假主管/负责人或管理员才能批准或拒绝分配申请。"
 
 #. module: hr_holidays
 #. odoo-python
@@ -2746,7 +2747,7 @@ msgstr "只有管理人员才能修改已取消的假期。"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 msgid "Only a time off Administrator can approve their own requests."
-msgstr ""
+msgstr "只有休假管理员才能批准自己的申请。"
 
 #. module: hr_holidays
 #. odoo-python
@@ -2754,7 +2755,7 @@ msgstr ""
 msgid ""
 "Only a time off Officer/Responsible or Administrator can approve or refuse "
 "allocation requests."
-msgstr ""
+msgstr "只有休假主管/负责人或管理员才能批准或拒绝分配申请。"
 
 #. module: hr_holidays
 #. odoo-python
@@ -3403,7 +3404,7 @@ msgstr "持续时间必须大于0。"
 #. odoo-python
 #: code:addons/hr_holidays/wizard/hr_departure_wizard.py:0
 msgid "The employee will leave the company on %(departure_date)s."
-msgstr ""
+msgstr "员工将于%(departure_date)s离职。"
 
 #. module: hr_holidays
 #. odoo-python
@@ -4074,7 +4075,7 @@ msgstr "验证类型"
 msgid ""
 "Validity End date has been updated because the employee will leave the "
 "company on %(departure_date)s."
-msgstr ""
+msgstr "有效期结束日期已更新，因为员工将于 %(departure_date)s 离开公司。"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_generate_multi_wizard_view_form
@@ -4341,7 +4342,7 @@ msgstr "您必须是%s的经理才能批准此休假"
 msgid ""
 "You must be either %s's Time Off Approver or Time off Administrator to "
 "validate this allocation request."
-msgstr ""
+msgstr "您必须是%s的休假审批人或休假管理员，才能验证此分配申请。"
 
 #. module: hr_holidays
 #. odoo-python

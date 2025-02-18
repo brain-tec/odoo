@@ -3,7 +3,8 @@
 # 	* base_import
 # 
 # Translators:
-# Wil Odoo, 2024
+# Piotr Strebski <strebski@gmail.com>, 2025
+# Wil Odoo, 2025
 # Marta Wacławek, 2025
 # 
 msgid ""
@@ -42,7 +43,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_action/import_action.js:0
 msgid "%s records successfully imported"
-msgstr ""
+msgstr "Pomyślnie zaimportowanych rekordów: %s"
 
 #. module: base_import
 #. odoo-javascript
@@ -147,6 +148,7 @@ msgstr ""
 #: code:addons/base_import/models/base_import.py:0
 msgid "Column %(column)s contains incorrect values (value: %(value)s)"
 msgstr ""
+"Kolumna %(column)s zawiera nieprawidłowe wartości (wartość: %(value)s)"
 
 #. module: base_import
 #. odoo-python
@@ -155,6 +157,8 @@ msgid ""
 "Column %(column)s contains incorrect values. Error in line %(line)d: "
 "%(error)s"
 msgstr ""
+"Kolumna %(column)s zawiera nieprawidłowe wartości. Błąd w linii %(line)d: "
+"%(error)s"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_mapping__column_name
@@ -277,7 +281,7 @@ msgstr "Kodowanie:"
 #. odoo-python
 #: code:addons/base_import/models/base_import.py:0
 msgid "Error Parsing Date [%(field)s:L%(line)d]: %(error)s"
-msgstr ""
+msgstr "Błąd podczas analizowania daty [%(field)s:L%(line)d]: %(error)s"
 
 #. module: base_import
 #. odoo-javascript
@@ -553,7 +557,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/base_import/static/src/import_data_sidepanel/import_data_sidepanel.xml:0
 msgid "Mb"
-msgstr ""
+msgstr "Mb"
 
 #. module: base_import
 #: model:ir.model.fields,field_description:base_import.field_base_import_import__res_model

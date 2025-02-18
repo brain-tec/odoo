@@ -3,7 +3,7 @@
 # 	* project
 # 
 # Translators:
-# Wil Odoo, 2024
+# Wil Odoo, 2025
 # Marta Wacławek, 2025
 # 
 msgid ""
@@ -117,7 +117,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/project/models/project_project.py:0
 msgid "%(closed_task_count)s / %(task_count)s"
-msgstr ""
+msgstr "%(closed_task_count)s/%(task_count)s"
 
 #. module: project
 #. odoo-python
@@ -129,7 +129,7 @@ msgstr "%(closed_task_count)s / %(task_count)s (%(closed_rate)s%%)"
 #. odoo-javascript
 #: code:addons/project/static/src/views/widget/subtask_counter.js:0
 msgid "%(count1)s/%(count2)s"
-msgstr ""
+msgstr "%(count1)s/%(count2)s"
 
 #. module: project
 #. odoo-python
@@ -2348,7 +2348,7 @@ msgstr "Skrzynka odbiorcza"
 #. module: project
 #: model:project.tags,name:project.project_tags_09
 msgid "Interior"
-msgstr ""
+msgstr "Wnętrze"
 
 #. module: project
 #: model:project.tags,name:project.project_tags_04
