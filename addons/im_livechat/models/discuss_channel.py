@@ -287,6 +287,8 @@ class DiscussChannel(models.Model):
     def _chatbot_restart(self, chatbot_script):
         # sudo: discuss.channel - visitor can clear current step to restart the script
         self.sudo().chatbot_current_step_id = False
+        # sudo: discuss.channel - visitor can reactivate livechat
+        self.sudo().livechat_active = True
         # sudo: chatbot.message - visitor can clear chatbot messages to restart the script
         self.sudo().chatbot_message_ids.unlink()
         return self._chatbot_post_message(
@@ -300,9 +302,9 @@ class DiscussChannel(models.Model):
     def _types_allowing_unfollow(self):
         return super()._types_allowing_unfollow() + ["livechat"]
 
-    def _action_unfollow(self, partner=None, guest=None):
+    def _action_unfollow(self, partner=None, guest=None, post_leave_message=True):
         if partner and self.channel_type == "livechat" and len(self.channel_member_ids) <= 2:
             # sudo: discuss.channel - last operator left the conversation, state must be updated
             self.sudo().livechat_active = False
             self._bus_send_store(Store(self, "livechat_active"))
-        super()._action_unfollow(partner, guest)
+        super()._action_unfollow(partner, guest, post_leave_message)
