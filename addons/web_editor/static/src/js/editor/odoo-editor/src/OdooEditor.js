@@ -84,6 +84,8 @@ import {
     ZERO_WIDTH_CHARS_REGEX,
     getAdjacentCharacter,
     isLinkEligibleForZwnbsp,
+    isZwnbsp,
+    childNodeIndex,
 } from './utils/utils.js';
 import { editorCommands } from './commands/commands.js';
 import { Powerbox } from './powerbox/Powerbox.js';
@@ -1304,12 +1306,33 @@ export class OdooEditor extends EventTarget {
     historyResetFromSteps(steps, historyIds) {
         this._historyIds = historyIds;
         this.observerUnactive();
+
+        // Recompute `_latestComputedSelection` after node recreation by converting `anchorNode`
+        // and `focusNode` to paths relative to the editable container for later lookup.
+        let latestComputedSelectionPath;
+        if (this._latestComputedSelection?.anchorNode) {
+            latestComputedSelectionPath = {
+                ...this._latestComputedSelection,
+                anchorNode: this._getNodeIndexPath(this._latestComputedSelection.anchorNode),
+                focusNode: this._getNodeIndexPath(this._latestComputedSelection.focusNode),
+            };
+        }
         for (const node of [...this.editable.childNodes]) {
             node.remove();
         }
         this._historyClean();
         for (const step of steps) {
             this.historyApply(step.mutations);
+        }
+        if (latestComputedSelectionPath) {
+            this._latestComputedSelection = {
+                ...latestComputedSelectionPath,
+                anchorNode: this._getNodeFromIndexPath(latestComputedSelectionPath.anchorNode),
+                focusNode: this._getNodeFromIndexPath(latestComputedSelectionPath.focusNode),
+            };
+            if (this.isSelectionInEditable(this._latestComputedSelection)) {
+                this._latestComputedSelectionInEditable = this._latestComputedSelection;
+            }
         }
         this._historySnapshots = [{ step: steps[0] }];
         this._historySteps = steps;
@@ -1680,6 +1703,28 @@ export class OdooEditor extends EventTarget {
         }
         this._currentStep.mutations.unshift(...this._historyStashedMutations);
         this._historyStashedMutations = [];
+    }
+    /**
+     * Generates the path to a node as an array of indices, relative to a given ancestor.
+     *
+     * @param {Node} node - The node to trace the path for.
+     * @returns {number[]} The path as an array of child indices.
+     */
+    _getNodeIndexPath(node) {
+        return [node, ...ancestors(node, this.editable)].map((ancestor) =>
+            childNodeIndex(ancestor)
+        );
+    }
+    /**
+     * Finds a node in the DOM based on a path of child indices.
+     *
+     * @param {number[]} indexPath - The path as an array of child indices.
+     * @returns {Node|undefined} The node at the specified path, or null if not found.
+     */
+    _getNodeFromIndexPath(indexPath) {
+        return (
+            indexPath.reduceRight((node, index) => node?.childNodes?.[index], this.editable.parentElement)
+        );
     }
     _historyClean() {
         this._historySteps = [];
@@ -4169,6 +4214,7 @@ export class OdooEditor extends EventTarget {
      * @private
      */
     _onKeyDown(ev) {
+        delete this._isNavigatingByMouse;
         const selection = this.document.getSelection();
         if (selection.anchorNode && isProtected(selection.anchorNode)) {
             return;
@@ -4465,6 +4511,40 @@ export class OdooEditor extends EventTarget {
             this.deselectTable();
         }
         const anchorNode = selection.anchorNode;
+        const isSelectionInEditable = this.isSelectionInEditable(selection);
+        if (this._isNavigatingByMouse && selection.isCollapsed && isSelectionInEditable) {
+            delete this._isNavigatingByMouse;
+            const { startContainer, startOffset, endContainer, endOffset } = getDeepRange(this.editable);
+            const linkElement = closestElement(startContainer, "a");
+            if (
+                linkElement &&
+                linkElement.textContent.startsWith("\uFEFF") &&
+                linkElement.textContent.endsWith("\uFEFF")
+            ) {
+                const linkDescendants = descendants(linkElement);
+
+                // Check if the cursor is positioned at the begining of link.
+                const isCursorAtStartOfLink = isZwnbsp(startContainer)
+                    ? linkDescendants.indexOf(startContainer) === 0
+                    : startContainer.nodeType === Node.TEXT_NODE &&
+                    linkDescendants.indexOf(startContainer) === 1 &&
+                    startOffset === 0;
+
+                // Check if the cursor is positioned at the end of link.
+                const isCursorAtEndOfLink = isZwnbsp(endContainer)
+                    ? linkDescendants.indexOf(endContainer) === linkDescendants.length - 1
+                    : endContainer.nodeType === Node.TEXT_NODE &&
+                    linkDescendants.indexOf(endContainer) === linkDescendants.length - 2 &&
+                    endOffset === nodeSize(endContainer);
+
+                // Handle selection movement.
+                if (isCursorAtStartOfLink || isCursorAtEndOfLink) {
+                    const block = closestBlock(linkElement);
+                    const linkIndex = [...block.childNodes].indexOf(linkElement);
+                    setSelection(block, isCursorAtStartOfLink ? linkIndex - 1 : linkIndex + 2);
+                }
+            }
+        }
         // Correct cursor if at editable root.
         if (
             selection.isCollapsed &&
@@ -4478,7 +4558,7 @@ export class OdooEditor extends EventTarget {
         if (
             selection.isCollapsed && anchorNode &&
             anchorNode.nodeName === "DIV" && anchorNode.innerHTML.trim() === "" &&
-            this.isSelectionInEditable(selection)
+            isSelectionInEditable
         ) {
             this._fixSelectionInEmptyDiv(selection);
             // The _onSelectionChange handler is going to be triggered again.
@@ -4487,7 +4567,6 @@ export class OdooEditor extends EventTarget {
         if (selection.rangeCount && selection.getRangeAt(0)) {
             this._handleSelectionInTable();
         }
-        const isSelectionInEditable = this.isSelectionInEditable(selection);
         if (!hasTableSelection(this.editable)) {
             this._updateToolbar(!selection.isCollapsed && isSelectionInEditable);
         }
@@ -4927,6 +5006,7 @@ export class OdooEditor extends EventTarget {
 
     _onMouseDown(ev) {
         this._currentMouseState = ev.type;
+        this._isNavigatingByMouse = true;
         this._lastMouseClickPosition = [ev.x, ev.y];
 
         if (this.canActivateContentEditable) {
