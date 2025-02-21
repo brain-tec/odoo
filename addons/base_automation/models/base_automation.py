@@ -10,6 +10,7 @@ from uuid import uuid4
 
 from dateutil.relativedelta import relativedelta
 from odoo import _, api, exceptions, fields, models
+from odoo.exceptions import LockError
 from odoo.fields import Domain
 from odoo.http import request
 from odoo.tools import safe_eval
@@ -44,7 +45,6 @@ DATE_RANGE_FACTOR = {
 
 CREATE_TRIGGERS = [
     'on_create',
-
     'on_create_or_write',
     'on_priority_set',
     'on_stage_set',
@@ -128,8 +128,8 @@ class BaseAutomation(models.Model):
             ('on_priority_set', "Priority is set to"),
             ('on_archive', "On archived"),
             ('on_unarchive', "On unarchived"),
-            ('on_create_or_write', "On save"),
-            ('on_create', "On creation"),  # deprecated, use 'on_create_or_write' instead
+            ('on_create', "On create"),
+            ('on_create_or_write', "On create and edit"),
             ('on_write', "On update"),  # deprecated, use 'on_create_or_write' instead
 
             ('on_unlink', "On deletion"),
@@ -588,8 +588,12 @@ class BaseAutomation(models.Model):
         """
         cron = self.env.ref('base_automation.ir_cron_data_base_automation_check', raise_if_not_found=False)
         if cron:
+            try:
+                cron.lock_for_update(allow_referencing=True)
+            except LockError:
+                return
             automations = self.with_context(active_test=True).search([('trigger', 'in', TIME_TRIGGERS)])
-            cron.try_write({
+            cron.write({
                 'active': bool(automations),
                 'interval_type': 'minutes',
                 'interval_number': self._get_cron_interval(automations),
