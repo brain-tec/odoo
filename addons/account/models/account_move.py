@@ -102,6 +102,10 @@ class AccountMove(models.Model):
         return self.journal_id.sequence_override_regex or super()._sequence_yearly_regex
 
     @property
+    def _sequence_year_range_regex(self):
+        return self.journal_id.sequence_override_regex or super()._sequence_year_range_regex
+
+    @property
     def _sequence_fixed_regex(self):
         return self.journal_id.sequence_override_regex or super()._sequence_fixed_regex
 
@@ -2538,7 +2542,7 @@ class AccountMove(models.Model):
                 or not self.invoice_date
                 or reference_date <= self.invoice_payment_term_id._get_last_discount_date(self.invoice_date)
             ) \
-            and not (payment_terms.matched_debit_ids + payment_terms.matched_credit_ids)
+            and not (payment_terms.sudo().matched_debit_ids + payment_terms.sudo().matched_credit_ids)
 
     # -------------------------------------------------------------------------
     # BUSINESS MODELS SYNCHRONIZATION
@@ -3239,7 +3243,7 @@ class AccountMove(models.Model):
             # Disallow modifying readonly fields on a posted move
             move_state = vals.get('state', move.state)
             unmodifiable_fields = (
-                'invoice_line_ids', 'line_ids', 'invoice_date', 'date', 'partner_id', 'partner_bank_id',
+                'invoice_line_ids', 'line_ids', 'invoice_date', 'date', 'partner_id',
                 'invoice_payment_term_id', 'currency_id', 'fiscal_position_id', 'invoice_cash_rounding_id')
             readonly_fields = [val for val in vals if val in unmodifiable_fields]
             if not self._context.get('skip_readonly_check') and move_state == "posted" and readonly_fields:
