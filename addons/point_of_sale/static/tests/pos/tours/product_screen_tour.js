@@ -349,9 +349,11 @@ registry.category("web_tour.tours").add("SearchProducts", {
             ProductScreen.searchProduct("chair"),
             ProductScreen.clickDisplayedProduct("Test chair 1"),
             ProductScreen.clickDisplayedProduct("Test CHAIR 2"),
+            ProductScreen.clickDisplayedProduct("Test sofa"),
             ProductScreen.searchProduct("CHAIR"),
             ProductScreen.clickDisplayedProduct("Test chair 1"),
             ProductScreen.clickDisplayedProduct("Test CHAIR 2"),
+            ProductScreen.clickDisplayedProduct("Test sofa"),
             ProductScreen.searchProduct("clémentine"),
             ProductScreen.clickDisplayedProduct("clémentine"),
         ].flat(),
@@ -516,5 +518,19 @@ registry.category("web_tour.tours").add("SortOrderlinesByCategories", {
                 "Product_11 Category sequence 2",
                 "Product_22 Category sequence 2",
             ]),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_pricelist_multi_items_different_qty_thresholds", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            ProductScreen.clickDisplayedProduct("tpmcapi product"),
+            ProductScreen.clickDisplayedProduct("tpmcapi product"),
+            ProductScreen.clickDisplayedProduct("tpmcapi product"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.totalIs("30"),
         ].flat(),
 });
