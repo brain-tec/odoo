@@ -394,6 +394,8 @@ class StockMove(models.Model):
             # Since the move lines might have been created in a certain order to respect
             # a removal strategy, they need to be unreserved in the opposite order
             for ml in reversed(move.move_line_ids.sorted('id')):
+                if self.env.context.get('unreserve_unpicked_only') and ml.picked:
+                    continue
                 if float_is_zero(quantity, precision_rounding=move.product_uom.rounding):
                     break
                 qty_ml_dec = min(ml.quantity, ml.product_uom_id._compute_quantity(quantity, ml.product_uom_id, round=False))
@@ -1886,9 +1888,7 @@ Please change the quantity done or the rounding precision of your unit of measur
 
     def _action_done(self, cancel_backorder=False):
         moves = self.filtered(
-            lambda move: move.state == 'draft'
-            or float_is_zero(move.product_uom_qty, precision_rounding=move.product_uom.rounding)
-        )._action_confirm(merge=False)  # MRP allows scrapping draft moves
+            lambda move: move.state == 'draft')._action_confirm(merge=False)
         moves = (self | moves).exists().filtered(lambda x: x.state not in ('done', 'cancel'))
 
         # Cancel moves where necessary ; we should do it before creating the extra moves because
@@ -2036,6 +2036,8 @@ Please change the quantity done or the rounding precision of your unit of measur
         return new_move_vals
 
     def _recompute_state(self):
+        if self._context.get('preserve_state'):
+            return
         moves_state_to_write = defaultdict(set)
         for move in self:
             rounding = move.product_uom.rounding
