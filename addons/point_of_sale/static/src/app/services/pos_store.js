@@ -38,6 +38,7 @@ import { unaccent } from "@web/core/utils/strings";
 import { WithLazyGetterTrap } from "@point_of_sale/lazy_getter";
 import { debounce } from "@web/core/utils/timing";
 import DevicesSynchronisation from "../utils/devices_synchronisation";
+import { openCustomerDisplay } from "@point_of_sale/customer_display/utils";
 
 const { DateTime } = luxon;
 
@@ -124,7 +125,6 @@ export class PosStore extends WithLazyGetterTrap {
         };
 
         this.hardwareProxy = hardware_proxy;
-        this.hiddenProductIds = new Set();
         this.selectedOrderUuid = null;
         this.selectedPartner = null;
         this.selectedCategory = null;
@@ -549,6 +549,14 @@ export class PosStore extends WithLazyGetterTrap {
         await this.deviceSync.readDataFromServer();
         this.markReady();
         this.showScreen(this.firstScreen);
+        await this.deviceSync.readDataFromServer();
+        if (this.config.customer_display_type !== "none") {
+            openCustomerDisplay(
+                this.getDisplayDeviceIP(),
+                this.config.access_token,
+                this.config.id
+            );
+        }
     }
 
     get productListViewMode() {
@@ -2162,10 +2170,11 @@ export class PosStore extends WithLazyGetterTrap {
         }
 
         const excludedProductIds = [
-            this.config.tip_product_id?.id,
-            ...this.hiddenProductIds,
-            ...this.session._pos_special_products_ids,
-        ];
+            this.config.tip_product_id?.product_tmpl_id?.id,
+            ...this.session._pos_special_products_ids.map(
+                (id) => this.models["product.product"].get(id)?.product_tmpl_id?.id
+            ),
+        ].filter(Boolean);
 
         list = list
             .filter(
