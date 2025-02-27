@@ -26,7 +26,7 @@ class PosConfig(models.Model):
         return warehouse
 
     def _default_picking_type_id(self):
-        return self.env['stock.warehouse'].with_context(active_test=False).search(self.env['stock.warehouse']._check_company_domain(self.env.company), limit=1).pos_type_id.id
+        return self.env['stock.warehouse'].search(self.env['stock.warehouse']._check_company_domain(self.env.company), limit=1).pos_type_id.id
 
     def _default_sale_journal(self):
         journal = self.env['account.journal']._ensure_company_account_journal()
@@ -812,7 +812,7 @@ class PosConfig(models.Model):
             'type': self.customer_display_type,
             'has_bg_img': bool(self.customer_display_bg_img),
             'company_id': self.company_id.id,
-            **({'proxy_ip': self._get_display_device_ip()} if self.customer_display_type == 'proxy' else {}),
+            **({'proxy_ip': self._get_display_device_ip()} if self.customer_display_type != 'none' else {}),
         }
 
     @api.model
