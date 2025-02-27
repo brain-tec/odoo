@@ -494,7 +494,7 @@ class AccountChartTemplate(models.AbstractModel):
 
         return data
 
-    def _load_data(self, data, ignore_duplicates=False):
+    def _load_data(self, data):
         """Load all the data linked to the template into the database.
 
         The data can contain translation values (i.e. `name@fr_FR` to translate the name in French)
@@ -504,8 +504,6 @@ class AccountChartTemplate(models.AbstractModel):
         :param data: Basically all the final data of records to create/update for the chart
                      of accounts. It is a mapping {model: {xml_id: values}}.
         :type data: dict[str, dict[(str, int), dict]]
-
-        :param ignore_duplicates: if true, inputs that match records already in the DB will be ignored
         """
         def deref_values(values, model):
             """Replace xml_id references by database ids in all provided values.
@@ -628,7 +626,7 @@ class AccountChartTemplate(models.AbstractModel):
                     'values': deref_values(record_vals, self.env[model]),
                     'noupdate': True,
                 })
-            created_records[model] = self.with_context(lang='en_US').env[model]._load_records(all_records_vals, ignore_duplicates=ignore_duplicates)
+            created_records[model] = self.with_context(lang='en_US').env[model]._load_records(all_records_vals)
         return created_records
 
     def _post_load_data(self, template_code, company, template_data):
@@ -1159,7 +1157,15 @@ class AccountChartTemplate(models.AbstractModel):
                     format_tag = re.sub(r'\s+', ' ', tag.strip())
                     mapped_tag = tags.get(format_tag)
                     if not mapped_tag:
-                        raise UserError(self.env._('Error while loading the localization. You should probably update your localization app first.'))
+                        country = self.env['res.country'].browse(country_id)
+                        message = self.env._(
+                            'Error while loading the localization: missing tax tag %(tag_name)s for country %(country_name)s. You should probably update your localization app first.',
+                            tag_name=format_tag, country_name=country.name)
+                        if not self._context.get('ignore_missing_tags'):
+                            raise UserError(message)
+                        else:
+                            _logger.error(message)
+                            continue
                     res.append(mapped_tag)
             return res
         return mapping_getter
@@ -1369,7 +1375,9 @@ class AccountChartTemplate(models.AbstractModel):
 
         # Gather translations for records that are created from the chart_template data
         for chart_template, chart_companies in groupby(companies, lambda c: c.chart_template):
-            chart_template_data = template_data or self.env['account.chart.template']._get_chart_template_data(chart_template)
+            chart_template_data = template_data or self.env['account.chart.template'] \
+                .with_context(ignore_missing_tags=True) \
+                ._get_chart_template_data(chart_template)
             chart_template_data.pop('template_data', None)
             for mname, data in chart_template_data.items():
                 for _xml_id, record in data.items():
