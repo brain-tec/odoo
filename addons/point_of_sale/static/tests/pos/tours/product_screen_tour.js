@@ -349,9 +349,11 @@ registry.category("web_tour.tours").add("SearchProducts", {
             ProductScreen.searchProduct("chair"),
             ProductScreen.clickDisplayedProduct("Test chair 1"),
             ProductScreen.clickDisplayedProduct("Test CHAIR 2"),
+            ProductScreen.clickDisplayedProduct("Test sofa"),
             ProductScreen.searchProduct("CHAIR"),
             ProductScreen.clickDisplayedProduct("Test chair 1"),
             ProductScreen.clickDisplayedProduct("Test CHAIR 2"),
+            ProductScreen.clickDisplayedProduct("Test sofa"),
             ProductScreen.searchProduct("clémentine"),
             ProductScreen.clickDisplayedProduct("clémentine"),
         ].flat(),
@@ -429,9 +431,6 @@ registry.category("web_tour.tours").add("PosCategoriesOrder", {
             },
             {
                 trigger: '.category-button:eq(3) > span:contains("AAY")',
-            },
-            {
-                trigger: '.category-button:not(:contains("AAD"))',
             },
         ].flat(),
 });
@@ -532,5 +531,19 @@ registry.category("web_tour.tours").add("CustomerPopupTour", {
             negateStep(PartnerList.checkCustomerShown("Z partner to scroll")),
             PartnerList.scrollBottom(),
             ProductScreen.clickCustomer("Z partner to scroll"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_pricelist_multi_items_different_qty_thresholds", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            ProductScreen.clickDisplayedProduct("tpmcapi product"),
+            ProductScreen.clickDisplayedProduct("tpmcapi product"),
+            ProductScreen.clickDisplayedProduct("tpmcapi product"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.totalIs("30"),
         ].flat(),
 });
