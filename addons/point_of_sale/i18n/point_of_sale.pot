@@ -1710,6 +1710,12 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/components/list_container/list_container.js:0
+msgid "Choose an order"
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/partner_list/partner_list.xml:0
 msgid "Choose customer"
 msgstr ""
@@ -4170,7 +4176,7 @@ msgstr ""
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/services/pos_store.js:0
-msgid "Lot/Serial Number(s) Required"
+msgid "Lot/Serial number(s) required for"
 msgstr ""
 
 #. module: point_of_sale
