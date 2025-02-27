@@ -1547,6 +1547,9 @@ class BaseModel(metaclass=MetaModel):
                 or a string `'field:granularity'`. Right now, the only supported granularities
                 are `'day'`, `'week'`, `'month'`, `'quarter'` or `'year'`, and they only make sense for
                 date/datetime fields.
+                Additionally integer date parts are also supported:
+                `'year_number'`, `'quarter_number'`, `'month_number'`, `'iso_week_number'`, `'day_of_year'`, `'day_of_month'`,
+                'day_of_week', 'hour_number', 'minute_number' and 'second_number'.
         :param list aggregates: list of aggregates specification.
                 Each element is `'field:agg'` (aggregate field with aggregation function `'agg'`).
                 The possible aggregation functions are the ones provided by
@@ -1803,12 +1806,34 @@ class BaseModel(metaclass=MetaModel):
                 continue
 
             field = self._fields.get(term)
+            __, __, granularity = parse_read_group_spec(term)
             if (
                 traverse_many2one and field and field.type == 'many2one'
                 and self.env[field.comodel_name]._order != 'id'
             ):
                 if sql_order := self._order_to_sql(f'{term} {direction} {nulls}', query):
                     orderby_terms.append(sql_order)
+            elif granularity == 'day_of_week':
+                """
+                Day offset relative to the first day of week in the user lang
+                formula: ((7 - first_week_day) + day_in_SQL) % 7
+
+                               | week starts on
+                           SQL | mon   sun   sat
+                               |  1  |  7  |  6   <-- first_week_day (in odoo)
+                          -----|-----------------
+                    mon     1  |  0  |  1  |  2
+                    tue     2  |  1  |  2  |  3
+                    wed     3  |  2  |  3  |  4
+                    thu     4  |  3  |  4  |  5
+                    fri     5  |  4  |  5  |  6
+                    sat     6  |  5  |  6  |  0
+                    sun     0  |  6  |  0  |  1
+                """
+                timezone = self.env.context.get('tz')
+                first_week_day = int(get_lang(self.env, timezone).week_start)
+                sql_expr = SQL("mod(7 - %s + %s::int, 7)", first_week_day, groupby_terms[term])
+                orderby_terms.append(SQL("%s %s %s", sql_expr, sql_direction, sql_nulls))
             else:
                 sql_expr = groupby_terms[term]
                 orderby_terms.append(SQL("%s %s %s", sql_expr, sql_direction, sql_nulls))
@@ -4668,13 +4693,12 @@ class BaseModel(metaclass=MetaModel):
             records._clean_properties()
         return records
 
-    def _load_records(self, data_list, update=False, ignore_duplicates=False):
+    def _load_records(self, data_list, update=False):
         """ Create or update records of this model, and assign XMLIDs.
 
             :param data_list: list of dicts with keys `xml_id` (XMLID to
                 assign), `noupdate` (flag on XMLID), `values` (field values)
             :param update: should be ``True`` when upgrading a module
-            :param ignore_duplicates: if true, inputs that match records already in the DB will be ignored
 
             :return: the records corresponding to ``data_list``
         """
@@ -4708,6 +4732,8 @@ class BaseModel(metaclass=MetaModel):
                     to_update.append(data)
                 elif not update:
                     to_create.append(data)
+                else:
+                    raise ValidationError(_("Cannot update a record without specifying its id or xml_id"))
                 continue
             row = existing.get(xml_id)
             if not row:
@@ -4731,11 +4757,8 @@ class BaseModel(metaclass=MetaModel):
                 to_create.append(data)
 
         # update existing records
-        if ignore_duplicates:
-            data_list = [data for data in data_list if data not in to_update]
-        else:
-            for data in to_update:
-                data['record']._load_records_write(data['values'])
+        for data in to_update:
+            data['record']._load_records_write(data['values'])
 
         # check for records to create with an XMLID from another module
         module = self.env.context.get('install_module')
@@ -4799,7 +4822,7 @@ class BaseModel(metaclass=MetaModel):
         ):
             domain &= Domain(self._active_name, '=', True)
 
-        domain = domain._optimize(self)
+        domain = domain._optimize_for_sql(self)
         if domain.is_false():
             return self.browse()._as_query()
         query = Query(self.env, self._table, self._table_sql)
@@ -4831,7 +4854,7 @@ class BaseModel(metaclass=MetaModel):
         domain = self.env['ir.rule']._compute_domain(self._name, mode)
         if not domain.is_true():
             model = self.sudo()
-            domain = domain._optimize(model)
+            domain = domain._optimize_for_sql(model)
             query.add_where(domain._to_sql(model, query.table, query))
 
     def _order_to_sql(self, order: str, query: Query, alias: (str | None) = None,
@@ -4965,7 +4988,7 @@ class BaseModel(metaclass=MetaModel):
             sec_domain = Domain.TRUE
         else:
             sec_domain = self.env['ir.rule']._compute_domain(self._name, 'read')
-            sec_domain = sec_domain._optimize(self.sudo())
+            sec_domain = sec_domain._optimize_for_sql(self.sudo())
 
         # build the query
         if sec_domain.is_false() or (not limit and limit is not None and limit is not False):
@@ -5179,6 +5202,38 @@ class BaseModel(metaclass=MetaModel):
         rows = self.env.execute_query(SQL("%s %s", query.select(), lock_sql))
         if len(rows) != len(ids):
             raise LockError(self.env._("Cannot grab a lock on records"))
+
+    def try_lock_for_update(self, *, allow_referencing: bool = False, limit: int | None = None) -> Self:
+        """ Grab an exclusive write-lock on some rows with the given ids.
+
+        Skip locked records and browse the records that could be locked.
+
+        :param allow_referencing: Acquire a row lock which allows for other
+            transactions to reference this record. Use only when modifying
+            values that are not identifiers.
+        :param limit: The maximum number of rows to lock
+        :return: The recordset of locked records
+        """
+        new_ids, ids = partition(lambda i: isinstance(i, NewId), self._ids)
+        if limit is not None:
+            if len(new_ids) >= limit:
+                return self.browse(new_ids[:limit])
+            # keep the order of ids when trying to lock
+            query = self.browse(ids)._as_query(ordered=True)
+            query.limit = limit - len(new_ids)
+        else:
+            query = Query(self.env, self._table, self._table_sql)
+            query.add_where(SQL("%s IN %s", SQL.identifier(self._table, 'id'), tuple(ids)))
+        if not ids:
+            return self
+        if allow_referencing:
+            lock_sql = SQL("FOR NO KEY UPDATE SKIP LOCKED")
+        else:
+            lock_sql = SQL("FOR UPDATE SKIP LOCKED")
+        sql = SQL("%s %s", query.select(), lock_sql)
+        real_ids = (id_ for [id_] in self.env.execute_query(sql))
+        valid_ids = {*real_ids, *new_ids}
+        return self.browse(i for i in self._ids if i in valid_ids)
 
     def _has_cycle(self, field_name=None) -> bool:
         """
