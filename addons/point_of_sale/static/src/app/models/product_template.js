@@ -259,6 +259,7 @@ export class ProductTemplate extends Base {
         const variantMatch = this.product_variant_ids.some(
             (variant) =>
                 (variant.default_code && variant.default_code.toLowerCase() == searchWord) ||
+                (variant.barcode && variant.barcode.toLowerCase() == searchWord) ||
                 variant.product_template_variant_value_ids.some((vv) =>
                     vv.name.toLowerCase().includes(searchWord)
                 )
@@ -299,6 +300,9 @@ export class ProductTemplate extends Base {
             });
         });
         return isCombinationArchived;
+    }
+    get canBeDisplayed() {
+        return this.active && this.available_in_pos;
     }
 }
 registry.category("pos_available_models").add(ProductTemplate.pythonModel, ProductTemplate);
