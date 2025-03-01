@@ -191,7 +191,10 @@ export class ProductTemplate extends Base {
                 break;
             }
             if (rule.product_tmpl_id?.id === productTmpl.id) {
-                productTemplateRule = rule;
+                // Prefer the rule with the highest `min_quantity`
+                if (!productTemplateRule || productTemplateRule.min_quantity < rule.min_quantity) {
+                    productTemplateRule = rule;
+                }
             }
         }
 
@@ -256,6 +259,7 @@ export class ProductTemplate extends Base {
         const variantMatch = this.product_variant_ids.some(
             (variant) =>
                 (variant.default_code && variant.default_code.toLowerCase() == searchWord) ||
+                (variant.barcode && variant.barcode.toLowerCase() == searchWord) ||
                 variant.product_template_variant_value_ids.some((vv) =>
                     vv.name.toLowerCase().includes(searchWord)
                 )
