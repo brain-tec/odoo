@@ -65,23 +65,21 @@ class TestFrontendCommon(TestPointOfSaleHttpCommon):
         cls.main_floor = cls.env['restaurant.floor'].create({
             'name': 'Main Floor',
             'pos_config_ids': [(4, cls.pos_config.id)],
-            'floor_prefix': 1,
         })
         cls.second_floor = cls.env['restaurant.floor'].create({
             'name': 'Second Floor',
             'pos_config_ids': [(4, cls.pos_config.id)],
-            'floor_prefix': 2,
         })
 
         cls.main_floor_table_5 = cls.env['restaurant.table'].create([{
-            'table_number': 105,
+            'table_number': 5,
             'floor_id': cls.main_floor.id,
             'seats': 4,
             'position_h': 100,
             'position_v': 100,
         }])
         cls.env['restaurant.table'].create([{
-            'table_number': 104,
+            'table_number': 4,
             'floor_id': cls.main_floor.id,
             'seats': 4,
             'shape': 'square',
@@ -89,7 +87,7 @@ class TestFrontendCommon(TestPointOfSaleHttpCommon):
             'position_v': 100,
         },
         {
-            'table_number': 102,
+            'table_number': 2,
             'floor_id': cls.main_floor.id,
             'seats': 4,
             'position_h': 250,
@@ -97,7 +95,7 @@ class TestFrontendCommon(TestPointOfSaleHttpCommon):
         },
         {
 
-            'table_number': 201,
+            'table_number': 1,
             'floor_id': cls.second_floor.id,
             'seats': 4,
             'shape': 'square',
@@ -105,7 +103,7 @@ class TestFrontendCommon(TestPointOfSaleHttpCommon):
             'position_v': 150,
         },
         {
-            'table_number': 203,
+            'table_number': 3,
             'floor_id': cls.second_floor.id,
             'seats': 4,
             'position_h': 100,
@@ -291,9 +289,10 @@ class TestFrontend(TestFrontendCommon):
         self.assertTrue(self.pos_config.current_session_id.order_ids.last_order_preparation_change, "There should be a last order preparation change")
         self.assertTrue("Coca" in self.pos_config.current_session_id.order_ids.last_order_preparation_change, "The last order preparation change should contain 'Coca'")
 
-    def test_11_bill_screen_qrcode(self):
+    def test_11_bill_screen_qrcode_data(self):
         self.pos_config.write({'printer_ids': False})
         self.pos_config.company_id.point_of_sale_use_ticket_qr_code = True
+        self.pos_config.company_id.point_of_sale_ticket_portal_url_display_mode = 'qr_code_and_url'
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('BillScreenTour')
 
