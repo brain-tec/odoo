@@ -356,6 +356,8 @@ registry.category("web_tour.tours").add("SearchProducts", {
             ProductScreen.clickDisplayedProduct("Test sofa"),
             ProductScreen.searchProduct("clémentine"),
             ProductScreen.clickDisplayedProduct("clémentine"),
+            ProductScreen.searchProduct("2100005000000"),
+            ProductScreen.clickDisplayedProduct("Wall Shelf Unit"),
         ].flat(),
 });
 
@@ -531,5 +533,19 @@ registry.category("web_tour.tours").add("CustomerPopupTour", {
             negateStep(PartnerList.checkCustomerShown("Z partner to scroll")),
             PartnerList.scrollBottom(),
             ProductScreen.clickCustomer("Z partner to scroll"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_pricelist_multi_items_different_qty_thresholds", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            ProductScreen.clickDisplayedProduct("tpmcapi product"),
+            ProductScreen.clickDisplayedProduct("tpmcapi product"),
+            ProductScreen.clickDisplayedProduct("tpmcapi product"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.totalIs("30"),
         ].flat(),
 });
