@@ -41,6 +41,23 @@ const getTemplateWithAttribute = function (attribute) {
     </div>`;
 };
 
+function installProtect() {
+    patchWithCleanup(Colibri.prototype, {
+        updateContent() {
+            expect.step("updateContent");
+            super.updateContent();
+        },
+        protectSyncAfterAsync(interaction, name, fn) {
+            fn = super.protectSyncAfterAsync(interaction, name, fn);
+            return (...args) => {
+                expect.step("protect");
+                fn(...args);
+                expect.step("unprotect");
+            };
+        },
+    });
+}
+
 describe("adding listeners", () => {
     test("can add a listener on a single element", async () => {
         let clicked = 0;
@@ -594,9 +611,9 @@ describe("handling crashes", () => {
             static selector = ".test";
             dynamicContent = { "t-on-click": () => {} };
         }
-        await expect(startInteraction(Test, TemplateTest))
-            .rejects
-            .toThrow("Selector missing for key t-on-click in dynamicContent (interaction 'Test')");
+        await expect(startInteraction(Test, TemplateTest)).rejects.toThrow(
+            "Selector missing for key t-on-click in dynamicContent (interaction 'Test')"
+        );
     });
 });
 
@@ -1060,6 +1077,22 @@ describe("waitFor...", () => {
             await advanceTime(50);
             expect.verifySteps(["named function"]);
         });
+
+        test("waitForTimeout runs through protect", async () => {
+            installProtect();
+            class Test extends Interaction {
+                static selector = ".test";
+                setup() {
+                    this.waitForTimeout(() => {
+                        expect.step("done");
+                    }, 100);
+                }
+            }
+            await startInteraction(Test, TemplateTest);
+            expect.verifySteps(["updateContent"]);
+            await advanceTime(100);
+            expect.verifySteps(["protect", "done", "unprotect", "updateContent"]);
+        });
     });
 
     describe("waitForAnimationFrame", () => {
@@ -1109,6 +1142,22 @@ describe("waitFor...", () => {
             await animationFrame();
             expect.verifySteps(["named function", "anonymous function"]);
         });
+    });
+
+    test("waitForAnimationFrame runs through protect", async () => {
+        installProtect();
+        class Test extends Interaction {
+            static selector = ".test";
+            setup() {
+                this.waitForAnimationFrame(() => {
+                    expect.step("done");
+                });
+            }
+        }
+        await startInteraction(Test, TemplateTest);
+        expect.verifySteps(["updateContent"]);
+        await animationFrame();
+        expect.verifySteps(["protect", "done", "unprotect", "updateContent"]);
     });
 });
 
@@ -1790,6 +1839,21 @@ describe("insert", () => {
         core.stopInteractions();
         expect(queryFirst("inserted")).toBe(null);
     });
+
+    test("inserted element is kept if removeOnClean is false", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            setup() {
+                const node = document.createElement("inserted");
+                this.insert(node, this.el, "beforeend", false);
+            }
+        }
+
+        const { core } = await startInteraction(Test, TemplateTest);
+        expect(queryOne(".test inserted:last-child")).toBeInstanceOf(HTMLElement);
+        core.stopInteractions();
+        expect(queryFirst("inserted")).toBeInstanceOf(HTMLElement);
+    });
 });
 
 describe("renderAt", () => {
@@ -1831,6 +1895,21 @@ describe("renderAt", () => {
         expect(queryFirst(".test [data-which]")).toBe(null);
         await click(subEls[0]);
         expect.verifySteps([]);
+    });
+
+    test("can neutralize cleanup of rendered template by setting removeOnClean to false", async () => {
+        class Test extends Interaction {
+            static selector = ".test";
+            setup() {
+                this.renderAt("web.testRenderAt", {}, this.el, "beforeend", undefined, false);
+            }
+        }
+
+        const { core } = await startInteraction([Test], TemplateTest);
+        expect(core.interactions).toHaveLength(1);
+        expect(queryFirst(".test .rendered")).toBeInstanceOf(HTMLElement);
+        core.stopInteractions();
+        expect(queryFirst(".test .rendered")).toBeInstanceOf(HTMLElement);
     });
 
     function checkOrder(position) {
@@ -1976,6 +2055,24 @@ describe("locked", () => {
         expect.verifySteps([]);
         await click("button");
         expect.verifySteps(["value"]);
+    });
+
+    test("locked event handler runs through protect", async () => {
+        installProtect();
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                _root: {
+                    "t-on-click": this.locked(() => {
+                        expect.step("done");
+                    }),
+                },
+            };
+        }
+        await startInteraction(Test, TemplateTest);
+        expect.verifySteps(["updateContent"]);
+        await click(queryOne(".test"));
+        expect.verifySteps(["protect", "done", "unprotect", "updateContent"]);
     });
 });
 
@@ -2197,6 +2294,26 @@ describe("debounced (2)", () => {
         expect(clicked).toBe(1);
         expect("span").toHaveAttribute("x", "1");
     });
+
+    test("debounced event handler runs through protect", async () => {
+        installProtect();
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                _root: {
+                    "t-on-click": this.debounced(() => {
+                        expect.step("done");
+                    }, 100),
+                },
+            };
+        }
+        await startInteraction(Test, TemplateTest);
+        expect.verifySteps(["updateContent"]);
+        await click(queryOne(".test"));
+        expect.verifySteps([]);
+        await advanceTime(100);
+        expect.verifySteps(["protect", "done", "unprotect", "updateContent"]);
+    });
 });
 
 describe("throttled_for_animation (1)", () => {
@@ -2374,6 +2491,30 @@ describe("throttled_for_animation (2)", () => {
         await animationFrame();
         expect(clicked).toBe(1);
         expect("span").toHaveAttribute("x", "1");
+    });
+
+    test("throttled event handler runs through protect", async () => {
+        installProtect();
+        class Test extends Interaction {
+            static selector = ".test";
+            dynamicContent = {
+                _root: {
+                    "t-on-click": this.throttled(() => {
+                        expect.step("done");
+                    }),
+                },
+            };
+        }
+        await startInteraction(Test, TemplateTest);
+        expect.verifySteps(["updateContent"]);
+        const testEl = queryOne(".test");
+        await click(testEl);
+        await click(testEl);
+        expect.verifySteps(["protect", "done", "unprotect", "updateContent"]);
+        await animationFrame();
+        expect.verifySteps(["protect", "done", "unprotect", "updateContent"]);
+        await animationFrame();
+        expect.verifySteps([]);
     });
 });
 
