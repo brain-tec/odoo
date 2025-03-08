@@ -692,7 +692,10 @@ export class PosStore extends WithLazyGetterTrap {
         // ---
         // This actions cannot be handled inside pos_order.js or pos_order_line.js
         if (productTemplate.isConfigurable() && configure) {
-            const payload = await this.openConfigurator(productTemplate);
+            const payload =
+                vals?.payload && Object.keys(vals?.payload).length
+                    ? vals.payload
+                    : await this.openConfigurator(productTemplate);
 
             if (payload) {
                 // Find candidate based on instantly created variants.
@@ -763,9 +766,12 @@ export class PosStore extends WithLazyGetterTrap {
         // ---
         // This actions cannot be handled inside pos_order.js or pos_order_line.js
         if (values.product_tmpl_id.isCombo() && configure) {
-            const payload = await makeAwaitable(this.dialog, ComboConfiguratorPopup, {
-                productTemplate: values.product_tmpl_id,
-            });
+            const payload =
+                vals?.payload && Object.keys(vals?.payload).length
+                    ? vals.payload
+                    : await makeAwaitable(this.dialog, ComboConfiguratorPopup, {
+                          productTemplate: values.product_tmpl_id,
+                      });
 
             if (!payload) {
                 return;
@@ -792,7 +798,7 @@ export class PosStore extends WithLazyGetterTrap {
                     price_unit: comboItem.price_unit,
                     price_type: "manual",
                     order_id: order,
-                    qty: 1,
+                    qty: values.qty,
                     attribute_value_ids: comboItem.attribute_value_ids?.map((attr) => [
                         "link",
                         attr,
@@ -1573,7 +1579,11 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     generateOrderChange(order, orderChange, categories, reprint = false) {
-        orderChange.new.sort((a, b) => {
+        const isPartOfCombo = (line) =>
+            line.isCombo || this.models["product.product"].get(line.product_id).type == "combo";
+        const comboChanges = orderChange.new.filter(isPartOfCombo);
+        const normalChanges = orderChange.new.filter((line) => !isPartOfCombo(line));
+        normalChanges.sort((a, b) => {
             const sequenceA = a.pos_categ_sequence;
             const sequenceB = b.pos_categ_sequence;
             if (sequenceA === 0 && sequenceB === 0) {
@@ -1582,6 +1592,8 @@ export class PosStore extends WithLazyGetterTrap {
 
             return sequenceA - sequenceB;
         });
+        orderChange.new = [...comboChanges, ...normalChanges];
+
         const orderData = {
             reprint: reprint,
             pos_reference: order.getName(),
@@ -2199,9 +2211,7 @@ export class PosStore extends WithLazyGetterTrap {
         ].filter(Boolean);
 
         list = list
-            .filter(
-                (product) => !excludedProductIds.includes(product.id) && product.available_in_pos
-            )
+            .filter((product) => !excludedProductIds.includes(product.id) && product.canBeDisplayed)
             .slice(0, 100);
 
         return searchWord !== ""
