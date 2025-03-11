@@ -212,6 +212,15 @@ class TestSelector(TransactionCase):
         self.assertEqual({(None, 'module', None, None, None), }, tags.include)  # all in module
         self.assertEqual({('standard', None, None, None, None), }, tags.exclude)  # exept standard ones
 
+        tags = TagsSelector('/some/absolute/path/v.3/module.py')
+        self.assertEqual({('standard', None, None, None, '/some/absolute/path/v.3/module.py'), }, tags.include)  # all in module
+
+        tags = TagsSelector('/some/absolute/path/v.3/module.py')
+        self.assertEqual({('standard', None, None, None, '/some/absolute/path/v.3/module.py'), }, tags.include)  # all in module
+
+        tags = TagsSelector('/module.method')
+        self.assertEqual({('standard', 'module', None, 'method', None), }, tags.include)  # all in module
+
 
 @tagged('nodatabase')
 class TestSelectorSelection(TransactionCase):
@@ -354,6 +363,19 @@ class TestSelectorSelection(TransactionCase):
         tags = TagsSelector('standard')
         position = TagsSelector('post_install')
         self.assertTrue(tags.check(post_install_obj) and position.check(post_install_obj))
+
+        # module part
+        tags = TagsSelector('/base')
+        self.assertTrue(tags.check(no_tags_obj), 'Test should match is module path')
+        tags = TagsSelector('/base/tests/test_tests_tags.py')
+        self.assertTrue(tags.check(no_tags_obj), 'Test should match is module path with file')
+
+        tags = TagsSelector('/account/tests/test_tests_tags.py')
+        self.assertFalse(tags.check(no_tags_obj), 'Test should not match another module path with file')
+
+        # absolute path case (used by test-file)
+        tags = TagsSelector(__file__)
+        self.assertTrue(tags.check(no_tags_obj), 'Test should its absolute file path')
 
 
 class TestTestClass(BaseCase):
