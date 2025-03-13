@@ -27,7 +27,7 @@ export class TourAutomatic {
     }
 
     start() {
-        setupEventActions(document.createElement("div"));
+        setupEventActions(document.createElement("div"), { allowSubmit: true });
         const { delayToCheckUndeterminisms, stepDelay } = this.config;
         const macroSteps = this.steps
             .filter((step) => step.index >= this.currentIndex)
@@ -56,9 +56,9 @@ export class TourAutomatic {
                     initialDelay: () => (this.previousStepIsJustACheck ? 0 : null),
                     trigger: step.trigger ? () => step.findTrigger() : null,
                     timeout: step.timeout || this.timeout || 10000,
-                    action: async () => {
+                    action: async (trigger) => {
                         if (delayToCheckUndeterminisms > 0) {
-                            await step.checkForUndeterminisms();
+                            await step.checkForUndeterminisms(trigger, delayToCheckUndeterminisms);
                         }
                         this.previousStepIsJustACheck = !step.hasAction;
                         if (this.debugMode) {

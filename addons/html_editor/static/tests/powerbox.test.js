@@ -99,9 +99,9 @@ describe("search", () => {
         expect(commandNames(el).length).toBe(28);
         expect(".o-we-category").toHaveCount(8);
         expect(queryAllTexts(".o-we-category")).toEqual([
+            "FORMAT",
             "STRUCTURE",
             "BANNER",
-            "FORMAT",
             "MEDIA",
             "NAVIGATION",
             "WIDGET",
@@ -743,7 +743,7 @@ test("select command with 'mouseenter' after scroll -- doc in iframe", async () 
 
     await hover(".o-we-command-name:eq(3)");
     await animationFrame();
-    expect(".active .o-we-command-name").toHaveText("4 columns");
+    expect(".active .o-we-command-name").toHaveText("Text");
 });
 
 test("click on a command", async () => {
@@ -790,10 +790,10 @@ test.todo("add plugins with the same powerboxCategory should crash", async () =>
             config: { Plugins: [...MAIN_PLUGINS, Plugin1, Plugin2] },
         })
     ).rejects.toThrow();
-    expect(["Duplicate category id: test"]).toVerifyErrors();
-    expect([
+    expect.verifyErrors(["Duplicate category id: test"]);
+    expect.verifySteps([
         "[Owl] Unhandled error. Destroying the root component",
         "[Owl] Unhandled error. Destroying the root component",
         "[Owl] Unhandled error. Destroying the root component",
-    ]).toVerifySteps();
+    ]);
 });
