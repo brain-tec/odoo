@@ -49,25 +49,25 @@ export class FormatPlugin extends Plugin {
         user_commands: [
             {
                 id: "formatBold",
-                title: _t("Toggle bold"),
+                description: _t("Toggle bold"),
                 icon: "fa-bold",
                 run: this.formatSelection.bind(this, "bold"),
             },
             {
                 id: "formatItalic",
-                title: _t("Toggle italic"),
+                description: _t("Toggle italic"),
                 icon: "fa-italic",
                 run: this.formatSelection.bind(this, "italic"),
             },
             {
                 id: "formatUnderline",
-                title: _t("Toggle underline"),
+                description: _t("Toggle underline"),
                 icon: "fa-underline",
                 run: this.formatSelection.bind(this, "underline"),
             },
             {
                 id: "formatStrikethrough",
-                title: _t("Toggle strikethrough"),
+                description: _t("Toggle strikethrough"),
                 icon: "fa-strikethrough",
                 run: this.formatSelection.bind(this, "strikeThrough"),
             },
@@ -89,7 +89,7 @@ export class FormatPlugin extends Plugin {
             },
             {
                 id: "removeFormat",
-                title: (sel, nodes) =>
+                description: (sel, nodes) =>
                     nodes && this.hasAnyFormat(nodes)
                         ? _t("Remove Format")
                         : _t("Selection has no format"),
@@ -102,39 +102,44 @@ export class FormatPlugin extends Plugin {
             { hotkey: "control+i", commandId: "formatItalic" },
             { hotkey: "control+u", commandId: "formatUnderline" },
             { hotkey: "control+5", commandId: "formatStrikethrough" },
+            { hotkey: "control+space", commandId: "removeFormat" },
         ],
         toolbar_groups: withSequence(20, { id: "decoration" }),
         toolbar_items: [
             {
                 id: "bold",
                 groupId: "decoration",
+                namespaces: ["compact", "expanded"],
                 commandId: "formatBold",
                 isActive: isFormatted(this, "bold"),
             },
             {
                 id: "italic",
                 groupId: "decoration",
+                namespaces: ["compact", "expanded"],
                 commandId: "formatItalic",
                 isActive: isFormatted(this, "italic"),
             },
             {
                 id: "underline",
                 groupId: "decoration",
+                namespaces: ["compact", "expanded"],
                 commandId: "formatUnderline",
                 isActive: isFormatted(this, "underline"),
             },
             {
                 id: "strikethrough",
                 groupId: "decoration",
+                namespaces: ["compact", "expanded"],
                 commandId: "formatStrikethrough",
                 isActive: isFormatted(this, "strikeThrough"),
             },
-            {
+            withSequence(20, {
                 id: "remove_format",
                 groupId: "decoration",
                 commandId: "removeFormat",
                 isDisabled: (sel, nodes) => !this.hasAnyFormat(nodes),
-            },
+            }),
         ],
         /** Handlers */
         beforeinput_handlers: withSequence(20, this.onBeforeInput.bind(this)),
