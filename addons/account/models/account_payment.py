@@ -315,8 +315,8 @@ class AccountPayment(models.Model):
         currency_id = self.currency_id.id
 
         # Compute a default label to set on the journal items.
-        liquidity_line_name = ''.join(x[1] for x in self._get_aml_default_display_name_list())
-        counterpart_line_name = ''.join(x[1] for x in self._get_aml_default_display_name_list())
+        liquidity_line_name = ''.join(x[1] for x in self._get_aml_default_display_name_list() if x[1])
+        counterpart_line_name = liquidity_line_name
 
         line_vals_list = [
             # Liquidity line.
@@ -366,7 +366,7 @@ class AccountPayment(models.Model):
             # default customer payment method logic
             partner = payment.partner_id
             payment_type = payment.payment_type if payment.payment_type in ('inbound', 'outbound') else None
-            if partner or payment_type:
+            if not bool(payment._origin) and (partner or payment_type):
                 field_name = f'property_{payment_type}_payment_method_line_id'
                 default_payment_method_line = payment.partner_id.with_company(payment.company_id)[field_name]
                 journal = default_payment_method_line.journal_id
@@ -375,10 +375,11 @@ class AccountPayment(models.Model):
                     continue
 
             company = payment.company_id or self.env.company
-            payment.journal_id = self.env['account.journal'].search([
-                *self.env['account.journal']._check_company_domain(company),
-                ('type', 'in', ['bank', 'cash', 'credit']),
-            ], limit=1)
+            if not payment.journal_id or company != payment.journal_id.company_id:
+                payment.journal_id = self.env['account.journal'].search([
+                    *self.env['account.journal']._check_company_domain(company),
+                    ('type', 'in', ['bank', 'cash', 'credit']),
+                ], limit=1)
 
     @api.depends('journal_id')
     def _compute_company_id(self):
