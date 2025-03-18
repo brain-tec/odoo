@@ -176,10 +176,11 @@ class Network {
      * not setting it will remove the track from the server
      */
     async updateUpload(type, track) {
-        await Promise.all([
-            this.p2p.updateUpload(type, track),
-            this.sfu?.updateUpload(type, track),
-        ]);
+        const proms = [this.p2p.updateUpload(type, track)];
+        if (this.sfu?.state === "connected") {
+            proms.push(this.sfu.updateUpload(type, track));
+        }
+        await Promise.all(proms);
     }
     /**
      * Stop or resume the consumption of tracks from the other call participants.
@@ -990,8 +991,10 @@ export class Rtc extends Record {
             case "track":
                 {
                     const { sessionId, type, track, active } = payload;
-                    const session = this.store["discuss.channel.rtc.session"].get(sessionId);
-                    if (!session) {
+                    const session = await this.store["discuss.channel.rtc.session"].getWhenReady(
+                        sessionId
+                    );
+                    if (!session || !this.state.channel) {
                         this.log(
                             this.selfSession,
                             `track received for unknown session ${sessionId} (${this.state.connectionType})`
@@ -1031,7 +1034,7 @@ export class Rtc extends Record {
     }
 
     async _handleSfuClientStateChange({ detail: { state, cause } }) {
-        this.log(this.localSession, "SFU connection state changed", { state, cause });
+        this.log(this.localSession, `connection state change: ${state}`, { state, cause });
         this.localSession.connectionState = state;
         switch (state) {
             case this.SFU_CLIENT_STATE.AUTHENTICATED:
@@ -1091,27 +1094,31 @@ export class Rtc extends Record {
             this._updateRemoteTabs(payload);
         }
         for (const [id, info] of Object.entries(payload)) {
-            const session = this.store["discuss.channel.rtc.session"].get(Number(id));
-            if (!session) {
-                return;
-            }
-            if (
-                this.channel.activeRtcSession === session &&
-                session.is_screen_sharing_on &&
-                !info.isScreenSharingOn
-            ) {
-                this.channel.activeRtcSession = undefined;
-            }
-            // `isRaisingHand` is turned into the Date `raisingHand`
-            this.setRemoteRaiseHand(session, info.isRaisingHand);
-            delete info.isRaisingHand;
-            assignDefined(session, {
-                is_muted: info.isSelfMuted ?? info.is_muted,
-                is_deaf: info.isDeaf ?? info.is_deaf,
-                isTalking: info.isTalking,
-                is_camera_on: info.isCameraOn ?? info.is_camera_on,
-                is_screen_sharing_on: info.isScreenSharingOn ?? info.is_screen_sharing_on,
-            });
+            (async () => {
+                const session = await this.store["discuss.channel.rtc.session"].getWhenReady(
+                    Number(id)
+                );
+                if (!session || !this.state.channel) {
+                    return;
+                }
+                if (
+                    this.channel.activeRtcSession === session &&
+                    session.is_screen_sharing_on &&
+                    !info.isScreenSharingOn
+                ) {
+                    this.channel.activeRtcSession = undefined;
+                }
+                // `isRaisingHand` is turned into the Date `raisingHand`
+                this.setRemoteRaiseHand(session, info.isRaisingHand);
+                delete info.isRaisingHand;
+                assignDefined(session, {
+                    is_muted: info.isSelfMuted ?? info.is_muted,
+                    is_deaf: info.isDeaf ?? info.is_deaf,
+                    isTalking: info.isTalking,
+                    is_camera_on: info.isCameraOn ?? info.is_camera_on,
+                    is_screen_sharing_on: info.isScreenSharingOn ?? info.is_screen_sharing_on,
+                });
+            })();
         }
     }
 
@@ -1288,7 +1295,7 @@ export class Rtc extends Record {
     buildSnapshot() {
         const server = {};
         if (this.state.connectionType === CONNECTION_TYPES.SERVER) {
-            server.info = this.serverInfo;
+            server.info = toRaw(this.serverInfo);
             server.state = this.sfuClient?.state;
             server.errors = this.sfuClient?.errors.map((error) => error.message);
         }
@@ -1974,6 +1981,8 @@ export const rtcService = {
                     return;
                 }
                 if (rtc.serverInfo?.channelUUID === serverInfo.channelUUID) {
+                    // we clear peers as inbound p2p connections may still be active
+                    rtc.p2pService.removeALlPeers();
                     // no reason to swap if the server is the same, if at some point we want to force a swap
                     // there should be an explicit flag in the event payload.
                     return;
