@@ -27,6 +27,7 @@ class PosOrder(models.Model):
     _inherit = ["portal.mixin", "pos.bus.mixin", "pos.load.mixin", "mail.thread"]
     _description = "Point of Sale Orders"
     _order = "date_order desc, name desc, id desc"
+    _mailing_enabled = True
 
     # This function deals with orders that belong to a closed session. It attempts to find
     # any open session that can be used to capture the order. If no open session is found,
@@ -88,7 +89,7 @@ class PosOrder(models.Model):
             })
             pos_order = pos_order.with_company(pos_order.company_id)
         else:
-            pos_order = self.env['pos.order'].browse(order.get('id'))
+            pos_order = existing_order
 
             # Save lines and payments before to avoid exception if a line is deleted
             # when vals change the state to 'paid'
@@ -97,6 +98,8 @@ class PosOrder(models.Model):
                     pos_order.write({field: order.get(field)})
                     order[field] = []
 
+            del order['uuid']
+            del order['access_token']
             pos_order.write(order)
 
         pos_order._link_combo_items(combo_child_uuids_by_parent_uuid)
@@ -942,6 +945,9 @@ class PosOrder(models.Model):
             self._create_order_picking()
         return self._generate_pos_order_invoice()
 
+    def _get_invoice_post_context(self):
+        return {"skip_invoice_sync": True}
+
     def _generate_pos_order_invoice(self):
         moves = self.env['account.move']
 
@@ -958,7 +964,7 @@ class PosOrder(models.Model):
             new_move = order._create_invoice(move_vals)
 
             order.state = 'invoiced'
-            new_move.sudo().with_company(order.company_id).with_context(skip_invoice_sync=True)._post()
+            new_move.sudo().with_company(order.company_id).with_context(**order._get_invoice_post_context())._post()
 
             moves += new_move
             payment_moves = order._apply_invoice_payments(order.session_id.state == 'closed')
