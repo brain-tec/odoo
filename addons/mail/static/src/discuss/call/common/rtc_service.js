@@ -1098,7 +1098,7 @@ export class Rtc extends Record {
                 const session = await this.store["discuss.channel.rtc.session"].getWhenReady(
                     Number(id)
                 );
-                if (!session || !this.state.channel) {
+                if (!session || !this.channel) {
                     return;
                 }
                 if (
@@ -1239,8 +1239,8 @@ export class Rtc extends Record {
         if (camera) {
             await this.toggleVideo("camera");
         }
-        await this.resetAudioTrack({ force: audio });
         await this._initConnection();
+        await this.resetAudioTrack({ force: audio });
         if (!this.state.channel?.id) {
             return;
         }
