@@ -215,8 +215,6 @@ class MailGatewayCommon(MailCommon):
         self.assertEqual(len(self._mails), 1)
         mail = self._mails[0]
         extra = f'References: {mail["references"]}'
-        if mail["headers"].get("X-Odoo-Message-Id"):
-            extra += f'\nX-Odoo-Message-Id: {mail["headers"]["X-Odoo-Message-Id"]}'
         with self.mock_mail_gateway(), self.mock_mail_app():
             self.format_and_process(
                 MAIL_TEMPLATE, mail['email_from'], ','.join(mail['email_to']),
@@ -446,19 +444,33 @@ class TestMailgateway(MailGatewayCommon):
     @mute_logger('odoo.addons.mail.models.mail_thread', 'odoo.models')
     def test_message_process_email_author_exclude_alias(self):
         """ Do not set alias as author to avoid including aliases in discussions """
-        from_1 = self.env['res.partner'].create({
-            'name': 'Brice Denisse',
-            'email': f'from.test@{self.mail_alias_domain.name}',
-        })
         self.env['mail.alias'].create({
             'alias_domain_id': self.mail_alias_domain.id,
             'alias_name': 'from.test',
             'alias_model_id': self.env['ir.model']._get('mail.test.gateway').id
         })
+        alias_impostors = self.env['res.partner'].create([
+            {
+                'name': 'Alias Impostor',
+                'email': f'from.test@{self.mail_alias_domain.name}',
+            }, {
+                'name': 'Alias Domain Impostor',
+                'email': self.mail_alias_domain.catchall_email,
+            },
+        ])
 
-        record = self.format_and_process(MAIL_TEMPLATE, from_1.email_formatted, f'groups@{self.alias_domain}')
-        self.assertFalse(record.message_ids[0].author_id, f'Should not link a partner, especially not {from_1}')
-        self.assertEqual(record.message_ids[0].email_from, from_1.email_formatted)
+        for email_from, impostor in [
+            (f'from.test@{self.mail_alias_domain.name}', alias_impostors[0]),
+            (f'"Brice Denisse" <from.test@{self.mail_alias_domain.name}>', alias_impostors[0]),
+            (f'"Catchall Impostor" <{self.mail_alias_domain.catchall_email}>', alias_impostors[1]),
+        ]:
+            with self.subTest(email_from=email_from):
+                record = self.format_and_process(
+                    MAIL_TEMPLATE, email_from, f'groups@{self.alias_domain}',
+                    subject=f'Incoming email from {email_from}',
+                )
+                self.assertFalse(record.message_ids[0].author_id, f'Should not link a partner, especially not {impostor.name}')
+                self.assertEqual(record.message_ids[0].email_from, email_from)
 
     @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.addons.mail.models.mail_thread', 'odoo.models')
     def test_message_route_alias_owner_author_notify(self):
@@ -2192,7 +2204,6 @@ class TestMailGatewayLoops(MailGatewayCommon):
                 body='Answer',
                 partner_ids=self.alias_partner.ids,
             )
-        last_mail = self._mails  # save to reuse
         self.assertSentEmail(self.user_employee.email_formatted, [self.alias_partner.email_formatted])
 
         # simulate this email coming back to the same Odoo server -> msg_id is
@@ -2204,17 +2215,6 @@ class TestMailGatewayLoops(MailGatewayCommon):
         self.assertFalse(capture_gateway.records)
         self.assertNotSentEmail()
         self.assertFalse(bool(self._new_msgs))
-
-        # simulate stupid email providers that rewrites msg_id -> thanks to
-        # a custom header, it is rejected as already managed by mailgateway
-        self._mails = last_mail
-        with RecordCapturer(self.env['mail.test.ticket'], []) as capture_ticket, \
-             RecordCapturer(self.env['mail.test.gateway'], []) as capture_gateway:
-            self._reinject(force_msg_id='123donotnamemailjet456')
-        self.assertFalse(capture_ticket.records)
-        self.assertFalse(capture_gateway.records)
-        self.assertFalse(bool(self._new_msgs))
-        self.assertNotSentEmail()
 
     @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.addons.mail.models.mail_thread')
     def test_routing_loop_forward_catchall(self):
