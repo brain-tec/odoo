@@ -8772,6 +8772,54 @@ test(`form view is not broken if save operation fails`, async () => {
     expect.verifySteps(["web_save"]); // write on save (it works)
 });
 
+test(`form view is not broken if save operation fails with redirect warning`, async () => {
+    onRpc("web_save", ({ args }) => {
+        if (args[1].foo === "incorrect value") {
+            throw makeServerError({
+                type: `RedirectWarning`,
+                args: [
+                    "The message",
+                    {
+                        name: "Sub view",
+                        res_model: "partner",
+                        type: "ir.actions.act_window",
+                        domain: [],
+                        target: "new",
+                        views: [[false, "form"]],
+                    },
+                    "Button Label",
+                    {},
+                ],
+                description: "Beep boop server stuff and technical string",
+            });
+        }
+    });
+    onRpc(({ method }) => expect.step(method));
+    await mountView({
+        resModel: "partner",
+        type: "form",
+        arch: `<form><field name="foo"/></form>`,
+        resId: 1,
+    });
+    expect.verifySteps(["get_views", "web_read"]);
+
+    await contains(`.o_field_widget[name=foo] input`).edit("incorrect value");
+    await contains(`.o_form_button_create`).click();
+    await animationFrame();
+    expect.verifySteps(["web_save"]);
+
+    // Oh snap dialog
+    expect(`.o_dialog`).toHaveCount(1);
+    expect(`.o_dialog .modal-footer .btn-primary`).toHaveCount(1);
+    expect(`.o_dialog .modal-footer .btn-secondary`).toHaveCount(2);
+    await contains(`.o_dialog .modal-footer .btn-secondary:first`).click();
+    await animationFrame();
+    expect.verifySteps(["get_views", "onchange"]);
+
+    // RedirectWarning dialog
+    expect(`.modal-title`).toHaveText("Sub view");
+});
+
 test.tags("desktop");
 test(`context is correctly passed after save & new in FormViewDialog`, async () => {
     Product._views = {
@@ -10402,7 +10450,7 @@ test(`fieldDependencies support for fields: dependence on a relational field`, a
     registry.category("fields").add("custom_field", {
         component: class CustomField extends Component {
             static props = ["*"];
-            static template = xml`<span t-esc="props.record.data.product_id[1]"/>`;
+            static template = xml`<span t-esc="props.record.data.product_id.display_name"/>`;
         },
         fieldDependencies: [{ name: "product_id", type: "many2one", relation: "product" }],
     });
@@ -11729,6 +11777,70 @@ test(`custom x2many with relatedFields and list view not inline`, async () => {
     await contains(`.o_data_row [name='foo'] input`).edit("new record");
     await contains(`.o_form_button_save`).click();
     expect.verifySteps(["web_read", "web_save"]);
+});
+
+test(`custom many2one with relatedFields`, async () => {
+    class CustomMany2One extends Component {
+        static template = xml`
+            <t t-set="value" t-value="props.record.data[props.name]"/>
+            <div class="content">
+                <div t-esc="value.id"/>
+                <div t-esc="value.display_name"/>
+                <div t-esc="value.foo"/>
+                <div t-esc="value.int_field"/>
+            </div>
+            <button id="update-m2o" t-on-click="() => this.update()">Update</button>
+        `;
+        static props = ["*"];
+
+        update() {
+            return this.props.record.update({ [this.props.name]: { id: 2 } });
+        }
+    }
+    fieldsRegistry.add("my_widget", {
+        component: CustomMany2One,
+        relatedFields: [
+            { name: "foo", type: "char" },
+            { name: "int_field", type: "integer" },
+        ],
+    });
+
+    onRpc("web_read", ({ kwargs }) => {
+        expect.step("web_read");
+        expect.step(kwargs.specification);
+    });
+
+    await mountView({
+        resModel: "partner",
+        type: "form",
+        arch: `<form><field name="parent_id" widget="my_widget"/></form>`,
+        resId: 1,
+    });
+    expect.verifySteps([
+        "web_read",
+        {
+            display_name: {},
+            parent_id: {
+                fields: {
+                    display_name: {},
+                    foo: {},
+                    int_field: {},
+                },
+            },
+        },
+    ]);
+    expect(`.o_field_widget[name="parent_id"] .content`).toHaveText("4\naaa\nMy little Foo Value\n0");
+
+    await contains(`#update-m2o`).click();
+    expect.verifySteps([
+        "web_read",
+        {
+            display_name: {},
+            foo: {},
+            int_field: {},
+        }
+    ]);
+    expect(`.o_field_widget[name="parent_id"] .content`).toHaveText("2\nsecond record\nblip\n9");
 });
 
 test(`existing record with falsy display_name`, async () => {
