@@ -815,6 +815,41 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.start_pos_tour("PosLoyaltyFreeProductTour2")
 
+    def test_loyalty_program_different_orders(self):
+        loyalty_program = self.env['loyalty.program'].create({
+            'name': 'Loyalty Program Test',
+            'program_type': 'loyalty',
+            'trigger': 'auto',
+            'applies_on': 'both',
+            'pos_ok': True,
+            'pos_config_ids': [Command.link(self.main_pos_config.id)],
+            'rule_ids': [(0, 0, {
+                'reward_point_mode': 'order',
+                'reward_point_amount': 10,
+                'minimum_amount': 5,
+                'minimum_qty': 1,
+            })],
+            'reward_ids': [(0, 0, {
+                'reward_type': 'product',
+                'required_points': 30,
+                'reward_product_id': self.product_a.id,
+                'reward_product_qty': 1,
+            })],
+        })
+
+        partner = self.env['res.partner'].create({'name': 'Test Partner'})
+        card = self.env['loyalty.card'].create({
+            'partner_id': partner.id,
+            'program_id': loyalty_program.id,
+            'points': 0,
+        })
+
+        self.main_pos_config.open_ui()
+
+        self.start_pos_tour("PosLoyaltyMultipleOrders")
+
+        self.assertEqual(card.points, 0, "Loyalty card credited for a draft order")
+
     def test_refund_with_gift_card(self):
         """When adding a gift card when there is a refund in the order, the amount
         of the gift card is set to the amount of the refund"""
@@ -2514,3 +2549,28 @@ class TestUi(TestPointOfSaleHttpCommon):
         loyalty_history = self.env['loyalty.history'].search([('card_id','=',ewallet_aaa.id)])
         self.assertEqual(loyalty_history.mapped("issued"), [0.0, 50.0])
         self.assertEqual(loyalty_history.mapped("used"), [12.0, 0.0])
+
+    def test_loyalty_on_order_with_fixed_tax(self):
+
+        self.env['loyalty.program'].search([('id', '!=', self.auto_promo_program_next.id)]).write({'active': False})
+        self.auto_promo_program_next.coupon_ids = [Command.create({
+            'code': '563412',
+            'points': 10
+        })]
+
+        fixed_tax = self.env['account.tax'].create({
+            'name': 'Fixed Tax',
+            'amount_type': 'fixed',
+            'amount': 50,
+        })
+        self.env["product.product"].create(
+            {
+                "name": "Product A",
+                "list_price": 15,
+                "available_in_pos": True,
+                "taxes_id": [Command.link(fixed_tax.id)],
+            }
+        )
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_loyalty_on_order_with_fixed_tax', login="pos_user")
