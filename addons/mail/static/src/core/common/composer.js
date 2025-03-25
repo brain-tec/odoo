@@ -489,6 +489,9 @@ export class Composer extends Component {
                     ev.preventDefault();
                     return;
                 }
+                if (this.isMobileOS) {
+                    return;
+                }
                 const shouldPost = this.env.inChatter ? ev.ctrlKey : !ev.shiftKey;
                 if (!shouldPost) {
                     return;
@@ -588,11 +591,11 @@ export class Composer extends Component {
             context: context,
         };
         const options = {
-            onClose: (...args) => {
-                // args === [] : click on 'X' or press escape
+            onClose: (args) => {
+                // args === { dismiss: true } : click on 'X' or press escape
                 // args === { special: true } : click on 'discard'
-                const accidentalDiscard = args.length === 0;
-                const isDiscard = accidentalDiscard || args[0]?.special;
+                const accidentalDiscard = args?.dismiss;
+                const isDiscard = accidentalDiscard || args?.special;
                 // otherwise message is posted (args === [undefined])
                 if (!isDiscard && this.props.composer.thread.model === "mail.box") {
                     this.notifySendFromMailbox();
