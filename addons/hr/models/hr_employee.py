@@ -48,6 +48,7 @@ class HrEmployee(models.Model):
         readonly=False,
         check_company=True,
         precompute=True,
+        index='btree_not_null',
         ondelete='restrict')
     user_partner_id = fields.Many2one(related='user_id.partner_id', related_sudo=False, string="User's partner")
     active = fields.Boolean('Active', related='resource_id.active', default=True, store=True, readonly=False)
@@ -137,7 +138,7 @@ class HrEmployee(models.Model):
         ], string='Employee Type', default='employee', required=True, groups="hr.group_hr_user",
         help="Categorize your Employees by type. This field also has an impact on contracts. Only Employees, Students and Trainee will have contract history.")
 
-    job_id = fields.Many2one(tracking=True)
+    job_id = fields.Many2one(tracking=True, index=True)
     # employee in company
     child_ids = fields.One2many('hr.employee', 'parent_id', string='Direct subordinates')
     category_ids = fields.Many2many(
@@ -730,9 +731,13 @@ class HrEmployee(models.Model):
     def _get_calendar_tz_batch(self, dt=None):
         """ Return a mapping { employee id : employee's effective schedule's (at dt) timezone }
         """
+        employees_by_id = self.grouped('id')
         if not dt:
             calendars = self._get_calendars()
-            return {emp_id: calendar.sudo().tz for emp_id, calendar in calendars.items()}
+            return {
+                emp_id: calendar.sudo().tz or employees_by_id[emp_id].tz \
+                    for emp_id, calendar in calendars.items()
+            }
 
         employees_by_tz = self.grouped(lambda emp: emp._get_tz())
 
@@ -740,7 +745,10 @@ class HrEmployee(models.Model):
         for tz, employee_ids in employees_by_tz.items():
             date_at = timezone(tz).localize(dt).date()
             calendars = self._get_calendars(date_at)
-            employee_timezones |= {emp_id: cal.sudo().tz for emp_id, cal in calendars.items()}
+            employee_timezones |= {
+                emp_id: cal.sudo().tz or employees_by_id[emp_id].tz \
+                    for emp_id, cal in calendars.items()
+            }
         return employee_timezones
 
     def _employee_attendance_intervals(self, start, stop, lunch=False):

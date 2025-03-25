@@ -29,10 +29,7 @@ import {
     tick,
 } from "@odoo/hoot-mock";
 import { Component, markup, onRendered, onWillStart, useRef, xml } from "@odoo/owl";
-import {
-    getPickerApplyButton,
-    getPickerCell,
-} from "@web/../tests/core/datetime/datetime_test_helpers";
+import { getPickerCell } from "@web/../tests/core/datetime/datetime_test_helpers";
 import {
     clickFieldDropdown,
     clickModalButton,
@@ -814,6 +811,47 @@ test(`list view with adjacent buttons and optional field`, async () => {
         message: "adjacent buttons in the arch must be grouped in a single column",
     });
     expect(`.o_data_row:eq(0) td.o_list_button`).toHaveCount(2);
+});
+
+test(`wait the view reload before closing the dialog`, async () => {
+    let searchReadDef;
+    onRpc("web_search_read", () => searchReadDef);
+    Foo._views = {
+        form: `<form><field name="foo"/></form>`,
+    };
+    onRpc("/web/dataset/call_button/foo/a", () => ({
+        type: "ir.actions.act_window",
+        name: "Archive Action",
+        res_model: "foo",
+        res_id: 1,
+        view_mode: "form",
+        target: "new",
+        views: [[false, "form"]],
+    }));
+
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list editable="bottom">
+                <field name="foo"/>
+                <button name="a" type="object" icon="fa-car"/>
+            </list>
+        `,
+    });
+    searchReadDef = new Deferred();
+    await contains(`tbody .o_list_button button:eq(0)`).click();
+    expect(`.o_dialog`).toHaveCount(1);
+    await contains(`.o_form_renderer .o_field_widget[name='foo'] input`).edit("plop");
+    await contains(`.o_dialog .o_form_button_save`).click();
+
+    await animationFrame(); // not needed but to be sure that the dialog is not closed.
+    expect(`.o_dialog`).toHaveCount(1);
+    searchReadDef.resolve();
+
+    await animationFrame();
+    expect(`.o_dialog`).toHaveCount(0);
+    expect(`tbody .o_list_char:eq(0)`).toHaveText("plop");
 });
 
 test(`list view with adjacent buttons with invisible modifier`, async () => {
@@ -10367,10 +10405,10 @@ test(`multi edit field with daterange widget`, async () => {
     // change dates range
     await contains(getPickerCell("16").at(0)).click();
     await contains(getPickerCell("12").at(1)).click();
-    expect(getPickerApplyButton()).not.toHaveAttribute("disabled");
 
     // Apply the changes
-    await contains(getPickerApplyButton()).click();
+    await contains(`.o_list_view`).click();
+
     expect(`.modal`).toHaveCount(1, {
         message: "The confirm dialog should appear to confirm the multi edition.",
     });
