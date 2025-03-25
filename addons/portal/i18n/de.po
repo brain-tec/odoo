@@ -412,7 +412,9 @@ msgstr "Bestätigen"
 msgid ""
 "Confirm\n"
 "                                <span class=\"fa fa-long-arrow-right\"/>"
-msgstr "<span class=\"fa fa-long-arrow-right\"/>"
+msgstr ""
+"Bestätigen\n"
+"                                <span class=\"fa fa-long-arrow-right\"/>"
 
 #. module: portal
 #. openerp-web
