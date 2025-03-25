@@ -1,11 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.http import route
+from odoo.http import request, route
 from odoo.tools.image import image_data_uri
 
-from odoo.addons.sale.controllers.combo_configurator import (
-    SaleComboConfiguratorController,
-)
+from odoo.addons.sale.controllers.combo_configurator import SaleComboConfiguratorController
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 
 
@@ -20,6 +18,7 @@ class WebsiteSaleComboConfiguratorController(SaleComboConfiguratorController, We
     )
     def website_sale_combo_configurator_get_data(self, *args, **kwargs):
         self._populate_currency_and_pricelist(kwargs)
+        request.update_context(display_default_code=False)  # Hide internal product reference
         return super().sale_combo_configurator_get_data(*args, **kwargs)
 
     @route(
@@ -45,7 +44,7 @@ class WebsiteSaleComboConfiguratorController(SaleComboConfiguratorController, We
         # current user.
         if (
             not combo_item.product_id.sudo(False).has_access('read')
-            and combo_item.product_id.image_128
+            and (combo_item_image := combo_item.product_id.image_256)
         ):
-            data['product']['image_src'] = image_data_uri(combo_item.product_id.image_128)
+            data['product']['image_src'] = image_data_uri(combo_item_image)
         return data
