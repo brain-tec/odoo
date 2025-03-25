@@ -69,7 +69,7 @@ class HrApplicant(models.Model):
     type_id = fields.Many2one('hr.recruitment.degree', "Degree")
     availability = fields.Date("Availability", help="The date at which the applicant will be available to start working", tracking=True)
     color = fields.Integer("Color Index", default=0)
-    employee_id = fields.Many2one('hr.employee', string="Employee", help="Employee linked to the applicant.", copy=False)
+    employee_id = fields.Many2one('hr.employee', string="Employee", help="Employee linked to the applicant.", copy=False, index='btree_not_null')
     emp_is_active = fields.Boolean(string="Employee Active", related='employee_id.active')
     employee_name = fields.Char(related='employee_id.name', string="Employee Name", readonly=False, tracking=False)
 
@@ -226,36 +226,43 @@ class HrApplicant(models.Model):
 
     def _inverse_partner_email(self):
         for applicant in self:
-            if not applicant.email_from:
+            email_normalized = tools.email_normalize(applicant.email_from or '')
+            if not email_normalized:
                 continue
             if not applicant.partner_id:
                 if not applicant.partner_name:
                     raise UserError(_("You must define a Contact Name for this applicant."))
-                applicant.partner_id = (
-                    self.env["res.partner"]
-                    .with_context(default_lang=self.env.lang)
-                    .find_or_create(applicant.email_from)
+                applicant.partner_id = applicant._partner_find_from_emails_single(
+                    [applicant.email_from], no_create=False,
+                    additional_values={
+                        email_normalized: {'lang': self.env.lang}
+                    },
                 )
             if applicant.partner_name and not applicant.partner_id.name:
                 applicant.partner_id.name = applicant.partner_name
-            if tools.email_normalize(applicant.email_from) != tools.email_normalize(applicant.partner_id.email):
-                # change email on a partner will trigger other heavy code, so avoid to change the email when
-                # it is the same. E.g. "email@example.com" vs "My Email" <email@example.com>""
+            if email_normalized and not applicant.partner_id.email:
                 applicant.partner_id.email = applicant.email_from
-            if applicant.partner_phone:
+            if applicant.partner_phone and not applicant.partner_id.phone:
                 applicant.partner_id.phone = applicant.partner_phone
 
     @api.depends("email_normalized", "partner_phone_sanitized", "linkedin_profile")
     def _compute_application_count(self):
         """
-        This method will find all applications that have either the same email,
-        phone number og linkedin profile as the current(self) application(s) excluding
-        applications that are in a talent pool(talents). If self has email,
-        phonenumber or linkedin set this method will include self in the returned count
+        This method will calculate the number of applications that are either
+        directly or indirectly linked to the current application(s)
+        - An application is considered directly linked if it shares the same
+          pool_applicant_id
+        - An application is considered indirectly_linked if it has the same
+          value as the current application(s) in any of the following field:
+          email, phone number or linkedin
+
+        Note: If self has pool_applicant_id, email, phone number or linkedin set
+        this method will include self in the returned count
         """
         all_emails = {a.email_normalized for a in self if a.email_normalized}
         all_phones = {a.partner_phone_sanitized for a in self if a.partner_phone_sanitized}
         all_linkedins = {a.linkedin_profile for a in self if a.linkedin_profile}
+        all_pool_applicants = {a.pool_applicant_id.id for a in self if a.pool_applicant_id}
 
         domain = Domain.FALSE
         if all_emails:
@@ -264,6 +271,8 @@ class HrApplicant(models.Model):
             domain |= Domain("partner_phone_sanitized", "in", list(all_phones))
         if all_linkedins:
             domain |= Domain("linkedin_profile", "in", list(all_linkedins))
+        if all_pool_applicants:
+            domain |= Domain("pool_applicant_id", "in", list(all_pool_applicants))
 
         domain &= Domain("talent_pool_ids", "=", False)
         matching_applicants = self.env["hr.applicant"].with_context(active_test=False).search(domain)
@@ -271,6 +280,7 @@ class HrApplicant(models.Model):
         email_map = defaultdict(set)
         phone_map = defaultdict(set)
         linkedin_map = defaultdict(set)
+        pool_applicant_map = defaultdict(set)
         for app in matching_applicants:
             if app.email_normalized:
                 email_map[app.email_normalized].add(app.id)
@@ -278,6 +288,8 @@ class HrApplicant(models.Model):
                 phone_map[app.partner_phone_sanitized].add(app.id)
             if app.linkedin_profile:
                 linkedin_map[app.linkedin_profile].add(app.id)
+            if app.pool_applicant_id:
+                pool_applicant_map[app.pool_applicant_id].add(app.id)
 
         for applicant in self:
             related_ids = set()
@@ -287,6 +299,8 @@ class HrApplicant(models.Model):
                 related_ids.update(phone_map.get(applicant.partner_phone_sanitized, set()))
             if applicant.linkedin_profile:
                 related_ids.update(linkedin_map.get(applicant.linkedin_profile, set()))
+            if applicant.pool_applicant_id:
+                related_ids.update(pool_applicant_map.get(applicant.pool_applicant_id, set()))
 
             count = len(related_ids)
 
@@ -319,6 +333,8 @@ class HrApplicant(models.Model):
             domain |= Domain("partner_phone_sanitized", "=", self.partner_phone_sanitized)
         if self.linkedin_profile:
             domain |= Domain("linkedin_profile", "=", self.linkedin_profile)
+        if self.pool_applicant_id:
+            domain |= Domain("pool_applicant_id", "=", self.pool_applicant_id)
         if ignore_talent:
             domain &= Domain("talent_pool_ids", "=", False)
         if only_talent:
@@ -613,7 +629,14 @@ class HrApplicant(models.Model):
 
     def copy_data(self, default=None):
         vals_list = super().copy_data(default=default)
-        return [dict(vals, partner_name=self.env._("%s (copy)", applicant.partner_name)) for applicant, vals in zip(self, vals_list)]
+
+        # Avoid adding `(copy)` to partner_name when an applicant is created trough the talent pool mechanism
+        if not self.env.context.get("no_copy_in_partner_name"):
+            vals_list = [
+                dict(vals, partner_name=self.env._("%s (copy)", applicant.partner_name))
+                for applicant, vals in zip(self, vals_list)
+            ]
+        return vals_list
 
     @api.model_create_multi
     def create(self, vals_list):
