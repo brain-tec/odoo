@@ -4511,7 +4511,9 @@ test(`clicking on stat buttons in edit mode on desktop`, async () => {
         },
     });
 
-    onRpc("web_save", ({ args }) => expect(args[1].foo).toBe("tralala"));
+    onRpc("web_save", ({ args }) => {
+        expect(args[1].foo).toBe("tralala");
+    });
     onRpc(({ method }) => expect.step(method));
     await mountView({
         resModel: "partner",
@@ -4552,7 +4554,9 @@ test(`clicking on stat buttons in edit mode on mobile`, async () => {
         },
     });
 
-    onRpc("web_save", ({ args }) => expect(args[1].foo).toBe("tralala"));
+    onRpc("web_save", ({ args }) => {
+        expect(args[1].foo).toBe("tralala");
+    });
     onRpc(({ method }) => expect.step(method));
     await mountView({
         resModel: "partner",
@@ -5369,6 +5373,82 @@ test(`switching to another record from a dirty one on desktop`, async () => {
     await contains(`.o_pager_previous`).click();
     expect(getPagerValue()).toEqual([1]);
 });
+
+test.tags("desktop")("Save record, no changes but dirty (add and remove tag)", async () => {
+    onRpc("web_save", () => expect.step("ERROR: web_save should not be called"));
+    onRpc("web_read", () => expect.step("web_read"));
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `<form>
+                <field name="type_ids" widget="many2many_tags"/>
+              </form>`,
+        resId: 1,
+    });
+
+    expect(`.o_field_widget[name=type_ids] .o_tag`).toHaveCount(0);
+
+    // add a tag
+    await contains(`.o_input_dropdown input`).click();
+    await contains(`.dropdown-item:contains(gold)`).click();
+
+    expect(`.o_field_widget[name=type_ids] .o_tag`).toHaveCount(1);
+
+    // remove tag
+    await contains(`.o_field_widget[name=type_ids] .o_tag .o_delete`).click();
+    expect(`.o_field_widget[name=type_ids] .o_tag`).toHaveCount(0);
+    expect.verifySteps(["web_read", "web_read"]);
+
+    // click on save
+    await contains(`.o_form_button_save`).click();
+    // The `web_save` RPC should not be called as there are no changes.
+    // The record must be marked as not dirty.
+    expect(`.o_form_status_indicator_buttons.invisible`).toHaveCount(1);
+    expect.verifySteps([]); // avoid doint an extra web_read
+});
+
+test.tags("desktop")(
+    "switching to another record from a dirty record but wo changes (add and remove tag)",
+    async () => {
+        onRpc("web_save", () => expect.step("ERROR: web_save should not be called"));
+        onRpc("web_read", () => expect.step("web_read"));
+        await mountView({
+            type: "form",
+            resModel: "partner",
+            arch: `<form>
+                  <field name="type_ids" widget="many2many_tags"/>
+              </form>`,
+            resIds: [1, 2],
+            resId: 1,
+        });
+
+        expect(getPagerValue()).toEqual([1]);
+        expect(getPagerLimit()).toBe(2);
+
+        expect(`.o_field_widget[name=type_ids] .o_tag`).toHaveCount(0);
+        expect(`.o_breadcrumb`).toHaveText("first record");
+
+        // add a tag
+        await contains(`.o_input_dropdown input`).click();
+        await contains(`.dropdown-item:contains(gold)`).click();
+
+        expect(`.o_field_widget[name=type_ids] .o_tag`).toHaveCount(1);
+
+        // remove tag
+        await contains(`.o_field_widget[name=type_ids] .o_tag .o_delete`).click();
+        expect(`.o_field_widget[name=type_ids] .o_tag`).toHaveCount(0);
+        expect.verifySteps(["web_read", "web_read"]);
+
+        // click on the pager to switch to the next record
+        // The `web_save` RPC should not be called as there are no changes.
+        // The next record should be load correctly.
+        await contains(`.o_pager_next`).click();
+        expect(`.modal`).toHaveCount(0);
+        expect(getPagerValue()).toEqual([2]);
+        expect(`.o_breadcrumb`).toHaveText("second record");
+        expect.verifySteps(["web_read"]);
+    }
+);
 
 test(`do not reload after save when using pager`, async () => {
     onRpc(({ method }) => expect.step(method));
@@ -7832,10 +7912,12 @@ test(`no autofocus with disable_autofocus option`, async () => {
         type: "form",
         arch: `<form disable_autofocus="1"><field name="int_field"/></form>`,
     });
-    expect(`.o_field_widget[name="foo"] input`).not.toBeFocused();
+
+    expect(`.o_field_widget[name="int_field"] input`).not.toBeFocused();
 
     await contains(`.o_form_button_save`).click();
-    expect(`.o_field_widget[name="foo"] input`).not.toBeFocused();
+
+    expect(`.o_field_widget[name="int_field"] input`).not.toBeFocused();
 });
 
 test.tags("desktop");
@@ -9035,9 +9117,9 @@ test(`buttons with "confirm" attribute: click twice on "Ok" on desktop`, async (
     await contains(`.o_statusbar_buttons button`).click();
     expect.verifySteps([]);
 
-    contains(`.modal-footer button.btn-primary`).click();
-    await animationFrame();
+    await click(`.modal-footer button.btn-primary`);
     expect(`.modal-footer button.btn-primary`).not.toBeEnabled();
+    await animationFrame();
     expect.verifySteps(["web_save", "execute_action"]);
 });
 
@@ -9067,9 +9149,9 @@ test(`buttons with "confirm" attribute: click twice on "Ok" on mobile`, async ()
     await contains(`.o-dropdown-item-unstyled-button button`).click();
     expect.verifySteps([]);
 
-    contains(`.modal-footer button.btn-primary`).click();
-    await animationFrame();
+    await click(`.modal-footer button.btn-primary`);
     expect(`.modal-footer button.btn-primary`).not.toBeEnabled();
+    await animationFrame();
     expect.verifySteps(["web_save", "execute_action"]);
 });
 
