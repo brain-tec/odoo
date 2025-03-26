@@ -1223,6 +1223,7 @@ export class PosStore extends WithLazyGetterTrap {
             const newData = this.models.loadData(this.models, missingRecords, [], false);
 
             for (const line of newData["pos.order.line"]) {
+                line.pack_lot_ids = line.pack_lot_ids.filter((lot) => typeof lot.id === "number");
                 const refundedOrderLine = line.refunded_orderline_id;
 
                 if (refundedOrderLine && ["paid", "done"].includes(line.order_id.state)) {
@@ -1991,6 +1992,10 @@ export class PosStore extends WithLazyGetterTrap {
         };
 
         const existingLotsName = existingLots.map((l) => l.name);
+        if (!packLotLinesToEdit.length && existingLotsName.length === 1) {
+            // If there's only one existing lot/serial number, automatically assign it to the order line
+            return { newPackLotLines: [{ lot_name: existingLotsName[0] }] };
+        }
         const payload = await makeAwaitable(this.dialog, EditListPopup, {
             title: _t("Lot/Serial number(s) required for"),
             name: product.display_name,
