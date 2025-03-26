@@ -1,4 +1,4 @@
-import { describe, expect, getFixture, test } from "@odoo/hoot";
+import { expect, getFixture, test } from "@odoo/hoot";
 import {
     clear,
     click,
@@ -51,6 +51,7 @@ import {
     getService,
     installLanguages,
     makeServerError,
+    MockServer,
     mockService,
     models,
     mountView,
@@ -89,8 +90,6 @@ import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { ListController } from "@web/views/list/list_controller";
 import { WebClient } from "@web/webclient/webclient";
-
-describe.current.tags("desktop");
 
 const { ResCompany, ResPartner, ResUsers } = webModels;
 
@@ -1715,6 +1714,7 @@ test(`multi_edit: clicking on a readonly field switches the focus to the next ed
     expect(`.o_field_widget[name=foo] input`).toBeFocused();
 });
 
+test.tags("desktop");
 test(`save a record with an required field computed by another`, async () => {
     Foo._onChanges = {
         foo(record) {
@@ -2458,6 +2458,7 @@ test(`enabling archive in list when groupby m2m field`, async () => {
     });
 });
 
+test.tags("desktop");
 test(`enabling archive in list when groupby m2m field and multi selecting the same record`, async () => {
     onRpc("has_group", () => false);
     onRpc("action_archive", ({ args }) => {
@@ -2535,6 +2536,7 @@ test(`enabling duplicate in list when groupby m2m field`, async () => {
     });
 });
 
+test.tags("desktop");
 test(`enabling duplicate in list when groupby m2m field and multi selecting the same record`, async () => {
     onRpc("has_group", () => false);
     onRpc("copy", ({ args }) => {
@@ -2612,6 +2614,7 @@ test(`enabling delete in list when groupby m2m field`, async () => {
     });
 });
 
+test.tags("desktop");
 test(`enabling delete in list when groupby m2m field and multi selecting the same record`, async () => {
     onRpc("has_group", () => false);
     onRpc("unlink", ({ args }) => {
@@ -2697,6 +2700,7 @@ test(`enabling unarchive in list when groupby m2m field`, async () => {
     });
 });
 
+test.tags("desktop");
 test(`enabling unarchive in list when groupby m2m field and multi selecting the same record`, async () => {
     onRpc("has_group", () => false);
     onRpc("action_unarchive", ({ args }) => {
@@ -2828,6 +2832,7 @@ test(`editing a record should change same record in other groups when grouped by
     expect(queryAllTexts(`.o_list_char`)).toEqual(["xyz", "blip", "blip", "xyz", "blip"]);
 });
 
+test.tags("desktop");
 test(`selecting the same record on different groups and editing it when grouping by m2m field`, async () => {
     onRpc("write", ({ args }) => {
         expect.step("write");
@@ -3467,11 +3472,9 @@ test(`editable list view: basic char field edition`, async () => {
     expect(`.o_field_cell:eq(0)`).toHaveText("abc", {
         message: "changes should be saved correctly",
     });
+    expect(`.o_data_row:eq(0)`).not.toHaveClass("o_selected_row");
     expect(`.o_data_row:eq(1)`).toHaveClass("o_selected_row");
-    expect(`.o_data_row`).not.toHaveClass("o_selected_row", {
-        message: "saved row should be in readonly mode",
-    });
-    expect(Foo._records[0].foo).toBe("abc", {
+    expect(MockServer.env["foo"].browse(1)[0].foo).toBe("abc", {
         message: "the edition should have been properly saved",
     });
 });
@@ -11798,6 +11801,7 @@ test(`editable list with fields with readonly modifier`, async () => {
     expect(`.o_selected_row .o_field_many2one input`).toBeFocused();
 });
 
+test.tags("desktop");
 test(`editable form alongside html field: click out to unselect the row`, async () => {
     Bar._fields.name = fields.Char();
 
@@ -12695,7 +12699,7 @@ test(`char field edition in editable grouped list`, async () => {
     await contains(`.o_data_cell`).click();
     await contains(`.o_selected_row .o_data_cell [name=foo] input`).edit("pla");
     await contains(`.o_list_button_save`).click();
-    expect(Foo._records[3].foo).toBe("pla", {
+    expect(MockServer.env["foo"].browse(4)[0].foo).toBe("pla", {
         message: "the edition should have been properly saved",
     });
     expect(`.o_data_row:eq(0):contains(pla)`).toHaveCount(1);
@@ -14558,6 +14562,7 @@ test(`list view with optional fields and async rendering`, async () => {
     expect(`.o-dropdown--menu input:checked`).toHaveCount(1);
 });
 
+test.tags("desktop");
 test(`change the viewType of the current action`, async () => {
     defineActions([
         {
@@ -16098,13 +16103,15 @@ test(`list view with default_group_by`, async () => {
         expect.step(`web_read_group${readGroupCount}`);
         switch (readGroupCount) {
             case 1:
-                return expect(kwargs.groupby).toEqual(["bar"]);
-            case 2:
-                return expect(kwargs.groupby).toEqual(["m2m"]);
             case 3:
-                return expect(kwargs.groupby).toEqual(["bar"]);
-            case 4:
-                return expect(kwargs.groupby).toEqual(["bar"]);
+            case 4: {
+                expect(kwargs.groupby).toEqual(["bar"]);
+                break;
+            }
+            case 2: {
+                expect(kwargs.groupby).toEqual(["m2m"]);
+                break;
+            }
         }
     });
 
@@ -16156,10 +16163,14 @@ test(`list view with multi-fields default_group_by`, async () => {
         readGroupCount++;
         expect.step(`web_read_group${readGroupCount}`);
         switch (readGroupCount) {
-            case 1:
-                return expect(kwargs.groupby).toEqual(["foo"]);
-            case 2:
-                return expect(kwargs.groupby).toEqual(["bar"]);
+            case 1: {
+                expect(kwargs.groupby).toEqual(["foo"]);
+                break;
+            }
+            case 2: {
+                expect(kwargs.groupby).toEqual(["bar"]);
+                break;
+            }
         }
     });
 
@@ -16297,7 +16308,7 @@ test(`Properties: boolean`, async () => {
     await contains(`.o_field_cell.o_boolean_cell`).click();
     await contains(`.o_field_cell.o_boolean_cell input`).click();
     await contains(`.o_list_button_save`).click();
-    expect(`.o_field_cell.o_boolean_cell input`).not.toBeChecked();
+    expect(`.o_field_cell.o_boolean_cell input:first`).not.toBeChecked();
     expect.verifySteps(["web_save"]);
 });
 
