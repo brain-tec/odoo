@@ -299,6 +299,7 @@ READ_GROUP_AGGREGATE = {
     'bool_and': lambda table, expr: SQL('BOOL_AND(%s)', expr),
     'bool_or': lambda table, expr: SQL('BOOL_OR(%s)', expr),
     'array_agg': lambda table, expr: SQL('ARRAY_AGG(%s ORDER BY %s)', expr, SQL.identifier(table, 'id')),
+    'array_agg_distinct': lambda table, expr: SQL('ARRAY_AGG(DISTINCT %s ORDER BY %s)', expr, expr),
     # 'recordset' aggregates will be post-processed to become recordsets
     'recordset': lambda table, expr: SQL('ARRAY_AGG(%s ORDER BY %s)', expr, SQL.identifier(table, 'id')),
     'count': lambda table, expr: SQL('COUNT(%s)', expr),
@@ -1454,13 +1455,23 @@ class BaseModel(metaclass=MetaModel):
             for fname in field_name.split('.'):
                 field = model._fields[fname]
                 model = self.env.get(field.comodel_name)
+            # depending on the operator, we may need to cast the value to the type of the field
+            # ignore if we cannot convert
             if field.relational:
-                # relational fields will trigger a _name_search on their comodel
+                # relational fields will search on the display_name
+                domains.append([(field_name + '.display_name', operator, value)])
+            elif operator.endswith('like'):
                 domains.append([(field_name, operator, value)])
-                continue
-            with contextlib.suppress(ValueError):
-                # ignore that case if the value doesn't match the field type
-                domains.append([(field_name, operator, field.convert_to_write(value, self))])
+            elif isinstance(value, COLLECTION_TYPES):
+                typed_value = []
+                for v in value:
+                    with contextlib.suppress(ValueError):
+                        typed_value.append(field.convert_to_write(v, self))
+                domains.append([(field_name, operator, typed_value)])
+            else:
+                with contextlib.suppress(ValueError):
+                    typed_value = field.convert_to_write(value, self)
+                    domains.append([(field_name, operator, typed_value)])
         return aggregator(domains)
 
     @api.model
@@ -1891,7 +1902,7 @@ class BaseModel(metaclass=MetaModel):
         fname, __, func = parse_read_group_spec(spec)  # func is either None, granularity or an aggregate
         if func in ('count', 'count_distinct'):
             return 0
-        if func == 'array_agg':
+        if func in ('array_agg', 'array_agg_distinct'):
             return []
         field = self._fields[fname]
         if (not func or func == 'recordset') and (field.relational or fname == 'id'):
