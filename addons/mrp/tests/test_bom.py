@@ -2608,9 +2608,17 @@ class TestTourBoM(HttpCase):
             'product_qty': 1,
             'type': 'normal',
         })
-    
-    def test_mrp_bom_product_catalog(self):
+        # This product is not directly used in py tests but needed to run tours without demo data.
+        cls.component = cls.env['product.product'].create({
+            'name': 'compo test',
+            'is_storable': True,
+        })
 
+    def test_mrp_bom_product_catalog(self):
+        grp_uom = self.env.ref('uom.group_uom')
+        group_user = self.env.ref('base.group_user')
+        group_user.write({'implied_ids': [Command.link(grp_uom.id)]})
+        self.env.user.write({'group_ids': [Command.link(grp_uom.id)]})
         self.assertEqual(len(self.bom.bom_line_ids), 0)
 
         url = f'/odoo/action-mrp.mrp_bom_form_action/{self.bom.id}'
