@@ -2,7 +2,7 @@ import { DateSection } from "@mail/core/common/date_section";
 import { Message } from "@mail/core/common/message";
 import { NotificationMessage } from "./notification_message";
 import { Record } from "@mail/core/common/record";
-import { useMessageEdition, useVisible } from "@mail/utils/common/hooks";
+import { useVisible } from "@mail/utils/common/hooks";
 
 import {
     Component,
@@ -33,7 +33,6 @@ const PRESENT_MESSAGE_THRESHOLD = 10;
  * @property {boolean} [isInChatWindow=false]
  * @property {number} [jumpPresent=0]
  * @property {number} [jumpToNewMessage=0]
- * @property {import("@mail/utils/common/hooks").MessageEdition} [messageEdition]
  * @property {"asc"|"desc"} [order="asc"]
  * @property {import("models").Thread} thread
  * @property {string} [searchTerm]
@@ -48,7 +47,6 @@ export class Thread extends Component {
         "jumpPresent?",
         "jumpToNewMessage?",
         "thread",
-        "messageEdition?",
         "order?",
         "scrollRef?",
         "showEmptyMessage?",
@@ -80,7 +78,6 @@ export class Thread extends Component {
             scrollTop: null,
         });
         this.lastJumpPresent = this.props.jumpPresent;
-        this.messageEdition = this.props.messageEdition ?? useMessageEdition();
         this.orm = useService("orm");
         /** @type {ReturnType<import('@mail/utils/common/hooks').useMessageHighlight>|null} */
         this.messageHighlight = this.env.messageHighlight
@@ -574,5 +571,47 @@ export class Thread extends Component {
         this.scrollableRef.el.scrollTop = value;
         this.lastSetValue = value;
         this.saveScroll();
+    }
+
+    get showStartMessage() {
+        return (
+            ["channel", "group"].includes(this.props.thread.channel_type) ||
+            this.props.thread.channel_type === "chat"
+        );
+    }
+
+    get startMessageTitle() {
+        const channelName = this.props.thread.name;
+        if (this.props.thread.parent_channel_id) {
+            return channelName;
+        }
+        if (this.props.thread.channel_type === "channel") {
+            return _t("Welcome to #%(channelName)s!", { channelName });
+        }
+        return this.props.thread.displayName;
+    }
+
+    get startMessageSubtitle() {
+        if (this.props.thread.parent_channel_id) {
+            const authorName = Object.values(this.store.Persona.records).find(
+                (persona) => persona.userId === this.props.thread.create_uid
+            )?.name;
+            if (authorName) {
+                return _t("Started by %(authorName)s", { authorName });
+            }
+        }
+        if (this.props.thread.channel_type === "channel") {
+            return _t("This is the start of #%(channelName)s channel", {
+                channelName: this.props.thread.name,
+            });
+        }
+        if (this.props.thread.channel_type === "channel") {
+            return _t("This is the start of %(conversationName)s group", {
+                conversationName: this.props.thread.displayName,
+            });
+        }
+        return _t("This is the start of direct chat with %(userName)s", {
+            userName: this.props.thread.displayName,
+        });
     }
 }
