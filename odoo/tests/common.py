@@ -31,28 +31,27 @@ import traceback
 import unittest
 import warnings
 from collections import defaultdict, deque
-from concurrent.futures import Future, CancelledError, wait
+from concurrent.futures import CancelledError, Future, InvalidStateError, wait
 from contextlib import contextmanager, ExitStack
 from datetime import datetime
 from functools import lru_cache, partial
-from itertools import zip_longest as izip_longest
-from passlib.context import CryptContext
-from typing import Optional, Iterable
+from itertools import islice, zip_longest
+from textwrap import shorten
+from typing import Optional, Iterable, cast
+from unittest import TestResult
 from unittest.mock import patch, _patch, Mock
+from urllib.parse import parse_qsl, urlencode, urljoin, urlsplit, urlunsplit
 from xmlrpc import client as xmlrpclib
-
-try:
-    from concurrent.futures import InvalidStateError
-except ImportError:
-    InvalidStateError = NotImplementedError
 
 import freezegun
 import requests
-import werkzeug.urls
 from lxml import etree, html
+from passlib.context import CryptContext
 from requests import PreparedRequest, Session
-from urllib3.util import Url, parse_url
 
+import odoo.addons.base
+import odoo.http
+import odoo.models
 import odoo.orm.registry
 from odoo import api
 from odoo.exceptions import AccessError
@@ -66,6 +65,7 @@ from odoo.tools.misc import find_in_path, lower_logging
 from odoo.tools.xml_utils import _validate_xml
 
 from . import case, test_cursor
+from .result import OdooTestResult
 
 try:
     # the behaviour of decorator changed in 5.0.5 changing the structure of the traceback when
@@ -84,11 +84,6 @@ try:
 except ImportError:
     # chrome headless tests will be skipped
     websocket = None
-
-try:
-    import freezegun
-except ImportError:
-    freezegun = None
 
 _logger = logging.getLogger(__name__)
 if config['test_enable']:
@@ -269,6 +264,9 @@ class BaseCase(case.TestCase):
     """ Subclass of TestCase for Odoo-specific code. This class is abstract and
     expects self.registry, self.cr and self.uid to be initialized by subclasses.
     """
+    registry: Registry = None
+    env: api.Environment = None
+    cr: Cursor = None
     def __init_subclass__(cls):
         """Assigns default test tags ``standard`` and ``at_install`` to test
         cases not having them. Also sets a completely unnecessary
@@ -298,8 +296,8 @@ class BaseCase(case.TestCase):
     def _request_handler(cls, s: Session, r: PreparedRequest, /, **kw):
         # allow localhost requests
         # TODO: also check port?
-        url = werkzeug.urls.url_parse(r.url)
-        if url.host in (HOST, 'localhost'):
+        url = urlsplit(r.url)
+        if url.hostname in (HOST, 'localhost'):
             return _super_send(s, r, **kw)
         if url.scheme == 'file':
             return _super_send(s, r, **kw)
@@ -308,7 +306,7 @@ class BaseCase(case.TestCase):
             "Blocking un-mocked external HTTP request %s %s", r.method, r.url)
         raise BlockedRequest(f"External requests verboten (was {r.method} {r.url})")
 
-    def run(self, result):
+    def run(self, result: OdooTestResult) -> None:
         testMethod = getattr(self, self._testMethodName)
 
         if getattr(testMethod, '_retry', True) and getattr(self, '_retry', True):
@@ -317,7 +315,6 @@ class BaseCase(case.TestCase):
             tests_run_count = 1
             _logger.info('Auto retry disabled for %s', self)
 
-        quiet_log = None
         for retry in range(tests_run_count):
             result.had_failure = False  # reset in case of retry without soft_fail
             if retry:
@@ -326,11 +323,11 @@ class BaseCase(case.TestCase):
                 with warnings.catch_warnings(), \
                         result.soft_fail(), \
                         lower_logging(25, logging.INFO) as quiet_log:
-                    super().run(result)
+                    super().run(cast(TestResult, result))
                 if not (result.had_failure or quiet_log.had_error_log):
                     break
             else:  # last try
-                super().run(result)
+                super().run(cast(TestResult, result))
                 if not result.wasSuccessful() and BaseCase._tests_run_count != 1:
                     _logger.runbot('Disabling auto-retry after a failed test')
                     BaseCase._tests_run_count = 1
@@ -459,7 +456,7 @@ class BaseCase(case.TestCase):
     def _assertRaises(self, exception, *, msg=None):
         """ Context manager that clears the environment upon failure. """
         with ExitStack() as init:
-            if hasattr(self, 'env'):
+            if self.env:
                 init.enter_context(self.env.cr.savepoint())
                 if issubclass(exception, AccessError):
                     # The savepoint() above calls flush(), which leaves the
@@ -586,7 +583,7 @@ class BaseCase(case.TestCase):
                 count = self.cr.sql_log_count - count0
                 if count != expected:
                     # add some info on caller to allow semi-automatic update of query count
-                    frame, filename, linenum, funcname, lines, index = inspect.stack()[2]
+                    _frame, filename, linenum, funcname, _lines, _index = inspect.stack()[2]
                     filename = filename.replace('\\', '/')
                     if "/odoo/addons/" in filename:
                         filename = filename.rsplit("/odoo/addons/", 1)[1]
@@ -665,14 +662,14 @@ class BaseCase(case.TestCase):
             r = {}
             for field_name in field_names:
                 record_value = record[field_name]
-                match (field := record._fields[field_name]).type:
-                    case 'many2one':
+                match record._fields[field_name]:
+                    case odoo.fields.Many2one():
                         record_value = record_value.id
-                    case 'one2many' | 'many2many':
+                    case odoo.fields.One2many() | odoo.fields.Many2many():
                         record_value = sorted(record_value.ids)
-                    case 'float' if digits := field.get_digits(record.env):
+                    case odoo.fields.Float() as field if digits := field.get_digits(record.env):
                         record_value = Approx(record_value, digits[1], decorate=False)
-                    case 'monetary' if currency_field_name := field.get_currency_field(record):
+                    case odoo.fields.Monetary() as field if currency_field_name := field.get_currency_field(record):
                         # don't round if there's no currency set
                         if c := record[currency_field_name]:
                             record_value = Approx(record_value, c, decorate=False)
@@ -709,7 +706,7 @@ class BaseCase(case.TestCase):
         self.assertEqual((n1.text or u'').strip(), (n2.text or u'').strip(), msg)
         self.assertEqual((n1.tail or u'').strip(), (n2.tail or u'').strip(), msg)
 
-        for c1, c2 in izip_longest(n1, n2):
+        for c1, c2 in zip_longest(n1, n2):
             self.assertTreesEqual(c1, c2, msg)
 
     def _assertXMLEqual(self, original, expected, parser="xml"):
@@ -776,8 +773,8 @@ class BaseCase(case.TestCase):
         which will wrap the current cursor.
         """
         assert not cls._registry_patched, 'Can only patch registry once'
-        assert hasattr(cls, 'cr'), 'No cursor'
-        assert hasattr(cls, 'registry'), 'No registry'
+        assert cls.cr, 'No cursor'
+        assert cls.registry, 'No registry'
 
         cls.registry_patches = cls._registry_test_mode_patches(
             cr=cls.cr, registry=cls.registry,
@@ -787,19 +784,19 @@ class BaseCase(case.TestCase):
         cls._registry_patched = True
         cls.addClassCleanup(cls.registry_leave_test_mode)
 
-    def registry_enter_test_mode(self, *, cr: Cursor | None = None, register_cleanup=True):
+    def registry_enter_test_mode(self, *, cr: Cursor | None = None, register_cleanup: bool = True) -> None:
         """
         Puts the registry in test mode.
 
         New cursors returned by the registry will be instances of `TestCursor`
         which will wrap the current cursor.
 
-        :param cr (default=self.cr): the cursor to wrap.
-        :param registry_cleanup: whether to register cleanup.
+        :param cr: the cursor to wrap (defaults to the current cursor if none)
+        :param register_cleanup: whether to register cleanup.
         """
         assert not type(self)._registry_patched, 'Can only patch registry once'
-        assert cr or hasattr(self, 'cr'), 'No cursor'
-        assert hasattr(self, 'registry'), 'No registry'
+        assert cr or self.cr, 'No cursor'
+        assert self.registry, 'No registry'
 
         type(self).registry_patches = self._registry_test_mode_patches(
             cr=cr or self.cr, registry=self.registry,
@@ -876,7 +873,7 @@ class Approx:  # noqa: PLW1641
     Most of the time, :meth:`TestCase.assertAlmostEqual` is more useful, but it
     doesn't work for all helpers.
     """
-    def __init__(self, value: float, rounding: int | float | odoo.addons.base.models.res_currency.Currency, /, decorate: bool) -> None:  # noqa: PYI041
+    def __init__(self, value: float, rounding: int | float | odoo.addons.base.models.res_currency.ResCurrency, /, decorate: bool) -> None:  # noqa: PYI041
         self.value = value
         self.decorate = decorate
         if isinstance(rounding, int):
@@ -913,9 +910,6 @@ class TransactionCase(BaseCase):
     fields. If a test modifies the registry (custom models and/or fields), it
     should prepare the necessary cleanup (`self.registry.reset_changes()`).
     """
-    registry: Registry = None
-    env: api.Environment = None
-    cr: Cursor = None
     muted_registry_logger = mute_logger(odoo.orm.registry._logger.name)
     freeze_time = None
 
@@ -966,7 +960,7 @@ class TransactionCase(BaseCase):
         cls.startClassPatcher(cls._signal_changes_patcher)
 
         cls.cr = cls.registry.cursor()
-        cls.addClassCleanup(cls.cr.close)
+        cls.addClassCleanup(cast(Cursor, cls.cr).close)
 
         if cls.freeze_time:
             cls.startClassPatcher(freezegun.freeze_time(cls.freeze_time))
@@ -1060,7 +1054,7 @@ class SingleTransactionCase(BaseCase):
         cls.addClassCleanup(cls.registry.clear_all_caches)
 
         cls.cr = cls.registry.cursor()
-        cls.addClassCleanup(cls.cr.close)
+        cls.addClassCleanup(cast(Cursor, cls.cr).close)
 
         cls.env = api.Environment(cls.cr, api.SUPERUSER_ID, {})
 
@@ -1100,11 +1094,8 @@ def save_test_file(test_name, content, prefix, extension='png', logger=_logger, 
     now = datetime.now().strftime(date_format)
     screenshots_dir = pathlib.Path(odoo.tools.config['screenshots']) / get_db_name() / 'screenshots'
     screenshots_dir.mkdir(parents=True, exist_ok=True)
-    fname = f'{prefix}{now}_{test_name}.{extension}'
-    full_path = screenshots_dir / fname
-
-    with full_path.open('wb') as f:
-        f.write(content)
+    full_path = screenshots_dir / f'{prefix}{now}_{test_name}.{extension}'
+    full_path.write_bytes(content)
     logger.runbot(f'{document_type} in: {full_path}')
 
 
@@ -1121,12 +1112,10 @@ class ChromeBrowser:
             raise unittest.SkipTest("websocket-client module is not installed")
         self.user_data_dir = tempfile.mkdtemp(suffix='_chrome_odoo')
 
-        otc = odoo.tools.config
-        self.screencasts_dir = None
-        self.screencast_frames = []
-        if otc['screencasts']:
-            self.screencasts_dir = os.path.join(otc['screencasts'], get_db_name(), 'screencasts')
-            os.makedirs(self.screencasts_frames_dir, exist_ok=True)
+        if scs := odoo.tools.config['screencasts']:
+            self.screencaster = Screencaster(self, scs)
+        else:
+            self.screencaster = NoScreencast()
 
         if os.name == 'posix':
             self.sigxcpu_handler = signal.getsignal(signal.SIGXCPU)
@@ -1155,7 +1144,7 @@ class ChromeBrowser:
             'Runtime.consoleAPICalled': self._handle_console,
             'Runtime.exceptionThrown': self._handle_exception,
             'Page.frameStoppedLoading': self._handle_frame_stopped_loading,
-            'Page.screencastFrame': self._handle_screencast_frame,
+            'Page.screencastFrame': self.screencaster,
         }
         self._receiver = threading.Thread(
             target=self._receive,
@@ -1181,26 +1170,16 @@ class ChromeBrowser:
         emulated_device['width'], emulated_device['height'] = [int(size) for size in test_case.browser_size.split(",")]
         self._websocket_request('Emulation.setDeviceMetricsOverride', params=emulated_device)
 
-    @property
-    def screencasts_frames_dir(self):
-        if screencasts_dir := self.screencasts_dir:
-            return os.path.join(screencasts_dir, 'frames')
-        else:
-            return None
-
     def signal_handler(self, sig, frame):
         if sig == signal.SIGXCPU:
             _logger.info('CPU time limit reached, stopping Chrome and shutting down')
             self.stop()
-            os._exit(0)
+            exit()
 
     def stop(self):
+        # method may be called during `_open_websocket`
         if hasattr(self, 'ws'):
-            self._websocket_send('Page.stopScreencast')
-            if screencasts_frames_dir := self.screencasts_frames_dir:
-                self.screencasts_dir = None
-                if os.path.isdir(screencasts_frames_dir):
-                    shutil.rmtree(screencasts_frames_dir, ignore_errors=True)
+            self.screencaster.stop()
 
             self._websocket_request('Page.stopLoading')
             self._websocket_request('Runtime.evaluate', params={'expression': """
@@ -1217,17 +1196,16 @@ class ChromeBrowser:
             self._websocket_send('Browser.close')
             self._logger.info("Closing websocket connection")
             self.ws.close()
-        if self.chrome:
-            self._logger.info("Terminating chrome headless with pid %s", self.chrome.pid)
-            self.chrome.terminate()
-            self.chrome.wait(5)
 
-        if self.user_data_dir and os.path.isdir(self.user_data_dir) and self.user_data_dir != '/':
-            self._logger.info('Removing chrome user profile "%s"', self.user_data_dir)
-            shutil.rmtree(self.user_data_dir, ignore_errors=True)
+        self._logger.info("Terminating chrome headless with pid %s", self.chrome.pid)
+        self.chrome.terminate()
+        self.chrome.wait(5)
+
+        self._logger.info('Removing chrome user profile "%s"', self.user_data_dir)
+        shutil.rmtree(self.user_data_dir, ignore_errors=True)
 
         # Restore previous signal handler
-        if self.sigxcpu_handler and os.name == 'posix':
+        if self.sigxcpu_handler:
             signal.signal(signal.SIGXCPU, self.sigxcpu_handler)
 
     @property
@@ -1343,17 +1321,14 @@ class ChromeBrowser:
         ``protocol``
             get the full protocol
         """
-        command = '/'.join(['json', command]).strip('/')
-        url = werkzeug.urls.url_join('http://%s:%s/' % (HOST, self.devtools_port), command)
+        url = f'http://{HOST}:{self.devtools_port}/json/{command}'.rstrip('/')
         self._logger.info("Issuing json command %s", url)
         delay = 0.1
         tries = 0
         failure_info = None
         message = None
         while timeout > 0:
-            try:
-                self.chrome.send_signal(0)
-            except ProcessLookupError:
+            if self.chrome.poll() is not None:
                 message = 'Chrome crashed at startup'
                 break
             try:
@@ -1432,28 +1407,22 @@ class ChromeBrowser:
             request_id = res.get('id')
             try:
                 if request_id is None:
-                    handler = self._handlers.get(res['method'])
-                    if handler:
+                    if handler := self._handlers.get(res['method']):
                         handler(**res['params'])
-                else:
-                    f = self._responses.pop(request_id, None)
-                    if f:
-                        if 'result' in res:
-                            f.set_result(res['result'])
-                        else:
-                            f.set_exception(ChromeBrowserException(res['error']['message']))
+                elif f := self._responses.pop(request_id, None):
+                    if 'result' in res:
+                        f.set_result(res['result'])
+                    else:
+                        f.set_exception(ChromeBrowserException(res['error']['message']))
             except Exception:
-                msg = str(msg)
-                if msg and len(msg) > 500:
-                    msg = msg[:500] + '...'
-                _logger.exception("While processing message %s", msg)
+                _logger.exception(
+                    "While processing message %s",
+                    shorten(str(msg), 500, placeholder='...'),
+                )
 
     def _websocket_request(self, method, *, params=None, timeout=10.0):
         assert threading.get_ident() != self._receiver.ident,\
             "_websocket_request must not be called from the consumer thread"
-        if self.ws is None:
-            return
-
         f = self._websocket_send(method, params=params, with_future=True)
         try:
             return f.result(timeout=timeout)
@@ -1465,9 +1434,6 @@ class ChromeBrowser:
 
         If ``with_future`` is set, returns a ``Future`` for the operation.
         """
-        if self.ws is None:
-            return
-
         result = None
         request_id = next(self._request_id)
         if with_future:
@@ -1514,7 +1480,7 @@ class ChromeBrowser:
                 return
             if not self.error_checker or self.error_checker(message):
                 self.take_screenshot()
-                self._save_screencast()
+                self.screencaster.save()
                 try:
                     self._result.set_exception(ChromeBrowserException(message))
                 except CancelledError:
@@ -1531,10 +1497,6 @@ class ChromeBrowser:
                 r = yield self._websocket_send("Runtime.getHeapUsage", with_future=True)
                 _logger.info("heap %d (allocated %d)", r['usedSize'], r['totalSize'])
 
-            if self.test_case.allow_end_on_form:
-                self._result.set_result(True)
-                return
-
             @run
             def _check_form():
                 node_id = 0
@@ -1550,9 +1512,9 @@ class ChromeBrowser:
                 if node_id:
                     self.take_screenshot("unsaved_form_")
                     msg = """\
-Tour finished with an open form view in edition mode.
+Tour finished with a dirty form view being open.
 
-Form views in edition mode are automatically saved when the page is closed, \
+Dirty form views are automatically saved when the page is closed, \
 which leads to stray network requests and inconsistencies."""
                     if self._result.done():
                         _logger.error("%s", msg)
@@ -1563,8 +1525,6 @@ which leads to stray network requests and inconsistencies."""
                 if not self._result.done():
                     self._result.set_result(True)
                 elif self._result.exception() is None:
-                    # if the future was already failed, we're happy,
-                    # otherwise swap for a new failed
                     _logger.error("Tried to make the tour successful twice.")
 
 
@@ -1584,7 +1544,7 @@ which leads to stray network requests and inconsistencies."""
             return
 
         self.take_screenshot()
-        self._save_screencast()
+        self.screencaster.save()
         try:
             self._result.set_exception(ChromeBrowserException(message))
         except CancelledError:
@@ -1599,22 +1559,6 @@ which leads to stray network requests and inconsistencies."""
         wait = self._frames.pop(frameId, None)
         if wait:
             wait()
-
-    def _handle_screencast_frame(self, sessionId, data, metadata):
-        frames_dir = self.screencasts_frames_dir
-        if not frames_dir:
-            return
-        self._websocket_send('Page.screencastFrameAck', params={'sessionId': sessionId})
-        outfile = os.path.join(frames_dir, 'frame_%05d.b64' % len(self.screencast_frames))
-        try:
-            with open(outfile, 'w') as f:
-                f.write(data)
-                self.screencast_frames.append({
-                    'file_path': outfile,
-                    'timestamp': metadata.get('timestamp')
-                })
-        except FileNotFoundError:
-            self._logger.debug('Useless screencast frame skipped: %s', outfile)
 
     _TO_LEVEL = {
         'debug': logging.DEBUG,
@@ -1646,70 +1590,14 @@ which leads to stray network requests and inconsistencies."""
         f.add_done_callback(handler)
         return f
 
-    def _save_screencast(self, prefix='failed'):
-        # could be encododed with something like that
-        #  ffmpeg -framerate 3 -i frame_%05d.png  output.mp4
-        if not self.screencast_frames:
-            self._logger.debug('No screencast frames to encode')
-            return None
-
-        self.stop_screencast()
-
-        for f in self.screencast_frames:
-            with open(f['file_path'], 'rb') as b64_file:
-                frame = base64.decodebytes(b64_file.read())
-            os.unlink(f['file_path'])
-            f['file_path'] = f['file_path'].replace('.b64', '.png')
-            with open(f['file_path'], 'wb') as png_file:
-                png_file.write(frame)
-
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
-        fname = '%s_screencast_%s.mp4' % (prefix, timestamp)
-        outfile = os.path.join(self.screencasts_dir, fname)
-
-        try:
-            ffmpeg_path = find_in_path('ffmpeg')
-        except IOError:
-            ffmpeg_path = None
-
-        if ffmpeg_path:
-            nb_frames = len(self.screencast_frames)
-            concat_script_path = os.path.join(self.screencasts_dir, fname.replace('.mp4', '.txt'))
-            with open(concat_script_path, 'w') as concat_file:
-                for i in range(nb_frames):
-                    frame_file_path = os.path.join(self.screencasts_frames_dir, self.screencast_frames[i]['file_path'])
-                    end_time = time.time() if i == nb_frames - 1 else self.screencast_frames[i+1]['timestamp']
-                    duration = end_time - self.screencast_frames[i]['timestamp']
-                    concat_file.write("file '%s'\nduration %s\n" % (frame_file_path, duration))
-                concat_file.write("file '%s'" % frame_file_path)  # needed by the concat plugin
-            try:
-                subprocess.run([ffmpeg_path, '-f', 'concat', '-safe', '0', '-i', concat_script_path, '-pix_fmt', 'yuv420p', '-g', '0', outfile], check=True)
-            except subprocess.CalledProcessError:
-                self._logger.error('Failed to encode screencast.')
-                return
-            self._logger.log(25, 'Screencast in: %s', outfile)
-        else:
-            outfile = outfile.strip('.mp4')
-            shutil.move(self.screencasts_frames_dir, outfile)
-            self._logger.runbot('Screencast frames in: %s', outfile)
-
-    def start_screencast(self):
-        assert self.screencasts_dir
-        self._websocket_send('Page.startScreencast')
-
-    def stop_screencast(self):
-        self._websocket_send('Page.stopScreencast')
-
     def set_cookie(self, name, value, path, domain):
         params = {'name': name, 'value': value, 'path': path, 'domain': domain}
         self._websocket_request('Network.setCookie', params=params)
-        return
 
     def delete_cookie(self, name, **kwargs):
         params = {k: v for k, v in kwargs.items() if k in ['url', 'domain', 'path']}
         params['name'] = name
         self._websocket_request('Network.deleteCookies', params=params)
-        return
 
     def _wait_ready(self, ready_code=None, timeout=60):
         ready_code = ready_code or "document.readyState === 'complete'"
@@ -1760,7 +1648,7 @@ which leads to stray network requests and inconsistencies."""
             err = e
 
         self.take_screenshot()
-        self._save_screencast()
+        self.screencaster.save()
         if isinstance(err, ChromeBrowserException):
             raise err
 
@@ -1854,6 +1742,90 @@ which leads to stray network requests and inconsistencies."""
             return m[0]
         return replacer
 
+class NoScreencast:
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def save(self):
+        pass
+
+    def __call__(self, sessionId, data, metadata):
+        pass
+
+
+class Screencaster:
+    def __init__(self, browser: ChromeBrowser, directory: str):
+        self.browser: ChromeBrowser = browser
+        self._logger: logging.Logger = browser._logger
+        self.directory = pathlib.Path(directory, get_db_name(), 'screencasts')
+        self.frames_dir = self.directory / 'frames'
+        self.frames_dir.mkdir(parents=True, exist_ok=True)
+        self.frames = []
+
+    def start(self):
+        self._logger.info('Starting screencast')
+        self.browser._websocket_send('Page.startScreencast')
+
+    def __call__(self, sessionId, data, metadata):
+        self.browser._websocket_send('Page.screencastFrameAck', params={'sessionId': sessionId})
+        outfile = self.frames_dir / f'frame_{len(self.frames):05d}.b64'
+        outfile.write_text(data)
+        self.frames.append({
+            'file_path': outfile,
+            'timestamp': metadata.get('timestamp')
+        })
+
+    def stop(self):
+        self.browser._websocket_send('Page.stopScreencast')
+        if self.frames_dir.is_dir():
+            shutil.rmtree(self.frames_dir, ignore_errors=True)
+
+    def save(self):
+        if not self.frames:
+            self._logger.debug('No screencast frames to encode')
+            return
+
+        self.browser._websocket_send('Page.stopScreencast')
+
+        t = time.time()
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+        outdir = self.directory / f'failed_screencast_{timestamp}'
+
+        duration = 1/24
+        concat_script_path = outdir.with_suffix('.txt')
+        with concat_script_path.open("w") as concat_file:
+            for f, next_frame in zip_longest(self.frames, islice(self.frames, 1, None)):
+                frame = base64.b64decode(f['file_path'].read_bytes(), validate=True)
+                f['file_path'].unlink()
+                frame_file_path = f['file_path'].with_suffix('.png')
+                frame_file_path.write_bytes(frame)
+
+                if f['timestamp'] is not None:
+                    end_time = next_frame['timestamp'] if next_frame else t
+                    duration = end_time - f['timestamp']
+                concat_file.write(f"file '{frame_file_path}'\nduration {duration}\n")
+            concat_file.write(f"file '{frame_file_path}'")  # needed by the concat plugin
+
+        try:
+            ffmpeg_path = find_in_path('ffmpeg')
+        except IOError:
+            shutil.move(self.frames_dir, outdir)
+            self._logger.runbot('Screencast frames in: %s', outdir)
+            return
+
+        outfile = outdir.with_suffix('.mp4')
+        try:
+            subprocess.run([ffmpeg_path, '-f', 'concat', '-safe', '0', '-i', concat_script_path, '-pix_fmt', 'yuv420p', '-g', '0', outfile], check=True)
+        except subprocess.CalledProcessError:
+            shutil.move(self.frames_dir, outdir)
+            self._logger.error('Failed to encode screencast, screencast frames in %s', outdir)
+        else:
+            shutil.rmtree(self.frames_dir, ignore_errors=True)
+            self._logger.runbot('Screencast in: %s', outfile)
+
 @lru_cache(1)
 def _find_executable():
     system = platform.system()
@@ -1928,7 +1900,7 @@ class HttpCase(TransactionCase):
     browser = None
     browser_size = '1366x768'
     touch_enabled = False
-    allow_end_on_form = False
+    session: odoo.http.Session = None
 
     _logger: logging.Logger = None
 
@@ -1973,33 +1945,23 @@ class HttpCase(TransactionCase):
 
     def parse_http_location(self, location):
         """ Parse a Location http header typically found in 201/3xx
-        responses, return the corresponding Url object. The scheme/host
+        responses, return the corresponding parsed url object. The scheme/host
         are taken from ``base_url()`` in case they are missing from the
         header.
-
-        https://urllib3.readthedocs.io/en/stable/reference/urllib3.util.html#urllib3.util.Url
         """
         if not location:
-            return Url()
-        base_url = parse_url(self.base_url())
-        url = parse_url(location)
-        return Url(
-            scheme=url.scheme or base_url.scheme,
-            auth=url.auth or base_url.auth,
-            host=url.host or base_url.host,
-            port=url.port or base_url.port,
-            path=url.path,
-            query=url.query,
-            fragment=url.fragment,
-        )
+            return urlsplit('')
+        s = urlsplit(urljoin(self.base_url(), location))
+        # normalise query parameters
+        return s._replace(query=urlencode(parse_qsl(s.query)))
 
     def assertURLEqual(self, test_url, truth_url, message=None):
         """ Assert that two URLs are equivalent. If any URL is missing
         a scheme and/or host, assume the same scheme/host as base_url()
         """
         self.assertEqual(
-            self.parse_http_location(test_url).url,
-            self.parse_http_location(truth_url).url,
+            self.parse_http_location(test_url),
+            self.parse_http_location(truth_url),
             message,
         )
 
@@ -2153,19 +2115,17 @@ class HttpCase(TransactionCase):
             # test cursors, which uses different caches than this transaction.
             self.cr.flush()
             self.cr.clear()
-            url = werkzeug.urls.url_join(self.base_url(), url_path)
+            url = urljoin(self.base_url(), url_path)
             if watch:
-                parsed = werkzeug.urls.url_parse(url)
-                qs = parsed.decode_query()
+                parsed = urlsplit(url)
+                qs = dict(parse_qsl(parsed.query))
                 qs['watch'] = '1'
                 if debug is not False:
                     qs['debug'] = "assets"
-                url = parsed.replace(query=werkzeug.urls.url_encode(qs)).to_url()
+                url = urlunsplit(parsed._replace(query=urlencode(qs)))
             self._logger.info('Open "%s" in browser', url)
 
-            if browser.screencasts_dir:
-                self._logger.info('Starting screencast')
-                browser.start_screencast()
+            browser.screencaster.start()
             if cookies:
                 for name, value in cookies.items():
                     browser.set_cookie(name, value, '/', HOST)
@@ -2178,7 +2138,7 @@ class HttpCase(TransactionCase):
                 timeout *= cpu_throttling  # extend the timeout as test will be slower to execute
                 _logger.log(
                     logging.INFO if cpu_throttling_os else logging.WARNING,
-                    'CPU throttling mode is only suitable for local testing - ' \
+                    'CPU throttling mode is only suitable for local testing - '
                     'Throttling browser CPU to %sx slowdown and extending timeout to %s sec', cpu_throttling, timeout)
                 browser._websocket_request('Emulation.setCPUThrottlingRate', params={'rate': cpu_throttling})
 
@@ -2245,30 +2205,24 @@ class HttpCase(TransactionCase):
     def make_jsonrpc_request(self, route, params=None, headers=None):
         """Make a JSON-RPC request to the server.
 
-        :param str route: the route to request
-        :param dict params: the parameters to send
         :raises requests.HTTPError: if one occurred
         :raises JsonRpcException: if the response contains an error
-        :return: The 'result' key from the response if any.
         """
-        data = json.dumps({
+        response = self.opener.post(urljoin(self.base_url(), route), json={
             'id': 0,
             'jsonrpc': '2.0',
             'method': 'call',
             'params': params or {},
-        }).encode()
-        headers = headers or {}
-        headers['Content-Type'] = 'application/json'
-        response = self.url_open(route, data, headers=headers)
+        }, headers=headers)
         response.raise_for_status()
         decoded_response = response.json()
-        if 'result' in decoded_response:
-            return decoded_response['result']
         if 'error' in decoded_response:
             raise JsonRpcException(
                 code=decoded_response['error']['code'],
                 message=decoded_response['error']['data']['name']
             )
+        # workaround: JsonRPCDispatcher is broken and may send neither result nor error
+        return decoded_response.get('result')
 
 
 def no_retry(arg):
