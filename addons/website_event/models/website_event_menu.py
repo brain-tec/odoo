@@ -17,9 +17,9 @@ class WebsiteEventMenu(models.Model):
     view_id = fields.Many2one('ir.ui.view', string='View', ondelete='cascade', help='Used when not being an url based menu')
     menu_type = fields.Selection(
         [('community', 'Community Menu'),
-         ('introduction', 'Introduction'),
-         ('location', 'Location'),
-         ('register', 'Info'),
+         ('introduction', 'Home'),
+         ('register', 'Practical'),
+         ('other', 'Other'),
         ], string="Menu Type", required=True)
 
     def copy(self, default=None):
