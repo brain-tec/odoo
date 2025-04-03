@@ -1,3 +1,5 @@
+import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
+
 export function clickNextOrder() {
     return [
         {
@@ -209,5 +211,14 @@ export function cashierNameExists(name) {
             content: `Cashier ${name} exists on the receipt`,
             trigger: `.pos-receipt-contact .cashier:contains(Served by):contains(${name})`,
         },
+    ];
+}
+
+export function discardOrderWarningDialog() {
+    return [
+        {
+            trigger: `.modal-dialog:contains("It seems that the order has not been sent. Would you like to send it to preparation?")`,
+        },
+        Dialog.discard(),
     ];
 }
