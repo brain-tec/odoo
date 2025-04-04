@@ -8139,6 +8139,18 @@ msgid ""
 "- Withholding Tax Report\n"
 "- Fiscal Positions\n"
 msgstr ""
+"\n"
+"サウジアラビア会計モジュール\n"
+"===========================================================\n"
+"サウジアラビア 会計 基本勘定科目表およびローカリゼーション\n"
+"\n"
+"有効化:\n"
+"\n"
+"- 勘定科目表\n"
+"- 税\n"
+"- Vat入力レポート\n"
+"- 源泉徴収税レポート\n"
+"- 会計ポジション\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_sa_pos
@@ -18084,7 +18096,7 @@ msgstr "会社を複製することは許可されていません。代わりに
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_profile__duration
 msgid "Duration"
-msgstr "経過時間"
+msgstr "所要時間"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_nl_reports_sbr
@@ -18225,7 +18237,7 @@ msgstr "エジプト - 会計"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_eg_edi_eta
 msgid "Egypt E-Invoicing"
-msgstr ""
+msgstr "エジプト 電子請求"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_partner__partner_share
@@ -18414,7 +18426,7 @@ msgstr "従業員契約レポート"
 #. module: base
 #: model:ir.module.category,name:base.module_category_services_employee_hourly_cost
 msgid "Employee Hourly Cost"
-msgstr "従業員毎時コスト"
+msgstr "従業員の時間単価"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_hourly_cost
@@ -28858,7 +28870,7 @@ msgstr "プロダクト在庫通知"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_comparison
 msgid "Product Comparison"
-msgstr "製品比較"
+msgstr "プロダクト比較"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_product_email_template
@@ -28879,7 +28891,7 @@ msgstr "プロダクトライフサイクルマネジメント (PLM)"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_product_matrix
 msgid "Product Matrix"
-msgstr "製品マトリックス"
+msgstr "プロダクトマトリックス"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_productivity
@@ -30758,12 +30770,12 @@ msgstr "サウジアラビア - 電子請求 (簡易版)"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll
 msgid "Saudi Arabia - Payroll"
-msgstr ""
+msgstr "サウジアラビア - 給与"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll_account
 msgid "Saudi Arabia - Payroll with Accounting"
-msgstr ""
+msgstr "サウジアラビア - 会計の給与"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_pos
@@ -34836,12 +34848,12 @@ msgstr "アラブ首長国連邦 - 会計"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll
 msgid "United Arab Emirates - Payroll"
-msgstr ""
+msgstr "アラブ首長国連邦 - 給与"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll_account
 msgid "United Arab Emirates - Payroll with Accounting"
-msgstr ""
+msgstr "アラブ首長国連邦 - 会計の給与"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ae_pos
@@ -35998,7 +36010,7 @@ msgstr "ウェブサイトがリード生成企業版にアクセス"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_profile
 msgid "Website profile"
-msgstr "ウェブサイトプロフィール"
+msgstr "ウェブサイトプロファイル"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_lang__week_start__3

@@ -11,7 +11,7 @@ import re
 from textwrap import shorten
 
 from odoo import api, fields, models, _, Command
-from odoo.addons.account.tools import format_structured_reference_iso
+from odoo.addons.account.tools import format_rf_reference
 from odoo.exceptions import UserError, ValidationError, AccessError, RedirectWarning
 from odoo.tools.misc import clean_context
 from odoo.tools import (
@@ -624,7 +624,8 @@ class AccountMove(models.Model):
     def _compute_hide_post_button(self):
         for record in self:
             record.hide_post_button = record.state != 'draft' \
-                or record.auto_post != 'no' and record.date > fields.Date.context_today(record)
+                or record.auto_post != 'no' and \
+                record.date and record.date > fields.Date.context_today(record)
 
     @api.depends('journal_id')
     def _compute_company_id(self):
@@ -1881,6 +1882,7 @@ class AccountMove(models.Model):
         having the biggest balance.
         '''
         self.ensure_one()
+        self = self.with_company(self.company_id.id)
         def _compute_cash_rounding(self, total_amount_currency):
             ''' Compute the amount differences due to the cash rounding.
             :param self:                    The current account.move record.
@@ -2604,7 +2606,7 @@ class AccountMove(models.Model):
             is 07 so the reference will be 'RF07 43'.
         """
         self.ensure_one()
-        return format_structured_reference_iso(self.id)
+        return format_rf_reference(self.id)
 
     def _get_invoice_reference_euro_partner(self):
         """ This computes the reference based on the RF Creditor Reference.
@@ -2621,7 +2623,7 @@ class AccountMove(models.Model):
         partner_ref = self.partner_id.ref
         partner_ref_nr = re.sub(r'\D', '', partner_ref or '')[-21:] or str(self.partner_id.id)[-21:]
         partner_ref_nr = partner_ref_nr[-21:]
-        return format_structured_reference_iso(partner_ref_nr)
+        return format_rf_reference(partner_ref_nr)
 
     def _get_invoice_reference_odoo_invoice(self):
         """ This computes the reference based on the Odoo format.
@@ -3981,6 +3983,20 @@ class AccountMove(models.Model):
 
     def _get_report_base_filename(self):
         return self._get_move_display_name()
+
+    def _get_report_attachment_filename(self):
+        self.ensure_one()
+        if self.state == 'posted':
+            name = self.name or _('INV')
+        else:
+            name = self._get_report_base_filename()
+        return f"{name.replace('/', '_')}.pdf"
+
+    def _get_report_mail_attachment_filename(self):
+        self.ensure_one()
+        invoice_name = (self.name or '').replace('/', '_')
+        post_suffix = _('_draft') if self.state == 'draft' else ''
+        return _('Invoice_%(name)s%(post)s', name=invoice_name, post=post_suffix)
 
     # -------------------------------------------------------------------------
     # CRON

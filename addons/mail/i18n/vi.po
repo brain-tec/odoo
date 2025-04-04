@@ -10,8 +10,8 @@
 # Dung Nguyen Thi <dungnt@trobz.com>, 2022
 # Nancy Momoland <thanh.np2502@gmail.com>, 2023
 # Martin Trigaux, 2023
-# Thi Huong Nguyen, 2025
 # Wil Odoo, 2025
+# Thi Huong Nguyen, 2025
 # 
 msgid ""
 msgstr ""
@@ -19,7 +19,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-02-06 13:31+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
+"Last-Translator: Thi Huong Nguyen, 2025\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3891,12 +3891,12 @@ msgstr "Tìm hoặc tạo một kênh..."
 #: code:addons/mail/static/src/models/discuss_sidebar_category.js:0
 #, python-format
 msgid "Find or start a conversation..."
-msgstr "Tìm hoặc tạo kênh trò chuyện..."
+msgstr "Tìm hoặc tạo một cuộc trò chuyện..."
 
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_channel_member__fold_state__folded
 msgid "Folded"
-msgstr "Đóng vào"
+msgstr "Thu gọn"
 
 #. module: mail
 #. odoo-javascript
@@ -3940,12 +3940,12 @@ msgstr "Form Người theo dõi"
 #: code:addons/mail/static/src/components/composer/composer.xml:0
 #, python-format
 msgid "Followers of"
-msgstr "Những Người dõi theo"
+msgstr "Người theo dõi"
 
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_alias__alias_contact__followers
 msgid "Followers only"
-msgstr "Chỉ những người dõi theo"
+msgstr "Chỉ những người theo dõi"
 
 #. module: mail
 #. odoo-javascript
@@ -4664,20 +4664,20 @@ msgstr "Cuộc gọi đến..."
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
 msgid "Incoming Email Servers"
-msgstr "Máy chủ Nhận Email"
+msgstr "Máy chủ thư đến"
 
 #. module: mail
 #: model:ir.model,name:mail.model_fetchmail_server
 #: model_terms:ir.ui.view,arch_db:mail.view_email_server_form
 #: model_terms:ir.ui.view,arch_db:mail.view_email_server_search
 msgid "Incoming Mail Server"
-msgstr "Máy chủ nhận thư"
+msgstr "Máy chủ thư đến"
 
 #. module: mail
 #: model:ir.actions.act_window,name:mail.action_email_server_tree
 #: model:ir.ui.menu,name:mail.menu_action_fetchmail_server_tree
 msgid "Incoming Mail Servers"
-msgstr "Máy chủ nhận Mail"
+msgstr "Máy chủ thư đến"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_activity__automated
@@ -8238,7 +8238,7 @@ msgstr "Tìm kiếm Nhóm"
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_email_server_search
 msgid "Search Incoming Mail Servers"
-msgstr "Tìm các máy chủ nhận email"
+msgstr "Tìm máy chủ thư đến"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_channel_rtc_session_view_search

@@ -2453,7 +2453,7 @@ msgid ""
 "on the delivery order sent by your vendor."
 msgstr ""
 "Mã đơn bán hàng hoặc chào thầu gửi bởi nhà cung cấp. Mã số này được sử dụng "
-"để so sánh lúc bạn nhận sản phẩm vì nó thường được viết trên phiếu xuất kho "
+"để so sánh lúc bạn nhận sản phẩm vì nó thường được viết trên lệnh giao hàng "
 "do nhà cung cấp gửi."
 
 #. module: purchase
@@ -2856,8 +2856,8 @@ msgid ""
 "This currency will be used, instead of the default one, for purchases from "
 "the current partner"
 msgstr ""
-"Tiền tệ này sẽ được sử dụng để mua hàng từ nhà cung cấp hiện tại thay vì "
-"tiền tệ mặc định"
+"Tiền tệ này sẽ được sử dụng để mua hàng từ đối tác hiện tại thay vì tiền tệ "
+"mặc định"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_res_config_settings__default_purchase_method

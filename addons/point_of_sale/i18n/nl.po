@@ -8,16 +8,16 @@
 # Jolien De Paepe, 2024
 # Larissa Manderfeld, 2024
 # Wil Odoo, 2024
-# Manon Rondou, 2024
 # Erwin van der Ploeg <erwin@odooexperts.nl>, 2025
+# Manon Rondou, 2025
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 08:26+0000\n"
+"POT-Creation-Date: 2025-03-19 11:06+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2025\n"
+"Last-Translator: Manon Rondou, 2025\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -7662,6 +7662,17 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-python
+#: code:addons/point_of_sale/models/account_cash_rounding.py:0
+#, python-format
+msgid ""
+"You cannot delete a rounding method that is used in a Point of Sale "
+"configuration."
+msgstr ""
+"Je kunt een afrondmethode die gebruikt wordt in een kassaconfiguratie niet "
+"verwijderen."
+
+#. module: point_of_sale
+#. odoo-python
 #: code:addons/point_of_sale/models/res_partner.py:0
 #, python-format
 msgid ""
@@ -8012,3 +8023,5 @@ msgid ""
 "This journal is associated with payment method %s that is being used by "
 "order %s in the active pos session %s"
 msgstr ""
+"Dit dagboek is gekoppeld aan betaalmethode %s die wordt gebruikt door "
+"bestelling %s in de actieve Kassa-sessie %s."

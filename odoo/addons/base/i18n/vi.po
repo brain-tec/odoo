@@ -1352,6 +1352,8 @@ msgid ""
 "        E-Invoicing, Universal Business Language\n"
 "    "
 msgstr ""
+"\n"
+"Lập hóa đơn điện tử, Ngôn ngữ kinh doanh chung"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_mx_reports
@@ -2817,7 +2819,7 @@ msgstr ""
 "Chuyển khoản Tín dụng ABA\n"
 "===================\n"
 "\n"
-"Phân hệ này cho phép tạo các đợt thanh toán hàng loạt dưới dạng tệp văn bản ABA (Hiệp hội\n"
+"Phân hệ này cho phép tạo các đợt thanh toán theo lô dưới dạng tệp văn bản ABA (Hiệp hội\n"
 "Ngân hàng Úc). Tệp 'aba' được tạo có thể được tải lên \n"
 " nhiều ngân hàng của Úc.\n"
 "\n"
@@ -2902,11 +2904,11 @@ msgstr ""
 "    Sau khi (các) khoản thanh toán được xác nhận, chúng sẽ hiển thị trong danh sách thanh toán.\n"
 "\n"
 "    Sử dụng bộ lọc hoặc sắp xếp, chọn các khoản thanh toán cần thiết. \n"
-"    **Tác vụ* chọn *Tạo thanh toán hàng loạt*.\n"
+"    **Tác vụ* chọn *Tạo thanh toán theo lô*.\n"
 "\n"
-"- *Nhà cung cấp > Thanh toán hàng loạt*\n"
+"- *Nhà cung cấp > Thanh toán theo lô*\n"
 "\n"
-"    Khi xác thực thanh toán hàng loạt, tệp ABA sẽ được tạo. Tệp này có thể \n"
+"    Khi xác thực thanh toán theo lô, tệp ABA sẽ được tạo. Tệp này có thể \n"
 "    được tái tạo. Sau đó, bạn có thể tải tệp lên ngân hàng.\n"
 
 #. module: base
@@ -4373,13 +4375,13 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Thanh toán Hàng loạt\n"
+"Thanh toán theo lô\n"
 "=======================================\n"
-"Thanh toán hàng loạt cho phép nhóm các khoản thanh toán.\n"
+"Thanh toán theo lô cho phép nhóm các khoản thanh toán.\n"
 "\n"
 "Chúng được sử dụng cụ thể, nhưng không chỉ để nhóm một số séc trước khi gửi chúng cho ngân hàng vào một đợt duy nhất.\n"
 "Sau đó, tổng số tiền gửi sẽ xuất hiện dưới dạng một giao dịch trên bảng sao kê ngân hàng của bạn.\n"
-"Khi bạn đối chiếu, chỉ cần chọn khoản thanh toán hàng loạt tương ứng để đối chiếu tất cả các khoản thanh toán trong đợt.\n"
+"Khi bạn đối chiếu, chỉ cần chọn khoản thanh toán theo lô tương ứng để đối chiếu tất cả các khoản thanh toán trong đợt.\n"
 "    "
 
 #. module: base
@@ -5271,7 +5273,7 @@ msgstr ""
 "Bất cứ khi nào hàng hóa được chuyển giao giữa A và B, DDT là\n"
 "tài liệu hợp pháp hóa, ví dụ: khi cảnh sát yêu cầu.\n"
 "\n"
-"Khi bạn muốn in phiếu lấy hàng gửi đi ở một công ty Ý,\n"
+"Khi bạn muốn in phiếu xuất kho gửi đi ở một công ty Ý,\n"
 "công ty này sẽ in DDT cho bạn. Đây giống như phiếu giao \n"
 "hàng, nhưng cũng bao gồm giá trị của sản phẩm,\n"
 "lý do vận chuyển, đơn vị vận chuyển,… hình thành nên một DDT.\n"
@@ -7098,7 +7100,7 @@ msgstr ""
 "Quản lý Chi phí theo Nhân viên\n"
 "==============================\n"
 "\n"
-"Phân hệ này cho phép bản quản lý chi tiêu phát sinh hàng ngày của nhân viên. Nó cho phép bạn truy cập vào kê khai chi phí của nhân viên và quyền hoàn thiện và xác nhận hoặc từ chối các kê khai này. Sau khi xác nhận, phân hệ này sẽ tạo một hoá đơn cho nhân viên.\n"
+"Phân hệ này cho phép bản quản lý chi phí phát sinh hàng ngày của nhân viên. Nó cho phép bạn truy cập vào kê khai chi phí của nhân viên và quyền hoàn thiện và xác nhận hoặc từ chối các kê khai này. Sau khi xác nhận, phân hệ này sẽ tạo một hoá đơn cho nhân viên.\n"
 "Nhân viên có thể mã hóa chi phí của họ và chu trình xác nhận sẽ tự động hạch toán chúng vào hệ thống kế toán sau khi quản lý xác nhận.\n"
 "\n"
 "\n"
@@ -8566,6 +8568,18 @@ msgid ""
 "- Withholding Tax Report\n"
 "- Fiscal Positions\n"
 msgstr ""
+"\n"
+"Phân hệ Kế toán cho Ả Rập Xê Út\n"
+"===========================================================\n"
+"Hệ thống tài khoản cơ bản và bản địa hóa cho Ả Rập Xê Út.\n"
+"\n"
+"Kích hoạt:\n"
+"\n"
+"- Hệ thống tài khoản kế toán\n"
+"- Thuế\n"
+"- Báo cáo kê khai thuế GTGT\n"
+"- Báo cáo thuế khấu trừ tại nguồn\n"
+"- Vị trí tài chính\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_sa_pos
@@ -10045,7 +10059,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Phân hệ này bổ sung tùy chọn chuyển hàng loạt trong quản lý kho\n"
+"Phân hệ này bổ sung tùy chọn chuyển theo lô trong quản lý kho\n"
 "==================================================================\n"
 "    "
 
@@ -12988,7 +13002,7 @@ msgstr "Tài khoản Nhập Sao kê Ngân hàng"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_accountant_batch_payment
 msgid "Account Batch Payment Reconciliation"
-msgstr "Tài khoản Đối chiếu Thanh toán Hàng loạt"
+msgstr "Tài khoản Đối chiếu Thanh toán theo lô"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_accounting_localizations_account_charts
@@ -13549,7 +13563,7 @@ msgstr "Bổ sung hỗ trợ Định danh itsme® khi ký tài liệu (chỉ ở
 #. module: base
 #: model:ir.module.module,summary:base.module_stock_barcode_picking_batch
 msgid "Add the support of batch transfers into the barcode view"
-msgstr "Thêm hỗ trợ chuyển hàng loạt vào chế độ xem mã vạch"
+msgstr "Thêm hỗ trợ chuyển theo lô vào chế độ xem mã vạch"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_product_matrix
@@ -14100,7 +14114,7 @@ msgstr "Cho phép gửi sms đến khách truy cập trang web có lead"
 #. module: base
 #: model:ir.module.module,summary:base.module_account_accountant_batch_payment
 msgid "Allows using Reconciliation with the Batch Payment feature."
-msgstr "Cho phép sử dụng Đối chiếu với tính năng Thanh toán Hàng loạt."
+msgstr "Cho phép sử dụng Đối chiếu với tính năng Thanh toán theo lô."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_delivery_fedex
@@ -15113,7 +15127,7 @@ msgstr "Phân hệ cầu nối Chất lượng Mã vạch"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_barcode_picking_batch
 msgid "Barcode for Batch Transfer"
-msgstr "Mã vạch cho Chuyển Hàng loạt"
+msgstr "Mã vạch cho Chuyển theo lô"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_barcodes_mobile
@@ -15142,7 +15156,7 @@ msgstr "Loại mã vạch, ví dụ: UPCA, EAN13, Code128"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_barcode_quality_control_picking_batch
 msgid "Barcode/Quality/Batch Transfer bridge module"
-msgstr "Phân hệ cầu nối Mã vạch/Chất lượng/Chuyển Hàng loạt"
+msgstr "Phân hệ cầu nối Mã vạch/Chất lượng/Chuyển theo lô"
 
 #. module: base
 #: model:ir.model,name:base.model_base
@@ -15240,12 +15254,12 @@ msgstr "Các đối tượng cơ bản và trình trợ giúp để hỗ trợ I
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_batch_payment
 msgid "Batch Payment"
-msgstr "Thanh toán Hàng loạt"
+msgstr "Thanh toán theo lô"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_delivery_stock_picking_batch
 msgid "Batch Transfer, Carrier"
-msgstr "Chuyển Hàng loạt, Hãng vận tải"
+msgstr "Chuyển hàng theo lô, Đơn vị vận chuyển"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ar_website_sale
@@ -19101,7 +19115,7 @@ msgstr "Ai Cập - Kế toán"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_eg_edi_eta
 msgid "Egypt E-Invoicing"
-msgstr ""
+msgstr "Hóa đơn Điện tử của Ai Cập"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_partner__partner_share
@@ -30673,7 +30687,7 @@ msgstr "Public"
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_O
 msgid "Public Administration"
-msgstr "Công khai tài khoản quản trị"
+msgstr "Hành chính công"
 
 #. module: base
 #: model:res.groups,comment:base.group_public
@@ -30851,7 +30865,7 @@ msgstr "Chất lượng"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_quality_control_picking_batch
 msgid "Quality - Batch Transfer"
-msgstr "Chất lượng - Chuyển Hàng loạt"
+msgstr "Chất lượng - Chuyển hàng theo lô"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_quality
@@ -32125,12 +32139,12 @@ msgstr "Ả Rập Xê Út - Hoá đơn điện tử (Đã đơn giản hoá)"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll
 msgid "Saudi Arabia - Payroll"
-msgstr ""
+msgstr "Ả Rập Xê Út - Bảng lương"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll_account
 msgid "Saudi Arabia - Payroll with Accounting"
-msgstr ""
+msgstr "Ả Rập Xê Út - Bảng lương với Kế toán"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_pos
@@ -33747,7 +33761,7 @@ msgstr "Hỗ trợ các bản nhạc trực tiếp: phát trực tuyến, tham g
 #. module: base
 #: model:ir.module.module,summary:base.module_quality_control_picking_batch
 msgid "Support of quality control into batch transfers"
-msgstr "Hỗ trợ kiểm soát chất lượng khi chuyển kho hàng loạt"
+msgstr "Hỗ trợ kiểm soát chất lượng khi chuyển kho theo lô"
 
 #. module: base
 #: model:res.country,name:base.sr
@@ -36384,12 +36398,12 @@ msgstr "Các Tiểu Vương Quốc Ả Rập Thống Nhất - Kế toán"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll
 msgid "United Arab Emirates - Payroll"
-msgstr ""
+msgstr "Các Tiểu Vương Quốc Ả Rập Thống Nhất - Bảng lương"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll_account
 msgid "United Arab Emirates - Payroll with Accounting"
-msgstr ""
+msgstr "Các Tiểu vương quốc Ả Rập Thống nhất - Bảng lương với Kế toán"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ae_pos
@@ -37285,7 +37299,7 @@ msgstr "Wallis và Futuna"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_picking_batch
 msgid "Warehouse Management: Batch Transfer"
-msgstr "Quản lý kho: Chuyển hàng loạt"
+msgstr "Quản lý kho: Chuyển theo lô"
 
 #. module: base
 #: model:ir.module.module,description:base.module_data_merge_stock_account
