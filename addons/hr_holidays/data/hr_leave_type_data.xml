@@ -225,6 +225,7 @@
         <field name="request_unit">half_day</field>
         <field name="leave_notif_subtype_id" ref="hr_holidays.mt_leave"/>
         <field name="company_id" eval="False"/>
+        <field name="country_id" ref="base.be"/>
     </record>
 
 <!-- CH: Switzerland -->
@@ -451,7 +452,6 @@
 <!-- LU : Luxemburg -->
     <record id="l10n_lu_leave_type_situational_unemployment" model="hr.leave.type">
         <field name="name">Unemployment (Weather / Situational)</field>
-        <field name="name@fr">Chômage (intempéries / conjoncturel)</field>
         <field name="requires_allocation">no</field>
         <field name="leave_validation_type">no_validation</field>
         <field name="allocation_validation_type">hr</field>

@@ -776,12 +776,14 @@ export class PosStore extends WithLazyGetterTrap {
             }
 
             // Product template of combo should not have more than 1 variant.
+            const [childLineConf, comboExtraLines] = payload;
             const comboPrices = computeComboItems(
                 values.product_tmpl_id.product_variant_ids[0],
-                payload,
+                childLineConf,
                 order.pricelist_id,
                 this.data.models["decimal.precision"].getAll(),
-                this.data.models["product.template.attribute.value"].getAllBy("id")
+                this.data.models["product.template.attribute.value"].getAllBy("id"),
+                comboExtraLines
             );
 
             values.combo_line_ids = comboPrices.map((comboItem) => [
@@ -796,7 +798,7 @@ export class PosStore extends WithLazyGetterTrap {
                     price_unit: comboItem.price_unit,
                     price_type: "manual",
                     order_id: order,
-                    qty: values.qty,
+                    qty: comboItem.qty,
                     attribute_value_ids: comboItem.attribute_value_ids?.map((attr) => [
                         "link",
                         attr,
@@ -2237,19 +2239,32 @@ export class PosStore extends WithLazyGetterTrap {
               });
     }
 
+    sortByWordIndex(products, words) {
+        return products.sort((a, b) => {
+            const nameA = unaccent(a.name);
+            const nameB = unaccent(b.name);
+
+            const indexA = nameA.indexOf(words);
+            const indexB = nameB.indexOf(words);
+            return (
+                (indexA === -1) - (indexB === -1) || indexA - indexB || nameA.localeCompare(nameB)
+            );
+        });
+    }
+
     getProductsBySearchWord(searchWord, products) {
         const words = unaccent(searchWord.toLowerCase(), false);
         const exactMatches = products.filter((product) => product.exactMatch(words));
 
         if (exactMatches.length > 0 && words.length > 2) {
-            return exactMatches;
+            return this.sortByWordIndex(exactMatches, words);
         }
 
         const matches = products.filter((p) =>
             unaccent(p.searchString, false).toLowerCase().includes(words)
         );
 
-        return Array.from(new Set([...exactMatches, ...matches]));
+        return this.sortByWordIndex(Array.from(new Set([...exactMatches, ...matches])), words);
     }
 
     getPaymentMethodDisplayText(pm, order) {
