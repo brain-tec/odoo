@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 """
@@ -39,14 +38,14 @@ class IrQweb(models.AbstractModel):
     """
     _inherit = 'ir.qweb'
 
-    def _compile_node(self, el, compile_context, indent):
+    def _compile_node(self, el, compile_context, level):
         snippet_key = compile_context.get('snippet-key')
         template = compile_context['template']
         sub_call_key = compile_context.get('snippet-sub-call-key')
         # We only add the 'data-snippet' & 'data-name' attrib once when
         # compiling the root node of the template.
         if template not in {snippet_key, sub_call_key} or el.getparent() is not None:
-            return super()._compile_node(el, compile_context, indent)
+            return super()._compile_node(el, compile_context, level)
 
         snippet_base_node = el
         if el.tag == 't':
@@ -72,7 +71,7 @@ class IrQweb(models.AbstractModel):
         snippet_name = compile_context.get('snippet-name')
         if snippet_name and 'data-name' not in snippet_base_node.attrib:
             snippet_base_node.attrib['data-name'] = snippet_name
-        return super()._compile_node(el, compile_context, indent)
+        return super()._compile_node(el, compile_context, level)
 
     # compile directives
 
@@ -127,9 +126,10 @@ class IrQweb(models.AbstractModel):
             if not module or module.state == 'installed':
                 return []
             name = el.attrib.get('string') or 'Snippet'
-            div = Markup('<div name="%s" data-oe-type="snippet" data-module-id="%s" data-o-image-preview="%s" data-oe-thumbnail="%s" %s><section/></div>') % (
+            div = Markup('<div name="%s" data-oe-type="snippet" data-module-id="%s" data-module-display-name="%s" data-o-image-preview="%s" data-oe-thumbnail="%s" %s><section/></div>') % (
                 name,
                 module.id,
+                module.display_name,
                 escape_silent(image_preview),
                 thumbnail,
                 Markup('data-o-group="%s"') % group if group else '',
@@ -169,7 +169,7 @@ class IrQwebField(models.AbstractModel):
     _inherit = ['ir.qweb.field']
 
     @api.model
-    def attributes(self, record, field_name, options, values):
+    def attributes(self, record, field_name, options, values=None):
         attrs = super().attributes(record, field_name, options, values)
         field = record._fields[field_name]
 
@@ -228,7 +228,7 @@ class IrQwebFieldMany2one(models.AbstractModel):
     _inherit = ['ir.qweb.field.many2one']
 
     @api.model
-    def attributes(self, record, field_name, options, values):
+    def attributes(self, record, field_name, options, values=None):
         attrs = super().attributes(record, field_name, options, values)
         if options.get('inherit_branding'):
             many2one = record[field_name]
@@ -269,7 +269,7 @@ class IrQwebFieldContact(models.AbstractModel):
     _inherit = ['ir.qweb.field.contact']
 
     @api.model
-    def attributes(self, record, field_name, options, values):
+    def attributes(self, record, field_name, options, values=None):
         attrs = super().attributes(record, field_name, options, values)
         if options.get('inherit_branding'):
             attrs['data-oe-contact-options'] = json.dumps(options)
@@ -287,7 +287,7 @@ class IrQwebFieldDate(models.AbstractModel):
     _inherit = ['ir.qweb.field.date']
 
     @api.model
-    def attributes(self, record, field_name, options, values):
+    def attributes(self, record, field_name, options, values=None):
         attrs = super().attributes(record, field_name, options, values)
         if options.get('inherit_branding'):
             attrs['data-oe-original'] = record[field_name]
@@ -325,7 +325,7 @@ class IrQwebFieldDatetime(models.AbstractModel):
     _inherit = ['ir.qweb.field.datetime']
 
     @api.model
-    def attributes(self, record, field_name, options, values):
+    def attributes(self, record, field_name, options, values=None):
         attrs = super().attributes(record, field_name, options, values)
 
         if options.get('inherit_branding'):
@@ -560,7 +560,7 @@ class IrQwebFieldDuration(models.AbstractModel):
     _inherit = ['ir.qweb.field.duration']
 
     @api.model
-    def attributes(self, record, field_name, options, values):
+    def attributes(self, record, field_name, options, values=None):
         attrs = super().attributes(record, field_name, options, values)
         if options.get('inherit_branding'):
             attrs['data-oe-original'] = record[field_name]
