@@ -11,6 +11,7 @@ from odoo import SUPERUSER_ID, _, api, fields, models
 from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
 from odoo.addons.web.controllers.utils import clean_action
 from odoo.exceptions import UserError, ValidationError
+from odoo.fields import Domain
 from odoo.osv import expression
 from odoo.tools import format_datetime, format_date, groupby, SQL
 from odoo.tools.float_utils import float_compare, float_is_zero
@@ -682,7 +683,7 @@ class StockPicking(models.Model):
     weight_bulk = fields.Float(
         'Bulk Weight', compute='_compute_bulk_weight', help="Total weight of products which are not in a package.")
     shipping_weight = fields.Float(
-        "Weight for Shipping", compute='_compute_shipping_weight', readonly=False,
+        "Weight for Shipping", compute='_compute_shipping_weight', readonly=False, store=True,
         help="Total weight of packages and products not in a package. "
         "Packages with no shipping weight specified will default to their products' total weight. "
         "This is the weight used to compute the cost of the shipping.")
@@ -721,6 +722,7 @@ class StockPicking(models.Model):
         string='Date Category', store=False,
         search='_search_date_category', readonly=True
     )
+    partner_country_id = fields.Many2one('res.country', related='partner_id.country_id')
 
     _name_uniq = models.Constraint(
         'unique(name, company_id)',
@@ -1051,8 +1053,9 @@ class StockPicking(models.Model):
 
     @api.model
     def _search_delay_alert_date(self, operator, value):
-        late_stock_moves = self.env['stock.move'].search([('delay_alert_date', operator, value)])
-        return [('move_ids', 'in', late_stock_moves.ids)]
+        if Domain.is_negative_operator(operator):
+            return NotImplemented
+        return [('move_ids.delay_alert_date', operator, value)]
 
     @api.onchange('picking_type_id', 'partner_id')
     def _onchange_picking_type(self):
