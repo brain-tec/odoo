@@ -383,50 +383,99 @@ export function clickLotIcon() {
         },
     ];
 }
-export function enterLotNumber(number) {
+export function deleteNthLotNumber(number) {
     return [
         {
-            content: "enter lot number",
-            trigger: ".list-line-input:first",
-            run: "edit " + number,
+            content: "delete lot number",
+            trigger: `.lot-container .lot-item:eq(${number - 1}) .btn`,
+            run: "click",
+        },
+    ];
+}
+export function selectNthLotNumber(number) {
+    return [
+        {
+            trigger: `.o-autocomplete--dropdown-menu .o-autocomplete--dropdown-item:eq(${
+                number - 1
+            })`,
+            run: "click",
         },
         Dialog.confirm(),
     ];
 }
-
-export function enterLastLotNumber(number) {
-    return [
+export function enterLotNumber(number, tracking = "serial", click = false) {
+    const steps = [];
+    if (click) {
+        steps.push({
+            trigger: ".o-autocomplete input",
+            run: "click",
+        });
+    }
+    steps.push(
+        {
+            trigger:
+                ".o-autocomplete--dropdown-item a:contains('No existing Lot/Serial number found...')",
+        },
         {
             content: "enter lot number",
-            trigger: ".edit-list-inputs .input-group:last-child input",
+            trigger: ".o-autocomplete input",
             run: "edit " + number,
         },
-        Dialog.confirm(),
-    ];
+        {
+            trigger: ".o-autocomplete--dropdown-item a:contains('Create Lot/Serial number...')",
+        },
+        {
+            trigger: ".o-autocomplete input",
+            run: "press Enter",
+        }
+    );
+    if (tracking === "serial") {
+        steps.push(
+            {
+                content: "check entered lot number",
+                trigger: `.lot-container .lot-item:eq(-1) span:contains(${number})`,
+            },
+            {
+                trigger: ".o-autocomplete input:value()",
+            }
+        );
+    }
+    steps.push(Dialog.confirm());
+    return steps;
 }
 
 export function enterLotNumbers(numbers) {
-    return numbers
-        .map((number) => [
+    const steps = [
+        {
+            trigger: ".o-autocomplete input",
+            run: "click",
+        },
+    ];
+    for (const lot of numbers) {
+        steps.push(
             {
                 content: "enter lot number",
-                trigger: ".list-line-input:last()",
-                run: "edit " + number,
+                trigger: ".o-autocomplete input",
+                run: "edit " + lot,
             },
             {
-                content: "Press Enter",
-                trigger: ".list-line-input:last()",
+                trigger: ".o-autocomplete--dropdown-item a:contains('Create Lot/Serial number...')",
+            },
+            {
+                trigger: ".o-autocomplete input",
                 run: "press Enter",
             },
-        ])
-        .flat()
-        .concat([
             {
-                content: "click validate lot number",
-                trigger: ".modal-content button:contains(Ok)",
-                run: "click",
+                content: "check entered lot number",
+                trigger: `.lot-container .lot-item:eq(-1) span:contains(${lot})`,
             },
-        ]);
+            {
+                trigger: ".o-autocomplete input:value()",
+            }
+        );
+    }
+    steps.push(Dialog.confirm());
+    return steps;
 }
 
 export function isShown() {
@@ -530,7 +579,7 @@ export function checkFirstLotNumber(number) {
     return [
         {
             content: "Check lot number",
-            trigger: `.popup-input:value(${number})`,
+            trigger: `.lot-container .lot-item:eq(0) span:contains(${number})`,
         },
     ];
 }
@@ -734,4 +783,56 @@ export function addDiscount(discount) {
             .split("")
             .flatMap((key) => Numpad.click(key)),
     ].flat();
+}
+
+function productInputSteps(name, barcode, list_price) {
+    return [
+        {
+            content: "Enter product name.",
+            trigger: 'div[name="name"] input',
+            run: `edit ${name}`,
+        },
+        {
+            content: "Enter barcode to fetch product data using barcodelookup.",
+            trigger: 'div[name="barcode"] input',
+            run: `edit ${barcode}`,
+        },
+        {
+            content: "Enter list_price.",
+            trigger: 'div[name="list_price"] input',
+            run: `edit ${list_price}`,
+        },
+    ];
+}
+
+export function createProductFromFrontend(name, barcode, list_price, category) {
+    return [
+        ...productInputSteps(name, barcode, list_price),
+        {
+            content: "Remove default tax 15%.",
+            trigger: 'div[name="taxes_id"] .o_delete',
+            run: "click",
+        },
+        {
+            content: "Open category selector.",
+            trigger: 'div[name="pos_categ_ids"] input',
+            run: "click",
+        },
+        {
+            isActive: ["desktop"],
+            content: "Select category.",
+            trigger: `.o_input_dropdown .o-autocomplete--dropdown-menu li:contains(${category})`,
+            run: "click",
+        },
+        {
+            isActive: ["mobile"],
+            content: "Select category.",
+            trigger: `.o_kanban_renderer .o_kanban_record span:contains(${category})`,
+            run: "click",
+        },
+    ];
+}
+
+export function editProductFromFrontend(name, barcode, list_price) {
+    return productInputSteps(name, barcode, list_price);
 }

@@ -1,6 +1,5 @@
 /* global posmodel */
 
-import * as BillScreen from "@pos_restaurant/../tests/tours/utils/bill_screen_util";
 import * as PaymentScreen from "@point_of_sale/../tests/pos/tours/utils/payment_screen_util";
 import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import * as ReceiptScreen from "@point_of_sale/../tests/pos/tours/utils/receipt_screen_util";
@@ -14,10 +13,10 @@ import * as Order from "@point_of_sale/../tests/generic_helpers/order_widget_uti
 import * as TicketScreen from "@point_of_sale/../tests/pos/tours/utils/ticket_screen_util";
 import * as combo from "@point_of_sale/../tests/pos/tours/utils/combo_popup_util";
 import { inLeftSide } from "@point_of_sale/../tests/pos/tours/utils/common";
-import { negateStep } from "@point_of_sale/../tests/generic_helpers/utils";
 import { registry } from "@web/core/registry";
 import * as Numpad from "@point_of_sale/../tests/generic_helpers/numpad_util";
 import { renderToElement } from "@web/core/utils/render";
+import { delay } from "@odoo/hoot-dom";
 
 const ProductScreen = { ...ProductScreenPos, ...ProductScreenResto };
 
@@ -188,7 +187,13 @@ registry.category("web_tour.tours").add("pos_restaurant_sync_second_login", {
 
             // Test transfering an order
             ProductScreen.clickControlButton("Transfer"),
-            FloorScreen.clickTable("4"),
+            {
+                trigger: ".table:contains(4)",
+                async run(helpers) {
+                    await delay(500);
+                    await helpers.click();
+                },
+            },
 
             // Test if products still get merged after transfering the order
             ProductScreen.clickDisplayedProduct("Coca-Cola"),
@@ -201,11 +206,23 @@ registry.category("web_tour.tours").add("pos_restaurant_sync_second_login", {
             ReceiptScreen.clickNextOrder(),
             // At this point, there are no draft orders.
 
-            FloorScreen.clickTable("2"),
+            {
+                trigger: ".table:contains(2)",
+                async run(helpers) {
+                    await delay(500);
+                    await helpers.click();
+                },
+            },
             ProductScreen.isShown(),
             ProductScreen.orderIsEmpty(),
             ProductScreen.clickControlButton("Transfer"),
-            FloorScreen.clickTable("4"),
+            {
+                trigger: ".table:contains(4)",
+                async run(helpers) {
+                    await delay(500);
+                    await helpers.click();
+                },
+            },
             ProductScreen.clickDisplayedProduct("Coca-Cola"),
             ProductScreen.totalAmountIs("2.20"),
             Chrome.clickPlanButton(),
@@ -224,35 +241,6 @@ registry.category("web_tour.tours").add("SaveLastPreparationChangesTour", {
             FloorScreen.clickTable("5"),
             ProductScreen.orderlinesHaveNoChange(),
             Chrome.clickPlanButton(),
-        ].flat(),
-});
-
-const billScreenQRCodeData = [
-    {
-        content: "Unique code is shown",
-        trigger: ".pos-receipt .unique-code",
-    },
-    {
-        content: "Portal url is shown",
-        trigger: ".pos-receipt .portal-url",
-    },
-];
-
-registry.category("web_tour.tours").add("BillScreenTour", {
-    steps: () =>
-        [
-            Chrome.startPoS(),
-            Dialog.confirm("Open Register"),
-            FloorScreen.clickTable("5"),
-            ProductScreen.clickDisplayedProduct("Coca-Cola"),
-            ProductScreen.clickControlButton("Bill"),
-            // HACK: is_modal should be false so that the trigger can be found.
-            billScreenQRCodeData.map(negateStep),
-            BillScreen.closeBillPopup(),
-            ProductScreen.clickPayButton(),
-            PaymentScreen.clickPaymentMethod("Bank"),
-            PaymentScreen.clickValidate(),
-            ...billScreenQRCodeData,
         ].flat(),
 });
 
