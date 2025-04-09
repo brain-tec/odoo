@@ -372,16 +372,23 @@ class PosSession(models.Model):
             # the .xml files as the CoA is not yet installed.
             pos_config = self.env['pos.config'].browse(config_id)
 
-            pos_name = self.env['ir.sequence'].with_context(
-                company_id=pos_config.company_id.id
-            ).next_by_code('pos.session')
-            if vals.get('name'):
-                pos_name += ' ' + vals['name']
+            base_name = f"{pos_config.name}/"
+            last_session = self.sudo().search_read(
+                [('name', 'ilike', base_name)],
+                ['name'],
+                order='name desc',
+                limit=1
+            )
+            if last_session:
+                last_number = int(last_session[0]['name'].split('/')[-1])
+            else:
+                last_number = 0
+
+            vals['name'] = f"{base_name}{str(last_number + 1).zfill(5)}"
 
             update_stock_at_closing = pos_config.company_id.point_of_sale_update_stock_quantities == "closing"
 
             vals.update({
-                'name': pos_name,
                 'config_id': config_id,
                 'update_stock_at_closing': update_stock_at_closing,
             })
@@ -416,7 +423,9 @@ class PosSession(models.Model):
         return True
 
     def get_session_orders(self):
-        return self.order_ids
+        return self.order_ids.filtered(lambda o:
+            not(o.preset_time and o.preset_time.date() > fields.Date.today())
+        )
 
     def action_pos_session_closing_control(self, balancing_account=False, amount_to_balance=0, bank_payment_method_diffs=None):
         bank_payment_method_diffs = bank_payment_method_diffs or {}
@@ -1708,6 +1717,8 @@ class PosSession(models.Model):
             return
         self.state = 'opened'
         self.start_at = fields.Datetime.now()
+        self.name = self.env['ir.sequence'].with_context(company_id=self.config_id.company_id.id).next_by_code('pos.session')
+
         cash_payment_method_ids = self.config_id.payment_method_ids.filtered(lambda pm: pm.is_cash_count)
         if cash_payment_method_ids:
             self.opening_notes = notes
