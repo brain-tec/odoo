@@ -197,7 +197,7 @@ class DiscussChannelMember(models.Model):
         # kept in sync.
         for member in res:
             if parent := member.channel_id.parent_channel_id:
-                parent.add_members(partner_ids=member.partner_id.ids, guest_ids=member.guest_id.ids)
+                parent._add_members(partners=member.partner_id, guests=member.guest_id)
         return res
 
     def write(self, vals):
@@ -304,11 +304,11 @@ class DiscussChannelMember(models.Model):
         self._join_sfu(ice_servers)
         if store:
             store.add(
-                self.channel_id, {"rtcSessions": Store.Many(current_rtc_sessions, mode="ADD")}
+                self.channel_id, {"rtc_session_ids": Store.Many(current_rtc_sessions, mode="ADD")}
             )
             store.add(
                 self.channel_id,
-                {"rtcSessions": Store.Many(outdated_rtc_sessions, [], mode="DELETE")},
+                {"rtc_session_ids": Store.Many(outdated_rtc_sessions, [], mode="DELETE")},
             )
             store.add_singleton_values(
                 "Rtc",
