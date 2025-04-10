@@ -989,7 +989,10 @@ class TestUi(TestPointOfSaleHttpCommon):
 
     def test_07_product_combo(self):
         setup_product_combo_items(self)
-        self.office_combo.write({'lst_price': 50})
+        self.office_combo.write({
+            'lst_price': 50,
+            'barcode': 'SuperCombo',
+        })
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('ProductComboPriceTaxIncludedTour')
         order = self.env['pos.order'].search([])
@@ -1833,6 +1836,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.pos_admin.write({
             'groups_id': [Command.link(self.env.ref('base.group_system').id)],
         })
+        self.pos_cat_chair_test.write({'sequence': 1})
         self.main_pos_config.with_user(self.pos_admin).open_ui()
         self.start_tour('/pos/ui?config_id=%d' % self.main_pos_config.id, 'test_product_create_update_from_frontend', login='pos_admin')
 
