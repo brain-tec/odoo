@@ -92,6 +92,7 @@ export class Message extends Component {
         "className?",
         "showDates?",
         "isFirstMessage?",
+        "isReadOnly?",
     ];
     static template = "mail.Message";
 
@@ -199,16 +200,16 @@ export class Message extends Component {
                 this.message.richTranslationValue,
                 this.props.messageSearch?.searchTerm,
                 this.message.richBody,
-                this.message.composer,
+                this.isEditing,
             ]
         );
         useEffect(
             () => {
-                if (!this.message.composer) {
+                if (!this.isEditing) {
                     this.prepareMessageBody(this.messageBody.el);
                 }
             },
-            () => [this.message.composer, this.message.richBody]
+            () => [this.isEditing, this.message.richBody]
         );
     }
 
@@ -228,7 +229,7 @@ export class Message extends Component {
             "px-1": this.props.isInChatWindow,
             "opacity-50": this.props.thread?.composer.replyToMessage?.notEq(this.props.message),
             "o-actionMenuMobileOpen": this.state.actionMenuMobileOpen,
-            "o-editing": this.props.message.composer,
+            "o-editing": this.isEditing,
         };
     }
 
@@ -260,7 +261,7 @@ export class Message extends Component {
     }
 
     get isEditing() {
-        return this.props.message.composer;
+        return !this.props.isReadOnly && this.props.message.composer;
     }
 
     get message() {
@@ -314,14 +315,11 @@ export class Message extends Component {
     }
 
     get isPersistentMessageFromAnotherThread() {
-        return !this.isOriginThread && !this.message.is_transient && this.message.thread;
-    }
-
-    get isOriginThread() {
-        if (!this.props.thread) {
-            return false;
-        }
-        return this.props.thread.eq(this.message.thread);
+        return (
+            !this.message.is_transient &&
+            this.message.thread &&
+            this.message.thread.notEq(this.props.thread)
+        );
     }
 
     get translatedFromText() {

@@ -288,6 +288,10 @@ class DiscussChannel(models.Model):
     # CRUD
     # ------------------------------------------------------------
 
+    @api.model
+    def _get_allowed_channel_member_create_params(self):
+        return ["partner_id", "guest_id", "unpin_dt", "last_interest_dt"]
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -304,7 +308,7 @@ class DiscussChannel(models.Model):
                 if cmd[0] != 0:
                     raise ValidationError(_('Invalid value when creating a channel with memberships, only 0 is allowed.'))
                 for field_name in cmd[2]:
-                    if field_name not in ["partner_id", "guest_id", "unpin_dt", "last_interest_dt"]:
+                    if field_name not in self._get_allowed_channel_member_create_params():
                         raise ValidationError(
                             _(
                                 "Invalid field “%(field_name)s” when creating a channel with members.",
@@ -477,9 +481,28 @@ class DiscussChannel(models.Model):
         self, partner_ids=None, guest_ids=None, invite_to_rtc_call=False, post_joined_message=True
     ):
         """ Adds the given partner_ids and guest_ids as member of self channels. """
+        return self._add_members(
+            partners=self.env["res.partner"].browse(partner_ids or []).exists(),
+            guests=self.env["mail.guest"].browse(guest_ids or []).exists(),
+            invite_to_rtc_call=invite_to_rtc_call,
+            post_joined_message=post_joined_message,
+        )
+
+    def _add_members(
+        self,
+        *,
+        guests=None,
+        partners=None,
+        users=None,
+        create_member_params=None,
+        invite_to_rtc_call=False,
+        post_joined_message=True,
+    ):
+        partners = partners or self.env["res.partner"]
+        if users:
+            partners |= users.partner_id
+        guests = guests or self.env["mail.guest"]
         current_partner, current_guest = self.env["res.partner"]._get_current_persona()
-        partners = self.env['res.partner'].browse(partner_ids or []).exists()
-        guests = self.env['mail.guest'].browse(guest_ids or []).exists()
         all_new_members = self.env["discuss.channel.member"]
         for channel in self:
             members_to_create = []
@@ -491,10 +514,12 @@ class DiscussChannel(models.Model):
                 ])
             ]))
             members_to_create += [{
+                **(create_member_params or {}),
                 'partner_id': partner.id,
                 'channel_id': channel.id,
             } for partner in partners - existing_members.partner_id]
             members_to_create += [{
+                **(create_member_params or {}),
                 'guest_id': guest.id,
                 'channel_id': channel.id,
             } for guest in guests - existing_members.guest_id]
@@ -894,18 +919,27 @@ class DiscussChannel(models.Model):
         if member:
             return member
         if not self.env.user._is_public():
-            return self.add_members(partner_ids=self.env.user.partner_id.ids)
+            return self._add_members(users=self.env.user)
         guest = self.env["mail.guest"]._get_guest_from_context()
         if guest:
-            return self.add_members(guest_ids=guest.ids)
+            return self._add_members(guests=guest)
         return self.env["discuss.channel.member"]
 
-    def _find_or_create_persona_for_channel(self, guest_name, timezone, country_code, post_joined_message=True):
+    def _find_or_create_persona_for_channel(
+        self,
+        guest_name,
+        timezone,
+        country_code,
+        create_member_params=None,
+        post_joined_message=True,
+    ):
         """
         :param channel: channel to add the persona to
         :param guest_name: name of the persona
         :param post_joined_message: whether to post a message to the channel
             to notify that the persona joined
+        :param create_member_params dict: optional parameters to pass to the
+            channel member create function.
         :return tuple(partner, guest):
         """
         self.ensure_one()
@@ -914,7 +948,7 @@ class DiscussChannel(models.Model):
         if member:
             return member.partner_id, member.guest_id
         if not self.env.user._is_public():
-            self.add_members([self.env.user.partner_id.id], post_joined_message=post_joined_message)
+            self._add_members(users=self.env.user, post_joined_message=post_joined_message)
         else:
             guest = self.env["mail.guest"]._get_guest_from_context()
             if not guest:
@@ -929,7 +963,11 @@ class DiscussChannel(models.Model):
                 guest._set_auth_cookie()
                 guest = guest.sudo(False)
                 self = self.with_context(guest=guest)
-            self.add_members(guest_ids=guest.ids, post_joined_message=post_joined_message)
+            self._add_members(
+                guests=guest,
+                create_member_params=create_member_params,
+                post_joined_message=post_joined_message,
+            )
         return self.env.user.partner_id if not guest else self.env["res.partner"], guest
 
     @api.model
@@ -1005,7 +1043,7 @@ class DiscussChannel(models.Model):
             "member_count",
             "name",
             Store.One("parent_channel_id"),
-            Store.Many("rtc_session_ids", mode="ADD", extra=True, rename="rtcSessions", sudo=True),
+            Store.Many("rtc_session_ids", mode="ADD", extra=True, sudo=True),
             "uuid",
         ]
         if for_current_user:
@@ -1179,7 +1217,7 @@ class DiscussChannel(models.Model):
         """Shortcut to add the current user as member of self channels.
         Prefer calling add_members() directly when possible.
         """
-        self.add_members(self.env.user.partner_id.ids)
+        self._add_members(users=self.env.user)
 
     @api.model
     def _create_channel(self, name, group_id):

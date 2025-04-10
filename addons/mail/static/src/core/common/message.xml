@@ -25,7 +25,7 @@
                             </small>
                         </t>
                     </div>
-                    <div class="w-100 o-min-width-0" t-att-class="{ 'flex-grow-1': message.composer }" t-ref="messageContent">
+                    <div class="w-100 o-min-width-0" t-att-class="{ 'flex-grow-1': isEditing }" t-ref="messageContent">
                         <div t-if="!props.squashed" class="o-mail-Message-header d-flex flex-wrap align-items-baseline lh-1" t-att-class="{ 'mb-1': !message.is_note }" name="header">
                             <span t-if="message.authorName and shouldDisplayAuthorName" class="o-mail-Message-author small" t-att-class="getAuthorAttClass()">
                                 <strong class="me-1" t-esc="message.authorName"/>
@@ -181,11 +181,11 @@
         'o-mail-Message-openActionMobile p-2 mt-n2 rounded-circle user-select-none': isMobileOS and !mobileExpanded,
         'me-n2': isMobileOS and !mobileExpanded and isAlignedRight,
         'ms-n2': isMobileOS and !mobileExpanded and !isAlignedRight,
-        'px-2 py-0': !isMobileOS,
+        'px-1 py-0': !isMobileOS,
         'rounded-start-1': !isMobileOS and isReverse,
         'rounded-end-1': !isMobileOS and !isReverse,
     }">
-        <i class="fa fa-lg fa-ellipsis-v" t-att-class="{ 'order-1': props.isInChatWindow, 'fa-fw': isMobileOS }" tabindex="1"/>
+        <i class="oi oi-large oi-ellipsis-v" t-att-class="{ 'order-1': props.isInChatWindow, 'fa-fw': isMobileOS }" tabindex="1"/>
     </button>
 </t>
 

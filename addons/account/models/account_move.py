@@ -910,7 +910,7 @@ class AccountMove(models.Model):
     @api.depends('date', 'journal_id', 'move_type', 'name', 'posted_before', 'sequence_number', 'sequence_prefix', 'state')
     def _compute_name_placeholder(self):
         for move in self:
-            if (not move.name or move.name == '/') and not move._get_last_sequence():
+            if (not move.name or move.name == '/') and self.date and not move._get_last_sequence():
                 sequence_format_string, sequence_format_values = move._get_next_sequence_format()
                 sequence_format_values['seq'] = sequence_format_values['seq'] + 1
                 move.name_placeholder = sequence_format_string.format(**sequence_format_values)
@@ -2307,7 +2307,6 @@ class AccountMove(models.Model):
     def _onchange_partner_id(self):
         self = self.with_company((self.journal_id.company_id or self.env.company)._accessible_branches()[:1])
 
-        warning = {}
         if self.partner_id:
             rec_account = self.partner_id.property_account_receivable_id
             pay_account = self.partner_id.property_account_payable_id
@@ -2315,20 +2314,6 @@ class AccountMove(models.Model):
                 action = self.env.ref('account.action_account_config')
                 msg = _('Cannot find a chart of accounts for this company, You should configure it. \nPlease go to Account Configuration.')
                 raise RedirectWarning(msg, action.id, _('Go to the configuration panel'))
-            p = self.partner_id
-            if p.invoice_warn == 'no-message' and p.parent_id:
-                p = p.parent_id
-            if p.invoice_warn and p.invoice_warn != 'no-message':
-                # Block if partner only has warning but parent company is blocked
-                if p.invoice_warn != 'block' and p.parent_id and p.parent_id.invoice_warn == 'block':
-                    p = p.parent_id
-                warning = {
-                    'title': _("Warning for %s", p.name),
-                    'message': p.invoice_warn_msg
-                }
-                if p.invoice_warn == 'block':
-                    self.partner_id = False
-                return {'warning': warning}
 
     @api.onchange('name', 'highest_name')
     def _onchange_name_warning(self):
