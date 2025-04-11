@@ -181,11 +181,11 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
             {
                 "discuss.channel": self._filter_channels_fields(
                     {
-                        "anonymous_country": False,
                         "anonymous_name": f"Visitor #{self.visitor.id}",
                         "authorizedGroupFullName": False,
                         "avatar_cache_key": "no-avatar",
                         "channel_type": "livechat",
+                        "country_id": False,
                         "create_uid": self.user_public.id,
                         "default_display_mode": False,
                         "description": False,
@@ -193,7 +193,7 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
                         "from_message_id": False,
                         "group_based_subscription": False,
                         "id": channel.id,
-                        "invitedMembers": [("ADD", [])],
+                        "invited_member_ids": [("ADD", [])],
                         "is_editable": True,
                         "last_interest_dt": fields.Datetime.to_string(channel.last_interest_dt),
                         "livechat_active": True,
@@ -296,11 +296,11 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
             Store(channel.with_context(guest=guest).with_user(self.user_public)).get_result()["discuss.channel"],
             self._filter_channels_fields(
                 {
-                    "anonymous_country": False,
                     "anonymous_name": f"Visitor #{self.visitor.id}",
                     "authorizedGroupFullName": False,
                     "avatar_cache_key": "no-avatar",
                     "channel_type": "livechat",
+                    "country_id": False,
                     "create_uid": self.user_public.id,
                     "custom_channel_name": False,
                     "custom_notifications": False,
@@ -310,7 +310,7 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
                     "from_message_id": False,
                     "group_based_subscription": False,
                     "id": channel.id,
-                    "invitedMembers": [("ADD", [])],
+                    "invited_member_ids": [("ADD", [])],
                     "is_editable": False,
                     "is_pinned": True,
                     "last_interest_dt": fields.Datetime.to_string(channel.last_interest_dt),
