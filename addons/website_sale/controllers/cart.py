@@ -60,6 +60,7 @@ class Cart(PaymentPortal):
             values['suggested_products'] = order_sudo._cart_accessories()
             values.update(self._get_express_shop_payment_values(order_sudo))
 
+        values.update(request.website._get_checkout_step_values())
         values.update(self._cart_values(**post))
         return request.render('website_sale.cart', values)
 
@@ -139,6 +140,27 @@ class Cart(PaymentPortal):
                 "The given product does not exist therefore it cannot be added to cart."
             ))
 
+        combo_item_products = [
+            product for product in linked_products or [] if product.get('combo_item_id')
+        ]
+        if (
+            product.type == 'combo'
+            and combo_item_products
+        ):
+            # A combo product and its items should have the same quantity (by design). If the
+            # requested quantity isn't available for one or more combo items, we should lower
+            # the quantity of the combo product and its items to the maximum available quantity
+            # of the combo item with the least available quantity.
+            combo_quantity, _warning = order_sudo._verify_updated_quantity(
+                request.env['sale.order.line'], product_id, quantity, **kwargs
+            )
+            for item_product in combo_item_products:
+                combo_item_quantity, _warning = order_sudo._verify_updated_quantity(
+                    request.env['sale.order.line'], item_product['product_id'], quantity, **kwargs
+                )
+                combo_quantity = min(combo_quantity, combo_item_quantity)
+            quantity = combo_quantity
+
         values = order_sudo._cart_add(
             product_id=product_id,
             quantity=quantity,
@@ -166,6 +188,8 @@ class Cart(PaymentPortal):
                         "The given product does not exist therefore it cannot be added to cart."
                     ))
 
+                if product.type == 'combo' and product_data.get('combo_item_id'):
+                    product_data['quantity'] = quantity
                 product_values = order_sudo._cart_add(
                     product_id=product_data['product_id'],
                     quantity=product_data['quantity'],

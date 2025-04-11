@@ -593,7 +593,7 @@ class DiscussChannel(models.Model):
             self._bus_send_store(
                 self,
                 {
-                    "invitedMembers": Store.Many(
+                    "invited_member_ids": Store.Many(
                         members,
                         [
                             Store.One("channel_id", [], as_thread=True, rename="thread"),
@@ -1037,7 +1037,6 @@ class DiscussChannel(models.Model):
                     *self.env["discuss.channel.member"]._to_store_persona("avatar_card"),
                 ],
                 mode="ADD",
-                rename="invitedMembers",
             ),
             "last_interest_dt",
             "member_count",
@@ -1267,14 +1266,13 @@ class DiscussChannel(models.Model):
             message = self.env["mail.message"].search([("id", "=", from_message_id)])
         sub_channel = self.create(
             {
-                "channel_member_ids": [Command.create({"partner_id": self.env.user.partner_id.id})],
                 "channel_type": self.channel_type,
                 "from_message_id": message.id,
                 "name": name or (message.body.striptags()[:30] if message.body else _("New Thread")),
                 "parent_channel_id": self.id,
             }
         )
-        self.env.user._bus_send_store(sub_channel)
+        sub_channel.add_members(partner_ids=(self.env.user.partner_id | message.author_id).ids, post_joined_message=False)
         notification = (
             Markup('<div class="o_mail_notification">%s</div>')
             % _(
