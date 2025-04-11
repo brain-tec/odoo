@@ -326,9 +326,9 @@
                     <field name="reconcile_model_id"/>
                     <separator/>
                     <filter string="Unposted" name="unposted" domain="[('parent_state', '=', 'draft')]" help="Unposted Journal Items"/>
-                    <filter string="Posted" name="posted" domain="[('parent_state', '=', 'posted')]" help="Posted Journal Items"/>
+                    <filter string="Posted" name="posted" domain="[('parent_state', 'in', ['posted', 'posted_sent'])]" help="Posted Journal Items"/>
                     <separator groups="account.group_account_secured,base.group_no_one"/>
-                    <filter name="not_secured" string="Not Secured" domain="[('move_id.secured', '=', False), ('move_id.state', '=', 'posted')]"
+                    <filter name="not_secured" string="Not Secured" domain="[('move_id.secured', '=', False), ('move_id.state', 'in', ['posted', 'posted_sent'])]"
                             groups="account.group_account_secured,base.group_no_one"/>
                     <separator/>
                     <filter string="To check" name="to_check" domain="[('move_id.checked', '=', False), ('parent_state', '!=', 'draft')]"/>
@@ -437,7 +437,7 @@
                     <field name="currency_id" groups="base.group_multi_currency" invisible="1"/>
                     <field name="company_currency_id" invisible="1"/>
                     <separator/>
-                    <filter string="Posted" name="posted" domain="[('parent_state', '=', 'posted')]" help="Posted Journal Items" invisible="1"/>
+                    <filter string="Posted" name="posted" domain="[('parent_state', 'in', ['posted', 'posted_sent'])]" help="Posted Journal Items" invisible="1"/>
                     <separator/>
                     <filter string="Invoices" name="invoices" domain="[('amount_residual', '&gt;', '0')]" invisible="context.get('journal_type') != 'sale'"/>
                     <filter string="Credit Notes" name="credit_notes" domain="[('amount_residual', '&lt;', '0')]" invisible="context.get('journal_type') != 'sale'"/>
@@ -473,15 +473,15 @@
                     <field name="company_currency_id" column_invisible="True"/>
                     <field name="made_sequence_gap" column_invisible="True"/>
                     <field name="invoice_date" string="Invoice Date" optional="hide" readonly="state != 'draft'"/>
-                    <field name="date" readonly="state in ['cancel', 'posted']"/>
-                    <field name="name" decoration-danger="made_sequence_gap and state == 'posted'" widget="char_with_placeholder_field" placeholder="/"/>
+                    <field name="date" readonly="state in ['cancel', 'posted', 'posted_sent']"/>
+                    <field name="name" decoration-danger="made_sequence_gap and state in ['posted', 'posted_sent']" widget="char_with_placeholder_field" placeholder="/"/>
                     <field name="partner_id" optional="show" readonly="state != 'draft'"/>
                     <field name="ref" optional="show"/>
                     <field name="journal_id"/>
                     <field name="company_id" groups="base.group_multi_company" optional="show"/>
                     <field name="amount_total_signed" sum="Total Amount" string="Total" decoration-bf="1"/>
-                    <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'posted'"/>
-                    <field name="currency_id" column_invisible="True" readonly="state in ['cancel', 'posted']"/>
+                    <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state in ['posted', 'posted_sent']"/>
+                    <field name="currency_id" column_invisible="True" readonly="state in ['cancel', 'posted', 'posted_sent']"/>
                     <field name="checked" optional="hide" widget="boolean_toggle"/>
                     <field name="activity_ids" widget="list_activity" optional="hide"/>
                 </list>
@@ -517,12 +517,12 @@
                     </header>
                     <field name="made_sequence_gap" column_invisible="True"/>
                     <field name="duplicated_ref_ids" column_invisible="True"/>  <!-- Needed for custome view account_tree-->
-                    <field name="name" decoration-bf="1" decoration-danger="made_sequence_gap and state == 'posted'" widget="char_with_placeholder_field" placeholder="/"/>
+                    <field name="name" decoration-bf="1" decoration-danger="made_sequence_gap and state in ['posted', 'posted_sent']" widget="char_with_placeholder_field" placeholder="/"/>
                     <field name="invoice_partner_display_name" column_invisible="context.get('default_move_type') not in ('in_invoice', 'in_refund', 'in_receipt')" groups="base.group_user" string="Vendor" />
                     <field name="invoice_partner_display_name" column_invisible="context.get('default_move_type') not in ('out_invoice', 'out_refund', 'out_receipt')" groups="base.group_user" string="Customer" />
                     <field name="invoice_date" optional="show" column_invisible="context.get('default_move_type') not in ('in_invoice', 'in_refund', 'in_receipt')" readonly="state != 'draft'" string="Bill Date" decoration-warning="abnormal_date_warning"/>
                     <field name="invoice_date" optional="show" column_invisible="context.get('default_move_type') not in ('out_invoice', 'out_refund', 'out_receipt')" readonly="state != 'draft'" string="Invoice Date" decoration-warning="abnormal_date_warning"/>
-                    <field name="date" optional="hide" string="Accounting Date" readonly="state in ['cancel', 'posted']"/>
+                    <field name="date" optional="hide" string="Accounting Date" readonly="state in ['cancel', 'posted', 'posted_sent']"/>
                     <field name="invoice_date_due" widget="remaining_days" optional="show" invisible="payment_state in ('paid', 'in_payment', 'reversed') or state == 'cancel'"/>
                     <field name="invoice_origin" optional="hide" string="Source Document"/>
                     <field name="payment_reference" optional="hide" column_invisible="context.get('default_move_type') in ('out_invoice', 'out_refund', 'out_receipt')"/>
@@ -536,7 +536,7 @@
                     <field name="amount_total_in_currency_signed" string="Total" sum="Total" optional="show" decoration-bf="1" decoration-warning="abnormal_amount_warning" groups="base.group_multi_currency"/>
                     <field name="amount_total_in_currency_signed" string="Total" sum="Total" optional="hide" decoration-bf="1" decoration-warning="abnormal_amount_warning" groups="!base.group_multi_currency"/>
                     <field name="amount_residual_signed" string="Amount Due" sum="Amount Due" optional="hide"/>
-                    <field name="currency_id" optional="hide" readonly="state in ['cancel', 'posted']"/>
+                    <field name="currency_id" optional="hide" readonly="state in ['cancel', 'posted', 'posted_sent']"/>
                     <field name="company_currency_id" column_invisible="True"/>
                     <field name="checked" optional="hide" widget="boolean_toggle"/>
                     <field name="status_in_payment"
@@ -715,28 +715,28 @@
                         <button name="action_invoice_sent"
                                 type="object"
                                 string="Send"
-                                invisible="state != 'posted' or is_being_sent or invoice_pdf_report_id or move_type not in ('out_invoice', 'out_refund')"
+                                invisible="state not in ['posted', 'posted_sent'] or is_being_sent or invoice_pdf_report_id or move_type not in ('out_invoice', 'out_refund')"
                                 class="oe_highlight"
                                 data-hotkey="y"/>
                         <button name="action_invoice_sent"
                                 type="object"
                                 string="Send"
-                                invisible="state != 'posted' or not is_being_sent and not invoice_pdf_report_id or move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')"
+                                invisible="state not in ['posted', 'posted_sent'] or not is_being_sent and not invoice_pdf_report_id or move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')"
                                 data-hotkey="y"/>
                         <button name="action_print_pdf"
                                 type="object"
                                 class="oe_highlight"
-                                invisible="state != 'posted' or is_being_sent or invoice_pdf_report_id or move_type == 'entry'"
+                                invisible="state not in ['posted', 'posted_sent'] or is_being_sent or invoice_pdf_report_id or move_type == 'entry'"
                                 string="Print"/>
                         <button name="action_print_pdf"
                                 type="object"
-                                invisible="state != 'posted' or (not is_being_sent and not invoice_pdf_report_id)"
+                                invisible="state not in ['posted', 'posted_sent'] or (not is_being_sent and not invoice_pdf_report_id)"
                                 string="Print"/>
                         <!-- Register Payment (only invoices / receipts) -->
                         <button name="action_register_payment" id="account_invoice_payment_btn"
                                 type="object" class="oe_highlight"
                                 invisible="(
-                                    state != 'posted'
+                                    state not in ['posted', 'posted_sent']
                                     or payment_state not in ('not_paid', 'partial', 'in_payment')
                                     or move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')
                                     or invoice_has_outstanding
@@ -748,7 +748,7 @@
                         <button name="action_register_payment" id="account_invoice_payment_secondary_btn"
                                 type="object"
                                 invisible="(
-                                    state != 'posted'
+                                    state not in ['posted', 'posted_sent']
                                     or payment_state not in ('not_paid', 'partial', 'in_payment')
                                     or move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')
                                     or not invoice_has_outstanding
@@ -763,10 +763,10 @@
                         <!-- Reverse -->
                         <button name="%(action_view_account_move_reversal)d" string="Reverse Entry"
                                 type="action" groups="account.group_account_invoice" data-hotkey="z"
-                                invisible="move_type != 'entry' or state != 'posted' or payment_state == 'reversed'"/>
+                                invisible="move_type != 'entry' or state not in ['posted', 'posted_sent'] or payment_state == 'reversed'"/>
                         <button name="action_reverse" string='Credit Note'
                                 type='object' groups="account.group_account_invoice"
-                                invisible="move_type not in ('out_invoice', 'in_invoice') or state != 'posted'"
+                                invisible="move_type not in ('out_invoice', 'in_invoice') or state not in ['posted', 'posted_sent']"
                                 data-hotkey="shift+n"/>
                         <!-- Cancel -->
                         <button name="button_cancel" string="Cancel Entry" type="object" groups="account.group_account_invoice" data-hotkey="x"
@@ -776,20 +776,20 @@
                         <button name="button_draft" string="Reset to Draft" type="object" groups="account.group_account_invoice"
                                 invisible="not show_reset_to_draft_button" data-hotkey="r" />
                         <button name="button_hash" string="Lock" type="object" groups="account.group_account_invoice"
-                                invisible="not restrict_mode_hash_table or inalterable_hash or state != 'posted'"/>
+                                invisible="not restrict_mode_hash_table or inalterable_hash or state not in ['posted', 'posted_sent']"/>
                         <button string="Request Cancel"
                                 name="button_request_cancel"
                                 type="object"
                                 groups="account.group_account_invoice"
-                                invisible="state != 'posted' or show_reset_to_draft_button or not need_cancel_request"
+                                invisible="state not in ['posted', 'posted_sent'] or show_reset_to_draft_button or not need_cancel_request"
                                 data-hotkey="w"/>
 
                         <!-- Set as Checked -->
                         <button name="button_set_checked" string="Set as Checked" type="object" groups="account.group_account_invoice"
                                 invisible="checked or state == 'draft'" data-hotkey="k" />
-                        <field name="state" widget="statusbar" statusbar_visible="draft,posted"
+                        <field name="state" widget="statusbar" statusbar_visible="draft,posted,posted_sent"
                                groups="!account.group_account_secured"/>
-                        <field name="state" widget="account_move_statusbar_secured" statusbar_visible="draft,posted"
+                        <field name="state" widget="account_move_statusbar_secured" statusbar_visible="draft,posted,posted_sent"
                                groups="account.group_account_secured"/>
                     </header>
                     <div class="alert alert-warning w-100 d-flex align-items-center gap-1" invisible="not duplicated_ref_ids"  role="alert">
@@ -923,7 +923,7 @@
                         <field name="payment_state" invisible="1" force_save="1"/>
                         <field name="invoice_filter_type_domain" invisible="1"/>
                         <field name="suitable_journal_ids" invisible="1"/>
-                        <field name="currency_id" invisible="1" readonly="state in ['cancel', 'posted']"/>
+                        <field name="currency_id" invisible="1" readonly="state in ['cancel', 'posted', 'posted_sent']"/>
                         <field name="company_currency_id" invisible="1"/>
                         <field name="commercial_partner_id" invisible="1"/>
                         <field name="bank_partner_id" invisible="1"/>
@@ -985,7 +985,7 @@
                                             help="Recompute all taxes and accounts based on this fiscal position"
                                             class="btn-link mb-1 px-0" icon="fa-refresh"
                                             confirm="This will update all taxes and accounts based on the currently selected fiscal position."
-                                            invisible="not show_update_fpos or state in ['cancel', 'posted']"/>
+                                            invisible="not show_update_fpos or state in ['cancel', 'posted', 'posted_sent']"/>
                                 </div>
 
                                 <field name="partner_shipping_id"
@@ -1022,7 +1022,7 @@
                                        readonly="state != 'draft'"/>
 
                                 <field name="date" string="Accounting Date"
-                                       invisible="move_type in ('out_invoice', 'out_refund', 'out_receipt') and not quick_edit_mode and not (state == 'posted' and date != invoice_date)"
+                                       invisible="move_type in ('out_invoice', 'out_refund', 'out_receipt') and not quick_edit_mode and not (state in ['posted', 'posted_sent'] and date != invoice_date)"
                                        readonly="state != 'draft'"/>
                                 <field name="payment_reference"
                                        invisible="move_type not in ('in_invoice', 'in_refund', 'out_receipt', 'in_receipt')"
@@ -1050,7 +1050,7 @@
                                     <field name="invoice_payment_term_id"
                                            context="{'example_date': invoice_date, 'example_amount': tax_totals['total_amount_currency']}"
                                            placeholder="Payment Terms"
-                                           options="{'no_quick_create':True}" readonly="state in ['cancel', 'posted']"/>
+                                           options="{'no_quick_create':True}" readonly="state in ['cancel', 'posted', 'posted_sent']"/>
                                 </div>
                                 <field name="delivery_date" invisible="not show_delivery_date" readonly="state != 'draft'"/>
                                 <label for="journal_id" groups="account.group_account_readonly"/>
@@ -1358,7 +1358,7 @@
                                                 string="Cut-Off"
                                                 aria-label="Change Period"
                                                 class="float-end"
-                                                column_invisible="parent.move_type == 'entry' or parent.state != 'posted'"
+                                                column_invisible="parent.move_type == 'entry' or parent.state not in ['posted', 'posted_sent']"
                                                 invisible="account_internal_group not in ('income', 'expense')"
                                                 context="{'default_action': 'change_period'}"/>
 
@@ -1424,7 +1424,7 @@
                                         <field name="company_id" groups="base.group_multi_company"/>
                                         <field name="invoice_incoterm_id"/>
                                         <field name="incoterm_location"/>
-                                        <field name="fiscal_position_id" readonly="state in ['cancel', 'posted']"/>
+                                        <field name="fiscal_position_id" readonly="state in ['cancel', 'posted', 'posted_sent']"/>
                                         <field name="secured" groups="account.group_account_secured,base.group_no_one"/>
                                         <field name="preferred_payment_method_line_id"
                                                string="Payment Method"
@@ -1465,7 +1465,7 @@
                                                invisible="move_type != 'entry'" />
                                     </group>
                                     <group>
-                                        <field name="fiscal_position_id" readonly="state in ['cancel', 'posted']"/>
+                                        <field name="fiscal_position_id" readonly="state in ['cancel', 'posted', 'posted_sent']"/>
                                         <field name="company_id" groups="base.group_multi_company" required="1"/>
                                     </group>
                                 </group>
@@ -1499,7 +1499,7 @@
                             <div class="d-flex justify-content-between">
                                 <field name="commercial_partner_id" string="Commercial Entity" class="o_text_block"/>
                                 <div class="m-1"/>
-                                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'posted'"/>
+                                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state in ['posted', 'posted_sent']"/>
                             </div>
                         </div>
                     </templates>
@@ -1523,7 +1523,7 @@
                     <filter string="Unposted" name="unposted" domain="[('state', '=', 'draft')]" help="Unposted Journal Entries"/>
                     <filter string="Posted" name="posted" domain="[('state', '=', 'posted')]" help="Posted Journal Entries"/>
                     <separator groups="account.group_account_secured,base.group_no_one"/>
-                    <filter name="not_secured" string="Not Secured" domain="[('secured', '=', False), ('state', '=', 'posted')]"
+                    <filter name="not_secured" string="Not Secured" domain="[('secured', '=', False), ('state', 'in', ['posted', 'posted_sent'])]"
                             groups="account.group_account_secured,base.group_no_one"/>
                     <separator/>
                     <filter string="Reversed" name="reversed" domain="[('payment_state', '=', 'reversed')]"/>
@@ -1582,10 +1582,10 @@
                     <filter domain="[('invoice_user_id', '=', uid)]" name="myinvoices" help="My Invoices"/>
                     <separator/>
                     <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
-                    <filter name="posted" string="Posted" domain="[('state', '=', 'posted')]"/>
+                    <filter name="posted" string="Posted" domain="[('state', 'in', ['posted', 'posted_sent'])]"/>
                     <filter name="cancel" string="Cancelled" domain="[('state', '=', 'cancel')]"/>
                     <separator groups="account.group_account_secured,base.group_no_one"/>
-                    <filter name="not_secured" string="Not Secured" domain="[('secured', '=', False), ('state', '=', 'posted')]"
+                    <filter name="not_secured" string="Not Secured" domain="[('secured', '=', False), ('state', 'in', ['posted', 'posted_sent'])]"
                             groups="account.group_account_secured,base.group_no_one"/>
                     <separator/>
                     <filter name="not_sent"
@@ -1606,13 +1606,13 @@
                     <filter string="To Check" name="to_check" domain="[('checked', '=', False), ('state', '!=', 'draft')]"/>
                     <separator/>
                     <!-- not_paid & partial -->
-                    <filter name="open" string="To pay" domain="[('state', '=', 'posted'), ('payment_state', 'in', ('not_paid', 'partial'))]"/>
+                    <filter name="open" string="To pay" domain="[('state', 'in', ['posted', 'posted_sent']), ('payment_state', 'in', ('not_paid', 'partial'))]"/>
                     <!-- in_payment & paid -->
-                    <filter name="in_payment" string="In payment" domain="[('state', '=', 'posted'), ('payment_state', '=', 'in_payment')]"/>
+                    <filter name="in_payment" string="In payment" domain="[('state', 'in', ['posted', 'posted_sent']), ('payment_state', '=', 'in_payment')]"/>
                     <!-- overdue -->
                     <filter name="late" string="Overdue" domain="[
                         ('invoice_date_due', '&lt;', time.strftime('%Y-%m-%d')),
-                        ('state', '=', 'posted'),
+                        ('state', 'in', ['posted', 'posted_sent']),
                         ('payment_state', 'in', ('not_paid', 'partial'))
                     ]" help="Overdue invoices, maturity date passed"/>
                     <separator/>
@@ -1939,7 +1939,7 @@
             <field name="view_mode">list</field>
             <field name="view_id" ref="view_move_line_payment_tree"/>
             <field name="search_view_id" ref="view_account_move_line_payment_filter"/>
-            <field name="domain">[('parent_state', '=', 'posted'), ('date_maturity', '!=', False), ('amount_residual', '!=', 0), ('account_id.reconcile', '=', True)]</field>
+            <field name="domain">[('parent_state', in ['posted', 'posted_sent']), ('date_maturity', '!=', False), ('amount_residual', '!=', 0), ('account_id.reconcile', '=', True)]</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     Amounts to settle

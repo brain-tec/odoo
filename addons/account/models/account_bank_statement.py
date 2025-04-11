@@ -133,7 +133,7 @@ class AccountBankStatement(models.Model):
             # When we create lines manually from the form view, they don't have any `internal_index` set yet.
             sorted_lines = stmt.line_ids.filtered("internal_index").sorted('internal_index')
             stmt.first_line_index = sorted_lines[:1].internal_index
-            stmt.date = sorted_lines.filtered(lambda l: l.state == 'posted')[-1:].date
+            stmt.date = sorted_lines.filtered(lambda l: l.state in ['posted', 'posted_sent'])[-1:].date
 
     @api.depends('create_date')
     def _compute_balance_start(self):
@@ -142,7 +142,7 @@ class AccountBankStatement(models.Model):
             previous_line_with_statement = self.env['account.bank.statement.line'].search([
                 ('internal_index', '<', stmt.first_line_index),
                 ('journal_id', '=', journal_id),
-                ('state', '=', 'posted'),
+                ('state', 'in', ['posted', 'posted_sent']),
                 ('statement_id', '!=', False),
             ], limit=1)
             balance_start = previous_line_with_statement.statement_id.balance_end_real
@@ -150,7 +150,7 @@ class AccountBankStatement(models.Model):
             lines_in_between_domain = [
                 ('internal_index', '<', stmt.first_line_index),
                 ('journal_id', '=', journal_id),
-                ('state', '=', 'posted'),
+                ('state', 'in', ['posted', 'posted_sent']),
             ]
             if previous_line_with_statement:
                 lines_in_between_domain.append(('internal_index', '>', previous_line_with_statement.internal_index))
@@ -167,7 +167,7 @@ class AccountBankStatement(models.Model):
     @api.depends('balance_start', 'line_ids.amount', 'line_ids.state')
     def _compute_balance_end(self):
         for stmt in self:
-            lines = stmt.line_ids.filtered(lambda x: x.state == 'posted')
+            lines = stmt.line_ids.filtered(lambda x: x.state in ['posted', 'posted_sent'])
             stmt.balance_end = stmt.balance_start + sum(lines.mapped('amount'))
 
     @api.depends('balance_start')
@@ -188,7 +188,7 @@ class AccountBankStatement(models.Model):
     @api.depends('balance_end', 'balance_end_real', 'line_ids.amount', 'line_ids.state')
     def _compute_is_complete(self):
         for stmt in self:
-            stmt.is_complete = stmt.line_ids.filtered(lambda l: l.state == 'posted') and stmt.currency_id.compare_amounts(
+            stmt.is_complete = stmt.line_ids.filtered(lambda l: l.state in ['posted', 'posted_sent']) and stmt.currency_id.compare_amounts(
                 stmt.balance_end, stmt.balance_end_real) == 0
 
     @api.depends('balance_end', 'balance_end_real')

@@ -23,7 +23,7 @@ class AccountAnalyticAccount(models.Model):
         sale_types = self.env['account.move'].get_sale_types(include_receipts=True)
         data = self.env['account.move.line']._read_group(
             [
-                ('parent_state', '=', 'posted'),
+                ('parent_state', 'in', ['posted', 'posted_sent']),
                 ('move_id.move_type', 'in', sale_types),
                 ('analytic_distribution', 'in', self.ids),
             ],
@@ -39,7 +39,7 @@ class AccountAnalyticAccount(models.Model):
         purchase_types = self.env['account.move'].get_purchase_types(include_receipts=True)
         data = self.env['account.move.line']._read_group(
             [
-                ('parent_state', '=', 'posted'),
+                ('parent_state', 'in', ['posted', 'posted_sent']),
                 ('move_id.move_type', 'in', purchase_types),
                 ('analytic_distribution', 'in', self.ids),
             ],

@@ -886,7 +886,7 @@ class AccountPaymentRegister(models.TransientModel):
         for wizard in self:
             wizard.is_register_payment_on_draft = any(l.parent_state == 'draft' for l in wizard.line_ids)
 
-    def _fetch_duplicate_reference(self, matching_states=('draft', 'posted')):
+    def _fetch_duplicate_reference(self, matching_states=('draft', 'posted', 'posted_sent')):
         """ Retrieve move ids for possible duplicates of payments. Duplicates moves:
         - Have the same partner_id, amount and date as the payment
         - Are not reconciled
@@ -1170,7 +1170,7 @@ class AccountPaymentRegister(models.TransientModel):
         :param edit_mode:   Is the wizard in edition mode.
         """
         domain = [
-            ('parent_state', '=', 'posted'),
+            ('parent_state', 'in', ['posted', 'posted_sent']),
             ('account_type', 'in', self.env['account.payment']._get_valid_payment_account_types()),
             ('reconciled', '=', False),
         ]
@@ -1186,7 +1186,7 @@ class AccountPaymentRegister(models.TransientModel):
                     .filtered_domain([
                         ('account_id', '=', account.id),
                         ('reconciled', '=', False),
-                        ('parent_state', '=', 'posted'),
+                        ('parent_state', 'in', ['posted', 'posted_sent']),
                     ])\
                     .reconcile()
             lines.move_id.matched_payment_ids += payment

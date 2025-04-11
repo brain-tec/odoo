@@ -730,7 +730,7 @@ class AccountMove(models.Model):
             self.env.cr.execute("""
                 CREATE UNIQUE INDEX account_move_unique_name
                                  ON account_move(name, journal_id)
-                              WHERE (state = 'posted' AND name != '/')
+                              WHERE (state in ('posted', 'posted_sent') AND name != '/')
             """)
 
         if not column_exists(self.env.cr, "account_move", "preferred_payment_method_line_id"):
@@ -789,7 +789,7 @@ class AccountMove(models.Model):
 
     def _compute_payment_reference(self):
         for move in self.filtered(lambda m: (
-            m.state == 'posted'
+            m.state in ['posted', 'posted_sent']
             and m.move_type == 'out_invoice'
             and not m.payment_reference
         )):
@@ -926,7 +926,7 @@ class AccountMove(models.Model):
 
     @api.depends('journal_id', 'sequence_number', 'sequence_prefix', 'state')
     def _compute_made_sequence_gap(self):
-        unposted = self.filtered(lambda move: move.sequence_number != 0 and move.state != 'posted')
+        unposted = self.filtered(lambda move: move.sequence_number != 0 and move.state not in ['posted', 'posted_sent'])
         unposted.made_sequence_gap = True
         for (journal, prefix), moves in (self - unposted).grouped(lambda m: (m.journal_id, m.sequence_prefix)).items():
             previous_numbers = set(self.env['account.move'].sudo().search([
@@ -1184,7 +1184,7 @@ class AccountMove(models.Model):
                 reconciliation_vals = [x for x in reconciliation_vals if x['source_line_account_type'] in ('asset_receivable', 'liability_payable')]
 
             new_pmt_state = 'not_paid' if invoice.payment_state != 'blocked' else 'blocked'
-            if invoice.state == 'posted':
+            if invoice.state in ['posted', 'posted_sent']:
 
                 # Posted invoice/expense entry.
                 if payment_state_matters:
@@ -1308,7 +1308,7 @@ class AccountMove(models.Model):
             move.invoice_outstanding_credits_debits_widget = False
             move.invoice_has_outstanding = False
 
-            if move.state != 'posted' \
+            if move.state not in ['posted', 'posted_sent'] \
                     or move.payment_state not in ('not_paid', 'partial') \
                     or not move.is_invoice(include_receipts=True):
                 continue
@@ -1318,7 +1318,7 @@ class AccountMove(models.Model):
 
             domain = [
                 ('account_id', 'in', pay_term_lines.account_id.ids),
-                ('parent_state', '=', 'posted'),
+                ('parent_state', 'in', ['posted', 'posted_sent']),
                 ('partner_id', '=', move.commercial_partner_id.id),
                 ('reconciled', '=', False),
                 '|', ('amount_residual', '!=', 0.0), ('amount_residual_currency', '!=', 0.0),
@@ -1380,7 +1380,7 @@ class AccountMove(models.Model):
         for move in self:
             payments_widget_vals = {'title': _('Less Payment'), 'outstanding': False, 'content': []}
 
-            if move.state == 'posted' and move.is_invoice(include_receipts=True):
+            if move.state in ['posted', 'posted_sent'] and move.is_invoice(include_receipts=True):
                 reconciled_vals = []
                 reconciled_partials = move.sudo()._get_all_reconciled_invoice_partials()
                 for reconciled_partial in reconciled_partials:
@@ -1717,7 +1717,7 @@ class AccountMove(models.Model):
             move.show_reset_to_draft_button = (
                 not self._is_move_restricted(move) \
                 and not move.inalterable_hash
-                and (move.state == 'cancel' or (move.state == 'posted' and not move.need_cancel_request))
+                and (move.state == 'cancel' or (move.state in ['posted', 'posted_sent'] and not move.need_cancel_request))
             )
 
     # EXTENDS portal portal.mixin
@@ -1842,7 +1842,7 @@ class AccountMove(models.Model):
             # Uses move._origin.id to handle records in edition/existing records and 0 for new records
             move.duplicated_ref_ids = move_to_duplicate_move.get(move._origin, self.env['account.move'])
 
-    def _fetch_duplicate_reference(self, matching_states=('draft', 'posted')):
+    def _fetch_duplicate_reference(self, matching_states=('draft', 'posted', 'posted_sent')):
         moves = self.filtered(lambda m: m.is_sale_document() or m.is_purchase_document() and m.ref)
 
         if not moves:
@@ -1992,7 +1992,7 @@ class AccountMove(models.Model):
                          LAG(other.invoice_date) OVER invoice - other.invoice_date AS date_diff
                     FROM account_move this
                     JOIN account_move other USING (partner_id, move_type, company_id, currency_id)
-                   WHERE other.state = 'posted'
+                   WHERE other.state in ('posted', 'posted_sent')
                      AND other.invoice_date <= COALESCE(this.invoice_date, this.date, %(today)s)
                      AND this.id = ANY(%(move_ids)s)
                      AND this.id != other.id
@@ -2711,7 +2711,7 @@ class AccountMove(models.Model):
         move_had_tax = {move: has_tax(move) for move in container['records']}
         yield
         # Skip posted moves.
-        for move in (x for x in container['records'] if x.state != 'posted'):
+        for move in (x for x in container['records'] if x.state not in ['posted', 'posted_sent']):
             if not has_tax(move) and not move_had_tax.get(move):
                 continue  # only manage automatically unbalanced when taxes are involved
             if move_had_tax.get(move) and not has_tax(move):
@@ -2750,7 +2750,7 @@ class AccountMove(models.Model):
     def _sync_rounding_lines(self, container):
         yield
         for invoice in container['records']:
-            if invoice.state != 'posted':
+            if invoice.state not in ['posted', 'posted_sent']:
                 invoice._recompute_cash_rounding_lines()
 
     @api.model
@@ -3178,7 +3178,7 @@ class AccountMove(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        if any('state' in vals and vals.get('state') == 'posted' for vals in vals_list):
+        if any('state' in vals and vals.get('state') in ['posted', 'posted_sent'] for vals in vals_list):
             raise UserError(_('You cannot create a move already in the posted state. Please create a draft move and post it after.'))
         container = {'records': self}
         with self._check_balanced(container):
@@ -3224,7 +3224,7 @@ class AccountMove(models.Model):
                 raise UserError(_('You cannot edit the journal of an account move with a sequence number assigned, unless the name is removed or set to "/". This might create a gap in the sequence.'))
 
             # You can't change the date or name of a move being inside a locked period.
-            if move.state == "posted" and (
+            if move.state in ['posted', 'posted_sent'] and (
                     ('name' in vals and move.name != vals['name'])
                     or ('date' in vals and move.date != vals['date'])
             ):
@@ -3232,7 +3232,7 @@ class AccountMove(models.Model):
                 move.line_ids._check_tax_lock_date()
 
             # You can't post subtract a move to a locked period.
-            if 'state' in vals and move.state == 'posted' and vals['state'] != 'posted':
+            if 'state' in vals and move.state in ['posted', 'posted_sent'] and vals['state'] not in ['posted', 'posted_sent']:
                 move._check_fiscal_lock_dates()
                 move.line_ids._check_tax_lock_date()
 
@@ -3242,7 +3242,7 @@ class AccountMove(models.Model):
                 'invoice_line_ids', 'line_ids', 'invoice_date', 'date', 'partner_id',
                 'invoice_payment_term_id', 'currency_id', 'fiscal_position_id', 'invoice_cash_rounding_id')
             readonly_fields = [val for val in vals if val in unmodifiable_fields]
-            if not self._context.get('skip_readonly_check') and move_state == "posted" and readonly_fields:
+            if not self._context.get('skip_readonly_check') and move_state in ['posted', 'posted_sent'] and readonly_fields:
                 raise UserError(_("You cannot modify the following readonly fields on a posted move: %s", ', '.join(readonly_fields)))
 
             if move.journal_id.sequence_override_regex and vals.get('name') and vals['name'] != '/' and not re.match(move.journal_id.sequence_override_regex, vals['name']):
@@ -3274,11 +3274,11 @@ class AccountMove(models.Model):
                 # You can't change the date of a not-locked move to a locked period.
                 # You can't post a new journal entry inside a locked period.
                 if 'date' in vals or 'state' in vals:
-                    posted_move = self.filtered(lambda m: m.state == 'posted')
+                    posted_move = self.filtered(lambda m: m.state in ['posted', 'posted_sent'])
                     posted_move._check_fiscal_lock_dates()
                     posted_move.line_ids._check_tax_lock_date()
 
-                if vals.get('state') == 'posted':
+                if vals.get('state') in ['posted', 'posted_sent']:
                     self.flush_recordset()  # Ensure that the name is correctly computed
                     self._hash_moves()
 
@@ -3469,7 +3469,7 @@ class AccountMove(models.Model):
 
     def _must_check_constrains_date_sequence(self):
         # OVERRIDES sequence.mixin
-        return self.state == 'posted' and not self.quick_edit_mode
+        return self.state in ['posted', 'posted_sent'] and not self.quick_edit_mode
 
     def _get_last_sequence_domain(self, relaxed=False):
         #pylint: disable=sql-injection
@@ -3754,7 +3754,7 @@ class AccountMove(models.Model):
         for record in self:
             if record.quick_edit_mode and not record.invoice_date:
                 invoice_date = fields.Date.context_today(self)
-                prev_move = self.search([('state', '=', 'posted'),
+                prev_move = self.search([('state', 'in', ['posted', 'posted_sent']),
                                          ('journal_id', '=', record.journal_id.id),
                                          ('company_id', '=', record.company_id.id),
                                          ('invoice_date', '!=', False)],
@@ -3845,7 +3845,7 @@ class AccountMove(models.Model):
         """
         common_domain = expression.AND([
             common_domain or [],
-            [('state', '=', 'posted')],
+            [('state', 'in', ['posted', 'posted_sent'])],
         ])
         if force_hash:
             return common_domain
@@ -4588,7 +4588,7 @@ class AccountMove(models.Model):
         self.ensure_one()
         if self.env.context.get('name_as_amount_total'):
             currency_amount = self.currency_id.format(self.amount_total)
-            if self.state == 'posted':
+            if self.state in ['posted', 'posted_sent']:
                 return _("%(ref)s (%(currency_amount)s)", ref=(self.ref or self.name), currency_amount=currency_amount)
             else:
                 return _("Draft (%(currency_amount)s)", currency_amount=currency_amount)
@@ -4818,7 +4818,7 @@ class AccountMove(models.Model):
                 to_cancel += move
             else:
                 to_unlink += move
-        to_unlink.filtered(lambda m: m.state in ('posted', 'cancel')).button_draft()
+        to_unlink.filtered(lambda m: m.state in ('posted', 'posted_sent', 'cancel')).button_draft()
         to_unlink.filtered(lambda m: m.state == 'draft').unlink()
         to_cancel.button_cancel()
         return to_reverse._reverse_moves(cancel=True)
@@ -4884,7 +4884,7 @@ class AccountMove(models.Model):
                     validation_msgs.add(_("The Bill/Refund date is required to validate this document."))
 
         for move in self:
-            if move.state in ['posted', 'cancel']:
+            if move.state in ['posted', 'posted_sent', 'cancel']:
                 validation_msgs.add(_('The entry %(name)s (id %(id)s) must be in draft.', name=move.name, id=move.id))
             if not move.line_ids.filtered(lambda line: line.display_type not in ('line_section', 'line_note')):
                 validation_msgs.add(_('You need to add a line before posting.'))
@@ -4946,7 +4946,7 @@ class AccountMove(models.Model):
                 wrong_lines.write({'partner_id': invoice.commercial_partner_id.id})
 
         # reconcile if state is in draft and move has reversal_entry_id set
-        draft_reverse_moves = to_post.filtered(lambda move: move.reversed_entry_id and move.reversed_entry_id.state == 'posted')
+        draft_reverse_moves = to_post.filtered(lambda move: move.reversed_entry_id and move.reversed_entry_id.state in ['posted', 'posted_sent'])
 
         to_post.write({
             'state': 'posted',
@@ -5033,7 +5033,7 @@ class AccountMove(models.Model):
     def _show_autopost_bills_wizard(self):
         if (
             len(self) != 1
-            or self.state != "posted"
+            or self.state not in ['posted', 'posted_sent']
             or not self.is_purchase_document(include_receipts=True)
             or self.restrict_mode_hash_table
             or all(not l.is_imported for l in self.line_ids)
@@ -5046,7 +5046,7 @@ class AccountMove(models.Model):
         prev_bills_same_partner = self.search([
             ('id', '!=', self.id),
             ('partner_id', '=', self.partner_id.id),
-            ('state', '=', 'posted'),
+            ('state', 'in', ['posted', 'posted_sent']),
             ('move_type', 'in', self.get_purchase_types(include_receipts=True)),
         ], order="create_date DESC", limit=10)
         nb_unmodified_bills = 1  # +1 for current bill that hasn't been modified either
@@ -5144,7 +5144,7 @@ class AccountMove(models.Model):
                 })
 
     def action_register_payment(self):
-        if any(m.state != 'posted' for m in self):
+        if any(m.state not in ['posted', 'posted_sent'] for m in self):
             raise UserError(_("You can only register payment for posted journal entries."))
         return self.action_force_register_payment()
 
@@ -5265,7 +5265,7 @@ class AccountMove(models.Model):
             move.checked = True
 
     def button_draft(self):
-        if any(move.state not in ('cancel', 'posted') for move in self):
+        if any(move.state not in ('cancel', 'posted', 'posted_sent') for move in self):
             raise UserError(_("Only posted/cancelled journal entries can be reset to draft."))
         if any(move.need_cancel_request for move in self):
             raise UserError(_("You can't reset to draft those journal entries. You need to request a cancellation instead."))
@@ -5356,7 +5356,7 @@ class AccountMove(models.Model):
     def button_cancel(self):
         # Shortcut to move from posted to cancelled directly. This is useful for E-invoices that must not be changed
         # when sent to the government.
-        moves_to_reset_draft = self.filtered(lambda x: x.state == 'posted')
+        moves_to_reset_draft = self.filtered(lambda x: x.state in ['posted', 'posted_sent'])
         if moves_to_reset_draft:
             moves_to_reset_draft.button_draft()
 
@@ -5963,7 +5963,7 @@ class AccountMove(models.Model):
     # ------------------------------------------------------------
 
     def _mailing_get_default_domain(self, mailing):
-        return ['&', ('move_type', '=', 'out_invoice'), ('state', '=', 'posted')]
+        return ['&', ('move_type', '=', 'out_invoice'), ('state', 'in', ['posted', 'posted_sent'])]
 
     @api.model
     def _routing_check_route(self, message, message_dict, route, raise_exception=True):
@@ -6126,7 +6126,7 @@ class AccountMove(models.Model):
 
         if 'payment_state' in init_values and self.payment_state == 'paid':
             return self.env.ref('account.mt_invoice_paid')
-        elif 'state' in init_values and self.state == 'posted' and self.is_sale_document(include_receipts=True):
+        elif 'state' in init_values and self.state in ['posted', 'posted_sent'] and self.is_sale_document(include_receipts=True):
             return self.env.ref('account.mt_invoice_validated')
         return super()._track_subtype(init_values)
 

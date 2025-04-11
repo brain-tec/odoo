@@ -121,7 +121,7 @@ class ProductTemplate(models.Model):
               JOIN uom_uom line_uom ON line.product_uom_id = line_uom.id
               JOIN uom_category line_uom_cat ON line_uom.category_id = line_uom_cat.id
              WHERE prod_template.id IN %s
-               AND line.parent_state = 'posted'
+               AND line.parent_state in ('posted', 'posted_sent')
                AND template_uom_cat.id != line_uom_cat.id
              LIMIT 1
         """, [tuple(self.ids)])

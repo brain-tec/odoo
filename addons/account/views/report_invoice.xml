@@ -53,10 +53,10 @@
                         <t t-set="layout_document_title">
                             <span t-if="not proforma"></span>
                             <span t-else="">PROFORMA</span>
-                            <span t-if="o.move_type == 'out_invoice' and o.state == 'posted'">Invoice</span>
+                            <span t-if="o.move_type == 'out_invoice' and o.state in ['posted', 'posted_sent']">Invoice</span>
                             <span t-elif="o.move_type == 'out_invoice' and o.state == 'draft'">Draft Invoice</span>
                             <span t-elif="o.move_type == 'out_invoice' and o.state == 'cancel'">Cancelled Invoice</span>
-                            <span t-elif="o.move_type == 'out_refund' and o.state == 'posted'">Credit Note</span>
+                            <span t-elif="o.move_type == 'out_refund' and o.state in ['posted', 'posted_sent']">Credit Note</span>
                             <span t-elif="o.move_type == 'out_refund' and o.state == 'draft'">Draft Credit Note</span>
                             <span t-elif="o.move_type == 'out_refund' and o.state == 'cancel'">Cancelled Credit Note</span>
                             <span t-elif="o.move_type == 'in_refund'">Vendor Credit Note</span>
@@ -72,7 +72,7 @@
                                 <t t-else=""><strong>Date</strong></t>
                                 <div t-field="o.invoice_date">2023-09-12</div>
                             </div>
-                            <div class="col" t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'" name="due_date">
+                            <div class="col" t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state in ['posted', 'posted_sent']" name="due_date">
                                 <strong>Due Date</strong>
                                 <div t-field="o.invoice_date_due">2023-10-31</div>
                             </div>

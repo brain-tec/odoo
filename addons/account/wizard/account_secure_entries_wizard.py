@@ -82,7 +82,7 @@ class AccountSecureEntries(models.TransientModel):
         self.ensure_one()
         res = []
         moves = self.env['account.move'].sudo().search(
-            self._get_unhashed_moves_in_hashed_period_domain(company_id, hash_date, [('state', '=', 'posted')])
+            self._get_unhashed_moves_in_hashed_period_domain(company_id, hash_date, [('state', 'in', ['posted', 'posted_sent'])])
         )
         for journal, journal_moves in moves.grouped('journal_id').items():
             for chain_moves in journal_moves.grouped('sequence_prefix').values():

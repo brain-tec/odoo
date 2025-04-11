@@ -209,7 +209,7 @@ class account_journal(models.Model):
                                   SELECT bool(m.id) as val
                                     FROM account_move m
                                    WHERE m.journal_id = j.id
-                                     AND m.state = 'posted'
+                                     AND m.state in ('posted', 'posted_sent')
                                    LIMIT 1
                               ) AS has_posted_entries ON true
             LEFT JOIN LATERAL (
@@ -334,7 +334,7 @@ class account_journal(models.Model):
                    COALESCE(SUM(move.amount_residual_signed) FILTER (WHERE invoice_date_due >= %(start_week5)s), 0) AS total_after
               FROM account_move move
              WHERE move.journal_id = ANY(%(journal_ids)s)
-               AND move.state = 'posted'
+               AND move.state in ('posted', 'posted_sent')
                AND move.payment_state in ('not_paid', 'partial')
                AND move.move_type IN %(invoice_types)s
                AND move.company_id = ANY(%(company_ids)s)
@@ -449,7 +449,7 @@ class account_journal(models.Model):
                AND st_line.company_id IN %s
                AND NOT st_line.is_reconciled
                AND st_line_move.checked IS TRUE
-               AND st_line_move.state = 'posted'
+               AND st_line_move.state in ('posted', 'posted_sent')
           GROUP BY st_line.journal_id
         """, [tuple(bank_cash_journals.ids), tuple(self.env.companies.ids)])
         number_to_reconcile = {
@@ -477,7 +477,7 @@ class account_journal(models.Model):
         misc_domain = [
             *self.env['account.move.line']._check_company_domain(self.env.companies),
             ('statement_line_id', '=', False),
-            ('parent_state', '=', 'posted'),
+            ('parent_state', 'in', ['posted', 'posted_sent']),
             ('payment_id', '=', False),
       ] + expression.OR(misc_domain)
 
@@ -497,7 +497,7 @@ class account_journal(models.Model):
                     ('journal_id', 'in', bank_cash_journals.ids),
                     ('move_id.company_id', 'in', self.env.companies.ids),
                     ('move_id.checked', '=', False),
-                    ('move_id.state', '=', 'posted'),
+                    ('move_id.state', 'in', ['posted', 'posted_sent']),
                 ],
                 groupby=['journal_id'],
                 aggregates=['amount:sum', '__count'],
@@ -583,7 +583,7 @@ class account_journal(models.Model):
                     *self.env['account.move']._check_company_domain(self.env.companies),
                     ('journal_id', 'in', sale_purchase_journals.ids),
                     ('checked', '=', False),
-                    ('state', '=', 'posted'),
+                    ('state', 'in', ['posted', 'posted_sent']),
                 ],
                 groupby=['journal_id'],
                 aggregates=['amount_total_signed:sum', '__count'],
@@ -657,7 +657,7 @@ class account_journal(models.Model):
                     *self.env['account.move']._check_company_domain(self.env.companies),
                     ('journal_id', 'in', general_journals.ids),
                     ('checked', '=', False),
-                    ('state', '=', 'posted'),
+                    ('state', 'in', ['posted', 'posted_sent']),
                 ],
                 groupby=['journal_id'],
                 aggregates=['amount_total_signed:sum', '__count'],
@@ -722,7 +722,7 @@ class account_journal(models.Model):
             ('journal_id', 'in', self.ids),
             ('payment_state', 'in', ('not_paid', 'partial')),
             ('move_type', 'in', ('out_invoice', 'out_refund') if journal_type == 'sale' else ('in_invoice', 'in_refund')),
-            ('state', '=', 'posted'),
+            ('state', 'in', ['posted', 'posted_sent']),
         ])
         selects = [
             SQL("journal_id"),
@@ -821,7 +821,7 @@ class account_journal(models.Model):
               JOIN account_move move ON move.origin_payment_id = payment.id
               JOIN account_journal journal ON move.journal_id = journal.id
              WHERE payment.is_matched IS TRUE
-               AND move.state = 'posted'
+               AND move.state in ('posted', 'posted_sent')
                AND payment.journal_id = ANY(%s)
                AND payment.company_id = ANY(%s)
                AND payment.outstanding_account_id = journal.default_account_id
@@ -848,7 +848,7 @@ class account_journal(models.Model):
               FROM account_payment payment
               JOIN account_move move ON move.origin_payment_id = payment.id
              WHERE (NOT payment.is_matched OR payment.is_matched IS NULL)
-               AND move.state = 'posted'
+               AND move.state in ('posted', 'posted_sent')
                AND payment.journal_id = ANY(%s)
                AND payment.company_id = ANY(%s)
           GROUP BY payment.company_id, payment.journal_id, payment.currency_id
@@ -980,7 +980,7 @@ class account_journal(models.Model):
             ('journal_id', '=', self.id),
             ('move_id.company_id', 'in', self.env.companies.ids),
             ('move_id.checked', '=', False),
-            ('move_id.state', '=', 'posted'),
+            ('move_id.state', 'in', ['posted', 'posted_sent']),
         ])
 
     def _select_action_to_open(self):
