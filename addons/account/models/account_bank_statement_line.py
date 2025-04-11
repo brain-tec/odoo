@@ -263,7 +263,7 @@ class AccountBankStatementLine(models.Model):
             for st_line_id, amount, is_anchor, balance_start, state in self._cr.fetchall():
                 if is_anchor:
                     current_running_balance = balance_start
-                if state == 'posted':
+                if state in ['posted', 'posted_sent']:
                     current_running_balance += amount
                 if record_by_id.get(st_line_id):
                     record_by_id[st_line_id].running_balance = current_running_balance
@@ -366,7 +366,7 @@ class AccountBankStatementLine(models.Model):
             # in a view in which the journal is already set and so is single journal view.
             last_line = self.search([
                 ('journal_id', '=', defaults['journal_id']),
-                ('state', '=', 'posted'),
+                ('state', 'in', ['posted', 'posted_sent']),
             ], limit=1)
             statement = last_line.statement_id
             if statement:
@@ -521,7 +521,7 @@ class AccountBankStatementLine(models.Model):
         return [
             # Base domain.
             ('display_type', 'not in', ('line_section', 'line_note')),
-            ('parent_state', '=', 'posted'),
+            ('parent_state', 'in', ['posted', 'posted_sent']),
             ('company_id', 'child_of', self.company_id.id),  # allow to match invoices from same or children companies to be consistant with what's shown in the interface
             # Reconciliation domain.
             ('reconciled', '=', False),

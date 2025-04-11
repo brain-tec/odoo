@@ -25,7 +25,7 @@ class Digest(models.Model):
                 ('date', '>', start),
                 ('date', '<=', end),
                 ('account_id.internal_group', '=', 'income'),
-                ('parent_state', '=', 'posted'),
+                ('parent_state', 'in', ['posted', 'posted_sent']),
             ],
         ))
 
