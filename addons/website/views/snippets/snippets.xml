@@ -376,16 +376,16 @@
                 </t>
                 <t t-snippet="website.s_opening_hours" string="Opening Hours" group="contact_and_forms"/>
                 <t t-snippet="website.s_contact_info" string="Contact Info" group="contact_and_forms"/>
-                <t t-snippet="website.s_website_form_overlay" string="Form Overlay" group="contact_and_forms">
+                <t t-snippet="website.s_website_form_overlay" string="Form Overlay" t-forbid-sanitize="form" group="contact_and_forms">
                     <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request</keywords>
                 </t>
-                <t t-snippet="website.s_website_form_info" string="Form Info" group="contact_and_forms">
+                <t t-snippet="website.s_website_form_info" string="Form Info" t-forbid-sanitize="form" group="contact_and_forms">
                     <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request, image, picture, photo, illustration, media, visual, company, organization, address, phone, email, location, get-in-touch</keywords>
                 </t>
-                <t t-snippet="website.s_website_form_cover" string="Form Cover" group="contact_and_forms">
+                <t t-snippet="website.s_website_form_cover" string="Form Cover" t-forbid-sanitize="form" group="contact_and_forms">
                     <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request, image, picture, photo, illustration, media, visual</keywords>
                 </t>
-                <t t-snippet="website.s_form_aside" string="Form Aside" group="contact_and_forms">
+                <t t-snippet="website.s_form_aside" string="Form Aside" t-forbid-sanitize="form" group="contact_and_forms">
                     <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request, image, picture, photo, illustration, media, visual, get-in-touch</keywords>
                 </t>
 
@@ -679,14 +679,13 @@
             <we-button data-select-class="s_carousel_indicators_hidden">Hidden</we-button>
         </we-select>
         <we-select string="Transition">
-            <we-button data-select-class="slide">Slide</we-button>
-            <we-button data-select-class="carousel-fade slide">Fade</we-button>
-            <we-divider/>
-            <we-button data-select-class="">None</we-button>
+            <we-button data-select-class="slide" data-name="slide_opt">Slide</we-button>
+            <we-button data-select-class="carousel-fade slide" data-name="fade_opt">Fade</we-button>
+            <we-button data-select-class="" data-name="none_opt">None</we-button>
         </we-select>
-        <we-input string="Speed"
-                  data-select-data-attribute="0s" data-attribute-name="bsInterval"
-                  data-unit="s" data-save-unit="ms" data-step="0.1"/>
+        <we-input string="Speed" class="o_we_sublevel_1" data-select-data-attribute="0s" data-attribute-name="bsInterval"
+                  data-unit="s" data-save-unit="ms" data-step="0.1" data-dependencies="slide_opt, fade_opt"/>
+        <we-checkbox string="Autoplay" class="autoplay o_we_sublevel_1" data-attribute-name="bsRide" data-select-data-attribute="carousel" data-dependencies="slide_opt, fade_opt"/>
     </div>
 </template>
 
