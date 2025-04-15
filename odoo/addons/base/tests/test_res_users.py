@@ -359,6 +359,9 @@ class TestUsers2(UsersCommonCase):
         self.assertEqual(set(user.read(['group_ids'])[0]['group_ids']), set((group_manager + group_user).ids))
         self.assertEqual(set(user.read(['all_group_ids'])[0]['all_group_ids']), set((group_visitor + group_manager + group_user).ids))
 
+        groups = self.env['res.groups'].search([('all_user_ids', '=', user.id)])
+        self.assertEqual(groups, user.all_group_ids)
+
     def test_implied_groups_on_change(self):
         """Test that a change on a reified fields trigger the onchange of group_ids."""
         group_public = self.env.ref('base.group_public')
@@ -499,7 +502,7 @@ class TestUsersIdentitycheck(HttpCase):
         form.password = 'admin@odoo'
         # The user clicks the button "Log out from all devices", which triggers a save then a call to the button method
         user_identity_check = form.save()
-        action = user_identity_check.run_check()
+        action = user_identity_check.with_context(password=form.password).run_check()
 
         # Test the session is no longer valid
         # Invalid session -> redirected from /web to /web/login

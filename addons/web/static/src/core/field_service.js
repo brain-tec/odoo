@@ -1,4 +1,3 @@
-import { Cache } from "@web/core/utils/cache";
 import { Domain } from "@web/core/domain";
 import { registry } from "@web/core/registry";
 
@@ -12,21 +11,6 @@ export const fieldService = {
     dependencies: ["orm"],
     async: ["loadFields", "loadPath", "loadPropertyDefinitions"],
     start(env, { orm }) {
-        const cache = new Cache(
-            (resModel, options) => {
-                return orm
-                    .call(resModel, "fields_get", [options.fieldNames, options.attributes])
-                    .catch((error) => {
-                        cache.clear(resModel, options);
-                        return Promise.reject(error);
-                    });
-            },
-            (resModel, options) =>
-                JSON.stringify([resModel, options.fieldNames, options.attributes])
-        );
-
-        env.bus.addEventListener("CLEAR-CACHES", () => cache.invalidate());
-
         /**
          * @param {string} resModel
          * @param {LoadFieldsOptions} [options]
@@ -36,7 +20,10 @@ export const fieldService = {
             if (typeof resModel !== "string" || !resModel) {
                 throw new Error(`Invalid model name: ${resModel}`);
             }
-            return cache.read(resModel, options);
+            return orm.cached.call(resModel, "fields_get", [
+                options.fieldNames,
+                options.attributes,
+            ]);
         }
 
         /**
@@ -71,6 +58,7 @@ export const fieldService = {
                         // differentiate definitions with same name but on different parent
                         record_id: record.id,
                         record_name: record.display_name,
+                        ...(definition.comodel ? { relation: definition.comodel } : {}),
                         ...definition,
                     };
                 }
