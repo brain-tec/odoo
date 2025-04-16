@@ -370,7 +370,7 @@ class ResPartner(models.Model):
             self.credit = False
             return
         query = self.env['account.move.line']._where_calc([
-            ('parent_state', '=', 'posted'),
+            ('parent_state', 'in', ['posted', 'posted_sent']),
             ('company_id', 'child_of', self.env.company.root_id.id)
         ])
         self.env['account.move.line'].flush_model(
@@ -431,7 +431,7 @@ class ResPartner(models.Model):
              WHERE acc.account_type = %s
                AND NOT acc.deprecated
                AND SPLIT_PART(line_company.parent_path, '/', 1)::int = %s
-               AND move.state = 'posted'
+               AND move.state in ('posted', 'posted_sent')
           GROUP BY aml.partner_id
             HAVING %s * COALESCE(SUM(aml.amount_residual), 0) {operator} %s''',
             (account_type, self.env.company.root_id.id, sign, operand)
@@ -766,7 +766,7 @@ class ResPartner(models.Model):
                 partner_domain,
                 [
                     ('move_type', 'in', ['out_invoice', 'out_refund']),
-                    ('state', '=', 'posted'),
+                    ('state', 'in', ['posted', 'posted_sent']),
                 ]
             ]),
             limit=1
@@ -807,7 +807,7 @@ class ResPartner(models.Model):
         """
         moves = self.sudo().env['account.move'].search_count([
             ('partner_id', 'in', self.ids),
-            ('state', 'in', ['draft', 'posted']),
+            ('state', 'in', ['draft', 'posted', 'posted_sent']),
         ])
         if moves:
             raise UserError(_("The partner cannot be deleted because it is used in Accounting"))

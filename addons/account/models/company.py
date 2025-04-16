@@ -460,7 +460,7 @@ class ResCompany(models.Model):
             ('company_id', 'child_of', self.ids),
             ('is_reconciled', '=', False),
             ('date', '<=', last_date),
-            ('move_id.state', 'in', ('draft', 'posted')),
+            ('move_id.state', 'in', ('draft', 'posted', 'posted_sent')),
         ]
 
     def _validate_locks(self, values):
@@ -726,7 +726,7 @@ class ResCompany(models.Model):
 
     def opening_move_posted(self):
         """ Returns true if this company has an opening account move and this move is posted."""
-        return bool(self.account_opening_move_id) and self.account_opening_move_id.state == 'posted'
+        return bool(self.account_opening_move_id) and self.account_opening_move_id.state in ['posted', 'posted_sent']
 
     def get_unaffected_earnings_account(self):
         """ Returns the unaffected earnings account for this company, creating one

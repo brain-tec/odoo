@@ -297,7 +297,11 @@ class PosSession(models.Model):
         for record in self:
             journal = record.config_id.journal_id
             company = journal.company_id
-            start_date = record.start_at.date()
+            # We need to convert 'start_at' datetime to the user timezone
+            # before converting it into a date. If not, it can lead to wrong
+            # results
+            start_at = fields.Datetime.context_timestamp(record, record.start_at)
+            start_date = start_at.date()
             violated_lock_dates = company._get_violated_lock_dates(start_date, True, journal)
             if violated_lock_dates:
                 raise ValidationError(_("You cannot create a session starting before: %(lock_date_info)s",
