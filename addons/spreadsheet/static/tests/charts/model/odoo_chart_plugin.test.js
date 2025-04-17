@@ -74,8 +74,8 @@ test("Odoo bar chart runtime loads the data", async () => {
     const { model } = await createSpreadsheetWithChart({
         type: "odoo_bar",
         mockRPC: async function (route, args) {
-            if (args.method === "web_read_group") {
-                expect.step("web_read_group");
+            if (args.method === "formatted_read_group") {
+                expect.step("formatted_read_group");
             }
         },
     });
@@ -104,15 +104,15 @@ test("Odoo bar chart runtime loads the data", async () => {
         labels: ["false", "true"],
     });
     // it should have loaded the data
-    expect.verifySteps(["web_read_group"]);
+    expect.verifySteps(["formatted_read_group"]);
 });
 
 test("Odoo pie chart runtime loads the data", async () => {
     const { model } = await createSpreadsheetWithChart({
         type: "odoo_pie",
         mockRPC: async function (route, args) {
-            if (args.method === "web_read_group") {
-                expect.step("web_read_group");
+            if (args.method === "formatted_read_group") {
+                expect.step("formatted_read_group");
             }
         },
     });
@@ -138,15 +138,15 @@ test("Odoo pie chart runtime loads the data", async () => {
         labels: ["false", "true"],
     });
     // it should have loaded the data
-    expect.verifySteps(["web_read_group"]);
+    expect.verifySteps(["formatted_read_group"]);
 });
 
 test("Odoo line chart runtime loads the data", async () => {
     const { model } = await createSpreadsheetWithChart({
         type: "odoo_line",
         mockRPC: async function (route, args) {
-            if (args.method === "web_read_group") {
-                expect.step("web_read_group");
+            if (args.method === "formatted_read_group") {
+                expect.step("formatted_read_group");
             }
         },
     });
@@ -176,7 +176,7 @@ test("Odoo line chart runtime loads the data", async () => {
         labels: ["false", "true"],
     });
     // it should have loaded the data
-    expect.verifySteps(["web_read_group"]);
+    expect.verifySteps(["formatted_read_group"]);
 });
 
 test("Area charts are supported", async () => {
@@ -187,7 +187,7 @@ test("Area charts are supported", async () => {
     const definition = model.getters.getChartDefinition(chartId);
     model.dispatch("UPDATE_CHART", {
         definition: { ...definition, fillArea: true, stacked: false },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     let runtime = model.getters.getChartRuntime(chartId).chartJsConfig;
@@ -196,7 +196,7 @@ test("Area charts are supported", async () => {
     expect(runtime.data.datasets[0].fill).toBe("origin");
     model.dispatch("UPDATE_CHART", {
         definition: { ...definition, fillArea: true, stacked: true },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     runtime = model.getters.getChartRuntime(chartId).chartJsConfig;
@@ -209,8 +209,8 @@ test("Data reloaded strictly upon domain update", async () => {
     const { model } = await createSpreadsheetWithChart({
         type: "odoo_line",
         mockRPC: async function (route, args) {
-            if (args.method === "web_read_group") {
-                expect.step("web_read_group");
+            if (args.method === "formatted_read_group") {
+                expect.step("formatted_read_group");
             }
         },
     });
@@ -222,21 +222,21 @@ test("Data reloaded strictly upon domain update", async () => {
     model.getters.getChartRuntime(chartId);
     await animationFrame();
     // it should have loaded the data
-    expect.verifySteps(["web_read_group"]);
+    expect.verifySteps(["formatted_read_group"]);
 
     model.dispatch("UPDATE_CHART", {
         definition: {
             ...definition,
             searchParams: { ...definition.searchParams, domain: [["1", "=", "1"]] },
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     // force runtime computation
     model.getters.getChartRuntime(chartId);
     await animationFrame();
     // it should have loaded the data with a new domain
-    expect.verifySteps(["web_read_group"]);
+    expect.verifySteps(["formatted_read_group"]);
 
     const newDefinition = model.getters.getChartDefinition(chartId);
     model.dispatch("UPDATE_CHART", {
@@ -244,7 +244,7 @@ test("Data reloaded strictly upon domain update", async () => {
             ...newDefinition,
             background: "#00FF00",
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     // force runtime computation
@@ -308,9 +308,9 @@ test("can import (export) contextual domain", async function () {
     const { model } = await createModelWithDataSource({
         spreadsheetData,
         mockRPC: function (route, args) {
-            if (args.method === "web_read_group") {
+            if (args.method === "formatted_read_group") {
                 expect(args.kwargs.domain).toEqual([["foo", "=", uid]]);
-                expect.step("web_read_group");
+                expect.step("formatted_read_group");
             }
         },
     });
@@ -320,7 +320,7 @@ test("can import (export) contextual domain", async function () {
         '[("foo", "=", uid)]',
         { message: "the domain is exported with the dynamic parts" }
     );
-    expect.verifySteps(["web_read_group"]);
+    expect.verifySteps(["formatted_read_group"]);
 });
 
 test("Can undo/redo an Odoo chart creation", async () => {
@@ -359,7 +359,7 @@ test("charts with no legend", async () => {
             ...pie,
             legendPosition: "none",
         },
-        id: pieChartId,
+        figureId: pieChartId,
         sheetId,
     });
     model.dispatch("UPDATE_CHART", {
@@ -367,7 +367,7 @@ test("charts with no legend", async () => {
             ...bar,
             legendPosition: "none",
         },
-        id: barChartId,
+        figureId: barChartId,
         sheetId,
     });
     model.dispatch("UPDATE_CHART", {
@@ -375,7 +375,7 @@ test("charts with no legend", async () => {
             ...line,
             legendPosition: "none",
         },
-        id: lineChartId,
+        figureId: lineChartId,
         sheetId,
     });
     expect(
@@ -399,7 +399,7 @@ test("Bar chart with stacked attribute is supported", async () => {
             ...definition,
             stacked: true,
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     expect(model.getters.getChartRuntime(chartId).chartJsConfig.options.scales.x.stacked).toBe(
@@ -413,7 +413,7 @@ test("Bar chart with stacked attribute is supported", async () => {
             ...definition,
             stacked: false,
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     expect(model.getters.getChartRuntime(chartId).chartJsConfig.options.scales.x.stacked).toBe(
@@ -428,7 +428,7 @@ test("Can copy/paste Odoo chart", async () => {
     const { model } = await createSpreadsheetWithChart({ type: "odoo_pie" });
     const sheetId = model.getters.getActiveSheetId();
     const chartId = model.getters.getChartIds(sheetId)[0];
-    model.dispatch("SELECT_FIGURE", { id: chartId });
+    model.dispatch("SELECT_FIGURE", { figureId: chartId });
     model.dispatch("COPY");
     model.dispatch("PASTE", { target: [toZone("A1")] });
     const chartIds = model.getters.getChartIds(sheetId);
@@ -449,7 +449,7 @@ test("Can cut/paste Odoo chart", async () => {
     const sheetId = model.getters.getActiveSheetId();
     const chartId = model.getters.getChartIds(sheetId)[0];
     const chartRuntime = model.getters.getChartRuntime(chartId);
-    model.dispatch("SELECT_FIGURE", { id: chartId });
+    model.dispatch("SELECT_FIGURE", { figureId: chartId });
     model.dispatch("CUT");
     model.dispatch("PASTE", { target: [toZone("A1")] });
     const chartIds = model.getters.getChartIds(sheetId);
@@ -490,7 +490,7 @@ test("Line chart with stacked attribute is supported", async () => {
             ...definition,
             stacked: true,
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     expect(model.getters.getChartRuntime(chartId).chartJsConfig.options.scales.x.stacked).toBe(
@@ -504,7 +504,7 @@ test("Line chart with stacked attribute is supported", async () => {
             ...definition,
             stacked: false,
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     expect(model.getters.getChartRuntime(chartId).chartJsConfig.options.scales.x.stacked).toBe(
@@ -519,7 +519,7 @@ test("Load odoo chart spreadsheet with models that cannot be accessed", async fu
     let hasAccessRights = true;
     const { model } = await createSpreadsheetWithChart({
         mockRPC: async function (route, args) {
-            if (args.model === "partner" && args.method === "web_read_group" && !hasAccessRights) {
+            if (args.model === "partner" && args.method === "formatted_read_group" && !hasAccessRights) {
                 throw makeServerError({ description: "ya done!" });
             }
         },
@@ -551,7 +551,7 @@ test("Line chart to support cumulative data", async () => {
             ...definition,
             cumulative: true,
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     await waitForDataLoaded(model);
@@ -563,7 +563,7 @@ test("Line chart to support cumulative data", async () => {
             ...definition,
             cumulative: false,
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     await waitForDataLoaded(model);
@@ -665,7 +665,7 @@ test("update existing chart to cumulate past data", async () => {
             ...definition,
             cumulative: true,
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     await waitForDataLoaded(model);
@@ -697,7 +697,7 @@ test("Odoo chart legend color changes with background color update", async () =>
             ...definition,
             background: "#000000",
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     expect(
@@ -728,7 +728,7 @@ test("Odoo chart datasource display name has a default when the chart title is e
             ...definition,
             title: { text: "" },
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     expect(model.getters.getOdooChartDisplayName(chartId)).toBe("(#1) Odoo Line Chart");
@@ -1004,7 +1004,7 @@ test("Show values is taken into account in the runtime", async () => {
             ...definition,
             showValues: true,
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     const runtime = model.getters.getChartRuntime(chartId);
@@ -1028,7 +1028,7 @@ test("Odoo line and bar charts display only horizontal grid lines", async () => 
             ...lineChartDefinition,
             type: "odoo_bar",
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
 
@@ -1065,7 +1065,7 @@ test("Can configure the chart datasets", async () => {
 
     model.dispatch("UPDATE_CHART", {
         definition: { ...definition, dataSets: [{ label: "My dataset" }, { label: "Second" }] },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     definition = model.getters.getChartDefinition(chartId);
@@ -1076,7 +1076,7 @@ test("Can configure the chart datasets", async () => {
             ...definition,
             searchParams: { ...searchParams, domain: [["bar", "=", false]] },
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     model.dispatch("REFRESH_ALL_DATA_SOURCES");
@@ -1096,7 +1096,7 @@ test("Chart data source is recreated when chart type is updated", async () => {
             ...model.getters.getChartDefinition(chartId),
             type: "odoo_line",
         },
-        id: chartId,
+        figureId: chartId,
         sheetId,
     });
     expect(chartDataSource !== model.getters.getChartDataSource(chartId)).toBe(true, {

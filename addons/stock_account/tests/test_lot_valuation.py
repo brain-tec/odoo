@@ -84,7 +84,7 @@ class TestLotValuation(TestStockValuationCommon):
 
     def test_real_time_valuation(self):
         """ Test account move lines contains lot """
-        self.stock_input_account, self.stock_output_account, self.stock_valuation_account, self.expense_account, self.stock_journal = _create_accounting_data(self.env)
+        self.stock_input_account, self.stock_output_account, self.stock_valuation_account, self.expense_account, self.income_account, self.stock_journal = _create_accounting_data(self.env)
         self.product1.categ_id.write({
             'property_stock_account_input_categ_id': self.stock_input_account.id,
             'property_stock_account_output_categ_id': self.stock_output_account.id,
@@ -430,7 +430,8 @@ class TestLotValuation(TestStockValuationCommon):
             'default_product_id': self.product1.id,
             'default_company_id': self.env.company.id,
             'default_added_value': 8.0,
-            'default_lot_id': self.lot1.id,
+            'active_ids': self.lot1.ids,
+            'active_model': 'stock.lot',
         })).save().action_validate_revaluation()
 
         layers = self.lot1.stock_valuation_layer_ids

@@ -11,6 +11,7 @@ import typing
 import warnings
 
 if typing.TYPE_CHECKING:
+    from .lru import LRU
     from collections.abc import Callable
     from odoo.models import BaseModel
     C = typing.TypeVar('C', bound=Callable)
@@ -105,10 +106,10 @@ class ormcache:
             # backward-compatible function that uses self.skiparg
             self.key = lambda *args, **kwargs: args[self.skiparg:]
 
-    def lru(self, model: BaseModel) -> tuple[typing.Any, tuple, ormcache_counter]:
+    def lru(self, model: BaseModel) -> tuple[LRU, tuple, ormcache_counter]:
         model_name = model._name or ''
         counter = STAT[model.pool.db_name, model_name, self.method]
-        cache = model.pool._Registry__caches[self.cache_name]  # type: ignore
+        cache: LRU = model.pool._Registry__caches[self.cache_name]  # type: ignore
         return cache, (model_name, self.method), counter
 
     def lookup(self, method, *args, **kwargs):
@@ -121,9 +122,10 @@ class ormcache:
         except KeyError:
             counter.miss += 1
             counter.cache_name = self.cache_name
-            start = time.time()
-            value = d[key] = self.method(*args, **kwargs)
-            counter.gen_time += time.time() - start
+            start = time.monotonic()
+            value = self.method(*args, **kwargs)
+            counter.gen_time += time.monotonic() - start
+            d[key] = value
             return value
         except TypeError:
             _logger.warning("cache lookup error on %r", key, exc_info=True)
@@ -172,8 +174,11 @@ def log_ormcache_stats(sig=None, frame=None):   # noqa: ARG001 (arguments are th
             cache_stats.append(f"Database {dbname_display}")
         if dbname:   # mainly for MockPool
             if (dbname, stat.cache_name) not in cache_entries:
-                cache = Registry.registries.d[dbname]._Registry__caches[stat.cache_name]
-                cache_entries[dbname, stat.cache_name] = Counter(k[:2] for k in cache.d)
+                try:
+                    cache = Registry.registries[dbname]._Registry__caches[stat.cache_name]
+                    cache_entries[dbname, stat.cache_name] = Counter(k[:2] for k in cache)
+                except KeyError:
+                    cache_entries[dbname, stat.cache_name] = Counter()
             nb_entries = cache_entries[dbname, stat.cache_name][model, method]
         else:
             nb_entries = 0

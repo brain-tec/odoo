@@ -639,9 +639,25 @@ export class Rtc extends Record {
         }
     }
 
+    async toggleDeafen() {
+        if (this.selfSession.is_deaf) {
+            await this.undeafen();
+            if (this.selfSession.is_muted) {
+                await this.unmute();
+            }
+        } else {
+            await this.deafen();
+        }
+    }
+
     async toggleMicrophone() {
-        if (this.localSession.isMute) {
-            await this.unmute();
+        if (this.selfSession.isMute) {
+            if (this.selfSession.is_muted) {
+                await this.unmute();
+            }
+            if (this.selfSession.is_deaf) {
+                await this.undeafen();
+            }
         } else {
             await this.mute();
         }
@@ -973,7 +989,9 @@ export class Rtc extends Record {
                     if (!sequence) {
                         return;
                     }
-                    const session = await this.store.RtcSession.getWhenReady(senderId);
+                    const session = await this.store["discuss.channel.rtc.session"].getWhenReady(
+                        senderId
+                    );
                     if (!session) {
                         return;
                     }
@@ -2044,7 +2062,9 @@ export const rtcService = {
         const rtc = env.services["mail.store"].rtc;
         rtc.p2pService = services["discuss.p2p"];
         rtc.p2pService.acceptOffer = async (id, sequence) => {
-            const session = await this.store.RtcSession.getWhenReady(Number(id));
+            const session = await this.store["discuss.channel.rtc.session"].getWhenReady(
+                Number(id)
+            );
             /**
              * We only accept offers for new connections (higher sequence),
              * or offers that renegotiate an existing connection (same sequence).
