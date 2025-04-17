@@ -13,7 +13,10 @@ class ProductProduct(models.Model):
 
     @api.model
     def _load_pos_data_fields(self, config_id):
-        return ['id', 'lst_price', 'display_name', 'product_tmpl_id', 'product_template_variant_value_ids', 'barcode', 'product_tag_ids', 'default_code', 'standard_price']
+        return [
+            'id', 'lst_price', 'display_name', 'product_tmpl_id', 'product_template_variant_value_ids',
+            'product_template_attribute_value_ids', 'barcode', 'product_tag_ids', 'default_code', 'standard_price'
+        ]
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_active_pos_session(self):
@@ -25,14 +28,13 @@ class ProductProduct(models.Model):
                     "Deleting a product available in a session would be like attempting to snatch a hamburger from a customer’s hand mid-bite; chaos will ensue as ketchup and mayo go flying everywhere!",
                 ))
 
-    def _load_pos_data(self, data):
-        products = super()._load_pos_data(data)
-        config = self.env['pos.config'].browse(data['pos.config'][0]['id'])
+    def _post_read_pos_data(self, data):
+        config = self.env['pos.config'].browse(self.env.context.get('config_id'))
         different_currency = config.currency_id != self.env.company.currency_id
         if different_currency:
-            for product in products:
+            for product in data:
                 product['lst_price'] = self.env.company.currency_id._convert(product['lst_price'], config.currency_id, self.env.company, fields.Date.today())
-        return products
+        return super()._post_read_pos_data(data)
 
     def _can_return_content(self, field_name=None, access_token=None):
         if field_name == "image_128" and self.sudo().available_in_pos:
