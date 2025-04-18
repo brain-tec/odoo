@@ -568,6 +568,8 @@ class IrActionsServer(models.Model):
     available_model_ids = fields.Many2many('ir.model', string='Available Models', compute='_compute_available_model_ids', store=False)
     model_name = fields.Char(related='model_id.model', string='Model Name')
     warning = fields.Text(string='Warning', compute='_compute_warning', recursive=True)
+    # Inverse relation of ir.cron.ir_actions_server_id (has delegate=True, so either 0 or 1 cron, even if o2m field)
+    ir_cron_ids = fields.One2many('ir.cron', 'ir_actions_server_id', 'Scheduled Action', context={'active_test': False})
     # Python code
     code = fields.Text(string='Python Code', groups='base.group_system',
                        default=DEFAULT_PYTHON_CODE,
@@ -612,6 +614,7 @@ class IrActionsServer(models.Model):
         ('value', 'Update'),
         ('equation', 'Compute')
     ], 'Value Type', default='value', change_default=True)
+    html_value = fields.Html()
     resource_ref = fields.Reference(
         string='Record', selection='_selection_target_model', inverse='_set_resource_ref')
     selection_value = fields.Many2one('ir.model.fields.selection', string="Custom Value", ondelete='cascade',
@@ -619,6 +622,7 @@ class IrActionsServer(models.Model):
 
     value_field_to_show = fields.Selection([
         ('value', 'value'),
+        ('html_value', 'html_value'),
         ('resource_ref', 'reference'),
         ('update_boolean_value', 'update_boolean_value'),
         ('selection_value', 'selection_value'),
@@ -1119,6 +1123,8 @@ class IrActionsServer(models.Model):
                 action.value_field_to_show = 'selection_value'
             elif action.update_field_id.ttype == 'boolean':
                 action.value_field_to_show = 'update_boolean_value'
+            elif action.update_field_id.ttype == 'html':
+                action.value_field_to_show = 'html_value'
             else:
                 action.value_field_to_show = 'value'
 
@@ -1175,6 +1181,8 @@ class IrActionsServer(models.Model):
             elif action.update_field_id.ttype == 'float':
                 with contextlib.suppress(Exception):
                     expr = float(action.value)
+            elif action.update_field_id.ttype == 'html':
+                expr = action.html_value
             result[action.id] = expr
         return result
 
@@ -1185,6 +1193,24 @@ class IrActionsServer(models.Model):
             for vals in vals_list:
                 vals['name'] = _('%s (copy)', vals.get('name', ''))
         return vals_list
+
+    def action_open_parent_action(self):
+        return {
+            "type": "ir.actions.act_window",
+            "target": "current",
+            "views": [[False, "form"]],
+            "res_model": self._name,
+            "res_id": self.parent_id.id,
+        }
+
+    def action_open_scheduled_action(self):
+        return {
+            "type": "ir.actions.act_window",
+            "target": "current",
+            "views": [[False, "form"]],
+            "res_model": "ir.cron",
+            "res_id": self.ir_cron_ids.ids[0],
+        }
 
 
 class IrActionsTodo(models.Model):
