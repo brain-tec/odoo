@@ -269,7 +269,7 @@ class ResPartner(models.Model):
     industry_id: ResPartnerIndustry = fields.Many2one('res.partner.industry', 'Industry')
     # company_type is only an interface field, do not use it in business logic
     company_type = fields.Selection(string='Company Type',
-        selection=[('person', 'Individual'), ('company', 'Company')],
+        selection=[('person', 'Person'), ('company', 'Company')],
         compute='_compute_company_type', inverse='_write_company_type')
     company_id: ResCompany = fields.Many2one('res.company', 'Company', index=True)
     color = fields.Integer(string='Color Index', default=0)
@@ -292,6 +292,18 @@ class ResPartner(models.Model):
 
     # hack to allow using plain browse record in qweb views, and used in ir.qweb.field.contact
     self: ResPartner = fields.Many2one(comodel_name='res.partner', compute='_compute_get_ids')
+    application_statistics = fields.Json(string="Stats", compute="_compute_application_statistics")
+
+    def _compute_application_statistics(self):
+        result = self._compute_application_statistics_hook()
+        for p in self:
+            p.application_statistics = result.get(p.id, [])
+
+    def _compute_application_statistics_hook(self):
+        """ Hook for override, as overriding compute method does not update
+        cache accordingly. All overrides receive False instead of previously
+        assigned value. """
+        return defaultdict(list)
 
     _check_name = models.Constraint(
         "CHECK( (type='contact' AND name IS NOT NULL) or (type!='contact') )",
@@ -323,7 +335,8 @@ class ResPartner(models.Model):
         super()._compute_avatar_128()
 
     def _compute_avatar(self, avatar_field, image_field):
-        partners_with_internal_user = self.filtered(lambda partner: partner.user_ids - partner.user_ids.filtered('share'))
+        partners_with_internal_user = self.filtered(
+            lambda partner: partner.user_ids - partner.user_ids.filtered('share') or partner.type == 'contact')
         super(ResPartner, partners_with_internal_user)._compute_avatar(avatar_field, image_field)
         partners_without_image = (self - partners_with_internal_user).filtered(lambda p: not p[image_field])
         for _, group in tools.groupby(partners_without_image, key=lambda p: p._avatar_get_placeholder_path()):
@@ -354,7 +367,7 @@ class ResPartner(models.Model):
         if self.company_name or self.parent_id:
             if not name and self.type in displayed_types:
                 name = type_description[self.type]
-            if not self.is_company:
+            if not self.is_company and not self.env.context.get('partner_display_name_hide_company'):
                 name = f"{self.commercial_company_name or self.sudo().parent_id.name}, {name}"
         return name.strip()
 
@@ -954,7 +967,10 @@ class ResPartner(models.Model):
                 }
 
     @api.depends('complete_name', 'email', 'vat', 'state_id', 'country_id', 'commercial_company_name')
-    @api.depends_context('show_address', 'partner_show_db_id', 'address_inline', 'show_email', 'show_vat', 'lang')
+    @api.depends_context(
+        'show_address', 'partner_display_name_hide_company', 'partner_show_db_id', 'address_inline',
+        'show_email', 'show_vat', 'lang',
+    )
     def _compute_display_name(self):
         for partner in self:
             name = partner.with_context(lang=self.env.lang)._get_complete_name()

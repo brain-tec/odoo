@@ -253,6 +253,12 @@ class ResUsers(models.Model):
     groups_count = fields.Integer('# Groups', help='Number of groups that apply to the current user',
                                   compute='_compute_accesses_count', compute_sudo=True)
 
+    def _default_view_group_hierarchy(self):
+        return self.env['res.groups']._get_view_group_hierarchy()
+
+    view_group_hierarchy = fields.Json(string='Technical field for user group setting', store=False, default=_default_view_group_hierarchy)
+    role = fields.Selection([('group_user', 'Member'), ('group_system', 'Administrator')], compute='_compute_role', readonly=False, string="Role")
+
     _login_key = models.Constraint("UNIQUE (login)",
         'You can not have two users with the same login!')
 
@@ -389,6 +395,24 @@ class ResUsers(models.Model):
             else:
                 user.password = user.new_password
 
+    @api.depends('group_ids')
+    def _compute_role(self):
+        for user in self:
+            user.role = (
+                'group_system' if user.has_group('base.group_system') else
+                'group_user' if user.has_group('base.group_user') else
+                False
+            )
+
+    @api.onchange('role')
+    def _onchange_role(self):
+        group_admin = self.env['res.groups'].new(origin=self.env.ref('base.group_system'))
+        group_user = self.env['res.groups'].new(origin=self.env.ref('base.group_user'))
+        for user in self:
+            if user.role and user.has_group('base.group_user'):
+                groups = user.group_ids - (group_admin + group_user)
+                user.group_ids = groups + (group_admin if user.role == 'group_system' else group_user)
+
     @api.depends('group_ids.all_implied_ids')
     def _compute_all_group_ids(self):
         for user in self:
@@ -492,6 +516,12 @@ class ResUsers(models.Model):
                     user=repr(user.name),
                     groups=", ".join(repr(g.display_name) for g in disjoint_groups),
                 ))
+
+    @api.constrains('group_ids')
+    def _check_at_least_one_administrator(self):
+        system = self.env.ref('base.group_system', raise_if_not_found=False)
+        if system and not system.user_ids:
+            raise ValidationError(_("You must have at least an administrator user."))
 
     def onchange(self, values, field_names, fields_spec):
         # Hacky fix to access fields in `SELF_READABLE_FIELDS` in the onchange logic.

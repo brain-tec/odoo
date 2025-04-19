@@ -94,7 +94,6 @@ class RepairOrder(models.Model):
         compute='compute_product_uom', store=True, precompute=True)
     lot_id = fields.Many2one(
         'stock.lot', 'Lot/Serial',
-        default=False,
         compute="compute_lot_id", store=True,
         domain="[('id', 'in', allowed_lot_ids)]", check_company=True,
         help="Products repaired are all belonging to this lot")
@@ -196,6 +195,15 @@ class RepairOrder(models.Model):
     reserve_visible = fields.Boolean(
         'Allowed to Reserve Production', compute='_compute_unreserve_visible',
         help='Technical field to check when we can reserve quantities')
+    picking_type_visible = fields.Boolean(compute='_compute_picking_type_visible')
+
+    def _compute_picking_type_visible(self):
+        repair_type_by_company = dict(self.env['stock.picking.type']._read_group([
+                ('code', '=', 'repair_operation'),
+                ('company_id', 'in', self.company_id.ids)
+            ], groupby=['company_id'], aggregates=['__count']))
+        for ro in self:
+            ro.picking_type_visible = repair_type_by_company.get(ro.company_id, 0) > 1
 
     @api.depends('product_id', 'picking_id', 'lot_id')
     def _compute_product_qty(self):
@@ -362,6 +370,8 @@ class RepairOrder(models.Model):
         res = super().default_get(fields_list)
         if 'picking_id' not in res and 'picking_id' in fields_list and 'default_repair_picking_id' in self.env.context:
             res['picking_id'] = self.env.context.get('default_repair_picking_id')
+        if 'lot_id' not in res and 'lot_id' in fields_list and 'default_repair_lot_id' in self.env.context:
+            res['lot_id'] = self.env.context.get('default_repair_lot_id')
         return res
 
     @api.model_create_multi

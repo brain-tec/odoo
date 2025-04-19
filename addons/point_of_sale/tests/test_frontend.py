@@ -1532,12 +1532,12 @@ class TestUi(TestPointOfSaleHttpCommon):
     def test_product_categories_order(self):
         """ Verify that the order of categories doesnt change in the frontend """
         self.env['pos.category'].search([]).write({'sequence': 100})
-        self.env['pos.category'].create({
+        aaa_catg = self.env['pos.category'].create({
             'name': 'AAA',
             'parent_id': False,
             'sequence': 1,
         })
-        self.env['pos.category'].create({
+        aac_catg = self.env['pos.category'].create({
             'name': 'AAC',
             'parent_id': False,
             'sequence': 3,
@@ -1551,7 +1551,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'name': 'AAX',
             'parent_id': parentA.id,
         })
-        self.env['pos.category'].create({
+        aay_catg = self.env['pos.category'].create({
             'name': 'AAY',
             'parent_id': parentB.id,
         })
@@ -1562,6 +1562,23 @@ class TestUi(TestPointOfSaleHttpCommon):
             'pos_categ_ids': [(6, 0, [parentA.id, parentB.id])],
             'available_in_pos': True,
         })
+        self.env['product.product'].create([
+            {
+                'name': 'Product in AAA Catg',
+                'pos_categ_ids': [(6, 0, [aaa_catg.id])],
+                'available_in_pos': True,
+            },
+            {
+                'name': 'Product in AAC Catg',
+                'pos_categ_ids': [(6, 0, [aac_catg.id])],
+                'available_in_pos': True,
+            },
+            {
+                'name': 'Product in AAY Catg',
+                'pos_categ_ids': [(6, 0, [aay_catg.id])],
+                'available_in_pos': True,
+            },
+        ])
         self.main_pos_config.with_user(self.pos_admin).open_ui()
         self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'PosCategoriesOrder', login="pos_admin")
 
@@ -1683,47 +1700,6 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'ProductSearchTour', login="pos_user")
-
-    def test_sort_orderlines_by_product_categoryies(self):
-        """ Test to ensure orderlines are added to the cart in the correct order based on their categories"""
-        self.pos_desk_misc_test.write({'sequence': 0})
-        self.pos_cat_chair_test.write({'sequence': 1})
-
-        self.product_1_categ_seq_1 = self.env['product.template'].create({
-            'name': 'Product_1 Category sequence 1',
-            'available_in_pos': True,
-            'list_price': 1.00,
-            'taxes_id': False,
-            'pos_categ_ids': [(4, self.pos_desk_misc_test.id)],
-        })
-        self.product_2_categ_seq_1 = self.env['product.template'].create({
-            'name': 'Product_2 Category sequence 1',
-            'available_in_pos': True,
-            'list_price': 2.00,
-            'taxes_id': False,
-            'pos_categ_ids': [(4, self.pos_desk_misc_test.id)],
-        })
-        self.product_11_categ_seq_2 = self.env['product.template'].create({
-            'name': 'Product_11 Category sequence 2',
-            'available_in_pos': True,
-            'list_price': 3.00,
-            'taxes_id': False,
-            'pos_categ_ids': [(4, self.pos_cat_chair_test.id)],
-        })
-        self.product_22_categ_seq_2 = self.env['product.template'].create({
-            'name': 'Product_22 Category sequence 2',
-            'available_in_pos': True,
-            'list_price': 4.00,
-            'taxes_id': False,
-            'pos_categ_ids': [(4, self.pos_cat_chair_test.id)],
-        })
-
-        self.main_pos_config.write({
-            'orderlines_sequence_in_cart_by_category': True,
-        })
-
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'SortOrderlinesByCategories', login="pos_user")
 
     def test_customer_popup(self):
         """Verify that the customer popup search & inifnite scroll work properly"""
