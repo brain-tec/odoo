@@ -318,9 +318,9 @@ class TestUsers2(UsersCommonCase):
 
     def test_selection_groups(self):
         # create 3 groups that should be in a selection
-        app = self.env['ir.module.category'].create({'name': 'Foo'})
+        app = self.env['res.groups.privilege'].create({'name': 'Foo'})
         group_user, group_manager, group_visitor = self.env['res.groups'].create([
-            {'name': name, 'category_id': app.id}
+            {'name': name, 'privilege_id': app.id}
             for name in ('User', 'Manager', 'Visitor')
         ])
         # THIS PART IS NECESSARY TO REPRODUCE AN ISSUE: group1.id < group2.id < group0.id
@@ -368,9 +368,12 @@ class TestUsers2(UsersCommonCase):
         group_portal = self.env.ref('base.group_portal')
         group_user = self.env.ref('base.group_user')
 
-        app = self.env['ir.module.category'].create({'name': 'Foo'})
+        app = self.env['res.groups.privilege'].create({'name': 'Foo'})
         group_contain_user = self.env['res.groups'].create({
-            'name': 'Small user group', 'category_id': app.id, 'implied_ids': [group_user.id]})
+            'name': 'Small user group',
+            'privilege_id': app.id,
+            'implied_ids': [group_user.id],
+        })
 
         user_form = Form(self.env['res.users'], view='base.view_users_form')
         user_form.name = "Test"
@@ -380,16 +383,23 @@ class TestUsers2(UsersCommonCase):
         user_form['group_ids'] = group_portal
         self.assertTrue(user_form.share, 'The group_ids onchange should have been triggered')
 
-        user_form['group_ids'] = group_user
-        self.assertFalse(user_form.share, 'The group_ids onchange should have been triggered')
+        user = user_form.save()
 
-        user_form['group_ids'] = group_public
-        self.assertTrue(user_form.share, 'The group_ids onchange should have been triggered')
+        # in debug mode, show the group widget for external user
 
-        user_form['group_ids'] = group_user
-        user_form['group_ids'] = group_user + group_contain_user
+        with self.debug_mode():
+            user_form = Form(user, view='base.view_users_form')
 
-        user_form.save()
+            user_form['group_ids'] = group_user
+            self.assertFalse(user_form.share, 'The group_ids onchange should have been triggered')
+
+            user_form['group_ids'] = group_public
+            self.assertTrue(user_form.share, 'The group_ids onchange should have been triggered')
+
+            user_form['group_ids'] = group_user
+            user_form['group_ids'] = group_user + group_contain_user
+
+            user_form.save()
 
         # in debug mode, allow extra groups
 
@@ -405,7 +415,7 @@ class TestUsers2(UsersCommonCase):
             user_form['group_ids'] = group_portal + group_contain_user
             self.assertFalse(user_form.share, 'The group_ids onchange should have been triggered')
 
-            with self.assertRaises(ValidationError, msg="The user cannot be at the same time in groups: ['User types / Internal User', 'User types / Portal', 'Foo / Small user group']"):
+            with self.assertRaises(ValidationError, msg="The user cannot be at the same time in groups: ['Membre', 'Portal', 'Foo / Small user group']"):
                 user_form.save()
 
     @users('portal_1')
