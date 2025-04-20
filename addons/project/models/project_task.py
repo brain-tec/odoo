@@ -94,7 +94,7 @@ class ProjectTask(models.Model):
     _mail_post_access = 'read'
     _order = "priority desc, sequence, date_deadline asc, id desc"
     _primary_email = 'email_from'
-    _systray_view = 'activity'
+    _systray_view = 'list'
     _track_duration_field = 'stage_id'
 
     def _get_versioned_fields(self):
@@ -456,7 +456,7 @@ class ProjectTask(models.Model):
     def message_subscribe(self, partner_ids=None, subtype_ids=None):
         # Set task notification based on project notification preference if user follow the project
         if not subtype_ids:
-            project_followers = self.project_id.message_follower_ids.filtered(lambda f: f.partner_id.id in partner_ids)
+            project_followers = self.project_id.sudo().message_follower_ids.filtered(lambda f: f.partner_id.id in partner_ids)
             for project_follower in project_followers:
                 project_subtypes = project_follower.subtype_ids
                 task_subtypes = (project_subtypes.mapped('parent_id') | project_subtypes.filtered(lambda sub: sub.internal or sub.default)).ids if project_subtypes else None
@@ -880,6 +880,8 @@ class ProjectTask(models.Model):
         )).copy(default=default)
 
         self._resolve_copied_dependencies(copied_tasks)
+        log_message = _("Task Created")
+        copied_tasks._message_log_batch(bodies={task.id: log_message for task in copied_tasks})
 
         return copied_tasks
 
