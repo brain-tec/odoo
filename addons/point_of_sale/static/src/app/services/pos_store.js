@@ -706,7 +706,7 @@ export class PosStore extends WithLazyGetterTrap {
         };
 
         // Handle refund constraints
-        if (order._isRefundAndSalesNotAllowed(values, options)) {
+        if (order.isSaleDisallowed(values, options)) {
             this.dialog.add(AlertDialog, {
                 title: _t("Oops.."),
                 body: _t("Ensure you validate the refund before taking another order."),
@@ -728,6 +728,7 @@ export class PosStore extends WithLazyGetterTrap {
                 // Find candidate based on instantly created variants.
                 const attributeValues = this.models["product.template.attribute.value"]
                     .readMany(payload.attribute_value_ids)
+                    .filter((value) => value.attribute_id.create_variant !== "no_variant")
                     .map((value) => value.id);
 
                 let candidate = productTemplate.product_variant_ids.find((variant) => {
@@ -914,16 +915,6 @@ export class PosStore extends WithLazyGetterTrap {
                 false,
                 values.product_id
             );
-        }
-        const isScannedProduct = opts.code && opts.code.type === "product";
-        if (values.price_extra && !isScannedProduct) {
-            const price = values.product_tmpl_id.getPrice(
-                order.pricelist_id,
-                values.qty,
-                values.price_extra
-            );
-
-            values.price_unit = price;
         }
 
         const line = this.data.models["pos.order.line"].create({ ...values, order_id: order });
