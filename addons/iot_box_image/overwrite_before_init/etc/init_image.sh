@@ -11,14 +11,19 @@ __base="$(basename ${__file} .sh)"
 # Recommends: antiword, graphviz, ghostscript, python-gevent, poppler-utils
 export DEBIAN_FRONTEND=noninteractive
 
+# single-user mode, appropriate for chroot environment
+# explicitly setting the runlevel prevents warnings after installing packages
+export RUNLEVEL=1
+
+# Unset lang variables to prevent locale settings leaking from host
+unset "${!LC_@}"
+unset "${!LANG@}"
+
 # set locale to en_US
 echo "set locale to en_US"
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-locale-gen
-# Environment variables
-echo "export LANGUAGE=en_US.UTF-8" >> ~/.bashrc
-echo "export LANG=en_US.UTF-8" >> ~/.bashrc
-echo "export LC_ALL=en_US.UTF-8" >> ~/.bashrc
+dpkg-reconfigure locales
+
 # Aliases
 echo  "alias ll='ls -al'" | tee -a ~/.bashrc /home/pi/.bashrc
 echo  "alias odoo='sudo systemctl stop odoo; sudo -u odoo /usr/bin/python3 /home/pi/odoo/odoo-bin --config /home/pi/odoo.conf'" | tee -a ~/.bashrc /home/pi/.bashrc
@@ -68,7 +73,7 @@ odoo_dev() {
   sudo git config --global --add safe.directory /home/pi/odoo
   sudo git remote add dev https://github.com/odoo-dev/odoo.git
   sudo git fetch dev \$1 --depth=1 --prune
-  sudo git reset --hard dev/\$1
+  sudo git reset --hard FETCH_HEAD
   sudo chown -R odoo:odoo /home/pi/odoo
   cd \$pwd
 }
@@ -84,7 +89,7 @@ odoo_origin() {
   sudo git config --global --add safe.directory /home/pi/odoo
   sudo git remote set-url origin https://github.com/odoo/odoo.git  # ensure odoo repository
   sudo git fetch origin \$1 --depth=1 --prune
-  sudo git reset --hard origin/\$1
+  sudo git reset --hard FETCH_HEAD
   sudo chown -R odoo:odoo /home/pi/odoo
   cd \$pwd
 }
@@ -140,9 +145,6 @@ devtools() {
   esac
 }
 " | tee -a ~/.bashrc /home/pi/.bashrc
-
-source ~/.bashrc
-source /home/pi/.bashrc
 
 # Change default hostname from 'raspberrypi' to 'iotbox'
 echo iotbox | tee /etc/hostname
@@ -215,7 +217,7 @@ systemctl disable dphys-swapfile.service
 systemctl enable ssh
 systemctl set-default graphical.target
 systemctl disable getty@tty1.service
-systemctl enable systemd-timesyncd.service
+systemctl disable systemd-timesyncd.service
 systemctl unmask hostapd.service
 systemctl disable hostapd.service
 systemctl disable cups-browsed.service
