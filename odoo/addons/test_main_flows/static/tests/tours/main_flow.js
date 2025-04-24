@@ -1051,7 +1051,7 @@ stepUtils.autoExpandMoreButtons(true),
     run: "click",
 },
 {
-    trigger: '.o_project_task_form_view div.o_notebook_headers',
+    trigger: '.o_form_view div.o_notebook_headers',
 },
 {
     trigger: 'a.nav-link:contains(Timesheets)',
@@ -1218,11 +1218,6 @@ stepUtils.autoExpandMoreButtons(true),
     isActive: ["enterprise", "desktop"],
     trigger: ".o_kanban_record span:contains('the_flow.customer')",
     content: _t("Select the newly created bank transaction"),
-    run: "click",
-}, {
-    isActive: ["enterprise", "desktop"],
-    trigger: "button.btn-primary:contains('Validate')",
-    content: _t("Reconcile the bank transaction"),
     run: "click",
 },
 // exit reconciliation widget

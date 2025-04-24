@@ -1170,7 +1170,7 @@ patch(PosOrder.prototype, {
 
             lst.push({
                 product_id: discountProduct,
-                price_unit: -(entry[1] * discountFactor),
+                price_unit: -(Math.min(this.getTotalWithTax(), entry[1]) * discountFactor),
                 qty: 1,
                 reward_id: reward,
                 is_reward_line: true,
@@ -1401,10 +1401,8 @@ patch(PosOrder.prototype, {
         }
     },
 
-    _isRefundAndSalesNotAllowed(values, options) {
+    isSaleDisallowed(values, options) {
         // Allow gift cards to be added to a refund
-        return (
-            super._isRefundAndSalesNotAllowed(values, options) && !options.eWalletGiftCardProgram
-        );
+        return super.isSaleDisallowed(values, options) && !options.eWalletGiftCardProgram;
     },
 });

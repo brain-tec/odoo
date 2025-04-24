@@ -5,6 +5,7 @@ import re
 import time
 
 from collections import defaultdict
+from psycopg2 import errors as pgerrors
 
 from odoo import _, api, fields, models
 from odoo.exceptions import LockError, UserError, ValidationError
@@ -118,28 +119,14 @@ class AccountFiscalPosition(models.Model):
                     if record.country_id not in record.country_group_id.country_ids:
                         raise ValidationError(_("You cannot create a fiscal position with a country outside of the selected country group."))
 
-                similar_fpos_domain = [
+                similar_fpos_count = self.env['account.fiscal.position'].search_count([
                     *self.env['account.fiscal.position']._check_company_domain(record.company_id),
-                    ('foreign_vat', '!=', False),
+                    ('foreign_vat', 'not in', (False, record.foreign_vat)),
                     ('id', '!=', record.id),
-                ]
-
-                if record.country_group_id:
-                    foreign_vat_country = self.country_group_id.country_ids.filtered(lambda c: c.code == record.foreign_vat[:2].upper())
-                    if not foreign_vat_country:
-                        raise ValidationError(_("The country code of the foreign VAT number does not match any country in the group."))
-                    similar_fpos_domain += [('country_group_id', '=', record.country_group_id.id), ('country_id', '=', foreign_vat_country.id)]
-                elif record.country_id:
-                    similar_fpos_domain += [('country_id', '=', record.country_id.id), ('country_group_id', '=', False)]
-
-                if record.state_ids:
-                    similar_fpos_domain.append(('state_ids', 'in', record.state_ids.ids))
-                else:
-                    similar_fpos_domain.append(('state_ids', '=', False))
-
-                similar_fpos_count = self.env['account.fiscal.position'].search_count(similar_fpos_domain)
+                    ('country_id', '=', record.country_id.id),
+                ])
                 if similar_fpos_count:
-                    raise ValidationError(_("A fiscal position with a foreign VAT already exists in this region."))
+                    raise ValidationError(_("A fiscal position with a foreign VAT already exists in this country."))
 
     def map_tax(self, taxes):
         return self.env['account.tax'].browse(unique(
@@ -819,16 +806,40 @@ class ResPartner(models.Model):
         if moves:
             raise UserError(_("The partner cannot be deleted because it is used in Accounting"))
 
-    def _increase_rank(self, field, n=1):
-        assert isinstance(n, int) and field in ('customer_rank', 'supplier_rank')
-        try:
-            self.lock_for_update(allow_referencing=True)
-        except LockError:
-            _logger.debug('Another transaction already locked partner rows. Cannot update partner ranks.')
+    def _increase_rank(self, field: str, n: int = 1):
+        assert field in ('customer_rank', 'supplier_rank')
+        if not self:
             return
-        records = self.sudo().with_context(tracking_disable=True)
-        for record in records:
-            record[field] += n
+        postcommit = self.env.cr.postcommit
+        data = postcommit.data.setdefault(f'account.res.partner.increase_rank.{field}', defaultdict(int))
+        already_registered = bool(data)
+        for record in self.sudo():
+            # In case we alrady have a value, we will increase the rank in
+            # postcommit to avoid serialization errors.  However, if the record
+            # has a rank of 0, we increase it directly so that filtering on
+            # partner_type is correctly set to customer or supplier.
+            if record[field] and record.id:
+                data[record.id] += n
+            else:
+                record[field] += n
+
+        if already_registered or not data:
+            return
+
+        @postcommit.add
+        def increase_partner_rank():
+            try:
+                with self.env.registry.cursor() as cr:
+                    partners = (
+                        self.env(cr=cr)[self._name]
+                        .sudo().browse(data)
+                        .with_context(prefetch_fields=False)
+                    )
+                    for partner in partners:
+                        partner[field] += data[partner.id]
+                    data.clear()
+            except pgerrors.OperationalError:
+                _logger.debug('Cannot update partner ranks.')
 
     @api.model
     def _run_vat_test(self, vat_number, default_country, partner_is_company=True):

@@ -325,7 +325,7 @@ class HrEmployee(models.Model):
 
     def action_create_users_confirmation(self):
         raise RedirectWarning(
-                message=_("You're about to invite new users. %s users will be created with the default user template's rights."
+                message=_("You're about to invite new users. %s users will be created with the default user template's rights. "
                 "Adding new users may increase your subscription cost. Do you wish to continue?", len(self.ids)),
                 action=self.env.ref('hr.action_hr_employee_create_users').id,
                 button_text=_('Confirm'),
@@ -369,7 +369,11 @@ class HrEmployee(models.Model):
         if new_users:
             self.env['res.users'].create(new_users)
             message = _('Users %s creation successful', ', '.join([user['name'] for user in new_users]))
-            next_action = _get_user_creation_notification_action(message, 'success', next_action)
+            next_action = _get_user_creation_notification_action(message, 'success', {
+                "type": "ir.actions.client",
+                "tag": "soft_reload",
+                "params": {"next": next_action},
+            })
 
         if old_users:
             message = _('User already exists for Those Employees %s', ', '.join(old_users))

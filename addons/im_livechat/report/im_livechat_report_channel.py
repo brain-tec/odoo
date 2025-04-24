@@ -19,7 +19,19 @@ class Im_LivechatReportChannel(models.Model):
     livechat_channel_id = fields.Many2one('im_livechat.channel', 'Channel', readonly=True)
     start_date = fields.Datetime('Start Date of session', readonly=True)
     start_hour = fields.Char('Start Hour of session', readonly=True)
-    day_number = fields.Char('Day Number', readonly=True, help="1 is Monday, 7 is Sunday")
+    day_number = fields.Selection(
+        selection=[
+            ("0", "Sunday"),
+            ("1", "Monday"),
+            ("2", "Tuesday"),
+            ("3", "Wednesday"),
+            ("4", "Thursday"),
+            ("5", "Friday"),
+            ("6", "Saturday"),
+        ],
+        string="Day of the Week",
+        readonly=True,
+    )
     time_to_answer = fields.Float('Time to answer (sec)', digits=(16, 2), readonly=True, aggregator="avg", help="Average time in seconds to give the first answer to the visitor")
     start_date_hour = fields.Char('Hour of start Date of session', readonly=True)
     duration = fields.Float('Average duration', digits=(16, 2), readonly=True, aggregator="avg", help="Duration of the conversation (in minutes)")
@@ -48,6 +60,7 @@ class Im_LivechatReportChannel(models.Model):
         string="Session Outcome",
         readonly=True,
     )
+    chatbot_script_id = fields.Many2one("chatbot.script", "Chatbot", readonly=True)
 
     def init(self):
         # Note : start_date_hour must be remove when the read_group will allow grouping on the hour of a datetime. Don't forget to change the view !
@@ -91,7 +104,8 @@ class Im_LivechatReportChannel(models.Model):
                 SELECT channel_id,
                        BOOL_OR(livechat_member_type = 'agent') as has_agent,
                        BOOL_OR(livechat_member_type = 'bot') as has_bot,
-                       MIN(CASE WHEN livechat_member_type = 'visitor' THEN partner_id END) AS visitor_partner_id
+                       MIN(CASE WHEN livechat_member_type = 'visitor' THEN partner_id END) AS visitor_partner_id,
+                       MIN(CASE WHEN chatbot_script_id IS NOT NULL THEN chatbot_script_id END) AS chatbot_script_id
                   FROM im_livechat_channel_member_history
               GROUP BY channel_id
             )
@@ -111,7 +125,7 @@ class Im_LivechatReportChannel(models.Model):
                 channel_member_history.visitor_partner_id AS visitor_partner_id,
                 to_char(date_trunc('hour', C.create_date), 'YYYY-MM-DD HH24:MI:SS') as start_date_hour,
                 to_char(date_trunc('hour', C.create_date), 'HH24') as start_hour,
-                EXTRACT(dow from  C.create_date) as day_number,
+                EXTRACT(dow from C.create_date)::text AS day_number,
                 EXTRACT('epoch' FROM MAX(message_vals.last_message_dt) - c.create_date)/60 AS duration,
                 CASE
                     WHEN channel_member_history.has_agent AND channel_member_history.has_bot THEN
@@ -150,7 +164,8 @@ class Im_LivechatReportChannel(models.Model):
                 END as is_unrated,
                 C.livechat_operator_id as partner_id,
                 CASE WHEN channel_member_history.has_agent THEN 1 ELSE 0 END as handled_by_agent,
-                CASE WHEN channel_member_history.has_bot and not channel_member_history.has_agent THEN 1 ELSE 0 END as handled_by_bot
+                CASE WHEN channel_member_history.has_bot and not channel_member_history.has_agent THEN 1 ELSE 0 END as handled_by_bot,
+                CASE WHEN channel_member_history.chatbot_script_id IS NOT NULL AND NOT channel_member_history.has_agent THEN channel_member_history.chatbot_script_id ELSE NULL END AS chatbot_script_id
             """,
         )
 
@@ -180,6 +195,7 @@ class Im_LivechatReportChannel(models.Model):
                 Rate.rating,
                 channel_member_history.has_bot,
                 channel_member_history.has_agent,
-                channel_member_history.visitor_partner_id
+                channel_member_history.visitor_partner_id,
+                channel_member_history.chatbot_script_id
             """,
         )
