@@ -724,6 +724,7 @@ export class PosStore extends WithLazyGetterTrap {
                 // Find candidate based on instantly created variants.
                 const attributeValues = this.models["product.template.attribute.value"]
                     .readMany(payload.attribute_value_ids)
+                    .filter((value) => value.attribute_id.create_variant !== "no_variant")
                     .map((value) => value.id);
 
                 let candidate = productTemplate.product_variant_ids.find((variant) => {
@@ -905,16 +906,6 @@ export class PosStore extends WithLazyGetterTrap {
                 false,
                 values.product_id
             );
-        }
-        const isScannedProduct = opts.code && opts.code.type === "product";
-        if (values.price_extra && !isScannedProduct) {
-            const price = values.product_tmpl_id.getPrice(
-                order.pricelist_id,
-                values.qty,
-                values.price_extra
-            );
-
-            values.price_unit = price;
         }
 
         const line = this.data.models["pos.order.line"].create({ ...values, order_id: order });
@@ -1920,10 +1911,14 @@ export class PosStore extends WithLazyGetterTrap {
         }
 
         if (preset) {
-            if (preset.identification === "address" && !order.partner_id) {
-                const partner = await this.selectPartner();
+            if (preset.needsPartner) {
+                const partner = order.partner_id || (await this.selectPartner());
                 if (!partner) {
                     return;
+                }
+                if (!(partner.street || partner.street2)) {
+                    this.notification.add(_t("Customer address is required"), { type: "warning" });
+                    await this.editPartner(partner);
                 }
             }
 
