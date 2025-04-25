@@ -3,8 +3,8 @@
 import logging
 import requests
 import uuid
-from markupsafe import Markup
 from datetime import timedelta
+from markupsafe import Markup
 
 from odoo import api, fields, models, _
 from odoo.addons.mail.tools.discuss import Store
@@ -264,8 +264,10 @@ class DiscussChannelMember(models.Model):
                 predicate=lambda m: m.partner_id,
             ),
             # sudo: mail.guest - reading guest related to a member is considered acceptable
-            Store.One(
-                "guest_id", fields, predicate=lambda m: m.guest_id, rename="persona", sudo=True
+            Store.Attr(
+                "persona",
+                lambda m: Store.One(m.guest_id.sudo(), m._get_store_guest_fields(fields)),
+                predicate=lambda m: m.guest_id,
             ),
         ]
 
@@ -280,6 +282,10 @@ class DiscussChannelMember(models.Model):
         ]
 
     def _get_store_partner_fields(self, fields):
+        self.ensure_one()
+        return fields
+
+    def _get_store_guest_fields(self, fields):
         self.ensure_one()
         return fields
 
@@ -318,10 +324,6 @@ class DiscussChannelMember(models.Model):
                     "serverInfo": self._get_rtc_server_info(rtc_session, ice_servers),
                 },
             )
-        if len(self.channel_id.rtc_session_ids) == 1:
-            body = Markup('<div data-oe-type="call" class="o_mail_notification"></div>')
-            message = self.channel_id.message_post(body=body, message_type="notification")
-            self.channel_id.last_call_message_id = message
         if self.channel_id._should_invite_members_to_join_call():
             self._rtc_invite_members()
 
@@ -388,13 +390,6 @@ class DiscussChannelMember(models.Model):
             self.rtc_session_ids.unlink()
         else:
             self.channel_id._rtc_cancel_invitations(member_ids=self.ids)
-        if not self.channel_id.rtc_session_ids and self.channel_id.last_call_message_id:
-            # deducing information about the end of call through write_date
-            self.channel_id._message_update_content(
-                self.channel_id.last_call_message_id,
-                self.channel_id.last_call_message_id.body,
-                strict=False
-            )
 
     def _rtc_sync_sessions(self, check_rtc_session_ids=None):
         """Synchronize the RTC sessions for self channel member.

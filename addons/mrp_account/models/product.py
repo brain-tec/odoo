@@ -97,10 +97,7 @@ class ProductProduct(models.Model):
             if opt._skip_operation_line(self):
                 continue
 
-            duration_expected = (
-                opt.workcenter_id._get_expected_duration(self) +
-                opt.time_cycle * 100 / opt.workcenter_id.time_efficiency)
-            total += (duration_expected / 60) * opt._total_cost_per_hour()
+            total += opt.cost
 
         for line in bom.bom_line_ids:
             if line._skip_bom_line(self):
@@ -126,22 +123,13 @@ class ProductProduct(models.Model):
                 total *= float_round(1 - byproduct_cost_share / 100, precision_rounding=0.0001)
             return bom.product_uom_id._compute_price(total / bom.product_qty, self.uom_id)
 
-    def _get_fifo_candidates_domain(self, company, lot=False):
-        fifo_candidates_domain = super()._get_fifo_candidates_domain(company, lot=lot)
-        if self in self.env.context.get('product_unbuild_map', ()):
-            fifo_candidates_domain = expression.AND([
-                fifo_candidates_domain,
-                [('stock_move_id', 'in', self.env.context['product_unbuild_map'][self].mo_id.move_finished_ids.ids)]
-            ])
-        return fifo_candidates_domain
-
 
 class ProductCategory(models.Model):
     _inherit = 'product.category'
 
     property_stock_account_production_cost_id = fields.Many2one(
         'account.account', 'Production Account', company_dependent=True, ondelete='restrict',
-        domain="[('deprecated', '=', False)]", check_company=True,
+        check_company=True,
         help="""This account will be used as a valuation counterpart for both components and final products for manufacturing orders.
                 If there are any workcenter/employee costs, this value will remain on the account once the production is completed.""")
 
