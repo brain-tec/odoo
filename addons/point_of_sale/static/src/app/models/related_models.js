@@ -898,6 +898,9 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
                 }
                 return result;
             },
+            getNewId() {
+                return uuid(model);
+            },
             // aliases
             getAllBy() {
                 return this.readAllBy(...arguments);
@@ -1015,6 +1018,10 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
                     for (const [f, p] of Object.entries(modelClasses[model]?.extraFields || {})) {
                         if (X2MANY_TYPES.has(p.type)) {
                             record[f] = oldRecord[f]?.map((r) => r.id) || [];
+                            continue;
+                        }
+                        if (p.type === "char") {
+                            record[f] = oldRecord[f] || "";
                             continue;
                         }
                         record[f] = oldRecord[f]?.id || false;
