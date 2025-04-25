@@ -41,7 +41,9 @@
             <field name="arch" type="xml">
                 <list js_class="im_livechat.discuss_channel_list" string="History" create="false" default_order="create_date desc">
                     <field name="create_date" string="Session Date"/>
-                    <field name="name" string="Participants" optional="show"/>
+                    <field name="livechat_agent_history_ids" string="Agents" widget="many2many_tags_avatar" optional="show"/>
+                    <field name="livechat_bot_history_ids" string="Bot" widget="many2many_tags_avatar" optional="show"/>
+                    <field name="livechat_customer_history_ids" string="Customer" widget="many2many_tags_avatar" optional="show"/>
                     <field name="country_id" optional="show"/>
                     <field name="livechat_channel_id" optional="show"/>
                     <field name="duration" widget="float_time" options="{'displaySeconds': True}" optional="show"/>
@@ -74,7 +76,7 @@
                                 <t t-if="record.country_id.raw_value">
                                     <span class="fw-bold">Country: </span><field string="Country" name="country_id"/>
                                 </t>
-                                <field name="livechat_operator_id" widget="many2one_avatar_user" class="ms-auto me-1"/>
+                                <field name="livechat_agent_partner_ids" widget="many2many_avatar_user" class="ms-auto me-1"/>
                             </footer>
                         </t>
                     </templates>

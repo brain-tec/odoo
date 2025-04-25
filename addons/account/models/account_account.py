@@ -44,6 +44,7 @@ class AccountAccount(models.Model):
             raise ValidationError(_('You cannot have more than one account with "Current Year Earnings" as type. (accounts: %s)', [a.code for a in account_unaffected_earnings]))
 
     name = fields.Char(string="Account Name", required=True, index='trigram', tracking=True, translate=True)
+    description = fields.Text(translate=True)
     currency_id = fields.Many2one('res.currency', string='Account Currency', tracking=True,
         help="Forces all journal items in this account to have a specific currency (i.e. bank journals). If no currency is set, entries can use any currency.")
     company_currency_id = fields.Many2one('res.currency', compute='_compute_company_currency_id')
@@ -51,7 +52,7 @@ class AccountAccount(models.Model):
     code = fields.Char(string="Code", size=64, tracking=True, compute='_compute_code', search='_search_code', inverse='_inverse_code')
     code_store = fields.Char(company_dependent=True)
     placeholder_code = fields.Char(string="Display code", compute='_compute_placeholder_code', search='_search_placeholder_code')
-    deprecated = fields.Boolean(default=False, tracking=True)
+    active = fields.Boolean(default=True, tracking=True)
     used = fields.Boolean(compute='_compute_used', search='_search_used')
     account_type = fields.Selection(
         selection=[
@@ -70,6 +71,7 @@ class AccountAccount(models.Model):
             ("income", "Income"),
             ("income_other", "Other Income"),
             ("expense", "Expenses"),
+            ("expense_other", "Other Expenses"),
             ("expense_depreciation", "Depreciation"),
             ("expense_direct_cost", "Cost of Revenue"),
             ("off_balance", "Off-Balance Sheet"),
@@ -123,12 +125,6 @@ class AccountAccount(models.Model):
     group_id = fields.Many2one('account.group', compute='_compute_account_group',
                                help="Account prefixes can determine account groups.")
     root_id = fields.Many2one('account.root', compute='_compute_account_root', search='_search_account_root')
-    allowed_journal_ids = fields.Many2many(
-        'account.journal',
-        string="Allowed Journals",
-        help="Define in which journals this account can be used. If empty, can be used in all journals.",
-        check_company=True,
-    )
     opening_debit = fields.Monetary(string="Opening Debit", compute='_compute_opening_debit_credit', inverse='_set_opening_debit', currency_field='company_currency_id')
     opening_credit = fields.Monetary(string="Opening Credit", compute='_compute_opening_debit_credit', inverse='_set_opening_credit', currency_field='company_currency_id')
     opening_balance = fields.Monetary(string="Opening Balance", compute='_compute_opening_debit_credit', inverse='_set_opening_balance', currency_field='company_currency_id')
@@ -197,21 +193,6 @@ class AccountAccount(models.Model):
                     raise UserError(_('An Off-Balance account can not be reconcilable'))
                 if record.tax_ids:
                     raise UserError(_('An Off-Balance account can not have taxes'))
-
-    @api.constrains('allowed_journal_ids')
-    def _constrains_allowed_journal_ids(self):
-        self.env['account.move.line'].flush_model(['account_id', 'journal_id'])
-        self.flush_recordset(['allowed_journal_ids'])
-        self._cr.execute("""
-            SELECT aml.id
-            FROM account_move_line aml
-            WHERE aml.account_id in %s
-            AND EXISTS (SELECT 1 FROM account_account_account_journal_rel WHERE account_account_id = aml.account_id)
-            AND NOT EXISTS (SELECT 1 FROM account_account_account_journal_rel WHERE account_account_id = aml.account_id AND account_journal_id = aml.journal_id)
-        """, [tuple(self.ids)])
-        ids = self._cr.fetchall()
-        if ids:
-            raise ValidationError(_('Some journal items already exist with this account but in other journals than the allowed ones.'))
 
     @api.constrains('currency_id')
     def _check_journal_consistency(self):
@@ -771,7 +752,7 @@ class AccountAccount(models.Model):
         domain = [
             *self.env['account.move.line']._check_company_domain(company_id),
             ('partner_id', '=', partner_id),
-            ('account_id.deprecated', '=', False),
+            ('account_id.active', '=', True),
             ('date', '>=', fields.Date.add(fields.Date.today(), days=-365 * 2)),
         ]
         if move_type in self.env['account.move'].get_inbound_types(include_receipts=True):
@@ -811,18 +792,54 @@ class AccountAccount(models.Model):
     def _order_accounts_by_frequency_for_partner(self, company_id, partner_id, move_type=None):
         return self._get_most_frequent_accounts_for_partner(company_id, partner_id, move_type)
 
+    def _order_to_sql(self, order: str, query: Query, alias: (str | None) = None, reverse: bool = False) -> SQL:
+        sql_order = super()._order_to_sql(order, query, alias, reverse)
+
+        if order == self._order and (preferred_internal_group := self.env.context.get('preferred_internal_group')):
+            sql_order = SQL(
+                "%(field_sql)s = %(preferred_internal_group)s %(direction)s, %(base_order)s",
+                field_sql=self._field_to_sql(alias or self._table, 'internal_group'),
+                preferred_internal_group=preferred_internal_group,
+                direction=SQL('ASC') if reverse else SQL('DESC'),
+                base_order=sql_order,
+            )
+        if order == self._order and (preferred_account_ids := self.env.context.get('preferred_account_ids')):
+            sql_order = SQL(
+                "%(alias)s.id in %(preferred_account_ids)s %(direction)s, %(base_order)s",
+                alias=SQL.identifier(alias or self._table),
+                preferred_account_ids=tuple(map(int, preferred_account_ids)),
+                direction=SQL('ASC') if reverse else SQL('DESC'),
+                base_order=sql_order,
+            )
+        return sql_order
+
     @api.model
-    def name_search(self, name='', domain=None, operator='ilike', limit=100) -> list[tuple[int, str]]:
-        if (
-            not name
-            and (partner := self.env.context.get('partner_id'))
-            and (move_type := self._context.get('move_type'))
-            and (ordered_accounts := self._order_accounts_by_frequency_for_partner(self.env.company.id, partner, move_type))
-        ):
-            records = self.sudo().browse(ordered_accounts)
-            records.fetch(['display_name'])
-            return [(record.id, record.display_name) for record in records]
-        return super().name_search(name, domain, operator, limit)
+    @api.readonly
+    def name_search(self, name='', domain=None, operator='ilike', limit=100):
+        move_type = self._context.get('move_type')
+        if not move_type:
+            return super().name_search(name, domain, operator, limit)
+
+        partner = self.env.context.get('partner_id')
+        suggested_accounts = self._order_accounts_by_frequency_for_partner(self.env.company.id, partner, move_type) if partner else []
+
+        if not name and suggested_accounts:
+            records = self.sudo().browse(suggested_accounts)
+        else:
+            search_domain = Domain('display_name', 'ilike', name) if name else []
+
+            move_type_accounts = {
+                'out': ['income'],
+                'in': ['expense', 'asset'],
+            }
+            move_type_prefix = move_type.split('_')[0]
+            # search all account types if the search term contains a number
+            digit_in_search_term = any(c.isdigit() for c in name)
+            internal_group_domain = [('internal_group', 'in', move_type_accounts.get(move_type_prefix, []))] if not digit_in_search_term else []
+
+            domain = Domain.AND([search_domain, internal_group_domain, domain])
+            records = self.with_context(preferred_account_ids=suggested_accounts).search(domain, limit=limit)
+        return [(record.id, record.display_name) for record in records]
 
     @api.model
     def _search_display_name(self, operator, value):
@@ -837,7 +854,7 @@ class AccountAccount(models.Model):
             ]
         if isinstance(value, str):
             name = value or ''
-            return ['|', ('code', '=like', name.split(' ')[0] + '%'), ('name', operator, name)]
+            return ['|', '|', ('code', '=like', name.split(' ')[0] + '%'), ('name', operator, name), ('description', 'ilike', name)]
         return NotImplemented
 
     @api.onchange('account_type')
@@ -857,11 +874,26 @@ class AccountAccount(models.Model):
             self.name = name
             self.code = code
 
-    @api.depends_context('company')
+    @api.depends_context('company', 'formatted_display_name')
     @api.depends('code')
     def _compute_display_name(self):
+        formatted_display_name = self.env.context.get('formatted_display_name')
+        preferred_account_ids = self.env.context.get('preferred_account_ids', [])
+        if (
+            (move_type := self.env.context.get('move_type'))
+            and (partner := self.env.context.get('partner_id'))
+            and not preferred_account_ids
+        ):
+            preferred_account_ids = self._order_accounts_by_frequency_for_partner(self.env.company.id, partner, move_type)
         for account in self:
-            account.display_name = f"{account.code} {account.name}" if account.code else account.name
+            if formatted_display_name and account.code:
+                account.display_name = (
+                    f"""{account.code} {account.name}"""
+                    f"""{f' `{_("Suggested")}`' if account.id in preferred_account_ids else ''}"""
+                    f"""{f'<br>--{account.description}--' if account.description else ''}"""
+                )
+            else:
+                account.display_name = f"{account.code} {account.name}" if account.code else account.name
 
     def copy_data(self, default=None):
         vals_list = super().copy_data(default)

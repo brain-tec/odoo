@@ -375,10 +375,12 @@ registry.category("web_tour.tours").add("CheckProductInformation", {
             Dialog.cancel(),
 
             // Check margin on a product.
-            ProductScreen.clickInfoProduct("product_a"),
-            {
-                trigger: ".section-financials :contains('Margin')",
-            },
+            ProductScreen.clickInfoProduct("product_a", [
+                {
+                    trigger: ".section-financials :contains('Margin')",
+                },
+                Dialog.confirm("Close"),
+            ]),
         ].flat(),
 });
 
@@ -636,19 +638,22 @@ registry.category("web_tour.tours").add("test_product_create_update_from_fronten
             ]),
 
             // Open the product's information popup.
-            ProductScreen.clickInfoProduct("Test Frontend Product"),
-            Dialog.confirm("Edit", ".btn-secondary"),
+            ProductScreen.clickInfoProduct(
+                "Test Frontend Product",
+                [
+                    Dialog.confirm("Edit", ".btn-secondary"),
+                    // Verify that the "Edit Product" dialog is displayed.
+                    Dialog.is({ title: "Edit Product" }),
 
-            // Verify that the "Edit Product" dialog is displayed.
-            Dialog.is({ title: "Edit Product" }),
-
-            // Edit the product with new details.
-            ProductScreen.editProductFromFrontend(
-                "Test Frontend Product Edited",
-                "710535977348",
-                "50.0"
+                    // Edit the product with new details.
+                    ProductScreen.editProductFromFrontend(
+                        "Test Frontend Product Edited",
+                        "710535977348",
+                        "50.0"
+                    ),
+                    Dialog.confirm(),
+                ].flat()
             ),
-            Dialog.confirm(),
             ProductScreen.clickSubcategory("Chair test"),
             ProductScreen.clickDisplayedProduct("Test Frontend Product Edited"),
             inLeftSide([
@@ -683,5 +688,16 @@ registry.category("web_tour.tours").add("test_fiscal_position_tax_group_labels",
                 content: "Make sure receipt tax label is correct and correspond to the orderline",
                 trigger: ".pos-receipt-taxes:contains('Tax Group 2')",
             },
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_product_long_press", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.longPressProduct("Test Product"),
+            Dialog.is(),
+            Chrome.endTour(),
         ].flat(),
 });

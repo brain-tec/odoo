@@ -45,7 +45,7 @@ class AccountInvoiceReport(models.Model):
     product_uom_id = fields.Many2one('uom.uom', string='Unit', readonly=True)
     product_categ_id = fields.Many2one('product.category', string='Product Category', readonly=True)
     invoice_date_due = fields.Date(string='Due Date', readonly=True)
-    account_id = fields.Many2one('account.account', string='Revenue/Expense Account', readonly=True, domain=[('deprecated', '=', False)])
+    account_id = fields.Many2one('account.account', string='Revenue/Expense Account', readonly=True)
     price_subtotal_currency = fields.Float(string='Untaxed Amount in Currency', readonly=True)
     price_subtotal = fields.Float(string='Untaxed Amount', readonly=True)
     price_total = fields.Float(string='Total', readonly=True)
@@ -162,7 +162,7 @@ class AccountInvoiceReport(models.Model):
         if aggregate_spec != 'price_average:avg':
             return super()._read_group_select(aggregate_spec, query)
         return SQL(
-            'SUM(%(f_price)s) / SUM(%(f_qty)s)',
+            'COALESCE(SUM(%(f_price)s) / NULLIF(SUM(%(f_qty)s), 0.0), 0)',
             f_qty=self._field_to_sql(self._table, 'quantity', query),
             f_price=self._field_to_sql(self._table, 'price_subtotal', query),
         )

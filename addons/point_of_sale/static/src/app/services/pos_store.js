@@ -1230,6 +1230,9 @@ export class PosStore extends WithLazyGetterTrap {
         );
 
         try {
+            if (this.data.network.offline) {
+                throw new ConnectionLostError();
+            }
             const orderIdsToDelete = this.getOrderIdsToDelete();
             if (orderIdsToDelete.length > 0) {
                 await this.deleteOrders([], orderIdsToDelete);
@@ -1284,7 +1287,7 @@ export class PosStore extends WithLazyGetterTrap {
                     .forEach((order) => (order.session_id = this.session));
             }
 
-            this.clearPendingOrder();
+            orders.forEach((o) => this.removePendingOrder(o));
             return newData["pos.order"];
         } catch (error) {
             if (options.throw) {
@@ -1939,10 +1942,14 @@ export class PosStore extends WithLazyGetterTrap {
         }
 
         if (preset) {
-            if (preset.identification === "address" && !order.partner_id) {
-                const partner = await this.selectPartner();
+            if (preset.needsPartner) {
+                const partner = order.partner_id || (await this.selectPartner());
                 if (!partner) {
                     return;
+                }
+                if (!(partner.street || partner.street2)) {
+                    this.notification.add(_t("Customer address is required"), { type: "warning" });
+                    await this.editPartner(partner);
                 }
             }
 

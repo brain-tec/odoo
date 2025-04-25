@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, tools
+from odoo import api, fields, models
 from odoo.tools import SQL
 
 
@@ -35,21 +35,19 @@ class Im_LivechatReportChannel(models.Model):
     time_to_answer = fields.Float('Time to answer (sec)', digits=(16, 2), readonly=True, aggregator="avg", help="Average time in seconds to give the first answer to the visitor")
     start_date_hour = fields.Char('Hour of start Date of session', readonly=True)
     duration = fields.Float('Average duration', digits=(16, 2), readonly=True, aggregator="avg", help="Duration of the conversation (in minutes)")
-    nbr_speaker = fields.Integer('# of speakers', readonly=True, aggregator="avg", help="Number of different speakers")
-    nbr_channel = fields.Integer("# of Sessions", readonly=True, aggregator="sum")
     nbr_message = fields.Integer('Average message', readonly=True, aggregator="avg", help="Number of message in the conversation")
-    days_of_activity = fields.Integer('Days of activity', aggregator="max", readonly=True, help="Number of days since the first session of the operator")
-    is_anonymous = fields.Integer('Is visitor anonymous', readonly=True)
     country_id = fields.Many2one('res.country', 'Country of the visitor', readonly=True)
-    is_happy = fields.Integer('Visitor is Happy', readonly=True)
     rating = fields.Integer('Rating', aggregator="avg", readonly=True)
     # TODO DBE : Use Selection field - Need : Pie chart must show labels, not keys.
     rating_text = fields.Char('Satisfaction Rate', readonly=True)
-    is_unrated = fields.Integer('Session not rated', readonly=True)
     partner_id = fields.Many2one("res.partner", "Agent", readonly=True)
     handled_by_bot = fields.Integer("Handled by Bot", readonly=True, aggregator="sum")
     handled_by_agent = fields.Integer("Handled by Agent", readonly=True, aggregator="sum")
     visitor_partner_id = fields.Many2one("res.partner", string="Customer", readonly=True)
+    call_duration_hour = fields.Float("Average call duration", digits=(16, 2), readonly=True, aggregator="avg")
+    has_call = fields.Float("Whether the session had a call", readonly=True)
+    number_of_calls = fields.Float("# of Sessions with calls", readonly=True, related="has_call", aggregator="sum")
+    percentage_of_calls = fields.Float("Session with Calls (%)", readonly=True, related="has_call", aggregator="avg")
     session_outcome = fields.Selection(
         selection=[
             ("no_answer", "Never Answered"),
@@ -61,16 +59,16 @@ class Im_LivechatReportChannel(models.Model):
         readonly=True,
     )
     chatbot_script_id = fields.Many2one("chatbot.script", "Chatbot", readonly=True)
+    chatbot_answers_path = fields.Char("Chatbot Answers", readonly=True)
+    chatbot_answers_path_str = fields.Char("Chatbot Answers (String)", readonly=True)
+    session_expertises = fields.Char("Expertises used in this session", readonly=True)
 
-    def init(self):
-        # Note : start_date_hour must be remove when the read_group will allow grouping on the hour of a datetime. Don't forget to change the view !
-        tools.drop_view_if_exists(self.env.cr, 'im_livechat_report_channel')
-        self.env.cr.execute(
-            SQL("CREATE OR REPLACE VIEW im_livechat_report_channel AS (%s)",
-            self._query()
-        ))
+    @property
+    def _unknown_chatbot_answer_name(self):
+        return self.env._("Unknown")
 
-    def _query(self) -> SQL:
+    @property
+    def _table_query(self):
         return SQL("%s %s %s %s %s", self._cte(), self._select(), self._from(), self._where(), self._group_by())
 
     def _cte(self) -> SQL:
@@ -108,8 +106,54 @@ class Im_LivechatReportChannel(models.Model):
                        MIN(CASE WHEN chatbot_script_id IS NOT NULL THEN chatbot_script_id END) AS chatbot_script_id
                   FROM im_livechat_channel_member_history
               GROUP BY channel_id
+            ),
+            chatbot_answer_history AS (
+                SELECT chatbot_message.discuss_channel_id AS channel_id,
+                       STRING_AGG(user_raw_script_answer_id::TEXT, ' - ' ORDER BY chatbot_message.id) AS answers_path,
+                       STRING_AGG(
+                           COALESCE(
+                               chatbot_script_answer.name->>%s,
+                               chatbot_script_answer.name->>'en_US',
+                               fallback.value,
+                               %s
+                           ),
+                           ' > ' ORDER BY chatbot_message.id
+                       ) AS answers_path_str
+                  FROM chatbot_message
+             LEFT JOIN chatbot_script_answer ON chatbot_message.user_script_answer_id = chatbot_script_answer.id
+     LEFT JOIN LATERAL (
+                      SELECT value
+                      FROM jsonb_each_text(chatbot_script_answer.name)
+                      LIMIT 1
+                    ) AS fallback ON TRUE
+                 WHERE chatbot_message.user_raw_script_answer_id IS NOT NULL
+              GROUP BY chatbot_message.discuss_channel_id
+            ),
+            expertise_history AS (
+                SELECT im_livechat_channel_member_history.channel_id,
+                       STRING_AGG(
+                             COALESCE(
+                                 im_livechat_expertise.name->>%s,
+                                 im_livechat_expertise.name->>'en_US',
+                                 fallback.value
+                             ),
+                             ' - ' ORDER BY im_livechat_expertise.id
+                         ) AS expertises
+                  FROM im_livechat_channel_member_history_im_livechat_expertise_rel REL
+                  JOIN im_livechat_expertise ON im_livechat_expertise.id = REL.im_livechat_expertise_id
+                  JOIN im_livechat_channel_member_history ON im_livechat_channel_member_history.id = REL.im_livechat_channel_member_history_id
+          JOIN LATERAL (
+                            SELECT value
+                              FROM jsonb_each_text(im_livechat_expertise.name)
+                             LIMIT 1
+                        ) AS fallback ON TRUE
+              GROUP BY channel_id
             )
-            """)
+            """,
+            self.env.lang,
+            self._unknown_chatbot_answer_name,
+            self.env.lang,
+        )
 
     def _select(self) -> SQL:
         return SQL(
@@ -119,7 +163,6 @@ class Im_LivechatReportChannel(models.Model):
                 C.uuid as uuid,
                 C.id as channel_id,
                 C.name as channel_name,
-                COUNT(DISTINCT C.id) AS nbr_channel,
                 C.livechat_channel_id as livechat_channel_id,
                 C.create_date as start_date,
                 channel_member_history.visitor_partner_id AS visitor_partner_id,
@@ -135,22 +178,12 @@ class Im_LivechatReportChannel(models.Model):
                     ELSE
                         EXTRACT('epoch' FROM MIN(message_vals.first_agent_message_dt_legacy) - c.create_date)
                 END AS time_to_answer,
-                count(distinct C.livechat_operator_id) as nbr_speaker,
                 SUM(message_vals.message_count) as nbr_message,
                 CASE
                     WHEN C.livechat_is_escalated THEN 'escalated'
                     ELSE C.livechat_failure
                 END AS session_outcome,
-                (DATE_PART('day', date_trunc('day', now()) - date_trunc('day', C.create_date)) + 1) as days_of_activity,
-                CASE
-                    WHEN C.anonymous_name IS NULL THEN 0
-                    ELSE 1
-                END as is_anonymous,
                 C.country_id,
-                CASE
-                    WHEN rate.rating = 5 THEN 1
-                    ELSE 0
-                END as is_happy,
                 Rate.rating as rating,
                 CASE
                     WHEN Rate.rating = 1 THEN 'Unhappy'
@@ -158,14 +191,21 @@ class Im_LivechatReportChannel(models.Model):
                     WHEN Rate.rating = 3 THEN 'Neutral'
                     ELSE null
                 END as rating_text,
-                CASE
-                    WHEN rate.rating > 0 THEN 0
-                    ELSE 1
-                END as is_unrated,
                 C.livechat_operator_id as partner_id,
                 CASE WHEN channel_member_history.has_agent THEN 1 ELSE 0 END as handled_by_agent,
                 CASE WHEN channel_member_history.has_bot and not channel_member_history.has_agent THEN 1 ELSE 0 END as handled_by_bot,
-                CASE WHEN channel_member_history.chatbot_script_id IS NOT NULL AND NOT channel_member_history.has_agent THEN channel_member_history.chatbot_script_id ELSE NULL END AS chatbot_script_id
+                CASE WHEN channel_member_history.chatbot_script_id IS NOT NULL AND NOT channel_member_history.has_agent THEN channel_member_history.chatbot_script_id ELSE NULL END AS chatbot_script_id,
+                CASE WHEN BOOL_OR(discuss_call_history.channel_id IS NOT NULL) THEN 1 ELSE 0 END AS has_call,
+                SUM(
+                    CASE
+                        WHEN discuss_call_history.end_dt IS NOT NULL
+                        THEN EXTRACT(EPOCH FROM discuss_call_history.end_dt - discuss_call_history.start_dt) / 3600
+                        ELSE NULL
+                    END
+                ) AS call_duration_hour,
+                (ARRAY_AGG(chatbot_answer_history.answers_path))[1] as chatbot_answers_path,
+                (ARRAY_AGG(chatbot_answer_history.answers_path_str))[1] as chatbot_answers_path_str,
+                (ARRAY_AGG(expertise_history.expertises))[1] AS session_expertises
             """,
         )
 
@@ -174,7 +214,10 @@ class Im_LivechatReportChannel(models.Model):
             """
             FROM discuss_channel C
             JOIN message_vals ON message_vals.channel_id = c.id
+       LEFT JOIN chatbot_answer_history ON chatbot_answer_history.channel_id = C.id
+       LEFT JOIN expertise_history ON expertise_history.channel_id = C.id
        LEFT JOIN channel_member_history ON channel_member_history.channel_id = c.id
+       LEFT JOIN discuss_call_history ON discuss_call_history.channel_id = C.id
        LEFT JOIN rating_rating Rate ON (Rate.res_id = C.id and Rate.res_model = 'discuss.channel' and Rate.parent_res_model = 'im_livechat.channel')
             """,
         )
@@ -199,3 +242,33 @@ class Im_LivechatReportChannel(models.Model):
                 channel_member_history.chatbot_script_id
             """,
         )
+
+    @api.model
+    def formatted_read_group(self, domain, groupby=(), aggregates=(), having=(), offset=0, limit=None, order=None):
+        # Update chatbot_answers_path label: ids are used for grouping but names
+        # should be displayed.
+        result = super().formatted_read_group(
+            domain, groupby, aggregates, having=having, offset=offset, limit=limit, order=order
+        )
+        answer_ids = {
+            int(answer_id.strip())
+            for entry in result
+            if entry.get("chatbot_answers_path")
+            for answer_id in entry["chatbot_answers_path"].split("-")
+        }
+        answer_name_by_id = {
+            answer.id: answer.name
+            for answer in self.env["chatbot.script.answer"].search_fetch(
+                [("id", "in", answer_ids)],
+                ["name"],
+            )
+        }
+        for entry in result:
+            if not (path := entry.get("chatbot_answers_path")):
+                continue
+            id_list = [int(answer_id.strip()) for answer_id in path.split("-")]
+            entry["chatbot_answers_path"] = " - ".join(
+                answer_name_by_id.get(answer_id, self._unknown_chatbot_answer_name)
+                for answer_id in id_list
+            )
+        return result
