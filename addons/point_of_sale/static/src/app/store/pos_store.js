@@ -1715,6 +1715,11 @@ export class PosStore extends Reactive {
                 return false;
             }
         }
+        payment.qrPaymentData = {
+            name: payment.payment_method_id.name,
+            amount: this.env.utils.formatCurrency(payment.amount),
+            qrCode: qr,
+        };
         return await ask(
             this.env.services.dialog,
             {
@@ -1725,7 +1730,10 @@ export class PosStore extends Reactive {
             },
             {},
             QRPopup
-        );
+        ).then((result) => {
+            payment.qrPaymentData = undefined;
+            return result;
+        });
     }
 
     get isTicketScreenShown() {
@@ -1756,6 +1764,10 @@ export class PosStore extends Reactive {
                 (p) => p.raw.product_tmpl_id === product.raw.product_tmpl_id
             ).length > 1
         );
+    }
+
+    getPhoneSearchFields() {
+        return ["phone", "mobile"];
     }
 }
 
