@@ -1246,7 +1246,8 @@ export class PosStore extends WithLazyGetterTrap {
                     .forEach((order) => (order.session_id = this.session));
             }
 
-            this.clearPendingOrder();
+            // Remove only synced orders from the pending orders
+            orders.forEach((o) => this.removePendingOrder(o));
             return newData["pos.order"];
         } catch (error) {
             if (options.throw) {
@@ -1876,9 +1877,9 @@ export class PosStore extends WithLazyGetterTrap {
 
             if (preset.use_timing && !order.preset_time) {
                 await this.syncPresetSlotAvaibility(preset);
-                order.preset_time = preset.nextSlot?.sql_datetime || false;
+                order.setPresetDateTime(preset.nextSlot?.sql_datetime || false);
             } else if (!preset.use_timing) {
-                order.preset_time = false;
+                order.setPresetDateTime(false);
             }
         }
     }
