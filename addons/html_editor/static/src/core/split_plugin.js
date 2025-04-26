@@ -52,15 +52,12 @@ export class SplitPlugin extends Plugin {
             // unmergeable.
             (node) => node.classList?.contains("oe_unbreakable"),
             (node) => {
-                const isExplicitlyNotContentEditable = (node) => {
+                const isExplicitlyNotContentEditable = (node) =>
                     // In the `contenteditable` attribute consideration,
                     // disconnected nodes can be unsplittable only if they are
                     // explicitly set under a contenteditable="false" element.
-                    return (
-                        !isContentEditable(node) &&
-                        (node.isConnected || closestElement(node, "[contenteditable]"))
-                    );
-                };
+                    !isContentEditable(node) &&
+                    (node.isConnected || closestElement(node, "[contenteditable]"));
                 return (
                     isExplicitlyNotContentEditable(node) ||
                     // If node sets contenteditable='true' and is inside a non-editable
@@ -181,16 +178,17 @@ export class SplitPlugin extends Plugin {
      */
     splitElement(element, offset) {
         /** @type {HTMLElement} **/
-        const before = element.cloneNode();
+        const firstPart = element.cloneNode();
         /** @type {HTMLElement} **/
-        const after = element.cloneNode();
-        element.before(before);
-        element.after(after);
+        const secondPart = element.cloneNode();
+        element.before(firstPart);
+        element.after(secondPart);
         const children = childNodes(element);
-        before.append(...children.slice(0, offset));
-        after.append(...children.slice(offset));
+        firstPart.append(...children.slice(0, offset));
+        secondPart.append(...children.slice(offset));
         element.remove();
-        return [before, after];
+        this.dispatchTo("after_split_element_handlers", { firstPart, secondPart });
+        return [firstPart, secondPart];
     }
 
     /**
