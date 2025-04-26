@@ -369,7 +369,7 @@ class AccountEdiCommon(models.AbstractModel):
 
         return attachments
 
-    def _import_partner(self, company_id, name, phone, email, vat, peppol_eas=False, peppol_endpoint=False, postal_address={}):
+    def _import_partner(self, company_id, name, phone, email, vat, *, peppol_eas=False, peppol_endpoint=False, postal_address={}, **kwargs):
         """ Retrieve the partner, if no matching partner is found, create it (only if he has a vat and a name) """
         logs = []
         if peppol_eas and peppol_endpoint:
@@ -391,8 +391,8 @@ class AccountEdiCommon(models.AbstractModel):
             if peppol_eas and peppol_endpoint:
                 partner_vals.update({'peppol_eas': peppol_eas, 'peppol_endpoint': peppol_endpoint})
             partner = self.env['res.partner'].create(partner_vals)
-            if vat and self.env['res.partner']._run_vat_test(vat, country, partner.is_company):
-                partner.vat = vat
+            if vat:
+                partner.vat, _country_code = self.env['res.partner']._run_vat_checks(country, vat, validation='setnull')
             logs.append(_("Could not retrieve a partner corresponding to '%s'. A new partner was created.", name))
         if not partner.country_id and not partner.street and not partner.street2 and not partner.city and not partner.zip and not partner.state_id:
             partner.write({

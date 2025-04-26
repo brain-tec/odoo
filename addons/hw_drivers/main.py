@@ -7,7 +7,7 @@ import schedule
 from threading import Thread
 import time
 
-from odoo.addons.hw_drivers.tools import certificate, helpers, wifi
+from odoo.addons.hw_drivers.tools import certificate, helpers, upgrade, wifi
 from odoo.addons.hw_drivers.websocket_client import WebsocketClient
 
 if platform.system() == 'Linux':
@@ -81,10 +81,10 @@ class Manager(Thread):
             wifi.reconnect(helpers.get_conf('wifi_ssid'), helpers.get_conf('wifi_password'))
 
         helpers.start_nginx_server()
-
         _logger.info("IoT Box Image version: %s", helpers.get_version(detailed_version=True))
+        upgrade.check_git_branch()
+
         if platform.system() == 'Linux' and helpers.get_odoo_server_url():
-            helpers.check_git_branch()
             helpers.generate_password()
 
         certificate.ensure_validity()
