@@ -742,6 +742,16 @@ export function addDiscount(discount) {
     ].flat();
 }
 
+export function setTimeZone(testTimeZone) {
+    return {
+        content: `Set test time zone to ${testTimeZone}`,
+        trigger: "body",
+        run: function () {
+            luxon.Settings.defaultZone = testTimeZone;
+        },
+    };
+}
+
 function productInputSteps(name, barcode, list_price) {
     return [
         {
@@ -792,4 +802,19 @@ export function createProductFromFrontend(name, barcode, list_price, category) {
 
 export function editProductFromFrontend(name, barcode, list_price) {
     return productInputSteps(name, barcode, list_price);
+}
+
+export function selectPreset(name = "Eat In") {
+    return [
+        {
+            content: "select Tackout preset",
+            trigger: `.product-screen .pads .control-buttons .preset-button`,
+            run: "click",
+        },
+        {
+            content: "select preset",
+            trigger: `.modal button:contains(${name})`,
+            run: "click",
+        },
+    ];
 }
