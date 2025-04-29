@@ -342,6 +342,10 @@ class BaseCase(case.TestCase):
         # allow localhost requests
         # TODO: also check port?
         url = urlsplit(r.url)
+        timeout = kw.get('timeout')
+        if timeout and timeout < 10:
+            _logger.getChild('requests').info('request %s with timeout %s increased to 10s during tests', url, timeout)
+            kw['timeout'] = 10
         if url.hostname in (HOST, 'localhost'):
             return _super_send(s, r, **kw)
         if url.scheme == 'file':
@@ -888,7 +892,7 @@ class BaseCase(case.TestCase):
         """ Asserts that we can currently open a test cursor. """
         if odoo.modules.module.current_test != self:
             message = f"Trying to open a test cursor for {self.canonical_tag} while already in a test {odoo.modules.module.current_test.canonical_tag}"
-            _logger.error(message)
+            _logger.runbot(message)
             raise BadRequest(message)
         request = odoo.http.request
         if not request or self.http_request_allow_all:
@@ -899,7 +903,7 @@ class BaseCase(case.TestCase):
             expected = http_request_required_key
             if not expected:
                 expected = 'None (request are not enabled)'
-            _logger.error(
+            _logger.runbot(
                 'Request with path %s has been ignored during test as it '
                 'it does not contain the test_cursor cookie or it is expired.'
                 ' (required "%s", got "%s")',
@@ -1270,6 +1274,7 @@ class ChromeBrowser:
         # maps frame ids to callbacks
         self._frames = {}
         self._handlers = {
+            'Fetch.requestPaused': self._handle_request_paused,
             'Runtime.consoleAPICalled': self._handle_console,
             'Runtime.exceptionThrown': self._handle_exception,
             'Page.frameStoppedLoading': self._handle_frame_stopped_loading,
@@ -1283,6 +1288,7 @@ class ChromeBrowser:
         self._receiver.start()
         self._logger.info('Enable chrome headless console log notification')
         self._websocket_send('Runtime.enable')
+        self._websocket_request('Fetch.enable')
         self._logger.info('Chrome headless enable page notifications')
         self._websocket_send('Page.enable')
         self._websocket_send('Page.setDownloadBehavior', params={
@@ -1560,6 +1566,18 @@ class ChromeBrowser:
         self._logger.debug('\n-> %s', payload)
         self.ws.send(json.dumps(payload))
         return result
+
+    def _handle_request_paused(self, **params):
+        url = params['request']['url']
+        try:
+            if url.startswith(f'http://{HOST}'):
+                self._websocket_send('Fetch.continueRequest', params={'requestId': params['requestId']})
+            else:
+                response = self.test_case.fetch_proxy(url)
+                self._websocket_send('Fetch.fulfillRequest', params={'requestId': params['requestId'], **response})
+        except (BrokenPipeError, ConnectionResetError):
+            # this can happen if the browser is closed. Just ignore it.
+            _logger.info("Websocket error while handling request %s", params['request']['url'])
 
     def _handle_console(self, type, args=None, stackTrace=None, **kw): # pylint: disable=redefined-builtin
         # console formatting differs somewhat from Python's, if args[0] has
@@ -2239,6 +2257,35 @@ class HttpCase(TransactionCase):
             browser.set_cookie('session_id', session.sid, '/', HOST)
 
         return session
+
+    def fetch_proxy(self, url):
+        """
+            This method is called every time a request is made from the chrome browser outside the local network
+            Returns a response that will be sent to the browser to simulate the external request.
+        """
+
+        if 'https://fonts.googleapis.com/css' in url:
+            _logger.info('External chrome request during tests: Return empty file for %s', url)
+            return self.make_fetch_proxy_response('')  # return empty css file, we don't care
+
+        _logger.info('External chrome request during tests: returning 404 for %s', url)
+        return {
+                'body': '',
+                'responseCode': 404,
+                'responseHeaders': [],
+            }
+
+    def make_fetch_proxy_response(self, content, code=200):
+        if isinstance(content, str):
+            content = content.encode()
+        return {
+                'body': base64.b64encode(content).decode(),
+                'responseCode': code,
+                'responseHeaders': [
+                    {'name': 'access-control-allow-origin', 'value': '*'},
+                    {'name': 'cache-control', 'value': 'public, max-age=10000'},
+                ],
+            }
 
     def browser_js(self, url_path, code, ready='', login=None, timeout=60, cookies=None, error_checker=None, watch=False, success_signal=DEFAULT_SUCCESS_SIGNAL, debug=False, cpu_throttling=None, **kw):
         """ Test JavaScript code running in the browser.
