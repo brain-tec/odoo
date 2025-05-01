@@ -231,7 +231,7 @@ Section -$(TITLE_Nginx) Nginx
 
     FindFirst $0 $1 "$INSTDIR\nginx*"
     DetailPrint "Setting up nginx"
-    Rename "$TEMP\$1" "$INSTDIR\nginx"
+    Rename "$INSTDIR\$1" "$INSTDIR\nginx"
     FindClose $0
 
     SetOutPath "$INSTDIR\nginx\conf"
@@ -300,7 +300,9 @@ Section "Uninstall"
     Rmdir /r "$INSTDIR\git"
     Rmdir /r "$INSTDIR\nssm"
     FindFirst $0 $1 "$INSTDIR\nginx*"
+    StrCmp $1 "" nginx_dir_not_found
     Rmdir /R "$INSTDIR\$1"
+    nginx_dir_not_found:
     FindClose $0
     DeleteRegKey HKLM "${UNINSTALL_REGISTRY_KEY}"
 SectionEnd

@@ -2,6 +2,7 @@
 # Threaded, Gevent and Prefork Servers
 #-----------------------------------------------------------
 import contextlib
+import collections
 import datetime
 import errno
 import logging
@@ -17,7 +18,6 @@ import sys
 import threading
 import time
 from collections import deque
-import contextlib
 from io import BytesIO
 
 import psutil
@@ -579,10 +579,6 @@ class ThreadedServer(CommonServer):
         threads it spawns are not marked daemon).
 
         """
-        # Force call to strptime just before starting the cron thread
-        # to prevent time.strptime AttributeError within the thread.
-        # See: http://bugs.python.org/issue7980
-        datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
         for i in range(config['max_cron_threads']):
             t = threading.Thread(target=self.cron_thread, args=(i,), name=f"odoo.service.cron.cron{i}")
             t.daemon = True
@@ -851,7 +847,7 @@ class PreforkServer(CommonServer):
         self.workers_cron = {}
         self.workers = {}
         self.generation = 0
-        self.queue = []
+        self.queue = collections.deque()
         self.long_polling_pid = None
 
     def pipe_new(self):
@@ -919,8 +915,8 @@ class PreforkServer(CommonServer):
                 self.worker_pop(pid)
 
     def process_signals(self):
-        while len(self.queue):
-            sig = self.queue.pop(0)
+        while self.queue:
+            sig = self.queue.popleft()
             if sig in [signal.SIGINT, signal.SIGTERM]:
                 raise KeyboardInterrupt
             elif sig == signal.SIGHUP:

@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import inspect
 import itertools
 import logging
 import random
@@ -15,7 +16,7 @@ from psycopg2.extras import Json
 from odoo import api, fields, models, tools
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Command, Domain
-from odoo.tools import lazy_property, split_every, sql, unique, OrderedSet, SQL
+from odoo.tools import reset_cached_properties, split_every, sql, unique, OrderedSet, SQL
 from odoo.tools.safe_eval import safe_eval, datetime, dateutil, time
 from odoo.tools.translate import _, LazyTranslate
 
@@ -1360,7 +1361,7 @@ class IrModelInherit(models.Model):
         IrModel = self.env["ir.model"]
         get_model_id = IrModel._get_id
 
-        module_mapping = defaultdict(list)
+        module_mapping = defaultdict(OrderedSet)
         for model_name in model_names:
             get_field_id = self.env["ir.model.fields"]._get_ids(model_name).get
             model_id = get_model_id(model_name)
@@ -1377,10 +1378,16 @@ class IrModelInherit(models.Model):
                 ] + [
                     (model_id, get_model_id(parent_name), get_field_id(field))
                     for parent_name, field in cls._inherits.items()
+                ] + [
+                    (model_id, get_model_id(field.comodel_name), get_field_id(field_name))
+                    for (field_name, field) in inspect.getmembers(cls)
+                    if isinstance(field, fields.Many2one)
+                    if field.type == 'many2one' and not field.related and field.delegate
+                    if field_name not in cls._inherits.values()
                 ]
 
                 for item in items:
-                    module_mapping[item].append(cls._module)
+                    module_mapping[item].add(cls._module)
 
         if not module_mapping:
             return
@@ -2410,7 +2417,7 @@ class IrModelData(models.Model):
                         field_.setup(model)
                         has_shared_field = True
         if has_shared_field:
-            lazy_property.reset_all(self.env.registry)
+            reset_cached_properties(self.env.registry)
 
         # to collect external ids of records that cannot be deleted
         undeletable_ids = []

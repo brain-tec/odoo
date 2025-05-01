@@ -25,7 +25,7 @@ import time
 import zipfile
 
 from odoo import http, release, service
-from odoo.tools.func import lazy_property
+from odoo.tools.func import reset_cached_properties
 from odoo.tools.misc import file_path
 
 lock = Lock()
@@ -122,7 +122,7 @@ def start_nginx_server():
         path_nginx = get_path_nginx()
         if path_nginx:
             _logger.info('Start Nginx server: %s\\nginx.exe', path_nginx)
-            os.popen(str(path_nginx / 'nginx.exe'))
+            subprocess.Popen([str(path_nginx / 'nginx.exe')], cwd=str(path_nginx))
     elif platform.system() == 'Linux':
         subprocess.check_call(["sudo", "service", "nginx", "restart"])
 
@@ -334,7 +334,8 @@ def load_iot_handlers():
                     spec.loader.exec_module(module)
                 except Exception:
                     _logger.exception('Unable to load handler file: %s', file)
-    lazy_property.reset_all(http.root)
+    reset_cached_properties(http.root)
+
 
 def list_file_by_os(file_list):
     platform_os = platform.system()
