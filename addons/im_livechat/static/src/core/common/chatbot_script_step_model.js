@@ -9,8 +9,8 @@ export class ChatbotScriptStep extends Record {
     /** @type {string} */
     message;
     /** @type {"free_input_multi"|"free_input_single"|"question_email"|"question_phone"|"question_selection"|"text"|"forward_operator"} */
-    type;
+    step_type;
     isLast = false;
-    answers = fields.Many("chatbot.script.answer");
+    answer_ids = fields.Many("chatbot.script.answer");
 }
 ChatbotScriptStep.register();
