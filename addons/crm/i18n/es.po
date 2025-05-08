@@ -4,15 +4,16 @@
 # 
 # Translators:
 # Wil Odoo, 2023
-# Larissa Manderfeld, 2024
+# Larissa Manderfeld, 2025
+# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:31+0000\n"
+"POT-Creation-Date: 2025-02-10 10:33+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Larissa Manderfeld, 2024\n"
+"Last-Translator: Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2025\n"
 "Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -43,7 +44,7 @@ msgstr "# Oportunidades vencidas"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__lead_unassigned_count
 msgid "# Unassigned Leads"
-msgstr "# Leads no asignados"
+msgstr "N.° de leads no asignados"
 
 #. module: crm
 #. odoo-python
@@ -201,8 +202,8 @@ msgstr "<span class=\"o_stat_text\"> Leads</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
-msgid "<span class=\"oe_grey p-2 text-nowrap\"> at </span>"
-msgstr "<span class=\"oe_grey p-2 text-nowrap\"> de </span>"
+msgid "<span class=\"oe_grey p-2 text-nowrap d-none d-sm-block\"> at </span>"
+msgstr "<span class=\"oe_grey p-2 text-nowrap d-none d-sm-block\"> de </span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -536,25 +537,25 @@ msgstr "Actividad por"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "Add a description..."
-msgstr "Agregar una descripción..."
+msgstr "Añadir una descripción..."
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.mail_activity_plan_action_lead
 msgid "Add a new plan"
-msgstr "Agregar un nuevo plan"
+msgstr "Añadir un nuevo plan"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "Add a qualification step before the creation of an opportunity"
 msgstr ""
-"Agregue un paso de calificación antes de la creación de una oportunidad."
+"Añada un paso de calificación antes de la creación de una oportunidad."
 
 #. module: crm
 #. odoo-javascript
 #: code:addons/crm/static/src/views/forecast_kanban/forecast_kanban_column_quick_create.js:0
 #, python-format
 msgid "Add next %s"
-msgstr "Agregar siguiente %s"
+msgstr "Añadir siguiente %s"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team__assignment_domain
@@ -792,7 +793,7 @@ msgstr "¡Boom! Récord del equipo durante los últimos 30 días."
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_bounce
 msgid "Bounce"
-msgstr "Devuelto"
+msgstr "Rebotado"
 
 #. module: crm
 #: model:ir.ui.menu,name:crm.crm_menu_root
@@ -983,7 +984,7 @@ msgstr ""
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_pls_update_view_form
 msgid "Consider leads created as of the:"
-msgstr "Considera los leads creados a partir del:"
+msgstr "Considerar los leads creados a partir del:"
 
 #. module: crm
 #: model:ir.model,name:crm.model_res_partner
@@ -1090,7 +1091,7 @@ msgstr "Correcto"
 #: model:ir.model.fields,help:crm.field_crm_lead__message_bounce
 msgid "Counter of the number of bounced emails for this contact"
 msgstr ""
-"Contador del número de correos electrónicos devueltos de este contacto"
+"Contador del número de correos electrónicos rebotados de este contacto"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_activity_report__country_id
@@ -1226,7 +1227,7 @@ msgstr "Moneda"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__alias_bounced_content
 msgid "Custom Bounced Message"
-msgstr "Mensaje devuelto personalizado"
+msgstr "Mensaje rebotado personalizado"
 
 #. module: crm
 #. odoo-python
@@ -1445,6 +1446,13 @@ msgid "Email cc:"
 msgstr "CC del correo electrónico:"
 
 #. module: crm
+#: model:ir.model.fields,help:crm.field_crm_team__alias_domain
+msgid "Email domain e.g. 'example.com' in 'odoo@example.com'"
+msgstr ""
+"Dominio del correo electrónico, p. ej. \"ejemplo.com\" en "
+"\"odoo@ejemplo.com\""
+
+#. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
 msgid "Email:"
 msgstr "Correo electrónico:"
@@ -1530,7 +1538,7 @@ msgstr "MMR esperado"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__expected_revenue
 msgid "Expected Revenue"
-msgstr "Ingreso esperado"
+msgstr "Ingresos esperados"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_tree_view_oppor
@@ -2375,7 +2383,7 @@ msgstr "Manualmente"
 #: model:ir.actions.act_window,name:crm.crm_lead_lost_action
 #, python-format
 msgid "Mark Lost"
-msgstr "Marcar perdido"
+msgstr "Marcar como perdido"
 
 #. module: crm
 #. odoo-python
@@ -2653,8 +2661,8 @@ msgid ""
 "No allocated leads to %(team_name)s team and its salespersons because no "
 "unassigned lead matches its domain."
 msgstr ""
-"No hay leads asignados para el equipo %(team_name)s y sus vendedores porque "
-"no hay leads sin asignar que coincidan con su dominio."
+"No hay leads asignados para el equipo %(team_name)s y sus comerciales porque"
+" no hay leads no asignados que coincidan con su dominio."
 
 #. module: crm
 #. odoo-python
@@ -2665,7 +2673,7 @@ msgid ""
 "capacity to its salespersons."
 msgstr ""
 "No hay leads asignados al equipo %(team_name)s porque no tiene capacidad. "
-"Agregue capacidad a sus vendedores."
+"Añada capacidad a sus vendedores."
 
 #. module: crm
 #. odoo-python
@@ -2763,7 +2771,7 @@ msgstr "Notas:"
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #, python-format
 msgid "Now, <b>add your Opportunity</b> to your Pipeline."
-msgstr "Ahora, <b>agregue su oportunidad</b> a su flujo."
+msgstr "Ahora, <b>añada su oportunidad</b> a su flujo."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__message_needaction_counter
@@ -3050,7 +3058,7 @@ msgstr "Teléfono en la lista negra"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__phone_state
 msgid "Phone Quality"
-msgstr "Calidad de llamada"
+msgstr "Calidad del número de teléfono"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__phone_mobile_search
@@ -3120,10 +3128,10 @@ msgid ""
 "- partners: only authenticated partners\n"
 "- followers: only followers of the related document or members of following channels\n"
 msgstr ""
-"Política para publicar un mensaje en el documento utilizando el servidor de correo.\n"
-"- todos: todos pueden publicar\n"
-"- contactos: sólo contactos autenticados\n"
-"- seguidores: sólo seguidores del documento relacionado o miembros de los siguientes canales\n"
+"Política para enviar un mensaje en el documento usando la pasarela de correo.\n"
+"- Todos: cualquiera puede enviar\n"
+"- Contactos: sólo contactos autenticados\n"
+"- Seguidores: sólo seguidores del documento relacionado o miembros de los siguientes canales\n"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__duplicate_lead_ids
@@ -3497,7 +3505,7 @@ msgstr "Mostrar sólo oportunidades"
 #: model:ir.model.fields,field_description:crm.field_crm_team__assignment_optout
 #: model:ir.model.fields,field_description:crm.field_crm_team_member__assignment_optout
 msgid "Skip auto assignment"
-msgstr "Saltar autoasignación"
+msgstr "Omitir la asignación automática"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_tree_view_oppor
@@ -3682,7 +3690,7 @@ msgid ""
 "The contacts below have been added as followers of this lead\n"
 "                        because they have been contacted less than 30 days ago on"
 msgstr ""
-"Los contactos a continuación se agregaron como seguidores de este lead\n"
+"Los contactos a continuación se añadieron como seguidores de este lead\n"
 "                        porque se contactaron hace menos de 30 días el"
 
 #. module: crm
@@ -3746,8 +3754,8 @@ msgid ""
 "The success rate is computed based on the stage, but you can add more fields"
 " in the statistical analysis."
 msgstr ""
-"La tasa de éxito se calcula según la etapa, pero puede agregar más campos en"
-" el análisis estadístico."
+"La tasa de éxito se calcula según la etapa, pero puede añadir más campos en "
+"el análisis estadístico."
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_opportunity_report_action_lead

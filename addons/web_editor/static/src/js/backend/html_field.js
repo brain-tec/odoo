@@ -33,6 +33,7 @@ import { uniqueId } from '@web/core/utils/functions';
 // Ensure `@web/views/fields/html/html_field` is loaded first as this module
 // must override the html field in the registry.
 import '@web/views/fields/html/html_field';
+import { Deferred } from "@web/core/utils/concurrency";
 
 let stripHistoryIds;
 
@@ -384,19 +385,29 @@ export class HtmlField extends Component {
         popover.style.left = leftPosition + 'px';
     }
     async commitChanges({ urgent, shouldInline } = {}) {
+        if (this.isCurrentlySaving && !urgent) {
+            await this.isCurrentlySaving;
+        }
         if (this._isDirty() || urgent || (shouldInline && this.props.isInlineStyle)) {
             let savePendingImagesPromise, toInlinePromise;
             if (this.wysiwyg && this.wysiwyg.odooEditor) {
+                if (!urgent) {
+                    this.isCurrentlySaving = new Deferred();
+                }
                 this.wysiwyg.odooEditor.observerUnactive('commitChanges');
                 savePendingImagesPromise = this.wysiwyg.savePendingImages();
                 if (this.props.isInlineStyle) {
                     // Avoid listening to changes made during the _toInline process.
                     toInlinePromise = this._toInline();
                 }
-                if (urgent) {
+                if (urgent && status(this) !== 'destroyed') {
                     await this.updateValue();
                 }
                 await savePendingImagesPromise;
+                const codeViewEl = this._getCodeViewEl();
+                if (codeViewEl) {
+                    codeViewEl.value = this.wysiwyg.getValue();
+                }
                 if (this.props.isInlineStyle) {
                     await toInlinePromise;
                 }
@@ -404,6 +415,9 @@ export class HtmlField extends Component {
             }
             if (status(this) !== 'destroyed') {
                 await this.updateValue();
+            }
+            if (this.isCurrentlySaving) {
+                this.isCurrentlySaving.resolve();
             }
         }
     }
@@ -679,11 +693,6 @@ export const htmlField = {
         label: _t("Snippets"),
         name: "snippets",
         type: "string"
-    }, {
-        label: _t("No videos"),
-        name: "noVideos",
-        type: "boolean",
-        default: true
     }, {
         label: _t("Resizable"),
         name: "resizable",

@@ -5,14 +5,15 @@
 # Translators:
 # Wil Odoo, 2023
 # Larissa Manderfeld, 2024
+# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"POT-Creation-Date: 2024-08-13 10:27+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Larissa Manderfeld, 2024\n"
+"Last-Translator: Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2025\n"
 "Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -246,8 +247,8 @@ msgid ""
 "Add this email address to white list of people and accept all pending "
 "messages from the same author."
 msgstr ""
-"Agregue esta dirección de correo para poner gente en la lista blanca y "
-"aceptar todos los mensajes pendientes del mismo autor."
+"Añada esta dirección de correo para poner gente en la lista blanca y aceptar"
+" todos los mensajes pendientes del mismo autor."
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_id
@@ -475,7 +476,7 @@ msgstr "El usuario actual es el moderador del grupo"
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_bounced_content
 msgid "Custom Bounced Message"
-msgstr "Mensaje devuelto personalizado"
+msgstr "Mensaje rebotado personalizado"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_defaults
@@ -534,6 +535,13 @@ msgstr ""
 "Dirección de correo del remitente. Este campo se establece cuando no se "
 "encuentra ningún contacto que coincida y reemplaza el campo author_id en el "
 "chatter."
+
+#. module: mail_group
+#: model:ir.model.fields,help:mail_group.field_mail_group__alias_domain
+msgid "Email domain e.g. 'example.com' in 'odoo@example.com'"
+msgstr ""
+"Dominio del correo electrónico, p. ej. \"ejemplo.com\" en "
+"\"odoo@ejemplo.com\""
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
@@ -1032,6 +1040,15 @@ msgid "Only members can send email to the mailing list."
 msgstr "Solo los miembros pueden enviar mensaje a este lista de correo."
 
 #. module: mail_group
+#. odoo-python
+#: code:addons/mail_group/models/mail_group.py:0
+#, python-format
+msgid "Only selected groups of users can send email to the mailing list."
+msgstr ""
+"Solo los grupos de usuarios seleccionados pueden enviar mensajes a la lista "
+"de correos."
+
+#. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_force_thread_id
 msgid ""
 "Optional ID of a thread (record) to which all incoming messages will be "
@@ -1115,10 +1132,10 @@ msgid ""
 "- partners: only authenticated partners\n"
 "- followers: only followers of the related document or members of following channels\n"
 msgstr ""
-"Política para publicar un mensaje en el documento utilizando el servidor de correo.\n"
-"- todos: todos pueden publicar\n"
-"- contactos: sólo contactos autenticados\n"
-"- seguidores: sólo seguidores del documento relacionado o miembros de los siguientes canales\n"
+"Política para enviar un mensaje en el documento usando la pasarela de correo.\n"
+"- Todos: cualquiera puede enviar\n"
+"- Contactos: sólo contactos autenticados\n"
+"- Seguidores: sólo seguidores del documento relacionado o miembros de los siguientes canales\n"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_footer

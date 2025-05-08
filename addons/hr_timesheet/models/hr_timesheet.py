@@ -99,6 +99,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.depends('task_id.partner_id', 'project_id.partner_id')
     def _compute_partner_id(self):
+        super()._compute_partner_id()
         for timesheet in self:
             if timesheet.project_id:
                 timesheet.partner_id = timesheet.task_id.partner_id or timesheet.project_id.partner_id
@@ -381,6 +382,10 @@ class AccountAnalyticLine(models.Model):
             if not vals.get('product_uom_id'):
                 company = account_per_id[vals['account_id']].company_id or data.company_id
                 vals['product_uom_id'] = uom_id_per_company.get(company.id, company.project_time_mode_id.id) or self.env.company.project_time_mode_id.id
+            # Set the top-level analytic plan according to the given analytic account
+            plan = self.env['account.analytic.account'].browse(vals.get('account_id')).root_plan_id
+            if plan:
+                vals[plan._column_name()] = vals.get('account_id')
         return vals_list
 
     def _timesheet_postprocess(self, values):

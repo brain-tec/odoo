@@ -6,11 +6,13 @@ from odoo import Command
 
 from odoo.api import Environment
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
-from odoo.tests import loaded_demo_data, tagged
+from odoo.tests import tagged
 from odoo.addons.account.tests.common import AccountTestInvoicingHttpCommon
 from odoo.addons.point_of_sale.tests.common_setup_methods import setup_pos_combo_items
 from datetime import date, timedelta
 from odoo.addons.point_of_sale.tests.common import archive_products
+from odoo.addons.point_of_sale.models.pos_config import PosConfig
+from unittest.mock import patch
 
 _logger = logging.getLogger(__name__)
 
@@ -512,9 +514,24 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
         })
 
         # Set customers
-        cls.partner_test_1 = cls.env['res.partner'].create({'name': 'Partner Test 1'})
-        cls.partner_test_2 = cls.env['res.partner'].create({'name': 'Partner Test 2'})
-        cls.partner_test_3 = cls.env['res.partner'].create({'name': 'Partner Test 3'})
+        partners = cls.env['res.partner'].create([
+            {'name': 'Partner Test 1'},
+            {'name': 'Partner Test 2'},
+            {'name': 'Partner Test 3'},
+            {
+                'name': 'Partner Full',
+                'email': 'partner.full@example.com',
+                'street': '77 Santa Barbara Rd',
+                'city': 'Pleasant Hill',
+                'state_id': cls.env.ref('base.state_us_5').id,
+                'zip': '94523',
+                'country_id': cls.env.ref('base.us').id,
+            }
+        ])
+        cls.partner_test_1 = partners[0]
+        cls.partner_test_2 = partners[1]
+        cls.partner_test_3 = partners[2]
+        cls.partner_full = partners[3]
 
         # Change the default sale pricelist of customers,
         # so the js tests can expect deterministically this pricelist when selecting a customer.
@@ -524,10 +541,9 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
 @tagged('post_install', '-at_install')
 class TestUi(TestPointOfSaleHttpCommon):
     def test_01_pos_basic_order(self):
-        if not loaded_demo_data(self.env):
-            _logger.warning("This test relies on demo data. To be rewritten independently of demo data for accurate and reliable results.")
-            return
-
+        self.tip.write({
+            'taxes_id': False,
+        })
         self.main_pos_config.write({
             'iface_tipproduct': True,
             'tip_product_id': self.tip.id,
@@ -557,9 +573,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.assertEqual(email_count, 1)
 
     def test_02_pos_with_invoiced(self):
-        if not loaded_demo_data(self.env):
-            _logger.warning("This test relies on demo data. To be rewritten independently of demo data for accurate and reliable results.")
-            return
         self.pos_user.write({
             'groups_id': [
                 (4, self.env.ref('account.group_account_invoice').id),
@@ -587,9 +600,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.assertTrue('(Red, Metal, Other: Custom Fabric)' in paid_order.lines[0].full_product_name)
 
     def test_05_ticket_screen(self):
-        if not loaded_demo_data(self.env):
-            _logger.warning("This test relies on demo data. To be rewritten independently of demo data for accurate and reliable results.")
-            return
         self.pos_user.write({
             'groups_id': [
                 (4, self.env.ref('account.group_account_invoice').id),
@@ -1199,6 +1209,140 @@ class TestUi(TestPointOfSaleHttpCommon):
         })
         self.main_pos_config.open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'FiscalPositionTwoTaxIncluded', login="accountman")
+
+    def test_pos_combo_change_fp(self):
+        """
+        Verify than when the fiscal position is changed,
+        the price of the combo doesn't change and taxes are well taken into account
+        """
+        tax_1 = self.env['account.tax'].create({
+            'name': 'Tax 10%',
+            'amount': 10,
+            'price_include': True,
+            'amount_type': 'percent',
+            'type_tax_use': 'sale',
+        })
+
+        tax_2 = self.env['account.tax'].create({
+            'name': 'Tax 5%',
+            'amount': 5,
+            'price_include': True,
+            'amount_type': 'percent',
+            'type_tax_use': 'sale',
+        })
+
+        setup_pos_combo_items(self)
+        self.office_combo.write({'list_price': 50, 'taxes_id': [(6, 0, [tax_1.id])]})
+        for combo in self.office_combo.combo_ids:  # Set the tax to all the products of the combo
+            for line in combo.combo_line_ids:
+                line.product_id.taxes_id = [(6, 0, [tax_1.id])]
+
+        fiscal_position = self.env['account.fiscal.position'].create({
+            'name': 'test fp',
+            'tax_ids': [(0, 0, {
+                'tax_src_id': tax_1.id,
+                'tax_dest_id': tax_2.id,
+            })],
+        })
+
+        self.main_pos_config.write({
+            'tax_regime_selection': True,
+            'fiscal_position_ids': [(6, 0, [fiscal_position.id])],
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'PosComboChangeFP', login="pos_user")
+
+    def test_cash_rounding_payment(self):
+        """Verify than an error popup is shown if the payment value is more precise than the rounding method"""
+        rounding_method = self.env['account.cash.rounding'].create({
+            'name': 'Down 0.10',
+            'rounding': 0.10,
+            'strategy': 'add_invoice_line',
+            'profit_account_id': self.company_data['default_account_revenue'].copy().id,
+            'loss_account_id': self.company_data['default_account_expense'].copy().id,
+            'rounding_method': 'DOWN',
+        })
+
+        self.main_pos_config.write({
+            'cash_rounding': True,
+            'only_round_cash_method': False,
+            'rounding_method': rounding_method.id,
+        })
+
+        self.env['ir.config_parameter'].sudo().set_param('barcode.max_time_between_keys_in_ms', 1)
+        self.main_pos_config.open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'CashRoundingPayment', login="accountman")
+
+    def test_customer_search_more(self):
+        partner_test_a = self.env["res.partner"].create({"name": "APartner"})
+        self.env["res.partner"].create({"name": "BPartner", "zip": 1111})
+
+        def mocked_get_limited_partners_loading(self):
+            return [(partner_test_a.id,)]
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        with patch.object(PosConfig, 'get_limited_partners_loading', mocked_get_limited_partners_loading):
+            self.main_pos_config.open_ui()
+            self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'SearchMoreCustomer', login="pos_user")
+
+    def test_add_multiple_serials_at_once(self):
+        self.product_a = self.env['product.product'].create({
+            'name': 'Product A',
+            'type': 'product',
+            'tracking': 'serial',
+            'categ_id': self.env.ref('product.product_category_all').id,
+            'available_in_pos': True,
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, "test_add_multiple_serials_at_once", login="pos_user")
+
+    def test_order_and_invoice_amounts(self):
+        payment_term = self.env['account.payment.term'].create({
+            'name': "early_payment_term",
+            'discount_percentage': 10,
+            'discount_days': 10,
+            'early_discount': True,
+            'early_pay_discount_computation': 'mixed',
+            'line_ids': [Command.create({
+                'value': 'percent',
+                'nb_days': 0,
+                'value_amount': 100,
+            })]
+        })
+        self.partner_test_1.property_payment_term_id = payment_term.id
+
+        tax = self.env['account.tax'].create({
+            'name': 'Tax 10%',
+            'amount': 10,
+            'amount_type': 'percent',
+            'type_tax_use': 'sale',
+        })
+        self.env['product.product'].create({
+            'name': 'Product Test',
+            'available_in_pos': True,
+            'list_price': 1000,
+            'taxes_id': [(6, 0, [tax.id])],
+        })
+        
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'PaymentScreenInvoiceOrder', login="pos_user")
+
+        order = self.env['pos.order'].search([('partner_id', '=', self.partner_test_1.id)], limit=1)
+        self.assertTrue(order)
+
+        self.assertEqual(order.partner_id, self.partner_test_1)
+
+        invoice = self.env['account.move'].search([('invoice_origin', '=', order.name)], limit=1)
+        self.assertTrue(invoice)
+        self.assertFalse(invoice.invoice_payment_term_id) 
+
+        self.assertAlmostEqual(order.amount_total, invoice.amount_total, places=2, msg="Order and Invoice amounts do not match.")
+
+
+    def test_combo_with_custom_attribute(self):
+        setup_pos_combo_items(self)
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_combo_with_custom_attribute', login="pos_user")
 
 # This class just runs the same tests as above but with mobile emulation
 class MobileTestUi(TestUi):

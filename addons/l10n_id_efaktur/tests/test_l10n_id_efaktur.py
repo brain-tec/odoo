@@ -3,9 +3,9 @@ import csv
 from odoo import Command
 from odoo.exceptions import ValidationError
 from odoo.tests import tagged, common
-from odoo.addons.l10n_id_efaktur.models.account_move import FK_HEAD_LIST, LT_HEAD_LIST, OF_HEAD_LIST, _csv_row
+from odoo.addons.l10n_id_efaktur.models.account_move import FK_HEAD_LIST, LT_HEAD_LIST, OF_HEAD_LIST, _csv_row, AccountMove
 from odoo.exceptions import RedirectWarning
-
+from unittest.mock import patch
 
 @tagged('post_install', '-at_install', 'post_install_l10n')
 class TestIndonesianEfaktur(common.TransactionCase):
@@ -19,12 +19,14 @@ class TestIndonesianEfaktur(common.TransactionCase):
 
         self.maxDiff = 1500
         # change company info for csv detai later
-        self.env.company.country_id = self.env.ref('base.id')
-        self.env.company.account_fiscal_country_id = self.env.company.country_id
+        indonesia = self.env.ref('base.id')
+        self.env.company.country_id = indonesia
+        self.env.company.account_fiscal_country_id = indonesia
         self.env.company.street = "test"
         self.env.company.phone = "12345"
+        self.env.company.vat = "1234567890123456"
 
-        self.partner_id = self.env['res.partner'].create({"name": "l10ntest", "l10n_id_pkp": True, "l10n_id_kode_transaksi": "01", "l10n_id_nik": "12345", "vat": "000000000000000"})
+        self.partner_id = self.env['res.partner'].create({"name": "l10ntest", "l10n_id_pkp": True, "l10n_id_kode_transaksi": "01", "l10n_id_nik": "12345", "vat": "000000000000000", "country_id": indonesia.id})
         self.env['account.tax.group'].create({
             'name': 'tax_group',
             'country_id': self.env.ref('base.id').id,
@@ -57,6 +59,16 @@ class TestIndonesianEfaktur(common.TransactionCase):
         })
         self.out_invoice_2.action_post()
 
+        # For the sake of unit test of this module, we want to retain the the compute method for field
+        # l10n_id_need_kode_transaksi of this module. In the coretax module, l10n_id_need_kode_transaksi
+        # is always set to False to prevent the flows of old module to be triggered
+        patch_kode_transaksi = patch('odoo.addons.l10n_id_efaktur_coretax.models.account_move.AccountMove._compute_need_kode_transaksi',
+                                AccountMove._compute_need_kode_transaksi)
+        self.startClassPatcher(patch_kode_transaksi)
+        patch_download_efaktur = patch("odoo.addons.l10n_id_efaktur_coretax.models.account_move.AccountMove.download_efaktur",
+                                AccountMove.download_efaktur)
+        self.startClassPatcher(patch_download_efaktur)
+
     def test_efaktur_csv_output_1(self):
         """
         Test to ensure that the output csv data contains tax-excluded prices regardless of whether the tax configuration is tax-included or tax-excluded.
@@ -71,7 +83,7 @@ class TestIndonesianEfaktur(common.TransactionCase):
             _csv_row(OF_HEAD_LIST, ','),
         )
         # remaining lines
-        line_4 = '"FK","01","0","0000000000001","5","2019","1/5/2019","000000000000000","12345#NIK#NAMA#l10ntest","","100","10","0","","0","0","0","0","INV/2019/00001","0"\n'
+        line_4 = '"FK","01","0","0000000000001","5","2019","1/5/2019","000000000000000","12345#NIK#NAMA#l10ntest","Indonesia","100","10","0","","0","0","0","0","INV/2019/00001","0"\n'
         line_5 = '"OF","","","100.00","1.0","100.00","0","100.00","10.00","0","0"\n'
 
         efaktur_csv_expected = output_head + line_4 + line_5
@@ -94,7 +106,7 @@ class TestIndonesianEfaktur(common.TransactionCase):
             _csv_row(LT_HEAD_LIST, ','),
             _csv_row(OF_HEAD_LIST, ','),
         )
-        line_4 = '"FK","01","0","0000000000002","5","2019","1/5/2019","000000000000000","12345#NIK#NAMA#l10ntest","","40040","4004","0","","0","0","0","0","INV/2019/00002","0"\n'
+        line_4 = '"FK","01","0","0000000000002","5","2019","1/5/2019","000000000000000","12345#NIK#NAMA#l10ntest","Indonesia","40040","4004","0","","0","0","0","0","INV/2019/00002","0"\n'
         line_5 = '"OF","","","100.10","400.0","40040.00","0","40040.00","4004.00","0","0"\n'
 
         efaktur_csv_expected = output_head + line_4 + line_5

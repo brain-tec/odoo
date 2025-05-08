@@ -5,23 +5,23 @@
 # Translators:
 # Kovács Tibor <kovika@gmail.com>, 2023
 # Krisztián Juhász <juhasz.krisztian@josafar.hu>, 2023
-# Tibor Kőnig <konig.tibor@evitalit.hu>, 2023
+# f1b3a33e3b33fcf18004a5292e501f50_3500ca8 <373b677b151624c4521d9efc77b996fd_750224>, 2023
 # Zsolt Godó <zsolttokio@gmail.com>, 2023
 # Ákos Nagy <akos.nagy@oregional.hu>, 2023
 # Daniel Gerstenbrand <daniel.gerstenbrand@gmail.com>, 2023
 # Tamás Dombos, 2023
-# Martin Trigaux, 2023
 # krnkris, 2023
 # Tamás Németh <ntomasz81@gmail.com>, 2023
 # gezza <geza.nagy@oregional.hu>, 2024
+# Martin Trigaux, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:31+0000\n"
+"POT-Creation-Date: 2025-02-10 10:33+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: gezza <geza.nagy@oregional.hu>, 2024\n"
+"Last-Translator: Martin Trigaux, 2025\n"
 "Language-Team: Hungarian (https://app.transifex.com/odoo/teams/41243/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -84,11 +84,6 @@ msgstr "1 telefonhívás"
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "12 days / year, including <br>6 of your choice."
 msgstr "12 nap / év, amiből <br>6 nap választható."
-
-#. module: hr
-#: model_terms:ir.ui.view,arch_db:hr.print_employee_badge
-msgid "12345678901"
-msgstr "12345678901"
 
 #. module: hr
 #: model_terms:hr.job,job_details:hr.job_ceo
@@ -556,6 +551,11 @@ msgid "Available"
 msgstr "Elérhető"
 
 #. module: hr
+#: model_terms:ir.ui.view,arch_db:hr.mail_activity_plan_view_form
+msgid "Available for all Departments"
+msgstr ""
+
+#. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__avatar_1920
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__avatar_1920
 msgid "Avatar"
@@ -616,6 +616,11 @@ msgstr "Névkártya azonosító"
 #: model:ir.model.fields,field_description:hr.field_hr_employee__bank_account_id
 msgid "Bank Account Number"
 msgstr "Bankszámlaszám"
+
+#. module: hr
+#: model:ir.model,name:hr.model_res_partner_bank
+msgid "Bank Accounts"
+msgstr "Bankszámlák"
 
 #. module: hr
 #: model:ir.model,name:hr.model_base
@@ -988,6 +993,8 @@ msgid ""
 msgstr ""
 
 #. module: hr
+#. odoo-javascript
+#: code:addons/hr/static/src/components/avatar_card/avatar_card_popover_patch.xml:0
 #: model:ir.model,name:hr.model_hr_department
 #: model:ir.model.fields,field_description:hr.field_hr_employee__department_id
 #: model:ir.model.fields,field_description:hr.field_hr_employee_base__department_id
@@ -1000,6 +1007,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr.view_department_filter
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
 #: model_terms:ir.ui.view,arch_db:hr.view_job_filter
+#, python-format
 msgid "Department"
 msgstr "Részleg"
 
@@ -1911,11 +1919,6 @@ msgid "Manager of employee %s is not set."
 msgstr "%s munkavállaló menedzsere nincs megadva."
 
 #. module: hr
-#: model_terms:ir.ui.view,arch_db:hr.print_employee_badge
-msgid "Marc Demo"
-msgstr ""
-
-#. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__marital
 #: model:ir.model.fields,field_description:hr.field_res_users__marital
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -2168,7 +2171,7 @@ msgstr "A toborzás fázisában ebbe a munkakörbe felvett munkavállalók szám
 #: model:ir.model.fields,help:hr.field_hr_employee__message_needaction_counter
 #: model:ir.model.fields,help:hr.field_hr_job__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "Üzenetek száma, melyek akciót igényelnek"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_department__message_has_error_counter
@@ -2808,8 +2811,10 @@ msgid "Social Security Number"
 msgstr "Társadalombiztosítási azonosító jel"
 
 #. module: hr
-#: model_terms:ir.ui.view,arch_db:hr.print_employee_badge
-msgid "Software Developer"
+#. odoo-python
+#: code:addons/hr/models/hr_employee_base.py:0
+#, python-format
+msgid "Some employee already have a work contact"
 msgstr ""
 
 #. module: hr

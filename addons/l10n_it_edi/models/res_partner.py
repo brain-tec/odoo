@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import re
 from stdnum.it import codicefiscale, iva
 
 from odoo import api, fields, models, _
@@ -135,15 +134,22 @@ class ResPartner(models.Model):
         if l10n_it_codice_fiscale is None:
             self.ensure_one()
             l10n_it_codice_fiscale = self.l10n_it_codice_fiscale
-        if l10n_it_codice_fiscale and re.match(r'^IT[0-9]{11}$', l10n_it_codice_fiscale):
-            return l10n_it_codice_fiscale[2:13]
-        return l10n_it_codice_fiscale
+        if l10n_it_codice_fiscale:
+            if codicefiscale._code_re.match(l10n_it_codice_fiscale):
+                # Personal codice
+                return codicefiscale.compact(l10n_it_codice_fiscale)
+            # Company codice
+            return iva.compact(l10n_it_codice_fiscale)
 
     @api.onchange('vat', 'country_id')
     def _l10n_it_onchange_vat(self):
-        if not self.l10n_it_codice_fiscale and self.vat and (self.country_id.code == "IT" or self.vat.startswith("IT")):
+        if self.vat and (
+            self.country_code == "IT"
+            if self.country_code
+            else self.vat.startswith("IT")
+        ):
             self.l10n_it_codice_fiscale = self._l10n_it_edi_normalized_codice_fiscale(self.vat)
-        elif self.country_id.code not in [False, "IT"]:
+        else:
             self.l10n_it_codice_fiscale = False
 
     @api.constrains('l10n_it_codice_fiscale')

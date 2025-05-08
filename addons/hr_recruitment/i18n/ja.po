@@ -3,17 +3,17 @@
 # 	* hr_recruitment
 # 
 # Translators:
-# Wil Odoo, 2024
-# Junko Augias, 2024
 # Ryoko Tsuda <ryoko@quartile.co>, 2024
+# Wil Odoo, 2025
+# Junko Augias, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"POT-Creation-Date: 2025-02-10 10:33+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Ryoko Tsuda <ryoko@quartile.co>, 2024\n"
+"Last-Translator: Junko Augias, 2025\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -98,6 +98,11 @@ msgid ""
 msgstr ""
 "<span class=\"badge rounded-pill text-bg-danger float-end me-4\" invisible=\"application_status != 'refused'\">却下済</span>\n"
 "                            <span class=\"badge rounded-pill text-bg-secondary float-end me-4\" invisible=\"application_status != 'archived'\">アーカイブ済</span>"
+
+#. module: hr_recruitment
+#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_get_refuse_reason_view_form
+msgid "<span class=\"mx-2\">to</span>"
+msgstr "<span class=\"mx-2\">から</span>"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_form
@@ -1189,12 +1194,12 @@ msgstr "カスタムバウンスメッセージ"
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__day_close
 msgid "Days to Close"
-msgstr "完了所要日数"
+msgstr "求人終了までの日数"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__day_open
 msgid "Days to Open"
-msgstr "開始日"
+msgstr "求人開始までの日数"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__alias_defaults
@@ -1392,6 +1397,11 @@ msgstr "この職種のEメールエイリアス。新規メールがこの職�
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__email_cc
 msgid "Email cc"
 msgstr "メールCC"
+
+#. module: hr_recruitment
+#: model:ir.model.fields,help:hr_recruitment.field_hr_job__alias_domain
+msgid "Email domain e.g. 'example.com' in 'odoo@example.com'"
+msgstr "Eメールドメイン例 'example.com' in 'odoo@example.com'"
 
 #. module: hr_recruitment
 #. odoo-python
@@ -1766,7 +1776,7 @@ msgstr "面接者"
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_applicant_send_mail__is_mail_template_editor
 msgid "Is Editor"
-msgstr "編集者であり"
+msgstr "編集者である"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_job__is_favorite
@@ -1874,17 +1884,17 @@ msgstr "かんばんがブロックされました"
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__legend_normal
 msgid "Kanban Ongoing"
-msgstr "かんばん進行中"
+msgstr "かんばん 選考中"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__kanban_state
 msgid "Kanban State"
-msgstr "かんばん状態"
+msgstr "かんばん ステータス"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__legend_done
 msgid "Kanban Valid"
-msgstr "かんばん有効"
+msgstr "かんばん 有効"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_digest_digest__kpi_hr_recruitment_new_colleagues_value
@@ -2274,7 +2284,7 @@ msgstr "過去の応募者"
 #: model:ir.model.fields.selection,name:hr_recruitment.selection__hr_applicant__application_status__ongoing
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search
 msgid "Ongoing"
-msgstr "処理中"
+msgstr "選考中"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_res_config_settings__module_website_hr_recruitment
@@ -2371,9 +2381,9 @@ msgid ""
 "- followers: only followers of the related document or members of following channels\n"
 msgstr ""
 "メールゲートウェイを使用したメッセージドキュメント投稿のポリシー\n"
-"- everyone: 誰にでも投稿可能\n"
-"- partners: 許可されたパートナーのみ\n"
-"- followers: 関連ドキュメントのフォロワーか、フォローしているチャンネルのメンバーのみ\n"
+"- 全員: 誰でも投稿可能\n"
+"- 取引先: 認証済みの取引先のみ\n"
+"- フォロワー: 関連ドキュメントのフォロワーか、フォローしているチャネルのメンバーのみ\n"
 
 #. module: hr_recruitment
 #: model:ir.model.fields,field_description:hr_recruitment.field_hr_applicant__probability
@@ -2611,7 +2621,7 @@ msgstr "履歴書内容"
 #. module: hr_recruitment
 #: model:hr.applicant.refuse.reason,name:hr_recruitment.refuse_reason_5
 msgid "Role already fulfilled"
-msgstr "職位がすでに決定済"
+msgstr "役職がすでに決定しました"
 
 #. module: hr_recruitment
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_applicant_view_search_bis
@@ -3170,6 +3180,7 @@ msgstr ""
 #. module: hr_recruitment
 #. odoo-python
 #: code:addons/hr_recruitment/models/hr_applicant.py:0
+#: code:addons/hr_recruitment/models/hr_applicant.py:0
 #, python-format
 msgid "You must define a Contact Name for this applicant."
 msgstr "この応募者に連絡先名を定義する必要があります。"
@@ -3213,8 +3224,3 @@ msgstr "例: domain.com"
 #: model_terms:ir.ui.view,arch_db:hr_recruitment.hr_job_simple_form
 msgid "e.g. sales-manager"
 msgstr "例: 営業マネジャー"
-
-#. module: hr_recruitment
-#: model_terms:ir.ui.view,arch_db:hr_recruitment.applicant_get_refuse_reason_view_form
-msgid "to"
-msgstr "から"

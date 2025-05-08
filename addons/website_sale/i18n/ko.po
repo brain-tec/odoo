@@ -3,17 +3,17 @@
 # 	* website_sale
 # 
 # Translators:
-# Sarah Park, 2023
-# Wil Odoo, 2024
 # Daye Jeong, 2024
+# Wil Odoo, 2025
+# Sarah Park, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 12:31+0000\n"
+"POT-Creation-Date: 2025-02-10 10:33+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Daye Jeong, 2024\n"
+"Last-Translator: Sarah Park, 2025\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -45,9 +45,13 @@ msgstr "%s 리뷰"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address_on_payment
-#: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "&amp; Shipping"
 msgstr "&amp; 선적"
+
+#. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.products_item
+msgid "&amp;nbsp;"
+msgstr "&amp;nbsp;"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address
@@ -122,7 +126,6 @@ msgstr "<b>가격표</b>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address_on_payment
-#: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "<b>Shipping: </b>"
 msgstr "<b>배송: </b>"
 
@@ -525,11 +528,6 @@ msgstr ""
 "            "
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.product
-msgid "<u class=\"h5\">Documents</u>"
-msgstr "<u class=\"h5\">문서</u>"
-
-#. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_custom_text
 msgid "<u>Terms and Conditions</u>"
 msgstr "<u>이용 약관</u>"
@@ -898,7 +896,6 @@ msgstr "크게"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address_on_payment
 #: model_terms:ir.ui.view,arch_db:website_sale.checkout
-#: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "Billing"
 msgstr "청구"
 
@@ -1248,7 +1245,7 @@ msgstr "Easypost로 배송비를 계산 및 배송합니다."
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Compute shipping cost and ship with Shiprocket"
-msgstr ""
+msgstr "배송비를 계산하고 Shiprocket으로 배송하기"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
@@ -1683,6 +1680,11 @@ msgstr "사용 권한 없음, 이 데이터는 사용자 요약 이메일에서 
 #, python-format
 msgid "Do you wish to clear your cart before adding products to it?"
 msgstr "장바구니에 상품을 추가하기 전에 장바구니를 비울까요?"
+
+#. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.product
+msgid "Documents"
+msgstr "문서"
 
 #. module: website_sale
 #. odoo-python
@@ -2365,7 +2367,7 @@ msgstr "필수 (손님으로 결제 불가)"
 #. module: website_sale
 #: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_image_spacing__medium
 msgid "Medium"
-msgstr "중간"
+msgstr "매체"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_template__message_has_error
@@ -2533,7 +2535,7 @@ msgstr "귀하의 주문 및 발송 주소로 선적할 방법이 없습니다. 
 
 #. module: website_sale
 #. odoo-python
-#: code:addons/website_sale/controllers/main.py:0
+#: code:addons/website_sale/models/sale_order.py:0
 #, python-format
 msgid "No shipping method is selected."
 msgstr "배송 방법이 선택되지 않았습니다."
@@ -2753,11 +2755,6 @@ msgid "Pay now"
 msgstr "지불하기"
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.payment
-msgid "Pay with"
-msgstr "결제 방법"
-
-#. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/website.py:0
 #, python-format
@@ -2780,6 +2777,11 @@ msgid "Payment Providers"
 msgstr "결제대행업체"
 
 #. module: website_sale
+#: model:ir.model,name:website_sale.model_payment_token
+msgid "Payment Token"
+msgstr "결제 토큰"
+
+#. module: website_sale
 #: model:ir.ui.menu,name:website_sale.menu_ecommerce_payment_tokens
 msgid "Payment Tokens"
 msgstr "결제 토큰"
@@ -2788,6 +2790,13 @@ msgstr "결제 토큰"
 #: model:ir.ui.menu,name:website_sale.menu_ecommerce_payment_transactions
 msgid "Payment Transactions"
 msgstr "결제 거래"
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+#, python-format
+msgid "Payment is already being processed."
+msgstr "결제가 이미 처리 중입니다."
 
 #. module: website_sale
 #. odoo-python
@@ -3164,7 +3173,7 @@ msgstr "제공된 동영상 URL '%s'이 유효하지 않습니다. 유효한 동
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_search_view_website
 #: model_terms:ir.ui.view,arch_db:website_sale.view_delivery_carrier_search
 msgid "Published"
-msgstr "게시 됨"
+msgstr "게시 완료"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -3444,7 +3453,7 @@ msgstr "영업팀"
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__salesperson_id
 #: model:ir.model.fields,field_description:website_sale.field_website__salesperson_id
 msgid "Salesperson"
-msgstr "영업사원"
+msgstr "영업 담당자"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.dynamic_filter_template_product_product_add_to_cart
@@ -3888,6 +3897,13 @@ msgstr "유효하지 않은 액세스 토큰입니다."
 msgid ""
 "The amount will be displayed strikethroughed on the eCommerce product page"
 msgstr "금액은 이커머스 품목 페이지에서 취소선 표시됩니다."
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/main.py:0
+#, python-format
+msgid "The cart has already been paid. Please refresh the page."
+msgstr "장바구니가 이미 결제되었습니다. 페이지를 새로고침하세요."
 
 #. module: website_sale
 #. odoo-python
@@ -4499,15 +4515,6 @@ msgstr "이메일"
 #, python-format
 msgid "Your Name"
 msgstr "성명"
-
-#. module: website_sale
-#. odoo-python
-#: code:addons/website_sale/models/website.py:0
-#, python-format
-msgid ""
-"Your account is not allowed to pay in company %s. Please log out and create "
-"a new account for this website, or contact the website administrator."
-msgstr ""
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.cart_lines

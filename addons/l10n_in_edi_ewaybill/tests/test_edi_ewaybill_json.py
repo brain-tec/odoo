@@ -7,7 +7,11 @@ from odoo.tests import tagged
 class TestEdiEwaybillJson(TestEdiJson):
 
     def test_edi_json(self):
-        (self.invoice + self.invoice_full_discount + self.invoice_zero_qty).write({
+        self.env['account.move'].browse((
+            self.invoice.id,
+            self.invoice_full_discount.id,
+            self.invoice_zero_qty.id,
+        )).write({
             "l10n_in_type_id": self.env.ref("l10n_in_edi_ewaybill.type_tax_invoice_sub_type_supply"),
             "l10n_in_distance": 20,
             "l10n_in_mode": "1",
@@ -76,13 +80,46 @@ class TestEdiEwaybillJson(TestEdiJson):
         }
         self.assertDictEqual(json_value, expected, "Indian EDI send json value is not matched")
 
+        # =================================== Different UOM Test ===========================================
+        self.invoice.button_draft()
+        self.invoice.invoice_line_ids.product_uom_id = self.env.ref('uom.product_uom_dozen')
+        self.invoice.action_post()
+        json_value = self.env["account.edi.format"]._l10n_in_edi_ewaybill_generate_json(self.invoice)
+        self.assertListEqual(
+            json_value['itemList'],
+            [
+                {
+                  "productName": "product_a",
+                  "hsnCode": "01111",
+                  "productDesc": "product_a",
+                  "quantity": 1.0,
+                  "qtyUnit": "DOZ",
+                  "taxableAmount": 900.0 * 12,
+                  "cgstRate": 2.5,
+                  "sgstRate": 2.5
+                },
+                {
+                  "productName": "product_with_cess",
+                  "hsnCode": "02222",
+                  "productDesc": "product_with_cess",
+                  "quantity": 1.0,
+                  "qtyUnit": "DOZ",
+                  "taxableAmount": 900.0 * 12,
+                  "cgstRate": 6.0,
+                  "sgstRate": 6.0,
+                  "cessRate": 5.0
+                }
+            ],
+            "Indian EDI send json UOM value is not matched"
+        )
+
         #=================================== Full discount test =====================================
         json_value = self.env["account.edi.format"]._l10n_in_edi_ewaybill_generate_json(self.invoice_full_discount)
         expected.update({
             "docNo": "INV/2019/00002",
             "itemList": [{
                 "productName": "product_a", "hsnCode": "01111", "productDesc": "product_a", "quantity": 1.0,
-                "qtyUnit": "UNT", "taxableAmount": 0.0, "cgstRate": 0.0, "sgstRate": 0.0
+                "qtyUnit": "UNT", "taxableAmount": 0.0, "cgstRate": 0.0, "sgstRate": 0.0, 'igstRate': 0.0,
             }],
             "totalValue": 0.0,
             "cgstValue": 0.0,
@@ -101,7 +138,7 @@ class TestEdiEwaybillJson(TestEdiJson):
             "docNo": "INV/2019/00003",
             "itemList": [{
                 "productName": "product_a", "hsnCode": "01111", "productDesc": "product_a", "quantity": 0.0,
-                "qtyUnit": "UNT", "taxableAmount": 0.0, "cgstRate": 0.0, "sgstRate": 0.0
+                "qtyUnit": "UNT", "taxableAmount": 0.0, "cgstRate": 0.0, "sgstRate": 0.0, 'igstRate': 0.0,
             }],
             "totalValue": 0.0,
             "cgstValue": 0.0,

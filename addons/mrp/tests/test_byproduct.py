@@ -470,6 +470,10 @@ class TestMrpByProduct(common.TransactionCase):
         mo.move_byproduct_ids.lot_ids = [(4, self.sn_1.id)]
         mo.move_byproduct_ids.lot_ids = [(4, self.sn_2.id)]
 
+        self.assertFalse(mo.move_byproduct_ids.show_lots_text)
+        self.assertTrue(mo.move_byproduct_ids.show_lots_m2o)
+        self.assertFalse(mo.move_byproduct_ids.show_quant)
+
         mo.button_mark_done()
         self.assertEqual(len(mo.move_byproduct_ids.move_line_ids), 2)
         self.assertEqual(mo.move_byproduct_ids.product_id, mo.move_byproduct_ids.move_line_ids.product_id)
@@ -493,3 +497,35 @@ class TestMrpByProduct(common.TransactionCase):
         self.assertEqual(picking.state, 'assigned')
         byproduct_move = picking.move_ids.filtered(lambda m: m.product_id == self.bom_byproduct.byproduct_ids.product_id)
         self.assertEqual(byproduct_move.product_qty, 1.0)
+
+    def test_3_steps_byproduct(self):
+        """ Test that non-bom byproducts are correctly pushed from
+        post-production to the stock location in 3-steps manufacture. """
+        self.warehouse.manufacture_steps = 'pbm_sam'
+        self.env.user.groups_id += self.env.ref('mrp.group_mrp_byproducts')
+        component, final_product, byproduct = self.env['product.product'].create([{
+            'name': name,
+            'type': 'product'
+        } for name in ['Old Blood', 'Insight', 'Eyes on the Inside']])
+        self.env['stock.quant']._update_available_quantity(component, self.warehouse.lot_stock_id, 1)
+        mo = self.env["mrp.production"].create({
+            'product_id': final_product.id,
+            'product_qty': 1.0,
+        })
+        mo_form = Form(mo)
+        with mo_form.move_raw_ids.new() as line:
+            line.product_id = component
+            line.product_uom_qty = 1
+        with mo_form.move_byproduct_ids.new() as line:
+            line.product_id = byproduct
+            line.product_uom_qty = 1
+        mo = mo_form.save()
+        mo.action_confirm()
+        preprod_picking = mo.picking_ids.filtered(lambda p: p.state == 'assigned')
+        preprod_picking.button_validate()
+        mo.button_mark_done()
+        postprod_picking = mo.picking_ids.filtered(lambda p: p.state == 'assigned')
+
+        self.assertEqual(len(postprod_picking.move_ids), 2)
+        self.assertEqual(postprod_picking.move_ids.product_id, final_product + byproduct)
+        self.assertEqual(postprod_picking.location_dest_id, self.warehouse.lot_stock_id)

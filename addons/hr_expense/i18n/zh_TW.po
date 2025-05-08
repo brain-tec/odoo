@@ -3,16 +3,16 @@
 # 	* hr_expense
 # 
 # Translators:
-# Wil Odoo, 2024
-# Tony Ng, 2024
+# Wil Odoo, 2025
+# Tony Ng, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-29 10:44+0000\n"
+"POT-Creation-Date: 2025-02-10 10:33+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Tony Ng, 2024\n"
+"Last-Translator: Tony Ng, 2025\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -370,7 +370,7 @@ msgstr "附件"
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__message_attachment_count
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__message_attachment_count
 msgid "Attachment Count"
-msgstr "附件數"
+msgstr "附件數目"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet_img
@@ -386,6 +386,11 @@ msgstr "附件"
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__attachment_ids
 msgid "Attachments of expenses"
 msgstr "開支附件"
+
+#. module: hr_expense
+#: model:ir.model,name:hr_expense.model_hr_employee_base
+msgid "Basic Employee"
+msgstr "一般員工"
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__tax_ids
@@ -450,6 +455,11 @@ msgid "Category: not found"
 msgstr "分類： 未找到"
 
 #. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__message_main_attachment_checksum
+msgid "Checksum/SHA1"
+msgstr "校驗碼/SHA1"
+
+#. module: hr_expense
 #: model:product.template,name:hr_expense.expense_product_communication_product_template
 msgid "Communication"
 msgstr "溝通"
@@ -494,6 +504,7 @@ msgstr "成本:"
 #. module: hr_expense
 #. odoo-javascript
 #: code:addons/hr_expense/static/src/js/tours/hr_expense.js:0
+#: code:addons/hr_expense/static/src/views/kanban.xml:0
 #: code:addons/hr_expense/static/src/views/list.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
 #, python-format
@@ -644,6 +655,14 @@ msgid ""
 "picture of your receipt and let Odoo digitalizes it for you. The OCR and "
 "Artificial Intelligence will fill the data automatically."
 msgstr "不要再把你的費用收據放在口袋裡了。只需拍下收據的照片，讓 Odoo 為您將其數位化。 OCR 和人工智能將自動辨識資訊。"
+
+#. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:hr_expense.view_move_form_inherit_expense
+msgid ""
+"Do you really want to invoice your own company? Remove the \"Company Name\" "
+"from the partner to fix the configuration. Cancel this invoice and start "
+"again."
+msgstr "你真的想向自己的公司開立發票嗎？請刪除合作夥伴中的「公司名稱」，以修復配置。取消此發票，然後重新開始。"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_account_analytic_applicability__business_domain
@@ -987,6 +1006,8 @@ msgstr "費用等待處理"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_employee__filter_for_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_employee_base__filter_for_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_employee_public__filter_for_expense
 msgid "Filter For Expense"
 msgstr "費用篩選"
 
@@ -1073,6 +1094,11 @@ msgstr "有訊息"
 #: model_terms:product.template,description:hr_expense.expense_product_travel_accommodation_product_template
 msgid "Hotel, plane ticket, taxi, etc."
 msgstr "酒店、機票、出租車等"
+
+#. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__hr_expense_alias_domain_id
+msgid "Hr Expense Alias Domain"
+msgstr "人力資源開支別名域"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__id
@@ -1339,7 +1365,7 @@ msgstr "我的活動截止時間"
 #: model:ir.ui.menu,name:hr_expense.menu_hr_expense_my_expenses_all
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_search
 msgid "My Expenses"
-msgstr "我的費用"
+msgstr "我的開支"
 
 #. module: hr_expense
 #: model:ir.actions.act_window,name:hr_expense.action_hr_expense_sheet_my_all
@@ -1372,6 +1398,12 @@ msgstr "新的開支報告，由 %(paid_by)s 支付"
 #, python-format
 msgid "New Expense Reports"
 msgstr "新開支報表"
+
+#. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__activity_calendar_event_id
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr "下一個活動日曆事件"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__activity_date_deadline
@@ -1476,6 +1508,13 @@ msgid "Number of messages with delivery error"
 msgstr "有發送錯誤的郵件數量"
 
 #. module: hr_expense
+#. odoo-javascript
+#: code:addons/hr_expense/static/src/components/expense_dashboard.xml:0
+#, python-format
+msgid "Numbers computed from your personal expenses."
+msgstr "根據你的個人開支，計算得出的數字。"
+
+#. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_register_no_user
 msgid "Odoo"
 msgstr "Odoo"
@@ -1503,7 +1542,7 @@ msgstr "你的<b>開支報表</b>準備就緒後，您可以將其提交給經�
 #: code:addons/hr_expense/models/hr_expense_sheet.py:0
 #, python-format
 msgid "Only HR Officers or the concerned employee can reset to draft."
-msgstr "只有人力資源人員或相關員工可以重置為草稿。"
+msgstr "只限人力資源職員或相關員工，才可重設為草稿。"
 
 #. module: hr_expense
 #: model_terms:ir.actions.act_window,help:hr_expense.hr_expense_actions_my_all
@@ -1588,6 +1627,14 @@ msgid "Phone bills, postage, etc."
 msgstr "電話費、郵費等"
 
 #. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
+#, python-format
+msgid ""
+"Please specify an expense journal in order to generate accounting entries."
+msgstr "請指定開支日記賬，以產生會計記項。"
+
+#. module: hr_expense
 #. odoo-javascript
 #: code:addons/hr_expense/static/src/views/list.xml:0
 #, python-format
@@ -1655,6 +1702,12 @@ msgstr "公開員工"
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
 msgid "Quantity"
 msgstr "數量"
+
+#. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense__rating_ids
+#: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__rating_ids
+msgid "Ratings"
+msgstr "評分"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -1838,6 +1891,13 @@ msgid "Sheet"
 msgstr "表"
 
 #. module: hr_expense
+#: model:ir.model.fields,field_description:hr_expense.field_account_bank_statement_line__show_commercial_partner_warning
+#: model:ir.model.fields,field_description:hr_expense.field_account_move__show_commercial_partner_warning
+#: model:ir.model.fields,field_description:hr_expense.field_account_payment__show_commercial_partner_warning
+msgid "Show Commercial Partner Warning"
+msgstr "顯示商業夥伴警告"
+
+#. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_sheet_view_search
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_search
 msgid "Show all records which has next action date is before today"
@@ -1856,13 +1916,6 @@ msgid ""
 "Snap pictures of your receipts and let Odoo<br> automatically create "
 "expenses for you."
 msgstr "為您的收據拍照並讓 Odoo<br>自動為您建立費用單據。"
-
-#. module: hr_expense
-#. odoo-python
-#: code:addons/hr_expense/models/hr_expense_sheet.py:0
-#, python-format
-msgid "Specify expense journal to generate accounting entries."
-msgstr "指定支出日記賬以生成會計分錄。"
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_product_product__can_be_expensed
@@ -1957,7 +2010,7 @@ msgstr "貨幣小計"
 #: model:ir.model,name:hr_expense.model_account_tax
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split__tax_ids
 msgid "Tax"
-msgstr "稅金"
+msgstr "稅項"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
@@ -1992,7 +2045,7 @@ msgstr "以貨幣計的稅額"
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
 #: model_terms:ir.ui.view,arch_db:hr_expense.view_hr_expense_sheet_form
 msgid "Taxes"
-msgstr "稅金"
+msgstr "稅項"
 
 #. module: hr_expense
 #: model:res.groups,name:hr_expense.group_hr_expense_team_approver
@@ -2179,7 +2232,7 @@ msgstr "量度單位"
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_sheet__untaxed_amount
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense_sheet
 msgid "Untaxed Amount"
-msgstr "不含稅金額"
+msgstr "未連稅金額"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__product_uom_category_id
@@ -2189,6 +2242,7 @@ msgstr "量度單位類別"
 #. module: hr_expense
 #. odoo-javascript
 #: code:addons/hr_expense/static/src/views/kanban.xml:0
+#: code:addons/hr_expense/static/src/views/list.xml:0
 #, python-format
 msgid "Upload"
 msgstr "上載圖片"
@@ -2328,7 +2382,7 @@ msgstr ""
 #: code:addons/hr_expense/models/hr_expense_sheet.py:0
 #, python-format
 msgid "You cannot cancel an expense sheet linked to a journal entry"
-msgstr ""
+msgstr "你不可取消已連結至日記賬記項的開支費用表"
 
 #. module: hr_expense
 #. odoo-python
@@ -2416,6 +2470,23 @@ msgstr "您不能在沒有金額的情況下報告費用！"
 #, python-format
 msgid "You cannot report twice the same line!"
 msgstr "同一項目您不能報支兩次！"
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense_sheet.py:0
+#, python-format
+msgid ""
+"You don't have the rights to bypass the validation process of this expense "
+"report."
+msgstr ""
+
+#. module: hr_expense
+#. odoo-python
+#: code:addons/hr_expense/models/hr_expense.py:0
+#, python-format
+msgid ""
+"You don't have the rights to bypass the validation process of this expense."
+msgstr ""
 
 #. module: hr_expense
 #. odoo-python

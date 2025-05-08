@@ -8,14 +8,15 @@
 # Martin Trigaux, 2024
 # Hongu Cosmin <cosmin513@gmail.com>, 2024
 # Dorin Hongu <dhongu@gmail.com>, 2024
+# Lyall Kindmurr, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"POT-Creation-Date: 2025-02-10 10:34+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Dorin Hongu <dhongu@gmail.com>, 2024\n"
+"Last-Translator: Lyall Kindmurr, 2024\n"
 "Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -107,7 +108,7 @@ msgstr "Creat de"
 #. module: product_expiry
 #: model:ir.model.fields,field_description:product_expiry.field_expiry_picking_confirmation__create_date
 msgid "Created on"
-msgstr "Creat în"
+msgstr "Creat pe"
 
 #. module: product_expiry
 #: model:ir.model.fields,help:product_expiry.field_stock_lot__alert_date
@@ -374,18 +375,6 @@ msgid ""
 msgstr ""
 "Aceasta este data la care marfa cu acest Numar de Serie incepe sa se "
 "deterioreze, fara a fi periculoasa inca."
-
-#. module: product_expiry
-#: model_terms:ir.ui.view,arch_db:product_expiry.view_stock_move_line_detailed_operation_tree_expiry
-#: model_terms:ir.ui.view,arch_db:product_expiry.view_stock_move_line_operation_tree_expiry
-msgid "This lot is expired"
-msgstr ""
-
-#. module: product_expiry
-#: model_terms:ir.ui.view,arch_db:product_expiry.view_stock_move_line_detailed_operation_tree_expiry
-#: model_terms:ir.ui.view,arch_db:product_expiry.view_stock_move_line_operation_tree_expiry
-msgid "This lot is expired."
-msgstr ""
 
 #. module: product_expiry
 #: model:ir.model,name:product_expiry.model_stock_picking
