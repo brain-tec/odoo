@@ -104,7 +104,7 @@ patch(Thread.prototype, {
         if (
             this.chatbot &&
             !this.chatbot.forwarded &&
-            this.chatbot.currentStep?.type !== "free_input_multi"
+            this.chatbot.currentStep?.step_type !== "free_input_multi"
         ) {
             this.chatbot.isProcessingAnswer = true;
         }
@@ -158,7 +158,7 @@ patch(Thread.prototype, {
             this.chatbot?.isProcessingAnswer ||
             (step &&
                 !step.operatorFound &&
-                (step.completed || !step.expectAnswer || step.answers.length > 0))
+                (step.completed || !step.expectAnswer || step.answer_ids.length > 0))
         );
     },
 
@@ -171,7 +171,7 @@ patch(Thread.prototype, {
             return _t("This livechat conversation has ended");
         }
         if (
-            this.chatbot.currentStep?.type === "question_selection" &&
+            this.chatbot.currentStep?.step_type === "question_selection" &&
             !this.chatbot.currentStep.selectedAnswer
         ) {
             return _t("Select an option above");

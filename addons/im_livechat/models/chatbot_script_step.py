@@ -438,8 +438,8 @@ class ChatbotScriptStep(models.Model):
 
     def _to_store_defaults(self):
         return [
-            Store.Many("answer_ids", rename="answers"),
+            Store.Many("answer_ids"),
             Store.Attr("is_last", lambda step: step._is_last_step()),
             Store.Attr("message", lambda s: plaintext2html(s.message) if s.message else False),
-            Store.Attr("step_type", rename="type"),
+            "step_type",
         ]
