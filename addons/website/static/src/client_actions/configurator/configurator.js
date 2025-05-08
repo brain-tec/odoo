@@ -1,5 +1,7 @@
 /** @odoo-module **/
 
+import { browser } from "@web/core/browser/browser";
+const sessionStorage = browser.sessionStorage;
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { delay } from "@web/core/utils/concurrency";
 import { getDataURLFromFile } from "@web/core/utils/urls";
@@ -257,6 +259,16 @@ class PaletteSelectionScreen extends Component {
         if (logoSelectInput.files.length === 1) {
             const previousLogoAttachmentId = this.state.logoAttachmentId;
             const file = logoSelectInput.files[0];
+            if (file.size > 2500000) {
+                this.notification.add(
+                    _t("The logo is too large. Please upload a logo smaller than 2.5 MB."),
+                    {
+                        title: file.name,
+                        type: "warning",
+                    }
+                );
+                return;
+            }
             const data = await getDataURLFromFile(file);
             const attachment = await this.rpc('/web_editor/attachment/add_data', {
                 'name': 'logo',
@@ -581,7 +593,7 @@ class Store {
                 color2: color2,
                 color3: mixCssColors('#FFFFFF', color2, 0.9),
                 color4: '#FFFFFF',
-                color5: mixCssColors(color1, '#000000', 0.75),
+                color5: mixCssColors(color1, '#000000', 0.125),
             };
             CUSTOM_BG_COLOR_ATTRS.forEach((attr) => {
                 recommendedPalette[attr] = recommendedPalette[this.defaultColors[attr]];
@@ -665,7 +677,7 @@ export class Configurator extends Component {
     }
 
     clearStorage() {
-        window.sessionStorage.removeItem(this.storageItemName);
+        sessionStorage.removeItem(this.storageItemName);
     }
 
     async getInitialState() {
@@ -698,7 +710,7 @@ export class Configurator extends Component {
             palettes[paletteName] = palette;
         });
 
-        const localState = JSON.parse(window.sessionStorage.getItem(this.storageItemName));
+        const localState = JSON.parse(sessionStorage.getItem(this.storageItemName));
         if (localState) {
             let themes = [];
             if (localState.selectedIndustry && localState.selectedPalette) {
@@ -755,7 +767,7 @@ export class Configurator extends Component {
             selectedType: state.selectedType,
             recommendedPalette: state.recommendedPalette,
         });
-        window.sessionStorage.setItem(this.storageItemName, newState);
+        sessionStorage.setItem(this.storageItemName, newState);
     }
 
     async skipConfigurator() {

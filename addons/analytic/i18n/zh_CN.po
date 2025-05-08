@@ -5,16 +5,16 @@
 # Translators:
 # 山西清水欧度(QQ:54773801) <54773801@qq.com>, 2023
 # Jeffery CHEN <jeffery9@gmail.com>, 2023
-# Chloe Wang, 2023
 # Wil Odoo, 2024
+# Chloe Wang, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-26 21:55+0000\n"
+"POT-Creation-Date: 2024-08-13 10:27+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Chloe Wang, 2025\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -629,6 +629,13 @@ msgid "Nebula"
 msgstr "星云"
 
 #. module: analytic
+#. odoo-javascript
+#: code:addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml:0
+#, python-format
+msgid "New Model"
+msgstr "新的模型"
+
+#. module: analytic
 #: model_terms:ir.actions.act_window,help:analytic.account_analytic_line_action_entries
 msgid "No activity yet"
 msgstr "还没有活动"
@@ -808,6 +815,13 @@ msgid "Search Analytic Lines"
 msgstr "搜索分析明细行"
 
 #. module: analytic
+#. odoo-python
+#: code:addons/analytic/models/analytic_account.py:0
+#, python-format
+msgid "See them"
+msgstr "查看它们"
+
+#. module: analytic
 #: model:ir.model.fields,help:analytic.field_account_analytic_distribution_model__company_id
 msgid ""
 "Select a company for which the analytic distribution will be used (e.g. "
@@ -887,9 +901,25 @@ msgstr "视图"
 #: code:addons/analytic/models/analytic_account.py:0
 #, python-format
 msgid ""
+"Whoa there! Moving this account would wipe out your current data. Let's "
+"avoid that, shall we?"
+msgstr "警告！若移动此账户将删除您当前所有数据。为避免数据丢失，请谨慎操作。"
+
+#. module: analytic
+#. odoo-python
+#: code:addons/analytic/models/analytic_account.py:0
+#, python-format
+msgid ""
 "You can't set a different company on your analytic account since there are "
 "some analytic items linked to it."
 msgstr "您不能在您的分析帐户上设置不同的公司，因为有一些分析项目关联到它."
+
+#. module: analytic
+#. odoo-python
+#: code:addons/analytic/models/analytic_plan.py:0
+#, python-format
+msgid "You cannot add a parent to the base plan '%s'"
+msgstr "你不可为基本计划 “%s” 加入母级项目"
 
 #. module: analytic
 #. odoo-python

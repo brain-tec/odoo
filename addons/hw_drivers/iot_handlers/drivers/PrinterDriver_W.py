@@ -38,7 +38,7 @@ class PrinterDriver(Driver):
     def __init__(self, identifier, device):
         super().__init__(identifier, device)
         self.device_type = 'printer'
-        self.device_connection = 'network'
+        self.device_connection = self._compute_device_connection(device)
         self.device_name = device.get('identifier')
         self.printer_handle = device.get('printer_handle')
         self.state = {
@@ -58,12 +58,17 @@ class PrinterDriver(Driver):
 
     @classmethod
     def supported(cls, device):
-        return True
+        # discard virtual printers (like "Microsoft Print to PDF") as they will trigger dialog boxes prompt
+        return device['port'] != 'PORTPROMPT:'
 
     @classmethod
     def get_status(cls):
         status = 'connected' if any(iot_devices[d].device_type == "printer" and iot_devices[d].device_connection == 'direct' for d in iot_devices) else 'disconnected'
         return {'status': status, 'messages': ''}
+
+    @staticmethod
+    def _compute_device_connection(device):
+        return 'direct' if device['port'].startswith(('USB', 'COM', 'LPT')) else 'network'
 
     def disconnect(self):
         self.update_status('disconnected', 'Printer was disconnected')
@@ -107,16 +112,29 @@ class PrinterDriver(Driver):
         printer = self.device_name
 
         args = [
-            "-dPrinted", "-dBATCH", "-dNOPAUSE", "-dNOPROMPT"
+            "-dPrinted", "-dBATCH", "-dNOPAUSE", "-dNOPROMPT",
             "-q",
             "-sDEVICE#mswinpr2",
             f'-sOutputFile#%printer%{printer}',
             f'{file_name}'
-            ]
+        ]
 
-        ghostscript.Ghostscript(*args)
+        _logger.debug("Printing report with ghostscript using %s", args)
+        stderr_buf = io.BytesIO()
+        stdout_buf = io.BytesIO()
+        stdout_log_level = logging.DEBUG
+        try:
+            ghostscript.Ghostscript(*args, stdout=stdout_buf, stderr=stderr_buf)
+        except Exception:
+            _logger.exception("Error while printing report, ghostscript args: %s, error buffer: %s", args, stderr_buf.getvalue())
+            stdout_log_level = logging.ERROR # some stdout value might contains relevant error information
+            raise
+        finally:
+            _logger.log(stdout_log_level, "Ghostscript stdout: %s", stdout_buf.getvalue())
 
     def print_receipt(self, data):
+        _logger.debug("print_receipt called for printer %s", self.device_name)
+
         receipt = b64decode(data['receipt'])
         im = Image.open(io.BytesIO(receipt))
 
@@ -146,16 +164,22 @@ class PrinterDriver(Driver):
 
     def open_cashbox(self, data):
         """Sends a signal to the current printer to open the connected cashbox."""
+        _logger.debug("open_cashbox called for printer %s", self.device_name)
+        
         commands = RECEIPT_PRINTER_COMMANDS[self.receipt_protocol]
         for drawer in commands['drawers']:
             self.print_raw(drawer)
 
     def _action_default(self, data):
+        _logger.debug("_action_default called for printer %s", self.device_name)
+
         document = b64decode(data['document'])
         mimetype = guess_mimetype(document)
         if mimetype == 'application/pdf':
             self.print_report(document)
         else:
             self.print_raw(document)
+        _logger.debug("_action_default finished with mimetype %s for printer %s", mimetype, self.device_name)
+
 
 proxy_drivers['printer'] = PrinterDriver

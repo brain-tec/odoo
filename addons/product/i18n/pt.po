@@ -5,10 +5,10 @@
 # Translators:
 # Manuela Silva <mmsrs@sky.com>, 2023
 # Wil Odoo, 2023
-# Maitê Dietze, 2024
-# Peter Lawrence Romão <peterromao@yahoo.co.uk>, 2024
 # Samuel Afonso, 2024
 # Rita Bastos, 2024
+# Maitê Dietze, 2024
+# Peter Lawrence Romão <peterromao@yahoo.co.uk>, 2025
 # 
 msgid ""
 msgstr ""
@@ -16,7 +16,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-26 21:55+0000\n"
 "PO-Revision-Date: 2023-10-26 23:09+0000\n"
-"Last-Translator: Rita Bastos, 2024\n"
+"Last-Translator: Peter Lawrence Romão <peterromao@yahoo.co.uk>, 2025\n"
 "Language-Team: Portuguese (https://app.transifex.com/odoo/teams/41243/pt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -82,6 +82,7 @@ msgstr "%s %% desconto"
 #. odoo-python
 #: code:addons/product/models/product_tag.py:0
 #: code:addons/product/models/product_template.py:0
+#: code:addons/product/models/product_pricelist.py:0
 #, python-format
 msgid "%s (copy)"
 msgstr "%s (cópia)"
@@ -278,8 +279,8 @@ msgid ""
 "Customer Invoice/Credit Note"
 msgstr ""
 "Uma descrição do 'Artigo' que quer comunicar aos seus clientes. Esta "
-"descrição será copiada para todas as 'Ordens de Vendas', 'Guias de Remessa' "
-"e 'Faturas de Cliente/Notas de Crédito'"
+"descrição será copiada para todas as 'Ordens de Venda', 'Guias de Remessa' e"
+" 'Faturas de Cliente/Notas de Crédito'"
 
 #. module: product
 #. odoo-python
@@ -572,7 +573,7 @@ msgstr "Atributos"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
 msgid "Attributes & Variants"
-msgstr ""
+msgstr "Atributos e Variantes"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view
@@ -2346,7 +2347,7 @@ msgstr "Categorias do Artigo"
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 #: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Product Category"
-msgstr "Categoria de Artigo"
+msgstr "Categoria do Artigo"
 
 #. module: product
 #: model:ir.model,name:product.model_product_document
@@ -2414,7 +2415,7 @@ msgstr "Nome do Artigo"
 #: model:ir.model.fields,field_description:product.field_product_product__packaging_ids
 #: model:ir.model.fields,field_description:product.field_product_template__packaging_ids
 msgid "Product Packages"
-msgstr "Bateladas de Artigos"
+msgstr "Embalagens de Artigos"
 
 #. module: product
 #: model:ir.model,name:product.model_product_packaging
@@ -2629,7 +2630,7 @@ msgstr "Descrição da Compra"
 #: model:ir.model.fields,field_description:product.field_product_product__uom_po_id
 #: model:ir.model.fields,field_description:product.field_product_template__uom_po_id
 msgid "Purchase UoM"
-msgstr ""
+msgstr "UM de compra"
 
 #. module: product
 #. odoo-javascript
@@ -2782,12 +2783,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:product.product_template_tree_view
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
 msgid "Sales Price"
-msgstr "Preço de Vendas"
+msgstr "Preço de Venda"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__lst_price
 msgid "Sales Price"
-msgstr ""
+msgstr "Preço de venda"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__display_type__select
@@ -3756,8 +3757,8 @@ msgid ""
 "You must define a product for everything you sell or purchase,\n"
 "                whether it's a storable product, a consumable or a service."
 msgstr ""
-"Você deve definir um produto para tudo o que você vende ou compra,\n"
-"                seja um produto armazenável, consumível, ou um serviço."
+"Deve definir um artigo para tudo o que vende ou compra,\n"
+"                seja ele um produto armazenável, consumível, ou um serviço."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_variant_action

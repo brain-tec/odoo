@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.exceptions import UserError
-from odoo.tests import tagged, Form
+from odoo.tests import tagged, Form, users
 from odoo import fields, Command
 
 from dateutil.relativedelta import relativedelta
@@ -156,6 +156,19 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
             'invoice_line_ids': [Command.create({'product_id': cls.product_a.id, 'price_unit': 10.0, 'tax_ids': []})],
         })
         (cls.in_refund_1 + cls.in_refund_2).action_post()
+
+        cls.branch = cls.setup_company_data("Branch", parent_id=cls.env.company.id)['company']
+        cls.user_branch = cls.env['res.users'].create({
+            'name': 'Branch User',
+            'login': 'user_branch',
+            'groups_id': [
+                Command.link(cls.env.ref('base.group_user').id),
+                Command.link(cls.env.ref('account.group_account_user').id),
+                Command.link(cls.env.ref('account.group_account_manager').id),
+            ],
+            'company_id': cls.branch.id,
+            'company_ids': [Command.set(cls.branch.ids)],
+        })
 
     def test_register_payment_single_batch_grouped_keep_open_lower_amount(self):
         ''' Pay 800.0 with 'open' as payment difference handling on two customer invoices (1000 + 2000). '''
@@ -1509,3 +1522,129 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon):
         })
 
         self.assertEqual(wizard.amount, 39.50)
+
+    def test_group_payment_method_with_branch(self):
+        # create a new branch
+        self.env.company.write({
+            'child_ids': [
+                Command.create({'name': 'Branch A'}),
+                Command.create({'name': 'Branch B'}),
+            ],
+        })
+        self.cr.precommit.run()  # load the CoA
+
+        # create an invoice on the new branch
+        branch_invoices = self.env['account.move']
+        for idx, branch in enumerate(self.env.company.child_ids):
+            self.env["account.journal"].create({
+                'code': 'TEST',
+                'company_id': branch.id,
+                'name': f'{branch.name} journal',
+                'type': 'bank',
+            })
+            receivable_account = self.env['account.account'].create({
+                'name': 'Receivable Account',
+                'code': f'{idx}234567',
+                'account_type': 'asset_receivable',
+                'reconcile': True,
+                'company_id': branch.id,
+            })
+            self.partner_a.with_company(branch).write({
+                'property_account_receivable_id': receivable_account.id,
+            })
+            branch_invoices |= self.init_invoice('out_invoice', products=self.product_a, company=branch)
+
+        parent_invoice = self.init_invoice('out_invoice', products=self.product_a)
+        (branch_invoices | parent_invoice).action_post()
+
+        # branch1 + parent
+        case1 = branch_invoices[0] + parent_invoice
+        # branch1 + branch2
+        case2 = branch_invoices
+        # branch1 + branch2 + parent
+        case3 = branch_invoices + parent_invoice
+
+        wizard = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=case1.ids).create({})
+        # When user select branch + parent, allow only parent company journals
+        self.assertTrue(wizard.journal_id.company_id == self.env.company)
+
+        # When user select sibling companies, group payments are not allowed
+        with self.assertRaises(UserError, msg="You can't create payments for entries belonging to different branches."):
+            self.env['account.payment.register'].with_context(active_model='account.move', active_ids=case2.ids).create({})
+
+        wizard = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=case3.ids).create({})
+        available_journals = wizard.available_journal_ids.filtered_domain([
+            *self.env['account.journal']._check_company_domain(wizard.company_id),
+            ('type', 'in', ('bank', 'cash')),
+        ])
+        # When user select 2+ branches and parent company allow to create payment on the parent journal
+        self.assertEqual(available_journals.company_id, self.env.company)
+
+    def test_epd_and_cash_rounding(self):
+        cash_rounding = self.env['account.cash.rounding'].create({
+            'name': 'add_invoice_line',
+            'rounding': 0.05,
+            'strategy': 'add_invoice_line',
+            'profit_account_id': self.company_data['default_account_revenue'].copy().id,
+            'loss_account_id': self.company_data['default_account_expense'].copy().id,
+            'rounding_method': 'UP',
+        })
+        payment_term = self.env.ref('account.account_payment_term_30days_early_discount')
+        tax = self.env['account.tax'].create({
+            'name': "21",
+            'amount_type': 'percent',
+            'amount': 21.0,
+        })
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2024-01-01',
+            'invoice_payment_term_id': payment_term.id,
+            'invoice_cash_rounding_id': cash_rounding.id,
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [Command.create({
+                'product_id': self.product_a.id,
+                'price_unit': 11,
+                'tax_ids': [Command.set(tax.ids)],
+            })]
+        })
+        invoice.action_post()
+
+        self.assertRecordValues(invoice, [{'amount_total': 13.35}])
+
+        self.env['account.payment.register']\
+            .with_context(active_model='account.move', active_ids=invoice.ids)\
+            .create({'payment_date': '2024-01-01'})\
+            ._create_payments()
+        self.assertRecordValues(invoice, [{'amount_residual': 0.0}])
+
+    @users('user_branch')
+    def test_branch_user_register_payment(self):
+        bill = self.env['account.move'].create({
+            'move_type': 'in_invoice',
+            'invoice_date': '2024-05-01',
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [Command.create({
+                'name': 'line',
+                'price_unit': 1000,
+                'quantity': 1,
+            })]
+        })
+        bill.action_post()
+
+        wizard = self.env['account.payment.register'].with_context(allowed_company_ids=self.env.company.ids, active_model='account.move', active_ids=bill.ids).create({
+            'amount': bill.amount_total,
+            'currency_id': bill.currency_id.id,
+            'payment_method_line_id': self.inbound_payment_method_line.id,
+        })
+        self.env.company.parent_ids.invalidate_recordset()
+        payment = wizard._create_payments()
+        self.assertTrue(payment)
+
+    def test_communication_wizard(self):
+        """
+        Tests that changing the payment reference updates the payment wizard's communication accordingly.
+        """
+        self.out_invoice_1.payment_reference = "test"
+        ctx = {'active_model': 'account.move', 'active_ids': self.out_invoice_1.ids}
+        wizard = self.env['account.payment.register'].with_context(**ctx).create({})
+        self.assertEqual(wizard.communication, "test")

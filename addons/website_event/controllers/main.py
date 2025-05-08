@@ -60,7 +60,7 @@ class WebsiteEventController(http.Controller):
         order = 'date_begin'
         if searches.get('date', 'upcoming') == 'old':
             order = 'date_begin desc'
-        order = 'is_published desc, ' + order
+        order = 'is_published desc, ' + order + ', id desc'
         search = searches.get('search')
         event_count, details, fuzzy_search_term = website._search_with_fuzzy("events", search,
             limit=page * step, order=order, options=options)
@@ -280,7 +280,7 @@ class WebsiteEventController(http.Controller):
         # goal is to use the answer to the first question of every 'type' (aka name / phone / email / company name)
         already_handled_fields_data = {}
         for key, value in form_details.items():
-            if not value:
+            if not value or '-' not in key:
                 continue
 
             key_values = key.split('-')
@@ -290,6 +290,9 @@ class WebsiteEventController(http.Controller):
                 if field_name not in registration_fields:
                     continue
                 registrations.setdefault(registration_index, dict())[field_name] = int(value) or False
+                continue
+
+            if len(key_values) != 3:
                 continue
 
             registration_index, question_type, question_id = key_values
@@ -362,6 +365,8 @@ class WebsiteEventController(http.Controller):
             that we have enough seats for all selected tickets.
             If we don't, the user is instead redirected to page to register with a
             formatted error message. """
+        if not request.env['ir.http']._verify_request_recaptcha_token('website_event_registration'):
+            raise UserError(_('Suspicious activity detected by Google reCaptcha.'))
         registrations_data = self._process_attendees_form(event, post)
         registration_tickets = Counter(registration['event_ticket_id'] for registration in registrations_data)
         event_tickets = request.env['event.event.ticket'].browse(list(registration_tickets.keys()))

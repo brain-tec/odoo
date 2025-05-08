@@ -111,8 +111,7 @@ class Company(models.Model):
             company.parent_ids = self.browse(int(id) for id in company.parent_path.split('/') if id) if company.parent_path else company
             company.root_id = company.parent_ids[0]
 
-    # TODO @api.depends(): currently now way to formulate the dependency on the
-    # partner's contact address
+    @api.depends(lambda self: [f'partner_id.{fname}' for fname in self._get_company_address_field_names()])
     def _compute_address(self):
         for company in self.filtered(lambda company: company.partner_id):
             address_data = company.partner_id.sudo().address_get(adr_pref=['contact'])
@@ -238,7 +237,7 @@ class Company(models.Model):
             if vals.get('name') and not vals.get('partner_id')
         ]
         if no_partner_vals_list:
-            partners = self.env['res.partner'].create([
+            partners = self.env['res.partner'].with_context(default_parent_id=False).create([
                 {
                     'name': vals['name'],
                     'is_company': True,
@@ -287,6 +286,15 @@ class Company(models.Model):
     def _unlink_if_company_has_no_children(self):
         if any(company.child_ids for company in self):
             raise UserError(_("Companies that have associated branches cannot be deleted. Consider archiving them instead."))
+
+    def unlink(self):
+        """
+        Unlink the companies and clear the cache to make sure that
+        _get_company_ids of res.users gets only existing company ids.
+        """
+        res = super().unlink()
+        self.env.registry.clear_cache()
+        return res
 
     def write(self, values):
         invalidation_fields = self.cache_invalidation_fields()

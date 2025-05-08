@@ -2,6 +2,7 @@
 
 import base64
 import fnmatch
+import functools
 import hashlib
 import inspect
 import json
@@ -325,6 +326,9 @@ class Website(models.Model):
         configurator_action_todo = self.env.ref('website.website_configurator_todo')
         return configurator_action_todo.action_launch()
 
+    def _idna_url(self, url):
+        return get_base_domain(url.lower(), True).encode('idna').decode('ascii')
+
     def _is_indexable_url(self, url):
         """
         Returns True if the given url has to be indexed by search engines.
@@ -337,7 +341,7 @@ class Website(models.Model):
         :param url: the url to check
         :return: True if the url has to be indexed, False otherwise
         """
-        return get_base_domain(url, True) == get_base_domain(self.domain, True)
+        return self._idna_url(url) == self._idna_url(self.domain)
 
     # ----------------------------------------------------------
     # Configurator
@@ -355,7 +359,7 @@ class Website(models.Model):
 
     def _OLG_api_rpc(self, route, params):
         # For text content generation
-        return self._api_rpc(route, params, 'website.olg_api_endpoint', DEFAULT_OLG_ENDPOINT, timeout=20)
+        return self._api_rpc(route, params, 'website.olg_api_endpoint', DEFAULT_OLG_ENDPOINT, timeout=45)
 
     def get_cta_data(self, website_purpose, website_type):
         return {'cta_btn_text': False, 'cta_btn_href': '/contactus'}
@@ -1328,9 +1332,12 @@ class Website(models.Model):
 
         for rule in router.iter_rules():
             if 'sitemap' in rule.endpoint.routing and rule.endpoint.routing['sitemap'] is not True:
-                if rule.endpoint.func in sitemap_endpoint_done:
+                endpoint_func = rule.endpoint.func
+                if isinstance(endpoint_func, functools.partial): # follow partial in case of redirect
+                    endpoint_func = endpoint_func.func
+                if endpoint_func.__func__ in sitemap_endpoint_done:
                     continue
-                sitemap_endpoint_done.add(rule.endpoint.func)
+                sitemap_endpoint_done.add(endpoint_func.__func__)
 
                 func = rule.endpoint.routing['sitemap']
                 if func is False:
@@ -1479,6 +1486,7 @@ class Website(models.Model):
         return action
 
     def button_go_website(self, path='/', mode_edit=False):
+        # TODO: adapt in master as 'mode_edit' is always set to False
         self._force()
         if mode_edit:
             # If the user gets on a translated page (e.g /fr) the editor will
@@ -1978,3 +1986,16 @@ class Website(models.Model):
                         for word in re.findall(match_pattern, value):
                             if word[0] == search[0]:
                                 yield word.lower()
+
+    def _allConsentsGranted(self):
+        """
+        Checks if all (cookies) consents have been granted. Note that in the
+        case no cookies bar has been enabled, this considers that full consent
+        has been immediately given. Indeed, in that case, we suppose that the
+        user implemented his own consent behavior through custom code / app.
+        That custom code / app is able to override this function as desired and
+        xpath the `tracking_code_config` script in `website.layout`.
+        :return: True if all consents have been granted, False otherwise
+        """
+        self.ensure_one()
+        return not self.cookies_bar or self.env['ir.http']._is_allowed_cookie('optional')

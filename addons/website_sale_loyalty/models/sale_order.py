@@ -167,7 +167,9 @@ class SaleOrder(models.Model):
         if set_qty == 0 and line.coupon_id and reward_id and reward_id.reward_type == 'discount':
             # Force the deletion of the line even if it's a temporary record created by new()
             line_id = line.id
-        res = super()._cart_update(product_id, line_id, add_qty, set_qty, **kwargs)
+        res = super()._cart_update(
+            product_id, line_id=line_id, add_qty=add_qty, set_qty=set_qty, **kwargs
+        )
         self._update_programs_and_rewards()
         self._auto_apply_rewards()
         return res
@@ -202,8 +204,7 @@ class SaleOrder(models.Model):
         res = self._get_claimable_rewards()
         loyality_cards = self.env['loyalty.card'].search([
             ('partner_id', '=', self.partner_id.id),
-            ('program_id.website_id', 'in', [False, self.website_id.id]),
-            ('program_id.company_id', 'in', [False, self.company_id.id]),
+            ('program_id', 'any', self._get_program_domain()),
             '|',
                 ('program_id.trigger', '=', 'with_code'),
                 '&', ('program_id.trigger', '=', 'auto'), ('program_id.applies_on', '=', 'future'),
