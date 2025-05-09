@@ -807,7 +807,7 @@ export class PosStore extends WithLazyGetterTrap {
                     ]),
                     combo_item_id: comboItem.combo_item_id,
                     price_unit: comboItem.price_unit,
-                    price_type: "manual",
+                    price_type: "automatic",
                     order_id: order,
                     qty: 1,
                     attribute_value_ids: comboItem.attribute_value_ids?.map((attr) => [
@@ -881,6 +881,8 @@ export class PosStore extends WithLazyGetterTrap {
                 const weight = await makeAwaitable(this.env.services.dialog, ScaleScreen);
                 if (weight) {
                     values.qty = weight;
+                } else {
+                    return;
                 }
             } else {
                 await values.product_tmpl_id._onScaleNotAvailable();
@@ -1213,9 +1215,7 @@ export class PosStore extends WithLazyGetterTrap {
                 order.recomputeOrderData();
             }
 
-            const serializedOrder = orders.map((order) =>
-                order.serialize({ orm: true, clear: true })
-            );
+            const serializedOrder = orders.map((order) => order.serialize({ orm: true }));
             const data = await this.data.call("pos.order", "sync_from_ui", [serializedOrder], {
                 context,
             });
@@ -1253,6 +1253,7 @@ export class PosStore extends WithLazyGetterTrap {
 
             // Remove only synced orders from the pending orders
             orders.forEach((o) => this.removePendingOrder(o));
+            orders.map((order) => order.clearCommands());
             return newData["pos.order"];
         } catch (error) {
             if (options.throw) {
