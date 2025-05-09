@@ -63,6 +63,7 @@ registry.category("web_tour.tours").add("test_devices_synchronization", {
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.clickValidate(),
+            ReceiptScreen.discardOrderWarningDialog(),
             ReceiptScreen.clickNextOrder(),
             Chrome.clickPlanButton(),
             FloorScreen.clickTable("4"),
@@ -70,6 +71,7 @@ registry.category("web_tour.tours").add("test_devices_synchronization", {
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.clickValidate(),
+            ReceiptScreen.discardOrderWarningDialog(),
             ReceiptScreen.clickNextOrder(),
 
             // product_screen
@@ -85,6 +87,8 @@ registry.category("web_tour.tours").add("test_devices_synchronization", {
                 ],
                 false
             ),
+            ProductScreen.orderLineHas("Coca-Cola", "2"),
+            ProductScreen.orderLineHas("Water", "2"),
             ProductScreen.clickDisplayedProduct("Water"),
             ProductScreen.clickLine("Coca-Cola", 2),
             ProductScreen.clickLine("Coca-Cola", 1),
