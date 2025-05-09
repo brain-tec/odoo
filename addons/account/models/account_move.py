@@ -742,6 +742,9 @@ class AccountMove(models.Model):
         search='_search_next_payment_date',
     )
 
+    display_send_button = fields.Boolean(compute='_compute_display_send_button')
+    highlight_send_button = fields.Boolean(compute='_compute_highlight_send_button')
+
     _checked_idx = models.Index("(journal_id) WHERE (checked IS NOT TRUE)")
     _payment_idx = models.Index("(journal_id, state, payment_state, move_type, date)")
     _unique_name = models.UniqueIndex(
@@ -2154,6 +2157,16 @@ class AccountMove(models.Model):
         for move in self:
             move.next_payment_date = min([line.payment_date for line in move.line_ids.filtered(lambda l: l.payment_date and not l.reconciled)], default=False)
 
+    @api.depends('move_type', 'state')
+    def _compute_display_send_button(self):
+        for move in self:
+            move.display_send_button = move.is_sale_document() and move.state == 'posted'
+
+    @api.depends('is_being_sent', 'invoice_pdf_report_id')
+    def _compute_highlight_send_button(self):
+        for move in self:
+            move.highlight_send_button = not move.is_being_sent and not move.invoice_pdf_report_id
+
     def _search_next_payment_date(self, operator, value):
         if operator not in ('in', '<', '<='):
             return NotImplemented
@@ -2869,7 +2882,7 @@ class AccountMove(models.Model):
             return self.env['account.move.line']._fields[field].convert_to_write(record[field], record)
 
         def get_tax_line_tracked_fields(line):
-            return ('amount_currency', 'balance')
+            return ('amount_currency', 'balance', 'analytic_distribution')
 
         def get_base_line_tracked_fields(line):
             grouping_key = AccountTax._prepare_base_line_grouping_key(fake_base_line)
@@ -3514,7 +3527,8 @@ class AccountMove(models.Model):
             for move in self:
                 if 'tax_totals' in vals:
                     super(AccountMove, move).write({'tax_totals': vals['tax_totals']})
-        if 'journal_id' in vals:
+
+        if any(field in vals for field in ['journal_id', 'currency_id']):
             self.line_ids._check_constrains_account_id_journal_id()
 
         return res

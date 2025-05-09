@@ -11,6 +11,8 @@
                     <field name="call_duration_hour" type="measure" widget="float_time"/>
                     <field name="partner_id" type="row"/>
                     <field name="percentage_of_calls" type="measure" widget="percentage"/>
+                    <field name="time_to_answer" string="Response Time (hh:mm:ss)" type="measure" widget="float_time" options="{'displaySeconds': True}" />
+                    <field name="duration" type="measure"/>
                     <field name="rating" string="Rating (%)" type="measure" widget="im_livechat.rating_percentage"/>
                     <field name="number_of_calls" string="# of calls" type="measure" widget="integer"/>
                 </pivot>
@@ -50,7 +52,7 @@
             <field name="name">im_livechat.report.channel.graph</field>
             <field name="model">im_livechat.report.channel</field>
             <field name="arch" type="xml">
-                <graph string="Livechat Support Statistics" stacked="1" sample="1">
+                <graph string="Livechat Support Statistics" type="line" stacked="1" sample="1">
                     <field name="call_duration_hour" type="measure" widget="float_time"/>
                     <field name="has_call" invisible="1"/>
                     <field name="percentage_of_calls" type="measure" widget="percentage"/>
@@ -70,7 +72,7 @@
                     <field name="livechat_channel_id" string="Channel"/>
                     <field name="country_id" string="Country"/>
                     <field name="chatbot_script_id"/>
-                    <field name="chatbot_answers_path_str"/>
+                    <field name="chatbot_answers_path_str" string="Chatbot Answers"/>
                     <field name="session_expertises" string="Expertise"/>
                     <field name="visitor_partner_id"/>
                     <filter name="my_session" domain="[('partner_id.user_id', '=', uid)]" string="My Sessions"/>
@@ -86,6 +88,8 @@
                     <filter name="filter_start_date" string="Date" date="start_date"/>
                     <filter name="filter_date_last_month" invisible="1" string="Date: Last month"
                         domain="[('start_date', '&gt;=', (context_today() + relativedelta(months=-1)).strftime('%Y-%m-%d'))]"/>
+                    <filter name="filter_date_last_week" invisible="1" string="Date: Last week"
+                        domain="[('start_date', '&gt;=', (context_today() + relativedelta(weeks=-1)).strftime('%Y-%m-%d'))]"/>
                     <group expand="0" string="Group By...">
                         <filter name="group_by_channel" string="Channel" domain="[]" context="{'group_by':'livechat_channel_id'}"/>
                         <filter name="group_by_operator" string="Agent" domain="[]" context="{'group_by': 'partner_id'}"/>
@@ -98,8 +102,8 @@
                         <filter name="group_by_customer" domain="[]" context="{'group_by':'visitor_partner_id'}"/>
                         <separator orientation="vertical" />
                         <filter name="group_by_hour" string="Hour of Day" domain="[]" context="{'group_by':'start_date_hour'}"/>
+                        <filter name="group_by_day_of_week" string="Day of Week" domain="[]" context="{'group_by':'day_number'}"/>
                         <filter name="group_by_month" string="Date" domain="[]" context="{'group_by':'start_date:month'}" />
-                        <filter name="group_by_day_of_week" string="Day of week" domain="[]" context="{'group_by':'day_number'}"/>
                     </group>
                 </search>
             </field>
@@ -119,7 +123,7 @@
             <field name="search_view_id" ref="im_livechat_report_channel_view_search"/>
             <field name="help" type="html">
                 <p class="o_view_nocontent_empty_folder">No data yet!</p>
-                <p>Track and improve livechat performance with insights on session activity, response time, customer ratings, and call interactions.</p>
+                <p>Track and improve live chat performance with insights on session activity, response times, customer ratings, and call interactions.</p>
             </field>
         </record>
 
@@ -131,12 +135,13 @@
                 {
                     "search_default_filter_date_last_month": 1,
                     "pivot_measures": ["__count", "time_to_answer", "duration", "rating", "number_of_calls"],
+                    "graph_measure": "__count__",
                     "im_livechat.hide_partner_company": True,
                 }
             </field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_empty_folder">No data yet!</p>
-                <p>Track and improve livechat performance with insights on session activity, response time, customer ratings, and call interactions.</p>
+                <p>Track and improve live chat performance with insights on session activity, response times, customer ratings, and call interactions.</p>
             </field>
         </record>
 
@@ -144,11 +149,10 @@
             <field name="name">Sessions</field>
             <field name="res_model">im_livechat.report.channel</field>
             <field name="view_mode">graph,pivot</field>
-            <field name="context">{"graph_measure": "time_to_answer", "search_default_last_week":1}</field>
+            <field name="context">{"graph_measure": "time_to_answer", "search_default_filter_date_last_week":1}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
-                    No data yet!
-                </p>
+                <p class="o_view_nocontent_smiling_face">No data yet!</p>
+                <p>Track and improve live chat performance with insights on session activity, response times, customer ratings, and call interactions.</p>
             </field>
         </record>
 
