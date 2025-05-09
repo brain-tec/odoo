@@ -10,7 +10,9 @@
                     <field name="livechat_agent_partner_ids" string="Agent"/>
                     <field name="country_id" string="Country"/>
                     <field name="livechat_customer_partner_ids" string="Customer"/>
-                    <filter name="filter_my_sessions" domain="[('livechat_operator_id.user_id', '=', uid)]" string="My Sessions"/>
+                    <filter name="filter_my_sessions" domain="[('livechat_operator_id.user_ids', '=', uid)]" string="My Sessions"/>
+                    <separator/>
+                    <filter name="ongoing" string="Ongoing" domain="[('livechat_active', '=', True)]"/>
                     <separator/>
                     <filter name="filter_session_rating_happy" domain="[('rating_ids', '!=', False), ('rating_avg', '&gt;=', 3.66)]" string="Happy"/>
                     <filter name="filter_session_rating_neutral" domain="[('rating_ids', '!=', False), ('rating_avg', '&gt;=', 2.33), ('rating_avg', '&lt;', 3.66)]" string="Neutral"/>
@@ -41,7 +43,7 @@
             <field name="name">discuss.channel.list</field>
             <field name="model">discuss.channel</field>
             <field name="arch" type="xml">
-                <list js_class="im_livechat.discuss_channel_list" string="History" create="false" default_order="create_date desc">
+                <list js_class="im_livechat.discuss_channel_list" sample="1" string="History" create="false" default_order="create_date desc">
                     <field name="create_date" string="Date"/>
                     <field name="livechat_agent_history_ids" string="Agents" widget="many2many_tags_avatar" optional="show"/>
                     <field name="livechat_bot_history_ids" string="Bot" widget="many2many_tags_avatar" optional="show"/>
@@ -200,6 +202,10 @@
                 'default_livechat_channel_id': active_id,
             }</field>
             <field name="search_view_id" ref="discuss_channel_view_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_empty_folder">No data yet!</p>
+                <p>Start a conversation to populate your chat history.</p>
+            </field>
         </record>
         <record id="discuss_channel_action_livechat_kanban" model="ir.actions.act_window.view">
             <field name="sequence">1</field>
