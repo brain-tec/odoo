@@ -47,6 +47,7 @@ Chatter.props.push(
     "compactHeight?",
     "has_activities?",
     "hasAttachmentPreview?",
+    "hasParentReloadOnActivityChanged?",
     "hasParentReloadOnAttachmentsChanged?",
     "hasParentReloadOnFollowersUpdate?",
     "hasParentReloadOnMessagePosted?",
@@ -62,6 +63,7 @@ Object.assign(Chatter.defaultProps, {
     compactHeight: false,
     has_activities: true,
     hasAttachmentPreview: false,
+    hasParentReloadOnActivityChanged: false,
     hasParentReloadOnAttachmentsChanged: false,
     hasParentReloadOnFollowersUpdate: false,
     hasParentReloadOnMessagePosted: false,
@@ -319,6 +321,9 @@ patch(Chatter.prototype, {
 
     onActivityChanged(thread) {
         this.load(thread, [...this.requestList, "messages"]);
+        if (this.props.hasParentReloadOnActivityChanged) {
+            this.reloadParentView();
+        }
     },
 
     onAddFollowers() {
@@ -354,10 +359,12 @@ patch(Chatter.prototype, {
         this.state.isSearchOpen = !this.state.isSearchOpen;
     },
 
-    onCloseFullComposerCallback() {
+    onCloseFullComposerCallback(isDiscard) {
         this.toggleComposer();
         super.onCloseFullComposerCallback();
-        this.props.record?.load();
+        if (!isDiscard) {
+            this.reloadParentView();
+        }
     },
 
     onFollowerChanged() {
@@ -415,6 +422,9 @@ patch(Chatter.prototype, {
         const schedule = async (thread) => {
             await this.store.scheduleActivity(thread.model, [thread.id]);
             this.load(thread, ["activities", "messages"]);
+            if (this.props.hasParentReloadOnActivityChanged) {
+                await this.reloadParentView();
+            }
         };
         if (this.state.thread.id) {
             schedule(this.state.thread);

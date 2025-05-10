@@ -6,7 +6,6 @@ import { rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
 import { Deferred } from "@web/core/utils/concurrency";
-import { isMobileOS } from "@web/core/browser/feature_detection";
 
 /**
  * @typedef SuggestedRecipient
@@ -88,6 +87,9 @@ export class Thread extends Record {
     }
     /** @type {boolean} */
     can_react = true;
+    chat_window = fields.One("ChatWindow", {
+        inverse: "thread",
+    });
     close_chat_window = fields.Attr(undefined, {
         /** @this {import("models").Thread} */
         onUpdate() {
@@ -165,6 +167,10 @@ export class Thread extends Record {
         },
     });
     isDisplayedOnUpdate() {}
+    get isFocused() {
+        return this.isFocusedCounter !== 0;
+    }
+    isFocusedCounter = 0;
     isLoadingAttachments = false;
     isLoadedDeferred = new Deferred();
     isLoaded = fields.Attr(false, {
@@ -732,9 +738,6 @@ export class Thread extends Record {
             assignDefined({ thread: this }, { fromMessagingMenu, bypassCompact })
         );
         cw.open({ focus: focus });
-        if (isMobileOS()) {
-            this.markAsRead();
-        }
         return cw;
     }
 
