@@ -82,11 +82,15 @@ Help your customers with this chat, and analyse their feedback.
             'im_livechat/static/src/js/im_livechat_chatbot_steps_one2many.js',
             'im_livechat/static/src/js/im_livechat_chatbot_script_answers_m2m.js',
             'im_livechat/static/src/views/**/*',
+            ('remove', 'im_livechat/static/src/views/lazy/**/*'),
             'im_livechat/static/src/scss/im_livechat_history.scss',
             'im_livechat/static/src/scss/im_livechat_form.scss',
             'im_livechat/static/src/core/common/**/*',
             'im_livechat/static/src/core/public_web/**/*',
             'im_livechat/static/src/core/web/**/*',
+        ],
+        'web.assets_backend_lazy': [
+            "im_livechat/static/src/views/lazy/**/*",
         ],
         'web.assets_unit_tests': [
             'im_livechat/static/tests/**/*',
@@ -123,6 +127,7 @@ Help your customers with this chat, and analyse their feedback.
             'web/static/src/scss/bootstrap_overridden.scss',
             'web/static/src/scss/ui.scss',
             'web/static/src/libs/fontawesome/css/font-awesome.css',
+            'web/static/src/scss/animation.scss',
             'web/static/lib/odoo_ui_icons/style.css',
             'web/static/src/webclient/webclient.scss',
             ('include', 'web._assets_core'),
