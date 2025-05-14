@@ -6,12 +6,14 @@ import time
 from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
+from werkzeug.urls import url_encode, url_join
 
 from odoo import _, api, models
 from odoo.exceptions import UserError, ValidationError
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment_razorpay import const
+from odoo.addons.payment_razorpay.controllers.main import RazorpayController
 
 
 _logger = logging.getLogger(__name__)
@@ -45,6 +47,11 @@ class PaymentTransaction(models.Model):
             'razorpay_customer_id': customer_id,
             'is_tokenize_request': self.tokenize,
             'razorpay_order_id': order_id,
+            'callback_url': url_join(
+                self.provider_id.get_base_url(),
+                f'{RazorpayController._return_url}?{url_encode({"reference": self.reference})}'
+            ),
+            'redirect': self.payment_method_id.code in const.REDIRECT_PAYMENT_METHOD_CODES,
         }
 
     def _razorpay_create_customer(self):
@@ -417,7 +424,11 @@ class PaymentTransaction(models.Model):
         entity_id = entity_data.get('id')
         if not entity_id:
             raise ValidationError("Razorpay: " + _("Received data with missing entity id."))
-        self.provider_reference = entity_id
+        # One reference can have multiple entity ids as Razorpay allows retry on payment failure.
+        # Making sure the last entity id is the one we have in the provider reference.
+        allowed_to_modify = self.state not in ('done', 'authorized')
+        if allowed_to_modify:
+            self.provider_reference = entity_id
 
         # Update the payment method.
         payment_method_type = entity_data.get('method', '')
@@ -426,7 +437,8 @@ class PaymentTransaction(models.Model):
         payment_method = self.env['payment.method']._get_from_code(
             payment_method_type, mapping=const.PAYMENT_METHODS_MAPPING
         )
-        self.payment_method_id = payment_method or self.payment_method_id
+        if allowed_to_modify and payment_method:
+            self.payment_method_id = payment_method
 
         # Update the payment state.
         entity_status = entity_data.get('status')
