@@ -17,6 +17,7 @@ import { getContent, setSelection } from "./_helpers/selection";
 import { contains } from "@web/../tests/web_test_helpers";
 import { execCommand } from "./_helpers/userCommands";
 import { expandToolbar } from "./_helpers/toolbar";
+import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
 
 test("can set foreground color", async () => {
     const { el } = await setupEditor("<p>[test]</p>");
@@ -611,6 +612,36 @@ test("solid tab color navigation using keys", async () => {
     );
     await press("Enter");
     expect(getContent(el)).toBe(`<p><font style="color: rgb(0, 0, 0);">[test]</font></p>`);
+});
+
+test("custom tab color navigation using keys", async () => {
+    const { el } = await setupEditor("<p>[test]</p>");
+    await expandToolbar();
+    await click(".o-we-toolbar .o-select-color-foreground");
+    await animationFrame();
+    await press("Tab");
+    expect(getActiveElement()).toBe(queryFirst('.o_font_color_selector button:contains("Custom")'));
+    await press("Enter");
+    await animationFrame();
+    expect(".btn:contains('Custom')").toHaveClass("active");
+    await press("Tab");
+    await press("Tab");
+    await press("Tab");
+    const htmlStyle = getHtmlStyle(document);
+    const defaultColor = getCSSVariableValue("body-color", htmlStyle);
+    expect(getActiveElement()).toBe(
+        queryFirst(`.o_font_color_selector button[data-color="${defaultColor.toLowerCase()}"]`)
+    );
+    await press("ArrowDown");
+    expect(getActiveElement()).toBe(
+        queryFirst('.o_font_color_selector button[data-color="black"]')
+    );
+    await press("ArrowDown");
+    expect(getActiveElement()).toBe(
+        queryFirst('.o_font_color_selector button[data-color="black"]') // Should do nothing
+    );
+    await press("Enter");
+    expect(getContent(el)).toBe(`<p><font class="text-black">[test]</font></p>`);
 });
 
 describe.tags("desktop");
