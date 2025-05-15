@@ -1170,9 +1170,10 @@ Please change the quantity done or the rounding precision in your settings.""",
                     pos_move.product_uom_qty = 0
                     moves_to_cancel |= pos_move
 
+        # We are using propagate to False in order to not cancel destination moves merged in moves[0]
+        (moves_to_unlink | moves_to_cancel)._clean_merged()
+
         if moves_to_unlink:
-            # We are using propagate to False in order to not cancel destination moves merged in moves[0]
-            moves_to_unlink._clean_merged()
             moves_to_unlink._action_cancel()
             moves_to_unlink.sudo().unlink()
 
@@ -1902,7 +1903,7 @@ Please change the quantity done or the rounding precision in your settings.""",
             if move.propagate_cancel:
                 # only cancel the next move if all my siblings are also cancelled
                 if all(state == 'cancel' for state in siblings_states):
-                    move.move_dest_ids.filtered(lambda m: m.state != 'done' and m.location_dest_id == m.move_dest_ids.location_id)._action_cancel()
+                    move.move_dest_ids.filtered(lambda m: m.state != 'done' and move.location_dest_id == m.location_id)._action_cancel()
                     if cancel_moves_origin:
                         move.move_orig_ids.sudo().filtered(lambda m: m.state != 'done')._action_cancel()
             else:
@@ -1992,7 +1993,11 @@ Please change the quantity done or the rounding precision in your settings.""",
                 backorder._check_entire_pack()
         if moves_todo:
             moves_todo._check_quantity()
+            moves_todo._action_synch_order()
         return moves_todo
+
+    def _action_synch_order(self):
+        return True
 
     def _create_backorder(self):
         # Split moves where necessary and move quants
