@@ -74,6 +74,8 @@ class _OdooOption(optparse.Option):
     def __init__(self, *opts, **attrs):
         self.my_default = attrs.pop('my_default', None)
         self.cli_loadable = attrs.pop('cli_loadable', True)
+        env_name = attrs.pop('env_name', None)
+        self.env_name = env_name or ''
         self.file_loadable = attrs.pop('file_loadable', True)
         self.file_exportable = attrs.pop('file_exportable', self.file_loadable)
         self.nargs_ = attrs.get('nargs')
@@ -88,12 +90,19 @@ class _OdooOption(optparse.Option):
             e = (f"it makes no sense that the option {self} can be exported "
                   "to the config file but not loaded from the config file")
             raise ValueError(e)
+        is_new_option = False
         if self.dest and self.dest not in self.config.options_index:
             self.config.options_index[self.dest] = self
+            is_new_option = True
         if self.nargs_ == '?':
             self.const = const
             for opt in self._short_opts + self._long_opts:
                 self.config.optional_options[opt] = self
+        if env_name is None and is_new_option and self.file_loadable:
+            # generate an env_name for file_loadable settings that are in the index
+            self.env_name = 'ODOO_' + self.dest.upper()
+        elif env_name and not is_new_option:
+            raise ValueError(f"cannot set env_name to an option that is not indexed: {self}")
 
     def __str__(self):
         out = []
@@ -121,6 +130,7 @@ class _PosixOnlyOption(_OdooOption):
         if os.name != 'posix':
             attrs['help'] = optparse.SUPPRESS_HELP
             attrs['cli_loadable'] = False
+            attrs['env_name'] = ''
             attrs['file_loadable'] = False
             attrs['file_exportable'] = False
         super().__init__(*opts, **attrs)
@@ -144,11 +154,13 @@ class configmanager:
     def __init__(self):
         self._default_options = {}
         self._file_options = {}
+        self._env_options = {}
         self._cli_options = {}
         self._runtime_options = {}
         self.options = collections.ChainMap(
             self._runtime_options,
             self._cli_options,
+            self._env_options,
             self._file_options,
             self._default_options,
         )
@@ -194,7 +206,7 @@ class configmanager:
 
         # Server startup config
         group = optparse.OptionGroup(parser, "Common options")
-        group.add_option("-c", "--config", dest="config", type='path', file_loadable=False,
+        group.add_option("-c", "--config", dest="config", type='path', file_loadable=False, env_name='ODOO_RC',
                          help="specify alternate config file")
         group.add_option("-s", "--save", action="store_true", dest="save", my_default=False, file_loadable=False,
                          help="save configuration to ~/.odoorc (or to ~/.openerp_serverrc if it exists)")
@@ -337,30 +349,32 @@ class configmanager:
 
         # Database Group
         group = optparse.OptionGroup(parser, "Database related options")
-        group.add_option("-d", "--database", dest="db_name", type='comma', metavar="DATABASE,...", my_default=[],
+        group.add_option("-d", "--database", dest="db_name", type='comma', metavar="DATABASE,...", my_default=[], env_name='PGDATABASE',
                          help="database(s) used when installing or updating modules.")
-        group.add_option("-r", "--db_user", dest="db_user", my_default='',
+        group.add_option("-r", "--db_user", dest="db_user", my_default='', env_name='PGUSER',
                          help="specify the database user name")
-        group.add_option("-w", "--db_password", dest="db_password", my_default='',
+        group.add_option("-w", "--db_password", dest="db_password", my_default='', env_name='PGPASSWORD',
                          help="specify the database password")
-        group.add_option("--pg_path", dest="pg_path", type='path', my_default='',
+        group.add_option("--pg_path", dest="pg_path", type='path', my_default='', env_name='PGPATH',
                          help="specify the pg executable path")
-        group.add_option("--db_host", dest="db_host", my_default='',
+        group.add_option("--db_host", dest="db_host", my_default='', env_name='PGHOST',
                          help="specify the database host")
-        group.add_option("--db_replica_host", dest="db_replica_host", my_default=None,
+        group.add_option("--db_replica_host", dest="db_replica_host", my_default=None, env_name='PGHOST_REPLICA',
                          help="specify the replica host")
-        group.add_option("--db_port", dest="db_port", my_default=None,
+        group.add_option("--db_port", dest="db_port", my_default=None, env_name='PGPORT',
                          help="specify the database port", type="int")
-        group.add_option("--db_replica_port", dest="db_replica_port", my_default=None,
+        group.add_option("--db_replica_port", dest="db_replica_port", my_default=None, env_name='PGPORT_REPLICA',
                          help="specify the replica port", type="int")
-        group.add_option("--db_sslmode", dest="db_sslmode", type="choice", my_default='prefer',
+        group.add_option("--db_sslmode", dest="db_sslmode", type="choice", my_default='prefer', env_name='PGSSLMODE',
                          choices=['disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'],
                          help="specify the database ssl connection mode (see PostgreSQL documentation)")
+        group.add_option("--db_app_name", dest="db_app_name", my_default="odoo-{pid}", env_name='PGAPPNAME',
+                         help="specify the application name in the database, {pid} is substituted by the process pid")
         group.add_option("--db_maxconn", dest="db_maxconn", type='int', my_default=64,
                          help="specify the maximum number of physical connections to PostgreSQL")
         group.add_option("--db_maxconn_gevent", dest="db_maxconn_gevent", type='int', my_default=None,
                          help="specify the maximum number of physical connections to PostgreSQL specifically for the gevent worker")
-        group.add_option("--db-template", dest="db_template", my_default="template0",
+        group.add_option("--db-template", dest="db_template", my_default="template0", env_name='PGDATABASE_TEMPLATE',
                          help="specify a custom database template to create a new database")
         parser.add_option_group(group)
 
@@ -394,7 +408,7 @@ class configmanager:
 
         # Advanced options
         group = optparse.OptionGroup(parser, "Advanced options")
-        group.add_option('--dev', dest='dev_mode', type='comma', metavar="FEATURE,...", my_default=[], file_exportable=False,
+        group.add_option('--dev', dest='dev_mode', type='comma', metavar="FEATURE,...", my_default=[], file_exportable=False, env_name='ODOO_DEV',
                          # optparse uses a fixed 55 chars to print the help no matter the
                          # terminal size, abuse that to align the features
                          help="Enable developer features (comma-separated list, use   "
@@ -488,11 +502,7 @@ class configmanager:
             f'/var/lib/{release.product_name}'
         )
 
-        if rcfilepath := os.getenv('ODOO_RC'):
-            pass
-        elif rcfilepath := os.getenv('OPENERP_SERVER'):
-            self._warn("Since ages ago, the OPENERP_SERVER environment variable has been replaced by ODOO_RC", DeprecationWarning)
-        elif os.name == 'nt':
+        if os.name == 'nt':
             rcfilepath = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'odoo.conf')
         elif os.path.isfile(rcfilepath := os.path.expanduser('~/.odoorc')):
             pass
@@ -581,6 +591,7 @@ class configmanager:
             if not self.options_index[option_name].cli_loadable:
                 delattr(opt, option_name)  # hence list(...) above
 
+        self._load_env_options()
         self._load_cli_options(opt)
         self._load_file_options(self['config'])
         self._postprocess_options()
@@ -589,6 +600,16 @@ class configmanager:
             self.save()
 
         return opt
+
+    def _load_env_options(self):
+        self._env_options.clear()
+        environ = os.environ
+        for option_name, option in self.options_index.items():
+            env_name = option.env_name
+            if env_name and env_name in environ:
+                self._env_options[option_name] = self.parse(option_name, environ[env_name])
+        if environ.get('OPENERP_SERVER'):
+            self._warn("Since ages ago, the OPENERP_SERVER environment variable has been replaced by ODOO_RC", DeprecationWarning)
 
     def _load_cli_options(self, opt):
         # odoo.cli.command.main parses the config twice, the second time
@@ -643,6 +664,7 @@ class configmanager:
         self._runtime_options['log_handler'] = list(_deduplicate_loggers([
             *self._default_options.get('log_handler', []),
             *self._file_options.get('log_handler', []),
+            *self._env_options.get('log_handler', []),
             *self._cli_options.get('log_handler', []),
         ]))
 
@@ -1007,6 +1029,7 @@ class configmanager:
             },
             'runtime': self._runtime_options.get(name, EMPTY),
             'cli': self._cli_options.get(name, EMPTY),
+            'env': self._env_options.get(name, EMPTY),
             'file': self._file_options.get(name, EMPTY),
             'default': self._default_options.get(name, EMPTY),
         }

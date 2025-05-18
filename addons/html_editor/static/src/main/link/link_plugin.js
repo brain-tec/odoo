@@ -11,7 +11,7 @@ import { KeepLast } from "@web/core/utils/concurrency";
 import { rpc } from "@web/core/network/rpc";
 import { memoize } from "@web/core/utils/functions";
 import { withSequence } from "@html_editor/utils/resource";
-import { isBlock } from "@html_editor/utils/blocks";
+import { isBlock, closestBlock } from "@html_editor/utils/blocks";
 
 /**
  * @typedef {import("@html_editor/core/selection_plugin").EditorSelection} EditorSelection
@@ -144,6 +144,7 @@ export class LinkPlugin extends Plugin {
         "overlay",
         "color",
         "baseContainer",
+        "feff",
     ];
     // @phoenix @todo: do we want to have createLink and insertLink methods in link plugin?
     static shared = ["createLink", "insertLink", "getPathAsUrlCommand"];
@@ -229,6 +230,7 @@ export class LinkPlugin extends Plugin {
         selectionchange_handlers: this.handleSelectionChange.bind(this),
         clean_for_save_handlers: ({ root }) => this.removeEmptyLinks(root),
         normalize_handlers: this.normalizeLink.bind(this),
+        after_insert_handlers: this.handleAfterInsert.bind(this),
 
         /** Overrides */
         split_element_block_overrides: this.handleSplitBlock.bind(this),
@@ -293,6 +295,7 @@ export class LinkPlugin extends Plugin {
         this.getAttachmentMetadata = memoize((url) =>
             fetchAttachmentMetaData(url, this.services.orm)
         );
+        this.newlyInsertedLinks = new Set();
     }
 
     destroy() {
@@ -512,6 +515,7 @@ export class LinkPlugin extends Plugin {
             onClose: () => {
                 this.linkInDocument = null;
                 this.overlay.close();
+                this.dependencies.selection.focusEditable();
             },
             getInternalMetaData: this.getInternalMetaData,
             getExternalMetaData: this.getExternalMetaData,
@@ -522,8 +526,14 @@ export class LinkPlugin extends Plugin {
             canUpload: this.config.allowFile,
             onUpload: this.config.onAttachmentChange,
             type: this.type || "",
+            showReplaceTitleBanner: this.newlyInsertedLinks.has(linkElement),
         };
         this.overlay.open({ props });
+        if (this.linkInDocument) {
+            if (this.newlyInsertedLinks.has(this.linkInDocument)) {
+                this.newlyInsertedLinks.delete(this.linkInDocument);
+            }
+        }
     }
     /**
      * close the link tool
@@ -576,7 +586,7 @@ export class LinkPlugin extends Plugin {
             if (color && childNodes.every((n) => !isBlock(n))) {
                 anchorEl.style.removeProperty("color");
                 const font = selectElements(anchorEl, "font").next().value;
-                if (font && anchorEl.textContent === font.textContent) {
+                if (font && cleanZWChars(anchorEl.textContent) === font.textContent) {
                     continue;
                 }
                 const newFont = this.document.createElement("font");
@@ -700,7 +710,6 @@ export class LinkPlugin extends Plugin {
 
     removeLinkFromSelection() {
         const selection = this.dependencies.split.splitSelection();
-        const cursors = this.dependencies.selection.preserveSelection();
 
         // If not, unlink only the part(s) of the link(s) that are selected:
         // `<a>a[b</a>c<a>d</a>e<a>f]g</a>` => `<a>a</a>[bcdef]<a>g</a>`.
@@ -711,10 +720,27 @@ export class LinkPlugin extends Plugin {
             closestElement(anchorNode, "a"),
             closestElement(focusNode, "a"),
         ];
+        let cursors;
+        if (startLink) {
+            // If a FEFF character is present as anchorNode or focusNode,
+            // restoring the selection later may throw an error. Therefore,
+            // FEFF characters should be cleaned before splitting the link.
+            cursors = this.dependencies.selection.preserveSelection();
+            this.dependencies.feff.removeFeffs(startLink, cursors);
+            cursors.restore();
+        }
+        if (endLink && startLink !== endLink) {
+            cursors = this.dependencies.selection.preserveSelection();
+            this.dependencies.feff.removeFeffs(endLink, cursors);
+            cursors.restore();
+        }
+        ({ anchorNode, focusNode, anchorOffset, focusOffset } =
+            this.dependencies.selection.getEditableSelection());
+        cursors = this.dependencies.selection.preserveSelection();
         // to remove link from selected images
         const selectedNodes = this.dependencies.selection.getSelectedNodes();
         const selectedImageNodes = selectedNodes.filter((node) => node.tagName === "IMG");
-        if (selectedImageNodes && startLink && endLink && startLink === endLink) {
+        if (selectedImageNodes.length && startLink && endLink && startLink === endLink) {
             for (const imageNode of selectedImageNodes) {
                 let imageLink;
                 const figure = closestElement(imageNode, "figure");
@@ -752,6 +778,8 @@ export class LinkPlugin extends Plugin {
                 return;
             }
         }
+        const startBlock = closestBlock(startLink);
+        const endBlock = closestBlock(endLink);
         if (startLink && startLink.isConnected) {
             anchorNode = this.dependencies.split.splitAroundUntil(anchorNode, startLink);
             anchorOffset = direction === DIRECTIONS.RIGHT ? 0 : nodeSize(anchorNode);
@@ -782,17 +810,29 @@ export class LinkPlugin extends Plugin {
             }
             cursors.restore();
         }
+        if (startBlock) {
+            // Remove empty links splitted by `splitAroundUntil` due to
+            // adjacent invisible text nodes.
+            this.removeEmptyLinks(startBlock);
+        }
+        if (endBlock && endBlock !== startBlock) {
+            this.removeEmptyLinks(endBlock);
+        }
         this.dependencies.history.addStep();
     }
 
     removeEmptyLinks(root) {
         // @todo: check for unremovables
         // @todo: preserve spaces
+        const buttonClassRegex =
+            /^(btn|btn-(sm|lg|(?:[a-z0-9_]+-)?(?:primary|secondary))|rounded-circle)$/;
         for (const link of root.querySelectorAll("a")) {
             if ([...link.childNodes].some(isVisible)) {
                 continue;
             }
-            const classes = [...link.classList].filter((c) => !this.ignoredClasses.has(c));
+            const classes = [...link.classList].filter(
+                (c) => !this.ignoredClasses.has(c) && !buttonClassRegex.test(c)
+            );
             const attributes = [...link.attributes].filter(
                 (a) => !["style", "href", "class"].includes(a.name)
             );
@@ -961,6 +1001,18 @@ export class LinkPlugin extends Plugin {
         blockToSplit = targetNode;
         splitOrLineBreakCallback({ ...params, targetNode, targetOffset, blockToSplit });
         return true;
+    }
+
+    handleAfterInsert(insertedNodes) {
+        for (const node of insertedNodes) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                for (const link of selectElements(node, "A")) {
+                    if (link.getAttribute("href") === link.textContent && !this.isImage) {
+                        this.newlyInsertedLinks.add(link);
+                    }
+                }
+            }
+        }
     }
 }
 
