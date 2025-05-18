@@ -7,7 +7,7 @@ from . import test_barcode
 from . import test_base
 from . import test_basecase
 from . import test_cache
-from . import test_date_intervals
+from . import test_intervals
 from . import test_date_utils
 from . import test_deprecation
 from . import test_db_cursor
@@ -44,8 +44,8 @@ from . import test_module
 from . import test_module_graph
 from . import test_orm
 from . import test_ormcache
-from . import test_osv
 from . import test_overrides
+from . import test_query
 from . import test_qweb_field
 from . import test_qweb
 from . import test_res_config

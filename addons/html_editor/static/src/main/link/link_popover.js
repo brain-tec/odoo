@@ -18,6 +18,7 @@ export class LinkPopover extends Component {
         getExternalMetaData: Function,
         getAttachmentMetadata: Function,
         isImage: Boolean,
+        showReplaceTitleBanner: Boolean,
         type: String,
         recordInfo: Object,
         canEdit: { type: Boolean, optional: true },
@@ -66,6 +67,7 @@ export class LinkPopover extends Component {
                     ?.pop() ||
                 "",
             isImage: this.props.isImage,
+            showReplaceTitleBanner: this.props.showReplaceTitleBanner,
         });
 
         this.editingWrapper = useRef("editing-wrapper");
@@ -84,7 +86,9 @@ export class LinkPopover extends Component {
             }
         });
         useExternalListener(document, "pointerdown", (ev) => {
-            if (
+            if (!this.state.url) {
+                this.onClickRemove();
+            } else if (
                 this.editingWrapper?.el &&
                 !this.state.isImage &&
                 !this.editingWrapper.el.contains(ev.target)
@@ -134,7 +138,7 @@ export class LinkPopover extends Component {
 
     onKeydownEnter(ev) {
         const isAutoCompleteDropdownOpen = document.querySelector(".o-autocomplete--dropdown-menu");
-        if (ev.key === "Enter" && !isAutoCompleteDropdownOpen) {
+        if (ev.key === "Enter" && !isAutoCompleteDropdownOpen && this.state.url) {
             ev.preventDefault();
             this.onClickApply();
         }
@@ -143,6 +147,7 @@ export class LinkPopover extends Component {
     onKeydown(ev) {
         if (ev.key === "Escape") {
             ev.preventDefault();
+            ev.stopImmediatePropagation();
             this.props.onClose();
         }
     }
