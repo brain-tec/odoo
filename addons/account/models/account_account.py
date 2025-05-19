@@ -489,30 +489,41 @@ class AccountAccount(models.Model):
             company by starting from an existing code and incrementing it.
 
             Examples:
-                |  start_code  |  codes checked for availability                            |
-                +--------------+------------------------------------------------------------+
-                |    102100    |  102101, 102102, 102103, 102104, ...                       |
-                |     1598     |  1599, 1600, 1601, 1602, ...                               |
-                |   10.01.08   |  10.01.09, 10.01.10, 10.01.11, 10.01.12, ...               |
-                |   10.01.97   |  10.01.98, 10.01.99, 10.01.97.copy2, 10.01.97.copy3, ...   |
-                |    1021A     |  1021A, 1022A, 1023A, 1024A, ...                           |
-                |    hello     |  hello.copy, hello.copy2, hello.copy3, hello.copy4, ...    |
-                |     9998     |  9999, 9998.copy, 9998.copy2, 9998.copy3, ...              |
 
-            :param start_code str: the code to increment until an available one is found
+            +--------------+-----------------------------------------------------------+
+            |  start_code  | codes checked for availability                            |
+            +==============+===========================================================+
+            |    102100    | 102101, 102102, 102103, 102104, ...                       |
+            +--------------+-----------------------------------------------------------+
+            |     1598     | 1599, 1600, 1601, 1602, ...                               |
+            +--------------+-----------------------------------------------------------+
+            |   10.01.08   | 10.01.09, 10.01.10, 10.01.11, 10.01.12, ...               |
+            +--------------+-----------------------------------------------------------+
+            |   10.01.97   | 10.01.98, 10.01.99, 10.01.97.copy2, 10.01.97.copy3, ...   |
+            +--------------+-----------------------------------------------------------+
+            |    1021A     | 1021A, 1022A, 1023A, 1024A, ...                           |
+            +--------------+-----------------------------------------------------------+
+            |    hello     | hello.copy, hello.copy2, hello.copy3, hello.copy4, ...    |
+            +--------------+-----------------------------------------------------------+
+            |     9998     | 9999, 9998.copy, 9998.copy2, 9998.copy3, ...              |
+            +--------------+-----------------------------------------------------------+
+
+            :param str start_code: the code to increment until an available one is found
             :param set[str] cache: a set of codes which you know are already used
                                     (optional, to speed up the method).
-                                    If none is given, the method will use cache = {start_code}.
+                                    If none is given, the method will use cache = ``{start_code}``.
                                     i.e. the method will return the first available code
                                     *strictly* greater than start_code.
                                     If you want the method to start at start_code, you should
                                     explicitly pass cache={}.
 
-            :return str: an available new account code for the active company.
-                         It will normally have length `len(start_code)`.
-                         If incrementing the last digits starting from `start_code` does
-                         not work, the method will try as a fallback
-                         '{start_code}.copy', '{start_code}.copy2', ... '{start_code}.copy99'.
+            :return: an available new account code for the active company.
+                     It will normally have length ``len(start_code)``.
+                     If incrementing the last digits starting from ``start_code`` does
+                     not work, the method will try as a fallback
+                     ``'{start_code}.copy'``, ``'{start_code}.copy2'``, ...
+                     ``'{start_code}.copy99'``.
+            :rtype: str
         """
         if cache is None:
             cache = {start_code}
