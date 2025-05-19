@@ -542,17 +542,18 @@ class Base(models.AbstractModel):
 
         Reply-to is formatted like '"Author Name" <reply.to@domain>".
         Heuristic it the following:
-         * search for specific aliases as they always have priority; it is limited
-           to aliases linked to documents (like project alias for task for example);
-         * use catchall address;
-         * use default;
+
+        * search for specific aliases as they always have priority; it is limited
+          to aliases linked to documents (like project alias for task for example);
+        * use catchall address;
+        * use default;
 
         This method can be used as a generic tools if self is a void recordset.
 
         :param default: default email if no alias or catchall is found;
         :param author_id: author to use in name part of formatted email;
 
-        :return result: dictionary. Keys are record IDs and value is formatted
+        :return: dictionary. Keys are record IDs and value is formatted
           like an email "Company_name Document_name <reply_to@email>"
         """
         return self._notify_get_reply_to_batch(
@@ -644,10 +645,6 @@ class Base(models.AbstractModel):
         possible we return only the email and skip the formataddr which causes
         the issue in python. We do not use hacks like crop the name part as
         encoding and quoting would be error prone.
-
-        :param <res.company> company: if given, setup the company used to
-          complete name in formataddr. Otherwise fallback on 'company_id'
-          of self or environment company;
         """
         length_limit = 68  # 78 - len('Reply-To: '), 78 per RFC
         # address itself is too long : return only email and log warning
@@ -679,7 +676,8 @@ class Base(models.AbstractModel):
         """ Generic method that takes a record not necessarily inheriting from
         mail.alias.mixin.
 
-        :return AliasError: error if any, False otherwise
+        :return: error if any, False otherwise
+        :rtype: AliasError | Literal[False]
         """
         author = self.env['res.partner'].browse(message_dict.get('author_id', False))
         if alias.alias_contact == 'followers':

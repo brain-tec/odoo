@@ -221,8 +221,8 @@ class IrActionsActions(models.Model):
     def _for_xml_id(self, full_xml_id):
         """ Returns the action content for the provided xml_id
 
-        :param xml_id: the namespace-less id of the action (the @id
-                       attribute from the XML file)
+        :param full_xml_id: the namespace-less id of the action (the @id
+            attribute from the XML file)
         :return: A read() view of the ir.actions.action safe for web use
         """
         record = self.env.ref(full_xml_id)
@@ -1052,6 +1052,7 @@ class IrActionsServer(models.Model):
         active_ids (optional)
            ids of the current records (mass mode). If ``active_ids`` and
            ``active_id`` are present, ``active_ids`` is given precedence.
+
         :return: an ``action_id`` to be executed, or ``False`` is finished
                  correctly without return action
         """

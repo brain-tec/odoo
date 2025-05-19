@@ -48,9 +48,7 @@ class ResCompany(models.Model):
 
     def _enrich(self):
         """ This method calls the partner autocomplete service from IAP to enrich
-        partner related fields of the company.
-
-        :return bool: either done, either failed """
+        partner related fields of the company. """
         self.ensure_one()
         _logger.info("Starting enrich of company %s (%s)", self.name, self.id)
 
@@ -60,7 +58,7 @@ class ResCompany(models.Model):
 
         company_data = self.env['res.partner'].enrich_by_domain(company_domain, timeout=COMPANY_AC_TIMEOUT)
         if not company_data or company_data.get("error"):
-            return
+            return False
 
         company_data = {field: value for field, value in company_data.items()
                         if field in self.partner_id._fields and value and (field == 'image_1920' or not self.partner_id[field])}
@@ -82,10 +80,14 @@ class ResCompany(models.Model):
 
     def _get_company_domain(self):
         """ Extract the company domain to be used by IAP services.
+
         The domain is extracted from the website or the email information.
-        e.g:
-            - www.info.proximus.be -> proximus.be
-            - info@proximus.be -> proximus.be """
+
+        >>> company.email, company._get_company_domain()
+        ("info@proximus.be", "proximus.be")
+        >>> company.website, company._get_company_domain()
+        ("www.info.proximus.be", "proximus.be")
+        """
         self.ensure_one()
 
         company_domain = email_domain_extract(self.email) if self.email else False
