@@ -4,6 +4,7 @@ import base64
 from datetime import datetime, timedelta
 from freezegun import freeze_time
 from unittest.mock import patch
+from markupsafe import Markup
 
 from odoo import Command, fields
 from odoo.tools.misc import limited_field_access_token
@@ -111,10 +112,10 @@ class TestChannelInternals(MailCommon, HttpCase):
                                         "model": "discuss.channel",
                                         "notification_ids": [],
                                         "parent_id": False,
+                                        "partner_ids": [],
                                         "pinned_at": False,
                                         "rating_id": False,
                                         "reactions": [],
-                                        "recipients": [],
                                         "record_name": "Channel",
                                         "res_id": channel.id,
                                         "scheduledDatetime": False,
@@ -163,7 +164,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                                     "last_seen_dt": False,
                                     "persona": {"id": self.test_partner.id, "type": "partner"},
                                     "seen_message_id": False,
-                                    "thread": {"id": channel.id, "model": "discuss.channel"},
+                                    "channel_id": {"id": channel.id, "model": "discuss.channel"},
                                 },
                             ],
                             "res.partner": self._filter_partners_fields(
@@ -210,7 +211,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                                     "last_seen_dt": False,
                                     "persona": {"id": self.test_partner.id, "type": "partner"},
                                     "seen_message_id": False,
-                                    "thread": {"id": channel.id, "model": "discuss.channel"},
+                                    "channel_id": {"id": channel.id, "model": "discuss.channel"},
                                 }
                             ],
                             "res.partner": self._filter_partners_fields(
@@ -430,7 +431,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                                 "message_unread_counter_bus_id": 0,
                                 "new_message_separator": msg_1.id + 1,
                                 "persona": {"id": self.user_admin.partner_id.id, "type": "partner"},
-                                "thread": {
+                                "channel_id": {
                                     "id": chat.id,
                                     "model": "discuss.channel",
                                 },
@@ -446,7 +447,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                                 "id": member.id,
                                 "persona": {"id": self.user_admin.partner_id.id, "type": "partner"},
                                 "seen_message_id": msg_1.id,
-                                "thread": {"id": chat.id, "model": "discuss.channel"},
+                                "channel_id": {"id": chat.id, "model": "discuss.channel"},
                             },
                         ],
                         "res.partner": self._filter_partners_fields(
@@ -877,3 +878,35 @@ class TestChannelInternals(MailCommon, HttpCase):
             ],
         ):
             test_group.execute_command_help()
+
+    @users('employee')
+    def test_message_update_content_bus(self):
+        self.maxDiff = None
+        channel = self.env["discuss.channel"].create({"name": "MyTestChannel"})
+        message = self.env['mail.message'].create({
+            "body": "Test",
+            "model": "discuss.channel",
+            "res_id": channel.id,
+        })
+        with self.assertBus(
+            [(self.cr.dbname, "discuss.channel", channel.id)],
+            [
+                {
+                    "type": "mail.record/insert",
+                    "payload": {
+                        "mail.message": [
+                            {
+                                "id": message.id,
+                                "attachment_ids": [],
+                                "body": ['markup', '<p>Test update</p><span class="o-mail-Message-edited"></span>'],
+                                "partner_ids": message.partner_ids.ids,
+                                "pinned_at": message.pinned_at,
+                                "write_date": fields.Datetime.to_string(message.write_date),
+                                "translationValue": False,
+                            }
+                        ],
+                    },
+                }
+            ],
+        ):
+            channel._message_update_content(message, Markup("<p>Test update</p>"), [])
