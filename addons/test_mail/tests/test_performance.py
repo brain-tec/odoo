@@ -331,8 +331,8 @@ class TestBaseAPIPerformance(BaseMailPerformance):
     def test_activity_mixin(self):
         record = self.env['mail.test.activity'].create({'name': 'Test'})
 
-        # todo guce postfreeze fix: admin 5 employee 5
-        with self.assertQueryCount(admin=12, employee=12):
+        # todo guce postfreeze fix: 5 5 -> admin 12 employee 12 ->  9 9?
+        with self.assertQueryCount(admin=5, employee=5):
             activity = record.action_start('Test Start')
             # read activity_type to normalize cache between enterprise and community
             # voip module read activity_type during create leading to one less query in enterprise on action_close
@@ -340,8 +340,8 @@ class TestBaseAPIPerformance(BaseMailPerformance):
 
         record.write({'name': 'Dupe write'})
 
-        # todo guce postgreeze fix: admin 15 employee 14
-        with self.assertQueryCount(admin=17, employee=17):  # tm: 11 / 11
+        # todo guce postfreeze fix: admin 15 employee 14 -> became 22 17?
+        with self.assertQueryCount(admin=15, employee=14):  # tm: 11 / 11
             record.action_close('Dupe feedback')
 
         self.assertEqual(record.activity_ids, self.env['mail.activity'])
@@ -1504,10 +1504,10 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "model": "mail.test.simple",
                                     "needaction": True,
                                     "notification_ids": [notif_1.id, notif_2.id],
+                                    "partner_ids": [],
                                     "pinned_at": False,
                                     "rating_id": False,
                                     "reactions": [],
-                                    "recipients": [],
                                     "record_name": "Test",
                                     "res_id": record.id,
                                     "scheduledDatetime": None,
@@ -1617,10 +1617,10 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "model": "mail.test.simple",
                                     "needaction": True,
                                     "notification_ids": [notif_1.id, notif_2.id],
+                                    "partner_ids": [],
                                     "pinned_at": False,
                                     "rating_id": False,
                                     "reactions": [],
-                                    "recipients": [],
                                     "record_name": "Test",
                                     "res_id": record.id,
                                     "scheduledDatetime": None,
