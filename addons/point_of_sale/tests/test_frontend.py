@@ -1489,6 +1489,29 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour(f"/pos/ui/{self.main_pos_config.id}", 'ProductComboChangeFP', login="pos_user")
 
+    def test_product_combo_change_pricelist(self):
+        """
+        Verify than when we change the pricelist, the combo price is updated
+        """
+        setup_product_combo_items(self)
+
+        sale_10_pl = self.env['product.pricelist'].create({
+            'name': 'sale 10%',
+        })
+        self.env['product.pricelist.item'].create({
+            'pricelist_id': sale_10_pl.id,
+            'base': 'pricelist',
+            'compute_price': 'percentage',
+            'applied_on': '3_global',
+            'percent_price': 10,
+        })
+
+        self.main_pos_config.write({
+            'available_pricelist_ids': [(4, sale_10_pl.id)],
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'ProductComboChangePricelist', login="pos_user")
+
     def test_cash_rounding_payment(self):
         """Verify than an error popup is shown if the payment value is more precise than the rounding method"""
         rounding_method = self.env['account.cash.rounding'].create({
@@ -1982,6 +2005,42 @@ class TestUi(TestPointOfSaleHttpCommon):
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_quantity_package_of_non_basic_unit', login="pos_user")
+
+    def test_preset_timing(self):
+        """
+        Test to set order preset hour inside a tour
+        """
+        self.preset_eat_in = self.env['pos.preset'].create({
+            'name': 'Eat in',
+        })
+        self.preset_takeaway = self.env['pos.preset'].create({
+            'name': 'Takeaway',
+            'identification': 'name',
+        })
+        self.preset_delivery = self.env['pos.preset'].create({
+            'name': 'Delivery',
+            'identification': 'address',
+        })
+        self.main_pos_config.write({
+            'use_presets': True,
+            'default_preset_id': self.preset_eat_in.id,
+            'available_preset_ids': [(6, 0, [self.preset_takeaway.id, self.preset_delivery.id])],
+        })
+        resource_calendar = self.env['resource.calendar'].create({
+            'name': 'Takeaway',
+            'attendance_ids': [(0, 0, {
+                'name': 'Takeaway',
+                'dayofweek': str(day),
+                'hour_from': 0,
+                'hour_to': 24,
+                'day_period': 'morning',
+            }) for day in range(7)],
+        })
+        self.preset_takeaway.write({
+            'use_timing': True,
+            'resource_calendar_id': resource_calendar
+        })
+        self.start_pos_tour('test_preset_timing')
 
 
 # This class just runs the same tests as above but with mobile emulation
