@@ -3,7 +3,7 @@
 # 	* sale
 # 
 # Translators:
-# Wil Odoo, 2024
+# Wil Odoo, 2025
 # Manon Rondou, 2025
 # 
 msgid ""
@@ -1083,7 +1083,7 @@ msgid ""
 msgstr ""
 "Selon la confirmation du produit, la quantité livrée peut être calculée automatiquement par mécanisme :\n"
 " - Manuel : la quantité est définie manuellement sur la ligne\n"
-"- Analytique à partir des notes de frais : la quantité est la somme des notes de frais comptabilisées\n"
+"- Analytique à partir des dépenses : la quantité est la somme des dépenses comptabilisées\n"
 "- Feuille de temps : la quantité est la somme des heures enregistrées sur les tâches liées à cette commande\n"
 "- Mouvements de stock : la quantité provient des transferts confirmés\n"
 
@@ -1286,7 +1286,7 @@ msgstr "Répartition Analytique"
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_line__qty_delivered_method__analytic
 msgid "Analytic From Expenses"
-msgstr "Analytique des notes de frais"
+msgstr "Analytique des dépenses"
 
 #. module: sale
 #: model:ir.model,name:sale.model_account_analytic_line
@@ -2842,7 +2842,7 @@ msgstr "Est un acompte"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__is_expense
 msgid "Is expense"
-msgstr "Est une note de frais"
+msgstr "Est une dépense"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__is_configurable_product
@@ -2854,7 +2854,7 @@ msgstr "Ce produit est-il configurable ?"
 msgid ""
 "Is true if the sales order line comes from an expense or a vendor bills"
 msgstr ""
-"Est vrai si la ligne de commande vient d'une note de frais ou d'une facture "
+"Est vrai si la ligne de commande vient d'une dépense ou d'une facture "
 "fournisseur"
 
 #. module: sale
@@ -4880,8 +4880,8 @@ msgid ""
 "cancelled. You cannot register an expense on a cancelled Sales Order."
 msgstr ""
 "La commande client %(order)s liée au compte analytique %(account)s est "
-"annulée. Vous ne pouvez pas enregistrer une note de frais sur une commande "
-"client annulée."
+"annulée. Vous ne pouvez pas enregistrer une dépense sur une commande client "
+"annulée."
 
 #. module: sale
 #. odoo-python
@@ -4892,9 +4892,9 @@ msgid ""
 "Please create a new SO linked to this Analytic Account."
 msgstr ""
 "La commande client %(order)s liée au compte analytique %(account)s est "
-"verrouillée en ce moment. Vous ne pouvez pas enregistrer une note de frais "
-"sur une commande client verrouillée. Veuillez créer une nouvelle  commande "
-"client liée à ce compte analytique."
+"verrouillée en ce moment. Vous ne pouvez pas enregistrer une dépense sur une"
+" commande client verrouillée. Veuillez créer une nouvelle  commande client "
+"liée à ce compte analytique."
 
 #. module: sale
 #. odoo-python
@@ -4904,7 +4904,7 @@ msgid ""
 " validated before registering expenses."
 msgstr ""
 "La commande client %(order)s liée au compte analytique %(account)s doit être"
-" validée avant d'enregistrer des notes de frais."
+" validée avant d'enregistrer des dépenses."
 
 #. module: sale
 #. odoo-python
@@ -5460,8 +5460,8 @@ msgid ""
 "Validated expenses can be re-invoiced to a customer at its cost or sales "
 "price."
 msgstr ""
-"Les notes de frais validées peuvent être refacturées à un client à leur coût"
-" ou à leur prix de vente."
+"Les dépenses validées peuvent être refacturées à un client à leur coût ou à "
+"leur prix de vente."
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_sale_order__validity_date
@@ -5621,6 +5621,12 @@ msgid ""
 msgstr ""
 "Vous ne pouvez pas changer le statut de cette ligne de commande. Nous vous "
 "invitons à supprimer cette ligne et à en créer une nouvelle."
+
+#. module: sale
+#. odoo-python
+#: code:addons/sale/models/sale_order_line.py:0
+msgid "You cannot modify the product of this order line."
+msgstr "Vous ne pouvez pas modifier le produit de cette ligne de commande."
 
 #. module: sale
 #: model:ir.model.constraint,message:sale.constraint_res_company_check_quotation_validity_days

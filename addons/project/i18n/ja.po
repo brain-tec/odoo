@@ -1400,7 +1400,7 @@ msgstr "協力者"
 #: model:ir.model.fields,field_description:project.field_project_share_wizard__collaborator_ids
 #: model_terms:ir.ui.view,arch_db:project.project_share_wizard_view_form
 msgid "Collaborators"
-msgstr "協力者"
+msgstr "共同作業者"
 
 #. module: project
 #: model:ir.model,name:project.model_project_collaborator
@@ -1469,7 +1469,7 @@ msgstr "ステージの設定"
 #: model_terms:ir.ui.view,arch_db:project.view_project_task_type_delete_confirmation_wizard
 #: model_terms:ir.ui.view,arch_db:project.view_project_task_type_unarchive_wizard
 msgid "Confirm"
-msgstr "確認"
+msgstr "確定"
 
 #. module: project
 #. odoo-python
@@ -2498,7 +2498,7 @@ msgstr "開発中"
 #: model:project.task.type,name:project.project_personal_stage_admin_0
 #: model:project.task.type,name:project.project_personal_stage_demo_0
 msgid "Inbox"
-msgstr "受信箱"
+msgstr "受信トレイ"
 
 #. module: project
 #: model:project.tags,name:project.project_tags_09
@@ -3469,9 +3469,9 @@ msgid ""
 "- followers: only followers of the related document or members of following channels\n"
 msgstr ""
 "メールゲートウェイを使用したメッセージドキュメント投稿のポリシー\n"
-"- everyone: 誰にでも投稿可能\n"
-"- partners: 許可されたパートナーのみ\n"
-"- followers: 関連ドキュメントのフォロワーか、フォローしているチャンネルのメンバーのみ\n"
+"- 全員: 誰でも投稿可能\n"
+"- 取引先: 認証済みの取引先のみ\n"
+"- フォロワー: 関連ドキュメントのフォロワーか、フォローしているチャネルのメンバーのみ\n"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__access_url
@@ -3690,7 +3690,7 @@ msgstr "プロジェクトの説明..."
 #. odoo-python
 #: code:addons/project/wizard/project_share_wizard.py:0
 msgid "Project shared with your collaborators."
-msgstr "協力者と共有するプロジェクト。"
+msgstr "共同作業者と共有済のプロジェクト。"
 
 #. module: project
 #: model:mail.template,subject:project.project_done_email_template

@@ -3639,7 +3639,7 @@ msgid ""
 "The distinction between working time (ex. Attendance) and absence (ex. "
 "Training) will be used in the computation of Accrual's plan rate."
 msgstr ""
-"Sự khác biệt giữa thời gian làm việc (VD: Chuyên cần) và vắng mặt (VD: Đào "
+"Sự khác biệt giữa thời gian làm việc (VD: Chấm công) và vắng mặt (VD: Đào "
 "tạo) sẽ được sử dụng để tính tỷ lệ kế hoạch tích lũy."
 
 #. module: hr_holidays
@@ -3874,7 +3874,7 @@ msgstr "Ngày nghỉ"
 #. module: hr_holidays
 #: model:ir.model,name:hr_holidays.model_hr_leave_allocation
 msgid "Time Off Allocation"
-msgstr "Phân bổ thời gian ngày nghỉ"
+msgstr "Phân bổ ngày nghỉ"
 
 #. module: hr_holidays
 #. odoo-python

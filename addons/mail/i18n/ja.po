@@ -378,7 +378,7 @@ msgstr "<b invisible=\"not no_record\" class=\"text-warning\">このモデルの
 msgid ""
 "<button>Change your preferences</button> to receive new notifications in "
 "your inbox."
-msgstr "<button>お気に入りを変更</button>して受信箱で新しい通知を受け取ります。"
+msgstr "<button>お気に入りを変更</button>して受信トレイで新しい通知を受け取ります。"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_kanban_open_target
@@ -585,7 +585,7 @@ msgstr "ボリューム設定にはパートナーかゲストが必要です。
 #. odoo-javascript
 #: code:addons/mail/static/src/discuss/call/common/call_invitation.xml:0
 msgid "Accept"
-msgstr "受理"
+msgstr "参加"
 
 #. module: mail
 #. odoo-python
@@ -1269,7 +1269,7 @@ msgstr "本当にこのメールアドレスのブラックリストを解除し
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity_plan_template__responsible_type__on_demand
 msgid "Ask at launch"
-msgstr "ローンチ時に聞く"
+msgstr "開始時に確認"
 
 #. module: mail
 #. odoo-javascript
@@ -1367,7 +1367,7 @@ msgstr "オーディオプレイヤー:"
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_alias__alias_contact__partners
 msgid "Authenticated Partners"
-msgstr "許可された取引先"
+msgstr "認証済み取引先"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__author_id
@@ -2213,7 +2213,7 @@ msgstr "独自の電子メールサーバーを構成する"
 #. odoo-javascript
 #: code:addons/mail/static/src/core/common/message_confirm_dialog.js:0
 msgid "Confirm"
-msgstr "確認"
+msgstr "確定"
 
 #. module: mail
 #. odoo-javascript
@@ -2239,7 +2239,7 @@ msgstr "おめでとうございます。活動が終了しました。"
 #. odoo-javascript
 #: code:addons/mail/static/src/core/web/thread_patch.xml:0
 msgid "Congratulations, your inbox is empty"
-msgstr "すばらしい！受信箱はカラです。"
+msgstr "すばらしい！受信トレイはカラです。"
 
 #. module: mail
 #. odoo-javascript
@@ -4381,7 +4381,7 @@ msgstr "例外活動を示すアイコン"
 #: model:ir.model.fields,help:mail.field_mail_followers__res_id
 #: model:ir.model.fields,help:mail.field_mail_wizard_invite__res_id
 msgid "Id of the followed resource"
-msgstr "追従するリソースのID"
+msgstr "フォロー対象レコードのID"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.discuss_channel_rtc_session_view_form
@@ -4450,7 +4450,7 @@ msgid ""
 "the email will be send as soon as possible. Unless a timezone is specified, "
 "it is considered as being in UTC timezone."
 msgstr ""
-"設定されている場合、キューマネジャーは日付の後に電子メールを送信します。 "
+"設定されている場合、送信予約管理機能は日付の後にEメールを送信します。 "
 "設定されていない場合、Eメールはできるだけ早く送信されます。タイムゾーンは指定されない限り、UTCタイムゾーンとみなされます。 "
 
 #. module: mail
@@ -4459,8 +4459,7 @@ msgid ""
 "If set, the queue manager will send the email after the date. If not set, "
 "the email will be send as soon as possible. You can use dynamic expression."
 msgstr ""
-"設定されている場合、キューマネジャーは日付の後に電子メールを送信します。 "
-"設定されていない場合、Eメールはできるだけ早く送信されます。ダイナミックエクスプレッションを使用可能です。 "
+"送信日時が設定されている場合、送信予約機能はその日時以降にEメールを送信します。設定されていない場合は、可能な限り早く送信されます。また、動的な式を使用することもできます。"
 
 #. module: mail
 #: model:ir.model.fields,help:mail.field_res_users_settings__mute_until_dt
@@ -4585,7 +4584,7 @@ msgstr "受信メールサーバ"
 #: code:addons/mail/static/src/core/web/store_service_patch.js:0
 #: model:ir.model.fields.selection,name:mail.selection__mail_notification__notification_type__inbox
 msgid "Inbox"
-msgstr "受信箱"
+msgstr "受信トレイ"
 
 #. module: mail
 #. odoo-javascript
@@ -4854,7 +4853,7 @@ msgstr "編集可能か"
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__is_mail_template_editor
 #: model:ir.model.fields,field_description:mail.field_mail_composer_mixin__is_mail_template_editor
 msgid "Is Editor"
-msgstr "編集者であり"
+msgstr "編集者である"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__message_is_follower
@@ -5500,12 +5499,12 @@ msgstr "%(action_name)sのメールテンプレートモデルがアクション
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_ir_mail_server__mail_template_ids
 msgid "Mail template using this mail server"
-msgstr "このメールサーバを使用するめーるテンプレート"
+msgstr "このメールサーバを使用するメールテンプレート"
 
 #. module: mail
 #: model:ir.actions.server,name:mail.ir_cron_mail_scheduler_action_ir_actions_server
 msgid "Mail: Email Queue Manager"
-msgstr "メール: Eメールキューマネジャー"
+msgstr "メール: メール送信予約管理機能"
 
 #. module: mail
 #: model:ir.actions.server,name:mail.ir_cron_mail_gateway_action_ir_actions_server
@@ -6318,7 +6317,7 @@ msgstr "メモ"
 #: model:ir.model.fields.selection,name:mail.selection__discuss_channel_member__custom_notifications__no_notif
 #: model:ir.model.fields.selection,name:mail.selection__res_users_settings__channel_notifications__no_notif
 msgid "Nothing"
-msgstr "なし"
+msgstr "通知しない"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_resend_partner__notification_id
@@ -7144,9 +7143,9 @@ msgid ""
 "- followers: only followers of the related document or members of following channels\n"
 msgstr ""
 "メールゲートウェイを使用したメッセージドキュメント投稿のポリシー\n"
-"- everyone: 誰にでも投稿可能\n"
-"- partners: 許可されたパートナーのみ\n"
-"- followers: 関連ドキュメントのフォロワーか、フォローしているチャンネルのメンバーのみ\n"
+"- 全員: 誰でも投稿可能\n"
+"- 取引先: 認証済みの取引先のみ\n"
+"- フォロワー: 関連ドキュメントのフォロワーか、フォローしているチャネルのメンバーのみ\n"
 
 #. module: mail
 #. odoo-javascript
@@ -9087,7 +9086,7 @@ msgstr "プラン\"%(plan_name)s\"が開始されました。"
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_template_preview__scheduled_date
 msgid "The queue manager will send the email after the date"
-msgstr "キューマネージャーは、日付の後に電子メールを送信します"
+msgstr "メールは送信予約管理機能により、指定日時を過ぎると自動送信されます。"
 
 #. module: mail
 #. odoo-python
@@ -9767,7 +9766,7 @@ msgstr "ファイルをアップロード"
 #. odoo-javascript
 #: code:addons/mail/static/src/core/web/activity_list_popover_item.xml:0
 msgid "Upload file"
-msgstr "ファイルをアップロードする"
+msgstr "ファイルをアップロード"
 
 #. module: mail
 #. odoo-javascript
@@ -10362,7 +10361,7 @@ msgstr "あなたはこのチャンネルの管理者です。本当に去りま
 #: code:addons/mail/static/src/core/web/thread_patch.xml:0
 msgid ""
 "You can mark any message as 'starred', and it shows up in this mailbox."
-msgstr "メッセージに「スター付き」のマークを付けると、この受信箱に表示されます。"
+msgstr "メッセージに「スター付き」のマークを付けると、この受信トレイに表示されます。"
 
 #. module: mail
 #. odoo-python
@@ -10543,7 +10542,7 @@ msgstr "お使いのブラウザはwebRTCをサポートしていません"
 #. odoo-javascript
 #: code:addons/mail/static/src/core/web/thread_patch.xml:0
 msgid "Your inbox is empty"
-msgstr "受信箱は空です。"
+msgstr "受信トレイは空です。"
 
 #. module: mail
 #. odoo-javascript

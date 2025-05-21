@@ -966,7 +966,7 @@ msgstr "아프리카"
 #. odoo-javascript
 #: code:addons/web/static/src/core/confirmation_dialog/confirmation_dialog.js:0
 msgid "Alert"
-msgstr "경고"
+msgstr "주의"
 
 #. module: web
 #. odoo-javascript
@@ -3200,6 +3200,13 @@ msgid ""
 "If checked, users won't be able to create records through the autocomplete "
 "dropdown at all."
 msgstr "이 옵션을 선택하면 사용자는 자동 완성 드롭다운을 통해 레코드를 생성할 수 없습니다."
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "If true, non-literals are accepted"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6253,6 +6260,20 @@ msgstr "이 셀의 내용이 XLSX 파일(%s자 이상)에 비해 너무 깁니�
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "The domain involves non-literals. Their evaluation might fail."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "The domain should not involve non-literals"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.xml:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 msgid ""
@@ -6983,7 +7004,7 @@ msgstr "화장실"
 #: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
 #: code:addons/web/static/src/views/fields/domain/domain_field.xml:0
 msgid "Warning"
-msgstr "경고"
+msgstr "주의"
 
 #. module: web
 #. odoo-javascript
@@ -6995,7 +7016,7 @@ msgstr "향후 날짜에 대한 경고"
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid "Warnings"
-msgstr "경고"
+msgstr "주의"
 
 #. module: web
 #. odoo-javascript
@@ -24722,7 +24743,7 @@ msgstr "하현달"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "warning"
-msgstr "경고"
+msgstr "주의"
 
 #. module: web
 #. odoo-javascript

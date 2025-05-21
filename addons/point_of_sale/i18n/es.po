@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 12:10+0000\n"
+"POT-Creation-Date: 2025-03-19 11:06+0000\n"
 "PO-Revision-Date: 2024-07-16 09:15+0000\n"
 "Last-Translator: Larissa Manderfeld, 2025\n"
 "Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
@@ -1383,7 +1383,7 @@ msgstr "Efectivo de la tienda de ropa"
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid "Cash Furn. Shop"
-msgstr "Efectivo de la mueblería"
+msgstr "Efectivo de la tienda de muebles"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -3096,7 +3096,7 @@ msgstr "Nombre completo de producto"
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid "Furniture Shop"
-msgstr "Mueblería"
+msgstr "Tienda de muebles"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -5142,7 +5142,7 @@ msgid ""
 "Some browsers don't allow HTTP calls from websites to devices in the network (for security reasons). If it is the case, you will need to follow Odoo's documentation for 'Self-signed certificate for ePOS printers' and 'Secure connection (HTTPS)' to solve the issue. "
 msgstr ""
 "Compruebe que la impresora siga conectada.  \n"
-"Algunos navegadores no permiten solicitudes HTTP desde sitios web a dispositivos en la red (por motivos de seguridad). Si ese es el caso, consulte la documentación de Odoo para \"Certificado autofirmado para impresoras ePOS\" y \"Conexión segura (HTTPS)\" para solucionar el problema."
+"Algunos navegadores no permiten solicitudes HTTP desde sitios web a dispositivos en la red (por motivos de seguridad). Si ese es el caso, consulte la documentación de Odoo para “Certificado autofirmado para impresoras ePOS” y “Conexión segura (HTTPS)” para solucionar el problema."
 
 #. module: point_of_sale
 #. odoo-python
@@ -8834,6 +8834,17 @@ msgstr "No puede facturar pedidos que pertenezcan a diferentes empresas."
 
 #. module: point_of_sale
 #. odoo-python
+#: code:addons/point_of_sale/models/account_cash_rounding.py:0
+#, python-format
+msgid ""
+"You cannot delete a rounding method that is used in a Point of Sale "
+"configuration."
+msgstr ""
+"No puede eliminar un método de redondeo que se utilice en una configuración "
+"de Punto de venta."
+
+#. module: point_of_sale
+#. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid ""
 "You cannot share open orders with configuration that does not use the same "
@@ -9051,7 +9062,7 @@ msgstr "p. ej. Entrada - Plato fuerte - Postre"
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_config_view_form
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid "ePos Printer"
-msgstr "Impresora de ePos"
+msgstr "Impresora ePos"
 
 #. module: point_of_sale
 #. odoo-javascript

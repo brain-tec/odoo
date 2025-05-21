@@ -69,14 +69,14 @@ msgid ""
 " * Done: The transfer has been processed.\n"
 " * Cancelled: The transfer has been cancelled."
 msgstr ""
-"*ドラフト:転送はまだ確認されていません。予約は適用されません。 \n"
+"*ドラフト:転送はまだ確認されていません。引当は適用されません。 \n"
 "*別の操作を待機中:この転送は、準備が整う前に別の操作を待機しています。 \n"
-"*待機中:転送は一部の製品の可用性を待機しています。 \n"
-"(a)配送ポリシーは'できるだけ早く'です。製品を予約することはできません。 \n"
-"(b)配送ポリシーは'すべての製品の準備ができたら'です。すべての製品を予約できるわけではありません。 \n"
+"*待機中:転送は一部のプロダクトの利用可能在庫を待っています。 \n"
+"(a)配送ポリシーは'できるだけ早く'です。プロダクトを引当てすることはできません。 \n"
+"(b)配送ポリシーは'すべてのプロダクトの準備ができたら'です。すべてのプロダクトを引当てできるわけではありません。 \n"
 "*準備完了:転送を処理する準備ができています。 \n"
-"(a)配送ポリシーは'できるだけ早く'です。少なくとも1つの製品が予約されています。 \n"
-"(b)配送ポリシーは'すべての製品の準備ができたら'です。すべての製品が予約されています。 \n"
+"(a)配送ポリシーは'できるだけ早く'です。少なくとも1つのプロダクトが引当されています。 \n"
+"(b)配送ポリシーは'すべてのプロダクトの準備ができたら'です。すべてのプロダクトが引当されています。 \n"
 "*完了:転送は処理されました。 \n"
 "*キャンセル済み:転送はキャンセルされました。"
 
@@ -264,7 +264,7 @@ msgid ""
 msgstr ""
 "*新規: 在庫移動が作成されましたがまだ確認されていません。\n"
 "*他の移動まち: この前にリンクされた在庫移動が完了する必要があります。\n"
-"* 利用可能在庫待ち: 在庫移動は確認されましたがプロダクトが引当できません。\n"
+"* 在庫待ち: 在庫移動は確認されましたがプロダクトが引当できません。\n"
 "* 在庫利用可能: 在庫移動のプロダクトは引当済です。\n"
 "* 完了: プロダクトが転送され、転送が検証されました。"
 
@@ -534,8 +534,8 @@ msgid ""
 "<i class=\"fa fa-exclamation-triangle\"/>\n"
 "                                All products could not be reserved. Click on the \"Check Availability\" button to try to reserve products."
 msgstr ""
-"<i class=\"fa fa-exclamation-triangle\"/>すべてのプロダクトを予約できませんでした。 "
-"'在庫確認'ボタンをクリックして、プロダクトの予約を試みてください。</i>"
+"<i class=\"fa fa-exclamation-triangle\"/>1すべての商品を引当できませんでした。 '在庫を確認' "
+"ボタンをクリックして、プロダクトの引当を試みてください</i>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_picking_type_kanban
@@ -660,18 +660,18 @@ msgstr "<span class=\"o_stat_text\">トレーサビリティ</span>"
 #: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
 msgid "<span><strong>Customer Address:</strong></span>"
-msgstr "<span><strong>顧客アドレス:</strong></span>"
+msgstr "<span><strong>顧客住所:</strong></span>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
 msgid "<span><strong>Delivery Address:</strong></span>"
-msgstr "<span><strong>配送先アドレス:</strong></span>"
+msgstr "<span><strong>配送先住所:</strong></span>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
 msgid "<span><strong>Vendor Address:</strong></span>"
-msgstr "<span><strong>仕入先アドレス:</strong></span>"
+msgstr "<span><strong>仕入先住所:</strong></span>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
@@ -682,7 +682,7 @@ msgstr "<span><strong>仕入先:</strong></span>"
 #: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
 msgid "<span><strong>Warehouse Address:</strong></span>"
-msgstr "<span><strong>倉庫アドレス:</strong></span>"
+msgstr "<span><strong>倉庫住所:</strong></span>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
@@ -745,7 +745,7 @@ msgstr "<strong>配送</strong>"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
 msgid "<strong>Delivery address</strong>"
-msgstr "<strong>配送先</strong>"
+msgstr "<strong>配送先住所</strong>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_inventory_conflict_form_view
@@ -1502,7 +1502,7 @@ msgstr "以下の文章は提案であり、Odoo S.A.ではその責任を負い
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__res_partner__picking_warn__block
 msgid "Blocking Message"
-msgstr "阻止メッセージ"
+msgstr "ブロッキングメッセージ"
 
 #. module: stock
 #. odoo-python
@@ -1544,7 +1544,7 @@ msgid ""
 "current stock) to gather products. If we want to chain moves and have this "
 "one to wait for the previous, this second option should be chosen."
 msgstr ""
-"デフォルトでは、システムは移動元ロケーションの在庫から引き当て、受け入れ可能になるまで受動的に待機します。もう一つの方法として、供給元ロケーションに対して直接調達を作成し(現在の在庫状況を無視して)、プロダクトを集めることも可能です。もし移動を連鎖させ、この移動を前の移動が完了するまで待機させたい場合は、後者のオプションを選択する必要があります。"
+"デフォルトでは、システムは移動元ロケーションの在庫から取得し、在庫が利用可能になるのを受動的に待機します。一方、もう一つの方法では、出庫元ロケーションに対して直接調達を作成し、現在の在庫を無視してプロダクトを手配することができます。在庫移動を連鎖させ、この移動を前の移動が完了するまで待機させたい場合は、後者の方法を選択する必要があります。"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location__active
@@ -1717,7 +1717,7 @@ msgstr "集約バーコード(すなわち、複数のバーコードエンコ�
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
 #: model_terms:ir.ui.view,arch_db:stock.vpicktree
 msgid "Check Availability"
-msgstr "利用可能確認"
+msgstr "在庫を確認"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__has_packages
@@ -1924,7 +1924,7 @@ msgstr "設定"
 #: model_terms:ir.ui.view,arch_db:stock.view_product_replenish
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_quantity_history
 msgid "Confirm"
-msgstr "確認"
+msgstr "確定"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_package_level__state__confirmed
@@ -2670,7 +2670,7 @@ msgstr "配送"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
 msgid "Delivery Address"
-msgstr "配送先"
+msgstr "配送先住所"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery
@@ -3036,7 +3036,7 @@ msgstr "使い捨てボックス"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_warn_insufficient_qty_scrap_form_view
 msgid "Do you confirm you want to scrap"
-msgstr "スクラップしたいことを確認しますか"
+msgstr "本当に廃棄しますか?"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_type_form
@@ -3228,7 +3228,7 @@ msgstr "配送予定"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_product_expiry
 msgid "Expiration Dates"
-msgstr "有効期限"
+msgstr "使用期限"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_location_form
@@ -3343,7 +3343,7 @@ msgstr "予測"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__forecast_availability
 msgid "Forecast Availability"
-msgstr "可用性の予測"
+msgstr "予測在庫"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_warehouse_orderpoint_form
@@ -3878,7 +3878,7 @@ msgstr "このチェックボックスをオンにすると、Odooはピッキ�
 msgid ""
 "If this checkbox is ticked, Odoo will automatically print the package label "
 "when \"Put in Pack\" button is used."
-msgstr "このチェックボックスをオンにすると、\"梱包に入れる\"ボタンを使用した際に、Odooは自動的に梱包ラベルを印刷します。"
+msgstr "このチェックボックスをオンにすると、\"梱包する\"ボタンを使用した際に、Odooは自動的に梱包ラベルを印刷します。"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__auto_print_packages
@@ -4662,7 +4662,7 @@ msgstr "遅れた活動"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Late Availability"
-msgstr "遅延利用可能"
+msgstr "在庫遅れ"
 
 #. module: stock
 #: model:ir.actions.act_window,name:stock.action_picking_tree_late
@@ -6358,7 +6358,7 @@ msgstr "ロット番号とシリアル番号のGS1バーコードを印刷"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__group_stock_lot_print_gs1
 msgid "Print GS1 Barcodes for Lots & Serial Numbers"
-msgstr "ロット番号とシリアル番号のGS1バーコードを印刷"
+msgstr "ロット/シリアル番号のGS1バーコードを印刷"
 
 #. module: stock
 #. odoo-javascript
@@ -6448,13 +6448,13 @@ msgstr "調達:スケジューラーを実行する"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move_line__produce_line_ids
 msgid "Produce Line"
-msgstr "プロデュースライン"
+msgstr "生産ライン"
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/product.py:0
 msgid "Produced Qty"
-msgstr "プロダクト数量"
+msgstr "生産済数量"
 
 #. module: stock
 #. odoo-javascript
@@ -6708,7 +6708,7 @@ msgstr "プロダクト"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking__products_availability_state
 msgid "Products Availability State"
-msgstr "製品の入手可能性の状態"
+msgstr "プロダクトの在庫可用性ステータス"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__priority
@@ -7273,7 +7273,7 @@ msgstr "部分的に処理されたピッキングの残部分"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_removal
 msgid "Removal"
-msgstr "除去"
+msgstr "払出"
 
 #. module: stock
 #: model:ir.model,name:stock.model_product_removal
@@ -8106,7 +8106,7 @@ msgstr ""
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Set expiration dates on lots & serial numbers"
-msgstr "ロット & シリアル番号で有効期限日を設定します"
+msgstr "ロット/シリアル番号で使用期限を設定する"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -8206,7 +8206,7 @@ msgstr "割り当てを表示"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking__show_check_availability
 msgid "Show Check Availability"
-msgstr "チェックの可用性を表示"
+msgstr "在庫確認ボタンを表示"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__show_operations
@@ -8360,7 +8360,7 @@ msgstr "情報源"
 #: model:ir.model.fields,field_description:stock.field_stock_scrap__origin
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Source Document"
-msgstr "参照元"
+msgstr "元ドキュメント"
 
 #. module: stock
 #. odoo-python
@@ -8763,7 +8763,7 @@ msgstr "技術情報"
 msgid ""
 "Technical field used to compute whether the button \"Check Availability\" "
 "should be displayed."
-msgstr "可用性の確認'ボタンを表示するかどうかを計算するために使用される技術フィールド。"
+msgstr " \"在庫を確認\" ボタンを表示するかどうかを計算するために使用される技術フィールド。"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_change_product_qty__product_tmpl_id
@@ -9073,7 +9073,7 @@ msgstr "この在庫移動を作成した在庫規則"
 msgid ""
 "The stock will be reserved for operations waiting for availability and the "
 "reordering rules will be triggered."
-msgstr "利用可能在庫待ちのオペレーションに在庫を引き当て、再オーダ規則をトリガします。"
+msgstr "在庫待ちのオペレーションに在庫を引き当て、再オーダ規則をトリガします。"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_rule__propagate_warehouse_id
@@ -9117,8 +9117,8 @@ msgid ""
 "on-demand flow. The requested delivery address will be the customer delivery"
 " address and not your warehouse."
 msgstr ""
-"これにより、ベンダーに顧客への配送を要求するために、製品に適用するドロップシッピングルートが追加されます。 "
-"ドロップシッピングする製品は、販売注文が確認されると、見積依頼を生成します。これはオンデマンドフローです。要求された配送先住所は、倉庫ではなく、顧客の配送先住所になります。"
+"これにより、仕入先に顧客への配送を要求するために、プロダクトに適用する直送ルートが追加されます。 "
+"直送するプロダクトは、販売オーダが確定されると、見積依頼を生成します。これはオンデマンドフローです。要求された配送先住所は、倉庫ではなく、顧客の配送先住所になります。"
 
 #. module: stock
 #. odoo-python
@@ -9362,19 +9362,19 @@ msgstr "適用待ち"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_backorder_confirmation_line__to_backorder
 msgid "To Backorder"
-msgstr "バックオーダ作成"
+msgstr "バックオーダ待ち"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.quant_search_view
 msgid "To Count"
-msgstr "未棚卸"
+msgstr "棚卸待ち"
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_picking.py:0
 #: model_terms:ir.ui.view,arch_db:stock.stock_picking_type_kanban
 msgid "To Deliver"
-msgstr "未配送"
+msgstr "配送待ち"
 
 #. module: stock
 #: model:ir.actions.act_window,name:stock.action_picking_tree_ready
@@ -9394,17 +9394,17 @@ msgstr "移動先"
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__qty_to_order
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_orderpoint__qty_to_order
 msgid "To Order"
-msgstr "オーダ予定"
+msgstr "オーダ予定数量"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_orderpoint__qty_to_order_computed
 msgid "To Order Computed"
-msgstr "算出オーダする"
+msgstr "オーダ予定数量(自動計算)"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_orderpoint__qty_to_order_manual
 msgid "To Order Manual"
-msgstr "手動オーダする"
+msgstr "オーダ予定数量(手動)"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_quant_relocate_view_form
@@ -9416,7 +9416,7 @@ msgstr "移動先梱包"
 #: code:addons/stock/models/stock_picking.py:0
 #: model_terms:ir.ui.view,arch_db:stock.stock_picking_type_kanban
 msgid "To Process"
-msgstr "未処理"
+msgstr "処理待ち"
 
 #. module: stock
 #. odoo-python
@@ -9428,7 +9428,7 @@ msgstr "未入荷"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_reorder_report_search
 msgid "To Reorder"
-msgstr "再注文対象"
+msgstr "再発注対象"
 
 #. module: stock
 #. odoo-javascript
@@ -9543,7 +9543,8 @@ msgid ""
 "Track following dates on lots & serial numbers: best before, removal, end of life, alert. \n"
 " Such dates are set automatically at lot/serial number creation based on values set on the product (in days)."
 msgstr ""
-"ロットとシリアル番号の次の日付を追跡します:ベストビフォア、削除、サポート終了、アラート。このような日付は、製品に設定された値(日数)に基づいて、ロット/シリアル番号の作成時に自動的に設定されます。"
+"ロット/シリアル番号の以下の日付を追跡: 品質保持期限、払出、使用期限、アラート。\n"
+"これらの日付は、プロダクトに設定された値(日数)に基づき、ロット番号/シリアル番号の作成時に自動的に設定されます。"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -9552,7 +9553,8 @@ msgid ""
 " life, alert. Such dates are set automatically at lot/serial number creation"
 " based on values set on the product (in days)."
 msgstr ""
-"ロットとシリアル番号の次の日付を追跡します:ベストビフォア、削除、サポート終了、アラート。このような日付は、製品に設定された値(日数)に基づいて、ロット/シリアル番号の作成時に自動的に設定されます。"
+"ロット/シリアル番号の以下の日付を追跡: "
+"品質保持期限、払出、使用期限、アラート。これらの日付は、プロダクトに設定された値(日数)に基づき、ロット番号/シリアル番号の作成時に自動的に設定されます。"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -9997,7 +9999,7 @@ msgstr "ビュー"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.product_view_kanban_catalog
 msgid "View Availability"
-msgstr "利用可能表示"
+msgstr "在庫を表示"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_template_property_form

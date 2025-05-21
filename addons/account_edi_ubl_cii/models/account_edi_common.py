@@ -3,7 +3,7 @@ from markupsafe import Markup
 from odoo import _, models, Command
 from odoo.addons.base.models.res_bank import sanitize_account_number
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import float_repr, format_list
+from odoo.tools import float_is_zero, float_repr, format_list
 from odoo.tools.float_utils import float_round
 from odoo.tools.misc import clean_context, formatLang, html_escape
 from odoo.tools.xml_utils import find_xml_value
@@ -55,7 +55,7 @@ EAS_MAPPING = {
     'CY': {'9928': 'vat'},
     'CZ': {'9929': 'vat'},
     'DE': {'9930': 'vat'},
-    'DK': {'0184': 'vat', '0198': 'vat'},
+    'DK': {'0184': 'company_registry', '0198': 'vat'},
     'EE': {'9931': 'vat'},
     'ES': {'9920': 'vat'},
     'FI': {'0216': None},
@@ -644,7 +644,8 @@ class AccountEdiCommon(models.AbstractModel):
         # discount
         discount = 0
         if billed_qty * price_unit != 0 and price_subtotal is not None:
-            discount = 100 * (1 - (price_subtotal - charge_amount) / (billed_qty * price_unit))
+            inferred_discount = 100 * (1 - (price_subtotal - charge_amount) / (billed_qty * price_unit))
+            discount = inferred_discount if not float_is_zero(inferred_discount, 2) else 0.0
 
         # Sometimes, the xml received is very bad; e.g.:
         #   * unit price = 0, qty = 0, but price_subtotal = -200
@@ -731,6 +732,8 @@ class AccountEdiCommon(models.AbstractModel):
                 line_values['tax_ids'].append(tax.id)
                 if tax.price_include:
                     line_values['price_unit'] *= (1 + tax.amount / 100)
+        if not line_values['tax_ids']:
+            line_values['tax_ids'] = False
         return logs
 
     def _retrieve_line_charges(self, invoice_line, line_values):

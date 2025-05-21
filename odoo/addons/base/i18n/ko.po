@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.4+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-03 11:38+0000\n"
+"POT-Creation-Date: 2025-05-13 14:27+0000\n"
 "PO-Revision-Date: 2024-07-16 09:15+0000\n"
 "Last-Translator: Sarah Park, 2025\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
@@ -586,6 +586,14 @@ msgstr ""
 "POS에 IOT Box가 없을 경우 Epson ePOS 프린터를 사용합니다. \n"
 
 #. module: base
+#: model:ir.module.module,summary:base.module_l10n_eg_edi_eta
+msgid ""
+"\n"
+"            Egypt Tax Authority Invoice Integration\n"
+"        "
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_l10n_ke_edi_oscu
 msgid ""
 "\n"
@@ -606,6 +614,17 @@ msgstr ""
 "\n"
 "            케냐 eTIMS 디바이스 EDI 재고 통합\n"
 "        "
+
+#. module: base
+#: model:ir.module.module,summary:base.module_l10n_sa_edi
+msgid ""
+"\n"
+"        E-Invoicing, Universal Business Language\n"
+"    "
+msgstr ""
+"\n"
+"        전자 청구서발행, 범용 비즈니스 언어\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_ke_edi_oscu_mrp
@@ -1156,19 +1175,6 @@ msgstr ""
 "==========================================\n"
 
 #. module: base
-#: model:ir.module.module,description:base.module_l10n_sa_hr_payroll_account
-msgid ""
-"\n"
-"Accounting Data for Saudi Arabia Payroll Rules.\n"
-"=======================================================\n"
-"\n"
-msgstr ""
-"\n"
-"사우디아라비아 급여 규칙용 회계 데이터입니다.\n"
-"=======================================================\n"
-"\n"
-
-#. module: base
 #: model:ir.module.module,description:base.module_l10n_ke_hr_payroll_account
 msgid ""
 "\n"
@@ -1268,6 +1274,19 @@ msgstr ""
 "=========================================\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_sa_hr_payroll_account
+msgid ""
+"\n"
+"Accounting Data for Saudi Arabia Payroll Rules.\n"
+"=======================================================\n"
+"\n"
+msgstr ""
+"\n"
+"사우디아라비아 급여 규칙용 회계 데이터입니다.\n"
+"=======================================================\n"
+"\n"
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_sk_hr_payroll_account
 msgid ""
 "\n"
@@ -1364,6 +1383,15 @@ msgid ""
 msgstr ""
 "\n"
 "나이지리아 회계 보고서\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_pk_reports
+msgid ""
+"\n"
+"Accounting Reports for Pakistan (Profit and Loss report and Balance Sheet)\n"
+msgstr ""
+"\n"
+"파키스탄 회계 보고서 (손익계산서 및 재무상태표)\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_hu
@@ -1692,15 +1720,6 @@ msgstr ""
 "\n"
 "OHADA 회계 보고서\n"
 "=================================\n"
-
-#. module: base
-#: model:ir.module.module,description:base.module_l10n_pk_reports
-msgid ""
-"\n"
-"Accounting Reports for Pakistan (Profit and Loss report and Balance Sheet)\n"
-msgstr ""
-"\n"
-"파키스탄 회계 보고서 (손익계산서 및 재무상태표)\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_pl_reports
@@ -2192,6 +2211,13 @@ msgid ""
 msgstr ""
 "\n"
 "문서 앱에서 이력서 및 편지를 관리할 수 있는 기능을 추가합니다.\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_it_xml_export
+msgid ""
+"\n"
+"Additional module to allow the export of the Italian monthly tax report to XML format.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_it_edi_ndd
@@ -4556,22 +4582,11 @@ msgstr ""
 "루마니아의 전자 청구서 기능 구현\n"
 
 #. module: base
-#: model:ir.module.module,description:base.module_l10n_dk_oioubl
-msgid ""
-"\n"
-"E-invoice implementation for the Denmark\n"
-msgstr ""
-"\n"
-"덴마크의 전자 청구서 기능 구현\n"
-
-#. module: base
 #: model:ir.module.module,description:base.module_l10n_sa_edi
 msgid ""
 "\n"
-"E-invoice implementation for the Kingdom of Saudi Arabia\n"
+"E-invoice implementation for Saudi Arabia; Integration with ZATCA\n"
 msgstr ""
-"\n"
-"사우디아라비아의 전자 청구서 기능 구현\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_sa_edi_pos
@@ -4581,6 +4596,27 @@ msgid ""
 msgstr ""
 "\n"
 "사우디아라비아의 전자 청구서 기능 구현; ZATCA 통합 (POS)\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_dk_oioubl
+msgid ""
+"\n"
+"E-invoice implementation for the Denmark\n"
+msgstr ""
+"\n"
+"덴마크의 전자 청구서 기능 구현\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_id_efaktur_coretax
+msgid ""
+"\n"
+"E-invoicing feature provided by DJP (Indonesian Tax Office). As of January 1st 2025,\n"
+"Indonesia is using CoreTax system, which changes the file format and content of E-Faktur.\n"
+"We're changing from CSV files into XML.\n"
+"At the same time, due to tax regulation changes back and forth, for general E-Faktur now,\n"
+"TaxBase (DPP) has to be mulitplied by factor of 11/12 while multiplied to tax of 12% which\n"
+"is resulting to 11%.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_skills_slides
@@ -4863,6 +4899,39 @@ msgstr ""
 "직원 프로필에서 문서에 쉽게 접근할 수 있습니다.\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_eg
+msgid ""
+"\n"
+"Egypt Accounting Module\n"
+"==============================================================================\n"
+"Egypt Accounting Basic Charts and Localization.\n"
+"\n"
+"Activates:\n"
+"\n"
+"- Chart of Accounts\n"
+"- Taxes\n"
+"- VAT Return\n"
+"- Withholding Tax Report\n"
+"- Schedule Tax Report\n"
+"- Other Taxes Report\n"
+"- Fiscal Positions\n"
+msgstr ""
+"\n"
+"이집트 회계 모듈\n"
+"==============================================================================\n"
+"이집트 회계 기본 과목표 및 현지화.\n"
+"\n"
+"활성화 대상:\n"
+"\n"
+"- 계정과목표\n"
+"- 세금\n"
+"- 부가가치세 신고\n"
+"- 원천세 세금 신고\n"
+"- 연금 세금 신고\n"
+"- 기타 세금 신고\n"
+"- 재정 위치\n"
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_eg_hr_payroll
 msgid ""
 "\n"
@@ -4884,6 +4953,19 @@ msgstr ""
 "- 사회 보험료 계산\n"
 "- 근무 종료 조항\n"
 "- 세금 감면 계산 및 공제\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_eg_edi_eta
+msgid ""
+"\n"
+"Egypt Tax Authority Invoice Integration\n"
+"==============================================================================\n"
+"Integrates with the ETA portal to automatically send and sign the Invoices to the Tax Authority.\n"
+msgstr ""
+"\n"
+"이집트 세무 기관 청구서 통합\n"
+"====================================================================================\n"
+"ETA 포털에 연동하여 자동으로 청구서를 세무 기관으로 전송하고 서명합니다.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_edi
@@ -5217,6 +5299,14 @@ msgid ""
 msgstr ""
 "\n"
 "조정 위젯에서 재고 내역을 필터링합니다.\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_hardware_shop
+msgid ""
+"\n"
+"For Hardware Stores that carry a large selection of products: plumbing, machinery, household, gardening, carpenter and electrical, etc.\n"
+"Using Point of Sale, Inventory, Sales, Purchase, Accounting, Contact, Employee, Dashboard, Barcode, and Documents to grow their business.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_tr_nilvera_einvoice
@@ -6397,17 +6487,6 @@ msgstr ""
 "위시리스트에 있는 품목들을 비교할 수 있습니다\n"
 
 #. module: base
-#: model:ir.module.module,description:base.module_l10n_sa_pos
-msgid ""
-"\n"
-"Saudi Arabia POS Localization\n"
-"===========================================================\n"
-msgstr ""
-"\n"
-"사우디아라비아 POS 현지화\n"
-"=======================================================\n"
-
-#. module: base
 #: model:ir.module.module,description:base.module_appointment_hr_recruitment
 msgid ""
 "\n"
@@ -6453,28 +6532,6 @@ msgstr ""
 "    * 기본/총/순 급여 설정 허용\n"
 "    * 직원 급여명세서\n"
 "    * 휴가 관리 모듈과 통합\n"
-
-#. module: base
-#: model:ir.module.module,description:base.module_l10n_sa_hr_payroll
-msgid ""
-"\n"
-"Saudi Arabia Payroll and End of Service rules.\n"
-"===========================================================\n"
-"- Basic Calculation\n"
-"- End of Service Calculation\n"
-"- Other Input Rules (Overtime, Salary Attachments, etc.)\n"
-"- Split Structures for EOS and Monthly Salaries\n"
-"- GOSI Employee Deduction\n"
-"- Unpaid leaves\n"
-msgstr ""
-"\n"
-"사우디 아라비아 급여 및 근무 종료 규칙.================================================================\n"
-"- 기본급 계산\n"
-"- 근무 종료 정산\n"
-"- 기타 입력 규칙(초과 근무, 급여 공제 등)\n"
-"- EOS 및 월 급여 기준 분할\n"
-"- GOSI 직원 공제\n"
-"- 무급 휴가\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_stock_landed_costs
@@ -7000,6 +7057,14 @@ msgstr ""
 "휴가 유형을 휴가로 설정하면 휴가가 승인될 때 ​​휴가 일정이 자동으로 만들어져 휴가가 내부 달력(CRM 모듈의 일정)과 동기화됩니다.\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_industry_real_estate
+msgid ""
+"\n"
+"Manage your long term or mid long term rental properties\n"
+"Manage your properties, create and manage rental contracts, and streamline your entire rental process. Efficient property management.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_mail_group
 msgid ""
 "\n"
@@ -7203,6 +7268,15 @@ msgstr ""
 "자원 예약 일정표를 관리합니다. 또한 자원의 가동여부도 관리합니다.\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_se_sie4_export
+msgid ""
+"\n"
+"Module for the export of accounting data to SIE 4 standard files.\n"
+"Official website: https://sie.se/\n"
+"XSD and documentation: https://sie.se/format/\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_fr_fec_import
 msgid ""
 "\n"
@@ -7298,6 +7372,15 @@ msgstr ""
 "\n"
 "SAF-T 파일은 일부 국가에서 기업이 세무 당국에 반드시 제출해야 하는 표준 회계 보고서입니다.\n"
 "이 모듈을 사용하면 해당 파일에서 계정, 전표, 협력사, 전표 및 작업 내역을 가져올 수 있습니다.\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_se_sie4_import
+msgid ""
+"\n"
+"Module for the import of SIE 4 standard files.\n"
+"Official website: https://sie.se/\n"
+"XSD and documentation: https://sie.se/format/\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_se_sie_import
@@ -7708,6 +7791,15 @@ msgstr ""
 "=========================================================\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_non_profit_organization
+msgid ""
+"\n"
+"Non Profit Organization\n"
+"\n"
+"This industry module pre-configure odoo for non profit organizations.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_no_saft
 msgid ""
 "\n"
@@ -7728,35 +7820,6 @@ msgid ""
 msgstr ""
 "\n"
 "조정 위젯에 일치하는 판매 주문이 있음을 알립니다.\n"
-
-#. module: base
-#: model:ir.module.module,description:base.module_l10n_sa
-msgid ""
-"\n"
-"Saudi Arabia Accounting Module\n"
-"===========================================================\n"
-"Saudi Arabia Accounting Basic Charts and Localization\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of Accounts\n"
-"- Taxes\n"
-"- Vat Filling Report\n"
-"- Withholding Tax Report\n"
-"- Fiscal Positions\n"
-msgstr ""
-"\n"
-"사우디 아라비아 회계 모듈\n"
-"==============================================================\n"
-"사우디 아라비아 회계 기본 과목표 및 현지화\n"
-"\n"
-"활성화 대상:\n"
-"\n"
-"- 계정과목표\n"
-"- 세금\n"
-"- 부가가치세 신고 보고서\n"
-"- 원천징수세 신고서\n"
-"- 재정 위치\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_web_enterprise
@@ -7984,6 +8047,33 @@ msgstr ""
 "\n"
 "작업지시용 PLM\n"
 "=================================================\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_pk
+msgid ""
+"\n"
+"Pakistan Accounting Module\n"
+"=======================================================\n"
+"Pakistan accounting basic charts and localization.\n"
+"\n"
+"Activates:\n"
+"\n"
+"- Chart of Accounts\n"
+"- Taxes\n"
+"- Tax Report\n"
+"- Withholding Tax Report\n"
+msgstr ""
+"\n"
+"파키스탄 회계 모듈\n"
+"=======================================================\n"
+"파키스탄 회계 기본 과목표 및 현지화.\n"
+"\n"
+"활성화 대상\n"
+"\n"
+"- 계정과목표\n"
+"- 세금\n"
+"- 세금 신고서\n"
+"- 원천징수 세금 신고서\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_pk_hr_payroll
@@ -8480,6 +8570,68 @@ msgstr ""
 "연결 모듈.\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_sa
+msgid ""
+"\n"
+"Saudi Arabia Accounting Module\n"
+"===========================================================\n"
+"Saudi Arabia Accounting Basic Charts and Localization\n"
+"\n"
+"Activates:\n"
+"\n"
+"- Chart of Accounts\n"
+"- Taxes\n"
+"- Vat Filling Report\n"
+"- Withholding Tax Report\n"
+"- Fiscal Positions\n"
+msgstr ""
+"\n"
+"사우디 아라비아 회계 모듈\n"
+"==============================================================\n"
+"사우디 아라비아 회계 기본 과목표 및 현지화\n"
+"\n"
+"활성화 대상:\n"
+"\n"
+"- 계정과목표\n"
+"- 세금\n"
+"- 부가가치세 신고 보고서\n"
+"- 원천징수세 신고서\n"
+"- 재정 위치\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_sa_pos
+msgid ""
+"\n"
+"Saudi Arabia POS Localization\n"
+"===========================================================\n"
+msgstr ""
+"\n"
+"사우디아라비아 POS 현지화\n"
+"=======================================================\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_sa_hr_payroll
+msgid ""
+"\n"
+"Saudi Arabia Payroll and End of Service rules.\n"
+"===========================================================\n"
+"- Basic Calculation\n"
+"- End of Service Calculation\n"
+"- Other Input Rules (Overtime, Salary Attachments, etc.)\n"
+"- Split Structures for EOS and Monthly Salaries\n"
+"- GOSI Employee Deduction\n"
+"- Unpaid leaves\n"
+msgstr ""
+"\n"
+"사우디 아라비아 급여 및 근무 종료 규칙.================================================================\n"
+"- 기본급 계산\n"
+"- 근무 종료 정산\n"
+"- 기타 입력 규칙(초과 근무, 급여 공제 등)\n"
+"- EOS 및 월 급여 기준 분할\n"
+"- GOSI 직원 공제\n"
+"- 무급 휴가\n"
+
+#. module: base
 #: model:ir.module.module,description:base.module_project_forecast
 msgid ""
 "\n"
@@ -8908,6 +9060,14 @@ msgstr ""
 "    * ELM 5 표준에 따라 급여 명세서 계산\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_agriculture_shop
+msgid ""
+"\n"
+"Tailored Setup for Agricultural Retail Businesses:\n"
+"This module is for B2B and B2C sales of farming products, including seeds, pesticides, plant nutrition, and equipment. The setup integrates all necessary modules (Point of Sale, Inventory, Sales, Purchase, ...) to run your business with the possibility to expand into online sales with the ecommerce and website applications.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_appointment_hr
 #: model:ir.module.module,description:base.module_test_appointment_full
 msgid ""
@@ -8954,6 +9114,19 @@ msgid ""
 msgstr ""
 "\n"
 "오스트리아 표준 세금 감사 파일 (SAF-T)은 XML 형식을 사용하여 다양한 유형의 회계 거래 데이터를 내보낼 수 있는 표준 파일 형식입니다.\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_photography
+msgid ""
+"\n"
+"The Odoo app for photography professionals provides a preconfigured database with all the\n"
+"necessary features to manage their business. The app includes pre-configured products and\n"
+"projects, a website template, and beautiful quotes to help photographers showcase their work\n"
+"and attract new clients. With this app, photographers can easily manage their projects, track\n"
+"their time, and create invoices. The website template allows photographers to showcase their\n"
+"portfolio and services, and the pre-configured products make it easy to sell prints and other\n"
+"photography-related items.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_anz_ubl_pint
@@ -9161,6 +9334,16 @@ msgstr ""
 "========================================\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_coal_petroleum
+msgid ""
+"\n"
+"The module specializes in trading coal and petroleum products, acquiring them from international\n"
+"suppliers or local vendors and reselling them to customers. They have a unique quality-checking\n"
+"method during the procurement process, defining specific parameters in the GRN and Delivery stages\n"
+"to ensure product quality.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_base_sparse_field
 msgid ""
 "\n"
@@ -9185,6 +9368,13 @@ msgstr ""
 "\n"
 "이 기술 모듈의 목적은 필요할 수 있는 다른 모든 모듈에 \n"
 "소셜 미디어 환경 설정을 위한 화면을 제공하는 것입니다.\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_industry_restaurant
+msgid ""
+"\n"
+"This Odoo module is designed to streamline and enhance the management of your restaurant operations.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_fr_pos_cert
@@ -9283,6 +9473,46 @@ msgid ""
 msgstr ""
 "\n"
 "이 연결 모듈은 stock_barcode 및 quality_control 모듈이 설치될 때 자동 설치됩니다.\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_solar_installation
+msgid ""
+"\n"
+"This configuration is designed for companies specializing in solar equipment and installation services.\n"
+"They cater to both residential and commercial customers,\n"
+"ensuring the efficient installation of solar panels and associated equipment.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_billboard_rental
+msgid ""
+"\n"
+"This industry caters to billboard rental businesses, specializing in managing outdoor advertising spaces. It involves coordinating prime location leases, complying with regulations, and maximizing client visibility.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_construction
+msgid ""
+"\n"
+"This industry is ideal for construction businesses proficient in managing projects from conception to completion,\n"
+"focusing on accurate quoting, efficient planning, seamless execution, and excellent customer service, ...\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_architects
+msgid ""
+"\n"
+"This industry is made for Architecture Firm that sell all kind of architectural services such as feasibility studies,\n"
+"schematic design, design development, worksite follow-up, energy efficiency assessment.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_condominium
+msgid ""
+"\n"
+"This industry is tailor-made for Property Owner Association businesses that aim at managing co-ownership properties. Such a business is complex because it implies managing all the aspects of the properties while fairly splitting the charges.\n"
+"Moreover, the business is legally regulated in lots of countries under different names: condo in the US, co-ownership in Canada, joint domination in the UK, property syndicate in France, syndic in Belgium, etc\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_partner
@@ -9467,6 +9697,22 @@ msgstr ""
 " - States\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_bd
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Bangladesh in Odoo\n"
+"==============================================================================\n"
+"\n"
+"Bangladesh accounting basic charts and localization.\n"
+"\n"
+"Activates:\n"
+"\n"
+"- Chart of accounts\n"
+"- Taxes\n"
+"- Tax report\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_be
 msgid ""
 "\n"
@@ -9526,39 +9772,6 @@ msgstr ""
 "\n"
 "        **접근 경로:** 청구서 발행, 보고서, 법률 보고서, 벨기에 명세서, 벨기에 명세서, 연간 VAT 과세 고객 명세서\n"
 "\n"
-
-#. module: base
-#: model:ir.module.module,description:base.module_l10n_eg
-msgid ""
-"\n"
-"Egypt Accounting Module\n"
-"==============================================================================\n"
-"Egypt Accounting Basic Charts and Localization.\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of Accounts\n"
-"- Taxes\n"
-"- VAT Return\n"
-"- Withholding Tax Report\n"
-"- Schedule Tax Report\n"
-"- Other Taxes Report\n"
-"- Fiscal Positions\n"
-msgstr ""
-"\n"
-"이집트 회계 모듈\n"
-"==============================================================================\n"
-"이집트 회계 기본 과목표 및 현지화.\n"
-"\n"
-"활성화 대상:\n"
-"\n"
-"- 계정과목표\n"
-"- 세금\n"
-"- 부가가치세 신고\n"
-"- 원천세 세금 신고\n"
-"- 연금 세금 신고\n"
-"- 기타 세금 신고\n"
-"- 재정 위치\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ee
@@ -11552,6 +11765,13 @@ msgstr ""
 "이 모듈은 MyInvois 전자 송장 기능을 개선하여 자체 청구 지원을 추가하고, 청구서 PDF 파일에 MyInvois QR 코드를 표시하며, 해외 고객의 TIN를 보다 효율적으로 관리할 수 있도록 합니다.\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_industry_lawyer
+msgid ""
+"\n"
+"This module installs a configuration that presets the modules and configure Odoo for a law firm.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_base_iban
 msgid ""
 "\n"
@@ -11623,30 +11843,6 @@ msgstr ""
 "* Future implementation will have auto synchronization of Vendor bills.\n"
 
 #. module: base
-#: model:ir.module.module,description:base.module_l10n_eg_edi_eta
-msgid ""
-"\n"
-"Egypt Tax Authority Invoice Integration\n"
-"==============================================================================\n"
-"Integrates with the ETA portal to automatically send and sign the Invoices to the Tax Authority.\n"
-msgstr ""
-"\n"
-"이집트 세무 기관 청구서 통합\n"
-"====================================================================================\n"
-"ETA 포털에 연동하여 자동으로 청구서를 세무 기관으로 전송하고 서명합니다.\n"
-
-#. module: base
-#: model:ir.module.module,summary:base.module_l10n_eg_edi_eta
-msgid ""
-"\n"
-"            Egyptian Tax Authority Invoice Integration\n"
-"        "
-msgstr ""
-"\n"
-"            이집트 세무 당국 청구서 통합\n"
-"        "
-
-#. module: base
 #: model:ir.module.module,description:base.module_l10n_ke_edi_tremol
 msgid ""
 "\n"
@@ -11681,6 +11877,50 @@ msgid ""
 msgstr ""
 "\n"
 "이 모듈은 케냐 eTIMS 기기와 통합됩니다. (OSCU)\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_bike_leasing
+msgid ""
+"\n"
+"This module is a complete solution for the bike leasing industry, simplifying lease management, bike tracking, and customer service. It's perfect for businesses aiming to streamline operations and embrace the growing trend of sustainable mobility.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_micro_brewery
+msgid ""
+"\n"
+"This module is a setup specific to support the business activities of a microbrewery such as Crafting Beer, Outside Sales, a local Bar, a local Shop and an ecommerce website.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_wellness_practitioner
+msgid ""
+"\n"
+"This module is designed for wellness practitioners, offering a complete solution to manage appointments and client relationships. It supports practitioners in providing personalized care, handling billing efficiently, and streamlining operations with integrated CRM, treatment plans, and essential tools like invoicing and appointment management. Perfect for professionals focused on holistic health and well-being services.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_hair_salon
+msgid ""
+"\n"
+"This module is for hair salons providing hair-related services such as hair cutting, brushing, coloring, hair and\n"
+"scalp treatments, beard and mustache shaping.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_corporate_gifts
+msgid ""
+"\n"
+"This module is for marketing companies selling and producing customized corporate gifts, like mugs and t-shirts.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_eyewear_shop
+msgid ""
+"\n"
+"This module is for stylish and affordable eyewear. It will deal with various types of eyewear like Sunglasses, Contact Lenses, Specialty eyewear, etc.\n"
+"The sales process involves creating sale orders, managing deliveries and invoicing. Additionally, they operate an eCommerce shop for online sales in the eyewear industry.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_crm_full
@@ -11750,6 +11990,13 @@ msgstr ""
 "결제 요청은 관련 승인권자에게 차기 활동을 작성합니다.\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_bar_industry
+msgid ""
+"\n"
+"This module offers a vibrant selection of cocktails, soft drinks, and other essential items for the bar and pub industry. It is an invaluable resource for anyone looking to elevate their establishment, enhance customer experience, or explore new trends in mixology and hospitality.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_account_check_printing
 msgid ""
 "\n"
@@ -11779,6 +12026,14 @@ msgid ""
 msgstr ""
 "\n"
 "이 모듈을 통해 직원들의 초과 근무 계산 시 휴가를 계산에서 제외시킬 수 있습니다.\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_electronic_store
+msgid ""
+"\n"
+"This module provides essential features to manage an electronic store.\n"
+"It includes product categories, products, sales orders, and more for electronic products.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_purchase_mrp
@@ -11933,6 +12188,27 @@ msgstr ""
 "이 모듈은 키드 대여를 위한 렌탈과 제조 관리 업무간의 연결 모듈입니다. \n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_furniture_store
+msgid ""
+"\n"
+"This module sets up a furniture store for selling furniture like chairs, sofas, dining tables, ...\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_fmcg_store
+msgid ""
+"\n"
+"This module setup a Point of Sale (POS) system for a grocery store which is essential for efficiently managing various product categories, handling transactions, and providing excellent customer service.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_certification_organism
+msgid ""
+"\n"
+"This module setup your database to easily use odoo in a Audit & Certification company.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_account_edi_ubl_cii_tests
 msgid ""
 "\n"
@@ -12010,6 +12286,14 @@ msgstr ""
 "이 모듈을 사용하면 MyInvois 시스템으로 청구서를 보낼 수 있습니다.\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_art_craft
+msgid ""
+"\n"
+"This modules provide a colourful array of paints, brushes, paper, beads, tools, colourful trays and other crafting (Handmade) essentials.\n"
+"They are a treasure trove for anyone seeking to express their creativity, explore new hobbies, or create beautiful handmade items.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_kz
 msgid ""
 "\n"
@@ -12026,6 +12310,69 @@ msgid ""
 msgstr ""
 "\n"
 "Odoo 사용 시 기본 계정과목표 및 세무 서식을 제공합니다.\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_automobile
+msgid ""
+"\n"
+"This set-up is for the automobile trading companies selling to the customers.\n"
+"The Automobile spare parts business have the more number of items for the various car brands and the parts for the Engine,\n"
+"Maintenance and accessorises etc.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_clothing_boutique
+msgid ""
+"\n"
+"This setup if for Clothing Store companies selling female clothing."
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_software_reseller
+msgid ""
+"\n"
+"This setup if for IT companies reselling software licenses, and consulting services.🚀\n"
+"The typical sale is a 1 year Oracle Database license that is purchased to Oracle, and resold to client at a margin, with extra services to setup the database.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_headhunter
+msgid ""
+"\n"
+"This setup is for Talent Acquisition Agency / Recruitment Agency / Staffing Agency.\n"
+"Those agencies work on two levels and with two different audiences, ...\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_cake_shop
+msgid ""
+"\n"
+"This setup is for bakery store companies selling to consumers. Bakery are businesses that carry a large selection of products: puffs , cakes , pastries etc...\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_surveyor
+msgid ""
+"\n"
+"This setup is for industrial companies who are into sureveying and measurement activities.\n"
+"It may include surveying of building properties and the measurement of completed construction activities.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_pharmacy_retail
+msgid ""
+"\n"
+"This setup is for pharmacy retail companies that purchase and sell products.\n"
+"They maintain the stock lot wise and also manage the expiry of the lots.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_sports_club
+msgid ""
+"\n"
+"This setup is for sports clubs that rent courts to their players, handle some basic gears and have a cafeteria.\n"
+"As a small company, The Club still has quite a lot of activities to manage and does all this with Odoo.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_documents_hr_holidays
@@ -12163,6 +12510,33 @@ msgstr ""
 "============================\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_ae
+msgid ""
+"\n"
+"United Arab Emirates Accounting Module\n"
+"=======================================================\n"
+"United Arab Emirates accounting basic charts and localization.\n"
+"\n"
+"Activates:\n"
+"\n"
+"- Chart of Accounts\n"
+"- Taxes\n"
+"- Tax Report\n"
+"- Fiscal Positions\n"
+msgstr ""
+"\n"
+"아랍에미리트 회계 모듈\n"
+"==========================================================\n"
+"아랍에미리트 회계 기본 과목표 및 현지화\n"
+"\n"
+"활성화 대상:\n"
+"\n"
+"- 계정과목표\n"
+"- 세금\n"
+"- 세무 신고서\n"
+"- 재정 위치\n"
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_ae_corporate_tax_report
 msgid ""
 "\n"
@@ -12190,33 +12564,6 @@ msgstr ""
 "- 기본급 계산\n"
 "- EOS 계산\n"
 "\n"
-
-#. module: base
-#: model:ir.module.module,description:base.module_l10n_ae
-msgid ""
-"\n"
-"United Arab Emirates Accounting Module\n"
-"=======================================================\n"
-"United Arab Emirates accounting basic charts and localization.\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of Accounts\n"
-"- Taxes\n"
-"- Tax Report\n"
-"- Fiscal Positions\n"
-msgstr ""
-"\n"
-"아랍에미리트 회계 모듈\n"
-"==========================================================\n"
-"아랍에미리트 회계 기본 과목표 및 현지화\n"
-"\n"
-"활성화 대상:\n"
-"\n"
-"- 계정과목표\n"
-"- 세금\n"
-"- 세무 신고서\n"
-"- 재정 위치\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_us_hr_payroll
@@ -12465,6 +12812,13 @@ msgstr ""
 "*  재고자산가액(과거 날짜 지원)\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_it_hardware
+msgid ""
+"\n"
+"We offer IT sales, installation, and repair services for a wide range of products, including laptops, RAM, accessories, and CCTV cameras.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_website_helpdesk_forum
 msgid ""
 "\n"
@@ -12576,6 +12930,13 @@ msgstr ""
 "    바랍니다.\n"
 "\n"
 "    이 모듈을 설치할 경우 이탈리아용 회계 모듈 (l10n_it)도 같이 업데이트하십시오\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_rs_edi
+msgid ""
+"\n"
+"eFaktura E-invoice implementation for Serbia\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_delivery_mondialrelay
@@ -13468,20 +13829,16 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 msgid ""
-"<span invisible=\"evaluation_type != 'value' or not update_field_type == "
-"'many2many'\">by</span>"
+"<span invisible=\"evaluation_type != 'value' or update_field_type in "
+"['one2many', 'many2many']\">to</span>"
 msgstr ""
-"<span invisible=\"evaluation_type != 'value' or not update_field_type == "
-"'many2many'\">작성자</span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 msgid ""
-"<span invisible=\"evaluation_type != 'value' or update_field_type == "
-"'many2many'\">to</span>"
+"<span invisible=\"evaluation_type != 'value' or update_field_type not in "
+"['one2many', 'many2many']\">by</span>"
 msgstr ""
-"<span invisible=\"evaluation_type != 'value' or update_field_type == "
-"'many2many'\">종료</span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
@@ -14977,6 +15334,11 @@ msgid "Addon for the Self Order App that allows customers to pay by Stripe."
 msgstr "고객이 Stripe으로 결제할 수 있는 셀프 주문 앱용 애드온입니다."
 
 #. module: base
+#: model:ir.module.module,description:base.module_tests
+msgid "Addons to test Odoo industries code."
+msgstr ""
+
+#. module: base
 #. odoo-python
 #: code:addons/base/models/ir_qweb_fields.py:0
 #: model_terms:ir.ui.view,arch_db:base.contact
@@ -15578,6 +15940,11 @@ msgid "After Amount"
 msgstr "이후 금액"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_agriculture_shop
+msgid "Agricultural Store"
+msgstr "농산물 판매점"
+
+#. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_A
 msgid "Agriculture"
 msgstr "농업"
@@ -15644,7 +16011,7 @@ msgstr "재무 통합에 필요한 모든 것"
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_holidays
 msgid "Allocate PTOs and follow leaves requests"
-msgstr "유급 휴가 할당 및 휴가 신청 조치"
+msgstr "휴가 배정부터 신청 처리 작업까지 한 번에"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_account_tax_python
@@ -16030,6 +16397,11 @@ msgstr "아메리카/코르도바"
 #: model:ir.model.fields.selection,name:base.selection__res_partner__tz__america/costa_rica
 msgid "America/Costa_Rica"
 msgstr "아메리카/코스타리카"
+
+#. module: base
+#: model:ir.model.fields.selection,name:base.selection__res_partner__tz__america/coyhaique
+msgid "America/Coyhaique"
+msgstr "아메리카/코아이크"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__tz__america/creston
@@ -17010,6 +17382,11 @@ msgid "Architecture Diff"
 msgstr "구조 차이점"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_architects
+msgid "Architecture Firm"
+msgstr "건축 회사"
+
+#. module: base
 #: model_terms:ir.ui.view,arch_db:base.edit_menu_access_search
 #: model_terms:ir.ui.view,arch_db:base.ir_access_view_search
 #: model_terms:ir.ui.view,arch_db:base.ir_cron_view_search
@@ -17089,6 +17466,11 @@ msgstr "보기 태그와 함께 클라이언트에 전달된 인수"
 #: model:res.country,name:base.am
 msgid "Armenia"
 msgstr "아르메니아"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_art_craft
+msgid "Arts & Crafts Store"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.aw
@@ -17776,6 +18158,11 @@ msgid "Attract visitors to subscribe to mailing lists"
 msgstr "방문자에게 메일링 리스트에 가입하도록 유도"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_certification_organism
+msgid "Audit & Certification"
+msgstr ""
+
+#. module: base
 #: model:res.country,name:base.au
 msgid "Australia"
 msgstr "호주"
@@ -18042,6 +18429,11 @@ msgstr "자동화 규칙"
 #: model:ir.module.module,shortdesc:base.module_base_automation_hr_contract
 msgid "Automation Rules based on Employee Contracts"
 msgstr "직원 계약을 기반으로 한 자동화 규칙"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_automobile
+msgid "Automobile Spare Parts"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_server__available_model_ids
@@ -18318,6 +18710,11 @@ msgid ""
 "Banks are the financial institutions at which you and your contacts have "
 "their accounts."
 msgstr "은행은 귀하 및 귀하의 지인들이 계좌를 가지고 있는 금융 기관을 말합니다."
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_bar_industry
+msgid "Bar Industry"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.bb
@@ -18659,9 +19056,19 @@ msgid "Bhutan"
 msgstr "부탄"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_bike_leasing
+msgid "Bike Leasing"
+msgstr "바이크 대여"
+
+#. module: base
 #: model:ir.module.module,summary:base.module_website_sale_ups
 msgid "Bill to your UPS account number"
 msgstr "귀하의 UPS 계좌 번호로 청구"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_billboard_rental
+msgid "Billboard Rental"
+msgstr "광고판 대여"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_property__type__binary
@@ -19228,6 +19635,11 @@ msgstr ""
 #: model:res.country,vat_label:base.ar
 msgid "CUIT"
 msgstr "CUIT"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_cake_shop
+msgid "Cake Store"
+msgstr "케이크 전문점"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_act_window_view__view_mode__calendar
@@ -19821,6 +20233,11 @@ msgid "Close"
 msgstr "닫기"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_clothing_boutique
+msgid "Clothing Store"
+msgstr "의류 매장"
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_cloud_storage
 msgid "Cloud Storage"
 msgstr "클라우드 저장 공간"
@@ -20403,6 +20820,8 @@ msgid "Constraints with the same name are unique per module."
 msgstr "모듈별로 제약 조건의 이름은 유일해야 합니다."
 
 #. module: base
+#: model:ir.module.category,name:base.module_category_construction
+#: model:ir.module.module,shortdesc:base.module_construction
 #: model:res.partner.industry,name:base.res_partner_industry_F
 msgid "Construction"
 msgstr "구축"
@@ -20566,6 +20985,11 @@ msgstr "쿡 제도"
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__copied
 msgid "Copied"
 msgstr "복사됨"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_corporate_gifts
+msgid "Corporate Gifts"
+msgstr "기업 홍보 물품"
 
 #. module: base
 #: model:res.country,name:base.cr
@@ -22549,20 +22973,14 @@ msgid "E-Invoice implementation for Romania"
 msgstr "루마니아의 전자 청구서 구현"
 
 #. module: base
+#: model:ir.module.module,summary:base.module_l10n_rs_edi
+msgid "E-Invoice implementation for Serbia"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_l10n_dk_oioubl
 msgid "E-Invoicing, Offentlig Information Online Universal Business Language"
 msgstr "전자 인보이스, 오프엔틀리그 정보 온라인 범용 비즈니스 언어"
-
-#. module: base
-#: model:ir.module.module,summary:base.module_l10n_sa_edi
-msgid ""
-"\n"
-"        E-Invoicing, Universal Business Language\n"
-"    "
-msgstr ""
-"\n"
-"        전자 청구서발행, 범용 비즈니스 언어\n"
-"    "
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_my_edi
@@ -22780,6 +23198,11 @@ msgstr "요르단 UBL 2.1을 위한 전자 청구서"
 #: model:ir.module.module,summary:base.module_l10n_pe_edi
 msgid "Electronic Invoicing for Peru (OSE method) and UBL 2.1"
 msgstr "페루 (OSE 방식) 및 UBL 2.1 용 전자 청구서 발행"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_electronic_store
+msgid "Electronic Store"
+msgstr "전자제품 매장"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_co_edi
@@ -23220,6 +23643,11 @@ msgstr "에스토니아 - 회계 보고서"
 #: model:ir.module.module,shortdesc:base.module_l10n_ee_rounding
 msgid "Estonia - Rounding"
 msgstr "에스토니아 - 반올림"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_ee_intrastat
+msgid "Estonia Intrastat Declaration"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.sz
@@ -23962,6 +24390,11 @@ msgid "Export"
 msgstr "내보내기"
 
 #. module: base
+#: model:ir.module.module,summary:base.module_l10n_se_sie4_export
+msgid "Export Accounting Data to SIE 4 files"
+msgstr ""
+
+#. module: base
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
 msgid "Export Complete"
 msgstr "내보내기 완료"
@@ -24169,6 +24602,11 @@ msgstr "청구서 검사에서 데이터를 추출하여 자동으로 채웁니�
 #: model:res.partner.industry,name:base.res_partner_industry_U
 msgid "Extraterritorial"
 msgstr "치외법권"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_eyewear_shop
+msgid "Eyewear Store"
+msgstr "안경점"
 
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_F
@@ -24598,6 +25036,11 @@ msgid "Find old records and archive/delete them"
 msgstr "이전 기록 찾기 및 보관 처리/삭제하기"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_industry_restaurant
+msgid "Fine Dining Restaurant"
+msgstr "파인 다이닝 레스토랑"
+
+#. module: base
 #: model:ir.model.fields.selection,name:base.selection__base_partner_merge_automatic_wizard__state__finished
 msgid "Finished"
 msgstr "완료됨"
@@ -24836,6 +25279,11 @@ msgid "Forum on Courses"
 msgstr "강좌 포럼"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_coal_petroleum
+msgid "Fossil Fuel Trading"
+msgstr ""
+
+#. module: base
 #. odoo-python
 #: code:addons/models.py:0
 msgid ""
@@ -24989,6 +25437,11 @@ msgid "Function"
 msgstr "직능"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_furniture_store
+msgid "Furniture Store"
+msgstr "가구 매장"
+
+#. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_G
 msgid ""
 "G - WHOLESALE AND RETAIL TRADE; REPAIR OF MOTOR VEHICLES AND MOTORCYCLES"
@@ -25120,6 +25573,11 @@ msgid "Gantt view for Time Off Dashboard"
 msgstr "휴가관리 현황판 간트 화면"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_gardening
+msgid "Gardening"
+msgstr "원예"
+
+#. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_rule_form
 msgid "General"
 msgstr "일반"
@@ -25182,6 +25640,7 @@ msgstr "추적 가능한 짧은 URL 생성"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_de_intrastat
+#: model:ir.module.module,description:base.module_l10n_ee_intrastat
 msgid "Generates Intrastat XML report for declaration."
 msgstr "신고용 Intrastat XML 보고서 생성."
 
@@ -25452,6 +25911,11 @@ msgid "Grid View"
 msgstr "그리드 화면"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_fmcg_store
+msgid "Grocery Store"
+msgstr "식료품점"
+
+#. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_access__group_id
 #: model_terms:ir.ui.view,arch_db:base.ir_access_view_search
 #: model_terms:ir.ui.view,arch_db:base.view_groups_search
@@ -25669,6 +26133,11 @@ msgid "HTTP Routing"
 msgstr "HTTP 라우팅"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_hair_salon
+msgid "Hair Salon"
+msgstr "헤어 살롱"
+
+#. module: base
 #: model:res.country,name:base.ht
 msgid "Haiti"
 msgstr "아이티"
@@ -25702,6 +26171,11 @@ msgid "Hardware Proxy"
 msgstr "하드웨어 프록시"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_hardware_shop
+msgid "Hardware Store"
+msgstr "철물점"
+
+#. module: base
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard__has_diff
 msgid "Has Diff"
 msgstr "Has Diff"
@@ -25720,6 +26194,11 @@ msgstr "머리글 여백"
 #: model:ir.model.fields,help:base.field_res_company__company_details
 msgid "Header text displayed at the top of all reports."
 msgstr "모든 보고서의 상단에 표시되는 머리말 문구입니다."
+
+#. module: base
+#: model:ir.module.category,name:base.module_category_health_and_fitness
+msgid "Health and Fitness"
+msgstr ""
 
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_Q
@@ -26027,6 +26506,11 @@ msgid "Hongkong"
 msgstr "홍콩"
 
 #. module: base
+#: model:ir.module.category,name:base.module_category_hospitality
+msgid "Hospitality"
+msgstr "환대 산업"
+
+#. module: base
 #: model:ir.model.fields,help:base.field_ir_mail_server__smtp_host
 msgid "Hostname or IP of SMTP server"
 msgstr "SMTP 서버의 호스트 이름 또는 IP"
@@ -26315,6 +26799,11 @@ msgid "ISO code"
 msgstr "ISO 코드"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_it_hardware
+msgid "IT Hardware & Support"
+msgstr ""
+
+#. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_J
 msgid "IT/Communication"
 msgstr "IT/커뮤니케이션"
@@ -26585,14 +27074,6 @@ msgid "Image is not encoded in base64."
 msgstr "이미지가 base64로 인코딩되지 않았습니다."
 
 #. module: base
-#. odoo-python
-#: code:addons/image.py:0
-msgid ""
-"Image size excessive, uploaded images must be smaller than %s million "
-"pixels."
-msgstr "이미지 크기가 너무 큽니다. 이미지 크기는 %s백만 픽셀보다 작아야 합니다."
-
-#. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_upgrade
 msgid "Impacted Apps"
 msgstr "영향을 받은 앱"
@@ -26658,9 +27139,14 @@ msgid "Import Accounting Data from SAF-T files"
 msgstr "SAF-T 파일에서 회계 데이터 가져오기"
 
 #. module: base
+#: model:ir.module.module,summary:base.module_l10n_se_sie4_import
+msgid "Import Accounting Data from SIE 4 files"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_l10n_se_sie_import
-msgid "Import Accounting Data from SIE files"
-msgstr "SIE 파일에서 회계 데이터 가져오기"
+msgid "Import Accounting Data from SIE 5 files"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_amazon
@@ -26972,6 +27458,11 @@ msgstr "인도네시아"
 #: model:ir.module.module,shortdesc:base.module_l10n_id_efaktur
 msgid "Indonesia E-faktur"
 msgstr "인도네시아 전자 팩스"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_id_efaktur_coretax
+msgid "Indonesia E-faktur (Coretax)"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_id
@@ -27783,9 +28274,19 @@ msgid ""
 msgstr "이탈리아 - 전자 인보이스 - 직불 메모 (nota di debito - NDD)를 지원하는 추가 모듈"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_it_edi_sale
+msgid "Italy - Sale E-invoicing"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_it_stock_ddt
 msgid "Italy - Stock DDT"
 msgstr "이탈리아 - 재고 DDT"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_it_xml_export
+msgid "Italy - Tax Report XML Export"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_it_edi_website_sale
@@ -27870,16 +28371,6 @@ msgstr "Json"
 #: model:res.partner.industry,full_name:base.res_partner_industry_K
 msgid "K - FINANCIAL AND INSURANCE ACTIVITIES"
 msgstr "K - 금융 및 보험 업무"
-
-#. module: base
-#: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll
-msgid "Saudi Arabia - Payroll"
-msgstr "사우디아라비아 - 급여"
-
-#. module: base
-#: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll_account
-msgid "Saudi Arabia - Payroll with Accounting"
-msgstr "사우디아라비아 - 회계 관리 및 급여"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_digest
@@ -28385,6 +28876,11 @@ msgid "Launch Configuration Wizard"
 msgstr "구성 마법사를 시작합니다."
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_industry_lawyer
+msgid "Law Firm"
+msgstr "법률 사무소"
+
+#. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__layout_background
 msgid "Layout Background"
 msgstr "배치 배경"
@@ -28614,6 +29110,11 @@ msgstr "pos_sale과 l10n_be 간의 연결 모듈"
 #: model:ir.module.module,summary:base.module_pos_sale_loyalty
 msgid "Link module between pos_sale and pos_loyalty"
 msgstr "pos_sale 과 pos_loyalty 사이의 연결 모듈"
+
+#. module: base
+#: model:ir.module.module,summary:base.module_l10n_es_edi_tbai_multi_refund
+msgid "Link one refund with multiple invoices"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_device__linked_ip_addresses
@@ -29565,6 +30066,12 @@ msgid "Mass mailing sms on sale orders"
 msgstr "판매 주문 고나련 대량 문자 발송"
 
 #. module: base
+#: model:ir.module.module,description:base.module_hr_recruitment_sms
+#: model:ir.module.module,summary:base.module_hr_recruitment_sms
+msgid "Mass mailing sms to job applicants"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_mps
 #: model:ir.module.module,summary:base.module_mrp_mps
 msgid "Master Production Schedule"
@@ -29767,6 +30274,11 @@ msgstr "멕시코/BajaSur"
 #: model:ir.model.fields.selection,name:base.selection__res_partner__tz__mexico/general
 msgid "Mexico/General"
 msgstr "멕시코/일반"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_micro_brewery
+msgid "Microbrewery"
+msgstr "양조장"
 
 #. module: base
 #: model:res.country,name:base.fm
@@ -30889,6 +31401,11 @@ msgstr ""
 #: model:ir.model.fields.selection,name:base.selection__ir_mail_server__smtp_encryption__none
 msgid "None"
 msgstr "없음"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_non_profit_organization
+msgid "Nonprofit Organization"
+msgstr "비영리 단체"
 
 #. module: base
 #: model:res.country,name:base.nf
@@ -34684,6 +35201,11 @@ msgid "Peruvian eCommerce"
 msgstr "페루 이커머스"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_pharmacy_retail
+msgid "Pharmacy"
+msgstr "약국"
+
+#. module: base
 #: model:res.country,name:base.ph
 msgid "Philippines"
 msgstr "필리핀"
@@ -34723,6 +35245,11 @@ msgstr "전화 번호 확인"
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 msgid "Phone:"
 msgstr "전화 :"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_photography
+msgid "Photography"
+msgstr "사진"
 
 #. module: base
 #: model:res.country,name:base.pn
@@ -35583,6 +36110,11 @@ msgstr ""
 "기본 필드의 속성은 수정할 수 없으므로 파이썬 코드로 수정하십시오. 더 좋은 방법은 사용자 정의 모듈을 통해 수정하는 것입니다."
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_condominium
+msgid "Property Owner Association"
+msgstr "부동산 소유자 협회"
+
+#. module: base
 #: model:res.partner.category,name:base.res_partner_category_2
 msgid "Prospects"
 msgstr "잠재 고객"
@@ -36056,6 +36588,7 @@ msgid "Readonly"
 msgstr "읽기 전용"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_industry_real_estate
 #: model:res.partner.industry,name:base.res_partner_industry_L
 msgid "Real Estate"
 msgstr "부동산"
@@ -36134,6 +36667,11 @@ msgstr "레코드:"
 #: model:ir.module.module,shortdesc:base.module_hr_recruitment
 msgid "Recruitment"
 msgstr "채용"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_hr_recruitment_sms
+msgid "Recruitment - SMS"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_recruitment_sign
@@ -36568,6 +37106,11 @@ msgstr "이전 버전으로 복구(소프트 리셋)"
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__on_delete__restrict
 msgid "Restrict"
 msgstr "한도"
+
+#. module: base
+#: model:ir.module.category,name:base.module_category_retail
+msgid "Retail"
+msgstr "소매"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_device_view_kanban
@@ -37062,6 +37605,11 @@ msgid "Sale modifications for Brazil"
 msgstr "브라질의 판매 변경 사항"
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_it_edi_sale
+msgid "Sale modifications for Italy E-invoicing"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_social_sale
 msgid "Sale statistics on social"
 msgstr "소셜 판매 통계"
@@ -37163,7 +37711,7 @@ msgstr "판매 내부 메커니즘"
 #: model:ir.model.fields,field_description:base.field_res_users__user_id
 #: model_terms:ir.ui.view,arch_db:base.view_res_partner_filter
 msgid "Salesperson"
-msgstr "영업사원"
+msgstr "영업 담당자"
 
 #. module: base
 #: model:res.country,name:base.ws
@@ -37241,6 +37789,16 @@ msgstr "사우디 아라비아 - 전자 청구서"
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_edi_pos
 msgid "Saudi Arabia - E-invoicing (Simplified)"
 msgstr "사우디아라비아 - 전자 청구서 (간이 버전)"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll
+msgid "Saudi Arabia - Payroll"
+msgstr "사우디아라비아 - 급여"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll_account
+msgid "Saudi Arabia - Payroll with Accounting"
+msgstr "사우디아라비아 - 회계 관리 및 급여"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_pos
@@ -37769,6 +38327,11 @@ msgid "Serbia - Accounting Reports"
 msgstr "세르비아 - 회계 보고서"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_rs_edi
+msgid "Serbia - eFaktura E-invoicing"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_logging__type__server
 msgid "Server"
 msgstr "서버"
@@ -38222,6 +38785,16 @@ msgid "Social media connectors for company settings."
 msgstr "회사 설정을 위한 소셜미디어 연결기."
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_software_reseller
+msgid "Software Reseller"
+msgstr "소프트웨어 리셀러"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_solar_installation
+msgid "Solar Energy Systems"
+msgstr ""
+
+#. module: base
 #: model:res.country,name:base.sb
 msgid "Solomon Islands"
 msgstr "솔로몬 제도"
@@ -38405,6 +38978,11 @@ msgstr "스피드스코프"
 #: model:ir.module.module,summary:base.module_website_event_track
 msgid "Sponsors, Tracks, Agenda, Event News"
 msgstr "스폰서, 트랙, 의제, 이벤트 뉴스"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_sports_club
+msgid "Sports Club"
+msgstr "스포츠 클럽"
 
 #. module: base
 #: model:ir.module.module,description:base.module_spreadsheet
@@ -38938,6 +39516,11 @@ msgid "Supplementary arguments"
 msgstr "보조 매개 변수"
 
 #. module: base
+#: model:ir.module.category,name:base.module_category_supply_chain
+msgid "Supply Chain"
+msgstr "공급망"
+
+#. module: base
 #: model:ir.module.module,summary:base.module_website_event_track_live
 msgid "Support live tracks: streaming, participation, youtube"
 msgstr "라이브 트랙 지원 : 스트리밍, 참여, 유튜브"
@@ -38956,6 +39539,11 @@ msgstr "셀프 주문 시 온라인 결제 지원"
 #: model:res.country,name:base.sr
 msgid "Suriname"
 msgstr "수리남"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_surveyor
+msgid "Surveying & Mapping"
+msgstr ""
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_marketing_surveys
@@ -38985,9 +39573,19 @@ msgid "Sweden - Accounting Reports"
 msgstr "스웨덴 - 회계 보고서"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_se_sie4_export
+msgid "Sweden - SIE 4 Export"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_se_sie4_import
+msgid "Sweden - SIE 4 Import"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_se_sie_import
-msgid "Sweden - SIE Import"
-msgstr "스웨덴 - SIE 가져오기"
+msgid "Sweden - SIE 5 Import"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_l10n_se
@@ -39170,6 +39768,11 @@ msgstr "타지왈"
 #: model:res.country,name:base.tj
 msgid "Tajikistan"
 msgstr "타지키스탄"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_headhunter
+msgid "Talent Acquisition"
+msgstr "인재 채용"
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_2
@@ -40484,58 +41087,6 @@ msgid ""
 msgstr "홍콩의 회계 계정과목표 및 현지화를 관리하는 기본 모듈입니다."
 
 #. module: base
-#: model:ir.module.module,description:base.module_l10n_bd
-msgid ""
-"\n"
-"This is the base module to manage the accounting chart for Bangladesh in Odoo\n"
-"============================\n"
-"Bangladesh accounting basic charts and localization.\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of accounts\n"
-"- Taxes\n"
-"- Tax report\n"
-msgstr ""
-"\n"
-"방글라데시의 회계 계정과목표를 관리하기 위한 Odoo 기본 모듈\n"
-"============================\n"
-"방글라데시 회계 기본 과목표 및 현지화.\n"
-"\n"
-"활성화 대상:\n"
-"\n"
-"- 계정과목표\n"
-"- 세금\n"
-"- 세금 신고서\n"
-
-#. module: base
-#: model:ir.module.module,description:base.module_l10n_pk
-msgid ""
-"\n"
-"Pakistan Accounting Module\n"
-"=======================================================\n"
-"Pakistan accounting basic charts and localization.\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of Accounts\n"
-"- Taxes\n"
-"- Tax Report\n"
-"- Withholding Tax Report\n"
-msgstr ""
-"\n"
-"파키스탄 회계 모듈\n"
-"=======================================================\n"
-"파키스탄 회계 기본 과목표 및 현지화.\n"
-"\n"
-"활성화 대상\n"
-"\n"
-"- 계정과목표\n"
-"- 세금\n"
-"- 세금 신고서\n"
-"- 원천징수 세금 신고서\n"
-
-#. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_report__attachment
 msgid ""
 "This is the filename of the attachment used to store the printing result. "
@@ -40646,9 +41197,9 @@ msgstr "이 모듈은 HR로 수정된 사용자 양식에 OdooBot 상태 및 알
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_codabox
 msgid ""
-"This module allows connection to CodaBox and automatically imports CODA and "
-"SODA statements in Odoo."
-msgstr "이 모듈을 사용하면 CodaBox에 연결하여 Odoo에서 CODA 및 SODA 명세서를 자동으로 가져올 수 있습니다."
+"This module allows connection to CodaBox\n"
+"and automatically imports CODA and SODA statements in Odoo.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_fedex
@@ -41050,6 +41601,11 @@ msgid "Thursday"
 msgstr "목요일"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_es_edi_tbai_multi_refund
+msgid "TicketBAI multi refund"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_website_helpdesk_livechat
 msgid "Ticketing, Support, Livechat"
 msgstr "티켓팅, 지원, 실시간 채팅"
@@ -41253,6 +41809,12 @@ msgstr ""
 "                  그는 마우스 트랩을 파는 것으로 잘 알려져 있습니다. \n"
 "                   이러한 수법으로 그는 지난 2년 동안 IT 예산을 거의 절반으로 \n"
 "                   줄였습니다. 유명한 관리 파트너입니다."
+
+#. module: base
+#. odoo-python
+#: code:addons/image.py:0
+msgid "Too large image (above %sMpx), reduce the image size."
+msgstr ""
 
 #. module: base
 #. odoo-python
@@ -41573,21 +42135,6 @@ msgid "U - ACTIVITIES OF EXTRATERRITORIAL ORGANISATIONS AND BODIES"
 msgstr "U - 치외법권 조직 및 기관 업무"
 
 #. module: base
-#: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll
-msgid "United Arab Emirates - Payroll"
-msgstr "아랍에미리트 - 급여"
-
-#. module: base
-#: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll_account
-msgid "United Arab Emirates - Payroll with Accounting"
-msgstr "아랍에미리트 - 회계 및 급여"
-
-#. module: base
-#: model:ir.module.module,shortdesc:base.module_l10n_ae_corporate_tax_report
-msgid "United Arab Emirates - Corporate Tax Report"
-msgstr "아랍에미리트 - 법인세 보고서."
-
-#. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__tz__uct
 msgid "UCT"
 msgstr "UCT"
@@ -41905,6 +42452,21 @@ msgstr "아랍에미리트 - 회계"
 #: model:ir.module.module,shortdesc:base.module_l10n_ae_reports
 msgid "United Arab Emirates - Accounting Reports"
 msgstr "아랍에미리트 - 회계 보고서"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_ae_corporate_tax_report
+msgid "United Arab Emirates - Corporate Tax Report"
+msgstr "아랍에미리트 - 법인세 보고서."
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll
+msgid "United Arab Emirates - Payroll"
+msgstr "아랍에미리트 - 급여"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll_account
+msgid "United Arab Emirates - Payroll with Accounting"
+msgstr "아랍에미리트 - 회계 및 급여"
 
 #. module: base
 #: model:res.country,name:base.uk
@@ -42868,7 +43430,7 @@ msgstr "품목 병합 시 사용자에게 경고"
 #: code:addons/base/models/ir_model.py:0
 #: code:addons/base/models/res_partner.py:0 code:addons/models.py:0
 msgid "Warning"
-msgstr "경고"
+msgstr "주의"
 
 #. module: base
 #. odoo-python
@@ -43163,6 +43725,11 @@ msgstr "수요일"
 #: model:ir.model.fields.selection,name:base.selection__ir_cron__interval_type__weeks
 msgid "Weeks"
 msgstr "주"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_wellness_practitioner
+msgid "Wellness Practitioner"
+msgstr "웰니스 코치"
 
 #. module: base
 #: model:res.country,name:base.eh
@@ -44516,6 +45083,11 @@ msgstr "selection_value"
 #: model:ir.module.category,name:base.module_category_services_sales_subscriptions
 msgid "subscriptions"
 msgstr "구독"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_tests
+msgid "test"
+msgstr "테스트"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_data_module_install

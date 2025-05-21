@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 12:10+0000\n"
+"POT-Creation-Date: 2025-03-19 11:06+0000\n"
 "PO-Revision-Date: 2024-07-16 09:15+0000\n"
 "Last-Translator: Sarah Park, 2025\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
@@ -8541,6 +8541,15 @@ msgstr "다른 회사의 주문에 대해서는 청구서를 발행할 수 없�
 
 #. module: point_of_sale
 #. odoo-python
+#: code:addons/point_of_sale/models/account_cash_rounding.py:0
+#, python-format
+msgid ""
+"You cannot delete a rounding method that is used in a Point of Sale "
+"configuration."
+msgstr "POS 환경설정에서 사용 중인 반올림 방식은 삭제할 수 없습니다."
+
+#. module: point_of_sale
+#. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid ""
 "You cannot share open orders with configuration that does not use the same "
@@ -8602,13 +8611,13 @@ msgstr "먼저 %s 콤보에서 품목을 삭제해야 합니다."
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid "You must have 'Administration Settings' access to load clothes data."
-msgstr ""
+msgstr "의류 데이터를 불러오려면 '관리 설정' 액세스 권한이 있어야 합니다."
 
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid "You must have 'Administration Settings' access to load furniture data."
-msgstr ""
+msgstr "가구 데이터를 불러오려면 '관리 설정' 액세스 권한이 있어야 합니다."
 
 #. module: point_of_sale
 #. odoo-python

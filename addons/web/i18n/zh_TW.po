@@ -1084,7 +1084,7 @@ msgstr "您確定要歸檔此列中的所有記錄嗎？"
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_controller.js:0
 msgid "Are you sure that you want to archive all the selected records?"
-msgstr "您確定要歸檔所有選定的記錄嗎？"
+msgstr "確定要封存所有已選取記錄？"
 
 #. module: web
 #. odoo-javascript
@@ -3193,6 +3193,13 @@ msgid ""
 "If checked, users won't be able to create records through the autocomplete "
 "dropdown at all."
 msgstr "若勾選，使用者將完全無法利用下拉式選單的自動填寫資料建立記錄。"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "If true, non-literals are accepted"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6240,6 +6247,20 @@ msgid ""
 "The content of this cell is too long for an XLSX file (more than %s "
 "characters). Please use the CSV format for this export."
 msgstr "此儲存格的內容對於 XLSX 檔來說太長（超過 %s  字元）。請為此匯出使用 CSV 格式。"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "The domain involves non-literals. Their evaluation might fail."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "The domain should not involve non-literals"
+msgstr ""
 
 #. module: web
 #. odoo-javascript

@@ -25,6 +25,7 @@
 # Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2024
 # Murat Kaplan <muratk@projetgrup.com>, 2024
 # Ediz Duman <neps1192@gmail.com>, 2024
+# Deniz Guvener, 2025
 # 
 msgid ""
 msgstr ""
@@ -32,7 +33,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-08-06 10:25+0000\n"
 "PO-Revision-Date: 2024-07-16 11:42+0000\n"
-"Last-Translator: Ediz Duman <neps1192@gmail.com>, 2024\n"
+"Last-Translator: Deniz Guvener, 2025\n"
 "Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -177,6 +178,10 @@ msgid ""
 "                                    <span class=\"o_wetrack_proposal_error_message\"/>\n"
 "                                </span>"
 msgstr ""
+"<span class=\"o_wetrack_proposal_error_section text-danger d-none ml8\">\n"
+"                                    <i class=\"fa fa-close mr4\" role=\"img\" aria-label=\"Error\" title=\"Error\"/>\n"
+"                                    <span class=\"o_wetrack_proposal_error_message\"/>\n"
+"                                </span>"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
@@ -353,6 +358,8 @@ msgid ""
 "Allow video and audio recording of their\n"
 "                            presentation, for publishing on our website."
 msgstr ""
+"Web sitemizde yayınlanmak üzere\n"
+"                            sunumlarının video ve ses kaydına izin vermek."
 
 #. module: website_event_track
 #: model:ir.model.fields,field_description:website_event_track.field_event_track__wishlisted_by_default
@@ -663,6 +670,8 @@ msgid ""
 "DROP BUILDING BLOCKS HERE TO MAKE THEM AVAILABLE ACROSS ALL PROPOSAL PAGES "
 "OF ALL EVENTS"
 msgstr ""
+"TÜM ETKİNLİKLERİN TÜM TEKLİF SAYFALARINDA KULLANILABİLMESİ İÇİN YAPI "
+"BLOKLARINI BURAYA BIRAKIN"
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.view_event_track_search
@@ -1349,7 +1358,7 @@ msgstr "Dünya Çapında Evde Yaşam: William'ın Hikayesi"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "Lightning Talks"
-msgstr ""
+msgstr "Hızlı Sunumlar"
 
 #. module: website_event_track
 #: model_terms:event.track,description:website_event_track.event_7_track_19
@@ -1727,7 +1736,7 @@ msgstr "Reddedildi"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "Regular Talks"
-msgstr ""
+msgstr "Standart Sunumlar"
 
 #. module: website_event_track
 #: model:ir.model.fields,help:website_event_track.field_event_track__track_start_relative
@@ -1865,7 +1874,7 @@ msgstr "Hoparlör Fotoğrafı"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "Speaker Profile"
-msgstr ""
+msgstr "Konuşmacı Profili"
 
 #. module: website_event_track
 #. odoo-python
@@ -1947,7 +1956,7 @@ msgstr "Etiketler"
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "Talk Intro"
-msgstr ""
+msgstr "Sunum Tanıtımı"
 
 #. module: website_event_track
 #. odoo-python
@@ -2045,11 +2054,15 @@ msgid ""
 "These are 30 minutes talks on many different topics. Most topics are "
 "accepted in lightning talks."
 msgstr ""
+"Bunlar, birçok farklı konuda 30 dakikalık konuşmalardır. Çoğu konu, kısa "
+"sunumlar (lightning talks) kapsamında kabul edilir."
 
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "These are standard talks with slides, alocated in slots of 60 minutes."
 msgstr ""
+"Bunlar, 60 dakikalık dilimler halinde ayrılmış, slaytlı standart "
+"konuşmalardır."
 
 #. module: website_event_track
 #: model_terms:ir.actions.act_window,help:website_event_track.event_track_visitor_action
@@ -2404,6 +2417,13 @@ msgid ""
 "                                audience, it will be considered for\n"
 "                                inclusion in the programme."
 msgstr ""
+"Akademik ve ticari projelerle ilgili raporlardan\n"
+"                                eğitimlere ve vaka çalışmalarına kadar \n"
+"                                geniş bir yelpazede sunumları kabul edeceğiz.\n"
+"                                Sunum ilginç ve dinleyiciler için potansiyel olarak faydalı \n"
+"                                olduğu sürece\n"
+"                                programa dahil edilmek üzere\n"
+"                                 değerlendirilecektir."
 
 #. module: website_event_track
 #. odoo-javascript
@@ -2414,7 +2434,7 @@ msgstr "Biz teklifi değerlendirmek ve kısa bir süre size geri alırsınız."
 #. module: website_event_track
 #: model_terms:ir.ui.view,arch_db:website_event_track.event_track_proposal
 msgid "We're sorry, this event does not accept proposals anymore"
-msgstr ""
+msgstr "Üzgünüz, bu etkinlik artık teklif kabul etmiyor"
 
 #. module: website_event_track
 #: model:ir.model,name:website_event_track.model_website

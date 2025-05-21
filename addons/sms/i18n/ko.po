@@ -1180,8 +1180,8 @@ msgstr "전송 실패"
 #. module: sms
 #. odoo-python
 #: code:addons/sms/models/ir_actions_server.py:0
-msgid "Sending SMS can only be done on a mail.thread or a transient model"
-msgstr "mail.thread 또는 transient model에서만 SMS를 전송할 수 있습니다."
+msgid "Sending SMS can only be done on a not transient mail.thread model"
+msgstr "SMS 전송은 임시 메일 스레드 모델이 아닌 경우에만 가능합니다."
 
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__state__pending
@@ -1412,7 +1412,7 @@ msgstr "보이는 레코드 수"
 #. odoo-python
 #: code:addons/sms/models/sms_sms.py:0
 msgid "Warning"
-msgstr "경고"
+msgstr "주의"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_res_partner__website_message_ids

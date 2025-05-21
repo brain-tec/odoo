@@ -260,6 +260,15 @@ export class WebsiteSnippetsMenu extends weSnippetEditor.SnippetsMenu {
         const toFind = $html.find("we-fontfamilypicker[data-variable]").toArray();
         const fontVariables = toFind.map((el) => el.dataset.variable);
         FontFamilyPickerUserValueWidget.prototype.fontVariables = fontVariables;
+
+        // TODO remove in 18.0
+        const navTabsStyleEl = $html.find(`[data-js="NavTabsStyle"]`)[0];
+        if (navTabsStyleEl) {
+            const divEl = document.createElement("div");
+            divEl.setAttribute("data-js", "TabsNavItems");
+            divEl.setAttribute("data-selector", ".nav-item");
+            navTabsStyleEl.append(divEl);
+        }
         return super._computeSnippetTemplates(html);
     }
     /**
@@ -531,6 +540,19 @@ export class WebsiteSnippetsMenu extends weSnippetEditor.SnippetsMenu {
             selectedTextEl.classList.add(...optionClassList);
             let $snippet = null;
             try {
+                const commonAncestor = range.commonAncestorContainer;
+                const ancestorElement =
+                    commonAncestor.nodeType === 1 ? commonAncestor : commonAncestor.parentElement;
+                const backgroundColorParentEl = ancestorElement.closest(
+                    'font[style*="background-color"], font[style*="background-image"], font[class^="bg-"]'
+                );
+                if (backgroundColorParentEl?.textContent === commonAncestor.textContent) {
+                    // As long as we handle the same text content, we extend the
+                    // existing range to the `<font/>` boundaries to keep the
+                    // background color applied correctly.
+                    range.setStartBefore(backgroundColorParentEl);
+                    range.setEndAfter(backgroundColorParentEl);
+                }
                 range.surroundContents(selectedTextEl);
                 $snippet = $(selectedTextEl);
             } catch {

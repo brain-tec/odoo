@@ -5,9 +5,9 @@
 # Translators:
 # David Pérez, 2024
 # Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2024
-# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2024
 # Martin Trigaux, 2025
 # Wil Odoo, 2025
+# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2025
 # Larissa Manderfeld, 2025
 # 
 msgid ""
@@ -3443,7 +3443,7 @@ msgstr "Administrador de Facturación"
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_payment_filter
 msgid "Bills"
-msgstr "Facturas"
+msgstr "Facturas (proveedores)"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -3834,7 +3834,7 @@ msgstr "Cuenta de pérdida por desajuste por descuento por pronto pago"
 #. module: account
 #: model:account.account,name:account.1_cash_journal_default_account_50
 msgid "Cash Furn. Shop"
-msgstr "Efectivo de la mueblería"
+msgstr "Efectivo de la tienda de muebles"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_view_bank_statement_tree
@@ -7759,9 +7759,9 @@ msgid ""
 "must charge VAT based on the delivery address. This rule applies regardless "
 "of where you are located."
 msgstr ""
-"Si vende productos y servicios a clientes en un país extranjero en la UE, "
-"debe cobrar IVA según la dirección de entrega. Esta regla aplica sin "
-"importar dónde esté ubicado."
+"Si vende productos y servicios a clientes en un país fuera de la UE, debe "
+"cobrar el IVA en función de la dirección de entrega. Esta regla aplica sin "
+"importar dónde se encuentra usted."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_unreconcile_view
@@ -8468,7 +8468,7 @@ msgstr "Facturado"
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_graph
 #: model_terms:ir.ui.view,arch_db:account.view_invoice_tree
 msgid "Invoices"
-msgstr "Facturas"
+msgstr "Facturas (clientes)"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_my_home_menu_invoice
@@ -15528,7 +15528,7 @@ msgstr "Este asiento se ha duplicado a partir de %s"
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "This entry has been reversed from %s"
-msgstr "Este asiento se ha revirtido apartir de %s"
+msgstr "Este asiento se ha revertido a partir de %s"
 
 #. module: account
 #. odoo-python
@@ -15923,7 +15923,7 @@ msgstr "Total residual en moneda"
 #: model:ir.model.fields,field_description:account.field_account_move__amount_total_signed
 #: model:ir.model.fields,field_description:account.field_account_payment__amount_total_signed
 msgid "Total Signed"
-msgstr "Total firmado"
+msgstr "Total con signo"
 
 #. module: account
 #. odoo-python
@@ -15993,7 +15993,7 @@ msgstr "Total en moneda"
 #: model:ir.model.fields,field_description:account.field_account_move__amount_total_in_currency_signed
 #: model:ir.model.fields,field_description:account.field_account_payment__amount_total_in_currency_signed
 msgid "Total in Currency Signed"
-msgstr "Total firmado en moneda"
+msgstr "Total con signo en moneda"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form

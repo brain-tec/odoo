@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Wil Odoo, 2025
+# Larissa Manderfeld, 2025
 # Manon Rondou, 2025
 # 
 msgid ""
@@ -6092,7 +6093,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
 #: model_terms:ir.ui.view,arch_db:website.template_footer_minimalist
 msgid "Home"
-msgstr "Page d'accueil"
+msgstr "Accueil"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -9795,7 +9796,7 @@ msgstr "Groupe restreint"
 #. module: website
 #: model:ir.actions.act_window,name:website.action_website_rewrite_list
 msgid "Rewrite"
-msgstr "Réécrire"
+msgstr "Réécriture d'URL"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view

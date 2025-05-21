@@ -7,6 +7,7 @@
 # Tereza Mokrá, 2024
 # Wil Odoo, 2025
 # Vojtěch Olšan, 2025
+# Denis Gobin, 2025
 # Marta Wacławek, 2025
 # 
 msgid ""
@@ -113,7 +114,7 @@ msgstr "(vytvořit)"
 #: model_terms:ir.ui.view,arch_db:web.external_layout_standard
 #: model_terms:ir.ui.view,arch_db:web.external_layout_striped
 msgid "(document name)"
-msgstr ""
+msgstr "(Název dokumentu)"
 
 #. module: web
 #. odoo-javascript
@@ -148,7 +149,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 msgid "+ KEY"
-msgstr ""
+msgstr "+ KLÍČ"
 
 #. module: web
 #. odoo-javascript
@@ -849,7 +850,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_controller.js:0
 msgid "Add Properties"
-msgstr ""
+msgstr "Přidat vlastnosti"
 
 #. module: web
 #. odoo-javascript
@@ -2305,7 +2306,7 @@ msgstr "Zrušit"
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_status_indicator/form_status_indicator.xml:0
 msgid "Discard all changes"
-msgstr ""
+msgstr "Zrušit všechny změny"
 
 #. module: web
 #. odoo-javascript
@@ -3184,6 +3185,13 @@ msgstr ""
 msgid ""
 "If checked, users won't be able to create records through the autocomplete "
 "dropdown at all."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "If true, non-literals are accepted"
 msgstr ""
 
 #. module: web
@@ -4407,7 +4415,7 @@ msgstr "Žádné záznamy"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/property_tags.js:0
 msgid "No result"
-msgstr ""
+msgstr "Žádné výsledky"
 
 #. module: web
 #. odoo-javascript
@@ -5116,7 +5124,7 @@ msgstr "Ukazatel průběhu"
 #. odoo-javascript
 #: code:addons/web/static/src/views/view_components/column_progress.xml:0
 msgid "Progress bar"
-msgstr ""
+msgstr "Ukazatel průběhu"
 
 #. module: web
 #. odoo-javascript
@@ -5226,7 +5234,7 @@ msgstr "Rozsah"
 #. odoo-javascript
 #: code:addons/web/static/src/core/colorlist/colorlist.js:0
 msgid "Raspberry"
-msgstr ""
+msgstr "Malina"
 
 #. module: web
 #. odoo-javascript
@@ -6095,7 +6103,7 @@ msgstr "Trička"
 #: code:addons/web/static/src/core/commands/command_items.xml:0
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 msgid "TIP"
-msgstr ""
+msgstr "TIP"
 
 #. module: web
 #. odoo-javascript
@@ -6241,6 +6249,20 @@ msgid ""
 msgstr ""
 "Obsah této buňky je pro soubor XLSX příliš dlouhý (více než %s znaků). Pro "
 "tento export použijte prosím formát CSV."
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "The domain involves non-literals. Their evaluation might fail."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "The domain should not involve non-literals"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -24358,7 +24380,7 @@ msgstr "uniforma"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "universal"
-msgstr "zniverzální"
+msgstr "univerzální"
 
 #. module: web
 #. odoo-javascript
@@ -25996,13 +26018,13 @@ msgstr "zombie"
 #. odoo-javascript
 #: code:addons/web/static/src/views/view_components/column_progress.xml:0
 msgid "{{ bar.count }} {{ bar.string }}"
-msgstr ""
+msgstr "{{ bar.count }} {{ bar.string }}"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
 msgid "{{ relatedFieldName }}..."
-msgstr ""
+msgstr "{{ relatedFieldName }}..."
 
 #. module: web
 #. odoo-javascript

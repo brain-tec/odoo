@@ -6,14 +6,15 @@
 # Islam Mušić, 2024
 # Wil Odoo, 2025
 # Katja Deržič, 2025
+# Aleš Pipan, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 12:10+0000\n"
+"POT-Creation-Date: 2025-03-19 11:06+0000\n"
 "PO-Revision-Date: 2024-07-16 09:15+0000\n"
-"Last-Translator: Katja Deržič, 2025\n"
+"Last-Translator: Aleš Pipan, 2025\n"
 "Language-Team: Slovenian (https://app.transifex.com/odoo/teams/41243/sl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -69,7 +70,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/receipt_screen/receipt/receipt_header/receipt_header.js:0
 msgid "%(vatLabel)s: %(vatId)s"
-msgstr ""
+msgstr "%(vatLabel)s: %(vatId)s"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -181,7 +182,7 @@ msgstr ""
 #. module: point_of_sale
 #: model:product.attribute.value,name:point_of_sale.product_attribute_value_42
 msgid "42"
-msgstr ""
+msgstr "42"
 
 #. module: point_of_sale
 #: model:product.attribute.value,name:point_of_sale.product_attribute_value_43
@@ -549,7 +550,7 @@ msgstr "Zaokroževanje gotovine na računu"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_payment__account_move_id
 msgid "Account Move"
-msgstr ""
+msgstr "Premik računa"
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_session__bank_payment_ids
@@ -913,6 +914,7 @@ msgstr "Ali ste prepričani, da stranka želi plačati"
 #: model:product.template,description_sale:point_of_sale.product_sourdough_loaf_product_template
 msgid "Artisan sourdough bread with a crisp crust and soft interior."
 msgstr ""
+"Obrtniški kruh iz kislega testa s hrustljavo skorjo in mehko notranjostjo."
 
 #. module: point_of_sale
 #: model:ir.model.fields.selection,name:point_of_sale.selection__pos_config__picking_policy__direct
@@ -1063,13 +1065,13 @@ msgstr "ID značke"
 #. module: point_of_sale
 #: model:product.template,name:point_of_sale.product_bagel_product_template
 msgid "Bagel"
-msgstr ""
+msgstr "Štručka"
 
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/backend/pos_kanban_view/pos_kanban_view.js:0
 msgid "Bakery"
-msgstr ""
+msgstr "Pekarna"
 
 #. module: point_of_sale
 #. odoo-python
@@ -1103,7 +1105,7 @@ msgstr "Postavka bančnega izpiska"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/backend/pos_kanban_view/pos_kanban_view.js:0
 msgid "Bar"
-msgstr ""
+msgstr "Bar"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
@@ -1318,19 +1320,19 @@ msgstr "Gotovina"
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid "Cash Bakery"
-msgstr ""
+msgstr "Pekarna denar"
 
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid "Cash Clothes Shop"
-msgstr ""
+msgstr "Trgovina z oblačili za gotovino"
 
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid "Cash Furn. Shop"
-msgstr ""
+msgstr "Trgovina s pohištvom za gotovino"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -1614,7 +1616,7 @@ msgstr ""
 #. module: point_of_sale
 #: model:product.template,name:point_of_sale.product_cinnamon_roll_product_template
 msgid "Cinnamon Roll"
-msgstr ""
+msgstr "Cimetova rolada"
 
 #. module: point_of_sale
 #: model:product.template,name:point_of_sale.product_classic_brown_jacket_product_template
@@ -2411,6 +2413,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid "Define the smallest coinage of the currency used to pay by cash"
 msgstr ""
+"Določite najmanjši kovanec valute, ki se uporablja za plačevanje z gotovino."
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_payment_method__name
@@ -3133,7 +3136,7 @@ msgstr "Glava"
 #. module: point_of_sale
 #: model:product.template,description_sale:point_of_sale.product_multigrain_bread_product_template
 msgid "Hearty multigrain loaf with seeds and grains for extra nutrition."
-msgstr ""
+msgstr "Obilen več zrnati kruh s semeni in žiti za dodatno hranilno vrednost."
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_payment_method__hide_qr_code_method
@@ -3820,7 +3823,7 @@ msgstr "Ročno"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.report_userlabel
 msgid "Marc Demo"
-msgstr ""
+msgstr "Marc Demo"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order__margin
@@ -3944,7 +3947,7 @@ msgstr ""
 #. module: point_of_sale
 #: model:product.template,name:point_of_sale.product_multigrain_bread_product_template
 msgid "Multigrain Bread"
-msgstr ""
+msgstr "Večzrnati kruh"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__my_activity_date_deadline
@@ -4655,12 +4658,12 @@ msgstr "Ostale informacije"
 #: code:addons/point_of_sale/static/src/app/debug/debug_widget.xml:0
 #: model:pos.category,name:point_of_sale.pos_category_others
 msgid "Others"
-msgstr ""
+msgstr "Ostali"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_payment_method__outstanding_account_id
 msgid "Outstanding Account"
-msgstr ""
+msgstr "Neporavnani račun"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_procurement_group__pos_order_id
@@ -4738,7 +4741,7 @@ msgstr "Plačano"
 #. module: point_of_sale
 #: model:product.template,name:point_of_sale.product_pain_au_chocolat_product_template
 msgid "Pain au Chocolat"
-msgstr ""
+msgstr "Čokoladna torta"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_category__parent_id
@@ -5873,7 +5876,7 @@ msgstr "Škrlatna"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/utils/qr_code_popup/qr_code_popup.xml:0
 msgid "QR Code"
-msgstr ""
+msgstr "QR Koda"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_payment_method__qr_code_method
@@ -6277,7 +6280,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/receipt_screen/receipt/order_receipt.xml:0
 msgid "Rounding"
-msgstr ""
+msgstr "Zaokroževanje"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
@@ -6816,6 +6819,8 @@ msgstr ""
 msgid ""
 "Soft dough with a buttery cinnamon filling, topped with cream cheese icing."
 msgstr ""
+"Mehko testo z maslenim cimetovim nadevom, prelito z glazuro iz kremnega "
+"sira."
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -7117,7 +7122,7 @@ msgstr ""
 #. module: point_of_sale
 #: model:ir.model,name:point_of_sale.model_account_fiscal_position_tax
 msgid "Tax Mapping of Fiscal Position"
-msgstr ""
+msgstr "Davčno mapiranje fiskalnega položaja"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.report_saledetails
@@ -7458,6 +7463,8 @@ msgid ""
 "The sale price is managed from the product template. Click on the 'Configure"
 " Variants' button to set the extra attribute prices."
 msgstr ""
+"Akcijska cena se upravlja iz predloge izdelka. Kliknite gumb »Konfiguriraj "
+"različice«, da nastavite cene dodatnih atributov."
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -8393,7 +8400,7 @@ msgstr "Z"
 #. module: point_of_sale
 #: model:product.attribute.value,name:point_of_sale.product_attribute_value_xl
 msgid "XL"
-msgstr ""
+msgstr "XL"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -8497,6 +8504,15 @@ msgstr "Pos kategorije ne morete izbrisati, dokler je seja še vedno odprta."
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_order.py:0
 msgid "You cannot invoice orders belonging to different companies."
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/account_cash_rounding.py:0
+#, python-format
+msgid ""
+"You cannot delete a rounding method that is used in a Point of Sale "
+"configuration."
 msgstr ""
 
 #. module: point_of_sale
@@ -8728,7 +8744,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/ticket_screen/ticket_screen.xml:0
 msgid "in"
-msgstr ""
+msgstr "v"
 
 #. module: point_of_sale
 #. odoo-javascript

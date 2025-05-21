@@ -26,7 +26,6 @@
 # Erol Erzi, 2024
 # Sinem Cil, 2024
 # Levent Karakaş <levent@mektup.at>, 2024
-# Ayhan Kızıltan, 2024
 # Gökhan Erdoğdu <gokhan.erdogdu@mechsoft.com.tr>, 2024
 # Ayhan KIZILTAN <akiziltan76@hotmail.com>, 2024
 # Ozlem Cikrikci <ozlemc@eskayazilim.com.tr>, 2024
@@ -34,7 +33,6 @@
 # Murat Durmuş <muratd@projetgrup.com>, 2024
 # Mehmet YAYLA, 2024
 # Halil, 2024
-# Deniz Guvener, 2025
 # Melih Melik Sonmez, 2025
 # Wil Odoo, 2025
 # Murat Kaplan <muratk@projetgrup.com>, 2025
@@ -43,17 +41,19 @@
 # Nadir Gazioglu <nadirgazioglu@gmail.com>, 2025
 # Martin Trigaux, 2025
 # Ediz Duman <neps1192@gmail.com>, 2025
+# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2025
 # Umur Akın <umura@projetgrup.com>, 2025
 # Hakan Türkün, 2025
-# Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2025
+# Ayhan Kızıltan, 2025
+# Deniz Guvener, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~17.4+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:11+0000\n"
+"POT-Creation-Date: 2025-05-13 14:27+0000\n"
 "PO-Revision-Date: 2024-07-16 09:15+0000\n"
-"Last-Translator: Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2025\n"
+"Last-Translator: Deniz Guvener, 2025\n"
 "Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -389,6 +389,14 @@ msgstr ""
 "Satış Noktası'nda IoT Kutusu olmadan Epson ePOS yazıcıları kullanma\n"
 
 #. module: base
+#: model:ir.module.module,summary:base.module_l10n_eg_edi_eta
+msgid ""
+"\n"
+"            Egypt Tax Authority Invoice Integration\n"
+"        "
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_l10n_ke_edi_oscu
 msgid ""
 "\n"
@@ -402,6 +410,14 @@ msgid ""
 "\n"
 "            Kenya eTIMS Device EDI Stock Integration\n"
 "        "
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,summary:base.module_l10n_sa_edi
+msgid ""
+"\n"
+"        E-Invoicing, Universal Business Language\n"
+"    "
 msgstr ""
 
 #. module: base
@@ -870,15 +886,6 @@ msgid ""
 msgstr ""
 
 #. module: base
-#: model:ir.module.module,description:base.module_l10n_sa_hr_payroll_account
-msgid ""
-"\n"
-"Accounting Data for Saudi Arabia Payroll Rules.\n"
-"=======================================================\n"
-"\n"
-msgstr ""
-
-#. module: base
 #: model:ir.module.module,description:base.module_l10n_ke_hr_payroll_account
 msgid ""
 "\n"
@@ -951,6 +958,15 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_sa_hr_payroll_account
+msgid ""
+"\n"
+"Accounting Data for Saudi Arabia Payroll Rules.\n"
+"=======================================================\n"
+"\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_sk_hr_payroll_account
 msgid ""
 "\n"
@@ -1020,6 +1036,13 @@ msgstr ""
 msgid ""
 "\n"
 "Accounting Reports for Nigeria\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_pk_reports
+msgid ""
+"\n"
+"Accounting Reports for Pakistan (Profit and Loss report and Balance Sheet)\n"
 msgstr ""
 
 #. module: base
@@ -1254,13 +1277,6 @@ msgid ""
 "\n"
 "Accounting reports for OHADA\n"
 "=================================\n"
-msgstr ""
-
-#. module: base
-#: model:ir.module.module,description:base.module_l10n_pk_reports
-msgid ""
-"\n"
-"Accounting Reports for Pakistan (Profit and Loss report and Balance Sheet)\n"
 msgstr ""
 
 #. module: base
@@ -1613,6 +1629,13 @@ msgstr ""
 "Belgeler uygulamasından özgeçmişleri ve harfleri yönetme özelliğini ekleyin.\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_it_xml_export
+msgid ""
+"\n"
+"Additional module to allow the export of the Italian monthly tax report to XML format.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_it_edi_ndd
 msgid ""
 "\n"
@@ -1731,6 +1754,16 @@ msgid ""
 "* Fast payment by just swiping/scanning a credit/debit card or a QR code while on the payment screen\n"
 "* Supported cards: Visa, MasterCard, Rupay, UPI\n"
 msgstr ""
+"\n"
+"Paytm POS ödemelerine izin verin\n"
+"==============================\n"
+"\n"
+"Bu modül, müşterilerin siparişleri için banka/kredi kartları ve UPI ile ödeme yapmalarına \n"
+"olanak tanır. İşlemler Paytm POS tarafından işlenir. Bir Paytm tüccar hesabı gereklidir. Şunlara\n"
+"imkan tanır:\n"
+"\n"
+"* Ödeme ekranındayken kredi/banka kartını veya QR kodunu kaydırarak/tarayarak hızlı ödeme\n"
+"* Desteklenen kartlar: Visa, MasterCard, Rupay, UPI\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_razorpay
@@ -1746,6 +1779,16 @@ msgid ""
 "* Fast payment by just swiping/scanning a credit/debit card or a QR code while on the payment screen\n"
 "* Supported cards: Visa, MasterCard, Rupay, UPI\n"
 msgstr ""
+"\n"
+"Razorpay POS ödemelerine izin verin\n"
+"==============================\n"
+"\n"
+"Bu modül, müşterilerin siparişleri için banka/kredi kartları ve UPI ile ödeme yapmalarına \n"
+"olanak tanır. İşlemler Razorpay POS tarafından işlenir. Bir Razorpay tüccar hesabı gereklidir. Şunlara\n"
+"imkan tanır:\n"
+"\n"
+"* Ödeme ekranındayken kredi/banka kartını veya QR kodunu kaydırarak/tarayarak hızlı ödeme\n"
+"* Desteklenen kartlar: Visa, MasterCard, Rupay, UPI\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_appointment
@@ -2456,6 +2499,24 @@ msgid ""
 "requests for on-premise installations.\n"
 "No modified version is certified and supported by Odoo SA.\n"
 msgstr ""
+"\n"
+"Belçika Kayıtlı Yazar Kasa\n"
+"================================\n"
+"\n"
+"Bu modül, Satış Noktası modülünü sertifikalı bir Belçika yazar kasasına dönüştürür.\n"
+"\n"
+"Daha fazla bilgi için:\n"
+"  * http://www.systemedecaisseenregistreuse.be/\n"
+"  * http://www.geregistreerdkassasysteem.be/\n"
+"\n"
+"Hukuki\n"
+"-----\n"
+"**pos_blackbox_be kaynaklarının kullanımı yalnızca odoo.com SaaS platformunda 17.0 \n"
+"sürümü için onaylanmıştır. pos_blackbox_be modülünü kurmadan önce Odoo SA ile iletişime geçin.\n"
+"\n"
+"Şirket içi kurulumlar için talep üzerine pos_blackbox_be'nin \n"
+"gizlenmiş ve onaylanmış bir sürümü sağlanabilir.\n"
+"Hiçbir değiştirilmiş sürüm Odoo SA tarafından onaylanmamıştır ve desteklenmemektedir.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_helpdesk_sale_timesheet
@@ -2881,6 +2942,8 @@ msgid ""
 "\n"
 "Contains advanced features for CRM such as new views\n"
 msgstr ""
+"\n"
+"Yeni görünümler gibi gelişmiş CRM özellikleri içerir\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_it_edi_website_sale
@@ -2918,6 +2981,9 @@ msgid ""
 "Convert business inquiries that have ended up in the Helpdesk pipeline by mistake,\n"
 "or generate a ticket from a business inquiry\n"
 msgstr ""
+"\n"
+"Yanlışlıkla Destek Sürecine düşen iş taleplerini fırsata dönüştürün\n"
+"ya da iş talebinden bir bilet oluşturun\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_holidays_attendance
@@ -3322,17 +3388,10 @@ msgid ""
 msgstr ""
 
 #. module: base
-#: model:ir.module.module,description:base.module_l10n_dk_oioubl
-msgid ""
-"\n"
-"E-invoice implementation for the Denmark\n"
-msgstr ""
-
-#. module: base
 #: model:ir.module.module,description:base.module_l10n_sa_edi
 msgid ""
 "\n"
-"E-invoice implementation for the Kingdom of Saudi Arabia\n"
+"E-invoice implementation for Saudi Arabia; Integration with ZATCA\n"
 msgstr ""
 
 #. module: base
@@ -3340,6 +3399,25 @@ msgstr ""
 msgid ""
 "\n"
 "E-invoice implementation for Saudi Arabia; Integration with ZATCA (POS)\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_dk_oioubl
+msgid ""
+"\n"
+"E-invoice implementation for the Denmark\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_id_efaktur_coretax
+msgid ""
+"\n"
+"E-invoicing feature provided by DJP (Indonesian Tax Office). As of January 1st 2025,\n"
+"Indonesia is using CoreTax system, which changes the file format and content of E-Faktur.\n"
+"We're changing from CSV files into XML.\n"
+"At the same time, due to tax regulation changes back and forth, for general E-Faktur now,\n"
+"TaxBase (DPP) has to be mulitplied by factor of 11/12 while multiplied to tax of 12% which\n"
+"is resulting to 11%.\n"
 msgstr ""
 
 #. module: base
@@ -3513,6 +3591,25 @@ msgstr ""
 "Çalışan profilinizden belgelerinize kolayca erişin.\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_eg
+msgid ""
+"\n"
+"Egypt Accounting Module\n"
+"==============================================================================\n"
+"Egypt Accounting Basic Charts and Localization.\n"
+"\n"
+"Activates:\n"
+"\n"
+"- Chart of Accounts\n"
+"- Taxes\n"
+"- VAT Return\n"
+"- Withholding Tax Report\n"
+"- Schedule Tax Report\n"
+"- Other Taxes Report\n"
+"- Fiscal Positions\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_eg_hr_payroll
 msgid ""
 "\n"
@@ -3524,6 +3621,15 @@ msgid ""
 "- Social insurance calculation\n"
 "- End of service provisions\n"
 "- Tax break calculations and deductions\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_eg_edi_eta
+msgid ""
+"\n"
+"Egypt Tax Authority Invoice Integration\n"
+"==============================================================================\n"
+"Integrates with the ETA portal to automatically send and sign the Invoices to the Tax Authority.\n"
 msgstr ""
 
 #. module: base
@@ -3678,6 +3784,10 @@ msgid ""
 "Enrich lead created automatically through an appointment with gathered website visitor information such as language,\n"
 "country and detailed information like pages browsed by the lead (through a link to website visitor).\n"
 msgstr ""
+"\n"
+"Bir randevu aracılığıyla otomatik olarak oluşturulan müşteri adayını dil, ülke gibi toplanan\n"
+"web sitesi ziyaretçisi bilgileriyle ve\n"
+"müşteri adayının göz attığı sayfalar gibi ayrıntılı bilgilerle zenginleştirin (web sitesi ziyaretçisine bir bağlantı aracılığıyla).\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_digest_enterprise
@@ -3767,6 +3877,14 @@ msgstr ""
 msgid ""
 "\n"
 "Filters the stock lines out of the reconciliation widget\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_hardware_shop
+msgid ""
+"\n"
+"For Hardware Stores that carry a large selection of products: plumbing, machinery, household, gardening, carpenter and electrical, etc.\n"
+"Using Point of Sale, Inventory, Sales, Purchase, Accounting, Contact, Employee, Dashboard, Barcode, and Documents to grow their business.\n"
 msgstr ""
 
 #. module: base
@@ -4091,6 +4209,9 @@ msgid ""
 "GCC POS Localization\n"
 "=======================================================\n"
 msgstr ""
+"\n"
+"KİK POS Yerelleştirmesi\n"
+"=======================================================\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_in_reports_gstr
@@ -4618,14 +4739,6 @@ msgid ""
 msgstr ""
 
 #. module: base
-#: model:ir.module.module,description:base.module_l10n_sa_pos
-msgid ""
-"\n"
-"Saudi Arabia POS Localization\n"
-"===========================================================\n"
-msgstr ""
-
-#. module: base
 #: model:ir.module.module,description:base.module_appointment_hr_recruitment
 msgid ""
 "\n"
@@ -4654,20 +4767,6 @@ msgid ""
 "    * Allow to configure Basic/Gross/Net Salary\n"
 "    * Employee Payslip\n"
 "    * Integrated with Leaves Management\n"
-msgstr ""
-
-#. module: base
-#: model:ir.module.module,description:base.module_l10n_sa_hr_payroll
-msgid ""
-"\n"
-"Saudi Arabia Payroll and End of Service rules.\n"
-"===========================================================\n"
-"- Basic Calculation\n"
-"- End of Service Calculation\n"
-"- Other Input Rules (Overtime, Salary Attachments, etc.)\n"
-"- Split Structures for EOS and Monthly Salaries\n"
-"- GOSI Employee Deduction\n"
-"- Unpaid leaves\n"
 msgstr ""
 
 #. module: base
@@ -5023,6 +5122,14 @@ msgstr ""
 " \n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_industry_real_estate
+msgid ""
+"\n"
+"Manage your long term or mid long term rental properties\n"
+"Manage your properties, create and manage rental contracts, and streamline your entire rental process. Efficient property management.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_mail_group
 msgid ""
 "\n"
@@ -5160,6 +5267,15 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_se_sie4_export
+msgid ""
+"\n"
+"Module for the export of accounting data to SIE 4 standard files.\n"
+"Official website: https://sie.se/\n"
+"XSD and documentation: https://sie.se/format/\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_fr_fec_import
 msgid ""
 "\n"
@@ -5218,6 +5334,15 @@ msgid ""
 "\n"
 "SAF-T files are the standard accounting reports that businesses in some countries have to submit to the tax authorities.\n"
 "This module allows the import of accounts, journals, partners, taxes and moves from these files.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_se_sie4_import
+msgid ""
+"\n"
+"Module for the import of SIE 4 standard files.\n"
+"Official website: https://sie.se/\n"
+"XSD and documentation: https://sie.se/format/\n"
 msgstr ""
 
 #. module: base
@@ -5552,6 +5677,15 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_non_profit_organization
+msgid ""
+"\n"
+"Non Profit Organization\n"
+"\n"
+"This industry module pre-configure odoo for non profit organizations.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_no_saft
 msgid ""
 "\n"
@@ -5565,23 +5699,6 @@ msgstr ""
 msgid ""
 "\n"
 "Notify that a matching sale order exists in the reconciliation widget.\n"
-msgstr ""
-
-#. module: base
-#: model:ir.module.module,description:base.module_l10n_sa
-msgid ""
-"\n"
-"Saudi Arabia Accounting Module\n"
-"===========================================================\n"
-"Saudi Arabia Accounting Basic Charts and Localization\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of Accounts\n"
-"- Taxes\n"
-"- Vat Filling Report\n"
-"- Withholding Tax Report\n"
-"- Fiscal Positions\n"
 msgstr ""
 
 #. module: base
@@ -5781,6 +5898,22 @@ msgid ""
 "\n"
 "PLM for workorder.\n"
 "=================================================\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_pk
+msgid ""
+"\n"
+"Pakistan Accounting Module\n"
+"=======================================================\n"
+"Pakistan accounting basic charts and localization.\n"
+"\n"
+"Activates:\n"
+"\n"
+"- Chart of Accounts\n"
+"- Taxes\n"
+"- Tax Report\n"
+"- Withholding Tax Report\n"
 msgstr ""
 
 #. module: base
@@ -6170,6 +6303,48 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_sa
+msgid ""
+"\n"
+"Saudi Arabia Accounting Module\n"
+"===========================================================\n"
+"Saudi Arabia Accounting Basic Charts and Localization\n"
+"\n"
+"Activates:\n"
+"\n"
+"- Chart of Accounts\n"
+"- Taxes\n"
+"- Vat Filling Report\n"
+"- Withholding Tax Report\n"
+"- Fiscal Positions\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_sa_pos
+msgid ""
+"\n"
+"Saudi Arabia POS Localization\n"
+"===========================================================\n"
+msgstr ""
+"\n"
+"Suudi Arabistan POS Yerelleştirmesi\n"
+"===========================================================\n"
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_sa_hr_payroll
+msgid ""
+"\n"
+"Saudi Arabia Payroll and End of Service rules.\n"
+"===========================================================\n"
+"- Basic Calculation\n"
+"- End of Service Calculation\n"
+"- Other Input Rules (Overtime, Salary Attachments, etc.)\n"
+"- Split Structures for EOS and Monthly Salaries\n"
+"- GOSI Employee Deduction\n"
+"- Unpaid leaves\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_project_forecast
 msgid ""
 "\n"
@@ -6248,6 +6423,14 @@ msgid ""
 "\n"
 "See: https://www.bpost.be/portal/goHome\n"
 msgstr ""
+"\n"
+"Gönderilerinizi bpost aracılığıyla gönderin ve çevrim içi olarak takip edin\n"
+"=======================================================\n"
+"\n"
+"Belçika'da bulunan şirketler, yerel Posta şirketi ile gönderim \n"
+"avantajından yararlanabilirler.\n"
+"\n"
+"Bkz: https://www.bpost.be/portal/goHome\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_link_tracker
@@ -6428,6 +6611,9 @@ msgid ""
 "Swiss POS Localization\n"
 "=======================================================\n"
 msgstr ""
+"\n"
+"İsviçre POS Yerelleştirmesi\n"
+"=======================================================\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ch
@@ -6466,6 +6652,14 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_agriculture_shop
+msgid ""
+"\n"
+"Tailored Setup for Agricultural Retail Businesses:\n"
+"This module is for B2B and B2C sales of farming products, including seeds, pesticides, plant nutrition, and equipment. The setup integrates all necessary modules (Point of Sale, Inventory, Sales, Purchase, ...) to run your business with the possibility to expand into online sales with the ecommerce and website applications.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_appointment_hr
 #: model:ir.module.module,description:base.module_test_appointment_full
 msgid ""
@@ -6501,6 +6695,19 @@ msgstr ""
 msgid ""
 "\n"
 "The Austrian Standard Audit File for Tax (SAF-T) is a standard file format for exporting various types of accounting transactional data using the XML format.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_photography
+msgid ""
+"\n"
+"The Odoo app for photography professionals provides a preconfigured database with all the\n"
+"necessary features to manage their business. The app includes pre-configured products and\n"
+"projects, a website template, and beautiful quotes to help photographers showcase their work\n"
+"and attract new clients. With this app, photographers can easily manage their projects, track\n"
+"their time, and create invoices. The website template allows photographers to showcase their\n"
+"portfolio and services, and the pre-configured products make it easy to sell prints and other\n"
+"photography-related items.\n"
 msgstr ""
 
 #. module: base
@@ -6647,6 +6854,16 @@ msgstr ""
 "========================================\n"
 
 #. module: base
+#: model:ir.module.module,description:base.module_coal_petroleum
+msgid ""
+"\n"
+"The module specializes in trading coal and petroleum products, acquiring them from international\n"
+"suppliers or local vendors and reselling them to customers. They have a unique quality-checking\n"
+"method during the procurement process, defining specific parameters in the GRN and Delivery stages\n"
+"to ensure product quality.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_base_sparse_field
 msgid ""
 "\n"
@@ -6662,6 +6879,13 @@ msgid ""
 "\n"
 "The purpose of this technical module is to provide a front for\n"
 "social media configuration for any other module that might need it.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_industry_restaurant
+msgid ""
+"\n"
+"This Odoo module is designed to streamline and enhance the management of your restaurant operations.\n"
 msgstr ""
 
 #. module: base
@@ -6745,6 +6969,46 @@ msgstr ""
 msgid ""
 "\n"
 "This bridge module is auto-installed when the modules stock_barcode and quality_control are installed.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_solar_installation
+msgid ""
+"\n"
+"This configuration is designed for companies specializing in solar equipment and installation services.\n"
+"They cater to both residential and commercial customers,\n"
+"ensuring the efficient installation of solar panels and associated equipment.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_billboard_rental
+msgid ""
+"\n"
+"This industry caters to billboard rental businesses, specializing in managing outdoor advertising spaces. It involves coordinating prime location leases, complying with regulations, and maximizing client visibility.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_construction
+msgid ""
+"\n"
+"This industry is ideal for construction businesses proficient in managing projects from conception to completion,\n"
+"focusing on accurate quoting, efficient planning, seamless execution, and excellent customer service, ...\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_architects
+msgid ""
+"\n"
+"This industry is made for Architecture Firm that sell all kind of architectural services such as feasibility studies,\n"
+"schematic design, design development, worksite follow-up, energy efficiency assessment.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_condominium
+msgid ""
+"\n"
+"This industry is tailor-made for Property Owner Association businesses that aim at managing co-ownership properties. Such a business is complex because it implies managing all the aspects of the properties while fairly splitting the charges.\n"
+"Moreover, the business is legally regulated in lots of countries under different names: condo in the US, co-ownership in Canada, joint domination in the UK, property syndicate in France, syndic in Belgium, etc\n"
 msgstr ""
 
 #. module: base
@@ -6864,6 +7128,22 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_bd
+msgid ""
+"\n"
+"This is the base module to manage the accounting chart for Bangladesh in Odoo\n"
+"==============================================================================\n"
+"\n"
+"Bangladesh accounting basic charts and localization.\n"
+"\n"
+"Activates:\n"
+"\n"
+"- Chart of accounts\n"
+"- Taxes\n"
+"- Tax report\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_be
 msgid ""
 "\n"
@@ -6894,25 +7174,6 @@ msgid ""
 "\n"
 "        **Path to access:** Invoicing/Reporting/Legal Reports/Belgium Statements/Annual Listing Of VAT-Subjected Customers\n"
 "\n"
-msgstr ""
-
-#. module: base
-#: model:ir.module.module,description:base.module_l10n_eg
-msgid ""
-"\n"
-"Egypt Accounting Module\n"
-"==============================================================================\n"
-"Egypt Accounting Basic Charts and Localization.\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of Accounts\n"
-"- Taxes\n"
-"- VAT Return\n"
-"- Withholding Tax Report\n"
-"- Schedule Tax Report\n"
-"- Other Taxes Report\n"
-"- Fiscal Positions\n"
 msgstr ""
 
 #. module: base
@@ -7422,6 +7683,11 @@ msgid ""
 "\n"
 "This shortcut allows you to generate a rental order based on the selected case.\n"
 msgstr ""
+"\n"
+"Bu modül, CRM'deki bir veya birkaç fırsat vakasına bir kısayol ekler.\n"
+"===========================================================================\n"
+"\n"
+"Bu kısayol, seçilen vakaya göre bir kiralama emri oluşturmanızı sağlar.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_crm
@@ -7437,6 +7703,16 @@ msgid ""
 "We suggest you to install this module, if you installed both the sale and the crm\n"
 "modules.\n"
 msgstr ""
+"\n"
+"Bu modül, CRM'deki bir veya birkaç fırsat vakasına bir kısayol ekler.\n"
+"===========================================================================\n"
+"\n"
+"Bu kısayol, seçilen vakaya göre bir satış siparişi oluşturmanızı sağlar.\n"
+"Farklı vakalar açıksa (bir liste), vakaya göre bir satış siparişi oluşturur.\n"
+"Vaka daha sonra sonlandırılır ve oluşturulan satış siparişine bağlanır.\n"
+"\n"
+"Hem satış hem de crm modüllerini yüklediyseniz, bu modülü yüklemenizi\n"
+"öneririz.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_appraisal_survey
@@ -7568,6 +7844,9 @@ msgid ""
 "This module allows Employees (and not users) to log in to the Point of Sale application using a barcode, a PIN number or both.\n"
 "The actual till still requires one user but an unlimited number of employees can log on to that till and process sales.\n"
 msgstr ""
+"\n"
+"Bu modül, Çalışanların (kullanıcıların değil) bir barkod, bir PIN numarası veya her ikisini kullanarak Satış Noktası uygulamasında oturum açmasına olanak tanır.\n"
+"Asıl kasa için hala bir kullanıcı gerekir, ancak sınırsız sayıda çalışan bu kasada oturum açabilir ve satışları işleyebilir.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_rating
@@ -7706,6 +7985,20 @@ msgid ""
 "The automatic assignment is figured from the weight of partner levels and the geolocalization. Partners get leads that are located around them.\n"
 "\n"
 msgstr ""
+"\n"
+"Bu modül, bayilerinizi/partnerlerinizi web sitenizde yayımlamanıza ve gelen müşteri adaylarını/fırsatları onlara yönlendirmenize olanak tanır.\n"
+"\n"
+"\n"
+"**Partner yayımlayın**\n"
+"\n"
+"Partner yayımlamak için iletişim formunda (İş Ortağı Ataması bölümünde) bir *Seviye* belirleyin ve *Yayımla* düğmesine tıklayın.\n"
+"\n"
+"**Müşteri adaylarını iletin**\n"
+"\n"
+"Müşteri adaylarını yönlendirme işlemi bir seferde bir veya birkaç müşteri adayı için yapılabilir. Eylem, müşteri adayı/fırsat formu görünümünün *Atanan Partner* bölümünde ve liste görünümünün *Eylem* menüsünde mevcuttur.\n"
+"\n"
+"Otomatik atama, partner seviyelerinin ve coğrafi konumlandırmanın ağırlığına göre belirlenir. Partnerler, çevrelerinde bulunan müşteri adaylarını alır.\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_update_tax_tags
@@ -7864,6 +8157,9 @@ msgid ""
 "This module brings the technical requirement for the Argentinean regulation.\n"
 "Install this if you are using the Point of Sale app in Argentina.\n"
 msgstr ""
+"\n"
+"Bu modül, Arjantin yönetmeliği için teknik gerekliliği getiriyor.\n"
+"Arjantin'de Satış Noktası uygulamasını kullanıyorsanız bunu yükleyin.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_cl_edi_pos
@@ -7873,6 +8169,10 @@ msgid ""
 "Install this if you are using the Point of Sale app in Chile.    \n"
 "\n"
 msgstr ""
+"\n"
+"Bu modül, Şili yönetmeliği için teknik gerekliliği getiriyor.\n"
+"Şili'de Satış Noktası uygulamasını kullanıyorsanız bunu yükleyin.    \n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_pe_pos
@@ -7881,6 +8181,9 @@ msgid ""
 "This module brings the technical requirement for the Peruvian regulation.\n"
 "Install this if you are using the Point of Sale app in Peru.\n"
 msgstr ""
+"\n"
+"Bu modül, Peru yönetmeliği için teknik gerekliliği getiriyor.\n"
+"Peru'da Satış Noktası uygulamasını kullanıyorsanız bunu yükleyin.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_de_pos_cert
@@ -7891,6 +8194,11 @@ msgid ""
 "Install this if you are using the Point of Sale app in Germany.\n"
 "\n"
 msgstr ""
+"\n"
+"Bu modül, Fiskaly ile bulut tabanlı bir çözüm kullanarak Teknik Güvenlik Sistemi ile yeni Almanya yönetmeliği için teknik gereksinimi getiriyor.\n"
+"\n"
+"Almanya'da Satış Noktası uygulamasını kullanıyorsanız bunu yükleyin.\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_de_pos_res_cert
@@ -7917,6 +8225,9 @@ msgid ""
 "This module contains tests related to point of sale QR code payment.\n"
 "It tests all the supported qr codes: SEPA, Swiss QR and EMV QR (using the hk and br implementation)\n"
 msgstr ""
+"\n"
+"Bu modül, satış noktası QR kod ödemesi ile ilgili testleri içerir..\n"
+"Desteklenen tüm qr kodlarını test eder: SEPA, İsviçre QR ve EMV QR (hk ve br uygulamasını kullanarak)\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_restaurant_loyalty
@@ -8305,6 +8616,13 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_industry_lawyer
+msgid ""
+"\n"
+"This module installs a configuration that presets the modules and configure Odoo for a law firm.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_base_iban
 msgid ""
 "\n"
@@ -8348,26 +8666,6 @@ msgid ""
 msgstr ""
 
 #. module: base
-#: model:ir.module.module,description:base.module_l10n_eg_edi_eta
-msgid ""
-"\n"
-"Egypt Tax Authority Invoice Integration\n"
-"==============================================================================\n"
-"Integrates with the ETA portal to automatically send and sign the Invoices to the Tax Authority.\n"
-msgstr ""
-
-#. module: base
-#: model:ir.module.module,summary:base.module_l10n_eg_edi_eta
-msgid ""
-"\n"
-"            Egyptian Tax Authority Invoice Integration\n"
-"        "
-msgstr ""
-"\n"
-"Mısır Vergi Dairesi Fatura Entegrasyonu\n"
-"        "
-
-#. module: base
 #: model:ir.module.module,description:base.module_l10n_ke_edi_tremol
 msgid ""
 "\n"
@@ -8396,6 +8694,50 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_bike_leasing
+msgid ""
+"\n"
+"This module is a complete solution for the bike leasing industry, simplifying lease management, bike tracking, and customer service. It's perfect for businesses aiming to streamline operations and embrace the growing trend of sustainable mobility.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_micro_brewery
+msgid ""
+"\n"
+"This module is a setup specific to support the business activities of a microbrewery such as Crafting Beer, Outside Sales, a local Bar, a local Shop and an ecommerce website.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_wellness_practitioner
+msgid ""
+"\n"
+"This module is designed for wellness practitioners, offering a complete solution to manage appointments and client relationships. It supports practitioners in providing personalized care, handling billing efficiently, and streamlining operations with integrated CRM, treatment plans, and essential tools like invoicing and appointment management. Perfect for professionals focused on holistic health and well-being services.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_hair_salon
+msgid ""
+"\n"
+"This module is for hair salons providing hair-related services such as hair cutting, brushing, coloring, hair and\n"
+"scalp treatments, beard and mustache shaping.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_corporate_gifts
+msgid ""
+"\n"
+"This module is for marketing companies selling and producing customized corporate gifts, like mugs and t-shirts.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_eyewear_shop
+msgid ""
+"\n"
+"This module is for stylish and affordable eyewear. It will deal with various types of eyewear like Sunglasses, Contact Lenses, Specialty eyewear, etc.\n"
+"The sales process involves creating sale orders, managing deliveries and invoicing. Additionally, they operate an eCommerce shop for online sales in the eyewear industry.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_test_crm_full
 msgid ""
 "\n"
@@ -8419,6 +8761,8 @@ msgid ""
 "\n"
 "This module makes sure that the point of sales are compliant to the law in sweden.\n"
 msgstr ""
+"\n"
+"Bu modül, satış noktalarının İsveç'teki yasalara uygun olmasını sağlar.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery_stock_picking_batch
@@ -8449,6 +8793,13 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_bar_industry
+msgid ""
+"\n"
+"This module offers a vibrant selection of cocktails, soft drinks, and other essential items for the bar and pub industry. It is an invaluable resource for anyone looking to elevate their establishment, enhance customer experience, or explore new trends in mixology and hospitality.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_account_check_printing
 msgid ""
 "\n"
@@ -8469,6 +8820,14 @@ msgstr ""
 msgid ""
 "\n"
 "This module prevents taking time offs into account when computing employee overtime.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_electronic_store
+msgid ""
+"\n"
+"This module provides essential features to manage an electronic store.\n"
+"It includes product categories, products, sales orders, and more for electronic products.\n"
 msgstr ""
 
 #. module: base
@@ -8526,6 +8885,9 @@ msgid ""
 "\n"
 "This module provides the information from PoS for the JPK of Poland\n"
 msgstr ""
+"\n"
+"Bu modül, Polonya’nın JPK sistemine yönelik PoS verilerini sağlar\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_quality_iot
@@ -8577,6 +8939,27 @@ msgstr ""
 msgid ""
 "\n"
 "This module serves as a bridge between Rental and Manufacturing, specifically in the case of renting kits.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_furniture_store
+msgid ""
+"\n"
+"This module sets up a furniture store for selling furniture like chairs, sofas, dining tables, ...\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_fmcg_store
+msgid ""
+"\n"
+"This module setup a Point of Sale (POS) system for a grocery store which is essential for efficiently managing various product categories, handling transactions, and providing excellent customer service.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_certification_organism
+msgid ""
+"\n"
+"This module setup your database to easily use odoo in a Audit & Certification company.\n"
 msgstr ""
 
 #. module: base
@@ -8642,6 +9025,14 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_art_craft
+msgid ""
+"\n"
+"This modules provide a colourful array of paints, brushes, paper, beads, tools, colourful trays and other crafting (Handmade) essentials.\n"
+"They are a treasure trove for anyone seeking to express their creativity, explore new hobbies, or create beautiful handmade items.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_kz
 msgid ""
 "\n"
@@ -8653,6 +9044,69 @@ msgstr ""
 msgid ""
 "\n"
 "This provides a base chart of accounts and taxes template for use in Odoo.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_automobile
+msgid ""
+"\n"
+"This set-up is for the automobile trading companies selling to the customers.\n"
+"The Automobile spare parts business have the more number of items for the various car brands and the parts for the Engine,\n"
+"Maintenance and accessorises etc.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_clothing_boutique
+msgid ""
+"\n"
+"This setup if for Clothing Store companies selling female clothing."
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_software_reseller
+msgid ""
+"\n"
+"This setup if for IT companies reselling software licenses, and consulting services.🚀\n"
+"The typical sale is a 1 year Oracle Database license that is purchased to Oracle, and resold to client at a margin, with extra services to setup the database.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_headhunter
+msgid ""
+"\n"
+"This setup is for Talent Acquisition Agency / Recruitment Agency / Staffing Agency.\n"
+"Those agencies work on two levels and with two different audiences, ...\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_cake_shop
+msgid ""
+"\n"
+"This setup is for bakery store companies selling to consumers. Bakery are businesses that carry a large selection of products: puffs , cakes , pastries etc...\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_surveyor
+msgid ""
+"\n"
+"This setup is for industrial companies who are into sureveying and measurement activities.\n"
+"It may include surveying of building properties and the measurement of completed construction activities.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_pharmacy_retail
+msgid ""
+"\n"
+"This setup is for pharmacy retail companies that purchase and sell products.\n"
+"They maintain the stock lot wise and also manage the expiry of the lots.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_sports_club
+msgid ""
+"\n"
+"This setup is for sports clubs that rent courts to their players, handle some basic gears and have a cafeteria.\n"
+"As a small company, The Club still has quite a lot of activities to manage and does all this with Odoo.\n"
 msgstr ""
 
 #. module: base
@@ -8753,6 +9207,22 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_ae
+msgid ""
+"\n"
+"United Arab Emirates Accounting Module\n"
+"=======================================================\n"
+"United Arab Emirates accounting basic charts and localization.\n"
+"\n"
+"Activates:\n"
+"\n"
+"- Chart of Accounts\n"
+"- Taxes\n"
+"- Tax Report\n"
+"- Fiscal Positions\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_l10n_ae_corporate_tax_report
 msgid ""
 "\n"
@@ -8770,22 +9240,6 @@ msgid ""
 "- Basic Salary Calculations\n"
 "- EOS Calculations\n"
 "\n"
-msgstr ""
-
-#. module: base
-#: model:ir.module.module,description:base.module_l10n_ae
-msgid ""
-"\n"
-"United Arab Emirates Accounting Module\n"
-"=======================================================\n"
-"United Arab Emirates accounting basic charts and localization.\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of Accounts\n"
-"- Taxes\n"
-"- Tax Report\n"
-"- Fiscal Positions\n"
 msgstr ""
 
 #. module: base
@@ -8967,6 +9421,13 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_it_hardware
+msgid ""
+"\n"
+"We offer IT sales, installation, and repair services for a wide range of products, including laptops, RAM, accessories, and CCTV cameras.\n"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,description:base.module_website_helpdesk_forum
 msgid ""
 "\n"
@@ -9038,6 +9499,13 @@ msgid ""
 "    in your tax configuration.\n"
 "\n"
 "    Please also update the Italian Accounting module (l10n_it) when you install this module.\n"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,description:base.module_l10n_rs_edi
+msgid ""
+"\n"
+"eFaktura E-invoice implementation for Serbia\n"
 msgstr ""
 
 #. module: base
@@ -9883,15 +10351,15 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 msgid ""
-"<span invisible=\"evaluation_type != 'value' or not update_field_type == "
-"'many2many'\">by</span>"
+"<span invisible=\"evaluation_type != 'value' or update_field_type in "
+"['one2many', 'many2many']\">to</span>"
 msgstr ""
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_form
 msgid ""
-"<span invisible=\"evaluation_type != 'value' or update_field_type == "
-"'many2many'\">to</span>"
+"<span invisible=\"evaluation_type != 'value' or update_field_type not in "
+"['one2many', 'many2many']\">by</span>"
 msgstr ""
 
 #. module: base
@@ -11251,7 +11719,7 @@ msgstr "Çalışanlarınızın özgeçmişine sertifika ekleme"
 #. module: base
 #: model:ir.module.module,description:base.module_pos_account_tax_python
 msgid "Add code to manage custom taxes to the POS assets bundle"
-msgstr ""
+msgstr "POS varlık paketine özel vergileri yönetmek için kod ekleyin"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_skills_slides
@@ -11357,6 +11825,522 @@ msgstr "Add views and tweaks on event"
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_server__update_m2m_operation__add
 msgid "Adding"
 msgstr ""
+"Adding\n"
+"Ekleme\n"
+"\n"
+"6156\n"
+"Branches\n"
+"Şubeler\n"
+"\n"
+"6365\n"
+"CodaBox\n"
+"CodaBox\n"
+"\n"
+"7262\n"
+"Frontdesk\n"
+"Resepsiyon\n"
+"\n"
+"7364\n"
+"Group-based\n"
+"Grup tabanlı\n"
+"\n"
+"8635\n"
+"Peppol\n"
+"Peppol\n"
+"\n"
+"8893\n"
+"RUT\n"
+"RUT\n"
+"\n"
+"8899\n"
+"Read\n"
+"Oku\n"
+"\n"
+"8951\n"
+"Removing\n"
+"Kaldırma\n"
+"\n"
+"9021\n"
+"Room\n"
+"Oda\n"
+"\n"
+"9048\n"
+"SBR\n"
+"SBR\n"
+"\n"
+"9507\n"
+"TIN\n"
+"Vergi Kimlik Numarası\n"
+"\n"
+"10092\n"
+"VoIP\n"
+"VoIP\n"
+"\n"
+"10163\n"
+"WhatsApp\n"
+"WhatsApp\n"
+"\n"
+"10168\n"
+"WhatsApp-Delivery\n"
+"WhatsApp-Teslimat\n"
+"\n"
+"10170\n"
+"WhatsApp-Sale\n"
+"WhatsApp-Satış\n"
+"\n"
+"10171\n"
+"WhatsApp-Website-Events\n"
+"WhatsApp-Web Sitesi Etkinlikleri\n"
+"\n"
+"10172\n"
+"WhatsApp-eCommerce\n"
+"WhatsApp-eTicaret\n"
+"\n"
+"10174\n"
+"Whatsapp-Payment\n"
+"WhatsApp-Ödeme\n"
+"\n"
+"10208\n"
+"Write\n"
+"Yaz\n"
+"\n"
+"10283\n"
+"account_qr_code_emv\n"
+"hesap_qr_kodu_emv\n"
+"\n"
+"10297\n"
+"create\n"
+"oluştur\n"
+"\n"
+"10379\n"
+"read\n"
+"oku\n"
+"\n"
+"10384\n"
+"selection_value\n"
+"seçim_değeri\n"
+"\n"
+"10407\n"
+"unlink\n"
+"bağlantıyı kaldır\n"
+"\n"
+"10408\n"
+"update_boolean_value\n"
+"mantıksal_değeri_güncelle\n"
+"\n"
+"10754\n"
+"Reimport\n"
+"Yeniden içe aktar\n"
+"\n"
+"10980\n"
+"VoIP\n"
+"VoIP\n"
+"\n"
+"11143\n"
+"Attending?\n"
+"Katılıyor musunuz?\n"
+"\n"
+"11295\n"
+"Maybe\n"
+"Belki\n"
+"\n"
+"11456\n"
+"accepted\n"
+"kabul edildi\n"
+"\n"
+"11457\n"
+"attendees\n"
+"katılımcılar\n"
+"\n"
+"11458\n"
+"awaiting\n"
+"bekleniyor\n"
+"\n"
+"11459\n"
+"declined\n"
+"reddedildi\n"
+"\n"
+"11462\n"
+"maybe,\n"
+"belki,\n"
+"\n"
+"11464\n"
+"no,\n"
+"hayır,\n"
+"\n"
+"11465\n"
+"props.placeholder\n"
+"yer_tutucu.özellikler\n"
+"\n"
+"11466\n"
+"uncertain\n"
+"belirsiz\n"
+"\n"
+"14763\n"
+"Apprenticeship\n"
+"Çıraklık\n"
+"\n"
+"14920\n"
+"Full-Time\n"
+"Tam Zamanlı\n"
+"\n"
+"14963\n"
+"Intern\n"
+"Stajyer\n"
+"\n"
+"15126\n"
+"Seasonal\n"
+"Mevsimlik\n"
+"\n"
+"15146\n"
+"Statutory\n"
+"Yasal\n"
+"\n"
+"15176\n"
+"Thesis\n"
+"Tez\n"
+"\n"
+"15196\n"
+"Vacancies:\n"
+"Açık Pozisyonlar:\n"
+"\n"
+"15247\n"
+"work_permit_name\n"
+"çalışma_izni_adı\n"
+"\n"
+"15250\n"
+"'Documentation'\n"
+"'Belgelendirme'\n"
+"\n"
+"15316\n"
+"Browser\n"
+"Tarayıcı\n"
+"\n"
+"15355\n"
+"Departement\n"
+"Departman\n"
+"\n"
+"15370\n"
+"Errors\n"
+"Hatalar\n"
+"\n"
+"15420\n"
+"Localisation\n"
+"Yerelleştirme\n"
+"\n"
+"15436\n"
+"Modes\n"
+"Modlar\n"
+"\n"
+"15485\n"
+"Systray\n"
+"Sistem Çubuğu\n"
+"\n"
+"Guideline\n"
+"Yönerge\n"
+"\n"
+"16128\n"
+"expense\n"
+"gider\n"
+"\n"
+"16132\n"
+"tax)\n"
+"vergi)\n"
+"\n"
+"16899\n"
+"initially\n"
+"başlangıçta\n"
+"\n"
+"16993\n"
+"Unspecified\n"
+"Belirtilmemiş\n"
+"\n"
+"17052\n"
+"people\n"
+"kişiler\n"
+"\n"
+"17187\n"
+"Candidate\n"
+"Aday\n"
+"\n"
+"17241\n"
+"Directly\n"
+"Doğrudan\n"
+"\n"
+"17271\n"
+"Evaluation\n"
+"Değerlendirme\n"
+"\n"
+"17328\n"
+"Interviewer\n"
+"Görüşmeci\n"
+"\n"
+"17480\n"
+"Regex\n"
+"Regex\n"
+"\n"
+"17528\n"
+"Sourcing\n"
+"Tedarik\n"
+"\n"
+"17656\n"
+"Responses\n"
+"Yanıtlar\n"
+"\n"
+"Creativity\n"
+"Yaratıcılık\n"
+"\n"
+"17736\n"
+"Cybersecurity\n"
+"Siber Güvenlik\n"
+"\n"
+"17747\n"
+"Decision-Making\n"
+"Karar Verme\n"
+"\n"
+"17754\n"
+"DevOps\n"
+"DevOps\n"
+"\n"
+"17760\n"
+"Django\n"
+"Django\n"
+"\n"
+"17774\n"
+"Encryption/decryption\n"
+"Şifreleme/şifre çözme\n"
+"\n"
+"17780\n"
+"English\n"
+"İngilizce\n"
+"\n"
+"17783\n"
+"Experience\n"
+"Deneyim\n"
+"\n"
+"17785\n"
+"Filipino\n"
+"Filipince\n"
+"\n"
+"17788\n"
+"Fluent\n"
+"Akıcı\n"
+"\n"
+"17797\n"
+"Geoscientist\n"
+"Jeobilimci\n"
+"\n"
+"17798\n"
+"German\n"
+"Almanca\n"
+"\n"
+"17800\n"
+"Go\n"
+"Go\n"
+"\n"
+"17803\n"
+"Greene-Orr\n"
+"Greene-Orr\n"
+"\n"
+"17807\n"
+"Hadoop\n"
+"Hadoop\n"
+"\n"
+"17813\n"
+"Hindi\n"
+"Hintçe\n"
+"\n"
+"17816\n"
+"Hubbard-Dean\n"
+"Hubbard-Dean\n"
+"\n"
+"17820\n"
+"IT\n"
+"BT (Bilgi Teknolojileri)\n"
+"\n"
+"17830\n"
+"Indonesian\n"
+"Endonezce\n"
+"\n"
+"17835\n"
+"Java\n"
+"Java\n"
+"\n"
+"17836\n"
+"Javanese\n"
+"Cavalı\n"
+"\n"
+"17837\n"
+"Javascript\n"
+"Javascript\n"
+"\n"
+"17845\n"
+"Korean\n"
+"Korece\n"
+"\n"
+"17846\n"
+"Kotlin\n"
+"Kotlin\n"
+"\n"
+"17852\n"
+"Leadership\n"
+"Liderlik\n"
+"\n"
+"17858\n"
+"Lewis-Bailey\n"
+"Lewis-Bailey\n"
+"\n"
+"17859\n"
+"Lexicographer\n"
+"Sözlükçü\n"
+"\n"
+"17862\n"
+"Logan-Martin\n"
+"Logan-Martin\n"
+"\n"
+"17864\n"
+"Lynch-Hodges\n"
+"Lynch-Hodges\n"
+"\n"
+"17870\n"
+"Marathi\n"
+"Marathi\n"
+"\n"
+"17875\n"
+"Matlab\n"
+"Matlab\n"
+"\n"
+"17888\n"
+"NoSQL\n"
+"NoSQL\n"
+"\n"
+"17890\n"
+"Norton-Silva\n"
+"Norton-Silva\n"
+"\n"
+"17893\n"
+"Organizational\n"
+"Organizasyonel\n"
+"\n"
+"17897\n"
+"PHP\n"
+"PHP\n"
+"\n"
+"17901\n"
+"Perez-Morgan\n"
+"Perez-Morgan\n"
+"\n"
+"17902\n"
+"Perl\n"
+"Perl\n"
+"\n"
+"17904\n"
+"Persuasion\n"
+"İkna\n"
+"\n"
+"17910\n"
+"Portuguese\n"
+"Portekizce\n"
+"\n"
+"17915\n"
+"Problem-Solving\n"
+"Problem Çözme\n"
+"\n"
+"17927\n"
+"Punjabi\n"
+"Pencapça\n"
+"\n"
+"17928\n"
+"Python\n"
+"Python\n"
+"\n"
+"17929\n"
+"RDMS\n"
+"RDMS\n"
+"\n"
+"17931\n"
+"React\n"
+"React\n"
+"\n"
+"17932\n"
+"Resourcefulness\n"
+"Pratik Zekâ\n"
+"\n"
+"17939\n"
+"Resumes\n"
+"Özgeçmişler\n"
+"\n"
+"17942\n"
+"Ruby\n"
+"Ruby\n"
+"\n"
+"17943\n"
+"Russell-Webster\n"
+"Russell-Webster\n"
+"\n"
+"17944\n"
+"Russian\n"
+"Rusça\n"
+"\n"
+"17945\n"
+"Rust\n"
+"Rust\n"
+"\n"
+"17947\n"
+"Saunders-Adkins\n"
+"Saunders-Adkins\n"
+"\n"
+"17948\n"
+"Scala\n"
+"Scala\n"
+"\n"
+"17963\n"
+"Simmons-Wilcox\n"
+"Simmons-Wilcox\n"
+"\n"
+"17977\n"
+"Spanish\n"
+"İspanyolca\n"
+"\n"
+"17978\n"
+"Spark\n"
+"Spark\n"
+"\n"
+"17984\n"
+"Stanley-Mendez\n"
+"Stanley-Mendez\n"
+"\n"
+"17986\n"
+"Sub\n"
+"Alt\n"
+"\n"
+"17988\n"
+"Swift\n"
+"Swift\n"
+"\n"
+"17992\n"
+"Teamwork\n"
+"Takım Çalışması\n"
+"\n"
+"17993\n"
+"Telugu\n"
+"Telugu\n"
+"\n"
+"18008\n"
+"Turkish\n"
+"Türkçe\n"
+"\n"
+"18014\n"
+"TypeScript\n"
+"TypeScript\n"
+"\n"
+"18017\n"
+"Urdu\n"
+"Urduca\n"
+"\n"
+"18022\n"
+"White-Bell\n"
+"White-Bell"
 
 #. module: base
 #: model:res.partner,website_short_description:base.res_partner_address_31
@@ -11380,15 +12364,26 @@ msgid ""
 "Addon for the POS App that allows customers to view the menu on their "
 "smartphone."
 msgstr ""
+"Müşterilerin menüyü akıllı telefonlarında görüntülemelerini sağlayan POS "
+"Uygulaması için eklenti."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_self_order_adyen
 msgid "Addon for the Self Order App that allows customers to pay by Adyen."
 msgstr ""
+"Müşterilerin Adyen ile ödeme yapmasını sağlayan Self Order uygulaması "
+"eklentisi."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_self_order_stripe
 msgid "Addon for the Self Order App that allows customers to pay by Stripe."
+msgstr ""
+"Müşterilerin Stripe ile ödeme yapmasını sağlayan Self Order uygulaması "
+"eklentisi."
+
+#. module: base
+#: model:ir.module.module,description:base.module_tests
+msgid "Addons to test Odoo industries code."
 msgstr ""
 
 #. module: base
@@ -11443,7 +12438,7 @@ msgstr "Adds a Gross to Net Salary Simulaton"
 #. module: base
 #: model:ir.module.module,description:base.module_voip_crm
 msgid "Adds a button to schedule calls from leads in Kanban."
-msgstr ""
+msgstr "Kanban'da adaylar üzerinden arama planlama düğmesi ekler."
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_project_stock
@@ -11472,6 +12467,8 @@ msgstr ""
 msgid ""
 "Adds a stat button on lead form view to access their livechat sessions."
 msgstr ""
+"Aday form görünümüne canlı sohbet oturumlarına erişmek için bir istatistik "
+"düğmesi ekler."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_loyalty_delivery
@@ -11996,6 +12993,11 @@ msgid "After Amount"
 msgstr "Tutardan Sonra"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_agriculture_shop
+msgid "Agricultural Store"
+msgstr ""
+
+#. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_A
 msgid "Agriculture"
 msgstr "Tarım"
@@ -12165,7 +13167,7 @@ msgstr "Bir kursta foruma bağlantı sağlar"
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ar_withholding
 msgid "Allows to register withholdings during the payment of an invoice."
-msgstr ""
+msgstr "Fatura ödemesi sırasında kesintilerin kaydedilmesine olanak tanır."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sms
@@ -12465,6 +13467,11 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__tz__america/costa_rica
 msgid "America/Costa_Rica"
+msgstr ""
+
+#. module: base
+#: model:ir.model.fields.selection,name:base.selection__res_partner__tz__america/coyhaique
+msgid "America/Coyhaique"
 msgstr ""
 
 #. module: base
@@ -13453,6 +14460,11 @@ msgid "Architecture Diff"
 msgstr "Mimarlık Farkı"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_architects
+msgid "Architecture Firm"
+msgstr ""
+
+#. module: base
 #: model_terms:ir.ui.view,arch_db:base.edit_menu_access_search
 #: model_terms:ir.ui.view,arch_db:base.ir_access_view_search
 #: model_terms:ir.ui.view,arch_db:base.ir_cron_view_search
@@ -13532,6 +14544,11 @@ msgstr "Argümanları görünümü etiketi ile birlikte istemciye gönderilir"
 #: model:res.country,name:base.am
 msgid "Armenia"
 msgstr "Ermenistan"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_art_craft
+msgid "Arts & Crafts Store"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.aw
@@ -14222,6 +15239,11 @@ msgid "Attract visitors to subscribe to mailing lists"
 msgstr "Posta listelerine abone olmak için ziyaretçileri çekin"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_certification_organism
+msgid "Audit & Certification"
+msgstr ""
+
+#. module: base
 #: model:res.country,name:base.au
 msgid "Australia"
 msgstr "Avustralya"
@@ -14489,6 +15511,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_base_automation_hr_contract
 msgid "Automation Rules based on Employee Contracts"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_automobile
+msgid "Automobile Spare Parts"
 msgstr ""
 
 #. module: base
@@ -14773,6 +15800,11 @@ msgid ""
 msgstr ""
 "Bankalar, sizin ve kişilerinizin hesaplarına sahip olduğu finansal "
 "kurumlardır."
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_bar_industry
+msgid "Bar Industry"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.bb
@@ -15117,9 +16149,19 @@ msgid "Bhutan"
 msgstr "Bhutan"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_bike_leasing
+msgid "Bike Leasing"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_website_sale_ups
 msgid "Bill to your UPS account number"
 msgstr "UPS hesap numaranıza faturalandırma"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_billboard_rental
+msgid "Billboard Rental"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_property__type__binary
@@ -15250,7 +16292,7 @@ msgstr "Bouvet Adası"
 #: model:ir.model.fields,field_description:base.field_res_company__child_ids
 #: model_terms:ir.ui.view,arch_db:base.view_company_form
 msgid "Branches"
-msgstr ""
+msgstr "Şubeler"
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_address_15
@@ -15528,7 +16570,7 @@ msgstr "İngiliz Hint Okyanusu Toprağı"
 #: model:ir.model.fields,field_description:base.field_res_device__browser
 #: model:ir.model.fields,field_description:base.field_res_device_log__browser
 msgid "Browser"
-msgstr ""
+msgstr "Tarayıcı"
 
 #. module: base
 #: model:res.country,name:base.bn
@@ -15673,7 +16715,7 @@ msgstr "CRM kuruluşu"
 #: model:ir.module.module,shortdesc:base.module_marketing_automation_crm
 #: model:ir.module.module,summary:base.module_marketing_automation_crm
 msgid "CRM in marketing automation"
-msgstr ""
+msgstr "Pazarlama otomasyonunda CRM"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__tz__cst6cdt
@@ -15698,6 +16740,11 @@ msgstr ""
 #: model:res.country,vat_label:base.ar
 msgid "CUIT"
 msgstr "CUIT"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_cake_shop
+msgid "Cake Store"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_act_window_view__view_mode__calendar
@@ -16305,6 +17352,11 @@ msgid "Close"
 msgstr "Kapat"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_clothing_boutique
+msgid "Clothing Store"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_cloud_storage
 msgid "Cloud Storage"
 msgstr ""
@@ -16332,7 +17384,7 @@ msgstr "Kokos (Keeling) Adaları"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_be_codabox
 msgid "CodaBox"
-msgstr ""
+msgstr "CodaBox"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_import_language
@@ -16892,6 +17944,8 @@ msgid "Constraints with the same name are unique per module."
 msgstr "Aynı ada sahip modül benzersiz kısıtlamalardır."
 
 #. module: base
+#: model:ir.module.category,name:base.module_category_construction
+#: model:ir.module.module,shortdesc:base.module_construction
 #: model:res.partner.industry,name:base.res_partner_industry_F
 msgid "Construction"
 msgstr "Yap"
@@ -17056,6 +18110,11 @@ msgstr "Cook Adaları"
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__copied
 msgid "Copied"
 msgstr "Kopyalanan"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_corporate_gifts
+msgid "Corporate Gifts"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.cr
@@ -19061,16 +20120,13 @@ msgid "E-Invoice implementation for Romania"
 msgstr ""
 
 #. module: base
-#: model:ir.module.module,summary:base.module_l10n_dk_oioubl
-msgid "E-Invoicing, Offentlig Information Online Universal Business Language"
+#: model:ir.module.module,summary:base.module_l10n_rs_edi
+msgid "E-Invoice implementation for Serbia"
 msgstr ""
 
 #. module: base
-#: model:ir.module.module,summary:base.module_l10n_sa_edi
-msgid ""
-"\n"
-"        E-Invoicing, Universal Business Language\n"
-"    "
+#: model:ir.module.module,summary:base.module_l10n_dk_oioubl
+msgid "E-Invoicing, Offentlig Information Online Universal Business Language"
 msgstr ""
 
 #. module: base
@@ -19292,6 +20348,11 @@ msgstr ""
 #: model:ir.module.module,summary:base.module_l10n_pe_edi
 msgid "Electronic Invoicing for Peru (OSE method) and UBL 2.1"
 msgstr "Peru için Elektronik Faturalandırma (OSE yöntemi) ve UBL 2.1"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_electronic_store
+msgid "Electronic Store"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_co_edi
@@ -19735,6 +20796,11 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ee_rounding
 msgid "Estonia - Rounding"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_ee_intrastat
+msgid "Estonia Intrastat Declaration"
 msgstr ""
 
 #. module: base
@@ -20413,7 +21479,7 @@ msgstr "İstisna"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_server__state__code
 msgid "Execute Code"
-msgstr ""
+msgstr "Kodu Çalıştırın"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.ir_cron_view_form
@@ -20479,6 +21545,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
 msgid "Export"
 msgstr "Dışa Aktar"
+
+#. module: base
+#: model:ir.module.module,summary:base.module_l10n_se_sie4_export
+msgid "Export Accounting Data to SIE 4 files"
+msgstr ""
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.wizard_lang_export
@@ -20692,6 +21763,11 @@ msgstr "Otomatik olarak doldurmak için fatura taramalarından veri ayıklayın"
 #: model:res.partner.industry,name:base.res_partner_industry_U
 msgid "Extraterritorial"
 msgstr "Yasal Sınırların Dışında"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_eyewear_shop
+msgid "Eyewear Store"
+msgstr ""
 
 #. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_F
@@ -21126,6 +22202,11 @@ msgid "Find old records and archive/delete them"
 msgstr "Eski kayıtları bulun ve arşivleyin/silin"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_industry_restaurant
+msgid "Fine Dining Restaurant"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields.selection,name:base.selection__base_partner_merge_automatic_wizard__state__finished
 msgid "Finished"
 msgstr "Tamamlandı"
@@ -21259,11 +22340,6 @@ msgid "Footer text displayed at the bottom of all reports."
 msgstr "Footer metin tüm çıktıların alt kısmında görüntülenir."
 
 #. module: base
-#: model:ir.module.module,summary:base.module_l10n_be_codabox
-msgid "For Accounting Firms"
-msgstr ""
-
-#. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_server__value
 #: model:ir.model.fields,help:base.field_ir_cron__value
 msgid ""
@@ -21366,6 +22442,11 @@ msgstr "Forum"
 #: model:ir.module.module,shortdesc:base.module_website_slides_forum
 msgid "Forum on Courses"
 msgstr "Kurs Forumu"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_coal_petroleum
+msgid "Fossil Fuel Trading"
+msgstr ""
 
 #. module: base
 #. odoo-python
@@ -21525,6 +22606,11 @@ msgid "Function"
 msgstr "Fonksiyon"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_furniture_store
+msgid "Furniture Store"
+msgstr ""
+
+#. module: base
 #: model:res.partner.industry,full_name:base.res_partner_industry_G
 msgid ""
 "G - WHOLESALE AND RETAIL TRADE; REPAIR OF MOTOR VEHICLES AND MOTORCYCLES"
@@ -21658,6 +22744,11 @@ msgid "Gantt view for Time Off Dashboard"
 msgstr "Zaman Kapalı Gösterge Tablosu için Gantt görünümü"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_gardening
+msgid "Gardening"
+msgstr ""
+
+#. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_rule_form
 msgid "General"
 msgstr "Genel"
@@ -21723,6 +22814,7 @@ msgstr "İzlenebilir ve kısa URL'ler oluşturun"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_de_intrastat
+#: model:ir.module.module,description:base.module_l10n_ee_intrastat
 msgid "Generates Intrastat XML report for declaration."
 msgstr ""
 
@@ -21801,7 +22893,7 @@ msgstr "Almanya - Tip restoran Satış Noktası Sertifikası"
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_de_pos_cert
 msgid "Germany TSS Regulation"
-msgstr ""
+msgstr "Almanya TSS Yönetmeliği"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_de_pos_res_cert
@@ -21993,6 +23085,11 @@ msgid "Grid View"
 msgstr "Tablo Görünümü"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_fmcg_store
+msgid "Grocery Store"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_access__group_id
 #: model_terms:ir.ui.view,arch_db:base.ir_access_view_search
 #: model_terms:ir.ui.view,arch_db:base.view_groups_search
@@ -22042,7 +23139,7 @@ msgstr "Kontak Grubu"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_rule_search
 msgid "Group-based"
-msgstr ""
+msgstr "Grup tabanlı"
 
 #. module: base
 #. odoo-python
@@ -22210,6 +23307,11 @@ msgid "HTTP Routing"
 msgstr "HTTP Yönlendirme"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_hair_salon
+msgid "Hair Salon"
+msgstr ""
+
+#. module: base
 #: model:res.country,name:base.ht
 msgid "Haiti"
 msgstr "Haiti"
@@ -22243,6 +23345,11 @@ msgid "Hardware Proxy"
 msgstr "Donanım Proxy"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_hardware_shop
+msgid "Hardware Store"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,field_description:base.field_reset_view_arch_wizard__has_diff
 msgid "Has Diff"
 msgstr "Has Diff"
@@ -22261,6 +23368,11 @@ msgstr "Başlık Boşluğu"
 #: model:ir.model.fields,help:base.field_res_company__company_details
 msgid "Header text displayed at the top of all reports."
 msgstr "Tüm raporların en üstünde görüntülenen üstbilgi metni."
+
+#. module: base
+#: model:ir.module.category,name:base.module_category_health_and_fitness
+msgid "Health and Fitness"
+msgstr ""
 
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_Q
@@ -22579,6 +23691,11 @@ msgid "Hongkong"
 msgstr ""
 
 #. module: base
+#: model:ir.module.category,name:base.module_category_hospitality
+msgid "Hospitality"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,help:base.field_ir_mail_server__smtp_host
 msgid "Hostname or IP of SMTP server"
 msgstr "SMTP sunucunun IP adresi ya da alan adı"
@@ -22863,6 +23980,11 @@ msgstr "ISO Dil ve Ülke kodu, örn. en_US"
 #: model:ir.model.fields,field_description:base.field_res_lang__iso_code
 msgid "ISO code"
 msgstr "ISO kodu"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_it_hardware
+msgid "IT Hardware & Support"
+msgstr ""
 
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_J
@@ -23151,15 +24273,6 @@ msgid "Image is not encoded in base64."
 msgstr "Görüntü base64 olarak kodlanmamış."
 
 #. module: base
-#. odoo-python
-#: code:addons/image.py:0
-msgid ""
-"Image size excessive, uploaded images must be smaller than %s million "
-"pixels."
-msgstr ""
-"Resim boyutu fazla, yüklenen resimler %s milyon pikselden küçük olmalıdır."
-
-#. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_upgrade
 msgid "Impacted Apps"
 msgstr "Etkilenen Uygulamalar"
@@ -23227,8 +24340,13 @@ msgid "Import Accounting Data from SAF-T files"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,summary:base.module_l10n_se_sie4_import
+msgid "Import Accounting Data from SIE 4 files"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_l10n_se_sie_import
-msgid "Import Accounting Data from SIE files"
+msgid "Import Accounting Data from SIE 5 files"
 msgstr ""
 
 #. module: base
@@ -23545,6 +24663,11 @@ msgstr "Endonezya"
 #: model:ir.module.module,shortdesc:base.module_l10n_id_efaktur
 msgid "Indonesia E-faktur"
 msgstr "Endonezya E-faktur"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_id_efaktur_coretax
+msgid "Indonesia E-faktur (Coretax)"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_id
@@ -24361,8 +25484,18 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_it_edi_sale
+msgid "Italy - Sale E-invoicing"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_it_stock_ddt
 msgid "Italy - Stock DDT"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_it_xml_export
+msgid "Italy - Tax Report XML Export"
 msgstr ""
 
 #. module: base
@@ -24448,16 +25581,6 @@ msgstr "Json"
 #: model:res.partner.industry,full_name:base.res_partner_industry_K
 msgid "K - FINANCIAL AND INSURANCE ACTIVITIES"
 msgstr "K - FİNANS VE SİGORTA FAALİYETLERİ"
-
-#. module: base
-#: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll
-msgid "Saudi Arabia - Payroll"
-msgstr ""
-
-#. module: base
-#: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll_account
-msgid "Saudi Arabia - Payroll with Accounting"
-msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_digest
@@ -24963,6 +26086,11 @@ msgid "Launch Configuration Wizard"
 msgstr "Yapılandırma Sihirbazı'nı başlatın"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_industry_lawyer
+msgid "Law Firm"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__layout_background
 msgid "Layout Background"
 msgstr "Serilim Arka Planı"
@@ -25194,6 +26322,11 @@ msgstr ""
 #: model:ir.module.module,summary:base.module_pos_sale_loyalty
 msgid "Link module between pos_sale and pos_loyalty"
 msgstr "Pos_sale ve pos_loyalty arasındaki bağlantı modülü"
+
+#. module: base
+#: model:ir.module.module,summary:base.module_l10n_es_edi_tbai_multi_refund
+msgid "Link one refund with multiple invoices"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_device__linked_ip_addresses
@@ -26155,6 +27288,12 @@ msgid "Mass mailing sms on sale orders"
 msgstr "Satış siparişlerinde toplu postalama sms"
 
 #. module: base
+#: model:ir.module.module,description:base.module_hr_recruitment_sms
+#: model:ir.module.module,summary:base.module_hr_recruitment_sms
+msgid "Mass mailing sms to job applicants"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_mps
 #: model:ir.module.module,summary:base.module_mrp_mps
 msgid "Master Production Schedule"
@@ -26356,6 +27495,11 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__tz__mexico/general
 msgid "Mexico/General"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_micro_brewery
+msgid "Microbrewery"
 msgstr ""
 
 #. module: base
@@ -27407,6 +28551,11 @@ msgid "None"
 msgstr "Hiçbiri"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_non_profit_organization
+msgid "Nonprofit Organization"
+msgstr ""
+
+#. module: base
 #: model:res.country,name:base.nf
 msgid "Norfolk Island"
 msgstr "Norfolk Adası"
@@ -27755,6 +28904,102 @@ msgid ""
 "Compare revenues with forecasts and budgets in real time.\n"
 "\n"
 msgstr ""
+"Odoo CRM\n"
+"--------\n"
+"\n"
+"Odoo'nun\n"
+"<a href=\"https://www.odoo.com/app/crm\">Açık Kaynak CRM</a> uygulaması ile ile satış verimliliğini artırın, kazanma oranlarını iyileştirin, geliri artırın.\n"
+"\n"
+"Satış huninizi hiç çaba harcamadan yönetin. Müşteri adaylarını çekin, telefon, arama ve\n"
+"toplantıları takip edin. Bilinçli kararlar vermek için  müşteri adaylarınızın\n"
+"kalitesini analiz edin ve e-postaları doğrudan uygulamaya entegre ederek zamandan tasarruf edin.\n"
+"\n"
+"Satış Huniniz Sizin İstediğiniz Şekilde\n"
+"--------------------------------------\n"
+"\n"
+"Devrim niteliğindeki kanban görünümü ile fırsat işlem hattınızı takip edin. Satış huninizin\n"
+"içinde çalışın ve sonraki eylemler, yeni mesajlar, en iyi fırsatlar\n"
+"ve beklenen gelirler hakkında anında görsel bilgi alın.\n"
+"\n"
+"Müşteri Adayı Yönetiminin Kolay Yolu\n"
+"-------------------------\n"
+"\n"
+"Gelen e-postalardan otomatik olarak müşteri adayları oluşturun. Müşteri adayı verimliliğini analiz edin ve performansı kampanyalara, kanallara veya Satış Ekibine göre karşılaştırın.\n"
+"\n"
+"Mükerrerleri bulun, müşteri adaylarını birleştirin ve tek bir işlemle  doğru satış elemanına \n"
+"atayın. Yönetime daha az, müşteri adaylarını nitelemeye daha çok zaman ayırın.\n"
+"\n"
+"Fırsatlarınızı Organize Edin\n"
+"---------------------------\n"
+"\n"
+"En iyi fırsatlara odaklanmak için fırsatlarınızı organize edin. E-postalar,\n"
+"telefon görüşmeleri, dahili notlar, toplantılar ve teklifler gibi \n"
+"tüm müşteri etkileşimlerinizi fırsattan yönetin.\n"
+"\n"
+"Belirli olaylardan haberdar olmak için ilginizi çeken fırsatları takip edin:\n"
+"anlaşma kazanıldı veya kaybedildi, aşama değişti, yeni müşteri talebi vb.\n"
+"\n"
+"E-posta Entegrasyonu ve Otomasyonu\n"
+"--------------------------------\n"
+"\n"
+"Her gün kullandığınız e-posta uygulamalarıyla çalışın. Şirketiniz\n"
+"ister Microsoft Outlook ister Gmail kullansın, kimsenin çalışma şeklini değiştirmesine gerek\n"
+"yoktur, böylece herkes üretken kalır.\n"
+"\n"
+"Gelen e-postaları otomatik olarak yönlendirin, sıralayın ve filtreleyin. Odoo CRM \n"
+"gelen e-postaları işler ve bunları doğru fırsatlara veya Satış Ekibine yönlendirir. Yeni müşteri adayları\n"
+"anında oluşturulur ve ilgilenen satış görevlileri otomatik olarak bilgilendirilir.\n"
+"\n"
+"Ortak Ajanda\n"
+"--------------------\n"
+"\n"
+"Entegre takvimi kullanarak toplantılarınızı ve telefon görüşmelerinizi planlayın. Kendi \n"
+"ajandanızı ve iş arkadaşlarınızın ajandasını tek bir görünümde görebilirsiniz. Yöneticiler için \n"
+"de ekibin nelerle meşgul olduğunu görmek kolaydır.\n"
+"\n"
+"Müşteri Adayı Otomasyonu ve Pazarlama Kampanyaları\n"
+"---------------------------------------\n"
+"\n"
+"Odoo <a href=\"https://www.odoo.com/app/crm\">CRM</a> ile görevleri otomatikleştirerek performansı artırın.\n"
+"\n"
+"Müşteri adayı edinme, takip ve promosyonları otomatikleştirmek için pazarlama \n"
+"kampanyalarımızı kullanın. Tetikleyicilere göre otomasyon kuralları \n"
+"tanımlayın (örneğin, bir satış elemanından aramasını isteyin, bir e-posta gönderin, ...) \n"
+"(20 günden beri etkinlik yok, bir promosyon e-postasını yanıtladı, vb.)\n"
+"\n"
+"Kampanyaları olası satıştan kapanışa kadar her kanalda optimize edin.\n"
+"Nereye yatırım yapacağınız konusunda daha akıllıca kararlar alın  ve pazarlama \n"
+"faaliyetlerinizin şirketinizin karlılığı üzerindeki etkisini gösterin.\n"
+"\n"
+"Satış Döngünüzü Özelleştirin\n"
+"--------------------------\n"
+"\n"
+"Satış yaklaşımınıza mükemmel şekilde uyan satış aşamalarını  yapılandırarak satış \n"
+"döngünüzü özelleştirin. Müşteri ilişkinizin her aşamasında satış performansınızı artırmak için \n"
+"doğru tahminler almak üzere istatistikleri kontrol edin.\n"
+"\n"
+"Oyunlaştırma ile Bağlılığı Artırın\n"
+"----------------------------------\n"
+"\n"
+"### Ekibinizin doğal rekabet arzusundan yararlanın\n"
+"\n"
+"Oyun mekaniğinden] (http://en.wikipedia.org/wiki/Gamification) esinlenen\n"
+"gerçek zamanlı tanıma ve ödüllerle iyi alışkanlıkları pekiştirin ve kazanma oranlarını artırın.\n"
+"Satış Ekiplerini zorluklar, kişisel hedefler ve ekip lider panoları ile net iş hedefleri\n"
+" etrafında hizalayın.\n"
+"\n"
+"### Lider Panoları\n"
+"\n"
+"Performans oranları ile Satış Ekibi arasında liderliği ve rekabeti teşvik edin.\n"
+"\n"
+"### Kişisel Hedefler\n"
+"\n"
+"Kullanıcıları şirket hedefleriyle uyumlu hale getirmek için onlara net hedefler atayın.\n"
+"\n"
+"### Ekip Hedefleri\n"
+"\n"
+"Gelirleri tahminler ve bütçelerle gerçek zamanlı olarak karşılaştırın.\n"
+"\n"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module__license__oeel-1
@@ -29506,7 +30751,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_hr
 msgid "POS - HR"
-msgstr ""
+msgstr "POS - İK"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_restaurant_loyalty
@@ -29526,7 +30771,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_sale
 msgid "POS - Sales"
-msgstr ""
+msgstr "POS - Satış"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_sale_loyalty
@@ -29551,12 +30796,12 @@ msgstr "POS Barcode scan in Mobile"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_epson_printer
 msgid "POS Epson Printer"
-msgstr ""
+msgstr "POS Epson Yazıcı"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_hr_restaurant
 msgid "POS HR Restaurant"
-msgstr ""
+msgstr "POS İK Restoran"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_iot_six
@@ -29571,7 +30816,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_paytm
 msgid "POS PayTM"
-msgstr ""
+msgstr "POS PayTM"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_pricer
@@ -29586,7 +30831,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_razorpay
 msgid "POS Razorpay"
-msgstr ""
+msgstr "POS Razorpay"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_restaurant_adyen
@@ -29601,7 +30846,7 @@ msgstr "POS Restoran Stripe"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_self_order
 msgid "POS Self Order"
-msgstr ""
+msgstr "POS Self Order"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_self_order_adyen
@@ -29651,7 +30896,7 @@ msgstr "POS Stripe"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_viva_wallet
 msgid "POS Viva Wallet"
-msgstr ""
+msgstr "POS Viva Wallet"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__tz__prc
@@ -30392,7 +31637,7 @@ msgstr "Bordro Yerelleştirmesi"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_peppol
 msgid "Peppol"
-msgstr ""
+msgstr "Peppol"
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_2
@@ -30441,6 +31686,11 @@ msgid "Peruvian eCommerce"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_pharmacy_retail
+msgid "Pharmacy"
+msgstr ""
+
+#. module: base
 #: model:res.country,name:base.ph
 msgid "Philippines"
 msgstr "Filipinler"
@@ -30480,6 +31730,11 @@ msgstr "Telefon Numarası Doğrulama"
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 msgid "Phone:"
 msgstr "Telefon:"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_photography
+msgid "Photography"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.pn
@@ -30537,7 +31792,7 @@ msgstr "Tatillerle entegrasyon planlama"
 #: model:ir.model.fields,field_description:base.field_res_device__platform
 #: model:ir.model.fields,field_description:base.field_res_device_log__platform
 msgid "Platform"
-msgstr ""
+msgstr "Platform"
 
 #. module: base
 #. odoo-python
@@ -30595,7 +31850,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_preparation_display
 msgid "PoS Preparation Display"
-msgstr ""
+msgstr "PoS Hazırlık Ekranı"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_hr_preparation_display
@@ -31353,6 +32608,11 @@ msgstr ""
 "kodundan değiştirin. Tercihen özel bir eklenti ile!"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_condominium
+msgid "Property Owner Association"
+msgstr ""
+
+#. module: base
 #: model:res.partner.category,name:base.res_partner_category_2
 msgid "Prospects"
 msgstr "Potansiyel"
@@ -31786,7 +33046,7 @@ msgstr "RUC"
 #. module: base
 #: model:res.country,vat_label:base.cl model:res.country,vat_label:base.uy
 msgid "RUT"
-msgstr ""
+msgstr "RUT"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_company__font__raleway
@@ -31828,6 +33088,7 @@ msgid "Readonly"
 msgstr "Salt Okunur"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_industry_real_estate
 #: model:res.partner.industry,name:base.res_partner_industry_L
 msgid "Real Estate"
 msgstr "Emlak"
@@ -31907,6 +33168,11 @@ msgstr "Kayıtlar:"
 #: model:ir.module.module,shortdesc:base.module_hr_recruitment
 msgid "Recruitment"
 msgstr "İşe Alım"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_hr_recruitment_sms
+msgid "Recruitment - SMS"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_recruitment_sign
@@ -32077,7 +33343,7 @@ msgstr "Bu raporla ilgili bağlamsal eylemi kaldır"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_server__update_m2m_operation__remove
 msgid "Removing"
-msgstr ""
+msgstr "Kaldırma"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_renting
@@ -32340,6 +33606,11 @@ msgid "Restrict"
 msgstr "Kısıtlama"
 
 #. module: base
+#: model:ir.module.category,name:base.module_category_retail
+msgid "Retail"
+msgstr ""
+
+#. module: base
 #: model_terms:ir.ui.view,arch_db:base.res_device_view_kanban
 #: model_terms:ir.ui.view,arch_db:base.res_device_view_tree
 msgid "Revoke"
@@ -32419,7 +33690,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,name:base.module_category_productivity_room
 msgid "Room"
-msgstr ""
+msgstr "Oda"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company__root_id
@@ -32522,7 +33793,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,name:base.module_category_accounting_localizations_sbr
 msgid "SBR"
-msgstr ""
+msgstr "SBR"
 
 #. module: base
 #: model:res.country.group,name:base.sepa_zone
@@ -32825,6 +34096,11 @@ msgid "Sale modifications for Brazil"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,description:base.module_l10n_it_edi_sale
+msgid "Sale modifications for Italy E-invoicing"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_social_sale
 msgid "Sale statistics on social"
 msgstr "Sosyal medyada satış istatistikleri"
@@ -33003,6 +34279,16 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_edi_pos
 msgid "Saudi Arabia - E-invoicing (Simplified)"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll
+msgid "Saudi Arabia - Payroll"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll_account
+msgid "Saudi Arabia - Payroll with Accounting"
 msgstr ""
 
 #. module: base
@@ -33532,6 +34818,11 @@ msgid "Serbia - Accounting Reports"
 msgstr "Sırbistan - Muhasebe Raporları"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_rs_edi
+msgid "Serbia - eFaktura E-invoicing"
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_logging__type__server
 msgid "Server"
 msgstr "Sunucu"
@@ -33986,6 +35277,16 @@ msgid "Social media connectors for company settings."
 msgstr "Şirket ayarları için sosyal medya konektörleri."
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_software_reseller
+msgid "Software Reseller"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_solar_installation
+msgid "Solar Energy Systems"
+msgstr ""
+
+#. module: base
 #: model:res.country,name:base.sb
 msgid "Solomon Islands"
 msgstr "Solomon Adaları"
@@ -34171,6 +35472,11 @@ msgstr "Speedscope (Hız Kapsamı)"
 #: model:ir.module.module,summary:base.module_website_event_track
 msgid "Sponsors, Tracks, Agenda, Event News"
 msgstr "Sponsorlar, Ajanda,  Etkinlik Haberleri"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_sports_club
+msgid "Sports Club"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_spreadsheet
@@ -34704,6 +36010,11 @@ msgid "Supplementary arguments"
 msgstr "Tedarik argümanları"
 
 #. module: base
+#: model:ir.module.category,name:base.module_category_supply_chain
+msgid "Supply Chain"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,summary:base.module_website_event_track_live
 msgid "Support live tracks: streaming, participation, youtube"
 msgstr "Canlı bölümleri destekleyin: akış, katılım, youtube"
@@ -34722,6 +36033,11 @@ msgstr ""
 #: model:res.country,name:base.sr
 msgid "Suriname"
 msgstr "Surinam"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_surveyor
+msgid "Surveying & Mapping"
+msgstr ""
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_marketing_surveys
@@ -34751,8 +36067,18 @@ msgid "Sweden - Accounting Reports"
 msgstr "Sweden - Accounting Reports"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_se_sie4_export
+msgid "Sweden - SIE 4 Export"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_se_sie4_import
+msgid "Sweden - SIE 4 Import"
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_se_sie_import
-msgid "Sweden - SIE Import"
+msgid "Sweden - SIE 5 Import"
 msgstr ""
 
 #. module: base
@@ -34883,7 +36209,7 @@ msgstr ""
 #. module: base
 #: model:res.country,vat_label:base.ug
 msgid "TIN"
-msgstr ""
+msgstr " Vergi Kimlik Numarası"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_mail_server__smtp_encryption__starttls
@@ -34940,6 +36266,11 @@ msgstr "Tajawal"
 #: model:res.country,name:base.tj
 msgid "Tajikistan"
 msgstr "Tacikistan"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_headhunter
+msgid "Talent Acquisition"
+msgstr ""
 
 #. module: base
 #: model_terms:res.partner,website_description:base.res_partner_2
@@ -35678,7 +37009,7 @@ msgstr "Bu kişiden sorumlu dahili kullanıcı."
 #. module: base
 #: model:ir.model.constraint,message:base.constraint_ir_cron_check_strictly_positive_interval
 msgid "The interval number must be a strictly positive number."
-msgstr ""
+msgstr "Aralık değeri kesinlikle pozitif bir sayı olmalıdır."
 
 #. module: base
 #. odoo-python
@@ -36284,37 +37615,6 @@ msgid ""
 msgstr ""
 
 #. module: base
-#: model:ir.module.module,description:base.module_l10n_bd
-msgid ""
-"\n"
-"This is the base module to manage the accounting chart for Bangladesh in Odoo\n"
-"============================\n"
-"Bangladesh accounting basic charts and localization.\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of accounts\n"
-"- Taxes\n"
-"- Tax report\n"
-msgstr ""
-
-#. module: base
-#: model:ir.module.module,description:base.module_l10n_pk
-msgid ""
-"\n"
-"Pakistan Accounting Module\n"
-"=======================================================\n"
-"Pakistan accounting basic charts and localization.\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of Accounts\n"
-"- Taxes\n"
-"- Tax Report\n"
-"- Withholding Tax Report\n"
-msgstr ""
-
-#. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_report__attachment
 msgid ""
 "This is the filename of the attachment used to store the printing result. "
@@ -36426,9 +37726,8 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_codabox
 msgid ""
-"This module allows Accounting Firms to connect to CodaBox\n"
-"and automatically import CODA and SODA statements for their clients in Odoo.\n"
-"The connection must be done by the Accounting Firm.\n"
+"This module allows connection to CodaBox\n"
+"and automatically imports CODA and SODA statements in Odoo.\n"
 msgstr ""
 
 #. module: base
@@ -36660,6 +37959,8 @@ msgid ""
 "This module enables product creation by scanning barcodes with a camera, "
 "utilizing the Barcode Lookup API Key."
 msgstr ""
+"Bu modül, Barkod Arama API Anahtarını kullanarak bir kamera ile barkodları "
+"tarayarak ürün oluşturmayı sağlar."
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_event_track_gantt
@@ -36705,7 +38006,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,description:base.module_pos_sms
 msgid "This module integrates the Point of Sale with SMS"
-msgstr ""
+msgstr "Bu modül, Satış Noktası'nı (POS) SMS ile entegre eder"
 
 #. module: base
 #: model:ir.module.module,description:base.module_whatsapp_event
@@ -36809,6 +38110,11 @@ msgstr "Bin Ayraçı"
 #: model:ir.model.fields.selection,name:base.selection__res_lang__week_start__4
 msgid "Thursday"
 msgstr "Perşembe"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_es_edi_tbai_multi_refund
+msgid "TicketBAI multi refund"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_helpdesk_livechat
@@ -37011,6 +38317,12 @@ msgstr ""
 "                özellikle fare tuzakları satmak için. Bu numarayla kesti\n"
 "                BT bütçesi son 2 yılda neredeyse yarı yarıya.\n"
 "                Ünlü Yönetici Ortak."
+
+#. module: base
+#. odoo-python
+#: code:addons/image.py:0
+msgid "Too large image (above %sMpx), reduce the image size."
+msgstr ""
 
 #. module: base
 #. odoo-python
@@ -37326,21 +38638,6 @@ msgstr ""
 #: model:res.partner.industry,full_name:base.res_partner_industry_U
 msgid "U - ACTIVITIES OF EXTRATERRITORIAL ORGANISATIONS AND BODIES"
 msgstr "U - ÜLKE DIŞINDAKİ KURUM VE KURULUŞLARIN FAALİYETLERİ"
-
-#. module: base
-#: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll
-msgid "United Arab Emirates - Payroll"
-msgstr ""
-
-#. module: base
-#: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll_account
-msgid "United Arab Emirates - Payroll with Accounting"
-msgstr ""
-
-#. module: base
-#: model:ir.module.module,shortdesc:base.module_l10n_ae_corporate_tax_report
-msgid "United Arab Emirates - Corporate Tax Report"
-msgstr ""
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__tz__uct
@@ -37668,6 +38965,21 @@ msgid "United Arab Emirates - Accounting Reports"
 msgstr ""
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_ae_corporate_tax_report
+msgid "United Arab Emirates - Corporate Tax Report"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll
+msgid "United Arab Emirates - Payroll"
+msgstr ""
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll_account
+msgid "United Arab Emirates - Payroll with Accounting"
+msgstr ""
+
+#. module: base
 #: model:res.country,name:base.uk
 msgid "United Kingdom"
 msgstr "Birleşik Krallık (Büyük Britanya ve Kuzey İrlanda)"
@@ -37934,7 +39246,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,description:base.module_pos_self_order_epson_printer
 msgid "Use Epson ePOS Printers without the IoT Box in the PoS Kiosk"
-msgstr ""
+msgstr "PoS Kioskta IoT Kutusu Olmadan Epson ePOS Yazıcıları Kullanın"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_iot
@@ -38583,7 +39895,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_voip
 msgid "VoIP"
-msgstr ""
+msgstr "VoIP"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_voip_onsip
@@ -38593,12 +39905,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_voip_crm
 msgid "VoIP for CRM"
-msgstr ""
+msgstr "CRM için VoIP"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_voip_crm
 msgid "VoIP integration with CRM module."
-msgstr ""
+msgstr "CRM modülü ile VoIP entegrasyonu"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__tz__w-su
@@ -38951,6 +40263,11 @@ msgid "Weeks"
 msgstr "Hafta"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_wellness_practitioner
+msgid "Wellness Practitioner"
+msgstr ""
+
+#. module: base
 #: model:res.country,name:base.eh
 msgid "Western Sahara"
 msgstr "Batı Sahra"
@@ -38988,7 +40305,7 @@ msgstr "Bu anahtar ne için?"
 #: model:ir.module.category,name:base.module_category_marketing_whatsapp
 #: model:ir.module.category,name:base.module_category_whatsapp
 msgid "WhatsApp"
-msgstr ""
+msgstr "WhatsApp"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_whatsapp
@@ -39004,27 +40321,27 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_whatsapp_delivery
 msgid "WhatsApp-Delivery"
-msgstr ""
+msgstr "WhatsApp-Teslimat"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_whatsapp_pos
 msgid "WhatsApp-POS"
-msgstr ""
+msgstr "WhatsApp-POS"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_whatsapp_sale
 msgid "WhatsApp-Sale"
-msgstr ""
+msgstr "WhatsApp-Satış"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_whatsapp_event
 msgid "WhatsApp-Website-Events"
-msgstr ""
+msgstr "WhatsApp-Web Sitesi Etkinlikleri"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_whatsapp_website_sale
 msgid "WhatsApp-eCommerce"
-msgstr ""
+msgstr "WhatsApp-eTicaret"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_whatsapp_account
@@ -39034,7 +40351,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_whatsapp_payment
 msgid "Whatsapp-Payment"
-msgstr ""
+msgstr "WhatsApp-Ödeme"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_server__sequence
@@ -39255,7 +40572,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_rule__perm_write
 #: model_terms:ir.ui.view,arch_db:base.view_rule_search
 msgid "Write"
-msgstr ""
+msgstr "Yazın"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_access__perm_write
@@ -39794,7 +41111,7 @@ msgstr "hesap"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_qr_code_emv
 msgid "account_qr_code_emv"
-msgstr ""
+msgstr "account_qr_code_emv"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_asset__active
@@ -39858,7 +41175,7 @@ msgstr "seç"
 #. odoo-python
 #: code:addons/base/models/ir_rule.py:0
 msgid "create"
-msgstr ""
+msgstr "oluşturun"
 
 #. module: base
 #. odoo-python
@@ -40178,7 +41495,7 @@ msgstr "json"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_be_pos_sale
 msgid "l10n_be_pos_sale"
-msgstr ""
+msgstr "l10n_be_pos_sale"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_model_fields__ttype__many2many
@@ -40264,7 +41581,7 @@ msgstr "pos_account_reports"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_mrp
 msgid "pos_mrp"
-msgstr ""
+msgstr "pos_mrp"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_expense_predict_product
@@ -40317,12 +41634,17 @@ msgstr "seçim"
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_server__value_field_to_show__selection_value
 msgid "selection_value"
-msgstr ""
+msgstr "seçim_değeri"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_services_sales_subscriptions
 msgid "subscriptions"
 msgstr "abonelikler"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_tests
+msgid "test"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_data_module_install
@@ -40444,12 +41766,12 @@ msgstr "doğru"
 #. odoo-python
 #: code:addons/base/models/ir_rule.py:0
 msgid "unlink"
-msgstr ""
+msgstr "bağlantıyı kaldırın"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_server__value_field_to_show__update_boolean_value
 msgid "update_boolean_value"
-msgstr ""
+msgstr "mantıksal_değeri_güncelleyin"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_server__value_field_to_show__value

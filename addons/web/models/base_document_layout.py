@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from markupsafe import Markup
+from math import ceil
 
 from odoo import api, fields, models
 
@@ -223,7 +224,7 @@ class BaseDocumentLayout(models.TransientModel):
             return False, False
 
         base_w, base_h = image.size
-        w = int(50 * base_w / base_h)
+        w = ceil(50 * base_w / base_h)
         h = 50
 
         # Converts to RGBA (if already RGBA, this is a noop)
@@ -290,7 +291,7 @@ class BaseDocumentLayout(models.TransientModel):
         Simply copied and adapted slightly
         """
 
-        def scss_importer(path, prev):
+        def scss_importer(path, *args):
             *parent_path, file = os.path.split(path)
             try:
                 parent_path = file_path(os.path.join(*parent_path))

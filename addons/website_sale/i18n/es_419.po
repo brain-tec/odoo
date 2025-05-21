@@ -3,8 +3,8 @@
 # 	* website_sale
 # 
 # Translators:
-# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2024
 # Wil Odoo, 2025
+# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2025
 # Fernanda Alvarez, 2025
 # 
 msgid ""
@@ -158,7 +158,7 @@ msgid ""
 msgstr ""
 "<br/>\n"
 "                Garantía de devolución de 30 días<br/>\n"
-"                Envío: 2-3 días laborales"
+"                Envío: 2-3 días hábiles"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.extra_info
@@ -832,7 +832,7 @@ msgstr "Atributos"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Automatically send abandoned checkout emails"
-msgstr "Envío automático de correos electrónicos de pagos abandonados"
+msgstr "Envío automático de correos electrónicos por carritos abandonados"
 
 #. module: website_sale
 #. odoo-javascript
@@ -2951,7 +2951,7 @@ msgstr "Posición"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__website_sale_prevent_zero_price_sale
 msgid "Prevent Sale of Zero Priced Product"
-msgstr "Evitar la venta de un producto con costo cero"
+msgstr "Evitar la venta de un producto si su precio es cero"
 
 #. module: website_sale
 #. odoo-javascript

@@ -1006,7 +1006,10 @@ class TestUi(TestPointOfSaleHttpCommon):
 
     def test_07_pos_combo(self):
         setup_pos_combo_items(self)
-        self.office_combo.write({'lst_price': 50})
+        self.office_combo.write({
+            'lst_price': 50,
+            'barcode': 'SuperCombo',
+        })
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('PosComboPriceTaxIncludedTour')
         order = self.env['pos.order'].search([])
@@ -1381,6 +1384,9 @@ class TestUi(TestPointOfSaleHttpCommon):
 
     def test_customer_display(self):
         self.start_tour(f"/pos_customer_display/{self.main_pos_config.id}/{self.main_pos_config.access_token}", 'CustomerDisplayTour', login="pos_user")
+
+    def test_customer_display_with_qr(self):
+        self.start_tour(f"/pos_customer_display/{self.main_pos_config.id}/{self.main_pos_config.access_token}", 'CustomerDisplayTourWithQr', login="pos_user")
 
     def test_refund_few_quantities(self):
         """ Test to check that refund works with quantities of less than 0.5 """

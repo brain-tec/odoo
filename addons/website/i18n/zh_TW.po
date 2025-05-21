@@ -1689,7 +1689,7 @@ msgstr "加入新的社交網絡"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog_add_product_widget
 msgid "Add Product"
-msgstr "添加產品"
+msgstr "加入產品"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_chart_options
@@ -3747,7 +3747,7 @@ msgstr "天 - 小時 - 分 - 秒"
 #. odoo-javascript
 #: code:addons/website/static/src/components/wysiwyg_adapter/wysiwyg_adapter.js:0
 msgid "DRAG BUILDING BLOCKS HERE"
-msgstr "拖曳區塊到這裡"
+msgstr "拖曳區塊至此處"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_alert_options
@@ -4930,7 +4930,7 @@ msgstr "農場友善頂級雞肉"
 #: model:ir.model.fields,field_description:website.field_res_config_settings__favicon
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Favicon"
-msgstr "網址列圖示"
+msgstr "網頁圖示"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_three_columns
@@ -9199,7 +9199,7 @@ msgstr "Qweb"
 #. module: website
 #: model:ir.model,name:website.model_ir_qweb_field_contact
 msgid "Qweb Field Contact"
-msgstr "Qweb 聯繫人欄位"
+msgstr "Qweb 欄位聯絡人"
 
 #. module: website
 #: model:ir.model,name:website.model_ir_qweb_field_html
@@ -11146,7 +11146,7 @@ msgstr "此指導計劃提供專門的力量訓練、營養指導和專家輔導
 #: model:ir.model.fields,help:website.field_res_config_settings__favicon
 #: model:ir.model.fields,help:website.field_website__favicon
 msgid "This field holds the image used to display a favicon on the website."
-msgstr "此欄位存放此網站網址列圖示的圖片."
+msgstr "此欄位存放用作顯示網站圖示的圖片。"
 
 #. module: website
 #. odoo-javascript
@@ -12426,7 +12426,7 @@ msgstr "網站域名應獨一無二。"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website__favicon
 msgid "Website Favicon"
-msgstr "網站網址列圖示"
+msgstr "網站圖示"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_ir_model__website_form_key
@@ -12640,7 +12640,7 @@ msgstr "網站: 分析"
 #. module: website
 #: model:ir.actions.server,name:website.ir_actions_server_website_dashboard
 msgid "Website: Dashboard"
-msgstr "網站: 儀錶板"
+msgstr "網站：Dashboard"
 
 #. module: website
 #: model:ir.actions.act_window,name:website.action_website_list

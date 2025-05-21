@@ -56,9 +56,11 @@ from odoo import api
 from odoo.models import BaseModel
 from odoo.exceptions import AccessError
 from odoo.fields import Command
+from odoo.http import BadRequest
+from odoo.modules import module
 from odoo.modules.registry import Registry
 from odoo.service import security
-from odoo.sql_db import BaseCursor, Cursor
+from odoo.sql_db import BaseCursor, Cursor, TestCursor
 from odoo.tools import float_compare, mute_logger, profiler, SQL, DotDict
 from odoo.tools.mail import single_email_re
 from odoo.tools.misc import find_in_path, lower_logging
@@ -112,6 +114,7 @@ CHECK_BROWSER_SLEEP = 0.1 # seconds
 CHECK_BROWSER_ITERATIONS = 100
 BROWSER_WAIT = CHECK_BROWSER_SLEEP * CHECK_BROWSER_ITERATIONS # seconds
 DEFAULT_SUCCESS_SIGNAL = 'test successful'
+TEST_CURSOR_COOKIE_NAME = 'test_request_key'
 
 def get_db_name():
     db = odoo.tools.config['db_name']
@@ -287,6 +290,10 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
         # allow localhost requests
         # TODO: also check port?
         url = werkzeug.urls.url_parse(r.url)
+        timeout = kw.get('timeout')
+        if timeout and timeout < 10:
+            _logger.getChild('requests').info('request %s with timeout %s increased to 10s during tests', url, timeout)
+            kw['timeout'] = 10
         if url.host in (HOST, 'localhost'):
             return _super_send(s, r, **kw)
         if url.scheme == 'file':
@@ -719,6 +726,56 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
             profile_session=self.profile_session,
             **kwargs)
 
+    def setUp(self):
+        super().setUp()
+        self.http_request_key = self.canonical_tag
+        self.http_request_strict_check = False  # by default, don't be to strict
+
+        def reset_http_key():
+            self.http_request_key = None
+            self.http_request_strict_check = True
+        self.addCleanup(reset_http_key)  # this should avoid to have a request executing during teardown
+
+    def mandatory_request_route(self, route):
+        return route == "/websocket"
+
+    def check_test_cursor(self, operation):
+        if odoo.modules.module.current_test != self:
+            message = f"Trying to open a test cursor for {self.canonical_tag} while already in a test {odoo.modules.module.current_test.canonical_tag}"
+            _logger.runbot(message)
+            raise BadRequest(message)
+        request = odoo.http.request
+        if not request or isinstance(request, Mock):
+            return
+        if not hasattr(self, 'http_request_key') or not self.http_request_key:
+            message = f'Using a test cursor without http_request_key, most likely between two tests on request {request.httprequest.path} in {module.current_test.canonical_tag}'
+            _logger.info(message)
+            raise BadRequest(message)
+        http_request_key = request.httprequest.cookies.get(TEST_CURSOR_COOKIE_NAME)
+        if not http_request_key:
+            if self.http_request_strict_check or self.mandatory_request_route(request.httprequest.path):
+                reason = 'for this path'
+                if self.http_request_strict_check:
+                    reason = 'after a browser_js call'
+                message = f'Using a test cursor without specified test on request {request.httprequest.path} in {module.current_test.canonical_tag} as been ignored since cookie is mandatory {reason}'
+                _logger.info(message)
+                raise BadRequest(message)
+            if operation == '__init__':  # main difference with master, don't fail if no cookie is defined_check
+                message = f'Opening a test cursor without specified test on request {request.httprequest.path} in {module.current_test.canonical_tag}'
+                _logger.info(message)
+            return
+        http_request_required_key = self.http_request_key
+        if http_request_key != http_request_required_key:
+            expected = http_request_required_key
+            _logger.runbot(
+                'Request with path %s has been ignored during test as it '
+                'it does not contain the test_cursor cookie or it is expired.'
+                ' (required "%s", got "%s")',
+                request.httprequest.path, expected, http_request_key
+            )
+            raise BadRequest(
+                'Request ignored during test as it does not contain the required cookie.'
+            )
 
 class Like:
     """
@@ -836,6 +893,14 @@ class TransactionCase(BaseCase):
 
         cls.cr = cls.registry.cursor()
         cls.addClassCleanup(cls.cr.close)
+
+        def check_cursor_stack():
+            for cursor in TestCursor._cursors_stack:
+                _logger.info('One curor was remaining in the TestCursor stack at the end of the test')
+                cursor._close = True
+            TestCursor._cursors_stack = []
+
+        cls.addClassCleanup(check_cursor_stack)
 
         cls.env = api.Environment(cls.cr, odoo.SUPERUSER_ID, {})
 
@@ -1054,12 +1119,13 @@ class ChromeBrowser:
             self._result.cancel()
 
             self._logger.info("Closing chrome headless with pid %s", self.chrome.pid)
-            self._websocket_send('Browser.close')
+            self._websocket_request('Browser.close')
             self._logger.info("Closing websocket connection")
             self.ws.close()
         if self.chrome:
             self._logger.info("Terminating chrome headless with pid %s", self.chrome.pid)
             self.chrome.terminate()
+            self.chrome.wait(15)
 
         if self.user_data_dir and os.path.isdir(self.user_data_dir) and self.user_data_dir != '/':
             self._logger.info('Removing chrome user profile "%s"', self.user_data_dir)
@@ -1259,6 +1325,8 @@ class ChromeBrowser:
             except websocket.WebSocketTimeoutException:
                 continue
             except Exception as e:
+                if isinstance(e, ConnectionResetError) and self._result.done():
+                    return
                 # if the socket is still connected something bad happened,
                 # otherwise the client was just shut down
                 if self.ws.connected:
@@ -1340,6 +1408,8 @@ class ChromeBrowser:
 
         log_type = type
         _logger = self._logger.getChild('browser')
+        if self._result.done() and 'failed to fetch' in message.casefold():
+            log_type = 'dir'
         _logger.log(
             self._TO_LEVEL.get(log_type, logging.INFO),
             "%s%s",
@@ -1418,8 +1488,9 @@ which leads to stray network requests and inconsistencies."""
             message += '\n' + stack
 
         if self._result.done():
-            self._logger.getChild('browser').error(
-                "Exception received after termination: %s", message)
+            if 'failed to fetch' not in message.casefold():
+                self._logger.getChild('browser').error(
+                    "Exception received after termination: %s", message)
             return
 
         self.take_screenshot()
@@ -1752,7 +1823,14 @@ class Transport(xmlrpclib.Transport):
     def request(self, *args, **kwargs):
         self.cr.flush()
         self.cr.clear()
-        return super().request(*args, **kwargs)
+        test = module.current_test
+        if test:
+            check = test.http_request_strict_check
+            test.http_request_strict_check = False
+        res = super().request(*args, **kwargs)
+        if test:
+            test.http_request_strict_check = check
+        return res
 
 
 class JsonRpcException(Exception):
@@ -1795,6 +1873,10 @@ class HttpCase(TransactionCase):
         self.xmlrpc_object = xmlrpclib.ServerProxy(self.xmlrpc_url + 'object', transport=Transport(self.cr))
         # setup an url opener helper
         self.opener = Opener(self.cr)
+        self.opener.cookies[TEST_CURSOR_COOKIE_NAME] = self.canonical_tag
+        # some test like test_webhook_send_and_receive may have a request that timeout, is not waited and causes errors in following tests.
+        # this shouldn't be possible in master thanks to the global lock but lets wait for remaining requests in all cases in stable.
+        self.addCleanup(self._wait_remaining_requests)
 
     def parse_http_location(self, location):
         """ Parse a Location http header typically found in 201/3xx
@@ -1907,9 +1989,11 @@ class HttpCase(TransactionCase):
         # completely) or clear-ing session.cookies.
         self.opener = Opener(self.cr)
         self.opener.cookies['session_id'] = session.sid
+        self.opener.cookies[TEST_CURSOR_COOKIE_NAME] = self.http_request_key
         if browser:
             self._logger.info('Setting session cookie in browser')
             browser.set_cookie('session_id', session.sid, '/', HOST)
+            browser.set_cookie(TEST_CURSOR_COOKIE_NAME, self.http_request_key, '/', HOST)
 
         return session
 
@@ -1950,7 +2034,9 @@ class HttpCase(TransactionCase):
 
         browser = ChromeBrowser(self, headless=not watch, success_signal=success_signal, debug=debug)
         try:
+            self.http_request_key = self.canonical_tag + '_browser_js'
             self.authenticate(login, login, browser=browser)
+            self.http_request_strict_check = True
             # Flush and clear the current transaction.  This is useful in case
             # we make requests to the server, as these requests are made with
             # test cursors, which uses different caches than this transaction.
@@ -2006,6 +2092,8 @@ class HttpCase(TransactionCase):
         finally:
             browser.stop()
             self._wait_remaining_requests()
+            self.http_request_key = self.canonical_tag
+            self.opener.cookies[TEST_CURSOR_COOKIE_NAME] = self.http_request_key
 
     @classmethod
     def base_url(cls):

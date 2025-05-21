@@ -144,3 +144,19 @@ registry.category("web_tour.tours").add("self_order_language_changes", {
         ProductPage.clickProduct("Produit Test"),
     ],
 });
+
+registry.category("web_tour.tours").add("self_order_pricelist", {
+    test: true,
+    steps: () => [
+        Utils.checkIsNoBtn("My Order"),
+        Utils.clickBtn("Order Now"),
+        ProductPage.clickProduct("Coca-Cola"),
+        ProductPage.clickProduct("Coca-Cola"),
+        ProductPage.clickProduct("Coca-Cola"),
+        Utils.clickBtn("Order"),
+        CartPage.checkProduct("Coca-Cola", "3.45", "3"),
+        Utils.clickBtn("Pay"),
+        Utils.clickBtn("Close"),
+        Utils.checkIsNoBtn("My Order"),
+    ],
+});
