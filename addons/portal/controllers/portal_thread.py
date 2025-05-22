@@ -74,7 +74,7 @@ class PortalChatter(http.Controller):
                 raise Forbidden()
             # Non-employee see only messages with not internal subtype (aka, no internal logs)
             if not request.env.user._is_internal():
-                domain = Domain.AND([Message._get_search_domain_share(), domain])
+                domain = Message._get_search_domain_share() & domain
             Message = request.env["mail.message"].sudo()
         res = Message._message_fetch(domain, **(fetch_params or {}))
         messages = res.pop("messages")
@@ -84,8 +84,8 @@ class PortalChatter(http.Controller):
             "messages": messages.ids,
         }
 
-    def _setup_portal_message_fetch_extra_domain(self, data):
-        return []
+    def _setup_portal_message_fetch_extra_domain(self, data) -> Domain:
+        return Domain.TRUE
 
     @http.route(['/mail/update_is_internal'], type='jsonrpc', auth="user", website=True)
     def portal_message_update_is_internal(self, message_id, is_internal):
