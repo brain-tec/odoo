@@ -5477,6 +5477,7 @@ class AccountMove(models.Model):
         self.ensure_one()
 
         report_action = self.action_send_and_print()
+        report_action['context'].update({'allow_partners_without_mail': True})
         if self.env.is_admin() and not self.env.company.external_report_layout_id and not self.env.context.get('discard_logo_check'):
             report_action = self.env['ir.actions.report']._action_configure_external_report_layout(report_action, "account.action_base_document_layout_configurator")
             report_action['context']['default_from_invoice'] = self.move_type == 'out_invoice'
@@ -5908,9 +5909,9 @@ class AccountMove(models.Model):
             next_amount_to_pay = self.amount_residual
             next_payment_reference = self.name
             next_due_date = epd_installment['date_maturity']
-            discount_date = epd_installment['line'].discount_date
+            discount_date = epd_installment['line'].discount_date or fields.Date.context_today(self)
             discount_amount_currency = epd_installment['discount_amount_currency']
-            days_left = (discount_date - fields.Date.context_today(self)).days  # should never be lower than 0 since epd is valid
+            days_left = max(0, (discount_date - fields.Date.context_today(self)).days)  # should never be lower than 0 since epd is valid
             if days_left > 0:
                 discount_msg = _(
                     "Discount of %(amount)s if paid within %(days)s days",
