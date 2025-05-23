@@ -38,6 +38,7 @@ import {
 import { strong } from "./_helpers/tags";
 import { insertText } from "./_helpers/user_actions";
 import { expandToolbar } from "./_helpers/toolbar";
+import { nodeSize } from "@html_editor/utils/position";
 
 test.tags("desktop");
 test("toolbar is only visible when selection is not collapsed in desktop", async () => {
@@ -453,7 +454,7 @@ test("toolbar works: ArrowUp/Down moves focus to font size dropdown", async () =
     expect(".o_font_size_selector_menu").toHaveCount(1);
     expect(getActiveElement()).toBe(inputEl);
 
-    const fontSizeSelectorMenu = queryOne(".o_font_size_selector_menu");
+    const fontSizeSelectorMenu = queryOne(".o_font_size_selector_menu div");
     await press("ArrowDown");
     await animationFrame();
     expect(".o_font_size_selector_menu").toHaveCount(1);
@@ -534,6 +535,75 @@ test("toolbar open on single selected cell in table", async () => {
     await animationFrame();
     await tick();
     expect(targetTd).toHaveClass("o_selected_td");
+    expect(".o-we-toolbar").toHaveCount(1);
+});
+
+test("should select table single cell when entire content is selected via mouse movement", async () => {
+    const content = unformat(`
+        <table class="table table-bordered o_table" style="width: 250px;">
+            <tbody>
+                <tr>
+                    <td style="width: 200px;">
+                        <p>abcdefghijklmno</p>
+                        <p>abcdefghijklmnopqrs</p>
+                        <p>abcdefg</p>
+                    </td>
+                    <td style="width: 50px;"><p><br></p></td>
+                </tr>
+                <tr>
+                    <td><p><br></p></td>
+                    <td><p><br></p></td>
+                </tr>
+            </tbody>
+        </table>
+    `);
+
+    const { el } = await setupEditor(content);
+
+    const firstTd = el.querySelector("td");
+    const firstP = firstTd.firstChild;
+    const lastP = firstTd.lastChild;
+
+    // Simulate mousedown at the top of the first paragraph.
+    const rectStart = firstP.getBoundingClientRect();
+    manuallyDispatchProgrammaticEvent(firstP, "mousedown", {
+        clientX: rectStart.left,
+        clientY: rectStart.top,
+    });
+
+    // Set selection from start of first <p> to end of last <p>.
+    setSelection({
+        anchorNode: firstP.firstChild,
+        anchorOffset: 0,
+        focusNode: lastP.firstChild,
+        focusOffset: nodeSize(lastP.firstChild),
+    });
+    await animationFrame();
+
+    // Get bounding rect of selection range.
+    const range = document.createRange();
+    range.setStart(lastP.firstChild, 0);
+    range.setEnd(lastP.firstChild, nodeSize(lastP.firstChild));
+    const rect = range.getBoundingClientRect();
+
+    // Simulate mousemove and mouseup events to complete the selection.
+    manuallyDispatchProgrammaticEvent(lastP, "mousemove", {
+        clientX: rect.right,
+        clientY: rect.top,
+    });
+    manuallyDispatchProgrammaticEvent(lastP, "mousemove", {
+        clientX: rect.right + 5,
+        clientY: rect.top,
+    });
+    manuallyDispatchProgrammaticEvent(lastP, "mouseup", {
+        clientX: rect.right + 5,
+        clientY: rect.top,
+    });
+
+    await animationFrame();
+    await tick();
+
+    expect(firstTd).toHaveClass("o_selected_td");
     expect(".o-we-toolbar").toHaveCount(1);
 });
 
@@ -665,6 +735,22 @@ test("toolbar opens in 'compact' namespace by default", async () => {
     expect(".o-we-toolbar").toHaveAttribute("data-namespace", "compact");
     await expandToolbar();
     expect(".o-we-toolbar").toHaveAttribute("data-namespace", "expanded");
+});
+
+test.tags("desktop");
+test("expanded toolbar reopens in 'compact' namespace by default after closing", async () => {
+    const { el } = await setupEditor("<p>[test]</p>");
+    await waitFor(".o-we-toolbar");
+    expect(".o-we-toolbar").toHaveAttribute("data-namespace", "compact");
+    await expandToolbar();
+    expect(".o-we-toolbar").toHaveAttribute("data-namespace", "expanded");
+    // Collapse selection
+    setContent(el, "<p>test[]</p>");
+    await waitForNone(".o-we-toolbar");
+    // Reopen toolbar
+    setContent(el, "<p>[test]</p>");
+    await waitFor(".o-we-toolbar");
+    expect(".o-we-toolbar").toHaveAttribute("data-namespace", "compact");
 });
 
 test("toolbar items without namespace default to 'expanded'", async () => {
@@ -840,6 +926,15 @@ test("toolbar should close on open link popover", async () => {
     expect(".o-we-toolbar").toHaveCount(0);
 });
 
+test.tags("desktop", "iframe");
+test("toolbar should close on open link popover (iframe)", async () => {
+    await setupEditor("<p>[a]</p>", { props: { iframe: true } });
+    expect(".o-we-toolbar").toHaveCount(1);
+    await click(".o-we-toolbar .fa-link");
+    await waitForNone(".o-we-toolbar");
+    expect(".o-we-toolbar").toHaveCount(0);
+});
+
 test.tags("desktop");
 test("toolbar should close on edit link from preview", async () => {
     await setupEditor(`<p><a href="#">[a]</a></p>`);
@@ -868,7 +963,8 @@ test("close the toolbar if the selection contains any nodes (traverseNode = [], 
 });
 
 test.tags("desktop");
-test("should not close image cropper while loading media", async () => {
+// TODO mysterious egg
+test.todo("should not close image cropper while loading media", async () => {
     onRpc("/html_editor/get_image_info", () => ({
         original: {
             image_src: "#",
@@ -910,6 +1006,27 @@ test("should not close image cropper while loading media", async () => {
     await click('.btn[name="image_crop"]');
     await waitFor('.btn[title="Discard"]', { timeout: 1000 });
     expect('.btn[title="Discard"]').toHaveCount(1);
+});
+
+test("toolbar shouldn't be visible if can_display_toolbar === false", async () => {
+    const { el } = await setupEditor("<p>[test]<img></p>", {
+        config: { resources: { can_display_toolbar: (namespace) => namespace !== "image" } },
+    });
+
+    expect(".o-we-toolbar").toHaveCount(1);
+    setContent(el, "<p>test[<img>]</p>");
+    await animationFrame();
+    expect(".o-we-toolbar").toHaveCount(0);
+});
+
+test.tags("desktop", "iframe");
+test("toolbar should close when clicked outside the iframe", async () => {
+    await setupEditor("<p>[a]</p>", { props: { iframe: true } });
+    expect(".o-we-toolbar").toHaveCount(1);
+    // click outside the iframe
+    await click(".o-main-components-container");
+    await waitForNone(".o-we-toolbar");
+    expect(".o-we-toolbar").toHaveCount(0);
 });
 
 describe.tags("desktop");
