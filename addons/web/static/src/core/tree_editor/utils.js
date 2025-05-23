@@ -10,7 +10,6 @@ import { useLoadFieldInfo, useLoadPathDescription } from "@web/core/model_field_
 import {
     condition,
     Couple,
-    createVirtualOperators,
     Expression,
     isTree,
     normalizeValue,
@@ -187,10 +186,31 @@ export function useMakeGetConditionDescription(fieldService, nameService) {
 }
 
 function _getConditionDescription(node, getFieldDef, getPathDescription, displayNames) {
-    const nodeWithVirtualOperators = createVirtualOperators(node, { getFieldDef });
-    const { operator, negate, value, path } = nodeWithVirtualOperators;
+    let { operator, negate, value, path } = node;
+    if (["=", "!="].includes(operator) && value === false) {
+        operator = operator === "=" ? "not_set" : "set";
+    } else if (["in", "not in"].includes(operator) && Array.isArray(value) && value.length === 0) {
+        operator = operator === "in" ? "not_set" : "set";
+    }
     const fieldDef = getFieldDef(path);
-    const operatorLabel = getOperatorLabel(operator, fieldDef?.type, negate);
+    let operatorLabel = getOperatorLabel(operator, fieldDef?.type, negate);
+    switch (operator) {
+        case "=":
+        case "in":
+            operatorLabel = "=";
+            break;
+        case "!=":
+        case "not in":
+            operatorLabel = _t("not =");
+            break;
+        case "any":
+            operatorLabel = ":";
+            break;
+        case "not any":
+            operatorLabel = _t(": not");
+            break;
+    }
+
     const pathDescription = getPathDescription(path);
     const description = {
         pathDescription,
@@ -231,13 +251,114 @@ function _getConditionDescription(node, getFieldDef, getPathDescription, display
             break;
         case "in":
         case "not in":
-            join = ",";
-            break;
+            addParenthesis = false;
+        // eslint-disable-next-line no-fallthrough
         default:
             join = _t("or");
     }
     description.valueDescription = { values, join, addParenthesis };
     return description;
+}
+
+export function useGetTreeDescription(fieldService, nameService) {
+    fieldService ||= useService("field");
+    nameService ||= useService("name");
+    const makeGetFieldDef = useMakeGetFieldDef(fieldService);
+    const makeGetConditionDescription = useMakeGetConditionDescription(fieldService, nameService);
+    return async (resModel, tree) => {
+        async function getTreeDescription(resModel, tree, isSubExpression = false) {
+            tree = simplifyTree(tree);
+            if (tree.type === "connector") {
+                // we assume that the domain tree is normalized (--> there is at least two children)
+                const childDescriptions = tree.children.map((node) =>
+                    getTreeDescription(resModel, node, true)
+                );
+                const separator = tree.value === "&" ? _t("and") : _t("or");
+                let description = await Promise.all(childDescriptions);
+                description = description.join(` ${separator} `);
+                if (isSubExpression || tree.negate) {
+                    description = `( ${description} )`;
+                }
+                if (tree.negate) {
+                    description = `! ${description}`;
+                }
+                return description;
+            }
+            const getFieldDef = await makeGetFieldDef(resModel, tree);
+            const getConditionDescription = await makeGetConditionDescription(
+                resModel,
+                tree,
+                getFieldDef
+            );
+            const { pathDescription, operatorDescription, valueDescription } =
+                getConditionDescription(tree);
+            const stringDescription = [pathDescription, operatorDescription];
+            if (valueDescription) {
+                const { values, join, addParenthesis } = valueDescription;
+                const jointedValues = values.join(` ${join} `);
+                stringDescription.push(addParenthesis ? `( ${jointedValues} )` : jointedValues);
+            } else if (isTree(tree.value)) {
+                const _fieldDef = getFieldDef(tree.path);
+                const _resModel = getResModel(_fieldDef);
+                const _tree = tree.value;
+                const description = await getTreeDescription(_resModel, _tree);
+                stringDescription.push(`( ${description} )`);
+            }
+            return stringDescription.join(" ");
+        }
+        return getTreeDescription(resModel, tree);
+    };
+}
+
+export function useGetTreeTooltip(fieldService, nameService) {
+    fieldService ||= useService("field");
+    nameService ||= useService("name");
+    const makeGetFieldDef = useMakeGetFieldDef(fieldService);
+    const makeGetConditionDescription = useMakeGetConditionDescription(fieldService, nameService);
+    return async (resModel, tree) => {
+        async function getTooltipLines(resModel, tree, depth = 0) {
+            const tabs = " ".repeat(depth * 4);
+            tree = simplifyTree(tree);
+            if (tree.type === "connector") {
+                // we assume that the domain tree is normalized (--> there is at least two children)
+                let connector = tree.value === "&" ? _t("all") : _t("any");
+                if (tree.negate) {
+                    connector = tree.value === "&" ? _t("not all") : _t("none");
+                }
+                connector = `${tabs}${connector}`;
+                const childrenTooltipLines = await Promise.all(
+                    tree.children.map((node) => getTooltipLines(resModel, node, depth + 1))
+                );
+                return [connector, ...childrenTooltipLines].flat();
+            }
+            const getFieldDef = await makeGetFieldDef(resModel, tree);
+            const getConditionDescription = await makeGetConditionDescription(
+                resModel,
+                tree,
+                getFieldDef
+            );
+            const { pathDescription, operatorDescription, valueDescription } =
+                getConditionDescription(tree);
+            const descr = [];
+            const stringDescriptions = [pathDescription, operatorDescription];
+            if (valueDescription) {
+                const { values, join, addParenthesis } = valueDescription;
+                const jointedValues = values.join(` ${join} `);
+                stringDescriptions.push(addParenthesis ? `( ${jointedValues} )` : jointedValues);
+            }
+            descr.push(`${tabs}${stringDescriptions.join(" ")}`);
+            if (isTree(tree.value)) {
+                const _fieldDef = getFieldDef(tree.path);
+                const _resModel = getResModel(_fieldDef);
+                const _tree = tree.value;
+                const tooltipLines = await getTooltipLines(_resModel, _tree, depth + 1);
+                descr.push(...tooltipLines);
+            }
+            return descr;
+        }
+        const descriptions = await getTooltipLines(resModel, tree);
+        return descriptions.join("\n");
+    };
 }
 
 export function getResModel(fieldDef) {
@@ -337,7 +458,7 @@ export function getDefaultPath(fieldDefs) {
  * @param {Tree} tree
  * @returns {tree}
  */
-export function simplifyTree(tree) {
+function simplifyTree(tree) {
     if (tree.type === "condition") {
         return tree;
     }
@@ -347,7 +468,8 @@ export function simplifyTree(tree) {
     }
     const children = [];
     const childrenByPath = {};
-    for (const child of processedChildren) {
+    for (let index = 0; index < processedChildren.length; index++) {
+        const child = processedChildren[index];
         if (
             child.type === "connector" ||
             typeof child.path !== "string" ||
@@ -356,25 +478,25 @@ export function simplifyTree(tree) {
             children.push(child);
         } else {
             if (!childrenByPath[child.path]) {
-                childrenByPath[child.path] = [];
+                childrenByPath[child.path] = { elems: [], index };
+                children.push(child); // will be replaced if necessary
             }
-            childrenByPath[child.path].push(child);
+            childrenByPath[child.path].elems.push(child);
         }
     }
     for (const path in childrenByPath) {
-        if (childrenByPath[path].length === 1) {
-            children.push(childrenByPath[path][0]);
+        if (childrenByPath[path].elems.length === 1) {
             continue;
         }
         const value = [];
-        for (const child of childrenByPath[path]) {
+        for (const child of childrenByPath[path].elems) {
             if (child.operator === "=") {
                 value.push(child.value);
             } else {
                 value.push(...child.value);
             }
         }
-        children.push(condition(path, "in", normalizeValue(unique(value))));
+        children[childrenByPath[path].index] = condition(path, "in", normalizeValue(unique(value)));
     }
     if (children.length === 1) {
         return { ...children[0] };
