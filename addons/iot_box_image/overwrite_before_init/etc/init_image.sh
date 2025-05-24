@@ -170,6 +170,9 @@ apt-get clean
 localepurge
 rm -rfv /usr/share/doc
 
+# Remove the default nginx website, we have our own config in /etc/nginx/conf.d/
+rm /etc/nginx/sites-enabled/default
+
 pip3 install -r /home/pi/odoo/addons/iot_box_image/configuration/requirements.txt --break-system-package
 
 # Dowload MPD server and library for Six terminals
@@ -197,6 +200,7 @@ usermod -a -G video odoo
 usermod -a -G render odoo
 usermod -a -G lp odoo
 usermod -a -G input odoo
+usermod -a -G dialout odoo
 usermod -a -G pi odoo
 mkdir -v /var/log/odoo
 chown odoo:odoo /var/log/odoo

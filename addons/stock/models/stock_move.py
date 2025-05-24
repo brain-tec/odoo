@@ -583,7 +583,7 @@ Please change the quantity done or the rounding precision in your settings.""",
                         }))
                         mls_without_lots -= move_line
                     else:  # No line without serial number, creates a new one.
-                        reserved_quants = self.env['stock.quant']._get_reserve_quantity(move.product_id, move.location_id, 1.0, lot_id=lot)
+                        reserved_quants = self.env['stock.quant'].with_context(packaging_uom_id=move.packaging_uom_id)._get_reserve_quantity(move.product_id, move.location_id, 1.0, lot_id=lot)
                         if reserved_quants:
                             move_line_vals = self._prepare_move_line_vals(quantity=0, reserved_quant=reserved_quants[0][0])
                         else:
@@ -1170,9 +1170,10 @@ Please change the quantity done or the rounding precision in your settings.""",
                     pos_move.product_uom_qty = 0
                     moves_to_cancel |= pos_move
 
+        # We are using propagate to False in order to not cancel destination moves merged in moves[0]
+        (moves_to_unlink | moves_to_cancel)._clean_merged()
+
         if moves_to_unlink:
-            # We are using propagate to False in order to not cancel destination moves merged in moves[0]
-            moves_to_unlink._clean_merged()
             moves_to_unlink._action_cancel()
             moves_to_unlink.sudo().unlink()
 
@@ -1439,7 +1440,7 @@ Please change the quantity done or the rounding precision in your settings.""",
 
         # create procurements for make to order moves
         procurement_requests = []
-        move_create_proc = self.browse(move_create_proc)
+        move_create_proc = self.browse(move_create_proc) if not self.env.context.get('bypass_procurement_creation', False) else self.env['stock.move']
         quantities = move_create_proc._prepare_procurement_qty()
         for move, quantity in zip(move_create_proc, quantities):
             values = move._prepare_procurement_values()
@@ -1634,7 +1635,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         if not owner_id:
             owner_id = self.env['res.partner']
 
-        quants = self.env['stock.quant']._get_reserve_quantity(
+        quants = self.env['stock.quant'].with_context(packaging_uom_id=self.packaging_uom_id)._get_reserve_quantity(
             self.product_id, location_id, need, uom_id=self.product_uom,
             lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
 
@@ -1776,6 +1777,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         moves_mto = moves_to_assign.filtered(lambda m: m.move_orig_ids and not m._should_bypass_reservation())
         quants_cache = self.env['stock.quant']._get_quants_by_products_locations(moves_mto.product_id, moves_mto.location_id)
         for move in moves_to_assign:
+            move = move.with_company(move.company_id)
             rounding = roundings[move]
             if not force_qty:
                 missing_reserved_uom_quantity = move.product_uom_qty - reserved_availability[move]
@@ -1902,7 +1904,7 @@ Please change the quantity done or the rounding precision in your settings.""",
             if move.propagate_cancel:
                 # only cancel the next move if all my siblings are also cancelled
                 if all(state == 'cancel' for state in siblings_states):
-                    move.move_dest_ids.filtered(lambda m: m.state != 'done' and m.location_dest_id == m.move_dest_ids.location_id)._action_cancel()
+                    move.move_dest_ids.filtered(lambda m: m.state != 'done' and move.location_dest_id == m.location_id)._action_cancel()
                     if cancel_moves_origin:
                         move.move_orig_ids.sudo().filtered(lambda m: m.state != 'done')._action_cancel()
             else:
@@ -1919,8 +1921,9 @@ Please change the quantity done or the rounding precision in your settings.""",
         return True
 
     def _skip_push(self):
-        return self.is_inventory or self.move_dest_ids and any(m.location_id._child_of(self.location_dest_id) for m in self.move_dest_ids) or\
-            self.location_final_id and self.location_final_id._child_of(self.location_dest_id)
+        return self.is_inventory or (
+            self.move_dest_ids and any(m.location_id._child_of(self.location_dest_id) for m in self.move_dest_ids)
+        )
 
     def _check_quantity(self):
         return self.env['stock.quant'].search([
@@ -2008,7 +2011,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         backorder_moves = self.env['stock.move'].create(backorder_moves_vals)
         # The backorder moves are not yet in their own picking. We do not want to check entire packs for those
         # ones as it could messed up the result_package_id of the moves being currently validated
-        backorder_moves.with_context(bypass_entire_pack=True)._action_confirm(merge=False)
+        backorder_moves.with_context(bypass_entire_pack=True, bypass_procurement_creation=True)._action_confirm(merge=False)
         return backorder_moves
 
     @api.ondelete(at_uninstall=False)
@@ -2269,6 +2272,7 @@ Please change the quantity done or the rounding precision in your settings.""",
                         ]
         moves_to_reserve = self.env['stock.move'].search(expression.AND([static_domain, expression.OR(domains)]),
                                                          order='priority desc, date asc, id asc')
+        moves_to_reserve = moves_to_reserve.sorted(key=lambda m: m.group_id.id in self.group_id.ids, reverse=True)
         moves_to_reserve._action_assign()
 
     def _rollup_move_dests_fetch(self):

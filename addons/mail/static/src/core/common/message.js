@@ -226,7 +226,8 @@ export class Message extends Component {
     get attClass() {
         return {
             [this.props.className]: true,
-            "o-card p-2 ps-1 mx-1 mt-2 mb-2 border border-secondary rounded-3": this.props.asCard,
+            "o-card p-2 ps-1 mx-1 mt-1 mb-1 border border-secondary shadow-sm rounded-3":
+                this.props.asCard,
             "pt-1": !this.props.asCard && !this.props.squashed,
             "o-pt-0_5": !this.props.asCard && this.props.squashed,
             "o-selfAuthored": this.message.isSelfAuthored && !this.env.messageCard,
@@ -259,7 +260,7 @@ export class Message extends Component {
 
     get authorName() {
         if (this.message.author) {
-            return this.message.author.name;
+            return this.message.getPersonaName(this.message.author);
         }
         return this.message.email_from;
     }
@@ -335,7 +336,12 @@ export class Message extends Component {
     }
 
     get isPersistentMessageFromAnotherThread() {
-        return !this.isOriginThread && !this.message.is_transient && this.message.thread;
+        return (
+            !this.isOriginThread &&
+            !this.message.is_transient &&
+            !this.message.isPending &&
+            this.message.thread
+        );
     }
 
     get isOriginThread() {

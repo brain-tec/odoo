@@ -101,15 +101,7 @@ composerActionsRegistry
         sequenceQuick: 20,
     })
     .add("upload-files", {
-        condition: (component) => {
-            const thread = component.thread ?? component.message?.thread;
-            return (
-                !(
-                    thread?.channel_type === "whatsapp" &&
-                    component.props.composer.attachments.length > 0
-                ) && !component.props.composer.portalComment
-            );
-        },
+        condition: (component) => component.allowUpload,
         icon: "fa fa-paperclip",
         name: _t("Attach Files"),
         onClick: (component, action, ev) => {
@@ -149,6 +141,17 @@ composerActionsRegistry
         sequence: 5,
     });
 
+export const composerActionsInternal = {
+    condition(component, id, action) {
+        if (!action?.condition) {
+            return true;
+        }
+        return typeof action.condition === "function"
+            ? action.condition(component)
+            : action.condition;
+    },
+};
+
 function transformAction(component, id, action) {
     return {
         get btnClass() {
@@ -161,12 +164,7 @@ function transformAction(component, id, action) {
             return action.componentProps?.(component, this);
         },
         get condition() {
-            if (!action?.condition) {
-                return true;
-            }
-            return typeof action.condition === "function"
-                ? action.condition(component)
-                : action.condition;
+            return composerActionsInternal.condition(component, id, action);
         },
         get disabledCondition() {
             return action.disabledCondition?.(component);

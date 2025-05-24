@@ -366,12 +366,14 @@ class IrActionsServer(models.Model):
 
         if self.mail_post_method in ('comment', 'note'):
             records = self.env[self.model_name].with_context(cleaned_ctx).browse(res_ids)
+            message_type = 'auto_comment' if self.state == 'mail_post' else 'notification'
             if self.mail_post_method == 'comment':
                 subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
             else:
                 subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
             records.message_post_with_source(
                 self.template_id,
+                message_type=message_type,
                 subtype_id=subtype_id,
             )
         else:
@@ -405,7 +407,9 @@ class IrActionsServer(models.Model):
             elif self.activity_user_type == 'generic' and self.activity_user_field_name in record:
                 user = record[self.activity_user_field_name]
             if user:
-                vals['user_id'] = user.id
+                # if x2m field, assign to the first user found
+                # (same behavior as Field.traverse_related)
+                vals['user_id'] = user.ids[0]
             record.activity_schedule(**vals)
         return False
 

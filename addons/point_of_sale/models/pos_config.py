@@ -12,6 +12,9 @@ from odoo.exceptions import AccessError, ValidationError, UserError
 from odoo.tools import SQL, convert
 from odoo.osv import expression
 
+DEFAULT_LIMIT_LOAD_PRODUCT = 5000
+DEFAULT_LIMIT_LOAD_PARTNER = 100
+
 
 class PosConfig(models.Model):
     _name = 'pos.config'
@@ -26,7 +29,7 @@ class PosConfig(models.Model):
         return warehouse
 
     def _default_picking_type_id(self):
-        return self.env['stock.warehouse'].with_context(active_test=False).search(self.env['stock.warehouse']._check_company_domain(self.env.company), limit=1).pos_type_id.id
+        return self.env['stock.warehouse'].search(self.env['stock.warehouse']._check_company_domain(self.env.company), limit=1).pos_type_id.id
 
     def _default_sale_journal(self):
         journal = self.env['account.journal']._ensure_company_account_journal()
@@ -221,16 +224,29 @@ class PosConfig(models.Model):
             'records': records
         })
 
-    def read_config_open_orders(self, domain, record_ids):
-        all_domain = expression.OR([domain, [('id', 'in', record_ids.get('pos.order')), ('config_id', '=', self.id)]])
-        all_orders = self.env['pos.order'].search(all_domain)
+    def read_config_open_orders(self, domain, record_ids=[]):
         delete_record_ids = {}
+        dynamic_records = {}
 
-        for model, ids in record_ids.items():
+        for model, domain in domain.items():
+            ids = record_ids[model]
             delete_record_ids[model] = [id for id in ids if not self.env[model].browse(id).exists()]
+            dynamic_records[model] = self.env[model].search(domain)
+
+        pos_order_data = dynamic_records.get('pos.order') or self.env['pos.order']
+        data = pos_order_data.read_pos_data([], self.id)
+
+        for key, records in dynamic_records.items():
+            fields = self.env[key]._load_pos_data_fields(self.id)
+            ids = list(set(records.ids + [record['id'] for record in data.get(key, [])]))
+            dynamic_records[key] = self.env[key].browse(ids).read(fields, load=False)
+
+        for key, value in data.items():
+            if key not in dynamic_records:
+                dynamic_records[key] = value
 
         return {
-            'dynamic_records': all_orders.filtered_domain(domain).read_pos_data([], self.id),
+            'dynamic_records': dynamic_records,
             'deleted_record_ids': delete_record_ids,
         }
 
@@ -417,6 +433,9 @@ class PosConfig(models.Model):
             if config.customer_display_type == 'proxy' and (not config.is_posbox or not config.proxy_ip):
                 raise UserError(_("You must set the iot box's IP address to use an IoT-connected screen. You'll find the field under the 'IoT Box' option."))
 
+    def _config_sequence_implementation(self):
+        return 'standard'
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -428,6 +447,7 @@ class PosConfig(models.Model):
                 'prefix': "%s/" % vals['name'],
                 'code': "pos.order",
                 'company_id': vals.get('company_id', False),
+                'implementation': self._config_sequence_implementation(),
             }
             # force sequence_id field to new pos.order sequence
             vals['sequence_id'] = IrSequence.create(val).id
@@ -486,6 +506,10 @@ class PosConfig(models.Model):
                 ))
 
         result = super(PosConfig, self).write(vals)
+
+        for config in self:
+            if config.use_presets and config.default_preset_id.id not in config.available_preset_ids.ids:
+                config.available_preset_ids |= config.default_preset_id
 
         self.sudo()._set_fiscal_position()
         self.sudo()._check_modules_to_install()
@@ -726,20 +750,18 @@ class PosConfig(models.Model):
         }).id
 
     def get_limited_product_count(self):
-        default_limit = 5000
-        config_param = self.env['ir.config_parameter'].sudo().get_param('point_of_sale.limited_product_count', default_limit)
+        config_param = self.env['ir.config_parameter'].sudo().get_param('point_of_sale.limited_product_count', DEFAULT_LIMIT_LOAD_PRODUCT)
         try:
             return int(config_param)
         except (TypeError, ValueError, OverflowError):
-            return default_limit
+            return DEFAULT_LIMIT_LOAD_PRODUCT
 
     def _get_limited_partner_count(self):
-        default_limit = 100
-        config_param = self.env['ir.config_parameter'].sudo().get_param('point_of_sale.limited_customer_count', default_limit)
+        config_param = self.env['ir.config_parameter'].sudo().get_param('point_of_sale.limited_customer_count', DEFAULT_LIMIT_LOAD_PARTNER)
         try:
             return int(config_param)
         except (TypeError, ValueError, OverflowError):
-            return default_limit
+            return DEFAULT_LIMIT_LOAD_PARTNER
 
     def get_limited_partners_loading(self, offset=0):
         return self.env.execute_query(SQL("""
@@ -1061,7 +1083,7 @@ class PosConfig(models.Model):
     def _set_default_pos_load_limit(self):
         param_model = self.env["ir.config_parameter"]
         if not param_model.get_param("point_of_sale.limited_product_count"):
-            param_model.set_param("point_of_sale.limited_product_count", 20000)
+            param_model.set_param("point_of_sale.limited_product_count", DEFAULT_LIMIT_LOAD_PRODUCT)
 
         if not param_model.get_param("point_of_sale.limited_customer_count"):
-            param_model.set_param("point_of_sale.limited_customer_count", 100)
+            param_model.set_param("point_of_sale.limited_customer_count", DEFAULT_LIMIT_LOAD_PARTNER)

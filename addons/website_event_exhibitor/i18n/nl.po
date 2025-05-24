@@ -346,7 +346,7 @@ msgstr ""
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
 msgid "Display on website footer"
-msgstr ""
+msgstr "Weergeven in de voettekst van de website"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__partner_email
@@ -893,7 +893,7 @@ msgstr "Reeks"
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__show_on_ticket
 msgid "Show on ticket"
-msgstr ""
+msgstr "Tonen op ticket"
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_event__exhibitor_menu
@@ -1011,11 +1011,15 @@ msgstr "Talentmanagement"
 #: model:ir.model.fields,help:website_event_exhibitor.field_event_sponsor__website_absolute_url
 msgid "The full absolute URL to access the document through the website."
 msgstr ""
+"De volledige absolute URL om toegang te krijgen tot het document via de "
+"website."
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,help:website_event_exhibitor.field_event_sponsor__website_url
 msgid "The full relative URL to access the document through the website."
 msgstr ""
+"De volledige relatieve URL om toegang te krijgen tot het document via de "
+"website."
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
@@ -1067,7 +1071,7 @@ msgstr "Website"
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__website_absolute_url
 msgid "Website Absolute URL"
-msgstr ""
+msgstr "Absolute URL van de website"
 
 #. module: website_event_exhibitor
 #: model:ir.model,name:website_event_exhibitor.model_website_event_menu
@@ -1170,4 +1174,4 @@ msgstr "begint om"
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
 msgid "to meet them!"
-msgstr ""
+msgstr "om hen te ontmoeten!"

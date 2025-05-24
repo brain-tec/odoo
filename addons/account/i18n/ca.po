@@ -5,18 +5,18 @@
 # Translators:
 # Iván Infantes Castarnado, 2025
 # Santiago Payà <santiagopim@gmail.com>, 2025
-# Wil Odoo, 2025
 # Josep Anton Belchi, 2025
-# Noemi Pla, 2025
 # EstudiTIC - estuditic.com <odoo@estuditic.com>, 2025
+# Wil Odoo, 2025
+# Noemi Pla, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:36+0000\n"
+"POT-Creation-Date: 2025-05-07 20:36+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
-"Last-Translator: EstudiTIC - estuditic.com <odoo@estuditic.com>, 2025\n"
+"Last-Translator: Noemi Pla, 2025\n"
 "Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -638,6 +638,37 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"        Estimat/da:\n"
+"        <t t-if=\"object.partner_id.parent_id\">\n"
+"            <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t> (<t t-out=\"object.partner_id.parent_id.name or ''\">Azure Interior</t>),\n"
+"        </t>\n"
+"        <t t-else=\"\">\n"
+"            <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,\n"
+"        </t>\n"
+"        <br/><br/>\n"
+"        Aquí està la seva\n"
+"        <t t-if=\"object.name\">\n"
+"            factura rectificativa <span style=\"font-weight:bold;\" t-out=\"object.name or ''\">RINV/2021/05/0001</span>\n"
+"        </t>\n"
+"        <t t-else=\"\">\n"
+"            factura rectificativa\n"
+"        </t>\n"
+"        <t t-if=\"object.invoice_origin\">\n"
+"            (amb referència: <t t-out=\"object.invoice_origin or ''\">SUB003</t>)\n"
+"        </t>\n"
+"        per un import de <span style=\"font-weight:bold;\" t-out=\"format_amount(object.amount_total, object.currency_id) or ''\">143.750,00 €</span>\n"
+"        de <t t-out=\"object.company_id.name or ''\">LaSevaEmpresa</t>.\n"
+"        <br/><br/>\n"
+"        No dubti a contactar amb nosaltres si té alguna pregunta.\n"
+"        <t t-if=\"not is_html_empty(object.invoice_user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
+"            <br/><br/>\n"
+"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.invoice_user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
+"        </t>\n"
+"    </p>\n"
+"</div>\n"
+"            "
 
 #. module: account
 #: model:mail.template,body_html:account.email_template_edi_invoice
@@ -1373,6 +1404,15 @@ msgid "<strong>Type: </strong>"
 msgstr "<strong>Tipus: </strong>"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
+msgid ""
+"<strong>Warning:</strong> Once the Audit Trail is enabled, it cannot be "
+"disabled again if there are any existing journal items."
+msgstr ""
+"<strong>Avís:</strong> un cop activada la pista d'auditoria, no es podrà "
+"desactivar si hi ha apunts comptables."
+
+#. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "@From: %(email)s"
@@ -1408,6 +1448,16 @@ msgstr ""
 #: code:addons/account/models/res_partner_bank.py:0
 msgid "A bank account can belong to only one journal."
 msgstr "Un compte bancari només pot pertànyer a un diari."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/res_partner_bank.py:0
+msgid ""
+"A bank account with Account Number %(number)s already exists for Partner "
+"%(partner)s, but is archived. Please unarchive it instead."
+msgstr ""
+"Ja existeix un compte bancari amb número de compte %(number)s per al "
+"contacte %(partner)s, però està arxivat. Si us plau, desarxiva'l."
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_bank_statement_tree
@@ -3438,8 +3488,8 @@ msgstr "Compte bancari"
 #. module: account
 #. odoo-python
 #: code:addons/account/models/res_partner_bank.py:0
-msgid "Bank Account %(link)s with number %(number)s deleted"
-msgstr "Compte bancari %(link)s amb número %(number)s eliminat"
+msgid "Bank Account %(link)s with number %(number)s archived"
+msgstr "Compte bancari %(link)s amb número %(number)s arxivat"
 
 #. module: account
 #. odoo-python
@@ -4056,6 +4106,12 @@ msgid ""
 msgstr ""
 "No es poden obtenir els detalls de l'agregació des d'una línia que no "
 "utilitza el motor «agregació»"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_send.py:0
+msgid "Cannot identify the invoices in the generated PDF: %s"
+msgstr "No és possible identificar les factures en el PDF generat: %s"
 
 #. module: account
 #: model:account.account,name:account.1_capital
@@ -7763,6 +7819,11 @@ msgid "From label"
 msgstr "De l'etiqueta"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_account_analytic_line_filter_inherit_account
+msgid "From last fiscal year"
+msgstr "Des de l'últim any fiscal"
+
+#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_report_expression__date_scope__previous_tax_period
 msgid "From previous tax period"
 msgstr "Des del període anterior"
@@ -9502,6 +9563,12 @@ msgstr ""
 #: code:addons/account/models/account_move.py:0
 msgid "It was previously '%(previous)s' and it is now '%(current)s'."
 msgstr "Ho era abans '%(previous)s' i és ara '%(current)s'."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+msgid "Items With Missing Analytic Distribution"
+msgstr "Apunts sense distribució analítica"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__res_company__fiscalyear_last_month__1
@@ -11411,6 +11478,12 @@ msgstr ""
 #: code:addons/account/models/account_move.py:0
 msgid "One or more invoices couldn't be processed."
 msgstr "Una o més factures no han pogut ser processades."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+msgid "One or more lines require a 100% analytic distribution."
+msgstr "Una o més línies requereixen una distribució analítica del 100%."
 
 #. module: account
 #: model:ir.ui.menu,name:account.root_payment_menu
@@ -13875,6 +13948,12 @@ msgstr "Token de Seguretat"
 #: code:addons/account/static/src/components/journal_dashboard_activity/journal_dashboard_activity.xml:0
 msgid "See all activities"
 msgstr "Veure totes les activitats"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+msgid "See items"
+msgstr "Veure apunts"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_analytic_distribution_model__product_categ_id
@@ -18115,6 +18194,11 @@ msgid "Wrong credit or debit value in accounting entry!"
 msgstr "Valor de crèdit o dèbit incorrecte en l'assentament comptable!"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_partner_property_form
+msgid "XML format"
+msgstr "Format XML"
+
+#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_move__auto_post__yearly
 msgid "Yearly"
 msgstr "Anualment"
@@ -19218,6 +19302,7 @@ msgstr "aquí"
 #: code:addons/account/models/account_journal.py:0
 #: code:addons/account/models/account_journal_dashboard.py:0
 #: code:addons/account/models/account_move.py:0
+#: code:addons/account/models/account_move_line.py:0
 #: code:addons/account/models/company.py:0
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #: code:addons/account/wizard/account_secure_entries_wizard.py:0

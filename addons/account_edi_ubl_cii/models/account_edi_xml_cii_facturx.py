@@ -181,6 +181,9 @@ class AccountEdiXmlCii(models.AbstractModel):
             'document_context_id': "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
         }
 
+        template_values['billing_start'] = invoice.invoice_date
+        template_values['billing_end'] = invoice.invoice_date_due
+
         # data used for IncludedSupplyChainTradeLineItem / SpecifiedLineTradeSettlement
         for line_vals in template_values['invoice_line_vals_list']:
             line = line_vals['line']
@@ -377,3 +380,4 @@ class AccountEdiXmlCii(models.AbstractModel):
             if amount_node is not None and float(amount_node.text) < 0:
                 return 'refund', -1
             return 'invoice', 1
+        return None, None

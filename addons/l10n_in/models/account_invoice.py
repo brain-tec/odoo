@@ -605,19 +605,8 @@ class AccountMove(models.Model):
 
     def _l10n_in_get_hsn_summary_table(self):
         self.ensure_one()
+        base_lines, _tax_lines = self._get_rounded_base_and_tax_lines()
         display_uom = self.env.user.has_group('uom.group_uom')
-
-        base_lines = []
-        for line in self.invoice_line_ids.filtered(lambda x: x.display_type == 'product'):
-            base_lines.append({
-                'l10n_in_hsn_code': line.l10n_in_hsn_code,
-                'quantity': line.quantity,
-                'price_unit': line.price_unit,
-                'discount': line.discount or 0.0,
-                'product': line.product_id,
-                'uom': line.product_uom_id,
-                'taxes_data': line.tax_ids,
-            })
         return self.env['account.tax']._l10n_in_get_hsn_summary_table(base_lines, display_uom)
 
     def _l10n_in_get_bill_from_irn(self, irn):
@@ -727,17 +716,22 @@ class AccountMove(models.Model):
         :rtype: str
         """
         self.ensure_one()
-        if not proforma:
-            if self.state == 'posted':
-                return self.journal_id.name
-            elif self.state == 'draft':
-                return _("Draft %(journal_name)s", journal_name=self.journal_id.name)
-            elif self.state == 'cancel':
-                return _("Cancelled %(journal_name)s", journal_name=self.journal_id.name)
-        else:
-            if self.state == 'posted':
-                return _("Proforma %(journal_name)s", journal_name=self.journal_id.name)
-            elif self.state == 'draft':
-                return _("Draft Proforma %(journal_name)s", journal_name=self.journal_id.name)
-            elif self.state == 'cancel':
-                return _("Cancelled Proforma %(journal_name)s", journal_name=self.journal_id.name)
+        if self.move_type == 'out_invoice' and self.state == 'posted':
+            if self.invoice_line_ids.tax_ids:
+                return _("Tax Invoice") if not proforma else _("Proforma Tax Invoice")
+            else:
+                return _("Invoice") if not proforma else _("Proforma Invoice")
+        elif self.move_type == 'out_invoice' and self.state == 'draft':
+            return _("Draft Invoice") if not proforma else _("Draft Proforma Invoice")
+        elif self.move_type == 'out_invoice' and self.state == 'cancel':
+            return _("Cancelled Invoice") if not proforma else _("Cancelled Proforma Invoice")
+        elif self.move_type == 'out_refund' and self.state == 'posted':
+            return _("Credit Note") if not proforma else _("Proforma Credit Note")
+        elif self.move_type == 'out_refund' and self.state == 'draft':
+            return _("Draft Credit Note") if not proforma else _("Draft Proforma Credit Note")
+        elif self.move_type == 'out_refund' and self.state == 'cancel':
+            return _("Cancelled Credit Note") if not proforma else _("Cancelled Proforma Credit Note")
+        elif self.move_type == 'in_refund':
+            return _("Vendor Credit Note") if not proforma else _("Proforma Vendor Credit Note")
+        elif self.move_type == 'in_invoice':
+            return _("Vendor Bill") if not proforma else _("Proforma Vendor Bill")

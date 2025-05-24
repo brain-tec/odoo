@@ -239,10 +239,20 @@ registry.category("web_tour.tours").add("SaveLastPreparationChangesTour", {
             Dialog.confirm("Open Register"),
             FloorScreen.clickTable("5"),
             ProductScreen.clickDisplayedProduct("Coca-Cola", true, "1"),
+            ProductScreen.orderlineIsToOrder("Coca-Cola"),
             ProductScreen.clickOrderButton(),
             FloorScreen.clickTable("5"),
+            Chrome.waitRequest(),
             ProductScreen.orderlinesHaveNoChange(),
+            Order.hasLine({
+                productName: "Coca-Cola",
+                quantity: 1,
+                withClass: ":eq(0)",
+            }),
             Chrome.clickPlanButton(),
+            FloorScreen.hasTable("2"),
+            FloorScreen.hasTable("4"),
+            FloorScreen.hasTable("5"),
         ].flat(),
 });
 
@@ -454,7 +464,6 @@ registry.category("web_tour.tours").add("PreparationPrinterContent", {
 });
 
 registry.category("web_tour.tours").add("test_combo_preparation_receipt", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -520,7 +529,6 @@ registry.category("web_tour.tours").add("test_combo_preparation_receipt", {
 });
 
 registry.category("web_tour.tours").add("MultiPreparationPrinter", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -534,7 +542,6 @@ registry.category("web_tour.tours").add("MultiPreparationPrinter", {
 });
 
 registry.category("web_tour.tours").add("LeaveResidualOrder", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -549,15 +556,23 @@ registry.category("web_tour.tours").add("LeaveResidualOrder", {
             FloorScreen.clickTable("5"),
             ProductScreen.clickDisplayedProduct("Coca-Cola"),
             Chrome.clickPlanButton(),
+            FloorScreen.hasTable("2"),
+            FloorScreen.hasTable("4"),
+            FloorScreen.hasTable("5"),
         ].flat(),
 });
 
 registry.category("web_tour.tours").add("FinishResidualOrder", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
+            FloorScreen.orderCountSyncedInTableIs("5", "1"),
             FloorScreen.clickTable("5"),
+            Order.hasLine({
+                productName: "Coca-Cola",
+                quantity: 1,
+                withClass: ":eq(0)",
+            }),
             ProductScreen.totalAmountIs("2.20"),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Bank"),
@@ -567,7 +582,6 @@ registry.category("web_tour.tours").add("FinishResidualOrder", {
 });
 
 registry.category("web_tour.tours").add("test_multiple_preparation_printer_different_categories", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -578,5 +592,22 @@ registry.category("web_tour.tours").add("test_multiple_preparation_printer_diffe
             ProductScreen.clickOrderButton(),
             Dialog.bodyIs("Failed in printing Printer 1, Printer 2 changes of the order"),
             Dialog.confirm(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("RestaurantPresetTakeoutTour", {
+    steps: () =>
+        [
+            Chrome.freezeDateTime(1739370000000),
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            FloorScreen.clickTable("4"),
+            ProductScreen.clickDisplayedProduct("Coca-Cola", true),
+            ProductScreen.selectPreset("Eat in", "Takeout"),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("Deco Addict"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Cash"),
+            PaymentScreen.clickValidate(),
         ].flat(),
 });

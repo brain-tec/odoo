@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:36+0000\n"
+"POT-Creation-Date: 2025-05-07 20:36+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Marta Wacławek, 2025\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
@@ -1676,6 +1676,12 @@ msgid "Employee accrue"
 msgstr ""
 
 #. module: hr_holidays
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_kanban
+#: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_kanban_approve_department
+msgid "Employee's image"
+msgstr ""
+
+#. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_holidays_summary_employee__emp
 msgid "Employee(s)"
 msgstr "Zaměstnanci"
@@ -1911,7 +1917,7 @@ msgstr "Půl dne"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report__has_department_manager_access
 msgid "Has Department Manager Access"
-msgstr ""
+msgstr "Má přístup manažera oddělení"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__has_mandatory_day
@@ -1938,7 +1944,7 @@ msgstr "Vylíhlý"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_employee_type_report__holiday_status
 msgid "Holiday Status"
-msgstr "Stav prázdnin"
+msgstr "Stav volna"
 
 #. module: hr_holidays
 #: model:ir.model,name:hr_holidays.model_report_hr_holidays_report_holidayssummary
@@ -2053,6 +2059,8 @@ msgid ""
 "If checked, users request can exceed the allocated days and balance can go "
 "in negative."
 msgstr ""
+"Pokud je zaškrtnuto, mohou uživatelé požádat o více než přidělený počet dní "
+"a zůstatek může být záporný."
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__active_employee
@@ -2205,7 +2213,7 @@ msgstr ""
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_employee_type_report__holiday_status__left
 msgid "Left"
-msgstr "Vlevo"
+msgstr "Zbývá"
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -3271,7 +3279,7 @@ msgstr "Začít po"
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_report_calendar__state
 msgid "State"
-msgstr "Stát"
+msgstr "Stav"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__state
@@ -4201,6 +4209,8 @@ msgid ""
 "When the field is checked the balance of an allocation using this accrual "
 "plan will never exceed the specified amount."
 msgstr ""
+"Pokud je toto pole zaškrtnuto, zůstatek alokace pomocí tohoto plánu časového"
+" rozlišení nikdy nepřekročí zadanou částku."
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__cap_accrued_time_yearly
@@ -4296,7 +4306,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 msgid "You cannot delete a time off which is in %s state"
-msgstr "Nemůžete odstranit volno, které je v %s Stát"
+msgstr "Nemůžete odstranit volno, které je ve stavu %s"
 
 #. module: hr_holidays
 #. odoo-python
@@ -4349,6 +4359,10 @@ msgid ""
 "public holidays, meaning that the balance of those employees would be "
 "affected by this change."
 msgstr ""
+"Nastavení „Zahrnout státní svátky“ nelze změnit, protože jedna nebo více"
+"                               dovolených tohoto typu se překrývá se "
+"státními svátky, což znamená, že by tato změna měla vliv na zůstatek "
+"dovolené těchto zaměstnanců."
 
 #. module: hr_holidays
 #. odoo-python

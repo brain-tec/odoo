@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:38+0000\n"
+"POT-Creation-Date: 2025-05-16 20:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Chloe Wang, 2025\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
@@ -2590,6 +2590,7 @@ msgstr "请勿离开，"
 #: code:addons/web/static/src/core/file_viewer/file_viewer.xml:0
 #: code:addons/web/static/src/views/fields/binary/binary_field.xml:0
 #: code:addons/web/static/src/views/fields/many2many_binary/many2many_binary_field.xml:0
+#: code:addons/web/static/src/views/fields/pdf_viewer/pdf_viewer_field.xml:0
 msgid "Download"
 msgstr "下载"
 
@@ -3396,6 +3397,13 @@ msgid ""
 "If checked, users won't be able to create records through the autocomplete "
 "dropdown at all."
 msgstr "如果选中该选项，用户将根本无法通过自动完成下拉菜单创建记录。"
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "If true, non-literals are accepted"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6579,6 +6587,20 @@ msgstr "对于XLSX文件，此单元格的内容太长（超过%s个字符）。
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "The domain involves non-literals. Their evaluation might fail."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "The domain should not involve non-literals"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.xml:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 msgid ""
@@ -6701,7 +6723,7 @@ msgstr "这是内部报表的一个例子。"
 msgid ""
 "This record belongs to a different parent so you can not change this "
 "property."
-msgstr "此记录属于不同的父记录，因此您不能更改此属性。"
+msgstr "此记录属于不同的母项记录，因此您不能更改此属性。"
 
 #. module: web
 #. odoo-javascript
@@ -7531,7 +7553,7 @@ msgstr "您可能不相信，"
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 msgid ""
 "You need edit access on the parent document to update these property fields"
-msgstr "更新这些属性字段需要父文档的编辑权限"
+msgstr "要更新这些属性字段，需要母项文件的编辑权限"
 
 #. module: web
 #. odoo-python
@@ -7826,7 +7848,6 @@ msgstr "外星怪物"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
 msgid "all"
 msgstr "所有"
@@ -13301,24 +13322,6 @@ msgstr "孔内标志"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "flag: England"
-msgstr "旗帜：英格兰"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "flag: Scotland"
-msgstr "旗帜：苏格兰"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "flag: Wales"
-msgstr "旗帜：威尔士"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "flamboyant"
 msgstr "华丽的"
 
@@ -18346,12 +18349,6 @@ msgstr "新选项卡"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
-msgid "new_template"
-msgstr "新模板"
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "news"
 msgstr "新闻"
@@ -19233,7 +19230,7 @@ msgstr "包裹"
 #. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor_operator_editor.js:0
 msgid "parent of"
-msgstr "父类"
+msgstr "是母项目，相对于"
 
 #. module: web
 #. odoo-javascript
@@ -21858,12 +21855,6 @@ msgstr "已选取"
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 msgid "selected records,"
 msgstr "所选记录,"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
-msgid "self"
-msgstr "自身"
 
 #. module: web
 #. odoo-javascript
@@ -26456,18 +26447,6 @@ msgstr "黄道带"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "zombie"
 msgstr "僵尸"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/view_components/column_progress.xml:0
-msgid "{{ bar.count }} {{ bar.string }}"
-msgstr "{{ bar.count }} {{ bar.string }}"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
-msgid "{{ relatedFieldName }}..."
-msgstr "{{ relatedFieldName }}..."
 
 #. module: web
 #. odoo-javascript

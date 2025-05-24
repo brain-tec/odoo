@@ -147,8 +147,8 @@ class SaleOrder(models.Model):
             if not order.user_id:
                 order.user_id = (
                     order.website_id.salesperson_id
-                    or order.partner_id.parent_id.user_id.id
                     or order.partner_id.user_id.id
+                    or order.partner_id.parent_id.user_id.id
                 )
 
     def _default_team_id(self):
@@ -228,6 +228,12 @@ class SaleOrder(models.Model):
         # 'You have been assigned to SOOOO' with OdooBot (and not public/logged in user).
         carts.with_context(force_user_recomputation=True)._compute_user_id()
         return super().action_confirm()
+
+    def _send_payment_succeeded_for_order_mail(self):
+        carts = self.filtered('website_id')
+        # Assign a salesman before sending payment confirmation mail.
+        carts.with_context(force_user_recomputation=True)._compute_user_id()
+        return super()._send_payment_succeeded_for_order_mail()
 
     @api.model
     def _get_note_url(self):
@@ -644,7 +650,9 @@ class SaleOrder(models.Model):
 
     def _is_reorder_allowed(self):
         self.ensure_one()
-        return self.state == 'sale' and any(line._is_reorder_allowed() for line in self.order_line if not line.display_type)
+        return self.state == 'sale' and any(
+            line._is_reorder_allowed() for line in self.order_line if line.product_id
+        )
 
     def _filter_can_send_abandoned_cart_mail(self):
         self.website_id.ensure_one()

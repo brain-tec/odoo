@@ -4,13 +4,14 @@
 # 
 # Translators:
 # Wil Odoo, 2025
+# Pilar Vargas, 2025
 # Larissa Manderfeld, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:36+0000\n"
+"POT-Creation-Date: 2025-05-16 20:36+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Larissa Manderfeld, 2025\n"
 "Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
@@ -7922,7 +7923,6 @@ msgstr "Título 1"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/js/editor/snippets.editor.js:0
-#: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "Headings"
 msgstr "Títulos"
 
@@ -7932,36 +7932,26 @@ msgid "Headings 1"
 msgstr "Título 1"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 2"
 msgstr "Título 2"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 3"
 msgstr "Título 3"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 4"
 msgstr "Título 4"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 5"
 msgstr "Título 5"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 6"
 msgstr "Título 6"
@@ -9768,8 +9758,6 @@ msgid "Linkedin"
 msgstr "Linkedin"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Links"
 msgstr "Enlaces"
@@ -12116,12 +12104,6 @@ msgid "Primary"
 msgstr "Primario"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Primary Buttons"
-msgstr "Botones primarios"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Primary Style"
 msgstr "Estilo primario"
@@ -13133,12 +13115,6 @@ msgstr "Segundo radio por defecto"
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Secondary"
 msgstr "Secundario"
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Secondary Buttons"
-msgstr "Botones secundarios"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -14267,8 +14243,6 @@ msgid "Test your robots.txt with Google Search Console"
 msgstr "Pruebe su robots.txt con Google Search Console"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.grid_layout_options
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -14491,6 +14465,13 @@ msgstr "El límite es el número máximo de registros recuperados"
 #: code:addons/website/models/website_snippet_filter.py:0
 msgid "The limit must be between 1 and 16."
 msgstr "El límite debe estar entre 1 y 16."
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "The logo is too large. Please upload a logo smaller than 2.5 MB."
+msgstr ""
+"El logotipo es demasiado grande. Suba un logotipo que ocupe menos de 2,5 MB."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
@@ -16837,12 +16818,6 @@ msgstr "Cuenta de X"
 
 #. module: website
 #. odoo-javascript
-#: code:addons/website/static/src/xml/website_form_editor.xml:0
-msgid "Yes"
-msgstr "Sí"
-
-#. module: website
-#. odoo-javascript
 #: code:addons/website/static/src/client_actions/website_preview/website_preview.js:0
 msgid ""
 "You are about to be redirected to the domain configured for your website ( "
@@ -17131,7 +17106,7 @@ msgstr "Cuenta de Youtube"
 #: model_terms:ir.ui.view,arch_db:website.s_google_map_options
 #: model_terms:ir.ui.view,arch_db:website.s_map_options
 msgid "Zoom"
-msgstr "Zum"
+msgstr "Zoom"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options

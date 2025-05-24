@@ -2377,7 +2377,7 @@ msgstr "請求"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Invoicing Policy"
-msgstr "請求方針"
+msgstr "請求ポリシー"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_template__message_is_follower
@@ -2674,7 +2674,7 @@ msgstr "Mondial Relayコネクター"
 #: model_terms:ir.ui.view,arch_db:website_sale.accordion_more_information
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "More Information"
-msgstr "詳しい情報"
+msgstr "詳細情報"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippets_options_web_editor
@@ -3131,7 +3131,7 @@ msgstr "ポートレート (4/5)"
 #: model:ir.model.fields,field_description:website_sale.field_product_ribbon__position
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "Position"
-msgstr "ポジション"
+msgstr "位置"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__website_sale_prevent_zero_price_sale

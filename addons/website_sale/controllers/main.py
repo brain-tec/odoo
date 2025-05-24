@@ -1019,10 +1019,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
         )
 
         is_new_address = not partner_sudo
-        is_extra_step_active = request.website.viewref('website_sale.extra_info').active
-        if is_extra_step_active:
-            callback = callback or '/shop/extra_info'
-        elif is_new_address or order_sudo.only_services:
+
+        if is_new_address or order_sudo.only_services:
             callback = callback or '/shop/checkout?try_skip_step=true'
         else:
             callback = callback or '/shop/checkout'
@@ -1214,7 +1212,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if shipping_address:
             #in order to not override shippig address, it's checked separately from shipping option
             self._include_country_and_state_in_address(shipping_address)
-            shipping_address, _side_values = self._parse_form_data(billing_address)
+            shipping_address, _side_values = self._parse_form_data(shipping_address)
 
             if order_sudo.partner_shipping_id.name.endswith(order_sudo.name):
                 # The existing partner was created by `process_express_checkout_delivery_choice`, it

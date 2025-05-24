@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:38+0000\n"
+"POT-Creation-Date: 2025-05-16 20:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Marta Wacławek, 2025\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
@@ -122,7 +122,7 @@ msgstr "(vytvořit)"
 #: model_terms:ir.ui.view,arch_db:web.external_layout_striped
 #: model_terms:ir.ui.view,arch_db:web.external_layout_wave
 msgid "(document name)"
-msgstr ""
+msgstr "(Název dokumentu)"
 
 #. module: web
 #. odoo-javascript
@@ -157,7 +157,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 msgid "+ KEY"
-msgstr ""
+msgstr "+ KLÍČ"
 
 #. module: web
 #. odoo-javascript
@@ -487,6 +487,11 @@ msgid ""
 "                            </select>\n"
 "                            <span id=\"temporal_warning\" class=\"alert alert-warning\" style=\"display:none\"><b>Warning:</b> Temporal mode will merge all samples.<br/>It can lead to partially invalid result in case of concurrent profiles.<br/>Use with caution </span>"
 msgstr ""
+"<select class=\"form-select\" name=\"profile_aggregation_mode\" id=\"profile_aggregation_mode\">\n"
+"                                <option value=\"tabs\">Oddělené (jeden na záložku)</option>\n"
+"                                <option value=\"temporal\">Časový (experimentální)</option>\n"
+"                            </select>\n"
+"                            <span id=\"temporal_warning\" class=\"alert alert-warning\" style=\"display:none\"><b>Varování:</b> Časový režim sloučí všechny vzorky. <br/>Může vést k částečně neplatnému výsledku v případě konkurenčních profilů. <br/>Používejte opatrně. </span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -536,7 +541,7 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid "<span id=\"line_tax_ids\">15%</span>"
-msgstr ""
+msgstr "<span id=\"line_tax_ids\">15%</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -2577,6 +2582,7 @@ msgstr ""
 #: code:addons/web/static/src/core/file_viewer/file_viewer.xml:0
 #: code:addons/web/static/src/views/fields/binary/binary_field.xml:0
 #: code:addons/web/static/src/views/fields/many2many_binary/many2many_binary_field.xml:0
+#: code:addons/web/static/src/views/fields/pdf_viewer/pdf_viewer_field.xml:0
 msgid "Download"
 msgstr "Stáhnout"
 
@@ -3380,6 +3386,13 @@ msgstr ""
 msgid ""
 "If checked, users won't be able to create records through the autocomplete "
 "dropdown at all."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "If true, non-literals are accepted"
 msgstr ""
 
 #. module: web
@@ -4658,7 +4671,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/property_tags.js:0
 msgid "No result"
-msgstr ""
+msgstr "Žádné výsledky"
 
 #. module: web
 #. odoo-javascript
@@ -5354,7 +5367,7 @@ msgstr "Ukazatel průběhu"
 #. odoo-javascript
 #: code:addons/web/static/src/views/view_components/column_progress.xml:0
 msgid "Progress bar"
-msgstr ""
+msgstr "Ukazatel průběhu"
 
 #. module: web
 #. odoo-javascript
@@ -5464,7 +5477,7 @@ msgstr "Rozsah"
 #. odoo-javascript
 #: code:addons/web/static/src/core/colorlist/colorlist.js:0
 msgid "Raspberry"
-msgstr ""
+msgstr "Malina"
 
 #. module: web
 #. odoo-javascript
@@ -6404,7 +6417,7 @@ msgstr "Trička"
 #: code:addons/web/static/src/core/commands/command_items.xml:0
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 msgid "TIP"
-msgstr ""
+msgstr "TIP"
 
 #. module: web
 #. odoo-javascript
@@ -6571,6 +6584,20 @@ msgid ""
 msgstr ""
 "Obsah této buňky je pro soubor XLSX příliš dlouhý (více než %s znaků). Pro "
 "tento export použijte prosím formát CSV."
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "The domain involves non-literals. Their evaluation might fail."
+msgstr ""
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/views/fields/domain/domain_field.js:0
+#, python-format
+msgid "The domain should not involve non-literals"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7828,7 +7855,6 @@ msgstr "mimozemská příšera"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
 msgid "all"
 msgstr "vše"
@@ -8397,7 +8423,7 @@ msgstr "pekařství"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "balance"
-msgstr "rovnováha"
+msgstr "zůstatek"
 
 #. module: web
 #. odoo-javascript
@@ -10659,7 +10685,7 @@ msgstr "studený"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "cold face"
-msgstr "studený obličej"
+msgstr "chladný výraz obličeje"
 
 #. module: web
 #. odoo-javascript
@@ -13299,24 +13325,6 @@ msgstr "vlajka"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "flag in hole"
 msgstr "vlajka v díře"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "flag: England"
-msgstr "vlajka: Anglie"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "flag: Scotland"
-msgstr "vlajka: Skotsko"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
-msgid "flag: Wales"
-msgstr "vlajka: Wales"
 
 #. module: web
 #. odoo-javascript
@@ -18348,12 +18356,6 @@ msgstr "nová záložka"
 
 #. module: web
 #. odoo-javascript
-#: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
-msgid "new_template"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "news"
 msgstr "Novinky"
@@ -21860,12 +21862,6 @@ msgstr "vybráno"
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 msgid "selected records,"
 msgstr "vybrané záznamy,"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/core/debug/debug_menu_items.xml:0
-msgid "self"
-msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -26458,18 +26454,6 @@ msgstr "znamení zvěrokruhu"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "zombie"
 msgstr "zombie"
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/view_components/column_progress.xml:0
-msgid "{{ bar.count }} {{ bar.string }}"
-msgstr ""
-
-#. module: web
-#. odoo-javascript
-#: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
-msgid "{{ relatedFieldName }}..."
-msgstr ""
 
 #. module: web
 #. odoo-javascript

@@ -160,7 +160,6 @@ class TestEventMailSchedule(TestEventMailCommon):
             self.mockSMSGateway(),
             self.mock_mail_gateway(),
             self.capture_triggers('event.event_mail_scheduler') as capture,
-            self.enter_registry_test_mode(),
         ):
             self.event_cron_id.method_direct_trigger()
 
@@ -187,7 +186,6 @@ class TestEventMailSchedule(TestEventMailCommon):
             self.mockSMSGateway(),
             self.mock_mail_gateway(),
             self.capture_triggers('event.event_mail_scheduler') as capture,
-            self.enter_registry_test_mode(),
         ):
             self.event_cron_id.method_direct_trigger()
         self.assertEqual(before_mail.last_registration_id, registrations[-1])
@@ -205,7 +203,6 @@ class TestEventMailSchedule(TestEventMailCommon):
             self.mockSMSGateway(),
             self.mock_mail_gateway(),
             self.capture_triggers('event.event_mail_scheduler') as capture,
-            self.enter_registry_test_mode(),
         ):
             self.event_cron_id.method_direct_trigger()
 
@@ -226,7 +223,6 @@ class TestEventMailSchedule(TestEventMailCommon):
             self.mockSMSGateway(),
             self.mock_mail_gateway(),
             self.capture_triggers('event.event_mail_scheduler') as capture,
-            self.enter_registry_test_mode(),
         ):
             self.event_cron_id.method_direct_trigger()
         self.assertEqual(after_mail.last_registration_id, registrations[-1])
@@ -282,7 +278,6 @@ class TestEventMailSchedule(TestEventMailCommon):
             self.mockSMSGateway(),
             self.mock_mail_gateway(),
             self.capture_triggers('event.event_mail_scheduler') as capture,
-            self.enter_registry_test_mode(),
         ):
             self.event_cron_id.method_direct_trigger()
 
@@ -342,3 +337,15 @@ class TestEventSaleMail(TestEventFullCommon):
                 "email_from": self.test_event.organizer_id.email_formatted,
             },
         )
+
+    def test_registration_template_body_translation(self):
+        self.env['res.lang']._activate_lang('fr_BE')
+        test_event = self.test_event
+        self.partners[0].lang = 'fr_BE'
+        self.env.ref('event.event_subscription').with_context(lang='fr_BE').body_html = 'Bonjour'
+        with self.mock_mail_gateway(mail_unlink_sent=False):
+            self.env['event.registration'].create({
+            'event_id': test_event.id,
+            'partner_id': self.partners[0].id
+            })
+        self.assertEqual(self._new_mails[0].body_html, "<p>Bonjour</p>")

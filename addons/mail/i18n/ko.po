@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:36+0000\n"
+"POT-Creation-Date: 2025-05-16 20:36+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Sarah Park, 2025\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
@@ -230,6 +230,12 @@ msgstr "%(partner)s <%(email)s> (ID %(id)s)"
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/core/web/recipients_input.js:0
+msgid "%(partner_name)s"
+msgstr ""
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/core/web/recipients_input.js:0
 msgid "%(partner_name)s <%(partner_email)s>"
 msgstr "%(partner_name)s <%(partner_email)s>"
 
@@ -322,12 +328,6 @@ msgstr "%s 새 메시지"
 #: code:addons/mail/static/src/discuss/call/common/rtc_service.js:0
 msgid "%s raised their hand"
 msgstr "%s님들이 손을 들었습니다"
-
-#. module: mail
-#. odoo-python
-#: code:addons/mail/models/discuss/discuss_channel_member.py:0
-msgid "%s started a live conference"
-msgstr "%s 님이 실시간 회의를 시작했습니다"
 
 #. module: mail
 #. odoo-javascript
@@ -1153,12 +1153,6 @@ msgid ""
 msgstr "해당 채팅에는 멤버를 추가할 수 없습니다. 2인 채팅용입니다."
 
 #. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/core/web/recipients_input.js:0
-msgid "Additional Contact"
-msgstr "추가 연락처"
-
-#. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__partner_ids
 msgid "Additional Contacts"
 msgstr "추가 연락처"
@@ -1776,18 +1770,11 @@ msgstr "두 개 이상의 문서를 첨부하거나 조회해야 하는 경우�
 
 #. module: mail
 #. odoo-javascript
-#: code:addons/mail/static/src/chatter/web/chatter.xml:0
 #: code:addons/mail/static/src/core/web/mail_composer_show_bcc_button.xml:0
 #: model:ir.model.fields,field_description:mail.field_mail_compose_message__notified_bcc
 #: model:ir.model.fields,field_description:mail.field_mail_scheduled_message__notified_bcc
 msgid "Bcc"
 msgstr "숨은참조"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/chatter/web/chatter.xml:0
-msgid "Bcc:"
-msgstr "숨은참조:"
 
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity_plan_template__delay_from__before_plan_date
@@ -1860,6 +1847,8 @@ msgid "Bot"
 msgstr "봇"
 
 #. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/core/common/notification_model.js:0
 #: model:ir.model.fields,field_description:mail.field_mail_thread_blacklist__message_bounce
 #: model:ir.model.fields,field_description:mail.field_res_company__bounce_formatted
 #: model:ir.model.fields,field_description:mail.field_res_partner__message_bounce
@@ -3279,6 +3268,7 @@ msgstr "다이렉트 메시지"
 #. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/core/web/activity_markasdone_popover.xml:0
+#: code:addons/mail/static/src/core/web/recipients_input_tags_list_popover.xml:0
 #: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
 #: model_terms:ir.ui.view,arch_db:mail.mail_blacklist_remove_view_form
@@ -3626,12 +3616,6 @@ msgid "Edit"
 msgstr "편집"
 
 #. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/core/web/recipients_input.js:0
-msgid "Edit Partner"
-msgstr "협력사 편집"
-
-#. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_resend_message_view_form
 msgid "Edit Partners"
 msgstr "협력사 편집하기"
@@ -3665,13 +3649,6 @@ msgstr "태그 수정"
 #: code:addons/mail/static/src/core/web/follower_list.xml:0
 msgid "Edit subscription"
 msgstr "구독 편집"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/core/web/recipients_input.js:0
-#: code:addons/mail/static/src/views/web/fields/many2many_tags_email/many2many_tags_email.js:0
-msgid "Edit: %s"
-msgstr "편집: %s"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_blacklist_remove__email
@@ -4972,14 +4949,6 @@ msgid "If SSL required."
 msgstr "SSL이 필요할 경우."
 
 #. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/views/web/fields/many2many_tags_email/many2many_tags_email.js:0
-msgid ""
-"If checked, clicking on the tag will open the form that allows to directly "
-"edit it."
-msgstr "이 옵션을 선택하면 태그 클릭 시 직접 수정할 수 있는 양식이 열립니다. "
-
-#. module: mail
 #: model:ir.model.fields,help:mail.field_discuss_channel__message_needaction
 #: model:ir.model.fields,help:mail.field_mail_blacklist__message_needaction
 #: model:ir.model.fields,help:mail.field_mail_thread__message_needaction
@@ -5532,7 +5501,7 @@ msgid "Is a note"
 msgstr "노트"
 
 #. module: mail
-#: model:ir.model.fields,field_description:mail.field_mail_compose_message__partner_share_is_follower
+#: model:ir.model.fields,field_description:mail.field_mail_compose_message__notified_bcc_contains_share
 msgid "Is an external partner follower of the document?"
 msgstr "외부 파트너가 문서를 팔로우하고 있나요?"
 
@@ -5615,6 +5584,18 @@ msgstr "참여 채널"
 #: model:ir.actions.act_window,name:mail.discuss_channel_action_view
 msgid "Join a group"
 msgstr "그룹에 참여"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/call/common/thread_actions.js:0
+msgid "Join the Call"
+msgstr "통화 참여"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/call/common/thread_actions.js:0
+msgid "Join the Call with Camera"
+msgstr "카메라를 사용하여 통화 참여"
 
 #. module: mail
 #. odoo-javascript
@@ -6951,12 +6932,6 @@ msgid "No messages found"
 msgstr "메시지를 찾을 수 없습니다."
 
 #. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/chatter/web/chatter.xml:0
-msgid "No recipient"
-msgstr "수신인 없음"
-
-#. module: mail
 #. odoo-python
 #: code:addons/mail/wizard/mail_compose_message.py:0
 msgid "No recipient found."
@@ -7787,6 +7762,11 @@ msgid "Partner"
 msgstr "협력사"
 
 #. module: mail
+#: model:ir.model.fields,field_description:mail.field_mail_compose_message__partner_ids_all_have_email
+msgid "Partner Ids All Have Email"
+msgstr "파트너 ID에 모두 이메일이 있음"
+
+#. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_resend_message__partner_readonly
 #: model:ir.model.fields,field_description:mail.field_mail_resend_partner__partner_readonly
 msgid "Partner Readonly"
@@ -7993,6 +7973,12 @@ msgstr "재생"
 #: model_terms:ir.ui.view,arch_db:mail.mail_bounce_catchall
 msgid "Please contact us instead using"
 msgstr "대신 연락 주십시오."
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/core/web/recipients_input_tags_list_popover.xml:0
+msgid "Please provide a valid email"
+msgstr "유효한 ​​이메일을 입력하세요."
 
 #. module: mail
 #. odoo-javascript
@@ -9139,12 +9125,6 @@ msgstr "언어 선택"
 #: code:addons/mail/static/src/views/web/fields/assign_user_command_hook.js:0
 msgid "Select a user..."
 msgstr "사용자 선택"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/core/common/discuss_notification_settings.xml:0
-msgid "Select duration"
-msgstr "기간 선택"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_discuss_channel__self_member_id
@@ -10527,12 +10507,6 @@ msgstr "오늘 활동"
 
 #. module: mail
 #. odoo-javascript
-#: code:addons/mail/static/src/core/common/message_model.js:0
-msgid "Today at %(time)s"
-msgstr "오늘 %(time)s"
-
-#. module: mail
-#. odoo-javascript
 #: code:addons/mail/static/src/core/web/activity.xml:0
 msgid "Today:"
 msgstr "오늘:"
@@ -11252,6 +11226,7 @@ msgstr "%s 화면"
 
 #. module: mail
 #. odoo-javascript
+#: code:addons/mail/static/src/core/web/recipients_popover.xml:0
 #: code:addons/mail/static/src/discuss/web/avatar_card/avatar_card_popover.xml:0
 msgid "View Profile"
 msgstr "프로필 보기"
@@ -11785,12 +11760,6 @@ msgid "after previous activity deadline"
 msgstr "이전 활동 마감 후"
 
 #. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/views/web/fields/scheduled_date_field/scheduled_date_dialog.xml:0
-msgid "afternoon"
-msgstr "오후"
-
-#. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_alias_view_form
 msgid "alias"
 msgstr "별칭"
@@ -11878,12 +11847,6 @@ msgid "created this channel."
 msgstr "이 채널을 생성했습니다."
 
 #. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/views/web/fields/scheduled_date_field/scheduled_date_dialog.xml:0
-msgid "custom"
-msgstr "맞춤"
-
-#. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.account_security_alert
 msgid "day, month dd, yyyy - hh:mm:ss (GMT)"
 msgstr "일, 월 dd, yyyy - hh:mm:ss (GMT)"
@@ -11911,12 +11874,6 @@ msgstr "일:"
 #: code:addons/mail/static/src/discuss/call/common/call_participant_card.xml:0
 msgid "deaf"
 msgstr "청각 장애가 있는 사람"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/core/common/discuss_notification_settings.xml:0
-msgid "default"
-msgstr "기본값"
 
 #. module: mail
 #: model:ir.model.fields,field_description:mail.field_mail_push__mail_push_device_id
@@ -12175,12 +12132,6 @@ msgid "model %s does not accept document creation"
 msgstr "%s 모델이 문서 생성을 허용하지 않습니다"
 
 #. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/views/web/fields/scheduled_date_field/scheduled_date_dialog.xml:0
-msgid "monday"
-msgstr "월요일"
-
-#. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity_plan_template__delay_unit__months
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity_type__delay_unit__months
 msgid "months"
@@ -12191,12 +12142,6 @@ msgstr "월"
 #: code:addons/mail/models/discuss/discuss_channel.py:0
 msgid "more"
 msgstr "더보기"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/views/web/fields/scheduled_date_field/scheduled_date_dialog.xml:0
-msgid "morning"
-msgstr "일출"
 
 #. module: mail
 #. odoo-javascript
@@ -12304,6 +12249,12 @@ msgstr "화면"
 #: code:addons/mail/models/mail_alias.py:0
 msgid "some specific addresses"
 msgstr "일부 특정 주소"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/discuss/discuss_channel_member.py:0
+msgid "started a live conference"
+msgstr ""
 
 #. module: mail
 #: model:ir.model.fields.selection,name:mail.selection__mail_ice_server__server_type__stun

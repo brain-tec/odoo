@@ -3,15 +3,15 @@
 # 	* account_peppol
 # 
 # Translators:
-# Wil Odoo, 2025
 # Manon Rondou, 2025
+# Wil Odoo, 2025
 # Erwin van der Ploeg <erwin@odooexperts.nl>, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:36+0000\n"
+"POT-Creation-Date: 2025-05-07 20:36+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2025\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
@@ -24,20 +24,26 @@ msgstr ""
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/wizard/account_move_send_wizard.py:0
-msgid " (Consumer)"
-msgstr " (Consument)"
-
-#. module: account_peppol
-#. odoo-python
-#: code:addons/account_peppol/wizard/account_move_send_wizard.py:0
 msgid " (Customer not on Peppol)"
 msgstr " (Klant niet op Peppol)"
 
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/wizard/account_move_send_wizard.py:0
-msgid " (Demo/Test mode)"
-msgstr " (Demo/Test mode)"
+msgid " (Demo)"
+msgstr " (Demo)"
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/wizard/account_move_send_wizard.py:0
+msgid " (Test)"
+msgstr " (Test)"
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/wizard/account_move_send_wizard.py:0
+msgid " (no VAT)"
+msgstr " (geen btw)"
 
 #. module: account_peppol
 #. odoo-python
@@ -57,15 +63,17 @@ msgid ""
 ".<br/>\n"
 "                            But you are receiving your e-invoices via this Access Point:"
 msgstr ""
+".<br/>\n"
+"                            Maar je ontvangt je e-facturen via dit toegangspunt:"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
 msgid ""
 "<br/>\n"
-"                            If you need a Peppol compliant software, we recommend"
+"                                In Belgium, electronic invoicing is <u>mandatory as of January 2026</u> - don't wait to register."
 msgstr ""
 "<br/>\n"
-"                            Voor software die aan Peppol-standaarden voldoet, gebruik"
+"In België is elektronische facturatie <u>verplicht vanaf januari 2026</u> - wacht niet langer om je te registreren."
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.account_peppol_view_move_form
@@ -123,7 +131,7 @@ msgstr "Wizard rekening verplaatsen verzenden"
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__account_peppol_edi_user
 msgid "Account Peppol Edi User"
-msgstr ""
+msgstr "Gebruiker Account Peppol Edi"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_account_journal__is_peppol_journal
@@ -165,12 +173,13 @@ msgstr "Peppol activeren (Test)"
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "Advanced Configuration"
-msgstr ""
+msgstr "Geavanceerde configuratie"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "Allow sending and receiving invoices through the Peppol network"
 msgstr ""
+"Sta het verzenden en ontvangen van facturen via het Peppol-netwerk toe"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_res_partner__available_peppol_edi_formats
@@ -266,7 +275,7 @@ msgstr "Bedrijf"
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
 msgid "Company information"
-msgstr ""
+msgstr "Bedrijfsgegevens"
 
 #. module: account_peppol
 #: model:ir.model,name:account_peppol.model_res_config_settings
@@ -276,7 +285,7 @@ msgstr "Configuratie-instellingen"
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
 msgid "Configure your Peppol Services and allowed formats"
-msgstr ""
+msgstr "Configureer je Peppol-diensten en toegestane formaten"
 
 #. module: account_peppol
 #. odoo-python
@@ -298,7 +307,7 @@ msgstr "E-mailadres en telefoonnummer van contactpersoon zijn vereist."
 #. module: account_peppol
 #: model:ir.model,website_form_label:account_peppol.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Een klant aanmaken"
 
 #. module: account_peppol
 #. odoo-javascript
@@ -331,7 +340,7 @@ msgstr ""
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
 msgid "Danger zone"
-msgstr ""
+msgstr "Gevaarzone"
 
 #. module: account_peppol
 #: model:ir.model.fields.selection,name:account_peppol.selection__peppol_registration__edi_mode__demo
@@ -424,6 +433,13 @@ msgid "Error"
 msgstr "Foutmelding"
 
 #. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/models/account_move_send.py:0
+msgid "Errors occurred while creating the EDI document (format: %s):"
+msgstr ""
+"Er zijn fouten opgetreden bij het maken van het EDI-document (formaat: %s):"
+
+#. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.account_journal_dashboard_kanban_view
 msgid "Fetch Peppol invoice status"
 msgstr "Haal de Peppol-factuurstatus op"
@@ -474,15 +490,6 @@ msgid ""
 "If you want to be invoiced by Peppol, your configuration must be valid."
 msgstr ""
 "Je configuratie dient geldig te zijn als je via Peppol wilt factureren."
-
-#. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
-msgid ""
-"In Belgium, electronic invoicing will be <u>mandatory as of January "
-"2026</u>."
-msgstr ""
-"Elektronische facturatie wordt <u>vanaf januari 2026 verplicht</u> in "
-"België."
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
@@ -628,24 +635,6 @@ msgid "PEPPOL: update participant status"
 msgstr "PEPPOL: Status deelnemer bijwerken"
 
 #. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
-msgid ""
-"PS: <b style=\"color: $o-enterprise-action-color;\">We did not send your "
-"invoice on Peppol.</b>"
-msgstr ""
-"PS: <b style=\"color: $o-enterprise-action-color;\">We hebben je factuur "
-"niet via Peppol verstuurd.</b>"
-
-#. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
-msgid ""
-"PS: This invoice has also been <b style=\"color: $o-enterprise-action-"
-"color\">sent on Peppol</b>."
-msgstr ""
-"PS: Deze factuur is ook <b style=\"color: $o-enterprise-action-color\">via "
-"Peppol verstuurd</b>."
-
-#. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/wizard/account_move_send_wizard.py:0
 msgid "Partner doesn't have a valid Peppol configuration."
@@ -660,12 +649,12 @@ msgstr "In afwachting van ontvangst"
 #. odoo-python
 #: code:addons/account_peppol/wizard/peppol_registration.py:0
 msgid "Peppol Address should be provided."
-msgstr ""
+msgstr "Een Peppol-adres is vereist."
 
 #. module: account_peppol
 #: model:ir.model,name:account_peppol.model_peppol_config_wizard
 msgid "Peppol Configuration Wizard"
-msgstr ""
+msgstr "Peppol-configuratiewizard"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__peppol_endpoint
@@ -680,13 +669,18 @@ msgstr "Eindpunt Peppol"
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__peppol_external_provider
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__peppol_external_provider
 msgid "Peppol External Provider"
-msgstr ""
+msgstr "Externe Peppol-provider"
+
+#. module: account_peppol
+#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
+msgid "Peppol ID"
+msgstr "Peppol ID"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__peppol_purchase_journal_id
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__account_peppol_purchase_journal_id
 msgid "Peppol Purchase Journal"
-msgstr ""
+msgstr "Inkoopdagboek Peppol"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.account_peppol_view_account_invoice_filter
@@ -829,7 +823,7 @@ msgstr "Klaar om te verzenden"
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
 msgid "Receive your electronic invoices in Odoo"
-msgstr ""
+msgstr "Ontvang je elektronische facturen in Odoo"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__smp_registration
@@ -839,25 +833,13 @@ msgstr "Als ontvanger inschrijven"
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "Register with Odoo"
-msgstr ""
-
-#. module: account_peppol
-#. odoo-python
-#: code:addons/account_peppol/wizard/peppol_registration.py:0
-msgid "Registered as a receiver."
-msgstr "Geregistreerd als ontvanger."
+msgstr "Registreren bij Odoo"
 
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/tools/demo_utils.py:0
 msgid "Registered as a sender (demo)."
 msgstr "Geregistreerd als verzender (demo)."
-
-#. module: account_peppol
-#. odoo-python
-#: code:addons/account_peppol/wizard/peppol_registration.py:0
-msgid "Registered as a sender."
-msgstr "Geregistreerd als verzender."
 
 #. module: account_peppol
 #. odoo-python
@@ -868,7 +850,6 @@ msgstr "Geregistreerd om documenten te ontvangen via Peppol (demo)."
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/models/res_config_settings.py:0
-#: code:addons/account_peppol/wizard/peppol_registration.py:0
 msgid "Registered to receive documents via Peppol."
 msgstr "Geregistreerd om documenten te ontvangen via Peppol."
 
@@ -925,6 +906,8 @@ msgid ""
 "Some service support migration keys. If this is your case you can enter your migration key below.\n"
 "                        If not, you should de-register from your current service provider and register with Odoo afterward."
 msgstr ""
+"Voor sommige services is het mogelijk om migratiesleutels te gebruiken. Als dit voor jou geldt, kun je je migratiesleutel hieronder invoeren.\n"
+"                        Als dat niet het geval is, meld je je af bij je huidige serviceprovider en registreer je je daarna bij Odoo."
 
 #. module: account_peppol
 #: model:ir.model.fields.selection,name:account_peppol.selection__peppol_registration__edi_mode__test
@@ -956,7 +939,7 @@ msgstr "Het identificatienummer van het Peppol eindpunt is niet correct."
 #. odoo-python
 #: code:addons/account_peppol/models/res_company.py:0
 msgid "The Peppol service that is used is %s."
-msgstr ""
+msgstr "De Peppol-service die wordt gebruikt is %s."
 
 #. module: account_peppol
 #. odoo-python
@@ -1000,8 +983,6 @@ msgid "The partner is missing Peppol EAS and/or Endpoint identifier."
 msgstr "Er ontbreekt een Peppol EAS en/of Endpoint-ID voor de partner."
 
 #. module: account_peppol
-#. odoo-python
-#: code:addons/account_peppol/wizard/peppol_registration.py:0
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_partner_form_account_peppol
 msgid ""
 "The recommended identification method for Belgium is your Company Registry "
@@ -1014,6 +995,11 @@ msgstr ""
 #: model:ir.model.fields,help:account_peppol.field_res_config_settings__account_peppol_edi_identification
 msgid "The unique id that identifies this user, typically the vat"
 msgstr "De unieke id die deze gebruiker identificeert, meestal het btw-nummer"
+
+#. module: account_peppol
+#: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
+msgid "This invoice has also been"
+msgstr "Deze factuur is ook"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
@@ -1104,13 +1090,13 @@ msgstr "Wizard"
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid ""
 "You are sending and receiving your e-invoices via Odoo with this Peppol ID"
-msgstr ""
+msgstr "Je verstuurt en ontvangt je e-facturen via Odoo met deze Peppol-ID"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "You are sending your e-invoices via Odoo with this Peppol ID"
-msgstr ""
+msgstr "Je verstuurt je e-facturen via Odoo met deze Peppol-ID"
 
 #. module: account_peppol
 #. odoo-python
@@ -1162,8 +1148,18 @@ msgstr "Je zal een verificatiecode ontvangen op dit telefoonnummer"
 #. odoo-python
 #: code:addons/account_peppol/wizard/peppol_registration.py:0
 msgid ""
-"Your company is already registered on another Access Point (%s) for "
-"receiving invoices. We will register you on Odoo as a sender only."
+"Your Peppol registration will be activated soon. You can already send "
+"invoices."
+msgstr ""
+"Je Peppol registratie wordt binnenkort geactiveerd. Je kunt nu al facturen "
+"versturen."
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/wizard/peppol_registration.py:0
+msgid ""
+"Your company is already registered on an Access Point (%s) for receiving "
+"invoices. We will register you on Odoo as a sender only."
 msgstr ""
 
 #. module: account_peppol
@@ -1184,7 +1180,6 @@ msgstr ""
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/models/res_config_settings.py:0
-#: code:addons/account_peppol/wizard/peppol_registration.py:0
 msgid ""
 "Your registration on Peppol network should be activated within a day. The "
 "updated status will be visible in Settings."
@@ -1203,3 +1198,23 @@ msgstr "Je registratie moet binnen de dag geactiveerd zijn."
 #: model:ir.model.fields.selection,name:account_peppol.selection__res_partner__invoice_sending_method__peppol
 msgid "by Peppol"
 msgstr "met Peppol"
+
+#. module: account_peppol
+#: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
+msgid "could not be sent via Peppol"
+msgstr "kon niet via Peppol worden verzonden"
+
+#. module: account_peppol
+#: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
+msgid "sent via Peppol"
+msgstr "verzonden via Peppol"
+
+#. module: account_peppol
+#: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
+msgid "to send invoices, but this one"
+msgstr "om facturen te versturen, maar deze"
+
+#. module: account_peppol
+#: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
+msgid "uses"
+msgstr "gebruikers"

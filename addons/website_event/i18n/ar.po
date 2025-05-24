@@ -564,6 +564,9 @@ msgid ""
 "\n"
 "            Note that the EventEvent is however always available via its link."
 msgstr ""
+"يحدد ظهور الفعالية في الموقع الإلكتروني وفي عمليات البحث.\n"
+"\n"
+"            ولكن، يُرجى العلم أن الفعالية تكون متاحة دائماً عن طريق رابط الفعالية. "
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_searchbar_input_snippet_options
@@ -1274,7 +1277,7 @@ msgstr "عينة"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_topbar
 msgid "Search an event.."
-msgstr ""
+msgstr "البحث عن فعالية.. "
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_registration_view_search
@@ -1522,7 +1525,7 @@ msgstr "الموقع الإلكتروني"
 #: model:ir.model.fields,field_description:website_event.field_event_tag__website_absolute_url
 #: model:ir.model.fields,field_description:website_event.field_event_tag_category__website_absolute_url
 msgid "Website Absolute URL"
-msgstr ""
+msgstr "رابط URL المطلق للموقع الإلكتروني "
 
 #. module: website_event
 #: model:ir.model,name:website_event.model_website_event_menu

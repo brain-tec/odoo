@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:36+0000\n"
+"POT-Creation-Date: 2025-05-16 20:36+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Malaz Abuidris <msea@odoo.com>, 2025\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
@@ -110,6 +110,8 @@ msgid ""
 "Action %s not found, link preview is not available, please check your url is"
 " correct"
 msgstr ""
+"لم يتم العثور على الإجراء، لا تتوفر معاينة للرابط، يرجى التحقق من صحة عنوان "
+"url الخاص بك "
 
 #. module: html_editor
 #. odoo-javascript
@@ -170,7 +172,7 @@ msgstr "إضافة رمز تعبيري"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/core/table_of_content/table_of_content.xml:0
 msgid "Add headings to fill the Table of Contents"
-msgstr ""
+msgstr "أضف العناوين لملء جدول المحتويات "
 
 #. module: html_editor
 #. odoo-javascript
@@ -882,7 +884,7 @@ msgstr "إخفاء زر المشاركة"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/table_of_content_plugin/table_of_content_plugin.js:0
 msgid "Highlight the structure (headings)"
-msgstr ""
+msgstr "قم بتحديد الهيكل (الترويسات) "
 
 #. module: html_editor
 #. odoo-javascript
@@ -1148,6 +1150,7 @@ msgid ""
 "Link preview is not available because %s, please check if your url is "
 "correct"
 msgstr ""
+"معاينة الرابط غير متوفرة بسبب %s، يرجى التحقق من صحة عنوان url الخاص بك "
 
 #. module: html_editor
 #. odoo-javascript
@@ -1702,7 +1705,7 @@ msgstr "الطاولة "
 #: code:addons/html_editor/static/src/others/embedded_components/core/table_of_content/table_of_content.xml:0
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/table_of_content_plugin/table_of_content_plugin.js:0
 msgid "Table of Contents"
-msgstr ""
+msgstr "جدول المحتويات "
 
 #. module: html_editor
 #. odoo-javascript
@@ -2058,12 +2061,6 @@ msgstr "تصغير"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "all"
-msgstr "الكل "
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
 msgid "alternatives..."
 msgstr "بدائل... "
@@ -2073,12 +2070,6 @@ msgstr "بدائل... "
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "and"
 msgstr "و"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "database"
-msgstr "قاعدة البيانات "
 
 #. module: html_editor
 #. odoo-javascript
@@ -2100,12 +2091,6 @@ msgstr "ملف "
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "media-library"
-msgstr "مكتبة الوسائط "
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "or"
 msgstr "أو"
@@ -2115,21 +2100,3 @@ msgstr "أو"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "videos"
 msgstr "مقاطع الفيديو"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlDescription}}"
-msgstr "{{state.urlDescription}}"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlTitle}}"
-msgstr "{{state.urlTitle}}"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.url}}"
-msgstr "{{state.url}}"

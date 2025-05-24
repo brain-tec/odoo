@@ -396,15 +396,20 @@ def load_certificate():
             timeout=5,
         )
         response.raise_for_status()
-        data = response.json()  # decode once
+        response_body = response.json()
     except requests.exceptions.RequestException as e:
         _logger.exception("An error occurred while trying to reach odoo.com servers.")
         return "ERR_IOT_HTTPS_LOAD_REQUEST_EXCEPTION\n\n%s" % e
 
-    error = data.get('error')
-    result = data.get('result')
-    if error or not result:
-        _logger.warning("An error received from odoo.com while trying to get the certificate: %s", error or 'Empty response')
+    server_error = response_body.get('error')
+    if server_error:
+        _logger.error("A server error received from odoo.com while trying to get the certificate: %s", server_error)
+        return "ERR_IOT_HTTPS_LOAD_REQUEST_NO_RESULT"
+
+    result = response_body.get('result', {})
+    certificate_error = result.get('error')
+    if certificate_error:
+        _logger.error("An error received from odoo.com while trying to get the certificate: %s", certificate_error)
         return "ERR_IOT_HTTPS_LOAD_REQUEST_NO_RESULT"
 
     update_conf({'subject': result['subject_cn']})
@@ -639,15 +644,17 @@ def get_conf(key=None, section='iot.box'):
 
 
 def disconnect_from_server():
-    """Disconnect the IoT Box from the server, clears associated caches"""
-    get_odoo_server_url.cache_clear()
+    """Disconnect the IoT Box from the server"""
     update_conf({
         'remote_server': '',
         'token': '',
         'db_uuid': '',
         'enterprise_code': '',
+        'screen_orientation': '',
+        'browser_url': '',
+        'iot_handlers_etag': '',
     })
-
+    odoo_restart()
 
 def save_browser_state(url=None, orientation=None):
     """Save the browser state to the file

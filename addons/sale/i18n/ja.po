@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:37+0000\n"
+"POT-Creation-Date: 2025-05-07 20:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Junko Augias, 2025\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
@@ -132,10 +132,8 @@ msgid ""
 "        <br/>\n"
 "        Do not hesitate to contact us if you have any questions.\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -143,24 +141,24 @@ msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 12px;\">\n"
 "        <t t-set=\"transaction_sudo\" t-value=\"object.get_portal_last_transaction()\"/>\n"
-"        こんにちは。\n"
+"        こんにちは\n"
 "        <br/><br/>\n"
-"        参照番号\n"
+"        参照番号:\n"
 "        <span style=\"font-weight:bold;\" t-out=\"transaction_sudo.reference or ''\">SOOO49</span>\n"
 "        金額\n"
 "        <span style=\"font-weight:bold;\" t-out=\"format_amount(transaction_sudo.amount, object.currency_id) or ''\">$ 10.00</span>\n"
 "        オーダ番号:\n"
 "        <span style=\"font-weight:bold;\" t-out=\"object.name or ''\">S00049</span>\n"
 "        <t t-if=\"transaction_sudo and transaction_sudo.state == 'pending'\">\n"
-"            の支払が保留になっています。\n"
+"            が保留になっています。\n"
 "            <br/>\n"
 "            <t t-if=\"object.currency_id.compare_amounts(object.amount_paid + transaction_sudo.amount, object.amount_total) &gt;= 0 and object.state in ('draft', 'sent')\">\n"
 "                お支払いが確認でき次第、お客様のご注文を確定致します。\n"
 "            </t>\n"
 "            <t t-else=\"\">\n"
-"                確定後、\n"
+"                確定後\n"
 "                <span style=\"font-weight:bold;\" t-out=\"format_amount(object.amount_total - object.amount_paid - transaction_sudo.amount, object.currency_id) or ''\">$ 10.00</span>\n"
-"                をお支払い下さい。\n"
+"                をお支払いください。\n"
 "            </t>\n"
 "        </t>\n"
 "        <t t-else=\"\">\n"
@@ -168,18 +166,16 @@ msgstr ""
 "            <t t-if=\"object.currency_id.compare_amounts(object.amount_paid, object.amount_total) &lt; 0\">\n"
 "                <br/>\n"
 "                <span style=\"font-weight:bold;\" t-out=\"format_amount(object.amount_total - object.amount_paid, object.currency_id) or ''\">$ 10.00</span>\n"
-"                が未払いです。\n"
+"                が未払です。\n"
 "            </t>\n"
 "        </t>\n"
 "        <br/><br/>\n"
-"        宜しくお願い致します。\n"
+"        よろしくお願いいたします。\n"
 "        <br/>\n"
 "        ご不明な点がございましたら、お問合せ下さい。\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -224,10 +220,8 @@ msgid ""
 "        <br/>\n"
 "        Do not hesitate to contact us if you have any questions.\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
 "    </p>\n"
 "<t t-if=\"hasattr(object, 'website_id') and object.website_id\">\n"
 "    <div style=\"margin: 0px; padding: 0px;\">\n"
@@ -443,12 +437,9 @@ msgstr ""
 "        </t>\n"
 "        <br/>\n"
 "        ご質問がございましたらお気軽にお問合せ下さい。\n"
-"        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
-"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
+"        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">           <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
-"    </p>\n"
+"            </p>\n"
 "<t t-if=\"hasattr(object, 'website_id') and object.website_id\">\n"
 "    <div style=\"margin: 0px; padding: 0px;\">\n"
 "        <table width=\"100%\" style=\"color: #454748; font-size: 12px; border-collapse: collapse; white-space: nowrap;\">\n"
@@ -661,10 +652,8 @@ msgid ""
 "        <br/>\n"
 "        Do not hesitate to contact us if you have any questions.\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -700,11 +689,9 @@ msgstr ""
 "        <br/>\n"
 "        ご不明な点がございましたら、お気軽にお問合せ下さい。\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
-"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
+"                        <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
-"    </p>\n"
+"            </p>\n"
 "</div>\n"
 "            "
 
@@ -724,10 +711,8 @@ msgid ""
 "        <br/><br/>\n"
 "        Do not hesitate to contact us if you have any questions.\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -745,11 +730,9 @@ msgstr ""
 "        <br/><br/>\n"
 "         ご不明な点がございましたら、お気軽にお問合せ下さい。\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
-"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
+"                      <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
-"    </p>\n"
+"   </p>\n"
 "</div>\n"
 "            "
 
@@ -1427,7 +1410,7 @@ msgstr "魅力的な見積で競合他社に打ち勝ちましょう!"
 #: model:ir.model.fields.selection,name:sale.selection__product_template__sale_line_warn__block
 #: model:ir.model.fields.selection,name:sale.selection__res_partner__sale_warn__block
 msgid "Blocking Message"
-msgstr "阻止メッセージ"
+msgstr "ブロッキングメッセージ"
 
 #. module: sale
 #: model_terms:ir.actions.act_window,help:sale.action_quotations
@@ -1579,7 +1562,7 @@ msgstr "ここをクリックして見積にプロダクトやサービスを追
 #. odoo-javascript
 #: code:addons/sale/static/src/xml/sales_team_progress_bar_template.xml:0
 msgid "Click to define an invoicing target"
-msgstr "クリックして請求対象を定義します"
+msgstr "クリックして請求目標を定義します"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -2166,6 +2149,7 @@ msgstr "請求書ドラフトの警告を表示する"
 #: model:ir.model.fields,field_description:sale.field_account_move_line__display_name
 #: model:ir.model.fields,field_description:sale.field_base_document_layout__display_name
 #: model:ir.model.fields,field_description:sale.field_crm_team__display_name
+#: model:ir.model.fields,field_description:sale.field_ir_config_parameter__display_name
 #: model:ir.model.fields,field_description:sale.field_payment_link_wizard__display_name
 #: model:ir.model.fields,field_description:sale.field_payment_provider__display_name
 #: model:ir.model.fields,field_description:sale.field_payment_transaction__display_name
@@ -2532,7 +2516,7 @@ msgstr "グループ化"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__has_active_pricelist
 msgid "Has Active Pricelist"
-msgstr "有効な価格表あり"
+msgstr "アクティブな価格表あり"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__has_archived_products
@@ -2578,6 +2562,7 @@ msgstr "非表示"
 #: model:ir.model.fields,field_description:sale.field_account_move_line__id
 #: model:ir.model.fields,field_description:sale.field_base_document_layout__id
 #: model:ir.model.fields,field_description:sale.field_crm_team__id
+#: model:ir.model.fields,field_description:sale.field_ir_config_parameter__id
 #: model:ir.model.fields,field_description:sale.field_payment_link_wizard__id
 #: model:ir.model.fields,field_description:sale.field_payment_provider__id
 #: model:ir.model.fields,field_description:sale.field_payment_transaction__id
@@ -2840,12 +2825,12 @@ msgstr "請求仕訳帳"
 #: model:ir.model.fields,field_description:sale.field_product_template__invoice_policy
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__default_invoice_policy
 msgid "Invoicing Policy"
-msgstr "請求方針"
+msgstr "請求ポリシー"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_crm_team__invoiced_target
 msgid "Invoicing Target"
-msgstr "請求目標額"
+msgstr "請求目標"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -3818,7 +3803,7 @@ msgstr "数量"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__qty_delivered
 msgid "Qty Delivered"
-msgstr "配送済数量"
+msgstr "納品済数量"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__qty_invoiced
@@ -3833,7 +3818,7 @@ msgstr "オーダ数量"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__qty_to_deliver
 msgid "Qty To Deliver"
-msgstr "配送予定数量"
+msgstr "未納品数量"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__qty_to_invoice
@@ -3858,7 +3843,7 @@ msgstr "数量"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__qty_to_invoice
 msgid "Quantity To Invoice"
-msgstr "請求する数量"
+msgstr "未請求数量"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
@@ -3914,7 +3899,7 @@ msgstr "見積が閲覧されました"
 #. module: sale
 #: model:mail.message.subtype,description:sale.mt_order_confirmed
 msgid "Quotation confirmed"
-msgstr "見積確認済"
+msgstr "見積が確定されました"
 
 #. module: sale
 #: model:mail.message.subtype,description:sale.mt_order_sent
@@ -3963,7 +3948,7 @@ msgstr "見積・受注"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_home_sale
 msgid "Quotations to review"
-msgstr "要確認見積書"
+msgstr "要確認の見積"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__rating_ids
@@ -4679,6 +4664,11 @@ msgid ""
 msgstr "オンライン支払フォームを通じて行われた取引のうち、 '完了' または '認証済' の状態にあり、このオーダにリンクされている取引の合計。"
 
 #. module: sale
+#: model:ir.model,name:sale.model_ir_config_parameter
+msgid "System Parameter"
+msgstr "システムパラメタ"
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__tag_ids
 #: model:ir.ui.menu,name:sale.menu_tag_config
 msgid "Tags"
@@ -4750,7 +4740,7 @@ msgid ""
 "Team %(team_name)s has %(sale_order_count)s active sale orders. Consider "
 "cancelling them or archiving the team instead."
 msgstr ""
-"%(team_name)sチームには %(sale_order_count)sの有効な販売オーダがあります。 "
+"%(team_name)sチームには %(sale_order_count)sのアクティブな販売オーダがあります。 "
 "それらを取消するか、代わりにチームをアーカイブすることを検討して下さい。"
 
 #. module: sale

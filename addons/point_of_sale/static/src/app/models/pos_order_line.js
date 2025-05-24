@@ -52,7 +52,8 @@ export class PosOrderline extends Base {
 
             if (product_packaging_by_barcode[code.code]) {
                 this.setQuantity(
-                    uom_by_id[product_packaging_by_barcode[code.code].uom_id.id].factor
+                    uom_by_id[product_packaging_by_barcode[code.code].uom_id.id].factor /
+                        this.product_id.product_tmpl_id.uom_id.factor
                 );
             }
         }
@@ -327,7 +328,10 @@ export class PosOrderline extends Base {
             this.isPosGroupable() &&
             // don't merge discounted orderlines
             this.getDiscount() === 0 &&
-            floatIsZero(price - order_line_price - orderline.getPriceExtra(), this.currency) &&
+            floatIsZero(
+                price - order_line_price - orderline.getPriceExtra(),
+                this.currency.decimal_places
+            ) &&
             !this.isLotTracked() &&
             this.full_product_name === orderline.full_product_name &&
             isSameCustomerNote &&
@@ -730,6 +734,12 @@ export class PosOrderline extends Base {
     }
     isSelected() {
         return this.order_id?.uiState?.selected_orderline_uuid === this.uuid;
+    }
+    get canBeRemoved() {
+        const decimals = this.models["decimal.precision"].find(
+            (dp) => dp.name === "Product Unit"
+        ).digits;
+        return floatIsZero(this.qty, decimals);
     }
     setDirty(processedLines = new Set()) {
         if (processedLines.has(this)) {

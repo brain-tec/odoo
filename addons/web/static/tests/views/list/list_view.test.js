@@ -577,7 +577,7 @@ test(`editable list with open_form_view`, async () => {
 
 test.tags("desktop");
 test(`editable list with open_form_view in debug`, async () => {
-    serverState.debug = true;
+    serverState.debug = "1";
     await mountView({
         resModel: "foo",
         type: "list",
@@ -606,7 +606,7 @@ test(`editable list without open_form_view in debug`, async () => {
             super.setItem(...arguments);
         },
     });
-    serverState.debug = true;
+    serverState.debug = "1";
     await mountView({
         resModel: "foo",
         type: "list",
@@ -646,7 +646,7 @@ test(`editable list without open_form_view in debug`, async () => {
 });
 
 test(`non-editable list in debug`, async () => {
-    serverState.debug = true;
+    serverState.debug = "1";
     await mountView({
         resModel: "foo",
         type: "list",
@@ -818,7 +818,7 @@ test(`list view with adjacent buttons and optional field`, async () => {
     expect(`.o_data_row:eq(0) td.o_list_button`).toHaveCount(2);
 });
 
-test(`wait the view reload before closing the dialog`, async () => {
+test(`wait the view reload before closing the dialog (save)`, async () => {
     let searchReadDef;
     onRpc("web_search_read", () => searchReadDef);
     Foo._views = {
@@ -857,6 +857,47 @@ test(`wait the view reload before closing the dialog`, async () => {
     await animationFrame();
     expect(`.o_dialog`).toHaveCount(0);
     expect(`tbody .o_list_char:eq(0)`).toHaveText("plop");
+});
+
+test(`wait the view reload before closing the dialog (cancel)`, async () => {
+    let searchReadDef;
+    onRpc("web_search_read", () => searchReadDef);
+    Foo._views = {
+        form: `<form><field name="foo"/></form>`,
+    };
+    onRpc("/web/dataset/call_button/foo/a", () => ({
+        type: "ir.actions.act_window",
+        name: "Archive Action",
+        res_model: "foo",
+        res_id: 1,
+        view_mode: "form",
+        target: "new",
+        views: [[false, "form"]],
+    }));
+
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list editable="bottom">
+                <field name="foo"/>
+                <button name="a" type="object" icon="fa-car"/>
+            </list>
+        `,
+    });
+    searchReadDef = new Deferred();
+    await contains(`tbody .o_list_button button:eq(0)`).click();
+    expect(`.o_dialog`).toHaveCount(1);
+    await contains(`.o_form_renderer .o_field_widget[name='foo'] input`).edit("plop");
+    await contains(`.o_dialog .o_form_button_cancel`).click();
+
+    await animationFrame(); // not needed but to be sure that the dialog is not closed.
+    expect(`.o_dialog`).toHaveCount(1);
+    searchReadDef.resolve();
+
+    await animationFrame();
+    expect(`.o_dialog`).toHaveCount(0);
+    expect(`tbody .o_list_char:eq(0)`).toHaveText("yop");
 });
 
 test(`list view with adjacent buttons with invisible modifier`, async () => {
@@ -6686,8 +6727,6 @@ test(`can display a list with a many2many field`, async () => {
 
 test.tags("desktop");
 test(`display a tooltip on a field`, async () => {
-    serverState.debug = false;
-
     await mountView({
         resModel: "foo",
         type: "list",
@@ -6705,7 +6744,7 @@ test(`display a tooltip on a field`, async () => {
     expect(`.o-tooltip`).toHaveCount(1);
     expect(`.o-tooltip`).toHaveText("Foo");
 
-    serverState.debug = true;
+    serverState.debug = "1";
 
     // it is necessary to rerender the list so tooltips can be properly created
     await validateSearch(); // reload view
@@ -6722,7 +6761,6 @@ test(`display a tooltip on a field`, async () => {
 
 test.tags("desktop");
 test("field (with help) tooltip in non debug mode", async function () {
-    serverState.debug = false;
     Foo._fields.foo.help = "This is a foo field";
     await mountView({
         type: "list",

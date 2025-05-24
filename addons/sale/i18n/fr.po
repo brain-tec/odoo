@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:37+0000\n"
+"POT-Creation-Date: 2025-05-07 20:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Manon Rondou, 2025\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
@@ -132,10 +132,8 @@ msgid ""
 "        <br/>\n"
 "        Do not hesitate to contact us if you have any questions.\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -158,9 +156,9 @@ msgstr ""
 "                Votre commande sera confirmée dès confirmation du paiement.\n"
 "            </t>\n"
 "            <t t-else=\"\">\n"
-"                Après confirmation, il restera\n"
+"                Une fois le paiement confirmé, il restera\n"
 "                <span style=\"font-weight:bold;\" t-out=\"format_amount(object.amount_total - object.amount_paid - transaction_sudo.amount, object.currency_id) or ''\">10,00 €</span>\n"
-"                à payer.\n"
+"                à régler.\n"
 "            </t>\n"
 "        </t>\n"
 "        <t t-else=\"\">\n"
@@ -176,10 +174,8 @@ msgstr ""
 "        <br/>\n"
 "        N'hésitez pas à nous contacter si vous avez des questions.\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -224,10 +220,8 @@ msgid ""
 "        <br/>\n"
 "        Do not hesitate to contact us if you have any questions.\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
 "    </p>\n"
 "<t t-if=\"hasattr(object, 'website_id') and object.website_id\">\n"
 "    <div style=\"margin: 0px; padding: 0px;\">\n"
@@ -444,10 +438,8 @@ msgstr ""
 "        <br/>\n"
 "        N'hésitez pas à nous contacter si vous avez des questions.\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
 "    </p>\n"
 "<t t-if=\"hasattr(object, 'website_id') and object.website_id\">\n"
 "    <div style=\"margin: 0px; padding: 0px;\">\n"
@@ -661,10 +653,8 @@ msgid ""
 "        <br/>\n"
 "        Do not hesitate to contact us if you have any questions.\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -678,7 +668,7 @@ msgstr ""
 "        <t t-if=\"object.origin\">\n"
 "            (avec la référence : <t t-out=\"object.origin or ''\">S00052</t> )\n"
 "        </t>\n"
-"        d'un montant de <span style=\"font-weight: bold;\" t-out=\"format_amount(object.amount_total, object.currency_id) or ''\">10 €</span> attend votre validation.\n"
+"        d'un montant de <span style=\"font-weight: bold;\" t-out=\"format_amount(object.amount_total, object.currency_id) or ''\">10,00 €</span> est en attente de validation.\n"
 "        <br/>\n"
 "        <t t-set=\"documents\" t-value=\"object._get_product_documents()\"/>\n"
 "        <t t-if=\"documents\">\n"
@@ -700,10 +690,8 @@ msgstr ""
 "        <br/>\n"
 "        N'hésitez pas à nous contacter si vous avez des questions.\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -724,10 +712,8 @@ msgid ""
 "        <br/><br/>\n"
 "        Do not hesitate to contact us if you have any questions.\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -745,10 +731,8 @@ msgstr ""
 "        <br/><br/>\n"
 "        N'hésitez pas à nous contacter si vous avez des questions.\n"
 "        <t t-if=\"not is_html_empty(object.user_id.signature)\" data-o-mail-quote-container=\"1\">\n"
-"            <br/><br/>\n"
 "            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.user_id.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></div>\n"
 "        </t>\n"
-"        <br/><br/>\n"
 "    </p>\n"
 "</div>\n"
 "            "
@@ -1091,7 +1075,7 @@ msgid ""
 msgstr ""
 "Selon la confirmation du produit, la quantité livrée peut être calculée automatiquement par mécanisme :\n"
 " - Manuel : la quantité est définie manuellement sur la ligne\n"
-"- Analytique à partir des notes de frais : la quantité est la somme des notes de frais comptabilisées\n"
+"- Analytique à partir des dépenses : la quantité est la somme des dépenses comptabilisées\n"
 "- Feuille de temps : la quantité est la somme des heures enregistrées sur les tâches liées à cette commande\n"
 "- Mouvements de stock : la quantité provient des transferts confirmés\n"
 
@@ -1298,7 +1282,7 @@ msgstr "Répartition Analytique"
 #. module: sale
 #: model:ir.model.fields.selection,name:sale.selection__sale_order_line__qty_delivered_method__analytic
 msgid "Analytic From Expenses"
-msgstr "Analytique des notes de frais"
+msgstr "Analytique des dépenses"
 
 #. module: sale
 #: model:ir.model,name:sale.model_account_analytic_line
@@ -2218,6 +2202,7 @@ msgstr "Afficher l'avertissement concernant la facture brouillon"
 #: model:ir.model.fields,field_description:sale.field_account_move_line__display_name
 #: model:ir.model.fields,field_description:sale.field_base_document_layout__display_name
 #: model:ir.model.fields,field_description:sale.field_crm_team__display_name
+#: model:ir.model.fields,field_description:sale.field_ir_config_parameter__display_name
 #: model:ir.model.fields,field_description:sale.field_payment_link_wizard__display_name
 #: model:ir.model.fields,field_description:sale.field_payment_provider__display_name
 #: model:ir.model.fields,field_description:sale.field_payment_transaction__display_name
@@ -2416,7 +2401,7 @@ msgstr "Prévu :"
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.product_template_form_view
 msgid "Expense"
-msgstr "Note de frais"
+msgstr "Dépense"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__validity_date
@@ -2642,6 +2627,7 @@ msgstr "Masqué"
 #: model:ir.model.fields,field_description:sale.field_account_move_line__id
 #: model:ir.model.fields,field_description:sale.field_base_document_layout__id
 #: model:ir.model.fields,field_description:sale.field_crm_team__id
+#: model:ir.model.fields,field_description:sale.field_ir_config_parameter__id
 #: model:ir.model.fields,field_description:sale.field_payment_link_wizard__id
 #: model:ir.model.fields,field_description:sale.field_payment_provider__id
 #: model:ir.model.fields,field_description:sale.field_payment_transaction__id
@@ -2954,7 +2940,7 @@ msgstr "Est un acompte"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__is_expense
 msgid "Is expense"
-msgstr "Est une note de frais"
+msgstr "Est une dépense"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_line__is_configurable_product
@@ -2966,7 +2952,7 @@ msgstr "Ce produit est-il configurable ?"
 msgid ""
 "Is true if the sales order line comes from an expense or a vendor bills"
 msgstr ""
-"Est vrai si la ligne de commande vient d'une note de frais ou d'une facture "
+"Est vrai si la ligne de commande vient d'une dépense ou d'une facture "
 "fournisseur"
 
 #. module: sale
@@ -4807,6 +4793,11 @@ msgstr ""
 "cette commande."
 
 #. module: sale
+#: model:ir.model,name:sale.model_ir_config_parameter
+msgid "System Parameter"
+msgstr "Paramètres système"
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__tag_ids
 #: model:ir.ui.menu,name:sale.menu_tag_config
 msgid "Tags"
@@ -5811,7 +5802,7 @@ msgstr ""
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 msgid "units"
-msgstr "unités"
+msgstr "unité(s)"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
@@ -5836,8 +5827,8 @@ msgid ""
 "{{ object.company_id.name }} {{ object.state in ('draft', 'sent') and "
 "'Proforma' or 'Order'}} (Ref {{ object.name or 'n/a' }})"
 msgstr ""
-"{{ object.company_id.name }} {{ object.state in ('draft', 'sent') and "
-"'Proforma' or 'Order'}} (Ref {{ object.name or 'n/a' }})"
+"{{ object.company_id.name }} {{ object.state in ('draft', 'sent') and 'Pro "
+"forma' or 'Commande'}} (Ref {{ object.name or 'n/a' }})"
 
 #. module: sale
 #: model:mail.template,subject:sale.email_template_edi_sale
@@ -5846,4 +5837,4 @@ msgid ""
 "'Quotation' or 'Order' }} (Ref {{ object.name or 'n/a' }})"
 msgstr ""
 "{{ object.company_id.name }} {{ object.state in ('draft', 'sent') and "
-"'Quotation' or 'Order' }} (Ref {{ object.name or 'n/a' }})"
+"'Devis' or 'Commande' }} (Ref {{ object.name or 'n/a' }})"

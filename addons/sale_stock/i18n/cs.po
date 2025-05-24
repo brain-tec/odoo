@@ -38,7 +38,7 @@ msgstr ""
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
 msgid "<i class=\"fa fa-fw fa-clock-o\"/>Preparation"
-msgstr ""
+msgstr "<i class=\"fa fa-fw fa-clock-o\"/>Příprava"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
@@ -749,7 +749,7 @@ msgstr "Tento produkt je doplňován na vyžádání."
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order_line__is_storable
 msgid "Track Inventory"
-msgstr "Sledovat Zboží"
+msgstr "Sledovat skladové zásoby"
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_stock_picking

@@ -164,7 +164,6 @@ registry.category("web_tour.tours").add("TicketScreenTour", {
 });
 
 registry.category("web_tour.tours").add("FiscalPositionNoTaxRefund", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -189,7 +188,6 @@ registry.category("web_tour.tours").add("FiscalPositionNoTaxRefund", {
 });
 
 registry.category("web_tour.tours").add("LotRefundTour", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -214,7 +212,6 @@ registry.category("web_tour.tours").add("LotRefundTour", {
 });
 
 registry.category("web_tour.tours").add("RefundFewQuantities", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -243,7 +240,6 @@ registry.category("web_tour.tours").add("RefundFewQuantities", {
 });
 
 registry.category("web_tour.tours").add("LotTour", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -289,4 +285,47 @@ registry.category("web_tour.tours").add("LotTour", {
                 trigger: ".info-list:contains('Lot Number 1001')",
             }),
         ].flat(),
+});
+
+registry.category("web_tour.tours").add("OrderTimeTour", {
+    steps: () => {
+        const validateDateStep = {
+            content: "Validate order date is Today",
+            trigger: ".orders .order-row:first .fw-bolder",
+            run: function ({ anchor: displayedDateElement }) {
+                if (displayedDateElement.textContent.trim() !== "Today") {
+                    throw new Error("Order date does not match local timezone");
+                }
+            },
+        };
+
+        const validateTimeStep = {
+            content: "Validate order time matches local timezone",
+            trigger: ".orders .order-row:first .small.text-muted",
+            run: function ({ anchor: displayedTimeElement }) {
+                const orderDateUTC = window.posmodel.getOrder().date_order;
+                const orderDateTime = luxon.DateTime.fromSQL(orderDateUTC, {
+                    zone: "UTC",
+                }).toLocal();
+                if (orderDateTime.toFormat("HH:mm") !== displayedTimeElement.textContent.trim()) {
+                    throw new Error("Order time does not match local timezone");
+                }
+            },
+        };
+
+        return [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Desk Pad"),
+            ProductScreen.setTimeZone("Pacific/Honolulu"),
+            Chrome.clickOrders(),
+            validateDateStep,
+            validateTimeStep,
+            ProductScreen.setTimeZone("Europe/Brussels"),
+            Chrome.clickRegister(),
+            Chrome.clickOrders(),
+            validateDateStep,
+            validateTimeStep,
+        ].flat();
+    },
 });
