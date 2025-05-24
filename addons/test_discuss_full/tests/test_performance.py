@@ -72,8 +72,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #           - search ir_attachment (_compute_avatar_128)
     #           - count discuss_channel_member (member_count)
     #           - _compute_message_needaction
-    #           - fetch res_groups (authorizedGroupFullName)
-    #           - fetch ir_module_category (authorizedGroupFullName)
+    #           - fetch res_groups (group_public_id)
+    #           - fetch ir_module_category (group_public_id)
     #           - search group_ids (group_based_subscription)
     _query_count_init_messaging = 35
     # Queries for _query_count_discuss_channels (in order):
@@ -116,8 +116,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - search ir_attachment (_compute_avatar_128)
     #       - count discuss_channel_member (member_count)
     #       - _compute_message_needaction
-    #       - fetch res_groups (authorizedGroupFullName)
-    #       - fetch ir_module_category (authorizedGroupFullName)
+    #       - fetch res_groups (group_public_id)
+    #       - fetch ir_module_category (group_public_id)
     #       - search group_ids (group_based_subscription)
     #       - _compute_message_unread
     #       - fetch im_livechat_channel
@@ -130,8 +130,9 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - search mail_link_preview
     #       - search mail_message_reaction
     #       - search mail_message_res_partner_rel
-    #       - search mail_message_subtype
+    #       - search mail_message_subtype (_filter_unimportant_notifications)
     #       - search mail_notification
+    #       - search mail_message_subtype (mail.message@_to_store)
     #       - search rating_rating
     #       - fetch mail_notification
     #       - search discuss_call_history
@@ -142,7 +143,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - search user (_author_to_store)
     #       - fetch user (_author_to_store)
     #       - _compute_rating_stats
-    _query_count_discuss_channels = 59
+    _query_count_discuss_channels = 60
 
     def setUp(self):
         super().setUp()
@@ -418,7 +419,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "hasMessageTranslationFeature": False,
                 "has_access_create_lead": False,
                 "internalUserGroupId": self.env.ref("base.group_user").id,
-                "mt_comment_id": xmlid_to_res_id("mail.mt_comment"),
+                "mt_comment": self.env.ref("mail.mt_comment").id,
+                "mt_note": self.env.ref("mail.mt_note").id,
                 "odoobot": {"id": self.user_root.partner_id.id, "type": "partner"},
                 "self": {"id": self.users[0].partner_id.id, "type": "partner"},
                 "settings": {
@@ -459,6 +461,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             "discuss.channel.rtc.session": [
                 self._expected_result_for_rtc_session(self.channel_channel_group_1, self.users[2]),
             ],
+            "res.groups": [{'full_name': 'Role / Member', 'id': self.env.ref("base.group_user").id}],
             "res.partner": self._filter_partners_fields(
                 self._expected_result_for_persona(self.users[0]),
                 self._expected_result_for_persona(self.users[14]),
@@ -550,6 +553,10 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             "mail.notification": [
                 self._expected_result_for_notification(self.channel_channel_public_1),
             ],
+            "mail.message.subtype": [
+                {"description": False, "id": self.env.ref("mail.mt_note").id},
+                {"description": False, "id": self.env.ref("mail.mt_comment").id},
+            ],
             "mail.thread": self._filter_threads_fields(
                 self._expected_result_for_thread(self.channel_general),
                 self._expected_result_for_thread(self.channel_channel_public_1),
@@ -567,6 +574,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 {"code": "IN", "id": self.env.ref("base.in").id, "name": "India"},
                 {"code": "BE", "id": self.env.ref("base.be").id, "name": "Belgium"},
             ],
+            "res.groups": [{'full_name': 'Role / Member', 'id': self.env.ref("base.group_user").id}],
             "res.partner": self._filter_partners_fields(
                 self._expected_result_for_persona(
                     self.users[0],
@@ -593,7 +601,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_general:
             return {
                 "anonymous_name": False,
-                "authorizedGroupFullName": self.group_user.full_name,
                 "avatar_cache_key": channel.avatar_cache_key,
                 "channel_type": "channel",
                 "country_id": False,
@@ -605,6 +612,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
                 "group_based_subscription": True,
+                "group_public_id": self.env.ref("base.group_user").id,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
                 "is_editable": True,
@@ -625,7 +633,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_channel_public_1:
             return {
                 "anonymous_name": False,
-                "authorizedGroupFullName": False,
                 "avatar_cache_key": channel.avatar_cache_key,
                 "channel_type": "channel",
                 "country_id": False,
@@ -637,6 +644,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
                 "group_based_subscription": False,
+                "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
                 "is_editable": True,
@@ -657,7 +665,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_channel_public_2:
             return {
                 "anonymous_name": False,
-                "authorizedGroupFullName": False,
                 "avatar_cache_key": channel.avatar_cache_key,
                 "channel_type": "channel",
                 "country_id": False,
@@ -669,6 +676,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
                 "group_based_subscription": False,
+                "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
                 "is_editable": True,
@@ -689,7 +697,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_channel_group_1:
             return {
                 "anonymous_name": False,
-                "authorizedGroupFullName": self.group_user.full_name,
                 "avatar_cache_key": channel.avatar_cache_key,
                 "channel_type": "channel",
                 "country_id": False,
@@ -701,6 +708,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
                 "group_based_subscription": False,
+                "group_public_id": self.env.ref("base.group_user").id,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", [member_0.id]]],
                 "is_editable": True,
@@ -724,7 +732,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_channel_group_2:
             return {
                 "anonymous_name": False,
-                "authorizedGroupFullName": self.group_user.full_name,
                 "avatar_cache_key": channel.avatar_cache_key,
                 "channel_type": "channel",
                 "country_id": False,
@@ -736,6 +743,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
                 "group_based_subscription": False,
+                "group_public_id": self.env.ref("base.group_user").id,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
                 "is_editable": True,
@@ -756,7 +764,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_group_1:
             return {
                 "anonymous_name": False,
-                "authorizedGroupFullName": False,
                 "avatar_cache_key": channel.avatar_cache_key,
                 "channel_type": "group",
                 "country_id": False,
@@ -768,6 +775,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
                 "group_based_subscription": False,
+                "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
                 "is_editable": True,
@@ -788,7 +796,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_chat_1:
             return {
                 "anonymous_name": False,
-                "authorizedGroupFullName": False,
                 "avatar_cache_key": channel.avatar_cache_key,
                 "channel_type": "chat",
                 "country_id": False,
@@ -800,6 +807,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
                 "group_based_subscription": False,
+                "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
                 "is_editable": True,
@@ -820,7 +828,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_chat_2:
             return {
                 "anonymous_name": False,
-                "authorizedGroupFullName": False,
                 "avatar_cache_key": channel.avatar_cache_key,
                 "channel_type": "chat",
                 "country_id": False,
@@ -832,6 +839,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
                 "group_based_subscription": False,
+                "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
                 "is_editable": True,
@@ -852,7 +860,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_chat_3:
             return {
                 "anonymous_name": False,
-                "authorizedGroupFullName": False,
                 "avatar_cache_key": channel.avatar_cache_key,
                 "channel_type": "chat",
                 "country_id": False,
@@ -864,6 +871,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
                 "group_based_subscription": False,
+                "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
                 "is_editable": True,
@@ -884,7 +892,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_chat_4:
             return {
                 "anonymous_name": False,
-                "authorizedGroupFullName": False,
                 "avatar_cache_key": channel.avatar_cache_key,
                 "channel_type": "chat",
                 "country_id": False,
@@ -896,6 +903,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
                 "group_based_subscription": False,
+                "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
                 "is_editable": True,
@@ -916,7 +924,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_livechat_1:
             return {
                 "anonymous_name": False,
-                "authorizedGroupFullName": False,
                 "avatar_cache_key": channel.avatar_cache_key,
                 "channel_type": "livechat",
                 "country_id": self.env.ref("base.in").id,
@@ -928,6 +935,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
                 "group_based_subscription": False,
+                "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
                 "is_editable": True,
@@ -948,7 +956,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_livechat_2:
             return {
                 "anonymous_name": "anon 2",
-                "authorizedGroupFullName": False,
                 "avatar_cache_key": channel.avatar_cache_key,
                 "channel_type": "livechat",
                 "country_id": self.env.ref("base.be").id,
@@ -960,6 +967,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
                 "group_based_subscription": False,
+                "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
                 "is_editable": True,
@@ -1281,8 +1289,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "id": last_message.id,
                 "incoming_email_cc": False,
                 "incoming_email_to": False,
-                "is_discussion": False,
-                "is_note": True,
                 "message_link_preview_ids": [],
                 "message_type": "comment",
                 "model": "discuss.channel",
@@ -1302,7 +1308,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "scheduledDatetime": False,
                 "starred": False,
                 "subject": False,
-                "subtype_description": False,
+                "subtype_id": self.env.ref("mail.mt_note").id,
                 "thread": {"id": channel.id, "model": "discuss.channel"},
                 "trackingValues": [],
                 "write_date": write_date,
@@ -1319,8 +1325,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "id": last_message.id,
                 "incoming_email_cc": False,
                 "incoming_email_to": False,
-                "is_discussion": False,
-                "is_note": True,
                 "message_link_preview_ids": [],
                 "message_type": "comment",
                 "model": "discuss.channel",
@@ -1341,7 +1345,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "scheduledDatetime": False,
                 "starred": True,
                 "subject": False,
-                "subtype_description": False,
+                "subtype_id": self.env.ref("mail.mt_note").id,
                 "trackingValues": [],
                 "write_date": write_date,
             }
@@ -1360,8 +1364,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "id": last_message.id,
                 "incoming_email_cc": False,
                 "incoming_email_to": False,
-                "is_discussion": True,
-                "is_note": False,
                 "message_link_preview_ids": [],
                 "message_type": "notification",
                 "model": "discuss.channel",
@@ -1378,7 +1380,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "scheduledDatetime": False,
                 "starred": False,
                 "subject": False,
-                "subtype_description": False,
+                "subtype_id": self.env.ref("mail.mt_comment").id,
                 "trackingValues": [],
                 "write_date": write_date,
             }
@@ -1398,8 +1400,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "id": last_message.id,
                 "incoming_email_cc": False,
                 "incoming_email_to": False,
-                "is_discussion": False,
-                "is_note": True,
                 "message_link_preview_ids": [],
                 "message_type": "notification",
                 "model": "discuss.channel",
@@ -1416,7 +1416,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "scheduledDatetime": False,
                 "starred": False,
                 "subject": False,
-                "subtype_description": False,
+                "subtype_id": self.env.ref("mail.mt_note").id,
                 "trackingValues": [],
                 "write_date": write_date,
             }
@@ -1435,8 +1435,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "id": last_message.id,
                 "incoming_email_cc": False,
                 "incoming_email_to": False,
-                "is_discussion": True,
-                "is_note": False,
                 "message_link_preview_ids": [],
                 "message_type": "notification",
                 "model": "discuss.channel",
@@ -1453,7 +1451,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "scheduledDatetime": False,
                 "starred": False,
                 "subject": False,
-                "subtype_description": False,
+                "subtype_id": self.env.ref("mail.mt_comment").id,
                 "trackingValues": [],
                 "write_date": write_date,
             }
@@ -1468,8 +1466,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "id": last_message.id,
                 "incoming_email_cc": False,
                 "incoming_email_to": False,
-                "is_discussion": False,
-                "is_note": True,
                 "message_link_preview_ids": [],
                 "message_type": "notification",
                 "model": "discuss.channel",
@@ -1486,7 +1482,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "scheduledDatetime": False,
                 "starred": False,
                 "subject": False,
-                "subtype_description": False,
+                "subtype_id": self.env.ref("mail.mt_note").id,
                 "trackingValues": [],
                 "write_date": write_date,
             }
@@ -1502,8 +1498,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "id": last_message.id,
                 "incoming_email_cc": False,
                 "incoming_email_to": False,
-                "is_discussion": False,
-                "is_note": True,
                 "message_link_preview_ids": [],
                 "message_type": "comment",
                 "model": "discuss.channel",
@@ -1520,7 +1514,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "scheduledDatetime": False,
                 "starred": False,
                 "subject": False,
-                "subtype_description": False,
+                "subtype_id": self.env.ref("mail.mt_note").id,
                 "trackingValues": [],
                 "write_date": write_date,
             }
@@ -1607,7 +1601,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "mail_message_id": last_message.id,
                 "notification_status": "sent",
                 "notification_type": "inbox",
-                "persona": {"id": self.users[0].partner_id.id, "type": "partner"},
+                "res_partner_id": {"id": self.users[0].partner_id.id, "type": "partner"},
             }
         return {}
 

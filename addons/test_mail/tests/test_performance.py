@@ -1497,8 +1497,6 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "id": message.id,
                                     "incoming_email_cc": False,
                                     "incoming_email_to": False,
-                                    "is_discussion": True,
-                                    "is_note": False,
                                     "message_link_preview_ids": [],
                                     "message_type": "comment",
                                     "model": "mail.test.simple",
@@ -1513,12 +1511,15 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "scheduledDatetime": None,
                                     "starred": False,
                                     "subject": False,
-                                    "subtype_description": False,
+                                    "subtype_id": self.env.ref("mail.mt_comment").id,
                                     "thread": {"id": record.id, "model": "mail.test.simple"},
                                     "trackingValues": [],
                                     "write_date": fields.Datetime.to_string(message.write_date),
                                 },
                             ),
+                            "mail.message.subtype": [
+                                {"description": False, "id": self.env.ref("mail.mt_comment").id},
+                            ],
                             "mail.notification": [
                                 {
                                     "failure_type": False,
@@ -1526,7 +1527,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "mail_message_id": message.id,
                                     "notification_status": "sent",
                                     "notification_type": "inbox",
-                                    "persona": {
+                                    "res_partner_id": {
                                         "id": self.user_test_inbox.partner_id.id,
                                         "type": "partner",
                                     },
@@ -1537,7 +1538,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "mail_message_id": message.id,
                                     "notification_status": "sent",
                                     "notification_type": "inbox",
-                                    "persona": {
+                                    "res_partner_id": {
                                         "id": self.user_test_inbox_2.partner_id.id,
                                         "type": "partner",
                                     },
@@ -1610,8 +1611,6 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "id": message.id,
                                     "incoming_email_cc": False,
                                     "incoming_email_to": False,
-                                    "is_discussion": True,
-                                    "is_note": False,
                                     "message_link_preview_ids": [],
                                     "message_type": "comment",
                                     "model": "mail.test.simple",
@@ -1626,12 +1625,15 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "scheduledDatetime": None,
                                     "starred": False,
                                     "subject": False,
-                                    "subtype_description": False,
+                                    "subtype_id": self.env.ref("mail.mt_comment").id,
                                     "thread": {"id": record.id, "model": "mail.test.simple"},
                                     "trackingValues": [],
                                     "write_date": fields.Datetime.to_string(message.write_date),
                                 },
                             ),
+                            "mail.message.subtype": [
+                                {"description": False, "id": self.env.ref("mail.mt_comment").id},
+                            ],
                             "mail.notification": [
                                 {
                                     "failure_type": False,
@@ -1639,7 +1641,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "mail_message_id": message.id,
                                     "notification_status": "sent",
                                     "notification_type": "inbox",
-                                    "persona": {
+                                    "res_partner_id": {
                                         "id": self.user_test_inbox.partner_id.id,
                                         "type": "partner",
                                     },
@@ -1650,7 +1652,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "mail_message_id": message.id,
                                     "notification_status": "sent",
                                     "notification_type": "inbox",
-                                    "persona": {
+                                    "res_partner_id": {
                                         "id": self.user_test_inbox_2.partner_id.id,
                                         "type": "partner",
                                     },

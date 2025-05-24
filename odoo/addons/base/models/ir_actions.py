@@ -613,9 +613,11 @@ class IrActionsServer(models.Model):
                              "`42` or `My custom name` or the selected record.")
     evaluation_type = fields.Selection([
         ('value', 'Update'),
+        ('sequence', 'Sequence'),
         ('equation', 'Compute')
     ], 'Value Type', default='value', change_default=True)
     html_value = fields.Html()
+    sequence_id = fields.Many2one('ir.sequence', string='Sequence to use')
     resource_ref = fields.Reference(
         string='Record', selection='_selection_target_model', inverse='_set_resource_ref')
     selection_value = fields.Many2one('ir.model.fields.selection', string="Custom Value", ondelete='cascade',
@@ -624,6 +626,7 @@ class IrActionsServer(models.Model):
     value_field_to_show = fields.Selection([
         ('value', 'value'),
         ('html_value', 'html_value'),
+        ('sequence_id', 'sequence_id'),
         ('resource_ref', 'reference'),
         ('update_boolean_value', 'update_boolean_value'),
         ('selection_value', 'selection_value'),
@@ -657,6 +660,8 @@ class IrActionsServer(models.Model):
             'child_ids.model_id',
             'child_ids.group_ids',
             'update_path',
+            'update_field_type',
+            'evaluation_type',
             'webhook_field_ids'
         ]
 
@@ -679,6 +684,9 @@ class IrActionsServer(models.Model):
 
         if (relation_chain := self._get_relation_chain("update_path")) and relation_chain[0] and isinstance(relation_chain[0][-1], fields.Json):
             warnings.append(_("I'm sorry to say that JSON fields (such as '%s') are currently not supported.", relation_chain[0][-1].string))
+
+        if self.state == 'object_write' and self.evaluation_type == 'sequence' and self.update_field_type and self.update_field_type not in ('char', 'text'):
+            warnings.append(_("A sequence must only be used with character fields."))
 
         if self.state == 'webhook' and self.model_id:
             restricted_fields = []
@@ -719,38 +727,24 @@ class IrActionsServer(models.Model):
 
     def _generate_action_name(self):
         self.ensure_one()
-        match self.state:
-            case 'object_write':
-                _field_chain, field_chain_str = self._get_relation_chain("update_path")
-                if self.evaluation_type == 'value':
-                    return _("Update %(field_chain_str)s", field_chain_str=field_chain_str)
-                else:
-                    return _("Compute %(field_chain_str)s", field_chain_str=field_chain_str)
-            case "object_copy":
-                if self.crud_model_id and self.resource_ref:
-                    return _("Duplicate %(model)s: %(record)s",
-                             model=self.crud_model_id.name,
-                             record=self.env[self.crud_model_id.model].browse(self.resource_ref.id).display_name)
+        if self.state == 'object_create':
+            return _("Create %(model_name)s", model_name=self.crud_model_id.name)
+        if self.state == 'object_write':
+            return _("Update %(model_name)s", model_name=self.crud_model_id.name)
+        if self.state == "object_copy":
+            if not self.crud_model_id or not self.resource_ref:
                 return _("Duplicate ...")
-            case 'object_create':
-                return _(
-                    "Create %(model_name)s with name %(value)s",
-                    model_name=self.crud_model_id.name,
-                    value=self.value
-                )
-            case _:
-                return dict(self._fields["state"]._description_selection(self.env)).get(
-                    self.state, ""
-                )
+            record = self.env[self.crud_model_id.model].browse(self.resource_ref.id)
+            return _("Duplicate %(record)s", record=record.display_name)
+        return dict(self._fields["state"]._description_selection(self.env)).get(
+            self.state, ""
+        )
 
     def _name_depends(self):
         return [
             "state",
-            "update_field_id",
             "crud_model_id",
-            "value",
             "resource_ref",
-            "evaluation_type",
         ]
 
     @api.depends(lambda self: self._name_depends())
@@ -822,7 +816,12 @@ class IrActionsServer(models.Model):
 
     def _get_relation_chain(self, searched_field_name):
         self.ensure_one()
-        if not searched_field_name or not searched_field_name in self._fields or not self[searched_field_name]:
+        if (
+            not searched_field_name
+            or not searched_field_name in self._fields
+            or not self[searched_field_name]
+            or not self.model_id
+        ):
             return [], ""
         path = self[searched_field_name].split('.')
         if not path:
@@ -1122,7 +1121,9 @@ class IrActionsServer(models.Model):
     @api.depends('evaluation_type', 'update_field_id')
     def _compute_value_field_to_show(self):  # check if value_field_to_show can be removed and use ttype in xml view instead
         for action in self:
-            if action.update_field_id.ttype in ('one2many', 'many2one', 'many2many'):
+            if action.evaluation_type == 'sequence':
+                action.value_field_to_show = 'sequence_id'
+            elif action.update_field_id.ttype in ('one2many', 'many2one', 'many2many'):
                 action.value_field_to_show = 'resource_ref'
             elif action.update_field_id.ttype == 'selection':
                 action.value_field_to_show = 'selection_value'
@@ -1164,6 +1165,8 @@ class IrActionsServer(models.Model):
             expr = action.value
             if action.evaluation_type == 'equation':
                 expr = safe_eval(action.value, eval_context)
+            elif action.evaluation_type == 'sequence':
+                expr = action.sequence_id.next_by_id()
             elif action.update_field_id.ttype in ['one2many', 'many2many']:
                 operation = action.update_m2m_operation
                 if operation == 'add':
