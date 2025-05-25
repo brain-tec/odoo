@@ -491,26 +491,41 @@ Please change the quantity done or the rounding precision in your settings.""",
         prefetch_virtual_available = defaultdict(set)
         virtual_available_dict = {}
         for move in product_moves:
-            if move._is_consuming() and move.state == 'draft':
+            if move._is_consuming() and move.state == 'draft' or move.picking_code == 'internal':
                 prefetch_virtual_available[key_virtual_available(move)].add(move.product_id.id)
             elif move.picking_type_id.code == 'incoming':
                 prefetch_virtual_available[key_virtual_available(move, incoming=True)].add(move.product_id.id)
         for key_context, product_ids in prefetch_virtual_available.items():
-            read_res = self.env['product.product'].browse(product_ids).with_context(warehouse_id=key_context[0], to_date=key_context[1]).read(['virtual_available'])
-            virtual_available_dict[key_context] = {res['id']: res['virtual_available'] for res in read_res}
+            read_res = self.env['product.product'].browse(product_ids).with_context(warehouse_id=key_context[0], to_date=key_context[1]).read([
+                'virtual_available',
+                'free_qty',
+            ])
+            virtual_available_dict[key_context] = {res['id']: (res['virtual_available'], res['free_qty']) for res in read_res}
 
         for move in product_moves:
+            if key_virtual_available(move) in virtual_available_dict and move.product_id.id in virtual_available_dict[key_virtual_available(move)]:
+                free_qty = virtual_available_dict[key_virtual_available(move)][move.product_id.id][1]
+            else:
+                free_qty = 0.0
+            if move.state == 'assigned':
+                move.forecast_availability = move.product_uom._compute_quantity(
+                    move.quantity, move.product_id.uom_id, rounding_method='HALF-UP')
+                continue
+            elif move.state == 'draft' and float_compare(free_qty, move.product_qty, precision_rounding=move.product_id.uom_id.rounding) >= 0:
+                move.forecast_availability = free_qty
+                continue
             if move._is_consuming():
-                if move.state == 'assigned':
-                    move.forecast_availability = move.product_uom._compute_quantity(
-                        move.quantity, move.product_id.uom_id, rounding_method='HALF-UP')
-                elif move.state == 'draft':
+                if move.state == 'draft':
                     # for move _is_consuming and in draft -> the forecast_availability > 0 if in stock
-                    move.forecast_availability = virtual_available_dict[key_virtual_available(move)][move.product_id.id] - move.product_qty
+                    move.forecast_availability = virtual_available_dict[key_virtual_available(move)][move.product_id.id][0] - move.product_qty
                 elif move.state in ('waiting', 'confirmed', 'partially_available'):
                     outgoing_unreserved_moves_per_warehouse[move.location_id.warehouse_id].add(move.id)
+            elif move.picking_type_id.code == 'internal':
+                if float_compare(free_qty, move.product_qty, precision_rounding=move.product_id.uom_id.rounding) >= 0:
+                    move.forecast_availability = free_qty
+                    continue
             elif move.picking_type_id.code == 'incoming':
-                forecast_availability = virtual_available_dict[key_virtual_available(move, incoming=True)][move.product_id.id]
+                forecast_availability = virtual_available_dict[key_virtual_available(move, incoming=True)][move.product_id.id][0]
                 if move.state == 'draft':
                     forecast_availability += move.product_qty
                 move.forecast_availability = forecast_availability
@@ -1777,6 +1792,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         moves_mto = moves_to_assign.filtered(lambda m: m.move_orig_ids and not m._should_bypass_reservation())
         quants_cache = self.env['stock.quant']._get_quants_by_products_locations(moves_mto.product_id, moves_mto.location_id)
         for move in moves_to_assign:
+            move = move.with_company(move.company_id)
             rounding = roundings[move]
             if not force_qty:
                 missing_reserved_uom_quantity = move.product_uom_qty - reserved_availability[move]
