@@ -145,24 +145,9 @@ export class WelcomeScreen extends Component {
     }
 }
 
-export class IndustrySelectionAutoComplete extends AutoComplete {
-    static timeout = 400;
-
-    get dropdownOptions() {
-        return {
-            ...super.dropdownOptions,
-            position: "bottom-fit",
-        };
-    }
-
-    get ulDropdownClass() {
-        return `${super.ulDropdownClass} custom-ui-autocomplete shadow-lg border-0 o_configurator_show_fast o_configurator_industry_dropdown`;
-    }
-}
-
 export class DescriptionScreen extends Component {
     static template = 'website.Configurator.DescriptionScreen';
-    static components = { SkipButton, AutoComplete: IndustrySelectionAutoComplete };
+    static components = { SkipButton, AutoComplete };
     static props = {
         navigate: Function,
         skip: Function,
@@ -783,13 +768,7 @@ export class Configurator extends Component {
 
             await store.start(() => this.getInitialState());
             this.updateStorage(store);
-            if (store.redirect_url) {
-                // If redirect_url exists, it means configurator_done is already
-                // true, so we can skip the configurator flow.
-                this.clearStorage();
-                await this.action.doAction(store.redirect_url);
-            }
-            if (!store.industries) {
+            if (!store.industries || store.configurator_done) {
                 await this.skipConfigurator();
             }
         });
@@ -860,7 +839,7 @@ export class Configurator extends Component {
         const r = {
             industries: results.industries,
             logo: results.logo ? 'data:image/png;base64,' + results.logo : false,
-            redirect_url: results.redirect_url,
+            configurator_done: results.configurator_done,
         };
         r.industries = r.industries.map((industry, index) => ({
             ...industry,
