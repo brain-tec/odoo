@@ -521,6 +521,9 @@ class PosOrder(models.Model):
                         country=order.partner_id.country_id or self.env.company.country_id)
             if vals.get('has_deleted_line') is not None and self.has_deleted_line:
                 del vals['has_deleted_line']
+            allowed_vals = ['paid', 'done', 'invoiced']
+            if vals.get('state') and vals['state'] not in allowed_vals and order.state in allowed_vals:
+                raise UserError(_('This order has already been paid. You cannot set it back to draft or edit it.'))
 
         list_line = self._create_pm_change_log(vals)
         res = super().write(vals)
@@ -1099,7 +1102,7 @@ class PosOrder(models.Model):
         sync_token = randrange(100_000_000)  # Use to differentiate 2 parallels calls to this function in the logs
         _logger.info("PoS synchronisation #%d started for PoS orders references: %s", sync_token, [self._get_order_log_representation(order) for order in orders])
         order_ids = []
-        session_ids = set({order.get('session_id') for order in orders})
+
         for order in orders:
             order_log_name = self._get_order_log_representation(order)
             _logger.debug("PoS synchronisation #%d processing order %s order full data: %s", sync_token, order_log_name, pformat(order))
@@ -1665,6 +1668,8 @@ class PosOrderLine(models.Model):
             product = line.product_id
             if line._is_product_storable_fifo_avco() and stock_moves:
                 product_cost = product._compute_average_price(0, line.qty, line._get_stock_moves_to_consider(stock_moves, product))
+                if (product.cost_currency_id.is_zero(product_cost) and self.order_id.shipping_date and self.refunded_orderline_id):
+                    product_cost = self.refunded_orderline_id.total_cost / self.refunded_orderline_id.qty
             else:
                 product_cost = product.standard_price
             line.total_cost = line.qty * product.cost_currency_id._convert(
