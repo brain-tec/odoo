@@ -2618,8 +2618,6 @@ test(`Add filters and specific color`, async () => {
     });
     expect.verifySteps([
         "get_views (event)",
-        "has_access (event)",
-        "has_access (event)",
         "search_read (filter.partner) [partner_id]",
         "search_read (event) [display_name, start, stop, is_all_day, color, attendee_ids, type_id]",
     ]);
@@ -4905,7 +4903,13 @@ test(`calendar render properties in popover`, async () => {
 
     await clickEvent(1);
     const popover = getMockEnv().isSmall ? ".modal" : ".o_popover";
-    expect(queryAllTexts(`${popover} .o_field_properties .o_card_property_field`)).toEqual([
+    // Labels:
+    expect(queryAllTexts(`${popover} .o_calendar_property_field span.fw-bold`)).toEqual([
+        "My Char",
+        "My Selection",
+    ]);
+    // Values:
+    expect(queryAllTexts(`${popover} .o_calendar_property_field div.text-truncate`)).toEqual([
         "hello",
         "B",
     ]);
@@ -5603,12 +5607,11 @@ test("calendar: check context is correclty sent to fetch data", async () => {
 });
 
 test(`disable editing without write access rights`, async () => {
-    onRpc("has_access", ({ args }) => args[1] != "write");
     await mountView({
         resModel: "event",
         type: "calendar",
         arch: `
-            <calendar date_start="start" date_stop="stop">
+            <calendar date_start="start" date_stop="stop" edit="False">
                 <field name="name"/>
             </calendar>
         `,
