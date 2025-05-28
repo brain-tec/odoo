@@ -118,7 +118,7 @@ export class ProductTemplate extends Base {
         return (
             this.isConfigurable() &&
             this.attribute_line_ids.length > 0 &&
-            !this.attribute_line_ids.every((l) => l.attribute_id.create_variant === "always")
+            this.attribute_line_ids.some((l) => l.attribute_id.create_variant === "no_variant")
         );
     }
 
@@ -264,7 +264,6 @@ export class ProductTemplate extends Base {
         const fields = ["barcode"];
         const variantMatch = this.product_variant_ids.some(
             (variant) =>
-                (variant.default_code && variant.default_code.toLowerCase() == searchWord) ||
                 (variant.barcode && variant.barcode.toLowerCase() == searchWord) ||
                 variant.product_template_variant_value_ids.some((vv) =>
                     vv.name.toLowerCase().includes(searchWord)
