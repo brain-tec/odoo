@@ -227,7 +227,6 @@ export class PaymentScreen extends Component {
         if (newTip === undefined) {
             return;
         }
-
         await this.pos.setTip(parseFloat(newTip ?? ""));
         const pLine =
             this.selectedPaymentLine &&
@@ -244,8 +243,9 @@ export class PaymentScreen extends Component {
             );
             return;
         }
-
-        pLine.setAmount(pLine.getAmount() - (tip || 0) + parseFloat(newTip));
+        const tipDifference = parseFloat(newTip) - (tip || 0);
+        const tipToAdd = change <= 0 ? tipDifference : Math.max(0, tipDifference - change);
+        pLine.setAmount(pLine.getAmount() + tipToAdd);
     }
     async toggleShippingDatePicker() {
         if (!this.currentOrder.getShippingDate()) {
@@ -269,7 +269,10 @@ export class PaymentScreen extends Component {
         // If a paymentline with a payment terminal linked to
         // it is removed, the terminal should get a cancel
         // request.
-        if (["waiting", "waitingCard", "timeout"].includes(line.getPaymentStatus())) {
+        if (
+            ["waiting", "waitingCard", "timeout"].includes(line.getPaymentStatus()) &&
+            line.payment_method_id.payment_terminal
+        ) {
             line.setPaymentStatus("waitingCancel");
             line.payment_method_id.payment_terminal
                 .sendPaymentCancel(this.currentOrder, uuid)
