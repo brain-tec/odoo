@@ -8,8 +8,9 @@ import { MAIN_EMBEDDINGS } from "@html_editor/others/embedded_components/embeddi
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { setupEditor, testEditor } from "./_helpers/editor";
 import { unformat } from "./_helpers/format";
-import { insertText } from "./_helpers/user_actions";
+import { deleteBackward, deleteForward, insertText } from "./_helpers/user_actions";
 import { cleanHints } from "./_helpers/dispatch";
+import { getContent } from "./_helpers/selection";
 
 class CaptionPluginWithPredictableId extends CaptionPlugin {
     getCaptionId() {
@@ -52,7 +53,7 @@ const toggleCaption = async (captionText) => {
 };
 const addLinkToImage = async (url) => {
     await click("img");
-    await waitFor(".o-we-toolbar");
+    await waitFor(".o-we-toolbar button[name='link']");
     await click(".o-we-toolbar");
     await click("button[name='link']");
     if (url) {
@@ -114,7 +115,7 @@ test("add a caption to an image and focus it", async () => {
         contentAfterEdit: unformat(
             `<p><br></p>
             <figure contenteditable="false">
-                <img class="img-fluid test-image" src="${base64Img}" data-caption-id="${captionId}" data-caption="">
+                <img class="img-fluid test-image o_editable_media" src="${base64Img}" data-caption-id="${captionId}" data-caption="">
                 <figcaption ${getFigcaptionAttributes(captionId, "", true)}>
                     <input ${CAPTION_INPUT_ATTRIBUTES}>
                 </figcaption>
@@ -144,7 +145,7 @@ test("add a caption to an image surrounded by text and focus it", async () => {
         contentAfterEdit: unformat(
             `<p>ab</p>
             <figure contenteditable="false">
-                <img class="img-fluid test-image" src="${base64Img}" data-caption-id="${captionId}" data-caption="">
+                <img class="img-fluid test-image o_editable_media" src="${base64Img}" data-caption-id="${captionId}" data-caption="">
                 <figcaption ${getFigcaptionAttributes(captionId, "", true)}>
                     <input ${CAPTION_INPUT_ATTRIBUTES}>
                 </figcaption>
@@ -169,7 +170,7 @@ test("saving an image with a caption replaces the input with plain text", async 
             // Paragraphs get added to ensure we can write before/after the figure.
             `<p><br></p>
             <figure contenteditable="false">
-                <img class="img-fluid test-image" src="${base64Img}" data-caption-id="${captionId}" data-caption="${caption}">
+                <img class="img-fluid test-image o_editable_media" src="${base64Img}" data-caption-id="${captionId}" data-caption="${caption}">
                 <figcaption ${getFigcaptionAttributes(captionId, caption)}>
                     <input ${CAPTION_INPUT_ATTRIBUTES}>
                 </figcaption>
@@ -180,7 +181,7 @@ test("saving an image with a caption replaces the input with plain text", async 
         contentAfterEdit: unformat(
             `<p><br></p>
             <figure contenteditable="false">
-                <img class="img-fluid test-image" src="${base64Img}" data-caption-id="${captionId}" data-caption="${caption}">
+                <img class="img-fluid test-image o_editable_media" src="${base64Img}" data-caption-id="${captionId}" data-caption="${caption}">
                 <figcaption ${getFigcaptionAttributes(captionId, caption)}>
                     <input ${CAPTION_INPUT_ATTRIBUTES}>
                 </figcaption>
@@ -254,7 +255,7 @@ test("leaving the caption persists its value", async () => {
     const caption = "Hello";
     await testEditor({
         config: configWithEmbeddedCaption,
-        contentBefore: `<p><img class="img-fluid test-image" src="${base64Img}" data-caption="${caption}"></p><h1>Heading</h1>`,
+        contentBefore: `<p><img class="img-fluid test-image o_editable_media" src="${base64Img}" data-caption="${caption}"></p><h1>Heading</h1>`,
         stepFunction: async (editor) => {
             await toggleCaption();
             await waitFor("figcaption > input");
@@ -274,7 +275,7 @@ test("leaving the caption persists its value", async () => {
         contentAfterEdit: unformat(
             `<p><br></p>
             <figure contenteditable="false">
-                <img class="img-fluid test-image" src="${base64Img}" data-caption="${caption}ab" data-caption-id="${captionId}">
+                <img class="img-fluid test-image o_editable_media" src="${base64Img}" data-caption="${caption}ab" data-caption-id="${captionId}">
                 <figcaption ${getFigcaptionAttributes(captionId, caption + "ab", true)}>
                     <input ${CAPTION_INPUT_ATTRIBUTES}>
                 </figcaption>
@@ -329,7 +330,7 @@ test("can't use the toolbar in a caption", async () => {
     // TODO: The toolbar should not _always_ be usable in mobile!
     await testEditor({
         config: configWithEmbeddedCaption,
-        contentBefore: `<img class="img-fluid test-image" src="${base64Img}" data-caption="Hello"><h1>[]Heading</h1>`,
+        contentBefore: `<img class="img-fluid test-image o_editable_media" src="${base64Img}" data-caption="Hello"><h1>[]Heading</h1>`,
         stepFunction: async (editor) => {
             await toggleCaption();
             await waitFor("figcaption > input");
@@ -361,7 +362,7 @@ test("undo in a caption undoes the last caption action then returns to regular e
     const caption = "Hello";
     await testEditor({
         config: configWithEmbeddedCaption,
-        contentBefore: `<p><img class="img-fluid test-image" src="${base64Img}" data-caption="${caption}"></p><h1>[]Heading</h1>`,
+        contentBefore: `<p><img class="img-fluid test-image o_editable_media" src="${base64Img}" data-caption="${caption}"></p><h1>[]Heading</h1>`,
         stepFunction: async (editor) => {
             await insertText(editor, "a");
             const heading = queryOne("h1");
@@ -456,7 +457,7 @@ test("undo in a caption undoes the last caption action then returns to regular e
         },
         contentAfter: unformat(
             `<p>
-                <img class="img-fluid test-image" src="${base64Img}" data-caption="${caption}">
+                <img class="img-fluid test-image o_editable_media" src="${base64Img}" data-caption="${caption}">
             </p>
             <h1>[]Heading</h1>`
         ),
@@ -482,6 +483,76 @@ test("remove an image with a caption", async () => {
             `<p><br></p>
             <h1>[]Heading</h1>`
         ),
+    });
+});
+
+// For the following two tests.
+const getDeleteImageTestData = () => {
+    const captionId = 1;
+    const caption = "Hello";
+    return {
+        config: configWithEmbeddedCaption,
+        contentBefore: unformat(
+            `<p><img class="img-fluid test-image" data-caption="${caption}" src="${base64Img}"></p>
+            <h1>[]Heading</h1>`
+        ),
+        prepareImage: async (editor) => {
+            await toggleCaption();
+            await waitFor("figcaption > input");
+            // Check that we indeed have a proper figure structure.
+            expect(getContent(editor.editable).replace("[]", "")).toBe(
+                unformat(
+                    `<p><br></p>
+                            <figure contenteditable="false">
+                            <img class="img-fluid test-image o_editable_media" data-caption="${caption}" src="${base64Img}" data-caption-id="${captionId}">
+                            <figcaption ${getFigcaptionAttributes(
+                                captionId,
+                                caption,
+                                true
+                            )}><input ${CAPTION_INPUT_ATTRIBUTES}></figcaption>
+                        </figure>
+                        <h1>Heading</h1>`
+                )
+            );
+            const input = queryOne("input");
+            expect(editor.document.activeElement).toBe(input);
+            expect(input.value).toBe(caption);
+            // Deselect and reselect the image.
+            await click("h1");
+            await click("img");
+        },
+        contentAfter: unformat(
+            `<p><br></p>
+            <h1>[]Heading</h1>`
+        ),
+    };
+};
+
+test.tags("focus required");
+test("remove an image with a caption, using the delete key", async () => {
+    const { config, contentBefore, prepareImage, contentAfter } = getDeleteImageTestData();
+    await testEditor({
+        config,
+        contentBefore,
+        stepFunction: async (editor) => {
+            await prepareImage(editor);
+            deleteForward(editor);
+        },
+        contentAfter,
+    });
+});
+
+test.tags("focus required");
+test("remove an image with a caption, using the backspace key", async () => {
+    const { config, contentBefore, prepareImage, contentAfter } = getDeleteImageTestData();
+    await testEditor({
+        config,
+        contentBefore,
+        stepFunction: async (editor) => {
+            await prepareImage(editor);
+            deleteBackward(editor);
+        },
+        contentAfter,
     });
 });
 
@@ -666,7 +737,7 @@ test("remove a link from an image with a caption", async () => {
             <div class="o-paragraph">
                 <a href="https://odoo.com">
                     <figure contenteditable="false">
-                        <img class="img-fluid test-image" src="${base64Img}" data-caption-id="${captionId}" data-caption="${caption}">
+                        <img class="img-fluid test-image o_editable_media" src="${base64Img}" data-caption-id="${captionId}" data-caption="${caption}">
                         <figcaption ${getFigcaptionAttributes(captionId, caption)}>
                             <input ${CAPTION_INPUT_ATTRIBUTES}>
                         </figcaption>
@@ -712,7 +783,7 @@ test("remove a caption from an image with a link", async () => {
             <div class="o-paragraph">
                 <a href="https://odoo.com">
                     <figure contenteditable="false">
-                        <img class="img-fluid test-image" src="${base64Img}" data-caption-id="${captionId}" data-caption="${caption}">
+                        <img class="img-fluid test-image o_editable_media" src="${base64Img}" data-caption-id="${captionId}" data-caption="${caption}">
                         <figcaption ${getFigcaptionAttributes(captionId, caption)}>
                             <input ${CAPTION_INPUT_ATTRIBUTES}>
                         </figcaption>

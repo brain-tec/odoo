@@ -24,6 +24,17 @@ defineSpreadsheetModels();
  * @param {{ model: Model, filter: object}} props
  */
 async function mountFilterValueComponent(props) {
+    props.setGlobalFilterValue =
+        props.setGlobalFilterValue ||
+        ((id, value, displayNames) => {
+            props.model.dispatch("SET_GLOBAL_FILTER_VALUE", {
+                id,
+                value,
+                displayNames,
+            });
+        });
+    props.globalFilterValue =
+        props.globalFilterValue || props.model.getters.getGlobalFilterValue(props.filter.id);
     await mountWithCleanup(FilterValue, { props });
 }
 
@@ -82,6 +93,39 @@ test("relational filter with domain", async function () {
     await click(".o_multi_record_selector input");
     await animationFrame();
     expect.verifySteps(["name_search"]);
+});
+
+test("Filter with showClear should display the clear icon", async function () {
+    const env = await makeMockEnv();
+    const model = new Model({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
+    await addGlobalFilter(model, {
+        id: "42",
+        type: "text",
+        label: "Text Filter",
+        defaultValue: "foo",
+    });
+    await mountFilterValueComponent({
+        model,
+        filter: model.getters.getGlobalFilter("42"),
+        showClear: true,
+    });
+    expect(".fa-times").toHaveCount(1);
+});
+
+test("Filter without showClear should not display the clear icon", async function () {
+    const env = await makeMockEnv();
+    const model = new Model({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
+    await addGlobalFilter(model, {
+        id: "42",
+        type: "text",
+        label: "Text Filter",
+        defaultValue: "foo",
+    });
+    await mountFilterValueComponent({
+        model,
+        filter: model.getters.getGlobalFilter("42"),
+    });
+    expect(".fa-times").toHaveCount(0);
 });
 
 test("relational filter with a contextual domain", async function () {

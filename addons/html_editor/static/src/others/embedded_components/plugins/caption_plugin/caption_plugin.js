@@ -4,7 +4,9 @@ import { closestBlock } from "@html_editor/utils/blocks";
 import { renderToElement } from "@web/core/utils/render";
 import { fillEmpty, unwrapContents } from "@html_editor/utils/dom";
 import { closestElement } from "@html_editor/utils/dom_traversal";
+import { EDITABLE_MEDIA_CLASS } from "@html_editor/utils/dom_info";
 import { boundariesOut, rightPos } from "@html_editor/utils/position";
+import { findInSelection } from "@html_editor/utils/selection";
 
 export class CaptionPlugin extends Plugin {
     static id = "caption";
@@ -31,11 +33,12 @@ export class CaptionPlugin extends Plugin {
                 groupId: "image_description",
                 commandId: "toggleImageCaption",
                 text: "Caption",
-                isActive: () => this.hasImageCaption(this.dependencies.image.getSelectedImage()),
+                isActive: () => this.hasImageCaption(this.dependencies.image.getTargetedImage()),
             },
         ],
         clean_for_save_handlers: this.cleanForSave.bind(this),
         mount_component_handlers: this.setupNewCaption.bind(this),
+        delete_handlers: this.afterDelete.bind(this),
         delete_image_handlers: this.handleDeleteImage.bind(this),
         afer_save_media_dialog_handlers: this.onImageReplaced.bind(this),
         hints: [{ selector: "FIGCAPTION", text: _t("Write a caption...") }],
@@ -43,6 +46,7 @@ export class CaptionPlugin extends Plugin {
             (node) => ["FIGURE", "FIGCAPTION"].includes(node.nodeName), // avoid merge
         ],
         image_name_predicates: [this.getImageName.bind(this)],
+        link_compatible_selection_predicates: [this.isLinkAllowedOnSelection.bind(this)],
     };
 
     setup() {
@@ -66,6 +70,7 @@ export class CaptionPlugin extends Plugin {
             caption.textContent = image.getAttribute("data-caption");
             image.removeAttribute("data-caption");
             image.removeAttribute("data-caption-id");
+            image.classList.remove(EDITABLE_MEDIA_CLASS);
             image.after(caption);
         }
     }
@@ -80,7 +85,7 @@ export class CaptionPlugin extends Plugin {
         );
     }
 
-    toggleImageCaption(image = this.dependencies.image.getSelectedImage()) {
+    toggleImageCaption(image = this.dependencies.image.getTargetedImage()) {
         if (!image) {
             return;
         }
@@ -127,6 +132,7 @@ export class CaptionPlugin extends Plugin {
         image.setAttribute("data-caption", captionText || "");
         // Ensure it's not possible to write inside the figure.
         figure.setAttribute("contenteditable", "false");
+        image.classList.add(EDITABLE_MEDIA_CLASS);
         // Ensure it's possible to write before and after the figure.
         const block = closestBlock(link || image);
         if (!block.previousSibling) {
@@ -169,6 +175,7 @@ export class CaptionPlugin extends Plugin {
             }
             unwrapContents(figure);
             image.removeAttribute("data-caption-id"); // (keep the data-caption for if we toggle again)
+            image.classList.remove(EDITABLE_MEDIA_CLASS);
             // Select the image.
             const [anchorNode, anchorOffset, focusNode, focusOffset] = boundariesOut(image);
             this.dependencies.selection.setSelection({
@@ -223,6 +230,21 @@ export class CaptionPlugin extends Plugin {
         }
     }
 
+    isLinkAllowedOnSelection() {
+        const figure = findInSelection(
+            this.dependencies.selection.getEditableSelection(),
+            "figure"
+        );
+        if (
+            figure &&
+            this.dependencies.selection
+                .getTargetedNodes()
+                .every((node) => closestElement(node, "figure") === figure)
+        ) {
+            return true;
+        }
+    }
+
     onImageReplaced(media) {
         const figure = closestElement(media, "figure");
         if (media.nodeName === "IMG" && figure) {
@@ -232,6 +254,23 @@ export class CaptionPlugin extends Plugin {
             }
             const [anchorNode, anchorOffset] = rightPos(figure);
             this.dependencies.selection.setSelection({ anchorNode, anchorOffset });
+        }
+    }
+
+    afterDelete() {
+        const { anchorNode } = this.dependencies.selection.getEditableSelection();
+        const targetedNodes = this.dependencies.selection.getTargetedNodes();
+        for (const figure of this.editable.querySelectorAll("figure:not(:has(img))")) {
+            const isSelectionInFigure = targetedNodes.includes(figure) || anchorNode === figure;
+            const sibling = figure.nextSibling || figure.previousSibling;
+            figure.remove();
+            if (isSelectionInFigure) {
+                // Note: this assumes the selection is collapsed after delete.
+                this.dependencies.selection.setSelection({
+                    anchorNode: sibling,
+                    anchorOffset: 0,
+                });
+            }
         }
     }
 
