@@ -2,7 +2,9 @@ import { Plugin } from "@html_editor/plugin";
 import {
     ICON_SELECTOR,
     MEDIA_SELECTOR,
+    EDITABLE_MEDIA_CLASS,
     isIconElement,
+    isMediaElement,
     isProtected,
     isProtecting,
 } from "@html_editor/utils/dom_info";
@@ -68,6 +70,7 @@ export class MediaPlugin extends Plugin {
         selectionchange_handlers: this.selectAroundIcon.bind(this),
 
         unsplittable_node_predicates: isIconElement, // avoid merge
+        is_node_editable_predicates: this.isEditableMediaElement.bind(this),
         clipboard_content_processors: this.clean.bind(this),
         clipboard_text_processors: (text) => text.replace(/\u200B/g, ""),
 
@@ -79,9 +82,16 @@ export class MediaPlugin extends Plugin {
         return this.config.getRecordInfo ? this.config.getRecordInfo(editableEl) : {};
     }
 
+    isEditableMediaElement(node) {
+        return (
+            (isMediaElement(node) || node.nodeName === "IMG") &&
+            node.classList.contains(EDITABLE_MEDIA_CLASS)
+        );
+    }
+
     replaceImage() {
-        const selectedNodes = this.dependencies.selection.getSelectedNodes();
-        const node = selectedNodes.find((node) => node.tagName === "IMG");
+        const targetedNodes = this.dependencies.selection.getTargetedNodes();
+        const node = targetedNodes.find((node) => node.tagName === "IMG");
         if (node) {
             this.openMediaDialog({ node });
             this.dependencies.history.addStep();
@@ -151,7 +161,7 @@ export class MediaPlugin extends Plugin {
         // Collapse selection after the inserted/replaced element.
         const [anchorNode, anchorOffset] = rightPos(element);
         this.dependencies.selection.setSelection({ anchorNode, anchorOffset });
-        this.delegateTo("afer_save_media_dialog_handlers", element);
+        this.dispatchTo("afer_save_media_dialog_handlers", element);
         this.dependencies.history.addStep();
     }
 

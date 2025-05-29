@@ -96,9 +96,9 @@ export function isNotAllowedContent(node) {
 }
 
 /**
- * @returns edges nodes if they do not have content selected
+ * @returns edge text nodes if they do not have content selected
  */
-function getUnselectedEdgeNodes(selection) {
+function getUnselectedEdgeTextNodes(selection) {
     const startEdgeNodes = (node, offset) =>
         node === selection.commonAncestorContainer || offset < nodeSize(node)
             ? []
@@ -107,10 +107,12 @@ function getUnselectedEdgeNodes(selection) {
         node === selection.commonAncestorContainer || offset > 0
             ? []
             : [node, ...endEdgeNodes(...leftPos(node))];
-    return new Set([
-        ...startEdgeNodes(selection.startContainer, selection.startOffset),
-        ...endEdgeNodes(selection.endContainer, selection.endOffset),
-    ]);
+    return new Set(
+        [
+            ...startEdgeNodes(selection.startContainer, selection.startOffset),
+            ...endEdgeNodes(selection.endContainer, selection.endOffset),
+        ].filter((node) => node.nodeType === Node.TEXT_NODE)
+    );
 }
 
 /**
@@ -153,14 +155,13 @@ function scrollToSelection(selection) {
  * @property { SelectionPlugin['extractContent'] } extractContent
  * @property { SelectionPlugin['focusEditable'] } focusEditable
  * @property { SelectionPlugin['getEditableSelection'] } getEditableSelection
- * @property { SelectionPlugin['getSelectedNodes'] } getSelectedNodes
  * @property { SelectionPlugin['getSelectionData'] } getSelectionData
- * @property { SelectionPlugin['getTraversedBlocks'] } getTraversedBlocks
- * @property { SelectionPlugin['getTraversedNodes'] } getTraversedNodes
+ * @property { SelectionPlugin['getTargetedBlocks'] } getTargetedBlocks
+ * @property { SelectionPlugin['getTargetedNodes'] } getTargetedNodes
  * @property { SelectionPlugin['modifySelection'] } modifySelection
  * @property { SelectionPlugin['preserveSelection'] } preserveSelection
  * @property { SelectionPlugin['rectifySelection'] } rectifySelection
- * @property { SelectionPlugin['isNodeContentsFullySelected'] } isNodeContentsFullySelected
+ * @property { SelectionPlugin['areNodeContentsFullySelected'] } areNodeContentsFullySelected
  * @property { SelectionPlugin['resetActiveSelection'] } resetActiveSelection
  * @property { SelectionPlugin['resetSelection'] } resetSelection
  * @property { SelectionPlugin['setCursorEnd'] } setCursorEnd
@@ -180,22 +181,23 @@ export class SelectionPlugin extends Plugin {
         "extractContent",
         "preserveSelection",
         "resetSelection",
-        "getSelectedNodes",
-        "getTraversedNodes",
-        "getTraversedBlocks",
+        "getTargetedNodes",
+        "getTargetedBlocks",
         "modifySelection",
         "rectifySelection",
-        "isNodeContentsFullySelected",
+        "areNodeContentsFullySelected",
         // todo: ideally, this should not be shared
         "resetActiveSelection",
         "focusEditable",
         // "collapseIfZWS",
         "isSelectionInEditable",
+        "isNodeEditable",
         "selectAroundNonEditable",
     ];
     resources = {
         user_commands: { id: "selectAll", run: this.selectAll.bind(this) },
         shortcuts: [{ hotkey: "control+a", commandId: "selectAll" }],
+        is_node_editable_predicates: (node) => node.parentElement?.isContentEditable,
     };
 
     setup() {
@@ -663,25 +665,7 @@ export class SelectionPlugin extends Plugin {
         };
     }
 
-    /**
-     * Returns an array containing all the nodes fully contained in the selection.
-     *
-     * @returns {Node[]}
-     */
-    getSelectedNodes() {
-        const selection = this.getSelectionData().editableSelection;
-        const range = new Range();
-        range.setStart(selection.startContainer, selection.startOffset);
-        range.setEnd(selection.endContainer, selection.endOffset);
-        const isNodeFullySelected = (node) =>
-            // Custom rules
-            this.getResource("fully_selected_node_predicates").some((cb) => cb(node, selection)) ||
-            // Default rule
-            (range.isPointInRange(node, 0) && range.isPointInRange(node, nodeSize(node)));
-        return this.getTraversedNodes().filter(isNodeFullySelected);
-    }
-
-    isNodeContentsFullySelected(node) {
+    areNodeContentsFullySelected(node) {
         const selection = this.getEditableSelection();
         const range = new Range();
         range.setStart(selection.startContainer, selection.startOffset);
@@ -690,52 +674,85 @@ export class SelectionPlugin extends Plugin {
         const firstLeafNode = firstLeaf(node);
         const lastLeafNode = lastLeaf(node);
         return (
-            range.isPointInRange(firstLeafNode, 0) &&
-            range.isPointInRange(lastLeafNode, nodeSize(lastLeafNode))
+            // Custom rules
+            this.getResource("fully_selected_node_predicates").some((cb) => cb(node, selection)) ||
+            // Default rule
+            (range.isPointInRange(firstLeafNode, 0) &&
+                range.isPointInRange(lastLeafNode, nodeSize(lastLeafNode)))
         );
     }
 
     /**
-     * Returns the nodes intersected by the current selection, up to the common
-     * ancestor container (inclusive).
+     * Returns the nodes targeted by the current selection, from top to bottom
+     * and left to right.
+     * This includes nodes intersected by the selection, as well as the deepest
+     * anchor and offset nodes that are at least partly contained in the
+     * selection.
+     * An element is considered intersected by the selection when reading the
+     * normalized selection's HTML contents would involve reading the opening or
+     * closing tags of the element.
+     * A collapsed selection returns the node in which it is collapsed.
+     *
+     * @example
+     * <p>a[]b</p> -> ["ab"]
+     * @example
+     * <p>a[b</p><h1>c]d</h1> -> [P, "ab", H1, "cd"]
+     * @example
+     * <p>a[b</p><h1>]cd</h1> -> [P, "ab", H1]
+     * @example
+     * <div><p>a[b</p><h1>cd</h1></div><h2>e]f</h2> -> [DIV, P, "ab", H1, "cd", H2, "ef"]
      *
      * @returns {Node[]}
      */
-    getTraversedNodes() {
-        const selection = this.getSelectionData().deepEditableSelection;
-        const { commonAncestorContainer: root } = selection;
+    getTargetedNodes() {
+        const selectionData = this.getSelectionData();
+        const selection = selectionData.deepEditableSelection;
+        const { commonAncestorContainer: root } = selectionData.editableSelection;
 
-        let traversedNodes = [
-            root,
-            ...descendants(root).filter((node) => selection.intersectsNode(node)),
-        ];
+        let targetedNodes = [];
+        if (selection.isCollapsed && selection.anchorNode.nodeType !== Node.TEXT_NODE) {
+            targetedNodes = [root];
+        }
+        targetedNodes.push(...descendants(root));
+        if (!targetedNodes.length) {
+            targetedNodes = [root];
+        }
+
+        targetedNodes = targetedNodes.filter(
+            (node) =>
+                selectionData.editableSelection.intersectsNode(node) ||
+                (node.nodeType === Node.TEXT_NODE &&
+                    (node === selection.anchorNode || node === selection.focusNode))
+        );
 
         const modifiers = [
             // Remove the editable from the list
             (nodes) => (nodes[0] === this.editable ? nodes.slice(1) : nodes),
-            // Filter out nodes that have no content selected
+            // Filter out text nodes that have no content selected
             (nodes) => {
-                const edgeNodes = getUnselectedEdgeNodes(selection);
-                return nodes.filter((node) => !edgeNodes.has(node));
+                if (selection.isCollapsed) {
+                    return nodes;
+                } else {
+                    const edgeTextNodes = getUnselectedEdgeTextNodes(selection);
+                    return nodes.filter((node) => !edgeTextNodes.has(node));
+                }
             },
             // Custom modifiers
-            ...this.getResource("traversed_nodes_processors"),
+            ...this.getResource("targeted_nodes_processors"),
         ];
-
         for (const modifier of modifiers) {
-            traversedNodes = modifier(traversedNodes);
+            targetedNodes = modifier(targetedNodes);
         }
-
-        return traversedNodes;
+        return targetedNodes;
     }
 
     /**
-     * Returns a Set of traversed blocks within the given range.
+     * Returns a Set of targeted blocks within the given range.
      *
      * @returns {Set<HTMLElement>}
      */
-    getTraversedBlocks() {
-        return new Set(this.getTraversedNodes().map(closestBlock).filter(Boolean));
+    getTargetedBlocks() {
+        return new Set(this.getTargetedNodes().map(closestBlock).filter(Boolean));
     }
     resetActiveSelection() {
         const selection = this.document.getSelection();
@@ -936,6 +953,10 @@ export class SelectionPlugin extends Plugin {
             this.editable.contains(anchorNode) &&
             (focusNode === anchorNode || this.editable.contains(focusNode))
         );
+    }
+
+    isNodeEditable(node) {
+        return this.getResource("is_node_editable_predicates").some((p) => p(node));
     }
 
     focusEditable() {

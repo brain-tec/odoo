@@ -2,12 +2,9 @@ import { expect, test } from "@odoo/hoot";
 import { click, dblclick, press, queryOne, waitFor, waitForNone } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { contains } from "@web/../tests/web_test_helpers";
-import { setupEditor } from "./_helpers/editor";
+import { base64Img, setupEditor } from "./_helpers/editor";
 import { getContent, setContent } from "./_helpers/selection";
 import { undo } from "./_helpers/user_actions";
-
-const base64Img =
-    "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA\n        AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\n            9TXL0Y4OHwAAAABJRU5ErkJggg==";
 
 test("image can be selected", async () => {
     const { plugins } = await setupEditor(`
@@ -18,7 +15,7 @@ test("image can be selected", async () => {
     await waitFor(".o-we-toolbar");
     expect(".btn-group[name='image_shape']").toHaveCount(1);
     const selectionPlugin = plugins.get("selection");
-    expect(selectionPlugin.getSelectedNodes()[1].tagName).toBe("IMG");
+    expect(selectionPlugin.getTargetedNodes()[0].tagName).toBe("IMG");
 });
 
 test("can shape an image", async () => {
