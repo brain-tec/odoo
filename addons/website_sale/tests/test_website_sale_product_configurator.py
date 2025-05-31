@@ -1,7 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import unittest
-
 from datetime import datetime
 
 from odoo.fields import Command
@@ -131,7 +129,7 @@ class TestWebsiteSaleProductConfigurator(HttpCase, WebsiteSaleCommon):
         # Check the name of the created sale order line
         new_sale_order = self.env['sale.order'].search([]) - old_sale_order
         new_order_line = new_sale_order.order_line
-        self.assertEqual(new_order_line.name, 'Short (TEST) (M always, M dynamic)\nNever attribute size: M never\nNever attribute size custom: Yes never custom: TEST')
+        self.assertEqual(new_order_line.name, 'Short (TEST) (M always, M dynamic)\n\nNever attribute size: M never\nNever attribute size custom: Yes never custom: TEST')
 
     def test_product_configurator_force_dialog(self):
         """ Test that the product configurator is shown if forced. """
@@ -399,8 +397,6 @@ class TestWebsiteSaleProductConfigurator(HttpCase, WebsiteSaleCommon):
         })
         self.start_tour('/', 'website_sale_product_configurator_zero_priced')
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_product_configurator_strikethrough_price(self):
         """ Test that the product configurator displays the strikethrough price correctly. """
         self.env['res.config.settings'].create({

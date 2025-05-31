@@ -164,6 +164,7 @@ class ImageGalleryOption extends Plugin {
                     const onClose = this.dependencies.media.openMediaDialog({
                         onlyImages: true,
                         multiImages: true,
+                        node: editingElement,
                         save: (images) => {
                             selectedImages = images;
                             resolve();
@@ -305,7 +306,7 @@ class ImageGalleryOption extends Plugin {
         const carouselEl = imageGalleryElement.querySelector(".carousel");
         const colorContrast =
             carouselEl && carouselEl.classList.contains("carousel-dark") ? "carousel-dark" : " ";
-        const slideshowEl = renderToElement("html_builder.s_image_gallery_slideshow", {
+        const slideshowEl = renderToElement("website.s_image_gallery_slideshow", {
             images: images,
             index: 0,
             interval: currentInterval || 0,
@@ -364,10 +365,10 @@ class ImageGalleryOption extends Plugin {
                 !["image/gif", "image/svg+xml", "image/webp"].includes(mimetypeBeforeConversion)
             ) {
                 // Convert to webp but keep original width.
-                const update = await this.dependencies.imagePostProcess.processImage(img, {
+                const update = await this.dependencies.imagePostProcess.processImage({ img, newDataset: {
                     formatMimetype: "image/webp",
                     ...newDataset,
-                });
+                }});
                 update();
             }
         };

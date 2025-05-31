@@ -170,7 +170,13 @@ export class Thread extends Record {
     get isFocused() {
         return this.isFocusedCounter !== 0;
     }
-    isFocusedCounter = 0;
+    isFocusedCounter = fields.Attr(0, {
+        onUpdate() {
+            if (this.isFocusedCounter < 0) {
+                this.isFocusedCounter = 0;
+            }
+        },
+    });
     isLoadingAttachments = false;
     isLoadedDeferred = new Deferred();
     isLoaded = fields.Attr(false, {
@@ -351,7 +357,6 @@ export class Thread extends Record {
     get isChatChannel() {
         return ["chat", "group"].includes(this.channel_type);
     }
-
 
     get supportsCustomChannelName() {
         return this.isChatChannel && this.channel_type !== "group";
@@ -825,7 +830,12 @@ export class Thread extends Record {
                 res_id: this.id,
                 model: "discuss.channel",
             };
-            tmpData.author = this.store.self;
+            if (this.store.self.type === "partner") {
+                tmpData.author_id = this.store.self;
+            }
+            if (this.store.self.type === "guest") {
+                tmpData.author_guest_id = this.store.self;
+            }
             if (parentId) {
                 tmpData.parent_id = this.store["mail.message"].get(parentId);
             }

@@ -160,7 +160,6 @@ class TestUiHtmlEditor(HttpCaseWithUserDemo):
         self.start_tour(self.env['website'].get_client_action_url('/contactus'), 'test_html_editor_scss', login='admin')
         self.start_tour(self.env['website'].get_client_action_url('/'), 'test_html_editor_scss_2', login='demo')
 
-    @unittest.skip
     def test_media_dialog_undraw(self):
         BASE_URL = self.base_url()
         banner = '/website/static/src/img/snippets_demo/s_banner.jpg'
@@ -512,11 +511,9 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_16_website_edit_megamenu(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'edit_megamenu', login='admin')
 
-    @unittest.skip
     def test_website_megamenu_active_nav_link(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'megamenu_active_nav_link', login='admin')
 
-    @unittest.skip
     def test_17_website_edit_menus(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'edit_menus', login='admin')
 
@@ -534,7 +531,6 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_21_website_start_cloned_snippet(self):
         self.start_tour('/odoo', 'website_start_cloned_snippet', login='admin')
 
-    @unittest.skip
     def test_22_website_gray_color_palette(self):
         self.start_tour('/odoo', 'website_gray_color_palette', login='admin')
 
@@ -770,7 +766,6 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_snippet_carousel(self):
         self.start_tour('/', 'snippet_carousel', login='admin')
 
-    @unittest.skip
     def test_snippet_carousel_autoplay(self):
         self.start_tour("/", "snippet_carousel_autoplay", login="admin")
 

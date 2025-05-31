@@ -162,6 +162,11 @@ export class PosStore extends WithLazyGetterTrap {
                 Component: DebugWidget,
             });
         }
+
+        window.addEventListener("online", () => {
+            // Sync should be done before websocket connection when going online
+            this.syncAllOrdersDebounced();
+        });
     }
 
     navigate(routeName, routeParams = {}) {
@@ -1384,7 +1389,13 @@ export class PosStore extends WithLazyGetterTrap {
             if (options.throw) {
                 throw error;
             }
-            console.warn("Offline mode active, order will be synced later");
+
+            if (error instanceof ConnectionLostError) {
+                console.warn("Offline mode active, order will be synced later");
+            } else {
+                this.deviceSync.readDataFromServer();
+            }
+
             return error;
         } finally {
             orders.forEach((order) => this.syncingOrders.delete(order.id));
@@ -2397,6 +2408,22 @@ export class PosStore extends WithLazyGetterTrap {
 
         list = list
             .filter((product) => !excludedProductIds.includes(product.id) && product.canBeDisplayed)
+            .sort((a, b) => {
+                // Sort in the same order as what we receive (look _load_product_with_domain)
+                if (a.sequence !== b.sequence) {
+                    return a.sequence - b.sequence;
+                }
+                if (a.default_code !== b.default_code) {
+                    if (!b.default_code) {
+                        return -1;
+                    }
+                    if (!a.default_code) {
+                        return 1;
+                    }
+                    return a.default_code.localeCompare(b.default_code);
+                }
+                return a.name.localeCompare(b.name);
+            })
             .slice(0, 100);
 
         if (this.areAllProductsSpecial(list)) {
@@ -2465,6 +2492,14 @@ export class PosStore extends WithLazyGetterTrap {
     }
     getTime(date) {
         return date.toFormat("hh:mm");
+    }
+
+    orderDone(order) {
+        order.setScreenData({ name: "" });
+        order.uiState.locked = true;
+        if (this.getOrder() === order) {
+            this.searchProductWord = "";
+        }
     }
 }
 
