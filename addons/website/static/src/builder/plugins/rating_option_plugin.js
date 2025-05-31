@@ -7,7 +7,7 @@ class RatingOptionPlugin extends Plugin {
     selector = ".s_rating";
     resources = {
         builder_options: {
-            template: "html_builder.RatingOption",
+            template: "website.RatingOption",
             selector: ".s_rating",
         },
         so_content_addition_selector: [".s_rating"],
@@ -111,11 +111,9 @@ function createIcons({ editingElement, nbActiveIcons, nbTotalIcons }) {
     const iconEls = getAllIcons(editingElement);
     [...iconEls].forEach((iconEl) => iconEl.remove());
     for (let i = 0; i < nbTotalIcons; i++) {
-        if (i < nbActiveIcons) {
-            activeIconEl.appendChild(document.createElement("i"));
-        } else {
-            inactiveIconEl.append(document.createElement("i"));
-        }
+        const targetEl = i < nbActiveIcons ? activeIconEl : inactiveIconEl;
+        targetEl.appendChild(document.createElement("i"));
+        targetEl.appendChild(document.createTextNode(" "));
     }
     renderIcons(editingElement);
 }

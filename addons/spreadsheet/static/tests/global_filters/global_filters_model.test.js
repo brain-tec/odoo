@@ -588,7 +588,7 @@ test("Get active filters with multiple filters", async function () {
     expect(model.getters.getActiveFilterCount()).toBe(0);
     await setGlobalFilterValue(model, {
         id: text.id,
-        value: "Hello",
+        value: ["Hello"],
     });
     expect(model.getters.getActiveFilterCount()).toBe(1);
 });
@@ -604,9 +604,40 @@ test("Get active filters with text filter enabled", async function () {
     expect(model.getters.getActiveFilterCount()).toBe(0);
     await setGlobalFilterValue(model, {
         id: filter.id,
-        value: "Hello",
+        value: ["Hello"],
     });
     expect(model.getters.getActiveFilterCount()).toBe(1);
+});
+
+test("domain generated with text filter", async function () {
+    const { model } = await createSpreadsheetWithPivot();
+    await addGlobalFilter(
+        model,
+        {
+            id: "42",
+            type: "text",
+            label: "Text Filter",
+        },
+        {
+            pivot: { "PIVOT#1": { chain: "name", type: "char" } },
+        }
+    );
+    const [filter] = model.getters.getGlobalFilters();
+    expect(model.getters.getPivotComputedDomain("PIVOT#1")).toEqual([]);
+    await setGlobalFilterValue(model, {
+        id: filter.id,
+        value: ["Hello"],
+    });
+    expect(model.getters.getPivotComputedDomain("PIVOT#1")).toEqual([["name", "ilike", "Hello"]]);
+    await setGlobalFilterValue(model, {
+        id: filter.id,
+        value: ["Hello", "World"],
+    });
+    expect(model.getters.getPivotComputedDomain("PIVOT#1")).toEqual([
+        "|",
+        ["name", "ilike", "Hello"],
+        ["name", "ilike", "World"],
+    ]);
 });
 
 test("restrict text filter to a range of values", async function () {
@@ -618,7 +649,7 @@ test("restrict text filter to a range of values", async function () {
         id: "42",
         type: "text",
         label: "Text Filter",
-        rangeOfAllowedValues: toRangeData(sheetId, "A1:A2"),
+        rangesOfAllowedValues: [toRangeData(sheetId, "A1:A2")],
     });
 
     expect(model.getters.getTextFilterOptions("42")).toEqual([
@@ -636,7 +667,7 @@ test("duplicated values appear once in text filter with range", async function (
         id: "42",
         type: "text",
         label: "Text Filter",
-        rangeOfAllowedValues: toRangeData(sheetId, "A1:A2"),
+        rangesOfAllowedValues: [toRangeData(sheetId, "A1:A2")],
     });
 
     expect(model.getters.getTextFilterOptions("42")).toEqual([{ value: "3", formattedValue: "3" }]);
@@ -653,7 +684,7 @@ test("numbers and dates are formatted in text filter with range", async function
         id: "42",
         type: "text",
         label: "Text Filter",
-        rangeOfAllowedValues: toRangeData(sheetId, "A1:A2"),
+        rangesOfAllowedValues: [toRangeData(sheetId, "A1:A2")],
     });
 
     expect(model.getters.getTextFilterOptions("42")).toEqual([
@@ -672,7 +703,7 @@ test("falsy values appears (but not empty string) in text filter with range", as
         id: "42",
         type: "text",
         label: "Text Filter",
-        rangeOfAllowedValues: toRangeData(sheetId, "A1:A3"),
+        rangesOfAllowedValues: [toRangeData(sheetId, "A1:A3")],
     });
 
     expect(model.getters.getTextFilterOptions("42")).toEqual([
@@ -689,8 +720,8 @@ test("default value appears in text filter with range", async function () {
         id: "42",
         type: "text",
         label: "Text Filter",
-        rangeOfAllowedValues: toRangeData(sheetId, "A1"),
-        defaultValue: "World",
+        rangesOfAllowedValues: [toRangeData(sheetId, "A1")],
+        defaultValue: ["World"],
     });
 
     expect(model.getters.getTextFilterOptions("42")).toEqual([
@@ -708,11 +739,11 @@ test("current value appears in text filter with range", async function () {
         id: "42",
         type: "text",
         label: "Text Filter",
-        rangeOfAllowedValues: toRangeData(sheetId, "A1:A2"),
+        rangesOfAllowedValues: [toRangeData(sheetId, "A1:A2")],
     });
     await setGlobalFilterValue(model, {
         id: "42",
-        value: "World", // set the value to one of the allowed values
+        value: ["World"], // set the value to one of the allowed values
     });
 
     setCellContent(model, "A2", "Bob"); // change the value of the cell
@@ -731,8 +762,8 @@ test("default value appears once if the same value is in the text filter range",
         id: "42",
         type: "text",
         label: "Text Filter",
-        rangeOfAllowedValues: toRangeData(sheetId, "A1"),
-        defaultValue: "Hello", // same value as in A1
+        rangesOfAllowedValues: [toRangeData(sheetId, "A1")],
+        defaultValue: ["Hello"], // same value as in A1
     });
     expect(model.getters.getTextFilterOptions("42")).toEqual([
         { value: "Hello", formattedValue: "Hello" },
@@ -748,12 +779,12 @@ test("formatted default value appears once if the same value is in the text filt
         id: "42",
         type: "text",
         label: "Text Filter",
-        rangeOfAllowedValues: toRangeData(sheetId, "A1"),
-        defaultValue: "0.3",
+        rangesOfAllowedValues: [toRangeData(sheetId, "A1")],
+        defaultValue: ["0.3"],
     });
     await setGlobalFilterValue(model, {
         id: "42",
-        value: "0.3",
+        value: ["0.3"],
     });
     expect(model.getters.getTextFilterOptions("42")).toEqual([
         { value: "0.3", formattedValue: "30.00%" },
@@ -770,8 +801,8 @@ test("errors and empty cells if the same value is in the text filter range", asy
         id: "42",
         type: "text",
         label: "Text Filter",
-        rangeOfAllowedValues: toRangeData(sheetId, "A1:A3"),
-        defaultValue: "Hello", // same value as in A1
+        rangesOfAllowedValues: [toRangeData(sheetId, "A1:A3")],
+        defaultValue: ["Hello"], // same value as in A1
     });
     expect(model.getters.getTextFilterOptions("42")).toEqual([
         { value: "Hello", formattedValue: "Hello" },
@@ -785,11 +816,13 @@ test("add column before a text filter range", async function () {
         id: "42",
         type: "text",
         label: "Text Filter",
-        rangeOfAllowedValues: toRangeData(sheetId, "A1:A2"),
+        rangesOfAllowedValues: [toRangeData(sheetId, "A1:A2")],
     });
     addColumns(model, "before", "A", 1);
 
-    expect(model.getters.getGlobalFilter("42").rangeOfAllowedValues.zone).toEqual(toZone("B1:B2"));
+    expect(model.getters.getGlobalFilter("42").rangesOfAllowedValues[0].zone).toEqual(
+        toZone("B1:B2")
+    );
 });
 
 test("delete a text filter range", async function () {
@@ -799,11 +832,11 @@ test("delete a text filter range", async function () {
         id: "42",
         type: "text",
         label: "Text Filter",
-        rangeOfAllowedValues: toRangeData(sheetId, "A1:A2"),
+        rangesOfAllowedValues: [toRangeData(sheetId, "A1:A2")],
     });
     deleteColumns(model, ["A"]);
 
-    expect(model.getters.getGlobalFilter("42").rangeOfAllowedValues).toBe(undefined);
+    expect(model.getters.getGlobalFilter("42").rangesOfAllowedValues).toBe(undefined);
 });
 
 test("import/export a text filter range", async function () {
@@ -813,16 +846,17 @@ test("import/export a text filter range", async function () {
         id: "42",
         type: "text",
         label: "Text Filter",
-        rangeOfAllowedValues: toRangeData(sheetId, "A1:A2"),
+        rangesOfAllowedValues: [toRangeData(sheetId, "A1:A2")],
     });
     // export
     const data = model.exportData();
-    expect(data.globalFilters[0].rangeOfAllowedValues).toBe("Sheet1!A1:A2");
+    expect(data.globalFilters[0].rangesOfAllowedValues).toEqual(["Sheet1!A1:A2"]);
     // import
     const newModel = new Model(data);
-    const range = newModel.getters.getGlobalFilter("42").rangeOfAllowedValues;
-    expect(range.zone).toEqual(toZone("A1:A2"));
-    expect(range.sheetId).toBe(sheetId);
+    const ranges = newModel.getters.getGlobalFilter("42").rangesOfAllowedValues;
+    expect(ranges.length).toBe(1);
+    expect(ranges[0].zone).toEqual(toZone("A1:A2"));
+    expect(ranges[0].sheetId).toBe(sheetId);
 });
 
 test("Get active filters with relation filter enabled", async function () {
@@ -891,10 +925,15 @@ test("ODOO.FILTER.VALUE text filter", async function () {
     const [filter] = model.getters.getGlobalFilters();
     await setGlobalFilterValue(model, {
         id: filter.id,
-        value: "Hello",
+        value: ["Hello"],
     });
     await animationFrame();
     expect(getCellValue(model, "A10")).toBe("Hello");
+    await setGlobalFilterValue(model, {
+        id: filter.id,
+        value: ["Hello", "World"],
+    });
+    expect(getCellValue(model, "A10")).toBe("Hello, World");
 });
 
 test("ODOO.FILTER.VALUE date filter", async function () {
@@ -1084,7 +1123,7 @@ test("ODOO.FILTER.VALUE with escaped quotes in the filter label", async function
         id: "42",
         type: "text",
         label: 'my "special" filter',
-        defaultValue: "Jean-Jacques",
+        defaultValue: ["Jean-Jacques"],
     });
     setCellContent(model, "A1", '=ODOO.FILTER.VALUE("my \\"special\\" filter")');
     expect(getCellValue(model, "A1")).toBe("Jean-Jacques");
@@ -1123,12 +1162,12 @@ test("Exporting data does not remove value from model", async function () {
     });
     await setGlobalFilterValue(model, {
         id: "42",
-        value: "Hello export bug",
+        value: ["Hello export bug"],
     });
     const [filter] = model.getters.getGlobalFilters();
-    expect(model.getters.getGlobalFilterValue(filter.id)).toBe("Hello export bug");
+    expect(model.getters.getGlobalFilterValue(filter.id)).toEqual(["Hello export bug"]);
     model.exportData();
-    expect(model.getters.getGlobalFilterValue(filter.id)).toBe("Hello export bug");
+    expect(model.getters.getGlobalFilterValue(filter.id)).toEqual(["Hello export bug"]);
 });
 
 test("Can undo-redo a ADD_GLOBAL_FILTER", async function () {
@@ -1461,7 +1500,7 @@ test("don't load data if a filter is activated but the data is not needed", asyn
 test("Default value defines value", async function () {
     const { model } = await createSpreadsheetWithPivot();
     const label = "This year";
-    const defaultValue = "value";
+    const defaultValue = ["value"];
     await addGlobalFilter(model, {
         id: "42",
         type: "text",
@@ -1469,17 +1508,17 @@ test("Default value defines value", async function () {
         defaultValue,
     });
     const [filter] = model.getters.getGlobalFilters();
-    expect(model.getters.getGlobalFilterValue(filter.id)).toBe(defaultValue);
+    expect(model.getters.getGlobalFilterValue(filter.id)).toEqual(defaultValue);
 });
 
 test("Default value defines value at model loading", async function () {
     const label = "This year";
-    const defaultValue = "value";
+    const defaultValue = ["value"];
     const model = new Model({
         globalFilters: [{ type: "text", label, defaultValue, fields: {}, id: "1" }],
     });
     const [filter] = model.getters.getGlobalFilters();
-    expect(model.getters.getGlobalFilterValue(filter.id)).toBe(defaultValue);
+    expect(model.getters.getGlobalFilterValue(filter.id)).toEqual(defaultValue);
 });
 
 test("filter display value of year filter is a string", async function () {

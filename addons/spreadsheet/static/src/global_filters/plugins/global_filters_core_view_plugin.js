@@ -56,7 +56,7 @@ export class GlobalFiltersCoreViewPlugin extends OdooCoreViewPlugin {
         "getActiveFilterCount",
         "isGlobalFilterActive",
         "getTextFilterOptions",
-        "getTextFilterOptionsFromRange",
+        "getTextFilterOptionsFromRanges",
     ]);
     constructor(config) {
         super(config);
@@ -178,7 +178,7 @@ export class GlobalFiltersCoreViewPlugin extends OdooCoreViewPlugin {
                 case "boolean":
                     return [];
                 case "text":
-                    return "";
+                    return [];
                 default:
                     return undefined;
             }
@@ -209,7 +209,7 @@ export class GlobalFiltersCoreViewPlugin extends OdooCoreViewPlugin {
         const value = this.getGlobalFilterValue(id);
         switch (type) {
             case "text":
-                return value;
+                return value && value.length > 0;
             case "date":
                 return (
                     value &&
@@ -245,10 +245,9 @@ export class GlobalFiltersCoreViewPlugin extends OdooCoreViewPlugin {
         }
         const value = this.getGlobalFilterValue(filter.id);
         switch (filter.type) {
-            case "boolean":
-                return [[{ value: value.length ? value.join(", ") : "" }]];
             case "text":
-                return [[{ value: value || "" }]];
+            case "boolean":
+                return [[{ value: value?.length ? value.join(", ") : "" }]];
             case "date": {
                 if (filter.rangeType === "from_to") {
                     const locale = this.getters.getLocale();
@@ -307,17 +306,17 @@ export class GlobalFiltersCoreViewPlugin extends OdooCoreViewPlugin {
      */
     getTextFilterOptions(filterId) {
         const filter = this.getters.getGlobalFilter(filterId);
-        if (filter.type !== "text" || !filter.rangeOfAllowedValues) {
+        if (filter.type !== "text" || !filter.rangesOfAllowedValues) {
             return [];
         }
         const additionOptions = [
             // add the current value because it might not be in the range
             // if the range cells changed in the meantime
-            this.getGlobalFilterValue(filterId),
-            filter.defaultValue,
+            ...(this.getGlobalFilterValue(filterId) ?? []),
+            ...(filter.defaultValue ?? []),
         ];
-        const options = this.getTextFilterOptionsFromRange(
-            filter.rangeOfAllowedValues,
+        const options = this.getTextFilterOptionsFromRanges(
+            filter.rangesOfAllowedValues,
             additionOptions
         );
         return options;
@@ -326,11 +325,13 @@ export class GlobalFiltersCoreViewPlugin extends OdooCoreViewPlugin {
     /**
      * Returns the possible values a text global filter can take from a range
      * or any addition raw string value. Removes duplicates and empty string values.
-     * @param {object} range
+     * @param {object[]} ranges
      * @param {string[]} additionalOptionValues
      */
-    getTextFilterOptionsFromRange(range, additionalOptionValues = []) {
-        const cells = this.getters.getEvaluatedCellsInZone(range.sheetId, range.zone);
+    getTextFilterOptionsFromRanges(ranges, additionalOptionValues = []) {
+        const cells = ranges.flatMap((range) =>
+            this.getters.getEvaluatedCellsInZone(range.sheetId, range.zone)
+        );
         const uniqueFormattedValues = new Set();
         const uniqueValues = new Set();
         const allowedValues = cells
@@ -510,11 +511,11 @@ export class GlobalFiltersCoreViewPlugin extends OdooCoreViewPlugin {
      */
     _getTextDomain(filter, fieldMatching) {
         const value = this.getGlobalFilterValue(filter.id);
-        if (!value || !fieldMatching.chain) {
+        if (!value || !value.length || !fieldMatching.chain) {
             return new Domain();
         }
         const field = fieldMatching.chain;
-        return new Domain([[field, "ilike", value]]);
+        return Domain.or(value.map((text) => [[field, "ilike", text]]));
     }
 
     /**
