@@ -229,6 +229,18 @@ test("toolbar format buttons should react to format change", async () => {
     expect(".btn[name='bold']").toHaveClass("active");
 });
 
+test("toolbar format buttons should react to format change across blocks (with whitespace)", async () => {
+    await setupEditor(`
+        <p>[abc</p>
+        <p>def]</p>
+        `);
+    await waitFor(".o-we-toolbar");
+    expect(".btn[name='bold']").not.toHaveClass("active");
+    await contains(".btn[name='bold']").click();
+    await animationFrame();
+    expect(".btn[name='bold']").toHaveClass("active");
+});
+
 test("toolbar disable link button when selection cross blocks", async () => {
     await setupEditor("<div>[<div>a<p>b</p></div>]</div>");
     await waitFor(".o-we-toolbar");
@@ -1208,6 +1220,27 @@ describe("toolbar open and close on user interaction", () => {
             manuallyDispatchProgrammaticEvent(p, "click", { detail: 3 });
             await advanceTime(500);
             expect(".o-we-toolbar").toHaveCount(1);
+        });
+
+        test("toolbar should not move on click toolbar button", async () => {
+            const { el } = await setupEditor(
+                `<p style="padding-top: 100px">aaaaaaaaaaaaa [test] bbbbbbbbbbbbb</p>`
+            );
+            await animationFrame();
+            expect(".o-we-toolbar").toHaveCount(1);
+
+            const overlay = queryOne(".o-we-toolbar").parentElement;
+            const position = {
+                top: overlay.style.top,
+                left: overlay.style.left,
+            };
+
+            await contains(".o-we-toolbar button[name='bold']").click();
+            expect(getContent(el)).toBe(
+                `<p style="padding-top: 100px">aaaaaaaaaaaaa <strong>[test]</strong> bbbbbbbbbbbbb</p>`
+            );
+            expect({ top: overlay.style.top, left: overlay.style.left }).toEqual(position);
+            expect(overlay.style.visibility).toBe("visible");
         });
     });
 
