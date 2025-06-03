@@ -127,6 +127,14 @@ def _tax_vals(name, amount, tax_tag_id=None, children_tax_xmlids=None, active=Tr
         ]})
     return tax_vals
 
+
+def _account_vals(name, code, account_type):
+    return {
+        'name': name,
+        'code': code,
+        'account_type': account_type,
+    }
+
 CSV_DATA = {
     'tax_1': (
         '"id","name","type_tax_use","amount","amount_type","description","invoice_label","tax_group_id","repartition_line_ids/repartition_type",'
@@ -283,6 +291,13 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             data['account.tax']['test_tax_1_template']['original_tax_ids'] = 'test_tax_3_template'
             return data
 
+        # First try with `force_create=False` (during an upgrade): it shouldn't crash
+        with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
+            self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False, force_create=False)
+
+        self.assertFalse(self.env['account.chart.template'].ref('test_tax_3_template', raise_if_not_found=False))
+
+        # then try with `force_create=True` (when updating the CoA manually)
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False)
 
@@ -299,6 +314,41 @@ class TestChartTemplate(AccountTestInvoicingCommon):
         self.assertEqual(fiscal_position.map_tax(tax_1), tax_2)
         self.assertEqual(fiscal_position.map_tax(tax_2), tax_4)
         self.assertEqual(fiscal_position.map_tax(tax_3), tax_1)
+
+    def test_update_accounts_creation(self):
+        """ Tests that adding a new accounts and a fiscal position tax creates new records when updating. """
+        def local_get_data(self, template_code):
+            data = test_get_data(self, template_code)
+            data['account.account'].update({
+                xmlid: _account_vals(name, code, account_type)
+                for name, xmlid, code, account_type in [
+                    ('Account 3', 'test_account_3_template', '333333', 'asset_current'),
+                    ('Account 4', 'test_account_4_template', '444444', 'asset_current'),
+                ]
+            })
+            data['account.fiscal.position']['test_fiscal_position_template']['account_ids'] = [
+                Command.create({
+                    'account_src_id': 'test_account_3_template',
+                    'account_dest_id': 'test_account_4_template',
+                }),
+            ]
+            return data
+
+        # First try with `force_create=False` (during an upgrade): it shouldn't crash
+        with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
+            self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False, force_create=False)
+
+        self.assertFalse(self.env['account.chart.template'].ref('test_account_3_template', raise_if_not_found=False))
+
+        # then try with `force_create=True` (when updating the CoA manually)
+        with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
+            self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False)
+
+        fiscal_position = self.env['account.fiscal.position'].search([])
+        self.assertEqual(
+            fiscal_position.map_account(self.env['account.chart.template'].ref('test_account_3_template')),
+            self.env['account.chart.template'].ref('test_account_4_template'),
+        )
 
     def test_remove_fiscal_position_try_loading_force_create_false(self):
         """Test that removing a fiscal position and calling try_loading with force_create=False does not recreate it."""
@@ -354,8 +404,6 @@ class TestChartTemplate(AccountTestInvoicingCommon):
         * Update all the references to the old taxes to the new ones.
           - Fiscal positions: The previous mappings won't be deleted but the new ones will be created.
                               This ensures that reports still work.
-          - Company: The default sales/purchase taxes should be updated. It should only impact the creation
-                     of new products so it is probably not going to be an issue.
         * If such a tax was part of a group, a new group must be created and the old one removed from the template.
 
         The procedure for the users, when they are ready, is:
@@ -391,7 +439,6 @@ class TestChartTemplate(AccountTestInvoicingCommon):
 
         self.assertEqual(fiscal_position.map_tax(tax_1), tax_2)
         self.assertEqual(fiscal_position.map_tax(tax_3), tax_2)
-        self.assertEqual(self.company.account_sale_tax_id, tax_3)
 
         # On a new company you would never see the old tax.
         # In case users need it, they can duplicate the new one and change the rate.
@@ -680,6 +727,8 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             return data
 
         company = self.company
+        # force first load since company data is removed on reload
+        company.chart_template = False
 
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             # hard fail the loading if the context key is set to ensure `test_all_l10n` works as expected
