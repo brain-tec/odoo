@@ -179,13 +179,13 @@ def get_module_path(module: str, downloaded: bool = False, display_warning: bool
     if re.search(r"[\/\\]", module):
         return None
     for adp in odoo.addons.__path__:
-        files = [opj(adp, module, manifest) for manifest in MANIFEST_NAMES] +\
-                [opj(adp, module + '.zip')]
-        if any(os.path.exists(f) for f in files):
+        if any(os.path.exists(opj(adp, module, manifest_name)) for manifest_name in MANIFEST_NAMES):
             return opj(adp, module)
 
     if downloaded:
-        return opj(tools.config.addons_data_dir, module)
+        path = opj(tools.config.addons_data_dir, module)
+        if os.path.exists(path):
+            return path
     if display_warning:
         _logger.warning('module %s: module not found', module)
     return None
@@ -283,7 +283,7 @@ def load_manifest(module: str, mod_path: str | None = None) -> dict:
     """ Load the module manifest from the file system. """
 
     if not mod_path:
-        mod_path = get_module_path(module, downloaded=True)
+        mod_path = get_module_path(module, downloaded=True, display_warning=False)
     manifest_file = module_manifest(mod_path)
 
     if not manifest_file:
@@ -424,29 +424,12 @@ def load_openerp_module(module_name: str) -> None:
 def get_modules() -> list[str]:
     """Get the list of module names that can be loaded.
     """
-    def listdir(dir):
-        def clean(name):
-            name = os.path.basename(name)
-            if name[-4:] == '.zip':
-                name = name[:-4]
-            return name
-
-        def is_really_module(name):
-            for mname in MANIFEST_NAMES:
-                if os.path.isfile(opj(dir, name, mname)):
-                    return True
-        return [
-            clean(it)
-            for it in os.listdir(dir)
-            if is_really_module(it)
-        ]
-
     plist: list[str] = []
     for ad in odoo.addons.__path__:
         if not os.path.exists(ad):
             _logger.warning("addons path does not exist: %s", ad)
             continue
-        plist.extend(listdir(ad))
+        plist.extend(name for name in os.listdir(ad) if module_manifest(opj(ad, name)))
     return sorted(set(plist))
 
 
