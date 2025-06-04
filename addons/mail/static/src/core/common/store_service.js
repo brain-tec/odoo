@@ -60,7 +60,11 @@ export class Store extends BaseStore {
     DEFAULT_AVATAR = "/mail/static/src/img/smiley/avatar.jpg";
     isReady = new Deferred();
     /** This is the current logged partner / guest */
-    self = fields.One("Persona");
+    self_partner = fields.One("Persona");
+    self_guest = fields.One("Persona");
+    get self() {
+        return this.self_partner || this.self_guest;
+    }
     allChannels = fields.Many("Thread", {
         inverse: "storeAsAllChannels",
         onUpdate() {
@@ -373,7 +377,33 @@ export class Store extends BaseStore {
     }
 
     /** Provides an override point for when the store service has started. */
-    onStarted() {}
+    onStarted() {
+        navigator.serviceWorker?.addEventListener("message", ({ data = {} }) => {
+            const { type, payload } = data;
+            if (type === "notification-display-request") {
+                const { correlationId, model, res_id } = payload;
+                const thread = this.Thread.get({ model, id: res_id });
+                let isTabFocused;
+                try {
+                    isTabFocused = parent.document.hasFocus();
+                } catch {
+                    // assumes tab not focused: parent.document from iframe triggers CORS error
+                }
+                if (isTabFocused && thread?.isDisplayed) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: "notification-display-response",
+                        payload: { correlationId },
+                    });
+                }
+            }
+            if (
+                type === "notification-displayed" &&
+                ["mail.thread", "discuss.channel"].includes(payload.model)
+            ) {
+                this.env.services["mail.out_of_focus"]._playSound();
+            }
+        });
+    }
 
     /**
      * Search and fetch for a partner with a given user or partner id.
@@ -639,7 +669,7 @@ export const storeService = {
          * these values will still be executed immediately. Providing a dummy default is enough to
          * avoid crashes, the actual values being filled at livechat init when they are necessary.
          */
-        store.self ??= { id: -1, type: "guest" };
+        store.self_guest ??= { id: -1, type: "guest" };
         store.settings ??= {};
         store.initialize();
         store.onStarted();
