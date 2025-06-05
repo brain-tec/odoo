@@ -78,6 +78,7 @@ ALLOWED_MIMETYPES = {
 }
 
 EMPTY = object()
+BYPASS_LOCK_CHECK = object()
 
 
 class AccountMove(models.Model):
@@ -195,8 +196,16 @@ class AccountMove(models.Model):
     line_ids = fields.One2many(
         'account.move.line',
         'move_id',
-        string='Journal Items',
+        string='Account Move Line Items',
         copy=True,
+    )
+
+    journal_line_ids = fields.One2many(  # /!\ journal_line_ids is just a subset of line_ids.
+        comodel_name='account.move.line',
+        inverse_name='move_id',
+        string='Journal Items',
+        copy=False,
+        domain=[('display_type', 'not in', ('line_section', 'line_note'))],
     )
 
     # === Link to the partial that created this exchange move === #
@@ -2460,6 +2469,8 @@ class AccountMove(models.Model):
         ''', tuple(moves.ids)))
 
     def _check_fiscal_lock_dates(self):
+        if self.env.context.get('bypass_lock_check') is BYPASS_LOCK_CHECK:
+            return
         for move in self:
             journal = move.journal_id
             violated_lock_dates = move.company_id._get_lock_date_violations(
@@ -3384,7 +3395,7 @@ class AccountMove(models.Model):
         return new_moves
 
     def _sanitize_vals(self, vals):
-        if vals.get('invoice_line_ids') and vals.get('line_ids'):
+        if vals.get('invoice_line_ids') and vals.get('journal_line_ids'):
             # values can sometimes be in only one of the two fields, sometimes in
             # both fields, sometimes one field can be explicitely empty while the other
             # one is not, sometimes not...
@@ -3393,15 +3404,15 @@ class AccountMove(models.Model):
                 for command, line_id, *line_vals in vals['invoice_line_ids']
                 if command == Command.UPDATE
             }
-            for command, line_id, *line_vals in vals['line_ids']:
+            for command, line_id, *line_vals in vals['journal_line_ids']:
                 if command == Command.UPDATE and line_id in update_vals:
                     line_vals[0].update(update_vals.pop(line_id))
             for line_id, line_vals in update_vals.items():
-                vals['line_ids'] += [Command.update(line_id, line_vals)]
+                vals['journal_line_ids'] += [Command.update(line_id, line_vals)]
             for command, line_id, *line_vals in vals['invoice_line_ids']:
                 assert command not in (Command.SET, Command.CLEAR)
-                if [command, line_id, *line_vals] not in vals['line_ids']:
-                    vals['line_ids'] += [(command, line_id, *line_vals)]
+                if [command, line_id, *line_vals] not in vals['journal_line_ids']:
+                    vals['journal_line_ids'] += [(command, line_id, *line_vals)]
             del vals['invoice_line_ids']
         return vals
 
@@ -5218,9 +5229,9 @@ class AccountMove(models.Model):
                         if partial.exchange_move_id:
                             to_post |= partial.exchange_move_id
                             # If the draft invoice changed since it was reconciled, in a way that would affect the exchange diff,
-                            # any existing reconcilation and draft exchange move would be deleted already (to force the user to 
+                            # any existing reconcilation and draft exchange move would be deleted already (to force the user to
                             # re-do the reconciliation).
-                            # This is ensured by the the checks in env['account.move.line'].write(): 
+                            # This is ensured by the the checks in env['account.move.line'].write():
                             #     see env[account.move.line]._get_lock_date_protected_fields()['reconciliation']
 
                         if partial._get_draft_caba_move_vals() != partial.draft_caba_move_vals:
