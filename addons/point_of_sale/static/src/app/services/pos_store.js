@@ -41,7 +41,6 @@ import { deserializeDateTime, formatDate } from "@web/core/l10n/dates";
 import { openProxyCustomerDisplay } from "@point_of_sale/customer_display/utils";
 import { ProductInfoPopup } from "@point_of_sale/app/components/popups/product_info_popup/product_info_popup";
 import { PresetSlotsPopup } from "@point_of_sale/app/components/popups/preset_slots_popup/preset_slots_popup";
-import { EditOrderNamePopup } from "@point_of_sale/app/components/popups/edit_order_name_popup/edit_order_name_popup";
 
 const { DateTime } = luxon;
 
@@ -609,12 +608,22 @@ export class PosStore extends WithLazyGetterTrap {
             return formattedUnitPrice;
         }
     }
-    async openConfigurator(pTemplate) {
+    async openConfigurator(pTemplate, opts = {}) {
         const attrById = this.models["product.attribute"].getAllBy("id");
         const attributeLines = pTemplate.attribute_line_ids.filter(
             (attr) => attr.attribute_id?.id in attrById
         );
-        const attributeLinesValues = attributeLines.map((attr) => attr.product_template_value_ids);
+        let attributeLinesValues = attributeLines.map((attr) => attr.product_template_value_ids);
+        if (opts.code) {
+            const product = this.models["product.product"].getBy("barcode", opts.code.base_code);
+            attributeLinesValues = attributeLinesValues.map((values) =>
+                values[0].attribute_id.create_variant === "no_variant"
+                    ? values
+                    : values.filter((value) =>
+                          product.product_template_attribute_value_ids.includes(value)
+                      )
+            );
+        }
         if (attributeLinesValues.some((values) => values.length > 1 || values[0].is_custom)) {
             return await makeAwaitable(this.dialog, ProductConfiguratorPopup, {
                 productTemplate: pTemplate,
@@ -730,7 +739,7 @@ export class PosStore extends WithLazyGetterTrap {
             const payload =
                 vals?.payload && Object.keys(vals?.payload).length
                     ? vals.payload
-                    : await this.openConfigurator(productTemplate);
+                    : await this.openConfigurator(productTemplate, opts);
 
             if (payload) {
                 // Find candidate based on instantly created variants.
@@ -1042,7 +1051,7 @@ export class PosStore extends WithLazyGetterTrap {
      */
     getCashier() {
         if (!this.user.role) {
-            this.user.role = this.user.raw.role;
+            this.user._role = this.user.raw.role;
         }
         return this.user;
     }
@@ -1945,20 +1954,6 @@ export class PosStore extends WithLazyGetterTrap {
     async selectPricelist(pricelist) {
         await this.getOrder().setPricelist(pricelist);
     }
-    async editFloatingOrderName(order) {
-        const newName = await makeAwaitable(this.dialog, EditOrderNamePopup, {
-            title: _t("Edit Order Name"),
-            placeholder: _t("18:45 John 4P"),
-            startingValue: order.floating_order_name || "",
-        });
-        if (typeof order.id == "number") {
-            this.data.write("pos.order", [order.id], {
-                floating_order_name: newName,
-            });
-        } else {
-            order.floating_order_name = newName;
-        }
-    }
     async openPresetTiming(order = this.getOrder()) {
         const data = await makeAwaitable(this.dialog, PresetSlotsPopup);
         if (data) {
@@ -1970,6 +1965,14 @@ export class PosStore extends WithLazyGetterTrap {
             if (data.slot.datetime > DateTime.now()) {
                 this.addPendingOrder([order.id]);
                 await this.syncAllOrders({ orders: [order] });
+            }
+        }
+    }
+    async handleSelectNamePreset(order) {
+        if (!order.partner_id) {
+            const partner = await this.selectPartner();
+            if (!partner) {
+                return;
             }
         }
     }
@@ -2000,17 +2003,8 @@ export class PosStore extends WithLazyGetterTrap {
                     await this.editPartner(partner);
                 }
             }
-
-            if (preset.identification === "name" && !order.floating_order_name && !order.table_id) {
-                order.floating_order_name = order.getPartner()?.name;
-                if (!order.floating_order_name) {
-                    await this.editFloatingOrderName(order);
-                    //re-set the order in case an order was selected from the current orders list in the EditOrderNamePopup
-                    order = this.getOrder();
-                    if (!order.floating_order_name) {
-                        return;
-                    }
-                }
+            if (preset.identification === "name") {
+                await this.handleSelectNamePreset(order);
             }
             order.setPreset(preset);
 
