@@ -8,11 +8,10 @@ import * as ReceiptScreen from "@point_of_sale/../tests/pos/tours/utils/receipt_
 import { registry } from "@web/core/registry";
 import * as Order from "@point_of_sale/../tests/generic_helpers/order_widget_util";
 import { back, inLeftSide, selectButton } from "@point_of_sale/../tests/pos/tours/utils/common";
-import { scan_barcode, negateStep } from "@point_of_sale/../tests/generic_helpers/utils";
+import { scan_barcode, negateStep, refresh } from "@point_of_sale/../tests/generic_helpers/utils";
 import * as ProductConfiguratorPopup from "@point_of_sale/../tests/pos/tours/utils/product_configurator_util";
 import * as Numpad from "@point_of_sale/../tests/generic_helpers/numpad_util";
 import * as OfflineUtil from "@point_of_sale/../tests/generic_helpers/offline_util";
-import * as TextInputPopup from "@point_of_sale/../tests/generic_helpers/text_input_popup_util";
 import * as TicketScreen from "@point_of_sale/../tests/pos/tours/utils/ticket_screen_util";
 
 registry.category("web_tour.tours").add("ProductScreenTour", {
@@ -285,6 +284,10 @@ registry.category("web_tour.tours").add("limitedProductPricelistLoading", {
 
             scan_barcode("0100202"),
             ProductScreen.selectedOrderlineHas("Test Product 2", "1", "120.0", "Red"),
+
+            refresh(),
+            scan_barcode("0100100"),
+            ProductScreen.selectedOrderlineHas("Test Product 1", "2", "160.0"),
 
             scan_barcode("0100300"),
             Chrome.endTour(),
@@ -706,6 +709,22 @@ registry.category("web_tour.tours").add("test_fiscal_position_tax_group_labels",
         ].flat(),
 });
 
+registry.category("web_tour.tours").add("test_one_attribute_value_scan_barcode", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            scan_barcode("1234567"),
+            ProductScreen.selectedOrderlineHas("Product Test", "1.0", "10", "Large, Red"),
+
+            scan_barcode("1234568"),
+            ProductScreen.selectedOrderlineHas("Product Test", "1.0", "10", "Large, Blue"),
+
+            Chrome.endTour(),
+        ].flat(),
+});
+
 registry.category("web_tour.tours").add("test_product_long_press", {
     steps: () =>
         [
@@ -717,15 +736,14 @@ registry.category("web_tour.tours").add("test_product_long_press", {
         ].flat(),
 });
 
-registry.category("web_tour.tours").add("test_preset_timing", {
+registry.category("web_tour.tours").add("test_preset_timing_retail", {
     steps: () =>
         [
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             ProductScreen.clickDisplayedProduct("Desk Organizer"),
-            ProductScreen.selectPreset("Eat in", "Takeaway"),
-            TextInputPopup.inputText("John"),
-            Dialog.confirm(),
+            ProductScreen.selectPreset("Eat in", "Delivery"),
+            PartnerList.clickPartner("A simple PoS man!"),
             Chrome.selectPresetTimingSlotHour("12:00"),
             Chrome.presetTimingSlotIs("12:00"),
             Chrome.isSynced(),
@@ -735,8 +753,8 @@ registry.category("web_tour.tours").add("test_preset_timing", {
             Chrome.createFloatingOrder(),
             ProductScreen.clickDisplayedProduct("Desk Organizer"),
             Chrome.clickOrders(),
-            TicketScreen.nthRowContains(1, "John"),
-            TicketScreen.nthRowContains(1, "Takeaway", false),
+            TicketScreen.nthRowContains(1, "A simple PoS man!"),
+            TicketScreen.nthRowContains(1, "Delivery", false),
             TicketScreen.nthRowContains(2, "002"),
             TicketScreen.nthRowContains(2, "Eat in", false),
         ].flat(),
