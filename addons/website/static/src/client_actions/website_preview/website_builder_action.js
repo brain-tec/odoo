@@ -145,7 +145,10 @@ export class WebsiteBuilder extends Component {
                 if (isEditing) {
                     setTimeout(() => {
                         registry.category("systray").remove("website.WebsiteSystrayItem");
+                        document.querySelector(".o_builder_open .o_main_navbar").classList.add("d-none");
                     }, 200);
+                } else {
+                    document.querySelector(".o_main_navbar")?.classList.remove("d-none");
                 }
             },
             () => [this.state.isEditing]
@@ -257,10 +260,6 @@ export class WebsiteBuilder extends Component {
 
     onIframeLoad(ev) {
         this.websiteService.pageDocument = this.websiteContent.el.contentDocument;
-        this.websiteContent.el.setAttribute("is-ready", "true");
-        this.websiteContent.el.contentWindow.addEventListener("beforeunload", () => {
-            this.websiteContent.el.removeAttribute("is-ready");
-        });
         if (this.translation) {
             deleteQueryParam("edit_translations", this.websiteService.contentWindow, true);
         }
@@ -419,7 +418,6 @@ export class WebsiteBuilder extends Component {
         this.websiteContent.el.contentWindow.addEventListener(
             "PUBLIC-ROOT-READY",
             (event) => {
-                this.websiteContent.el.setAttribute("is-ready", "true");
                 this.websiteService.websiteRootInstance = event.detail.rootInstance;
                 deferred.resolve();
             },

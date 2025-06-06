@@ -801,11 +801,11 @@ test("support of connector '!' (mode readonly)", async () => {
         },
         {
             domain: `["!", "|", ("foo", "=", "abc"), "&", ("foo", "=", "def"), ("foo", "!=", "ghi")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nnot =\nabc\nany\nof:\nFoo\nnot =\ndef\nFoo\n=\nghi`,
+            result: `Match\nall\nof the following rules:\nFoo\nnot =\nabc\nany\nof:\nFoo\nnot =\ndef\nFoo\nnot not =\nghi`,
         },
         {
             domain: `["!", "|", ("foo", "=", "abc"), "&", ("foo", "!=", "def"), "!", ("foo", "=", "ghi")]`,
-            result: `Match\nall\nof the following rules:\nFoo\nnot =\nabc\nany\nof:\nFoo\n=\ndef\nFoo\n=\nghi`,
+            result: `Match\nall\nof the following rules:\nFoo\nnot =\nabc\nany\nof:\nFoo\nnot not =\ndef\nFoo\n=\nghi`,
         },
     ];
 
@@ -2878,7 +2878,7 @@ test("datetime options (readonly)", async () => {
                 ("datetime.minute_number", "!=", 40),
                 ("datetime.second_number", "!=", 30),
             ]`,
-            text: `Datetime ➔ Time = 15:40:30`,
+            text: `Datetime ➔ Time ➔ Hour not not = 15`, // first line here
         },
         {
             domain: `[
@@ -3278,4 +3278,51 @@ test("hide today, next, last operators when allowExpressions = False", async () 
         "set",
         "not set",
     ]);
+});
+
+test("many2one: placeholders for in operator", async () => {
+    await makeDomainSelector({
+        domain: `[("product_id", "in", [])]`,
+    });
+    expect(`${SELECTORS.valueEditor} input`).toHaveAttribute(
+        "placeholder",
+        `Select one or several criteria`
+    );
+});
+
+test("datetime: placeholders for in operator", async () => {
+    await makeDomainSelector({
+        domain: `[("datetime", "in", [])]`,
+    });
+    expect(`${SELECTORS.valueEditor} input`).toHaveAttribute(
+        "placeholder",
+        `Select one or several criteria`
+    );
+});
+
+test("date: placeholders for in operator", async () => {
+    await makeDomainSelector({
+        domain: `[("date", "in", [])]`,
+    });
+    expect(`${SELECTORS.valueEditor} input`).toHaveAttribute(
+        "placeholder",
+        `Select one or several criteria`
+    );
+});
+
+test("char: placeholders for in operator", async () => {
+    await makeDomainSelector({
+        domain: `[("display_name", "in", [])]`,
+    });
+    expect(`${SELECTORS.valueEditor} input`).toHaveAttribute(
+        "placeholder",
+        `Press "Enter" to add criterion`
+    );
+});
+
+test("selection: placeholders for in operator", async () => {
+    await makeDomainSelector({
+        domain: `[("state", "in", [])]`,
+    });
+    expect(`${SELECTORS.valueEditor} select`).toHaveValue(`Select one or several criteria`);
 });
