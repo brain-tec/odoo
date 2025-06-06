@@ -402,6 +402,9 @@
                 <t t-snippet="website.s_floating_blocks" string="Floating Cards" group="products">
                     <keywords>hero, animation, animated, cards, float, stacked, promo, categories, ecommerce, shop</keywords>
                 </t>
+                <t t-snippet="website.s_attributes_horizontal" string="Horizontal Attributes" group="products">
+                    <keywords>services, icons, features, characteristic, specs, advantages, functionalities, exhibit, details, capabilities, attributes, promotion, overview, specifications</keywords>
+                </t>
                 <t id="sale_products_hook"/>
 
                 <!-- Blogs group -->
@@ -2241,7 +2244,7 @@
         </we-collapse>
     </div>
     <div data-js="OptionsTab" data-selector="website-settings" data-no-check="true">
-        <we-row string="Theme">
+        <we-row string="Theme" groups="base.group_system">
             <we-button data-switch-theme="" data-no-preview="true" class="o_we_bg_brand_primary">Switch Theme</we-button>
         </we-row>
         <we-row string="Language">

@@ -345,7 +345,7 @@ test("Domain of date filter with month offset on graph field", async function ()
     /** @type GlobalFilter */
     const filter = {
         ...THIS_YEAR_GLOBAL_FILTER,
-        defaultValue: { yearOffset: 0, period: "july" },
+        defaultValue: "this_month",
     };
     await addGlobalFilter(model, filter, {
         chart: { [chartId]: { chain: "date", type: "date", offset: -2 } },
@@ -2097,6 +2097,7 @@ test("getFiltersMatchingPivot return correctly matching filter according to cell
                     <field name="probability" type="measure"/>
                     <field name="date" interval="year" type="col"/>
                     <field name="date" interval="month" type="col"/>
+                    <field name="date" interval="quarter" type="col"/>
                 </pivot>`,
     });
     await addGlobalFilter(
@@ -2133,6 +2134,10 @@ test("getFiltersMatchingPivot return correctly matching filter according to cell
     expect(relationalFiltersWithNoneValue).toEqual([{ filterId: "42", value: undefined }]);
     const dateFilters1 = getFiltersMatchingPivot(model, '=PIVOT.HEADER(1,"date:month","08/2016")');
     expect(dateFilters1).toEqual([{ filterId: "43", value: { yearOffset: -6, period: "august" } }]);
+    const december = getFiltersMatchingPivot(model, '=PIVOT.HEADER(1,"date:month","12/2016")');
+    expect(december).toEqual([{ filterId: "43", value: { yearOffset: -6, period: "december" } }]);
+    const q4 = getFiltersMatchingPivot(model, '=PIVOT.HEADER(1,"date:quarter","4/2016")');
+    expect(q4).toEqual([{ filterId: "43", value: { yearOffset: -6, period: "fourth_quarter" } }]);
     const dateFilters2 = getFiltersMatchingPivot(model, '=PIVOT.HEADER(1,"date:year","2016")');
     expect(dateFilters2).toEqual([{ filterId: "43", value: { yearOffset: -6 } }]);
 });

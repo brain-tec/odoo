@@ -55,7 +55,7 @@ const { DateTime } = luxon;
  * @property {boolean} [distributeNot]
  */
 
-export const TERM_OPERATORS_NEGATION = {
+const TERM_OPERATORS_NEGATION = {
     "<": ">=",
     ">": "<=",
     "<=": ">",
@@ -350,10 +350,6 @@ function getNormalizedCondition(condition) {
     return { ...condition, operator, negate };
 }
 
-function normalizeCondition(condition) {
-    Object.assign(condition, getNormalizedCondition(condition));
-}
-
 /**
  * @param {AST[]} ASTs
  * @param {Options} [options={}]
@@ -398,7 +394,6 @@ function _construcTree(ASTs, options = {}, negate = false) {
                 tree.value = Array.isArray(tree.value) ? tree.value : [tree.value];
             }
         }
-        normalizeCondition(tree);
     }
     let remaimingASTs = tailASTs;
     if (tree.type === "connector") {
@@ -869,7 +864,7 @@ function normalizeConnector(connector) {
         if (newTree.negate) {
             const newChild = { ...child, negate: !child.negate };
             if (newChild.type === "condition") {
-                return getNormalizedCondition(newChild);
+                return newChild;
             }
             return newChild;
         }
@@ -1655,24 +1650,4 @@ export function domainFromTree(tree) {
 export function treeFromDomain(domain, options = {}) {
     const tree = construcTree(domain, options);
     return applyTransformations(FULL_VIRTUAL_OPERATORS_CREATION, tree, options);
-}
-
-/**
- * @param {DomainRepr} domain a string representation of a domain
- * @param {Options} [options={}]
- * @returns {string} an expression
- */
-export function expressionFromDomain(domain, options = {}) {
-    const tree = treeFromDomain(domain, options);
-    return expressionFromTree(tree, options);
-}
-
-/**
- * @param {string} expression an expression
- * @param {Options} [options={}]
- * @returns {string} a string representation of a domain
- */
-export function domainFromExpression(expression, options = {}) {
-    const tree = treeFromExpression(expression, options);
-    return domainFromTree(tree);
 }
