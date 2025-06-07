@@ -877,3 +877,33 @@ class TestRepair(common.TransactionCase):
             'quantity': 1.0,
         })]
         self.assertEqual(repair_order.lot_id, sn_1)
+        # duplicate the move and check that the link to the repair order is not copied
+        copied_move = repair_order.move_ids.copy()
+        self.assertFalse(copied_move.repair_id)
+
+    def test_missing_production_location_raises_user_error(self):
+        """
+        Test that a missing production location raises a UserError when creating a warehouse.
+        """
+        company = Form(self.env['res.company'])
+        company.name = "ELCT Co."
+        company = company.save()
+        # mimic missing production location with intentional misconfiguration
+        prod_location = self.env['stock.location'].search([('usage', '=', 'production'), ('company_id', '=', company.id)], limit=1)
+        if prod_location:
+            prod_location.usage = "internal"
+        with self.assertRaises(UserError):
+            self.env['stock.warehouse'].create({
+                'name': 'ELCT',
+                'code': 'ET',
+                'company_id': company.id,
+            })
+
+    def test_add_product_from_catalog(self):
+        """Check that only consumable products are available in the catalog."""
+        catalog_action = self.repair0.action_add_from_catalog()
+        domain = catalog_action.get('domain')
+        self.assertEqual(self.product_order_repair.type, 'service')
+        self.assertEqual(self.product_product_11.type, 'consu')
+        self.assertTrue(self.product_product_11.filtered_domain(domain))
+        self.assertFalse(self.product_order_repair.filtered_domain(domain))

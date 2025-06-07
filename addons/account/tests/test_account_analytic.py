@@ -478,3 +478,47 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon, AnalyticCommon):
             self.analytic_plan_1._column_name(): self.analytic_account_1.id,
             'partner_id': self.partner_b.id,
         }])
+
+    def test_tax_line_sync_with_analytic(self):
+        """
+        Test that the line syncs, especially the tax line, keep the analytic distribution when saving the move
+        """
+        account_with_tax = self.company_data['default_account_revenue'].copy({'tax_ids': [Command.set(self.company_data['default_tax_sale'].ids)]})
+        move = self.env['account.move'].create({
+            'move_type': 'entry',
+            'line_ids': [Command.create({'account_id': account_with_tax.id, 'debit': 100})]
+        })
+
+        move.line_ids.write({'analytic_distribution': {self.analytic_account_1.id: 100}})
+
+        self.assertRecordValues(move.line_ids.sorted('balance'), [
+            {
+                'name': 'Automatic Balancing Line',
+                'analytic_distribution': {str(self.analytic_account_1.id): 100.00},
+            },
+            {
+                'name': self.company_data['default_tax_sale'].name,
+                'analytic_distribution': {str(self.analytic_account_1.id): 100.00},
+            },
+            {
+                'name': False,
+                'analytic_distribution': {str(self.analytic_account_1.id): 100.00},
+            },
+        ])
+
+    def test_get_relevant_plans_in_multi_company(self):
+        """ Test the plans returned with applicability rules and options in multi-company """
+        self.analytic_plan_1.write({
+            'applicability_ids': [Command.create({
+                'business_domain': 'general',
+                'applicability': 'mandatory',
+                'account_prefix': '60, 61, 62',
+            })],
+        })
+        company_2 = self.company_data_2['company']
+        plans_json = self.env['account.analytic.plan'].sudo().with_company(company_2).get_relevant_plans(
+            business_domain='general',
+            account=self.company_data['default_account_assets'].id,
+            company=self.company.id,
+        )
+        self.assertTrue(plans_json)

@@ -26,7 +26,7 @@ patch(PosStore.prototype, {
                 action: () =>
                     this.dialog.closeAll() &&
                     this.config.module_pos_restaurant &&
-                    !["PaymentScreen", "TicketScreen", "ActionScreen"].includes(
+                    !["PaymentScreen", "TicketScreen", "ActionScreen", "LoginScreen"].includes(
                         this.mainScreen.component.name
                     ) &&
                     this.showScreen("FloorScreen"),
@@ -460,7 +460,9 @@ patch(PosStore.prototype, {
     //@override
     addNewOrder(data = {}) {
         const order = super.addNewOrder(...arguments);
-        this.addPendingOrder([order.id]);
+        if (this.config.module_pos_restaurant) {
+            this.addPendingOrder([order.id]);
+        }
         return order;
     },
     createOrderIfNeeded(data) {
@@ -477,6 +479,7 @@ patch(PosStore.prototype, {
         let currentCourse;
         if (this.config.module_pos_restaurant) {
             const order = this.getOrder();
+            this.addPendingOrder([order.id]);
             if (!order.uiState.booked) {
                 order.setBooked(true);
             }
@@ -573,6 +576,19 @@ patch(PosStore.prototype, {
         }
 
         this.showScreen(screenName || "ProductScreen", props);
+    },
+    async handleSelectNamePreset(order) {
+        if (this.config.module_pos_restaurant) {
+            const orderPreset = order.preset_id;
+            if (orderPreset && !order.floating_order_name && !order.table_id) {
+                order.floating_order_name = order.getPartner()?.name;
+                if (!order.floating_order_name) {
+                    this.editFloatingOrderName(order);
+                }
+            }
+        } else {
+            return super.handleSelectNamePreset(...arguments);
+        }
     },
     findTable(tableNumber) {
         const find_table = (t) => t.table_number === parseInt(tableNumber);

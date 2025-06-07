@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:36+0000\n"
+"POT-Creation-Date: 2025-05-30 18:36+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Thi Huong Nguyen, 2025\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
@@ -1327,7 +1327,7 @@ msgid ""
 "                            <b>Help center</b>"
 msgstr ""
 "<i class=\"s_mega_menu_little_icons_icon fa fa-headphones fa-fw me-2\"/>\n"
-"                            <b>Trung tâm hỗ trợ</b>"
+"                            <b>Trung tâm Trợ giúp</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
@@ -6283,7 +6283,7 @@ msgstr "Vẫn chỉnh sửa HTML"
 #. odoo-javascript
 #: code:addons/website/static/src/components/edit_head_body_dialog/edit_head_body_dialog.xml:0
 msgid "Edit Head and Body Code"
-msgstr "Chỉnh sửa mã đầu và mã thân"
+msgstr "Chỉnh sửa mã tiêu đề và nội dung"
 
 #. module: website
 #. odoo-javascript
@@ -6404,7 +6404,7 @@ msgstr "Email & marketing"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Email Marketing"
-msgstr "Marketing qua Email"
+msgstr "Marketing qua email"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -6430,7 +6430,7 @@ msgstr "Mã nhúng"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
 msgid "Emily manages talent acquisition and workplace culture."
-msgstr "Emily quản lý việc thu hút nhân tài và văn hóa công ty."
+msgstr "Emily quản lý việc thu hút ứng viên tiềm năng và văn hóa công ty."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_empowerment
@@ -7898,7 +7898,6 @@ msgstr "Thẻ tiêu đề 1"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/js/editor/snippets.editor.js:0
-#: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "Headings"
 msgstr "Tiêu đề"
 
@@ -7908,36 +7907,26 @@ msgid "Headings 1"
 msgstr "Tiêu đề 1"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 2"
 msgstr "Tiêu đề 2"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 3"
 msgstr "Tiêu đề 3"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 4"
 msgstr "Tiêu đề 4"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 5"
 msgstr "Tiêu đề 5"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 6"
 msgstr "Tiêu đề 6"
@@ -7967,7 +7956,7 @@ msgstr "Xin chào! Tôi là Tony Fred."
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_images_subtitles
 msgid "Help center"
-msgstr "Trung tâm hỗ trợ"
+msgstr "Trung tâm Trợ giúp"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
@@ -9109,12 +9098,12 @@ msgstr "Không bằng"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 msgid "Is not set"
-msgstr "Không được đặt"
+msgstr "Không được thiết lập"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 msgid "Is set"
-msgstr "Được đặt"
+msgstr "Được thiết lập"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -9739,8 +9728,6 @@ msgid "Linkedin"
 msgstr "Linkedin"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Links"
 msgstr "Liên kết"
@@ -9800,18 +9787,18 @@ msgstr "Icon nhỏ"
 #. module: website
 #: model:website.configurator.feature,name:website.feature_module_live_chat
 msgid "Live Chat"
-msgstr "Trò chuyện Trực tiếp"
+msgstr "Trò chuyện trực tiếp"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Livechat"
-msgstr "Trò chuyện Trực tiếp"
+msgstr "Trò chuyện trực tiếp"
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/systray_items/new_content.js:0
 msgid "Livechat Widget"
-msgstr "Trò chuyện Trực tiếp Widget"
+msgstr "Trò chuyện trực tiếp Widget"
 
 #. module: website
 #. odoo-javascript
@@ -9959,7 +9946,7 @@ msgstr "Giám đốc Marketing"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
 msgid "Marketplace"
-msgstr "Marketplace"
+msgstr "Sàn thương mại điện tử"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_gallery_options
@@ -10347,12 +10334,12 @@ msgstr "Phân hệ"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__module_marketing_automation
 msgid "Module Marketing Automation"
-msgstr "Phân hệ Tự động hoá Marketing"
+msgstr "Phân hệ Tự động hoá marketing"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__module_website_livechat
 msgid "Module Website Livechat"
-msgstr "Phân hệ Trang web Trò chuyện Trực tiếp"
+msgstr "Phân hệ Trang web Trò chuyện trực tiếp"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -11641,7 +11628,7 @@ msgstr "Lịch sử số lần xem trang"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Page Visibility"
-msgstr "Hiển thị trang"
+msgstr "Chế độ hiển thị trang"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_configurator_feature__iap_page_code
@@ -12085,12 +12072,6 @@ msgid "Primary"
 msgstr "Chủ đạo"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Primary Buttons"
-msgstr "Nút chính"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Primary Style"
 msgstr "Phong cách chính"
@@ -12294,6 +12275,11 @@ msgstr "Pulse"
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Punchy Image"
 msgstr "Hình ảnh mạnh mẽ"
+
+#. module: website
+#: model:ir.model.fields,field_description:website.field_website__domain_punycode
+msgid "Punycode Domain"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -12682,7 +12668,7 @@ msgstr "Việc đặt lại các chế độ xem chưa được hỗ trợ"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
 msgid "Resources"
-msgstr "Nguồn lực"
+msgstr "Tài nguyên"
 
 #. module: website
 #. odoo-javascript
@@ -13103,12 +13089,6 @@ msgstr "Radio mặc định thứ hai"
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Secondary"
 msgstr "Secondary"
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Secondary Buttons"
-msgstr "Nút phụ"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -13793,8 +13773,8 @@ msgid ""
 "Speed and efficiency ensure tasks are completed quickly and resources are "
 "used optimally, enhancing productivity and satisfaction."
 msgstr ""
-"Tốc độ và hiệu quả đảm bảo các nhiệm vụ được hoàn thành nhanh chóng và nguồn"
-" lực được sử dụng tối ưu, nâng cao năng suất và sự hài lòng."
+"Tốc độ và hiệu quả đảm bảo các nhiệm vụ được hoàn thành nhanh chóng và tài "
+"nguyên được sử dụng tối ưu, nâng cao năng suất và sự hài lòng."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
@@ -14058,7 +14038,7 @@ msgstr "Gợi ý"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
 msgid "Support and Resources"
-msgstr "Hỗ trợ và nguồn lực"
+msgstr "Hỗ trợ và tài nguyên"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
@@ -14231,8 +14211,6 @@ msgid "Test your robots.txt with Google Search Console"
 msgstr "Kiểm tra tệp robots.txt của bạn bằng Google Search Console"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.grid_layout_options
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -14452,6 +14430,12 @@ msgstr "Giới hạn là số lượng dữ liệu tối đa được truy xuấ
 #: code:addons/website/models/website_snippet_filter.py:0
 msgid "The limit must be between 1 and 16."
 msgstr "Giới hạn phải từ 1 đến 16."
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "The logo is too large. Please upload a logo smaller than 2.5 MB."
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
@@ -15768,7 +15752,7 @@ msgstr "Giao diện mà kế thừa từ giao diện này"
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Visibility"
-msgstr "Hiển thị"
+msgstr "Chế độ hiển thị"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_ir_ui_view__visibility_password
@@ -16004,7 +15988,7 @@ msgid ""
 "We are committed to providing exceptional support and resources to help you "
 "succeed with our platform."
 msgstr ""
-"Chúng tôi cam kết cung cấp hỗ trợ và nguồn lực đặc biệt để giúp bạn thành "
+"Chúng tôi cam kết cung cấp hỗ trợ và tài nguyên đặc biệt để giúp bạn thành "
 "công với nền tảng của chúng tôi."
 
 #. module: website
@@ -16794,12 +16778,6 @@ msgstr "X Tài khoản"
 
 #. module: website
 #. odoo-javascript
-#: code:addons/website/static/src/xml/website_form_editor.xml:0
-msgid "Yes"
-msgstr "Có"
-
-#. module: website
-#. odoo-javascript
 #: code:addons/website/static/src/client_actions/website_preview/website_preview.js:0
 msgid ""
 "You are about to be redirected to the domain configured for your website ( "
@@ -16854,7 +16832,7 @@ msgid ""
 msgstr ""
 "Bạn có thể liên hệ với bộ phận hỗ trợ khách hàng của chúng tôi bằng cách gửi"
 " email đến info@yourcompany.example.com, gọi đến số +1 555-555-5556 hoặc sử "
-"dụng tính năng Trò chuyện Trực tiếp trên trang web của chúng tôi. Đội ngũ "
+"dụng tính năng Trò chuyện trực tiếp trên trang web của chúng tôi. Đội ngũ "
 "tận tâm của chúng tôi luôn sẵn sàng hỗ trợ 24/7 để giải đáp mọi thắc mắc "
 "hoặc vấn đề mà bạn gặp phải."
 

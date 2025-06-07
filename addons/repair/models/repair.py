@@ -91,7 +91,7 @@ class RepairOrder(models.Model):
     allowed_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_uom_ids')
     product_uom = fields.Many2one(
         'uom.uom', 'Unit', domain="[('id', 'in', allowed_uom_ids)]",
-        compute='compute_product_uom', store=True, precompute=True)
+        compute='compute_product_uom', store=True, precompute=True, readonly=False)
     lot_id = fields.Many2one(
         'stock.lot', 'Lot/Serial',
         compute="compute_lot_id", store=True,
@@ -716,6 +716,9 @@ class RepairOrder(models.Model):
         new_default_data = self.env['stock.move']._get_product_catalog_lines_data(parent_record=self)
 
         return {**default_data, **new_default_data}
+
+    def _get_product_catalog_domain(self):
+        return expression.AND([super()._get_product_catalog_domain(), [('type', '=', 'consu')]])
 
     def _get_product_catalog_order_data(self, products, **kwargs):
         product_catalog = super()._get_product_catalog_order_data(products, **kwargs)

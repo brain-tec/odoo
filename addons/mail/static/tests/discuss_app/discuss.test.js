@@ -18,7 +18,7 @@ import {
 } from "@mail/../tests/mail_test_helpers";
 import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
 import { describe, expect, test } from "@odoo/hoot";
-import { animationFrame, Deferred, press, tick, waitFor } from "@odoo/hoot-dom";
+import { animationFrame, Deferred, press, runAllTimers, tick, waitFor } from "@odoo/hoot-dom";
 import { mockDate } from "@odoo/hoot-mock";
 import {
     asyncStep,
@@ -34,7 +34,6 @@ import {
 } from "@web/../tests/web_test_helpers";
 
 import { OutOfFocusService } from "@mail/core/common/out_of_focus_service";
-import { EventBus } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { rpc } from "@web/core/network/rpc";
 
@@ -582,7 +581,7 @@ test("sidebar: basic channel rendering", async () => {
     await start();
     await openDiscuss();
     await contains(".o-mail-DiscussSidebarChannel", { text: "General" });
-    await contains(".o-mail-DiscussSidebarChannel img[data-alt='Thread Image']");
+    await contains(".o-mail-DiscussSidebarChannel img[alt='Thread Image']");
     await contains(".o-mail-DiscussSidebarChannel .o-mail-DiscussSidebarChannel-commands.d-none");
     await contains(
         ".o-mail-DiscussSidebarChannel .o-mail-DiscussSidebarChannel-commands [title='Channel settings']"
@@ -1455,18 +1454,7 @@ test("receive new message plays sound", async () => {
     await waitForSteps(["sound:new-message"]);
 });
 
-test("message sound on receiving new message (push notif enabled)", async () => {
-    // Simulate push notification allowed
-    patchWithCleanup(window.navigator, {
-        serviceWorker: Object.assign(new EventBus(), {
-            register: () => Promise.resolve(),
-            getRegistration: async () => ({
-                get pushManager() {
-                    return Promise.resolve({ getSubscription: async () => ({}) });
-                },
-            }),
-        }),
-    });
+test("message sound on receiving new message based on user preferences", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Dumbledore" });
     const userId = pyEnv["res.users"].create({ partner_id: partnerId });
@@ -1502,7 +1490,7 @@ test("message sound on receiving new message (push notif enabled)", async () => 
             thread_model: "discuss.channel",
         })
     );
-    await waitFor(".o-mail-ChatBubble .badge:contains(1)");
+    await waitFor(".o-mail-ChatBubble .badge:contains(1)", { timeout: 3000 });
     await waitForSteps(["sound:new-message"]);
     // simulate message sound settings turned off
     browser.localStorage.setItem("mail.user_setting.message_sound", false);
@@ -1517,7 +1505,7 @@ test("message sound on receiving new message (push notif enabled)", async () => 
             thread_model: "discuss.channel",
         })
     );
-    await waitFor(".o-mail-ChatBubble .badge:contains(2)");
+    await waitFor(".o-mail-ChatBubble .badge:contains(2)", { timeout: 3000 });
     expect.verifySteps([]);
     // simulate message sound settings turned on
     browser.localStorage.setItem("mail.user_setting.message_sound", null);
@@ -1532,7 +1520,7 @@ test("message sound on receiving new message (push notif enabled)", async () => 
             thread_model: "discuss.channel",
         })
     );
-    await waitFor(".o-mail-ChatBubble .badge:contains(3)");
+    await waitFor(".o-mail-ChatBubble .badge:contains(3)", { timeout: 3000 });
     await waitForSteps(["sound:new-message"]);
 });
 
@@ -1886,6 +1874,21 @@ test("warning on send with shortcut when attempting to post message with still-u
     await contains(".o_notification", { text: "Please wait while the file is uploading." });
 });
 
+test("post attachment-only message shows optimistically the new message with attachment", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "test" });
+    onRpcBefore("/mail/message/post", async () => await new Deferred());
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-mail-Composer input[type=file]");
+    const file = new File(["hello, world"], "text.txt", { type: "text/plain" });
+    await editInput(document.body, ".o-mail-Composer input[type=file]", [file]);
+    await contains(".o-mail-AttachmentCard:not(:has(.fa.fa-circle-o-notch)):contains('text.txt')");
+    await press("Enter");
+    await contains(".o-mail-Message");
+    await contains(".o-mail-Message .o-mail-AttachmentCard:contains('text.txt')");
+});
+
 test("failure on loading messages should display error", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
@@ -2119,6 +2122,7 @@ test("Message shows up even if channel data is incomplete", async () => {
         channel_type: "chat",
     });
     getService("bus_service").forceUpdateChannels();
+    await runAllTimers();
     await waitUntilSubscribe();
     await withUser(correspondentUserId, () =>
         rpc("/discuss/channel/notify_typing", {

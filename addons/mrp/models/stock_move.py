@@ -263,6 +263,7 @@ class StockMove(models.Model):
         for bom in self.bom_line_id.bom_id:
             if bom.type != 'phantom':
                 continue
+            # mapped('id') to keep NewId
             line_ids = self.bom_line_id.filtered(lambda line: line.bom_id == bom).mapped('id')
             total = len(line_ids)
             for i, line_id in enumerate(line_ids):
@@ -506,7 +507,7 @@ class StockMove(models.Model):
         return super(StockMove, moves)._action_done(cancel_backorder)
 
     def _should_bypass_reservation(self, forced_location=False):
-        return super()._should_bypass_reservation(forced_location) or self.product_id.is_kits
+        return super()._should_bypass_reservation(forced_location) or self.product_id.with_company(self.company_id).is_kits
 
     def action_explode(self):
         """ Explodes pickings """

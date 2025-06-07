@@ -1988,7 +1988,7 @@ msgstr "Nastavení personalistiky"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_manager_department_report__has_department_manager_access
 msgid "Has Department Manager Access"
-msgstr ""
+msgstr "Má přístup manažera oddělení"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__has_message
@@ -2198,7 +2198,7 @@ msgstr ""
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_consultant
 msgid "Innovation"
-msgstr ""
+msgstr "Inovace"
 
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_interim
@@ -3522,7 +3522,7 @@ msgstr "Počáteční datum"
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "State"
-msgstr "Stát"
+msgstr "Stav"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -3689,6 +3689,10 @@ msgid ""
 "                products and customers portfolio according to the marketing plan. This mission requires strong\n"
 "                collaboration with Technical Service and Sales."
 msgstr ""
+"Marketingový manažer definuje dlouhodobou a krátkodobou marketingovou strategii pro své segmenty trhu\n"
+"                na světě. Vyvíjí a sleduje roční rozpočet ve spolupráci s týmem prodeje. Definuje\n"
+"                produkty a portfolio zákazníků v souladu s marketingovým plánem. Toto povolání vyžaduje těsnou\n"
+"                spolupráci s technickými službami a týmem prodeje."
 
 #. module: hr
 #. odoo-python

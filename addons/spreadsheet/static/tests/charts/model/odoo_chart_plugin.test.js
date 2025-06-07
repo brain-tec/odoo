@@ -11,7 +11,7 @@ import {
 } from "@spreadsheet/../tests/helpers/chart";
 import { insertListInSpreadsheet } from "@spreadsheet/../tests/helpers/list";
 import { createModelWithDataSource } from "@spreadsheet/../tests/helpers/model";
-import { addGlobalFilter } from "@spreadsheet/../tests/helpers/commands";
+import { addGlobalFilter, updateChart } from "@spreadsheet/../tests/helpers/commands";
 import { THIS_YEAR_GLOBAL_FILTER } from "@spreadsheet/../tests/helpers/global_filter";
 import { mockService, makeServerError } from "@web/../tests/web_test_helpers";
 import * as spreadsheet from "@odoo/o-spreadsheet";
@@ -252,6 +252,33 @@ test("Data reloaded strictly upon domain update", async () => {
     await animationFrame();
     // it should have not have loaded the data since the domain was unchanged
     expect.verifySteps([]);
+});
+
+test("Data reloaded upon domain update for charts other than pie/bar/line", async () => {
+    const { model } = await createSpreadsheetWithChart({
+        type: "odoo_line",
+        mockRPC: async function (route, args) {
+            if (args.method === "web_read_group") {
+                expect.step("web_read_group");
+            }
+        },
+    });
+    const sheetId = model.getters.getActiveSheetId();
+    const chartId = model.getters.getChartIds(sheetId)[0];
+
+    await waitForDataLoaded(model);
+    expect.verifySteps(["web_read_group"]); // Data loaded
+
+    updateChart(model, chartId, { type: "odoo_pie" });
+    await waitForDataLoaded(model);
+    expect.verifySteps(["web_read_group"]); // Chart type changed
+
+    const newDefinition = model.getters.getChartDefinition(chartId);
+    updateChart(model, chartId, {
+        searchParams: { ...newDefinition.searchParams, domain: [["1", "=", "1"]] },
+    });
+    await waitForDataLoaded(model);
+    expect.verifySteps(["web_read_group"]); // Data re-loaded on domain update
 });
 
 test("Can import/export an Odoo chart", async () => {
@@ -572,86 +599,45 @@ test("Line chart to support cumulative data", async () => {
     ]);
 });
 
-test("cumulative line chart with past data before domain period", async () => {
-    const serverData = getBasicServerData();
-    serverData.models.partner.records = [
-        { date: "2020-01-01", probability: 10 },
-        { date: "2021-01-01", probability: 2 },
-        { date: "2022-01-01", probability: 3 },
-        { date: "2022-03-01", probability: 4 },
-        { date: "2022-06-01", probability: 5 },
-    ];
-    const { model } = await createSpreadsheetWithChart({
-        type: "odoo_line",
-        serverData,
-        definition: {
-            type: "odoo_line",
-            metaData: {
-                groupBy: ["date"],
-                measure: "probability",
-                order: null,
-                resModel: "partner",
-            },
-            searchParams: {
-                comparison: null,
-                context: {},
-                domain: [
-                    ["date", ">=", "2022-01-01"],
-                    ["date", "<=", "2022-12-31"],
-                ],
-                groupBy: [],
-                orderBy: [],
-            },
-            cumulative: true,
-            title: { text: "Partners" },
-            dataSourceId: "42",
-            id: "42",
-        },
-    });
-    const sheetId = model.getters.getActiveSheetId();
-    const chartId = model.getters.getChartIds(sheetId)[0];
-    await waitForDataLoaded(model);
-    expect(model.getters.getChartRuntime(chartId).chartJsConfig.data.datasets[0].data).toEqual([
-        15, 19, 24,
-    ]);
-});
+const cumulativeDateServerData = getBasicServerData();
+cumulativeDateServerData.models.partner.records = [
+    { date: "2020-01-01", probability: 10 },
+    { date: "2021-01-01", probability: 2 },
+    { date: "2022-01-01", probability: 3 },
+    { date: "2022-03-01", probability: 4 },
+    { date: "2022-06-01", probability: 5 },
+];
 
-test("update existing chart to cumulate past data", async () => {
-    const serverData = getBasicServerData();
-    serverData.models.partner.records = [
-        { date: "2020-01-01", probability: 10 },
-        { date: "2021-01-01", probability: 2 },
-        { date: "2022-01-01", probability: 3 },
-        { date: "2022-03-01", probability: 4 },
-        { date: "2022-06-01", probability: 5 },
-    ];
-    const definition = {
-        type: "odoo_line",
-        metaData: {
-            groupBy: ["date"],
-            measure: "probability",
-            order: null,
-            resModel: "partner",
-        },
-        searchParams: {
-            comparison: null,
-            context: {},
-            domain: [
-                ["date", ">=", "2022-01-01"],
-                ["date", "<=", "2022-12-31"],
-            ],
-            groupBy: [],
-            orderBy: [],
-        },
-        cumulative: false,
-        title: "Partners",
-        dataSourceId: "42",
-        id: "42",
-    };
+const cumulativeChartDefinition = {
+    type: "odoo_line",
+    metaData: {
+        groupBy: ["date"],
+        measure: "probability",
+        order: null,
+        resModel: "partner",
+    },
+    searchParams: {
+        comparison: null,
+        context: {},
+        domain: [
+            ["date", ">=", "2022-01-01"],
+            ["date", "<=", "2022-12-31"],
+        ],
+        groupBy: [],
+        orderBy: [],
+    },
+    title: "Partners",
+    dataSourceId: "42",
+    id: "42",
+};
+
+test("cumulative line chart with past data before domain period without specifying cumulated start", async () => {
     const { model } = await createSpreadsheetWithChart({
         type: "odoo_line",
-        serverData,
-        definition,
+        serverData: cumulativeDateServerData,
+        definition: {
+            ...cumulativeChartDefinition,
+        },
     });
     const sheetId = model.getters.getActiveSheetId();
     const chartId = model.getters.getChartIds(sheetId)[0];
@@ -662,7 +648,7 @@ test("update existing chart to cumulate past data", async () => {
 
     model.dispatch("UPDATE_CHART", {
         definition: {
-            ...definition,
+            ...cumulativeChartDefinition,
             cumulative: true,
         },
         id: chartId,
@@ -672,6 +658,48 @@ test("update existing chart to cumulate past data", async () => {
     expect(model.getters.getChartRuntime(chartId).chartJsConfig.data.datasets[0].data).toEqual([
         15, 19, 24,
     ]);
+});
+
+test("cumulative line chart with past data before domain period specifying cumulated start as true", async () => {
+    const { model } = await createSpreadsheetWithChart({
+        type: "odoo_line",
+        serverData: cumulativeDateServerData,
+        definition: {
+            ...cumulativeChartDefinition,
+            cumulative: true,
+            cumulatedStart: true,
+        },
+    });
+    const sheetId = model.getters.getActiveSheetId();
+    const chartId = model.getters.getChartIds(sheetId)[0];
+    await waitForDataLoaded(model);
+    expect(model.getters.getChartRuntime(chartId).chartJsConfig.data.datasets[0].data).toEqual([
+        15, 19, 24,
+    ]);
+    const figure = model.exportData().sheets[0].figures[0];
+    expect(figure.data.cumulative).toBe(true);
+    expect(figure.data.cumulatedStart).toBe(true);
+});
+
+test("cumulative line chart with past data before domain period specifying cumulated start as false", async () => {
+    const { model } = await createSpreadsheetWithChart({
+        type: "odoo_line",
+        serverData: cumulativeDateServerData,
+        definition: {
+            ...cumulativeChartDefinition,
+            cumulative: true,
+            cumulatedStart: false,
+        },
+    });
+    const sheetId = model.getters.getActiveSheetId();
+    const chartId = model.getters.getChartIds(sheetId)[0];
+    await waitForDataLoaded(model);
+    expect(model.getters.getChartRuntime(chartId).chartJsConfig.data.datasets[0].data).toEqual([
+        3, 7, 12,
+    ]);
+    const figure = model.exportData().sheets[0].figures[0];
+    expect(figure.data.cumulative).toBe(true);
+    expect(figure.data.cumulatedStart).toBe(false);
 });
 
 test("Can insert odoo chart from a different model", async () => {
@@ -810,7 +838,8 @@ test("See records when clicking on a bar chart bar", async () => {
     const runtime = model.getters.getChartRuntime(chartId);
     expect.verifySteps([]);
 
-    await runtime.chartJsConfig.options.onClick(undefined, [{ datasetIndex: 0, index: 0 }]);
+    const event = { type: "click", native: new Event("click") };
+    await runtime.chartJsConfig.options.onClick(event, [{ datasetIndex: 0, index: 0 }]);
     await animationFrame();
     expect.verifySteps(["load-action", "do-action"]);
 });
@@ -883,7 +912,8 @@ test("See records when clicking on a pie chart slice", async () => {
     const runtime = model.getters.getChartRuntime(chartId);
     expect.verifySteps([]);
 
-    await runtime.chartJsConfig.options.onClick(undefined, [{ datasetIndex: 0, index: 0 }]);
+    const event = { type: "click", native: new Event("click") };
+    await runtime.chartJsConfig.options.onClick(event, [{ datasetIndex: 0, index: 0 }]);
     await animationFrame();
     expect.verifySteps(["do-action"]);
 });
@@ -930,7 +960,8 @@ test("See records when clicking on a waterfall chart bar", async () => {
     const runtime = model.getters.getChartRuntime(chartId);
 
     // First dataset
-    await runtime.chartJsConfig.options.onClick(undefined, [{ datasetIndex: 0, index: 0 }]);
+    const event = { type: "click", native: new Event("click") };
+    await runtime.chartJsConfig.options.onClick(event, [{ datasetIndex: 0, index: 0 }]);
     await animationFrame();
     expect(lastActionCalled?.domain).toEqual([
         "&",
@@ -941,7 +972,7 @@ test("See records when clicking on a waterfall chart bar", async () => {
     ]);
 
     // First dataset subtotal
-    await runtime.chartJsConfig.options.onClick(undefined, [{ datasetIndex: 0, index: 2 }]);
+    await runtime.chartJsConfig.options.onClick(event, [{ datasetIndex: 0, index: 2 }]);
     await animationFrame();
     expect(lastActionCalled?.domain).toEqual([
         "&",
@@ -952,7 +983,7 @@ test("See records when clicking on a waterfall chart bar", async () => {
     ]);
 
     // Second dataset
-    await runtime.chartJsConfig.options.onClick(undefined, [{ datasetIndex: 0, index: 3 }]);
+    await runtime.chartJsConfig.options.onClick(event, [{ datasetIndex: 0, index: 3 }]);
     await animationFrame();
     expect(lastActionCalled?.domain).toEqual([
         "&",

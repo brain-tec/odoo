@@ -4,14 +4,15 @@
 # 
 # Translators:
 # Wil Odoo, 2025
+# Deniz Guvener_Odoo <degu@odoo.com>, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-20 10:02+0000\n"
+"POT-Creation-Date: 2025-03-12 20:36+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
+"Last-Translator: Deniz Guvener_Odoo <degu@odoo.com>, 2025\n"
 "Language-Team: Turkish (https://app.transifex.com/odoo/teams/41243/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -245,7 +246,7 @@ msgstr "<span>Görünüm</span>"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_hr_job_form
 msgid "<span>new Employees</span>"
-msgstr ""
+msgstr "<span>yeni Çalışanlar</span>"
 
 #. module: hr
 #: model_terms:hr.job,description:hr.job_hrm
@@ -493,7 +494,7 @@ msgstr "Uygula"
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_apprenticeship
 msgid "Apprenticeship"
-msgstr ""
+msgstr "Çıraklık"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
@@ -1227,7 +1228,7 @@ msgstr "Müşteri İlişkileri"
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_cto
 msgid "Cybersecurity"
-msgstr ""
+msgstr "Siber Güvenlik"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_developer
@@ -1906,7 +1907,7 @@ msgstr "Meyve, kahve ve <br> atıştırmalıklar sağlanır."
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_full_time
 msgid "Full-Time"
-msgstr ""
+msgstr "Tam Zamanlı"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
@@ -2201,7 +2202,7 @@ msgstr "Geçici"
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_part_time
 msgid "Intern"
-msgstr ""
+msgstr "Stajyer"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__is_flexible
@@ -2377,7 +2378,7 @@ msgstr "Tüm satış döngüsünü yönet"
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_cto
 msgid "Leadership"
-msgstr ""
+msgstr "Liderlik"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -2747,7 +2748,7 @@ msgstr "İşe alınması beklenen yeni personel adedi."
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee_public__work_location_type__office
 #: model:ir.model.fields.selection,name:hr.selection__hr_work_location__location_type__office
 msgid "Office"
-msgstr ""
+msgstr "Ofis"
 
 #. module: hr
 #: model:res.groups,name:hr.group_hr_user
@@ -3110,7 +3111,7 @@ msgstr "Kişisel Posta Kodu"
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid "Problem-Solving"
-msgstr ""
+msgstr "Problem Çözme"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_developer
@@ -3379,7 +3380,7 @@ msgstr "Okul"
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_seasonal
 msgid "Seasonal"
-msgstr ""
+msgstr "Mevsimlik"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -3539,7 +3540,7 @@ msgstr ""
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_statutaire
 msgid "Statutory"
-msgstr ""
+msgstr "Yasal"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_ceo
@@ -3758,7 +3759,7 @@ msgstr "%(employee)s 'nın çalışma izninin bitiş tarihi: %(date)s."
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_thesis
 msgid "Thesis"
-msgstr ""
+msgstr "Tez"
 
 #. module: hr
 #. odoo-python
@@ -3888,7 +3889,7 @@ msgstr ""
 #. module: hr
 #: model_terms:ir.actions.act_window,help:hr.open_view_categ_form
 msgid "Use tags to categorize your Employees."
-msgstr ""
+msgstr "Çalışanlarınızı kategorilere ayırmak için etiketleri kullanın."
 
 #. module: hr
 #: model:ir.model,name:hr.model_res_users
@@ -3908,7 +3909,7 @@ msgstr "Kullanıcının İş ortağı"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_job_view_kanban
 msgid "Vacancies:"
-msgstr ""
+msgstr "Açık Pozisyonlar:"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_company__hr_presence_control_ip_list
@@ -4206,6 +4207,18 @@ msgid ""
 "contributing to the set up of a new politic,\n"
 "being involved into satisfaction surveys in order to have a better knowledge of how the support given is seen by the customers."
 msgstr ""
+"Odoo'nun yeni bir sürümünün piyasaya sürülmesinden sonra eğitim araçlarımızın ve satış öncesi araçlarımızın güncellenmesine katılıyorsunuz. Aslında, yazılımın her yeni sürümü işlevsellik, ergonomi ve yapılandırma açısından önemli iyileştirmeler getirir.\n"
+"Mevcut araçlara (kitaplar, sınıf destekleri, Odoo sunum slaytları, ticari araçlar) aşina olmanız, yazılımın yeni sürümüne \n"
+"uygun hale getirmek için bu araçların güncellenmesine katkıda bulunmanız ve elbette yazılımın\n"
+"yeni alanlarını kapsayacak şekilde iyileştirmeler önermeniz gerekecektir.\n"
+"Kurulum Desteği departmanına katılıyorsunuz. Bu 3 kişilik ekip, yazılımın kurulumunda Odoo'nun müşterileriyle birlikte hareket eder. Göreviniz, yazılımın \n"
+"farklı işlevlerini göstermek için web seminerlerini canlandırmak olacaktır.\n"
+"Müşterileri desteklemek ve \n"
+"sorularına yanıt vermek.\n"
+"Destek yöneticisinin yeni destek hizmetleri kurmasına şu şekilde yardımcı olursunuz: \n"
+"yeni vakaların ele alınmasına dahil olmak,\n"
+"yeni bir politikanın oluşturulmasına katkıda bulunmak,\n"
+"verilen desteğin müşteriler tarafından nasıl görüldüğüne dair daha iyi bilgi sahibi olmak için memnuniyet anketlerine dahil olmak."
 
 #. module: hr
 #: model_terms:hr.job,description:hr.job_cto
@@ -4214,6 +4227,9 @@ msgid ""
 "\n"
 "The job is located in Grand-Rosière (1367), Belgium (between Louvain-La-Neuve and Namur)."
 msgstr ""
+"Partnerlerimize ve müşterilerimize sağladığımız danışmanlık hizmetlerinde yer alacaksınız: tasarım, analiz, geliştirme, test, proje yönetimi, destek/koçluk. Otonom olarak çalışacak ve bazı projeler için küçük dağınık haldeki geliştirme ekiplerini koordine edecek ve denetleyeceksiniz. İsteğe bağlı olarak partnerlere ve müşterilere Odoo eğitimleri vereceksiniz (oturum başına 8-10 kişi). Profesyonel Hizmetler Müdürünün altında çalışacak ve tüm geliştiriciler ve danışmanlarla iş birliği içinde olacaksınız.\n"
+"\n"
+"İş yerinin konumu: Grand-Rosière (1367), Belçika (Louvain-La-Neuve ile Namur arasında)."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -4312,4 +4328,4 @@ msgstr ""
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__work_permit_name
 msgid "work_permit_name"
-msgstr ""
+msgstr "çalışma_izni_adı"

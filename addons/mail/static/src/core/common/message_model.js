@@ -170,6 +170,9 @@ export class Message extends Record {
     }
 
     get bubbleColor() {
+        if (this.message_type === "notification") {
+            return undefined;
+        }
         if (!this.isSelfAuthored && !this.is_note && !this.isHighlightedFromMention) {
             return "blue";
         }
@@ -375,6 +378,7 @@ export class Message extends Record {
     get canToggleStar() {
         return Boolean(
             !this.is_transient &&
+                !this.isPending &&
                 this.thread &&
                 this.store.self.type === "partner" &&
                 this.store.self.isInternalUser
@@ -383,7 +387,7 @@ export class Message extends Record {
 
     /** @param {import("models").Thread} thread the thread where the message is shown */
     canAddReaction(thread) {
-        return Boolean(!this.is_transient && this.thread?.can_react);
+        return Boolean(!this.is_transient && !this.isPending && this.thread?.can_react);
     }
 
     /** @param {import("models").Thread} thread the thread where the message is shown */
@@ -435,6 +439,14 @@ export class Message extends Record {
         if (this.hasLink && this.store.hasLinkPreviewFeature) {
             rpc("/mail/link_preview", { message_id: this.id }, { silent: true });
         }
+    }
+
+    /**
+     * @param {import("models").Persona} persona
+     * @returns {string}
+     */
+    getPersonaName(persona) {
+        return this.thread?.getPersonaName(persona) || persona.displayName;
     }
 
     async react(content) {

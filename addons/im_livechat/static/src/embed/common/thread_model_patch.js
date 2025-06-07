@@ -87,9 +87,7 @@ patch(Thread.prototype, {
     },
     get displayName() {
         if (this.channel_type === "livechat" && this.livechat_operator_id) {
-            return (
-                this.livechat_operator_id.user_livechat_username || this.livechat_operator_id.name
-            );
+            return this.getPersonaName(this.livechat_operator_id);
         }
         return super.displayName;
     },
@@ -138,6 +136,7 @@ patch(Thread.prototype, {
         return message;
     },
 
+    /** @deprecated */
     get showUnreadBanner() {
         if (this.chatbot && !this.chatbot.currentStep?.operatorFound) {
             return false;

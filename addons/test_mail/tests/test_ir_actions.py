@@ -92,7 +92,7 @@ class TestServerActionsEmail(MailCommon, TestServerActionsBase):
                               'mail_mail_values': {
                                 'author_id': self.env.user.partner_id,
                               },
-                              'message_type': 'notification',
+                              'message_type': 'auto_comment',
                               'subtype': 'mail.mt_comment',
                              }
             ):
@@ -109,7 +109,7 @@ class TestServerActionsEmail(MailCommon, TestServerActionsBase):
         with self.assertSinglePostNotifications(
                 [{'partner': self.test_partner, 'type': 'email', 'status': 'ready'}],
                 message_info={'content': 'Hello %s' % self.test_partner.name,
-                              'message_type': 'notification',
+                              'message_type': 'auto_comment',
                               'subtype': 'mail.mt_note',
                              }
             ):
@@ -158,6 +158,27 @@ class TestServerActionsEmail(MailCommon, TestServerActionsBase):
         self.assertFalse(run_res, 'ir_actions_server: create next activity action correctly finished should return False')
         self.assertEqual(self.env['mail.activity'].search_count([]), before_count + 1)
         self.assertEqual(self.env['mail.activity'].search_count([('summary', '=', 'TestNew')]), 1)
+
+    def test_action_next_activity_from_x2m_user(self):
+        self.test_partner.user_ids = self.user_demo | self.user_admin
+        self.action.write({
+            'state': 'next_activity',
+            'activity_user_type': 'generic',
+            'activity_user_field_name': 'user_ids',
+            'activity_type_id': self.env.ref('mail.mail_activity_data_meeting').id,
+            'activity_summary': 'TestNew',
+        })
+        before_count = self.env['mail.activity'].search_count([])
+        run_res = self.action.with_context(self.context).run()
+        self.assertFalse(run_res, 'ir_actions_server: create next activity action correctly finished should return False')
+        self.assertEqual(self.env['mail.activity'].search_count([]), before_count + 1)
+        self.assertRecordValues(
+            self.env['mail.activity'].search([('res_model', '=', 'res.partner'), ('res_id', '=', self.test_partner.id)]),
+            [{
+                'summary': 'TestNew',
+                'user_id': self.user_demo.id,  # the first user found
+            }],
+        )
 
     @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
     def test_action_send_mail_without_mail_thread(self):

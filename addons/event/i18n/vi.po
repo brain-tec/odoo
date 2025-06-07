@@ -316,7 +316,7 @@ msgstr ""
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_event_kanban
 msgid "<i class=\"fa fa-map-marker mt-1 me-2 text-center ps-1\" title=\"Location\"/>"
-msgstr "<i class=\"fa fa-map-marker mt-1 me-2 text-center ps-1\" title=\"Địa điểm\"/>"
+msgstr "<i class=\"fa fa-map-marker mt-1 me-2 text-center ps-1\" title=\"Vị trí\"/>"
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_registration_view_kanban
@@ -749,7 +749,7 @@ msgstr ""
 "                    <!-- CONTACT ORGANIZER -->\n"
 "                    <t t-if=\"event_organizer\">\n"
 "                        <div>\n"
-"                            <span style=\"font-weight:300;margin:10px 0px\">Bạn có câu hỏi về sự kiệnt?</span>\n"
+"                            <span style=\"font-weight:300;margin:10px 0px\">Bạn có câu hỏi về sự kiện?</span>\n"
 "                            <div>Hãy liên hệ với ban tổ chức:</div>\n"
 "                            <ul>\n"
 "                                <li><t t-out=\"event_organizer.name or ''\">YourCompany</t></li>\n"
@@ -1219,9 +1219,9 @@ msgstr ""
 "                    <t t-if=\"event_organizer\">\n"
 "                        <div>\n"
 "                            <span style=\"font-weight:300;margin:10px 0px\">Bạn có câu hỏi về sự kiện?</span>\n"
-"                            <div>Please contact the organizer:</div>\n"
+"                            <div>Hãy liên hệ với ban tổ chức:</div>\n"
 "                            <ul>\n"
-"                                <li t-out=\"event_organizer.name or ''\">Hãy liên hệ với ban tổ chức</li>\n"
+"                                <li t-out=\"event_organizer.name or ''\">YourCompany</li>\n"
 "                                <t t-if=\"event_organizer.email\">\n"
 "                                    <li>Email: <a t-attf-href=\"mailto:{{ event_organizer.email }}\" style=\"text-decoration:none;color:#875A7B;\" t-out=\"event_organizer.email or ''\"/></li>\n"
 "                                </t>\n"
@@ -3980,7 +3980,7 @@ msgstr "Vui lòng quét lại!"
 #. module: event
 #: model_terms:event.event,description:event.event_2
 msgid "Point of Sale (POS), Introduction to report customization."
-msgstr "Điểm bán hàng (PoS), Giới thiệu về tuỳ biến báo cáo."
+msgstr "Máy tính tiền (PoS), Giới thiệu về tuỳ biến báo cáo."
 
 #. module: event
 #. odoo-javascript
@@ -4322,7 +4322,7 @@ msgstr "Bán vé trên trang web của bạn"
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.res_config_settings_view_form
 msgid "Sell tickets with Point of Sale"
-msgstr "Bán vé với Điểm bán hàng"
+msgstr "Bán vé với Máy tính tiền"
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.res_config_settings_view_form

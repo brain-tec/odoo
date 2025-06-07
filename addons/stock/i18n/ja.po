@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:36+0000\n"
+"POT-Creation-Date: 2025-05-07 20:36+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Junko Augias, 2025\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
@@ -68,16 +68,16 @@ msgid ""
 " * Done: The transfer has been processed.\n"
 " * Cancelled: The transfer has been cancelled."
 msgstr ""
-" * ドラフト：転送はまだ確定していません。予約は適用されません。\n"
-"* 別のオペレーション待ち：この転送は準備が整う前に別のオペレーションを待っています。\n"
-"* 待機中：転送は一部のプロダクトの在庫確保を待っています。\n"
-"(a) 配送方針が \"できるだけ早く\" の場合：プロダクトは予約できません。\n"
-"(b) 発送方針が \"全てのプロダクトが準備でき次第\" の場合：全てのプロダクトが予約できませんでした。\n"
-"* 準備完了：転送は処理準備が整いました。\n"
-"(a) 発送方針が\"できるだけ早く\"の場合：少なくとも1つのプロダクトが予約されました。\n"
-"(b) 発送方針が \"全てのプロダクトが準備でき次第\" の場合：全てのプロダクトが予約されました。\n"
-"* 完了：転送が処理されました。\n"
-"* 取消：転送がキャンセルされました。"
+"*ドラフト:転送はまだ確認されていません。引当は適用されません。 \n"
+"*別の操作を待機中:この転送は、準備が整う前に別の操作を待機しています。 \n"
+"*待機中:転送は一部のプロダクトの利用可能在庫を待っています。 \n"
+"(a)配送ポリシーは'できるだけ早く'です。プロダクトを引当てすることはできません。 \n"
+"(b)配送ポリシーは'すべてのプロダクトの準備ができたら'です。すべてのプロダクトを引当てできるわけではありません。 \n"
+"*準備完了:転送を処理する準備ができています。 \n"
+"(a)配送ポリシーは'できるだけ早く'です。少なくとも1つのプロダクトが引当されています。 \n"
+"(b)配送ポリシーは'すべてのプロダクトの準備ができたら'です。すべてのプロダクトが引当されています。 \n"
+"*完了:転送は処理されました。 \n"
+"*キャンセル済み:転送はキャンセルされました。"
 
 #. module: stock
 #. odoo-python
@@ -386,6 +386,12 @@ msgid "1 Week"
 msgstr "1週間"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
+#: model_terms:ir.ui.view,arch_db:stock.stock_report_delivery_aggregated_move_lines
+msgid "1.00"
+msgstr "1.00"
+
+#. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
 msgid "12.0"
 msgstr "12.0"
@@ -582,8 +588,8 @@ msgid ""
 "<i class=\"fa fa-exclamation-triangle\"/>\n"
 "                                All products could not be reserved. Click on the \"Check Availability\" button to try to reserve products."
 msgstr ""
-"<i class=\"fa fa-exclamation-triangle\"/>すべてのプロダクトを引当てできませんでした。 '在庫確認' "
-"ボタンをクリックして、プロダクトの予約を試みてください。"
+"<i class=\"fa fa-exclamation-triangle\"/>1すべての商品を引当できませんでした。 '在庫を確認' "
+"ボタンをクリックして、プロダクトの引当を試みてください。"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_picking_type_kanban
@@ -964,7 +970,7 @@ msgstr "この関数を有効にすると、この特定のロケーションで
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse__active
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_orderpoint__active
 msgid "Active"
-msgstr "有効化"
+msgstr "アクティブ"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_lot__activity_ids
@@ -1579,7 +1585,7 @@ msgstr "以下の文章は提案であり、Odoo S.A.ではその責任を負い
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__res_partner__picking_warn__block
 msgid "Blocking Message"
-msgstr "阻止メッセージ"
+msgstr "ブロッキングメッセージ"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_quant_package__quant_ids
@@ -1615,7 +1621,7 @@ msgid ""
 "current stock) to gather products. If we want to chain moves and have this "
 "one to wait for the previous, this second option should be chosen."
 msgstr ""
-"デフォルトでは、システムはソースの場所での在庫から取得し、利用可能になるまで受動的に待機します。他の方法としては、ソースの場所で調達を直接作成して（したがって、現在の在庫を無視する）製品を収集することができます。動きを連鎖させて、これを前のものを待つようにしたい場合は、この2番目のオプションを選択した方が良いです。"
+"デフォルトでは、システムは移動元ロケーションの在庫から取得し、在庫が利用可能になるのを受動的に待機します。一方、もう一つの方法では、出庫元ロケーションに対して直接調達を作成し、現在の在庫を無視してプロダクトを手配することができます。在庫移動を連鎖させ、この移動を前の移動が完了するまで待機させたい場合は、後者の方法を選択する必要があります。"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location__active
@@ -1778,7 +1784,7 @@ msgstr "集約バーコード(すなわち、複数のバーコードエンコ�
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
 #: model_terms:ir.ui.view,arch_db:stock.vpicktree
 msgid "Check Availability"
-msgstr "在庫状況を確認"
+msgstr "在庫を確認"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__has_packages
@@ -2901,7 +2907,7 @@ msgstr "移動先梱包IDドメイン"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__partner_id
 msgid "Destination Address "
-msgstr "移動先アドレス (引当用)"
+msgstr "配送先住所"
 
 #. module: stock
 #. odoo-python
@@ -3434,7 +3440,7 @@ msgstr "予測"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__forecast_availability
 msgid "Forecast Availability"
-msgstr "在庫状況の予測"
+msgstr "予測在庫"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_warehouse_orderpoint_form
@@ -4793,7 +4799,7 @@ msgstr "遅れた活動"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Late Availability"
-msgstr "在庫遅延"
+msgstr "在庫遅れ"
 
 #. module: stock
 #: model:ir.actions.act_window,name:stock.action_picking_tree_late
@@ -6129,6 +6135,12 @@ msgid "Pack Type"
 msgstr "梱包タイプ"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
+#: model_terms:ir.ui.view,arch_db:stock.stock_report_delivery_aggregated_move_lines
+msgid "Pack of 6"
+msgstr "6個パック"
+
+#. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_package_level__package_id
 #: model:ir.model.fields,field_description:stock.field_stock_quant__package_id
 #: model:ir.model.fields,field_description:stock.field_stock_scrap__package_id
@@ -6392,7 +6404,7 @@ msgstr "実地棚卸"
 #: code:addons/stock/models/stock_warehouse.py:0
 #: model:ir.model.fields,field_description:stock.field_stock_backorder_confirmation__pick_ids
 msgid "Pick"
-msgstr "集荷"
+msgstr "ピッキング"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move_line__quant_id
@@ -6402,7 +6414,7 @@ msgstr "以下から集荷:"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse__pick_type_id
 msgid "Pick Type"
-msgstr "ピックタイプ"
+msgstr "ピッキングタイプ"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_warehouse__delivery_steps__pick_ship
@@ -6867,7 +6879,7 @@ msgstr "プロダクト"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking__products_availability_state
 msgid "Products Availability State"
-msgstr "プロダクト在庫状況ステータス"
+msgstr "プロダクトの在庫可用性ステータス"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__priority
@@ -8304,7 +8316,7 @@ msgstr "割り当てを表示"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking__show_check_availability
 msgid "Show Check Availability"
-msgstr "在庫状況の確認を表示"
+msgstr "在庫確認ボタンを表示"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__show_operations
@@ -8880,7 +8892,7 @@ msgstr "技術情報"
 msgid ""
 "Technical field used to compute whether the button \"Check Availability\" "
 "should be displayed."
-msgstr "\"在庫状況を確認\" ボタンを表示するかどうかを計算するために使用される技術フィールド。"
+msgstr " \"在庫を確認\"  ボタンを表示するかどうかを計算するために使用される技術フィールド。"
 
 #. module: stock
 #. odoo-python
@@ -9351,16 +9363,6 @@ msgstr "このメモは入荷オーダに追加されます（倉庫内の保管
 
 #. module: stock
 #. odoo-python
-#: code:addons/stock/wizard/stock_orderpoint_snooze.py:0
-msgid ""
-"This order point has been created automatically.\n"
-"snoozing it will not affect future ones created for the same product."
-msgstr ""
-"このオーダポイントは自動的に作成されました。\n"
-"スヌーズしても、同じプロダクトに対して今後作成されるオーダポイントには影響しません。"
-
-#. module: stock
-#. odoo-python
 #: code:addons/stock/models/product.py:0
 msgid ""
 "This product has been used in at least one inventory movement. It is not "
@@ -9476,19 +9478,19 @@ msgstr "適用待ち"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_backorder_confirmation_line__to_backorder
 msgid "To Backorder"
-msgstr "バックオーダ作成"
+msgstr "バックオーダ待ち"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.quant_search_view
 msgid "To Count"
-msgstr "未棚卸"
+msgstr "棚卸待ち"
 
 #. module: stock
 #. odoo-python
 #: code:addons/stock/models/stock_picking.py:0
 #: model_terms:ir.ui.view,arch_db:stock.stock_picking_type_kanban
 msgid "To Deliver"
-msgstr "未配送"
+msgstr "配送待ち"
 
 #. module: stock
 #: model:ir.actions.act_window,name:stock.action_picking_tree_graph
@@ -9511,23 +9513,23 @@ msgstr "移動先"
 #: model:ir.model.fields,field_description:stock.field_stock_replenishment_option__qty_to_order
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_orderpoint__qty_to_order
 msgid "To Order"
-msgstr "オーダ予定"
+msgstr "オーダ予定数量"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_orderpoint__qty_to_order_computed
 msgid "To Order Computed"
-msgstr "算出オーダする"
+msgstr "オーダ予定数量(自動計算)"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_orderpoint__qty_to_order_manual
 msgid "To Order Manual"
-msgstr "手動オーダする"
+msgstr "オーダ予定数量(手動)"
 
 #. module: stock
 #. odoo-javascript
 #: code:addons/stock/static/src/stock_forecasted/forecasted_details.xml:0
 msgid "To Order with Visibility Days"
-msgstr "先読み日数でオーダ予定"
+msgstr "オーダ予定数量(先読み日数考慮)"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_quant_relocate_view_form
@@ -9546,12 +9548,12 @@ msgstr "処理待ち"
 #: code:addons/stock/models/stock_picking.py:0
 #: model_terms:ir.ui.view,arch_db:stock.stock_picking_type_kanban
 msgid "To Receive"
-msgstr "未入荷"
+msgstr "入荷待ち"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_reorder_report_search
 msgid "To Reorder"
-msgstr "再注文対象"
+msgstr "再発注対象"
 
 #. module: stock
 #. odoo-javascript
@@ -10082,7 +10084,7 @@ msgstr "照会"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.product_view_kanban_catalog
 msgid "View Availability"
-msgstr "在庫状況を表示"
+msgstr "在庫を表示"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_template_property_form

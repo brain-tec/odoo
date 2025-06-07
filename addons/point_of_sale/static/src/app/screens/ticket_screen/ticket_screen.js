@@ -449,7 +449,10 @@ export class TicketScreen extends Component {
     }
     getDate(order) {
         const todayTs = DateTime.now().startOf("day").ts;
-        if (order.date_order.startOf("day").ts === todayTs) {
+        if (
+            DateTime.fromSQL(order.date_order, { zone: "utc" }).toLocal().startOf("day").ts ===
+            todayTs
+        ) {
             return _t("Today");
         } else {
             return formatDate(order.date_order);
@@ -584,7 +587,7 @@ export class TicketScreen extends Component {
                 }
             }
         }
-        return emptyOrderForPartner || emptyOrder || this.pos.addNewOrder();
+        return emptyOrderForPartner || emptyOrder || this.pos.addNewOrder({ partner_id: partner });
     }
     _doesOrderHaveSoleItem(order) {
         const orderlines = order.getOrderlines();

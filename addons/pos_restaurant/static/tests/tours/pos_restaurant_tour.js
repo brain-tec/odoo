@@ -1,6 +1,5 @@
 /* global posmodel */
 
-import * as BillScreen from "@pos_restaurant/../tests/tours/utils/bill_screen_util";
 import * as PaymentScreen from "@point_of_sale/../tests/pos/tours/utils/payment_screen_util";
 import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import * as ReceiptScreen from "@point_of_sale/../tests/pos/tours/utils/receipt_screen_util";
@@ -14,11 +13,11 @@ import * as Order from "@point_of_sale/../tests/generic_helpers/order_widget_uti
 import * as TicketScreen from "@point_of_sale/../tests/pos/tours/utils/ticket_screen_util";
 import * as combo from "@point_of_sale/../tests/pos/tours/utils/combo_popup_util";
 import { inLeftSide } from "@point_of_sale/../tests/pos/tours/utils/common";
-import { negateStep } from "@point_of_sale/../tests/generic_helpers/utils";
 import { registry } from "@web/core/registry";
 import * as Numpad from "@point_of_sale/../tests/generic_helpers/numpad_util";
 import { renderToElement } from "@web/core/utils/render";
 import { delay } from "@odoo/hoot-dom";
+import * as TextInputPopup from "@point_of_sale/../tests/generic_helpers/text_input_popup_util";
 
 const ProductScreen = { ...ProductScreenPos, ...ProductScreenResto };
 
@@ -239,39 +238,20 @@ registry.category("web_tour.tours").add("SaveLastPreparationChangesTour", {
             Dialog.confirm("Open Register"),
             FloorScreen.clickTable("5"),
             ProductScreen.clickDisplayedProduct("Coca-Cola", true, "1"),
+            ProductScreen.orderlineIsToOrder("Coca-Cola"),
             ProductScreen.clickOrderButton(),
             FloorScreen.clickTable("5"),
+            Chrome.waitRequest(),
             ProductScreen.orderlinesHaveNoChange(),
+            Order.hasLine({
+                productName: "Coca-Cola",
+                quantity: 1,
+                withClass: ":eq(0)",
+            }),
             Chrome.clickPlanButton(),
-        ].flat(),
-});
-
-const billScreenQRCodeData = [
-    {
-        content: "Unique code is shown",
-        trigger: ".pos-receipt .unique-code",
-    },
-    {
-        content: "Portal url is shown",
-        trigger: ".pos-receipt .portal-url",
-    },
-];
-
-registry.category("web_tour.tours").add("BillScreenTour", {
-    steps: () =>
-        [
-            Chrome.startPoS(),
-            Dialog.confirm("Open Register"),
-            FloorScreen.clickTable("5"),
-            ProductScreen.clickDisplayedProduct("Coca-Cola"),
-            ProductScreen.clickControlButton("Bill"),
-            // HACK: is_modal should be false so that the trigger can be found.
-            billScreenQRCodeData.map(negateStep),
-            BillScreen.closeBillPopup(),
-            ProductScreen.clickPayButton(),
-            PaymentScreen.clickPaymentMethod("Bank"),
-            PaymentScreen.clickValidate(),
-            ...billScreenQRCodeData,
+            FloorScreen.hasTable("2"),
+            FloorScreen.hasTable("4"),
+            FloorScreen.hasTable("5"),
         ].flat(),
 });
 
@@ -448,13 +428,15 @@ registry.category("web_tour.tours").add("PreparationPrinterContent", {
                     if (!rendered.innerHTML.includes("14:20")) {
                         throw new Error("14:20 not found in printed receipt");
                     }
+                    if (rendered.innerHTML.includes("DUPLICATA!")) {
+                        throw new Error("DUPLICATA! should not be present in printed receipt");
+                    }
                 },
             },
         ].flat(),
 });
 
 registry.category("web_tour.tours").add("test_combo_preparation_receipt", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -520,7 +502,6 @@ registry.category("web_tour.tours").add("test_combo_preparation_receipt", {
 });
 
 registry.category("web_tour.tours").add("MultiPreparationPrinter", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -534,7 +515,6 @@ registry.category("web_tour.tours").add("MultiPreparationPrinter", {
 });
 
 registry.category("web_tour.tours").add("LeaveResidualOrder", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -549,15 +529,23 @@ registry.category("web_tour.tours").add("LeaveResidualOrder", {
             FloorScreen.clickTable("5"),
             ProductScreen.clickDisplayedProduct("Coca-Cola"),
             Chrome.clickPlanButton(),
+            FloorScreen.hasTable("2"),
+            FloorScreen.hasTable("4"),
+            FloorScreen.hasTable("5"),
         ].flat(),
 });
 
 registry.category("web_tour.tours").add("FinishResidualOrder", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
+            FloorScreen.orderCountSyncedInTableIs("5", "1"),
             FloorScreen.clickTable("5"),
+            Order.hasLine({
+                productName: "Coca-Cola",
+                quantity: 1,
+                withClass: ":eq(0)",
+            }),
             ProductScreen.totalAmountIs("2.20"),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Bank"),
@@ -567,7 +555,6 @@ registry.category("web_tour.tours").add("FinishResidualOrder", {
 });
 
 registry.category("web_tour.tours").add("test_multiple_preparation_printer_different_categories", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -578,5 +565,105 @@ registry.category("web_tour.tours").add("test_multiple_preparation_printer_diffe
             ProductScreen.clickOrderButton(),
             Dialog.bodyIs("Failed in printing Printer 1, Printer 2 changes of the order"),
             Dialog.confirm(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_preset_timing_restaurant", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            FloorScreen.clickNewOrder(),
+            ProductScreen.clickDisplayedProduct("Coca-Cola"),
+            ProductScreen.selectPreset("Eat in", "Takeaway"),
+            TextInputPopup.inputText("John"),
+            Dialog.confirm(),
+            Chrome.clickPresetTimingSlot(),
+            Chrome.selectPresetTimingSlotHour("12:00"),
+            Chrome.presetTimingSlotIs("12:00"),
+            Chrome.clickPresetTimingSlot(),
+            Chrome.selectPresetTimingSlotHour("15:00"),
+            Chrome.presetTimingSlotIs("15:00"),
+            Chrome.clickPlanButton(),
+            FloorScreen.clickTable("4"),
+            ProductScreen.clickDisplayedProduct("Coca-Cola"),
+            Chrome.clickOrders(),
+            TicketScreen.nthRowContains(1, "John"),
+            TicketScreen.nthRowContains(1, "Takeaway", false),
+            TicketScreen.nthRowContains(2, "002"),
+            TicketScreen.nthRowContains(2, "Eat in", false),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("RestaurantPresetTakeoutTour", {
+    steps: () =>
+        [
+            Chrome.freezeDateTime(1739370000000),
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            FloorScreen.clickTable("4"),
+            ProductScreen.clickDisplayedProduct("Coca-Cola", true),
+            ProductScreen.selectPreset("Eat in", "Takeout"),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("Deco Addict"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Cash"),
+            PaymentScreen.clickValidate(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_combo_preparation_receipt_layout", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            FloorScreen.clickTable("5"),
+            ProductScreen.clickDisplayedProduct("Office Combo"),
+            combo.select("Combo Product 2"),
+            combo.select("Combo Product 4"),
+            combo.select("Combo Product 6"),
+            Dialog.confirm(),
+            {
+                trigger: "body",
+                run: async () => {
+                    const order = posmodel.getOrder();
+                    const orderChange = posmodel.changesToOrder(
+                        order,
+                        posmodel.config.preparationCategories,
+                        false
+                    );
+                    const { orderData, changes } = posmodel.generateOrderChange(
+                        order,
+                        orderChange,
+                        Array.from(posmodel.config.preparationCategories),
+                        false
+                    );
+
+                    orderData.changes = {
+                        title: "new",
+                        data: changes.new,
+                    };
+
+                    const printed = renderToElement("point_of_sale.OrderChangeReceipt", {
+                        data: orderData,
+                    });
+                    const comboItemLines = [...printed.querySelectorAll(".orderline.ms-5")].map(
+                        (el) => el.innerText
+                    );
+                    const expectedComboItemLines = [
+                        "1 Combo Product 2",
+                        "1 Combo Product 4",
+                        "1 Combo Product 6",
+                    ];
+                    if (
+                        comboItemLines.length !== expectedComboItemLines.length ||
+                        !comboItemLines.every((line, index) =>
+                            line.includes(expectedComboItemLines[index])
+                        )
+                    ) {
+                        throw new Error("Order line mismatch");
+                    }
+                },
+            },
         ].flat(),
 });

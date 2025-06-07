@@ -1122,7 +1122,7 @@ msgstr "Đã bị chặn"
 #: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_form
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
 msgid "Blocked By"
-msgstr "Đã chặn bởi"
+msgstr "Bị chặn bởi"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
@@ -3564,7 +3564,7 @@ msgstr "Cập nhật dự án"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__project_privacy_visibility
 msgid "Project Visibility"
-msgstr "Hiển thị dự án"
+msgstr "Chế độ hiển thị dự án"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
@@ -3915,7 +3915,7 @@ msgstr "Đang nghiên cứu"
 #. odoo-javascript
 #: code:addons/project/static/src/views/project_task_kanban/project_task_kanban_examples.js:0
 msgid "Resources Allocation"
-msgstr "Phân bổ nguồn lực"
+msgstr "Phân bổ tài nguyên"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__activity_user_id
@@ -5308,7 +5308,7 @@ msgstr "Xem nhiệm vụ"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__privacy_visibility
 msgid "Visibility"
-msgstr "Hiển thị"
+msgstr "Chế độ hiển thị"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project

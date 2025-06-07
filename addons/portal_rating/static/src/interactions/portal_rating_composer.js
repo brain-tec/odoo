@@ -28,7 +28,6 @@ export class RatingPopupComposer extends Interaction {
             "user_id": user.userId,
             "reloadRatingPopupComposer": this.onReloadRatingPopupComposer.bind(this),
         }, options, {});
-        this.options.send_button_label = this.options.default_message_id ? _t("Update review") : _t("Post review");
     }
 
     start() {
@@ -54,12 +53,13 @@ export class RatingPopupComposer extends Interaction {
 
         // Append the modal
         const modalEl = this.el.querySelector(".o_rating_popup_composer_modal");
+        modalEl.replaceChildren();
         this.renderAt(
             "portal_rating.PopupComposer", {
             inline_mode: true,
             widget: this,
             val: this.rating_avg,
-        }, modalEl) || "";
+        }, modalEl);
 
         if (this.composerEl) {
             this.services["public.interactions"].stopInteractions(this.composerEl);
@@ -68,8 +68,10 @@ export class RatingPopupComposer extends Interaction {
         // Instantiate the "Portal Composer" widget and insert it into the modal
         // TODO Exchange options through another mean ?
         const options = PortalComposer.prepareOptions(this.options);
+        // Change the text of send button
+        options.send_button_label = options.default_message_id ? _t("Update review") : _t("Post review");
         this.env.portalComposerOptions = options;
-        const locationEl = this.composerEl || this.el.querySelector(".o_rating_popup_composer_modal .o_portal_chatter_composer");
+        const locationEl = this.el.querySelector(".o_rating_popup_composer_modal .o_portal_chatter_composer");
         // TODO maybe always put in this.options - and prepare in setup ???
         if (!locationEl) {
             return;

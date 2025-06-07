@@ -7,6 +7,7 @@ import {
     fields,
     getService,
     makeServerError,
+    MockServer,
     mockService,
     models,
     mountView,
@@ -258,7 +259,7 @@ test("Add a custom domain leaf on default state of the view with a globalDomain 
     await mountView({
         type: "hierarchy",
         resModel: "hr.employee",
-        arch: Employee._views["hierarchy,false"],
+        viewId: false,
         searchViewArch: `
                 <search>
                     <filter name="exclude_third" domain="[['id', '!=', 3]]"/>
@@ -304,7 +305,7 @@ test("search record in hierarchy view", async () => {
     await mountView({
         type: "hierarchy",
         resModel: "hr.employee",
-        arch: Employee._views["hierarchy,false"],
+        viewId: false,
         searchViewArch: `
             <search>
                 <filter name="test_filter" domain="[['id', '=', 4]]"/>
@@ -326,8 +327,7 @@ test("search record in hierarchy view with child field name defined in the arch"
     await mountView({
         type: "hierarchy",
         resModel: "hr.employee",
-        viewId: 1,
-        arch: Employee._views["hierarchy,false"],
+        viewId: false,
         searchViewArch: `
             <search>
                 <filter name="test_filter" domain="[['id', '=', 4]]"/>
@@ -349,7 +349,7 @@ test("fetch parent record", async () => {
     await mountView({
         type: "hierarchy",
         resModel: "hr.employee",
-        arch: Employee._views["hierarchy,false"],
+        viewId: false,
         searchViewArch: `
             <search>
                 <filter name="test_filter" domain="[['id', '=', 4]]"/>
@@ -394,7 +394,7 @@ test("fetch parent when there are many records without the same parent in the sa
     await mountView({
         type: "hierarchy",
         resModel: "hr.employee",
-        arch: Employee._views["hierarchy,false"],
+        viewId: false,
         searchViewArch: `
             <search>
                 <filter name="test_filter" domain="[['name', 'ilike', 'l']]"/>
@@ -434,7 +434,7 @@ test("fetch parent when parent record is in the same row", async () => {
     await mountView({
         type: "hierarchy",
         resModel: "hr.employee",
-        arch: Employee._views["hierarchy,false"],
+        viewId: false,
         searchViewArch: `
             <search>
                 <filter name="test_filter" domain="[['id', 'in', [1, 2, 3, 4, 5]]]"/>
@@ -467,7 +467,7 @@ test("fetch parent of node with children displayed", async () => {
     await mountView({
         type: "hierarchy",
         resModel: "hr.employee",
-        arch: Employee._views["hierarchy,false"],
+        viewId: false,
         searchViewArch: `
             <search>
                 <filter name="test_filter" domain="[['id', 'in', [1, 2, 3, 4, 5]]]"/>
@@ -535,7 +535,7 @@ test("drag and drop is disabled by default", async () => {
 });
 
 test("drag and drop record on another row", async () => {
-    Employee._views["hierarchy,false"] = Employee._views["hierarchy,false"].replace(
+    Employee._views["hierarchy"] = Employee._views["hierarchy"].replace(
         "<hierarchy>",
         "<hierarchy draggable='1'>"
     );
@@ -568,7 +568,7 @@ test("drag and drop record on another row", async () => {
 
 test("drag and drop record at an invalid position", async () => {
     expect.assertions(8);
-    Employee._views["hierarchy,false"] = Employee._views["hierarchy,false"].replace(
+    Employee._views["hierarchy"] = Employee._views["hierarchy"].replace(
         "<hierarchy>",
         "<hierarchy draggable='1'>"
     );
@@ -622,7 +622,7 @@ test("drag and drop record at an invalid position", async () => {
 });
 
 test("drag and drop record on sibling node", async () => {
-    Employee._views["hierarchy,false"] = Employee._views["hierarchy,false"].replace(
+    Employee._views["hierarchy"] = Employee._views["hierarchy"].replace(
         "<hierarchy>",
         "<hierarchy draggable='1'>"
     );
@@ -720,7 +720,7 @@ test("drag and drop record on node of another tree", async () => {
 });
 
 test("drag and drop node unfolded on first row", async () => {
-    Employee._views["hierarchy,false"] = Employee._views["hierarchy,false"].replace(
+    Employee._views["hierarchy"] = Employee._views["hierarchy"].replace(
         "<hierarchy>",
         "<hierarchy draggable='1'>"
     );
@@ -769,7 +769,7 @@ test("drag and drop node unfolded on first row", async () => {
 });
 
 test("drag and drop node when other node is unfolded on first row", async () => {
-    Employee._views["hierarchy,false"] = Employee._views["hierarchy,false"].replace(
+    Employee._views["hierarchy"] = Employee._views["hierarchy"].replace(
         "<hierarchy>",
         "<hierarchy draggable='1'>"
     );
@@ -808,7 +808,7 @@ test("drag and drop node when other node is unfolded on first row", async () => 
 });
 
 test("drag and drop node unfolded on another row", async () => {
-    Employee._views["hierarchy,false"] = Employee._views["hierarchy,false"].replace(
+    Employee._views["hierarchy"] = Employee._views["hierarchy"].replace(
         "<hierarchy>",
         "<hierarchy draggable='1'>"
     );
@@ -822,6 +822,7 @@ test("drag and drop node unfolded on another row", async () => {
     await mountView({
         type: "hierarchy",
         resModel: "hr.employee",
+        viewId: false,
     });
     expect(".o_hierarchy_row").toHaveCount(2);
     expect(".o_hierarchy_node").toHaveCount(2);
@@ -922,7 +923,7 @@ test("drag and drop node as a child of a sibling of its parent", async () => {
 });
 
 test("drag and drop record and respect ordering", async () => {
-    Employee._views["hierarchy,false"] = Employee._views["hierarchy,false"].replace(
+    Employee._views["hierarchy"] = Employee._views["hierarchy"].replace(
         "<hierarchy>",
         "<hierarchy default_order='name' draggable='1'>"
     );
@@ -984,7 +985,7 @@ test("drag and drop record and respect ordering", async () => {
 });
 
 test("drag node and move it on a row", async () => {
-    Employee._views["hierarchy,false"] = Employee._views["hierarchy,false"].replace(
+    Employee._views["hierarchy"] = Employee._views["hierarchy"].replace(
         "<hierarchy>",
         "<hierarchy draggable='1'>"
     );
@@ -1011,7 +1012,7 @@ test("drag node and move it on a row", async () => {
 });
 
 test("drag node and move it on another node", async () => {
-    Employee._views["hierarchy,false"] = Employee._views["hierarchy,false"].replace(
+    Employee._views["hierarchy"] = Employee._views["hierarchy"].replace(
         "<hierarchy>",
         "<hierarchy draggable='1'>"
     );
@@ -1044,7 +1045,7 @@ test("drag node and move it on another node", async () => {
 });
 
 test("drag node to scroll", async () => {
-    Employee._views["hierarchy,false"] = Employee._views["hierarchy,false"].replace(
+    Employee._views["hierarchy"] = Employee._views["hierarchy"].replace(
         "<hierarchy>",
         "<hierarchy draggable='1'>"
     );
@@ -1139,7 +1140,7 @@ test("check default icon is correctly used inside button to display child nodes"
 });
 
 test("use other icon used next to Unfold string displayed inside the button", async () => {
-    Employee._views["hierarchy,false"] = Employee._views["hierarchy,false"].replace(
+    Employee._views["hierarchy"] = Employee._views["hierarchy"].replace(
         "<hierarchy>",
         "<hierarchy icon='fa-users'>"
     );
@@ -1190,7 +1191,7 @@ test("use `hierarchy_res_id` context to load the view at that specific node with
 });
 
 test("cannot set the record dragged as parent", async () => {
-    Employee._views["hierarchy,false"] = Employee._views["hierarchy,false"].replace(
+    Employee._views["hierarchy"] = Employee._views["hierarchy"].replace(
         "<hierarchy>",
         "<hierarchy draggable='1'>"
     );
@@ -1223,7 +1224,7 @@ test("cannot set the record dragged as parent", async () => {
 });
 
 test("cannot create cyclic", async () => {
-    Employee._views["hierarchy,false"] = Employee._views["hierarchy,false"].replace(
+    Employee._views["hierarchy"] = Employee._views["hierarchy"].replace(
         "<hierarchy>",
         "<hierarchy draggable='1'>"
     );
@@ -1330,8 +1331,9 @@ test("can properly evaluate invisible elements in a hierarchy card", async () =>
 test("Reload the view with the same unfolded records when clicking with a view button", async () => {
     mockService("action", {
         doActionButton({ resId, onClose }) {
-            const record = Employee._records[resId - 1];
-            record.name = "_" + record.name;
+            for (const record of MockServer.env["hr.employee"].browse(resId)) {
+                record.name = "_" + record.name;
+            }
             onClose();
         },
     });
@@ -1491,7 +1493,7 @@ test("Avoid fetching subnodes if those subnodes are already in the view", async 
     await mountView({
         type: "hierarchy",
         resModel: "hr.employee",
-        arch: Employee._views["hierarchy,false"],
+        arch: Employee._views.hierarchy,
         searchViewArch: `
             <search>
                 <filter name="test_filter" domain="[['id', 'in', [1, 2, 3, 4, 5]]]"/>

@@ -10,7 +10,7 @@ from odoo import api, fields, models, tools
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
 from odoo.osv import expression
-from odoo.tools import SQL
+from odoo.tools import SQL, clean_context
 from odoo.tools.translate import _
 
 
@@ -677,7 +677,7 @@ class HrApplicant(models.Model):
         res = super().write(vals)
 
         for applicant in self:
-            if applicant.pool_applicant_id and (not applicant.is_pool_applicant):
+            if applicant.pool_applicant_id and applicant != applicant.pool_applicant_id and (not applicant.is_pool_applicant):
                 if 'email_from' in vals:
                     applicant.pool_applicant_id.email_from = vals['email_from']
                 if 'partner_phone' in vals:
@@ -1022,7 +1022,7 @@ class HrApplicant(models.Model):
             })
 
         action = self.env['ir.actions.act_window']._for_xml_id('hr.open_view_employee_list')
-        employee = self.env['hr.employee'].create(self._get_employee_create_vals())
+        employee = self.env['hr.employee'].with_context(clean_context(self.env.context)).create(self._get_employee_create_vals())
         action['res_id'] = employee.id
         employee_attachments = self.env['ir.attachment'].search([('res_model', '=','hr.employee'), ('res_id', '=', employee.id)])
         unique_attachments = self.attachment_ids.filtered(

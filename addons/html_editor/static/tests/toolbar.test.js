@@ -34,9 +34,15 @@ import {
     moveSelectionOutsideEditor,
     setContent,
     setSelection,
+    simulateDoubleClickSelect,
+    simulateTripleClickSelect,
+    firstClick,
+    secondClick,
+    thirdClick,
 } from "./_helpers/selection";
 import { strong } from "./_helpers/tags";
 import { insertText } from "./_helpers/user_actions";
+import { nodeSize } from "@html_editor/utils/position";
 
 test.tags("desktop");
 test("toolbar is only visible when selection is not collapsed in desktop", async () => {
@@ -501,6 +507,75 @@ test("toolbar open on single selected cell in table", async () => {
     expect(".o-we-toolbar").toHaveCount(1);
 });
 
+test("should select table single cell when entire content is selected via mouse movement", async () => {
+    const content = unformat(`
+        <table class="table table-bordered o_table" style="width: 250px;">
+            <tbody>
+                <tr>
+                    <td style="width: 200px;">
+                        <p>abcdefghijklmno</p>
+                        <p>abcdefghijklmnopqrs</p>
+                        <p>abcdefg</p>
+                    </td>
+                    <td style="width: 50px;"><p><br></p></td>
+                </tr>
+                <tr>
+                    <td><p><br></p></td>
+                    <td><p><br></p></td>
+                </tr>
+            </tbody>
+        </table>
+    `);
+
+    const { el } = await setupEditor(content);
+
+    const firstTd = el.querySelector("td");
+    const firstP = firstTd.firstChild;
+    const lastP = firstTd.lastChild;
+
+    // Simulate mousedown at the top of the first paragraph.
+    const rectStart = firstP.getBoundingClientRect();
+    manuallyDispatchProgrammaticEvent(firstP, "mousedown", {
+        clientX: rectStart.left,
+        clientY: rectStart.top,
+    });
+
+    // Set selection from start of first <p> to end of last <p>.
+    setSelection({
+        anchorNode: firstP.firstChild,
+        anchorOffset: 0,
+        focusNode: lastP.firstChild,
+        focusOffset: nodeSize(lastP.firstChild),
+    });
+    await animationFrame();
+
+    // Get bounding rect of selection range.
+    const range = document.createRange();
+    range.setStart(lastP.firstChild, 0);
+    range.setEnd(lastP.firstChild, nodeSize(lastP.firstChild));
+    const rect = range.getBoundingClientRect();
+
+    // Simulate mousemove and mouseup events to complete the selection.
+    manuallyDispatchProgrammaticEvent(lastP, "mousemove", {
+        clientX: rect.right,
+        clientY: rect.top,
+    });
+    manuallyDispatchProgrammaticEvent(lastP, "mousemove", {
+        clientX: rect.right + 5,
+        clientY: rect.top,
+    });
+    manuallyDispatchProgrammaticEvent(lastP, "mouseup", {
+        clientX: rect.right + 5,
+        clientY: rect.top,
+    });
+
+    await animationFrame();
+    await tick();
+
+    expect(firstTd).toHaveClass("o_selected_td");
+    expect(".o-we-toolbar").toHaveCount(1);
+});
+
 test.tags("desktop");
 test("toolbar should close on keypress tab inside table", async () => {
     const contentBefore = unformat(`
@@ -794,7 +869,7 @@ test("close the toolbar if the selection contains any nodes (traverseNode = [], 
 });
 
 test.tags("desktop");
-test("should not close image cropper while loading media", async () => {
+test("should be able to close image cropper while loading the media", async () => {
     onRpc("/html_editor/get_image_info", () => ({
         original: {
             image_src: "#",
@@ -818,24 +893,8 @@ test("should not close image cropper while loading media", async () => {
     await click('.btn[title="Discard"]');
     await animationFrame();
 
-    // cropper should not close as the cropper still loading the image.
-    expect('.btn[title="Discard"]').toHaveCount(1);
-
-    // once the image loaded we should be able to close
-    await waitFor('img[src^="blob:"]', { timeout: 2000 });
-    await click('.btn[title="Discard"]');
-    await waitForNone('.btn[title="Discard"]', { timeout: 1000 });
-
-    await click("img");
-    await waitFor(".o-we-toolbar", { timeout: 1000 });
-
-    await click('div[name="image_transform"] > .btn');
-    await animationFrame();
-
-    await waitFor('.btn[name="image_crop"]', { timeout: 1000 });
-    await click('.btn[name="image_crop"]');
-    await waitFor('.btn[title="Discard"]', { timeout: 1000 });
-    expect('.btn[title="Discard"]').toHaveCount(1);
+    // Cropper should get closed while the cropper still loading the image.
+    expect('.btn[title="Discard"]').toHaveCount(0);
 });
 
 describe.tags("desktop");
@@ -922,42 +981,11 @@ describe("toolbar open and close on user interaction", () => {
             expect(".o-we-toolbar").toHaveCount(0);
         });
 
-        const firstClick = async (target) => {
-            manuallyDispatchProgrammaticEvent(target, "mousedown", { detail: 1 });
-            setSelection({ anchorNode: target, anchorOffset: 0 });
-            await tick(); // selectionChange
-            manuallyDispatchProgrammaticEvent(target, "mouseup", { detail: 1 });
-            manuallyDispatchProgrammaticEvent(target, "click", { detail: 1 });
-            await tick();
-        };
-
-        const secondClick = async (target) => {
-            manuallyDispatchProgrammaticEvent(target, "mousedown", { detail: 2 });
-            const document = target.ownerDocument;
-            document.getSelection().modify("extend", "forward", "word");
-            await tick(); // selectionChange
-            manuallyDispatchProgrammaticEvent(target, "mouseup", { detail: 2 });
-            manuallyDispatchProgrammaticEvent(target, "click", { detail: 2 });
-            await tick();
-        };
-
-        const thirdClick = async (target) => {
-            manuallyDispatchProgrammaticEvent(target, "mousedown", { detail: 3 });
-            const document = target.ownerDocument;
-            document.getSelection().modify("extend", "forward", "paragraphboundary");
-            await tick(); // selectionChange
-            manuallyDispatchProgrammaticEvent(target, "mouseup", { detail: 3 });
-            manuallyDispatchProgrammaticEvent(target, "click", { detail: 3 });
-            await tick();
-        };
-
         test("toolbar should open on double click", async () => {
             const { el } = await setupEditor("<p>test</p>");
             const p = el.firstElementChild;
 
-            // Double click
-            await firstClick(p);
-            await secondClick(p);
+            await simulateDoubleClickSelect(p);
             expect(getContent(el)).toBe("<p>[test]</p>");
             // toolbar open after double click is debounced
             await advanceTime(500);
@@ -968,10 +996,7 @@ describe("toolbar open and close on user interaction", () => {
             const { el } = await setupEditor("<p>test text</p>");
             const p = el.firstElementChild;
 
-            // Triple click
-            await firstClick(p);
-            await secondClick(p);
-            await thirdClick(p);
+            await simulateTripleClickSelect(p);
             expect(getContent(el)).toBe("<p>[test text]</p>");
             // toolbar open after triple click is debounced
             await advanceTime(500);
@@ -1001,8 +1026,7 @@ describe("toolbar open and close on user interaction", () => {
             const { el } = await setupEditor("<p>test text</p>");
             const p = el.firstElementChild;
 
-            await firstClick(p);
-            await secondClick(p);
+            await simulateDoubleClickSelect(p);
             await pointerDown(p);
             manuallyDispatchProgrammaticEvent(p, "mousedown", { detail: 3 });
             setSelection({ anchorNode: p, anchorOffset: 0, focusOffset: 1 });

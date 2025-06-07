@@ -3,16 +3,16 @@
 # 	* bus
 # 
 # Translators:
-# Aleš Pipan, 2025
 # Wil Odoo, 2025
+# Aleš Pipan, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:36+0000\n"
+"POT-Creation-Date: 2025-05-07 20:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
+"Last-Translator: Aleš Pipan, 2025\n"
 "Language-Team: Slovenian (https://app.transifex.com/odoo/teams/41243/sl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -33,7 +33,7 @@ msgstr "Priponka"
 #. module: bus
 #: model:ir.model,name:bus.model_bus_listener_mixin
 msgid "Can send messages via bus.bus"
-msgstr ""
+msgstr "Sporočila lahko pošiljate preko bus.bus"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__channel
@@ -43,7 +43,7 @@ msgstr "Kanal"
 #. module: bus
 #: model:ir.model,name:bus.model_bus_bus
 msgid "Communication Bus"
-msgstr ""
+msgstr "Komunikacija Bus"
 
 #. module: bus
 #: model:ir.model,name:bus.model_res_partner
@@ -53,7 +53,7 @@ msgstr "Stik"
 #. module: bus
 #: model:ir.model,website_form_label:bus.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Ustvari stranko"
 
 #. module: bus
 #: model:ir.model.fields,field_description:bus.field_bus_bus__create_uid
@@ -78,6 +78,18 @@ msgstr "Ustvarjeno"
 #: model:ir.model.fields,field_description:bus.field_res_users_settings__display_name
 msgid "Display Name"
 msgstr "Prikazani naziv"
+
+#. module: bus
+#. odoo-javascript
+#: code:addons/bus/static/src/debug/bus_logs_menu_item.xml:0
+msgid "Download logs"
+msgstr "Prenesi dnevnike"
+
+#. module: bus
+#. odoo-javascript
+#: code:addons/bus/static/src/debug/bus_logs_menu_item.xml:0
+msgid "Enable Bus Logging"
+msgstr "Omogoči beleženje vodila"
 
 #. module: bus
 #: model:ir.model,name:bus.model_ir_http
@@ -134,19 +146,21 @@ msgid ""
 "Save your work and refresh to get the latest updates and avoid potential "
 "issues."
 msgstr ""
+"Shranite svoje delo in osvežite stran, da dobite najnovejše posodobitve in "
+"se izognete morebitnim težavam."
 
 #. module: bus
 #. odoo-javascript
 #: code:addons/bus/static/src/services/assets_watchdog_service.js:0
 msgid "The page appears to be out of date."
-msgstr ""
+msgstr "Zdi se, da je stran zastarela."
 
 #. module: bus
 #. odoo-javascript
 #: code:addons/bus/static/src/outdated_page_watcher_service.js:0
 #: code:addons/bus/static/src/services/bus_service.js:0
 msgid "The page is out of date"
-msgstr ""
+msgstr "Stran je zastarela"
 
 #. module: bus
 #: model:ir.model,name:bus.model_res_users
@@ -156,7 +170,7 @@ msgstr "Uporabnik"
 #. module: bus
 #: model:ir.model,name:bus.model_res_users_settings
 msgid "User Settings"
-msgstr ""
+msgstr "Uporabniške nastavitve"
 
 #. module: bus
 #. odoo-python
@@ -166,8 +180,11 @@ msgid ""
 " users it is important to change it immediately for security reasons. I will"
 " keep nagging you about it!"
 msgstr ""
+"Vaše geslo je privzeto (admin)! Če je ta sistem izpostavljen nezaupanja "
+"vrednim uporabnikom, ga je zaradi varnostnih razlogov pomembno takoj "
+"spremeniti. Še naprej vas bom spraševal o tem!"
 
 #. module: bus
 #: model:ir.model,name:bus.model_ir_websocket
 msgid "websocket message handling"
-msgstr ""
+msgstr "obravnavanje sporočil spletnega vtičnika"

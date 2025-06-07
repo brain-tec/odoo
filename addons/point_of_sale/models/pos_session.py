@@ -93,6 +93,12 @@ class PosSession(models.Model):
     update_stock_at_closing = fields.Boolean('Stock should be updated at closing')
     bank_payment_ids = fields.One2many('account.payment', 'pos_session_id', 'Bank Payments', help='Account payments representing aggregated and bank split payments.')
 
+    def write(self, vals):
+        if vals.get('state') == 'closed':
+            for record in self:
+                record.config_id._notify(('CLOSING_SESSION', {'login_number': self.env.context.get('login_number', False)}))
+        return super().write(vals)
+
     @api.model
     def _load_pos_data_relations(self, model, fields):
         model_fields = self.env[model]._fields
@@ -197,6 +203,10 @@ class PosSession(models.Model):
 
     def delete_opening_control_session(self):
         self.ensure_one()
+        if not self.exists():
+            return {
+                'status': 'success',
+            }
         if self.state != 'opening_control' or len(self.order_ids) > 0:
             raise UserError(_("You can only cancel a session that is in opening control state and has no orders."))
         self.sudo().unlink()
@@ -392,8 +402,10 @@ class PosSession(models.Model):
 
     def unlink(self):
         self.statement_line_ids.unlink()
-        (self.order_seq_id | self.login_number_seq_id).unlink()
-        return super(PosSession, self).unlink()
+        sequences_to_unlink = (self.order_seq_id | self.login_number_seq_id)
+        result = super().unlink()
+        sequences_to_unlink.unlink()
+        return result
 
     def login(self):
         self.ensure_one()
@@ -605,7 +617,6 @@ class PosSession(models.Model):
             }
 
         self.post_close_register_message()
-        self.config_id._notify(('CLOSING_SESSION', {'login_number': self.env.context.get('login_number', False)}))
         return {'successful': True}
 
     def post_close_register_message(self):
@@ -1125,11 +1136,17 @@ class PosSession(models.Model):
             'company_id': self.company_id.id,
         })
 
+        # In community the outstanding account is computed on the creation of account.payment records
+        accounting_installed = self.env['account.move']._get_invoice_in_payment_state() == 'in_payment'
+        if not account_payment.outstanding_account_id and accounting_installed:
+            account_payment.outstanding_account_id = account_payment._get_outstanding_account(account_payment.payment_type)
+
         if float_compare(amounts['amount'], 0, precision_rounding=self.currency_id.rounding) < 0:
             # revert the accounts because account.payment doesn't accept negative amount.
             account_payment.write({
                 'outstanding_account_id': account_payment.destination_account_id,
                 'destination_account_id': account_payment.outstanding_account_id,
+                'payment_type': 'outbound',
             })
 
         account_payment.action_post()
@@ -1419,10 +1436,10 @@ class PosSession(models.Model):
         else:
             product_name = ""
             product_uom = False
-        title = 'Sales' if sign == 1 else 'Refund'
-        name = '%s untaxed' % title
+        title = _('Sales') if sign == 1 else _('Refund')
+        name = _('%s untaxed', title)
         if applied_taxes:
-            name = '%s %s with %s' % (title, product_name, ', '.join([tax.name for tax in applied_taxes]))
+            name = _('%(title)s %(product_name)s with %(taxes)s', title=title, product_name=product_name, taxes=', '.join([tax.name for tax in applied_taxes]))
         partial_vals = {
             'name': name,
             'account_id': account_id,

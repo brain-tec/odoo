@@ -583,7 +583,7 @@ Please change the quantity done or the rounding precision in your settings.""",
                         }))
                         mls_without_lots -= move_line
                     else:  # No line without serial number, creates a new one.
-                        reserved_quants = self.env['stock.quant']._get_reserve_quantity(move.product_id, move.location_id, 1.0, lot_id=lot)
+                        reserved_quants = self.env['stock.quant'].with_context(packaging_uom_id=move.packaging_uom_id)._get_reserve_quantity(move.product_id, move.location_id, 1.0, lot_id=lot)
                         if reserved_quants:
                             move_line_vals = self._prepare_move_line_vals(quantity=0, reserved_quant=reserved_quants[0][0])
                         else:
@@ -1034,7 +1034,7 @@ Please change the quantity done or the rounding precision in your settings.""",
 
             # Make sure it is not returning the return
             if rule and (not move.origin_returned_move_id or move.origin_returned_move_id.location_dest_id.id != rule.location_dest_id.id):
-                new_move = rule._run_push(move)
+                new_move = rule._run_push(move) or new_move
                 if new_move:
                     new_moves.append(new_move)
 
@@ -1086,7 +1086,7 @@ Please change the quantity done or the rounding precision in your settings.""",
 
     @api.model
     def _prepare_merge_negative_moves_excluded_distinct_fields(self):
-        return ['description_picking', 'price_unit']
+        return ['description_picking']
 
     def _clean_merged(self):
         """Cleanup hook used when merging moves"""
@@ -1095,6 +1095,27 @@ Please change the quantity done or the rounding precision in your settings.""",
     def _update_candidate_moves_list(self, candidate_moves_set):
         for picking in self.mapped('picking_id'):
             candidate_moves_set.add(picking.move_ids)
+
+    def _merge_move_itemgetter(self, distinct_fields, excluded_fields=None):
+        field_names = [
+            f_name for f_name in distinct_fields
+            if f_name != 'price_unit' and (excluded_fields is None or f_name not in excluded_fields)
+        ]
+        base_getter = itemgetter(*field_names)
+
+        if 'price_unit' not in distinct_fields:
+            return base_getter
+
+        price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')
+        currency_prec = self.company_id.currency_id.decimal_places
+        price_precision = min(currency_prec, price_unit_prec)
+
+        def _get_formatted_price_unit(move):
+            # Round and Cast the price_unit into a string so that rounding errors do not prevent the merge
+            rounded_price_unit = float_round(move.price_unit, precision_digits=price_precision)
+            return "{:.{p}f}".format(rounded_price_unit, p=price_precision)
+
+        return lambda move: base_getter(move) + (_get_formatted_price_unit(move),)
 
     def _merge_moves(self, merge_into=False):
         """ This method will, for each move in `self`, go up in their linked picking and try to
@@ -1124,13 +1145,13 @@ Please change the quantity done or the rounding precision in your settings.""",
         # Detach their picking as they will either get absorbed or create a backorder, so no extra logs will be put in the chatter
         neg_qty_moves.picking_id = False
         excluded_fields = self._prepare_merge_negative_moves_excluded_distinct_fields()
-        neg_key = itemgetter(*[field for field in distinct_fields if field not in excluded_fields])
+        neg_key = self._merge_move_itemgetter(distinct_fields, excluded_fields)
         price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')
 
         for candidate_moves in candidate_moves_set:
             # First step find move to merge.
             candidate_moves = candidate_moves.filtered(lambda m: m.state not in ('done', 'cancel', 'draft')) - neg_qty_moves
-            for __, g in groupby(candidate_moves, key=itemgetter(*distinct_fields)):
+            for __, g in groupby(candidate_moves, key=self._merge_move_itemgetter(distinct_fields)):
                 moves = self.env['stock.move'].concat(*g)
                 # Merge all positive moves together
                 if len(moves) > 1:
@@ -1148,31 +1169,29 @@ Please change the quantity done or the rounding precision in your settings.""",
         for neg_move in neg_qty_moves:
             # Check all the candidates that matches the same limited key, and adjust their quantities to absorb negative moves
             for pos_move in moves_by_neg_key.get(neg_key(neg_move), []):
-                currency_prec = pos_move.product_id.currency_id.decimal_places
-                rounding = min(currency_prec, price_unit_prec)
-                if float_compare(pos_move.price_unit, neg_move.price_unit, precision_digits=rounding) == 0:
-                    new_total_value = pos_move.product_qty * pos_move.price_unit + neg_move.product_qty * neg_move.price_unit
-                    # If quantity can be fully absorbed by a single move, update its quantity and remove the negative move
-                    if float_compare(pos_move.product_uom_qty, abs(neg_move.product_uom_qty), precision_rounding=pos_move.product_uom.rounding) >= 0:
-                        pos_move.product_uom_qty += neg_move.product_uom_qty
-                        pos_move.write({
-                            'price_unit': float_round(new_total_value / pos_move.product_qty, precision_digits=price_unit_prec) if pos_move.product_qty else 0,
-                            'move_dest_ids': [Command.link(m.id) for m in neg_move.mapped('move_dest_ids') if m.location_id == pos_move.location_dest_id],
-                            'move_orig_ids': [Command.link(m.id) for m in neg_move.mapped('move_orig_ids') if m.location_dest_id == pos_move.location_id],
-                        })
-                        merged_moves |= pos_move
-                        moves_to_unlink |= neg_move
-                        if float_is_zero(pos_move.product_uom_qty, precision_rounding=pos_move.product_uom.rounding):
-                            moves_to_cancel |= pos_move
-                        break
-                    neg_move.product_uom_qty += pos_move.product_uom_qty
-                    neg_move.price_unit = float_round(new_total_value / neg_move.product_qty, precision_digits=price_unit_prec)
-                    pos_move.product_uom_qty = 0
-                    moves_to_cancel |= pos_move
+                new_total_value = pos_move.product_qty * pos_move.price_unit + neg_move.product_qty * neg_move.price_unit
+                # If quantity can be fully absorbed by a single move, update its quantity and remove the negative move
+                if float_compare(pos_move.product_uom_qty, abs(neg_move.product_uom_qty), precision_rounding=pos_move.product_uom.rounding) >= 0:
+                    pos_move.product_uom_qty += neg_move.product_uom_qty
+                    pos_move.write({
+                        'price_unit': float_round(new_total_value / pos_move.product_qty, precision_digits=price_unit_prec) if pos_move.product_qty else 0,
+                        'move_dest_ids': [Command.link(m.id) for m in neg_move.mapped('move_dest_ids') if m.location_id == pos_move.location_dest_id],
+                        'move_orig_ids': [Command.link(m.id) for m in neg_move.mapped('move_orig_ids') if m.location_dest_id == pos_move.location_id],
+                    })
+                    merged_moves |= pos_move
+                    moves_to_unlink |= neg_move
+                    if float_is_zero(pos_move.product_uom_qty, precision_rounding=pos_move.product_uom.rounding):
+                        moves_to_cancel |= pos_move
+                    break
+                neg_move.product_uom_qty += pos_move.product_uom_qty
+                neg_move.price_unit = float_round(new_total_value / neg_move.product_qty, precision_digits=price_unit_prec)
+                pos_move.product_uom_qty = 0
+                moves_to_cancel |= pos_move
+
+        # We are using propagate to False in order to not cancel destination moves merged in moves[0]
+        (moves_to_unlink | moves_to_cancel)._clean_merged()
 
         if moves_to_unlink:
-            # We are using propagate to False in order to not cancel destination moves merged in moves[0]
-            moves_to_unlink._clean_merged()
             moves_to_unlink._action_cancel()
             moves_to_unlink.sudo().unlink()
 
@@ -1439,7 +1458,7 @@ Please change the quantity done or the rounding precision in your settings.""",
 
         # create procurements for make to order moves
         procurement_requests = []
-        move_create_proc = self.browse(move_create_proc)
+        move_create_proc = self.browse(move_create_proc) if not self.env.context.get('bypass_procurement_creation', False) else self.env['stock.move']
         quantities = move_create_proc._prepare_procurement_qty()
         for move, quantity in zip(move_create_proc, quantities):
             values = move._prepare_procurement_values()
@@ -1634,7 +1653,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         if not owner_id:
             owner_id = self.env['res.partner']
 
-        quants = self.env['stock.quant']._get_reserve_quantity(
+        quants = self.env['stock.quant'].with_context(packaging_uom_id=self.packaging_uom_id)._get_reserve_quantity(
             self.product_id, location_id, need, uom_id=self.product_uom,
             lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
 
@@ -1776,6 +1795,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         moves_mto = moves_to_assign.filtered(lambda m: m.move_orig_ids and not m._should_bypass_reservation())
         quants_cache = self.env['stock.quant']._get_quants_by_products_locations(moves_mto.product_id, moves_mto.location_id)
         for move in moves_to_assign:
+            move = move.with_company(move.company_id)
             rounding = roundings[move]
             if not force_qty:
                 missing_reserved_uom_quantity = move.product_uom_qty - reserved_availability[move]
@@ -1902,7 +1922,7 @@ Please change the quantity done or the rounding precision in your settings.""",
             if move.propagate_cancel:
                 # only cancel the next move if all my siblings are also cancelled
                 if all(state == 'cancel' for state in siblings_states):
-                    move.move_dest_ids.filtered(lambda m: m.state != 'done' and m.location_dest_id == m.move_dest_ids.location_id)._action_cancel()
+                    move.move_dest_ids.filtered(lambda m: m.state != 'done' and move.location_dest_id == m.location_id)._action_cancel()
                     if cancel_moves_origin:
                         move.move_orig_ids.sudo().filtered(lambda m: m.state != 'done')._action_cancel()
             else:
@@ -1919,8 +1939,9 @@ Please change the quantity done or the rounding precision in your settings.""",
         return True
 
     def _skip_push(self):
-        return self.is_inventory or self.move_dest_ids and any(m.location_id._child_of(self.location_dest_id) for m in self.move_dest_ids) or\
-            self.location_final_id and self.location_final_id._child_of(self.location_dest_id)
+        return self.is_inventory or (
+            self.move_dest_ids and any(m.location_id._child_of(self.location_dest_id) for m in self.move_dest_ids)
+        )
 
     def _check_quantity(self):
         return self.env['stock.quant'].search([
@@ -2008,7 +2029,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         backorder_moves = self.env['stock.move'].create(backorder_moves_vals)
         # The backorder moves are not yet in their own picking. We do not want to check entire packs for those
         # ones as it could messed up the result_package_id of the moves being currently validated
-        backorder_moves.with_context(bypass_entire_pack=True)._action_confirm(merge=False)
+        backorder_moves.with_context(bypass_entire_pack=True, bypass_procurement_creation=True)._action_confirm(merge=False)
         return backorder_moves
 
     @api.ondelete(at_uninstall=False)
@@ -2269,6 +2290,7 @@ Please change the quantity done or the rounding precision in your settings.""",
                         ]
         moves_to_reserve = self.env['stock.move'].search(expression.AND([static_domain, expression.OR(domains)]),
                                                          order='priority desc, date asc, id asc')
+        moves_to_reserve = moves_to_reserve.sorted(key=lambda m: m.group_id.id in self.group_id.ids, reverse=True)
         moves_to_reserve._action_assign()
 
     def _rollup_move_dests_fetch(self):

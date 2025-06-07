@@ -4,14 +4,15 @@
 # 
 # Translators:
 # Wil Odoo, 2025
+# Dylan Kiss, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:36+0000\n"
+"POT-Creation-Date: 2025-05-07 20:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
+"Last-Translator: Dylan Kiss, 2025\n"
 "Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -63,8 +64,8 @@ msgid ""
 "An administrator needs to configure Outlook Synchronization before you can "
 "use it!"
 msgstr ""
-"Järjestelmänvalvojan on määritettävä Outlook-synkronointi ennen kuin voit "
-"käyttää sitä!"
+"Ylläpitäjän on määritettävä Outlook-synkronointi ennen kuin voit käyttää "
+"sitä!"
 
 #. module: microsoft_calendar
 #. odoo-python
@@ -120,7 +121,7 @@ msgstr "Asetukset"
 #. odoo-javascript
 #: code:addons/microsoft_calendar/static/src/views/microsoft_calendar/microsoft_calendar_controller.js:0
 msgid "Configure"
-msgstr "Konfiguroi"
+msgstr "Määritä"
 
 #. module: microsoft_calendar
 #: model_terms:ir.ui.view,arch_db:microsoft_calendar.microsoft_calendar_reset_account_view_form
@@ -436,12 +437,6 @@ msgid ""
 msgstr ""
 "Outlook-synkronointi on määritettävä ennen kuin voit käyttää sitä, haluatko "
 "tehdä sen nyt?"
-
-#. module: microsoft_calendar
-#. odoo-python
-#: code:addons/microsoft_calendar/models/res_users.py:0
-msgid "The account for the Outlook Calendar service is not configured."
-msgstr "Outlook-kalenteripalvelun tiliä ei ole määritetty."
 
 #. module: microsoft_calendar
 #: model:ir.model.fields,help:microsoft_calendar.field_microsoft_calendar_account_reset__delete_policy

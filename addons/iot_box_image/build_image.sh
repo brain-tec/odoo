@@ -161,6 +161,11 @@ cp -av "${OVERWRITE_FILES_BEFORE_INIT_DIR}"/* "${MOUNT_POINT}"
 # it needs to be performed in the classic filesystem, as 'systemctl' commands are not available in /root_bypass_ramdisks
 sudo systemctl reload NetworkManager
 
+# generate a keypair for the IoT Box SSH Certificate Authority
+mkdir -pv ./.ssh
+echo "y" | ssh-keygen -t ed25519 -f "./.ssh/iotbox_ca_${VERSION_IOTBOX}" -N "" -C "Odoo SSH CA ${VERSION_IOTBOX}"
+cp -v "./.ssh/iotbox_ca_${VERSION_IOTBOX}.pub" "${MOUNT_POINT}/etc/ssh/ca.pub"
+
 chroot "${MOUNT_POINT}" /bin/bash -c "/etc/init_image.sh"
 
 # copy iotbox version
@@ -186,4 +191,5 @@ kpartx -dv "${LOOP_RASPIOS_PATH}"
 kpartx -dv "${LOOP_IOT_PATH}"  # /dev/loop1
 losetup -d "${LOOP_IOT_PATH}"  # /dev/loop1
 
-echo "Image build finished."
+echo ""
+echo "Image build finished, you'll find the certificate authority keypair at './.ssh/iotbox_ca_${VERSION_IOTBOX}'"

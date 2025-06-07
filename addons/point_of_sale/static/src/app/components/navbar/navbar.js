@@ -21,6 +21,7 @@ import { PresetSlotsPopup } from "@point_of_sale/app/components/popups/preset_sl
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { openCustomerDisplay } from "@point_of_sale/customer_display/utils";
+import { useAsyncLockedMethod } from "@point_of_sale/app/hooks/hooks";
 
 const { DateTime } = luxon;
 
@@ -55,12 +56,13 @@ export class Navbar extends Component {
             this.isSystemUser = await user.hasGroup("base.group_system");
         });
         useExternalListener(document, "keydown", this.handleKeydown.bind(this));
+        this.openPresetTiming = useAsyncLockedMethod(this.openPresetTiming);
     }
 
     handleKeydown(event) {
-        const isEndCharacter = event.key.match(/(Enter|Tab)/);
+        const isEndCharacter = event.key?.match(/(Enter|Tab)/);
         const isSpecialKey =
-            !["Control", "Alt"].includes(event.key) && (event.key.length > 1 || event.metaKey);
+            !["Control", "Alt"].includes(event.key) && (event.key?.length > 1 || event.metaKey);
 
         clearTimeout(this.timeout);
         if (isEndCharacter) {
@@ -86,7 +88,7 @@ export class Navbar extends Component {
             document.activeElement !== this.inputRef.el &&
             !this.pos.getOrder()?.getSelectedOrderline() &&
             this.noOpenDialogs() &&
-            event.key.length == 1 &&
+            event.key?.length == 1 &&
             this.bufferedInput.length < 3
         ) {
             this.inputRef.el.focus();

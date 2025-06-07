@@ -3,6 +3,8 @@ import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
 import { fields, getKwArgs, makeKwArgs, models } from "@web/../tests/web_test_helpers";
 import { serializeDateTime, today } from "@web/core/l10n/dates";
 
+const { DateTime } = luxon;
+
 export class DiscussChannelMember extends models.ServerModel {
     _name = "discuss.channel.member";
 
@@ -36,7 +38,11 @@ export class DiscussChannelMember extends models.ServerModel {
                 channel,
                 "mail.record/insert",
                 new mailDataHelpers.Store(DiscussChannelMember.browse(member.id))
-                    .add("discuss.channel.member", { id: member.id, isTyping: is_typing })
+                    .add("discuss.channel.member", {
+                        id: member.id,
+                        isTyping: is_typing,
+                        is_typing_dt: serializeDateTime(DateTime.now()),
+                    })
                     .get_result(),
             ]);
         }
@@ -135,14 +141,12 @@ export class DiscussChannelMember extends models.ServerModel {
     /**
      * @param {number[]} ids
      * @param {number} last_message_id
-     * @param {boolean} [sync]
      */
-    _mark_as_read(ids, last_message_id, sync) {
+    _mark_as_read(ids, last_message_id) {
         const kwargs = getKwArgs(arguments, "ids", "last_message_id", "sync");
         ids = kwargs.ids;
         delete kwargs.ids;
         last_message_id = kwargs.last_message_id;
-        sync = kwargs.sync ?? false;
         const [member] = this.browse(ids);
         if (!member) {
             return;
@@ -157,8 +161,7 @@ export class DiscussChannelMember extends models.ServerModel {
         this._set_last_seen_message([member.id], last_message_id);
         this.env["discuss.channel.member"]._set_new_message_separator(
             [member.id],
-            last_message_id + 1,
-            sync
+            last_message_id + 1
         );
     }
 
@@ -216,14 +219,12 @@ export class DiscussChannelMember extends models.ServerModel {
     /**
      * @param {number[]} ids
      * @param {number} message_id
-     * @param {boolean} sync
      */
-    _set_new_message_separator(ids, message_id, sync) {
+    _set_new_message_separator(ids, message_id) {
         const kwargs = getKwArgs(arguments, "ids", "message_id", "sync");
         ids = kwargs.ids;
         delete kwargs.ids;
         message_id = kwargs.message_id;
-        sync = kwargs.sync ?? false;
 
         /** @type {import("mock_models").DiscussChannelMember} */
         const DiscussChannelMember = this.env["discuss.channel.member"];
@@ -252,7 +253,7 @@ export class DiscussChannelMember extends models.ServerModel {
                     },
                 })
             )
-                .add("discuss.channel.member", { id: member.id, syncUnread: sync })
+                .add("discuss.channel.member", { id: member.id })
                 .get_result()
         );
     }

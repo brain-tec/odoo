@@ -241,14 +241,17 @@ class L10nInEwaybill(models.Model):
     )
     def _compute_is_editable(self):
         for ewaybill in self:
-            is_incoming = ewaybill._is_incoming()
-            is_overseas = (
-                ewaybill._get_billing_partner().l10n_in_gst_treatment in ('overseas', 'special_economic_zone')
-            )
-            ewaybill.is_bill_to_editable = not is_incoming
-            ewaybill.is_bill_from_editable = is_incoming
-            ewaybill.is_ship_from_editable = is_incoming and is_overseas
-            ewaybill.is_ship_to_editable = not is_incoming and not is_overseas
+            if ewaybill.account_move_id:
+                ewaybill.is_bill_to_editable = False
+                ewaybill.is_bill_from_editable = False
+                ewaybill.is_ship_from_editable = True
+                ewaybill.is_ship_to_editable = True
+            else:
+                is_incoming = ewaybill._is_incoming()
+                ewaybill.is_bill_to_editable = not is_incoming
+                ewaybill.is_bill_from_editable = is_incoming
+                ewaybill.is_ship_from_editable = not is_incoming
+                ewaybill.is_ship_to_editable = is_incoming
 
     def _compute_content(self):
         dependent_fields = self._get_ewaybill_dependencies()
@@ -299,6 +302,13 @@ class L10nInEwaybill(models.Model):
             'cancel_reason': False,
             'cancel_remarks': False,
         })
+
+    def action_print(self):
+        self.ensure_one()
+        if self.state in ['pending', 'cancel']:
+            raise UserError(_("Please generate the E-Waybill to print it."))
+
+        return self._generate_and_attach_pdf(_("Ewaybill"))
 
     @api.model
     def _get_default_help_message(self, status):
@@ -425,7 +435,7 @@ class L10nInEwaybill(models.Model):
         return {}
 
     def _handle_internal_warning_if_present(self, response):
-        if warnings := response.get('odoo_warning'):
+        if warnings := response.pop('odoo_warning', False):
             for warning in warnings:
                 if warning.get('message_post'):
                     self.message_post(
@@ -499,10 +509,10 @@ class L10nInEwaybill(models.Model):
         self._write_successfully_response({
             'name': name,
             'state': 'generated',
-            'ewaybill_date': self._indian_timezone_to_odoo_utc(
+            'ewaybill_date': self._convert_str_datetime_to_date(
                 response_data['ewayBillDate']
             ),
-            'ewaybill_expiry_date': self._indian_timezone_to_odoo_utc(
+            'ewaybill_expiry_date': self._convert_str_datetime_to_date(
                 response_data.get('validUpto')
             ),
             **self._l10n_in_ewaybill_handle_zero_distance_alert_if_present(response_data)
@@ -514,6 +524,7 @@ class L10nInEwaybill(models.Model):
         """
             This method is used to convert date from Indian timezone to UTC
         """
+        # TODO remove in master
         if not str_date:
             return False
         try:
@@ -528,6 +539,24 @@ class L10nInEwaybill(models.Model):
                 return fields.Datetime.to_string(fields.Datetime.now())
         utc_time = local_time.astimezone(pytz.utc)
         return fields.Datetime.to_string(utc_time)
+
+    @api.model
+    def _convert_str_datetime_to_date(self, str_datetime):
+        """
+        Expected datetime formats:
+        - 25/05/2025 11:59:00 PM
+        - 09/04/2025 23:59:59 (trailing with extra whitespace)
+        - 2025-05-24 23:59:00
+        """
+        if not str_datetime:
+            return False
+        str_date = str_datetime[:10]  # Extract the date
+        if re.match(r"\d{2}/\d{2}/\d{4}", str_date):
+            return datetime.strptime(str_date, "%d/%m/%Y")
+        elif re.match(r"\d{4}-\d{2}-\d{2}", str_date):
+            return datetime.strptime(str_date, "%Y-%m-%d")
+        _logger.error("L10nINEwaybill Invalid date format: %s", str_datetime)
+        return False
 
     @api.model
     def _get_partner_state_code(self, partner):
@@ -676,13 +705,34 @@ class L10nInEwaybill(models.Model):
             ewb_name = res_json.get("ewayBillNo") or res_json.get("EwbNo")
             if not ewb_name:
                 return False
-            ewb_date = self._indian_timezone_to_odoo_utc(res_json.get("ewayBillDate") or res_json.get("EwbDt"))
-            ewb_validity = self._indian_timezone_to_odoo_utc(res_json.get("validUpto") or res_json.get("EwbValidTill"))
+            ewb_date = self._convert_str_datetime_to_date(res_json.get("ewayBillDate") or res_json.get("EwbDt"))
+            ewb_validity = self._convert_str_datetime_to_date(res_json.get("validUpto") or res_json.get("EwbValidTill"))
             self.write({
                 "name": ewb_name,
                 "ewaybill_date": ewb_date,
                 "ewaybill_expiry_date": ewb_validity,
             })
+
+    def _generate_and_attach_pdf(self, doc_label):
+        self.ensure_one()
+        pdf_content = self.env['ir.actions.report']._render_qweb_pdf(
+            'l10n_in_ewaybill.report_ewaybill', res_ids=[self.id])[0]
+        attachment = self.env['ir.attachment'].create({
+            'name': f'{doc_label} - {self.document_number}.pdf',
+            'type': 'binary',
+            'datas': base64.b64encode(pdf_content),
+            'res_model': 'l10n.in.ewaybill',
+            'res_id': self.id,
+            'mimetype': 'application/pdf',
+        })
+        self.message_post(
+            body=_("%s has been generated.", doc_label),
+            attachment_ids=[attachment.id]
+        )
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+        }
 
     @api.ondelete(at_uninstall=False)
     def _unlink_l10n_in_ewaybill_prevent(self):

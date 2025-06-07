@@ -3,15 +3,16 @@
 # 	* sms
 # 
 # Translators:
-# Wil Odoo, 2025
 # Jeffery CHEN <jeffery9@gmail.com>, 2025
+# Wil Odoo, 2025
+# Raymond Yu <cl_yu@hotmail.com>, 2025
 # Chloe Wang, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:37+0000\n"
+"POT-Creation-Date: 2025-05-23 18:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Chloe Wang, 2025\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
@@ -229,6 +230,11 @@ msgstr "你确定要将这些短信息模板重置为原始配置吗？更改和
 #: code:addons/sms/controllers/main.py:0
 msgid "Bad parameters"
 msgstr "参数无效"
+
+#. module: sms
+#: model:ir.model,name:sms.model_base
+msgid "Base"
+msgstr "基础"
 
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__failure_type__sms_blacklist
@@ -1003,6 +1009,12 @@ msgid "SMS (without note)"
 msgstr "短信（无备注）"
 
 #. module: sms
+#. odoo-javascript
+#: code:addons/sms/static/src/thread/message_patch.js:0
+msgid "SMS Account"
+msgstr "短消息账户"
+
+#. module: sms
 #: model:ir.model,name:sms.model_sms_account_phone
 msgid "SMS Account Registration Phone Number Wizard"
 msgstr "短信账户注册电话号码向导"
@@ -1258,8 +1270,8 @@ msgstr "发送失败"
 #. module: sms
 #. odoo-python
 #: code:addons/sms/models/ir_actions_server.py:0
-msgid "Sending SMS can only be done on a mail.thread or a transient model"
-msgstr "发送短信息只能在邮件线程或瞬态模型上完成"
+msgid "Sending SMS can only be done on a not transient mail.thread model"
+msgstr "发送短消息只能在非临时 mail.thread 模型上完成"
 
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__state__pending

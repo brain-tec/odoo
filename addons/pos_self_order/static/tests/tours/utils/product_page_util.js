@@ -6,6 +6,13 @@ export function clickProduct(productName) {
     };
 }
 
+export function waitProduct(productName) {
+    return {
+        content: `Wait for product '${productName}'`,
+        trigger: `.self_order_product_card span:contains('${productName}')`,
+    };
+}
+
 export function checkReferenceNotInProductName(productName, reference) {
     return {
         content: `Check product label has '${productName}' and not ${reference}`,
@@ -33,6 +40,13 @@ export function clickDiscard() {
         content: "Click on Discard button",
         trigger: ".btn.btn-secondary .oi-chevron-left",
         run: "click",
+    };
+}
+
+export function checkAttributePrice(name, value, price) {
+    return {
+        content: `Check product price ${price} for variant ${name}: ${value}`,
+        trigger: `div.attribute-row h2:contains('${name}') + div.row div.col label div.name span:contains('${value}') + span:contains('${price}')`,
     };
 }
 

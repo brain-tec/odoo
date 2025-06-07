@@ -129,12 +129,14 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
         })
 
         so_line_order_task_in_global = SaleOrderLine.create({
+            'name': f"{self.product_order_service2.name}\n[TEST1]\nGlobal project",
             'product_id': self.product_order_service2.id,
             'product_uom_qty': 10,
             'order_id': sale_order.id,
         })
 
         so_line_order_new_task_new_project = SaleOrderLine.create({
+            'name': f"{self.product_order_service3.display_name}\n[TEST2]\nNew project",
             'product_id': self.product_order_service3.id,
             'product_uom_qty': 10,
             'order_id': sale_order.id,
@@ -153,9 +155,27 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
         # service_tracking 'task_global_project'
         self.assertFalse(so_line_order_task_in_global.project_id, "Only task should be created, project should not be linked")
         self.assertEqual(self.project_global.tasks.sale_line_id, so_line_order_task_in_global, "Global project's task should be linked to so line")
+        self.assertEqual(
+            so_line_order_task_in_global.task_id.name,
+            f"{sale_order.name} - [TEST1]",
+            "Task name in global project should include SO name & partial line description",
+        )
+        self.assertEqual(
+            str(so_line_order_task_in_global.task_id.description),
+            '<p>Global project</p>',
+        )
         #  service_tracking 'task_in_project'
         self.assertTrue(so_line_order_new_task_new_project.project_id, "Sales order line should be linked to newly created project")
         self.assertTrue(so_line_order_new_task_new_project.task_id, "Sales order line should be linked to newly created task")
+        self.assertEqual(
+            so_line_order_new_task_new_project.task_id.name,
+            "[TEST2]",
+            "Task name in new project should only include partial line description",
+        )
+        self.assertEqual(
+            str(so_line_order_new_task_new_project.task_id.description),
+            '<p>New project</p>',
+        )
         # service_tracking 'project_only'
         self.assertFalse(so_line_order_only_project.task_id, "Task should not be created")
         self.assertTrue(so_line_order_only_project.project_id, "Sales order line should be linked to newly created project")
@@ -1272,3 +1292,31 @@ class TestSaleProject(HttpCase, TestSaleProjectCommon):
         so.action_confirm()
         self.assertFalse(self.product_order_service2.project_id.task_ids)
         self.assertFalse(sol.task_id)
+
+    def test_create_sale_order_for_project(self):
+        """ Test when user creates a SO inside stat button displayed in project form view
+
+            Test Case
+            =========
+            When the user clicks on the stat button `Make Billable`, the `create_for_project_id` is added
+            to the contex. With that context, we will make sure the action_confirm will do nothing if the
+            user clicks on it since the SO will automatically be confirmed in that use case.
+        """
+        self.project_global.partner_id = self.partner
+        action_dict = self.project_global.with_context(
+            create_for_project_id=self.project_global.id,
+            default_project_id=self.project_global.id,
+            default_partner_id=self.partner.id
+        ).action_view_sos()
+        sale_order = self.env['sale.order'].with_context(action_dict['context']).create({
+            'order_line': [Command.create({
+                'product_id': self.product_order_service2.id,
+                'product_uom_qty': 2,
+            })],
+        })
+        self.assertEqual(sale_order.partner_id, self.partner)
+        self.assertEqual(sale_order.project_id, self.project_global)
+        self.assertEqual(sale_order.state, 'sale')
+        self.assertEqual(self.project_global.sale_line_id, sale_order.order_line)
+
+        sale_order.action_confirm()  # no error should be raised even if the SO is already confirmed

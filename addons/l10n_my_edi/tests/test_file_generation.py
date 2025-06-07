@@ -53,6 +53,7 @@ class L10nMyEDITestFileGeneration(AccountTestInvoicingCommon):
             'city': 'Main city',
             'phone': '+60123456786',
             'l10n_my_edi_industrial_classification': cls.env['l10n_my_edi.industry_classification'].search([('code', '=', '01111')]).id,
+            'ref': "MY-REF",
         })
         cls.partner_b.write({
             'vat': 'EI00000000020',
@@ -231,7 +232,7 @@ class L10nMyEDITestFileGeneration(AccountTestInvoicingCommon):
         self._assert_node_values(
             root,
             'cac:AdditionalDocumentReference[descendant::*[local-name() = "DocumentType"]]/cbc:DocumentType',
-            'CustomsImportForm',
+            'K2',
         )
         self._assert_node_values(
             root,
@@ -490,6 +491,45 @@ class L10nMyEDITestFileGeneration(AccountTestInvoicingCommon):
             '02',
             attributes={'listVersionID': '1.1'},
         )
+
+    def test_11_bill_imports_form(self):
+        """
+        Ensure that when a bill contains a customs number; it is treated as an importation and not exportation.
+        """
+        bill = self.init_invoice(
+            'in_invoice', products=self.product_a
+        )
+        bill.write({
+            'l10n_my_edi_custom_form_reference': 'E12345678912',
+        })
+
+        bill.action_post()
+
+        file, _errors = bill._l10n_my_edi_generate_invoice_xml()
+        root = etree.fromstring(file)
+
+        self._assert_node_values(
+            root,
+            'cac:AdditionalDocumentReference[descendant::*[local-name() = "DocumentType"]]/cbc:DocumentType',
+            'CustomsImportForm',
+        )
+
+    def test_12_partner_ref_not_in_party_id(self):
+        """
+        Ensure that when an invoice contains a customs number; it is treated as an importation and not exportation.
+        """
+        invoice = self.init_invoice(
+            'out_invoice', products=self.product_a
+        )
+        invoice.action_post()
+
+        file, _errors = invoice._l10n_my_edi_generate_invoice_xml()
+        root = etree.fromstring(file)
+
+        # There should not be any ID without attribute
+        customer_root = root.xpath('cac:AccountingCustomerParty/cac:Party', namespaces=NS_MAP)[0]
+        node = customer_root.xpath('cac:PartyIdentification/cbc:ID[count(@*)=0]', namespaces=NS_MAP)
+        self.assertEqual(node, [])
 
     def _assert_node_values(self, root, node_path, text, attributes=None):
         node = root.xpath(node_path, namespaces=NS_MAP)

@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from base64 import b64encode
+from collections import defaultdict
 from datetime import datetime
 import logging
 from lxml import etree
@@ -121,6 +122,7 @@ class AccountMove(models.Model):
         compute='_compute_l10n_it_document_type',
         store=True,
         readonly=False,
+        copy=False,
     )
 
     def _auto_init(self):
@@ -225,9 +227,10 @@ class AccountMove(models.Model):
             But when reversing the move, the document type of the original move is copied and so it isn't recomputed.
         """
         # EXTENDS account
+        default_values_list = default_values_list or [{}] * len(self)
+        for default_values in default_values_list:
+            default_values.update({'l10n_it_document_type': False})
         reverse_moves = super()._reverse_moves(default_values_list, cancel)
-        for move in reverse_moves:
-            move.l10n_it_document_type = False
         return reverse_moves
 
     @api.depends('l10n_it_edi_transaction')
@@ -400,7 +403,7 @@ class AccountMove(models.Model):
             else:
                 it_values['prezzo_unitario'] = 0.0
             if base_line['currency_id'] != self.company_currency_id:
-                it_values['prezzo_unitario'] = base_line['currency_id']._convert(it_values['prezzo_unitario'], self.company_currency_id, date=self.date)
+                it_values['prezzo_unitario'] = it_values['prezzo_unitario'] / base_line['rate']
 
             # Discount.
             it_values['sconto_maggiorazione_list'] = []
@@ -661,7 +664,7 @@ class AccountMove(models.Model):
             'partner_bank': self.partner_bank_id,
             'formato_trasmissione': formato_trasmissione,
             'document_type': document_type,
-            'payment_method': 'MP05',
+            'payment_method': self.l10n_it_payment_method,
             'downpayment_moves': downpayment_moves,
             'reconciled_moves': self._get_reconciled_invoices(),
             'rc_refund': reverse_charge_refund,
@@ -788,8 +791,8 @@ class AccountMove(models.Model):
                      'import_type': 'in_refund',
                      'self_invoice': False,
                      'simplified': False},
-            'TD05': {'move_types': ['out_refund'],
-                     'import_type': 'in_refund',
+            'TD05': {'move_types': ['in_invoice', 'out_invoice'],
+                     'import_type': 'in_invoice',
                      'self_invoice': False,
                      'simplified': False},
             'TD06': {'move_types': ['out_invoice'],
@@ -1395,19 +1398,30 @@ class AccountMove(models.Model):
                 move_line.tax_ids = [Command.set(fitting_taxes)]
 
         # Discounts
-        if elements := element.xpath('.//ScontoMaggiorazione'):
-            # Special case of only 1 percentage discount
-            if len(elements) == 1:
-                element = elements[0]
-                if discount_percentage := get_float(element, './/Percentuale'):
-                    discount_type = get_text(element, './/Tipo')
-                    discount_sign = -1 if discount_type == 'MG' else 1
-                    move_line.discount = discount_sign * discount_percentage
-            # Discounts in cascade summarized in 1 percentage
-            else:
-                total = get_float(element, './/PrezzoTotale')
-                discount = 100 - (100 * total) / (move_line.quantity * move_line.price_unit)
-                move_line.discount = discount
+        if discounts := element.xpath('.//ScontoMaggiorazione'):
+            current_unit_price = move_line.price_unit
+            # We apply the discounts in the order they are found in the XML.
+            # The first discount is applied to the unit price, the second to the result of the first, etc.
+            # If the discount is a percentage, it is applied to the unit price.
+            # If the discount is an amount, it is subtracted from the unit price.
+            # If the computed amount is different than the expected one, we log a message.
+            for discount in discounts:
+                discount_type = get_text(discount, './/Tipo')
+                discount_sign = -1 if discount_type == 'MG' else 1
+                if discount_percentage := get_float(discount, './/Percentuale'):
+                    current_unit_price *= discount_sign * (100 - discount_percentage) / 100
+                elif discount_amount := get_float(discount, './/Importo'):
+                    current_unit_price -= discount_sign * discount_amount
+            expected_total = get_float(element, './/PrezzoTotale')
+            current_total = current_unit_price * move_line.quantity
+            if float_compare(expected_total, current_total, precision_rounding=move_line.currency_id.rounding) != 0:
+                message = Markup("<br/>").join((
+                    _("The amount_total %(current_total)s is different than PrezzoTotale %(expected_total)s for '%(move_name)s'", current_total=current_total, expected_total=expected_total, move_name=move_line.name),
+                    self._compose_info_message(element, '.')
+                ))
+                message_to_log.append(message)
+            discount = 100 - (100 * current_unit_price) / move_line.price_unit
+            move_line.discount = discount
 
         return message_to_log
 
@@ -1623,14 +1637,11 @@ class AccountMove(models.Model):
 
     def _l10n_it_edi_send(self, attachments_vals):
         self.env['res.company']._with_locked_records(self)
-        files_to_upload = []
+        files_to_upload = defaultdict(lambda: (self.env['account.move'], []))
         filename_move = {}
 
         # Setup moves for sending
         for move in self:
-            attachment_vals = attachments_vals[move]
-            filename = attachment_vals['name']
-            content = b64encode(attachment_vals['raw']).decode()
             move.l10n_it_edi_header = False
             if move.commercial_partner_id._l10n_it_edi_is_public_administration():
                 move.l10n_it_edi_state = 'requires_user_signature'
@@ -1641,13 +1652,20 @@ class AccountMove(models.Model):
                     "through the 'Fatture e Corrispettivi' portal of the Tax Agency."
                 )))
             else:
+                attachment_vals = attachments_vals[move]
+                filename = attachment_vals['name']
+                content = b64encode(attachment_vals['raw']).decode()
                 move.l10n_it_edi_state = 'being_sent'
-                files_to_upload.append({'filename': filename, 'xml': content})
+                proxy_user = move.company_id.l10n_it_edi_proxy_user_id
+                moves, files = files_to_upload[proxy_user]
+                files_to_upload[proxy_user] = (moves | move, files + [{'filename': filename, 'xml': content}])
                 filename_move[filename] = move
 
         # Upload files
+        results = {}
         try:
-            results = self._l10n_it_edi_upload(files_to_upload)
+            for proxy_user, (moves, files) in files_to_upload.items():
+                results.update(moves._l10n_it_edi_upload(files))
         except AccountEdiProxyError as e:
             messages_to_log = []
             for filename in filename_move:

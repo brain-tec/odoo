@@ -285,6 +285,8 @@ class SlideChannel(models.Model):
     _order = 'sequence, id'
     _partner_unfollow_enabled = True
 
+    _CUSTOMER_HEADERS_LIMIT_COUNT = 0  # never use X-Msg-To headers
+
     def _default_cover_properties(self):
         """ Cover properties defaults are overridden to keep a consistent look for the slides
         channels headers across Odoo versions (pre-customization, with purple gradient fitting the
@@ -829,6 +831,10 @@ class SlideChannel(models.Model):
         to_activate.with_context(active_test=False).slide_ids.action_unarchive()
         return super(SlideChannel, to_activate).action_unarchive()
 
+    # ---------------------------------------------------------
+    # Mail Thread
+    # ---------------------------------------------------------
+
     def message_post(self, *, parent_id=False, subtype_id=False, **kwargs):
         """ Temporary workaround to avoid spam. If someone replies on a channel
         through the 'Presentation Published' email, it should be considered as a
@@ -856,6 +862,9 @@ class SlideChannel(models.Model):
         if message.rating_value and message.is_current_user_or_guest_author:
             self.env.user._add_karma(self.karma_gen_channel_rank, self, _("Course Ranked"))
         return message
+
+    def _mail_get_partner_fields(self, introspect_fields=False):
+        return []
 
     # ---------------------------------------------------------
     # Business / Actions

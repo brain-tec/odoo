@@ -325,7 +325,8 @@ test("mark channel as fetched when a new message is loaded", async () => {
     );
     await contains(".o-mail-Message");
     await waitForSteps(["rpc:channel_fetch"]);
-    await contains(".o-mail-Thread-newMessage:contains('New')");
+    await contains(".o-mail-ChatWindow .badge:contains(1)");
+    await contains(".o-mail-Message:contains('Hello!')");
     await focus(".o-mail-Composer-input");
     await waitForSteps(["rpc:mark_as_read"]);
 });
@@ -416,7 +417,7 @@ test("should not scroll on receiving new message if the list is initially scroll
             Command.create({ partner_id: partnerId }),
         ],
     });
-    for (let i = 0; i <= 10; i++) {
+    for (let i = 0; i <= 20; i++) {
         pyEnv["mail.message"].create({
             body: "not empty",
             model: "discuss.channel",
@@ -426,7 +427,7 @@ test("should not scroll on receiving new message if the list is initially scroll
     await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-NotificationItem");
-    await contains(".o-mail-Message", { count: 11 });
+    await contains(".o-mail-Message", { count: 21 });
     await contains(".o-mail-Thread", { scroll: 0 });
     // simulate receiving a message
     withUser(userId, () =>
@@ -436,7 +437,7 @@ test("should not scroll on receiving new message if the list is initially scroll
             thread_model: "discuss.channel",
         })
     );
-    await contains(".o-mail-Message", { count: 12 });
+    await contains(".o-mail-Message", { count: 22 });
     await contains(".o-mail-ChatWindow .o-mail-Thread", { scroll: 0 });
 });
 

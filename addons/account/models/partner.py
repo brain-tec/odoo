@@ -13,6 +13,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, SQL, mute_logger, unique
 
+from odoo.addons.account.models.account_move import BYPASS_LOCK_CHECK
 from odoo.addons.base.models.res_partner import WARNING_HELP, WARNING_MESSAGE
 from odoo.addons.base_vat.models.res_partner import _ref_vat
 
@@ -624,6 +625,7 @@ class ResPartner(models.Model):
     duplicated_bank_account_partners_count = fields.Integer(
         compute='_compute_duplicated_bank_account_partners_count',
     )
+    # DEPRECATED, DO NOT USE, TO BE REMOVED IN MASTER
     is_coa_installed = fields.Boolean(store=False, default=lambda partner: bool(partner.env.company.chart_template))
 
     property_outbound_payment_method_line_id = fields.Many2one(
@@ -679,7 +681,7 @@ class ResPartner(models.Model):
         return self.env['res.partner.bank'].search(domain)
 
     @api.depends_context('company')
-    @api.depends('commercial_partner_id.country_code')
+    @api.depends('country_code')
     def _compute_invoice_edi_format(self):
         for partner in self:
             if not partner.commercial_partner_id or partner.commercial_partner_id.invoice_edi_format_store == 'none':
@@ -793,6 +795,26 @@ class ResPartner(models.Model):
         return super().can_edit_vat() and not self._has_invoice(
             [('partner_id', 'child_of', self.commercial_partner_id.id)]
         )
+
+    def write(self, vals):
+        if 'parent_id' in vals:
+            partner2move_lines = self.sudo().env['account.move.line'].search([('partner_id', 'in', self.ids)]).grouped('partner_id')
+            parent_vat = self.env['res.partner'].browse(vals['parent_id']).vat
+            if partner2move_lines and vals['parent_id'] and {parent_vat} != set(self.mapped('vat')):
+                raise UserError(_("You cannot set a partner as an invoicing address of another if they have a different %(vat_label)s.", vat_label=self.vat_label))
+
+        res = super().write(vals)
+
+        if 'parent_id' in vals:
+            for partner, move_lines in partner2move_lines.items():
+                partner._compute_commercial_partner()
+                # Make sure to write on all the lines at the same time to avoid breaking the reconciliation check
+                move_lines.with_context(bypass_lock_check=BYPASS_LOCK_CHECK).partner_id = partner.commercial_partner_id
+
+                # Update the commercial partner on account.move that were *entirely* dedicated to that partner (exclude moves shared between partners, e.g misc entries or batch bank payments)
+                move_lines.move_id.filtered(lambda m: m.partner_id == partner).with_context(bypass_lock_check=BYPASS_LOCK_CHECK).commercial_partner_id = partner.commercial_partner_id
+                partner._message_log(body=_("The commercial partner has been updated for all related accounting entries."))
+        return res
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -294,6 +294,17 @@ class ProjectProject(models.Model):
                 action['res_id'] = res_id
             return action
 
+        if section_name == 'cost_of_goods_sold':
+            action = {
+                'name': _('Cost of Goods Sold Items'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'account.move.line',
+                'views': [[False, 'tree'], [False, 'form']],
+                'domain': [('move_id', '=', res_id), ('display_type', '=', 'cogs')],
+                'context': {'create': False, 'edit': False},
+            }
+            return action
+
         return super().action_profitability_items(section_name, domain, res_id)
 
     @api.depends('sale_order_id.invoice_status', 'tasks.sale_order_id.invoice_status')
@@ -518,6 +529,7 @@ class ProjectProject(models.Model):
             'materials': self.env._('Materials'),
             'other_invoice_revenues': self.env._('Customer Invoices'),
             'downpayments': self.env._('Down Payments'),
+            'cost_of_goods_sold': self.env._('Cost of Goods Sold'),
         }
 
     def _get_profitability_sequence_per_invoice_type(self):
@@ -699,13 +711,13 @@ class ProjectProject(models.Model):
         if invoices_move_lines:
             revenues_lines = []
             cogs_lines = []
-            amount_invoiced = amount_to_invoice = 0.0
             for move_line in invoices_move_lines:
                 if move_line['display_type'] == 'cogs':
                     cogs_lines.append(move_line)
                 else:
                     revenues_lines.append(move_line)
             for move_lines, ml_type in ((revenues_lines, 'revenues'), (cogs_lines, 'costs')):
+                amount_invoiced = amount_to_invoice = 0.0
                 for move_line in move_lines:
                     currency = move_line.currency_id
                     price_subtotal = currency._convert(move_line.price_subtotal, self.currency_id, self.company_id)

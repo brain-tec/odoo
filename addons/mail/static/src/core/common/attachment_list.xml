@@ -6,8 +6,6 @@
             t-att-class="{
                 'o-inComposer': env.inComposer,
                 'o-inChatWindow': env.inChatWindow,
-                'me-2 pe-4': isInChatWindowAndIsAlignedLeft and !env.inComposer,
-                'ms-2 ps-4': isInChatWindowAndIsAlignedRight and !env.inComposer,
             }"
         >
             <div class="d-flex flex-grow-1 flex-wrap mx-1 align-items-center" t-att-class="{
@@ -15,7 +13,7 @@
                         }" role="menu" >
                 <div t-foreach="images" t-as="attachment" t-key="attachment.id"
                      t-att-aria-label="attachment.name"
-                     class="o-mail-AttachmentImage d-flex position-relative flex-shrink-0 mw-100 mb-1 me-1 rounded o-viewable"
+                     class="o-mail-AttachmentImage d-flex position-relative flex-shrink-0 mw-100 mb-1 me-1 rounded-3 o-viewable"
                      t-att-title="attachment.name"
                      t-att-class="{ 'o-isUploading': attachment.uploading }"
                      tabindex="0"
@@ -24,7 +22,7 @@
                      role="menuitem"
                 >
                     <img
-                        class="img img-fluid my-0 mx-auto rounded"
+                        class="img img-fluid my-0 mx-auto rounded-3 shadow-sm border border-light"
                         t-att-class="{ 'opacity-25': attachment.uploading }"
                         t-att-src="getImageUrl(attachment)"
                         t-att-alt="attachment.name"
@@ -43,8 +41,6 @@
                     t-foreach="cards" t-as="attachment" t-key="attachment.id"
                     class="o-mail-AttachmentCard d-flex rounded mb-1 me-1 mw-100 overflow-auto"
                     t-att-class="{
-                               'ms-1': isInChatWindowAndIsAlignedRight,
-                               'me-1': !isInChatWindowAndIsAlignedRight,
                                'o-viewable': attachment.isViewable,
                                'o-isUploading': attachment.uploading,
                                }"

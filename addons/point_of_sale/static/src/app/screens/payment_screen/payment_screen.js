@@ -53,7 +53,6 @@ export class PaymentScreen extends Component {
 
     onMounted() {
         const order = this.pos.getOrder();
-        this.pos.addPendingOrder([order.id]);
 
         for (const payment of order.payment_ids) {
             const pmid = payment.payment_method_id.id;
@@ -228,7 +227,6 @@ export class PaymentScreen extends Component {
         if (newTip === undefined) {
             return;
         }
-
         await this.pos.setTip(parseFloat(newTip ?? ""));
         const pLine =
             this.selectedPaymentLine &&
@@ -245,8 +243,9 @@ export class PaymentScreen extends Component {
             );
             return;
         }
-
-        pLine.setAmount(pLine.getAmount() - (tip || 0) + parseFloat(newTip));
+        const tipDifference = parseFloat(newTip) - (tip || 0);
+        const tipToAdd = change <= 0 ? tipDifference : Math.max(0, tipDifference - change);
+        pLine.setAmount(pLine.getAmount() + tipToAdd);
     }
     async toggleShippingDatePicker() {
         if (!this.currentOrder.getShippingDate()) {
@@ -293,11 +292,7 @@ export class PaymentScreen extends Component {
         if (!this.checkCashRoundingHasBeenWellApplied()) {
             return;
         }
-        const linesToRemove = this.currentOrder.lines.filter((line) => {
-            const rounding = line.product_id.uom_id.rounding;
-            const decimals = Math.max(0, Math.ceil(-Math.log10(rounding)));
-            return floatIsZero(line.qty, decimals);
-        });
+        const linesToRemove = this.currentOrder.lines.filter((line) => line.canBeRemoved);
         for (const line of linesToRemove) {
             this.currentOrder.removeOrderline(line);
         }

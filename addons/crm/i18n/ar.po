@@ -197,7 +197,7 @@ msgstr "<span class=\"o_stat_text\"> العملاء المهتمين</span> "
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "<span class=\"opacity-50 p-2 text-nowrap d-none d-sm-block\"> at </span>"
-msgstr ""
+msgstr "<span class=\"opacity-50 p-2 text-nowrap d-none d-sm-block\"> في </span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -205,16 +205,19 @@ msgid ""
 "<span class=\"opacity-50 p-2\" groups=\"crm.group_use_recurring_revenues\"> + </span>\n"
 "                                        <span class=\"opacity-50 p-2\" groups=\"!crm.group_use_recurring_revenues\"> at </span>"
 msgstr ""
+"<span class=\"opacity-50 p-2\" groups=\"crm.group_use_recurring_revenues\"> + </span>\n"
+"                                        <span class=\"opacity-50 p-2\" groups=\"!crm.group_use_recurring_revenues\"> في </span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "<span class=\"opacity-50 p-2\"> %</span>"
-msgstr ""
+msgstr "<span class=\"opacity-50 p-2\"> %</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_team_member_view_form
 msgid "<span> leads assigned the last 30 days out of a maximum of </span>"
 msgstr ""
+"<span> العملاء المهتمون الذين تم تعيينهم خلال آخر 30 يوم من أصل </span>  "
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
@@ -244,6 +247,11 @@ msgid ""
 "                                    specified otherwise.\n"
 "                                </span>"
 msgstr ""
+"<span>قم بتعيين العملاء المهتمين دورياً حسب الأولويات والفلاتر.</span><br/>\n"
+"                                <span invisible=\"not crm_use_auto_assignment\">\n"
+"                                    سوف تستخدم كافة فرق المبيعات هذا الإعداد اقتراضياً إلا إذا\n"
+"                                    تم تحديد خلاف ذلك.\n"
+"                                </span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
@@ -423,6 +431,8 @@ msgstr ""
 #: code:addons/crm/models/crm_lead.py:0
 msgid "A lead in a Won stage cannot be lost. Move it to another stage first."
 msgstr ""
+"لا يمكن أن يكون العميل المهتم في مرحلة \"تم ربح الصفقة\" ضائعاً. قم بنقله "
+"إلى مرحلة أخرى أولاً. "
 
 #. module: crm
 #. odoo-python
@@ -859,6 +869,8 @@ msgid ""
 "operations, as the probabilities of opportunities in this stage will be "
 "recomputed on saving."
 msgstr ""
+"قد يؤدي تغيير قيمة ”مرحلة ربح الصفقة“ إلى إجراء عدد كبير من العمليات، حيث "
+"سيتم إعادة حساب احتمالات الفرص في هذه المرحلة عند الحفظ. "
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_tree
@@ -2454,6 +2466,8 @@ msgid ""
 "Member preferred assignment domain for user %(user)s and team %(team)s is "
 "incorrectly formatted"
 msgstr ""
+"لم تتم صياغة النطاق المفضل لتعيين العضو للمستخدم %(user)s والفريق %(team)s "
+"بشكل صحيح "
 
 #. module: crm
 #: model:ir.actions.act_window,name:crm.action_merge_opportunities
@@ -3111,7 +3125,7 @@ msgstr "تصنيف العملاء المهتمين التوقعي: إعادة ا
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team_member__assignment_domain_preferred
 msgid "Preference assignment Domain"
-msgstr ""
+msgstr "نطاق تعيين التفضيلات "
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__priority

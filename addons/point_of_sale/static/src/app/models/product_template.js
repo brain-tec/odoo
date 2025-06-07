@@ -18,6 +18,13 @@ import { accountTaxHelpers } from "@account/helpers/account_tax";
 export class ProductTemplate extends Base {
     static pythonModel = "product.template";
 
+    setup(_vals) {
+        super.setup(...arguments);
+        this.uiState = {
+            applicablePricelistRules: {},
+        };
+    }
+
     prepareProductBaseLineForTaxesComputationExtraValues(
         price,
         pricelist = false,
@@ -118,7 +125,7 @@ export class ProductTemplate extends Base {
         return (
             this.isConfigurable() &&
             this.attribute_line_ids.length > 0 &&
-            !this.attribute_line_ids.every((l) => l.attribute_id.create_variant === "always")
+            this.attribute_line_ids.some((l) => l.attribute_id.create_variant === "no_variant")
         );
     }
 
@@ -161,6 +168,31 @@ export class ProductTemplate extends Base {
         return current;
     }
 
+    getApplicablePricelistRules(pricelist) {
+        const productTmplRules = this["<-product.pricelist.item.product_tmpl_id"] || [];
+        const rulesIds = [...new Set([...productTmplRules])]
+            .filter((rule) => rule.pricelist_id.id === pricelist.id)
+            .map((rule) => rule.id);
+        if (
+            this.uiState.applicablePricelistRules[pricelist.id] &&
+            (!rulesIds.length ||
+                this.uiState.applicablePricelistRules[pricelist.id].includes(rulesIds[0]))
+        ) {
+            return this.uiState.applicablePricelistRules[pricelist.id];
+        }
+
+        const parentCategoryIds = this.parentCategories;
+        const availableRules =
+            pricelist.item_ids?.filter(
+                (rule) =>
+                    (rulesIds.includes(rule.id) || (!rule.product_id && !rule.product_tmpl_id)) &&
+                    (!rule.product_tmpl_id || rule.product_tmpl_id.id === this.id) &&
+                    (!rule.categ_id || parentCategoryIds.includes(rule.categ_id.id))
+            ) || [];
+        this.uiState.applicablePricelistRules[pricelist.id] = availableRules.map((rule) => rule.id);
+        return this.uiState.applicablePricelistRules[pricelist.id];
+    }
+
     // Port of _get_product_price on product.pricelist.
     //
     // Anything related to UOM can be ignored, the POS will always use
@@ -187,22 +219,19 @@ export class ProductTemplate extends Base {
         }
 
         const product = variant;
-        const productTmpl = variant.product_tmpl_id || this;
         const standardPrice = variant ? variant.standard_price : this.standard_price;
         const basePrice = variant ? variant.lst_price : this.list_price;
-        const productTmplRules = productTmpl["<-product.pricelist.item.product_tmpl_id"] || [];
-        const productRules = product["<-product.pricelist.item.product_id"] || [];
-        const rulesIds = [...productTmplRules, ...productRules].map((rule) => rule.id);
-
         let price = basePrice + (price_extra || 0);
-        const rules =
-            pricelist?.item_ids?.filter(
-                (rule) =>
-                    (rulesIds.includes(rule.id) || (!rule.product_id && !rule.product_tmpl_id)) &&
-                    (!rule.min_quantity || quantity >= rule.min_quantity) &&
-                    (!rule.product_id || rule.product_id.id === product?.id) &&
-                    (!rule.categ_id || rule.categ_id.id === product?.categ_id?.id)
-            ) || [];
+        let rules = [];
+        if (pricelist) {
+            if (product) {
+                rules = product.getApplicablePricelistRules(pricelist);
+            } else {
+                rules = this.getApplicablePricelistRules(pricelist);
+            }
+            rules = this.models["product.pricelist.item"].readMany(rules);
+            rules = rules.filter((rule) => !rule.min_quantity || quantity >= rule.min_quantity);
+        }
 
         const rule = rules.length && rules[0];
         if (!rule) {
@@ -264,7 +293,6 @@ export class ProductTemplate extends Base {
         const fields = ["barcode"];
         const variantMatch = this.product_variant_ids.some(
             (variant) =>
-                (variant.default_code && variant.default_code.toLowerCase() == searchWord) ||
                 (variant.barcode && variant.barcode.toLowerCase() == searchWord) ||
                 variant.product_template_variant_value_ids.some((vv) =>
                     vv.name.toLowerCase().includes(searchWord)
