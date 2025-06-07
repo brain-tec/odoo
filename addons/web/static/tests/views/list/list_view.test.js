@@ -83,6 +83,7 @@ import { Domain } from "@web/core/domain";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { useBus } from "@web/core/utils/hooks";
+import { omit } from "@web/core/utils/objects";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { session } from "@web/session";
 import { floatField } from "@web/views/fields/float/float_field";
@@ -131,7 +132,7 @@ class Foo extends models.Model {
             amount: 1200,
             currency_id: 2,
             reference: "bar,1",
-            properties: {},
+            properties: [],
         },
         {
             id: 2,
@@ -143,7 +144,7 @@ class Foo extends models.Model {
             m2m: [1, 2, 3],
             amount: 500,
             reference: "res.currency,1",
-            properties: {},
+            properties: [],
         },
         {
             id: 3,
@@ -155,7 +156,7 @@ class Foo extends models.Model {
             m2m: [],
             amount: 300,
             reference: "res.currency,2",
-            properties: {},
+            properties: [],
         },
         {
             id: 4,
@@ -166,7 +167,7 @@ class Foo extends models.Model {
             m2o: 1,
             m2m: [1],
             amount: 0,
-            properties: {},
+            properties: [],
         },
     ];
 }
@@ -611,11 +612,12 @@ test(`editable list without open_form_view in debug`, async () => {
         resModel: "foo",
         type: "list",
         arch: `<list editable="top"><field name="foo"/></list>`,
+        viewId: 1,
         selectRecord(resId, options) {
             expect.step(`switch to form - resId: ${resId} activeIds: ${options.activeIds}`);
         },
     });
-    const localStorageKey = "debug_open_view,foo,list,123456789,foo";
+    const localStorageKey = "debug_open_view,foo,list,1,foo";
     expect.verifySteps([["getItem", localStorageKey, null]]);
     expect(`td.o_list_record_open_form_view`).toHaveCount(0);
     expect(".o_optional_columns_dropdown").toHaveCount(1);
@@ -5603,14 +5605,17 @@ test(`archive/unarchive handles returned action`, async () => {
         },
     ]);
 
-    onRpc("/web/dataset/call_kw/foo/action_archive", () => ({
-        type: "ir.actions.act_window",
-        name: "Archive Action",
-        res_model: "bar",
-        view_mode: "form",
-        target: "new",
-        views: [[false, "form"]],
-    }));
+    onRpc("foo", "action_archive", ({ parent }) => {
+        parent();
+        return {
+            type: "ir.actions.act_window",
+            name: "Archive Action",
+            res_model: "bar",
+            view_mode: "form",
+            target: "new",
+            views: [[false, "form"]],
+        };
+    });
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction(11);
@@ -6327,7 +6332,6 @@ test(`grouped, show only limited records when the list view is initially expande
 
 test(`list keeps offset on switchView`, async () => {
     Foo._views = {
-        search: `<search/>`,
         "list,99": `<list limit="1"><field name="display_name"/></list>`,
         "form,100": `<form><field name="display_name"/></form>`,
     };
@@ -6360,7 +6364,6 @@ test(`list keeps offset on switchView`, async () => {
 test.tags("desktop");
 test(`Navigate between the list and kanban view using the command palette`, async () => {
     Foo._views = {
-        search: `<search/>`,
         list: `<list><field name="display_name"/></list>`,
         kanban: `
             <kanban class="o_kanban_test">
@@ -6950,8 +6953,8 @@ test(`bounce create button when no data and click on empty area`, async () => {
 });
 
 test(`no content helper when no data`, async () => {
-    const records = Foo._records.slice(0);
-    Foo._records.splice(0);
+    const records = Foo._records.map((record) => omit(record, "id"));
+    Foo._records = [];
 
     await mountView({
         resModel: "foo",
@@ -6963,7 +6966,7 @@ test(`no content helper when no data`, async () => {
     expect(`.o_list_view table`).toHaveCount(1, { message: "should have a table in the dom" });
     expect(`.o_view_nocontent`).toHaveText("click to add a partner");
 
-    Foo._records.push(...records);
+    MockServer.env["foo"].create(records);
     await validateSearch();
     expect(`.o_view_nocontent`).toHaveCount(0, {
         message: "should not display the no content helper",
@@ -7069,7 +7072,6 @@ test(`refresh empty list with sample data`, async () => {
                 <field name="datetime"/>
             </list>
         `,
-        kanban: `<kanban/>`,
     };
 
     await mountWithCleanup(WebClient);
@@ -10896,9 +10898,8 @@ test(`editable list view: multi edition cannot call onchanges`, async () => {
     };
 
     stepAllNetworkCalls();
-    onRpc("write", ({ args }) => {
-        for (const id of args[0]) {
-            const record = Foo._records.find((r) => r.id === id);
+    onRpc("write", function ({ args }) {
+        for (const record of this.env["foo"].browse(args[0])) {
             record.int_field = args[1].foo.length;
         }
     });
@@ -11009,7 +11010,6 @@ test(`multi edition: many2many_tags in many2many field`, async () => {
     }
     Bar._views = {
         list: `<list><field name="name"/></list>`,
-        search: `<search/>`,
     };
 
     await mountView({
@@ -12163,11 +12163,6 @@ test.tags("desktop");
 test(`list view move to previous page when all records from last page archive/unarchived`, async () => {
     // add active field on foo model and make all records active
     Foo._fields.active = fields.Boolean({ default: true });
-
-    onRpc("/web/dataset/call_kw/foo/action_archive", () => {
-        Foo._records[3].active = false;
-        return {};
-    });
 
     await mountView({
         resModel: "foo",
@@ -14496,7 +14491,6 @@ test(`optional fields is shown only if enabled`, async () => {
                 <field name="display_name" optional="show"/>
             </list>
         `,
-        search: `<search/>`,
     };
 
     await mountWithCleanup(WebClient);
@@ -15403,8 +15397,6 @@ test(`archive/unarchive not available on active readonly models`, async () => {
 test(`open groups are kept when leaving and coming back`, async () => {
     Foo._views = {
         list: `<list><field name="foo"/></list>`,
-        search: `<search/>`,
-        form: `<form/>`,
     };
 
     await mountWithCleanup(WebClient);
@@ -15443,8 +15435,6 @@ test(`open groups are kept when leaving and coming back (grouped by date)`, asyn
     Foo._fields.date = fields.Date({ default: "2022-10-10" });
     Foo._views = {
         list: `<list><field name="foo"/></list>`,
-        search: `<search/>`,
-        form: `<form/>`,
     };
 
     await mountWithCleanup(WebClient);
@@ -15482,8 +15472,6 @@ test(`open groups are kept when leaving and coming back (grouped by date)`, asyn
 test(`go to the next page after leaving and coming back to a grouped list view`, async () => {
     Foo._views = {
         list: `<list groups_limit="1"><field name="foo"/></list>`,
-        form: `<form/>`,
-        search: `<search/>`,
     };
 
     await mountWithCleanup(WebClient);
@@ -16071,7 +16059,6 @@ test.tags("desktop");
 test(`Search more in a many2one`, async () => {
     Bar._views = {
         list: `<list><field name="display_name"/></list>`,
-        search: `<search/>`,
     };
 
     patchWithCleanup(Many2XAutocomplete.defaultProps, {
@@ -16873,10 +16860,7 @@ test(`properties: optional show/hide (config from local storage)`, async () => {
         }
     }
 
-    localStorage.setItem(
-        "optional_fields,foo,list,123456789,m2o,properties",
-        "properties.property_char"
-    );
+    localStorage.setItem("optional_fields,foo,list,1,m2o,properties", "properties.property_char");
 
     await mountView({
         resModel: "foo",
@@ -16887,6 +16871,7 @@ test(`properties: optional show/hide (config from local storage)`, async () => {
                 <field name="properties"/>
             </list>
         `,
+        viewId: 1,
     });
     expect(`.o_list_table thead th:not(.o_list_record_selector)`).toHaveCount(3);
     expect(`.o_list_table thead th[data-name=m2o]`).toHaveCount(1);
@@ -16907,10 +16892,7 @@ test(`properties: optional show/hide (at reload, config from local storage)`, as
         }
     }
 
-    localStorage.setItem(
-        "optional_fields,foo,list,123456789,m2o,properties",
-        "properties.property_char"
-    );
+    localStorage.setItem("optional_fields,foo,list,1,m2o,properties", "properties.property_char");
 
     await mountView({
         resModel: "foo",
@@ -16921,6 +16903,7 @@ test(`properties: optional show/hide (at reload, config from local storage)`, as
                 <field name="properties"/>
             </list>
         `,
+        viewId: 1,
         groupBy: ["m2o"],
     });
 
@@ -17146,7 +17129,6 @@ test(`restore order from state when using default order`, async () => {
                 <field name="foo"/>
             </form>
         `,
-        search: `<search/>`,
     };
 
     onRpc("web_search_read", ({ kwargs }) => expect.step(`order:${kwargs.order}`));
@@ -17241,11 +17223,9 @@ test(`context keys not passed down the stack and not to fields`, async () => {
                 <field name="m2m" widget="many2many_tags"/>
             </list>
         `,
-        search: `<search/>`,
     };
     Bar._views = {
         list: `<list><field name="name"/></list>`,
-        search: `<search/>`,
     };
 
     Bar._records = [];
@@ -17594,7 +17574,7 @@ test("two pages, go page 2, record deleted meanwhile", async () => {
     expect(getPagerValue()).toEqual([1, 3]);
     expect(getPagerLimit()).toBe(4);
 
-    Foo._records.splice(3);
+    MockServer.env["foo"].unlink(4);
     await pagerNext();
     expect(".o_data_row").toHaveCount(3);
     expect(getPagerValue()).toEqual([1, 3]);
@@ -17625,7 +17605,7 @@ test("two pages, go page 2, record deleted meanwhile (grouped case)", async () =
     expect(getPagerValue(queryFirst(".o_group_header"))).toEqual([1, 3]);
     expect(getPagerLimit(queryFirst(".o_group_header"))).toBe(4);
 
-    Foo._records.splice(3);
+    MockServer.env["foo"].unlink(4);
     await pagerNext(queryFirst(".o_group_header"));
     expect(".o_data_row").toHaveCount(3);
     expect(".o_group_header .o_pager").toHaveCount(0);
@@ -17663,7 +17643,6 @@ test("open record, with invalid record in list", async () => {
     Foo._views = {
         form: `<form><field name="foo"/><field name="int_field"/></form>`,
         list: `<list><field name="foo" required="1"/><field name="int_field"/></list>`,
-        search: `<search/>`,
     };
 
     mockService("notification", {

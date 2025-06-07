@@ -21,6 +21,7 @@ import {
     fields,
     getService,
     makeServerError,
+    MockServer,
     mockService,
     models,
     mountView,
@@ -1085,13 +1086,7 @@ test("embedded one2many with handle widget", async () => {
 
     await clickSave();
 
-    expect(
-        Turtle._records.map((r) => ({
-            id: r.id,
-            turtle_foo: r.turtle_foo,
-            turtle_int: r.turtle_int,
-        }))
-    ).toEqual([
+    expect(MockServer.env["turtle"].map((r) => pick(r, "id", "turtle_foo", "turtle_int"))).toEqual([
         { id: 1, turtle_foo: "yop", turtle_int: 1 },
         { id: 2, turtle_foo: "blip", turtle_int: 0 },
         { id: 3, turtle_foo: "kawa", turtle_int: 21 },
@@ -1819,7 +1814,9 @@ test("onchange on one2many containing x2many in form view", async () => {
             obj.turtles = [[0, false, { turtle_foo: "new record" }]];
         },
     };
-    Partner._views = { list: '<list><field name="foo"/></list>', search: "<search></search>" };
+    Partner._views = {
+        list: '<list><field name="foo"/></list>',
+    };
 
     await mountView({
         type: "form",
@@ -5752,7 +5749,7 @@ test("id field in one2many in a new record", async () => {
 });
 
 test("sub form view with a required field", async () => {
-    Partner._fields.foo = fields.Char({ default: null, required: true });
+    Partner._fields.foo = fields.Char({ required: true });
 
     await mountView({
         type: "form",
@@ -6280,9 +6277,8 @@ test("many2many list in a one2many opened by a many2one", async () => {
     Partner._views = { form: '<form><field name="timmy"/></form>' };
     PartnerType._views = {
         list: '<list editable="bottom"><field name="name"/></list>',
-        search: "<search></search>",
     };
-    onRpc("/web/dataset/call_kw/partner/get_formview_id", () => false);
+    onRpc("partner", "get_formview_id", () => false);
     onRpc("web_save", (args) => {
         expect(args.args[1].timmy).toEqual([[4, 12]], {
             message: "should properly add id",
@@ -9179,8 +9175,10 @@ test("one2many form view with action button", async () => {
     // See https://github.com/odoo/odoo/issues/24189
     mockService("action", {
         doActionButton(params) {
-            Partner._records[1].name = "new name";
-            Partner._records[1].timmy = [12];
+            for (const record of MockServer.env["partner"].browse(params.resIds)) {
+                record.name = "new name";
+                record.timmy = [12];
+            }
             params.onClose();
         },
     });
@@ -10415,7 +10413,7 @@ test("reordering embedded one2many with handle widget starting with same sequenc
     ]);
 
     await clickSave();
-    expect(Turtle._records.map((r) => ({ id: r.id, turtle_int: r.turtle_int }))).toEqual([
+    expect(MockServer.env["turtle"].map((r) => pick(r, "id", "turtle_int"))).toEqual([
         { id: 1, turtle_int: 2 },
         { id: 2, turtle_int: 3 },
         { id: 3, turtle_int: 4 },
@@ -10566,7 +10564,6 @@ test("x2many default_order multiple fields with limit", async () => {
 test("one2many from a model that has been sorted", async () => {
     Partner._views = {
         list: `<list><field name="int_field"/></list>`,
-        search: `<search/>`,
         form: `
             <form>
                 <field name="turtles">
@@ -11633,7 +11630,14 @@ test("does not crash when you parse a tree arch containing another tree arch", a
 });
 test("open a one2many record containing a one2many", async () => {
     Partner._views = {
-        [["form", 1234]]: `
+        [["form", 5]]: /* xml */ `
+            <form>
+                <field name="p" context="{ 'form_view_ref': 1234 }">
+                    <list><field name="name" /></list>
+                </field>
+            </form>
+        `,
+        [["form", 1234]]: /* xml */ `
             <form>
                 <field name="turtles" >
                     <list>
@@ -11645,10 +11649,10 @@ test("open a one2many record containing a one2many", async () => {
 
     patchWithCleanup(browser.localStorage, {
         setItem(args) {
-            expect.step(`localStorage setItem ${args}`);
+            expect.step(`setItem: ${args}`);
         },
         getItem(args) {
-            expect.step(`localStorage getItem ${args}`);
+            expect.step(`getItem: ${args}`);
             return null;
         },
     });
@@ -11657,29 +11661,25 @@ test("open a one2many record containing a one2many", async () => {
     rec.p = [1];
     await mountView({
         type: "form",
-        arch: `<form>
-            <field name="p" context="{ 'form_view_ref': 1234 }">
-                <list><field name="name" /></list>
-            </field>
-        </form>`,
         resModel: "partner",
         resId: 2,
+        viewId: 5,
     });
 
     expect.verifySteps([
-        "localStorage getItem web.emoji.frequent",
-        "localStorage getItem pwaService.installationState",
-        "localStorage getItem optional_fields,partner,form,123456789,p,list,name",
-        "localStorage getItem debug_open_view,partner,form,123456789,p,list,name",
+        "getItem: web.emoji.frequent",
+        "getItem: pwaService.installationState",
+        "getItem: optional_fields,partner,form,5,p,list,name",
+        "getItem: debug_open_view,partner,form,5,p,list,name",
     ]);
 
     await contains(".o_data_cell").click();
     expect(".modal .o_data_row").toHaveCount(1);
     expect.verifySteps([
-        "localStorage getItem optional_fields,partner,form,123456789,p,list,name",
-        "localStorage getItem debug_open_view,partner,form,123456789,p,list,name",
-        "localStorage getItem optional_fields,partner,form,123456789,turtles,list,name",
-        "localStorage getItem debug_open_view,partner,form,123456789,turtles,list,name",
+        "getItem: optional_fields,partner,form,5,p,list,name",
+        "getItem: debug_open_view,partner,form,5,p,list,name",
+        "getItem: optional_fields,partner,form,5,turtles,list,name",
+        "getItem: debug_open_view,partner,form,5,turtles,list,name",
     ]);
 });
 
@@ -12096,9 +12096,10 @@ test("nested one2manys, multi page, onchange", async () => {
     expect.verifySteps(["onchange"]);
 
     await clickSave();
-    expect(Partner._records[0].int_field).toBe(5);
-    expect(Turtle._records[1].turtle_int).toBe(5);
-    expect(Turtle._records[0].turtle_int).toBe(5);
+
+    expect(MockServer.env["partner"][0].int_field).toBe(5);
+    expect(MockServer.env["turtle"][1].turtle_int).toBe(5);
+    expect(MockServer.env["turtle"][0].turtle_int).toBe(5);
 });
 
 test("multi page, command forget for record of second page", async () => {
@@ -12645,7 +12646,6 @@ test("add a row to an x2many and ask canBeRemoved twice", async () => {
     const def = new Deferred();
     Partner._views = {
         list: `<list><field name="int_field"/></list>`,
-        search: `<search/>`,
         form: `
             <form>
                 <field name="p">
