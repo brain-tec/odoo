@@ -88,7 +88,6 @@ class TestSnippets(HttpCase):
     def test_07_image_gallery(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_image_gallery', login='admin')
 
-    @unittest.skip
     def test_08_table_of_content(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_table_of_content', login='admin')
 
@@ -97,7 +96,6 @@ class TestSnippets(HttpCase):
         create_image_attachment(self.env, '/web/image/website.s_banner_default_image.jpg', 's_default_image2.jpg')
         self.start_tour("/", "snippet_image_gallery_remove", login='admin')
 
-    @unittest.skip
     def test_10_parallax(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'test_parallax', login='admin')
 

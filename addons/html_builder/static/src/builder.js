@@ -151,6 +151,7 @@ export class Builder extends Component {
                 updateInvisibleElementsPanel: () => this.updateInvisibleEls(),
                 allowCustomStyle: true,
                 allowTargetBlank: true,
+                getAnimateTextConfig: () => ({ editor: this.editor, editorBus }),
             },
             this.env.services
         );
@@ -294,7 +295,7 @@ export class Builder extends Component {
     }
 
     async onBeforeLeave() {
-        if (this.state.canUndo) {
+        if (this.state.canUndo && !this.editor.shared.savePlugin.isAlreadySaved()) {
             let continueProcess = true;
             await new Promise((resolve) => {
                 this.dialog.add(ConfirmationDialog, {
