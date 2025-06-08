@@ -22,6 +22,7 @@ import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { Typing } from "@mail/discuss/typing/common/typing";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
+import { isMobileOS } from "@web/core/browser/feature_detection";
 
 /**
  * @typedef {Object} Props
@@ -61,6 +62,7 @@ export class ChatWindow extends Component {
         this.threadActions = useThreadActions();
         this.actionsMenuButtonHover = useHover("actionsMenuButton");
         this.parentChannelHover = useHover("parentChannel");
+        this.isMobileOS = isMobileOS();
 
         useChildSubEnv({
             closeActionPanel: () => this.threadActions.activeAction?.close(),
@@ -90,12 +92,11 @@ export class ChatWindow extends Component {
     }
 
     get style() {
-        const maxHeight = !this.ui.isSmall ? "max-height: 95vh;" : "";
         const textDirection = localization.direction;
         const offsetFrom = textDirection === "rtl" ? "left" : "right";
         const visibleOffset = this.ui.isSmall ? 0 : this.props.right;
         const oppositeFrom = offsetFrom === "right" ? "left" : "right";
-        return `${offsetFrom}: ${visibleOffset}px; ${oppositeFrom}: auto; ${maxHeight}`;
+        return `${offsetFrom}: ${visibleOffset}px; ${oppositeFrom}: auto;`;
     }
 
     onKeydown(ev) {
