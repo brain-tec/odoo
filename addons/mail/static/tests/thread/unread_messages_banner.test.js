@@ -11,7 +11,7 @@ import {
     startServer,
 } from "@mail/../tests/mail_test_helpers";
 import { describe, test } from "@odoo/hoot";
-import { tick } from "@odoo/hoot-mock";
+import { mockUserAgent, tick } from "@odoo/hoot-mock";
 import {
     asyncStep,
     Command,
@@ -141,7 +141,7 @@ test("remove banner when opening thread at the bottom", async () => {
     await start();
     await openDiscuss(channelId);
     await click("[title='Expand']", { parent: [".o-mail-Message", { text: "Hello World" }] });
-    await click(".o-mail-Message-moreMenu [title='Mark as Unread']");
+    await click(".o-dropdown-item:contains('Mark as Unread')");
     await contains(".o-mail-Thread-banner", { text: "1 new message" });
     await click(".o-mail-DiscussSidebar-item", { text: "Inbox" });
     await contains(".o-mail-Discuss-threadName[title='Inbox']");
@@ -165,7 +165,7 @@ test("keep banner after mark as unread when scrolling to bottom", async () => {
     await start();
     await openDiscuss(channelId);
     await click("[title='Expand']", { parent: [".o-mail-Message", { text: "message 29" }] });
-    await click(".o-mail-Message-moreMenu [title='Mark as Unread']");
+    await click(".o-dropdown-item:contains('Mark as Unread')");
     await scroll(".o-mail-Thread", "bottom");
     await contains(".o-mail-Thread-banner", { text: "30 new messages" });
 });
@@ -217,6 +217,7 @@ test("sidebar and banner counters display same value", async () => {
 });
 
 test("mobile: mark as read when opening chat", async () => {
+    mockUserAgent("android");
     const pyEnv = await startServer();
     const bobPartnerId = pyEnv["res.partner"].create({ name: "bob" });
     const channelId = pyEnv["discuss.channel"].create({
@@ -240,6 +241,8 @@ test("mobile: mark as read when opening chat", async () => {
     await contains(".o-mail-NotificationItem:has(.badge:contains(1))", { text: "bob" });
     await click(".o-mail-NotificationItem", { text: "bob" });
     await contains(".o-mail-Message");
+    await contains(".o-mail-Thread.o-focused");
+    await contains(".o-mail-Composer:not(.o-focused)");
     await click(".o-mail-ChatWindow-command[title*='Close Chat Window']");
     await contains(".o-mail-NotificationItem:has(.badge:contains(1))", { text: "bob", count: 0 });
 });
