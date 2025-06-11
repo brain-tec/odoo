@@ -11,7 +11,8 @@ threadActionsRegistry
         condition(component) {
             return component.props.chatWindow;
         },
-        icon: "fa fa-fw fa-minus",
+        icon: "oi oi-fw oi-minus",
+        iconLarge: "oi oi-fw fa-lg oi-minus",
         name(component) {
             return !component.props.chatWindow?.isOpen ? _t("Open") : _t("Fold");
         },
@@ -33,6 +34,7 @@ threadActionsRegistry
             );
         },
         icon: "fa fa-fw fa-pencil",
+        iconLarge: "fa fa-lg fa-fw fa-pencil",
         name: _t("Rename Thread"),
         open(component) {
             component.state.editingName = true;
@@ -45,6 +47,7 @@ threadActionsRegistry
             return component.props.chatWindow;
         },
         icon: "oi fa-fw oi-close",
+        iconLarge: "oi fa-lg fa-fw oi-close",
         name: _t("Close Chat Window (ESC)"),
         open(component) {
             component.close();
@@ -183,7 +186,17 @@ function transformAction(component, id, action) {
          * - In action definition: indicate whether the action is elligible as partition actions. @see useThreadActions::partition
          * - While action is being used: indicate that the action is being used as a partitioned action.
          */
-        partition: action.partition ?? true,
+        get partition() {
+            if (action._partition) {
+                return action._partition;
+            }
+            return typeof action.partition === "function"
+                ? action.partition(component)
+                : action.partition ?? true;
+        },
+        set partition(partition) {
+            action._partition = partition;
+        },
         /** Determines whether this is a popover linked to this action. */
         popover: null,
         /** Determines the order of this action (smaller first). */

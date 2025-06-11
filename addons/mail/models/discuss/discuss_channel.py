@@ -384,17 +384,29 @@ class DiscussChannel(models.Model):
                         channels=failing_channels.mapped("name"),
                     )
                 )
+
+        def get_field_name(field_description):
+            if isinstance(field_description, Store.Attr):
+                return field_description.field_name
+            return field_description
+
         def get_vals(channel):
-            return {field_name: channel[field_name] for field_name in self._sync_field_names()}
+            return {
+                get_field_name(field_description): (
+                    channel[get_field_name(field_description)],
+                    field_description,
+                )
+                for field_description in self._sync_field_names()
+            }
 
         old_vals = {channel: get_vals(channel) for channel in self}
         result = super().write(vals)
         for channel in self:
             new_vals = get_vals(channel)
             diff = []
-            for field_name, value in new_vals.items():
-                if value != old_vals[channel][field_name]:
-                    diff.append(field_name)
+            for field_name, (value, field_description) in new_vals.items():
+                if value != old_vals[channel][field_name][0]:
+                    diff.append(field_description)
             if diff:
                 channel._bus_send_store(channel, diff)
         if vals.get('group_ids'):
@@ -408,20 +420,13 @@ class DiscussChannel(models.Model):
             "create_uid",
             "default_display_mode",
             "description",
-            "group_ids",
+            Store.Many("group_ids", []),
             "group_public_id",
             "last_interest_dt",
             "member_count",
             "name",
             "uuid",
         ]
-
-    def _field_store_repr(self, field_name):
-        """Return the default Store representation of the given field name, which can be passed as
-        param to the various Store methods."""
-        if field_name == "group_ids":
-            return [Store.Attr("group_based_subscription", lambda c: bool(c.group_ids))]
-        return [field_name]
 
     # ------------------------------------------------------------
     # MEMBERS MANAGEMENT
@@ -1044,7 +1049,7 @@ class DiscussChannel(models.Model):
             "default_display_mode",
             "description",
             Store.One("from_message_id"),
-            "group_ids",
+            Store.Many("group_ids", []),
             Store.One("group_public_id", ["full_name"]),
             Store.Many(
                 "invited_member_ids",

@@ -218,7 +218,7 @@ class Store:
             elif isinstance(val, date):
                 target[key] = odoo.fields.Date.to_string(val)
             elif isinstance(val, Markup):
-                target[key] = ["markup", val]
+                target[key] = ["markup", str(val)]
             else:
                 target[key] = val
 
@@ -232,7 +232,7 @@ class Store:
         if fields is None:
             return []
         if isinstance(fields, dict):
-            fields = list(Store.Attr(key, value) for key, value in fields.items())
+            fields = [Store.Attr(key, value) for key, value in fields.items()]
         if not isinstance(fields, list):
             fields = [fields]
         if hasattr(records, "_field_store_repr"):
@@ -249,7 +249,7 @@ class Store:
                 if isinstance(field, dict):
                     data.update(field)
                 elif not field.predicate or field.predicate(record):
-                    data[field.rename or field.field_name] = field._get_value(record)
+                    data[field.field_name] = field._get_value(record)
         return records_data
 
     def _get_record_index(self, model_name, values):
@@ -266,10 +266,9 @@ class Store:
         Note: when a static value is given to a recordset, the same value is set on all records.
         """
 
-        def __init__(self, field_name, value=None, *, predicate=None, rename=None, sudo=False):
+        def __init__(self, field_name, value=None, *, predicate=None, sudo=False):
             self.field_name = field_name
             self.predicate = predicate
-            self.rename = rename
             self.sudo = sudo
             self.value = value
 
@@ -285,27 +284,32 @@ class Store:
 
         def __init__(
             self,
-            records_or_field_names,
+            records_or_field_name,
             fields=None,
             *,
             as_thread=False,
+            dynamic_fields=None,
             only_data=False,
             predicate=None,
-            rename=None,
             sudo=False,
             value=None,
             **kwargs,
         ):
-            field_name = records_or_field_names if isinstance(records_or_field_names, str) else None
-            super().__init__(field_name, predicate=predicate, rename=rename, sudo=sudo, value=value)
+            field_name = records_or_field_name if isinstance(records_or_field_name, str) else None
+            super().__init__(field_name, predicate=predicate, sudo=sudo, value=value)
             assert (
-                not records_or_field_names
-                or isinstance(records_or_field_names, (str, models.Model))
-            ), f"expected recordset, field name, or empty value for Relation: {records_or_field_names}"
+                not records_or_field_name
+                or isinstance(records_or_field_name, (str, models.Model))
+            ), f"expected recordset, field name, or empty value for Relation: {records_or_field_name}"
             self.records = (
-                records_or_field_names if isinstance(records_or_field_names, models.Model) else None
+                records_or_field_name if isinstance(records_or_field_name, models.Model) else None
+            )
+            assert self.records is None or dynamic_fields is None, (
+                """dynamic_fields can only be set when field name is provided, not records. """
+                f"""Records: {self.records}, dynamic_fields: {dynamic_fields}"""
             )
             self.as_thread = as_thread
+            self.dynamic_fields = dynamic_fields
             self.fields = fields
             self.only_data = only_data
             self.kwargs = kwargs
@@ -317,17 +321,21 @@ class Store:
                 if self.field_name == "thread" and "thread" not in record._fields:
                     if (res_model := record[res_model_field]) and (res_id := record["res_id"]):
                         target = record.env[res_model].browse(res_id)
-            return self._copy_with_records(target)
+            return self._copy_with_records(target, calling_record=record)
 
-        def _copy_with_records(self, records, fields=None, **kwargs):
+        def _copy_with_records(self, records, calling_record):
             """Returns a new relation with the given records instead of the field name."""
             assert self.field_name and self.records is None
+            assert not self.dynamic_fields or calling_record
+            extra_fields = self.kwargs.get("extra_fields", [])
+            if self.dynamic_fields:
+                extra_fields += self.dynamic_fields(calling_record)
             params = {
                 "as_thread": self.as_thread,
-                "fields": fields if fields is not None else self.fields,
+                "extra_fields": extra_fields,
+                "fields": self.fields,
                 "only_data": self.only_data,
-                "rename": self.rename,
-                **self.kwargs,
+                **{key: val for key, val in self.kwargs.items() if key != "extra_fields"},
             }
             return self.__class__(records, **params)
 
@@ -344,9 +352,9 @@ class Store:
             fields=None,
             *,
             as_thread=False,
+            dynamic_fields=None,
             only_data=False,
             predicate=None,
-            rename=None,
             sudo=False,
             value=None,
             **kwargs,
@@ -355,9 +363,9 @@ class Store:
                 record_or_field_name,
                 fields,
                 as_thread=as_thread,
+                dynamic_fields=dynamic_fields,
                 only_data=only_data,
                 predicate=predicate,
-                rename=rename,
                 sudo=sudo,
                 value=value,
                 **kwargs,
@@ -394,9 +402,9 @@ class Store:
             *,
             mode="REPLACE",
             as_thread=False,
+            dynamic_fields=None,
             only_data=False,
             predicate=None,
-            rename=None,
             sort=None,
             sudo=False,
             value=None,
@@ -406,9 +414,9 @@ class Store:
                 records_or_field_name,
                 fields,
                 as_thread=as_thread,
+                dynamic_fields=dynamic_fields,
                 only_data=only_data,
                 predicate=predicate,
-                rename=rename,
                 sudo=sudo,
                 value=value,
                 **kwargs,
@@ -416,10 +424,10 @@ class Store:
             self.mode = mode
             self.sort = sort
 
-        def _copy_with_records(self, records, fields=None, **kwargs):
-            res = super()._copy_with_records(records, fields, **kwargs)
-            res.mode = kwargs.get("mode", self.mode)
-            res.sort = kwargs.get("sort", self.sort)
+        def _copy_with_records(self, *args, **kwargs):
+            res = super()._copy_with_records(*args, **kwargs)
+            res.mode = self.mode
+            res.sort = self.sort
             return res
 
         def _add_to_store(self, store: "Store", target, key):

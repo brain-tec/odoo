@@ -173,7 +173,6 @@
                 </t>
             </Dropdown>
             <a href="#" t-if="hasSelection()" title="Clear All" class="btn btn-link text-nowrap text-uppercase" t-on-click="() => this.clearSelection()">CLEAR ALL</a>
-            <div t-else="" class="mx-4"/>
         </div>
     </div>
 </t>
@@ -186,7 +185,7 @@
             >
             <header
                 class="list-group-item list-group-item-action d-flex align-items-center px-0 py-lg-0 border-0"
-                t-att-class="{'active text-900 fw-bold': state.active[section.id] === valueId}"
+                t-att-class="{'active text-black fw-bold': state.active[section.id] === valueId}"
                 t-on-click="() => this.toggleCategory(section, value)"
                 >
                 <div

@@ -659,8 +659,17 @@ test("basic top bar rendering", async () => {
     await contains("button:disabled", { text: "Unstar all" });
     await contains(".o-mail-Discuss-threadName", { value: "Starred" });
     await click(".o-mail-DiscussSidebarChannel", { text: "General" });
-    await contains(".o-mail-Discuss-header button[title='Invite People']");
     await contains(".o-mail-Discuss-threadName", { value: "General" });
+    await contains(".o-mail-Discuss-header button", { count: 9 });
+    await contains(".o-mail-Discuss-header button[title='Start Video Call']");
+    await contains(".o-mail-Discuss-header button[title='Start Call']");
+    await contains(".o-mail-Discuss-header button[title='Notification Settings']");
+    await contains(".o-mail-Discuss-header button[title='Invite People']");
+    await contains(".o-mail-Discuss-header button[title='Search Messages']");
+    await contains(".o-mail-Discuss-header button[title='Threads']");
+    await contains(".o-mail-Discuss-header button[title='Attachments']");
+    await contains(".o-mail-Discuss-header button[title='Pinned Messages']");
+    await contains(".o-mail-Discuss-header button[title='Members']");
 });
 
 test("rendering of inbox message", async () => {
@@ -1966,7 +1975,7 @@ test("composer state: attachments save and restore", async () => {
     await contains(".o-mail-AttachmentCard", { text: "text4.txt" });
 });
 
-test("sidebar: cannot unpin channel group_based_subscription: mandatorily pinned", async () => {
+test("sidebar: cannot leave channel with group_ids", async () => {
     mockDate("2023-01-03 12:00:00"); // so that it's after last interest (mock server is in 2019 by default!)
     const pyEnv = await startServer();
     pyEnv["discuss.channel"].create({
