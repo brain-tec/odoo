@@ -73,7 +73,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #           - _compute_message_needaction
     #           - fetch res_groups (group_public_id)
     #           - fetch ir_module_category (group_public_id)
-    #           - search group_ids (group_based_subscription)
+    #           - search group_ids
     _query_count_init_messaging = 35
     # Queries for _query_count_discuss_channels (in order):
     #   1: insert res_device_log
@@ -115,7 +115,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - _compute_message_needaction
     #       - fetch res_groups (group_public_id)
     #       - fetch ir_module_category (group_public_id)
-    #       - search group_ids (group_based_subscription)
+    #       - search group_ids
     #       - _compute_message_unread
     #       - fetch im_livechat_channel
     #   - _get_last_messages
@@ -606,7 +606,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "description": "General announcements for all employees.",
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
-                "group_based_subscription": True,
+                "group_ids": channel.group_ids.ids,
                 "group_public_id": self.env.ref("base.group_user").id,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
@@ -638,7 +638,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "description": False,
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
-                "group_based_subscription": False,
+                "group_ids": [],
                 "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
@@ -670,7 +670,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "description": False,
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
-                "group_based_subscription": False,
+                "group_ids": [],
                 "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
@@ -702,7 +702,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "description": False,
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
-                "group_based_subscription": False,
+                "group_ids": [],
                 "group_public_id": self.env.ref("base.group_user").id,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", [member_0.id]]],
@@ -737,7 +737,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "description": False,
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
-                "group_based_subscription": False,
+                "group_ids": [],
                 "group_public_id": self.env.ref("base.group_user").id,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
@@ -769,7 +769,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "description": False,
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
-                "group_based_subscription": False,
+                "group_ids": [],
                 "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
@@ -801,7 +801,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "description": False,
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
-                "group_based_subscription": False,
+                "group_ids": [],
                 "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
@@ -833,7 +833,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "description": False,
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
-                "group_based_subscription": False,
+                "group_ids": [],
                 "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
@@ -865,7 +865,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "description": False,
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
-                "group_based_subscription": False,
+                "group_ids": [],
                 "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
@@ -897,7 +897,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "description": False,
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
-                "group_based_subscription": False,
+                "group_ids": [],
                 "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
@@ -929,7 +929,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "description": False,
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
-                "group_based_subscription": False,
+                "group_ids": [],
                 "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
@@ -961,7 +961,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "description": False,
                 "fetchChannelInfoState": "fetched",
                 "from_message_id": False,
-                "group_based_subscription": False,
+                "group_ids": [],
                 "group_public_id": False,
                 "id": channel.id,
                 "invited_member_ids": [["ADD", []]],
@@ -1275,8 +1275,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_general:
             return {
                 "attachment_ids": [],
-                "author_id": {"id": user_0.partner_id.id, "type": "partner"},
                 "author_guest_id": False,
+                "author_id": {"id": user_0.partner_id.id, "type": "partner"},
                 "body": ["markup", "<p>test</p>"],
                 "create_date": create_date,
                 "date": date,
@@ -1312,8 +1312,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_channel_public_1:
             return {
                 "attachment_ids": [],
-                "author_id": {"id": user_2.partner_id.id, "type": "partner"},
                 "author_guest_id": False,
+                "author_id": {"id": user_2.partner_id.id, "type": "partner"},
                 "body": ["markup", "<p>test</p>"],
                 "create_date": create_date,
                 "date": date,
@@ -1349,8 +1349,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_channel_public_2:
             return {
                 "attachment_ids": [],
-                "author_id": {"id": user_0.partner_id.id, "type": "partner"},
                 "author_guest_id": False,
+                "author_id": {"id": user_0.partner_id.id, "type": "partner"},
                 "body": [
                     "markup",
                     f'<div class="o_mail_notification" data-oe-type=\"channel-joined\">invited <a href="#" data-oe-model="res.partner" data-oe-id="{user_9.partner_id.id}">@test9</a> to the channel</div>',
@@ -1385,8 +1385,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_channel_group_1:
             return {
                 "attachment_ids": [],
-                "author_id": {"id": self.user_root.partner_id.id, "type": "partner"},
                 "author_guest_id": False,
+                "author_id": {"id": self.user_root.partner_id.id, "type": "partner"},
                 "body": [
                     "markup",
                     '<div data-oe-type=\"call\" class="o_mail_notification"></div>',
@@ -1422,8 +1422,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_channel_group_2:
             return {
                 "attachment_ids": [],
-                "author_id": {"id": user_0.partner_id.id, "type": "partner"},
                 "author_guest_id": False,
+                "author_id": {"id": user_0.partner_id.id, "type": "partner"},
                 "body": [
                     "markup",
                     f'<div class="o_mail_notification" data-oe-type=\"channel-joined\">invited <a href="#" data-oe-model="res.partner" data-oe-id="{user_13.partner_id.id}">@test13</a> to the channel</div>',
@@ -1458,6 +1458,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_livechat_1:
             return {
                 "attachment_ids": [],
+                "author_guest_id": False,
                 "author_id": {"id": user_1.partner_id.id, "type": "partner"},
                 "body": ["markup", "<p>test</p>"],
                 "create_date": create_date,
@@ -1489,13 +1490,12 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         if channel == self.channel_livechat_2:
             return {
                 "attachment_ids": [],
-                "author_id": False,
                 "author_guest_id": {"id": guest.id, "type": "guest"},
+                "author_id": False,
                 "body": ["markup", "<p>test</p>"],
                 "create_date": create_date,
                 "date": date,
                 "default_subject": "anon 2 Ernest Employee",
-                "email_from": False,
                 "id": last_message.id,
                 "incoming_email_cc": False,
                 "incoming_email_to": False,
@@ -1535,33 +1535,33 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 {
                     "content": "👍",
                     "count": 1,
+                    "guests": [],
                     "message": last_message.id,
+                    "partners": [{"id": partner_2, "type": "partner"}],
                     "sequence": min(reactions_0.ids),
-                    "guest_ids": [],
-                    "partner_ids": [{"id": partner_2, "type": "partner"}],
                 },
                 {
                     "content": "😁",
                     "count": 2,
+                    "guests": [],
                     "message": last_message.id,
-                    "sequence": min(reactions_1.ids),
-                    "guest_ids": [],
-                    "partner_ids": [
+                    "partners": [
                         {"id": partner_2, "type": "partner"},
                         {"id": partner_1, "type": "partner"},
                     ],
+                    "sequence": min(reactions_1.ids),
                 },
                 {
                     "content": "😊",
                     "count": 3,
+                    "guests": [],
                     "message": last_message.id,
-                    "sequence": min(reactions_2.ids),
-                    "guest_ids": [],
-                    "partner_ids": [
+                    "partners": [
                         {"id": partner_2, "type": "partner"},
                         {"id": partner_1, "type": "partner"},
                         {"id": partner_0, "type": "partner"},
                     ],
+                    "sequence": min(reactions_2.ids),
                 },
             ]
         if channel == self.channel_channel_public_1:
@@ -1569,35 +1569,36 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 {
                     "content": "😁",
                     "count": 1,
+                    "guests": [],
                     "message": last_message.id,
+                    "partners": [{"id": partner_2, "type": "partner"}],
                     "sequence": min(reactions_1.ids),
-                    "guest_ids": [],
-                    "partner_ids": [{"id": partner_2, "type": "partner"}],
                 },
                 {
                     "content": "😊",
                     "count": 3,
+                    "guests": [],
                     "message": last_message.id,
-                    "sequence": min(reactions_2.ids),
-                    "guest_ids": [],
-                    "partner_ids": [
+                    "partners": [
                         {"id": partner_2, "type": "partner"},
                         {"id": partner_1, "type": "partner"},
                         {"id": partner_0, "type": "partner"},
                     ],
+                    "sequence": min(reactions_2.ids),
                 },
                 {
                     "content": "😏",
                     "count": 2,
+                    "guests": [],
                     "message": last_message.id,
-                    "sequence": min(reactions_3.ids),
-                    "guest_ids": [],
-                    "partner_ids": [
+                    "partners": [
                         {"id": partner_1, "type": "partner"},
                         {"id": partner_0, "type": "partner"},
                     ],
+                    "sequence": min(reactions_3.ids),
                 },
             ]
+        return []
 
     def _expected_result_for_notification(self, channel):
         last_message = channel._get_last_messages()

@@ -28,6 +28,7 @@ import { ResourceEditor } from "@website/components/resource_editor/resource_edi
 import { isHTTPSorNakedDomainRedirection } from "./utils";
 import { WebsiteSystrayItem } from "./website_systray_item";
 import { renderToElement } from "@web/core/utils/render";
+import { isBrowserMicrosoftEdge } from "@web/core/browser/feature_detection";
 
 const websiteSystrayRegistry = registry.category("website_systray");
 
@@ -426,7 +427,13 @@ export class WebsiteBuilder extends Component {
         this.setIframeLoaded();
         this.websiteService.websiteRootInstance = undefined;
         if (url) {
-            this.websiteContent.el.contentWindow.location = encodeURIComponent(url);
+            const urlObj = new URL(url, this.websiteContent.el.contentWindow.location);
+            const pathSegments = urlObj.pathname.split("/").map(encodeURIComponent);
+            const encodedPath = pathSegments.join("/");
+            this.websiteContent.el.contentWindow.location.href = new URL(
+                encodedPath,
+                this.websiteContent.el.contentWindow.location
+            );
         } else {
             this.websiteContent.el.contentWindow.location.reload();
         }
@@ -528,6 +535,10 @@ export class WebsiteBuilder extends Component {
     addListeners(target) {
         target.removeEventListener("keydown", this.onKeydownRefresh);
         target.addEventListener("keydown", this.onKeydownRefresh);
+    }
+
+    get isMicrosoftEdge() {
+        return isBrowserMicrosoftEdge();
     }
 }
 

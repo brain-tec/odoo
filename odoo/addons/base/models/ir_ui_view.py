@@ -224,15 +224,13 @@ actual arch.
                 ('xml' in config['dev_mode'] and not view.arch_updated)
             if read_file and view.arch_fs and (view.xml_id or view.key):
                 xml_id = view.xml_id or view.key
-                # It is safe to split on / herebelow because arch_fs is explicitely stored with '/'
                 try:
-                    fullpath = file_path(view.arch_fs)
-                except FileNotFoundError:
+                    # reading the file will raise an OSError if it is unreadable
+                    arch_fs = get_view_arch_from_file(file_path(view.arch_fs, check_exists=False), xml_id)
+                except OSError:
                     _logger.warning("View %s: Full path [%s] cannot be found.", xml_id, view.arch_fs)
                     arch_fs = False
-                    continue
 
-                arch_fs = get_view_arch_from_file(fullpath, xml_id)
                 # replace %(xml_id)s, %(xml_id)d, %%(xml_id)s, %%(xml_id)d by the res_id
                 if arch_fs:
                     arch_fs = resolve_external_ids(arch_fs, xml_id).replace('%%', '%')
@@ -2768,6 +2766,29 @@ class Base(models.AbstractModel):
                 raise UserError(_("No default view of type '%s' could be found!", view_type))
         return arch, view
 
+    def _get_view_postprocessed(self, view, arch, **options):
+        """
+        Get the post-processed view architecture and the corresponding fields.
+
+        This method uses the view's ``postprocess_and_fields`` function to process
+        the view architecture. It applies access control rules, field modifiers,
+        and tag-specific logic. It also automatically embeds subviews for
+        ``one2many`` and ``many2many`` fields when required, and collects all
+        fields used across the view and its subviews.
+
+        :param view: an ``ir.ui.view`` record
+        :param arch: the view architecture as a string
+        :param options: bool options to return additional features:
+                        ``mobile`` (bool): true if the web client is currently using
+                        the responsive mobile view (to use kanban views instead of
+                        list views for x2many fields)
+        :return: a tuple containing:
+                - the post-processed view architecture as a string
+                - a dictionary of models and the fields used in the view
+        :rtype: tuple(str, dict)
+        """
+        return view.postprocess_and_fields(arch, model=self._name, **options)
+
     @api.model
     def _get_view_cache_key(self, view_id=None, view_type='form', **options):
         """ Get the key to use for caching `_get_view_cache`.
@@ -2827,7 +2848,7 @@ class Base(models.AbstractModel):
         arch, view = self._get_view(view_id, view_type, **options)
 
         # Apply post processing, groups and modifiers etc...
-        arch, models = view.postprocess_and_fields(arch, model=self._name, **options)
+        arch, models = self._get_view_postprocessed(view, arch, **options)
         models = self._get_view_fields(view_type or view.type, models)
         result = {
             'arch': arch,

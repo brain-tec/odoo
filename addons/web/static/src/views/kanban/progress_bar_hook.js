@@ -1,4 +1,5 @@
 import { reactive } from "@odoo/owl";
+import { getCurrency } from "@web/core/currency";
 import { Domain } from "@web/core/domain";
 import { _t } from "@web/core/l10n/translation";
 import {
@@ -133,19 +134,28 @@ class ProgressBarState {
         let value = 0;
         if (!this.activeBars[group.serverValue]) {
             value = group.count;
-            if (aggregateField) {
-                value =
-                    _findGroup(this._aggregateValues, group.groupByField, group.serverValue)[
-                        aggregateField.name
-                    ] || 0;
+            if (value && aggregateField) {
+                value = _findGroup(this._aggregateValues, group.groupByField, group.serverValue)[
+                    aggregateField.name
+                ];
             }
         } else {
             value = this.activeBars[group.serverValue].count;
-            if (aggregateField) {
+            if (value && aggregateField) {
                 value =
-                    (this.activeBars[group.serverValue]?.aggregates &&
-                        this.activeBars[group.serverValue]?.aggregates[aggregateField.name]) ||
-                    0;
+                    this.activeBars[group.serverValue]?.aggregates &&
+                    this.activeBars[group.serverValue]?.aggregates[aggregateField.name];
+            }
+        }
+        value ??= false;
+        if (value && aggregateField.type === "monetary" && aggregateField.currency_field) {
+            const currencyId = group.aggregates[aggregateField.currency_field][0];
+            if (currencyId) {
+                return {
+                    title,
+                    value,
+                    currency: getCurrency(currencyId),
+                };
             }
         }
         return { title, value };
