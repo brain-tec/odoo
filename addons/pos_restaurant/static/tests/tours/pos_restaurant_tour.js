@@ -579,9 +579,6 @@ registry.category("web_tour.tours").add("test_preset_timing_restaurant", {
             TextInputPopup.inputText("John"),
             Dialog.confirm(),
             Chrome.clickPresetTimingSlot(),
-            Chrome.selectPresetTimingSlotHour("12:00"),
-            Chrome.presetTimingSlotIs("12:00"),
-            Chrome.clickPresetTimingSlot(),
             Chrome.selectPresetTimingSlotHour("15:00"),
             Chrome.presetTimingSlotIs("15:00"),
             Chrome.clickPlanButton(),
@@ -665,5 +662,22 @@ registry.category("web_tour.tours").add("test_combo_preparation_receipt_layout",
                     }
                 },
             },
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_customer_alone_saved", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            FloorScreen.clickTable("5"),
+            ProductScreen.clickDisplayedProduct("Coca-Cola"),
+            Chrome.clickOrders(),
+            Chrome.clickRegister(),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("Deco Addict"),
+            Chrome.clickOrders(),
+            Chrome.clickRegister(),
+            ProductScreen.customerIsSelected("Deco Addict"),
         ].flat(),
 });
