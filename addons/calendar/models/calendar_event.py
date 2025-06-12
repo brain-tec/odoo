@@ -987,6 +987,22 @@ class CalendarEvent(models.Model):
                 '&', ('privacy', '=', False), ('user_id', 'in', public_calendars_settings)
         ]
 
+    def _is_event_over(self):
+        """Check if the event is over. This method is used to check if the event
+        should trigger invitations with Google Calendar.
+        :return: True if the event is over, False otherwise
+        """
+        self.ensure_one()
+        now = fields.Datetime.now()
+        today = fields.Date.today()
+
+        # For all-day events
+        if self.allday:
+            return self.stop_date and self.stop_date < today
+
+        # For timed events
+        return self.stop and self.stop < now
+
     # ------------------------------------------------------------
     # ACTIONS
     # ------------------------------------------------------------
@@ -1405,7 +1421,7 @@ class CalendarEvent(models.Model):
     def find_partner_customer(self):
         self.ensure_one()
         return next(
-            (attendee.partner_id for attendee in self.attendee_ids.sorted('create_date')
+            (attendee.partner_id for attendee in self.attendee_ids
              if attendee.partner_id != self.user_id.partner_id),
             self.env['calendar.attendee']
         )

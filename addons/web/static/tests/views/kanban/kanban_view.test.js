@@ -572,7 +572,7 @@ test("empty group when grouped by date", async () => {
 
     expect(queryAllTexts(".o_kanban_header")).toEqual(["January 2017\n(1)", "February 2017\n(3)"]);
 
-    Partner._records.shift(); // remove only record of the first group
+    MockServer.env["partner"].shift(); // remove only record of the first group
 
     await press("Enter"); // reload
     await animationFrame();
@@ -1531,7 +1531,7 @@ test("kanban with an action id as on_create attrs", async () => {
             // simplified flow in this test: simulate a target new action which
             // creates a record and closes itself
             expect.step(`doAction ${action}`);
-            Partner._records.push({ id: 299, foo: "new" });
+            MockServer.env["partner"].create({ foo: "new" });
             options.onClose();
         },
     });
@@ -3460,7 +3460,7 @@ test("quick create is disabled until record is created and onchange is done", as
 
 test.tags("desktop");
 test("quick create record fail in grouped by many2one", async () => {
-    Partner._views["form,false"] = `
+    Partner._views["form"] = `
         <form>
             <field name="product_id"/>
             <field name="foo"/>
@@ -3504,7 +3504,7 @@ test("quick create record fail in grouped by many2one", async () => {
 });
 
 test("quick create record and click Edit, name_create fails", async () => {
-    Partner._views["kanban,false"] = `
+    Partner._views["kanban"] = `
         <kanban sample="1">
             <templates>
                 <t t-name="card">
@@ -3512,9 +3512,8 @@ test("quick create record and click Edit, name_create fails", async () => {
                 </t>
             </templates>
         </kanban>`;
-    Partner._views["search,false"] = "<search/>";
-    Partner._views["list,false"] = '<list><field name="foo"/></list>';
-    Partner._views["form,false"] = `
+    Partner._views["list"] = '<list><field name="foo"/></list>';
+    Partner._views["form"] = `
         <form>
             <field name="product_id"/>
             <field name="foo"/>
@@ -3558,7 +3557,7 @@ test("quick create record and click Edit, name_create fails", async () => {
 
 test.tags("desktop");
 test("quick create record is re-enabled after discard on failure", async () => {
-    Partner._views["form,false"] = `
+    Partner._views["form"] = `
         <form>
             <field name="product_id"/>
             <field name="foo"/>
@@ -3600,7 +3599,7 @@ test("quick create record is re-enabled after discard on failure", async () => {
 test("quick create record fails in grouped by char", async () => {
     expect.assertions(7);
 
-    Partner._views["form,false"] = '<form><field name="foo"/></form>';
+    Partner._views["form"] = '<form><field name="foo"/></form>';
 
     onRpc("name_create", () => {
         throw makeServerError({ message: "This is a user error" });
@@ -3648,7 +3647,7 @@ test("quick create record fails in grouped by char", async () => {
 test("quick create record fails in grouped by selection", async () => {
     expect.assertions(7);
 
-    Partner._views["form,false"] = '<form><field name="state"/></form>';
+    Partner._views["form"] = '<form><field name="state"/></form>';
 
     onRpc("name_create", () => {
         throw makeServerError({ message: "This is a user error" });
@@ -4340,7 +4339,7 @@ test("Do not open record when clicking on `a` with `href`", async () => {
 test("Open record when clicking on widget field", async function (assert) {
     expect.assertions(2);
 
-    Product._views["form,false"] = `<form string="Product"><field name="display_name"/></form>`;
+    Product._views["form"] = `<form string="Product"><field name="display_name"/></form>`;
 
     await mountView({
         type: "kanban",
@@ -5826,7 +5825,7 @@ test("delete an empty column, then a column with records.", async () => {
 
 test.tags("desktop");
 test("edit a column in grouped on m2o", async () => {
-    Product._views["form,false"] = `
+    Product._views["form"] = `
         <form string="Product">
             <field name="name"/>
         </form>`;
@@ -5896,7 +5895,7 @@ test("edit a column in grouped on m2o", async () => {
 test("edit a column propagates right context", async () => {
     expect.assertions(4);
 
-    Product._views["form,false"] = `
+    Product._views["form"] = `
         <form string="Product">
             <field name="display_name"/>
         </form>`;
@@ -7054,7 +7053,7 @@ test("empty grouped kanban with sample data and many2many_tags", async () => {
 
 test.tags("desktop");
 test("sample data does not change after reload with sample data", async () => {
-    Partner._views["kanban,false"] = `
+    Partner._views["kanban"] = `
         <kanban sample="1">
             <templates>
                 <t t-name="card">
@@ -7062,9 +7061,8 @@ test("sample data does not change after reload with sample data", async () => {
                 </t>
             </templates>
         </kanban>`;
-    Partner._views["search,false"] = "<search/>";
     // list-view so that there is a view switcher, unused
-    Partner._views["list,false"] = '<list><field name="foo"/></list>';
+    Partner._views["list"] = '<list><field name="foo"/></list>';
 
     onRpc("web_read_group", function ({ kwargs, parent }) {
         const result = parent();
@@ -7135,7 +7133,7 @@ test("non empty kanban with sample data", async () => {
 test("empty grouped kanban with sample data: add a column", async () => {
     onRpc("web_read_group", function ({ parent }) {
         const result = parent();
-        result.groups = Product._records.map((r) => ({
+        result.groups = this.env["product"].map((r) => ({
             product_id: [r.id, r.display_name],
             __count: 0,
             __extra_domain: [["product_id", "=", r.id]],
@@ -7266,7 +7264,7 @@ test("empty grouped kanban with sample data: delete a column", async () => {
 test("empty grouped kanban with sample data: add a column and delete it right away", async () => {
     onRpc("web_read_group", function ({ parent }) {
         const result = parent();
-        result.groups = Product._records.map((r) => ({
+        result.groups = this.env["product"].map((r) => ({
             product_id: [r.id, r.display_name],
             __count: 0,
             __extra_domain: [["product_id", "=", r.id]],
@@ -7531,13 +7529,13 @@ test("button executes action and reloads", async () => {
 
 test("button executes action and check domain", async () => {
     Partner._fields.active = fields.Boolean({ default: true });
-    for (let i = 0; i < Partner.length; i++) {
+    for (let i = 0; i < Partner._records.length; i++) {
         Partner._records[i].active = true;
     }
 
     mockService("action", {
         doActionButton({ onClose }) {
-            Partner._records[0].active = false;
+            MockServer.env["partner"][0].active = false;
             onClose();
         },
     });
@@ -10193,6 +10191,7 @@ test("set cover image", async () => {
             mimetype: "image/png",
             res_model: "partner",
             res_id: 1,
+            create_uid: false,
         },
         {
             id: 2,
@@ -10200,6 +10199,7 @@ test("set cover image", async () => {
             mimetype: "image/png",
             res_model: "partner",
             res_id: 2,
+            create_uid: false,
         },
     ];
     Partner._fields.displayed_image_id = fields.Many2one({
@@ -10338,6 +10338,7 @@ test("unset cover image", async () => {
             mimetype: "image/png",
             res_model: "partner",
             res_id: 1,
+            create_uid: false,
         },
         {
             id: 2,
@@ -10345,6 +10346,7 @@ test("unset cover image", async () => {
             mimetype: "image/png",
             res_model: "partner",
             res_id: 2,
+            create_uid: false,
         },
     ];
     Partner._fields.displayed_image_id = fields.Many2one({
@@ -11111,7 +11113,7 @@ test("Allow use of 'editable'/'deletable' in ungrouped kanban", async () => {
 test.tags("desktop");
 test("folded groups kept when leaving/coming back", async () => {
     Partner._views = {
-        "kanban,false": `
+        kanban: `
             <kanban>
                 <templates>
                     <t t-name="card">
@@ -11119,8 +11121,6 @@ test("folded groups kept when leaving/coming back", async () => {
                     </t>
                 </templates>
             </kanban>`,
-        "search,false": "<search/>",
-        "form,false": "<form/>",
     };
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -11160,7 +11160,7 @@ test.tags("desktop");
 test("filter groups kept when leaving/coming back", async () => {
     Partner._records[1].state = "abc";
     Partner._views = {
-        "kanban,false": `
+        kanban: `
             <kanban>
                 <progressbar field="state" colors='{"abc": "success", "def": "warning", "ghi": "danger"}' />
                 <templates>
@@ -11169,8 +11169,7 @@ test("filter groups kept when leaving/coming back", async () => {
                     </t>
                 </templates>
             </kanban>`,
-        "search,false": "<search/>",
-        "form,false": `
+        form: `
             <form>
                 <field name="state" widget="radio"/>
             </form>`,
@@ -11220,7 +11219,7 @@ test("folded groups kept when leaving/coming back (grouped by date)", async () =
     Partner._fields.date = fields.Date({ default: "2022-10-10" });
     Partner._records[0].date = "2022-05-10";
     Partner._views = {
-        "kanban,false": `
+        kanban: `
             <kanban>
                 <templates>
                     <t t-name="card">
@@ -11228,8 +11227,6 @@ test("folded groups kept when leaving/coming back (grouped by date)", async () =
                     </t>
                 </templates>
             </kanban>`,
-        "search,false": "<search/>",
-        "form,false": "<form/>",
     };
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -11268,7 +11265,7 @@ test("folded groups kept when leaving/coming back (grouped by date)", async () =
 test.tags("desktop");
 test("loaded records kept when leaving/coming back", async () => {
     Partner._views = {
-        "kanban,false": `
+        kanban: `
             <kanban limit="1">
                 <templates>
                     <t t-name="card">
@@ -11276,8 +11273,6 @@ test("loaded records kept when leaving/coming back", async () => {
                     </t>
                 </templates>
             </kanban>`,
-        "search,false": "<search/>",
-        "form,false": "<form/>",
     };
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -12249,7 +12244,7 @@ test("drag record to folded column, with progressbars", async () => {
 test.tags("desktop");
 test("quick create record in grouped kanban in a form view dialog", async () => {
     Partner._fields.foo = fields.Char({ default: "ABC" });
-    Partner._views["form,false"] = `<form><field name="bar"/></form>`;
+    Partner._views["form"] = `<form><field name="bar"/></form>`;
 
     onRpc("name_create", ({ method }) => {
         throw makeServerError();
@@ -13132,9 +13127,8 @@ test("kanbans with basic and custom compiler, same arch", async () => {
 
     Partner._fields.one2many = fields.One2many({ relation: "partner" });
     Partner._records[0].one2many = [1];
-    Partner._views["form,false"] = `<form><field name="one2many" mode="kanban"/></form>`;
-    Partner._views["search,false"] = `<search/>`;
-    Partner._views["kanban,false"] = `
+    Partner._views["form"] = `<form><field name="one2many" mode="kanban"/></form>`;
+    Partner._views["kanban"] = `
         <kanban js_class="my_kanban">
             <templates>
                 <t t-name="card">
@@ -13419,7 +13413,7 @@ test("kanban records are middle clickable by default", async () => {
             return res;
         },
     });
-    Partner._views["kanban,false"] = `
+    Partner._views.kanban = /* xml */ `
         <kanban>
             <templates>
                 <t t-name="card">
@@ -13427,8 +13421,7 @@ test("kanban records are middle clickable by default", async () => {
                 </t>
             </templates>
         </kanban>`;
-    Partner._views["search,false"] = "<search/>";
-    Partner._views["form,false"] = `
+    Partner._views.form = /* xml */ `
         <form>
             <field name="product_id"/>
             <field name="foo"/>
@@ -13667,7 +13660,7 @@ test("selection can be enabled by pressing 'space' key", async () => {
 
 test.tags("desktop");
 test("drag and drop records and quickly open a record", async () => {
-    Partner._views["kanban,false"] = `
+    Partner._views.kanban = /* xml */ `
         <kanban>
             <templates>
                 <t t-name="card">
@@ -13675,8 +13668,7 @@ test("drag and drop records and quickly open a record", async () => {
                 </t>
             </templates>
         </kanban>`;
-    Partner._views["search,false"] = "<search/>";
-    Partner._views["form,false"] = `
+    Partner._views.form = /* xml */ `
         <form>
             <field name="foo"/>
         </form>`;
