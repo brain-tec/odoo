@@ -250,7 +250,6 @@ test("click on many2one_avatar in an editable list view (editable top)", async (
             </list>`,
     });
 
-    await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
     await contains(".o_data_row .o_data_cell [name='user_id']").click();
     expect(".o_data_row:eq(0)").toHaveClass("o_selected_row");
 
@@ -340,7 +339,6 @@ test("widget many2one_avatar in kanban view (load more dialog)", async () => {
 
     Users._views = {
         list: '<list><field name="display_name"/></list>',
-        search: "<search/>",
     };
     await mountView({
         type: "kanban",

@@ -4,9 +4,14 @@ import { registry } from "@web/core/registry";
 import { CarouselItemHeaderMiddleButtons } from "./carousel_item_header_buttons";
 import { renderToElement } from "@web/core/utils/render";
 
+const carouselWrapperSelector =
+    ".s_carousel_wrapper, .s_carousel_intro_wrapper, .s_carousel_cards_wrapper";
+const carouselControlsSelector =
+    ".carousel-control-prev, .carousel-control-next, .carousel-indicators";
+
 export class CarouselOptionPlugin extends Plugin {
     static id = "carouselOption";
-    static dependencies = ["clone", "history", "remove", "builder-options", "builderActions"];
+    static dependencies = ["clone", "builder-options", "builderActions"];
     static shared = ["slide", "addSlide", "removeSlide"];
 
     resources = {
@@ -47,15 +52,15 @@ export class CarouselOptionPlugin extends Plugin {
         },
         builder_actions: this.getActions(),
         on_cloned_handlers: this.onCloned.bind(this),
-        on_will_clone_handlers: this.onWillClone.bind(this),
         on_snippet_dropped_handlers: this.onSnippetDropped.bind(this),
-        normalize_handlers: this.normalize.bind(this),
-        on_reorder_items_handlers: this.reorderCarouselItems.bind(this),
+        get_gallery_items_handlers: this.getGalleryItems.bind(this),
+        reorder_items_handlers: this.reorderCarouselItems.bind(this),
         before_save_handlers: () => {
             const proms = [];
+            // Restore all the carousels so their first slide is the active one.
             for (const carouselEl of this.editable.querySelectorAll(".carousel")) {
-                const firstItem = carouselEl.querySelector(".carousel-item");
-                if (firstItem.classList.contains("active")) {
+                const firstItemEl = carouselEl.querySelector(".carousel-item");
+                if (firstItemEl.classList.contains("active")) {
                     continue;
                 }
                 proms.push(this.slide(carouselEl, 0));
@@ -77,17 +82,7 @@ export class CarouselOptionPlugin extends Plugin {
                     this.slideCarousel(editingElement, direction),
             },
             toggleControllers: {
-                apply: ({ editingElement }) => {
-                    const carouselEl = editingElement.closest(".carousel");
-                    const indicatorsWrapEl = carouselEl.querySelector(".carousel-indicators");
-                    const areControllersHidden =
-                        carouselEl.classList.contains("s_carousel_arrows_hidden") &&
-                        indicatorsWrapEl.classList.contains("s_carousel_indicators_hidden");
-                    carouselEl.classList.toggle(
-                        "s_carousel_controllers_hidden",
-                        areControllersHidden
-                    );
-                },
+                apply: ({ editingElement }) => this.toggleControllers(editingElement),
             },
             toggleCardImg: {
                 apply: ({ editingElement }) => this.toggleCardImg(editingElement),
@@ -104,6 +99,25 @@ export class CarouselOptionPlugin extends Plugin {
         };
     }
 
+    /**
+     * Adds a custom class if all controllers are hidden.
+     *
+     * @param {HTMLElement} editingElement the carousel element.
+     */
+    toggleControllers(editingElement) {
+        const carouselEl = editingElement.closest(".carousel");
+        const indicatorsEl = carouselEl.querySelector(".carousel-indicators");
+        const areControllersHidden =
+            carouselEl.classList.contains("s_carousel_arrows_hidden") &&
+            indicatorsEl.classList.contains("s_carousel_indicators_hidden");
+        carouselEl.classList.toggle("s_carousel_controllers_hidden", areControllersHidden);
+    }
+
+    /**
+     * Toggles the card images.
+     *
+     * @param {HTMLElement} editingElement the carousel element.
+     */
     toggleCardImg(editingElement) {
         const carouselEl = editingElement.closest(".carousel");
         const cardEls = carouselEl.querySelectorAll(".card");
@@ -114,53 +128,79 @@ export class CarouselOptionPlugin extends Plugin {
     }
 
     getTitleExtraInfo(editingElement) {
-        const itemsEls = [...editingElement.parentElement.children];
-        const activeIndex = itemsEls.indexOf(editingElement);
-
-        const updatedText = ` (${activeIndex + 1}/${itemsEls.length})`;
+        const itemEls = [...editingElement.parentElement.children];
+        const activeIndex = itemEls.indexOf(editingElement);
+        // Updates the slide counter.
+        const updatedText = ` (${activeIndex + 1}/${itemEls.length})`;
         return updatedText;
     }
 
+    /**
+     * Adds a slide.
+     *
+     * @param {HTMLElement} editingElement the carousel element.
+     */
     async addSlide(editingElement) {
-        const activeCarouselItem = editingElement.querySelector(".carousel-item.active");
-        this.dependencies.clone.cloneElement(activeCarouselItem);
+        // Clone the active item and remove the "active" class.
+        const activeItemEl = editingElement.querySelector(".carousel-item.active");
+        const newItemEl = this.dependencies.clone.cloneElement(activeItemEl, {
+            activateClone: false,
+        });
+        newItemEl.classList.remove("active");
 
+        // Show the controllers (now that there is always more than one item).
+        const controlEls = editingElement.querySelectorAll(carouselControlsSelector);
+        controlEls.forEach((controlEl) => {
+            controlEl.classList.remove("d-none");
+        });
+
+        // Add the new indicator.
+        const indicatorsEl = editingElement.querySelector(".carousel-indicators");
+        const newIndicatorEl = this.document.createElement("button");
+        newIndicatorEl.setAttribute("data-bs-target", "#" + editingElement.id);
+        newIndicatorEl.setAttribute("aria-label", _t("Carousel indicator"));
+        indicatorsEl.appendChild(newIndicatorEl);
+
+        // Slide to the new item.
         await this.slide(editingElement, "next");
-        this.dependencies.history.addStep();
-        this.dependencies["builder-options"].updateContainers(
-            editingElement.querySelector(".carousel-item.active")
-        );
     }
 
-    async removeSlide(editingCarouselElement) {
-        const toRemoveCarouselItemEl =
-            editingCarouselElement.querySelector(".carousel-item.active");
-        const toRemoveIndicatorEl = editingCarouselElement.querySelector(
-            ".carousel-indicators > .active"
-        );
-        const itemsEls = [...editingCarouselElement.querySelectorAll(".carousel-item")];
+    /**
+     * Removes the current slide.
+     *
+     * @param {HTMLElement} editingElement the carousel element.
+     */
+    async removeSlide(editingElement) {
+        const itemEls = [...editingElement.querySelectorAll(".carousel-item")];
+        const newLength = itemEls.length - 1;
+        if (newLength > 0) {
+            const activeItemEl = editingElement.querySelector(".carousel-item.active");
+            const activeIndicatorEl = editingElement.querySelector(
+                ".carousel-indicators > .active"
+            );
+            // Slide to the previous item.
+            await this.slide(editingElement, "prev");
 
-        if (itemsEls.length > 1) {
-            // Slide to the previous item
-            await this.slide(editingCarouselElement, "prev");
+            // Remove the carousel item and the indicator.
+            activeItemEl.remove();
+            activeIndicatorEl.remove();
 
-            // Remove the carousel item and the indicator
-            this.dependencies.remove.removeElement(toRemoveCarouselItemEl);
-            this.dependencies.remove.removeElement(toRemoveIndicatorEl);
-
-            this.dependencies.history.addStep();
-            this.dependencies["builder-options"].updateContainers(
-                editingCarouselElement.querySelector(".carousel-item.active")
+            // Hide the controllers if there is only one slide left.
+            const controlEls = editingElement.querySelectorAll(carouselControlsSelector);
+            controlEls.forEach((controlEl) =>
+                controlEl.classList.toggle("d-none", newLength === 1)
             );
         }
     }
 
+    /**
+     * Slides the carousel.
+     *
+     * @param {HTMLElement} editingElement the carousel element.
+     * @param {String} direction "prev" or "next".
+     */
     async slideCarousel(editingElement, direction) {
         await this.slide(editingElement, direction);
-        this.dependencies.history.addStep();
-        this.dependencies["builder-options"].updateContainers(
-            editingElement.querySelector(".carousel-item.active")
-        );
     }
 
     /**
@@ -189,14 +229,18 @@ export class CarouselOptionPlugin extends Plugin {
                     // Setting the active indicator manually, as Bootstrap could
                     // not do it because the `data-bs-slide-to` attribute is not
                     // here in edit mode anymore.
-                    const activeSlide = editingElement.querySelector(".carousel-item.active");
-                    const indicatorsEl = editingElement.querySelector(".carousel-indicators");
-                    const activeIndex = [...activeSlide.parentElement.children].indexOf(
-                        activeSlide
+                    const itemEls = editingElement.querySelectorAll(".carousel-item");
+                    const activeItemEl = editingElement.querySelector(".carousel-item.active");
+                    const activeIndex = [...itemEls].indexOf(activeItemEl);
+                    const indicatorEls = editingElement.querySelectorAll(
+                        ".carousel-indicators > *"
                     );
-                    const activeIndicatorEl = [...indicatorsEl.children][activeIndex];
+                    const activeIndicatorEl = [...indicatorEls][activeIndex];
                     activeIndicatorEl.classList.add("active");
                     activeIndicatorEl.setAttribute("aria-current", "true");
+
+                    // Activate the active item.
+                    this.dependencies["builder-options"].setNextTarget(activeItemEl);
 
                     resolve();
                 }, 0.2 * slideDuration);
@@ -214,49 +258,24 @@ export class CarouselOptionPlugin extends Plugin {
         });
     }
 
-    onWillClone({ originalEl }) {
-        if (originalEl.matches(".carousel-item")) {
-            const editingCarousel = originalEl.closest(".carousel");
-
-            const indicatorsEl = editingCarousel.querySelector(".carousel-indicators");
-            this.controlEls = editingCarousel.querySelectorAll(
-                ".carousel-control-prev, .carousel-control-next, .carousel-indicators"
-            );
-            this.controlEls.forEach((control) => {
-                control.classList.remove("d-none");
-            });
-
-            const newIndicatorEl = this.document.createElement("button");
-            newIndicatorEl.setAttribute("data-bs-target", "#" + editingCarousel.id);
-            newIndicatorEl.setAttribute("aria-label", _t("Carousel indicator"));
-            indicatorsEl.appendChild(newIndicatorEl);
-        }
-    }
-
     onCloned({ cloneEl }) {
-        if (
-            cloneEl.matches(
-                ".s_carousel_wrapper, .s_carousel_intro_wrapper, .s_carousel_cards_wrapper"
-            )
-        ) {
+        if (cloneEl.matches(carouselWrapperSelector)) {
             this.assignUniqueID(cloneEl);
-        }
-        if (cloneEl.matches(".carousel-item")) {
-            // Need to remove editor data from the clone so it gets its own.
-            cloneEl.classList.remove("active");
         }
     }
 
     onSnippetDropped({ snippetEl }) {
-        if (
-            snippetEl.matches(
-                ".s_carousel_wrapper, .s_carousel_intro_wrapper, .s_carousel_cards_wrapper"
-            )
-        ) {
+        if (snippetEl.matches(carouselWrapperSelector)) {
             this.assignUniqueID(snippetEl);
         }
     }
 
+    /**
+     * Creates a unique ID for the carousel and reassign data-attributes that
+     * depend on it.
+     *
+     * @param {HTMLElement} editingElement the carousel element.
+     */
     assignUniqueID(editingElement) {
         const id = "myCarousel" + Date.now();
         editingElement.querySelector(".carousel").setAttribute("id", id);
@@ -271,95 +290,67 @@ export class CarouselOptionPlugin extends Plugin {
             }
         });
     }
-    normalize(root) {
-        const carousel = root.closest(".carousel");
-        const allCarousels = [...root.querySelectorAll(".carousel")];
-        if (carousel) {
-            allCarousels.push(carousel);
-        }
-        this.fixWrongHistoryOnCarousels(allCarousels);
-    }
+
     /**
-     * This fix is exists to workaround a bug:
-     * - add slide
-     * - undo
-     * - redo
-     * => the active class of the carousel item and therefore it looks like the carrousel is empty.
+     * Gets the carousel items to reorder.
      *
-     * @todo: find the root cause and remove this fix.
+     * @param {HTMLElement} activeItemEl the current active item
+     * @param {String} optionName
+     * @returns {Array<HTMLElement>}
      */
-    fixWrongHistoryOnCarousels(carousels) {
-        for (const carousel of carousels) {
-            const carouselItems = carousel.querySelectorAll(".carousel-item");
-            const activeCarouselItems = carousel.querySelectorAll(".carousel-item.active");
-            if (!activeCarouselItems.length) {
-                carouselItems[0].classList.add("active");
-                const indicatorsEl = carousel.querySelector(".carousel-indicators");
-                const activeIndicatorEl = [...indicatorsEl.children][0];
-                activeIndicatorEl.classList.add("active");
-                activeIndicatorEl.setAttribute("aria-current", "true");
-            }
+    getGalleryItems(activeItemEl, optionName) {
+        let itemEls = [];
+        if (optionName === "Carousel") {
+            const carouselEl = activeItemEl.closest(".carousel");
+            itemEls = [...carouselEl.querySelectorAll(".carousel-item")];
         }
+        return itemEls;
     }
 
-    reorderCarouselItems({ elementToReorder, position, optionName }) {
+    /**
+     * Updates the DOM with the reordered carousel items.
+     *
+     * @param {HTMLElement} activeItemEl the active item
+     * @param {Array<HTMLElement>} itemEls the reordered items
+     * @param {String} optionName
+     */
+    reorderCarouselItems(activeItemEl, itemEls, optionName) {
         if (optionName === "Carousel") {
-            const editingCarouselElement = elementToReorder.closest(".carousel");
-            const itemsEls = [...editingCarouselElement.querySelectorAll(".carousel-item")];
+            const carouselEl = activeItemEl.closest(".carousel");
 
-            // reorder carousel items
-            const oldPosition = itemsEls.indexOf(elementToReorder);
-            if (oldPosition === 0 && position === "prev") {
-                position = "last";
-            } else if (oldPosition === itemsEls.length - 1 && position === "next") {
-                position = "first";
-            }
-            itemsEls.splice(oldPosition, 1);
-            switch (position) {
-                case "first":
-                    itemsEls.unshift(elementToReorder);
-                    break;
-                case "prev":
-                    itemsEls.splice(Math.max(oldPosition - 1, 0), 0, elementToReorder);
-                    break;
-                case "next":
-                    itemsEls.splice(oldPosition + 1, 0, elementToReorder);
-                    break;
-                case "last":
-                    itemsEls.push(elementToReorder);
-                    break;
-            }
-
-            // replace the carousel-inner element by one with reordered carousel items
-            const carouselInnerEl = editingCarouselElement.querySelector(".carousel-inner");
+            // Replace the content with the new slides.
+            const carouselInnerEl = carouselEl.querySelector(".carousel-inner");
             const newCarouselInnerEl = document.createElement("div");
             newCarouselInnerEl.classList.add("carousel-inner");
-            newCarouselInnerEl.append(...itemsEls);
+            newCarouselInnerEl.append(...itemEls);
             carouselInnerEl.replaceWith(newCarouselInnerEl);
 
-            // slide to the reordered target carousel item and update indicators
-            const newItemPosition = itemsEls.indexOf(elementToReorder);
-            editingCarouselElement.classList.remove("slide");
-            const carouselInstance = window.Carousel.getOrCreateInstance(editingCarouselElement, {
-                ride: false,
-                pause: true,
-            });
-            carouselInstance.to(newItemPosition);
-            const indicatorEls = editingCarouselElement.querySelectorAll(
-                ".carousel-indicators > *"
-            );
-            indicatorEls.forEach((indicatorEl, i) => {
-                indicatorEl.classList.toggle("active", i === newItemPosition);
-            });
-            editingCarouselElement.classList.add("slide");
-            // Prevent the carousel from automatically sliding afterwards.
-            carouselInstance["pause"]();
+            // Update the indicators.
+            const newPosition = itemEls.indexOf(activeItemEl);
+            updateCarouselIndicators(carouselEl, newPosition);
 
-            const activeImageEl = editingCarouselElement.querySelector(".carousel-item.active img");
-            this.dependencies.history.addStep();
-            this.dependencies["builder-options"].updateContainers(activeImageEl, { force: true });
+            // Activate the active slide.
+            this.dependencies["builder-options"].setNextTarget(activeItemEl);
         }
     }
+}
+
+/**
+ * Updates the carousel indicators to make the one at the given index be the
+ * active one.
+ *
+ * @param {HTMLElement} carouselEl the carousel element
+ * @param {Number} newPosition the index
+ */
+export function updateCarouselIndicators(carouselEl, newPosition) {
+    const indicatorEls = carouselEl.querySelectorAll(".carousel-indicators > *");
+    indicatorEls.forEach((indicatorEl, i) => {
+        indicatorEl.classList.toggle("active", i === newPosition);
+        indicatorEl.removeAttribute("aria-current");
+        if (i === newPosition) {
+            indicatorEl.setAttribute("aria-current", "true");
+        }
+    });
 }
 
 registry.category("website-plugins").add(CarouselOptionPlugin.id, CarouselOptionPlugin);

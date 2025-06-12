@@ -3,12 +3,14 @@ import { CheckBox } from "@web/core/checkbox/checkbox";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
+import { localization } from "@web/core/l10n/localization";
 import { Pager } from "@web/core/pager/pager";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable_owl";
 import { getTabableElements } from "@web/core/utils/ui";
+import { AGGREGATABLE_FIELD_TYPES, combineModifiers } from "@web/model/relational_model/utils";
 import { Field, getPropertyFieldInfo } from "@web/views/fields/field";
 import { getTooltipInfo } from "@web/views/fields/field_tooltip";
 import {
@@ -16,25 +18,24 @@ import {
     getClassNameFromDecoration,
     getFormattedValue,
 } from "@web/views/utils";
-import { AGGREGATABLE_FIELD_TYPES, combineModifiers } from "@web/model/relational_model/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
 import { useBounceButton } from "@web/views/view_hook";
 import { Widget } from "@web/views/widgets/widget";
-import { localization } from "@web/core/l10n/localization";
 import { useMagicColumnWidths } from "./column_width_hook";
 
 import {
     Component,
     onMounted,
     onPatched,
-    status,
     onWillPatch,
     onWillRender,
+    status,
     useExternalListener,
     useRef,
 } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { exprToBoolean } from "@web/core/utils/strings";
+import { MOVABLE_RECORD_TYPES } from "@web/model/relational_model/dynamic_group_list";
 
 /**
  * @typedef {import('@web/model/relational_model/dynamic_list').DynamicList} DynamicList
@@ -96,7 +97,7 @@ export class ListRenderer extends Component {
     static useMagicColumnWidths = true;
     static LONG_TOUCH_THRESHOLD = 400;
     static components = { DropdownItem, Field, ViewButton, CheckBox, Dropdown, Pager, Widget };
-    static defaultProps = { hasSelectors: false, cycleOnTab: true };
+    static defaultProps = { allowSelectors: false, cycleOnTab: true };
     static props = [
         "activeActions?",
         "list",
@@ -393,7 +394,10 @@ export class ListRenderer extends Component {
         if (!this.props.list.canResequence() || this.props.readonly) {
             return false;
         }
-        const { handleField, orderBy } = this.props.list;
+        const { groupBy, groupByField, handleField, orderBy } = this.props.list;
+        if (groupBy?.length > 1 || (groupByField && !this.isMovableField(groupByField))) {
+            return false;
+        }
         return !orderBy.length || (orderBy.length && orderBy[0].name === handleField);
     }
 
@@ -447,6 +451,10 @@ export class ListRenderer extends Component {
             return true;
         }
         return false;
+    }
+
+    isMovableField(field) {
+        return MOVABLE_RECORD_TYPES.includes(field.type);
     }
 
     focusCell(column, forward = true) {
@@ -608,7 +616,7 @@ export class ListRenderer extends Component {
 
     get aggregates() {
         let values;
-        if (this.props.list.selection && this.props.list.selection.length) {
+        if (this.props.list.selection.length) {
             values = this.props.list.selection.map((r) => r.data);
         } else if (this.props.list.isGrouped) {
             values = this.props.list.groups.map((g) => g.aggregates);
@@ -1109,14 +1117,15 @@ export class ListRenderer extends Component {
         if (ev.target.special_click) {
             return;
         }
-        const recordAfterResequence = async () => {
-            const recordIndex = this.props.list.records.indexOf(record);
-            await this.resequencePromise;
-            // row might have changed record after resequence
-            record = this.props.list.records[recordIndex] || record;
-        };
 
-        if ((this.props.list.model.multiEdit && record.selected) || this.isInlineEditable(record)) {
+        const multiEdit = this.props.list.model.multiEdit;
+        const hasSelection = !!this.props.list.selection.length;
+        if (hasSelection && this.canSelectRecord && (!multiEdit || !record.selected)) {
+            this.toggleRecordSelection(record);
+        } else if (
+            (multiEdit && record.selected) ||
+            (this.isInlineEditable(record) && !hasSelection)
+        ) {
             if (record.isInEdition && this.editedRecord === record) {
                 const cell = this.tableRef.el.querySelector(
                     `.o_selected_row td[name='${column.name}']`
@@ -1129,7 +1138,10 @@ export class ListRenderer extends Component {
                 this.focusCell(column);
                 this.cellToFocus = null;
             } else {
-                await recordAfterResequence();
+                const recordIndex = this.props.list.records.indexOf(record);
+                await this.resequencePromise;
+                // row might have changed record after resequence
+                record = this.props.list.records[recordIndex] || record;
                 await this.props.list.enterEditMode(record);
                 this.cellToFocus = { column, record };
                 if (
@@ -2108,7 +2120,7 @@ export class ListRenderer extends Component {
      */
     ignoreEventInSelectionMode(ev) {
         const { list } = this.props;
-        if (this.env.isSmall && list.selection && list.selection.length) {
+        if (this.env.isSmall && list.selection.length) {
             // in selection mode, only selection is allowed.
             ev.stopPropagation();
             ev.preventDefault();
@@ -2121,7 +2133,7 @@ export class ListRenderer extends Component {
      */
     onClickCapture(record, ev) {
         const { list } = this.props;
-        if (this.env.isSmall && list.selection && list.selection.length) {
+        if (this.env.isSmall && list.selection.length) {
             ev.stopPropagation();
             ev.preventDefault();
             this.toggleRecordSelection(record);

@@ -1,6 +1,6 @@
 import { expect, getFixture, test } from "@odoo/hoot";
 import { hover, press, queryAllTexts, queryOne } from "@odoo/hoot-dom";
-import { Deferred, animationFrame, runAllTimers } from "@odoo/hoot-mock";
+import { animationFrame, Deferred, runAllTimers } from "@odoo/hoot-mock";
 
 import {
     clickFieldDropdown,
@@ -11,6 +11,7 @@ import {
     fieldInput,
     fields,
     makeServerError,
+    MockServer,
     mockService,
     models,
     mountView,
@@ -225,9 +226,9 @@ test("Many2ManyTagsField with color: rendering and edition on desktop", async ()
     PartnerType._records.push({ id: 13, name: "red", color: 8 });
     onRpc(({ args, method, model, kwargs, route }) => {
         if (route === "/web/dataset/call_kw/partner/web_save") {
-            var commands = args[1].timmy;
-            expect(commands.length).toBe(2);
-            expect(commands.map((cmd) => cmd[0]).join("-")).toBe("4-3");
+            const commands = args[1].timmy;
+            expect(commands).toHaveLength(2);
+            expect(commands.map((cmd) => cmd[0])).toEqual([4, 3]);
             expect(commands.map((cmd) => cmd[1])).toEqual([13, 14], {
                 message: "Should add 13, remove 14",
             });
@@ -325,10 +326,11 @@ test("Many2ManyTagsField in list view on desktop", async () => {
     expect(".o_colorlist").toHaveCount(0);
 
     await contains(".o_list_record_selector:eq(1)").click();
+    expect(".o_data_row_selected").toHaveCount(1);
     await contains(".o_field_many2many_tags .badge :nth-child(1)").click();
-    expect.verifySteps(["selectRecord"]);
+    expect(".o_data_row_selected").toHaveCount(0);
+    expect.verifySteps([]);
     await animationFrame();
-
     expect(".o_colorlist").toHaveCount(0);
 });
 
@@ -731,9 +733,9 @@ test("Many2ManyTagsField can load more than 40 records", async () => {
         relation: "partner",
     });
     Partner._records[0].partner_ids = [];
-    for (var i = 15; i < 115; i++) {
-        Partner._records.push({ id: i, name: "walter" + i });
-        Partner._records[0].partner_ids.push(i);
+    for (let id = 15; id < 115; id++) {
+        Partner._records.push({ id, name: "walter" + id });
+        Partner._records[0].partner_ids.push(id);
     }
     await mountView({
         type: "form",
@@ -1031,11 +1033,8 @@ test("Many2ManyTagsField: select multiple records on desktop", async () => {
         search: '<search><field name="name"/></search>',
     };
 
-    for (var i = 1; i <= 10; i++) {
-        PartnerType._records.push({
-            id: 100 + i,
-            name: "Partner" + i,
-        });
+    for (let id = 101; id <= 110; id++) {
+        PartnerType._records.push({ id, name: "Partner" + id });
     }
 
     await mountView({
@@ -1053,7 +1052,7 @@ test("Many2ManyTagsField: select multiple records on desktop", async () => {
     expect(".o_dialog").toHaveCount(1);
     // + 1 for the select all
     expect(".o_dialog .o_list_renderer .o_list_record_selector input").toHaveCount(
-        PartnerType._records.length + 1
+        MockServer.env["partner.type"].length + 1
     );
     //multiple select tag
     await contains(".o_dialog .o_list_renderer .o_list_record_selector input").click();
@@ -1062,7 +1061,7 @@ test("Many2ManyTagsField: select multiple records on desktop", async () => {
 
     await contains(".o_dialog .o_select_button").click();
     expect("o_dialog").toHaveCount(0);
-    expect('[name="timmy"] .badge').toHaveCount(PartnerType._records.length);
+    expect('[name="timmy"] .badge').toHaveCount(MockServer.env["partner.type"].length);
 });
 
 test.tags("desktop");
@@ -1074,11 +1073,8 @@ test("Many2ManyTagsField: select multiple records doesn't show already added tag
         search: '<search><field name="name"/></search>',
     };
 
-    for (var i = 1; i <= 10; i++) {
-        PartnerType._records.push({
-            id: 100 + i,
-            name: "Partner" + i,
-        });
+    for (let id = 101; id <= 110; id++) {
+        PartnerType._records.push({ id, name: "Partner" + id });
     }
 
     await mountView({
@@ -1094,23 +1090,20 @@ test("Many2ManyTagsField: select multiple records doesn't show already added tag
     await selectFieldDropdownItem("timmy", "Search more...");
 
     expect(".o_dialog .o_list_renderer .o_list_record_selector input").toHaveCount(
-        PartnerType._records.length + 1
+        MockServer.env["partner.type"].length + 1
     );
 
     //multiple select tag
     await contains(".o_dialog .o_list_renderer .o_list_record_selector input").click();
     await animationFrame(); // necessary for the button to be switched to enabled.
     await contains(".o_dialog .o_select_button").click();
-    expect('[name="timmy"] .badge').toHaveCount(PartnerType._records.length);
+    expect('[name="timmy"] .badge').toHaveCount(MockServer.env["partner.type"].length);
 });
 
 test.tags("desktop");
 test("Many2ManyTagsField: save&new in edit mode doesn't close edit window on desktop", async () => {
-    for (var i = 1; i <= 10; i++) {
-        PartnerType._records.push({
-            id: 100 + i,
-            name: "Partner" + i,
-        });
+    for (let id = 101; id <= 110; id++) {
+        PartnerType._records.push({ id, name: "Partner" + id });
     }
 
     PartnerType._views = {
@@ -1235,16 +1228,12 @@ test("Many2ManyTagsField: Save&New in many2many_tags with default_ keys in conte
 test.tags("desktop");
 test("Many2ManyTagsField: conditional create/delete actions on desktop", async () => {
     Turtle._records[0].partner_ids = [2];
-    for (var i = 1; i <= 10; i++) {
-        Partner._records.push({
-            id: 100 + i,
-            name: "Partner" + i,
-        });
+    for (let id = 101; id <= 110; id++) {
+        Partner._records.push({ id, name: "Partner" + id });
     }
 
     Partner._views = {
         list: '<list><field name="name"/></list>',
-        search: "<search/>",
     };
 
     await mountView({
