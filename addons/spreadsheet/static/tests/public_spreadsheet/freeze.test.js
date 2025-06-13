@@ -194,10 +194,11 @@ test("a new sheet is added for global filters", async function () {
 test("global filters and their display value are exported", async function () {
     const { model } = await createModelWithDataSource();
     await addGlobalFilter(model, THIS_YEAR_GLOBAL_FILTER);
+    const year = new Date().getFullYear().toString();
     const data = await freezeOdooData(model);
     expect(data.globalFilters.length).toBe(1);
     expect(data.globalFilters[0].label).toBe("This Year");
-    expect(data.globalFilters[0].value).toBe(new Date().getFullYear().toString());
+    expect(data.globalFilters[0].value).toBe(`1/1/${year}, 12/31/${year}`);
 });
 
 test("from/to global filters are exported", async function () {
@@ -296,7 +297,7 @@ test("spilled pivot table", async function () {
     const data = await freezeOdooData(model);
     const sheet = data.sheets[0];
     const cells = sheet.cells;
-    expect(cells.A10).toBe("(#1) Partner Pivot");
+    expect(cells.A10).toBe("Partner Pivot");
     expect(cells.A11).toBe("");
     expect(cells.A12).toBe("Total");
     expect(cells.B10).toBe("Total");
