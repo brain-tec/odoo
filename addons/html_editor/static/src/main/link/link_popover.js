@@ -86,7 +86,7 @@ export class LinkPopover extends Component {
         });
         useExternalListener(document, "pointerdown", (ev) => {
             if (!this.state.url) {
-                this.onClickRemove();
+                this.props.onDiscard();
             } else if (
                 this.editingWrapper?.el &&
                 !this.state.isImage &&
@@ -110,7 +110,6 @@ export class LinkPopover extends Component {
         this.state.url = deducedUrl
             ? this.correctLink(deducedUrl)
             : this.correctLink(this.state.url);
-        this.loadAsyncLinkPreview();
         this.props.onApply(this.state.url, this.state.label, this.classes);
     }
     onClickEdit() {
