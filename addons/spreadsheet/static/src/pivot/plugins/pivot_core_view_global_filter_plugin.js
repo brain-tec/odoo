@@ -11,7 +11,6 @@ import { OdooCoreViewPlugin } from "@spreadsheet/plugins";
 /**
  * Convert pivot period to the related filter value
  *
- * @param {import("@spreadsheet/global_filters/plugins/global_filters_core_plugin").RangeType} timeRange
  * @param {string} value
  * @returns {object}
  */
@@ -36,34 +35,28 @@ function pivotPeriodToFilterValue(timeRange, value) {
         case "year":
             return {
                 type: "year",
-                period: {
-                    year,
-                },
+                year,
             };
         case "month": {
             const month = value.includes("/") ? Number.parseInt(value.split("/")[0]) : -1;
             if (month <= 0 || month > 12) {
-                return { type: "year", period: { year } };
+                return { type: "year", year };
             }
             return {
                 type: "month",
-                period: {
-                    month,
-                    year,
-                },
+                month,
+                year,
             };
         }
         case "quarter": {
             const quarter = value.includes("/") ? Number.parseInt(value.split("/")[0]) : -1;
             if (quarter <= 0 || quarter > 4) {
-                return { type: "year", period: { year } };
+                return { type: "year", year };
             }
             return {
                 type: "quarter",
-                period: {
-                    quarter,
-                    year,
-                },
+                quarter,
+                year,
             };
         }
     }
@@ -168,7 +161,7 @@ export class PivotCoreViewGlobalFilterPlugin extends OdooCoreViewPlugin {
                 const currentValue = this.getters.getGlobalFilterValue(filter.id);
                 switch (filter.type) {
                     case "date":
-                        if (filter.rangeType === "fixedPeriod" && time) {
+                        if (time) {
                             if (value === "false") {
                                 transformedValue = undefined;
                             } else {

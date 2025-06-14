@@ -1,18 +1,31 @@
 /** @ts-check */
-import { describe, expect, test } from "@odoo/hoot";
-import { getDateDomain, getRelativeDateFromTo } from "@spreadsheet/global_filters/helpers";
+import { describe, expect, test, beforeEach } from "@odoo/hoot";
+import {
+    getDateDomain,
+    getRelativeDateFromTo,
+    dateFilterValueToString,
+} from "@spreadsheet/global_filters/helpers";
 import {
     getDateDomainDurationInDays,
     assertDateDomainEqual,
 } from "@spreadsheet/../tests/helpers/date_domain";
+import { patchTranslations } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("headless");
 
 const { DateTime } = luxon;
 
-function getRelativeDateDomain(now, offset, rangeType, fieldName, fieldType) {
-    const { from, to } = getRelativeDateFromTo(now, offset, rangeType);
+beforeEach(() => {
+    patchTranslations();
+});
+
+function getRelativeDateDomain(now, offset, period, fieldName, fieldType) {
+    const { from, to } = getRelativeDateFromTo(now, offset, period);
     return getDateDomain(from, to, fieldName, fieldType);
+}
+
+function valueToString(value) {
+    return dateFilterValueToString(value).toString();
 }
 
 test("getRelativeDateDomain > year_to_date (year to date)", async function () {
@@ -21,72 +34,58 @@ test("getRelativeDateDomain > year_to_date (year to date)", async function () {
     assertDateDomainEqual("field", "2022-01-01", "2022-05-16", domain);
 });
 
-test("getRelativeDateDomain > last_week (last 7 days)", async function () {
+test("getRelativeDateDomain > last_7_days (last 7 days)", async function () {
     const now = DateTime.fromISO("2022-05-16");
-    const domain = getRelativeDateDomain(now, 0, "last_week", "field", "date");
+    const domain = getRelativeDateDomain(now, 0, "last_7_days", "field", "date");
     expect(getDateDomainDurationInDays(domain)).toBe(7);
     assertDateDomainEqual("field", "2022-05-10", "2022-05-16", domain);
 });
 
-test("getRelativeDateDomain > last_month (last 30 days)", async function () {
+test("getRelativeDateDomain > last_30_days (last 30 days)", async function () {
     const now = DateTime.fromISO("2022-05-16");
-    const domain = getRelativeDateDomain(now, 0, "last_month", "field", "date");
+    const domain = getRelativeDateDomain(now, 0, "last_30_days", "field", "date");
     expect(getDateDomainDurationInDays(domain)).toBe(30);
     assertDateDomainEqual("field", "2022-04-17", "2022-05-16", domain);
 });
 
-test("getRelativeDateDomain > last_three_months (last 90 days)", async function () {
+test("getRelativeDateDomain > last_90_days (last 90 days)", async function () {
     const now = DateTime.fromISO("2022-05-16");
-    const domain = getRelativeDateDomain(now, 0, "last_three_months", "field", "date");
+    const domain = getRelativeDateDomain(now, 0, "last_90_days", "field", "date");
     expect(getDateDomainDurationInDays(domain)).toBe(90);
     assertDateDomainEqual("field", "2022-02-16", "2022-05-16", domain);
 });
 
-test("getRelativeDateDomain > last_six_months (last 180 days)", async function () {
+test("getRelativeDateDomain > last_12_months (last 12 months)", async function () {
     const now = DateTime.fromISO("2022-05-16");
-    const domain = getRelativeDateDomain(now, 0, "last_six_months", "field", "date");
-    expect(getDateDomainDurationInDays(domain)).toBe(180);
-    assertDateDomainEqual("field", "2021-11-18", "2022-05-16", domain);
-});
-
-test("getRelativeDateDomain > last_year (last 365 days)", async function () {
-    const now = DateTime.fromISO("2022-05-16");
-    const domain = getRelativeDateDomain(now, 0, "last_year", "field", "date");
+    const domain = getRelativeDateDomain(now, 0, "last_12_months", "field", "date");
     expect(getDateDomainDurationInDays(domain)).toBe(365);
-    assertDateDomainEqual("field", "2021-05-17", "2022-05-16", domain);
-});
-
-test("getRelativeDateDomain > last_three_years (last 3 * 365 days)", async function () {
-    const now = DateTime.fromISO("2022-05-16");
-    const domain = getRelativeDateDomain(now, 0, "last_three_years", "field", "date");
-    expect(getDateDomainDurationInDays(domain)).toBe(3 * 365);
-    assertDateDomainEqual("field", "2019-05-18", "2022-05-16", domain);
+    assertDateDomainEqual("field", "2021-05-01", "2022-04-30", domain);
 });
 
 test("getRelativeDateDomain > simple date time", async function () {
     const now = DateTime.fromISO("2022-05-16T00:00:00+00:00", { zone: "utc" });
-    const domain = getRelativeDateDomain(now, 0, "last_week", "field", "datetime");
+    const domain = getRelativeDateDomain(now, 0, "last_7_days", "field", "datetime");
     expect(getDateDomainDurationInDays(domain)).toBe(7);
     assertDateDomainEqual("field", "2022-05-10 00:00:00", "2022-05-16 23:59:59", domain);
 });
 
 test("getRelativeDateDomain > date time from middle of day", async function () {
     const now = DateTime.fromISO("2022-05-16T13:59:00+00:00", { zone: "utc" });
-    const domain = getRelativeDateDomain(now, 0, "last_week", "field", "datetime");
+    const domain = getRelativeDateDomain(now, 0, "last_7_days", "field", "datetime");
     expect(getDateDomainDurationInDays(domain)).toBe(7);
     assertDateDomainEqual("field", "2022-05-10 00:00:00", "2022-05-16 23:59:59", domain);
 });
 
 test("getRelativeDateDomain > date time with timezone", async function () {
     const now = DateTime.fromISO("2022-05-16T12:00:00+02:00", { zone: "UTC+2" });
-    const domain = getRelativeDateDomain(now, 0, "last_week", "field", "datetime");
+    const domain = getRelativeDateDomain(now, 0, "last_7_days", "field", "datetime");
     expect(getDateDomainDurationInDays(domain)).toBe(7);
     assertDateDomainEqual("field", "2022-05-09 22:00:00", "2022-05-16 21:59:59", domain);
 });
 
 test("getRelativeDateDomain > date time with timezone on different day than UTC", async function () {
     const now = DateTime.fromISO("2022-05-16T01:00:00+02:00", { zone: "UTC+2" });
-    const domain = getRelativeDateDomain(now, 0, "last_week", "field", "datetime");
+    const domain = getRelativeDateDomain(now, 0, "last_7_days", "field", "datetime");
     expect(getDateDomainDurationInDays(domain)).toBe(7);
     assertDateDomainEqual("field", "2022-05-09 22:00:00", "2022-05-16 21:59:59", domain);
 });
@@ -97,37 +96,68 @@ test("getRelativeDateDomain > with offset > year_to_date (year to date)", async 
     assertDateDomainEqual("field", "2021-01-01", "2021-05-16", domain);
 });
 
-test("getRelativeDateDomain > with offset > last_week (last 7 days)", async function () {
+test("getRelativeDateDomain > with offset > last_7_days (last 7 days)", async function () {
     const now = DateTime.fromISO("2022-05-16");
-    const domain = getRelativeDateDomain(now, -1, "last_week", "field", "date");
+    const domain = getRelativeDateDomain(now, -1, "last_7_days", "field", "date");
     expect(getDateDomainDurationInDays(domain)).toBe(7);
     assertDateDomainEqual("field", "2022-05-03", "2022-05-09", domain);
 });
 
 test("getRelativeDateDomain > with offset (last 30 days)", async function () {
     const now = DateTime.fromISO("2022-05-16");
-    const domain = getRelativeDateDomain(now, -2, "last_month", "field", "date");
+    const domain = getRelativeDateDomain(now, -2, "last_30_days", "field", "date");
     expect(getDateDomainDurationInDays(domain)).toBe(30);
     assertDateDomainEqual("field", "2022-02-16", "2022-03-17", domain);
 });
 
-test("getRelativeDateDomain > with offset > last_year (last 365 days)", async function () {
+test("getRelativeDateDomain > with offset > last_12_months (last 12 months)", async function () {
     const now = DateTime.fromISO("2022-05-16");
-    const domain = getRelativeDateDomain(now, 1, "last_year", "field", "date");
+    const domain = getRelativeDateDomain(now, 1, "last_12_months", "field", "date");
     expect(getDateDomainDurationInDays(domain)).toBe(365);
-    assertDateDomainEqual("field", "2022-05-17", "2023-05-16", domain);
-});
-
-test("getRelativeDateDomain > with offset > last_three_years (last 3 * 365 days)", async function () {
-    const now = DateTime.fromISO("2022-05-16");
-    const domain = getRelativeDateDomain(now, -1, "last_three_years", "field", "date");
-    expect(getDateDomainDurationInDays(domain)).toBe(3 * 365);
-    assertDateDomainEqual("field", "2016-05-18", "2019-05-17", domain);
+    assertDateDomainEqual("field", "2022-05-01", "2023-04-30", domain);
 });
 
 test("getRelativeDateDomain > with offset > simple date time", async function () {
     const now = DateTime.fromISO("2022-05-16T00:00:00+00:00", { zone: "utc" });
-    const domain = getRelativeDateDomain(now, -1, "last_week", "field", "datetime");
+    const domain = getRelativeDateDomain(now, -1, "last_7_days", "field", "datetime");
     expect(getDateDomainDurationInDays(domain)).toBe(7);
     assertDateDomainEqual("field", "2022-05-03 00:00:00", "2022-05-09 23:59:59", domain);
+});
+
+test("dateFilterValueToString > relative periods", function () {
+    expect(valueToString({ type: "relative", period: "last_7_days" })).toBe("Last 7 Days");
+    expect(valueToString({ type: "relative", period: "last_30_days" })).toBe("Last 30 Days");
+    expect(valueToString({ type: "relative", period: "last_90_days" })).toBe("Last 90 Days");
+    expect(valueToString({ type: "relative", period: "year_to_date" })).toBe("Year to Date");
+    expect(valueToString({ type: "relative", period: "last_12_months" })).toBe("Last 12 Months");
+});
+test("dateFilterValueToString > month", function () {
+    expect(valueToString({ type: "month", year: 2022, month: 5 })).toBe("May 2022");
+});
+
+test("dateFilterValueToString > quarter", function () {
+    expect(valueToString({ type: "quarter", year: 2022, quarter: 2 })).toBe("Q2 2022");
+});
+
+test("dateFilterValueToString > year", function () {
+    expect(valueToString({ type: "year", year: 2022 })).toBe("2022");
+});
+
+test("dateFilterValueToString > range", function () {
+    expect(valueToString({ type: "range", from: "2022-01-01", to: "2022-12-31" })).toBe(
+        "2022-01-01 to 2022-12-31"
+    );
+    expect(valueToString({ type: "range", from: "2022-01-01" })).toBe("2022-01-01 to all time");
+    expect(valueToString({ type: "range", to: "2022-12-31" })).toBe("All time to 2022-12-31");
+    expect(valueToString({ type: "range" })).toBe("All time");
+});
+
+test("dateFilterValueToString > all time", function () {
+    expect(valueToString({ type: undefined })).toBe("All time");
+    expect(valueToString({})).toBe("All time");
+});
+
+test("dateFilterValueToString > invalid value", function () {
+    expect(valueToString({ type: "invalid" })).toBe("All time");
+    expect(valueToString(undefined)).toBe("All time");
 });
