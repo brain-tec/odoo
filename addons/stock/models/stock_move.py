@@ -699,7 +699,9 @@ Please change the quantity done or the rounding precision in your settings.""",
                 vals['state'] = 'done'
             if vals.get('state') == 'done':
                 vals['picked'] = True
-        return super().create(vals_list)
+        res = super().create(vals_list)
+        res._update_orderpoints()
+        return res
 
     def write(self, vals):
         # Handle the write on the initial demand by updating the reserved quantity and logging
@@ -740,7 +742,9 @@ Please change the quantity done or the rounding precision in your settings.""",
             picking = self.env['stock.picking'].browse(vals['picking_id'])
             if picking.group_id:
                 vals['group_id'] = picking.group_id.id
-        res = super(StockMove, self).write(vals)
+        if 'product_id' in vals or 'location_id' in vals or 'location_dest_id' in vals:
+            self._update_orderpoints()
+        res = super().write(vals)
         if move_to_recompute_state:
             move_to_recompute_state._recompute_state()
         if move_to_check_location:
@@ -762,7 +766,29 @@ Please change the quantity done or the rounding precision in your settings.""",
                 moves.warehouse_id = warehouse.id
         if receipt_moves_to_reassign:
             receipt_moves_to_reassign._action_assign()
+        if ('product_id' in vals or 'state' in vals or 'date' in vals or 'product_uom_qty' in vals or
+                'location_id' in vals or 'location_dest_id' in vals):
+            self._update_orderpoints()
         return res
+
+    def _update_orderpoints(self):
+        """ Manually mark the relevant orderpoints for re-computation.
+        This allows us to only recompute the qty_to_order for the orderpoints in the relevant warehouse(s),
+        instead of all the orderpoints linked to the product."""
+        orderpoint_domain = []
+        for move in self:
+            domain_for_move = [('product_id', '=', move.product_id.id)]
+            wh_ids = move.location_id.warehouse_id.ids + move.location_dest_id.warehouse_id.ids
+            if wh_ids:
+                domain_for_move = expression.AND([domain_for_move, [('warehouse_id', 'in', wh_ids)]])
+            if not orderpoint_domain:
+                orderpoint_domain = domain_for_move
+                continue
+            orderpoint_domain = expression.OR([orderpoint_domain, domain_for_move])
+        if orderpoint_domain:
+            orderpoints = self.env['stock.warehouse.orderpoint'].sudo().search(orderpoint_domain, order='id')
+            orderpoints.invalidate_recordset(['qty_to_order', 'qty_forecast'])
+            self.env.add_to_compute(self.env['stock.warehouse.orderpoint']._fields['qty_to_order_computed'], orderpoints)
 
     def _delay_alert_get_documents(self):
         """Returns a list of recordset of the documents linked to the stock.move in `self` in order
@@ -1532,11 +1558,8 @@ Please change the quantity done or the rounding precision in your settings.""",
 
         # call `_action_assign` on every confirmed move which location_id bypasses the reservation + those expected to be auto-assigned
         moves.filtered(lambda move: move.state in ('confirmed', 'partially_available')
-                       and (move._should_bypass_reservation()
-                            or move.picking_type_id.reservation_method == 'at_confirm'
-                            or (move.reservation_date and move.reservation_date <= fields.Date.today())))\
+                       and (move._should_bypass_reservation() or move._should_assign_at_confirm()))\
              ._action_assign()
-
         if new_push_moves:
             neg_push_moves = new_push_moves.filtered(lambda sm: sm.product_uom.compare(sm.product_uom_qty, 0) < 0)
             (new_push_moves - neg_push_moves).sudo()._action_confirm()
@@ -1716,6 +1739,9 @@ Please change the quantity done or the rounding precision in your settings.""",
         self.ensure_one()
         location = forced_location or self.location_id
         return location.should_bypass_reservation() or not self.product_id.is_storable
+
+    def _should_assign_at_confirm(self):
+        return self._should_bypass_reservation() or self.picking_type_id.reservation_method == 'at_confirm' or (self.reservation_date and self.reservation_date <= fields.Date.today())
 
     def _get_picked_quantity(self):
         self.ensure_one()

@@ -221,6 +221,10 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
     # update the registry after all checks have passed
     registry[name] = model_cls
 
+    # mark all impacted models for setup
+    for model_name in registry.descendants([name], '_inherit', '_inherits'):
+        registry[model_name]._setup_done__ = False
+
     return model_cls
 
 
@@ -313,10 +317,8 @@ def setup_model_classes(env: Environment):
     for model_cls in models_classes:
         _setup(model_cls, env)
 
-    registry._m2m: defaultdict[tuple[str, str, str], list[Field]] = defaultdict(list)
     for model_cls in models_classes:
         _setup_fields(model_cls, env)
-    del registry._m2m
 
     for model_cls in models_classes:
         model_cls(env, (), ())._post_model_setup__()
@@ -324,7 +326,9 @@ def setup_model_classes(env: Environment):
 
 def _prepare_setup(model_cls: type[BaseModel]):
     """ Prepare the setup of the model. """
-    model_cls._setup_done__ = False
+    if model_cls._setup_done__:
+        assert model_cls.__bases__ == model_cls._base_classes__
+        return
 
     # changing base classes is costly, do it only when necessary
     if model_cls.__bases__ != model_cls._base_classes__:

@@ -58,7 +58,6 @@ test("Chart is impacted by global filter in dashboard mode", async function () {
         id: "42",
         type: "date",
         label: "Last Year",
-        rangeType: "fixedPeriod",
     };
     await addGlobalFilter(model, filter, {
         chart: { [chartId]: { chain: "date", type: "date" } },
@@ -68,7 +67,7 @@ test("Chart is impacted by global filter in dashboard mode", async function () {
     expect(computedDomain).toEqual([]);
     await setGlobalFilterValue(model, {
         id: "42",
-        value: { type: "year", period: { year: DateTime.local().year - 1 } },
+        value: { type: "year", year: DateTime.local().year - 1 },
     });
     computedDomain = model.getters.getChartDataSource(chartId).getComputedDomain();
     expect(computedDomain.length).toBe(3);

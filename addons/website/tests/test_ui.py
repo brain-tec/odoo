@@ -652,7 +652,6 @@ class TestUi(HttpCaseWithWebsiteUser):
         })
         self.start_tour(self.env['website'].get_client_action_url('/'), 'drop_404_ir_attachment_url', login='admin')
 
-    @unittest.skip
     def test_mobile_order_with_drag_and_drop(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'website_mobile_order_with_drag_and_drop', login='admin')
 
@@ -714,7 +713,6 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_media_iframe_video(self):
         self.start_tour("/", "website_media_iframe_video", login="admin")
 
-    @unittest.skip
     def test_snippet_visibility_option(self):
         self.start_tour("/", "snippet_visibility_option", login="admin")
 

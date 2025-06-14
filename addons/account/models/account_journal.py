@@ -45,6 +45,10 @@ class AccountJournal(models.Model):
     _check_company_domain = models.check_company_domain_parent_of
     _rec_names_search = ['name', 'code']
 
+    def _default_display_invoice_template_pdf_report_id(self):
+        """ Show PDF template selection if there are more than 1 template available for invoices. """
+        return len(self.available_invoice_template_pdf_report_ids) > 1
+
     def _default_inbound_payment_methods(self):
         return self.env.ref('account.account_payment_method_manual_in')
 
@@ -169,6 +173,17 @@ class AccountJournal(models.Model):
         compute='_compute_payment_sequence', readonly=False, store=True, precompute=True,
         help="Check this box if you don't want to share the same sequence on payments and bank transactions posted on this journal",
     )
+    invoice_template_pdf_report_id = fields.Many2one(
+        string="Invoice report",
+        comodel_name='ir.actions.report',
+        domain="[('id', 'in', available_invoice_template_pdf_report_ids)]",
+        readonly=False,
+    )
+    available_invoice_template_pdf_report_ids = fields.One2many(
+        comodel_name='ir.actions.report',
+        compute='_compute_available_invoice_template_pdf_report_ids',
+    )
+    display_invoice_template_pdf_report_id = fields.Boolean(default=_default_display_invoice_template_pdf_report_id, store=False)
     sequence_override_regex = fields.Text(help="Technical field used to enforce complex sequence composition that the system would normally misunderstand.\n"\
                                           "This is a regex that can include all the following capture groups: prefix1, year, prefix2, month, prefix3, seq, suffix.\n"\
                                           "The prefix* groups are the separators between the year, month and the actual increasing sequence number (seq).\n"\
@@ -664,6 +679,10 @@ class AccountJournal(models.Model):
         for journal in self:
             journal.payment_sequence = journal.type in ('bank', 'cash', 'credit')
 
+    def _compute_available_invoice_template_pdf_report_ids(self):
+        for journal in self:
+            journal.available_invoice_template_pdf_report_ids = self.env['account.move']._get_available_invoice_template_pdf_report_ids()
+
     def unlink(self):
         bank_accounts = self.env['res.partner.bank'].browse()
         for bank_account in self.mapped('bank_account_id'):
@@ -1031,28 +1050,18 @@ class AccountJournal(models.Model):
         if not self:
             raise UserError(self.env['account.journal']._build_no_journal_error_msg(self.env.company.display_name, [journal_type]))
 
-        # As we are coming from the journal, we assume that each attachments
-        # will create an invoice with a tentative to enhance with EDI / OCR..
-        all_invoices = self.env['account.move']
-        for attachment in attachments:
-            invoice = self.env['account.move'].with_context(skip_is_manually_modified=True).create({
-                'journal_id': self.id,
-                'move_type': move_type,
-            })
+        # Create one invoice per group.
+        invoices = self.env['account.move'] \
+            .with_context(
+                default_journal_id=self.id,
+                skip_is_manually_modified=True,
+            ) \
+            ._create_records_from_attachments(attachments)
 
-            invoice.with_context(skip_is_manually_modified=True)._extend_with_attachments(attachment, new=True)
-
-            all_invoices |= invoice
-
-            invoice.with_context(
-                account_predictive_bills_disable_prediction=True,
-                no_new_invoice=True,
-            ).message_post(attachment_ids=attachment.ids)
-
-            attachment.write({'res_model': 'account.move', 'res_id': invoice.id})
+        for invoice in invoices:
             invoice._autopost_bill()
 
-        return all_invoices
+        return invoices
 
     def create_document_from_attachment(self, attachment_ids):
         """ Create the invoices from files.
