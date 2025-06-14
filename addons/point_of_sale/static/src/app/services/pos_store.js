@@ -433,6 +433,42 @@ export class PosStore extends WithLazyGetterTrap {
                 products[i].available_in_pos = false;
             }
         }
+
+        this.productAttributesExclusion = this.computeProductAttributesExclusion();
+    }
+
+    computeProductAttributesExclusion() {
+        const exclusions = new Map();
+
+        const addExclusion = (key, value) => {
+            if (!exclusions.has(key)) {
+                exclusions.set(key, new Set());
+            }
+            exclusions.get(key).add(value);
+        };
+
+        for (const exclusion of this.models["product.template.attribute.exclusion"].getAll()) {
+            const ptavId = exclusion.product_template_attribute_value_id.id;
+            for (const { id: valueId } of exclusion.value_ids) {
+                addExclusion(ptavId, valueId);
+                addExclusion(valueId, ptavId);
+            }
+        }
+        return exclusions;
+    }
+
+    doHaveConflictWith(value, selectedValues) {
+        const exclusions = this.productAttributesExclusion.get(value.id);
+        if (!exclusions) {
+            return false;
+        }
+        const selectedValueIds = new Set(selectedValues.map((v) => v.id));
+        for (const exclusionId of exclusions) {
+            if (selectedValueIds.has(exclusionId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     async onDeleteOrder(order) {
@@ -1756,6 +1792,9 @@ export class PosStore extends WithLazyGetterTrap {
             const product = this.models["product.product"].get(change["product_id"]);
             const categoryIds = product.parentPosCategIds;
 
+            if (change.isCombo) {
+                return true;
+            }
             for (const categoryId of categoryIds) {
                 if (categories.includes(categoryId)) {
                     return true;
@@ -2290,36 +2329,38 @@ export class PosStore extends WithLazyGetterTrap {
             return [];
         }
 
-        const excludedProductIds = [
-            this.config.tip_product_id?.product_tmpl_id?.id,
-            ...this.session._pos_special_products_ids.map(
-                (id) => this.models["product.product"].get(id)?.product_tmpl_id?.id
-            ),
-        ].filter(Boolean);
+        const excludedProductIds = new Set(
+            [
+                this.config.tip_product_id?.product_tmpl_id?.id,
+                ...this.session._pos_special_products_ids.map(
+                    (id) => this.models["product.product"].get(id)?.product_tmpl_id?.id
+                ),
+            ].filter(Boolean)
+        );
+        const filteredList = [];
+        const availableCateg = new Set(
+            (this.config.iface_available_categ_ids || []).map((c) => c.id)
+        );
 
-        list = list
-            .filter((product) => !excludedProductIds.includes(product.id) && product.canBeDisplayed)
-            .sort((a, b) => {
-                // Sort in the same order as what we receive (look _load_product_with_domain)
-                if (a.sequence !== b.sequence) {
-                    return a.sequence - b.sequence;
-                }
-                if (a.default_code !== b.default_code) {
-                    if (!b.default_code) {
-                        return -1;
-                    }
-                    if (!a.default_code) {
-                        return 1;
-                    }
-                    return a.default_code.localeCompare(b.default_code);
-                }
-                return a.name.localeCompare(b.name);
-            })
-            .slice(0, 100);
+        for (const p of list) {
+            if (filteredList.length >= 100) {
+                break;
+            }
+
+            if (excludedProductIds.has(p.id) || !p.canBeDisplayed) {
+                continue;
+            }
+
+            if (availableCateg.size && !p.pos_categ_ids.some((c) => availableCateg.has(c.id))) {
+                continue;
+            }
+
+            filteredList.push(p);
+        }
 
         return searchWord !== ""
-            ? list.sort((a, b) => b.is_favorite - a.is_favorite)
-            : list.sort((a, b) => {
+            ? filteredList.sort((a, b) => b.is_favorite - a.is_favorite)
+            : filteredList.sort((a, b) => {
                   if (b.is_favorite !== a.is_favorite) {
                       return b.is_favorite - a.is_favorite;
                   }
