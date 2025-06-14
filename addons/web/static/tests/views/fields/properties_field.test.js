@@ -1098,7 +1098,6 @@ test("properties: many2one 'Search more...'", async () => {
             <field name="id"/>
             <field name="display_name"/>
         </list>`;
-    User._views[["search", false]] = /* xml */ `<search/>`;
 
     // Patch the Many2XAutocomplete default search limit options
     patchWithCleanup(Many2XAutocomplete.defaultProps, {
@@ -1598,7 +1597,6 @@ test("properties: kanban view without properties", async () => {
  */
 test.tags("desktop");
 test("properties: switch view on desktop", async () => {
-    Partner._views[["search", false]] = /* xml */ `<search/>`;
     Partner._views[["kanban", 99]] = /* xml */ `<kanban>
                 <templates>
                     <t t-name="card">
@@ -1632,7 +1630,6 @@ test("properties: switch view on desktop", async () => {
 
 test.tags("mobile");
 test("properties: switch view on mobile", async () => {
-    Partner._views[["search", false]] = /* xml */ `<search/>`;
     Partner._views[["kanban", 99]] = /* xml */ `<kanban>
                 <templates>
                     <t t-name="card">
@@ -1908,6 +1905,25 @@ test("properties: form view and falsy domain, properties are empty", async () =>
     await click(".o-dropdown--menu span .fa-cogs");
     await animationFrame();
     expect(".o_test_properties_not_empty").toHaveCount(1);
+});
+
+test("properties: discard changes", async () => {
+    onRpc("has_access", () => true);
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: /* xml */ `
+            <form>
+                <field name="company_id"/>
+                <field name="properties" widget="properties"/>
+            </form>`,
+    });
+    expect(".o_property_field:first-child input").toHaveValue("char value");
+    await contains(".o_property_field:first-child input").edit("char updated");
+    expect(".o_property_field:first-child input").toHaveValue("char updated");
+    await clickCancel();
+    expect(".o_property_field:first-child input").toHaveValue("char value");
 });
 
 // ---------------------------------------------------

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from freezegun import freeze_time
+
 from odoo import Command
 from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_common import ValuationReconciliationTestCommon
 from odoo.tests import common, Form
@@ -2471,3 +2473,145 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
             { 'quantity': 1.0, 'product_id': self.component_a.id, 'bom_line_id': False},
         ] + expected_pick_moves
         self.assertRecordValues(pick.move_ids.sorted(lambda m: m.quantity), expected_pick_moves)
+
+    def test_return_kit_in_quarantine_location(self):
+        """
+        Return a kit to WH/Return Location
+        Push Rule: WH/Return -> WH/Stock
+        Ensure the delivered qty is correctly updated
+        """
+        wh = self.company_data['default_warehouse']
+        stock_location = wh.lot_stock_id
+
+        return_location = self.env['stock.location'].create({
+            'location_id': stock_location.location_id.id,
+            'name': 'Return Location',
+            'usage': 'internal',
+        })
+
+        self.env['stock.route'].create({
+            'name': 'Return Route',
+            'warehouse_selectable': True,
+            'warehouse_ids': [(4, wh.id)],
+            'rule_ids': [(0, 0, {
+                'name': 'Return to Stock',
+                'location_src_id': return_location.id,
+                'location_dest_id': stock_location.id,
+                'company_id': self.company_data['company'].id,
+                'action': 'push',
+                'auto': 'manual',
+                'picking_type_id': wh.int_type_id.id,
+            })],
+        })
+
+        order = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                (0, 0, {'product_id': self.kit_1.id}),
+            ],
+        })
+        order.action_confirm()
+
+        delivery = order.picking_ids
+        for move in delivery.move_ids:
+            move.quantity = move.product_qty
+        delivery.button_validate()
+        self.assertEqual(delivery.state, 'done')
+
+        return_wizard = self.env['stock.return.picking'].with_context(active_id=delivery.id, active_model='stock.picking').create({})
+        for line in return_wizard.product_return_moves:
+            line.quantity = line.move_quantity
+        res = return_wizard.action_create_returns()
+
+        return_picking = self.env['stock.picking'].browse(res["res_id"])
+        return_picking.location_dest_id = return_location
+        for move in return_picking.move_ids:
+            move.quantity = move.product_qty
+        return_picking.button_validate()
+        self.assertEqual(return_picking.state, 'done')
+        self.assertEqual(order.order_line.qty_delivered, 0)
+
+        internal_picking = return_picking.move_ids.move_dest_ids.picking_id
+        self.assertTrue(internal_picking)
+
+        for move in internal_picking.move_ids:
+            move.quantity = move.product_qty
+        internal_picking.button_validate()
+        self.assertEqual(internal_picking.state, 'done')
+        self.assertEqual(order.order_line.qty_delivered, 0)
+
+    def test_return_for_exchange_kit_product_component(self):
+        """ Returning for exchange a kit's component should leave the original sale order line's
+        qty_delivered with the correct value.
+        """
+        for comp in self.bom_kit_1.bom_line_ids.product_id:
+            self.env['stock.quant']._update_available_quantity(comp, self.company_data['default_warehouse'].lot_stock_id, quantity=10)
+
+        comp_to_return = self.bom_kit_1.bom_line_ids.filtered(lambda bl: bl.product_qty == 1).product_id
+        kit_product = self.kit_1
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.partner.id,
+            'order_line': [Command.create({
+                'product_id': kit_product.id,
+                'product_uom_qty': 1.0,
+            })],
+        })
+        sale_order.action_confirm()
+        delivery = sale_order.picking_ids
+        delivery.action_assign()
+        delivery.button_validate()
+        return_picking_form = Form(self.env['stock.return.picking'].with_context(active_id=delivery.id, active_model='stock.picking'))
+        return_wizard = return_picking_form.save()
+        return_wizard.product_return_moves.filtered(lambda prm: prm.product_id == comp_to_return).quantity = 1
+        res = return_wizard.action_create_exchanges()
+        return_picking = self.env['stock.picking'].browse(res['res_id'])
+        return_picking.button_validate()
+        exchange_picking = sale_order.picking_ids.filtered(lambda so: so.state != 'done')
+        exchange_picking.button_validate()
+        self.assertEqual(sale_order.order_line.qty_delivered, 1)
+
+    def test_date_deadline_propagation_to_byproducts(self):
+        route_manufacture = self.company_data['default_warehouse'].manufacture_pull_id.route_id
+        route_mto = self.company_data['default_warehouse'].mto_pull_id.route_id
+        fns = self._cls_create_product('Finished', self.uom_unit, routes=[route_manufacture, route_mto])
+        cmp = self._cls_create_product('Component', self.uom_unit)
+        bp = self._cls_create_product('ByProduct', self.uom_unit)
+        partner = self.env['res.partner'].create({'name': 'Test Partner'})
+
+        self.env['mrp.bom'].create({
+            'product_tmpl_id': fns.product_tmpl_id.id,
+            'product_id': fns.id,
+            'product_qty': 1.0,
+            'type': 'normal',
+            'bom_line_ids': [Command.create({'product_id': cmp.id, 'product_qty': 1})],
+            'byproduct_ids': [Command.create({'product_id': bp.id, 'product_qty': 1})],
+        })
+
+        with freeze_time('2025-01-01'):
+            order = self.env['sale.order'].create({
+                'partner_id': partner.id,
+                'order_line': [Command.create({'product_id': fns.id, 'product_uom_qty': 1})],
+            })
+            order.action_confirm()
+            mo = self.env["mrp.production"].search([('product_id', '=', fns.id)])
+            fns_move = mo.move_finished_ids.filtered(lambda m: m.product_id.id == fns.id)
+
+            self.assertEqual(len(mo.move_finished_ids), 2)  # 1 for FNS, 1 for BP
+            self.assertEqual(len(fns_move), 1)
+
+            for move in mo.move_finished_ids:
+                self.assertEqual(move.date_deadline.strftime('%Y-%m-%d'), '2025-01-01')
+            order.commitment_date = '2025-01-02'
+            for move in mo.move_finished_ids:
+                self.assertEqual(move.date_deadline.strftime('%Y-%m-%d'), '2025-01-02')
+
+            # Set Quantity producing to 2
+            wiz = self.env['change.production.qty'].create({'mo_id': mo.id, 'product_qty': 2.0})
+            wiz.change_prod_qty()
+
+            fns_move = mo.move_finished_ids.filtered(lambda m: m.product_id.id == fns.id)
+            self.assertEqual(len(mo.move_finished_ids), 2)  # 1 for FNS, 1 for BP
+            self.assertEqual(len(fns_move), 1)
+
+            mo.button_mark_done()
+            self.assertEqual(mo.state, 'done')

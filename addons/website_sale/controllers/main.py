@@ -978,10 +978,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
             ], limit=1)
         return super()._get_default_country(order_sudo=order_sudo, **kwargs)
 
-    @route(auth='public')
-    def portal_address_country_info(self, *args, **kwargs):
-        return super().portal_address_country_info(*args, **kwargs)
-
     @route(
         '/shop/address/submit', type='http', methods=['POST'], auth='public', website=True,
         sitemap=False
@@ -1019,10 +1015,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
         )
 
         is_new_address = not partner_sudo
-        is_extra_step_active = request.website.viewref('website_sale.extra_info').active
-        if is_extra_step_active:
-            callback = callback or '/shop/extra_info'
-        elif is_new_address or order_sudo.only_services:
+
+        if is_new_address or order_sudo.only_services:
             callback = callback or '/shop/checkout?try_skip_step=true'
         else:
             callback = callback or '/shop/checkout'
@@ -1214,7 +1208,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if shipping_address:
             #in order to not override shippig address, it's checked separately from shipping option
             self._include_country_and_state_in_address(shipping_address)
-            shipping_address, _side_values = self._parse_form_data(billing_address)
+            shipping_address, _side_values = self._parse_form_data(shipping_address)
 
             if order_sudo.partner_shipping_id.name.endswith(order_sudo.name):
                 # The existing partner was created by `process_express_checkout_delivery_choice`, it
@@ -1362,6 +1356,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     def _get_shop_payment_values(self, order, **kwargs):
         checkout_page_values = {
+            'sale_order': order,
             'website_sale_order': order,
             'errors': self._get_shop_payment_errors(order),
             'partner': order.partner_invoice_id,

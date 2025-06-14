@@ -34,8 +34,20 @@ registry.category("web_tour.tours").add("course_reviews", {
             run: "click",
         },
         {
-            trigger: "a[id=review-tab]",
-            run: "click",
+            trigger: "body:not(:has(.modal.show))",
+        },
+        {
+            trigger: ".o_wslides_course_header_nav_review",
+            run() {
+                const a = document.querySelector("a[id=review-tab]");
+                if (a.textContent !== "Reviews (1)") {
+                    throw Error("Text should be 'Reviews (1)'.")
+                }
+                a.click();
+            },
+        },
+        {
+            trigger: "#chatterRoot:shadow .o-mail-Message-textContent:contains(Great course!)",
         },
         {
             // If it fails here, it means the system is allowing you to add another review.
@@ -48,11 +60,16 @@ registry.category("web_tour.tours").add("course_reviews", {
         },
         {
             trigger: ".modal.modal_shown.show button.o_portal_chatter_composer_btn",
-            run: "click",
+            run() {
+                if (this.anchor.textContent !== "Update review") {
+                    throw Error("Button text should be 'Update review'.")
+                }
+                this.anchor.click();
+            },
         },
         {
             content: "Reload page (fetch message)",
-            trigger: ".modal",
+            trigger: "body:not(:has(.modal.show))",
             run() {
                 location.reload();
             },
@@ -70,7 +87,7 @@ registry.category("web_tour.tours").add("course_reviews", {
             run: "click",
         },
         {
-            trigger: "#chatterRoot:shadow .o-mail-QuickReactionMenu-emoji span:contains('👍'):not(:visible)",
+            trigger: "#chatterRoot:shadow .o-mail-QuickReactionMenu-emoji span:contains('👍')",
             run: "click",
         },
         {

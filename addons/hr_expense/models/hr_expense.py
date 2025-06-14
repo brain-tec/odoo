@@ -79,7 +79,7 @@ class HrExpense(models.Model):
         comodel_name='res.users',
         string="Manager",
         compute='_compute_from_employee_id', store=True,
-        domain=lambda self: ['|', ('employee_id.expense_manager_id', 'in', self.env.user.id), ('all_group_ids', 'in', self.env.ref('hr_expense.group_hr_expense_team_approver').ids)],
+        domain=lambda self: [('share', '=', False), '|', ('employee_id.expense_manager_id', 'in', self.env.user.id), ('all_group_ids', 'in', self.env.ref('hr_expense.group_hr_expense_team_approver').ids)],
         copy=False,
         tracking=True,
     )
@@ -947,7 +947,7 @@ class HrExpense(models.Model):
     @api.model
     def _get_empty_list_mail_alias(self):
         use_mailgateway = self.env['ir.config_parameter'].sudo().get_param('hr_expense.use_mailgateway')
-        expense_alias = self.env.ref('hr_expense.mail_alias_expense') if use_mailgateway else False
+        expense_alias = self.env.ref('hr_expense.mail_alias_expense', raise_if_not_found=False) if use_mailgateway else False
         if expense_alias and expense_alias.alias_domain and expense_alias.alias_name:
             # encode, but force %20 encoding for space instead of a + (URL / mailto difference)
             params = werkzeug.urls.url_encode({'subject': _("Lunch with customer $12.32")}).replace('+', '%20')
@@ -1575,14 +1575,13 @@ class HrExpense(models.Model):
         for employee_sudo, expenses_sudo in self.sudo().grouped('employee_id').items():
             multiple_expenses_name = _("Expenses of %(employee)s", employee=employee_sudo.name)
             move_ref = expenses_sudo.name if len(expenses_sudo) == 1 else multiple_expenses_name
-            currency = expenses_sudo.currency_id if len(expenses_sudo.currency_id) == 1 else expenses_sudo.company_currency_id
             return_vals.append({
             **expenses_sudo._prepare_move_vals(),
                 'ref': move_ref,
                 'move_type': 'in_invoice',
                 'partner_id': employee_sudo.work_contact_id.id,
                 'commercial_partner_id': employee_sudo.user_partner_id.id,
-                'currency_id': currency.id,
+                'currency_id': expenses_sudo.company_currency_id.id,
                 'line_ids': [Command.create(expense_sudo._prepare_move_lines_vals()) for expense_sudo in expenses_sudo],
                 'partner_bank_id': employee_sudo.bank_account_id.id,
                 'attachment_ids': attachments_data,
@@ -1739,6 +1738,12 @@ class HrExpense(models.Model):
         if journal.type == 'purchase':
             account = journal.default_account_id
 
+        if not account:
+            raise UserError(_(
+                "Odoo had a look at your expense, its product, your company and the journal but came back with empty hands.\n"
+                "Give Odoo a hand to find an account by setting up an expense account.\n"
+                "%(expense)s %(expense_name)s.\n"
+            ), {'expense': self, 'expense_name': self.name})
         return account
 
     def _get_expense_account_destination(self):

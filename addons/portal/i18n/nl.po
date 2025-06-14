@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:37+0000\n"
+"POT-Creation-Date: 2025-05-16 20:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Manon Rondou, 2025\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
@@ -76,6 +76,8 @@ msgid ""
 "<i class=\"fa fa-pencil me-1\"/>\n"
 "                        Edit"
 msgstr ""
+"<i class=\"fa fa-pencil me-1\"/>\n"
+"                        Wijzig"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.side_content
@@ -85,7 +87,7 @@ msgstr "<i class=\"fa fa-pencil\"/>Informatie bewerken"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_row
 msgid "<i class=\"fa fa-plus fa-2x mb-2\"/>Add Address"
-msgstr ""
+msgstr "<i class=\"fa fa-plus fa-2x mb-2\"/>Adres toevoegen"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_footer
@@ -137,6 +139,11 @@ msgid ""
 "                        operation.\n"
 "                    </small>"
 msgstr ""
+"<small class=\"form-text text-muted\">\n"
+"                        Het is niet toegestaan de bedrijfsnaam of het BTW-nummer te wijzigen zodra document(en)\n"
+"                        voor je account zijn uitgegeven. Neem voor deze handeling contact\n"
+"                        met ons op.\n"
+"                    </small>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.pager
@@ -157,7 +164,7 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_kanban
 msgid "<span class=\"mx-2\">|</span>"
-msgstr ""
+msgstr "<span class=\"mx-2\">|</span>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_footer
@@ -402,7 +409,7 @@ msgstr "Toegevoegd op"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_management
 msgid "Address Management"
-msgstr ""
+msgstr "Adresbeheer"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_breadcrumbs
@@ -466,6 +473,8 @@ msgid ""
 "Changing your name is not allowed once document(s) have been issued for your"
 " account. Please contact us directly for this operation."
 msgstr ""
+"Het is niet toegestaan je naam te wijzigen zodra document(en) voor je "
+"account is/zijn uitgegeven. Neem voor deze handeling contact met ons op."
 
 #. module: portal
 #. odoo-javascript
@@ -559,7 +568,7 @@ msgstr "Land"
 #. module: portal
 #: model:ir.model,website_form_label:portal.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Een klant aanmaken"
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__create_uid
@@ -791,7 +800,7 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid "If you want to modify it, update"
-msgstr ""
+msgstr "Voor aanpassingen, werk het volgende bij:"
 
 #. module: portal
 #. odoo-javascript
@@ -863,12 +872,6 @@ msgstr ""
 "               en compleet is,"
 
 #. module: portal
-#. odoo-javascript
-#: code:addons/portal/static/src/xml/portal_security.xml:0
-msgid "Key Description"
-msgstr "Omschrijving Key"
-
-#. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__write_uid
 #: model:ir.model.fields,field_description:portal.field_portal_wizard__write_uid
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__write_uid
@@ -932,7 +935,7 @@ msgstr "Mijn account"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.my_addresses
 msgid "My addresses"
-msgstr ""
+msgstr "Mijn adressen"
 
 #. module: portal
 #. odoo-javascript
@@ -1105,7 +1108,7 @@ msgstr "Verwijderen"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_kanban
 msgid "Remove address"
-msgstr ""
+msgstr "Adres verwijderen"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
@@ -1125,7 +1128,7 @@ msgstr "Zelfde als afleveradres"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_footer
 msgid "Save Address"
-msgstr ""
+msgstr "Adres opslaan"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -1145,7 +1148,6 @@ msgstr "Beveiliging"
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/interactions/portal_security.js:0
-#: code:addons/portal/static/src/xml/portal_security.xml:0
 msgid "Security Control"
 msgstr "Veiligheidscontrole"
 
@@ -1239,13 +1241,13 @@ msgstr "Bedankt!"
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
 msgid "The %(field_name)s is managed on your company account."
-msgstr ""
+msgstr "%(field_name)s wordt beheerd op je bedrijfsaccount."
 
 #. module: portal
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
 msgid "The %(field_name)s is managed on your main account address."
-msgstr ""
+msgstr "%(field_name)s wordt beheerd op je hoofdaccountadres."
 
 #. module: portal
 #. odoo-python
@@ -1276,12 +1278,16 @@ msgstr "De bijlage bestaat niet of je hebt geen rechten om ze te bekijken."
 msgid ""
 "The company name and VAT number can only be updated on the company account."
 msgstr ""
+"De bedrijfsnaam en het btw-nummer kunnen alleen worden bijgewerkt op het "
+"bedrijfsaccount."
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid ""
 "The company name and VAT number can only be updated on your main account."
 msgstr ""
+"De bedrijfsnaam en het btw-nummer kunnen alleen worden bijgewerkt op je "
+"hoofdaccount."
 
 #. module: portal
 #. odoo-python
@@ -1527,7 +1533,7 @@ msgstr "Verkeerd wachtwoord."
 #. odoo-python
 #: code:addons/portal/controllers/portal.py:0
 msgid "You cannot archive your main address"
-msgstr ""
+msgstr "Je kunt je hoofdadres niet archiveren"
 
 #. module: portal
 #. odoo-python
@@ -1555,7 +1561,7 @@ msgstr "Je moet eerst portaaltoegang verlenen aan de partner \"%s\"."
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_kanban
 msgid "Your Account Address"
-msgstr ""
+msgstr "Je accountadres"
 
 #. module: portal
 #: model:mail.template,subject:portal.mail_template_data_portal_welcome
@@ -1625,4 +1631,4 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid "your account details"
-msgstr ""
+msgstr "je accountgegevens"

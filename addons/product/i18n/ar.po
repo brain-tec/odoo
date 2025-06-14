@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:36+0000\n"
+"POT-Creation-Date: 2025-05-16 20:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Malaz Abuidris <msea@odoo.com>, 2025\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
@@ -269,7 +269,7 @@ msgstr "<span class=\"o_stat_text\"> المنتجات</span>"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.uom_uom_form_view_inherit
 msgid "<span class=\"o_stat_text\">Packaging Barcodes</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">باركودات التعبئة</span> "
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_attribute_view_form
@@ -508,7 +508,7 @@ msgstr "أضف إلى المنتجات"
 #: model:ir.model.fields,help:product.field_product_product__uom_ids
 #: model:ir.model.fields,help:product.field_product_template__uom_ids
 msgid "Additional packagings for this product which can be used for sales"
-msgstr ""
+msgstr "عبوات إضافية لهذا المنتج يمكن استخدامها في المبيعات "
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_search
@@ -532,10 +532,8 @@ msgid "All Product Variants using this Tag"
 msgstr "كافة متغيرات المنتجات التي تستخدم علامة التصنيف هذه"
 
 #. module: product
-#. odoo-javascript
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__applied_on__3_global
 #: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
 msgid "All Products"
@@ -822,6 +820,8 @@ msgid ""
 "Changing the unit of measure for your product will apply a conversion 1 %(old_uom_name)s = 1 %(new_uom_name)s.\n"
 "All existing records (Sales orders, Purchase orders, etc.) using this product will be updated by replacing the unit name."
 msgstr ""
+"سيؤدي تغيير وحدة القياس في منتجك إلى تطبيق معدل تحويل قدره 1 %(old_uom_name)s = 1 %(new_uom_name)s.\n"
+"سيتم تحديث كافة السجلات الموجودة (أوامر البيع، أوامر الشراء، إلخ) التي تستخدم هذا المنتج عن طريق استبدال اسم الوحدة. "
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__checksum
@@ -1877,7 +1877,7 @@ msgstr "المخزون "
 #: model:ir.model.fields,field_description:product.field_product_product__is_dynamically_created
 #: model:ir.model.fields,field_description:product.field_product_template__is_dynamically_created
 msgid "Is Dynamically Created"
-msgstr ""
+msgstr "تم إنشاؤها ديناميكياً "
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_category__message_is_follower
@@ -1918,7 +1918,7 @@ msgstr "كيلوجرامات"
 #: code:addons/product/models/product_product.py:0
 #: code:addons/product/models/product_template.py:0
 msgid "Labels cannot be printed for products of service type"
-msgstr ""
+msgstr "لا يمكن طباعة الملصقات للمنتجات من نوع \"خدمة\" "
 
 #. module: product
 #: model:product.template,name:product.product_product_6_product_template
@@ -2379,7 +2379,7 @@ msgstr "باركودات التعبئة والتغليف "
 #. module: product
 #: model:ir.actions.report,name:product.report_product_packaging
 msgid "Packaging Barcodes (PDF)"
-msgstr ""
+msgstr "باركودات التعبئة (PDF) "
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__uom_ids
@@ -3321,6 +3321,13 @@ msgstr ""
 "لا يمكن تغيير الخاصية بمجرد أن يتم استخدام القيمة في منتج واحد على الأقل. "
 
 #. module: product
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+#: code:addons/product/models/product_template.py:0
+msgid "The cost of a product can't be negative."
+msgstr "لا يمكن أن تكون تكلفة المنتج قيمة سالبة. "
+
+#. module: product
 #: model:product.template,description_sale:product.desk_organizer_product_template
 msgid ""
 "The desk organiser is perfect for storing all kinds of small things and "
@@ -3403,6 +3410,9 @@ msgid ""
 " a vendor unit is set, quantity should be specified in this unit, otherwise "
 "it should be specified in the default unit of the product."
 msgstr ""
+"الكمية المطلوب شراؤها من هذا المورِّد حتى تتمكن من الاستفادة من سعر الوحدة. "
+"إذا تم تعيين وحدة المورّد، يجب أن يتم تحديد الكمية بهذه الوحدة، وإلا فسيتم "
+"تحديدها بالوحدة الافتراضية للمنتج. "
 
 #. module: product
 #. odoo-python
@@ -3647,7 +3657,7 @@ msgstr "استخدم هذه الخاصية لتخزين أي ملفات ترغب
 #: model:ir.model.fields,help:product.field_res_partner__property_product_pricelist
 #: model:ir.model.fields,help:product.field_res_users__property_product_pricelist
 msgid "Used for sales to the current partner"
-msgstr ""
+msgstr "يُستخدم للمبيعات للشريك الحالي "
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__is_used_on_products

@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:36+0000\n"
+"POT-Creation-Date: 2025-06-06 18:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Marianna Ciofani, 2025\n"
 "Language-Team: Italian (https://app.transifex.com/odoo/teams/41243/it/)\n"
@@ -212,6 +212,18 @@ msgstr "%(ref)s (%(currency_amount)s)"
 #: code:addons/account/models/account_account_tag.py:0
 msgid "%(tag)s (%(country_code)s)"
 msgstr "%(tag)s (%(country_code)s)"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_tax.py:0
+msgid ""
+"%(tax_account)s (%(account_name)s) should be an account of type "
+"\"%(receivable)s\" or \"%(payable)s\" with both options "
+"\"%(allow_reconciliation)s\" and \"%(non_trade)s\" enabled."
+msgstr ""
+"%(tax_account)s (%(account_name)s) deve essere un conto di tipo "
+"\"%(receivable)s\" o \"%(payable)s\" con entrambe le opzioni "
+"\"%(allow_reconciliation)s\" e \"%(non_trade)s\" attive."
 
 #. module: account
 #. odoo-python
@@ -1361,6 +1373,11 @@ msgstr "<span>Avviso: il documento può essere un duplicato di</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
+msgid "<strong class=\"d-block mt-3\">Shipping Address</strong>"
+msgstr "<strong class=\"d-block mt-3\">Indirizzo di spedizione</strong>"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<strong class=\"mr16\">Subtotal</strong>"
 msgstr "<strong class=\"mr16\">Totale parziale</strong>"
 
@@ -1426,11 +1443,6 @@ msgstr "<strong>Riferimento</strong>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "<strong>Shipping Address</strong>"
-msgstr "<strong>Indirizzo di spedizione</strong>"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<strong>Source</strong>"
 msgstr "<strong>Origine</strong>"
 
@@ -1464,6 +1476,15 @@ msgstr "<strong>Totale</strong>"
 #: model_terms:ir.ui.view,arch_db:account.view_account_account_kanban
 msgid "<strong>Type: </strong>"
 msgstr "<strong>Tipo: </strong>"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
+msgid ""
+"<strong>Warning:</strong> Once the Audit Trail is enabled, it cannot be "
+"disabled again if there are any existing journal items."
+msgstr ""
+"<strong>Attenzione:</strong> una volta attivata la traccia di audit, non è "
+"possibile disattivarla di nuovo se sono presenti movimenti contabili."
 
 #. module: account
 #. odoo-python
@@ -1502,6 +1523,16 @@ msgstr ""
 #: code:addons/account/models/res_partner_bank.py:0
 msgid "A bank account can belong to only one journal."
 msgstr "Un conto bancario può appartenere a un solo registro."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/res_partner_bank.py:0
+msgid ""
+"A bank account with Account Number %(number)s already exists for Partner "
+"%(partner)s, but is archived. Please unarchive it instead."
+msgstr ""
+"Esiste già un conto bancario con numero %(number)s per il partner "
+"%(partner)s ma è archiviato. Annulla l'archiviazione."
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_bank_statement_tree
@@ -3535,8 +3566,8 @@ msgstr "Conto bancario"
 #. module: account
 #. odoo-python
 #: code:addons/account/models/res_partner_bank.py:0
-msgid "Bank Account %(link)s with number %(number)s deleted"
-msgstr "Conto bancario %(link)s con numero %(number)s eliminato"
+msgid "Bank Account %(link)s with number %(number)s archived"
+msgstr "Conto bancario %(link)s con numero %(number)s archiviato"
 
 #. module: account
 #. odoo-python
@@ -3718,6 +3749,12 @@ msgstr "Transazioni bancarie e pagamenti:"
 #: code:addons/account/models/account_journal_dashboard.py:0
 msgid "Bank: Balance"
 msgstr "Banca: saldo"
+
+#. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/many2many_tags_banks/many2many_tags_banks.js:0
+msgid "Banks"
+msgstr "Banche"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_tax_repartition_line__repartition_type__base
@@ -4164,6 +4201,12 @@ msgid ""
 msgstr ""
 "Impossibile ottenere i dettagli di aggregazione da una riga che non utilizza"
 " il motore di \"aggregazione\""
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_send.py:0
+msgid "Cannot identify the invoices in the generated PDF: %s"
+msgstr "Impossibile individuare le fatture nel PDF generato: %s"
 
 #. module: account
 #: model:account.account,name:account.1_capital
@@ -7871,6 +7914,11 @@ msgid "From label"
 msgstr "Da etichetta"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_account_analytic_line_filter_inherit_account
+msgid "From last fiscal year"
+msgstr "Dall'ultimo anno fiscale"
+
+#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_report_expression__date_scope__previous_tax_period
 msgid "From previous tax period"
 msgstr "Dal periodo d'imposta precedente"
@@ -8982,6 +9030,7 @@ msgstr ""
 
 #. module: account
 #. odoo-javascript
+#: code:addons/account/static/src/components/many2many_tags_banks/many2many_tags_banks.xml:0
 #: code:addons/account/static/src/components/product_label_section_and_note_field/product_label_section_and_note_field.xml:0
 msgid "Internal link"
 msgstr "Collegamento esterno"
@@ -9614,6 +9663,12 @@ msgstr "Sembra che ci siano movimenti di chiusura dipendenti da registrare"
 #: code:addons/account/models/account_move.py:0
 msgid "It was previously '%(previous)s' and it is now '%(current)s'."
 msgstr "Prima era '%(previous)s' e ora è '%(current)s'."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+msgid "Items With Missing Analytic Distribution"
+msgstr "Movimenti con distribuzione analitica mancante"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__res_company__fiscalyear_last_month__1
@@ -11123,6 +11178,12 @@ msgid "No possible action found with the selected lines."
 msgstr "Per le righe selezionate non è stata trovata alcuna azione possibile."
 
 #. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/many2many_tags_banks/many2many_tags_banks.js:0
+msgid "No search more"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_move_line__display_type__non_deductible_product
 msgid "Non Deductible Products"
 msgstr "Prodotti non deducibili"
@@ -11524,6 +11585,12 @@ msgstr ""
 #: code:addons/account/models/account_move.py:0
 msgid "One or more invoices couldn't be processed."
 msgstr "Non è stato possibile elaborare una o più fatture."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+msgid "One or more lines require a 100% analytic distribution."
+msgstr "Una o più righe richiedono una distribuzione analitica al 100%·"
 
 #. module: account
 #: model:ir.ui.menu,name:account.root_payment_menu
@@ -13984,6 +14051,12 @@ msgid "See all activities"
 msgstr "Vedi tutte le attività"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+msgid "See items"
+msgstr "Vedi movimenti"
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_analytic_distribution_model__product_categ_id
 msgid ""
 "Select a product category which will use analytic account specified in "
@@ -15628,6 +15701,15 @@ msgstr ""
 " non è implementata"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/partner.py:0
+msgid ""
+"The commercial partner has been updated for all related accounting entries."
+msgstr ""
+"Il partner commerciale è stato aggiornato per tutte le registrazioni "
+"contabili correlate."
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_tax_repartition_line__company_id
 msgid "The company this distribution line belongs to."
 msgstr "L'azienda a cui appartiene la riga di ripartizione."
@@ -17010,8 +17092,8 @@ msgid ""
 "To keep the audit trail, you can not delete journal entries once they have been posted.\n"
 "Instead, you can cancel the journal entry."
 msgstr ""
-"Per mantenere la traccia di audit non devi eliminare le registazioni contabili una volta che sono state registrate.\n"
-"È possibile annullare una registazione."
+"Per mantenere la traccia di audit non devi eliminare le registrazioni contabili una volta che sono state registrate.\n"
+"È possibile annullare una registrazione."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
@@ -18239,6 +18321,11 @@ msgid "Wrong credit or debit value in accounting entry!"
 msgstr "Valore debito o credito errato nella registrazione contabile!"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_partner_property_form
+msgid "XML format"
+msgstr "Formato XML"
+
+#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_move__auto_post__yearly
 msgid "Yearly"
 msgstr "Annuale"
@@ -18917,6 +19004,16 @@ msgstr ""
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/partner.py:0
+msgid ""
+"You cannot set a partner as an invoicing address of another if they have a "
+"different %(vat_label)s."
+msgstr ""
+"Non è possibile configurare un partner come indirizzo di fatturazione di un "
+"altro se hanno una %(vat_label)s differente."
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/account_account.py:0
 msgid ""
 "You cannot switch an account to prevent the reconciliation if some partial "
@@ -19347,6 +19444,7 @@ msgstr "qui"
 #: code:addons/account/models/account_journal.py:0
 #: code:addons/account/models/account_journal_dashboard.py:0
 #: code:addons/account/models/account_move.py:0
+#: code:addons/account/models/account_move_line.py:0
 #: code:addons/account/models/company.py:0
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #: code:addons/account/wizard/account_secure_entries_wizard.py:0
@@ -19548,6 +19646,12 @@ msgstr "stornata"
 #: model:ir.model.fields,field_description:account.field_account_tax_repartition_line__tag_ids_domain
 msgid "tag domain"
 msgstr "dominio tag"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/chart_template.py:0
+msgid "tax_src_id"
+msgstr "tax_src_id"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_partner_property_form

@@ -136,11 +136,6 @@ class L10n_InWithholdWizard(models.TransientModel):
                 warnings['lower_move_amount'] = {
                     'message': message
                 }
-            elif wizard.related_payment_id and float_compare(wizard.related_payment_id.amount, wizard.base, precision_digits=precision) < 0:
-                message = _("The base amount of TDS is greater than the untaxed amount of the %s", wizard.type_name)
-                warnings['lower_payment_amount'] = {
-                    'message': message
-                }
             wizard.l10n_in_withholding_warning = warnings
 
     @api.depends('tax_id', 'base')
@@ -193,7 +188,7 @@ class L10n_InWithholdWizard(models.TransientModel):
                 lambda l: l.account_id.account_type in ('asset_receivable', 'liability_payable') and not l.reconciled)
             (inv_reconc + wh_reconc).reconcile()
         related_record = self.related_move_id or self.related_payment_id
-        withhold.message_post(
+        withhold._message_log(
             body=Markup("%s %s: <a href='#' data-oe-model='%s' data-oe-id='%s'>%s</a>") % (
                 _("TDS created from"),
                 self.type_name,

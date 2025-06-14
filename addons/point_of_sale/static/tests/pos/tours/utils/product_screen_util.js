@@ -185,6 +185,21 @@ export function clickPartnerButton() {
 export function clickCustomer(name) {
     return [PartnerList.clickPartner(name), { ...back(), isActive: ["mobile"] }];
 }
+export function selectPreset(selectedPreset, presetToSelect) {
+    return [
+        clickReview(),
+        {
+            content: "click preset button",
+            trigger: `.product-screen button:contains("${selectedPreset}")`,
+            run: "click",
+        },
+        {
+            content: `click preset '${presetToSelect}' from preset modal`,
+            trigger: `.modal-body button:contains(${presetToSelect})`,
+            run: "click",
+        },
+    ];
+}
 export function customerIsSelected(name) {
     return [
         clickReview(),
@@ -460,6 +475,13 @@ export function selectedOrderlineHasDirect(productName, quantity, price) {
         productName,
         quantity,
         price,
+    });
+}
+export function orderComboLineHas(productName, quantity, priceUnit) {
+    return Order.hasLine({
+        productName,
+        quantity,
+        priceUnit,
     });
 }
 export function orderLineHas(productName, quantity, price) {
@@ -740,6 +762,16 @@ export function addDiscount(discount) {
             .split("")
             .flatMap((key) => Numpad.click(key)),
     ].flat();
+}
+
+export function setTimeZone(testTimeZone) {
+    return {
+        content: `Set test time zone to ${testTimeZone}`,
+        trigger: "body",
+        run: function () {
+            luxon.Settings.defaultZone = testTimeZone;
+        },
+    };
 }
 
 function productInputSteps(name, barcode, list_price) {

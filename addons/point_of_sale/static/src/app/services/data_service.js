@@ -144,8 +144,13 @@ export class PosData extends Reactive {
                 }
             }
 
-            await this.indexedDB.delete(model, remove);
-            await this.indexedDB.create(model, put);
+            if (remove.length) {
+                await this.indexedDB.delete(model, remove);
+            }
+
+            if (put.length) {
+                await this.indexedDB.create(model, put);
+            }
         }
     }
 
@@ -243,8 +248,21 @@ export class PosData extends Reactive {
                     }
                 );
 
-                for (const [model, values] of Object.entries(data)) {
+                const local_records_to_filter = {};
+                for (const model of this.opts.cleanupModels) {
                     const local = localData[model] || [];
+                    if (local.length > 0) {
+                        local_records_to_filter[model] = local.map((r) => r.id);
+                    }
+                }
+
+                const data_to_remove = await this.orm.call("pos.session", "filter_local_data", [
+                    odoo.pos_session_id,
+                    local_records_to_filter,
+                ]);
+
+                for (const [model, values] of Object.entries(data)) {
+                    let local = localData[model] || [];
 
                     if (this.opts.uniqueModels.includes(model) && values.length > 0) {
                         this.indexedDB.delete(
@@ -253,6 +271,11 @@ export class PosData extends Reactive {
                         );
                         localData[model] = values;
                     } else {
+                        if (data_to_remove[model] && data_to_remove[model].length > 0) {
+                            const remove_ids = data_to_remove[model];
+                            local = local.filter((r) => !remove_ids.includes(r.id));
+                            this.indexedDB.delete(model, remove_ids);
+                        }
                         localData[model] = local.concat(values);
                     }
                 }
@@ -282,7 +305,7 @@ export class PosData extends Reactive {
         delete data["pos.order.line"];
 
         this.models.loadData(data, this.modelToLoad);
-        this.models.loadData({ "pos.order": order, "pos.order.line": orderlines });
+        this.models.loadData({ "pos.order": order, "pos.order.line": orderlines }, [], true);
         this.sanitizeData();
     }
 
@@ -291,7 +314,9 @@ export class PosData extends Reactive {
             order.lines.some((line) => line.is_reward_line && !line.coupon_id)
         );
         for (const order of order_to_delete) {
-            order.lines.forEach((line) => line.delete());
+            for (let i = order.lines.length - 1; i >= 0; i--) {
+                order.lines[i].delete();
+            }
         }
     }
 
@@ -359,13 +384,13 @@ export class PosData extends Reactive {
 
         const ignore = Object.keys(this.opts.databaseTable);
         for (const model of Object.keys(this.relations)) {
-            if (ignore.includes(model)) {
-                continue;
-            }
-
             this.models[model].addEventListener("delete", (params) => {
                 this.indexedDB.delete(model, [params.key]);
             });
+
+            if (ignore.includes(model)) {
+                continue;
+            }
 
             this.models[model].addEventListener("update", (params) => {
                 const record = this.models[model].get(params.id).raw;
@@ -742,6 +767,7 @@ export class PosData extends Reactive {
         if (data) {
             this.deviceSync?.dispatch && this.deviceSync.dispatch(data);
             const results = this.models.loadData(data, [], true);
+            this.synchronizeServerDataInIndexedDB(data);
             return results;
         }
         return false;

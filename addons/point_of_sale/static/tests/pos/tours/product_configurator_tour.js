@@ -94,3 +94,36 @@ registry.category("web_tour.tours").add("PosProductWithDynamicAttributes", {
             ProductScreen.selectedOrderlineHas("Dynamic Product", "1", "12.65", "Test 2"),
         ].flat(),
 });
+
+registry.category("web_tour.tours").add("test_attribute_order", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Product Test"),
+            ProductConfigurator.pickRadio("Value 1"),
+            ProductConfigurator.pickRadio("Value 2"),
+            ProductConfigurator.pickRadio("Value 3"),
+            Dialog.confirm(),
+            ProductScreen.selectedOrderlineHas(
+                "Product Test",
+                "1",
+                "10",
+                "Value 1, Value 2, Value 3"
+            ),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_exclusion_attribute_values", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Configurable Chair"),
+            ProductConfigurator.pickColor("Red"),
+            ProductConfigurator.pickSelect("Metal"),
+            ProductConfigurator.isUnavailable("Other"),
+            ProductConfigurator.isUnavailable("Wool"),
+            Chrome.endTour(),
+        ].flat(),
+});

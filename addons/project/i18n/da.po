@@ -5,14 +5,15 @@
 # Translators:
 # Wil Odoo, 2025
 # Ejner Sønniksen <ejner@vkdata.dk>, 2025
+# Kira Petersen, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-20 10:02+0000\n"
+"POT-Creation-Date: 2025-03-12 20:36+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
-"Last-Translator: Ejner Sønniksen <ejner@vkdata.dk>, 2025\n"
+"Last-Translator: Kira Petersen, 2025\n"
 "Language-Team: Danish (https://app.transifex.com/odoo/teams/41243/da/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1277,7 +1278,7 @@ msgstr "Oprettelsesdato"
 #. module: project
 #: model:ir.model,website_form_label:project.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Opret en kunde"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.open_create_project
@@ -2914,7 +2915,7 @@ msgstr ""
 #. module: project
 #: model:project.tags,name:project.project_tags_10
 msgid "Office"
-msgstr ""
+msgstr "Kontor"
 
 #. module: project
 #: model:account.analytic.account,name:project.analytic_office_design
@@ -5012,7 +5013,7 @@ msgstr "Synlighed"
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form_project_fsm_base
 msgid "Visible to all"
-msgstr ""
+msgstr "Kan ses af alle"
 
 #. module: project
 #. odoo-javascript

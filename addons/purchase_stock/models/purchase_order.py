@@ -269,8 +269,10 @@ class PurchaseOrder(models.Model):
 
     def _get_final_location_record(self):
         self.ensure_one()
-        if self.dest_address_id and self.picking_type_id.code == 'dropship':
-            return self.dest_address_id.property_stock_customer
+        if self.picking_type_id.code == 'dropship':
+            if self.dest_address_id:
+                return self.dest_address_id.property_stock_customer
+            return self.picking_type_id.default_location_dest_id
         return self.picking_type_id.warehouse_id.lot_stock_id
 
     @api.model
@@ -278,9 +280,8 @@ class PurchaseOrder(models.Model):
         picking_type = self.env['stock.picking.type'].search([('code', '=', 'incoming'), ('warehouse_id.company_id', '=', company_id)])
         if not picking_type:
             picking_type = self.env['stock.picking.type'].search([('code', '=', 'incoming'), ('warehouse_id', '=', False)])
-        company_warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1)
-        if not company_warehouse:
-            self.env['stock.warehouse']._warehouse_redirect_warning()
+        if not picking_type:
+            picking_type = self.env['stock.picking.type'].with_context(active_test=False).search([('code', '=', 'incoming'), ('warehouse_id', '=', False)])
         return picking_type[:1]
 
     def _prepare_group_vals(self):

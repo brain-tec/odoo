@@ -25,6 +25,8 @@ class ForumPost(models.Model):
     ]
     _order = "is_correct DESC, vote_count DESC, last_activity_date DESC"
 
+    _CUSTOMER_HEADERS_LIMIT_COUNT = 0  # never use X-Msg-To headers
+
     name = fields.Char('Title')
     forum_id = fields.Many2one('forum.forum', string='Forum', required=True)
     content = fields.Html('Content', strip_style=True)

@@ -7,6 +7,7 @@ import { roundCurrency } from "@point_of_sale/app/models/utils/currency";
 import { computeComboItems } from "./utils/compute_combo_items";
 import { accountTaxHelpers } from "@account/helpers/account_tax";
 import { localization } from "@web/core/l10n/localization";
+import { formatDate } from "@web/core/l10n/dates";
 
 const formatCurrency = registry.subRegistries.formatters.content.monetary[1];
 const { DateTime } = luxon;
@@ -17,7 +18,7 @@ export class PosOrder extends Base {
     setup(vals) {
         super.setup(vals);
 
-        if (!this.session_id && (!this.finalized || typeof this.id !== "number")) {
+        if (!this.session_id?.id && (!this.finalized || typeof this.id !== "number")) {
             this.session_id = this.session;
 
             if (this.state === "draft" && this.lines.length == 0 && this.payment_ids.length == 0) {
@@ -478,7 +479,7 @@ export class PosOrder extends Base {
             );
         }
         const combo_children_lines = this.lines.filter(
-            (line) => line.price_type === "original" && line.combo_parent_id
+            (line) => line.price_type === "automatic" && line.combo_parent_id
         );
         combo_children_lines.forEach((line) => {
             line.setUnitPrice(
@@ -692,7 +693,8 @@ export class PosOrder extends Base {
                         orderLine.getAllPrices().priceWithTax;
                     if (
                         orderLine.displayDiscountPolicy() === "without_discount" &&
-                        !(orderLine.price_type === "manual")
+                        !(orderLine.price_type === "manual") &&
+                        orderLine.discount == 0
                     ) {
                         sum +=
                             (orderLine.getTaxedlstUnitPrice() -
@@ -949,7 +951,7 @@ export class PosOrder extends Base {
     }
     //FIXME remove this
     getShippingDate() {
-        return this.shipping_date;
+        return formatDate(this.shipping_date);
     }
 
     getHasRefundLines() {

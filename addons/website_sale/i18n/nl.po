@@ -1482,7 +1482,7 @@ msgstr "Aanmaken"
 #. module: website_sale
 #: model:ir.model,website_form_label:website_sale.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Een klant aanmaken"
 
 #. module: website_sale
 #: model_terms:ir.actions.act_window,help:website_sale.product_template_action_website
@@ -1620,7 +1620,7 @@ msgstr "DHL Express Connector"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "DHL Shipping Methods"
-msgstr "DHL verzendwijzes"
+msgstr "DHL verzendmethoden"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product
@@ -1700,7 +1700,7 @@ msgstr "Afleveringsbedrag"
 #: model:ir.ui.menu,name:website_sale.menu_ecommerce_delivery
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Delivery Methods"
-msgstr "Verzendwijzes"
+msgstr "Verzendmethoden"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address
@@ -1962,7 +1962,7 @@ msgstr "Easypost"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Easypost Shipping Methods"
-msgstr "Easypost verzendwijzes"
+msgstr "Easypost verzendmethoden"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.website_sale_pricelist_form_view
@@ -2052,7 +2052,7 @@ msgstr "Extra info"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
 msgid "Extra Media"
-msgstr ""
+msgstr "Extra media"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_product__product_template_image_ids
@@ -2104,7 +2104,7 @@ msgstr "FedEx"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "FedEx Shipping Methods"
-msgstr "FedEx verzendwijzes"
+msgstr "FedEx verzendmethoden"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_website_sale_extra_field__field_id
@@ -2433,7 +2433,7 @@ msgstr "Ongeldige afbeelding"
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
 msgid "Invalid video URL provided."
-msgstr ""
+msgstr "Opgegeven video-URL is ongeldig."
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__module_account
@@ -3978,7 +3978,7 @@ msgstr "Verzendkosten"
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_delivery_carrier
 msgid "Shipping Methods"
-msgstr "Verzendwijzes"
+msgstr "Verzendmethoden"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
@@ -3988,7 +3988,7 @@ msgstr "Shiprocket"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Shiprocket Shipping Methods"
-msgstr "Shiprocket verzendwijzes"
+msgstr "Shiprocket verzendmethoden"
 
 #. module: website_sale
 #: model:website.menu,name:website_sale.menu_shop
@@ -4301,12 +4301,16 @@ msgstr ""
 #: model:ir.model.fields,help:website_sale.field_product_template__website_absolute_url
 msgid "The full absolute URL to access the document through the website."
 msgstr ""
+"De volledige absolute URL om toegang te krijgen tot het document via de "
+"website."
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_delivery_carrier__website_url
 #: model:ir.model.fields,help:website_sale.field_product_template__website_url
 msgid "The full relative URL to access the document through the website."
 msgstr ""
+"De volledige relatieve URL om toegang te krijgen tot het document via de "
+"website."
 
 #. module: website_sale
 #. odoo-python
@@ -4428,13 +4432,13 @@ msgstr "Dit is je huidige winkelmandje."
 #. odoo-python
 #: code:addons/website_sale/models/sale_order.py:0
 msgid "This line doesn't belong to your order."
-msgstr ""
+msgstr "Deze regel hoort niet bij je bestelling."
 
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/cart.py:0
 msgid "This line doesn't exist anymore."
-msgstr ""
+msgstr "Deze regel bestaat niet meer."
 
 #. module: website_sale
 #. odoo-python
@@ -4579,7 +4583,7 @@ msgstr "USPS"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "USPS Shipping Methods"
-msgstr "USPS verzendwijzes"
+msgstr "USPS verzendmethoden"
 
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_drawers_underbed
@@ -4780,7 +4784,7 @@ msgstr "Website"
 #: model:ir.model.fields,field_description:website_sale.field_delivery_carrier__website_absolute_url
 #: model:ir.model.fields,field_description:website_sale.field_product_template__website_absolute_url
 msgid "Website Absolute URL"
-msgstr ""
+msgstr "Absolute URL van de website"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_product_view_form_normalized
@@ -4937,6 +4941,9 @@ msgid ""
 "                            at the same time!<br/>\n"
 "                            If you want to modify your billing address, create a"
 msgstr ""
+"Je bewerkt zowel je <b>bezorg- als factuuradres</b>\n"
+"                             tegelijkertijd!<br/>\n"
+"                             Als je je factuuradres wilt wijzigen, maak dan een"
 
 #. module: website_sale
 #. odoo-python
@@ -5035,7 +5042,7 @@ msgstr "bpost"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "bpost Shipping Methods"
-msgstr "bpost verzendwijzes"
+msgstr "bpost verzendmethoden"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_template_options
@@ -5125,31 +5132,31 @@ msgstr "in categorie \""
 #. odoo-python
 #: code:addons/website_sale/models/crm_team.py:0
 msgid "is_abandoned_cart"
-msgstr ""
+msgstr "is_abandoned_cart"
 
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/website.py:0
 msgid "list_price asc"
-msgstr ""
+msgstr "list_price asc"
 
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/website.py:0
 msgid "list_price desc"
-msgstr ""
+msgstr "list_price desc"
 
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/res_config_settings.py:0
 msgid "model"
-msgstr ""
+msgstr "model"
 
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/models/website.py:0
 msgid "name asc"
-msgstr ""
+msgstr "naam oplopend"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address
@@ -5160,7 +5167,7 @@ msgstr "nieuw adres"
 #. odoo-python
 #: code:addons/website_sale/models/website.py:0
 msgid "publish_date desc"
-msgstr ""
+msgstr "publish_date desc"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.cart_lines
@@ -5181,4 +5188,4 @@ msgstr "om je order te volgen."
 #. odoo-python
 #: code:addons/website_sale/models/website.py:0
 msgid "website_sale.checkout"
-msgstr ""
+msgstr "website_sale.checkout"

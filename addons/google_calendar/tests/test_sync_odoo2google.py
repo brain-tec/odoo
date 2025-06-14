@@ -8,7 +8,6 @@ from odoo.addons.google_calendar.utils.google_event import GoogleEvent
 from odoo.addons.google_calendar.utils.google_calendar import GoogleCalendarService
 from odoo.addons.google_calendar.models.res_users import ResUsers
 from odoo.addons.google_calendar.tests.test_sync_common import TestSyncGoogle, patch_api
-from odoo.addons.mail.tests.common import MailCommon
 from odoo.tests.common import users, warmup
 from odoo.tests import tagged
 from odoo import tools
@@ -92,7 +91,7 @@ class TestSyncOdoo2Google(TestSyncGoogle):
 
             events._sync_odoo2google(self.google_service)
 
-        with self.assertQueryCount(__system__=23):
+        with self.assertQueryCount(__system__=28):
             events.unlink()
 
 
@@ -125,7 +124,7 @@ class TestSyncOdoo2Google(TestSyncGoogle):
                 'res_id': partner.id,
             })
 
-        with self.assertQueryCount(__system__=28):
+        with self.assertQueryCount(__system__=29):
             event.unlink()
 
     def test_event_without_user(self):
@@ -600,33 +599,6 @@ class TestSyncOdoo2Google(TestSyncGoogle):
             'transparency': 'opaque',
         }, timeout=3)
 
-    def test_send_update_do_request(self):
-        self.env.cr.postcommit.clear()
-        with self.mock_google_service():
-            event = self.env['calendar.event'].create({
-                'name': "Event",
-                'allday': True,
-                'start': datetime(2020, 1, 15),
-                'stop': datetime(2020, 1, 15),
-                'need_sync': False,
-            })
-            event.with_context(send_updates=True)._sync_odoo2google(self.google_service)
-            self.call_post_commit_hooks()
-        self.assertGoogleEventSendUpdates('all')
-
-    def test_not_send_update_do_request(self):
-        with self.mock_google_service():
-            event = self.env['calendar.event'].create({
-                'name': "Event",
-                'allday': True,
-                'start': datetime(2020, 1, 15),
-                'stop': datetime(2020, 1, 15),
-                'need_sync': False,
-            })
-            event.with_context(send_updates=False)._sync_odoo2google(self.google_service)
-            self.call_post_commit_hooks()
-        self.assertGoogleEventSendUpdates('none')
-
     @patch_api
     def test_recurrence_delete_single_events(self):
         """
@@ -958,3 +930,140 @@ class TestSyncOdoo2Google(TestSyncGoogle):
             **event_response_data,
             'extendedProperties': {'shared': {'%s_odoo_id' % self.env.cr.dbname: event2.id}},
         })
+
+    @patch_api
+    @patch.object(ResUsers, '_sync_request')
+    def test_skip_sync_for_non_synchronized_users_new_events(self, mock_sync_request):
+        """
+        Skip the synchro of new events by attendees when the organizer is not synchronized with Google.
+        Otherwise, the event ownership will be lost to the attendee and it could generate duplicates in
+        Odoo, as well cause problems in the future the synchronization of that event for the original owner.
+        """
+        with self.mock_datetime_and_now("2023-01-10"):
+            # Stop the synchronization for the organizer and leave the attendee synchronized.
+            # Then, create an event with the organizer and attendee. Assert that it was not inserted.
+            self.organizer_user.google_synchronization_stopped = True
+            self.attendee_user.google_synchronization_stopped = False
+            record = self.env['calendar.event'].with_user(self.organizer_user).create({
+                'name': "Event",
+                'start': datetime(2023, 1, 15, 8, 0),
+                'stop': datetime(2023, 1, 15, 18, 0),
+                'need_sync': True,
+                'partner_ids': [(4, self.organizer_user.partner_id.id), (4, self.attendee_user.partner_id.id)]
+            })
+            self.assertGoogleEventNotInserted()
+
+            # Define mock return values for the '_sync_request' method.
+            mock_sync_request.return_value = {
+                'events': GoogleEvent([]),
+                'default_reminders': (),
+                'full_sync': False,
+            }
+
+            # Synchronize the attendee, and ensure that the event was not inserted after it.
+            self.attendee_user.with_user(self.attendee_user).sudo()._sync_google_calendar(self.google_service)
+            self.assertGoogleAPINotCalled()
+
+            # Now, we synchronize the organizer and make sure the event got inserted by him.
+            self.organizer_user.with_user(self.organizer_user).restart_google_synchronization()
+            self.organizer_user.with_user(self.organizer_user).sudo()._sync_google_calendar(self.google_service)
+            self.assertGoogleEventInserted({
+                'id': False,
+                'start': {'dateTime': '2023-01-15T08:00:00+00:00', 'date': None},
+                'end': {'dateTime': '2023-01-15T18:00:00+00:00', 'date': None},
+                'summary': 'Event',
+                'description': '',
+                'location': '',
+                'guestsCanModify': True,
+                'transparency': 'opaque',
+                'reminders': {'overrides': [], 'useDefault': False},
+                'organizer': {'email': self.organizer_user.email, 'self': True},
+                'attendees': [
+                                {'email': self.attendee_user.email, 'responseStatus': 'needsAction'},
+                                {'email': self.organizer_user.email, 'responseStatus': 'accepted'}
+                            ],
+                'extendedProperties': {'shared': {'%s_odoo_id' % self.env.cr.dbname: record.id}},
+            })
+
+    def test_event_over_send_updates(self):
+        """Test that events that are over don't sent updates to attendees."""
+        with self.mock_datetime_and_now("2023-01-10"):
+            self.env.cr.postcommit.clear()
+            with self.mock_google_service():
+                past_event = self.env['calendar.event'].create({
+                    'name': "Event",
+                    'start': datetime(2020, 1, 15, 8, 0),
+                    'stop': datetime(2020, 1, 15, 9, 0),
+                    'need_sync': False,
+                })
+                past_event._sync_odoo2google(self.google_service)
+                self.call_post_commit_hooks()
+            self.assertTrue(past_event._is_event_over(), "Event should be considered over")
+            self.assertGoogleEventSendUpdates('none')
+
+    def test_event_not_over_send_updates(self):
+        """Test that events that are not over send updates to attendees."""
+        with self.mock_datetime_and_now("2023-01-10"):
+            self.env.cr.postcommit.clear()
+            with self.mock_google_service():
+                future_date = datetime(2023, 1, 20, 8, 0)  # Fixed date instead of datetime.now()
+                future_event = self.env['calendar.event'].create({
+                    'name': "Future Event",
+                    'start': future_date,
+                    'stop': future_date + relativedelta(hours=1),
+                    'need_sync': False,
+                })
+                # Sync the event and verify send_updates is set to 'all'
+                future_event._sync_odoo2google(self.google_service)
+                self.call_post_commit_hooks()
+            self.assertFalse(future_event._is_event_over(), "Future event should not be considered over")
+            self.assertGoogleEventSendUpdates('all')
+
+    def test_recurrence_over_send_updates(self):
+        """Test that recurrences that are over don't send updates to attendees."""
+        with self.mock_datetime_and_now("2023-01-10"):
+            self.env.cr.postcommit.clear()
+            with self.mock_google_service():
+                past_event = self.env['calendar.event'].create({
+                    'name': "Past Recurring Event",
+                    'start': datetime(2020, 1, 15, 8, 0),
+                    'stop': datetime(2020, 1, 15, 9, 0),
+                    'need_sync': False,
+                })
+                past_recurrence = self.env['calendar.recurrence'].create({
+                    'rrule': 'FREQ=WEEKLY;COUNT=2;BYDAY=WE',
+                    'base_event_id': past_event.id,
+                    'need_sync': False,
+                })
+                past_recurrence._apply_recurrence()
+                # Sync the recurrence and verify send_updates is set to 'none'
+                past_recurrence._sync_odoo2google(self.google_service)
+                self.call_post_commit_hooks()
+            self.assertTrue(past_recurrence._is_event_over(), "Past recurrence should be considered over")
+            self.assertGoogleEventSendUpdates('none')
+
+    def test_recurrence_not_over_send_updates(self):
+        """Test that recurrences that are not over send updates to attendees."""
+        with self.mock_datetime_and_now("2023-01-10"):
+            self.env.cr.postcommit.clear()
+            with self.mock_google_service():
+                future_date = datetime(2023, 1, 20, 8, 0)
+                future_event = self.env['calendar.event'].create({
+                    'name': "Future Recurring Event",
+                    'start': future_date,
+                    'stop': future_date + relativedelta(hours=1),
+                    'need_sync': False,
+                })
+                future_recurrence = self.env['calendar.recurrence'].create(
+                    {
+                        'rrule': 'FREQ=WEEKLY;COUNT=2;BYDAY=WE',
+                        'base_event_id': future_event.id,
+                        'need_sync': False,
+                    }
+                )
+                future_recurrence._apply_recurrence()
+                # Sync the recurrence and verify send_updates is set to 'all'
+                future_recurrence._sync_odoo2google(self.google_service)
+                self.call_post_commit_hooks()
+            self.assertFalse(future_recurrence._is_event_over(), "Future recurrence should not be considered over")
+            self.assertGoogleEventSendUpdates('all')

@@ -1457,7 +1457,7 @@ class BaseModel(metaclass=MetaModel):
                 # relational fields will trigger a _name_search on their comodel
                 domains.append([(field_name, operator, value)])
                 continue
-            with contextlib.suppress(ValueError):
+            with contextlib.suppress(ValueError, TypeError):
                 # ignore that case if the value doesn't match the field type
                 domains.append([(field_name, operator, field.convert_to_write(value, self))])
         return aggregator(domains)
@@ -2918,7 +2918,7 @@ class BaseModel(metaclass=MetaModel):
         Note that the cursor on self has to be in a valid state.
         """
         if (constraint_name := exc.diag.constraint_name) and (cons := self._table_objects.get(constraint_name)):
-            cons_rec = self.env['ir.model.constraint'].search_fetch([
+            cons_rec = self.env['ir.model.constraint'].sudo().search_fetch([
                 ('name', '=', constraint_name),
                 ('model.model', '=', self._name),
             ], ['message'], limit=1)
@@ -4694,7 +4694,7 @@ class BaseModel(metaclass=MetaModel):
             if fname not in self or self._fields[fname].type != 'properties':
                 continue
             field_converter = self._fields[fname].convert_to_cache
-            to_write[fname] = dict(self[fname], **field_converter(values.pop(fname), self, validate=False))
+            to_write[fname] = dict(self[fname] or {}, **field_converter(values.pop(fname), self, validate=False))
 
         self.write(values)
         if to_write:

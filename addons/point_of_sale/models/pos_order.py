@@ -91,6 +91,10 @@ class PosOrder(models.Model):
         else:
             pos_order = existing_order
 
+            # If the order is belonging to another session, it must be moved to the current session first
+            if order.get('session_id') and order['session_id'] != pos_order.session_id.id:
+                pos_order.write({'session_id': order['session_id']})
+
             # Save lines and payments before to avoid exception if a line is deleted
             # when vals change the state to 'paid'
             for field in ['lines', 'payment_ids']:
@@ -162,7 +166,7 @@ class PosOrder(models.Model):
         prec_acc = order.currency_id.decimal_places
 
         # Recompute amount paid because we don't trust the client
-        order.with_context(backend_recomputation=True).write({'amount_paid': order._compute_amount_paid()})
+        order.write({'amount_paid': order._compute_amount_paid()})
 
         if not draft and not float_is_zero(pos_order['amount_return'], prec_acc):
             cash_payment_method = pos_session.payment_method_ids.filtered('is_cash_count')[:1]
@@ -514,12 +518,15 @@ class PosOrder(models.Model):
                         country=order.partner_id.country_id or self.env.company.country_id)
             if vals.get('has_deleted_line') is not None and self.has_deleted_line:
                 del vals['has_deleted_line']
+            allowed_vals = ['paid', 'done', 'invoiced']
+            if vals.get('state') and vals['state'] not in allowed_vals and order.state in allowed_vals:
+                raise UserError(_('This order has already been paid. You cannot set it back to draft or edit it.'))
 
         list_line = self._create_pm_change_log(vals)
         res = super().write(vals)
         for order in self:
             if vals.get('payment_ids'):
-                order.with_context(backend_recomputation=True)._compute_prices()
+                order._compute_prices()
                 totally_paid_or_more = order.currency_id.compare_amounts(order.amount_paid, order.amount_total)
                 if totally_paid_or_more < 0 and order.state in ['paid', 'done']:
                     raise UserError(_('The paid amount is different from the total amount of the order.'))
@@ -1419,18 +1426,22 @@ class PosOrderLine(models.Model):
     @api.model
     def _load_pos_data_fields(self, config_id):
         return [
-            'qty', 'attribute_value_ids', 'custom_attribute_value_ids', 'price_unit', 'uuid', 'price_subtotal', 'price_subtotal_incl', 'order_id', 'note', 'price_type',
-            'product_id', 'discount', 'tax_ids', 'pack_lot_ids', 'customer_note', 'refunded_qty', 'price_extra', 'full_product_name', 'refunded_orderline_id', 'combo_parent_id', 'combo_line_ids', 'combo_item_id', 'refund_orderline_ids'
+            'qty', 'attribute_value_ids', 'custom_attribute_value_ids', 'price_unit', 'uuid',
+            'price_subtotal', 'price_subtotal_incl', 'order_id', 'note', 'price_type',
+            'product_id', 'discount', 'tax_ids', 'pack_lot_ids', 'customer_note', 'refunded_qty',
+            'price_extra', 'full_product_name', 'refunded_orderline_id', 'combo_parent_id',
+            'combo_line_ids', 'combo_item_id', 'refund_orderline_ids', 'write_date'
         ]
 
     @api.model
     def _is_field_accepted(self, field):
         return field in self._fields and not field in ['combo_parent_id', 'combo_line_ids']
 
-    @api.depends('refund_orderline_ids')
+    @api.depends('refund_orderline_ids', 'refund_orderline_ids.order_id.state')
     def _compute_refund_qty(self):
         for orderline in self:
-            orderline.refunded_qty = -sum(orderline.mapped('refund_orderline_ids.qty'))
+            refund_order_line = orderline.refund_orderline_ids.filtered(lambda l: l.order_id.state != 'cancel')
+            orderline.refunded_qty = -sum(refund_order_line.mapped('qty'))
 
     def _prepare_refund_data(self, refund_order, PosPackOperationLot):
         """
@@ -1610,7 +1621,7 @@ class PosOrderLine(models.Model):
             group_id = line._get_procurement_group()
             if not group_id:
                 group_id = self.env['procurement.group'].create(line._prepare_procurement_group_vals())
-                line.order_id.with_context(backend_recomputation=True).write({'procurement_group_id': group_id})
+                line.order_id.write({'procurement_group_id': group_id})
 
             values = line._prepare_procurement_values(group_id=group_id)
             product_qty = line.qty
@@ -1653,6 +1664,8 @@ class PosOrderLine(models.Model):
             product = line.product_id
             if line._is_product_storable_fifo_avco() and stock_moves:
                 product_cost = product._compute_average_price(0, line.qty, line._get_stock_moves_to_consider(stock_moves, product))
+                if (product.cost_currency_id.is_zero(product_cost) and self.order_id.shipping_date and self.refunded_orderline_id):
+                    product_cost = self.refunded_orderline_id.total_cost / self.refunded_orderline_id.qty
             else:
                 product_cost = product.standard_price
             line.total_cost = line.qty * product.cost_currency_id._convert(
@@ -1759,7 +1772,7 @@ class PosPackOperationLot(models.Model):
 
     @api.model
     def _load_pos_data_fields(self, config_id):
-        return ['lot_name', 'pos_order_line_id']
+        return ['lot_name', 'pos_order_line_id', 'write_date']
 
 
 class AccountCashRounding(models.Model):

@@ -63,21 +63,26 @@ registry.category("web_tour.tours").add("l10n_es_pos_settle_account_due", {
             Dialog.confirm("Open Register"),
             ProductScreen.clickPartnerButton(),
             PartnerList.clickPartnerOptions("Partner Test 1"),
-            {
-                isActive: ["auto"],
-                trigger: "div.o_popover :contains('Settle Due Accounts')",
-                content: "Check the popover opened",
-                run: "click",
-            },
-            {
-                trigger: "tr.o_data_row td[name='name']:contains('Shop/0001')",
-                content: "Check the settle due account line is present",
-                run: "click",
-            },
+            PartnerList.clickDropDownItemText("Settle due accounts"),
+            PartnerList.clickSettleOrderName("Shop/0001"),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickValidate(),
             Chrome.confirmPopup(),
+            ReceiptScreen.isShown(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_simplified_invoice_not_override_set_pricelist", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.addOrderline("Desk Pad", "1"),
+            ProductScreen.clickPriceList("Test pricelist"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Cash"),
+            PaymentScreen.clickValidate(),
             ReceiptScreen.isShown(),
         ].flat(),
 });

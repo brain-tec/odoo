@@ -3,16 +3,16 @@
 # 	* google_calendar
 # 
 # Translators:
-# Wil Odoo, 2025
 # Thi Huong Nguyen, 2025
+# Wil Odoo, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:37+0000\n"
+"POT-Creation-Date: 2025-06-06 18:38+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
-"Last-Translator: Thi Huong Nguyen, 2025\n"
+"Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -77,8 +77,8 @@ msgid ""
 " synchronization."
 msgstr ""
 "Đã xảy ra lỗi khi tạo mã token. Mã uỷ quyền của bạn có thể không hợp lệ hoặc"
-" đã quá hạn [%s]. Bạn nên kiểm tra mã ID và mã bí mật của máy khách trong "
-"nền tảng Google API hoặc thử dừng và khởi động lại đồng bộ hóa lịch. "
+" đã quá hạn [%s]. Bạn nên kiểm tra mã ID và mã bí mật của ứng dụng trong nền"
+" tảng Google API hoặc thử dừng và khởi động lại đồng bộ hóa lịch. "
 
 #. module: google_calendar
 #: model:ir.model,name:google_calendar.model_calendar_attendee
@@ -175,6 +175,7 @@ msgid "Discard"
 msgstr "Huỷ bỏ"
 
 #. module: google_calendar
+#: model:ir.model.fields,field_description:google_calendar.field_calendar_alarm_manager__display_name
 #: model:ir.model.fields,field_description:google_calendar.field_calendar_attendee__display_name
 #: model:ir.model.fields,field_description:google_calendar.field_calendar_event__display_name
 #: model:ir.model.fields,field_description:google_calendar.field_calendar_recurrence__display_name
@@ -191,6 +192,11 @@ msgstr "Tên hiển thị"
 #: code:addons/google_calendar/models/calendar.py:0
 msgid "Email"
 msgstr "Email"
+
+#. module: google_calendar
+#: model:ir.model,name:google_calendar.model_calendar_alarm_manager
+msgid "Event Alarm Manager"
+msgstr "Quản lý cảnh báo sự kiện"
 
 #. module: google_calendar
 #: model:ir.model,name:google_calendar.model_calendar_recurrence
@@ -258,6 +264,7 @@ msgid "Guests Event Modification Permission"
 msgstr "Quyền sửa đổi sự kiện của khách"
 
 #. module: google_calendar
+#: model:ir.model.fields,field_description:google_calendar.field_calendar_alarm_manager__id
 #: model:ir.model.fields,field_description:google_calendar.field_calendar_attendee__id
 #: model:ir.model.fields,field_description:google_calendar.field_calendar_event__id
 #: model:ir.model.fields,field_description:google_calendar.field_calendar_recurrence__id

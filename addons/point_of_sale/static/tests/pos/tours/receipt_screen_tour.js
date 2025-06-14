@@ -11,12 +11,11 @@ import * as Numpad from "@point_of_sale/../tests/generic_helpers/numpad_util";
 import { registry } from "@web/core/registry";
 import { inLeftSide } from "@point_of_sale/../tests/pos/tours/utils/common";
 import * as OfflineUtil from "@point_of_sale/../tests/generic_helpers/offline_util";
-import { run } from "@point_of_sale/../tests/generic_helpers/utils";
+import { run, negateStep } from "@point_of_sale/../tests/generic_helpers/utils";
 import { renderToElement } from "@web/core/utils/render";
 import { formatCurrency } from "@web/core/currency";
 
 registry.category("web_tour.tours").add("ReceiptScreenTour", {
-    checkDelay: 50,
     steps: () =>
         [
             // press close button in receipt screen
@@ -92,6 +91,23 @@ registry.category("web_tour.tours").add("ReceiptScreenTour", {
             Order.hasLine({ customerNote: "Test customer note" }),
             ReceiptScreen.clickNextOrder(),
 
+            // Test that Internal notes are not available on receipt
+            ProductScreen.addOrderline("Desk Pad", "1", "5"),
+            inLeftSide([
+                { ...ProductScreen.clickLine("Desk Pad")[0], isActive: ["mobile"] },
+                ...ProductScreen.addInternalNote("Test internal note"),
+                ...ProductScreen.clickSelectedLine("Desk Pad"),
+                ...ProductScreen.addInternalNote("Test internal note on order"),
+                ...Order.hasInternalNote("Test internal note on order"),
+            ]),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.isShown(),
+            negateStep(...Order.hasLine({ internalNote: "Test internal note" })),
+            negateStep(...Order.hasInternalNote("Test internal note on order")),
+            ReceiptScreen.clickNextOrder(),
+
             // Test discount and original price
             ProductScreen.addOrderline("Desk Pad", "1", "20"),
             inLeftSide([
@@ -114,7 +130,6 @@ registry.category("web_tour.tours").add("ReceiptScreenTour", {
 });
 
 registry.category("web_tour.tours").add("ReceiptScreenDiscountWithPricelistTour", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -143,7 +158,6 @@ registry.category("web_tour.tours").add("ReceiptScreenDiscountWithPricelistTour"
 });
 
 registry.category("web_tour.tours").add("OrderPaidInCash", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -168,7 +182,6 @@ registry.category("web_tour.tours").add("OrderPaidInCash", {
 });
 
 registry.category("web_tour.tours").add("ReceiptTrackingMethodTour", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),
@@ -183,7 +196,6 @@ registry.category("web_tour.tours").add("ReceiptTrackingMethodTour", {
 });
 
 registry.category("web_tour.tours").add("point_of_sale.test_printed_receipt_tour", {
-    checkDelay: 50,
     steps: () =>
         [
             Chrome.startPoS(),

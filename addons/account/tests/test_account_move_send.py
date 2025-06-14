@@ -9,7 +9,7 @@ from odoo import Command
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.mail.tests.common import MailCommon
 from odoo.exceptions import UserError
-from odoo.tests import users, warmup, tagged
+from odoo.tests import users, warmup, tagged, Form
 from odoo.tools import formataddr, mute_logger
 
 
@@ -512,15 +512,13 @@ class TestAccountMoveSendCommon(AccountTestInvoicingCommon):
             )
 
     def create_send_and_print(self, invoices, default=False, **kwargs):
-        wizard_model = 'account.move.send.wizard' if len(invoices) == 1 else 'account.move.send.batch.wizard'
-        if wizard_model == 'account.move.send.wizard' and not default and not kwargs.get('sending_methods'):
+        action_send_and_print = invoices.action_send_and_print()
+        if action_send_and_print['res_model'] == 'account.move.send.wizard' and not default and not kwargs.get('sending_methods'):
             # In most cases, for testing purpose you only want to try to generate the document, no need to send it.
             # Therefore by default we deactivate sending methods, unless default parameter is set to True,
             # or they are explicitly given.
             kwargs['sending_methods'] = []
-        return self.env[wizard_model]\
-            .with_context(active_model='account.move', active_ids=invoices.ids)\
-            .create(kwargs)
+        return self.env[action_send_and_print['res_model']].with_context(action_send_and_print['context']).create(kwargs)
 
     def _get_mail_message(self, move, limit=1):
         return self.env['mail.message'].search([('model', '=', move._name), ('res_id', '=', move.id)], limit=limit)
@@ -683,6 +681,19 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
             ('res_field', '=', 'invoice_pdf_report_file'),
         ])
         self.assertEqual(len(invoice_attachments), 1)
+
+    def test_compute_value_of_send_invoice_batch_wizard(self):
+        invoices = (
+            self.init_invoice("out_invoice", partner=self.partner_a, amounts=[1000], post=True) +
+            self.init_invoice("out_invoice", partner=self.partner_b, amounts=[1000], post=True)
+        )
+
+        move_send_batch_wizard = Form(self.env['account.move.send.batch.wizard'].with_context(
+            active_model='account.move', active_ids=invoices.ids))
+
+        self.assertEqual(move_send_batch_wizard.move_ids.ids, invoices.ids)
+        self.assertEqual(move_send_batch_wizard.summary_data, {'email': {'count': len(invoices), 'label': 'by Email'}})
+        self.assertFalse(move_send_batch_wizard.alerts)
 
     def test_invoice_multi_email_missing(self):
         invoice1 = self.init_invoice("out_invoice", partner=self.partner_a, amounts=[1000], post=True)

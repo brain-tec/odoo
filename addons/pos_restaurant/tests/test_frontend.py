@@ -7,6 +7,8 @@ from odoo.addons.point_of_sale.tests.common import archive_products
 from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
 from odoo import Command
 
+from datetime import datetime
+
 @odoo.tests.tagged('post_install', '-at_install')
 class TestFrontendCommon(TestPointOfSaleHttpCommon):
 
@@ -291,13 +293,6 @@ class TestFrontend(TestFrontendCommon):
         self.assertTrue(self.pos_config.current_session_id.order_ids.last_order_preparation_change, "There should be a last order preparation change")
         self.assertTrue("Coca" in self.pos_config.current_session_id.order_ids.last_order_preparation_change, "The last order preparation change should contain 'Coca'")
 
-    def test_11_bill_screen_qrcode_data(self):
-        self.pos_config.write({'printer_ids': False})
-        self.pos_config.company_id.point_of_sale_use_ticket_qr_code = True
-        self.pos_config.company_id.point_of_sale_ticket_portal_url_display_mode = 'qr_code_and_url'
-        self.pos_config.with_user(self.pos_user).open_ui()
-        self.start_pos_tour('BillScreenTour')
-
     def test_12_order_tracking(self):
         self.pos_config.write({'order_edit_tracking': True})
         self.pos_config.with_user(self.pos_user).open_ui()
@@ -540,3 +535,79 @@ class TestFrontend(TestFrontendCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_multiple_preparation_printer_different_categories', login="pos_user")
+
+    def test_preset_timing_restaurant(self):
+        """
+        Test to set order preset hour inside a tour
+        """
+        self.preset_eat_in = self.env['pos.preset'].create({
+            'name': 'Eat in',
+        })
+        self.preset_takeaway = self.env['pos.preset'].create({
+            'name': 'Takeaway',
+            'identification': 'name',
+        })
+        self.main_pos_config.write({
+            'use_presets': True,
+            'default_preset_id': self.preset_eat_in.id,
+            'available_preset_ids': [(6, 0, [self.preset_takeaway.id])],
+        })
+        resource_calendar = self.env['resource.calendar'].create({
+            'name': 'Takeaway',
+            'attendance_ids': [(0, 0, {
+                'name': 'Takeaway',
+                'dayofweek': str(day),
+                'hour_from': 0,
+                'hour_to': 24,
+                'day_period': 'morning',
+            }) for day in range(0, 7)],
+        })
+        self.preset_takeaway.write({
+            'use_timing': True,
+            'resource_calendar_id': resource_calendar
+        })
+        self.start_pos_tour('test_preset_timing_restaurant')
+
+    def test_restaurant_preset_takeout_tour(self):
+        self.pos_config.write({
+            'printer_ids': False,
+            'is_order_printer': False,
+            'use_presets': True,
+            'default_preset_id': self.env.ref('pos_restaurant.pos_takein_preset', False).id,
+            'available_preset_ids': [(6, 0, [
+                self.env.ref('pos_restaurant.pos_takeout_preset').id,
+                self.env.ref('pos_restaurant.pos_delivery_preset').id,
+            ])]
+        })
+        self.pos_config.with_user(self.pos_admin).open_ui()
+        self.start_pos_tour('RestaurantPresetTakeoutTour', login="pos_admin")
+        order = self.pos_config.current_session_id.order_ids[0]
+        self.assertEqual(order.preset_id, self.env.ref('pos_restaurant.pos_takeout_preset'), "The preset should be 'Takeout'")
+        expected_time = datetime(2025, 2, 12, 14, 40)
+        self.assertEqual(order.preset_time, expected_time, f"The preset time should be {expected_time}, but got {order.preset_time}")
+
+    def test_combo_preparation_receipt_layout(self):
+        setup_product_combo_items(self)
+        pos_printer = self.env['pos.printer'].create({
+            'name': 'Printer',
+            'printer_type': 'epson_epos',
+            'epson_printer_ip': '0.0.0.0',
+            'product_categories_ids': [Command.set(self.env['pos.category'].search([]).ids)],
+        })
+        self.pos_config.write({
+            'is_order_printer': True,
+            'printer_ids': [Command.set(pos_printer.ids)],
+        })
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour(f"/pos/ui?config_id={self.pos_config.id}", 'test_combo_preparation_receipt_layout', login="pos_admin")
+
+    def test_tip_after_payment(self):
+        self.pos_config.write({'iface_tipproduct': True, 'tip_product_id': self.tip.id})
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('test_tip_after_payment')
+
+    def test_customer_alone_saved(self):
+        """
+        Tests that when a customer is set, it will be saved and not be reset even if this is the only thing that changed in the order
+        """
+        self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_customer_alone_saved', login="pos_user")

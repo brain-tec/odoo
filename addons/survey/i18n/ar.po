@@ -942,7 +942,7 @@ msgstr ""
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_form
 msgid "All installed languages"
-msgstr ""
+msgstr "كافة اللغات المثبتة "
 
 #. module: survey
 #: model:ir.model.fields.selection,name:survey.selection__survey_survey__questions_selection__all
@@ -1069,7 +1069,7 @@ msgstr "مؤرشف"
 #. odoo-javascript
 #: code:addons/survey/static/src/js/survey_form.js:0
 msgid "Are you sure you want to submit the survey?"
-msgstr ""
+msgstr "هل أنت واثق من أنك ترغب في تقديم الاستطلاع؟ "
 
 #. module: survey
 #: model:survey.question,title:survey.survey_demo_food_preferences_q1
@@ -1291,6 +1291,8 @@ msgid ""
 "Cannot deactivate a language currently used by survey(s) only supporting "
 "that language."
 msgstr ""
+"لا يمكن إلغاء تفعيل لغة مستخدمة حالياً من قبل الاستطلاعات التي تدعم تلك "
+"اللغة فقط. "
 
 #. module: survey
 #. odoo-python
@@ -1299,6 +1301,8 @@ msgid ""
 "Cannot deactivate languages currently used by survey(s) only supporting "
 "those languages."
 msgstr ""
+"لا يمكن إلغاء تفعيل اللغات المستخدمة حالياً من قِبَل الاستطلاعات التي تدعم "
+"تلك اللغات فقط. "
 
 #. module: survey
 #. odoo-python
@@ -2802,7 +2806,7 @@ msgstr "مغادرة"
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__lang_ids
 msgid "Leave the field empty to support all installed languages."
-msgstr ""
+msgstr "اترك الحقل فارغاً حتى تتمكن من دعم كافة اللغات التي تم تثبيتها. "
 
 #. module: survey
 #: model:survey.question.answer,value:survey.vendor_certification_page_1_question_3_choice_4
@@ -3223,7 +3227,7 @@ msgstr "لا توجد درجة "
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.survey_question_answer_action
 msgid "No survey labels found"
-msgstr "لم يتم العثور على بطاقات عناوون للاستطلاع "
+msgstr "لم يتم العثور على بطاقات عناوين للاستطلاع "
 
 #. module: survey
 #: model_terms:ir.actions.act_window,help:survey.survey_user_input_line_action

@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:36+0000\n"
+"POT-Creation-Date: 2025-06-06 18:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Marta Wacławek, 2025\n"
 "Language-Team: Polish (https://app.transifex.com/odoo/teams/41243/pl/)\n"
@@ -255,7 +255,7 @@ msgstr "$5.00"
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_rating/options.js:0
 msgid "%(amount)s out of %(total)s stars"
-msgstr ""
+msgstr "%(amount)s z %(total)s gwiazdek"
 
 #. module: website
 #. odoo-javascript
@@ -4295,7 +4295,7 @@ msgstr "Dyrektor finansowy"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_grid
 msgid "Chief Marketing Officer"
-msgstr ""
+msgstr "Dyrektor marketingowy"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_basic
@@ -7880,7 +7880,6 @@ msgstr "Nagłówek 1"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/js/editor/snippets.editor.js:0
-#: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "Headings"
 msgstr "Nagłówki"
 
@@ -7890,36 +7889,26 @@ msgid "Headings 1"
 msgstr "Nagłówki 1"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 2"
 msgstr "Nagłówki 2"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 3"
 msgstr "Nagłówki 3"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 4"
 msgstr "Nagłówki 4"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 5"
 msgstr "Nagłówki 5"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 6"
 msgstr "Nagłówki 6"
@@ -9718,8 +9707,6 @@ msgid "Linkedin"
 msgstr "Linkedin"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Links"
 msgstr "Linki"
@@ -9796,6 +9783,7 @@ msgstr "Widżet Czatu na Żywo"
 #: code:addons/website/static/src/client_actions/website_preview/website_preview.xml:0
 #: code:addons/website/static/src/components/dialog/add_page_dialog.js:0
 #: code:addons/website/static/src/components/dialog/seo.xml:0
+#: code:addons/website/static/src/js/editor/html_editor.js:0
 #: code:addons/website/static/src/xml/web_editor.xml:0
 #: code:addons/website/static/src/xml/website.background.video.xml:0
 msgid "Loading..."
@@ -12067,12 +12055,6 @@ msgid "Primary"
 msgstr "Podstawowy"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Primary Buttons"
-msgstr "Przyciski główne"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Primary Style"
 msgstr "Styl główny"
@@ -12277,6 +12259,11 @@ msgstr "Puls"
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Punchy Image"
 msgstr "Przyciągający uwagę obraz"
+
+#. module: website
+#: model:ir.model.fields,field_description:website.field_website__domain_punycode
+msgid "Punycode Domain"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -13084,12 +13071,6 @@ msgstr "Drugie domyślne radio"
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Secondary"
 msgstr "Drugi"
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Secondary Buttons"
-msgstr "Przyciski dodatkowe"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -14216,8 +14197,6 @@ msgid "Test your robots.txt with Google Search Console"
 msgstr "Przetestuj swój plik robots.txt w Google Search Console"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.grid_layout_options
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -14439,6 +14418,12 @@ msgstr "Limit to maksymalna liczba pobranych rekordów"
 #: code:addons/website/models/website_snippet_filter.py:0
 msgid "The limit must be between 1 and 16."
 msgstr "Granica musi być pomiędzy 1 i 16."
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "The logo is too large. Please upload a logo smaller than 2.5 MB."
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
@@ -15284,6 +15269,12 @@ msgstr ""
 "302 Moved temporarily: Przeglądarka nie zachowa w pamięci podręcznej nowego adresu URL i zapyta ponownie o nowy adres URL następnym razem.\n"
 "404 Not Found: Jeśli chcesz usunąć konkretną stronę/kontroler (np. Ecommerce jest zainstalowany, ale nie chcesz /shop na określonej stronie).\n"
 "308 Redirect / Rewrite: Jeśli chcesz zmienić nazwę kontrolera na nowy adres url. (Np. /shop -> /garden - oba adresy url będą dostępne, ale /shop zostanie automatycznie przekierowany do /garden)."
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/xml/html_editor.xml:0
+msgid "Type your URL"
+msgstr ""
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_controller_page__name_slugified
@@ -16768,12 +16759,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:website.field_website__social_twitter
 msgid "X Account"
 msgstr "Konto X"
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website_form_editor.xml:0
-msgid "Yes"
-msgstr "Tak"
 
 #. module: website
 #. odoo-javascript

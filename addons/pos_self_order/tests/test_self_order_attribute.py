@@ -17,7 +17,7 @@ class TestSelfOrderAttribute(SelfOrderCommonTest):
         })
 
         product = self.env['product.template'].search([('name', '=', 'Desk Organizer')])[0]
-        product.attribute_line_ids[0].product_template_value_ids[0].price_extra = 0.0
+        product.attribute_line_ids[0].product_template_value_ids[0].price_extra = 0.25
         product.attribute_line_ids[0].product_template_value_ids[1].price_extra = 1.0
         product.attribute_line_ids[0].product_template_value_ids[2].price_extra = 2.0
 
@@ -85,6 +85,10 @@ class TestSelfOrderAttribute(SelfOrderCommonTest):
         pos_categ_chairs = self.env['pos.category'].create({
             'name': 'Chairs',
         })
+        self.pos_config.write({
+            'iface_available_categ_ids': [(4, pos_categ_chairs.id)]
+        })
+
         color_attribute = self.env['product.attribute'].create({
             'name': 'Color',
             'create_variant': 'always',

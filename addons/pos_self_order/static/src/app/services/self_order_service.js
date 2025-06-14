@@ -7,7 +7,7 @@ import { markup } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { cookie } from "@web/core/browser/cookie";
-import { formatDateTime } from "@web/core/l10n/dates";
+import { formatDateTime, serializeDateTime } from "@web/core/l10n/dates";
 import { printerService } from "@point_of_sale/app/services/printer_service";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
 import { HWPrinter } from "@point_of_sale/app/utils/printer/hw_printer";
@@ -213,6 +213,7 @@ export class SelfOrder extends Reactive {
             note: customer_note || "",
             price_unit: productPrice.pricelist_price,
             price_extra: 0,
+            price_type: "original",
         };
 
         if (Object.entries(selectedValues).length > 0) {
@@ -315,7 +316,7 @@ export class SelfOrder extends Reactive {
 
         if (lineToMerge) {
             lineToMerge.setDirty();
-            lineToMerge.qty += newLine.qty;
+            lineToMerge.setQuantity(lineToMerge.qty + newLine.qty);
             newLine.delete();
         } else {
             newLine.setDirty();
@@ -427,7 +428,7 @@ export class SelfOrder extends Reactive {
 
         const pricelist = autoSelectedPresets
             ? this.config.default_preset_id?.pricelist_id
-            : this.config.default_pricelist_id;
+            : this.config.pricelist_id;
 
         const newOrder = this.models["pos.order"].create({
             company_id: this.company,
@@ -463,7 +464,7 @@ export class SelfOrder extends Reactive {
             (p) => p.pos_categ_ids.length === 0 && !isSpecialProduct(p)
         );
 
-        if (productWoCat.length) {
+        if (productWoCat.length && !this.config.iface_available_categ_ids.length) {
             this.productCategories.push({
                 id: 0,
                 hour_after: 0,
@@ -498,14 +499,17 @@ export class SelfOrder extends Reactive {
     }
 
     _getKioskPrintingCategoriesChanges(order, categories) {
-        return order.lines.filter((orderline) =>
-            categories.some((category) =>
+        return order.lines.filter((orderline) => {
+            const baseProductId = orderline.combo_parent_id
+                ? orderline.combo_parent_id.product_id.id
+                : orderline.product_id.id;
+            return categories.some((category) =>
                 this.models["product.product"]
-                    .get(orderline.product_id.id)
+                    .get(baseProductId)
                     .pos_categ_ids.map((categ) => categ.id)
                     .includes(category.id)
-            )
-        );
+            );
+        });
     }
 
     async printKioskChanges(access_token = "") {
@@ -676,9 +680,7 @@ export class SelfOrder extends Reactive {
             .filter((o) => o.state === "draft" && typeof o.id === "number")
             .map((order) => ({
                 access_token: order.access_token,
-                write_date: order.write_date.plus({ seconds: 1 }).toFormat("yyyy-MM-dd HH:mm:ss", {
-                    numberingSystem: "latn",
-                }),
+                write_date: serializeDateTime(order.write_date.plus({ seconds: 1 })),
             }))
             .filter((order) => order.access_token);
 
@@ -754,10 +756,6 @@ export class SelfOrder extends Reactive {
             type: "success",
         });
         this.router.navigate("default");
-    }
-
-    updateOrderFromServer(order) {
-        this.currentOrder.updateDataFromServer(order);
     }
 
     isOrder() {
@@ -844,7 +842,7 @@ export class SelfOrder extends Reactive {
     getProductPriceInfo(productTemplate, product) {
         const pricelist = this.config.use_presets
             ? this.currentOrder.preset_id?.pricelist_id
-            : this.config.default_pricelist_id;
+            : this.config.pricelist_id;
         const price = productTemplate.getPrice(pricelist, 1, 0, false, product);
 
         let taxes = productTemplate.taxes_id;

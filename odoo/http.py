@@ -315,8 +315,21 @@ class SessionExpiredException(Exception):
     pass
 
 
-def content_disposition(filename):
-    return "attachment; filename*=UTF-8''{}".format(
+def content_disposition(filename, disposition_type='attachment'):
+    """
+    Craft a ``Content-Disposition`` header, see :rfc:`6266`.
+
+    :param filename: The name of the file, should that file be saved on
+        disk by the browser.
+    :param disposition_type: Tell the browser what to do with the file,
+        either ``"attachment"`` to save the file on disk,
+        either ``"inline"`` to display the file.
+    """
+    if disposition_type not in ('attachment', 'inline'):
+        e = f"Invalid disposition_type: {disposition_type!r}"
+        raise ValueError(e)
+    return "{}; filename*=UTF-8''{}".format(
+        disposition_type,
         url_quote(filename, safe='', unsafe='()<>@,;:"/[]?={}\\*\'%') # RFC6266
     )
 
@@ -1111,7 +1124,7 @@ class Session(collections.abc.MutableMapping):
         if auth_info.get('mfa') == 'skip' or not user._mfa_url():
             self.finalize(env)
 
-        if request and request.session is self:
+        if request and request.session is self and request.db == env.registry.db_name:
             request.env = env(user=self.uid, context=self.context)
             request.update_context(lang=get_lang(request.env(user=pre_uid)).code)
 
@@ -1728,7 +1741,7 @@ class Request:
                         profile_session=self.session['profile_session'],
                         collectors=self.session['profile_collectors'],
                         params=self.session['profile_params'],
-                    )
+                    )._get_cm_proxy()
                 except Exception:
                     _logger.exception("Failure during Profiler creation")
                     self.session['profile_session'] = None
@@ -1847,21 +1860,34 @@ class Request:
         threading.current_thread().url = httprequest.url
         self.httprequest = httprequest
 
-    def _save_session(self):
-        """ Save a modified session on disk. """
+    def _save_session(self, env=None):
+        """
+        Save a modified session on disk.
+
+        :param env: an environment to compute the session token.
+            MUST be left ``None`` (in which case it uses the request's
+            env) UNLESS the database changed.
+        """
         sess = self.session
+        if env is None:
+            env = self.env
 
         if not sess.can_save:
             return
 
         if sess.should_rotate:
-            root.session_store.rotate(sess, self.env)  # it saves
+            root.session_store.rotate(sess, env)  # it saves
         elif sess.is_dirty:
             root.session_store.save(sess)
 
         cookie_sid = self.cookies.get('session_id')
         if sess.is_dirty or cookie_sid != sess.sid:
-            self.future_response.set_cookie('session_id', sess.sid, max_age=get_session_max_inactivity(self.env), httponly=True)
+            self.future_response.set_cookie(
+                'session_id',
+                sess.sid,
+                max_age=get_session_max_inactivity(env),
+                httponly=True
+            )
 
     def _set_request_dispatcher(self, rule):
         routing = rule.endpoint.routing

@@ -5,6 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { Component, onWillRender } from "@odoo/owl";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+import { roundPrecision } from "@web/core/utils/numbers";
 
 export class QtyAtDatePopover extends Component {
     static template = "sale_stock.QtyAtDatePopover";
@@ -30,17 +31,17 @@ export class QtyAtDatePopover extends Component {
     }
 }
 
-
 export class QtyAtDateWidget extends Component {
     static components = { Popover: QtyAtDatePopover };
     static template = "sale_stock.QtyAtDate";
     static props = {...standardWidgetProps};
     setup() {
         this.popover = usePopover(this.constructor.components.Popover, { position: "top" });
+        this.orm = useService("orm");
         this.calcData = {};
         onWillRender(() => {
             this.initCalcData();
-        })
+        });
     }
 
     initCalcData() {
@@ -64,6 +65,27 @@ export class QtyAtDateWidget extends Component {
         }
     }
 
+    async calcDataForDisplay() {
+        const { data } = this.props.record;
+        let lineUom;
+        if (data.product_uom_id?.[0]) {
+            lineUom = (await this.orm.read("uom.uom", [data.product_uom_id[0]], ["factor", "rounding"]))[0];
+        }
+        let lineProduct;
+        if (data.product_id?.[0]) {
+            lineProduct = await this.orm.searchRead("product.product", [["id", "=", data.product_id[0]]], ["uom_id"]);
+        }
+        let productUom;
+        if (lineProduct?.[0]?.uom_id?.[0]) {
+            productUom = (await this.orm.searchRead("uom.uom", [["id", "=", lineProduct[0].uom_id[0]]], ["factor", "name"]))[0];
+        }
+        if (lineUom && productUom) {
+            this.calcData.product_uom_virtual_available_at_date = roundPrecision(data.virtual_available_at_date * lineUom.factor / productUom.factor, 1);
+            this.calcData.product_uom_free_qty_today = roundPrecision(data.free_qty_today * lineUom.factor / productUom.factor, 1);
+            this.calcData.product_uom_name = productUom.name;
+        }
+    }
+
     updateCalcData() {
         // popup specific data
         const { data } = this.props.record;
@@ -76,9 +98,11 @@ export class QtyAtDateWidget extends Component {
         }
     }
 
-    showPopup(ev) {
+    async showPopup(ev) {
+        const target = ev.currentTarget;
+        await this.calcDataForDisplay();
         this.updateCalcData();
-        this.popover.open(ev.currentTarget, {
+        this.popover.open(target, {
             record: this.props.record,
             calcData: this.calcData,
         });

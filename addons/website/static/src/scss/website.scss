@@ -166,6 +166,13 @@ $-seen-urls: ();
         $custom-colors: append($custom-colors, $key);
     }
     @include print-variable('custom-colors', $custom-colors);
+
+    // A background color is set on <html> to prevent the fallback iframe used
+    // for navigation in the backend to be visible once the top iframe is loaded
+    // (see /website/iframefallback). Indeed, if the website <body> uses a
+    // transparent background color, the fallback iframe would be visible on
+    // some browsers (e.g. Chrome).
+    background-color: white;
 }
 
 @mixin body-image-bg-style() {
@@ -361,7 +368,7 @@ body {
 // the selector is probably too specific and should rather be about extending
 // bootstrap if possible.
 #wrapwrap:not(.o_header_overlay) header, header.o_header_is_scrolled, header .o_navbar_mobile {
-    .nav-item > .nav-link > *, .nav-item > .nav-link::after, .js_language_selector span, .badge {
+    .nav-item > .nav-link > *, .nav-item > .nav-link::after, .js_language_selector span, .badge, .nav-item > .accordion-item * {
         $header-text-color: o-website-value('header-text-color');
         // Check if the value is wrapped in quotes (initially it wasn't, and it
         // didn't work) because we don't want the text color of the navbar to
@@ -387,12 +394,36 @@ body {
 
 // Apply background color to the offcanvas menu
 .o_navbar_mobile {
+    $-navbar-mobile-bg-color: o-color('menu-custom') or o-color('menu');
     height: 100dvh;
-    background-color: o-color('menu-custom') or o-color('menu');
+    background-color: $-navbar-mobile-bg-color;
 
     // Make offcanvas close btn above mega menu
     .btn-close {
         z-index: $o-mega-menu-btn-close-zindex;
+    }
+
+    .top_menu > .accordion {
+        ul > li > a.nav-link {
+            background-color: inherit;
+        }
+
+        .accordion-button {
+            &:not(.collapsed) {
+                @if $-navbar-mobile-bg-color != null {
+                    background-color: shade-color($-navbar-mobile-bg-color, 5%);
+                }
+            }
+
+            // Replace the default chevron with our Odoo UI icon so it adapts to
+            // the theme colors.
+            &:after {
+                height: 100%;
+                background: none;
+                font-family: 'odoo_ui_icons';
+                content: '\e839';
+            }
+        }
     }
 }
 
@@ -785,6 +816,9 @@ table.table_desc tr td {
     flex-direction: column;
     justify-content: space-around;
     min-height: 100vh !important;
+    // See JS: this is overridden for multiple reasons, including the fact that
+    // Arc browser does not support this correctly at the moment.
+    min-height: 100svh !important;
 }
 .o_half_screen_height {
     @extend .o_full_screen_height;
@@ -1281,8 +1315,14 @@ $-o-carousel-controllers-size: map-get($spacers, 5);
     > .s_parallax_bg {
         @extend %o-we-background-layer;
     }
-    &.s_parallax_is_fixed > .s_parallax_bg {
-        background-attachment: fixed;
+    @include media-breakpoint-up(xl) {
+        // Fixed backgrounds are disabled when using a mobile/tablet device,
+        // which is not a big deal but, on some of them (iOS...), defining the
+        // background as fixed breaks the background-size/position props.
+        // So we enable this only for >= XL devices.
+        &.s_parallax_is_fixed > .s_parallax_bg {
+            background-attachment: fixed;
+        }
     }
 }
 // Keeps parallax snippet element selectable when Height = auto.
@@ -1644,6 +1684,7 @@ header {
     .o_mega_nav {
         padding-left: $grid-gutter-width * .5;
         height: $o-mega-menu-nav-height;
+        background-color: inherit;
     }
 
     // Div needed for selector specificity to apply mh
@@ -1654,6 +1695,7 @@ header {
         visibility: hidden;
         margin-top: $o-mega-menu-nav-height !important;
         border: none;
+        height: calc(100dvh - #{$o-mega-menu-nav-height});
         max-height: 100vh;
         background-color: o-color('menu-custom') or o-color('menu');
         overflow-x: hidden;

@@ -69,8 +69,9 @@ class Cart(PaymentPortal):
         )
         payment_form_values.update({
             'payment_access_token': payment_form_values.pop('access_token'),  # Rename the key.
+            # Do not include delivery related lines
             'minor_amount': payment_utils.to_minor_currency_units(
-                order.amount_total, order.currency_id
+                order._get_amount_total_excluding_delivery(), order.currency_id
             ),
             'merchant_name': request.website.name,
             'transaction_route': f'/shop/payment/transaction/{order.id}',
@@ -78,6 +79,7 @@ class Cart(PaymentPortal):
             'landing_route': '/shop/payment/validate',
             'payment_method_unknown_id': request.env.ref('payment.payment_method_unknown').id,
             'shipping_info_required': order._has_deliverable_products(),
+            # Todo: remove in master
             'delivery_amount': payment_utils.to_minor_currency_units(
                 order.order_line.filtered(lambda l: l.is_delivery).price_total, order.currency_id
             ),
@@ -132,6 +134,7 @@ class Cart(PaymentPortal):
         :rtype: dict
         """
         order_sudo = request.cart or request.website._create_cart()
+        quantity = int(quantity)  # Do not allow float values in ecommerce by default
 
         product = request.env['product.product'].browse(product_id).exists()
         if quantity and (not product or not product._is_add_to_cart_allowed()):
@@ -246,6 +249,7 @@ class Cart(PaymentPortal):
         :params dict kwargs: additional parameters given to _cart_update_line_quantity calls.
         """
         order_sudo = request.cart
+        quantity = int(quantity)  # Do not allow float values in ecommerce by default
 
         # This method must be only called from the cart page BUT in some advanced logic
         # eg. website_sale_loyalty, a cart line could be a temporary record without id.

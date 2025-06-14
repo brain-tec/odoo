@@ -175,8 +175,19 @@ export class Form extends Interaction {
         // All 'hidden if' fields start with d-none
         this.el.querySelectorAll(".s_website_form_field_hidden_if:not(.d-none)").forEach(el => el.classList.add("d-none"));
 
+        // Prevent "data-for" values removal on destroy, they are still used
+        // in edit mode to keep the form linked to its predefined server
+        // values (e.g., the default `job_id` value on the application form
+        // for a given job).
+        const dataForValues = wUtils.getParsedDataFor(this.el.id, document) || {};
+        const initialValuesToReset = new Map(
+            [...this.initialValues.entries()].filter(
+                ([input]) => !dataForValues[input.name] || input.name === "email_to"
+            )
+        );
+
         // Reset the initial default values.
-        for (const [fieldEl, initialValue] of this.initialValues.entries()) {
+        for (const [fieldEl, initialValue] of initialValuesToReset.entries()) {
             if (initialValue) {
                 fieldEl.setAttribute("value", initialValue);
             } else {
@@ -338,7 +349,7 @@ export class Form extends Interaction {
                 const inputEl = dateEl.querySelector("input");
                 const { value } = inputEl;
                 if (!value) {
-                    return;
+                    continue;
                 }
 
                 formValues[inputEl.getAttribute("name")] = dateEl.matches(".s_website_form_date")
@@ -739,12 +750,25 @@ export class Form extends Interaction {
                 return false;
             }
 
-            const formData = new FormData(this.el);
+            const formData = this.getFormDataIncludingDisabledFields(this.el);
             const currentValueOfDependency = ["contains", "!contains"].includes(comparator)
                 ? formData.getAll(dependencyName).join()
                 : formData.get(dependencyName);
             return this.compareTo(comparator, currentValueOfDependency, visibilityCondition, between);
         };
+    }
+
+    /**
+     * @param {HTMLElement} formEl the form from which we want to retrieve
+     *      the FormData, including the disabled fields.
+     * @returns {FormData} a FormData object containing also disabled fields
+     */
+    getFormDataIncludingDisabledFields(formEl) {
+        const formCopy = formEl.cloneNode(true);
+        formCopy.querySelectorAll("input, select, textarea").forEach((element) => {
+            element.removeAttribute("disabled");
+        });
+        return new FormData(formCopy);
     }
 
     isFieldVisible(fieldEl) {

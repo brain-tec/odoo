@@ -91,6 +91,11 @@ class ResCompany(models.Model):
     # HELPER METHODS
     # -------------------------------------------------------------------------
 
+    @api.model
+    def _check_phonenumbers_import(self):
+        if not phonenumbers:
+            raise ValidationError(_("Please install the phonenumbers library."))
+
     def _sanitize_peppol_phone_number(self, phone_number=None):
         self.ensure_one()
 
@@ -99,8 +104,7 @@ class ResCompany(models.Model):
             "For example: +32123456789, where +32 is the country code.\n"
             "Currently, only European countries are supported.")
 
-        if not phonenumbers:
-            raise ValidationError(_("Please install the phonenumbers library."))
+        self._check_phonenumbers_import()
 
         phone_number = phone_number or self.account_peppol_phone_number
         if not phone_number:
@@ -304,8 +308,7 @@ class ResCompany(models.Model):
         ):
             error_msg = _(
                 "A participant with these details has already been registered on the network. "
-                "If you have previously registered to an alternative Peppol service, please deregister from that service, "
-                "or request a migration key before trying again. "
+                "If you have previously registered to a Peppol service, please deregister."
             )
             if (external_provider := _get_peppol_provider(participant_info)) and "Odoo" not in external_provider:
                 error_msg += _("The Peppol service that is used is %s.", external_provider)

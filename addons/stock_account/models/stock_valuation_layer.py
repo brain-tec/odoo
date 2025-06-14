@@ -42,6 +42,7 @@ class StockValuationLayer(models.Model):
     lot_id = fields.Many2one('stock.lot', 'Lot/Serial Number', check_company=True, index=True)
 
     _index = models.Index("(product_id, remaining_qty, stock_move_id, company_id, create_date)")
+    _company_product_index = models.Index("(product_id, company_id, id, value, quantity)")
 
     def _compute_warehouse_id(self):
         for svl in self:
@@ -59,6 +60,10 @@ class StockValuationLayer(models.Model):
             ('stock_move_id.location_id.warehouse_id', operator, value),
         ]).ids
         return [('id', 'in', layer_ids)]
+
+    def _candidate_sort_key(self):
+        self.ensure_one()
+        return tuple()
 
     def _validate_accounting_entries(self):
         am_vals = []
@@ -119,7 +124,7 @@ class StockValuationLayer(models.Model):
         #  Handler called when the user clicked on the 'Valuation at Date' button.
         #  Opens wizard to display, at choice, the products inventory or a computed
         #  inventory at a given date.
-        context = {}
+        context = {"pivot_measures": ["quantity", "value"]}
         if ("default_product_id" in self.env.context):
             context["product_id"] = self.env.context["default_product_id"]
         elif ("default_product_tmpl_id" in self.env.context):

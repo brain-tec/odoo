@@ -3,16 +3,17 @@
 # 	* website
 # 
 # Translators:
-# Jessica Jakara, 2025
+# Dylan Kiss, 2025
 # Wil Odoo, 2025
+# Jessica Jakara, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:36+0000\n"
+"POT-Creation-Date: 2025-06-06 18:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
+"Last-Translator: Jessica Jakara, 2025\n"
 "Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -371,7 +372,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.layout
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "/contactus"
-msgstr "/yhteys"
+msgstr "/contactus"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_key_images
@@ -2422,8 +2423,8 @@ msgid ""
 "A features section highlights your product’s key attributes, engaging "
 "visitors and boosting conversions."
 msgstr ""
-"Ominaisuudet-osio korostaa tuotteen tärkeimpiä ominaisuuksia, houkutellen "
-"kävijöitä ja kasvattaa konversiota."
+"Ominaisuudet-osio korostaa tuotteen tärkeimpiä määritteitä, houkutellen "
+"kävijöitä ja kasvattaen konversiota."
 
 #. module: website
 #. odoo-javascript
@@ -2525,7 +2526,7 @@ msgstr "Tekoäly"
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "API Key"
-msgstr "API Avain"
+msgstr "API-avain"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_groups
@@ -3813,7 +3814,7 @@ msgstr "Murupolku"
 #. odoo-javascript
 #: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
 msgid "Build my website"
-msgstr "Rakenna verkkosivustoni"
+msgstr "Rakenna verkkosivuni"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_table_of_content
@@ -4288,7 +4289,7 @@ msgstr "Talousjohtaja"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_grid
 msgid "Chief Marketing Officer"
-msgstr ""
+msgstr "Markkinointijohtaja"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_basic
@@ -4759,7 +4760,7 @@ msgstr "Konsultointi"
 #: model_terms:ir.ui.view,arch_db:website.s_tabs
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Contact"
-msgstr "Kontakti"
+msgstr "Yhteystiedot"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -5054,7 +5055,7 @@ msgstr "Luo"
 #. module: website
 #: model:ir.model,website_form_label:website.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Luo asiakas"
 
 #. module: website
 #. odoo-javascript
@@ -7635,7 +7636,7 @@ msgstr "Google kartta"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website__google_maps_api_key
 msgid "Google Maps API Key"
-msgstr "Google Maps API Key"
+msgstr "Google Maps API-avain"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cta_mobile
@@ -7867,7 +7868,6 @@ msgstr "Väliotsikko 1"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/js/editor/snippets.editor.js:0
-#: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "Headings"
 msgstr "Otsikot"
 
@@ -7877,36 +7877,26 @@ msgid "Headings 1"
 msgstr "Otsikot 1"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 2"
 msgstr "Otsikot 2"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 3"
 msgstr "Otsikot 3"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 4"
 msgstr "Otsikot 4"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 5"
 msgstr "Otsikot 5"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 6"
 msgstr "Otsikot 6"
@@ -8041,7 +8031,7 @@ msgstr "Korosta historiaasi, esitä kasvua ja keskeisiä välitavoitteita."
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_showcase
 msgid "Highlights Key Attributes"
-msgstr "Korostaa keskeisiä ominaisuuksia"
+msgstr "Korostaa keskeisiä määritteitä"
 
 #. module: website
 #. odoo-javascript
@@ -8911,7 +8901,7 @@ msgstr "Intuitiivinen järjestelmä"
 #: code:addons/website/static/src/js/editor/snippets.editor.js:0
 msgid "Invalid API Key. The following error was returned by Google: %(error)s"
 msgstr ""
-"Virheellinen API-avain. Seuraava virhekoodi palautui Googlelta: %(error)s"
+"Virheellinen API-avain. Google palautti seuraavan virhekoodin: %(error)s"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_grid
@@ -9710,8 +9700,6 @@ msgid "Linkedin"
 msgstr "Linkedin"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Links"
 msgstr "Linkit"
@@ -9788,6 +9776,7 @@ msgstr "Livechat-osio"
 #: code:addons/website/static/src/client_actions/website_preview/website_preview.xml:0
 #: code:addons/website/static/src/components/dialog/add_page_dialog.js:0
 #: code:addons/website/static/src/components/dialog/seo.xml:0
+#: code:addons/website/static/src/js/editor/html_editor.js:0
 #: code:addons/website/static/src/xml/web_editor.xml:0
 #: code:addons/website/static/src/xml/website.background.video.xml:0
 msgid "Loading..."
@@ -9806,7 +9795,7 @@ msgstr "Logo"
 #: model_terms:ir.ui.view,arch_db:website.template_footer_contact
 #: model_terms:ir.ui.view,arch_db:website.template_footer_minimalist
 msgid "Logo of MyCompany"
-msgstr "Oman yrityksen logo"
+msgstr "Oman yritykseni logo"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -9846,9 +9835,8 @@ msgid ""
 "Make sure to wait if errors keep being shown: sometimes enabling an API "
 "allows to use it immediately but Google keeps triggering errors for a while"
 msgstr ""
-"Varmista, että odotat, jos virheitä näytetään jatkuvasti: joskus API:n "
-"käyttöönotto mahdollistaa sen käytön välittömästi, mutta Google näyttää "
-"virheitä jonkin aikaa"
+"Varmista, että odotat, jos virheitä ilmestyy jatkuvasti: joskus API:n "
+"käyttöönotto toimii välittömästi, mutta Google näyttää virheitä jonkin aikaa"
 
 #. module: website
 #. odoo-javascript
@@ -9879,13 +9867,13 @@ msgstr "Kartta"
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "Maps JavaScript API"
-msgstr "Karttojen JavaScript API"
+msgstr "Maps JavaScript API"
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "Maps Static API"
-msgstr "Karttojen staattinen API"
+msgstr "Maps Static API"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
@@ -10001,7 +9989,7 @@ msgstr "Välimeren buffet, jossa on alkupaloja, pääruokia ja jälkiruokia"
 #: model_terms:ir.ui.view,arch_db:website.s_rating_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Medium"
-msgstr "Media"
+msgstr "Mediatyyppi"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_about_full_1_s_text_block_h2
@@ -10120,7 +10108,7 @@ msgstr "Valikot"
 #. module: website
 #: model:ir.model,name:website.model_base_partner_merge_automatic_wizard
 msgid "Merge Partner Wizard"
-msgstr "Kumppanin yhdistämistyökalu"
+msgstr "Ohjattu kumppanin yhdistäminen"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_facebook_page_options
@@ -10464,7 +10452,7 @@ msgstr "Omat taitoni"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.option_header_brand_name
 msgid "My Website"
-msgstr "Oma verkkosivu"
+msgstr "Oma verkkosivuni"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_centered
@@ -10644,10 +10632,10 @@ msgid ""
 "will help you configure essential settings such as language, time zone, and "
 "notifications."
 msgstr ""
-"Seuraavaksi tutustut <b>asennuksen helppokäyttötoimintoon</b>, joka on "
-"suunniteltu opastamaan sinua alustan peruskonfiguraatiossa. "
-"Helppokäyttötoiminta auttaa sinua määrittämään olennaiset asetukset, kuten "
-"kielen, aikavyöhykkeen ja ilmoitukset."
+"Seuraavaksi sinulle esitellään <b>ohjattu asetustoiminto</b>, joka on "
+"suunniteltu opastamaan sinua alustan peruskonfiguraatiossa. Ohjattu toiminto"
+" auttaa sinua määrittämään olennaiset asetukset, kuten kielen, "
+"aikavyöhykkeen ja ilmoitukset."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.step_wizard
@@ -10726,7 +10714,7 @@ msgstr "Ei otsikkoa"
 #. odoo-javascript
 #: code:addons/website/static/src/systray_items/website_switcher.js:0
 msgid "No website domain configured for this website."
-msgstr "Tälle verkkosivustolle ei ole määritetty verkkotunnusta."
+msgstr "Tälle verkkosivulle ei ole määritetty domainia."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.column_count_option
@@ -10878,7 +10866,7 @@ msgstr "Odoo tiedot"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Odoo Menu"
-msgstr "Odoo-valikko"
+msgstr "Odoo valikko"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.show_website_info
@@ -12052,12 +12040,6 @@ msgid "Primary"
 msgstr "Ensisijainen"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Primary Buttons"
-msgstr "Ensisijaiset painikkeet"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Primary Style"
 msgstr "Ensisijainen tyyli"
@@ -12262,6 +12244,11 @@ msgstr "Sykkivä"
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Punchy Image"
 msgstr "Iskevä kuva"
+
+#. module: website
+#: model:ir.model.fields,field_description:website.field_website__domain_punycode
+msgid "Punycode Domain"
+msgstr "Punycode Domain"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -13070,12 +13057,6 @@ msgstr "Toinen oletusradio"
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Secondary"
 msgstr "Toissijainen"
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Secondary Buttons"
-msgstr "Toissijaiset painikkeet"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -14201,8 +14182,6 @@ msgid "Test your robots.txt with Google Search Console"
 msgstr "Testaa robots.txt-tiedostosi Google Search Console -palvelun avulla"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.grid_layout_options
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -14422,6 +14401,12 @@ msgstr "Raja on haettujen tietueiden enimmäismäärä"
 #: code:addons/website/models/website_snippet_filter.py:0
 msgid "The limit must be between 1 and 16."
 msgstr "Rajan on oltava välillä 1 ja 16."
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "The logo is too large. Please upload a logo smaller than 2.5 MB."
+msgstr "Logo on liian suuri. Lataa alle 2,5 Mt kokoinen logo."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
@@ -14802,7 +14787,7 @@ msgstr "Tätä näkymä-archia on muutettu"
 #: code:addons/website/static/src/systray_items/website_switcher.js:0
 #: code:addons/website/static/src/systray_items/website_switcher.xml:0
 msgid "This website does not have a domain configured."
-msgstr "Tälle verkkosivustolle ei ole määritetty verkkotunnusta."
+msgstr "Tälle verkkosivulle ei ole määritetty domainia."
 
 #. module: website
 #. odoo-javascript
@@ -14811,8 +14796,8 @@ msgid ""
 "This website does not have a domain configured. To avoid unexpected behaviours during website edition, we recommend closing (or refreshing) other browser tabs.\n"
 "To remove this message please set a domain in your website settings"
 msgstr ""
-"Tälle verkkosivustolle ei ole määritetty verkkotunnusta. Jotta vältät odottamattomat toiminnot verkkosivuston muokkauksen aikana, suosittelemme sulkemaan (tai päivittämään) muut selaimen välilehdet.\n"
-"Poista tämä viesti määrittämällä verkkotunnus verkkosivuston asetuksissa"
+"Tälle verkkosivulle ei ole määritetty domainia. Jotta vältät odottamattomat tapahtumat verkkosivun muokkauksen aikana, suosittelemme sulkemaan (tai päivittämään) muut selaimen välilehdet.\n"
+"Poista tämä viesti määrittämällä domain verkkosivun asetuksissa"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.view_edit_third_party_domains
@@ -15170,7 +15155,7 @@ msgstr "Käännä 404-sivua"
 #. odoo-javascript
 #: code:addons/website/static/src/components/translator/translator.js:0
 msgid "Translate Attribute"
-msgstr "Käännä ominaisuus"
+msgstr "Käännä määrite"
 
 #. module: website
 #. odoo-javascript
@@ -15268,6 +15253,12 @@ msgstr ""
 "    "
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/xml/html_editor.xml:0
+msgid "Type your URL"
+msgstr "Kirjoita URL-osoite"
+
+#. module: website
 #: model:ir.model.fields,field_description:website.field_website_controller_page__name_slugified
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
@@ -15302,7 +15293,7 @@ msgstr "UTM-kampanja"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "UTM Medium"
-msgstr "UTM-media"
+msgstr "UTM-mediatyyppi"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -16754,21 +16745,15 @@ msgstr "X Tili"
 
 #. module: website
 #. odoo-javascript
-#: code:addons/website/static/src/xml/website_form_editor.xml:0
-msgid "Yes"
-msgstr "Kyllä"
-
-#. module: website
-#. odoo-javascript
 #: code:addons/website/static/src/client_actions/website_preview/website_preview.js:0
 msgid ""
 "You are about to be redirected to the domain configured for your website ( "
 "%s ). This is necessary to edit or view your website from the Website app. "
 "You might need to log back in."
 msgstr ""
-"Sinut ohjataan pian verkkosivustollesi määritettyyn verkkotunnukseen ( %s )."
-" Tämä on tarpeen, jotta voit muokata tai tarkastella verkkosivustoasi "
-"verkkosivustosovelluksesta. Sinun on ehkä kirjauduttava takaisin sisään."
+"Sinut ohjataan pian verkkosivullesi määritettyyn domainiin ( %s ). Tämä on "
+"tarpeen, jotta voit muokata tai tarkastella verkkosivuasi Verkkosivu-"
+"sovelluksesta. Sinun on ehkä kirjauduttava takaisin sisään."
 
 #. module: website
 #. odoo-javascript
@@ -16980,7 +16965,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/components/resource_editor/resource_editor_warning.xml:0
 msgid "Your changes might be lost during future Odoo upgrade."
-msgstr "Muutoksesi saattavat hävitä Odoon tulevan päivityksen aikana."
+msgstr "Muutoksesi saattavat kadota Odoon tulevan versionkorotuksen aikana."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_list
@@ -18011,9 +17996,8 @@ msgid ""
 "promotion, characteristic, quality, highlights, specs, advantages, "
 "functionalities, exhibit, details, capabilities, attributes, promotion"
 msgstr ""
-"edistäminen, ominaisuus, laatu, kohokohdat, ominaisuudet, edut, toiminnot, "
-"näytteillepano, yksityiskohdat, ominaisuudet, ominaisuudet, attribuutit, "
-"edistäminen"
+"mainonta, piirre, laatu, kohokohdat, tekniset tiedot, edut, toiminnot, "
+"esittely, tiedot, kyvyt, ominaisuudet, määritteet, mainonta"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -18022,9 +18006,9 @@ msgid ""
 "functionalities, exhibit, details, capabilities, attributes, promotion, "
 "headline, content, overview, spotlight"
 msgstr ""
-"edistäminen, ominaisuus, laatu, kohokohdat, tekniset tiedot, edut, "
-"toiminnallisuudet, näyttely, yksityiskohdat, ominaisuudet, ominaisuudet, "
-"ominaisuudet, edistäminen, otsikko, sisältö, yleiskatsaus, valokeilassa"
+"mainonta, piirteet, laatu, kohokohdat, tekniset tiedot, edut, "
+"toiminnallisuudet, esittely, tiedot, kyvyt, määritteet, mainos, otsikko, "
+"sisältö, yleiskatsaus, valokeilassa"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -18033,9 +18017,9 @@ msgid ""
 "functionalities, exhibit, details, capabilities, attributes, promotion, "
 "presentation, demo, feature"
 msgstr ""
-"edistäminen, ominaisuus, laatu, kohokohdat, tekniset tiedot, edut, "
-"toiminnallisuudet, näyttely, yksityiskohdat, ominaisuudet, ominaisuudet, "
-"ominaisuudet, edistäminen, esittely, esittely, demo, ominaisuus"
+"mainonta, piirteet, laatu, kohokohdat, tekniset tiedot, edut, "
+"toiminnallisuudet, esittely, tiedot, kyvyt, määritteet, mainos, jakaminen, "
+"demo, ominaisuus"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -18044,10 +18028,9 @@ msgid ""
 "functionalities, features, exhibit, details, capabilities, attributes, "
 "promotion, headline, content, overview, spotlight"
 msgstr ""
-"edistäminen, ominaisuus, laatu, kohokohdat, tekniset tiedot, edut, "
-"toiminnallisuudet, ominaisuudet, näyttely, yksityiskohdat, ominaisuudet, "
-"ominaisuudet, ominaisuudet, edistäminen, otsikko, sisältö, yleiskatsaus, "
-"valokeilassa"
+"mainonta, piirteet, laatu, kohokohdat, tekniset tiedot, edut, "
+"toiminnallisuudet, ominaisuudet, esittely, tiedot, kyvyt, määritteet, "
+"mainos, otsikko, sisältö, yleiskatsaus, valokeilassa"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets

@@ -17,20 +17,25 @@
                 t-ref="root"
                 t-if="message.exists()"
             >
+                <div t-if="props.asCard and isMobileOS" class="position-absolute end-0 z-1"><t t-call="mail.Message.actions"/></div>
                 <div class="o-mail-Message-core position-relative d-flex flex-shrink-0">
-                    <div class="o-mail-Message-sidebar d-flex flex-shrink-0 justify-content-center" t-att-class="{ 'align-items-start': !isAlignedRight, 'o-inChatWindow': env.inChatWindow }">
-                        <div t-if="!props.squashed" class="o-mail-Message-avatarContainer position-relative bg-view rounded-3" t-att-class="getAvatarContainerAttClass()">
-                            <img class="o-mail-Message-avatar w-100 h-100 rounded-3" t-att-src="authorAvatarUrl" t-att-class="authorAvatarAttClass"/>
-                        </div>
+                    <div class="o-mail-Message-sidebar d-flex flex-shrink-0 align-items-center flex-column" t-att-class="{ 'align-items-start': !isAlignedRight, 'o-inChatWindow': env.inChatWindow }">
+                        <t t-if="!props.squashed">
+                            <div class="o-mail-Message-avatarContainer position-relative bg-view rounded-3" t-att-class="getAvatarContainerAttClass()">
+                                <img class="o-mail-Message-avatar w-100 h-100 rounded-3" t-att-src="authorAvatarUrl" t-att-class="authorAvatarAttClass"/>
+                            </div>
+                            <t t-if="message.starred" t-call="mail.Message.sidebarStarred"/>
+                        </t>
                         <t t-elif="message.isPending" t-call="mail.Message.pendingStatus"/>
                         <t t-elif="!message.is_transient">
                             <small t-if="isActive and props.showDates" class="o-mail-Message-date o-xsmaller mt-2 text-center lh-1" t-att-title="message.datetimeShort">
                                 <t t-esc="message.dateSimple"/>
                             </small>
+                            <t t-elif="message.starred" t-call="mail.Message.sidebarStarred"/>
                         </t>
                     </div>
                     <div class="w-100 o-min-width-0" t-att-class="{ 'flex-grow-1': message.composer }" t-ref="messageContent">
-                        <div t-if="!props.squashed" class="o-mail-Message-header d-flex flex-wrap align-items-baseline lh-1" t-att-class="{ 'mb-1': !message.is_note }" name="header">
+                        <div t-if="!props.squashed" class="o-mail-Message-header d-flex flex-wrap align-items-baseline lh-1" t-att-class="{ 'mb-1': !message.is_note, 'pe-2': props.asCard and isMobileOS }" name="header">
                             <span t-if="authorName and shouldDisplayAuthorName" class="o-mail-Message-author smaller" t-att-class="getAuthorAttClass()">
                                 <strong class="me-1" t-esc="authorName"/>
                             </span>
@@ -53,7 +58,7 @@
                                 </span>
                             </div>
                             <t t-if="isAlignedRight" t-call="mail.Message.notification"/>
-                            <t t-if="message.is_note" t-call="mail.Message.actions"/>
+                            <t t-if="!message.bubbleColor and !(props.asCard and isMobileOS)" t-call="mail.Message.actions"/>
                         </div>
                         <div
                             class="o-mail-Message-contentContainer position-relative d-flex"
@@ -67,12 +72,33 @@
                                     <t t-if="message.isEmpty or (message.message_type !== 'notification' and !message.is_transient and (message.hasTextContent or message.subtype_description or state.isEditing or message.edited))">
                                         <LinkPreviewList t-if="!state.isEditing and message.linkPreviewSquash" linkPreviews="message.link_preview_ids" deletable="false"/>
                                         <t t-else="">
-                                            <div class="position-relative overflow-x-auto overflow-y-hidden d-inline-block" t-att-class="{ 'w-100': state.isEditing }">
-                                                <div t-if="message.bubbleColor" class="o-mail-Message-bubble rounded-bottom-3 position-absolute top-0 start-0 w-100 h-100 border" t-att-class="{
+                                            <div t-if="message.bubbleColor and !props.squashed" class="o-mail-Message-bubbleTail position-absolute d-flex" t-att-style="isAlignedRight ? 'right: -4px; transform: rotateY(180deg);' : 'left: -4px;'" t-att-class="{
+                                                'o-blue': message.bubbleColor === 'blue',
+                                                'o-green': message.bubbleColor === 'green',
+                                                'o-orange': message.bubbleColor === 'orange',
+                                            }">
+                                                <svg viewBox="0 0 6 12" height="12" width="6" x="0px" y="0px">
+                                                    <path class="o-mail-Message-bubbleTailBorder" fill="currentColor" d="M 0, 0 L 5, 9 V 0 z"/>
+                                                    <path class="o-mail-Message-bubbleTailBg" fill="currentColor" d="M 2, 1 L 5, 7 V 1 z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="position-relative overflow-x-auto overflow-y-hidden d-inline-block text-body" t-att-class="{
+                                                'w-100': state.isEditing,
+                                                'shadow-sm': message.bubbleColor,
+                                                'o-rounded-bubble': message.bubbleColor and props.squashed,
+                                                'o-rounded-bottom-bubble': message.bubbleColor and !props.squashed,
+                                                'o-rounded-start-bubble': message.bubbleColor and !props.squashed and isAlignedRight,
+                                                'o-rounded-end-bubble': message.bubbleColor and !props.squashed and !isAlignedRight,
+                                            }">
+                                                <div t-if="message.bubbleColor" class="o-mail-Message-bubble position-absolute top-0 start-0 w-100 h-100 border" t-att-class="{
+                                                    'o-rounded-bubble': props.squashed,
+                                                    'o-rounded-bottom-bubble': !props.squashed,
+                                                    'o-rounded-start-bubble': !props.squashed and isAlignedRight,
+                                                    'o-rounded-end-bubble': !props.squashed and !isAlignedRight,
                                                     'o-blue': message.bubbleColor === 'blue',
                                                     'o-green': message.bubbleColor === 'green',
                                                     'o-orange': message.bubbleColor === 'orange',
-                                                    }" t-attf-class="{{ isAlignedRight ? 'rounded-start-3' : 'rounded-end-3' }}"/>
+                                                }"/>
                                                 <MessageInReply t-if="message.parentMessage" message="message" onClick="props.onParentMessageClick"/>
                                                 <div class="position-relative text-break o-mail-Message-body" t-att-class="{
                                                             'p-1': message.is_note,
@@ -81,7 +107,8 @@
                                                             'py-2': !message.is_note and !state.isEditing,
                                                             'pt-2 pb-1': !message.is_note and state.isEditing,
                                                             'o-note': message.is_note,
-                                                            'align-self-start rounded-end-3 rounded-bottom-3': !state.isEditing and !message.is_note,
+                                                            'o-rounded-bubble': props.squashed,
+                                                            'align-self-start o-rounded-end-bubble o-rounded-bottom-bubble': !state.isEditing and !message.is_note and !props.squashed,
                                                             'flex-grow-1': state.isEditing,
                                                             }" t-ref="body">
                                                     <i t-if="message.isEmpty" class="text-muted opacity-75" t-esc="message.inlineBody"/>
@@ -104,7 +131,7 @@
                                             </div>
                                         </t>
                                     </t>
-                                    <t t-if="!message.is_note and message.hasTextContent and !env.inChatWindow" t-call="mail.Message.actions"/>
+                                    <t t-if="message.bubbleColor and message.hasTextContent and !env.inChatWindow and !(props.asCard and isMobileOS)" t-call="mail.Message.actions"/>
                                 </div>
                                 <div class="position-relative">
                                     <AttachmentList
@@ -114,9 +141,9 @@
                                         imagesHeight="message.attachment_ids.length === 1 ? 300 : 75"
                                         messageSearch="props.messageSearch"/>
                                 </div>
-                                <LinkPreviewList t-if="message.link_preview_ids.length > 0 and store.hasLinkPreviewFeature and !message.linkPreviewSquash" linkPreviews="message.link_preview_ids" deletable="props.message.editable"/>
+                                <LinkPreviewList t-if="message.link_preview_ids.length > 0 and store.hasLinkPreviewFeature and !message.linkPreviewSquash" linkPreviews="message.link_preview_ids" deletable="message.isSelfAuthored or store.self.isAdmin"/>
                             </div>
-                            <t t-if="!message.is_note and (!message.hasTextContent or env.inChatWindow)" t-call="mail.Message.actions"/>
+                            <t t-if="message.bubbleColor and (!message.hasTextContent or env.inChatWindow) and !(props.asCard and isMobileOS)" t-call="mail.Message.actions"/>
                         </div>
                         <MessageReactions message="message" openReactionMenu="openReactionMenu" t-if="message.reactions.length"/>
                     </div>
@@ -130,20 +157,29 @@
 </t>
 
 <t t-name="mail.Message.actions">
-    <div t-if="props.hasActions and message.hasActions and !state.isEditing" class="o-mail-Message-actions d-print-none"
+    <div t-if="props.hasActions and message.hasActions and !state.isEditing" class="o-mail-Message-actions d-print-none d-flex align-items-start"
         t-att-class="{
             'start-0': isAlignedRight,
             'mx-1': !isMobileOS,
-            'mt-1': !message.is_note,
-            'my-n2': message.is_note,
+            'mt-1': message.bubbleColor and !props.asCard and !isMobileOS,
+            'my-n2': !message.bubbleColor and !props.asCard and !isMobileOS,
             'invisible': !isActive and !isMobileOS,
             'o-expanded': optionsDropdown.isOpen
         }"
     >
-        <t t-if="isMobileOS and !mobileExpanded" t-call="mail.Message.expandAction"/>
+        <t t-if="isMobileOS">
+            <t t-if="isAlignedRight">
+                <t t-call="mail.Message.emptyQuickAction"/>
+                <t t-if="!props.asCard" t-call="mail.Message.expandAction"/>
+            </t>
+            <t t-else="">
+                <t t-call="mail.Message.expandAction"/>
+                <t t-if="!props.asCard" t-call="mail.Message.emptyQuickAction"/>
+            </t>
+        </t>
         <t t-else="">
             <t t-set="isReverse" t-value="env.inChatWindow and isAlignedRight"/>
-            <div class="d-flex rounded-1 overflow-hidden" t-att-class="{ 'flex-row-reverse': isReverse }">
+            <div class="d-flex rounded-1 overflow-hidden gap-1" t-att-class="{ 'flex-row-reverse': isReverse }">
                 <t t-set="quickActions" t-value="messageActions.actions.slice(0, messageActions.actions.length gt quickActionCount ? quickActionCount - 1 : quickActionCount)"/>
                 <t t-foreach="quickActions" t-as="action" t-key="action.id">
                     <t t-set="isStart" t-value="(!isReverse and action.isFirst) or (isReverse and action.isLast)"/>
@@ -152,7 +188,7 @@
                         'rounded-start-1': isStart,
                         'rounded-end-1': isEnd,
                     }"/>
-                    <button t-else="" class="btn border-0 px-1 py-0 rounded-0" t-att-title="action.title" t-att-name="action.id" t-on-click.stop="action.onClick" t-att-class="{
+                    <button t-else="" class="btn border-0 p-0 rounded-0" t-att-title="action.title" t-att-name="action.id" t-on-click.stop="action.onClick" t-att-class="{
                         'rounded-start-1': isStart,
                         'rounded-end-1': isEnd,
                     }">
@@ -176,9 +212,7 @@
                     </Dropdown>
                 </div>
                 <t t-foreach="Array.from({ length: quickActionCount - quickActions.length - 1 })" t-as="emptyQuickAction" t-key="emptyQuickAction_index">
-                    <button class="btn border-0 px-1 py-0 rounded-0 opacity-0 pe-none">
-                        <i class="fa-lg fa fa-question"/>
-                    </button>
+                    <t t-call="mail.Message.emptyQuickAction"/>
                 </t>
             </div>
         </t>
@@ -187,14 +221,22 @@
 
 <t t-name="mail.Message.expandAction">
     <button class="btn border-0 rounded-0 o-mail-Message-expandBtn" t-att-title="expandText" t-on-click="openMobileActions" t-att-class="{
-        'o-mail-Message-openActionMobile p-2 mt-n2 rounded-circle user-select-none': isMobileOS and !mobileExpanded,
-        'me-n2': isMobileOS and !mobileExpanded and isAlignedRight,
-        'ms-n2': isMobileOS and !mobileExpanded and !isAlignedRight,
-        'px-2 py-0': !isMobileOS,
+        'o-mail-Message-openActionMobile p-2 rounded-circle user-select-none': isMobileOS,
+        'me-n2': isMobileOS and (isAlignedRight and !props.asCard or !isAlignedRight and props.asCard),
+        'ms-n2': isMobileOS and (isAlignedRight and props.asCard or !isAlignedRight and !props.asCard),
+        'mt-n3': isMobileOS and props.asCard,
+        'mt-n1': isMobileOS and !props.asCard,
+        'px-1 py-0': !isMobileOS,
         'rounded-start-1': !isMobileOS and isReverse,
         'rounded-end-1': !isMobileOS and !isReverse,
     }">
         <i class="fa fa-lg fa-ellipsis-v" t-att-class="{ 'order-1': props.isInChatWindow, 'fa-fw': isMobileOS }" tabindex="1"/>
+    </button>
+</t>
+
+<t t-name="mail.Message.emptyQuickAction">
+    <button class="btn border-0 p-0 rounded-0 opacity-0 pe-none">
+        <i class="fa-lg fa fa-question"/>
     </button>
 </t>
 
@@ -224,6 +266,12 @@
 
 <t t-name="mail.Message.mentionedChannelIcon">
     <i t-att-class="icon"/>
+</t>
+
+<t t-name="mail.Message.sidebarStarred">
+    <small class="text-center lh-1 o-opacity-35" t-att-class="{ 'align-self-start ms-1': isAlignedRight, 'align-self-end me-1': !isAlignedRight, 'mt-2': props.squashed, 'mt-1': !props.squashed }">
+        <i class="fa fa-star o-mail-Message-starred"/>
+    </small>
 </t>
 
 </templates>

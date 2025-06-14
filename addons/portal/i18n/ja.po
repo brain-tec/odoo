@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:37+0000\n"
+"POT-Creation-Date: 2025-05-16 20:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Junko Augias, 2025\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
@@ -659,13 +659,13 @@ msgstr "表示名"
 #. odoo-javascript
 #: code:addons/portal/static/src/interactions/sidebar.js:0
 msgid "Due in %s days"
-msgstr "%sで期日"
+msgstr "期日まであと%s日"
 
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/interactions/sidebar.js:0
 msgid "Due today"
-msgstr "今日が期限"
+msgstr "本日期日"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_kanban
@@ -856,12 +856,6 @@ msgid ""
 msgstr ""
 "この記述が明確で完全であることが非常に\n"
 "　　　　重要です、"
-
-#. module: portal
-#. odoo-javascript
-#: code:addons/portal/static/src/xml/portal_security.xml:0
-msgid "Key Description"
-msgstr "キー説明"
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__write_uid
@@ -1132,7 +1126,6 @@ msgstr "セキュリティ"
 #. module: portal
 #. odoo-javascript
 #: code:addons/portal/static/src/interactions/portal_security.js:0
-#: code:addons/portal/static/src/xml/portal_security.xml:0
 msgid "Security Control"
 msgstr "セキュリティ管理"
 

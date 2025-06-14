@@ -5,6 +5,8 @@ import * as Chrome from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
 import * as NumberPopup from "@point_of_sale/../tests/generic_helpers/number_popup_util";
 import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import * as SelectionPopup from "@point_of_sale/../tests/generic_helpers/selection_popup_util";
+import * as BackendUtils from "@point_of_sale/../tests/pos/tours/utils/backend_utils";
+import * as Utils from "@point_of_sale/../tests/generic_helpers/utils";
 import { registry } from "@web/core/registry";
 import { negate } from "@point_of_sale/../tests/generic_helpers/utils";
 
@@ -133,7 +135,49 @@ registry.category("web_tour.tours").add("CashierCannotClose", {
             SelectionPopup.has("Mitchell Admin", { run: "click" }),
             Chrome.clickMenuButton(),
             {
-                trigger: negate(`span.dropdown-item:contains("Close Register")`),
+                trigger: `span.dropdown-item:contains("Close Register")`,
             },
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_basic_user_can_change_price", {
+    steps: () =>
+        [
+            Chrome.clickBtn("Open Register"),
+            PosHr.loginScreenIsShown(),
+            PosHr.clickLoginButton(),
+            SelectionPopup.has("Test Employee 3", { run: "click" }),
+            Dialog.confirm("Open Register"),
+            ProductScreen.addOrderline("Desk Pad", "1", "10", "10"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_change_on_rights_reflected_directly", {
+    steps: () =>
+        [
+            Chrome.clickBtn("Open Register"),
+            PosHr.loginScreenIsShown(),
+            PosHr.clickLoginButton(),
+            SelectionPopup.has("Mitchell Admin", { run: "click" }),
+            Dialog.confirm("Open Register"),
+            Chrome.clickMenuOption("Backend"),
+            BackendUtils.editShopConfiguration("Shop"),
+            {
+                trigger: ".o_tag:contains('Pos Employee1') .o_delete",
+                run: "click",
+            },
+            BackendUtils.saveConfiguration(),
+            {
+                trigger: ".o_main_navbar .o-dropdown-item:contains('Dashboard')",
+                run: "click",
+            },
+            {
+                trigger: ".btn:contains('Continue Selling')",
+                run: "click",
+            },
+            Chrome.clickBtn("Unlock Register"),
+            PosHr.loginScreenIsShown(),
+            PosHr.clickLoginButton(),
+            Utils.negateStep(...SelectionPopup.has("Pos Employee1")),
         ].flat(),
 });

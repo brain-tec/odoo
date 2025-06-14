@@ -79,6 +79,7 @@ ALLOWED_MIMETYPES = {
 }
 
 EMPTY = object()
+BYPASS_LOCK_CHECK = object()
 
 
 class AccountMove(models.Model):
@@ -797,7 +798,7 @@ class AccountMove(models.Model):
     @api.depends('invoice_date', 'company_id')
     def _compute_date(self):
         for move in self:
-            if not move.invoice_date:
+            if not move.invoice_date or not move.is_invoice():
                 if not move.date:
                     move.date = fields.Date.context_today(self)
                 continue
@@ -1818,21 +1819,17 @@ class AccountMove(models.Model):
     @api.depends('move_type', 'partner_id', 'company_id')
     def _compute_narration(self):
         use_invoice_terms = self.env['ir.config_parameter'].sudo().get_param('account.use_invoice_terms')
-        for move in self:
-            if not move.is_sale_document(include_receipts=True):
-                continue
-            if not use_invoice_terms:
-                move.narration = False
+        invoice_to_update_terms = self.filtered(lambda m: use_invoice_terms and m.is_sale_document(include_receipts=True))
+        for move in invoice_to_update_terms:
+            lang = move.partner_id.lang or self.env.user.lang
+            if move.company_id.terms_type != 'html':
+                narration = move.company_id.with_context(lang=lang).invoice_terms if not is_html_empty(move.company_id.invoice_terms) else ''
             else:
-                lang = move.partner_id.lang or self.env.user.lang
-                if not move.company_id.terms_type == 'html':
-                    narration = move.company_id.with_context(lang=lang).invoice_terms if not is_html_empty(move.company_id.invoice_terms) else ''
-                else:
-                    baseurl = self.env.company.get_base_url() + '/terms'
-                    context = {'lang': lang}
-                    narration = _('Terms & Conditions: %s', baseurl)
-                    del context
-                move.narration = narration or False
+                baseurl = self.env.company.get_base_url() + '/terms'
+                context = {'lang': lang}
+                narration = _('Terms & Conditions: %s', baseurl)
+                del context
+            move.narration = narration or False
 
     def _get_partner_credit_warning_exclude_amount(self):
         # to extend in module 'sale'; see there for details
@@ -2467,6 +2464,8 @@ class AccountMove(models.Model):
         ''', tuple(moves.ids)))
 
     def _check_fiscal_lock_dates(self):
+        if self.env.context.get('bypass_lock_check') is BYPASS_LOCK_CHECK:
+            return
         for move in self:
             journal = move.journal_id
             violated_lock_dates = move.company_id._get_lock_date_violations(
@@ -2884,7 +2883,7 @@ class AccountMove(models.Model):
             return self.env['account.move.line']._fields[field].convert_to_write(record[field], record)
 
         def get_tax_line_tracked_fields(line):
-            return ('amount_currency', 'balance')
+            return ('amount_currency', 'balance', 'analytic_distribution')
 
         def get_base_line_tracked_fields(line):
             grouping_key = AccountTax._prepare_base_line_grouping_key(fake_base_line)
@@ -2967,9 +2966,19 @@ class AccountMove(models.Model):
                 # A base line has been modified.
                 round_from_tax_lines = (
                     # The changed lines don't affect the taxes.
-                    all(not line.tax_ids and not move_base_lines_values_before.get(line, {}).get('tax_ids') for line in changed_lines)
+                    all(
+                        not line.tax_ids and not move_base_lines_values_before.get(line, {}).get('tax_ids')
+                        for line in changed_lines
+                    )
                     # Keep the tax lines amounts if an amount has been manually computed.
-                    or any_field_has_changed(move_tax_lines_values_before, tax_lines)
+                    or (
+                        list(move_tax_lines_values_before) != list(tax_lines)
+                        or any(
+                            self.env.is_protected(line._fields[fname], line)
+                            for line in tax_lines
+                            for fname in move_tax_lines_values_before[line]
+                        )
+                    )
                 )
 
                 # If the move has been created with all lines including the tax ones and the balance/amount_currency are provided on
@@ -3529,7 +3538,8 @@ class AccountMove(models.Model):
             for move in self:
                 if 'tax_totals' in vals:
                     super(AccountMove, move).write({'tax_totals': vals['tax_totals']})
-        if 'journal_id' in vals:
+
+        if any(field in vals for field in ['journal_id', 'currency_id']):
             self.line_ids._check_constrains_account_id_journal_id()
 
         return res
@@ -4435,7 +4445,8 @@ class AccountMove(models.Model):
 
                         if success or file_data['type'] == 'pdf' or file_data['attachment'].mimetype in ALLOWED_MIMETYPES:
                             (invoice.invoice_line_ids - existing_lines).is_imported = True
-                            invoice._link_bill_origin_to_purchase_orders(timeout=4)
+                            if not extend_with_existing_lines:
+                                invoice._link_bill_origin_to_purchase_orders(timeout=4)
                             invoices |= invoice
                             current_invoice = self.env['account.move']
                             add_file_data_results(file_data, invoice)
@@ -5205,9 +5216,9 @@ class AccountMove(models.Model):
                         if partial.exchange_move_id:
                             to_post |= partial.exchange_move_id
                             # If the draft invoice changed since it was reconciled, in a way that would affect the exchange diff,
-                            # any existing reconcilation and draft exchange move would be deleted already (to force the user to 
+                            # any existing reconcilation and draft exchange move would be deleted already (to force the user to
                             # re-do the reconciliation).
-                            # This is ensured by the the checks in env['account.move.line'].write(): 
+                            # This is ensured by the the checks in env['account.move.line'].write():
                             #     see env[account.move.line]._get_lock_date_protected_fields()['reconciliation']
 
                         if partial._get_draft_caba_move_vals() != partial.draft_caba_move_vals:
@@ -5389,6 +5400,7 @@ class AccountMove(models.Model):
         }
 
     def action_update_fpos_values(self):
+        self.invoice_line_ids._compute_price_unit()
         self.invoice_line_ids._compute_tax_ids()
         self.line_ids._compute_account_id()
 
@@ -5477,6 +5489,7 @@ class AccountMove(models.Model):
         self.ensure_one()
 
         report_action = self.action_send_and_print()
+        report_action['context'].update({'allow_partners_without_mail': True})
         if self.env.is_admin() and not self.env.company.external_report_layout_id and not self.env.context.get('discard_logo_check'):
             report_action = self.env['ir.actions.report']._action_configure_external_report_layout(report_action, "account.action_base_document_layout_configurator")
             report_action['context']['default_from_invoice'] = self.move_type == 'out_invoice'
@@ -5900,9 +5913,9 @@ class AccountMove(models.Model):
             next_amount_to_pay = self.amount_residual
             next_payment_reference = self.name
             next_due_date = epd_installment['date_maturity']
-            discount_date = epd_installment['line'].discount_date
+            discount_date = epd_installment['line'].discount_date or fields.Date.context_today(self)
             discount_amount_currency = epd_installment['discount_amount_currency']
-            days_left = (discount_date - fields.Date.context_today(self)).days  # should never be lower than 0 since epd is valid
+            days_left = max(0, (discount_date - fields.Date.context_today(self)).days)  # should never be lower than 0 since epd is valid
             if days_left > 0:
                 discount_msg = _(
                     "Discount of %(amount)s if paid within %(days)s days",

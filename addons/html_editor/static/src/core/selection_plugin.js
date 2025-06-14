@@ -23,7 +23,6 @@ import {
     normalizeDeepCursorPosition,
     normalizeFakeBR,
 } from "../utils/selection";
-import { isElement } from "../utils/dom_info";
 import { closestScrollableY } from "@web/core/utils/scrolling";
 
 /**
@@ -126,30 +125,18 @@ function scrollToSelection(selection) {
         return;
     }
     let rect = range.getBoundingClientRect();
-    // If the range is invisible (0 width & height) and selection is collapsed,
-    // it's likely inside an empty paragraph.
-    // In that case, we try to get the bounding rect from a nearby child element
-    // within the anchorNode to better get position the selection.
-    if (
-        rect.width === 0 &&
-        rect.height === 0 &&
-        selection.isCollapsed &&
-        selection.anchorNode.hasChildNodes()
-    ) {
-        const target =
-            selection.anchorNode.childNodes[selection.anchorOffset] ||
-            selection.anchorNode.childNodes[selection.anchorOffset - 1];
-        if (isElement(target)) {
-            rect = target.getBoundingClientRect();
-        }
+    // If the range is invisible (0 width & height),
+    // We call `getBoundingClientRect` on closest element.
+    if (rect.width === 0 && rect.height === 0 && selection.isCollapsed) {
+        rect = closestElement(selection.anchorNode).getBoundingClientRect();
     }
 
     const containerRect = container.getBoundingClientRect();
     const offsetTop = rect.top - containerRect.top + container.scrollTop;
     const offsetBottom = rect.bottom - containerRect.top + container.scrollTop;
 
-    if (rect.height >= containerRect.height) {
-        // Selection is larger than scrollable so we do nothing.
+    if (rect.bottom > containerRect.top && rect.top < containerRect.bottom) {
+        // If selection is partially visible, no need to scroll.
         return;
     }
     // Simulate the "nearest" behavior by scrolling to the closest top/bottom edge
@@ -218,7 +205,9 @@ export class SelectionPlugin extends Plugin {
             }
         });
         this.addDomListener(this.editable, "mousedown", (ev) => {
-            if (ev.detail >= 3) {
+            if (ev.detail === 2) {
+                this.correctDoubleClick = true;
+            } else if (ev.detail >= 3) {
                 this.correctTripleClick = true;
             }
         });
@@ -263,6 +252,31 @@ export class SelectionPlugin extends Plugin {
                 if (focusOffset === 0 && anchorNode !== focusNode) {
                     [focusNode, focusOffset] = endPos(previousLeaf(focusNode));
                     return this.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
+                }
+            }
+            if (this.correctDoubleClick) {
+                this.correctDoubleClick = false;
+                const { anchorNode, anchorOffset, focusNode } = this.activeSelection;
+                const anchorElement = closestElement(anchorNode);
+                // Allow editing the text of a link after "double click" on the last word of said link.
+                // This is done by correcting the selection focus inside of the link
+                if (
+                    anchorElement.tagName === "A" &&
+                    anchorNode !== focusNode &&
+                    focusNode.previousSibling === anchorElement
+                ) {
+                    const anchorElementLength = anchorElement.childNodes.length;
+
+                    // Due to the ZWS added around links we can always expect
+                    // the last childNode to be a ZWS in its own textNode.
+                    // therefore we can safely set the selection focus before last node.
+                    const newSelection = {
+                        anchorNode: anchorNode,
+                        anchorOffset: anchorOffset,
+                        focusNode: anchorElement,
+                        focusOffset: anchorElementLength - 1,
+                    };
+                    return this.setSelection(newSelection);
                 }
             }
 

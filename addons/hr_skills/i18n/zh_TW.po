@@ -531,7 +531,7 @@ msgstr "Elphinstone Primary School"
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_email
 msgid "Email Marketing"
-msgstr "電郵市場行銷"
+msgstr "電郵推廣"
 
 #. module: hr_skills
 #: model:ir.model,name:hr_skills.model_hr_employee
@@ -736,7 +736,7 @@ msgstr "分組依據"
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_skill_view_search
 msgid "Group By..."
-msgstr "分組依據..."
+msgstr "分組依據⋯"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_html

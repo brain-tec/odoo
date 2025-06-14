@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 20:36+0000\n"
+"POT-Creation-Date: 2025-05-16 20:37+0000\n"
 "PO-Revision-Date: 2025-02-20 10:06+0000\n"
 "Last-Translator: Manon Rondou, 2025\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
@@ -537,10 +537,8 @@ msgid "All Product Variants using this Tag"
 msgstr "Alle productvarianten die deze label gebruiken"
 
 #. module: product
-#. odoo-javascript
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__applied_on__3_global
 #: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
 msgid "All Products"
@@ -1037,7 +1035,7 @@ msgstr "Landengroepen"
 #. module: product
 #: model:ir.model,website_form_label:product.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Een klant aanmaken"
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
@@ -1935,6 +1933,7 @@ msgstr "Kilogram"
 #: code:addons/product/models/product_template.py:0
 msgid "Labels cannot be printed for products of service type"
 msgstr ""
+"Labels kunnen niet worden afgedrukt voor producten van het servicetype"
 
 #. module: product
 #: model:product.template,name:product.product_product_6_product_template
@@ -3343,6 +3342,13 @@ msgstr ""
 "product is gebruikt."
 
 #. module: product
+#. odoo-python
+#: code:addons/product/models/product_product.py:0
+#: code:addons/product/models/product_template.py:0
+msgid "The cost of a product can't be negative."
+msgstr ""
+
+#. module: product
 #: model:product.template,description_sale:product.desk_organizer_product_template
 msgid ""
 "The desk organiser is perfect for storing all kinds of small things and "
@@ -3608,7 +3614,7 @@ msgstr "Prijs:"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.report_packagingbarcode
 msgid "Units"
-msgstr "Stuks"
+msgstr "Stuk(s)"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.res_config_settings_view_form
@@ -4217,7 +4223,7 @@ msgstr "Je moet een positief aantal instellen."
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid "attribute_id"
-msgstr ""
+msgstr "attribute_id"
 
 #. module: product
 #. odoo-javascript

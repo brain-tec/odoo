@@ -66,8 +66,8 @@ test("many2one in list view", async () => {
     expect(".o_avatar_card").toHaveCount(1);
     expect(".o_avatar_card_buttons button:eq(0)").toHaveText("Send message");
     await contains(".o_avatar_card_buttons button:eq(0)").click();
-    expect(".o-mail-ChatWindow").toHaveCount(2);
     await waitFor(".o-mail-ChatWindow-header:contains('Luigi')");
+    expect(".o-mail-ChatWindow").toHaveCount(2);
 
     // click on third employee (same as first)
     await contains(".o_data_cell .o_m2o_avatar > img:eq(2)").click();
@@ -77,6 +77,7 @@ test("many2one in list view", async () => {
     expect(".o_card_user_infos > a").toHaveText("Mario@partner.com");
     expect(".o_avatar_card_buttons button:eq(0)").toHaveText("Send message");
     await contains(".o_avatar_card_buttons button:eq(0)").click();
+    await waitFor(".o-mail-ChatWindow-header:contains('Mario')");
     expect(".o-mail-ChatWindow").toHaveCount(2);
 });
 
@@ -116,17 +117,6 @@ test("many2one: click on an employee not associated with a user", async () => {
     const { env } = await makeMockServer();
     const employeeId = env["hr.employee.public"].create({ name: "Mario" });
     const avatarId = env["m2x.avatar.employee"].create({ employee_id: employeeId });
-    onRpc("web_read", (args) => {
-        expect.step(`web_read ${args.model} ${args.args[0]}`);
-        expect(args.kwargs.specification).toEqual({
-            employee_id: {
-                fields: {
-                    display_name: {},
-                },
-            },
-            display_name: {},
-        });
-    });
     onRpc("has_group", () => false);
     await mountView({
         type: "form",
@@ -136,7 +126,6 @@ test("many2one: click on an employee not associated with a user", async () => {
     });
     await waitFor(".o_field_widget[name=employee_id] input:value(Mario)");
     await contains(".o_m2o_avatar > img").click();
-    expect.verifySteps([`web_read m2x.avatar.employee ${avatarId}`]);
 });
 
 test("many2one with hr group widget in kanban view", async () => {
@@ -304,12 +293,8 @@ test("many2one with hr group widget in form view", async () => {
     const avatarId_1 = env["m2x.avatar.employee"].create({
         employee_ids: [employeeId_1, employeeId_2],
     });
-    onRpc("web_read", (args) => {
-        expect.step(`web_read ${args.model} ${args.args[0]}`);
-    });
-    onRpc("read", (args) => {
-        expect.step(`read ${args.model} ${args.args[0]}`);
-    });
+    expect.step(`read hr.employee ${employeeId_1}`);
+    expect.step(`read hr.employee ${employeeId_2}`);
     await mountView({
         type: "form",
         resId: avatarId_1,
@@ -324,7 +309,6 @@ test("many2one with hr group widget in form view", async () => {
     await contains(".o_field_many2many_avatar_employee .o_tag .o_m2m_avatar:eq(0)").click();
     await contains(".o_field_many2many_avatar_employee .o_tag .o_m2m_avatar:eq(1)").click();
     expect.verifySteps([
-        `web_read m2x.avatar.employee ${avatarId_1}`,
         `read hr.employee ${employeeId_1}`,
         `read hr.employee ${employeeId_2}`,
     ]);
@@ -458,8 +442,8 @@ test("many2many in kanban view", async () => {
     expect(".o_avatar_card").toHaveCount(1);
     expect(".o_avatar_card_buttons button:eq(0)").toHaveText("Send message");
     await contains(".o_avatar_card_buttons button:eq(0)").click();
-    expect(".o-mail-ChatWindow").toHaveCount(2);
     await waitFor(".o-mail-ChatWindow-header:contains('Luigi')");
+    expect(".o-mail-ChatWindow").toHaveCount(2);
 });
 
 test("many2many: click on an employee not associated with a user", async () => {
@@ -507,6 +491,6 @@ test("many2many: click on an employee not associated with a user", async () => {
     expect(".o_avatar_card").toHaveCount(1);
     expect(".o_avatar_card_buttons button:eq(0)").toHaveText("Send message");
     await contains(".o_avatar_card_buttons button:eq(0)").click();
-    expect(".o-mail-ChatWindow").toHaveCount(1);
     await waitFor(".o-mail-ChatWindow-header:contains('Luigi')");
+    expect(".o-mail-ChatWindow").toHaveCount(1);
 });

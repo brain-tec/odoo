@@ -1505,7 +1505,7 @@ msgstr "Eenheid"
 #. module: repair
 #: model_terms:ir.ui.view,arch_db:repair.report_repairorder
 msgid "Units"
-msgstr "Stuks"
+msgstr "Stuk(s)"
 
 #. module: repair
 #: model_terms:ir.ui.view,arch_db:repair.view_repair_order_form
@@ -1617,7 +1617,7 @@ msgstr "ID"
 #. odoo-python
 #: code:addons/repair/models/sale_order.py:0
 msgid "sale_order_id"
-msgstr ""
+msgstr "sale_order_id"
 
 #. module: repair
 #: model:ir.actions.server,name:repair.action_repair_overview

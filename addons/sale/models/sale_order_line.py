@@ -120,6 +120,7 @@ class SaleOrderLine(models.Model):
         string="Description",
         compute='_compute_name',
         store=True, readonly=False, required=True, precompute=True)
+    translated_product_name = fields.Text(compute='_compute_translated_product_name')
 
     product_uom_qty = fields.Float(
         string="Quantity",
@@ -302,7 +303,18 @@ class SaleOrderLine(models.Model):
     def _compute_display_name(self):
         name_per_id = self._additional_name_per_id()
         for so_line in self.sudo():
-            name = '{} - {}'.format(so_line.order_id.name, so_line.name and so_line.name.split('\n')[0] or so_line.product_id.name)
+            if so_line.order_partner_id.lang:
+                so_line = so_line.with_context(lang=so_line.order_id._get_lang())
+            if (product := so_line.product_id).display_name:
+                default_name = so_line._get_sale_order_line_multiline_description_sale()
+                if so_line.name == default_name:
+                    description = product.display_name
+                else:
+                    parts = (so_line.name or "").split('\n', 2)
+                    description = parts[1] if len(parts) > 1 and parts[1] else product.display_name
+            else:
+                description = (so_line.name or "").split('\n', 1)[0]
+            name = f"{so_line.order_id.name} - {description}"
             additional_name = name_per_id.get(so_line.id)
             if additional_name:
                 name = f'{name} {additional_name}'
@@ -405,7 +417,7 @@ class SaleOrderLine(models.Model):
         if not self.product_custom_attribute_value_ids and not no_variant_ptavs:
             return ""
 
-        name = ""
+        name = "\n"
 
         custom_ptavs = self.product_custom_attribute_value_ids.custom_product_template_attribute_value_id
         multi_ptavs = no_variant_ptavs.filtered(lambda ptav: ptav.display_type == 'multi').sorted()
@@ -457,6 +469,13 @@ class SaleOrderLine(models.Model):
                 )
 
         return name
+
+    @api.depends('product_id')
+    def _compute_translated_product_name(self):
+        for line in self:
+            line.translated_product_name = line.product_id.with_context(
+                lang=line.order_id._get_lang(),
+            ).display_name
 
     @api.depends('display_type', 'product_id')
     def _compute_product_uom_qty(self):
@@ -903,18 +922,20 @@ class SaleOrderLine(models.Model):
         """
         Compute the quantity to invoice. If the invoice policy is order, the quantity to invoice is
         calculated from the ordered quantity. Otherwise, the quantity delivered is used.
-        For combo product lines, first compute all other lines, and then set quantity to invoice
-        only if at least one of its combo item lines is invoiceable.
+        For combo product lines, compute the value if a linked combo item line gets recomputed,
+        and set `qty_to_invoice` only if at least one of its combo item lines is invoiceable.
         """
-        combo_lines = []
+        combo_lines = set()
         for line in self:
             if line.state == 'sale' and not line.display_type:
                 if line.product_id.type == 'combo':
-                    combo_lines.append(line)
+                    combo_lines.add(line)
                 elif line.product_id.invoice_policy == 'order':
                     line.qty_to_invoice = line.product_uom_qty - line.qty_invoiced
                 else:
                     line.qty_to_invoice = line.qty_delivered - line.qty_invoiced
+                if line.combo_item_id and line.linked_line_id:
+                    combo_lines.add(line.linked_line_id)
             else:
                 line.qty_to_invoice = 0
         for combo_line in combo_lines:
@@ -1331,7 +1352,6 @@ class SaleOrderLine(models.Model):
             'sale_line_ids': [Command.link(self.id)],
             'is_downpayment': self.is_downpayment,
         }
-        self._set_analytic_distribution(res, **optional_values)
         downpayment_lines = self.invoice_lines.filtered('is_downpayment')
         if self.is_downpayment and downpayment_lines:
             res['account_id'] = downpayment_lines.account_id[:1].id
