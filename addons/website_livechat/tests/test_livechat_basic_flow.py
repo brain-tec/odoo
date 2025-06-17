@@ -305,7 +305,6 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
                     "channel_type": "livechat",
                     "country_id": False,
                     "create_uid": self.user_public.id,
-                    "custom_channel_name": False,
                     "custom_notifications": False,
                     "default_display_mode": False,
                     "description": False,
@@ -364,6 +363,19 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
             headers={"Referer": "/hide"},
         )
         self.assertEqual(result["Store"]["livechat_available"], False)
+
+    def test_livechat_visitor_to_store(self):
+        """Test livechat_visitor_id is sent with livechat channels data even when there is no
+        visitor."""
+        self.target_visitor = None
+        channel_info = self.make_jsonrpc_request(
+            "/im_livechat/get_session",
+            {
+                "anonymous_name": "whatever",
+                "channel_id": self.livechat_channel.id,
+            },
+        )["store_data"]["discuss.channel"][0]
+        self.assertEqual(channel_info["livechat_visitor_id"], False)
 
 
 @tests.tagged('post_install', '-at_install')

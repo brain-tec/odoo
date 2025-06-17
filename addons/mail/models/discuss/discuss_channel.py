@@ -876,13 +876,8 @@ class DiscussChannel(models.Model):
             :param partner_ids : the partner to notify
         """
         for partner in self.env['res.partner'].browse(partner_ids):
-            user_id = partner.user_ids and partner.user_ids[0] or False
-            if user_id:
-                user_channels = self.with_user(user_id).with_context(
-                    # sudo: res.company - context is required by ir.rules
-                    allowed_company_ids=user_id.sudo().company_ids.ids
-                )
-                partner._bus_send_store(user_channels)
+            if user := partner.main_user_id:
+                partner._bus_send_store(self.with_user(user).with_context(allowed_company_ids=[]))
 
     # ------------------------------------------------------------
     # INSTANT MESSAGING API
@@ -1068,7 +1063,6 @@ class DiscussChannel(models.Model):
         ]
         if for_current_user:
             res = res + [
-                forward_member_field("custom_channel_name"),
                 forward_member_field("custom_notifications"),
                 {"fetchChannelInfoState": "fetched"},
                 "is_editable",
@@ -1085,6 +1079,7 @@ class DiscussChannel(models.Model):
                 Store.One(
                     "self_member_id",
                     extra_fields=[
+                        "custom_channel_name",
                         "last_interest_dt",
                         "message_unread_counter",
                         {"message_unread_counter_bus_id": bus_last_id},
@@ -1221,9 +1216,8 @@ class DiscussChannel(models.Model):
 
     def channel_set_custom_name(self, name):
         self.ensure_one()
-        member = self.env['discuss.channel.member'].search([('partner_id', '=', self.env.user.partner_id.id), ('channel_id', '=', self.id)])
-        member.write({'custom_channel_name': name})
-        member._bus_send_store(self, {"custom_channel_name": member.custom_channel_name})
+        self.self_member_id.custom_channel_name = name
+        self.self_member_id._bus_send_store(self.self_member_id, "custom_channel_name")
 
     def channel_rename(self, name):
         self.ensure_one()

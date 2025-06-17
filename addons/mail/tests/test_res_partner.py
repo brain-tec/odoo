@@ -121,13 +121,30 @@ class TestPartner(MailCommon):
         for i in range(0, 2):
             mail_new_test_user(self.env, login=f'{name}-{i}-portal-user', groups='base.group_portal')
             mail_new_test_user(self.env, login=f'{name}-{i}-internal-user', groups='base.group_user')
-        partners_format = self.env["res.partner"].get_mention_suggestions(name, limit=5)[
-            "res.partner"
-        ]
+        store_data = self.env["res.partner"].get_mention_suggestions(name, limit=5)
+        partners_format = store_data["res.partner"]
         self.assertEqual(len(partners_format), 5, "should have found limit (5) partners")
         # return format for user is either a dict (there is a user and the dict is data) or a list of command (clear)
-        self.assertEqual(list(map(lambda p: p['isInternalUser'], partners_format)), [True, True, False, False, False], "should return internal users in priority")
-        self.assertEqual(list(map(lambda p: bool(p['userId']), partners_format)), [True, True, True, True, False], "should return partners without users last")
+        self.assertEqual(
+            [
+                next(
+                    (
+                        not u["share"]
+                        for u in store_data["res.users"]
+                        if u["id"] == p["main_user_id"]
+                    ),
+                    False,
+                )
+                for p in partners_format
+            ],
+            [True, True, False, False, False],
+            "should return internal users in priority",
+        )
+        self.assertEqual(
+            [bool(p["main_user_id"]) for p in partners_format],
+            [True, True, True, True, False],
+            "should return partners without users last",
+        )
 
     @users('admin')
     def test_find_or_create(self):

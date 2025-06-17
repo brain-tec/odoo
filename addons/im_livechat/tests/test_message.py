@@ -216,11 +216,13 @@ class TestImLivechatMessage(ChatbotCase, MailCommon):
                         ].partner_id._get_avatar_128_access_token(),
                         "id": self.users[1].partner_id.id,
                         "is_company": False,
-                        "isInternalUser": True,
+                        "main_user_id": self.users[1].id,
                         "user_livechat_username": "chuck",
-                        "userId": self.users[1].id,
                         "write_date": fields.Datetime.to_string(self.users[1].write_date),
                     },
+                ),
+                "res.users": self._filter_users_fields(
+                    {"id": self.users[1].id, "share": False},
                 ),
             },
         )
@@ -326,15 +328,17 @@ class TestImLivechatMessage(ChatbotCase, MailCommon):
                                     {
                                         "avatar_128_access_token": self.env.user.partner_id._get_avatar_128_access_token(),
                                         "id": self.env.user.partner_id.id,
-                                        "isInternalUser": False,
                                         "is_company": False,
+                                        "main_user_id": self.env.user.id,
                                         "name": "Chell Gladys",
-                                        "userId": self.env.user.id,
                                         "user_livechat_username": False,
                                         "write_date": fields.Datetime.to_string(
                                             self.env.user.write_date
                                         ),
                                     },
+                                ),
+                                "res.users": self._filter_users_fields(
+                                    {"id": self.env.user.id, "share": True},
                                 ),
                             },
                             "id": channel.id,

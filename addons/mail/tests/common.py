@@ -1253,11 +1253,34 @@ class MailCase(common.TransactionCase, MockEmail):
              'name': partner.name,
              'notif': partner.user_ids.notification_type or 'email',
              'share': partner.partner_share,
-             'type': 'user' if partner.user_ids and not partner.partner_share else partner.user_ids and 'portal' or 'customer',
-             'uid': partner.user_ids[0].id if partner.user_ids else False,
+             'type': 'user' if partner.main_user_id and partner.main_user_id._is_internal() else 'customer',
+             'uid': partner.main_user_id.id,
              'ushare': all(user.share for user in partner.user_ids) if partner.user_ids else False,
             } for partner in partners
         ]
+
+    def _get_mail_composer_web_context(self, records, add_web=True, **values):
+        """ Helper to generate composer context. Will make tests a bit less
+        verbose.
+
+        :param bool add_web: add web context, generally making noise especially in
+          mass mail mode (active_id/ids both present in context)
+        """
+        base_context = {
+            'default_model': records._name,
+            'default_res_ids': records.ids,
+        }
+        if len(records) == 1:
+            base_context['default_composition_mode'] = 'comment'
+        else:
+            base_context['default_composition_mode'] = 'mass_mail'
+        if add_web:
+            base_context['active_model'] = records._name
+            base_context['active_id'] = records[0].id
+            base_context['active_ids'] = records.ids
+        if values:
+            base_context.update(**values)
+        return base_context
 
     def _message_post_and_get_unfollow_urls(self, record, partner_ids):
         """ Post a message on the record for the partners and extract the unfollow URLs. """
@@ -1953,10 +1976,16 @@ class MailCommon(MailCase):
         """ Remove store partner data dependant on other modules if they are not not installed.
         Not written in a modular way to avoid complex override for a simple test tool.
         """
-        if "hr.leave" not in self.env:
-            for data in partners_data:
-                data.pop("leave_date_to", None)
         return list(partners_data)
+
+    def _filter_users_fields(self, /, *users_data):
+        """ Remove store user data dependant on other modules if they are not not installed.
+        Not written in a modular way to avoid complex override for a simple test tool.
+        """
+        for data in users_data:
+            if "hr.leave" not in self.env:
+                data.pop("leave_date_to", None)
+        return list(users_data)
 
     def _filter_threads_fields(self, /, *threads_data):
         """ Remove store thread data dependant on other modules if they are not not installed.
