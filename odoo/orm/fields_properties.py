@@ -9,8 +9,8 @@ import uuid
 from collections import abc, defaultdict
 from operator import attrgetter
 
-from odoo.exceptions import AccessError, MissingError
-from odoo.tools import SQL, OrderedSet, is_list_of
+from odoo.exceptions import AccessError, UserError, MissingError
+from odoo.tools import SQL, OrderedSet, is_list_of, html_sanitize
 from odoo.tools.misc import frozendict, has_list_types
 from odoo.tools.translate import _
 
@@ -67,13 +67,23 @@ class Properties(Field):
     _description_definition_record = property(attrgetter('definition_record'))
     _description_definition_record_field = property(attrgetter('definition_record_field'))
 
+    HTML_SANITIZE_OPTIONS = {
+        'sanitize_attributes': True,
+        'sanitize_tags': True,
+        'sanitize_style': False,
+        'sanitize_form': True,
+        'sanitize_conditional_comments': True,
+        'strip_style': False,
+        'strip_classes': False,
+    }
+
     ALLOWED_TYPES = (
         # standard types
-        'boolean', 'integer', 'float', 'text', 'char', 'date', 'datetime',
+        'boolean', 'integer', 'float', 'text', 'char', 'html', 'date', 'datetime',
         # relational like types
         'many2one', 'many2many', 'selection', 'tags',
         # UI types
-         'separator',
+        'separator',
     )
 
     def _setup_attrs__(self, model_class, name):
@@ -125,23 +135,34 @@ class Properties(Field):
         if isinstance(value, Property):
             value = value._values
 
-        if isinstance(value, dict):
+        elif isinstance(value, dict):
             # avoid accidental side effects from shared mutable data
-            return copy.deepcopy(value)
+            value = copy.deepcopy(value)
 
-        if isinstance(value, str):
+        elif isinstance(value, str):
             value = json.loads(value)
             if not isinstance(value, dict):
                 raise ValueError(f"Wrong property value {value!r}")
-            return value
 
-        if isinstance(value, list):
+        elif isinstance(value, list):
             # Convert the list with all definitions into a simple dict
             # {name: value} to store the strict minimum on the child
             self._remove_display_name(value)
-            return self._list_to_dict(value)
+            value = self._list_to_dict(value)
 
-        raise ValueError(f"Wrong property type {type(value)!r}")
+        else:
+            raise TypeError(f"Wrong property type {type(value)!r}")
+
+        if validate:
+            # Sanitize `_html` flagged properties
+            for property_name, property_value in value.items():
+                if property_name.endswith('_html'):
+                    value[property_name] = html_sanitize(
+                        property_value,
+                        **self.HTML_SANITIZE_OPTIONS,
+                    )
+
+        return value
 
     # Record format: the value is either False, or a dict mapping property
     # names to their corresponding value, like
@@ -275,6 +296,9 @@ class Properties(Field):
 
         if isinstance(value, Property):
             value = value._values
+
+        if len(records[self.definition_record]) > 1 and value:
+            raise UserError(records.env._("Updating records with different property fields definitions is not supported. Update by separate definition instead."))
 
         if isinstance(value, dict):
             # don't need to write on the container definition
@@ -524,6 +548,11 @@ class Properties(Field):
                     if id_ in res_ids_per_model[res_model]
                 ] if res_model in env else []
 
+            elif property_type == 'html':
+                # field name should end with `_html` to be legit and sanitized,
+                # otherwise do not trust the value and force False
+                property_value = property_definition['name'].endswith('_html') and property_value
+
             property_definition['value'] = property_value
 
     @classmethod
@@ -610,6 +639,41 @@ class Properties(Field):
                 property_definition.pop('value', None)
         return values_list
 
+    def expression_getter(self, field_expr):
+        _fname, property_name = parse_field_expr(field_expr)
+        if not property_name:
+            raise ValueError(f"Missing property name for {self}")
+
+        def get_property(record):
+            property_value = self.__get__(record)
+            value = property_value.get(property_name)
+            if value:
+                return value
+            # find definition to check the type
+            for definition in self._get_properties_definition(record) or ():
+                if definition.get('name') == property_name:
+                    break
+            else:
+                # definition not found
+                return value or False
+
+            if not value and definition['type'] in ('many2one', 'many2many'):
+                return record.env.get(definition.get('comodel'))
+            return value
+
+        return get_property
+
+    def filter_function(self, records, field_expr, operator, value):
+        getter = self.expression_getter(field_expr)
+        domain = None
+        if operator == 'any' or isinstance(value, Domain):
+            domain = Domain(value).optimize(records)
+        elif operator == 'in' and isinstance(value, COLLECTION_TYPES) and isinstance(getter(records.browse()), BaseModel):
+            domain = Domain('id', 'in', value).optimize(records)
+        if domain is not None:
+            return lambda rec: getter(rec).filtered_domain(domain)
+        return super().filter_function(records, field_expr, operator, value)
+
     def property_to_sql(self, field_sql: SQL, property_name: str, model: BaseModel, alias: str, query: Query) -> SQL:
         check_property_field_value_name(property_name)
         return SQL("(%s -> %s)", field_sql, property_name)
@@ -679,20 +743,30 @@ class Properties(Field):
             combine_sql = SQL(" OR ") if operator == 'in' else SQL(" AND ")
             return SQL("(%s)", combine_sql.join(sqls))
 
-        sql_operator = SQL_OPERATORS[operator]
-        if operator in ('ilike', 'not ilike'):
-            value = f'%{value}%'
-            unaccent = model.env.registry.unaccent
-        else:
-            unaccent = lambda x: x  # noqa: E731
+        unaccent = lambda x: x  # noqa: E731
+        if operator.endswith('like'):
+            if operator.endswith('ilike'):
+                unaccent = model.env.registry.unaccent
+            if '=' in operator:
+                value = str(value)
+            else:
+                value = f'%{value}%'
+
+        try:
+            sql_operator = SQL_OPERATORS[operator]
+        except KeyError:
+            raise ValueError(f"Invalid operator {operator} for Properties")
 
         if isinstance(value, str):
             sql_left = SQL("(%s ->> %s)", raw_sql_field, property_name)  # JSONified value
             sql_right = SQL("%s", value)
-            return SQL(
+            sql = SQL(
                 "%s%s%s",
                 unaccent(sql_left), sql_operator, unaccent(sql_right),
             )
+            if Domain.is_negative_operator(operator):
+                sql = SQL("(%s OR %s IS NULL)", sql, sql_left)
+            return sql
 
         sql_right = SQL("%s", json.dumps(value))
         return SQL(
@@ -806,7 +880,7 @@ class PropertiesDefinition(Field):
             'string': 'Color Code',
             'type': 'char',
             'default': 'blue',
-            'default': 'red',
+            'value': 'red',
         }, {
             'name': 'aa34746a6851ee4e',
             'string': 'Partner',
@@ -822,7 +896,7 @@ class PropertiesDefinition(Field):
             value = json.loads(value)
 
         if not isinstance(value, list):
-            raise ValueError(f'Wrong properties definition type {type(value)!r}')
+            raise TypeError(f'Wrong properties definition type {type(value)!r}')
 
         if validate:
             Properties._remove_display_name(value, value_key='default')
@@ -845,7 +919,7 @@ class PropertiesDefinition(Field):
             value = json.loads(value)
 
         if not isinstance(value, list):
-            raise ValueError(f'Wrong properties definition type {type(value)!r}')
+            raise TypeError(f'Wrong properties definition type {type(value)!r}')
 
         if validate:
             Properties._remove_display_name(value, value_key='default')
@@ -943,14 +1017,23 @@ class PropertiesDefinition(Field):
                     ', '.join(required_keys),
                 )
 
+            property_type = property_definition.get('type')
             property_name = property_definition.get('name')
             if not property_name or property_name in properties_names:
                 raise ValueError(f'The property name {property_name!r} is not set or duplicated.')
             properties_names.add(property_name)
 
-            property_type = property_definition.get('type')
+            if property_type == 'html' and not property_name.endswith('_html'):
+                raise ValueError("HTML property name should end with `_html`.")
+
+            if property_type != 'html' and property_name.endswith('_html'):
+                raise ValueError("Only HTML properties can have the `_html` suffix.")
+
             if property_type and property_type not in Properties.ALLOWED_TYPES:
                 raise ValueError(f'Wrong property type {property_type!r}.')
+
+            if property_type == 'html' and (default := property_definition.get('default')):
+                property_definition['default'] = html_sanitize(default, **Properties.HTML_SANITIZE_OPTIONS)
 
             model = property_definition.get('comodel')
             if model and (model not in env or env[model].is_transient() or env[model]._abstract):

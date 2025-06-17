@@ -48,6 +48,7 @@ export class Thread extends Record {
     }
 
     autofocus = 0;
+    create_uid = fields.One("res.users");
     /** @type {number} */
     id;
     /** @type {string} */
@@ -114,8 +115,6 @@ export class Thread extends Record {
     });
     counter = 0;
     counter_bus_id = 0;
-    /** @type {string} */
-    custom_channel_name;
     /** @type {string} */
     description;
     /** @type {string} */
@@ -784,7 +783,9 @@ export class Thread extends Record {
                     { name: newName }
                 );
             } else if (this.supportsCustomChannelName) {
-                this.custom_channel_name = newName;
+                if (this.selfMember) {
+                    this.selfMember.custom_channel_name = newName;
+                }
                 await this.store.env.services.orm.call(
                     "discuss.channel",
                     "channel_set_custom_name",
@@ -902,7 +903,11 @@ export class Thread extends Record {
     }
 
     async leaveChannel({ force = false } = {}) {
-        if (this.channel_type !== "group" && this.create_uid === this.store.self.userId && !force) {
+        if (
+            this.channel_type !== "group" &&
+            this.create_uid?.eq(this.store.self.main_user_id) &&
+            !force
+        ) {
             await this.askLeaveConfirmation(
                 _t("You are the administrator of this channel. Are you sure you want to leave?")
             );

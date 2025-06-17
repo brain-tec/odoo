@@ -238,6 +238,7 @@ export class ResPartner extends webModels.ResPartner {
         /** @type {import("mock_models").ResUsers} */
         const ResUsers = this.env["res.users"];
 
+        this._compute_main_user_id(); // compute not automatically triggering when necessary
         for (const partner of this.browse(ids)) {
             const [data] = this._read_format(
                 partner.id,
@@ -247,7 +248,7 @@ export class ResPartner extends webModels.ResPartner {
                             "avatar_128",
                             "country_id",
                             "display_name",
-                            "isAdmin",
+                            "is_admin",
                             "notification_type",
                             "user",
                         ].includes(field)
@@ -270,21 +271,21 @@ export class ResPartner extends webModels.ResPartner {
                 data.im_status_access_token = partner.id;
             }
             if (fields.includes("user")) {
-                const users = ResUsers.browse(partner.user_ids);
-                const internalUsers = users.filter((user) => !user.share);
-                let mainUser;
-                if (internalUsers.length > 0) {
-                    mainUser = internalUsers[0];
-                } else if (users.length > 0) {
-                    mainUser = users[0];
+                data.main_user_id = partner.main_user_id;
+                if (partner.main_user_id) {
+                    store.add(
+                        ResUsers.browse(partner.main_user_id),
+                        makeKwArgs({ fields: ["share"] })
+                    );
                 }
-                data.userId = mainUser ? mainUser.id : false;
-                data.isInternalUser = mainUser ? !mainUser.share : false;
-                if (fields.includes("isAdmin")) {
-                    data.isAdmin = true; // mock server simplification
+                if (partner.main_user_id && fields.includes("is_admin")) {
+                    store.add(ResUsers.browse(partner.main_user_id), { is_admin: true }); // mock server simplification
                 }
-                if (fields.includes("notification_type")) {
-                    data.notification_preference = mainUser.notification_type;
+                if (partner.main_user_id && fields.includes("notification_type")) {
+                    store.add(
+                        ResUsers.browse(partner.main_user_id),
+                        makeKwArgs({ fields: ["notification_type"] })
+                    );
                 }
             }
             store.add(this.browse(partner.id), data);

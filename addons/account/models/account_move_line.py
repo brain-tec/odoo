@@ -886,18 +886,24 @@ class AccountMoveLine(models.Model):
         self.ensure_one()
 
         company_domain = self.env['account.tax']._check_company_domain(self.move_id.company_id)
-        if self.move_id.is_sale_document(include_receipts=True):
-            # Out invoice.
-            filtered_taxes_id = self.product_id.taxes_id.filtered_domain(company_domain)
-            tax_ids = filtered_taxes_id or self.account_id.tax_ids.filtered(lambda tax: tax.type_tax_use == 'sale')
+        tax_ids = self.env['account.tax']
 
-        elif self.move_id.is_purchase_document(include_receipts=True):
-            # In invoice.
-            filtered_supplier_taxes_id = self.product_id.supplier_taxes_id.filtered_domain(company_domain)
-            tax_ids = filtered_supplier_taxes_id or self.account_id.tax_ids.filtered(lambda tax: tax.type_tax_use == 'purchase')
+        if self.move_id.is_receipt():
+            tax_ids = self.company_id.account_purchase_receipt_tax_id if self.move_id.move_type == 'in_receipt' else self.company_id.account_sale_receipt_tax_id
 
-        else:
-            tax_ids = False if self.env.context.get('skip_computed_taxes') or self.move_id.is_entry() else self.account_id.tax_ids
+        if not tax_ids:
+            if self.move_id.is_sale_document(include_receipts=True):
+                # Out invoice.
+                filtered_taxes_id = self.product_id.taxes_id.filtered_domain(company_domain)
+                tax_ids = filtered_taxes_id or self.account_id.tax_ids.filtered(lambda tax: tax.type_tax_use == 'sale')
+
+            elif self.move_id.is_purchase_document(include_receipts=True):
+                # In invoice.
+                filtered_supplier_taxes_id = self.product_id.supplier_taxes_id.filtered_domain(company_domain)
+                tax_ids = filtered_supplier_taxes_id or self.account_id.tax_ids.filtered(lambda tax: tax.type_tax_use == 'purchase')
+
+            else:
+                tax_ids = False if self.env.context.get('skip_computed_taxes') or self.move_id.is_entry() else self.account_id.tax_ids
 
         if self.company_id and tax_ids:
             tax_ids = tax_ids._filter_taxes_by_company(self.company_id)
@@ -1079,6 +1085,11 @@ class AccountMoveLine(models.Model):
         cache = {}
         for line in self:
             if line.display_type == 'product' or not line.move_id.is_invoice(include_receipts=True):
+                related_distribution = line._related_analytic_distribution()
+                root_plans = self.env['account.analytic.account'].browse(
+                    list({int(account_id) for ids in related_distribution for account_id in ids.split(',')})
+                ).root_plan_id
+
                 arguments = frozendict({
                     "product_id": line.product_id.id,
                     "product_categ_id": line.product_id.categ_id.id,
@@ -1086,10 +1097,11 @@ class AccountMoveLine(models.Model):
                     "partner_category_id": line.partner_id.category_id.ids,
                     "account_prefix": line.account_id.code,
                     "company_id": line.company_id.id,
+                    "related_root_plan_ids": root_plans,
                 })
                 if arguments not in cache:
                     cache[arguments] = self.env['account.analytic.distribution.model']._get_distribution(arguments)
-                line.analytic_distribution = cache[arguments] or line.analytic_distribution
+                line.analytic_distribution = related_distribution | cache[arguments] or line.analytic_distribution
 
     @api.depends('discount_date', 'date_maturity')
     def _compute_payment_date(self):
@@ -2958,6 +2970,10 @@ class AccountMoveLine(models.Model):
             'company_id': self.company_id.id or self.env.company.id,
             'category': 'invoice' if self.move_id.is_sale_document() else 'vendor_bill' if self.move_id.is_purchase_document() else 'other',
         }
+
+    def _related_analytic_distribution(self):
+        """ Returns the analytic distribution set on the record which triggered the creation of this line. """
+        return {}
 
     # -------------------------------------------------------------------------
     # INSTALLMENTS

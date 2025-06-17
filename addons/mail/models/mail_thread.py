@@ -2088,7 +2088,7 @@ class MailThread(models.AbstractModel):
             record_su = record_su if hasattr(record_su, '_partner_find_from_emails_single') else self.env['mail.thread'].sudo()
 
         partner = record_su._partner_find_from_emails_single([email_value], filter_found=lambda p: p.user_ids, no_create=True)
-        return partner.user_ids and partner.user_ids[0] or self.env['res.users']
+        return partner.main_user_id
 
     @api.model
     def _mail_find_partner_from_emails(self, emails, records=None, force_create=False, extra_domain=False):
@@ -3573,10 +3573,8 @@ class MailThread(models.AbstractModel):
         lang = force_email_lang if force_email_lang else self.env.lang
         record_wlang = self.with_context(lang=lang)
 
-        # compute send user and its related signature; try to use self.env.user instead of browsing
-        # user_ids if they are the author will give a sudo user, improving access performances and cache usage.
         author = message.env['res.partner'].browse(msg_vals.get('author_id')) if 'author_id' in msg_vals else message.author_id
-        author_user = self.env.user if self.env.user.partner_id == author else author.user_ids[0] if author and author.user_ids else False
+        author_user = author.main_user_id
         signature, email_add_signature = '', False
 
         if author_user:
@@ -4220,31 +4218,17 @@ class MailThread(models.AbstractModel):
 
     def _notify_get_action_link(self, link_type, **kwargs):
         """ Prepare link to an action: view document, follow document, ... """
-        params = {
-            'model': kwargs.get('model', self._name),
-            'res_id': kwargs.get('res_id', self.ids and self.ids[0] or False),
-        }
-        # keep only accepted parameters:
-        # - action (deprecated), token (assign), access_token (view)
-        # - auth_signup: auth_signup_token and auth_login
-        # - portal: pid, hash
-        params.update(dict(
-            (key, value)
-            for key, value in kwargs.items()
-            if key in ('action', 'token', 'access_token', 'auth_signup_token',
-                       'auth_login', 'pid', 'hash')
-        ))
+        params = self._get_action_link_params(link_type, **kwargs)
 
         if link_type in ['view', 'unfollow']:
             base_link = '/mail/%s' % link_type
         elif link_type == 'controller':
             controller = kwargs.get('controller')
-            params.pop('model')
             base_link = '%s' % controller
         else:
             raise NotImplementedError(f'Invalid notification link type {link_type}')
 
-        if link_type not in ['view']:
+        if link_type != 'view':
             token = self._encode_link(base_link, params)
             params['token'] = token
 
@@ -4263,6 +4247,28 @@ class MailThread(models.AbstractModel):
         token = '%s?%s' % (base_link, ' '.join('%s=%s' % (key, params[key]) for key in sorted(params)))
         hm = hmac.new(secret.encode('utf-8'), token.encode('utf-8'), hashlib.sha1).hexdigest()
         return hm
+
+    def _get_action_link_params(self, link_type, **kwargs):
+        """ Parameters management for '_notify_get_action_link' """
+        params = {
+            'model': kwargs.get('model', self._name),
+            'res_id': kwargs.get('res_id', self.ids[0] if self else False),
+        }
+        # keep only accepted parameters:
+        # - action (deprecated), token (assign), access_token (view)
+        # - auth_signup: auth_signup_token and auth_login
+        # - portal: pid, hash
+        params.update({
+            key: value
+            for key, value in kwargs.items()
+            if key in ('action', 'token', 'access_token', 'auth_signup_token',
+                       'auth_login', 'pid', 'hash')
+        })
+        if link_type == 'controller':
+            params.pop('model')
+        elif link_type not in ['view', 'assign', 'follow', 'unfollow']:
+            return {}
+        return params
 
     @api.model
     def _generate_tracking_message(self, message, return_line='\n'):
