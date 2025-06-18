@@ -708,7 +708,6 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_snippet_carousel_autoplay(self):
         self.start_tour("/", "snippet_carousel_autoplay", login="admin")
 
-    @unittest.skip
     def test_media_iframe_video(self):
         self.start_tour("/", "website_media_iframe_video", login="admin")
 
@@ -726,3 +725,6 @@ class TestUi(HttpCaseWithWebsiteUser):
 
     def test_popup_visibility_option(self):
         self.start_tour("/", "website_popup_visibility_option", login="admin")
+
+    def test_systray_items_disappear(self):
+        self.start_tour("/", "website_systray_items_disappear", login="admin")
