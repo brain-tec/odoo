@@ -64,9 +64,9 @@ class ResPartner(models.Model):
         )
         return bool(sale_order)
 
-    def _can_edit_name(self):
-        """ Can't edit `name` if there is (non draft) issued SO. """
-        return super()._can_edit_name() and not self._has_order(
+    def _can_edit_country(self):
+        """ Can't edit `country_id` if there is (non draft) issued SO. """
+        return super()._can_edit_country() and not self._has_order(
             [
                 ('partner_invoice_id', '=', self.id),
                 ('partner_id', '=', self.id),
@@ -82,6 +82,8 @@ class ResPartner(models.Model):
     def _compute_credit_to_invoice(self):
         # EXTENDS 'account'
         super()._compute_credit_to_invoice()
+        if not (commercial_partners := self.commercial_partner_id & self):
+            return  # nothing to compute
         company = self.env.company
         if not company.account_use_credit_limit:
             return
@@ -89,7 +91,7 @@ class ResPartner(models.Model):
         sale_orders = self.env['sale.order'].search([
             ('company_id', '=', company.id),
             ('partner_invoice_id', 'any', [
-                ('commercial_partner_id', 'in', self.commercial_partner_id.ids),
+                ('commercial_partner_id', 'in', commercial_partners.ids),
             ]),
             ('order_line', 'any', [('untaxed_amount_to_invoice', '>', 0)]),
             ('state', '=', 'sale'),

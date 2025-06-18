@@ -157,6 +157,7 @@ class AccountTax(models.Model):
     amount = fields.Float(required=True, digits=(16, 4), default=0.0, tracking=True)
     description = fields.Html(string='Description', translate=html_translate)
     invoice_label = fields.Char(string='Label on Invoices', translate=True)
+    tax_label = fields.Char(compute='_compute_tax_label')
     price_include = fields.Boolean(
         compute='_compute_price_include',
         search='_search_price_include',
@@ -707,6 +708,11 @@ class AccountTax(models.Model):
                     name += wrapper % record.country_code
 
             record.display_name = name
+
+    @api.depends('name', 'invoice_label')
+    def _compute_tax_label(self):
+        for tax in self:
+            tax.tax_label = tax.invoice_label or tax.name
 
     @api.onchange('amount')
     def onchange_amount(self):
@@ -2719,7 +2725,7 @@ class AccountTax(models.Model):
                 for tax_rep_data in tax_data['tax_reps_data']:
                     grouping_key = frozendict(tax_rep_data['grouping_key'])
                     tax_line = tax_lines_mapping[grouping_key]
-                    tax_line['name'] = tax.name
+                    tax_line['name'] = base_line.get('manual_tax_line_name', tax.name)
                     tax_line['tax_base_amount'] += sign * tax_data['base_amount'] * (-1 if tax_tag_invert else 1)
                     tax_line['amount_currency'] += sign * tax_rep_data['tax_amount_currency']
                     tax_line['balance'] += sign * tax_rep_data['tax_amount']

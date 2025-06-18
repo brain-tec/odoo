@@ -301,7 +301,6 @@
                                     <field name="product_qty" class="oe_inline" readonly="state != 'draft'"/>
                                 </button>
                                 <label for="product_uom_id" string="" class="oe_inline"/>
-                                <field name="product_uom_id" groups="!uom.group_uom" invisible="1"/>
                                 <field name="product_uom_id" options="{'no_open': True, 'no_create': True, 'quantity_field': 'product_qty'}" groups="uom.group_uom" widget="many2one_uom" readonly="state != 'draft'" class="flex-grow-0" style="width:auto!important"/>
                                 <span class='fw-bold text-nowrap'>To Produce</span>
                                 <button type="object" name="action_product_forecast_report" title="Forecast Report" icon="fa-area-chart" invisible="forecasted_issue"/>
@@ -316,7 +315,7 @@
                                     readonly="state != 'draft'"/>
                                 <button name="action_generate_bom" type="object" icon="fa-plus"
                                     title="Generate a new BoM from this Manufacturing Order" groups="mrp.group_mrp_manager"
-                                    invisible="bom_id or not product_id or not move_raw_ids">
+                                    invisible="bom_id or not product_id or (not move_raw_ids and not workorder_ids)">
                                     <span>Generate BOM</span>
                                 </button>
                                 <button name="action_update_bom" string="Update BoM" type="object"

@@ -11,6 +11,7 @@ import { unformat } from "./_helpers/format";
 import { deleteBackward, deleteForward, insertText } from "./_helpers/user_actions";
 import { cleanHints } from "./_helpers/dispatch";
 import { getContent } from "./_helpers/selection";
+import { expectElementCount } from "./_helpers/ui_expectations";
 
 class CaptionPluginWithPredictableId extends CaptionPlugin {
     getCaptionId() {
@@ -233,7 +234,7 @@ test("clicking the caption button on an image with a caption removes the caption
             const input = queryOne("figure > figcaption > input");
             await toggleCaption();
             expect(editor.document.activeElement).not.toBe(input);
-            expect(".o-we-toolbar").toHaveCount(1);
+            await expectElementCount(".o-we-toolbar", 1);
         },
         contentAfterEdit: unformat(
             `<p><br></p>
@@ -307,7 +308,7 @@ test("can't use the powerbox in a caption", async () => {
             expect(editor.document.activeElement).toBe(input);
             await press("/");
             await animationFrame();
-            expect(".o-we-powerbox").toHaveCount(0);
+            await expectElementCount(".o-we-powerbox", 0);
             const heading = queryOne("h1");
             await click(heading);
             await animationFrame(); // Wait for the selection to change.
@@ -337,7 +338,7 @@ test("can't use the toolbar in a caption", async () => {
             const input = queryOne("figure > figcaption > input");
             expect(editor.document.activeElement).toBe(input);
             await animationFrame();
-            expect(".o-we-toolbar").toHaveCount(0);
+            await expectElementCount(".o-we-toolbar", 0);
             input.select();
             // Check that the contents of the input were indeed selected by
             // inserting text.
@@ -612,8 +613,8 @@ test("add a link to an image with a caption", async () => {
         ),
         stepFunction: async () => {
             await addLinkToImage("odoo.com");
-            expect(".o-we-linkpopover").toHaveCount(1);
-            expect(".o-we-toolbar").toHaveCount(1);
+            await expectElementCount(".o-we-linkpopover", 1);
+            await expectElementCount(".o-we-toolbar", 1);
         },
         contentAfter: unformat(
             `<p><br></p>
@@ -672,8 +673,8 @@ test("add a caption then a link to an image surrounded by text", async () => {
         stepFunction: async () => {
             await toggleCaption("Hello");
             await addLinkToImage("odoo.com");
-            expect(".o-we-linkpopover").toHaveCount(1);
-            expect(".o-we-toolbar").toHaveCount(1);
+            await expectElementCount(".o-we-linkpopover", 1);
+            await expectElementCount(".o-we-toolbar", 1);
         },
         contentAfter: unformat(
             `<p>ab</p>
@@ -749,8 +750,8 @@ test("remove a link from an image with a caption", async () => {
         stepFunction: async () => {
             await removeLinkFromImage();
             await animationFrame();
-            expect(".o-we-linkpopover").toHaveCount(0);
-            expect(".o-we-toolbar").toHaveCount(1);
+            await expectElementCount(".o-we-linkpopover", 0);
+            await expectElementCount(".o-we-toolbar", 1);
         },
         contentAfter: unformat(
             `<p><br></p>
@@ -794,8 +795,8 @@ test("remove a caption from an image with a link", async () => {
         ),
         stepFunction: async () => {
             await toggleCaption();
-            expect(".o-we-linkpopover").toHaveCount(1);
-            expect(".o-we-toolbar").toHaveCount(1);
+            await expectElementCount(".o-we-linkpopover", 1);
+            await expectElementCount(".o-we-toolbar", 1);
         },
         contentAfter: unformat(
             `<p><br></p>
