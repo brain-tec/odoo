@@ -801,15 +801,7 @@ export class SelfOrder extends Reactive {
         }
 
         // Taxes computation.
-        const taxesData = getTaxesValues(
-            taxes,
-            price,
-            1,
-            product,
-            this.config._product_default_values,
-            this.company,
-            this.currency
-        );
+        const taxesData = getTaxesValues(taxes, price, 1, product, {}, this.company, this.currency);
 
         return { pricelist_price: price, ...taxesData };
     }
@@ -875,10 +867,10 @@ export class SelfOrder extends Reactive {
         return this.getAvailableCategories().length > 1;
     }
 
-    get kioskBackgroundImage() {
-        const bgImage = this.config._self_ordering_image_background_ids[0];
-        if (bgImage) {
-            return `url(data:image/png;base64,${bgImage.data})`;
+    get kioskBackgroundImageUrl() {
+        const imageId = this.config._self_ordering_image_background_ids[0];
+        if (imageId) {
+            return `url('/web/image/ir.attachment/${imageId}/raw')`;
         }
         return "none";
     }
