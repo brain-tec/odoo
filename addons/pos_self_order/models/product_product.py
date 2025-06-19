@@ -21,13 +21,7 @@ class ProductTemplate(models.Model):
 
     def _load_pos_self_data(self, data):
         domain = self._load_pos_self_data_domain(data)
-
-        # Add custom fields for 'formula' taxes.
         fields = set(self._load_pos_self_data_fields(data['pos.config'][0]['id']))
-        taxes = self.env['account.tax'].search(self.env['account.tax']._load_pos_self_data_domain(data))
-        product_fields = taxes._eval_taxes_computation_prepare_product_fields()
-        fields = list(fields.union(product_fields))
-
         config = self.env['pos.config'].browse(data['pos.config'][0]['id'])
         products = self.search_read(
             domain,
@@ -46,9 +40,7 @@ class ProductTemplate(models.Model):
             load=False
         )
         products.extend(combo_products_choice)
-
-        data['pos.config'][0]['_product_default_values'] = \
-            self.env['account.tax']._eval_taxes_computation_prepare_product_default_values(product_fields)
+        self._process_pos_self_ui_products(products)
 
         return products
 
@@ -101,7 +93,7 @@ class ProductTemplate(models.Model):
         return res
 
     def _can_return_content(self, field_name=None, access_token=None):
-        if field_name == "image_512" and self.sudo().self_order_available:
+        if field_name in ["image_512", "image_128"] and self.sudo().self_order_available:
             return True
         return super()._can_return_content(field_name, access_token)
 
