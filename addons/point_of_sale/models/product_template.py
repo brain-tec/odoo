@@ -87,16 +87,10 @@ class ProductTemplate(models.Model):
             'id', 'display_name', 'standard_price', 'categ_id', 'pos_categ_ids', 'taxes_id', 'barcode', 'name', 'list_price', 'is_favorite',
             'default_code', 'to_weight', 'uom_id', 'description_sale', 'description', 'tracking', 'type', 'service_tracking', 'is_storable',
             'write_date', 'color', 'pos_sequence', 'available_in_pos', 'attribute_line_ids', 'active', 'image_128', 'combo_ids', 'product_variant_ids', 'public_description',
-            'pos_optional_product_ids', 'sequence',
+            'pos_optional_product_ids', 'sequence', 'product_tag_ids'
         ]
 
     def _load_pos_data(self, data):
-        # Add custom fields for 'formula' taxes.
-        fields = set(self._load_pos_data_fields(data['pos.config'][0]['id']))
-        taxes = self.env['account.tax'].search(self.env['account.tax']._load_pos_data_domain(data))
-        product_fields = taxes._eval_taxes_computation_prepare_product_fields()
-        fields = list(fields.union(product_fields))
-
         config = self.env['pos.config'].browse(data['pos.config'][0]['id'])
         limit_count = config.get_limited_product_count()
         pos_limited_loading = self.env.context.get('pos_limited_loading', True)
@@ -133,9 +127,6 @@ class ProductTemplate(models.Model):
 
         product_combo = products.filtered(lambda p: p['type'] == 'combo')
         products += product_combo.combo_ids.combo_item_ids.product_id.product_tmpl_id
-
-        data['pos.config'][0]['_product_default_values'] = \
-            self.env['account.tax']._eval_taxes_computation_prepare_product_default_values(product_fields)
 
         special_products = config._get_special_products().filtered(
                     lambda product: not product.sudo().company_id

@@ -265,6 +265,9 @@ export class SelfOrder extends Reactive {
             this.printKioskChanges(access_token);
         }
     }
+    hasPaymentMethod() {
+        return this.filterPaymentMethods(this.models["pos.payment.method"].getAll()).length > 0;
+    }
 
     filterPaymentMethods(pms) {
         //based on _load_pos_self_data_domain from pos_payment_method.py
@@ -505,11 +508,12 @@ export class SelfOrder extends Reactive {
                 if (this.router.activeSlot !== "payment" && this.router.activeSlot !== "default") {
                     this.timeoutPopup = this.dialog.add(TimeoutPopup, {
                         onTimeout: () => {
+                            this.dialog.closeAll();
                             this.router.navigate("default");
                         },
                     });
                 }
-            }, 1 * 1000 * 90);
+            }, 1000 * 90);
         });
     }
 
@@ -542,7 +546,6 @@ export class SelfOrder extends Reactive {
         const lineToDelete = [];
         for (const line of this.currentOrder.lines) {
             const changes = line.changes;
-
             if (Object.values(changes).some((v) => v)) {
                 if (line.qty <= changes.qty) {
                     lineToDelete.push(line);
@@ -804,15 +807,7 @@ export class SelfOrder extends Reactive {
         }
 
         // Taxes computation.
-        const taxesData = getTaxesValues(
-            taxes,
-            price,
-            1,
-            product,
-            this.config._product_default_values,
-            this.company,
-            this.currency
-        );
+        const taxesData = getTaxesValues(taxes, price, 1, product, {}, this.company, this.currency);
 
         return { pricelist_price: price, ...taxesData };
     }
@@ -868,14 +863,6 @@ export class SelfOrder extends Reactive {
 
     hasPresets() {
         return this.config.use_presets && this.models["pos.preset"].length > 1;
-    }
-
-    displayCategoryPage() {
-        if (!this.kioskMode) {
-            return;
-        }
-
-        return this.getAvailableCategories().length > 1;
     }
 
     get kioskBackgroundImage() {
