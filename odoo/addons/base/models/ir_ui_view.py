@@ -14,13 +14,14 @@ from lxml.etree import LxmlError
 from lxml.builder import E
 from markupsafe import Markup
 from contextlib import suppress
+from collections.abc import Sequence
 
 from odoo import api, fields, models, tools
-from odoo.exceptions import ValidationError, AccessError, UserError
+from odoo.exceptions import ValidationError, AccessError, UserError, MissingError
 from odoo.fields import Domain
 from odoo.http import request
 from odoo.modules.module import get_resource_from_path
-from odoo.tools import _, config, frozendict, SQL
+from odoo.tools import _, config, frozendict, partition, unique, SQL
 from odoo.tools.convert import _fix_multiple_roots
 from odoo.tools.misc import file_path, get_diff, ConstantMapping
 from odoo.tools.template_inheritance import apply_inheritance_specs, locate_node
@@ -660,15 +661,19 @@ actual arch.
         where_clause = query.where_clause
         assert query.from_clause == SQL.identifier('ir_ui_view'), f"Unexpected from clause: {query.from_clause}"
 
-        self.flush_model(['inherit_id', 'priority', 'model', 'mode'])
+        field_names = [f.name for f in self._fields.values() if f.prefetch is True]
+        aliased_names = SQL(', ').join(
+            SQL("%s AS %s", self._field_to_sql('ir_ui_view', name), SQL.identifier(name))
+            for name in field_names
+        )
+
         query = SQL("""
             WITH RECURSIVE ir_ui_view_inherits AS (
-                SELECT id, inherit_id, priority, mode, model
+                SELECT ir_ui_view.id, %(aliased_names)s
                 FROM ir_ui_view
                 WHERE id IN %(ids)s AND (%(where_clause)s)
             UNION
-                SELECT ir_ui_view.id, ir_ui_view.inherit_id, ir_ui_view.priority,
-                       ir_ui_view.mode, ir_ui_view.model
+                SELECT ir_ui_view.id, %(aliased_names)s
                 FROM ir_ui_view
                 INNER JOIN ir_ui_view_inherits parent ON parent.id = ir_ui_view.inherit_id
                 WHERE coalesce(ir_ui_view.model, '') = coalesce(parent.model, '')
@@ -676,10 +681,13 @@ actual arch.
                       AND (%(where_clause)s)
             )
             SELECT
-                v.id, v.inherit_id, v.mode
-            FROM ir_ui_view_inherits v
+                v.id, %(field_names)s
+            FROM ir_ui_view_inherits as v
             ORDER BY v.priority, v.id
-        """, ids=tuple(self.ids), where_clause=where_clause)
+        """,
+            aliased_names=aliased_names,
+            field_names=SQL(', ').join(SQL.identifier('v', f) for f in field_names),
+            ids=tuple(self.ids), where_clause=where_clause)
         # ORDER BY v.priority, v.id:
         # 1/ sort by priority: abritrary value set by developers on some
         #    views to solve "dependency hell" problems and force a view
@@ -689,20 +697,19 @@ actual arch.
         #    database. e.g. base views are placed before stock ones.
 
         rows = self.env.execute_query(query)
-        views = self.browse(row[0] for row in rows)
+        if not rows:
+            return self.browse()
 
-        # optimization: fill in cache of inherit_id and mode
-        self._fields['inherit_id']._insert_cache(views, [row[1] for row in rows])
-        self._fields['mode']._insert_cache(views, [row[2] for row in rows])
+        ids, *columns = zip(*rows)
+        views = self.browse(ids)
 
-        # During an upgrade, we can only use the views that have been
-        # fully upgraded already.
-        if self.pool._init and not self._context.get('load_all_views'):
-            views = views._filter_loaded_views()
+        # optimization: fill in cache of retrieved fields
+        for fname, column in zip(field_names, columns, strict=True):
+            self._fields[fname]._insert_cache(views, column)
 
         return views
 
-    def _filter_loaded_views(self):
+    def _filter_loaded_views(self, check_view_ids):
         """
         During the module upgrade phase it may happen that a view is
         present in the database but the fields it relies on are not
@@ -712,7 +719,6 @@ actual arch.
         initialization phase is completely finished.
         """
         # check that all found ids have a corresponding xml_id in a loaded module
-        check_view_ids = set(self.env.context['check_view_ids'])
         ids_to_check = [vid for vid in self.ids if vid not in check_view_ids]
         if not ids_to_check:
             return self
@@ -967,35 +973,58 @@ actual arch.
         return etree.tostring(self._get_combined_arch(), encoding='unicode')
 
     def _get_combined_arch(self):
+        self.ensure_one()
+        return self._get_combined_archs()[0]
+
+    def _get_combined_archs(self):
         """ Return the arch of ``self`` (as an etree) combined with its inherited views. """
-        root = self
-        view_ids = []
-        while True:
-            view_ids.append(root.id)
-            if not root.inherit_id:
-                break
-            root = root.inherit_id
-
-        views = self.browse(view_ids)
-
-        # Add inherited views to the list of loading forced views
-        # Otherwise, inherited views could not find elements created in
-        # their direct parents if that parent is defined in the same module
-        # introduce check_view_ids in context
-        if 'check_view_ids' not in views.env.context:
-            views = views.with_context(check_view_ids=[])
-        views.env.context['check_view_ids'].extend(view_ids)
+        parented = []
+        roots = self.env['ir.ui.view']
+        for root in self:
+            parented.append(view_ids := [])
+            while True:
+                view_ids.append(root.id)
+                if not root.inherit_id:
+                    roots += root
+                    break
+                root = root.inherit_id
+        views = self.env['ir.ui.view'].browse(unique(view_id for view_ids in parented for view_id in view_ids))
 
         # Map each node to its children nodes. Note that all children nodes are
         # part of a single prefetch set, which is all views to combine.
-        tree_views = views._get_inheriting_views()
-        hierarchy = collections.defaultdict(list)
-        for view in tree_views:
-            hierarchy[view.inherit_id].append(view)
+        all_tree_views = views._get_inheriting_views()
 
-        # optimization: make root part of the prefetch set, too
-        arch = root.with_prefetch(tree_views._prefetch_ids)._combine(hierarchy)
-        return arch
+        # During an upgrade, we can only use the views that have been
+        # fully upgraded already.
+        if self.pool._init and not self.env.context.get('load_all_views'):
+            check_view_ids = self.env.context.get('check_view_ids', [])
+            # Add inherited views to the list of loading forced views
+            # Otherwise, inherited views could not find elements created in
+            # their direct parents if that parent is defined in the same module
+            # introduce check_view_ids in context
+            check_view_ids += views.ids
+            all_tree_views = all_tree_views._filter_loaded_views(set(check_view_ids))
+
+        # get the global children views then get hierarchy for each views
+        children_views = collections.defaultdict(list)
+        for view in all_tree_views:
+            children_views[view.inherit_id].append(view)
+
+        def get_hierarchy(root, parented_ids, _hierarchy=None):
+            if _hierarchy is None:
+                _hierarchy = collections.defaultdict(list)
+            _hierarchy[root.inherit_id].append(root)
+            for child in children_views[root]:
+                if child.id in parented_ids or child.mode != 'primary':
+                    get_hierarchy(child, parented_ids, _hierarchy)
+            return _hierarchy
+
+        roots = roots.with_prefetch(all_tree_views._prefetch_ids)
+
+        return [
+            root._combine(get_hierarchy(root, parented_ids))
+            for root, parented_ids in zip(roots, parented)
+        ]
 
     def _get_view_refs(self, node):
         """ Extract the `[view_type]_view_ref` keys and values from the node context attribute,
@@ -1010,6 +1039,172 @@ actual arch.
             m.group('view_type'): m.group('view_id')
             for m in ref_re.finditer(node.get('context'))
         }
+
+    # ------------------------------------------------------
+    # Get views and cache
+    # ------------------------------------------------------
+
+    @api.model
+    def _get_cached_template_prefetched_keys(self):
+        return ['id', 'key', 'active']
+
+    def _get_template_minimal_cache_keys(self):
+        return ['active_test']
+
+    @api.model
+    @tools.ormcache('id_or_xmlid', 'isinstance(id_or_xmlid, str) and tuple(self.env.context.get(k) or False for k in self._get_template_minimal_cache_keys())', cache='templates')
+    def _get_cached_template_info(self, id_or_xmlid, _view=None):
+        """ Return the ir.ui.view id from the xml id, use `_preload_views`.
+        """
+        view = None
+        error = False
+        if _view is not None:
+            view = _view
+        elif isinstance(id_or_xmlid, int):
+            view = self.env['ir.ui.view'].sudo().browse(id_or_xmlid)
+            try:
+                view.key
+            except MissingError:
+                view = None
+                error = MissingError(self.env._("Template not found: %s", id_or_xmlid))
+            except UserError as e:
+                view = None
+                error = e
+        else:
+            preload = self.sudo()._preload_views([id_or_xmlid])[id_or_xmlid]
+            view = preload['view']
+            error = preload['error']
+        info = {
+            f: view[f] if view else None
+            for f in self._get_cached_template_prefetched_keys()}
+        info['error'] = error
+        return info
+
+    @api.model
+    def _get_template_view(self, id_or_xmlid: int | str, raise_if_not_found=True) -> models.BaseModel:
+        info = self._get_cached_template_info(id_or_xmlid)
+        if info['error'] and raise_if_not_found:
+            raise info['error']
+        return self.env['ir.ui.view'].browse(info['id'])
+
+    @api.model
+    def _get_template_domain(self, xmlids: list[str]) -> Domain:
+        return Domain('key', 'in', xmlids)
+
+    @api.model
+    def _get_template_order(self) -> str:
+        return "priority, id"
+
+    @api.model
+    def _fetch_template_views(self, ids_or_xmlids: Sequence[int | str]) -> dict[int | str, models.BaseModel | Exception]:
+        """ Return the view corresponding to ``template``, which may be a
+            view ID or an XML ID. Note that this method may be overridden for other
+            kinds of template values.
+        """
+        IrUiView = self.env['ir.ui.view'].sudo().with_context(load_all_views=True, raise_if_not_found=True)
+
+        ids, xmlids = partition(lambda v: isinstance(v, int), ids_or_xmlids)
+
+        # search view in ir.ui.view
+        view_by_id = {}
+        field_names = [f.name for f in IrUiView._fields.values() if f.prefetch is True]
+        if xmlids:
+            domain = Domain('id', 'in', ids) | Domain(self._get_template_domain(xmlids))
+            views = IrUiView.search_fetch(domain, field_names, order=self._get_template_order())
+        else:
+            views = IrUiView.browse(ids)
+
+        for view in views:
+            try:
+                if view.key in view_by_id:
+                    # keeps views according to their priority order
+                    continue
+            except MissingError:
+                continue
+            view_by_id[view.id] = view
+            if view.key:
+                view_by_id[view.key] = view
+
+        # search missing view from xmlid in ir.model.data
+        missing_xmlid_views = [xmlid for xmlid in xmlids if '.' in xmlid and xmlid not in view_by_id]
+        if missing_xmlid_views:
+            domain = Domain.OR(
+                Domain('model', '=', 'ir.ui.view') & Domain('module', '=', res[0]) & Domain('name', '=', res[1])
+                for xmlid in missing_xmlid_views
+                if (res := xmlid.split('.', 1))
+            )
+
+            for model_data in self.env['ir.model.data'].sudo().search(domain):
+                view = IrUiView.browse(model_data.res_id)
+                if view.exists():
+                    view_by_id[view.id] = view
+                    xmlid = f"{model_data.module}.{model_data.name}"
+                    view_by_id[xmlid] = view
+                    if view.key:
+                        view_by_id[view.key] = view
+
+        for key, view in view_by_id.items():
+            # push information in cache
+            self._get_cached_template_info(key, _view=view)
+
+        # create data and errors
+        for view_id in ids:
+            if view_id not in view_by_id:
+                # push information in cache
+                self._get_cached_template_info(view_id, _view=False)
+                view_by_id[view_id] = MissingError(self.env._("Template does not exist or has been deleted: %s", view_id))
+        for xmlid in xmlids:
+            if xmlid not in view_by_id:
+                # push information in cache
+                self._get_cached_template_info(xmlid, _view=False)
+                view_by_id[xmlid] = MissingError(self.env._("Template not found: %s", xmlid))
+        return view_by_id
+
+    @tools.ormcache(cache='templates')
+    def _clear_preload_views_cache_if_needed(self):
+        """ Invalidate the local cache when the orm cache is cleared
+        """
+        self.env.cr.cache.pop('_compile_batch_', None)
+
+    def _preload_views(self, refs: Sequence[int | str]) -> dict[int | str, dict]:
+        """
+        Return self's arch combined with its inherited views archs.
+
+        :param refs: list of id or xmlid
+        :return: dictionary of preloaded information {id or xmlid: {xmlid, ref, view, error}}
+        """
+        self._clear_preload_views_cache_if_needed()
+
+        context = {k: self.env.context.get(k) for k in self.env['ir.qweb']._get_template_cache_keys()}
+        cache_key = tuple(context.values())
+
+        compile_batch = self.env.cr.cache.setdefault('_compile_batch_', {}).setdefault(cache_key, {})
+
+        refs = [int(ref) if isinstance(ref, int) or ref.isdigit() else ref for ref in refs]
+        missing_refs = [ref for ref in refs if ref and ref not in compile_batch]
+        if not missing_refs:
+            return compile_batch
+
+        unknown_views = self._fetch_template_views(missing_refs)
+
+        # add in cache
+        for id_or_xmlid, view in unknown_views.items():
+            if isinstance(view, models.BaseModel):
+                compile_batch[view.id] = compile_batch[id_or_xmlid] = {
+                    'xmlid': view.key or id_or_xmlid,
+                    'ref': view.id,
+                    'view': view,
+                    'error': False,
+                }
+            else:
+                compile_batch[id_or_xmlid] = {
+                    'xmlid': id_or_xmlid,
+                    'view': None,
+                    'ref': None,
+                    'error': view,  # MissingError
+                }
+
+        return compile_batch
 
     #------------------------------------------------------
     # Postprocessing: translation, groups and modifiers
@@ -2139,35 +2334,13 @@ actual arch.
         """ Return the list of context keys to use for caching ``_read_template``. """
         return ['lang', 'inherit_branding', 'edit_translations']
 
-    @api.model
-    def _read_template(self, view_id):
-        arch_tree = self.browse(view_id)._get_combined_arch()
-        self.distribute_branding(arch_tree)
-        return etree.tostring(arch_tree, encoding='unicode')
-
-    @api.model
-    def _get_view_id(self, template):
-        """ Return the view ID corresponding to ``template``, which may be a
-        view ID or an XML ID. Note that this method may be overridden for other
-        kinds of template values.
-        """
-        if isinstance(template, int):
-            return template
-        if '.' not in template:
-            raise ValueError('Invalid template id: %r' % template)
-        view = self.sudo().search([('key', '=', template)], limit=1)
-        if view:
-            return view.id
-        res_model, res_id = self.env['ir.model.data']._xmlid_to_res_model_res_id(template, raise_if_not_found=True)
-        assert res_model == self._name, "Call _get_view_id, expected %r, got %r" % (self._name, res_model)
-        return res_id
-
-    @api.model
-    def _get(self, view_ref):
-        """ Return the view corresponding to ``view_ref``, which may be a
-        view ID or an XML ID.
-        """
-        return self.browse(self._get_view_id(view_ref))
+    def _get_view_etrees(self):
+        if not self:
+            return []
+        arch_trees = self._get_combined_archs()
+        for arch_tree in arch_trees:
+            self.distribute_branding(arch_tree)
+        return arch_trees
 
     def _contains_branded(self, node):
         return node.tag == 't'\
@@ -2269,8 +2442,7 @@ actual arch.
     @api.readonly
     @api.model
     def render_public_asset(self, template, values=None):
-        template_sudo = self._get(template).sudo()
-        template_sudo._check_view_access()
+        self._get_template_view(template).sudo()._check_view_access()
         return self.env['ir.qweb'].sudo()._render(template, values)
 
     def _render_template(self, template, values=None):

@@ -9,6 +9,7 @@ from itertools import zip_longest
 from lxml import etree as ET, html
 from lxml.html import builder as h
 
+from odoo.exceptions import MissingError
 from odoo.modules.module import _DEFAULT_MANIFEST
 from odoo.tests import common, HttpCase, tagged
 
@@ -587,28 +588,28 @@ class TestCowViewSaving(TestViewSavingCommon, HttpCase):
         main_view.with_context(website_id=1).write({'arch': '<body>SPECIFIC<div>Z</div></body>'})
         self.assertEqual(total_views + 3 + 3, View.search_count([]), "It should have duplicated the Main View tree as a specific tree and then removed the specific view from the generic tree as no more needed")
 
-        generic_view = View.with_context(website_id=None)._get_view_id('website.main_view')
-        specific_view = View.with_context(website_id=1)._get_view_id('website.main_view')
-        generic_view_arch = View.browse(generic_view).with_context(load_all_views=True).get_combined_arch()
-        specific_view_arch = View.browse(specific_view).with_context(load_all_views=True, website_id=1).get_combined_arch()
+        generic_view = View.with_context(website_id=None)._get_template_view("website.main_view")
+        specific_view = View.with_context(website_id=1)._get_template_view("website.main_view")
+        generic_view_arch = generic_view.with_context(load_all_views=True).get_combined_arch()
+        specific_view_arch = specific_view.with_context(load_all_views=True, website_id=1).get_combined_arch()
         self.assertEqual(generic_view_arch, '<body>GENERIC<div>VIEW<span>C</span></div></body>')
         self.assertEqual(specific_view_arch, '<body>SPECIFIC<div>VIEW<span>D</span></div></body>', "Writing on top level view hierarchy with a website in context should write on the view and clone it's inherited views")
 
-    def test_multi_website_view_obj_active(self):
+    def test_multi_website_view_active(self):
         ''' With the following structure:
             * A generic active parent view
             * A generic active child view, that is inactive on website 1
             The methods to retrieve views should return the specific inactive
             child over the generic active one.
         '''
-        View = self.env['ir.ui.view']
+        View = self.env['ir.ui.view'].with_context(active_test=False)
         self.inherit_view.with_context(website_id=1).write({'active': False})
 
-        # Test _view_obj() return the inactive specific over active generic
-        inherit_view = View._view_obj(self.inherit_view.key)
-        self.assertEqual(inherit_view.active, True, "_view_obj should return the generic one")
-        inherit_view = View.with_context(website_id=1)._view_obj(self.inherit_view.key)
-        self.assertEqual(inherit_view.active, False, "_view_obj should return the specific one")
+        # Test _get_template_view() return the inactive specific over active generic
+        inherit_view = View._get_template_view(self.inherit_view.key)
+        self.assertEqual(inherit_view.active, True, "_get_template_view should return the generic one")
+        inherit_view = View.with_context(website_id=1)._get_template_view(self.inherit_view.key)
+        self.assertEqual(inherit_view.active, False, "_get_template_view should return the specific one")
 
         # Test get_related_views() return the inactive specific over active generic
         # Note that we cannot test get_related_views without a website in context as it will fallback on a website with get_current_website()
@@ -1418,10 +1419,10 @@ class Crawler(HttpCase):
         # ----------------------------------------------------------------------------------------------------------------
         #  1 | Products Theme Kea              |    1    | _theme_kea_sale.products      | _theme_kea_sale.products      |
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(MissingError):
             # It should crash as it should not find a view on website 1 for '_theme_kea_sale.products', !!and certainly not a theme.ir.ui.view!!.
-            view = View.with_context(website_id=website_1.id)._view_obj('_theme_kea_sale.products')
-        view = View.with_context(website_id=website_2.id)._view_obj('_theme_kea_sale.products')
+            view = View.with_context(website_id=website_1.id)._get_template_view('_theme_kea_sale.products')
+        view = View.with_context(website_id=website_2.id)._get_template_view('_theme_kea_sale.products')
         self.assertEqual(len(view), 1, "It should find the ir.ui.view with key '_theme_kea_sale.products' on website 2..")
         self.assertEqual(view._name, 'ir.ui.view', "..and not a theme.ir.ui.view")
 

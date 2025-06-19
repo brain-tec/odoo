@@ -5,9 +5,8 @@ import uuid
 import werkzeug
 
 from odoo import api, fields, models
-from odoo import tools
-from odoo.addons.website.tools import add_form_signature
-from odoo.exceptions import AccessError
+from odoo.fields import Domain
+from odoo.exceptions import AccessError, MissingError
 from odoo.osv import expression
 from odoo.http import request
 
@@ -295,46 +294,27 @@ class IrUiView(models.Model):
               * In a website context, every view from another website
         """
         current_website_id = self._context.get('website_id')
-        most_specific_views = self.env['ir.ui.view']
         if not current_website_id:
             return self.filtered(lambda view: not view.website_id)
 
-        specific_views_keys = set()
-        for view_check in self:
-            if view_check.website_id and view_check.website_id.id == current_website_id:
-                specific_views_keys.add(view_check.key)
-
+        specific_views_keys = {view.key for view in self if view.website_id.id == current_website_id and view.key}
+        most_specific_views = []
         for view in self:
             # specific view: add it if it's for the current website and ignore
             # it if it's for another website
             if view.website_id and view.website_id.id == current_website_id:
-                most_specific_views |= view
+                most_specific_views.append(view)
             # generic view: add it only if, for the current website, there is no
             # specific view for this view (based on the same `key` attribute)
             elif not view.website_id and view.key not in specific_views_keys:
-                most_specific_views |= view
+                most_specific_views.append(view)
 
-        return most_specific_views
+        return self.browse().union(*most_specific_views)
 
     @api.model
     def _view_get_inherited_children(self, view):
         extensions = super()._view_get_inherited_children(view)
         return extensions.filter_duplicate()
-
-    @api.model
-    def _view_obj(self, view_id):
-        ''' Given an xml_id or a view_id, return the corresponding view record.
-            In case of website context, return the most specific one.
-            :param view_id: either a string xml_id or an integer view_id
-            :return: The view record or empty recordset
-        '''
-        if isinstance(view_id, str) or isinstance(view_id, int):
-            return self.env['website'].viewref(view_id)
-        else:
-            # It can already be a view object when called by '_views_get()' that is calling '_view_obj'
-            # for it's inherit_children_ids, passing them directly as object record. (Note that it might
-            # be a view_id from another website but it will be filtered in 'get_related_views()')
-            return view_id if view_id._name == 'ir.ui.view' else self.env['ir.ui.view']
 
     @api.model
     def _get_inheriting_views_domain(self):
@@ -382,34 +362,44 @@ class IrUiView(models.Model):
                     """
 
     @api.model
-    @tools.ormcache('self.env.uid', 'self.env.su', 'xml_id', 'self._context.get("website_id")', cache='templates')
-    def _get_view_id(self, xml_id):
-        """If a website_id is in the context and the given xml_id is not an int
-        then try to get the id of the specific view for that website, but
-        fallback to the id of the generic view if there is no specific.
+    def _get_cached_template_prefetched_keys(self):
+        return super()._get_cached_template_prefetched_keys() + ['active', 'visibility']
 
-        If no website_id is in the context, it might randomly return the generic
-        or the specific view, so it's probably not recommanded to use this
-        method. `viewref` is probably more suitable.
+    @api.model
+    def _get_template_minimal_cache_keys(self):
+        return super()._get_template_minimal_cache_keys() + ['website_id']
 
-        Archived views are ignored (unless the active_test context is set, but
-        then the ormcache will not work as expected).
+    @api.model
+    def _get_template_domain(self, xmlids):
+        """ If a website_id is in the context and the given xml_id then try
+            to get the id of the specific view for that website, but fallback
+            to the id of the generic view if there is no specific.
+            If no website_id is in the context, every view with a website will
+            be filtered out.
+
+            Archived views are ignored (unless the active_test context is set, but
+            then the ormcache will not work as expected).
         """
-        website_id = self._context.get('website_id')
-        if website_id and not isinstance(xml_id, int):
-            current_website = self.env['website'].browse(int(website_id))
-            domain = ['&', ('key', '=', xml_id)] + current_website.website_domain()
+        domain = super()._get_template_domain(xmlids)
+        return domain & Domain('website_id', 'in', (False, self.env.context.get('website_id', False)))
 
-            view = self.sudo().search(domain, order='website_id', limit=1)
-            if not view:
-                _logger.warning("Could not find view object with xml_id '%s'", xml_id)
-                raise ValueError('View %r in website %r not found' % (xml_id, self._context['website_id']))
-            return view.id
-        return super(IrUiView, self.sudo())._get_view_id(xml_id)
+    @api.model
+    def _fetch_template_views(self, ids_or_xmlids):
+        data = super()._fetch_template_views(ids_or_xmlids)
+        for key in list(data):
+            if isinstance(data[key], MissingError):
+                data[key] = MissingError(self.env._("%(error)s (website: %(website_id)s)", error=data[key], website_id=self.env.context.get('website_id')))
+        return data
 
-    @tools.ormcache('self.id', cache='templates')
+    @api.model
+    def _get_template_order(self):
+        return f"website_id asc, {super()._get_template_order()}"
+
     def _get_cached_visibility(self):
-        return self.visibility
+        info = self._get_cached_template_info(self.id, _view=self)
+        if info['error']:
+            raise info['error']
+        return info['visibility']
 
     def _handle_visibility(self, do_raise=True):
         """ Check the visibility set on the main view and raise 403 if you should not have access.
@@ -448,9 +438,17 @@ class IrUiView(models.Model):
                 return False
         return True
 
+    @api.readonly
+    @api.model
+    def render_public_asset(self, template, values=None):
+        # to get the specific asset for access checking
+        if request and hasattr(request, 'website'):
+            return super(IrUiView, self.with_context(website_id=request.website.id)).render_public_asset(template, values=values)
+        return super().render_public_asset(template, values=values)
+
     def _render_template(self, template, values=None):
         """ Render the template. If website is enabled on request, then extend rendering context with website values. """
-        view = self._get(template).sudo()
+        view = self._get_template_view(template).sudo()
         view._handle_visibility(do_raise=True)
         if values is None:
             values = {}
@@ -510,11 +508,6 @@ class IrUiView(models.Model):
         return super()._get_allowed_root_attrs() + [
             'data-bg-video-src', 'data-shape', 'data-scroll-background-ratio',
         ]
-
-    def _get_combined_arch(self):
-        root = super()._get_combined_arch()
-        add_form_signature(root, self.sudo().env)
-        return root
 
     # --------------------------------------------------------------------------
     # Snippet saving
