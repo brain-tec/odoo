@@ -193,6 +193,12 @@ class ProjectProject(models.Model):
             self._ensure_sale_order_linked([sol_id])
         return project
 
+    def _get_sale_orders_domain(self, all_sale_orders):
+        return [("id", "in", all_sale_orders.ids)]
+
+    def _get_view_action(self):
+        return self.env["ir.actions.act_window"]._for_xml_id("sale.action_orders")
+
     def action_view_sols(self):
         self.ensure_one()
         all_sale_order_lines = self._fetch_sale_order_items({'project.task': [('is_closed', '=', False)]})
@@ -227,33 +233,22 @@ class ProjectProject(models.Model):
         self.ensure_one()
         all_sale_orders = self._fetch_sale_order_items({'project.task': [('is_closed', '=', False)]}).sudo().order_id
         embedded_action_context = self.env.context.get('from_embedded_action', False)
-        action_window = {
-            "type": "ir.actions.act_window",
-            "res_model": "sale.order",
-            'name': _("%(name)s's Sales Orders", name=self.name),
-            "context": {
-                "create": self.env.context.get('create_for_project_id', embedded_action_context),
-                "show_sale": True,
-                'default_partner_id': self.partner_id.id,
-                'default_project_id': self.id,
-                "create_for_project_id": self.id if not embedded_action_context else False,
-                "from_embedded_action": embedded_action_context
-            },
-            'help': "<p class='o_view_nocontent_smiling_face'>%s</p><p>%s<br/>%s</p>" %
-            (_("Create a new quotation, the first step of a new sale!"),
-                _("Once the quotation is confirmed by the customer, it becomes a sales order."),
-                _("You will be able to create an invoice and collect the payment."))
+        action_window = self._get_view_action()
+        action_window["display_name"] = self.env._("%(name)s's %(action_name)s", name=self.name, action_name=action_window.get('name'))
+        action_window["domain"] = self._get_sale_orders_domain(all_sale_orders)
+        action_window['context'] = {
+            **ast.literal_eval(action_window['context']),
+            "create": self.env.context.get("create_for_project_id", embedded_action_context),
+            "show_sale": True,
+            "default_partner_id": self.partner_id.id,
+            "default_project_id": self.id,
+            "create_for_project_id": self.id if not embedded_action_context else False,
+            "from_embedded_action": embedded_action_context,
         }
         if len(all_sale_orders) <= 1 and not embedded_action_context:
             action_window.update({
                 "res_id": all_sale_orders.id,
                 "views": [[False, "form"]],
-            })
-        else:
-            action_window.update({
-                "domain": [('id', 'in', all_sale_orders.ids)],
-                "views": [[False, "list"], [False, "kanban"], [False, "calendar"], [False, "pivot"],
-                           [False, "graph"], [False, "activity"], [False, "form"]],
             })
         return action_window
 
@@ -908,3 +903,31 @@ class ProjectProject(models.Model):
             action_window['views'] = [[False, 'form']]
             action_window['res_id'] = vendor_bill_ids[0]
         return action_window
+
+    def _fetch_products_linked_to_template(self, limit=None):
+        self.ensure_one()
+        return self.env['product.template'].search([('project_template_id', '=', self.id)], limit=limit)
+
+    def template_to_project_confirmation_callback(self, callbacks):
+        super().template_to_project_confirmation_callback(callbacks)
+        if callbacks.get('unlink_template_products'):
+            self._fetch_products_linked_to_template().project_template_id = False
+
+    def _get_template_to_project_confirmation_callbacks(self):
+        callbacks = super()._get_template_to_project_confirmation_callbacks()
+        if self._fetch_products_linked_to_template(limit=1):
+            callbacks['unlink_template_products'] = True
+        return callbacks
+
+    def _get_template_to_project_warnings(self):
+        self.ensure_one()
+        res = super()._get_template_to_project_warnings()
+        if self.is_template and self._fetch_products_linked_to_template(limit=1):
+            res.append(self.env._('Converting this template to a regular project will unlink it from its associated products.'))
+        return res
+
+    def _get_template_default_context_whitelist(self):
+        return [
+            *super()._get_template_default_context_whitelist(),
+            'allow_billable',
+        ]

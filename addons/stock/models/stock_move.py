@@ -7,7 +7,7 @@ from datetime import timedelta
 from operator import itemgetter
 from re import findall as regex_findall
 
-from odoo import _, api, Command, fields, models
+from odoo import _, api, Command, fields, models, SUPERUSER_ID
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
@@ -20,13 +20,13 @@ class StockMove(models.Model):
     _name = 'stock.move'
     _description = "Stock Move"
     _order = 'sequence, id'
+    _rec_name = 'reference'
 
     def _default_group_id(self):
         if self.env.context.get('default_picking_id'):
             return self.env['stock.picking'].browse(self.env.context['default_picking_id']).group_id.id
         return False
 
-    name = fields.Char('Description', required=True)
     sequence = fields.Integer('Sequence', default=10)
     priority = fields.Selection(
         PROCUREMENT_PRIORITIES, 'Priority', default='0',
@@ -52,7 +52,8 @@ class StockMove(models.Model):
         'move_id', 'template_attribute_value_id',
         string="Never attribute Values"
     )
-    description_picking = fields.Text('Description of Picking')
+    description_picking = fields.Text(string="Description Of Picking", compute='_compute_description_picking', inverse='_inverse_description_picking')
+    description_picking_manual = fields.Text(readonly=True)
     product_qty = fields.Float(
         'Real Quantity', compute='_compute_product_qty', inverse='_set_product_qty',
         digits=0, store=True, compute_sudo=True,
@@ -151,6 +152,7 @@ class StockMove(models.Model):
     delay_alert_date = fields.Datetime('Delay Alert Date', help='Process at this date to be on time', compute="_compute_delay_alert_date", store=True)
     picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type', compute='_compute_picking_type_id', store=True, readonly=False, check_company=True)
     is_inventory = fields.Boolean('Inventory')
+    inventory_name = fields.Char(readonly=True)
     move_line_ids = fields.One2many('stock.move.line', 'move_id')
     origin_returned_move_id = fields.Many2one(
         'stock.move', 'Origin return move', copy=False, index=True,
@@ -330,10 +332,20 @@ class StockMove(models.Model):
         for move in self:
             move.is_quantity_done_editable = move.product_id
 
-    @api.depends('name', 'picking_id.name', 'scrap_id.name', 'scrapped')
+    @api.depends('picking_id.name', 'scrap_id.name', 'scrapped', 'is_inventory', 'inventory_name')
     def _compute_reference(self):
         for move in self:
-            move.reference = move.scrap_id.name if move.scrapped else move.picking_id.name or move.name
+            if move.scrapped:
+                move.reference = move.scrap_id.name
+            elif move.is_inventory:
+                if move.inventory_name:
+                    move.reference = move.inventory_name
+                else:
+                    move.reference = _('Product Quantity Confirmed') if float_is_zero(move.quantity, precision_rounding=move.product_uom.rounding) else _('Product Quantity Updated')
+                    if move.create_uid and move.create_uid.id != SUPERUSER_ID:
+                        move.reference += f' ({move.create_uid.display_name})'
+            else:
+                move.reference = move.picking_id.name
 
     @api.depends('move_line_ids')
     def _compute_move_lines_count(self):
@@ -686,6 +698,25 @@ Please change the quantity done or the rounding precision in your settings.""",
                 move.picking_id.origin and '%s/' % move.picking_id.origin or '',
                 move.product_id.code and '%s: ' % move.product_id.code or '',
                 move.location_id.name, move.location_dest_id.name)
+
+    @api.depends('product_id', 'picking_type_id', 'description_picking_manual')
+    def _compute_description_picking(self):
+        for move in self:
+            if move.description_picking_manual:
+                move.description_picking = move.description_picking_manual
+            elif move.product_id:
+                product = move.product_id.with_context(lang=self._get_lang())
+                move.description_picking = product._get_picking_description(move.picking_type_id) or move._get_description()
+            else:
+                move.description_picking = ""
+
+    def _get_description(self):
+        product = self.product_id.with_context(lang=self._get_lang())
+        return product._get_description(self.picking_type_id)
+
+    def _inverse_description_picking(self):
+        for move in self:
+            move.description_picking_manual = move.description_picking
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -1283,13 +1314,6 @@ Please change the quantity done or the rounding precision in your settings.""",
             else:
                 return moves_todo[-1:].state or 'draft'
 
-    @api.onchange('product_id', 'picking_type_id')
-    def _onchange_product_id(self):
-        product = self.product_id.with_context(lang=self._get_lang())
-        self.name = product.partner_ref
-        if product:
-            self.description_picking = product._get_description(self.picking_type_id)
-
     @api.onchange('lot_ids')
     def _onchange_lot_ids(self):
         quantity = sum(ml.quantity_product_uom for ml in self.move_line_ids.filtered(lambda ml: not ml.lot_id and ml.lot_name))
@@ -1628,7 +1652,8 @@ Please change the quantity done or the rounding precision in your settings.""",
         if self.procure_method == "make_to_order":
             move_dest_ids = self
         return {
-            'product_description_variants': self.description_picking and self.description_picking.replace(product_id._get_description(self.picking_type_id), ''),
+            # TODO CLPI: maybe make this a little cleaner
+            'product_description_variants': self.description_picking and self.description_picking.replace(product_id._get_description(self.picking_type_id), '').replace(product_id._get_picking_description(self.picking_type_id) or '', ''),
             'never_product_template_attribute_value_ids': self.never_product_template_attribute_value_ids,
             'date_planned': dates_info.get('date_planned'),
             'date_order': dates_info.get('date_order'),

@@ -283,9 +283,6 @@ class PurchaseOrderLine(models.Model):
             location_dest = location_final
         date_planned = self.date_planned or self.order_id.date_planned
         return {
-            # truncate to 2000 to avoid triggering index limit error
-            # TODO: remove index in master?
-            'name': (self.product_id.display_name or '')[:2000],
             'product_id': self.product_id.id,
             'date': date_planned,
             'date_deadline': date_planned,
@@ -302,7 +299,6 @@ class PurchaseOrderLine(models.Model):
             'picking_type_id': self.order_id.picking_type_id.id,
             'group_id': self.order_id.group_id.id,
             'origin': self.order_id.name,
-            'description_picking': product.description_pickingin or self.name,
             'propagate_cancel': self.propagate_cancel,
             'warehouse_id': self.order_id.picking_type_id.warehouse_id.id,
             'product_uom_qty': product_uom_qty,
