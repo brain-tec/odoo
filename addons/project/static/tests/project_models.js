@@ -6,6 +6,7 @@ export class ProjectProject extends models.Model {
 
     name = fields.Char();
     is_favorite = fields.Boolean();
+    is_template = fields.Boolean();
     active = fields.Boolean({ default: true });
     stage_id = fields.Many2one({ relation: "project.project.stage" });
     date = fields.Date({ string: "Expiration Date" });
@@ -102,6 +103,10 @@ export class ProjectTask extends models.Model {
     closed_depend_on_count = fields.Integer();
     is_closed = fields.Boolean();
     is_template = fields.Boolean({ string: "Is Template", default: false });
+
+    plan_task_in_calendar(idOrIds, values) {
+        return this.write(idOrIds, values);
+    }
 
     _records = [
         {

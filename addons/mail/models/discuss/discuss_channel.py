@@ -15,6 +15,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools import format_list, get_lang, html_escape
 from odoo.tools.misc import OrderedSet
+from odoo.tools.sql import SQL
 
 channel_avatar = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 530.06 530.06">
 <rect width="530.06" height="530.06" fill="#875a7b"/>
@@ -392,29 +393,35 @@ class DiscussChannel(models.Model):
 
         def get_vals(channel):
             return {
-                get_field_name(field_description): (
-                    channel[get_field_name(field_description)],
-                    field_description,
-                )
-                for field_description in self._sync_field_names()
+                subchannel: {
+                    get_field_name(field_description): (
+                        channel[get_field_name(field_description)],
+                        field_description,
+                    )
+                    for field_description in field_descriptions
+                }
+                for subchannel, field_descriptions in self._sync_field_names().items()
             }
 
         old_vals = {channel: get_vals(channel) for channel in self}
         result = super().write(vals)
         for channel in self:
-            new_vals = get_vals(channel)
-            diff = []
-            for field_name, (value, field_description) in new_vals.items():
-                if value != old_vals[channel][field_name][0]:
-                    diff.append(field_description)
-            if diff:
-                channel._bus_send_store(channel, diff)
+            new_subchannel_vals = get_vals(channel)
+            for subchannel, vals in new_subchannel_vals.items():
+                diff = []
+                for field_name, (value, field_description) in vals.items():
+                    if value != old_vals[channel][subchannel][field_name][0]:
+                        diff.append(field_description)
+                if diff:
+                    channel._bus_send_store(channel, diff, subchannel=subchannel)
         if vals.get('group_ids'):
             self._subscribe_users_automatically()
         return result
 
     def _sync_field_names(self):
-        return [
+        # keys are bus subchannel names, values are lists of field names to sync
+        res = defaultdict(list)
+        res[None] += [
             "avatar_cache_key",
             "channel_type",
             "create_uid",
@@ -427,6 +434,7 @@ class DiscussChannel(models.Model):
             "name",
             "uuid",
         ]
+        return res
 
     # ------------------------------------------------------------
     # MEMBERS MANAGEMENT
@@ -1105,55 +1113,71 @@ class DiscussChannel(models.Model):
             :returns: channel_info of the created or existing channel
             :rtype: dict
         """
-        if self.env.user.partner_id.id not in partners_to:
-            partners_to.append(self.env.user.partner_id.id)
-        if len(partners_to) > 2:
+        partners = (
+            self.env["res.partner"]
+            .with_context(active_test=False)
+            .search([("id", "in", partners_to)])
+        ) | self.env.user.partner_id
+        if len(partners) > 2:
             raise UserError(_("A chat should not be created with more than 2 persons. Create a group instead."))
         # determine type according to the number of partner in the channel
         self.flush_model()
         self.env['discuss.channel.member'].flush_model()
-        self.env.cr.execute("""
+        self.env.cr.execute(
+            SQL(
+                """
             SELECT M.channel_id
             FROM discuss_channel C, discuss_channel_member M
             WHERE M.channel_id = C.id
-                AND M.partner_id IN %s
+                AND M.partner_id IN %(partner_ids)s
                 AND C.channel_type LIKE 'chat'
                 AND NOT EXISTS (
                     SELECT 1
                     FROM discuss_channel_member M2
                     WHERE M2.channel_id = C.id
-                        AND M2.partner_id NOT IN %s
+                        AND M2.partner_id NOT IN %(partner_ids)s
                 )
             GROUP BY M.channel_id
-            HAVING ARRAY_AGG(DISTINCT M.partner_id ORDER BY M.partner_id) = %s
+            HAVING ARRAY_AGG(DISTINCT M.partner_id ORDER BY M.partner_id) = %(sorted_partner_ids)s
             LIMIT 1
-        """, (tuple(partners_to), tuple(partners_to), sorted(list(partners_to)),))
+                """,
+                partner_ids=tuple(partners.ids),
+                sorted_partner_ids=sorted(partners.ids),
+            )
+        )
         result = self.env.cr.dictfetchall()
+        # use the same "now" in the whole function to ensure unpin_dt > last_interest_dt
+        now = fields.Datetime.now()
+        last_interest_dt = now - timedelta(seconds=1)
         if result:
             # get the existing channel between the given partners
             channel = self.browse(result[0].get('channel_id'))
             # pin or open the channel for the current partner
             if pin:
-                member = self.env['discuss.channel.member'].search([('partner_id', '=', self.env.user.partner_id.id), ('channel_id', '=', channel.id)])
-                vals = {'last_interest_dt': fields.Datetime.now()}
-                if pin:
-                    vals['unpin_dt'] = False
-                member.write(vals)
+                channel.self_member_id.write(
+                    {"last_interest_dt": last_interest_dt, "unpin_dt": False}
+                )
             channel._broadcast(self.env.user.partner_id.ids)
         else:
             # create a new one
-            channel = self.create({
-                'channel_member_ids': [
-                    Command.create({
-                        'partner_id': partner_id,
-                        # only pin for the current user, so the chat does not show up for the correspondent until a message has been sent
-                        'unpin_dt': False if partner_id == self.env.user.partner_id.id else fields.Datetime.now(),
-                    }) for partner_id in partners_to
-                ],
-                'channel_type': 'chat',
-                'name': ', '.join(self.env['res.partner'].browse(partners_to).mapped('name')),
-            })
-            channel._broadcast(partners_to)
+            channel = self.create(
+                {
+                    "channel_member_ids": [
+                        Command.create(
+                            {
+                                "last_interest_dt": last_interest_dt,
+                                "partner_id": partner.id,
+                                # only pin for the current user, so the chat does not show up for the correspondent until a message has been sent
+                                "unpin_dt": False if partner == self.env.user.partner_id else now,
+                            }
+                        )
+                        for partner in partners
+                    ],
+                    "channel_type": "chat",
+                    "name": ", ".join(partners.mapped("name")),
+                }
+            )
+            channel._broadcast(partners.ids)
         return channel
 
     def channel_pin(self, pinned=False):
