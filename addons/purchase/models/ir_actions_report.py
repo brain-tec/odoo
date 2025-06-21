@@ -11,10 +11,12 @@ class IrActionsReport(models.Model):
         # EXTENDS base
         collected_streams = super()._render_qweb_pdf_prepare_streams(report_ref, data, res_ids=res_ids)
 
-        if collected_streams \
-                and res_ids \
-                and len(res_ids) == 1 \
-                and self._is_purchase_order_report(report_ref):
+        if (
+            collected_streams
+            and res_ids
+            and len(res_ids) == 1
+            and self._is_purchase_order_report(report_ref)
+        ):
             purchase_order = self.env['purchase.order'].browse(res_ids)
             builders = purchase_order._get_edi_builders()
 
@@ -28,12 +30,13 @@ class IrActionsReport(models.Model):
             reader = OdooPdfFileReader(reader_buffer, strict=False)
             writer = OdooPdfFileWriter()
             writer.cloneReaderDocumentRoot(reader)
+
+            # Generate and attach EDI documents from each builder
             for builder in builders:
                 xml_content = builder._export_order(purchase_order)
 
-                # Post-process and embed the edi document.
                 writer.addAttachment(
-                    builder._export_purchase_order_filename(purchase_order),
+                    builder._export_invoice_filename(purchase_order),  # works even if it's a SO or PO
                     xml_content,
                     subtype='text/xml'
                 )

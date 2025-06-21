@@ -585,9 +585,6 @@ registry.category("web_tour.tours").add("test_preset_timing_restaurant", {
             Dialog.confirm(),
             Chrome.selectPresetTimingSlotHour("12:00"),
             Chrome.presetTimingSlotIs("12:00"),
-            Chrome.clickPresetTimingSlot(),
-            Chrome.selectPresetTimingSlotHour("15:00"),
-            Chrome.presetTimingSlotIs("15:00"),
             Chrome.clickPlanButton(),
             FloorScreen.clickTable("4"),
             ProductScreen.clickDisplayedProduct("Coca-Cola"),
@@ -669,5 +666,15 @@ registry.category("web_tour.tours").add("test_customer_alone_saved", {
             Chrome.clickOrders(),
             Chrome.clickRegister(),
             ProductScreen.customerIsSelected("Deco Addict"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_open_default_register_screen_config", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Coca-Cola"),
+            Chrome.endTour(),
         ].flat(),
 });

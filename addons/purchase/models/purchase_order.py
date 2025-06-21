@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import logging
+
 from collections import defaultdict
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -14,10 +16,12 @@ from odoo.tools import format_amount, format_date, formatLang, groupby, OrderedS
 from odoo.tools.float_utils import float_is_zero, float_repr
 from odoo.exceptions import UserError, ValidationError
 
+_logger = logging.getLogger(__name__)
+
 
 class PurchaseOrder(models.Model):
     _name = 'purchase.order'
-    _inherit = ['portal.mixin', 'product.catalog.mixin', 'mail.thread', 'mail.activity.mixin']
+    _inherit = ['portal.mixin', 'product.catalog.mixin', 'mail.thread', 'mail.activity.mixin', 'account.document.import.mixin']
     _description = "Purchase Order"
     _rec_names_search = ['name', 'partner_ref']
     _order = 'priority desc, id desc'
@@ -108,7 +112,7 @@ class PurchaseOrder(models.Model):
     acknowledged = fields.Boolean(
         'Acknowledged', copy=False, tracking=True,
         help="It indicates that the vendor has acknowledged the receipt of the purchase order.")
-    notes = fields.Html('Terms and Conditions')
+    note = fields.Html('Terms and Conditions')
 
     partner_bill_count = fields.Integer(related='partner_id.supplier_invoice_count')
     invoice_count = fields.Integer(compute="_compute_invoice", string='Bill Count', copy=False, default=0, store=True)
@@ -157,6 +161,7 @@ class PurchaseOrder(models.Model):
         store=True,
         precompute=True,
     )
+    duplicated_order_ids = fields.Many2many(comodel_name='purchase.order', compute='_compute_duplicated_order_ids')
 
     receipt_reminder_email = fields.Boolean('Receipt Reminder Email', compute='_compute_receipt_reminder_email', store=True, readonly=False)
     reminder_date_before_receipt = fields.Integer('Days Before Receipt', compute='_compute_receipt_reminder_email', store=True, readonly=False)
@@ -288,6 +293,58 @@ class PurchaseOrder(models.Model):
                 if product_msg := line.purchase_line_warn_msg:
                     warnings.add(line.product_id.display_name + ' - ' + product_msg)
             order.purchase_warning_text = '\n'.join(warnings)
+
+    @api.depends('partner_ref', 'origin', 'partner_id')
+    def _compute_duplicated_order_ids(self):
+        """Compute duplicated purchase orders based on key fields."""
+        draft_orders = self.filtered(lambda o: o.state == 'draft')
+        order_to_duplicate_orders = draft_orders._fetch_duplicate_orders()
+        for order in draft_orders:
+            duplicate_ids = order_to_duplicate_orders.get(order.id, [])
+            order.duplicated_order_ids = [Command.set(duplicate_ids)]
+        (self - draft_orders).duplicated_order_ids = False
+
+    def _fetch_duplicate_orders(self):
+        """ Fetch duplicated orders.
+
+        :return: Dictionary mapping order to its related duplicated orders.
+        :rtype: dict
+        """
+        orders = self.filtered(lambda order: order.id and order.partner_ref)
+        if not orders:
+            return {}
+
+        self.env['purchase.order'].flush_model(['company_id', 'partner_id', 'partner_ref', 'origin', 'state'])
+
+        result = self.env.execute_query(SQL("""
+            SELECT
+                po.id AS order_id,
+                array_agg(duplicate_po.id) AS duplicate_ids
+            FROM purchase_order po
+            JOIN purchase_order AS duplicate_po
+                ON po.company_id = duplicate_po.company_id
+                AND po.id != duplicate_po.id
+                AND duplicate_po.state != 'cancel'
+                AND po.partner_id = duplicate_po.partner_id
+                AND (
+                    po.origin = duplicate_po.name
+                    OR po.partner_ref = duplicate_po.partner_ref
+                )
+            WHERE po.id IN %(orders)s
+            GROUP BY po.id
+        """, orders=tuple(orders.ids)))
+
+        return {order_id: set(duplicate_ids) for order_id, duplicate_ids in result}
+
+    def action_open_business_doc(self):
+        self.ensure_one()
+        return {
+            'name': _("Order"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'purchase.order',
+            'res_id': self.id,
+            'views': [(False, 'form')],
+        }
 
     @api.onchange('date_planned')
     def onchange_date_planned(self):
@@ -529,6 +586,9 @@ class PurchaseOrder(models.Model):
         for order in self:
             if order.state not in ['draft', 'sent']:
                 continue
+            error_msg = order._confirmation_error_message()
+            if error_msg:
+                raise UserError(error_msg)
             order.order_line._validate_analytic_distribution()
             order._add_supplier_to_product()
             # Deal with double validation process
@@ -551,6 +611,19 @@ class PurchaseOrder(models.Model):
         if self.lock_confirmed_po == 'lock':
             raise UserError(_("Unlocking the order is not allowed as 'Lock Confirmed Orders' is enabled."))
         self.locked = False
+
+    def _confirmation_error_message(self):
+        """ Return whether order can be confirmed or not if not then return error message. """
+        self.ensure_one()
+        if any(
+            not line.display_type
+            and not line.is_downpayment
+            and not line.product_id
+            for line in self.order_line
+        ):
+            return _("Some order lines are missing a product, you need to correct them before going further.")
+
+        return False
 
     def _prepare_supplier_info(self, partner, line, price, currency):
         # Prepare supplierinfo data when adding a product
@@ -816,7 +889,7 @@ class PurchaseOrder(models.Model):
 
         invoice_vals = {
             'move_type': move_type,
-            'narration': self.notes,
+            'narration': self.note,
             'currency_id': self.currency_id.id,
             'partner_id': partner_invoice.id,
             'fiscal_position_id': (self.fiscal_position_id or self.fiscal_position_id._get_fiscal_position(partner_invoice)).id,
@@ -1229,5 +1302,24 @@ class PurchaseOrder(models.Model):
         self.ensure_one()
         return self.state == 'cancel'
 
+    # ------------------------------------------------------------
+    # EDI
+    # ------------------------------------------------------------
+
     def _get_edi_builders(self):
         return []
+
+    def create_document_from_attachment(self, attachment_ids):
+        """ Create the purchase orders from given attachment_ids
+        and redirect newly create order view.
+
+        :param list attachment_ids: List of attachments process.
+        :return: An action redirecting to related sale order view.
+        :rtype: dict
+        """
+        attachments = self.env['ir.attachment'].browse(attachment_ids)
+        if not attachments:
+            raise UserError(_("No attachment was provided"))
+
+        orders = self.with_context(default_partner_id=self.env.user.partner_id.id)._create_records_from_attachments(attachments)
+        return orders._get_records_action(name=_("Generated Orders"))
