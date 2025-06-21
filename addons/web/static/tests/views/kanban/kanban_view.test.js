@@ -507,12 +507,10 @@ test("basic grouped rendering", async () => {
 
     // check available actions in kanban header's config dropdown
     expect(".o-dropdown--menu .o_kanban_toggle_fold").toHaveCount(1);
-    expect(".o_kanban_header:first-child .o_kanban_config .o_column_edit").toHaveCount(0);
-    expect(".o_kanban_header:first-child .o_kanban_config .o_column_delete").toHaveCount(0);
-    expect(".o_kanban_header:first-child .o_kanban_config .o_column_archive_records").toHaveCount(
-        0
-    );
-    expect(".o_kanban_header:first-child .o_kanban_config .o_column_unarchive_records").toHaveCount(
+    expect(".o_kanban_header:first-child .o_group_config .o_group_edit").toHaveCount(0);
+    expect(".o_kanban_header:first-child .o_group_config .o_group_delete").toHaveCount(0);
+    expect(".o_kanban_header:first-child .o_group_config .o_column_archive_records").toHaveCount(0);
+    expect(".o_kanban_header:first-child .o_group_config .o_column_unarchive_records").toHaveCount(
         0
     );
 
@@ -3438,6 +3436,54 @@ test("quick create is disabled until record is created and onchange is done", as
 });
 
 test.tags("desktop");
+test("kanban grouped by stage_id: move record from to the None column", async () => {
+    // Fake model: partner.stage (only for group headers)
+    const Stage = class extends models.Model {
+        _name = "partner.stage";
+        name = fields.Char();
+        _records = [{ id: 10, name: "New" }];
+    };
+    defineModels([Stage]);
+
+    // Set up a record with no stage initially
+    Partner._records = [
+        { id: 1, foo: "Task A", stage_id: false },
+        { id: 2, foo: "Task B", stage_id: 10},
+    ];
+    Partner._fields.stage_id = fields.Many2one({ relation: "partner.stage" });
+
+    await mountView({
+        type: "kanban",
+        resModel: "partner",
+        arch: `
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="foo"/>
+                    </t>
+                </templates>
+            </kanban>`,
+        groupBy: ["stage_id"],
+    });
+
+    expect(queryAll(".o_kanban_group")).toHaveCount(2); // None and New
+
+    await click(".o_kanban_group:first .o_kanban_header");
+    
+    // Drag a record to the "None" column
+    let dragActions = await contains(".o_kanban_record:contains(Task B)").drag();
+    await dragActions.moveTo(".o_kanban_group:nth-child(1) .o_kanban_header");
+    await dragActions.drop();
+
+    // Reload
+    await validateSearch();
+
+    // Assert it's back in "None"
+    expect(queryAll(".o_kanban_record", { root: getKanbanColumn(0) })).toHaveCount(2);
+    expect(queryAllTexts(".o_kanban_record", { root: getKanbanColumn(0) })[1]).toBe("Task B");
+});
+
+test.tags("desktop");
 test("quick create record fail in grouped by many2one", async () => {
     Partner._views["form"] = `
         <form>
@@ -5526,10 +5572,10 @@ test("delete a column in grouped on m2o", async () => {
             message: "should be able to fold the column",
         }
     );
-    expect(queryAll(".o_column_edit", { root: getKanbanColumnDropdownMenu(0) })).toHaveCount(1, {
+    expect(queryAll(".o_group_edit", { root: getKanbanColumnDropdownMenu(0) })).toHaveCount(1, {
         message: "should be able to edit the column",
     });
-    expect(queryAll(".o_column_delete", { root: getKanbanColumnDropdownMenu(0) })).toHaveCount(1, {
+    expect(queryAll(".o_group_delete", { root: getKanbanColumnDropdownMenu(0) })).toHaveCount(1, {
         message: "should be able to delete the column",
     });
     expect(
@@ -5571,10 +5617,10 @@ test("delete a column in grouped on m2o", async () => {
             message: "should be able to fold the column",
         }
     );
-    expect(queryAll(".o_column_edit", { root: getKanbanColumnDropdownMenu(0) })).toHaveCount(0, {
+    expect(queryAll(".o_group_edit", { root: getKanbanColumnDropdownMenu(0) })).toHaveCount(0, {
         message: "should be able to edit the column",
     });
-    expect(queryAll(".o_column_delete", { root: getKanbanColumnDropdownMenu(0) })).toHaveCount(0, {
+    expect(queryAll(".o_group_delete", { root: getKanbanColumnDropdownMenu(0) })).toHaveCount(0, {
         message: "should not be able to delete the column",
     });
     expect(
@@ -7165,7 +7211,7 @@ test("empty grouped kanban with sample data: cannot fold a column", async () => 
 
     await toggleKanbanColumnActions(0);
 
-    expect(getDropdownMenu(".o_kanban_config").querySelector(".o_kanban_toggle_fold")).toHaveClass(
+    expect(getDropdownMenu(".o_group_config").querySelector(".o_kanban_toggle_fold")).toHaveClass(
         "disabled"
     );
 });
@@ -7819,7 +7865,7 @@ test("open config dropdown on kanban with records and groups draggable off", asy
         groupBy: ["product_id"],
     });
 
-    expect(".o_kanban_group .o_kanban_config").toHaveCount(2);
+    expect(".o_kanban_group .o_group_config").toHaveCount(2);
     expect(".o-dropdown--menu").toHaveCount(0);
 
     await toggleKanbanColumnActions(0);
@@ -12777,7 +12823,7 @@ test("Kanban: no reset of the groupby when a non-empty column is deleted", async
 
     // check availability of delete action in kanban header's config dropdown
     await toggleKanbanColumnActions(2);
-    expect(queryAll(".o_column_delete", { root: getKanbanColumnDropdownMenu(2) })).toHaveCount(1, {
+    expect(queryAll(".o_group_delete", { root: getKanbanColumnDropdownMenu(2) })).toHaveCount(1, {
         message: "should be able to delete the column",
     });
 

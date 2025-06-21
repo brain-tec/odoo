@@ -3,6 +3,7 @@
 import ast
 import calendar
 from collections import Counter, defaultdict
+from collections.abc import Mapping
 from contextlib import ExitStack, contextmanager
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
@@ -4423,7 +4424,8 @@ class AccountMove(models.Model):
         }
 
         def total_grouping_function(base_line, tax_data):
-            return not filter_tax_values_to_apply or filter_tax_values_to_apply(base_line, tax_data)
+            if tax_data:
+                return not filter_tax_values_to_apply or filter_tax_values_to_apply(base_line, tax_data)
 
         # Report the total amounts.
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, total_grouping_function)
@@ -4460,7 +4462,7 @@ class AccountMove(models.Model):
             for grouping_key, values in aggregated_values.items():
                 if not grouping_key:
                     continue
-                if isinstance(grouping_key, dict):
+                if isinstance(grouping_key, Mapping):
                     values.update(grouping_key)
                 tax_details[grouping_key] = values
 
@@ -4469,7 +4471,7 @@ class AccountMove(models.Model):
         for grouping_key, values in values_per_grouping_key.items():
             if not grouping_key:
                 continue
-            if isinstance(grouping_key, dict):
+            if isinstance(grouping_key, Mapping):
                 values.update(grouping_key)
             tax_details[grouping_key] = values
 
