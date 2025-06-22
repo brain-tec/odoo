@@ -3,12 +3,12 @@ import { Base, createRelatedModels } from "@point_of_sale/app/models/related_mod
 import { registry } from "@web/core/registry";
 import { Mutex } from "@web/core/utils/concurrency";
 import { markRaw } from "@odoo/owl";
-import { batched } from "@web/core/utils/timing";
+import { debounce } from "@web/core/utils/timing";
 import IndexedDB from "../models/utils/indexed_db";
 import { DataServiceOptions } from "../models/data_service_options";
 import { getOnNotified, uuidv4 } from "@point_of_sale/utils";
 import { browser } from "@web/core/browser/browser";
-import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
+import { ConnectionLostError, rpc, RPCError } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 
 const { DateTime } = luxon;
@@ -33,30 +33,51 @@ export class PosData extends Reactive {
         this.records = {};
         this.opts = new DataServiceOptions();
         this.channels = [];
+        this.debouncedSynchronizeLocalDataInIndexedDB = debounce(
+            this.synchronizeLocalDataInIndexedDB.bind(this),
+            300
+        );
 
         this.network = {
             warningTriggered: false,
-            offline: !navigator.onLine,
+            offline: false,
             loading: true,
             unsyncData: [],
         };
 
+        if (!navigator.onLine) {
+            await this.checkConnectivity();
+        }
+
         this.initializeWebsocket();
         await this.intializeDataRelation();
-        browser.addEventListener("online", () => {
-            if (this.network.offline) {
-                this.network.offline = false;
-                this.network.warningTriggered = false;
-            }
 
-            this.syncData();
-        });
-
-        browser.addEventListener("offline", () => {
-            this.network.offline = true;
-        });
-
+        browser.addEventListener("online", () => this.checkConnectivity());
+        browser.addEventListener("offline", () => this.checkConnectivity());
         this.bus.addEventListener("connect", this.reconnectWebSocket.bind(this));
+    }
+
+    async checkConnectivity() {
+        try {
+            // Runbot tests will soon be run in dockers with no access to the outside world,
+            // so all their interfaces will be disconnected. The problem is that the browser
+            // considers itself offline when no interface is connected. However, in this case,
+            // if the Odoo server is still accessible.
+            //
+            // This method also makes it possible to run local tests when no connection is
+            // available and an Odoo server is running locally.
+            //
+            // A ping is required to verify that the connection to the server is not possible.
+            await rpc("/pos/ping");
+            await this.syncData();
+
+            this.network.offline = false;
+            this.network.warningTriggered = false;
+        } catch (error) {
+            if (error instanceof ConnectionLostError) {
+                this.network.offline = true;
+            }
+        }
     }
 
     initializeWebsocket() {
@@ -220,7 +241,7 @@ export class PosData extends Reactive {
         const session = localData?.["pos.session"]?.[0];
 
         if (
-            (navigator.onLine && session?.state !== "opened") ||
+            (!this.network.offline && session?.state !== "opened") ||
             session?.id !== odoo.pos_session_id ||
             odoo.from_backend
         ) {
@@ -322,7 +343,7 @@ export class PosData extends Reactive {
 
     async loadFieldsAndRelations() {
         const key = `pos_data_params_${odoo.pos_config_id}`;
-        if (!navigator.onLine) {
+        if (this.network.offline) {
             return JSON.parse(localStorage.getItem(key));
         }
 
@@ -370,16 +391,55 @@ export class PosData extends Reactive {
         this.relations = relations;
         this.models = models;
 
+        if (odoo.debug === "assets") {
+            window.performance.mark("pos_data_service_init");
+        }
+
         await this.initData();
         await this.getLocalDataFromIndexedDB();
         this.initListeners();
+
+        if (odoo.debug === "assets") {
+            window.performance.mark("pos_data_service_init_end");
+            this.debugInfos();
+        }
+
         this.network.loading = false;
+    }
+
+    debugInfos() {
+        const sortedByLength = Object.keys(this.models)
+            .map((m) => [m, this.models[m].length])
+            .sort((a, b) => a[1] - b[1]);
+
+        for (const [model, length] of sortedByLength) {
+            console.debug(
+                `[%c${model}%c]: %c${length}%c records`,
+                "color:lime;",
+                "",
+                "font-weight:bold;color:#e67e22",
+                ""
+            );
+        }
+
+        const measure = window.performance.measure(
+            "pos_loading",
+            "pos_data_service_init",
+            "pos_data_service_init_end"
+        );
+
+        console.debug(
+            `%cPosDataService initialized in %c${measure.duration.toFixed(2)}ms%c`,
+            "color:lime;font-weight:bold",
+            "color:#e67e22;font-weight:bold",
+            ""
+        );
     }
 
     initListeners() {
         this.models["pos.order"].addEventListener(
             "update",
-            batched(this.synchronizeLocalDataInIndexedDB.bind(this))
+            this.debouncedSynchronizeLocalDataInIndexedDB.bind(this)
         );
 
         const ignore = Object.keys(this.opts.databaseTable);
@@ -574,7 +634,7 @@ export class PosData extends Reactive {
     }
 
     async missingRecursive(recordMap, idsMap = {}, acc = {}) {
-        if (!navigator.onLine) {
+        if (this.network.offline) {
             return acc;
         }
 
@@ -642,6 +702,17 @@ export class PosData extends Reactive {
             }
 
             try {
+                if (["product.product", "product.template"].includes(model)) {
+                    const domain = model === "product.product" ? "product_variant_ids.id" : "id";
+                    await this.callRelated("product.template", "load_product_from_pos", [
+                        odoo.pos_config_id,
+                        [[domain, "in", Array.from(ids)]],
+                        0,
+                        0,
+                    ]);
+                    continue;
+                }
+
                 const data = await this.orm.read(model, Array.from(ids), this.fields[model], {
                     load: false,
                 });
