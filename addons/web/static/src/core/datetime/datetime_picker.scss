@@ -1,9 +1,9 @@
 .o_datetime_picker {
-    --DateTimePicker__Cell-size-md: 3rem;
-    --DateTimePicker__Cell-size-lg: 5rem;
     --DateTimePicker__Template-rows: 3;
     --DateTimePicker__Template-columns: 4;
     --DateTimePicker__Day-template-rows: 6;
+
+    width: $o-datetime-picker-width;
 
     // Header
     .o_datetime_picker_header .o_header_part {
@@ -74,28 +74,7 @@
         place-items: center;
     }
 
-    // Compute  spacing  between the two month by compensating buttons size and tables gap
-
-    .o_zoom_out {
-        gap: calc(
-            #{$btn-border-width} * 4 + #{$o-font-size-base} * 2 + #{$input-btn-padding-x} * 4
-        );
-    }
-
-    .o_cell_md {
+    .o_date_item_cell {
         aspect-ratio: 1;
-        @include media-breakpoint-up(md) {
-            width: var(--DateTimePicker__Cell-size-md);
-            height: var(--DateTimePicker__Cell-size-md);
-        }
-    }
-
-    .o_cell_lg {
-        width: var(--DateTimePicker__Cell-size-lg);
-        height: var(--DateTimePicker__Cell-size-lg);
-    }
-
-    .o_text_sm {
-        font-size: 0.875rem;
     }
 }
