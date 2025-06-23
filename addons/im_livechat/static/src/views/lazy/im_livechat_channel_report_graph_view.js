@@ -1,20 +1,9 @@
-import { registry } from "@web/core/registry";
-import { GraphRenderer } from "@web/views/graph/graph_renderer";
-import { graphView } from "@web/views/graph/graph_view";
+import { LivechatGraphRendererMixin } from "@im_livechat/views/lazy/im_livechat_graph_renderer_mixin";
 
-class ImLivechatChannelReportGraphRenderer extends GraphRenderer {
-    async onGraphClickedFinal(domain) {
-        const action = this.env.services.orm.call(
-            "im_livechat.report.channel",
-            "action_open_discuss_channel_list_view",
-            [],
-            { report_channels_domain: domain }
-        );
-        this.env.services.action.doAction(action);
-    }
-}
+import { registry } from "@web/core/registry";
+import { graphView } from "@web/views/graph/graph_view";
 
 registry.category("views").add("im_livechat.channel_report_graph_views", {
     ...graphView,
-    Renderer: ImLivechatChannelReportGraphRenderer,
+    Renderer: LivechatGraphRendererMixin("im_livechat.report.channel"),
 });

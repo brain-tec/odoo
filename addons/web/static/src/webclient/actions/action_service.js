@@ -749,6 +749,7 @@ export function makeActionManager(env, router = _router) {
             config: {
                 actionId: action.id,
                 actionName: action.name,
+                cache: action.cache,
                 actionType: "ir.actions.act_window",
                 embeddedActions,
                 parentActionId,
@@ -1141,8 +1142,10 @@ export function makeActionManager(env, router = _router) {
         if (url && !(url.startsWith("http") || url.startsWith("/"))) {
             url = "/" + url;
         }
-        if (action.target === "download" || action.target === "self") {
+        if (action.target === "self") {
             browser.location.assign(url);
+        } else if (action.target === "download") {
+            _openURL(url);
         } else {
             _openURL(url);
             if (action.close) {
