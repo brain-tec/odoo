@@ -87,7 +87,7 @@ class ProductTemplate(models.Model):
             'id', 'display_name', 'standard_price', 'categ_id', 'pos_categ_ids', 'taxes_id', 'barcode', 'name', 'list_price', 'is_favorite',
             'default_code', 'to_weight', 'uom_id', 'description_sale', 'description', 'tracking', 'type', 'service_tracking', 'is_storable',
             'write_date', 'color', 'pos_sequence', 'available_in_pos', 'attribute_line_ids', 'active', 'image_128', 'combo_ids', 'product_variant_ids', 'public_description',
-            'pos_optional_product_ids', 'sequence',
+            'pos_optional_product_ids', 'sequence', 'product_tag_ids'
         ]
 
     def _load_pos_data(self, data):
@@ -121,8 +121,6 @@ class ProductTemplate(models.Model):
             )
             product_tmpl_ids = [r[0] for r in self.env.execute_query(sql)]
             products = self._load_product_with_domain([('id', 'in', product_tmpl_ids)])
-            product_combo = products.filtered(lambda p: p['type'] == 'combo')
-            products += product_combo.combo_ids.combo_item_ids.product_id.product_tmpl_id
         else:
             domain = self._load_pos_data_domain(data)
             products = self._load_product_with_domain(domain)

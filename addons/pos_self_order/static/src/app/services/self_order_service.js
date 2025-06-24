@@ -265,6 +265,9 @@ export class SelfOrder extends Reactive {
             this.printKioskChanges(access_token);
         }
     }
+    hasPaymentMethod() {
+        return this.filterPaymentMethods(this.models["pos.payment.method"].getAll()).length > 0;
+    }
 
     filterPaymentMethods(pms) {
         //based on _load_pos_self_data_domain from pos_payment_method.py
@@ -406,7 +409,7 @@ export class SelfOrder extends Reactive {
             (p) => p.pos_categ_ids.length === 0 && !excludedProductTemplateIds.has(p.id)
         );
 
-        if (productWoCat.length) {
+        if (productWoCat.length && !this.config.iface_available_categ_ids.length) {
             this.productCategories.push({
                 id: 0,
                 hour_after: 0,
@@ -445,14 +448,17 @@ export class SelfOrder extends Reactive {
     }
 
     _getKioskPrintingCategoriesChanges(order, categories) {
-        return order.lines.filter((orderline) =>
-            categories.some((category) =>
+        return order.lines.filter((orderline) => {
+            const baseProductId = orderline.combo_parent_id
+                ? orderline.combo_parent_id.product_id.id
+                : orderline.product_id.id;
+            return categories.some((category) =>
                 this.models["product.product"]
-                    .get(orderline.product_id.id)
+                    .get(baseProductId)
                     .pos_categ_ids.map((categ) => categ.id)
                     .includes(category.id)
-            )
-        );
+            );
+        });
     }
 
     async printKioskChanges(access_token = "") {
@@ -502,11 +508,12 @@ export class SelfOrder extends Reactive {
                 if (this.router.activeSlot !== "payment" && this.router.activeSlot !== "default") {
                     this.timeoutPopup = this.dialog.add(TimeoutPopup, {
                         onTimeout: () => {
+                            this.dialog.closeAll();
                             this.router.navigate("default");
                         },
                     });
                 }
-            }, 1 * 1000 * 90);
+            }, 1000 * 90);
         });
     }
 
@@ -539,7 +546,6 @@ export class SelfOrder extends Reactive {
         const lineToDelete = [];
         for (const line of this.currentOrder.lines) {
             const changes = line.changes;
-
             if (Object.values(changes).some((v) => v)) {
                 if (line.qty <= changes.qty) {
                     lineToDelete.push(line);
@@ -857,14 +863,6 @@ export class SelfOrder extends Reactive {
 
     hasPresets() {
         return this.config.use_presets && this.models["pos.preset"].length > 1;
-    }
-
-    displayCategoryPage() {
-        if (!this.kioskMode) {
-            return;
-        }
-
-        return this.getAvailableCategories().length > 1;
     }
 
     get kioskBackgroundImageUrl() {

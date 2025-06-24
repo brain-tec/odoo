@@ -70,6 +70,8 @@ _CACHES_BY_KEY = {
     'groups': ('groups', 'templates', 'templates.cached_values'),  # The processing of groups is saved in the view
 }
 
+_REPLICA_RETRY_TIME = 20 * 60  # 20 minutes
+
 
 def _unaccent(x: SQL | str | psycopg2.sql.Composable) -> SQL | str | psycopg2.sql.Composed:
     if isinstance(x, SQL):
@@ -228,6 +230,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self.db_name = db_name
         self._db: Connection = sql_db.db_connect(db_name, readonly=False)
         self._db_readonly: Connection | None = None
+        self._db_readonly_failed_time: float | None = None
         if config['db_replica_host'] or config['test_enable'] or 'replica' in config['dev_mode']:  # by default, only use readonly pool if we have a db_replica_host defined.
             self._db_readonly = sql_db.db_connect(db_name, readonly=True)
 
@@ -394,8 +397,8 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self._is_modifying_relations.clear()
         self.registry_invalidated = True
 
-        self.field_depends.clear()
-        self.field_depends_context.clear()
+        # model classes on which to *not* recompute field_depends[_context]
+        models_field_depends_done = set()
 
         if model_names is None:
             self.many2many_relations.clear()
@@ -405,25 +408,33 @@ class Registry(Mapping[str, type["BaseModel"]]):
             for model_cls in self.models.values():
                 model_cls._setup_done__ = False
 
+            self.field_depends.clear()
+            self.field_depends_context.clear()
+
         else:
             # only mark impacted models for setup
             for model_name in self.descendants(model_names, '_inherit', '_inherits'):
                 self[model_name]._setup_done__ = False
 
             # recursively mark fields to re-setup
-            todo = [
-                field
-                for model_cls in self.models.values()
-                if not model_cls._setup_done__
-                for field in model_cls._fields.values()
-            ]
+            todo = []
+            for model_cls in self.models.values():
+                if model_cls._setup_done__:
+                    models_field_depends_done.add(model_cls)
+                else:
+                    todo.extend(model_cls._fields.values())
+
+            done = set()
             for field in todo:
-                if field._setup_done and field._base_fields__:
+                if field in done:
+                    continue
+
+                model_cls = self[field.model_name]
+                if model_cls._setup_done__ and field._base_fields__:
                     # the field has been created by model_classes._setup() as
                     # Field(_base_fields__=...); restore it to force its setup
-                    base_fields = field._base_fields__
-                    model_cls = self[field.model_name]
                     name = field.name
+                    base_fields = field._base_fields__
 
                     field.__dict__.clear()
                     field.__init__(_base_fields__=base_fields)
@@ -431,6 +442,13 @@ class Registry(Mapping[str, type["BaseModel"]]):
                     field.__set_name__(model_cls, name)
                     field._setup_done = False
 
+                    models_field_depends_done.discard(model_cls)
+
+                # partial invalidation of field_depends[_context]
+                self.field_depends.pop(field, None)
+                self.field_depends_context.pop(field, None)
+
+                done.add(field)
                 todo.extend(self.field_setup_dependents.pop(field, ()))
 
         self.many2one_company_dependents.clear()
@@ -438,7 +456,10 @@ class Registry(Mapping[str, type["BaseModel"]]):
         model_classes.setup_model_classes(env)
 
         # determine field_depends and field_depends_context
-        for model in env.values():
+        for model_cls in self.models.values():
+            if model_cls in models_field_depends_done:
+                continue
+            model = model_cls(env, (), ())
             for field in model._fields.values():
                 depends, depends_context = field.get_depends(model)
                 self.field_depends[field] = tuple(depends)
@@ -1087,13 +1108,18 @@ class Registry(Mapping[str, type["BaseModel"]]):
                 replica exists or that no readonly cursor could be acquired.
         """
         if readonly and self._db_readonly is not None:
-            try:
-                return self._db_readonly.cursor()
-            except psycopg2.OperationalError:
-                # Setting _db_readonly to None will deactivate the readonly mode until
-                # worker restart / recycling.
-                self._db_readonly = None
-                _logger.warning('Failed to open a readonly cursor, falling back to read-write cursor')
+            if (
+                self._db_readonly_failed_time is None
+                or time.monotonic() > self._db_readonly_failed_time + _REPLICA_RETRY_TIME
+            ):
+                try:
+                    cr = self._db_readonly.cursor()
+                    self._db_readonly_failed_time = None
+                    return cr
+                except psycopg2.OperationalError:
+                    self._db_readonly_failed_time = time.monotonic()
+                    _logger.warning("Failed to open a readonly cursor, falling back to read-write cursor for %dmin %dsec", *divmod(_REPLICA_RETRY_TIME, 60))
+            threading.current_thread().cursor_mode = 'ro->rw'
         return self._db.cursor()
 
 

@@ -21,14 +21,20 @@ class HrEmployeePublic(models.Model):
     department_id = fields.Many2one('hr.department', readonly=True)
     member_of_department = fields.Boolean(compute='_compute_member_of_department', search='_search_part_of_department')
     job_id = fields.Many2one('hr.job', readonly=True)
+    job_title = fields.Char(related='employee_id.job_title')
     company_id = fields.Many2one('res.company', readonly=True)
     address_id = fields.Many2one('res.partner', readonly=True)
     mobile_phone = fields.Char(readonly=True)
     work_phone = fields.Char(readonly=True)
     work_email = fields.Char(readonly=True)
+    share = fields.Boolean(related='employee_id.share')
+    phone = fields.Char(related='employee_id.phone')
+    im_status = fields.Char(related='employee_id.im_status')
+    email = fields.Char(related='employee_id.email')
     work_contact_id = fields.Many2one('res.partner', readonly=True)
     work_location_id = fields.Many2one('hr.work.location', readonly=True)
     work_location_name = fields.Char(compute="_compute_work_location_name")
+    work_location_type = fields.Selection(related='employee_id.work_location_type')
     user_id = fields.Many2one('res.users', readonly=True)
     resource_id = fields.Many2one('resource.resource', readonly=True)
     tz = fields.Selection(related='resource_id.tz')
@@ -181,10 +187,10 @@ class HrEmployeePublic(models.Model):
 
     @api.model
     def _get_fields(self):
-        return 'e.id AS id,e.name AS name,' + ','.join(
+        return 'e.id AS id,e.name AS name,e.active AS active,' + ','.join(
             ('v.%s' if name in self.env['hr.version']._fields and self.env['hr.version']._fields[name].store else 'e.%s') % name
             for name, field in self._fields.items()
-            if field.store and field.type not in ['many2many', 'one2many'] and name not in ['id', 'name'])
+            if field.store and field.type not in ['many2many', 'one2many'] and name not in ['id', 'name', 'active'])
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
