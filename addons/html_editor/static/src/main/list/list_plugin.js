@@ -9,6 +9,7 @@ import {
     isParagraphRelatedElement,
     isProtected,
     isProtecting,
+    isShrunkBlock,
     listElementSelector,
 } from "@html_editor/utils/dom_info";
 import {
@@ -648,15 +649,16 @@ export class ListPlugin extends Plugin {
     outdentTopLevelLI(li) {
         const cursors = this.dependencies.selection.preserveSelection();
         const ul = li.parentNode;
-        // Transform LI's children into blocks
-        wrapInlinesInBlocks(li, {
-            baseContainerNodeName: this.dependencies.baseContainer.getDefaultNodeName(),
-            cursors,
-        });
-        if (!li.hasChildNodes()) {
-            // Outdenting an empty LI produces an empty baseContainer
+        const children = childNodes(li);
+        if (!children.every(isBlock)) {
             const baseContainer = this.dependencies.baseContainer.createBaseContainer();
-            baseContainer.append(this.document.createElement("br"));
+            for (const child of children) {
+                cursors.update(callbacksForCursorUpdate.append(baseContainer, child));
+                baseContainer.append(child);
+            }
+            if (isShrunkBlock(baseContainer)) {
+                baseContainer.append(this.document.createElement("br"));
+            }
             li.append(baseContainer);
             cursors.remapNode(li, baseContainer);
         }
@@ -787,6 +789,12 @@ export class ListPlugin extends Plugin {
         if (listItems.length || navListItems.length) {
             this.indentListNodes(listItems);
             this.dependencies.tabulation.indentBlocks(nonListItems);
+            const listsToAdjustPadding = new Set(
+                listItems.map((li) => closestElement(li, "ul, ol")).filter(Boolean)
+            );
+            for (const list of listsToAdjustPadding) {
+                this.adjustListPadding(list);
+            }
             // Do nothing to nav-items.
             this.dependencies.history.addStep();
             return true;
@@ -1060,7 +1068,10 @@ export class ListPlugin extends Plugin {
                 li.parentElement.nodeName === "UL" ? markerWidth * 2 : markerWidth;
             // For smaller font sizes, doubling the width of the dot marker is still lower than the
             // default. The default is kept in that case.
-            return Math.max(defaultPadding, paddingForMarker);
+            // Fallback to default if marker is missing (e.g., in li.oe-nested).
+            return isNaN(paddingForMarker)
+                ? defaultPadding
+                : Math.max(defaultPadding, paddingForMarker);
         });
         const largestPadding = Math.max(...requiredPaddings);
         if (largestPadding > defaultPadding) {
