@@ -155,19 +155,21 @@ def check_image():
     return {'major': version[0], 'minor': version[1]}
 
 
-def save_conf_server(url, token, db_uuid, enterprise_code):
+def save_conf_server(url, token, db_uuid, enterprise_code, db_name=None):
     """
     Save server configurations in odoo.conf
     :param url: The URL of the server
     :param token: The token to authenticate the server
     :param db_uuid: The database UUID
     :param enterprise_code: The enterprise code
+    :param db_name: The database name
     """
     update_conf({
         'remote_server': url,
         'token': token,
         'db_uuid': db_uuid,
         'enterprise_code': enterprise_code,
+        'db_name': db_name,
     })
     get_odoo_server_url.cache_clear()
 
@@ -211,11 +213,16 @@ def get_identifier():
     # On windows, get motherboard's uuid (serial number isn't reliable as it's not always present)
     command = ['powershell', '-Command', "(Get-CimInstance Win32_ComputerSystemProduct).UUID"]
     p = subprocess.run(command, stdout=subprocess.PIPE, check=False)
-    if p.returncode != 0:
-        _logger.error("Failed to get Windows IoT serial number")
-        return False
+    identifier = get_conf('generated_identifier')  # Fallback identifier if windows does not return mb UUID
+    if p.returncode == 0 and p.stdout.decode().strip():
+        return p.stdout.decode().strip()
 
-    return p.stdout.decode().strip() or False
+    _logger.error("Failed to get Windows IoT serial number, defaulting to a random identifier")
+    if not identifier:
+        identifier = secrets.token_hex()
+        update_conf({'generated_identifier': identifier})
+
+    return identifier
 
 
 def get_path_nginx():
@@ -484,6 +491,7 @@ def disconnect_from_server():
         'remote_server': '',
         'token': '',
         'db_uuid': '',
+        'db_name': '',
         'enterprise_code': '',
         'screen_orientation': '',
         'browser_url': '',
