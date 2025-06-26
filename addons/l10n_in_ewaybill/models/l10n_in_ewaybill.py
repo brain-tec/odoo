@@ -472,7 +472,7 @@ class L10nInEwaybill(models.Model):
         cancel_json = {
             'ewbNo': int(self.name),
             'cancelRsnCode': int(self.cancel_reason),
-            'CnlRem': self.cancel_remarks,
+            'cancelRmrk': self.cancel_remarks,
         }
         ewb_api = EWayBillApi(self.company_id)
         self._lock_ewaybill()
@@ -481,6 +481,7 @@ class L10nInEwaybill(models.Model):
         except EWayBillError as error:
             self._handle_error(error)
             return False
+        self._handle_internal_warning_if_present(response)  # In case of error 312
         self._create_and_post_response_attachment(
             ewb_name=self.name,
             response=response,
