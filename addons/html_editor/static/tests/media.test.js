@@ -1,16 +1,16 @@
+import { EDITABLE_MEDIA_CLASS } from "@html_editor/utils/dom_info";
 import { describe, expect, test } from "@odoo/hoot";
 import { click, press, waitFor } from "@odoo/hoot-dom";
 import { animationFrame, tick } from "@odoo/hoot-mock";
 import { makeMockEnv, onRpc } from "@web/../tests/web_test_helpers";
+import { cleanHints } from "./_helpers/dispatch";
 import { base64Img, setupEditor, testEditor } from "./_helpers/editor";
 import { getContent } from "./_helpers/selection";
-import { deleteBackward, deleteForward, insertText } from "./_helpers/user_actions";
-import { cleanHints } from "./_helpers/dispatch";
-import { EDITABLE_MEDIA_CLASS } from "@html_editor/utils/dom_info";
 import { expectElementCount } from "./_helpers/ui_expectations";
+import { deleteBackward, deleteForward, insertText } from "./_helpers/user_actions";
 
 test("Can replace an image", async () => {
-    onRpc("/web/dataset/call_kw/ir.attachment/search_read", () => [
+    onRpc("ir.attachment", "search_read", () => [
         {
             id: 1,
             name: "logo",
@@ -37,7 +37,7 @@ test("Can replace an image", async () => {
 
 test.tags("focus required");
 test("Selection is collapsed after the image after replacing it", async () => {
-    onRpc("/web/dataset/call_kw/ir.attachment/search_read", () => [
+    onRpc("ir.attachment", "search_read", () => [
         {
             id: 1,
             name: "logo",
@@ -64,7 +64,7 @@ test("Selection is collapsed after the image after replacing it", async () => {
 
 test.tags("focus required");
 test("Can insert an image, and selection should be collapsed after it", async () => {
-    onRpc("/web/dataset/call_kw/ir.attachment/search_read", () => [
+    onRpc("ir.attachment", "search_read", () => [
         {
             id: 1,
             name: "logo",
@@ -88,7 +88,7 @@ test("Can insert an image, and selection should be collapsed after it", async ()
 });
 
 test("press escape to close media dialog", async () => {
-    onRpc("/web/dataset/call_kw/ir.attachment/search_read", () => []);
+    onRpc("ir.attachment", "search_read", () => []);
     const env = await makeMockEnv();
     const { editor, el } = await setupEditor("<p>a[]bc</p>", { env });
     await insertText(editor, "/image");
@@ -106,14 +106,14 @@ test("press escape to close media dialog", async () => {
 describe("Powerbox search keywords", () => {
     test("Image and Icon are keywords for the Media command", async () => {
         const { editor } = await setupEditor("<p>[]<br></p>");
-        insertText(editor, "/");
+        await insertText(editor, "/");
         for (const word of ["image", "icon"]) {
-            insertText(editor, word);
+            await insertText(editor, word);
             await animationFrame();
             expect(".active .o-we-command-name").toHaveText("Media");
             // delete the keyword to try the next one
             for (let i = 0; i < word.length; i++) {
-                press("backspace");
+                await press("backspace");
             }
         }
     });

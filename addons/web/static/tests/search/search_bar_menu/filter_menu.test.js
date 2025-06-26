@@ -700,17 +700,17 @@ test("Add a custom filter", async () => {
     await clickOnButtonAddBranch(-1);
     await clickOnButtonAddRule(-1);
     await contains(".modal footer button").click();
-    expect(getFacetTexts()).toEqual(["Filter", "Id = ( )", "Id = ( )", "Id = ( )"]);
+    expect(getFacetTexts()).toEqual(["Filter", "Id = 1", "Id = 1", "Id = 1"]);
     expect(searchBar.env.searchModel.domain).toEqual([
         "&",
         ["foo", "=", "abc"],
         "&",
-        ["id", "in", []],
+        ["id", "=", 1],
         "&",
-        ["id", "in", []],
+        ["id", "=", 1],
         "|",
-        ["id", "in", []],
-        ["id", "in", []],
+        ["id", "=", 1],
+        ["id", "=", 1],
     ]);
 
     // open again the search menu -> the custom filter should not be displayed
@@ -896,7 +896,7 @@ test("display names in facets (with a property)", async () => {
     Partner._records = [{ id: 1, name: "John" }];
 
     onRpc("/web/domain/validate", () => true);
-    onRpc("/web/dataset/call_kw/parent.model/web_search_read", () => ({
+    onRpc("parent.model", "web_search_read", () => ({
         records: [
             {
                 id: 1337,

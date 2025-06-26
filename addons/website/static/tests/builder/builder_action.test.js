@@ -1,8 +1,12 @@
+import { BuilderAction } from "@html_builder/core/builder_action";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import { animationFrame, Deferred } from "@odoo/hoot-dom";
+import { animationFrame, click, Deferred, waitFor } from "@odoo/hoot-dom";
 import { useState, xml } from "@odoo/owl";
+import { Plugin } from "@html_editor/plugin";
+import { setSelection } from "@html_editor/../tests/_helpers/selection";
+import { expandToolbar } from "@html_editor/../tests/_helpers/toolbar";
 import { contains, patchWithCleanup } from "@web/../tests/web_test_helpers";
-import { defineWebsiteModels, setupWebsiteBuilder } from "./website_helpers";
+import { addPlugin, defineWebsiteModels, setupWebsiteBuilder } from "./website_helpers";
 import { BaseOptionComponent } from "@html_builder/core/utils";
 import { WebsiteBuilderClientAction } from "@website/client_actions/website_preview/website_builder_action";
 import {
@@ -10,7 +14,6 @@ import {
     addBuilderOption,
     setupHTMLBuilder,
 } from "@html_builder/../tests/helpers";
-import { BuilderAction } from "@html_builder/core/builder_action";
 
 describe("website tests", () => {
     beforeEach(defineWebsiteModels);
@@ -37,6 +40,50 @@ describe("website tests", () => {
         });
         await setupWebsiteBuilder(`<h1> Homepage </h1>`);
         expect(websiteBuilder.initialUrl).toBe("/website/force/1?path=%2F");
+    });
+
+    test("getRecordInfo retrieves the info from the #wrap element", async () => {
+        class TestPlugin extends Plugin {
+            static id = "test";
+            resources = {
+                user_commands: [
+                    {
+                        id: "test_cmd",
+                        run: () => {
+                            const recordInfo = this.config.getRecordInfo();
+                            expect.step(`getRecordInfo ${JSON.stringify(recordInfo)}`);
+                        },
+                    },
+                ],
+                toolbar_groups: { id: "test_group" },
+                toolbar_items: [
+                    {
+                        id: "test_btn",
+                        groupId: "test_group",
+                        commandId: "test_cmd",
+                        description: "Test Button",
+                    },
+                ],
+            };
+        }
+        addPlugin(TestPlugin);
+
+        const { getEditor } = await setupWebsiteBuilder(`<p>plop</p>`);
+        const editor = getEditor();
+        const p = editor.editable.querySelector("p");
+        setSelection({
+            anchorNode: p.firstChild,
+            anchorOffset: 0,
+            focusOffset: 4,
+        });
+
+        await waitFor(".o-we-toolbar");
+        await expandToolbar();
+        await click(".o-we-toolbar .btn[name=test_btn]");
+
+        expect.verifySteps([
+            'getRecordInfo {"resModel":"ir.ui.view","resId":"539","field":"arch"}',
+        ]);
     });
 });
 
@@ -128,5 +175,66 @@ describe("HTML builder tests", () => {
         prepareDeferred.resolve();
         await animationFrame();
         expect.verifySteps(["prepare"]);
+    });
+
+    describe("isPreviewing is passed to action's apply and clean", () => {
+        beforeEach(async () => {
+            addBuilderAction({
+                IsPreviewingAction: class extends BuilderAction {
+                    static id = "isPreviewing";
+                    isApplied({ editingElement }) {
+                        return editingElement.classList.contains("o_applied");
+                    }
+
+                    getValue({ editingElement }) {
+                        return editingElement.dataset.value;
+                    }
+
+                    apply({ isPreviewing, editingElement, value }) {
+                        expect.step(`apply ${isPreviewing}`);
+                        editingElement.classList.add("o_applied");
+                        editingElement.dataset.value = value;
+                    }
+
+                    clean({ isPreviewing, editingElement }) {
+                        expect.step(`clean ${isPreviewing}`);
+                        editingElement.classList.remove("o_applied");
+                    }
+                },
+            });
+        });
+
+        test("useClickableBuilderComponent", async () => {
+            addBuilderOption({
+                selector: ".test-options-target",
+                template: xml`<BuilderButton action="'isPreviewing'" actionValue="true">Toggle</BuilderButton>`,
+            });
+            await setupHTMLBuilder(`<section class="test-options-target">Homepage</section>`);
+            await contains(":iframe .test-options-target").click();
+
+            // apply
+            await contains("[data-action-id='isPreviewing']").click();
+            expect.verifySteps(["apply true", "apply false"]);
+
+            // Hover something else, making sure we have a preview on next click
+            await contains(":iframe .test-options-target").click();
+
+            // clean
+            await contains("[data-action-id='isPreviewing']").click();
+            expect.verifySteps(["clean true", "clean false"]);
+        });
+
+        test("useInputBuilderComponent", async () => {
+            addBuilderOption({
+                selector: ".test-options-target",
+                template: xml`<BuilderTextInput action="'isPreviewing'"/>`,
+            });
+            await setupHTMLBuilder(`<section class="test-options-target">Homepage</section>`);
+            await contains(":iframe .test-options-target").click();
+
+            // apply
+            await contains("[data-action-id='isPreviewing'] input").edit("truthy");
+            expect.verifySteps(["apply true", "apply false"]);
+        });
     });
 });

@@ -945,7 +945,7 @@ test("execute_action of type object are handled", async () => {
     expect.assertions(4);
     serverState.userContext = { some_key: 2 };
 
-    onRpc("partner", "object", async function ({ args, kwargs }) {
+    onRpc("partner", "object", function ({ args, kwargs }) {
         expect(kwargs).toEqual(
             {
                 context: {
@@ -2398,7 +2398,7 @@ test("do not restore after action button clicked", async () => {
     expect(".o_statusbar_buttons button[name=do_something]").toBeVisible();
 
     await contains(".o_statusbar_buttons button[name=do_something]").click();
-    expect(".o_form_buttons_view .o_form_button_save").not.toBeVisible();
+    expect(".o_form_buttons_view .o_form_button_save").not.toHaveCount();
 });
 
 test("debugManager is active for views", async () => {

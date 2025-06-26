@@ -789,6 +789,12 @@ export class ListPlugin extends Plugin {
         if (listItems.length || navListItems.length) {
             this.indentListNodes(listItems);
             this.dependencies.tabulation.indentBlocks(nonListItems);
+            const listsToAdjustPadding = new Set(
+                listItems.map((li) => closestElement(li, "ul, ol")).filter(Boolean)
+            );
+            for (const list of listsToAdjustPadding) {
+                this.adjustListPadding(list);
+            }
             // Do nothing to nav-items.
             this.dependencies.history.addStep();
             return true;
@@ -1050,7 +1056,10 @@ export class ListPlugin extends Plugin {
         }
 
         const largestMarker = list.children[Symbol.iterator]()
-            .map((li) => parseFloat(this.window.getComputedStyle(li, "::marker").width))
+            .map((li) => {
+                const markerWidth = parseFloat(this.window.getComputedStyle(li, "::marker").width);
+                return isNaN(markerWidth) ? 0 : markerWidth;
+            })
             .reduce(Math.max);
         // For `UL` with large font size the marker width is so big that more padding is needed.
         const largestMarkerPadding = Math.floor(largestMarker) * (list.nodeName === "UL" ? 2 : 1);

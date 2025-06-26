@@ -7,6 +7,7 @@ import { SetupEditorPlugin } from "@html_builder/core/setup_editor_plugin";
 import { VisibilityPlugin } from "@html_builder/core/visibility_plugin";
 import { removePlugins } from "@html_builder/utils/utils";
 import { MAIN_PLUGINS as MAIN_EDITOR_PLUGINS } from "@html_editor/plugin_sets";
+import { closestElement } from "@html_editor/utils/dom_traversal";
 import { Component } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { HighlightPlugin } from "./plugins/highlight/highlight_plugin";
@@ -41,20 +42,47 @@ export class WebsiteBuilder extends Component {
         const websitePlugins = this.props.translation
             ? TRANSLATION_PLUGINS
             : registry.category("website-plugins").getAll();
-        const mainEditorPlugins = removePlugins(
-            [...MAIN_EDITOR_PLUGINS],
-            [
-                "PowerButtonsPlugin",
-                "DoubleClickImagePreviewPlugin",
-                "SeparatorPlugin",
-                "StarPlugin",
-                "BannerPlugin",
-                "MoveNodePlugin",
-            ]
-        );
+        const mainEditorPluginsToRemove = [
+            "PowerButtonsPlugin",
+            "DoubleClickImagePreviewPlugin",
+            "SeparatorPlugin",
+            "StarPlugin",
+            "BannerPlugin",
+            "MoveNodePlugin",
+        ];
+        const pluginsBlockedInTranslationMode = [
+            "PowerboxPlugin",
+            "SearchPowerboxPlugin",
+            "YoutubePlugin",
+            "ImagePlugin",
+        ];
+        const pluginsToRemove = this.props.translation
+            ? [...mainEditorPluginsToRemove, ...pluginsBlockedInTranslationMode]
+            : mainEditorPluginsToRemove;
+        const mainEditorPlugins = removePlugins([...MAIN_EDITOR_PLUGINS], pluginsToRemove);
         const coreBuilderPlugins = this.props.translation ? [] : CORE_BUILDER_PLUGINS;
         const Plugins = [...mainEditorPlugins, ...coreBuilderPlugins, ...(websitePlugins || [])];
         builderProps.Plugins = Plugins;
+        builderProps.onEditorLoad = (editor) => {
+            this.editor = editor;
+        };
+        builderProps.config.getRecordInfo = (editableEl) => {
+            if (this.editor && !editableEl) {
+                editableEl = closestElement(
+                    this.editor.shared.selection.getEditableSelection().anchorNode,
+                    "[data-oe-model]",
+                );
+            }
+            if (!editableEl) {
+                return {};
+            }
+            return {
+                resModel: editableEl.dataset["oeModel"],
+                resId: editableEl.dataset["oeId"],
+                field: editableEl.dataset["oeField"],
+                type: editableEl.dataset["oeType"],
+            };
+        };
         return builderProps;
     }
 }

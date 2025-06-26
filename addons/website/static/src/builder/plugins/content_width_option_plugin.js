@@ -6,14 +6,14 @@ import { ClassAction } from "@html_builder/core/core_builder_action_plugin";
 
 class ContentWidthOptionPlugin extends Plugin {
     static id = "contentWidthOption";
-    static dependencies = ["builderActions", "history"];
+    static dependencies = ["builderActions"];
     resources = {
         builder_options: [
             withSequence(CONTAINER_WIDTH, {
                 template: "website.ContentWidthOption",
                 selector: "section, .s_carousel .carousel-item, .s_carousel_intro_item",
                 exclude:
-                    "[data-snippet] :not(.oe_structure) > [data-snippet],#footer > *,#o_wblog_post_content *",
+                    "[data-snippet] :not(.oe_structure) > [data-snippet],#footer > *,#o_wblog_post_content *,.s_floating_blocks .s_floating_blocks_block",
                 applyTo:
                     ":scope > .container, :scope > .container-fluid, :scope > .o_container_small",
             }),
@@ -26,11 +26,9 @@ class ContentWidthOptionPlugin extends Plugin {
 
 class SetContainerWidthAction extends ClassAction {
     static id = "setContainerWidth";
-    static dependencies = ["history"];
-    apply({ editingElement }) {
+    apply({ isPreviewing, editingElement }) {
         super.apply(...arguments);
-        const isPreviewMode = this.dependencies.history.getIsPreviewing();
-        editingElement.classList.toggle("o_container_preview", isPreviewMode);
+        editingElement.classList.toggle("o_container_preview", isPreviewing);
     }
 }
 
