@@ -41,7 +41,7 @@ test("change the background shape of elements", async () => {
     await contains(":iframe .selector").click();
     await contains("[data-label='Shape'] button").click();
     await contains(
-        ".o_pager_container .button_shape:nth-child(2) [data-action-id='setBackgroundShape']"
+        ".o_pager_container .o-hb-bg-shape-btn:nth-child(2) [data-action-id='setBackgroundShape']"
     ).click();
     expect(":iframe .selector div#first").toHaveAttribute(
         "data-oe-shape-data",
@@ -61,7 +61,7 @@ test("remove background shape", async () => {
     await contains(":iframe section").click();
     await contains("button[data-action-id='setBackgroundShape']").click();
     expect(":iframe section").not.toHaveAttribute("data-oe-shape-data");
-    expect("button[data-action-id='setBackgroundShape']").not.toBeVisible();
+    expect("button[data-action-id='setBackgroundShape']").not.toHaveCount();
 });
 
 test("toggle Show/Hide on mobile of the shape background", async () => {
@@ -80,7 +80,7 @@ test("toggle Show/Hide on mobile of the shape background", async () => {
 
 test("Check if an element with a background image has necessary classes", async () => {
     await setupWebsiteBuilder(`
-        <section class="s_banner overflow-hidden" style="background-color:(0, 0, 0, 0); 
+        <section class="s_banner overflow-hidden" style="background-color:(0, 0, 0, 0);
                 background-image: url(&quot;/website_slides/static/src/img/banner_default.svg&quot;); height: 300px" data-snippet="s_banner">
             AAA
         </section>`);
