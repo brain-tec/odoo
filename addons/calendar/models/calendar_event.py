@@ -760,13 +760,14 @@ class CalendarEvent(models.Model):
             attendee_update_events.attendee_ids.filtered(lambda att: self.user_id.partner_id == att.partner_id).write({'state': 'needsAction'})
 
         current_attendees = self.filtered('active').attendee_ids
-        if 'partner_ids' in values:
+        skip_attendee_notification = self.env.context.get('skip_attendee_notification')
+        if not skip_attendee_notification and 'partner_ids' in values:
             # we send to all partners and not only the new ones
             (current_attendees - previous_attendees)._notify_attendees(
                 self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False),
                 force_send=True,
             )
-        if not self.env.context.get('is_calendar_event_new') and 'start' in values:
+        if not skip_attendee_notification and not self.env.context.get('is_calendar_event_new') and 'start' in values:
             start_date = fields.Datetime.to_datetime(values.get('start'))
             # Only notify on future events
             if start_date and start_date >= fields.Datetime.now():
@@ -990,22 +991,6 @@ class CalendarEvent(models.Model):
                 '|', ('privacy', 'in', ['public', 'confidential']), ('user_id', '=', self.env.user.id),
                 '&', ('privacy', '=', False), ('user_id', 'in', public_calendars_settings)
         ]
-
-    def _is_event_over(self):
-        """Check if the event is over. This method is used to check if the event
-        should trigger invitations with Google Calendar.
-        :return: True if the event is over, False otherwise
-        """
-        self.ensure_one()
-        now = fields.Datetime.now()
-        today = fields.Date.today()
-
-        # For all-day events
-        if self.allday:
-            return self.stop_date and self.stop_date < today
-
-        # For timed events
-        return self.stop and self.stop < now
 
     # ------------------------------------------------------------
     # ACTIONS
@@ -1381,7 +1366,7 @@ class CalendarEvent(models.Model):
             # Archive all events and delete recurrence, reactivate base event and apply updated values.
             base_event.action_mass_archive("all_events")
             base_event.recurrence_id.unlink()
-            base_event.write({
+            base_event.with_context(skip_attendee_notification=True).write({
                 'active': True,
                 'recurrence_id': False,
                 **values, **time_values
