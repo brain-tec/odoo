@@ -10,11 +10,8 @@ import {
     clickOnButtonAddBranch,
     clickOnButtonAddRule,
     clickOnButtonDeleteNode,
-    clickPrev,
     Country,
     editValue,
-    followRelation,
-    formatDomain,
     getConditionText,
     getCurrentOperator,
     getCurrentPath,
@@ -194,7 +191,7 @@ test("building a domain with an invalid path", async () => {
         "Invalid field chain"
     );
     expect(getOperatorOptions()).toHaveLength(1);
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("abc");
 
     await openModelFieldSelectorPopover();
@@ -207,19 +204,19 @@ test("building a domain with an invalid path (2)", async () => {
     await makeDomainSelector({
         domain: `[(bloup, "=", "abc")]`,
         update(domain) {
-            expect(domain).toBe(`[("id", "in", [])]`);
+            expect(domain).toBe(`[("id", "=", 1)]`);
         },
     });
 
     expect(getCurrentPath()).toBe("bloup");
     expect(isNotSupportedPath()).toBe(true);
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("abc");
 
     await clearNotSupported();
     expect(getCurrentPath()).toBe("Id");
     expect(getCurrentOperator()).toBe("equals");
-    expect(getCurrentValue()).toBe("");
+    expect(getCurrentValue()).toBe("1");
 });
 
 test("building a domain with an invalid path (3)", async () => {
@@ -237,12 +234,12 @@ test("building a domain with an invalid path (3)", async () => {
 
     expect(getCurrentPath()).toBe("bloup");
     expect(isNotSupportedPath()).toBe(true);
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("abc");
 
     await clearNotSupported();
     expect(getCurrentPath()).toBe("User");
-    expect(getCurrentOperator()).toBe("equals");
+    expect(getCurrentOperator()).toBe("is in");
     expect(getCurrentValue()).toBe("");
 });
 
@@ -250,7 +247,7 @@ test("building a domain with an invalid operator", async () => {
     await makeDomainSelector({
         domain: `[("foo", "!!!!=!!!!", "abc")]`,
         update(domain) {
-            expect(domain).toBe(`[("foo", "in", [])]`);
+            expect(domain).toBe(`[("foo", "=", "abc")]`);
         },
     });
 
@@ -263,9 +260,9 @@ test("building a domain with an invalid operator", async () => {
     await clearNotSupported();
     expect(getCurrentPath()).toBe("Foo");
     expect(".o_model_field_selector_warning").toHaveCount(0);
-    expect(getOperatorOptions()).toHaveLength(8);
+    expect(getOperatorOptions()).toHaveLength(10);
     expect(getCurrentOperator()).toBe("equals");
-    expect(getCurrentValue()).toBe("");
+    expect(getCurrentValue()).toBe("abc");
 });
 
 test("building a domain with an expression for value", async () => {
@@ -292,7 +289,7 @@ test("building a domain with an expression in value", async () => {
     });
 
     expect(getCurrentPath()).toBe("Int");
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("id");
 
     await selectOperator("<");
@@ -357,15 +354,18 @@ test("edit a domain with the debug textarea", async () => {
 });
 
 test("set [(1, '=', 1)] or [(0, '=', 1)] as domain with the debug textarea", async () => {
+    expect.assertions(11);
+
     let newDomain;
     await makeDomainSelector({
         domain: `[("product_id", "ilike", 1)]`,
         isDebugMode: true,
         update(domain, fromDebug) {
-            expect.step(domain);
+            expect(domain).toBe(newDomain);
             expect(fromDebug).toBe(true);
         },
     });
+
     expect(SELECTORS.condition).toHaveCount(1);
 
     newDomain = `[(1, "=", 1)]`;
@@ -373,18 +373,15 @@ test("set [(1, '=', 1)] or [(0, '=', 1)] as domain with the debug textarea", asy
     expect(SELECTORS.debugArea).toHaveValue(newDomain, {
         message: "the domain should not have been formatted",
     });
-    expect.verifySteps([newDomain]);
-    expect(".o_tree_editor").toHaveText("Match all records\nNew Rule");
 
     newDomain = `[(0, "=", 1)]`;
     await contains(SELECTORS.debugArea).edit(newDomain);
     expect(SELECTORS.debugArea).toHaveValue(newDomain, {
         message: "the domain should not have been formatted",
     });
-    expect.verifySteps([newDomain]);
     expect(SELECTORS.condition).toHaveCount(1);
     expect(getCurrentPath()).toBe("0");
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("1");
 });
 
@@ -405,9 +402,20 @@ test("cache fields_get", async () => {
     expect.verifySteps(["fields_get"]);
 });
 
-test("show correct operator", async () => {
-    await makeDomainSelector({ domain: `[('state', 'in', ['abc'])]` });
+test("selection field with operator change from 'set' to '='", async () => {
+    await makeDomainSelector({ domain: `[['state', '!=', False]]` });
+    expect(getCurrentPath()).toBe("State");
+    expect(getCurrentOperator()).toBe("set");
+
+    await selectOperator("=");
+    expect(getCurrentPath()).toBe("State");
     expect(getCurrentOperator()).toBe("equals");
+    expect(getCurrentValue()).toBe(`ABC`);
+});
+
+test("show correct operator", async () => {
+    await makeDomainSelector({ domain: `[['state', 'in', ['abc']]]` });
+    expect(getCurrentOperator()).toBe("is in");
 });
 
 test("multi selection", async () => {
@@ -451,7 +459,7 @@ test("multi selection", async () => {
 test("json field with operator change from 'equal' to 'ilike'", async () => {
     await makeDomainSelector({ domain: `[['json_field', '=', "hey"]]` });
     expect(getCurrentPath()).toBe(`Json Field`);
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe(`hey`);
 
     await selectOperator("ilike");
@@ -602,7 +610,7 @@ test("debug input in model field selector popover", async () => {
     expect(getCurrentPath()).toBe("a");
     expect(".o_model_field_selector_warning").toHaveCount(1);
     expect(getOperatorOptions()).toHaveLength(1);
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("1");
     expect(SELECTORS.debugArea).toHaveValue(`[("a", "=", 1)]`);
 });
@@ -638,7 +646,7 @@ test("between operator (2)", async () => {
         domain: `["&", "&", ("foo", "=", "abc"), ("datetime", ">=", "2023-01-01 00:00:00"), ("datetime", "<=", "2023-01-10 23:59:59")]`,
     });
     expect(SELECTORS.condition).toHaveCount(2);
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentOperator(1)).toBe("between");
     expect(".o_datetime_input").toHaveCount(2);
 });
@@ -650,7 +658,7 @@ test("between operator (3)", async () => {
     });
     expect(SELECTORS.condition).toHaveCount(2);
     expect(getCurrentOperator()).toBe("between");
-    expect(getCurrentOperator(1)).toBe("=");
+    expect(getCurrentOperator(1)).toBe("equals");
     expect(".o_datetime_input").toHaveCount(2);
 });
 
@@ -661,7 +669,7 @@ test("between operator (4)", async () => {
     });
     expect(SELECTORS.condition).toHaveCount(2);
     expect(getCurrentOperator()).toBe("between");
-    expect(getCurrentOperator(1)).toBe("=");
+    expect(getCurrentOperator(1)).toBe("equals");
     expect(".o_datetime_input").toHaveCount(2);
 });
 
@@ -992,7 +1000,7 @@ test("support properties", async () => {
         ".o_model_field_selector_popover_item[data-name='properties'] .o_model_field_selector_popover_relation_icon"
     ).click();
     expect(getCurrentPath()).toBe("Properties");
-    expectedDomain = `[("properties.xpad_prop_1", "in", [])]`;
+    expectedDomain = `[("properties.xpad_prop_1", "=", False)]`;
     await contains(".o_model_field_selector_popover_item[data-name='xpad_prop_1'] button").click();
     expect(getCurrentPath()).toBe("Properties > M2O");
     expect(getOperatorOptions()).toEqual(["equals", "not equals", "set", "not set"]);
@@ -1005,26 +1013,28 @@ test("support properties", async () => {
         },
         {
             name: "xphone_prop_2",
-            domain: `[("properties.xphone_prop_2", "in", [])]`,
+            domain: `[("properties.xphone_prop_2", "=", False)]`,
             options: ["equals", "not equals", "set", "not set"],
         },
         {
             name: "xphone_prop_3",
-            domain: `[("properties.xphone_prop_3", "in", [])]`,
+            domain: `[("properties.xphone_prop_3", "=", "")]`,
             options: [
                 "equals",
                 "not equals",
                 "contains",
                 "not contains",
-                "starts with",
-                "ends with",
+                "is in",
+                "is not in",
                 "set",
                 "not set",
+                "starts with",
+                "ends with",
             ],
         },
         {
             name: "xphone_prop_4",
-            domain: `[("properties.xphone_prop_4", "in", [])]`,
+            domain: `[("properties.xphone_prop_4", "=", 1)]`,
             options: [
                 "equals",
                 "not equals",
@@ -1040,12 +1050,12 @@ test("support properties", async () => {
         },
         {
             name: "xphone_prop_5",
-            domain: `[("properties.xphone_prop_5", "in", [])]`,
+            domain: `[("properties.xphone_prop_5", "=", context_today().strftime("%Y-%m-%d"))]`,
             options: [
-                "equals",
-                "not equals",
                 "today",
                 "not today",
+                "equals",
+                "not equals",
                 "greater",
                 "lower",
                 "between",
@@ -1060,13 +1070,13 @@ test("support properties", async () => {
         },
         {
             name: "xphone_prop_6",
-            domain: `[("properties.xphone_prop_6", "in", [])]`,
-            options: ["equals", "not equals", "set", "not set"],
+            domain: `[("properties.xphone_prop_6", "in", "")]`,
+            options: ["is in", "is not in", "set", "not set"],
         },
         {
             name: "xphone_prop_7",
             domain: `[("properties.xphone_prop_7", "in", [])]`,
-            options: ["equals", "not equals", "set", "not set"],
+            options: ["is in", "is not in", "set", "not set"],
         },
     ];
 
@@ -1195,7 +1205,7 @@ test("updating path should also update operator if invalid", async () => {
     await makeDomainSelector({
         domain: `[("id", "<", 0)]`,
         update: (domain) => {
-            expect(domain).toBe(`[("foo", "in", [])]`);
+            expect(domain).toBe(`[("foo", "=", "")]`);
         },
     });
 
@@ -1548,15 +1558,16 @@ test("many2one field operators (edit)", async () => {
         domain: `[("product_id", "=", false)]`,
     });
     expect(getOperatorOptions()).toEqual([
+        "is in",
+        "is not in",
         "equals",
         "not equals",
         "contains",
         "not contains",
-        "starts with",
-        "ends with",
         "set",
         "not set",
-        "=",
+        "starts with",
+        "ends with",
     ]);
 });
 
@@ -1572,6 +1583,10 @@ test("many2one field: operator switch (edit)", async () => {
     expect(getCurrentValue()).toBe("");
     expect.verifySteps([`[("product_id", "in", [])]`]);
 
+    await selectOperator("=");
+    expect(getCurrentValue()).toBe("");
+    expect.verifySteps([`[("product_id", "=", False)]`]);
+
     await selectOperator("not in");
     expect(queryAllTexts(SELECTORS.tag)).toEqual([]);
     expect(getCurrentValue()).toBe("");
@@ -1581,19 +1596,23 @@ test("many2one field: operator switch (edit)", async () => {
     expect(getCurrentValue()).toBe("");
     expect.verifySteps([`[("product_id", "ilike", "")]`]);
 
+    await selectOperator("!=");
+    expect(getCurrentValue()).toBe("");
+    expect.verifySteps([`[("product_id", "!=", False)]`]);
+
     await selectOperator("not ilike");
     expect(getCurrentValue()).toBe("");
     expect.verifySteps([`[("product_id", "not ilike", "")]`]);
 });
 
 test("many2one field and operator =/!= (edit)", async () => {
-    const parent = await makeDomainSelector({
+    await makeDomainSelector({
         domain: `[("product_id", "=", False)]`,
         update(domain) {
             expect.step(domain);
         },
     });
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("");
     expect.verifySteps([]);
     expect(".dropdown-menu").toHaveCount(0);
@@ -1602,29 +1621,30 @@ test("many2one field and operator =/!= (edit)", async () => {
     await runAllTimers();
     expect(".dropdown-menu").toHaveCount(1);
     expect(queryAllTexts(".dropdown-menu li")).toEqual(["xphone"]);
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("xph");
 
     await contains(".dropdown-menu li").click();
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("xphone");
     expect.verifySteps([`[("product_id", "=", 37)]`]);
     expect(".dropdown-menu").toHaveCount(0);
 
     await editValue("", { confirm: false });
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("");
     await contains(".o_domain_selector").click();
     expect.verifySteps([`[("product_id", "=", False)]`]);
 
-    await parent.set(`[("product_id", "!=", False)]`);
-    expect(getCurrentOperator()).toBe("!=");
+    await selectOperator("!=");
+    expect(getCurrentOperator()).toBe("not equals");
     expect(getCurrentValue()).toBe("");
+    expect.verifySteps([`[("product_id", "!=", False)]`]);
 
     await editValue("xpa", { confirm: false });
     await runAllTimers();
     await contains(".dropdown-menu li").click();
-    expect(getCurrentOperator()).toBe("!=");
+    expect(getCurrentOperator()).toBe("not equals");
     expect(getCurrentValue()).toBe("xpad");
     expect.verifySteps([`[("product_id", "!=", 41)]`]);
 });
@@ -1634,7 +1654,7 @@ test("many2one field on record with falsy display_name", async () => {
     await makeDomainSelector({
         domain: `[("product_id", "=", False)]`,
     });
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("");
     expect(".dropdown-menu").toHaveCount(0);
 
@@ -1652,7 +1672,7 @@ test("many2one field and operator in/not in (edit)", async () => {
             expect.step(domain);
         },
     });
-    expect(getCurrentOperator()).toBe("equals");
+    expect(getCurrentOperator()).toBe("is in");
     expect(getCurrentValue()).toBe("xphone");
     expect.verifySteps([]);
     expect(".dropdown-menu").toHaveCount(0);
@@ -1666,12 +1686,12 @@ test("many2one field and operator in/not in (edit)", async () => {
     expect(getCurrentValue()).toBe("xphone xpad");
 
     await selectOperator("not in");
-    expect(getCurrentOperator()).toBe("not equals");
+    expect(getCurrentOperator()).toBe("is not in");
     expect(getCurrentValue()).toBe("xphone xpad");
     expect.verifySteps([`[("product_id", "not in", [37, 41])]`]);
 
     await contains(".o_tag .o_delete").click();
-    expect(getCurrentOperator()).toBe("not equals");
+    expect(getCurrentOperator()).toBe("is not in");
     expect(getCurrentValue()).toBe("xpad");
     expect.verifySteps([`[("product_id", "not in", [41])]`]);
 });
@@ -1709,7 +1729,7 @@ test("many2many field and operator set/not set (edit)", async () => {
             expect.step(domain);
         },
     });
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("");
     expect.verifySteps([]);
 
@@ -1723,6 +1743,11 @@ test("many2many field and operator set/not set (edit)", async () => {
     expect(getCurrentOperator()).toBe("set");
     expect(".o_ds_value_cell").toHaveCount(0);
     expect.verifySteps([`[("product_id", "!=", False)]`]);
+
+    await selectOperator("!=");
+    expect(getCurrentOperator()).toBe("not equals");
+    expect(getCurrentValue()).toBe("");
+    expect.verifySteps([`[("product_id", "!=", False)]`]);
 });
 
 test("many2many field: clone a set/not set condition", async () => {
@@ -1732,7 +1757,7 @@ test("many2many field: clone a set/not set condition", async () => {
             expect.step(domain);
         },
     });
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("");
     expect.verifySteps([]);
 
@@ -1755,14 +1780,16 @@ test("x2many field operators (edit)", async () => {
         domain: `[("product_ids", "=", false)]`,
     });
     expect(getOperatorOptions()).toEqual([
+        "is in",
+        "is not in",
         "equals",
         "not equals",
         "contains",
         "not contains",
-        "starts with",
-        "ends with",
         "set",
         "not set",
+        "starts with",
+        "ends with",
     ]);
 });
 
@@ -1774,11 +1801,15 @@ test("x2many field: operator switch (edit)", async () => {
             expect.step(domain);
         },
     });
-
     await selectOperator("in");
     expect(queryAllTexts(SELECTORS.tag)).toEqual([]);
     expect(getCurrentValue()).toBe("");
     expect.verifySteps([`[("product_ids", "in", [])]`]);
+
+    await selectOperator("=");
+    expect(queryAllTexts(SELECTORS.tag)).toEqual([]);
+    expect(getCurrentValue()).toBe("");
+    expect.verifySteps([`[("product_ids", "=", [])]`]);
 
     await selectOperator("not in");
     expect(queryAllTexts(SELECTORS.tag)).toEqual([]);
@@ -1793,6 +1824,11 @@ test("x2many field: operator switch (edit)", async () => {
     expect(".o_ds_value_cell").toHaveCount(0);
     expect.verifySteps([`[("product_ids", "=", False)]`]);
 
+    await selectOperator("!=");
+    expect(queryAllTexts(SELECTORS.tag)).toEqual([]);
+    expect(getCurrentValue()).toBe("");
+    expect.verifySteps([`[("product_ids", "!=", [])]`]);
+
     await selectOperator("not ilike");
     expect(getCurrentValue()).toBe("");
     expect.verifySteps([`[("product_ids", "not ilike", "")]`]);
@@ -1802,7 +1838,7 @@ test("x2many field: operator switch (edit)", async () => {
     expect.verifySteps([`[("product_ids", "!=", False)]`]);
 });
 
-test("many2many field: operator in/not in (edit)", async () => {
+test("many2many field: operator =/!=/in/not in (edit)", async () => {
     addProductIds();
     await makeDomainSelector({
         domain: `[("product_ids", "in", [37])]`,
@@ -1810,7 +1846,7 @@ test("many2many field: operator in/not in (edit)", async () => {
             expect.step(domain);
         },
     });
-    expect(getCurrentOperator()).toBe("equals");
+    expect(getCurrentOperator()).toBe("is in");
     expect(getCurrentValue()).toBe("xphone");
     expect.verifySteps([]);
     expect(".dropdown-menu").toHaveCount(0);
@@ -1825,44 +1861,24 @@ test("many2many field: operator in/not in (edit)", async () => {
     expect(getCurrentValue()).toBe("xphone xpad");
 
     await selectOperator("not in");
-    expect(getCurrentOperator()).toBe("not equals");
+    expect(getCurrentOperator()).toBe("is not in");
     expect(getCurrentValue()).toBe("xphone xpad");
     expect.verifySteps([`[("product_ids", "not in", [37, 41])]`]);
 
     await contains(".o_tag .o_delete").click();
-    expect(getCurrentOperator()).toBe("not equals");
+    expect(getCurrentOperator()).toBe("is not in");
     expect(getCurrentValue()).toBe("xpad");
     expect.verifySteps([`[("product_ids", "not in", [41])]`]);
-});
 
-test("many2many field: operator = (edit)", async () => {
-    addProductIds();
-    await makeDomainSelector({
-        domain: `[("product_ids", "=", [37])]`,
-        update(domain) {
-            expect.step(domain);
-        },
-    });
-    await contains(SELECTORS.valueEditor + " input").fill("x");
-    await runAllTimers();
-    expect(getCurrentOperator()).toBe("=");
-    expect(getCurrentValue()).toBe("xphone xpad");
-    expect.verifySteps([`[("product_ids", "=", [37, 41])]`]);
-});
+    await selectOperator("=");
+    expect(getCurrentOperator()).toBe("equals");
+    expect(getCurrentValue()).toBe("xpad");
+    expect.verifySteps([`[("product_ids", "=", [41])]`]);
 
-test("many2many field: operator != (edit)", async () => {
-    addProductIds();
-    await makeDomainSelector({
-        domain: `[("product_ids", "!=", [37])]`,
-        update(domain) {
-            expect.step(domain);
-        },
-    });
-    await contains(SELECTORS.valueEditor + " input").fill("x");
-    await runAllTimers();
-    expect(getCurrentOperator()).toBe("!=");
-    expect(getCurrentValue()).toBe("xphone xpad");
-    expect.verifySteps([`[("product_ids", "!=", [37, 41])]`]);
+    await selectOperator("!=");
+    expect(getCurrentOperator()).toBe("not equals");
+    expect(getCurrentValue()).toBe("xpad");
+    expect.verifySteps([`[("product_ids", "!=", [41])]`]);
 });
 
 test("many2many field: operator ilike/not ilike (edit)", async () => {
@@ -1968,7 +1984,7 @@ test("Include archived on empty tree", async () => {
 
     await addNewRule();
     expect(SELECTORS.condition).toHaveCount(1);
-    expect.verifySteps(['["&", ("id", "in", []), ("active", "in", [True, False])]']);
+    expect.verifySteps(['["&", ("id", "=", 1), ("active", "in", [True, False])]']);
 });
 
 test("Include archived not shown when model doesn't have the active field", async () => {
@@ -1981,6 +1997,31 @@ test("Include archived not shown when model doesn't have the active field", asyn
     });
     expect(SELECTORS.condition).toHaveCount(1);
     expect('.form-switch label:contains("Include archived")').toHaveCount(0);
+});
+
+test("date/datetime edition: switch !=/set", async () => {
+    mockDate("2023-04-20 17:00:00", 0);
+    await makeDomainSelector({
+        isDebugMode: true,
+        domain: `[("date", "!=", "2023-05-20")]`,
+        update(domain) {
+            expect.step(domain);
+        },
+    });
+    expect(getCurrentOperator()).toBe("not equals");
+    expect(".o_datetime_input").toHaveCount(1);
+    expect(getCurrentValue()).toBe("05/20/2023");
+
+    await selectOperator("set");
+    expect(getCurrentOperator()).toBe("set");
+    expect(".o_datetime_input").toHaveCount(0);
+    expect.verifySteps([`[("date", "!=", False)]`]);
+
+    await selectOperator("!=");
+    expect(getCurrentOperator()).toBe("not equals");
+    expect(".o_datetime_input").toHaveCount(1);
+    expect(getCurrentValue()).toBe("04/20/2023");
+    expect.verifySteps([`[("date", "!=", "2023-04-20")]`]);
 });
 
 test("date/datetime edition: switch is_set to other operators", async () => {
@@ -2024,9 +2065,9 @@ test("date/datetime edition: switch is_set to other operators", async () => {
 
 test("render false and true leaves", async () => {
     await makeDomainSelector({ domain: `[(0, "=", 1), (1, "=", 1)]` });
-    expect(getOperatorOptions()).toEqual(["="]);
+    expect(getOperatorOptions()).toEqual(["equals"]);
     expect(getValueOptions()).toEqual(["1"]);
-    expect(getOperatorOptions(-1)).toEqual(["="]);
+    expect(getOperatorOptions(-1)).toEqual(["equals"]);
     expect(getValueOptions(-1)).toEqual(["1"]);
 });
 
@@ -2072,9 +2113,9 @@ test(`any/not any operator in editable mode`, async () => {
     expect(getCurrentPath(3)).toBe("Product Team > Team Name");
     expect(getCurrentValue(1)).toBe("Leicester Liverpool");
     expect(getCurrentOperator(1)).toBe("matches");
-    expect(getCurrentOperator(3)).toBe("not equals");
+    expect(getCurrentOperator(3)).toBe("is not in");
     await selectOperator("in", 3);
-    expect(getCurrentOperator(3)).toBe("equals");
+    expect(getCurrentOperator(3)).toBe("is in");
     expect(SELECTORS.debugArea).toHaveValue(
         `[("product_id", "any", ["|", ("team_id", "any", [("name", "=", "Mancester City")]), ("team_id.name", "in", ["Leicester", "Liverpool"])])]`
     );
@@ -2091,7 +2132,7 @@ test(`any/not any operator in editable mode (add a rule in empty sub domain)`, a
     expect(getCurrentOperator()).toBe("matches");
     expect(getCurrentPath(1)).toBe("Id");
     expect(getCurrentOperator(1)).toBe("equals");
-    expect(SELECTORS.debugArea).toHaveValue(`[("product_id", "any", [("id", "in", [])])]`);
+    expect(SELECTORS.debugArea).toHaveValue(`[("product_id", "any", [("id", "=", 1)])]`);
 });
 
 test(`any/not any operator (readonly) with custom domain as value`, async () => {
@@ -2480,7 +2521,7 @@ test("many2one: no domain in autocompletion", async () => {
             expect.step(domain);
         },
     });
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("");
     expect.verifySteps([]);
     expect(".dropdown-menu").toHaveCount(0);
@@ -2490,11 +2531,11 @@ test("many2one: no domain in autocompletion", async () => {
 
     expect(".dropdown-menu").toHaveCount(1);
     expect(queryAllTexts(".dropdown-menu li")).toEqual(["xphone", "xpad"]);
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("x");
 
     await contains(".dropdown-menu li").click();
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("xphone");
     expect.verifySteps([`[("product_id", "=", 37)]`]);
     expect(".dropdown-menu").toHaveCount(0);
@@ -2509,7 +2550,7 @@ test("many2many: domain in autocompletion", async () => {
             expect.step(domain);
         },
     });
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("");
     expect.verifySteps([]);
     expect(".dropdown-menu").toHaveCount(0);
@@ -2519,11 +2560,11 @@ test("many2many: domain in autocompletion", async () => {
 
     expect(".dropdown-menu").toHaveCount(1);
     expect(queryAllTexts(".dropdown-menu li")).toEqual(["xpad"]);
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("x");
 
     await contains(".dropdown-menu li").click();
-    expect(getCurrentOperator()).toBe("=");
+    expect(getCurrentOperator()).toBe("equals");
     expect(getCurrentValue()).toBe("xpad");
     expect.verifySteps([`[("product_ids", "=", [41])]`]);
     expect(".dropdown-menu").toHaveCount(0);
@@ -2538,18 +2579,20 @@ test("Any operator supported even if not proposed", async () => {
         domain: `[("product_id", "any", [])]`,
     });
     expect(getOperatorOptions()).toEqual([
+        "is in",
+        "is not in",
         "equals",
         "not equals",
         "contains",
         "not contains",
-        "starts with",
-        "ends with",
         "set",
         "not set",
+        "starts with",
+        "ends with",
         "matches",
     ]);
     await addNewRule();
-    expect.verifySteps([`[("product_id", "any", [("id", "in", [])])]`]);
+    expect.verifySteps([`[("product_id", "any", [("id", "=", 1)])]`]);
 });
 
 test("Hierarchical operators", async () => {
@@ -2560,33 +2603,37 @@ test("Hierarchical operators", async () => {
         },
     });
     await addNewRule();
-    expect.verifySteps(['[("id", "in", [])]']);
+    expect.verifySteps(['[("id", "=", 1)]']);
     await openModelFieldSelectorPopover();
     await contains(
         ".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains(Product)"
     ).click();
     expect.verifySteps(['[("product_id", "in", [])]']);
     expect(getOperatorOptions()).toEqual([
+        "is in",
+        "is not in",
         "equals",
         "not equals",
         "contains",
         "not contains",
-        "starts with",
-        "ends with",
         "set",
         "not set",
+        "starts with",
+        "ends with",
     ]);
     await contains(SELECTORS.debugArea).edit(`[("product_id", "parent_of", [])]`);
     expect.verifySteps(['[("product_id", "parent_of", [])]']);
     expect(getOperatorOptions()).toEqual([
+        "is in",
+        "is not in",
         "equals",
         "not equals",
         "contains",
         "not contains",
-        "starts with",
-        "ends with",
         "set",
         "not set",
+        "starts with",
+        "ends with",
         "parent of",
     ]);
     await editValue("x", { confirm: false });
@@ -2617,13 +2664,13 @@ test("preserve virtual operators in sub domains", async () => {
     expect(getCurrentOperator(1)).toBe("matches");
     expect(getCurrentOperator(2)).toBe("not set");
     expect(getCurrentOperator(3)).toBe("not set");
-    expect(getCurrentOperator(4)).toBe("=");
+    expect(getCurrentOperator(4)).toBe("equals");
 
     await addNewRule(1);
     expect(getCurrentOperator(2)).toBe("not set");
     expect(getCurrentOperator(3)).toBe("not set");
-    expect(getCurrentOperator(4)).toBe("=");
-    expect(getCurrentOperator(5)).toBe("=");
+    expect(getCurrentOperator(4)).toBe("equals");
+    expect(getCurrentOperator(5)).toBe("equals");
     expect.verifySteps([
         `[("product_id", "any", ["&", "&", ("team_id", "any", ["&", ("active", "=", False), ("name", "=", False)]), ("id", "=", 1), ("id", "=", 1)])]`,
     ]);
@@ -2723,542 +2770,8 @@ test("remove all conditions in a sub connector", async () => {
     expect.verifySteps([`[("bar", "!=", False)]`]);
 });
 
-test("datetime options (readonly)", async () => {
-    const parent = await makeDomainSelector({
-        readonly: true,
-        domain: `[]`,
-    });
-    const toTest = [
-        {
-            domain: `[
-                ("datetime.year_number", "=", False),
-                ("datetime.month_number", "=", False),
-                ("datetime.day_of_month", "=", False),
-            ]`,
-            text: `Datetime ➔ Date not set`,
-        },
-        {
-            domain: `[
-                "|",
-                "|",
-                ("datetime.year_number", "!=", False),
-                ("datetime.month_number", "!=", False),
-                ("datetime.day_of_month", "!=", False),
-            ]`,
-            text: `Datetime ➔ Date set`,
-        },
-        {
-            domain: `[
-                ("datetime.year_number", "=", 2025),
-                ("datetime.month_number", "=", 3),
-                ("datetime.day_of_month", "=", 20),
-            ]`,
-            text: `Datetime ➔ Date = 03/20/2025`,
-        },
-        {
-            domain: `[
-                "|",
-                "|",
-                ("datetime.year_number", "!=", 2025),
-                ("datetime.month_number", "!=", 3),
-                ("datetime.day_of_month", "!=", 20),
-            ]`,
-            text: `Datetime ➔ Date not = 03/20/2025`,
-        },
-        {
-            domain: `[
-                ("datetime.year_number", "=", a),
-                ("datetime.month_number", "=", 3),
-                ("datetime.day_of_month", "=", 20),
-            ]`,
-            text: `Datetime ➔ Date ➔ Year = a`, // first line here
-        },
-        {
-            domain: `[
-                "&",
-                    "|",
-                        "|", "|",
-                            ("datetime.year_number", ">", 2025),
-                            "&",
-                                ("datetime.year_number", "=", 2025),
-                                ("datetime.month_number", ">", 3),
-                            "&", "&",
-                                ("datetime.year_number", "=", 2025),
-                                ("datetime.month_number", "=", 3),
-                                ("datetime.day_of_month", ">", 20),
-                        "&", "&",
-                            ("datetime.year_number", "=", 2025),
-                            ("datetime.month_number", "=", 3),
-                            ("datetime.day_of_month", "=", 20),
-                    "|",
-                        "|","|",
-                            ("datetime.year_number", "<", 2026),
-                            "&",
-                                ("datetime.year_number", "=", 2026),
-                                ("datetime.month_number", "<", 7),
-                            "&", "&",
-                                ("datetime.year_number", "=", 2026),
-                                ("datetime.month_number", "=", 7),
-                                ("datetime.day_of_month", "<", 15),
-                        "&", "&",
-                            ("datetime.year_number", "=", 2026),
-                            ("datetime.month_number", "=", 7),
-                            ("datetime.day_of_month", "=", 15)
-            ]`,
-            text: `Datetime ➔ Date between 03/20/2025 and 07/15/2026`,
-        },
-        {
-            domain: `[
-                ("datetime.hour_number", "=", False),
-                ("datetime.minute_number", "=", False),
-                ("datetime.second_number", "=", False),
-            ]`,
-            text: `Datetime ➔ Time not set`,
-        },
-        {
-            domain: `[
-                "|",
-                "|",
-                ("datetime.hour_number", "!=", False),
-                ("datetime.minute_number", "!=", False),
-                ("datetime.second_number", "!=", False),
-            ]`,
-            text: `Datetime ➔ Time set`,
-        },
-        {
-            domain: `[
-                ("datetime.hour_number", "=", 15),
-                ("datetime.minute_number", "=", 4),
-                ("datetime.second_number", "=", 3),
-            ]`,
-            text: `Datetime ➔ Time = 15:04:03`,
-        },
-        {
-            domain: `[
-                "|",
-                "|",
-                ("datetime.hour_number", "!=", 15),
-                ("datetime.minute_number", "!=", 40),
-                ("datetime.second_number", "!=", 30),
-            ]`,
-            text: `Datetime ➔ Time not = 15:40:30`,
-        },
-        {
-            domain: `[
-                "!",
-                "|",
-                "|",
-                ("datetime.hour_number", "!=", 15),
-                ("datetime.minute_number", "!=", 40),
-                ("datetime.second_number", "!=", 30),
-            ]`,
-            text: `Datetime ➔ Time ➔ Hour not not = 15`, // first line here
-        },
-        {
-            domain: `[
-                "&",
-                    "|",
-                        "|", "|",
-                            ("datetime.hour_number", ">", 15),
-                            "&",
-                                ("datetime.hour_number", "=", 15),
-                                ("datetime.minute_number", ">", 40),
-                            "&", "&",
-                                ("datetime.hour_number", "=", 15),
-                                ("datetime.minute_number", "=", 40),
-                                ("datetime.second_number", ">", 30),
-                        "&", "&",
-                            ("datetime.hour_number", "=", 15),
-                            ("datetime.minute_number", "=", 40),
-                            ("datetime.second_number", "=", 30),
-                    "|",
-                        "|", "|",
-                            ("datetime.hour_number", "<", 17),
-                            "&",
-                                ("datetime.hour_number", "=", 17),
-                                ("datetime.minute_number", "<", 20),
-                            "&", "&",
-                                ("datetime.hour_number", "=", 17),
-                                ("datetime.minute_number", "=", 20),
-                                ("datetime.second_number", "<", 00),
-                        "&", "&",
-                                ("datetime.hour_number", "=", 17),
-                                ("datetime.minute_number", "=", 20),
-                                ("datetime.second_number", "=", 00)
-            ]`,
-            text: `Datetime ➔ Time between 15:40:30 and 17:20:00`,
-        },
-        {
-            domain: `[
-                ("datetime.hour_number", "=", a),
-                ("datetime.minute_number", "=", 40),
-                ("datetime.second_number", "=", 20),
-            ]`,
-            text: `Datetime ➔ Time ➔ Hour = a`, // first line here
-        },
-        {
-            domain: `[("datetime.year_number", "=", False)]`,
-            text: `Datetime ➔ Date ➔ Year not set`,
-        },
-        {
-            domain: `[("datetime.year_number", "=", 2026)]`,
-            text: `Datetime ➔ Date ➔ Year = 2026`,
-        },
-        {
-            domain: `[("datetime.quarter_number", "=", False)]`,
-            text: `Datetime ➔ Date ➔ Quarter not set`,
-        },
-        {
-            domain: `[("datetime.quarter_number", "=", 1)]`,
-            text: `Datetime ➔ Date ➔ Quarter = Quarter 1`,
-        },
-        {
-            domain: `[("datetime.month_number", "=", False)]`,
-            text: `Datetime ➔ Date ➔ Month not set`,
-        },
-        {
-            domain: `[("datetime.month_number", "=", 3)]`,
-            text: `Datetime ➔ Date ➔ Month = March`,
-        },
-        {
-            domain: `[("datetime.iso_week_number", "=", False)]`,
-            text: `Datetime ➔ Date ➔ Week number not set`,
-        },
-        {
-            domain: `[("datetime.iso_week_number", "=", 3)]`,
-            text: `Datetime ➔ Date ➔ Week number = 3`,
-        },
-        {
-            domain: `[("datetime.day_of_year", "=", False)]`,
-            text: `Datetime ➔ Date ➔ Day of year not set`,
-        },
-        {
-            domain: `[("datetime.day_of_year", "=", 3)]`,
-            text: `Datetime ➔ Date ➔ Day of year = 3`,
-        },
-        {
-            domain: `[("datetime.day_of_month", "=", False)]`,
-            text: `Datetime ➔ Date ➔ Day of month not set`,
-        },
-        {
-            domain: `[("datetime.day_of_month", "=", 3)]`,
-            text: `Datetime ➔ Date ➔ Day of month = 3`,
-        },
-        {
-            domain: `[("datetime.day_of_week", "=", False)]`,
-            text: `Datetime ➔ Date ➔ Weekday not set`,
-        },
-        {
-            domain: `[("datetime.day_of_week", "=", 3)]`,
-            text: `Datetime ➔ Date ➔ Weekday = Wednesday`,
-        },
-        {
-            domain: `[("datetime.hour_number", "=", False)]`,
-            text: `Datetime ➔ Time ➔ Hour not set`,
-        },
-        {
-            domain: `[("datetime.hour_number", "=", 3)]`,
-            text: `Datetime ➔ Time ➔ Hour = 3`,
-        },
-        {
-            domain: `[("datetime.minute_number", "=", False)]`,
-            text: `Datetime ➔ Time ➔ Minute not set`,
-        },
-        {
-            domain: `[("datetime.minute_number", "=", 3)]`,
-            text: `Datetime ➔ Time ➔ Minute = 3`,
-        },
-        {
-            domain: `[("datetime.second_number", "=", False)]`,
-            text: `Datetime ➔ Time ➔ Second not set`,
-        },
-        {
-            domain: `[("datetime.second_number", "=", 3)]`,
-            text: `Datetime ➔ Time ➔ Second = 3`,
-        },
-    ];
-    for (const { domain, text } of toTest) {
-        await parent.set(domain);
-        expect(getConditionText()).toBe(text);
-    }
-});
-
-test("datetime options (edit)", async () => {
-    mockDate("2025-03-24 17:00:00");
-    let expectStep = true;
-    await makeDomainSelector({
-        domain: `[]`,
-        update(domain) {
-            if (expectStep) {
-                expect.step(domain);
-            }
-        },
-    });
-    await addNewRule();
-    expect.verifySteps([formatDomain('[("id", "in", [])]')]);
-    await openModelFieldSelectorPopover();
-    await contains(".o_model_field_selector_popover_item_name:contains('Datetime')").click();
-    expect.verifySteps([formatDomain(`[("datetime", "in", [])]`)]);
-
-    await openModelFieldSelectorPopover();
-    await followRelation(2);
-    await contains(".o_model_field_selector_popover_item_name:contains('Date')").click();
-    expect.verifySteps([formatDomain(`[(0, "=", 1)]`)]);
-
-    await contains(".o_datetime_input").click();
-    await contains(getPickerCell("26", true)).click();
-    expect(getCurrentValue()).toBe("03/26/2025 03/26/2025"); // to fix: problem with DatetimeInput
-    expect.verifySteps([
-        formatDomain(
-            '["&", "&", ("datetime.year_number", "=", 2025), ("datetime.month_number", "=", 3), ("datetime.day_of_month", "=", 26)]'
-        ),
-    ]);
-
-    expect(getOperatorOptions()).toEqual([
-        "equals",
-        "not equals",
-        "greater",
-        "lower",
-        "between",
-        "not between",
-        "set",
-        "not set",
-    ]);
-
-    await selectOperator("between");
-    expect(SELECTORS.condition).toHaveCount(1);
-    expect(getCurrentOperator()).toBe("between");
-    expect(SELECTORS.valueEditor).toHaveCount(1);
-    expect(SELECTORS.valueEditor + " " + SELECTORS.editor).toHaveCount(2);
-    expect(SELECTORS.clearNotSupported).toHaveCount(0);
-    expect(`${SELECTORS.editor} .o_datetime_input`).toHaveCount(2);
-    expect.verifySteps([
-        formatDomain(
-            `[
-                "&",
-                    "|",
-                        "|", "|",
-                            ("datetime.year_number", ">", 2025),
-                            "&", ("datetime.year_number", "=", 2025), ("datetime.month_number", ">", 3),
-                            "&", "&", ("datetime.year_number", "=", 2025), ("datetime.month_number", "=", 3), ("datetime.day_of_month", ">", 24),
-                        "&", "&", ("datetime.year_number", "=", 2025), ("datetime.month_number", "=", 3), ("datetime.day_of_month", "=", 24),
-                    "|",
-                        "|", "|",
-                            ("datetime.year_number", "<", 2025),
-                            "&", ("datetime.year_number", "=", 2025), ("datetime.month_number", "<", 3),
-                            "&", "&", ("datetime.year_number", "=", 2025), ("datetime.month_number", "=", 3), ("datetime.day_of_month", "<", 24),
-                            "&", "&", ("datetime.year_number", "=", 2025), ("datetime.month_number", "=", 3), ("datetime.day_of_month", "=", 24)]`
-        ),
-    ]);
-
-    await openModelFieldSelectorPopover();
-    await followRelation();
-    await contains(".o_model_field_selector_popover_item_name:contains('Weekday')").click();
-    expect.verifySteps([formatDomain(`[("datetime.day_of_week", "in", [])]`)]);
-    await selectValue(5);
-    expect(getCurrentValue()).toBe("Friday");
-    expect.verifySteps([formatDomain(`[("datetime.day_of_week", "in", [5])]`)]);
-
-    expect(getOperatorOptions()).toEqual([
-        "equals",
-        "not equals",
-        "greater",
-        "lower",
-        "between",
-        "not between",
-        "set",
-        "not set",
-    ]);
-
-    await openModelFieldSelectorPopover();
-    await clickPrev();
-    expectStep = false; // we don't want to control minutes/seconds.
-    await contains(".o_model_field_selector_popover_item_name:contains('Time')").click();
-    expectStep = true;
-
-    await editValue("12:15:00", { confirm: false });
-    await contains(".o_domain_selector").click();
-    await animationFrame();
-    expect(getCurrentValue()).toBe("12:15:00");
-    expect.verifySteps([
-        formatDomain(
-            '["&", "&", ("datetime.hour_number", "=", 12), ("datetime.minute_number", "=", 15), ("datetime.second_number", "=", 0)]'
-        ),
-    ]);
-
-    await openModelFieldSelectorPopover();
-    await followRelation(1);
-    expectStep = false;
-    await contains(".o_model_field_selector_popover_item_name:contains('Hour')").click();
-    expectStep = true;
-    await editValue("15");
-    expect.verifySteps([formatDomain('[("datetime.hour_number", "in", [15])]')]);
-
-    expect(getOperatorOptions()).toEqual([
-        "equals",
-        "not equals",
-        "greater",
-        "lower",
-        "between",
-        "not between",
-        "set",
-        "not set",
-    ]);
-});
-
-test("date options (readonly)", async () => {
-    const parent = await makeDomainSelector({
-        readonly: true,
-        domain: `[]`,
-    });
-    const toTest = [
-        {
-            domain: `[
-                ("date.year_number", "=", False),
-                ("date.month_number", "=", False),
-                ("date.day_of_month", "=", False),
-            ]`,
-            text: `Date ➔ Year not set`, // first line here
-        },
-        {
-            domain: `[
-                ("date.hour_number", "=", False),
-                ("date.minute_number", "=", False),
-                ("date.second_number", "=", False),
-            ]`,
-            text: `Date ➔ hour_number not set`, // first line here
-        },
-        {
-            domain: `[("date.year_number", "=", False)]`,
-            text: `Date ➔ Year not set`,
-        },
-        {
-            domain: `[("date.year_number", "=", 2026)]`,
-            text: `Date ➔ Year = 2026`,
-        },
-        {
-            domain: `[("date.quarter_number", "=", False)]`,
-            text: `Date ➔ Quarter not set`,
-        },
-        {
-            domain: `[("date.quarter_number", "=", 1)]`,
-            text: `Date ➔ Quarter = Quarter 1`,
-        },
-        {
-            domain: `[("date.month_number", "=", False)]`,
-            text: `Date ➔ Month not set`,
-        },
-        {
-            domain: `[("date.month_number", "=", 3)]`,
-            text: `Date ➔ Month = March`,
-        },
-        {
-            domain: `[("date.iso_week_number", "=", False)]`,
-            text: `Date ➔ Week number not set`,
-        },
-        {
-            domain: `[("date.iso_week_number", "=", 3)]`,
-            text: `Date ➔ Week number = 3`,
-        },
-        {
-            domain: `[("date.day_of_year", "=", False)]`,
-            text: `Date ➔ Day of year not set`,
-        },
-        {
-            domain: `[("date.day_of_year", "=", 3)]`,
-            text: `Date ➔ Day of year = 3`,
-        },
-        {
-            domain: `[("date.day_of_month", "=", False)]`,
-            text: `Date ➔ Day of month not set`,
-        },
-        {
-            domain: `[("date.day_of_month", "=", 3)]`,
-            text: `Date ➔ Day of month = 3`,
-        },
-        {
-            domain: `[("date.day_of_week", "=", False)]`,
-            text: `Date ➔ Weekday not set`,
-        },
-        {
-            domain: `[("date.day_of_week", "=", 3)]`,
-            text: `Date ➔ Weekday = Wednesday`,
-        },
-        {
-            domain: `[("date.month_number", "=", context_today().month)]`,
-            text: `Date ➔ Month = This month`,
-        },
-        {
-            domain: `[("date.day_of_month", "=", context_today().day)]`,
-            text: `Date ➔ Day of month = This day`,
-        },
-    ];
-    for (const { domain, text } of toTest) {
-        await parent.set(domain);
-        expect(getConditionText()).toBe(text);
-    }
-});
-
-test("date options (edit)", async () => {
-    mockDate("2025-03-24 17:00:00");
-    await makeDomainSelector({
-        domain: `[]`,
-        update(domain) {
-            expect.step(domain);
-        },
-    });
-    await addNewRule();
-    expect.verifySteps(['[("id", "in", [])]']);
-    await openModelFieldSelectorPopover();
-    await contains(".o_model_field_selector_popover_item_name:contains('Date')").click();
-    expect.verifySteps(['[("date", "in", [])]']);
-
-    await selectOperator("today");
-    expect.verifySteps(['[("date", "=", context_today().strftime("%Y-%m-%d"))]']);
-
-    await openModelFieldSelectorPopover();
-    await followRelation(1);
-    await contains(".o_model_field_selector_popover_item_name:contains(/^Month$/)").click();
-
-    expect(getOperatorOptions()).toEqual([
-        "equals",
-        "not equals",
-        "greater",
-        "lower",
-        "between",
-        "not between",
-        "set",
-        "not set",
-    ]);
-    expect.verifySteps([`[("date.month_number", "in", [])]`]);
-
-    await selectValue(5);
-    expect(getCurrentValue()).toBe("May");
-    expect.verifySteps([`[("date.month_number", "in", [5])]`]);
-});
-
-test("date options (edit): This day/This month", async () => {
-    mockDate("2025-03-24 17:00:00");
-    await makeDomainSelector({
-        domain: `[("date.month_number", "=", 5)]`,
-        update(domain) {
-            expect.step(domain);
-        },
-    });
-    expect(getCurrentValue()).toBe("May");
-    await selectValue("context_today().month");
-    expect(getCurrentValue()).toBe("This month");
-    expect.verifySteps([`[("date.month_number", "=", context_today().month)]`]);
-    await openModelFieldSelectorPopover();
-    await contains(`.o_model_field_selector_popover_item[data-name='day_of_month'] button`).click();
-    expect.verifySteps([`[("date.day_of_month", "in", [])]`]);
-    expect(getCurrentValue()).toBe("Select one or several criteria");
-    await selectValue("context_today().day");
-    expect(getCurrentValue()).toBe("This day");
-    expect.verifySteps([`[("date.day_of_month", "in", [context_today().day])]`]);
-});
-
 test("hide today, next, last operators when allowExpressions = False", async () => {
+    Team._fields.active = fields.Boolean();
     await makeDomainSelector({
         domain: `[("datetime", "=", False)]`,
         allowExpressions: false,
@@ -3275,36 +2788,6 @@ test("hide today, next, last operators when allowExpressions = False", async () 
         "not between",
         "set",
         "not set",
-        "=",
-    ]);
-});
-
-test(`hide "This day"/"This month" when allowExpressions = False`, async () => {
-    await makeDomainSelector({
-        domain: `[("datetime.day_of_month", "=", 1), ("datetime.month_number", "=", 1) ]`,
-        allowExpressions: false,
-        update(domain) {
-            expect.step(domain);
-        },
-    });
-    const range = [];
-    for (let i = 1; i <= 31; i++) {
-        range.push(String(i));
-    }
-    expect(getValueOptions()).toEqual(range);
-    expect(getValueOptions(1)).toEqual([
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
     ]);
 });
 
@@ -3353,90 +2836,4 @@ test("selection: placeholders for in operator", async () => {
         domain: `[("state", "in", [])]`,
     });
     expect(`${SELECTORS.valueEditor} select`).toHaveValue(`Select one or several criteria`);
-});
-
-test(`datetime option 'Date': placeholders for in operator`, async () => {
-    await makeDomainSelector({
-        domain: `[("datetime", "=", False)]`,
-    });
-    await openModelFieldSelectorPopover();
-    await followRelation(2);
-    await contains(".o_model_field_selector_popover_item:contains('Date') button").click();
-    expect(`${SELECTORS.valueEditor} input`).toHaveAttribute(
-        "placeholder",
-        `Select one or several criteria`
-    );
-});
-
-test(`datetime option "Time": placeholders for in operator`, async () => {
-    await makeDomainSelector({
-        domain: `[("datetime", "=", False)]`,
-    });
-    await openModelFieldSelectorPopover();
-    await followRelation(2);
-    await contains(".o_model_field_selector_popover_item:contains('Time') button").click();
-    expect(`${SELECTORS.valueEditor} input`).toHaveAttribute("placeholder", `hh:mm:ss`);
-});
-
-test("datetime: switch from in to today", async () => {
-    await makeDomainSelector({
-        domain: `[("datetime", "=", False)]`,
-        update(domain) {
-            expect.step(domain);
-        },
-    });
-    await selectOperator("in");
-    expect.verifySteps([`[("datetime", "in", [])]`]);
-    await selectOperator("today");
-    expect.verifySteps([
-        formatDomain(`
-        [
-            "&",
-                ("datetime", ">=", datetime.datetime.combine(context_today(), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")),
-                ("datetime", "<=", datetime.datetime.combine(context_today(), datetime.time(23, 59, 59)).to_utc().strftime("%Y-%m-%d %H:%M:%S"))
-        ]`),
-    ]);
-});
-
-test("datetime: switch from today to in", async () => {
-    await makeDomainSelector({
-        domain: `[("datetime", "=", False)]`,
-        update(domain) {
-            expect.step(domain);
-        },
-    });
-    await selectOperator("today");
-    expect.verifySteps([
-        formatDomain(`
-        [
-            "&",
-                ("datetime", ">=", datetime.datetime.combine(context_today(), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")),
-                ("datetime", "<=", datetime.datetime.combine(context_today(), datetime.time(23, 59, 59)).to_utc().strftime("%Y-%m-%d %H:%M:%S"))
-        ]`),
-    ]);
-    await selectOperator("in");
-    expect.verifySteps([`[("datetime", "in", [])]`]);
-});
-
-test(`switch from (0, "=", 1) to ("datetime.__date, "in", [])`, async () => {
-    await makeDomainSelector({
-        domain: `[(0, "=", 1)]`,
-        update(domain) {
-            expect.step(domain);
-        },
-    });
-    await openModelFieldSelectorPopover();
-    await followRelation(2);
-    await contains(".o_model_field_selector_popover_item_name:contains('Date')").click();
-    expect(getOperatorOptions()).toEqual([
-        "equals",
-        "not equals",
-        "greater",
-        "lower",
-        "between",
-        "not between",
-        "set",
-        "not set",
-    ]);
-    expect.verifySteps([`[(0, "=", 1)]`]);
 });

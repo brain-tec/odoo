@@ -14,7 +14,6 @@ from markupsafe import Markup
 from odoo import api, fields, models, _, tools
 from odoo.fields import Domain
 from odoo.exceptions import ValidationError, AccessError, RedirectWarning, UserError
-from odoo.osv import expression
 from odoo.tools import convert, format_time, SQL, Query
 from odoo.tools.intervals import Intervals
 
@@ -867,9 +866,9 @@ class HrEmployee(models.Model):
         }
         if dep_rd:
             return action_reload
-        convert.convert_file(env=self.env, module='hr', filename='data/scenarios/hr_scenario.xml', idref=None, mode='init', kind="data")
+        convert.convert_file(env=self.env, module='hr', filename='data/scenarios/hr_scenario.xml', idref=None, mode='init')
         if 'resume_line_ids' in self:
-            convert.convert_file(env=self.env, module='hr_skills', filename='data/scenarios/hr_skills_scenario.xml', idref=None, mode='init', kind="data")
+            convert.convert_file(env=self.env, module='hr_skills', filename='data/scenarios/hr_skills_scenario.xml', idref=None, mode='init')
         return action_reload
 
     def get_formview_id(self, access_uid=None):
@@ -1078,9 +1077,9 @@ class HrEmployee(models.Model):
             # Empty links to this employees (example: manager, coach, time off responsible, ...)
             employee_fields_to_empty = self._get_employee_m2o_to_empty_on_archived_employees()
             user_fields_to_empty = self._get_user_m2o_to_empty_on_archived_employees()
-            employee_domain = [[(field, 'in', archived_employees.ids)] for field in employee_fields_to_empty]
-            user_domain = [[(field, 'in', archived_employees.user_id.ids) for field in user_fields_to_empty]]
-            employees = self.env['hr.employee'].search(expression.OR(employee_domain + user_domain))
+            employee_domain = Domain.OR(Domain(field, 'in', archived_employees.ids) for field in employee_fields_to_empty)
+            user_domain = Domain.AND(Domain(field, 'in', archived_employees.user_id.ids) for field in user_fields_to_empty)
+            employees = self.env['hr.employee'].search(employee_domain | user_domain)
             for employee in employees:
                 for field in employee_fields_to_empty:
                     if employee[field] in archived_employees:
@@ -1122,7 +1121,7 @@ class HrEmployee(models.Model):
         demo_tag = self.env.ref('hr.employee_category_demo', raise_if_not_found=False)
         if demo_tag:
             return
-        convert.convert_file(self.env, 'hr', 'data/scenarios/hr_scenario.xml', None, mode='init', kind='data')
+        convert.convert_file(self.env, 'hr', 'data/scenarios/hr_scenario.xml', None, mode='init')
 
     # ---------------------------------------------------------
     # Business Methods
