@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import { animationFrame, manuallyDispatchProgrammaticEvent, queryAllTexts } from "@odoo/hoot-dom";
 import { contains, mockService, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { defineWebsiteModels, invisibleEl, setupWebsiteBuilder } from "./website_helpers";
+import { expectElementCount } from "@html_editor/../tests/_helpers/ui_expectations";
 
 defineWebsiteModels();
 
@@ -60,6 +61,16 @@ test("invisible elements in translate mode", async () => {
     expect(
         ".o_we_invisible_el_panel  .o_we_invisible_entry:contains('Invisible Element')"
     ).toHaveCount(1);
+});
+
+test("show invisible elements in translate mode", async () => {
+    await setupSidebarBuilderForTranslation({ websiteContent: invisibleEl });
+
+    expect(":iframe .o_snippet_invisible").toHaveAttribute("data-invisible", "1");
+    await contains(
+        ".o_we_invisible_el_panel  .o_we_invisible_entry:contains('Invisible Element') i.fa-eye-slash"
+    ).click();
+    expect(":iframe .o_snippet_invisible").not.toHaveAttribute("data-invisible");
 });
 
 test("translate text", async () => {
@@ -184,6 +195,21 @@ test("translate select", async () => {
     expect(queryAllTexts(":iframe [data-initial-translation-value='Option 1']")).toEqual([
         "Option fr",
     ]);
+});
+
+test("test that powerbox should not open in translate mode", async () => {
+    const { getEditor } = await setupSidebarBuilderForTranslation({
+        websiteContent: getTranslateEditable("&nbsp;"),
+    });
+    const editor = getEditor();
+    const textNode = editor.editable.querySelector("span").firstChild;
+    expect(textNode.nodeType).toBe(Node.TEXT_NODE);
+    setSelection({ anchorNode: textNode, anchorOffset: 0 });
+    await animationFrame();
+    // Simulate typing `/`
+    await insertText(editor, "/");
+    await animationFrame();
+    await expectElementCount(".o-we-powerbox", 0);
 });
 
 describe("save translation", () => {
