@@ -1,5 +1,4 @@
 import { Editor } from "@html_editor/editor";
-import { closestElement } from "@html_editor/utils/dom_traversal";
 import {
     Component,
     EventBus,
@@ -21,8 +20,8 @@ import { InvisibleElementsPanel } from "@html_builder/sidebar/invisible_elements
 import { BlockTab } from "@html_builder/sidebar/block_tab";
 import { CustomizeTab } from "@html_builder/sidebar/customize_tab";
 import {
-    EDITOR_COLOR_CSS_VARIABLES,
-    getCSSVariableValue,
+    setBuilderCSSVariables,
+    setEditableDocument,
     setEditableWindow,
 } from "@html_builder/utils/utils_css";
 import { withSequence } from "@html_editor/utils/resource";
@@ -33,6 +32,7 @@ export class Builder extends Component {
     static props = {
         closeEditor: { type: Function },
         reloadEditor: { type: Function, optional: true },
+        onEditorLoad: { type: Function, optional: true },
         snippetsName: { type: String },
         toggleMobile: { type: Function },
         overlayRef: { type: Function },
@@ -43,6 +43,7 @@ export class Builder extends Component {
         getThemeTab: { type: Function, optional: true },
     };
     static defaultProps = {
+        onEditorLoad: () => {},
         config: {},
     };
 
@@ -114,19 +115,6 @@ export class Builder extends Component {
 
                     // disable the toolbar for images and icons
                 },
-                getRecordInfo: (editableEl) => {
-                    if (!editableEl) {
-                        editableEl = closestElement(
-                            this.editor.shared.selection.getEditableSelection().anchorNode
-                        );
-                    }
-                    return {
-                        resModel: editableEl.dataset["oeModel"],
-                        resId: editableEl.dataset["oeId"],
-                        field: editableEl.dataset["oeField"],
-                        type: editableEl.dataset["oeType"],
-                    };
-                },
                 localOverlayContainers: {
                     key: this.env.localOverlayContainerKey,
                     ref: this.props.overlayRef,
@@ -141,6 +129,7 @@ export class Builder extends Component {
             },
             this.env.services
         );
+        this.props.onEditorLoad(this.editor);
 
         this.snippetModel = useState(useService("html_builder.snippets"));
         this.snippetModel.registerBeforeReload(this.save.bind(this));
@@ -153,6 +142,7 @@ export class Builder extends Component {
             const iframeEl = await this.props.iframeLoaded;
             this.editableEl = iframeEl.contentDocument.body.querySelector("#wrapwrap");
             setEditableWindow(iframeEl.contentWindow);
+            setEditableDocument(iframeEl.contentDocument);
 
             // Prevent image dragging in the website builder. Not via css because
             // if one of the image ancestor has a dragstart listener, the dragstart handler
@@ -188,7 +178,7 @@ export class Builder extends Component {
 
         onMounted(() => {
             this.editor.document.body.classList.add("editor_enable");
-            this.setCSSVariables();
+            setBuilderCSSVariables();
             // TODO: onload editor
             this.updateInvisibleEls();
         });
@@ -203,18 +193,6 @@ export class Builder extends Component {
 
     get displayOnlyCustomizeTab() {
         return !!this.props.config.customizeTab;
-    }
-
-    setCSSVariables() {
-        const el = this.builder_sidebarRef.el;
-        for (const style of EDITOR_COLOR_CSS_VARIABLES) {
-            let value = getCSSVariableValue(style);
-            if (value.startsWith("'") && value.endsWith("'")) {
-                // Gradient values are recovered within a string.
-                value = value.substring(1, value.length - 1);
-            }
-            el.style.setProperty(`--we-cp-${style}`, value);
-        }
     }
 
     discard() {
