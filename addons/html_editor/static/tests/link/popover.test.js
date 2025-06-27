@@ -10,6 +10,7 @@ import {
     select,
     waitFor,
     waitForNone,
+    manuallyDispatchProgrammaticEvent,
 } from "@odoo/hoot-dom";
 import { animationFrame, tick } from "@odoo/hoot-mock";
 import { markup } from "@odoo/owl";
@@ -84,6 +85,18 @@ describe("should open a popover", () => {
         queryOne(".o_we_href_input_link").focus();
         await animationFrame();
         expect(queryOne(".o-we-linkpopover").parentElement).toHaveAttribute("style", style);
+    });
+    test("link popover should close when clicking on a contenteditable false element", async () => {
+        await setupEditor(
+            '<p><a href="#">li[]nk</a> <a contenteditable="false">uneditable link</a></p>'
+        );
+        await waitFor(".o-we-linkpopover");
+        expect(".o-we-linkpopover").toHaveCount(1);
+        // click on an uneditable element
+        const nodeEl = queryOne("a[contenteditable='false']");
+        manuallyDispatchProgrammaticEvent(nodeEl, "mousedown");
+        await waitForNone(".o-we-linkpopover", { timeout: 1500 });
+        expect(".o-we-linkpopover").toHaveCount(0);
     });
 });
 
@@ -1424,5 +1437,86 @@ describe("link popover with empty URL", () => {
         expect(cleanLinkArtifacts(getContent(el))).toBe(
             '<p>[]this is a <a href="http://test.com/">link</a></p>'
         );
+    });
+});
+
+describe("label is a valid URL", () => {
+    test("URL input should be prefilled by corresponding URL if the label matches the URL format", async () => {
+        const { el } = await setupEditor("<p>[google.com]</p>");
+        await waitFor(".o-we-toolbar");
+        await click(".o-we-toolbar .fa-link");
+        await waitFor(".o-we-linkpopover");
+        expect("input.o_we_label_link").toHaveValue("google.com");
+        expect("input.o_we_href_input_link").toHaveValue("https://google.com");
+        await click(".o_we_apply_link");
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p><a href="https://google.com">google.com[]</a></p>'
+        );
+    });
+    test("URL input should be prefilled by corresponding URL if the label matches the URL format (2)", async () => {
+        const { el } = await setupEditor("<p>[https://google.com]</p>");
+        await waitFor(".o-we-toolbar");
+        await click(".o-we-toolbar .fa-link");
+        await waitFor(".o-we-linkpopover");
+        expect("input.o_we_label_link").toHaveValue("https://google.com");
+        expect("input.o_we_href_input_link").toHaveValue("https://google.com");
+        await click(".o_we_apply_link");
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p><a href="https://google.com">https://google.com[]</a></p>'
+        );
+    });
+    test("URL input should be prefilled by corresponding URL if the label matches the email format", async () => {
+        const { el } = await setupEditor("<p>[test@test.com]</p>");
+        await waitFor(".o-we-toolbar");
+        await click(".o-we-toolbar .fa-link");
+        await waitFor(".o-we-linkpopover");
+        expect("input.o_we_label_link").toHaveValue("test@test.com");
+        expect("input.o_we_href_input_link").toHaveValue("mailto:test@test.com");
+        await click(".o_we_apply_link");
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p><a href="mailto:test@test.com">test@test.com[]</a></p>'
+        );
+    });
+    test("URL input should be prefilled by corresponding URL if the label matches the email format (2)", async () => {
+        const { el } = await setupEditor("<p>[mailto:test@test.com]</p>");
+        await waitFor(".o-we-toolbar");
+        await click(".o-we-toolbar .fa-link");
+        await waitFor(".o-we-linkpopover");
+        expect("input.o_we_label_link").toHaveValue("mailto:test@test.com");
+        expect("input.o_we_href_input_link").toHaveValue("mailto:test@test.com");
+        await click(".o_we_apply_link");
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p><a href="mailto:test@test.com">mailto:test@test.com[]</a></p>'
+        );
+    });
+    test("URL input should be prefilled by corresponding URL if the label matches the telephone format", async () => {
+        const { el } = await setupEditor("<p>[12345678]</p>");
+        await waitFor(".o-we-toolbar");
+        await click(".o-we-toolbar .fa-link");
+        await waitFor(".o-we-linkpopover");
+        expect("input.o_we_label_link").toHaveValue("12345678");
+        expect("input.o_we_href_input_link").toHaveValue("tel:12345678");
+        await click(".o_we_apply_link");
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p><a href="tel:12345678">12345678[]</a></p>'
+        );
+    });
+    test("URL input should be prefilled by corresponding URL if the label matches the telephone format (2)", async () => {
+        const { el } = await setupEditor("<p>[tel:123]</p>");
+        await waitFor(".o-we-toolbar");
+        await click(".o-we-toolbar .fa-link");
+        await waitFor(".o-we-linkpopover");
+        expect("input.o_we_label_link").toHaveValue("tel:123");
+        expect("input.o_we_href_input_link").toHaveValue("tel:123");
+        await click(".o_we_apply_link");
+        expect(cleanLinkArtifacts(getContent(el))).toBe('<p><a href="tel:123">tel:123[]</a></p>');
+    });
+    test("popover should display href URL even if label is a valid URL and differs from href", async () => {
+        await setupEditor('<p><a href="https://odoo.com/">googl[]e.com</a></p>');
+        await waitFor(".o-we-linkpopover", { timeout: 1500 });
+        expect(queryFirst(".o-we-linkpopover a").href).toBe("https://odoo.com/");
+        await click(".o_we_edit_link");
+        await waitFor(".o_we_href_input_link");
+        expect("input.o_we_href_input_link").toHaveValue("https://odoo.com/");
     });
 });
