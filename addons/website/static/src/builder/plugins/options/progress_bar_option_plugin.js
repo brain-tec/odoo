@@ -33,7 +33,7 @@ class ProgressBarOptionPlugin extends Plugin {
     }
 }
 
-class DisplayAction extends BuilderAction {
+export class DisplayAction extends BuilderAction {
     static id = "display";
     apply({ editingElement, params: { mainParam: position } }) {
         // retro-compatibility
@@ -67,13 +67,16 @@ class DisplayAction extends BuilderAction {
             progress.insertAdjacentElement("afterend", progressLabel);
         }
 
-        // Temporary hide the label. It's effectively removed in cleanForSave
-        // if the option is confirmed
-        progressLabel.classList.toggle("d-none", position === "none");
+        // Added to address the prior omission of s_progress_bar_text in s_numbers_charts
+        if (progressLabel) {
+            // Temporary hide the label. It's effectively removed in cleanForSave
+            // if the option is confirmed
+            progressLabel.classList.toggle("d-none", position === "none");
+        }
     }
 }
 
-class ProgressBarValueAction extends BuilderAction {
+export class ProgressBarValueAction extends BuilderAction {
     static id = "progressBarValue";
     apply({ editingElement, value }) {
         value = parseInt(value);
@@ -81,9 +84,15 @@ class ProgressBarValueAction extends BuilderAction {
         const progressBarEl = editingElement.querySelector(".progress-bar");
         const progressBarTextEl = editingElement.querySelector(".s_progress_bar_text");
         const progressMainEl = editingElement.querySelector(".progress");
-        // Target precisely the XX% not only XX to not replace wrong element
-        // eg 'Since 1978 we have completed 45%' <- don't replace 1978
-        progressBarTextEl.innerText = progressBarTextEl.innerText.replace(/[0-9]+%/, value + "%");
+        // Added to address the prior omission of s_progress_bar_text in s_numbers_charts
+        if (progressBarTextEl) {
+            // Target precisely the XX% not only XX to not replace wrong element
+            // eg 'Since 1978 we have completed 45%' <- don't replace 1978
+            progressBarTextEl.innerText = progressBarTextEl.innerText.replace(
+                /[0-9]+%/,
+                value + "%"
+            );
+        }
         progressMainEl.setAttribute("aria-valuenow", value);
         progressBarEl.style.width = value + "%";
     }

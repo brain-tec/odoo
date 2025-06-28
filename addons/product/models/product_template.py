@@ -7,7 +7,7 @@ from collections import defaultdict
 
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError, ValidationError
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.tools.image import is_image_size_above
 
 _logger = logging.getLogger(__name__)
@@ -497,7 +497,7 @@ class ProductTemplate(models.Model):
     def create(self, vals_list):
         ''' Store the initial standard price in order to be able to retrieve the cost of a product template for a given date'''
         templates = super(ProductTemplate, self).create(vals_list)
-        if self._context.get("create_product_product", True):
+        if self.env.context.get("create_product_product", True):
             templates._create_variant_ids()
 
         # This is needed to set given values to first variant after creation
@@ -516,7 +516,7 @@ class ProductTemplate(models.Model):
             products = self.filtered(lambda template: template.uom_id.id != vals['uom_id']).product_variant_ids
             products.with_context(skip_uom_conversion=True)._update_uom(vals['uom_id'])
         res = super(ProductTemplate, self).write(vals)
-        if self._context.get("create_product_product", True) and 'attribute_line_ids' in vals or (vals.get('active') and len(self.product_variant_ids) == 0):
+        if self.env.context.get("create_product_product", True) and 'attribute_line_ids' in vals or (vals.get('active') and len(self.product_variant_ids) == 0):
             self._create_variant_ids()
         if 'active' in vals and not vals.get('active'):
             self.with_context(active_test=False).mapped('product_variant_ids').write({'active': vals.get('active')})
@@ -571,8 +571,11 @@ class ProductTemplate(models.Model):
     def _search_display_name(self, operator, value):
         domain = super()._search_display_name(operator, value)
         if self.env.context.get('search_product_product', bool(value)):
-            combine = expression.OR if operator not in expression.NEGATIVE_TERM_OPERATORS else expression.AND
-            domain = combine([domain, [('product_variant_ids', operator, value)]])
+            variant_domain = Domain('product_variant_ids', operator, value)
+            if Domain.is_negative_operator(operator):
+                domain &= variant_domain
+            else:
+                domain |= variant_domain
         return domain
 
     @api.model
@@ -1157,13 +1160,13 @@ class ProductTemplate(models.Model):
         Use sudo because the same result should be cached for all users.
         """
         self.ensure_one()
-        domain = [('product_tmpl_id', '=', self.id)]
+        domain = Domain('product_tmpl_id', '=', self.id)
         combination_indices_ids = filtered_combination._ids2str()
 
         if combination_indices_ids:
-            domain = expression.AND([domain, [('combination_indices', '=', combination_indices_ids)]])
+            domain &= Domain('combination_indices', '=', combination_indices_ids)
         else:
-            domain = expression.AND([domain, [('combination_indices', 'in', ['', False])]])
+            domain &= Domain('combination_indices', 'in', ['', False])
 
         return self.env['product.product'].sudo().with_context(active_test=False).search(domain, order='active DESC', limit=1).id
 
@@ -1441,13 +1444,8 @@ class ProductTemplate(models.Model):
 
     def _get_product_document_domain(self):
         self.ensure_one()
-        return expression.OR([
-            expression.AND([[('res_model', '=', 'product.template')], [('res_id', 'in', self.ids)]]),
-            expression.AND([
-                [('res_model', '=', 'product.product')],
-                [('res_id', 'in', self.product_variant_ids.ids)],
-            ])
-        ])
+        return (Domain('res_model', '=', 'product.template') & Domain('res_id', 'in', self.ids)) \
+            | (Domain('res_model', '=', 'product.product') & Domain('res_id', 'in', self.product_variant_ids.ids))
 
     def _get_list_price(self, price):
         """ Get the product sales price from a public price based on taxes defined on the product.

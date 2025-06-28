@@ -6,6 +6,7 @@ import { AnimateOption } from "./animate_option";
 import { ANIMATE } from "@website/builder/option_sequence";
 import { _t } from "@web/core/l10n/translation";
 import { AnimateText } from "./animate_text";
+import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 import { ancestors, closestElement, findFurthest } from "@html_editor/utils/dom_traversal";
 import { childNodeIndex, DIRECTIONS, nodeSize } from "@html_editor/utils/position";
 import { BuilderAction } from "@html_builder/core/builder_action";
@@ -44,6 +45,7 @@ class AnimateOptionPlugin extends Plugin {
                     isDisabled: this.isAnimatedTextDisabled.bind(this),
                     animateOptionProps: { ...this.animateOptionProps, requireAnimation: true },
                 },
+                isAvailable: isHtmlContentSupported,
             },
         ],
         system_classes: ["o_animating"],
@@ -338,7 +340,7 @@ class AnimateOptionPlugin extends Plugin {
     }
 }
 
-class SetAnimationModeAction extends BuilderAction {
+export class SetAnimationModeAction extends BuilderAction {
     static id = "setAnimationMode";
     static dependencies = ["animateOption"];
     setup() {
@@ -440,7 +442,7 @@ class SetAnimationModeAction extends BuilderAction {
         }
     }
 }
-class SetAnimateIntensityAction extends BuilderAction {
+export class SetAnimateIntensityAction extends BuilderAction {
     static id = "setAnimateIntensity";
     static dependencies = ["animateOption"];
     getValue({ editingElement }) {
@@ -454,7 +456,7 @@ class SetAnimateIntensityAction extends BuilderAction {
         this.dependencies.animateOption.forceAnimation(editingElement);
     }
 }
-class ForceAnimationAction extends BuilderAction {
+export class ForceAnimationAction extends BuilderAction {
     static id = "forceAnimation";
     static dependencies = ["animateOption"];
     // todo: to remove after having the commit of louis
@@ -465,7 +467,7 @@ class ForceAnimationAction extends BuilderAction {
         this.dependencies.animateOption.forceAnimation(editingElement);
     }
 }
-class SetAnimationEffectAction extends BuilderAction {
+export class SetAnimationEffectAction extends BuilderAction {
     static id = "setAnimationEffect";
     static dependencies = ["animateOption"];
     isApplied({ editingElement, value: className }) {

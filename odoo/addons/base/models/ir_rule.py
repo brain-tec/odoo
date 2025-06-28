@@ -19,7 +19,7 @@ class IrRule(models.Model):
     _MODES = ['read', 'write', 'create', 'unlink']
     _allow_sudo_commands = False
 
-    name = fields.Char(index=True)
+    name = fields.Char()
     active = fields.Boolean(default=True, help="If you uncheck the active field, it will disable the record rule without deleting it (if you delete a native record rule, it may be re-created when you reload the module).")
     model_id = fields.Many2one('ir.model', string='Model', index=True, required=True, ondelete="cascade")
     groups = fields.Many2many('res.groups', 'rule_group_rel', 'rule_group_id', 'group_id', ondelete='restrict')
@@ -173,7 +173,7 @@ class IrRule(models.Model):
 
     def _compute_domain_context_values(self):
         for k in self._compute_domain_keys():
-            v = self._context.get(k)
+            v = self.env.context.get(k)
             if isinstance(v, list):
                 # currently this could be a frozenset (to avoid depending on
                 # the order of allowed_company_ids) but it seems safer if
@@ -205,7 +205,7 @@ class IrRule(models.Model):
         return res
 
     def _make_access_error(self, operation, records):
-        _logger.info('Access Denied by record rules for operation: %s on record ids: %r, uid: %s, model: %s', operation, records.ids[:6], self._uid, records._name)
+        _logger.info('Access Denied by record rules for operation: %s on record ids: %r, uid: %s, model: %s', operation, records.ids[:6], self.env.uid, records._name)
         self = self.with_context(self.env.user.context_get())
 
         model = records._name

@@ -12,6 +12,7 @@ import { removeClass, removeStyle } from "@html_editor/utils/dom";
 import { isTextNode } from "@html_editor/utils/dom_info";
 import { getCurrentTextHighlight } from "@website/js/highlight_utils";
 import { isCSSColor, rgbaToHex } from "@web/core/utils/colors";
+import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 import { nodeSize } from "@html_editor/utils/position";
 
 export class HighlightPlugin extends Plugin {
@@ -39,6 +40,7 @@ export class HighlightPlugin extends Plugin {
                     },
                     onClick: this.completeHighlightSelection.bind(this),
                 },
+                isAvailable: isHtmlContentSupported,
             },
         ],
         clean_for_save_handlers: ({ root }) => {
@@ -306,8 +308,8 @@ class HighlightToolbarButton extends Component {
         this.props.onClick();
         this.configuratorPopover.open(this.root.el, {
             stackState: this.componentStack,
-            style: "max-height: 275px; width: 262px",
-            class: "d-flex flex-column",
+            style: "max-height: 300px; width: 262px",
+            class: "d-flex flex-column p-2",
         });
     }
 }
