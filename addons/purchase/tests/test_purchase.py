@@ -772,6 +772,9 @@ class TestPurchase(AccountTestInvoicingCommon):
             po_line.product_id = self.product_a
             po_line.product_qty = 1
             po_line.price_unit = 100
+        with po_1.order_line.new() as po_line:
+            po_line.display_type = 'line_note'
+            po_line.name = 'Test Note'
         po_1 = po_1.save()
         po_1.incoterm_id = incoterm_id_1
 
@@ -790,6 +793,9 @@ class TestPurchase(AccountTestInvoicingCommon):
             po_line_2.product_id = self.product_b
             po_line_2.product_qty = 5
             po_line_2.price_unit = 500
+        with po_2.order_line.new() as po_line:
+            po_line.display_type = 'line_section'
+            po_line.name = 'Test section'
         po_2 = po_2.save()
         po_2.incoterm_id = incoterm_id_2
 
@@ -912,3 +918,36 @@ class TestPurchase(AccountTestInvoicingCommon):
         action = product_tmpl.action_view_po()
         action_record = self.env[action['res_model']].search(action['domain'])
         self.assertEqual(action_record, po.order_line)
+
+    def test_purchase_suggest_qty(self):
+        """
+        Checks the suggested qty of POL is correctly set based on valid supplier-info
+        leading to correctly compute the price unit, product_qty and product_desc
+        """
+        self.env['product.supplierinfo'].create([
+            {
+                'partner_id': self.partner_a.id,
+                'product_id': self.product_a.id,
+                'min_qty': 1,
+                'price': 50,
+                'date_start': fields.Date.today() - timedelta(days=5),
+                'date_end': fields.Date.today() - timedelta(days=3),
+                'product_code': 'product_code_1',
+            },
+            {
+                'partner_id': self.partner_a.id,
+                'product_id': self.product_a.id,
+                'min_qty': 10,
+                'price': 100,
+                'date_start': fields.Date.today() - timedelta(days=5),
+                'date_end': fields.Date.today() + timedelta(days=3),
+                'product_code': 'HHH',
+            },
+        ])
+        po_form = Form(self.env['purchase.order'])
+        po_form.partner_id = self.partner_a
+        with po_form.order_line.new() as po_line:
+            po_line.product_id = self.product_a
+        po = po_form.save()
+        self.assertEqual(po.order_line.product_qty, 10.0)
+        self.assertEqual(po.order_line.name, '[HHH] product_a')
