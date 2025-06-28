@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import timedelta
 from collections import defaultdict
 
 from odoo import api, fields, models, _
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.tools import float_compare
 from odoo.exceptions import UserError
 
@@ -42,7 +41,7 @@ class SaleOrderLine(models.Model):
                 # prefer rules on the route itself even if they pull from a different warehouse than the SO's
                 rules = sorted(
                     self.env['stock.rule'].search(
-                        domain=expression.AND([[('route_id', 'in', line.route_ids.ids)], domain]),
+                        domain=Domain.AND([[('route_id', 'in', line.route_ids.ids)], domain]),
                         order='route_sequence, sequence'
                     ),
                     # if there are multiple rules on the route, prefer those that pull from the SO's warehouse
@@ -310,8 +309,8 @@ class SaleOrderLine(models.Model):
                 if move.warehouse_id.id not in seen_wh_ids:
                     triggering_rule_ids.append(move.rule_id.id)
                     seen_wh_ids.add(move.warehouse_id.id)
-        if self._context.get('accrual_entry_date'):
-            moves = moves.filtered(lambda r: fields.Date.context_today(r, r.date) <= self._context['accrual_entry_date'])
+        if self.env.context.get('accrual_entry_date'):
+            moves = moves.filtered(lambda r: fields.Date.context_today(r, r.date) <= self.env.context['accrual_entry_date'])
 
         for move in moves:
             if (strict and move.location_dest_id._is_outgoing()) or \
@@ -346,7 +345,7 @@ class SaleOrderLine(models.Model):
         sale order line. procurement group will launch '_run_pull', '_run_buy' or '_run_manufacture'
         depending on the sale order line product rule.
         """
-        if self._context.get("skip_procurement"):
+        if self.env.context.get("skip_procurement"):
             return True
         precision = self.env['decimal.precision'].precision_get('Product Unit')
         procurements = []

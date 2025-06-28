@@ -145,7 +145,7 @@ class AccountMove(models.Model):
             ))
 
         if self._can_commit():
-            self._cr.commit()
+            self.env.cr.commit()
         return None
 
     def _l10n_ro_edi_fetch_invoice_sent_documents(self):
@@ -225,7 +225,7 @@ class AccountMove(models.Model):
         self.env['l10n_ro_edi.document'].sudo().browse(document_ids_to_delete).unlink()
         self.env['l10n_ro_edi.document'].sudo().create(documents_to_create)
         if self._can_commit():
-            self._cr.commit()
+            self.env.cr.commit()
 
     @api.model
     def _l10n_ro_edi_fetch_invoices(self):
@@ -249,7 +249,8 @@ class AccountMove(models.Model):
         # Non-indexed moves that were not processed after some time have probably been refused by the SPV. Since
         # there is no way to recover the index for refused invoices, we simply refuse them manually without proper reason.
         domain = (
-            Domain('l10n_ro_edi_index', '=', False)
+            Domain('company_id', '=', self.env.company.id)
+            & Domain('l10n_ro_edi_index', '=', False)
             & Domain('l10n_ro_edi_state', '=', 'invoice_not_indexed')
         )
         non_indexed_invoices = self.env['account.move'].search(domain)
@@ -276,7 +277,7 @@ class AccountMove(models.Model):
         self.env['l10n_ro_edi.document'].sudo().browse(document_ids_to_delete).unlink()
 
         if self._can_commit():
-            self._cr.commit()
+            self.env.cr.commit()
 
     @api.model
     def _l10n_ro_edi_process_invoice_accepted_messages(self, sent_invoices_accepted_messages):
@@ -300,7 +301,8 @@ class AccountMove(models.Model):
         invoice_names = {message['answer']['invoice']['name'] for message in sent_invoices_accepted_messages if 'error' not in message}
         invoice_indexes = [message['id_solicitare'] for message in sent_invoices_accepted_messages]
         domain = (
-            Domain('move_type', 'in', self.get_sale_types())
+            Domain('company_id', '=', self.env.company.id)
+            & Domain('move_type', 'in', self.get_sale_types())
             & (
                 (
                     Domain('l10n_ro_edi_index', 'in', invoice_indexes)
@@ -370,7 +372,8 @@ class AccountMove(models.Model):
         '''
         refused_invoice_indexes = [message['id_solicitare'] for message in sent_invoices_refused_messages]
         domain = (
-            Domain('move_type', 'in', self.get_sale_types())
+            Domain('company_id', '=', self.env.company.id)
+            & Domain('move_type', 'in', self.get_sale_types())
             & Domain('l10n_ro_edi_index', 'in', refused_invoice_indexes)
             & Domain('l10n_ro_edi_state', '=', 'invoice_sent')
         )
@@ -417,7 +420,8 @@ class AccountMove(models.Model):
         # - have an index that is present in the message data or,
         # - the same amount and seller VAT, and optionally the same bill date
         domain = (
-            Domain('move_type', 'in', self.get_purchase_types())
+            Domain('company_id', '=', self.env.company.id)
+            & Domain('move_type', 'in', self.get_purchase_types())
             & (
                 (
                     Domain('l10n_ro_edi_index', '=', False)

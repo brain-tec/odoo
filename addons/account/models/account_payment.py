@@ -639,7 +639,7 @@ class AccountPayment(models.Model):
         self.env['account.move.line'].flush_model(fnames=['move_id', 'account_id', 'statement_line_id'])
         self.env['account.partial.reconcile'].flush_model(fnames=['debit_move_id', 'credit_move_id'])
 
-        self._cr.execute('''
+        self.env.cr.execute('''
             SELECT
                 payment.id,
                 ARRAY_AGG(DISTINCT invoice.id) AS invoice_ids,
@@ -665,7 +665,7 @@ class AccountPayment(models.Model):
         ''', {
             'payment_ids': tuple(stored_payments.ids)
         })
-        query_res = self._cr.dictfetchall()
+        query_res = self.env.cr.dictfetchall()
 
         for pay in self:
             pay.reconciled_invoice_ids = pay.invoice_ids.filtered(lambda m: m.is_sale_document(True))
@@ -682,7 +682,7 @@ class AccountPayment(models.Model):
             pay.reconciled_invoices_count = len(pay.reconciled_invoice_ids)
             pay.reconciled_bills_count = len(pay.reconciled_bill_ids)
 
-        self._cr.execute('''
+        query_res = dict(self.env.execute_query(SQL('''
             SELECT
                 payment.id,
                 ARRAY_AGG(DISTINCT counterpart_line.statement_line_id) AS statement_line_ids
@@ -703,10 +703,8 @@ class AccountPayment(models.Model):
                 AND line.id != counterpart_line.id
                 AND counterpart_line.statement_line_id IS NOT NULL
             GROUP BY payment.id
-        ''', {
-            'payment_ids': tuple(stored_payments.ids)
-        })
-        query_res = dict((payment_id, statement_line_ids) for payment_id, statement_line_ids in self._cr.fetchall())
+        ''', payment_ids=tuple(stored_payments.ids)
+        )))
 
         for pay in self:
             statement_line_ids = query_res.get(pay.id, [])
@@ -911,6 +909,15 @@ class AccountPayment(models.Model):
                 **(vals or {}),
             })
         return vals_list
+
+    def _message_mail_after_hook(self, mails):
+        for payment, mail in zip(self, mails):
+            if (
+                not payment.message_main_attachment_id
+                and (attachments_to_link := mail.attachment_ids.filtered(lambda a: a.res_model == 'mail.message'))
+            ):
+                attachments_to_link.write({'res_model': self._name, 'res_id': payment.id})
+        return super()._message_mail_after_hook(mails)
 
     # -------------------------------------------------------------------------
     # SYNCHRONIZATION account.payment -> account.move

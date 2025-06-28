@@ -1,11 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import re
-from operator import itemgetter
 
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import ValidationError
-from odoo.osv import expression
+from odoo.fields import Domain
 from odoo.tools import float_compare, groupby
 from odoo.tools.image import is_image_size_above
 from odoo.tools.misc import unique
@@ -281,8 +280,8 @@ class ProductProduct(models.Model):
     @api.onchange('lst_price')
     def _set_product_lst_price(self):
         for product in self:
-            if self._context.get('uom'):
-                value = self.env['uom.uom'].browse(self._context['uom'])._compute_price(product.lst_price, product.uom_id)
+            if self.env.context.get('uom'):
+                value = self.env['uom.uom'].browse(self.env.context['uom'])._compute_price(product.lst_price, product.uom_id)
             else:
                 value = product.lst_price
             value -= product.price_extra
@@ -297,8 +296,8 @@ class ProductProduct(models.Model):
     @api.depends_context('uom')
     def _compute_product_lst_price(self):
         to_uom = None
-        if 'uom' in self._context:
-            to_uom = self.env['uom.uom'].browse(self._context['uom'])
+        if 'uom' in self.env.context:
+            to_uom = self.env['uom.uom'].browse(self.env.context['uom'])
 
         for product in self:
             if to_uom:
@@ -314,7 +313,7 @@ class ProductProduct(models.Model):
             product.code = product.default_code
             if read_access:
                 for supplier_info in product.seller_ids:
-                    if supplier_info.partner_id.id == product._context.get('partner_id'):
+                    if supplier_info.partner_id.id == product.env.context.get('partner_id'):
                         if supplier_info.product_id and supplier_info.product_id != product:
                             # Supplier info specific for another variant.
                             continue
@@ -327,7 +326,7 @@ class ProductProduct(models.Model):
     def _compute_partner_ref(self):
         for product in self:
             for supplier_info in product.seller_ids:
-                if supplier_info.partner_id.id == product._context.get('partner_id'):
+                if supplier_info.partner_id.id == product.env.context.get('partner_id'):
                     product_name = supplier_info.product_name or product.default_code or product.name
                     product.partner_ref = '%s%s' % (product.code and '[%s] ' % product.code or '', product_name)
                     break
@@ -349,7 +348,7 @@ class ProductProduct(models.Model):
             ).sorted('sequence')
 
     def _search_all_product_tag_ids(self, operator, operand):
-        if operator in expression.NEGATIVE_TERM_OPERATORS:
+        if Domain.is_negative_operator(operator):
             return NotImplemented
         return ['|', ('product_tag_ids', operator, operand), ('additional_product_tag_ids', operator, operand)]
 
@@ -519,9 +518,8 @@ class ProductProduct(models.Model):
     @api.model
     def _search(self, domain, offset=0, limit=None, order=None):
         # TDE FIXME: strange
-        if self._context.get('search_default_categ_id'):
-            domain = list(domain)
-            domain.append((('categ_id', 'child_of', self._context['search_default_categ_id'])))
+        if self.env.context.get('search_default_categ_id'):
+            domain = Domain(domain) & Domain('categ_id', 'child_of', self.env.context['search_default_categ_id'])
         return super()._search(domain, offset, limit, order)
 
     @api.depends('name', 'default_code', 'product_tmpl_id')
@@ -529,13 +527,13 @@ class ProductProduct(models.Model):
     def _compute_display_name(self):
 
         def get_display_name(name, code):
-            if self._context.get('display_default_code', True) and code:
+            if self.env.context.get('display_default_code', True) and code:
                 if self.env.context.get('formatted_display_name'):
                     return f'{name}\t--{code}--'
                 return f'[{code}] {name}'
             return name
 
-        partner_id = self._context.get('partner_id')
+        partner_id = self.env.context.get('partner_id')
         if partner_id:
             partner_ids = [partner_id, self.env['res.partner'].browse(partner_id).commercial_partner_id.id]
         else:
@@ -589,8 +587,8 @@ class ProductProduct(models.Model):
 
     @api.model
     def _search_display_name(self, operator, value):
-        is_positive = operator not in expression.NEGATIVE_TERM_OPERATORS
-        combine = expression.OR if is_positive else expression.AND
+        is_positive = not Domain.is_negative_operator(operator)
+        combine = Domain.OR if is_positive else Domain.AND
         domains = [
             [('name', operator, value)],
             [('default_code', operator, value)],
@@ -618,47 +616,46 @@ class ProductProduct(models.Model):
             return super().name_search(name, domain, operator, limit)
         # search progressively by the most specific attributes
         positive_operators = ['=', 'ilike', '=ilike', 'like', '=like']
-        is_positive = operator not in expression.NEGATIVE_TERM_OPERATORS
+        is_positive = not Domain.is_negative_operator(operator)
         products = self.browse()
-        domain = domain or []
+        domain = Domain(domain or Domain.TRUE)
         if operator in positive_operators:
-            products = self.search_fetch(expression.AND([domain, [('default_code', '=', name)]]), ['display_name'], limit=limit) \
-                or self.search_fetch(expression.AND([domain, [('barcode', '=', name)]]), ['display_name'], limit=limit)
+            products = self.search_fetch(domain & Domain('default_code', '=', name), ['display_name'], limit=limit) \
+                or self.search_fetch(domain & Domain('barcode', '=', name), ['display_name'], limit=limit)
         if not products:
             if is_positive:
                 # Do not merge the 2 next lines into one single search, SQL search performance would be abysmal
                 # on a database with thousands of matching products, due to the huge merge+unique needed for the
                 # OR operator (and given the fact that the 'name' lookup results come from the ir.translation table
                 # Performing a quick memory merge of ids in Python will give much better performance
-                products = self.search_fetch(expression.AND([domain, [('default_code', operator, name)]]), ['display_name'], limit=limit)
+                products = self.search_fetch(domain & Domain('default_code', operator, name), ['display_name'], limit=limit)
                 limit_rest = limit and limit - len(products)
                 if limit_rest is None or limit_rest > 0:
-                    products_query = self._search(expression.AND([domain, [('default_code', operator, name)]]), limit=limit)
-                    products |= self.search_fetch(expression.AND([domain, [('id', 'not in', products_query)], [('name', operator, name)]]), ['display_name'], limit=limit_rest)
+                    products_query = self._search(domain & Domain('default_code', operator, name), limit=limit)
+                    products |= self.search_fetch(domain & Domain('id', 'not in', products_query) & Domain('name', operator, name), ['display_name'], limit=limit_rest)
             else:
-                domain_neg = [
-                    ('name', operator, name),
-                    '|', ('default_code', operator, name), ('default_code', '=', False),
-                ]
-                products = self.search_fetch(expression.AND([domain, domain_neg]), ['display_name'], limit=limit)
+                domain_neg = Domain('name', operator, name) & (
+                    Domain('default_code', operator, name) | Domain('default_code', '=', False)
+                )
+                products = self.search_fetch(domain & domain_neg, ['display_name'], limit=limit)
         if not products and operator in positive_operators and (m := re.search(r'(\[(.*?)\])', name)):
-            match_domain = [('default_code', '=', m.group(2))]
-            products = self.search_fetch(expression.AND([domain, match_domain]), ['display_name'], limit=limit)
+            match_domain = Domain('default_code', '=', m.group(2))
+            products = self.search_fetch(domain & match_domain, ['display_name'], limit=limit)
         if not products and (partner_id := self.env.context.get('partner_id')):
             # still no results, partner in context: search on supplier info as last hope to find something
-            supplier_domain = [
+            supplier_domain = Domain([
                 ('partner_id', '=', partner_id),
                 '|',
                 ('product_code', operator, name),
                 ('product_name', operator, name),
-            ]
-            match_domain = [('product_tmpl_id.seller_ids', 'any', supplier_domain)]
-            products = self.search_fetch(expression.AND([domain, match_domain]), ['display_name'], limit=limit)
+            ])
+            match_domain = Domain('product_tmpl_id.seller_ids', 'any', supplier_domain)
+            products = self.search_fetch(domain & match_domain, ['display_name'], limit=limit)
         return [(product.id, product.display_name) for product in products.sudo()]
 
     @api.model
     def view_header_get(self, view_id, view_type):
-        if self._context.get('categ_id'):
+        if self.env.context.get('categ_id'):
             return _(
                 'Products: %(category)s',
                 category=self.env['product.category'].browse(self.env.context['categ_id']).name,

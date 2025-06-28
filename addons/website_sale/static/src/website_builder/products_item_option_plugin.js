@@ -9,7 +9,6 @@ import { BuilderAction } from "@html_builder/core/builder_action";
 
 class ProductsItemOptionPlugin extends Plugin {
     static id = "productsItemOptionPlugin";
-    static dependencies = ["history"];
     static shared = [
         "setItemSize",
         "setProductTemplateID",
@@ -317,7 +316,7 @@ class ProductsItemOptionPlugin extends Plugin {
 
 }
 
-class SetItemSizeAction extends BuilderAction {
+export class SetItemSizeAction extends BuilderAction {
     static id = "setItemSize";
     static dependencies = ["productsItemOptionPlugin"];
     setup() {
@@ -349,7 +348,7 @@ class SetItemSizeAction extends BuilderAction {
         });
     }
 }
-class ChangeSequenceAction extends BuilderAction {
+export class ChangeSequenceAction extends BuilderAction {
     static id = "changeSequence";
     static dependencies = ["productsItemOptionPlugin"];
     setup() {
@@ -367,14 +366,13 @@ class ChangeSequenceAction extends BuilderAction {
         });
     }
 }
-class SetRibbonAction extends BuilderAction {
+export class SetRibbonAction extends BuilderAction {
     static id = "setRibbon";
-    static dependencies = ["productsItemOptionPlugin", "history"];
+    static dependencies = ["productsItemOptionPlugin"];
     isApplied({ editingElement, value }) {
         return (parseInt(editingElement.dataset.ribbonId) || "") === value;
     }
-    apply({ editingElement, value }) {
-        const isPreviewMode = this.dependencies.history.getIsPreviewing();
+    apply({ isPreviewing, editingElement, value }) {
         this.dependencies.productsItemOptionPlugin.setProductTemplateID(parseInt(
             editingElement
                 .querySelector('[data-oe-model="product.template"]')
@@ -394,10 +392,10 @@ class SetRibbonAction extends BuilderAction {
             position: "left",
         };
 
-        return this.dependencies.productsItemOptionPlugin._setRibbon(editingElement, ribbon, !isPreviewMode);
+        return this.dependencies.productsItemOptionPlugin._setRibbon(editingElement, ribbon, !isPreviewing);
     }
 }
-class CreateRibbonAction extends BuilderAction {
+export class CreateRibbonAction extends BuilderAction {
     static id = "createRibbon";
     dependencies = ["productsItemOptionPlugin"]
     apply({ editingElement }) {
@@ -423,9 +421,9 @@ class CreateRibbonAction extends BuilderAction {
         return this.dependencies.productsItemOptionPlugin._setRibbon(editingElement, ribbon);
     }
 }
-class ModifyRibbonAction extends BuilderAction {
+export class ModifyRibbonAction extends BuilderAction {
     static id = "modifyRibbon";
-    static dependencies = ["productsItemOptionPlugin", "history"];
+    static dependencies = ["productsItemOptionPlugin"];
     setup() {
         this.piop = this.dependencies.productsItemOptionPlugin
     }
@@ -452,8 +450,7 @@ class ModifyRibbonAction extends BuilderAction {
         }
         return this.dependencies.productsItemOptionPlugin.getRibbonsObject()[ribbonId][field] === value;
     }
-    apply({ editingElement, params, value }) {
-        const isPreviewMode = this.dependencies.history.getIsPreviewing();
+    apply({ isPreviewing, editingElement, params, value }) {
         const setting = params.mainParam;
         const ribbonId = parseInt(editingElement.dataset.ribbonId);
         this.dependencies.productsItemOptionPlugin.getRibbonsObject()[ribbonId][setting] = value;
@@ -461,10 +458,10 @@ class ModifyRibbonAction extends BuilderAction {
         const ribbon = this.dependencies.productsItemOptionPlugin.getRibbons().find((ribbon) => ribbon.id == ribbonId);
         ribbon[setting] = value;
 
-        return this.plugin._setRibbon(editingElement, ribbon, !isPreviewMode);
+        return this.plugin._setRibbon(editingElement, ribbon, !isPreviewing);
     }
 }
-class DeleteRibbonAction extends BuilderAction {
+export class DeleteRibbonAction extends BuilderAction {
     static id = "deleteRibbon";
     static dependencies = ["productsItemOptionPlugin"];
     async apply({ editingElement }) {
