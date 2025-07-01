@@ -29,13 +29,31 @@ import { isHTTPSorNakedDomainRedirection } from "./utils";
 import { WebsiteSystrayItem } from "./website_systray_item";
 import { renderToElement } from "@web/core/utils/render";
 import { isBrowserMicrosoftEdge } from "@web/core/browser/feature_detection";
+import { router } from "@web/core/browser/router";
 
 const websiteSystrayRegistry = registry.category("website_systray");
 
 export class WebsiteBuilderClientAction extends Component {
     static template = "website.WebsiteBuilderClientAction";
     static components = { LazyComponent, LocalOverlayContainer, ResizablePanel, ResourceEditor };
-    static props = { ...standardActionServiceProps };
+    static props = {
+        ...standardActionServiceProps,
+        editTranslations: { type: Boolean, optional: true },
+        enableEditor: { type: Boolean, optional: true },
+        path: { type: String, optional: true },
+        websiteId: { type: [Number, { value: false }], optional: true },
+        withLoader: { type: Boolean, optonal: true },
+    };
+
+    static extractProps(action) {
+        return {
+            editTranslations: action.params?.edit_translations || false,
+            enableEditor: action.params?.enable_editor || false,
+            path: action.params?.path,
+            websiteId: action.params?.website_id || false,
+            withLoader: action.params?.with_loader || false,
+        }
+    }
 
     setup() {
         this.target = null;
@@ -57,6 +75,9 @@ export class WebsiteBuilderClientAction extends Component {
         this.component = useComponent();
 
         this.onKeydownRefresh = this._onKeydownRefresh.bind(this);
+        this.env.services["mail.store"].isReady.then(() => {
+            this.env.services["mail.store"].websiteBuilder.on = true;
+        });
 
         onMounted(() => {
             // You can't wait for rendering because the Builder depends on the
@@ -86,13 +107,12 @@ export class WebsiteBuilderClientAction extends Component {
                 )}?path=${encodedPath}`;
                 this.websiteService.currentWebsiteId = websiteId;
             };
-            const backendWebsiteId = this.props.action.context.params?.website_id;
             const proms = [
                 this.websiteService.fetchWebsites(),
                 this.websiteService.fetchUserGroups(),
             ];
-            if (backendWebsiteId) {
-                updateWebsiteId(backendWebsiteId);
+            if (this.websiteId) {
+                updateWebsiteId(this.websiteId);
                 await Promise.all(proms);
             } else {
                 const [backendWebsiteRepr] = await Promise.all([
@@ -106,8 +126,7 @@ export class WebsiteBuilderClientAction extends Component {
             this.addListeners(document);
             this.addSystrayItems();
             this.websiteService.useMysterious = true;
-            const { enable_editor, edit_translations } = this.props.action.context.params || {};
-            const edition = !!(enable_editor || edit_translations);
+            const edition = !!(this.enableEditor || this.editTranslations);
             if (edition) {
                 this.onEditPage();
             }
@@ -125,6 +144,9 @@ export class WebsiteBuilderClientAction extends Component {
             websiteSystrayRegistry.remove("website.WebsiteSystrayItem");
             this.websiteService.currentWebsiteId = null;
             websiteSystrayRegistry.trigger("EDIT-WEBSITE");
+            this.env.services["mail.store"].isReady.then(() => {
+                this.env.services["mail.store"].websiteBuilder.on = false;
+            });
         });
 
         effect(
@@ -145,8 +167,14 @@ export class WebsiteBuilderClientAction extends Component {
                         websiteSystrayRegistry.trigger("EDIT-WEBSITE");
                         document.querySelector(".o_builder_open .o_main_navbar").classList.add("d-none");
                     }, 200);
+                    this.env.services["mail.store"].isReady.then(() => {
+                        this.env.services["mail.store"].websiteBuilder.editing = true;
+                    });
                 } else {
                     document.querySelector(".o_main_navbar")?.classList.remove("d-none");
+                    this.env.services["mail.store"].isReady.then(() => {
+                        this.env.services["mail.store"].websiteBuilder.editing = false;
+                    });
                 }
             },
             () => [this.state.isEditing]
@@ -264,6 +292,10 @@ export class WebsiteBuilderClientAction extends Component {
     }
 
     onIframeLoad(ev) {
+        this.env.services["mail.store"].isReady.then(() => {
+            this.env.services["mail.store"].websiteBuilder.iframeWindow =
+                this.websiteContent.el.contentWindow;
+        });
         this.websiteService.pageDocument = this.websiteContent.el.contentDocument;
         if (this.translation) {
             deleteQueryParam("edit_translations", this.websiteService.contentWindow, true);
@@ -276,9 +308,8 @@ export class WebsiteBuilderClientAction extends Component {
         this.resolveIframeLoaded();
         this.addWelcomeMessage();
 
-        if (this.props.action.context.params?.with_loader) {
+        if (this.withLoader) {
             this.websiteService.hideLoader();
-            this.props.action.context.params.with_loader = false;
         }
     }
 
@@ -358,8 +389,16 @@ export class WebsiteBuilderClientAction extends Component {
         });
     }
 
+    get editTranslations() {
+        return this.props.editTranslations || !!router.current.edit_translations;
+    }
+
+    get enableEditor() {
+        return this.props.enableEditor || !!router.current.enable_editor;
+    }
+
     get path() {
-        let path = this.props.action.context.params?.path;
+        let path = this.props.path || router.current.path;
         if (path) {
             const url = new URL(path, window.location.origin);
             if (isTopWindowURL(url)) {
@@ -379,6 +418,15 @@ export class WebsiteBuilderClientAction extends Component {
             path = "/";
         }
         return path;
+    }
+
+    get websiteId() {
+        return this.props.websiteId || router.current.website_id || false;
+    }
+
+
+    get withLoader() {
+        return this.props.withLoader || !!router.current.with_loader;
     }
 
     async reloadEditor(param = {}) {

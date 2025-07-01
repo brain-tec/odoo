@@ -13,13 +13,13 @@ import * as combo from "@point_of_sale/../tests/pos/tours/utils/combo_popup_util
 import { inLeftSide } from "@point_of_sale/../tests/pos/tours/utils/common";
 import { registry } from "@web/core/registry";
 import * as Numpad from "@point_of_sale/../tests/generic_helpers/numpad_util";
-import { delay } from "@odoo/hoot-dom";
 import * as TextInputPopup from "@point_of_sale/../tests/generic_helpers/text_input_popup_util";
 import {
     generatePreparationChanges,
     generatePreparationReceiptElement,
 } from "@point_of_sale/../tests/pos/tours/utils/preparation_receipt_util";
 import { renderToElement } from "@web/core/utils/render";
+import { negate } from "@point_of_sale/../tests/generic_helpers/utils";
 
 const ProductScreen = { ...ProductScreenPos, ...ProductScreenResto };
 
@@ -187,17 +187,34 @@ registry.category("web_tour.tours").add("pos_restaurant_sync_second_login", {
             // There is one draft synced order from the previous tour
             Chrome.startPoS(),
             FloorScreen.clickTable("2"),
+            Chrome.waitRequest(),
+            ProductScreen.isShown(),
+            {
+                trigger: ".pos-leftheader .badge:contains(2)",
+            },
             ProductScreen.totalAmountIs("4.40"),
 
             // Test transfering an order
             ProductScreen.clickControlButton("Transfer"),
+            FloorScreen.orderCountSyncedInTableIs(2, 2),
+            FloorScreen.clickTable("4"),
+            Chrome.waitRequest(),
+            ProductScreen.isShown(),
             {
-                trigger: ".table:contains(4)",
-                async run(helpers) {
-                    await delay(500);
-                    await helpers.click();
-                },
+                trigger: ".pos-leftheader .badge:contains(4)",
             },
+            Order.hasLine({
+                productName: "Coca-Cola",
+                quantity: 1,
+                withClass: ":eq(0)",
+                price: 2.2,
+            }),
+            Order.hasLine({
+                productName: "Minute Maid",
+                quantity: 1,
+                withClass: ":eq(1)",
+                price: 2.2,
+            }),
 
             // Test if products still get merged after transfering the order
             ProductScreen.clickDisplayedProduct("Coca-Cola"),
@@ -211,26 +228,26 @@ registry.category("web_tour.tours").add("pos_restaurant_sync_second_login", {
             ReceiptScreen.clickNextOrder(),
             // At this point, there are no draft orders.
 
-            {
-                trigger: ".table:contains(2)",
-                async run(helpers) {
-                    await delay(500);
-                    await helpers.click();
-                },
-            },
+            FloorScreen.clickTable("2"),
             ProductScreen.isShown(),
+            {
+                trigger: ".pos-leftheader .badge:contains(2)",
+            },
             ProductScreen.orderIsEmpty(),
             ProductScreen.clickControlButton("Transfer"),
+            FloorScreen.orderCountSyncedInTableIs(2, 0),
+            FloorScreen.orderCountSyncedInTableIs(4, 0),
+            FloorScreen.clickTable("4"),
+            Chrome.waitRequest(),
+            ProductScreen.isShown(),
             {
-                trigger: ".table:contains(4)",
-                async run(helpers) {
-                    await delay(500);
-                    await helpers.click();
-                },
+                trigger: ".pos-leftheader .badge:contains(4)",
             },
+            ProductScreen.orderIsEmpty(),
             ProductScreen.clickDisplayedProduct("Coca-Cola"),
             ProductScreen.totalAmountIs("2.20"),
             Chrome.clickPlanButton(),
+            FloorScreen.isShown(),
             FloorScreen.orderCountSyncedInTableIs("4", "1"),
         ].flat(),
 });
@@ -256,6 +273,42 @@ registry.category("web_tour.tours").add("SaveLastPreparationChangesTour", {
             FloorScreen.hasTable("2"),
             FloorScreen.hasTable("4"),
             FloorScreen.hasTable("5"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_pos_restaurant_course", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            FloorScreen.clickTable("5"),
+            ProductScreen.clickCourseButton(),
+            ProductScreen.clickDisplayedProduct("Coca-Cola"),
+            ProductScreen.clickCourseButton(),
+            ProductScreen.clickDisplayedProduct("Minute Maid"),
+            ProductScreen.clickCourseButton(),
+            ProductScreen.clickOrderButton(),
+            FloorScreen.clickTable("5"),
+            // Check only 2 courses are there and empty course gets removed on clicking Order button
+            {
+                trigger: negate('.order-course-name:eq(2) > span:contains("Course 3")'),
+            },
+            ProductScreen.clickCourseButton(),
+            Chrome.clickPlanButton(),
+            FloorScreen.isShown(),
+            FloorScreen.clickTable("5"),
+            // Check only 2 courses are there and empty course gets removed on clicking Plan button
+            {
+                trigger: negate('.order-course-name:eq(2) > span:contains("Course 3")'),
+            },
+            // Check empty course gets remove after fire course.
+            ProductScreen.clickCourseButton(),
+            ProductScreen.selectCourseLine("Course 2"),
+            ProductScreen.fireCourseButton(),
+            FloorScreen.clickTable("5"),
+            {
+                trigger: negate('.order-course-name:eq(2) > span:contains("Course 3")'),
+            },
         ].flat(),
 });
 
