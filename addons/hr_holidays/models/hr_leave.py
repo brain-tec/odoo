@@ -264,7 +264,7 @@ class HrLeave(models.Model):
                 ('employee_id', '=', holiday.employee_id.id),
                 ('date_from', '<', holiday.date_to),
                 ('date_to', '>', holiday.date_from),
-                ('id', '!=', holiday.id),
+                ('id', 'not in', holiday.ids),
             ])
             if not conflicting_holidays:
                 holiday.dashboard_warning_message = False
@@ -602,9 +602,10 @@ class HrLeave(models.Model):
         for leave in self:
             virtual_remaining_leaves = 0
             max_leaves = 0
-            for allocation_dict in employee_days_per_allocation[leave.employee_id][leave.holiday_status_id].values():
-                max_leaves += allocation_dict['max_leaves']
-                virtual_remaining_leaves += allocation_dict['virtual_remaining_leaves']
+            for allocation, allocation_dict in employee_days_per_allocation[leave.employee_id][leave.holiday_status_id].items():
+                if allocation and (not allocation.date_to or allocation.date_to >= date_from):
+                    max_leaves += allocation_dict['max_leaves']
+                    virtual_remaining_leaves += allocation_dict['virtual_remaining_leaves']
             leave.virtual_remaining_leaves = virtual_remaining_leaves
             leave.max_leaves = max_leaves
 
@@ -1210,7 +1211,7 @@ class HrLeave(models.Model):
             state_result['validate'].update({'confirm', 'refuse'})
             state_result['refuse'].update({'confirm', 'validate'})
             state_result['cancel'].update({'confirm', 'validate', 'refuse'})
-        elif is_time_off_manager and not is_in_past:
+        elif is_time_off_manager:
             if validation_type != 'hr':
                 state_result['confirm'].add('refuse')
                 state_result['validate'].add('refuse')
@@ -1234,7 +1235,6 @@ class HrLeave(models.Model):
             is_time_off_manager = holiday.employee_id.leave_manager_id == self.env.user
             dict_all_possible_state = holiday._get_next_states_by_state()
             validation_type = holiday.validation_type
-            is_in_past = holiday.date_from.date() < fields.Date.today()
             error_message = ""
             # Standard Check
             if holiday.state == state:
@@ -1243,11 +1243,6 @@ class HrLeave(models.Model):
                 error_message = self.env._('Not possible state. State Approve is only used for leave needed 2 approvals')
             elif holiday.state == 'cancel':
                 error_message = self.env._('A cancelled leave cannot be modified.')
-
-            # Leave in past
-            elif is_in_past and not is_officer:
-                error_message = self.env._('Only a Time Off Officer can change the state of a leave in the past.')
-
             elif state not in dict_all_possible_state.get(holiday.state, {}):
                 if state == 'cancel':
                     error_message = self.env._('You can only cancel your own leave. You can cancel a leave only if this leave \
