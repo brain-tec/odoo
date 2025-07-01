@@ -17,6 +17,7 @@ import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { ResizablePanel } from "@web/core/resizable_panel/resizable_panel";
+import { RPCError } from "@web/core/network/rpc";
 import { Deferred } from "@web/core/utils/concurrency";
 import { uniqueId } from "@web/core/utils/functions";
 import { useChildRef, useService } from "@web/core/utils/hooks";
@@ -28,7 +29,7 @@ import { ResourceEditor } from "@website/components/resource_editor/resource_edi
 import { isHTTPSorNakedDomainRedirection } from "./utils";
 import { WebsiteSystrayItem } from "./website_systray_item";
 import { renderToElement } from "@web/core/utils/render";
-import { isBrowserMicrosoftEdge } from "@web/core/browser/feature_detection";
+import { isBrowserChrome, isBrowserMicrosoftEdge } from "@web/core/browser/feature_detection";
 import { router } from "@web/core/browser/router";
 
 const websiteSystrayRegistry = registry.category("website_systray");
@@ -75,9 +76,6 @@ export class WebsiteBuilderClientAction extends Component {
         this.component = useComponent();
 
         this.onKeydownRefresh = this._onKeydownRefresh.bind(this);
-        this.env.services["mail.store"].isReady.then(() => {
-            this.env.services["mail.store"].websiteBuilder.on = true;
-        });
 
         onMounted(() => {
             // You can't wait for rendering because the Builder depends on the
@@ -144,9 +142,6 @@ export class WebsiteBuilderClientAction extends Component {
             websiteSystrayRegistry.remove("website.WebsiteSystrayItem");
             this.websiteService.currentWebsiteId = null;
             websiteSystrayRegistry.trigger("EDIT-WEBSITE");
-            this.env.services["mail.store"].isReady.then(() => {
-                this.env.services["mail.store"].websiteBuilder.on = false;
-            });
         });
 
         effect(
@@ -167,14 +162,8 @@ export class WebsiteBuilderClientAction extends Component {
                         websiteSystrayRegistry.trigger("EDIT-WEBSITE");
                         document.querySelector(".o_builder_open .o_main_navbar").classList.add("d-none");
                     }, 200);
-                    this.env.services["mail.store"].isReady.then(() => {
-                        this.env.services["mail.store"].websiteBuilder.editing = true;
-                    });
                 } else {
                     document.querySelector(".o_main_navbar")?.classList.remove("d-none");
-                    this.env.services["mail.store"].isReady.then(() => {
-                        this.env.services["mail.store"].websiteBuilder.editing = false;
-                    });
                 }
             },
             () => [this.state.isEditing]
@@ -187,6 +176,7 @@ export class WebsiteBuilderClientAction extends Component {
             reloadEditor: this.reloadEditor.bind(this),
             snippetsName: "website.snippets",
             toggleMobile: this.toggleMobile.bind(this),
+            installSnippetModule: this.installSnippetModule.bind(this),
             overlayRef: this.overlayRef,
             iframeLoaded: this.iframeLoaded,
             isMobile: this.websiteContext.isMobile,
@@ -292,10 +282,44 @@ export class WebsiteBuilderClientAction extends Component {
     }
 
     onIframeLoad(ev) {
-        this.env.services["mail.store"].isReady.then(() => {
-            this.env.services["mail.store"].websiteBuilder.iframeWindow =
-                this.websiteContent.el.contentWindow;
-        });
+        // FIX Chrome-only. If you have the backend in a language A but the
+        // website in English only, you can 1) modify a record's (event,
+        // product...) name in language A (say "New Name").
+        // 2) visit the page `/new-name-11` => the server will redirect you to
+        // the English page `/origin-11`, which is the only one existing.
+        // Chrome caches the redirection.
+        // 3) give the same name in English as in language A, try to visit
+        // => the server now wants to access `/new-name-11`
+        // => Chrome uses the cache to redirect `/new-name-11` to `/origin-11`,
+        // => the server tries to redirect to `/new-name-11` => loop.
+        // Chrome injects a "Too many redirects" layout in the iframe, which in
+        // turn raises a CORS error when the app tries to update the iframe.
+        // If we detect that behavior, we reload the iframe with a new query
+        // parameter, so that it's not cached for Chrome.
+        const iframe = this.websiteContent.el;
+        if (isBrowserChrome() && !iframe.src.includes("iframe_reload")) {
+            try {
+                /* eslint-disable no-unused-expressions */
+                iframe.contentWindow.location.href;
+            } catch (err) {
+                if (err.name === "SecurityError") {
+                    ev.stopImmediatePropagation();
+                    // Note that iframe's `src` is the URL used to start the
+                    // website preview, it's not sync'd with iframe navigation.
+                    const srcUrl = new URL(iframe.src);
+                    const pathUrl = new URL(srcUrl.searchParams.get("path"), srcUrl.origin);
+                    pathUrl.searchParams.set("iframe_reload", "1");
+                    srcUrl.searchParams.set("path", `${pathUrl.pathname}${pathUrl.search}`);
+                    // We could inject `pathUrl` directly but keep the same
+                    // expected URL format `/website/force/1?path=..`
+                    iframe.src = srcUrl.toString();
+                    return;
+                } else {
+                    throw err;
+                }
+            }
+        }
+
         this.websiteService.pageDocument = this.websiteContent.el.contentDocument;
         if (this.translation) {
             deleteQueryParam("edit_translations", this.websiteService.contentWindow, true);
@@ -321,52 +345,19 @@ export class WebsiteBuilderClientAction extends Component {
                 // Forward clicks to close backend client action's navbar
                 // dropdowns.
                 this.websiteContent.el.dispatchEvent(new MouseEvent("click", ev));
-                /* TODO ?
             } else {
                 // When in edit mode, prevent the default behaviours of clicks
                 // as to avoid DOM changes not handled by the editor.
                 // (Such as clicking on a link that triggers navigating to
                 // another page.)
-                if (!ev.target.closest("#oe_manipulators")) {
-                    ev.preventDefault();
-                }
-                */
+                ev.preventDefault();
             }
             const linkEl = ev.target.closest("[href]");
             if (!linkEl) {
                 return;
             }
 
-            const { href, target /*, classList*/ } = linkEl;
-            /* TODO ? If to be done, most likely in a plugin
-            if (classList.contains('o_add_language')) {
-                ev.preventDefault();
-                const searchParams = new URLSearchParams(href);
-                this.action.doAction('base.action_view_base_language_install', {
-                    target: 'new',
-                    additionalContext: {
-                        params: {
-                            website_id: this.websiteId,
-                            url_return: searchParams.get("url_return"),
-                        },
-                    },
-                });
-            } else if (classList.contains('js_change_lang') && isEditing) {
-                ev.preventDefault();
-                const lang = linkEl.dataset['url_code'];
-                // The "edit_translations" search param coming from keep_query
-                // is removed, and the hash is added.
-                const destinationUrl = new URL(href, window.location);
-                destinationUrl.searchParams.delete('edit_translations');
-                destinationUrl.hash = this.websiteService.contentWindow.location.hash;
-                this.websiteService.bus.trigger('LEAVE-EDIT-MODE', {
-                    onLeave: () => {
-                        this.websiteService.goToWebsite({ path: destinationUrl.toString(), lang });
-                    },
-                    reloadIframe: false,
-                });
-            } else
-            */
+            const { href, target } = linkEl;
             if (href && target !== "_blank" && !this.state.isEditing) {
                 if (isTopWindowURL(linkEl)) {
                     ev.preventDefault();
@@ -471,6 +462,40 @@ export class WebsiteBuilderClientAction extends Component {
             await this.loadAssetsEditBundle();
         }
         this.ui.unblock();
+    }
+
+    reloadWebClient() {
+        const currentPath = encodeURIComponent(window.location.pathname);
+        const websiteId = this.websiteService.currentWebsite.id;
+        redirect(
+            `/odoo/action-website.website_preview?website_id=${encodeURIComponent(
+                websiteId
+            )}&path=${currentPath}&enable_editor=1`
+        );
+    }
+
+    async installSnippetModule(snippet, beforeInstall) {
+        this.dialog.closeAll();
+        try {
+            this.ui.block();
+            await beforeInstall();
+            await this.orm.call("ir.module.module", "button_immediate_install", [
+                [parseInt(snippet.moduleId)],
+            ]);
+            this.reloadWebClient();
+        } catch (e) {
+            if (e instanceof RPCError) {
+                const message = _t("Could not install module %s", snippet.moduleDisplayName);
+                this.notification.add(message, {
+                    type: "danger",
+                    sticky: true,
+                });
+                return;
+            }
+            throw e;
+        } finally {
+            this.ui.unblock();
+        }
     }
 
     preparePublicRootReady() {
