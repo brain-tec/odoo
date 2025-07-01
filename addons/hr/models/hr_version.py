@@ -106,7 +106,7 @@ class HrVersion(models.Model):
     job_id = fields.Many2one('hr.job', check_company=True, tracking=True)
     job_title = fields.Char(compute="_compute_job_title", inverse="_inverse_job_title", store=True, readonly=False,
         string="Job Title", tracking=True)
-    is_custom_job_title = fields.Boolean(default=False, groups="hr.group_hr_user")
+    is_custom_job_title = fields.Boolean(compute='_compute_is_custom_job_title', store=True, default=False, groups="hr.group_hr_user")
     address_id = fields.Many2one(
         'res.partner',
         string='Work Address',
@@ -199,6 +199,12 @@ class HrVersion(models.Model):
         for version in self:
             version.is_custom_job_title = version.job_title != version.job_id.name
 
+    @api.depends('job_id')
+    def _compute_is_custom_job_title(self):
+        for version in self.filtered('job_id'):
+            if version._origin.job_id != version.job_id:
+                version.is_custom_job_title = False
+
     @api.constrains('employee_id', 'contract_date_start', 'contract_date_end')
     def _check_dates(self):
         version_read_group = self.env['hr.version']._read_group(
@@ -232,11 +238,13 @@ class HrVersion(models.Model):
                     continue
                 if date_start <= contract_date_end and version.contract_date_start <= date_to:
                     raise ValidationError(_(
-                        'You have some overlapping contracts for %(employee)s:\n%(overlaps)s',
+                        'Overlapping contracts for %(employee)s:\n%(overlaps)s',
                         employee=version.employee_id.display_name,
                         overlaps='\n'.join(
-                            [f'Version ({version.display_name}): {version.contract_date_start} - {version.contract_date_end}'] +
-                            [f'Version ({version.display_name}): {date_start} - {date_end}' for version in versions])))
+                            [f'Version {format_date(v.env, v.date_version, date_format="MMM d, y")}: '
+                             f'from {format_date(v.env, v.contract_date_start, date_format="MMM d, y")} '
+                             f'to {format_date(v.env, v.contract_date_end, date_format="MMM d, y") if v.contract_date_end else "Indefinite"}'
+                             for v in (versions | version)])))
             if not contract_period_exists:
                 dates_per_employee[version.employee_id].append((version.contract_date_start, version.contract_date_end, version))
 
