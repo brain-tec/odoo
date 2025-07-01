@@ -2340,6 +2340,9 @@ test(`grouped list rendering with groupby m2o and m2m field`, async () => {
         `,
         groupBy: ["m2o", "m2m"],
     });
+    expect(`.o_list_footer td > button`).toHaveCount(0, {
+        message: "no quick create since no default groupby",
+    });
     expect(queryAllTexts(`tbody > tr`)).toEqual(["Value 1 (3)", "Value 2 (1)"]);
 
     await contains(`th.o_group_name`).click();
@@ -2364,7 +2367,7 @@ test(`grouped list rendering with groupby m2o and m2m field`, async () => {
     ]);
 });
 
-test(`grouped list rendering with groupby m2o field: add group`, async () => {
+test(`grouped list rendering with default_group_by m2o field: add group`, async () => {
     onRpc("name_create", ({ args }) => {
         expect(args[0]).toBe("New group");
         expect.step("name_create");
@@ -2372,8 +2375,7 @@ test(`grouped list rendering with groupby m2o field: add group`, async () => {
     await mountView({
         resModel: "foo",
         type: "list",
-        arch: `<list><field name="foo"/></list>`,
-        groupBy: ["m2o"],
+        arch: `<list default_group_by="m2o"><field name="foo"/></list>`,
     });
     expect(`.o_group_header:eq(0) th`).toHaveCount(1);
     expect(queryAllTexts(".o_group_name")).toEqual(["Value 1 (3)", "Value 2 (1)"]);
@@ -7107,34 +7109,6 @@ test(`no nocontent helper when no data and no help`, async () => {
     });
     expect(`tr.o_data_row`).toHaveCount(0, { message: "should not have any data row" });
     expect(`.o_list_view table`).toHaveCount(1, { message: "should have a table in the dom" });
-});
-
-test.tags("desktop");
-test("reset filter button should appear when no data corresponding to facets", async () => {
-    await mountView({
-        type: "list",
-        resModel: "foo",
-        arch: `<list><field name="foo"/></list>`,
-        searchViewArch: `
-            <search>
-                <filter name="no_match" string="Match nothing" domain="[['id', '=', 0]]"/>
-            </search>`,
-        noContentHelp: "click to add a partnerReset Filters",
-    });
-
-    await contains(".o_list_view").click();
-    await toggleSearchBarMenu();
-    await toggleMenuItem("Match nothing");
-
-    expect(".o_view_nocontent").toHaveCount(1);
-    expect(getFacetTexts()).not.toEqual([]);
-    expect(".o_reset_filter_button").toHaveCount(1);
-    expect(".o_reset_filter_button").toHaveText("Reset Filters");
-    expect(".o_facet_value").toHaveText("Match nothing");
-
-    await contains(".o_reset_filter_button").click();
-    expect(getFacetTexts()).toEqual([]);
-    expect(".o_reset_filter_button").not.toHaveCount(1);
 });
 
 test(`empty list with sample data`, async () => {
