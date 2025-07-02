@@ -7,7 +7,6 @@ from collections import defaultdict
 from odoo import _, api, fields, models
 from odoo.fields import Domain
 from odoo.http import request
-from odoo.osv import expression
 from odoo.tools import float_is_zero, is_html_empty
 from odoo.tools.translate import html_translate
 
@@ -211,9 +210,9 @@ class ProductTemplate(models.Model):
         return variant_dict
 
     def _get_website_accessory_product(self):
-        domain = self.env['website'].sale_product_domain()
+        domain = Domain(self.env['website'].sale_product_domain())
         if not self.env.user._is_internal():
-            domain = expression.AND([domain, [('is_published', '=', True)]])
+            domain &= Domain('is_published', '=', True)
         return self.accessory_product_ids.filtered_domain(domain)
 
     def _get_website_alternative_product(self):
@@ -594,11 +593,12 @@ class ProductTemplate(models.Model):
         })
 
         if self.env['res.groups']._is_feature_enabled('website_sale.group_show_uom_price'):
+            price_per_product_uom = uom._compute_price(
+                price=combination_info['price'], to_unit=self.uom_id
+            )
             combination_info.update({
                 'base_unit_name': product_or_template.base_unit_name,
-                'base_unit_price': product_or_template._get_base_unit_price(
-                    combination_info['price']
-                ),
+                'base_unit_price': product_or_template._get_base_unit_price(price_per_product_uom),
             })
 
         if combination_info['prevent_zero_price_sale']:

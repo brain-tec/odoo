@@ -84,8 +84,6 @@ class TestSnippets(HttpCase):
     def test_06_snippet_popup_add_remove(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_popup_add_remove', login='admin')
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_07_image_gallery(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_image_gallery', login='admin')
 
@@ -94,7 +92,7 @@ class TestSnippets(HttpCase):
 
     def test_09_snippet_image_gallery(self):
         create_image_attachment(self.env, '/web/image/website.s_banner_default_image.jpg', 's_default_image.jpg')
-        create_image_attachment(self.env, '/web/image/website.s_banner_default_image.jpg', 's_default_image2.jpg')
+        create_image_attachment(self.env, '/web/image/website.s_banner_default_image.jpg', 's_default_image2.webp')
         self.start_tour("/", "snippet_image_gallery_remove", login='admin')
 
     def test_10_parallax(self):

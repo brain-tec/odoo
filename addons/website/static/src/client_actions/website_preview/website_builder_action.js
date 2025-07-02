@@ -17,6 +17,7 @@ import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { ResizablePanel } from "@web/core/resizable_panel/resizable_panel";
+import { RPCError } from "@web/core/network/rpc";
 import { Deferred } from "@web/core/utils/concurrency";
 import { uniqueId } from "@web/core/utils/functions";
 import { useChildRef, useService } from "@web/core/utils/hooks";
@@ -187,6 +188,7 @@ export class WebsiteBuilderClientAction extends Component {
             reloadEditor: this.reloadEditor.bind(this),
             snippetsName: "website.snippets",
             toggleMobile: this.toggleMobile.bind(this),
+            installSnippetModule: this.installSnippetModule.bind(this),
             overlayRef: this.overlayRef,
             iframeLoaded: this.iframeLoaded,
             isMobile: this.websiteContext.isMobile,
@@ -321,52 +323,19 @@ export class WebsiteBuilderClientAction extends Component {
                 // Forward clicks to close backend client action's navbar
                 // dropdowns.
                 this.websiteContent.el.dispatchEvent(new MouseEvent("click", ev));
-                /* TODO ?
             } else {
                 // When in edit mode, prevent the default behaviours of clicks
                 // as to avoid DOM changes not handled by the editor.
                 // (Such as clicking on a link that triggers navigating to
                 // another page.)
-                if (!ev.target.closest("#oe_manipulators")) {
-                    ev.preventDefault();
-                }
-                */
+                ev.preventDefault();
             }
             const linkEl = ev.target.closest("[href]");
             if (!linkEl) {
                 return;
             }
 
-            const { href, target /*, classList*/ } = linkEl;
-            /* TODO ? If to be done, most likely in a plugin
-            if (classList.contains('o_add_language')) {
-                ev.preventDefault();
-                const searchParams = new URLSearchParams(href);
-                this.action.doAction('base.action_view_base_language_install', {
-                    target: 'new',
-                    additionalContext: {
-                        params: {
-                            website_id: this.websiteId,
-                            url_return: searchParams.get("url_return"),
-                        },
-                    },
-                });
-            } else if (classList.contains('js_change_lang') && isEditing) {
-                ev.preventDefault();
-                const lang = linkEl.dataset['url_code'];
-                // The "edit_translations" search param coming from keep_query
-                // is removed, and the hash is added.
-                const destinationUrl = new URL(href, window.location);
-                destinationUrl.searchParams.delete('edit_translations');
-                destinationUrl.hash = this.websiteService.contentWindow.location.hash;
-                this.websiteService.bus.trigger('LEAVE-EDIT-MODE', {
-                    onLeave: () => {
-                        this.websiteService.goToWebsite({ path: destinationUrl.toString(), lang });
-                    },
-                    reloadIframe: false,
-                });
-            } else
-            */
+            const { href, target } = linkEl;
             if (href && target !== "_blank" && !this.state.isEditing) {
                 if (isTopWindowURL(linkEl)) {
                     ev.preventDefault();
@@ -471,6 +440,40 @@ export class WebsiteBuilderClientAction extends Component {
             await this.loadAssetsEditBundle();
         }
         this.ui.unblock();
+    }
+
+    reloadWebClient() {
+        const currentPath = encodeURIComponent(window.location.pathname);
+        const websiteId = this.websiteService.currentWebsite.id;
+        redirect(
+            `/odoo/action-website.website_preview?website_id=${encodeURIComponent(
+                websiteId
+            )}&path=${currentPath}&enable_editor=1`
+        );
+    }
+
+    async installSnippetModule(snippet, beforeInstall) {
+        this.dialog.closeAll();
+        try {
+            this.ui.block();
+            await beforeInstall();
+            await this.orm.call("ir.module.module", "button_immediate_install", [
+                [parseInt(snippet.moduleId)],
+            ]);
+            this.reloadWebClient();
+        } catch (e) {
+            if (e instanceof RPCError) {
+                const message = _t("Could not install module %s", snippet.moduleDisplayName);
+                this.notification.add(message, {
+                    type: "danger",
+                    sticky: true,
+                });
+                return;
+            }
+            throw e;
+        } finally {
+            this.ui.unblock();
+        }
     }
 
     preparePublicRootReady() {
