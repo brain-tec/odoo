@@ -508,7 +508,6 @@ class IrModelFields(models.Model):
     _allow_sudo_commands = False
 
     name = fields.Char(string='Field Name', default='x_', required=True, index=True)
-    complete_name = fields.Char(index=True)
     model = fields.Char(string='Model Name', required=True, index=True,
                         help="The technical name of the model this field belongs to")
     relation = fields.Char(string='Related Model',
@@ -1793,7 +1792,7 @@ class IrModelConstraint(models.Model):
     model = fields.Many2one('ir.model', required=True, ondelete="cascade", index=True, readonly=True)
     module = fields.Many2one('ir.module.module', required=True, index=True, ondelete='cascade', readonly=True)
     type = fields.Char(
-        string='Constraint Type', required=True, size=1, index=True, readonly=True,
+        string='Constraint Type', required=True, size=1, readonly=True,
         help="Type of the constraint: `f` for a foreign key, `u` for other constraints.")
 
     _module_name_uniq = models.Constraint('UNIQUE (name, module)',
