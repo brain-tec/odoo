@@ -9,6 +9,7 @@ import { patch } from "@web/core/utils/patch";
 patch(Thread.prototype, {
     setup() {
         super.setup();
+        this.hasFetchedLivechatSessionData = false;
         this.livechat_status = undefined;
         this.livechat_note = fields.Html();
         this.livechatNoteText = fields.Attr(undefined, {
@@ -19,6 +20,7 @@ patch(Thread.prototype, {
                 return this.livechatNoteText;
             },
         });
+        this.livechat_expertise_ids = fields.Many("im_livechat.expertise");
     },
     get livechatStatusLabel() {
         const status = this.livechat_status;
