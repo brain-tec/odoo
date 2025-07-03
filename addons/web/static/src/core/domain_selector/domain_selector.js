@@ -1,21 +1,19 @@
 import { Component, onWillStart, onWillUpdateProps } from "@odoo/owl";
-import { Domain } from "@web/core/domain";
-import { TreeEditor } from "@web/core/tree_editor/tree_editor";
-import {
-    domainFromTree,
-    treeFromDomain,
-    formatValue,
-    condition,
-    constructTree,
-} from "@web/core/tree_editor/condition_tree";
 import { CheckBox } from "@web/core/checkbox/checkbox";
-import { deepEqual } from "@web/core/utils/objects";
+import { Domain } from "@web/core/domain";
 import { getDomainDisplayedOperators } from "@web/core/domain_selector/domain_selector_operator_editor";
-import { getOperatorEditorInfo } from "@web/core/tree_editor/tree_editor_operator_editor";
 import { _t } from "@web/core/l10n/translation";
 import { ModelFieldSelector } from "@web/core/model_field_selector/model_field_selector";
+import {
+    areEqualTrees,
+    condition,
+    connector,
+    formatValue,
+} from "@web/core/tree_editor/condition_tree";
+import { domainFromTree } from "@web/core/tree_editor/domain_from_tree";
+import { TreeEditor } from "@web/core/tree_editor/tree_editor";
+import { getOperatorEditorInfo } from "@web/core/tree_editor/tree_editor_operator_editor";
 import { useService } from "@web/core/utils/hooks";
-import { useMakeGetFieldDef } from "@web/core/tree_editor/utils";
 import { getDefaultCondition } from "./utils";
 
 const ARCHIVED_CONDITION = condition("active", "in", [true, false]);
@@ -44,7 +42,7 @@ export class DomainSelector extends Component {
 
     setup() {
         this.fieldService = useService("field");
-        this.makeGetFieldDef = useMakeGetFieldDef(this.fieldService);
+        this.treeProcessor = useService("tree_processor");
 
         this.tree = null;
         this.showArchivedCheckbox = false;
@@ -69,21 +67,19 @@ export class DomainSelector extends Component {
             return;
         }
 
-        const getFieldDef = await this.makeGetFieldDef(p.resModel, constructTree(domain), [
-            "active",
+        const [tree, { fieldDef: activeFieldDef }] = await Promise.all([
+            this.treeProcessor.treeFromDomain(p.resModel, domain, !p.isDebugMode),
+            this.fieldService.loadFieldInfo(p.resModel, "active"),
         ]);
 
-        this.tree = treeFromDomain(domain, {
-            getFieldDef,
-            distributeNot: !p.isDebugMode,
-        });
+        this.tree = tree;
+        this.showArchivedCheckbox = this.getShowArchivedCheckBox(Boolean(activeFieldDef), p);
 
-        this.showArchivedCheckbox = this.getShowArchivedCheckBox(Boolean(getFieldDef("active")), p);
         this.includeArchived = false;
         if (this.showArchivedCheckbox) {
             if (this.tree.value === "&") {
                 this.tree.children = this.tree.children.filter((child) => {
-                    if (deepEqual(child, ARCHIVED_CONDITION)) {
+                    if (areEqualTrees(child, ARCHIVED_CONDITION)) {
                         this.includeArchived = true;
                         return false;
                     }
@@ -92,9 +88,9 @@ export class DomainSelector extends Component {
                 if (this.tree.children.length === 1) {
                     this.tree = this.tree.children[0];
                 }
-            } else if (deepEqual(this.tree, ARCHIVED_CONDITION)) {
+            } else if (areEqualTrees(this.tree, ARCHIVED_CONDITION)) {
                 this.includeArchived = true;
-                this.tree = treeFromDomain(`[]`);
+                this.tree = connector("&");
             }
         }
     }

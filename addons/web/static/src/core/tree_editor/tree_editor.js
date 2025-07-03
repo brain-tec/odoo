@@ -1,27 +1,16 @@
 import { Component, onWillStart, onWillUpdateProps } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { useLoadFieldInfo } from "@web/core/model_field_selector/utils";
-import {
-    areEquivalentTrees,
-    cloneTree,
-    condition,
-    connector,
-    isTree,
-} from "@web/core/tree_editor/condition_tree";
+import { cloneTree, connector, isTree, TRUE_TREE } from "@web/core/tree_editor/condition_tree";
 import {
     getDefaultValue,
     getValueEditorInfo,
 } from "@web/core/tree_editor/tree_editor_value_editors";
-import {
-    getResModel,
-    useMakeGetConditionDescription,
-    useMakeGetFieldDef,
-} from "@web/core/tree_editor/utils";
+import { getResModel } from "@web/core/tree_editor/utils";
+import { areEquivalentTrees } from "@web/core/tree_editor/virtual_operators";
 import { useService } from "@web/core/utils/hooks";
 import { shallowEqual } from "@web/core/utils/objects";
 
-const TRUE_TREE = condition(1, "=", 1);
 export class TreeEditor extends Component {
     static template = "web.TreeEditor";
     static components = {
@@ -54,13 +43,7 @@ export class TreeEditor extends Component {
     setup() {
         this.isTree = isTree;
         this.fieldService = useService("field");
-        this.nameService = useService("name");
-        this.loadFieldInfo = useLoadFieldInfo(this.fieldService);
-        this.makeGetFieldDef = useMakeGetFieldDef(this.fieldService);
-        this.makeGetConditionDescription = useMakeGetConditionDescription(
-            this.fieldService,
-            this.nameService
-        );
+        this.treeProcessor = useService("tree_processor");
         onWillStart(() => this.onPropsUpdated(this.props));
         onWillUpdateProps((nextProps) => this.onPropsUpdated(nextProps));
     }
@@ -87,16 +70,15 @@ export class TreeEditor extends Component {
     async prepareInfo(props) {
         const [fieldDefs, getFieldDef] = await Promise.all([
             this.fieldService.loadFields(props.resModel),
-            this.makeGetFieldDef(props.resModel, this.tree),
+            this.treeProcessor.makeGetFieldDef(props.resModel, this.tree),
         ]);
         this.getFieldDef = getFieldDef;
         this.defaultCondition = props.getDefaultCondition(fieldDefs);
 
         if (props.readonly) {
-            this.getConditionDescription = await this.makeGetConditionDescription(
+            this.getConditionDescription = await this.treeProcessor.makeGetConditionDescription(
                 props.resModel,
-                this.tree,
-                this.getFieldDef
+                this.tree
             );
         }
     }
@@ -203,7 +185,7 @@ export class TreeEditor extends Component {
     }
 
     async _updatePath(node, path) {
-        const { fieldDef } = await this.loadFieldInfo(this.props.resModel, path);
+        const { fieldDef } = await this.fieldService.loadFieldInfo(this.props.resModel, path);
         node.path = path;
         node.negate = false;
         node.operator = this.props.getDefaultOperator(fieldDef);

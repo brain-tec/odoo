@@ -79,15 +79,20 @@ class HrLeave(models.Model):
     def default_get(self, fields_list):
         defaults = super().default_get(fields_list)
         defaults = self._default_get_request_dates(defaults)
-
-        lt = self.env['hr.leave.type']
         if self.env.context.get('holiday_status_display_name', True) and 'holiday_status_id' in fields_list and not defaults.get('holiday_status_id'):
             domain = ['|', ('requires_allocation', '=', False), ('has_valid_allocation', '=', True)]
-            if defaults.get('request_unit_hours'):
-                domain.append(('request_unit', '=', 'hour'))
-            lt = self.env['hr.leave.type'].search(domain, limit=1, order='sequence')
-            if lt:
-                defaults['holiday_status_id'] = lt.id
+            defaults['holiday_status_id'] = False
+            leave_types = self.env['hr.leave.type'].search(domain, order='sequence')
+            selected_leave_type = next(
+                (
+                    leave_type for leave_type in leave_types
+                    if (defaults.get('request_unit_hours') and leave_type['request_unit'] == 'hour') or (not defaults.get('request_unit_hours'))
+                ),
+                leave_types[0] if leave_types else None,
+            )
+            if selected_leave_type:
+                defaults['holiday_status_id'] = selected_leave_type.id
+                defaults['request_unit_hours'] = (selected_leave_type.request_unit == 'hour')
 
         if 'request_date_from' in fields_list and 'request_date_from' not in defaults:
             defaults['request_date_from'] = fields.Date.today()
@@ -659,9 +664,10 @@ Contracts:
         for leave in self:
             virtual_remaining_leaves = 0
             max_leaves = 0
-            for allocation_dict in employee_days_per_allocation[leave.employee_id][leave.holiday_status_id].values():
-                max_leaves += allocation_dict['max_leaves']
-                virtual_remaining_leaves += allocation_dict['virtual_remaining_leaves']
+            for allocation, allocation_dict in employee_days_per_allocation[leave.employee_id][leave.holiday_status_id].items():
+                if allocation and (not allocation.date_to or allocation.date_to >= date_from):
+                    max_leaves += allocation_dict['max_leaves']
+                    virtual_remaining_leaves += allocation_dict['virtual_remaining_leaves']
             leave.virtual_remaining_leaves = virtual_remaining_leaves
             leave.max_leaves = max_leaves
 
