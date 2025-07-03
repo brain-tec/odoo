@@ -31,6 +31,7 @@ import { WebsiteSystrayItem } from "./website_systray_item";
 import { renderToElement } from "@web/core/utils/render";
 import { isBrowserMicrosoftEdge } from "@web/core/browser/feature_detection";
 import { router } from "@web/core/browser/router";
+import { getScrollingElement } from "@web/core/utils/scrolling";
 
 const websiteSystrayRegistry = registry.category("website_systray");
 
@@ -66,6 +67,8 @@ export class WebsiteBuilderClientAction extends Component {
         this.title = useService("title");
         this.hotkeyService = useService("hotkey");
         this.websiteService.websiteRootInstance = undefined;
+        this.iframeFallbackUrl = '/website/iframefallback';
+        this.iframefallback = useRef('iframefallback');
 
         this.websiteContent = useRef("iframe");
         useSubEnv({
@@ -76,9 +79,6 @@ export class WebsiteBuilderClientAction extends Component {
         this.component = useComponent();
 
         this.onKeydownRefresh = this._onKeydownRefresh.bind(this);
-        this.env.services["mail.store"].isReady.then(() => {
-            this.env.services["mail.store"].websiteBuilder.on = true;
-        });
 
         onMounted(() => {
             // You can't wait for rendering because the Builder depends on the
@@ -145,9 +145,6 @@ export class WebsiteBuilderClientAction extends Component {
             websiteSystrayRegistry.remove("website.WebsiteSystrayItem");
             this.websiteService.currentWebsiteId = null;
             websiteSystrayRegistry.trigger("EDIT-WEBSITE");
-            this.env.services["mail.store"].isReady.then(() => {
-                this.env.services["mail.store"].websiteBuilder.on = false;
-            });
         });
 
         effect(
@@ -168,20 +165,18 @@ export class WebsiteBuilderClientAction extends Component {
                         websiteSystrayRegistry.trigger("EDIT-WEBSITE");
                         document.querySelector(".o_builder_open .o_main_navbar").classList.add("d-none");
                     }, 200);
-                    this.env.services["mail.store"].isReady.then(() => {
-                        this.env.services["mail.store"].websiteBuilder.editing = true;
-                    });
                 } else {
                     document.querySelector(".o_main_navbar")?.classList.remove("d-none");
-                    this.env.services["mail.store"].isReady.then(() => {
-                        this.env.services["mail.store"].websiteBuilder.editing = false;
-                    });
                 }
             },
             () => [this.state.isEditing]
         );
     }
 
+    get testMode() {
+        return false;
+    }
+    
     get websiteBuilderProps() {
         const builderProps = {
             closeEditor: this.reloadIframeAndCloseEditor.bind(this),
@@ -294,10 +289,6 @@ export class WebsiteBuilderClientAction extends Component {
     }
 
     onIframeLoad(ev) {
-        this.env.services["mail.store"].isReady.then(() => {
-            this.env.services["mail.store"].websiteBuilder.iframeWindow =
-                this.websiteContent.el.contentWindow;
-        });
         this.websiteService.pageDocument = this.websiteContent.el.contentDocument;
         if (this.translation) {
             deleteQueryParam("edit_translations", this.websiteService.contentWindow, true);
@@ -505,10 +496,36 @@ export class WebsiteBuilderClientAction extends Component {
         this.iframeLoaded = new Promise((resolve) => {
             this.resolveIframeLoaded = () => {
                 this.hotkeyService.registerIframe(this.websiteContent.el);
+                this.websiteContent.el.contentWindow.addEventListener('beforeunload', this.onPageUnload.bind(this));
+
                 this.addListeners(this.websiteContent.el.contentDocument);
                 resolve(this.websiteContent.el);
             };
         });
+    }
+
+    onPageUnload() {
+        // If the iframe is currently displaying an XML file, the body does not
+        // exist, so we do not replace the iframefallback content.
+        const websiteDoc = this.websiteContent.el?.contentDocument;
+        const fallBackDoc = this.iframefallback.el?.contentDocument;
+        if (!this.state.isEditing  && websiteDoc && fallBackDoc) {
+            fallBackDoc.body.replaceWith(websiteDoc.body.cloneNode(true));
+            const currentScrollEl = getScrollingElement(websiteDoc);
+            const scrollElement = getScrollingElement(fallBackDoc);
+            scrollElement.scrollTop = currentScrollEl.scrollTop;
+            this.cleanIframeFallback();
+        }
+    }
+
+    cleanIframeFallback() {
+        // Remove autoplay in all iframes urls so videos are not
+        const iframesEl = this.iframefallback.el.contentDocument.querySelectorAll("iframe");
+        for (const iframeEl of iframesEl) {
+            const url = new URL(iframeEl.src);
+            url.searchParams.delete('autoplay');
+            iframeEl.src = url.toString();
+        }
     }
 
     toggleMobile() {
