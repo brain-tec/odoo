@@ -420,11 +420,6 @@ export class PosStore extends WithLazyGetterTrap {
         }
         this.config.iface_printers = !!this.unwatched.printers.length;
 
-        // Monitor product pricelist
-        this.models["product.product"].addEventListener(
-            "create",
-            this.computeProductPricelistCache.bind(this)
-        );
         this.models["product.pricelist.item"].addEventListener("create", () => {
             const order = this.getOrder();
             if (!order) {
@@ -609,6 +604,27 @@ export class PosStore extends WithLazyGetterTrap {
     async _onBeforeDeleteOrder(order) {
         return true;
     }
+
+    /**
+     * This method is used to load new products from the server.
+     * It also load pricelists, attributes and packagings
+     * @param {Array} domain
+     * @param {number} offset
+     * @param {number} limit
+     * @returns {Promise<Object>}
+     */
+    async loadNewProducts(domain, offset = 0, limit = 0) {
+        const result = await this.data.callRelated("product.template", "load_product_from_pos", [
+            odoo.pos_config_id,
+            domain,
+            offset,
+            limit,
+        ]);
+        this.productAttributesExclusion = this.computeProductAttributesExclusion();
+        return result;
+    }
+
+    // FIXME Dead code to be deleted in master
     computeProductPricelistCache(data) {
         if (!data) {
             return;
@@ -618,6 +634,7 @@ export class PosStore extends WithLazyGetterTrap {
         this._loadMissingPricelistItems(products);
     }
 
+    // FIXME Dead code to be deleted in master
     async _loadMissingPricelistItems(products) {
         const validProducts = products.filter((product) => typeof product.id === "number");
         if (!validProducts.length) {
@@ -1176,7 +1193,7 @@ export class PosStore extends WithLazyGetterTrap {
     get showCashMoveButton() {
         return Boolean(this.config.cash_control && this.session._has_cash_move_perm);
     }
-    createNewOrder(data = {}) {
+    createNewOrder(data = {}, onGetNextOrderRefs = () => {}) {
         const fiscalPosition = this.models["account.fiscal.position"].find(
             (fp) => fp.id === this.config.default_fiscal_position_id?.id
         );
@@ -1196,7 +1213,7 @@ export class PosStore extends WithLazyGetterTrap {
             ...data,
         });
 
-        this.getNextOrderRefs(order);
+        this.getNextOrderRefs(order).then(() => onGetNextOrderRefs(order));
         order.setPricelist(this.config.pricelist_id);
 
         if (this.config.use_presets) {
@@ -1242,7 +1259,7 @@ export class PosStore extends WithLazyGetterTrap {
                 throw error;
             }
         } finally {
-            this.data.synchronizeLocalDataInIndexedDB();
+            this.data.debouncedSynchronizeLocalDataInIndexedDB();
         }
     }
     /**
@@ -1800,6 +1817,45 @@ export class PosStore extends WithLazyGetterTrap {
         return { orderData, changes };
     }
 
+    async generateReceiptsDataToPrint(orderData, changes, orderChange) {
+        const receiptsData = [];
+        if (changes.new.length) {
+            const orderDataNew = { ...orderData };
+            orderDataNew.changes = {
+                title: _t("NEW"),
+                data: changes.new,
+            };
+            receiptsData.push(await this.prepareReceiptGroupedData(orderDataNew));
+        }
+
+        if (changes.cancelled.length) {
+            const orderDataCancelled = { ...orderData };
+            orderDataCancelled.changes = {
+                title: _t("CANCELLED"),
+                data: changes.cancelled,
+            };
+            receiptsData.push(await this.prepareReceiptGroupedData(orderDataCancelled));
+        }
+
+        if (changes.noteUpdate.length) {
+            const orderDataNoteUpdate = { ...orderData };
+            const { noteUpdateTitle, printNoteUpdateData = true } = orderChange;
+            orderDataNoteUpdate.changes = {
+                title: noteUpdateTitle || _t("NOTE UPDATE"),
+                data: printNoteUpdateData ? changes.noteUpdate : [],
+            };
+            receiptsData.push(await this.prepareReceiptGroupedData(orderDataNoteUpdate));
+            orderData.changes.noteUpdate = [];
+        }
+
+        if (orderChange.internal_note || orderChange.general_customer_note) {
+            const orderDataNote = { ...orderData };
+            orderDataNote.changes = { title: "", data: [] };
+            receiptsData.push(await this.prepareReceiptGroupedData(orderDataNote));
+        }
+        return receiptsData;
+    }
+
     async printChanges(order, orderChange, reprint = false) {
         const unsuccedPrints = [];
 
@@ -1810,45 +1866,13 @@ export class PosStore extends WithLazyGetterTrap {
                 printer.config.product_categories_ids,
                 reprint
             );
-
-            if (changes.new.length) {
-                orderData.changes = {
-                    title: _t("NEW"),
-                    data: changes.new,
-                };
-                const result = await this.printOrderChanges(orderData, printer);
-                if (!result.successful) {
-                    unsuccedPrints.push(printer.config.name);
-                }
-            }
-
-            if (changes.cancelled.length) {
-                orderData.changes = {
-                    title: _t("CANCELLED"),
-                    data: changes.cancelled,
-                };
-                const result = await this.printOrderChanges(orderData, printer);
-                if (!result.successful) {
-                    unsuccedPrints.push(printer.config.name);
-                }
-            }
-
-            if (changes.noteUpdate.length) {
-                const { noteUpdateTitle, printNoteUpdateData = true } = orderChange;
-                orderData.changes = {
-                    title: noteUpdateTitle || _t("NOTE UPDATE"),
-                    data: printNoteUpdateData ? changes.noteUpdate : [],
-                };
-                const result = await this.printOrderChanges(orderData, printer);
-                if (!result.successful) {
-                    unsuccedPrints.push(printer.config.name);
-                }
-                orderData.changes.noteUpdate = [];
-            }
-
-            if (orderChange.internal_note || orderChange.general_customer_note) {
-                orderData.changes = { title: "", data: [] };
-                const result = await this.printOrderChanges(orderData, printer);
+            const receiptsData = await this.generateReceiptsDataToPrint(
+                orderData,
+                changes,
+                orderChange
+            );
+            for (const data of receiptsData) {
+                const result = await this.printOrderChanges(data, printer);
                 if (!result.successful) {
                     unsuccedPrints.push(printer.config.name);
                 }
@@ -1865,7 +1889,7 @@ export class PosStore extends WithLazyGetterTrap {
         }
     }
 
-    async printOrderChanges(data, printer) {
+    async prepareReceiptGroupedData(data) {
         const dataChanges = data.changes?.data;
         if (dataChanges && dataChanges.some((c) => c.group)) {
             const groupedData = dataChanges.reduce((acc, c) => {
@@ -1878,6 +1902,10 @@ export class PosStore extends WithLazyGetterTrap {
             }, {});
             data.changes.groupedData = Object.values(groupedData).sort((a, b) => a.index - b.index);
         }
+        return data;
+    }
+
+    async printOrderChanges(data, printer) {
         const receipt = renderToElement("point_of_sale.OrderChangeReceipt", {
             data: data,
         });

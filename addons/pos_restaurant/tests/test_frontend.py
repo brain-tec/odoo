@@ -263,6 +263,8 @@ class TestFrontend(TestFrontendCommon):
     def test_06_split_bill_screen(self):
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('SplitBillScreenTour2')
+        orders = self.env['pos.order'].search([('pos_reference', '!=', '')], limit=2, order='id desc')
+        self.assertEqual(len(orders), 2)
 
     def test_07_split_bill_screen(self):
         # disable kitchen printer to avoid printing errors
@@ -396,6 +398,21 @@ class TestFrontend(TestFrontendCommon):
             })
             self.main_pos_config.with_user(self.pos_user).open_ui()
             self.start_tour(f"/pos/ui/{self.main_pos_config.id}", 'PreparationPrinterContent', login="pos_user")
+
+    def test_course_restaurant_preparation_tour(self):
+        self.env['pos.printer'].create({
+            'name': 'Printer',
+            'printer_type': 'epson_epos',
+            'epson_printer_ip': '0.0.0.0',
+            'product_categories_ids': [Command.set(self.env['pos.category'].search([]).ids)],
+        })
+
+        self.main_pos_config.write({
+            'is_order_printer': True,
+            'printer_ids': [Command.set(self.env['pos.printer'].search([]).ids)],
+        })
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('test_course_restaurant_preparation_tour', login="pos_user")
 
     def test_create_floor_tour(self):
         self.pos_config.with_user(self.pos_user).open_ui()

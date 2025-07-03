@@ -15,6 +15,9 @@ export class DiscussChannel extends mailModels.DiscussChannel {
             ("need_help", "Looking for help"),
         ],
     });
+    livechat_expertise_ids = fields.Many2many({
+        relation: "im_livechat.expertise",
+    });
 
     action_unfollow(idOrIds) {
         /** @type {import("mock_models").BusBus} */
@@ -38,7 +41,12 @@ export class DiscussChannel extends mailModels.DiscussChannel {
     }
 
     _channel_basic_info_fields() {
-        return super._channel_basic_info_fields().concat(["livechat_note", "livechat_status"]);
+        return [
+            ...super._channel_basic_info_fields(),
+            "livechat_note",
+            "livechat_status",
+            "livechat_expertise_ids",
+        ];
     }
 
     /**
@@ -79,6 +87,10 @@ export class DiscussChannel extends mailModels.DiscussChannel {
                 channelInfo["livechat_end_dt"] = channel.livechat_end_dt;
                 channelInfo["livechat_note"] = ["markup", channel.livechat_note];
                 channelInfo["livechat_status"] = channel.livechat_status;
+                channelInfo["livechat_expertise_ids"] = mailDataHelpers.Store.many(
+                    this.env["im_livechat.expertise"].browse(channel.livechat_expertise_ids),
+                    makeKwArgs({ fields: ["name"] })
+                );
                 channelInfo.livechat_channel_id = mailDataHelpers.Store.one(
                     this.env["im_livechat.channel"].browse(channel.livechat_channel_id),
                     makeKwArgs({ fields: ["name"] })
@@ -117,6 +129,18 @@ export class DiscussChannel extends mailModels.DiscussChannel {
     }
     _get_visitor_leave_message() {
         return "Visitor left the conversation.";
+    }
+
+    _email_livechat_transcript(channel_id, email) {
+        const [channel] = this.browse(channel_id);
+        this.message_post(
+            channel.id,
+            makeKwArgs({
+                body: `<div class="o_mail_notification o_hide_author">${this.env.user.name} sent the conversation to ${email}</div>`,
+                message_type: "notification",
+                subtype_xmlid: "mail.mt_comment",
+            })
+        );
     }
 
     /**
