@@ -4,6 +4,7 @@ import {
     onMounted,
     onWillDestroy,
     onWillStart,
+    onWillUnmount,
     status,
     useComponent,
     useEffect,
@@ -29,7 +30,7 @@ import { ResourceEditor } from "@website/components/resource_editor/resource_edi
 import { isHTTPSorNakedDomainRedirection } from "./utils";
 import { WebsiteSystrayItem } from "./website_systray_item";
 import { renderToElement } from "@web/core/utils/render";
-import { isBrowserMicrosoftEdge } from "@web/core/browser/feature_detection";
+import { isBrowserChrome, isBrowserMicrosoftEdge } from "@web/core/browser/feature_detection";
 import { router } from "@web/core/browser/router";
 import { getScrollingElement } from "@web/core/utils/scrolling";
 
@@ -71,14 +72,14 @@ export class WebsiteBuilderClientAction extends Component {
         this.iframefallback = useRef('iframefallback');
 
         this.websiteContent = useRef("iframe");
+        this.cleanups = [];
+
         useSubEnv({
             builderRef: useRef("container"),
         });
         this.state = useState({ isEditing: false, showSidebar: true, key: 1 });
         this.websiteContext = useState(this.websiteService.context);
         this.component = useComponent();
-
-        this.onKeydownRefresh = this._onKeydownRefresh.bind(this);
 
         onMounted(() => {
             // You can't wait for rendering because the Builder depends on the
@@ -136,6 +137,11 @@ export class WebsiteBuilderClientAction extends Component {
                 loadBundle("html_builder.assets").then(() => {
                     this.env.services["html_builder.snippets"].load();
                 });
+            }
+        });
+        onWillUnmount(() => {
+            for (let fn of this.cleanups) {
+                fn();
             }
         });
         this.publicRootReady = new Deferred();
@@ -289,6 +295,44 @@ export class WebsiteBuilderClientAction extends Component {
     }
 
     onIframeLoad(ev) {
+        // FIX Chrome-only. If you have the backend in a language A but the
+        // website in English only, you can 1) modify a record's (event,
+        // product...) name in language A (say "New Name").
+        // 2) visit the page `/new-name-11` => the server will redirect you to
+        // the English page `/origin-11`, which is the only one existing.
+        // Chrome caches the redirection.
+        // 3) give the same name in English as in language A, try to visit
+        // => the server now wants to access `/new-name-11`
+        // => Chrome uses the cache to redirect `/new-name-11` to `/origin-11`,
+        // => the server tries to redirect to `/new-name-11` => loop.
+        // Chrome injects a "Too many redirects" layout in the iframe, which in
+        // turn raises a CORS error when the app tries to update the iframe.
+        // If we detect that behavior, we reload the iframe with a new query
+        // parameter, so that it's not cached for Chrome.
+        const iframe = this.websiteContent.el;
+        if (isBrowserChrome() && !iframe.src.includes("iframe_reload")) {
+            try {
+                /* eslint-disable no-unused-expressions */
+                iframe.contentWindow.location.href;
+            } catch (err) {
+                if (err.name === "SecurityError") {
+                    ev.stopImmediatePropagation();
+                    // Note that iframe's `src` is the URL used to start the
+                    // website preview, it's not sync'd with iframe navigation.
+                    const srcUrl = new URL(iframe.src);
+                    const pathUrl = new URL(srcUrl.searchParams.get("path"), srcUrl.origin);
+                    pathUrl.searchParams.set("iframe_reload", "1");
+                    srcUrl.searchParams.set("path", `${pathUrl.pathname}${pathUrl.search}`);
+                    // We could inject `pathUrl` directly but keep the same
+                    // expected URL format `/website/force/1?path=..`
+                    iframe.src = srcUrl.toString();
+                    return;
+                } else {
+                    throw err;
+                }
+            }
+        }
+
         this.websiteService.pageDocument = this.websiteContent.el.contentDocument;
         if (this.translation) {
             deleteQueryParam("edit_translations", this.websiteService.contentWindow, true);
@@ -520,7 +564,7 @@ export class WebsiteBuilderClientAction extends Component {
 
     cleanIframeFallback() {
         // Remove autoplay in all iframes urls so videos are not
-        const iframesEl = this.iframefallback.el.contentDocument.querySelectorAll("iframe");
+        const iframesEl = this.iframefallback.el.contentDocument.querySelectorAll('iframe[src]:not([src=""])');
         for (const iframeEl of iframesEl) {
             const url = new URL(iframeEl.src);
             url.searchParams.delete('autoplay');
@@ -560,7 +604,7 @@ export class WebsiteBuilderClientAction extends Component {
      *
      * @param {KeyboardEvent} ev
      */
-    _onKeydownRefresh(ev) {
+    onKeydownRefresh(ev) {
         const hotkey = getActiveHotkey(ev);
         if (hotkey !== "control+r" && hotkey !== "f5") {
             return;
@@ -585,8 +629,11 @@ export class WebsiteBuilderClientAction extends Component {
      * @param {HTMLElement} target - document or iframe document
      */
     addListeners(target) {
-        target.removeEventListener("keydown", this.onKeydownRefresh);
-        target.addEventListener("keydown", this.onKeydownRefresh);
+        const listener = ev => this.onKeydownRefresh(ev);
+        target.addEventListener("keydown", listener);
+        this.cleanups.push(() => {
+            target.removeEventListener("keydown", listener);
+        });
     }
 
     get isMicrosoftEdge() {
