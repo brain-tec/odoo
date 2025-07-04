@@ -1133,7 +1133,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"/>
             </div>
             <div
-                if="is_view_active('website_sale.search') and (opt_wsale_attributes or opt_wsale_attributes_top)"
+                t-if="is_view_active('website_sale.search') and (opt_wsale_attributes or opt_wsale_attributes_top)"
                 class="offcanvas-body flex-grow-0 overflow-visible"
             >
                 <t t-call="website_sale.search">
@@ -2566,7 +2566,7 @@
                                     />
                                 </a>
                                 <div
-                                    class="text-truncate small text-muted"
+                                    class="text-truncate o_description_line overflow-hidden mb-2 small text-muted"
                                     t-field="product.description_sale"
                                 />
                             </div>
