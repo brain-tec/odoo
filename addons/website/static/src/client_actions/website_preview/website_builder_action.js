@@ -4,6 +4,7 @@ import {
     onMounted,
     onWillDestroy,
     onWillStart,
+    onWillUnmount,
     status,
     useComponent,
     useEffect,
@@ -71,14 +72,14 @@ export class WebsiteBuilderClientAction extends Component {
         this.iframefallback = useRef('iframefallback');
 
         this.websiteContent = useRef("iframe");
+        this.cleanups = [];
+
         useSubEnv({
             builderRef: useRef("container"),
         });
         this.state = useState({ isEditing: false, showSidebar: true, key: 1 });
         this.websiteContext = useState(this.websiteService.context);
         this.component = useComponent();
-
-        this.onKeydownRefresh = this._onKeydownRefresh.bind(this);
 
         onMounted(() => {
             // You can't wait for rendering because the Builder depends on the
@@ -133,9 +134,14 @@ export class WebsiteBuilderClientAction extends Component {
             }
             if (!this.ui.isSmall) {
                 // preload builder and snippets so clicking on "edit" is faster
-                loadBundle("html_builder.assets").then(() => {
+                loadBundle("website.website_builder_assets").then(() => {
                     this.env.services["html_builder.snippets"].load();
                 });
+            }
+        });
+        onWillUnmount(() => {
+            for (let fn of this.cleanups) {
+                fn();
             }
         });
         this.publicRootReady = new Deferred();
@@ -558,7 +564,7 @@ export class WebsiteBuilderClientAction extends Component {
 
     cleanIframeFallback() {
         // Remove autoplay in all iframes urls so videos are not
-        const iframesEl = this.iframefallback.el.contentDocument.querySelectorAll("iframe");
+        const iframesEl = this.iframefallback.el.contentDocument.querySelectorAll('iframe[src]:not([src=""])');
         for (const iframeEl of iframesEl) {
             const url = new URL(iframeEl.src);
             url.searchParams.delete('autoplay');
@@ -598,7 +604,7 @@ export class WebsiteBuilderClientAction extends Component {
      *
      * @param {KeyboardEvent} ev
      */
-    _onKeydownRefresh(ev) {
+    onKeydownRefresh(ev) {
         const hotkey = getActiveHotkey(ev);
         if (hotkey !== "control+r" && hotkey !== "f5") {
             return;
@@ -623,8 +629,11 @@ export class WebsiteBuilderClientAction extends Component {
      * @param {HTMLElement} target - document or iframe document
      */
     addListeners(target) {
-        target.removeEventListener("keydown", this.onKeydownRefresh);
-        target.addEventListener("keydown", this.onKeydownRefresh);
+        const listener = ev => this.onKeydownRefresh(ev);
+        target.addEventListener("keydown", listener);
+        this.cleanups.push(() => {
+            target.removeEventListener("keydown", listener);
+        });
     }
 
     get isMicrosoftEdge() {

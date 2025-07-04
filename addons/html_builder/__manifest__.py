@@ -36,6 +36,7 @@
             'web/static/lib/bootstrap/scss/_maps.scss',
             'web/static/fonts/fonts.scss',
             'html_builder/static/src/**/*',
+            ('remove', 'html_builder/static/src/**/*.inside.scss'),
             ('remove', 'html_builder/static/src/**/*.dark.scss'),
         ],
         'web.assets_web_dark': [
@@ -63,7 +64,7 @@
         ],
         'web.assets_unit_tests': [
             'html_builder/static/tests/**/*',
-            ('include', 'html_builder.assets'),
+            ('include', 'website.website_builder_assets'),
         ],
     },
     'license': 'LGPL-3',
