@@ -158,13 +158,10 @@ class DiscussChannel(models.Model):
         "(channel_type, create_date) WHERE channel_type = 'livechat'"
     )
 
-    @api.depends('message_ids')
+    @api.depends("livechat_end_dt")
     def _compute_duration(self):
-        last_msg_by_channel_id = {
-            message.res_id: message for message in self._get_last_messages()
-        }
         for record in self:
-            end = last.date if (last := last_msg_by_channel_id.get(record.id)) else fields.Datetime.now()
+            end = record.livechat_end_dt or fields.Datetime.now()
             record.duration = (end - record.create_date).total_seconds() / 3600
 
     @api.depends("livechat_end_dt")
@@ -315,6 +312,7 @@ class DiscussChannel(models.Model):
         field_names["internal_users"].extend([
             Store.Attr("livechat_note", predicate=lambda c: c.channel_type == "livechat"),
             Store.Attr("livechat_status", predicate=lambda c: c.channel_type == "livechat"),
+            Store.Many("livechat_expertise_ids", ["name"], predicate=lambda c: c.channel_type == "livechat"),
         ])
         return field_names
 
@@ -340,6 +338,7 @@ class DiscussChannel(models.Model):
             fields.extend([
                 Store.Attr("livechat_note", predicate=lambda c: c.channel_type == "livechat"),
                 Store.Attr("livechat_status", predicate=lambda c: c.channel_type == "livechat"),
+                Store.Many("livechat_expertise_ids", ["name"], predicate=lambda c: c.channel_type == "livechat"),
             ])
         return super()._to_store_defaults(for_current_user=for_current_user) + fields
 
@@ -467,6 +466,8 @@ class DiscussChannel(models.Model):
             last_msg_from_chatbot = message.author_id == chatbot_op
         return Markup("").join(parts)
 
+    def _get_livechat_session_fields_to_store(self):
+        return []
 
     # =======================
     # Chatbot
