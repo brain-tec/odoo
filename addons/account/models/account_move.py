@@ -14,11 +14,11 @@ import re
 import os
 from textwrap import shorten
 
-from odoo import api, fields, models, _, Command, modules
+from odoo import api, fields, models, _, modules
 from odoo.tools.sql import column_exists, create_column
 from odoo.addons.account.tools import format_structured_reference_iso
 from odoo.exceptions import UserError, ValidationError, AccessError, RedirectWarning
-from odoo.osv import expression
+from odoo.fields import Command, Domain
 from odoo.tools.misc import clean_context
 from odoo.tools import (
     date_utils,
@@ -931,6 +931,7 @@ class AccountMove(models.Model):
             for move in moves:
                 move.made_sequence_gap = move.sequence_number > 1 and (move.sequence_number - 1) not in previous_numbers
 
+    @api.depends_context('lang')
     @api.depends('move_type')
     def _compute_type_name(self):
         type_name_mapping = dict(
@@ -2534,12 +2535,13 @@ class AccountMove(models.Model):
         return res
 
     def _get_product_catalog_domain(self):
+        domain = super()._get_product_catalog_domain()
         if self.is_sale_document():
-            return expression.AND([super()._get_product_catalog_domain(), [('sale_ok', '=', True)]])
+            return domain & Domain('sale_ok', '=', True)
         elif self.is_purchase_document():
-            return expression.AND([super()._get_product_catalog_domain(), [('purchase_ok', '=', True)]])
+            return domain & Domain('purchase_ok', '=', True)
         else:  # In case of an entry
-            return super()._get_product_catalog_domain()
+            return domain
 
     def _default_order_line_values(self, child_field=False):
         default_data = super()._default_order_line_values(child_field)
@@ -4107,16 +4109,10 @@ class AccountMove(models.Model):
         :param common_domain: a search domain that will be included in the returned domain in any case
         :param force_hash: if True, we'll check all moves posted, independently of journal settings
         """
-        common_domain = expression.AND([
-            common_domain or [],
-            [('state', '=', 'posted')],
-        ])
+        domain = Domain(common_domain or Domain.TRUE) & Domain('state', '=', 'posted')
         if force_hash:
-            return common_domain
-        return expression.AND([
-            common_domain,
-            [('restrict_mode_hash_table', '=', True)],
-        ])
+            return domain
+        return domain & Domain('restrict_mode_hash_table', '=', True)
 
     @api.model
     def _is_move_restricted(self, move, force_hash=False):
@@ -4167,7 +4163,7 @@ class AccountMove(models.Model):
         ], force_hash=True)
         if last_move_hashed and not include_pre_last_hash:
             # Hash moves only after the last hashed move, not the ones that may have been posted before the journal was set on restrict mode
-            domain.extend([('sequence_number', '>', last_move_hashed.sequence_number)])
+            domain &= Domain('sequence_number', '>', last_move_hashed.sequence_number)
 
         # On the accounting dashboard, we are only interested on whether there are documents to hash or not
         # so we can stop the computation early if we find at least one document to hash
@@ -4953,10 +4949,9 @@ class AccountMove(models.Model):
     def _can_be_unlinked(self):
         self.ensure_one()
         lock_date = self.company_id._get_user_fiscal_lock_date(self.journal_id)
-        is_part_of_restricted_audit_trail = self.posted_before and self.company_id.restrictive_audit_trail
         posted_caba_entry = self.state == 'posted' and (self.tax_cash_basis_rec_id or self.tax_cash_basis_origin_move_id)
         posted_exchange_diff_entry = self.state == 'posted' and self.exchange_diff_partial_ids
-        return not self.inalterable_hash and self.date > lock_date and not is_part_of_restricted_audit_trail and not posted_caba_entry and not posted_exchange_diff_entry
+        return not self.inalterable_hash and self.date > lock_date and not posted_caba_entry and not posted_exchange_diff_entry
 
     def _is_protected_by_audit_trail(self):
         return any(move.posted_before and move.company_id.restrictive_audit_trail for move in self)
