@@ -7,6 +7,7 @@ import {
     insertSnippet,
     registerWebsitePreviewTour,
 } from '@website/js/tours/tour_utils';
+import { stepUtils } from "@web_tour/tour_service/tour_utils";
 
 registerWebsitePreviewTour('snippet_translation', {
     url: '/',
@@ -36,6 +37,7 @@ registerWebsitePreviewTour('snippet_translation', {
 registerWebsitePreviewTour('snippet_translation_changing_lang', {
     url: '/',
 }, () => [
+    stepUtils.waitIframeIsReady(),
     {
         content: "Open dropdown language selector",
         trigger: ':iframe .js_language_selector button',
@@ -87,3 +89,39 @@ registerWebsitePreviewTour('snippet_translation_changing_lang', {
         trigger: ':iframe .s_cover .btn-outline-secondary:contains("Contact us in Parseltongue")',
     },
 ]);
+registerWebsitePreviewTour(
+    "snippet_translation_switching_website",
+    {
+        url: "/",
+    },
+    () => [
+        ...clickOnEditAndWaitEditModeInTranslatedPage(),
+        ...insertSnippet({ id: "s_cover", name: "Cover", groupName: "Intro" }),
+        {
+            content: "Check that contact us contain Parseltongue",
+            trigger:
+                ":iframe .s_cover .btn-outline-secondary:contains('Contact us in Parseltongue')",
+        },
+        ...clickOnSave(),
+        {
+            content: "Open website switcher dropdown",
+            trigger: ".o_website_switcher_container button",
+            run: "click",
+        },
+        {
+            content: "Switch to website fu_GB",
+            trigger: ".o-dropdown--menu .o-dropdown-item:contains('website fu_GB')",
+            run: "click",
+        },
+        {
+            content: "Wait for website fu_GB",
+            trigger: ":iframe .o_homepage_editor_welcome_message",
+        },
+        ...clickOnEditAndWaitEditMode(),
+        ...insertSnippet({ id: "s_cover", name: "Cover", groupName: "Intro" }),
+        {
+            content: "Check that contact us contain Fake User Lang",
+            trigger: ":iframe .s_cover .btn-outline-secondary:contains('Fake User Lang')",
+        },
+    ]
+);
