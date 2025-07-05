@@ -119,6 +119,7 @@
                     <field name="price" invisible="1"/>
                     <group name="pricelist_rule_computation">
                         <group name="pricelist_rule_method">
+                            <field name="applied_on" invisible="1"/>
                             <field name="display_applied_on"
                                 string="Apply To"
                                 widget="radio"
@@ -251,7 +252,7 @@
                 <attribute name="force_save">1</attribute>
             </field>
             <field name="date_start" position="after">
-                <field name="pricelist_id"/>
+                <field name="pricelist_id" groups="product.group_product_pricelist"/>
             </field>
         </field>
     </record>

@@ -135,7 +135,9 @@ export class WebsiteBuilderClientAction extends Component {
             if (!this.ui.isSmall) {
                 // preload builder and snippets so clicking on "edit" is faster
                 loadBundle("website.website_builder_assets").then(() => {
-                    this.env.services["html_builder.snippets"].load();
+                    this.env.services["html_builder.snippets"].reload({
+                        lang: this.websiteService.currentWebsite?.default_lang_id.code,
+                    });
                 });
             }
         });
@@ -246,10 +248,20 @@ export class WebsiteBuilderClientAction extends Component {
     }
 
     async onEditPage() {
-        await this.iframeLoaded;
-        await this.publicRootReady;
-        await this.loadAssetsEditBundle();
+        this.blockIframe();
+        await this.loadIframeAndBundles(true);
+        this.unblockIframe();
         this.state.isEditing = true;
+    }
+    /**
+     * @param {Boolean} isEditing
+     */
+    async loadIframeAndBundles(isEditing) {
+        await this.iframeLoaded;
+        if (isEditing) {
+            await this.publicRootReady;
+            await this.loadAssetsEditBundle();
+        }
     }
 
     async loadAssetsEditBundle() {
@@ -348,6 +360,13 @@ export class WebsiteBuilderClientAction extends Component {
         if (this.withLoader) {
             this.websiteService.hideLoader();
         }
+    }
+
+    blockIframe() {
+        this.websiteContent.el.setAttribute("inert", "");
+    }
+    unblockIframe() {
+        this.websiteContent.el.removeAttribute("inert");
     }
 
     setupClickListener() {
@@ -469,11 +488,7 @@ export class WebsiteBuilderClientAction extends Component {
         } else {
             this.websiteContent.el.contentWindow.location.reload();
         }
-        await this.iframeLoaded;
-        if (isEditing) {
-            await this.publicRootReady;
-            await this.loadAssetsEditBundle();
-        }
+        await this.loadIframeAndBundles(isEditing);
         this.ui.unblock();
     }
 
