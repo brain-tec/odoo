@@ -1,15 +1,15 @@
 import { Component } from "@odoo/owl";
-import { useDateTimePicker } from "@web/core/datetime/datetime_hook";
+import { useDateTimePicker } from "@web/core/datetime/datetime_picker_hook";
 import { ConversionError, formatDateTime, parseDateTime } from "@web/core/l10n/dates";
 import { useChildRef } from "@web/core/utils/hooks";
 import { pick } from "@web/core/utils/objects";
-import { BuilderComponent } from "./builder_component";
-import { BuilderTextInputBase, textInputBasePassthroughProps } from "./builder_text_input_base";
 import {
     basicContainerBuilderComponentProps,
     useBuilderComponent,
     useInputBuilderComponent,
 } from "../utils";
+import { BuilderComponent } from "./builder_component";
+import { BuilderTextInputBase, textInputBasePassthroughProps } from "./builder_text_input_base";
 
 const { DateTime } = luxon;
 
@@ -38,9 +38,6 @@ export class BuilderDateTimePicker extends Component {
             parseDisplayValue: this.parseDisplayValue.bind(this),
         });
         this.state = state;
-        if (!this.state.value) {
-            this.state.value = this.getDefaultValue();
-        }
         this.oldValue = this.state.value;
 
         this.commit = (userInputValue) => {

@@ -346,6 +346,7 @@
         ],
         'web.assets_unit_tests': [
             'web/static/src/legacy/js/public/minimal_dom.js',
+            'website/static/src/client_actions/website_preview/website_builder_action_test_mode.js',
             'website/static/tests/core/**/*',
             'website/static/tests/helpers.js',
             'website/static/tests/interactions/**/*',
@@ -480,8 +481,6 @@
             'website/static/src/components/navbar/navbar.scss',
             'website/static/src/components/navbar/navbar.xml',
             'website/static/src/components/burger_menu/burger_menu.js',
-            'website/static/src/components/switch/switch.js',
-            'website/static/src/components/switch/switch.scss',
             'website/static/src/components/wysiwyg_adapter/page_options.js',
             'website/static/src/components/translator/translator.js',
             'website/static/src/components/translator/translator.scss',
@@ -497,10 +496,11 @@
             # Don't include dark mode files in light mode
             ('remove', 'website/static/src/components/dialog/*.dark.scss'),
         ],
-        'html_builder.assets': [
-
+        'website.website_builder_assets': [
+            ('include', 'html_builder.assets'),
             'website/static/src/scss/website_common.scss',
             'website/static/src/builder/**/*',
+            ('remove', 'website/static/src/builder/**/*.inside.scss'),
         ],
         'html_builder.iframe_add_dialog': [
             'website/static/src/snippets/**/*.edit.scss',
