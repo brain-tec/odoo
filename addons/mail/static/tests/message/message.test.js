@@ -14,9 +14,10 @@ import {
     startServer,
     triggerHotkey,
 } from "@mail/../tests/mail_test_helpers";
+import { LONG_PRESS_DELAY } from "@mail/utils/common/hooks";
 import { describe, expect, test } from "@odoo/hoot";
-import { animationFrame, leave, press, queryFirst } from "@odoo/hoot-dom";
-import { mockDate, mockTouch, mockUserAgent, tick } from "@odoo/hoot-mock";
+import { animationFrame, leave, pointerDown, press, queryFirst } from "@odoo/hoot-dom";
+import { advanceTime, mockDate, mockTouch, mockUserAgent, tick } from "@odoo/hoot-mock";
 import {
     asyncStep,
     contains as webContains,
@@ -144,7 +145,8 @@ test("Can add reaction to a message on an ipad", async () => {
     await start();
     await openDiscuss(channelId);
     await contains(".o-mail-Message");
-    await click(".o-mail-Message [title='Expand']");
+    await pointerDown(".o-mail-Message");
+    await advanceTime(LONG_PRESS_DELAY);
     await click("button:contains('Add a Reaction')");
     await click(".o-EmojiPicker-content .o-Emoji:contains('😀')");
     await contains(".o-mail-MessageReaction:contains('😀\n1')");
@@ -175,7 +177,11 @@ test("Editing message keeps the mentioned channels", async () => {
     await contains(".o-mail-Discuss-threadName", { value: "other" });
 });
 
-test("Can edit message comment in chatter", async () => {
+test.skip("Can edit message comment in chatter", async () => {
+    // Fails on runbot often because race condition between RPC returns and bus notifications,
+    // leading to late steps receiving old bus notifications and therefore assertion error.
+    // This happens with heavy CPU load, e.g. when test takes around 2.5 seconds to run rather
+    // than 400ms in ideal condition.
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "TestPartner" });
     pyEnv["mail.message"].create({
