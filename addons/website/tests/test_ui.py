@@ -251,8 +251,6 @@ class TestUiTranslate(odoo.tests.HttpCase):
 
         self.start_tour(self.env['website'].get_client_action_url('/'), 'translate_text_options', login='admin')
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_snippet_translation(self):
         ResLang = self.env['res.lang']
         parseltongue, fake_user_lang = ResLang.create([{
@@ -273,6 +271,9 @@ class TestUiTranslate(odoo.tests.HttpCase):
             parseltongue.code: {
                 # See contact_us_label
                 'Contact us': 'Contact us in Parseltongue'
+            },
+            fake_user_lang.code: {
+                'Contact us': 'Contact us in Fake User Lang'
             }
         })
         website = self.env['website'].create({
@@ -285,9 +286,15 @@ class TestUiTranslate(odoo.tests.HttpCase):
             'language_ids': [(6, 0, [self.env.ref('base.lang_en').id, parseltongue.id])],
             'default_lang_id': parseltongue.id,
         })
+        self.env['website'].create({
+            'name': 'website fu_GB',
+            'language_ids': [Command.set([fake_user_lang.id])],
+            'default_lang_id': fake_user_lang.id,
+        })
 
         self.start_tour(f"/website/force/{website.id}", 'snippet_translation', login='admin')
         self.start_tour(f"/website/force/{website_2.id}", 'snippet_translation_changing_lang', login='admin')
+        self.start_tour(f"/website/force/{website_2.id}", 'snippet_translation_switching_website', login='admin')
 
 
 @odoo.tests.common.tagged('post_install', '-at_install')
