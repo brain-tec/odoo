@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-16 20:36+0000\n"
+"POT-Creation-Date: 2025-07-04 18:37+0000\n"
 "PO-Revision-Date: 2024-12-24 16:06+0000\n"
 "Last-Translator: Chloe Wang, 2025\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
@@ -9925,6 +9925,8 @@ msgstr "此消息已发送。"
 
 #. module: mail
 #. odoo-javascript
+#. odoo-python
+#: code:addons/mail/models/discuss/discuss_channel.py:0
 #: code:addons/mail/static/src/core/common/message_model.js:0
 msgid "This message has been removed"
 msgstr "此信息已被删除"
@@ -11578,273 +11580,372 @@ msgstr "例：讨论提案"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
-#: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popover_item.js:0
-msgid "Yesterplate Editors will be able to create new dynamic templates or modify existing ones."
-msgstr ""
-"Người dùng sẽ có thể kết xuất mẫu.\n"
-"Tuy nhiên chỉ Biên tập viên mẫu email mới có thể tạo mẫu động mới hoặc sửa đổi mẫu hiện có."
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_without_record_access
+#: model_terms:ir.ui.view,arch_db:mail.view_server_action_form_template
+msgid "e.g. Discuss proposal"
+msgstr "例如.讨论提案"
 
 #. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_plan_template_view_form
+msgid "e.g. Log a note"
+msgstr "例：备注"
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_plan_view_form
+msgid "e.g. Onboarding"
+msgstr "例如：入职"
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_type_view_form
+msgid "e.g. Schedule a meeting"
+msgstr "例如安排会议"
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_alias_view_form
 #: model_terms:ir.ui.view,arch_db:mail.res_config_settings_view_form
-msgid ""
-"Using your own email server is required to send/receive emails in Community "
-"and Enterprise versions. Online users already benefit from a ready-to-use "
-"email server (@mycompany.odoo.com)."
-msgstr ""
-"Sử dụng máy chủ email của riêng bạn là bắt buộc để gửi/nhận email trong các "
-"phiên bản Cộng đồng và Doanh nghiệp. Người dùng online đã được hưởng lợi từ "
-"máy chủ email sẵn sàng sử dụng (@tencongty.com)."
+msgid "e.g. mycompany.com"
+msgstr "e.g. mycompany.com"
 
 #. module: mail
-#: model:ir.model.fields.selection,name:mail.selection__mail_alias__alias_status__valid
-msgid "Valid"
-msgstr "Hợp lệ"
+#: model_terms:ir.ui.view,arch_db:mail.view_server_action_form_template
+msgid "e.g. partner_id"
+msgstr "例：partner_id"
 
 #. module: mail
-#. odoo-python
-#: code:addons/mail/models/mail_alias.py:0
-msgid ""
-"Value %(allowed_domains)s for `mail.catchall.domain.allowed` cannot be validated.\n"
-"It should be a comma separated list of domains e.g. example.com,example.org."
-msgstr ""
-"Không thể xác thực giá trị %(allowed_domains)s cho `mail.catchall.domain.allowed`.\n"
-"Nó phải là một danh sách các tên miền được phân tách bằng dấu phẩy. VD: example.com,example.org."
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/call/common/call_settings.xml:0
-msgid "Video Settings"
-msgstr "Cài đặt video"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/call/common/call_context_menu.xml:0
-msgid "Video player:"
-msgstr "Trình phát video:"
-
-#. module: mail
-#. odoo-python
-#: code:addons/mail/models/mail_thread.py:0
-#: model:ir.model,name:mail.model_ir_ui_view
-msgid "View"
-msgstr "Chế độ xem"
-
-#. module: mail
-#. odoo-python
-#: code:addons/mail/models/mail_thread.py:0
-msgid "View %s"
-msgstr "Xem %s"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/web/avatar_card/avatar_card_popover.xml:0
-msgid "View Profile"
-msgstr "Xem trang cá nhân"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/core/common/message_actions.js:0
-msgid "View Reactions"
-msgstr "Xem phản ứng"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/core/public_web/message_actions.js:0
-msgid "View Thread"
-msgstr "Xem chủ đề"
-
-#. module: mail
-#: model:ir.model.fields,field_description:mail.field_ir_actions_act_window_view__view_mode
-#: model:ir.model.fields,field_description:mail.field_ir_ui_view__type
-msgid "View Type"
-msgstr "Dạng hiển thị"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/core/web/activity_menu.xml:0
-msgid "View all activities"
-msgstr "Xem tất cả hoạt động"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/core/web/discuss_sidebar_categories_patch.js:0
-msgid "View or join channels"
-msgstr "Xem hoặc tham gia kênh"
-
-#. module: mail
-#: model:ir.model.fields,field_description:mail.field_ir_attachment__voice_ids
-#: model_terms:ir.ui.view,arch_db:mail.res_users_settings_view_form
-msgid "Voice"
-msgstr "Giọng nói"
-
-#. module: mail
-#: model:ir.ui.menu,name:mail.menu_call_settings
-msgid "Voice & Video"
-msgstr "Giọng nói & video"
-
-#. module: mail
-#: model:ir.actions.client,name:mail.discuss_call_settings_action
-msgid "Voice & Video Settings"
-msgstr "Cài đặt giọng nói & video"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/call/common/call_settings.xml:0
-msgid "Voice Detection"
-msgstr "Phát hiện giọng nói"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/voice_message/common/composer_actions_patch.js:0
-#: code:addons/mail/static/src/discuss/voice_message/common/voice_recorder.xml:0
-msgid "Voice Message"
-msgstr "Tin nhắn thoại"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/call/common/call_settings.xml:0
-msgid "Voice detection sensitivity"
-msgstr "Độ nhạy phát hiện giọng nói"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/voice_message/common/voice_recorder.js:0
-msgid "Voice recording stopped"
-msgstr "Ghi âm đã ngừng"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/call/common/call_settings.xml:0
-msgid "Voice settings"
-msgstr "Cài đặt giọng nói"
-
-#. module: mail
-#: model:ir.model.fields,field_description:mail.field_res_users_settings_volumes__volume
-msgid "Volume"
-msgstr "Thể tích"
+#: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_form
+msgid "e.g. support"
+msgstr "例如支持"
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.res_users_settings_view_form
-msgid "Volume per partner"
-msgstr "Dung lượng theo mỗi đối tác"
+msgid "e.g. true.true..f"
+msgstr "例如 true.true..f"
 
 #. module: mail
-#: model:ir.model.fields,field_description:mail.field_res_users_settings__volume_settings_ids
-msgid "Volumes of other partners"
-msgstr "Dung lượng của các đối tác khác"
+#: model_terms:ir.ui.view,arch_db:mail.view_server_action_form_template
+msgid "e.g. user_id"
+msgstr "例如：user_id"
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
+msgid "e.g: \"info@mycompany.odoo.com\""
+msgstr "例如：“info@mycompany.odoo.com”"
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_compose_message_view_form_template_save
+msgid "e.g: Send order confirmation"
+msgstr "例如：发送订单确认"
 
 #. module: mail
 #. odoo-javascript
-#: code:addons/mail/static/src/discuss/gif_picker/common/gif_picker.xml:0
-msgid ""
-"Want to spice up your conversations with GIFs? Activate the feature in the "
-"settings!"
-msgstr ""
-"Bạn muốn thêm gia vị cho cuộc trò chuyện của mình bằng ảnh GIF? Hãy kích "
-"hoạt tính năng này trong cài đặt!"
+#: code:addons/mail/static/src/core/web/activity.xml:0
+msgid "for"
+msgstr "分派给"
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.message_origin_link
+msgid "has been created from:"
+msgstr "已经创建自:"
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.message_origin_link
+msgid "has been modified from:"
+msgstr "已经被修改自:"
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.message_activity_assigned
+msgid "has just assigned you the following activity:"
+msgstr "刚刚为您分配了以下活动："
+
+#. module: mail
+#: model:ir.model.fields,help:mail.field_res_config_settings__tenor_content_filter
+msgid "https://developers.google.com/tenor/guides/content-filtering"
+msgstr "https://developers.google.com/tenor/guides/content-filtering"
 
 #. module: mail
 #. odoo-javascript
-#: code:addons/mail/static/src/core/web/activity_button.js:0
-#: code:addons/mail/static/src/views/web/fields/list_activity/list_activity.js:0
-msgid "Warning"
-msgstr "Cảnh báo"
-
-#. module: mail
-#. odoo-python
-#: code:addons/mail/models/mail_alias.py:0
-msgid ""
-"We could not create alias %(alias_name)s because domain "
-"%(alias_domain_name)s belongs to company %(alias_company_names)s while the "
-"owner document belongs to company %(company_name)s."
-msgstr ""
-"Chúng tôi không thể tạo bí danh %(alias_name)s vì miền %(alias_domain_name)s"
-" thuộc về công ty %(alias_company_names)s trong khi tài liệu sở hữu thuộc về"
-" công ty %(company_name)s."
-
-#. module: mail
-#. odoo-python
-#: code:addons/mail/models/mail_alias.py:0
-msgid ""
-"We could not create alias %(alias_name)s because domain "
-"%(alias_domain_name)s belongs to company %(alias_company_names)s while the "
-"target document belongs to company %(company_name)s."
-msgstr ""
-"Chúng tôi không thể tạo bí danh %(alias_name)s vì miền %(alias_domain_name)s"
-" thuộc về công ty %(alias_company_names)s trong khi tài liệu đích thuộc về "
-"công ty %(company_name)s."
+#: code:addons/mail/static/src/core/common/relative_time.js:0
+msgid "in a few seconds"
+msgstr "在几秒之内"
 
 #. module: mail
 #. odoo-python
 #: code:addons/mail/models/models.py:0
-msgid "We were not able to fetch value of field '%(field)s'"
-msgstr "Chúng tôi không thể tìm nạp giá trị của trường '%(field)s'"
-
-#. module: mail
-#: model:ir.model.fields.selection,name:mail.selection__ir_actions_server__activity_date_deadline_range_type__weeks
-msgid "Weeks"
-msgstr "Tuần"
-
-#. module: mail
-#: model_terms:ir.ui.view,arch_db:mail.email_compose_message_wizard_form
-msgid "Welcome to MyCompany!"
-msgstr "Chào mừng đến với MyCompany!"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/message_pin/common/message_model_patch.js:0
-msgid ""
-"Well, nothing lasts forever, but are you sure you want to unpin this "
-"message?"
-msgstr ""
-"Chà, không có gì là tồn tại mãi mãi, nhưng bạn có chắc chắn muốn bỏ ghim tin"
-" nhắn này không?"
-
-#. module: mail
-#. odoo-javascript
-#: code:addons/mail/static/src/discuss/core/public/welcome_page.xml:0
-msgid "What's your name?"
-msgstr "Bạn tên là gì?"
-
-#. module: mail
-#: model:ir.model.fields,help:mail.field_mail_activity__user_tz
-msgid ""
-"When printing documents and exporting/importing data, time values are computed according to this timezone.\n"
-"If the timezone is not set, UTC (Coordinated Universal Time) is used.\n"
-"Anywhere else, time values are computed according to the time offset of your web client."
-msgstr ""
-"Khi in tài liệu và xuất/nhập dữ liệu, các giá trị thời gian được tính theo múi giờ này.\n"
-"Nếu múi giờ không được thiết lập, UTC (Giờ phối hợp quốc tế) sẽ được sử dụng.\n"
-"Với các thao tác khác, giá trị thời gian được tính theo chênh lệch múi giờ của trang web máy khách."
+msgid "incorrectly configured alias"
+msgstr "不正确配置的别名"
 
 #. module: mail
 #. odoo-python
-#: code:addons/mail/models/mail_activity_plan_template.py:0
-msgid ""
-"When selecting \"Default user\" assignment, you must specify a responsible."
-msgstr ""
-"Khi chọn phân công là \"Người dùng mặc định\", bạn phải chỉ định người phụ "
-"trách."
+#: code:addons/mail/models/models.py:0
+msgid "incorrectly configured alias (unknown reference record)"
+msgstr "错误地别名配置（未知参考记录）"
 
 #. module: mail
-#: model:ir.model.fields,help:mail.field_fetchmail_server__original
-msgid ""
-"Whether a full original copy of each email should be kept for reference and "
-"attached to each processed message. This will usually double the size of "
-"your message database."
-msgstr ""
-"Có giữ lại một bản gốc của mỗi email để dẫn chiếu và đính kèm vào các thông "
-"điệp. Việc này sẽ làm tăng gấp đôi dung lượng lưu trữ các thông điệp trong "
-"cơ sở dữ liệu."
+#. odoo-python
+#: code:addons/mail/models/discuss/discuss_channel.py:0
+msgid "invited %s to the channel"
+msgstr "邀请%s加入频道"
 
 #. module: mail
-#: model:ir.model.fields,help:mail.field_fetchmail_server__attach
-msgid ""
-"Whether attachments should be downloaded. If not enabled, incoming emails "
-"will be stripped of any attachments before being processed"
-msgstr ""
-"Có nên tải xuống tệp đính kèm hay không. Nếu không được bật, email đến sẽ bị"
-" xóa bất kỳ tệp đính kèm nào trước khi được xử lý"
+#. odoo-python
+#: code:addons/mail/models/discuss/discuss_channel.py:0
+msgid "joined the channel"
+msgstr "加入频道"
 
 #. module: mail
-#: model:ir.model.fields,help:m
+#. odoo-python
+#: code:addons/mail/models/discuss/discuss_channel.py:0
+msgid "left the channel"
+msgstr "离开频道"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/gif_picker/common/gif_picker.xml:0
+msgid "list"
+msgstr "列表"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/gif_picker/common/gif_picker.xml:0
+msgid "list-item"
+msgstr "刊登物品"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/call/common/call_participant_card.xml:0
+msgid "live"
+msgstr "在线"
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_blacklist_remove_view_form
+msgid "mail_blacklist_removal"
+msgstr "mail_blacklist_removal"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/call/common/call_participant_card.xml:0
+msgid "media player Error"
+msgstr "媒体播放器故障"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/call/common/call_context_menu.xml:0
+msgid "microphone"
+msgstr "麦克风"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_thread.py:0
+msgid "model %s does not accept document creation"
+msgstr "模型 %s 不接受单据创建"
+
+#. module: mail
+#: model:ir.model.fields.selection,name:mail.selection__mail_activity_plan_template__delay_unit__months
+#: model:ir.model.fields.selection,name:mail.selection__mail_activity_type__delay_unit__months
+msgid "months"
+msgstr "月"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/discuss/discuss_channel.py:0
+msgid "more"
+msgstr "更多"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/call/common/call_settings.xml:0
+msgid "ms"
+msgstr "秒"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/call/common/call_participant_card.xml:0
+msgid "muted"
+msgstr "静音"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_alias.py:0
+msgid "new"
+msgstr "新建"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/call/common/call_context_menu.js:0
+msgid "no connection"
+msgstr "无连接"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/core/common/relative_time.js:0
+msgid "now"
+msgstr "现在"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/core/common/message.xml:0
+#: model_terms:ir.ui.view,arch_db:mail.view_mail_form
+msgid "on"
+msgstr "在"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/core/common/composer.xml:0
+msgid "on:"
+msgstr "于:"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/core/web/activity_mail_template.xml:0
+msgid "or"
+msgstr "或"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/core/common/composer.js:0
+msgid "or press %(send_keybind)s"
+msgstr "或者按%(send_keybind)s"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/core/common/channel_member_list.xml:0
+msgid "other members."
+msgstr "其他成员."
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/call/common/call_participant_card.xml:0
+msgid "raising hand"
+msgstr "举手"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_thread.py:0
+msgid ""
+"reply to missing document (%(model)s,%(thread)s), fall back on document "
+"creation"
+msgstr "回复丢失的文档 (%(model)s,%(thread)s), 退回到文档创建"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_thread.py:0
+msgid ""
+"reply to model %s that does not accept document update, fall back on "
+"document creation"
+msgstr "回复模型 %s 不接受单据更新单据创建"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/models.py:0
+msgid "restricted to followers"
+msgstr "仅限于关注者"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/models.py:0
+msgid "restricted to known authors"
+msgstr "仅限于已知的作者"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/call/common/call_context_menu.xml:0
+msgid "screen"
+msgstr "屏幕"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_alias.py:0
+msgid "some specific addresses"
+msgstr "一些具体地址"
+
+#. module: mail
+#: model:ir.model.fields.selection,name:mail.selection__mail_ice_server__server_type__stun
+msgid "stun:"
+msgstr "stun:"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_thread.py:0
+msgid "target model unspecified"
+msgstr "目标模型未指定"
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_bounce_catchall
+msgid "team."
+msgstr "团队."
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_thread.py:0
+msgid "template"
+msgstr "模板"
+
+#. module: mail
+#: model:ir.model.fields.selection,name:mail.selection__mail_ice_server__server_type__turn
+msgid "turn:"
+msgstr "turn:"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_thread.py:0
+msgid "unknown error"
+msgstr "未知错误"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_thread.py:0
+msgid "unknown target model %s"
+msgstr "位置目标模型 %s"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/call/common/call_context_menu.xml:0
+msgid "up DTLS:"
+msgstr "up DTLS:"
+
+#. module: mail
+#. odoo-javascript
+#: code:addons/mail/static/src/discuss/call/common/call_context_menu.xml:0
+msgid "up ICE:"
+msgstr "up ICE:"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_thread.py:0
+msgid "view"
+msgstr "查看"
+
+#. module: mail
+#: model:ir.model,name:mail.model_ir_websocket
+msgid "websocket message handling"
+msgstr "websocket消息处理"
+
+#. module: mail
+#: model:ir.model.fields.selection,name:mail.selection__mail_activity_plan_template__delay_unit__weeks
+#: model:ir.model.fields.selection,name:mail.selection__mail_activity_type__delay_unit__weeks
+msgid "weeks"
+msgstr "周"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/discuss/discuss_channel.py:0
+msgid "you"
+msgstr "你"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/mail_alias.py:0
+msgid "your alias"
+msgstr "你的别名"
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.email_template_form
+msgid "{{ object.partner_id.lang }}"
+msgstr "{{ object.partner_id.lang }}"
+
+#. module: mail
+#. odoo-python
+#: code:addons/mail/models/discuss/discuss_channel_member.py:0
+msgid "“%(member_name)s” in “%(channel_name)s”"
+msgstr "\"%(channel_name)s\"中的\"%(member_name)s\""
