@@ -59,4 +59,15 @@ export class MessageReactionMenu extends Component {
     getEmojiShortcode(reaction) {
         return this.store.emojiLoader.loaded?.emojiValueToShortcodes?.[reaction.content][0] ?? "?";
     }
+
+    get contentClass() {
+        const attClass = {
+            "o-mail-MessageReactionMenu h-50 d-flex": true,
+            "position-absolute bottom-0": this.store.useMobileView,
+        };
+        return Object.entries(attClass)
+            .filter(([classNames, value]) => value)
+            .map(([classNames]) => classNames)
+            .join(" ");
+    }
 }

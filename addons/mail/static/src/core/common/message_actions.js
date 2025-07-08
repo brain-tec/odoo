@@ -8,6 +8,7 @@ import { discussComponentRegistry } from "./discuss_component_registry";
 import { Deferred } from "@web/core/utils/concurrency";
 import { useEmojiPicker } from "@web/core/emoji_picker/emoji_picker";
 import { QuickReactionMenu } from "@mail/core/common/quick_reaction_menu";
+import { isMobileOS } from "@web/core/browser/feature_detection";
 
 const { DateTime } = luxon;
 
@@ -85,6 +86,7 @@ messageActionsRegistry
         title: _t("View Reactions"),
         onClick: (component) => component.openReactionMenu(),
         sequence: 50,
+        mobileCloseAfterClick: false,
         dropdown: true,
     })
     .add("unfollow", {
@@ -155,6 +157,13 @@ messageActionsRegistry
         onClick: (component) => component.onClickToggleTranslation(),
         sequence: 100,
     })
+    .add("copy-message", {
+        condition: (component) => isMobileOS() && !component.message.isBodyEmpty,
+        onClick: (component) => component.message.copyMessageText(),
+        title: _t("Copy to Clipboard"),
+        icon: "fa fa-copy",
+        sequence: 25,
+    })
     .add("copy-link", {
         condition: (component) =>
             component.message.message_type &&
@@ -195,9 +204,7 @@ function transformAction(component, id, action) {
         },
         /** Determines the order of this action (smaller first). */
         get sequence() {
-            return typeof action.sequence === "function"
-                ? action.sequence(component)
-                : action.sequence;
+            return messageActionsInternal.sequence(component, id, action);
         },
         /** Component setup to execute when this action is registered. */
         setup: action.setup,
@@ -207,6 +214,9 @@ function transformAction(component, id, action) {
 export const messageActionsInternal = {
     condition(component, id, action) {
         return action.condition(component);
+    },
+    sequence(component, id, action) {
+        return typeof action.sequence === "function" ? action.sequence(component) : action.sequence;
     },
 };
 
