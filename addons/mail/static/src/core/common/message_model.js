@@ -241,6 +241,7 @@ export class Message extends Record {
      * the cookie-authenticated persona and the partner authenticated with the
      * portal token in the context of the related thread.
      *
+     * @deprecated
      * @returns {import("models").Persona[]}
      */
     get selves() {
@@ -252,7 +253,7 @@ export class Message extends Record {
     }
 
     get isSelfMentioned() {
-        return this.selves.some((s) => s.in(this.recipients));
+        return this.effectiveSelf.in(this.recipients);
     }
 
     get isHighlightedFromMention() {
@@ -264,7 +265,7 @@ export class Message extends Record {
             if (!this.author) {
                 return false;
             }
-            return this.author.in(this.selves);
+            return this.author.eq(this.effectiveSelf);
         },
     });
 
@@ -503,6 +504,19 @@ export class Message extends Record {
             type = "danger";
         }
         this.store.env.services.notification.add(notification, { type });
+    }
+
+    async copyMessageText() {
+        const messageBody = convertBrToLineBreak(this.body);
+        try {
+            await browser.navigator.clipboard.writeText(messageBody);
+        } catch {
+            this.store.env.services.notification.add(
+                _t("Message Copy Failed (Permission denied?)!"),
+                { type: "danger" }
+            );
+        }
+        this.store.env.services.notification.add(_t("Message Copied!"), { type: "info" });
     }
 
     async edit(
