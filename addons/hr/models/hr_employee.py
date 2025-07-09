@@ -105,7 +105,7 @@ class HrEmployee(models.Model):
     newly_hired = fields.Boolean('Newly Hired', compute='_compute_newly_hired', search='_search_newly_hired')
 
     active = fields.Boolean('Active', related='resource_id.active', default=True, store=True, readonly=False)
-    company_id = fields.Many2one('res.company', required=True)
+    company_id = fields.Many2one('res.company', required=True, tracking=True)
     company_country_id = fields.Many2one('res.country', 'Company Country', related='company_id.country_id', readonly=True, groups="base.group_system,hr.group_hr_user")
     company_country_code = fields.Char(related='company_country_id.code', depends=['company_country_id'], readonly=True, groups="base.group_system,hr.group_hr_user", string='Company Country Code')
     work_phone = fields.Char('Work Phone', compute="_compute_phones", store=True, readonly=False, tracking=True)
@@ -136,13 +136,7 @@ class HrEmployee(models.Model):
     work_permit_scheduled_activity = fields.Boolean(default=False, groups="hr.group_hr_user")
     work_permit_name = fields.Char('work_permit_name', compute='_compute_work_permit_name', groups="hr.group_hr_user")
     additional_note = fields.Text(string='Additional Note', groups="hr.group_hr_user", tracking=True)
-    certificate = fields.Selection([
-        ('graduate', 'Graduate'),
-        ('bachelor', 'Bachelor'),
-        ('master', 'Master'),
-        ('doctor', 'Doctor'),
-        ('other', 'Other'),
-    ], 'Certificate Level', groups="hr.group_hr_user", tracking=True)
+    certificate = fields.Selection(selection='_get_certificate_selection', string='Certificate Level', groups="hr.group_hr_user", tracking=True)
     study_field = fields.Char("Field of Study", groups="hr.group_hr_user", tracking=True)
     study_school = fields.Char("School", groups="hr.group_hr_user", tracking=True)
     emergency_contact = fields.Char(groups="hr.group_hr_user", tracking=True)
@@ -282,6 +276,16 @@ class HrEmployee(models.Model):
         for employee in self:
             employee.hr_icon_display = 'presence_' + employee.hr_presence_state
             employee.show_hr_icon_display = bool(employee.user_id)
+
+    @api.model
+    def _get_certificate_selection(self):
+        return [
+            ('graduate', self.env._('Graduate')),
+            ('bachelor', self.env._('Bachelor')),
+            ('master', self.env._('Master')),
+            ('doctor', self.env._('Doctor')),
+            ('other', self.env._('Other')),
+        ]
 
     def _get_first_versions(self):
         self.ensure_one()
@@ -1094,7 +1098,7 @@ class HrEmployee(models.Model):
             employee_fields_to_empty = self._get_employee_m2o_to_empty_on_archived_employees()
             user_fields_to_empty = self._get_user_m2o_to_empty_on_archived_employees()
             employee_domain = Domain.OR(Domain(field, 'in', archived_employees.ids) for field in employee_fields_to_empty)
-            user_domain = Domain.AND(Domain(field, 'in', archived_employees.user_id.ids) for field in user_fields_to_empty)
+            user_domain = Domain.OR(Domain(field, 'in', archived_employees.user_id.ids) for field in user_fields_to_empty)
             employees = self.env['hr.employee'].search(employee_domain | user_domain)
             for employee in employees:
                 for field in employee_fields_to_empty:
@@ -1123,15 +1127,6 @@ class HrEmployee(models.Model):
                 'title': _("Warning"),
                 'message': _("To avoid multi company issues (losing the access to your previous contracts, leaves, ...), you should create another employee in the new company instead.")
             }}
-
-    def _get_marital_status_selection(self):
-        return [
-            ('single', _('Single')),
-            ('married', _('Married')),
-            ('cohabitant', _('Legal Cohabitant')),
-            ('widower', _('Widower')),
-            ('divorced', _('Divorced')),
-        ]
 
     def _load_scenario(self):
         demo_tag = self.env.ref('hr.employee_category_demo', raise_if_not_found=False)
