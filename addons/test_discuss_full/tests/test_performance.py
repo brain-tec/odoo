@@ -88,7 +88,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #   2: _get_channels_as_member
     #       - search discuss_channel (member_domain)
     #       - search discuss_channel (pinned_member_domain)
-    #   31: channel _to_store_defaults:
+    #   33: channel _to_store_defaults:
     #       - read group member (prefetch _compute_self_member_id from _compute_is_member)
     #       - read group member (_compute_invited_member_ids)
     #       - search discuss_channel_rtc_session
@@ -432,7 +432,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "self_partner": {"id": self.users[0].partner_id.id, "type": "partner"},
                 "settings": {
                     "channel_notifications": False,
-                    "mute_until_dt": False,
                     "id": self.env["res.users.settings"]._find_or_create_for_user(self.users[0]).id,
                     "is_discuss_sidebar_category_channel_open": True,
                     "is_discuss_sidebar_category_chat_open": True,
@@ -626,7 +625,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "channel_type": "channel",
                 "country_id": False,
                 "create_uid": self.user_root.id,
-                "custom_notifications": False,
                 "default_display_mode": False,
                 "description": "General announcements for all employees.",
                 "fetchChannelInfoState": "fetched",
@@ -656,7 +654,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "channel_type": "channel",
                 "country_id": False,
                 "create_uid": self.env.user.id,
-                "custom_notifications": False,
                 "default_display_mode": False,
                 "description": False,
                 "fetchChannelInfoState": "fetched",
@@ -686,7 +683,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "channel_type": "channel",
                 "country_id": False,
                 "create_uid": self.env.user.id,
-                "custom_notifications": False,
                 "default_display_mode": False,
                 "description": False,
                 "fetchChannelInfoState": "fetched",
@@ -716,7 +712,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "channel_type": "channel",
                 "country_id": False,
                 "create_uid": self.env.user.id,
-                "custom_notifications": False,
                 "default_display_mode": False,
                 "description": False,
                 "fetchChannelInfoState": "fetched",
@@ -749,7 +744,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "channel_type": "channel",
                 "country_id": False,
                 "create_uid": self.env.user.id,
-                "custom_notifications": False,
                 "default_display_mode": False,
                 "description": False,
                 "fetchChannelInfoState": "fetched",
@@ -779,7 +773,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "channel_type": "group",
                 "country_id": False,
                 "create_uid": self.env.user.id,
-                "custom_notifications": False,
                 "default_display_mode": False,
                 "description": False,
                 "fetchChannelInfoState": "fetched",
@@ -809,7 +802,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "channel_type": "chat",
                 "country_id": False,
                 "create_uid": self.env.user.id,
-                "custom_notifications": False,
                 "default_display_mode": False,
                 "description": False,
                 "fetchChannelInfoState": "fetched",
@@ -839,7 +831,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "channel_type": "chat",
                 "country_id": False,
                 "create_uid": self.env.user.id,
-                "custom_notifications": False,
                 "default_display_mode": False,
                 "description": False,
                 "fetchChannelInfoState": "fetched",
@@ -869,7 +860,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "channel_type": "chat",
                 "country_id": False,
                 "create_uid": self.env.user.id,
-                "custom_notifications": False,
                 "default_display_mode": False,
                 "description": False,
                 "fetchChannelInfoState": "fetched",
@@ -899,7 +889,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "channel_type": "chat",
                 "country_id": False,
                 "create_uid": self.env.user.id,
-                "custom_notifications": False,
                 "default_display_mode": False,
                 "description": False,
                 "fetchChannelInfoState": "fetched",
@@ -929,7 +918,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "channel_type": "livechat",
                 "country_id": self.env.ref("base.in").id,
                 "create_uid": self.users[1].id,
-                "custom_notifications": False,
                 "default_display_mode": False,
                 "description": False,
                 "fetchChannelInfoState": "fetched",
@@ -964,7 +952,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "channel_type": "livechat",
                 "country_id": self.env.ref("base.be").id,
                 "create_uid": self.env.ref("base.public_user").id,
-                "custom_notifications": False,
                 "default_display_mode": False,
                 "description": False,
                 "fetchChannelInfoState": "fetched",
@@ -1022,6 +1009,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             return {
                 "create_date": member_0_create_date,
                 "custom_channel_name": False,
+                "custom_notifications": False,
                 "fetched_message_id": False,
                 "id": member_0.id,
                 "last_interest_dt": member_0_last_interest_dt,
@@ -1037,6 +1025,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             return {
                 "create_date": member_0_create_date,
                 "custom_channel_name": False,
+                "custom_notifications": False,
                 "fetched_message_id": last_message.id,
                 "id": member_0.id,
                 "last_interest_dt": member_0_last_interest_dt,
@@ -1052,6 +1041,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             return {
                 "create_date": member_0_create_date,
                 "custom_channel_name": False,
+                "custom_notifications": False,
                 "fetched_message_id": last_message.id,
                 "id": member_0.id,
                 "last_interest_dt": member_0_last_interest_dt,
@@ -1067,6 +1057,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             return {
                 "create_date": member_0_create_date,
                 "custom_channel_name": False,
+                "custom_notifications": False,
                 "fetched_message_id": last_message_of_partner_0.id,
                 "id": member_0.id,
                 "last_interest_dt": member_0_last_interest_dt,
@@ -1088,6 +1079,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             return {
                 "create_date": member_0_create_date,
                 "custom_channel_name": False,
+                "custom_notifications": False,
                 "fetched_message_id": last_message.id,
                 "id": member_0.id,
                 "last_interest_dt": member_0_last_interest_dt,
@@ -1103,6 +1095,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             return {
                 "create_date": member_0_create_date,
                 "custom_channel_name": False,
+                "custom_notifications": False,
                 "fetched_message_id": False,
                 "id": member_0.id,
                 "last_interest_dt": member_0_last_interest_dt,
@@ -1128,6 +1121,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             return {
                 "create_date": member_0_create_date,
                 "custom_channel_name": False,
+                "custom_notifications": False,
                 "fetched_message_id": False,
                 "id": member_0.id,
                 "last_interest_dt": member_0_last_interest_dt,
@@ -1153,6 +1147,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             return {
                 "create_date": member_0_create_date,
                 "custom_channel_name": False,
+                "custom_notifications": False,
                 "fetched_message_id": False,
                 "id": member_0.id,
                 "last_interest_dt": member_0_last_interest_dt,
@@ -1178,6 +1173,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             return {
                 "create_date": member_0_create_date,
                 "custom_channel_name": False,
+                "custom_notifications": False,
                 "fetched_message_id": False,
                 "id": member_0.id,
                 "last_interest_dt": member_0_last_interest_dt,
@@ -1203,6 +1199,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             return {
                 "create_date": member_0_create_date,
                 "custom_channel_name": False,
+                "custom_notifications": False,
                 "fetched_message_id": False,
                 "id": member_0.id,
                 "last_interest_dt": member_0_last_interest_dt,
@@ -1228,6 +1225,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             return {
                 "create_date": member_0_create_date,
                 "custom_channel_name": False,
+                "custom_notifications": False,
                 "fetched_message_id": False,
                 "id": member_0.id,
                 "livechat_member_type": "agent",
@@ -1255,6 +1253,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             return {
                 "create_date": member_0_create_date,
                 "custom_channel_name": False,
+                "custom_notifications": False,
                 "fetched_message_id": False,
                 "id": member_0.id,
                 "livechat_member_type": "agent",
