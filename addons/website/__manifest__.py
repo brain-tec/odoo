@@ -221,6 +221,7 @@
             "website/static/src/**/common/**/*",
         ],
         'web.assets_frontend': [
+            'html_builder/static/src/utils/scrolling.js',
             'website/static/src/interactions/**/*',
             'website/static/src/core/**/*',
             'website/static/src/utils/**/*',
@@ -350,8 +351,10 @@
             'website/static/tests/interactions/**/*',
             'website/static/tests/builder/**/*',
             'website/static/tests/mock_server/**/*',
+            'website/static/tests/new_content_modal.test.js',
         ],
         'web.assets_unit_tests_setup': [
+            'html_builder/static/src/utils/scrolling.js',
             'web/static/src/legacy/js/core/class.js',
             'web/static/src/legacy/js/public/lazyloader.js',
             'web/static/src/legacy/js/public/minimal_dom.js',
@@ -469,6 +472,7 @@
             'website/static/src/components/edit_head_body_dialog/edit_head_body_dialog.js',
             'website/static/src/components/edit_head_body_dialog/edit_head_body_dialog.scss',
             'website/static/src/components/edit_head_body_dialog/edit_head_body_dialog.xml',
+            'website/static/src/utils/**/*',
             'website/static/src/components/dialog/*.js',
             'website/static/src/components/dialog/*.scss',
             'website/static/src/components/dialog/*.xml',
