@@ -209,8 +209,6 @@ class TestUiTranslate(odoo.tests.HttpCase):
         })
         self.start_tour(self.env['website'].get_client_action_url('/'), 'rte_translator', login='admin', timeout=120)
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_translate_menu_name(self):
         lang_en = self.env.ref('base.lang_en')
         parseltongue = self.env['res.lang'].create({
@@ -435,8 +433,6 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_09_website_edit_link_popover(self):
         self.start_tour('/@/', 'edit_link_popover', login='admin', step_delay=500, timeout=180)
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_10_website_conditional_visibility(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'conditional_visibility_1', login='admin')
         self.start_tour('/odoo', 'conditional_visibility_2', login='website_user')
@@ -498,8 +494,6 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_23_website_multi_edition(self):
         self.start_tour('/@/', 'website_multi_edition', login='admin')
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_24_snippet_cache_across_websites(self):
         default_website = self.env.ref('website.default_website')
         website = self.env['website'].create({
@@ -573,8 +567,6 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_update_column_count(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'website_update_column_count', login="admin")
 
-    # TODO master-mysterious-egg fix error
-    @unittest.skip("prepare mysterious-egg for merging")
     def test_website_text_highlights(self):
         self.start_tour("/", 'text_highlights', login='admin')
 
