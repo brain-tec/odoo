@@ -498,9 +498,14 @@ class AccountMove(models.Model):
         required=True,
         compute='_compute_currency_id', inverse='_inverse_currency_id', store=True, readonly=False, precompute=True,
     )
+    expected_currency_rate = fields.Float(
+        compute="_compute_expected_currency_rate",
+        digits=0,
+    )
     invoice_currency_rate = fields.Float(
         string='Currency Rate',
         compute='_compute_invoice_currency_rate', store=True, precompute=True,
+        readonly=False,
         copy=False,
         digits=0,
         help="Currency rate from company currency to document currency.",
@@ -1041,18 +1046,23 @@ class AccountMove(models.Model):
         return self.invoice_date or fields.Date.context_today(self)
 
     @api.depends('currency_id', 'company_currency_id', 'company_id', 'invoice_date')
+    def _compute_expected_currency_rate(self):
+        for move in self:
+            if move.currency_id:
+                move.expected_currency_rate = move.env['res.currency']._get_conversion_rate(
+                    from_currency=move.company_currency_id,
+                    to_currency=move.currency_id,
+                    company=move.company_id,
+                    date=move._get_invoice_currency_rate_date(),
+                )
+            else:
+                move.expected_currency_rate = 1
+
+    @api.depends('currency_id', 'company_currency_id', 'company_id', 'invoice_date')
     def _compute_invoice_currency_rate(self):
         for move in self:
             if move.is_invoice(include_receipts=True):
-                if move.currency_id:
-                    move.invoice_currency_rate = self.env['res.currency']._get_conversion_rate(
-                        from_currency=move.company_currency_id,
-                        to_currency=move.currency_id,
-                        company=move.company_id,
-                        date=move._get_invoice_currency_rate_date(),
-                    )
-                else:
-                    move.invoice_currency_rate = 1
+                move.invoice_currency_rate = move.expected_currency_rate
 
     @api.depends('move_type')
     def _compute_direction_sign(self):
@@ -2430,20 +2440,14 @@ class AccountMove(models.Model):
             if disabled:
                 return
 
-        unbalanced_moves = self._get_unbalanced_moves(container)
-        if unbalanced_moves:
-            error_msg = _("An error has occurred.")
-            for move_id, sum_debit, sum_credit in unbalanced_moves:
-                move = self.browse(move_id)
-                error_msg += _(
-                    "\n\n"
-                    "The journal entry is not balanced,"
-                    "with %(debit_total)s on the debit side and %(credit_total)s on the credit side, there needs to be an equilibrium!\n\n"
-                    "Consider adding a default account on the journal \"%(journal)s\" to automatically balance each journal entry and restore order to the accounting universe!",
-                    debit_total=format_amount(self.env, sum_debit, move.company_id.currency_id),
-                    credit_total=format_amount(self.env, sum_credit, move.company_id.currency_id),
-                    journal=move.journal_id.name)
-            raise UserError(error_msg)
+        if unbalanced_moves := self._get_unbalanced_moves(container):
+            if len(unbalanced_moves) == 1:
+                raise UserError(_("The entry is not balanced."))
+
+            error_msg = _("The following entries are unbalanced:\n\n")
+            for move in unbalanced_moves:
+                error_msg += f"  - {self.browse(move[0]).name}\n"
+                raise UserError(error_msg)
 
     def _get_unbalanced_moves(self, container):
         moves = container['records'].filtered(lambda move: move.line_ids)
@@ -2789,6 +2793,8 @@ class AccountMove(models.Model):
     def _get_automatic_balancing_account(self):
         """ Small helper for special cases where we want to auto balance a move with a specific account. """
         self.ensure_one()
+        if self.journal_id.default_account_id:
+            return self.journal_id.default_account_id.id
         return self.company_id.account_journal_suspense_account_id.id
 
     @contextmanager
@@ -5336,6 +5342,21 @@ class AccountMove(models.Model):
                     }))
                 move.write({'line_ids': line_ids_commands})
 
+    def get_currency_rate(self, company_id, to_currency_id, date):
+        company = self.env['res.company'].browse(company_id)
+        to_currency = self.env['res.currency'].browse(to_currency_id)
+
+        return self.env['res.currency']._get_conversion_rate(
+            from_currency=company.currency_id,
+            to_currency=to_currency,
+            company=company,
+            date=date,
+        )
+
+    def refresh_invoice_currency_rate(self):
+        for move in self:
+            move.invoice_currency_rate = move.expected_currency_rate
+
     def action_register_payment(self):
         if any(m.state != 'posted' for m in self):
             raise UserError(_("You can only register payment for posted journal entries."))
@@ -5472,7 +5493,7 @@ class AccountMove(models.Model):
 
         self._check_draftable()
         # We remove all the analytics entries for this journal
-        self.mapped('line_ids.analytic_line_ids').unlink()
+        self.line_ids.analytic_line_ids.with_context(skip_analytic_sync=True).unlink()
         self.mapped('line_ids').remove_move_reconcile()
         self.state = 'draft'
 

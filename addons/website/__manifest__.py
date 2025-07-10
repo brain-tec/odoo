@@ -351,6 +351,7 @@
             'website/static/tests/builder/**/*',
             'website/static/tests/mock_server/**/*',
             'website/static/tests/redirect_field.test.js',
+            'website/static/tests/new_content_modal.test.js',
         ],
         'web.assets_unit_tests_setup': [
             'html_builder/static/src/utils/scrolling.js',
@@ -471,6 +472,7 @@
             'website/static/src/components/edit_head_body_dialog/edit_head_body_dialog.js',
             'website/static/src/components/edit_head_body_dialog/edit_head_body_dialog.scss',
             'website/static/src/components/edit_head_body_dialog/edit_head_body_dialog.xml',
+            'website/static/src/utils/**/*',
             'website/static/src/components/dialog/*.js',
             'website/static/src/components/dialog/*.scss',
             'website/static/src/components/dialog/*.xml',

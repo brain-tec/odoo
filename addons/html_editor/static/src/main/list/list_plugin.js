@@ -3,6 +3,7 @@ import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import { removeClass, toggleClass, wrapInlinesInBlocks } from "@html_editor/utils/dom";
 import {
     getDeepestPosition,
+    isElement,
     isEmptyBlock,
     isListElement,
     isListItemElement,
@@ -10,6 +11,7 @@ import {
     isProtected,
     isProtecting,
     isShrunkBlock,
+    isVisibleTextNode,
     listElementSelector,
 } from "@html_editor/utils/dom_info";
 import {
@@ -19,8 +21,10 @@ import {
     selectElements,
     ancestors,
     childNodes,
+    firstLeaf,
+    lastLeaf,
 } from "@html_editor/utils/dom_traversal";
-import { childNodeIndex } from "@html_editor/utils/position";
+import { childNodeIndex, nodeSize } from "@html_editor/utils/position";
 import { leftLeafOnlyNotBlockPath } from "@html_editor/utils/dom_state";
 import { _t } from "@web/core/l10n/translation";
 import { compareListTypes, createList, insertListAfter, isListItem } from "./utils";
@@ -132,7 +136,7 @@ export class ListPlugin extends Plugin {
             { commandId: "toggleListCL" },
         ].map((item) => withSequence(15, item)),
 
-        hints: [{ selector: "LI", text: _t("List") }],
+        hints: [{ selector: `LI, LI > ${baseContainerGlobalSelector}`, text: _t("List") }],
 
         /** Handlers */
         input_handlers: this.onInput.bind(this),
@@ -150,6 +154,22 @@ export class ListPlugin extends Plugin {
         format_selection_overrides: this.applyFormatToListItem.bind(this),
         node_to_insert_processors: this.processNodeToInsert.bind(this),
         clipboard_content_processors: this.processContentForClipboard.bind(this),
+        fully_selected_node_predicates: (node, selection, range) => {
+            if (node.nodeName === "LI") {
+                const nonListChildren = childNodes(node).filter(
+                    (n) => !["UL", "OL"].includes(n.nodeName)
+                );
+                if (!nonListChildren.length) {
+                    return;
+                }
+                const startLeaf = firstLeaf(nonListChildren[0]);
+                const endLeaf = lastLeaf(nonListChildren[nonListChildren.length - 1]);
+                return (
+                    range.isPointInRange(startLeaf, 0) &&
+                    range.isPointInRange(endLeaf, nodeSize(endLeaf))
+                );
+            }
+        },
     };
 
     setup() {
@@ -288,11 +308,11 @@ export class ListPlugin extends Plugin {
     }
 
     normalize(root = this.editable) {
-        const closestNestedLI = closestElement(root, "li.oe-nested");
+        const closestNestedLI = closestElement(root, "li:has(ul, ol)");
         if (closestNestedLI) {
             root = closestNestedLI.parentElement;
         }
-        for (const element of selectElements(root, "ul, ol, li")) {
+        for (let element of selectElements(root, "ul, ol, li")) {
             if (isProtected(element) || isProtecting(element)) {
                 continue;
             }
@@ -302,7 +322,10 @@ export class ListPlugin extends Plugin {
                 this.normalizeLI,
                 this.normalizeNestedList,
             ]) {
-                fn.call(this, element);
+                const updatedElement = fn.call(this, element);
+                if (updatedElement) {
+                    element = updatedElement;
+                }
             }
         }
     }
@@ -485,7 +508,11 @@ export class ListPlugin extends Plugin {
             previousSibling &&
             element.isContentEditable &&
             previousSibling.isContentEditable &&
-            compareListTypes(previousSibling, element)
+            (compareListTypes(previousSibling, element) ||
+                (element.tagName === "LI" &&
+                    isListItem(previousSibling) &&
+                    (isListElement(previousSibling.lastChild) ||
+                        isListElement(element.firstChild))))
         ) {
             const cursors = this.dependencies.selection.preserveSelection();
             cursors.update(callbacksForCursorUpdate.merge(element));
@@ -494,6 +521,7 @@ export class ListPlugin extends Plugin {
             element.remove();
             this.adjustListPadding(previousSibling);
             cursors.restore();
+            return previousSibling;
         }
     }
 
@@ -501,8 +529,15 @@ export class ListPlugin extends Plugin {
      * Wraps inlines in P to avoid inlines with block siblings.
      */
     normalizeLI(element) {
-        if (!isListItem(element) || element.classList.contains("oe-nested")) {
+        if (!isListItem(element)) {
             return;
+        }
+
+        if (
+            element.firstChild?.nodeType === Node.ELEMENT_NODE &&
+            isListElement(element.firstChild)
+        ) {
+            element.classList.add("oe-nested");
         }
 
         if (
@@ -525,10 +560,15 @@ export class ListPlugin extends Plugin {
         }
         if (["UL", "OL"].includes(element.parentElement?.tagName)) {
             const cursors = this.dependencies.selection.preserveSelection();
-            const li = this.document.createElement("li");
+            let li;
+            if (element.previousElementSibling?.nodeName === "LI") {
+                li = element.previousElementSibling;
+            } else {
+                li = this.document.createElement("li");
+                li.classList.add("oe-nested");
+            }
             element.parentElement.insertBefore(li, element);
             li.appendChild(element);
-            li.classList.add("oe-nested");
             cursors.restore();
         }
     }
@@ -542,13 +582,15 @@ export class ListPlugin extends Plugin {
      * @param {HTMLLIElement} li
      */
     indentLI(li) {
-        const lip = this.document.createElement("li");
+        const lip = li.previousElementSibling || this.document.createElement("li");
+        if (!lip.hasChildNodes()) {
+            lip.classList.add("oe-nested");
+        }
         const parentLi = li.parentElement;
         const nextSiblingLi = li.nextSibling;
-        lip.classList.add("oe-nested");
         const destul =
             li.previousElementSibling?.querySelector("ol, ul") ||
-            li.nextElementSibling?.querySelector("ol, ul") ||
+            li.querySelector("ol, ul") ||
             li.closest("ol, ul");
         const cursors = this.dependencies.selection.preserveSelection();
         // Remove the LI first to force a removal mutation in collaboration.
@@ -559,6 +601,8 @@ export class ListPlugin extends Plugin {
         // lip replaces li
         li.before(lip);
         ul.append(li);
+        const nestedLists = childNodes(li).filter((n) => isListElement(n));
+        ul.after(...nestedLists);
         parentLi.insertBefore(lip, nextSiblingLi);
         cursors.update((cursor) => {
             if (cursor.node === lip.parentNode) {
@@ -573,14 +617,14 @@ export class ListPlugin extends Plugin {
         cursors.restore();
     }
 
-    // @temp comment: former oShiftTab
     /**
      * @param {HTMLLIElement} li
      * @returns {HTMLLIElement|null} li or null if it no longer exists.
      */
     outdentLI(li) {
-        if (li.nextElementSibling) {
-            this.splitList(li.nextElementSibling);
+        const listToSplit = li.querySelector("ol, ul") || li.nextElementSibling;
+        if (listToSplit) {
+            this.splitList(listToSplit);
         }
 
         if (isListItem(li.parentNode.parentNode)) {
@@ -594,31 +638,42 @@ export class ListPlugin extends Plugin {
     /**
      * Splits a list at the given LI element (li is moved to the new list).
      *
-     * @param {HTMLLIElement} li
+     * @param {HTMLUListElement|HTMLOListElement|HTMLLIElement} node - HTML element
      */
-    splitList(li) {
+    splitList(node) {
         const cursors = this.dependencies.selection.preserveSelection();
         // Create new list
-        const currentList = li.parentElement;
+        const currentList = closestElement(node, "ul, ol");
         const newList = currentList.cloneNode(false);
-        if (isListItem(li.parentNode.parentNode)) {
+        const isList = isListElement(node);
+        const wrapperLi = isList ? this.document.createElement("li") : node;
+
+        if (isList) {
+            wrapperLi.classList.add("oe-nested");
+            newList.append(wrapperLi);
+            cursors.update(callbacksForCursorUpdate.after(node.parentNode.parentNode, newList));
+            node.parentNode.parentNode.after(newList);
+        } else if (isListItem(node.parentNode.parentNode)) {
             // li is nested list item
             const lip = this.document.createElement("li");
             lip.classList.add("oe-nested");
             lip.append(newList);
-            cursors.update(callbacksForCursorUpdate.after(li.parentNode.parentNode, lip));
-            li.parentNode.parentNode.after(lip);
+            cursors.update(callbacksForCursorUpdate.after(node.parentNode.parentNode, lip));
+            node.parentNode.parentNode.after(lip);
         } else {
-            cursors.update(callbacksForCursorUpdate.after(li.parentNode, newList));
-            li.parentNode.after(newList);
+            cursors.update(callbacksForCursorUpdate.after(node.parentNode, newList));
+            node.parentNode.after(newList);
         }
-        // Move nodes to new list
-        while (li.nextSibling) {
-            cursors.update(callbacksForCursorUpdate.append(newList, li.nextSibling));
-            newList.append(li.nextSibling);
+
+        const moveFrom = isList ? node.parentElement : node;
+        while (moveFrom.nextSibling) {
+            cursors.update(callbacksForCursorUpdate.append(newList, moveFrom.nextSibling));
+            newList.append(moveFrom.nextSibling);
         }
-        cursors.update(callbacksForCursorUpdate.prepend(newList, li));
-        newList.prepend(li);
+
+        const moveTo = isList ? wrapperLi : newList;
+        cursors.update(callbacksForCursorUpdate.prepend(moveTo, node));
+        moveTo.prepend(node);
         cursors.restore();
         this.adjustListPadding(currentList);
         this.adjustListPadding(newList);
@@ -632,7 +687,10 @@ export class ListPlugin extends Plugin {
         // Move LI
         cursors.update(callbacksForCursorUpdate.after(lip, li));
         lip.after(li);
-
+        while (ul.nextSibling) {
+            cursors.update(callbacksForCursorUpdate.append(li, ul.nextSibling));
+            li.append(ul.nextSibling);
+        }
         // Remove UL and LI.oe-nested if left empty.
         if (!ul.children.length) {
             cursors.update(callbacksForCursorUpdate.remove(ul));
@@ -738,13 +796,15 @@ export class ListPlugin extends Plugin {
         const listItems = new Set();
         const navListItems = new Set();
         const nonListItems = [];
-        for (const block of this.dependencies.selection.getTargetedBlocks()) {
+        const blocks = [...this.dependencies.selection.getTargetedBlocks()].filter(
+            (n) => !n.querySelector("li")
+        );
+        for (const block of blocks) {
             const closestLI = block.closest("li");
             if (closestLI) {
                 if (closestLI.classList.contains("nav-item")) {
                     navListItems.add(closestLI);
-                } else if (!closestLI.querySelector("li") && closestLI.isContentEditable) {
-                    // Keep deepest list items only.
+                } else if (closestLI.isContentEditable) {
                     listItems.add(closestLI);
                 }
             } else if (!["UL", "OL"].includes(block.tagName)) {
@@ -767,7 +827,7 @@ export class ListPlugin extends Plugin {
             return nodeToInsert;
         }
         const mode = container && this.getListMode(listEl);
-        if (isListItemElement(nodeToInsert) && nodeToInsert.classList.contains("oe-nested")) {
+        if (isListItemElement(nodeToInsert) && nodeToInsert.querySelector("ol, ul")) {
             return this.convertList(nodeToInsert, mode);
         }
         if (isListElement(nodeToInsert)) {
@@ -985,59 +1045,125 @@ export class ListPlugin extends Plugin {
     }
 
     applyColorToListItem(color, mode) {
-        const targetedNodes = new Set(
-            this.dependencies.selection
-                .getTargetedNodes()
-                .map((n) => closestElement(n, "li"))
-                .filter(Boolean)
+        this.dependencies.split.splitSelection();
+        const targetedNodes = this.dependencies.selection.getTargetedNodes();
+        const listItems = new Set(
+            targetedNodes.map((n) => closestElement(n, "li")).filter(Boolean)
         );
-        if (!targetedNodes.size || mode !== "color") {
+        if (!listItems.size || mode !== "color") {
             return;
         }
-        for (const list of targetedNodes) {
-            if (this.dependencies.selection.areNodeContentsFullySelected(list)) {
-                for (const node of descendants(list)) {
-                    if (node.nodeType === Node.ELEMENT_NODE && node.style.color) {
+        const cursors = this.dependencies.selection.preserveSelection();
+        for (const listItem of listItems) {
+            if (this.dependencies.selection.areNodeContentsFullySelected(listItem)) {
+                for (const node of [
+                    listItem,
+                    ...descendants(listItem).filter(
+                        (n) => isElement(n) && closestElement(n, "LI") === listItem
+                    ),
+                ]) {
+                    removeClass(node, "o_default_color");
+                    if (node.style.color) {
                         node.style.color = "";
                     }
                 }
-                this.dependencies.color.colorElement(list, color, mode);
+
+                if (color) {
+                    this.dependencies.color.colorElement(listItem, color, mode);
+                    const sublists = childNodes(listItem).filter(isListElement);
+                    for (const list of sublists) {
+                        list.classList.add("o_default_color");
+                    }
+                }
+            } else if (color === "" && listItem.style.color) {
+                const textNodes = targetedNodes.filter(
+                    (n) => isVisibleTextNode(n) && closestElement(n, "li") === listItem
+                );
+                // Remove inline color from partial selection by
+                // wrapping in font with default color.
+                for (const node of textNodes) {
+                    const font = this.document.createElement("font");
+                    font.classList.add("o_default_color");
+                    node.before(font);
+                    cursors.update(callbacksForCursorUpdate.before(node, font));
+                    font.append(node);
+                    cursors.update(callbacksForCursorUpdate.append(font, node));
+                }
             }
         }
+        cursors.restore();
     }
 
-    applyFormatToListItem(formatName, { formatProps } = {}) {
-        const targetedNodes = new Set(
-            this.dependencies.selection
-                .getTargetedNodes()
-                .map((n) => closestElement(n, "li"))
-                .filter(Boolean)
+    applyFormatToListItem(formatName, { formatProps, applyStyle } = {}) {
+        if (!["setFontSizeClassName", "fontSize"].includes(formatName)) {
+            return;
+        }
+        this.dependencies.split.splitSelection();
+        const targetedNodes = this.dependencies.selection.getTargetedNodes();
+        const listItems = new Set(
+            targetedNodes.map((n) => closestElement(n, "li")).filter(Boolean)
         );
-        if (!targetedNodes.size || !["setFontSizeClassName", "fontSize"].includes(formatName)) {
+        if (!listItems.size) {
             return false;
         }
         const listsSet = new Set();
-        for (const listItem of targetedNodes) {
-            // Skip list items with block descendants
-            if ([...descendants(listItem)].some(isBlock)) {
+        const cursors = this.dependencies.selection.preserveSelection();
+        for (const listItem of listItems) {
+            // Skip list items with block descendants other than base
+            // container or a list related elements or no font size formatting
+            // to remove.
+            const hasOnlyBaseBlocks = [...descendants(listItem)]
+                .filter(isBlock)
+                .every((n) => n.matches(`${baseContainerGlobalSelector}, ol, ul, li`));
+            const hasExistingFontSize =
+                FONT_SIZE_CLASSES.some((c) => listItem.classList.contains(c)) ||
+                listItem.style.fontSize;
+            if (!hasOnlyBaseBlocks || (!applyStyle && !hasExistingFontSize)) {
                 continue;
             }
 
             if (this.dependencies.selection.areNodeContentsFullySelected(listItem)) {
-                for (const node of [listItem, ...descendants(listItem)]) {
-                    if (node.nodeType === Node.ELEMENT_NODE) {
-                        removeClass(node, ...FONT_SIZE_CLASSES);
+                for (const node of [
+                    listItem,
+                    ...descendants(listItem).filter(
+                        (n) => isElement(n) && closestElement(n, "LI") === listItem
+                    ),
+                ]) {
+                    removeClass(node, ...FONT_SIZE_CLASSES, "o_default_font_size");
+                    if (node.style.fontSize) {
+                        node.style.fontSize = "";
                     }
                 }
 
-                if (formatName === "setFontSizeClassName") {
-                    listItem.classList.add(formatProps.className);
-                } else if (formatName === "fontSize") {
-                    listItem.style.fontSize = formatProps.size;
+                if (applyStyle) {
+                    if (formatName === "setFontSizeClassName") {
+                        listItem.classList.add(formatProps.className);
+                    } else if (formatName === "fontSize") {
+                        listItem.style.fontSize = formatProps.size;
+                    }
+                    const sublists = childNodes(listItem).filter(isListElement);
+                    for (const list of sublists) {
+                        list.classList.add("o_default_font_size");
+                    }
+                }
+            } else if (!applyStyle && hasExistingFontSize) {
+                const textNodes = targetedNodes.filter(
+                    (n) => isVisibleTextNode(n) && closestElement(n, "li") === listItem
+                );
+                // Remove inline font size from partial selection by
+                // wrapping in span with default font size.
+                for (const node of textNodes) {
+                    const span = this.document.createElement("span");
+                    span.classList.add("o_default_font_size");
+                    node.before(span);
+                    cursors.update(callbacksForCursorUpdate.before(node, span));
+                    span.append(node);
+                    cursors.update(callbacksForCursorUpdate.append(span, node));
                 }
             }
             listsSet.add(listItem.parentElement);
         }
+        cursors.restore();
         for (const list of listsSet) {
             this.adjustListPadding(list);
         }
