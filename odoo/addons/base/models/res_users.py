@@ -138,6 +138,8 @@ class ResUsersLog(models.Model):
     # Uses the magical fields `create_uid` and `create_date` for recording logins.
     # See `mail.presence` for more recent activity tracking purposes.
 
+    create_uid = fields.Many2one('res.users', string='Created by', readonly=True, index=True)
+
     @api.autovacuum
     def _gc_user_logs(self):
         self.env.cr.execute("""
@@ -473,7 +475,7 @@ class ResUsers(models.Model):
 
     @api.model
     def _search_res_users_settings_id(self, operator, operand):
-        return [('res_users_settings_ids', operator, operand)]
+        return Domain('res_users_settings_ids', operator, operand)
 
     @api.onchange('login')
     def on_change_login(self):

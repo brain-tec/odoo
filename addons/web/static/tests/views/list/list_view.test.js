@@ -1030,10 +1030,10 @@ test(`list view: action button in controlPanel basic rendering on mobile`, async
     });
     expect(`.o_control_panel_actions > *`).toHaveCount(0);
     await contains(".o_control_panel_breadcrumbs .o_cp_action_menus .fa-cog").click();
-    expect(queryAllTexts(`.o_popover .o-dropdown-item`)).toEqual(["Export All"]);
+    expect(queryAllTexts(`.o-dropdown--menu .o-dropdown-item`)).toEqual(["Export All"]);
     await clickRecordSelector();
     await contains(".o_control_panel_breadcrumbs .o_cp_action_menus .fa-cog").click();
-    expect(queryAllTexts(`.o_popover .o-dropdown-item`)).toEqual([
+    expect(queryAllTexts(`.o-dropdown--menu .o-dropdown-item`)).toEqual([
         "plaf",
         "Export",
         "Duplicate",
@@ -1041,7 +1041,7 @@ test(`list view: action button in controlPanel basic rendering on mobile`, async
     ]);
     await clickRecordSelector();
     await contains(".o_control_panel_breadcrumbs .o_cp_action_menus .fa-cog").click();
-    expect(queryAllTexts(`.o_popover .o-dropdown-item`)).toEqual(["Export All"]);
+    expect(queryAllTexts(`.o-dropdown--menu .o-dropdown-item`)).toEqual(["Export All"]);
 });
 
 test.tags("desktop");
@@ -1122,7 +1122,7 @@ test(`list view: action button in controlPanel with display='always' on mobile`,
 
     await clickRecordSelector();
     await contains(".o_control_panel_breadcrumbs .o_cp_action_menus .fa-cog").click();
-    expect(queryAllTexts(`.o_popover .o-dropdown-item`)).toEqual([
+    expect(queryAllTexts(`.o-dropdown--menu .o-dropdown-item`)).toEqual([
         "",
         "default-selection",
         "Export",
@@ -2427,8 +2427,8 @@ test(`grouped list rendering with groupby m2o field: edit group`, async () => {
     expect(queryAllTexts(`.o_group_name`)).toEqual(["Value 1 (3)", "Value 2 (1)"]);
     expect(`.o_group_header:first .o_group_config`).toHaveCount(1);
     await contains(`.o_group_header:first .o_group_config button`, { visible: false }).click();
-    expect(`.o_popover.o-dropdown--group-config-menu`).toHaveCount(1);
-    await contains(`.o_popover.o-dropdown--group-config-menu .o_group_edit`).click();
+    expect(`.o-dropdown--group-config-menu`).toHaveCount(1);
+    await contains(`.o-dropdown--group-config-menu .o_group_edit`).click();
     expect(`.o_dialog`).toHaveCount(1);
     expect(`.o_dialog .o_form_renderer .o_field_char[name="name"]`).toHaveCount(1);
     await contains(`.o_dialog .o_form_renderer .o_field_char[name="name"] input`).edit(
@@ -2439,9 +2439,12 @@ test(`grouped list rendering with groupby m2o field: edit group`, async () => {
     expect.verifySteps(["web_save"]);
     expect(queryAllTexts(`.o_group_name`)).toEqual(["Value edit (3)", "Value 2 (1)"]);
     await contains(`.o_group_header:first .o_group_config button`, { visible: false }).click();
-    expect(`.o_popover.o-dropdown--group-config-menu`).toHaveCount(1);
-    await contains(getFixture()).click();
-    expect(`.o_popover.o-dropdown--group-config-menu`).toHaveCount(0, {
+    if (getMockEnv().isSmall) {
+        await contains(".o_bottom_sheet_backdrop").click();
+    } else {
+        await contains(getFixture()).click();
+    }
+    expect(`.o-dropdown--group-config-menu`).toHaveCount(0, {
         message: "Close on click away should occur properly",
     });
 });
@@ -2461,8 +2464,8 @@ test(`grouped list rendering with groupby m2o field: delete group`, async () => 
     expect(queryAllTexts(`.o_group_name`)).toEqual(["Value 1 (3)", "Value 2 (1)"]);
     expect(`.o_group_header:first .o_group_config`).toHaveCount(1);
     await contains(`.o_group_header:first .o_group_config button`, { visible: false }).click();
-    expect(`.o_popover.o-dropdown--group-config-menu`).toHaveCount(1);
-    await contains(`.o_popover.o-dropdown--group-config-menu .o_group_delete`).click();
+    expect(`.o-dropdown--group-config-menu`).toHaveCount(1);
+    await contains(`.o-dropdown--group-config-menu .o_group_delete`).click();
     expect(`.o_dialog`).toHaveCount(1);
     expect(`.o_dialog .modal-body`).toHaveText("Are you sure you want to delete this column?");
     await contains(`.o_dialog footer button:contains(Delete)`).click();
@@ -5382,7 +5385,7 @@ test(`custom delete confirmation dialog`, async () => {
     class CautiousController extends listView.Controller {
         get deleteConfirmationDialogProps() {
             const props = super.deleteConfirmationDialogProps;
-            props.body = markup(`<span class="text-danger">These are the consequences</span>`);
+            props.body = markup`<span class="text-danger">These are the consequences</span>`;
             return props;
         }
     }
@@ -18538,7 +18541,7 @@ test(`cache web_search_read`, async () => {
     expect(queryAllTexts(`.o_list_char`)).toEqual(["blip", "gnap11", "blip", "plop", "plop2"]);
 });
 
-test(`cache web_search_read (onUpdate called after anoter load)`, async () => {
+test(`cache web_search_read (onUpdate called after another load)`, async () => {
     const searchReadDefs = [null, new Deferred(), new Deferred()];
     let webSearchReadCount = 0;
     onRpc("web_search_read", () => searchReadDefs[webSearchReadCount++]);
@@ -18592,4 +18595,244 @@ test(`cache web_search_read (onUpdate called after anoter load)`, async () => {
     await animationFrame();
     expect(`.o_data_row`).toHaveCount(5);
     expect(queryAllTexts(`.o_list_char`)).toEqual(["blip", "blip", "gnap", "new record", "yop"]);
+});
+
+test(`cache web_read_group (no change)`, async () => {
+    let def;
+    onRpc("web_read_group", () => def);
+
+    Foo._views = {
+        "list,false": `<list default_group_by="bar"><field name="foo"/></list>`,
+        "kanban,false": `
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="foo"/>
+                    </t>
+                </templates>
+            </kanban>`,
+        "search,false": `<search/>`,
+    };
+
+    defineActions([
+        {
+            id: 1,
+            name: "Partners Action",
+            res_model: "foo",
+            views: [[false, "list"]],
+            search_view_id: [false, "search"],
+        },
+        {
+            id: 2,
+            name: "Another action",
+            res_model: "foo",
+            views: [[false, "kanban"]],
+            search_view_id: [false, "search"],
+        },
+    ]);
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+    expect(`.o_list_view`).toHaveCount(1);
+    expect(`.o_group_header`).toHaveCount(2);
+    expect(queryAllTexts(`.o_group_header`)).toEqual(["No (1)", "Yes (3)"]);
+
+    // execute another action to remove the list from the DOM
+    await getService("action").doAction(2);
+    expect(`.o_kanban_view`).toHaveCount(1);
+
+    // execute again action 1, but web_read_group is delayed
+    def = new Deferred();
+    await getService("action").doAction(1);
+    expect(`.o_list_view`).toHaveCount(1);
+    expect(`.o_group_header`).toHaveCount(2);
+    expect(queryAllTexts(`.o_group_header`)).toEqual(["No (1)", "Yes (3)"]);
+
+    // simulate the return of web_read_group => nothing should have changed
+    def.resolve();
+    await animationFrame();
+    expect(`.o_list_view`).toHaveCount(1);
+    expect(`.o_group_header`).toHaveCount(2);
+    expect(queryAllTexts(`.o_group_header`)).toEqual(["No (1)", "Yes (3)"]);
+});
+
+test(`cache web_read_group (change)`, async () => {
+    let def;
+    onRpc("web_read_group", () => def);
+
+    Foo._views = {
+        "list,false": `<list default_group_by="int_field"><field name="foo"/></list>`,
+        "kanban,false": `
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="foo"/>
+                    </t>
+                </templates>
+            </kanban>`,
+        "search,false": `<search/>`,
+    };
+
+    defineActions([
+        {
+            id: 1,
+            name: "Partners Action",
+            res_model: "foo",
+            views: [[false, "list"]],
+            search_view_id: [false, "search"],
+        },
+        {
+            id: 2,
+            name: "Another action",
+            res_model: "foo",
+            views: [[false, "kanban"]],
+            search_view_id: [false, "search"],
+        },
+    ]);
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+    expect(`.o_list_view`).toHaveCount(1);
+    expect(`.o_group_header`).toHaveCount(4);
+    expect(queryAllTexts(`.o_group_header`)).toEqual(["-4 (1)", "9 (1)", "10 (1)", "17 (1)"]);
+
+    // simulate the create of new records by someone else
+    MockServer.env.foo.create([{ int_field: 44 }, { int_field: -4 }]);
+
+    // execute another action to remove the list from the DOM
+    await getService("action").doAction(2);
+    expect(`.o_kanban_view`).toHaveCount(1);
+
+    // execute again action 1, but web_read_group is delayed
+    def = new Deferred();
+    await getService("action").doAction(1);
+    expect(`.o_list_view`).toHaveCount(1);
+    expect(`.o_group_header`).toHaveCount(4);
+    expect(queryAllTexts(`.o_group_header`)).toEqual(["-4 (1)", "9 (1)", "10 (1)", "17 (1)"]);
+
+    // simulate the return of web_read_group => the data should have been updated
+    def.resolve();
+    await animationFrame();
+    expect(`.o_list_view`).toHaveCount(1);
+    expect(`.o_group_header`).toHaveCount(5);
+    expect(queryAllTexts(`.o_group_header`)).toEqual([
+        "-4 (2)",
+        "9 (1)",
+        "10 (1)",
+        "17 (1)",
+        "44 (1)",
+    ]);
+});
+
+test(`cache web_read_group (with sample data, no change)`, async () => {
+    let def;
+    onRpc("web_read_group", () => def);
+
+    Foo._records = [];
+    Foo._views = {
+        "list,false": `<list sample="1" default_group_by="int_field"><field name="foo"/></list>`,
+        "kanban,false": `
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="foo"/>
+                    </t>
+                </templates>
+            </kanban>`,
+        "search,false": `<search/>`,
+    };
+
+    defineActions([
+        {
+            id: 1,
+            name: "Partners Action",
+            res_model: "foo",
+            views: [[false, "list"]],
+            search_view_id: [false, "search"],
+        },
+        {
+            id: 2,
+            name: "Another action",
+            res_model: "foo",
+            views: [[false, "kanban"]],
+            search_view_id: [false, "search"],
+        },
+    ]);
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+    expect(`.o_list_view .o_view_sample_data`).toHaveCount(1);
+
+    // execute another action to remove the list from the DOM
+    await getService("action").doAction(2);
+    expect(`.o_kanban_view`).toHaveCount(1);
+
+    // execute again action 1, but web_read_group is delayed
+    def = new Deferred();
+    await getService("action").doAction(1);
+    expect(`.o_list_view .o_view_sample_data`).toHaveCount(1);
+
+    // simulate the return of web_read_group => the sample data should still be displayed
+    def.resolve();
+    await animationFrame();
+    expect(`.o_list_view .o_view_sample_data`).toHaveCount(1);
+});
+
+test(`cache web_read_group (with sample data, change)`, async () => {
+    let def;
+    onRpc("web_read_group", () => def);
+
+    Foo._records = [];
+    Foo._views = {
+        "list,false": `<list sample="1" default_group_by="int_field"><field name="foo"/></list>`,
+        "kanban,false": `
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="foo"/>
+                    </t>
+                </templates>
+            </kanban>`,
+        "search,false": `<search/>`,
+    };
+
+    defineActions([
+        {
+            id: 1,
+            name: "Partners Action",
+            res_model: "foo",
+            views: [[false, "list"]],
+            search_view_id: [false, "search"],
+        },
+        {
+            id: 2,
+            name: "Another action",
+            res_model: "foo",
+            views: [[false, "kanban"]],
+            search_view_id: [false, "search"],
+        },
+    ]);
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+    expect(`.o_list_view .o_view_sample_data`).toHaveCount(1);
+
+    // simulate the create of new records by someone else
+    MockServer.env.foo.create([{ int_field: 44 }, { int_field: -4 }]);
+
+    // execute another action to remove the list from the DOM
+    await getService("action").doAction(2);
+    expect(`.o_kanban_view`).toHaveCount(1);
+
+    // execute again action 1, but web_read_group is delayed
+    def = new Deferred();
+    await getService("action").doAction(1);
+    expect(`.o_list_view .o_view_sample_data`).toHaveCount(1);
+
+    // simulate the return of web_read_group => the data should have been updated
+    def.resolve();
+    await animationFrame();
+    expect(`.o_list_view`).toHaveCount(1);
+    expect(`.o_group_header`).toHaveCount(2);
+    expect(queryAllTexts(`.o_group_header`)).toEqual(["-4 (1)", "44 (1)"]);
 });

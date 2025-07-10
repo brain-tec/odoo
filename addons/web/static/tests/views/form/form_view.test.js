@@ -2007,6 +2007,7 @@ test(`readonly stat buttons stays disabled on mobile`, async () => {
     expect(`button.oe_stat_button[disabled]`).toHaveCount(1);
 
     await contains(`button[name=action_to_perform]`).click();
+    await contains(".o_bottom_sheet_backdrop").click();
     await contains(".o-form-buttonbox .o_button_more").click();
     expect(`button.oe_stat_button[disabled]`).toHaveCount(1, {
         message: "After performing the action, only one button should be disabled.",
@@ -12209,6 +12210,75 @@ test(`field with special data`, async () => {
     expect.verifySteps(["get_special_data 9", "get_special_data 42"]);
 });
 
+test(`field with special data (with persistent Cache)`, async () => {
+    class MyWidget extends Component {
+        static props = ["*"];
+        static template = xml`<div class="my_widget">MyWidget <t t-esc="specialData.data.test"/></div>`;
+        setup() {
+            this.specialData = useSpecialData((orm, props) => {
+                const { record } = props;
+                return orm.call("my.model", "get_special_data", [record.data.int_field]);
+            });
+        }
+    }
+    widgetsRegistry.add("my_widget", { component: MyWidget });
+
+    let def = new Deferred();
+    onRpc("get_special_data", ({ args }) => {
+        expect.step(`get_special_data ${args[0]}`);
+        return def;
+    });
+
+    defineActions([
+        {
+            id: 1,
+            name: "Partner",
+            res_model: "partner",
+            views: [[false, "form"]],
+            view_mode: "form",
+            res_id: 2,
+        },
+        {
+            id: 2,
+            res_model: "res.users",
+            res_id: 19,
+            view_mode: "form",
+            views: [[false, "form"]],
+        },
+    ]);
+    Partner._views = {
+        form: `
+            <form>
+                <field name="int_field" />
+                <widget name="my_widget" />
+            </form>`,
+    };
+    await mountWithCleanup(WebClient);
+
+    def.resolve({ test: 1 });
+    await getService("action").doAction(1);
+    expect(`.o_last_breadcrumb_item`).toHaveText("second record");
+    expect(`.my_widget`).toHaveText("MyWidget 1");
+    await contains(`[name='int_field'] input`).edit("42");
+    expect.verifySteps(["get_special_data 9", "get_special_data 42"]);
+
+    // Go to another model, to remove the model cache
+    await getService("action").doAction(2);
+    expect(`.o_last_breadcrumb_item`).toHaveText("Christine");
+
+    //Came back to the model with the special data
+    def = new Deferred();
+    await getService("action").doAction(1);
+    expect(`.o_last_breadcrumb_item`).toHaveText("second record");
+    expect(`.my_widget`).toHaveText("MyWidget 1");
+
+    def.resolve({ test: 2 });
+    await animationFrame();
+    expect(`.o_last_breadcrumb_item`).toHaveText("second record");
+    expect(`.my_widget`).toHaveText("MyWidget 2");
+    expect.verifySteps(["get_special_data 42"]);
+});
+
 test(`x2many field in form dialog view is correctly saved when using a view button`, async () => {
     defineActions([
         {
@@ -12460,6 +12530,7 @@ test(`statusbar buttons are correctly rendered in mobile`, async () => {
     expect(".o_statusbar_buttons button:eq(0)").toHaveText("Confirm");
     // open the dropdown
     await contains(".o_statusbar_buttons button:has(.oi-ellipsis-v)").click();
+    await animationFrame();
     expect(".o-dropdown--menu:visible").toHaveCount(1, { message: "dropdown should be visible" });
     expect(".o-dropdown--menu button").toHaveCount(1, {
         message: "should have 1 button in the dropdown",
@@ -12503,50 +12574,6 @@ test(`statusbar widgets should appear in the CogMenu dropdown`, async () => {
     expect(".o_statusbar_buttons button:eq(0)").toHaveText("Attach document");
     expect(".o_statusbar_buttons button:has(.oi-ellipsis-v)").toHaveCount(0, {
         message: "shouldn't have 'More' dropdown",
-    });
-});
-
-test.tags("mobile");
-test(`CogMenu dropdown should keep its open/close state`, async () => {
-    await mountView({
-        type: "form",
-        resModel: "partner",
-        arch: `
-                <form>
-                    <header>
-                        <button string="Just more than one" />
-                        <button string="Confirm" invisible="name == ''" />
-                        <button string="Do it" invisible="name != ''" />
-                    </header>
-                    <sheet>
-                        <field name="name" />
-                    </sheet>
-                </form>
-            `,
-    });
-    expect(".o_cp_action_menus button:has(.fa-cog)").toHaveCount(1, {
-        message: "should have a 'CogMenu' dropdown",
-    });
-
-    expect(".o_cp_action_menus button:has(.fa-cog)").not.toHaveClass("show", {
-        message: "dropdown should be closed",
-    });
-
-    // open the dropdown
-    await contains(".o_cp_action_menus button:has(.fa-cog)").click();
-    expect(".o_cp_action_menus button:has(.fa-cog)").toHaveClass("show", {
-        message: "dropdown should be opened",
-    });
-
-    // change name to update buttons' modifiers
-    await contains(".o_field_widget[name=name] input").edit("test");
-
-    expect(".o_cp_action_menus button:has(.fa-cog)").toHaveCount(1, {
-        message: "should have a 'CogMenu' dropdown",
-    });
-
-    expect(".o_cp_action_menus button:has(.fa-cog)").not.toHaveClass("show", {
-        message: "dropdown should be opened",
     });
 });
 

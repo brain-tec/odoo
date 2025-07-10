@@ -262,7 +262,7 @@ test("all measures should be displayed with a pivot_measures context", async () 
     });
 
     await contains("button:contains(Measures)").click();
-    expect(".o_popover.popover.o-dropdown--menu.dropdown-menu").toHaveCount(1);
+    expect(".o-dropdown--menu.o-dropdown--menu.dropdown-menu").toHaveCount(1);
     const measures = queryAllTexts(".o-dropdown-item");
     expect(measures).toEqual(["bouh", "Computed and not stored", "Foo", "Count"]);
 });
@@ -2633,6 +2633,7 @@ test("group bys added via control panel and expand Header do not stack", async (
     ]);
 });
 
+test.tags("desktop");
 test("display only one dropdown menu", async () => {
     await mountView({
         type: "pivot",
@@ -2733,7 +2734,7 @@ test("empty pivot view with action helper", async () => {
         type: "pivot",
         resModel: "partner",
         context: { search_default_small_than_0: true },
-        noContentHelp: markup(`<p class="abc">click to add a foo</p>`),
+        noContentHelp: markup`<p class="abc">click to add a foo</p>`,
         config: {
             views: [[false, "search"]],
         },
@@ -2760,7 +2761,7 @@ test("empty pivot view with sample data", async () => {
         type: "pivot",
         resModel: "partner",
         context: { search_default_small_than_0: true },
-        noContentHelp: markup('<p class="abc">click to add a foo</p>'),
+        noContentHelp: markup`<p class="abc">click to add a foo</p>`,
         config: {
             views: [[false, "search"]],
         },
@@ -2789,7 +2790,7 @@ test("non empty pivot view with sample data", async () => {
     await mountView({
         type: "pivot",
         resModel: "partner",
-        noContentHelp: markup('<p class="abc">click to add a foo</p>'),
+        noContentHelp: markup`<p class="abc">click to add a foo</p>`,
         config: {
             views: [[false, "search"]],
         },

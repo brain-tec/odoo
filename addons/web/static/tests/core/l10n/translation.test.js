@@ -123,7 +123,7 @@ test("[cache] write into the cache", async () => {
         },
         modules: { web: { messages: [{ id: "Hello", string: "Bonjour" }] } },
         multi_lang: false,
-        hash: "6b1bcfb1",
+        hash: "cf48f5f2",
     };
     expect.verifySteps([
         "hash: ",
@@ -223,7 +223,7 @@ test("[cache] update the cache if hash are different - template", async () => {
         },
         modules: { web: { messages: [{ id: "Hello", string: "Bonjour" }] } }, // value was updated in the cache
         multi_lang: false,
-        hash: "6b1bcfb1", // hash was updated in the cache
+        hash: "cf48f5f2", // hash was updated in the cache
     };
     expect.verifySteps([
         "hash: 30b", //Fetch with the hash of the translation in cache
@@ -310,7 +310,7 @@ test("[cache] update the cache if hash are different - js", async () => {
             },
         }, // value was updated in the cache
         multi_lang: false,
-        hash: "6b1bcfb1", // hash was updated in the cache
+        hash: "2a52c9bf", // hash was updated in the cache
     };
     expect.verifySteps([
         "hash: 30b", //Fetch with the hash of the translation in cache
@@ -428,8 +428,8 @@ describe("_t with markups", () => {
         const translatedStr = _t(
             "FREE %(blink_start)sROBUX%(blink_end)s, please contact %(email)s",
             {
-                blink_start: markup("<blink>"),
-                blink_end: markup("</blink>"),
+                blink_start: markup`<blink>`,
+                blink_end: markup`</blink>`,
                 email: maliciousUserInput,
             }
         );
@@ -442,7 +442,7 @@ describe("_t with markups", () => {
         translatedTerms[translationLoaded] = true;
         const maliciousTranslation = "<script>document.write('pizza hawai')</script> %s";
         patchTranslations({ "I love %s": maliciousTranslation });
-        const translatedStr = _t("I love %s", markup("<blink>Mario Kart</blink>"));
+        const translatedStr = _t("I love %s", markup`<blink>Mario Kart</blink>`);
         expect(translatedStr.valueOf()).toBe(
             "&lt;script&gt;document.write(&#x27;pizza hawai&#x27;)&lt;/script&gt; <blink>Mario Kart</blink>"
         );
