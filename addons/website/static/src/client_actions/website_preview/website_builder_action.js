@@ -45,7 +45,6 @@ export class WebsiteBuilderClientAction extends Component {
         enableEditor: { type: Boolean, optional: true },
         path: { type: String, optional: true },
         websiteId: { type: [Number, { value: false }], optional: true },
-        withLoader: { type: Boolean, optonal: true },
     };
 
     static extractProps(action) {
@@ -54,7 +53,6 @@ export class WebsiteBuilderClientAction extends Component {
             enableEditor: action.params?.enable_editor || false,
             path: action.params?.path,
             websiteId: action.params?.website_id || false,
-            withLoader: action.params?.with_loader || false,
         }
     }
 
@@ -73,6 +71,8 @@ export class WebsiteBuilderClientAction extends Component {
 
         this.websiteContent = useRef("iframe");
         this.cleanups = [];
+
+        this.snippetsTemplate = "website.snippets";
 
         useSubEnv({
             builderRef: useRef("container"),
@@ -135,10 +135,12 @@ export class WebsiteBuilderClientAction extends Component {
             if (!this.ui.isSmall) {
                 // preload builder and snippets so clicking on "edit" is faster
                 loadBundle("website.website_builder_assets").then(() => {
-                    this.env.services["html_builder.snippets"].reload({
-                        lang: this.websiteService.currentWebsite?.default_lang_id.code,
-                        website_id: this.websiteService.currentWebsite?.id,
-                    });
+                    this.env.services["html_builder.snippets"]
+                        .getSnippetModel(this.snippetsTemplate)
+                        .reload({
+                            lang: this.websiteService.currentWebsite?.default_lang_id.code,
+                            website_id: this.websiteService.currentWebsite?.id,
+                        });
                 });
             }
         });
@@ -185,7 +187,7 @@ export class WebsiteBuilderClientAction extends Component {
     get testMode() {
         return false;
     }
-    
+
     get websiteBuilderProps() {
         const iframeLoaded = this.iframeLoaded.then((el) => {
             return this.waitForIframeReady().then(() => el);
@@ -193,7 +195,7 @@ export class WebsiteBuilderClientAction extends Component {
         const builderProps = {
             closeEditor: this.reloadIframeAndCloseEditor.bind(this),
             reloadEditor: this.reloadEditor.bind(this),
-            snippetsName: "website.snippets",
+            snippetsName: this.snippetsTemplate,
             toggleMobile: this.toggleMobile.bind(this),
             installSnippetModule: this.installSnippetModule.bind(this),
             overlayRef: this.overlayRef,
@@ -367,10 +369,7 @@ export class WebsiteBuilderClientAction extends Component {
         this.replaceBrowserUrl();
         this.resolveIframeLoaded();
         this.addWelcomeMessage();
-
-        if (this.withLoader) {
-            this.websiteService.hideLoader();
-        }
+        this.websiteService.hideLoader();
     }
 
     blockIframe() {
@@ -458,10 +457,6 @@ export class WebsiteBuilderClientAction extends Component {
         return this.props.websiteId || router.current.website_id || false;
     }
 
-
-    get withLoader() {
-        return this.props.withLoader || !!router.current.with_loader;
-    }
 
     waitForIframeReady() {
         return new Promise((resolve) => {
