@@ -16,7 +16,7 @@ from odoo import Command, _, models, api
 from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import AccessError, UserError
 from odoo.modules import get_resource_from_path
-from odoo.tools import file_open, float_compare, get_lang, groupby, SQL
+from odoo.tools import file_open, float_compare, get_lang, groupby, split_every, SQL
 from odoo.tools.translate import code_translations, TranslationImporter
 
 _logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ TEMPLATE_MODELS = (
 )
 
 TAX_TAG_DELIMITER = '||'
-
+PRODUCTS_BATCH_SIZE = 2000
 
 def preserve_existing_tags_on_taxes(env, module):
     ''' This is a utility function used to preserve existing previous tags during upgrade of the module.'''
@@ -665,14 +665,17 @@ class AccountChartTemplate(models.AbstractModel):
         # that would, otherwise, just look empty all the time for the current user/company
         sudoed_products = self.env['product.template'].sudo().search(self.env['product.template']._check_company_domain(company))
 
-        if company.account_sale_tax_id:
-            sudoed_products_sale = sudoed_products.filtered(
-                lambda p: p.taxes_id and not p.taxes_id.filtered_domain(p.taxes_id._check_company_domain(company)))
-            sudoed_products_sale._force_default_sale_tax(company)
-        if company.account_purchase_tax_id:
-            sudoed_products_purchase = sudoed_products.filtered(
-                lambda p: p.supplier_taxes_id and not p.supplier_taxes_id.filtered_domain(p.taxes_id._check_company_domain(company)))
-            sudoed_products_purchase._force_default_purchase_tax(company)
+        for batch in split_every(PRODUCTS_BATCH_SIZE, sudoed_products.with_context(prefetch_fields=False)):
+            if company.account_sale_tax_id:
+                sudoed_products_sale = batch.filtered(
+                    lambda p: p.taxes_id and not p.taxes_id.filtered_domain(p.taxes_id._check_company_domain(company)))
+                sudoed_products_sale._force_default_sale_tax(company)
+            if company.account_purchase_tax_id:
+                sudoed_products_purchase = batch.filtered(
+                    lambda p: p.supplier_taxes_id and not p.supplier_taxes_id.filtered_domain(p.taxes_id._check_company_domain(company)))
+                sudoed_products_purchase._force_default_purchase_tax(company)
+            # Reset all caches
+            self.env.invalidate_all()
 
         # Display caba fields if there are caba taxes
         if not company.parent_id and self.env['account.tax'].search([('tax_exigibility', '=', 'on_payment')]):
