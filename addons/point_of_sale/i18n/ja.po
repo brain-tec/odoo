@@ -13,9 +13,9 @@
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 11:06+0000\n"
+"POT-Creation-Date: 2025-06-27 03:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
 "Last-Translator: Junko Augias, 2025\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
@@ -1968,12 +1968,12 @@ msgstr "デスク"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_close_session_wizard__account_id
 msgid "Destination account"
-msgstr "移動先の勘定科目"
+msgstr "振替先勘定科目"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_close_session_wizard__account_readonly
 msgid "Destination account is readonly"
-msgstr "移動先の勘定科目は読取専用です"
+msgstr "振替先勘定科目は読取専用です"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -2246,7 +2246,7 @@ msgstr "リモート接続されたバーコードスキャナーでバーコー
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_config__iface_electronic_scale
 msgid "Enables Electronic Scale integration."
-msgstr "電子スケール統合を可能にします。"
+msgstr "電子スケール連携を有効にします。"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -3380,8 +3380,8 @@ msgstr "さらに"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/js/Screens/TicketScreen/TicketScreen.js:0
 #, python-format
-msgid "Multiple Invoiced Orders Selected"
-msgstr "複数の請求済オーダが選択されました"
+msgid "Multiple Orders Selected"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__my_activity_date_deadline
@@ -5103,7 +5103,7 @@ msgstr "理由"
 #: code:addons/point_of_sale/static/src/xml/ChromeWidgets/DebugWidget.xml:0
 #, python-format
 msgid "Read Weighing Scale"
-msgstr "体重計を読む"
+msgstr "スケールの読み取り"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -5710,7 +5710,7 @@ msgstr "セッションID"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order__session_move_id
 msgid "Session Journal Entry"
-msgstr "セッションジャーナルエントリ"
+msgstr "セッション仕訳"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -6528,7 +6528,7 @@ msgstr "セッションは異常に長い間開かれました。閉鎖をご検
 msgid ""
 "The transactions are processed by Adyen. Set your Adyen credentials on the "
 "related payment method."
-msgstr "トランザクションはAdyenによって処理されます。関連する支払い方法でAdyenの認証情報を設定します。"
+msgstr "取引はAdyenによって処理されます。関連する支払い方法でAdyenの認証情報を設定します。"
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_res_config_settings__module_pos_six
@@ -6536,7 +6536,7 @@ msgstr "トランザクションはAdyenによって処理されます。関連�
 msgid ""
 "The transactions are processed by Six. Set the IP address of the terminal on"
 " the related payment method."
-msgstr "トランザクションはSixによって処理されます。関連する支払い方法で端末のIPアドレスを設定します。"
+msgstr "取引はSixによって処理されます。関連する支払い方法で端末のIPアドレスを設定します。"
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_res_config_settings__module_pos_stripe
@@ -6552,7 +6552,7 @@ msgstr "取引はStripeによって処理されます。関連する支払方法
 msgid ""
 "The transactions are processed by Vantiv. Set your Vantiv credentials on the"
 " related payment method."
-msgstr "トランザクションはVantivによって処理されます。関連する支払い方法でVantiv認証情報を設定します。"
+msgstr "取引はVantivによって処理されます。関連する支払い方法でVantiv認証情報を設定します。"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__cash_register_balance_end
@@ -6709,6 +6709,15 @@ msgid ""
 msgstr "この仕訳帳は支払方法に関連付けられています。タイプは変更できません。"
 
 #. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/account_journal.py:0
+#, python-format
+msgid ""
+"This journal is associated with payment method %s that is being used by "
+"order %s in the active pos session %s"
+msgstr "この仕訳帳は、支払方法%s (オーダ%sで使用されている、有効化されたposセッション%s内)に関連付けられています。"
+
+#. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/js/ChromeWidgets/DebugWidget.js:0
 #, python-format
@@ -6843,7 +6852,7 @@ msgstr "返金予定: %s"
 #: model:ir.model.fields,field_description:point_of_sale.field_product_product__to_weight
 #: model:ir.model.fields,field_description:point_of_sale.field_product_template__to_weight
 msgid "To Weigh With Scale"
-msgstr "はかりで計量"
+msgstr "スケールで計量"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order__to_invoice
@@ -6902,7 +6911,7 @@ msgstr "割引合計"
 #: code:addons/point_of_sale/static/src/xml/Screens/PaymentScreen/PaymentScreenStatus.xml:0
 #, python-format
 msgid "Total Due"
-msgstr "未払合計"
+msgstr "合計未払金額"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -7454,9 +7463,9 @@ msgstr "%s支払方法の\"顧客の特定\"オプションを有効にしまし
 #: code:addons/point_of_sale/static/src/js/Screens/TicketScreen/TicketScreen.js:0
 #, python-format
 msgid ""
-"You have selected orderlines from multiple invoiced orders. To proceed "
-"refund, please select orderlines from the same invoiced order."
-msgstr "複数の請求済オーダからオーダ明細を選択しました。払戻を続行するには、同じ請求のオーダからオーダ明細を選択して下さい。"
+"You have selected orderlines from multiple orders. To proceed refund, please"
+" select orderlines from the same order."
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -7734,12 +7743,3 @@ msgstr ""
 #, python-format
 msgid "were duplicates of existing orders"
 msgstr "既存の注文の複製でした"
-
-#. module: point_of_sale
-#. odoo-python
-#: code:addons/point_of_sale/models/account_journal.py:0
-#, python-format
-msgid ""
-"This journal is associated with payment method %s that is being used by "
-"order %s in the active pos session %s"
-msgstr "この仕訳帳は、支払方法%s (オーダ%sで使用されている、有効化されたposセッション%s内)に関連付けられています。"

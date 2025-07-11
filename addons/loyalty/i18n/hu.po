@@ -10,16 +10,16 @@
 # krnkris, 2022
 # Tamás Németh <ntomasz81@gmail.com>, 2023
 # Martin Trigaux, 2024
-# gezza <geza.nagy@oregional.hu>, 2024
 # Valics Lehel, 2025
+# gezza <geza.nagy@oregional.hu>, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 08:27+0000\n"
+"POT-Creation-Date: 2025-05-22 18:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Valics Lehel, 2025\n"
+"Last-Translator: gezza <geza.nagy@oregional.hu>, 2025\n"
 "Language-Team: Hungarian (https://app.transifex.com/odoo/teams/41243/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -57,7 +57,7 @@ msgstr ""
 #: code:addons/loyalty/models/loyalty_reward.py:0
 #, python-format
 msgid " (Max %s)"
-msgstr ""
+msgstr " (Max %s)"
 
 #. module: loyalty
 #. odoo-python
@@ -97,7 +97,7 @@ msgstr ""
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_kanban
 msgid "( Max"
-msgstr ""
+msgstr "( Max"
 
 #. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_kanban
@@ -1004,13 +1004,6 @@ msgid "Generate eWallet"
 msgstr ""
 
 #. module: loyalty
-#. odoo-javascript
-#: code:addons/loyalty/static/src/xml/loyalty_templates.xml:0
-#, python-format
-msgid "Generate {{props.context.program_item_name}}"
-msgstr ""
-
-#. module: loyalty
 #: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_gift_ewallet_view_form
 msgid "Gift &amp; Ewallet"
 msgstr ""
@@ -1553,12 +1546,12 @@ msgstr ""
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_reward__reward_product_ids
 msgid "Reward Products"
-msgstr ""
+msgstr "Jutalom termékek"
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_reward__reward_type
 msgid "Reward Type"
-msgstr ""
+msgstr "Jutalom típus"
 
 #. module: loyalty
 #. odoo-python
@@ -1701,7 +1694,7 @@ msgstr ""
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_reward__reward_product_ids
 msgid "These are the products that can be claimed with this rule."
-msgstr ""
+msgstr "A szabály által igényelhető termékek"
 
 #. module: loyalty
 #: model:ir.model.fields,help:loyalty.field_loyalty_reward__discount_max_amount
@@ -1732,6 +1725,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__trigger
 msgid "Trigger"
 msgstr "Indítás"
+
+#. module: loyalty
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_reward.py:0
+#, python-format
+msgid "Unsupported search operator"
+msgstr ""
 
 #. module: loyalty
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_card__use_count
@@ -1984,11 +1984,4 @@ msgstr ""
 #: code:addons/loyalty/models/loyalty_reward.py:0
 #, python-format
 msgid "your order"
-msgstr ""
-
-#. module: loyalty
-#. odoo-javascript
-#: code:addons/loyalty/static/src/xml/loyalty_templates.xml:0
-#, python-format
-msgid "{{loyalty_el_title}}"
 msgstr ""

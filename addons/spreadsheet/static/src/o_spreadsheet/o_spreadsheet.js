@@ -2125,7 +2125,7 @@
      *   formula, commas are used to separate arguments
      * - it does not support % symbol, in formulas % is an operator
      */
-    const formulaNumberRegexp = /(^-?\d+(\.?\d*(e\d+)?)?|^-?\.\d+)(?!\w|!)/;
+    const formulaNumberRegexp = /(^-?\d+(\.?\d*(e(\+|-)?\d+)?)?|^-?\.\d+)(?!\w|!)/;
     const pIntegerAndDecimals = "(\\d+(,\\d{3,})*(\\.\\d*)?)"; // pattern that match integer number with or without decimal digits
     const pOnlyDecimals = "(\\.\\d+)"; // pattern that match only expression with decimal digits
     const pScientificFormat = "(e(\\+|-)?\\d+)?"; // pattern that match scientific format between zero and one time (should be placed before pPercentFormat)
@@ -3935,19 +3935,26 @@
                 .filter(({ row }) => !this.env.model.getters.isRowHidden(sheetId, row))
                 .map(({ col, row }) => { var _a; return (_a = this.env.model.getters.getCell(sheetId, col, row)) === null || _a === void 0 ? void 0 : _a.formattedValue; });
             const filterValues = this.env.model.getters.getFilterValues(sheetId, position.col, position.row);
-            const strValues = [...cellValues, ...filterValues];
-            const normalizedFilteredValues = filterValues.map(toLowerCase);
-            // Set with lowercase values to avoid duplicates
-            const normalizedValues = [...new Set(strValues.map(toLowerCase))];
-            const sortedValues = normalizedValues.sort((val1, val2) => val1.localeCompare(val2, undefined, { numeric: true, sensitivity: "base" }));
-            return sortedValues.map((normalizedValue) => {
-                const checked = normalizedFilteredValues.findIndex((filteredValue) => filteredValue === normalizedValue) ===
-                    -1;
-                return {
-                    checked,
-                    string: strValues.find((val) => toLowerCase(val) === normalizedValue) || "",
-                };
-            });
+            const normalizedFilteredValues = new Set(filterValues.map(toLowerCase));
+            const set = new Set();
+            const values = [];
+            const addValue = (value) => {
+                const normalizedValue = toLowerCase(value);
+                if (!set.has(normalizedValue)) {
+                    values.push({
+                        string: value || "",
+                        checked: !normalizedFilteredValues.has(normalizedValue),
+                        normalizedValue,
+                    });
+                    set.add(normalizedValue);
+                }
+            };
+            cellValues.forEach(addValue);
+            filterValues.forEach(addValue);
+            return values.sort((val1, val2) => val1.normalizedValue.localeCompare(val2.normalizedValue, undefined, {
+                numeric: true,
+                sensitivity: "base",
+            }));
         }
         checkValue(value) {
             var _a;
@@ -5317,6 +5324,10 @@
         });
     };
     const CAN_REMOVE_COLUMNS_ROWS = (dimension, env) => {
+        if ((dimension === "COL" && env.model.getters.getActiveRows().size > 0) ||
+            (dimension === "ROW" && env.model.getters.getActiveCols().size > 0)) {
+            return false;
+        }
         const sheetId = env.model.getters.getActiveSheetId();
         const selectedElements = env.model.getters.getElementsFromSelection(dimension);
         const includesAllVisibleHeaders = env.model.getters.checkElementsIncludeAllVisibleHeaders(sheetId, dimension, selectedElements);
@@ -6665,11 +6676,11 @@
          * transformation function given
          */
         addTransformation(executed, toTransforms, fn) {
-            for (let toTransform of toTransforms) {
-                if (!this.content[toTransform]) {
-                    this.content[toTransform] = new Map();
-                }
-                this.content[toTransform].set(executed, fn);
+            if (!this.content[executed]) {
+                this.content[executed] = new Map();
+            }
+            for (const toTransform of toTransforms) {
+                this.content[executed].set(toTransform, fn);
             }
             return this;
         }
@@ -6678,7 +6689,7 @@
          * that the executed command happened.
          */
         getTransformation(toTransform, executed) {
-            return this.content[toTransform] && this.content[toTransform].get(executed);
+            return this.content[executed] && this.content[executed].get(toTransform);
         }
     }
     const otRegistry = new OTRegistry();
@@ -17683,6 +17694,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         return value === null || value === undefined;
     }
     const getNeutral = { number: 0, string: "", boolean: false };
+    function areAlmostEqual(value1, value2, epsilon = 2e-16) {
+        return Math.abs(value1 - value2) < epsilon;
+    }
     const EQ = {
         description: _lt(`Equal.`),
         args: args(`
@@ -17698,6 +17712,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             }
             if (typeof value2 === "string") {
                 value2 = value2.toUpperCase();
+            }
+            if (typeof value1 === "number" && typeof value2 === "number") {
+                return areAlmostEqual(value1, value2);
             }
             return value1 === value2;
         },
@@ -17733,6 +17750,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         returns: ["BOOLEAN"],
         compute: function (value1, value2) {
             return applyRelationalOperator(value1, value2, (v1, v2) => {
+                if (typeof v1 === "number" && typeof v2 === "number") {
+                    return !areAlmostEqual(v1, v2) && v1 > v2;
+                }
                 return v1 > v2;
             });
         },
@@ -17749,6 +17769,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
         returns: ["BOOLEAN"],
         compute: function (value1, value2) {
             return applyRelationalOperator(value1, value2, (v1, v2) => {
+                if (typeof v1 === "number" && typeof v2 === "number") {
+                    return areAlmostEqual(v1, v2) || v1 > v2;
+                }
                 return v1 >= v2;
             });
         },
@@ -26054,7 +26077,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          */
         handleMissingValue(parentElement, missingElementName, optionalArgs) {
             if (optionalArgs === null || optionalArgs === void 0 ? void 0 : optionalArgs.required) {
-                if (optionalArgs === null || optionalArgs === void 0 ? void 0 : optionalArgs.default) {
+                if ((optionalArgs === null || optionalArgs === void 0 ? void 0 : optionalArgs.default) !== undefined) {
                     this.warningManager.addParsingWarning(`Missing required ${missingElementName} in element <${parentElement.tagName}> of ${this.currentFile}, replacing it by the default value ${optionalArgs.default}`);
                 }
                 else {
@@ -28845,9 +28868,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 : 0 /* CommandResult.Success */;
         }
         checkChartExists(cmd) {
-            return this.getters.getFigureSheetId(cmd.id)
-                ? 0 /* CommandResult.Success */
-                : 86 /* CommandResult.ChartDoesNotExist */;
+            return this.isChartDefined(cmd.id) ? 0 /* CommandResult.Success */ : 86 /* CommandResult.ChartDoesNotExist */;
         }
     }
     ChartPlugin.getters = [
@@ -34021,9 +34042,10 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 const filteredValues = (_b = (_a = this.filterValues[sheetId]) === null || _a === void 0 ? void 0 : _a[filter.id]) === null || _b === void 0 ? void 0 : _b.map(toLowerCase);
                 if (!filteredValues || !filter.filteredZone)
                     continue;
+                const filteredValuesSet = new Set(filteredValues);
                 for (let row = filter.filteredZone.top; row <= filter.filteredZone.bottom; row++) {
                     const value = this.getCellValueAsString(sheetId, filter.col, row);
-                    if (filteredValues.includes(value)) {
+                    if (filteredValuesSet.has(value)) {
                         hiddenRows.add(row);
                     }
                 }
@@ -36367,10 +36389,20 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
      */
     function transformAll(toTransform, executed) {
         let transformedCommands = [...toTransform];
+        const possibleTransformations = new Set(otRegistry.getKeys());
         for (const executedCommand of executed) {
-            transformedCommands = transformedCommands
-                .map((cmd) => transform(cmd, executedCommand))
-                .filter(isDefined$1);
+            // If the executed command is not in the registry, we skip it
+            // because we know there won't be any transformation impacting the
+            // commands to transform.
+            if (possibleTransformations.has(executedCommand.type)) {
+                transformedCommands = transformedCommands.reduce((acc, cmd) => {
+                    const transformed = transform(cmd, executedCommand);
+                    if (transformed) {
+                        acc.push(transformed);
+                    }
+                    return acc;
+                }, []);
+            }
         }
         return transformedCommands;
     }
@@ -36830,7 +36862,6 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
             if (this.waitingAck) {
                 return;
             }
-            this.waitingAck = true;
             this.sendPendingMessage();
         }
         /**
@@ -36860,6 +36891,7 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                 throw new Error(`Trying to send a new revision while replaying initial revision. This can lead to endless dispatches every time the spreadsheet is open.
       ${JSON.stringify(message)}`);
             }
+            this.waitingAck = true;
             this.transportService.sendMessage({
                 ...message,
                 serverRevisionId: this.serverRevisionId,
@@ -41452,26 +41484,28 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
                     bottom: Math.min(this.getters.getNumberRows(sheetId) - 1, bottom),
                 };
             };
-            const { col: refCol, row: refRow } = this.getReferencePosition();
+            const { cell: refCell, zone: refZone } = this.getReferenceAnchor();
+            const { col: refCol, row: refRow } = refCell;
             // check if we can shrink selection
             let n = 0;
             while (result !== null) {
                 n++;
                 if (deltaCol < 0) {
                     const newRight = this.getNextAvailableCol(deltaCol, right - (n - 1), refRow);
-                    result = refCol <= right - n ? expand({ top, left, bottom, right: newRight }) : null;
+                    result = refZone.right <= right - n ? expand({ top, left, bottom, right: newRight }) : null;
                 }
                 if (deltaCol > 0) {
                     const newLeft = this.getNextAvailableCol(deltaCol, left + (n - 1), refRow);
-                    result = left + n <= refCol ? expand({ top, left: newLeft, bottom, right }) : null;
+                    result = left + n <= refZone.left ? expand({ top, left: newLeft, bottom, right }) : null;
                 }
                 if (deltaRow < 0) {
                     const newBottom = this.getNextAvailableRow(deltaRow, refCol, bottom - (n - 1));
-                    result = refRow <= bottom - n ? expand({ top, left, bottom: newBottom, right }) : null;
+                    result =
+                        refZone.bottom <= bottom - n ? expand({ top, left, bottom: newBottom, right }) : null;
                 }
                 if (deltaRow > 0) {
                     const newTop = this.getNextAvailableRow(deltaRow, refCol, top + (n - 1));
-                    result = top + n <= refRow ? expand({ top: newTop, left, bottom, right }) : null;
+                    result = top + n <= refZone.top ? expand({ top: newTop, left, bottom, right }) : null;
                 }
                 result = result ? organizeZone(result) : result;
                 if (result && !isEqual(result, anchor.zone)) {
@@ -41707,18 +41741,26 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
          * If the anchor is hidden, browses from left to right and top to bottom to
          * find a visible cell.
          */
-        getReferencePosition() {
+        getReferenceAnchor() {
             const sheetId = this.getters.getActiveSheetId();
             const anchor = this.anchor;
             const { left, right, top, bottom } = anchor.zone;
             const { col: anchorCol, row: anchorRow } = anchor.cell;
+            const col = this.getters.isColHidden(sheetId, anchorCol)
+                ? this.getters.findVisibleHeader(sheetId, "COL", left, right) || anchorCol
+                : anchorCol;
+            const row = this.getters.isRowHidden(sheetId, anchorRow)
+                ? this.getters.findVisibleHeader(sheetId, "ROW", top, bottom) || anchorRow
+                : anchorRow;
+            const zone = this.getters.expandZone(sheetId, {
+                left: col,
+                right: col,
+                top: row,
+                bottom: row,
+            });
             return {
-                col: this.getters.isColHidden(sheetId, anchorCol)
-                    ? this.getters.findVisibleHeader(sheetId, "COL", left, right) || anchorCol
-                    : anchorCol,
-                row: this.getters.isRowHidden(sheetId, anchorRow)
-                    ? this.getters.findVisibleHeader(sheetId, "ROW", top, bottom) || anchorRow
-                    : anchorRow,
+                cell: { col, row },
+                zone,
             };
         }
         deltaToTarget(position, direction, step) {
@@ -43847,9 +43889,9 @@ day_count_convention (number, default=${DEFAULT_DAY_COUNT_CONVENTION} ) ${_lt("A
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.version = '16.0.69';
-    __info__.date = '2025-05-02T12:50:10.021Z';
-    __info__.hash = '51188e8';
+    __info__.version = '16.0.74';
+    __info__.date = '2025-06-27T09:14:38.112Z';
+    __info__.hash = 'a1d6303';
 
 
 })(this.o_spreadsheet = this.o_spreadsheet || {}, owl);

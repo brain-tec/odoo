@@ -182,9 +182,9 @@ msgstr ""
 "(Lead, Vấn đề Dự án) cho các tài khoản email đến của mình. Các email mới sẽ\n"
 "tự động tạo ra những tài liệu mới thuộc loại đã chọn, vì vậy việc tạo tích hợp hộp thư với Odoo\n"
 "diễn ra thật nhanh chóng. Tối ưu hơn: những tài liệu này trực tiếp hoạt động như các\n"
-"cuộc hội thoại nhỏ được đồng bộ hóa qua email. Bạn có thể trả lời từ trong Odoo và\n"
+"cuộc trò chuyện nhỏ được đồng bộ hóa qua email. Bạn có thể trả lời từ trong Odoo và\n"
 "các câu trả lời sẽ tự động được thu thập khi chúng trở lại và được đính kèm vào\n"
-"cùng một tài liệu *cuộc hội thoại*.\n"
+"cùng một tài liệu *cuộc trò chuyện*.\n"
 "Đối với các nhu cầu cụ thể hơn, bạn cũng có thể chỉ định các hành động tùy chỉnh\n"
 "(về mặt kỹ thuật: Hành động Máy chủ) được kích hoạt cho mỗi thư đến.\n"
 "    "
@@ -2254,7 +2254,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    Chế độ Gantt cho Trang tổng quan Ngày nghỉ\n"
+"    Chế độ Gantt cho Bảng điều khiển Ngày nghỉ\n"
 "    "
 
 #. module: base
@@ -2389,7 +2389,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"    Lên lịch cho nhóm của bạn theo các dự án để ước tính hạn chót một cách chính xác.\n"
+"    Lên lịch cho nhóm của bạn theo các dự án để ước tính thời hạn một cách chính xác.\n"
 "    "
 
 #. module: base
@@ -2488,7 +2488,7 @@ msgid ""
 "    This is a link module between Point of Sale and Mrp.\n"
 msgstr ""
 "\n"
-"    Đây là module liên kết giữa Điểm bán hàng và MRP.\n"
+"    Đây là module liên kết giữa POS và MRP.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_edi_ubl_cii_tax_extension
@@ -3875,7 +3875,7 @@ msgid ""
 msgstr ""
 "\n"
 "Cho phép sử dụng các thiết bị được kết nối với Hộp IoT trong POS.\n"
-"Các thiết bị được hỗ trợ bao gồm thiết bị đầu cuối thanh toán, máy in hóa đơn, cân và màn hình khách hàng.\n"
+"Các thiết bị được hỗ trợ bao gồm thiết bị thanh toán, máy in hóa đơn, cân và màn hình khách hàng.\n"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_stock_renting
@@ -6433,11 +6433,11 @@ msgstr ""
 "- Giải quyết phiếu hỗ trợ bằng cách xử lý qua các giai đoạn khác nhau.\n"
 "- Thêm mức độ ưu tiên, loại, mô tả và thẻ để xác định phiếu hỗ trợ.\n"
 "- Sử dụng chatter để truyền đạt thông tin bổ sung và nhắn tin với đồng nghiệp về phiếu hỗ trợ.\n"
-"- Tận hưởng việc sử dụng trang tổng quan phù hợp và chế độ xem Kanban dễ sử dụng để xử lý phiếu hỗ trợ.\n"
+"- Tận hưởng việc sử dụng bảng điều khiển phù hợp và chế độ xem Kanban dễ sử dụng để xử lý phiếu hỗ trợ.\n"
 "- Thực hiện phân tích chuyên sâu về phiếu hỗ trợ thông qua chế độ xem pivot trong menu báo cáo.\n"
 "- Tạo một nhóm và xác định các thành viên trong nhóm, sử dụng phương thức tự động giao việc nếu muốn.\n"
 "- Sử dụng bí danh email để tự động tạo phiếu hỗ trợ và trò chuyện với khách hàng.\n"
-"- Thêm hạn chót thỏa thuận mức độ dịch vụ vào phiếu hỗ trợ một cách tự động.\n"
+"- Thêm thời hạn thỏa thuận mức độ dịch vụ vào phiếu hỗ trợ một cách tự động.\n"
 "- Nhận phản hồi của khách hàng bằng cách sử dụng đánh giá.\n"
 "- Dễ dàng cài đặt các tính năng bổ sung bằng cách sử dụng chế độ xem biểu mẫu nhóm.\n"
 "\n"
@@ -6846,10 +6846,10 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Hãy để người dùng tạo trang tổng quan tùy chỉnh.\n"
+"Hãy để người dùng tạo bảng điều khiển tùy chỉnh.\n"
 "===============================================\n"
 "\n"
-"Cho phép người dùng tạo trang tổng quan cho riêng mình.\n"
+"Cho phép người dùng tạo bảng điều khiển cho riêng mình.\n"
 "    "
 
 #. module: base
@@ -7169,7 +7169,7 @@ msgstr ""
 "Với phân hệ này, bạn có thể cá nhân hóa đơn bán hàng và báo cáo hóa đơn với\n"
 "danh mục, tổng phụ hoặc ngắt trang.\n"
 "\n"
-"Trang tổng quan của Quản lý Bán hàng sẽ bao gồm\n"
+"Bảng điều khiển của Quản lý Bán hàng sẽ bao gồm\n"
 "------------------------------------------------\n"
 "* Báo giá của tôi\n"
 "* Doanh thu Hàng tháng (Biểu đồ)\n"
@@ -8545,9 +8545,9 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Trang tổng quan Gói đăng ký Bán hàng\n"
+"Bảng điều khiển Gói đăng ký Bán hàng\n"
 "===========================\n"
-"Bổ sung Trang tổng quan để:\n"
+"Bổ sung Bảng điều khiển để:\n"
 "1) Phân tích doanh thu định kỳ và các số liệu khác từ gói đăng ký\n"
 "2) Phân tích các sửa đổi gói đăng ký được nhân viên bán hàng thực hiện và tính toán giá trị của chúng.\n"
 "    "
@@ -8849,8 +8849,8 @@ msgstr ""
 "Studio - Tùy chỉnh Odoo\n"
 "=======================\n"
 "\n"
-"Addon này cho phép người dùng tùy chỉnh hầu hết các yếu tố giao diện người dùng, theo \n"
-"cách đơn giản mà đầy tính đồ họa. Addon này có hai tính năng chính:\n"
+"Tiện ích bổ sung này cho phép người dùng tùy chỉnh hầu hết các yếu tố giao diện người dùng, theo \n"
+"cách đơn giản mà đầy tính đồ họa. Tiện ích bổ sung này có hai tính năng chính:\n"
 "\n"
 "* tạo một ứng dụng mới (thêm phân hệ, mục menu cấp cao nhất và tác vụ mặc định)\n"
 "* tùy chỉnh một ứng dụng hiện có (chỉnh sửa menu, tác vụ, chế độ xem, bản dịch,...)\n"
@@ -9891,7 +9891,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Phân hệ này thêm chế độ xem trang tổng quan mới trong ứng dụng Trang web.\n"
+"Phân hệ này thêm chế độ xem bảng điều khiển mới trong ứng dụng Trang web.\n"
 "Chế độ xem mới này chứa một số thống kê cơ bản, biểu đồ và chế độ xem phụ pivot cho phép bạn có được cái nhìn tổng quan nhanh về doanh số bán hàng trực tuyến của mình.\n"
 "Bạn cũng có trong tay các công cụ mới để phân tích dữ liệu.\n"
 "    "
@@ -11265,7 +11265,7 @@ msgstr ""
 "* Định giá tồn kho (định kỳ hoặc tự động)\n"
 "* Xuất hóa đơn khi Lấy hàng\n"
 "\n"
-"Trang tổng quan/Báo cáo cho Quản lý Kho bao gồm:\n"
+"Bảng điều khiển/Báo cáo cho Quản lý Kho bao gồm:\n"
 "-------------------------------------------------------------\n"
 "* Định giá Tồn kho theo ngày xác định (hỗ trợ cả ngày trong quá khứ)\n"
 "    "
@@ -12521,21 +12521,21 @@ msgstr "Một <graph> chỉ có thể chứa<field> các nút, tìm thấy một
 #: model:ir.module.module,summary:base.module_payment_adyen
 msgid "A Dutch payment provider covering Europe and the US."
 msgstr ""
-"Một nhà cung cấp dịch vụ thanh toán của Hà Lan bao gồm châu Âu và Hoa Kỳ."
+"Một nhà cung cấp dịch vụ thanh toán của Hà Lan hỗ trợ châu Âu và Hoa Kỳ."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_mollie
 msgid "A Dutch payment provider covering several European countries."
 msgstr ""
-"Một nhà cung cấp dịch vụ thanh toán của Hà Lan bao gồm nhiều quốc gia châu "
+"Một nhà cung cấp dịch vụ thanh toán của Hà Lan hỗ trợ nhiều quốc gia châu "
 "Âu."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_buckaroo
 msgid "A Dutch payment provider covering several countries in Europe."
 msgstr ""
-"Một nhà cung cấp dịch vụ thanh toán của Hà Lan bao gồm nhiều quốc gia ở châu"
-" Âu."
+"Một nhà cung cấp dịch vụ thanh toán của Hà Lan hỗ trợ nhiều quốc gia ở châu "
+"Âu."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_sips
@@ -12548,7 +12548,7 @@ msgstr ""
 #: model:ir.module.module,summary:base.module_payment_flutterwave
 msgid "A Nigerian payment provider covering several African countries."
 msgstr ""
-"Một nhà cung cấp dịch vụ thanh toán của Nigeria bao gồm nhiều quốc gia châu "
+"Một nhà cung cấp dịch vụ thanh toán của Nigeria hỗ trợ nhiều quốc gia châu "
 "Phi."
 
 #. module: base
@@ -12713,14 +12713,13 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_razorpay
 msgid "A payment provider covering India."
-msgstr "Một nhà cung cấp dịch vụ thanh toán bao gồm Ấn Độ."
+msgstr "Một nhà cung cấp dịch vụ thanh toán hỗ trợ Ấn Độ."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_mercado_pago
 msgid "A payment provider covering several countries in Latin America."
 msgstr ""
-"Một nhà cung cấp dịch vụ thanh toán bao gồm một số quốc gia ở châu Mỹ "
-"Latinh."
+"Một nhà cung cấp dịch vụ thanh toán hỗ trợ một số quốc gia ở Mỹ Latinh."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_custom
@@ -13479,7 +13478,7 @@ msgstr "Thêm thông tin crm UTM trên mạng xã hội"
 #. module: base
 #: model:ir.module.module,summary:base.module_event_sale_dashboard
 msgid "Add dashboard for Event Revenues Report"
-msgstr "Bổ sung trang tổng quan cho Báo cáo Doanh thu Sự kiện"
+msgstr "Bổ sung bảng điều khiển cho Báo cáo Doanh thu Sự kiện"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_delivery
@@ -14159,7 +14158,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_aps
 msgid "An Amazon payment provider covering the MENA region."
-msgstr "Một nhà cung cấp dịch vụ thanh toán của Amazon bao gồm khu vực MENA."
+msgstr "Một nhà cung cấp dịch vụ thanh toán của Amazon hỗ trợ khu vực MENA."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_paypal
@@ -14172,7 +14171,7 @@ msgstr ""
 #: model:ir.module.module,summary:base.module_payment_stripe
 msgid "An Irish-American payment provider covering the US and many others."
 msgstr ""
-"Một nhà cung cấp dịch vụ thanh toán Hoa Kỳ-Ireland bao gồm Hoa Kỳ và nhiều "
+"Một nhà cung cấp dịch vụ thanh toán Hoa Kỳ-Ireland hỗ trợ Hoa Kỳ và nhiều "
 "quốc gia khác."
 
 #. module: base
@@ -14239,13 +14238,13 @@ msgstr ""
 #: model:ir.module.module,summary:base.module_payment_asiapay
 msgid "An payment provider based in Hong Kong covering most Asian countries."
 msgstr ""
-"Một nhà cung cấp dịch vụ thanh toán có trụ sở tại Hồng Kông bao phủ gồm hết "
+"Một nhà cung cấp dịch vụ thanh toán có trụ sở tại Hồng Kông hỗ trợ gồm hết "
 "các quốc gia châu Á."
 
 #. module: base
 #: model:ir.module.module,summary:base.module_payment_authorize
 msgid "An payment provider covering the US, Australia, and Canada."
-msgstr "Một nhà cung cấp dịch vụ thanh toán bao gồm Hoa Kỳ, Úc và Canada."
+msgstr "Một nhà cung cấp dịch vụ thanh toán hỗ trợ Hoa Kỳ, Úc và Canada."
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_analytic
@@ -15758,7 +15757,7 @@ msgstr "Tạo mẫu báo giá tuyệt vời"
 #. module: base
 #: model:ir.module.module,summary:base.module_board
 msgid "Build your own dashboards"
-msgstr "Xây dựng trang tổng quan của riêng bạn"
+msgstr "Xây dựng bảng điều khiển của riêng bạn"
 
 #. module: base
 #: model:res.country,name:base.bg
@@ -17822,7 +17821,7 @@ msgid ""
 "dashboard views (via web client)"
 msgstr ""
 "Giao diện được tuỳ biến là các giao diện được sử dụng khi người dùng tái tổ "
-"chức nội dung ở giao diện Trang tổng quan (thông qua giao diện web)"
+"chức nội dung ở giao diện Bảng điều khiển (thông qua giao diện web)"
 
 #. module: base
 #: model:res.country,name:base.cy
@@ -17851,8 +17850,8 @@ msgstr "D - NGUỒN CUNG ĐIỆN, KHÍ ĐỐT, HƠI NƯỚC VÀ ĐIỀU HÒA KH�
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_dhl
-msgid "DHL Express Shipping"
-msgstr "Chuyển Phát Nhanh DHL"
+msgid "DHL Express Shipping (Legacy)"
+msgstr "Chuyển Phát Nhanh DHL (Cũ)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_din5008
@@ -17916,7 +17915,7 @@ msgstr "Gạch ngang"
 #: model:ir.ui.menu,name:base.menu_board_root
 #: model:ir.ui.menu,name:base.menu_reporting_dashboard
 msgid "Dashboards"
-msgstr "Trang tổng quan"
+msgstr "Bảng điều khiển"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_productivity_data_cleaning
@@ -19312,7 +19311,7 @@ msgstr "Chi phí theo Giờ của Nhân viên"
 #: model:ir.module.module,shortdesc:base.module_hr_hourly_cost
 #: model:ir.module.module,summary:base.module_hr_hourly_cost
 msgid "Employee Hourly Wage"
-msgstr "Tiền công theo Giờ của Nhân viên"
+msgstr "Lương theo giờ của nhân viên"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_presence
@@ -19740,7 +19739,7 @@ msgstr "Doanh số Sự kiện"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_event_sale_dashboard
 msgid "Events Sales Dashboard"
-msgstr "Trang tổng quan Doanh số Sự kiện"
+msgstr "Bảng điều khiển Doanh số Sự kiện"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_event_booth
@@ -21025,7 +21024,7 @@ msgstr "Gantt"
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_holidays_gantt
 msgid "Gantt view for Time Off Dashboard"
-msgstr "Chế độ Gantt cho Trang tổng quan Ngày nghỉ"
+msgstr "Chế độ Gantt cho Bảng điều khiển Ngày nghỉ"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_web_kanban_gauge
@@ -21183,7 +21182,7 @@ msgstr "Đức SKR04 - Kế toán"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_dashboard
 msgid "Get a new dashboard view in the Website App"
-msgstr "Có được một chế độ xem trang tổng quan mới trong Ứng dụng Trang web"
+msgstr "Có được một chế độ xem bảng điều khiển mới trong Ứng dụng Trang web"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_social_demo
@@ -22894,23 +22893,22 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_six
 msgid "Integrate your POS with a Six payment terminal"
-msgstr "Tích hợp POS của bạn với thiết bị đầu cuối thanh toán Six"
+msgstr "Tích hợp POS của bạn với thiết bị thanh toán Six"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_iot_six
 msgid "Integrate your POS with a Six payment terminal through IoT"
-msgstr ""
-"Tích hợp POS của bạn với thiết bị đầu cuối thanh toán Six thông qua IoT"
+msgstr "Tích hợp POS của bạn với thiết bị thanh toán Six thông qua IoT"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_stripe
 msgid "Integrate your POS with a Stripe payment terminal"
-msgstr "Tích hợp POS của bạn với thiết bị đầu cuối thanh toán Stripe"
+msgstr "Tích hợp POS của bạn với thiết bị thanh toán Stripe"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_adyen
 msgid "Integrate your POS with an Adyen payment terminal"
-msgstr "Tích hợp POS của bạn với thiết bị đầu cuối thanh toán Adyen"
+msgstr "Tích hợp POS của bạn với thiết bị thanh toán Adyen"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_project_mail_plugin
@@ -24664,7 +24662,7 @@ msgstr "Malta"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_mt_pos
 msgid "Malta - Point of Sale"
-msgstr "Malta - Điểm bán hàng"
+msgstr "Malta - POS"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_mt_pos
@@ -27321,11 +27319,11 @@ msgstr ""
 "Tất cả các cuộc đàm phán và thảo luận được đính kèm với tài nguyên phù hợp và \n"
 "những nhà quản lý có liên quan được thông báo về các sự kiện cụ thể.\n"
 "\n"
-"Trang tổng quan Chiến dịch\n"
+"Bảng điều khiển Chiến dịch\n"
 "-------------------\n"
 "\n"
 "Có được thông tin chi tiết bạn cần để tạo chiến dịch marketing thông minh hơn. Theo dõi số liệu thống kê \n"
-"cho mỗi chiến dịch: tỷ lệ thoát trang, thư đã gửi, nội dung hay nhất,... Trang tổng quan rõ ràng \n"
+"cho mỗi chiến dịch: tỷ lệ thoát trang, thư đã gửi, nội dung hay nhất,... Bảng điều khiển rõ ràng \n"
 "giúp bạn có được cái nhìn tổng quan trực tiếp về hiệu suất chiến dịch của mình.\n"
 "\n"
 "Tích hợp Hoàn toàn với các Ứng dụng Khác\n"
@@ -29050,7 +29048,7 @@ msgstr ""
 "- Lập hóa đơn tự động\n"
 "- Chính sách hủy \n"
 "- Giá riêng cho các thành viên\n"
-"- Trang tổng quan và báo cáo\n"
+"- Bảng điều khiển và báo cáo\n"
 "\n"
 "### Sắp xếp\n"
 "\n"
@@ -29950,7 +29948,7 @@ msgstr "Điểm bán lẻ"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_loyalty
 msgid "Point of Sale - Coupons & Loyalty"
-msgstr "Điểm bán hàng - Phiếu thưởng & Khách hàng thân thiết"
+msgstr "POS - Phiếu thưởng & Khách hàng thân thiết"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_daily_sales_reports
@@ -29965,17 +29963,17 @@ msgstr "Chiết khấu Điểm bán lẻ"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_sale_stock_renting
 msgid "Point of Sale Rental Stock"
-msgstr "Điểm bán hàng Cho thuê Tồn kho"
+msgstr "POS Cho thuê Tồn kho"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_settle_due
 msgid "Point of Sale Settle Due"
-msgstr "Điểm bán hàng đến hạn thanh toán"
+msgstr "POS đến hạn thanh toán"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_enterprise
 msgid "Point of Sale enterprise"
-msgstr "Điểm bán hàng enterprise"
+msgstr "POS enterprise"
 
 #. module: base
 #: model:res.country,name:base.pl
@@ -30469,7 +30467,7 @@ msgstr ""
 "--------------------------------\n"
 "\n"
 "Tổ chức các dự án theo quy trình của riêng bạn. Thực hiện nhiệm vụ và vấn đề bằng cách sử dụng \n"
-"chế độ xem kanban, lên lịch cho các nhiệm vụ bằng biểu đồ gantt và kiểm soát hạn chót trong \n"
+"chế độ xem kanban, lên lịch cho các nhiệm vụ bằng biểu đồ gantt và kiểm soát thời hạn trong \n"
 "chế độ xem lịch. Mỗi dự án có thể có các giai đoạn riêng, cho phép các đội ngũ tối ưu hóa\n"
 "công việc của họ.\n"
 "\n"
@@ -32005,7 +32003,7 @@ msgstr "Sale Stock Margin"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_subscription_dashboard
 msgid "Sale Subscription Dashboard"
-msgstr "Trang tổng quan đăng ký bán hàng"
+msgstr "Bảng điều khiển đăng ký bán hàng"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_purchase
@@ -32573,8 +32571,14 @@ msgstr "Gửi bưu kiện của bạn qua shiprocket và theo dõi chúng online
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery_dhl
-msgid "Send your shippings through DHL and track them online"
-msgstr "Gửi hàng của bạn qua DHL và theo dõi chúng online"
+msgid ""
+"This is the legacy integration with DHL Express that is no longer supported."
+" Please install the new \"DHL Express Shipping\" module and uninstall this "
+"one as soon as possible."
+msgstr ""
+"Đây là tích hợp cũ với Chuyển phát Nhanh DHL không còn được hỗ trợ. Vui lòng"
+" cài đặt phân hệ \"Chuyển phát Nhanh DHL\" mới và gỡ bỏ phân hệ này càng sớm"
+" càng tốt."
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery_fedex_rest
@@ -32928,7 +32932,7 @@ msgstr "Đăng ký"
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_discount
 msgid "Simple Discounts in the Point of Sale "
-msgstr "Giảm giá đơn giản tại điểm bán hàng "
+msgstr "Giảm giá đơn giản tại POS "
 
 #. module: base
 #. odoo-python
@@ -33380,17 +33384,17 @@ msgstr "Tài liệu bảng tính"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard
 msgid "Spreadsheet dashboard"
-msgstr "Trang tổng quan bảng tính"
+msgstr "Bảng điều khiển bảng tính"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_edition
 msgid "Spreadsheet dashboard edition"
-msgstr "Phiên bản trang tổng quan bảng tính"
+msgstr "Phiên bản bảng điều khiển bảng tính"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_crm
 msgid "Spreadsheet dashboard for CRM"
-msgstr "Trang tổng quan bảng tính cho CRM"
+msgstr "Bảng điều khiển bảng tính cho CRM"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_account
@@ -33401,12 +33405,12 @@ msgstr "Bảng điều khiển bảng tính cho kế toán"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_website_sale_slides
 msgid "Spreadsheet dashboard for eLearning"
-msgstr "Trang tổng quan bảng tính cho eLearning"
+msgstr "Bảng điều khiển bảng tính cho eLearning"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_event_sale
 msgid "Spreadsheet dashboard for events"
-msgstr "Trang tổng quan bảng tính cho các sự kiện"
+msgstr "Bảng điều khiển bảng tính cho các sự kiện"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_hr_expense
@@ -33416,22 +33420,22 @@ msgstr "Bảng điều khiển bảng tính cho các chi phí"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_sale_expense
 msgid "Spreadsheet dashboard for expenses and sales"
-msgstr "Trang tổng quan bảng tính dành cho chi phí và bán hàng"
+msgstr "Bảng điều khiển bảng tính dành cho chi phí và bán hàng"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_helpdesk
 msgid "Spreadsheet dashboard for helpdesk"
-msgstr "Trang tổng quan bảng tính cho bộ phận trợ giúp"
+msgstr "Bảng điều khiển bảng tính cho bộ phận trợ giúp"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_hr_contract
 msgid "Spreadsheet dashboard for human resources"
-msgstr "Trang tổng quan bảng tính cho nguồn nhân lực"
+msgstr "Bảng điều khiển bảng tính cho nguồn nhân lực"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_im_livechat
 msgid "Spreadsheet dashboard for live chat"
-msgstr "Trang tổng quan bảng tính để trò chuyện trực tiếp"
+msgstr "Bảng điều khiển bảng tính để trò chuyện trực tiếp"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_mrp_account
@@ -33441,28 +33445,28 @@ msgstr "Bảng điều khiển bảng tính cho sản xuất"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_pos_hr
 msgid "Spreadsheet dashboard for point of sale"
-msgstr "Trang tổng quan bảng tính cho điểm bán hàng"
+msgstr "Bảng điều khiển bảng tính cho POS"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_purchase
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_purchase_stock
 msgid "Spreadsheet dashboard for purchases"
-msgstr "Trang tổng quan bảng tính để mua hàng"
+msgstr "Bảng điều khiển bảng tính để mua hàng"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_hr_referral
 msgid "Spreadsheet dashboard for recruitment"
-msgstr "Trang tổng quan bảng tính để tuyển dụng"
+msgstr "Bảng điều khiển bảng tính để tuyển dụng"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_sale_renting
 msgid "Spreadsheet dashboard for rental"
-msgstr "Trang tổng quan bảng tính cho thuê"
+msgstr "Bảng điều khiển bảng tính cho thuê"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_sale
 msgid "Spreadsheet dashboard for sales"
-msgstr "Trang tổng quan bảng tính để bán hàng"
+msgstr "Bảng điều khiển bảng tính để bán hàng"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_spreadsheet_dashboard_stock
@@ -33803,7 +33807,7 @@ msgstr "Máy tính tiền đã đăng ký của Thụy Điển"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ch_pos
 msgid "Swiss - Point of Sale"
-msgstr "Thuỵ Sĩ - Điểm bán hàng"
+msgstr "Thuỵ Sĩ - POS"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.language_install_view_form_lang_switch
@@ -35365,9 +35369,9 @@ msgid ""
 "and keep track of application submissions easily. It comes as an add-on of "
 "*Recruitment* app."
 msgstr ""
-"Module này cho phép xuất bản các vị trí công việc có sẵn của bạn trên trang "
-"web của bạn và theo dõi các ứng dụng nộp đơn dễ dàng. Nó đến như là một add-"
-"on của * ứng dụng tuyển dụng *."
+"Phân hệ này cho phép xuất bản các Vị trí công việc có sẵn của bạn trên trang"
+" web của bạn và theo dõi các ứng dụng nộp đơn dễ dàng. Nó đến như là một "
+"tiện ích bổ sung của * ứng dụng tuyển dụng *."
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_mail_sms
@@ -35581,7 +35585,7 @@ msgid ""
 "    "
 msgstr ""
 "Module này giúp phân tích doanh thu từ các sự kiện.\n"
-"Với mục đích đó, chế độ xem trang tổng quan được thêm vào báo cáo doanh thu\n"
+"Với mục đích đó, chế độ xem bảng điều khiển được thêm vào báo cáo doanh thu\n"
 "    "
 
 #. module: base
@@ -36352,7 +36356,7 @@ msgstr "Chưa được phân loại"
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_uninstall
 #, python-format
 msgid "Uninstall"
-msgstr "Xóa cài đặt"
+msgstr "Gỡ cài đặt"
 
 #. module: base
 #. odoo-python
@@ -36360,7 +36364,7 @@ msgstr "Xóa cài đặt"
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_uninstall
 #, python-format
 msgid "Uninstall module"
-msgstr "Mô-đun chưa cài đặt"
+msgstr "Gỡ cài đặt phân hệ"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__ir_module_module__state__uninstallable
@@ -37556,7 +37560,7 @@ msgstr "Cấu hình kho sản phẩm bán trên trang web"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_dashboard
 msgid "Website Sales Dashboard"
-msgstr "Trang tổng quan bán hàng Website"
+msgstr "Bảng điều khiển bán hàng Website"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_helpdesk_slides_forum

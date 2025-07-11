@@ -27,7 +27,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 08:26+0000\n"
+"POT-Creation-Date: 2025-05-22 18:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:54+0000\n"
 "Last-Translator: Naser mars, 2025\n"
 "Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
@@ -3729,7 +3729,6 @@ msgid "Off Track"
 msgstr "خارج از مسیر"
 
 #. module: project
-#: model:account.analytic.account,name:project.analytic_office_design
 #: model:project.project,name:project.project_project_1
 msgid "Office Design"
 msgstr "طراحی دفتر کار"
@@ -4006,6 +4005,20 @@ msgstr ""
 #: model:ir.model.fields,field_description:project.field_project_task__access_url
 msgid "Portal Access URL"
 msgstr "آدرس دسترسی پرتال"
+
+#. module: project
+#. odoo-python
+#: code:addons/project/models/project.py:0
+#, python-format
+msgid "Portal Parent Task"
+msgstr ""
+
+#. module: project
+#. odoo-python
+#: code:addons/project/models/project.py:0
+#, python-format
+msgid "Portal Sub-tasks"
+msgstr ""
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__portal_user_names
@@ -4561,7 +4574,6 @@ msgid "Related Document Model"
 msgstr "مدل مدرک مربوطه"
 
 #. module: project
-#: model:account.analytic.account,name:project.analytic_renovations
 #: model:project.project,name:project.project_project_3
 msgid "Renovations"
 msgstr "نوسازی‌ها"
@@ -4653,7 +4665,6 @@ msgid "Research"
 msgstr "پژوهش"
 
 #. module: project
-#: model:account.analytic.account,name:project.analytic_research_development
 #: model:project.project,name:project.project_project_2
 msgid "Research & Development"
 msgstr "تحقیق و توسعه"

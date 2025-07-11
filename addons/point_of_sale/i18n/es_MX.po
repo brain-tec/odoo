@@ -8,16 +8,16 @@
 # Iran Villalobos López, 2023
 # Lucia Pacheco, 2024
 # Martin Trigaux, 2024
-# Fernanda Alvarez, 2025
 # Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2025
+# Fernanda Alvarez, 2025
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0+e\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 11:06+0000\n"
+"POT-Creation-Date: 2025-06-27 03:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2025\n"
+"Last-Translator: Fernanda Alvarez, 2025\n"
 "Language-Team: Spanish (Mexico) (https://app.transifex.com/odoo/teams/41243/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3477,8 +3477,8 @@ msgstr "Más..."
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/js/Screens/TicketScreen/TicketScreen.js:0
 #, python-format
-msgid "Multiple Invoiced Orders Selected"
-msgstr "Se seleccionaron varias órdenes facturadas."
+msgid "Multiple Orders Selected"
+msgstr "Varias órdenes seleccionadas"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__my_activity_date_deadline
@@ -5884,8 +5884,8 @@ msgid ""
 "Set a maximum difference allowed between the expected and counted money "
 "during the closing of the session"
 msgstr ""
-"Establezca la diferencia máxima permitida entre el dinero esperado y el "
-"dinero contado al cierre de la sesión."
+"Defina la diferencia máxima permitida entre el dinero esperado y el dinero "
+"contado al cierre de la sesión"
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_config__set_maximum_difference
@@ -5894,8 +5894,8 @@ msgid ""
 "Set a maximum difference allowed between the expected and counted money "
 "during the closing of the session."
 msgstr ""
-"Establezca la diferencia máxima permitida entre el dinero esperado y el "
-"dinero contado al cierre de la sesión."
+"Defina la diferencia máxima permitida entre el dinero esperado y el dinero "
+"contado al cierre de la sesión"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -6939,6 +6939,17 @@ msgstr ""
 "Este diario está asociado con un método de pago. No puede modificar su tipo."
 
 #. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/account_journal.py:0
+#, python-format
+msgid ""
+"This journal is associated with payment method %s that is being used by "
+"order %s in the active pos session %s"
+msgstr ""
+"Este diario está asociado con el método de pago %s que usa la orden %s en la"
+" sesión %s activa del PdV."
+
+#. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/js/ChromeWidgets/DebugWidget.js:0
 #, python-format
@@ -7734,12 +7745,11 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/js/Screens/TicketScreen/TicketScreen.js:0
 #, python-format
 msgid ""
-"You have selected orderlines from multiple invoiced orders. To proceed "
-"refund, please select orderlines from the same invoiced order."
+"You have selected orderlines from multiple orders. To proceed refund, please"
+" select orderlines from the same order."
 msgstr ""
-"Seleccionó líneas de órdenes de muchas órdenes facturadas. Para continuar "
-"con el reembolso, seleccione las líneas de la orden que sean de la misma "
-"orden facturada."
+"Seleccinó las líneas de varias órdenes. Seleccione las líneas que pertenecen"
+" a la misma orden para continuar con el reembolso."
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -8028,14 +8038,3 @@ msgstr ""
 #, python-format
 msgid "were duplicates of existing orders"
 msgstr "eran duplicados de órdenes existentes"
-
-#. module: point_of_sale
-#. odoo-python
-#: code:addons/point_of_sale/models/account_journal.py:0
-#, python-format
-msgid ""
-"This journal is associated with payment method %s that is being used by "
-"order %s in the active pos session %s"
-msgstr ""
-"Este diario está asociado con el método de pago %s que usa la orden %s en la"
-" sesión %s activa del PdV."

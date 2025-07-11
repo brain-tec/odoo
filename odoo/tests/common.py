@@ -251,6 +251,8 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
         super().__init__(methodName)
         self.addTypeEqualityFunc(etree._Element, self.assertTreesEqual)
         self.addTypeEqualityFunc(html.HtmlElement, self.assertTreesEqual)
+        if methodName != 'runTest':
+            self.test_tags = self.test_tags | set(self.get_method_additional_tags(getattr(self, methodName)))
 
     def run(self, result):
         testMethod = getattr(self, self._testMethodName)
@@ -468,6 +470,9 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
 
             The second form is convenient when used with :func:`users`.
         """
+        if not 'is_query_count' in self.test_tags:
+            # change into warning in master
+            self._logger.info('assertQueryCount is used but the test is not tagged `is_query_count`')
         if self.warm:
             # mock random in order to avoid random bus gc
             with patch('random.random', lambda: 1):
@@ -720,6 +725,15 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
                 'Request ignored during test as it does not contain the required cookie.'
             )
 
+    def get_method_additional_tags(self, test_method):
+        """Guess if the test_methods is a query_count and adds an `is_query_count` tag on the test
+        """
+        additional_tags = []
+        method_source = inspect.getsource(test_method) if test_method else ''
+        if 'self.assertQueryCount' in method_source:
+            additional_tags.append('is_query_count')
+        return additional_tags
+
 savepoint_seq = itertools.count()
 
 
@@ -951,6 +965,7 @@ class ChromeBrowser:
         # maps frame ids to callbacks
         self._frames = {}
         self._handlers = {
+            'Fetch.requestPaused': self._handle_request_paused,
             'Runtime.consoleAPICalled': self._handle_console,
             'Runtime.exceptionThrown': self._handle_exception,
             'Page.frameStoppedLoading': self._handle_frame_stopped_loading,
@@ -964,6 +979,7 @@ class ChromeBrowser:
         self._receiver.start()
         self._logger.info('Enable chrome headless console log notification')
         self._websocket_send('Runtime.enable')
+        self._websocket_request('Fetch.enable')
         self._logger.info('Chrome headless enable page notifications')
         self._websocket_send('Page.enable')
         self._websocket_send('Page.setDownloadBehavior', params={
@@ -1205,6 +1221,8 @@ class ChromeBrowser:
             except websocket.WebSocketTimeoutException:
                 continue
             except Exception as e:
+                if isinstance(e, ConnectionResetError) and self._result.done():
+                    return
                 # if the socket is still connected something bad happened,
                 # otherwise the client was just shut down
                 if self.ws.connected:
@@ -1264,6 +1282,22 @@ class ChromeBrowser:
         self.ws.send(json.dumps(payload))
         return result
 
+    def _handle_request_paused(self, **params):
+        url = params['request']['url']
+        if url.startswith(f'http://{HOST}'):
+            cmd = 'Fetch.continueRequest'
+            response = {}
+        else:
+            cmd = 'Fetch.fulfillRequest'
+            response = module.current_test.fetch_proxy(url)
+        try:
+            self._websocket_send(cmd, params={'requestId': params['requestId'], **response})
+        except websocket.WebSocketConnectionClosedException:
+            pass
+        except (BrokenPipeError, ConnectionResetError):
+            # this can happen if the browser is closed. Just ignore it.
+            _logger.info("Websocket error while handling request %s", params['request']['url'])
+
     def _handle_console(self, type, args=None, stackTrace=None, **kw): # pylint: disable=redefined-builtin
         # console formatting differs somewhat from Python's, if args[0] has
         # format modifiers that many of args[1:] get formatted in, missing
@@ -1286,6 +1320,8 @@ class ChromeBrowser:
 
         log_type = type
         _logger = self._logger.getChild('browser')
+        if self._result.done() and 'failed to fetch' in message.casefold():
+            log_type = 'dir'
         _logger.log(
             self._TO_LEVEL.get(log_type, logging.INFO),
             "%s%s",
@@ -1359,8 +1395,9 @@ which leads to stray network requests and inconsistencies."""
             message += '\n' + stack
 
         if self._result.done():
-            self._logger.getChild('browser').error(
-                "Exception received after termination: %s", message)
+            if 'failed to fetch' not in message.casefold():
+                self._logger.getChild('browser').error(
+                    "Exception received after termination: %s", message)
             return
 
         self.take_screenshot()
@@ -1401,6 +1438,7 @@ which leads to stray network requests and inconsistencies."""
         'info': logging.INFO,
         'warning': logging.WARNING,
         'error': logging.ERROR,
+        'dir': logging.RUNBOT,
         # TODO: what do with
         # dir, dirxml, table, trace, clear, startGroup, startGroupCollapsed,
         # endGroup, assert, profile, profileEnd, count, timeEnd
@@ -1468,7 +1506,7 @@ which leads to stray network requests and inconsistencies."""
                     concat_file.write("file '%s'\nduration %s\n" % (frame_file_path, duration))
                 concat_file.write("file '%s'" % frame_file_path)  # needed by the concat plugin
             try:
-                subprocess.run([ffmpeg_path, '-f', 'concat', '-safe', '0', '-i', concat_script_path, '-pix_fmt', 'yuv420p', '-g', '0', outfile], check=True)
+                subprocess.run([ffmpeg_path, '-f', 'concat', '-safe', '0', '-i', concat_script_path, '-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2', '-pix_fmt', 'yuv420p', '-g', '0', outfile], check=True)
             except subprocess.CalledProcessError:
                 self._logger.error('Failed to encode screencast.')
                 return
@@ -1864,6 +1902,39 @@ class HttpCase(TransactionCase):
 
         return session
 
+    def fetch_proxy(self, url):
+        """
+            This method is called every time a request is made from the chrome browser outside the local network
+            Returns a response that will be sent to the browser to simulate the external request.
+        """
+
+        if 'https://fonts.googleapis.com/css' in url:
+            _logger.info('External chrome request during tests: Return empty file for %s', url)
+            return self.make_fetch_proxy_response('')  # return empty css file, we don't care
+
+        if 'autocomplete.clearbit.com' in url:
+            _logger.info('External chrome request during tests: Return empty suggestions for %s', url)
+            return self.make_fetch_proxy_response('[]')  # return empty css file, we don't care
+
+        _logger.info('External chrome request during tests: returning 404 for %s', url)
+        return {
+                'body': '',
+                'responseCode': 404,
+                'responseHeaders': [],
+            }
+
+    def make_fetch_proxy_response(self, content, code=200):
+        if isinstance(content, str):
+            content = content.encode()
+        return {
+                'body': base64.b64encode(content).decode(),
+                'responseCode': code,
+                'responseHeaders': [
+                    {'name': 'access-control-allow-origin', 'value': '*'},
+                    {'name': 'cache-control', 'value': 'public, max-age=10000'},
+                ],
+            }
+
     def browser_js(self, url_path, code, ready='', login=None, timeout=60, cookies=None, error_checker=None, watch=False, cpu_throttling=None, **kw):
         """ Test JavaScript code running in the browser.
 
@@ -1967,6 +2038,9 @@ class HttpCase(TransactionCase):
         """Wrapper for `browser_js` to start the given `tour_name` with the
         optional delay between steps `step_delay`. Other arguments from
         `browser_js` can be passed as keyword arguments."""
+        if not 'is_tour' in self.test_tags:
+            # change it into warning in master
+            self._logger.info('start_tour was called from a test not tagged `is_tour`')
         step_delay = ', %s' % step_delay if step_delay else ''
         code = kwargs.pop('code', "odoo.startTour('%s'%s)" % (tour_name, step_delay))
         ready = kwargs.pop('ready', "odoo.__DEBUG__.services['web_tour.tour'].tours['%s'].ready" % tour_name)
@@ -1982,6 +2056,15 @@ class HttpCase(TransactionCase):
             return sup.profile(description=request.httprequest.full_path)
         return profiler.Nested(_profiler, patch('odoo.http.Request._get_profiler_context_manager', route_profiler))
 
+    def get_method_additional_tags(self, test_method):
+        """
+        guess if the test_methods is a tour and adds an `is_tour` tag on the test
+        """
+        additional_tags = super().get_method_additional_tags(test_method)
+        method_source = inspect.getsource(test_method)
+        if 'self.start_tour' in method_source:
+            additional_tags.append('is_tour')
+        return additional_tags
 
 # kept for backward compatibility
 class HttpSavepointCase(HttpCase):

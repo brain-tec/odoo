@@ -26,13 +26,14 @@
 # Hed Shefer <hed@laylinetech.com>, 2024
 # Uri Segman, 2024
 # ZVI BLONDER <ZVIBLONDER@gmail.com>, 2025
+# Yoram Lavi, 2025
 # or balmas, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 08:27+0000\n"
+"POT-Creation-Date: 2025-06-13 18:36+0000\n"
 "PO-Revision-Date: 2022-09-22 05:54+0000\n"
 "Last-Translator: or balmas, 2025\n"
 "Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
@@ -988,6 +989,10 @@ msgid ""
 "purchase amount, period). Rewards can be discounts (% or amount) or free "
 "products."
 msgstr ""
+"הגדל את המכירות שלך באמצעות מגוון תוכניות: קופונים, מבצעים, כרטיסי מתנה "
+"ותוכנית נאמנות. ניתן להגדיר תנאים ספציפיים (מוצרים, לקוחות, סכום רכישה "
+"מינימלי, תקופת זמן). התגמולים יכולים להיות הנחות (באחוזים או סכום קבוע) או "
+"מוצרים חינמיים."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_bank_statement_line__campaign_id
@@ -1110,8 +1115,10 @@ msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with DHL"
-msgstr "חשב עלויות המשלוח ושלח באמצעות  DHL"
+msgid ""
+"Compute shipping costs and ship with DHL<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -1120,8 +1127,10 @@ msgstr "חשב עלויות המשלוח ושלח באמצעות Easypost"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with FedEx"
-msgstr "חשב עלויות המשלוח ושלח באמצעות FedEx"
+msgid ""
+"Compute shipping costs and ship with FedEx<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -1130,13 +1139,17 @@ msgstr "חישוב עלויות משלוח ושלח עם Sendcloud"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with UPS"
-msgstr "חשב עלויות המשלוח ושלח באמצעות UPS"
+msgid ""
+"Compute shipping costs and ship with UPS<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with USPS"
-msgstr "חשב עלויות המשלוח ושלח באמצעות USPS"
+msgid ""
+"Compute shipping costs and ship with USPS<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -1379,6 +1392,11 @@ msgstr "התאם אישית את מראה הצעות המחיר שלך."
 #, python-format
 msgid "Customize your quotes and orders."
 msgstr "התאם אישית את הצעות המחיר וההזמנות שלך."
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+msgid "DHL Connector"
+msgstr ""
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_dhl
@@ -1729,6 +1747,7 @@ msgstr "שורת נוספת עם %s "
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_fedex
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "FedEx Connector"
 msgstr "חיבור ל FedEx"
 
@@ -2115,7 +2134,7 @@ msgstr "כתובת לחיוב ולאספקה:"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_move_line__is_downpayment
 msgid "Is Downpayment"
-msgstr ""
+msgstr "האם שולמה מקדמה"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order_cancel__is_mail_template_editor
@@ -4314,11 +4333,13 @@ msgstr "סוג הפעילות החריגה ברשומה."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_ups
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "UPS Connector"
 msgstr "חיבור ל UPS"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_usps
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "USPS Connector"
 msgstr "חיבור ל USPS"
 
@@ -4449,14 +4470,6 @@ msgstr "וריאנט מתצוגת רשת"
 #. module: sale
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
-#, python-format
-msgid "View Order"
-msgstr "צפיה בהזמנה"
-
-#. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-#: code:addons/sale/models/sale_order.py:0
 #: code:addons/sale/models/sale_order.py:0
 #, python-format
 msgid "View Quotation"
@@ -4553,6 +4566,8 @@ msgid ""
 "You can select all orders and invoice them in batch,<br>\n"
 "            or check every order and invoice them one by one."
 msgstr ""
+"באפשרותך לבחור את כל ההזמנות ולהפיק להן חשבונית משותפת,<br>\n"
+"                   או לסמן כל הזמנה בנפרד ולהפיק לה חשבונית אחת-אחת."
 
 #. module: sale
 #: model:ir.model.fields,help:sale.field_payment_provider__so_reference_type

@@ -450,7 +450,12 @@ class MailMail(models.Model):
                     len(batch_ids), mail_server_id)
             finally:
                 if smtp_session:
-                    smtp_session.quit()
+                    try:
+                        smtp_session.quit()
+                    except smtplib.SMTPServerDisconnected:
+                        _logger.info(
+                            "Ignoring SMTPServerDisconnected while trying to quit non open session"
+                        )
 
     def _send(self, auto_commit=False, raise_exception=False, smtp_session=None):
         IrMailServer = self.env['ir.mail_server']
@@ -593,8 +598,8 @@ class MailMail(models.Model):
                         mail.message_id,
                         tools.email_normalize(msg['from']),  # FROM should not change, so last msg good enough
                         ', '.join(
-                            repr(tools.mail.email_anonymize(tools.email_normalize(m['email_to'])))
-                            for m in email_list
+                            repr(tools.mail.email_anonymize(tools.email_normalize(e)))
+                            for m in email_list for e in m['email_to']
                         ),
                     )
                     _logger.info("Total emails tried by SMTP: %s", len(email_list))

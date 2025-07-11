@@ -12,7 +12,7 @@
 # CristianCruzParra, 2022
 # RGB Consulting <odoo@rgbconsulting.com>, 2022
 # Sandra Franch <sandra.franch@upc.edu>, 2022
-# Xavier, 2022
+# Harcogourmet, 2022
 # Susanna Pujol, 2022
 # Quim - coopdevs <quim.rebull@coopdevs.org>, 2022
 # marcescu, 2022
@@ -30,7 +30,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-06 13:31+0000\n"
+"POT-Creation-Date: 2025-05-06 20:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:45+0000\n"
 "Last-Translator: Noemi Pla, 2025\n"
 "Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
@@ -1008,6 +1008,8 @@ msgstr "Esdeveniment base"
 #. odoo-python
 #: code:addons/calendar/models/calendar_event.py:0
 #: code:addons/calendar/models/calendar_event.py:0
+#: code:addons/calendar/models/calendar_event.py:0
+#: code:addons/calendar/models/calendar_event.py:0
 #: model:ir.model.fields.selection,name:calendar.selection__calendar_attendee__availability__busy
 #: model:ir.model.fields.selection,name:calendar.selection__calendar_event__show_as__busy
 #: model_terms:ir.ui.view,arch_db:calendar.view_calendar_event_search
@@ -1429,49 +1431,49 @@ msgstr "Hora del esdeveniment"
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "Every %(interval)s Days"
-msgstr ""
+msgstr "Cada %(interval)s dies"
 
 #. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "Every %(interval)s Days for %(count)s events"
-msgstr ""
+msgstr "Cada %(interval)s dies durant %(count)s esdeveniments"
 
 #. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "Every %(interval)s Days until %(until)s"
-msgstr ""
+msgstr "Cada %(interval)s dies fins al %(until)s"
 
 #. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "Every %(interval)s Months day %(day)s"
-msgstr ""
+msgstr "Cada %(interval)s mesos el dia %(day)s"
 
 #. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "Every %(interval)s Months day %(day)s for %(count)s events"
-msgstr ""
+msgstr "Cada %(interval)s mesos el dia %(day)s durant %(count)s esdeveniments"
 
 #. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "Every %(interval)s Months day %(day)s until %(until)s"
-msgstr ""
+msgstr "Cada %(interval)s mesos el dia %(day)s fins al %(until)s"
 
 #. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "Every %(interval)s Months on the %(position)s %(weekday)s"
-msgstr ""
+msgstr "Cada %(interval)s mesos el %(position)s %(weekday)s"
 
 #. module: calendar
 #. odoo-python
@@ -1481,6 +1483,8 @@ msgid ""
 "Every %(interval)s Months on the %(position)s %(weekday)s for %(count)s "
 "events"
 msgstr ""
+"Cada %(interval)s mesos el %(position)s %(weekday)s durant %(count)s "
+"esdeveniments"
 
 #. module: calendar
 #. odoo-python
@@ -1488,49 +1492,49 @@ msgstr ""
 #, python-format
 msgid ""
 "Every %(interval)s Months on the %(position)s %(weekday)s until %(until)s"
-msgstr ""
+msgstr "Cada %(interval)s mesos el %(position)s %(weekday)s fins al %(until)s"
 
 #. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "Every %(interval)s Weeks on %(days)s"
-msgstr ""
+msgstr "Cada %(interval)s setmanes el %(days)s"
 
 #. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "Every %(interval)s Weeks on %(days)s for %(count)s events"
-msgstr ""
+msgstr "Cada %(interval)s setmanes el %(days)s durant %(count)s esdeveniments"
 
 #. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "Every %(interval)s Weeks on %(days)s until %(until)s"
-msgstr ""
+msgstr "Cada %(interval)s setmanes el %(days)s fins al %(until)s"
 
 #. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "Every %(interval)s Years"
-msgstr ""
+msgstr "Cada %(interval)s anys"
 
 #. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "Every %(interval)s Years for %(count)s events"
-msgstr ""
+msgstr "Cada %(interval)s anys durnat %(count)s esdeveniments"
 
 #. module: calendar
 #. odoo-python
 #: code:addons/calendar/models/calendar_recurrence.py:0
 #, python-format
 msgid "Every %(interval)s Years until %(until)s"
-msgstr ""
+msgstr "Cada %(interval)s anys fins al %(until)s"
 
 #. module: calendar
 #. odoo-python

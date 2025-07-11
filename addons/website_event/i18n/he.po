@@ -20,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 08:26+0000\n"
+"POT-Creation-Date: 2025-05-22 18:35+0000\n"
 "PO-Revision-Date: 2022-09-22 05:56+0000\n"
 "Last-Translator: or balmas, 2025\n"
 "Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
@@ -199,6 +199,8 @@ msgid ""
 "<span class=\"badge text-bg-secondary text-uppercase "
 "o_wevent_badge\">Speaker</span>"
 msgstr ""
+"<span class=\"badge text-bg-secondary text-uppercase o_wevent_badge\"> "
+"דובר</span>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_topbar
@@ -560,7 +562,7 @@ msgstr "קטגוריית תיוג אירועים"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_options_template
 msgid "Event Tags"
-msgstr ""
+msgstr "תגיות אירוע"
 
 #. module: website_event
 #: model:ir.model,name:website_event.model_event_type
@@ -1160,6 +1162,13 @@ msgstr "החלף ניווט"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.snippet_options
 msgid "Top Bar Filter"
+msgstr ""
+
+#. module: website_event
+#. odoo-python
+#: code:addons/website_event/models/website_visitor.py:0
+#, python-format
+msgid "Unsupported 'Not In' operation on visitors registrations"
 msgstr ""
 
 #. module: website_event

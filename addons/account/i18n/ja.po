@@ -10,18 +10,18 @@
 # 江口和志 <sandwhale1010@gmail.com>, 2023
 # Tatsuki Kanda, 2023
 # 764374359f7a865bd0df682e21e54552_335e00f <6548f6be8d222d7d28a3e8d58aa819d1_1128047>, 2023
-# Ryoko Tsuda <ryoko@quartile.co>, 2024
 # Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2024
-# Wil Odoo, 2025
+# Ryoko Tsuda <ryoko@quartile.co>, 2025
 # Junko Augias, 2025
+# Wil Odoo, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 08:26+0000\n"
+"POT-Creation-Date: 2025-07-04 01:32+0000\n"
 "PO-Revision-Date: 2022-09-22 05:44+0000\n"
-"Last-Translator: Junko Augias, 2025\n"
+"Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -155,9 +155,9 @@ msgstr "%s (コピー)"
 #: code:addons/account/models/account_account.py:0
 #: code:addons/account/models/account_account.py:0
 #: code:addons/account/models/account_journal.py:0
-#: code:addons/account/models/account_reconcile_model.py:0
-#: code:addons/account/models/account_reconcile_model.py:0
 #: code:addons/account/models/account_payment_term.py:0
+#: code:addons/account/models/account_reconcile_model.py:0
+#: code:addons/account/models/account_reconcile_model.py:0
 #, python-format
 msgid "%s (copy)"
 msgstr "%s (コピー)"
@@ -266,12 +266,6 @@ msgstr "(含まれている)。"
 #, python-format
 msgid "(including this document) "
 msgstr "(この文書を含む) "
-
-#. module: account
-#: model:ir.actions.report,print_report_name:account.account_invoices
-#: model:ir.actions.report,print_report_name:account.account_invoices_without_payment
-msgid "(object._get_report_base_filename())"
-msgstr "(object._get_report_base_filename())"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_form
@@ -1847,7 +1841,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_search
 msgid "Account with Entries"
-msgstr "入力のあるアカウント"
+msgstr "仕訳のある勘定科目"
 
 #. module: account
 #: model:ir.actions.server,name:account.ir_cron_auto_post_draft_entry_ir_actions_server
@@ -1947,7 +1941,7 @@ msgstr "会計関連の設定は次で管理"
 #: model:ir.model.fields.selection,name:account.selection__account_account_tag__applicability__accounts
 #: model_terms:ir.ui.view,arch_db:account.view_account_search
 msgid "Accounts"
-msgstr "アカウント"
+msgstr "勘定科目"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_template_form
@@ -2044,7 +2038,7 @@ msgstr "アクション"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "Activate to create purchase receipt"
-msgstr "領収書作成のために有効化してください"
+msgstr "有効にして仕入受領書を作成します"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -2314,7 +2308,7 @@ msgstr "後続の税額に影響します"
 #: code:addons/account/static/src/components/account_resequence/account_resequence.xml:0
 #, python-format
 msgid "After"
-msgstr "変更後"
+msgstr "日後"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_report_expression__engine__aggregation
@@ -2478,7 +2472,7 @@ msgstr "金額"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__amount_company_currency_signed
 msgid "Amount Company Currency Signed"
-msgstr "取引通貨金額 署名済"
+msgstr "会社通貨金額(±)"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__match_amount
@@ -2493,14 +2487,14 @@ msgstr "金額条件"
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 #: model_terms:ir.ui.view,arch_db:account.view_invoice_tree
 msgid "Amount Due"
-msgstr "未消込額"
+msgstr "請求残高"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__amount_residual_signed
 #: model:ir.model.fields,field_description:account.field_account_move__amount_residual_signed
 #: model:ir.model.fields,field_description:account.field_account_payment__amount_residual_signed
 msgid "Amount Due Signed"
-msgstr "未消込額(±)"
+msgstr "請求残高(±)"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__match_amount_max
@@ -2532,7 +2526,7 @@ msgstr "受領した金額"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__amount_signed
 msgid "Amount Signed"
-msgstr "署名済金額"
+msgstr "金額(±)"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__match_nature
@@ -5133,7 +5127,7 @@ msgstr "日付例"
 msgid ""
 "Date from which the accounting is managed in Odoo. It is the date of the "
 "opening entry."
-msgstr "会計がOdooで管理された日付。これは、開始エントリの日付です。"
+msgstr "Odooで会計管理を開始する日付です。これは期首仕訳の日付にあたります。"
 
 #. module: account
 #. odoo-javascript
@@ -5258,7 +5252,7 @@ msgstr "会社のデフォルトインコタームズ"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__default_opening_date_filter
 msgid "Default Opening"
-msgstr "オープニングデフォルト"
+msgstr "デフォルト期首日付"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__account_default_pos_receivable_account_id
@@ -5326,7 +5320,7 @@ msgstr "プロダクト販売時に適用されるデフォルト税"
 msgid ""
 "Define in which journals this account can be used. If empty, can be used in "
 "all journals."
-msgstr "このアカウントを使用できるジャーナルを定義します。空の場合、すべてのジャーナルで使用できます。"
+msgstr "この勘定科目を使用できる仕訳帳を指定します。空白の場合、すべての仕訳帳で使用できます。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -5390,29 +5384,9 @@ msgid "Delivery address for current invoice."
 msgstr "現在の請求書の配送先住所。"
 
 #. module: account
-#: model:account.account.tag,name:account.demo_ceo_wages_account
-msgid "Demo CEO Wages Account"
-msgstr "CEO 賃金勘定のデモ"
-
-#. module: account
-#: model:account.account.tag,name:account.demo_capital_account
-msgid "Demo Capital Account"
-msgstr "資本勘定デモ"
-
-#. module: account
-#: model:account.account.tag,name:account.demo_sale_of_land_account
-msgid "Demo Sale of Land Account"
-msgstr "土地売却勘定デモ"
-
-#. module: account
-#: model:account.account.tag,name:account.demo_stock_account
-msgid "Demo Stock Account"
-msgstr "株式勘定デモ"
-
-#. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__deprecated
 msgid "Deprecated"
-msgstr "廃止済"
+msgstr "非推奨"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_account__account_type__expense_depreciation
@@ -5436,19 +5410,19 @@ msgstr "請求書表示内容"
 #: model:ir.model.fields,field_description:account.field_account_payment__destination_account_id
 #, python-format
 msgid "Destination Account"
-msgstr "宛先の勘定"
+msgstr "相手方勘定科目"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__destination_journal_id
 msgid "Destination Journal"
-msgstr "相手先仕訳帳"
+msgstr "振替先仕訳帳"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_payment.py:0
 #, python-format
 msgid "Destination journal"
-msgstr "相手先仕訳帳"
+msgstr "振替先仕訳帳"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__auto_apply
@@ -5865,7 +5839,7 @@ msgstr "ドラフトの支払"
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "Draft Purchase Receipt"
-msgstr "購買記録の下書き"
+msgstr "ドラフト仕入受領書"
 
 #. module: account
 #. odoo-python
@@ -5908,7 +5882,7 @@ msgstr "以下に対する支払額："
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 #, python-format
 msgid "Due Date"
-msgstr "期日"
+msgstr "支払期日"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_payment_term_form
@@ -6078,7 +6052,7 @@ msgstr "終了日"
 #. module: account
 #: model:account.payment.term,name:account.account_payment_term_end_following_month
 msgid "End of Following Month"
-msgstr "翌月末"
+msgstr "末日締め翌月末払い"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment_term_line__end_month
@@ -6393,11 +6367,6 @@ msgid "Financial Tags"
 msgstr "財務タグ"
 
 #. module: account
-#: model:account.account.tag,name:account.account_tag_financing
-msgid "Financing Activities"
-msgstr "会計業務"
-
-#. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_partner_mapping__payment_ref_regex
 msgid "Find Text in Label"
 msgstr "ラベルの最初のテキスト"
@@ -6410,12 +6379,12 @@ msgstr "ノートの最初のテキスト"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_resequence_wizard__first_date
 msgid "First Date"
-msgstr "初回日"
+msgstr "開始日"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
 msgid "First Entry"
-msgstr "最初の入力"
+msgstr "初回仕訳"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
@@ -6442,7 +6411,7 @@ msgstr "最初の請求書を送付しました!"
 #: model:ir.model.fields,field_description:account.field_account_move__auto_post_origin_id
 #: model:ir.model.fields,field_description:account.field_account_payment__auto_post_origin_id
 msgid "First recurring entry"
-msgstr "最初の定期的なエントリ"
+msgstr "初回定期仕訳"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__account_fiscal_country_id
@@ -6583,7 +6552,7 @@ msgstr "折り畳み可"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 msgid "Follow Customer Payments"
-msgstr "顧客の支払いをフォロー"
+msgstr "顧客支払をフォロー"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__message_follower_ids
@@ -6838,7 +6807,7 @@ msgstr "キャンセルされた請求書、削除された項目、または未
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "Gaps in the sequence"
-msgstr "シーケンス内のギャップ"
+msgstr "シーケンスの欠落"
 
 #. module: account
 #: model:ir.ui.menu,name:account.menu_finance_entries_generate_entries
@@ -7106,6 +7075,7 @@ msgstr "ID"
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/account_move.py:0
 #: code:addons/account/models/chart_template.py:0
 #, python-format
 msgid "INV"
@@ -7409,7 +7379,7 @@ msgstr "変更不可ハッシュ"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
 msgid "Inalterability check"
-msgstr "変更不可チェック"
+msgstr "改ざん防止検証"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__secure_sequence_number
@@ -7526,7 +7496,7 @@ msgstr "貿易条件は、買い手と売り手の間で取引費用と責任を
 #. module: account
 #: model:ir.model.fields,help:account.field_account_move_line__tax_line_id
 msgid "Indicates that this journal item is a tax line"
-msgstr "このジャーナル項目は税ラインであることを示します"
+msgstr "この仕訳明細が税額に対応する行(税金行)であることを示します"
 
 #. module: account
 #. odoo-javascript
@@ -7702,11 +7672,6 @@ msgstr "無効な会計年度最終日"
 #: model:ir.model.fields,field_description:account.field_account_move_line__tax_tag_invert
 msgid "Invert Tags"
 msgstr "反転タグ"
-
-#. module: account
-#: model:account.account.tag,name:account.account_tag_investing
-msgid "Investing & Extraordinary Activities"
-msgstr "投資・その他の活動"
 
 #. module: account
 #. odoo-python
@@ -7915,10 +7880,10 @@ msgid "Invoice: Sending"
 msgstr "請求書: 送信"
 
 #. module: account
-#: model:mail.template,report_name:account.email_template_edi_invoice
-msgid ""
-"Invoice_{{ (object.name or '').replace('/','_') }}{{ object.state == 'draft'"
-" and '_draft' or '' }}"
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "Invoice_%(name)s%(post)s"
 msgstr ""
 
 #. module: account
@@ -8143,6 +8108,13 @@ msgid "It was previously '%(previous)s' and it is now '%(current)s'."
 msgstr "元は '%(previous)s' が更新されて '%(current)s'になりました。"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+#, python-format
+msgid "Items With Missing Analytic Distribution"
+msgstr "分析分布が欠落している項目"
+
+#. module: account
 #: model:ir.model.fields.selection,name:account.selection__res_company__fiscalyear_last_month__1
 msgid "January"
 msgstr "1月"
@@ -8344,7 +8316,7 @@ msgstr "仕訳未消込入金勘定"
 #: model:ir.model.fields,field_description:account.field_account_chart_template__account_journal_suspense_account_id
 #: model:ir.model.fields,field_description:account.field_res_company__account_journal_suspense_account_id
 msgid "Journal Suspense Account"
-msgstr "仕訳保留勘定"
+msgstr "仕訳帳用仮勘定"
 
 #. module: account
 #: model:ir.model.constraint,message:account.constraint_account_journal_code_company_uniq
@@ -8376,19 +8348,19 @@ msgstr "仕訳は、反対仕訳と同じ種類の項目を使用する必要が
 #. module: account
 #: model:ir.model.fields,help:account.field_res_company__automatic_entry_default_journal_id
 msgid "Journal used by default for moving the period of an entry"
-msgstr "エントリの期間を移動するためにデフォルトで使用されるジャーナル"
+msgstr "仕訳の会計期間を移動する際に、デフォルトで使用される仕訳帳"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_res_company__account_opening_journal_id
 msgid ""
 "Journal where the opening entry of this company's accounting has been "
 "posted."
-msgstr "この会社の会計の最初のエントリが投稿されたジャーナル。"
+msgstr "この会社の会計における期首仕訳が記帳された仕訳帳です。"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_automatic_entry_wizard__journal_id
 msgid "Journal where to create the entry."
-msgstr "エントリを作成するジャーナル。"
+msgstr "仕訳を作成するための仕訳帳です。"
 
 #. module: account
 #. odoo-javascript
@@ -8528,7 +8500,7 @@ msgstr "言語"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
 msgid "Last Entry"
-msgstr "最後のエントリ"
+msgstr "最終仕訳"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
@@ -9076,7 +9048,7 @@ msgstr "送信されたとしてマーク"
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment_register__payment_difference_handling__reconcile
 msgid "Mark as fully paid"
-msgstr "完全に支払われたとしてマーク"
+msgstr "全額支払済とする"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_reconcile_model__match_label__match_regex
@@ -9392,7 +9364,7 @@ msgstr "自分の請求書"
 #: model:account.report.column,name:account.generic_tax_report_column_net
 #: model:account.report.column,name:account.generic_tax_report_tax_account_column_net
 msgid "NET"
-msgstr "ネット"
+msgstr "課税対象額"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account_template__name
@@ -9894,11 +9866,6 @@ msgid "Off-Balance Sheet"
 msgstr "オフバランスシート"
 
 #. module: account
-#: model:account.account.tag,name:account.demo_office_furniture_account
-msgid "Office Furniture"
-msgstr "オフィス家具"
-
-#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_reconcile_model__matching_order__old_first
 #: model:ir.model.fields.selection,name:account.selection__account_reconcile_model_template__matching_order__old_first
 msgid "Oldest first"
@@ -9949,6 +9916,13 @@ msgstr "請求書の準備ができたら、を押して確認します。"
 #: model_terms:ir.ui.view,arch_db:account.view_partner_property_form
 msgid "One or more Bank Accounts set on this partner are also used by other"
 msgstr "この取引先に設定した、一つ以上の銀行口座は他のものに使われています"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+#, python-format
+msgid "One or more lines require a 100% analytic distribution."
+msgstr "1つ以上の行で100%の分析分配が必要です。"
 
 #. module: account
 #. odoo-python
@@ -10018,37 +9992,37 @@ msgstr "オープン"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__opening_balance
 msgid "Opening Balance"
-msgstr "開始残高"
+msgstr "期首残高"
 
 #. module: account
 #: model:ir.model,name:account.model_account_financial_year_op
 msgid "Opening Balance of Financial Year"
-msgstr "会計年度の開始残高"
+msgstr "会計年度の期首残高"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__opening_credit
 msgid "Opening Credit"
-msgstr "貸方開始残高"
+msgstr "期首貸方残高"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_financial_year_op__opening_date
 msgid "Opening Date"
-msgstr "開始日"
+msgstr "期首日付"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__opening_debit
 msgid "Opening Debit"
-msgstr "借方開始残高"
+msgstr "期首借方残高"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__account_opening_date
 msgid "Opening Entry"
-msgstr "エントリを開きます"
+msgstr "期首仕訳"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__account_opening_journal_id
 msgid "Opening Journal"
-msgstr "ジャーナルを開きます"
+msgstr "期首仕訳帳"
 
 #. module: account
 #. odoo-python
@@ -10056,24 +10030,19 @@ msgstr "ジャーナルを開きます"
 #: model:ir.model.fields,field_description:account.field_res_company__account_opening_move_id
 #, python-format
 msgid "Opening Journal Entry"
-msgstr "仕訳を開きます"
+msgstr "期首仕訳エントリ"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_financial_year_op__opening_move_posted
 msgid "Opening Move Posted"
-msgstr "記帳済開始仕訳"
+msgstr "期首仕訳が記帳済"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/company.py:0
 #, python-format
 msgid "Opening balance"
-msgstr "残高を開きます"
-
-#. module: account
-#: model:account.account.tag,name:account.account_tag_operating
-msgid "Operating Activities"
-msgstr "オペレーティング活動"
+msgstr "期首残高"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
@@ -10631,12 +10600,12 @@ msgstr "支払QRコード"
 #. module: account
 #: model:ir.actions.report,name:account.action_report_payment_receipt
 msgid "Payment Receipt"
-msgstr "領収書"
+msgstr "入金領収書"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
 msgid "Payment Receipt:"
-msgstr "領収書"
+msgstr "入金領収書:"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__payment_reference
@@ -10765,7 +10734,7 @@ msgstr "支払条件: 45日以内"
 #. module: account
 #: model_terms:account.payment.term,note:account.account_payment_term_end_following_month
 msgid "Payment terms: End of Following Month"
-msgstr "支払条件: 翌月末"
+msgstr "支払条件:末日締め翌月末払い"
 
 #. module: account
 #: model_terms:account.payment.term,note:account.account_payment_term_immediate
@@ -11238,7 +11207,7 @@ msgstr "購買"
 #: model:ir.model.fields.selection,name:account.selection__account_move__move_type__in_receipt
 #: model:res.groups,name:account.group_purchase_receipts
 msgid "Purchase Receipt"
-msgstr "購買記録"
+msgstr "仕入受領書"
 
 #. module: account
 #. odoo-python
@@ -11456,7 +11425,7 @@ msgstr "消込モデル"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_full_reconcile__partial_reconcile_ids
 msgid "Reconciliation Parts"
-msgstr "消込パーツ"
+msgstr "消込部分"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.res_partner_action_supplier_bills
@@ -11551,7 +11520,7 @@ msgstr "銀行取引明細書の登録"
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_move_in_receipt_type
 msgid "Register a new purchase receipt"
-msgstr "購買記録を登録"
+msgstr "新規仕入受領書を登録"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_account_payments
@@ -12193,6 +12162,13 @@ msgid "See all activities"
 msgstr "すべての活動を参照します。"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_line.py:0
+#, python-format
+msgid "See items"
+msgstr "項目を見る"
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_journal__type
 msgid ""
 "Select 'Sale' for customer invoices journals.\n"
@@ -12550,7 +12526,7 @@ msgstr "短縮コード"
 msgid ""
 "Shorter name used for display. The journal entries of this journal will also"
 " be named using this prefix by default."
-msgstr "表示に使用する短い名前。このジャーナルのジャーナルエントリは、デフォルトで、このプレフィックスを使用して名前が付けられます。"
+msgstr "表示用の短縮名です。この仕訳帳の仕訳は、デフォルトでこのプレフィックスを使って命名されます。"
 
 #. module: account
 #: model:res.groups,name:account.group_account_readonly
@@ -12965,7 +12941,7 @@ msgstr "サブタイプ"
 #: model:ir.model.fields,field_description:account.field_account_move__suitable_journal_ids
 #: model:ir.model.fields,field_description:account.field_account_payment__suitable_journal_ids
 msgid "Suitable Journal"
-msgstr "適しジャーナル"
+msgstr "適用可能な仕訳帳"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__supplier_rank
@@ -13086,7 +13062,7 @@ msgstr "現金基準税仕訳帳"
 #: model:ir.model.fields,field_description:account.field_account_tax_repartition_line__use_in_tax_closing
 #: model:ir.model.fields,field_description:account.field_account_tax_repartition_line_template__use_in_tax_closing
 msgid "Tax Closing Entry"
-msgstr "税決算仕訳"
+msgstr "税務決算仕訳"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_tax__amount_type
@@ -13556,7 +13532,7 @@ msgstr "諸条件"
 #. module: account
 #: model:ir.model.fields,help:account.field_res_company__account_opening_date
 msgid "That is the date of the opening entry."
-msgstr "それがオープニングエントリーの日付です。"
+msgstr "これは期首仕訳の日付です。"
 
 #. module: account
 #. odoo-python
@@ -14477,7 +14453,7 @@ msgstr "未消込金残高が以前の明細書の期末残高と一致しない
 #. module: account
 #: model:ir.model.fields,help:account.field_account_move_line__statement_line_id
 msgid "The statement line that created this entry"
-msgstr "このエントリを作成した文の行"
+msgstr "この仕訳を作成した明細行"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_reconcile_model__payment_tolerance_type
@@ -14761,8 +14737,8 @@ msgstr "この仕訳には、お使いの財政状態と合わない税が含ま
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 #, python-format
-msgid "This entry has been duplicated from %s%s"
-msgstr ""
+msgid "This entry has been duplicated from %s"
+msgstr "この仕訳は%sより複製されました"
 
 #. module: account
 #. odoo-python
@@ -14800,14 +14776,6 @@ msgid ""
 "This journal already contains items, therefore you cannot modify its "
 "company."
 msgstr "このジャーナルにはすでにアイテムが含まれているため、会社を変更することはできません。"
-
-#. module: account
-#. odoo-python
-#: code:addons/account/models/account_journal.py:0
-#, python-format
-msgid ""
-"This journal is associated with a payment method. You cannot archive it"
-msgstr "この仕訳帳は支払方法に関連付けられています。アーカイブできません。"
 
 #. module: account
 #. odoo-python
@@ -14932,7 +14900,7 @@ msgstr "この消込モデルは、これまで一度もエントリに使用さ
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "This recurring entry originated from %s"
-msgstr "この定期的な仕訳は以下に由来します：%s"
+msgstr "この定期仕訳は%sから作成されました"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__auto_post_until
@@ -14985,7 +14953,7 @@ msgstr "終了日"
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
 msgid "To Check"
-msgstr "要チェック"
+msgstr "要確認"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
@@ -15065,13 +15033,13 @@ msgstr "請求額合計"
 #: model:ir.model.fields,field_description:account.field_res_partner__debit
 #: model:ir.model.fields,field_description:account.field_res_users__debit
 msgid "Total Payable"
-msgstr "合計買掛金/未払金"
+msgstr "買掛残高"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__credit
 #: model:ir.model.fields,field_description:account.field_res_users__credit
 msgid "Total Receivable"
-msgstr "合計売掛金/未収金"
+msgstr "売掛残高"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_line_tree
@@ -15536,7 +15504,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__sequence
 msgid "Used to order Journals in the dashboard view"
-msgstr "ダッシュボードビューで注文ジャーナルに使用"
+msgstr "ダッシュボードビューで仕訳帳を並べ替えるために使用されます"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__loss_account_id
@@ -15884,14 +15852,16 @@ msgstr "チェックを入れると、この式の値を表示する際に0値�
 msgid ""
 "When the purchase receipt is confirmed, you can record the\n"
 "                vendor payment related to this purchase receipt."
-msgstr "購買記録では経費計上とともに仕入先支払を記録することが可能です。"
+msgstr ""
+"仕入受領書が確定すると、この仕入受領書に関連する\n"
+"                仕入先への支払を記録することができます。"
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_move_out_receipt_type
 msgid ""
 "When the sale receipt is confirmed, you can record the customer\n"
 "                payment related to this sales receipt."
-msgstr "販売記録では売上計上とともに顧客支払を記録することが可能です。"
+msgstr "販売領収書が確認されると、この領収書に関連する顧客支払を記録できるようになります。"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -16435,7 +16405,7 @@ msgstr ""
 #: code:addons/account/models/account_account.py:0
 #, python-format
 msgid "You cannot merge accounts."
-msgstr "アカウントをマージできません。"
+msgstr "勘定科目を統合できません。"
 
 #. module: account
 #. odoo-python
@@ -16554,7 +16524,7 @@ msgstr "このアカウントには、異なる外貨を持つ仕訳がすでに
 msgid ""
 "You cannot switch an account to prevent the reconciliation if some partial "
 "reconciliations are still pending."
-msgstr "一部の調整がまだ保留中の場合は、アカウントを切り替えて調整を防ぐことはできません。"
+msgstr "未処理の部分消込が残っている場合は、消込を防ぐために勘定科目を変更することはできません。"
 
 #. module: account
 #. odoo-python
@@ -16733,6 +16703,13 @@ msgstr "[FURN_8999] 3人掛ソファ"
 #, python-format
 msgid "[Not set]"
 msgstr "[未割当]"
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "_draft"
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -16921,6 +16898,12 @@ msgid "name"
 msgstr "名前"
 
 #. module: account
+#: model:ir.actions.report,print_report_name:account.account_invoices
+#: model:ir.actions.report,print_report_name:account.account_invoices_without_payment
+msgid "object._get_report_base_filename()"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_tax_repartition_line__repartition_type__tax
 #: model:ir.model.fields.selection,name:account.selection__account_tax_repartition_line_template__repartition_type__tax
 msgid "of tax"
@@ -16990,7 +16973,7 @@ msgstr "to"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "to check"
-msgstr "チェックするため"
+msgstr "確認するため"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_form
@@ -17050,6 +17033,11 @@ msgstr ""
 #. module: account
 #: model:mail.template,report_name:account.mail_template_data_payment_receipt
 msgid "{{ (object.name or '').replace('/','-') }}"
+msgstr ""
+
+#. module: account
+#: model:mail.template,report_name:account.email_template_edi_invoice
+msgid "{{ object._get_report_mail_attachment_filename() }}"
 msgstr ""
 
 #. module: account
