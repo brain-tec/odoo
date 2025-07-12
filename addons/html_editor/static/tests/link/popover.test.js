@@ -10,7 +10,6 @@ import {
     select,
     waitFor,
     waitForNone,
-    manuallyDispatchProgrammaticEvent,
 } from "@odoo/hoot-dom";
 import { animationFrame, tick } from "@odoo/hoot-mock";
 import { markup } from "@odoo/owl";
@@ -80,6 +79,13 @@ describe("should open a popover", () => {
         expect(".o_we_edit_link").toHaveCount(1);
         expect(".o_we_remove_link").toHaveCount(1);
     });
+    test("link popover should not have the remove button when link is unremovable", async () => {
+        await setupEditor('<p>a<a class="oe_unremovable" href="http://test.test/">bcd[]</a>e</p>');
+        await expectElementCount(".o-we-linkpopover", 1);
+        expect(".o_we_copy_link").toHaveCount(1);
+        expect(".o_we_edit_link").toHaveCount(1);
+        expect(".o_we_remove_link").toHaveCount(0);
+    });
     test("link popover should not repositioned when clicking in the input field", async () => {
         await setupEditor("<p>this is a <a>li[]nk</a></p>");
         await waitFor(".o_we_href_input_link");
@@ -96,7 +102,7 @@ describe("should open a popover", () => {
         expect(".o-we-linkpopover").toHaveCount(1);
         // click on an uneditable element
         const nodeEl = queryOne("a[contenteditable='false']");
-        manuallyDispatchProgrammaticEvent(nodeEl, "mousedown");
+        setSelection({ anchorNode: nodeEl, anchorOffset: 0 });
         await waitForNone(".o-we-linkpopover", { timeout: 1500 });
         expect(".o-we-linkpopover").toHaveCount(0);
     });
@@ -1064,7 +1070,8 @@ describe("link preview", () => {
     });
     test("test external metadata cached correctly", async () => {
         const title = "Open Source ERP and CRM | Odoo";
-        const description = "From ERP to CRM, eCommerce and CMS. Download Odoo or use it in the cloud. Grow Your Business.";
+        const description =
+            "From ERP to CRM, eCommerce and CMS. Download Odoo or use it in the cloud. Grow Your Business.";
         onRpc("/html_editor/link_preview_external", () => {
             expect.step("/html_editor/link_preview_external");
             return {

@@ -152,7 +152,7 @@ class HrLeaveAllocation(models.Model):
         return _(
             '%(name)s (%(duration)s day(s))',
             name=self.holiday_status_id.name,
-            duration=self.number_of_days,
+            duration=float_round(self.number_of_days, precision_digits=2),
         )
 
     @api.onchange('name')
@@ -813,17 +813,6 @@ class HrLeaveAllocation(models.Model):
     # Business methods
     ####################################################
 
-    def action_set_to_confirm(self):
-        if any(allocation.state != 'refuse' for allocation in self):
-            raise UserError(_('Allocation state must be "Refused" in order to be reset to "To Approve".'))
-        self.write({
-            'state': 'confirm',
-            'approver_id': False,
-            'second_approver_id': False,
-        })
-        self.activity_update()
-        return True
-
     def action_approve(self):
         current_employee = self.env.user.employee_id
         allocation_to_approve = self.env['hr.leave.allocation']
@@ -981,8 +970,8 @@ class HrLeaveAllocation(models.Model):
                         note = _(
                             'New Allocation Request created by %(user)s: %(count)s Days of %(allocation_type)s',
                             user=allocation.create_uid.name,
-                            count=allocation.number_of_days,
-                            allocation_type=allocation.holiday_status_id.name
+                            count=float_round(allocation.number_of_days, precision_digits=2),
+                            allocation_type=allocation.holiday_status_id.name,
                         )
                     else:
                         activity_type = approval_activity
