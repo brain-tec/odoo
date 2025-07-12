@@ -60,7 +60,7 @@
         <field name="model">mrp.workorder</field>
         <field name="priority" eval="100"/>
         <field name="arch" type="xml">
-            <list>
+            <list multi_edit="1">
                 <field name="consumption" column_invisible="True"/>
                 <field name="company_id" column_invisible="True"/>
                 <field name="is_produced" column_invisible="True"/>
@@ -280,6 +280,8 @@
                 <field name="production_id"/>
                 <field name="product_id"/>
                 <field name="finished_lot_id"/>
+                <field name="product_variant_attributes"/>
+                <field name="move_raw_ids" string="Component" filter_domain="[('move_raw_ids.product_id', 'ilike', self)]"/>
                 <filter string="In Progress" name="progress" domain="[('state', '=', 'progress')]"/>
                 <filter string="To Do" name="ready" domain="[('state', '=', 'ready')]"/>
                 <filter string="Blocked" name="blocked" domain="[('state', '=', 'blocked')]"/>

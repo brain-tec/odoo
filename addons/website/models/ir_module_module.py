@@ -416,7 +416,6 @@ class IrModuleModule(models.Model):
         self._theme_upgrade_upstream()
 
         result = website.button_go_website()
-        result['params']['with_loader'] = True
         return result
 
     def button_remove_theme(self):
@@ -493,9 +492,9 @@ class IrModuleModule(models.Model):
             self.pool.website_views_to_adapt.clear()
 
     @api.model
-    def _load_module_terms(self, modules, langs, overwrite=False, imported_module=False):
+    def _load_module_terms(self, modules, langs, overwrite=False):
         """ Add missing website specific translation """
-        res = super()._load_module_terms(modules, langs, overwrite=overwrite, imported_module=imported_module)
+        res = super()._load_module_terms(modules, langs, overwrite=overwrite)
 
         if not langs or langs == ['en_US'] or not modules:
             return res
