@@ -1589,6 +1589,243 @@ class BaseModel(metaclass=MetaModel):
         return defaults
 
     @api.model
+    def _read_grouping_sets(
+        self,
+        domain: DomainType,
+        grouping_sets: Sequence[Sequence[str]],
+        aggregates: Sequence[str] = (),
+        order: str | None = None,
+    ) -> list[list[tuple]]:
+        """ Performs multiple aggregations with different groupings in a single query if possible.
+
+        This method uses SQL `GROUPING SETS` as a more advanced and efficient
+        alternative to calling :meth:`~._read_group` multiple times with different
+        `groupby` parameters. It allows you to get different levels of aggregated
+        data in one database round-trip.
+        Note that for many2many multiple SQL might be needed because of the deduplicated rows.
+
+        :param domain: :ref:`A search domain <reference/orm/domains>` to filter records before grouping
+        :param grouping_sets: A list of `groupby` specifications. Each inner list
+                              is a set of fields to group by and is equivalent to the
+                              `groupby` parameter of the :meth:`~._read_group` method.
+                              For example: `[['partner_id'], ['partner_id', 'state']]`.
+        :param aggregates: list of aggregates specification.
+                Each element is `'field:agg'` (aggregate field with aggregation function `'agg'`).
+                The possible aggregation functions are the ones provided by
+                `PostgreSQL <https://www.postgresql.org/docs/current/static/functions-aggregate.html>`_,
+                `'count_distinct'` with the expected meaning and `'recordset'` to act like `'array_agg'`
+                converted into a recordset.
+        :param order: optional ``order by`` specification, for
+                overriding the natural sort ordering of the groups,
+                see also :meth:`~.search`.
+        :return: A list of lists of tuples. The outer list's structure mirrors the
+                 input `grouping_sets`. Each inner list contains the results for one
+                 grouping specification. Each tuple within an inner list contains the
+                 values for the grouped fields, followed by the aggregate values,
+                 in the order they were specified.
+
+                 For example, given:
+                 - `grouping_sets=[['foo'], ['foo', 'bar']]`
+                 - `aggregates=['baz:sum']`
+
+                 The returned structure would be:
+                  ::
+
+                    [
+                        # Results for ['foo']
+                        [(foo1_val, baz_sum_1), (foo2_val, baz_sum_2), ...],
+                        # Results for ['foo', 'bar']
+                        [(foo1_val, bar1_val, baz_sum_3), (foo2_val, bar2_val, baz_sum_4), ...],
+                    ]
+
+        :raise AccessError: if user is not allowed to access requested information
+        """
+        if not grouping_sets:
+            raise ValueError("The 'grouping_sets' parameter cannot be empty.")
+
+        query = self._search(domain)
+        result = [[] for __ in grouping_sets]
+        if query.is_empty():
+            return result
+
+        # grouping_sets: [(a, b), (a), ()]
+        # all_groupby_specs: (a, b)
+        all_groupby_specs = tuple(unique(spec for groupby in grouping_sets for spec in groupby))
+
+        # --- Many2many Special Handling ---
+        many2many_groupby_specs = []
+        if len(grouping_sets) > 1:  # many2many logic only applies if we have multiple groupings
+            for spec in all_groupby_specs:
+                fname, property_name, __ = parse_read_group_spec(spec)
+                field = self._fields[fname]
+                if field.type == 'many2many':
+                    many2many_groupby_specs.append(spec)
+                elif field.type == 'properties':
+                    definition = self.get_property_definition(f"{fname}.{property_name}")
+                    property_type = definition.get('type')
+                    if property_type in ('tags', 'many2many'):
+                        many2many_groupby_specs.append(spec)
+
+        if (
+            many2many_groupby_specs and
+            # If aggregates are sensitive to row duplication (like sum, avg), we must isolate M2M groupings.
+            any(
+                not aggregate.endswith(
+                    (':max', ':min', ':bool_and', ':bool_or', ':array_agg_distinct', ':recordset', ':count_distinct'),
+                )
+                for aggregate in aggregates if aggregate != '__count'
+            )
+        ):
+            # The following logic is a recursive decomposition strategy. It's complex
+            # but necessary to prevent M2M joins from corrupting aggregates in other grouping sets.
+            # We find all combinations of M2M fields and create a sub-call for grouping sets
+            # that share that exact combination of M2M fields.
+
+            # ['A', 'B', 'C'] => [('A', 'B', 'C'), ('A', 'B'), ('A', 'C'), ('B', 'C'), ('A',), ('B',), ('C',), ()]
+            m2m_combinaisons = (
+                groupby for i in range(len(many2many_groupby_specs), -1, -1)
+                for groupby in itertools.combinations(many2many_groupby_specs, i)
+            )
+
+            grouping_sets_to_process = dict(enumerate(grouping_sets))
+            batched_calls = []  # [([groupby, ...], [index_result, ...])]
+
+            for m2m_comb in m2m_combinaisons:
+                if not grouping_sets_to_process:
+                    break
+                sub_grouping_sets = []
+                sub_result_indexes = []
+                for i, groupby in list(grouping_sets_to_process.items()):
+                    if all(m2m in groupby for m2m in m2m_comb):
+                        sub_grouping_sets.append(groupby)
+                        sub_result_indexes.append(i)
+                        grouping_sets_to_process.pop(i)
+
+                if sub_grouping_sets:
+                    batched_calls.append((sub_result_indexes, sub_grouping_sets))
+
+            assert not grouping_sets_to_process
+            # If the problem was decomposed, make recursive calls and assemble results.
+            if len(batched_calls) > 1:
+                for indexes, sub_grouping_sets in batched_calls:
+
+                    sub_order_parts = []
+                    all_sub_groupby = {spec for groupby in sub_grouping_sets for spec in groupby}
+                    for order_part in (order or '').split(','):
+                        order_part = order_part.strip()
+                        if not any(
+                            order_part.startswith(spec)
+                            for spec in all_groupby_specs if spec not in all_sub_groupby
+                        ):
+                            sub_order_parts.append(order_part)
+
+                    sub_results = self._read_grouping_sets(
+                        domain, sub_grouping_sets, aggregates=aggregates, order=",".join(sub_order_parts),
+                    )
+                    for index, subresult in zip(indexes, sub_results):
+                        result[index] = subresult
+                return result
+
+        elif many2many_groupby_specs and '__count' in aggregates:
+            # Efficiently handle '__count' with M2M fields by using a distinct count on 'id'
+            # without making another _read_grouping_sets (this is the very common case).
+            aggregates = tuple(
+                aggregate if aggregate != '__count' else 'id:count_distinct'
+                for aggregate in aggregates
+            )
+            if order:
+                order = order.replace('__count', 'id:count_distinct')
+
+        # --- SQL Query Construction ---
+        groupby_terms: dict[str, SQL] = {
+            spec: self._read_group_groupby(spec, query) for spec in all_groupby_specs
+        }
+        aggregates_terms: list[SQL] = [
+            self._read_group_select(spec, query) for spec in aggregates
+        ]
+        if groupby_terms:
+            # grouping_select_sql: GROUPING(a, b)
+            grouping_select_sql = SQL("GROUPING(%s)", SQL(", ").join(groupby_terms.values()))
+        else:
+            # GROUPING() is invalid SQL, so we use the 0 as literal
+            grouping_select_sql = SQL("0")
+
+        select_args = [grouping_select_sql, *groupby_terms.values(), *aggregates_terms]
+
+        # _read_group_orderby may change groupby_terms then it is necessary to be call before
+        query.order = self._read_group_orderby(order, groupby_terms, query)
+        # GROUPING SET ((a, b), (a), ())
+        grouping_sets_sql = [
+            SQL("(%s)", SQL(", ").join(groupby_terms[groupby_spec] for groupby_spec in grouping_set))
+            for grouping_set in grouping_sets
+        ]
+        query.groupby = SQL("GROUPING SETS (%s)", SQL(", ").join(grouping_sets_sql))
+
+        # This handles the case where `order` adds columns that must also be in `GROUP BY`.
+        # Rebuild the grouping sets to include these extra terms.
+
+        # row_values: [(GROUPING(...), a1, b1, aggregates...), (GROUPING(...), a2, b2, aggregates...), ...]
+        row_values = self.env.execute_query(query.select(*select_args))
+
+        if not row_values:  # shortcut
+            return result
+
+        # --- Result Post-Processing ---
+        # This is the core of the result dispatching logic. It uses the integer
+        # returned by GROUPING() as a key to map each result row to the correct
+        # grouping set defined by the user.
+        aggregates_indexes = tuple(range(len(all_groupby_specs), len(all_groupby_specs) + len(aggregates)))
+
+        # Map each possible GROUPING() bitmask to its corresponding result list and value extractor.
+        # {GROUPING(...): (append_method, extractor_method)}
+        mask_grouping_mapping = {}
+        for result_index, groupby_specs in enumerate(grouping_sets):
+            # PostgreSQL Doc: https://www.postgresql.org/docs/17/functions-aggregate.html#Grouping-Operations
+            # GROUPING ( group_by_expression(s) ) => integer
+            # Returns a bit mask indicating which GROUP BY expressions are not included in the
+            # current grouping set. Bits are assigned with the rightmost argument corresponding to
+            # the least-significant bit; each bit is 0 if the corresponding expression is included
+            # in the grouping criteria of the grouping set generating the current result row, and 1
+            # if it is not included.
+
+            # for GROUPING SET ((a, b), (a), ())
+            # GROUPING(a, b): a and b included = 0, a included = 1, b included = 2, none included = 3
+            groupby_mask = sum(
+                1 << i for i, groupby_spec in enumerate(reversed(all_groupby_specs))
+                if groupby_spec not in groupby_specs  # 0 if included and 1 if not
+            )
+            assert groupby_mask not in mask_grouping_mapping, f"_read_grouping_sets doesn't manage duplicate groupby specs: {grouping_sets!r}"
+
+            mask_grouping_mapping[groupby_mask] = (
+                result[result_index].append,
+                itemgetter_tuple(list(itertools.chain(
+                    (all_groupby_specs.index(groupby_spec) for groupby_spec in groupby_specs),
+                    aggregates_indexes,
+                ))),
+            )
+
+        aggregates_start_index = len(all_groupby_specs) + 1
+        # Transpose rows to columns for efficient, column-wise post-processing.
+        columns = list(zip(*row_values))
+        # The first column is the grouping mask
+        dispatch_info = map(mask_grouping_mapping.__getitem__, columns[0])
+        # Post-process values column by column
+        columns = [
+            *map(self._read_group_postprocess_groupby, all_groupby_specs, columns[1:aggregates_start_index]),
+            *map(self._read_group_postprocess_aggregate, aggregates, columns[aggregates_start_index:]),
+        ]
+
+        # result: [
+        #   [(a1, b1, <aggregates>), (a2, b2, <aggregates>), ...],
+        #   [(a1, <aggregates>), (a2, <aggregates>), ...],
+        #   [(<aggregates>)],
+        # ]
+        for (append_method, extractor), *row in zip(dispatch_info, *columns, strict=True):
+            append_method(extractor(row))
+
+        return result
+
+    @api.model
     def _read_group(
         self,
         domain: DomainType,
@@ -1649,19 +1886,18 @@ class BaseModel(metaclass=MetaModel):
             spec: self._read_group_groupby(spec, query)
             for spec in groupby
         }
-        if groupby_terms:
-            query.groupby = SQL(", ").join(groupby_terms.values())
-            query.having = self._read_group_having(list(having), query)
-            # _read_group_orderby may possibly extend query.groupby for orderby
-            query.order = self._read_group_orderby(order, groupby_terms, query)
-
-        select_terms: list[SQL] = [
+        aggregates_terms: list[SQL] = [
             self._read_group_select(spec, query)
             for spec in aggregates
         ]
+        select_args = [*[groupby_terms[spec] for spec in groupby], *aggregates_terms]
+        if groupby_terms:
+            query.order = self._read_group_orderby(order, groupby_terms, query)
+            query.groupby = SQL(", ").join(groupby_terms.values())
+            query.having = self._read_group_having(list(having), query)
 
         # row_values: [(a1, b1, c1), (a2, b2, c2), ...]
-        row_values = self.env.execute_query(query.select(*[groupby_terms[spec] for spec in groupby], *select_terms))
+        row_values = self.env.execute_query(query.select(*select_args))
 
         if not row_values:
             return row_values
@@ -1740,7 +1976,7 @@ class BaseModel(metaclass=MetaModel):
             # in order to reuse the mechanism _apply_ir_rules, then inject the
             # query as an extra condition of the left join
             comodel = self.env[field.comodel_name]
-            coquery = comodel._where_calc([], active_test=False)
+            coquery = comodel._search([], active_test=False, bypass_access=True)
             comodel._apply_ir_rules(coquery)
             # LEFT JOIN {field.relation} AS rel_alias ON
             #     alias.id = rel_alias.{field.column1}
@@ -1832,6 +2068,8 @@ class BaseModel(metaclass=MetaModel):
         """ Return (<SQL expression>, <SQL expression>)
         corresponding to the given order and groupby terms.
 
+        Note: this method may change groupby_terms
+
         :param order: the order specification
         :param groupby_terms: the group by terms mapping ({spec: sql_expression})
         :param query: The query we are building
@@ -1874,6 +2112,10 @@ class BaseModel(metaclass=MetaModel):
             ):
                 if sql_order := self._order_to_sql(f'{term} {direction} {nulls}', query):
                     orderby_terms.append(sql_order)
+                    if query._order_groupby:
+                        groupby_terms[term] = SQL(", ").join([groupby_terms[term], *query._order_groupby])
+                        query._order_groupby.clear()
+
             elif granularity == 'day_of_week':
                 """
                 Day offset relative to the first day of week in the user lang
@@ -3463,7 +3705,7 @@ class BaseModel(metaclass=MetaModel):
 
         # first determine a query that satisfies the domain and access rules
         if any(field.column_type for field in fields_to_fetch):
-            query = self.with_context(active_test=False)._search([('id', 'in', self.ids)])
+            query = self._search([('id', 'in', self.ids)], active_test=False)
         else:
             try:
                 self.check_access('read')
@@ -4870,35 +5112,6 @@ class BaseModel(metaclass=MetaModel):
 
         return original_self.concat(*(data['record'] for data in data_list))
 
-    @api.model
-    def _where_calc(self, domain: DomainType, active_test: bool = True) -> Query:
-        """Compute the WHERE clause for the `_search` method without applying any security rule.
-
-        :param domain: the domain to compute
-        :param active_test: whether the default filtering of records with
-            ``active`` field set to ``False`` should be applied.
-        :return: the query expressing the given domain as provided in domain
-        """
-        domain = Domain(domain)
-
-        # if the object has an active field ('active', 'x_active'), filter out all
-        # inactive records unless they were explicitly asked for
-        if (
-            self._active_name
-            and active_test
-            and self.env.context.get('active_test', True)
-            and not any(leaf.field_expr == self._active_name for leaf in domain.iter_conditions())
-        ):
-            domain &= Domain(self._active_name, '=', True)
-
-        domain = domain.optimize_full(self)
-        if domain.is_false():
-            return self.browse()._as_query()
-        query = Query(self.env, self._table, self._table_sql)
-        if not domain.is_true():
-            query.add_where(domain._to_sql(self, self._table, query))
-        return query
-
     def _check_qorder(self, word: str) -> None:
         if not regex_order.match(word):
             raise UserError(_(
@@ -4995,8 +5208,7 @@ class BaseModel(metaclass=MetaModel):
                 sql_field = self._field_to_sql(alias, field_name, query)
 
             if coorder == 'id':
-                if query.groupby:
-                    query.groupby = SQL('%s, %s', query.groupby, sql_field)
+                query._order_groupby.append(sql_field)
                 return SQL("%s %s %s", sql_field, direction, nulls)
 
             # instead of ordering by the field's raw value, use the comodel's
@@ -5020,8 +5232,8 @@ class BaseModel(metaclass=MetaModel):
         sql_field = self._field_to_sql(alias, field_name, query)
         if field.type == 'boolean':
             sql_field = SQL("COALESCE(%s, FALSE)", sql_field)
-        if query.groupby:
-            query.groupby = SQL('%s, %s', query.groupby, sql_field)
+
+        query._order_groupby.append(sql_field)
 
         return SQL("%s %s %s", sql_field, direction, nulls)
 
@@ -5032,6 +5244,9 @@ class BaseModel(metaclass=MetaModel):
         offset: int = 0,
         limit: int | None = None,
         order: str | None = None,
+        *,
+        active_test: bool = True,
+        bypass_access: bool = False,
     ) -> Query:
         """
         Private implementation of search() method.
@@ -5045,27 +5260,43 @@ class BaseModel(metaclass=MetaModel):
         the latter option, though, as it might hurt performance. Indeed, by
         default the returned query object is not actually executed, and it can
         be injected as a value in a domain in order to generate sub-queries.
+
+        The `active_test` flag specifies whether to filter only active records.
+        The `bypass_access` controls whether or not permissions should be
+        checked on the model and record rules should be applied.
         """
-        self.browse().check_access('read')
+        check_access = not (self.env.su or bypass_access)
+        if check_access:
+            self.browse().check_access('read')
 
-        # deletegate to _where_calc
-        query = self._where_calc(domain)
-        if query.is_empty():
-            return query
-
-        # security access domain
-        if self.env.su:
-            sec_domain = Domain.TRUE
-        else:
-            sec_domain = self.env['ir.rule']._compute_domain(self._name, 'read')
-            sec_domain = sec_domain.optimize_full(self.sudo())
+        domain = Domain(domain)
+        # inactive records unless they were explicitly asked for
+        if (
+            self._active_name
+            and active_test
+            and self.env.context.get('active_test', True)
+            and not any(leaf.field_expr == self._active_name for leaf in domain.iter_conditions())
+        ):
+            domain &= Domain(self._active_name, '=', True)
 
         # build the query
-        if sec_domain.is_false() or (not limit and limit is not None and limit is not False):
+        domain = domain.optimize_full(self)
+        if domain.is_false():
             return self.browse()._as_query()
-        if not sec_domain.is_true():
-            query.add_where(sec_domain._to_sql(self.sudo(), self._table, query))
+        query = Query(self.env, self._table, self._table_sql)
+        if not domain.is_true():
+            query.add_where(domain._to_sql(self, self._table, query))
 
+        # security access domain
+        if check_access:
+            sec_domain = self.env['ir.rule']._compute_domain(self._name, 'read')
+            sec_domain = sec_domain.optimize_full(self.sudo())
+            if sec_domain.is_false():
+                return self.browse()._as_query()
+            if not sec_domain.is_true():
+                query.add_where(sec_domain._to_sql(self.sudo(), self._table, query))
+
+        # add order and limits
         if order:
             query.order = self._order_to_sql(order, query)
         if limit is not None:
