@@ -727,7 +727,7 @@ class AccountMoveLine(models.Model):
             return
 
         # get the where clause
-        query = self._where_calc(list(self.env.context.get('domain_cumulated_balance') or []))
+        query = self._search(self.env.context.get('domain_cumulated_balance') or [], bypass_access=True)
         sql_order = self._order_to_sql(self.env.context.get('order_cumulated_balance'), query, reverse=True)
         result = dict(self.env.execute_query(query.select(
             SQL.identifier(query.table, "id"),
@@ -1115,7 +1115,7 @@ class AccountMoveLine(models.Model):
                 related_distribution = line._related_analytic_distribution()
                 root_plans = self.env['account.analytic.account'].browse(
                     list({int(account_id) for ids in related_distribution for account_id in ids.split(',')})
-                ).root_plan_id
+                ).exists().root_plan_id
 
                 arguments = frozendict({
                     "product_id": line.product_id.id,
