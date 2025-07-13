@@ -829,6 +829,19 @@ class CalendarEvent(models.Model):
             domain = Domain.AND([domain, self._get_default_privacy_domain()])
         return super()._read_group(domain, groupby, aggregates, having=having, offset=offset, limit=limit, order=order)
 
+    @api.model
+    def _read_grouping_sets(self, domain, grouping_sets, aggregates=(), order=None) -> list[tuple]:
+        fnames = {
+            spec.split(':')[0] for spec in itertools.chain(
+                *grouping_sets,
+                aggregates,
+            )
+        }
+        private_fields = fnames - self._get_public_fields()
+        if not self.env.su and private_fields:
+            domain = Domain.AND([domain, self._get_default_privacy_domain()])
+        return super()._read_grouping_sets(domain, grouping_sets, aggregates, order=order)
+
     def unlink(self):
         if not self:
             return super().unlink()
@@ -984,7 +997,7 @@ class CalendarEvent(models.Model):
 
     def _get_default_privacy_domain(self):
         # Sub query user settings from calendars that are not private ('public' and 'confidential').
-        public_calendars_settings = self.env['res.users.settings'].sudo()._where_calc([('calendar_default_privacy', '!=', 'private')]).select('user_id')
+        public_calendars_settings = self.env['res.users.settings'].sudo()._search([('calendar_default_privacy', '!=', 'private')]).select('user_id')
         # display public, confidential events and events with default privacy when owner's default privacy is not private
         return [
             '|',

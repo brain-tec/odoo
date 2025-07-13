@@ -73,7 +73,7 @@ class HrEmployee(models.Model):
     name = fields.Char(string="Employee Name", related='resource_id.name', store=True, readonly=False, tracking=True)
     resource_id = fields.Many2one('resource.resource', required=True)
     # required because the mixin already creates it so it is not related to the version_id
-    resource_calendar_id = fields.Many2one(related='version_id.resource_calendar_id', index=False, store=False)
+    resource_calendar_id = fields.Many2one(related='version_id.resource_calendar_id', index=False, store=False, check_company=True)
     user_id = fields.Many2one(
         'res.users', 'User',
         related='resource_id.user_id',
@@ -135,7 +135,6 @@ class HrEmployee(models.Model):
     has_work_permit = fields.Binary(string="Work Permit", groups="hr.group_hr_user")
     work_permit_scheduled_activity = fields.Boolean(default=False, groups="hr.group_hr_user")
     work_permit_name = fields.Char('work_permit_name', compute='_compute_work_permit_name', groups="hr.group_hr_user")
-    additional_note = fields.Text(string='Additional Note', groups="hr.group_hr_user", tracking=True)
     certificate = fields.Selection(selection='_get_certificate_selection', string='Certificate Level', groups="hr.group_hr_user", tracking=True)
     study_field = fields.Char("Field of Study", groups="hr.group_hr_user", tracking=True)
     study_school = fields.Char("School", groups="hr.group_hr_user", tracking=True)
@@ -846,7 +845,7 @@ class HrEmployee(models.Model):
         return res
 
     @api.model
-    def _search(self, domain, offset=0, limit=None, order=None):
+    def _search(self, domain, offset=0, limit=None, order=None, *, bypass_access=False, **kwargs):
         """
             We override the _search because it is the method that checks the access rights
             This is correct to override the _search. That way we enforce the fact that calling
@@ -855,12 +854,12 @@ class HrEmployee(models.Model):
             browsed on the hr.employee model. This can be trusted as the ids of the public
             employees exactly match the ids of the related hr.employee.
         """
-        if self.browse().has_access('read'):
-            return super()._search(domain, offset, limit, order)
+        if self.browse().has_access('read') or bypass_access:
+            return super()._search(domain, offset, limit, order, bypass_access=bypass_access, **kwargs)
         try:
             # HACK: suppress warning if domain is optimized for another model
             domain = list(domain) if isinstance(domain, Domain) else domain
-            ids = self.env['hr.employee.public']._search(domain, offset, limit, order)
+            ids = self.env['hr.employee.public']._search(domain, offset, limit, order, **kwargs)
         except ValueError:
             raise AccessError(_('You do not have access to this document.'))
         # the result is expected from this table, so we should link tables
