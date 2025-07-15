@@ -336,13 +336,14 @@ class AccountBankStatementLine(models.Model):
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
 
-    def default_get(self, fields_list):
+    @api.model
+    def default_get(self, fields):
         self_ctx = self.with_context(is_statement_line=True)
-        defaults = super(AccountBankStatementLine, self_ctx).default_get(fields_list)
-        if 'journal_id' in fields_list and not defaults.get('journal_id'):
+        defaults = super(AccountBankStatementLine, self_ctx).default_get(fields)
+        if 'journal_id' in fields and not defaults.get('journal_id'):
             defaults['journal_id'] = self_ctx.env['account.move']._search_default_journal().id
 
-        if 'date' in fields_list and not defaults.get('date') and 'journal_id' in defaults:
+        if 'date' in fields and not defaults.get('date') and 'journal_id' in defaults:
             # copy the date and statement from the latest transaction of the same journal to help the user
             # to enter the next transaction, they do not have to enter the date and the statement every time until the
             # statement is completed. It is only possible if we know the journal that is used, so it can only be done
@@ -511,7 +512,7 @@ class AccountBankStatementLine(models.Model):
         return state_domain + [
             # Base domain.
             ('display_type', 'not in', ('line_section', 'line_note')),
-            ('company_id', 'child_of', self.company_id.id),  # allow to match invoices from same or children companies to be consistant with what's shown in the interface
+            ('company_id', 'in', self.env['res.company'].search([('id', 'child_of', self.company_id.id)]).ids),  # allow to match invoices from same or children companies to be consistant with what's shown in the interface
             # Reconciliation domain.
             ('reconciled', '=', False),
             # Domain to use the account_move_line__unreconciled_index

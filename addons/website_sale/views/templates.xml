@@ -1071,23 +1071,20 @@
 
     <template id="website_sale.filter_pills_attributes" name="Pills attributes in Filter">
         <t t-foreach="a.value_ids" t-as="v">
-            <div
-                t-attf-class="o_wsale_variant_pills_shop form-check btn btn-primary mb-1 {{'active' if v.id in attrib_set else ''}}"
-            >
-                <input
-                    type="checkbox"
-                    name="attribute_value"
-                    class="form-check-input"
-                    t-att-id="'%s-%s' % (a.id,v.id)"
-                    t-att-value="'%s-%s' % (a.id,v.id)"
-                    t-att-checked="v.id in attrib_set"
-                />
-                <label
-                    class="form-check-label fw-normal"
-                    t-att-for="'%s-%s' % (a.id,v.id)"
-                    t-field="v.name"
-                />
-            </div>
+            <input
+                type="checkbox"
+                name="attribute_value"
+                class="btn-check"
+                t-att-id="'%s-%s' % (a.id,v.id)"
+                t-att-value="'%s-%s' % (a.id,v.id)"
+                t-att-checked="v.id in attrib_set"
+                autocomplete="off"
+            />
+            <label
+                t-attf-class="btn border {{'active bg-primary-subtle border-primary text-primary-emphasis' if v.id in attrib_set else ''}}"
+                t-att-for="'%s-%s' % (a.id,v.id)"
+                t-field="v.name"
+            />
         </t>
     </template>
 
@@ -1160,7 +1157,7 @@
                                 </div>
                                 <div
                                     t-elif="a.display_type == 'pills'"
-                                    t-attf-class="btn-group-toggle {{'my-2' if isMobile else 'mb-3'}}"
+                                    t-attf-class="d-flex flex-wrap gap-2 {{'my-2' if isMobile else 'mb-3'}}"
                                     data-bs-toggle="buttons"
                                 >
                                     <t t-call="website_sale.filter_pills_attributes"/>
@@ -1272,8 +1269,7 @@
                         </div>
                     </div>
                 </div>
-                <div t-if="opt_wsale_categories"
-                     class="accordion-item">
+                <div t-if="opt_wsale_categories" class="accordion-item d-lg-none">
                     <h2 id="o_wsale_offcanvas_categories_header" class="accordion-header mb-0">
                         <button class="o_wsale_offcanvas_title accordion-button rounded-0 collapsed"
                                 type="button"
@@ -1882,7 +1878,6 @@
                          t-attf-class="oe_website_sale container mt-4 mb-5 #{'discount'
                             if combination_info['has_discounted_price'] else ''}"
                          t-att-data-view-track="view_track and '1' or '0'"
-                         t-att-data-product-tracking-info="'product_tracking_info' in combination_info and json.dumps(combination_info['product_tracking_info'])"
                 >
                     <div class="d-flex flex-wrap align-items-center">
                         <div class="d-flex align-items-center flex-grow-1 mb-4 m-lg-0">
@@ -1892,19 +1887,24 @@
                                         <i class="oi oi-chevron-left d-lg-none me-1" role="presentation"/>All Products
                                     </a>
                                 </li>
-                                <li
-                                    t-nocache="The category does not have to be cached, as the product can be accessed via different paths."
-                                    t-if="category"
-                                    class="breadcrumb-item"
-                                >
-                                    <a
-                                        class="py-2 py-lg-0"
-                                        t-att-href="keep('%s/category/%s' % (shop_path, slug(category)))"
+                                <t t-foreach="category.parents_and_self" t-as="cat">
+                                    <li
+                                        t-nocache="The category does not have to be cached, as the product can be accessed via different paths."
+                                        class="breadcrumb-item"
                                     >
-                                        <i class="oi oi-chevron-left d-lg-none me-1" role="presentation"/><t t-out="category.name"/>
-                                    </a>
-                                </li>
-                                <li t-else="" class="o_not_editable breadcrumb-item d-lg-none">
+                                        <a
+                                            class="py-2 py-lg-0"
+                                            t-att-href="keep('%s/category/%s' % (shop_path, slug(cat)))"
+                                        >
+                                            <i
+                                                class="oi oi-chevron-left d-lg-none me-1"
+                                                role="presentation"
+                                            />
+                                            <t t-out="cat.name"/>
+                                        </a>
+                                    </li>
+                                </t>
+                                <li class="o_not_editable breadcrumb-item d-lg-none">
                                     <a class="py-2 py-lg-0" t-att-href="keep(shop_path)">
                                         <i class="oi oi-chevron-left me-1" role="presentation"/>All Products
                                     </a>
@@ -2220,7 +2220,7 @@
         </xpath>
         <xpath expr="//div[@id='o_wsale_cta_wrapper']" position="inside">
             <div class="d-flex gap-5 flex-grow-1 justify-content-between align-items-center order-first w-100 mb-3 pb-3 border-bottom">
-                <span class="text-muted">Price</span>
+                <span name="o_wsale_cta_wrapper_boxed_price_label" class="text-muted">Price</span>
                 <t t-call="website_sale.product_price"/>
             </div>
         </xpath>
@@ -2532,7 +2532,7 @@
     <template id="product_price">
         <div
             name="product_price"
-            t-attf-class="product_price text-end {{'' if is_view_active('website_sale.cta_wrapper_boxed') else 'mt-2'}} {{'d-none' if combination_info['prevent_zero_price_sale'] else 'd-inline-block'}}"
+            t-attf-class="product_price {{'' if is_view_active('website_sale.cta_wrapper_boxed') else 'mt-2'}} {{'d-none' if combination_info['prevent_zero_price_sale'] else 'd-inline-block'}}"
         >
             <div
                 name="product_price_container"
@@ -3842,7 +3842,12 @@
 
     <!-- Called in `website_sale.confirmation`. -->
     <template id="payment_confirmation_status">
-        <div class="oe_website_sale_tx_status mt-3" t-att-data-order-id="order.id" t-att-data-order-tracking-info="json.dumps(order_tracking_info)">
+        <div
+            name="order_confirmation"
+            class="mt-3"
+            t-att-data-order-id="order.id"
+            t-att-data-order-tracking-info="json.dumps(order_tracking_info)"
+        >
             <t t-set="tx_sudo" t-value="order.get_portal_last_transaction()"/>
             <div
                 t-if="tx_sudo"
