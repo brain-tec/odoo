@@ -65,6 +65,7 @@ patch(storeInsertFns, {
 export class Store extends BaseStore {
     static FETCH_DATA_DEBOUNCE_DELAY = 1;
     static OTHER_LONG_TYPING = 60000;
+    static IM_STATUS_DEBOUNCE_DELAY = 1000;
 
     FETCH_LIMIT = 30;
     DEFAULT_AVATAR = "/mail/static/src/img/smiley/avatar.jpg";
@@ -335,9 +336,13 @@ export class Store extends BaseStore {
     }
 
     _fetchStoreDataRpc(fetchParams) {
+        const context = {
+            ...user.context,
+            allowed_company_ids: user.allowedCompanies.map((c) => c.id),
+        };
         return rpc(
             this.fetchReadonly ? "/mail/data" : "/mail/action",
-            { fetch_params: fetchParams, context: user.context },
+            { fetch_params: fetchParams, context },
             { silent: this.fetchSilent }
         );
     }
