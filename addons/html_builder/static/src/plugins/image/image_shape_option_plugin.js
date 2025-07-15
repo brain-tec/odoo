@@ -1,8 +1,8 @@
 import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { DEFAULT_PALETTE } from "@html_editor/utils/color";
+import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
 import { isCSSColor } from "@web/core/utils/colors";
-import { getCSSVariableValue } from "@html_builder/utils/utils_css";
 import { getShapeURL } from "@html_builder/plugins/image/image_helpers";
 import { activateCropper, createDataURL, loadImage } from "@html_editor/utils/image_processing";
 import { getValueFromVar } from "@html_builder/utils/utils";
@@ -82,11 +82,16 @@ export class ImageShapeOptionPlugin extends Plugin {
     async processImageWarmup(img, newDataset) {
         const getData = (propName) =>
             propName in newDataset ? newDataset[propName] : img.dataset[propName];
-        const shapeId = getData("shape");
+        let shapeId = getData("shape");
         // todo: should we reset some data if shapeName is not defined?
         if (!shapeId) {
             return;
         }
+        // todo: probably we should replace `web_editor` with `html_builder` in
+        // `data-shape` in every snippet, but this will require a migration
+        // script, and it's too late for 18.4.
+        shapeId = shapeId.replace(/^web_editor/, "html_builder");
+
         const isNewShape = "shape" in newDataset && newDataset.shape !== img.dataset.shape;
         const shapeSvgText = await this.getShapeSvgText(shapeId);
 
@@ -323,7 +328,7 @@ export class ImageShapeOptionPlugin extends Plugin {
         if (!color || isCSSColor(color)) {
             return color;
         }
-        return getCSSVariableValue(color);
+        return getCSSVariableValue(color, getHtmlStyle(this.document));
     }
     isTransformableShape(shapeId) {
         if (!shapeId) {
