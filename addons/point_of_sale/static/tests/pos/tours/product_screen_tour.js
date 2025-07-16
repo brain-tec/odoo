@@ -28,6 +28,16 @@ registry.category("web_tour.tours").add("ProductScreenTour", {
             Chrome.startPoS(),
             OfflineUtil.setOfflineMode(),
             ProductScreen.firstProductIsFavorite("Whiteboard Pen"),
+            // Make sure we don't have any scroll bar on the product list
+            {
+                trigger: ".product-list",
+                run: function () {
+                    const productList = document.querySelector(".product-list");
+                    if (productList.scrollWidth > document.documentElement.scrollWidth) {
+                        throw new Error("Product list is overflowing");
+                    }
+                },
+            },
             ProductScreen.clickDisplayedProduct("Desk Organizer", true, "1", "5.10"),
             ProductScreen.clickDisplayedProduct("Desk Organizer", true, "2", "10.20"),
             ProductScreen.clickDisplayedProduct("Letter Tray", true, "1", "5.28"),
@@ -840,6 +850,44 @@ registry.category("web_tour.tours").add("test_delete_line", {
                 ...Chrome.confirmPopup(),
             ]),
             ProductScreen.orderIsEmpty(),
+            Chrome.endTour(),
+        ].flat(),
+});
+
+function clickLoadSampleButton() {
+    return [
+        {
+            trigger:
+                '.o_view_nocontent .o_nocontent_help button.btn-primary:contains("Load Sample")',
+            content: "Click on Load Sample button",
+            run: "click",
+        },
+    ].flat();
+}
+
+registry.category("web_tour.tours").add("test_load_pos_demo_data_by_pos_user", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            clickLoadSampleButton(),
+            {
+                trigger:
+                    '.modal-content:has(.modal-title:contains("Access Denied")) .modal-footer .btn.btn-primary:contains("Ok")',
+                content: "Click Ok on the Access Denied dialog box",
+                run: "click",
+            },
+            Chrome.endTour(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_load_pos_demo_data_by_pos_admin", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            clickLoadSampleButton(),
+            ProductScreen.isShown(),
+            ProductScreen.clickDisplayedProduct("Small Shelf"),
             Chrome.endTour(),
         ].flat(),
 });
