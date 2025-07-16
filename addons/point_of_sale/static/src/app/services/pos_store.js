@@ -326,7 +326,7 @@ export class PosStore extends WithLazyGetterTrap {
 
     async closingSessionNotification(data) {
         if (
-            parseInt(data.login_number) == this.session.login_number ||
+            parseInt(data.login_number) === this.session.login_number ||
             this.session.id !== parseInt(data.session_id)
         ) {
             return;
@@ -1131,7 +1131,7 @@ export class PosStore extends WithLazyGetterTrap {
     get showCashMoveButton() {
         return Boolean(this.config.cash_control && this.config._has_cash_move_perm);
     }
-    createNewOrder(data = {}) {
+    createNewOrder(data = {}, onGetNextOrderRefs = () => {}) {
         const fiscalPosition = this.models["account.fiscal.position"].find(
             (fp) => fp.id === this.config.default_fiscal_position_id?.id
         );
@@ -1151,7 +1151,7 @@ export class PosStore extends WithLazyGetterTrap {
             ...data,
         });
 
-        this.getNextOrderRefs(order);
+        this.getNextOrderRefs(order).then(() => onGetNextOrderRefs(order));
         order.setPricelist(this.config.pricelist_id);
 
         if (this.config.use_presets) {
