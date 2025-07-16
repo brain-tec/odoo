@@ -2,14 +2,12 @@ import { Builder } from "@html_builder/builder";
 import { CORE_PLUGINS } from "@html_builder/core/core_plugins";
 import { Img } from "@html_builder/core/img";
 import { SetupEditorPlugin } from "@html_builder/core/setup_editor_plugin";
-import { removePlugins } from "@html_builder/utils/utils";
 import { LocalOverlayContainer } from "@html_editor/local_overlay_container";
 import { Plugin } from "@html_editor/plugin";
-import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { withSequence } from "@html_editor/utils/resource";
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { after } from "@odoo/hoot";
-import { animationFrame } from "@odoo/hoot-dom";
+import { animationFrame, queryOne } from "@odoo/hoot-dom";
 import { Component, onMounted, useRef, useState, useSubEnv, xml } from "@odoo/owl";
 import {
     defineModels,
@@ -124,7 +122,10 @@ class IrUiView extends models.Model {
     }
 }
 
-export async function setupHTMLBuilder(content = "", { snippetContent, dropzoneSelectors } = {}) {
+export async function setupHTMLBuilder(
+    content = "",
+    { snippetContent, dropzoneSelectors, styleContent } = {}
+) {
     defineMailModels(); // fuck this shit
 
     defineModels([IrUiView]);
@@ -158,18 +159,7 @@ export async function setupHTMLBuilder(content = "", { snippetContent, dropzoneS
         render_public_asset: () => getSnippetView(snippets),
     });
 
-    const mainPlugins = removePlugins(
-        [...MAIN_PLUGINS],
-        [
-            "PowerButtonsPlugin",
-            "DoubleClickImagePreviewPlugin",
-            "SeparatorPlugin",
-            "StarPlugin",
-            "BannerPlugin",
-            "MoveNodePlugin",
-        ]
-    );
-    const Plugins = [...mainPlugins, ...CORE_PLUGINS];
+    const Plugins = [...CORE_PLUGINS];
 
     if (dropzoneSelectors) {
         const pluginId = uniqueId("test-dropzone-selector");
@@ -200,6 +190,12 @@ export async function setupHTMLBuilder(content = "", { snippetContent, dropzoneS
     });
     const comp = await mountWithCleanup(BuilderContainer, { props: { content, Plugins } });
     await comp.iframeLoaded;
+    if (styleContent) {
+        const iframeDocument = queryOne(":iframe");
+        const styleEl = iframeDocument.createElement("style");
+        styleEl.textContent = styleContent;
+        iframeDocument.head.appendChild(styleEl);
+    }
     comp.state.isEditing = true;
     await prom;
     await animationFrame();
