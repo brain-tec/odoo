@@ -1433,6 +1433,7 @@ class AccountMove(models.Model):
                         'account_payment_id': counterpart_line.payment_id.id,
                         'payment_method_name': counterpart_line.payment_id.payment_method_line_id.name,
                         'move_id': counterpart_line.move_id.id,
+                        'is_refund': counterpart_line.move_id.move_type in ['in_refund', 'out_refund'],
                         'ref': reconciliation_ref,
                         # these are necessary for the views to change depending on the values
                         'is_exchange': reconciled_partial['is_exchange'],
@@ -4392,7 +4393,7 @@ class AccountMove(models.Model):
 
         base_amls = self.line_ids.filtered(lambda x: x.display_type == 'product')
         base_lines = [self._prepare_product_base_line_for_taxes_computation(x) for x in base_amls]
-        tax_amls = self.line_ids.filtered(lambda x: x.display_type == 'tax')
+        tax_amls = self.line_ids.filtered('tax_repartition_line_id')
         tax_lines = [self._prepare_tax_line_for_taxes_computation(x) for x in tax_amls]
         AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
         AccountTax._round_base_lines_tax_details(base_lines, self.company_id, tax_lines=tax_lines)
@@ -4410,7 +4411,7 @@ class AccountMove(models.Model):
 
         base_amls = self.line_ids.filtered(lambda x: x.display_type == 'product' and (not filter_invl_to_apply or filter_invl_to_apply(x)))
         base_lines = [self._prepare_product_base_line_for_taxes_computation(x) for x in base_amls]
-        tax_amls = self.line_ids.filtered(lambda x: x.display_type == 'tax')
+        tax_amls = self.line_ids.filtered('tax_repartition_line_id')
         tax_lines = self._prepare_tax_lines_for_taxes_computation(tax_amls, round_from_tax_lines)
         AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
         if postfix_function:
@@ -4507,7 +4508,7 @@ class AccountMove(models.Model):
 
         company = self.company_id
         payment_term_line = self.line_ids.filtered(lambda x: x.display_type == 'payment_term')
-        tax_lines = self.line_ids.filtered(lambda x: x.display_type == 'tax')
+        tax_lines = self.line_ids.filtered('tax_repartition_line_id')
         invoice_lines = self.line_ids.filtered(lambda x: x.display_type == 'product')
         payment_term = self.invoice_payment_term_id
         early_pay_discount_computation = payment_term.early_pay_discount_computation
