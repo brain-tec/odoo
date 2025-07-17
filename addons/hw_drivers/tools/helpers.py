@@ -75,9 +75,10 @@ def toggleable(function):
 
     @wraps(function)
     def devtools_wrapper(*args, **kwargs):
-        if args and args[0].__class__.__name__ == 'DriverController' and get_conf('longpolling', section='devtools'):
-            _logger.warning("Refusing call to %s: longpolling is disabled by devtools", fname)
-            raise Locked("Longpolling disabled by devtools")  # raise to make the http request fail
+        if args and args[0].__class__.__name__ == 'DriverController':
+            if get_conf('longpolling', section='devtools'):
+                _logger.warning("Refusing call to %s: longpolling is disabled by devtools", fname)
+                raise Locked("Longpolling disabled by devtools")  # raise to make the http request fail
         elif function.__name__ == 'action':
             action = args[1].get('action', 'default')  # first argument is self (containing Driver instance), second is 'data'
             disabled_actions = (get_conf('actions', section='devtools') or '').split(',')
@@ -499,10 +500,15 @@ def download_iot_handlers(auto=True, server_url=None):
     if not data:
         return
 
-    delete_iot_handlers()
-    with writable():
-        path = path_file('odoo', 'addons', 'hw_drivers', 'iot_handlers')
+    try:
         zip_file = zipfile.ZipFile(io.BytesIO(data))
+    except zipfile.BadZipFile:
+        _logger.exception('Bad IoT handlers response received: not a zip file')
+        return
+
+    delete_iot_handlers()
+    path = path_file('odoo', 'addons', 'hw_drivers', 'iot_handlers')
+    with writable():
         zip_file.extractall(path)
 
 
