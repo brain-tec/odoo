@@ -967,7 +967,7 @@ export class PosStore extends WithLazyGetterTrap {
                     decimalAccuracy,
                     this.getProductPrice(values.product_id)
                 );
-                const weight = await makeAwaitable(this.env.services.dialog, ScaleScreen);
+                const weight = await this.weighProduct();
                 if (weight) {
                     values.qty = weight;
                 } else if (weight !== null) {
@@ -1968,6 +1968,14 @@ export class PosStore extends WithLazyGetterTrap {
         );
     }
     async loadSampleData() {
+        const isPosManager = await user.hasGroup("point_of_sale.group_pos_manager");
+        if (!isPosManager) {
+            this.dialog.add(AlertDialog, {
+                title: _t("Access Denied"),
+                body: _t("It seems like you don't have enough rights to load data."),
+            });
+            return;
+        }
         await this.data.call("pos.config", "load_demo_data", [[this.config.id]]);
         await this.reloadData(true);
     }
@@ -2512,6 +2520,10 @@ export class PosStore extends WithLazyGetterTrap {
     }
     getTime(date) {
         return date.toFormat("hh:mm");
+    }
+
+    weighProduct() {
+        return makeAwaitable(this.env.services.dialog, ScaleScreen);
     }
 }
 
