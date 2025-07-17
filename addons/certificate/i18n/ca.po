@@ -9,6 +9,7 @@
 # Martin Trigaux, 2024
 # Iván Infantes Castarnado, 2024
 # Manel Fernandez Ramirez <manelfera@outlook.com>, 2024
+# EstudiTIC - estuditic.com <odoo@estuditic.com>, 2025
 # Noemi Pla, 2025
 # 
 msgid ""
@@ -137,7 +138,7 @@ msgstr "Creat el"
 #. module: certificate
 #: model:ir.model,name:certificate.model_certificate_key
 msgid "Cryptographic Keys"
-msgstr ""
+msgstr "Claus Croptogràfiques"
 
 #. module: certificate
 #: model:ir.model.fields.selection,name:certificate.selection__certificate_certificate__content_format__der
@@ -153,7 +154,7 @@ msgstr "Nom mostrat"
 #. module: certificate
 #: model:ir.model.fields,field_description:certificate.field_certificate_certificate__date_end
 msgid "Expiration date"
-msgstr ""
+msgstr "Data de venciment"
 
 #. module: certificate
 #: model:ir.model.fields.selection,name:certificate.selection__certificate_certificate__scope__general
@@ -294,7 +295,7 @@ msgstr "Públic"
 #. module: certificate
 #: model:ir.model.fields,field_description:certificate.field_certificate_certificate__public_key_id
 msgid "Public Key"
-msgstr ""
+msgstr "Clau pública"
 
 #. module: certificate
 #: model:ir.model.fields,field_description:certificate.field_certificate_key__public
@@ -356,7 +357,19 @@ msgstr ""
 #. module: certificate
 #. odoo-python
 #: code:addons/certificate/models/key.py:0
+msgid "The key size should be at least 512 bytes."
+msgstr ""
+
+#. module: certificate
+#. odoo-python
+#: code:addons/certificate/models/key.py:0
 msgid "The private key could not be loaded."
+msgstr ""
+
+#. module: certificate
+#. odoo-python
+#: code:addons/certificate/models/key.py:0
+msgid "The public exponent should be 65537 (or 3 for legacy purposes)."
 msgstr ""
 
 #. module: certificate

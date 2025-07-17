@@ -81,10 +81,9 @@ test("toggling category button does not hide active sub thread", async () => {
 });
 
 test("Closing a category sends the updated user setting to the server.", async () => {
-    onRpc("/web/dataset/call_kw/res.users.settings/set_res_users_settings", async (request) => {
-        const { params } = await request.json();
+    onRpc("res.users.settings", "set_res_users_settings", ({ kwargs }) => {
         step("/web/dataset/call_kw/res.users.settings/set_res_users_settings");
-        expect(params.kwargs.new_settings.is_discuss_sidebar_category_channel_open).toBe(false);
+        expect(kwargs.new_settings.is_discuss_sidebar_category_channel_open).toBe(false);
     });
     await start();
     await openDiscuss();
@@ -101,10 +100,9 @@ test("Opening a category sends the updated user setting to the server.", async (
         user_id: serverState.userId,
         is_discuss_sidebar_category_channel_open: false,
     });
-    onRpc("/web/dataset/call_kw/res.users.settings/set_res_users_settings", async (request) => {
-        const { params } = await request.json();
+    onRpc("res.users.settings", "set_res_users_settings", ({ kwargs }) => {
         step("/web/dataset/call_kw/res.users.settings/set_res_users_settings");
-        expect(params.kwargs.new_settings.is_discuss_sidebar_category_channel_open).toBe(true);
+        expect(kwargs.new_settings.is_discuss_sidebar_category_channel_open).toBe(true);
     });
     await start();
     await openDiscuss();
@@ -289,7 +287,7 @@ test("sidebar: basic chat rendering", async () => {
     await openDiscuss();
     await contains(".o-mail-DiscussSidebarChannel");
     await contains(".o-mail-DiscussSidebarChannel", { text: "Demo" });
-    await contains(".o-mail-DiscussSidebarChannel img[data-alt='Thread Image']");
+    await contains(".o-mail-DiscussSidebarChannel img[alt='Thread Image']");
     await contains(
         ".o-mail-DiscussSidebarChannel .o-mail-DiscussSidebarChannel-commands [title='Unpin Conversation']"
     );

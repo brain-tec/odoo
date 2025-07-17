@@ -11,7 +11,7 @@ from pytz import timezone
 from requests.exceptions import RequestException
 
 from odoo import _, api, fields, models, release
-from odoo.addons.l10n_es_edi_sii.models.account_edi_format import PatchedHTTPAdapter
+from odoo.addons.certificate.tools import CertificateAdapter
 from odoo.addons.l10n_es_edi_tbai.models.l10n_es_edi_tbai_agencies import get_key
 from odoo.addons.l10n_es_edi_tbai.models.xml_utils import (
     NS_MAP,
@@ -112,7 +112,7 @@ class L10nEsEdiTbaiDocument(models.Model):
         if not self.company_id.vat:
             return _("Please configure the Tax ID on your company for TicketBAI.")
 
-        if self.company_id._l10n_es_freelancer() and not self.env['ir.config_parameter'].sudo().get_param('l10n_es_edi_tbai.epigrafe', False):
+        if self.company_id.l10n_es_tbai_tax_agency == 'bizkaia' and self.company_id._l10n_es_freelancer() and not self.env['ir.config_parameter'].sudo().get_param('l10n_es_edi_tbai.epigrafe', False):
             return _("In order to use Ticketbai Batuz for freelancers, you will need to configure the "
                         "Epigrafe or Main Activity.  In this version, you need to go in debug mode to "
                         "Settings > Technical > System Parameters and set the parameter 'l10n_es_edi_tbai.epigrafe'"
@@ -190,7 +190,7 @@ class L10nEsEdiTbaiDocument(models.Model):
         def _send_request_to_agency(*args, **kwargs):
             session = requests.Session()
             session.cert = kwargs.pop('pkcs12_data')
-            session.mount("https://", PatchedHTTPAdapter())
+            session.mount("https://", CertificateAdapter())
             response = session.request('post', *args, **kwargs)
             response.raise_for_status()
             response_xml = None
@@ -296,6 +296,7 @@ class L10nEsEdiTbaiDocument(models.Model):
             'sender_vat': sender.vat[2:] if sender.vat.startswith('ES') else sender.vat,
             'fiscal_year': str(self.date.year),
             'freelancer': freelancer,
+            'is_freelancer': freelancer,  # For bugfix, will be removed in master
             'epigrafe': self.env['ir.config_parameter'].sudo().get_param('l10n_es_edi_tbai.epigrafe', '')
         }
         lroe_values.update({'tbai_b64_list': [base64.b64encode(self.xml_attachment_id.raw).decode()]})
@@ -412,7 +413,7 @@ class L10nEsEdiTbaiDocument(models.Model):
 
     def _get_sale_values(self, values):
         sale_values = {
-            'prev_doc': self.company_id._get_l10n_es_tbai_last_chained_document(),
+            'chain_prev_document': self.company_id._get_l10n_es_tbai_last_chained_document(),
             **self._get_regime_code_value(values['taxes'], values['is_simplified']),
         }
 
@@ -424,14 +425,7 @@ class L10nEsEdiTbaiDocument(models.Model):
         return sale_values
 
     def _get_regime_code_value(self, taxes, is_simplified):
-        regime_key = []
-
-        if is_simplified and self.company_id.l10n_es_tbai_tax_agency != 'bizkaia':
-            regime_key.append('52')  # code for simplified invoices
-        else:
-            regime_key.append(taxes._l10n_es_get_regime_code())
-
-        return {'regime_key': regime_key}
+        return {'regime_key': [taxes._l10n_es_get_regime_code()]}
 
     @api.model
     def _add_base_lines_tax_amounts(self, base_lines, company, tax_lines=None):
@@ -535,6 +529,8 @@ class L10nEsEdiTbaiDocument(models.Model):
         AccountTax = self.env['account.tax']
 
         def tax_details_info_grouping_function(base_line, tax_data):
+            if not tax_data:
+                return None
             tax = tax_data['tax']
 
             return {
@@ -568,7 +564,7 @@ class L10nEsEdiTbaiDocument(models.Model):
 
         # Aggregate the base lines again (with no grouping) to add the base amount to the total.
         def totals_grouping_function(base_line, tax_data):
-            return True
+            return True if tax_data else None
 
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, totals_grouping_function)
         values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
@@ -587,6 +583,8 @@ class L10nEsEdiTbaiDocument(models.Model):
         AccountTax = self.env['account.tax']
 
         def tax_details_info_grouping_function(base_line, tax_data):
+            if not tax_data:
+                return None
             tax = tax_data['tax']
 
             return {
@@ -626,13 +624,16 @@ class L10nEsEdiTbaiDocument(models.Model):
 
         # Aggregate the base lines again (with no grouping) to add the base amount to the total.
         def totals_grouping_function(base_line, tax_data):
-            return True
+            return True if tax_data else None
 
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, totals_grouping_function)
         values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
 
         for values in values_per_grouping_key.values():
             total_amount += values['base_amount']
+
+        if is_refund:
+            total_amount = -total_amount
 
         return {
             'invoice_info': invoice_info,

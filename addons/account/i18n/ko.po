@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-07 20:36+0000\n"
+"POT-Creation-Date: 2025-07-11 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
 "Last-Translator: Sarah Park, 2025\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
@@ -22,22 +22,6 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Language: ko\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-
-#. module: account
-#. odoo-python
-#: code:addons/account/models/account_move.py:0
-msgid ""
-"\n"
-"\n"
-"The move (%(move)s) is not balanced.\n"
-"The total of debits equals %(debit_total)s and the total of credits equals %(credit_total)s.\n"
-"You might want to specify a default account on journal \"%(journal)s\" to automatically balance each move."
-msgstr ""
-"\n"
-"\n"
-"작업 (%(move)s)에 따른 대차가 맞지 않습니다.\n"
-"대변 총액은  %(debit_total)s이며 차변 총액은 %(credit_total)s입니다.\n"
-"작업으로 인한 대차 금액을 자동 조정하기 위해 \"%(journal)s\" 계정을 전표 기본 설정으로 지정할 수 있습니다."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__type
@@ -215,6 +199,18 @@ msgstr "%(tag)s (%(country_code)s)"
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/account_tax.py:0
+msgid ""
+"%(tax_account)s (%(account_name)s) should be an account of type "
+"\"%(receivable)s\" or \"%(payable)s\" with both options "
+"\"%(allow_reconciliation)s\" and \"%(non_trade)s\" enabled."
+msgstr ""
+"%(tax_account)s (%(account_name)s) 항목의 계정 유형은  \"%(receivable)s\" 또는 "
+"\"%(payable)s\" 유형이어야 하며 \"%(allow_reconciliation)s\" 및 \"%(non_trade)s\" "
+"항목이 모두 활성화되어 있어야 합니다."
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "%(tax_name)s (rounding)"
 msgstr "%(tax_name)s (반올림)"
@@ -337,11 +333,6 @@ msgstr ""
 "    <br/>\n"
 "    --\n"
 "    <br/>"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.view_partner_property_form
-msgid ". Please make sure that this is a wanted behavior."
-msgstr ". 해당 항목을 실제로 진행할지 여부를 확인해 주세요."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -584,6 +575,15 @@ msgid ""
 msgstr ""
 "<b>%(count)s</b>회 분할 납부 (<b>%(amount)s</b>), 납부 기한: <b style='color: "
 "#704A66;'>%(date)s</b>"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_partner_property_form
+msgid ""
+"<br/>\n"
+"                        <span>Please make sure that this is a wanted behavior.</span>"
+msgstr ""
+"<br/>\n"
+"                        <span>해당 작업이 실제 진행하려는 작업인지 확인하세요.</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -936,22 +936,11 @@ msgstr "<span class=\"figure-caption\">자동화된 명세서와 알림으로 �
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid ""
-"<span class=\"o_form_label mx-3 oe_edit_only\" groups=\"account.group_account_readonly\" invisible=\"move_type == 'entry'\">\n"
-"                                        <span groups=\"base.group_multi_currency\">in </span>\n"
-"                                    </span>"
+"<span class=\"o_form_label mx-3 oe_edit_only text-center\" style=\"width: "
+"6ch;\" invisible=\"state != 'draft' or invoice_payment_term_id\">or</span>"
 msgstr ""
-"<span class=\"o_form_label mx-3 oe_edit_only\" groups=\"account.group_account_readonly\" invisible=\"move_type == 'entry'\">\n"
-"                                        <span groups=\"base.group_multi_currency\">- </span>\n"
-"                                    </span>"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.view_move_form
-msgid ""
-"<span class=\"o_form_label mx-3 oe_edit_only\" invisible=\"state != 'draft' "
-"or invoice_payment_term_id\"> or </span>"
-msgstr ""
-"<span class=\"o_form_label mx-3 oe_edit_only\" invisible=\"state != 'draft' "
-"or invoice_payment_term_id\"> 또는 </span>"
+"<span class=\"o_form_label mx-3 oe_edit_only text-center\" style=\"width: "
+"6ch;\" invisible=\"state != 'draft' or invoice_payment_term_id\">또는</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_line_form
@@ -1190,11 +1179,6 @@ msgid "<span> (DR)</span>"
 msgstr "<span> (차변)</span>"
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.view_move_form
-msgid "<span> = </span>"
-msgstr "<span> = </span>"
-
-#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 msgid "<span> Bill</span>"
 msgstr "<span> 거래처 청구서</span>"
@@ -1227,8 +1211,8 @@ msgstr "<span>$ <span class=\"oe_currency_value\">19,250.00</span></span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
-msgid "<span>1 </span>"
-msgstr "<span>1 </span>"
+msgid "<span>1</span>"
+msgstr "<span>1</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.bill_preview
@@ -1239,6 +1223,11 @@ msgstr "<span>5.00</span>"
 #: model_terms:web_tour.tour,rainbow_man_message:account.account_tour
 msgid "<span><b>Good job!</b> You went through all steps of this tour.</span>"
 msgstr "<span><b>잘하셨습니다!</b>  이번 여정의 모든 단계를 마쳤습니다.</span>"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_move_form
+msgid "<span>=</span>"
+msgstr "<span>=</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
@@ -1289,6 +1278,13 @@ msgid "<span>New</span>"
 msgstr "<span>신규</span>"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_partner_property_form
+msgid ""
+"<span>One or more Bank Accounts set on this partner are also used by "
+"others:</span>"
+msgstr "<span>해당 파트너에 대해 설정된 은행 계좌 중 하나 이상이 다음에도 이용되고 있습니다:</span>"
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "<span>Operations</span>"
 msgstr "<span>운영</span>"
@@ -1319,6 +1315,11 @@ msgstr "<span>세율 0%</span>"
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<span>Taxes</span>"
 msgstr "<span>세금</span>"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_partner_bank_form_inherit_account
+msgid "<span>The Bank Account could be a duplicate of</span>"
+msgstr "<span>은행 계좌는 다음과 중복될 수 있습니다:</span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
@@ -1353,6 +1354,11 @@ msgstr "<span>보기</span>"
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "<span>Warning: this document might be a duplicate of</span>"
 msgstr "<span>경고: 이 문서는 다음 문서와 중복될 수 있습니다:</span>"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
+msgid "<strong class=\"d-block mt-3\">Shipping Address</strong>"
+msgstr "<strong class=\"d-block mt-3\">배송지 주소</strong>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -1421,11 +1427,6 @@ msgstr "<strong>참조</strong>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "<strong>Shipping Address</strong>"
-msgstr "<strong>배송지 주소</strong>"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<strong>Source</strong>"
 msgstr "<strong>소스</strong>"
 
@@ -1461,6 +1462,15 @@ msgid "<strong>Type: </strong>"
 msgstr "<strong>유형: </strong>"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
+msgid ""
+"<strong>Warning:</strong> Once the Audit Trail is enabled, it cannot be "
+"disabled again if there are any existing journal items."
+msgstr ""
+"<strong>주의:</strong> 감사 추적 기능을 활성화된 이후에는, 기존에 전표 항목이 있는 경우 다시 비활성화를 할 수 "
+"없습니다."
+
+#. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "@From: %(email)s"
@@ -1494,6 +1504,16 @@ msgstr "이 별칭으로 새로운 레코드를 만들 때 파이썬 사전을 �
 #: code:addons/account/models/res_partner_bank.py:0
 msgid "A bank account can belong to only one journal."
 msgstr "은행 계좌마다 한 가지 전표에만 지정될 수 있습니다."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/res_partner_bank.py:0
+msgid ""
+"A bank account with Account Number %(number)s already exists for Partner "
+"%(partner)s, but is archived. Please unarchive it instead."
+msgstr ""
+"계좌 번호 %(number)s 사용 중인 파트너 %(partner)s 의 은행 계좌가 이미 존재하며 보관 상태입니다. 대신 보관 해제를 "
+"하세요."
 
 #. module: account
 #: model_terms:ir.actions.act_window,help:account.action_bank_statement_tree
@@ -2541,7 +2561,7 @@ msgstr "집계 수식 바로가기"
 #: model:ir.model.fields,field_description:account.field_account_move_send_batch_wizard__alerts
 #: model:ir.model.fields,field_description:account.field_account_move_send_wizard__alerts
 msgid "Alerts"
-msgstr "경고"
+msgstr "주의"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__alias_id
@@ -2839,12 +2859,6 @@ msgstr ""
 "                이는 바로 재무상태표와 손익계산서입니다.\n"
 "                회사의 연도별 계정은 법적으로\n"
 "                특정한 정보를 공개해야 합니다."
-
-#. module: account
-#. odoo-python
-#: code:addons/account/models/account_move.py:0
-msgid "An error has occurred."
-msgstr "오류가 발생했습니다."
 
 #. module: account
 #. odoo-python
@@ -3417,8 +3431,8 @@ msgstr "은행 계좌"
 #. module: account
 #. odoo-python
 #: code:addons/account/models/res_partner_bank.py:0
-msgid "Bank Account %(link)s with number %(number)s deleted"
-msgstr "은행 계좌 %(link)s에서 번호가 %(number)s인 계좌가 삭제되었습니다."
+msgid "Bank Account %(link)s with number %(number)s archived"
+msgstr "은행 계좌 %(link)s %(number)s 번호가 보관되었습니다."
 
 #. module: account
 #. odoo-python
@@ -4003,6 +4017,12 @@ msgid ""
 msgstr "'집계' 엔진을 사용하지 않는 항목에서는 집계 세부 정보를 가져올 수 없습니다"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/account_move_send.py:0
+msgid "Cannot identify the invoices in the generated PDF: %s"
+msgstr "생성된 PDF 파일에서 청구서를 식별할 수 없습니다: %s"
+
+#. module: account
 #: model:account.account,name:account.1_capital
 msgid "Capital"
 msgstr "자본"
@@ -4473,6 +4493,11 @@ msgid "Commercial Entity"
 msgstr "상업 항목"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_move_line__commercial_partner_country
+msgid "Commercial Partner Country"
+msgstr "비즈니스 파트너 국가"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__invoice_reference_model
 msgid "Communication Standard"
 msgstr "연락 표준"
@@ -4866,6 +4891,8 @@ msgid "Create Automatic Entries"
 msgstr "자동 입력 생성"
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/chart_template.py:0
 #: model:account.reconcile.model,name:account.1_reconcile_bill
 msgid "Create Bill"
 msgstr "청구서 발행"
@@ -5217,7 +5244,7 @@ msgstr "신용 한도"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_partial_reconcile__credit_move_id
 msgid "Credit Move"
-msgstr "대변 작업"
+msgstr "대변 이동"
 
 #. module: account
 #. odoo-python
@@ -5227,23 +5254,23 @@ msgstr "대변 작업"
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Credit Note"
-msgstr "대변전표"
+msgstr "신용 전표"
 
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "Credit Note Created"
-msgstr "대변전표가 생성되었습니다."
+msgstr "신용 전표가 생성되었습니다."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_out_credit_note_tree
 msgid "Credit Note Currency"
-msgstr "대변전표 통화"
+msgstr "신용 전표 통화"
 
 #. module: account
 #: model:mail.template,name:account.email_template_edi_credit_note
 msgid "Credit Note: Sending"
-msgstr "대변전표 전송 양식"
+msgstr "신용 전표: 전송 중"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_move_out_refund_type
@@ -5253,7 +5280,7 @@ msgstr "대변전표 전송 양식"
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_payment_filter
 msgid "Credit Notes"
-msgstr "대변전표"
+msgstr "신용 전표"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_credit_statement_tree
@@ -6589,6 +6616,14 @@ msgid "Due Terms"
 msgstr "지급 조건"
 
 #. module: account
+#: model:ir.model.fields,field_description:account.field_account_setup_bank_manual_config__duplicate_bank_partner_ids
+#: model:ir.model.fields,field_description:account.field_res_partner__duplicate_bank_partner_ids
+#: model:ir.model.fields,field_description:account.field_res_partner_bank__duplicate_bank_partner_ids
+#: model:ir.model.fields,field_description:account.field_res_users__duplicate_bank_partner_ids
+msgid "Duplicate Bank Partner"
+msgstr "은행 파트너 복사"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__duplicate_payment_ids
 #: model:ir.model.fields,field_description:account.field_account_payment_register__duplicate_payment_ids
 msgid "Duplicate Payment"
@@ -6987,6 +7022,12 @@ msgstr "외환 차액 입력:"
 #: model:ir.model.fields,field_description:account.field_account_journal_group__excluded_journal_ids
 msgid "Excluded Journals"
 msgstr "포함되지 않은 전표"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_bank_statement_line__expected_currency_rate
+#: model:ir.model.fields,field_description:account.field_account_move__expected_currency_rate
+msgid "Expected Currency Rate"
+msgstr "예상 환율"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_company__expects_chart_of_accounts
@@ -9770,7 +9811,7 @@ msgstr "\"%s\" 내역은 상위 항목으로 정의됩니다"
 #. module: account
 #: model:account.reconcile.model,name:account.1_reconcile_from_label
 msgid "Line with Bank Fees"
-msgstr "은행 수수료 행"
+msgstr "은행 수수료 내역"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_report__line_ids
@@ -10999,11 +11040,6 @@ msgid "Once your invoice is ready, confirm it."
 msgstr "청구서가 준비되면 확정을 클릭하세요."
 
 #. module: account
-#: model_terms:ir.ui.view,arch_db:account.view_partner_property_form
-msgid "One or more Bank Accounts set on this partner are also used by other"
-msgstr "이 파트너용으로 설정된 은행 계좌들이 다음에서도 사용됩니다."
-
-#. module: account
 #. odoo-python
 #: code:addons/account/models/account_move.py:0
 msgid "One or more invoices couldn't be processed."
@@ -11254,8 +11290,8 @@ msgid ""
 "timeframe is indicated on either the invoice or the order. In the event of "
 "non-payment by the due date,"
 msgstr ""
-"청구서나 주문서에 별도로 결제 기간이 명시되어 있지 않은 한, 청구서 금액의 지불 기한은 21일 영업일 내입니다. 기한 내 납부가 "
-"완료되지 않은 경우에는,"
+"당사의 청구 대금은 청구서 또는 주문서에 별도의 지급 기간이 명시되어 있지 않는 한, 영업일 기준으로 21일 이내에 지급되어야 합니다. "
+"만약 기한일까지 결제가 완료되지 않은 경우"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_payment_method__payment_type__outbound
@@ -11590,7 +11626,6 @@ msgstr "파트너는 이메일 주소를 가지고 있어야 합니다."
 #: code:addons/account/models/partner.py:0
 #: model:ir.model.fields,field_description:account.field_account_report__filter_partner
 #: model_terms:ir.ui.view,arch_db:account.view_message_tree_audit_log_search
-#: model_terms:ir.ui.view,arch_db:account.view_partner_property_form
 msgid "Partners"
 msgstr "협력사"
 
@@ -11604,6 +11639,12 @@ msgstr "파트너 은행 계좌가 없는 경우"
 #: code:addons/account/models/partner.py:0
 msgid "Partners that are used in hashed entries cannot be merged."
 msgstr "해시 항목에 사용되는 협력사는 병합할 수 없습니다."
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_partner_bank_form_inherit_account
+#: model_terms:ir.ui.view,arch_db:account.view_partner_property_form
+msgid "Partners with same bank"
+msgstr "은행이 동일한 파트너"
 
 #. module: account
 #. odoo-python
@@ -11997,6 +12038,12 @@ msgstr "피싱 위험: 높음"
 #: model_terms:ir.ui.view,arch_db:account.view_partner_bank_search_inherit
 msgid "Phishing risk: Medium"
 msgstr "피싱 위험: 보통"
+
+#. module: account
+#. odoo-javascript
+#: code:addons/account/static/src/components/account_pick_currency_rate/account_pick_currency_rate.xml:0
+msgid "Pick the rate on a certain date"
+msgstr "특정일의 환율을 선택하세요"
 
 #. module: account
 #. odoo-python
@@ -12655,6 +12702,11 @@ msgid ""
 "Reference of the document used to issue this payment. Eg. check number, file"
 " name, etc."
 msgstr "이 결제 항목을 발행에 사용된 문서 참조 번호입니다 (예: 수표 번호, 파일명 등)."
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_move_form
+msgid "Refresh currency rate to the invoice date"
+msgstr "환율을 청구서에 있는 날짜를 기준으로 업데이트하세요"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_tax_repartition_line__document_type__refund
@@ -14987,6 +15039,13 @@ msgid ""
 msgstr "전표에 대해 참조 모델과 참조 유형을 조합시키도록 구현되지 않았습니다."
 
 #. module: account
+#. odoo-python
+#: code:addons/account/models/partner.py:0
+msgid ""
+"The commercial partner has been updated for all related accounting entries."
+msgstr "비즈니스 파트너 정보가 관련 회계 내역 전체에 반영이 완료되었습니다."
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_tax_repartition_line__company_id
 msgid "The company this distribution line belongs to."
 msgstr "이 유통 항목이 속해 있는 회사입니다."
@@ -15181,6 +15240,16 @@ msgstr "다음과 같이 전표 입력 항목을 생성합니다."
 #: code:addons/account/models/account_account.py:0
 msgid "The following accounts must be assigned to at least one company:"
 msgstr "다음 계정은 반드시 적어도 하나의 회사에 할당되어야 합니다."
+
+#. module: account
+#. odoo-python
+#: code:addons/account/models/account_move.py:0
+msgid ""
+"The following entries are unbalanced:\n"
+"\n"
+msgstr ""
+"다음 항목은 잔액이 맞지 않습니다:\n"
+"\n"
 
 #. module: account
 #. odoo-python
@@ -16226,17 +16295,17 @@ msgstr "확인하기"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
 msgid "To Invoice"
-msgstr "청구서 발행 대기 중"
+msgstr "청구서 발행"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "To Pay"
-msgstr "결제하기"
+msgstr "결제 대기 중"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "To Validate"
-msgstr "승인하기"
+msgstr "승인 대기 중"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.email_template_mail_gateway_failed
@@ -16263,7 +16332,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 msgid "To pay"
-msgstr "급여 지급"
+msgstr "결제 대기 중"
 
 #. module: account
 #. odoo-python
@@ -16290,7 +16359,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_partner_bank_search_inherit
 msgid "To validate"
-msgstr "승인하기"
+msgstr "승인 대기 중"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_report__default_opening_date_filter__today
@@ -17251,7 +17320,7 @@ msgstr "이 공급업체의 청구서 승인을 더욱 간편하게 자동화하
 #: code:addons/account/static/src/components/json_checkboxes/json_checkboxes.xml:0
 #: model:ir.model.fields.selection,name:account.selection__res_partner__invoice_warn__warning
 msgid "Warning"
-msgstr "경고"
+msgstr "주의"
 
 #. module: account
 #. odoo-python
@@ -17447,6 +17516,11 @@ msgid "Wrong credit or debit value in accounting entry!"
 msgstr "회계 항목의 차변 또는 대변 값이 잘못되었습니다!"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_partner_property_form
+msgid "XML format"
+msgstr "XML 형식"
+
+#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_move__auto_post__yearly
 msgid "Yearly"
 msgstr "매년"
@@ -17608,8 +17682,10 @@ msgstr "%s 전표에 가계정을 설정하지 않으면 새로운 명세서 내
 #. module: account
 #. odoo-python
 #: code:addons/account/wizard/account_payment_register.py:0
-msgid "You can't create payments for entries belonging to different branches."
-msgstr "다른 지점의 항목에 대해 결제를 생성할 수 없습니다."
+msgid ""
+"You can't create payments for entries belonging to different branches "
+"without access to parent company."
+msgstr "다른 지점에 속한 항목에 대해서는 결제를 생성할 수 없습니다. 본점 접근 권한이 있어야 합니다."
 
 #. module: account
 #. odoo-python
@@ -18023,6 +18099,14 @@ msgstr "이 계정에 외화를 설정할 수 없습니다. 이미 다른 외화
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/partner.py:0
+msgid ""
+"You cannot set a partner as an invoicing address of another if they have a "
+"different %(vat_label)s."
+msgstr "다른 %(vat_label) 항목이 적용되는 경우에는, 해당 파트너를 다른 파트너의 청구서 주소로 설정할 수 없습니다."
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/account_account.py:0
 msgid ""
 "You cannot switch an account to prevent the reconciliation if some partial "
@@ -18426,6 +18510,11 @@ msgstr "적용되었습니다."
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_form
 msgid "here"
 msgstr "생성하기"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_move_form
+msgid "in"
+msgstr "분류"
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_reconcile_model__payment_tolerance_type__fixed_amount

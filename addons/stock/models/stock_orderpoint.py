@@ -125,23 +125,16 @@ class StockWarehouseOrderpoint(models.Model):
     @api.depends('route_id', 'product_id', 'location_id', 'company_id', 'warehouse_id', 'product_id.route_ids')
     def _compute_rules(self):
         orderpoints_to_compute = self.filtered(lambda orderpoint: orderpoint.product_id and orderpoint.location_id)
-        # Products without routes have no impact on _get_rules_from_location.
-        product_ids_with_routes = set(orderpoints_to_compute.product_id.filter_has_routes().ids)
-        # Small cache mapping (location_id, route_id) -> stock.rule.
-        # This reduces calls to _get_rules_from_location for products without routes.
+        # Small cache mapping (location_id, route_id, product_id.route_ids | product_id.categ_id.total_route_ids) -> stock.rule.
+        # This reduces calls to _get_rules_from_location for products without routes and products with the same routes.
         rules_cache = {}
         for orderpoint in orderpoints_to_compute:
-            if orderpoint.product_id.id not in product_ids_with_routes:
-                cache_key = (orderpoint.location_id, orderpoint.route_id)
-                rule_ids = rules_cache.get(cache_key) or orderpoint.product_id._get_rules_from_location(
-                    orderpoint.location_id, route_ids=orderpoint.route_id
-                )
-                orderpoint.rule_ids = rule_ids
-                rules_cache[cache_key] = rule_ids
-            else:
-                orderpoint.rule_ids = orderpoint.product_id._get_rules_from_location(
-                    orderpoint.location_id, route_ids=orderpoint.route_id
-                )
+            cache_key = (orderpoint.location_id, orderpoint.route_id, orderpoint.product_id.route_ids | orderpoint.product_id.categ_id.total_route_ids)
+            rule_ids = rules_cache.get(cache_key) or orderpoint.product_id._get_rules_from_location(
+                orderpoint.location_id, route_ids=orderpoint.route_id
+            )
+            orderpoint.rule_ids = rule_ids
+            rules_cache[cache_key] = rule_ids
         (self - orderpoints_to_compute).rule_ids = False
 
     @api.depends('product_max_qty')
@@ -333,6 +326,8 @@ class StockWarehouseOrderpoint(models.Model):
         for orderpoint in self:
             if orderpoint.trigger == 'auto':
                 orderpoint.qty_to_order_manual = 0
+            elif not orderpoint.qty_to_order_manual and not orderpoint.qty_to_order:
+                orderpoint.qty_to_order = orderpoint.qty_to_order_computed
             elif orderpoint.qty_to_order != orderpoint.qty_to_order_computed:
                 orderpoint.qty_to_order_manual = orderpoint.qty_to_order
 
@@ -346,28 +341,37 @@ class StockWarehouseOrderpoint(models.Model):
 
     @api.depends('qty_multiple', 'qty_forecast', 'product_min_qty', 'product_max_qty', 'visibility_days')
     def _compute_qty_to_order_computed(self):
-        for orderpoint in self:
-            if not orderpoint.product_id or not orderpoint.location_id:
-                orderpoint.qty_to_order_computed = False
-                continue
-            orderpoint.qty_to_order_computed = orderpoint._get_qty_to_order(qty_in_progress_by_orderpoint=orderpoint._quantity_in_progress())
+        def to_compute(orderpoint):
+            rounding = orderpoint.product_uom.rounding
+            # The check is on purpose. We only want to consider the visibility days if the forecast is negative and
+            # there is a already something to ressuply base on lead times.
+            return (
+                orderpoint.id
+                and float_compare(orderpoint.qty_forecast, orderpoint.product_min_qty, precision_rounding=rounding) < 0
+            )
 
-    def _get_qty_to_order(self, force_visibility_days=False, qty_in_progress_by_orderpoint={}):
+        orderpoints = self.filtered(to_compute)
+        qty_in_progress_by_orderpoint = orderpoints._quantity_in_progress()
+        for orderpoint in orderpoints:
+            orderpoint.qty_to_order_computed = orderpoint._get_qty_to_order(qty_in_progress_by_orderpoint=qty_in_progress_by_orderpoint)
+        (self - orderpoints).qty_to_order_computed = False
+
+    def _get_qty_to_order(self, force_visibility_days=False, qty_in_progress_by_orderpoint=None):
         self.ensure_one()
-        if not self.product_id or not self.location_id:
-            return False
         visibility_days = self.visibility_days
         if force_visibility_days is not False:
             # Accepts falsy values such as 0.
             visibility_days = force_visibility_days
         qty_to_order = 0.0
+        qty_in_progress_by_orderpoint = qty_in_progress_by_orderpoint or {}
+        qty_in_progress = qty_in_progress_by_orderpoint.get(self.id)
+        if qty_in_progress is None:
+            qty_in_progress = self._quantity_in_progress()[self.id]
         rounding = self.product_uom.rounding
         # The check is on purpose. We only want to consider the visibility days if the forecast is negative and
         # there is a already something to ressuply base on lead times.
         if float_compare(self.qty_forecast, self.product_min_qty, precision_rounding=rounding) < 0:
-            # We want to know how much we should order to also satisfy the needs that gonna appear in the next (visibility) days
             product_context = self._get_product_context(visibility_days=visibility_days)
-            qty_in_progress = qty_in_progress_by_orderpoint.get(self.id) or self._quantity_in_progress()[self.id]
             qty_forecast_with_visibility = self.product_id.with_context(product_context).read(['virtual_available'])[0]['virtual_available'] + qty_in_progress
             qty_to_order = max(self.product_min_qty, self.product_max_qty) - qty_forecast_with_visibility
             remainder = (self.qty_multiple > 0.0 and qty_to_order % self.qty_multiple) or 0.0
@@ -483,8 +487,10 @@ class StockWarehouseOrderpoint(models.Model):
 
         # recompute virtual_available with lead days
         today = fields.datetime.now().replace(hour=23, minute=59, second=59)
-        for (days, loc), product_ids in ploc_per_day.items():
-            products = self.env['product.product'].browse(product_ids)
+        product_ids = set()
+        location_ids = set()
+        for (days, loc), prod_ids in ploc_per_day.items():
+            products = self.env['product.product'].browse(prod_ids)
             qties = products.with_context(
                 location=loc.id,
                 to_date=today + relativedelta.relativedelta(days=days)
@@ -492,13 +498,16 @@ class StockWarehouseOrderpoint(models.Model):
             for (product, qty) in zip(products, qties):
                 if float_compare(qty['virtual_available'], 0, precision_rounding=product.uom_id.rounding) < 0:
                     to_refill[(qty['id'], loc.id)] = qty['virtual_available']
+                    product_ids.add(qty['id'])
+                    location_ids.add(loc.id)
             products.invalidate_recordset()
         if not to_refill:
             return action
 
         # Remove incoming quantity from other origin than moves (e.g RFQ)
-        product_ids, location_ids = zip(*to_refill)
-        qty_by_product_loc, dummy = self.env['product.product'].browse(product_ids)._get_quantity_in_progress(location_ids=location_ids)
+        product_ids = list(product_ids)
+        location_ids = list(location_ids)
+        qty_by_product_loc = self.env['product.product'].browse(product_ids)._get_quantity_in_progress(location_ids=location_ids)[0]
         rounding = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         # Group orderpoint by product-location
         orderpoint_by_product_location = self.env['stock.warehouse.orderpoint']._read_group(

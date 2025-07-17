@@ -4,6 +4,8 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
+import pytz
+
 
 class HolidaysType(models.Model):
     _inherit = "hr.leave.type"
@@ -80,9 +82,22 @@ class Holidays(models.Model):
             if not leave.employee_id:
                 continue
 
-            work_hours_data = leave.employee_id._list_work_time_per_day(
-                leave.date_from,
-                leave.date_to)[leave.employee_id.id]
+            calendar = leave.employee_id.resource_calendar_id
+            calendar_timezone = pytz.timezone(calendar.tz)
+
+            if calendar.flexible_hours and (leave.request_unit_hours or leave.request_unit_half or leave.date_from.date() == leave.date_to.date()):
+                leave_date = leave.date_from.astimezone(calendar_timezone).date()
+                if leave.request_unit_hours:
+                    hours = leave.request_hour_to - leave.request_hour_from
+                elif leave.request_unit_half:
+                    hours = calendar.hours_per_day / 2
+                else:  # Single-day leave
+                    hours = calendar.hours_per_day
+                work_hours_data = [(leave_date, hours)]
+            else:
+                work_hours_data = leave.employee_id._list_work_time_per_day(
+                    leave.date_from,
+                    leave.date_to)[leave.employee_id.id]
 
             for index, (day_date, work_hours_count) in enumerate(work_hours_data):
                 vals_list.append(leave._timesheet_prepare_line_values(index, work_hours_data, day_date, work_hours_count, project, task))

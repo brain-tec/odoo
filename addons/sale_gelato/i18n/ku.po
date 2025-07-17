@@ -72,7 +72,7 @@ msgstr ""
 #. module: sale_gelato
 #: model:ir.model,name:sale_gelato.model_res_company
 msgid "Companies"
-msgstr ""
+msgstr "کۆمپانیاکان"
 
 #. module: sale_gelato
 #: model:ir.model,name:sale_gelato.model_res_config_settings
@@ -215,7 +215,7 @@ msgstr ""
 #. module: sale_gelato
 #: model:ir.model,name:sale_gelato.model_product_template
 msgid "Product"
-msgstr ""
+msgstr "بەرهەم"
 
 #. module: sale_gelato
 #: model:ir.model,name:sale_gelato.model_product_document
@@ -232,12 +232,12 @@ msgstr ""
 #. module: sale_gelato
 #: model:ir.model,name:sale_gelato.model_product_product
 msgid "Product Variant"
-msgstr ""
+msgstr "جۆری بەرهەم"
 
 #. module: sale_gelato
 #: model:ir.model.fields,field_description:sale_gelato.field_delivery_carrier__delivery_type
 msgid "Provider"
-msgstr ""
+msgstr "دابینکەر"
 
 #. module: sale_gelato
 #: model:ir.model,name:sale_gelato.model_sale_order

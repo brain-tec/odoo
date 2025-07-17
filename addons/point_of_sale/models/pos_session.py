@@ -95,6 +95,12 @@ class PosSession(models.Model):
 
     _sql_constraints = [('uniq_name', 'unique(name)', "The name of this POS Session must be unique!")]
 
+    def write(self, vals):
+        if vals.get('state') == 'closed':
+            for record in self:
+                record.config_id._notify(('CLOSING_SESSION', {'login_number': self.env.context.get('login_number', False)}))
+        return super().write(vals)
+
     @api.model
     def _load_pos_data_relations(self, model, response):
         model_fields = self.env[model]._fields
@@ -131,8 +137,8 @@ class PosSession(models.Model):
     @api.model
     def _load_pos_data_models(self, config_id):
         return ['pos.config', 'pos.order', 'pos.order.line', 'pos.pack.operation.lot', 'pos.payment', 'pos.payment.method', 'pos.printer',
-                        'pos.category', 'pos.bill', 'res.company', 'account.tax', 'account.tax.group', 'product.product', 'product.attribute', 'product.attribute.custom.value',
-            'product.template.attribute.line', 'product.template.attribute.value', 'product.combo', 'product.combo.item', 'product.packaging', 'res.users', 'res.partner',
+                        'pos.category', 'pos.bill', 'res.company', 'account.tax', 'account.tax.group', 'product.product', 'product.template.attribute.line', 'product.attribute',
+            'product.attribute.custom.value', 'product.template.attribute.value', 'product.combo', 'product.combo.item', 'product.packaging', 'res.users', 'res.partner',
             'decimal.precision', 'uom.uom', 'uom.category', 'res.country', 'res.country.state', 'res.lang', 'product.pricelist', 'product.pricelist.item', 'product.category',
             'account.cash.rounding', 'account.fiscal.position', 'account.fiscal.position.tax', 'stock.picking.type', 'res.currency', 'pos.note', 'ir.ui.view', 'product.tag', 'ir.module.module']
 
@@ -187,6 +193,10 @@ class PosSession(models.Model):
 
     def delete_opening_control_session(self):
         self.ensure_one()
+        if not self.exists():
+            return {
+                'status': 'success',
+            }
         if self.state != 'opening_control' or len(self.order_ids) > 0:
             raise UserError(_("You can only cancel a session that is in opening control state and has no orders."))
         self.sudo().unlink()
@@ -195,7 +205,6 @@ class PosSession(models.Model):
         }
 
     def get_pos_ui_product_pricelist_item_by_product(self, product_tmpl_ids, product_ids, config_id):
-        pricelist_fields = self.env['product.pricelist']._load_pos_data_fields(config_id)
         pricelist_item_fields = self.env['product.pricelist.item']._load_pos_data_fields(config_id)
 
         pricelist_item_domain = [
@@ -208,12 +217,8 @@ class PosSession(models.Model):
         ]
 
         pricelist_item = self.env['product.pricelist.item'].search(pricelist_item_domain)
-        pricelist = pricelist_item.pricelist_id
 
-        return {
-            'product.pricelist.item': pricelist_item.read(pricelist_item_fields, load=False),
-            'product.pricelist': pricelist.read(pricelist_fields, load=False)
-        }
+        return {'product.pricelist.item': pricelist_item.read(pricelist_item_fields, load=False)}
 
     @api.depends('currency_id', 'company_id.currency_id')
     def _compute_is_in_company_currency(self):
@@ -226,7 +231,8 @@ class PosSession(models.Model):
             cash_payment_method = session.payment_method_ids.filtered('is_cash_count')[:1]
             if cash_payment_method:
                 total_cash_payment = 0.0
-                result = self.env['pos.payment']._read_group([('session_id', '=', session.id), ('payment_method_id', '=', cash_payment_method.id)], aggregates=['amount:sum'])
+                captured_cash_payments_domain = AND([session._get_captured_payments_domain(),[('payment_method_id', '=', cash_payment_method.id)]])
+                result = self.env['pos.payment']._read_group(captured_cash_payments_domain, aggregates=['amount:sum'])
                 total_cash_payment = result[0][0] or 0.0
                 if session.state == 'closed':
                     total_cash = session.cash_real_transaction + total_cash_payment
@@ -573,7 +579,6 @@ class PosSession(models.Model):
             }
 
         self.post_close_register_message()
-        self.config_id._notify(('CLOSING_SESSION', {'login_number': self.env.context.get('login_number', False)}))
         return {'successful': True}
 
     def post_close_register_message(self):
@@ -631,10 +636,10 @@ class PosSession(models.Model):
     def _get_diff_account_move_ref(self, payment_method):
         return _('Closing difference in %(payment_method)s (%(session)s)', payment_method=payment_method.name, session=self.name)
 
-    def _get_diff_vals(self, payment_method_id, diff_amount):
+    def _get_diff_vals(self, payment_method_id, diff_amount, outstanding_account=False):
         payment_method = self.env['pos.payment.method'].browse(payment_method_id)
         diff_compare_to_zero = self.currency_id.compare_amounts(diff_amount, 0)
-        source_account = payment_method.outstanding_account_id
+        source_account = payment_method.outstanding_account_id or outstanding_account
         destination_account = self.env['account.account']
 
         if (diff_compare_to_zero > 0):
@@ -1076,7 +1081,7 @@ class PosSession(models.Model):
             vals.append(self._get_combine_receivable_vals(payment_method, amounts['amount'], amounts['amount_converted']))
         for payment, amounts in split_receivables_pay_later.items():
             vals.append(self._get_split_receivable_vals(payment, amounts['amount'], amounts['amount_converted']))
-        MoveLine.create(vals)
+        data['pay_later_move_lines'] = MoveLine.create(vals)
         return data
 
     def _create_combine_account_payment(self, payment_method, amounts, diff_amount):
@@ -1084,7 +1089,7 @@ class PosSession(models.Model):
         destination_account = self._get_receivable_account(payment_method)
 
         account_payment = self.env['account.payment'].with_context(pos_payment=True).create({
-            'amount': abs(amounts['amount']) + diff_amount,
+            'amount': abs(amounts['amount']),
             'journal_id': payment_method.journal_id.id,
             'force_outstanding_account_id': outstanding_account.id,
             'destination_account_id': destination_account.id,
@@ -1104,6 +1109,7 @@ class PosSession(models.Model):
             account_payment.write({
                 'outstanding_account_id': account_payment.destination_account_id,
                 'destination_account_id': account_payment.outstanding_account_id,
+                'payment_type': 'outbound',
             })
 
         account_payment.action_post()
@@ -1115,7 +1121,7 @@ class PosSession(models.Model):
         return account_payment.move_id.line_ids.filtered(lambda line: line.account_id == self._get_receivable_account(payment_method))
 
     def _apply_diff_on_account_payment_move(self, account_payment, payment_method, diff_amount):
-        diff_vals = self._get_diff_vals(payment_method.id, diff_amount)
+        diff_vals = self._get_diff_vals(payment_method.id, diff_amount, account_payment.outstanding_account_id)
         if not diff_vals:
             return
         source_vals, dest_vals = diff_vals
@@ -1131,6 +1137,9 @@ class PosSession(models.Model):
                     'credit': new_balance_compare_to_zero < 0 and -new_balance or 0.0
                 })
             ]
+        })
+        account_payment.write({
+            'amount': abs(new_balance),
         })
         account_payment.move_id.action_post()
 
@@ -1286,7 +1295,6 @@ class PosSession(models.Model):
         stock_output_lines = data.get('stock_output_lines')
         payment_method_to_receivable_lines = data.get('payment_method_to_receivable_lines')
         payment_to_receivable_lines = data.get('payment_to_receivable_lines')
-
 
         all_lines = (
               split_cash_statement_lines

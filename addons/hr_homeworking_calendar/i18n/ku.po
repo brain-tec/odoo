@@ -55,17 +55,17 @@ msgstr ""
 #. module: hr_homeworking_calendar
 #: model:ir.model.fields,field_description:hr_homeworking_calendar.field_homework_location_wizard__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "دروستکراوە لەلایەن..."
 
 #. module: hr_homeworking_calendar
 #: model:ir.model.fields,field_description:hr_homeworking_calendar.field_homework_location_wizard__create_date
 msgid "Created on"
-msgstr ""
+msgstr "دروستکراوە لە"
 
 #. module: hr_homeworking_calendar
 #: model:ir.model.fields,field_description:hr_homeworking_calendar.field_homework_location_wizard__date
 msgid "Date"
-msgstr ""
+msgstr "ڕێکەوت"
 
 #. module: hr_homeworking_calendar
 #: model:ir.model.fields,field_description:hr_homeworking_calendar.field_homework_location_wizard__day_week_string
@@ -90,23 +90,23 @@ msgstr ""
 #. module: hr_homeworking_calendar
 #: model:ir.model.fields,field_description:hr_homeworking_calendar.field_homework_location_wizard__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: hr_homeworking_calendar
 #: model:ir.model.fields,field_description:hr_homeworking_calendar.field_homework_location_wizard__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "دوایین نوێکردنەوە لەلایەن..."
 
 #. module: hr_homeworking_calendar
 #: model:ir.model.fields,field_description:hr_homeworking_calendar.field_homework_location_wizard__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "دوایین نوێکردنەوە لە..."
 
 #. module: hr_homeworking_calendar
 #: model:ir.model.fields,field_description:hr_homeworking_calendar.field_homework_location_wizard__work_location_id
 #: model_terms:ir.ui.view,arch_db:hr_homeworking_calendar.homework_location_wizard_view_form
 msgid "Location"
-msgstr ""
+msgstr "شوێن"
 
 #. module: hr_homeworking_calendar
 #: model:ir.model.fields,field_description:hr_homeworking_calendar.field_homework_location_wizard__work_location_name

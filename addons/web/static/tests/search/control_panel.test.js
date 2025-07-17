@@ -18,8 +18,6 @@ import { WebClient } from "@web/webclient/webclient";
 
 class Foo extends models.Model {
     _views = {
-        search: `<search/>`,
-        list: `<list/>`,
         kanban: `<kanban><t t-name="card"></t></kanban>`,
     };
 }
@@ -37,7 +35,8 @@ test("simple rendering", async () => {
     expect(`.o_breadcrumb`).toHaveCount(1);
 });
 
-test.tags`desktop`("breadcrumbs", async () => {
+test.tags("desktop");
+test("breadcrumbs", async () => {
     await mountWithSearch(
         ControlPanel,
         { resModel: "foo" },
@@ -67,7 +66,8 @@ test.tags`desktop`("breadcrumbs", async () => {
     expect.verifySteps(["controller_7"]);
 });
 
-test.tags`desktop`("view switcher", async () => {
+test.tags("desktop");
+test("view switcher", async () => {
     await mountWithSearch(
         ControlPanel,
         { resModel: "foo" },
@@ -94,7 +94,8 @@ test.tags`desktop`("view switcher", async () => {
     expect.verifySteps(["kanban"]);
 });
 
-test.tags`mobile`("view switcher on mobile", async () => {
+test.tags("mobile");
+test("view switcher on mobile", async () => {
     await mountWithSearch(
         ControlPanel,
         { resModel: "foo" },
@@ -164,7 +165,8 @@ test("view switcher hotkey cycles through views", async () => {
     expect(`.o_list_view`).toHaveCount(1);
 });
 
-test.tags`desktop`("control panel layout buttons in dialog", async () => {
+test.tags("desktop");
+test("control panel layout buttons in dialog", async () => {
     onRpc("has_group", () => true);
     Foo._fields.char = fields.Char();
     Foo._records = [
@@ -175,7 +177,7 @@ test.tags`desktop`("control panel layout buttons in dialog", async () => {
             char: "b",
         },
     ];
-    Foo._views["list,false"] = `<list editable="top"><field name="char"/></list>`;
+    Foo._views["list"] = `<list editable="top"><field name="char"/></list>`;
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction({

@@ -264,6 +264,7 @@ export class HtmlField extends Component {
         }
         if (this.props.codeview) {
             config.resources = {
+                ...config.resources,
                 user_commands: [
                     {
                         id: "codeview",
@@ -319,6 +320,7 @@ export const htmlField = {
         }
         if (options.height) {
             editorConfig.height = `${options.height}px`;
+            editorConfig.classList = ["overflow-auto"];
         }
         if ("disableImage" in options) {
             editorConfig.disableImage = Boolean(options.disableImage);

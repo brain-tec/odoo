@@ -341,6 +341,15 @@ registry.category("web_tour.tours").add("PosSettleOrderShipLater", {
         [
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
+            PosSale.settleNthOrder(2),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickShipLaterButton(),
+            PaymentScreen.shippingLaterHighlighted(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.remainingIs("0.0"),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.isShown(),
+            ReceiptScreen.clickNextOrder(),
             PosSale.settleNthOrder(1),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickShipLaterButton(),
@@ -359,7 +368,7 @@ registry.category("web_tour.tours").add("PosSettleOrder5", {
             Dialog.confirm("Open Register"),
             PosSale.settleNthOrder(1),
             ProductScreen.selectedOrderlineHas("Product A", "1.00"),
-            Chrome.clickMenuOption("Backend"),
+            Chrome.clickMenuOption("Backend", { expectUnloadPage: true }),
         ].flat(),
 });
 
@@ -419,5 +428,24 @@ registry.category("web_tour.tours").add("test_settle_order_with_lot", {
             Dialog.confirm("Open Register"),
             PosSale.settleNthOrder(1, { loadSN: true }),
             PosSale.selectedOrderLinesHasLots("Product A", ["1001", "1002"]),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_down_payment_displayed", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            PosSale.downPaymentFirstOrder("+10"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.clickNextOrder(),
+            PosSale.settleNthOrder(1),
+            Order.hasLine({
+                productName: "Down Payment",
+                quantity: "1.0",
+                price: "-1.15",
+            }),
         ].flat(),
 });

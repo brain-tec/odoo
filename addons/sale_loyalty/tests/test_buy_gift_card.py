@@ -59,7 +59,6 @@ class TestBuyGiftCard(TestSaleCouponCommon):
             'order_line': [Command.create({'product_id': self.product_gift_card.id})],
         })
         order._update_programs_and_rewards()
-        order._auto_apply_rewards()
 
         # Create an order without salesman to test company-based fallback
         orders = order + order.copy({'user_id': None})
@@ -69,7 +68,7 @@ class TestBuyGiftCard(TestSaleCouponCommon):
 
         # Confirm order as Public User to trigger loyalty mail
         public_user = self.env.ref('base.public_user')
-        orders.with_context({}).with_user(public_user).sudo().action_confirm()
+        orders.with_user(public_user).with_company(order.company_id).sudo().action_confirm()
 
         mails = self.env['mail.mail'].search([])
         self.assertEqual(len(mails), 2)

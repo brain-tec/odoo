@@ -249,3 +249,131 @@ class TestAccountPayment(AccountPaymentCommon):
             'amount': None,
             'amount_max': None,
         })
+
+    def test_payment_invoice_same_receivable(self):
+        """
+        Test that when creating a payment transaction, the payment uses the same account_id as the related invoice
+        and not the partner accound_id
+        """
+        payment_term = self.env['account.payment.term'].create({
+            'name': "early_payment_term",
+            'company_id': self.company_data['company'].id,
+            'discount_percentage': 10,
+            'discount_days': 10,
+            'early_discount': True,
+        })
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner.id,
+            'currency_id': self.currency.id,
+            'invoice_payment_term_id': payment_term.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'test line',
+                    'price_unit': 100.0,
+                    'tax_ids': [Command.set(self.company_data['default_tax_sale'].ids)],
+                }),
+                Command.create({
+                    'name': 'test line 2',
+                    'price_unit': 100.0,
+                    'tax_ids': [Command.set(self.company_data['default_tax_sale'].ids)],
+                }),
+            ],
+        })
+
+        self.partner.property_account_receivable_id = self.env['account.account'].search([('name', '=', 'Account Payable')], limit=1)
+        payment = self._create_transaction(
+            reference='payment_3',
+            flow='direct',
+            state='done',
+            amount=invoice.invoice_payment_term_id._get_amount_due_after_discount(
+                total_amount=invoice.amount_residual,
+                untaxed_amount=invoice.amount_tax,
+            ),
+            invoice_ids=[invoice.id],
+            partner_id=self.partner.id,
+        )._create_payment()
+
+        self.assertNotEqual(self.partner.property_account_receivable_id, payment.destination_account_id)
+        self.assertEqual(payment.destination_account_id, invoice.line_ids[-1].account_id)
+
+    def test_vendor_payment_name_remains_same_after_repost(self):
+        """
+        Test that modifying and reposting a vendor payment does not change its name, except when the journal is changed.
+        """
+        journal = self.company_data['default_journal_bank']
+
+        payment = self.env['account.payment'].create({
+            'partner_id': self.partner.id,
+            'partner_type': 'supplier',
+            'payment_type': 'outbound',
+            'amount': 10,
+            'journal_id': journal.id,
+            'payment_method_line_id': journal.inbound_payment_method_line_ids[0].id,
+        })
+        payment.action_post()
+
+        original_name = payment.move_id.name
+
+        payment2 = self.env['account.payment'].create({
+            'partner_id': self.partner.id,
+            'partner_type': 'supplier',
+            'payment_type': 'outbound',
+            'amount': 20,
+            'journal_id': journal.id,
+            'payment_method_line_id': journal.inbound_payment_method_line_ids[0].id,
+        })
+
+        payment2.action_post()
+        payment.move_id.button_draft()
+        payment.move_id.line_ids.unlink()
+        payment.amount = 30
+        payment.move_id._compute_name()
+        payment.move_id._post()
+
+        self.assertEqual(
+            payment.move_id.name,
+            original_name,
+            "Payment name should remain the same after reposting"
+        )
+
+        # Now try to change the journal, and check if the name is now updated
+        payment.move_id.button_draft()
+        new_journal = journal.copy()
+        new_payment_method_line = new_journal.inbound_payment_method_line_ids[0]
+        new_payment_method_line.write({'payment_account_id': self.company_data['default_account_receivable'].id})
+        payment.write({
+            'journal_id': new_journal.id,
+            'payment_method_line_id': new_payment_method_line.id,
+        })
+        payment.move_id.action_post()
+        self.assertNotEqual(
+            payment.move_id.name,
+            original_name,
+            "Payment name should be updated after changing the journal"
+        )
+
+    def test_post_process_does_not_fail_on_cancelled_invoice(self):
+        """ If the payment state is 'pending' and the invoice gets cancelled, and later the payment is confirmed,
+            ensure that the _post_process() method does not raise an error.
+        """
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'test line',
+                    'price_unit': 100.0,
+                }),
+            ],
+        })
+        tx = self._create_transaction(
+            flow='direct',
+            state='pending',
+            invoice_ids=[invoice.id],
+        )
+        invoice.button_cancel()
+        tx._set_done()
+        # _post_process() shouldn't raise an error even though the invoice is cancelled
+        tx._post_process()
+        self.assertEqual(tx.payment_id.state, 'in_process')

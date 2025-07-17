@@ -1,6 +1,11 @@
 import { Plugin } from "@html_editor/plugin";
 import { closestBlock, isBlock } from "@html_editor/utils/blocks";
-import { removeClass, toggleClass, wrapInlinesInBlocks } from "@html_editor/utils/dom";
+import {
+    removeClass,
+    toggleClass,
+    unwrapContents,
+    wrapInlinesInBlocks,
+} from "@html_editor/utils/dom";
 import {
     getDeepestPosition,
     isEmptyBlock,
@@ -9,6 +14,7 @@ import {
     isParagraphRelatedElement,
     isProtected,
     isProtecting,
+    isShrunkBlock,
     listElementSelector,
 } from "@html_editor/utils/dom_info";
 import {
@@ -121,6 +127,7 @@ export class ListPlugin extends Plugin {
         shift_tab_overrides: this.handleShiftTab.bind(this),
         split_element_block_overrides: this.handleSplitBlock.bind(this),
         node_to_insert_processors: this.processNodeToInsert.bind(this),
+        before_insert_within_pre_processors: this.insertListWithinPre.bind(this),
     };
 
     setup() {
@@ -439,10 +446,15 @@ export class ListPlugin extends Plugin {
         if (!isOrphan) {
             return;
         }
-        // Transform <li> into <p> if they are not in a <ul> / <ol>.
-        const paragraph = this.dependencies.baseContainer.createBaseContainer();
-        element.replaceWith(paragraph);
-        paragraph.replaceChildren(...element.childNodes);
+        if (element.children.length && [...element.children].every(isBlock)) {
+            // Unwrap <li> if each of its children is a block element.
+            unwrapContents(element);
+        } else {
+            // Otherwise, wrap its content in a new <p> element.
+            const paragraph = this.dependencies.baseContainer.createBaseContainer();
+            element.replaceWith(paragraph);
+            paragraph.replaceChildren(...element.childNodes);
+        }
     }
 
     mergeSimilarLists(element) {
@@ -622,14 +634,16 @@ export class ListPlugin extends Plugin {
         const ul = li.parentNode;
         const dir = ul.getAttribute("dir");
         const textAlign = ul.style.getPropertyValue("text-align");
-        wrapInlinesInBlocks(li, {
-            baseContainerNodeName: this.dependencies.baseContainer.getDefaultNodeName(),
-            cursors,
-        });
-        if (!li.hasChildNodes()) {
-            // Outdenting an empty LI produces an empty baseContainer
+        const children = childNodes(li);
+        if (!children.every(isBlock)) {
             const baseContainer = this.dependencies.baseContainer.createBaseContainer();
-            baseContainer.append(this.document.createElement("br"));
+            for (const child of children) {
+                cursors.update(callbacksForCursorUpdate.append(baseContainer, child));
+                baseContainer.append(child);
+            }
+            if (isShrunkBlock(baseContainer)) {
+                baseContainer.append(this.document.createElement("br"));
+            }
             li.append(baseContainer);
             cursors.remapNode(li, baseContainer);
         }
@@ -835,6 +849,29 @@ export class ListPlugin extends Plugin {
         }
 
         return true;
+    }
+
+    insertListWithinPre(node) {
+        const listItems = node.querySelectorAll("li:not(.oe-nested)");
+        for (const li of listItems) {
+            const nestingLvl = ancestors(li).filter(isListElement).length - 1;
+            const list = closestElement(li, "ul, ol");
+            const listMode = this.getListMode(list);
+            let char;
+            if (listMode === "CL") {
+                char = "[] ";
+            } else if (listMode === "OL") {
+                const children = childNodes(li.parentElement).filter(
+                    (n) => !n.classList.contains("oe-nested")
+                );
+                char = `${children.indexOf(li) + 1}. `;
+            } else {
+                char = "* ";
+            }
+            const prefix = " ".repeat(nestingLvl * 4) + char;
+            li.prepend(this.document.createTextNode(prefix));
+        }
+        return node;
     }
 
     // --------------------------------------------------------------------------

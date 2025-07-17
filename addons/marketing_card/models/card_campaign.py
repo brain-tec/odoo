@@ -1,4 +1,6 @@
 import base64
+import pytz
+from datetime import date, datetime
 
 from odoo import _, api, fields, models, exceptions
 
@@ -23,7 +25,7 @@ class CardCampaign(models.Model):
 
     name = fields.Char(required=True)
     active = fields.Boolean(default=True)
-    body_html = fields.Html(related='card_template_id.body', render_engine="qweb")
+    body_html = fields.Html(related='card_template_id.body', render_engine="qweb", readonly=False)
 
     card_count = fields.Integer(compute='_compute_card_stats')
     card_click_count = fields.Integer(compute='_compute_card_stats')
@@ -49,7 +51,7 @@ class CardCampaign(models.Model):
 
     user_id = fields.Many2one('res.users', string='Responsible', default=lambda self: self.env.user, domain="[('share', '=', False)]")
 
-    reward_message = fields.Html(string='Thanks to You Message')
+    reward_message = fields.Html(string='Thank You Message')
     reward_target_url = fields.Char(string='Reward Link')
     request_title = fields.Char('Request', default=lambda self: _('Help us share the news'))
     request_description = fields.Text('Request Description')
@@ -374,8 +376,8 @@ class CardCampaign(models.Model):
         """Helper to get the right value for dynamic fields."""
         self.ensure_one()
         result = {
-            'image1': images[0] if (images := self.content_image1_path and record.mapped(self.content_image1_path)) else False,
-            'image2': images[0] if (images := self.content_image2_path and record.mapped(self.content_image2_path)) else False,
+            'image1': images[0] if (images := self.content_image1_path and self.content_image1_path in record and record.mapped(self.content_image1_path)) else False,
+            'image2': images[0] if (images := self.content_image2_path and self.content_image2_path in record and record.mapped(self.content_image2_path)) else False,
         }
         campaign_text_element_fields = (
             ('header', 'content_header', 'content_header_dyn', 'content_header_path'),
@@ -394,4 +396,10 @@ class CardCampaign(models.Model):
                 except (AttributeError, KeyError):
                     # for generic image, or if field incorrect, return name of field
                     result[el] = self[path_field]
+                # force dates to their relevant timezone as that's what is usually wanted
+                if (
+                    isinstance(result[el], (date, datetime))
+                    and (tz := record._mail_get_timezone_with_default(default_tz=None))
+                ):
+                    result[el] = pytz.utc.localize(result[el]).astimezone(pytz.timezone(tz)).replace(tzinfo=None)
         return result

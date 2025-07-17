@@ -1161,6 +1161,7 @@ class SaleOrder(models.Model):
         # We don't need it and it creates issues in the creation of linked records.
         context = self._context.copy()
         context.pop('default_name', None)
+        context.pop('default_user_id', None)
 
         self.with_context(context)._action_confirm()
         user = self[:1].create_uid
@@ -1630,8 +1631,8 @@ class SaleOrder(models.Model):
         # 4) Some moves might actually be refunds: convert them if the total amount is negative
         # We do this after the moves have been created since we need taxes, etc. to know if the total
         # is actually negative or not
-        if final:
-            if moves_to_switch := moves.sudo().filtered(lambda m: m.amount_total < 0):
+        if final and (moves_to_switch := moves.sudo().filtered(lambda m: m.amount_total < 0)):
+            with self.env.protecting([moves._fields['team_id']], moves_to_switch):
                 moves_to_switch.action_switch_move_type()
                 self.invoice_ids._set_reversed_entry(moves_to_switch)
 
@@ -1759,17 +1760,6 @@ class SaleOrder(models.Model):
                 access_opt['title'] = _("Accept & Pay Quotation")
             elif self.state in ('draft', 'sent'):
                 access_opt['title'] = _("View Quotation")
-
-        # enable followers that have access through portal
-        follower_group = next(group for group in groups if group[0] == 'follower')
-        follower_group[2]['active'] = True
-        follower_group[2]['has_button_access'] = True
-        access_opt = follower_group[2].setdefault('button_access', {})
-        if self.state in ('draft', 'sent'):
-            access_opt['title'] = _("View Quotation")
-        else:
-            access_opt['title'] = _("View Order")
-        access_opt['url'] = self._notify_get_action_link('view', **local_msg_vals)
 
         return groups
 

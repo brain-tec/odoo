@@ -7,17 +7,17 @@
 # Martin Trigaux, 2024
 # ShevAbam, 2024
 # Fabien Pinckaers <fp@openerp.com>, 2025
+# Larissa Manderfeld, 2025
 # Wil Odoo, 2025
 # Manon Rondou, 2025
-# Larissa Manderfeld, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:22+0000\n"
+"POT-Creation-Date: 2025-06-27 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Larissa Manderfeld, 2025\n"
+"Last-Translator: Manon Rondou, 2025\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -948,7 +948,7 @@ msgid ""
 "<br/>This is a simple hero unit, a simple jumbotron-style component for "
 "calling extra attention to featured content or information.<br/><br/>"
 msgstr ""
-"<br/>Il s'agit d'une simple unité de héros, un composant simple de type "
+"<br/>Il s'agit d'une simple unité hero, un composant simple de type "
 "jumbotron pour attirer l'attention sur un contenu ou une information en "
 "vedette.<br/><br/>"
 
@@ -1967,6 +1967,16 @@ msgid ""
 msgstr ""
 "<span class=\"s_number display-1-fs\">Plus de 8</span><br/>\n"
 "                        <span class=\"h5-fs\">pages impressionnantes</span>"
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
+msgid "<span class=\"s_progress_bar_text small d-none\">25%</span>"
+msgstr "<span class=\"s_progress_bar_text small d-none\">25%</span>"
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
+msgid "<span class=\"s_progress_bar_text small d-none\">80%</span>"
+msgstr "<span class=\"s_progress_bar_text small d-none\">80%</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_progress_bar
@@ -4000,7 +4010,7 @@ msgstr "Card Offset"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_card_options
 msgid "Card Width"
-msgstr "Card Largeur"
+msgstr "Largeur card"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -7702,7 +7712,6 @@ msgstr "Titre 1"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/js/editor/snippets.editor.js:0
-#: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "Headings"
 msgstr "Titres"
 
@@ -7712,36 +7721,26 @@ msgid "Headings 1"
 msgstr "Titre 1"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 2"
 msgstr "Titre 2"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 3"
 msgstr "Titre 3"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 4"
 msgstr "Titre 4"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 5"
 msgstr "Titre 5"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 6"
 msgstr "Titre 6"
@@ -7910,7 +7909,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
 #: model_terms:ir.ui.view,arch_db:website.template_footer_minimalist
 msgid "Home"
-msgstr "Page d'accueil"
+msgstr "Accueil"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -9511,8 +9510,6 @@ msgid "Linkedin"
 msgstr "Linkedin"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Links"
 msgstr "Liens"
@@ -9591,6 +9588,7 @@ msgstr "Widget de Live Chat"
 #: code:addons/website/static/src/client_actions/website_preview/website_preview.xml:0
 #: code:addons/website/static/src/components/dialog/add_page_dialog.js:0
 #: code:addons/website/static/src/components/dialog/seo.xml:0
+#: code:addons/website/static/src/js/editor/html_editor.js:0
 #: code:addons/website/static/src/xml/web_editor.xml:0
 #: code:addons/website/static/src/xml/website.background.video.xml:0
 msgid "Loading..."
@@ -10313,7 +10311,7 @@ msgstr "Nom, id ou clé"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Narrow"
-msgstr "Étroit"
+msgstr "Restreint"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -11815,12 +11813,6 @@ msgid "Primary"
 msgstr "Primaire"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Primary Buttons"
-msgstr "Boutons principaux"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Primary Style"
 msgstr "Style primaire"
@@ -12023,6 +12015,11 @@ msgid "Punchy Image"
 msgstr "Image percutante"
 
 #. module: website
+#: model:ir.model.fields,field_description:website.field_website__domain_punycode
+msgid "Punycode Domain"
+msgstr "Domaine Punycode"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid "Purpose"
 msgstr "But"
@@ -12116,7 +12113,7 @@ msgstr "Évaluation"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_card_options
 msgid "Ratio"
-msgstr "Facteur"
+msgstr "Ratio"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -12819,12 +12816,6 @@ msgstr "Deuxième radio par défaut"
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Secondary"
 msgstr "Secondaire"
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Secondary Buttons"
-msgstr "Boutons secondaires"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -13935,8 +13926,6 @@ msgid "Test your robots.txt with Google Search Console"
 msgstr "Testez votre fichier robots.txt avec Google Search Console"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.grid_layout_options
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -14150,6 +14139,13 @@ msgstr "La limite est le nombre maximum d'enregistrements récupérés"
 #: code:addons/website/models/website_snippet_filter.py:0
 msgid "The limit must be between 1 and 16."
 msgstr "La limite doit être comprise entre 1 et 16."
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "The logo is too large. Please upload a logo smaller than 2.5 MB."
+msgstr ""
+"Le logo est trop grand. Veuillez télécharger un logo de moins de 2,5 Mo."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
@@ -14438,9 +14434,9 @@ msgid ""
 "This is a simple hero unit, a simple jumbotron-style component for calling "
 "extra attention to featured content or information."
 msgstr ""
-"Il s'agit d'une simple unité de héros, un simple composant de style "
-"jumbotron pour attirer une attention supplémentaire sur le contenu ou les "
-"informations vedettes."
+"Il s'agit d'une simple unité hero, un simple composant de style jumbotron "
+"pour attirer une attention supplémentaire sur le contenu ou les informations"
+" vedettes."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_key_images
@@ -14991,6 +14987,12 @@ msgstr ""
 "308 Rediriger/Réécrire: Si vous voulez renommer un contrôleur avec une nouvelle URL. (Par exemple: /shop -> /magasin - Les deux URL seront accessibles mais /shop sera automatiquement redirigé vers /magasin)"
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/xml/html_editor.xml:0
+msgid "Type your URL"
+msgstr "Tapez votre URL"
+
+#. module: website
 #: model:ir.model.fields,field_description:website.field_website_controller_page__name_slugified
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
@@ -15011,6 +15013,12 @@ msgid "URL matching those filters will be rewritten using the CDN Base URL"
 msgstr ""
 "Les URL qui correspondent à ces filtres seront réécrits en utilisant l'URL "
 "CDN Base "
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/website_rewrite.py:0
+msgid "URL must not start with '#'."
+msgstr "L'URL ne peut pas commencer par '#'."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_rewrite__url_to
@@ -16465,12 +16473,6 @@ msgstr "Compte X"
 
 #. module: website
 #. odoo-javascript
-#: code:addons/website/static/src/xml/website_form_editor.xml:0
-msgid "Yes"
-msgstr "Oui"
-
-#. module: website
-#. odoo-javascript
 #: code:addons/website/static/src/client_actions/website_preview/website_preview.js:0
 msgid ""
 "You are about to be redirected to the domain configured for your website ( "
@@ -16848,6 +16850,12 @@ msgstr "une boutique en ligne"
 #: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
 msgid "and"
 msgstr "et"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/website_rewrite.py:0
+msgid "base URL of 'URL to' should not be same as 'URL from'."
+msgstr "URL de base \"URL vers\" ne peut pas être identique à \"URL de\"."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets

@@ -23,7 +23,7 @@ def test_get_data(self, template_code):
     return {
         'template_data': {
             'code_digits': 6,
-            'currency_id': 'base.EUR',
+            'currency_id': self.env.ref('base.EUR').id,
             'property_account_income_categ_id': 'test_account_income_template',
             'property_account_expense_categ_id': 'test_account_expense_template',
             'property_account_receivable_id': 'test_account_receivable_template',
@@ -295,6 +295,25 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             ])
             return data
 
+        # First try with `force_create=False` (during an upgrade)
+        with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
+            self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False, force_create=False)
+
+        taxes = self.env['account.tax'].search([('company_id', '=', self.company.id)])
+        self.assertRecordValues(taxes, [
+            {'name': 'Tax 1'},
+            {'name': 'Tax 2'},
+        ])
+
+        fiscal_position = self.env['account.fiscal.position'].search([])
+        self.assertRecordValues(fiscal_position.tax_ids.tax_src_id, [
+            {'name': 'Tax 1'},
+        ])
+        self.assertRecordValues(fiscal_position.tax_ids.tax_dest_id, [
+            {'name': 'Tax 2'},
+        ])
+
+        # then try with `force_create=True` (when updating the CoA manually)
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False)
 
@@ -373,8 +392,6 @@ class TestChartTemplate(AccountTestInvoicingCommon):
         * Update all the references to the old taxes to the new ones.
           - Fiscal positions: The previous mappings won't be deleted but the new ones will be created.
                               This ensures that reports still work.
-          - Company: The default sales/purchase taxes should be updated. It should only impact the creation
-                     of new products so it is probably not going to be an issue.
         * If such a tax was part of a group, a new group must be created and the old one removed from the template.
 
         The procedure for the users, when they are ready, is:
@@ -416,8 +433,6 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             {'tax_src_id': tax_1.id, 'tax_dest_id': tax_2.id},
             {'tax_src_id': tax_3.id, 'tax_dest_id': tax_2.id},
         ])
-        self.assertEqual(self.company.account_sale_tax_id, tax_3)
-
         # On a new company you would never see the old tax.
         # In case users need it, they can duplicate the new one and change the rate.
         new_company = self.env['res.company'].create({'name': 'New Company'})
@@ -708,6 +723,8 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             return data
 
         company = self.company
+        # force first load since company data is removed on reload
+        company.chart_template = False
 
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             # hard fail the loading if the context key is set to ensure `test_all_l10n` works as expected
@@ -972,14 +989,14 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             'no_translation.test_chart_template_company_test_free_account_group.name@fr_BE': 'Free Account Group account/FR',  # fallback to account
             'tax_group_taxes.name@en_US': 'Taxes',
             'tax_group_taxes.name@fr_BE': 'Taxes FR',
-            'test_tax_1_template.description@en_US': Markup('<p>Tax 1 Description</p>'),
+            'test_tax_1_template.description@en_US': Markup('Tax 1 Description'),
             'test_tax_1_template.description@fr_BE': Markup('Tax 1 Description translation2/FR'),
             'test_tax_1_template.name@en_US': 'Tax 1',
             'test_tax_1_template.name@fr_BE': 'Tax 1 FR',
             'translation.test_chart_template_company_test_free_account.name@en_US': 'Free Account',
             'translation.test_chart_template_company_test_free_account.name@fr_BE': 'Free Account FR_BE',  # do not use generic lang
-            'translation.test_chart_template_company_test_free_tax.description@en_US': Markup('<p>Free Tax Description</p>'),
-            'translation.test_chart_template_company_test_free_tax.description@fr_BE': Markup('<p>Free Tax Description</p>'),
+            'translation.test_chart_template_company_test_free_tax.description@en_US': Markup('Free Tax Description'),
+            'translation.test_chart_template_company_test_free_tax.description@fr_BE': Markup('Free Tax Description FR'),
             'translation.test_chart_template_company_test_free_tax.name@en_US': 'Free Tax',
             'translation.test_chart_template_company_test_free_tax.name@fr_BE': 'Free Tax FR',
         })

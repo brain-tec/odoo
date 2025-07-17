@@ -14,7 +14,7 @@
 # José Cabrera Lozano <jose.cabrera@edukative.es>, 2024
 # Óscar Fonseca <tecnico@pyming.com>, 2024
 # Jonatan Gk, 2024
-# Xavier, 2024
+# Harcogourmet, 2024
 # Martin Trigaux, 2024
 # Manel Fernandez Ramirez <manelfera@outlook.com>, 2024
 # CristianCruzParra, 2024
@@ -27,15 +27,15 @@
 # Sandra Franch <sandra.franch@upc.edu>, 2024
 # Josep Anton Belchi, 2024
 # Noemi Pla, 2025
-# Wil Odoo, 2025
+# Santiago Payà <santiagopim@gmail.com>, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
+"POT-Creation-Date: 2025-05-14 20:47+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
+"Last-Translator: Santiago Payà <santiagopim@gmail.com>, 2025\n"
 "Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -78,7 +78,7 @@ msgstr "'. Mostrant els resultats per'"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
 msgid "+1 (650) 555-0187"
-msgstr ""
+msgstr "+1 (650) 555-0187"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -350,7 +350,7 @@ msgstr "Autoguardar"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "Bachelor Degree or Higher"
-msgstr "Grau o Grau Superior"
+msgstr "Grau o superior"
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_job__can_publish
@@ -551,7 +551,7 @@ msgstr "Lloc de treball"
 #. odoo-python
 #: code:addons/website_hr_recruitment/controllers/main.py:0
 msgid "Job Title"
-msgstr "Títul del treball"
+msgstr "Títol del treball"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
@@ -641,12 +641,6 @@ msgstr ""
 "autonomia"
 
 #. module: website_hr_recruitment
-#. odoo-javascript
-#: code:addons/website_hr_recruitment/static/src/fields/boolean_toggle_labeled_field.xml:0
-msgid "Not Published"
-msgstr "No publicat"
-
-#. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.snippet_options
 msgid "Offices Filter"
 msgstr "Filtre d'Oficines"
@@ -711,8 +705,6 @@ msgid "Products"
 msgstr "Productes"
 
 #. module: website_hr_recruitment
-#. odoo-javascript
-#: code:addons/website_hr_recruitment/static/src/fields/boolean_toggle_labeled_field.xml:0
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.hr_job_search_view_inherit
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.hr_job_website_inherit
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.view_hr_job_tree_inherit_website
@@ -749,7 +741,7 @@ msgstr "Responsabilitats"
 #. module: website_hr_recruitment
 #: model:ir.model.fields,help:website_hr_recruitment.field_hr_job__website_id
 msgid "Restrict to a specific website."
-msgstr ""
+msgstr "Restringir a un lloc web específic."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_pages_kanban_view

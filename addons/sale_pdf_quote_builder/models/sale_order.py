@@ -38,7 +38,7 @@ class SaleOrder(models.Model):
             ).filtered(lambda doc:
                 order.sale_order_template_id in doc.quotation_template_ids
                 or not doc.quotation_template_ids
-            )
+            ) | order.quotation_document_ids
 
     @api.depends('available_product_document_ids', 'order_line', 'order_line.available_product_document_ids')
     def _compute_is_pdf_quote_builder_available(self):
@@ -47,6 +47,15 @@ class SaleOrder(models.Model):
                 order.available_product_document_ids
                 or order.order_line.available_product_document_ids
             )
+
+    # === ONCHANGE METHODS === #
+
+    @api.onchange('sale_order_template_id')
+    def _onchange_sale_order_template_id(self):
+        super()._onchange_sale_order_template_id()
+        for order in self:
+            # Remove documents which are no longer available.
+            order.quotation_document_ids &= order.available_product_document_ids
 
     # === ACTION METHODS === #
 

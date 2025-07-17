@@ -20,7 +20,7 @@
                     'o-discussApp': env.inDiscussApp,
                 }" t-attf-class="{{ props.className }}">
             <div class="o-mail-Composer-sidebarMain flex-shrink-0" t-if="showComposerAvatar">
-                <img class="o-mail-Composer-avatar o_avatar rounded" t-att-src="store.self.avatarUrl" alt="Avatar of user"/>
+                <img class="o-mail-Composer-avatar o_avatar rounded" t-att-src="(thread?.effectiveSelf or message.effectiveSelf).avatarUrl" alt="Avatar of user"/>
             </div>
             <div class="o-mail-Composer-coreHeader text-truncate small p-2" t-if="props.composer.thread and props.messageToReplyTo?.thread?.eq(props.composer.thread)">
                 <span class="cursor-pointer" t-on-click="() => env.messageHighlight?.highlightMessage(props.messageToReplyTo.message, props.composer.thread)">
@@ -41,7 +41,7 @@
                 >
                     <div class="position-relative flex-grow-1">
                         <t t-set="inputClasses" t-value="'o-mail-Composer-inputStyle form-control border-0 rounded-3'"/>
-                        <textarea class="o-mail-Composer-input o-mail-Composer-bg shadow-none overflow-auto"
+                        <textarea class="o-mail-Composer-input o-mail-Composer-bg shadow-none overflow-auto text-body"
                             t-att-class="inputClasses"
                             t-ref="textarea"
                             t-on-keydown="onKeydown"

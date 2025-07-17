@@ -5,14 +5,15 @@
 # Translators:
 # Katja Deržič, 2024
 # Wil Odoo, 2024
+# Aleš Pipan, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:39+0000\n"
+"POT-Creation-Date: 2025-05-23 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Aleš Pipan, 2025\n"
 "Language-Team: Slovenian (https://app.transifex.com/odoo/teams/41243/sl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,7 +24,7 @@ msgstr ""
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_website_visitor__event_registration_count
 msgid "# Registrations"
-msgstr ""
+msgstr "# Registracije"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.events_list
@@ -133,7 +134,7 @@ msgstr ""
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.events_list
 msgid "<i class=\"fa fa-map-marker me-2\" title=\"Location\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-map-marker me-2\" title=\"Location\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -365,6 +366,10 @@ msgid ""
 "founded TinyERP. This was the first phase of OpenERP which would later "
 "became Odoo, the most installed open-source business software worldwide."
 msgstr ""
+"Pri komaj 13 letih je Janez Novak že začel razvijati svoje prve poslovne "
+"aplikacije za stranke. Po obvladovanju gradbeništva je ustanovil TinyERP. To"
+" je bila prva faza OpenERP, ki je kasneje postal Odoo, najpogosteje "
+"nameščena odprtokodna poslovna programska oprema na svetu."
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
@@ -560,7 +565,7 @@ msgstr ""
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_ticket_access
 msgid "Download Tickets <i class=\"ms-1 fa fa-download\"/>"
-msgstr ""
+msgstr "Prenesi vstopnice <i class=\"ms-1 fa fa-download\"/>"
 
 #. module: website_event
 #. odoo-javascript
@@ -592,7 +597,7 @@ msgstr ""
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
 msgid "Event Details"
-msgstr ""
+msgstr "Podrobnosti dogodka"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -637,7 +642,7 @@ msgstr ""
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_website_visitor__event_registration_ids
 msgid "Event Registrations"
-msgstr ""
+msgstr "Prijave na dogodke"
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_event__subtitle
@@ -757,13 +762,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_dates
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
 msgid "Google Agenda"
-msgstr ""
+msgstr "Googlov dnevni red"
 
 #. module: website_event
 #. odoo-python
 #: code:addons/website_event/models/website_snippet_filter.py:0
 msgid "Great Reno Ballon Race"
-msgstr ""
+msgstr "Velika dirka balonov v Renu"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.snippet_options
@@ -784,7 +789,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_event/models/website_snippet_filter.py:0
 msgid "Hockey Tournament"
-msgstr ""
+msgstr "Hokejski turnir"
 
 #. module: website_event
 #: model:event.question,title:website_event.event_7_question_1
@@ -890,7 +895,7 @@ msgstr "Seznam"
 #. odoo-python
 #: code:addons/website_event/models/website_snippet_filter.py:0
 msgid "Live Music Festival"
-msgstr ""
+msgstr "Festival žive glasbe"
 
 #. module: website_event
 #. odoo-python
@@ -1008,7 +1013,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_event/models/website_snippet_filter.py:0
 msgid "OpenWood Collection Online Reveal"
-msgstr ""
+msgstr "Spletna predstavitev zbirke OpenWood"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -1029,13 +1034,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_dates
 #: model_terms:ir.ui.view,arch_db:website_event.registration_complete
 msgid "Outlook"
-msgstr ""
+msgstr "Outlook"
 
 #. module: website_event
 #. odoo-python
 #: code:addons/website_event/models/event_event.py:0
 msgid "Past Events"
-msgstr ""
+msgstr "Pretekli dogodki"
 
 #. module: website_event
 #: model:event.question.answer,name:website_event.event_0_question_0_answer_2
@@ -1046,7 +1051,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_photos
 #: model_terms:ir.ui.view,arch_db:website_event.snippet_options
 msgid "Photos"
-msgstr ""
+msgstr "Fotografije"
 
 #. module: website_event
 #: model:ir.model.fields.selection,name:website_event.selection__event_event__website_visibility__public
@@ -1347,9 +1352,15 @@ msgid "Top Bar Filter"
 msgstr ""
 
 #. module: website_event
+#. odoo-python
+#: code:addons/website_event/models/website_visitor.py:0
+msgid "Unsupported 'Not In' operation on visitors registrations"
+msgstr ""
+
+#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_time
 msgid "Upcoming"
-msgstr ""
+msgstr "Prihajajoče"
 
 #. module: website_event
 #. odoo-python

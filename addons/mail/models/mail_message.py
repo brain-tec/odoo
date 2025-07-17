@@ -955,7 +955,7 @@ class Message(models.Model):
         # avoid useless queries when notifying Inbox right after a message_post
         scheduled_dt_by_msg_id = {}
         if msg_vals:
-            scheduled_dt_by_msg_id = {msg.id: msg_vals.get("scheduled_date") for msg in self}
+            scheduled_dt_by_msg_id = {msg.id: msg_vals.get("scheduled_date", False) for msg in self}
         elif self:
             schedulers = (
                 self.env["mail.message.schedule"]
@@ -1096,7 +1096,6 @@ class Message(models.Model):
                 [("subject", "ilike", search_term)],
                 [("subtype_id.description", "ilike", search_term)],
             ])])
-            domain = expression.AND([domain, [("message_type", "not in", ["user_notification", "notification"])]])
             res["count"] = self.search_count(domain)
         if around is not None:
             messages_before = self.search(domain=[*domain, ('id', '<=', around)], limit=limit // 2, order="id DESC")

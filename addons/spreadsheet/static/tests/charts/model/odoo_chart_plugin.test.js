@@ -36,6 +36,38 @@ const fr_FR = {
     formulaArgSeparator: ";",
 };
 
+const action = {
+    domain: [
+        ["date", ">=", "2022-01-01"],
+        ["date", "<", "2022-02-01"],
+        "&",
+        ["date", ">=", "2022-01-01"],
+        ["date", "<=", "2022-12-31"],
+    ],
+    name: "January 2022 / Probability",
+    res_model: "partner",
+    target: "current",
+    type: "ir.actions.act_window",
+    views: [
+        [false, "list"],
+        [false, "form"],
+    ],
+};
+
+const fakeActionService = {
+    doAction: async (request, options = {}) => {
+        if (request.type === "ir.actions.act_window") {
+            expect.step("do-action");
+            expect(request).toEqual(action);
+        }
+    },
+    loadAction(actionRequest) {
+        expect.step("load-action");
+        expect(actionRequest).toBe("test.my_action");
+        return action;
+    },
+};
+
 describe.current.tags("headless");
 defineSpreadsheetModels();
 defineSpreadsheetActions();
@@ -577,86 +609,45 @@ test("Line chart to support cumulative data", async () => {
     ]);
 });
 
-test("cumulative line chart with past data before domain period", async () => {
-    const serverData = getBasicServerData();
-    serverData.models.partner.records = [
-        { date: "2020-01-01", probability: 10 },
-        { date: "2021-01-01", probability: 2 },
-        { date: "2022-01-01", probability: 3 },
-        { date: "2022-03-01", probability: 4 },
-        { date: "2022-06-01", probability: 5 },
-    ];
-    const { model } = await createSpreadsheetWithChart({
-        type: "odoo_line",
-        serverData,
-        definition: {
-            type: "odoo_line",
-            metaData: {
-                groupBy: ["date"],
-                measure: "probability",
-                order: null,
-                resModel: "partner",
-            },
-            searchParams: {
-                comparison: null,
-                context: {},
-                domain: [
-                    ["date", ">=", "2022-01-01"],
-                    ["date", "<=", "2022-12-31"],
-                ],
-                groupBy: [],
-                orderBy: [],
-            },
-            cumulative: true,
-            title: { text: "Partners" },
-            dataSourceId: "42",
-            id: "42",
-        },
-    });
-    const sheetId = model.getters.getActiveSheetId();
-    const chartId = model.getters.getChartIds(sheetId)[0];
-    await waitForDataLoaded(model);
-    expect(model.getters.getChartRuntime(chartId).chartJsConfig.data.datasets[0].data).toEqual([
-        15, 19, 24,
-    ]);
-});
+const cumulativeDateServerData = getBasicServerData();
+cumulativeDateServerData.models.partner.records = [
+    { date: "2020-01-01", probability: 10 },
+    { date: "2021-01-01", probability: 2 },
+    { date: "2022-01-01", probability: 3 },
+    { date: "2022-03-01", probability: 4 },
+    { date: "2022-06-01", probability: 5 },
+];
 
-test("update existing chart to cumulate past data", async () => {
-    const serverData = getBasicServerData();
-    serverData.models.partner.records = [
-        { date: "2020-01-01", probability: 10 },
-        { date: "2021-01-01", probability: 2 },
-        { date: "2022-01-01", probability: 3 },
-        { date: "2022-03-01", probability: 4 },
-        { date: "2022-06-01", probability: 5 },
-    ];
-    const definition = {
-        type: "odoo_line",
-        metaData: {
-            groupBy: ["date"],
-            measure: "probability",
-            order: null,
-            resModel: "partner",
-        },
-        searchParams: {
-            comparison: null,
-            context: {},
-            domain: [
-                ["date", ">=", "2022-01-01"],
-                ["date", "<=", "2022-12-31"],
-            ],
-            groupBy: [],
-            orderBy: [],
-        },
-        cumulative: false,
-        title: "Partners",
-        dataSourceId: "42",
-        id: "42",
-    };
+const cumulativeChartDefinition = {
+    type: "odoo_line",
+    metaData: {
+        groupBy: ["date"],
+        measure: "probability",
+        order: null,
+        resModel: "partner",
+    },
+    searchParams: {
+        comparison: null,
+        context: {},
+        domain: [
+            ["date", ">=", "2022-01-01"],
+            ["date", "<=", "2022-12-31"],
+        ],
+        groupBy: [],
+        orderBy: [],
+    },
+    title: "Partners",
+    dataSourceId: "42",
+    id: "42",
+};
+
+test("cumulative line chart with past data before domain period without specifying cumulated start", async () => {
     const { model } = await createSpreadsheetWithChart({
         type: "odoo_line",
-        serverData,
-        definition,
+        serverData: cumulativeDateServerData,
+        definition: {
+            ...cumulativeChartDefinition,
+        },
     });
     const sheetId = model.getters.getActiveSheetId();
     const chartId = model.getters.getChartIds(sheetId)[0];
@@ -667,7 +658,7 @@ test("update existing chart to cumulate past data", async () => {
 
     model.dispatch("UPDATE_CHART", {
         definition: {
-            ...definition,
+            ...cumulativeChartDefinition,
             cumulative: true,
         },
         id: chartId,
@@ -677,6 +668,48 @@ test("update existing chart to cumulate past data", async () => {
     expect(model.getters.getChartRuntime(chartId).chartJsConfig.data.datasets[0].data).toEqual([
         15, 19, 24,
     ]);
+});
+
+test("cumulative line chart with past data before domain period specifying cumulated start as true", async () => {
+    const { model } = await createSpreadsheetWithChart({
+        type: "odoo_line",
+        serverData: cumulativeDateServerData,
+        definition: {
+            ...cumulativeChartDefinition,
+            cumulative: true,
+            cumulatedStart: true,
+        },
+    });
+    const sheetId = model.getters.getActiveSheetId();
+    const chartId = model.getters.getChartIds(sheetId)[0];
+    await waitForDataLoaded(model);
+    expect(model.getters.getChartRuntime(chartId).chartJsConfig.data.datasets[0].data).toEqual([
+        15, 19, 24,
+    ]);
+    const figure = model.exportData().sheets[0].figures[0];
+    expect(figure.data.cumulative).toBe(true);
+    expect(figure.data.cumulatedStart).toBe(true);
+});
+
+test("cumulative line chart with past data before domain period specifying cumulated start as false", async () => {
+    const { model } = await createSpreadsheetWithChart({
+        type: "odoo_line",
+        serverData: cumulativeDateServerData,
+        definition: {
+            ...cumulativeChartDefinition,
+            cumulative: true,
+            cumulatedStart: false,
+        },
+    });
+    const sheetId = model.getters.getActiveSheetId();
+    const chartId = model.getters.getChartIds(sheetId)[0];
+    await waitForDataLoaded(model);
+    expect(model.getters.getChartRuntime(chartId).chartJsConfig.data.datasets[0].data).toEqual([
+        3, 7, 12,
+    ]);
+    const figure = model.exportData().sheets[0].figures[0];
+    expect(figure.data.cumulative).toBe(true);
+    expect(figure.data.cumulatedStart).toBe(false);
 });
 
 test("Can insert odoo chart from a different model", async () => {
@@ -740,71 +773,15 @@ test("Odoo chart datasource display name has a default when the chart title is e
 });
 
 test("See records when clicking on a bar chart bar", async () => {
-    const action = {
-        domain: [
-            ["date", ">=", "2022-01-01"],
-            ["date", "<", "2022-02-01"],
-            "&",
-            ["date", ">=", "2022-01-01"],
-            ["date", "<=", "2022-12-31"],
-        ],
-        name: "January 2022 / Probability",
-        res_model: "partner",
-        target: "current",
-        type: "ir.actions.act_window",
-        views: [
-            [false, "list"],
-            [false, "form"],
-        ],
-    };
-    const fakeActionService = {
-        doAction: async (request, options = {}) => {
-            if (request.type === "ir.actions.act_window") {
-                expect.step("do-action");
-                expect(request).toEqual(action);
-            }
-        },
-        loadAction(actionRequest) {
-            expect.step("load-action");
-            expect(actionRequest).toBe("test.my_action");
-            return action;
-        },
-    };
     mockService("action", fakeActionService);
-    const serverData = getBasicServerData();
-    serverData.models.partner.records = [
-        { date: "2020-01-01", probability: 10 },
-        { date: "2021-01-01", probability: 2 },
-        { date: "2022-01-01", probability: 3 },
-        { date: "2022-03-01", probability: 4 },
-        { date: "2022-06-01", probability: 5 },
-    ];
     const { model } = await createSpreadsheetWithChart({
         type: "odoo_bar",
-        serverData,
+        serverData: cumulativeDateServerData,
         definition: {
+            ...cumulativeChartDefinition,
             type: "odoo_bar",
-            metaData: {
-                groupBy: ["date"],
-                measure: "probability",
-                order: null,
-                resModel: "partner",
-            },
-            searchParams: {
-                comparison: null,
-                context: {},
-                domain: [
-                    ["date", ">=", "2022-01-01"],
-                    ["date", "<=", "2022-12-31"],
-                ],
-                groupBy: [],
-                orderBy: [],
-            },
             actionXmlId: "test.my_action",
             cumulative: true,
-            title: { text: "Partners" },
-            dataSourceId: "42",
-            id: "42",
         },
     });
     const sheetId = model.getters.getActiveSheetId();
@@ -818,63 +795,77 @@ test("See records when clicking on a bar chart bar", async () => {
     expect.verifySteps(["load-action", "do-action"]);
 });
 
+test("See records when clicking on a line chart point", async () => {
+    mockService("action", fakeActionService);
+    const { model } = await createSpreadsheetWithChart({
+        type: "odoo_line",
+        serverData: cumulativeDateServerData,
+        definition: {
+            ...cumulativeChartDefinition,
+            actionXmlId: "test.my_action",
+            cumulative: true,
+        },
+    });
+    const sheetId = model.getters.getActiveSheetId();
+    const chartId = model.getters.getChartIds(sheetId)[0];
+    await waitForDataLoaded(model);
+    const runtime = model.getters.getChartRuntime(chartId);
+    expect.verifySteps([]);
+
+    await runtime.chartJsConfig.options.onClick(undefined, [{ datasetIndex: 0, index: 0 }]);
+    await animationFrame();
+    expect.verifySteps(["load-action", "do-action"]);
+});
+
+test("Actions not triggered by trendline clicks", async () => {
+    mockService("action", fakeActionService);
+    const { model } = await createSpreadsheetWithChart({
+        type: "odoo_line",
+        serverData: cumulativeDateServerData,
+        definition: {
+            ...cumulativeChartDefinition,
+            type: "odoo_line",
+            actionXmlId: "test.my_action",
+            cumulative: true,
+            trend: "polynomial",
+        },
+    });
+
+    const sheetId = model.getters.getActiveSheetId();
+    const chartId = model.getters.getChartIds(sheetId)[0];
+    await waitForDataLoaded(model);
+    const runtime = model.getters.getChartRuntime(chartId);
+    expect.verifySteps([]);
+
+    const trendlineDatasetIndex = runtime.chartJsConfig.data.datasets.length;
+    await runtime.chartJsConfig.options.onClick(undefined, [
+        { datasetIndex: trendlineDatasetIndex, index: 0 },
+    ]);
+    await animationFrame();
+    expect.verifySteps([]);
+});
+
 test("See records when clicking on a pie chart slice", async () => {
     const fakeActionService = {
         doAction: async (request, options = {}) => {
             if (request.type === "ir.actions.act_window") {
                 expect.step("do-action");
                 expect(request).toEqual({
-                    domain: [
-                        ["date", ">=", "2022-01-01"],
-                        ["date", "<", "2022-02-01"],
-                        "&",
-                        ["date", ">=", "2022-01-01"],
-                        ["date", "<=", "2022-12-31"],
-                    ],
+                    ...action,
                     name: "January 2022",
-                    res_model: "partner",
-                    target: "current",
-                    type: "ir.actions.act_window",
-                    views: [
-                        [false, "list"],
-                        [false, "form"],
-                    ],
                 });
             }
         },
     };
     mockService("action", fakeActionService);
-    const serverData = getBasicServerData();
-    serverData.models.partner.records = [
-        { date: "2020-01-01", probability: 10 },
-        { date: "2021-01-01", probability: 2 },
-        { date: "2022-01-01", probability: 3 },
-        { date: "2022-03-01", probability: 4 },
-        { date: "2022-06-01", probability: 5 },
-    ];
     const { model } = await createSpreadsheetWithChart({
         type: "odoo_pie",
-        serverData,
+        serverData: cumulativeDateServerData,
         definition: {
+            ...cumulativeChartDefinition,
             type: "odoo_pie",
-            metaData: {
-                groupBy: ["date"],
-                measure: "probability",
-                resModel: "partner",
-            },
-            searchParams: {
-                context: {},
-                domain: [
-                    ["date", ">=", "2022-01-01"],
-                    ["date", "<=", "2022-12-31"],
-                ],
-                groupBy: [],
-                orderBy: [],
-            },
+            actionXmlId: "test.my_action",
             cumulative: true,
-            title: { text: "Partners" },
-            dataSourceId: "42",
-            id: "42",
         },
     });
     const sheetId = model.getters.getActiveSheetId();

@@ -407,7 +407,7 @@
                                     <t t-set="_classes" t-valuef="d-none me-auto d-lg-inline-block"/>
                                 </t>
 
-                                <div t-if="category" class="d-flex align-items-center d-lg-none me-auto">
+                                <div t-if="category" class="d-flex align-items-center d-lg-none me-auto o_not_editable">
                                     <t t-if="not category.parent_id" t-set="backUrl" t-valuef="/shop"/>
                                     <t t-else="" t-set="backUrl" t-value="keep('/shop/category/' + slug(category.parent_id), category=0)"/>
 
@@ -706,8 +706,7 @@
                         </div>
                     </div>
                 </div>
-                <div t-if="opt_wsale_categories"
-                     class="accordion-item">
+                <div t-if="opt_wsale_categories" class="accordion-item d-lg-none">
                     <h2 id="o_wsale_offcanvas_categories_header" class="accordion-header mb-0">
                         <button class="o_wsale_offcanvas_title accordion-button rounded-0 collapsed"
                                 type="button"
@@ -1194,14 +1193,23 @@
     </template>
 
     <template id="filter_products_tags" name="Filter by Tags" active="True">
-        <div t-if="all_tags">
-            <h6 class="mb-3">
-                <b>Tags</b>
+        <div t-if="all_tags" class="accordion-item">
+            <h6 class="accordion-header">
+                <button class="accordion-button px-0 bg-transparent shadow-none"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        aria-expanded="true"
+                        t-attf-data-bs-target="#o_wsale_tags_option_inner"
+                        t-attf-aria-controls="o_wsale_tags_option_inner">
+                    <b>Tags</b>
+                </button>
             </h6>
-            <div class="flex-column mb-3">
-                <t t-call="website_sale.filter_products_tags_list">
-                    <t t-set="all_tags" t-value="all_tags"/>
-                </t>
+            <div id="o_wsale_tags_option_inner" class="accordion-collapse collapse show">
+                <div class="flex-column mb-3">
+                    <t t-call="website_sale.filter_products_tags_list">
+                        <t t-set="all_tags" t-value="all_tags"/>
+                    </t>
+                </div>
             </div>
         </div>
     </template>

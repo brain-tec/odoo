@@ -39,6 +39,7 @@ import {
     defineModels,
     defineParams,
     fields,
+    MockServer,
     models,
     mountWithCleanup,
     onRpc,
@@ -1077,7 +1078,9 @@ test("support properties", async () => {
         await openModelFieldSelectorPopover();
         expectedDomain = domain;
         await contains(`.o_model_field_selector_popover_item[data-name='${name}'] button`).click();
-        const { string } = Product._records[0].definitions.find((def) => def.name === name);
+        const { string } = MockServer.env["product"][0].definitions.find(
+            (def) => def.name === name
+        );
         expect(getCurrentPath()).toBe(`Properties > ${string}`);
         expect(getOperatorOptions()).toEqual(options);
     }
@@ -2482,5 +2485,27 @@ test("preserve virtual operators in sub domains", async () => {
     expect(getCurrentOperator(3)).toBe("is not set");
     expect.verifySteps([
         `[("product_id", "any", [("team_id", "any", ["&", ("active", "=", False), ("name", "=", False)])])]`,
+    ]);
+});
+
+test("hide within operators when allowExpressions = False", async () => {
+    Team._fields.active = fields.Boolean();
+    await makeDomainSelector({
+        domain: `[("datetime", "=", False)]`,
+        allowExpressions: false,
+        update(domain) {
+            expect.step(domain);
+        },
+    });
+    expect(getOperatorOptions()).toEqual([
+        "=",
+        "!=",
+        ">",
+        ">=",
+        "<",
+        "<=",
+        "is between",
+        "is set",
+        "is not set",
     ]);
 });

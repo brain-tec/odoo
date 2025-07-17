@@ -194,6 +194,21 @@ class AccountEdiXmlCII(models.AbstractModel):
             line = line_vals['line']
             line_vals['unece_uom_code'] = self._get_uom_unece_code(line.product_uom_id)
 
+            if line._fields.get('deferred_start_date') and (line.deferred_start_date or line.deferred_end_date):
+                line_vals['billing_start'] = line.deferred_start_date
+                line_vals['billing_end'] = line.deferred_end_date
+
+        # [BR - IC - 11] - In an Invoice with a VAT breakdown (BG-23) where the VAT category code (BT-118) is
+        # "Intra-community supply" the Actual delivery date (BT-72) or the Invoicing period (BG-14) shall not be blank.
+        billing_start_dates = [invoice.invoice_date] if invoice.invoice_date else []
+        billing_start_dates += [line_vals['billing_start'] for line_vals in template_values['invoice_line_vals_list'] if line_vals.get('billing_start')]
+        billing_end_dates = [invoice.invoice_date_due] if invoice.invoice_date_due else []
+        billing_end_dates += [line_vals['billing_end'] for line_vals in template_values['invoice_line_vals_list'] if line_vals.get('billing_end')]
+        if billing_start_dates:
+            template_values['billing_start'] = min(billing_start_dates)
+        if billing_end_dates:
+            template_values['billing_end'] = max(billing_end_dates)
+
         # data used for ApplicableHeaderTradeSettlement / ApplicableTradeTax (at the end of the xml)
         for tax_detail_vals in template_values['tax_details']['tax_details'].values():
             # /!\ -0.0 == 0.0 in python but not in XSLT, so it can raise a fatal error when validating the XML
@@ -203,12 +218,6 @@ class AccountEdiXmlCII(models.AbstractModel):
 
             if tax_detail_vals.get('tax_category_code') == 'K':
                 template_values['intracom_delivery'] = True
-            # [BR - IC - 11] - In an Invoice with a VAT breakdown (BG-23) where the VAT category code (BT-118) is
-            # "Intra-community supply" the Actual delivery date (BT-72) or the Invoicing period (BG-14) shall not be blank.
-            if tax_detail_vals.get('tax_category_code') == 'K' and not template_values['scheduled_delivery_time']:
-                date_range = self._get_invoicing_period(invoice)
-                template_values['billing_start'] = min(date_range)
-                template_values['billing_end'] = max(date_range)
 
         # Fixed taxes: add them as charges on the invoice lines
         for line_vals in template_values['invoice_line_vals_list']:
@@ -330,6 +339,13 @@ class AccountEdiXmlCII(models.AbstractModel):
             'tax_percentage': './{*}CategoryTradeTax/{*}RateApplicablePercent',
         }
 
+    def _get_invoice_line_xpaths(self, document_type=False, qty_factor=1):
+        return {
+            'deferred_start_date': './{*}SpecifiedLineTradeSettlement/{*}BillingSpecifiedPeriod/{*}StartDateTime/{*}DateTimeString',
+            'deferred_end_date': './{*}SpecifiedLineTradeSettlement/{*}BillingSpecifiedPeriod/{*}EndDateTime/{*}DateTimeString',
+            'date_format': DEFAULT_FACTURX_DATE_FORMAT,
+        }
+
     def _get_line_xpaths(self, document_type=False, qty_factor=1):
         return {
             'basis_qty': (
@@ -376,3 +392,4 @@ class AccountEdiXmlCII(models.AbstractModel):
             if amount_node is not None and float(amount_node.text) < 0:
                 return 'refund', -1
             return 'invoice', 1
+        return None, None

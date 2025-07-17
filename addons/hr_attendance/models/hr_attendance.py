@@ -45,7 +45,7 @@ class HrAttendance(models.Model):
     overtime_hours = fields.Float(string="Over Time", compute='_compute_overtime_hours', store=True)
     overtime_status = fields.Selection(selection=[('to_approve', "To Approve"),
                                                   ('approved', "Approved"),
-                                                  ('refused', "Refused")], compute="_compute_overtime_status", store=True, tracking=True)
+                                                  ('refused', "Refused")], compute="_compute_overtime_status", store=True, tracking=True, readonly=False)
     validated_overtime_hours = fields.Float(string="Extra Hours", compute='_compute_validated_overtime_hours', store=True, readonly=False, tracking=True)
     no_validated_overtime_hours = fields.Boolean(compute='_compute_no_validated_overtime_hours')
     in_latitude = fields.Float(string="Latitude", digits=(10, 7), readonly=True, aggregator=None)
@@ -354,21 +354,14 @@ class HrAttendance(models.Model):
                 overtime_duration_real = 0
                 # Overtime is not counted if any shift is not closed or if there are no attendances for that day,
                 # this could happen when deleting attendances.
-                if not unfinished_shifts and attendances:
-                    # The employee is working flexible hours
-                    if emp.is_flexible:
-                        work_duration = 0
-                        for attendance in attendances:
-                            local_check_in = pytz.utc.localize(attendance.check_in)
-                            local_check_out = pytz.utc.localize(attendance.check_out)
-                            work_duration += (local_check_out - local_check_in).total_seconds() / 3600.0
-                        # In case of fully flexible employee, no overtime is computed
-                        if not emp.is_fully_flexible:
-                            overtime_duration = work_duration - emp.resource_id.calendar_id.hours_per_day
-                            overtime_duration_real = overtime_duration
 
+                # No overtime computed for fully flexible employees
+                if emp.is_fully_flexible:
+                    continue
+
+                if not unfinished_shifts and attendances:
                     # The employee usually doesn't work on that day
-                    elif not working_times[attendance_date]:
+                    if not working_times[attendance_date]:
                         # User does not have any resource_calendar_attendance for that day (week-end for example)
                         overtime_duration = sum(attendances.mapped('worked_hours'))
                         overtime_duration_real = overtime_duration
@@ -411,10 +404,13 @@ class HrAttendance(models.Model):
                                              overtime_to_unlink.employee_id.ids)
         overtime_to_unlink.sudo().unlink()
         to_recompute = self.search([('employee_id', 'in', employees_worked_hours_to_compute)])
+        # for automatically validated attendances, avoid recomputing extra hours if user has changed its value
+        validated_modified = to_recompute.filtered(lambda att: att.employee_id.company_id.attendance_overtime_validation == 'no_validation'
+                                                        and float_compare(att.overtime_hours, att.validated_overtime_hours, precision_digits=2))
         self.env.add_to_compute(self._fields['overtime_hours'],
                                 to_recompute)
         self.env.add_to_compute(self._fields['validated_overtime_hours'],
-                                to_recompute)
+                                to_recompute - validated_modified)
         self.env.add_to_compute(self._fields['expected_hours'],
                                 to_recompute)
 
@@ -461,8 +457,9 @@ class HrAttendance(models.Model):
                 stop_dt = min(planned_end_dt, local_check_out)
                 work_duration += (stop_dt - start_dt).total_seconds() / 3600.0
                 # remove lunch time from work duration
-                lunch_intervals = employee._employee_attendance_intervals(start_dt, stop_dt, lunch=True)
-                work_duration -= sum((i[1] - i[0]).total_seconds() / 3600.0 for i in lunch_intervals)
+                if not employee.is_flexible:
+                    lunch_intervals = employee._employee_attendance_intervals(start_dt, stop_dt, lunch=True)
+                    work_duration -= sum((i[1] - i[0]).total_seconds() / 3600.0 for i in lunch_intervals)
 
             # There is an overtime at the end of the day
             if local_check_out > planned_end_dt:
@@ -473,6 +470,8 @@ class HrAttendance(models.Model):
     def create(self, vals_list):
         res = super().create(vals_list)
         res._update_overtime()
+        no_validation = res.filtered(lambda att: att.employee_id.company_id.attendance_overtime_validation == 'no_validation')
+        self.env.add_to_compute(self._fields['validated_overtime_hours'], no_validation)
         return res
 
     def write(self, vals):
@@ -671,14 +670,17 @@ class HrAttendance(models.Model):
 
     def _read_group_employee_id(self, resources, domain):
         user_domain = self.env.context.get('user_domain')
+        employee_domain = [('company_id', 'in', self.env.context.get('allowed_company_ids', []))]
+        if not self.env.user.has_group('hr_attendance.group_hr_attendance_manager'):
+            employee_domain = AND([employee_domain, [('attendance_manager_id', '=', self.env.user.id)]])
         if not user_domain:
-            return self.env['hr.employee'].search([('company_id', 'in', self.env.context.get('allowed_company_ids', []))])
+            return self.env['hr.employee'].search(employee_domain)
         else:
             employee_name_domain = []
             for leaf in user_domain:
                 if len(leaf) == 3 and leaf[0] == 'employee_id':
                     employee_name_domain.append([('name', leaf[1], leaf[2])])
-            return resources | self.env['hr.employee'].search(OR(employee_name_domain))
+            return resources | self.env['hr.employee'].search(AND([OR(employee_name_domain), employee_domain]))
 
     def action_approve_overtime(self):
         self.write({
@@ -691,23 +693,28 @@ class HrAttendance(models.Model):
         })
 
     def _cron_auto_check_out(self):
+        def check_in_tz(attendance):
+            """Returns check-in time in calendar's timezone."""
+            return attendance.check_in.astimezone(pytz.timezone(attendance.employee_id.resource_calendar_id.tz or 'UTC'))
+
         to_verify = self.env['hr.attendance'].search(
             [('check_out', '=', False),
-             ('employee_id.company_id.auto_check_out', '=', True)]
+             ('employee_id.company_id.auto_check_out', '=', True),
+             ('employee_id.resource_calendar_id.flexible_hours', '=', False)]
         )
 
         if not to_verify:
             return
 
-        previous_duration = self.env['hr.attendance']._read_group(
-            domain=[
-                ('employee_id', 'in', to_verify.mapped('employee_id').ids),
-                ('check_in', '>', (fields.Datetime.now() - relativedelta(days=1)).replace(hour=0, minute=0, second=0)),
-                ('check_out', '!=', False)], groupby=['check_in:day', 'employee_id'], aggregates=['worked_hours:sum'])
+        previous_attendances = self.env['hr.attendance'].search([
+                    ('employee_id', 'in', to_verify.mapped('employee_id').ids),
+                    ('check_in', '>', (fields.Datetime.now() - relativedelta(days=1)).replace(hour=0, minute=0, second=0)),
+                    ('check_out', '!=', False)
+        ])
 
         mapped_previous_duration = defaultdict(lambda: defaultdict(float))
-        for rec in previous_duration:
-            mapped_previous_duration[rec[1]][rec[0].date()] += rec[2]
+        for previous in previous_attendances:
+            mapped_previous_duration[previous.employee_id][check_in_tz(previous).date()] += previous.worked_hours
 
         all_companies = to_verify.employee_id.company_id
 
@@ -715,14 +722,17 @@ class HrAttendance(models.Model):
             max_tol = company.auto_check_out_tolerance
             to_verify_company = to_verify.filtered(lambda a: a.employee_id.company_id.id == company.id)
 
-            # Attendances where Last open attendance worked time + previously worked time on that day + tolerance greater than the planned worked hours in his calendar
-            to_check_out = to_verify_company.filtered(lambda a: (fields.Datetime.now() - a.check_in).seconds / 3600 + mapped_previous_duration[a.employee_id][a.check_in.date()] - max_tol > (sum(a.employee_id.resource_calendar_id.attendance_ids.filtered(lambda att: att.dayofweek == str(a.check_in.weekday())).mapped('duration_hours'))))
+            # Attendances where Last open attendance time + previously worked time on that day + tolerance greater than the attendances hours (including lunch) in his calendar
+            to_check_out = to_verify_company.filtered(lambda a: (fields.Datetime.now() - a.check_in).seconds / 3600 + mapped_previous_duration[a.employee_id][check_in_tz(a).date()] - max_tol >
+                                                                (sum(a.employee_id.resource_calendar_id.attendance_ids.filtered(lambda att: att.dayofweek == str(check_in_tz(a).weekday()) and (not att.two_weeks_calendar or att.week_type == str(att.get_week_type(check_in_tz(a).date())))).mapped(lambda at: at.hour_to - at.hour_from))))
             body = _('This attendance was automatically checked out because the employee exceeded the allowed time for their scheduled work hours.')
 
             for att in to_check_out:
-                delta_duration = max(1, (sum(att.employee_id.resource_calendar_id.attendance_ids.filtered(lambda a: a.dayofweek == str(att.check_in.weekday())).mapped('duration_hours')) + max_tol - mapped_previous_duration[att.employee_id][att.check_in.date()]) * 3600)
+                expected_worked_hours = sum(att.employee_id.resource_calendar_id.attendance_ids.filtered(lambda a: a.dayofweek == str(check_in_tz(att).weekday()) and (not a.two_weeks_calendar or a.week_type == str(a.get_week_type(check_in_tz(att).date())))).mapped("duration_hours"))
+                att.check_out = fields.Datetime.now()
+                excess_hours = att.worked_hours - (expected_worked_hours + max_tol - mapped_previous_duration[att.employee_id][check_in_tz(att).date()])
                 att.write({
-                    "check_out": att.check_in + relativedelta(seconds=delta_duration),
+                    "check_out": max(att.check_out - relativedelta(hours=excess_hours), att.check_in + relativedelta(seconds=1)),
                     "out_mode": "auto_check_out"
                 })
                 att.message_post(body=body)
@@ -741,7 +751,9 @@ class HrAttendance(models.Model):
 
         technical_attendances_vals = []
         absent_employees = self.env['hr.employee'].search([('id', 'not in', checked_in_employees.ids),
-                                                           ('company_id', 'in', companies.ids)])
+                                                           ('company_id', 'in', companies.ids),
+                                                           ('resource_calendar_id.flexible_hours', '=', False)])
+
         for emp in absent_employees:
             local_day_start = pytz.utc.localize(yesterday).astimezone(pytz.timezone(emp._get_tz()))
             technical_attendances_vals.append({

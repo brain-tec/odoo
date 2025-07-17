@@ -3,15 +3,15 @@
 # 	* stock
 # 
 # Translators:
-# Wil Odoo, 2024
 # Daye Jeong, 2025
+# Wil Odoo, 2025
 # Sarah Park, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:36+0000\n"
+"POT-Creation-Date: 2025-07-11 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
 "Last-Translator: Sarah Park, 2025\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
@@ -768,6 +768,11 @@ msgid "<strong>Customer Address</strong>"
 msgstr "<strong>고객 주소</strong>"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
+msgid "<strong>Delivered</strong>"
+msgstr "<strong>배송 완료</strong>"
+
+#. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
 msgid "<strong>Delivery address</strong>"
 msgstr "<strong>배송 주소</strong>"
@@ -807,6 +812,11 @@ msgstr "<strong>최소 수량:</strong>"
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
 msgid "<strong>Order</strong>"
 msgstr "<strong>주문</strong>"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
+msgid "<strong>Ordered</strong>"
+msgstr "<strong>주문 완료</strong>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
@@ -1896,6 +1906,15 @@ msgstr "DHL로 배송비를 계산 및 배송합니다."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid ""
+"Compute shipping costs and ship with DHL<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+"배송비 계산 후 DHL로 발송하세요.<br/>\n"
+"                                    <strong>(홈&gt;앱 으로 이동하여 설치하세요)</strong>"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Compute shipping costs and ship with Easypost"
 msgstr "Easypost로 배송비를 계산 및 배송합니다."
 
@@ -1903,6 +1922,15 @@ msgstr "Easypost로 배송비를 계산 및 배송합니다."
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Compute shipping costs and ship with FedEx"
 msgstr "FedEx로 배송비를 계산 및 배송합니다."
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid ""
+"Compute shipping costs and ship with FedEx<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+"배송비 계산 후 FedEx로 발송하세요.<br/>\n"
+"                                    <strong>(홈&gt;앱 으로 이동하여 설치하세요)</strong>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -1926,8 +1954,26 @@ msgstr "UPS로 배송비를 계산 및 배송합니다."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid ""
+"Compute shipping costs and ship with UPS<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+"배송비 계산 후 UPS로 발송하세요.<br/>\n"
+"                                    <strong>(홈&gt;앱 으로 이동하여 설치하세요)</strong>"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Compute shipping costs and ship with USPS"
 msgstr "USPS로 배송비를 계산 및 배송합니다."
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid ""
+"Compute shipping costs and ship with USPS<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+"배송비 계산 후 USPS로 발송하세요.<br/>\n"
+"                                    <strong>(홈&gt;앱 으로 이동하여 설치하세요)</strong>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -2350,10 +2396,10 @@ msgid ""
 "Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 "품목의 현재 수량입니다.\n"
-"재고 공간이 하나인 경우에는 이 공간 또는 하위 공간에 저장된 상품을 포함합니다.\n"
-"창고가 하나인 경우에는 이 창고의 재고 공간 또는 그 하위 재고 공간에 저장된 품목을 포함합니다.\n"
-"이 상점의 창고 또는 그 하위의 재고 공간에 보관합니다.\n"
-"그렇지 않으면 '내부' 유형의 모든 저장 공간에 저장된 품목이 포함됩니다."
+"재고 위치가 하나 뿐인 경우, 해당 위치 또는 하위 위치에 보관된 품목이 모두 포함됩니다.\n"
+"창고가 하나 뿐인 경우에는, 해당 창고의 재고 위치 또는 하위 재고 위치에 보관된 품목이 모두 포함됩니다.\n"
+"상점의 창고 재고 위치 또는 그 하위의 재고 위치에 모두 보관됩니다.\n"
+"그 외에는 '내부' 유형인 모든 보관 위치에 보관되어 있는 품목이 모두 포함됩니다."
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__product_label_layout__move_quantity__custom
@@ -2439,6 +2485,11 @@ msgstr "DEMO_SOURCE_DISPLAY_NAME"
 #: model_terms:ir.ui.view,arch_db:stock.report_reception_body
 msgid "DEMO_UOM"
 msgstr "DEMO_UOM"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid "DHL Connector"
+msgstr "DHL 커넥터"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_dhl
@@ -3109,6 +3160,7 @@ msgid "Do you confirm you want to scrap"
 msgstr "폐기를 승인하시겠습니까?"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_type_form
 msgid "Documentation"
 msgstr "문서"
@@ -3335,6 +3387,7 @@ msgstr "2월"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_fedex
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "FedEx Connector"
 msgstr "FedEx 배송"
 
@@ -6002,9 +6055,9 @@ msgid ""
 "My Company (Chicago) will be authorized to suspend any provision of services"
 " without prior warning in the event of late payment."
 msgstr ""
-"당사 청구서는 청구서 또는 주문서에 별도의 지급 기간이 명시되어 있지 않는 한, 영업일 기준 21일 이내에 지급하도록 되어 있습니다. "
-"기한일까지 결제가 완료되지 않은 경우 My Company(Chicago)는 미납 금액의 10%에 해당하는 고정 이자에 대한 지급을 요청할"
-" 권한을 보유합니다. 또한 My Company(Chicago)는 연체 발생 시 사전 고지 없이 서비스 제공을 중단할 권한이 있습니다."
+"당사의 청구 대금은 청구서 또는 주문서에 별도의 지급 기간이 명시되어 있지 않는 한, 영업일 기준으로 21일 이내에 지급되어야 합니다. "
+"만약 기한일까지 결제가 완료되지 않은 경우 My Company(Chicago)는 미납 금액의 10%에 해당하는 고정 이자를 청구할 권한을"
+" 보유합니다. 또한 My Company(Chicago)는 연체 발생 시 사전 통지 없이 서비스 제공을 중단할 권한을 보유합니다."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse__out_type_id
@@ -7160,10 +7213,10 @@ msgid ""
 "In a context with a single Warehouse, this includes goods leaving the Stock Location of this Warehouse, or any of its children.\n"
 "Otherwise, this includes goods leaving any Stock Location with 'internal' type."
 msgstr ""
-"계획 출고되는 체품의 수량.\n"
-"단일 재고 공간이 있는 상황에서 이 공간를 떠나는 품목 또는 그 하위 공간의 품목을 포함합니다.\n"
-"단일 창고가 있는 환경에서 이 창고의 재고 공간을 떠나는 품목 또는 그 하위 공간을 포함합니다.\n"
-"그렇지 않은 경우, 이 것은 '내부' 유형의 모든 재고 공간를 벗어나는 품목을 포함합니다."
+"출고용으로 계획된 제품의 수량입니다.\n"
+"재고 위치가 하나만 있는 상황에서 해당 위치 또는 그 하위 위치에서 출고되는 제품이 여기에 포함됩니다.\n"
+"창고가 하나만 있는 상황에서 해당 창고의 재고 위치 또는 그 하위 위치에서 출고되는 제품이 여기에 포함됩니다. \n"
+"그 외에 경우, '내부' 유형인 모든 재고 위치에서 출고되는 제품이 속하게 됩니다."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_quant__quantity
@@ -8185,13 +8238,13 @@ msgid ""
 "FEFO: products/lots with the closest removal date will be moved out first (the availability of this method depends on the \"Expiration Dates\" setting).\n"
 "Least Packages: FIFO but with the least number of packages possible when there are several packages containing the same product."
 msgstr ""
-"모든 품목 카테고리에 적용할 수 있는 표준화된 제거 전략을 수립합니다:\n"
+"본 품목 카테고리의 출처 위치와 무관하게 적용할 수 있는 구체적인 제거 전략을 수립합니다:\n"
 "\n"
 "FIFO: 가장 먼저 입고된 제품/로트부터 우선적으로 출고됩니다.\n"
 "LIFO: 가장 최근에 입고된 제품/로트가 우선적으로 출고됩니다.\n"
-"가장 가까운 위치: 대상 위치에서 가장 가까운 곳에 위치한 제품/로트가 우선적으로 출고됩니다.\n"
-"FEFO: 만료일이 가장 가까운 제품/로트가 우선적으로 출고되며, '만료일' 설정이 활성화된 경우에 한하여 적용됩니다.\n"
-"최소 패키지: FIFO를 활용하되 여러 패키지에 동일한 제품이 포함된 경우 단위 수가 가장 적은 패키지의 우선순위를 지정합니다."
+"가장 가까운 위치: 대상 위치에서 가장 근접한 곳에 위치한 제품/로트가 우선적으로 출고됩니다.\n"
+"FEFO: 유통기한이 가장 임박한 제품/로트가 우선적으로 출고됩니다 ('유통기한' 설정이 활성화된 경우에 한하여 적용).\n"
+"최소 패키지: FIFO 방식으로 처리하되, 여러 패키지에 동일한 제품이 포함된 경우 단위 수가 가장 패키지 수량이 적은 경우 우선적으로 출고됩니다."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -9862,11 +9915,13 @@ msgstr "레코드에 있는 예외 활동의 유형입니다."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_ups
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "UPS Connector"
 msgstr "UPS 배송"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_usps
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "USPS Connector"
 msgstr "USPS 배송"
 
@@ -10352,7 +10407,7 @@ msgstr "폐기 수량 부족 경고"
 #: code:addons/stock/models/stock_warehouse.py:0
 #: model:ir.model.fields.selection,name:stock.selection__res_partner__picking_warn__warning
 msgid "Warning"
-msgstr "경고"
+msgstr "주의"
 
 #. module: stock
 #. odoo-python
@@ -10386,7 +10441,7 @@ msgstr "경고: 원본 위치 변경"
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Warnings"
-msgstr "경고"
+msgstr "주의"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__group_warning_stock

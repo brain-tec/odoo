@@ -3,12 +3,13 @@ from contextlib import contextmanager
 
 from odoo import Command, fields
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.addons.mail.tests.common import MailCommon
 from odoo.tests import Form, tagged
 from unittest.mock import patch
 
 
 @tagged('post_install', '-at_install')
-class TestAccountPayment(AccountTestInvoicingCommon):
+class TestAccountPayment(AccountTestInvoicingCommon, MailCommon):
 
     @classmethod
     def setUpClass(cls):
@@ -287,6 +288,30 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'journal_id': self.company_data['default_journal_bank'].id,
         }])
 
+    def test_attachments_send_multiple(self):
+        payments = self.env['account.payment'].create([{
+            'amount': 100.0,
+            'payment_type': 'inbound',
+            'partner_type': 'customer',
+            'partner_id': p.id,
+        } for p in (self.partner_a, self.partner_b)])
+
+        form = Form(self.env['mail.compose.message'].with_context({
+            'mailing_document_based': True,
+            'mail_post_autofollow': True,
+            'default_composition_mode': 'mass_mail',
+            'default_template_id': self.env.ref('account.mail_template_data_payment_receipt'),
+            'default_email_layout_xmlid': 'mail.mail_notification_light',
+            'default_model': 'account.payment',
+            'default_res_ids': payments.ids,
+        }))
+        saved_form = form.save()
+        with self.mock_mail_gateway():
+            saved_form._action_send_mail()
+
+        for p in payments:
+            self.assertTrue(p._get_mail_thread_data_attachments())
+
     def test_compute_currency_id(self):
         ''' When creating a new account.payment without specifying a currency, the default currency should be the one
         set on the journal.
@@ -518,6 +543,38 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             payment.journal_id = default_journal
             self.assertEqual(payment.payment_method_line_id.journal_id.id, default_journal.id)
 
+    def test_journal_change_and_change_names(self):
+        """Test that changing the journal on a payment updates the journal entry name correctly."""
+
+        initial_journal = self.company_data['default_journal_bank']
+        new_journal = self.company_data['default_journal_cash']
+
+        # Use the existing payment method line from the initial journal
+        payment_method_line = initial_journal.inbound_payment_method_line_ids[0]
+
+        # Ensure the new journal has the correct payment method line
+        new_journal.inbound_payment_method_line_ids[0].payment_account_id = self.payment_debit_account_id
+
+        # Create the payment with the initial journal and post it
+        payment = self.env['account.payment'].create({
+            'amount': 50.0,
+            'payment_type': 'inbound',
+            'partner_type': 'customer',
+            'partner_id': self.partner_a.id,
+            'journal_id': initial_journal.id,
+            'payment_method_line_id': payment_method_line.id,
+        })
+        payment.action_post()
+
+        # Change the journal, reset the payment to draft, and post again
+        payment.action_draft()
+        payment.journal_id = new_journal
+        payment.payment_method_line_id = new_journal.inbound_payment_method_line_ids[0]
+        payment.action_post()
+
+        # Verify the journal entry's name were updated correctly
+        self.assertRegex(payment.move_id.name, rf"^P{new_journal.code}/")
+
     def test_payments_copy_data(self):
         payment_1, payment_2 = self.env['account.payment'].create([
             {
@@ -618,6 +675,25 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'amount': 2629,
         })
         payment.action_post()
+        self.assertEqual(payment.state, 'paid')
+
+    def test_payment_state_with_unreconciliable_outstanding_account(self):
+        unreconciliable_account = self.env['account.account'].create({
+            'code': '209.01.01',
+            'name': 'Bank Account',
+            'account_type': 'asset_cash',
+            'reconcile': False,
+        })
+        self.company_data['default_journal_bank'].outbound_payment_method_line_ids.payment_account_id = unreconciliable_account
+        invoice = self.init_invoice(move_type='out_invoice', amounts=[10], post=True)
+
+        payment = self.env['account.payment.register'].with_context(
+            active_model='account.move',
+            active_ids=invoice.ids,
+        ).create({
+            'payment_method_line_id': self.company_data['default_journal_bank'].outbound_payment_method_line_ids[0].id,
+        })._create_payments()
+
         self.assertEqual(payment.state, 'paid')
 
     def test_invoice_paid_hook_called_in_various_scenarios(self):
@@ -762,3 +838,23 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             .create({'payment_method_line_id': payment_method_line.id})\
             ._create_payments()
         self.assertEqual(invoice.state, "posted")
+
+    def test_payment_amount_without_move(self):
+        bank_journal_2 = self.company_data['default_journal_bank'].copy()
+
+        payment = self.env['account.payment'].create({
+            'amount': 100,
+            'payment_type': 'outbound',
+            'partner_type': 'supplier',
+            'partner_id': self.partner_a.id,
+            'currency_id': self.other_currency.id,
+            'journal_id': bank_journal_2.id,
+        })
+
+        payment.action_post()
+
+        self.assertRecordValues(payment, [{
+            'amount': 100,
+            'amount_signed': -100,
+            'amount_company_currency_signed': -50,
+        }])

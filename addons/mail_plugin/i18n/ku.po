@@ -43,7 +43,7 @@ msgstr ""
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Address"
-msgstr ""
+msgstr "ناونیشان"
 
 #. module: mail_plugin
 #: model_terms:ir.ui.view,arch_db:mail_plugin.app_auth
@@ -104,13 +104,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Close"
-msgstr ""
+msgstr "داخستن"
 
 #. module: mail_plugin
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Company"
-msgstr ""
+msgstr "کۆمپانیا"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -197,7 +197,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Create"
-msgstr ""
+msgstr "دروستکردن"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -214,12 +214,12 @@ msgstr ""
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "دروستکراوە لەلایەن..."
 
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__create_date
 msgid "Created on"
-msgstr ""
+msgstr "دروستکراوە لە"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -248,7 +248,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 msgid "Description"
-msgstr ""
+msgstr "وەسف"
 
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__display_name
@@ -344,7 +344,7 @@ msgstr ""
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -369,12 +369,12 @@ msgstr ""
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "دوایین نوێکردنەوە لەلایەن..."
 
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "دوایین نوێکردنەوە لە..."
 
 #. module: mail_plugin
 #: model_terms:ir.ui.view,arch_db:mail_plugin.app_auth
@@ -532,7 +532,7 @@ msgstr ""
 #. module: mail_plugin
 #: model:ir.model.fields,field_description:mail_plugin.field_res_partner_iap__partner_id
 msgid "Partner"
-msgstr ""
+msgstr "هاوبەش"
 
 #. module: mail_plugin
 #: model:ir.model,name:mail_plugin.model_res_partner_iap
@@ -543,7 +543,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Phone"
-msgstr ""
+msgstr "تەلەفۆن"
 
 #. module: mail_plugin
 #. odoo-javascript
@@ -696,7 +696,7 @@ msgstr ""
 #: code:addons/mail_plugin/static/src/to_translate/translations_gmail.xml:0
 #: code:addons/mail_plugin/static/src/to_translate/translations_outlook.xml:0
 msgid "Website"
-msgstr ""
+msgstr "ماڵپەڕ"
 
 #. module: mail_plugin
 #. odoo-javascript

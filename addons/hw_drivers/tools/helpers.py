@@ -208,19 +208,21 @@ def check_image():
     return {'major': version[0], 'minor': version[1]}
 
 
-def save_conf_server(url, token, db_uuid, enterprise_code):
+def save_conf_server(url, token, db_uuid, enterprise_code, db_name=None):
     """
     Save server configurations in odoo.conf
     :param url: The URL of the server
     :param token: The token to authenticate the server
     :param db_uuid: The database UUID
     :param enterprise_code: The enterprise code
+    :param db_name: The database name
     """
     update_conf({
         'remote_server': url,
         'token': token,
         'db_uuid': db_uuid,
         'enterprise_code': enterprise_code,
+        'db_name': db_name,
     })
 
 
@@ -266,13 +268,18 @@ def get_img_name():
     major, minor = get_version()[1:].split('.')
     return 'iotboxv%s_%s.zip' % (major, minor)
 
+
 def get_ip():
-    interfaces = netifaces.interfaces()
-    for interface in interfaces:
-        if netifaces.ifaddresses(interface).get(netifaces.AF_INET):
-            addr = netifaces.ifaddresses(interface).get(netifaces.AF_INET)[0]['addr']
-            if addr != '127.0.0.1':
-                return addr
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(('8.8.8.8', 1))  # Google DNS
+        return s.getsockname()[0]
+    except OSError as e:
+        _logger.warning("Could not get local IP address: %s", e)
+        return None
+    finally:
+        s.close()
+
 
 def get_mac_address():
     interfaces = netifaces.interfaces()
@@ -352,14 +359,14 @@ def load_certificate():
     """
     db_uuid = get_conf('db_uuid')
     enterprise_code = get_conf('enterprise_code')
-    if not (db_uuid and enterprise_code):
+    if not db_uuid:
         return "ERR_IOT_HTTPS_LOAD_NO_CREDENTIAL"
 
     url = 'https://www.odoo.com/odoo-enterprise/iot/x509'
     data = {
         'params': {
             'db_uuid': db_uuid,
-            'enterprise_code': enterprise_code
+            'enterprise_code': enterprise_code or ''
         }
     }
     urllib3.disable_warnings()
@@ -378,8 +385,20 @@ def load_certificate():
     if response.status != 200:
         return "ERR_IOT_HTTPS_LOAD_REQUEST_STATUS %s\n\n%s" % (response.status, response.reason)
 
-    result = json.loads(response.data.decode('utf8'))['result']
-    if not result:
+    response_body = json.loads(response.data.decode())
+    server_error = response_body.get('error')
+    if server_error:
+        _logger.error("A server error received from odoo.com while trying to get the certificate: %s", server_error)
+        return "ERR_IOT_HTTPS_LOAD_REQUEST_NO_RESULT"
+
+    result = response_body.get('result', {})
+    certificate_error = result.get('error')
+    if certificate_error:
+        _logger.error("An error received from odoo.com while trying to get the certificate: %s", certificate_error)
+        return "ERR_IOT_HTTPS_LOAD_REQUEST_NO_RESULT"
+
+    if not result.get('x509_pem') or not result.get('private_key_pem'):
+        _logger.error("The certificate received from odoo.com is not valid.")
         return "ERR_IOT_HTTPS_LOAD_REQUEST_NO_RESULT"
 
     update_conf({'subject': result['subject_cn']})
@@ -427,12 +446,17 @@ def download_iot_handlers(auto=True):
         server = server + '/iot/get_handlers'
         try:
             resp = pm.request('POST', server, fields={'mac': get_mac_address(), 'auto': auto}, timeout=8)
+            if resp.status != 200:
+                _logger.error('Bad IoT handlers response received: status %s', resp.status)
+                return
             if resp.data:
+                zip_file = zipfile.ZipFile(io.BytesIO(resp.data))
                 delete_iot_handlers()
+                path = path_file('odoo', 'addons', 'hw_drivers', 'iot_handlers')
                 with writable():
-                    path = path_file('odoo', 'addons', 'hw_drivers', 'iot_handlers')
-                    zip_file = zipfile.ZipFile(io.BytesIO(resp.data))
                     zip_file.extractall(path)
+        except zipfile.BadZipFile:
+            _logger.exception('Bad IoT handlers response received: not a zip file')
         except Exception:
             _logger.exception('Could not reach configured server to download IoT handlers')
 
@@ -603,6 +627,10 @@ def disconnect_from_server():
         'token': '',
         'db_uuid': '',
         'enterprise_code': '',
+        'db_name': '',
+        'screen_orientation': '',
+        'browser_url': '',
+        'iot_handlers_etag': '',
     })
 
 

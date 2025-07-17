@@ -325,7 +325,7 @@ class AccountJournal(models.Model):
         method_information_mapping = results['method_information_mapping']
         providers_per_code = results['providers_per_code']
 
-        journal_bank_cash = self.filtered(lambda j: j.type in ('bank', 'cash'))
+        journal_bank_cash = self.filtered(lambda j: j.type in ('bank', 'cash', 'credit'))
         journal_other = self - journal_bank_cash
         journal_other.available_payment_method_ids = False
 
@@ -901,7 +901,7 @@ class AccountJournal(models.Model):
     def _compute_display_name(self):
         for journal in self:
             name = journal.name
-            if journal.currency_id and journal.currency_id != journal.company_id.currency_id:
+            if journal.currency_id and journal.currency_id != journal.company_id.sudo().currency_id:
                 name = f"{name} ({journal.currency_id.name})"
             journal.display_name = name
 

@@ -3,11 +3,11 @@
 # 	* partner_autocomplete
 # 
 # Translators:
-# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2024
 # Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
 # Veikko Väätäjä <veikko.vaataja@gmail.com>, 2024
 # Kari Lindgren <kari.lindgren@emsystems.fi>, 2024
 # Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2024
+# Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2025
 # Jessica Jakara, 2025
 # 
 msgid ""
@@ -161,7 +161,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/partner_autocomplete/static/src/xml/partner_autocomplete.xml:0
 msgid "Search Worldwide 🌎"
-msgstr ""
+msgstr "Etsi maailmanlaajuisesti 🌎"
 
 #. module: partner_autocomplete
 #. odoo-javascript
@@ -186,4 +186,4 @@ msgstr "Testitila"
 #. odoo-python
 #: code:addons/partner_autocomplete/models/res_partner.py:0
 msgid "Unable to enrich company (no credit was consumed)."
-msgstr ""
+msgstr "Yritystietoja ei voitu rikastaa (luottoa ei kulutettu)."

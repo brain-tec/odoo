@@ -179,7 +179,13 @@ class ProductProduct(models.Model):
         config = self.env['pos.config'].browse(pos_config_id)
 
         # Tax related
-        taxes = self.taxes_id.compute_all(price, config.currency_id, quantity, self)
+        tax_to_use = None
+        company = config.company_id
+        while not tax_to_use and company:
+            tax_to_use = self.taxes_id.filtered(lambda tax: tax.company_id.id == company.id)
+            if not tax_to_use:
+                company = company.parent_id
+        taxes = tax_to_use.compute_all(price, config.currency_id, quantity, self)
         grouped_taxes = {}
         for tax in taxes['taxes']:
             if tax['id'] in grouped_taxes:
@@ -202,7 +208,7 @@ class ProductProduct(models.Model):
         else:
             pricelists = config.pricelist_id
         price_per_pricelist_id = pricelists._price_get(self, quantity) if pricelists else False
-        pricelist_list = [{'name': pl.name, 'price': price_per_pricelist_id[pl.id]} for pl in pricelists]
+        pricelist_list = [{'id': pl.id, 'name': pl.name, 'price': price_per_pricelist_id[pl.id]} for pl in pricelists]
 
         # Warehouses
         warehouse_list = [
@@ -256,6 +262,11 @@ class ProductAttribute(models.Model):
     def _load_pos_data_fields(self, config_id):
         return ['name', 'display_type', 'template_value_ids', 'attribute_line_ids', 'create_variant']
 
+    @api.model
+    def _load_pos_data_domain(self, data):
+        loaded_attribute_ids = {ptal['attribute_id'] for ptal in data['product.template.attribute.line']['data']}
+        return [('id', 'in', list(loaded_attribute_ids))]
+
 
 class ProductAttributeCustomValue(models.Model):
     _name = 'product.attribute.custom.value'
@@ -269,7 +280,7 @@ class ProductAttributeCustomValue(models.Model):
 
     @api.model
     def _load_pos_data_fields(self, config_id):
-        return ['custom_value', 'custom_product_template_attribute_value_id', 'pos_order_line_id']
+        return ['custom_value', 'custom_product_template_attribute_value_id', 'pos_order_line_id', 'write_date']
 
 
 class ProductTemplateAttributeLine(models.Model):

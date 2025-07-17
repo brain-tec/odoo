@@ -5,6 +5,7 @@
 # Translators:
 # Rita Bastos, 2025
 # Wil Odoo, 2025
+# Daniel Reis, 2025
 # Maitê Dietze, 2025
 # 
 msgid ""
@@ -28,6 +29,8 @@ msgid ""
 "A discount product is needed to use the Global Discount feature. Go to Point"
 " of Sale > Configuration > Settings to set it."
 msgstr ""
+"É necessário um produto de desconto para utilizar o recurso de desconto "
+"global. Acesse Ponto de Venda > Configuração > Definições para configurá-lo."
 
 #. module: pos_discount
 #: model:ir.model.fields,help:pos_discount.field_pos_config__iface_discount
@@ -63,13 +66,13 @@ msgstr "Percentagem de Desconto"
 #: model:ir.model.fields,field_description:pos_discount.field_pos_config__discount_product_id
 #: model_terms:ir.ui.view,arch_db:pos_discount.res_config_settings_view_form
 msgid "Discount Product"
-msgstr "Desconto em Produto"
+msgstr "Artigo de Desconto"
 
 #. module: pos_discount
 #. odoo-javascript
 #: code:addons/pos_discount/static/src/overrides/components/control_buttons/control_buttons.js:0
 msgid "No discount product found"
-msgstr ""
+msgstr "Nenhum produto de desconto encontrado"
 
 #. module: pos_discount
 #: model:ir.model.fields,field_description:pos_discount.field_pos_config__iface_discount
@@ -84,7 +87,7 @@ msgstr "Configuração do Ponto de Venda"
 #. module: pos_discount
 #: model:ir.model.fields,field_description:pos_discount.field_res_config_settings__pos_discount_product_id
 msgid "Pos Discount Product"
-msgstr ""
+msgstr "Produto de desconto do PDV"
 
 #. module: pos_discount
 #: model:ir.model,name:pos_discount.model_product_product
@@ -95,7 +98,7 @@ msgstr "Categoria do Artigo"
 #: model:ir.model.fields,help:pos_discount.field_pos_config__discount_pc
 #: model:ir.model.fields,help:pos_discount.field_res_config_settings__pos_discount_pc
 msgid "The default discount percentage when clicking on the Discount button"
-msgstr ""
+msgstr "O percentual de desconto padrão ao clicar no botão Desconto"
 
 #. module: pos_discount
 #. odoo-javascript
@@ -104,8 +107,10 @@ msgid ""
 "The discount product seems misconfigured. Make sure it is flagged as 'Can be"
 " Sold' and 'Available in Point of Sale'."
 msgstr ""
+"O produto de desconto parece mal configurado. Certifique-se de que está "
+"marcado como 'Pode ser vendido' e 'Disponível no ponto de venda'."
 
 #. module: pos_discount
 #: model:ir.model.fields,help:pos_discount.field_pos_config__discount_product_id
 msgid "The product used to apply the discount on the ticket."
-msgstr ""
+msgstr "O produto utilizado para aplicar o desconto no ticket."

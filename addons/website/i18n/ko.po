@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:22+0000\n"
+"POT-Creation-Date: 2025-06-27 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
 "Last-Translator: Sarah Park, 2025\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
@@ -894,9 +894,9 @@ msgid ""
 "preferences, adding any necessary payment information, and selecting the "
 "initial features or modules you wish to use."
 msgstr ""
-"<br/>온보딩 프로세스는 <b>계정 생성</b>으로부터 시작됩니다. 이 단계에서는 이메일 주소 또는 소셜 미디어 계정을 사용하여 "
-"플랫폼에 가입해야 합니다. 계정을 만들면 계정을 활성화할 수 있는 링크가 포함된 확인 이메일을 받게 됩니다. 활성화가 완료되면 기본 설정"
-" 설정, 필요한 결제 정보 입력, 사용하려는 초기 기능 또는 모듈 선택 등 프로필을 완성하라는 안내를 받게 됩니다."
+"<br/>온보딩 프로세스는 <b>계정을 생성</b>하는 것부터 시작됩니다. 이 단계에서는 이메일 주소 또는 소셜 미디어 계정을 이용하여 "
+"플랫폼에 가입합니다. 계정을 생성한 후에는 계정을 활성화할 수 있는 링크가 포함된 확인 이메일을 받게 됩니다. 계정 활성화가 완료되면 "
+"기본 설정 설정, 필수 결제 정보 입력, 사용하고자 하는 초기 기능 또는 모듈 선택 등 프로필을 작성을 하도록 안내를 받게 됩니다."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner
@@ -1349,7 +1349,7 @@ msgid ""
 "                                    </small>"
 msgstr ""
 "<small class=\"text-muted\">\n"
-"                                        사용자가 동의하지 않은 경우 사용자를 추적하는 타사 서비스(예: 유튜브, 구글 지도, 페이스북 등)를 차단합니다.\n"
+"                                        사용자가 동의하지 않은 경우 사용자를 추적하는 외부 서비스(예: 유튜브, 구글 지도, 페이스북 등)를 차단합니다.\n"
 "                                    </small>"
 
 #. module: website
@@ -1686,7 +1686,7 @@ msgid ""
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x rounded-circle pe-none text-o-color-1\" contenteditable=\"false\"/>\n"
 "                        <small class=\"text-muted\">2024년 4월 3일</small>\n"
-"                        <strong>맞춤형 보고서를 위한 새로운 대시보드 기능</strong>"
+"                        <strong>맞춤형 보고서용 새로운 현황판 기능 도입</strong>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list
@@ -1877,6 +1877,16 @@ msgid ""
 msgstr ""
 "<span class=\"s_number display-1-fs\">8가지 이상의</span><br/>\n"
 "                                <span class=\"h5-fs\">멋진 페이지</span>"
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
+msgid "<span class=\"s_progress_bar_text small d-none\">25%</span>"
+msgstr "<span class=\"s_progress_bar_text small d-none\">25%</span>"
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
+msgid "<span class=\"s_progress_bar_text small d-none\">80%</span>"
+msgstr "<span class=\"s_progress_bar_text small d-none\">80%</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_progress_bar
@@ -2459,7 +2469,7 @@ msgstr "추가"
 msgid ""
 "Add 3rd-party service domains <em>(\"www.example.com\" or "
 "\"example.com\")</em>, one per line."
-msgstr "타사 서비스 도메인 <em>(\"www.example.com\" 또는 \"example.com\")</em>을 한 줄에 하나씩 추가합니다."
+msgstr "외부 서비스 도메인 <em>(\"www.example.com\" 또는 \"example.com\")</em>을 한 줄에 하나씩 추가합니다."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_options
@@ -2735,12 +2745,12 @@ msgstr "이후"
 #: code:addons/website/static/src/components/wysiwyg_adapter/wysiwyg_adapter.js:0
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Alert"
-msgstr "경고"
+msgstr "주의"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Alerts"
-msgstr "경고"
+msgstr "주의"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team_detail
@@ -3411,19 +3421,19 @@ msgstr "블록"
 #: model:ir.model.fields,field_description:website.field_res_config_settings__website_block_third_party_domains
 #: model:ir.model.fields,field_description:website.field_website__block_third_party_domains
 msgid "Block 3rd-party domains"
-msgstr "타사 도메인 차단"
+msgstr "외부 도메인 차단"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_res_config_settings__website_block_third_party_domains
 #: model:ir.model.fields,help:website.field_website__block_third_party_domains
 msgid ""
 "Block 3rd-party domains that may track users (YouTube, Google Maps, etc.)."
-msgstr "사용자를 추적할 수 있는 타사 도메인(유튜브, 구글지도 등)을 차단합니다."
+msgstr "사용자를 추적할 수 있는 외부 도메인(유튜브, 구글 지도 등)을 차단합니다."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Block tracking 3rd-party services"
-msgstr "서비스 트래킹 차단"
+msgstr "외부 서비스 추적 차단"
 
 #. module: website
 #. odoo-javascript
@@ -7394,7 +7404,6 @@ msgstr "제목 1"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/js/editor/snippets.editor.js:0
-#: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "Headings"
 msgstr "제목"
 
@@ -7404,36 +7413,26 @@ msgid "Headings 1"
 msgstr "제목 1"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 2"
 msgstr "제목 2"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 3"
 msgstr "제목 3"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 4"
 msgstr "제목 4"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 5"
 msgstr "제목 5"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 6"
 msgstr "제목 6"
@@ -9154,8 +9153,6 @@ msgid "Linkedin"
 msgstr "링크드인"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Links"
 msgstr "링크"
@@ -9185,7 +9182,7 @@ msgstr "솔루션 또는 서비스의 주요 기능을 나열하고 자세히 �
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website__blocked_third_party_domains
 msgid "List of blocked 3rd-party domains"
-msgstr "차단된 타사 도메인 목록"
+msgstr "차단된 외부 도메인 목록"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -9230,6 +9227,7 @@ msgstr "실시간 채팅 위젯"
 #: code:addons/website/static/src/client_actions/website_preview/website_preview.xml:0
 #: code:addons/website/static/src/components/dialog/add_page_dialog.js:0
 #: code:addons/website/static/src/components/dialog/seo.xml:0
+#: code:addons/website/static/src/js/editor/html_editor.js:0
 #: code:addons/website/static/src/xml/web_editor.xml:0
 #: code:addons/website/static/src/xml/website.background.video.xml:0
 msgid "Loading..."
@@ -10188,7 +10186,7 @@ msgstr "추적 안됨"
 msgid ""
 "Note that some third-party services may install additional cookies on your "
 "browser in order to identify you."
-msgstr "일부 타사 서비스는 사용자를 식별하기 위해 브라우저에 추가 쿠키를 설치할 수 있습니다."
+msgstr "일부 외부 기관의 경우 브라우저에 사용자 식별용으로 추가 쿠키를 설치할 수 있습니다."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_menus_form_view
@@ -11379,12 +11377,6 @@ msgid "Primary"
 msgstr "기본"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Primary Buttons"
-msgstr "기본 버튼 색상"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Primary Style"
 msgstr "기본 스타일"
@@ -11584,6 +11576,11 @@ msgstr "펄스"
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "Punchy Image"
 msgstr "펀치 이미지"
+
+#. module: website
+#: model:ir.model.fields,field_description:website.field_website__domain_punycode
+msgid "Punycode Domain"
+msgstr "Punycode 도메인"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -12367,12 +12364,6 @@ msgstr "두 번째 기본 라디오"
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Secondary"
 msgstr "2차"
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Secondary Buttons"
-msgstr "추가 버튼 색상"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -13460,8 +13451,6 @@ msgid "Test your robots.txt with Google Search Console"
 msgstr "Google Search 콘솔로 robots.txt를 테스트하세요"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.grid_layout_options
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -13668,6 +13657,12 @@ msgstr "검색할 수 있는 최대 레코드 수의 한도입니다."
 #: code:addons/website/models/website_snippet_filter.py:0
 msgid "The limit must be between 1 and 16."
 msgstr "제한값은 1에서 16 사이여야 합니다."
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "The logo is too large. Please upload a logo smaller than 2.5 MB."
+msgstr "로고가 너무 큽니다. 2.5MB 미만인 로고를 업로드하세요."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
@@ -14459,12 +14454,18 @@ msgid ""
 "        308 Redirect / Rewrite: If you want rename a controller with a new url. (Eg: /shop -> /garden - Both url will be accessible but /shop will automatically be redirected to /garden)\n"
 "    "
 msgstr ""
-"리디렉션/다시 쓰기 유형 :\n"
+"리디렉션/재작성 유형 :\n"
 "\n"
-"        301 영구적으로 이동 : 브라우저가 새 URL을 캐시에 보관합니다.\n"
-"302 일시적으로 이동 : 브라우저가 새 URL을 캐시에 보관하지 않고 다음 번에 새유형 URL을 다시 묻습니다. \n"
-"404 찾을 수 없음 : 특정 페이지/컨트롤러를 제거하려는 경우 (예: 전자 상거래가 설치되어 있지만 특정 웹 사이트에서 /shop을 원하지 않는 경우)\n"
-"308 리디렉션/다시쓰기 : 새로운 URL로 컨트롤러의 이름을 바꾸려면. (예: /shop-> /garden - 두 URL 모두 액세스 할 수 있지만 /shop은 자동으로 /garden으로 리디렉션됩니다)"
+"        301 영구 이동 : 브라우저가 새 URL을 캐시에 저장합니다.\n"
+"302 임시 이동 : 브라우저가 새 URL을 캐시에 저장하지 않고 다음 요청 시 새 URL을 다시 요청합니다. \n"
+"404 찾을 수 없음 : 특정 페이지 또는 컨트롤러를 제거하려는 경우에 해당합니다 (예: 이커머스가 설치되어 있으나 특정 웹사이트에서 /shop 페이지를 사용하지 않으려는 경우).\n"
+"308 리디렉션/재작성 : 새 URL로 컨트롤러의 이름을 변경하려는 경우에 해당합니다 (예: /shop-> /garden - 두 가지 URL에 모두 액세스 할 수 있지만 /shop은 자동으로 /garden으로 리디렉션됩니다)."
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/xml/html_editor.xml:0
+msgid "Type your URL"
+msgstr "URL 입력"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_controller_page__name_slugified
@@ -14485,6 +14486,12 @@ msgstr "다음의 URL"
 #: model:ir.model.fields,help:website.field_website__cdn_filters
 msgid "URL matching those filters will be rewritten using the CDN Base URL"
 msgstr "해당 필터와 일치하는 URL은 CDN 기본 URL을 사용하여 다시 작성됩니다."
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/website_rewrite.py:0
+msgid "URL must not start with '#'."
+msgstr "URL은 '#' 으로 시작할 수 없습니다."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_rewrite__url_to
@@ -14796,7 +14803,7 @@ msgstr "사용자 유지율"
 #: model:ir.model,name:website.model_website_custom_blocked_third_party_domains
 #: model:ir.model.fields,field_description:website.field_website__custom_blocked_third_party_domains
 msgid "User list of blocked 3rd-party domains"
-msgstr "차단된 타사 도메인 사용자 목록"
+msgstr "차단된 외부 도메인 사용자 목록"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_menu__group_ids
@@ -15066,7 +15073,7 @@ msgstr "방문자가 웹사이트에 방문하여 기록을 확인하고 참여�
 #: model_terms:ir.ui.view,arch_db:website.s_badge_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Warning"
-msgstr "경고"
+msgstr "주의"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_controller_page__warning_info
@@ -15854,12 +15861,6 @@ msgstr "X 계정"
 
 #. module: website
 #. odoo-javascript
-#: code:addons/website/static/src/xml/website_form_editor.xml:0
-msgid "Yes"
-msgstr "예"
-
-#. module: website
-#. odoo-javascript
 #: code:addons/website/static/src/client_actions/website_preview/website_preview.js:0
 msgid ""
 "You are about to be redirected to the domain configured for your website ( "
@@ -16210,6 +16211,12 @@ msgstr "온라인 스토어"
 #: code:addons/website/static/src/client_actions/configurator/configurator.xml:0
 msgid "and"
 msgstr "및"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/website_rewrite.py:0
+msgid "base URL of 'URL to' should not be same as 'URL from'."
+msgstr "'URL to'에 있는 기본 URL은 'URL from'과 동일할 수 없습니다."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets

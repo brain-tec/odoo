@@ -12,11 +12,12 @@ import { fillEmpty, unwrapContents } from "@html_editor/utils/dom";
 import {
     isContentEditable,
     isEmptyBlock,
+    isRedundantElement,
     isTextNode,
     isWhitespace,
     isZwnbsp,
 } from "@html_editor/utils/dom_info";
-import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
+import { closestElement, descendants, selectElements } from "@html_editor/utils/dom_traversal";
 import { isCSSColor } from "@web/core/utils/colors";
 import { ColorSelector } from "./color_selector";
 import { reactive } from "@odoo/owl";
@@ -65,6 +66,7 @@ export class ColorPlugin extends Plugin {
         /** Handlers */
         selectionchange_handlers: this.updateSelectedColor.bind(this),
         remove_format_handlers: this.removeAllColor.bind(this),
+        normalize_handlers: this.normalize.bind(this),
     };
 
     setup() {
@@ -72,6 +74,14 @@ export class ColorPlugin extends Plugin {
         this.previewableApplyColor = this.dependencies.history.makePreviewableOperation(
             (color, mode, previewMode) => this._applyColor(color, mode, previewMode)
         );
+    }
+
+    normalize(root) {
+        for (const el of selectElements(root, "font")) {
+            if (isRedundantElement(el)) {
+                unwrapContents(el);
+            }
+        }
     }
 
     /**
@@ -167,7 +177,12 @@ export class ColorPlugin extends Plugin {
                 const hasAnySelectedNodeColor = (mode) => {
                     const nodes = this.dependencies.selection
                         .getTraversedNodes()
-                        .filter((n) => isTextNode(n) || n.classList.contains("o_selected_td"));
+                        .filter(
+                            (n) =>
+                                isTextNode(n) ||
+                                (mode === "backgroundColor" &&
+                                    n.classList.contains("o_selected_td"))
+                        );
                     return hasAnyNodesColor(nodes, mode);
                 };
                 while (hasAnySelectedNodeColor(mode) && max > 0) {
@@ -250,10 +265,21 @@ export class ColorPlugin extends Plugin {
                 let font = closestElement(node, "font") || closestElement(node, "span");
                 const children = font && descendants(font);
                 const hasInlineGradient = font && isColorGradient(font.style["background-image"]);
+                const isFullySelected =
+                    children && children.every((child) => selectedNodes.includes(child));
+                const isTextGradient =
+                    hasInlineGradient && font.classList.contains("text-gradient");
+                const shouldReplaceExistingGradient =
+                    isFullySelected &&
+                    ((mode === "color" && isTextGradient) ||
+                        (mode === "backgroundColor" && !isTextGradient));
                 if (
                     font &&
                     (font.nodeName === "FONT" || (font.nodeName === "SPAN" && font.style[mode])) &&
-                    (isColorGradient(color) || color === "" || !hasInlineGradient)
+                    (isColorGradient(color) ||
+                        color === "" ||
+                        !hasInlineGradient ||
+                        shouldReplaceExistingGradient)
                 ) {
                     // Partially selected <font>: split it.
                     const selectedChildren = children.filter((child) =>
@@ -262,11 +288,10 @@ export class ColorPlugin extends Plugin {
                     if (selectedChildren.length) {
                         const closestGradientEl = closestElement(
                             node,
-                            '[style*="background-image"]'
+                            'font[style*="background-image"], span[style*="background-image"]'
                         );
                         const isGradientBeingUpdated = closestGradientEl && isColorGradient(color);
                         const splitnode = isGradientBeingUpdated ? closestGradientEl : font;
-                        // font = splitAroundUntil(selectedChildren, splitnode);
                         font = this.dependencies.split.splitAroundUntil(
                             selectedChildren,
                             splitnode
@@ -293,7 +318,8 @@ export class ColorPlugin extends Plugin {
                             mode === "color" &&
                             (font.style.webkitTextFillColor ||
                                 (closestGradientEl &&
-                                    closestGradientEl.classList.contains("text-gradient")))
+                                    closestGradientEl.classList.contains("text-gradient") &&
+                                    !shouldReplaceExistingGradient))
                         ) {
                             font.style.webkitTextFillColor = color;
                         }
@@ -328,8 +354,6 @@ export class ColorPlugin extends Plugin {
                         font = previous;
                     } else {
                         // No <font> found: insert a new one.
-                        const isTextGradient =
-                            hasInlineGradient && font.classList.contains("text-gradient");
                         font = this.document.createElement("font");
                         node.after(font);
                         if (isTextGradient && mode === "color") {

@@ -44,6 +44,15 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                Dobrý den,<br/><br/>\n"
+"                Požádali jste o přihlášení do seznamu adresátů <strong t-out=\"object.name or ''\"/>.\n"
+"                <br/><br/>\n"
+"                Pro potvrzení prosím navštivte následující odkaz: <strong t-if=\"ctx.get('token_url')\"><a t-att-href=\"ctx['token_url']\"><t t-out=\"ctx['token_url'] or ''\"/></a></strong>\n"
+"                <br/><br/>\n"
+"                Pokud se jedná o chybu nebo jste o tuto akci nežádali, tuto zprávu prosím ignorujte.\n"
+"            </div>\n"
+"        "
 
 #. module: mail_group
 #: model:mail.template,body_html:mail_group.mail_template_list_unsubscribe
@@ -58,6 +67,15 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                Dobrý den,<br/><br/>\n"
+"                Požádali jste o odhlášení ze seznamu adresátů <strong t-out=\"object.name or ''\"/>.\n"
+"                <br/><br/>\n"
+"                Pro potvrzení prosím navštivte následující odkaz: <strong t-if=\"ctx.get('token_url')\"><a t-att-href=\"ctx['token_url']\"><t t-out=\"ctx['token_url'] or ''\"/></a></strong>.\n"
+"                <br/><br/>\n"
+"                Pokud se jedná o chybu nebo jste o tuto akci nežádali, tuto zprávu prosím ignorujte.\n"
+"            </div>\n"
+"        "
 
 #. module: mail_group
 #: model:mail.template,body_html:mail_group.mail_template_guidelines
@@ -377,12 +395,12 @@ msgstr ""
 #. module: mail_group
 #: model:mail.template,subject:mail_group.mail_template_list_subscribe
 msgid "Confirm subscription to {{ object.name }}"
-msgstr ""
+msgstr "Potvrďte předplatné {{ object.name }}"
 
 #. module: mail_group
 #: model:mail.template,subject:mail_group.mail_template_list_unsubscribe
 msgid "Confirm unsubscription to {{ object.name }}"
-msgstr ""
+msgstr "Potvrďte zrušení předplatného {{ object.name }}"
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group_message__body
@@ -554,7 +572,7 @@ msgstr "Pokyny"
 #. module: mail_group
 #: model:mail.template,subject:mail_group.mail_template_guidelines
 msgid "Guidelines of group {{ object.mail_group_id.name }}"
-msgstr ""
+msgstr "Směrnice skupiny {{ object.mail_group_id.name }}"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_notify_moderation

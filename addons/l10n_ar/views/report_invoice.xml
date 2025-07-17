@@ -4,9 +4,9 @@
     <!-- this header can be used on any Argentinean report, to be useful some variables should be passed -->
     <template id="custom_header">
         <div class="mb-3">
-            <div class="row">
+            <div class="row mb-2">
                 <div name="left-upper-side" class="col-5" t-if="not pre_printed_report">
-                    <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 45px;" alt="Logo"/>
+                    <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 65px;" alt="Logo"/>
                 </div>
                 <div name="center-upper" class="col-2 text-center" t-att-style="'color: %s;' % o.company_id.primary_color">
                     <span style="display: inline-block; text-align: center; line-height: 8px;">
@@ -278,7 +278,7 @@
         <div id="qrcode" position="after">
             <!-- RG 5614/2024: Show ARCA VAT and Other National Internal Taxes -->
             <t t-set="l10n_ar_custom_tax_summary" t-value="o._l10n_ar_get_invoice_custom_tax_summary_for_report()"/>
-            <div class="l10n_ar_tax_details" t-if="l10n_ar_custom_tax_summary">
+            <div t-attf-class="l10n_ar_tax_details {{ 'col-6' if report_type == 'pdf' else '' }}" t-if="l10n_ar_custom_tax_summary">
                 <table class="table table-sm table-borderless" style="page-break-inside: avoid;">
                     <th class="border-black" style="border-bottom: 1px solid" colspan="2">
                            Fiscal Transparency Regime for the Final Consumer (Law 27.743)

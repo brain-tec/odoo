@@ -461,8 +461,9 @@ except ImportError:
 
 def get_iso_codes(lang: str) -> str:
     if lang.find('_') != -1:
-        if lang.split('_')[0] == lang.split('_')[1].lower():
-            lang = lang.split('_')[0]
+        lang_items = lang.split('_')
+        if lang_items[0] == lang_items[1].lower():
+            lang = lang_items[0]
     return lang
 
 
@@ -1715,7 +1716,7 @@ def get_diff(data_from, data_to, custom_style=False, dark_color_scheme=False):
         For the table to fit the modal width, some custom style is needed.
         """
         to_append = {
-            'diff_header': 'bg-600 text-center align-top px-2',
+            'diff_header': 'bg-600 text-light text-center align-top px-2',
             'diff_next': 'd-none',
         }
         for old, new in to_append.items():

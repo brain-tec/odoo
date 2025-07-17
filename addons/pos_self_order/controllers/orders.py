@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import re
 from datetime import timedelta
-from odoo import http, fields
+from odoo import http, fields, _
 from odoo.http import request
 from odoo.tools import float_round
 from odoo.osv import expression
 from werkzeug.exceptions import NotFound, BadRequest, Unauthorized
+from odoo.exceptions import MissingError
+from odoo.tools import consteq
 
 class PosSelfOrderController(http.Controller):
     @http.route("/pos-self-order/process-order/<device_type>/", auth="public", type="json", website=True)
@@ -110,21 +112,37 @@ class PosSelfOrderController(http.Controller):
                     })
                 lst_price = 0
 
+    @http.route('/pos-self-order/remove-order', auth='public', type='json', website=True)
+    def remove_order(self, access_token, order_id, order_access_token):
+        pos_config = self._verify_pos_config(access_token)
+        pos_order = pos_config.env['pos.order'].browse(order_id)
+
+        if not pos_order.exists() or not consteq(pos_order.access_token, order_access_token):
+            raise MissingError(_("Your order does not exist or has been removed"))
+
+        if pos_order.state != 'draft':
+            raise Unauthorized(_("You are not authorized to remove this order"))
+
+        pos_order.remove_from_ui([pos_order.id])
+
     @http.route('/pos-self-order/get-orders', auth='public', type='json', website=True)
     def get_orders_by_access_token(self, access_token, order_access_tokens, table_identifier=None):
         pos_config = self._verify_pos_config(access_token)
         session = pos_config.current_session_id
         table = pos_config.env["restaurant.table"].search([('identifier', '=', table_identifier)], limit=1)
+        domain = False
 
-        domain = ['&', '&',
-            ('table_id', '=', table.id),
-            ('state', '=', 'draft'),
-            ('access_token', 'not in', [data.get('access_token') for data in order_access_tokens])
-        ]
+        if not table_identifier:
+            domain = [(False, '=', True)]
+        else:
+            domain = ['&', '&',
+                ('table_id', '=', table.id),
+                ('state', '=', 'draft'),
+                ('access_token', 'not in', [data.get('access_token') for data in order_access_tokens])
+            ]
 
         for data in order_access_tokens:
-            domain = expression.OR([domain, [
-                '&',
+            domain = expression.OR([domain, ['&',
                 ('access_token', '=', data.get('access_token')),
                 ('write_date', '>', data.get('write_date'))
             ]])

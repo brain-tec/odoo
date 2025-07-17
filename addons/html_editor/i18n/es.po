@@ -3,20 +3,19 @@
 # 	* html_editor
 # 
 # Translators:
-# Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2024
 # Tiffany Chang, 2024
 # Martin Trigaux, 2024
 # Fernanda Alvarez, 2024
-# Larissa Manderfeld, 2025
 # Wil Odoo, 2025
+# Larissa Manderfeld, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:37+0000\n"
+"POT-Creation-Date: 2025-05-14 20:47+0000\n"
 "PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
+"Last-Translator: Larissa Manderfeld, 2025\n"
 "Language-Team: Spanish (https://app.transifex.com/odoo/teams/41243/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -373,7 +372,7 @@ msgstr "ChatGPT"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/list/list_plugin.js:0
 msgid "Checklist"
-msgstr "Lista de verificación"
+msgstr "Lista de comprobación"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1775,7 +1774,7 @@ msgstr "Información sobre herramientas"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/list/list_plugin.js:0
 msgid "Track tasks with a checklist"
-msgstr "Llevar el seguimiento de las tareas con una lista de pendientes"
+msgstr "Llevar el seguimiento de las tareas con una lista de comprobación"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1943,7 +1942,7 @@ msgid ""
 "You can upload documents with the button located in the top left of the "
 "screen."
 msgstr ""
-"Puede cargar documentos con el botón ubicado en la esquina superior "
+"Puede cargar documentos con el botón situado en la esquina superior "
 "izquierda de la pantalla."
 
 #. module: html_editor
@@ -2009,12 +2008,6 @@ msgstr "Alejar"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "all"
-msgstr "todas"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
 msgid "alternatives..."
 msgstr "alternativas..."
@@ -2024,12 +2017,6 @@ msgstr "alternativas..."
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "and"
 msgstr "y"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "database"
-msgstr "database"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2051,12 +2038,6 @@ msgstr "archivo "
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "media-library"
-msgstr "media-library"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "or"
 msgstr "o"
@@ -2066,21 +2047,3 @@ msgstr "o"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "videos"
 msgstr "vídeos"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlDescription}}"
-msgstr "{{state.urlDescription}}"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlTitle}}"
-msgstr "{{state.urlTitle}}"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.url}}"
-msgstr "{{state.url}}"

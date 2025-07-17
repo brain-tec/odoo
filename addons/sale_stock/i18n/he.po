@@ -117,6 +117,11 @@ msgid ""
 "  - Timesheet: the quantity is the sum of hours recorded on tasks linked to this sale line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
+"בהתאם להגדרות המוצר, כמות שסופקה יכולה להיחשב באופן אוטומטי באמצעות אחד המנגנונים הבאים:\n"
+"ידני: הכמות מוזנת באופן ידני בשורה.\n"
+"אנליטי מהוצאות : הכמות היא סכום הכמויות מהוצאות שנרשמו.\n"
+"גיליון שעות : הכמות היא סכום השעות שנרשמו במשימות המקושרות לשורת מכירה זו.\n"
+"תנועות מלאי: הכמות מגיעה מהעברות מלאי שאושרו.\n"
 
 #. module: sale_stock
 #. odoo-javascript
@@ -330,12 +335,12 @@ msgstr "מיקום סחר בינלאומיים"
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.report_delivery_document_inherit_sale_stock
 msgid "Incoterm details"
-msgstr ""
+msgstr "פרטי תנאי סחר בינלאומיים"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
 msgid "Incoterm:"
-msgstr ""
+msgstr "תנאי סחר בינלאומיים:"
 
 #. module: sale_stock
 #: model:ir.model.fields,help:sale_stock.field_sale_order__incoterm
@@ -650,7 +655,7 @@ msgstr "מדיניות משלוח"
 #. module: sale_stock
 #: model:ir.model.fields.selection,name:sale_stock.selection__sale_order__delivery_status__started
 msgid "Started"
-msgstr ""
+msgstr "התחיל"
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_stock_move
@@ -820,4 +825,4 @@ msgstr "מעובד במקום"
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/xml/delay_alert.xml:0
 msgid "will be late."
-msgstr ""
+msgstr "יהיה באיחור"

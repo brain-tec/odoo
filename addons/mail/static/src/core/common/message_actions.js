@@ -62,7 +62,7 @@ messageActionsRegistry
                         const reaction = component.props.message.reactions.find(
                             ({ content, personas }) =>
                                 content === emoji &&
-                                personas.find((persona) => persona.eq(component.store.self))
+                                component.props.thread.effectiveSelf.in(personas)
                         );
                         if (!reaction) {
                             component.props.message.react(emoji);
@@ -121,7 +121,8 @@ messageActionsRegistry
     .add("mark-as-unread", {
         condition: (component) =>
             component.props.thread?.model === "discuss.channel" &&
-            component.store.self.type === "partner",
+            component.store.self.type === "partner" &&
+            component.props.message.persistent,
         icon: "fa fa-eye-slash",
         title: _t("Mark as Unread"),
         onClick: (component) => component.props.message.onClickMarkAsUnread(component.props.thread),

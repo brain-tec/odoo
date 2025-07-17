@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { describe, expect, test } from "@odoo/hoot";
-import { isIterable, isRegExpFilter } from "@web/../lib/hoot-dom/hoot_dom_utils";
+import { isIterable } from "@web/../lib/hoot-dom/hoot_dom_utils";
 import {
     deepEqual,
     formatHumanReadable,
@@ -10,6 +10,7 @@ import {
     levenshtein,
     lookup,
     match,
+    parseQuery,
     title,
     toExplicitString,
 } from "../hoot_utils";
@@ -84,20 +85,20 @@ describe(parseUrl(import.meta.url), () => {
 
         for (const [a, b] of TRUTHY_CASES) {
             expect(deepEqual(a, b)).toBe(true, {
-                message: (_, r) => [a, r`==`, b],
+                message: [a, `==`, b],
             });
         }
         for (const [a, b] of FALSY_CASES) {
             expect(deepEqual(a, b)).toBe(false, {
-                message: (_, r) => [a, r`!=`, b],
+                message: [a, `!=`, b],
             });
         }
         for (const [a, b] of TRUTHY_IF_UNORDERED_CASES) {
             expect(deepEqual(a, b)).toBe(false, {
-                message: (_, r) => [a, r`!=`, b],
+                message: [a, `!=`, b],
             });
             expect(deepEqual(a, b, { ignoreOrder: true })).toBe(true, {
-                message: (_, r) => [a, r`==`, b, r`(unordered))`],
+                message: [a, `==`, b, `(unordered))`],
             });
         }
     });
@@ -160,12 +161,14 @@ describe(parseUrl(import.meta.url), () => {
         expect(
             formatTechnical({
                 b: 2,
+                [Symbol("s")]: "value",
                 a: true,
             })
         ).toBe(
             `{
   a: true,
   b: 2,
+  Symbol(s): "value",
 }`.trim()
         );
 
@@ -214,14 +217,6 @@ describe(parseUrl(import.meta.url), () => {
         expect(isIterable({})).toBe(false);
     });
 
-    test("isRegExpFilter", () => {
-        expect(isRegExpFilter("/abc/")).toBe(true);
-        expect(isRegExpFilter("/abc/i")).toBe(true);
-
-        expect(isRegExpFilter("/abc")).toBe(false);
-        expect(isRegExpFilter("abc/")).toBe(false);
-    });
-
     test("levenshtein", () => {
         expect(levenshtein("abc", "abc")).toBe(0);
         expect(levenshtein("abc", "àbc ")).toBe(2);
@@ -229,10 +224,76 @@ describe(parseUrl(import.meta.url), () => {
         expect(levenshtein("abc", "adc")).toBe(1);
     });
 
-    test("lookup", () => {
-        const list = [{ key: "bababa" }, { key: "baaab" }, { key: "cccbccb" }];
-        expect(lookup("aaa", list)).toEqual([{ key: "baaab" }, { key: "bababa" }]);
-        expect(lookup(/.b$/, list)).toEqual([{ key: "baaab" }, { key: "cccbccb" }]);
+    test("parseQuery & lookup", () => {
+        /**
+         * @param {string} query
+         * @param {string[]} itemsList
+         * @param {string} [property]
+         */
+        const expectQuery = (query, itemsList, property = "key") => {
+            const keyedItems = itemsList.map((item) => ({ [property]: item }));
+            const result = lookup(parseQuery(query), keyedItems);
+            return {
+                /**
+                 * @param {string[]} expected
+                 */
+                toEqual: (expected) =>
+                    expect(result).toEqual(
+                        expected.map((item) => ({ [property]: item })),
+                        { message: `query ${query} should match ${expected}` }
+                    ),
+            };
+        };
+
+        const list = [
+            "Frodo",
+            "Sam",
+            "Merry",
+            "Pippin",
+            "Frodo Sam",
+            "Merry Pippin",
+            "Frodo Sam Merry Pippin",
+        ];
+
+        // Error handling
+        expect(() => parseQuery()).toThrow();
+        expect(() => lookup()).toThrow();
+        expect(() => lookup("a", [{ key: "a" }])).toThrow();
+        expect(() => lookup(parseQuery("a"))).toThrow();
+
+        // Empty query and/or empty lists
+        expectQuery("", []).toEqual([]);
+        expectQuery("", ["bababa", "baaab", "cccbccb"]).toEqual(["bababa", "baaab", "cccbccb"]);
+        expectQuery("aaa", []).toEqual([]);
+
+        // Regex
+        expectQuery(`/.b$/`, ["bababa", "baaab", "cccbccB"]).toEqual(["baaab"]);
+        expectQuery(`/.b$/i`, ["bababa", "baaab", "cccbccB"]).toEqual(["baaab", "cccbccB"]);
+
+        // Exact match
+        expectQuery(`"aaa"`, ["bababa", "baaab", "cccbccb"]).toEqual(["baaab"]);
+        expectQuery(`"sam"`, list).toEqual([]);
+        expectQuery(`"Sam"`, list).toEqual(["Sam", "Frodo Sam", "Frodo Sam Merry Pippin"]);
+        expectQuery(`"Sam" "Frodo"`, list).toEqual(["Frodo Sam", "Frodo Sam Merry Pippin"]);
+        expectQuery(`"Frodo Sam"`, list).toEqual(["Frodo Sam", "Frodo Sam Merry Pippin"]);
+        expectQuery(`"FrodoSam"`, list).toEqual([]);
+        expectQuery(`"Frodo  Sam"`, list).toEqual([]);
+        expectQuery(`"Sam" -"Frodo"`, list).toEqual(["Sam"]);
+
+        // Partial (fuzzy) match
+        expectQuery(`aaa`, ["bababa", "baaab", "cccbccb"]).toEqual(["baaab", "bababa"]);
+        expectQuery(`aaa -bbb`, ["bababa", "baaab", "cccbccb"]).toEqual(["baaab"]);
+        expectQuery(`-aaa`, ["bababa", "baaab", "cccbccb"]).toEqual(["cccbccb"]);
+        expectQuery(`frosapip`, list).toEqual(["Frodo Sam Merry Pippin"]);
+        expectQuery(`-s fro`, list).toEqual(["Frodo"]);
+        expectQuery(` FR  SAPI `, list).toEqual(["Frodo Sam Merry Pippin"]);
+
+        // Mixed queries
+        expectQuery(`"Sam" fro pip`, list).toEqual(["Frodo Sam Merry Pippin"]);
+        expectQuery(`fro"Sam"pip`, list).toEqual(["Frodo Sam Merry Pippin"]);
+        expectQuery(`-"Frodo" s`, list).toEqual(["Sam"]);
+        expectQuery(`"Merry" -p`, list).toEqual(["Merry"]);
+        expectQuery(`"rry" -s`, list).toEqual(["Merry", "Merry Pippin"]);
     });
 
     test("match", () => {

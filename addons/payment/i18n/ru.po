@@ -8,14 +8,15 @@
 # Сергей Шебанин <sergey@shebanin.ru>, 2024
 # Wil Odoo, 2025
 # Ilya Rozhkov, 2025
+# Anastasiia Koroleva, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:37+0000\n"
+"POT-Creation-Date: 2025-05-07 20:37+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Ilya Rozhkov, 2025\n"
+"Last-Translator: Anastasiia Koroleva, 2025\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -499,7 +500,7 @@ msgstr "Доступные методы"
 #. module: payment
 #: model:payment.method,name:payment.payment_method_axis
 msgid "Axis"
-msgstr ""
+msgstr "Ось"
 
 #. module: payment
 #: model:payment.method,name:payment.payment_method_bacs_direct_debit
@@ -1447,7 +1448,7 @@ msgstr "Дата последнего изменения штата"
 #: model:ir.model.fields,field_description:payment.field_payment_token__write_uid
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__write_uid
 msgid "Last Updated by"
-msgstr "Последнее обновление"
+msgstr "Последнее обновление:"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_capture_wizard__write_date
@@ -1458,7 +1459,7 @@ msgstr "Последнее обновление"
 #: model:ir.model.fields,field_description:payment.field_payment_token__write_date
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__write_date
 msgid "Last Updated on"
-msgstr "Последнее обновление"
+msgstr "Дата последнего обновления:"
 
 #. module: payment
 #: model:onboarding.onboarding.step,button_text:payment.onboarding_onboarding_step_payment_provider
@@ -3142,6 +3143,12 @@ msgid ""
 msgstr ""
 "Вы не можете изменить компанию поставщика платежей в существующих "
 "транзакциях."
+
+#. module: payment
+#. odoo-python
+#: code:addons/payment/models/payment_method.py:0
+msgid "You cannot delete the default payment method."
+msgstr ""
 
 #. module: payment
 #. odoo-python

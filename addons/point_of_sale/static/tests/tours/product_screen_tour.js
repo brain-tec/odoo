@@ -241,8 +241,20 @@ registry.category("web_tour.tours").add("CashClosingDetails", {
             ProductScreen.closeWithCashAmount("50.0"),
             ProductScreen.cashDifferenceIs("-1.00"),
             Dialog.confirm("Close Register"),
-            Dialog.confirm("Proceed Anyway", ".btn-primary"),
-            Chrome.clickBtn("Backend"),
+            {
+                trigger: ".modal .btn-primary:contains(Proceed Anyway)",
+                run: "click",
+                expectUnloadPage: true,
+            },
+            {
+                trigger: "button:contains(backend)",
+                run: "click",
+                expectUnloadPage: true,
+            },
+            {
+                trigger: "body",
+                expectUnloadPage: true,
+            },
             ProductScreen.lastClosingCashIs("50.00"),
         ].flat(),
 });
@@ -544,5 +556,62 @@ registry.category("web_tour.tours").add("AddMultipleSerialsAtOnce", {
             ProductScreen.enterLotNumbers(["SN005", "SN006"]),
             ProductScreen.selectedOrderlineHas("Product A", "4.0"),
             Chrome.endTour(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_draft_orders_not_syncing", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.orderIsEmpty(),
+            ProductScreen.clickDisplayedProduct("Desk Pad"),
+            Chrome.createFloatingOrder(),
+            ProductScreen.clickDisplayedProduct("Desk Pad"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.isShown(),
+            Chrome.endTour(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_one_attribute_value_scan_barcode", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            scan_barcode("1234567"),
+            ProductScreen.selectedOrderlineHas("Product Test (Red)", "1.0"),
+
+            scan_barcode("1234568"),
+            ProductScreen.selectedOrderlineHas("Product Test (Blue)", "1.0"),
+
+            Chrome.endTour(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("FiscalPositionTaxLabels", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Test Product"),
+            ProductScreen.totalAmountIs("100.00"),
+            ProductScreen.clickFiscalPosition("Fiscal Position Test"),
+            ProductScreen.totalAmountIs("100.00"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank", true, { remaining: "0.00" }),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.isShown(),
+            {
+                content: "Make sure orderline tax label is correct",
+                trigger: ".orderline:contains('Tax Group 2')",
+            },
+            {
+                content: "Make sure receipt tax label is correct and correspond to the orderline",
+                trigger: ".pos-receipt-taxes:contains('Tax Group 2')",
+            },
         ].flat(),
 });

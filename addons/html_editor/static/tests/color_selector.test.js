@@ -15,6 +15,7 @@ import { setupEditor } from "./_helpers/editor";
 import { getContent, setSelection } from "./_helpers/selection";
 import { contains } from "@web/../tests/web_test_helpers";
 import { execCommand } from "./_helpers/userCommands";
+import { expectElementCount } from "./_helpers/ui_expectations";
 
 test("can set foreground color", async () => {
     const { el } = await setupEditor("<p>[test]</p>");
@@ -28,8 +29,7 @@ test("can set foreground color", async () => {
 
     await click(".o_color_button[data-color='#6BADDE']");
     await animationFrame();
-    await waitFor(".o-we-toolbar");
-    expect(".o-we-toolbar").toHaveCount(1); // toolbar still open
+    await expectElementCount(".o-we-toolbar", 1);
     expect(".o_font_color_selector").toHaveCount(0); // selector closed
     expect(getContent(el)).toBe(`<p><font style="color: rgb(107, 173, 222);">[test]</font></p>`);
 });
@@ -46,8 +46,7 @@ test("can set background color", async () => {
 
     await click(".o_color_button[data-color='#6BADDE']");
     await animationFrame();
-    await waitFor(".o-we-toolbar");
-    expect(".o-we-toolbar").toHaveCount(1); // toolbar still open
+    await expectElementCount(".o-we-toolbar", 1);
     expect(".o_font_color_selector").toHaveCount(0); // selector closed
     expect(getContent(el)).toBe(
         `<p><font style="background-color: rgba(107, 173, 222, 0.6);">[test]</font></p>`
@@ -64,8 +63,7 @@ test("should add opacity to custom background colors but not to theme colors", a
     expect(".o_font_color_selector").toHaveCount(1);
 
     await contains(".o_color_button[data-color='#FF0000']").click(); // Select a custom color.
-    await waitFor(".o-we-toolbar");
-    expect(".o-we-toolbar").toHaveCount(1);
+    await expectElementCount(".o-we-toolbar", 1);
     expect(".o_font_color_selector").toHaveCount(0);
     // Verify custom color applies RGBA with 0.6 opacity.
     expect(getContent(el)).toBe(
@@ -170,6 +168,30 @@ test("custom background colors used in the editor are shown in the colorpicker",
     expect(queryOne("button[data-color='#ff0000']").style.backgroundColor).toBe("rgb(255, 0, 0)");
     expect(queryAll("button[data-color='#00ff00']")).toHaveCount(1);
     expect(queryOne("button[data-color='#00ff00']").style.backgroundColor).toBe("rgb(0, 255, 0)");
+});
+
+test("applied custom color should be shown in colorpicker after switching tab", async () => {
+    const { el } = await setupEditor(
+        '<p><font style="background-color: rgb(255, 0, 0);">[test]</font></p>'
+    );
+    await waitFor(".o-we-toolbar");
+    expect(".o_font_color_selector").toHaveCount(0);
+    await click(".o-we-toolbar .o-select-color-background");
+    await animationFrame();
+    await click(".btn:contains('Custom')");
+    await animationFrame();
+    expect(".o_hex_input").toHaveValue("#FF0000");
+    const newColor = "#00FF00";
+    await contains(".o_hex_input").edit(newColor);
+    expect(".o_hex_input").toHaveValue(newColor);
+    expect(getContent(el)).toBe(
+        '<p><font style="background-color: rgb(0, 255, 0);">[test]</font></p>'
+    );
+    await click(".btn:contains('Solid')");
+    await animationFrame();
+    await click(".btn:contains('Custom')");
+    await animationFrame();
+    expect(".o_hex_input").toHaveValue(newColor);
 });
 
 test("select hex color and apply it", async () => {
@@ -408,6 +430,19 @@ test("gradient picker correctly shows the current selected gradient", async () =
     expect("input[name='secondColorPercentage']").toHaveValue(90);
 });
 
+test("custom colorpicker should show default color when selected text has gradient", async () => {
+    await setupEditor(
+        `<p><font style="background-image: linear-gradient(2deg, rgb(255, 204, 51) 10%, rgb(226, 51, 255) 90%);" class="text-gradient">[test]</font></p>`
+    );
+    await waitFor(".o-we-toolbar");
+    expect(".o_font_color_selector").toHaveCount(0);
+    await click(".o-we-toolbar .o-select-color-foreground");
+    await expectElementCount(".o_font_color_selector", 1);
+    await click(".btn:contains('Custom')");
+    await expectElementCount(".o_hex_input", 1);
+    expect(".o_hex_input").toHaveValue("#FF0000");
+});
+
 test("gradient picker does change the selector gradient color", async () => {
     await setupEditor(
         `<p><font style="background-image: linear-gradient(2deg, rgb(255, 204, 51) 10%, rgb(226, 51, 255) 90%);" class="text-gradient">[test]</font></p>`
@@ -605,7 +640,7 @@ describe("color preview", () => {
                 </tbody>
             </table>
         `);
-        expect(".o-we-toolbar").toHaveCount(1); // toolbar still open
+        await expectElementCount(".o-we-toolbar", 1);
     });
 
     test("should preview color in table on hover in custom tab", async () => {
@@ -673,6 +708,6 @@ describe("color preview", () => {
                 </tbody>
             </table>
         `);
-        expect(".o-we-toolbar").toHaveCount(1); // toolbar still open
+        await expectElementCount(".o-we-toolbar", 1);
     });
 });

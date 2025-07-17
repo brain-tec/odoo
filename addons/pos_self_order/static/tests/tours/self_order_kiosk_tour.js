@@ -43,6 +43,11 @@ registry.category("web_tour.tours").add("self_kiosk_each_table_takeaway_in", {
         Utils.checkIsNoBtn("My Order"),
         ...clickOrderNowAndWaitLocation("Eat In"),
         Utils.checkIsDisabledBtn("Order"),
+        ProductPage.clickProduct("Coca-Cola"),
+        Utils.clickBtn("Order"),
+        CartPage.checkProduct("Coca-Cola", "2.53", "1"),
+        CartPage.removeLine("Coca-Cola"),
+        ProductPage.isShown(),
     ],
 });
 
@@ -162,5 +167,23 @@ registry.category("web_tour.tours").add("test_self_order_kiosk_combo_sides", {
             { name: "Fabric", value: "Leather" },
         ]),
         Utils.clickBtn("Add to cart"),
+    ],
+});
+
+registry.category("web_tour.tours").add("self_order_pricelist", {
+    steps: () => [
+        Utils.checkIsNoBtn("My Order"),
+        Utils.clickBtn("Order Now"),
+        ProductPage.clickProduct("Coca-Cola"),
+        ProductPage.clickProduct("Coca-Cola"),
+        Utils.clickBtn("Order"),
+        CartPage.checkProduct("Coca-Cola", "5.06", "2"),
+        CartPage.clickBack(),
+        ProductPage.clickProduct("Coca-Cola"),
+        Utils.clickBtn("Order"),
+        CartPage.checkProduct("Coca-Cola", "3.45", "3"),
+        Utils.clickBtn("Pay"),
+        Utils.clickBtn("Close"),
+        Utils.checkIsNoBtn("My Order"),
     ],
 });
