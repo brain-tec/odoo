@@ -86,7 +86,7 @@ registry.category("web_tour.tours").add("discuss_channel_public_tour.js", {
             async run() {
                 /** @type {import("models").Store} */
                 const store = odoo.__WOWL_DEBUG__.root.env.services["mail.store"];
-                if (store.self.type === "guest") {
+                if (store.self_guest) {
                     const src = this.anchor.querySelector("img").src;
                     const token = store["ir.attachment"].get(
                         (src.match("/web/image/([0-9]+)") || []).at(-1)
@@ -113,7 +113,7 @@ registry.category("web_tour.tours").add("discuss_channel_public_tour.js", {
         },
         {
             trigger: ".o-mail-Message[data-persistent]:contains(cheese)",
-            run: "hover && click .o-mail-Message [title='Add a Reaction']",
+            run: "hover && click .o-mail-Message:contains(cheese) [title='Add a Reaction']",
         },
         {
             trigger: ".o-mail-QuickReactionMenu",
@@ -134,7 +134,7 @@ registry.category("web_tour.tours").add("discuss_channel_public_tour.js", {
         {
             content: "Click on more menu",
             trigger: ".o-mail-Message[data-persistent]:contains(cheese)",
-            run: "hover && click .o-mail-Message [title='Expand']",
+            run: "hover && click .o-mail-Message:contains(cheese) [title='Expand']",
         },
         {
             content: "Click on edit",
