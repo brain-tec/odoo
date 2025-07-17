@@ -157,7 +157,7 @@ class PortalAccount(CustomerPortal):
         except (AccessError, MissingError):
             return request.redirect('/my')
 
-        if report_type == 'pdf' and download and invoice_sudo.state == 'posted':
+        if report_type == 'pdf' and download and invoice_sudo.state in ['posted', 'posted_sent']:
             # Download the official attachment(s) or a Pro Forma invoice
             docs_data = invoice_sudo._get_invoice_legal_documents_all(allow_fallback=True)
             if len(docs_data) == 1:

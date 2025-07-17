@@ -378,11 +378,14 @@ class ProductProduct(models.Model):
 
     def write(self, values):
         res = super(ProductProduct, self).write(values)
-        if 'product_template_attribute_value_ids' in values:
-            # `_get_variant_id_for_combination` depends on `product_template_attribute_value_ids`
-            self.env.registry.clear_cache()
-        elif 'active' in values:
+        needs_invalidation = False
+        if 'active' in values and any(rec.active != values['active'] for rec in self):
             # `_get_first_possible_variant_id` depends on variants active state
+            needs_invalidation = True
+        elif 'product_template_attribute_value_ids' in values:
+            # `_get_variant_id_for_combination` depends on `product_template_attribute_value_ids
+            needs_invalidation = True
+        if needs_invalidation:
             self.env.registry.clear_cache()
         return res
 

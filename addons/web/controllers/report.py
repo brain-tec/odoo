@@ -7,6 +7,7 @@ import werkzeug.exceptions
 from werkzeug.urls import url_parse
 
 from odoo import http
+from odoo.exceptions import AccessError, UserError, AccessDenied, ValidationError
 from odoo.http import content_disposition, request
 from odoo.tools.misc import html_escape
 from odoo.tools.safe_eval import safe_eval, time
@@ -148,6 +149,18 @@ class ReportController(http.Controller):
                 'data': se
             }
             res = request.make_response(html_escape(json.dumps(error)))
+
+            # Workaround to show 'known' exceptions (access righs, validation
+            # errors, data checks done in the reports,...) as 'regular' errors
+            # instead of showing all the exceptions caught as Internal server
+            # errors
+            is_known_error = \
+                isinstance(e, ValidationError) or \
+                isinstance(e, UserError) or \
+                isinstance(e, AccessError)
+            if is_known_error:
+                return res
+
             raise werkzeug.exceptions.InternalServerError(response=res) from e
 
     @http.route(['/report/check_wkhtmltopdf'], type='json', auth='user', readonly=True)

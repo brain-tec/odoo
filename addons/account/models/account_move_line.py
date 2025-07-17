@@ -1186,7 +1186,7 @@ class AccountMoveLine(models.Model):
         if self.env.context.get('skip_analytic_sync'):
             return
         lines_to_modify = self.env['account.move.line'].browse([
-            line.id for line in self if line.parent_state == "posted"
+            line.id for line in self if line.parent_state in ['posted', 'posted_sent']
         ]).with_context(skip_analytic_sync=True)
         lines_to_modify.analytic_line_ids.unlink()
         lines_to_modify._create_analytic_lines()
@@ -1275,7 +1275,7 @@ class AccountMoveLine(models.Model):
     def _check_tax_lock_date(self):
         for line in self:
             move = line.move_id
-            if move.state != 'posted':
+            if move.state not in ['posted', 'posted_sent']:
                 continue
             violated_lock_dates = move.company_id._get_lock_date_violations(
                 move.date,
@@ -1411,12 +1411,12 @@ class AccountMoveLine(models.Model):
         create_index(self._cr, 'account_move_line_date_name_id_idx', 'account_move_line', ["date desc", "move_name desc", "id"])
         # Match exactly how the ORM converts domains to ensure the query planner uses it
         create_index(self._cr, 'account_move_line__unreconciled_index', 'account_move_line', ['account_id', 'partner_id'],
-                     where="(reconciled IS NULL OR reconciled = false OR reconciled IS NOT true) AND parent_state = 'posted'")
+                     where="(reconciled IS NULL OR reconciled = false OR reconciled IS NOT true) AND parent_state in ('posted', 'posted_sent')")
         create_index(self.env.cr,
                      indexname='account_move_line_journal_id_neg_amnt_residual_idx',
                      tablename='account_move_line',
                      expressions=['journal_id'],
-                     where="amount_residual < 0 AND parent_state = 'posted'")
+                     where="amount_residual < 0 AND parent_state in ('posted', 'posted_sent')")
         # covers the standard index on account_id
         create_index(self.env.cr,
                      indexname='account_move_line_account_id_date_idx',
@@ -1574,15 +1574,15 @@ class AccountMoveLine(models.Model):
                 line_to_write -= line
                 continue
 
-            if line.parent_state == 'posted' and any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in ('tax_ids', 'tax_line_id')):
+            if line.parent_state in ['posted', 'posted_sent'] and any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in ('tax_ids', 'tax_line_id')):
                 raise UserError(_('You cannot modify the taxes related to a posted journal item, you should reset the journal entry to draft to do so.'))
 
             # Check the lock date.
-            if line.parent_state == 'posted' and any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in protected_fields['fiscal']):
+            if line.parent_state in ['posted', 'posted_sent'] and any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in protected_fields['fiscal']):
                 line.move_id._check_fiscal_lock_dates()
 
             # Check the tax lock date.
-            if line.parent_state == 'posted' and any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in protected_fields['tax']):
+            if line.parent_state in ['posted', 'posted_sent'] and any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in protected_fields['tax']):
                 line._check_tax_lock_date()
 
             # Check the reconciliation.
@@ -1670,7 +1670,7 @@ class AccountMoveLine(models.Model):
     @api.ondelete(at_uninstall=False)
     def _unlink_except_posted(self):
         # Prevent deleting lines on posted entries
-        if not self._context.get('force_delete') and any(m.state == 'posted' for m in self.move_id):
+        if not self._context.get('force_delete') and any(m.state in ['posted', 'posted_sent'] for m in self.move_id):
             raise UserError(_("You can't delete a posted journal item. Don’t play games with your accounting records; reset the journal entry to draft before deleting it."))
 
     @api.ondelete(at_uninstall=False)
@@ -1704,7 +1704,7 @@ class AccountMoveLine(models.Model):
         self._check_reconciliation()
 
         # Check the lock date. (Only relevant if the move is posted)
-        self.move_id.filtered(lambda m: m.state == 'posted')._check_fiscal_lock_dates()
+        self.move_id.filtered(lambda m: m.state in ['posted', 'posted_sent'])._check_fiscal_lock_dates()
 
         # Check the tax lock date.
         self._check_tax_lock_date()
@@ -2335,7 +2335,7 @@ class AccountMoveLine(models.Model):
 
         if any(aml.reconciled for aml in self):
             raise UserError(_("You are trying to reconcile some entries that are already reconciled."))
-        if any(aml.parent_state != 'posted' for aml in self):
+        if any(aml.parent_state not in ['posted', 'posted_sent'] for aml in self):
             raise UserError(_("You can only reconcile posted entries."))
         accounts = self.mapped(lambda x: x._get_reconciliation_aml_field_value('account_id', shadowed_aml_values))
         if len(accounts) > 1:
@@ -3113,7 +3113,7 @@ class AccountMoveLine(models.Model):
                 groupby=['matching_number', 'account_id'],
                 aggregates=['id:recordset'],
             ):
-                if all(move.state == 'posted' for move in lines.move_id):
+                if all(move.state in ['posted', 'posted_sent'] for move in lines.move_id):
                     if not account.reconcile:
                         _logger.info("%s has reconciled lines, changing the config", account.display_name)
                         account.reconcile = True
@@ -3450,7 +3450,7 @@ class AccountMoveLine(models.Model):
         Intended to be overriden in localization.
         """
         self.ensure_one()
-        return self.move_id.state == 'posted'
+        return self.move_id.state in ['posted', 'posted_sent']
 
     # -------------------------------------------------------------------------
     # PUBLIC ACTIONS
