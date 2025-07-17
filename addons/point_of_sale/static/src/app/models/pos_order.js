@@ -61,7 +61,7 @@ export class PosOrder extends Base {
         // !!Keep all uiState in one object!!
         this.uiState = {
             unmerge: {},
-            lastPrint: false,
+            lastPrints: [],
             lineToRefund: {},
             displayed: true,
             booked: false,
@@ -149,8 +149,9 @@ export class PosOrder extends Base {
     }
 
     setPreset(preset) {
-        this.setPricelist(preset.pricelist_id);
-        this.fiscal_position_id = preset.fiscal_position_id;
+        this.setPricelist(preset.pricelist_id || this.config.pricelist_id);
+        this.fiscal_position_id =
+            preset.fiscal_position_id || this.config.default_fiscal_position_id;
         this.preset_id = preset;
         if (preset.is_return) {
             this.lines.forEach((l) => l.setQuantity(-Math.abs(l.getQuantity())));

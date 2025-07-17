@@ -11,7 +11,7 @@ from markupsafe import Markup
 from odoo import api, fields, models, _
 from odoo.fields import Domain
 from odoo.modules.registry import Registry
-from odoo.tools import ormcache_context, email_normalize
+from odoo.tools import email_normalize
 from odoo.sql_db import BaseCursor
 
 from odoo.addons.google_calendar.utils.google_event import GoogleEvent
@@ -58,14 +58,12 @@ class GoogleCalendarSync(models.AbstractModel):
     _name = 'google.calendar.sync'
     _description = "Synchronize a record with Google Calendar"
 
-    google_id = fields.Char('Google Calendar Id', copy=False)
+    google_id = fields.Char('Google Calendar Id', index='btree_not_null', copy=False)
     need_sync = fields.Boolean(default=True, copy=False)
     active = fields.Boolean(default=True)
 
     def write(self, vals):
         google_service = GoogleCalendarService(self.env['google.service'])
-        if 'google_id' in vals:
-            self.env.registry.clear_cache()  # _event_ids_from_google_ids
         synced_fields = self._get_google_synced_fields()
         if 'need_sync' not in vals and vals.keys() & synced_fields and not self.env.user.google_synchronization_stopped:
             vals['need_sync'] = True
@@ -80,8 +78,6 @@ class GoogleCalendarSync(models.AbstractModel):
 
     @api.model_create_multi
     def create(self, vals_list):
-        if any(vals.get('google_id') for vals in vals_list):
-            self.env.registry.clear_cache()  # _event_ids_from_google_ids
         if self.env.user.google_synchronization_stopped:
             for vals in vals_list:
                 vals.update({'need_sync': False})
@@ -127,12 +123,7 @@ class GoogleCalendarSync(models.AbstractModel):
     def _from_google_ids(self, google_ids):
         if not google_ids:
             return self.browse()
-        return self.browse(self._event_ids_from_google_ids(google_ids))
-
-    @api.model
-    @ormcache_context('google_ids', keys=('active_test',))
-    def _event_ids_from_google_ids(self, google_ids):
-        return self.search([('google_id', 'in', google_ids)]).ids
+        return self.search([('google_id', 'in', google_ids)])
 
     def _sync_odoo2google(self, google_service: GoogleCalendarService):
         if not self:
@@ -278,6 +269,8 @@ class GoogleCalendarSync(models.AbstractModel):
         with google_calendar_token(self.env.user.sudo()) as token:
             if token:
                 try:
+                    send_updates = not self._is_event_over()
+                    google_service.google_service = google_service.google_service.with_context(send_updates=send_updates)
                     google_service.patch(google_id, values, token=token, timeout=timeout)
                 except HTTPError as e:
                     if e.response.status_code in (400, 403):
@@ -307,7 +300,7 @@ class GoogleCalendarSync(models.AbstractModel):
         with google_calendar_token(self.env.user.sudo()) as token:
             if token:
                 try:
-                    send_updates = self.env.context.get('send_updates', True)
+                    send_updates = self.env.context.get('send_updates', True) and not self._is_event_over()
                     google_service.google_service = google_service.google_service.with_context(send_updates=send_updates)
                     google_values = google_service.insert(values, token=token, timeout=timeout, need_video_call=self._need_video_call())
                     self.with_context(dont_notify=True).write(self._get_post_sync_values(values, google_values))

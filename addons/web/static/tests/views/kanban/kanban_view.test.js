@@ -1564,6 +1564,87 @@ test("kanban with an action id as on_create attrs", async () => {
     ]);
 });
 
+test("Open new card in form view, without reloading the kanban view", async () => {
+    defineActions([
+        {
+            id: 1,
+            res_model: "partner",
+            type: "ir.actions.act_window",
+            views: [[false, "kanban"]],
+        },
+        {
+            id: 2,
+            xml_id: "some.action",
+            res_model: "partner",
+            type: "ir.actions.act_window",
+            target: "new",
+            views: [["create_view_ref", "form"]],
+        },
+    ]);
+    Partner._views = {
+        kanban: `
+            <kanban on_create="some.action">
+                <templates>
+                    <t t-name="card">
+                        <field name="foo"/>
+                    </t>
+                </templates>
+            </kanban>`,
+        form: `
+            <form>
+                <field name="foo"/>
+            </form>`,
+        "form,create_view_ref": `
+            <form>
+                <field name="foo"/>
+                <footer>
+                    <button string="Create Card" name="open_new_card" type="object" class="btn-primary"/>
+                </footer>
+            </form>`,
+        search: `<search />`,
+    };
+    onRpc("/web/dataset/call_button/partner/open_new_card", () => {
+        const newId = MockServer.env["partner"].create({ foo: "new" });
+        return {
+            type: "ir.actions.act_window",
+            name: "Open Card",
+            target: "current",
+            res_model: "partner",
+            res_id: newId,
+            view_mode: "form",
+            views: [[false, "form"]],
+        };
+    });
+
+    stepAllNetworkCalls();
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(4);
+    await createKanbanRecord();
+    expect(`.modal`).toHaveCount(1);
+    await contains(`.modal-footer button.btn-primary`).click();
+    expect(`.modal`).toHaveCount(0);
+    expect(".o_form_view").toHaveCount(1);
+    // should not reload the first kanban view
+    expect.verifySteps([
+        "/web/webclient/translations",
+        "/web/webclient/load_menus",
+        "/web/action/load",
+        "get_views",
+        "web_search_read",
+        "has_group",
+        "/web/action/load",
+        "get_views",
+        "onchange",
+        "web_save",
+        "open_new_card",
+        "get_views",
+        "web_read",
+    ]);
+});
+
 test.tags("desktop");
 test("grouped kanban with quick_create attrs set to false", async () => {
     await mountView({
@@ -3699,7 +3780,7 @@ test("quick create record fails in grouped by selection", async () => {
     await validateKanbanRecord();
 
     expect(".modal .o_form_view .o_form_editable").toHaveCount(1);
-    expect(".modal .o_field_widget[name=state] select:first").toHaveValue('"abc"');
+    expect(".modal .o_field_widget[name=state] input").toHaveValue("ABC");
 
     await contains(".modal .o_form_button_save").click();
 
@@ -4047,7 +4128,7 @@ test("quick create record in grouped by selection field (within quick_create_vie
     });
 
     await quickCreateKanbanRecord();
-    expect(".o_kanban_quick_create select:first").toHaveValue('"abc"', {
+    expect(".o_kanban_quick_create input").toHaveValue("ABC", {
         message: "should have set the correct state value by default",
     });
 

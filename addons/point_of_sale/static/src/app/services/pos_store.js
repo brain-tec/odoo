@@ -1681,12 +1681,13 @@ export class PosStore extends WithLazyGetterTrap {
                     !orderChange.noteUpdate.length &&
                     !orderChange.internal_note &&
                     !orderChange.general_customer_note &&
-                    order.uiState.lastPrint
+                    order.uiState.lastPrints
                 ) {
-                    orderChange = order.uiState.lastPrint;
+                    orderChange = [order.uiState.lastPrints.at(-1)];
                     reprint = true;
                 } else {
-                    order.uiState.lastPrint = orderChange;
+                    order.uiState.lastPrints.push(orderChange);
+                    orderChange = [orderChange];
                 }
 
                 if (reprint && opts.orderDone) {
@@ -1802,25 +1803,27 @@ export class PosStore extends WithLazyGetterTrap {
         const retryPrinters = new Set();
 
         for (const printer of printers) {
-            const { orderData, changes } = this.generateOrderChange(
-                order,
-                orderChange,
-                printer.config.product_categories_ids,
-                reprint
-            );
-            const receiptsData = await this.generateReceiptsDataToPrint(
-                orderData,
-                changes,
-                orderChange
-            );
-            let result = {};
-            for (const data of receiptsData) {
-                result = await this.printOrderChanges(data, printer);
-                if (!result.successful) {
-                    retryPrinters.add(printer);
-                    unsuccessfulPrints.push(printer.config.name + ": " + result.message.body);
-                } else if (result.warningCode) {
-                    this.displayPrinterWarning(result, printer.config.name);
+            for (const change of orderChange) {
+                const { orderData, changes } = this.generateOrderChange(
+                    order,
+                    change,
+                    printer.config.product_categories_ids,
+                    reprint
+                );
+                const receiptsData = await this.generateReceiptsDataToPrint(
+                    orderData,
+                    changes,
+                    change
+                );
+                let result = {};
+                for (const data of receiptsData) {
+                    result = await this.printOrderChanges(data, printer);
+                    if (!result.successful) {
+                        retryPrinters.add(printer);
+                        unsuccessfulPrints.push(printer.config.name + ": " + result.message.body);
+                    } else if (result.warningCode) {
+                        this.displayPrinterWarning(result, printer.config.name);
+                    }
                 }
             }
         }
@@ -2396,19 +2399,21 @@ export class PosStore extends WithLazyGetterTrap {
         const searchWord = this.searchProductWord.trim();
         const allProducts = this.models["product.template"].getAll();
         let list = [];
+        const isSearchByWord = searchWord !== "";
+        const isSelectedCategory = this.selectedCategory?.id;
 
-        if (searchWord !== "") {
+        if (isSearchByWord) {
             if (!this._searchTriggered) {
                 this.setSelectedCategory(0);
                 this._searchTriggered = true;
             }
             list = this.getProductsBySearchWord(
                 searchWord,
-                this.selectedCategory?.id ? this.selectedCategory.associatedProducts : allProducts
+                isSelectedCategory ? this.selectedCategory.associatedProducts : allProducts
             );
         } else {
             this._searchTriggered = false;
-            if (this.selectedCategory?.id) {
+            if (isSelectedCategory) {
                 list = this.selectedCategory.associatedProducts;
             } else {
                 list = allProducts;
@@ -2441,11 +2446,11 @@ export class PosStore extends WithLazyGetterTrap {
             filteredList.push(p);
         }
 
-        if (this.areAllProductsSpecial(filteredList)) {
+        if (!isSearchByWord && !isSelectedCategory && this.areAllProductsSpecial(filteredList)) {
             return [];
         }
 
-        return searchWord !== ""
+        return isSearchByWord
             ? filteredList.sort((a, b) => b.is_favorite - a.is_favorite)
             : filteredList.sort((a, b) => {
                   if (b.is_favorite !== a.is_favorite) {
@@ -2483,18 +2488,17 @@ export class PosStore extends WithLazyGetterTrap {
         return this.sortByWordIndex(Array.from(new Set([...exactMatches, ...matches])), words);
     }
 
-    getPaymentMethodDisplayText(pm, order) {
+    getPaymentMethodFmtAmount(pm, order) {
         const { cash_rounding, only_round_cash_method } = this.config;
         const amount = order.getDefaultAmountDueToPayIn(pm);
-        const fmtAmount = this.env.utils.formatCurrency(amount, false);
+        const fmtAmount = this.env.utils.formatCurrency(amount, true);
         if (
-            !this.currency.isPositive(amount) ||
-            !cash_rounding ||
-            (only_round_cash_method && pm.type !== "cash")
+            this.currency.isPositive(amount) &&
+            cash_rounding &&
+            !only_round_cash_method &&
+            pm.type === "cash"
         ) {
-            return pm.name;
-        } else {
-            return `${pm.name} (${fmtAmount})`;
+            return fmtAmount;
         }
     }
     getDate(date) {
