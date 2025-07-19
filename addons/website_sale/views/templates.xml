@@ -1709,7 +1709,7 @@
             </t>
         </xpath>
         <xpath expr="//div[contains(@t-attf-class, 'accordion-item')]//h6" position="replace">
-            <h6 t-if="not isMobile" class="accordion-header">
+            <div t-if="not isMobile" class="accordion-header h6 mb-0">
                 <button
                     t-attf-class="accordion-button px-0 bg-transparent shadow-none
                         {{'collapsed' if visible_attributes &gt;= 4 else ''}}"
@@ -1721,7 +1721,7 @@
                 >
                     <b t-field="a.name"/>
                 </button>
-            </h6>
+            </div>
         </xpath>
         <xpath expr="//div[contains(@t-attf-id, 'o_products_attributes_')]" position="attributes">
             <attribute
@@ -1741,7 +1741,7 @@
         >
             <t t-if="is_sidebar_collapsible">
                 <div class="accordion-item">
-                    <h6 class="accordion-header">
+                    <div class="accordion-header h6 mb-0">
                         <button
                             class="accordion-button px-0 bg-transparent shadow-none"
                             type="button"
@@ -1752,7 +1752,7 @@
                         >
                             <b>Price Range</b>
                         </button>
-                    </h6>
+                    </div>
                     <div
                         id="o_wsale_price_range_option_inner"
                         class="accordion-collapse collapse show"
@@ -1794,7 +1794,7 @@
 
     <template id="filter_products_tags" name="Filter by Tags" active="True">
         <div t-if="all_tags" class="accordion-item">
-            <h6 class="accordion-header">
+            <div class="accordion-header h6 mb-0">
                 <button class="accordion-button px-0 bg-transparent shadow-none"
                         type="button"
                         data-bs-toggle="collapse"
@@ -1803,7 +1803,7 @@
                         t-attf-aria-controls="o_wsale_tags_option_inner">
                     <b>Tags</b>
                 </button>
-            </h6>
+            </div>
             <div id="o_wsale_tags_option_inner" class="accordion-collapse collapse show">
                 <div class="flex-column mb-3">
                     <t t-call="website_sale.filter_products_tags_list">
@@ -2671,7 +2671,12 @@
     <!-- Encapsulate the content in a `a` tag with a link to the product page. Override this
          template to change or remove the product link. Called in `website_sale.cart_lines`. -->
     <template id="cart_line_product_link" name="Shopping Cart Line Product Link">
-        <a t-if="line._is_sellable()" t-att-href="line.product_id.website_url" name="o_cart_line_product_link">
+        <a
+            t-if="line._is_sellable()"
+            class="text-reset"
+            t-att-href="line.product_id.website_url"
+            name="o_cart_line_product_link"
+        >
             <t t-out="0"/>
         </a>
         <t t-else="" t-out="0"/>
@@ -2743,26 +2748,27 @@
                         <div class="d-flex gap-3">
                             <div class="flex-grow-1 text-wrap w-100">
                                 <div class="d-flex justify-content-between">
-                                    <div class="d-md-flex flex-md-wrap column-gap-md-2 align-items-md-center">
+                                    <div class="d-md-flex flex-md-wrap column-gap-md-1 align-items-md-center">
                                         <t t-call="website_sale.cart_line_product_link">
                                             <h6
                                                 t-out="line._get_line_header()"
-                                                class="mb-0 fw-bold text-wrap small"
+                                                class="text-wrap mb-1"
                                             />
                                         </t>
                                         <t t-set="combination_name" t-value="line._get_combination_name()"/>
+                                        <span t-if="combination_name" class="d-none d-md-inline h6 text-muted mb-1">-</span>
                                         <div
                                             t-if="combination_name or line.product_template_id._has_multiple_uoms()"
                                             class="d-inline-flex flex-wrap column-gap-2 row-gap-1 align-items-center my-1 my-md-0 w-100 w-md-auto"
                                         >
                                             <span
                                                 t-if="combination_name"
-                                                class="h6 text-muted small mb-0"
+                                                class="h6 text-muted mb-1"
                                                 t-out="combination_name"
                                             />
                                             <span
                                                 t-if="line.product_template_id._has_multiple_uoms()"
-                                                class="badge bg-light"
+                                                class="badge bg-light mb-1"
                                                 t-out="line.product_uom_id.name"
                                             />
                                         </div>
@@ -2891,7 +2897,7 @@
 
     <template id="cart_lines_price" name="Shopping Cart Line Price">
         <h6
-            class="d-flex flex-column flex-md-row align-items-end align-items-md-start justify-content-md-end mb-0 small fw-bold"
+            class="d-flex flex-column flex-md-row align-items-end align-items-md-start justify-content-md-end mb-1"
             name="website_sale_cart_line_price"
         >
             <t t-if="line.discount and line._is_sellable() and line._get_displayed_unit_price()">
@@ -3023,9 +3029,9 @@
                     <div class="flex-grow-1">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <a t-att-href="product.website_url">
+                                <a class="text-reset" t-att-href="product.website_url">
                                     <h6
-                                        class="align-top small fw-bold text-wrap"
+                                        class="align-top text-wrap"
                                         t-out="product.with_context(display_default_code=False).display_name"
                                     />
                                 </a>
@@ -3034,40 +3040,40 @@
                                     t-field="product.description_sale"
                                 />
                             </div>
-                            <h6
-                                class="d-flex mb-0 small text-end fw-bold"
-                                name="suggested_product_price_container"
-                            >
-                                <t
-                                    t-set="combination_info"
-                                    t-value="product._get_combination_info_variant()"
-                                />
-                                <del
-                                    name="suggested_product_list_price"
-                                    t-attf-class="me-2 text-nowrap text-muted {{'' if combination_info['has_discounted_price'] else 'd-none'}}"
-                                    t-esc="combination_info['list_price']"
-                                    t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
-                                />
-                                <span
-                                    name="suggested_product_price"
-                                    class="text-nowrap"
-                                    t-esc="combination_info['price']"
-                                    t-options="{'widget': 'monetary','display_currency': website.currency_id}"
-                                />
-                            </h6>
-                        </div>
-                        <div class="d-flex justify-content-md-end">
-                            <button
-                                role="button"
-                                class="js_add_suggested_products btn btn-primary text-nowrap"
-                                t-att-data-product-id="product.id"
-                                t-att-data-product-template-id="product.product_tmpl_id.id"
-                                t-att-data-product-type="product.type"
-                                t-att-data-show-quantity="is_view_active('website_sale.product_quantity')"
-                            >
-                                <i class="d-md-none fa fa-shopping-cart" role="presentation"/>
-                                <span class="d-none d-md-inline">Add to cart</span>
-                            </button>
+                            <div class="d-flex flex-column gap-2 align-items-end">
+                                <h6
+                                    class="d-flex mb-0 text-end"
+                                    name="suggested_product_price_container"
+                                >
+                                    <t
+                                        t-set="combination_info"
+                                        t-value="product._get_combination_info_variant()"
+                                    />
+                                    <del
+                                        name="suggested_product_list_price"
+                                        t-attf-class="me-2 text-nowrap text-muted {{'' if combination_info['has_discounted_price'] else 'd-none'}}"
+                                        t-esc="combination_info['list_price']"
+                                        t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
+                                    />
+                                    <span
+                                        name="suggested_product_price"
+                                        class="text-nowrap"
+                                        t-esc="combination_info['price']"
+                                        t-options="{'widget': 'monetary','display_currency': website.currency_id}"
+                                    />
+                                </h6>
+                                <button
+                                    role="button"
+                                    class="js_add_suggested_products btn btn-primary text-nowrap"
+                                    t-att-data-product-id="product.id"
+                                    t-att-data-product-template-id="product.product_tmpl_id.id"
+                                    t-att-data-product-type="product.type"
+                                    t-att-data-show-quantity="is_view_active('website_sale.product_quantity')"
+                                >
+                                    <i class="d-md-none fa fa-shopping-cart" role="presentation"/>
+                                    <span class="d-none d-md-inline">Add to cart</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
