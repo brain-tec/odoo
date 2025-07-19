@@ -96,6 +96,7 @@ export async function setupWebsiteBuilder(
         beforeWrapwrapContent = "",
         translateMode = false,
         onIframeLoaded = () => {},
+        delayReload = async () => {},
     } = {}
 ) {
     // TODO: fix when the iframe is reloaded and become empty (e.g. discard button)
@@ -110,21 +111,22 @@ export async function setupWebsiteBuilder(
     await mountWithCleanup(WebClient);
     let originalIframeLoaded;
     let resolveIframeLoaded = () => {};
+    const bodyHTML = `${beforeWrapwrapContent}
+        <div id="wrapwrap">${headerContent} <div id="wrap" class="oe_structure oe_empty" data-oe-model="ir.ui.view" data-oe-id="539" data-oe-field="arch">${websiteContent}</div></div>`;
     const iframeLoaded = new Promise((resolve) => {
         resolveIframeLoaded = (el) => {
             const iframe = el;
+            const styleEl = iframe.contentDocument.createElement("style");
+            styleEl.textContent = /*css*/ `* { transition: none !important; } `;
             if (styleContent) {
-                const style = iframe.contentDocument.createElement("style");
-                style.innerHTML = styleContent;
-                iframe.contentDocument.head.appendChild(style);
+                styleEl.textContent += styleContent;
             }
+            iframe.contentDocument.head.appendChild(styleEl);
             iframe.contentDocument.documentElement.setAttribute(
                 "data-main-object",
                 "website.page(4,)"
             );
-            iframe.contentDocument.body.innerHTML = `
-                ${beforeWrapwrapContent}
-                <div id="wrapwrap">${headerContent} <div id="wrap" class="oe_structure oe_empty" data-oe-model="ir.ui.view" data-oe-id="539" data-oe-field="arch">${websiteContent}</div></div>`;
+            iframe.contentDocument.body.innerHTML = bodyHTML;
             // we artificially set the is-ready attribute to trick the rest of
             // the code into thinking that the js inside the iframe is properly
             // loaded
@@ -162,6 +164,10 @@ export async function setupWebsiteBuilder(
         },
         get translation() {
             return translateMode;
+        },
+        async reloadIframe() {
+            await delayReload();
+            this.websiteContent.el.contentDocument.body.innerHTML = bodyHTML;
         },
     });
     patchWithCleanup(WebsiteSystrayItem.prototype, {
@@ -303,6 +309,7 @@ export function addOption({
     props,
     editableOnly,
     title,
+    reloadTarget,
 }) {
     const pluginId = uniqueId("test-option");
     const Class = makeOptionPlugin({
@@ -317,6 +324,7 @@ export function addOption({
         props,
         editableOnly,
         title,
+        reloadTarget,
     });
     registry.category("website-plugins").add(pluginId, Class);
     after(() => {
@@ -335,6 +343,7 @@ function makeOptionPlugin({
     props,
     editableOnly,
     title,
+    reloadTarget,
 }) {
     const option = {
         OptionComponent,
@@ -346,6 +355,7 @@ function makeOptionPlugin({
         props,
         editableOnly,
         title,
+        reloadTarget,
     };
 
     const Class = {

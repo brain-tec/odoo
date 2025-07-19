@@ -176,7 +176,6 @@
             'barcodes/static/src/js/barcode_parser.js',
             'barcodes_gs1_nomenclature/static/src/js/barcode_parser.js',
             'barcodes_gs1_nomenclature/static/src/js/barcode_service.js',
-            'web/static/src/views/fields/parsers.js',
             # report download utils
             'web/static/src/webclient/actions/reports/utils.js',
             # PoS files
@@ -204,9 +203,7 @@
         ],
         'point_of_sale.base_tests': [
             "web/static/lib/hoot-dom/**/*",
-            "web_tour/static/src/tour_pointer/**/*.xml",
-            "web_tour/static/src/tour_pointer/**/*.js",
-            "web_tour/static/src/tour_service/**/*",
+            "web_tour/static/src/js/**/*",
             'web_tour/static/src/tour_utils.js',
             "barcodes/static/tests/legacy/helpers.js",
             "web/static/tests/legacy/helpers/utils.js",

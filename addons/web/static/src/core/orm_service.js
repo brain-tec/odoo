@@ -90,6 +90,7 @@ export const UPDATE_METHODS = [
     "create",
     "write",
     "web_save",
+    "web_save_multi",
     "action_archive",
     "action_unarchive",
 ];
@@ -99,7 +100,7 @@ export class ORM {
         this.rpc = rpc; // to be overridable by the SampleORM
         /** @protected */
         this._silent = false;
-        this._cached = false;
+        this._cache = false;
     }
 
     /** @returns {ORM} */
@@ -111,8 +112,8 @@ export class ORM {
      * @param {object} options
      * @returns {ORM}
      */
-    cached(options = {}) {
-        return Object.assign(Object.create(this), { _cached: options });
+    cache(options = {}) {
+        return Object.assign(Object.create(this), { _cache: options });
     }
 
     /**
@@ -135,7 +136,7 @@ export class ORM {
         };
         return this.rpc(url, params, {
             silent: this._silent,
-            cached: this._cached,
+            cache: this._cache,
         });
     }
 
@@ -362,19 +363,34 @@ export class ORM {
         validateObject("data", data);
         return this.call(model, "web_save", [ids, data], kwargs);
     }
+
+    /**
+     * @param {string} model
+     * @param {number[]} ids
+     * @param {Object[]} data
+     * @param {Object} [kwargs={}]
+     * @param {Object} [kwargs.specification]
+     * @param {Object} [kwargs.context]
+     * @returns {Promise<any[]>}
+     */
+    async webSaveMulti(model, ids, data, kwargs = {}) {
+        validatePrimitiveList("ids", "number", ids);
+        validateArray("data", data);
+        data.forEach((d) => {
+            validateObject("data item", d);
+        });
+        return this.call(model, "web_save_multi", [ids, data], kwargs);
+    }
 }
 
 /**
  * Note:
  *
- * when we will need a way to configure a rpc (for example, to setup a "shadow"
- * flag, or some way of not displaying errors), we can use the following api:
+ * To hide RPC errors, use the following API:
  *
  * this.orm = useService('orm');
- *
  * ...
- *
- * const result = await this.orm.withOption({shadow: true}).read('res.partner', [id]);
+ * const result = await this.orm.silent.read('res.partner', [id]);
  */
 export const ormService = {
     async: [
