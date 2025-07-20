@@ -487,13 +487,14 @@ export class WebsiteBuilderClientAction extends Component {
         // trigger an new instance of the builder menu
         this.state.key++;
 
-        this.notification.add(_t("Your modifications were saved to apply this option."), {
-            title: _t("Content saved."),
+        this.notification.add("Content saved", {
             type: "success",
         });
     }
 
     async reloadIframeAndCloseEditor() {
+        this.initialTab = null;
+        this.target = null;
         const isEditing = false;
         this.state.isEditing = isEditing;
         this.addSystrayItems();
