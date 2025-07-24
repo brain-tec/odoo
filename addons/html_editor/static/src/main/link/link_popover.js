@@ -19,7 +19,6 @@ export class LinkPopover extends Component {
         onDiscard: Function,
         onRemove: Function,
         onCopy: Function,
-        onClose: Function,
         onEdit: Function,
         getInternalMetaData: Function,
         getExternalMetaData: Function,
@@ -121,7 +120,12 @@ export class LinkPopover extends Component {
         });
         this.customTextResetPreviewColor = this.customTextColorState.selectedColor;
         this.customFillColorState = useState({
-            selectedColor: computedStyle.backgroundColor || DEFAULT_CUSTOM_FILL_COLOR,
+            selectedColor:
+                (computedStyle.backgroundImage === "none"
+                    ? undefined
+                    : computedStyle.backgroundImage) ||
+                computedStyle.backgroundColor ||
+                DEFAULT_CUSTOM_FILL_COLOR,
             defaultTab: "solid",
         });
         this.customFillResetPreviewColor = this.customFillColorState.selectedColor;
@@ -137,6 +141,10 @@ export class LinkPopover extends Component {
                     refName,
                     {
                         state: this[colorStateRef],
+                        enabledTabs:
+                            colorStateRef === "customFillColorState"
+                                ? ["solid", "custom", "gradient"]
+                                : ["solid", "custom"],
                         getUsedCustomColors: () => [],
                         colorPrefix: "",
                         applyColor: (colorValue) => {
@@ -273,27 +281,13 @@ export class LinkPopover extends Component {
         if (ev.key === "Escape") {
             ev.preventDefault();
             ev.stopImmediatePropagation();
-            this.props.onClose();
+            this.onClickApply();
         }
     }
 
     onClickReplaceTitle() {
         this.state.label = this.state.urlTitle;
         this.onClickApply();
-    }
-
-    onClickForceEditMode(ev) {
-        if (this.props.linkElement.href) {
-            const currentUrl = new URL(this.props.linkElement.href);
-            if (
-                browser.location.hostname === currentUrl.hostname &&
-                !currentUrl.pathname.startsWith("/@/")
-            ) {
-                ev.preventDefault();
-                currentUrl.pathname = `/@${currentUrl.pathname}`;
-                browser.open(currentUrl);
-            }
-        }
     }
 
     onClickDirectDownload(checked) {
@@ -524,7 +518,10 @@ export class LinkPopover extends Component {
             return false;
         }
         let customStyles = `color: ${this.customTextColorState.selectedColor}; `;
-        customStyles += `background-color: ${this.customFillColorState.selectedColor}; `;
+        const backgroundProperty = this.customFillColorState.selectedColor?.includes("gradient")
+            ? "background-image"
+            : "background-color";
+        customStyles += `${backgroundProperty}: ${this.customFillColorState.selectedColor}; `;
         customStyles += `border-width: ${this.state.customBorderSize}px; `;
         customStyles += `border-color: ${this.customBorderColorState.selectedColor}; `;
         customStyles += `border-style: ${this.state.customBorderStyle}; `;
