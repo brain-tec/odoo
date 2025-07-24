@@ -191,7 +191,7 @@ export class FormatPlugin extends Plugin {
     hasSelectionFormat(format, targetedNodes = this.dependencies.selection.getTargetedNodes()) {
         const targetedTextNodes = targetedNodes.filter(isTextNode);
         const isFormatted = formatsSpecs[format].isFormatted;
-        return targetedTextNodes.some((n) => isFormatted(n, this.editable));
+        return targetedTextNodes.some((n) => isFormatted(n, { editable: this.editable }));
     }
     /**
      * Return true if the current selection on the editable appears as the given
@@ -209,7 +209,9 @@ export class FormatPlugin extends Plugin {
             targetedTextNodes.length &&
             targetedTextNodes.every(
                 (node) =>
-                    isZwnbsp(node) || isEmptyTextNode(node) || isFormatted(node, this.editable)
+                    isZwnbsp(node) ||
+                    isEmptyTextNode(node) ||
+                    isFormatted(node, { editable: this.editable })
             )
         );
     }
@@ -301,7 +303,7 @@ export class FormatPlugin extends Plugin {
             // with a class that is not indicated as splittable.
             const isClassListSplittable = (classList) =>
                 [...classList].every((className) =>
-                    this.getResource("format_splittable_class").some((cb) => cb(className))
+                    this.getResource("format_class_predicates").some((cb) => cb(className))
                 );
 
             while (
@@ -485,7 +487,11 @@ export class FormatPlugin extends Plugin {
         if (this.getResource("unremovable_node_predicates").some((p) => p(element))) {
             return;
         }
-        if (element.classList.length) {
+        if (
+            ![...element.classList].every((c) =>
+                this.getResource("format_class_predicates").some((p) => p(c))
+            )
+        ) {
             // Original comment from web_editor:
             // We only remove the empty element if it has no class, to ensure we
             // don't break visual styles (in that case, its ZWS was kept to
