@@ -5606,7 +5606,6 @@ class AccountMove(models.Model):
         self._check_draftable()
         # We remove all the analytics entries for this journal
         self.line_ids.analytic_line_ids.with_context(skip_analytic_sync=True).unlink()
-        self.mapped('line_ids').remove_move_reconcile()
         self.state = 'draft'
 
         self._detach_attachments()
@@ -5696,6 +5695,7 @@ class AccountMove(models.Model):
         if any(move.state != 'draft' for move in self):
             raise UserError(_("Only draft journal entries can be cancelled."))
 
+        self.line_ids.remove_move_reconcile()
         self.payment_ids.state = "canceled"
         self.write({'auto_post': 'no', 'state': 'cancel'})
 
@@ -5811,6 +5811,10 @@ class AccountMove(models.Model):
             [('sending_data', '!=', False)],
             limit=limit,
         )
+        total_to_process = self.env['account.move'].search_count(
+            [('sending_data', '!=', False)],
+        )
+
         need_retrigger = len(to_process) > job_count
         if not to_process:
             return
@@ -5827,6 +5831,8 @@ class AccountMove(models.Model):
             to_process,
             from_cron=True,
         )
+        self.env['ir.cron']._notify_progress(done=len(to_process),
+                                             remaining=total_to_process - len(to_process))
 
         for partner_id, partner_moves in moves_by_partner.items():
             partner = self.env['res.partner'].browse(partner_id)
