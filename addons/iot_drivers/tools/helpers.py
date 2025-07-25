@@ -8,7 +8,6 @@ from importlib import util
 import inspect
 import io
 import logging
-import netifaces
 from pathlib import Path
 import platform
 import re
@@ -202,12 +201,15 @@ def get_img_name():
 
 
 def get_ip():
-    interfaces = netifaces.interfaces()
-    for interface in interfaces:
-        if netifaces.ifaddresses(interface).get(netifaces.AF_INET):
-            addr = netifaces.ifaddresses(interface).get(netifaces.AF_INET)[0]['addr']
-            if addr != '127.0.0.1':
-                return addr
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(('8.8.8.8', 1))  # Google DNS
+        return s.getsockname()[0]
+    except OSError as e:
+        _logger.warning("Could not get local IP address: %s", e)
+        return None
+    finally:
+        s.close()
 
 
 @cache
@@ -457,17 +459,17 @@ def update_conf(values, section='iot.box'):
     :param dict values: key-value pairs to update the config with.
     :param str section: The section to update the key-value pairs in (Default: iot.box).
     """
-    _logger.debug("Updating odoo.conf with values: %s", values)
-    conf = get_conf()
-
-    if not conf.has_section(section):
-        _logger.debug("Creating new section '%s' in odoo.conf", section)
-        conf.add_section(section)
-
-    for key, value in values.items():
-        conf.set(section, key, value) if value else conf.remove_option(section, key)
-
     with writable():
+        _logger.debug("Updating odoo.conf with values: %s", values)
+        conf = get_conf()
+
+        if not conf.has_section(section):
+            _logger.debug("Creating new section '%s' in odoo.conf", section)
+            conf.add_section(section)
+
+        for key, value in values.items():
+            conf.set(section, key, value) if value else conf.remove_option(section, key)
+
         with open(path_file("odoo.conf"), "w", encoding='utf-8') as f:
             conf.write(f)
 
@@ -568,9 +570,16 @@ def reset_log_level():
         _logger.info("Resetting log level to default.")
         update_conf({
             'log_level_reset_timestamp': '',
-            'log_handler': ':WARNING',
-            'log_level': 'warn',
+            'log_handler': ':INFO',
+            'log_level': 'info',
         })
+
+
+def _get_system_uptime():
+    if platform.system() == 'Windows':
+        return 0
+    uptime_string = read_file_first_line("/proc/uptime")
+    return float(uptime_string.split(" ")[0])
 
 
 def _get_raspberry_pi_model():
@@ -587,3 +596,5 @@ def _get_raspberry_pi_model():
 
 
 raspberry_pi_model = _get_raspberry_pi_model()
+odoo_start_time = time.monotonic()
+system_start_time = odoo_start_time - _get_system_uptime()
