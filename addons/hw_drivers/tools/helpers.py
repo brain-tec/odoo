@@ -149,7 +149,7 @@ def check_certificate():
     server = get_odoo_server_url()
 
     if not server:
-        _logger.info('Ignoring the nginx certificate check without a connected database')
+        _logger.debug('Ignoring the nginx certificate check without a connected database')
         return {"status": CertificateStatus.ERROR,
                 "error_code": "ERR_IOT_HTTPS_CHECK_NO_SERVER"}
 
@@ -179,7 +179,7 @@ def check_certificate():
         return {"status": CertificateStatus.NEED_REFRESH}
     else:
         message = 'Your certificate %(certificate)s is valid until %(end_date)s' % {"certificate": cn, "end_date": cert_end_date}
-        _logger.info(message)
+        _logger.debug(message)
         return {"status": CertificateStatus.OK, "message": message}
 
 
@@ -649,17 +649,17 @@ def update_conf(values, section='iot.box'):
     :param dict values: key-value pairs to update the config with.
     :param str section: The section to update the key-value pairs in (Default: iot.box).
     """
-    _logger.debug("Updating odoo.conf with values: %s", values)
-    conf = get_conf()
-
-    if not conf.has_section(section):
-        _logger.debug("Creating new section '%s' in odoo.conf", section)
-        conf.add_section(section)
-
-    for key, value in values.items():
-        conf.set(section, key, value) if value else conf.remove_option(section, key)
-
     with writable():
+        _logger.debug("Updating odoo.conf with values: %s", values)
+        conf = get_conf()
+
+        if not conf.has_section(section):
+            _logger.debug("Creating new section '%s' in odoo.conf", section)
+            conf.add_section(section)
+
+        for key, value in values.items():
+            conf.set(section, key, value) if value else conf.remove_option(section, key)
+
         with open(path_file("odoo.conf"), "w", encoding='utf-8') as f:
             conf.write(f)
 
@@ -758,8 +758,8 @@ def reset_log_level():
         _logger.info("Resetting log level to default.")
         update_conf({
             'log_level_reset_timestamp': '',
-            'log_handler': ':WARNING',
-            'log_level': 'warn',
+            'log_handler': ':INFO,werkzeug:WARNING',
+            'log_level': 'info',
         })
 
 
