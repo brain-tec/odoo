@@ -363,6 +363,7 @@ export class PosOrderline extends Base {
             discount: discount,
             tax_ids: this.tax_ids,
             product_id: product,
+            rate: 1.0,
             ...customValues,
         };
         if (order.fiscal_position_id) {
@@ -468,14 +469,6 @@ export class PosOrderline extends Base {
 
     getTaxDetails() {
         return this.allPrices.taxDetails;
-    }
-
-    getTotalTaxesIncludedInPrice() {
-        const productTaxes = this._getProductTaxesAfterFiscalPosition();
-        const taxDetails = this.getTaxDetails();
-        return productTaxes
-            .filter((tax) => tax.price_include)
-            .reduce((sum, tax) => sum + taxDetails[tax.id].amount, 0);
     }
 
     /**
