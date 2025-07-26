@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import fields, Command
-from odoo.tests import Form, HttpCase, new_test_user
+from odoo.tests import Form, HttpCase, new_test_user, tagged
 from odoo.tools.float_utils import float_round
 
 from odoo.addons.product.tests.common import ProductCommon
@@ -434,6 +434,20 @@ class AccountTestInvoicingCommon(ProductCommon):
             'name': f"fixed_{amount}_({self.tax_number})",
             'amount_type': 'fixed',
             'amount': amount,
+        })
+
+    def python_tax(self, formula, **kwargs):
+        account_tax_python = self.env['ir.module.module']._get('account_tax_python')
+        if account_tax_python.state != 'installed':
+            raise SkipTest("Module 'account_tax_python' is not installed!")
+
+        self.tax_number += 1
+        return self.env['account.tax'].create({
+            **kwargs,
+            'name': f"code_({self.tax_number})",
+            'amount_type': 'code',
+            'amount': 0.0,
+            'formula': formula,
         })
 
     @classmethod
@@ -878,6 +892,7 @@ class AccountTestInvoicingHttpCommon(AccountTestInvoicingCommon, AccountTestMock
     pass
 
 
+@tagged('is_tour')
 class TestTaxCommon(AccountTestInvoicingHttpCommon):
 
     @classmethod
