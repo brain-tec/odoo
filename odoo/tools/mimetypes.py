@@ -128,7 +128,7 @@ _mime_mappings = (
     _Entry('image/png', [b'\x89PNG\r\n\x1A\n'], []),
     _Entry('image/gif', [b'GIF87a', b'GIF89a'], []),
     _Entry('image/bmp', [b'BM'], []),
-    _Entry('application/xml', [b'<'], [
+    _Entry('text/xml', [b'<'], [
         _check_svg,
     ]),
     _Entry('image/x-icon', [b'\x00\x00\x01\x00'], []),
@@ -178,28 +178,22 @@ def _odoo_guess_mimetype(bin_data, default='application/octet-stream'):
 
 try:
     import magic
-except ImportError:
-    magic = None
-
-if magic:
-    # There are 2 python libs named 'magic' with incompatible api.
-    # magic from pypi https://pypi.python.org/pypi/python-magic/
-    if hasattr(magic, 'from_buffer'):
-        _guesser = functools.partial(magic.from_buffer, mime=True)
-    # magic from file(1) https://packages.debian.org/squeeze/python-magic
-    elif hasattr(magic, 'open'):
-        ms = magic.open(magic.MAGIC_MIME_TYPE)
-        ms.load()
-        _guesser = ms.buffer
-
     def guess_mimetype(bin_data, default=None):
-        mimetype = _guesser(bin_data[:1024])
-        # upgrade incorrect mimetype to official one, fixed upstream
-        # https://github.com/file/file/commit/1a08bb5c235700ba623ffa6f3c95938fe295b262
-        if mimetype == 'image/svg':
-            return 'image/svg+xml'
+        mimetype = magic.from_buffer(bin_data[:1024], mime=True)
+        if mimetype in ('application/CDFV2', 'application/x-ole-storage'):
+            # Those are the generic file format that Microsoft Office
+            # was using before 2006, use our own check to further
+            # discriminate the mimetype.
+            try:
+                if msoffice_mimetype := _check_olecf(bin_data):
+                    return msoffice_mimetype
+            except Exception:  # noqa: BLE001
+                _logger.getChild('guess_mimetype').warning(
+                    "Sub-checker '_check_olecf' of type 'application/x-ole-storage' failed",
+                    exc_info=True)
         return mimetype
-else:
+
+except ImportError:
     guess_mimetype = _odoo_guess_mimetype
 
 
