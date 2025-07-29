@@ -259,6 +259,9 @@ class TestFrontend(TestFrontendCommon):
         order_tips.sort()
         self.assertEqual(order_tips, [0.0, 0.4, 1.0, 1.0, 1.5])
 
+        order1 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-00001')], limit=1, order='id desc')
+        self.assertEqual(order1.payment_ids.amount, 2.4)
+
         order4 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-00004')], limit=1, order='id desc')
         self.assertEqual(order4.customer_count, 2)
 
@@ -622,3 +625,10 @@ class TestFrontend(TestFrontendCommon):
         We can now transfer order from one table to another and from floating order to another etc.
         """
         self.start_pos_tour('test_transfering_orders', login="pos_user")
+
+    def test_synchronisation_of_orders(self):
+        """ Test order synchronization with order data using the notify_synchronisation method.
+            First, an ongoing order is created on the server, and verify its presence in the POS UI.
+            Then, the order is paid from the server, and confirm if the order state is updated correctly.
+        """
+        self.start_pos_tour("OrderSynchronisationTour")
