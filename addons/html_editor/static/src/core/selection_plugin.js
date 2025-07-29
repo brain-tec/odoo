@@ -166,6 +166,7 @@ function scrollToSelection(selection) {
  * @property { SelectionPlugin['getTargetedBlocks'] } getTargetedBlocks
  * @property { SelectionPlugin['getTargetedNodes'] } getTargetedNodes
  * @property { SelectionPlugin['modifySelection'] } modifySelection
+ * @property { SelectionPlugin['preserveFocus'] } preserveFocus
  * @property { SelectionPlugin['preserveSelection'] } preserveSelection
  * @property { SelectionPlugin['rectifySelection'] } rectifySelection
  * @property { SelectionPlugin['areNodeContentsFullySelected'] } areNodeContentsFullySelected
@@ -187,6 +188,7 @@ export class SelectionPlugin extends Plugin {
         "setCursorStart",
         "setCursorEnd",
         "extractContent",
+        "preserveFocus",
         "preserveSelection",
         "resetSelection",
         "getTargetedNodes",
@@ -208,7 +210,7 @@ export class SelectionPlugin extends Plugin {
 
     setup() {
         this.resetSelection();
-        this.addDomListener(this.document, "selectionchange", () => {
+        this.addGlobalDomListener("selectionchange", () => {
             this.updateActiveSelection();
             const selection = this.document.getSelection();
             if (this.isSelectionInEditable(selection)) {
@@ -579,6 +581,7 @@ export class SelectionPlugin extends Plugin {
         if (!this.validateSelection({ anchorNode, anchorOffset, focusNode, focusOffset })) {
             return null;
         }
+        const restore = this.preserveTextareaSelections();
         const isCollapsed = anchorNode === focusNode && anchorOffset === focusOffset;
         [focusNode, focusOffset] = normalizeSelfClosingElement(focusNode, focusOffset, "right");
         [anchorNode, anchorOffset] = isCollapsed
@@ -623,8 +626,55 @@ export class SelectionPlugin extends Plugin {
                 });
             }
         }
+        restore();
 
         return this.activeSelection;
+    }
+
+    /**
+     * Take the selections in all `<textarea>` elements in the editable and
+     * return a function that restores them.
+     *
+     * @returns {() => void}
+     */
+    preserveTextareaSelections() {
+        const selections = [...this.editable.querySelectorAll("textarea")].map((textarea) => ({
+            textarea,
+            start: textarea.selectionStart,
+            end: textarea.selectionEnd,
+            direction: textarea.selectionDirection,
+        }));
+        return () => {
+            if (
+                this.activeSelection?.isCollapsed &&
+                this.activeSelection.anchorNode?.nodeName === "TEXTAREA"
+            ) {
+                // If a textarea is targeted, focus it so its selection is active.
+                this.activeSelection.anchorNode.focus();
+            }
+            for (const { textarea, start, end, direction } of selections) {
+                textarea.setSelectionRange(start, end, direction);
+            }
+        };
+    }
+
+    /**
+     * Take the current active element and return a function that restores the
+     * focus in it if its content is editable.
+     *
+     * @returns {() => void}
+     */
+    preserveFocus() {
+        const activeElement = this.document.activeElement;
+        return () => {
+            if (
+                activeElement &&
+                activeElement !== this.document.activeElement &&
+                this.isNodeEditable(activeElement)
+            ) {
+                activeElement.focus();
+            }
+        };
     }
 
     /**
