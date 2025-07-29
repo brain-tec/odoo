@@ -145,7 +145,6 @@ export class FormatPlugin extends Plugin {
             {
                 id: "strikethrough",
                 groupId: "decoration",
-                namespaces: ["compact", "expanded"],
                 commandId: "formatStrikethrough",
                 isActive: isFormatted(this, "strikeThrough"),
             },
@@ -231,7 +230,7 @@ export class FormatPlugin extends Plugin {
     }
 
     formatSelection(formatName, options) {
-        this.delegateTo("format_selection_overrides", formatName, options);
+        this.delegateTo("format_selection_handlers", formatName, options);
         if (this._formatSelection(formatName, options) && !options?.removeFormat) {
             this.dependencies.history.addStep();
         }
