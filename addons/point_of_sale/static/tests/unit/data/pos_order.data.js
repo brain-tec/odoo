@@ -3,6 +3,14 @@ import { models } from "@web/../tests/web_test_helpers";
 export class PosOrder extends models.ServerModel {
     _name = "pos.order";
 
+    get_preparation_change(id) {
+        const read = this.read([id]);
+        const changes = read[0]?.last_order_preparation_change || "{}";
+        return {
+            last_order_preparation_change: changes,
+        };
+    }
+
     _load_pos_data_fields() {
         return [];
     }
@@ -22,7 +30,17 @@ export class PosOrder extends models.ServerModel {
     }
 
     sync_from_ui(data) {
-        const orderIds = this.create(data);
+        const orderIds = [];
+        for (const record of data) {
+            if (record.id) {
+                this.write([record.id], record);
+                orderIds.push(record.id);
+            } else {
+                const id = this.create(record);
+                orderIds.push(id);
+            }
+        }
+
         return this.read_pos_data(orderIds, data, this.config_id);
     }
 
