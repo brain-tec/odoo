@@ -354,6 +354,34 @@ class PosOrder(models.Model):
         ('to_invoice', 'To Invoice'),
     ], string='Invoice Status', compute='_compute_invoice_status')
 
+    def get_preparation_change(self):
+        self.ensure_one()
+        return {
+            'last_order_preparation_change': self.last_order_preparation_change,
+        }
+
+    def _ensure_to_keep_last_preparation_change(self, vals):
+        for record in self:
+            if record.last_order_preparation_change:
+                change = json.loads(record.last_order_preparation_change)
+                if not change.get('metadata'):
+                    return
+
+                local_change = json.loads(vals.get('last_order_preparation_change', '{}'))
+                if not local_change.get('metadata'):
+                    vals['last_order_preparation_change'] = record.last_order_preparation_change
+                    return
+
+                server_date = fields.Datetime.from_string(change['metadata'].get('serverDate'))
+                local_date = fields.Datetime.from_string(local_change['metadata'].get('serverDate'))
+
+                if server_date > local_date:
+                    _logger.warning("Preparation changes were outdated, probably linked to a synching issue.")
+                    vals['last_order_preparation_change'] = record.last_order_preparation_change
+                else:
+                    local_change['metadata']['serverDate'] = fields.Datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    vals['last_order_preparation_change'] = json.dumps(local_change)
+
     @api.depends('account_move')
     def _compute_invoice_status(self):
         for order in self:
@@ -695,6 +723,8 @@ class PosOrder(models.Model):
         amount_total = sum(order.amount_total for order in self)
         if amount_total <= 0 and self.partner_id.bank_ids:
             bank_partner_id = self.partner_id.bank_ids[0].id
+        elif amount_total >= 0 and self.payment_ids and self.payment_ids[0].payment_method_id.journal_id.bank_account_id:
+            bank_partner_id = self.payment_ids[0].payment_method_id.journal_id.bank_account_id.id
         elif amount_total >= 0 and self.company_id.partner_id.bank_ids:
             bank_partner_id = self.company_id.partner_id.bank_ids[0].id
         return bank_partner_id
@@ -813,6 +843,7 @@ class PosOrder(models.Model):
             'invoice_origin': ', '.join(ref or '' for ref in self.mapped('pos_reference')),
             'pos_refunded_invoice_ids': pos_refunded_invoice_ids,
             'pos_order_ids': self.ids,
+            'ref': self.name if is_single_order else False,
             'journal_id': self.config_id.invoice_journal_id.id,
             'move_type': move_type,
             'partner_id': self.partner_id.address_get(['invoice'])['invoice'],
@@ -886,7 +917,13 @@ class PosOrder(models.Model):
         # Cash rounding.
         cash_rounding = self.config_id.rounding_method
         if self.config_id.cash_rounding and cash_rounding and (not self.config_id.only_round_cash_method or any(p.payment_method_id.is_cash_count for p in self.payment_ids)):
-            amount_currency = cash_rounding.compute_difference(self.currency_id, total_amount_currency)
+            if self.config_id.only_round_cash_method and any(not p.payment_method_id.is_cash_count for p in self.payment_ids):
+                # If only_round_cash_method is True, and there are non-cash payments, cash rounding must be computed
+                # based on the total amount of the order, and total payment amount.
+                total_payment_amount = self.currency_id.round(sum(p.amount for p in self.payment_ids))
+                amount_currency = sign * self.currency_id.round(self.currency_id.round(total_amount_currency) + total_payment_amount)
+            else:
+                amount_currency = cash_rounding.compute_difference(self.currency_id, total_amount_currency)
             if not self.currency_id.is_zero(amount_currency):
                 balance = company_currency.round(amount_currency * rate)
 
@@ -1116,6 +1153,7 @@ class PosOrder(models.Model):
 
             existing_order = self._get_open_order(order)
             if existing_order and existing_order.state == 'draft':
+                existing_order._ensure_to_keep_last_preparation_change(order)
                 order_ids.append(self._process_order(order, existing_order))
                 _logger.info("PoS synchronisation #%d order %s updated pos.order #%d", sync_token, order_log_name, order_ids[-1])
             elif not existing_order:
@@ -1124,6 +1162,7 @@ class PosOrder(models.Model):
             else:
                 # In theory, this situation is unintended
                 # In practice it can happen when "Tip later" option is used
+                existing_order._ensure_to_keep_last_preparation_change(order)
                 order_ids.append(existing_order.id)
                 _logger.info("PoS synchronisation #%d order %s sync ignored for existing PoS order %s (state: %s)", sync_token, order_log_name, existing_order, existing_order.state)
 
