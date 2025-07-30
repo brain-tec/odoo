@@ -1,4 +1,5 @@
 import { Plugin } from "@html_editor/plugin";
+import { withSequence } from "@html_editor/utils/resource";
 import { registry } from "@web/core/registry";
 
 export class EditInteractionPlugin extends Plugin {
@@ -9,7 +10,7 @@ export class EditInteractionPlugin extends Plugin {
     resources = {
         normalize_handlers: this.refreshInteractions.bind(this),
         content_manually_updated_handlers: this.refreshInteractions.bind(this),
-        before_save_handlers: () => this.stopInteractions(),
+        before_save_handlers: withSequence(5, () => this.stopInteractions()),
         on_will_clone_handlers: ({ originalEl }) => {
             this.stopInteractions(originalEl);
         },
@@ -28,7 +29,6 @@ export class EditInteractionPlugin extends Plugin {
 
     setup() {
         this.websiteEditService = undefined;
-        this.areInteractionsStartedInEditMode = false;
 
         window.parent.document.addEventListener(
             "transfer_website_edit_service",
@@ -54,15 +54,10 @@ export class EditInteractionPlugin extends Plugin {
             throw new Error("website edit service not loaded");
         }
         this.websiteEditService.update(element, "edit");
-        this.areInteractionsStartedInEditMode = true;
     }
 
     refreshInteractions(element) {
-        if (this.areInteractionsStartedInEditMode) {
-            this.websiteEditService.refresh(element);
-        } else {
-            this.restartInteractions(element);
-        }
+        this.websiteEditService.refresh(element);
     }
 
     stopInteractions(element) {
