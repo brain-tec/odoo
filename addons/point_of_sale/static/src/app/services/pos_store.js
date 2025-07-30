@@ -979,7 +979,7 @@ export class PosStore extends WithLazyGetterTrap {
                     decimalAccuracy,
                     this.getProductPrice(values.product_id)
                 );
-                const weight = await makeAwaitable(this.env.services.dialog, ScaleScreen);
+                const weight = await this.weighProduct();
                 if (weight) {
                     values.qty = weight;
                 } else if (weight !== null) {
@@ -2518,7 +2518,6 @@ export class PosStore extends WithLazyGetterTrap {
 
     orderDone(order) {
         order.setScreenData({ name: "" });
-        order.uiState.locked = true;
         if (this.getOrder() === order) {
             this.searchProductWord = "";
         }
@@ -2540,6 +2539,10 @@ export class PosStore extends WithLazyGetterTrap {
         return (
             (await this.data.orm.searchCount("pos.session", [["id", "=", this.session.id]])) === 0
         );
+    }
+
+    weighProduct() {
+        return makeAwaitable(this.env.services.dialog, ScaleScreen);
     }
 }
 
