@@ -629,7 +629,7 @@ class HrExpense(models.Model):
     def _compute_price_unit(self):
         """
            The price_unit is the unit price of the product if no product is set and no attachment overrides it.
-           Otherwise it is always computed from the total_amount and the quantity else it would break the vendor bill
+           Otherwise it is always computed from the total_amount and the quantity else it would break the Receipt Entry
            when edited after creation.
         """
         for expense in self:
@@ -1152,7 +1152,7 @@ class HrExpense(models.Model):
         """
         Post the expense, following one of those two options:
             - Company-paid expenses: Create and post a payment, with an accounting entry
-            - Employee-paid expenses: Through a wizard, create and post a bill
+            - Employee-paid expenses: Through a wizard, create and post a receipt
         """
         # When a move has been deleted
         self._check_can_create_move()
@@ -1523,15 +1523,15 @@ class HrExpense(models.Model):
             journal = (
                     company.expense_journal_id
                     or expenses.env['account.journal'].search([*company_domain, ('type', '=', 'purchase')], limit=1))
-            expense_bill_vals_list = [
+            expense_receipt_vals_list = [
                 {
-                    **new_bill_vals,
+                    **new_receipt_vals,
                     'journal_id': journal.id,
                     'invoice_date': today,
                 }
-                for new_bill_vals in expenses._prepare_bills_vals()
+                for new_receipt_vals in expenses._prepare_receipts_vals()
             ]
-            moves = self.env['account.move'].sudo().create(expense_bill_vals_list)
+            moves = self.env['account.move'].sudo().create(expense_receipt_vals_list)
             for move in moves:
                 move._message_set_main_attachment_id(move.attachment_ids, force=True, filter_xml=False)
             moves.action_post()
@@ -1566,7 +1566,7 @@ class HrExpense(models.Model):
         # returning the move with the superuser flag set back as it was at the origin of the call
         return moves_sudo.sudo(self.env.su)
 
-    def _prepare_bills_vals(self):
+    def _prepare_receipts_vals(self):
         attachments_data = []
         for attachment in self.message_main_attachment_id:
             attachments_data.append(
@@ -1580,7 +1580,7 @@ class HrExpense(models.Model):
             return_vals.append({
             **expenses_sudo._prepare_move_vals(),
                 'ref': move_ref,
-                'move_type': 'in_invoice',
+                'move_type': 'in_receipt',
                 'partner_id': employee_sudo.work_contact_id.id,
                 'commercial_partner_id': employee_sudo.user_partner_id.id,
                 'currency_id': expenses_sudo.company_currency_id.id,
@@ -1751,22 +1751,7 @@ class HrExpense(models.Model):
     def _get_expense_account_destination(self):
         self.ensure_one()
         if self.payment_mode == 'company_account':
-            journal = self.payment_method_line_id.journal_id
-            account_dest = (
-                self.payment_method_line_id.payment_account_id
-                or journal.company_id.expense_outstanding_account_id
-            )
-            if not account_dest:
-                error_msg = _(
-                    "A default outstanding account must be defined in the settings for company-paid expenses. "
-                    "You can alternatively specify one in the Journal for the %(method)s payment method.",
-                    method=self.payment_method_line_id.display_name,
-                )
-                if self.env['res.config.settings'].has_access('write'):
-                    action = self.env.ref('hr_expense.action_hr_expense_configuration')
-                    raise RedirectWarning(error_msg, action=action.id, button_text=_("Go to settings"))
-                else:
-                    raise UserError(error_msg)
+            account_dest = self.payment_method_line_id.payment_account_id or self._get_outstanding_account_id()
         else:
             if not self.employee_id.sudo().work_contact_id:
                 raise UserError(
@@ -1775,6 +1760,24 @@ class HrExpense(models.Model):
             partner = self.employee_id.sudo().work_contact_id.with_company(self.company_id)
             account_dest = partner.property_account_payable_id or partner.parent_id.property_account_payable_id
         return account_dest.id
+
+    def _get_outstanding_account_id(self):
+        account_ref = 'account_journal_payment_debit_account_id' if self.payment_method_line_id.payment_type == 'inbound' else 'account_journal_payment_credit_account_id'
+        chart_template = self.with_context(allowed_company_ids=self.company_id.root_id.ids).env['account.chart.template']
+        outstanding_account = chart_template.ref(account_ref, raise_if_not_found=False)
+        if not outstanding_account:
+            bank_prefix = self.company_id.bank_account_code_prefix
+            template_data = chart_template._get_chart_template_data(self.company_id.chart_template).get('template_data')
+            code_digits = int(template_data.get('code_digits', 6))
+            chart_template._create_outstanding_accounts(self.company_id, bank_prefix, code_digits)
+            outstanding_account = chart_template.ref(account_ref, raise_if_not_found=False)
+        if not outstanding_account.active:
+            raise RedirectWarning(
+                message=_("The account %(name)s (%(code)s) is archived. Activate it to continue", name=outstanding_account.name, code=outstanding_account.code),
+                action=outstanding_account._get_records_action(),
+                button_text=_("Go to Account"),
+            )
+        return outstanding_account
 
     def _creation_message(self):
         if self.env.context.get('from_split_wizard'):
