@@ -127,7 +127,6 @@ export class WebsiteBuilderClientAction extends Component {
         onMounted(() => {
             this.addListeners(document);
             this.addSystrayItems();
-            this.websiteService.useMysterious = true;
             const edition = !!(this.enableEditor || this.editTranslations);
             if (edition) {
                 this.onEditPage();
@@ -259,6 +258,13 @@ export class WebsiteBuilderClientAction extends Component {
         this.websiteContext.showResourceEditor = false;
         this.blockIframe();
         await this.loadIframeAndBundles(true);
+        window.document.dispatchEvent(
+            new CustomEvent("edit_page", {
+                detail: {
+                    iframeDocument: this.websiteContent.el.contentDocument.document,
+                },
+            })
+        );
         this.unblockIframe();
         this.state.isEditing = true;
     }
