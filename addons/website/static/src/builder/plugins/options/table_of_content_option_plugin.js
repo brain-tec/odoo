@@ -10,7 +10,9 @@ import { BuilderAction } from "@html_builder/core/builder_action";
  * @returns {Object}
  */
 function getTocAndHeadingId(headingEl) {
-    const match = /^table_of_content_heading_(\d+)_(\d+)$/.exec(headingEl.getAttribute("id"));
+    const match = /^table_of_content_heading_(\d+)_(\d+)$/.exec(
+        headingEl && headingEl.getAttribute("id")
+    );
     if (match) {
         return { tocId: parseInt(match[1]), headingId: parseInt(match[2]) };
     }
@@ -19,7 +21,7 @@ function getTocAndHeadingId(headingEl) {
 
 class TableOfContentOptionPlugin extends Plugin {
     static id = "tableOfContentOption";
-    static dependencies = ["clone"];
+    static dependencies = ["clone", "remove"];
     resources = {
         builder_options: [
             {
@@ -55,6 +57,7 @@ class TableOfContentOptionPlugin extends Plugin {
             }
             return true;
         },
+        is_unremovable_selector: ".s_table_of_content_navbar_wrap, .s_table_of_content_main",
     };
 
     normalize(root) {
@@ -76,7 +79,7 @@ class TableOfContentOptionPlugin extends Plugin {
 
         if (tableOfContentMain.children.length === 0) {
             // Remove the table of content if empty content.
-            tableOfContent.remove();
+            this.dependencies.remove.removeElement(tableOfContent)
             return;
         }
 
