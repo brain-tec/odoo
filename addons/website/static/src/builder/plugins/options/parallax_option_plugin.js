@@ -13,6 +13,7 @@ class WebsiteParallaxPlugin extends Plugin {
             SetParallaxTypeAction,
         },
         on_bg_image_hide_handlers: this.onBgImageHide.bind(this),
+        force_not_editable_selector: ".s_parallax_bg, section.s_parallax > .oe_structure",
     };
     setup() {
         this.backgroundOptionSelectorParams = getSelectorParams(
@@ -45,7 +46,7 @@ class WebsiteParallaxPlugin extends Plugin {
         } else {
             delete editingElement.dataset.parallaxType;
         }
-        let parallaxEl = editingElement.querySelector(".s_parallax_bg");
+        let parallaxEl = editingElement.querySelector(":scope > .s_parallax_bg");
         if (isParallax) {
             if (!parallaxEl) {
                 parallaxEl = document.createElement("span");
@@ -68,7 +69,7 @@ class WebsiteParallaxPlugin extends Plugin {
         }
     }
     removeParallax(editingEl) {
-        const parallaxEl = editingEl.querySelector(".s_parallax_bg");
+        const parallaxEl = editingEl.querySelector(":scope > .s_parallax_bg");
         const bgImage = parallaxEl?.style.backgroundImage;
         if (
             !parallaxEl ||
