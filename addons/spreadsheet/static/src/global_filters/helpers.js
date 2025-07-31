@@ -37,6 +37,51 @@ export const RELATIVE_PERIODS = {
 };
 
 /**
+ * @param {DateValue} dateFilterValue
+ * @param {{ chain: string, type: string }} [fieldMatching]
+ * @returns {string}
+ */
+export function getBestGranularity(dateFilterValue, fieldMatching) {
+    if (!dateFilterValue) {
+        return "year";
+    }
+    const { from, to } = getDateRange(dateFilterValue);
+    const numberOfDays = Math.round(to.diff(from, "days").days);
+    if (numberOfDays <= 1) {
+        return fieldMatching?.type === "datetime" ? "hour" : "day";
+    } else if (numberOfDays <= 90) {
+        return "day";
+    } else if (numberOfDays <= 365 * 3) {
+        return "month";
+    } else {
+        return "year";
+    }
+}
+
+/**
+ * @param {DateValue} dateFilterValue
+ * @returns {string[]}
+ */
+export function getValidGranularities(dateFilterValue) {
+    if (!dateFilterValue) {
+        return ["week", "month", "quarter", "year"];
+    }
+    const { from, to } = getDateRange(dateFilterValue);
+    const numberOfDays = Math.round(to.diff(from, "days").days);
+    if (numberOfDays <= 1) {
+        return ["hour", "day"];
+    } else if (numberOfDays <= 7) {
+        return ["hour", "day", "week"];
+    } else if (numberOfDays <= 31) {
+        return ["hour", "day", "week", "month"];
+    } else if (numberOfDays <= 31 * 3) {
+        return ["day", "week", "month", "quarter"];
+    } else {
+        return ["week", "month", "quarter", "year"];
+    }
+}
+
+/**
  * Compute the display name of a date filter value.
  */
 export function dateFilterValueToString(value) {
@@ -101,7 +146,7 @@ export function checkFilterDefaultValueIsValid(filter, defaultValue) {
 }
 
 const SET_OPERATORS_BEHAVIORS = {
-    operators: ["set", "not_set"],
+    operators: ["set", "not set"],
     validateValue: isSetValueValid,
     validateDefaultValue: isSetValueValid,
     getSearchBarFacetValues: (env, filter, filterValue) => [
@@ -147,7 +192,7 @@ const FILTERS_BEHAVIORS = {
             },
         },
         {
-            operators: ["starts_with"],
+            operators: ["starts with"],
             defaultValue: { strings: [] },
             validateValue: (filterValue) => isArrayOfStrings(filterValue.strings),
             validateDefaultValue: (filterValue) => isArrayOfStrings(filterValue.strings),
@@ -336,7 +381,7 @@ function isCurrentUserOrArrayOfIds(value) {
  * @returns {boolean}
  */
 function isSetValueValid(value) {
-    return value.operator === "set" || value.operator === "not_set";
+    return value.operator === "set" || value.operator === "not set";
 }
 
 /**
@@ -753,7 +798,7 @@ export function getDateDomain(from, to, field, fieldType) {
     return new Domain();
 }
 
-const TEXT_OPERATORS = ["ilike", "not ilike", "starts_with"];
+const TEXT_OPERATORS = ["ilike", "not ilike", "starts with"];
 
 export function getFilterTypeOperators(filterType) {
     if (filterType === "date") {
@@ -865,7 +910,7 @@ function getOperatorLabel(operator) {
         case "=":
         case "in":
         case "set":
-        case "not_set":
+        case "not set":
             return "";
         case "!=":
         case "not in":
