@@ -1170,7 +1170,7 @@ export class Rtc extends Record {
                     return;
                 }
                 this._p2pRecoveryCount++;
-                if (this._p2pRecoveryCount > 1) {
+                if (this._p2pRecoveryCount > 1 || !hasTurn(this.iceServers)) {
                     this.upgradeConnectionDebounce();
                 }
             }
@@ -2201,7 +2201,7 @@ export const rtcService = {
         "mail.fullscreen",
         "mail.sound_effects",
         "mail.store",
-        "multi_tab",
+        "legacy_multi_tab",
         "notification",
         "presence",
     ],
