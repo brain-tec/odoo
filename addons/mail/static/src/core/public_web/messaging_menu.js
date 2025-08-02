@@ -37,7 +37,8 @@ export class MessagingMenu extends Component {
 
     onClickThread(isMarkAsRead, thread) {
         if (!isMarkAsRead) {
-            this.openDiscussion(thread);
+            thread.open({ focus: true, fromMessagingMenu: true, bypassCompact: true });
+            this.dropdown.close();
             return;
         }
         this.markAsRead(thread);
@@ -125,26 +126,19 @@ export class MessagingMenu extends Component {
     get tabs() {
         return [
             {
-                counter: this.store.getDiscussSidebarCategoryCounter(this.store.discuss.chats.id),
+                counter: this.store.discuss.chats.threadsWithCounter.length,
                 icon: "fa fa-user",
                 id: "chat",
                 label: _t("Chats"),
             },
             {
                 channelHasUnread: Boolean(this.store.discuss.unreadChannels.length),
-                counter: this.store.getDiscussSidebarCategoryCounter(
-                    this.store.discuss.channels.id
-                ),
+                counter: this.store.discuss.channels.threadsWithCounter.length,
                 icon: "fa fa-users",
                 id: "channel",
                 label: _t("Channels"),
             },
         ];
-    }
-
-    openDiscussion(thread) {
-        thread.open({ focus: true, fromMessagingMenu: true, bypassCompact: true });
-        this.dropdown.close();
     }
 
     onClickNavTab(tabId) {
