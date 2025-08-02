@@ -478,7 +478,7 @@ class AccountMove(models.Model):
     )
     invoice_has_outstanding = fields.Boolean(
         groups="account.group_account_invoice,account.group_account_readonly",
-        compute='_compute_payments_widget_to_reconcile_info',
+        compute='_compute_invoice_has_outstanding',
     )
     invoice_payments_widget = fields.Binary(
         groups="account.group_account_invoice,account.group_account_readonly",
@@ -1341,7 +1341,6 @@ class AccountMove(models.Model):
 
         for move in self:
             move.invoice_outstanding_credits_debits_widget = False
-            move.invoice_has_outstanding = False
 
             if move.state not in {'draft', 'posted'} \
                     or move.payment_state not in ('not_paid', 'partial') \
@@ -1396,7 +1395,11 @@ class AccountMove(models.Model):
 
             if payments_widget_vals['content']:
                 move.invoice_outstanding_credits_debits_widget = payments_widget_vals
-                move.invoice_has_outstanding = True
+
+    @api.depends('invoice_outstanding_credits_debits_widget')
+    def _compute_invoice_has_outstanding(self):
+        for move in self:
+            move.invoice_has_outstanding = bool(move.invoice_outstanding_credits_debits_widget)
 
     @api.depends('partner_id', 'company_id')
     def _compute_preferred_payment_method_line_id(self):
@@ -6188,7 +6191,7 @@ class AccountMove(models.Model):
 
     def _get_invoice_legal_documents(self, filetype, allow_fallback=False):
         """ Retrieve the invoice legal document of type filetype.
-        :param filetype: the type of legal document to retrieve. Example: 'pdf', 'all'.
+        :param filetype: the type of legal document to retrieve. Example: 'pdf'.
         :param bool allow_fallback: if True, returns a Proforma if the PDF invoice doesn't exist.
         :return dict: the invoice PDF data such as
         {'filename': 'INV_2024_0001.pdf', 'filetype': 'pdf', 'content':...}
@@ -6204,8 +6207,6 @@ class AccountMove(models.Model):
                 }
             elif allow_fallback:
                 return self._get_invoice_pdf_proforma()
-        elif filetype == 'all':
-            return self._get_invoice_legal_documents_all(allow_fallback=allow_fallback)
 
     def _get_invoice_legal_documents_all(self, allow_fallback=False):
         """ Retrieve the invoice legal attachments: PDF, XML, ...
