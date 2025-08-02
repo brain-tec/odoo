@@ -85,6 +85,10 @@ $o-discuss-talkingColor: lighten($success, 10%);
     outline: 1px solid $o-gray-300;
 }
 
+.o-hover-text-underline:hover {
+    text-decoration: underline;
+}
+
 $o-mail-spacers-sizes: () !default;
 $o-mail-spacers-sizes: map-merge(
     $o-mail-spacers-sizes,
@@ -216,6 +220,10 @@ $o-mail-utilities: map-merge(
     @include generate-utility($utility)
 }
 
+.o-fs-small {
+    font-size: $o-font-size-base-small !important;
+}
+
 .o-scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: $gray-400 transparent;
@@ -292,7 +300,7 @@ $o-mail-utilities: map-merge(
     }
 }
 
-a.o_mail_redirect, a.o_channel_redirect, a.o-discuss-mention {
+a.o_mail_redirect, a.o_channel_redirect, a.o-discuss-mention, a.o_message_redirect_transformed {
     border-radius: $btn-border-radius-sm;
     padding: 0rem 0.1875rem;
     border: 1px solid;
@@ -300,7 +308,7 @@ a.o_mail_redirect, a.o_channel_redirect, a.o-discuss-mention {
     display: inline-block;
 }
 
-a.o_mail_redirect, a.o_channel_redirect {
+a.o_mail_redirect, a.o_channel_redirect, a.o_message_redirect_transformed {
     @include o-mention-variant(rgba($primary, .15), rgba($primary, .25), darken($primary, 10%), rgba($primary, .2), rgba($primary, .5), darken($primary, 15%));
 }
 

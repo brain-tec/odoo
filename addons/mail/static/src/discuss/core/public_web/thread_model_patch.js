@@ -13,6 +13,13 @@ const threadPatch = {
                 return this.channel_type === "channel" && this.isUnread ? this.store.discuss : null;
             },
         });
+        this.categoryAsThreadWithCounter = fields.One("DiscussAppCategory", {
+            compute() {
+                return this.displayInSidebar && this.importantCounter > 0
+                    ? this.discussAppCategory
+                    : null;
+            },
+        });
         this.discussAppCategory = fields.One("DiscussAppCategory", {
             compute() {
                 return this._computeDiscussAppCategory();
@@ -129,6 +136,14 @@ const threadPatch = {
         if (!this.is_pinned && !this.isLocallyPinned) {
             this.sub_channel_ids.forEach((c) => (c.isLocallyPinned = false));
         }
+    },
+    /** @override */
+    openChannel() {
+        if (this.store.discuss.isActive && !this.store.env.services.ui.isSmall) {
+            this.setAsDiscussThread();
+            return true;
+        }
+        return super.openChannel();
     },
     setAsDiscussThread() {
         super.setAsDiscussThread(...arguments);
