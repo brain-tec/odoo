@@ -178,7 +178,7 @@ class AccountChartTemplate(models.AbstractModel):
         # Ensure that the context is the correct one, even if not called by try_loading
         if not self.env.is_system():
             raise AccessError(_("Only administrators can install chart templates"))
-
+        self = self.sudo()  # noqa: PLW0642
         chart_template_mapping = self._get_chart_template_mapping()[template_code]
         if not company.country_id:
             company.country_id = chart_template_mapping.get('country_id')
@@ -1224,13 +1224,18 @@ class AccountChartTemplate(models.AbstractModel):
                     mapped_tag = tags.get(format_tag)
                     if not mapped_tag:
                         country = self.env['res.country'].browse(country_id)
-                        message = self.env._(
-                            'Error while loading the localization: missing tax tag %(tag_name)s for country %(country_name)s. You should probably update your localization app first.',
-                            tag_name=format_tag, country_name=country.name)
                         if not self.env.context.get('ignore_missing_tags'):
-                            raise UserError(message)
+                            raise UserError(self.env._(
+                                'Error while loading the localization: missing tax tag %(tag_name)s for country %(country_name)s.'
+                                ' You should probably update your localization app first.',
+                                tag_name=format_tag, country_name=country.name
+                            ))
                         else:
-                            _logger.error(message)
+                            _logger.error(
+                                'Error while loading the localization: missing tax tag %s for country %s.'
+                                ' You should probably update your localization app first.',
+                                format_tag, country.name
+                            )
                             continue
                     res.append(mapped_tag)
             return res

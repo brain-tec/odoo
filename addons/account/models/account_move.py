@@ -191,7 +191,7 @@ class AccountMove(models.Model):
         inverse_name='move_id',
         string='Journal Items',
         copy=False,
-        domain=[('display_type', 'not in', ('line_section', 'line_note'))],
+        domain=[('display_type', 'not in', ('line_section', 'line_subsection', 'line_note'))],
     )
 
     # === Link to the partial that created this exchange move === #
@@ -353,7 +353,7 @@ class AccountMove(models.Model):
         'move_id',
         string='Invoice lines',
         copy=False,
-        domain=[('display_type', 'in', ('product', 'line_section', 'line_note'))],
+        domain=[('display_type', 'in', ('product', 'line_section', 'line_subsection', 'line_note'))],
     )
 
     # === Date fields === #
@@ -5130,7 +5130,7 @@ class AccountMove(models.Model):
         for move in self:
             if move.state in ['posted', 'cancel']:
                 validation_msgs.add(_('The entry %(name)s (id %(id)s) must be in draft.', name=move.name, id=move.id))
-            if not move.line_ids.filtered(lambda line: line.display_type not in ('line_section', 'line_note')):
+            if not move.line_ids.filtered(lambda line: line.display_type not in ('line_section', 'line_subsection', 'line_note')):
                 validation_msgs.add(_("Even magicians can't post nothing!"))
             if not soft and move.auto_post != 'no' and move.date > fields.Date.context_today(self):
                 date_msg = move.date.strftime(get_lang(self.env).date_format)
@@ -5181,7 +5181,7 @@ class AccountMove(models.Model):
             # partner on the lines to be the same as the one on the move, because that's the only one the user can see/edit.
             wrong_lines = invoice.is_invoice() and invoice.line_ids.filtered(lambda aml:
                 aml.partner_id != invoice.commercial_partner_id
-                and aml.display_type not in ('line_note', 'line_section')
+                and aml.display_type not in ('line_section', 'line_subsection', 'line_note')
             )
             if wrong_lines:
                 wrong_lines.write({'partner_id': invoice.commercial_partner_id.id})
@@ -6169,7 +6169,7 @@ class AccountMove(models.Model):
 
     def _get_invoice_legal_documents(self, filetype, allow_fallback=False):
         """ Retrieve the invoice legal document of type filetype.
-        :param filetype: the type of legal document to retrieve. Example: 'pdf', 'all'.
+        :param filetype: the type of legal document to retrieve. Example: 'pdf'.
         :param bool allow_fallback: if True, returns a Proforma if the PDF invoice doesn't exist.
         :return dict: the invoice PDF data such as
         {'filename': 'INV_2024_0001.pdf', 'filetype': 'pdf', 'content':...}
@@ -6185,8 +6185,6 @@ class AccountMove(models.Model):
                 }
             elif allow_fallback:
                 return self._get_invoice_pdf_proforma()
-        elif filetype == 'all':
-            return self._get_invoice_legal_documents_all(allow_fallback=allow_fallback)
 
     def _get_invoice_legal_documents_all(self, allow_fallback=False):
         """ Retrieve the invoice legal attachments: PDF, XML, ...
