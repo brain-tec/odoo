@@ -57,6 +57,8 @@ PROJECT_TASK_READABLE_FIELDS = {
     'is_template',
     'has_template_ancestor',
     'stage_id_color',
+    'access_token',
+    'access_url',
 }
 
 PROJECT_TASK_WRITABLE_FIELDS = {
@@ -810,7 +812,7 @@ class ProjectTask(models.Model):
     @api.depends('is_template', 'parent_id.has_template_ancestor')
     def _compute_has_template_ancestor(self):
         for task in self:
-            task.has_template_ancestor = task.is_template or (task.parent_id and task.parent_id.has_template_ancestor)
+            task.has_template_ancestor = task.is_template or (task.parent_id and task.parent_id.sudo().has_template_ancestor)
 
     def _search_has_template_ancestor(self, operator, value):
         if operator not in ['=', '!='] or not isinstance(value, bool):

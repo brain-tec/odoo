@@ -111,9 +111,23 @@ class Website(models.Model):
     shop_ppg = fields.Integer(
         string="Number of products in the grid on the shop", default=20,
     )
-    shop_ppr = fields.Integer(string="Number of grid columns on the shop", default=4)
+    shop_ppr = fields.Integer(string="Number of grid columns on the shop", default=3)
 
     shop_gap = fields.Char(string="Grid-gap on the shop", default="16px", required=False)
+
+    shop_opt_products_design_classes = fields.Char(
+        string="Shop Design Class",
+        default=(
+            'o_wsale_products_opt_layout_catalog o_wsale_products_opt_design_thumbs '
+            'o_wsale_products_opt_name_color_regular o_wsale_products_opt_thumb_6_5 '
+            'o_wsale_products_opt_thumb_cover o_wsale_products_opt_img_secondary_show '
+            'o_wsale_products_opt_img_hover_zoom_out_light o_wsale_products_opt_has_cta '
+            'o_wsale_products_opt_actions_onhover o_wsale_products_opt_has_wishlist '
+            'o_wsale_products_opt_wishlist_fixed o_wsale_products_opt_has_description '
+            'o_wsale_products_opt_actions_subtle o_wsale_products_opt_cc1'
+        ),
+        help="CSS class for shop products design"
+    )
 
     shop_default_sort = fields.Selection(
         selection='_get_product_sort_mapping', required=True, default='website_sequence asc')
@@ -265,6 +279,7 @@ class Website(models.Model):
         website_settings = {}
         views_to_disable = []
         views_to_enable = []
+        scss_customization_params = {}
         ThemeUtils = self.env['theme.utils'].with_context(website_id=website.id)
         Assets = self.env['web_editor.assets']
 
@@ -272,6 +287,7 @@ class Website(models.Model):
             website_settings.update(style_config_['website_fields'])
             views_to_disable.extend(style_config_['views']['disable'])
             views_to_enable.extend(style_config_['views']['enable'])
+            scss_customization_params.update(style_config_.get('scss_customization_params', {}))
 
         # Extract shop page settings.
         if shop_page_style_option:
@@ -349,12 +365,15 @@ class Website(models.Model):
                 if footer_updated:
                     footer_view.write({'arch': etree.tostring(arch_tree)})
 
-        # For website editor to recognize the correct footer template
+        if 'website_sale.template_footer_website_sale' in views_to_enable:
+            scss_customization_params['footer-template'] = 'website_sale'
+
+        # For a website editor to recognize the correct header/footer templates
         # (reason `isApplied` method of footer plugin)
-        if 'website_sale.footer_template_website_sale' in views_to_enable:
+        if scss_customization_params:
             Assets.make_scss_customization(
                 '/website/static/src/scss/options/user_values.scss',
-                {'footer-template': 'website_sale'},
+                scss_customization_params,
             )
 
         return res
