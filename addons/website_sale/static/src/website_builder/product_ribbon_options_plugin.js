@@ -1,6 +1,6 @@
-import { Plugin } from "@html_editor/plugin";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import { SNIPPET_SPECIFIC_NEXT } from "@html_builder/utils/option_sequence";
+import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { reactive } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -226,12 +226,21 @@ class ProductsRibbonOptionPlugin extends Plugin {
         ribbons.forEach((ribbonElement) => {
             ribbonElement.classList.add("d-none");
             ribbonElement.dataset.ribbonId = "";
-            this.productTemplatesRibbons.push({
-                templateId: isProductPage
-                    ? this.productTemplateID
-                    : parseInt(ribbonElement.previousElementSibling.dataset.oeId),
-                ribbonId: false,
-            });
+            let templateId;
+            if (isProductPage) {
+                templateId = this.productTemplateID;
+            } else {
+                // Find the product template ID from the ribbon element's parent form
+                const productForm = ribbonElement.closest('form.oe_product_cart');
+                const templateElement = productForm?.querySelector('[data-oe-model="product.template"]');
+                templateId = templateElement ? parseInt(templateElement.getAttribute('data-oe-id')) : null;
+            }
+            if (templateId && !isNaN(templateId)) {
+                this.productTemplatesRibbons.push({
+                    templateId: templateId,
+                    ribbonId: false,
+                });
+            }
         });
         this._saveRibbons();
     }
@@ -272,7 +281,7 @@ class SetRibbonAction extends BuilderAction {
     }
     isApplied({ editingElement, value }) {
         const ribbonId = parseInt(
-            editingElement.querySelector('.o_ribbons').dataset.ribbonId,
+            editingElement.querySelector('.o_ribbons')?.dataset.ribbonId,
         );
         const match = !ribbonId || !this.ribbonOptions.getRibbonsObject().hasOwnProperty(ribbonId)
             ? ''
@@ -346,7 +355,7 @@ class ModifyRibbonAction extends BuilderAction {
     }
     getValue({ editingElement, params }) {
         const ribbonId = parseInt(
-            editingElement.querySelector('.o_ribbons').dataset.ribbonId
+            editingElement.querySelector('.o_ribbons')?.dataset.ribbonId
         );
         if (!ribbonId || !this.ribbonOptions.getRibbonsObject().hasOwnProperty(ribbonId)) {
             return;
@@ -356,7 +365,7 @@ class ModifyRibbonAction extends BuilderAction {
     }
     isApplied({ editingElement, params, value }) {
         let ribbonId = parseInt(
-            editingElement.querySelector('.o_ribbons').dataset.ribbonId
+            editingElement.querySelector('.o_ribbons')?.dataset.ribbonId
         );
         if (!ribbonId || !this.ribbonOptions.getRibbonsObject().hasOwnProperty(ribbonId)) {
             return;
