@@ -9,6 +9,7 @@ import { Deferred } from "@web/core/utils/concurrency";
 import { useEmojiPicker } from "@web/core/emoji_picker/emoji_picker";
 import { QuickReactionMenu } from "@mail/core/common/quick_reaction_menu";
 import { isMobileOS } from "@web/core/browser/feature_detection";
+import { Action } from "./action";
 
 const { DateTime } = luxon;
 
@@ -17,7 +18,7 @@ export const messageActionsRegistry = registry.category("mail.message/actions");
 messageActionsRegistry
     .add("reaction", {
         component: QuickReactionMenu,
-        props: (component) => ({
+        componentProps: (component) => ({
             message: component.props.message,
             action: messageActionsRegistry.get("reaction"),
             messageActive: component.isActive,
@@ -87,7 +88,6 @@ messageActionsRegistry
         onSelected: (component) => component.openReactionMenu(),
         sequence: 50,
         mobileCloseAfterClick: false,
-        dropdown: true,
     })
     .add("unfollow", {
         condition: (component) => component.props.message.canUnfollow(component.props.thread),
@@ -176,41 +176,15 @@ messageActionsRegistry
         sequence: 110,
     });
 
-function transformAction(component, id, action) {
-    return {
-        component: action.component,
-        id,
-        mobileCloseAfterClick: action.mobileCloseAfterClick ?? true,
-        /** Condition to display this action. */
-        get condition() {
-            return messageActionsInternal.condition(component, id, action);
-        },
-        /** If set, this is considered as a danger (destructive) action. */
-        get danger() {
-            return typeof action.danger === "function" ? action.danger(component) : action.danger;
-        },
-        /** Icon for the button this action. */
-        get icon() {
-            return typeof action.icon === "function" ? action.icon(component) : action.icon;
-        },
-        /** Name of this action, displayed to the user. */
-        get name() {
-            const res = this.isActive && action.nameActive ? action.nameActive : action.name;
-            return typeof res === "function" ? res(component) : res;
-        },
-        get props() {
-            return action.props(component);
-        },
-        onSelected(ev) {
-            return action.onSelected?.(component, this, ev);
-        },
-        /** Determines the order of this action (smaller first). */
-        get sequence() {
-            return messageActionsInternal.sequence(component, id, action);
-        },
-        /** Component setup to execute when this action is registered. */
-        setup: action.setup,
-    };
+class MessageAction extends Action {
+    get mobileCloseAfterClick() {
+        return this.explicitDefinition.mobileCloseAfterClick ?? true;
+    }
+
+    /** Condition to display this action. */
+    get condition() {
+        return messageActionsInternal.condition(this._component, this.id, this.explicitDefinition);
+    }
 }
 
 export const messageActionsInternal = {
@@ -226,7 +200,7 @@ export function useMessageActions() {
     const component = useComponent();
     const transformedActions = messageActionsRegistry
         .getEntries()
-        .map(([id, action]) => transformAction(component, id, action));
+        .map(([id, action]) => new MessageAction(component, id, action));
     for (const action of transformedActions) {
         if (action.setup) {
             action.setup(action);
