@@ -25,6 +25,9 @@ import { CoreBuilderActionPlugin } from "@html_builder/core/core_builder_action_
 import { CarouselOptionTranslationPlugin } from "./plugins/carousel_option_translation_plugin";
 import { ThemeTab } from "./plugins/theme/theme_tab";
 import { BuilderContentEditablePlugin } from "@html_builder/core/builder_content_editable_plugin";
+import { ImageFieldPlugin } from "@html_builder/plugins/image_field_plugin";
+import { MonetaryFieldPlugin } from "@html_builder/plugins/monetary_field_plugin";
+import { Many2OneOptionPlugin } from "@html_builder/plugins/many2one_option_plugin";
 
 const TRANSLATION_PLUGINS = [
     BuilderOptionsTranslationPlugin,
@@ -46,6 +49,9 @@ const TRANSLATION_PLUGINS = [
     EditInteractionPlugin,
     CarouselOptionTranslationPlugin,
     BuilderContentEditablePlugin,
+    ImageFieldPlugin,
+    MonetaryFieldPlugin,
+    Many2OneOptionPlugin,
 ];
 
 export class WebsiteBuilder extends Component {
