@@ -28,9 +28,9 @@ test("auto-select 'Inbox' when discuss had channel as active thread", async () =
     await openDiscuss(channelId);
     await click(".o-mail-ChatWindow [title*='Close Chat Window']");
     await contains(".o-mail-MessagingMenu-tab.o-active", { text: "Channels" });
-    await click("button", { text: "Mailboxes" });
-    await contains(".o-mail-MessagingMenu-tab.o-active", { text: "Mailboxes" });
-    await contains("button.active", { text: "Inbox" });
+    await click("button", { text: "Inbox" });
+    await contains(".o-mail-MessagingMenu-tab.o-active", { text: "Inbox" });
+    await contains("button.active", { text: "Inbox" }); // in header
 });
 
 test("show loading on initial opening", async () => {
@@ -63,8 +63,8 @@ test("can leave channel in mobile", async () => {
     await start();
     await openDiscuss(channelId);
     // dropdown requires an extra delay before click (because handler is registered in useEffect)
-    await contains(".o-mail-ChatWindow-command", { text: "General" });
-    await click(".o-mail-ChatWindow-command", { text: "General" });
+    await contains(".o-mail-ChatWindow-moreActions", { text: "General" });
+    await click(".o-mail-ChatWindow-moreActions", { text: "General" });
     await contains(".o-dropdown-item", { text: "Leave Channel" });
 });
 

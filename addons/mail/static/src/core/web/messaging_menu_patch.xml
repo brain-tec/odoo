@@ -5,7 +5,7 @@
             <div t-if="!env.inDiscussApp" t-att-class="discussSystray.class">
                 <Dropdown state="dropdown" beforeOpen.bind="beforeOpen" position="'bottom-end'" menuClass="discussSystray.menuClass" bottomSheet="false">
                     <button class="bg-transparent">
-                        <i class="fa fa-lg fa-comments" role="img" aria-label="Messages" t-on-click="() => store.discuss.activeTab = ui.isSmall and store.discuss.activeTab === 'main' ? 'main' : store.discuss.activeTab"></i>
+                        <i class="fa fa-lg fa-comments" role="img" aria-label="Messages" t-on-click="() => store.discuss.activeTab = ui.isSmall and store.discuss.activeTab === 'notification' ? 'notification' : store.discuss.activeTab"></i>
                         <span t-if="counter" class="o-mail-MessagingMenu-counter badge rounded-pill"><t t-esc="counter"/></span>
                     </button>
                     <t t-set-slot="content">
@@ -17,12 +17,12 @@
     </t>
 
     <t t-inherit="mail.MessagingMenu.content" t-inherit-mode="extension">
-        <xpath expr="//*[@t-ref='notification-list']" position="before">
+        <xpath expr="//*[@name='before-content']" position="after">
             <div class="o-mail-MessagingMenu-header d-flex o-px-1_5" t-att-class="{'border-start-0 border-end-0': ui.isSmall, 'flex-shrink-0': !env.inDiscussApp }">
                 <t t-if="!ui.isSmall">
                     <MessagingMenuQuickSearch t-if="state.searchOpen" onClose.bind="toggleSearch"/>
                     <t t-else="">
-                        <button class="o-mail-MessagingMenu-headerFilter btn btn-link o-px-1_5 py-1 m-1 lh-1" t-att-class="store.discuss.activeTab === 'main' ? 'fw-bold o-active shadow-sm' : 'text-muted'" type="button" role="tab" t-on-click="() => store.discuss.activeTab = 'main'">All</button>
+                        <button class="o-mail-MessagingMenu-headerFilter btn btn-link o-px-1_5 py-1 m-1 lh-1" t-att-class="store.discuss.activeTab === 'notification' ? 'fw-bold o-active shadow-sm' : 'text-muted'" type="button" role="tab" t-on-click="() => store.discuss.activeTab = 'notification'">Notifications</button>
                         <button class="o-mail-MessagingMenu-headerFilter btn btn-link o-px-1_5 py-1 m-1 lh-1" t-att-class="store.discuss.activeTab === 'chat' ? 'fw-bold o-active shadow-sm' : 'text-muted'" type="button" role="tab" t-on-click="() => store.discuss.activeTab = 'chat'">Chats</button>
                         <button class="o-mail-MessagingMenu-headerFilter btn btn-link o-px-1_5 py-1 m-1 lh-1" t-att-class="store.discuss.activeTab === 'channel' ? 'fw-bold o-active shadow-sm' : 'text-muted'" type="button" role="tab" t-on-click="() => store.discuss.activeTab = 'channel'">Channels</button>
                         <button t-if="threads.length >= 20 and store.channels.status !== 'fetching'" class="btn btn-link py-1 rounded-0 text-muted" type="button" title="Quick search" t-on-click="toggleSearch"><i class="fa fa-fw fa-search"/></button>
@@ -53,10 +53,10 @@
                         <ImStatus persona="installationRequest.partner" className="'position-absolute top-100 start-100 translate-middle mt-n1 ms-n1'"/>
                     </t>
                     <t t-set-slot="sideContent">
-                        <div class="d-flex align-items-center justify-content-center o-gap-1_5" t-att-class="{ 'pe-1': !ui.isSmall }">
+                        <div class="d-flex align-items-center justify-content-center o-gap-1_5" t-att-class="{ 'o-pe-0_5': !ui.isSmall }">
                             <a t-if="ui.isSmall" class="btn fa fa-cloud-download px-0"/>
                             <t t-else="">
-                                <a class="btn btn-primary px-2 py-1 smaller">Install</a>
+                                <a class="btn btn-primary px-1 py-0 smaller">Install</a>
                                 <span t-if="!hasTouch()" t-on-click.stop="() => this.pwa.decline()" class="text-dark bg-transparent oi oi-close opacity-50 opacity-100-hover" title="Dismiss"></span>
                             </t>
                         </div>
@@ -77,7 +77,7 @@
                         <ImStatus persona="notificationRequest.partner" className="'position-absolute top-100 start-100 translate-middle mt-n1 ms-n1'"/>
                     </t>
                     <t t-set-slot="sideContent">
-                        <div class="d-flex align-items-center justify-content-center o-gap-1_5" t-att-class="{ 'pe-1': !ui.isSmall }">
+                        <div class="d-flex align-items-center justify-content-center o-gap-1_5" t-att-class="{ 'o-pe-0_5': !ui.isSmall }">
                             <a t-if="ui.isSmall" class="btn fa fa-bell px-0"/>
                             <t t-else="">
                                 <a class="btn btn-primary btn-sm px-1 py-0">Enable</a>
@@ -88,7 +88,7 @@
                 </NotificationItem>
                 <t t-set="itemIndex" t-value="itemIndex + 1"/>
             </t>
-            <t t-if="store.discuss.activeTab === 'main' and !env.inDiscussApp and !store.discuss.searchTerm">
+            <t t-if="store.discuss.activeTab === 'notification' and !store.discuss.searchTerm">
                 <t t-foreach="store.failures" t-as="failure" t-key="failure.id">
                     <NotificationItem
                         important="1"

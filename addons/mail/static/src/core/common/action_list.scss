@@ -30,10 +30,10 @@
 
         &.o-inline {
             i {
-                opacity: var(--mail-ActionList-buttonInlineIconOpacity, 65%);
-            }
-            &.o-mail-ChatWindow-command i {
                 opacity: 35%;
+            }
+            &.o-odooControlPanelSwitchStyle i {
+                opacity: var(--mail-ActionList-buttonInlineIconOpacity, 65%);
             }
         }
         &:not(.o-inline) i {
@@ -50,22 +50,22 @@
             }
         }
 
-        &:hover:not(.o-dropdown-item), &.o-isActive, &.o-active, &.focus, &.show {
+        &:hover:not(.o-dropdown-item), &.o-isActive, &.o-active, &.focus, &.show, &.active {
             .o-mail-ActionList-actionLabel {
                 opacity: 100%;
             }
 
-            color: var(--mail-ActionList-activeItemColor, $body-color);
+            color: var(--mail-ActionList-activeItemColor, black);
             &:not(.o-inline) {
                 background-color: $dropdown-link-hover-bg !important;
             }
             &.o-danger {
-                    background-color: var(--mail-ActionList-dangerBgColor, rgba($danger, .75)) !important;
-                    color: white !important;
+                background-color: var(--mail-ActionList-dangerBgColor, rgba($danger, .75)) !important;
+                color: white !important;
             }
             &.o-success {
-                    background-color: var(--mail-ActionList-successBgColor, rgba($success, .6)) !important;
-                    color: white !important;
+                background-color: var(--mail-ActionList-successBgColor, rgba($success, .6)) !important;
+                color: white !important;
             }
             z-index: 2 !important;
             i {
