@@ -2,7 +2,7 @@ import { setSelection } from "@html_editor/../tests/_helpers/selection";
 import { insertText } from "@html_editor/../tests/_helpers/user_actions";
 import { expect, test } from "@odoo/hoot";
 import { animationFrame, click, Deferred, queryOne } from "@odoo/hoot-dom";
-import { contains, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { contains, defineActions, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { WebsiteBuilderClientAction } from "@website/client_actions/website_preview/website_builder_action";
 import {
     addActionOption,
@@ -10,13 +10,17 @@ import {
     addPlugin,
     defineWebsiteModels,
     exampleWebsiteContent,
+    getDragHelper,
+    getDragMoveHelper,
     modifyText,
     setupWebsiteBuilder,
+    waitForEndOfOperation,
     wrapExample,
 } from "./website_helpers";
-import { xml } from "@odoo/owl";
+import { Component, xml } from "@odoo/owl";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import { Plugin } from "@html_editor/plugin";
+import { registry } from "@web/core/registry";
 
 defineWebsiteModels();
 
@@ -248,6 +252,134 @@ test("preview shouldn't let o_dirty", async () => {
     expect(":iframe #wrap").not.toHaveClass("o_dirty");
 });
 
+test("Drag and drop from sidebar should only mark the concerned elements as dirty", async () => {
+    await setupWebsiteBuilder(`
+        <section class="s_dummy_snippet_1" style="height: 100px;">
+            <div><p>Test</p></div>
+        </section>
+        <div class="view" data-oe-model="view" data-oe-id="42" data-oe-field="view">
+            <section class="s_dummy_snippet_2" style="height: 100px;">
+                <div><p>Hello</p></div>
+            </section>
+        </div>    
+    `);
+
+    // Dragging in outer view then in inner view should only apply dirty on the
+    // inner one.
+    let dragUtils = await contains(".o-snippets-menu #snippet_content .o_snippet_thumbnail").drag();
+    expect(":iframe .oe_drop_zone").toHaveCount(4);
+    await dragUtils.moveTo(":iframe .s_dummy_snippet_1 .oe_drop_zone");
+    await dragUtils.moveTo(":iframe .s_dummy_snippet_2 .oe_drop_zone");
+    await dragUtils.drop(getDragHelper());
+    await waitForEndOfOperation();
+    expect(":iframe .s_dummy_snippet_2 p").toHaveCount(2);
+    expect(":iframe .view.o_editable").toHaveClass("o_dirty");
+    expect(":iframe #wrap").not.toHaveClass("o_dirty");
+    expect(":iframe .o_dirty").toHaveCount(1);
+    // Undo
+    await contains(".o-website-builder_sidebar .fa-undo").click();
+    expect(":iframe .o_dirty").toHaveCount(0);
+
+    // Dragging in inner view then in outer view should only apply dirty on the
+    // outer one.
+    dragUtils = await contains(".o-snippets-menu #snippet_content .o_snippet_thumbnail").drag();
+    expect(":iframe .oe_drop_zone").toHaveCount(4);
+    await dragUtils.moveTo(":iframe .s_dummy_snippet_2 .oe_drop_zone");
+    await dragUtils.moveTo(":iframe .s_dummy_snippet_1 .oe_drop_zone");
+    await dragUtils.drop(getDragHelper());
+    await waitForEndOfOperation();
+    expect(":iframe .s_dummy_snippet_1 p").toHaveCount(2);
+    expect(":iframe .view.o_editable").not.toHaveClass("o_dirty");
+    expect(":iframe #wrap").toHaveClass("o_dirty");
+    expect(":iframe .o_dirty").toHaveCount(1);
+    // Undo
+    await contains(".o-website-builder_sidebar .fa-undo").click();
+    expect(":iframe .o_dirty").toHaveCount(0);
+
+    // Dragging over the views then dropping in the sidebar to cancel should not
+    // apply dirty at all.
+    dragUtils = await contains(".o-snippets-menu #snippet_content .o_snippet_thumbnail").drag();
+    expect(":iframe .oe_drop_zone").toHaveCount(4);
+    await dragUtils.moveTo(":iframe .s_dummy_snippet_1 .oe_drop_zone");
+    await dragUtils.moveTo(":iframe .s_dummy_snippet_2 .oe_drop_zone");
+    await dragUtils.moveTo(".o_block_tab");
+    await dragUtils.drop(getDragHelper());
+    expect(":iframe p").toHaveCount(2);
+    expect(":iframe .o_dirty").toHaveCount(0);
+});
+
+test("Drag and drop from the page should only mark the concerned elements as dirty", async () => {
+    await setupWebsiteBuilder(`
+        <section class="s_dummy_snippet_1" style="height: 100px;">
+            <div>
+                <p>Test</p>
+                <div class="s_alert" data-vcss="001" data-snippet="s_alert" data-name="Alert">
+                    <div class="s_alert_content">
+                        <p>Dummy</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="view_1" data-oe-model="view_1" data-oe-id="42" data-oe-field="view_1">
+            <section class="s_dummy_snippet_2" style="height: 100px;">
+                <div><p>Hello</p></div>
+            </section>
+        </div>
+        <div class="view_2" data-oe-model="view_2" data-oe-id="43" data-oe-field="view_2">
+            <section class="s_dummy_snippet_3" style="height: 100px;">
+                <div><p>Hello</p></div>
+            </section>
+        </div>      
+    `);
+
+    // Drag and dropping at the same place should cancel everything and not mark
+    // anything dirty.
+    await contains(":iframe .s_alert").click();
+    expect(".overlay .o_overlay_options .o_move_handle").toHaveCount(1);
+    let dragUtils = await contains(".o_overlay_options .o_move_handle").drag();
+    expect(":iframe .oe_drop_zone").toHaveCount(6);
+    await dragUtils.moveTo(":iframe .s_dummy_snippet_1 .oe_drop_zone:nth-child(3)");
+    await dragUtils.drop(getDragMoveHelper());
+    await waitForEndOfOperation();
+    expect(".o-website-builder_sidebar .fa-undo").toHaveAttribute("disabled");
+    expect(":iframe .o_dirty").toHaveCount(0);
+
+    // Dragging across views and dropping in the original one should only apply
+    // dirty on that one.
+    dragUtils = await contains(".o_overlay_options .o_move_handle").drag();
+    expect(":iframe .oe_drop_zone").toHaveCount(6);
+    await dragUtils.moveTo(":iframe .s_dummy_snippet_2 .oe_drop_zone");
+    await dragUtils.moveTo(":iframe .s_dummy_snippet_3 .oe_drop_zone");
+    await dragUtils.moveTo(":iframe .s_dummy_snippet_1 .oe_drop_zone");
+    await dragUtils.drop(getDragMoveHelper());
+    await waitForEndOfOperation();
+    expect(":iframe .s_dummy_snippet_1 .s_alert:nth-child(1)").toHaveCount(1);
+    expect(":iframe #wrap").toHaveClass("o_dirty");
+    expect(":iframe .view_1.o_editable").not.toHaveClass("o_dirty");
+    expect(":iframe .view_2.o_editable").not.toHaveClass("o_dirty");
+    expect(":iframe .o_dirty").toHaveCount(1);
+    // Undo
+    await contains(".o-website-builder_sidebar .fa-undo").click();
+    expect(":iframe .o_dirty").toHaveCount(0);
+
+    // Dragging across views and dropping in another one should only apply dirty
+    // on the original and the one where we dropped.
+    dragUtils = await contains(".o_overlay_options .o_move_handle").drag();
+    expect(":iframe .oe_drop_zone").toHaveCount(6);
+    await dragUtils.moveTo(":iframe .s_dummy_snippet_2 .oe_drop_zone");
+    await dragUtils.moveTo(":iframe .s_dummy_snippet_3 .oe_drop_zone");
+    await dragUtils.drop(getDragMoveHelper());
+    await waitForEndOfOperation();
+    expect(":iframe .s_dummy_snippet_3 .s_alert:nth-child(1)").toHaveCount(1);
+    expect(":iframe #wrap").toHaveClass("o_dirty");
+    expect(":iframe .view_1.o_editable").not.toHaveClass("o_dirty");
+    expect(":iframe .view_2.o_editable").toHaveClass("o_dirty");
+    expect(":iframe .o_dirty").toHaveCount(2);
+    // Undo
+    await contains(".o-website-builder_sidebar .fa-undo").click();
+    expect(":iframe .o_dirty").toHaveCount(0);
+});
+
 function setupSaveAndReloadIframe() {
     const resultSave = [];
     onRpc("ir.ui.view", "save", ({ args }) => {
@@ -262,3 +394,30 @@ function setupSaveAndReloadIframe() {
     });
     return resultSave;
 }
+
+test("'Switch Theme' after a mutation should only ask one confirmation", async () => {
+    class MockSwitchThemeAction extends Component {
+        static props = ["*"];
+        static template = xml`<div class="mock-switch-theme"></div>`;
+    }
+    defineActions([
+        {
+            tag: "__test__switch_theme__action__",
+            xml_id: "website.theme_install_kanban_action",
+            type: "ir.actions.client",
+        },
+    ]);
+    registry.category("actions").add("__test__switch_theme__action__", MockSwitchThemeAction);
+
+    setupSaveAndReloadIframe();
+    const { getEditor, getEditableContent } = await setupWebsiteBuilder(exampleWebsiteContent);
+    await modifyText(getEditor(), getEditableContent());
+    await contains(`.o-snippets-tabs button[data-name="theme"]`).click();
+    await contains(`.o_theme_tab button[data-action-id="switchTheme"]`).click();
+    expect(".modal main").toHaveText(/Changing theme/);
+    await contains(`.modal button:contains(Ok)`).click();
+    expect(".modal").toHaveCount(0, {
+        message: "There should not be the modal telling changes will be lost",
+    });
+    expect(".mock-switch-theme").toHaveCount(1);
+});
