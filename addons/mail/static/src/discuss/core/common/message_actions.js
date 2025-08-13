@@ -1,4 +1,4 @@
-import { messageActionsRegistry } from "@mail/core/common/message_actions";
+import { messageActionsRegistry, registerMessageAction } from "@mail/core/common/message_actions";
 
 import { toRaw } from "@odoo/owl";
 
@@ -7,7 +7,7 @@ import { rpc } from "@web/core/network/rpc";
 import { createDocumentFragmentFromContent } from "@web/core/utils/html";
 import { patch } from "@web/core/utils/patch";
 
-messageActionsRegistry.add("set-new-message-separator", {
+registerMessageAction("set-new-message-separator", {
     /** @param {import("@mail/core/common/message").Message} component */
     condition: (component) => {
         const thread = component.props.thread;
@@ -20,6 +20,7 @@ messageActionsRegistry.add("set-new-message-separator", {
         );
     },
     icon: "fa fa-eye-slash",
+    iconLarge: "fa fa-lg fa-eye-slash",
     name: _t("Mark as Unread"),
     /** @param {import("@mail/core/common/message").Message} component */
     onSelected: (component) => {

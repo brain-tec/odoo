@@ -60,12 +60,13 @@ patch(Thread.prototype, {
             pushState = this.notEq(this.store.discuss.thread);
         }
         this.store.discuss.thread = this;
-        this.store.discuss.activeTab =
-            !this.store.env.services.ui.isSmall || this.model === "mail.box"
-                ? "main"
-                : ["chat", "group"].includes(this.channel_type)
-                ? "chat"
-                : "channel";
+        this.store.discuss.activeTab = !this.store.env.services.ui.isSmall
+            ? "notification"
+            : this.model === "mail.box"
+            ? "inbox"
+            : ["chat", "group"].includes(this.channel_type)
+            ? "chat"
+            : "channel";
         if (pushState) {
             this.setActiveURL();
         }
@@ -96,7 +97,7 @@ patch(Thread.prototype, {
         if (this.eq(this.store.discuss.thread)) {
             router.replaceState({ active_id: undefined });
         }
-        if (this.model === "discuss.channel" && this.is_pinned) {
+        if (this.model === "discuss.channel" && this.selfMember?.is_pinned !== false) {
             await this.store.env.services.orm.silent.call(
                 "discuss.channel",
                 "channel_pin",

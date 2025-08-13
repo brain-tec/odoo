@@ -1,12 +1,12 @@
-import { threadActionsRegistry } from "@mail/core/common/thread_actions";
+import { registerThreadAction } from "@mail/core/common/thread_actions";
 import { PinnedMessagesPanel } from "@mail/discuss/message_pin/common/pinned_messages_panel";
 
 import { useChildSubEnv } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 
-threadActionsRegistry.add("pinned-messages", {
-    component: PinnedMessagesPanel,
+registerThreadAction("pinned-messages", {
+    actionPanelComponent: PinnedMessagesPanel,
     condition(component) {
         return (
             component.thread?.model === "discuss.channel" &&
@@ -20,13 +20,13 @@ threadActionsRegistry.add("pinned-messages", {
     nameActive: _t("Hide Pinned Messages"),
     sequence: 20,
     sequenceGroup: 10,
-    setup(action) {
+    setup() {
         useChildSubEnv({
             pinMenu: {
-                open: () => action.open(),
+                open: () => this.open(),
                 close: () => {
-                    if (action.isActive) {
-                        action.close();
+                    if (this.isActive) {
+                        this.close();
                     }
                 },
             },
