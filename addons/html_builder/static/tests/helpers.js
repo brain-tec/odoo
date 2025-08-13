@@ -2,12 +2,12 @@ import { Builder } from "@html_builder/builder";
 import { CORE_PLUGINS } from "@html_builder/core/core_plugins";
 import { Img } from "@html_builder/core/img";
 import { SetupEditorPlugin } from "@html_builder/core/setup_editor_plugin";
+import { unformat } from "@html_editor/../tests/_helpers/format";
 import { LocalOverlayContainer } from "@html_editor/local_overlay_container";
 import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
-import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { after } from "@odoo/hoot";
-import { animationFrame, queryOne } from "@odoo/hoot-dom";
+import { animationFrame, waitForNone, queryOne, waitFor, advanceTime } from "@odoo/hoot-dom";
 import { Component, onMounted, useRef, useState, useSubEnv, xml } from "@odoo/owl";
 import {
     defineModels,
@@ -18,6 +18,8 @@ import {
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
 import { uniqueId } from "@web/core/utils/functions";
+import { loadBundle } from "@web/core/assets";
+import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 
 export function patchWithCleanupImg() {
     const defaultImg =
@@ -50,9 +52,29 @@ function getSnippetView(snippets) {
     </snippets>`;
 }
 
-function getSnippetStructure({ name, content, keywords = [], groupName, imagePreview = "" }) {
+/**
+ * Creates snippet structure HTML for test fixtures
+ * @param {Object} options - Snippet structure configuration
+ * @param {string} options.name - The display name of the snippet
+ * @param {string} options.content - The HTML content of the snippet
+ * @param {string[]} [options.keywords=[]] - Search keywords for the snippet
+ * @param {string} options.groupName - The snippet group (category) name
+ * @param {string} [options.imagePreview=""] - URL to preview image
+ * @param {string|number} [options.moduleId=""] - Module ID if snippet belongs to a module
+ * @param {string} [options.moduleDisplayName=""] - Human-readable module name
+ * @returns {string} HTML string for the snippet structure
+ */
+export function getSnippetStructure({
+    name,
+    content,
+    keywords = [],
+    groupName,
+    imagePreview = "",
+    moduleId = "",
+    moduleDisplayName = "",
+}) {
     keywords = keywords.join(", ");
-    return `<div name="${name}" data-oe-snippet-id="123" data-o-image-preview="${imagePreview}" data-oe-keywords="${keywords}" data-o-group="${groupName}">${content}</div>`;
+    return `<div name="${name}" data-oe-snippet-id="123" data-o-image-preview="${imagePreview}" data-oe-keywords="${keywords}" data-o-group="${groupName}" data-module-id="${moduleId}" data-module-display-name="${moduleDisplayName}">${content}</div>`;
 }
 
 class BuilderContainer extends Component {
@@ -142,36 +164,35 @@ class IrUiView extends models.Model {
  */
 export async function setupHTMLBuilder(
     content = "",
-    { headerContent = "", snippetContent, dropzoneSelectors, styleContent } = {}
+    { headerContent = "", snippetContent, dropzoneSelectors, snippets, styleContent } = {}
 ) {
-    defineMailModels(); // fuck this shit
-
+    defineMailModels();
     defineModels([IrUiView]);
 
     patchWithCleanupImg();
 
-    // const snippetsDescription = { name: "Test", groupName: "a", content: snippetContentStr };
-    // [{ name: "Test", groupName: "a", content: snippetContentStr }];
-
-    const snippets = {
-        snippet_groups: [
-            '<div name="A" data-oe-thumbnail="a.svg" data-oe-snippet-id="123" data-o-snippet-group="a"><section data-snippet="s_snippet_group"></section></div>',
-        ],
-        snippet_structure: [
-            getSnippetStructure({
-                name: "Test",
-                groupName: "a",
-                content: `<section class="s_test" data-snippet="s_test" data-name="Test">
+    if (!snippets) {
+        snippets = {
+            snippet_groups: [
+                '<div name="A" data-oe-thumbnail="a.svg" data-oe-snippet-id="123" data-o-snippet-group="a"><section data-snippet="s_snippet_group"></section></div>',
+            ],
+            snippet_structure: [
+                getSnippetStructure({
+                    name: "Test",
+                    groupName: "a",
+                    content: `<section class="s_test" data-snippet="s_test" data-name="Test">
             <div class="test_a"></div>
             </section>`,
-            }),
-        ],
-        snippet_content: snippetContent || [
-            `<section class="s_test" data-snippet="s_test" data-name="Test">
+                }),
+            ],
+            // TODO: maybe we should use the same structure as in the snippets?
+            snippet_content: snippetContent || [
+                `<section class="s_test" data-snippet="s_test" data-name="Test">
             <div class="test_a"></div>
             </section>`,
-        ],
-    };
+            ],
+        };
+    }
 
     patchWithCleanup(IrUiView.prototype, {
         render_public_asset: () => getSnippetView(snippets),
@@ -231,7 +252,6 @@ export async function setupHTMLBuilder(
         editor: attachedEditor,
         contentEl: comp.iframeRef.el.contentDocument.body.firstChild.firstChild,
         builderEl: comp.env.builderRef.el.querySelector(".o-website-builder_sidebar"),
-        snippetContent: snippets.snippet_content.join(""),
     };
 }
 
@@ -284,4 +304,153 @@ export function addBuilderAction(actions = {}) {
         };
     }
     addBuilderPlugin(P);
+}
+
+/**
+ * Returns the dragged helper when drag and dropping snippets.
+ */
+export function getDragHelper() {
+    return document.body.querySelector(".o_draggable_dragging .o_snippet_thumbnail");
+}
+
+/**
+ * Returns the dragged helper when drag and dropping elements from the page.
+ */
+export function getDragMoveHelper() {
+    return document.body.querySelector(".o_drag_move_helper");
+}
+
+/**
+ * Waits for the loading element added by the mutex to be removed, indicating
+ * that the operation is over.
+ */
+export async function waitForEndOfOperation() {
+    advanceTime(500);
+    advanceTime(50);
+    await waitForNone(":iframe .o_loading_screen");
+    await animationFrame();
+}
+
+export function addDropZoneSelector(selector) {
+    const pluginId = uniqueId("test-dropzone-selector");
+
+    class P extends Plugin {
+        static id = pluginId;
+        resources = {
+            dropzone_selector: [selector],
+        };
+    }
+
+    registry.category("website-plugins").add(pluginId, P);
+    after(() => {
+        registry.category("website-plugins").remove(P);
+    });
+}
+
+export async function waitForSnippetDialog() {
+    await animationFrame();
+    await loadBundle("web.assets_frontend", {
+        targetDoc: queryOne("iframe.o_add_snippet_iframe").contentDocument,
+        js: false,
+    });
+    await loadBundle("html_builder.iframe_add_dialog", {
+        targetDoc: queryOne("iframe.o_add_snippet_iframe").contentDocument,
+        js: false,
+    });
+    await waitFor(".o_add_snippet_dialog iframe.show.o_add_snippet_iframe");
+}
+
+// Snippet Testing Helpers
+// Use createTestSnippets() for most cases to replace repetitive getSnippetsDescription functions
+// Use getBasicSection() for simple HTML section generation
+
+/**
+ * Creates a basic HTML section structure for test snippets
+ * @param {string} content - The content to place inside the section
+ * @param {Object} [options={}] - Configuration options
+ * @param {string} [options.name] - Name attribute for the section (data-name)
+ * @param {string} [options.snippet="s_test"] - Snippet class and data-snippet value
+ * @param {string} [options.additionalClassOnRoot=""] - Additional CSS classes for the root element
+ * @returns {string} Formatted HTML section element
+ */
+export function getBasicSection(
+    content,
+    { name, snippet = "s_test", additionalClassOnRoot = "" } = {}
+) {
+    let classes = snippet;
+    if (additionalClassOnRoot) {
+        classes += ` ${additionalClassOnRoot}`;
+    }
+    return unformat(
+        `<section class="${classes}" data-snippet="${snippet}" ${
+            name ? `data-name="${name}"` : ""
+        }><div class="test_a o-paragraph">${content}</div></section>`
+    );
+}
+
+export function createTestSnippets({ snippets: snippetConfigs = [], withName = false }) {
+    return snippetConfigs.map((snippetConfig) => {
+        const {
+            name,
+            groupName = "a",
+            content,
+            innerHTML,
+            keywords = [],
+            imagePreview = "",
+            moduleId,
+            moduleDisplayName,
+            additionalClassOnRoot,
+            snippet: snippetId,
+        } = snippetConfig;
+
+        const finalContent =
+            content ||
+            getBasicSection(innerHTML || name, {
+                name: withName ? name : "",
+                snippet: snippetId || "s_test",
+                additionalClassOnRoot,
+            });
+
+        const snippet = {
+            name,
+            groupName,
+            content: finalContent,
+            keywords,
+            imagePreview,
+            moduleId,
+            moduleDisplayName,
+        };
+
+        return snippet;
+    });
+}
+
+export async function setupHTMLBuilderWithDummySnippet(content) {
+    const snippetEl = `<section class="s_test" data-snippet="s_test" data-name="Test">
+            <div class="test_a"></div>
+        </section>`;
+
+    const snippetsDescription = createTestSnippets({
+        snippets: [
+            {
+                name: "Test",
+                groupName: "a",
+                content: snippetEl,
+            },
+        ],
+    });
+
+    const snippetsStructure = {
+        snippets: {
+            snippet_groups: [
+                '<div name="A" data-oe-thumbnail="a.svg" data-oe-snippet-id="123" data-o-snippet-group="a"><section data-snippet="s_snippet_group"></section></div>',
+            ],
+            snippet_structure: snippetsDescription.map((snippetDesc) =>
+                getSnippetStructure(snippetDesc)
+            ),
+        },
+    };
+    const { contentEl } = await setupHTMLBuilder(content || "", snippetsStructure);
+
+    return { contentEl };
 }
