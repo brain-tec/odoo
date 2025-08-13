@@ -116,7 +116,7 @@ class TestUser(MailCommon):
             '"Jean Poilvache" <POILVACHE@test.example.com>',
         ]
         with self.mock_mail_gateway(), \
-             RecordCapturer(self.env['res.users'], []) as capture:
+             RecordCapturer(self.env['res.users']) as capture:
             self.env['res.users'].web_create_users(src)
 
         exp_emails = ['poiluchette@test.example.com', 'poilvache@test.example.com']
@@ -212,6 +212,7 @@ class TestUserSettings(MailCommon):
         settings.is_discuss_sidebar_category_chat_open = False
         settings.is_discuss_sidebar_category_channel_open = False
 
+        self._reset_bus()
         with self.assertBus(
                 [(self.cr.dbname, 'res.partner', self.partner_employee.id)],
                 [{

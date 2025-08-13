@@ -12,9 +12,10 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
+import { DiscussContent } from "./discuss_content";
 
 export class MessagingMenu extends Component {
-    static components = { CountryFlag, Dropdown, NotificationItem, ImStatus };
+    static components = { CountryFlag, DiscussContent, Dropdown, NotificationItem, ImStatus };
     static props = [];
     static template = "mail.MessagingMenu";
 
@@ -124,13 +125,14 @@ export class MessagingMenu extends Component {
     /**
      * @type {{ id: string, icon: string, label: string }[]}
      */
-    get tabs() {
+    get _tabs() {
         return [
             {
                 counter: this.store.discuss.chats.threadsWithCounter.length,
                 icon: "fa fa-user",
                 id: "chat",
                 label: _t("Chats"),
+                sequence: 20,
             },
             {
                 channelHasUnread: Boolean(this.store.discuss.unreadChannels.length),
@@ -138,8 +140,13 @@ export class MessagingMenu extends Component {
                 icon: "fa fa-users",
                 id: "channel",
                 label: _t("Channels"),
+                sequence: 40,
             },
         ];
+    }
+
+    get tabs() {
+        return this._tabs.sort((t1, t2) => t1.sequence - t2.sequence);
     }
 
     onClickNavTab(tabId) {
@@ -148,13 +155,12 @@ export class MessagingMenu extends Component {
         }
         this.store.discuss.activeTab = tabId;
         if (
-            this.store.discuss.activeTab === "main" &&
-            this.env.inDiscussApp &&
+            this.store.discuss.activeTab === "inbox" &&
             (!this.store.discuss.thread || this.store.discuss.thread.model !== "mail.box")
         ) {
             this.store.inbox.setAsDiscussThread();
         }
-        if (this.store.discuss.activeTab !== "main") {
+        if (this.store.discuss.activeTab !== "inbox") {
             this.store.discuss.thread = undefined;
         }
     }

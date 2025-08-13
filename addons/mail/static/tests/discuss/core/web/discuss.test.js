@@ -143,7 +143,7 @@ test("mobile chat search should allow to create group chat", async () => {
     patchUiSize({ size: SIZES.SM });
     await start();
     await openDiscuss();
-    await contains("button.active", { text: "Inbox" });
+    await contains("button.o-active", { text: "Notifications" });
     await click("button", { text: "Chats" });
     await contains(".o-mail-DiscussSearch-inputContainer");
 });
@@ -210,7 +210,7 @@ test("Preserve letter case and accents when creating channel from sidebar", asyn
     await click("input[placeholder='Search conversations']");
     await insertText("input[placeholder='Search a conversation']", "Crème brûlée Fan Club");
     await click("a", { text: "Create Channel" });
-    await contains(".o-mail-Discuss-threadName", { value: "Crème brûlée Fan Club" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "Crème brûlée Fan Club" });
 });
 
 test("Create channel must have a name", async () => {

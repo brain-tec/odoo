@@ -23,24 +23,24 @@ test("navigate to sub channel", async () => {
     await start();
     await openDiscuss(channelId);
     // Should access sub-thread after its creation.
-    await contains(".o-mail-Discuss-threadName", { value: "General" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "General" });
     await click("button[title='Threads']");
     await click("button[aria-label='Create Thread']");
-    await contains(".o-mail-Discuss-threadName", { value: "New Thread" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "New Thread" });
     // Should access sub-thread when clicking on the menu.
     await click(".o-mail-DiscussSidebarChannel", { name: "General" });
-    await contains(".o-mail-Discuss-threadName", { value: "General" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "General" });
     await click("button[title='Threads']");
     await click(".o-mail-SubChannelList-thread", { text: "New Thread" });
-    await contains(".o-mail-Discuss-threadName", { value: "New Thread" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "New Thread" });
     // Should access sub-thread when clicking on the notification.
     await click(".o-mail-DiscussSidebarChannel", { name: "General" });
-    await contains(".o-mail-Discuss-threadName", { value: "New Thread" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "New Thread" });
     await contains(".o-mail-NotificationMessage", {
         text: `${serverState.partnerName} started a thread: New Thread.1:00 PM`,
     });
     await click(".o-mail-NotificationMessage a", { text: "New Thread" });
-    await contains(".o-mail-Discuss-threadName", { value: "New Thread" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "New Thread" });
 });
 
 test("can manually unpin a sub-thread", async () => {
@@ -49,10 +49,10 @@ test("can manually unpin a sub-thread", async () => {
     await start();
     await openDiscuss(channelId);
     // Open thread so this is pinned
-    await contains(".o-mail-Discuss-threadName", { value: "General" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "General" });
     await click("button[title='Threads']");
     await click("button[aria-label='Create Thread']");
-    await contains(".o-mail-Discuss-threadName", { value: "New Thread" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "New Thread" });
     await click("[title='Threads Actions']");
     await click(".o-dropdown-item:contains('Unpin Conversation')");
     await contains(".o-mail-DiscussSidebar-item", { text: "New Thread", count: 0 });
@@ -70,7 +70,9 @@ test("create sub thread from existing message", async () => {
     await openDiscuss(channelId);
     await click(".o-mail-Message-actions [title='Expand']");
     await click(".o-dropdown-item:contains('Create Thread')");
-    await contains(".o-mail-Discuss-threadName", { value: "Selling a training session and" });
+    await contains(".o-mail-DiscussContent-threadName", {
+        value: "Selling a training session and",
+    });
     await contains(".o-mail-Message", {
         text: "Selling a training session and selling the products after the training session is more efficient.",
     });
@@ -78,7 +80,9 @@ test("create sub thread from existing message", async () => {
     await click(".o-mail-Message-actions [title='Expand']");
     await contains(".o-dropdown-item:contains('Create Thread')", { count: 0 });
     await click(".o-dropdown-item:contains('View Thread')");
-    await contains(".o-mail-Discuss-threadName", { value: "Selling a training session and" });
+    await contains(".o-mail-DiscussContent-threadName", {
+        value: "Selling a training session and",
+    });
 });
 
 test("should allow creating a thread from an existing thread", async () => {
@@ -98,7 +102,7 @@ test("should allow creating a thread from an existing thread", async () => {
     await openDiscuss(sub_channel_id);
     await click(".o-mail-Message-actions [title='Expand']");
     await click(".o-dropdown-item:contains('Create Thread')");
-    await contains(".o-mail-Discuss-threadName", { value: "hello alex" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "hello alex" });
     await click(".o-mail-DiscussSidebarChannel", { name: "General" });
     await contains(".o-mail-NotificationMessage", {
         text: `${serverState.partnerName} started a thread: hello alex.1:00 PM`,
@@ -121,7 +125,9 @@ test("create sub thread from existing message (slow network)", async () => {
     await click(".o-dropdown-item:contains('Create Thread')");
     await animationFrame();
     createSubChannelDef.resolve();
-    await contains(".o-mail-Discuss-threadName", { value: "Selling a training session and" });
+    await contains(".o-mail-DiscussContent-threadName", {
+        value: "Selling a training session and",
+    });
     await contains(".o-mail-Message", {
         text: "Selling a training session and selling the products after the training session is more efficient.",
     });
@@ -135,9 +141,10 @@ test("create sub thread from sub-thread list", async () => {
     await click("button[title='Threads']");
     await contains(".o-mail-SubChannelList", { text: "This channel has no thread yet." });
     await click("button[aria-label='Create Thread']");
-    await contains(".o-mail-Discuss-threadName", { value: "New Thread" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "New Thread" });
     await click(".o-mail-DiscussSidebarChannel", { name: "General" });
-    await click("button[title='Threads']");
+    await contains(".o-mail-DiscussContent-threadName", { value: "General" });
+    await click(".o-mail-DiscussContent-header button[title='Threads']");
     await insertText(
         ".o-mail-ActionPanel:has(.o-mail-SubChannelList) .o_searchview_input",
         "MyEpicThread"
@@ -145,7 +152,7 @@ test("create sub thread from sub-thread list", async () => {
     await click("button[aria-label='Search button']");
     await contains(".o-mail-SubChannelList", { text: 'No thread named "MyEpicThread"' });
     await click("button[aria-label='Create Thread']");
-    await contains(".o-mail-Discuss-threadName", { value: "MyEpicThread" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "MyEpicThread" });
 });
 
 test("'Thread' menu available in threads", async () => {
@@ -160,6 +167,7 @@ test("'Thread' menu available in threads", async () => {
     await start();
     await openDiscuss(subChannelID);
     await click(".o-mail-DiscussSidebar-item", { text: "ThreadOne" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "ThreadOne" });
     await click("button[title='Threads']");
     await insertText(".o-mail-ActionPanel input[placeholder='Search by name']", "ThreadTwo");
     await click(".o-mail-ActionPanel button", { text: "Create" });
@@ -197,6 +205,7 @@ test("sub thread is available for channel and group, not for chat", async () => 
     await click(".o-mail-ActionPanel button", { text: "Create" });
     await click(".o-mail-DiscussSidebar-item", { text: "Sub thread for channel" });
     await click(".o-mail-DiscussSidebarChannel", { text: "Group" });
+    await contains(".o-mail-DiscussContent-threadName", { value: "Group" });
     await click("button[title='Threads']");
     await insertText(
         ".o-mail-ActionPanel input[placeholder='Search by name']",
@@ -248,6 +257,7 @@ test("sub-thread is visually muted when mute is active", async () => {
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
     await start();
     await openDiscuss(channelId);
+    await contains(".o-mail-DiscussContent-threadName", { value: "General" });
     await click("button[title='Threads']");
     await click("button[aria-label='Create Thread']");
     await contains(".opacity-50.o-mail-DiscussSidebar-item:contains('New Thread')", { count: 0 });
