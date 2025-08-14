@@ -503,8 +503,7 @@ export class PosStore extends WithLazyGetterTrap {
                     const orderPresetDate = DateTime.fromISO(order.preset_time);
                     const isSame = DateTime.now().hasSame(orderPresetDate, "day");
                     if (!order.preset_time || isSame) {
-                        await this.checkPreparationStateAndSentOrderInPreparation(order, {
-                            cancelled: true,
+                        await this.checkPreparationStateAndSentOrderInPreparation(order, true, {
                             orderDone: true,
                         });
                     }
@@ -557,12 +556,13 @@ export class PosStore extends WithLazyGetterTrap {
      * @returns {Promise<Object>}
      */
     async loadNewProducts(domain, offset = 0, limit = 0) {
-        const result = await this.data.callRelated("product.template", "load_product_from_pos", [
-            odoo.pos_config_id,
-            domain,
-            offset,
-            limit,
-        ]);
+        const result = await this.data.callRelated(
+            "product.template",
+            "load_product_from_pos",
+            [odoo.pos_config_id, domain, offset, limit],
+            {},
+            false
+        );
         this.productAttributesExclusion = this.computeProductAttributesExclusion();
         return result;
     }
@@ -1645,9 +1645,9 @@ export class PosStore extends WithLazyGetterTrap {
     changesToOrder(order, skipped = false, orderPreparationCategories, cancelled = false) {
         return changesToOrder(order, skipped, orderPreparationCategories, cancelled);
     }
-    async checkPreparationStateAndSentOrderInPreparation(order, cancelled = false) {
+    async checkPreparationStateAndSentOrderInPreparation(order, cancelled = false, opts = {}) {
         if (typeof order.id !== "number") {
-            return this.sendOrderInPreparation(order, cancelled);
+            return this.sendOrderInPreparation(order, { cancelled, ...opts });
         }
 
         const data = await this.data.call("pos.order", "get_preparation_change", [order.id]);
@@ -1674,7 +1674,7 @@ export class PosStore extends WithLazyGetterTrap {
             return;
         }
 
-        return this.sendOrderInPreparation(order, cancelled);
+        return this.sendOrderInPreparation(order, { cancelled, ...opts });
     }
     // Now the printer should work in PoS without restaurant
     async sendOrderInPreparation(order, opts = {}) {
@@ -1715,7 +1715,7 @@ export class PosStore extends WithLazyGetterTrap {
         // Ensure that other devices are aware of the changes
         // Otherwise several devices can print the same changes
         // We need to check if a preparation display is configured to avoid unnecessary sync
-        if (isPrinted && !this.config["<-pos_preparation_display.display.pos_config_ids"]?.length) {
+        if (isPrinted && !this.models["pos_preparation_display.display"]?.length) {
             await this.syncAllOrders({ orders: [order] });
         }
     }
@@ -1724,7 +1724,7 @@ export class PosStore extends WithLazyGetterTrap {
             this.data.network.warningTriggered = false;
             throw new ConnectionLostError();
         }
-        await this.checkPreparationStateAndSentOrderInPreparation(o, { cancelled });
+        await this.checkPreparationStateAndSentOrderInPreparation(o, cancelled);
     }
 
     getOrderData(order, reprint) {
@@ -2496,6 +2496,23 @@ export class PosStore extends WithLazyGetterTrap {
 
     weighProduct() {
         return makeAwaitable(this.env.services.dialog, ScaleScreen);
+    }
+
+    selectEmptyOrder() {
+        const emptyOrders = this.models["pos.order"].filter(
+            (order) =>
+                order.isEmpty() &&
+                !order.finalized &&
+                order.payment_ids.length === 0 &&
+                !order.partner_id &&
+                order.pricelist_id?.id === this.config.pricelist_id?.id &&
+                order.fiscal_position_id?.id === this.config.default_fiscal_position_id?.id
+        );
+        if (emptyOrders.length > 0) {
+            this.setOrder(emptyOrders[0]);
+            return;
+        }
+        this.addNewOrder();
     }
 
     async isSessionDeleted() {

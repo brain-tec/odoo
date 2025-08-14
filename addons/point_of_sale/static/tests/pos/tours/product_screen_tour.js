@@ -18,7 +18,7 @@ import * as TicketScreen from "@point_of_sale/../tests/pos/tours/utils/ticket_sc
 import * as Utils from "@point_of_sale/../tests/pos/tours/utils/common";
 import * as BackendUtils from "@point_of_sale/../tests/pos/tours/utils/backend_utils";
 import * as combo from "@point_of_sale/../tests/pos/tours/utils/combo_popup_util";
-import { generatePreparationReceiptElement } from "@point_of_sale/../tests/pos/tours/utils/preparation_receipt_util";
+import { checkPreparationTicketData } from "@point_of_sale/../tests/pos/tours/utils/preparation_receipt_util";
 
 registry.category("web_tour.tours").add("ProductScreenTour", {
     steps: () =>
@@ -198,6 +198,27 @@ registry.category("web_tour.tours").add("FloatingOrderTour", {
         ].flat(),
 });
 
+registry.category("web_tour.tours").add("test_reuse_empty_floating_order", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.orderIsEmpty(),
+            ProductScreen.checkFloatingOrderCount(1),
+            ProductScreen.clickDisplayedProduct("Desk Organizer", true, "1.0", "5.10"),
+            Chrome.createFloatingOrder(),
+            ProductScreen.checkFloatingOrderCount(2),
+            ProductScreen.selectFloatingOrder(0),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank", true, { remaining: "0.00" }),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.isShown(),
+            ReceiptScreen.clickNextOrder(),
+            // Should reuse previously created empty floating order
+            ProductScreen.checkFloatingOrderCount(1),
+        ].flat(),
+});
+
 registry.category("web_tour.tours").add("FiscalPositionNoTax", {
     steps: () =>
         [
@@ -333,19 +354,10 @@ registry.category("web_tour.tours").add("test_restricted_categories_combo_produc
             ProductScreen.clickDisplayedProduct("Office Combo"),
             combo.select("Combo Product 5"),
             Dialog.confirm(),
-            {
-                content: "Check if order preparation has product correctly ordered",
-                trigger: "body",
-                run: async () => {
-                    const rendered = generatePreparationReceiptElement();
-                    if (!rendered.innerHTML.includes("Office Combo")) {
-                        throw new Error("Office Combo not found in preparation receipt");
-                    }
-                    if (!rendered.innerHTML.includes("Combo Product 5")) {
-                        throw new Error("Combo Product 5 not found in preparation receipt");
-                    }
-                },
-            },
+            checkPreparationTicketData([
+                { name: "Office Combo", qty: 1 },
+                { name: "Combo Product 5", qty: 1 },
+            ]),
             Chrome.endTour(),
         ].flat(),
 });
