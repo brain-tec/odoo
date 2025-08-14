@@ -4,6 +4,7 @@ import {
     useBuilderComponent,
     useInputBuilderComponent,
 } from "@html_builder/core/utils";
+import { isSmallInteger } from "@html_builder/utils/utils";
 import { Component, onWillUpdateProps, useRef } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
@@ -33,6 +34,7 @@ export class BuilderList extends Component {
         sortable: { optional: true },
         hiddenProperties: { type: Array, optional: true },
         records: { type: String, optional: true },
+        defaultNewValue: { type: Object, optional: true },
     };
     static defaultProps = {
         addItemTitle: _t("Add"),
@@ -41,6 +43,7 @@ export class BuilderList extends Component {
         sortable: true,
         hiddenProperties: [],
         mode: "button",
+        defaultNewValue: {},
     };
     static components = { BuilderComponent, Dropdown };
 
@@ -147,6 +150,7 @@ export class BuilderList extends Component {
 
     makeDefaultItem() {
         return {
+            ...this.props.defaultNewValue,
             ...this.props.default,
             _id: this.getNextAvailableItemId(),
         };
@@ -183,6 +187,7 @@ export class BuilderList extends Component {
         }
         const item = items.find((item) => item._id === id);
         item[propertyName] = value;
+        item.id = isSmallInteger(value) ? parseInt(value) : value;
 
         if (commitToHistory) {
             this.commit(items);
