@@ -33,7 +33,9 @@ export class ReceiptScreen extends Component {
             const order = this.pos.getOrder();
 
             if (!this.pos.config.module_pos_restaurant) {
-                this.pos.checkPreparationStateAndSentOrderInPreparation(order, { orderDone: true });
+                this.pos.checkPreparationStateAndSentOrderInPreparation(order, false, {
+                    orderDone: true,
+                });
             }
         });
     }
@@ -80,7 +82,7 @@ export class ReceiptScreen extends Component {
     async orderDone() {
         this.currentOrder.uiState.screen_data.value = "";
         if (!this.pos.config.module_pos_restaurant) {
-            this.pos.addNewOrder();
+            this.pos.selectEmptyOrder();
         }
         this.pos.searchProductWord = "";
         this.pos.showScreen(this.nextScreen);
