@@ -40,6 +40,7 @@ import { renderToElement } from "@web/core/utils/render";
 import { selectElements } from "@html_editor/utils/dom_traversal";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import { FormOption } from "./form_option";
+import { isSmallInteger } from "@html_builder/utils/utils";
 
 const DEFAULT_EMAIL_TO_VALUE = "info@yourcompany.example.com";
 export class FormOptionPlugin extends Plugin {
@@ -524,6 +525,27 @@ export class FormOptionPlugin extends Plugin {
                 field.id = targetEl.id;
             }
         }
+
+        // Synchronize the possible values with the fields whose visibility
+        // depends on the current field
+        const newValuesText = field.records.map((record) => record.id);
+        const inputEls = oldFieldEl.querySelectorAll(".s_website_form_input, option");
+        const inputName = oldFieldEl.querySelector(".s_website_form_input")?.name;
+        const formEl = oldFieldEl.closest(".s_website_form");
+        for (let i = 0; i < inputEls.length; i++) {
+            const input = inputEls[i];
+            if (newValuesText[i] && input.value && !newValuesText.includes(input.value)) {
+                for (const dependentEl of formEl.querySelectorAll(
+                    `[data-visibility-condition="${CSS.escape(
+                        input.value
+                    )}"][data-visibility-dependency="${CSS.escape(inputName)}"]`
+                )) {
+                    dependentEl.dataset.visibilityCondition = newValuesText[i];
+                }
+                break;
+            }
+        }
+
         const fieldEl = renderField(field);
         replaceFieldElement(oldFieldEl, fieldEl);
     }
@@ -683,7 +705,7 @@ export class FormOptionPlugin extends Plugin {
                 ? [_t("Radio"), "exclusive_boolean"]
                 : [_t("Checkbox"), "boolean"];
             const defaults = [...fieldEl.querySelectorAll("[checked], [selected]")].map((el) =>
-                /^-?[0-9]{1,15}$/.test(el.value) ? parseInt(el.value) : el.value
+                isSmallInteger(el.value) ? parseInt(el.value) : el.value
             );
             let availableRecords = undefined;
             if (!isFieldCustom(fieldEl)) {
