@@ -8,7 +8,6 @@ import {
 } from "../website_helpers";
 import { patch } from "@web/core/utils/patch";
 import { IrModel } from "@web/../tests/_framework/mock_server/mock_models/ir_model";
-import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { animationFrame } from "@odoo/hoot-dom";
 
@@ -53,15 +52,15 @@ test("change action of form changes available options", async () => {
         .category("website.form_editor_actions")
         .add("apply_job", {
             formFields: [
-                { type: "char", name: "partner_name", fillWith: "name", string: _t("Your Name") },
+                { type: "char", name: "partner_name", fillWith: "name", string: "Your Name" },
             ],
             fields: [
-                { name: "job_id", type: "many2one", relation: "hr.job", string: _t("Applied Job") },
+                { name: "job_id", type: "many2one", relation: "hr.job", string: "Applied Job" },
             ],
             successPage: "/job-thank-you",
         })
         .add("create_customer", {
-            formFields: [{ type: "char", name: "name", fillWith: "name", string: _t("Your Name") }],
+            formFields: [{ type: "char", name: "name", fillWith: "name", string: "Your Name" }],
         });
 
     await setupWebsiteBuilder(
@@ -251,4 +250,92 @@ test("Remove visibility dependency on field unavailable (change second)", async 
     await contains("[data-label=Label] input").click();
     await contains("[data-label=Label] input").edit("a");
     expect(":iframe .s_website_form_field:not([data-visibility-dependency])").toHaveCount(2);
+});
+
+const formWithConditionOnChexbox = `
+<section class="s_website_form"><form data-model_name="mail.mail">
+    <div data-name="Field" class="s_website_form_field mb-3 col-12 s_website_form_custom" data-type="one2many">
+        <div class="row s_col_no_resize s_col_no_bgcolor">
+            <label class="col-sm-auto s_website_form_label" style="width: 200px" for="ofwe8fyqws37">
+                <span class="s_website_form_label_content">Custom Text</span>
+            </label>
+            <div class="col-sm">
+                <div class="row s_col_no_resize s_col_no_bgcolor s_website_form_multiple" data-name="Custom Text" data-display="horizontal">
+                    <div class="checkbox col-12 col-lg-4 col-md-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="s_website_form_input form-check-input" id="ofwe8fyqws370" name="Custom Text" value="Option 1" data-fill-with="undefined">
+                            <label class="form-check-label s_website_form_check_label" for="ofwe8fyqws370">Option 1</label>
+                        </div>
+                    </div>
+                    <div class="checkbox col-12 col-lg-4 col-md-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="s_website_form_input form-check-input" id="ofwe8fyqws371" name="Custom Text" value="Option 2">
+                            <label class="form-check-label s_website_form_check_label" for="ofwe8fyqws371">Option 2</label>
+                        </div>
+                    </div>
+                    <div class="checkbox col-12 col-lg-4 col-md-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="s_website_form_input form-check-input" id="ofwe8fyqws372" name="Custom Text" value="Option 3">
+                            <label class="form-check-label s_website_form_check_label" for="ofwe8fyqws372">Option 3</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+     <div data-name="Field" class="s_website_form_field mb-3 col-12 s_website_form_custom s_website_form_field_hidden_if d-none" data-type="char" data-visibility-dependency="Custom Text" data-visibility-condition="Option 1" data-visibility-comparator="selected">
+         <div class="row s_col_no_resize s_col_no_bgcolor">
+             <label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px" for="second">
+                 <span class="s_website_form_label_content">b</span>
+             </label>
+             <div class="col-sm">
+                 <input class="form-control s_website_form_input" type="text" name="b" id="second"/>
+             </div>
+         </div>
+     </div>
+     <div class="s_website_form_submit">
+        <div class="s_website_form_label"/>
+        <a>Submit</a>
+    </div>
+</form></section>
+`;
+
+const changeFieldAndCheckDependency = async (
+    changeFieldAction,
+    fieldDependencyName = "Option 1"
+) => {
+    onRpc("get_authorized_fields", () => ({}));
+    await setupWebsiteBuilder(formWithConditionOnChexbox);
+    await contains(":iframe input[value='Option 2']").click();
+    await changeFieldAction();
+    await contains(":iframe input[name='b']").click();
+    await contains(`#hidden_condition_no_text_opt:contains(${fieldDependencyName})`).click();
+};
+
+test("Correctly set field dependency name at field rename", async () => {
+    await changeFieldAndCheckDependency(
+        async () => await contains("input[data-id='1']").edit("newName")
+    );
+    expect(".o-main-components-container  .o-dropdown-item:contains('Option 3')").toHaveCount(1);
+    expect(".o-main-components-container  .o-dropdown-item:contains('newName')").toHaveCount(1);
+});
+
+test("Correctly set field dependency name at field addition", async () => {
+    await changeFieldAndCheckDependency(
+        async () => await contains("button.builder_list_add_item").click()
+    );
+    expect(".o-main-components-container  .o-dropdown-item:contains('Option 2')").toHaveCount(1);
+    expect(".o-main-components-container  .o-dropdown-item:contains('Option 3')").toHaveCount(1);
+    expect(".o-main-components-container  .o-dropdown-item:contains('Item')").toHaveCount(1);
+});
+
+test("Correctly set field dependency name at selected field rename", async () => {
+    const newName = "newName";
+    await changeFieldAndCheckDependency(
+        async () => await contains("input[data-id='0']").edit(newName),
+        newName
+    );
+    expect(".o-main-components-container  .o-dropdown-item:contains('Option 3')").toHaveCount(1);
+    expect(".o-main-components-container  .o-dropdown-item:contains('Option 2')").toHaveCount(1);
+    expect(`.o-main-components-container  .o-dropdown-item:contains('${newName}')`).toHaveCount(1);
 });
