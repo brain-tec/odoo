@@ -401,14 +401,6 @@ patch(PosStore.prototype, {
             }
         }
         const potentialRewards = this.getPotentialFreeProductRewards();
-        const rewardsToApply = [];
-        for (const reward of potentialRewards) {
-            for (const reward_product_id of reward.reward.reward_product_ids) {
-                if (productIds.includes(reward_product_id.id)) {
-                    rewardsToApply.push(reward);
-                }
-            }
-        }
 
         // move price_unit from opt to vals
         if (opt.price_unit !== undefined) {
@@ -418,13 +410,21 @@ patch(PosStore.prototype, {
 
         const result = await super.addLineToCurrentOrder(vals, opt, configure);
 
+        const rewardsToApply = [];
+        for (const reward of potentialRewards) {
+            for (const reward_product_id of reward.reward.reward_product_ids) {
+                if (result.product_id.id == reward_product_id.id) {
+                    rewardsToApply.push(reward);
+                }
+            }
+        }
+
         await this.updatePrograms();
         if (rewardsToApply.length == 1) {
             const reward = rewardsToApply[0];
-            for (const id of productIds) {
-                const product = this.models["product.product"].get(id);
-                order._applyReward(reward.reward, reward.coupon_id, { product });
-            }
+            order._applyReward(reward.reward, reward.coupon_id, {
+                product: result.product_id,
+            });
         }
         this.updateRewards();
 
@@ -594,9 +594,20 @@ patch(PosStore.prototype, {
         const domain = new Domain(reward_product_domain);
 
         try {
+            // reward.all_discount_product_ids = [
+            //     ["link", ...products.filter((p) => domain.contains(p.raw))],
+            // ];
+            const existingProduct = reward.all_discount_product_ids;
             reward.all_discount_product_ids = [
-                ["link", ...products.filter((p) => domain.contains(p.raw))],
+                ...existingProduct,
+                ...products.filter((p) => domain.contains(p.raw)),
             ];
+
+            // reward.update({
+            //     all_discount_product_ids: [
+            //         ["link", ...products.filter((p) => domain.contains(p.serialize()))],
+            //     ],
+            // });
         } catch (error) {
             if (!(error instanceof InvalidDomainError || error instanceof TypeError)) {
                 throw error;
