@@ -2142,6 +2142,90 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_zero_decimal_places_currency', login="pos_user")
 
+    def test_barcode_search_attributes_preset(self):
+        product = self.env['product.template'].create({
+            'name': 'Product with Attributes',
+            'available_in_pos': True,
+            'list_price': 10,
+            'taxes_id': False,
+        })
+
+        # Product template to force UI reset (acts as a delay)
+        self.env['product.template'].create({
+            'name': 'Product without Attributes',
+            'available_in_pos': True,
+            'list_price': 20,
+            'taxes_id': False,
+            'barcode': '987654321',
+        })
+
+        attribute_1, attribute_2, attribute_3, attribute_4 = self.env['product.attribute'].create([{
+            'name': 'Attribute 1',
+            'create_variant': 'always',
+            'display_type': 'radio',
+            'value_ids': [(0, 0, {
+                'name': 'Value 1',
+            }), (0, 0, {
+                'name': 'Value 2',
+            })],
+        }, {
+            'name': 'Attribute 2',
+            'create_variant': 'always',
+            'display_type': 'pills',
+            'value_ids': [(0, 0, {
+                'name': 'Value 3',
+            }), (0, 0, {
+                'name': 'Value 4',
+            })],
+        }, {
+            'name': 'Attribute 3',
+            'create_variant': 'always',
+            'display_type': 'select',
+            'value_ids': [(0, 0, {
+                'name': 'Value 5',
+            }), (0, 0, {
+                'name': 'Value 6',
+            })],
+        }, {
+            'name': 'Attribute 4',
+            'create_variant': 'always',
+            'display_type': 'color',
+            'value_ids': [(0, 0, {
+                'name': 'Value 7',
+            }), (0, 0, {
+                'name': 'Value 8',
+            })],
+        }])
+
+        self.env['product.template.attribute.line'].create([{
+            'product_tmpl_id': product.id,
+            'attribute_id': attribute_1.id,
+            'value_ids': [(6, 0, attribute_1.value_ids.ids)],
+            'sequence': 1,
+        }, {
+            'product_tmpl_id': product.id,
+            'attribute_id': attribute_2.id,
+            'value_ids': [(6, 0, attribute_2.value_ids.ids)],
+            'sequence': 2,
+        }, {
+            'product_tmpl_id': product.id,
+            'attribute_id': attribute_3.id,
+            'value_ids': [(6, 0, attribute_3.value_ids.ids)],
+            'sequence': 3,
+        }, {
+            'product_tmpl_id': product.id,
+            'attribute_id': attribute_4.id,
+            'value_ids': [(6, 0, attribute_4.value_ids.ids)],
+            'sequence': 4,
+        }])
+
+        for p in product.product_variant_ids:
+            p.write({
+                'barcode': f'1234{"".join(p.product_template_attribute_value_ids.mapped(lambda ptav: ptav.name[-1]))}',
+            })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_barcode_search_attributes_preset', login="pos_user")
+
     def test_quantity_package_of_non_basic_unit(self):
         test_uom_unit = self.env['uom.uom'].create({
             "name": "test unit uom",
@@ -2602,6 +2686,71 @@ class TestUi(TestPointOfSaleHttpCommon):
             'combo_ids': [Command.link(combo.id)],
         })
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_combo_variant_mix', login="pos_user")
+
+    def test_cross_exclusion_attribute_values(self):
+        """ If you create a product with two attributes and 2 values for each attribute, and you exclude one value of the first attribute with one value of the second attribute
+        and vice versa, you should still be able to select the other values of the attributes. """
+        self.attribute_1 = self.env['product.attribute'].create({
+            'name': 'attribute_1',
+            'create_variant': 'no_variant',
+        })
+
+        self.attribute_2 = self.env['product.attribute'].create({
+            'name': 'attribute_2',
+            'create_variant': 'no_variant',
+        })
+
+        self.attribute_1_value_1 = self.env['product.attribute.value'].create({
+            'name': 'attribute_1_value_1',
+            'attribute_id': self.attribute_1.id,
+        })
+        self.attribute_1_value_2 = self.env['product.attribute.value'].create({
+            'name': 'attribute_1_value_2',
+            'attribute_id': self.attribute_1.id,
+        })
+        self.attribute_2_value_1 = self.env['product.attribute.value'].create({
+            'name': 'attribute_2_value_1',
+            'attribute_id': self.attribute_2.id,
+        })
+        self.attribute_2_value_2 = self.env['product.attribute.value'].create({
+            'name': 'attribute_2_value_2',
+            'attribute_id': self.attribute_2.id,
+        })
+
+        self.test_product_1 = self.env['product.template'].create({
+            'name': 'Test Product 1',
+            'available_in_pos': True,
+            'list_price': 10.0,
+            'attribute_line_ids': [
+                (0, 0, {
+                    'attribute_id': self.attribute_1.id,
+                    'value_ids': [(6, 0, [self.attribute_1_value_1.id, self.attribute_1_value_2.id])],
+                }),
+                (0, 0, {
+                    'attribute_id': self.attribute_2.id,
+                    'value_ids': [(6, 0, [self.attribute_2_value_1.id, self.attribute_2_value_2.id])],
+                }),
+            ],
+        })
+
+        # Test the exclusion of attribute values
+        ptav_1_1 = self.test_product_1.attribute_line_ids.filtered(lambda l: l.attribute_id.id == self.attribute_1.id).product_template_value_ids.filtered(lambda v: v.product_attribute_value_id.id == self.attribute_1_value_1.id)
+        ptav_1_2 = self.test_product_1.attribute_line_ids.filtered(lambda l: l.attribute_id.id == self.attribute_1.id).product_template_value_ids.filtered(lambda v: v.product_attribute_value_id.id == self.attribute_1_value_2.id)
+        ptav_2_2 = self.test_product_1.attribute_line_ids.filtered(lambda l: l.attribute_id.id == self.attribute_2.id).product_template_value_ids.filtered(lambda v: v.product_attribute_value_id.id == self.attribute_2_value_2.id)
+        ptav_2_1 = self.test_product_1.attribute_line_ids.filtered(lambda l: l.attribute_id.id == self.attribute_2.id).product_template_value_ids.filtered(lambda v: v.product_attribute_value_id.id == self.attribute_2_value_1.id)
+        self.env['product.template.attribute.exclusion'].create({
+            'product_tmpl_id': self.test_product_1.id,
+            'product_template_attribute_value_id': ptav_1_1.id,
+            'value_ids': [Command.set([ptav_2_1.id])],
+        })
+
+        self.env['product.template.attribute.exclusion'].create({
+            'product_tmpl_id': self.test_product_1.id,
+            'product_template_attribute_value_id': ptav_1_2.id,
+            'value_ids': [Command.set([ptav_2_2.id])],
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('test_cross_exclusion_attribute_values')
 
 
 # This class just runs the same tests as above but with mobile emulation
