@@ -149,7 +149,7 @@
                         <notebook>
                             <page name="work_information" string="Work">
                                 <div class="row" id="o_hr_work_information_container">
-                                    <div id="o_work_information" class="col-lg-7 d-flex flex-column">
+                                    <div id="o_work_information" class="o_hr_column col-lg-7 d-flex flex-column">
                                         <group string="work">
                                             <field name="company_id" groups="base.group_multi_company" domain="[('id', 'in', allowed_company_ids)]"/>
                                             <field name="department_id"/>
@@ -174,13 +174,13 @@
                                             <field name="additional_note" placeholder="Provide additional information about this version..." colspan="2" nolabel="1"/>
                                         </group>
                                     </div>
-                                    <div id="o_employee_org_chart" class="col-lg-5"></div>
+                                    <div id="o_employee_org_chart" class="o_hr_column col-lg-5"></div>
                                 </div>
                             </page>
                             <page name="resume" string="Resume">
                                 <div class="row" id="o_hr_skills_resume_container">
-                                    <div id="o_employee_left" class="o_hr_skills_editable o_hr_skills_group o_group_resume col-lg-7 d-flex flex-column"></div>
-                                    <div id="o_work_information_right" class="o_hr_skills_editable o_hr_skills_group o_group_skills col-lg-5 px-0 ps-lg-5 pe-lg-0"></div>
+                                    <div id="o_employee_left" class="o_hr_skills_editable o_hr_skills_group o_hr_column o_group_resume col-lg-7 d-flex flex-column"></div>
+                                    <div id="o_work_information_right" class="o_hr_skills_editable o_hr_skills_group o_hr_column o_group_skills col-lg-5"></div>
                                 </div>
                             </page>
                             <page name="personal_information" string="Personal" groups="hr.group_hr_user">
@@ -213,13 +213,19 @@
                                         <field name="emergency_contact" string="Contact"/>
                                         <field name="emergency_phone" class="o_force_ltr" string="Phone"/>
                                     </group>
-                                    <group string="Visa">
-                                        <field name="visa_no"/>
-                                        <field name="visa_expire"/>
-                                    </group>
-                                    <group string="Work Permit">
-                                        <field name="permit_no"/>
-                                        <field name="work_permit_expiration_date" string="Expiration Date"/>
+                                    <group string="Visa &amp; Work Permit">
+                                        <label for="visa_no"/>
+                                        <div class="o_wrap_label d-flex flex-row gap-3 align-items-baseline">
+                                            <field name="visa_no" />
+                                            <label for="visa_expire" class="flex-shrink-0" invisible="not visa_no" string="Expires on"/>
+                                            <field name="visa_expire" invisible="not visa_no"/>
+                                        </div>
+                                        <label for="permit_no"/>
+                                        <div class="o_wrap_label d-flex flex-row gap-3 align-items-baseline">
+                                            <field name="permit_no" />
+                                            <label for="work_permit_expiration_date" class="flex-shrink-0" invisible="not permit_no" string="Expires on"/>
+                                            <field name="work_permit_expiration_date" invisible="not permit_no"/>
+                                        </div>
                                         <field name="work_permit_name" invisible="1"/>
                                         <field name="has_work_permit" widget="work_permit_upload" filename="work_permit_name" string="Document"/>
                                     </group>
@@ -227,7 +233,12 @@
                                         <field name="country_id" options='{"no_open": True, "no_create": True}'/>
                                         <field name="identification_id"/>
                                         <field name="ssnid"/>
-                                        <field name="passport_id"/>
+                                        <label for="passport_id"/>
+                                        <div class="o_wrap_label d-flex flex-row gap-3 align-items-baseline">
+                                            <field name="passport_id" />
+                                            <label for="passport_expiration_date" class="flex-shrink-0" invisible="not passport_id" string="Expires on"/>
+                                            <field name="passport_expiration_date" invisible="not passport_id"/>
+                                        </div>
                                     </group>
                                     <group string="Location" name="hr_location_group">
                                         <label for="private_street" string="Private Address"/>
