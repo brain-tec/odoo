@@ -552,10 +552,6 @@ class SaleOrderLine(models.Model):
 
     @api.depends('product_id', 'product_uom_id', 'product_uom_qty')
     def _compute_price_unit(self):
-        def has_manual_price(line):
-            return line.currency_id.compare_amounts(line.technical_price_unit, line.price_unit)
-
-        force_recompute = self.env.context.get('force_price_recomputation')
         for line in self:
             # Don't compute the price for deleted lines or lines for which the
             # price unit doesn't come from the product.
@@ -565,7 +561,7 @@ class SaleOrderLine(models.Model):
             # check if the price has been manually set or there is already invoiced amount.
             # if so, the price shouldn't change as it might have been manually edited.
             if (
-                (not force_recompute and has_manual_price(line))
+                (line.technical_price_unit != line.price_unit and not line.env.context.get('force_price_recomputation'))
                 or line.qty_invoiced > 0
                 or (line.product_id.expense_policy == 'cost' and line.is_expense)
             ):
@@ -777,11 +773,12 @@ class SaleOrderLine(models.Model):
         :return: A python dictionary.
         """
         self.ensure_one()
+        company = self.order_id.company_id or self.env.company
         base_values = {
             'tax_ids': self.tax_ids,
             'quantity': self.product_uom_qty,
             'partner_id': self.order_id.partner_id,
-            'currency_id': self.order_id.currency_id or self.order_id.company_id.currency_id,
+            'currency_id': self.order_id.currency_id or company.currency_id,
             'rate': self.order_id.currency_rate,
         }
         if self._is_global_discount():
@@ -797,11 +794,14 @@ class SaleOrderLine(models.Model):
 
     @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_ids')
     def _compute_amount(self):
+        AccountTax = self.env['account.tax']
         for line in self:
+            company = line.company_id or self.env.company
             base_line = line._prepare_base_line_for_taxes_computation()
-            self.env['account.tax']._add_tax_details_in_base_line(base_line, line.company_id)
-            line.price_subtotal = base_line['tax_details']['raw_total_excluded_currency']
-            line.price_total = base_line['tax_details']['raw_total_included_currency']
+            AccountTax._add_tax_details_in_base_line(base_line, company)
+            AccountTax._round_base_lines_tax_details([base_line], company)
+            line.price_subtotal = base_line['tax_details']['total_excluded_currency']
+            line.price_total = base_line['tax_details']['total_included_currency']
             line.price_tax = line.price_total - line.price_subtotal
 
     @api.depends('price_subtotal', 'product_uom_qty')
