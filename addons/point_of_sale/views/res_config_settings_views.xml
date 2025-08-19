@@ -108,7 +108,7 @@
                                                 invisible="not group_cash_rounding"/>
                                     </div>
                                 </setting>
-                                <setting help="Set a maximum difference allowed between the expected and counted money during the closing of the session">
+                                <setting id="set_maximum_difference" help="Set a maximum difference allowed between the expected and counted money during the closing of the session">
                                     <field name="pos_set_maximum_difference" />
                                     <div class="content-group mt16" invisible="not pos_set_maximum_difference">
                                         <label for="pos_amount_authorized_diff" string="Authorized Difference" class="fw-normal me-1"/>
@@ -126,9 +126,6 @@
                                 </setting>
                             </block>
                             <block title="PoS Interface" id="pos_interface_section">
-                                <div class="o_notification_alert alert alert-warning" invisible="pos_company_has_template" role="alert">
-                                    There is no Chart of Accounts configured on the company. Please go to the invoicing settings to install a Chart of Accounts.
-                                </div>
                                 <setting id="multiple_employee_session" title="Employees can scan their badge or enter a PIN to log in to a PoS session. These credentials are configurable in the *HR Settings* tab of the employee form." string="Log in with Employees" help="Allow to log and switch between selected Employees" documentation="/applications/sales/point_of_sale/employee_login.html">
                                     <field name="pos_module_pos_hr"/>
                                     <div class="content-group mt16" invisible="not pos_module_pos_hr">
@@ -282,7 +279,7 @@
                                 <setting id="manual_discount" help="Allow cashiers to set a discount per line" documentation="/applications/sales/point_of_sale/pricing/discounts.html">
                                     <field name="pos_manual_discount"/>
                                 </setting>
-                                <setting help="Adds a button to set a global discount" documentation="/applications/sales/point_of_sale/pricing/discounts.html">
+                                <setting id="pos_global_discount" help="Adds a button to set a global discount" documentation="/applications/sales/point_of_sale/pricing/discounts.html">
                                     <field name="pos_module_pos_discount"/>
                                     <div class="content-group mt16" invisible="not pos_module_pos_discount">
                                         <div class="text-warning mb4" id="warning_text_pos_discount" >
@@ -344,7 +341,7 @@
                                         </div>
                                     </div>
                                 </setting>
-                                <setting help="Print basic ticket without prices. Can be used for gifts.">
+                                <setting id="basic_receipt" help="Print basic ticket without prices. Can be used for gifts.">
                                     <field name="pos_basic_receipt"/>
                                 </setting>
                             </block>
@@ -386,6 +383,16 @@
                             <block title="Connected Devices" id="pos_connected_devices_section">
                                 <setting id="pos_other_devices" string="ePos Printer" help="Connect device to your PoS without an IoT Box" documentation="/applications/sales/point_of_sale/configuration/epos_ssc.html">
                                     <field name="pos_other_devices"/>
+                                    <div class="content-group" invisible="not pos_other_devices">
+                                        <field name="pos_epson_printer_ip" placeholder="Epson Receipt Printer IP Address" />
+                                        <div class="row" invisible="pos_epson_printer_ip in [False, '']">
+                                            <label string="Cashdrawer" for="pos_iface_cashdrawer" class="col-lg-3 o_light_label"/>
+                                            <field name="pos_iface_cashdrawer"/>
+                                        </div>
+                                    </div>
+                                    <div role="alert" class="alert alert-warning" invisible="not pos_iface_print_via_proxy or not pos_other_devices or pos_epson_printer_ip in [False, '']">
+                                        The Epson receipt printer will be used instead of the receipt printer connected to the IoT Box.
+                                    </div>
                                 </setting>
                                 <setting id="customer_display" string="Customer Display" help="Set the background image of your customer display" documentation="/applications/sales/point_of_sale/shop/customer_display.html" >
                                     <label for="pos_customer_display_bg_img" />
@@ -456,7 +463,7 @@
                                 <setting title="Operation types show up in the Inventory dashboard." string="Operation Type" help="Used to record product pickings. Products are consumed from its default source location.">
                                     <field name="pos_picking_type_id" domain="[('company_id', '=', company_id)]" required="pos_config_id"/>
                                 </setting>
-                                <setting string="Allow Ship Later" help="Sell products and deliver them later.">
+                                <setting id="ship_later" string="Allow Ship Later" help="Sell products and deliver them later.">
                                     <field name="pos_ship_later"/>
                                     <div class="content-group mt16" invisible="not pos_ship_later">
                                         <div class="row">
