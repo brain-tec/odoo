@@ -25,7 +25,7 @@ class PurchaseOrder(models.Model):
     _rec_names_search = ['name', 'partner_ref']
     _order = 'priority desc, id desc'
 
-    @api.depends('order_line.price_subtotal', 'company_id')
+    @api.depends('order_line.price_subtotal', 'company_id', 'currency_id')
     def _amount_all(self):
         AccountTax = self.env['account.tax']
         for order in self:
@@ -1180,8 +1180,11 @@ class PurchaseOrder(models.Model):
             params=params
         )
         if seller:
+            price = seller.price_discounted
+            if seller.currency_id != self.currency_id:
+                price = seller.currency_id._convert(seller.price_discounted, self.currency_id)
             product_infos.update(
-                price=seller.price_discounted,
+                price=price,
                 min_qty=seller.min_qty,
             )
 
@@ -1290,7 +1293,11 @@ class PurchaseOrder(models.Model):
             })
             if pol.selected_seller_id:
                 # Fix the PO line's price on the seller's one.
-                pol.price_unit = pol.selected_seller_id.price_discounted
+                seller = pol.selected_seller_id
+                price = seller.price_discounted
+                if seller.currency_id != self.currency_id:
+                    price = seller.currency_id._convert(seller.price_discounted, self.currency_id)
+                pol.price_unit = price
         return pol.price_unit_discounted
 
     def _create_order_section(self, child_field, name, position, **kwargs):

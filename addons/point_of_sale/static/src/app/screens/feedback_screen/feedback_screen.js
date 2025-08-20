@@ -1,7 +1,9 @@
 import { registry } from "@web/core/registry";
-import { Component, useRef, onMounted } from "@odoo/owl";
+import { Component, useRef, onMounted, useEffect, useState, onWillUnmount } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { PriceFormatter } from "@point_of_sale/app/components/price_formatter/price_formatter";
+import { _t } from "@web/core/l10n/translation";
+import { useService } from "@web/core/utils/hooks";
 
 export class FeedbackScreen extends Component {
     static template = "point_of_sale.FeedbackScreen";
@@ -9,19 +11,47 @@ export class FeedbackScreen extends Component {
     static components = { PriceFormatter };
     static props = {
         orderUuid: String,
+        waitFor: { type: Object, optional: true },
+        paymentMethodId: { type: Number, optional: true, default: null },
     };
 
     setup() {
         super.setup();
         this.pos = usePos();
+        this.notification = useService("notification");
         this.containerRef = useRef("feedback-screen");
         this.amountRef = useRef("amount");
+        this.state = useState({
+            loading: true,
+        });
+
         onMounted(() => {
             this.scaleText();
         });
-        this.timeout = setTimeout(() => {
-            this.goToNextScreen();
-        }, 2000);
+
+        useEffect(
+            () => {
+                const waiter = async () => {
+                    try {
+                        if (this.props.waitFor) {
+                            await this.props.waitFor;
+                        }
+                    } finally {
+                        this.state.loading = false;
+                        this.timeout = setTimeout(() => {
+                            this.goToNextScreen();
+                        }, 5000);
+                    }
+                };
+
+                waiter();
+            },
+            () => []
+        );
+
+        onWillUnmount(() => {
+            clearTimeout(this.timeout);
+        });
     }
 
     scaleText() {
@@ -42,6 +72,15 @@ export class FeedbackScreen extends Component {
     }
 
     onClick() {
+        if (this.state.loading) {
+            this.notification.add(
+                _t("A request is still being processed in the background. Please wait."),
+                {
+                    type: "warning",
+                }
+            );
+            return;
+        }
         clearTimeout(this.timeout);
         this.goToNextScreen();
     }
