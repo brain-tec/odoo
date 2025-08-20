@@ -515,8 +515,7 @@ export class PosStore extends WithLazyGetterTrap {
                     const orderPresetDate = DateTime.fromISO(order.preset_time);
                     const isSame = DateTime.now().hasSame(orderPresetDate, "day");
                     if (!order.preset_time || isSame) {
-                        await this.checkPreparationStateAndSentOrderInPreparation(order, {
-                            cancelled: true,
+                        await this.checkPreparationStateAndSentOrderInPreparation(order, true, {
                             orderDone: true,
                         });
                     }
@@ -1585,7 +1584,8 @@ export class PosStore extends WithLazyGetterTrap {
             const paymentLine = order.payment_ids.find(
                 (paymentLine) =>
                     paymentLine.payment_method_id.use_payment_terminal === terminalName &&
-                    !paymentLine.isDone()
+                    !paymentLine.isDone() &&
+                    paymentLine.getPaymentStatus() !== "retry"
             );
             if (paymentLine) {
                 return paymentLine;
@@ -1690,9 +1690,9 @@ export class PosStore extends WithLazyGetterTrap {
     changesToOrder(order, skipped = false, orderPreparationCategories, cancelled = false) {
         return changesToOrder(order, skipped, orderPreparationCategories, cancelled);
     }
-    async checkPreparationStateAndSentOrderInPreparation(order, cancelled = false) {
+    async checkPreparationStateAndSentOrderInPreparation(order, cancelled = false, opts = {}) {
         if (typeof order.id !== "number") {
-            return this.sendOrderInPreparation(order, cancelled);
+            return this.sendOrderInPreparation(order, { cancelled, ...opts });
         }
 
         const data = await this.data.call("pos.order", "get_preparation_change", [order.id]);
@@ -1719,7 +1719,7 @@ export class PosStore extends WithLazyGetterTrap {
             return;
         }
 
-        return this.sendOrderInPreparation(order, cancelled);
+        return this.sendOrderInPreparation(order, { cancelled, ...opts });
     }
     // Now the printer should work in PoS without restaurant
     async sendOrderInPreparation(order, opts = {}) {
@@ -1766,7 +1766,7 @@ export class PosStore extends WithLazyGetterTrap {
         // Ensure that other devices are aware of the changes
         // Otherwise several devices can print the same changes
         // We need to check if a preparation display is configured to avoid unnecessary sync
-        if (isPrinted && !this.config["<-pos_preparation_display.display.pos_config_ids"]?.length) {
+        if (isPrinted && !this.models["pos.prep.display"]?.length) {
             await this.syncAllOrders({ orders: [order] });
         }
     }
@@ -1775,7 +1775,7 @@ export class PosStore extends WithLazyGetterTrap {
             this.data.network.warningTriggered = false;
             throw new ConnectionLostError();
         }
-        await this.checkPreparationStateAndSentOrderInPreparation(o, { cancelled });
+        await this.checkPreparationStateAndSentOrderInPreparation(o, cancelled);
     }
 
     getStrNotes(note) {
