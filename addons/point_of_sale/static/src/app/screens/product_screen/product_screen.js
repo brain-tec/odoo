@@ -399,6 +399,10 @@ export class ProductScreen extends Component {
             });
         }
     }
+
+    async fastValidate(paymentMethod) {
+        await this.pos.validateOrderFast(paymentMethod);
+    }
 }
 
 registry.category("pos_pages").add("ProductScreen", {
