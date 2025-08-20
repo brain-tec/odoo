@@ -969,4 +969,12 @@ patch(PosStore.prototype, {
             customer_count: order.getCustomerCount(),
         };
     },
+
+    async validateOrderFast(paymentMethod) {
+        const currentOrder = this.getOrder();
+        if (!currentOrder) {
+            return false;
+        }
+        await super.validateOrderFast(...arguments);
+    },
 });

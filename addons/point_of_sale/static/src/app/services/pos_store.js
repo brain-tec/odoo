@@ -39,6 +39,7 @@ import { RetryPrintPopup } from "@point_of_sale/app/components/popups/retry_prin
 import { PresetSlotsPopup } from "@point_of_sale/app/components/popups/preset_slots_popup/preset_slots_popup";
 import { DebugWidget } from "../utils/debug/debug_widget";
 import { EpsonPrinter } from "@point_of_sale/app/utils/printer/epson_printer";
+import OrderPaymentValidation from "../utils/order_payment_validation";
 
 const { DateTime } = luxon;
 
@@ -2605,6 +2606,15 @@ export class PosStore extends WithLazyGetterTrap {
 
     weighProduct() {
         return makeAwaitable(this.env.services.dialog, ScaleScreen);
+    }
+
+    async validateOrderFast(paymentMethod) {
+        const validation = new OrderPaymentValidation({
+            pos: this,
+            orderUuid: this.getOrder().uuid,
+            fastPaymentMethod: paymentMethod,
+        });
+        await validation.validateOrder(false);
     }
 }
 

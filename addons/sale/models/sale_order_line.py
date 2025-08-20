@@ -597,15 +597,23 @@ class SaleOrderLine(models.Model):
                 line.price_unit = 0.0
                 line.technical_price_unit = 0.0
             else:
-                line = line.with_company(line.company_id)
-                price = line._get_display_price()
-                product_taxes = line.product_id.taxes_id._filter_taxes_by_company(line.company_id)
-                line.price_unit = line.product_id._get_tax_included_unit_price_from_price(
-                    price,
-                    product_taxes=product_taxes,
-                    fiscal_position=line.order_id.fiscal_position_id,
-                )
-                line.technical_price_unit = line.price_unit
+                line._reset_price_unit()
+
+    def _reset_price_unit(self):
+        self.ensure_one()
+
+        line = self.with_company(self.company_id)
+        price = line._get_display_price()
+        product_taxes = line.product_id.taxes_id._filter_taxes_by_company(line.company_id)
+        price_unit = line.product_id._get_tax_included_unit_price_from_price(
+            price,
+            product_taxes=product_taxes,
+            fiscal_position=line.order_id.fiscal_position_id,
+        )
+        line.update({
+            'price_unit': price_unit,
+            'technical_price_unit': price_unit,
+        })
 
     def _get_order_date(self):
         self.ensure_one()
@@ -791,11 +799,12 @@ class SaleOrderLine(models.Model):
         :return: A python dictionary.
         """
         self.ensure_one()
+        company = self.order_id.company_id or self.env.company
         base_values = {
             'tax_ids': self.tax_ids,
             'quantity': self.product_uom_qty,
             'partner_id': self.order_id.partner_id,
-            'currency_id': self.order_id.currency_id or self.order_id.company_id.currency_id,
+            'currency_id': self.order_id.currency_id or company.currency_id,
             'rate': self.order_id.currency_rate,
         }
         if self._is_global_discount():
@@ -811,11 +820,14 @@ class SaleOrderLine(models.Model):
 
     @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_ids')
     def _compute_amount(self):
+        AccountTax = self.env['account.tax']
         for line in self:
+            company = line.company_id or self.env.company
             base_line = line._prepare_base_line_for_taxes_computation()
-            self.env['account.tax']._add_tax_details_in_base_line(base_line, line.company_id)
-            line.price_subtotal = base_line['tax_details']['raw_total_excluded_currency']
-            line.price_total = base_line['tax_details']['raw_total_included_currency']
+            AccountTax._add_tax_details_in_base_line(base_line, company)
+            AccountTax._round_base_lines_tax_details([base_line], company)
+            line.price_subtotal = base_line['tax_details']['total_excluded_currency']
+            line.price_total = base_line['tax_details']['total_included_currency']
             line.price_tax = line.price_total - line.price_subtotal
 
     @api.depends('price_subtotal', 'product_uom_qty')
@@ -1217,6 +1229,14 @@ class SaleOrderLine(models.Model):
                 raise ValidationError(_(
                     "A sale order line's product must match its combo item's product."
                 ))
+
+    # === ONCHANGE METHODS ===#
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        if not self.product_id:
+            return
+        self._reset_price_unit()
 
     #=== CRUD METHODS ===#
 
@@ -1654,4 +1674,7 @@ class SaleOrderLine(models.Model):
         """ A combo product line always has a zero price (by design). The actual price of the combo
         product can be computed by summing the prices of its combo items (i.e. its linked lines).
         """
-        return self.linked_line_ids if self.product_type == 'combo' else self
+        if self.product_type == 'combo':
+            # Only consider combo item lines (not optional product lines)
+            return self.linked_line_ids.filtered('combo_item_id')
+        return self
