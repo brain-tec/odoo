@@ -1554,8 +1554,13 @@
     <template id="categories_recursive" name="Category list">
         <li class="nav-item mb-1" t-att-data-publish="c.has_published_products and 'on' or 'off'">
             <t t-call="website_sale.categorie_link"/>
-            <ul t-if="c.child_id" class="nav flex-column nav-hierarchy mt-1 ps-3">
-                <t t-foreach="c.child_id" t-as="c">
+            <!-- Dynamic category display based on search -->
+            <t t-set="children" t-value="not search and c.child_id or c.child_id.filtered(lambda c: c.id in search_categories_ids)"/>
+            <!-- Only show categories with published products to portal users preventing from access errors  -->
+            <t t-set="children" t-value="request.env.user._is_internal() and children or children.filtered('has_published_products')"/>
+
+            <ul t-if="children" class="nav flex-column nav-hierarchy mt-1 ps-3">
+                <t t-foreach="children" t-as="c">
                     <t t-if="not search or c.id in search_categories_ids">
                         <t t-call="website_sale.categories_recursive" />
                     </t>
@@ -1641,7 +1646,9 @@
     </template>
 
     <template id="option_collapse_categories_recursive" name="Collapse Category Recursive">
+        <!-- Dynamic category display based on search -->
         <t t-set="children" t-value="not search and c.child_id or c.child_id.filtered(lambda c: c.id in search_categories_ids)"/>
+        <!-- Only show categories with published products to portal users preventing from access errors  -->
         <t t-set="children" t-value="request.env.user._is_internal() and children or children.filtered('has_published_products')"/>
 
         <t t-if="children">
@@ -1716,12 +1723,12 @@
             <h6 t-if="not isMobile" class="accordion-header">
                 <button
                     t-attf-class="accordion-button px-0 bg-transparent shadow-none
-                        {{'collapsed' if visible_attributes &gt;= 4 else ''}}"
+                        {{'collapsed' if _status != 'active' and visible_attributes &gt;= 4 else ''}}"
                     type="button"
                     data-bs-toggle="collapse"
                     t-attf-data-bs-target="#o_products_attributes_{{a.id}}"
                     t-attf-aria-controls="o_products_attributes_{{a.id}}"
-                    t-att-aria-expanded="'false' if visible_attributes &gt;= 4 else 'true'"
+                    t-att-aria-expanded="'false' if _status != 'active' and visible_attributes &gt;= 4 else 'true'"
                 >
                     <b t-field="a.name"/>
                 </button>
@@ -1730,7 +1737,7 @@
         <xpath expr="//div[contains(@t-attf-id, 'o_products_attributes_')]" position="attributes">
             <attribute
                 name="t-attf-class"
-                add="accordion-collapse collapse {{'' if visible_attributes &gt;= 4 else 'show'}}"
+                add="accordion-collapse collapse {{'' if _status != 'active' and visible_attributes &gt;= 4 else 'show'}}"
                 separator=" "
             />
             <attribute name="data-bs-parent" add="wsale_products_attributes_collapse"/>
