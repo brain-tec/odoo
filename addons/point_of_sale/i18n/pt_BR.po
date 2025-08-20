@@ -1,25 +1,29 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* point_of_sale
-# 
+# * point_of_sale
+#
 # Translators:
 # Diego Sayron, 2025
 # Wil Odoo, 2025
 # Maitê Dietze, 2025
-# 
+#
+# "Maitê Dietze (madi)" <madi@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-07-16 18:37+0000\n"
-"PO-Revision-Date: 2025-07-01 13:06+0000\n"
-"Last-Translator: Maitê Dietze, 2025\n"
-"Language-Team: Portuguese (Brazil) (https://app.transifex.com/odoo/teams/41243/pt_BR/)\n"
+"PO-Revision-Date: 2025-08-19 14:34+0000\n"
+"Last-Translator: \"Maitê Dietze (madi)\" <madi@odoo.com>\n"
+"Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/"
+"odoo-s18-4/point_of_sale/pt_BR/>\n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: pt_BR\n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
+"1000000 == 0) ? 1 : 2);\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_order__pos_reference
@@ -35,13 +39,14 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Referência legível por humanos para esse pedido.\n"
+"        Referência legível por humanos para esse pedido.\n"
 "* Formato: AALL-SSS-FOOOO\n"
 "* AA é o ano\n"
 "* LL é o número de login (proxy para o dispositivo)\n"
 "* SSS é o ID da sessão\n"
 "* F é 1 ou 0 (1 se o número de sequência for gerado pelo cliente)\n"
-"* OOOO é o número de sequência."
+"* OOOO é o número de sequência.\n"
+"    "
 
 #. module: point_of_sale
 #. odoo-python
@@ -57,20 +62,18 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/models/pos_order.js:0
 msgid " (Refund)"
-msgstr "(Reembolso)"
+msgstr " (Reembolso)"
 
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/stock_picking.py:0
 msgid " - From \"%(uom_from)s\" to \"%(uom_to)s\""
-msgstr ""
-"De \"%(uom_from)s\"\n"
-"para \"%(uom_to)s\""
+msgstr " De \"%(uom_from)s\" para \"%(uom_to)s\""
 
 #. module: point_of_sale
 #: model:ir.model.fields.selection,name:point_of_sale.selection__pos_printer__printer_type__iot
 msgid " Use a printer connected to the IoT Box"
-msgstr "Usar uma impressora conectada à IoT Box"
+msgstr " Usar uma impressora conectada à IoT Box"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -1918,7 +1921,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/components/list_container/list_container.js:0
 msgid "Choose an order"
-msgstr "Choose an order"
+msgstr "Selecione um pedido"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -3432,8 +3435,8 @@ msgstr ""
 msgid ""
 "Flaky croissant filled with creamy cheese, a savory twist on a classic."
 msgstr ""
-"Croissant folheado recheado com queijo cremoso, um toque  a mais sabor para "
-"o clássico."
+"Croissant folheado recheado com queijo cremoso, um toque a mais sabor para o "
+"clássico."
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
@@ -5028,7 +5031,7 @@ msgstr "Nenhum vínculo a uma fatura para %s."
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/partner_list/partner_list.js:0
 msgid "No more customer found for \"%s\"."
-msgstr " Nenhum outro cliente encontrado para ”%s”."
+msgstr "Nenhum outro cliente encontrado para ”%s”."
 
 #. module: point_of_sale
 #. odoo-python
@@ -5380,7 +5383,7 @@ msgstr "Abertura de caixa"
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_session.py:0
 msgid "Opening control message: "
-msgstr "Mensagem de controle de abertura:"
+msgstr "Mensagem de controle de abertura: "
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -5593,7 +5596,7 @@ msgstr "Outros"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/components/popups/cash_move_popup/cash_move_list_popup/cash_move_list_popup.js:0
 msgid "Out"
-msgstr "Out"
+msgstr "De"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_payment_method__outstanding_account_id
@@ -5970,8 +5973,8 @@ msgid ""
 "Please close all the point of sale sessions in this period before closing "
 "it. Open sessions are: %s "
 msgstr ""
-"Feche todas as sessões de ponto de venda neste período antes de fechá-lo. As"
-" sessões abertas são: %s"
+"Feche todas as sessões de ponto de venda neste período antes de fechá-lo. As "
+"sessões abertas são: %s "
 
 #. module: point_of_sale
 #. odoo-python
@@ -7488,7 +7491,7 @@ msgstr "Balança"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/scale_screen/scale_screen.js:0
 msgid "Scale error"
-msgstr "Scale error"
+msgstr "Erro na balança"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -8083,7 +8086,7 @@ msgstr "Movimentação de estoque"
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_order.py:0
 msgid "Stock input for %s"
-msgstr " Entrada de estoque para %s"
+msgstr "Entrada de estoque para %s"
 
 #. module: point_of_sale
 #. odoo-python
@@ -8592,7 +8595,7 @@ msgid ""
 "backend for the order: "
 msgstr ""
 "O pedido foi sincronizado anteriormente. Gere a fatura a partir do backend "
-"para o pedido:"
+"para o pedido: "
 
 #. module: point_of_sale
 #. odoo-python
@@ -9225,7 +9228,7 @@ msgid ""
 "accounting application. "
 msgstr ""
 "Para garantir o acompanhamento do saldo devedor, gere uma fatura ou faça o "
-"download do aplicativo de contabilidade."
+"download do aplicativo de contabilidade. "
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order__to_invoice
@@ -9509,7 +9512,7 @@ msgstr "Erro desconhecido"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/scale_screen/scale_service.js:0
 msgid "Unnamed Product"
-msgstr "Unnamed Product"
+msgstr "Produto sem nome"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -9752,7 +9755,7 @@ msgstr "Histórico de comunicação do site"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/customer_display/customer_display.xml:0
 msgid "Weighing Product:"
-msgstr "Weighing Product:"
+msgstr "Produto de pesagem:"
 
 #. module: point_of_sale
 #: model:ir.model.fields.selection,name:point_of_sale.selection__barcode_rule__type__weight
@@ -9981,8 +9984,8 @@ msgid ""
 "You cannot delete a rounding method that is used in a Point of Sale "
 "configuration."
 msgstr ""
-"You cannot delete a rounding method that is used in a Point of Sale "
-"configuration."
+"Não é possível excluir um método de arredondamento usado em uma configuração "
+"de PDV."
 
 #. module: point_of_sale
 #. odoo-python
@@ -10234,7 +10237,7 @@ msgstr "ex.: Política de devolução, agradecimento pela compra."
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.product_pos_category_form_view
 msgid "e.g. Soft Drinks"
-msgstr "ex.: Bebidas não alcóolicas "
+msgstr "ex.: Bebidas não alcóolicas"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_config_view_form
