@@ -1143,8 +1143,8 @@ class AccountMove(models.Model):
 
         groups = self.grouped(lambda move:
             'legacy' if move.payment_state == 'invoicing_legacy' else
-            'invoices' if _invoice_qualifies(move) else
             'blocked' if move.payment_state == 'blocked' else
+            'invoices' if _invoice_qualifies(move) else
             'unpaid'
         )
         groups.get('unpaid', self.browse()).payment_state = 'not_paid'
@@ -1236,6 +1236,24 @@ class AccountMove(models.Model):
                 move.status_in_payment = move.payment_state
             else:
                 move.status_in_payment = move.state
+
+    def _field_to_sql(self, alias: str, fname: str, query=None, flush: bool = True) -> SQL:
+        if fname == 'status_in_payment':
+            return SQL(
+                "CASE "
+                f"WHEN {alias}.state = 'draft' THEN 'draft' "
+                f"WHEN {alias}.state = 'cancel' THEN 'cancel' "
+                f"ELSE {alias}.payment_state "
+                "END"
+            )
+        elif fname == 'move_sent_values':
+            return SQL(
+                "CASE "
+                f"WHEN {alias}.is_move_sent THEN 'sent' "
+                f"ELSE 'not_sent' "
+                "END"
+            )
+        return super()._field_to_sql(alias, fname, query=query, flush=flush)
 
     @api.depends('matched_payment_ids')
     def _compute_payment_count(self):
