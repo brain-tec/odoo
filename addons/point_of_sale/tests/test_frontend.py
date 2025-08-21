@@ -2226,6 +2226,12 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_barcode_search_attributes_preset', login="pos_user")
 
+    def test_auto_validate_force_done(self):
+        self.main_pos_config.write({
+            'auto_validate_terminal_payment': True
+        })
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_auto_validate_force_done', login="pos_user")
+
     def test_pos_ui_round_globally(self):
         self.main_pos_config.company_id.tax_calculation_rounding_method = 'round_globally'
         tax_16 = self.env['account.tax'].create({
@@ -2654,15 +2660,13 @@ class TestUi(TestPointOfSaleHttpCommon):
         if loaded_demo_data(self.env):
             self.skipTest('Cannot test with demo data.')
 
-        # Unlink existing product records
-        Product = self.env['product.product']
-        pos_product_domain = [('available_in_pos', '=', True)]
-        Product.search(pos_product_domain).action_archive()
+        # archive existing product records
+        archive_products(self.env)
 
         # cannot load by pos user
         self.start_pos_tour('test_load_pos_demo_data_by_pos_user', login='pos_user')
-        pos_products = Product.search(pos_product_domain)
-        self.assertFalse(pos_products, 'Demo data should not be loaded by user.')
+        products = self.env['product.template'].search_count([('available_in_pos', '=', True)])
+        self.assertFalse(products, 'Demo data should not be loaded by user.')
 
     def test_combo_variant_mix(self):
         color_attribute = self.env['product.attribute'].create({
