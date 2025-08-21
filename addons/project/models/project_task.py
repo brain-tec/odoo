@@ -613,16 +613,6 @@ class ProjectTask(models.Model):
         for task in self:
             task.access_url = f'/my/tasks/{task.id}'
 
-    def _compute_access_warning(self):
-        super()._compute_access_warning()
-        for task in self.filtered(lambda x: x.project_id.privacy_visibility != 'portal'):
-            visibility_field = self.env['ir.model.fields'].search([('model', '=', 'project.project'), ('name', '=', 'privacy_visibility')], limit=1)
-            visibility_public = self.env['ir.model.fields.selection'].search([('field_id', '=', visibility_field.id), ('value', '=', 'portal')])
-            task.access_warning = _(
-                "The task cannot be shared with the recipient(s) because the privacy of the project is too restricted. Set the privacy of the project to '%(visibility)s' in order to make it accessible by the recipient(s).",
-                visibility=visibility_public.name,
-            )
-
     @api.depends('child_ids.allocated_hours')
     def _compute_subtask_allocated_hours(self):
         for task in self:
@@ -1173,7 +1163,7 @@ class ProjectTask(models.Model):
         if tasks.project_id:
             tasks.sudo()._set_stage_on_project_from_task()
         for task in tasks.sudo():
-            if task.project_id.privacy_visibility == 'portal':
+            if task.project_id.privacy_visibility in ['invited_users', 'portal']:
                 task._portal_ensure_token()
             for follower in task.parent_id.message_follower_ids:
                 task.message_subscribe(follower.partner_id.ids, follower.subtype_ids.ids)
@@ -1631,16 +1621,16 @@ class ProjectTask(models.Model):
         new_group = ('group_project_user', lambda pdata: pdata['type'] == 'user' and project_user_group_id in pdata['groups'], {})
         groups = [new_group] + groups
 
-        if self.project_privacy_visibility == 'portal':
+        if self.project_privacy_visibility in ['invited_users', 'portal']:
             groups.insert(0, (
                 'allowed_portal_users',
-                lambda pdata: pdata['type'] == 'portal',
+                lambda pdata: pdata['type'] in ['invited_users', 'portal'],
                 {
                     'active': True,
                     'has_button_access': True,
                 }
             ))
-        portal_privacy = self.project_id.privacy_visibility == 'portal'
+        portal_privacy = self.project_id.privacy_visibility in ['invited_users', 'portal']
         for group_name, _group_method, group_data in groups:
             if group_name in ('customer', 'user') or group_name == 'portal_customer' and not portal_privacy:
                 group_data['has_button_access'] = False
@@ -1657,15 +1647,6 @@ class ProjectTask(models.Model):
         if leftover:
             res.update(super(ProjectTask, leftover)._notify_get_reply_to(default=default, author_id=author_id))
         return res
-
-    def _ensure_personal_stages(self):
-        user = self.env.user
-        ProjectTaskTypeSudo = self.env['project.task.type'].sudo()
-        # In the case no stages have been found, we create the default stages for the user
-        if not ProjectTaskTypeSudo.search_count([('user_id', '=', user.id)], limit=1):
-            ProjectTaskTypeSudo.with_context(lang=user.lang, default_project_id=False).create(
-                self.with_context(lang=user.lang)._get_default_personal_stage_create_vals(user.id)
-            )
 
     @api.model
     def message_new(self, msg_dict, custom_values=None):
