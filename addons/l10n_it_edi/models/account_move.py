@@ -61,7 +61,7 @@ class AccountMove(models.Model):
         string="SDI State",
         selection=[
             ('being_sent', 'Being Sent To SdI'),
-            ('requires_user_signature', 'Requires user signature'),
+            ('requires_user_signature', 'Requires user signature'),  # TODO: remove in master
             ('processing', 'SdI Processing'),
             ('rejected', 'SdI Rejected'),
             ('forwarded', 'SdI Accepted, Forwarded to Partner'),
@@ -122,27 +122,6 @@ class AccountMove(models.Model):
         store=True,
         readonly=False,
         copy=False,
-    )
-
-    l10n_it_amount_vat_signed = fields.Monetary(
-        string='VAT',
-        compute='_compute_amount_extended',
-        currency_field='company_currency_id',
-    )
-    l10n_it_amount_pension_fund_signed = fields.Monetary(
-        string='Pension Fund',
-        compute='_compute_amount_extended',
-        currency_field='company_currency_id',
-    )
-    l10n_it_amount_withholding_signed = fields.Monetary(
-        string='Withholding',
-        compute='_compute_amount_extended',
-        currency_field='company_currency_id',
-    )
-    l10n_it_amount_before_withholding_signed = fields.Monetary(
-        string='Total Before Withholding',
-        compute='_compute_amount_extended',
-        currency_field='company_currency_id',
     )
 
     def _auto_init(self):
@@ -232,19 +211,6 @@ class AccountMove(models.Model):
                 invoice_lines_tags = move.line_ids.tax_tag_ids
                 ids_intersection = set(invoice_lines_tags.ids) & set(vj_lines_tags.ids)
                 move.l10n_it_edi_is_self_invoice = bool(ids_intersection)
-
-    @api.depends('amount_total_signed')
-    def _compute_amount_extended(self):
-        for move in self:
-            totals = {None: 0.0, 'vat': 0.0, 'withholding': 0.0, 'pension_fund': 0.0}
-            if move.country_code == 'IT' and move.is_invoice(True):
-                for line in [line for line in move.line_ids if line.tax_line_id]:
-                    kind = line.tax_line_id._l10n_it_get_tax_kind()
-                    totals[kind] -= line.balance
-            move.l10n_it_amount_vat_signed = totals['vat']
-            move.l10n_it_amount_withholding_signed = totals['withholding']
-            move.l10n_it_amount_pension_fund_signed = totals['pension_fund']
-            move.l10n_it_amount_before_withholding_signed = move.amount_untaxed_signed + totals['vat'] + totals['pension_fund']
 
     def _l10n_it_edi_exempt_reason_tag_mapping(self):
         return {
@@ -2023,23 +1989,21 @@ class AccountMove(models.Model):
         # Setup moves for sending
         for move in self:
             move.l10n_it_edi_header = False
-            if move.commercial_partner_id._l10n_it_edi_is_public_administration():
-                move.l10n_it_edi_state = 'requires_user_signature'
-                move.l10n_it_edi_transaction = False
-                move.sudo().message_post(body=nl2br(_(
-                    "Sending invoices to Public Administration partners is not supported.\n"
-                    "The IT EDI XML file is generated, please sign the document and upload it "
-                    "through the 'Fatture e Corrispettivi' portal of the Tax Agency."
-                )))
-            else:
-                attachment_vals = attachments_vals[move]
-                filename = attachment_vals['name']
-                content = b64encode(attachment_vals['raw']).decode()
-                move.l10n_it_edi_state = 'being_sent'
-                proxy_user = move.company_id.l10n_it_edi_proxy_user_id
-                moves, files = files_to_upload[proxy_user]
-                files_to_upload[proxy_user] = (moves | move, files + [{'filename': filename, 'xml': content}])
-                filename_move[filename] = move
+            attachment_vals = attachments_vals[move]
+            filename = attachment_vals['name']
+            content = b64encode(attachment_vals['raw']).decode()
+            proxy_user = move.company_id.l10n_it_edi_proxy_user_id
+            moves, files = files_to_upload[proxy_user]
+            to_upload = (
+                moves | move,
+                files + [{
+                    'filename': filename,
+                    'xml': content,
+                    'destination_code': move.commercial_partner_id.l10n_it_pa_index,
+                }],
+            )
+            files_to_upload[proxy_user] = to_upload
+            filename_move[filename] = move
 
         # Upload files
         results = {}
@@ -2060,20 +2024,45 @@ class AccountMove(models.Model):
 
         # Handle results
         for filename, vals in results.items():
-            sent_move = filename_move[filename]
+            move = filename_move[filename]
             if 'error' in vals:
-                sent_move.l10n_it_edi_state = False
-                sent_move.l10n_it_edi_transaction = False
-                message = nl2br(_("Error uploading the e-invoice file %(file)s.\n%(error)s", file=filename, error=vals['error']))
+                state, id_transaction = False, False
+                error_code, error_description = vals.get('error'), vals.get('error_description')
+                error_message = self._l10n_it_edi_upload_error_message(error_code, error_description)
+                header = nl2br(_("Error uploading the e-invoice file %(file)s.\n%(error)s",
+                    file=filename,
+                    error=error_message
+                ))
             else:
-                is_demo = vals['id_transaction'] == 'demo'
-                sent_move.l10n_it_edi_state = 'processing'
-                sent_move.l10n_it_edi_transaction = vals['id_transaction']
-                message = (
-                    _("We are simulating the sending of the e-invoice file %s, as we are in demo mode.", filename)
-                    if is_demo else _("The e-invoice file %s was sent to the SdI for processing.", filename))
-            sent_move.l10n_it_edi_header = message
-            sent_move.sudo().message_post(body=message)
+                state, id_transaction = "processing", vals.get('id_transaction')
+                if vals['id_transaction'] == 'demo':
+                    header = _("We are simulating the sending of the e-invoice file %s, as we are in demo mode.", filename)
+                elif vals.get('signed', False):
+                    header = nl2br(_("The e-invoice file %s was signed and sent to the SdI for processing.", filename))
+                else:
+                    header = _("The e-invoice file %s was sent to the SdI for processing.", filename)
+                move.sudo().message_post(body=header)
+
+            move.l10n_it_edi_header = header
+            move.l10n_it_edi_state = state
+            move.l10n_it_edi_transaction = id_transaction
+
+        return results
+
+    def _l10n_it_edi_upload_error_message(self, error_code, error_description):
+        """ Translate server errors with the client user's language. """
+        errors_map = {
+            'EI01': _('Attached file is empty'),
+            'EI02': _('Service momentarily unavailable'),
+            'EI03': _('Unauthorized user'),
+            'OOGE': _('Error sending file from the Proxy Server to SdI'),
+            'OOSE': _('Error signing the XML'),
+            'OOCE': _('Proxy Server configuration error'),
+        }
+        error_message = errors_map.get(error_code, _("Unknown error"))
+        if error_description:
+            error_message = f'{error_message}: {error_description}'
+        return error_message
 
     def _l10n_it_edi_upload(self, files):
         '''Upload files to the SdI.
@@ -2091,18 +2080,10 @@ class AccountMove(models.Model):
         if proxy_user.edi_mode == 'demo':
             return {file_data['filename']: {'id_transaction': 'demo'} for file_data in files}
 
-        ERRORS = {'EI01': _('Attached file is empty'),
-                  'EI02': _('Service momentarily unavailable'),
-                  'EI03': _('Unauthorized user')}
-
         server_url = proxy_user._get_server_url()
         results = proxy_user._make_request(
             f'{server_url}/api/l10n_it_edi/1/out/SdiRiceviFile',
             params={'files': files})
-
-        for filename, vals in results.items():
-            if 'error' in vals:
-                results[filename]['error'] = ERRORS.get(vals.get('error'), _("Unknown error"))
 
         return results
 
