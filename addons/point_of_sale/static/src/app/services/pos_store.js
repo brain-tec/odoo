@@ -1327,7 +1327,7 @@ export class PosStore extends WithLazyGetterTrap {
 
         // Filter out orders that are already being synced
         orders = orders.filter(
-            (order) => !this.syncingOrders.has(order.id) && (order.isDirty() || options.force)
+            (order) => !this.syncingOrders.has(order.uuid) && (order.isDirty() || options.force)
         );
 
         try {
@@ -1347,7 +1347,7 @@ export class PosStore extends WithLazyGetterTrap {
             }
 
             // Add order IDs to the syncing set
-            orders.forEach((order) => this.syncingOrders.add(order.id));
+            orders.forEach((order) => this.syncingOrders.add(order.uuid));
 
             // Re-compute all taxes, prices and other information needed for the backend
             for (const order of orders) {
@@ -1416,7 +1416,7 @@ export class PosStore extends WithLazyGetterTrap {
 
             return error;
         } finally {
-            orders.forEach((order) => this.syncingOrders.delete(order.id));
+            orders.forEach((order) => this.syncingOrders.delete(order.uuid));
         }
     }
 
@@ -1599,7 +1599,8 @@ export class PosStore extends WithLazyGetterTrap {
             const paymentLine = order.payment_ids.find(
                 (paymentLine) =>
                     paymentLine.payment_method_id.use_payment_terminal === terminalName &&
-                    !paymentLine.isDone()
+                    !paymentLine.isDone() &&
+                    paymentLine.getPaymentStatus() !== "retry"
             );
             if (paymentLine) {
                 return paymentLine;
