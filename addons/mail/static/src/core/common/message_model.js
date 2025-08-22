@@ -16,6 +16,8 @@ import { user } from "@web/core/user";
 import { createDocumentFragmentFromContent, createElementWithContent } from "@web/core/utils/html";
 import { url } from "@web/core/utils/urls";
 
+import { markup } from "@odoo/owl";
+
 const { DateTime } = luxon;
 export class Message extends Record {
     static _name = "mail.message";
@@ -377,6 +379,13 @@ export class Message extends Record {
             if (this.notificationType === "call") {
                 return _t("%(caller)s started a call", { caller: this.authorName });
             }
+            if (this.notificationType === "channel_rename") {
+                const name = htmlToTextContentInline(this.body);
+                const params = { user: this.authorName, name: markup`<b>${name}</b>` };
+                return this.thread?.parent_channel_id
+                    ? _t("%(user)s changed the thread name to %(name)s", params)
+                    : _t("%(user)s changed the channel name to %(name)s", params);
+            }
             if (this.isEmpty) {
                 return _t("This message has been removed");
             }
@@ -560,7 +569,7 @@ export class Message extends Record {
         }
         this.composer = {
             mentionedPartners: this.partner_ids,
-            text,
+            composerText: text,
             selection: {
                 start: text.length,
                 end: text.length,

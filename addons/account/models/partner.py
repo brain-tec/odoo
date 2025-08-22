@@ -595,13 +595,13 @@ class ResPartner(models.Model):
     property_outbound_payment_method_line_id = fields.Many2one(
         comodel_name='account.payment.method.line',
         company_dependent=True,
-        domain=lambda self: [('payment_type', '=', 'outbound'), ('company_id', '=', self.env.company.id)],
+        domain=lambda self: [('payment_type', '=', 'outbound'), ('company_id', 'parent_of', self.env.company.id)],
     )
 
     property_inbound_payment_method_line_id = fields.Many2one(
         comodel_name='account.payment.method.line',
         company_dependent=True,
-        domain=lambda self: [('payment_type', '=', 'inbound'), ('company_id', '=', self.env.company.id)],
+        domain=lambda self: [('payment_type', '=', 'inbound'), ('company_id', 'parent_of', self.env.company.id)],
     )
 
     def _compute_bank_count(self):
@@ -733,7 +733,7 @@ class ResPartner(models.Model):
         if 'parent_id' in vals:
             partner2move_lines = self.sudo().env['account.move.line'].search([('partner_id', 'in', self.ids)]).grouped('partner_id')
             parent_vat = self.env['res.partner'].browse(vals['parent_id']).vat
-            if partner2move_lines and vals['parent_id'] and {parent_vat} != set(self.mapped('vat')):
+            if partner2move_lines and vals['parent_id'] and any((partner.vat or '') != (parent_vat or '') for partner in self):
                 raise UserError(_("You cannot set a partner as an invoicing address of another if they have a different %(vat_label)s.", vat_label=self.vat_label))
 
         res = super().write(vals)
