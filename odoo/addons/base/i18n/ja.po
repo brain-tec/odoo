@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4+e\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-07-03 12:30+0000\n"
-"PO-Revision-Date: 2025-08-18 23:11+0000\n"
+"PO-Revision-Date: 2025-08-21 19:35+0000\n"
 "Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-s18-4/base/"
 "ja/>\n"
@@ -63,15 +63,16 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"オーストリアの勘定科目表（Uniform Accounts Framework 2010）.\n"
-"================================================== ========\n"
 "\n"
-"*次のアカウントテンプレートのチャートを定義します：\n"
-"    *オーストリアの一般会計チャート2010\n"
-"*販売と購入のVATのテンプレートを定義します\n"
-"*税テンプレートを定義します\n"
-"*オーストリアの財政法の会計ポジションを定義します\n"
-"*税レポートU1 /U30を定義します\n"
+"オーストリアの勘定科目表（Uniform Accounts Framework 2010）\n"
+"==========================================================\n"
+"\n"
+"    * 次の勘定科目テンプレートを定義します：:\n"
+"         オーストリア一般勘定科目表（2010年版）\n"
+"   * 売上および仕入れに関する VAT（付加価値税）テンプレートを定義します\n"
+"    * 税テンプレートを定義します\n"
+"    * オーストリアの税制に対応した会計ポジションを定義します\n"
+"    * 税レポート U1 / U30 を定義します\n"
 "\n"
 
 #. module: base
@@ -1141,9 +1142,11 @@ msgstr ""
 "\n"
 "会計アクセス権\n"
 "========================\n"
-"これは仕訳帳項目と勘定科目一覧表など、すべてのアカウンティング機能への管理者ユーザのアクセスを提供します。\n"
+"これは仕訳項目と勘定科目一覧表など、すべてのアカウンティング機能への管理者ユ"
+"ーザのアクセスを提供します。\n"
 "\n"
-"ここで、デモ・ユーザーに会計アプリケーションのみユーザー権限の管理者に管理者とユーザーのアクセス権を割り当てます。\n"
+"ここで、デモ・ユーザーに会計アプリケーションのみユーザー権限の管理者に管理者"
+"とユーザーのアクセス権を割り当てます。\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_in_asset
@@ -11455,8 +11458,10 @@ msgid ""
 "You can easily assign grade to members/partners, with a specific pricelist.\n"
 msgstr ""
 "\n"
-"このモジュールでは、会員資格およびパートナーシップの管理に関するすべてのオペレーションを管理できます。.\n"
-"==========================================================================================\n"
+"このモジュールでは、メンバーシップおよびパートナーシップの管理に関するすべて"
+"のオペレーションを管理できます。.\n"
+"=========================================================================================="
+"\n"
 "\n"
 "メンバーや取引先に、特定の価格表で簡単にグレードを割当てることができます。\n"
 
@@ -20541,7 +20546,7 @@ msgstr "チャド"
 #. module: base
 #: model:ir.actions.act_window,name:base.action_res_users_my
 msgid "Change My Preferences"
-msgstr "設定の変更"
+msgstr "個人設定を変更"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.change_password_wizard_action
@@ -21359,7 +21364,7 @@ msgstr "構成"
 #. module: base
 #: model:ir.model,name:base.model_res_config_settings
 msgid "Config Settings"
-msgstr "コンフィグ設定"
+msgstr "詳細設定"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.config_wizard_step_view_form
@@ -36722,7 +36727,8 @@ msgstr "修正内容は指定のグループの全ユーザに適用されます
 msgid ""
 "Please use the change password wizard (in User Preferences or User menu) to "
 "change your own password."
-msgstr "あなた自身のパスワードを変更をするには、パスワード変更ウィザード（ユーザ設定またはユーザメニューの中の）を利用して下さい。"
+msgstr "あなた自身のパスワードを変更をするには、パスワード変更ウィザード（ユーザ個人"
+"設定またはユーザメニュー内）を利用して下さい。"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_event_sale
@@ -38160,7 +38166,7 @@ msgstr "採用レポート"
 #. module: base
 #: model:ir.module.module,summary:base.module_documents_hr_recruitment
 msgid "Recruitment resumés and letters from documents"
-msgstr "採用履歴書と書類からの手紙"
+msgstr "採用履歴書とドキュメントからの手紙"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_appointment_hr_recruitment
@@ -38577,7 +38583,7 @@ msgstr "取り消す"
 #: model:ir.model.fields,field_description:base.field_res_device__revoked
 #: model:ir.model.fields,field_description:base.field_res_device_log__revoked
 msgid "Revoked"
-msgstr "取消済"
+msgstr "キャンセル済"
 
 #. module: base
 #: model:res.currency,currency_unit_label:base.OMR
@@ -42335,7 +42341,8 @@ msgstr "言語%sはインストールされていません。"
 msgid ""
 "The languages that you selected have been successfully installed. Users can "
 "choose their favorite language in their preferences."
-msgstr "選択した言語は正常にインストールされました。ユーザは追加設定で好きな言語を選択できます。"
+msgstr "選択した言語は正常にインストールされました。ユーザは個人設定で好きな言語を選"
+"択できます。"
 
 #. module: base
 #. odoo-python
@@ -46737,7 +46744,7 @@ msgstr "取得"
 msgid ""
 "has been successfully installed.\n"
 "                            Users can choose their favorite language in their preferences."
-msgstr "は正常にインストールされました。ユーザは環境設定で好きな言語を選択できます。"
+msgstr "は正常にインストールされました。ユーザは個人設定で好きな言語を選択できます。"
 
 #. module: base
 #. odoo-python
