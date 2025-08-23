@@ -270,7 +270,7 @@ test("Create a direct message channel when clicking on start a meeting", async (
     await click("button[title='New Meeting']");
     await contains(".o-mail-DiscussSidebarChannel", { text: "Mitchell Admin" });
     await contains(".o-discuss-Call");
-    await contains(".o-discuss-ChannelInvitation");
+    await contains(".o-mail-Meeting-sidePanel:contains('Invite people')");
 });
 
 test("Can share user camera and screen together", async () => {
@@ -745,4 +745,42 @@ test("single 'join' (with camera) button when last call had camera on", async ()
         text: "Join",
         contains: [".fa-video-camera"],
     });
+});
+
+test("dynamic focus switches to talking participant", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    const aliceSessionId = pyEnv["discuss.channel.rtc.session"].create({
+        channel_member_id: pyEnv["discuss.channel.member"].create({
+            channel_id: channelId,
+            partner_id: pyEnv["res.partner"].create({ name: "Alice" }),
+        }),
+        channel_id: channelId,
+    });
+    const bobSessionId = pyEnv["discuss.channel.rtc.session"].create({
+        channel_member_id: pyEnv["discuss.channel.member"].create({
+            channel_id: channelId,
+            partner_id: pyEnv["res.partner"].create({ name: "Bob" }),
+        }),
+        channel_id: channelId,
+    });
+
+    const env = await start();
+    const rtc = env.services["discuss.rtc"];
+    await openDiscuss(channelId);
+    await click("[title='Join Call']");
+    await click(".o-discuss-CallParticipantCard[title='Alice']");
+    await contains(".o-discuss-CallParticipantCard[title='Alice']");
+    await contains(".o-discuss-CallParticipantCard[title='Bob']", {
+        count: 0,
+    });
+    rtc.updateSessionInfo({ [bobSessionId]: { isTalking: true } });
+    await contains(".o-discuss-CallParticipantCard[title='Bob']");
+    rtc.updateSessionInfo({ [aliceSessionId]: { isTalking: true } });
+    await contains(".o-discuss-CallParticipantCard[title='Bob']", {
+        count: 0,
+    });
+    await contains(".o-discuss-CallParticipantCard[title='Alice']");
+    rtc.updateSessionInfo({ [aliceSessionId]: { isTalking: false } });
+    await contains(".o-discuss-CallParticipantCard[title='Bob']");
 });
