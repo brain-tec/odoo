@@ -220,7 +220,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
         self.models: dict[str, type[BaseModel]] = {}    # model name/model instance mapping
         self._sql_constraints = set()  # type: ignore
-        self._database_translated_fields: set[str] = set()  # names of translated fields in database "{model}.{field_name}"
+        self._database_translated_fields: dict[str, str] = {}  # names and translate function names of translated fields in database {"{model}.{field_name}": "translate_func"}
         self._database_company_dependent_fields: set[str] = set()  # names of company dependent fields in database
         if config['test_enable']:
             from odoo.tests.result import OdooTestResult  # noqa: PLC0415
@@ -315,10 +315,6 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
     def __getitem__(self, model_name: str) -> type[BaseModel]:
         """ Return the model with the given name or raise KeyError if it doesn't exist."""
-        return self.models[model_name]
-
-    def __call__(self, model_name: str) -> type[BaseModel]:
-        """ Same as ``self[model_name]``. """
         return self.models[model_name]
 
     def __setitem__(self, model_name: str, model: type[BaseModel]):

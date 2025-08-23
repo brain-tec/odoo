@@ -1,4 +1,6 @@
+import { reactive } from "@odoo/owl";
 import { Model } from "@odoo/o-spreadsheet";
+import { registry } from "@web/core/registry";
 import { OdooDataProvider } from "@spreadsheet/data_sources/odoo_data_provider";
 import { createDefaultCurrency } from "@spreadsheet/currency/helpers";
 import { _t } from "@web/core/l10n/translation";
@@ -59,12 +61,16 @@ export class DashboardLoader {
     }
 
     /**
-     * @param {Array<DashboardGroupData>} groups
-     * @param {Object<number, Dashboard>} dashboards
+     * Restore the state of the dashboard loader
+     * @param {Object} state
+     * @param {Array<DashboardGroupData>} state.groups
+     * @param {Record<number, Dashboard>} state.dashboards
+     * @param {number} state.activeDashboardId
      */
-    restoreFromState(groups, dashboards) {
+    restoreFromState({ groups, dashboards, activeDashboardId }) {
         this.groups = groups;
         this.dashboards = dashboards;
+        this.activeDashboardId = activeDashboardId;
     }
 
     /**
@@ -74,6 +80,7 @@ export class DashboardLoader {
         return {
             groups: this.groups,
             dashboards: this.dashboards,
+            activeDashboardId: this.activeDashboardId,
         };
     }
 
@@ -93,6 +100,20 @@ export class DashboardLoader {
                 status: Status.NotLoaded,
             };
         }
+    }
+
+    activateDashboard(dashboardId) {
+        this.activeDashboardId = dashboardId;
+    }
+
+    /**
+     * @returns {Dashboard | undefined}
+     */
+    getActiveDashboard() {
+        if (!this.activeDashboardId) {
+            return undefined;
+        }
+        return this.getDashboard(this.activeDashboardId);
     }
 
     /**
@@ -127,6 +148,12 @@ export class DashboardLoader {
                   ...dashboardGroups,
               ]
             : dashboardGroups;
+    }
+
+    clear() {
+        this.groups = [];
+        this.dashboards = {};
+        this.activeDashboardId = undefined;
     }
 
     /**
@@ -189,8 +216,15 @@ export class DashboardLoader {
             const result = await this.env.services.http.get(
                 `/spreadsheet/dashboard/data/${dashboardId}`
             );
-            const { snapshot, revisions, default_currency, is_sample } = result;
-            dashboard.model = this._createSpreadsheetModel(snapshot, revisions, default_currency);
+            const { snapshot, revisions, default_currency, is_sample, translation_namespace } =
+                result;
+            dashboard.translationNamespace = translation_namespace;
+            dashboard.model = this._createSpreadsheetModel(
+                snapshot,
+                revisions,
+                default_currency,
+                translation_namespace
+            );
             dashboard.status = Status.Loaded;
             dashboard.isSample = is_sample;
         } catch (error) {
@@ -223,12 +257,12 @@ export class DashboardLoader {
      * @param {object} [defaultCurrency]
      * @returns {Model}
      */
-    _createSpreadsheetModel(snapshot, revisions = [], currency) {
+    _createSpreadsheetModel(snapshot, revisions = [], currency, translationNamespace) {
         const odooDataProvider = new OdooDataProvider(this.env);
         const model = new Model(
             snapshot,
             {
-                custom: { env: this.env, orm: this.orm, odooDataProvider },
+                custom: { env: this.env, orm: this.orm, odooDataProvider, translationNamespace },
                 mode: "dashboard",
                 defaultCurrency: createDefaultCurrency(currency),
                 external: { geoJsonService: this.geoJsonService },
@@ -242,3 +276,16 @@ export class DashboardLoader {
         return model;
     }
 }
+
+const dashboardLoaderService = {
+    dependencies: ["orm", "geo_json_service"],
+    start(env) {
+        const loader = new DashboardLoader(env, env.services.orm, env.services.geo_json_service);
+        env.bus.addEventListener("ACTION_MANAGER:UPDATE", () => {
+            loader.clear();
+        });
+        return reactive(loader);
+    },
+};
+
+registry.category("services").add("spreadsheet_dashboard_loader", dashboardLoaderService);
