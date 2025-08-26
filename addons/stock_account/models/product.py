@@ -83,13 +83,6 @@ class ProductTemplate(models.Model):
                 or AccountAccount
             )
         accounts['stock_variation'] = accounts['stock_valuation'].account_stock_variation_id
-        company = self.company_id or self.env.company
-        if self.is_storable:
-            accounts['expense'] = (
-                self.property_account_expense_id
-                or self.categ_id.property_cogs_account_id
-                or company.account_cogs_id
-            )
         return accounts
 
     def get_product_accounts(self, fiscal_pos=None):
@@ -138,28 +131,32 @@ class ProductProduct(models.Model):
             product.avg_cost = product.total_value / qty_available if qty_available else 0.0
 
     def write(self, vals):
+        old_price = False
         if 'standard_price' in vals and not self.env.context.get('disable_auto_revaluation'):
-            self._change_standard_price(vals['standard_price'])
+            old_price = {product: product.standard_price for product in self}
         if 'lot_valuated' in vals:
             # lot_valuated must be updated from the ProductTemplate
             self.product_tmpl_id.write({'lot_valuated': vals.pop('lot_valuated')})
-        return super().write(vals)
+        res = super().write(vals)
+        if old_price:
+            self._change_standard_price(old_price)
+        return res
 
     # -------------------------------------------------------------------------
     # Private
     # -------------------------------------------------------------------------
 
-    def _change_standard_price(self, new_price):
+    def _change_standard_price(self, old_price):
         for product in self:
-            if product.cost_method != 'average' or product.standard_price == new_price:
+            if product.cost_method == 'fifo' or product.standard_price == old_price.get(product):
                 continue
-            self.env['product.value'].create({
+            self.env['product.value'].sudo().create({
                 'product_id': product.id,
-                'value': new_price,
-                'company_id': product.company_id or self.env.company.id,
+                'value': product.standard_price,
+                'company_id': product.company_id.id or self.env.company.id,
                 'date': fields.Datetime.now(),
                 'description': _('Price update from %(old_price)s to %(new_price)s by %(user)s',
-                    old_price=product.standard_price, new_price=new_price, user=self.env.user.name)
+                    old_price=old_price, new_price=product.standard_price, user=self.env.user.name)
             })
         return
 
@@ -234,11 +231,11 @@ class ProductProduct(models.Model):
                 in_qty = move._get_valued_qty()
                 in_value = move.value
                 if at_date or move.is_dropship:
-                    in_value = move._get_value(at_date=at_date)[0]
+                    in_value = move._get_value(at_date=at_date)
                 if lot:
                     total_qty = move._get_valued_qty(lot)
                     in_value = in_value * in_qty / total_qty
-                if quantity < 0 and quantity + in_qty > 0:
+                if quantity < 0 and quantity + in_qty >= 0:
                     positive_qty = quantity + in_qty
                     ratio = positive_qty / in_qty
                     avco_total_value = ratio * in_value
@@ -283,17 +280,17 @@ class ProductProduct(models.Model):
         moves_in = self.env['stock.move'].search(moves_domain, order='date desc, id desc', limit=fifo_stack_size * 10)
         # TODO: fetch more if 10 times quantity is not enough
 
-        remaining_qty_on_last_move = 0
+        remaining_qty_on_first_stack_move = 0
         # Go to the bottom of the stack
         while fifo_stack_size > 0 and moves_in:
             move = moves_in[0]
             moves_in = moves_in[1:]
             in_qty = move._get_valued_qty()
             fifo_stack.append(move)
-            remaining_qty_on_last_move = min(in_qty, fifo_stack_size)
+            remaining_qty_on_first_stack_move = min(in_qty, fifo_stack_size)
             fifo_stack_size -= in_qty
         fifo_stack.reverse()
-        return fifo_stack, remaining_qty_on_last_move
+        return fifo_stack, remaining_qty_on_first_stack_move
 
     def _run_fifo(self, quantity, lot=None, at_date=None, location=None):
         """ Returns the value for the next outgoing product base on the qty give as argument."""
@@ -301,15 +298,20 @@ class ProductProduct(models.Model):
         external_location = location and location.is_valued_external
 
         fifo_cost = 0
-        fifo_stack, __ = self._run_fifo_get_stack(lot=lot, at_date=at_date, location=location)
-
+        fifo_stack, qty_on_first_move = self._run_fifo_get_stack(lot=lot, at_date=at_date, location=location)
         # Going up to get the quantity in the argument
         while quantity > 0 and fifo_stack:
             move = fifo_stack.pop(0)
-            in_qty = move._get_valued_qty()
-            in_value = move.value
+            if qty_on_first_move:
+                valued_qty = move._get_valued_qty()
+                in_qty = qty_on_first_move
+                in_value = move.value * in_qty / valued_qty
+                qty_on_first_move = 0
+            else:
+                in_qty = move._get_valued_qty()
+                in_value = move.value
             if at_date and not external_location:
-                in_value = move._get_value(at_date=at_date)[0]
+                in_value = move._get_value(at_date=at_date)
             if in_qty > quantity:
                 in_value = in_value * quantity / in_qty
                 in_qty = quantity
@@ -363,10 +365,6 @@ class ProductCategory(models.Model):
         'account.account', 'Stock Valuation Account', company_dependent=True, ondelete='restrict',
         check_company=True,
         help="""When automated inventory valuation is enabled on a product, this account will hold the current value of the products.""")
-    property_cogs_account_id = fields.Many2one(
-        'account.account', 'Cost of Goods Sold Account', company_dependent=True, ondelete='restrict',
-        check_company=True,
-        help="""Expense account for cost of good sold. Only useful for storable products.""")
     property_price_difference_account_id = fields.Many2one(
         'account.account', 'Price Difference Account', company_dependent=True, ondelete='restrict',
         check_company=True,

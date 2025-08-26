@@ -5,6 +5,13 @@ from collections import defaultdict
 from odoo import api, fields, models, _, Command
 from odoo.fields import Domain
 from odoo.tools import OrderedSet
+from odoo.exceptions import UserError
+
+VALUATION_DICT = {
+    'value': 0,
+    'quantity': 0,
+    'description': False,
+}
 
 
 class StockMove(models.Model):
@@ -85,10 +92,7 @@ class StockMove(models.Model):
                 move.remaining_value = 0
                 continue
             ratio = move.remaining_qty / move.quantity if move.quantity else 0
-            if move.product_id.cost_method == 'fifo':
-                move.remaining_value = ratio * move.value if ratio else 0
-            else:
-                move.remaining_value = move.remaining_qty * move.product_id.standard_price
+            move.remaining_value = ratio * move.value if ratio else 0
 
     def _inverse_value_manual(self):
         for move in self:
@@ -99,10 +103,11 @@ class StockMove(models.Model):
                 'value': move.value_manual,
                 'company_id': move.company_id.id,
             })
-            move._set_value()
 
     def action_adjust_valuation(self):
-        action = self.env['ir.actions.act_window']._for_xml_id("stock_account.stock_move_revaluation_action")
+        if len(self) != 1:
+            raise UserError(_("You can only adjust valuation for one move at a time."))
+        action = self.env['ir.actions.act_window']._for_xml_id("stock_account.product_value_action")
         product = self.product_id if len(self.product_id) == 1 else False
         if product:
             action['name'] = _('Adjust Valuation: %(product)s', product=product.display_name)
@@ -177,7 +182,7 @@ class StockMove(models.Model):
         # TODO: Don't use self.quantity but real valued quantity
         if not self._get_valued_qty():
             return 0.0
-        return self._get_value()[0] / self._get_valued_qty()
+        return self._get_value() / self._get_valued_qty()
 
     @api.model
     def _get_valued_types(self):
@@ -203,7 +208,7 @@ class StockMove(models.Model):
                 if move.product_id.lot_valuated:
                     lots_to_recompute.update(move.move_line_ids.lot_id.ids)
             if move.is_in:
-                move.value = move.sudo()._get_value()[0]
+                move.value = move.sudo()._get_value()
                 continue
             # Outgoing moves
             if not move._is_out():
@@ -217,7 +222,14 @@ class StockMove(models.Model):
         self.env['product.product'].browse(products_to_recompute)._update_standard_price()
         self.env['stock.lot'].browse(lots_to_recompute)._update_standard_price()
 
-    def _get_value(self, forced_std_price=False, at_date=False):
+    def _get_value(self, forced_std_price=False, at_date=False, ignore_manual_update=False):
+        return self._get_value_data(forced_std_price, at_date, ignore_manual_update)['value']
+
+    def _get_value_data(self,
+        forced_std_price=False,
+        at_date=False,
+        ignore_manual_update=False,
+        add_computed_value_to_description=False):
         """Returns the value and the quantity valued on the move
         In priority order:
         - Take value from accounting documents (invoices, bills)
@@ -236,29 +248,52 @@ class StockMove(models.Model):
 
         valued_qty = remaining_qty = self._get_valued_qty()
         value = 0
+        descriptions = []
 
-        manual_value, manual_qty = self._get_manual_value(remaining_qty, at_date)
-        value += manual_value
-        remaining_qty -= manual_qty
+        if not ignore_manual_update:
+            manual_data = self._get_manual_value(
+                remaining_qty, at_date,
+                add_computed_value_to_description=add_computed_value_to_description)
+            value += manual_data['value']
+            remaining_qty -= manual_data['quantity']
+            if manual_data.get('description'):
+                descriptions.append(manual_data['description'])
 
         # 1. take from Invoice/Bills
         if remaining_qty:
-            account_move_value, account_move_qty = self._get_value_from_account_move(remaining_qty, at_date)
-            value += account_move_value
-            remaining_qty -= account_move_qty
+            account_data = self._get_value_from_account_move(remaining_qty, at_date)
+            value += account_data['value']
+            remaining_qty -= account_data['quantity']
+            if account_data.get('description'):
+                descriptions.append(account_data['description'])
 
         # 2. from SO/PO lines
         if remaining_qty:
-            quotation_value, quotation_qty = self._get_value_from_quotation(remaining_qty, at_date)
-            value += quotation_value
-            remaining_qty -= quotation_qty
+            quotation_data = self._get_value_from_quotation(remaining_qty, at_date)
+            value += quotation_data['value']
+            remaining_qty -= quotation_data['quantity']
+            if quotation_data.get('description'):
+                descriptions.append(quotation_data['description'])
 
-        # 3. standard_price
+        # 3. from returns
         if remaining_qty:
-            std_price_value = self._get_value_from_std_price(remaining_qty, forced_std_price, at_date)
-            value += std_price_value
+            return_data = self._get_value_from_returns(remaining_qty, at_date)
+            value += return_data['value']
+            remaining_qty -= return_data['quantity']
+            if return_data.get('description'):
+                descriptions.append(return_data['description'])
 
-        return value, valued_qty
+        # 4. standard_price
+        if remaining_qty:
+            std_price_data = self._get_value_from_std_price(remaining_qty, forced_std_price, at_date)
+            value += std_price_data['value']
+            descriptions.append(std_price_data.get('description'))
+
+        return {
+            'value': value,
+            'quantity': valued_qty,
+            'description': ', '.join(descriptions),
+        }
 
     def _get_valued_qty(self, lot=None):
         self.ensure_one()
@@ -272,24 +307,53 @@ class StockMove(models.Model):
             return self.quantity
         return 0
 
-    def _get_manual_value(self, quantity, at_date=None):
+    def _get_manual_value(self, quantity, at_date=None, add_computed_value_to_description=False):
+        valuation_data = dict(VALUATION_DICT)
         domain = Domain([('move_id', '=', self.id)])
         if at_date:
             domain &= Domain([('date', '<=', at_date)])
         manual_value = self.env['product.value'].search(domain, order="date desc, id desc", limit=1)
         if manual_value:
-            return manual_value.value, quantity
-        return 0, 0
+            valuation_data['value'] = manual_value.value
+            valuation_data['quantity'] = quantity
+            description = _('Adjusted on %(date)s by %(user)s',
+                date=manual_value.date,
+                user=manual_value.user_id.name,
+            )
+            if add_computed_value_to_description:
+                description += _(', Computed = %(computed_value)s%(currency_symbol)s)',
+                computed_value=self._get_value_data(ignore_manual_update=True)['value'],
+                currency_symbol=manual_value.currency_id.symbol)
+            valuation_data['description'] = description
+        return valuation_data
 
     def _get_value_from_account_move(self, quantity, at_date=None):
-        return 0, 0
+        return dict(VALUATION_DICT)
 
     def _get_value_from_quotation(self, quantity, at_date=None):
-        return 0, 0
+        return dict(VALUATION_DICT)
+
+    def _get_value_from_returns(self, quantity, at_date=None):
+        if self.origin_returned_move_id and self.origin_returned_move_id.is_out:
+            origin_move = self.origin_returned_move_id
+            return {
+                'value': origin_move.value * quantity / origin_move._get_valued_qty(),
+                'quantity': quantity,
+                'description': _('Value based on original move %(reference)s', reference=origin_move.reference),
+            }
+        return dict(VALUATION_DICT)
 
     def _get_value_from_std_price(self, quantity, std_price=False, at_date=None):
         std_price = std_price or self.product_id.standard_price
-        return std_price * quantity
+        return {
+            'value': std_price * quantity,
+            'quantity': quantity,
+            'description': _("%(quantity)s %(uom)s at product's standard price %(price)s",
+                quantity=quantity,
+                uom=self.product_id.uom_id.name,
+                price=std_price,
+            ),
+        }
 
     def _get_move_directions(self):
         move_in_ids = set()

@@ -49,6 +49,7 @@ class RazorpayController(Controller):
         if not authorization_code:  # The user cancelled the authorization.
             return request.redirect(redirect_url)
 
+        # Fetch an access token using the authorization token.
         proxy_payload = self.env['payment.provider']._prepare_json_rpc_payload(
             {'authorization_code': authorization_code}
         )
@@ -67,7 +68,7 @@ class RazorpayController(Controller):
             'razorpay_key_id': None,
             'razorpay_key_secret': None,
             'razorpay_webhook_secret': None,
-            # Set the new OAuth fields.
+            # Save the OAuth credentials.
             'razorpay_account_id': response_content['razorpay_account_id'],
             'razorpay_public_token': response_content['public_token'],
             'razorpay_refresh_token': response_content['refresh_token'],
