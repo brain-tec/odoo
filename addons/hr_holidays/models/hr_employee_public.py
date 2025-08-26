@@ -17,9 +17,6 @@ class HrEmployeePublic(models.Model):
     leave_date_to = fields.Date('To Date', compute='_compute_leave_status')
     show_leaves = fields.Boolean('Able to see Remaining Time Off', compute='_compute_show_leaves')
     is_absent = fields.Boolean('Absent Today', compute='_compute_leave_status', search='_search_absent_employee')
-    hr_icon_display = fields.Selection(selection_add=[
-        ('presence_holiday_absent', 'On leave'),
-        ('presence_holiday_present', 'Present but on leave')])
     allocation_display = fields.Char(compute='_compute_allocation_display')
     allocation_remaining_display = fields.Char(related='employee_id.allocation_remaining_display')
 
@@ -54,3 +51,19 @@ class HrEmployeePublic(models.Model):
         self.ensure_one()
         if self.is_user:
             return self.employee_id.action_time_off_dashboard()
+
+    def action_open_time_off_calendar(self):
+        """Open the time off calendar filtered on this employee."""
+        self.ensure_one()
+        action = self.env.ref('hr_holidays.action_my_days_off_dashboard_calendar').sudo().read()[0]
+        action['domain'] = [('employee_id', '=', self.id)]
+        ctx = ({
+            'active_employee_id': self.id,
+            'search_default_employee_id': [self.id],
+            'search_default_my_leaves': 0,
+            'search_default_team': 0,
+            'search_default_current_year': 1,
+            'hide_employee_name': 1,
+        })
+        action['context'] = ctx
+        return action

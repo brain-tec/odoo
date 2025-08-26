@@ -213,7 +213,7 @@ class ProductProduct(models.Model):
         return [
             self.env['website'].image_url(extra_image, 'image_1920')
             for extra_image in self.product_variant_image_ids + self.product_template_image_ids
-            if extra_image.image_1920  # only images, no video urls
+            if extra_image.image_128  # only images, no video urls
         ]
 
     def _prepare_gmc_items(self):
@@ -279,7 +279,7 @@ class ProductProduct(models.Model):
         self.ensure_one()
         return {
             # Don't send any image link if there isn't. Google does not allow placeholder
-            'image_link': url_join(base_url, self._get_image_1920_url()) if self.image_1920 else '',
+            'image_link': url_join(base_url, self._get_image_1920_url()) if self.image_128 else '',
             # Supports up to 10 extra images
             'additional_image_link': [
                 url_join(base_url, url) for url in self._get_extra_image_1920_urls()[:10]
