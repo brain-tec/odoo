@@ -1,7 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
 
 
 class StockLot(models.Model):
@@ -53,9 +52,13 @@ class StockLot(models.Model):
         return lots
 
     def write(self, vals):
+        old_price = False
         if 'standard_price' in vals and not self.env.context.get('disable_auto_revaluation'):
-            self._change_standard_price(vals['standard_price'])
-        return super().write(vals)
+            old_price = {lot: lot.standard_price for lot in self}
+        res = super().write(vals)
+        if old_price:
+            self._change_standard_price(old_price)
+        return res
 
     def _update_standard_price(self):
         # TODO: Add extra value and extra quantity kwargs to avoid total recomputation
@@ -64,43 +67,22 @@ class StockLot(models.Model):
                 continue
             lot.with_context(disable_auto_revaluation=True).standard_price = lot.product_id._run_avco(lot=lot)[0]
 
-    def _change_standard_price(self, new_price):
+    def _change_standard_price(self, old_price):
         """Helper to create the stock valuation layers and the account moves
         after an update of standard price.
 
         :param new_price: new standard price
         """
         for lot in self:
-            if lot.product_id.cost_method != 'average' or lot.standard_price == new_price:
+            if lot.product_id.cost_method != 'average' or lot.standard_price == old_price:
                 continue
             product = lot.product_id
-            self.env['product.value'].create({
+            self.env['product.value'].sudo().create({
                 'product_id': product.id,
                 'lot_id': lot.id,
-                'value': new_price,
-                'company_id': product.company_id or self.env.company.id,
+                'value': lot.standard_price,
+                'company_id': product.company_id.id or self.env.company.id,
                 'date': fields.Datetime.now(),
                 'description': _('%(lot)s price update from %(old_price)s to %(new_price)s by %(user)s',
-                    lot=lot.name, old_price=product.standard_price, new_price=new_price, user=self.env.user.name)
+                    lot=lot.name, old_price=old_price, new_price=lot.standard_price, user=self.env.user.name)
             })
-
-    # # -------------------------------------------------------------------------
-    # # Actions
-    # # -------------------------------------------------------------------------
-    def action_revaluation(self):
-        # Cannot hide the button in list view for non required field in groupby
-        if not self:
-            raise UserError(_("Select an existing lot/serial number to be reevaluated"))
-        elif all(self.product_id.uom_id.is_zero(lot.product_qty) for lot in self):
-            raise UserError(_("You cannot adjust the valuation of a layer with zero quantity"))
-        self.ensure_one()
-        ctx = dict(self.env.context, default_lot_ids=self.ids, default_company_id=self.env.company.id)
-        return {
-            'name': _('Lot/Serial number Revaluation - %s', self.product_id.display_name),
-            'view_mode': 'form',
-            'res_model': 'stock.valuation.layer.revaluation',
-            'view_id': self.env.ref('stock_account.stock_valuation_layer_revaluation_form_view').id,
-            'type': 'ir.actions.act_window',
-            'context': ctx,
-            'target': 'new'
-        }

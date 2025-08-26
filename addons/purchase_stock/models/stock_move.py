@@ -144,16 +144,19 @@ class StockMove(models.Model):
     # --------------------------------------------------------
 
     def _get_value_from_account_move(self, quantity, at_date=None):
+        valuation_data = super()._get_value_from_account_move(quantity, at_date=at_date)
         if not (self.purchase_line_id and self.purchase_line_id):
-            return 0, 0
+            return valuation_data
 
         quantity = 0
         value = 0
+        aml_ids = set()
         for aml in self.purchase_line_id.invoice_lines:
             if at_date and aml.date > at_date:
                 continue
             if aml.move_id.state != 'posted':
                 continue
+            aml_ids.add(aml.id)
             if aml.move_type == 'in_invoice':
                 quantity += aml.quantity
                 value += aml.price_subtotal
@@ -161,7 +164,13 @@ class StockMove(models.Model):
                 quantity -= aml.quantity
                 value -= aml.price_subtotal
 
-        return value, quantity
+        valuation_data['quantity'] = quantity
+        valuation_data['value'] = value
+        account_moves = self.env['account.move.line'].browse(aml_ids).move_id
+        valuation_data['description'] = _('%(value)s for %(quantity)s %(unit)s from %(bills)s',
+            value=value, quantity=quantity, unit=self.product_id.uom_id.name,
+            bills=', '.join(account_move.name for account_move in account_moves))
+        return valuation_data
 
     def _get_value_from_quotation(self, quantity, at_date=None):
         # TODO: Start from global value
@@ -171,7 +180,11 @@ class StockMove(models.Model):
             return super()._get_value_from_quotation(quantity)
         price_unit = self.purchase_line_id._get_stock_move_price_unit()
         quantity = min(quantity, self.quantity)
-        return price_unit * quantity, quantity
+        return {
+            'value': price_unit * quantity,
+            'quantity': quantity,
+            'description': _('From %(quotation)s', quotation=self.purchase_line_id.order_id.name),
+        }
 
     def _get_related_invoices(self):
         """ Overridden to return the vendor bills related to this stock move.
