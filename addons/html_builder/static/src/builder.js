@@ -5,17 +5,17 @@ import {
     onMounted,
     onWillDestroy,
     onWillStart,
+    onWillUnmount,
     onWillUpdateProps,
+    status,
     useRef,
     useState,
     useSubEnv,
 } from "@odoo/owl";
-import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { addLoadingEffect as addButtonLoadingEffect } from "@web/core/utils/ui";
-import { useSetupAction } from "@web/search/action_hook";
 import { InvisibleElementsPanel } from "@html_builder/sidebar/invisible_elements_panel";
 import { BlockTab } from "@html_builder/sidebar/block_tab";
 import { CustomizeTab } from "@html_builder/sidebar/customize_tab";
@@ -28,7 +28,7 @@ export class Builder extends Component {
     static template = "html_builder.Builder";
     static components = { BlockTab, CustomizeTab };
     static props = {
-        closeEditor: { type: Function },
+        closeEditor: { type: Function, optional: true },
         reloadEditor: { type: Function, optional: true },
         onEditorLoad: { type: Function, optional: true },
         installSnippetModule: { type: Function, optional: true },
@@ -40,10 +40,13 @@ export class Builder extends Component {
         Plugins: { type: Array, optional: true },
         config: { type: Object, optional: true },
         getThemeTab: { type: Function, optional: true },
+        editableSelector: { type: String },
+        themeTabDisplayName: { type: String, optional: true },
+        slots: { type: Object, optional: true },
     };
     static defaultProps = {
-        onEditorLoad: () => {},
         config: {},
+        themeTabDisplayName: _t("Theme"),
     };
 
     setup() {
@@ -64,7 +67,6 @@ export class Builder extends Component {
         useHotkey("control+y", () => this.redo());
         useHotkey("control+shift+z", () => this.redo());
         this.orm = useService("orm");
-        this.dialog = useService("dialog");
         this.ui = useService("ui");
         this.notification = useService("notification");
 
@@ -87,19 +89,19 @@ export class Builder extends Component {
                         this.updateInvisibleEls();
                         this.editorBus.trigger("UPDATE_EDITING_ELEMENT");
                         this.triggerDomUpdated();
+                        this.props.config.onChange?.();
                     }
                 },
                 reloadEditor: async (param = {}) => {
-                    await this.props.reloadEditor({
+                    await this.props.reloadEditor?.({
                         initialTab: this.state.activeTab,
                         ...param,
                     });
                 },
                 closeEditor: async () => {
-                    await this.props.closeEditor();
+                    await this.props.closeEditor?.();
                 },
-                installSnippetModule: async (snippet) =>
-                    this.props.installSnippetModule(snippet, this.save.bind(this)),
+                installSnippetModule: (snippet) => this.props.installSnippetModule?.(snippet),
                 resources: {
                     trigger_dom_updated: () => {
                         this.triggerDomUpdated();
@@ -109,10 +111,14 @@ export class Builder extends Component {
                     }),
                     before_save_handlers: () => {
                         const snippetMenuEl = this.builder_sidebarRef.el;
-                        // Add a loading effect on the save button and disable the other actions
-                        this.removeLoadingEffect = addButtonLoadingEffect(
-                            snippetMenuEl.querySelector("[data-action='save']")
-                        );
+                        const saveButton = snippetMenuEl.querySelector("[data-action='save']");
+                        delete this.removeLoadingEffect;
+                        if (saveButton) {
+                            // Add a loading effect on the save button and disable the other actions
+                            this.removeLoadingEffect = addButtonLoadingEffect(
+                                snippetMenuEl.querySelector("[data-action='save']")
+                            );
+                        }
                         this.actionButtonEls = snippetMenuEl.querySelectorAll("[data-action]");
                         for (const actionButtonEl of this.actionButtonEls) {
                             actionButtonEl.disabled = true;
@@ -122,7 +128,7 @@ export class Builder extends Component {
                         for (const actionButtonEl of this.actionButtonEls) {
                             actionButtonEl.removeAttribute("disabled");
                         }
-                        this.removeLoadingEffect();
+                        this.removeLoadingEffect?.();
                     },
                     change_current_options_containers_listeners: (currentOptionsContainers) => {
                         this.state.currentOptionsContainers = currentOptionsContainers;
@@ -166,7 +172,7 @@ export class Builder extends Component {
             },
             this.env.services
         );
-        this.props.onEditorLoad(this.editor);
+        this.props.onEditorLoad?.(this.editor);
 
         onWillStart(async () => {
             await this.snippetModel.load();
@@ -174,7 +180,12 @@ export class Builder extends Component {
             // instantiating the sub components that potentially need the
             // editor.
             const iframeEl = await this.props.iframeLoaded;
-            this.editableEl = iframeEl.contentDocument.body.querySelector("#wrapwrap");
+            if (status(this) === "destroyed") {
+                return;
+            }
+            this.editableEl = iframeEl.contentDocument.body.querySelector(
+                this.props.editableSelector
+            );
 
             // Prevent image dragging in the website builder. Not via css because
             // if one of the image ancestor has a dragstart listener, the dragstart handler
@@ -186,7 +197,6 @@ export class Builder extends Component {
                 }
             };
             this.editor.attachTo(this.editableEl);
-            this.editableEl.addEventListener("dragstart", this.onDragStart);
         });
 
         useSubEnv({
@@ -200,13 +210,7 @@ export class Builder extends Component {
         // });
         onWillDestroy(() => {
             this.editor.destroy();
-            this.editableEl.removeEventListener("dragstart", this.onDragStart);
             // actionService.setActionMode("current");
-        });
-
-        useSetupAction({
-            beforeUnload: (ev) => this.onBeforeUnload(ev),
-            beforeLeave: () => this.onBeforeLeave(),
         });
 
         onMounted(() => {
@@ -214,6 +218,10 @@ export class Builder extends Component {
             setBuilderCSSVariables(getHtmlStyle(this.editor.document));
             // TODO: onload editor
             this.updateInvisibleEls();
+            this.editableEl.addEventListener("dragstart", this.onDragStart);
+        });
+        onWillUnmount(() => {
+            this.editableEl.removeEventListener("dragstart", this.onDragStart);
         });
         onWillUpdateProps((nextProps) => {
             if (nextProps.isMobile !== this.props.isMobile) {
@@ -241,38 +249,10 @@ export class Builder extends Component {
         return !!this.props.config.customizeTab;
     }
 
-    discard() {
-        if (this.editor.shared.history.canUndo()) {
-            this.dialog.add(ConfirmationDialog, {
-                title: _t("Discard all changes?"),
-                body: _t(
-                    "Are you sure you want to discard all your changes? Once you do, they're gone for good."
-                ),
-                confirmLabel: _t("Discard changes"),
-                cancelLabel: _t("Keep editing"),
-                confirm: () => this.props.closeEditor(),
-                cancel: () => {},
-            });
-        } else {
-            this.props.closeEditor();
-        }
-    }
-
     getInvisibleSelector(isMobile = this.props.isMobile) {
         return `.o_snippet_invisible, ${
             isMobile ? ".o_snippet_mobile_invisible" : ".o_snippet_desktop_invisible"
         }`;
-    }
-
-    async save() {
-        this.editor.shared.operation.next(this._save.bind(this), { withLoadingEffect: false });
-    }
-
-    async _save() {
-        this.isSaving = true;
-        // TODO: handle the urgent save and the fail of the save operation
-        await this.editor.shared.savePlugin.save({ alwaysSkipAfterSaveHandlers: false });
-        this.props.closeEditor();
     }
 
     /**
@@ -303,32 +283,6 @@ export class Builder extends Component {
 
     redo() {
         this.editor.shared.history.redo();
-    }
-
-    onBeforeUnload(event) {
-        if (!this.isSaving && this.editor.shared.history.canUndo()) {
-            event.preventDefault();
-            event.returnValue = "Unsaved changes";
-        }
-    }
-
-    async onBeforeLeave() {
-        if (this.editor.shared.history.canUndo()) {
-            let continueProcess = true;
-            await new Promise((resolve) => {
-                this.dialog.add(ConfirmationDialog, {
-                    body: _t("If you proceed, your changes will be lost"),
-                    confirmLabel: _t("Continue"),
-                    confirm: () => resolve(),
-                    cancel: () => {
-                        continueProcess = false;
-                        resolve();
-                    },
-                });
-            });
-            return continueProcess;
-        }
-        return true;
     }
 
     onMobilePreviewClick() {
