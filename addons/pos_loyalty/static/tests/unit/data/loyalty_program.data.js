@@ -45,6 +45,7 @@ export class LoyaltyProgram extends models.ServerModel {
             trigger_product_ids: [],
             rule_ids: [1],
             reward_ids: [],
+            write_date: "2025-01-01 10:00:00",
         },
         {
             id: 2,
@@ -63,6 +64,7 @@ export class LoyaltyProgram extends models.ServerModel {
             trigger_product_ids: [],
             rule_ids: [],
             reward_ids: [],
+            write_date: "2025-01-01 10:00:00",
         },
         {
             id: 3,
@@ -81,6 +83,7 @@ export class LoyaltyProgram extends models.ServerModel {
             trigger_product_ids: [],
             rule_ids: [1],
             reward_ids: [5],
+            write_date: "2025-01-01 10:00:00",
         },
         {
             id: 4,
@@ -99,6 +102,7 @@ export class LoyaltyProgram extends models.ServerModel {
             trigger_product_ids: [],
             rule_ids: [],
             reward_ids: [],
+            write_date: "2025-01-01 10:00:00",
         },
         {
             id: 5,
@@ -117,6 +121,7 @@ export class LoyaltyProgram extends models.ServerModel {
             trigger_product_ids: [],
             rule_ids: [1],
             reward_ids: [],
+            write_date: "2025-01-01 10:00:00",
         },
         {
             id: 6,
@@ -135,6 +140,7 @@ export class LoyaltyProgram extends models.ServerModel {
             trigger_product_ids: [],
             rule_ids: [],
             reward_ids: [],
+            write_date: "2025-01-01 10:00:00",
         },
         {
             id: 7,
@@ -153,6 +159,7 @@ export class LoyaltyProgram extends models.ServerModel {
             trigger_product_ids: [],
             rule_ids: [4],
             reward_ids: [3],
+            write_date: "2025-01-01 10:00:00",
         },
         {
             id: 8,
@@ -171,6 +178,7 @@ export class LoyaltyProgram extends models.ServerModel {
             trigger_product_ids: [],
             rule_ids: [5],
             reward_ids: [4],
+            write_date: "2025-01-01 10:00:00",
         },
         {
             id: 9,

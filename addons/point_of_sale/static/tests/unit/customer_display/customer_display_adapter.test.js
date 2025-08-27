@@ -24,13 +24,13 @@ test("order amounts summary", async () => {
     const adapter = new CustomerDisplayPosAdapter();
 
     adapter.formatOrderData(order);
-    expectFormattedPrice(adapter.data.amount, "$ 17.85");
-    expectFormattedPrice(adapter.data.amountTaxes, "$ 2.85");
+    expectFormattedPrice(adapter.data.amount, "$ 595.00");
+    expectFormattedPrice(adapter.data.amountTaxes, "$ 95.00");
     expect(adapter.data.subtotal).toBe(false);
 
     store.config.iface_tax_included = "subtotal";
     adapter.formatOrderData(order);
-    expectFormattedPrice(adapter.data.amount, "$ 17.85");
-    expectFormattedPrice(adapter.data.amountTaxes, "$ 2.85");
-    expectFormattedPrice(adapter.data.subtotal, "$ 15.00");
+    expectFormattedPrice(adapter.data.amount, "$ 595.00");
+    expectFormattedPrice(adapter.data.amountTaxes, "$ 95.00");
+    expectFormattedPrice(adapter.data.subtotal, "$ 500.00");
 });

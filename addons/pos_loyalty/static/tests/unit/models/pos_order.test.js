@@ -419,6 +419,7 @@ describe("pos.order - loyalty", () => {
             productId: 10,
             templateId: 10,
             qty: 3,
+            price_unit: store.models["product.product"].get(10).lst_price,
         });
         await store.orderUpdateLoyaltyPrograms();
         order._applyReward(reward, loyalty_card.id);
