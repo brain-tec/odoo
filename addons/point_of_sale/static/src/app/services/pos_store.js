@@ -568,12 +568,13 @@ export class PosStore extends WithLazyGetterTrap {
      * @returns {Promise<Object>}
      */
     async loadNewProducts(domain, offset = 0, limit = 0) {
-        const result = await this.data.callRelated("product.template", "load_product_from_pos", [
-            odoo.pos_config_id,
-            domain,
-            offset,
-            limit,
-        ]);
+        const result = await this.data.callRelated(
+            "product.template",
+            "load_product_from_pos",
+            [odoo.pos_config_id, domain, offset, limit],
+            {},
+            false
+        );
         this.productAttributesExclusion = this.computeProductAttributesExclusion();
         return result;
     }
@@ -2620,6 +2621,23 @@ export class PosStore extends WithLazyGetterTrap {
 
     weighProduct() {
         return makeAwaitable(this.env.services.dialog, ScaleScreen);
+    }
+
+    selectEmptyOrder() {
+        const emptyOrders = this.models["pos.order"].filter(
+            (order) =>
+                order.isEmpty() &&
+                !order.finalized &&
+                order.payment_ids.length === 0 &&
+                !order.partner_id &&
+                order.pricelist_id?.id === this.config.pricelist_id?.id &&
+                order.fiscal_position_id?.id === this.config.default_fiscal_position_id?.id
+        );
+        if (emptyOrders.length > 0) {
+            this.setOrder(emptyOrders[0]);
+            return;
+        }
+        this.addNewOrder();
     }
 
     async isSessionDeleted() {
