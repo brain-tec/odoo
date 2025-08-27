@@ -1,22 +1,18 @@
 import { hasTouch, isBrowserFirefox } from "@web/core/browser/feature_detection";
-import { registry } from "@web/core/registry";
 import { utils as uiUtils } from "@web/core/ui/ui_service";
 import publicWidget from "@web/legacy/js/public/public_widget";
-import { Interaction } from "@web/public/interaction";
 import "@website/libs/zoomodoo/zoomodoo";
 import { ProductImageViewer } from "@website_sale/js/components/website_sale_image_viewer";
 import VariantMixin from "@website_sale/js/sale_variant_mixin";
 
 export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
     selector: '.oe_website_sale',
-    events: Object.assign({}, VariantMixin.events || {}, {
+    events: {
         'change form .js_product:first input[name="add_qty"]': '_onChangeAddQuantity',
         'click a.js_add_cart_json': '_onChangeQuantity',
-        'click .a-submit': '_onClickSubmit',
         'change form.js_attributes input, form.js_attributes select': '_onChangeAttribute',
         'submit .o_wsale_products_searchbar_form': '_onSubmitSaleSearch',
         'click #add_to_cart, .o_we_buy_now, #products_grid .o_wsale_product_btn .a-submit': '_onClickAdd',
-        'click input.js_product_change': 'onChangeVariant',
         'change .js_main_product [data-attribute_exclusions]': 'onChangeVariant',
         'click .o_product_page_reviews_link': '_onClickReviewsLink',
         'mousedown .o_wsale_filmstrip_wrapper': '_onMouseDown',
@@ -27,7 +23,9 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
         'submit': '_onClickConfirmOrder',
         'input .o_wsale_attribute_search_bar': '_searchAttributeValues',
         'click .o_wsale_view_more_btn': '_onToggleViewMoreLabel',
-    }),
+        'change .css_attribute_color input': '_onChangeColorAttribute',
+        'click .o_variant_pills': '_onChangePillsAttribute',
+    },
 
     /**
      * @constructor
@@ -169,24 +167,6 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
                 .trigger("change");
         });
     },
-    /**
-     * This is overridden to handle the "List View of Variants" of the web shop.
-     * That feature allows directly selecting the variant from a list instead of selecting the
-     * attribute values.
-     *
-     * Since the layout is completely different, we need to fetch the product_id directly
-     * from the selected variant.
-     *
-     * @override
-     */
-    _getProductId: function ($parent) {
-        if ($parent.find('input.js_product_change').length !== 0) {
-            return parseInt($parent.find('input.js_product_change:checked').val());
-        }
-        else {
-            return VariantMixin._getProductId.apply(this, arguments);
-        }
-    },
     _getProductImageLayout: function () {
         return document.querySelector("#product_detail_main").dataset.image_layout;
     },
@@ -198,9 +178,6 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
             'carousel': "#o-carousel-product",
             'grid': "#o-grid-product",
         }[this._getProductImageLayout()];
-    },
-    _getProductImageContainer: function () {
-        return document.querySelector(this._getProductImageContainerSelector());
     },
     _isEditorEnabled() {
         return document.body.classList.contains("editor_enable");
@@ -283,7 +260,7 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
      * @override
      * @private
      */
-    _updateProductImage: function ($productContainer, displayImage, productId, productTemplateId, newImages) {
+    _updateProductImage: function ($productContainer, newImages) {
         let $images = $productContainer.find(this._getProductImageContainerSelector());
         // When using the web editor, don't reload this or the images won't
         // be able to be edited depending on if this is done loading before
@@ -403,32 +380,6 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
      * @private
      * @param {Event} ev
      */
-    _onClickSubmit: function (ev) {
-        if ($(ev.currentTarget).is('#add_to_cart, #products_grid .a-submit')) {
-            return;
-        }
-        var $aSubmit = $(ev.currentTarget);
-        if (!ev.defaultPrevented && !$aSubmit.is(".disabled")) {
-            ev.preventDefault();
-            $aSubmit.closest('form')[0].requestSubmit();
-        }
-        if ($aSubmit.hasClass('a-submit-disable')) {
-            $aSubmit.addClass("disabled");
-        }
-        if ($aSubmit.hasClass('a-submit-loading')) {
-            var loading = '<span class="fa fa-cog fa-spin"/>';
-            var fa_span = $aSubmit.find('i[class*="fa"]');
-            if (fa_span.length) {
-                fa_span.replaceWith(loading);
-            } else {
-                $aSubmit.append(loading);
-            }
-        }
-    },
-    /**
-     * @private
-     * @param {Event} ev
-     */
     _onChangeAttribute: function (ev) {
         if (!ev.defaultPrevented) {
             ev.preventDefault();
@@ -538,6 +489,35 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
         setTimeout(() => submitFormButton.attr('disabled', false), 5000);
     },
 
+    /**
+     * Highlight selected color
+     *
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onChangeColorAttribute: function (ev) {
+        let $eventTarget = $(ev.target);
+        var $parent = $eventTarget.closest('.js_product');
+        $parent.find('.css_attribute_color')
+            .removeClass("active")
+            .filter(':has(input:checked)')
+            .addClass("active");
+        let $attrValueEl = $eventTarget.closest('.variant_attribute').find('.attribute_value')[0];
+        if ($attrValueEl) {
+            $attrValueEl.innerText = $eventTarget.data('value_name');
+        }
+    },
+
+    _onChangePillsAttribute: function (ev) {
+        const radio = ev.target.closest('.o_variant_pills').querySelector("input");
+        radio.click();  // Trigger onChangeVariant.
+        var $parent = $(ev.target).closest('.js_product');
+        $parent.find('.o_variant_pills')
+            .removeClass("active border-primary text-primary-emphasis bg-primary-subtle")
+            .filter(':has(input:checked)')
+            .addClass("active border-primary text-primary-emphasis bg-primary-subtle");
+    },
+
     // -------------------------------------
     // Utils
     // -------------------------------------
@@ -551,11 +531,9 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
      * @returns {void}
      */
     _updateRootProduct(form) {
-        const productId = parseInt(form.querySelector([
-            'input[type="hidden"][name="product_id"]',
-            // Variants list view
-            'input[type="radio"][name="product_id"]:checked',
-        ].join(','))?.value);
+        const productId = parseInt(
+            form.querySelector('input[type="hidden"][name="product_id"]')?.value
+        );
         const quantity = parseFloat(form.querySelector('input[name="add_qty"]')?.value);
         const uomId = this._getUoMId(form);
         const isCombo = form.querySelector(
@@ -585,12 +563,6 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
      *      `product.template.attribute.value` ids.
      */
     _getSelectedPTAV(form) {
-        // Variants list view
-        let combination = form.querySelector('input.js_product_change:checked')?.dataset.combination;
-        if (combination) {
-            return JSON.parse(combination);
-        }
-
         const selectedPTAVElements = form.querySelectorAll([
             '.js_product input.js_variant_change:not(.no_variant):checked',
             '.js_product select.js_variant_change:not(.no_variant)'
@@ -650,99 +622,6 @@ export const WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
 
 publicWidget.registry.WebsiteSale = WebsiteSale
 
-publicWidget.registry.WebsiteSaleSearchModal = publicWidget.Widget.extend({
-    selector: '#o_wsale_search_modal',
-    disabledInEditableMode: true,
-
-    //--------------------------------------------------------------------------
-    // Overrides
-    //--------------------------------------------------------------------------
-    start() {
-        this._super(...arguments);
-
-        this.el.addEventListener("shown.bs.modal", (ev) => {
-            ev.target.querySelector('.oe_search_box').focus();
-        });
-    },
-});
-
-publicWidget.registry.WebsiteSaleAccordionProduct = publicWidget.Widget.extend({
-    selector: "#product_accordion",
-
-    /**
-     * @override
-     */
-    async start() {
-        await this._super(...arguments);
-        this._updateAccordionActiveItem();
-    },
-
-    /**
-     * Replace the .SCSS styling applied awaiting Js for the default bootstrap classes,
-     * opening the first accordion entry and restoring flush behavior.
-     *
-     * @private
-     */
-    _updateAccordionActiveItem() {
-        const firstAccordionItemEl = this.el.querySelector('.accordion-item');
-        if (!firstAccordionItemEl) return;
-
-        const firstAccordionItemButtonEl = firstAccordionItemEl.querySelector('.accordion-button');
-        firstAccordionItemButtonEl.classList.remove('collapsed');
-        firstAccordionItemButtonEl.setAttribute('aria-expanded', 'true');
-        firstAccordionItemEl.querySelector('.accordion-collapse').classList.add('show');
-        this.target.classList.remove('o_accordion_not_initialized');
-    },
-});
-
-export class WebsiteSaleProductStickyCol extends Interaction {
-    static selector = ".oe_website_sale";
-
-    dynamicContent = {
-        ".o_wsale_product_sticky_col": {
-            "t-att-style": () => ({
-                "opacity": "1",
-                "top": `${this.position || 16}px`,
-            }),
-        }
-    };
-
-    setup() {
-        this.position = 16;
-    }
-
-    start() {
-        this._adaptToHeaderChange();
-        this.registerCleanup(this.services.website_menus.registerCallback(this._adaptToHeaderChange.bind(this)));
-    }
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     */
-
-    _adaptToHeaderChange() {
-        let position = 16; // Add 1rem equivalent in px to provide a visual gap by default
-
-        for (const el of this.el.ownerDocument.querySelectorAll(".o_top_fixed_element")) {
-            position += el.offsetHeight;
-        }
-
-        if (this.position !== position) {
-            this.position = position;
-            this.updateContent();
-        }
-    }
-}
-registry
-    .category("public.interactions")
-    .add("website.website_sale_product_sticky_col", WebsiteSaleProductStickyCol);
-
 export default {
     WebsiteSale: publicWidget.registry.WebsiteSale,
-    WebsiteSaleSearchModal: publicWidget.registry.WebsiteSaleSearchModal,
-    WebsiteSaleProductPage: publicWidget.registry.WebsiteSaleAccordionProduct,
 };
