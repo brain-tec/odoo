@@ -33,7 +33,7 @@ import {
 } from "@web/../tests/web_test_helpers";
 
 import { Composer } from "@mail/core/common/composer";
-import { press, queryFirst } from "@odoo/hoot-dom";
+import { edit, press, queryFirst } from "@odoo/hoot-dom";
 import { browser } from "@web/core/browser/browser";
 
 describe.current.tags("desktop");
@@ -73,7 +73,7 @@ test("composer text input: basic rendering when linked thread is a discuss.chann
     await contains("textarea.o-mail-Composer-input");
 });
 
-test("composer text input placeholder should contain channel name when thread does not have specific correspondent", async () => {
+test("[text composer] composer text input placeholder should contain channel name when thread does not have specific correspondent", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
         channel_type: "channel",
@@ -84,7 +84,23 @@ test("composer text input placeholder should contain channel name when thread do
     await contains("textarea.o-mail-Composer-input[placeholder='Message #General…']");
 });
 
-test("composer input placeholder in channel thread", async () => {
+test.tags("html composer");
+test("composer text input placeholder should contain channel name when thread does not have specific correspondent", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_type: "channel",
+        name: "General",
+    });
+    await start();
+    const composerService = getService("mail.composer");
+    composerService.setHtmlComposer();
+    await openDiscuss(channelId);
+    await contains(
+        ".o-mail-Composer-html.odoo-editor-editable .o-we-hint[o-we-hint-text='Message #General…']"
+    );
+});
+
+test("[text composer] composer input placeholder in channel thread", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({
         name: "General",
@@ -96,6 +112,25 @@ test("composer input placeholder in channel thread", async () => {
     await start();
     await openDiscuss(subchannelID);
     await contains(`.o-mail-Composer-input[placeholder='Message "ThreadFromGeneral"']`);
+});
+
+test.tags("html composer");
+test("composer input placeholder in channel thread", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({
+        name: "General",
+    });
+    const subchannelID = pyEnv["discuss.channel"].create({
+        name: "ThreadFromGeneral",
+        parent_channel_id: channelId,
+    });
+    await start();
+    const composerService = getService("mail.composer");
+    composerService.setHtmlComposer();
+    await openDiscuss(subchannelID);
+    await contains(
+        ".o-mail-Composer-html.odoo-editor-editable .o-we-hint[o-we-hint-text='Message \"ThreadFromGeneral\"']"
+    );
 });
 
 test("add an emoji", async () => {
@@ -467,9 +502,15 @@ test('post message on channel with "Enter" keyboard shortcut', async () => {
     const channelId = pyEnv["discuss.channel"].create({ name: "general" });
     await start();
     await openDiscuss(channelId);
-    await insertText(".o-mail-Composer-input", "Test");
+    await focus(".o-mail-Composer-input");
+    await edit("Test");
     await contains(".o-mail-Message", { count: 0 });
-    triggerHotkey("Enter");
+    await press("Enter");
+    await contains(".o-mail-Message");
+    // check composition mode doesn't send message
+    await edit("test", { composition: true });
+    await press("Enter", { isComposing: true });
+    await animationFrame();
     await contains(".o-mail-Message");
 });
 
@@ -543,7 +584,7 @@ test("Can post suggestions", async () => {
     await contains(".o-mail-Message .o_channel_redirect");
 });
 
-test("composer text input placeholder should contain correspondent name when thread has exactly one correspondent", async () => {
+test("[text composer] composer text input placeholder should contain correspondent name when thread has exactly one correspondent", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Marc Demo" });
     const channelId = pyEnv["discuss.channel"].create({
@@ -556,6 +597,26 @@ test("composer text input placeholder should contain correspondent name when thr
     await start();
     await openDiscuss(channelId);
     await contains("textarea.o-mail-Composer-input[placeholder='Message Marc Demo…']");
+});
+
+test.tags("html composer");
+test("composer text input placeholder should contain correspondent name when thread has exactly one correspondent", async () => {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "Marc Demo" });
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: partnerId }),
+        ],
+        channel_type: "chat",
+    });
+    await start();
+    await openDiscuss(channelId);
+    const composerService = getService("mail.composer");
+    composerService.setHtmlComposer();
+    await contains(
+        ".o-mail-Composer-html.odoo-editor-editable .o-we-hint[o-we-hint-text='Message Marc Demo…']"
+    );
 });
 
 test.tags("focus required");

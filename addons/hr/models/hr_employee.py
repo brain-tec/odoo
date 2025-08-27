@@ -74,7 +74,7 @@ class HrEmployee(models.Model):
     name = fields.Char(string="Employee Name", related='resource_id.name', store=True, readonly=False, tracking=True)
     resource_id = fields.Many2one('resource.resource', required=True)
     # required because the mixin already creates it so it is not related to the version_id
-    resource_calendar_id = fields.Many2one(related='version_id.resource_calendar_id', index=False, store=False, check_company=True)
+    resource_calendar_id = fields.Many2one(related='version_id.resource_calendar_id', inherited=True, index=False, store=False, check_company=True)
     user_id = fields.Many2one(
         'res.users', 'User',
         related='resource_id.user_id',
@@ -115,6 +115,7 @@ class HrEmployee(models.Model):
     work_contact_id = fields.Many2one('res.partner', 'Work Contact', copy=False, index='btree_not_null')
     # private info
     legal_name = fields.Char(compute='_compute_legal_name', store=True, readonly=False, groups="hr.group_hr_user")
+    is_user_active = fields.Boolean(related='user_id.active', string="User's active", groups="hr.group_hr_user")
     private_phone = fields.Char(string="Private Phone", groups="hr.group_hr_user")
     private_email = fields.Char(string="Private Email", groups="hr.group_hr_user")
     lang = fields.Selection(selection=_lang_get, string="Lang", groups="hr.group_hr_user")
@@ -146,6 +147,18 @@ class HrEmployee(models.Model):
         ("home", "Home"),
         ("office", "Office"),
         ("other", "Other")], compute="_compute_work_location_type", tracking=True)
+    contract_date_start = fields.Date(readonly=False, related="version_id.contract_date_start", inherited=True, groups="hr.group_hr_manager")
+    contract_date_end = fields.Date(readonly=False, related="version_id.contract_date_end", inherited=True, groups="hr.group_hr_manager")
+    trial_date_end = fields.Date(readonly=False, related="version_id.trial_date_end", inherited=True, groups="hr.group_hr_manager")
+    contract_wage = fields.Monetary(related="version_id.contract_wage", inherited=True, groups="hr.group_hr_manager")
+    date_start = fields.Date(related='version_id.date_start', inherited=True, groups="hr.group_hr_manager")
+    date_end = fields.Date(related='version_id.date_end', inherited=True, groups="hr.group_hr_manager")
+    is_current = fields.Boolean(related='version_id.is_current', inherited=True, groups="hr.group_hr_manager")
+    is_past = fields.Boolean(related='version_id.is_past', inherited=True, groups="hr.group_hr_manager")
+    is_future = fields.Boolean(related='version_id.is_future', inherited=True, groups="hr.group_hr_manager")
+    is_in_contract = fields.Boolean(related='version_id.is_in_contract', inherited=True, groups="hr.group_hr_manager")
+    structure_type_id = fields.Many2one(readonly=False, related='version_id.structure_type_id', inherited=True, groups="hr.group_hr_manager")
+    contract_type_id = fields.Many2one(readonly=False, related='version_id.contract_type_id', inherited=True, groups="hr.group_hr_manager")
 
     # employee in company
     parent_id = fields.Many2one('hr.employee', 'Manager', tracking=True, index=True,
@@ -207,6 +220,26 @@ class HrEmployee(models.Model):
         'A user cannot be linked to multiple employees in the same company.',
     )
 
+    def _prepare_create_values(self, vals_list):
+        result = super()._prepare_create_values(vals_list)
+        new_vals_list = []
+        Version = self.env['hr.version']
+        version_fields = [fname for fname, field in Version._fields.items() if Version._has_field_access(field, 'write')]
+        for vals in result:
+            employee_vals = {}
+            version_vals = {}
+            for fname, value in vals.items():
+                employee_field = self._fields.get(fname)
+                if not (employee_field and employee_field.inherited and employee_field.related_field.model_name == 'hr.version'):
+                    employee_vals[fname] = value
+                else:
+                    version_vals[fname] = value
+            new_vals_list.append({
+                **employee_vals,
+                **{k: v for k, v in version_vals.items() if k in version_fields},
+            })
+        return new_vals_list
+
     @api.model
     def _create(self, data_list):
         versions = [vals['stored'].pop('version_id', None) for vals in data_list]
@@ -218,6 +251,7 @@ class HrEmployee(models.Model):
         return result
 
     @api.model
+    @api.deprecated("Override of a deprecated method")
     def check_field_access_rights(self, operation, field_names):
         # DISCLAIMER: Dirty hack to avoid having to create a bridge module to override only a
         # groups on a field which is not prefetched (because not stored) but would crash anyway
@@ -408,7 +442,7 @@ class HrEmployee(models.Model):
         if version_to_copy.date_version == date:
             return version_to_copy
 
-        date_from, date_to = self._get_contract_dates(date)
+        date_from, date_to = self.sudo()._get_contract_dates(date)
         contract_date_start = values['contract_date_start'] = values.get('contract_date_start', date_from)
         contract_date_end = values['contract_date_end'] = values.get('contract_date_end', date_to)
         if isinstance(contract_date_start, str):
@@ -420,15 +454,18 @@ class HrEmployee(models.Model):
             values['employee_id'] = self.id
 
         if contract_date_start == date_from and contract_date_end != date_to:
-            versions_to_sync = self.env['hr.version'].with_context(sync_contract_dates=True).search([
+            versions_sudo_to_sync = self.env['hr.version'].with_context(sync_contract_dates=True).sudo().search([
                 ('employee_id', '=', values['employee_id']),
                 ('contract_date_start', '=', date_from),
             ])
-            if versions_to_sync:
-                versions_to_sync.write({
+            if versions_sudo_to_sync:
+                versions_sudo_to_sync.write({
                     'contract_date_end': contract_date_end,
                 })
-        return version_to_copy.copy(values)
+        self.check_access('write')
+        version_to_copy.check_access('write')
+        new_version = version_to_copy.sudo().copy(values)
+        return new_version.sudo(False)
 
     def _is_in_contract(self, date):
         return self._get_version(date)._is_in_contract(date)
@@ -1091,7 +1128,11 @@ class HrEmployee(models.Model):
 
         employee = super().new(new_vals, origin, ref)
         version_vals['employee_id'] = employee
-        self.env['hr.version'].new(version_vals)
+        self.env['hr.version'].new({
+            f_name: value
+            for f_name, value in version_vals.items()
+            if self.env['hr.version']._has_field_access(self.env['hr.version']._fields[f_name], 'read')
+        })
         return employee
 
     @api.model_create_multi
@@ -1313,9 +1354,9 @@ class HrEmployee(models.Model):
 
         date_from = fields.Date.to_date(date_from)
         for employee in self:
-            employee_versions = employee.version_ids.filtered(lambda v: v._is_in_contract(date_from))
-            if employee_versions:
-                res[employee.id] = employee_versions[0].resource_calendar_id.sudo(False)
+            employee_versions_sudo = employee.version_ids.sudo().filtered(lambda v: v._is_in_contract(date_from))
+            if employee_versions_sudo:
+                res[employee.id] = employee_versions_sudo[0].resource_calendar_id.sudo(False)
         return res
 
     def _get_calendar_periods(self, start, stop):
