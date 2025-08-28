@@ -577,7 +577,8 @@
                         class="oe_stat_button"
                         icon="fa-address-card-o"
                         type="object"
-                        help="Related Contacts">
+                        help="Related Contacts"
+                        groups="base.group_no_one">
                         <div class="o_field_widget o_stat_info">
                             <span class="o_stat_value"><field name="related_partners_count"></field></span>
                             <span class="o_stat_text">Contacts</span>
@@ -619,6 +620,7 @@
             <field name="name">Employees</field>
             <field name="path">employees</field>
             <field name="res_model">hr.employee</field>
+            <field name="view_mode">kanban,list,form,activity,graph,pivot</field>
             <field name="domain">[('company_id', 'in', allowed_company_ids)]</field>
             <field name="context">{'chat_icon': True, 'searchpanel_default_company_id': allowed_company_ids[0]}</field>
             <field name="view_id" eval="False"/>

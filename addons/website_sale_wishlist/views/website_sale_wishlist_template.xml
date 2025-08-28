@@ -297,13 +297,9 @@
             <t t-set="additional_title">Shop Wishlist</t>
             <div id="wrap" class="js_sale">
                 <div class="oe_structure" id="oe_structure_website_sale_wishlist_product_wishlist_1"/>
-                <div class="container oe_website_sale pt-3">
+                <div class="container oe_website_sale pt-4">
                     <section class="container wishlist-section pb-5">
-                        <h2 class="fs-4">My Wishlist</h2>
-                        <div class="checkbox mb-3">
-                            <label class='text-muted'><input type="checkbox" id='b2b_wish' value="1" class="mr8"/>Add product to my cart but keep it in my wishlist</label>
-                        </div>
-
+                        <h1 class="h4-fs mb-3">My Wishlist</h1>
                         <div
                             id="o_comparelist_table"
                             style="--o-wsale-products-grid-gap: 16px;"
@@ -333,16 +329,22 @@
                                         <t t-set="product_price">
                                             <br t-if="combination_info['prevent_zero_price_sale']"/>
                                             <div t-else="" class="align-middle o_wish_price">
-                                                <t t-out="combination_info['price']"
-                                                    t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
+                                                <span aria-label="Sale price">
+                                                    <t t-out="combination_info['price']"
+                                                        t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
+                                                    />
+                                                </span>
                                                 <small
-                                                    t-if="combination_info.get('base_unit_price')"
-                                                    class="cart_product_base_unit_price d-block text-muted"
+                                                    t-if="combination_info['has_discounted_price']"
+                                                    class="cart_product_base_unit_price text-muted"
                                                 >
-                                                    <t t-call="website_sale.base_unit_price">
-                                                        <t t-set="product" t-value="wish.product_id"/>
-                                                        <t t-set="base_unit_price" t-value="combination_info.get('base_unit_price')"/>
-                                                    </t>
+                                                    <del
+                                                        aria-label="Original price"
+                                                        t-out="combination_info['list_price']"
+                                                        class="text-nowrap"
+                                                        t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
+                                                        name="product_list_price"
+                                                    />
                                                 </small>
                                             </div>
                                         </t>
