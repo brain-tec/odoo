@@ -9,6 +9,12 @@ import { getContent, setSelection } from "./_helpers/selection";
 import { pasteHtml, pasteOdooEditorHtml, pasteText, undo } from "./_helpers/user_actions";
 import { createBaseContainer } from "@html_editor/utils/base_container";
 import { expectElementCount } from "./_helpers/ui_expectations";
+import {
+    EMBEDDED_COMPONENT_PLUGINS,
+    MAIN_PLUGINS,
+    NO_EMBEDDED_COMPONENTS_FALLBACK_PLUGINS,
+} from "@html_editor/plugin_sets";
+import { MAIN_EMBEDDINGS } from "@html_editor/others/embedded_components/embedding_sets";
 
 function isInline(node) {
     return ["I", "B", "U", "S", "EM", "STRONG", "IMG", "BR", "A", "FONT"].includes(node);
@@ -3306,6 +3312,7 @@ describe("images", () => {
 });
 
 describe("youtube video", () => {
+    const config = { Plugins: [...MAIN_PLUGINS, ...NO_EMBEDDED_COMPONENTS_FALLBACK_PLUGINS] };
     describe("range collapsed", () => {
         beforeEach(() => {
             onRpc("/html_editor/video_url/data", async (request) => {
@@ -3315,7 +3322,7 @@ describe("youtube video", () => {
         });
 
         test("should paste and transform a youtube URL in a p (1)", async () => {
-            const { el, editor } = await setupEditor("<p>ab[]cd</p>");
+            const { el, editor } = await setupEditor("<p>ab[]cd</p>", { config });
             pasteText(editor, videoUrl);
             await animationFrame();
             await expectElementCount(".o-we-powerbox", 1);
@@ -3329,7 +3336,9 @@ describe("youtube video", () => {
         });
 
         test("should paste and transform a youtube URL in a span (1)", async () => {
-            const { el, editor } = await setupEditor('<p>a<span class="a">b[]c</span>d</p>');
+            const { el, editor } = await setupEditor('<p>a<span class="a">b[]c</span>d</p>', {
+                config,
+            });
             pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
             await animationFrame();
             await expectElementCount(".o-we-powerbox", 1);
@@ -3344,7 +3353,8 @@ describe("youtube video", () => {
 
         test("should paste and not transform a youtube URL in a existing link", async () => {
             const { el, editor, plugins } = await setupEditor(
-                '<p>a<a href="http://existing.com">b[]c</a>d</p>'
+                '<p>a<a href="http://existing.com">b[]c</a>d</p>',
+                { config }
             );
             pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
             // Ensure the powerbox is active
@@ -3357,7 +3367,7 @@ describe("youtube video", () => {
 
         test("should paste a youtube URL as a link in a p (1)", async () => {
             const url = "https://youtu.be/dQw4w9WgXcQ";
-            const { el, editor } = await setupEditor("<p>[]</p>");
+            const { el, editor } = await setupEditor("<p>[]</p>", { config });
             pasteText(editor, url);
             await animationFrame();
             await expectElementCount(".o-we-powerbox", 1);
@@ -3369,7 +3379,7 @@ describe("youtube video", () => {
 
         test("should not revert a history step when pasting a youtube URL as a link (1)", async () => {
             const url = "https://youtu.be/dQw4w9WgXcQ";
-            const { el, editor } = await setupEditor("<p>[]</p>");
+            const { el, editor } = await setupEditor("<p>[]</p>", { config });
             // paste text to have a history step recorded
             pasteText(editor, "*should not disappear*");
             pasteText(editor, url);
@@ -3393,7 +3403,7 @@ describe("youtube video", () => {
         });
 
         test("should paste and transform a youtube URL in a p (2)", async () => {
-            const { el, editor } = await setupEditor("<p>ab[xxx]cd</p>");
+            const { el, editor } = await setupEditor("<p>ab[xxx]cd</p>", { config });
             pasteText(editor, "https://youtu.be/dQw4w9WgXcQ");
             await animationFrame();
             await expectElementCount(".o-we-powerbox", 1);
@@ -3408,7 +3418,8 @@ describe("youtube video", () => {
 
         test("should paste and transform a youtube URL in a span (2)", async () => {
             const { el, editor } = await setupEditor(
-                '<p>a<span class="a">b[x<a href="http://existing.com">546</a>x]c</span>d</p>'
+                '<p>a<span class="a">b[x<a href="http://existing.com">546</a>x]c</span>d</p>',
+                { config }
             );
             pasteText(editor, videoUrl);
             await animationFrame();
@@ -3424,7 +3435,8 @@ describe("youtube video", () => {
 
         test("should paste and not transform a youtube URL in a existing link", async () => {
             const { el, editor, plugins } = await setupEditor(
-                '<p>a<a href="http://existing.com">b[qsdqsd]c</a>d</p>'
+                '<p>a<a href="http://existing.com">b[qsdqsd]c</a>d</p>',
+                { config }
             );
             pasteText(editor, videoUrl);
             // Ensure the powerbox is active
@@ -3436,7 +3448,7 @@ describe("youtube video", () => {
         });
 
         test("should paste a youtube URL as a link in a p (2)", async () => {
-            const { el, editor } = await setupEditor("<p>ab[xxx]cd</p>");
+            const { el, editor } = await setupEditor("<p>ab[xxx]cd</p>", { config });
             pasteText(editor, videoUrl);
             await animationFrame();
             await expectElementCount(".o-we-powerbox", 1);
@@ -3449,7 +3461,7 @@ describe("youtube video", () => {
         });
 
         test("should not revert a history step when pasting a youtube URL as a link (2)", async () => {
-            const { el, editor } = await setupEditor("<p>[]</p>");
+            const { el, editor } = await setupEditor("<p>[]</p>", { config });
             // paste text (to have a history step recorded)
             pasteText(editor, "abxxxcd");
             // select xxx in "<p>ab[xxx]cd</p>"
@@ -3476,7 +3488,7 @@ describe("youtube video", () => {
         });
 
         test("should restore selection after pasting video URL followed by UNDO (1)", async () => {
-            const { el, editor } = await setupEditor("<p>[abc]</p>");
+            const { el, editor } = await setupEditor("<p>[abc]</p>", { config });
             pasteText(editor, videoUrl);
             await animationFrame();
             await expectElementCount(".o-we-powerbox", 1);
@@ -3488,7 +3500,7 @@ describe("youtube video", () => {
         });
 
         test("should restore selection after pasting video URL followed by UNDO (2)", async () => {
-            const { el, editor } = await setupEditor("<p>[abc]</p>");
+            const { el, editor } = await setupEditor("<p>[abc]</p>", { config });
             pasteText(editor, videoUrl);
             await animationFrame();
             await expectElementCount(".o-we-powerbox", 1);
@@ -3499,6 +3511,39 @@ describe("youtube video", () => {
             undo(editor);
             expect(getContent(el)).toBe("<p>[abc]</p>");
         });
+    });
+});
+
+describe("youtube video with embedded components", () => {
+    beforeEach(() => {
+        onRpc("/html_editor/video_url/data", async (request) => {
+            const { params } = await request.json();
+            return { platform: "youtube", video_id: params.video_url.split("v=")[1] };
+        });
+    });
+    const config = {
+        Plugins: [...MAIN_PLUGINS, ...EMBEDDED_COMPONENT_PLUGINS],
+        resources: { embedded_components: MAIN_EMBEDDINGS },
+    };
+    test("should embed a video on youtube URL paste", async () => {
+        const { editor } = await setupEditor("<p>[]<br></p>", { config });
+        pasteText(editor, videoUrl);
+        await waitFor(".o-we-powerbox");
+        // Pick first command (Embed video)
+        await press("Enter");
+        await waitFor(`[data-embedded="video"] iframe`);
+        expect(`[data-embedded="video"] iframe`).toHaveCount(1);
+    });
+    test("should paste a youtube URL as a link in a p", async () => {
+        const { el, editor } = await setupEditor("<p>[]<br></p>", { config });
+        pasteText(editor, videoUrl);
+        await waitFor(".o-we-powerbox");
+        // Pick the second command (Paste as URL)
+        await press("ArrowDown");
+        await press("Enter");
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            `<p><a href="${videoUrl}">${videoUrl}</a>[]</p>`
+        );
     });
 });
 
