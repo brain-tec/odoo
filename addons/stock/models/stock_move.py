@@ -547,10 +547,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         for warehouse, moves_ids in outgoing_unreserved_moves_per_warehouse.items():
             if not warehouse:  # No prediction possible if no warehouse.
                 continue
-            moves = self.browse(moves_ids)
-            moves_per_location = defaultdict(lambda: self.env['stock.move'])
-            for move in moves:
-                moves_per_location[move.location_id] |= move
+            moves_per_location = self.browse(moves_ids).grouped('location_id')
             for location, mvs in moves_per_location.items():
                 forecast_info = mvs._get_forecast_availability_outgoing(warehouse, location)
                 for move in mvs:
@@ -590,7 +587,7 @@ Please change the quantity done or the rounding precision in your settings.""",
 
     def _set_lot_ids(self):
         for move in self:
-            if move.product_id.tracking != 'serial':
+            if move.state == 'assigned' and all(ml.lot_id for ml in move.move_line_ids):
                 continue
             move_lines_commands = []
             mls = move.move_line_ids
@@ -605,10 +602,9 @@ Please change the quantity done or the rounding precision in your settings.""",
                     if mls_without_lots[:1]:  # Updates an existing line without serial number.
                         move_line = mls_without_lots[:1]
                         move_lines_commands.append(Command.update(move_line.id, {
-                            'lot_name': lot.name,
                             'lot_id': lot.id,
                             'product_uom_id': move.product_id.uom_id.id,
-                            'quantity': 1,
+                            'quantity': 1 if move.product_id.tracking == 'serial' else move.quantity,
                         }))
                         mls_without_lots -= move_line
                     else:  # No line without serial number, creates a new one.
@@ -618,7 +614,6 @@ Please change the quantity done or the rounding precision in your settings.""",
                         else:
                             move_line_vals = self._prepare_move_line_vals(quantity=0)
                             move_line_vals['lot_id'] = lot.id
-                            move_line_vals['lot_name'] = lot.name
                         move_line_vals['product_uom_id'] = move.product_id.uom_id.id
                         move_line_vals['quantity'] = 1
                         move_lines_commands.append((0, 0, move_line_vals))
@@ -872,17 +867,6 @@ Please change the quantity done or the rounding precision in your settings.""",
                 self.env.context,
             ),
         }
-
-    def action_assign_serial(self):
-        """ Opens a wizard to assign SN's name on each move lines.
-        """
-        self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id("stock.act_assign_serial_numbers")
-        action['context'] = {
-            'default_product_id': self.product_id.id,
-            'default_move_id': self.id,
-        }
-        return action
 
     def action_product_forecast_report(self):
         self.ensure_one()
@@ -2255,8 +2239,13 @@ Please change the quantity done or the rounding precision in your settings.""",
             if self.product_uom.is_zero(qty):
                 res.append((2, ml.id))
                 continue
-            if ml.product_uom_id.compare(ml_qty, 0) <= 0:
+            if (qty_comparison := ml.product_uom_id.compare(ml_qty, 0)) < 0:
                 continue
+            elif qty_comparison == 0:
+                # Convert qty into move line uom
+                if ml.product_uom_id != self.product_uom:
+                    qty = self.product_uom._compute_quantity(qty, ml.product_uom_id, round=False)
+                return [Command.update(ml.id, {'quantity': qty})]
             # Convert move line qty into move uom
             if ml.product_uom_id != self.product_uom:
                 ml_qty = ml.product_uom_id._compute_quantity(ml_qty, self.product_uom, round=False)
