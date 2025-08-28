@@ -198,6 +198,27 @@ registry.category("web_tour.tours").add("FloatingOrderTour", {
         ].flat(),
 });
 
+registry.category("web_tour.tours").add("test_reuse_empty_floating_order", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.orderIsEmpty(),
+            ProductScreen.checkFloatingOrderCount(1),
+            ProductScreen.clickDisplayedProduct("Desk Organizer", true, "1.0", "5.10"),
+            Chrome.createFloatingOrder(),
+            ProductScreen.checkFloatingOrderCount(2),
+            ProductScreen.selectFloatingOrder(0),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank", true, { remaining: "0.00" }),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.isShown(),
+            ReceiptScreen.clickNextOrder(),
+            // Should reuse previously created empty floating order
+            ProductScreen.checkFloatingOrderCount(1),
+        ].flat(),
+});
+
 registry.category("web_tour.tours").add("FiscalPositionNoTax", {
     steps: () =>
         [
@@ -982,6 +1003,17 @@ registry.category("web_tour.tours").add("test_pos_ui_round_globally", {
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickValidate(),
             ReceiptScreen.isShown(),
+            Chrome.endTour(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_preset_customer_selection", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            PartnerList.clickPartner("Test Partner"),
+            ProductScreen.customerIsSelected("Test Partner"),
             Chrome.endTour(),
         ].flat(),
 });
