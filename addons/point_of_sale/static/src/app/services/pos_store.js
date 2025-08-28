@@ -620,12 +620,13 @@ export class PosStore extends WithLazyGetterTrap {
      * @returns {Promise<Object>}
      */
     async loadNewProducts(domain, offset = 0, limit = 0) {
-        const result = await this.data.callRelated("product.template", "load_product_from_pos", [
-            odoo.pos_config_id,
-            domain,
-            offset,
-            limit,
-        ]);
+        const result = await this.data.callRelated(
+            "product.template",
+            "load_product_from_pos",
+            [odoo.pos_config_id, domain, offset, limit],
+            {},
+            false
+        );
         this.productAttributesExclusion = this.computeProductAttributesExclusion();
         return result;
     }
@@ -697,7 +698,7 @@ export class PosStore extends WithLazyGetterTrap {
             } else {
                 this.selectedOrderUuid = openOrders.length
                     ? openOrders[openOrders.length - 1].uuid
-                    : this.addNewOrder().uuid;
+                    : null;
             }
         }
 
@@ -1303,11 +1304,17 @@ export class PosStore extends WithLazyGetterTrap {
         return this.models["pos.order"].find((o) => o.state === "draft") || this.addNewOrder();
     }
     getEmptyOrder() {
-        const orders = this.models["pos.order"].filter(
-            (order) => !order.finalized && order.isEmpty()
+        const emptyOrders = this.models["pos.order"].filter(
+            (order) =>
+                order.isEmpty() &&
+                !order.finalized &&
+                order.payment_ids.length === 0 &&
+                !order.partner_id &&
+                order.pricelist_id?.id === this.config.pricelist_id?.id &&
+                order.fiscal_position_id?.id === this.config.default_fiscal_position_id?.id
         );
-        if (orders.length > 0) {
-            return orders[0];
+        if (emptyOrders.length > 0) {
+            return emptyOrders[0];
         }
         return this.addNewOrder();
     }
@@ -2204,6 +2211,9 @@ export class PosStore extends WithLazyGetterTrap {
                 if (!(partner.street || partner.street2)) {
                     this.notification.add(_t("Customer address is required"), { type: "warning" });
                     await this.editPartner(partner);
+                    if (!(partner.street || partner.street2)) {
+                        return;
+                    }
                 }
             }
             if (preset.identification === "name") {

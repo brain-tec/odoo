@@ -1909,6 +1909,11 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.assertEqual(len(self.main_pos_config.current_session_id.statement_line_ids), 1, "There should be one cash in/out statement line")
         self.assertEqual(self.main_pos_config.current_session_id.statement_line_ids[0].amount, -5, "The cash in/out amount should be -5")
 
+    def test_reuse_empty_floating_order(self):
+        """ Verify that after a payment, POS should reuse an existing empty floating order if available, instead of always creating new ones """
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_reuse_empty_floating_order', login="pos_user")
+
     def test_add_multiple_serials_at_once(self):
         self.product_a = self.env['product.product'].create({
             'name': 'Product A',
@@ -2790,6 +2795,26 @@ class TestUi(TestPointOfSaleHttpCommon):
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_cross_exclusion_attribute_values')
+
+    def test_preset_customer_selection(self):
+        self.preset_delivery = self.env['pos.preset'].create({
+            'name': 'Delivery',
+            'identification': 'address',
+        })
+        self.env['res.partner'].create({
+            'name': 'Test Partner',
+            'street': '123 Test Street',
+            'city': 'Test City',
+            'zip': '12345',
+            'country_id': self.env['res.country'].search([], limit=1).id,
+        })
+        self.main_pos_config.write({
+            'use_presets': True,
+            'default_preset_id': self.preset_delivery.id,
+            'available_preset_ids': [(6, 0, [self.preset_delivery.id])],
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('test_preset_customer_selection')
 
 
 # This class just runs the same tests as above but with mobile emulation
