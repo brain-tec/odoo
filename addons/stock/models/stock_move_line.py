@@ -140,7 +140,7 @@ class StockMoveLine(models.Model):
                 line.location_dest_id = line.move_id.location_dest_id or line.picking_id.location_dest_id
 
     def _search_picking_type_id(self, operator, value):
-        if Domain.is_negative_operator(operator):
+        if operator in Domain.NEGATIVE_OPERATORS:
             return NotImplemented
         return Domain('picking_id.picking_type_id', operator, value)
 
@@ -578,9 +578,6 @@ class StockMoveLine(models.Model):
             # which is clear by the unlink of move line
             moves.with_prefetch()._recompute_state()
         return res
-
-    def _sorting_move_lines(self):
-        return (self.id,)
 
     def _action_done(self):
         """ This method is called during a move's `action_done`. It'll actually move a quant from

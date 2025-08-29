@@ -27,7 +27,6 @@
         'report/report_stock_rule.xml',
         'wizard/stock_replenishment_info.xml',
         'wizard/product_replenish_views.xml',
-        'wizard/purchase_order_suggest_views.xml',
     ],
     'demo': [
         'data/purchase_stock_demo.xml',
@@ -39,8 +38,11 @@
         'web.assets_backend': [
             'purchase_stock/static/src/**/*',
         ],
+        'web.assets_tests': [
+            'purchase_stock/static/tests/tours/**/*',
+        ],
         'web.assets_unit_tests': [
-            'purchase_stock/static/tests/**/*',
+            'purchase_stock/static/tests/*.test.js',
         ],
     },
     'author': 'Odoo S.A.',

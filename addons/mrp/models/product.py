@@ -61,6 +61,9 @@ class ProductTemplate(models.Model):
                 template.show_on_hand_qty_status_button = template.product_variant_count <= 1
                 template.show_forecasted_qty_status_button = False
 
+    def _should_open_product_quants(self):
+        return super()._should_open_product_quants() or self.is_kits
+
     def _compute_used_in_bom_count(self):
         for template in self:
             template.used_in_bom_count = self.env['mrp.bom'].search_count(
@@ -362,7 +365,6 @@ class ProductProduct(models.Model):
             components |= self.env['product.product'].concat(*[l[0].product_id for l in bom_sub_lines])
         res = super(ProductProduct, components).action_open_quants()
         if bom_kits:
-            res['context']['single_product'] = False
             res['context'].pop('default_product_tmpl_id', None)
         return res
 
