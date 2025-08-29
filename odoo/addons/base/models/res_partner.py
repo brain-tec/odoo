@@ -238,7 +238,7 @@ class ResPartner(models.Model):
     vat_label = fields.Char(string='Tax ID Label', compute='_compute_vat_label')
     same_vat_partner_id: ResPartner = fields.Many2one('res.partner', string='Partner with same Tax ID', compute='_compute_same_vat_partner_id', store=False)
     same_company_registry_partner_id: ResPartner = fields.Many2one('res.partner', string='Partner with same Company Registry', compute='_compute_same_vat_partner_id', store=False)
-    company_registry = fields.Char(string="Company ID", compute='_compute_company_registry', store=True, readonly=False,
+    company_registry = fields.Char(string="Company ID", compute='_compute_company_registry', store=True, readonly=False, index='btree_not_null',
        help="The registry number of the company. Use it if it is different from the Tax ID. It must be unique across all partners of a same country")
     company_registry_label = fields.Char(string='Company ID Label', compute='_compute_company_registry_label')
     company_registry_placeholder = fields.Char(compute='_compute_company_registry_placeholder')
@@ -703,8 +703,8 @@ class ResPartner(models.Model):
             sync_vals = commercial_partner._get_commercial_values()
             if sync_vals:
                 self.write(sync_vals)
-                self._company_dependent_commercial_sync()
                 self._commercial_sync_to_descendants()
+            self._company_dependent_commercial_sync()
 
     def _company_dependent_commercial_sync(self):
         """ Propagate sync of company dependant commercial fields to other
