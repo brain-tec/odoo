@@ -729,7 +729,7 @@ class MrpProduction(models.Model):
 
     @api.model
     def _search_delay_alert_date(self, operator, value):
-        if Domain.is_negative_operator(operator):
+        if operator in Domain.NEGATIVE_OPERATORS:
             return NotImplemented
         late_stock_moves = self.env['stock.move'].search([('delay_alert_date', operator, value)])
         return ['|', ('move_raw_ids', 'in', late_stock_moves.ids), ('move_finished_ids', 'in', late_stock_moves.ids)]
@@ -1984,7 +1984,7 @@ class MrpProduction(models.Model):
             ml_by_move = []
             product_uom = initial_move.product_id.uom_id
             if not initial_move.picked:
-                for move_line in initial_move.move_line_ids.sorted(key=lambda ml: ml._sorting_move_lines()):
+                for move_line in initial_move.move_line_ids:
                     available_qty = move_line.product_uom_id._compute_quantity(move_line.quantity, product_uom, rounding_method="HALF-UP")
                     if product_uom.compare(available_qty, 0) <= 0:
                         continue

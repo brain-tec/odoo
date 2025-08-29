@@ -464,6 +464,9 @@ class DiscussChannel(models.Model):
             return field_description
 
         def get_field_value(channel, field_description):
+            if isinstance(field_description, Store.Attr):
+                if field_description.predicate and not field_description.predicate(channel):
+                    return None
             if isinstance(field_description, Store.Relation):
                 return field_description._get_value(channel).records
             if isinstance(field_description, Store.Attr):
@@ -986,6 +989,22 @@ class DiscussChannel(models.Model):
     def _should_invite_members_to_join_call(self):
         self.ensure_one()
         return len(self.rtc_session_ids) == 1 and self.channel_type != "channel"
+
+    def _get_access_action(self, access_uid=None, force_website=False):
+        """ Redirect to Discuss instead of form view. """
+        self.ensure_one()
+        if not self.env.user._is_internal() or force_website:
+            return {
+                "type": "ir.actions.act_url",
+                "url": f"/discuss/channel/{self.id}",
+                "target": "self",
+                "target_type": "public",
+            }
+        return {
+            "type": "ir.actions.act_url",
+            "url": f"/odoo/action-mail.action_discuss?active_id={self.id}",
+            "target": "self",
+        }
 
     # ------------------------------------------------------------
     # BROADCAST

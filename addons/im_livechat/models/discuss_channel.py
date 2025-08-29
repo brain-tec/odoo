@@ -396,6 +396,7 @@ class DiscussChannel(models.Model):
             ),
         )
         field_names["internal_users"].extend([
+            Store.Attr("description", predicate=is_livechat_channel),
             Store.Attr("livechat_note", predicate=is_livechat_channel),
             Store.Attr("livechat_status", predicate=is_livechat_channel),
             Store.Many("livechat_expertise_ids", ["name"], predicate=is_livechat_channel),
@@ -426,6 +427,7 @@ class DiscussChannel(models.Model):
                 )
             )
             fields.extend([
+                Store.Attr("description", predicate=is_livechat_channel),
                 Store.Attr("livechat_note", predicate=is_livechat_channel),
                 Store.Attr("livechat_outcome", predicate=is_livechat_channel),
                 Store.Attr("livechat_status", predicate=is_livechat_channel),
@@ -845,7 +847,7 @@ class DiscussChannel(models.Model):
     def _post_current_chatbot_step_message(self, chatbot_script_step):
         posted_message = self.env['mail.message']
         if chatbot_script_step and chatbot_script_step.message:
-            posted_message = self._chatbot_post_message(chatbot_script_step.chatbot_script_id, plaintext2html(chatbot_script_step.message))
+            posted_message = self._chatbot_post_message(chatbot_script_step.chatbot_script_id, chatbot_script_step.message)
         return posted_message
 
     def _add_new_members_to_channel(self, create_member_params, inviting_partner, users=None, partners=None):

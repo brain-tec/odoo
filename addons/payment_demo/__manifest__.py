@@ -21,7 +21,7 @@
     'uninstall_hook': 'uninstall_hook',
     'assets': {
         'web.assets_frontend': [
-            'payment_demo/static/src/js/**/*',
+            'payment_demo/static/src/interactions/**/*',
         ],
     },
     'author': 'Odoo S.A.',
