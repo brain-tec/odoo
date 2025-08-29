@@ -341,6 +341,7 @@ test("'New Meeting' in mobile", async () => {
     await click(".o-discuss-ChannelInvitation-selectable", { text: "Partner 2" });
     await click("button:not([disabled])", { text: "Invite to Group Chat" });
     await contains(".o-discuss-Call");
+    await click("[title='Exit Fullscreen']");
     // dropdown requires an extra delay before click (because handler is registered in useEffect)
     await contains("[title='Open Actions Menu']");
     await click("[title='Open Actions Menu']");
@@ -516,6 +517,16 @@ test("start call when accepting from push notification", async () => {
     );
     await contains(".o-mail-DiscussContent-threadName[title=General]");
     await contains(`.o-discuss-CallParticipantCard[title='${serverState.partnerName}']`);
+});
+
+test("Clicking sidebar call participant opens avatar card", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    await start();
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await click(".o-mail-DiscussSidebarCallParticipants-participant", { text: "Mitchell Admin" });
+    await contains(".o_avatar_card .o_card_user_infos", { text: "Mitchell Admin" });
 });
 
 test("Use saved volume settings", async () => {

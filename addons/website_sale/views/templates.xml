@@ -409,6 +409,20 @@
                             t-att-title="ptav.name"
                         />
                     </div>
+                    <div
+                        t-elif="ptav.display_type == 'image'"
+                        class="d-flex"
+                    >
+                        <div
+                            t-attf-class="css_attribute_image size_small cursor-pointer d-block rounded bg-body #{'custom_value' if ptav.is_custom else ''} #{'transparent' if (not ptav.is_custom and not ptav.html_color) else ''}"
+                            t-att-title="ptav.name"
+                        >
+                            <div
+                                class="o_bg_img_center w-100 h-100 rounded-1"
+                                t-att-style="'background-image:url(/web/image/product.attribute.value/%s/image);' % ptav.product_attribute_value_id.id"
+                            />
+                        </div>
+                    </div>
                     <span
                         t-else=""
                         t-attf-class="{{'' if ppr == 2 and layout_mode != 'list' else 'btn-sm'}} btn bg-body w-100 text-body text-truncate"
@@ -949,6 +963,27 @@
         </t>
     </template>
 
+    <template id="website_sale.filter_image_attributes" name="Image attributes in Filter">
+        <t t-foreach="a.value_ids" t-as="v">
+            <label
+                t-attf-class="css_attribute_image size_small position-relative rounded-3 bg-body text-center cursor-pointer #{'active' if v.id in attrib_set else ''} #{'custom_value' if v.is_custom else ''} #{'transparent' if (not v.is_custom and not v.html_color) else ''}"
+            >
+                <input
+                    type="checkbox"
+                    name="attribute_value"
+                    t-att-value="'%s-%s' % (a.id, v.id)"
+                    t-att-checked="'checked' if v.id in attrib_set else None"
+                    t-att-title="v.name"
+                    class="w-100 h-100 opacity-0 cursor-pointer"
+                />
+                <div
+                    class="oe_img_bg o_bg_img_center position-absolute top-0 w-100 h-100 rounded-1"
+                    t-att-style="'background-image:url(/web/image/product.attribute.value/%s/image); background-size:cover;' % v.id if v.image else ''"
+                />
+            </label>
+        </t>
+    </template>
+
     <template id="website_sale.filter_select_attributes" name="Select attributes in Filter">
         <select class="form-select css_attribute_select" name="attribute_value">
             <option value="" selected="true">All <t t-out="a.name"/></option>
@@ -1152,6 +1187,12 @@
                                     t-attf-class="{{'pt-1 pb-3' if isMobile else 'mb-3'}}"
                                 >
                                     <t t-call="website_sale.filter_color_attributes"/>
+                                </div>
+                                <div
+                                    t-elif="a.display_type == 'image'"
+                                    t-attf-class="d-flex flex-wrap gap-2 #{'pt-1 pb-3' if isMobile else 'mb-3'}"
+                                >
+                                    <t t-call="website_sale.filter_image_attributes"/>
                                 </div>
                                 <div
                                     t-elif="a.display_type in ('radio', 'multi')"
@@ -1900,8 +1941,10 @@
                     <div class="o_wsale_content_contained container d-flex flex-wrap align-items-center py-2 mb-lg-2">
                         <div class="d-flex align-items-center flex-grow-1">
                             <ol class="o_wsale_breadcrumb breadcrumb m-0 p-0">
-                                <li class="o_not_editable breadcrumb-item d-none d-lg-inline-block">
-                                    <a t-att-href="keep(shop_path)">All Products</a>
+                                <li class="breadcrumb-item d-none d-lg-inline-block">
+                                    <a t-att-href="keep(shop_path)">
+                                        <t t-call="website_sale.all_products_link_name"/>
+                                    </a>
                                 </li>
                                 <t t-foreach="category.parents_and_self" t-as="cat">
                                     <li
@@ -1925,7 +1968,9 @@
                                 </li>
                                 <li class="breadcrumb-item d-lg-none">
                                     <a t-att-href="category and keep('%s/category/%s' % (shop_path, slug(cat))) or keep(shop_path)">
-                                        <i class="oi oi-chevron-left me-2" role="img"/><t t-out="category.name or 'All Products'"/>
+                                        <i class="oi oi-chevron-left me-2" role="img"/>
+                                        <t t-if="category.name" t-out="category.name"/>
+                                        <t t-else="" t-call="website_sale.all_products_link_name"/>
                                     </a>
                                 </li>
                             </ol>
@@ -2328,6 +2373,10 @@
         </xpath>
     </template>
 
+    <template id="all_products_link_name" name="All Products name">
+        <span placeholder="All products">All products</span>
+    </template>
+
     <template id="product_accordion" name="Accordion On Product Page">
         <div
             t-if="is_view_active('website_sale_comparison.accordion_specs_item')
@@ -2439,23 +2488,8 @@
     </template>
 
     <!-- Product options: Zoom -->
-    <template inherit_id='website_sale.product' id="product_picture_magnify_hover" name="Automatic Image Zoom">
+    <template inherit_id='website_sale.product' id="product_picture_magnify_click" name="Image Zoom On Click">
         <xpath expr='//div[hasclass("o_wsale_product_page")]' position='attributes'>
-            <attribute name="data-ecom-zoom-auto">1</attribute>
-            <attribute name="class" separator=" " add="ecom-zoomable zoomodoo-next" />
-        </xpath>
-    </template>
-
-    <template inherit_id='website_sale.product' id="product_picture_magnify_click" active="False" name="Image Zoom On Click">
-        <xpath expr='//div[hasclass("o_wsale_product_page")]' position='attributes'>
-            <attribute name="data-ecom-zoom-click">1</attribute>
-            <attribute name="class" separator=" " add="ecom-zoomable zoomodoo-next" />
-        </xpath>
-    </template>
-
-    <template inherit_id='website_sale.product' id="product_picture_magnify_both" active="False" name="Automatic Image Zoom And On Click">
-        <xpath expr='//div[hasclass("o_wsale_product_page")]' position='attributes'>
-            <attribute name="data-ecom-zoom-auto">1</attribute>
             <attribute name="data-ecom-zoom-click">1</attribute>
             <attribute name="class" separator=" " add="ecom-zoomable zoomodoo-next" />
         </xpath>
@@ -2498,6 +2532,7 @@
                     class="css_quantity_minus btn btn-link pe-2 js_add_cart_json border-0"
                     aria-label="Remove one"
                     title="Remove one"
+                    name="remove_one"
                 >
                     <i class="oi oi-minus text-600"/>
                 </a>
