@@ -226,11 +226,12 @@ class StockPicking(models.Model):
             'issue_time': scheduled_date_local.time().strftime('%H:%M:%S'),
             'actual_date': date_done_local.strftime('%Y-%m-%d'),
             'actual_time': date_done_local.strftime('%H:%M:%S'),
-            'line_count': len(self.move_ids_without_package),
+            'line_count': len(self.move_ids),
             'printed_date': self.l10n_tr_nilvera_delivery_date and self.l10n_tr_nilvera_delivery_date.strftime('%Y-%m-%d'),
             'drivers': drivers,
             'default_tckn': '22222222222',
             'dispatch_scenario': 'TEMELIRSALIYE',
+            'copy_indicator': 'false',
         }
         xml_content = self.env['ir.qweb']._render(
             'l10n_tr_nilvera_edispatch.l10n_tr_edispatch_format',

@@ -477,13 +477,22 @@
     <template id="products_breadcrumb" name="Products Breadcrumb">
         <ol t-if="category" t-attf-class="breadcrumb #{_classes}">
             <li class="breadcrumb-item">
-                <a t-att-href="keep(shop_path)">Products</a>
+                <a
+                    t-att-class="'d-none d-lg-inline' if len(category.parents_and_self) &gt; 1 else ''"
+                    t-att-href="keep(shop_path)"
+                >
+                    Products
+                </a>
+                <span t-if="len(category.parents_and_self) &gt; 1" class="d-lg-none">...</span>
             </li>
             <t t-foreach="category.parents_and_self" t-as="cat">
                 <li t-if="cat == category" class="breadcrumb-item">
                     <span class="d-inline-block" t-field="cat.name"/>
                 </li>
-                <li t-else="" class="breadcrumb-item">
+                <li
+                    t-else=""
+                    t-attf-class="breadcrumb-item {{cat_index &lt; cat_size - 2 and 'd-none d-lg-inline'}}"
+                >
                     <a
                         t-att-href="keep('%s/category/%s' % (shop_path, slug(cat)))"
                         t-field="cat.name"
@@ -515,6 +524,13 @@
             <t t-set="opt_wsale_categories_top" t-value="is_view_active('website_sale.products_categories_top')"/>
             <t t-set="opt_wsale_attributes_top" t-value="is_view_active('website_sale.products_attributes_top')"/>
             <t t-set="opt_wsale_floating_bar" t-value="is_view_active('website_sale.floating_bar')"/>
+
+            <t t-set="opt_wsale_show_shop_title" t-value="is_view_active('website_sale.products_shop_title')"/>
+            <t t-set="opt_wsale_shop_title_align" t-value="is_view_active('website_sale.products_shop_title_align')"/>
+
+            <t t-set="opt_wsale_show_category_title" t-value="category and category.show_category_title"/>
+            <t t-set="opt_wsale_show_category_description" t-value="category and category.show_category_description"/>
+            <t t-set="opt_wsale_category_align" t-value="category and category.align_category_content"/>
 
             <t t-set="website_sale_pricelists" t-value="website.get_pricelist_available(show_visible=True)" />
             <t t-set="website_sale_sortable" t-value="website._get_product_sort_mapping()"/>
@@ -602,7 +618,7 @@
                                 <t t-call="website_sale.sidebar_dropzone_at_bottom"/>
                             </div>
                         </aside>
-                        <div id="products_grid" t-attf-class="col">
+                        <div id="products_grid" class="col">
                             <t
                                 t-set="_header_has_content"
                                 t-value="category or opt_wsale_categories_top or (not opt_wsale_floating_bar and (opt_wsale_attributes_top or is_view_active('website_sale.search') or is_view_active('website_sale.sort') or hasPricelistDropdown))"
@@ -610,27 +626,27 @@
 
                             <header
                                 id="o_wsale_products_header"
-                                t-attf-class="d-flex flex-column gap-2 {{_header_has_content and 'pt-4 pb-3' or (not _header_has_content and not opt_wsale_design_grid and 'py-3')}}"
-                                >
+                                t-att-data-category-id="category.id"
+                                t-att-data-category-name="category.name"
+                                t-attf-class="d-flex flex-column gap-2
+                                    {{_header_has_content and 'pt-4 pb-3' or opt_wsale_design_grid and 'py-3'}}
+                                    {{category and 'o_wsale_products_header_is_category' or 'o_wsale_products_header_is_shop'}}
+                                    {{opt_wsale_show_category_title and 'o_wsale_products_header_show_category_title'}}
+                                    {{opt_wsale_show_category_description and 'o_wsale_products_header_show_category_description'}}
+                                    {{opt_wsale_category_align and 'o_wsale_products_header_category_center_content'}}
+                                    {{opt_wsale_show_shop_title and 'o_wsale_products_header_show_shop_title'}}
+                                    {{opt_wsale_shop_title_align and 'o_wsale_products_header_shop_center_content'}}"
+                            >
                                 <t t-if="category and not search" t-call="website_sale.products_breadcrumb">
                                     <t
                                         t-set="_classes"
-                                        t-valuef="d-none d-lg-flex w-100 p-0 mb-0 small"
+                                        t-valuef="w-100 p-0 mb-0 small {{not opt_wsale_show_category_title and 'mb-2 mb-lg-0'}}"
                                     />
                                 </t>
                                 <h1
                                     t-if="category or search"
-                                    t-attf-class="d-flex gap-1 align-items-center mb-0 lh-lg {{search and 'base-fs font-sans-serif' or 'fs-3'}} {{search and bool(category) and 'mb-2'}}"
+                                    t-attf-class="o_wsale_category_title d-flex gap-1 align-items-center mb-0 lh-lg {{search and bool(category) and 'mb-2'}} {{search and 'o_wsale_category_title_is_search base-fs font-sans-serif' or 'fs-3'}}"
                                 >
-                                    <a
-                                        t-if="(search and not category) or (not search and category)"
-                                        t-attf-class="btn ps-0 pe-2 {{not search and 'd-lg-none'}}"
-                                        t-att-href="keep('%s/category/%s' % (shop_path, slug(category.parent_id))) if category.parent_id else keep(shop_path, search=0)"
-                                        role="button"
-                                        t-attf-title="Back to {{category.parent_id and category.parent_id.name or 'Shop'}}"
-                                    >
-                                        <i class="oi oi-chevron-left" role="img"/>
-                                    </a>
                                     <t t-if="search and category">
                                         <span class="text-muted">Searching</span>
                                         <span class="badge text-bg-info fw-normal base-fs">
@@ -657,9 +673,14 @@
                                     <span t-elif="search">
                                         <span class="text-muted">Search results for </span>'<strong t-out="search"/>' <small t-if="search_count" class="text-muted"> (<t t-out="search_count"/>)</small>
                                     </span>
-                                    <t t-elif="category" t-out="category.name"/>
+                                    <t t-elif="category">
+                                        <span t-field="category.name"/>
+                                    </t>
                                 </h1>
-                                <h1 class="h4-fs" t-if="not category and not search">
+                                <h1
+                                    class="o_wsale_shop_title h4-fs"
+                                    t-if="not category and not search"
+                                >
                                     All products
                                 </h1>
                                 <t t-if="category">
@@ -669,8 +690,19 @@
                                     </t>
                                     <div
                                         id="category_header"
+                                        class="o_wsale_category_description"
                                         t-att-data-editor-message="editor_msg"
                                         t-field="category.website_description"
+                                    />
+                                </t>
+                                <t t-else="">
+                                    <t t-set="editor_msg">
+                                        Drag building blocks here to customize the header for the shop page.
+                                    </t>
+                                    <div
+                                        id="oe_structure_products_header_shop"
+                                        class="oe_structure oe_empty"
+                                        t-att-data-editor-message="editor_msg"
                                     />
                                 </t>
                                 <t t-if="opt_wsale_categories_top"
@@ -794,25 +826,41 @@
                             </div>
                             <div t-else="" class="text-center text-muted mt128 mb256">
                                 <t t-if="not search">
-                                    <h3 class="mt8">No product defined</h3>
-                                    <p t-if="category">No product defined in this category.</p>
+                                    <div t-call="website.empty_search_svg" class="mt-5 mb-3"/>
+                                    <h3
+                                        class="mt8"
+                                        style="text-align: center;"
+                                    >
+                                        No product defined
+                                    </h3>
+                                    <p
+                                        t-if="category"
+                                        style="text-align: center;"
+                                    >
+                                        No product defined in this category.
+                                    </p>
                                 </t>
                                 <t t-else="">
-                                    <h3 class="mt8">No results</h3>
-                                    <p>No results for "<strong t-out='search'/>"<t t-if="category"> in category "<strong t-out="category.display_name"/>"</t>.</p>
-                                    <a
-                                        t-if="category"
-                                        t-att-href="keep(shop_path, search=search)"
-                                        t-attf-title="Search {{search}} globally"
-                                        class="d-block pb-5"
-                                    >
-                                        Search globally
-                                    </a>
+                                    <div t-call="website.empty_search_svg" class="mt-5 mb-3"/>
+                                    <h3 class="mt8" style="text-align: center;">No results</h3>
+                                    <p style="text-align: center;">
+                                        No results for "<strong t-out='search'/>"<t t-if="category"> in category "<strong t-out="category.display_name"/>"</t>.
+                                    </p>
+                                    <p style="text-align: center;">
+                                        <a
+                                            t-if="category"
+                                            t-att-href="keep(shop_path, search=search)"
+                                            t-attf-title="Search {{search}} globally"
+                                            class="d-block pb-5"
+                                        >
+                                            Search globally
+                                        </a>
+                                    </p>
                                 </t>
                                 <div
                                     t-ignore="true"
                                     groups="sales_team.group_sale_manager"
-                                    class="alert alert-info d-inline-block mx-auto"
+                                    class="alert alert-info d-inline-block mx-auto text-center"
                                 >
                                     Click <i>'New'</i> in the top-right corner to create your first product.
                                 </div>
@@ -941,6 +989,9 @@
     <template id="website_sale.products_categories" active="False" name="Categories in Left Side "/>
     <template id="website_sale.products_categories_top" active="True" name="Categories in top-nav"/>
     <template id="website_sale.products_attributes_top" active="False" name="Attributes in top-nav"/>
+
+    <template id="website_sale.products_shop_title" active="True" name="Show Shop Title"/>
+    <template id="website_sale.products_shop_title_align" active="False" name="Align Shop Title"/>
 
     <template id="website_sale.filter_color_attributes" name="Color attributes in Filter">
         <t t-foreach="a.value_ids" t-as="v">
@@ -1385,7 +1436,7 @@
             class="o_wsale_filmstrip_container o_wsale_filmstrip_default d-flex align-items-stretch overflow-hidden"
             role="navigation"
         >
-            <div class="o_wsale_filmstrip_wrapper position-relative w-100 overflow-auto z-1">
+            <div class="o_wsale_filmstrip_wrapper position-relative overflow-auto z-1">
                 <ul
                     class="o_wsale_filmstrip d-flex align-items-stretch mb-0 list-unstyled overflow-visible"
                     role="menu"
@@ -2725,7 +2776,7 @@
                             <div class="s_website_form_submit s_website_form_no_submit_option d-flex flex-column flex-lg-row align-items-lg-center pt-4">
                                 <a role="button"
                                    name="website_sale_main_button"
-                                   class="s_website_form_send btn btn-primary order-lg-3 w-100 w-lg-auto ms-lg-auto"
+                                   class="s_website_form_send btn btn-primary order-lg-3 w-lg-auto ms-lg-auto w-100"
                                    href="/shop/payment">
                                     Continue checkout
                                     <i class="fa fa-angle-right ms-2 fw-light"/>
@@ -2782,12 +2833,24 @@
 
     <!-- Lines that show items in the cart. Called in `website_sale.cart`. -->
     <template id="cart_lines" name="Shopping Cart Lines">
-        <div t-if="not website_sale_order or not website_sale_order.website_order_line" class="js_cart_lines alert alert-info">
-            Your cart is empty!
+        <div
+            t-if="not website_sale_order or not website_sale_order.website_order_line"
+            class="js_cart_lines w-100"
+        >
+            <div t-call="website_sale.empty_cart_svg" class="mt-5 mb-3"/>
+            <h5 class="mb-3" style="text-align: center;">
+                Your cart is empty!
+            </h5>
+            <p style="text-align: center;">
+                <a href="/shop" class="btn btn-primary">
+                    Shop
+                </a>
+            </p>
         </div>
         <t t-if='website_sale_order'>
             <div t-if='website_sale_order._get_shop_warning(clear=False)' class="alert alert-warning js_cart_lines" role="alert">
-                <strong>Warning!</strong> <t t-out='website_sale_order._get_shop_warning()'/>
+                <strong>Warning!</strong>
+                <div t-out="website_sale_order._get_shop_warning()" class="text-prewrap"/>
             </div>
         </t>
         <div id="cart_products"
@@ -3720,9 +3783,12 @@
                             <t t-call="website_sale.wizard_checkout"/>
                         </div>
                         <!-- Checkout Page Content | Left Column -->
-                        <div class="oe_clear_stucture oe_cart col-12 col-lg-7">
+                        <div
+                            t-attf-class="oe_clear_stucture oe_cart col-12 #{'col-lg-7' if website_sale_order and website_sale_order.website_order_line else ''}"
+                        >
                             <t t-out="0"/>
                         </div>
+
                         <!-- Short Checkout Summary displayed on /cart | Right Column -->
                         <div
                             t-if="show_shorter_cart_summary"
@@ -4160,20 +4226,6 @@
         </xpath>
     </template>
 
-    <template id="sale_order_portal_content_inherit_website_sale" name="Orders Followup Products Links" inherit_id="sale.sale_order_portal_content">
-        <xpath expr="//section[@id='details']//div[hasclass('table-responsive')]" position="attributes">
-            <attribute name="class" remove="table-responsive" separator=" "/>
-        </xpath>
-        <xpath expr="//section[@id='details']//td[@id='product_name']/*" position="replace">
-            <a t-if="line.product_id.website_published" t-att-href="line.product_id.website_url" class="d-block text-wrap" style="max-width: 35vw">
-                <span t-field="line.name" />
-            </a>
-            <t t-if="not line.product_id.website_published">
-                <span t-field="line.name" class="d-block text-wrap" style="max-width: 35vw"/>
-            </t>
-        </xpath>
-    </template>
-
     <!-- Product page images -->
     <template id="website_sale.shop_product_images" name="Shop Product Images">
         <t t-set="product_images" t-value="product_variant._get_images() if product_variant else product._get_images()"/>
@@ -4423,14 +4475,4 @@
         </xpath>
     </template>
 
-    <template id="sale_order_re_order_btn" inherit_id="sale.sale_order_portal_template" name="Sale Order Order Again">
-        <xpath expr="//t[@t-set='entries']/div/div/div[hasclass('o_download_pdf')]" position="before">
-            <t t-if="request.website.enabled_portal_reorder_button and sale_order.with_user(request.env.user).sudo()._is_reorder_allowed()">
-                <button class="btn btn-primary o_wsale_reorder_button" t-att-data-sale-order-id="sale_order.id">
-                    <i class="fa fa-rotate-right me-1"/>
-                    Order Again
-                </button>
-            </t>
-        </xpath>
-    </template>
 </odoo>
