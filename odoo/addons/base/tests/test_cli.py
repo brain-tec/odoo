@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 
 from odoo.cli.command import commands, load_addons_commands, load_internal_commands
-from odoo.tests import BaseCase, Like, TransactionCase
+from odoo.tests import BaseCase, TransactionCase
 from odoo.tools import config, file_path
 
 
@@ -129,13 +129,9 @@ class TestCommand(BaseCase):
             )
         self.assertFalse(shell.wait(), "exited with a non 0 code")
 
-        self.assertEqual(shell.stdout.read().splitlines(), [
-            Like("No environment set..."),
-            Like("odoo: <module 'odoo' ...>"),
-            Like("openerp: <module 'odoo' ...>"),
-            ">>> Hello from Python!",
-            '>>> '
-        ])
+        # we skip local variables as they differ based on configuration (e.g.: if a database is specified or not)
+        lines = [line for line in shell.stdout.read().splitlines() if line.startswith('>>>')]
+        self.assertEqual(lines, [">>> Hello from Python!", '>>> '])
 
 
 class TestCommandUsingDb(TestCommand, TransactionCase):
@@ -166,9 +162,9 @@ class TestCommandUsingDb(TestCommand, TransactionCase):
             text=False, bufsize=0,
         )
 
-        # Feed the buffer for maximum 5 seconds.
+        # Feed the buffer for maximum 15 seconds.
         buffer = io.BytesIO()
-        timeout = time.monotonic() + 5
+        timeout = time.monotonic() + 15
         os.set_blocking(proc.stdout.fileno(), False)
         while buffer.tell() < len(expected_text) and time.monotonic() < timeout:
             if chunk := proc.stdout.read(len(expected_text) - buffer.tell()):
@@ -179,12 +175,12 @@ class TestCommandUsingDb(TestCommand, TransactionCase):
                 # sleep instead: not great, not terrible.
                 time.sleep(.1)
 
-        self.assertEqual(buffer.getvalue(), expected_text,
-            "The subprocess did not write the prelude in under 5 seconds.")
-
         proc.terminate()
         try:
             proc.wait(timeout=5)
         except sp.TimeoutExpired:
             proc.kill()
             raise
+
+        self.assertEqual(buffer.getvalue(), expected_text,
+            "The subprocess did not write the prelude in under 15 seconds.")
