@@ -639,7 +639,7 @@ export class PosStore extends WithLazyGetterTrap {
             } else {
                 this.selectedOrderUuid = openOrders.length
                     ? openOrders[openOrders.length - 1].uuid
-                    : this.addNewOrder().uuid;
+                    : null;
             }
         }
 
@@ -2037,8 +2037,12 @@ export class PosStore extends WithLazyGetterTrap {
         );
     }
     async loadSampleData() {
-        const isPosManager = await user.hasGroup("point_of_sale.group_pos_manager");
-        if (!isPosManager) {
+        const [isPosManager, isAdmin] = await Promise.all([
+            user.hasGroup("point_of_sale.group_pos_manager"),
+            user.hasGroup("base.group_system"),
+        ]);
+
+        if (!(isPosManager && isAdmin)) {
             this.dialog.add(AlertDialog, {
                 title: _t("Access Denied"),
                 body: _t("It seems like you don't have enough rights to load data."),
@@ -2144,6 +2148,9 @@ export class PosStore extends WithLazyGetterTrap {
                 if (!(partner.street || partner.street2)) {
                     this.notification.add(_t("Customer address is required"), { type: "warning" });
                     await this.editPartner(partner);
+                    if (!(partner.street || partner.street2)) {
+                        return;
+                    }
                 }
             }
             if (preset.identification === "name") {
@@ -2183,9 +2190,7 @@ export class PosStore extends WithLazyGetterTrap {
     }
     // There for override to do something before adding partner to current order from partner list
     setPartnerToCurrentOrder(partner) {
-        const order = this.getOrder();
-        order.setPartner(partner);
-        this.addPendingOrder([order.id]);
+        this.getOrder().setPartner(partner);
     }
     async selectPartner(currentOrder = this.getOrder()) {
         // FIXME, find order to refund when we are in the ticketscreen.

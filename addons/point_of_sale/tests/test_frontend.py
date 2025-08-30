@@ -1791,8 +1791,8 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.current_session_id.action_pos_session_closing_control()
         self.assertEqual(
-            two_last_orders[0].picking_ids.move_line_ids_without_package.owner_id.id,
-            two_last_orders[1].picking_ids.move_line_ids_without_package.owner_id.id,
+            two_last_orders[0].picking_ids.move_line_ids.owner_id.id,
+            two_last_orders[1].picking_ids.move_line_ids.owner_id.id,
             "The owner of the refund is not the same as the owner of the original order")
 
     def test_only_existing_lots(self):
@@ -2777,6 +2777,20 @@ class TestUi(TestPointOfSaleHttpCommon):
         products = self.env['product.template'].search_count([('available_in_pos', '=', True)])
         self.assertFalse(products, 'Demo data should not be loaded by user.')
 
+        # Member role with POS Administrator access
+        self.pos_user.write({'group_ids': [
+            Command.set(
+                [
+                    self.env.ref('base.group_user').id,
+                    self.env.ref('point_of_sale.group_pos_manager').id,
+                    self.env.ref('account.group_account_manager').id,
+                ]
+            )
+        ]})
+        self.start_pos_tour('test_load_pos_demo_data_with_member_role', login='pos_user')
+        products = self.env['product.template'].search_count([('available_in_pos', '=', True)])
+        self.assertFalse(products, 'Demo data should not be loaded by user with member role.')
+
     def test_combo_variant_mix(self):
         color_attribute = self.env['product.attribute'].create({
             'name': 'Color',
@@ -2899,6 +2913,26 @@ class TestUi(TestPointOfSaleHttpCommon):
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_cross_exclusion_attribute_values')
+
+    def test_preset_customer_selection(self):
+        self.preset_delivery = self.env['pos.preset'].create({
+            'name': 'Delivery',
+            'identification': 'address',
+        })
+        self.env['res.partner'].create({
+            'name': 'Test Partner',
+            'street': '123 Test Street',
+            'city': 'Test City',
+            'zip': '12345',
+            'country_id': self.env['res.country'].search([], limit=1).id,
+        })
+        self.main_pos_config.write({
+            'use_presets': True,
+            'default_preset_id': self.preset_delivery.id,
+            'available_preset_ids': [(6, 0, [self.preset_delivery.id])],
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('test_preset_customer_selection')
 
 
 # This class just runs the same tests as above but with mobile emulation

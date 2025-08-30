@@ -32,7 +32,9 @@
         'views/product_tile_templates.xml',
         'views/delivery_form_templates.xml',
         'views/gmc_templates.xml',
+        'views/sale_portal_templates.xml',
         'views/templates.xml',
+        'views/templates_svg.xml',
 
         # Model views.
         'views/account_move_views.xml',
@@ -73,6 +75,7 @@
         'views/snippets/s_mega_menu/multi_menus.xml',
         'views/snippets/s_mega_menu/odoo_menu.xml',
         'views/snippets/s_mega_menu/thumbnails.xml',
+        'views/generate_primary_template.xml',
     ],
     'demo': [
         'data/demo.xml',
@@ -107,8 +110,6 @@
             'website/static/src/interactions/multirange_input.js',
             'website_sale/static/src/xml/website_sale_image_viewer.xml',
             'website_sale/static/src/js/components/website_sale_image_viewer.js',
-            'website_sale/static/src/xml/website_sale_reorder_modal.xml',
-            'website_sale/static/src/js/website_sale_reorder.js',
             'website_sale/static/src/js/notification/add_to_cart_notification/add_to_cart_notification.js',
             'website_sale/static/src/js/notification/add_to_cart_notification/add_to_cart_notification.xml',
             'website_sale/static/src/js/notification/cart_notification/cart_notification.js',
