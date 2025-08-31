@@ -291,6 +291,9 @@ export class Composer extends Component {
             content: this.props.composer.composerHtml,
             placeholder: this.placeholder,
             Plugins: this.ui.isSmall ? MAIL_SMALL_UI_PLUGINS : MAIL_PLUGINS,
+            composerPluginDependencies: {
+                onKeydown: this.onKeydown.bind(this),
+            },
             classList: ["o-mail-Composer-html"],
             onChange: () => this.onChangeWysiwygContent(),
             onEditorReady: () => {
@@ -842,6 +845,9 @@ export class Composer extends Component {
         this.updateFromEditor = true;
         // markup: editor content is trusted
         this.props.composer.composerHtml = markup(this.editor.getContent());
+        if (!this.props.composer.isDirty) {
+            this.props.composer.isDirty = true;
+        }
         this.updateFromEditor = false;
     }
 

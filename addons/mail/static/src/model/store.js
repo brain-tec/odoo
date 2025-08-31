@@ -1,5 +1,5 @@
 import { Record } from "./record";
-import { IS_DELETED_SYM, STORE_SYM, modelRegistry } from "./misc";
+import { STORE_SYM, modelRegistry } from "./misc";
 import { reactive, toRaw } from "@odoo/owl";
 
 /** @typedef {import("./record_list").RecordList} RecordList */
@@ -43,6 +43,7 @@ export class Store extends Record {
             this.handleError(err);
         }
         this._.UPDATE--;
+        const deletingRecordsByLocalId = new Map();
         if (this._.UPDATE === 0) {
             // pretend an increased update cycle so that nothing in queue creates many small update cycles
             this._.UPDATE++;
@@ -148,7 +149,9 @@ export class Store extends Record {
                     RD_QUEUE.delete(record);
                     for (const [localId, names] of record._.uses.data.entries()) {
                         for (const [name2, count] of names.entries()) {
-                            const usingRecord2 = toRaw(this.recordByLocalId).get(localId);
+                            const usingRecord2 =
+                                toRaw(this.recordByLocalId).get(localId) ||
+                                deletingRecordsByLocalId.get(localId);
                             if (!usingRecord2) {
                                 // record already deleted, clean inverses
                                 record._.uses.data.delete(localId);
@@ -163,6 +166,8 @@ export class Store extends Record {
                             }
                         }
                     }
+                    deletingRecordsByLocalId.set(record.localId, record);
+                    this.recordByLocalId.delete(record.localId);
                     this._.ADD_QUEUE("hard_delete", toRaw(record));
                 }
                 while (RHD_QUEUE.size > 0) {
@@ -170,9 +175,7 @@ export class Store extends Record {
                     /** @type {Record} */
                     const record = RHD_QUEUE.keys().next().value;
                     RHD_QUEUE.delete(record);
-                    record._[IS_DELETED_SYM] = true;
-                    delete record.Model.records[record.localId];
-                    this.recordByLocalId.delete(record.localId);
+                    deletingRecordsByLocalId.delete(record.localId);
                 }
             }
             this._.UPDATE--;
@@ -199,8 +202,7 @@ export class Store extends Record {
     insert(dataByModelName = {}, options = {}) {
         const store = this;
         const ctx = storeInsertFns.makeContext(store);
-        return Record.MAKE_UPDATE(function storeInsert() {
-            const res = {};
+        Record.MAKE_UPDATE(function storeInsert() {
             const recordsDataToDelete = [];
             for (const [pyOrJsModelName, data] of Object.entries(dataByModelName)) {
                 const modelName = storeInsertFns.getActualModelName(store, ctx, pyOrJsModelName);
@@ -224,20 +226,13 @@ export class Store extends Record {
                         insertData.push(vals);
                     }
                 }
-                const records = store[modelName].insert(insertData, options);
-                if (!res[modelName]) {
-                    res[modelName] = records;
-                } else {
-                    const knownRecordIds = new Set(res[modelName].map((r) => r.localId));
-                    res[modelName].push(...records.filter((r) => !knownRecordIds.has(r.localId)));
-                }
+                store[modelName].insert(insertData, options);
             }
             // Delete after all inserts to make sure a relation potentially registered before the
             // delete doesn't re-add the deleted record by mistake.
             for (const [modelName, vals] of recordsDataToDelete) {
                 store[modelName].get(vals)?.delete();
             }
-            return res;
         });
     }
     onChange(record, name, cb) {
