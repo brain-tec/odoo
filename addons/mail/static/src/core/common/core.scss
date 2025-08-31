@@ -53,12 +53,7 @@ $o-discuss-talkingColor: lighten($success, 10%);
 }
 
 .o-discuss-dropdownMenu {
-    background-color: $gray-100;
     --Dropdown_menu-margin-y: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    border-radius: o-rounded-bubble();
-    box-shadow: $box-shadow-sm;
 
     .o_bottom_sheet_sheet:has(&) {
         background-color: $gray-100;
@@ -80,6 +75,10 @@ $o-discuss-talkingColor: lighten($success, 10%);
         transform: translate(0, 0) !important; // cancel systray style on badge
         font-size: .78572 * $font-size-base !important; // roughly 11px, small but readable
         user-select: none;
+    }
+    &.o-discuss-badge-circle {
+        aspect-ratio: 1;
+        line-height: 2;
     }
 }
 

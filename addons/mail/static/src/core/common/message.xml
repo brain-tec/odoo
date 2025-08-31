@@ -36,7 +36,7 @@
                     <div class="w-100 o-min-width-0" t-att-class="{ 'flex-grow-1': isEditing }" t-ref="messageContent">
                         <div t-if="!props.squashed" class="o-mail-Message-header d-flex flex-wrap align-items-baseline lh-1" t-att-class="{ 'mb-1': !message.isNote, 'pe-2': props.asCard and isMobileOS }" name="header">
                             <span t-if="message.authorName and shouldDisplayAuthorName" class="o-mail-Message-author smaller" t-att-class="getAuthorAttClass()">
-                                <strong class="me-1" t-esc="message.authorName"/>
+                                <strong class="me-1 fw-bold" t-esc="message.authorName"/>
                             </span>
                             <t t-if="!isAlignedRight" t-call="mail.Message.notification"/>
                             <t t-if="isAlignedRight and !message.bubbleColor and !(props.asCard and isMobileOS)" t-call="mail.Message.actions"/>
@@ -84,7 +84,6 @@
                                             </div>
                                             <div class="position-relative overflow-x-auto overflow-y-hidden d-inline-block text-body" t-att-class="{
                                                 'w-100': isEditing,
-                                                'shadow-sm': message.bubbleColor,
                                                 'o-rounded-bubble': message.bubbleColor and props.squashed,
                                                 'o-rounded-bottom-bubble': message.bubbleColor and !props.squashed,
                                                 'o-rounded-start-bubble': message.bubbleColor and !props.squashed and isAlignedRight,

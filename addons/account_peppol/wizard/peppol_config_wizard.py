@@ -23,13 +23,10 @@ class PeppolConfigWizard(models.TransientModel):
         required=True,
         default=lambda self: self.env.company,
     )
-    account_peppol_edi_user = fields.Many2one(
-        comodel_name='account_edi_proxy_client.user',
-        compute='_compute_account_peppol_edi_user',
-    )
+    account_peppol_edi_user = fields.Many2one(related='company_id.account_peppol_edi_user')
     account_peppol_edi_identification = fields.Char(related='account_peppol_edi_user.edi_identification')
     account_peppol_proxy_state = fields.Selection(related='company_id.account_peppol_proxy_state', readonly=False)
-    account_peppol_contact_email = fields.Char(related='company_id.account_peppol_contact_email', readonly=False, required=True)
+    account_peppol_contact_email = fields.Char(default=lambda self: self.env.company.account_peppol_contact_email, required=True)
     account_peppol_migration_key = fields.Char(related='company_id.account_peppol_migration_key', readonly=False)
 
     service_json = fields.Json(
@@ -50,12 +47,6 @@ class PeppolConfigWizard(models.TransientModel):
     # -------------------------------------------------------------------------
     # COMPUTES
     # -------------------------------------------------------------------------
-
-    @api.depends('company_id')
-    def _compute_account_peppol_edi_user(self):
-        for wizard in self:
-            wizard.account_peppol_edi_user = wizard.company_id.account_edi_proxy_client_ids.filtered(
-                lambda u: u.proxy_type == 'peppol')
 
     @api.depends('account_peppol_edi_user', 'account_peppol_proxy_state')
     def _compute_service_json(self):
@@ -116,6 +107,7 @@ class PeppolConfigWizard(models.TransientModel):
 
         # Update company details
         if self.account_peppol_contact_email != self.company_id.account_peppol_contact_email:
+            self.company_id.account_peppol_contact_email = self.account_peppol_contact_email
             params = {
                 'update_data': {
                     'peppol_contact_email': self.account_peppol_contact_email,
