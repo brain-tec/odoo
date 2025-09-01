@@ -2184,8 +2184,7 @@ class BaseModel(metaclass=MetaModel):
                     sat     6  |  5  |  6  |  0
                     sun     0  |  6  |  0  |  1
                 """
-                timezone = self.env.context.get('tz')
-                first_week_day = int(get_lang(self.env, timezone).week_start)
+                first_week_day = int(get_lang(self.env).week_start)
                 sql_expr = SQL("mod(7 - %s + %s::int, 7)", first_week_day, groupby_terms[term])
                 orderby_terms.append(SQL("%s %s %s", sql_expr, sql_direction, sql_nulls))
             else:
@@ -3622,7 +3621,6 @@ class BaseModel(metaclass=MetaModel):
         # the following write is incharge of
         # 1. mark field as modified
         # 2. execute logics in the override `write` method
-        # 3. update write_date of the record if exists to support 't-cache'
         # even if the value in cache is the same as the value written
         self[field_name] = self[field_name]
         return True
