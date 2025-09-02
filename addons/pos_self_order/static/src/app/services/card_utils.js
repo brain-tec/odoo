@@ -101,8 +101,8 @@ export function getOrderLineValues(
                     );
                     if (attrVal.attribute_id.create_variant !== "always") {
                         values.price_extra += attrVal.price_extra;
-                        acc.push(attrVal);
                     }
+                    acc.push(attrVal);
                 });
                 return acc;
             },
@@ -158,7 +158,8 @@ export function getOrderLineValues(
             order.pricelist_id,
             models["decimal.precision"].getAll(),
             models["product.template.attribute.value"].getAllBy("id"),
-            extraItems
+            extraItems,
+            selfOrder.currency
         );
 
         values.price_unit = 0;
