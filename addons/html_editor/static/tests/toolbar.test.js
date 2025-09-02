@@ -22,6 +22,10 @@ import {
     onRpc,
     patchTranslations,
     patchWithCleanup,
+    defineModels,
+    fields,
+    models,
+    mountView,
 } from "@web/../tests/web_test_helpers";
 import { fontItems, fontSizeItems } from "../src/main/font/font_plugin";
 import { Plugin } from "../src/plugin";
@@ -420,6 +424,20 @@ test("toolbar works: show the correct text alignment after undo/redo", async () 
     await animationFrame();
     expect(getContent(el)).toBe(`<p style="text-align: center;">[test]</p>`);
     expect("button[name='text_align'] span").toHaveInnerHTML(`<i class="fa fa-align-center"> </i>`);
+});
+
+test("should focus the editable area after selecting a font size item", async () => {
+    const { editor, el } = await setupEditor("<p>[test]</p>");
+    await expectElementCount(".o-we-toolbar", 1);
+    const iframeEl = queryOne(".o-we-toolbar [name='font_size_selector'] iframe");
+    const inputEl = iframeEl.contentWindow.document?.querySelector("input");
+    await contains(".o-we-toolbar [name='font_size_selector']").click();
+    expect(getActiveElement()).toBe(inputEl);
+    await waitFor(".o_font_size_selector_menu .dropdown-item:contains('21')");
+    await contains(".o_font_size_selector_menu .dropdown-item:contains('21')").click();
+    expect(getActiveElement()).toBe(editor.editable);
+    expect(getActiveElement()).not.toBe(inputEl);
+    expect(getContent(el)).toBe(`<p><span class="h2-fs">[test]</span></p>`);
 });
 
 test.tags("desktop");
@@ -1681,4 +1699,104 @@ test("toolbar strikethrough buttons should not be active when checked list is st
     await waitFor(".btn[name='strikethrough']:not(.active)");
     expect(getContent(el)).toBe('<ul class="o_checklist"><li class="o_checked">[test]</li></ul>');
     expect(".o-we-toolbar .btn[name='strikethrough']").not.toHaveClass("active");
+});
+
+test.tags("desktop");
+test("dropdown menu should not overflow scroll container", async () => {
+    class Test extends models.Model {
+        name = fields.Char();
+        txt = fields.Html();
+        _records = [{ id: 1, name: "Test", txt: "<p>text</p>".repeat(50) }];
+    }
+
+    defineModels([Test]);
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "test",
+        arch: `
+            <form>
+                <field name="name"/>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+
+    const top = (rangeOrElement) => rangeOrElement.getBoundingClientRect().top;
+    const bottom = (elementOrRange) => elementOrRange.getBoundingClientRect().bottom;
+    const scrollableElement = queryOne(".o_content");
+    const editable = queryOne(".odoo-editor-editable");
+
+    // Select a paragraph in the middle of the text
+    const fifthParagraph = editable.children[5];
+    setSelection({
+        anchorNode: fifthParagraph,
+        anchorOffset: 0,
+        focusNode: fifthParagraph,
+        focusOffset: 1,
+    });
+    const range = document.getSelection().getRangeAt(0);
+
+    await expandToolbar();
+    const toolbar = queryOne(".o-we-toolbar");
+
+    // Toolbar should be above the selection
+    expect(bottom(toolbar)).toBeLessThan(top(range));
+
+    // Color selector
+    await contains(".o-we-toolbar .o-select-color-foreground").click();
+    await expectElementCount(".o_font_color_selector", 1);
+    const colorSelector = queryOne(".o_font_color_selector");
+
+    // Scroll down to bring the toolbar close to the top
+    let scrollStep = top(toolbar) - top(scrollableElement);
+    scrollableElement.scrollTop += scrollStep;
+    await animationFrame();
+
+    // Toolbar should be below the selection
+    expect(top(toolbar)).toBeGreaterThan(bottom(range));
+
+    // Scroll down to make the toolbar overflow the scroll container
+    scrollStep = top(toolbar) - top(scrollableElement);
+    scrollableElement.scrollTop += scrollStep;
+    await animationFrame();
+    await advanceTime(200);
+
+    // Toolbar should be invisible
+    expect(toolbar).not.toBeVisible();
+
+    // Color selector should be invisible
+    expect(colorSelector).not.toBeVisible();
+
+    // Scroll up to make toolbar visible
+    scrollableElement.scrollTop = 0;
+    await animationFrame();
+    await advanceTime(200);
+    expect(toolbar).toBeVisible();
+
+    // Color selector should be visible along with toolbar
+    expect(colorSelector).toBeVisible();
+
+    // Font selector
+    await contains(".o-we-toolbar [name='font'] .dropdown-toggle").click();
+    await expectElementCount(".o_font_selector_menu", 1);
+    const fontSelector = queryOne(".o_font_selector_menu");
+
+    // Scroll down to make the toolbar overflow the scroll container
+    scrollStep = top(toolbar) - top(scrollableElement);
+    scrollableElement.scrollTop += scrollStep;
+    await animationFrame();
+
+    // Toolbar should be invisible
+    expect(toolbar).not.toBeVisible();
+
+    // Font selector should be invisible
+    expect(fontSelector).not.toBeVisible();
+
+    // Scroll up to make toolbar visible
+    scrollableElement.scrollTop -= scrollStep;
+    await animationFrame();
+    expect(toolbar).toBeVisible();
+
+    // Font selector should be visible
+    expect(fontSelector).toBeVisible();
 });

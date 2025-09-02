@@ -6,6 +6,8 @@ import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { useDebounced } from "@web/core/utils/timing";
 import { cookie } from "@web/core/browser/cookie";
 import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
+import { useDropdownAutoVisibility } from "@html_editor/dropdown_autovisibility_hook";
+import { useChildRef } from "@web/core/utils/hooks";
 
 const MAX_FONT_SIZE = 144;
 
@@ -16,6 +18,7 @@ export class FontSizeSelector extends Component {
         getDisplay: Function,
         onFontSizeInput: Function,
         onSelected: Function,
+        onBlur: { type: Function, optional: true },
         document: { validate: (p) => p.nodeType === Node.DOCUMENT_NODE },
         ...toolbarButtonProps,
     };
@@ -25,6 +28,8 @@ export class FontSizeSelector extends Component {
         this.items = this.props.getItems();
         this.state = useState(this.props.getDisplay());
         this.dropdown = useDropdownState();
+        this.menuRef = useChildRef();
+        useDropdownAutoVisibility(this.env.overlayState, this.menuRef);
         this.iframeContentRef = useRef("iframeContent");
         this.debouncedCustomFontSizeInput = useDebounced(this.onCustomFontSizeInput, 200);
 
@@ -103,7 +108,14 @@ export class FontSizeSelector extends Component {
             () => {
                 if (this.fontSizeInput) {
                     // Focus input on dropdown open, blur on close.
-                    this.dropdown.isOpen ? this.fontSizeInput.select() : this.fontSizeInput.blur();
+                    if (this.dropdown.isOpen) {
+                        this.fontSizeInput.select();
+                    } else if (
+                        this.iframeContentRef.el?.contains(this.props.document.activeElement)
+                    ) {
+                        this.fontSizeInput.blur();
+                        this.props.onBlur?.();
+                    }
                 }
             },
             () => [this.dropdown.isOpen]

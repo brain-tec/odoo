@@ -455,8 +455,16 @@ actual arch.
 
                     # During an upgrade, we can only use the views that have been
                     # fully upgraded already.
-                    if self.pool._init:
-                        sibling_primary_views = sibling_primary_views._filter_loaded_views(set(sibling_primary_views.ids))
+                    if self.pool._init and sibling_primary_views:
+                        query = sibling_primary_views._get_filter_xmlid_query()
+                        sql = SQL(query, res_ids=tuple(sibling_primary_views.ids), modules=tuple(self.pool._init_modules))
+                        loaded_view_ids = {id_ for id_, in self.env.execute_query(sql)}
+                        loaded_view_ids.update({
+                            id
+                            for id, xid in (sibling_primary_views - views.browse(loaded_view_ids)).get_external_id().items()
+                            if xid in self.pool.loaded_xmlids
+                        })
+                        sibling_primary_views = sibling_primary_views.browse(loaded_view_ids)
 
                     # Check if we know how to apply inheritances
                     sibling_primary_views._get_combined_archs()
@@ -1029,6 +1037,14 @@ actual arch.
                 root = root.inherit_id
         views = self.env['ir.ui.view'].browse(unique(view_id for view_ids in parented for view_id in view_ids))
 
+        # Add inherited views to the list of loading forced views
+        # Otherwise, inherited views could not find elements created in
+        # their direct parents if that parent is defined in the same module
+        # introduce check_view_ids in context
+        if 'check_view_ids' not in views.env.context:
+            views = views.with_context(check_view_ids=[])
+        views.env.context['check_view_ids'].extend(views.ids)
+
         # Map each node to its children nodes. Note that all children nodes are
         # part of a single prefetch set, which is all views to combine.
         all_tree_views = views._get_inheriting_views()
@@ -1036,13 +1052,7 @@ actual arch.
         # During an upgrade, we can only use the views that have been
         # fully upgraded already.
         if self.pool._init and not self.env.context.get('load_all_views'):
-            check_view_ids = self.env.context.get('check_view_ids', [])
-            # Add inherited views to the list of loading forced views
-            # Otherwise, inherited views could not find elements created in
-            # their direct parents if that parent is defined in the same module
-            # introduce check_view_ids in context
-            check_view_ids += views.ids
-            all_tree_views = all_tree_views._filter_loaded_views(set(check_view_ids))
+            all_tree_views = all_tree_views._filter_loaded_views(set(views.env.context['check_view_ids']))
 
         # get the global children views then get hierarchy for each views
         children_views = collections.defaultdict(list)
