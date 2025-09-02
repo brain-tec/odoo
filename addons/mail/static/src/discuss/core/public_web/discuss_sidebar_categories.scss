@@ -1,10 +1,3 @@
-.o-mail-DiscussSidebar {
-    .o-mail-DiscussSidebarCategory-icon {
-        width: 15px;
-        height: 15px;
-    }
-}
-
 $o-mail-DiscussSidebarChannel-borderOpacity: .05;
 
 .o-mail-DiscussSidebarChannel-container {
@@ -93,7 +86,7 @@ $o-mail-DiscussSidebarChannel-borderOpacity: .05;
 
 .o-mail-DiscussSidebarCategory-actions button:not(:hover) {
     .text-success, .text-danger {
-        --color: #{$btn-color}
+        --color: #{$btn-color};
     }
 }
 
@@ -112,6 +105,10 @@ $o-mail-DiscussSidebarChannel-borderOpacity: .05;
 
 .o-mail-DiscussSidebarChannel-subChannel.o-nonCompact {
     margin-left: map-get($spacers, 4) + map-get($spacers, 2);
+}
+
+.o-mail-DiscussSidebarChannel-subChannelList {
+    gap: 1px;
 }
 
 .o-mail-DiscussSidebar-unreadIndicator {
