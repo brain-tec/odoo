@@ -351,8 +351,9 @@ test("can't use the toolbar in a caption", async () => {
             // inserting text.
             editor.document.execCommand("insertText", false, "a");
             expect(input.value).toBe("a");
-            await click("h1");
-            await animationFrame(); // Wait for the selection to change.
+            await click("h1"); // Blur the input.
+            await animationFrame(); // Wait for the focus event to trigger a step.
+            editor.shared.selection.setCursorStart(queryOne("h1"));
         },
         contentAfter: unformat(
             `<p><br></p>
@@ -608,6 +609,104 @@ test("replace an image with a caption", async () => {
     });
 });
 
+test("edit caption after replacing image", async () => {
+    onRpc("/web/dataset/call_kw/ir.attachment/search_read", () => [
+        {
+            id: 1,
+            name: "logo",
+            mimetype: "image/png",
+            image_src: "/web/static/img/logo2.png",
+            access_token: false,
+            public: true,
+        },
+    ]);
+    const env = await makeMockEnv();
+    await testEditor({
+        env,
+        config: configWithEmbeddedCaption,
+        contentBefore: unformat(
+            `<figure>
+                <img src="/web/static/img/logo.png">
+                <figcaption>ab</figcaption>
+            </figure>
+            <h1>[]Heading</h1>`
+        ),
+        stepFunction: async (editor) => {
+            await click("img");
+            await waitFor(".o-we-toolbar button[name='replace_image']");
+            await click("button[name='replace_image']");
+            await waitFor(".o_select_media_dialog");
+            await click(".o_existing_attachment_cell .o_button_area");
+            await animationFrame();
+            expect("img[src='/web/static/img/logo.png']").toHaveCount(0);
+            expect("img[src='/web/static/img/logo2.png']").toHaveCount(1);
+            const input = queryOne("figure > figcaption > input");
+            await click(input);
+            expect(editor.document.activeElement).toBe(input);
+            await press("c");
+            expect(input.value).toBe("abc");
+            expect(editor.document.activeElement).toBe(input);
+            await click("img");
+            await animationFrame();
+        },
+        contentAfter: unformat(
+            `<p><br></p>
+            <figure>
+                [<img src="/web/static/img/logo2.png" alt="" data-attachment-id="1" class="img img-fluid o_we_custom_image">]
+                <figcaption>abc</figcaption>
+            </figure>
+            <h1>Heading</h1>`
+        ),
+    });
+});
+
+test("after replacing a captioned image, undo should revert to the original image and caption", async () => {
+    onRpc("/web/dataset/call_kw/ir.attachment/search_read", () => [
+        {
+            id: 1,
+            name: "logo",
+            mimetype: "image/png",
+            image_src: "/web/static/img/logo2.png",
+            access_token: false,
+            public: true,
+        },
+    ]);
+    const env = await makeMockEnv();
+    await testEditor({
+        env,
+        config: configWithEmbeddedCaption,
+        contentBefore: unformat(
+            `<figure>
+                <img src="/web/static/img/logo.png" class="img-fluid test-image">
+                <figcaption></figcaption>
+            </figure>
+            <h1>[]Heading</h1>`
+        ),
+        stepFunction: async () => {
+            await click("img");
+            await waitFor(".o-we-toolbar button[name='replace_image']");
+            await click("button[name='replace_image']");
+            await waitFor(".o_select_media_dialog");
+            await click(".o_existing_attachment_cell .o_button_area");
+            await animationFrame();
+            expect("img[src='/web/static/img/logo.png']").toHaveCount(0);
+            expect("img[src='/web/static/img/logo2.png']").toHaveCount(1);
+            await press(["ctrl", "z"]);
+            await animationFrame();
+            expect("img[src='/web/static/img/logo.png']").toHaveCount(1);
+            expect("img[src='/web/static/img/logo2.png']").toHaveCount(0);
+        },
+        contentAfter: unformat(
+            `<p><br></p>
+            <figure>
+                [<img src="/web/static/img/logo.png" class="img-fluid test-image">]
+                <figcaption></figcaption>
+            </figure>
+            <h1>Heading</h1>`
+        ),
+    });
+});
+
 test("add a link to an image with a caption", async () => {
     await testEditor({
         config: configWithEmbeddedCaption,
@@ -702,13 +801,14 @@ test("add a link then a caption to an image surrounded by text", async () => {
     await testEditor({
         config: configWithEmbeddedCaption,
         contentBefore: `<p>ab<img class="img-fluid test-image" src="${base64Img}">cd</p>`,
-        stepFunction: async () => {
+        stepFunction: async (editor) => {
             await addLinkToImage("odoo.com");
             await animationFrame();
             await toggleCaption("Hello");
             // Blur the input to commit the caption.
-            await click("p");
-            await animationFrame(); // Wait for the selection to change.
+            await click("p"); // Blur the input.
+            await animationFrame(); // Wait for the focus event to trigger a step.
+            editor.shared.selection.setCursorStart(editor.document.querySelectorAll("p")[1]);
         },
         contentAfter: unformat(
             `<p>ab</p>
