@@ -33,6 +33,9 @@ const COLOR_COMBINATION_SELECTOR = COLOR_COMBINATION_CLASSES.map((c) => `.${c}`)
  * @typedef { Object } ColorShared
  * @property { ColorPlugin['colorElement'] } colorElement
  * @property { ColorPlugin['getPropsForColorSelector'] } getPropsForColorSelector
+ * @property { ColorPlugin['removeAllColor'] } removeAllColor
+ * @property { ColorPlugin['getElementColors'] } getElementColors
+ * @property { ColorPlugin['getColorCombination'] } getColorCombination
  */
 export class ColorPlugin extends Plugin {
     static id = "color";
@@ -133,6 +136,10 @@ export class ColorPlugin extends Plugin {
             applyColorResetPreview: this.applyColorResetPreview.bind(this),
             colorPrefix: mode === "color" ? "text-" : "bg-",
             onClose: () => this.dependencies.selection.focusEditable(),
+            getTargetedElements: () => {
+                const nodes = this.dependencies.selection.getTargetedNodes().filter(isTextNode);
+                return nodes.map((node) => closestElement(node));
+            },
         };
     }
 
