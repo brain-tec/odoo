@@ -1,5 +1,6 @@
 import { PosOrder } from "@point_of_sale/app/models/pos_order";
 import { patch } from "@web/core/utils/patch";
+import { floatIsZero } from "@web/core/utils/numbers";
 import { _t } from "@web/core/l10n/translation";
 import { loyaltyIdsGenerator } from "@pos_loyalty/app/services/pos_store";
 import { computePriceForcePriceInclude } from "@point_of_sale/app/models/utils/tax_utils";
@@ -309,7 +310,12 @@ patch(PosOrder.prototype, {
             }
 
             //If there is only one possible reward we try to claim the most possible out of it
-            if (claimedReward.reward.reward_product_ids?.length === 1) {
+            if (
+                claimedReward.reward.reward_product_ids?.length === 1 &&
+                allRewardsMerged.filter(
+                    (reward) => reward.reward.program_id.id === claimedReward.reward.program_id.id
+                ).length === 1
+            ) {
                 delete claimedReward.args["quantity"];
             }
             this._applyReward(claimedReward.reward, claimedReward.coupon_id, claimedReward.args);
@@ -1140,7 +1146,7 @@ patch(PosOrder.prototype, {
         }
         let { discountable, discountablePerTax } = getDiscountable(reward);
         discountable = Math.min(this.getTotalWithTax(), discountable);
-        if (!discountable) {
+        if (floatIsZero(discountable)) {
             return [];
         }
         let maxDiscount = reward.discount_max_amount || Infinity;
@@ -1334,12 +1340,9 @@ patch(PosOrder.prototype, {
                 this._isRewardProductPartOfRules(reward, product) &&
                 reward.program_id.applies_on !== "future"
             ) {
-                const line = this.getOrderlines().find(
-                    (line) => line._reward_product_id?.id === product.id
-                );
                 // Compute the correction points once even if there are multiple reward lines.
                 // This is because _getPointsCorrection is taking into account all the lines already.
-                const claimedPoints = line ? this._getPointsCorrection(reward.program_id) : 0;
+                const claimedPoints = this._getPointsCorrection(reward.program_id);
                 return Math.floor((remainingPoints - claimedPoints) / reward.required_points) > 0
                     ? reward.reward_product_qty
                     : 0;
