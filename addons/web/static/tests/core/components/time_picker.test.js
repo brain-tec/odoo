@@ -394,3 +394,25 @@ test("ensure placeholder is customizable", async () => {
     await animationFrame();
     expect(".o_time_picker_input").toHaveAttribute("placeholder", "your time");
 });
+
+test("add a custom class", async () => {
+    class Parent extends Component {
+        static components = { TimePicker };
+        static props = {};
+        static template = xml`<TimePicker cssClass="'o_custom_class'"/>`;
+    }
+
+    await mountWithCleanup(Parent);
+    expect(".o_time_picker").toHaveClass("o_custom_class");
+});
+
+test("add a custom input class", async () => {
+    class Parent extends Component {
+        static components = { TimePicker };
+        static props = {};
+        static template = xml`<TimePicker inputCssClass="'o_custom_class'"/>`;
+    }
+
+    await mountWithCleanup(Parent);
+    expect(".o_time_picker_input").toHaveClass("o_custom_class");
+});

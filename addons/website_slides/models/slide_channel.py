@@ -141,6 +141,7 @@ class SlideChannel(models.Model):
         help='Defines who can access your courses and their content.')
     upload_group_ids = fields.Many2many(
         'res.groups', 'rel_upload_groups', 'channel_id', 'group_id', string='Upload Groups',
+        groups='base.group_user',
         help="Group of users allowed to publish contents on a documentation course.")
     website_default_background_image_url = fields.Char('Background image URL', compute='_compute_website_default_background_image_url')
     # membership
@@ -370,8 +371,8 @@ class SlideChannel(models.Model):
         for record in self:
             if record.user_id == self.env.user:
                 record.can_upload = True
-            elif record.upload_group_ids:
-                record.can_upload = bool(record.upload_group_ids & self.env.user.group_ids)
+            elif record.sudo().upload_group_ids:
+                record.can_upload = bool(record.sudo().upload_group_ids & self.env.user.group_ids)
             else:
                 record.can_upload = self.env.user.has_group('website_slides.group_website_slides_manager')
 
@@ -1069,3 +1070,7 @@ class SlideChannel(models.Model):
         if field in image_fields:
             return self.website_default_background_image_url
         return super()._get_placeholder_filename(field)
+
+    @api.model
+    def _allow_publish_rating_stats(self):
+        return True

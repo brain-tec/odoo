@@ -39,11 +39,12 @@ Dashboard / Reports for Warehouse Management includes:
         'views/stock_move_views.xml',
         'wizard/stock_request_count.xml',
         'report/account_invoice_report_view.xml',
+        'report/stock_avco_audit_report_views.xml',
         'report/stock_valuation_report.xml',
     ],
     'installable': True,
     'auto_install': True,
-    'post_init_hook': '_configure_journals',
+    'post_init_hook': '_post_init_hook',
     'assets': {
         'web.assets_backend': [
             'stock_account/static/src/**/*',
