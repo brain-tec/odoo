@@ -44,7 +44,7 @@ class StockPackage(models.Model):
     child_package_ids = fields.One2many('stock.package', 'parent_package_id', string='Contained Packages')
     all_children_package_ids = fields.One2many('stock.package', compute='_compute_all_children_package_ids', search="_search_all_children_package_ids")
     package_dest_id = fields.Many2one('stock.package', 'Destination Container', index='btree_not_null')
-    outermost_package_id = fields.Many2one('stock.package', 'Outermost Destination Container', compute="_compute_outermost_package_id")
+    outermost_package_id = fields.Many2one('stock.package', 'Outermost Destination Container', compute="_compute_outermost_package_id", search="_search_outermost_package_id")
     child_package_dest_ids = fields.One2many('stock.package', 'package_dest_id', 'Assigned Contained Packages')
     move_line_ids = fields.One2many('stock.move.line', compute="_compute_move_line_ids", search="_search_move_line_ids")
     picking_ids = fields.Many2many('stock.picking', string='Transfers', compute='_compute_picking_ids', search="_search_picking_ids", help="Transfers in which the Package is set as Destination Package")
@@ -116,8 +116,9 @@ class StockPackage(models.Model):
 
         display_uom = self.env.user.has_group('uom.group_uom')
         for package in self:
-            package_content = package.contained_quant_ids.mapped(lambda q: (q.quantity, q.product_uom_id.name, q.product_id.display_name))
-            package.content_description = format_list(self.env, [format_content(qty, uom_name, product_name, display_uom) for (qty, uom_name, product_name) in package_content])
+            package_content = package.contained_quant_ids.grouped(lambda q: (q.product_uom_id, q.product_id))
+            package_content = [(uom.name, product.display_name, sum(quants.mapped('quantity'))) for ((uom, product), quants) in package_content.items()]
+            package.content_description = format_list(self.env, [format_content(qty, uom_name, product_name, display_uom) for (uom_name, product_name, qty) in package_content])
 
     def _compute_json_popover(self):
         for package in self:
@@ -238,6 +239,17 @@ class StockPackage(models.Model):
 
         return [('id', 'in', all_package_ids)]
 
+    def _search_outermost_package_id(self, operator, value):
+        if operator not in ['in', 'not in']:
+            return NotImplemented
+
+        packages = self.env['stock.package'].search_fetch(
+            domain=[('package_dest_id', operator, value)],
+            field_names=['child_package_dest_ids']
+        )
+        __, all_children_ids = packages._get_all_children_package_dest_ids()
+        return [('id', 'in', all_children_ids)]
+
     def _search_owner(self, operator, value):
         if operator in Domain.NEGATIVE_OPERATORS:
             return NotImplemented
@@ -318,6 +330,10 @@ class StockPackage(models.Model):
             return action
         return False
 
+    def _post_put_in_pack_hook(self):
+        self.ensure_one()
+        return self
+
     def action_put_in_pack(self, *, package_id=False, package_type_id=False, package_name=False):
         action = self._pre_put_in_pack_hook(package_id, package_type_id, package_name, self.env.context.get('from_package_wizard'))
         if action:
@@ -331,7 +347,7 @@ class StockPackage(models.Model):
                 'name': package_name,
             })
         self.package_dest_id = package
-        return package
+        return package._post_put_in_pack_hook()
 
     def action_remove_package(self):
         move_line_ids_to_unlink = set()
@@ -484,14 +500,16 @@ class StockPackage(models.Model):
 
         return list(fetch_next_parents(self))
 
-    def _apply_package_dest_for_entire_packs(self):
+    def _apply_package_dest_for_entire_packs(self, allowed_package_ids=None):
         """ When a package is assigned to a picking, if all of its container is added,
             then we consider the container to be added itself, unless the container
             is a reusable package itself.
         """
         for container, packages in self.grouped('parent_package_id').items():
             if container.child_package_ids == packages and container.package_type_id.package_use != 'reusable':
+                if allowed_package_ids and container.id not in allowed_package_ids:
+                    continue
                 packages.package_dest_id = container
         if self.package_dest_id:
             # If one level was added, need to check if the upper container is fully contained as well.
-            self.package_dest_id._apply_package_dest_for_entire_packs()
+            self.package_dest_id._apply_package_dest_for_entire_packs(allowed_package_ids)

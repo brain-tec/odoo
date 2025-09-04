@@ -534,6 +534,10 @@ class StockMoveLine(models.Model):
         if packages_to_check:
             # Clear the dest from packages if not linked to any active picking
             packages_to_check.filtered(lambda p: p.package_dest_id and not p.picking_ids).package_dest_id = False
+        if updates or 'quantity' in vals:
+            # Updated fields could imply that entire packs are no longer entire.
+            if mls_to_update := self._get_lines_not_entire_pack():
+                mls_to_update.write({'is_entire_pack': False})
 
         # As stock_account values according to a move's `product_uom_qty`, we consider that any
         # done stock move should have its `quantity_done` equals to its `product_uom_qty`, and
@@ -856,7 +860,7 @@ class StockMoveLine(models.Model):
         elif description.startswith(product.name):
             description = description.removeprefix(product.name).strip()
         line_key = f'{product.id}_{product.display_name}_{description or ""}_{uom.id}'
-        return {
+        properties = {
             'line_key': line_key,
             'name': name,
             'description': description,
@@ -864,6 +868,11 @@ class StockMoveLine(models.Model):
             'packaging_uom_id': packaging_uom,
             'move': move,
         }
+        if move_line and move_line.result_package_id:
+            properties['package'] = move_line.result_package_id
+            properties['package_history'] = move_line.package_history_id
+            properties['line_key'] += f'_{move_line.result_package_id.id}'
+        return properties
 
     def _get_aggregated_product_quantities(self, **kwargs):
         """ Returns a dictionary of products (key = id+name+description+uom) and corresponding values of interest.
@@ -899,12 +908,12 @@ class StockMoveLine(models.Model):
                     # Filters on the aggregation key (product, description and uom) to add the
                     # quantities delayed to backorders to retrieve the original ordered qty.
                     following_move_lines = backorders.move_line_ids.filtered(
-                        lambda ml: self._get_aggregated_properties(move=ml.move_id)['line_key'] == line_key
+                        lambda ml: line_key.startswith(self._get_aggregated_properties(move=ml.move_id)['line_key'])
                     )
                     qty_ordered += sum(following_move_lines.move_id.mapped('product_uom_qty'))
                     # Remove the done quantities of the other move lines of the stock move
                     previous_move_lines = move_line.move_id.move_line_ids.filtered(
-                        lambda ml: self._get_aggregated_properties(move=ml.move_id)['line_key'] == line_key and ml.id != move_line.id
+                        lambda ml: line_key.startswith(self._get_aggregated_properties(move=ml.move_id)['line_key']) and ml.id != move_line.id
                     )
                     qty_ordered -= sum([m.product_uom_id._compute_quantity(m.quantity, uom) for m in previous_move_lines])
                     packaging_qty_ordered = move_line.product_uom_id._compute_quantity(qty_ordered, move_line.move_id.packaging_uom_id)
@@ -939,7 +948,7 @@ class StockMoveLine(models.Model):
             aggregated_properties = self._get_aggregated_properties(move=empty_move)
             line_key = aggregated_properties['line_key']
 
-            if line_key not in aggregated_move_lines and not to_bypass:
+            if not any(aggregated_key.startswith(line_key) for aggregated_key in aggregated_move_lines) and not to_bypass:
                 qty_ordered = empty_move.product_uom_qty
                 aggregated_move_lines[line_key] = {
                     **aggregated_properties,
@@ -949,6 +958,10 @@ class StockMoveLine(models.Model):
                 }
             elif line_key in aggregated_move_lines:
                 aggregated_move_lines[line_key]['qty_ordered'] += empty_move.product_uom_qty
+            else:
+                keys = list(filter(lambda key: key.startswith(line_key), aggregated_move_lines))
+                if keys:
+                    aggregated_move_lines[keys[0]]['qty_ordered'] += empty_move.product_uom_qty
 
         return aggregated_move_lines
 
@@ -1050,6 +1063,22 @@ class StockMoveLine(models.Model):
                 'res_id': wiz.id,
                 'target': 'new'
             }
+
+    def _get_lines_not_entire_pack(self):
+        """ Checks within self for move lines that should no longer be considered as entire packs.
+        """
+        relevant_move_lines = self.filtered(lambda ml: ml.is_entire_pack)
+        if not relevant_move_lines:
+            return False
+
+        # If `result_package_id` was either removed or changed, cannot be considered as an entire pack anymore.
+        ids_to_update = set(relevant_move_lines.filtered(lambda ml: ml.package_id != ml.result_package_id).ids)
+        for package, move_lines in relevant_move_lines.grouped('package_id').items():
+            pickings = move_lines.picking_id
+            if not pickings._is_single_transfer() or not pickings._check_move_lines_map_quant_package(package):
+                ids_to_update.update(pickings.move_line_ids.filtered(lambda ml: ml.package_id == package).ids)
+
+        return self.env['stock.move.line'].browse(ids_to_update)
 
     def _put_in_pack(self, package_id=False, package_type_id=False, package_name=False):
         if package_id:

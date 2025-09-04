@@ -60,12 +60,17 @@ class ProductTemplate(models.Model):
     @api.depends_context('company')
     @api.depends('categ_id.property_valuation')
     def _compute_valuation(self):
-        pt_with_category = self.filtered('categ_id')
-        (self - pt_with_category).valuation = 'periodic'
-        for product_template in pt_with_category:
+        for product_template in self:
             product_template.valuation = product_template.categ_id.with_company(
-                product_template.company_id
-            ).property_valuation
+                product_template.company_id).property_valuation or self.env.company.inventory_valuation
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'lot_valuated' in vals:
+            self.env['stock.lot'].search([
+                ('product_id', 'in', self.product_variant_ids.ids),
+            ])._update_standard_price()
+        return res
 
     # -------------------------------------------------------------------------
     # Misc.
@@ -75,12 +80,11 @@ class ProductTemplate(models.Model):
         @return: dictionary which contains information regarding stock accounts and super (income+expense accounts)
         """
         accounts = super()._get_product_accounts()
-        AccountAccount = self.env['account.account']
 
         accounts['stock_valuation'] = (
                 self.categ_id.property_stock_valuation_account_id
                 or self.categ_id._fields['property_stock_valuation_account_id'].get_company_dependent_fallback(self.categ_id)
-                or AccountAccount
+                or self.env.company.account_stock_valuation_id
             )
         accounts['stock_variation'] = accounts['stock_valuation'].account_stock_variation_id
         return accounts
@@ -94,6 +98,7 @@ class ProductTemplate(models.Model):
             'stock_journal': (
                 self.categ_id.property_stock_journal
                 or self.categ_id._fields['property_stock_journal'].get_company_dependent_fallback(self.categ_id)
+                or self.env.company.account_stock_journal_id
             )
         })
         return accounts
@@ -156,7 +161,7 @@ class ProductProduct(models.Model):
                 'company_id': product.company_id.id or self.env.company.id,
                 'date': fields.Datetime.now(),
                 'description': _('Price update from %(old_price)s to %(new_price)s by %(user)s',
-                    old_price=old_price, new_price=product.standard_price, user=self.env.user.name)
+                    old_price=old_price.get(product), new_price=product.standard_price, user=self.env.user.name)
             })
         return
 
@@ -187,6 +192,7 @@ class ProductProduct(models.Model):
         # Get value and quantity for all incoming
         moves_domain = Domain([
             ('product_id', '=', self.id),
+            ('company_id', '=', self.env.company.id),
         ])
         if lot:
             moves_domain &= Domain([
@@ -221,6 +227,7 @@ class ProductProduct(models.Model):
             avco_value = product_values[-1].value
             return avco_value, avco_value * quantity
 
+        # TODO Only browse from last product_value
         for move in moves:
             if product_values and move.date > product_values[0].date:
                 product_value = product_values[0]
@@ -233,8 +240,9 @@ class ProductProduct(models.Model):
                 if at_date or move.is_dropship:
                     in_value = move._get_value(at_date=at_date)
                 if lot:
-                    total_qty = move._get_valued_qty(lot)
-                    in_value = in_value * in_qty / total_qty
+                    lot_qty = move._get_valued_qty(lot)
+                    in_value = in_value * lot_qty / in_qty
+                    in_qty = lot_qty
                 if quantity < 0 and quantity + in_qty >= 0:
                     positive_qty = quantity + in_qty
                     ratio = positive_qty / in_qty
@@ -265,6 +273,7 @@ class ProductProduct(models.Model):
 
         moves_domain = Domain([
             ('product_id', '=', self.id),
+            ('company_id', '=', self.env.company.id)
         ])
         if lot:
             moves_domain &= Domain([('move_line_ids.lot_id', 'in', lot.id)])

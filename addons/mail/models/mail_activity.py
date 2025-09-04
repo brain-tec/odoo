@@ -81,7 +81,9 @@ class MailActivity(models.Model):
     attachment_ids = fields.Many2many(
         'ir.attachment', 'activity_attachment_rel',
         'activity_id', 'attachment_id',
-        string='Attachments')
+        string='Attachments',
+        bypass_search_access=True,
+    )
     # description
     user_id = fields.Many2one(
         'res.users', 'Assigned to',
@@ -625,7 +627,7 @@ class MailActivity(models.Model):
             "can_write",
             "chaining_type",
             "create_date",
-            Store.One("create_uid", "name"),
+            Store.One("create_uid", Store.One("partner_id", "name")),
             "date_deadline",
             "date_done",
             "icon",

@@ -589,7 +589,9 @@ export class FormOptionPlugin extends Plugin {
         // Update available visibility dependencies
         const existingDependencyNames = [];
         const conditionInputs = [];
-        for (const el of formEl.querySelectorAll(".s_website_form_field")) {
+        for (const el of formEl.querySelectorAll(
+            ".s_website_form_field:not(.s_website_form_dnone), .s_website_form_field[data-type]"
+        )) {
             const inputEl = el.querySelector(".s_website_form_input");
             if (
                 el.querySelector(".s_website_form_label_content") &&
@@ -660,7 +662,7 @@ export class FormOptionPlugin extends Plugin {
                     for (const el of inputsInDependencyContainer) {
                         conditionValueList.push({
                             value: el.value,
-                            textContent: el.value,
+                            textContent: inputsInDependencyContainer.length === 1 ? el.value : dependencyContainerEl.querySelector(`label[for="${el.id}"]`).textContent,
                         });
                     }
                     if (!inputContainerEl.dataset.visibilityCondition) {

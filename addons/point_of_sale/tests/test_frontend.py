@@ -885,6 +885,13 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.assertEqual(dashboard_statistics['orders']['draft']['amount'], 10.0)
         self.assertEqual(dashboard_statistics['orders']['draft']['count'], 1)
 
+    def test_tax_control_button_visiblity(self):
+        self.main_pos_config.write({
+            'tax_regime_selection': False,
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('test_tax_control_button_visiblity')
+
     def test_fiscal_position_no_tax(self):
         #create a tax of 15% with price included
         tax = self.env['account.tax'].create({
@@ -1316,6 +1323,12 @@ class TestUi(TestPointOfSaleHttpCommon):
             'applied_on': '0_product_variant',
             'product_id': product_1.id,
             'fixed_price': 80,
+            'min_quantity': 1,
+        }, {
+            'applied_on': '0_product_variant',
+            'product_id': product_1.id,
+            'fixed_price': 70,
+            'min_quantity': 2,
         }, {
             'applied_on': '0_product_variant',
             'product_id': product_2_template.product_variant_ids[1].id,

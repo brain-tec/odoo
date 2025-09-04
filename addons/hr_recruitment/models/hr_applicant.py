@@ -136,7 +136,7 @@ class HrApplicant(models.Model):
     applicant_properties = fields.Properties('Properties', definition='job_id.applicant_properties_definition', copy=True)
     applicant_notes = fields.Html()
     refuse_date = fields.Datetime('Refuse Date')
-    talent_pool_ids = fields.Many2many(comodel_name="hr.talent.pool", string="Talent Pools", groups="base.group_user")
+    talent_pool_ids = fields.Many2many(comodel_name="hr.talent.pool", string="Talent Pools")
     pool_applicant_id = fields.Many2one("hr.applicant", index='btree_not_null')
     is_pool_applicant = fields.Boolean(compute="_compute_is_pool")
     is_applicant_in_pool = fields.Boolean(
@@ -490,6 +490,15 @@ class HrApplicant(models.Model):
             else:
                 applicant.delay_close = False
 
+    def _get_rotting_depends_fields(self):
+        return super()._get_rotting_depends_fields() + ['application_status', 'date_closed']
+
+    def _get_rotting_domain(self):
+        return super()._get_rotting_domain() & Domain([
+            ('application_status', '=', 'ongoing'),
+            ('date_closed', '=', False),
+        ])
+
     @api.depends_context('lang')
     @api.depends('meeting_ids', 'meeting_ids.start')
     def _compute_meeting_display(self):
@@ -669,6 +678,9 @@ class HrApplicant(models.Model):
                         applicant.job_id.no_of_recruitment -= 1
                 elif not new_stage.hired_stage and applicant.stage_id.hired_stage:
                     applicant.job_id.no_of_recruitment += 1
+        # kanban_state: also set date_last_stage_update
+        if 'kanban_state' in vals:
+            vals['date_last_stage_update'] = fields.Datetime.now()
         res = super().write(vals)
 
         for applicant in self:

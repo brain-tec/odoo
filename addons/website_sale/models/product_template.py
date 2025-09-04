@@ -553,7 +553,7 @@ class ProductTemplate(models.Model):
             and not all(
                 tax.price_include
                 for tax
-                in product_or_template.combo_ids.sudo().combo_item_ids.product_id.taxes_id
+                in product_or_template.sudo().combo_ids.combo_item_ids.product_id.taxes_id
             )
         ):
             combination_info['tax_disclaimer'] = _(
@@ -1069,3 +1069,7 @@ class ProductTemplate(models.Model):
                 "target_type": "public",
             }
         return super()._get_access_action(access_uid=access_uid, force_website=force_website)
+
+    @api.model
+    def _allow_publish_rating_stats(self):
+        return True

@@ -52,7 +52,7 @@ class ResCompany(models.Model):
 
         if not aml_vals_list:
             # No account moves to create, so nothing to display.
-            raise UserError(_("Nothing to close"))
+            raise UserError(_("Everything is correctly closed"))
 
         moves_vals = {
             'journal_id': self.account_stock_journal_id.id,
@@ -125,7 +125,7 @@ class ResCompany(models.Model):
 
     @api.model
     def _cron_post_stock_valuation(self):
-        domain = Domain([('inventory_period', '=', 'daily')])
+        domain = Domain([('inventory_period', '=', 'daily'), ('inventory_valuation', '!=', 'real_time')])
         if fields.Date.today() == fields.Date.today() + relativedelta(day=31):
             domain = domain & Domain([('inventory_period', '=', 'monthly')])
         companies = self.env['res.company'].search(domain)
@@ -160,12 +160,20 @@ class ResCompany(models.Model):
         valued_location = self.env['stock.location'].search([('valuation_account_id', '!=', False)])
 
         moves_in_by_location = self.env['stock.move']._read_group(
-            [('is_out', '=', True), ('location_dest_id', 'in', valued_location.ids)],
+            [
+                ('is_out', '=', True),
+                ('location_dest_id', 'in', valued_location.ids),
+                ('product_id.is_storable', '=', True),
+            ],
             ['location_dest_id'],
             ['value:sum'],
         )
         moves_out_by_location = self.env['stock.move']._read_group(
-            [('is_in', '=', True), ('location_id', 'in', valued_location.ids)],
+            [
+                ('is_in', '=', True),
+                ('location_id', 'in', valued_location.ids),
+                ('product_id.is_storable', '=', True),
+            ],
             ['location_id'],
             ['value:sum'],
         )
@@ -222,6 +230,9 @@ class ResCompany(models.Model):
             balance = inventory_data.get(account, 0) - accounting_data.get(account, 0)
             balance -= extra_balance.get(account.id, 0)
 
+            if self.currency_id.is_zero(balance):
+                continue
+
             amls_vals = self._prepare_inventory_aml_vals(
                 account,
                 account_variation,
@@ -236,8 +247,6 @@ class ResCompany(models.Model):
         """ In continental perpetual the inventory variation is never posted.
         This method compute the variation for a period and post it.
         """
-        if self.anglo_saxon_accounting:
-            return []
         extra_balance = self._get_extra_balance(extra_aml_vals_list)
 
         fiscal_year_date_from = self.compute_fiscalyear_dates(fields.Date.today())['date_from']
@@ -259,19 +268,23 @@ class ResCompany(models.Model):
             balance_last_period = accounting_data_last_period.get(account, 0)
             balance_over_period = balance_today - balance_last_period
 
-            existing_balance = sum(self.env['account.move.line']._search([
+            existing_balance = sum(self.env['account.move.line'].search([
                 ('account_id', '=', variation_acc.id),
                 ('company_id', '=', self.id),
                 ('parent_state', '=', 'posted'),
             ]).mapped('balance'))
+            balance_over_period += existing_balance
+
+            if self.currency_id.is_zero(balance_over_period):
+                continue
 
             amls_vals = self._prepare_inventory_aml_vals(
                 expense_acc,
                 variation_acc,
-                balance_over_period - existing_balance,
+                balance_over_period,
                 _('Closing: Stock Variation Over Period'),
             )
-            amls_vals_list.append(amls_vals)
+            amls_vals_list += amls_vals
 
         return amls_vals_list
 
