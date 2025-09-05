@@ -543,12 +543,10 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
 
     def test_subcontracting_lead_days(self):
         """ Test the lead days computation for subcontracting. Subcontracting delay =
-            max(Vendor lead time, Manufacturing lead time + DTPMO) + Days to Purchase + Purchase security lead time
+            max(Vendor lead time, Manufacturing lead time + DTPMO) + Days to Purchase
         """
         rule = self.env['stock.rule'].search([('action', '=', 'buy')], limit=1)
-        self.env.company.manufacturing_lead = 114514   # should never be used
 
-        self.env.company.po_lead = 1
         self.env.company.days_to_purchase = 2
         # Case 1 Vendor lead time >= Manufacturing lead time + DTPMO
         seller = self.env['product.supplierinfo'].create({
@@ -560,22 +558,19 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
         self.bom.produce_delay = 3
         self.bom.days_to_prepare_mo = 4
         delays, _ = rule._get_lead_days(self.finished, supplierinfo=seller)
-        self.assertEqual(delays['total_delay'], seller.delay + self.env.company.po_lead + self.env.company.days_to_purchase)
+        self.assertEqual(delays['total_delay'], seller.delay + self.env.company.days_to_purchase + self.env.company.horizon_days)
         # Case 2 Vendor lead time < Manufacturing lead time + DTPMO
         self.bom.produce_delay = 5
         self.bom.days_to_prepare_mo = 6
         delays, _ = rule._get_lead_days(self.finished, supplierinfo=seller)
-        self.assertEqual(delays['total_delay'], self.bom.produce_delay + self.bom.days_to_prepare_mo + self.env.company.po_lead + self.env.company.days_to_purchase)
+        self.assertEqual(delays['total_delay'], self.bom.produce_delay + self.bom.days_to_prepare_mo + self.env.company.days_to_purchase + self.env.company.horizon_days)
 
     def test_subcontracting_lead_days_on_overview(self):
         """Test on the BOM overview, the lead days and resupply availability are
         correctly computed. The dtpmo on the bom should be used for the lead days,
         while the resupply availability should be based on the calculated dtpmo.
         """
-        # should never be used
-        self.env.company.manufacturing_lead = 114514
         # should be added in all cases
-        self.env.company.po_lead = 5
         self.env.company.days_to_purchase = 5
 
         buy_route_id = self.ref('purchase_stock.route_warehouse0_buy')
@@ -604,36 +599,36 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
 
         # Case 1: Vendor lead time >= Manufacturing lead time + DTPMO on BOM
         bom_data = self.env['report.mrp.report_bom_structure']._get_bom_data(self.bom, self.warehouse, self.finished)
-        self.assertEqual(bom_data['lead_time'], 15 + 5 + 5 + 0,
-            "Lead time = Purchase lead time(finished) + Days to Purchase + Purchase security lead time + DTPMO on BOM")
+        self.assertEqual(bom_data['lead_time'], 15 + 5 + 0,
+            "Lead time = Purchase lead time(finished) + Days to Purchase + DTPMO on BOM")
         # Resupply delay = 0 (received from MRP, where route type != "manufacture")
-        # Vendor lead time = 15 (finished product supplier delay)
+        # Vendor lead time = 10 (finished product supplier delay)
         # Manufacture lead time = 10 (BoM.produce_delay)
-        # Max purchase component delay = max delay(comp1, comp2) + po_lead + days_to_purchase = 20
-        self.assertEqual(bom_data['resupply_avail_delay'], 0 + 15 + 20 + 5 + 5,
+        # Max purchase component delay = max delay(comp1, comp2) + days_to_purchase = 20
+        self.assertEqual(bom_data['resupply_avail_delay'], 0 + 10 + 20 + 5,
             'Resupply avail delay = Resupply delay + Max(Vendor lead time, Manufacture lead time)'
-            ' + Max purchase component delay + Purchase security lead time + Days to Purchase'
+            ' + Max purchase component delay + Days to Purchase'
         )
 
         # Case 2: Vendor lead time < Manufacturing lead time + DTPMO on BOM
         self.bom.action_compute_bom_days()
-        self.assertEqual(self.bom.days_to_prepare_mo, 10 + 5 + 5,
-            "DTPMO = Purchase lead time(comp1) + Days to Purchase + Purchase security lead time")
+        self.assertEqual(self.bom.days_to_prepare_mo, 10 + 5,
+            "DTPMO = Purchase lead time(comp1) + Days to Purchase")
 
         self.bom.days_to_prepare_mo = 10
         # Temp increase BoM.produce_delay, to check if it is now used in the final calculation
         self.bom.produce_delay = 30
 
         bom_data = self.env['report.mrp.report_bom_structure']._get_bom_data(self.bom, self.warehouse, self.finished)
-        self.assertEqual(bom_data['lead_time'], 30 + 5 + 5 + 10,
-            "Lead time = Manufacturing lead time + Days to Purchase + Purchase security lead time + DTPMO on BOM")
+        self.assertEqual(bom_data['lead_time'], 30 + 5 + 10,
+            "Lead time = Manufacturing lead time + Days to Purchase + DTPMO on BOM")
         # Resupply delay = 0 (received from MRP, where route type != "manufacture")
         # Vendor lead time = 15 (finished product supplier delay)
         # Manufacture lead time = 30 (BoM.produce_delay)
-        # Max purchase component delay = max delay(comp1, comp2) + po_lead + days_to_purchase = 20
-        self.assertEqual(bom_data['resupply_avail_delay'], 0 + 30 + 20 + 5 + 5,
+        # Max purchase component delay = max delay(comp1, comp2) + days_to_purchase = 15
+        self.assertEqual(bom_data['resupply_avail_delay'], 0 + 30 + 15 + 5,
             'Resupply avail delay = Resupply delay + Max(Vendor lead time, Manufacture lead time)'
-            ' + Max purchase component delay + Purchase security lead time + Days to Purchase'
+            ' + Max purchase component delay + Days to Purchase'
         )
         # Continue the test with the original produce_delay
         self.bom.produce_delay = 10
@@ -645,17 +640,17 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
         # Case 1: Vendor lead time >= Manufacturing lead time + DTPMO on BOM
         self.bom.days_to_prepare_mo = 2
         bom_data = self.env['report.mrp.report_bom_structure']._get_bom_data(self.bom, self.warehouse, self.finished)
-        self.assertEqual(bom_data['lead_time'], 15 + 5 + 5,
-            "Lead time = Purchase lead time(finished) + Days to Purchase + Purchase security lead time")
+        self.assertEqual(bom_data['lead_time'], 15 + 5,
+            "Lead time = Purchase lead time(finished) + Days to Purchase")
         for component in bom_data['components']:
             self.assertEqual(component['availability_state'], 'available')
         # Case 2: Vendor lead time < Manufacturing lead time + DTPMO on BOM
         self.bom.action_compute_bom_days()
-        self.assertEqual(self.bom.days_to_prepare_mo, 10 + 5 + 5,
-            "DTPMO = Purchase lead time(comp1) + Days to Purchase + Purchase security lead time")
+        self.assertEqual(self.bom.days_to_prepare_mo, 10 + 5,
+            "DTPMO = Purchase lead time(comp1) + Days to Purchase")
         bom_data = self.env['report.mrp.report_bom_structure']._get_bom_data(self.bom, self.warehouse, self.finished)
-        self.assertEqual(bom_data['lead_time'], 10 + 5 + 5 + 20,
-            "Lead time = Manufacturing lead time + Days to Purchase + Purchase security lead time + DTPMO on BOM")
+        self.assertEqual(bom_data['lead_time'], 10 + 5 + 15,
+            "Lead time = Manufacturing lead time + Days to Purchase + DTPMO on BOM")
         for component in bom_data['components']:
             self.assertEqual(component['availability_state'], 'available')
 
@@ -816,6 +811,7 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
         report_values = self.env['report.mrp.report_bom_structure']._get_report_data(bom.id, searchQty=search_qty_more_than_total, searchVariant=False)
         self.assertEqual(report_values['lines']['components'][0]['stock_avail_state'], 'unavailable')
 
+    # TODO: po_lead doesn't exist anymore, remove?
     def test_bom_overview_availability_po_lead(self):
         # Create routes for components and the main product
         self.env['product.supplierinfo'].create({
@@ -836,8 +832,6 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
 
         self.bom.produce_delay = 1
         self.bom.days_to_prepare_mo = 3
-        # Security Lead Time for Purchase should always be added
-        self.env.company.po_lead = 2
 
         # Add 4 units of each component to subcontractor's location
         subcontractor_location = self.env.company.subcontracting_location_id
@@ -947,8 +941,8 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
         return_picking.button_validate()
         self.assertEqual(return_picking.state, 'done')
 
-    def test_global_visibility_days_affect_lead_time(self):
-        """ Don't count global visibility days more than once, make sure a PO generated from
+    def test_global_horizon_days_affect_lead_time(self):
+        """ Don't count global horizon days more than once, make sure a PO generated from
         replenishment/orderpoint has a sensible planned reception date.
         """
         wh = self.env.user._get_default_warehouse_id()
@@ -969,12 +963,12 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
                 'location_dest_id': self.env.ref('stock.stock_location_customers').id,
             })],
         })
-        out_picking.with_context(global_visibility_days=365).action_assign()
+        out_picking.with_context(global_horizon_days=365).action_assign()
         r = orderpoint.action_stock_replenishment_info()
         repl_info = self.env[r['res_model']].browse(r['res_id'])
-        lead_days_date = datetime.strptime(
-            loads(repl_info.with_context(global_visibility_days=365).json_lead_days)['lead_days_date'],'%m/%d/%Y').date()
-        self.assertEqual(lead_days_date, Date.today() + timedelta(days=365))
+        lead_horizon_date = datetime.strptime(
+            loads(repl_info.with_context(global_horizon_days=365).json_lead_days)['lead_horizon_date'], '%m/%d/%Y').date()
+        self.assertEqual(lead_horizon_date, Date.today() + timedelta(days=365))
 
         orderpoint.action_replenish()
         purchase_order = self.env['purchase.order'].search([
