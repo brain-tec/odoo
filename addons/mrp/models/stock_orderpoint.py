@@ -13,7 +13,6 @@ class StockWarehouseOrderpoint(models.Model):
     bom_id = fields.Many2one(
         'mrp.bom', string='Bill of Materials', check_company=True,
         domain="[('type', '=', 'normal'), '&', '|', ('company_id', '=', company_id), ('company_id', '=', False), '|', ('product_id', '=', product_id), '&', ('product_id', '=', False), ('product_tmpl_id', '=', product_tmpl_id)]")
-    manufacturing_visibility_days = fields.Float(default=0.0, help="Visibility Days applied on the manufacturing routes.")
 
     def _get_replenishment_order_notification(self):
         self.ensure_one()
@@ -38,6 +37,17 @@ class StockWarehouseOrderpoint(models.Model):
             }
         return super()._get_replenishment_order_notification()
 
+    @api.depends('bom_id', 'product_id.bom_ids.produce_delay')
+    def _compute_deadline_date(self):
+        """ Extend to add more depends values """
+        super()._compute_deadline_date()
+
+    def _get_lead_days_values(self):
+        values = super()._get_lead_days_values()
+        if self.bom_id:
+            values['bom'] = self.bom_id
+        return values
+
     @api.depends('bom_id', 'bom_id.product_uom_id', 'product_id.bom_ids', 'product_id.bom_ids.product_uom_id')
     def _compute_qty_to_order_computed(self):
         """ Extend to add more depends values """
@@ -49,6 +59,13 @@ class StockWarehouseOrderpoint(models.Model):
             if 'manufacture' in orderpoint.rule_ids.mapped('action'):
                 orderpoint.allowed_replenishment_uom_ids += orderpoint.product_id.bom_ids.product_uom_id
 
+    def _compute_show_supply_warning(self):
+        for orderpoint in self:
+            if 'manufacture' in orderpoint.rule_ids.mapped('action') and not orderpoint.show_supply_warning:
+                orderpoint.show_supply_warning = not orderpoint.product_id.bom_ids
+                continue
+            super(StockWarehouseOrderpoint, orderpoint)._compute_show_supply_warning()
+
     @api.depends('route_id')
     def _compute_show_bom(self):
         manufacture_route = []
@@ -56,20 +73,6 @@ class StockWarehouseOrderpoint(models.Model):
             manufacture_route.append(res['route_id'][0])
         for orderpoint in self:
             orderpoint.show_bom = orderpoint.route_id.id in manufacture_route
-
-    def _compute_visibility_days(self):
-        res = super()._compute_visibility_days()
-        for orderpoint in self:
-            if 'manufacture' in orderpoint.rule_ids.mapped('action'):
-                orderpoint.visibility_days = orderpoint.manufacturing_visibility_days
-        return res
-
-    def _set_visibility_days(self):
-        res = super()._set_visibility_days()
-        for orderpoint in self:
-            if 'manufacture' in orderpoint.rule_ids.mapped('action'):
-                orderpoint.manufacturing_visibility_days = orderpoint.visibility_days
-        return res
 
     def _compute_days_to_order(self):
         res = super()._compute_days_to_order()
@@ -80,7 +83,7 @@ class StockWarehouseOrderpoint(models.Model):
         orderpoints_with_bom = self.filtered(lambda orderpoint: orderpoint.product_id.variant_bom_ids or orderpoint.product_id.bom_ids)
         for orderpoint in orderpoints_with_bom:
             if 'manufacture' in orderpoint.rule_ids.mapped('action'):
-                boms = (orderpoint.product_id.variant_bom_ids or orderpoint.product_id.bom_ids)
+                boms = orderpoint.bom_id or orderpoint.product_id.variant_bom_ids or orderpoint.product_id.bom_ids
                 orderpoint.days_to_order = boms and boms[0].days_to_prepare_mo or 0
         return res
 
@@ -150,8 +153,8 @@ class StockWarehouseOrderpoint(models.Model):
         ])
         for prod in in_progress_productions:
             date_start, date_finished, orderpoint = prod.date_start, prod.date_finished, prod.orderpoint_id
-            lead_days_date = datetime.combine(orderpoint.lead_days_date, time.max)
-            if date_start <= lead_days_date < date_finished:
+            lead_horizon_date = datetime.combine(orderpoint.lead_horizon_date, time.max)
+            if date_start <= lead_horizon_date < date_finished:
                 res[orderpoint.id] += prod.product_uom_id._compute_quantity(
                         prod.product_qty, orderpoint.product_uom, round=False)
         return res

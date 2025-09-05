@@ -113,13 +113,17 @@ class StockReturnPicking(models.TransientModel):
 class StockWarehouseOrderpoint(models.Model):
     _inherit = "stock.warehouse.orderpoint"
 
-    show_supplier = fields.Boolean('Show supplier column', compute='_compute_show_suppplier')
+    show_supplier = fields.Boolean('Show supplier column', compute='_compute_show_supplier')
     supplier_id = fields.Many2one(
         'product.supplierinfo', string='Vendor Pricelist', check_company=True,
         domain="['|', ('product_id', '=', product_id), '&', ('product_id', '=', False), ('product_tmpl_id', '=', product_tmpl_id)]")
-    vendor_id = fields.Many2one(related='supplier_id.partner_id', string="Vendor")
-    purchase_visibility_days = fields.Float(default=0.0, help="Visibility Days applied on the purchase routes.")
+    vendor_ids = fields.One2many(related='product_id.seller_ids', string="Vendors")
     product_supplier_id = fields.Many2one('res.partner', compute='_compute_product_supplier_id', store=True, string='Product Supplier')
+
+    @api.depends('supplier_id')
+    def _compute_deadline_date(self):
+        """ Extend to add more depends values """
+        super()._compute_deadline_date()
 
     @api.depends('product_id.purchase_order_line_ids.product_qty', 'product_id.purchase_order_line_ids.state', 'supplier_id', 'supplier_id.product_uom_id', 'product_id.seller_ids', 'product_id.seller_ids.product_uom_id')
     def _compute_qty_to_order_computed(self):
@@ -132,24 +136,10 @@ class StockWarehouseOrderpoint(models.Model):
     def _compute_lead_days(self):
         return super()._compute_lead_days()
 
-    def _compute_visibility_days(self):
-        res = super()._compute_visibility_days()
-        for orderpoint in self:
-            if 'buy' in orderpoint.rule_ids.mapped('action'):
-                orderpoint.visibility_days = orderpoint.purchase_visibility_days
-        return res
-
     @api.depends('product_tmpl_id', 'product_tmpl_id.seller_ids', 'product_tmpl_id.seller_ids.sequence', 'product_tmpl_id.seller_ids.partner_id')
     def _compute_product_supplier_id(self):
         for orderpoint in self:
             orderpoint.product_supplier_id = orderpoint.product_tmpl_id.seller_ids.sorted('sequence')[:1].partner_id.id
-
-    def _set_visibility_days(self):
-        res = super()._set_visibility_days()
-        for orderpoint in self:
-            if 'buy' in orderpoint.rule_ids.mapped('action'):
-                orderpoint.purchase_visibility_days = orderpoint.visibility_days
-        return res
 
     def _compute_days_to_order(self):
         res = super()._compute_days_to_order()
@@ -164,12 +154,19 @@ class StockWarehouseOrderpoint(models.Model):
         return res
 
     @api.depends('route_id')
-    def _compute_show_suppplier(self):
+    def _compute_show_supplier(self):
         buy_route = []
         for res in self.env['stock.rule'].search_read([('action', '=', 'buy')], ['route_id']):
             buy_route.append(res['route_id'][0])
         for orderpoint in self:
             orderpoint.show_supplier = orderpoint.route_id.id in buy_route
+
+    def _compute_show_supply_warning(self):
+        for orderpoint in self:
+            if 'buy' in orderpoint.rule_ids.mapped('action') and not orderpoint.show_supply_warning:
+                orderpoint.show_supply_warning = not orderpoint.vendor_ids
+                continue
+            super(StockWarehouseOrderpoint, orderpoint)._compute_show_supply_warning()
 
     def action_view_purchase(self):
         """ This function returns an action that display existing

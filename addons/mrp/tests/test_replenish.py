@@ -28,20 +28,16 @@ class TestMrpReplenish(TestMrpCommon):
         route = self.warehouse_1.manufacture_pull_id.route_id
         product = self.product_4
         product.route_ids = route
-        self.env.company.manufacturing_lead = 0
-        self.env['ir.config_parameter'].sudo().set_param('mrp.use_manufacturing_lead', True)
 
         with freeze_time("2023-01-01"):
             wizard = self._create_wizard(product, self.warehouse_1)
             self.assertEqual(fields.Datetime.from_string('2023-01-01 00:00:00'), wizard.date_planned)
-            self.env.company.manufacturing_lead = 3
-            wizard2 = self._create_wizard(product, self.warehouse_1)
-            self.assertEqual(fields.Datetime.from_string('2023-01-04 00:00:00'), wizard2.date_planned)
             route.rule_ids[0].delay = 2
             wizard3 = self._create_wizard(product, self.warehouse_1)
-            self.assertEqual(fields.Datetime.from_string('2023-01-06 00:00:00'), wizard3.date_planned)
+            self.assertEqual(fields.Datetime.from_string('2023-01-03 00:00:00'), wizard3.date_planned)
 
     def test_mrp_orderpoint_leadtime(self):
+        self.env.company.horizon_days = 0
         route_manufacture = self.warehouse_1.manufacture_pull_id.route_id
         route_manufacture.supplied_wh_id = self.warehouse_1
         route_manufacture.supplier_wh_id = self.warehouse_1
@@ -99,7 +95,6 @@ class TestMrpReplenish(TestMrpCommon):
         product = self.product_4
         bom = product.bom_ids
         product.route_ids = route
-        self.env.company.manufacturing_lead = 0
         with freeze_time("2023-01-01"):
             wizard = self._create_wizard(product, self.warehouse_1)
             self.assertEqual(fields.Datetime.from_string('2023-01-01 00:00:00'), wizard.date_planned)
@@ -182,8 +177,8 @@ class TestMrpReplenish(TestMrpCommon):
         self.assertEqual(move_to_scrap.quantity, 10, "Scrapped component should return to qty 10")
         self.assertEqual(move_other.quantity, 10, "Other component should still be qty 10")
 
-    def test_global_visibility_days_affect_lead_time_manufacture_rule(self):
-        """ Ensure global visibility days will only be captured one time in an orderpoint's
+    def test_global_horizon_days_affect_lead_time_manufacture_rule(self):
+        """ Ensure global horizon days will only be captured one time in an orderpoint's
         lead_days/json_lead_days.
         """
         self.warehouse_1.manufacture_steps = 'pbm'
@@ -205,12 +200,12 @@ class TestMrpReplenish(TestMrpCommon):
                 'location_dest_id': self.customer_location.id,
             })],
         })
-        out_picking.with_context(global_visibility_days=365).action_assign()
+        out_picking.with_context(global_horizon_days=365).action_assign()
         r = orderpoint.action_stock_replenishment_info()
         repl_info = self.env[r['res_model']].browse(r['res_id'])
-        lead_days_date = datetime.strptime(
-            loads(repl_info.json_lead_days)['lead_days_date'], '%m/%d/%Y').date()
-        self.assertEqual(lead_days_date, fields.Date.today() + timedelta(days=365))
+        lead_horizon_date = datetime.strptime(
+            loads(repl_info.json_lead_days)['lead_horizon_date'], '%m/%d/%Y').date()
+        self.assertEqual(lead_horizon_date, fields.Date.today() + timedelta(days=365))
 
     def test_orderpoint_onchange_reordering_rule(self):
         """ Ensure onchange logic works properly when editing a reordering rule
@@ -231,7 +226,7 @@ class TestMrpReplenish(TestMrpCommon):
         orderpoint.action_replenish()
 
         prod = self.env['mrp.production'].search([('origin', '=', orderpoint.name)])
-        # Error is triggered for date_start <= lead_days_date < date_finished
+        # Error is triggered for date_start <= lead_horizon_date < date_finished
         prod.date_start = fields.Date.today() + timedelta(days=1)
 
         with Form(orderpoint, view='stock.view_warehouse_orderpoint_tree_editable') as form:
@@ -287,3 +282,32 @@ class TestMrpReplenish(TestMrpCommon):
 
         self.assertEqual(len(mo_final), 1, "Expected one MO for the final product.")
         self.assertEqual(len(mo_component), 1, "Expected one MO for the manufactured BOM component.")
+
+    def test_orderpoint_warning_mrp(self):
+        """ Checks that the warning correctly computes depending on if there's a bom. """
+        orderpoint = self.env['stock.warehouse.orderpoint'].create({
+            'product_id': self.product_4.id,
+            'product_min_qty': 10,
+            'product_max_qty': 50,
+        })
+        self.assertTrue(orderpoint.show_supply_warning)
+
+        # Add a manufacture route to the product
+        self.product_4.route_ids |= self.route_manufacture
+        orderpoint.invalidate_recordset(fnames=['show_supply_warning'])
+        self.assertFalse(orderpoint.show_supply_warning)
+
+        # Archive the boms linked to the product
+        self.product_4.bom_ids.active = False
+        orderpoint.invalidate_recordset(fnames=['show_supply_warning'])
+        self.assertTrue(orderpoint.show_supply_warning)
+
+    def test_set_bom_on_orderpoint(self):
+        """ Test that action_set_bom_on_orderpoint correctly sets a bom on selected orderpoint. """
+        orderpoint = self.env['stock.warehouse.orderpoint'].create({
+            'product_id': self.product_4.id,
+            'product_min_qty': 10,
+            'product_max_qty': 50,
+        })
+        self.product_4.bom_ids.with_context(orderpoint_id=orderpoint.id).action_set_bom_on_orderpoint()
+        self.assertEqual(orderpoint.bom_id.id, self.product_4.bom_ids.id)

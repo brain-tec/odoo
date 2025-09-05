@@ -3,12 +3,13 @@ import { Notebook } from "@web/core/notebook/notebook";
 import { formatDateTime } from "@web/core/l10n/dates";
 import { useService } from "@web/core/utils/hooks";
 import { memoize } from "@web/core/utils/functions";
-import { Component, onMounted, useState, markup, onWillStart } from "@odoo/owl";
+import { Component, onMounted, useState, markup, onWillStart, onWillDestroy } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
 import { HtmlViewer } from "@html_editor/components/html_viewer/html_viewer";
 import { READONLY_MAIN_EMBEDDINGS } from "@html_editor/others/embedded_components/embedding_sets";
 import { browser } from "@web/core/browser/browser";
+import { cookie } from "@web/core/browser/cookie";
 import { loadBundle } from "@web/core/assets";
 
 const { DateTime } = luxon;
@@ -44,12 +45,14 @@ export class HistoryDialog extends Component {
         revisionComparison: null,
         revisionId: null,
         revisionLoading: false,
+        cssMaxHeight: 400,
     });
 
     setup() {
         this.size = "fullscreen";
         this.title = this.props.title;
         this.orm = useService("orm");
+        this.resizeObserver = null;
 
         onWillStart(async () => {
             // We include the current document version as the first revision,
@@ -77,8 +80,19 @@ export class HistoryDialog extends Component {
             });
 
             this.state.revisionsData = revisionData;
+            this.resizeObserver = new ResizeObserver(this.resize.bind(this));
+            this.resizeObserver.observe(document.body);
         });
         onMounted(() => this.init());
+        onWillDestroy(() => {
+            this.resizeObserver?.disconnect();
+        });
+    }
+
+    resize() {
+        const dialogContainer = document.querySelector(".html-history-dialog-container");
+        const computedStyle = getComputedStyle(dialogContainer);
+        this.state.cssMaxHeight = parseInt(computedStyle.height.replace("px", "")) - 160;
     }
 
     getConfig(value) {
@@ -94,6 +108,7 @@ export class HistoryDialog extends Component {
             await loadBundle("html_editor.assets_history_diff");
         }
         await this.updateCurrentRevision(this.state.revisionsData[0]["revision_id"]);
+        this.resize();
     }
 
     async updateCurrentRevision(revisionId) {
@@ -134,11 +149,13 @@ export class HistoryDialog extends Component {
             );
             // Remove unnecessary linebreaks
             unifiedDiffString = unifiedDiffString.replace(/^\s*[\r\n]/gm, "");
+            const colorScheme = cookie.get("color_scheme") === "dark" ? "dark" : "light";
             // eslint-disable-next-line no-undef
             const diffHtml = Diff2Html.html(unifiedDiffString, {
                 drawFileList: false,
                 matching: "lines",
                 outputFormat: "side-by-side",
+                colorScheme: colorScheme,
             });
             return markup(diffHtml);
         }.bind(this)

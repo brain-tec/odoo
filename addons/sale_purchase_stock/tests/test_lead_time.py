@@ -29,8 +29,6 @@ class TestLeadTime(TestCommonSalePurchaseNoChart):
     def test_supplier_lead_time(self):
         """ Basic stock configuration and a supplier with a minimum qty and a lead time """
 
-        self.env.user.company_id.po_lead = 7
-
         product = self.env['product.product'].create({
             'name': 'corpse starch',
             'is_storable': True,
@@ -61,6 +59,7 @@ class TestLeadTime(TestCommonSalePurchaseNoChart):
         self.assertEqual(po.order_line.price_unit, product.seller_ids.price)
 
     def test_dynamic_lead_time_delay(self):
+        self.env.company.horizon_days = 0
         self.product_a.write({
             'seller_ids': [(0, 0, {
                 'partner_id': self.partner_a.id,
