@@ -8,7 +8,7 @@ class StockRule(models.Model):
         """For subcontracting, we need to consider both vendor lead time and
         manufacturing lead time, and DTPMO (Days To Prepare MO).
         Subcontracting delay =
-            max(Vendor lead time, Manufacturing lead time + DTPMO) + Days to Purchase + Purchase security lead time
+            max(Vendor lead time, Manufacturing lead time + DTPMO) + Days to Purchase
         """
         bypass_delay_description = self.env.context.get('bypass_delay_description')
         buy_rule = self.filtered(lambda r: r.action == 'buy')
@@ -25,11 +25,12 @@ class StockRule(models.Model):
             return super()._get_lead_days(product, **values)
 
         delays, delay_description = super(StockRule, self - buy_rule)._get_lead_days(product, **values)
-        extra_delays, extra_delay_description = super(StockRule, buy_rule.with_context(ignore_vendor_lead_time=True, global_visibility_days=0))._get_lead_days(product, **values)
+        extra_delays, extra_delay_description = super(StockRule, buy_rule.with_context(ignore_vendor_lead_time=True, global_horizon_days=0))._get_lead_days(product, **values)
         if seller.delay >= bom.produce_delay + bom.days_to_prepare_mo:
             delays['total_delay'] += seller.delay
             delays['purchase_delay'] += seller.delay
             if not bypass_delay_description:
+                delay_description.append((_('Receipt Date'), int(seller.delay)))
                 delay_description.append((_('Vendor Lead Time'), _('+ %d day(s)', seller.delay)))
         else:
             manufacture_delay = bom.produce_delay
@@ -37,13 +38,15 @@ class StockRule(models.Model):
             # set manufacture_delay to purchase_delay so that PO can be created with correct date
             delays['purchase_delay'] += manufacture_delay
             if not bypass_delay_description:
+                delay_description.append((_('Receipt Date'), manufacture_delay))
                 delay_description.append((_('Manufacturing Lead Time'), _('+ %d day(s)', manufacture_delay)))
             days_to_order = bom.days_to_prepare_mo
             delays['total_delay'] += days_to_order
             # add dtpmo to purchase_delay so that PO can be created with correct date
             delays['purchase_delay'] += days_to_order
             if not bypass_delay_description:
-                extra_delay_description.append((_('Days to Supply Components'), _('+ %d day(s)', days_to_order)))
+                delay_description.append((_('Production Start Date'), days_to_order))
+                delay_description.append((_('Days to Supply Components'), _('+ %d day(s)', days_to_order)))
 
         for key, value in extra_delays.items():
             delays[key] += value

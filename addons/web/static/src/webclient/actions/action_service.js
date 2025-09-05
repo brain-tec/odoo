@@ -146,7 +146,7 @@ export function makeActionManager(env, router = _router) {
         const { model, method } = ev.detail.data.params;
         if (model === "ir.actions.act_window" && UPDATE_METHODS.includes(method)) {
             rpcBus.trigger("CLEAR-CACHES", "/web/action/load");
-            const virtualStack = await _controllersFromState();
+            const virtualStack = await _controllersFromState(router.current);
             const nextStack = [...virtualStack, controllerStack[controllerStack.length - 1]];
             nextStack[nextStack.length - 1].config.breadcrumbs.splice(
                 0,
@@ -162,15 +162,15 @@ export function makeActionManager(env, router = _router) {
     // ---------------------------------------------------------------------------
 
     /**
-     * Create an array of virtual controllers based on the current state of the
-     * router.
+     * Create an array of virtual controllers based on the given state.
      *
+     * @private
+     * @param {object} state
      * @returns {Promise<object[]>} an array of virtual controllers
      */
-    async function _controllersFromState() {
+    async function _controllersFromState(state) {
         const currentState = JSON.parse(browser.sessionStorage.getItem("current_state") || "{}");
-        let state = router.current;
-        if (router.stateToUrl(currentState) === browser.location.pathname) {
+        if (router.stateToUrl(currentState) === router.stateToUrl(state)) {
             state = currentState;
         }
         if (!state?.actionStack?.length) {
@@ -327,6 +327,36 @@ export function makeActionManager(env, router = _router) {
     }
 
     /**
+     * Returns the current action, which is the action of the last controller in the stack.
+     *
+     * @returns {Action|null}
+     */
+
+    async function _getCurrentAction() {
+        const currentController = _getCurrentController();
+        let action = null;
+        if (currentController) {
+            if (currentController.virtual) {
+                try {
+                    action = await _loadAction(currentController.action.id);
+                } catch (error) {
+                    if (
+                        error.exceptionName ===
+                        "odoo.addons.web.controllers.action.MissingActionError"
+                    ) {
+                        action = null;
+                    } else {
+                        throw error;
+                    }
+                }
+            } else {
+                action = JSON.parse(currentController.action._originalAction);
+            }
+        }
+        return action;
+    }
+
+    /**
      * Given an id, xmlid, tag (key of the client action registry) or directly an
      * object describing an action.
      *
@@ -469,10 +499,10 @@ export function makeActionManager(env, router = _router) {
 
     /**
      * @private
-     * @param {object} [state] the state from which to get the action params
+     * @param {object} state the state from which to get the action params
      * @returns {{ actionRequest: object, options: object} | null}
      */
-    function _getActionParams(state = router.current) {
+    function _getActionParams(state) {
         const options = {};
         let actionRequest = null;
         const storedAction = browser.sessionStorage.getItem("current_action");
@@ -1707,13 +1737,16 @@ export function makeActionManager(env, router = _router) {
 
     /**
      * Restores a stack of virtual controllers from the current contents of the
-     * URL and performs a "doAction" on the last one.
+     * state (usually router.current) and performs a "doAction" on the last one.
      *
+     * @private
+     * @param {object} [state]
      * @returns {Promise<boolean>} true if doAction was performed
      */
-    async function loadState() {
-        const newStack = await _controllersFromState();
-        const actionParams = _getActionParams();
+
+    async function loadState(state = router.current) {
+        const newStack = await _controllersFromState(state);
+        const actionParams = _getActionParams(state);
         if (actionParams) {
             // Params valid => performs a "doAction"
             const { actionRequest, options } = actionParams;
@@ -1723,7 +1756,25 @@ export function makeActionManager(env, router = _router) {
             } else {
                 options.newStack = newStack;
             }
-            await doAction(actionRequest, options);
+            try {
+                await doAction(actionRequest, options);
+            } catch (error) {
+                if (
+                    error.exceptionName === "odoo.addons.web.controllers.action.MissingActionError"
+                ) {
+                    if (state.actionStack.length > 1) {
+                        const newState = {
+                            ...state.actionStack.slice(0, -1).at(-1),
+                            actionStack: [...state.actionStack.slice(0, -1)],
+                        };
+                        return loadState(newState);
+                    } else {
+                        env.bus.trigger("WEBCLIENT:LOAD_DEFAULT_APP");
+                    }
+                } else {
+                    throw error;
+                }
+            }
             return true;
         }
     }
@@ -1800,6 +1851,9 @@ export function makeActionManager(env, router = _router) {
         },
         get currentController() {
             return _getCurrentController();
+        },
+        get currentAction() {
+            return _getCurrentAction();
         },
     };
 }

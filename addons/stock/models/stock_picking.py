@@ -12,7 +12,7 @@ from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
 from odoo.addons.web.controllers.utils import clean_action
 from odoo.exceptions import UserError
 from odoo.fields import Domain
-from odoo.tools import format_datetime, format_date, groupby, SQL
+from odoo.tools import format_datetime, format_date, groupby, OrderedSet, SQL
 from odoo.tools.float_utils import float_compare, float_is_zero
 
 
@@ -641,6 +641,7 @@ class StockPicking(models.Model):
     )
     move_line_ids = fields.One2many('stock.move.line', 'picking_id', 'Operations')
     packages_count = fields.Integer('Packages Count', compute='_compute_packages_count')
+    package_history_ids = fields.Many2many('stock.package.history', string='Transfered Packages', copy=False)
     show_check_availability = fields.Boolean(
         compute='_compute_show_check_availability',
         help='Technical field used to compute whether the button "Check Availability" should be displayed.')
@@ -872,15 +873,23 @@ class StockPicking(models.Model):
         for picking in self:
             picking.weight_bulk = picking_weights[picking.id]
 
-    @api.depends('move_line_ids.result_package_id', 'move_line_ids.result_package_id.shipping_weight', 'weight_bulk')
+    @api.depends('move_line_ids.result_package_id', 'move_line_ids.result_package_id.shipping_weight', 'move_line_ids.result_package_id.outermost_package_id.shipping_weight', 'weight_bulk')
     def _compute_shipping_weight(self):
         for picking in self:
             # if shipping weight is not assigned => default to calculated product weight
             packages_weight = picking.move_line_ids.result_package_id.sudo()._get_weight(picking.id)
-            picking.shipping_weight = (
-                picking.weight_bulk +
-                sum(pack.shipping_weight or packages_weight[pack] for pack in picking.move_line_ids.result_package_id)
-            )
+
+            shipping_weight = picking.weight_bulk
+            relevant_packages = picking.move_line_ids.result_package_id.mapped(lambda p: p.outermost_package_id or p)
+            children_packages_by_pack = relevant_packages._get_all_children_package_dest_ids()[0]
+            for package in relevant_packages:
+                if package.shipping_weight:
+                    shipping_weight += package.shipping_weight
+                else:
+                    shipping_weight += package.package_type_id.base_weight
+                    shipping_weight += sum(packages_weight[pack] for pack in self.env['stock.package'].browse(children_packages_by_pack[package]))
+
+            picking.shipping_weight = shipping_weight
 
     def _compute_shipping_volume(self):
         for picking in self:
@@ -925,9 +934,8 @@ class StockPicking(models.Model):
             for picking in pack.picking_ids:
                 packages_by_pick[picking] += 1
 
-        histories_by_pick = self.env['stock.move.line']._read_group([
-            ('picking_id', 'in', done_pickings.ids), ('picking_id.state', '=', 'done')],
-            ['picking_id'], ['package_history_id:count_distinct'])
+        histories_by_pick = self.env['stock.package.history']._read_group([
+            ('picking_ids', 'in', done_pickings.ids)], ['picking_ids'], ['__count'])
         histories_by_pick = dict(histories_by_pick)
 
         for picking in done_pickings:
@@ -1263,7 +1271,9 @@ class StockPicking(models.Model):
             )
 
     def _check_move_lines_map_quant_package(self, package):
-        return package._check_move_lines_map_quant(self.move_line_ids.filtered(lambda ml: ml.package_id == package and ml.product_id.is_storable))
+        return package._check_move_lines_map_quant(self.move_line_ids.filtered(lambda ml:
+            ml.product_id.is_storable
+            and (ml.package_id == package or ml.package_id in package.all_children_package_ids)))
 
     def _get_entire_pack_location_dest(self, move_line_ids):
         location_dest_ids = move_line_ids.mapped('location_dest_id')
@@ -1871,7 +1881,7 @@ class StockPicking(models.Model):
             pack_move_lines = self.env['stock.move.line'].create(move_line_vals)
             pack_move_lines._apply_putaway_strategy()
             # Need to set the right package dest for now fully contained packages
-            self.move_line_ids.result_package_id._apply_package_dest_for_entire_packs()
+            self.move_line_ids.result_package_id._apply_package_dest_for_entire_packs(allowed_package_ids=all_package_ids)
             return True
         return False
 
@@ -1894,7 +1904,6 @@ class StockPicking(models.Model):
             'domain': [('picking_ids', 'in', self.ids)],
             'context': {
                 'picking_id': self.id,
-                'show_entire_packs': self.picking_type_id.show_entire_packs,
                 'search_default_main_packages': True,
             },
         }
@@ -2058,6 +2067,15 @@ class StockPicking(models.Model):
                 clean_action(action, self.env)
                 report_actions.append(action)
         return report_actions
+
+    def _get_packages_for_print(self):
+        package_ids = OrderedSet()
+        for picking in self:
+            if picking.state == 'done':
+                package_ids.update(picking.package_history_ids.package_id.ids)
+            else:
+                package_ids.update(picking.move_line_ids.result_package_id._get_all_package_dest_ids())
+        return self.env['stock.package'].browse(package_ids)
 
     def _can_return(self):
         self.ensure_one()

@@ -5,7 +5,6 @@ import odoo.tests
 from odoo.tests import Form
 from odoo.tests.common import TransactionCase
 from odoo.exceptions import UserError
-from odoo import Command
 
 
 class TestPackingCommon(TransactionCase):
@@ -1829,3 +1828,104 @@ class TestPackagePropagation(TestPackingCommon):
         # action_assign => On move lines, result_package_id is not set.
         self.assertEqual(partial_deliveries.move_line_ids.package_id, package, "The package should be used as source.")
         self.assertFalse(partial_deliveries.move_line_ids.result_package_id, "If the contents of a single pack are reserved by multiple picks, the entire pack can't reproduce on each pick.")
+
+    def test_multi_step_reservation_multi_level_packages(self):
+        """ Checks that in a multi-step delivery, the packages are correctly re-assigned after the validation of the first step.
+        """
+        self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 6)
+
+        pg = self.env['procurement.group'].create({'name': 'package_propagation'})
+        self.env['procurement.group'].run([
+            pg.Procurement(
+                self.productA,
+                6.0,
+                self.productA.uom_id,
+                self.customer_location,
+                'package_propagation',
+                'package_propagation',
+                self.warehouse.company_id,
+                {
+                    'warehouse_id': self.warehouse,
+                    'group_id': pg,
+                }
+            )
+        ])
+        pick = self.env['stock.picking'].search([('group_id', '=', pg.id)])
+
+        pick.move_ids.quantity = 1
+        smol_pack = pick.action_put_in_pack(package_name='Smol')
+
+        pick.move_ids.quantity = 3
+        mid_pack = pick.action_put_in_pack(package_name='Mid')
+        smol_pack.action_put_in_pack(package_id=mid_pack.id)
+        self.assertEqual(smol_pack.dest_complete_name, 'Mid > Smol')
+
+        pick.move_ids.quantity = 6
+        big_pack = pick.action_put_in_pack(package_name='Big')
+        mid_pack.action_put_in_pack(package_id=big_pack.id)
+        self.assertEqual(smol_pack.dest_complete_name, 'Big > Mid > Smol')
+
+        pick.button_validate()
+        pack = pick._get_next_transfers()
+        self.assertRecordValues(pack.move_line_ids.sorted(lambda ml: ml.package_id.id), [
+            {'package_id': smol_pack.id, 'result_package_id': smol_pack.id, 'quantity': 1},
+            {'package_id': mid_pack.id, 'result_package_id': mid_pack.id, 'quantity': 2},
+            {'package_id': big_pack.id, 'result_package_id': big_pack.id, 'quantity': 3},
+        ])
+        self.assertEqual(smol_pack.dest_complete_name, 'Big > Mid > Smol')
+
+    def test_add_only_child_package(self):
+        """ Ensures that when adding packages directly into a picking, if that package has a
+            parent package but it isn't selected, then the parent won't be set as destination,
+            thus be removed from the parent.
+        """
+        container, pack = self.env['stock.package'].create([{
+            'name': name,
+        } for name in ['container', 'package']])
+        self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 1, package_id=pack)
+        pack.parent_package_id = container
+
+        delivery = self.env['stock.picking'].create({
+            'picking_type_id': self.warehouse.out_type_id.id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+        })
+
+        delivery.action_add_entire_packs(pack)
+        self.assertEqual(delivery.move_line_ids.result_package_id, pack)
+        self.assertTrue(delivery.move_line_ids.is_entire_pack)
+        self.assertFalse(pack.package_dest_id)
+
+        pack.with_context(picking_id=delivery.id).action_remove_package()
+        self.assertFalse(pack.move_line_ids)
+
+        delivery.action_add_entire_packs(container)
+        self.assertEqual(delivery.move_line_ids.result_package_id, pack)
+        self.assertTrue(delivery.move_line_ids.is_entire_pack)
+        self.assertEqual(pack.package_dest_id, container)
+
+    def test_remove_part_of_entire_pack(self):
+        """ Checks that removing quantity from an entire pack removes its `is_entire_pack` flag for all of its move lines,
+            while keeping the other ones untouched.
+        """
+        pack1, pack2 = self.env['stock.package'].create([{
+            'name': name,
+        } for name in ['pack1', 'pack2']])
+        self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 5, package_id=pack1)
+        self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 3, package_id=pack1)
+        self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 1, package_id=pack2)
+
+        delivery = self.env['stock.picking'].create({
+            'picking_type_id': self.warehouse.out_type_id.id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+        })
+
+        delivery.action_add_entire_packs(pack1 | pack2)
+        self.assertEqual(delivery.move_line_ids.mapped('is_entire_pack'), [True, True, True])
+
+        # Remove some quantity from one move line. The package should not be considered as 'entire' for both move lines.
+        pack1_ml = delivery.move_line_ids.filtered(lambda ml: ml.package_id == pack1)
+        pack1_ml[0].quantity = 1
+        self.assertEqual(pack1_ml.mapped('is_entire_pack'), [False, False])
+        self.assertTrue(delivery.move_line_ids.filtered(lambda ml: ml.package_id == pack2).is_entire_pack)
