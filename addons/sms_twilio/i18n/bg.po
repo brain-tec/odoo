@@ -1,139 +1,133 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# * sms_twilio
+# 	* sms_twilio
 #
-# "Kwanghee Park (kwpa)" <kwpa@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-05-16 12:28+0000\n"
-"PO-Revision-Date: 2025-09-03 09:00+0000\n"
-"Last-Translator: \"Kwanghee Park (kwpa)\" <kwpa@odoo.com>\n"
-"Language-Team: Korean <https://translate.odoo.com/projects/odoo-18/"
-"sms_twilio/ko/>\n"
-"Language: ko\n"
+"PO-Revision-Date: 2025-05-16 12:28+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"Plural-Forms: \n"
 
 #. module: sms_twilio
 #: model_terms:ir.ui.view,arch_db:sms_twilio.manage_connection_wizard_view
-#, fuzzy
 msgid "+1 555-123-4567"
-msgstr "+1 555-123-4567"
+msgstr ""
 
 #. module: sms_twilio
 #: model_terms:ir.ui.view,arch_db:sms_twilio.manage_connection_wizard_view
-#, fuzzy
 msgid "ACabcde12345abcde12345abcde12345ab"
-msgstr "ACabcde12345abcde12345abcde12345ab"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_res_company__sms_twilio_account_sid
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_manage_connection_wizard__sms_twilio_account_sid
 msgid "Account SID"
-msgstr "계정 SID"
+msgstr ""
 
 #. module: sms_twilio
 #: model_terms:ir.ui.view,arch_db:sms_twilio.manage_connection_wizard_view
 msgid ""
 "Any number here that is not on Twilio will be deleted and the ordering will "
 "be reset to Twilio's."
-msgstr "Twilio에 존재하지 않는 번호는 삭제되고, 순서는 Twilio로 재설정됩니다."
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_res_company__sms_twilio_auth_token
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_manage_connection_wizard__sms_twilio_auth_token
 msgid "Auth Token"
-msgstr "인증 토큰"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields.selection,name:sms_twilio.selection__sms_sms__failure_type__sms_twilio_authentication
 msgid "Authentication error"
-msgstr "인증 오류"
+msgstr ""
 
 #. module: sms_twilio
 #: model_terms:ir.ui.view,arch_db:sms_twilio.manage_connection_wizard_view
 msgid "Cancel"
-msgstr "취소"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model,name:sms_twilio.model_res_company
 msgid "Companies"
-msgstr "회사"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_manage_connection_wizard__company_id
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_number__company_id
 msgid "Company"
-msgstr "회사"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model,name:sms_twilio.model_res_config_settings
 msgid "Config Settings"
-msgstr "환경설정 항목 설정"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_number__country_id
 msgid "Country"
-msgstr "국가"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_number__country_code
 msgid "Country Code"
-msgstr "국가 코드"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_manage_connection_wizard__create_uid
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_number__create_uid
 msgid "Created by"
-msgstr "작성자"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_manage_connection_wizard__create_date
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_number__create_date
 msgid "Created on"
-msgstr "작성일"
+msgstr ""
 
 #. module: sms_twilio
 #: model_terms:ir.ui.view,arch_db:sms_twilio.manage_connection_wizard_view
 msgid "Credentials"
-msgstr "자격 증명"
+msgstr ""
 
 #. module: sms_twilio
 #: model_terms:ir.ui.view,arch_db:sms_twilio.manage_connection_wizard_view
 msgid "Delete"
-msgstr "삭제"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_manage_connection_wizard__display_name
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_number__display_name
 msgid "Display Name"
-msgstr "표시명"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_manage_connection_wizard__sms_twilio_error_msg
 msgid "Error message"
-msgstr "오류 메시지"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_sms__failure_type
 msgid "Failure Type"
-msgstr "실패 유형"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_mail_notification__failure_type
 msgid "Failure type"
-msgstr "실패 유형"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_manage_connection_wizard__id
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_number__id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: sms_twilio
 #. odoo-python
@@ -142,7 +136,7 @@ msgstr "ID"
 msgid ""
 "Invalid Twilio Account SID: must only contain alphanumeric characters after "
 "'AC'."
-msgstr "잘못된 Twilio 계정 SID: 'AC' 뒤에는 반드시 영숫자만 올 수 있습니다."
+msgstr ""
 
 #. module: sms_twilio
 #. odoo-python
@@ -150,59 +144,58 @@ msgstr "잘못된 Twilio 계정 SID: 'AC' 뒤에는 반드시 영숫자만 올 �
 #, python-format
 msgid ""
 "Invalid Twilio Account SID: must start with 'AC' and be 34 characters long."
-msgstr "잘못된 Twilio 계정 SID: 반드시 'AC' 로 시작해야 하며 글자 수는 34자를 넘을 "
-"수 없습니다."
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_manage_connection_wizard__write_uid
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_number__write_uid
 msgid "Last Updated by"
-msgstr "최종 수정자"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_manage_connection_wizard__write_date
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_number__write_date
 msgid "Last Updated on"
-msgstr "최종 수정일"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model,name:sms_twilio.model_sms_tracker
 msgid "Link SMS to mailing/sms tracking models"
-msgstr "SMS를 메일링 및 SMS 추적 모델에 연결합니다"
+msgstr ""
 
 #. module: sms_twilio
 #: model_terms:ir.ui.view,arch_db:sms_twilio.res_config_settings_view_form
 msgid "Manage Twilio Connection"
-msgstr "Twilio 연결 관리"
+msgstr ""
 
 #. module: sms_twilio
 #. odoo-python
 #: code:addons/sms_twilio/models/res_company.py:0
 #, python-format
 msgid "Manage Twilio SMS"
-msgstr "Twilio SMS 관리"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model,name:sms_twilio.model_mail_notification
 msgid "Message Notifications"
-msgstr "메시지 알림"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields,field_description:sms_twilio.field_res_company__sms_twilio_number_ids
 #: model:ir.model.fields,field_description:sms_twilio.field_sms_twilio_manage_connection_wizard__sms_twilio_number_ids
 #: model_terms:ir.ui.view,arch_db:sms_twilio.manage_connection_wizard_view
 msgid "Numbers"
-msgstr "번호"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model.fields.selection,name:sms_twilio.selection__res_company__sms_provider__iap
 msgid "Odoo IAP"
-msgstr "Odoo IAP"
+msgstr ""
 
 #. module: sms_twilio
 #: model:ir.model,name:sms_twilio.model_sms_sms
 msgid "Outgoing SMS"
-msgstr "발신 SMS"
+msgstr ""
 
 #. module: sms_twilio
 #. odoo-python
