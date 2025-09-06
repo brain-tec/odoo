@@ -285,9 +285,11 @@
             <t t-set="additional_title">Shop Wishlist</t>
             <div id="wrap" class="js_sale">
                 <div class="oe_structure" id="oe_structure_website_sale_wishlist_product_wishlist_1"/>
-                <div class="container oe_website_sale pt-4">
+                <div class="container oe_website_sale">
                     <section class="container wishlist-section pb-5">
-                        <h1 class="h4-fs mb-3">My Wishlist</h1>
+                        <div class="o_wishlist_products_header pt-4 pb-3">
+                            <h1 class="h4-fs mb-0">My Wishlist</h1>
+                        </div>
                         <div
                             id="empty-wishlist-message"
                             t-attf-class="w-100 #{'d-none' if wishes else ''}"
@@ -316,15 +318,6 @@
                                     t-att-data-wish-id="wish.id"
                                     t-att-data-product-id="wish.product_id.id"
                                 >
-                                    <div class="d-flex gap-2 position-absolute start-50 translate-middle-x z-3">
-                                        <button
-                                            type="button"
-                                            class="btn btn-light btn-sm o_wish_rm rounded-top-0"
-                                            title="Remove from wishlist"
-                                        >
-                                            <i class='fa fa-trash-o small' role="presentation"/>
-                                        </button>
-                                    </div>
                                     <t t-call="website_sale.products_item">
                                         <t t-set="product" t-value="wish.product_id.product_tmpl_id"/>
                                         <t t-set="product_variant" t-value="wish.product_id"/>
@@ -381,6 +374,17 @@
                                                     <span class="o_label small ms-1">Add to Cart</span>
                                                 </button>
                                             </div>
+                                        </t>
+                                        <t
+                                            t-set="extra_actions"
+                                        >
+                                            <button
+                                                type="button"
+                                                class="btn btn-light o_wish_rm z-3 rounded-pill lh-1"
+                                                title="Remove from wishlist"
+                                            >
+                                                <i class="oi oi-close" role="presentation"/>
+                                            </button>
                                         </t>
                                     </t>
                                 </article>

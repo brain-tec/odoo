@@ -147,8 +147,8 @@ class HrVersion(models.Model):
         groups="hr.group_hr_manager")
     trial_date_end = fields.Date('End of Trial Period', help="End date of the trial period (if there is one).",
                                  groups="hr.group_hr_manager")
-    date_start = fields.Date(compute='_compute_dates', groups="hr.group_hr_manager")
-    date_end = fields.Date(compute='_compute_dates', groups="hr.group_hr_manager")
+    date_start = fields.Date(compute='_compute_dates', groups="hr.group_hr_manager", search="_search_start_date")
+    date_end = fields.Date(compute='_compute_dates', groups="hr.group_hr_manager", search="_search_end_date")
     is_current = fields.Boolean(compute='_compute_is_current', groups="hr.group_hr_manager")
     is_past = fields.Boolean(compute='_compute_is_past', groups="hr.group_hr_manager")
     is_future = fields.Boolean(compute='_compute_is_future', groups="hr.group_hr_manager")
@@ -247,15 +247,17 @@ class HrVersion(models.Model):
                     continue
                 if date_start <= contract_date_end and version.contract_date_start <= date_to:
                     raise ValidationError(self.env._(
-                        'Overlapping contracts for %(employee)s:\n%(overlaps)s',
-                        employee=version.employee_id.display_name,
-                        overlaps='\n'.join(
-                            [self.env._('Employee Record') + f' ({format_date_abbr(v.env, v.date_version)}): '
-                             f'{format_date_abbr(v.env, v.contract_date_start)} '
-                             f'- {format_date_abbr(v.env, v.contract_date_end) if v.contract_date_end else self.env._("Indefinite")}'
-                             for v in (versions | version)])))
+                        "%s already has a contract running during the selected period.\n\n"
+                        "Please either:\n\n"
+                        "- Change the start date so that it doesn't overlap with the existing contract, or\n"
+                        "- Create a new employee if this employee should have multiple active contracts.",
+                        version.employee_id.display_name))
             if not contract_period_exists:
                 dates_per_employee[version.employee_id].append((version.contract_date_start, version.contract_date_end, version))
+
+    def check_contract_finished(self):
+        if self.contract_date_start and not self.contract_date_end:
+            raise ValidationError(self.env._("Before creating a new contract, close the current one by setting an end date."))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -516,6 +518,12 @@ class HrVersion(models.Model):
                 version.date_end = date_version_end
             else:
                 version.date_end = version.contract_date_end
+
+    def _search_start_date(self, operator, value):
+        return [('contract_date_start', operator, value)]
+
+    def _search_end_date(self, operator, value):
+        return [('contract_date_end', operator, value)]
 
     @api.model
     def _get_marital_status_selection(self):

@@ -1535,9 +1535,9 @@ class SaleOrder(models.Model):
                     optional_values['extra_tax_data'] = self.env['account.tax']\
                         ._reverse_quantity_base_line_extra_tax_data(line.extra_tax_data)
 
-                invoice_line_vals.append(
-                    Command.create(line._prepare_invoice_line(**optional_values))
-                )
+                for vals in line._prepare_invoice_lines_vals_list(**optional_values):
+                    invoice_line_vals.append(Command.create(vals))
+
                 invoice_item_sequence += 1
 
             invoice_vals['invoice_line_ids'] += invoice_line_vals
@@ -1769,8 +1769,10 @@ class SaleOrder(models.Model):
                 )
             return (
                 line.display_type == 'line_section'
-                or (line.display_type == 'line_subsection' and not line.parent_id.collapse_composition)
-                or not line.collapse_composition
+                or not (
+                    line.parent_id.collapse_composition
+                    or line.parent_id.parent_id.collapse_composition
+                )
             )
 
         return self.order_line.filtered(show_line)
@@ -2089,11 +2091,12 @@ class SaleOrder(models.Model):
 
     def _get_product_catalog_record_lines(self, product_ids, *, selected_section_id=False, **kwargs):
         grouped_lines = defaultdict(lambda: self.env['sale.order.line'])
+        selected_section_id = selected_section_id or False
         for line in self.order_line:
             if (
                 line.display_type
                 or line.product_id.id not in product_ids
-                or line.section_line_id.id != selected_section_id
+                or line.get_parent_section_line().id != selected_section_id
             ):
                 continue
             grouped_lines[line.product_id] |= line
@@ -2134,10 +2137,11 @@ class SaleOrder(models.Model):
         :rtype: float
         """
         request.update_context(catalog_skip_tracking=True)
-        sol = self.order_line.filtered_domain([
-            ('product_id', '=', product_id),
-            ('section_line_id', '=', selected_section_id),
-        ])
+        selected_section_id = selected_section_id or False
+        sol = self.order_line.filtered(
+            lambda l: l.product_id.id == product_id
+            and l.get_parent_section_line().id == selected_section_id,
+        )
         if sol:
             if quantity != 0:
                 sol.product_uom_qty = quantity
