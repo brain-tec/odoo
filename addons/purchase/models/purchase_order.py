@@ -1147,11 +1147,12 @@ class PurchaseOrder(models.Model):
 
     def _get_product_catalog_record_lines(self, product_ids, *, selected_section_id=False, **kwargs):
         grouped_lines = defaultdict(lambda: self.env['purchase.order.line'])
+        selected_section_id = selected_section_id or False
         for line in self.order_line:
             if (
                 line.display_type
                 or line.product_id.id not in product_ids
-                or line.section_line_id.id != selected_section_id
+                or line.get_parent_section_line().id != selected_section_id
             ):
                 continue
             grouped_lines[line.product_id] |= line
@@ -1271,10 +1272,11 @@ class PurchaseOrder(models.Model):
         :rtype: float
         """
         self.ensure_one()
-        pol = self.order_line.filtered_domain([
-            ('product_id', '=', product_id),
-            ('section_line_id', '=', selected_section_id),
-        ])
+        selected_section_id = selected_section_id or False
+        pol = self.order_line.filtered(
+            lambda l: l.product_id.id == product_id
+            and l.get_parent_section_line().id == selected_section_id,
+        )
         if pol:
             if quantity != 0:
                 pol.product_qty = quantity

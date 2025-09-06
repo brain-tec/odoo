@@ -120,7 +120,7 @@ export class LinkPopover extends Component {
             isDocument: false,
             buttonSize: linkElement.className.match(/btn-(sm|lg)/)?.[1] || "",
             buttonShape: this.getButtonShape(),
-            customBorderSize: computedStyle.borderWidth.replace("px", "") || "1",
+            customBorderSize: computedStyle.borderWidth.replace("px", "") || "0",
             customBorderStyle: computedStyle.borderStyle || "solid",
             isImage: this.props.isImage,
             showReplaceTitleBanner: this.props.showReplaceTitleBanner,
@@ -466,7 +466,10 @@ export class LinkPopover extends Component {
             if (icon) {
                 this.state.previewIcon.value = icon;
             }
-        } else if (window.location.hostname !== url.hostname) {
+        } else if (
+            window.location.hostname !== url.hostname &&
+            !new RegExp(`^https?://${session.db}\\.odoo\\.com(/.*)?$`).test(url.origin)
+        ) {
             // Preview pages from current website only. External website will
             // most of the time raise a CORS error. To avoid that error, we
             // would need to fetch the page through the server (s2s), involving

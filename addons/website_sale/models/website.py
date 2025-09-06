@@ -44,6 +44,15 @@ class Website(models.Model):
         except ValueError:
             return False
 
+    def _default_confirmation_email_template(self):
+        template_id = self.env['ir.config_parameter'].sudo().get_param(
+            'sale.default_confirmation_template'
+        )
+        default_template = template_id and self.env['mail.template'].browse(int(template_id))
+        if default_template.exists():
+            return default_template
+        return self.env.ref('sale.mail_template_sale_confirmation', raise_if_not_found=False)
+
     #=== FIELDS ===#
 
     salesperson_id = fields.Many2one(
@@ -73,7 +82,6 @@ class Website(models.Model):
         selection=[
             ('stay', "Stay on Product Page"),
             ('go_to_cart', "Go to cart"),
-            ('force_dialog', "Let the user decide (dialog)"),
         ],
         default='stay',
     )
@@ -239,7 +247,7 @@ class Website(models.Model):
 
     prevent_zero_price_sale = fields.Boolean(string="Hide 'Add To Cart' when price = 0")
 
-    enabled_gmc_src = fields.Boolean(string="Google Merchant Center Data Source")
+    enabled_gmc_src = fields.Boolean(string="Google Merchant Center")
 
     currency_id = fields.Many2one(
         string="Default Currency",
@@ -250,6 +258,11 @@ class Website(models.Model):
         string="Price list available for this Ecommerce/Website",
         comodel_name='product.pricelist',
         compute="_compute_pricelist_ids",
+    )
+    confirmation_email_template_id = fields.Many2one(
+        comodel_name='mail.template',
+        domain=[('model', '=', 'sale.order')],
+        default=_default_confirmation_email_template,
     )
 
     _check_gmc_ecommerce_access = models.Constraint(
@@ -338,6 +351,7 @@ class Website(models.Model):
 
         website = self.get_current_website()
         website_settings = {}
+        category_settings = {}
         views_to_disable = []
         views_to_enable = []
         scss_customization_params = {}
@@ -346,6 +360,7 @@ class Website(models.Model):
 
         def parse_style_config(style_config_):
             website_settings.update(style_config_['website_fields'])
+            category_settings.update(style_config_.get('category_fields', {}))
             views_to_disable.extend(style_config_['views']['disable'])
             views_to_enable.extend(style_config_['views']['enable'])
             scss_customization_params.update(style_config_.get('scss_customization_params', {}))
@@ -363,12 +378,11 @@ class Website(models.Model):
         # Apply eCommerce page style configurations.
         if website_settings:
             website.write(website_settings)
+        if category_settings:
+            self.env['product.public.category'].search(website.website_domain()).write(
+                category_settings
+            )
         for xml_id in views_to_disable:
-            if (
-                xml_id == 'website_sale_comparison.product_add_to_compare'
-                and 'website_sale_comparison' not in self.env['ir.module.module']._installed()
-            ):
-                continue
             ThemeUtils.disable_view(xml_id)
         for xml_id in views_to_enable:
             ThemeUtils.enable_view(xml_id)
@@ -518,6 +532,7 @@ class Website(models.Model):
                     'name': cat['name'],
                     'website_description': cat['description'],
                     'image_1920': image_base64,
+                    'cover_image': image_base64,
                 })
             self.env['product.public.category'].sudo().create(categories)
         return res
@@ -1007,3 +1022,34 @@ class Website(models.Model):
 
     def _get_snippet_defaults(self, snippet):
         return super()._get_snippet_defaults(snippet) | const.SNIPPET_DEFAULTS.get(snippet, {})
+
+    def _get_product_image_ratio(self):
+        """Get the product image aspect ratio based on the website's design classes.
+
+        Returns:
+            str: The aspect ratio as a string (e.g., '16_9', '4_3', '1_1')
+        """
+        classes = self.shop_opt_products_design_classes or ''
+        ratio_mapping = {
+            'o_wsale_products_opt_thumb_16_9': '16_9',
+            'o_wsale_products_opt_thumb_4_3': '4_3',
+            'o_wsale_products_opt_thumb_6_5': '6_5',
+            'o_wsale_products_opt_thumb_4_5': '4_5',
+            'o_wsale_products_opt_thumb_2_3': '2_3',
+        }
+        for class_name, ratio in ratio_mapping.items():
+            if class_name in classes:
+                return ratio
+        return '1_1'
+
+    def _get_product_image_ratio_height(self):
+        match self._get_product_image_ratio():
+            case '16_9':
+                return '36px'
+            case '4_3':
+                return '48px'
+            case '6_5':
+                return '53px'
+            case '4_5':
+                return '96px'
+        return '64px'

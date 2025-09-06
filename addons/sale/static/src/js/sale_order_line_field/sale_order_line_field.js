@@ -13,8 +13,56 @@ import {
 import { registry } from '@web/core/registry';
 import { CharField } from '@web/views/fields/char/char_field';
 
+function getComboRecords(listRecords, record) {
+    const comboRecords = [];
+
+    if (record.data.product_type === 'combo') {
+        // if currernt record is combo then we move forward util we find non combo line
+        comboRecords.push(record);
+        let index = listRecords.indexOf(record) + 1;
+
+        while (index < listRecords.length) {
+            const r = listRecords[index];
+            if (!r.data.combo_item_id?.id || r.data.linked_line_id?.id !== record.resId) {
+                break;
+            }
+            comboRecords.push(r);
+            index++;
+        }
+
+    } else if (record.data.combo_item_id?.id) {
+        // if current record is combo item then we move backward util we find associated combo line
+        // Here we assume that the record we get is the last item of the combo 
+        let index = listRecords.indexOf(record);
+        while (index >= 0) {
+            const r = listRecords[index];
+            comboRecords.unshift(r);
+
+            if (r.data.product_type === 'combo' && r.resId === record.data.linked_line_id?.id) {
+                break;
+            }
+            index--;
+        }
+    }
+
+    return comboRecords;
+}
+
 export class SaleOrderLineListRenderer extends ProductLabelSectionAndNoteListRender {
     static recordRowTemplate = 'sale.ListRenderer.RecordRow';
+
+    setup(){
+        super.setup();
+        this.priceColumns.push('discount');
+    }
+
+    /**
+     * Little hack to make sure we get correct title field everytime
+     * while accessing comboColumns
+     */
+    get comboColumns() {
+        return [this.titleField, 'product_uom_qty', 'discount'];
+    }
 
     /**
      * Product description widget logic
@@ -41,21 +89,6 @@ export class SaleOrderLineListRenderer extends ProductLabelSectionAndNoteListRen
         return activeColumns;
     }
 
-    /**
-     * Combo logic
-     */
-
-    getCellClass(column, record) {
-        const classNames = super.getCellClass(column, record);
-        if (
-            this.isCombo(record)
-            && ![this.titleField, 'product_uom_qty', 'discount'].includes(column.name)
-        ) {
-            return `${classNames} opacity-0 pe-none`;
-        }
-        return classNames;
-    }
-
     getRowClass(record) {
         let classNames = super.getRowClass(record);
         if (this.isCombo(record) || this.isComboItem(record)) {
@@ -78,6 +111,53 @@ export class SaleOrderLineListRenderer extends ProductLabelSectionAndNoteListRen
         await super.onDeleteRecord(record);
     }
 
+    async moveCombo(record, direction) {
+        const canProceed = await this.props.list.leaveEditMode({ canAbandon: false });
+        if (!canProceed) return;
+
+        const { movingProducts, targetProducts } = this.getComboSwapPairs(record, direction);
+        return this.swapSections(movingProducts, targetProducts);
+    }
+
+    getComboSwapPairs(record, direction) {
+        const comboProducts = getComboRecords(this.props.list.records, record);
+
+        if (direction === 'up') {
+            return {
+                movingProducts: this.getPreviousRecords(record),
+                targetProducts: comboProducts,
+            };
+        }
+        if (direction === 'down') {
+            return {
+                movingProducts: comboProducts,
+                targetProducts: this.getNextRecords(record),
+            };
+        }
+        return { movingProducts: [], targetProducts: [] };
+    }
+
+    getPreviousRecords(record) {
+        const { records } = this.props.list;
+        const previousRecord = records[records.indexOf(record) - 1];
+
+        if (previousRecord?.data.combo_item_id?.id){
+            return getComboRecords(records, previousRecord);
+        }
+        return previousRecord ? [previousRecord] : false;
+    }
+
+    getNextRecords(record) {
+        const { records } = this.props.list;
+        const comboRecords = getComboRecords(records, record);
+
+        const nextRecord = records[records.indexOf(record) + comboRecords.length];
+        if (nextRecord?.data.product_type === 'combo'){
+            return getComboRecords(records, nextRecord);
+        }
+        return nextRecord ? [nextRecord] : false;
+    }
+
     isCombo(record) {
         return record.data.product_type === 'combo';
     }
@@ -88,6 +168,10 @@ export class SaleOrderLineListRenderer extends ProductLabelSectionAndNoteListRen
 
     shouldDuplicateSectionItem(record) {
         return !this.isCombo(record) && !this.isComboItem(record);
+    }
+
+    displayDeleteIcon(record){
+        return super.displayDeleteIcon(record) && !this.isComboItem(record);
     }
 }
 

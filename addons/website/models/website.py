@@ -528,6 +528,12 @@ class Website(models.Model):
             if template_class not in snippet_classes:
                 snippet_classes.append(template_class)
 
+        # Add 'o_colored_level' to maintain correct color configuration.
+        snippet_classes.append('o_colored_level')
+
+        # Apply class modifications (add/remove) to the snippet or its children.
+        # - If dict is found, apply to the first child matching the selector.
+        # - Otherwise, treated as direct modification on the snippet element.
         class_modifications = [
             ('remove', customizations.get('remove_classes', []) or default_settings.get('remove_classes', [])),
             ('add', customizations.get('add_classes', []) or default_settings.get('add_classes', [])),
@@ -1874,12 +1880,14 @@ class Website(models.Model):
             return self.env["ir.actions.actions"]._for_xml_id("website.backend_dashboard")
         return self.env["ir.actions.actions"]._for_xml_id("website.action_website")
 
-    def get_client_action_url(self, url, mode_edit=False):
+    def get_client_action_url(self, url, mode_edit=False, mode_debug=0):
         action_params = {
             "path": url,
         }
         if mode_edit:
             action_params["enable_editor"] = 1
+        if mode_debug:
+            action_params["debug"] = mode_debug
         return "/odoo/action-website.website_preview?" + urls.url_encode(action_params)
 
     def get_client_action(self, url, mode_edit=False, website_id=False):

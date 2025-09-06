@@ -1,4 +1,3 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
 from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
 from pytz import UTC
@@ -87,10 +86,10 @@ class PurchaseOrderLine(models.Model):
     product_template_attribute_value_ids = fields.Many2many(related='product_id.product_template_attribute_value_ids', readonly=True)
     product_no_variant_attribute_value_ids = fields.Many2many('product.template.attribute.value', string='Product attribute values that do not create variants', ondelete='restrict')
     purchase_line_warn_msg = fields.Text(related='product_id.purchase_line_warn_msg')
-    section_line_id = fields.Many2one(
-        comodel_name='purchase.order.line',
-        compute='_compute_section_line_id',
-        store=True,
+    parent_id = fields.Many2one(
+        'purchase.order.line',
+        string="Parent Section Line",
+        compute='_compute_parent_id',
     )
     technical_price_unit = fields.Float(help="Technical field for price computation")
 
@@ -401,16 +400,26 @@ class PurchaseOrderLine(models.Model):
             price_unit *= self.product_id.uom_id.factor / self.product_uom_id.factor
         return price_unit
 
-    @api.depends('order_id.order_line.sequence')
-    def _compute_section_line_id(self):
+    def _compute_parent_id(self):
+        purchase_order_lines = set(self)
         for order, lines in self.grouped('order_id').items():
-            current_section_line = False
-            for line in lines.sorted('sequence'):
+            if not order:
+                lines.parent_id = False
+                continue
+            last_section = False
+            last_sub = False
+            for line in order.order_line.sorted('sequence'):
                 if line.display_type == 'line_section':
-                    current_section_line = line
-                    line.section_line_id = False
-                else:
-                    line.section_line_id = current_section_line
+                    last_section = line
+                    if line in purchase_order_lines:
+                        line.parent_id = False
+                    last_sub = False
+                elif line.display_type == 'line_subsection':
+                    if line in purchase_order_lines:
+                        line.parent_id = last_section
+                    last_sub = line
+                elif line in purchase_order_lines:
+                    line.parent_id = last_sub or last_section
 
     def action_add_from_catalog(self):
         order = self.env['purchase.order'].browse(self.env.context.get('order_id'))
@@ -628,3 +637,9 @@ class PurchaseOrderLine(models.Model):
             "order_id": self.order_id,
             "force_uom": True,
         }
+
+    def get_parent_section_line(self):
+        if not self.display_type and self.parent_id.display_type == 'line_subsection':
+            return self.parent_id.parent_id
+
+        return self.parent_id
