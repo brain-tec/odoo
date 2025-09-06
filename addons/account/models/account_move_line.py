@@ -83,7 +83,7 @@ class AccountMoveLine(models.Model):
     )
     is_storno = fields.Boolean(
         string="Company Storno Accounting",
-        related='move_id.is_storno',
+        compute='_compute_is_storno', store=True, readonly=False, precompute=True,
         help="Utility field to express whether the journal item is subject to storno accounting",
     )
     sequence = fields.Integer(compute='_compute_sequence', store=True, readonly=False, precompute=True)
@@ -339,21 +339,17 @@ class AccountMoveLine(models.Model):
     collapse_composition = fields.Boolean(
         string="Hide Composition",
         help="If checked, the lines below this section will not be displayed in reports and portal.",
-        compute="_compute_section_visibility_fields", store=True, readonly=False,
     )
     collapse_prices = fields.Boolean(
         string="Hide Prices",
         help="If checked, the prices of the lines below this section will not be displayed in reports and portal.",
-        compute="_compute_section_visibility_fields", store=True, readonly=False,
     )
     parent_id = fields.Many2one(
         'account.move.line',
         string="Parent Section Line",
         compute='_compute_parent_id',
-        search='_search_parent_id',
-        copy=False,
+        compute_sudo=True,
     )
-    child_ids = fields.One2many(comodel_name='account.move.line', inverse_name='parent_id')
     product_id = fields.Many2one(
         comodel_name='product.product',
         string='Product',
@@ -383,11 +379,6 @@ class AccountMoveLine(models.Model):
         tracking=True,
         help="This field is used for payable and receivable journal entries. "
              "You can put the limit date for the payment of this line.",
-    )
-    section_line_id = fields.Many2one(
-        comodel_name='account.move.line',
-        compute='_compute_section_line_id',
-        store=True,
     )
 
     # === Price fields === #
@@ -696,6 +687,18 @@ class AccountMoveLine(models.Model):
 
         return [('account_id', operator, value)]
 
+    @api.depends('move_id.is_storno', 'price_unit', 'quantity')
+    def _compute_is_storno(self):
+        for line in self:
+            if not line.company_id.account_storno:
+                continue
+            line.is_storno = line.is_storno or line.move_id.is_storno
+
+            # For invoice lines, we want to set is_storno based on the sign of the line if the entire move is not storno (not refund)
+            # This allows setting is_storno to true or false depending on quantity and price_unit
+            if not line.move_id.is_storno and line in line.move_id.invoice_line_ids and line.quantity * line.price_unit:
+                line.is_storno = line.quantity * line.price_unit < 0
+
     @api.depends('move_id')
     def _compute_balance(self):
         for line in self:
@@ -715,7 +718,7 @@ class AccountMoveLine(models.Model):
             else:
                 line.balance = 0
 
-    @api.depends('balance', 'move_id.is_storno')
+    @api.depends('balance')
     def _compute_debit_credit(self):
         for line in self:
             if not line.is_storno:
@@ -887,17 +890,6 @@ class AccountMoveLine(models.Model):
                 line.quantity = line.quantity if line.quantity else 1
             else:
                 line.quantity = False
-
-    @api.depends('move_id.line_ids.sequence')
-    def _compute_section_line_id(self):
-        for move, lines in self.grouped('move_id').items():
-            current_section_line = False
-            for line in lines.sorted('sequence'):
-                if line.display_type == 'line_section':
-                    current_section_line = line
-                    line.section_line_id = False
-                else:
-                    line.section_line_id = current_section_line
 
     @api.depends('display_type')
     def _compute_sequence(self):
@@ -1195,12 +1187,14 @@ class AccountMoveLine(models.Model):
             )
             line.reconciled_lines_excluding_exchange_diff_ids = all_lines - excluded_ids
 
-    @api.depends('sequence', 'move_id')
     def _compute_parent_id(self):
-        for _move, lines in self.grouped('move_id').items():
+        for move, lines in self.grouped('move_id').items():
+            if not move:
+                lines.parent_id = False
+                continue
             last_section = False
             last_sub = False
-            for line in lines.sorted('sequence'):
+            for line in move.line_ids.sorted('sequence'):
                 if line.display_type == 'line_section':
                     last_section = line
                     line.parent_id = False
@@ -1208,22 +1202,10 @@ class AccountMoveLine(models.Model):
                 elif line.display_type == 'line_subsection':
                     line.parent_id = last_section
                     last_sub = line
-                elif line.display_type == 'product':
-                    line.parent_id = last_sub or last_section or False
+                elif line.display_type in {'line_note', 'product'}:
+                    line.parent_id = last_sub or last_section
                 else:
                     line.parent_id = False
-
-    @api.depends('parent_id')
-    def _compute_section_visibility_fields(self):
-        for line in self:
-            if line.display_type in ('line_section', 'line_subsection'):
-                continue
-
-            line.collapse_prices = line.parent_id.collapse_prices
-            line.collapse_composition = line.parent_id.collapse_composition
-
-    def _search_parent_id(self, operator, value):
-        return [('id', operator, value)]
 
     @api.depends('move_id.move_type')
     def _compute_no_followup(self):
@@ -1318,6 +1300,7 @@ class AccountMoveLine(models.Model):
     @api.onchange('debit')
     def _inverse_debit(self):
         for line in self:
+            line.is_storno = line.debit < 0
             if line.debit:
                 line.credit = 0
             line.balance = line.debit - line.credit
@@ -1325,6 +1308,7 @@ class AccountMoveLine(models.Model):
     @api.onchange('credit')
     def _inverse_credit(self):
         for line in self:
+            line.is_storno = line.credit < 0
             if line.credit:
                 line.debit = 0
             line.balance = line.debit - line.credit
@@ -1584,11 +1568,15 @@ class AccountMoveLine(models.Model):
     def _sanitize_vals(self, vals):
         if 'debit' in vals or 'credit' in vals:
             vals = vals.copy()
-            if 'balance' in vals:
-                vals.pop('debit', None)
-                vals.pop('credit', None)
-            else:
-                vals['balance'] = vals.pop('debit', 0) - vals.pop('credit', 0)
+
+            # This is used for negative amounts in debit/credit for manual inputs (to stay in same debit/credit as input)
+            if vals.get('move_id') and self.env['account.move'].browse(vals['move_id']).company_id.account_storno:
+                vals['is_storno'] = vals.get('is_storno', False) or (vals.get('debit', 0) < 0 or vals.get('credit', 0) < 0)
+
+            debit = vals.pop('debit', 0)
+            credit = vals.pop('credit', 0)
+            if 'balance' not in vals:
+                vals['balance'] = debit - credit
         if (
             vals.get('matching_number')
             and not vals['matching_number'].startswith('I')
@@ -3393,16 +3381,21 @@ class AccountMoveLine(models.Model):
         self.ensure_one()
         return self.move_id.state == 'posted'
 
-    def get_lines_grouped_by_section(self):
+    def _get_child_lines(self, grouped=True):
         """
         Return a tax-wise summary of sale order lines linked to section.
         Groups lines by their tax IDs and computes subtotal and total for each group.
         """
         self.ensure_one()
 
-        section_lines = self.child_ids + self.child_ids.child_ids
+        section_lines = self.move_id.invoice_line_ids.filtered(lambda l: (l.parent_id == self or l.parent_id.parent_id == self) and l != self)
         result = []
         for taxes, lines in groupby(section_lines, key=lambda l: l.tax_ids):
+            amls = sum(lines, start=self.env['account.move.line'])
+            for aml in amls.sorted('sequence'):
+                if aml.parent_id != self and aml.parent_id not in amls:
+                    amls += aml.parent_id
+
             tax_labels = [tax.tax_label for tax in taxes if tax.tax_label]
             subtotal = sum(l.price_subtotal for l in lines)
             price_total = sum(l.price_total for l in lines)
@@ -3411,22 +3404,78 @@ class AccountMoveLine(models.Model):
                 result.append({
                     'name': self.name,
                     'taxes': tax_labels,
-                    'ids': [line.id for line in section_lines],
                     'price_subtotal': subtotal,
                     'price_total': price_total,
+                    'display_type': self.display_type if not grouped else 'product',
+                    'quantity': 1,
+                    'discount': self.discount,
                 })
+
+                if not grouped:
+                    treated_lines = []
+                    for line in amls.sorted('sequence'):
+                        if line.display_type == 'line_subsection' and not self.collapse_composition and line.collapse_composition:
+                            sub_section_lines = amls.filtered(lambda l: (l.parent_id == self or l.parent_id.parent_id == self) and l != self)
+                            result.append({
+                                'name': line.name,
+                                'price_subtotal': sum(l.price_subtotal for l in sub_section_lines),
+                                'price_total': sum(l.price_total for l in sub_section_lines),
+                                'display_type': 'product',
+                                'original_display_type': line.display_type,
+                                'quantity': 1,
+                                'discount': line.discount,
+                            })
+                            treated_lines.extend(sub_section_lines)
+                        elif line not in treated_lines:
+                            result.append({
+                                'name': line.name,
+                                'price_subtotal': sum(l.price_subtotal for l in amls.filtered(lambda l: (l.parent_id == line or l.parent_id.parent_id == line))),
+                                'price_total': sum(l.price_total for l in amls.filtered(lambda l: (l.parent_id == line or l.parent_id.parent_id == line))),
+                                'display_type': line.display_type,
+                                'quantity': line.quantity,
+                                'line_uom': line.product_uom_id,
+                                'product_uom': line.product_id.uom_id,
+                                'discount': line.discount,
+                            })
 
         return result or [{
             'name': self.name,
             'taxes': [],
-            'ids': [],
             'price_subtotal': 0.0,
             'price_total': 0.0,
+            'quantity': 0,
+            'display_type': 'product',
         }]
 
     def get_section_subtotal(self):
-        section_lines = self.child_ids + self.child_ids.child_ids
+        section_lines = self._get_section_lines()
         return sum(section_lines.mapped('price_subtotal'))
+
+    def get_column_to_exclude_for_colspan_calculation(self, taxes=None):
+        colspan = 2 if taxes and self.display_type != 'product' else 1
+        return colspan
+
+    def get_parent_section_line(self):
+        if self.display_type == 'product' and self.parent_id.display_type == 'line_subsection':
+            return self.parent_id.parent_id
+
+        return self.parent_id
+
+    def _get_section_lines(self):
+        self.ensure_one()
+        return self.move_id.invoice_line_ids.filtered(self._is_line_in_section)
+
+    def _is_line_in_section(self, line):
+        """Return whether the line is a direct or indirect child of the section."""
+        self.ensure_one()
+        is_direct_child = line.parent_id == self
+        is_indirect_child = (
+            self.display_type == 'line_section'
+            and line.parent_id
+            and line.parent_id.display_type == 'line_subsection'
+            and line.parent_id.parent_id == self
+        )
+        return is_direct_child or is_indirect_child
 
     # -------------------------------------------------------------------------
     # PUBLIC ACTIONS

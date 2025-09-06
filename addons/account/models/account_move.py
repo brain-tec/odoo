@@ -156,10 +156,7 @@ class AccountMove(models.Model):
         index=True,
         default="entry",
     )
-    is_storno = fields.Boolean(
-        compute='_compute_is_storno', store=True, readonly=False,
-        copy=False,
-    )
+    is_storno = fields.Boolean(compute='_compute_is_storno')
     journal_id = fields.Many2one(
         'account.journal',
         string='Journal',
@@ -895,7 +892,9 @@ class AccountMove(models.Model):
     @api.depends('move_type')
     def _compute_is_storno(self):
         for move in self:
-            move.is_storno = move.is_storno or (move.move_type in ('out_refund', 'in_refund') and move.company_id.account_storno)
+            move.is_storno = move.is_storno or (
+                move.company_id.account_storno and move.move_type in ('out_refund', 'in_refund')
+            )
 
     @api.depends('company_id', 'invoice_filter_type_domain')
     def _compute_suitable_journal_ids(self):
@@ -2745,9 +2744,10 @@ class AccountMove(models.Model):
 
     def _get_product_catalog_record_lines(self, product_ids, *, selected_section_id=False, **kwargs):
         grouped_lines = defaultdict(lambda: self.env['account.move.line'])
+        selected_section_id = selected_section_id or False
         for line in self.line_ids:
             if (
-                line.section_line_id.id == selected_section_id
+                line.get_parent_section_line().id == selected_section_id
                 and line.display_type == 'product'
                 and line.product_id.id in product_ids
             ):
@@ -2772,10 +2772,11 @@ class AccountMove(models.Model):
                  sale order and the quantity selected.
         :rtype: float
         """
-        move_line = self.line_ids.filtered_domain([
-            ('product_id', '=', product_id),
-            ('section_line_id', '=', selected_section_id),
-        ])
+        selected_section_id = selected_section_id or False
+        move_line = self.line_ids.filtered(
+            lambda line: line.product_id.id == product_id
+            and line.get_parent_section_line().id == selected_section_id,
+        )
         if move_line:
             if quantity != 0:
                 move_line.quantity = quantity
@@ -3615,10 +3616,18 @@ class AccountMove(models.Model):
         for old_move, new_move in zip(self, new_moves):
             message_origin = '' if not new_move.auto_post_origin_id else \
                 (Markup('<br/>') + _('This recurring entry originated from %s', new_move.auto_post_origin_id._get_html_link()))
-            message_content = _('This entry has been reversed from %s', old_move._get_html_link()) if default.get('reversed_entry_id') else _('This entry has been duplicated from %s', old_move._get_html_link())
+            message_content = old_move._get_copy_message_content(default)
             bodies[new_move.id] = message_content + message_origin
         new_moves._message_log_batch(bodies=bodies)
         return new_moves
+
+    def _get_copy_message_content(self, default):
+        """Hook method to customize the message content when copying a move.
+        This method can be overridden by other modules to add custom logic.
+        :param default: The default values dict passed to copy method
+        :return: The message content string
+        """
+        return _('This entry has been reversed from %s', self._get_html_link()) if default.get('reversed_entry_id') else _('This entry has been duplicated from %s', self._get_html_link())
 
     def _sanitize_vals(self, vals):
         if vals.get('invoice_line_ids') and vals.get('journal_line_ids'):
@@ -5190,6 +5199,7 @@ class AccountMove(models.Model):
             Command.update(line.id, {
                 'balance': -line.balance,
                 'amount_currency': -line.amount_currency,
+                **({'is_storno': not line.is_storno} if line.company_id.account_storno else {}),
             })
             for line in reverse_moves.line_ids
             if line.move_id.move_type == 'entry' or line.display_type == 'cogs'
@@ -6838,6 +6848,21 @@ class AccountMove(models.Model):
         """
         # TO OVERRIDE
         return []
+
+    def _get_move_lines_to_report(self):
+        def show_line(line):
+            return (
+                line.display_type == 'line_section'
+                or (not (
+                    line.parent_id.collapse_composition
+                    or line.parent_id.parent_id.collapse_composition
+                ) and not (
+                    line.parent_id.collapse_prices
+                    or line.parent_id.parent_id.collapse_prices
+                ))
+            )
+
+        return self.invoice_line_ids.filtered(show_line).sorted('sequence')
 
     @staticmethod
     def _can_commit():

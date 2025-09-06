@@ -35,6 +35,11 @@ class ResUsers(models.Model):
              "- Handle by Emails: notifications are sent to your email address\n"
              "- Handle in Odoo: notifications appear in your Odoo Inbox")
     presence_ids = fields.One2many("mail.presence", "user_id", groups="base.group_system")
+    # OOO management
+    out_of_office_from = fields.Datetime()
+    out_of_office_to = fields.Datetime()
+    out_of_office_message = fields.Html('Vacation Responder')
+    is_out_of_office = fields.Boolean('Out of Office', compute='_compute_is_out_of_office')
     # sudo: res.users - can access presence of accessible user
     im_status = fields.Char("IM Status", compute="_compute_im_status", compute_sudo=True)
     manual_im_status = fields.Selection(
@@ -89,6 +94,20 @@ class ResUsers(models.Model):
         new_portal_users.notification_type = 'email'
         new_portal_users.write({"group_ids": [Command.unlink(inbox_group_id)]})
 
+    @api.depends('out_of_office_from', 'out_of_office_to')
+    def _compute_is_out_of_office(self):
+        """ Out-of-office is considered as activated once out_of_office_from is
+        set in the past. "To" is not mandatory, as users could simply deactivate
+        it when coming back if the leave timerange is unknown. """
+        now = self.env.cr.now()
+        todo = self.filtered(lambda u: u.out_of_office_from and u._is_internal())
+        for user in todo:
+            if user.out_of_office_to:
+                user.is_out_of_office = (user.out_of_office_from <= now <= user.out_of_office_to)
+            else:
+                user.is_out_of_office = (user.out_of_office_from <= now)
+        (self - todo).is_out_of_office = False
+
     @api.depends("manual_im_status", "presence_ids.status")
     def _compute_im_status(self):
         for user in self:
@@ -113,7 +132,7 @@ class ResUsers(models.Model):
         mail_servers = self.env['ir.mail_server'].sudo().search(fields.Domain.AND([
             [('from_filter', 'ilike', '_@_')],
             fields.Domain.OR([[
-                ('from_filter', '=', user.email),
+                ('from_filter', '=', user.email_normalized),
                 ('smtp_user', '=', user.email),
                 ('owner_user_id', '=', user._origin.id),
             ] for user in self]),
@@ -122,11 +141,12 @@ class ResUsers(models.Model):
         for user in self:
             server = mail_servers.get(user) or self.env['ir.mail_server']
             user.outgoing_mail_server_id = server.id
-            user.outgoing_mail_server_type = self._get_personal_server_type(server)
-
-    @api.model
-    def _get_personal_server_type(self, smtp_server):
-        return 'default'
+            type_options = self._fields['outgoing_mail_server_type']._selection
+            user.outgoing_mail_server_type = (
+                server.smtp_authentication
+                if server.smtp_authentication in type_options
+                else 'default'
+            )
 
     # ------------------------------------------------------------
     # CRUD
@@ -136,7 +156,11 @@ class ResUsers(models.Model):
     def SELF_READABLE_FIELDS(self):
         return super().SELF_READABLE_FIELDS + [
             "can_edit_role",
+            "is_out_of_office",
             "notification_type",
+            "out_of_office_from",
+            "out_of_office_message",
+            "out_of_office_to",
             "role_ids",
             "has_external_mail_server",
             "outgoing_mail_server_id",
@@ -145,7 +169,12 @@ class ResUsers(models.Model):
 
     @property
     def SELF_WRITEABLE_FIELDS(self):
-        return super().SELF_WRITEABLE_FIELDS + ['notification_type']
+        return super().SELF_WRITEABLE_FIELDS + [
+            "notification_type",
+            "out_of_office_from",
+            "out_of_office_message",
+            "out_of_office_to",
+        ]
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -176,8 +205,8 @@ class ResUsers(models.Model):
         if vals.get('email'):
             previous_email_by_user = {
                 user: user.email
-                for user in self.filtered(lambda user: bool(email_normalize(user.email)))
-                if email_normalize(user.email) != email_normalize(vals['email'])
+                for user in self.filtered(lambda user: bool(user.email_normalized))
+                if user.email_normalized != email_normalize(vals['email'])
             }
         if 'notification_type' in vals:
             user_notification_type_modified = self.filtered(lambda user: user.notification_type != vals['notification_type'])
