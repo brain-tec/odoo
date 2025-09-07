@@ -28,6 +28,14 @@ class AccountMove(models.Model):
       help="Technical field to know if the chain has been stopped by a previous invoice",
   )
 
+    def _l10n_gcc_get_invoice_title(self):
+        # EXTENDS l10n_gcc_invoice
+        self.ensure_one()
+        if self.company_id.country_code == 'SA' and self._l10n_sa_is_simplified():
+            return self.env._('Simplified Tax Invoice')
+
+        return super()._l10n_gcc_get_invoice_title()
+
     def _l10n_sa_is_simplified(self):
         """
             Returns True if the customer is an individual, i.e: The invoice is B2C
@@ -284,10 +292,10 @@ class AccountMove(models.Model):
             return self.with_context(l10n_sa_file_format=False).env['account.edi.xml.ubl_21.zatca']._export_invoice_filename(self)
         return super()._get_report_base_filename()
 
-    def _get_invoice_report_filename(self, extension='pdf'):
+    def _get_invoice_report_filename(self, extension='pdf', report=None):
         if self._is_l10n_sa_eligibile_invoice():
             return self.with_context(l10n_sa_file_format=extension).env['account.edi.xml.ubl_21.zatca']._export_invoice_filename(self)
-        return super()._get_invoice_report_filename(extension)
+        return super()._get_invoice_report_filename(extension, report)
 
     def _l10n_sa_is_in_chain(self):
         """
