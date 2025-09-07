@@ -69,6 +69,22 @@ export class SnippetModel extends Reactive {
         );
     }
 
+    /**
+     * Checks if the given element is an inner content snippet.
+     *
+     * @param {HTMLElement} el the element
+     * @returns {Boolean}
+     */
+    isInnerContent(el) {
+        const snippetName = el.dataset.snippet;
+        if (!snippetName) {
+            return false;
+        }
+        return !!this.snippetsByCategory.snippet_content.find(
+            (snippet) => snippet.name === snippetName
+        );
+    }
+
     getSnippet(category, id) {
         return this.snippetsByCategory[category].find((snippet) => snippet.id === id);
     }
@@ -182,6 +198,7 @@ export class SnippetModel extends Reactive {
                     label: snippetEl.dataset.oLabel,
                     isDisabled: false,
                     forbidSanitize: false,
+                    gridColumnSpan: 0,
                 };
                 const moduleId = snippetEl.dataset.moduleId;
                 if (moduleId) {
@@ -193,6 +210,9 @@ export class SnippetModel extends Reactive {
                 }
                 if (snippetEl.dataset.oeForbidSanitize) {
                     Object.assign(snippet, { forbidSanitize: snippetEl.dataset.oeForbidSanitize });
+                }
+                if (snippetEl.dataset.oGridColumnSpan) {
+                    snippet.gridColumnSpan = parseInt(snippetEl.dataset.oGridColumnSpan);
                 }
                 switch (snippetCategory.id) {
                     case "snippet_groups":

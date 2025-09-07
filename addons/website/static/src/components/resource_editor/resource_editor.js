@@ -181,7 +181,7 @@ export class ResourceEditor extends Component {
 
     async loadResources() {
         const resources = await this.keepLast.add(
-            rpc("/web_editor/get_assets_editor_resources", {
+            rpc("/website/get_assets_editor_resources", {
                 key: this.viewKey,
                 bundles: this.state.xmlFilter === "all",
                 bundles_restriction: BUNDLES_RESTRICTION,
@@ -408,6 +408,10 @@ export class ResourceEditor extends Component {
     }
 
     showErrorLine() {
+        if (!this.editorRef.el) {
+            // Possibly destroyed.
+            return;
+        }
         const resourceId = this.state.currentResource.id;
         const error = this.errors.find(({ resource }) => resource.id === resourceId)?.error;
         if (error) {
@@ -422,6 +426,10 @@ export class ResourceEditor extends Component {
     }
 
     clearErrorLine() {
+        if (!this.editorRef.el) {
+            // Possibly destroyed.
+            return;
+        }
         const allGutterCells = this.editorRef.el.querySelectorAll(".ace_gutter-cell");
         for (const gutterCell of allGutterCells) {
             gutterCell.classList.remove("o_error");

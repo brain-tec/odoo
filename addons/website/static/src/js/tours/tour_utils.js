@@ -116,11 +116,11 @@ export function changeImage(snippet, position = "bottom") {
     By default, prevents the step from being active if a palette is opened.
     Set allowPalette to true to select options within a palette.
 */
-export function changeOption(optionName, weName = '', optionTooltipLabel = '', position = "bottom", allowPalette = false) {
+export function changeOption(blockName, actionId = '', optionTooltipLabel = '', position = "bottom", allowPalette = false) {
     const noPalette = allowPalette ? "" : !document.querySelector(".o_popover .o_font_color_selector") && ".o_customize_tab";
-    const option_block = `${noPalette} [data-container-title='${optionName}']`;
+    const option_block = `${noPalette} [data-container-title='${blockName}']`;
     return {
-        trigger: `${option_block} ${weName}, ${option_block} [data-action-id="${weName}"]`,
+        trigger: `${option_block} ${actionId}, ${option_block} [data-action-id="${actionId}"]`,
         content: markup(_t("<b>Click</b> on this option to change the %s of the block.", optionTooltipLabel)),
         tooltipPosition: position,
         run: "click",
@@ -240,7 +240,7 @@ export function clickOnElement(elementName, selector) {
 export function clickOnEditAndWaitEditMode(position = "bottom") {
     return [{
         content: markup(_t("<b>Click Edit</b> to start designing your homepage.")),
-        trigger: "body .o_menu_systray button:contains('Edit')",
+        trigger: "body .o_menu_systray .o_menu_systray_item.o_edit_website_container button",
         tooltipPosition: position,
         run: "click",
     }, {
@@ -293,7 +293,7 @@ export function clickOnSnippet(snippet, position = "bottom") {
     ];
 }
 
-export function clickOnSave(position = "bottom", timeout = 50000) {
+export function clickOnSave(position = "bottom", timeout = 50000, withContains = true) {
     return [
         {
             trigger: ".o-snippets-menu:not(:has(.o_we_ongoing_insertion))",
@@ -303,7 +303,7 @@ export function clickOnSave(position = "bottom", timeout = 50000) {
             noPrepend: true,
         },
         {
-            trigger: "button[data-action=save]:enabled:contains(save)",
+            trigger: withContains ? "button[data-action=save]:enabled:contains(save)" : "button[data-action=save]:enabled",
         content: markup(_t("Good job! It's time to <b>Save</b> your work.")),
             tooltipPosition: position,
             run: "click",
@@ -407,6 +407,10 @@ export function goToTheme(position = "bottom") {
             tooltipPosition: position,
             run: "click",
         },
+        {
+            content: "Check that the theme tab is active",
+            trigger: ".o-tab-content .options-container [data-action-id='switchTheme']",
+        },
     ];
 }
 
@@ -509,14 +513,17 @@ export function registerThemeHomepageTour(name, steps) {
         throw new Error(`tour.steps has to be a function that returns TourStep[]`);
     }
     return registerWebsitePreviewTour(
-        name,
+        "homepage", // it overrides the community tour with the associated theme tour
         {
             url: "/",
         },
         () => [
             ...clickOnEditAndWaitEditMode(),
-            ...prepend_trigger(
-                steps().concat(clickOnSave())),
+            // FIXME(?) this should probably reuse the prepend_trigger function
+            // so that we do check that we are really on the homepage.
+            ...steps(),
+            ...goToTheme(),
+            ...clickOnSave(),
         ]
     );
 }
