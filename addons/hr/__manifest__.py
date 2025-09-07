@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
@@ -26,6 +25,8 @@
         'wizard/hr_departure_wizard_views.xml',
         'wizard/hr_contract_template_wizard.views.xml',
         'wizard/mail_activity_schedule_views.xml',
+        'wizard/hr_bank_account_allocation_wizard.xml',
+        'wizard/hr_bank_account_allocation_wizard_line.xml',
         'views/mail_activity_plan_views.xml',
         'views/hr_version_views.xml',
         'views/hr_contract_template_views.xml',
@@ -52,7 +53,6 @@
     ],
     'installable': True,
     'application': True,
-    'post_init_hook': '_install_hr_localization',
     'assets': {
         'web.assets_backend': [
             'hr/static/src/**/*',

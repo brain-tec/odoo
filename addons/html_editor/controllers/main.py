@@ -1,7 +1,7 @@
 import contextlib
 import re
 import uuid
-from base64 import b64decode
+from base64 import b64decode, b64encode
 from datetime import datetime
 import werkzeug.exceptions
 import werkzeug.urls
@@ -13,12 +13,12 @@ from odoo import _, http, tools, SUPERUSER_ID
 from odoo.addons.html_editor.tools import get_video_url_data
 from odoo.exceptions import UserError, MissingError, AccessError
 from odoo.http import request
-from odoo.tools.image import image_process
+from odoo.tools.image import image_process, image_data_uri, binary_to_image, get_webp_size
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.tools.misc import file_open
 from odoo.addons.iap.tools import iap_tools
 from odoo.addons.mail.tools import link_preview
-from lxml import html
+from lxml import html, etree
 
 from ..models.ir_attachment import SUPPORTED_IMAGE_MIMETYPES
 
@@ -211,6 +211,38 @@ class HTML_Editor(http.Controller):
                      ";\n\t\t}\n\t</style>")
             svg = re.sub(regex, subst, svg, flags=re.MULTILINE)
         return svg
+
+    @http.route('/html_editor/attachment/remove', type='jsonrpc', auth='user', website=True)
+    def remove(self, ids, **kwargs):
+        """ Removes a web-based image attachment if it is used by no view (template)
+
+        Returns a dict mapping attachments which would not be removed (if any)
+        mapped to the views preventing their removal
+        """
+        self._clean_context()
+        Attachment = attachments_to_remove = request.env['ir.attachment']
+        Views = request.env['ir.ui.view']
+
+        # views blocking removal of the attachment
+        removal_blocked_by = {}
+
+        for attachment in Attachment.browse(ids):
+            # in-document URLs are html-escaped, a straight search will not
+            # find them
+            url = tools.html_escape(attachment.local_url)
+            views = Views.search([
+                "|",
+                ('arch_db', 'like', '"%s"' % url),
+                ('arch_db', 'like', "'%s'" % url)
+            ])
+
+            if views:
+                removal_blocked_by[attachment.id] = views.read(['name'])
+            else:
+                attachments_to_remove += attachment
+        if attachments_to_remove:
+            attachments_to_remove.unlink()
+        return removal_blocked_by
 
     def _clean_context(self):
         # avoid allowed_company_ids which may erroneously restrict based on website
@@ -542,6 +574,43 @@ class HTML_Editor(http.Controller):
             ('Cache-control', 'max-age=%s' % http.STATIC_CACHE_LONG),
         ])
 
+    @http.route(['/web_editor/image_shape/<string:img_key>/<module>/<path:filename>', '/html_editor/image_shape/<string:img_key>/<module>/<path:filename>'], type='http', auth="public", website=True)
+    def image_shape(self, module, filename, img_key, **kwargs):
+        svg = self._get_shape_svg(module, 'image_shapes', filename)
+
+        record = request.env['ir.binary']._find_record(img_key)
+        stream = request.env['ir.binary']._get_image_stream_from(record)
+        if stream.type == 'url':
+            return stream.get_response()
+
+        image = stream.read()
+        if record.mimetype == "image/webp":
+            width, height = (str(size) for size in get_webp_size(image))
+        else:
+            img = binary_to_image(image)
+            width, height = (str(size) for size in img.size)
+        root = etree.fromstring(svg)
+
+        if root.attrib.get("data-forced-size"):
+            # Adjusts the SVG height to ensure the image fits properly within
+            # the SVG (e.g. for "devices" shapes).
+            svgHeight = float(root.attrib.get("height"))
+            svgWidth = float(root.attrib.get("width"))
+            svgAspectRatio = svgWidth / svgHeight
+            height = str(float(width) / svgAspectRatio)
+
+        root.attrib.update({'width': width, 'height': height})
+        # Update default color palette on shape SVG.
+        svg, _ = self._update_svg_colors(kwargs, etree.tostring(root, pretty_print=True).decode('utf-8'))
+        # Add image in base64 inside the shape.
+        uri = image_data_uri(b64encode(image))
+        svg = svg.replace('<image xlink:href="', '<image xlink:href="%s' % uri)
+
+        return request.make_response(svg, [
+            ('Content-type', 'image/svg+xml'),
+            ('Cache-control', 'max-age=%s' % http.STATIC_CACHE_LONG),
+        ])
+
     @http.route(["/web_editor/generate_text", "/html_editor/generate_text"], type="jsonrpc", auth="user")
     def generate_text(self, prompt, conversation_history):
         try:
@@ -647,3 +716,14 @@ class HTML_Editor(http.Controller):
         # catch all other exceptions and return the error message to display in the console but not blocking the flow
         except Exception as e:  # noqa: BLE001
             return {'other_error_msg': str(e)}
+
+    @http.route(['/html_editor/media_library_search'], type='jsonrpc', auth="user", website=True)
+    def media_library_search(self, **params):
+        ICP = request.env['ir.config_parameter'].sudo()
+        endpoint = ICP.get_param('web_editor.media_library_endpoint', DEFAULT_LIBRARY_ENDPOINT)
+        params['dbuuid'] = ICP.get_param('database.uuid')
+        response = requests.post('%s/media-library/1/search' % endpoint, data=params, timeout=5)
+        if response.status_code == requests.codes.ok and response.headers['content-type'] == 'application/json':
+            return response.json()
+        else:
+            return {'error': response.status_code}

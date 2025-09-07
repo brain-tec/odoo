@@ -1012,14 +1012,40 @@ class AccountMove(models.Model):
             move.fiscal_position_id = self.env['account.fiscal.position'].with_company(move.company_id)._get_fiscal_position(
                 move.partner_id, delivery=delivery_partner)
 
-    @api.depends('bank_partner_id')
+    @api.depends('bank_partner_id', 'currency_id', 'preferred_payment_method_line_id')
     def _compute_partner_bank_id(self):
+        def _bank_selection_key(bank):
+            """Sorting priority:
+            0. Same currency as the move
+            1. No currency set
+            2. Different currency
+            Then: prefer banks allowing outgoing payments (trusted ones)
+            """
+            if bank.currency_id == move.currency_id:
+                currency_priority = 0
+            elif not bank.currency_id:
+                currency_priority = 1
+            else:
+                currency_priority = 2
+            return (currency_priority, not bank.allow_out_payment)
+
         for move in self:
-            # This will get the bank account from the partner in an order with the trusted first
-            bank_ids = move.bank_partner_id.bank_ids.filtered(
+            if (
+                payment_method := (
+                    move.preferred_payment_method_line_id
+                    or (
+                        move.bank_partner_id.property_inbound_payment_method_line_id
+                        if move.is_inbound()
+                        else move.bank_partner_id.property_outbound_payment_method_line_id
+                    )
+                )
+            ) and payment_method.journal_id:
+                move.partner_bank_id = payment_method.journal_id.bank_account_id
+                continue
+
+            move.partner_bank_id = move.bank_partner_id.bank_ids.filtered(
                 lambda bank: not bank.company_id or bank.company_id == move.company_id
-            ).sorted(lambda bank: not bank.allow_out_payment)
-            move.partner_bank_id = bank_ids[:1]
+            ).sorted(key=_bank_selection_key)[:1]
 
     @api.depends('partner_id')
     def _compute_invoice_payment_term_id(self):
@@ -6391,12 +6417,13 @@ class AccountMove(models.Model):
         elif allow_fallback:
             return [self._get_invoice_pdf_proforma()]
 
-    def _get_invoice_report_filename(self, extension='pdf'):
+    def _get_invoice_report_filename(self, extension='pdf', report=None):
         """ Get the filename of the generated invoice report with extension file. """
         self.ensure_one()
-        report_id = self.partner_id.invoice_template_pdf_report_id or self.env.ref('account.account_invoices')
-        if report_id.print_report_name and isinstance(report_id.print_report_name, str):
-            file_name = safe_eval(report_id.print_report_name, {'object': self})
+        if not report:
+            report = self.partner_id.invoice_template_pdf_report_id or self.env.ref('account.account_invoices')
+        if report.print_report_name and isinstance(report.print_report_name, str):
+            file_name = safe_eval(report.print_report_name, {'object': self})
         else:
             file_name = self.name
         return f"{file_name.replace('/', '_')}.{extension}"
