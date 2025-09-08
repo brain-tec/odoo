@@ -631,6 +631,10 @@ class AccountMove(models.Model):
     invoice_source_email = fields.Char(string='Source Email', tracking=True)
     invoice_partner_display_name = fields.Char(compute='_compute_invoice_partner_display_info', store=True)
     is_manually_modified = fields.Boolean()
+    is_self_billing = fields.Boolean(
+        string='Self Billing',
+        help="This bill is a self-billing invoice (that you create on behalf of your vendor).",
+    )
 
     # === Fiduciary mode fields === #
     quick_edit_mode = fields.Boolean(compute='_compute_quick_edit_mode')
@@ -4998,7 +5002,6 @@ class AccountMove(models.Model):
                         **vals,
                         'amount_currency': 0.0,
                         'balance': 0.0,
-                        'display_type': 'epd',  # Used to compute tax_tag_invert for early payment discount lines
                     })
                     line_vals['amount_currency'] += vals['amount_currency']
                     line_vals['balance'] += vals['balance']
@@ -5688,7 +5691,7 @@ class AccountMove(models.Model):
         return action
 
     def action_send_and_print(self):
-        self.env['account.move.send']._check_move_constrains(self)
+        self.env['account.move.send']._check_move_constraints(self)
         return {
             'name': _("Send"),
             'type': 'ir.actions.act_window',
@@ -5901,11 +5904,14 @@ class AccountMove(models.Model):
         """
         :return: the correct mail template based on the current move type
         """
-        return self.env.ref(
-            'account.email_template_edi_credit_note'
-            if all(move.move_type == 'out_refund' for move in self)
-            else 'account.email_template_edi_invoice'
-        )
+        template_xmlid = 'account.email_template_edi_invoice'
+        if all(move.move_type == 'out_refund' for move in self):
+            template_xmlid = 'account.email_template_edi_credit_note'
+        elif all(move.move_type == 'in_invoice' and move.is_self_billing for move in self):
+            template_xmlid = 'account.email_template_edi_self_billing_invoice'
+        elif all(move.move_type == 'in_refund' and move.is_self_billing for move in self):
+            template_xmlid = 'account.email_template_edi_self_billing_credit_note'
+        return self.env.ref(template_xmlid)
 
     def _notify_get_recipients_groups(self, message, model_description, msg_vals=False):
         groups = super()._notify_get_recipients_groups(message, model_description, msg_vals=msg_vals)

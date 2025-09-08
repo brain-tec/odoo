@@ -38,7 +38,6 @@
                                     <group string="Taxes" invisible="not tax_line_id and not tax_ids">
                                         <field name="tax_line_id" readonly="1" invisible="not tax_line_id"/>
                                         <field name="tax_ids" widget="many2many_tax_tags" readonly="1" invisible="not tax_ids"/>
-                                        <field name="tax_tag_invert" readonly="1" groups="base.group_no_one"/>
                                     </group>
                                     <group string="Matching" invisible="not matched_debit_ids and not matched_credit_ids">
                                         <label for="full_reconcile_id"/>
@@ -1407,8 +1406,6 @@
                                                     ('country_id', '=', False),
                                                 ]"/>
 
-                                        <field name="tax_tag_invert" readonly="1" optional="hide" groups="base.group_no_one"/>
-
                                         <!-- Buttons -->
                                         <button name="action_automatic_entry"
                                                 type="object"
@@ -1509,6 +1506,8 @@
                                         <field name="auto_post_until"
                                                invisible="auto_post in ('no', 'at_date')"
                                                readonly="state != 'draft'"/>
+                                        <field name="is_self_billing"
+                                               invisible="move_type not in ('in_invoice', 'in_refund')"/>
                                     </group>
                                 </group>
                             </page>

@@ -1,4 +1,4 @@
-from odoo import api, models
+from odoo import models
 
 
 class AccountEdiXmlUbl_21(models.AbstractModel):
@@ -12,19 +12,6 @@ class AccountEdiXmlUbl_21(models.AbstractModel):
 
     def _export_invoice_filename(self, invoice):
         return f"{invoice.name.replace('/', '_')}_ubl_21.xml"
-
-    @api.model
-    def _get_customization_ids(self):
-        return {
-            'ubl_bis3': 'urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0',
-            'nlcius': 'urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0',
-            'ubl_sg': 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:sg:3.0',
-            'xrechnung': 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0',
-            'ubl_a_nz': 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:aunz:3.0',
-            'pint_jp': 'urn:peppol:pint:billing-1@jp-1',
-            'pint_sg': 'urn:peppol:pint:billing-1@sg-1',
-            'pint_my': 'urn:peppol:pint:billing-1@my-1',
-        }
 
     # -------------------------------------------------------------------------
     # EXPORT: Templates
@@ -48,7 +35,7 @@ class AccountEdiXmlUbl_21(models.AbstractModel):
         document_node.update({
             'cbc:UBLVersionID': {'_text': '2.1'},
             'cbc:DueDate': {'_text': invoice.invoice_date_due} if vals['document_type'] == 'invoice' else None,
-            'cbc:CreditNoteTypeCode': {'_text': 381} if vals['document_type'] == 'credit_note' else None,
+            'cbc:CreditNoteTypeCode': {'_text': 261 if vals['process_type'] == 'selfbilling' else 381} if vals['document_type'] == 'credit_note' else None,
             'cbc:BuyerReference': {'_text': invoice.commercial_partner_id.ref},
         })
 

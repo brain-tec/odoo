@@ -36,10 +36,9 @@ class AccountEdiXmlUbl_Nl(models.AbstractModel):
     # EXPORT: Templates
     # -------------------------------------------------------------------------
 
-    def _add_invoice_header_nodes(self, document_node, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        super()._add_invoice_header_nodes(document_node, vals)
-        document_node['cbc:CustomizationID'] = {'_text': self._get_customization_ids()['nlcius']}
+    def _get_customization_id(self, process_type='billing'):
+        if process_type == 'billing':
+            return 'urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0'
 
     def _add_invoice_payment_means_nodes(self, document_node, vals):
         # EXTENDS account.edi.xml.ubl_bis3
