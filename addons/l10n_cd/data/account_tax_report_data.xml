@@ -40,8 +40,18 @@
                                 <field name="expression_ids">
                                     <record id="account_tax_report_line_cd_sales_taxable_goods_balance" model="account.report.expression">
                                         <field name="label">balance</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">CD_GOODS_BASE.sale + CD_GOODS_BASE.purchase</field>
+                                    </record>
+                                    <record id="account_tax_report_line_cd_sales_taxable_goods_balance_sale" model="account.report.expression">
+                                        <field name="label">sale</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">CD_1a</field>
+                                        <field name="formula">-CD_1a</field>
+                                    </record>
+                                    <record id="account_tax_report_line_cd_sales_taxable_goods_balance_purchase" model="account.report.expression">
+                                        <field name="label">purchase</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">CD_1a_rc</field>
                                     </record>
                                 </field>
                             </record>
@@ -53,7 +63,7 @@
                                     <record id="account_tax_report_line_cd_sales_taxable_services_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">CD_2a</field>
+                                        <field name="formula">-CD_2a</field>
                                     </record>
                                 </field>
                             </record>
@@ -65,7 +75,7 @@
                                     <record id="account_tax_report_line_cd_sales_taxable_goods_self_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">CD_3a</field>
+                                        <field name="formula">-CD_3a</field>
                                     </record>
                                 </field>
                             </record>
@@ -77,7 +87,7 @@
                                     <record id="account_tax_report_line_cd_sales_taxable_services_self_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">CD_4a</field>
+                                        <field name="formula">-CD_4a</field>
                                     </record>
                                 </field>
                             </record>
@@ -89,7 +99,7 @@
                                     <record id="account_tax_report_line_cd_sales_taxable_public_market_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">CD_5a</field>
+                                        <field name="formula">-CD_5a</field>
                                     </record>
                                 </field>
                             </record>
@@ -101,7 +111,7 @@
                                     <record id="account_tax_report_line_cd_sales_taxable_export_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">CD_6a</field>
+                                        <field name="formula">-CD_6a</field>
                                     </record>
                                 </field>
                             </record>
@@ -113,7 +123,7 @@
                                     <record id="account_tax_report_line_cd_sales_taxable_exempt_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">CD_7a</field>
+                                        <field name="formula">-CD_7a</field>
                                     </record>
                                 </field>
                             </record>
@@ -125,7 +135,7 @@
                                     <record id="account_tax_report_line_cd_sales_taxable_non_imposable_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">CD_8a</field>
+                                        <field name="formula">-CD_8a</field>
                                     </record>
                                 </field>
                             </record>
@@ -151,7 +161,7 @@
                                     <record id="account_tax_report_line_cd_sales_tax_goods_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">CD_1b</field>
+                                        <field name="formula">-CD_1b</field>
                                     </record>
                                 </field>
                             </record>
@@ -163,7 +173,7 @@
                                     <record id="account_tax_report_line_cd_sales_tax_services_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">CD_2b</field>
+                                        <field name="formula">-CD_2b</field>
                                     </record>
                                 </field>
                             </record>
@@ -175,7 +185,7 @@
                                     <record id="account_tax_report_line_cd_sales_tax_goods_self_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">CD_3b</field>
+                                        <field name="formula">-CD_3b</field>
                                     </record>
                                 </field>
                             </record>
@@ -187,7 +197,7 @@
                                     <record id="account_tax_report_line_cd_sales_tax_services_self_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">CD_4b</field>
+                                        <field name="formula">-CD_4b</field>
                                     </record>
                                 </field>
                             </record>
@@ -199,7 +209,7 @@
                                     <record id="account_tax_report_line_cd_sales_tax_public_market_balance" model="account.report.expression">
                                         <field name="label">balance</field>
                                         <field name="engine">tax_tags</field>
-                                        <field name="formula">CD_5b</field>
+                                        <field name="formula">-CD_5b</field>
                                     </record>
                                 </field>
                             </record>

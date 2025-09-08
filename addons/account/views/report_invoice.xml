@@ -70,11 +70,17 @@
                                 <span t-elif="o.move_type == 'out_refund' and o.state == 'cancel'">
                                     <t name="cancelled_credit_note_title">Cancelled Credit Note</t>
                                 </span>
-                                <span t-elif="o.move_type == 'in_refund'">
+                                <span t-elif="o.move_type == 'in_refund' and not o.is_self_billing">
                                     <t name="vendor_credit_note_title">Vendor Credit Note</t>
                                 </span>
-                                <span t-elif="o.move_type == 'in_invoice'">
+                                <span t-elif="o.move_type == 'in_refund' and o.is_self_billing">
+                                    <t name="self_billing_credit_note_title">Self Billing Credit Note</t>
+                                </span>
+                                <span t-elif="o.move_type == 'in_invoice' and not o.is_self_billing">
                                     <t name="vendor_bill_title">Vendor Bill</t>
+                                </span>
+                                <span t-elif="o.move_type == 'in_invoice' and o.is_self_billing">
+                                    <t name="self_billing_invoice_title">Self Billing</t>
                                 </span>
                             </t>
                             <t t-else="">
@@ -119,6 +125,10 @@
                             <div class="col" t-if="o.invoice_date_due and o.move_type == 'out_invoice' and o.state == 'posted'" name="due_date">
                                 <strong>Due Date</strong>
                                 <div t-field="o.invoice_date_due">2023-10-31</div>
+                            </div>
+                            <div class="col" t-if="o.taxable_supply_date and o.show_taxable_supply_date" name="taxable_supply_date">
+                                <strong>Taxable Supply</strong>
+                                <div t-field="o.taxable_supply_date">2023-10-31</div>
                             </div>
                             <div class="col" t-if="o.delivery_date" name="delivery_date">
                                 <strong>Delivery Date</strong>

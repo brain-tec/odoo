@@ -383,6 +383,16 @@ class AccountMove(models.Model):
         readonly=False,
     )
     show_delivery_date = fields.Boolean(compute='_compute_show_delivery_date')
+    taxable_supply_date = fields.Date(
+        string="Taxable Supply Date",
+        copy=False,
+        store=True,
+        compute='_compute_taxable_supply_date',
+        precompute=True,
+        readonly=False,
+    )
+    show_taxable_supply_date = fields.Boolean(compute='_compute_show_taxable_supply_date')
+    taxable_supply_date_placeholder = fields.Char(compute='_compute_taxable_supply_date_placeholder')
     invoice_payment_term_id = fields.Many2one(
         comodel_name='account.payment.term',
         string='Payment Terms',
@@ -621,6 +631,10 @@ class AccountMove(models.Model):
     invoice_source_email = fields.Char(string='Source Email', tracking=True)
     invoice_partner_display_name = fields.Char(compute='_compute_invoice_partner_display_info', store=True)
     is_manually_modified = fields.Boolean()
+    is_self_billing = fields.Boolean(
+        string='Self Billing',
+        help="This bill is a self-billing invoice (that you create on behalf of your vendor).",
+    )
 
     # === Fiduciary mode fields === #
     quick_edit_mode = fields.Boolean(compute='_compute_quick_edit_mode')
@@ -810,7 +824,7 @@ class AccountMove(models.Model):
         self.ensure_one()
         return self.invoice_date or self.date
 
-    @api.depends('invoice_date', 'company_id', 'move_type')
+    @api.depends('invoice_date', 'company_id', 'move_type', 'taxable_supply_date')
     def _compute_date(self):
         for move in self:
             accounting_date = move._get_accounting_date_source()
@@ -1075,6 +1089,17 @@ class AccountMove(models.Model):
         for move in self:
             move.show_delivery_date = move.delivery_date and move.is_sale_document()
 
+    def _compute_taxable_supply_date(self):
+        pass
+
+    def _compute_show_taxable_supply_date(self):
+        for move in self:
+            move.show_taxable_supply_date = False
+
+    def _compute_taxable_supply_date_placeholder(self):
+        for move in self:
+            move.taxable_supply_date_placeholder = ''
+
     @api.depends('journal_id', 'statement_line_id')
     def _compute_currency_id(self):
         for invoice in self:
@@ -1090,7 +1115,7 @@ class AccountMove(models.Model):
         self.ensure_one()
         return self.invoice_date or fields.Date.context_today(self)
 
-    @api.depends('currency_id', 'company_currency_id', 'company_id', 'invoice_date')
+    @api.depends('currency_id', 'company_currency_id', 'company_id', 'invoice_date', 'taxable_supply_date')
     def _compute_expected_currency_rate(self):
         for move in self:
             if move.currency_id:
@@ -1103,7 +1128,7 @@ class AccountMove(models.Model):
             else:
                 move.expected_currency_rate = 1
 
-    @api.depends('currency_id', 'company_currency_id', 'company_id', 'invoice_date')
+    @api.depends('currency_id', 'company_currency_id', 'company_id', 'invoice_date', 'taxable_supply_date')
     def _compute_invoice_currency_rate(self):
         for move in self:
             if move.is_invoice(include_receipts=True):
@@ -4977,7 +5002,6 @@ class AccountMove(models.Model):
                         **vals,
                         'amount_currency': 0.0,
                         'balance': 0.0,
-                        'display_type': 'epd',  # Used to compute tax_tag_invert for early payment discount lines
                     })
                     line_vals['amount_currency'] += vals['amount_currency']
                     line_vals['balance'] += vals['balance']
@@ -5667,7 +5691,7 @@ class AccountMove(models.Model):
         return action
 
     def action_send_and_print(self):
-        self.env['account.move.send']._check_move_constrains(self)
+        self.env['account.move.send']._check_move_constraints(self)
         return {
             'name': _("Send"),
             'type': 'ir.actions.act_window',
@@ -5880,11 +5904,14 @@ class AccountMove(models.Model):
         """
         :return: the correct mail template based on the current move type
         """
-        return self.env.ref(
-            'account.email_template_edi_credit_note'
-            if all(move.move_type == 'out_refund' for move in self)
-            else 'account.email_template_edi_invoice'
-        )
+        template_xmlid = 'account.email_template_edi_invoice'
+        if all(move.move_type == 'out_refund' for move in self):
+            template_xmlid = 'account.email_template_edi_credit_note'
+        elif all(move.move_type == 'in_invoice' and move.is_self_billing for move in self):
+            template_xmlid = 'account.email_template_edi_self_billing_invoice'
+        elif all(move.move_type == 'in_refund' and move.is_self_billing for move in self):
+            template_xmlid = 'account.email_template_edi_self_billing_credit_note'
+        return self.env.ref(template_xmlid)
 
     def _notify_get_recipients_groups(self, message, model_description, msg_vals=False):
         groups = super()._notify_get_recipients_groups(message, model_description, msg_vals=msg_vals)

@@ -35,12 +35,11 @@ import { useService } from "@web/core/utils/hooks";
 import { createElementWithContent } from "@web/core/utils/html";
 import { getOrigin, url } from "@web/core/utils/urls";
 import { useMessageActions } from "./message_actions";
-import { cookie } from "@web/core/browser/cookie";
 import { rpc } from "@web/core/network/rpc";
 import { discussComponentRegistry } from "./discuss_component_registry";
 import { NotificationMessage } from "./notification_message";
 import { useLongPress } from "@mail/utils/common/hooks";
-import { ActionList } from "./action_list";
+import { ActionList } from "@mail/core/common/action_list";
 
 /**
  * @typedef {Object} Props
@@ -98,6 +97,7 @@ export class Message extends Component {
 
     setup() {
         super.setup();
+        this.store = useService("mail.store");
         this.popover = usePopover(this.constructor.components.Popover, { position: "top" });
         this.state = useState({
             isHovered: false,
@@ -123,8 +123,10 @@ export class Message extends Component {
         onWillDestroy(() => this.props.registerMessageRef?.(this.props.message, null));
         this.hasTouch = hasTouch;
         this.messageBody = useRef("body");
-        this.messageActions = useMessageActions();
-        this.store = useService("mail.store");
+        this.messageActions = useMessageActions({
+            message: () => this.message,
+            thread: () => this.props.thread,
+        });
         this.shadowBody = useRef("shadowBody");
         this.dialog = useService("dialog");
         this.ui = useService("ui");
@@ -137,7 +139,7 @@ export class Message extends Component {
         onMounted(() => {
             if (this.shadowBody.el) {
                 this.shadowRoot = this.shadowBody.el.attachShadow({ mode: "open" });
-                const color = cookie.get("color_scheme") === "dark" ? "white" : "black";
+                const color = this.store.isOdooWhiteTheme ? "dark" : "white";
                 const shadowStyle = document.createElement("style");
                 shadowStyle.textContent = `
                     * {
@@ -154,7 +156,7 @@ export class Message extends Component {
                         background: ${this.constructor.SHADOW_HIGHLIGHT_COLOR} !important;
                     }
                 `;
-                if (cookie.get("color_scheme") === "dark") {
+                if (!this.store.isOdooWhiteTheme) {
                     this.shadowRoot.appendChild(shadowStyle);
                 }
                 const ellipsisStyle = document.createElement("style");
@@ -218,6 +220,41 @@ export class Message extends Component {
         );
     }
 
+    computeActions() {
+        const allActions = this.messageActions.actions;
+        const quickActions = allActions.slice(
+            0,
+            allActions.length > this.quickActionCount
+                ? this.quickActionCount - 1
+                : this.quickActionCount
+        );
+        const moreActions =
+            allActions.length > this.quickActionCount
+                ? allActions.slice(this.quickActionCount - 1)
+                : false;
+        const moreAction = moreActions?.length
+            ? this.messageActions.more({
+                  actions: moreActions,
+                  dropdownMenuClass: "o-mail-Message-moreMenu",
+                  dropdownPosition: this.isAlignedRight
+                      ? this.message.threadAsNewest
+                          ? "left-end"
+                          : "left-start"
+                      : this.message.threadAsNewest
+                      ? "right-end"
+                      : "right-start",
+                  name: this.expandText,
+              })
+            : undefined;
+        const actions = moreAction ? [...quickActions, moreAction] : quickActions;
+        if (this.isAlignedRight) {
+            actions.reverse();
+        }
+        this.state.moreAction = moreAction;
+        this.quickActions = quickActions;
+        this.actions = actions;
+    }
+
     get attClass() {
         return {
             "user-select-none": isMobileOS(),
@@ -276,7 +313,7 @@ export class Message extends Component {
 
     /** Max amount of quick actions, including "..." */
     get quickActionCount() {
-        return this.env.inChatWindow ? 2 : 4;
+        return this.env.inChatWindow || this.env.inMeetingChat ? 2 : 4;
     }
 
     get showSubtypeDescription() {
@@ -311,7 +348,7 @@ export class Message extends Component {
             this.state.isHovered ||
             this.state.isClicked ||
             this.emojiPicker?.isOpen ||
-            this.optionsDropdown.isOpen
+            this.state.moreAction?.definition.isActive
         );
     }
 
