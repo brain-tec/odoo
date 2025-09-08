@@ -586,9 +586,8 @@ class StockPicking(models.Model):
              " * Ready: The transfer is ready to be processed.\n(a) The shipping policy is \"As soon as possible\": at least one product has been reserved.\n(b) The shipping policy is \"When all products are ready\": all product have been reserved.\n"
              " * Done: The transfer has been processed.\n"
              " * Cancelled: The transfer has been cancelled.")
-    group_id = fields.Many2one(
-        'procurement.group', 'Procurement Group',
-        readonly=True, related='move_ids.group_id', store=True)
+    reference_ids = fields.Many2many(
+        'stock.reference', related="move_ids.reference_ids", string="References", readonly=True)
     priority = fields.Selection(
         PROCUREMENT_PRIORITIES, string='Priority', default='0',
         help="Products will be reserved first for the transfers with the highest priorities.")
@@ -717,8 +716,7 @@ class StockPicking(models.Model):
     @api.depends('picking_type_id')
     def _compute_move_type(self):
         for record in self:
-            if not record.group_id.move_type:
-                record.move_type = record.picking_type_id.move_type
+            record.move_type = record.picking_type_id.move_type
 
     @api.depends('date_deadline', 'scheduled_date')
     def _compute_has_deadline_issue(self):
@@ -822,8 +820,8 @@ class StockPicking(models.Model):
                 'any_draft': picking_moves_state_map[picking_id.id].get('any_draft', False) or move_state == 'draft',
                 'all_cancel': picking_moves_state_map[picking_id.id].get('all_cancel', True) and move_state == 'cancel',
                 'all_cancel_done': picking_moves_state_map[picking_id.id].get('all_cancel_done', True) and move_state in ('cancel', 'done'),
-                'all_done_are_scrapped': picking_moves_state_map[picking_id.id].get('all_done_are_scrapped', True) and (move.scrapped if move_state == 'done' else True),
-                'any_cancel_and_not_scrapped': picking_moves_state_map[picking_id.id].get('any_cancel_and_not_scrapped', False) or (move_state == 'cancel' and not move.scrapped),
+                'all_done_are_scrapped': picking_moves_state_map[picking_id.id].get('all_done_are_scrapped', True) and (move.location_dest_usage == 'inventory' if move_state == 'done' else True),
+                'any_cancel_and_not_scrapped': picking_moves_state_map[picking_id.id].get('any_cancel_and_not_scrapped', False) or (move_state == 'cancel' and move.location_dest_usage != 'inventory'),
             })
             picking_move_lines[picking_id.id].add(move.id)
         for picking in self:
@@ -916,7 +914,7 @@ class StockPicking(models.Model):
         result = {
             picking
             for [picking] in self.env['stock.move']._read_group(
-                [('picking_id', 'in', self.ids), ('scrapped', '=', True)],
+                [('picking_id', 'in', self.ids), ('location_dest_usage', '=', 'inventory')],
                 ['picking_id'],
             )
         }
@@ -1102,10 +1100,6 @@ class StockPicking(models.Model):
                 if picking_type.sequence_id:
                     vals['name'] = picking_type.sequence_id.next_by_id()
 
-            if 'move_type' not in vals and vals.get('group_id'):
-                procurement_group = self.env['procurement.group'].browse(vals.get('group_id'))
-                if procurement_group.move_type:
-                    vals['move_type'] = procurement_group.move_type
             # make sure to write `schedule_date` *after* the `stock.move` creation in
             # order to get a determinist execution of `_set_scheduled_date`
             scheduled_dates.append(vals.pop('scheduled_date', False))
@@ -1142,7 +1136,7 @@ class StockPicking(models.Model):
         if 'partner_id' in vals:
             after_vals['partner_id'] = vals['partner_id']
         if after_vals:
-            self.move_ids.filtered(lambda move: not move.scrapped).write(after_vals)
+            self.move_ids.filtered(lambda move: move.location_dest_usage != 'inventory').write(after_vals)
         if vals.get('move_ids'):
             self._autoconfirm_picking()
 
@@ -1455,7 +1449,7 @@ class StockPicking(models.Model):
             for move in picking.move_ids:
                 if move.quantity:
                     has_quantity = True
-                if move.scrapped:
+                if move.location_dest_usage == 'inventory':
                     continue
                 if move.picked:
                     has_pick = True

@@ -261,57 +261,57 @@
                     <record id="tax_report_mx_diot_refunds_8_n_tag" model="account.report.expression">
                         <field name="label">refunds_8_n</field>
                         <field name="engine">tax_tags</field>
-                        <field name="formula">DIOT: Refunds 8% N.</field>
+                        <field name="formula">-DIOT: Refunds 8% N.</field>
                     </record>
                     <record id="tax_report_mx_diot_refunds_8_s_tag" model="account.report.expression">
                         <field name="label">refunds_8_s</field>
                         <field name="engine">tax_tags</field>
-                        <field name="formula">DIOT: Refunds 8% S.</field>
+                        <field name="formula">-DIOT: Refunds 8% S.</field>
                     </record>
                     <record id="tax_report_mx_diot_refunds_16_tag" model="account.report.expression">
                         <field name="label">refunds_16</field>
                         <field name="engine">tax_tags</field>
-                        <field name="formula">DIOT: Refunds 16%</field>
+                        <field name="formula">-DIOT: Refunds 16%</field>
                     </record>
                     <record id="tax_report_mx_diot_refunds_16_imp_tag" model="account.report.expression">
                         <field name="label">refunds_16_imp</field>
                         <field name="engine">tax_tags</field>
-                        <field name="formula">DIOT: Refunds 16% IMP</field>
+                        <field name="formula">-DIOT: Refunds 16% IMP</field>
                     </record>
                     <record id="tax_report_mx_diot_refunds_16_imp_int_tag" model="account.report.expression">
                         <field name="label">refunds_16_imp_int</field>
                         <field name="engine">tax_tags</field>
-                        <field name="formula">DIOT: Refunds 16% IMP INT</field>
+                        <field name="formula">-DIOT: Refunds 16% IMP INT</field>
                     </record>
 
                     <record id="tax_report_mx_diot_paid_8_n_wnc_tag" model="account.report.expression">
                         <field name="label">paid_8_n_wnc</field>
                         <field name="engine">domain</field>
-                        <field name="formula" eval="['|', '|', '|', ('tax_tag_ids', '=', '+DIOT: 8% N.'), ('tax_tag_ids', '=', '-DIOT: 8% N.'), ('tax_tag_ids', '=', '+DIOT: 8% N. NO ACREDITABLE'), ('tax_tag_ids', '=', '-DIOT: 8% N. NO ACREDITABLE')]"/>
+                        <field name="formula" eval="['|', '|', '|', ('tax_tag_ids', '=', 'DIOT: 8% N.'), ('tax_tag_ids', '=', 'DIOT: 8% N.'), ('tax_tag_ids', '=', 'DIOT: 8% N. NO ACREDITABLE'), ('tax_tag_ids', '=', 'DIOT: 8% N. NO ACREDITABLE')]"/>
                         <field name="subformula">sum</field>
                     </record>
                     <record id="tax_report_mx_diot_paid_8_s_wnc_tag" model="account.report.expression">
                         <field name="label">paid_8_s_wnc</field>
                         <field name="engine">domain</field>
-                        <field name="formula" eval="['|', '|', '|', ('tax_tag_ids', '=', '+DIOT: 8% S.'), ('tax_tag_ids', '=', '-DIOT: 8% S.'), ('tax_tag_ids', '=', '+DIOT: 8% S. NO ACREDITABLE'), ('tax_tag_ids', '=', '-DIOT: 8% S. NO ACREDITABLE')]"/>
+                        <field name="formula" eval="['|', '|', '|', ('tax_tag_ids', '=', 'DIOT: 8% S.'), ('tax_tag_ids', '=', 'DIOT: 8% S.'), ('tax_tag_ids', '=', 'DIOT: 8% S. NO ACREDITABLE'), ('tax_tag_ids', '=', 'DIOT: 8% S. NO ACREDITABLE')]"/>
                         <field name="subformula">sum</field>
                     </record>
                     <record id="tax_report_mx_diot_paid_16_wnc_tag" model="account.report.expression">
                         <field name="label">paid_16_wnc</field>
                         <field name="engine">domain</field>
-                        <field name="formula" eval="['|', '|', '|', ('tax_tag_ids', '=', '+DIOT: 16%'), ('tax_tag_ids', '=', '-DIOT: 16%'), ('tax_tag_ids', '=', '+DIOT: 16% NO ACREDITABLE'), ('tax_tag_ids', '=', '-DIOT: 16% NO ACREDITABLE')]"/>
+                        <field name="formula" eval="['|', '|', '|', ('tax_tag_ids', '=', 'DIOT: 16%'), ('tax_tag_ids', '=', 'DIOT: 16%'), ('tax_tag_ids', '=', 'DIOT: 16% NO ACREDITABLE'), ('tax_tag_ids', '=', 'DIOT: 16% NO ACREDITABLE')]"/>
                         <field name="subformula">sum</field>
                     </record>
                     <record id="tax_report_mx_diot_paid_16_imp_wnc_tag" model="account.report.expression">
                         <field name="label">paid_16_imp_wnc</field>
                         <field name="engine">domain</field>
-                        <field name="formula" eval="['|', '|', '|', ('tax_tag_ids', '=', '+DIOT: 16% IMP'), ('tax_tag_ids', '=', '-DIOT: 16% IMP'), ('tax_tag_ids', '=', '+DIOT: 16% IMP NO ACREDITABLE'), ('tax_tag_ids', '=', '-DIOT: 16% IMP NO ACREDITABLE')]"/>
+                        <field name="formula" eval="['|', '|', '|', ('tax_tag_ids', '=', 'DIOT: 16% IMP'), ('tax_tag_ids', '=', 'DIOT: 16% IMP'), ('tax_tag_ids', '=', 'DIOT: 16% IMP NO ACREDITABLE'), ('tax_tag_ids', '=', 'DIOT: 16% IMP NO ACREDITABLE')]"/>
                         <field name="subformula">sum</field>
                     </record>
                     <record id="tax_report_mx_diot_paid_16_imp_int_wnc_tag" model="account.report.expression">
                         <field name="label">paid_16_imp_int_wnc</field>
                         <field name="engine">domain</field>
-                        <field name="formula" eval="['|', '|', '|', ('tax_tag_ids', '=', '+DIOT: 16% IMP INT'), ('tax_tag_ids', '=', '-DIOT: 16% IMP INT'), ('tax_tag_ids', '=', '+DIOT: 16% IMP INT NO ACREDITABLE'), ('tax_tag_ids', '=', '-DIOT: 16% IMP INT NO ACREDITABLE')]"/>
+                        <field name="formula" eval="['|', '|', '|', ('tax_tag_ids', '=', 'DIOT: 16% IMP INT'), ('tax_tag_ids', '=', 'DIOT: 16% IMP INT'), ('tax_tag_ids', '=', 'DIOT: 16% IMP INT NO ACREDITABLE'), ('tax_tag_ids', '=', 'DIOT: 16% IMP INT NO ACREDITABLE')]"/>
                         <field name="subformula">sum</field>
                     </record>
 
@@ -333,12 +333,12 @@
                     <record id="tax_report_mx_diot_withheld_tag" model="account.report.expression">
                         <field name="label">withheld</field>
                         <field name="engine">tax_tags</field>
-                        <field name="formula">DIOT: Retención</field>
+                        <field name="formula">-DIOT: Retención</field>
                     </record>
                     <record id="tax_report_mx_diot_refunds_tag" model="account.report.expression">
                         <field name="label">refunds</field>
                         <field name="engine">tax_tags</field>
-                        <field name="formula">DIOT: Refunds</field>
+                        <field name="formula">-DIOT: Refunds</field>
                     </record>
                     <record id="tax_report_mx_diot_no_obj_tag" model="account.report.expression">
                         <field name="label">no_obj</field>

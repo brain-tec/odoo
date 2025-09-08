@@ -122,8 +122,7 @@ class StockWarehouse(models.Model):
                 if 'partner_id' not in vals:
                     vals['partner_id'] = company.partner_id.id
             # create view location for warehouse then create all locations
-            loc_vals = {'name': vals.get('code'), 'usage': 'view',
-                        'location_id': self.env.ref('stock.stock_location_locations').id}
+            loc_vals = {'name': vals.get('code'), 'usage': 'view'}
             if vals.get('company_id'):
                 loc_vals['company_id'] = vals.get('company_id')
             vals['view_location_id'] = self.env['stock.location'].create(loc_vals).id
@@ -731,7 +730,7 @@ class StockWarehouse(models.Model):
                     values={'route_id': inter_wh_route.id})
             pull_rules_list += self._get_supply_pull_rules_values(
                 [self.Routing(transit_location, self.lot_stock_id, self.in_type_id, 'pull')],
-                values={'route_id': inter_wh_route.id, 'propagate_warehouse_id': supplier_wh.id})
+                values={'route_id': inter_wh_route.id})
             for pull_rule_vals in pull_rules_list:
                 Rule.create(pull_rule_vals)
 
