@@ -11,7 +11,6 @@ import {
     startServer,
 } from "@mail/../tests/mail_test_helpers";
 import { describe, expect, test } from "@odoo/hoot";
-import { press } from "@odoo/hoot-dom";
 import { disableAnimations } from "@odoo/hoot-mock";
 import { Command, getService, serverState, withUser } from "@web/../tests/web_test_helpers";
 
@@ -30,7 +29,9 @@ test("can make DM chat in mobile", async () => {
     await contains("button.active", { text: "Inbox" });
     await click("button", { text: "Chat" });
     await click("button", { text: "Start a conversation" });
+    await contains(".o_command_name", { count: 5 });
     await insertText("input[placeholder='Search a conversation']", "Gandalf");
+    await contains(".o_command_name", { count: 3 });
     await click(".o_command_name", { text: "Gandalf" });
     await contains(".o-mail-ChatWindow", { text: "Gandalf" });
 });
@@ -44,8 +45,10 @@ test("can search channel in mobile", async () => {
     await contains("button.active", { text: "Inbox" });
     await click("button", { text: "Channel" });
     await click("button", { text: "Start a conversation" });
+    await contains(".o_command_name", { count: 5 });
     await insertText("input[placeholder='Search a conversation']", "Gryff");
-    await click("a", { text: "Gryffindors" });
+    await contains(".o_command_name", { count: 3 });
+    await click(".o_command_name", { text: "Gryffindors" });
     await contains(".o-mail-ChatWindow div[title='Gryffindors']");
 });
 
@@ -142,7 +145,7 @@ test("channel preview ignores transient message", async () => {
     await start();
     await openDiscuss(channelId);
     await insertText(".o-mail-Composer-input", "/who");
-    await press("Enter");
+    await click(".o-mail-Composer button[title='Send']:enabled");
     await contains(".o_mail_notification", { text: "You are alone in this channel." });
     await click(".o_menu_systray .dropdown-toggle:has(i[aria-label='Messages'])");
     await contains(".o-mail-NotificationItem-text", { text: "Demo: test" });
