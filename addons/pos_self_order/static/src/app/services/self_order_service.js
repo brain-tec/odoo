@@ -616,7 +616,8 @@ export class SelfOrder extends Reactive {
                 {
                     order: this.currentOrder.serializeForORM(),
                     access_token: this.access_token,
-                    table_identifier: this.currentOrder?.table_id?.identifier || tableIdentifier,
+                    table_identifier:
+                        this.currentOrder?.self_ordering_table_id?.identifier || tableIdentifier,
                 }
             );
             const result = this.models.connectNewData(data);
@@ -648,6 +649,7 @@ export class SelfOrder extends Reactive {
             .filter((o) => o.state === "draft" && typeof o.id === "number")
             .map((order) => ({
                 access_token: order.access_token,
+                state: order.state,
                 write_date: serializeDateTime(order.write_date.plus({ seconds: 1 })),
             }))
             .filter((order) => order.access_token);
