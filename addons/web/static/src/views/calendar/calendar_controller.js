@@ -17,13 +17,10 @@ import { ViewScaleSelector } from "@web/views/view_components/view_scale_selecto
 import { CogMenu } from "@web/search/cog_menu/cog_menu";
 import { browser } from "@web/core/browser/browser";
 import { standardViewProps } from "@web/views/standard_view_props";
-import {
-    MultiSelectionButtons,
-    useMultiSelectionButtons,
-} from "@web/views/view_components/multi_selection_buttons";
+import { MultiSelectionButtons } from "@web/views/view_components/multi_selection_buttons";
 import { getLocalYearAndWeek } from "@web/core/l10n/dates";
 
-import { Component, useState } from "@odoo/owl";
+import { Component, reactive, useState } from "@odoo/owl";
 
 const { DateTime } = luxon;
 
@@ -219,9 +216,8 @@ export class CalendarController extends Component {
         return _t("New Event");
     }
 
-    prepareSelectionFeature() {
-        this.selectedCells = null;
-        this.multiSelectionButtonsReactive = useMultiSelectionButtons({
+    prepareMultiSelectionButtonsReactive() {
+        return reactive({
             onCancel: this.cleanSquareSelection.bind(this),
             onAdd: (multiCreateData) => {
                 this.onMultiCreate(multiCreateData, this.selectedCells);
@@ -232,31 +228,38 @@ export class CalendarController extends Component {
                 this.cleanSquareSelection();
             },
             nbSelected: 0,
-            multiCreateView: this.model.meta.multiCreateView,
+            multiCreateView: this.model.meta.multiCreateView || "",
             resModel: this.model.meta.resModel,
             multiCreateValues: this.props.state?.multiCreateValues,
             showMultiCreateTimeRange: this.model.showMultiCreateTimeRange,
+            visible: false,
             context: this.props.context,
         });
+    }
 
+    prepareSelectionFeature() {
+        this.selectedCells = null;
+        this.multiSelectionButtonsReactive = this.prepareMultiSelectionButtonsReactive();
         this.callbackRecorder = new CallbackRecorder();
         this._baseRendererProps.callbackRecorder = this.callbackRecorder;
-        this._baseRendererProps.onSquareSelection = (selectedCells) => {
-            if (selectedCells.length) {
-                this.selectedCells = selectedCells;
-                this.multiSelectionButtonsReactive.visible = true;
-                this.multiSelectionButtonsReactive.nbSelected = this.getSelectedRecordIds(
-                    this.selectedCells
-                ).length;
-            } else {
-                this.selectedCells = null;
-                this.multiSelectionButtonsReactive.visible = false;
-                this.multiSelectionButtonsReactive.nbSelected = 0;
-            }
-        };
+        this._baseRendererProps.onSquareSelection = this.updateMultiSelection.bind(this);
         this._baseRendererProps.cleanSquareSelection = this.cleanSquareSelection.bind(this);
 
         useBus(this.model.bus, "update", this.cleanSquareSelection.bind(this));
+    }
+
+    updateMultiSelection(selectedCells) {
+        if (selectedCells.length) {
+            this.selectedCells = selectedCells;
+            this.multiSelectionButtonsReactive.visible = true;
+            this.multiSelectionButtonsReactive.nbSelected = this.getSelectedRecordIds(
+                this.selectedCells
+            ).length;
+        } else {
+            this.selectedCells = null;
+            this.multiSelectionButtonsReactive.visible = false;
+            this.multiSelectionButtonsReactive.nbSelected = 0;
+        }
     }
 
     cleanSquareSelection() {
