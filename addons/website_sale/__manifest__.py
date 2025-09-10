@@ -101,8 +101,7 @@
             'website_sale/static/src/scss/product_configurator.scss',
 
             'website_sale/static/src/js/cart_service.js',
-            'website_sale/static/src/js/sale_variant_mixin.js',
-            'website_sale/static/src/js/website_sale.js',
+            'website_sale/static/src/js/variant_mixin.js',
             'website_sale/static/src/xml/website_sale.xml',
             'website_sale/static/src/js/website_sale_utils.js',
             'website_sale/static/src/xml/website_sale_utils.xml',
@@ -155,7 +154,7 @@
             'website_sale/static/src/js/website_sale_form_editor.js',
             'website_sale/static/src/website_builder/**/*',
             'website_sale/static/src/js/website_sale_utils.js',
-            ('remove', 'website_sale/static/src/**/*.inside.scss'),
+            ('remove', 'website_sale/static/src/**/*.edit.*'),
         ],
         'website.assets_wysiwyg': [
             'website_sale/static/src/scss/website_sale.editor.scss',
@@ -166,12 +165,9 @@
             'website_sale/static/src/xml/website_sale_utils.xml',
             'website_sale/static/src/xml/website_sale_editor_previews.xml',
         ],
-        'website.backend_assets_all_wysiwyg': [
-            'website_sale/static/src/js/components/wysiwyg_adapter/wysiwyg_adapter.js',
-        ],
-        'website.inside_builder_style': [
+        'website.assets_edit_frontend': [
             'web/static/lib/bootstrap/scss/_variables.scss',
-            'website_sale/static/src/website_builder/**/*.inside.scss',
+            'website_sale/static/src/website_builder/**/*.edit.*',
         ],
         'web.assets_tests': [
             'website_sale/static/tests/tours/**/*',
@@ -185,7 +181,9 @@
             'delivery/static/src/js/location_selector/**/*',
             'website_sale/static/src/interactions/**/*',
             'website_sale/static/src/snippets/s_dynamic_snippet_products/dynamic_snippet_products.js',
+            'website_sale/static/src/js/variant_mixin.js',
             'website_sale/static/src/js/website_sale_utils.js',
+            'website_sale/static/src/js/components/website_sale_image_viewer.js',
             # TODO Find out why these do not work:
             #'website_sale/static/src/snippets/**/*.js',
             # TODO Re-activate when testing edit mode

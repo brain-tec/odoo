@@ -405,6 +405,7 @@ class AccountMove(models.Model):
     tax_calculation_rounding_method = fields.Selection(
         related='company_id.tax_calculation_rounding_method',
         string='Tax calculation rounding method', readonly=True)
+    show_journal = fields.Boolean(compute='_compute_show_journal')
     # === Partner fields === #
     partner_id = fields.Many2one(
         'res.partner',
@@ -631,10 +632,6 @@ class AccountMove(models.Model):
     invoice_source_email = fields.Char(string='Source Email', tracking=True)
     invoice_partner_display_name = fields.Char(compute='_compute_invoice_partner_display_info', store=True)
     is_manually_modified = fields.Boolean()
-    is_self_billing = fields.Boolean(
-        string='Self Billing',
-        help="This bill is a self-billing invoice (that you create on behalf of your vendor).",
-    )
 
     # === Fiduciary mode fields === #
     quick_edit_mode = fields.Boolean(compute='_compute_quick_edit_mode')
@@ -1418,6 +1415,11 @@ class AccountMove(models.Model):
                         'balance': invoice.amount_total_signed,
                         'amount_currency': invoice.amount_total_in_currency_signed,
                     }
+
+    @api.depends('suitable_journal_ids')
+    def _compute_show_journal(self):
+        for move in self:
+            move.show_journal = len(move.suitable_journal_ids) > 1
 
     def _compute_payments_widget_to_reconcile_info(self):
 
@@ -2298,9 +2300,10 @@ class AccountMove(models.Model):
     def _compute_no_followup(self):
         for move in self:
             if move.is_invoice():
-                move.no_followup = move.line_ids.filtered(
+                lines = move.line_ids.filtered(
                     lambda line: line.account_type in ('asset_receivable', 'liability_payable'),
-                )[0].no_followup
+                )
+                move.no_followup = lines[0].no_followup if lines else True
             else:
                 move.no_followup = True
 
@@ -2731,8 +2734,7 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     def action_add_from_catalog(self):
         res = super().action_add_from_catalog()
-        if res['context'].get('product_catalog_order_model') == 'account.move':
-            res['search_view_id'] = [self.env.ref('account.product_view_search_catalog').id, 'search']
+        res['search_view_id'] = [self.env.ref('account.product_view_search_catalog').id, 'search']
         return res
 
     def _get_action_add_from_catalog_extra_context(self):
@@ -2793,12 +2795,17 @@ class AccountMove(models.Model):
                 )
         return product_infos
 
-    def _get_product_catalog_record_lines(self, product_ids, *, selected_section_id=False, **kwargs):
+    def _get_product_catalog_record_lines(self, product_ids, *, section_id=None, **kwargs):
         grouped_lines = defaultdict(lambda: self.env['account.move.line'])
-        selected_section_id = selected_section_id or False
+        if section_id is None:
+            section_id = (
+                self.line_ids[:1].id
+                if self.line_ids[:1].display_type == 'line_section'
+                else False
+            )
         for line in self.line_ids:
             if (
-                line.get_parent_section_line().id == selected_section_id
+                line.get_parent_section_line().id == section_id
                 and line.display_type == 'product'
                 and line.product_id.id in product_ids
             ):
@@ -2806,27 +2813,20 @@ class AccountMove(models.Model):
         return grouped_lines
 
     def _update_order_line_info(
-            self,
-            product_id,
-            quantity,
-            *,
-            selected_section_id=False,
-            child_field='line_ids',
-            **kwargs,
-        ):
+        self, product_id, quantity, *, section_id=False, child_field='line_ids', **kwargs
+    ):
         """ Update account_move_line information for a given product or create a
         new one if none exists yet.
         :param int product_id: The product, as a `product.product` id.
         :param int quantity: The quantity selected in the catalog
-        :param int selected_section_id: The id of section selected in the catalog.
+        :param int section_id: The id of section selected in the catalog.
         :return: The unit price of the product, based on the pricelist of the
                  sale order and the quantity selected.
         :rtype: float
         """
-        selected_section_id = selected_section_id or False
         move_line = self.line_ids.filtered(
             lambda line: line.product_id.id == product_id
-            and line.get_parent_section_line().id == selected_section_id,
+            and line.get_parent_section_line().id == section_id,
         )
         if move_line:
             if quantity != 0:
@@ -2845,7 +2845,7 @@ class AccountMove(models.Model):
                 'move_id': self.id,
                 'quantity': quantity,
                 'product_id': product_id,
-                'sequence': self._get_new_line_sequence(child_field, selected_section_id),
+                'sequence': self._get_new_line_sequence(child_field, section_id),
             })
         return move_line.price_unit
 
@@ -2856,18 +2856,13 @@ class AccountMove(models.Model):
         self.ensure_one()
         return self.state == 'cancel'
 
-    def _get_section_model_info(self):
-        """ Override of `product` to return the model name and parent field for the move lines.
-
-        :return: line_model, parent_field
-        """
-        return 'account.move.line', 'move_id'
+    def _get_parent_field_on_child_model(self):
+        return 'move_id'
 
     def _is_line_valid_for_section_line_count(self, line):
-        """ Override of `product` to check if a line is valid for inclusion in the section's line
-            count.
+        """Check if a line is valid for inclusion in the section's line count.
 
-        :param recordset line: A record of an order line.
+        :param recordset line: A record of a move line.
         :return: True if this line is a valid, else False.
         :rtype: bool
         """
@@ -4026,6 +4021,12 @@ class AccountMove(models.Model):
                 domain += [('move_type', 'in' if self.move_type in refund_types else 'not in', refund_types)]
             if self.journal_id.payment_sequence:
                 domain += [('origin_payment_id', '!=' if is_payment else '=', False)]
+            if self.journal_id.is_self_billing:
+                if self.partner_id:
+                    domain += [('partner_id', '=', self.partner_id.id)]
+                else:
+                    # If the partner id is not set, we can't compute the sequence, so we force a sequence reset.
+                    domain += [(0, '=', 1)]
             reference_move_name = self.sudo().search(domain + [('date', '<=', self.date)], order='date desc', limit=1).name
             if not reference_move_name:
                 reference_move_name = self.sudo().search(domain, order='date asc', limit=1).name
@@ -4067,6 +4068,12 @@ class AccountMove(models.Model):
             else:
                 where_string += " AND origin_payment_id IS NULL "
 
+        if self.journal_id.is_self_billing:
+            if self.partner_id:
+                where_string += " AND partner_id = %(partner_id)s "
+                param['partner_id'] = self.partner_id.id
+            else:
+                where_string += " AND false "
         return where_string, param
 
     def _get_starting_sequence(self):
@@ -4092,7 +4099,16 @@ class AccountMove(models.Model):
             # example). Note that it's already the case for monthly sequences.
             starting_sequence = "%s/%s/%s" % (self.journal_id.code, year_part, '0000' if is_staggered_year else '00000')
         else:
-            starting_sequence = "%s/%s/%02d/0000" % (self.journal_id.code, year_part, move_date.month)
+            if self.journal_id.is_self_billing:
+                partner_name = self.partner_id.commercial_partner_id.name.replace(' ', '')[:10] if self.partner_id else _('[Partner name]')
+                starting_sequence = "%s/%s/%02d/0000" % (
+                    partner_name,
+                    year_part,
+                    move_date.month,
+                )
+            else:
+                starting_sequence = "%s/%s/%02d/0000" % (self.journal_id.code, year_part, move_date.month)
+
         if self.journal_id.refund_sequence and self.move_type in ('out_refund', 'in_refund'):
             starting_sequence = "R" + starting_sequence
         if self.journal_id.payment_sequence and self.origin_payment_id or self.env.context.get('is_payment'):
@@ -5907,9 +5923,9 @@ class AccountMove(models.Model):
         template_xmlid = 'account.email_template_edi_invoice'
         if all(move.move_type == 'out_refund' for move in self):
             template_xmlid = 'account.email_template_edi_credit_note'
-        elif all(move.move_type == 'in_invoice' and move.is_self_billing for move in self):
+        elif all(move.move_type == 'in_invoice' and move.journal_id.is_self_billing for move in self):
             template_xmlid = 'account.email_template_edi_self_billing_invoice'
-        elif all(move.move_type == 'in_refund' and move.is_self_billing for move in self):
+        elif all(move.move_type == 'in_refund' and move.journal_id.is_self_billing for move in self):
             template_xmlid = 'account.email_template_edi_self_billing_credit_note'
         return self.env.ref(template_xmlid)
 
