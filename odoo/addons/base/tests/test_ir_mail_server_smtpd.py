@@ -7,14 +7,16 @@ import ssl
 import unittest
 import warnings
 from base64 import b64encode
+from os import getenv
 from pathlib import Path
-from unittest.mock import patch
 from socket import getaddrinfo  # keep a reference on the non-patched function
+from unittest.mock import patch
 
-from odoo import modules
 from odoo.exceptions import UserError
 from odoo.tools import config, file_path, mute_logger
+
 from .common import TransactionCaseWithUserDemo
+from odoo.addons.base.models.ir_mail_server import IrMail_Server
 
 try:
     import aiosmtpd
@@ -28,6 +30,11 @@ except ImportError:
 PASSWORD = 'secretpassword'
 _openssl = shutil.which('openssl')
 _logger = logging.getLogger(__name__)
+
+if getenv('ODOO_RUNBOT') and not _openssl:
+    _logger.warning("detected runbot environment but openssl not found in PATH, TestIrMailServerSMTPD will be skipped")
+if getenv('ODOO_RUNBOT') and not aiosmtpd:
+    _logger.warning("detected runbot environment but aiosmtpd not installed, TestIrMailServerSMTPD will be skipped")
 
 
 def _find_free_local_address():
@@ -148,7 +155,7 @@ class TestIrMailServerSMTPD(TransactionCaseWithUserDemo):
         # reactivate sending emails during this test suite, make sure
         # NOT TO send emails using another ir.mail_server than the one
         # created in setUp!
-        patcher = patch.object(modules.module, 'current_test', False)
+        patcher = patch.object(IrMail_Server, '_disable_send', return_value=False)
         patcher.start()
         self.addCleanup(patcher.stop)
 
