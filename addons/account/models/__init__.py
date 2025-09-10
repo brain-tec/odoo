@@ -28,6 +28,7 @@ from . import account_analytic_plan
 from . import account_analytic_line
 from . import account_journal_dashboard
 from . import product
+from . import product_catalog_mixin
 from . import company
 from . import res_config_settings
 from . import res_country_group
@@ -35,6 +36,7 @@ from . import account_cash_rounding
 from . import account_incoterms
 from . import decimal_precision
 from . import digest
+from . import kpi_provider
 from . import res_users
 from . import ir_attachment
 from . import ir_actions_report

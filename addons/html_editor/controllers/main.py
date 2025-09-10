@@ -492,7 +492,7 @@ class HTML_Editor(http.Controller):
         """
         attachments = []
         ICP = request.env['ir.config_parameter'].sudo()
-        library_endpoint = ICP.get_param('web_editor.media_library_endpoint', DEFAULT_LIBRARY_ENDPOINT)
+        library_endpoint = ICP.get_param('html_editor.media_library_endpoint', DEFAULT_LIBRARY_ENDPOINT)
 
         media_ids = ','.join(media.keys())
         params = {
@@ -552,6 +552,9 @@ class HTML_Editor(http.Controller):
                     raise werkzeug.exceptions.NotFound()
             svg = attachment.raw.decode('utf-8')
         else:
+            # Used for compatibility
+            if module == 'web_editor':
+                module = 'html_builder'
             svg = self._get_shape_svg(module, 'shapes', filename)
 
         svg, options = self._update_svg_colors(kwargs, svg)
@@ -576,6 +579,9 @@ class HTML_Editor(http.Controller):
 
     @http.route(['/web_editor/image_shape/<string:img_key>/<module>/<path:filename>', '/html_editor/image_shape/<string:img_key>/<module>/<path:filename>'], type='http', auth="public", website=True)
     def image_shape(self, module, filename, img_key, **kwargs):
+        # Used for compatibility
+        if module == 'web_editor':
+            module = 'html_builder'
         svg = self._get_shape_svg(module, 'image_shapes', filename)
 
         record = request.env['ir.binary']._find_record(img_key)
@@ -615,7 +621,7 @@ class HTML_Editor(http.Controller):
     def generate_text(self, prompt, conversation_history):
         try:
             IrConfigParameter = request.env['ir.config_parameter'].sudo()
-            olg_api_endpoint = IrConfigParameter.get_param('web_editor.olg_api_endpoint', DEFAULT_OLG_ENDPOINT)
+            olg_api_endpoint = IrConfigParameter.get_param('html_editor.olg_api_endpoint', DEFAULT_OLG_ENDPOINT)
             database_id = IrConfigParameter.get_param('database.uuid')
             response = iap_tools.iap_jsonrpc(olg_api_endpoint + "/api/olg/1/chat", params={
                 'prompt': prompt,
@@ -720,7 +726,7 @@ class HTML_Editor(http.Controller):
     @http.route(['/html_editor/media_library_search'], type='jsonrpc', auth="user", website=True)
     def media_library_search(self, **params):
         ICP = request.env['ir.config_parameter'].sudo()
-        endpoint = ICP.get_param('web_editor.media_library_endpoint', DEFAULT_LIBRARY_ENDPOINT)
+        endpoint = ICP.get_param('html_editor.media_library_endpoint', DEFAULT_LIBRARY_ENDPOINT)
         params['dbuuid'] = ICP.get_param('database.uuid')
         response = requests.post('%s/media-library/1/search' % endpoint, data=params, timeout=5)
         if response.status_code == requests.codes.ok and response.headers['content-type'] == 'application/json':

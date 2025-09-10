@@ -11,7 +11,6 @@
     'depends': [
         'digest',
         'web',
-        'web_editor',
         'html_editor',
         'http_routing',
         'portal',
@@ -282,14 +281,9 @@
             ('remove', 'website/static/src/js/content/adapt_content.js'),
         ],
         'website.assets_edit_frontend': [
-            'website/static/src/**/*.edit.js',
-            'website/static/src/**/*.edit.scss',
-            'website/static/src/**/*.edit.xml',
+            ('include', 'html_builder.assets_edit_frontend'),
+            'website/static/src/**/*.edit.*',
             'website/static/src/core/website_edit_service.js',
-        ],
-        'website.inside_builder_style': [
-            ('include', 'html_builder.inside_builder_style'),
-            'website/static/src/**/*.inside.scss',
         ],
         'web._assets_primary_variables': [
             'website/static/src/scss/primary_variables.scss',
@@ -396,7 +390,7 @@
         ],
         'website.assets_wysiwyg': [
             ('include', 'web._assets_helpers'),
-            'web_editor/static/src/scss/bootstrap_overridden.scss',
+            'html_editor/static/src/scss/bootstrap_overridden.scss',
             'web/static/src/scss/pre_variables.scss',
             'web/static/lib/bootstrap/scss/_variables.scss',
             'web/static/lib/bootstrap/scss/_variables-dark.scss',
@@ -411,10 +405,6 @@
             'website/static/src/xml/website.cookies_bar.xml',
         ],
         'website.assets_all_wysiwyg': [
-            ('include', 'website.assets_wysiwyg'),
-        ],
-        'website.backend_assets_all_wysiwyg': [
-            ('include', 'web_editor.backend_assets_wysiwyg'),
             ('include', 'website.assets_wysiwyg'),
         ],
         'html_editor.assets_media_dialog': [
@@ -454,10 +444,12 @@
             ('include', 'html_builder.assets'),
             'website/static/src/scss/website_common.scss',
             'website/static/src/builder/**/*',
-            ('remove', 'website/static/src/builder/**/*.inside.scss'),
+            ('remove', 'website/static/src/builder/**/*.edit.*'),
         ],
         'html_builder.iframe_add_dialog': [
-            'website/static/src/snippets/**/*.edit.scss',
+            'website/static/src/snippets/s_color_blocks_2/s_color_blocks_2.scss',
+            'website/static/src/snippets/s_ecomm_categories_showcase/categories_showcase.scss',
+            'website/static/src/snippets/s_floating_blocks/floating_blocks.scss',
         ],
     },
     'configurator_snippets': {

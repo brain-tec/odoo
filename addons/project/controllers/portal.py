@@ -154,7 +154,10 @@ class ProjectCustomerPortal(CustomerPortal):
             # FIXME: See if we prefer to give only the currency that the portal user just need to see the correct information in project sharing
             currencies=request.env['res.currency'].get_all_currencies(),
         )
-        session_info['user_context']['allow_milestones'] = project.allow_milestones
+        session_info['user_context'].update({
+            'allow_milestones': project.allow_milestones,
+            'allow_task_dependencies': project.allow_task_dependencies,
+        })
         return session_info
 
     @http.route(['/my/projects/<int:project_id>/project_sharing', '/my/projects/<int:project_id>/project_sharing/<path:subpath>'], type='http', auth='user', methods=['GET'])
@@ -478,7 +481,7 @@ class ProjectCustomerPortal(CustomerPortal):
 
     def _get_my_tasks_searchbar_filters(self, project_domain=None, task_domain=None):
         searchbar_filters = {
-            'all': {'label': _('All'), 'domain': [('project_id', '!=', False)]},
+            'all': {'label': _('All'), 'domain': [('project_id', '!=', False), ('is_template', '=', False)]},
         }
 
         # extends filterby criteria with project the customer has access to
@@ -491,7 +494,7 @@ class ProjectCustomerPortal(CustomerPortal):
         # extends filterby criteria with project (criteria name is the project id)
         # Note: portal users can't view projects they don't follow
         project_groups = request.env['project.task']._read_group(
-            Domain.AND([[('project_id', 'not in', projects.ids), ('project_id', '!=', False)], task_domain or []]),
+            Domain.AND([[('project_id', 'not in', projects.ids), ('is_template', '=', False), ('project_id', '!=', False)], task_domain or []]),
             ['project_id'])
         for [project] in project_groups:
             searchbar_filters.update({
