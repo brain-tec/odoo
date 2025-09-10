@@ -22,31 +22,33 @@
 
     'assets': {
         'web._assets_primary_variables': [
-            ('after', 'web/static/src/scss/primary_variables.scss', 'html_builder/static/src/builder.variables.scss'),
+            # TODO DUAU: change when file is back in html_builder
+            ('after', 'web/static/src/scss/primary_variables.scss', 'html_editor/static/src/scss/builder.variables.scss'),
             'html_builder/static/src/**/*.variables.scss',
         ],
         # this bundle is lazy loaded when the editor is ready
         'html_builder.assets': [
             ('include', 'web._assets_helpers'),
 
-            'html_builder/static/src/bootstrap_overriden.scss',
+            # TODO DUAU: change when file is back in html_builder
+            'html_editor/static/src/scss/bootstrap_overridden.scss',
             'web/static/src/scss/pre_variables.scss',
             'web/static/lib/bootstrap/scss/_variables.scss',
             'web/static/lib/bootstrap/scss/_variables-dark.scss',
             'web/static/lib/bootstrap/scss/_maps.scss',
             'web/static/fonts/fonts.scss',
             'html_builder/static/src/**/*',
-            ('remove', 'html_builder/static/src/**/*.inside.scss'),
+            ('remove', 'html_builder/static/src/**/*.edit.*'),
             ('remove', 'html_builder/static/src/**/*.dark.scss'),
         ],
         'web.assets_web_dark': [
             'html_builder/static/src/**/*.dark.scss',
         ],
-        'html_builder.inside_builder_style': [
+        'html_builder.assets_edit_frontend': [
             ('include', 'web._assets_helpers'),
 
             'web/static/src/scss/bootstrap_overridden.scss',
-            'html_builder/static/src/**/*.inside.scss',
+            'html_builder/static/src/**/*.edit.*',
             'html_editor/static/src/main/chatgpt/chatgpt_plugin.scss',
             'html_editor/static/src/main/link/link.scss',
         ],
