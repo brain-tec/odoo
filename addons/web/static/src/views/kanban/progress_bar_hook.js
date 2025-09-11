@@ -1,5 +1,4 @@
 import { reactive } from "@odoo/owl";
-import { getCurrency } from "@web/core/currency";
 import { Domain } from "@web/core/domain";
 import { _t } from "@web/core/l10n/translation";
 import {
@@ -139,38 +138,39 @@ class ProgressBarState {
     }
 
     getAggregateValue(group, aggregateField) {
+        const { groupByField, serverValue } = group;
         const title = aggregateField ? aggregateField.string : _t("Count");
         let value = 0;
-        if (!this.activeBars[group.serverValue]) {
+        if (!this.activeBars[serverValue]) {
             value = group.count;
             if (value && aggregateField) {
-                value = _findGroup(this._aggregateValues, group.groupByField, group.serverValue)[
+                value = _findGroup(this._aggregateValues, groupByField, serverValue)[
                     aggregateField.name
                 ];
             }
         } else {
-            value = this.activeBars[group.serverValue].count;
+            value = this.activeBars[serverValue].count;
             if (value && aggregateField) {
                 value =
-                    this.activeBars[group.serverValue]?.aggregates &&
-                    this.activeBars[group.serverValue]?.aggregates[aggregateField.name];
+                    this.activeBars[serverValue]?.aggregates &&
+                    this.activeBars[serverValue]?.aggregates[aggregateField.name];
             }
         }
         value ||= 0;
         if (aggregateField.type === "monetary" && aggregateField.currency_field) {
-            const currencies = group.aggregates?.[aggregateField.currency_field];
+            const aggValues = _findGroup(this._aggregateValues, groupByField, serverValue);
+            const currencies = aggValues?.[aggregateField.currency_field];
             if (currencies?.length > 1) {
                 return {
-                    title: `${title}: ${_t("different currencies cannot be aggregated")}`,
                     value,
-                    currency: false,
+                    currencies,
                 };
             }
             if (currencies?.[0]) {
                 return {
                     title,
                     value,
-                    currency: getCurrency(currencies[0]),
+                    currencies: [currencies[0]],
                 };
             }
         }
