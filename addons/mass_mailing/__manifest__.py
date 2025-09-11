@@ -102,10 +102,9 @@
             'web/static/src/scss/ui.scss',
             'web/static/src/scss/fontawesome_overridden.scss',
 
-            ('include', 'html_builder.inside_builder_style'),
+            ('include', 'html_builder.assets_edit_frontend'),
             'mass_mailing/static/src/scss/mass_mailing_mail.scss',
             'mass_mailing/static/src/iframe_assets/**/*',
-            'mass_mailing/static/src/theme_assets/**/*',
         ],
         'html_builder.iframe_add_dialog': [
             'mass_mailing/static/src/builder/snippet_viewer/*.scss',
