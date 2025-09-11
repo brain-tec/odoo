@@ -1928,6 +1928,8 @@ test("Retry loading more messages on failed load more messages should load more 
     messageFetchShouldFail = false;
     await click("button", { text: "Click here to retry" });
     await contains(".o-mail-Message", { count: 60 });
+    await scroll(".o-mail-Thread", 0);
+    await contains(".o-mail-Message", { count: 90 });
 });
 
 test("composer state: attachments save and restore", async () => {
@@ -2257,7 +2259,9 @@ test("Newly created chat is at the top of the DM list", async () => {
     await start();
     await openDiscuss();
     await click("input[placeholder='Find or start a conversation']");
+    await contains(".o_command_name", { count: 6 });
     await insertText("input[placeholder='Search a conversation']", "Jer");
+    await contains(".o_command_name", { count: 3 });
     await click(".o_command_name", { text: "Jerry Golay" });
     await contains(".o-mail-DiscussSidebar-item", {
         text: "Jerry Golay",
