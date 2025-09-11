@@ -1045,7 +1045,7 @@ class AccountJournal(models.Model):
             action['domain'] = ast.literal_eval(action['domain'] or '[]')
         if not self.env.context.get('action_name'):
             if self.type == 'sale':
-                action['domain'] = [(domain_type_field, 'in', ('out_invoice', 'out_refund', 'out_receipt'))]
+                action['domain'] = [(domain_type_field, 'in', ('out_invoice', 'out_refund', 'out_receipt', 'entry'))]
             elif self.type == 'purchase':
                 action['domain'] = [(domain_type_field, 'in', ('in_invoice', 'in_refund', 'in_receipt', 'entry'))]
 
@@ -1071,6 +1071,11 @@ class AccountJournal(models.Model):
         if mode == 'form':
             action['views'] = [[False, 'form']]
         return action
+
+    def action_post_all_entries(self):
+        ctx = dict(self.env.context, active_model='account.journal', active_id=self.id)
+        moves_to_validate = self.env['account.move'].search([('journal_id', '=', self.id)])
+        return moves_to_validate.with_context(ctx).action_validate_moves_with_confirmation()
 
     def open_action_with_context(self):
         action_name = self.env.context.get('action_name', False)

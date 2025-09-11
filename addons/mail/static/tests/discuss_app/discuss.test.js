@@ -1814,7 +1814,7 @@ test('auto-select "Inbox nav bar" when discuss had inbox as active thread', asyn
     await openDiscuss();
     await click("button:contains('Inbox')");
     await contains(".o-mail-DiscussContent-threadName", { value: "Inbox" });
-    await contains(".o-mail-MessagingMenu-navbar button.o-active", { text: "Inbox" });
+    await contains(".o-mail-MessagingMenu-navbar button.active", { text: "Inbox" });
     await contains("button.active.o-active", { text: "Inbox" });
     await contains("h4", { text: "Congratulations, your inbox is empty" });
 });
@@ -2015,6 +2015,8 @@ test("Retry loading more messages on failed load more messages should load more 
     messageFetchShouldFail = false;
     await click("button", { text: "Click here to retry" });
     await contains(".o-mail-Message", { count: 60 });
+    await scroll(".o-mail-Thread", 0);
+    await contains(".o-mail-Message", { count: 90 });
 });
 
 test("composer state: attachments save and restore", async () => {

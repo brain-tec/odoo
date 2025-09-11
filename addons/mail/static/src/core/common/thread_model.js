@@ -454,6 +454,7 @@ export class Thread extends Record {
         let res;
         try {
             res = await this.fetchMessagesData({ after, around, before });
+            this.hasLoadingFailed = false;
         } catch (e) {
             this.hasLoadingFailed = true;
             this.isLoaded = true;
@@ -623,12 +624,6 @@ export class Thread extends Record {
 
     get fetchRouteChatter() {
         return "/mail/thread/messages";
-    }
-
-    async leave() {
-        await this.store.env.services.orm.silent.call("discuss.channel", "action_unfollow", [
-            this.id,
-        ]);
     }
 
     /**
@@ -897,7 +892,10 @@ export class Thread extends Record {
                 )
             );
         }
-        this.leave();
+        await this.closeChatWindow();
+        await this.store.env.services.orm.silent.call("discuss.channel", "action_unfollow", [
+            this.id,
+        ]);
     }
 
     _getActualModelName() {

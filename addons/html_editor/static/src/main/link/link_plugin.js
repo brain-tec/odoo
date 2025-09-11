@@ -246,6 +246,7 @@ export class LinkPlugin extends Plugin {
             ".dropdown-item",
             "[data-oe-model]",
             ":has(>[data-oe-model])",
+            ".o_prevent_link_editor a",
         ],
         legit_empty_link_predicates: (linkEl) => linkEl.hasAttribute("data-mimetype"),
 
@@ -803,8 +804,9 @@ export class LinkPlugin extends Plugin {
             }
         } else {
             const closestLinkElement = closestElement(selection.anchorNode, "A");
-            const isLinkEditable =
-                this.delegateTo("is_link_editable_predicates", closestLinkElement) || false;
+            const isLinkEditable = this.getResource("is_link_editable_predicates").some((p) =>
+                p(closestLinkElement)
+            );
             if (closestLinkElement && closestLinkElement.isContentEditable) {
                 if (closestLinkElement !== this.linkInDocument || !this.currentOverlay.isOpen) {
                     this.openLinkTools(closestLinkElement);
