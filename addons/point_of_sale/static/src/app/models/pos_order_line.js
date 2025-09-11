@@ -594,7 +594,7 @@ export class PosOrderline extends Base {
     }
 
     getCustomerNote() {
-        return this.customer_note;
+        return this.customer_note || "";
     }
 
     getTotalCost() {
@@ -671,7 +671,7 @@ export class PosOrderline extends Base {
                     this.order_id.fiscal_position_id,
                     this.models
                 )
-                    ?.map((tax) => tax.tax_group_id.pos_receipt_label)
+                    ?.map((tax) => tax.tax_group_id?.pos_receipt_label)
                     .filter((label) => label)
             ),
         ].join(" ");
