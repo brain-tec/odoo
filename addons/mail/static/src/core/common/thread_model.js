@@ -321,7 +321,7 @@ export class Thread extends Record {
      * @returns {string}
      */
     getPersonaName(persona) {
-        return persona.displayName;
+        return persona.displayName || persona.name;
     }
 
     get hasAttachmentPanel() {
@@ -454,6 +454,7 @@ export class Thread extends Record {
         let res;
         try {
             res = await this.fetchMessagesData({ after, around, before });
+            this.hasLoadingFailed = false;
         } catch (e) {
             this.hasLoadingFailed = true;
             this.isLoaded = true;
