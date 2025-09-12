@@ -182,6 +182,7 @@ export class LinkPopover extends Component {
                         },
                     },
                     {
+                        env: this.__owl__.childEnv,
                         onClose: this.onChange.bind(this),
                     }
                 );
@@ -216,13 +217,11 @@ export class LinkPopover extends Component {
             this.loadAsyncLinkPreview();
         }
         const onPointerDown = (ev) => {
-            if (!this.state.url) {
-                this.props.onDiscard();
-            } else if (
-                this.editingWrapper?.el &&
-                !this.state.isImage &&
-                !this.editingWrapper.el.contains(ev.target)
-            ) {
+            if (this.state.isImage) {
+                return;
+            }
+            this.state.url ||= "#";
+            if (this.editingWrapper?.el && !this.editingWrapper.el.contains(ev.target)) {
                 this.onClickApply();
             }
         };
