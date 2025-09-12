@@ -9,7 +9,7 @@ import {
     useDomState,
     useHasPreview,
 } from "../utils";
-import { isColorGradient } from "@web/core/utils/colors";
+import { isCSSColor, isColorGradient } from "@web/core/utils/colors";
 import { getAllUsedColors } from "@html_builder/utils/utils_css";
 
 // TODO replace by useInputBuilderComponent after extract unit by AGAU
@@ -138,7 +138,6 @@ export class BuilderColorPicker extends Component {
                     this.props.getUsedCustomColors || this.getUsedCustomColors.bind(this),
                 colorPrefix: "color-prefix-",
                 themeColorPrefix: "hb-cp-",
-                showRgbaField: true,
                 noTransparency: this.props.noTransparency,
                 enabledTabs: this.props.enabledTabs,
                 grayscales: this.props.grayscales,
@@ -158,7 +157,10 @@ export class BuilderColorPicker extends Component {
             if (isColorGradient(this.state.selectedColor)) {
                 return `background-image: ${this.state.selectedColor}`;
             }
-            return `background-color: ${this.state.selectedColor}`;
+            if (isCSSColor(this.state.selectedColor)) {
+                return `background-color: ${this.state.selectedColor}`;
+            }
+            return `background-color: var(--${this.state.selectedColor})`;
         }
         if (this.state.selectedColorCombination) {
             const colorCombination = this.state.selectedColorCombination.replace("_", "-");

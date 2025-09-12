@@ -17,7 +17,7 @@ const DISPLAY_TYPES = {
     SUBSECTION: "line_subsection",
 };
 
-function getParentSectionRecord(list, record) {
+export function getParentSectionRecord(list, record) {
     const { sectionIndex } = getRecordsUntilSection(list, record, false, record.data.display_type !== DISPLAY_TYPES.SUBSECTION);
     return list.records[sectionIndex];
 }
@@ -93,6 +93,8 @@ export class SectionAndNoteListRenderer extends ListRenderer {
         super.setup();
         this.titleField = "name";
         this.priceColumns = [...this.props.aggregatedFields, "price_unit"];
+        // invisible fields to force copy when duplicating a section
+        this.copyFields = ["display_type", "collapse_composition", "collapse_prices"];
         useEffect(
             (editedRecord) => this.focusToName(editedRecord),
             () => [this.editedRecord]
@@ -227,6 +229,7 @@ export class SectionAndNoteListRenderer extends ListRenderer {
         });
         await this.props.list.duplicateRecords(recordsToDuplicate, {
             targetIndex: sectionIndex,
+            copyFields: this.copyFields,
         });
     }
 
@@ -345,7 +348,7 @@ export class SectionAndNoteListRenderer extends ListRenderer {
 
     getCellClass(column, record) {
         let classNames = super.getCellClass(column, record);
-        // For hiding columnns of section and note 
+        // For hiding columnns of section and note
         if (
             this.isSectionOrNote(record)
             && column.widget !== "handle"
