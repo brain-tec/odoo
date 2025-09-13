@@ -1124,7 +1124,7 @@ export class PosStore extends WithLazyGetterTrap {
         return this.user;
     }
     getCashierUserId() {
-        return this.user.id;
+        return this.user?.id;
     }
     cashierHasPriceControlRights() {
         return !this.config.restrict_price_control || this.getCashier()._role == "manager";
@@ -1732,7 +1732,7 @@ export class PosStore extends WithLazyGetterTrap {
                 let reprint = false;
                 let orderChange = changesToOrder(
                     order,
-                    this.config.preparationCategories,
+                    this.config.printerCategories,
                     opts.cancelled
                 );
 
