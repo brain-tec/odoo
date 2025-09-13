@@ -7976,7 +7976,7 @@ test("edit the kanban color with the colorpicker", async () => {
         })
     ).toHaveCount(12, { message: "the color picker should have 12 children (the colors)" });
 
-    await contains(".o_kanban_colorpicker .o_kanban_color_9").click();
+    await contains(".o_kanban_colorpicker .o_colorlist_item_color_9").click();
 
     // should write on the color field
     expect.verifySteps(["write-color-9"]);
@@ -8008,7 +8008,7 @@ test("kanban with colorpicker and node with color attribute", async () => {
     });
     expect(getKanbanRecord({ index: 0 })).toHaveClass("o_kanban_color_3");
     await toggleKanbanRecordDropdown(0);
-    await contains(`.o_kanban_colorpicker .o_kanban_color_9[title="Raspberry"]`).click();
+    await contains(`.o_kanban_colorpicker .o_colorlist_item_color_9[title="Raspberry"]`).click();
     // should write on the color field
     expect.verifySteps(["write-color-9"]);
     expect(getKanbanRecord({ index: 0 })).toHaveClass("o_kanban_color_9");
@@ -8040,7 +8040,7 @@ test("edit the kanban color with translated colors resulting in the same terms",
     });
 
     await toggleKanbanRecordDropdown(0);
-    await contains(".o_kanban_colorpicker .o_kanban_color_9").click();
+    await contains(".o_kanban_colorpicker .o_colorlist_item_color_9").click();
     expect(getKanbanRecord({ index: 0 })).toHaveClass("o_kanban_color_9");
 });
 
@@ -14535,4 +14535,83 @@ test(`cache web_read_group: less groups than in cache`, async () => {
     await animationFrame();
     expect(`.o_kanban_view .o_kanban_group`).toHaveCount(1);
     expect(queryAllTexts(`.o_kanban_group .o_kanban_header`)).toEqual(["xmo\n(4)"]);
+});
+
+test.tags("desktop");
+test("Cache: folded is now unfolded", async () => {
+    Product._records[1].fold = true;
+
+    Partner._views = {
+        "kanban,false": `
+            <kanban default_group_by="product_id">
+                <templates>
+                    <div t-name="card">
+                        <field name="id"/>
+                    </div>
+                </templates>
+            </kanban>`,
+        "search,false": `<search/>`,
+    };
+
+    defineActions([
+        {
+            id: 1,
+            name: "Partners Action",
+            res_model: "partner",
+            views: [[false, "kanban"]],
+            search_view_id: [false, "search"],
+        },
+    ]);
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+
+    expect(queryAll(".o_kanban_record", { root: getKanbanColumn(0) })).toHaveCount(2);
+    expect(getKanbanColumn(1)).toHaveClass("o_column_folded");
+    expect(queryText(getKanbanColumn(1))).toBe("xmo\n(2)");
+
+    MockServer.env["product"].write(5, { fold: false });
+    await getService("action").doAction(1);
+
+    expect(queryAll(".o_kanban_record", { root: getKanbanColumn(0) })).toHaveCount(2);
+    expect(queryAll(".o_kanban_record", { root: getKanbanColumn(1) })).toHaveCount(2);
+});
+
+test.tags("desktop");
+test("Cache: unfolded is now folded", async () => {
+    Product._records[1].fold = false;
+
+    Partner._views = {
+        "kanban,false": `
+            <kanban default_group_by="product_id">
+                <templates>
+                    <div t-name="card">
+                        <field name="id"/>
+                    </div>
+                </templates>
+            </kanban>`,
+        "search,false": `<search/>`,
+    };
+
+    defineActions([
+        {
+            id: 1,
+            name: "Partners Action",
+            res_model: "partner",
+            views: [[false, "kanban"]],
+            search_view_id: [false, "search"],
+        },
+    ]);
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+
+    expect(queryAll(".o_kanban_record", { root: getKanbanColumn(0) })).toHaveCount(2);
+    expect(queryAll(".o_kanban_record", { root: getKanbanColumn(1) })).toHaveCount(2);
+
+    MockServer.env["product"].write(5, { fold: true });
+    await getService("action").doAction(1);
+    expect(queryAll(".o_kanban_record", { root: getKanbanColumn(0) })).toHaveCount(2);
+    expect(getKanbanColumn(1)).toHaveClass("o_column_folded");
+    expect(queryText(getKanbanColumn(1))).toBe("xmo\n(2)");
 });
