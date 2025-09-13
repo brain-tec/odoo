@@ -712,6 +712,7 @@ class AccountMove(models.Model):
         string="PDF File",
         copy=False,
     )
+    invoice_incoterm_placeholder = fields.Char(compute='_compute_invoice_incoterm_placeholder')
 
     # === Display purpose fields === #
     # used to have a dynamic domain on journal / taxes in the form view.
@@ -2150,6 +2151,11 @@ class AccountMove(models.Model):
 
     def _compute_incoterm_location(self):
         pass
+
+    @api.depends('company_id.incoterm_id')
+    def _compute_invoice_incoterm_placeholder(self):
+        for move in self:
+            move.invoice_incoterm_placeholder = move.company_id.incoterm_id.display_name if move.company_id.incoterm_id else _('Define a default in the settings')
 
     @api.depends('partner_id', 'invoice_date', 'amount_total')
     def _compute_abnormal_warnings(self):
@@ -4023,7 +4029,7 @@ class AccountMove(models.Model):
                 domain += [('origin_payment_id', '!=' if is_payment else '=', False)]
             if self.journal_id.is_self_billing:
                 if self.partner_id:
-                    domain += [('partner_id', '=', self.partner_id.id)]
+                    domain += [('commercial_partner_id', '=', self.partner_id.commercial_partner_id.id)]
                 else:
                     # If the partner id is not set, we can't compute the sequence, so we force a sequence reset.
                     domain += [(0, '=', 1)]
@@ -4070,8 +4076,8 @@ class AccountMove(models.Model):
 
         if self.journal_id.is_self_billing:
             if self.partner_id:
-                where_string += " AND partner_id = %(partner_id)s "
-                param['partner_id'] = self.partner_id.id
+                where_string += " AND commercial_partner_id = %(partner_id)s "
+                param['partner_id'] = self.partner_id.commercial_partner_id.id
             else:
                 where_string += " AND false "
         return where_string, param
@@ -4100,9 +4106,10 @@ class AccountMove(models.Model):
             starting_sequence = "%s/%s/%s" % (self.journal_id.code, year_part, '0000' if is_staggered_year else '00000')
         else:
             if self.journal_id.is_self_billing:
-                partner_name = self.partner_id.commercial_partner_id.name.replace(' ', '')[:10] if self.partner_id else _('[Partner name]')
-                starting_sequence = "%s/%s/%02d/0000" % (
-                    partner_name,
+                partner_identifier = str(self.partner_id.commercial_partner_id.id) if self.partner_id else _('[Partner id]')
+                starting_sequence = "%s%s/%s/%02d/0000" % (
+                    self.journal_id.code,
+                    partner_identifier.zfill(5),
                     year_part,
                     move_date.month,
                 )
@@ -5369,9 +5376,14 @@ class AccountMove(models.Model):
                     validation_msgs.add(_("The field 'Vendor' is required, please complete it to validate the Vendor Bill."))
 
             # Handle case when the invoice_date is not set. In that case, the invoice_date is set at today and then,
-            # lines are recomputed accordingly.
+            # lines are recomputed accordingly (if the user didnt' change the rate manually)
             if not invoice.invoice_date and invoice.is_invoice(include_receipts=True):
-                invoice.invoice_date = fields.Date.context_today(self)
+                if invoice.invoice_currency_rate != invoice.expected_currency_rate:
+                    # keep the rate set by the user
+                    with self.env.protecting([self._fields['invoice_currency_rate']], invoice):
+                        invoice.invoice_date = fields.Date.context_today(self)
+                else:
+                    invoice.invoice_date = fields.Date.context_today(self)
 
         for move in self:
             if move.state in ['posted', 'cancel']:
@@ -5746,7 +5758,8 @@ class AccountMove(models.Model):
 
     def action_print_pdf(self):
         self.ensure_one()
-        report_action = self.env.ref('account.account_invoices').report_action(self.id, config=False)
+        invoice_template = self.env['account.move.send']._get_default_pdf_report_id(self)
+        report_action = invoice_template.report_action(self.id, config=False)
         return self._get_action_with_base_document_layout_configurator(report_action)
 
     def preview_invoice(self):
