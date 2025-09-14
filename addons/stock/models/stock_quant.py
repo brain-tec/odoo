@@ -430,7 +430,7 @@ class StockQuant(models.Model):
         }
         return action
 
-    def action_apply_inventory(self):
+    def action_apply_inventory(self, date=None):
         # for some reason if multi-record, env.context doesn't pass to wizards...
         ctx = dict(self.env.context or {})
         ctx['default_quant_ids'] = self.ids
@@ -446,7 +446,7 @@ class StockQuant(models.Model):
                 'target': 'new',
                 'context': ctx,
             }
-        self._apply_inventory()
+        self._apply_inventory(date)
         self.inventory_quantity_set = False
 
     def action_stock_quant_relocate(self):
@@ -987,7 +987,7 @@ class StockQuant(models.Model):
                 [('company_id', '=', company_id)], limit=1
             ).lot_stock_id
 
-    def _apply_inventory(self):
+    def _apply_inventory(self, date=None):
         # Consider the inventory_quantity as set => recompute the inventory_diff_quantity if needed
         self.inventory_quantity_set = True
         move_vals = []
@@ -1010,6 +1010,8 @@ class StockQuant(models.Model):
                                                      package_id=quant.package_id))
         moves = self.env['stock.move'].with_context(inventory_mode=False).create(move_vals)
         moves.with_context(ignore_dest_packages=True)._action_done()
+        if date:
+            moves.date = date
         moves._trigger_assign()
         self.location_id.sudo().write({'last_inventory_date': fields.Date.today()})
         date_by_location = {loc: loc._get_next_inventory_date() for loc in self.mapped('location_id')}
@@ -1511,11 +1513,14 @@ class StockQuant(models.Model):
         :param unpack: set to True when needing to unpack the quant
         :param up_to_parent_packages: `stock.package` that are the upper limit to keep the parents
         """
-        def set_parent_package(package, limit_ids):
-            if not package.parent_package_id or not limit_ids or package.id in limit_ids:
+        def set_parent_package(all_quants, package, limit_ids):
+            if not package.parent_package_id or (limit_ids and package.id in limit_ids):
+                return
+            if any(quant not in all_quants for quant in package.parent_package_id.contained_quant_ids):
+                # Only move the container package as well if its whole content is moved as well
                 return
             package.package_dest_id = package.parent_package_id
-            return set_parent_package(package.parent_package_id, limit_ids)
+            return set_parent_package(all_quants, package.parent_package_id, limit_ids)
 
         message = message or _('Quantity Relocated')
         move_vals = []
@@ -1524,7 +1529,7 @@ class StockQuant(models.Model):
             result_package_id = package_dest_id  # temp variable to keep package_dest_id unchanged
             if not unpack and not package_dest_id:
                 result_package_id = quant.package_id
-                set_parent_package(result_package_id, limit_ids)
+                set_parent_package(self, result_package_id, limit_ids)
             move_vals.append(quant.with_context(inventory_name=message)._get_inventory_move_values(
                 quant.quantity,
                 quant.location_id,
