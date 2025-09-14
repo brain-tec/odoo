@@ -43,7 +43,7 @@ class StockPickingType(models.Model):
         'stock.picking.type', 'Operation Type for Returns',
         index='btree_not_null',
         check_company=True)
-    show_entire_packs = fields.Boolean('Move Entire Packages', default=False, help="If ticked, you will be able to select entire packages to move")
+    show_entire_packs = fields.Boolean('Move Entire Packages', default=False, help="If ticked, packages to move will be directly displayed in Barcode instead of the products they contain")
     set_package_type = fields.Boolean('Set Package Type', default=False, help="If ticked, you will be able to select which package or package type to use in a put in pack")
     warehouse_id = fields.Many2one(
         'stock.warehouse', 'Warehouse', compute='_compute_warehouse_id', store=True, readonly=False, ondelete='cascade',
@@ -602,7 +602,7 @@ class StockPicking(models.Model):
     has_deadline_issue = fields.Boolean(
         "Is late", compute='_compute_has_deadline_issue', store=True, default=False,
         help="Is late or will be late depending on the deadline and scheduled date")
-    date_done = fields.Datetime('Date of Transfer', copy=False, readonly=True, help="Date at which the transfer has been processed or cancelled.")
+    date_done = fields.Datetime('Date of Transfer', copy=False, help="Date at which the transfer has been processed or cancelled.")
     delay_alert_date = fields.Datetime('Delay Alert Date', compute='_compute_delay_alert_date', search='_search_delay_alert_date')
     json_popover = fields.Char('JSON data for the popover widget', compute='_compute_json_popover')
     location_id = fields.Many2one(
@@ -848,6 +848,8 @@ class StockPicking(models.Model):
     @api.depends('move_ids.state', 'move_ids.date', 'move_type')
     def _compute_scheduled_date(self):
         for picking in self:
+            if not picking.id:
+                continue
             moves_dates = picking.move_ids.filtered(lambda move: move.state not in ('done', 'cancel')).mapped('date')
             if picking.move_type == 'direct':
                 picking.scheduled_date = min(moves_dates, default=picking.scheduled_date or fields.Datetime.now())
@@ -885,7 +887,7 @@ class StockPicking(models.Model):
                     shipping_weight += package.shipping_weight
                 else:
                     shipping_weight += package.package_type_id.base_weight
-                    shipping_weight += sum(packages_weight[pack] for pack in self.env['stock.package'].browse(children_packages_by_pack[package]))
+                    shipping_weight += sum(packages_weight.get(pack, 0) for pack in self.env['stock.package'].browse(children_packages_by_pack.get(package)))
 
             picking.shipping_weight = shipping_weight
 
@@ -906,8 +908,10 @@ class StockPicking(models.Model):
 
     def _set_scheduled_date(self):
         for picking in self:
-            if picking.state in ('done', 'cancel'):
-                raise UserError(_("You cannot change the Scheduled Date on a done or cancelled transfer."))
+            if picking.state == 'cancel':
+                raise UserError(_("You cannot change the Scheduled Date on a cancelled transfer."))
+            if picking.state == 'done':
+                continue
             picking.move_ids.write({'date': picking.scheduled_date})
 
     def _has_scrap_move(self):
@@ -1124,6 +1128,8 @@ class StockPicking(models.Model):
                     vals['location_id'] = picking_type.default_location_src_id.id
                     vals['location_dest_id'] = picking_type.default_location_dest_id.id
         res = super().write(vals)
+        if vals.get('date_done'):
+            self.filtered(lambda p: p.state == 'done').move_ids.date = vals['date_done']
         if vals.get('signature'):
             for picking in self:
                 picking._attach_sign()
@@ -1864,10 +1870,10 @@ class StockPicking(models.Model):
             'target': 'new',
         }
 
-    def action_add_entire_packs(self, packages):
+    def action_add_entire_packs(self, package_ids):
         self.ensure_one()
         if self.state not in ('done', 'cancel'):
-            all_packages = self.env['stock.package'].search([('id', 'child_of', packages.ids)])
+            all_packages = self.env['stock.package'].search([('id', 'child_of', package_ids)])
             all_package_ids = set(all_packages.ids)
             # Remove existing move lines that already pulled from these packages, as using them fully now.
             self.move_line_ids.filtered(lambda ml: ml.package_id.id in all_package_ids).unlink()
@@ -1898,6 +1904,8 @@ class StockPicking(models.Model):
             'domain': [('picking_ids', 'in', self.ids)],
             'context': {
                 'picking_id': self.id,
+                'location_id': self.location_id.id,
+                'can_add_entire_packs': self.picking_type_code != 'incoming',
                 'search_default_main_packages': True,
             },
         }
