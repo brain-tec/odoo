@@ -66,13 +66,15 @@
                     <!-- Use t-set in order to be able to translate, if put in the attribute directly then export POT file will not exist this text-->
                     <label class="o_configurator_industry_wrapper me-2" t-ref="industrySelection">
                         <AutoComplete
-                            placeholder.translate="Clothes, Marketing, ..."
+                            placeholder.translate="Restaurant, Hair Salon, Clothing Store,..."
                             value="state.selectedIndustry?.label ?? ''"
                             sources="sources"
                             onInput.bind="onAutocompleteInput"
-                            inputDebounceDelay="400"
+                            inputDebounceDelay="100"
                             menuPositionOptions="{ position: 'bottom-fit' }"
                             menuCssClass="'custom-ui-autocomplete shadow-lg border-0 o_configurator_show_fast o_configurator_industry_dropdown'"
+                            selectOnBlur="true"
+                            selectOnTab="true"
                         />
                     </label>
                     <span> business</span>
