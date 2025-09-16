@@ -42,10 +42,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-29 18:37+0000\n"
-"PO-Revision-Date: 2025-09-01 21:17+0000\n"
-"Last-Translator: Claes-Johan Dahlin "
-"<user-89@users.noreply.translate.odoo.com>\n"
+"POT-Creation-Date: 2025-09-12 01:50+0000\n"
+"PO-Revision-Date: 2025-09-15 11:38+0000\n"
+"Last-Translator: Jakob Krabbe <jakob.krabbe@vertel.se>\n"
 "Language-Team: Swedish <https://translate.odoo.com/projects/odoo-18/account/"
 "sv/>\n"
 "Language: sv\n"
@@ -8220,7 +8219,7 @@ msgid ""
 msgstr ""
 "Hej,\n"
 "    <br/><br/>\n"
-"    Ditt e-postmeddelande har kasserats. E-postadressen du har använt "
+"    Ditt e-postmeddelande har avbrutits. E-postadressen du har använt "
 "accepterar endast nya fakturor:"
 
 #. module: account
@@ -9842,6 +9841,11 @@ msgstr "juli"
 #: model:ir.model.fields.selection,name:account.selection__res_company__fiscalyear_last_month__6
 msgid "June"
 msgstr "juni"
+
+#. module: account
+#: model:ir.model,name:account.model_kpi_provider
+msgid "KPI Provider"
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_journal__kanban_dashboard
