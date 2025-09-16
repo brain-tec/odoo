@@ -1,8 +1,8 @@
 // ! WARNING: this module cannot depend on modules not ending with ".hoot" (except libs) !
 
 import { describe, dryRun, globals, start, stop } from "@odoo/hoot";
-import { Deferred } from "@odoo/hoot-dom";
-import { watchKeys, watchListeners } from "@odoo/hoot-mock";
+import { Deferred, delay } from "@odoo/hoot-dom";
+import { watchAddedNodes, watchKeys, watchListeners } from "@odoo/hoot-mock";
 
 import { mockBrowserFactory } from "./mock_browser.hoot";
 import { mockCurrencyFactory } from "./mock_currency.hoot";
@@ -112,7 +112,7 @@ async function describeDrySuite(fileSuffix, entryPoints) {
         });
     }
 
-    moduleSetLoader.cleanup();
+    await moduleSetLoader.cleanup();
 }
 
 /**
@@ -365,6 +365,7 @@ async function __gcAndLogMemory(label, testCount) {
 /** @extends {OdooModuleLoader} */
 class ModuleSetLoader extends loader.constructor {
     cleanups = [];
+    preventGlobalDefine = false;
 
     /**
      * @param {ModuleSet} moduleSet
@@ -398,7 +399,11 @@ class ModuleSetLoader extends loader.constructor {
         return !filter || filter(name) || R_DEFAULT_MODULE.test(name);
     }
 
-    cleanup() {
+    async cleanup() {
+        // Wait for side-effects to be properly caught up by the different "watchers"
+        // (like mutation records).
+        await delay();
+
         odoo.define = define;
         odoo.loader = loader;
 
@@ -412,7 +417,7 @@ class ModuleSetLoader extends loader.constructor {
      * @type {typeof loader["define"]}
      */
     define(name, deps, factory) {
-        if (!loader.factories.has(name)) {
+        if (!this.preventGlobalDefine && !loader.factories.has(name)) {
             // Lazy-loaded modules are added to the main loader for next ModuleSetLoader
             // instances.
             loader.define(name, deps, factory, true);
@@ -428,7 +433,8 @@ class ModuleSetLoader extends loader.constructor {
         this.cleanups.push(
             watchKeys(window.odoo),
             watchKeys(window, ALLOWED_GLOBAL_KEYS),
-            watchListeners()
+            watchListeners(window),
+            watchAddedNodes(window)
         );
 
         // Load module set modules (without entry point)
@@ -466,6 +472,7 @@ const ALLOWED_GLOBAL_KEYS = [
     // Bootstrap.js is voluntarily ignored as it is deprecated
     "Chart", // Chart.js
     "Cropper", // Cropper.js
+    "DiffMatchPatch", // Diff Match Patch
     "DOMPurify", // DOMPurify
     "Diff2Html",
     "FullCalendar", // Full Calendar
@@ -476,6 +483,7 @@ const ALLOWED_GLOBAL_KEYS = [
     "owl", // Owl
     "pdfjsLib", // PDF JS
     "Popper", // Popper
+    "Prism", // PrismJS
     "SignaturePad", // Signature Pad
     "StackTrace", // StackTrace
     "ZXing", // ZXing
@@ -680,7 +688,8 @@ export async function runTests(options) {
         // Run recently added tests
         const running = await start(suite);
 
-        moduleSetLoader.cleanup();
+        await moduleSetLoader.cleanup();
+
         lastSuiteName = suite.fullName;
         lastNumberTests = suite.reporting.tests;
 
