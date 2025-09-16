@@ -106,15 +106,18 @@ class AccountMove(models.Model):
 
     def _invoice_paid_hook(self):
         # OVERRIDE
-        res = super(AccountMove, self)._invoice_paid_hook()
-        todo = set()
-        for invoice in self.filtered(lambda move: move.is_invoice()):
-            for line in invoice.invoice_line_ids:
-                for sale_line in line.sale_line_ids:
-                    todo.add((sale_line.order_id, invoice.name))
-        for (order, name) in todo:
-            order.message_post(body=_("Invoice %s paid", name))
-        return res
+        # SV doesn't want that a message is posted in the SO chatter when an
+        # invoice is paid.
+        return super()._invoice_paid_hook()
+        # res = super(AccountMove, self)._invoice_paid_hook()
+        # todo = set()
+        # for invoice in self.filtered(lambda move: move.is_invoice()):
+        #     for line in invoice.invoice_line_ids:
+        #         for sale_line in line.sale_line_ids:
+        #             todo.add((sale_line.order_id, invoice.name))
+        # for (order, name) in todo:
+        #     order.message_post(body=_("Invoice %s paid", name))
+        # return res
 
     def _action_invoice_ready_to_be_sent(self):
         # OVERRIDE
