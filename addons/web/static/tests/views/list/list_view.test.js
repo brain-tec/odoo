@@ -1653,7 +1653,7 @@ test("multi_edit: edit a required field with invalid value", async () => {
     await contains(`.o_field_widget[name=foo] input`).clear();
 
     expect(`.o_notification`).toHaveCount(1);
-    expect(`.o_notification`).toHaveText("Invalid fields:\nFoo");
+    expect(`.o_notification`).toHaveText("Missing required fields");
     expect(`.o_data_row:eq(0) .o_data_cell[name='foo']`).toHaveText("yop");
     expect(`.o_data_row:eq(0)`).toHaveClass("o_data_row_selected");
     expect(`.o_data_row:eq(0)`).not.toHaveClass("o_selected_row");
@@ -4670,7 +4670,7 @@ test(`monetary aggregates in grouped list`, async () => {
     expect(".o_multi_currency_popover").toHaveText("2,800.00 € at $ 0.50");
 });
 
-test(`monetary aggregates in grouped list (different currencies in same group)`, async () => {
+test(`monetary aggregates in grouped list (!= currencies in same group)`, async () => {
     await mountView({
         resModel: "foo",
         type: "list",
@@ -4689,6 +4689,33 @@ test(`monetary aggregates in grouped list (different currencies in same group)`,
     expect(`.o_group_header:first`).toHaveText("No (1)\n $ 0.00");
     expect(`.o_group_header:last`).toHaveText("Yes (3)\n $ 2,000.00?");
     expect(`.o_list_footer .o_list_number span`).toHaveText("$ 2,000.00?");
+});
+
+test(`monetary aggregates in grouped list (!= currencies in same group, delete)`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <field name="foo"/>
+                <field name="amount" widget="monetary" sum="Sum"/>
+                <field name="currency_id"/>
+            </list>
+        `,
+        groupBy: ["bar"],
+        actionMenus: {},
+    });
+    expect(`.o_group_header`).toHaveCount(2);
+    expect(`.o_group_header:last`).toHaveText("Yes (3)\n $ 2,000.00?");
+    await contains(`.o_group_header:last`).click();
+    expect(`.o_data_row`).toHaveCount(3);
+    await selectAllRecords();
+    expect(`.o_data_row_selected`).toHaveCount(3);
+    await toggleActionMenu();
+    await toggleMenuItem("Delete");
+    await contains(`.o_dialog footer .btn-primary`).click(); // confirm
+    expect(`.o_data_row`).toHaveCount(0);
+    expect(`.o_group_header:last`).toHaveText("Yes (0)\n 0.00");
 });
 
 test(`handle false values in aggregates`, async () => {
@@ -15565,9 +15592,8 @@ test(`Auto save: modify a record and leave action (reject)`, async () => {
     };
 
     mockService("notification", {
-        add(message, options) {
-            expect.step(options.title.toString());
-            expect.step(message.toString());
+        add(message, _) {
+            expect.step(message);
         },
     });
 
@@ -15582,7 +15608,7 @@ test(`Auto save: modify a record and leave action (reject)`, async () => {
     expect(queryAllTexts(`.o_data_cell`)).toEqual(["", "blip", "gnap", "blip"]);
     expect(`.o_selected_row .o_field_widget[name=foo]`).toHaveClass("o_field_invalid");
     expect(`.o_data_row`).toHaveCount(4);
-    expect.verifySteps(["Invalid fields: ", "<ul><li>Foo</li></ul>"]);
+    expect.verifySteps(["Missing required fields"]);
 });
 
 test(`Auto save: add a record and change page`, async () => {
