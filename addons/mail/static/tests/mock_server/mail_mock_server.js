@@ -706,6 +706,8 @@ async function mail_message_update_content(request) {
     const BusBus = this.env["bus.bus"];
     /** @type {import("mock_models").IrAttachment} */
     const IrAttachment = this.env["ir.attachment"];
+    /** @type {import("mock_models").MailMessageLinkPreview} */
+    const MailMessageLinkPreview = this.env["mail.message.link.preview"];
     /** @type {import("mock_models").MailMessage} */
     const MailMessage = this.env["mail.message"];
 
@@ -730,11 +732,14 @@ async function mail_message_update_content(request) {
         IrAttachment.write(
             attachments.map((attachment) => attachment.id),
             {
-                model: message.model,
+                res_model: message.model,
                 res_id: message.res_id,
             }
         );
         msg_values.attachment_ids = update_data.attachment_ids;
+    }
+    if (update_data.body === "") {
+        MailMessageLinkPreview.unlink(message.message_link_preview_ids);
     }
     if (!update_data.body && update_data.attachment_ids.length === 0) {
         msg_values.partner_ids = false;
@@ -753,6 +758,7 @@ async function mail_message_update_content(request) {
                 makeKwArgs({ fields: ["avatar_128", "name"] })
             ),
             pinned_at: message.pinned_at,
+            message_link_preview_ids: message.message_link_preview_ids,
         }).get_result()
     );
     return new mailDataHelpers.Store(
@@ -924,23 +930,23 @@ async function search(request) {
         ["channel_type", "!=", "chat"],
     ];
     const priority_conditions = [[["is_member", "=", true], ...base_domain], base_domain];
-    const channels = new Set();
+    const channelIds = new Set();
     let remaining_limit;
     for (const domain of priority_conditions) {
-        remaining_limit = limit - channels.size;
+        remaining_limit = limit - channelIds.size;
         if (remaining_limit <= 0) {
             break;
         }
-        const channelIds = DiscussChannel.search(
-            Domain.and([[["id", "not in", [...channels]]], domain]).toList(),
+        const partialChannelIds = DiscussChannel.search(
+            Domain.and([[["id", "not in", [...channelIds]]], domain]).toList(),
             undefined,
             remaining_limit
         );
-        for (const channelId of channelIds) {
-            channels.add(channelId);
+        for (const channelId of partialChannelIds) {
+            channelIds.add(channelId);
         }
     }
-    store.add(channels);
+    store.add(DiscussChannel.browse(channelIds));
     ResPartner._search_for_channel_invite(store, term, undefined, limit);
     return store.get_result();
 }
