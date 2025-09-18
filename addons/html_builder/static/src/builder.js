@@ -45,6 +45,7 @@ export class Builder extends Component {
         editableSelector: { type: String },
         themeTabDisplayName: { type: String, optional: true },
         slots: { type: Object, optional: true },
+        getCustomizeTranslationTab: { type: Function, optional: true },
     };
     static defaultProps = {
         config: {},
@@ -53,6 +54,7 @@ export class Builder extends Component {
 
     setup() {
         this.ThemeTab = this.props.getThemeTab?.();
+        this.CustomizeTranslationTab = this.props.getCustomizeTranslationTab?.();
         // const actionService = useService("action");
         this.builder_sidebarRef = useRef("builder_sidebar");
         this.state = useState({
@@ -186,6 +188,7 @@ export class Builder extends Component {
                 getAnimateTextConfig: () => ({ editor: this.editor, editorBus: this.editorBus }),
                 baseContainers: ["P"],
                 cleanEmptyStructuralContainers: false,
+                isEditableRTL: false,
             },
             this.env.services
         );
@@ -203,6 +206,10 @@ export class Builder extends Component {
             this.editableEl = iframeEl.contentDocument.body.querySelector(
                 this.props.editableSelector
             );
+
+            if (this.editableEl.matches(".o_rtl")) {
+                this.editor.config.isEditableRTL = true;
+            }
 
             // Prevent image dragging in the website builder. Not via css because
             // if one of the image ancestor has a dragstart listener, the dragstart handler
@@ -259,7 +266,7 @@ export class Builder extends Component {
     }
 
     get displayOnlyCustomizeTab() {
-        return !!this.props.config.customizeTab;
+        return this.props.config.isTranslationMode;
     }
 
     getInvisibleSelector(isMobile = this.props.isMobile) {
