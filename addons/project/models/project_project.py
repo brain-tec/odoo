@@ -1387,7 +1387,9 @@ class ProjectProject(models.Model):
         """
         Whitelist of fields that can be set through the `default_` context keys when creating a project from a template.
         """
-        return []
+        return [
+            "allow_milestones",
+        ]
 
     @api.model
     def _get_template_field_blacklist(self):
@@ -1417,10 +1419,11 @@ class ProjectProject(models.Model):
         project.message_post(body=self.env._("Project created from template %(name)s.", name=self.name))
 
         # Tasks dispatching using project roles
-        project.task_ids.role_ids = False
         if role_to_users_mapping and (mapping := role_to_users_mapping.filtered(lambda entry: entry.user_ids)):
-            for template_task, new_task in zip(self.task_ids, project.task_ids):
+            for new_task in project.task_ids:
                 for entry in mapping:
-                    if entry.role_id in template_task.role_ids:
+                    if entry.role_id in new_task.role_ids:
                         new_task.user_ids |= entry.user_ids
+
+        project.task_ids.role_ids = False
         return project
