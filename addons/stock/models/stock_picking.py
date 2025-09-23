@@ -43,7 +43,7 @@ class StockPickingType(models.Model):
         'stock.picking.type', 'Operation Type for Returns',
         index='btree_not_null',
         check_company=True)
-    show_entire_packs = fields.Boolean('Move Entire Packages', default=False, help="If ticked, you will be able to select entire packages to move")
+    show_entire_packs = fields.Boolean('Move Entire Packages', default=False, help="If ticked, packages to move will be directly displayed in Barcode instead of the products they contain")
     set_package_type = fields.Boolean('Set Package Type', default=False, help="If ticked, you will be able to select which package or package type to use in a put in pack")
     warehouse_id = fields.Many2one(
         'stock.warehouse', 'Warehouse', compute='_compute_warehouse_id', store=True, readonly=False, ondelete='cascade',
@@ -887,7 +887,7 @@ class StockPicking(models.Model):
                     shipping_weight += package.shipping_weight
                 else:
                     shipping_weight += package.package_type_id.base_weight
-                    shipping_weight += sum(packages_weight[pack] for pack in self.env['stock.package'].browse(children_packages_by_pack[package]))
+                    shipping_weight += sum(packages_weight.get(pack, 0) for pack in self.env['stock.package'].browse(children_packages_by_pack.get(package)))
 
             picking.shipping_weight = shipping_weight
 
@@ -1870,10 +1870,10 @@ class StockPicking(models.Model):
             'target': 'new',
         }
 
-    def action_add_entire_packs(self, packages):
+    def action_add_entire_packs(self, package_ids):
         self.ensure_one()
         if self.state not in ('done', 'cancel'):
-            all_packages = self.env['stock.package'].search([('id', 'child_of', packages.ids)])
+            all_packages = self.env['stock.package'].search([('id', 'child_of', package_ids)])
             all_package_ids = set(all_packages.ids)
             # Remove existing move lines that already pulled from these packages, as using them fully now.
             self.move_line_ids.filtered(lambda ml: ml.package_id.id in all_package_ids).unlink()
@@ -1904,6 +1904,8 @@ class StockPicking(models.Model):
             'domain': [('picking_ids', 'in', self.ids)],
             'context': {
                 'picking_id': self.id,
+                'location_id': self.location_id.id,
+                'can_add_entire_packs': self.picking_type_code != 'incoming',
                 'search_default_main_packages': True,
             },
         }

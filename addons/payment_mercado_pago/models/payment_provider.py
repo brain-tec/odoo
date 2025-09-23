@@ -33,20 +33,31 @@ class PaymentProvider(models.Model):
         inverse='_inverse_mercado_pago_account_country_id',
         domain=[('code', 'in', list(const.SUPPORTED_COUNTRIES))],
         required_if_provider='mercado_pago',
+        copy=False,
     )
+    # TODO anko remove in 19.1
+    mercado_pago_is_oauth_supported = fields.Boolean(compute='_compute_mercado_pago_is_oauth_supported')
 
     # OAuth fields
     mercado_pago_access_token = fields.Char(
-        string="Mercado Pago Access Token", groups='base.group_system'
+        string="Mercado Pago Access Token",
+        copy=False,
+        groups='base.group_system',
     )
     mercado_pago_access_token_expiry = fields.Datetime(
-        string="Mercado Pago Access Token Expiry", groups='base.group_system'
+        string="Mercado Pago Access Token Expiry",
+        copy=False,
+        groups='base.group_system',
     )
     mercado_pago_refresh_token = fields.Char(
-        string="Mercado Pago Refresh Token", groups='base.group_system'
+        string="Mercado Pago Refresh Token",
+        copy=False,
+        groups='base.group_system',
     )
     mercado_pago_public_key = fields.Char(
-        string="Mercado Pago Public Key", groups='base.group_system'
+        string="Mercado Pago Public Key",
+        copy=False,
+        groups='base.group_system',
     )
 
     # === COMPUTE METHODS === #
@@ -67,6 +78,10 @@ class PaymentProvider(models.Model):
                 active_test=False,
             ).search([('name', '=', currency_code)], limit=1)
             provider.available_currency_ids = [Command.set(currency.ids)]
+
+    def _compute_mercado_pago_is_oauth_supported(self):
+        """Return current state of OAuth support by Odoo. To be removed in future versions."""
+        self.mercado_pago_is_oauth_supported = False
 
     # === CONSTRAINT METHODS === #
 
@@ -145,6 +160,7 @@ class PaymentProvider(models.Model):
         return_url = urljoin(self.get_base_url(), const.OAUTH_RETURN_ROUTE)
         proxy_url_params = {
             'return_url': f'{return_url}?{urlencode(return_url_params)}',
+            'account_country_code': self.mercado_pago_account_country_id.code.lower(),
         }
         proxy_url = self._build_request_url('/authorize', is_proxy_request=True)
         return {
@@ -268,7 +284,10 @@ class PaymentProvider(models.Model):
             return self.mercado_pago_access_token
         else:
             proxy_payload = self._prepare_json_rpc_payload(
-                {'refresh_token': self.mercado_pago_refresh_token}
+                {
+                    'refresh_token': self.mercado_pago_refresh_token,
+                    'account_country_code': self.mercado_pago_account_country_id.code.lower(),
+                }
             )
             response_content = self._send_api_request(
                 'POST',
