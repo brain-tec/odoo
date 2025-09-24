@@ -2,6 +2,8 @@ import { test, expect, describe } from "@odoo/hoot";
 import { getFilledOrder, setupPosEnv } from "../utils";
 import { definePosModels } from "../data/generate_model_definitions";
 import { ConnectionLostError } from "@web/core/network/rpc";
+import { onRpc } from "@web/../tests/web_test_helpers";
+import { imageUrl } from "@web/core/utils/urls";
 
 definePosModels();
 
@@ -179,7 +181,7 @@ describe("pos_store.js", () => {
             quantity: 3,
             note: "",
             pos_categ_id: 1,
-            pos_categ_sequence: 0,
+            pos_categ_sequence: 1,
             display_name: "TEST",
             group: undefined,
             isCombo: undefined,
@@ -194,7 +196,7 @@ describe("pos_store.js", () => {
             quantity: 2,
             note: "Wait",
             pos_categ_id: 2,
-            pos_categ_sequence: 0,
+            pos_categ_sequence: 2,
             display_name: "TEST 2",
             group: undefined,
             isCombo: undefined,
@@ -338,5 +340,52 @@ describe("pos_store.js", () => {
         store.clearPendingOrder();
         ({ orderToCreate, orderToUpdate, orderToDelete } = store.getPendingOrder());
         expect(orderToDelete).toHaveLength(0);
+    });
+
+    describe("cacheReceiptLogo", () => {
+        function getCompanyLogo256Url(companyId) {
+            const fullUrl = imageUrl("res.company", companyId, "logo", {
+                width: 256,
+                height: 256,
+            });
+            const index = fullUrl.indexOf("/web");
+            return fullUrl.substring(index);
+        }
+
+        test("correctly cached", async () => {
+            onRpc(
+                getCompanyLogo256Url("<int:id>"),
+                async (request, { id }) => {
+                    expect.step(`Company logo ${id} fetched`);
+                    return `Company logo ${id}`;
+                },
+                {
+                    pure: true,
+                }
+            );
+            const store = await setupPosEnv();
+            const companyId = store.company.id;
+            expect.verifySteps([`Company logo ${companyId} fetched`]);
+            const { receiptLogoUrl } = store.config;
+            expect(receiptLogoUrl).toInclude("data:");
+            expect(atob(receiptLogoUrl.split(",")[1])).toInclude(`Company logo ${companyId}`);
+        });
+
+        test("fetch failed", async () => {
+            onRpc(
+                getCompanyLogo256Url("<int:id>"),
+                async (request, { id }) => {
+                    expect.step(`Company logo ${id} fetched`);
+                    throw new Error("Fetch failed");
+                },
+                {
+                    pure: true,
+                }
+            );
+            const store = await setupPosEnv();
+            const companyId = store.company.id;
+            expect.verifySteps([`Company logo ${companyId} fetched`]);
+            expect(store.config.receiptLogoUrl).toInclude(getCompanyLogo256Url(companyId));
+        });
     });
 });
