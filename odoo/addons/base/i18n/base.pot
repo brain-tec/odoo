@@ -264,7 +264,7 @@ msgstr ""
 msgid ""
 "\n"
 "\n"
-"Note: this might be a multi-company issue. Switching company may help - in Odoo, not in real life!"
+"Note: this might be a multi-company issue. Switching company may help - in Odoo."
 msgstr ""
 
 #. module: base
@@ -22570,14 +22570,6 @@ msgid ""
 "If you have groups, the visibility of this menu will be based on these "
 "groups. If this field is empty, Odoo will compute visibility based on the "
 "related object's read access."
-msgstr ""
-
-#. module: base
-#. odoo-python
-#: code:addons/base/models/ir_rule.py:0
-msgid ""
-"If you really, really need access, perhaps you can win over your friendly "
-"administrator with a batch of freshly baked cookies."
 msgstr ""
 
 #. module: base

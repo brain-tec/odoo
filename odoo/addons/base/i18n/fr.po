@@ -489,11 +489,11 @@ msgstr ""
 msgid ""
 "\n"
 "\n"
-"Note: this might be a multi-company issue. Switching company may help - in Odoo, not in real life!"
+"Note: this might be a multi-company issue. Switching company may help - in Odoo."
 msgstr ""
 "\n"
 "\n"
-"Remarque : il peut s'agir d'un problème concernant plusieurs sociétés. Changer de société peut aider - dans Odoo, pas dans la vraie vie !"
+"Remarque : il peut s'agir d'un problème concernant plusieurs sociétés. Changer de société peut aider - dans Odoo."
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_jp
@@ -28081,16 +28081,6 @@ msgstr ""
 "Si des groupes sont mentionnés, la visibilité de ce menu sera fondée sur ces"
 " groupes. Si ce champ est vide, Odoo calculera la visibilité sur le critère "
 "des droits en lecture de l'objet relatif."
-
-#. module: base
-#. odoo-python
-#: code:addons/base/models/ir_rule.py:0
-msgid ""
-"If you really, really need access, perhaps you can win over your friendly "
-"administrator with a batch of freshly baked cookies."
-msgstr ""
-"Si vous avez vraiment besoin d'un accès, vous pouvez peut-être convaincre "
-"votre sympathique administrateur en lui offrant des cookies maison."
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model_access__active

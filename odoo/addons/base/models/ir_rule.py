@@ -217,7 +217,7 @@ class IrRule(models.Model):
             "Sorry, %(user)s doesn't have '%(operation)s' access to:", user=user_description, operation=operations[operation])
         failing_model = _("- %(description)s (%(model)s)", description=description, model=model)
 
-        resolution_info = _("If you really, really need access, perhaps you can win over your friendly administrator with a batch of freshly baked cookies.")
+        resolution_info = ""
 
         # Note that by default, public and portal users do not have
         # the group "base.group_no_one", even if debug mode is enabled,
@@ -238,7 +238,7 @@ class IrRule(models.Model):
         if company_related:
             suggested_companies = records_sudo._get_redirect_suggested_company()
             if suggested_companies and len(suggested_companies) != 1:
-                resolution_info += _('\n\nNote: this might be a multi-company issue. Switching company may help - in Odoo, not in real life!')
+                resolution_info += _('\n\nNote: this might be a multi-company issue. Switching company may help - in Odoo.')
             elif suggested_companies and suggested_companies in self.env.user.company_ids:
                 context = {'suggested_company': {'id': suggested_companies.id, 'display_name': suggested_companies.display_name}}
                 resolution_info += _('\n\nThis seems to be a multi-company issue, you might be able to access the record by switching to the company: %s.', suggested_companies.display_name)
