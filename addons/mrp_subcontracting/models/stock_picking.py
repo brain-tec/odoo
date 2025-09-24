@@ -13,6 +13,13 @@ from dateutil.relativedelta import relativedelta
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
+    show_subcontracting_details_visible = fields.Boolean(compute='_compute_show_subcontracting_details_visible')
+
+    @api.depends('move_ids.show_subcontracting_details_visible')
+    def _compute_show_subcontracting_details_visible(self):
+        for picking in self:
+            picking.show_subcontracting_details_visible = any(m.show_subcontracting_details_visible for m in picking.move_ids)
+
     @api.depends('picking_type_id', 'partner_id')
     def _compute_location_id(self):
         super()._compute_location_id()
@@ -25,6 +32,12 @@ class StockPicking(models.Model):
                 and picking.partner_id.property_stock_subcontractor:
                 picking.location_dest_id = picking.partner_id.property_stock_subcontractor
 
+    @api.depends('move_ids.is_subcontract', 'move_ids.has_tracking')
+    def _compute_show_lots_text(self):
+        super()._compute_show_lots_text()
+        for picking in self:
+            if any(move.is_subcontract and move.has_tracking != 'none' for move in picking.move_ids):
+                picking.show_lots_text = False
 
     # -------------------------------------------------------------------------
     # Action methods
@@ -44,12 +57,37 @@ class StockPicking(models.Model):
 
         return res
 
-    @api.depends('move_ids.is_subcontract', 'move_ids.has_tracking')
-    def _compute_show_lots_text(self):
-        super()._compute_show_lots_text()
-        for picking in self:
-            if any(move.is_subcontract and move.has_tracking != 'none' for move in picking.move_ids):
-                picking.show_lots_text = False
+    def action_show_subcontract_details(self):
+        productions = self._get_subcontract_production().filtered(lambda m: m.state != 'cancel')
+        ctx = {"mrp_subcontracting": True}
+        if self.env.user._is_portal():
+            form_view_id = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_portal_form_view')
+            ctx.update(no_breadcrumbs=False)
+        else:
+            form_view_id = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_form_view')
+        action = {
+            'type': 'ir.actions.act_window',
+            'res_model': 'mrp.production',
+            'target': 'current',
+            'context': ctx
+        }
+        if len(productions) > 1:
+            action.update({
+                'name': _('Subcontracting MOs'),
+                'views': [
+                    (self.env.ref('mrp_subcontracting.mrp_production_subcontracting_tree_view').id, 'list'),
+                    (form_view_id.id, 'form'),
+                ],
+                'domain': [('id', 'in', productions.ids)],
+            })
+        elif len(productions) == 1:
+            action.update({
+                'views': [(form_view_id.id, 'form')],
+                'res_id': productions.id,
+            })
+        else:
+            return {}
+        return action
 
     # -------------------------------------------------------------------------
     # Subcontract helpers
@@ -102,20 +140,23 @@ class StockPicking(models.Model):
         self.ensure_one()
         group_by_company = defaultdict(lambda: ([], []))
         for move, bom in subcontract_details:
-            # do not create extra production for move that have their quantity updated
             if move.move_orig_ids.production_id:
-                # Magic spicy sauce for the backorder case:
-                # To ensure correct splitting of the component moves of the SBC MO, we will invoke a split of the SBC
-                # MO here directly and then link the backorder MO to the backorder move.
-                # If we would just run _subcontracted_produce as usual for the newly created SBC receipt move, any
-                # reservations of raw component moves of the SBC MO would not be preserved properly (for example when
-                # using resupply subcontractor on order)
-                production_to_split = move.move_orig_ids[0].production_id
-                original_qty = move.move_orig_ids[0].product_qty
-                move.move_orig_ids = False
-                _, new_mo = production_to_split.with_context(allow_more=True)._split_productions({production_to_split: [original_qty, move.product_qty]})
-                new_mo.move_finished_ids.move_dest_ids = move
-                continue
+                if len(move.move_orig_ids.move_dest_ids) > 1:
+                    # Magic spicy sauce for the backorder case:
+                    # To ensure correct splitting of the component moves of the SBC MO, we will invoke a split of the SBC
+                    # MO here directly and then link the backorder MO to the backorder move.
+                    # If we would just run _subcontracted_produce as usual for the newly created SBC receipt move, any
+                    # reservations of raw component moves of the SBC MO would not be preserved properly (for example when
+                    # using resupply subcontractor on order)
+                    production_to_split = move.move_orig_ids[0].production_id
+                    original_qty = move.move_orig_ids[0].product_qty
+                    move.move_orig_ids = False
+                    _, new_mo = production_to_split.with_context(allow_more=True)._split_productions({production_to_split: [original_qty, move.product_qty]})
+                    new_mo.move_finished_ids.move_dest_ids = move
+                    continue
+                else:
+                    # do not create extra production for move that have their quantity updated
+                    return
             quantity = move.product_qty or move.quantity
             if move.product_uom.compare(quantity, 0) <= 0:
                 # If a subcontracted amount is decreased, don't create a MO that would be for a negative value.
