@@ -18446,12 +18446,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/account/models/account_move_line.py:0
 msgid ""
-"You can't delete a posted journal item. Don’t play games with your "
-"accounting records; reset the journal entry to draft before deleting it."
+"You can't delete a posted journal item. Reset the journal entry to draft "
+"before deleting it."
 msgstr ""
-"Sie können eine gebuchte Buchungszeile nicht löschen. Spielen Sie keine "
-"Spielchen mit Ihren Buchhaltungsunterlagen, sondern setzen Sie die "
-"Journalbuchung auf Entwurf zurück, bevor Sie sie löschen."
+"Sie können eine gebuchte Buchungszeile nicht löschen. "
+"Setzen Sie die Journalbuchung auf Entwurf zurück, bevor Sie sie löschen."
 
 #. module: account
 #. odoo-python
