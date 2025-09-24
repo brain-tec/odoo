@@ -1764,8 +1764,8 @@ class MrpProduction(models.Model):
         self.workorder_ids.filtered(lambda x: x.state not in ['done', 'cancel']).action_cancel()
         finish_moves = self.move_finished_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
         raw_moves = self.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
-        (finish_moves | raw_moves)._action_cancel()
-        picking_ids = self.picking_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
+        (finish_moves | raw_moves).with_context(skip_mo_check=True)._action_cancel()
+        picking_ids = self.picking_ids.filtered(lambda x: x.state not in ('done', 'cancel') and not x.move_ids.move_dest_ids)
         picking_ids.action_cancel()
 
         for production, documents in documents_by_production.items():
@@ -1866,7 +1866,7 @@ class MrpProduction(models.Model):
             'orderpoint_id': self.orderpoint_id.id,
         }
 
-    def _split_productions(self, amounts=False, cancel_remaining_qty=False, set_consumed_qty=False, skip_procurement=True):
+    def _split_productions(self, amounts=False, cancel_remaining_qty=False, set_consumed_qty=False):
         """ Splits productions into productions smaller quantities to produce, i.e. creates
         its backorders.
 
@@ -1951,7 +1951,7 @@ class MrpProduction(models.Model):
                 move_to_backorder_moves[move] = self.env['stock.move']
                 unit_factor = move.product_uom_qty / initial_qty_by_production[production]
                 initial_move_vals = move.copy_data(move._get_backorder_move_vals())[0]
-                move.with_context(do_not_unreserve=True, no_procurement=skip_procurement).product_uom_qty = production.product_qty * unit_factor
+                move.with_context(do_not_unreserve=True, no_procurement=True).product_uom_qty = production.product_qty * unit_factor
 
                 for backorder in production_to_backorders[production]:
                     move_vals = dict(
@@ -3079,3 +3079,13 @@ class MrpProduction(models.Model):
         if res:
             res = OrderedSet(topological_sort(self.fields_get(res, ('depends'))))
         return res
+
+    def _add_reference(self, reference):
+        """ link the given reference to the list of references. """
+        self.ensure_one()
+        self.reference_ids = [Command.link(reference.id)]
+
+    def _remove_reference(self, reference):
+        """ remove the given reference to the list of references. """
+        self.ensure_one()
+        self.reference_ids = [Command.unlink(reference.id)]
