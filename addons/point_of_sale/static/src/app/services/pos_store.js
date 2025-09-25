@@ -443,6 +443,7 @@ export class PosStore extends WithLazyGetterTrap {
         });
 
         await this.processProductAttributes();
+        await this.config.cacheReceiptLogo();
     }
     cashMove() {
         this.hardwareProxy.openCashbox(_t("Cash in / out"));
@@ -2036,6 +2037,10 @@ export class PosStore extends WithLazyGetterTrap {
                 },
             }
         );
+    }
+    orderContainsProduct(product) {
+        const lines = this.getOpenOrders().flatMap((o) => o.lines);
+        return lines.some((l) => l.product_id.product_tmpl_id.id === product.id);
     }
     async loadSampleData() {
         const [isPosManager, isAdmin] = await Promise.all([
