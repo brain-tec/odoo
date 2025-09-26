@@ -26,6 +26,7 @@ export class Chrome extends Component {
                 ev.stopPropagation();
             }
             this.pos.navigateToFirstPage();
+            return false;
         });
         if (this.pos.router.state.current === "SaverScreen") {
             this.pos.navigateToFirstPage();
@@ -78,6 +79,6 @@ export class Chrome extends Component {
 
     // GETTERS //
     get showCashMoveButton() {
-        return Boolean(this.pos.config.cash_control);
+        return Boolean(this.pos.config.cash_control && this.session._has_cash_move_perm);
     }
 }
