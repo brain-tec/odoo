@@ -210,7 +210,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         ProductTemplate = env['product.template']
         dom = sitemap_qs2dom(qs, SHOP_PATH, ProductTemplate._rec_name)
         dom &= Domain(website.sale_product_domain())
-        for product in ProductTemplate.search(dom):
+        for product in ProductTemplate.with_context(prefetch_fields=False).search(dom):
             loc = f'{SHOP_PATH}/{env["ir.http"]._slug(product)}'
             if not qs or qs.lower() in loc:
                 yield {'loc': loc}
@@ -378,7 +378,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if filter_by_price_enabled:
             # TODO Find an alternative way to obtain the domain through the search metadata.
             Product = request.env['product.template'].with_context(bin_size=True)
-            domain = self._get_shop_domain(search, category, attribute_value_dict)
+            search_term = fuzzy_search_term if fuzzy_search_term else search
+            domain = self._get_shop_domain(search_term, category, attribute_value_dict)
 
             # This is ~4 times more efficient than a search for the cheapest and most expensive products
             query = Product._search(domain)
