@@ -1,9 +1,13 @@
+import { addBuilderOption } from "@html_builder/../tests/helpers";
 import { expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { xml } from "@odoo/owl";
-import { delay } from "@web/core/utils/concurrency";
 import { contains, defineModels, fields, models, onRpc } from "@web/../tests/web_test_helpers";
-import { addOption, defineWebsiteModels, setupWebsiteBuilder } from "../../website_helpers";
+import { delay } from "@web/core/utils/concurrency";
+import {
+    defineWebsiteModels,
+    setupWebsiteBuilder,
+} from "@website/../tests/builder/website_helpers";
 
 class Test extends models.Model {
     _name = "test";
@@ -37,7 +41,7 @@ test("model many2many: find tag, select tag, unselect tag", async () => {
         [2, "Second"],
         [3, "Third"],
     ]);
-    addOption({
+    addBuilderOption({
         selector: ".test-options-target",
         template: xml`<ModelMany2Many baseModel="'test.base'" m2oField="'rel'" recordId="1"/>`,
     });
