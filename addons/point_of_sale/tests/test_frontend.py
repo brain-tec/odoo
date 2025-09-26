@@ -667,9 +667,10 @@ class TestUi(TestPointOfSaleHttpCommon):
             Command.set([ self.small_shelf.id ])
         ]})
 
-        self.letter_tray.write({'pos_optional_product_ids': [
-            Command.set([ self.configurable_chair.id ])
-        ]})
+        self.letter_tray.write({
+            'pos_optional_product_ids': [Command.set([self.configurable_chair.id])],
+            'barcode': 'lettertray'
+        })
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_optional_product')
@@ -1117,7 +1118,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             )
         ]})
         self.main_pos_config.open_ui()
-        self.start_pos_tour('chrome_without_cash_move_permission', login="accountman")
+        self.start_pos_tour('test_chrome_without_cash_move_permission', login='accountman')
 
     def test_09_pos_barcodes_scan_product_packaging(self):
         pack_of_10 = self.env['uom.uom'].create({
