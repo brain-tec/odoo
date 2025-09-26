@@ -66,7 +66,7 @@ class StockRule(models.Model):
     sequence = fields.Integer('Sequence', default=20)
     company_id = fields.Many2one('res.company', 'Company',
         default=lambda self: self.env.company,
-        domain="[('id', '=?', route_company_id)]")
+        domain="[('id', '=?', route_company_id)]", index=True)
     location_dest_id = fields.Many2one('stock.location', 'Destination Location', required=True, check_company=True, index=True)
     location_src_id = fields.Many2one('stock.location', 'Source Location', check_company=True, index=True)
     location_dest_from_rule = fields.Boolean(
@@ -412,6 +412,7 @@ class StockRule(models.Model):
         :return: the cumulative delay and cumulative delay's description
         :rtype: tuple[defaultdict(float), list[str, str]]
         """
+        # FIXME : ensure one product or make the method work with multiple products
         _ = self.env._
         delays = defaultdict(float)
         delay_description = []
@@ -426,6 +427,9 @@ class StockRule(models.Model):
                     for rule in delaying_rules
                 ]
         # Check if there's a horizon set
+        bypass_global_horizon_days = self.env.context.get('bypass_global_horizon_days')
+        if bypass_global_horizon_days:
+            return delays, delay_description
         global_horizon_days = self.env['stock.warehouse.orderpoint'].get_horizon_days()
         if global_horizon_days:
             delays['horizon_time'] += global_horizon_days
