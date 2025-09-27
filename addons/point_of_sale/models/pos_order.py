@@ -1054,12 +1054,12 @@ class PosOrder(models.Model):
             line.filtered(lambda l: not l.reconciled).reconcile()
 
     def action_pos_order_invoice(self):
-        if len(self.company_id) > 1:
-            raise UserError(_("You cannot invoice orders belonging to different companies."))
-        self.write({'to_invoice': True})
-        if self.company_id.anglo_saxon_accounting and self.session_id.update_stock_at_closing and self.session_id.state != 'closed':
-            self._create_order_picking()
-        move = self._generate_pos_order_invoice()
+        self.ensure_one()
+        if not (move := self.account_move):
+            self.write({'to_invoice': True})
+            if self.company_id.anglo_saxon_accounting and self.session_id.update_stock_at_closing and self.session_id.state != 'closed':
+                self._create_order_picking()
+            move = self._generate_pos_order_invoice()
         return {
             'name': _('Customer Invoice'),
             'view_mode': 'form',
@@ -1075,6 +1075,8 @@ class PosOrder(models.Model):
         return {"skip_invoice_sync": True}
 
     def _generate_pos_order_invoice(self):
+        if not self.env['res.company']._with_locked_records(self, allow_raising=False):
+            raise UserError(_("Some orders are already being invoiced. Please try again later."))
         self.state = 'done'
 
         company = self.company_id
@@ -1386,16 +1388,13 @@ class PosOrder(models.Model):
     @api.model
     def search_paid_order_ids(self, config_id, domain, limit, offset):
         """Search for 'paid' orders that satisfy the given domain, limit and offset."""
-        default_domain = [('state', '!=', 'draft'), ('state', '!=', 'cancel')]
-        if domain == []:
-            real_domain = AND([[['config_id', '=', config_id]], default_domain])
-        else:
-            real_domain = AND([domain, default_domain])
+        pos_config = self.env['pos.config'].browse(config_id)
+        default_domain = [('state', '!=', 'draft'), ('state', '!=', 'cancel'), ('config_id', 'in', [config_id] + pos_config.trusted_config_ids.ids)]
+        real_domain = AND([domain, default_domain])
         orders = self.search(real_domain, limit=limit, offset=offset, order='create_date desc')
         # We clean here the orders that does not have the same currency.
         # As we cannot use currency_id in the domain (because it is not a stored field),
         # we must do it after the search.
-        pos_config = self.env['pos.config'].browse(config_id)
         orders = orders.filtered(lambda order: order.currency_id == pos_config.currency_id)
         orderlines = self.env['pos.order.line'].search(['|', ('refunded_orderline_id.order_id', 'in', orders.ids), ('order_id', 'in', orders.ids)])
 
