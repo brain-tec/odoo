@@ -1,10 +1,10 @@
+import { waitForEndOfOperation } from "@html_builder/../tests/helpers";
 import { expect, test } from "@odoo/hoot";
 import { waitForNone } from "@odoo/hoot-dom";
 import { contains, dataURItoBlob, defineModels, models, onRpc } from "@web/../tests/web_test_helpers";
 import {
     defineWebsiteModels,
     setupWebsiteBuilder,
-    waitForEndOfOperation,
 } from "@website/../tests/builder/website_helpers";
 
 class ProductRibbon extends models.Model {
@@ -27,7 +27,7 @@ test("Product page options", async () => {
                         o_wsale_product_page_opt_image_radius_none
                         o_wsale_product_page_opt_separators"
                 >
-                    <div id="product_detail_main" data-image_layout="carousel">
+                    <div id="product_detail_main" data-image-layout="carousel">
                         <div class="o_wsale_product_images" data-image-amount="2">
                             <div id="o-carousel-product">
                                 <div class="carousel-item h-100 text-center active o_colored_level" style="min-height: 693px;">
