@@ -25,7 +25,7 @@ _logger = logging.getLogger(__name__)
 class PosOrder(models.Model):
     _name = 'pos.order'
     _inherit = ["portal.mixin", "pos.bus.mixin", "pos.load.mixin", "mail.thread"]
-    _description = "Point of Sale Orders"
+    _description = "Point of Sale Order"
     _order = "date_order desc, name desc, id desc"
     _mailing_enabled = True
 
@@ -1284,6 +1284,7 @@ class PosOrder(models.Model):
             refund_order._compute_prices()
             refund_orders |= refund_order
             refund_order.config_id.notify_synchronisation(current_session.id, 0)
+        refund_orders._compute_prices()
         return refund_orders
 
     def refund(self):
@@ -1380,14 +1381,13 @@ class PosOrder(models.Model):
     @api.model
     def search_paid_order_ids(self, config_id, domain, limit, offset):
         """Search for 'paid' orders that satisfy the given domain, limit and offset."""
-        default_domain = Domain('state', '!=', 'draft') & Domain('state', '!=', 'cancel')
-        domain = Domain(domain) or Domain('config_id', '=', config_id)
-        real_domain = domain & default_domain
+        pos_config = self.env['pos.config'].browse(config_id)
+        default_domain = Domain('state', '!=', 'draft') & Domain('state', '!=', 'cancel') & Domain('config_id', 'in', [config_id] + pos_config.trusted_config_ids.ids)
+        real_domain = Domain(domain) & default_domain
         orders = self.search(real_domain, limit=limit, offset=offset, order='create_date desc')
         # We clean here the orders that does not have the same currency.
         # As we cannot use currency_id in the domain (because it is not a stored field),
         # we must do it after the search.
-        pos_config = self.env['pos.config'].browse(config_id)
         orders = orders.filtered(lambda order: order.currency_id == pos_config.currency_id)
         orderlines = self.env['pos.order.line'].search(['|', ('refunded_orderline_id.order_id', 'in', orders.ids), ('order_id', 'in', orders.ids)])
 
@@ -1415,7 +1415,7 @@ class PosOrder(models.Model):
 
 class PosOrderLine(models.Model):
     _name = 'pos.order.line'
-    _description = "Point of Sale Order Lines"
+    _description = "Point of Sale Order Line"
     _rec_name = "product_id"
     _inherit = ['pos.load.mixin']
 
