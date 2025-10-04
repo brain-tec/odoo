@@ -490,7 +490,9 @@ class HrEmployee(models.Model):
     @api.depends('current_version_id')
     @api.depends_context('version_id')
     def _compute_version_id(self):
-        context_version = self.env['hr.version'].browse(self.env.context.get('version_id', False))
+        context_version_id = self.env.context.get('version_id', False)
+        context_version = self.env['hr.version'].browse(context_version_id).exists() if context_version_id else self.env['hr.version']
+
         for employee in self:
             if context_version.employee_id == self:
                 version = context_version
@@ -746,7 +748,7 @@ class HrEmployee(models.Model):
         )
         contract_versions_by_employee = defaultdict(lambda: defaultdict(lambda: self.env["hr.version"]))
         for employee, _date_version, version in all_versions:
-            contract_versions_by_employee[employee.id][version.contract_date_start] |= version
+            contract_versions_by_employee[employee.id][version[0].contract_date_start] |= version
         return contract_versions_by_employee
 
     def _get_all_contract_dates(self):

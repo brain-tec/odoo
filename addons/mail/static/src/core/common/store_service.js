@@ -1,6 +1,6 @@
 import { Store as BaseStore, fields, makeStore, storeInsertFns } from "@mail/core/common/record";
 import { threadCompareRegistry } from "@mail/core/common/thread_compare";
-import { cleanTerm, generateEmojisOnHtml, prettifyMessageContent } from "@mail/utils/common/format";
+import { cleanTerm, generateEmojisOnHtml, prettifyMessageText } from "@mail/utils/common/format";
 
 import { reactive } from "@odoo/owl";
 
@@ -167,14 +167,14 @@ export class Store extends BaseStore {
             );
             const tab = this.discuss.activeTab;
             if (tab === "inbox") {
-                threads = threads.filter(({ channel_type }) =>
-                    this.tabToThreadType("mailbox").includes(channel_type)
+                threads = threads.filter((thread) =>
+                    this.tabToThreadType("mailbox").includes(thread.channel?.channel_type)
                 );
             } else if (tab === "starred") {
                 threads = [this.starred];
             } else if (tab !== "notification") {
-                threads = threads.filter(({ channel_type }) =>
-                    this.tabToThreadType(tab).includes(channel_type)
+                threads = threads.filter((thread) =>
+                    this.tabToThreadType(tab).includes(thread.channel?.channel_type)
                 );
             }
             return threads;
@@ -198,7 +198,10 @@ export class Store extends BaseStore {
 
     shouldSimulateDarkTheme(ctx) {
         return (
-            (ctx?.env?.inDiscussCallView || ctx?.env?.inCallInvitation) &&
+            (ctx?.env?.inDiscussCallView ||
+                ctx?.env?.inCallInvitation ||
+                ctx?.env.isDiscussPipBanner ||
+                ctx?.env?.inWelcomePage) &&
             this.isOdooWhiteTheme &&
             !ctx?.env.inMeetingSideActions &&
             !ctx?.env.inDiscussActionPanel
@@ -453,7 +456,7 @@ export class Store extends BaseStore {
 
     /** Provides an override point for when the store service has started. */
     onStarted() {
-        this.isOdooWhiteTheme = cookie.get("color_scheme") !== "dark";
+        this.isOdooWhiteTheme = cookie.get("color_scheme") !== "dark" || this.inPublicPage;
         navigator.serviceWorker?.addEventListener("message", ({ data = {} }) => {
             const { type, payload } = data;
             if (type === "notification-display-request") {
@@ -733,7 +736,7 @@ export class Store extends BaseStore {
             ...thread.getFetchParams(),
             fetch_params: {
                 is_notification,
-                search_term: await prettifyMessageContent(searchTerm), // formatted like message_post
+                search_term: await prettifyMessageText(searchTerm), // formatted like message_post
                 before,
             },
         });
