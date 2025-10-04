@@ -16,7 +16,7 @@ class AccountChartTemplate(models.AbstractModel):
         :rtype: dict
         """
         return {
-            'name': _("Generic Chart of Accounts"),
+            'name': _("Generic (Minimal) Chart of Accounts"),
             'country': None,
             'property_account_receivable_id': 'receivable',
             'property_account_payable_id': 'payable',
@@ -46,5 +46,6 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_journal_early_pay_discount_gain_account_id': 'cash_discount_gain',
                 'expense_account_id': 'expense',
                 'income_account_id': 'income',
+                'deferred_expense_account_id': 'prepayments',
             }
         }

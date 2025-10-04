@@ -122,7 +122,7 @@ class ProjectTask(models.Model):
         project_id = self.env.context.get('default_project_id')
         if not project_id:
             return False
-        return self.stage_find(project_id, order="fold, sequence, id")
+        return self.env['project.project'].browse(project_id)._get_default_task_stage().id
 
     @api.model
     def _default_user_ids(self):
@@ -671,7 +671,7 @@ class ProjectTask(models.Model):
             project = task.project_id or task.parent_id.project_id
             if project:
                 if project not in task.stage_id.project_ids:
-                    task.stage_id = task.stage_find(project.id, [('fold', '=', False)])
+                    task.stage_id = project._get_default_task_stage().id
             else:
                 task.stage_id = False
 
@@ -876,18 +876,26 @@ class ProjectTask(models.Model):
 
     def _create_task_mapping(self, copied_tasks):
         """
-        Thanks to the way create and command.create is handled, when a task with 2 children is copied, we have the guarantee that the children of the
-        copied task will have the same index in the child_ids recordset. We can use this behavior to create a mapping containing all the original tasks and their copy.
-        :return:
-            task_mapping: a dict containing the mapping of the original task ids and their copied task (k: original_task.id, v: new_task)
-            task_dependencies: a dict containing the ids of the dependencies of the original task when they have one.
-            (k: original_task_id, v: [original_task.depend_on_ids.ids, original_task.dependent_ids.ids]
+        Create a mapping between original tasks and their copied counterparts.
+
+        When a task with children is copied, the children of the copied task
+        maintain the same index in the ``child_ids`` recordset. This method leverages
+        that behavior to generate a mapping containing all original tasks and their copies.
+
+        :param copied_tasks: The tasks that have been copied.
+        :type copied_tasks: recordset of project.task
+
+        :returns: A tuple of two dictionaries. The first dictionary, ``task_mapping``,
+                maps original task IDs to copied task objects (``{original_task.id: new_task}``).
+                The second dictionary, ``task_dependencies``, maps original task IDs to
+                a tuple of two lists of dependency IDs (``{original_task_id: ([depend_on_ids], [dependent_ids])}``).
+        :rtype: tuple[dict[int, project.task], dict[int, tuple[list[int], list[int]]]]
         """
         task_mapping, task_dependencies = {}, {}
         for original_task, copied_task in zip(self, copied_tasks):
             task_mapping[original_task.id] = copied_task
             if original_task.allow_task_dependencies and (original_task.depend_on_ids or original_task.dependent_ids):
-                task_dependencies[original_task.id] = [original_task.depend_on_ids.ids, original_task.dependent_ids.ids]
+                task_dependencies[original_task.id] = (original_task.depend_on_ids.ids, original_task.dependent_ids.ids)
             if original_task.child_ids:
                 # If the task has children, we have to call the method create_task_mapping to get their ids and dependencies mapping too.
                 children_mapping, children_dependencies = original_task.child_ids._create_task_mapping(copied_task.child_ids)
@@ -941,31 +949,6 @@ class ProjectTask(models.Model):
             empty_list_help_document_name=tname,
         )
         return super().get_empty_list_help(help_message)
-
-    # ----------------------------------------
-    # Case management
-    # ----------------------------------------
-
-    def stage_find(self, section_id, domain=[], order='sequence, id'):
-        """ Override of the base.stage method
-            Parameter of the stage search taken from the lead:
-            - section_id: if set, stages must belong to this section or
-              be a default stage; if not set, stages must be default
-              stages
-        """
-        # collect all section_ids
-        section_ids = []
-        if section_id:
-            section_ids.append(section_id)
-        section_ids.extend(self.mapped('project_id').ids)
-        search_domain = []
-        if section_ids:
-            search_domain = [('|')] * (len(section_ids) - 1)
-            for section_id in section_ids:
-                search_domain.append(('project_ids', '=', section_id))
-        search_domain += list(domain)
-        # perform search, return the first found
-        return self.env['project.task.type'].search(search_domain, order=order, limit=1).id
 
     # ------------------------------------------------
     # CRUD overrides
@@ -1044,7 +1027,11 @@ class ProjectTask(models.Model):
     def _ensure_fields_write(self, vals, defaults=False):
         if defaults:
             vals = {
-                **{key[8:]: value for key, value in self.env.context.items() if key.startswith("default_")},
+                **{
+                    key[8:]: value
+                    for key, value in self.env.context.items()
+                    if key.startswith("default_") and key[8:] in self._fields
+                },
                 **vals
             }
 

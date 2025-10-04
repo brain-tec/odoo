@@ -104,7 +104,7 @@ export class Thread extends Record {
         compute() {
             return (
                 this.self_member_id?.is_pinned ||
-                (["channel", "group"].includes(this.channel_type) &&
+                (["channel", "group"].includes(this.channel?.channel_type) &&
                     this.hasSelfAsMember &&
                     !this.parent_channel_id)
             );
@@ -306,7 +306,7 @@ export class Thread extends Record {
     }
 
     get supportsCustomChannelName() {
-        return this.isChatChannel && this.channel_type !== "group";
+        return this.isChatChannel && this.channel?.channel_type !== "group";
     }
 
     get displayName() {
@@ -319,6 +319,13 @@ export class Thread extends Record {
 
     get avatarUrl() {
         return this.module_icon ?? this.store.DEFAULT_AVATAR;
+    }
+
+    get fullNameWithParent() {
+        const text = this.parent_channel_id
+            ? `${this.parent_channel_id.displayName} > ${this.displayName}`
+            : this.displayName;
+        return text;
     }
 
     get isTransient() {
