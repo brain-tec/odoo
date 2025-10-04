@@ -8,7 +8,7 @@ from odoo.addons.mail.tests.common import mail_new_test_user, MailCommon
 from odoo.addons.test_mail.models.test_mail_models import MailTestSimple
 from odoo.addons.test_mail.tests.common import TestRecipients
 from odoo.addons.mail.tools.discuss import Store
-from odoo.tests import Form, tagged, users
+from odoo.tests import Form, users, warmup, tagged
 from odoo.tools import mute_logger
 
 
@@ -61,6 +61,11 @@ class ThreadRecipients(MailCommon, TestRecipients):
                 'alias_domain_id': cls.mail_alias_domain.id,
                 'alias_model_id': cls.env['ir.model']._get_id('mail.test.ticket.mc'),
                 'alias_name': 'test.alias.partner',
+            }, {
+                'alias_domain_id': cls.mail_alias_domain.id,
+                'alias_incoming_local': True,
+                'alias_model_id': cls.env['ir.model']._get_id('mail.test.ticket.mc'),
+                'alias_name': 'test.alias.free.local',
             }
         ])
         cls.test_partner_alias = cls.env['res.partner'].create({
@@ -372,6 +377,7 @@ class TestAPI(ThreadRecipients):
         self.assertEqual(partner.phone, '+32455998877')
 
     @users('employee')
+    @warmup
     def test_message_get_default_recipients(self):
         void_partner = self.env['res.partner'].sudo().create({'name': 'No Email'})
         test_records = self.env['mail.test.recipients'].create([
@@ -481,6 +487,11 @@ class TestAPI(ThreadRecipients):
                 'email_from': self.test_aliases[0].alias_full_name,
                 'name': 'Alias email',
             },
+            # do not propose alias email (left-part pre-17 support)
+            {
+                'email_from': f'{self.test_aliases[2].alias_name}@other.domain',
+                'name': 'Alias email (left-part compat)',
+            },
             # do not propose alias email (even if linked to a partner)
             {
                 'email_from': self.test_aliases[1].alias_full_name,
@@ -508,6 +519,8 @@ class TestAPI(ThreadRecipients):
             {'email_cc': '', 'email_to': '', 'partner_ids': []},
             # alias email is not ok
             {'email_cc': '', 'email_to': '', 'partner_ids': []},
+            # left-part compat alias email is not ok
+            {'email_cc': '', 'email_to': '', 'partner_ids': []},
             # alias email is not ok even if linked to partner
             {'email_cc': '', 'email_to': '', 'partner_ids': []},
             # archived is ok, customer
@@ -529,6 +542,7 @@ class TestAPI(ThreadRecipients):
         self.assertEqual(len(suggestions), 2)
         for suggestion, expected in zip(suggestions, [{
             'create_values': {},
+            'display_name': self.partner_employee.display_name,
             'email': self.user_employee.email_normalized,
             'name': self.user_employee.name,
             'partner_id': self.partner_employee.id,
@@ -584,6 +598,7 @@ class TestAPI(ThreadRecipients):
                         suggestions[0],
                         {
                             'create_values': {},
+                            'display_name': sugg_partner.display_name,
                             'email': sugg_partner.email_normalized,
                             'name': sugg_partner.name,
                             'partner_id': sugg_partner.id,
@@ -650,6 +665,7 @@ class TestAPI(ThreadRecipients):
             [
                 {
                     'create_values': {},
+                    'display_name': self.test_partner.display_name,
                     'email': self.test_partner.email_normalized,
                     'name': self.test_partner.name,
                     'partner_id': self.test_partner.id,
@@ -659,6 +675,7 @@ class TestAPI(ThreadRecipients):
             [
                 {
                     'create_values': {},
+                    'display_name': self.test_partner_archived.display_name,
                     'email': self.test_partner_archived.email_normalized,
                     'name': self.test_partner_archived.name,
                     'partner_id': self.test_partner_archived.id,
@@ -724,6 +741,7 @@ class TestAPI(ThreadRecipients):
         for recipient, expected in zip(recipients, [
             {  # partner first: author of message
                 'create_values': {},
+                'display_name': self.user_portal.partner_id.display_name,
                 'email': self.user_portal.email_normalized,
                 'name': self.user_portal.name,
                 'partner_id': self.user_portal.partner_id.id,
@@ -751,6 +769,7 @@ class TestAPI(ThreadRecipients):
         for recipient, expected in zip(recipients, [
             {  # partner first: recipient of message
                 'create_values': {},
+                'display_name': self.user_portal.partner_id.display_name,
                 'email': self.user_portal.email_normalized,
                 'name': self.user_portal.name,
                 'partner_id': self.user_portal.partner_id.id,
@@ -795,20 +814,24 @@ class TestAPI(ThreadRecipients):
         for recipient, expected in zip(recipients, [
             {  # partner first: author of message
                 'create_values': {},
+                'display_name': self.user_portal.partner_id.display_name,
                 'email': self.user_portal.email_normalized,
                 'name': self.user_portal.name,
                 'partner_id': self.user_portal.partner_id.id,
             }, {  # override of model for email_cc
+                'display_name': new_to.display_name,
                 'email': test_cc_tuples[0][1],
                 'name': test_cc_tuples[0][0],
                 'partner_id': new_to.id,
                 'create_values': {},
             }, {  # replying message to
+                'display_name': new_cc_0.display_name,
                 'email': test_to_tuples[0][1],
                 'name': test_to_tuples[0][0],
                 'partner_id': new_cc_0.id,
                 'create_values': {},
             }, {  # replying message  cc
+                'display_name': new_cc_1.display_name,
                 'email': test_cc_tuples[1][1],
                 'name': test_cc_tuples[1][0],
                 'partner_id': new_cc_1.id,
@@ -866,11 +889,13 @@ class TestAPI(ThreadRecipients):
                 },
                 [{
                     'create_values': {},
+                    'display_name': self.user_portal.partner_id.display_name,
                     'email': self.user_portal.email_normalized,
                     'name': self.user_portal.name,
                     'partner_id': self.user_portal.partner_id.id,
                 }, {
                     'create_values': {},
+                    'display_name': self.user_employee.partner_id.display_name,
                     'email': self.user_employee.email_normalized,
                     'name': self.user_employee.name,
                     'partner_id': self.user_employee.partner_id.id,
@@ -885,11 +910,13 @@ class TestAPI(ThreadRecipients):
                 },
                 [{
                     'create_values': {},
+                    'display_name': self.user_portal.display_name,
                     'email': self.user_portal.email_normalized,
                     'name': self.user_portal.name,
                     'partner_id': self.user_portal.partner_id.id,
                 }, {
                     'create_values': {},
+                    'display_name': self.user_employee.display_name,
                     'email': self.user_employee.email_normalized,
                     'name': self.user_employee.name,
                     'partner_id': self.user_employee.partner_id.id,
