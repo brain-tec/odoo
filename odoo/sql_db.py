@@ -243,18 +243,11 @@ class BaseCursor(_CursorProtocol):
         raise NotImplementedError
 
     def dictfetchmany(self, size: int) -> list[dict[str, typing.Any]]:
-        res: list[dict[str, typing.Any]] = []
-        while size > 0 and (row := self.dictfetchone()) is not None:
-            res.append(row)
-            size -= 1
-        return res
+        raise NotImplementedError
 
     def dictfetchall(self) -> list[dict[str, typing.Any]]:
         """ Return all rows as dicts (column_name -> value). """
-        res: list[dict[str, typing.Any]] = []
-        while (row := self.dictfetchone()) is not None:
-            res.append(row)
-        return res
+        raise NotImplementedError
 
     def split_for_in_conditions(self, ids: Iterable[T], size: int = 0) -> Iterator[tuple[T, ...]]:
         """Split a list of identifiers into one or more smaller tuples
@@ -336,18 +329,14 @@ class Cursor(BaseCursor):
             *any* data which may be modified during the life of the cursor.
 
     """
-    sql_from_log: dict[str, tuple[int, float]]
-    sql_into_log: dict[str, tuple[int, float]]
-    sql_log_count: int
-
     def __init__(self, pool: ConnectionPool, dbname: str, dsn: dict):
         super().__init__()
-        self.sql_from_log = {}
-        self.sql_into_log = {}
+        self.sql_from_log: dict[str, tuple[int, float]] = {}
+        self.sql_into_log: dict[str, tuple[int, float]] = {}
 
         # default log level determined at cursor creation, could be
         # overridden later for debugging purposes
-        self.sql_log_count = 0
+        self.sql_log_count: int = 0
 
         # avoid the call of close() (by __del__) if an exception
         # is raised by any of the following initializations
@@ -359,32 +348,38 @@ class Cursor(BaseCursor):
         self._cnx: PsycoConnection = pool.borrow(dsn)
         self._obj: psycopg2.extensions.cursor = self._cnx.cursor()
         if _logger.isEnabledFor(logging.DEBUG):
-            self.__caller = frame_codeinfo(currentframe(), 2)
+            self.__caller: tuple[str, str | int] | None = frame_codeinfo(currentframe(), 2)
         else:
-            self.__caller = False
+            self.__caller = None
         self._closed = False   # real initialization value
-        # See the docstring of this class.
-        self.connection.set_isolation_level(ISOLATION_LEVEL_REPEATABLE_READ)
-        self.connection.set_session(readonly=pool.readonly)
+        self._cnx.set_session(
+            # See the docstring of this class.
+            isolation_level=ISOLATION_LEVEL_REPEATABLE_READ,
+            readonly=pool.readonly,
+            autocommit=False,
+        )
 
         if os.getenv('ODOO_FAKETIME_TEST_MODE') and self.dbname in tools.config['db_name']:
             self.execute("SET search_path = public, pg_catalog;")
             self.commit()  # ensure that the search_path remains after a rollback
 
-    def __build_dict(self, row: tuple) -> dict[str, typing.Any]:
+    def dictfetchone(self) -> dict[str, typing.Any] | None:
         description = self._obj.description
         assert description, "Query does not have results"
-        return {column.name: row[index] for index, column in enumerate(description)}
-
-    def dictfetchone(self) -> dict[str, typing.Any] | None:
         row = self._obj.fetchone()
-        return self.__build_dict(row) if row else None
+        return {column.name: value for column, value in zip(description, row)} if row else None
 
     def dictfetchmany(self, size) -> list[dict[str, typing.Any]]:
-        return [self.__build_dict(row) for row in self._obj.fetchmany(size)]
+        description = self._obj.description
+        assert description, "Query does not have results"
+        names = [column.name for column in description]
+        return [dict(zip(names, row)) for row in self._obj.fetchmany(size)]
 
     def dictfetchall(self) -> list[dict[str, typing.Any]]:
-        return [self.__build_dict(row) for row in self._obj.fetchall()]
+        description = self._obj.description
+        assert description, "Query does not have results"
+        names = [column.name for column in description]
+        return [dict(zip(names, row)) for row in self._obj.fetchall()]
 
     def __del__(self):
         if not self._closed and not self._cnx.closed:
@@ -420,7 +415,7 @@ class Cursor(BaseCursor):
 
         if params and not isinstance(params, (tuple, list, dict)):
             # psycopg2's TypeError is not clear if you mess up the params
-            raise ValueError("SQL query parameters should be a tuple, list or dict; got %r" % (params,))
+            raise ValueError(f"SQL query parameters should be a tuple, list or dict; got {params!r}")
 
         start = real_time()
         try:
@@ -513,7 +508,7 @@ class Cursor(BaseCursor):
 
     def close(self) -> None:
         if not self.closed:
-            return self._close(False)
+            self._close(False)
 
     def _close(self, leak: bool = False) -> None:
         if not self._obj:
@@ -656,9 +651,7 @@ class ConnectionPool:
                     cnx.reset()
                 except psycopg2.OperationalError:
                     self._debug('Cannot reset connection at index %d: %r', i, cnx.dsn)
-                    # psycopg2 2.4.4 and earlier do not allow closing a closed connection
-                    if not cnx.closed:
-                        cnx.close()
+                    cnx.close()
                     continue
                 cnx._pool_in_use = True
                 self._debug('Borrow existing connection to %r at index %d', cnx.dsn, i)
@@ -810,7 +803,6 @@ def db_connect(to: str, allow_uri=False, readonly=False) -> Connection:
     global _Pool, _Pool_readonly  # noqa: PLW0603 (global-statement)
 
     maxconn = (tools.config['db_maxconn_gevent'] if hasattr(odoo, 'evented') and odoo.evented else 0) or tools.config['db_maxconn']
-    _Pool_readonly if readonly else _Pool
     if readonly:
         if _Pool_readonly is None:
             _Pool_readonly = ConnectionPool(int(maxconn), readonly=True)
