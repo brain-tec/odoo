@@ -4,14 +4,6 @@ import { reactive, toRaw } from "@odoo/owl";
 
 /** @typedef {import("./record_list").RecordList} RecordList */
 
-export const storeInsertFns = {
-    makeContext(store) {},
-    getActualModelName(store, ctx, pyOrJsModelName) {
-        return pyOrJsModelName;
-    },
-    getExtraFieldsFromModel(store) {},
-};
-
 export class Store extends Record {
     /** @type {import("./store_internal").StoreInternal} */
     _;
@@ -201,24 +193,15 @@ export class Store extends Record {
      */
     insert(dataByModelName = {}, options = {}) {
         const store = this;
-        const ctx = storeInsertFns.makeContext(store);
         Record.MAKE_UPDATE(function storeInsert() {
             const recordsDataToDelete = [];
-            for (const [pyOrJsModelName, data] of Object.entries(dataByModelName)) {
-                const modelName = storeInsertFns.getActualModelName(store, ctx, pyOrJsModelName);
+            for (const [modelName, data] of Object.entries(dataByModelName)) {
                 if (!store[modelName]) {
                     console.warn(`store.insert() received data for unknown model “${modelName}”.`);
                     continue;
                 }
                 const insertData = [];
                 for (const vals of Array.isArray(data) ? data : [data]) {
-                    const extraFields = storeInsertFns.getExtraFieldsFromModel(
-                        store,
-                        pyOrJsModelName
-                    );
-                    if (extraFields) {
-                        Object.assign(vals, extraFields);
-                    }
                     if (vals._DELETE) {
                         delete vals._DELETE;
                         recordsDataToDelete.push([modelName, vals]);
@@ -296,7 +279,7 @@ export class Store extends Record {
     }
     _cleanupData(data) {
         super._cleanupData(data);
-        if (this._getActualModelName() === "Store") {
+        if (this.Model.getName() === "Store") {
             delete data.Models;
             for (const [name] of modelRegistry.getEntries()) {
                 delete data[name];
