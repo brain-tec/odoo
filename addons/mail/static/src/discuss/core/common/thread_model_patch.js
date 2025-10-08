@@ -20,7 +20,7 @@ const threadStaticPatch = {
         if (data.model !== "discuss.channel" || data.id < 1) {
             return super.getOrFetch(...arguments);
         }
-        const thread = this.store.Thread.get({ id: data.id, model: data.model });
+        const thread = this.store["mail.thread"].get({ id: data.id, model: data.model });
         if (thread?.fetchChannelInfoState === "fetched") {
             return Promise.resolve(thread);
         }
@@ -33,7 +33,7 @@ const threadStaticPatch = {
         this.store.fetchChannel(data.id).then(
             () => {
                 this.store.channelIdsFetchingDeferred.delete(data.id);
-                const thread = this.store.Thread.get({ id: data.id, model: data.model });
+                const thread = this.store["mail.thread"].get({ id: data.id, model: data.model });
                 if (thread?.exists()) {
                     thread.fetchChannelInfoState = "fetched";
                     def.resolve(thread);
@@ -43,7 +43,7 @@ const threadStaticPatch = {
             },
             () => {
                 this.store.channelIdsFetchingDeferred.delete(data.id);
-                const thread = this.store.Thread.get({ id: data.id, model: data.model });
+                const thread = this.store["mail.thread"].get({ id: data.id, model: data.model });
                 if (thread?.exists()) {
                     def.reject(thread);
                 } else {
@@ -60,6 +60,8 @@ patch(Thread, threadStaticPatch);
 const threadPatch = {
     setup() {
         super.setup();
+        /** @type {string} */
+        this.avatar_cache_key = undefined;
         this.channel = fields.One("discuss.channel", {
             inverse: "thread",
             /** @this {import("models").Thread} */
@@ -73,6 +75,8 @@ const threadPatch = {
             onDelete: (r) => r.delete(),
             sort: (m1, m2) => m1.id - m2.id,
         });
+        /** @type {string} */
+        this.channel_type = undefined;
         this.correspondent = fields.One("discuss.channel.member", {
             /** @this {import("models").Thread} */
             compute() {
