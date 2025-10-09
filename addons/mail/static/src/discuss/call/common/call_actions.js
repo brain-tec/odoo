@@ -6,6 +6,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { QuickVoiceSettings } from "./quick_voice_settings";
 import { QuickVideoSettings } from "./quick_video_settings";
+import { attClassObjectToString } from "@mail/utils/common/format";
 
 export const callActionsRegistry = registry.category("discuss.call/actions");
 
@@ -168,16 +169,6 @@ registerCallAction("auto-focus", {
     sequence: 50,
     sequenceGroup: 200,
 });
-/** @deprecated Blur background action is replaced by @see QuickVideoSettings menu item "Blur background" */
-export const blurBackgroundAction = {
-    condition: false,
-    name: ({ store }) => (store.settings.useBlur ? _t("Remove Blur") : _t("Blur Background")),
-    isActive: ({ store }) => store?.settings?.useBlur,
-    icon: "fa fa-photo",
-    onSelected: ({ store }) => (store.settings.useBlur = !store.settings.useBlur),
-    sequence: 60,
-    sequenceGroup: 200,
-};
 registerCallAction("fullscreen", {
     condition: ({ store, thread }) => thread?.eq(store.rtc?.channel),
     name: ({ store }) => (store.rtc.state.isFullscreen ? _t("Exit Fullscreen") : _t("Fullscreen")),
@@ -229,7 +220,11 @@ export const acceptWithCamera = {
 };
 registerCallAction("accept-with-camera", acceptWithCamera);
 registerCallAction("join-back", {
-    btnClass: "text-nowrap pe-2 rounded-pill",
+    btnClass: ({ owner }) =>
+        attClassObjectToString({
+            "text-nowrap pe-2 rounded-pill": true,
+            "mx-1": !owner.env.inCallInvitation,
+        }),
     condition: ({ store, thread }) =>
         !thread?.eq(store.rtc?.channel) && typeof thread?.useCameraByDefault === "boolean",
     disabledCondition: ({ store }) => store.rtc?.state.hasPendingRequest,
@@ -269,8 +264,11 @@ export const joinAction = {
 };
 registerCallAction("join", joinAction);
 export const rejectAction = {
-    btnClass: ({ thread }) =>
-        typeof thread?.useCameraByDefault === "boolean" ? "pe-2 rounded-pill" : undefined,
+    btnClass: ({ owner, thread }) =>
+        attClassObjectToString({
+            "pe-2 rounded-pill": typeof thread?.useCameraByDefault === "boolean",
+            "mx-1": !owner.env.inCallInvitation && typeof thread?.useCameraByDefault === "boolean",
+        }),
     condition: ({ thread }) => thread?.self_member_id?.rtc_inviting_session_id,
     disabledCondition: ({ store }) => store.rtc?.state.hasPendingRequest,
     icon: "oi oi-close",

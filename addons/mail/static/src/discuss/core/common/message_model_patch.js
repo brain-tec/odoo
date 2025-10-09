@@ -45,8 +45,6 @@ const messagePatch = {
                 return this.id < this.thread.lastSelfMessageSeenByEveryone.id;
             },
         });
-        /** @type {Promise<Thread>[]} @deprecated */
-        this.mentionedChannelPromises = [];
         this.threadAsFirstUnread = fields.One("mail.thread", { inverse: "firstUnreadMessage" });
     },
     /** @returns {import("models").ChannelMember[]} */
@@ -68,6 +66,13 @@ const messagePatch = {
             mentionedPartners,
             mentionedRoles,
         });
+    },
+    /**
+     * @param {Thread} thread the thread being viewed
+     * @returns {boolean}
+     */
+    showSeenIndicator(thread) {
+        return this.isSelfAuthored && thread?.hasSeenFeature;
     },
 };
 patch(Message.prototype, messagePatch);
