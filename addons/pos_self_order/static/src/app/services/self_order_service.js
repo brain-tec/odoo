@@ -13,7 +13,12 @@ import { renderToElement } from "@web/core/utils/render";
 import { TimeoutPopup } from "@pos_self_order/app/components/timeout_popup/timeout_popup";
 import { NetworkConnectionLostPopup } from "@pos_self_order/app/components/network_connectionLost_popup/network_connectionLost_popup";
 import { UnavailableProductsDialog } from "@pos_self_order/app/components/unavailable_product_dialog/unavailable_product_dialog";
-import { constructFullProductName, deduceUrl, random5Chars } from "@point_of_sale/utils";
+import {
+    constructFullProductName,
+    deduceUrl,
+    random5Chars,
+    orderUsageUTCtoLocalUtil,
+} from "@point_of_sale/utils";
 import { getOrderLineValues } from "./card_utils";
 import {
     getTaxesAfterFiscalPosition,
@@ -205,8 +210,8 @@ export class SelfOrder extends Reactive {
                 access_token: this.access_token,
                 preset_id: this.currentOrder?.preset_id?.id,
             });
-
-            preset.computeAvailabilities(presetAvailabilities);
+            const localUsage = orderUsageUTCtoLocalUtil(presetAvailabilities.usage_utc);
+            preset.computeAvailabilities(localUsage);
         } catch {
             console.info("Offline mode, cannot update the slot avaibility");
         }
@@ -280,23 +285,13 @@ export class SelfOrder extends Reactive {
         this.printKioskChanges(access_token);
     }
     hasPaymentMethod() {
-        return this.filterPaymentMethods(this.models["pos.payment.method"].getAll()).length > 0;
-    }
-
-    filterPaymentMethods(pms) {
-        //based on _load_pos_self_data_domain from pos_payment_method.py
-        return this.config.self_ordering_mode === "kiosk"
-            ? pms.filter((rec) => ["adyen", "stripe"].includes(rec.use_payment_terminal))
-            : [];
+        return this.models["pos.payment.method"].getAll().length > 0;
     }
 
     async confirmOrder() {
         const payAfter = this.config.self_ordering_pay_after; // each, meal
         const device = this.config.self_ordering_mode; // kiosk, mobile
         const service = this.selfService; // table, counter, delivery
-        const paymentMethods = this.filterPaymentMethods(
-            this.models["pos.payment.method"].getAll()
-        ); // Stripe, Adyen, Online
 
         let order = this.currentOrder;
         const orderHasChanges = Object.keys(order.changes).length > 0;
@@ -320,7 +315,7 @@ export class SelfOrder extends Reactive {
 
         // When no payment methods redirect to confirmation page
         // the client will be able to pay at counter
-        if (paymentMethods.length === 0) {
+        if (!this.hasPaymentMethod()) {
             let screenMode = "pay";
 
             if (orderHasChanges) {
