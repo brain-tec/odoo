@@ -184,6 +184,7 @@ class HrEmployee(models.Model):
     is_in_contract = fields.Boolean(related='version_id.is_in_contract', inherited=True, groups="hr.group_hr_manager")
     structure_type_id = fields.Many2one(readonly=False, related='version_id.structure_type_id', inherited=True, groups="hr.group_hr_manager")
     contract_type_id = fields.Many2one(readonly=False, related='version_id.contract_type_id', inherited=True, groups="hr.group_hr_manager")
+    hourly_cost = fields.Monetary('Hourly Cost', groups="hr.group_hr_user", tracking=True)
 
     # Direct subordinates
     parent_id = fields.Many2one('hr.employee', 'Manager', tracking=True, index=True,
@@ -1337,6 +1338,63 @@ class HrEmployee(models.Model):
             if self.env['hr.version']._has_field_access(self.env['hr.version']._fields[f_name], 'read')
         })
         return employee
+
+    @api.model
+    def cycles_in_hierarchy_read(self, domain):
+        """
+        Detect cycles in a parent-child hierarchy using Floyd's Tortoise and Hare algorithm.
+        The algorithm works iff each child in the hierarchy has at most one parent.
+
+        :param domain: A domain used to search for records in the hierarchy.
+        :type domain: list
+
+        :return: List of record IDs that are part of a cycle in a model.
+        :rtype: list[int]
+        """
+        records = self.search_fetch(domain=domain, field_names=['parent_id'])
+        parent_map = defaultdict(
+            lambda: None,
+            {
+                record.id: record.parent_id.id if record.parent_id else None
+                for record in records
+            },
+        )
+        visited = set()
+        in_cycle = set()
+
+        for record in records:
+            record_id = record.id
+            if record in visited:
+                continue
+
+            # Floyd's Tortoise and Hare cycle detection
+            parent = record_id
+            grand_parent = record_id
+
+            while True:
+                parent = parent_map.get(parent)
+                grand_parent = parent_map.get(parent_map.get(grand_parent))
+
+                if parent is None or grand_parent is None:
+                    break
+
+                if parent == grand_parent or parent in in_cycle or grand_parent in in_cycle:
+                    cycle_node = record_id
+                    while cycle_node not in in_cycle:
+                        in_cycle.add(cycle_node)
+                        visited.add(cycle_node)
+                        cycle_node = parent_map.get(cycle_node)
+                    break
+
+                if parent in visited or grand_parent in visited:
+                    break
+
+            # Mark the current traversal as visited
+            current = record_id
+            while current is not None and current not in visited:
+                visited.add(current)
+                current = parent_map.get(current)
+        return list(in_cycle)
 
     @api.model_create_multi
     def create(self, vals_list):
