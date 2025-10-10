@@ -1,4 +1,9 @@
-import { isTextNode, isParagraphRelatedElement, isIconElement } from "../utils/dom_info";
+import {
+    isTextNode,
+    isParagraphRelatedElement,
+    isIconElement,
+    isEmptyBlock,
+} from "../utils/dom_info";
 import { Plugin } from "../plugin";
 import { closestBlock } from "../utils/blocks";
 import {
@@ -7,6 +12,7 @@ import {
     unwrapContents,
     wrapInlinesInBlocks,
     splitTextNode,
+    fillEmpty,
 } from "../utils/dom";
 import { childNodes, closestElement } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
@@ -74,6 +80,8 @@ export const CLIPBOARD_WHITELISTS = {
         "img-thumbnail",
         "rounded",
         "rounded-circle",
+        // Odoo tables
+        "o_table",
         "table",
         "table-bordered",
         /^padding-/,
@@ -477,6 +485,13 @@ export class ClipboardPlugin extends Plugin {
                 node = this.dependencies.dom.setTagName(node, "TD");
             }
             if (node.nodeName === "TD") {
+                // Insert base container into empty TD.
+                if (isEmptyBlock(node)) {
+                    const baseContainer = this.dependencies.baseContainer.createBaseContainer();
+                    fillEmpty(baseContainer);
+                    node.replaceChildren(baseContainer);
+                }
+
                 if (node.hasAttribute("bgcolor") && !node.style["background-color"]) {
                     node.style["background-color"] = node.getAttribute("bgcolor");
                 }
@@ -553,7 +568,7 @@ export class ClipboardPlugin extends Plugin {
      * @returns {boolean}
      */
     isWhitelisted(item) {
-        if (item instanceof Attr) {
+        if (item.nodeType === Node.ATTRIBUTE_NODE) {
             return CLIPBOARD_WHITELISTS.attributes.includes(item.name);
         } else if (typeof item === "string") {
             return CLIPBOARD_WHITELISTS.classes.some((okClass) =>
