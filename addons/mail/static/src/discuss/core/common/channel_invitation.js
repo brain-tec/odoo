@@ -204,7 +204,7 @@ export class ChannelInvitation extends Component {
             invitePromises.push(
                 this.orm.call("discuss.channel", "add_members", [[this.props.thread.id]], {
                     partner_ids: this.selectedPartners.map((partner) => partner.id),
-                    invite_to_rtc_call: this.rtc.state.channel?.eq(this.props.thread),
+                    invite_to_rtc_call: this.rtc.state.channel?.eq(this.props.thread?.channel),
                 })
             );
         }
@@ -235,8 +235,8 @@ export class ChannelInvitation extends Component {
                     return _t("Invite");
                 }
                 if (this.selectedPartners.length === 1) {
-                    const alreadyChat = Object.values(this.store["mail.thread"].records).some(
-                        (thread) => thread.correspondent?.partner_id.eq(this.selectedPartners[0])
+                    const alreadyChat = Object.values(this.store["discuss.channel"].records).some(
+                        (channel) => channel.correspondent?.partner_id.eq(this.selectedPartners[0])
                     );
                     if (alreadyChat) {
                         return _t("Go to conversation");

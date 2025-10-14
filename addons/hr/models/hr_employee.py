@@ -14,7 +14,8 @@ from markupsafe import Markup
 from odoo import api, fields, models, _, tools
 from odoo.fields import Domain
 from odoo.exceptions import ValidationError, AccessError, RedirectWarning, UserError
-from odoo.tools import convert, format_time, email_normalize, SQL, Query
+from odoo.models import Query
+from odoo.tools import convert, format_time, email_normalize, SQL
 from odoo.tools.intervals import Intervals
 from odoo.addons.hr.models.hr_version import format_date_abbr
 from odoo.addons.mail.tools.discuss import Store
@@ -1205,9 +1206,16 @@ class HrEmployee(models.Model):
     def get_views(self, views, options=None):
         if self.browse().has_access('read'):
             return super().get_views(views, options)
-        res = self.env['hr.employee.public'].get_views(views, options)
-        res['models'].update({'hr.employee': res['models']['hr.employee.public']})
-        return res
+        # returning public employee data would cause a traceback when building
+        # the private employee xml view
+        raise RedirectWarning(
+            message=_(
+            """You are not allowed to access "Employee" (hr.employee) records.
+We can redirect you to the public employee list."""
+            ),
+            action=self.env.ref('hr.hr_employee_public_action').id,
+            button_text=_("Employees profile"),
+        )
 
     @api.model
     def _search(self, domain, offset=0, limit=None, order=None, *, bypass_access=False, **kwargs):
