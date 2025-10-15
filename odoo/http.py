@@ -443,7 +443,7 @@ def dispatch_rpc(service_name, method, params):
 
 
 def get_session_max_inactivity(env):
-    if not env or env.cr._closed:
+    if not env or env.cr.closed:
         return SESSION_LIFETIME
 
     ICP = env['ir.config_parameter'].sudo()
@@ -1446,8 +1446,8 @@ class GeoIP(collections.abc.Mapping):
     def __bool__(self):
         return self.country_name is not None
 
-    # Old dict API, undocumented for now, will be deprecated some day
     def __getitem__(self, item):
+        warnings.warn("Since 20.0, dictionnary GeoIP API is deprecated.", DeprecationWarning, stacklevel=2)
         if item == 'country_name':
             return self.country_name
 
@@ -2110,7 +2110,7 @@ class Request:
         data = json.dumps(data, ensure_ascii=False, default=json_default)
 
         headers = werkzeug.datastructures.Headers(headers)
-        headers['Content-Length'] = len(data)
+        headers['Content-Length'] = str(len(data))
         if 'Content-Type' not in headers:
             headers['Content-Type'] = 'application/json; charset=utf-8'
 
@@ -2289,7 +2289,6 @@ class Request:
                 self.registry = registry.check_signaling(cr)
             except (AttributeError, psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
                 raise RegistryError(f"Cannot get registry {self.db}") from e
-            threading.current_thread().dbname = self.registry.db_name
 
             # find the controller endpoint to use
             self.env = odoo.api.Environment(cr, self.session.uid, self.session.context)
@@ -2442,7 +2441,7 @@ class Dispatcher(ABC):
             ))
 
         if cors and self.request.httprequest.method == 'OPTIONS':
-            set_header('Access-Control-Max-Age', CORS_MAX_AGE)
+            set_header('Access-Control-Max-Age', str(CORS_MAX_AGE))
             set_header('Access-Control-Allow-Headers',
                        'Origin, X-Requested-With, Content-Type, Accept, Authorization')
             werkzeug.exceptions.abort(Response(status=204))
