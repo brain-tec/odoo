@@ -695,6 +695,14 @@ font[class*='bg-'] {
     }
 }
 
+.btn-close {
+    // Most components with an integrated .btn-close (o_notification, modals, offcanvas)
+    // use $body-bg by default, which is why we check it here.
+    @if (lightness($body-bg) < 50) {
+        @include btn-close-white();
+    }
+}
+
 // Badges
 .badge, .o_filter_tag {
     --badge-color: var(--color);
@@ -1641,7 +1649,7 @@ header {
 
 @if o-website-value('header-template') == 'sidebar' {
     @include media-breakpoint-up(lg) {
-        #wrapwrap {
+        #wrapwrap:has(> header) {
             // Two different website options might add padding:
             // - The sidebar header template
             // - The website layout template when different than 'full'
