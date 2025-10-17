@@ -742,8 +742,8 @@ export class PosStore extends WithLazyGetterTrap {
             return "flex-row-reverse justify-content-between m-1";
         }
     }
-    async onProductInfoClick(productTemplate) {
-        const info = await this.getProductInfo(productTemplate, 1);
+    async onProductInfoClick(productTemplate, productProduct = false) {
+        const info = await this.getProductInfo(productTemplate, 1, 0, productProduct);
         this.dialog.add(ProductInfoPopup, { info: info, productTemplate: productTemplate });
     }
     getProductPriceFormatted(productTemplate) {
@@ -2729,7 +2729,11 @@ export class PosStore extends WithLazyGetterTrap {
                 continue;
             }
 
-            if (availableCateg.size && !p.pos_categ_ids.some((c) => availableCateg.has(c.id))) {
+            if (
+                availableCateg.size &&
+                !this.session._pos_special_display_products_ids?.includes(p.id) &&
+                !p.pos_categ_ids.some((c) => availableCateg.has(c.id))
+            ) {
                 continue;
             }
 
