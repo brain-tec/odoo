@@ -210,7 +210,6 @@ from .tools import (config, consteq, file_path, get_lang, json_default,
 from .tools.facade import Proxy, ProxyAttr, ProxyFunc
 from .tools.func import filter_kwargs
 from .tools.misc import submap, real_time
-from .tools._vendor import sessions
 from .tools._vendor.useragents import UserAgent
 
 
@@ -447,12 +446,7 @@ def get_session_max_inactivity(env):
         return SESSION_LIFETIME
 
     ICP = env['ir.config_parameter'].sudo()
-
-    try:
-        return int(ICP.get_param('sessions.max_inactivity_seconds', SESSION_LIFETIME))
-    except ValueError:
-        _logger.warning("Invalid value for 'sessions.max_inactivity_seconds', using default value.")
-        return SESSION_LIFETIME
+    return ICP.get_int('sessions.max_inactivity_seconds') or SESSION_LIFETIME
 
 
 def is_cors_preflight(request, endpoint):
@@ -1152,19 +1146,16 @@ class Session(collections.abc.MutableMapping):
 # =========================================================
 # Session Store
 # =========================================================
-
-S = typing.TypeVar('S', bound=Session)
-
 # TODO: remove `84` length when v18.4 is deprecated
 # This will invalidate sessions generated with the old sid generator
 _base64_urlsafe_re = re.compile(r'^[A-Za-z0-9_-]{84,86}$')
 _session_identifier_re = re.compile(r'^[A-Za-z0-9_-]{42}$')
 
 
-class SessionStore(typing.Generic[S]):
+class SessionStore:
     """ Odoo implementation of the filesystem session store. """
 
-    def __init__(self, /, path: str | None = None, session_cls: S | None = None):
+    def __init__(self, /, path: str | None = None, session_cls: type[Session] = Session):
         """
         :param path: the path to the folder used for storing the sessions.
             If not provided the default temporary directory is used.
@@ -1175,7 +1166,7 @@ class SessionStore(typing.Generic[S]):
             path = os.path.join(tempfile.gettempdir(), 'odoo_session_store')
             os.makedirs(path, exist_ok=True)
         self.path: str = path
-        self.session_cls: Session = session_cls or Session
+        self.session_cls: type[Session] = session_cls
 
     def generate_key(self) -> str:
         """ Generate a 86-chars long token with 64 bytes of entropy. """
@@ -1191,7 +1182,7 @@ class SessionStore(typing.Generic[S]):
         """ Check if a session identifier has the correct format. """
         return _base64_urlsafe_re.fullmatch(sid) is not None
 
-    def new(self) -> S:
+    def new(self) -> Session:
         """ Generate a new session. """
         return self.session_cls({}, self.generate_key(), new=True)
 
@@ -1202,7 +1193,7 @@ class SessionStore(typing.Generic[S]):
             raise ValueError(f'Invalid session id {sid!r}')
         return os.path.join(self.path, sid[:2], sid)
 
-    def save(self, session: S) -> None:
+    def save(self, session: Session) -> None:
         """ Save a session. """
         # Perform an atomic save
         session_path = self.get_session_path(session.sid)
@@ -1222,13 +1213,13 @@ class SessionStore(typing.Generic[S]):
                 os.replace(tmp, session_path)
             os.chmod(session_path, 0o644)
 
-    def delete(self, session: S) -> None:
+    def delete(self, session: Session) -> None:
         """ Delete a session. """
         session_path = self.get_session_path(session.sid)
         with contextlib.suppress(OSError):
             os.unlink(session_path)
 
-    def get(self, sid: str, *, keep_sid: bool = False) -> S:
+    def get(self, sid: str, *, keep_sid: bool = False) -> Session:
         """
         Get a session for the sid.
 
@@ -1968,7 +1959,7 @@ class Request:
         :returns: ASCII token string
         :rtype: str
         """
-        secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
+        secret = self.env['ir.config_parameter'].sudo().get_str('database.secret')
         if not secret:
             raise ValueError("CSRF protection requires a configured database secret")
 
@@ -1990,7 +1981,7 @@ class Request:
         if not csrf:
             return False
 
-        secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
+        secret = self.env['ir.config_parameter'].sudo().get_str('database.secret')
         if not secret:
             raise ValueError("CSRF protection requires a configured database secret")
 
@@ -2780,7 +2771,7 @@ class Application:
     def session_store(self):
         path = odoo.tools.config.session_dir
         _logger.debug('HTTP sessions stored in: %s', path)
-        return SessionStore(path=path, session_cls=Session)
+        return SessionStore(path=path)
 
     def get_db_router(self, db):
         if not db:
