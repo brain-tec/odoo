@@ -44,16 +44,16 @@ def get_twilio_credentials(env) -> tuple[str | None, str | None]:
     :return: tuple(account_sid: str, auth_token: str) or (None, None) if Twilio is disabled
     """
     params = env["ir.config_parameter"].sudo()
-    if not params.get_param("mail.use_twilio_rtc_servers"):
+    if not params.get_bool("mail.use_twilio_rtc_servers"):
         return None, None
-    account_sid = params.get_param("mail.twilio_account_sid")
-    auth_token = params.get_param("mail.twilio_account_token")
+    account_sid = params.get_str("mail.twilio_account_sid")
+    auth_token = params.get_str("mail.twilio_account_token")
     return account_sid, auth_token
 
 
 def get_sfu_url(env) -> str | None:
     params = env["ir.config_parameter"].sudo()
-    sfu_url = params.get_param("mail.sfu_server_url") if params.get_param("mail.use_sfu_server") else None
+    sfu_url = params.get_str("mail.sfu_server_url") if params.get_bool("mail.use_sfu_server") else None
     if not sfu_url:
         sfu_url = os.getenv("ODOO_SFU_URL")
     if sfu_url:
@@ -61,7 +61,7 @@ def get_sfu_url(env) -> str | None:
 
 
 def get_sfu_key(env) -> str | None:
-    sfu_key = env['ir.config_parameter'].sudo().get_param('mail.sfu_server_key')
+    sfu_key = env['ir.config_parameter'].sudo().get_str('mail.sfu_server_key')
     if not sfu_key:
         return os.getenv("ODOO_SFU_KEY")
     return sfu_key
@@ -517,7 +517,7 @@ class Store:
         def _add_to_store(self, store: "Store", target, key):
             self._sort_recods()
             super()._add_to_store(store, target, key)
-            if not self.only_data:
+            if not self.only_data and (self.records or self.mode == "REPLACE"):
                 rel_val = self._get_id()
                 target[key] = (
                     target[key] + rel_val if key in target and self.mode != "REPLACE" else rel_val
