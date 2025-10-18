@@ -163,12 +163,9 @@ export class SelfOrder extends Reactive {
     getAvailableCategories() {
         let now = luxon.DateTime.now();
         now = now.hour + now.minute / 60;
-        const isKiosk = this.config.self_ordering_mode === "kiosk";
         const availableCategories = this.productCategories
             .filter(
-                (c) =>
-                    this.productByCategIds[c.id]?.length > 0 ||
-                    (isKiosk && c.child_ids.some((child) => child.id in this.productByCategIds))
+                (c) => this.productByCategIds[c.id]?.length > 0 || c.associatedProducts?.length > 0
             )
             .sort((a, b) => a.sequence - b.sequence);
         return availableCategories.filter((c) => {
@@ -563,6 +560,15 @@ export class SelfOrder extends Reactive {
     }
 
     cancelOrder() {
+        if (
+            this.config.self_ordering_mode === "kiosk" &&
+            this.hasPaymentMethod() &&
+            typeof this.currentOrder.id === "number"
+        ) {
+            this.cancelBackendOrder();
+            return;
+        }
+
         const lineToDelete = [];
         for (const line of this.currentOrder.lines) {
             const changes = line.changes;
@@ -599,6 +605,20 @@ export class SelfOrder extends Reactive {
             this.router.navigate("default");
             this.currentOrder.delete();
             this.selectedOrderUuid = null;
+        }
+    }
+
+    async cancelBackendOrder() {
+        try {
+            await rpc("/pos-self-order/remove-order", {
+                access_token: this.access_token,
+                order_id: this.currentOrder.id,
+                order_access_token: this.currentOrder.access_token,
+            });
+            this.currentOrder.state = "cancel";
+            this.router.navigate("default");
+        } catch (error) {
+            this.handleErrorNotification(error);
         }
     }
 
