@@ -306,16 +306,6 @@ class BaseCase(case.TestCase):
     registry: Registry = None
     env: api.Environment = None
     cr: Cursor = None
-    def __init_subclass__(cls):
-        """Assigns default test tags ``standard`` and ``at_install`` to test
-        cases not having them. Also sets a completely unnecessary
-        ``test_module`` attribute.
-        """
-        super().__init_subclass__()
-        if cls.__module__.startswith('odoo.addons.'):
-            if getattr(cls, 'test_tags', None) is None:
-                cls.test_tags = {'standard', 'at_install'}
-            cls.test_module = cls.__module__.split('.')[2]
 
     longMessage = True      # more verbose error message by default: https://www.odoo.com/r/Vmh
     warm = True             # False during warm-up phase (see :func:`warmup`)
@@ -327,13 +317,24 @@ class BaseCase(case.TestCase):
     _registry_readonly_enabled = True
     test_cursor_lock_timeout: int = 20
 
+    @classmethod
+    def __init_subclass__(cls):
+        """Assigns default test tags ``standard`` and ``post_install`` to test
+        cases not having them. Also sets a completely unnecessary
+        ``test_module`` attribute.
+        """
+        super().__init_subclass__()
+        if cls.__module__.startswith('odoo.addons.'):
+            if getattr(cls, 'test_tags', None) is None:
+                cls.test_tags = {'standard', 'post_install'}
+            cls.test_module = cls.__module__.split('.')[2]
+
     def __init__(self, methodName='runTest'):
         super().__init__(methodName)
         self.addTypeEqualityFunc(etree._Element, self.assertTreesEqual)
         self.addTypeEqualityFunc(html.HtmlElement, self.assertTreesEqual)
         if methodName != 'runTest':
             self.test_tags = self.test_tags | set(self.get_method_additional_tags(getattr(self, methodName)))
-
 
     @classmethod
     def _request_handler(cls, s: Session, r: PreparedRequest, /, **kw):
@@ -1350,27 +1351,36 @@ class ChromeBrowser:
     def stop(self):
         # method may be called during `_open_websocket`
         if hasattr(self, 'ws'):
-            self.screencaster.stop()
+            try:
+                self.screencaster.stop()
 
-            self._websocket_request('Page.stopLoading')
-            self._websocket_request('Runtime.evaluate', params={'expression': """
-            ('serviceWorker' in navigator) &&
-                navigator.serviceWorker.getRegistrations().then(
-                    registrations => Promise.all(registrations.map(r => r.unregister()))
-                )
-            """, 'awaitPromise': True})
-            # wait for the screenshot or whatever
-            wait(self._responses.values(), 10)
-            self._result.cancel()
+                self._websocket_request('Page.stopLoading')
+                self._websocket_request('Runtime.evaluate', params={'expression': """
+                ('serviceWorker' in navigator) &&
+                    navigator.serviceWorker.getRegistrations().then(
+                        registrations => Promise.all(registrations.map(r => r.unregister()))
+                    )
+                """, 'awaitPromise': True})
+                # wait for the screenshot or whatever
+                wait(self._responses.values(), 10)
+                self._result.cancel()
 
-            self._logger.info("Closing chrome headless with pid %s", self.chrome.pid)
-            self._websocket_request('Browser.close')
+                self._logger.info("Closing chrome headless with pid %s", self.chrome.pid)
+                self._websocket_request('Browser.close')
+            except ChromeBrowserException as e:
+                _logger.runbot("WS error during browser shutdown: %s", e)
+            except Exception:  # noqa: BLE001
+                _logger.warning("Error during browser shutdown", exc_info=True)
             self._logger.info("Closing websocket connection")
             self.ws.close()
 
         self._logger.info("Terminating chrome headless with pid %s", self.chrome.pid)
         self.chrome.terminate()
-        self.chrome.wait(5)
+        try:
+            self.chrome.wait(5)
+        except subprocess.TimeoutExpired:
+            self._logger.warning("Killing chrome headless with pid %s: still alive", self.chrome.pid)
+            self.chrome.kill()
 
         self._logger.info('Removing chrome user profile "%s"', self.user_data_dir)
         shutil.rmtree(self.user_data_dir, ignore_errors=True)
@@ -2442,17 +2452,13 @@ class HttpCase(TransactionCase):
             # code = ""
             self.assertTrue(browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
 
-            error = False
+            error = None
             try:
                 browser._wait_code_ok(code, timeout, error_checker=error_checker)
             except ChromeBrowserException as chrome_browser_exception:
                 error = chrome_browser_exception
             if error:  # dont keep initial traceback, keep that outside of except
-                if code:
-                    message = 'The test code "%s" failed' % code
-                else:
-                    message = "Some js test failed"
-                self.fail('%s\n\n%s' % (message, error))
+                self.fail(str(error))
 
     def start_tour(self, url_path, tour_name, step_delay=None, **kwargs):
         """Wrapper for `browser_js` to start the given `tour_name` with the
@@ -2622,7 +2628,7 @@ def tagged(*tags):
     A tag prefixed by '-' will remove the tag e.g. to remove the 'standard' tag.
 
     By default, all Test classes from odoo.tests.common have a test_tags
-    attribute that defaults to 'standard' and 'at_install'.
+    attribute that defaults to 'standard' and 'post_install'.
 
     When using class inheritance, the tags ARE inherited.
     """
