@@ -426,6 +426,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                     "id": self.users[0].id,
                     "is_admin": False,
                     "notification_type": "inbox",
+                    "partner_id": partner_0.id,
                     "share": False,
                     "signature": ["markup", str(self.users[0].signature)],
                 },
@@ -433,7 +434,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             "Store": {
                 "channel_types_with_seen_infos": sorted(["chat", "group", "livechat"]),
                 "action_discuss_id": xmlid_to_res_id("mail.action_discuss"),
-                "hasCannedResponses": False,
+                "hasCannedResponses": True,
                 "hasGifPickerFeature": False,
                 "hasLinkPreviewFeature": True,
                 "has_access_livechat": True,
@@ -443,7 +444,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "mt_comment": self.env.ref("mail.mt_comment").id,
                 "mt_note": self.env.ref("mail.mt_note").id,
                 "odoobot": self.user_root.partner_id.id,
-                "self_partner": self.users[0].partner_id.id,
+                "self_user": self.users[0].id,
                 "settings": {
                     "channel_notifications": False,
                     "id": self.env["res.users.settings"]._find_or_create_for_user(self.users[0]).id,
