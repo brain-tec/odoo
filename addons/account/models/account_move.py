@@ -1853,7 +1853,7 @@ class AccountMove(models.Model):
         for move in self.filtered(lambda move: move.is_invoice()):
             move.access_url = '/my/invoices/%s' % (move.id)
 
-    @api.depends('move_type', 'partner_id', 'company_id')
+    @api.depends('move_type', 'partner_id', 'partner_id.lang', 'company_id')
     def _compute_narration(self):
         use_invoice_terms = self.env['ir.config_parameter'].sudo().get_param('account.use_invoice_terms')
         invoice_to_update_terms = self.filtered(lambda m: use_invoice_terms and m.is_sale_document(include_receipts=True))
@@ -5561,6 +5561,13 @@ class AccountMove(models.Model):
             'target': target,
         }
 
+    def action_move_download_all(self):
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/account/download_move_attachments/{",".join(str(move_id) for move_id in self.ids)}',
+            'target': 'download',
+        }
+
     def action_print_pdf(self):
         self.ensure_one()
         invoice_template = self.env['account.move.send']._get_default_pdf_report_id(self)
@@ -6741,7 +6748,14 @@ class AccountMove(models.Model):
     def get_extra_print_items(self):
         """ Helper to dynamically add items in the 'Print' menu of list and form of account.move.
         """
-        # TO OVERRIDE
+        if posted_moves := self.filtered(lambda m: m.state == 'posted'):
+            return [
+                {
+                    'key': 'download_all',
+                    'description': _("Export ZIP"),
+                    **posted_moves.action_move_download_all(),
+                },
+            ]
         return []
 
     @staticmethod
