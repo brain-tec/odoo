@@ -1226,6 +1226,35 @@ class PropertiesCase(TestPropertiesMixin):
         self.assertEqual(values.get('name'), 'new_selection')
         self.assertEqual(values.get('selection'), [], 'Selection key should be at least an empty array (never False)')
 
+        self.discussion_1.attributes_definition = [
+            {
+                'name': 'option',
+                'type': 'selection',
+                'selection': [['a', 'Label'], ['b', 'Label'], ['c', 'Label']],
+            },
+        ]
+
+        (self.message_1 | self.message_2 | self.message_3).discussion = self.discussion_1
+        (self.message_1 | self.message_2).attributes = [{
+            'value': 'a',
+            'name': 'option',
+        }]
+        self.message_3.attributes = [{
+            'value': 'b',
+            'name': 'option',
+        }]
+        self.assertEqual(
+            (self.message_1 | self.message_2 | self.message_3)
+            .filtered_domain([('attributes.option', '=', 'b')]),
+             self.message_3)
+        self.assertEqual(
+            (self.message_1 | self.message_2 | self.message_3)
+            .filtered_domain([('attributes.option', '=', 'a')]),
+             self.message_1 | self.message_2)
+        self.assertFalse(
+            (self.message_1 | self.message_2 | self.message_3)
+            .filtered_domain([('attributes.option', '=', 'Label')]))
+
     def test_properties_field_separator(self):
         """Test the separator properties."""
         self.message_1.attributes = [
@@ -1481,7 +1510,7 @@ class PropertiesCase(TestPropertiesMixin):
         self.env['ir.rule'].sudo().create({
             'name': 'test_rule_tags',
             'model_id': self.env['ir.model']._get('test_orm.multi.tag').id,
-            'domain_force': [('name', 'not in', tags[5:].mapped('name'))],
+            'domain_force': [('id', 'not in', tags[5:].ids)],
             'perm_read': True,
             'perm_create': True,
             'perm_write': True,
