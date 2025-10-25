@@ -608,7 +608,8 @@ class AccountMove(models.Model):
             ('cancel', "Cancelled"),
         ],
         compute='_compute_status_in_payment',
-        copy=False,
+        compute_sql='_compute_sql_status_in_payment',
+        compute_sudo=False,
     )
     amount_total_words = fields.Char(
         string="Amount total in words",
@@ -669,8 +670,9 @@ class AccountMove(models.Model):
             ('not_sent', 'Not Sent'),
         ],
         string='Sent',
-        compute='compute_move_sent_values',
-        search='_search_move_sent_values',
+        compute='_compute_move_sent_values',
+        compute_sql='_compute_sql_move_sent_values',
+        compute_sudo=False,
     )
     invoice_user_id = fields.Many2one(
         string='Salesperson',
@@ -812,14 +814,13 @@ class AccountMove(models.Model):
             move.is_being_sent = bool(move.sending_data)
 
     @api.depends('is_move_sent')
-    def compute_move_sent_values(self):
+    def _compute_move_sent_values(self):
         for move in self:
             move.move_sent_values = 'sent' if move.is_move_sent else 'not_sent'
 
-    def _search_move_sent_values(self, operator, value):
-        if operator != 'in' or value - {'sent', 'not_sent'}:
-            return NotImplemented
-        return [('is_move_sent', 'in', [elem == 'sent' for elem in value])]
+    def _compute_sql_move_sent_values(self, alias, query):
+        is_move_sent = self._field_to_sql(alias, 'is_move_sent', query)
+        return SQL("CASE WHEN %s THEN 'sent' ELSE 'not_sent' END", is_move_sent)
 
     def _compute_payment_reference(self):
         for move in self.filtered(lambda m: (
@@ -1316,23 +1317,15 @@ class AccountMove(models.Model):
             else:
                 move.status_in_payment = move.state
 
-    def _field_to_sql(self, alias: str, fname: str, query=None) -> SQL:
-        if fname == 'status_in_payment':
-            return SQL(
-                "CASE "
-                f"WHEN {alias}.state = 'draft' THEN 'draft' "
-                f"WHEN {alias}.state = 'cancel' THEN 'cancel' "
-                f"ELSE {alias}.payment_state "
-                "END"
-            )
-        elif fname == 'move_sent_values':
-            return SQL(
-                "CASE "
-                f"WHEN {alias}.is_move_sent THEN 'sent' "
-                f"ELSE 'not_sent' "
-                "END"
-            )
-        return super()._field_to_sql(alias, fname, query=query)
+    def _compute_sql_status_in_payment(self, alias, query):
+        # TODO not the same logic as the compute?
+        state = self._field_to_sql(alias, 'state', query)
+        payment_state = self._field_to_sql(alias, 'payment_state', query)
+        return SQL("""CASE
+            WHEN %s = 'draft' THEN 'draft'
+            WHEN %s = 'cancel' THEN 'cancel'
+            ELSE %s
+            END""", state, state, payment_state)
 
     @api.depends('reconciled_payment_ids')
     def _compute_payment_count(self):
@@ -5804,6 +5797,13 @@ class AccountMove(models.Model):
             'target': target,
         }
 
+    def action_move_download_all(self):
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/account/download_move_attachments/{",".join(str(move_id) for move_id in self.ids)}',
+            'target': 'download',
+        }
+
     def action_print_pdf(self):
         self.ensure_one()
         invoice_template = self.env['account.move.send']._get_default_pdf_report_id(self)
@@ -5849,6 +5849,13 @@ class AccountMove(models.Model):
             return autopost_bills_wizard
         return False
 
+    def _get_moves_requiring_confirmation(self):
+        """Return the subset of moves that require confirmation before validation."""
+        return self.filtered(
+            lambda move: (move.date or move.invoice_date) > fields.Date.context_today(self)
+            or move.restrict_mode_hash_table,
+        )
+
     def action_validate_moves_with_confirmation(self):
         """
         If 'restrict_mode_hash_table' is enabled or future-dated moves, open a confirmation wizard;
@@ -5858,10 +5865,8 @@ class AccountMove(models.Model):
         if not draft_moves:
             raise UserError(_('There are no journal items in the draft state to post.'))
 
-        need_confirmation_moves = draft_moves.filtered(lambda move:
-            (move.date or move.invoice_date) > fields.Date.context_today(self)
-            or move.restrict_mode_hash_table
-        )
+        need_confirmation_moves = draft_moves._get_moves_requiring_confirmation()
+
         direct_validate_moves = draft_moves - need_confirmation_moves
         if direct_validate_moves:
             direct_validate_moves._post(soft=False)
@@ -6988,7 +6993,14 @@ class AccountMove(models.Model):
     def get_extra_print_items(self):
         """ Helper to dynamically add items in the 'Print' menu of list and form of account.move.
         """
-        # TO OVERRIDE
+        if posted_moves := self.filtered(lambda m: m.state == 'posted'):
+            return [
+                {
+                    'key': 'download_all',
+                    'description': _("Export ZIP"),
+                    **posted_moves.action_move_download_all(),
+                },
+            ]
         return []
 
     def _get_move_lines_to_report(self):
