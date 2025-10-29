@@ -40,6 +40,7 @@ import {
     mailDataHelpers,
 } from "./mock_server/mail_mock_server";
 import { Base } from "./mock_server/mock_models/base";
+import { DiscussCategory } from "./mock_server/mock_models/discuss_category";
 import { DiscussChannel } from "./mock_server/mock_models/discuss_channel";
 import { DiscussChannelMember } from "./mock_server/mock_models/discuss_channel_member";
 import { DiscussChannelRtcSession } from "./mock_server/mock_models/discuss_channel_rtc_session";
@@ -111,6 +112,7 @@ export const mailModels = {
     ...busModels,
     Base,
     DiscussChannel,
+    DiscussCategory,
     DiscussChannelMember,
     DiscussChannelRtcSession,
     DiscussGifFavorite,
@@ -761,7 +763,7 @@ function toChatHubData(opened, folded) {
 }
 
 function convertChatHubParam(param) {
-    return typeof param === "number" ? { id: param, model: "discuss.channel" } : param;
+    return typeof param === "number" ? { id: param } : param;
 }
 
 export function setupChatHub({ opened = [], folded = [] } = {}) {

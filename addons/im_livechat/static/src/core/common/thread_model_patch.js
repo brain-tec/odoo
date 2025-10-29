@@ -8,7 +8,6 @@ patch(Thread.prototype, {
         super.setup();
         this.livechat_end_dt = fields.Datetime();
         this.livechat_operator_id = fields.One("res.partner");
-        this.livechat_conversation_tag_ids = fields.Many("im_livechat.conversation.tag");
         this.livechatVisitorMember = fields.One("discuss.channel.member", {
             compute() {
                 if (this.channel?.channel_type !== "livechat") {
@@ -73,7 +72,7 @@ patch(Thread.prototype, {
      * @param {import("models").Persona} persona
      */
     getPersonaName(persona) {
-        if (this.channel?.channel_type === "livechat" && persona.user_livechat_username) {
+        if (this.channel?.channel_type === "livechat" && persona?.user_livechat_username) {
             return persona.user_livechat_username;
         }
         return super.getPersonaName(persona);
