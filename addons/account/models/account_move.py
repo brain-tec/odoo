@@ -1310,11 +1310,16 @@ class AccountMove(models.Model):
     @api.depends('payment_state', 'state', 'is_move_sent')
     def _compute_status_in_payment(self):
         for move in self:
-            if move.state == 'posted' and move.payment_state == 'not_paid' and move.is_move_sent:
-                move.status_in_payment = 'sent'
-            elif move.state == 'posted' and move.payment_state in ('partial', 'in_payment', 'paid', 'reversed'):
-                move.status_in_payment = move.payment_state
-            else:
+            if move.state == 'posted':
+                if move.payment_state in ('partial', 'in_payment', 'paid', 'reversed'):
+                    move.status_in_payment = move.payment_state
+                elif move.is_move_sent:
+                    move.status_in_payment = 'sent'
+            elif move.state == 'draft':
+                if move.payment_state in ('partial', 'in_payment', 'paid'):
+                    move.status_in_payment = move.payment_state
+
+            if not move.status_in_payment:
                 move.status_in_payment = move.state
 
     def _compute_sql_status_in_payment(self, alias, query):
@@ -6109,7 +6114,11 @@ class AccountMove(models.Model):
             ('sending_data', '!=', False),
             ('state', '=', 'posted'),
         ]
-        to_process = self.search(domain, limit=job_count).try_lock_for_update()
+        to_process = self.search(
+            domain,
+            order='date asc, invoice_date asc, sequence_number asc, id asc',
+            limit=job_count)
+        to_process.try_lock_for_update()
         if not to_process:
             return
 
@@ -7007,13 +7016,10 @@ class AccountMove(models.Model):
         def show_line(line):
             return (
                 line.display_type == 'line_section'
-                or (not (
-                    line.parent_id.collapse_composition
-                    or line.parent_id.parent_id.collapse_composition
-                ) and not (
-                    line.parent_id.collapse_prices
-                    or line.parent_id.parent_id.collapse_prices
-                ))
+                or (
+                    not any([line.parent_id.collapse_composition, line.parent_id.parent_id.collapse_composition]) and
+                    not any([line.parent_id.collapse_prices, line.parent_id.parent_id.collapse_prices])
+                )
             )
 
         return self.invoice_line_ids.filtered(show_line).sorted('sequence')
