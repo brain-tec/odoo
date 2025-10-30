@@ -589,7 +589,7 @@ export class PosStore extends WithLazyGetterTrap {
         }
 
         if (ids.size > 0) {
-            await this.data.callRelated("pos.order", "cancel_order_from_pos", [Array.from(ids)]);
+            await this.data.call("pos.order", "cancel_order_from_pos", [Array.from(ids)]);
             return true;
         }
 
@@ -1266,7 +1266,7 @@ export class PosStore extends WithLazyGetterTrap {
         this.setNextOrderRefs(order);
         order.setPricelist(this.config.pricelist_id);
 
-        if (this.config.use_presets) {
+        if (this.config.use_presets && !data["preset_id"]) {
             this.selectPreset(this.config.default_preset_id, order);
         }
 
