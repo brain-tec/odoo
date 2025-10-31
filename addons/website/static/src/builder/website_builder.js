@@ -5,6 +5,7 @@ import { DisableSnippetsPlugin } from "@html_builder/core/disable_snippets_plugi
 import { OperationPlugin } from "@html_builder/core/operation_plugin";
 import { SavePlugin } from "@html_builder/core/save_plugin";
 import { SetupEditorPlugin } from "@html_builder/core/setup_editor_plugin";
+import { TranslateSetupEditorPlugin } from "./plugins/translate_setup_editor_plugin";
 import { VisibilityPlugin } from "@html_builder/core/visibility_plugin";
 import { removePlugins } from "@html_builder/utils/utils";
 import { closestElement } from "@html_editor/utils/dom_traversal";
@@ -52,6 +53,7 @@ const TRANSLATION_PLUGINS = [
     DisableSnippetsPlugin,
     SavePlugin,
     SetupEditorPlugin,
+    TranslateSetupEditorPlugin,
     WebsiteSetupEditorPlugin,
     VisibilityPlugin,
     PopupVisibilityPlugin,
@@ -164,7 +166,7 @@ export class WebsiteBuilder extends Component {
     get builderProps() {
         const builderProps = Object.assign({}, this.props.builderProps);
         const websitePlugins = this.props.translation
-            ? TRANSLATION_PLUGINS
+            ? [...TRANSLATION_PLUGINS, ...registry.category("website-translation-plugins").getAll()]
             : [
                   ...registry.category("builder-plugins").getAll(),
                   ...registry.category("website-plugins").getAll(),
