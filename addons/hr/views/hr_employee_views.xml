@@ -361,8 +361,10 @@
                                     <group name="contract" groups="hr.group_hr_user">
                                         <div colspan="2" class="col-lg-6 w-100 mt-4 mb-3 o_horizontal_separator text-uppercase fw-bolder small d-flex">
                                             <span>Contract Overview</span>
-                                            <button name="%(hr_version_wizard_action)d" type="action" string="Load a Template" 
-                                                class="btn btn-link ms-auto text-end lh-1 h-100 p-0"/>
+                                            <field name="contract_template_id"
+                                                widget="contract_template_button"
+                                                class="btn btn-addr btn-link ms-auto text-end w-auto lh-1 h-100 p-0"
+                                                nolabel="1"/>
                                         </div>
                                         <label for="contract_date_start" string="Contract"/>
                                         <div class="o_row" name="contract_dates">
@@ -382,7 +384,7 @@
                                                 domain="['|', ('country_id', '=', False), ('country_id', '=', company_country_id)]"/>
 
                                         <separator name="schedule" string="Schedule"/>
-                                        <field name="resource_calendar_id" help="The default working hours are set in configuration."/>
+                                        <field name="resource_calendar_id" help="The default working hours are set in configuration." placeholder="Flexible"/>
                                     </group>
                                 </group>
                             </page>
