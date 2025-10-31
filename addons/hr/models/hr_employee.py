@@ -76,6 +76,11 @@ class HrEmployee(models.Model):
     )
     versions_count = fields.Integer(string="Employee Records Count", compute='_compute_versions_count', groups="hr.group_hr_user")
 
+    contract_template_id = fields.Many2one(
+        'hr.version',
+        groups="hr.group_hr_user,hr_payroll.group_hr_payroll_user",
+    )
+
     @api.model
     def _lang_get(self):
         return self.env['res.lang'].get_installed()
@@ -391,10 +396,21 @@ class HrEmployee(models.Model):
                                              "Please select a date outside existing contracts",
                                              format_date_abbr(self.env, date)))
 
+    @api.onchange('private_phone')
+    def _onchange_private_phone_validation(self):
+        if self.private_phone:
+            self.private_phone = self._phone_format(fname="private_phone", force_format="INTERNATIONAL") or self.private_phone
+
+    @api.onchange('emergency_phone')
+    def _onchange_emergency_phone_validation(self):
+        if self.emergency_phone:
+            self.emergency_phone = self._phone_format(fname="emergency_phone", force_format="INTERNATIONAL") or self.emergency_phone
+
     @api.onchange('contract_template_id')
     def _onchange_contract_template_id(self):
         if self.contract_template_id:
-            whitelist = self.env['hr.version']._get_whitelist_fields_from_template()
+            template_company = self.contract_template_id.company_id
+            whitelist = self.contract_template_id.with_company(template_company)._get_whitelist_fields_from_template()
             for field in self.contract_template_id._fields:
                 if field in whitelist and not self.env['hr.version']._fields[field].related:
                     self[field] = self.contract_template_id[field]
@@ -882,7 +898,9 @@ class HrEmployee(models.Model):
             if employee.company_id.sudo().hr_presence_control_login:
                 # sudo: res.users - can access presence of accessible user
                 presence_status = employee.user_id.sudo().presence_ids.status or "offline"
-                if presence_status == "online":
+                if not employee.sudo().is_in_contract:
+                    state = "out_of_working_hour"
+                elif presence_status == "online":
                     state = 'present'
                 elif presence_status == "offline" and employee.id in working_now_list:
                     state = 'absent'

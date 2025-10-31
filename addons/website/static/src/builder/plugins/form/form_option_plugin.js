@@ -169,8 +169,8 @@ export class FormOptionPlugin extends Plugin {
             SetRequirementComparatorAction,
             SetMultipleFilesAction,
         },
-        force_not_editable_selector: ".s_website_form form",
-        force_editable_selector: [
+        content_not_editable_selectors: ".s_website_form form",
+        content_editable_selectors: [
             ".s_website_form_send",
             ".s_website_form_field_description",
             ".s_website_form_recaptcha",
@@ -479,10 +479,15 @@ export class FormOptionPlugin extends Plugin {
         const field = getCustomField("char", _t("Custom Text"));
         field.formatInfo = getDefaultFormat(formEl);
         const fieldEl = renderField(field);
-        const locationEl = formEl.querySelector(
+        let locationEl = formEl.querySelector(
             ".s_website_form_submit, .s_website_form_recaptcha"
         );
-        locationEl.insertAdjacentElement("beforebegin", fieldEl);
+        if (!locationEl) {
+            locationEl = formEl.querySelector(".s_website_form_rows");
+            locationEl.insertAdjacentElement("beforeend", fieldEl);
+        } else {
+            locationEl.insertAdjacentElement("beforebegin", fieldEl);
+        }
         this.dependencies.builderOptions.setNextTarget(fieldEl);
     }
     addFieldAfterField(fieldEl) {
