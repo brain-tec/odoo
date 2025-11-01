@@ -396,6 +396,16 @@ class HrEmployee(models.Model):
                                              "Please select a date outside existing contracts",
                                              format_date_abbr(self.env, date)))
 
+    @api.onchange('private_phone')
+    def _onchange_private_phone_validation(self):
+        if self.private_phone:
+            self.private_phone = self._phone_format(fname="private_phone", force_format="INTERNATIONAL") or self.private_phone
+
+    @api.onchange('emergency_phone')
+    def _onchange_emergency_phone_validation(self):
+        if self.emergency_phone:
+            self.emergency_phone = self._phone_format(fname="emergency_phone", force_format="INTERNATIONAL") or self.emergency_phone
+
     @api.onchange('contract_template_id')
     def _onchange_contract_template_id(self):
         if self.contract_template_id:
@@ -1650,7 +1660,7 @@ We can redirect you to the public employee list."""
                 # if employee is under fully flexible contract, use timezone of the employee
                 calendar_tz = timezone(version.resource_calendar_id.tz) if version.resource_calendar_id else timezone(employee.resource_id.tz)
                 date_start = datetime.combine(
-                    version.date_start,
+                    version.contract_date_start,
                     time(0, 0, 0)
                 ).replace(tzinfo=calendar_tz).astimezone(utc)
                 if version.date_end:
@@ -1735,12 +1745,15 @@ We can redirect you to the public employee list."""
                 domain=[('company_id', 'in', [False, self.company_id.id])])[self.resource_id.id]
             return calendar_intervals
         duration_data = Intervals()
+        version_prev = datetime.combine(valid_versions[0].date_start, time.min, employee_tz)
         for version in valid_versions:
             version_start = datetime.combine(version.date_start, time.min, employee_tz)
+            contract_start = datetime.combine(version.contract_date_start, time.min, employee_tz)
             version_end = datetime.combine(version.date_end or date.max, time.max, employee_tz)
             calendar = version.resource_calendar_id or version.company_id.resource_calendar_id
+            start_date = version_start if version_prev < version_start else contract_start
             version_intervals = calendar._work_intervals_batch(
-                                    max(date_from, version_start),
+                                    max(date_from, start_date),
                                     min(date_to, version_end),
                                     tz=employee_tz,
                                     resources=self.resource_id,
