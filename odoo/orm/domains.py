@@ -317,14 +317,18 @@ class Domain:
 
     def __and__(self, other):
         """Domain & Domain"""
+        if isinstance(other, DomainBool):
+            return other & self
         if isinstance(other, Domain):
-            return DomainAnd.apply([self, other])
+            return DomainAnd.apply((self, other))
         return NotImplemented
 
     def __or__(self, other):
         """Domain | Domain"""
+        if isinstance(other, DomainBool):
+            return other | self
         if isinstance(other, Domain):
-            return DomainOr.apply([self, other])
+            return DomainOr.apply((self, other))
         return NotImplemented
 
     def __invert__(self):
@@ -654,6 +658,15 @@ class DomainNary(Domain):
         children = self._flatten(child._optimize(model, level) for child in self.children)
         size = len(children)
         if size > 1:
+            # nary-optimizations are independent of the level, so if BASIC was
+            # performed and all children are exactly the same, there is no need
+            # to try to merge them again
+            if (
+                level > OptimizationLevel.BASIC
+                and len(self.children) == size
+                and all(map(operator.is_, self.children, children))
+            ):
+                return self
             # sort children in order to ease their grouping by field and operator
             children.sort(key=_optimize_nary_sort_key)
             # run optimizations until some merge happens
