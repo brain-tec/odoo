@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* web
-# 
+# * web
+#
 # Translators:
 # Matija Gudlin, 2024
 # Milan Tribuson <one.mile.code@gmail.com>, 2024
@@ -28,20 +28,24 @@
 # Denis Gobin, 2025
 # Goran Kliska <gkliska@gmail.com>, 2025
 # Ivica Dimjašević, 2025
-# 
+# Luka Carević <luka@uvid.hr>, 2025
+# Karlo Mikešić <karlo@uvid.hr>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-23 18:39+0000\n"
-"PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Ivica Dimjašević, 2025\n"
-"Language-Team: Croatian (https://app.transifex.com/odoo/teams/41243/hr/)\n"
+"POT-Creation-Date: 2025-10-16 18:39+0000\n"
+"PO-Revision-Date: 2025-09-04 16:46+0000\n"
+"Last-Translator: Karlo Mikešić <karlo@uvid.hr>\n"
+"Language-Team: Croatian <https://translate.odoo.com/projects/odoo-18/web/hr/"
+">\n"
+"Language: hr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: hr\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: web
 #. odoo-javascript
@@ -497,20 +501,20 @@ msgstr "<span class=\"text-nowrap\">$ 2,887.50</span>"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span "
-"class=\"oe_currency_value\">11,750.00</span></span>"
+"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">11,750.00</"
+"span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$ <span "
-"class=\"oe_currency_value\">11,750.00</span></span>"
+"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">11,750.00</"
+"span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span "
-"class=\"oe_currency_value\">7,500.00</span></span>"
+"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">7,500.00</"
+"span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$ <span "
-"class=\"oe_currency_value\">7,500.00</span></span>"
+"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">7,500.00</"
+"span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -530,8 +534,10 @@ msgstr "<span class=\"text-nowrap\">Porez 15%</span>"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
-"                                       Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
+"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa "
+"Barbara\n"
+"                                       Rd<br/>Pleasant Hill CA 94523<br/"
+">United States</span>"
 msgstr ""
 
 #. module: web
@@ -595,25 +601,30 @@ msgstr "<span>Jedinična cijena</span>"
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span>[FURN_8220] Four Person Desk<br/>\n"
-"                                       Four person modern office workstation</span>"
+"                                       Four person modern office "
+"workstation</span>"
 msgstr ""
 "<span>[FURN_8220] Stol za četiri osobe<br/>\n"
-"                                       Moderna uredska radna stanica za četiri osobe</span>"
+"                                       Moderna uredska radna stanica za "
+"četiri osobe</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span>[FURN_8999] Three-Seat Sofa<br/>\n"
-"                                       Three Seater Sofa with Lounger in Steel Grey Colour</span>"
+"                                       Three Seater Sofa with Lounger in "
+"Steel Grey Colour</span>"
 msgstr ""
 "<span>[FURN_8999] Sofa s tri sjedala<br/>\n"
-"                                       Sofa s tri sjedala s ležaljkom u čelično sivoj boji</span>"
+"                                       Sofa s tri sjedala s ležaljkom u "
+"čelično sivoj boji</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<strong class=\"text-nowrap\">$ <span class=\"oe_currency_value\">\n"
-"                                                       22,137.50</span></strong>"
+"                                                       22,137.50</span></"
+"strong>"
 msgstr ""
 
 #. module: web
@@ -885,7 +896,7 @@ msgstr "Dodaj novo pravilo"
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_controller.js:0
 msgid "Add Properties"
-msgstr ""
+msgstr "Dodaj svojstva"
 
 #. module: web
 #. odoo-javascript
@@ -928,7 +939,7 @@ msgstr "Dodajte stupac"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/domain/domain_field.xml:0
 msgid "Add condition"
-msgstr ""
+msgstr "Dodaj uvjet"
 
 #. module: web
 #. odoo-javascript
@@ -958,7 +969,7 @@ msgstr "Dodaj u omiljene"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/x2many/x2many_field.js:0
 msgid "Add: %s"
-msgstr ""
+msgstr "Dodaj: %s"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
@@ -969,7 +980,7 @@ msgstr "Adresa"
 #. odoo-javascript
 #: code:addons/web/static/src/views/view_dialogs/select_create_dialog.xml:0
 msgid "Adjust your filters or create a new record."
-msgstr ""
+msgstr "Prilagodite filtre ili kreirajte novi zapis."
 
 #. module: web
 #. odoo-javascript
@@ -1116,8 +1127,7 @@ msgstr "Arhiviraj sve"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/kanban/kanban_header.js:0
-msgid ""
-"Are you sure that you want to archive all the records from this column?"
+msgid "Are you sure that you want to archive all the records from this column?"
 msgstr "Jeste li sigurni da želite da arhivirate sve zapise iz ove kolone?"
 
 #. module: web
@@ -1371,11 +1381,11 @@ msgstr "Postani superkorisnik"
 #. odoo-python
 #: code:addons/web/controllers/export.py:0
 msgid ""
-"Binary fields can not be exported to Excel unless their content is "
-"base64-encoded. That does not seem to be the case for %s."
+"Binary fields can not be exported to Excel unless their content is base64-"
+"encoded. That does not seem to be the case for %s."
 msgstr ""
-"Binarna polja se ne mogu izvesti u Excel ukoliko njihov sadržaj nije "
-"base64-enkodiran. Čini se da to nije slučaj sa %s."
+"Binarna polja se ne mogu izvesti u Excel ukoliko njihov sadržaj nije base64-"
+"enkodiran. Čini se da to nije slučaj sa %s."
 
 #. module: web
 #. odoo-javascript
@@ -1446,11 +1456,15 @@ msgstr "Vrsta gumba:"
 #. odoo-javascript
 #: code:addons/web/static/src/core/signature/signature_dialog.xml:0
 msgid ""
-"By clicking Adopt & Sign, I agree that the chosen signature/initials will be"
-" a valid electronic representation of my hand-written signature/initials for"
-" all purposes when it is used on documents, including legally binding "
+"By clicking Adopt & Sign, I agree that the chosen signature/initials will be "
+"a valid electronic representation of my hand-written signature/initials for "
+"all purposes when it is used on documents, including legally binding "
 "contracts."
 msgstr ""
+"Klikom na „Prihvati i potpiši” slažem se da odabrani potpis/inicijali "
+"predstavljaju valjanu elektroničku zamjenu mog vlastoručnog potpisa/"
+"inicijala u sve svrhe kada se koriste na dokumentima, uključujući pravno "
+"obvezujuće ugovore."
 
 #. module: web
 #. odoo-javascript
@@ -1634,7 +1648,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/user_switch/user_switch.xml:0
 msgid "Choose a user"
-msgstr ""
+msgstr "Odaberi korisnika"
 
 #. module: web
 #. odoo-javascript
@@ -2025,7 +2039,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/barcode/barcode_video_scanner.js:0
 msgid "Could not start scanning. %(message)s"
-msgstr ""
+msgstr "Nije moguće pokrenuti skeniranje. %(message)s"
 
 #. module: web
 #. odoo-javascript
@@ -2317,13 +2331,13 @@ msgstr ""
 #: code:addons/web/static/src/views/list/list_controller.js:0
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
 msgid "Delete"
-msgstr "Briši"
+msgstr "Obriši"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
 msgid "Delete Filter"
-msgstr ""
+msgstr "Obriši filter"
 
 #. module: web
 #. odoo-javascript
@@ -2434,7 +2448,7 @@ msgstr "Odbaci sve promjene"
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_error_dialog/form_error_dialog.xml:0
 msgid "Discard changes"
-msgstr ""
+msgstr "Odbaci promjene"
 
 #. module: web
 #. odoo-javascript
@@ -2453,7 +2467,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/property_definition.xml:0
 msgid "Display in Cards"
-msgstr ""
+msgstr "Prikaži u karticama"
 
 #. module: web
 #. odoo-javascript
@@ -2715,7 +2729,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/settings_form_view/widgets/res_config_invite_users.xml:0
 msgid "Enter an email"
-msgstr ""
+msgstr "Unesite email"
 
 #. module: web
 #. odoo-javascript
@@ -2769,7 +2783,7 @@ msgstr "Sve"
 #. odoo-javascript
 #: code:addons/web/static/src/core/dialog/dialog.xml:0
 msgid "Expand"
-msgstr ""
+msgstr "Proširi"
 
 #. module: web
 #. odoo-javascript
@@ -3024,11 +3038,13 @@ msgstr "Tekst podnožja prikazan na dnu svih izvještaja."
 #. odoo-javascript
 #: code:addons/web/static/src/views/pivot/pivot_renderer.js:0
 msgid ""
-"For Excel compatibility, data cannot be exported if there are more than 16384 columns.\n"
+"For Excel compatibility, data cannot be exported if there are more than "
+"16384 columns.\n"
 "\n"
 "Tip: try to flip axis, filter further or reduce the number of measures."
 msgstr ""
-"Za Excel kompatibilnost, podaci ne mogu biti izvezeni ako postoji više od 16384 stupaca.\n"
+"Za Excel kompatibilnost, podaci ne mogu biti izvezeni ako postoji više od "
+"16384 stupaca.\n"
 "\n"
 "Savjet: pokušajte okrenuti os, dalje filtrirati ili smanjiti broj mjera."
 
@@ -3292,8 +3308,7 @@ msgstr "Ikona"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/url/url_field.js:0
-msgid ""
-"If True, the url will be used as it is, without any prefix added to it."
+msgid "If True, the url will be used as it is, without any prefix added to it."
 msgstr ""
 
 #. module: web
@@ -3565,11 +3580,16 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/debug/profiling/profiling_qweb.xml:0
 msgid ""
-"It is possible that the \"t-call\" time does not correspond to the overall time of the\n"
-"            template. Because the global time (in the drop down) does not take into account the\n"
-"            duration which is not in the rendering (look for the template, read, inheritance,\n"
-"            compilation...). During rendering, the global time also takes part of the time to make\n"
-"            the profile as well as some part not logged in the function generated by the qweb."
+"It is possible that the \"t-call\" time does not correspond to the overall "
+"time of the\n"
+"            template. Because the global time (in the drop down) does not "
+"take into account the\n"
+"            duration which is not in the rendering (look for the template, "
+"read, inheritance,\n"
+"            compilation...). During rendering, the global time also takes "
+"part of the time to make\n"
+"            the profile as well as some part not logged in the function "
+"generated by the qweb."
 msgstr ""
 
 #. module: web
@@ -3764,7 +3784,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/kanban/kanban_column_examples_dialog.xml:0
 msgid "Kanban Examples"
-msgstr ""
+msgstr "Kanban primjeri"
 
 #. module: web
 #. odoo-javascript
@@ -4522,7 +4542,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/search/properties_group_by_item/properties_group_by_item.xml:0
 msgid "No Properties"
-msgstr ""
+msgstr "Nema svojstava"
 
 #. module: web
 #. odoo-javascript
@@ -4540,7 +4560,7 @@ msgstr "Nema boje"
 #. odoo-javascript
 #: code:addons/web/static/src/core/commands/default_providers.js:0
 msgid "No command found"
-msgstr ""
+msgstr "Nije pronađena nijedna naredba"
 
 #. module: web
 #. odoo-javascript
@@ -4594,7 +4614,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/view_dialogs/select_create_dialog.xml:0
 msgid "No record found"
-msgstr ""
+msgstr "Nema pronađenih zapisa"
 
 #. module: web
 #. odoo-javascript
@@ -4821,7 +4841,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/barcode/barcode_video_scanner.js:0
 msgid "Odoo needs your authorization first."
-msgstr ""
+msgstr "Odoo prvo treba Vašu autorizaciju."
 
 #. module: web
 #. odoo-javascript
@@ -4891,21 +4911,21 @@ msgstr "Samo prvih %(count)s zapisa je izbirsano (od %(total)s označenih)"
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for category (found type "
-"%(field_type)s)"
+"Only types %(supported_types)s are supported for category (found type %"
+"(field_type)s)"
 msgstr ""
-"Samo tipovi %(supported_types)s su podržani za kategoriju (pronađeni tipovi "
-"%(field_type)s)"
+"Samo tipovi %(supported_types)s su podržani za kategoriju (pronađeni tipovi %"
+"(field_type)s)"
 
 #. module: web
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for filter (found type "
-"%(field_type)s)"
+"Only types %(supported_types)s are supported for filter (found type %"
+"(field_type)s)"
 msgstr ""
-"Samo tipovi %(supported_types)s su podržani za filter (pronađeni tipovi "
-"%(field_type)s)"
+"Samo tipovi %(supported_types)s su podržani za filter (pronađeni tipovi %"
+"(field_type)s)"
 
 #. module: web
 #. odoo-javascript
@@ -5187,7 +5207,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
 msgid "Press"
-msgstr ""
+msgstr "Pritisnite"
 
 #. module: web
 #. odoo-javascript
@@ -5446,7 +5466,7 @@ msgstr ""
 "Jeste li spremni na činjenicu da će vaš zapis nestati? Jeste li sigurni?\n"
 "Nestat će zauvijek!\n"
 "\n"
-"Razmislite dvaput prije nego što kliknete gumb \"Briši\"!"
+"Razmislite dvaput prije nego što kliknete gumb \"Obriši\"!"
 
 #. module: web
 #. odoo-javascript
@@ -5763,7 +5783,7 @@ msgstr "Spremi i novi"
 #. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.xml:0
 msgid "Save View"
-msgstr ""
+msgstr "Spremi prikaz"
 
 #. module: web
 #. odoo-javascript
@@ -5827,19 +5847,19 @@ msgstr "Traži dalje..."
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_picker.xml:0
 msgid "Search emoji"
-msgstr ""
+msgstr "Traži emoji"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/commands/default_providers.js:0
 msgid "Search for a command..."
-msgstr ""
+msgstr "Pretraži komandu...."
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/menus/menu_providers.js:0
 msgid "Search for a menu..."
-msgstr ""
+msgstr "Pretraži izbornik..."
 
 #. module: web
 #. odoo-javascript
@@ -5940,7 +5960,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/model_field_selector/model_field_selector_popover.js:0
 msgid "Select a field"
-msgstr ""
+msgstr "Odaberite polje"
 
 #. module: web
 #. odoo-javascript
@@ -6032,7 +6052,7 @@ msgstr "Pošalji e-mail"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/property_definition.js:0
 msgid "Separator"
-msgstr "Separator"
+msgstr "Razdjelnik"
 
 #. module: web
 #. odoo-javascript
@@ -6075,8 +6095,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid ""
-"Set to true the full range input has to be display by default, even if "
-"empty."
+"Set to true the full range input has to be display by default, even if empty."
 msgstr ""
 
 #. module: web
@@ -6133,7 +6152,7 @@ msgstr "Prečaci"
 #. odoo-javascript
 #: code:addons/web/static/src/search/control_panel/control_panel.js:0
 msgid "Show %s view"
-msgstr ""
+msgstr "Prikaži %s pogled"
 
 #. module: web
 #. odoo-javascript
@@ -6163,7 +6182,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/view_components/view_scale_selector.xml:0
 msgid "Show weekends"
-msgstr ""
+msgstr "Prikaži vikende"
 
 #. module: web
 #. odoo-javascript
@@ -6287,7 +6306,7 @@ msgstr "Ostani ovdje"
 #. odoo-javascript
 #: code:addons/web/static/src/views/form/form_error_dialog/form_error_dialog.xml:0
 msgid "Stay here"
-msgstr ""
+msgstr "Ostani ovdje"
 
 #. module: web
 #. odoo-javascript
@@ -6336,7 +6355,7 @@ msgstr "Podrška"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/switch_company_menu/switch_company_menu.js:0
 msgid "Switch Company"
-msgstr ""
+msgstr "Promijeni tvrtku"
 
 #. module: web
 #. odoo-javascript
@@ -6541,14 +6560,26 @@ msgstr ""
 
 #. module: web
 #. odoo-javascript
+#: code:addons/web/static/src/core/utils/files.js:0
+msgid "The file is not an image, resizing is not possible"
+msgstr ""
+
+#. module: web
+#. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.xml:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 msgid ""
-"The operation was interrupted. This usually means that the current operation"
-" is taking too much time."
+"The operation was interrupted. This usually means that the current operation "
+"is taking too much time."
 msgstr ""
 "Operacija je prekinuta. Ovo uobičajeno znači da trenutna operacija traje "
 "isuviše dugo."
+
+#. module: web
+#. odoo-javascript
+#: code:addons/web/static/src/core/utils/files.js:0
+msgid "The resizing of the image failed"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -6560,8 +6591,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/utils/files.js:0
 msgid ""
-"The selected file (%(size)sB) is larger than the maximum allowed file size "
-"(%(maxSize)sB)."
+"The selected file (%(size)sB) is larger than the maximum allowed file size (%"
+"(maxSize)sB)."
 msgstr ""
 
 #. module: web
@@ -6588,8 +6619,8 @@ msgid ""
 "There are too many rows (%(count)s rows, limit: %(limit)s) to export as "
 "Excel 2007-2013 (.xlsx) format. Consider splitting the export."
 msgstr ""
-"Postoji previše redaka (%(count)s redaka, limit: %(limit)s) za izvoz u Excel"
-" 2007-2013 (.xlsx) formatu. Razmislite o dijeljenju izvozne datoteke."
+"Postoji previše redaka (%(count)s redaka, limit: %(limit)s) za izvoz u Excel "
+"2007-2013 (.xlsx) formatu. Razmislite o dijeljenju izvozne datoteke."
 
 #. module: web
 #. odoo-javascript
@@ -6612,8 +6643,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.xml:0
 msgid "This date is on the future. Make sure it is what you expected."
-msgstr ""
-"Taj datum je o budućnosti. Uvjerite se da je to ono što ste očekivali."
+msgstr "Taj datum je o budućnosti. Uvjerite se da je to ono što ste očekivali."
 
 #. module: web
 #. odoo-javascript
@@ -6655,7 +6685,7 @@ msgstr "Ova datoteka nije valjana. Molimo odaberite sliku."
 #. odoo-javascript
 #: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.js:0
 msgid "This filter is global and will be removed for everyone."
-msgstr ""
+msgstr "Ovaj filter je globalan i bit će uklonjen za sve."
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.preview_externalreport
@@ -6710,10 +6740,13 @@ msgstr ""
 #: code:addons/web/static/src/views/fields/timezone_mismatch/timezone_mismatch_field.js:0
 msgid ""
 "Timezone Mismatch : This timezone is different from that of your browser.\n"
-"Please, set the same timezone as your browser's to avoid time discrepancies in your system."
+"Please, set the same timezone as your browser's to avoid time discrepancies "
+"in your system."
 msgstr ""
-"Vremenske zone se ne podudaraju : Ova vremenska zona drugačija je od one u Vašem pregledniku.\n"
-"Molimo postavite vremensku zonu koja se podudara s onom u Vašem pregledniku kako bi se izbjegla vremenska odstupanja u Vašem sustavu."
+"Vremenske zone se ne podudaraju : Ova vremenska zona drugačija je od one u "
+"Vašem pregledniku.\n"
+"Molimo postavite vremensku zonu koja se podudara s onom u Vašem pregledniku "
+"kako bi se izbjegla vremenska odstupanja u Vašem sustavu."
 
 #. module: web
 #. odoo-javascript
@@ -6769,7 +6802,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/search/search_bar_menu/search_bar_menu.xml:0
 msgid "Toggle Search Panel"
-msgstr ""
+msgstr "Uključi prozor za pretraživanje"
 
 #. module: web
 #. odoo-javascript
@@ -6857,6 +6890,9 @@ msgid ""
 "Try to add some records, or make sure that there is no\n"
 "                    active filter in the search bar."
 msgstr ""
+"Pokušajte dodati nove zapise ili provjerite da u traci za pretraživanje "
+"nema \n"
+"                    aktivnog filtera."
 
 #. module: web
 #. odoo-javascript
@@ -6942,14 +6978,14 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/barcode/barcode_dialog.xml:0
 msgid "Unable to access camera"
-msgstr ""
+msgstr "Nije moguće pristupiti kameri"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/actions/reports/utils.js:0
 msgid ""
-"Unable to find Wkhtmltopdf on this system. The report will be shown in "
-"html.%(link)s"
+"Unable to find Wkhtmltopdf on this system. The report will be shown in html.%"
+"(link)s"
 msgstr ""
 
 #. module: web
@@ -6977,7 +7013,7 @@ msgstr "Odarhiviraj sve"
 #: code:addons/web/controllers/export.py:0
 #: code:addons/web/static/src/views/calendar/calendar_model.js:0
 msgid "Undefined"
-msgstr "Nedefiniran"
+msgstr "Nedefinirano"
 
 #. module: web
 #. odoo-javascript
@@ -7239,7 +7275,7 @@ msgstr "Pogledaj"
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_renderer.xml:0
 msgid "View Button"
-msgstr ""
+msgstr "Gumb za prikaz"
 
 #. module: web
 #. odoo-javascript
@@ -7320,7 +7356,7 @@ msgstr ""
 #. module: web
 #: model:ir.model.fields,field_description:web.field_res_config_settings__web_app_name
 msgid "Web App Name"
-msgstr ""
+msgstr "Naziv web aplikacije"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.qunit_mobile_suite
@@ -7381,6 +7417,7 @@ msgid ""
 "Whether or not this Property Field is displayed in the Calendar, Cards & "
 "Kanban views"
 msgstr ""
+"Prikazuje li se ovo polje svojstva u prikazima kalendara, kartica i kanbana"
 
 #. module: web
 #. odoo-javascript
@@ -7410,6 +7447,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
 msgid "Write your phone, email, bank account, tax ID, ..."
 msgstr ""
+"Napišite svoj broj telefona, e-poštu, bankovni račun, porezni broj, ..."
 
 #. module: web
 #. odoo-python
@@ -7539,8 +7577,8 @@ msgstr ""
 #: code:addons/web/static/src/webclient/actions/reports/utils.js:0
 msgid ""
 "You should upgrade your version of Wkhtmltopdf to at least 0.12.0 in order "
-"to get a correct display of headers and footers as well as support for "
-"table-breaking between pages.%(link)s"
+"to get a correct display of headers and footers as well as support for table-"
+"breaking between pages.%(link)s"
 msgstr ""
 
 #. module: web
@@ -13510,7 +13548,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "forever"
-msgstr ""
+msgstr "zauvijek"
 
 #. module: web
 #. odoo-javascript
@@ -18268,7 +18306,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/commands/command_palette.xml:0
 msgid "new tab"
-msgstr ""
+msgstr "nova kartica"
 
 #. module: web
 #. odoo-javascript
@@ -18665,7 +18703,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 msgid "on any screen to show shortcut overlays and"
-msgstr ""
+msgstr "na bilo kojem zaslonu za prikaz prečaca i"
 
 #. module: web
 #. odoo-javascript
@@ -24101,13 +24139,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/kanban/kanban_column_quick_create.xml:0
 msgid "to discard"
-msgstr ""
+msgstr "za odbacivanje"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 msgid "to trigger a shortcut."
-msgstr ""
+msgstr "za aktivaciju prečaca"
 
 #. module: web
 #. odoo-javascript
@@ -26369,13 +26407,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/user_menu/user_menu_items.xml:0
 msgid "— press"
-msgstr ""
+msgstr "pritisnite"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/commands/command_items.xml:0
 msgid "— search for"
-msgstr ""
+msgstr "— traži za"
 
 #. module: web
 #. odoo-javascript
@@ -26423,7 +26461,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "“monthly amount”"
-msgstr ""
+msgstr "\"mjesečni iznos\""
 
 #. module: web
 #. odoo-javascript

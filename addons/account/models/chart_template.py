@@ -99,7 +99,7 @@ class AccountChartTemplate(models.AbstractModel):
         field = self.env['ir.module.module']._fields['account_templates']
         modules = (
             self.env.cache.get_records(self.env['ir.module.module'], field)
-            or self.env['ir.module.module'].sudo().search([])
+            or self.env['ir.module.module'].sudo().search([('state', '!=', 'uninstallable')])
         )
 
         return {
@@ -342,8 +342,9 @@ class AccountChartTemplate(models.AbstractModel):
             for xmlid, values in records.items():
                 if model_name == 'account.fiscal.position':
                     # if xmlid is not in xmlid2fiscal_position and we do not force create so we will skip_update for that record
-                    if xmlid not in xmlid2fiscal_position and not force_create:
-                        skip_update.add((model_name, xmlid))
+                    if xmlid not in xmlid2fiscal_position:
+                        if not force_create:
+                            skip_update.add((model_name, xmlid))
                         continue
                     # Only add accounts and taxes mappings containing new records
                     for model in ['account', 'tax']:
@@ -1209,13 +1210,18 @@ class AccountChartTemplate(models.AbstractModel):
                     mapped_tag = tags.get(format_tag)
                     if not mapped_tag:
                         country = self.env['res.country'].browse(country_id)
-                        message = self.env._(
-                            'Error while loading the localization: missing tax tag %(tag_name)s for country %(country_name)s. You should probably update your localization app first.',
-                            tag_name=format_tag, country_name=country.name)
                         if not self._context.get('ignore_missing_tags'):
-                            raise UserError(message)
+                            raise UserError(self.env._(
+                                'Error while loading the localization: missing tax tag %(tag_name)s for country %(country_name)s.'
+                                ' You should probably update your localization app first.',
+                                tag_name=format_tag, country_name=country.name
+                            ))
                         else:
-                            _logger.error(message)
+                            _logger.error(
+                                'Error while loading the localization: missing tax tag %s for country %s.'
+                                ' You should probably update your localization app first.',
+                                format_tag, country.name
+                            )
                             continue
                     res.append(mapped_tag)
             return res

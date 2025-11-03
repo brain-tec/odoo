@@ -1591,6 +1591,42 @@ class TestTemplating(ViewCase):
             " the main view's"
         )
 
+    def test_branding_remove_add_text(self):
+        view1 = self.View.create({
+            'name': "Base view",
+            'type': 'qweb',
+            'arch': """<root>
+                <item order="1">
+                    <item/>
+                </item>
+            </root>""",
+        })
+        view2 = self.View.create({
+            'name': "Extension",
+            'type': 'qweb',
+            'inherit_id': view1.id,
+            'arch': """
+            <data>
+                <xpath expr="/root/item/item" position="replace" />
+                <xpath expr="/root/item" position="inside">A<div/>B</xpath>
+            </data>
+            """
+        })
+
+        arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
+        arch = etree.fromstring(arch_string)
+        self.View.distribute_branding(arch)
+
+        expected = etree.fromstring(f"""
+        <root>
+            <item order="1">
+                A
+                <div data-oe-id="{view2.id}" data-oe-xpath="/data/xpath[2]/div" data-oe-model="ir.ui.view" data-oe-field="arch"/>
+                B
+            </item>
+        </root>
+        """)
+        self.assertEqual(arch, expected)
 
 class TestViews(ViewCase):
 
@@ -1908,6 +1944,15 @@ class TestViews(ViewCase):
             arch,
             '''Field "not_a_field" does not exist in model "ir.ui.view"''',
         )
+
+    def test_invalid_type(self):
+        """Ensure invalid root tag infers an invalid type and raises ValidationError"""
+        with self.assertRaises(ValidationError):
+            self.View.create({
+                'name': 'invalid_view',
+                'arch': '<template></template>',
+                'inherit_id': False,
+            })
 
     def test_context_in_view(self):
         arch = """
@@ -4386,7 +4431,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'appointment',
             'approvals',
             'approvals_purchase_stock',
-            'auth_signup',
             'auth_totp',
             'barcodes_gs1_nomenclature',
             'base_address_extended',
@@ -4426,7 +4470,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'documents_l10n_hk_hr_payroll',
             'documents_l10n_ke_hr_payroll',
             'documents_project',
-            'documents_project_sale',
             'documents_spreadsheet',
             'event',
             'event_booth',
@@ -4480,7 +4523,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'hr_work_entry',
             'hr_work_entry_contract',
             'hr_work_entry_holidays_enterprise',
-            'iap',
             'im_livechat',
             'industry_fsm',
             'industry_fsm_report',
@@ -4490,7 +4532,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'iot',
             'knowledge',
             'l10n_ae_hr_payroll',
-            'l10n_ae_hr_payroll_account',
             'l10n_ar',
             'l10n_ar_edi',
             'l10n_ar_withholding',
@@ -4512,7 +4553,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'l10n_ch',
             'l10n_ch_hr_payroll',
             'l10n_ch_hr_payroll_elm_transmission',
-            'l10n_ch_hr_payroll_elm_transmission_account',
             'l10n_cl',
             'l10n_cl_edi',
             'l10n_cl_edi_exports',
@@ -4536,11 +4576,9 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'l10n_es_edi_tbai_pos',
             'l10n_es_reports',
             'l10n_es_reports_modelo130',
-            'l10n_fr_fec_import',
             'l10n_fr_hr_holidays',
             'l10n_fr_hr_payroll',
             'l10n_fr_intrastat',
-            'l10n_fr_intrastat_services',
             'l10n_fr_pos_cert',
             'l10n_fr_reports',
             'l10n_gr_edi',
@@ -4550,7 +4588,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'l10n_id_efaktur_coretax',
             'l10n_in_hr_holidays',
             'l10n_in_hr_payroll',
-            'l10n_in_hr_payroll_account',
             'l10n_it_edi',
             'l10n_it_edi_doi',
             'l10n_it_edi_sale',
@@ -4578,8 +4615,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'l10n_mx_edi_pos',
             'l10n_mx_edi_stock',
             'l10n_mx_gr_edi',
-            'l10n_mx_hr_payroll',
-            'l10n_mx_hr_payroll_account',
             'l10n_mx_hr_payroll_localisation',
             'l10n_mx_jo_hr_payroll',
             'l10n_mx_jo_hr_payroll_account',
@@ -4593,12 +4628,9 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'l10n_nz_eft',
             'l10n_pe',
             'l10n_pe_edi',
-            'l10n_pe_edi_pos',
             'l10n_pe_edi_stock',
-            'l10n_pe_pos',
             'l10n_pe_reports',
             'l10n_pe_reports_stock',
-            'l10n_pe_website_sale',
             'l10n_ph',
             'l10n_ph_check_printing',
             'l10n_pl_reports',
@@ -4713,7 +4745,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'sign',
             'sms',
             'snailmail',
-            'snailmail_account',
             'social',
             'social_crm',
             'social_facebook',
@@ -4780,7 +4811,7 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'worksheet',
         )
 
-        modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
+        modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'installed'), ('name', 'in', only_log_modules)]).mapped('name'))
         module_log_views = defaultdict(list)
         module_error_views = defaultdict(lambda: defaultdict(list)) 
         uncommented_regexp = r'''(<field [^>]*invisible=['"](True|1)['"][^>]*>)[\s\t\n ]*(.*)'''

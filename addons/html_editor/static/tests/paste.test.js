@@ -68,7 +68,39 @@ describe("Html Paste cleaning - whitelist", () => {
                 );
             },
             contentAfter:
-                '<p>123a</p><table class="table table-bordered"><thead><tr><th>h</th></tr></thead><tbody><tr><td>b</td></tr></tbody></table><p>d[]</p>',
+                '<p>123a</p><table class="table table-bordered o_table"><tbody><tr><td>h</td></tr><tr><td>b</td></tr></tbody></table><p>d[]</p>',
+        });
+    });
+
+    test("should insert a base container inside empty <td> on paste", async () => {
+        await testEditor({
+            contentBefore: `
+                <p>[]<br></p>
+            `,
+            stepFunction: async (editor) => {
+                pasteHtml(
+                    editor,
+                    unformat(`
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `)
+                );
+            },
+            contentAfter: unformat(`
+                <table class="table table-bordered o_table">
+                    <tbody>
+                        <tr>
+                            <td><p><br></p></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>[]<br></p>
+            `),
         });
     });
 
@@ -3051,6 +3083,28 @@ describe("link", () => {
             });
         });
 
+        test("should paste plain text content inside a link if all of its contents is selected but link is inside non-editable (not collapsed)", async () => {
+            await testEditor({
+                contentBefore:
+                    '<p contenteditable="false">a<a href="#" contenteditable="true">[xyz]</a>d</p>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "bc");
+                },
+                contentAfter:
+                    '<p contenteditable="false">a<a href="#" contenteditable="true">bc[]</a>d</p>',
+            });
+        });
+
+        test("should paste plain text content inside a link if all of its contents is selected but link is unremovable (not collapsed)", async () => {
+            await testEditor({
+                contentBefore: '<p>a<a href="#" class="oe_unremovable">[xyz]</a>d</p>',
+                stepFunction: async (editor) => {
+                    pasteText(editor, "bc");
+                },
+                contentAfter: '<p>a<a href="#" class="oe_unremovable">bc[]</a>d</p>',
+            });
+        });
+
         test("should paste and transform plain text content over a link if all of its contents is selected (not collapsed)", async () => {
             await testEditor({
                 contentBefore: '<p><a href="#">[xyz]</a></p>',
@@ -3738,7 +3792,7 @@ describe("Paste HTML tables", () => {
 </div>`
                 );
             },
-            contentAfter: `<table class="table table-bordered">
+            contentAfter: `<table class="table table-bordered o_table">
 ${"            "}
 ${"            "}
             <tbody><tr>
@@ -3837,7 +3891,7 @@ ${"            "}
 </google-sheets-html-origin>`
                 );
             },
-            contentAfter: `<table class="table table-bordered">
+            contentAfter: `<table class="table table-bordered o_table">
 ${"        "}
 ${"            "}
 ${"            "}
@@ -3972,7 +4026,7 @@ ${"        "}
 </html>`
                 );
             },
-            contentAfter: `<table class="table table-bordered">
+            contentAfter: `<table class="table table-bordered o_table">
 ${"        "}
 ${"        "}
         <tbody><tr>
@@ -4003,6 +4057,119 @@ ${"        "}
             </td>
         </tr>
     </tbody></table><p>[]<br></p>`,
+        });
+    });
+
+    test("should apply default table classes (table, table-bordered, o_table) on paste", async () => {
+        await testEditor({
+            contentBefore: `
+                <p>[]<br></p>
+            `,
+            stepFunction: async (editor) => {
+                pasteHtml(
+                    editor,
+                    unformat(`
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `)
+                );
+            },
+            contentAfter: unformat(`
+                <table class="table table-bordered o_table">
+                    <tbody>
+                        <tr>
+                            <td><p><br></p></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>[]<br></p>
+            `),
+        });
+    });
+
+    test("should move all rows from thead to tbody", async () => {
+        await testEditor({
+            contentBefore: "<p>[]<br></p>",
+            stepFunction: async (editor) => {
+                pasteHtml(
+                    editor,
+                    unformat(`
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>1</th>
+                                    <th>2</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>2</td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>2</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `)
+                );
+            },
+            contentAfter: unformat(`
+                        <table class="table table-bordered o_table">
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>2</td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>2</td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>2</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>[]<br></p>
+                    `),
+        });
+    });
+    test("should replace thead element with tbody", async () => {
+        await testEditor({
+            contentBefore: "<p>[]<br></p>",
+            stepFunction: async (editor) => {
+                pasteHtml(
+                    editor,
+                    unformat(`
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>1</th>
+                                    <th>2</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    `)
+                );
+            },
+            contentAfter: unformat(`
+                        <table class="table table-bordered o_table">
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>2</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>[]<br></p>
+                    `),
         });
     });
 });
@@ -4097,6 +4264,64 @@ describe("onDrop", () => {
 
         expect(getContent(el)).toBe(
             `<p>ab<img class="img-fluid" data-file-name="image.png" src="${base64Image}">[]c</p>`
+        );
+    });
+    test("should be able to drag and drop icon", async () => {
+        const { el } = await setupEditor(`<p>a<span class="fa fa-heart">[]</span>bc</p><p>def</p>`);
+        const pElement = el.lastElementChild;
+        const iconElement = el.querySelector(".fa");
+        const defTextNode = pElement.firstChild;
+
+        patchWithCleanup(document, {
+            caretPositionFromPoint: () => ({
+                offsetNode: defTextNode,
+                offset: defTextNode.textContent.length,
+            }),
+        });
+
+        const dragdata = new DataTransfer();
+        await dispatch(iconElement, "dragstart", { dataTransfer: dragdata });
+
+        const dropData = new DataTransfer();
+        // Simulate the text/html data with unwanted styles that the browser would do.
+        dropData.setData(
+            "text/html",
+            `<span class="fa fa-heart" contenteditable="false" style="font-weight: normal">\u200b</span>`
+        );
+        await dispatch(pElement, "drop", { dataTransfer: dropData });
+        await animationFrame();
+
+        expect(getContent(el)).toBe(
+            '<p>abc</p><p>def\ufeff<span class="fa fa-heart" contenteditable="false">\u200b</span>\ufeff[]</p>'
+        );
+    });
+    test("should be able to drag and drop icon along with text", async () => {
+        const { el } = await setupEditor(`<p>a[b<span class="fa fa-heart"></span>cd]</p><p>ef</p>`);
+        const pElement = el.lastElementChild;
+        const iconElement = el.querySelector(".fa");
+        const efTextNode = pElement.firstChild;
+
+        patchWithCleanup(document, {
+            caretPositionFromPoint: () => ({
+                offsetNode: efTextNode,
+                offset: efTextNode.textContent.length,
+            }),
+        });
+
+        const dragdata = new DataTransfer();
+        await dispatch(iconElement, "dragstart", { dataTransfer: dragdata });
+
+        const dropData = new DataTransfer();
+        // Simulate the text/html data with unwanted styles that the browser would do.
+        dropData.setData(
+            "text/html",
+            `<span style="font-weight: normal">b<span class="fa fa-heart" contenteditable="false" style="font-weight: normal">\u200b</span>cd</span>`
+        );
+        await dispatch(pElement, "drop", { dataTransfer: dropData });
+        await animationFrame();
+
+        expect(getContent(el)).toBe(
+            '<p>a</p><p>efb\ufeff<span class="fa fa-heart" contenteditable="false">\u200b</span>\ufeffcd[]</p>'
         );
     });
 });

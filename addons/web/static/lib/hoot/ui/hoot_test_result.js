@@ -90,6 +90,8 @@ function stackTemplate(label, owner) {
     `;
 }
 
+const DOC_URL = `https://www.odoo.com/documentation/18.0/developer/reference/frontend/unit_testing/hoot.html#`;
+
 const ERROR_TEMPLATE = /* xml */ `
     <div class="text-rose flex items-center gap-1 px-2 truncate">
         <i class="fa fa-exclamation" />
@@ -114,8 +116,12 @@ const EVENT_TEMPLATE = /* xml */ `
         <t t-else="">
             <i class="fa" t-att-class="eventIcon" />
         </t>
-        <!-- TODO: add documentation links once they exist -->
-        <a href="#" class="hover:text-primary flex gap-1 items-center" t-att-class="{ 'text-cyan': sType === 'assertion' }">
+        <a
+            class="hover:text-primary flex gap-1 items-center"
+            t-att-class="{ 'text-cyan': sType === 'assertion' }"
+            t-att-href="DOC_URL + (event.docLabel or event.label)"
+            target="_blank"
+        >
             <t t-if="event.flags">
                 <i t-if="event.hasFlag('rejects')" class="fa fa-times" />
                 <i t-elif="event.hasFlag('resolves')" class="fa fa-arrow-right" />
@@ -166,8 +172,8 @@ const EVENT_TEMPLATE = /* xml */ `
         <t t-esc="'@' + timestamp" />
     </small>
     <t t-if="event.additionalMessage">
-        <div class="flex items-center ms-4 px-2 gap-1 truncate col-span-2">
-            <em class="text-blue" t-esc="event.additionalMessage" />
+        <div class="flex items-center ms-4 px-2 gap-1 col-span-2">
+            <em class="text-blue truncate" t-esc="event.additionalMessage" />
             <HootCopyButton text="event.additionalMessage" />
         </div>
     </t>
@@ -293,9 +299,12 @@ export class HootTestResult extends Component {
                         </button>
                     </nav>
                     <t t-if="state.showCode">
-                        <pre
-                            class="p-2 m-2 mt-0 rounded bg-white text-black dark:bg-black dark:text-white animate-slide-down overflow-auto"
-                        ><code class="language-javascript" t-out="props.test.code" /></pre>
+                        <div class="m-2 mt-0 rounded animate-slide-down overflow-auto">
+                            <pre
+                                class="language-javascript"
+                                style="margin: 0"
+                            ><code class="language-javascript" t-out="props.test.code" /></pre>
+                        </div>
                     </t>
                 </div>
             </t>
@@ -303,6 +312,7 @@ export class HootTestResult extends Component {
     `;
 
     CASE_EVENT_TYPES = CASE_EVENT_TYPES;
+    DOC_URL = DOC_URL;
 
     Tag = Tag;
     formatHumanReadable = formatHumanReadable;

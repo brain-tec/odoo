@@ -316,6 +316,7 @@ QUnit.module("Base Import Tests", (hooks) => {
 
     QUnit.test("Import view: UI before file upload", async function (assert) {
         const templateURL = "/myTemplateURL.xlsx";
+        const secondTemplateURL = "/mySecondTemplateURL.xlsx";
 
         patchWithCleanup(browser.location, {
             origin: "http://example.com",
@@ -330,6 +331,10 @@ QUnit.module("Base Import Tests", (hooks) => {
                         label: "Some Import Template",
                         template: templateURL,
                     },
+                    {
+                        label: "Another Import Template",
+                        template: secondTemplateURL,
+                    }
                 ]);
             },
             "base_import.import/create": (route, args) => {
@@ -347,13 +352,27 @@ QUnit.module("Base Import Tests", (hooks) => {
 
         assert.containsOnce(target, ".o_import_action", "import view is displayed");
         assert.strictEqual(
-            target.querySelector(".o_nocontent_help .btn-outline-primary").textContent,
+            target.querySelectorAll(".o_nocontent_help .btn-outline-primary").length,
+            2,
+            "there are two import template buttons"
+        )
+        assert.strictEqual(
+            target.querySelectorAll(".o_nocontent_help .btn-outline-primary")[0].textContent,
             " Some Import Template"
         );
         assert.strictEqual(
-            target.querySelector(".o_nocontent_help .btn-outline-primary").href,
+            target.querySelectorAll(".o_nocontent_help .btn-outline-primary")[0].href,
             window.location.origin + templateURL,
-            "button has the right download url"
+            "1st button has the right download url"
+        );
+        assert.strictEqual(
+            target.querySelectorAll(".o_nocontent_help .btn-outline-primary")[1].textContent,
+            " Another Import Template"
+        );
+        assert.strictEqual(
+            target.querySelectorAll(".o_nocontent_help .btn-outline-primary")[1].href,
+            window.location.origin + secondTemplateURL,
+            "2nd button has the right download url"
         );
         assert.verifySteps(["partner/get_import_templates", "base_import.import/create"]);
         assert.containsN(
@@ -1215,6 +1234,43 @@ QUnit.module("Base Import Tests", (hooks) => {
             target.querySelector("input#o_import_row_start").value,
             "1",
             "the import will resume at line 1"
+        );
+    });
+
+    QUnit.test("Import view: test in batches then reset starting row", async function (assert) {
+        registerFakeHTTPService();
+
+        patchWithCleanup(ImportAction.prototype, {
+            get isBatched() {
+                return true;
+            },
+        });
+
+        await createImportAction({
+            "base_import.import/execute_import": (route, args) => executeImport(args, true),
+        });
+
+        const file = new File(["fake_file"], "fake_file.xls", { type: "text/plain" });
+        await editInput(target, ".o_control_panel_main_buttons input[type='file']", file);
+        await editInput(target, "input#o_import_batch_limit", 1);
+
+        // click on the test button
+        await click(target.querySelector(".o_control_panel_main_buttons button:nth-child(2)"));
+        await nextTick();
+        assert.strictEqual(target.querySelector("input#o_import_row_start").value, "2");
+        await nextTick();
+        assert.strictEqual(target.querySelector("input#o_import_row_start").value, "3");
+
+        // The import is now done
+        await nextTick();
+        assert.strictEqual(
+            target.querySelector(".o_import_data_content .alert-info").textContent,
+            "Everything seems valid."
+        );
+        assert.strictEqual(
+            target.querySelector("input#o_import_row_start").value,
+            "1",
+            "the actual import will start at line 1 after testing"
         );
     });
 

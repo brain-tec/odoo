@@ -83,10 +83,9 @@ class PaymentTransaction(models.Model):
         )._post_process()
 
         for done_tx in self.filtered(lambda tx: tx.state == 'done'):
-            confirmed_orders = done_tx._check_amount_and_confirm_order()
-            if done_tx.operation == 'validation':
-                continue
-            (done_tx.sale_order_ids - confirmed_orders)._send_payment_succeeded_for_order_mail()
+            if done_tx.operation != 'validation':
+                confirmed_orders = done_tx._check_amount_and_confirm_order()
+                (done_tx.sale_order_ids - confirmed_orders)._send_payment_succeeded_for_order_mail()
 
             auto_invoice = str2bool(
                 self.env['ir.config_parameter'].sudo().get_param('sale.automatic_invoice')
@@ -96,7 +95,7 @@ class PaymentTransaction(models.Model):
                 # orders to create the invoice even if only a partial payment was made.
                 done_tx._invoice_sale_orders()
             super(PaymentTransaction, done_tx)._post_process()  # Post the invoices.
-            if auto_invoice:
+            if auto_invoice and not self.env.context.get('skip_sale_auto_invoice_send'):
                 if (
                     str2bool(self.env['ir.config_parameter'].sudo().get_param('sale.async_emails'))
                     and (send_invoice_cron := self.env.ref('sale.send_invoice_cron', raise_if_not_found=False))
@@ -163,7 +162,7 @@ class PaymentTransaction(models.Model):
                 if mail_template.exists():
                     send_context['mail_template'] = mail_template
 
-            self.env['account.move.send']._generate_and_send_invoices(
+            tx.env['account.move.send']._generate_and_send_invoices(
                 invoice_to_send,
                 **send_context,
             )

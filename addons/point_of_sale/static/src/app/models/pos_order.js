@@ -37,6 +37,7 @@ export class PosOrder extends Base {
         this.last_order_preparation_change = vals.last_order_preparation_change
             ? JSON.parse(vals.last_order_preparation_change)
             : {
+                  metadata: {},
                   lines: {},
                   generalNote: "",
                   sittingMode: "dine in",
@@ -59,12 +60,11 @@ export class PosOrder extends Base {
         if (!this.uiState) {
             this.uiState = {
                 lineToRefund: {},
-                displayed: true,
+                displayed: this.state !== "cancel",
                 booked: false,
                 screen_data: {},
                 selected_orderline_uuid: undefined,
                 selected_paymentline_uuid: undefined,
-                locked: this.state !== "draft",
                 // Pos restaurant specific to most proper way is to override this
                 TipScreen: {
                     inputTipAmount: "",
@@ -261,7 +261,7 @@ export class PosOrder extends Base {
             label_discounts: _t("Discounts"),
             show_rounding: !floatIsZero(order_rounding, this.currency.decimal_places),
             order_rounding: order_rounding,
-            show_change: !floatIsZero(order_change, this.currency.decimal_places),
+            show_change: !floatIsZero(order_change, this.currency.decimal_places) && this.finalized,
             order_change: order_change,
             paymentlines,
             amount_total: this.get_total_with_tax(),
@@ -365,6 +365,10 @@ export class PosOrder extends Base {
         }
         this.last_order_preparation_change.sittingMode = this.takeaway ? "takeaway" : "dine in";
         this.last_order_preparation_change.generalNote = this.general_note;
+        this.last_order_preparation_change.metadata = {
+            serverDate: serializeDateTime(DateTime.now()),
+        };
+        this.setDirty();
     }
 
     hasSkippedChanges() {
@@ -473,12 +477,26 @@ export class PosOrder extends Base {
         );
 
         for (const line of lines_to_recompute) {
-            const newPrice = line.product_id.get_price(
-                pricelist,
-                line.get_quantity(),
-                line.get_price_extra()
-            );
-            line.set_unit_price(newPrice);
+            if (line.isLotTracked()) {
+                const related_lines = [];
+                const price = line.product_id.get_price(
+                    pricelist,
+                    line.get_quantity(),
+                    line.get_price_extra(),
+                    false,
+                    false,
+                    line,
+                    related_lines
+                );
+                related_lines.forEach((line) => line.set_unit_price(price));
+            } else {
+                const newPrice = line.product_id.get_price(
+                    pricelist,
+                    line.get_quantity(),
+                    line.get_price_extra()
+                );
+                line.set_unit_price(newPrice);
+            }
         }
 
         const attributes_prices = {};
@@ -502,7 +520,8 @@ export class PosOrder extends Base {
                 }),
                 pricelist,
                 this.models["decimal.precision"].getAll(),
-                this.models["product.template.attribute.value"].getAllBy("id")
+                this.models["product.template.attribute.value"].getAllBy("id"),
+                this.config_id.currency_id
             );
         }
         const combo_children_lines = this.lines.filter(
@@ -1030,6 +1049,10 @@ export class PosOrder extends Base {
         } else {
             return true;
         }
+    }
+
+    canBeValidated() {
+        return this.is_paid() && this._isValidEmptyOrder();
     }
 
     _generateTicketCode() {

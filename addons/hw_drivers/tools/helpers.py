@@ -32,11 +32,6 @@ from odoo.tools.misc import file_path
 lock = Lock()
 _logger = logging.getLogger(__name__)
 
-try:
-    import crypt
-except ImportError:
-    _logger.warning('Could not import library crypt')
-
 
 class Orientation(Enum):
     """xrandr/wlr-randr screen orientation for kiosk mode"""
@@ -120,7 +115,7 @@ def check_certificate():
     except EnvironmentError:
         _logger.exception("Unable to read certificate file")
         return {"status": CertificateStatus.ERROR,
-                "error_code": "ERR_IOT_HTTPS_CHECK_CERT_READ_EXCEPTION"}
+                "error_code": "Can't read certificate file"}
 
     cert_end_date = datetime.datetime.strptime(cert.get_notAfter().decode('utf-8'), "%Y%m%d%H%M%SZ") - datetime.timedelta(days=10)
     for key in cert.get_subject().get_components():
@@ -227,16 +222,13 @@ def save_conf_server(url, token, db_uuid, enterprise_code, db_name=None):
 
 
 def generate_password():
+    """Resets (pi) user password generating a new random one.
+
+    :return: The new generated password
     """
-    Generate an unique code to secure raspberry pi
-    """
-    alphabet = 'abcdefghijkmnpqrstuvwxyz23456789'
-    password = ''.join(secrets.choice(alphabet) for i in range(12))
+    password = secrets.token_urlsafe(16)
     try:
-        shadow_password = crypt.crypt(password, crypt.mksalt())
-        subprocess.run(('sudo', 'usermod', '-p', shadow_password, 'pi'), check=True)
-        with writable():
-            subprocess.run(('sudo', 'cp', '/etc/shadow', '/root_bypass_ramdisks/etc/shadow'), check=True)
+        subprocess.run(['sudo', 'chpasswd'], input=f"pi:{password}", text=True, check=True)
         return password
     except subprocess.CalledProcessError as e:
         _logger.exception("Failed to generate password: %s", e.output)
@@ -288,6 +280,20 @@ def get_mac_address():
             addr = netifaces.ifaddresses(interface).get(netifaces.AF_LINK)[0]['addr']
             if addr != '00:00:00:00:00:00':
                 return addr
+
+
+def get_serial_number():
+    if platform.system() == 'Linux':
+        return read_file_first_line('/sys/firmware/devicetree/base/serial-number').strip("\x00")
+
+    # On windows, get motherboard's uuid (serial number isn't reliable as it's not always present)
+    command = ['powershell', '-Command', "(Get-CimInstance Win32_ComputerSystemProduct).UUID"]
+    p = subprocess.run(command, stdout=subprocess.PIPE, check=False)
+    if p.returncode != 0:
+        _logger.error("Failed to get Windows IoT serial number")
+        return False
+
+    return p.stdout.decode().strip() or False
 
 def get_path_nginx():
     return str(list(Path().absolute().parent.glob('*nginx*'))[0])
@@ -360,7 +366,7 @@ def load_certificate():
     db_uuid = get_conf('db_uuid')
     enterprise_code = get_conf('enterprise_code')
     if not db_uuid:
-        return "ERR_IOT_HTTPS_LOAD_NO_CREDENTIAL"
+        return "No database UUID found on the IoT Box configuration, try pairing again."
 
     url = 'https://www.odoo.com/odoo-enterprise/iot/x509'
     data = {
@@ -378,28 +384,29 @@ def load_certificate():
             body = json.dumps(data).encode('utf8'),
             headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         )
-    except Exception as e:
+    except Exception:
         _logger.exception("An error occurred while trying to reach odoo.com servers.")
-        return "ERR_IOT_HTTPS_LOAD_REQUEST_EXCEPTION\n\n%s" % e
+        return "ERR_SSL_CERT_DOWNLOAD"
 
     if response.status != 200:
-        return "ERR_IOT_HTTPS_LOAD_REQUEST_STATUS %s\n\n%s" % (response.status, response.reason)
+        _logger.error("Server returned an invalid status while trying to get the certificate: %s %s", response.status, response.reason)
+        return "ERR_SSL_CERT_DOWNLOAD"
 
     response_body = json.loads(response.data.decode())
     server_error = response_body.get('error')
     if server_error:
         _logger.error("A server error received from odoo.com while trying to get the certificate: %s", server_error)
-        return "ERR_IOT_HTTPS_LOAD_REQUEST_NO_RESULT"
+        return server_error
 
     result = response_body.get('result', {})
     certificate_error = result.get('error')
     if certificate_error:
         _logger.error("An error received from odoo.com while trying to get the certificate: %s", certificate_error)
-        return "ERR_IOT_HTTPS_LOAD_REQUEST_NO_RESULT"
+        return certificate_error
 
     if not result.get('x509_pem') or not result.get('private_key_pem'):
         _logger.error("The certificate received from odoo.com is not valid.")
-        return "ERR_IOT_HTTPS_LOAD_REQUEST_NO_RESULT"
+        return "The certificate received from odoo.com is not valid, try restarting."
 
     update_conf({'subject': result['subject_cn']})
     if platform.system() == 'Linux':
@@ -442,7 +449,7 @@ def download_iot_handlers(auto=True):
     server = get_odoo_server_url()
     if server:
         urllib3.disable_warnings()
-        pm = urllib3.PoolManager(cert_reqs='CERT_NONE')
+        pm = urllib3.PoolManager()
         server = server + '/iot/get_handlers'
         try:
             resp = pm.request('POST', server, fields={'mac': get_mac_address(), 'auto': auto}, timeout=8)
@@ -591,18 +598,20 @@ def update_conf(values, section='iot.box'):
     :param values: The dictionary of key-value pairs to update the config with.
     :param section: The section to update the key-value pairs in (Default: iot.box).
     """
-    _logger.debug("Updating odoo.conf with values: %s", values)
-    conf = get_conf()
-    get_conf.cache_clear()  # Clear the cache to get the updated config
+    with writable():
+        _logger.debug("Updating odoo.conf with values: %s", values)
+        conf = get_conf()
+        get_conf.cache_clear()  # Clear the cache to get the updated config
 
-    if not conf.has_section(section):
-        _logger.debug("Creating new section '%s' in odoo.conf", section)
-        conf.add_section(section)
+        if not conf.has_section(section):
+            _logger.debug("Creating new section '%s' in odoo.conf", section)
+            conf.add_section(section)
 
-    for key, value in values.items():
-        conf.set(section, key, value) if value else conf.remove_option(section, key)
+        for key, value in values.items():
+            conf.set(section, key, value) if value else conf.remove_option(section, key)
 
-    write_file("odoo.conf", conf)
+        with open(path_file("odoo.conf"), "w", encoding='utf-8') as f:
+            conf.write(f)
 
 
 @cache

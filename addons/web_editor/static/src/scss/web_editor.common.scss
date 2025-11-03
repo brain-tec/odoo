@@ -615,6 +615,10 @@ pre {
                 }
             }
         }
+
+        .btn-close {
+            filter: unset;
+        }
     }
 }
 @for $index from 1 through length($o-color-combinations) {
@@ -718,6 +722,12 @@ pre {
                     background-color: $-btn-primary-color;
                     color: color-contrast($-btn-primary-color);
                     border-color: $-btn-primary-color;
+                }
+            }
+
+            .btn-close {
+                @if (lightness($-bg-color) < 50) {
+                    @include btn-close-white();
                 }
             }
         }
@@ -832,6 +842,27 @@ section, .oe_img_bg, [data-oe-shape-data] {
     // are not rendered (invisible) when inside a gradient.
     .fa {
         display: inherit;
+    }
+
+    %o-text-gradient-decoration {
+        background-size: 100% 0.1em;
+        background-repeat: repeat-x;
+        background-image: inherit !important;
+        text-decoration-color: transparent !important;
+        color: transparent;
+        caret-color: black;
+    }
+    * {
+        background-size: 0px;
+        background-image: inherit !important;
+    }
+    s:not(font[style*="-webkit-text-fill-color"] s) {
+        @extend %o-text-gradient-decoration;
+        background-position: 0 50%;
+    }
+    u:not(font[style*="-webkit-text-fill-color"] u) {
+        @extend %o-text-gradient-decoration;
+        background-position: 0 95%;
     }
 }
 

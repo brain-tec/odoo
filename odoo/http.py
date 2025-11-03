@@ -978,6 +978,28 @@ class FilesystemSessionStore(sessions.FilesystemSessionStore):
     def is_valid_key(self, key):
         return _base64_urlsafe_re.match(key) is not None
 
+    def get_missing_session_identifiers(self, identifiers):
+        """
+            :param identifiers: session identifiers whose file existence must be checked
+                                identifiers are a part session sid (first 42 chars)
+            :type identifiers: iterable
+            :return: the identifiers which are not present on the filesystem
+            :rtype: set
+        """
+        # There are a lot of session files.
+        # Use the param ``identifiers`` to select the necessary directories.
+        # In the worst case, we have 4096 directories (64^2).
+        identifiers = set(identifiers)
+        directories = {
+            os.path.normpath(os.path.join(self.path, identifier[:2]))
+            for identifier in identifiers
+        }
+        # Remove the identifiers for which a file is present on the filesystem.
+        for directory in directories:
+            with contextlib.suppress(OSError), os.scandir(directory) as session_files:
+                identifiers.difference_update(sf.name[:42] for sf in session_files)
+        return identifiers
+
     def delete_from_identifiers(self, identifiers):
         files_to_unlink = []
         for identifier in identifiers:
@@ -1547,10 +1569,31 @@ class Response(Proxy):
     flatten = ProxyFunc(None)
 
     def __init__(self, *args, **kwargs):
-        response = args[0] if len(args) == 1 and isinstance(args[0], _Response) else _Response(*args, **kwargs)
+        response = None
+        if len(args) == 1:
+            arg = args[0]
+            if isinstance(arg, Response):
+                response = arg._wrapped__
+            elif isinstance(arg, _Response):
+                response = arg
+            elif isinstance(arg, werkzeug.wrappers.Response):
+                response = _Response.load(arg)
+        if response is None:
+            response = _Response(*args, **kwargs)
+
         super().__init__(response)
         if 'set_cookie' in response.__dict__:
             self.__dict__['set_cookie'] = response.__dict__['set_cookie']
+
+
+__wz_get_response = HTTPException.get_response
+
+
+def get_response(self, environ=None, scope=None):
+    return Response(__wz_get_response(self, environ, scope))
+
+
+HTTPException.get_response = get_response
 
 
 werkzeug_abort = werkzeug.exceptions.abort

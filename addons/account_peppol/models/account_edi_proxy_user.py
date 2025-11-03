@@ -78,16 +78,13 @@ class AccountEdiProxyClientUser(models.Model):
     def _check_company_on_peppol(self, company, edi_identification):
         if (
             not company.account_peppol_migration_key
-            and (participant_info := company.partner_id._get_participant_info(edi_identification)) is not None
+            and (participant_info := company.partner_id._peppol_lookup_participant(edi_identification)) is not None
             and company.partner_id._check_peppol_participant_exists(participant_info, edi_identification, check_company=True)
         ):
             error_msg = _(
                 "A participant with these details has already been registered on the network. "
                 "If you have previously registered to a Peppol service, please deregister."
             )
-
-            if isinstance(participant_info, str):
-                error_msg += _("The Peppol service that is used is likely to be %s.", participant_info)
             raise UserError(error_msg)
 
     # -------------------------------------------------------------------------
@@ -167,6 +164,7 @@ class AccountEdiProxyClientUser(models.Model):
             }
         }
         for edi_user in self:
+            edi_user = edi_user.with_company(edi_user.company_id)
             params['domain']['receiver_identifier'] = edi_user.edi_identification
             try:
                 # request all messages that haven't been acknowledged
@@ -228,6 +226,7 @@ class AccountEdiProxyClientUser(models.Model):
         job_count = self._context.get('peppol_crons_job_count') or BATCH_SIZE
         need_retrigger = False
         for edi_user in self:
+            edi_user = edi_user.with_company(edi_user.company_id)
             edi_user_moves = self.env['account.move'].search(
                 [
                     ('peppol_move_state', '=', 'processing'),
@@ -277,6 +276,7 @@ class AccountEdiProxyClientUser(models.Model):
 
     def _peppol_get_participant_status(self):
         for edi_user in self:
+            edi_user = edi_user.with_company(edi_user.company_id)
             try:
                 proxy_user = edi_user._call_peppol_proxy("/api/peppol/2/participant_status")
             except AccountEdiProxyError as e:

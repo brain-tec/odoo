@@ -294,8 +294,8 @@ class TestFrenchLeaves(TransactionCase):
         """
         Test Case:
         ==========
-        - Employee works from 8 to 12 and 14 to 17 Monday to Wednesday
-        - Company works from 9 to 12 and 13 to 18 Monday to Friday
+        - Employee works from 8 to 12 and 14 to 17 Monday to Wednesday -> 7h/d
+        - Company works from 9 to 12 and 13 to 18 Monday to Friday -> 8h/d
         - Employee requests 1 day off on Monday -> duration should be 1.0
         - Employee requests 0.5 day off on Monday morning or afternoon -> duration should be 0.5
         """
@@ -346,6 +346,7 @@ class TestFrenchLeaves(TransactionCase):
             'request_date_to': '2024-07-22',
         })
         self.assertEqual(leave.number_of_days, 1, 'The duration should be 1 day.')
+        self.assertNotEqual(leave.number_of_hours, 8.0, 'Company and employee hours per day should not match in this case')
 
         leave = self.env['hr.leave'].create({
             'name': 'Test',
@@ -359,11 +360,13 @@ class TestFrenchLeaves(TransactionCase):
         self.assertEqual(leave.number_of_days, 0.5, 'The duration should be 0.5 day.')
         self.assertEqual(leave.date_from.date(), date(2024, 7, 29))
         self.assertEqual(leave.date_to.date(), date(2024, 7, 29))
+        self.assertNotEqual(leave.number_of_hours, 8.0, 'Company and employee hours per day should not match in this case')
 
         leave.request_date_from_period = 'pm'
         self.assertEqual(leave.number_of_days, 0.5, 'The duration should be 0.5 day.')
         self.assertEqual(leave.date_from.date(), date(2024, 7, 29))
         self.assertEqual(leave.date_to.date(), date(2024, 7, 29))
+        self.assertNotEqual(leave.number_of_hours, 8.0, 'Company and employee hours per day should not match in this case')
 
     def test_leave_full_day_different_working_hours(self):
         """Check full days leave creation for an employee with different working hours than the 2 weeks company's calendar."""
@@ -411,3 +414,35 @@ class TestFrenchLeaves(TransactionCase):
         self.assertEqual(leave_2.number_of_days, 5.0)
         self.assertEqual(leave_2.date_from.date(), date(2024, 10, 21))
         self.assertEqual(leave_2.date_to.date(), date(2024, 10, 27))
+
+    def test_leave_employee_different_schedule_from_company(self):
+        self.company.resource_calendar_id = self.env['resource.calendar'].create({
+            'name': 'Company Calendar',
+            'attendance_ids': [attendance for i in range(5) for attendance in [
+                (0, 0, {'name': f'Day {i} of week', 'dayofweek': str(i), 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': f'Day {i} of week', 'dayofweek': str(i), 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': f'Day {i} of week', 'dayofweek': str(i), 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'})]
+            ]
+        })
+        self.employee.resource_calendar_id = self.env['resource.calendar'].create({
+            'name': 'Employee Calendar',
+            'attendance_ids': [attendance for i in range(5) for attendance in [
+                (0, 0, {'name': f'Day {i} of week', 'dayofweek': str(i), 'hour_from': 9, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': f'Day {i} of week', 'dayofweek': str(i), 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': f'Day {i} of week', 'dayofweek': str(i), 'hour_from': 13, 'hour_to': 17.50, 'day_period': 'afternoon'})]
+            ]
+        })
+
+        leave_1 = self.env['hr.leave'].create({
+            'name': 'Test leave',
+            'holiday_status_id': self.time_off_type.id,
+            'employee_id': self.employee.id,
+            'request_date_from': '2025-08-04',
+            'request_date_to': '2025-08-04',
+        })
+
+        work_hours_data = leave_1.employee_id._list_work_time_per_day(
+            leave_1.date_from,
+            leave_1.date_to)
+
+        self.assertEqual(work_hours_data[leave_1.employee_id.id][0][1], 7.50)

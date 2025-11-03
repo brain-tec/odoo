@@ -18,7 +18,7 @@ from odoo import api, fields, models, SUPERUSER_ID, tools, _
 from odoo.exceptions import AccessError, ValidationError, UserError
 from odoo.http import Stream, root, request
 from odoo.tools import config, human_size, image, str2bool, consteq
-from odoo.tools.mimetypes import guess_mimetype, fix_filename_extension
+from odoo.tools.mimetypes import guess_mimetype, fix_filename_extension, _olecf_mimetypes
 from odoo.osv import expression
 
 _logger = logging.getLogger(__name__)
@@ -347,7 +347,10 @@ class IrAttachment(models.Model):
                     nw, nh = map(int, max_resolution.split('x'))
                     if w > nw or h > nh:
                         img = img.resize(nw, nh)
-                        quality = int(ICP('base.image_autoresize_quality', 80))
+                        if _subtype == 'jpeg':  # Do not affect PNGs color palette
+                            quality = int(ICP('base.image_autoresize_quality', 80))
+                        else:
+                            quality = 0
                         image_data = img.image_quality(quality=quality)
                         if is_raw:
                             values['raw'] = image_data
@@ -770,6 +773,8 @@ class IrAttachment(models.Model):
             file.seek(-len(head), 1)  # rewind
             mimetype = guess_mimetype(head)
             filename = fix_filename_extension(file.filename, mimetype)
+            if mimetype in ('application/zip', *_olecf_mimetypes):
+                mimetype = mimetypes.guess_type(filename)[0]
         elif all(mimetype.partition('/')):
             filename = fix_filename_extension(file.filename, mimetype)
         else:
@@ -830,3 +835,7 @@ class IrAttachment(models.Model):
             stream.size = 0
 
         return stream
+
+    def _is_remote_source(self):
+        self.ensure_one()
+        return self.url and not self.file_size and self.url.startswith(('http://', 'https://', 'ftp://'))
