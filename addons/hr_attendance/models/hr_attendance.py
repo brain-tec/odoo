@@ -168,6 +168,9 @@ class HrAttendance(models.Model):
                 attendance.validated_overtime_hours = 0
 
         for attendance in no_validation:
+            if isinstance(attendance.id, models.NewId):
+                # We ignore NewId records here as we want to make sure a new value means it has been manually set by the user.
+                continue
             attendance.validated_overtime_hours = attendance.overtime_hours
 
     @api.depends('validated_overtime_hours')
@@ -480,6 +483,11 @@ class HrAttendance(models.Model):
             not self.env.user.has_group('hr_attendance.group_hr_attendance_officer'):
             raise AccessError(_("Do not have access, user cannot edit the attendances that are not his own."))
         attendances_dates = self._get_attendances_dates()
+
+        if vals.get('check_out') and self.out_mode == 'technical':
+            vals.update({'out_mode': 'manual'})
+        if vals.get('check_in') and self.in_mode == 'technical':
+            vals.update({'in_mode': 'manual'})
         result = super(HrAttendance, self).write(vals)
         if any(field in vals for field in ['employee_id', 'check_in', 'check_out']):
             # Merge attendance dates before and after write to recompute the
@@ -528,9 +536,10 @@ class HrAttendance(models.Model):
     def _load_demo_data(self):
         if self.has_demo_data():
             return
-        self.env['hr.employee']._load_scenario()
+        env_sudo = self.sudo().with_context({}).env
+        env_sudo['hr.employee']._load_scenario()
         # Load employees, schedules, departments and partners
-        convert.convert_file(self.env, 'hr_attendance', 'data/scenarios/hr_attendance_scenario.xml', None, mode='init', kind='data')
+        convert.convert_file(env_sudo, 'hr_attendance', 'data/scenarios/hr_attendance_scenario.xml', None, mode='init', kind='data')
 
         employee_sj = self.env.ref('hr.employee_sj')
         employee_mw = self.env.ref('hr.employee_mw')
@@ -674,7 +683,10 @@ class HrAttendance(models.Model):
         if not self.env.user.has_group('hr_attendance.group_hr_attendance_manager'):
             employee_domain = AND([employee_domain, [('attendance_manager_id', '=', self.env.user.id)]])
         if not user_domain:
-            return self.env['hr.employee'].search(employee_domain)
+            # Workaround to make it work only for list view.
+            if 'gantt_start_date' in self.env.context:
+                return self.env['hr.employee'].search(employee_domain)
+            return resources & self.env['hr.employee'].search(employee_domain)
         else:
             employee_name_domain = []
             for leaf in user_domain:
@@ -695,7 +707,7 @@ class HrAttendance(models.Model):
     def _cron_auto_check_out(self):
         def check_in_tz(attendance):
             """Returns check-in time in calendar's timezone."""
-            return attendance.check_in.astimezone(pytz.timezone(attendance.employee_id.resource_calendar_id.tz or 'UTC'))
+            return attendance.check_in.astimezone(pytz.timezone(attendance.employee_id._get_tz()))
 
         to_verify = self.env['hr.attendance'].search(
             [('check_out', '=', False),
@@ -706,9 +718,10 @@ class HrAttendance(models.Model):
         if not to_verify:
             return
 
+        to_verify_min_date = min(to_verify.mapped('check_in')).replace(hour=0, minute=0, second=0)
         previous_attendances = self.env['hr.attendance'].search([
                     ('employee_id', 'in', to_verify.mapped('employee_id').ids),
-                    ('check_in', '>', (fields.Datetime.now() - relativedelta(days=1)).replace(hour=0, minute=0, second=0)),
+                    ('check_in', '>', to_verify_min_date),
                     ('check_out', '!=', False)
         ])
 
@@ -722,20 +735,32 @@ class HrAttendance(models.Model):
             max_tol = company.auto_check_out_tolerance
             to_verify_company = to_verify.filtered(lambda a: a.employee_id.company_id.id == company.id)
 
-            # Attendances where Last open attendance time + previously worked time on that day + tolerance greater than the attendances hours (including lunch) in his calendar
-            to_check_out = to_verify_company.filtered(lambda a: (fields.Datetime.now() - a.check_in).seconds / 3600 + mapped_previous_duration[a.employee_id][check_in_tz(a).date()] - max_tol >
-                                                                (sum(a.employee_id.resource_calendar_id.attendance_ids.filtered(lambda att: att.dayofweek == str(check_in_tz(a).weekday()) and (not att.two_weeks_calendar or att.week_type == str(att.get_week_type(check_in_tz(a).date())))).mapped(lambda at: at.hour_to - at.hour_from))))
-            body = _('This attendance was automatically checked out because the employee exceeded the allowed time for their scheduled work hours.')
+            for att in to_verify_company:
 
-            for att in to_check_out:
-                expected_worked_hours = sum(att.employee_id.resource_calendar_id.attendance_ids.filtered(lambda a: a.dayofweek == str(check_in_tz(att).weekday()) and (not a.two_weeks_calendar or a.week_type == str(a.get_week_type(check_in_tz(att).date())))).mapped("duration_hours"))
-                att.check_out = fields.Datetime.now()
-                excess_hours = att.worked_hours - (expected_worked_hours + max_tol - mapped_previous_duration[att.employee_id][check_in_tz(att).date()])
-                att.write({
-                    "check_out": max(att.check_out - relativedelta(hours=excess_hours), att.check_in + relativedelta(seconds=1)),
-                    "out_mode": "auto_check_out"
-                })
-                att.message_post(body=body)
+                employee_timezone = pytz.timezone(att.employee_id._get_tz())
+                check_in_datetime = check_in_tz(att)
+                now_datetime = fields.Datetime.now().astimezone(employee_timezone)
+                current_attendance_duration = (now_datetime - check_in_datetime).total_seconds() / 3600
+                previous_attendances_duration = mapped_previous_duration[att.employee_id][check_in_datetime.date()]
+
+                expected_worked_hours = sum(
+                    att.employee_id.resource_calendar_id.attendance_ids.filtered(
+                        lambda a: a.dayofweek == str(check_in_datetime.weekday())
+                            and (not a.two_weeks_calendar or a.week_type == str(a.get_week_type(check_in_datetime.date())))
+                    ).mapped("duration_hours")
+                )
+
+                # Attendances where Last open attendance time + previously worked time on that day + tolerance greater than the attendances hours (including lunch) in his calendar
+                if (current_attendance_duration + previous_attendances_duration - max_tol) > expected_worked_hours:
+                    att.check_out = att.check_in.replace(hour=23, minute=59, second=59)
+                    excess_hours = att.worked_hours - (expected_worked_hours + max_tol - previous_attendances_duration)
+                    att.write({
+                        "check_out": max(att.check_out - relativedelta(hours=excess_hours), att.check_in + relativedelta(seconds=1)),
+                        "out_mode": "auto_check_out"
+                    })
+                    att.message_post(
+                        body=_('This attendance was automatically checked out because the employee exceeded the allowed time for their scheduled work hours.')
+                    )
 
     def _cron_absence_detection(self):
         """

@@ -1,4 +1,5 @@
 import { closestElement } from "@html_editor/utils/dom_traversal";
+import { isElement } from "./dom_info";
 
 export const COLOR_PALETTE_COMPATIBILITY_COLOR_NAMES = [
     "primary",
@@ -223,8 +224,29 @@ export function isColorGradient(value) {
     return value && value.includes("-gradient(");
 }
 
-export const TEXT_CLASSES_REGEX = /\btext-[^\s]*\b/;
+export const TEXT_CLASSES_REGEX =
+    /\btext-(primary|secondary|success|danger|warning|info|light|dark|body|muted|white|black|reset|gradient|opacity-\d{1,3}|o-[^\s]+|\d+)\b/;
 export const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/;
+
+/**
+ * Returns true if the given element has a visible color applied
+ * by `TEXT_CLASSES_REGEX` or `BG_CLASSES_REGEX`
+ *
+ * @param {Element} element
+ * @param {string} mode 'color' or 'backgroundColor'
+ * @returns {boolean}
+ */
+export function hasTextColorClass(element, mode) {
+    if (!element || !isElement(element)) {
+        return false;
+    }
+    const classRegex = mode === "color" ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX;
+    const parent = element.parentNode;
+    return (
+        classRegex.test(element.className) &&
+        (!parent || getComputedStyle(element)[mode] !== getComputedStyle(parent)[mode])
+    );
+}
 
 /**
  * Returns true if the given element has a visible color (fore- or
@@ -237,7 +259,10 @@ export const BG_CLASSES_REGEX = /\bbg-[^\s]*\b/;
 export function hasColor(element, mode) {
     const style = element.style;
     const parent = element.parentNode;
-    const classRegex = mode === "color" ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX;
+    if (element.classList.contains("btn")) {
+        // Ignore style applied on buttons from color detection
+        return false;
+    }
     if (isColorGradient(style["background-image"])) {
         if (element.classList.contains("text-gradient")) {
             if (mode === "color") {
@@ -253,8 +278,7 @@ export function hasColor(element, mode) {
         (style[mode] &&
             style[mode] !== "inherit" &&
             (!parent || style[mode] !== parent.style[mode])) ||
-        (classRegex.test(element.className) &&
-            (!parent || getComputedStyle(element)[mode] !== getComputedStyle(parent)[mode]))
+        hasTextColorClass(element, mode)
     );
 }
 

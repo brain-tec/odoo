@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from odoo import Command
 from odoo.addons.mrp.tests.common import TestMrpCommon
 from odoo.tests import Form
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import TransactionCase, freeze_time
 
 
 class TestMrpProductionBackorder(TestMrpCommon):
@@ -666,6 +666,15 @@ class TestMrpProductionBackorder(TestMrpCommon):
         self.assertEqual(mo.product_qty, 1)
         self.assertEqual(mo.move_raw_ids.mapped('product_uom_qty'), [0.5, 1])
 
+    def test_split_multiple_mo(self):
+        """ Checks that we can open the `split_production` wizard with multiple MOs at once
+        """
+        productions = self.env['mrp.production'].create([{
+            'product_qty': 5,
+            'bom_id': self.bom_1.id,
+        } for _ in range(2)])
+        Form.from_action(self.env, productions.action_split())
+
     def test_split_mo_partially_available(self):
         """
         Test that an MO components availability is correct after split.
@@ -949,6 +958,7 @@ class TestMrpWorkorderBackorder(TransactionCase):
         cls.bom_finished1.bom_line_ids[0].operation_id = cls.bom_finished1.operation_ids[0].id
         cls.bom_finished1.bom_line_ids[1].operation_id = cls.bom_finished1.operation_ids[1].id
 
+    @freeze_time('2025-10-27 12:00:00')
     def test_mrp_backorder_operations(self):
         """
         Checks that the operations'data are correclty set on a backorder:
@@ -1001,7 +1011,10 @@ class TestMrpWorkorderBackorder(TransactionCase):
         op_6.button_start()
         op_6.button_finish()
         bo_2.button_mark_done()
-        self.assertRecordValues(op_6, [{'state': 'done', 'qty_remaining': 0.0}])
+        self.assertRecordValues(bo_2.workorder_ids, [
+            {'state': 'cancel', 'qty_remaining': 0.0, 'duration': 0.0},
+            {'state': 'done', 'qty_remaining': 0.0, 'duration': 240.0}
+        ])
 
     def test_kit_bom_order_splitting(self):
         self.env.ref('base.group_user').implied_ids += (

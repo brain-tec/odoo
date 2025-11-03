@@ -146,8 +146,8 @@ class AccountEdiXmlUBL20(models.AbstractModel):
     def _get_partner_party_vals(self, partner, role):
         return {
             'partner': partner,
-            'party_identification_vals': self._get_partner_party_identification_vals_list(partner.commercial_partner_id),
-            'party_name_vals': [{'name': partner.display_name}],
+            'party_identification_vals': self.with_context(ubl_partner_role=role)._get_partner_party_identification_vals_list(partner.commercial_partner_id),
+            'party_name_vals': [{'name': partner.display_name if partner.name else partner.commercial_partner_id.display_name}],
             'postal_address_vals': self._get_partner_address_vals(partner),
             'party_tax_scheme_vals': self._get_partner_party_tax_scheme_vals_list(partner.commercial_partner_id, role),
             'party_legal_entity_vals': self._get_partner_party_legal_entity_vals_list(partner.commercial_partner_id),
@@ -479,7 +479,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         else:
             gross_price_subtotal = net_price_subtotal / (1.0 - (line.discount or 0.0) / 100.0)
         # Price subtotal with discount / quantity:
-        gross_price_unit = gross_price_subtotal / line.quantity if line.quantity else 0.0
+        gross_price_unit = gross_price_subtotal / line.quantity if line.quantity and not line.currency_id.is_zero(gross_price_subtotal) else 0.0
 
         uom = self._get_uom_unece_code(line.product_uom_id)
 
@@ -1743,11 +1743,14 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         line_node['cac:Item'] = {
             'cbc:Description': {'_text': product.description_sale},
             'cbc:Name': {'_text': product.name},
+            'cac:SellersItemIdentification': {
+                'cbc:ID': {'_text': product.default_code},
+            },
             'cac:StandardItemIdentification': {
                 'cbc:ID': {
                     '_text': product.barcode,
                     'schemeID': '0160',  # GTIN
-                },
+                } if product.barcode else None,
             },
             'cac:AdditionalItemProperty': [
                 {

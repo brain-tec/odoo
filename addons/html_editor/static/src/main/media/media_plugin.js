@@ -1,6 +1,7 @@
 import { Plugin } from "@html_editor/plugin";
 import {
     ICON_SELECTOR,
+    EDITABLE_MEDIA_CLASS,
     isIconElement,
     isMediaElement,
     isProtected,
@@ -67,6 +68,7 @@ export class MediaPlugin extends Plugin {
 
         unsplittable_node_predicates: isIconElement, // avoid merge
         functional_empty_node_predicates: isMediaElement,
+        is_node_editable_predicates: this.isEditableMediaElement.bind(this),
 
         selectors_for_feff_providers: () => ICON_SELECTOR,
     };
@@ -75,9 +77,16 @@ export class MediaPlugin extends Plugin {
         return this.config.getRecordInfo ? this.config.getRecordInfo() : {};
     }
 
+    isEditableMediaElement(node) {
+        return (
+            (isMediaElement(node) || node.nodeName === "IMG") &&
+            node.classList.contains(EDITABLE_MEDIA_CLASS)
+        );
+    }
+
     replaceImage() {
-        const selectedNodes = this.dependencies.selection.getSelectedNodes();
-        const node = selectedNodes.find((node) => node.tagName === "IMG");
+        const targetedNodes = this.dependencies.selection.getTargetedNodes();
+        const node = targetedNodes.find((node) => node.tagName === "IMG");
         if (node) {
             this.openMediaDialog({ node });
             this.dependencies.history.addStep();
@@ -170,12 +179,12 @@ export class MediaPlugin extends Plugin {
         return mediaDialogClosedPromise;
     }
 
-    async savePendingImages() {
-        const editableEl = this.editable;
+    async savePendingImages(editableEl) {
         const { resModel, resId } = this.recordInfo;
         // When saving a webp, o_b64_image_to_save is turned into
         // o_modified_image_to_save by saveB64Image to request the saving
         // of the pre-converted webp resizes and all the equivalent jpgs.
+        const oldSrcToNewSrcMap = new Map();
         const b64Proms = [...editableEl.querySelectorAll(".o_b64_image_to_save")].map(
             async (el) => {
                 const dirtyEditable = el.closest(".o_dirty");
@@ -185,7 +194,9 @@ export class MediaPlugin extends Plugin {
                     // the correct "resModel" and "resId" parameters.
                     return;
                 }
+                const oldSrc = el.getAttribute("src");
                 await this.saveB64Image(el, resModel, resId);
+                oldSrcToNewSrcMap.set(oldSrc, el.getAttribute("src"));
             }
         );
         const modifiedProms = [...editableEl.querySelectorAll(".o_modified_image_to_save")].map(
@@ -197,7 +208,9 @@ export class MediaPlugin extends Plugin {
                     // with the correct "resModel" and "resId" parameters.
                     return;
                 }
+                const oldSrc = el.getAttribute("src");
                 await this.saveModifiedImage(el, resModel, resId);
+                oldSrcToNewSrcMap.set(oldSrc, el.getAttribute("src"));
             }
         );
         const proms = [...b64Proms, ...modifiedProms];
@@ -205,7 +218,7 @@ export class MediaPlugin extends Plugin {
         if (hasChange) {
             await Promise.all(proms);
         }
-        return hasChange;
+        return hasChange ? oldSrcToNewSrcMap : undefined;
     }
 
     createAttachment({ el, imageData, resModel, resId }) {

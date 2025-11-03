@@ -7,7 +7,7 @@ import {
 } from "@mail/utils/common/format";
 import { createDocumentFragmentFromContent } from "@mail/utils/common/html";
 
-import { toRaw } from "@odoo/owl";
+import { markup, toRaw } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { stateToUrl } from "@web/core/browser/router";
@@ -111,6 +111,15 @@ export class Message extends Record {
             return Boolean(div.querySelector("a:not([data-oe-model])"));
         },
     });
+    hasMailNotificationSummary = Record.attr(false, {
+        compute() {
+            return Boolean(
+                createDocumentFragmentFromContent(this.body).querySelector(
+                    '[summary="o_mail_notification"]'
+                )
+            );
+        },
+    });
     /** @type {number|string} */
     id;
     /** @type {boolean} */
@@ -183,6 +192,7 @@ export class Message extends Record {
     /** @type {undefined|Boolean} */
     needaction;
     starred = false;
+    showTranslation = false;
 
     /**
      * True if the backend would technically allow edition
@@ -334,6 +344,8 @@ export class Message extends Record {
 
     isTranslatable(thread) {
         return (
+            !this.isBodyEmpty &&
+            !this.hasMailNotificationSummary &&
             this.store.hasMessageTranslationFeature &&
             !["discuss.channel", "mail.box"].includes(thread?.model)
         );
@@ -346,12 +358,7 @@ export class Message extends Record {
     isEmpty = Record.attr(false, {
         /** @this {import("models").Message} */
         compute() {
-            return (
-                this.isBodyEmpty &&
-                this.attachment_ids.length === 0 &&
-                this.trackingValues.length === 0 &&
-                !this.subtype_description
-            );
+            return this.computeIsEmpty();
         },
     });
     isBodyEmpty = Record.attr(undefined, {
@@ -374,6 +381,15 @@ export class Message extends Record {
             );
         },
     });
+
+    computeIsEmpty() {
+        return (
+            this.isBodyEmpty &&
+            this.attachment_ids.length === 0 &&
+            this.trackingValues.length === 0 &&
+            !this.subtype_description
+        );
+    }
 
     /**
      * Determines if the link preview is actually the main content of the
@@ -483,6 +499,19 @@ export class Message extends Record {
         if (this.hasLink && this.store.hasLinkPreviewFeature) {
             rpc("/mail/link_preview", { message_id: this.id }, { silent: true });
         }
+        return data;
+    }
+
+    async onClickToggleTranslation() {
+        if (!this.translationValue) {
+            const { error, lang_name, body } = await rpc("/mail/message/translate", {
+                message_id: this.id,
+            });
+            this.translationValue = body && markup(body);
+            this.translationSource = lang_name;
+            this.translationErrors = error;
+        }
+        this.showTranslation = !this.showTranslation && Boolean(this.translationValue);
     }
 
     async react(content) {
@@ -501,15 +530,19 @@ export class Message extends Record {
     }
 
     async remove() {
-        await rpc("/mail/message/update_content", {
+        const data = await rpc("/mail/message/update_content", this.removeParams);
+        this.store.insert(data, { html: true });
+        return data;
+    }
+
+    get removeParams() {
+        return {
             attachment_ids: [],
             attachment_tokens: [],
             body: "",
             message_id: this.id,
             ...this.thread.rpcParams,
-        });
-        this.body = "";
-        this.attachment_ids = [];
+        };
     }
 
     async setDone() {

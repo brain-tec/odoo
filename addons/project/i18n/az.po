@@ -1,26 +1,28 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* project
-# 
+# * project
+#
 # Translators:
 # Nurlan Farajov, 2024
 # Jumshud Sultanov <cumshud@gmail.com>, 2024
 # Nurlan Farajov <coolinuxoid@gmail.com>, 2025
 # erpgo translator <jumshud@erpgo.az>, 2025
-# 
+# ERPGo Odoo <erpgo.odoo@gmail.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-06-27 18:38+0000\n"
-"PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: erpgo translator <jumshud@erpgo.az>, 2025\n"
-"Language-Team: Azerbaijani (https://app.transifex.com/odoo/teams/41243/az/)\n"
+"PO-Revision-Date: 2025-10-24 22:20+0000\n"
+"Last-Translator: ERPGo Odoo <erpgo.odoo@gmail.com>\n"
+"Language-Team: Azerbaijani <https://translate.odoo.com/projects/odoo-18/"
+"project/az/>\n"
+"Language: az\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: az\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: project
 #. odoo-python
@@ -147,7 +149,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/project/models/project_project.py:0
 msgid "%(name)s Dashboard"
-msgstr ""
+msgstr "%(name)s İdarə paneli"
 
 #. module: project
 #. odoo-python
@@ -192,7 +194,7 @@ msgstr "%s (surət)"
 #. odoo-javascript
 #: code:addons/project/static/src/components/notebook_task_one2many_field/notebook_task_list_renderer.js:0
 msgid "%s closed tasks"
-msgstr ""
+msgstr "%s bağlanmış tapşırıq"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.milestone_deadline
@@ -604,7 +606,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:project.field_project_share_wizard__access_warning
 #: model:ir.model.fields,field_description:project.field_project_task__access_warning
 msgid "Access warning"
-msgstr "Hesaba Giriş Xəbərdarlığı"
+msgstr "Giriş xəbərdarlığı"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_milestone__message_needaction
@@ -612,7 +614,7 @@ msgstr "Hesaba Giriş Xəbərdarlığı"
 #: model:ir.model.fields,field_description:project.field_project_task__message_needaction
 #: model:ir.model.fields,field_description:project.field_project_update__message_needaction
 msgid "Action Needed"
-msgstr "Gərəkli Əməliyyat"
+msgstr "Əməliyyat Lazımdır"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__active
@@ -632,7 +634,7 @@ msgstr "Fəaliyyətlər"
 #: model:ir.model.fields,field_description:project.field_project_task__activity_exception_decoration
 #: model:ir.model.fields,field_description:project.field_project_update__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Faəliyyət istisnaetmə İşarəsi"
+msgstr "Fəaliyyət İstisna Dekorasiyası"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.mail_activity_plan_action_config_project_task_plan
@@ -783,7 +785,7 @@ msgstr "BÜTÜN"
 #: model:ir.actions.act_window,name:project.action_view_all_task
 #: model:ir.ui.menu,name:project.menu_project_management_all_tasks
 msgid "All Tasks"
-msgstr ""
+msgstr "Bütün Tapşırıqlar"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_project__privacy_visibility__employees
@@ -794,13 +796,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:project.field_project_task__allocated_hours
 #: model:ir.model.fields,field_description:project.field_project_task_burndown_chart_report__allocated_hours
 msgid "Allocated Time"
-msgstr ""
+msgstr "Ayrılmış Vaxt"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_task
 #: model_terms:ir.ui.view,arch_db:project.portal_my_task_allocated_hours_template
 msgid "Allocated Time:"
-msgstr ""
+msgstr "Ayrılmış Vaxt:"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
@@ -949,7 +951,7 @@ msgstr "Təyin olunub"
 #: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_tree
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form_project_fsm_base
 msgid "Assignees"
-msgstr ""
+msgstr "Təyin olunanlar"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form_base
@@ -1104,7 +1106,7 @@ msgstr "Bloklanıb"
 #: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_form
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
 msgid "Blocked By"
-msgstr ""
+msgstr "Bloklandı"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
@@ -1150,7 +1152,7 @@ msgstr ""
 #: model:project.task.type,name:project.project_personal_stage_demo_6
 #: model:project.task.type,name:project.project_stage_3
 msgid "Cancelled"
-msgstr "Ləğv olundu"
+msgstr "Ləğv edildi"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__state__02_changes_requested
@@ -1160,7 +1162,7 @@ msgstr "Ləğv olundu"
 #: model:mail.message.subtype,name:project.mt_project_task_changes_requested
 #: model:mail.message.subtype,name:project.mt_task_changes_requested
 msgid "Changes Requested"
-msgstr ""
+msgstr "Dəyişikliklər tələb olunur"
 
 #. module: project
 #. odoo-javascript
@@ -1342,7 +1344,7 @@ msgstr ""
 #: code:addons/project/models/project_task.py:0
 #: model:ir.actions.server,name:project.action_server_convert_to_subtask
 msgid "Convert to Task/Sub-Task"
-msgstr ""
+msgstr "Tapşırığa/Alt Tapşırığa çevirin"
 
 #. module: project
 #. odoo-javascript
@@ -1427,7 +1429,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__create_date
 msgid "Created On"
-msgstr "Tarixdə yaradıldı"
+msgstr "Yaradılan tarix"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_collaborator__create_uid
@@ -1445,7 +1447,7 @@ msgstr "Tarixdə yaradıldı"
 #: model:ir.model.fields,field_description:project.field_project_task_type_delete_wizard__create_uid
 #: model:ir.model.fields,field_description:project.field_project_update__create_uid
 msgid "Created by"
-msgstr "Tərəfindən yaradılıb"
+msgstr "Yaradan"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_collaborator__create_date
@@ -1462,7 +1464,7 @@ msgstr "Tərəfindən yaradılıb"
 #: model:ir.model.fields,field_description:project.field_project_task_type_delete_wizard__create_date
 #: model:ir.model.fields,field_description:project.field_project_update__create_date
 msgid "Created on"
-msgstr "Tarixdə yaradıldı"
+msgstr "Yaradılan tarix"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form_base
@@ -1530,7 +1532,7 @@ msgstr ""
 #: model:ir.model.fields,help:project.field_project_project__access_url
 #: model:ir.model.fields,help:project.field_project_task__access_url
 msgid "Customer Portal URL"
-msgstr "Müştəri Portalı URL"
+msgstr "Müştəri Portalının URL-i"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.rating_rating_action_project_report
@@ -1569,7 +1571,7 @@ msgstr "Gündəlik"
 #: model:ir.embedded.actions,name:project.project_embedded_action_project_updates
 #: model_terms:ir.ui.view,arch_db:project.project_view_kanban_inherit_project
 msgid "Dashboard"
-msgstr "Şəxsi kabinet"
+msgstr "Məlumat Paneli"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_burndown_chart_report__date
@@ -1795,7 +1797,7 @@ msgstr "Ləğv edin"
 #: model:ir.model.fields,field_description:project.field_project_update__display_name
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__display_name
 msgid "Display Name"
-msgstr "Göstəriləcək Ad"
+msgstr "Görünən Adı"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
@@ -1837,7 +1839,7 @@ msgstr "Qaralama"
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
 #: model_terms:ir.ui.view,arch_db:project.view_task_kanban
 msgid "Duplicate"
-msgstr "Təkrar"
+msgstr "Dublikat"
 
 #. module: project
 #. odoo-python
@@ -2044,7 +2046,7 @@ msgstr "İzləyicilər (Tərəfdaşlar)"
 #: model:ir.model.fields,help:project.field_project_task__activity_type_icon
 #: model:ir.model.fields,help:project.field_project_update__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "Gözəl şriftli ikon, məsələn fa-tapşırıqlar"
+msgstr "Font Awesome ikonu, məsələn: fa-tasks"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_type__forever
@@ -2114,7 +2116,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project.view_project_project_filter
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form_base
 msgid "Group By"
-msgstr "Görə Qrupla"
+msgstr "Qrupla"
 
 #. module: project
 #. odoo-javascript
@@ -2247,7 +2249,7 @@ msgstr "Simvol"
 #: model:ir.model.fields,help:project.field_project_task__activity_exception_icon
 #: model:ir.model.fields,help:project.field_project_update__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr "İstisna fəaliyyəti göstərən simvol."
+msgstr "İstisna fəaliyyətini göstərmək üçün ikon."
 
 #. module: project
 #. odoo-javascript
@@ -2261,7 +2263,7 @@ msgstr ""
 #: model:ir.model.fields,help:project.field_project_task__message_needaction
 #: model:ir.model.fields,help:project.field_project_update__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "İşarələnibsə, yeni mesajlara baxmalısınız."
+msgstr "Əgər işarələnibsə, yeni mesajlar sizin diqqətinizi tələb edəcək."
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_milestone__message_has_error
@@ -2273,7 +2275,7 @@ msgstr "İşarələnibsə, yeni mesajlara baxmalısınız."
 #: model:ir.model.fields,help:project.field_project_update__message_has_error
 #: model:ir.model.fields,help:project.field_project_update__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "İşarələnibsə, bəzi mesajların çatdırılmasında xəta var."
+msgstr "Əgər işarələnibsə, bəzi mesajların çatdırılmasında xəta var."
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project_stage__fold
@@ -2632,7 +2634,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/project/static/src/views/project_task_kanban/project_task_kanban_examples.js:0
 msgid "Manufacturing"
-msgstr "İstehsal"
+msgstr "İstehsalat"
 
 #. module: project
 #. odoo-javascript
@@ -2692,7 +2694,7 @@ msgstr "Mesaj"
 #: model:ir.model.fields,field_description:project.field_project_task__message_has_error
 #: model:ir.model.fields,field_description:project.field_project_update__message_has_error
 msgid "Message Delivery error"
-msgstr "Mesajın Çatdırılmasında xəta"
+msgstr "Mesaj Çatdırılma xətası"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_milestone__message_ids
@@ -2723,7 +2725,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:project.field_res_config_settings__group_project_milestone
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
 msgid "Milestones"
-msgstr ""
+msgstr "Mərhələlər"
 
 #. module: project
 #. odoo-javascript
@@ -2766,7 +2768,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project.project_task_burndown_chart_report_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form_project_fsm_base
 msgid "My Tasks"
-msgstr ""
+msgstr "Mənim Tapşırıqlarım"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_update_view_search
@@ -2791,7 +2793,7 @@ msgstr "Ad"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
 msgid "Name of the Tasks"
-msgstr ""
+msgstr "Tapşırıqların Adı"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__label_tasks
@@ -3003,7 +3005,7 @@ msgstr "Qeyd"
 #: model:ir.model.fields,field_description:project.field_project_task__message_needaction_counter
 #: model:ir.model.fields,field_description:project.field_project_update__message_needaction_counter
 msgid "Number of Actions"
-msgstr "Hərəkətlərin sayı"
+msgstr "Əməliyyatların sayı"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_milestone__message_has_error_counter
@@ -3091,7 +3093,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project.project_task_burndown_chart_report_view_search
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form_base
 msgid "Open Tasks"
-msgstr ""
+msgstr "Açıq Tapşırıqlar"
 
 #. module: project
 #. odoo-javascript
@@ -3244,7 +3246,7 @@ msgstr "Xoş qiymətləndirmələrin faizi"
 #: model_terms:ir.ui.view,arch_db:project.view_task_calendar
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
 msgid "Personal Stage"
-msgstr ""
+msgstr "Şəxsi Mərhələ"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__personal_stage_id
@@ -3260,7 +3262,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project.edit_project
 #: model_terms:ir.ui.view,arch_db:project.view_project
 msgid "Planned Date"
-msgstr "Planalşdırılmış Tarix"
+msgstr "Planlaşdırılmış Tarix"
 
 #. module: project
 #. odoo-python
@@ -3293,7 +3295,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:project.field_project_project__access_url
 #: model:ir.model.fields,field_description:project.field_project_task__access_url
 msgid "Portal Access URL"
-msgstr "Porta Giriş URL-si"
+msgstr "Portala Giriş URL-i"
 
 #. module: project
 #. odoo-python
@@ -3461,7 +3463,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:project.field_res_config_settings__group_project_stages
 #: model:ir.ui.menu,name:project.menu_project_config_project_stage
 msgid "Project Stages"
-msgstr ""
+msgstr "Layihə Mərhələləri"
 
 #. module: project
 #: model:ir.model,name:project.model_project_tags
@@ -3554,7 +3556,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project.view_project
 #: model_terms:ir.ui.view,arch_db:project.view_project_calendar
 msgid "Projects"
-msgstr ""
+msgstr "Layihələr"
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.open_view_project_all_config_group_stage
@@ -4196,7 +4198,7 @@ msgstr ""
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form_base
 msgid "Starred Tasks"
-msgstr ""
+msgstr "Ulduzlanmış Tapşırıqlar"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__date_start
@@ -4262,7 +4264,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project.project_sharing_project_task_view_form
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
 msgid "Sub-tasks"
-msgstr ""
+msgstr "Alt tapşırıqlar"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.rating_rating_view_form_project
@@ -4487,7 +4489,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project.view_task_partner_info_form
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form_base
 msgid "Tasks"
-msgstr ""
+msgstr "Tapşırıqlar"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.action_project_task_user_tree
@@ -4967,7 +4969,7 @@ msgstr ""
 #: model:ir.model.fields,help:project.field_project_task__activity_exception_decoration
 #: model:ir.model.fields,help:project.field_project_update__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "Qeyddəki istisna fəaliyyət növü."
+msgstr "Rekorddakı istisna fəaliyyət növü."
 
 #. module: project
 #. odoo-python
@@ -4995,7 +4997,7 @@ msgstr "Təyin olunmamış"
 #: code:addons/project/static/src/project_sharing/chatter/portal_chatter_patch.xml:0
 #: code:addons/project/static/src/project_sharing/components/chatter/chatter_container.xml:0
 msgid "Unfollow"
-msgstr ""
+msgstr "İzləmədən çıx"
 
 #. module: project
 #. odoo-python

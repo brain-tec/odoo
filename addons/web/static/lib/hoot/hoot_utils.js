@@ -10,7 +10,6 @@ import {
     R_WHITE_SPACE,
     toSelector,
 } from "@web/../lib/hoot-dom/hoot_dom_utils";
-import { DiffMatchPatch } from "./lib/diff_match_patch";
 import { getRunner } from "./main_runner";
 
 /**
@@ -166,10 +165,21 @@ function getGenericSerializer(value) {
 }
 
 function makeObjectCache() {
-    const cache = new Set();
+    const cache = new WeakSet();
     return {
-        add: (...values) => values.forEach((value) => cache.add(value)),
-        has: (...values) => values.every((value) => cache.has(value)),
+        add: (...values) => {
+            for (const value of values) {
+                cache.add(value);
+            }
+        },
+        has: (...values) => {
+            for (const value of values) {
+                if (!cache.has(value)) {
+                    return false;
+                }
+            }
+            return true;
+        },
     };
 }
 
@@ -204,6 +214,51 @@ function stringSort(a, b) {
 function truncate(value, length = MAX_HUMAN_READABLE_SIZE) {
     const strValue = String(value);
     return strValue.length <= length ? strValue : strValue.slice(0, length) + ELLIPSIS;
+}
+
+/**
+ * @template T
+ * @param {T} value
+ * @param {ReturnType<makeObjectCache>} cache
+ * @returns {T}
+ */
+function _deepCopy(value, cache) {
+    if (!value) {
+        return value;
+    }
+    if (typeof value === "function") {
+        if (value.name) {
+            return `<function ${value.name}>`;
+        } else {
+            return "<anonymous function>";
+        }
+    }
+    if (typeof value === "object" && !Markup.isMarkup(value)) {
+        if (isInstanceOf(value, String, Number, Boolean)) {
+            return value;
+        }
+        if (isNode(value)) {
+            // Nodes
+            return value.cloneNode(true);
+        } else if (isInstanceOf(value, Date, RegExp)) {
+            // Dates & regular expressions
+            return new (getConstructor(value))(value);
+        } else if (isIterable(value)) {
+            const isArray = $isArray(value);
+            const valueArray = isArray ? value : [...value];
+            // Iterables
+            const values = valueArray.map((item) => _deepCopy(item, cache));
+            return $isArray(value) ? values : new (getConstructor(value))(values);
+        } else {
+            // Other objects
+            if (cache.has(value)) {
+                return S_CIRCULAR;
+            }
+            cache.add(value);
+            return $fromEntries($ownKeys(value).map((key) => [key, _deepCopy(value[key], cache)]));
+        }
+    }
+    return value;
 }
 
 /**
@@ -522,6 +577,8 @@ class QueryPartialString extends QueryString {
     compareFn = getFuzzyScore;
 }
 
+const EMPTY_CONSTRUCTOR = { name: null };
+
 /** @type {Map<Function, (value: unknown) => string>} */
 const GENERIC_SERIALIZERS = new Map([
     [BigInt, (v) => v.valueOf()],
@@ -551,9 +608,6 @@ const R_CLASS = /^[A-Z][a-z]/;
 const R_NAMED_FUNCTION = /^\s*(async\s+)?function/;
 const R_INVISIBLE_CHARACTERS = /[\u00a0\u200b-\u200d\ufeff]/g;
 const R_OBJECT = /^\[object ([\w-]+)\]$/;
-
-const dmp = new DiffMatchPatch();
-const { DIFF_INSERT, DIFF_DELETE } = DiffMatchPatch;
 
 const labelObjects = new WeakSet();
 const objectConstructors = new Map();
@@ -599,6 +653,22 @@ export function callHootKey(ev) {
             }
         }
     }
+}
+
+/**
+ * @template T
+ * @param {T} object
+ * @returns {T}
+ */
+export function copyAndBind(object) {
+    const copy = {};
+    for (const [key, desc] of $entries($getOwnPropertyDescriptors(object))) {
+        if (key !== "constructor" && typeof desc.value === "function") {
+            desc.value = desc.value.bind(object);
+        }
+        $defineProperty(copy, key, desc);
+    }
+    return copy;
 }
 
 /**
@@ -719,45 +789,6 @@ export function createMock(target, descriptors) {
 }
 
 /**
- * @template T
- * @param {T} value
- * @returns {T}
- */
-export function deepCopy(value) {
-    if (!value) {
-        return value;
-    }
-    if (typeof value === "function") {
-        if (value.name) {
-            return `<function ${value.name}>`;
-        } else {
-            return "<anonymous function>";
-        }
-    }
-
-    if (typeof value === "object" && !Markup.isMarkup(value)) {
-        if (isInstanceOf(value, String, Number, Boolean)) {
-            return value;
-        }
-        if (isNode(value)) {
-            // Nodes
-            return value.cloneNode(true);
-        } else if (isInstanceOf(value, Date, RegExp)) {
-            // Dates & regular expressions
-            return new (getConstructor(value))(value);
-        } else if (isIterable(value)) {
-            // Iterables
-            const values = [...value].map(deepCopy);
-            return $isArray(value) ? values : new (getConstructor(value))(values);
-        } else {
-            // Other objects
-            return $fromEntries($ownKeys(value).map((key) => [key, deepCopy(value[key])]));
-        }
-    }
-    return value;
-}
-
-/**
  * @template {(...args: any[]) => any} T
  * @param {T} fn
  */
@@ -803,6 +834,15 @@ export function debounce(fn, delay) {
             }, delay);
         },
     }[name];
+}
+
+/**
+ * @template T
+ * @param {T} value
+ * @returns {T}
+ */
+export function deepCopy(value) {
+    return _deepCopy(value, makeObjectCache());
 }
 
 /**
@@ -959,7 +999,7 @@ export function generateHash(...strings) {
 export function getConstructor(value) {
     const { constructor } = value;
     if (constructor !== Object) {
-        return constructor || { name: null };
+        return constructor || EMPTY_CONSTRUCTOR;
     }
     const str = value.toString();
     const match = str.match(R_OBJECT);
@@ -1259,7 +1299,9 @@ export function makeRuntimeHook(name) {
                 valid ||= Boolean(last.global);
             }
             if (!valid) {
-                throw new HootError(`cannot call "${name}" callback outside of a suite`);
+                throw new HootError(`cannot call "${name}" callback outside of a suite`, {
+                    level: "critical",
+                });
             }
             return runner[name](...callbacks);
         },
@@ -1768,6 +1810,22 @@ export class ElementMap extends Map {
 
 export class HootError extends Error {
     name = "HootError";
+    /** @type {keyof typeof import("./core/logger").ISSUE_LEVELS} */
+    level;
+
+    /**
+     *
+     * @param {string} [message]
+     * @param {ErrorOptions & {
+     *  level?: keyof typeof import("./core/logger").ISSUE_LEVELS;
+     * }} [options]
+     */
+    constructor(message, options) {
+        super(message, options);
+
+        // See 'logger.js' for details on each issue level
+        this.level = options?.level;
+    }
 }
 
 /** @template [T=string] */
@@ -1795,12 +1853,17 @@ export class Markup {
      * @param {unknown} actual
      */
     static diff(expected, actual) {
+        if (!window.DiffMatchPatch) {
+            return null;
+        }
         const eType = typeof expected;
         if (eType !== typeof actual || !((expected && eType === "object") || eType === "string")) {
             // Cannot diff
             return null;
         }
-        let hasDiff;
+        let hasDiff = false;
+        const { DIFF_INSERT, DIFF_DELETE } = window.DiffMatchPatch;
+        const dmp = new window.DiffMatchPatch();
         const diff = dmp
             .diff_main(formatTechnical(expected), formatTechnical(actual))
             .map((diff) => {
@@ -1975,6 +2038,7 @@ export const INCLUDE_LEVEL = {
 };
 
 export const MIME_TYPE = {
+    formData: "multipart/form-data",
     blob: "application/octet-stream",
     json: "application/json",
     text: "text/plain",
@@ -1987,6 +2051,7 @@ export const STORAGE = {
 };
 
 export const S_ANY = Symbol("any value");
+export const S_CIRCULAR = Symbol("circular object");
 export const S_NONE = Symbol("no value");
 
 export const R_QUERY_EXACT = new RegExp(

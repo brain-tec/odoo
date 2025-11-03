@@ -228,10 +228,15 @@ class PosConfig(models.Model):
         delete_record_ids = {}
         dynamic_records = {}
 
-        for model, domain in domain.items():
-            ids = record_ids[model]
-            delete_record_ids[model] = [id for id in ids if not self.env[model].browse(id).exists()]
-            dynamic_records[model] = self.env[model].search(domain)
+        for model, dom in domain.items():
+            ids = record_ids.get(model, [])
+            browsed = self.env[model].browse(ids)
+
+            dynamic_records[model] = self.env[model].search(dom)
+            delete_record_ids[model] = browsed.filtered(lambda r: not r.exists()).ids
+            # Cancelled orders must be forced deleted from the user interface.
+            if model == "pos.order":
+                delete_record_ids[model] += browsed.exists().filtered(lambda r: r.state == "cancel").ids
 
         pos_order_data = dynamic_records.get('pos.order') or self.env['pos.order']
         data = pos_order_data.read_pos_data([], self.id)
@@ -418,12 +423,13 @@ class PosConfig(models.Model):
 
     @api.constrains('payment_method_ids')
     def _check_payment_method_ids_journal(self):
-        for cash_method in self.payment_method_ids.filtered(lambda m: m.journal_id.type == 'cash'):
-            if self.env['pos.config'].search_count([('id', '!=', self.id), ('payment_method_ids', 'in', cash_method.ids)], limit=1):
-                raise ValidationError(_("This cash payment method is already used in another Point of Sale.\n"
-                                        "A new cash payment method should be created for this Point of Sale."))
-            if len(cash_method.journal_id.pos_payment_method_ids) > 1:
-                raise ValidationError(_("You cannot use the same journal on multiples cash payment methods."))
+        for config in self:
+            for cash_method in config.payment_method_ids.filtered(lambda m: m.journal_id.type == 'cash'):
+                if self.env['pos.config'].search_count([('id', '!=', config.id), ('payment_method_ids', 'in', cash_method.ids)], limit=1):
+                    raise ValidationError(_("This cash payment method is already used in another Point of Sale.\n"
+                                            "A new cash payment method should be created for this Point of Sale."))
+                if len(cash_method.journal_id.pos_payment_method_ids) > 1:
+                    raise ValidationError(_("You cannot use the same journal on multiples cash payment methods."))
 
     @api.constrains('trusted_config_ids')
     def _check_trusted_config_ids_currency(self):

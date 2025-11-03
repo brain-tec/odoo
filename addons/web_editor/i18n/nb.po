@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # 	* web_editor
-# 
+#
 # Translators:
 # Thor Arne Hvidsten <thor.arne.hvidsten@gmail.com>, 2024
 # Cécile Collart <cco@odoo.com>, 2024
@@ -11,19 +11,20 @@
 # Jorunn D. Newth, 2024
 # Martin Trigaux, 2024
 # Rune Restad, 2025
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-14 20:48+0000\n"
+"POT-Creation-Date: 2025-10-31 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
 "Last-Translator: Rune Restad, 2025\n"
-"Language-Team: Norwegian Bokmål (https://app.transifex.com/odoo/teams/41243/nb/)\n"
+"Language-Team: Norwegian Bokmål (https://app.transifex.com/odoo/teams/41243/"
+"nb/)\n"
+"Language: nb\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: nb\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: web_editor
@@ -1412,12 +1413,6 @@ msgstr "Høyde"
 #. module: web_editor
 #. odoo-javascript
 #: code:addons/web_editor/static/src/components/media_dialog/video_selector.js:0
-msgid "Hide Dailymotion logo"
-msgstr "Skjul DailyMotion-logo"
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/components/media_dialog/video_selector.js:0
 msgid "Hide fullscreen button"
 msgstr "Skjul fullskjerm-knapp"
 
@@ -1426,12 +1421,6 @@ msgstr "Skjul fullskjerm-knapp"
 #: code:addons/web_editor/static/src/components/media_dialog/video_selector.js:0
 msgid "Hide player controls"
 msgstr "Skjul spillerkontroller"
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/components/media_dialog/video_selector.js:0
-msgid "Hide sharing button"
-msgstr "Skjul deleknapp"
 
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_html_field_history_mixin__html_field_history
@@ -1684,6 +1673,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 msgid "Insert your signature"
+msgstr ""
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/components/media_dialog/video_selector.xml:0
+msgid "Instagram"
 msgstr ""
 
 #. module: web_editor
@@ -2793,7 +2788,8 @@ msgstr "Den oppgitte URLen er ikke gyldig"
 #: code:addons/web_editor/static/src/js/wysiwyg/conflict_dialog.xml:0
 msgid ""
 "The version from the database will be used.\n"
-"                            If you need to keep your changes, copy the content below and edit the new document."
+"                            If you need to keep your changes, copy the "
+"content below and edit the new document."
 msgstr ""
 
 #. module: web_editor
@@ -3131,6 +3127,18 @@ msgstr ""
 
 #. module: web_editor
 #. odoo-javascript
+#: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
+msgid "WebGL is not enabled on your browser."
+msgstr ""
+
+#. module: web_editor
+#. odoo-javascript
+#: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
+msgid "WebP compression not supported on this browser"
+msgstr ""
+
+#. module: web_editor
+#. odoo-javascript
 #: code:addons/web_editor/static/src/js/editor/odoo-editor/src/OdooEditor.js:0
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 msgid "Widgets"
@@ -3213,12 +3221,6 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
 msgid "You might not be able to customize it anymore."
 msgstr ""
-
-#. module: web_editor
-#. odoo-javascript
-#: code:addons/web_editor/static/src/components/media_dialog/video_selector.xml:0
-msgid "Youku"
-msgstr "Youku"
 
 #. module: web_editor
 #. odoo-javascript
@@ -3330,3 +3332,12 @@ msgstr "Håndtering av WebSocket-meldinger"
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "www.example.com"
 msgstr ""
+
+#~ msgid "Hide Dailymotion logo"
+#~ msgstr "Skjul DailyMotion-logo"
+
+#~ msgid "Hide sharing button"
+#~ msgstr "Skjul deleknapp"
+
+#~ msgid "Youku"
+#~ msgstr "Youku"

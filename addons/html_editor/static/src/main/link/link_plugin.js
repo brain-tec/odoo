@@ -101,7 +101,7 @@ async function fetchInternalMetaData(url) {
             const html_parser = new window.DOMParser();
             const doc = html_parser.parseFromString(content, "text/html");
             const internalUrlMetaData = await rpc("/html_editor/link_preview_internal", {
-                preview_url: urlParsed.pathname,
+                preview_url: urlParsed.href,
             });
 
             internalUrlMetaData["favicon"] = doc.querySelector("link[rel~='icon']");
@@ -154,6 +154,7 @@ export class LinkPlugin extends Plugin {
         "overlay",
         "color",
         "feff",
+        "linkSelection",
     ];
     // @phoenix @todo: do we want to have createLink and insertLink methods in link plugin?
     static shared = ["createLink", "insertLink", "getPathAsUrlCommand"];
@@ -404,6 +405,7 @@ export class LinkPlugin extends Plugin {
             },
             onClose: () => {
                 this.overlay.close();
+                this.removeCurrentLinkIfEmtpy();
             },
             getInternalMetaData: this.getInternalMetaData,
             getExternalMetaData: this.getExternalMetaData,
@@ -458,13 +460,13 @@ export class LinkPlugin extends Plugin {
             // note that data-prevent-closing-overlay also used in color picker but link popover
             // and color picker don't open at the same time so it's ok to query like this
             const popoverEl = document.querySelector("[data-prevent-closing-overlay=true]");
-            if (popoverEl?.contains(selectionData.documentSelection?.anchorNode)) {
+            if (popoverEl && (!selectionData.documentSelection || popoverEl.contains(selectionData.documentSelection.anchorNode))) {
                 return;
             }
             this.overlay.close();
         } else if (!selection.isCollapsed) {
-            const selectedNodes = this.dependencies.selection.getSelectedNodes();
-            const imageNode = selectedNodes.find((node) => node.tagName === "IMG");
+            const targetedNodes = this.dependencies.selection.getTargetedNodes();
+            const imageNode = targetedNodes.find((node) => node.tagName === "IMG");
             if (imageNode && imageNode.parentNode.tagName === "A") {
                 if (this.linkElement !== imageNode.parentElement) {
                     this.overlay.close();
@@ -510,6 +512,10 @@ export class LinkPlugin extends Plugin {
                 this.overlay.close();
                 this.linkElement = linkEl;
                 this.LinkPopoverState.editing = false;
+            }
+
+            if (this.linkElement && this.linkElement.classList.contains("o_link_in_selection")) {
+                this.dependencies.linkSelection.padLinkWithZwnbsp(this.linkElement);
             }
 
             // if the link includes an inline image, we close the previous opened popover to reposition it
@@ -582,14 +588,14 @@ export class LinkPlugin extends Plugin {
                 !linkElement.contains(selection.focusNode)
             ) {
                 this.dependencies.split.splitSelection();
-                const selectedNodes = this.dependencies.selection.getSelectedNodes();
+                const targetedNodes = this.dependencies.selection.getTargetedNodes();
                 let before = linkElement.previousSibling;
-                while (before !== null && selectedNodes.includes(before)) {
+                while (before !== null && targetedNodes.includes(before)) {
                     linkElement.insertBefore(before, linkElement.firstChild);
                     before = linkElement.previousSibling;
                 }
                 let after = linkElement.nextSibling;
-                while (after !== null && selectedNodes.includes(after)) {
+                while (after !== null && targetedNodes.includes(after)) {
                     linkElement.appendChild(after);
                     after = linkElement.nextSibling;
                 }
@@ -600,8 +606,8 @@ export class LinkPlugin extends Plugin {
         } else {
             // create a new link element
             this.LinkPopoverState.editing = true;
-            const selectedNodes = this.dependencies.selection.getSelectedNodes();
-            const imageNode = selectedNodes.find((node) => node.tagName === "IMG");
+            const targetedNodes = this.dependencies.selection.getTargetedNodes();
+            const imageNode = targetedNodes.find((node) => node.tagName === "IMG");
 
             const link = this.document.createElement("a");
             if (!selection.isCollapsed) {
@@ -687,8 +693,8 @@ export class LinkPlugin extends Plugin {
             this.dependencies.selection.getEditableSelection());
         cursors = this.dependencies.selection.preserveSelection();
         // to remove link from selected images
-        const selectedNodes = this.dependencies.selection.getSelectedNodes();
-        const selectedImageNodes = selectedNodes.filter((node) => node.tagName === "IMG");
+        let targetedNodes = this.dependencies.selection.getTargetedNodes();
+        const selectedImageNodes = targetedNodes.filter((node) => node.tagName === "IMG");
         if (selectedImageNodes.length && startLink && endLink && startLink === endLink) {
             for (const imageNode of selectedImageNodes) {
                 let imageLink;
@@ -709,7 +715,7 @@ export class LinkPlugin extends Plugin {
             // when only unlink an inline image, add step after the unwrapping
             if (
                 selectedImageNodes.length === 1 &&
-                selectedImageNodes.length === selectedNodes.length
+                selectedImageNodes.length === targetedNodes.length
             ) {
                 this.dependencies.history.addStep();
                 return;
@@ -734,7 +740,7 @@ export class LinkPlugin extends Plugin {
                 { normalize: true }
             );
         }
-        const targetedNodes = this.dependencies.selection.getSelectedNodes();
+        targetedNodes = this.dependencies.selection.getTargetedNodes();
         const links = new Set(
             targetedNodes
                 .map((node) => closestElement(node, "a"))

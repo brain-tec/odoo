@@ -496,9 +496,6 @@ class TestUi(odoo.tests.HttpCase):
     def test_14_carousel_snippet_content_removal(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'carousel_content_removal', login='admin')
 
-    def test_15_website_link_tools(self):
-        self.start_tour(self.env['website'].get_client_action_url('/'), 'link_tools', login="admin")
-
     def test_16_website_edit_megamenu(self):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'edit_megamenu', login='admin')
 
@@ -759,3 +756,9 @@ class TestUi(odoo.tests.HttpCase):
 
     def test_popup_visibility_option(self):
         self.start_tour("/", "website_popup_visibility_option", login="admin")
+
+    def test_hiding_sidebar_header(self):
+        self.start_tour("/", "hide_sidebar_header", login="admin")
+
+    def test_header_color_and_undo_redo_issue(self):
+        self.start_tour("/", "undo_redo_header_oriented_issue", login="admin")

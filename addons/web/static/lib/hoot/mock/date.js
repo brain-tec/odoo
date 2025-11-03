@@ -109,6 +109,11 @@ class MockDateTimeFormat extends DateTimeFormat {
         });
     }
 
+    /** @type {Intl.DateTimeFormat["format"]} */
+    format(date) {
+        return super.format(date || new MockDate());
+    }
+
     resolvedOptions() {
         return {
             ...super.resolvedOptions(),
@@ -156,7 +161,7 @@ export function cleanupDate() {
  * @see {@link mockTimeZone} for the time zone params.
  *
  * @param {string | DateSpecs} [date]
- * @param  {string | number | null} [tz]
+ * @param {string | number | null} [tz]
  * @example
  *  mockDate("2023-12-25T20:45:00"); // 2023-12-25 20:45:00 UTC
  * @example
