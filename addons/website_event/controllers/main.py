@@ -314,6 +314,7 @@ class WebsiteEventController(http.Controller):
 
     @http.route(['''/event/<model("event.event"):event>/registration/confirm'''], type='http', auth="public", methods=['POST'], website=True)
     def registration_confirm(self, event, **post):
+        # t166248
         registrations = self._process_attendees_form(event, post)
         attendees_sudo = self._create_attendees_from_registration_post(event, registrations)
 

@@ -296,6 +296,12 @@
                                         <input class="form-control" type="text" t-attf-name="#{counter}-name" required="This field is required"
                                             t-att-value="default_first_attendee.get('name', '') if counter == 1 else ''"/>
                                     </div>
+<!--                                    t166248-->
+                                    <div class="col-lg my-2">
+                                        <label>SurName *</label>
+                                        <input class="form-control" type="text" t-attf-name="#{counter}-surname" required="This field is required"
+                                            t-att-value="default_first_attendee.get('surname', '') if counter == 1 else ''"/>
+                                    </div>
                                     <div class="col-lg my-2">
                                         <label>Email *</label>
                                         <input class="form-control" type="email" t-attf-name="#{counter}-email" required="This field is required"

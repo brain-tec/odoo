@@ -219,6 +219,11 @@ class EventEvent(models.Model):
         compute='_compute_ticket_instructions', store=True, readonly=False,
         help="This information will be printed on your tickets.")
 
+    @api.depends('name', 'date_begin')
+    def _compute_display_name(self):  # t166246
+        for event in self:
+            event.display_name = "%s (%s)" % (event.date_begin.date() if event.date_begin else _('Undefined date'), event.name)
+
     @api.depends('stage_id', 'kanban_state')
     def _compute_kanban_state_label(self):
         for event in self:
@@ -524,7 +529,7 @@ class EventEvent(models.Model):
                         for attribute_name in self.env['event.type.ticket']._get_event_ticket_fields_whitelist()
                     }) for line in event.event_type_id.event_type_ticket_ids
                 ]
-            event.event_ticket_ids = command
+            event.with_context(test_context_magic=True).event_ticket_ids = command
 
     @api.depends('event_type_id')
     def _compute_note(self):

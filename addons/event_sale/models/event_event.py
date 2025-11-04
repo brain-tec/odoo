@@ -76,7 +76,7 @@ class Event(models.Model):
         for event in self:
             event.sale_price_subtotal = sale_price_by_event.get(event._origin.id or event.id, 0)
 
-    def action_view_linked_orders(self):
+    def action_view_linked_orders(self):  #t166255
         """ Redirects to the orders linked to the current events """
         sale_order_action = self.env["ir.actions.actions"]._for_xml_id("sale.action_orders")
         sale_order_action.update({
