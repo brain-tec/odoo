@@ -13,6 +13,7 @@ from . import exception_logger
 from . import http
 from . import interface
 from . import main
+from . import tools
 from . import websocket_client
 
 _get = requests.get
