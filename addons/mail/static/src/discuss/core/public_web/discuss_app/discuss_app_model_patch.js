@@ -1,4 +1,4 @@
-import { fields } from "@mail/core/common/record";
+import { fields } from "@mail/model/export";
 import { DiscussApp } from "@mail/core/public_web/discuss_app/discuss_app_model";
 
 import { _t } from "@web/core/l10n/translation";
@@ -53,7 +53,7 @@ const discussAppPatch = {
             addTitle: _t("Start a conversation"),
             canView: false,
             extraClass: "o-mail-DiscussSidebarCategory-chat",
-            icon: "fa fa-users",
+            icon: "oi oi-users",
             id: "chats",
             name: _t("Direct messages"),
             sequence: 30,
