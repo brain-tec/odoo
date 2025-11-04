@@ -1,4 +1,4 @@
-import { fields } from "@mail/core/common/record";
+import { fields } from "@mail/model/export";
 import { Thread } from "@mail/core/common/thread_model";
 import { useSequential } from "@mail/utils/common/hooks";
 import { compareDatetime, nearestGreaterThanOrEqual } from "@mail/utils/common/misc";
@@ -52,12 +52,6 @@ const threadPatch = {
         /** @type {"not_fetched"|"fetching"|"fetched"} */
         this.fetchChannelInfoState = "not_fetched";
         this.group_ids = fields.Many("res.groups");
-        this.hasOtherMembersTyping = fields.Attr(false, {
-            /** @this {import("models").Thread} */
-            compute() {
-                return this.otherTypingMembers.length > 0;
-            },
-        });
         this.hasSeenFeature = fields.Attr(false, {
             /** @this {import("models").Thread} */
             compute() {
@@ -162,12 +156,6 @@ const threadPatch = {
                 );
             },
         });
-        this.otherTypingMembers = fields.Many("discuss.channel.member", {
-            /** @this {import("models").Thread} */
-            compute() {
-                return this.typingMembers.filter((member) => !member.persona?.eq(this.store.self));
-            },
-        });
         this.self_member_id = fields.One("discuss.channel.member", {
             inverse: "threadAsSelf",
         });
@@ -185,7 +173,6 @@ const threadPatch = {
                 this.store.updateBusSubscription();
             },
         });
-        this.typingMembers = fields.Many("discuss.channel.member", { inverse: "threadAsTyping" });
     },
     /** @returns {import("models").ChannelMember[]} */
     _computeOfflineMembers() {
@@ -519,17 +506,13 @@ const threadPatch = {
             { description }
         );
     },
-    async leaveChannel({ force = false } = {}) {
-        if (
-            this.channel?.channel_type !== "group" &&
-            this.create_uid?.eq(this.store.self_user) &&
-            !force
-        ) {
+    async leaveChannel() {
+        if (this.channel?.channel_type !== "group" && this.create_uid?.eq(this.store.self_user)) {
             await this.askLeaveConfirmation(
                 _t("You are the administrator of this channel. Are you sure you want to leave?")
             );
         }
-        if (this.channel?.channel_type === "group" && !force) {
+        if (this.channel?.channel_type === "group") {
             await this.askLeaveConfirmation(
                 _t(
                     "You are about to leave this group conversation and will no longer have access to it unless you are invited again. Are you sure you want to continue?"
@@ -537,9 +520,10 @@ const threadPatch = {
             );
         }
         await this.closeChatWindow();
-        await this.store.env.services.orm.silent.call("discuss.channel", "action_unfollow", [
-            this.id,
-        ]);
+        this.leaveChannelRpc();
+    },
+    leaveChannelRpc() {
+        this.store.env.services.orm.silent.call("discuss.channel", "action_unfollow", [this.id]);
     },
     /** @param {string} name */
     async rename(name) {
