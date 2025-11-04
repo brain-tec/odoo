@@ -1,4 +1,4 @@
-import { fields } from "@mail/core/common/record";
+import { fields } from "@mail/model/export";
 import { Thread } from "@mail/core/common/thread_model";
 import { _t } from "@web/core/l10n/translation";
 
@@ -69,12 +69,11 @@ patch(Thread.prototype, {
             this.store.discuss.activeTab = "livechat";
         }
     },
-    async leaveChannel({ force = false } = {}) {
+    async leaveChannel() {
         if (
             this.channel?.channel_type === "livechat" &&
             this.channel?.channel_member_ids.length <= 2 &&
-            !this.livechat_end_dt &&
-            !force
+            !this.livechat_end_dt
         ) {
             await this.askLeaveConfirmation(
                 _t("Leaving will end the live chat. Do you want to proceed?")

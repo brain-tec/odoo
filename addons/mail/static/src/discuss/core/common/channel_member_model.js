@@ -1,5 +1,5 @@
 import { Store } from "@mail/core/common/store_service";
-import { fields, Record } from "@mail/core/common/record";
+import { fields, Record } from "@mail/model/export";
 
 import { browser } from "@web/core/browser/browser";
 import { deserializeDateTime } from "@web/core/l10n/dates";
@@ -101,9 +101,9 @@ export class ChannelMember extends Record {
             }
         },
     });
-    threadAsTyping = fields.One("mail.thread", {
+    channelAsTyping = fields.One("discuss.channel", {
         compute() {
-            return this.isTyping ? this.channel_id : undefined;
+            return this.isTyping ? this.channel_id.channel : undefined;
         },
         eager: true,
         onDelete() {
