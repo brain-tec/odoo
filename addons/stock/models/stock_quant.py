@@ -1047,8 +1047,12 @@ class StockQuant(models.Model):
             raise ValidationError(_('Quantity or Reserved Quantity should be set.'))
         self = self.sudo()
         quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
-        if lot_id and quantity > 0:
-            quants = quants.filtered(lambda q: q.lot_id)
+        if lot_id:
+            if product_id.uom_id.compare(quantity, 0) > 0:
+                quants = quants.filtered(lambda q: q.lot_id)
+            else:
+                # Don't remove quantity from a negative quant without lot
+                quants = quants.filtered(lambda q: product_id.uom_id.compare(q.quantity, 0) > 0 or q.lot_id)
 
         if location_id.should_bypass_reservation():
             incoming_dates = []
@@ -1157,7 +1161,8 @@ class StockQuant(models.Model):
                 del reserved_move_lines[(product, location, lot, package, owner)]
 
         for (product, location, lot, package, owner), reserved_quantity in reserved_move_lines.items():
-            if location.should_bypass_reservation():
+            if location.should_bypass_reservation() or\
+                self.env['stock.quant']._should_bypass_product(product, location, reserved_quantity, lot, package, owner):
                 continue
             else:
                 self.env['stock.quant']._update_reserved_quantity(product, location, reserved_quantity, lot_id=lot, package_id=package, owner_id=owner)
@@ -1533,6 +1538,9 @@ class StockQuant(models.Model):
                 result_package_id))
         moves = self.env['stock.move'].create(move_vals)
         moves._action_done()
+
+    def _should_bypass_product(self, product=False, location=False, reserved_quantity=0, lot_id=False, package_id=False, owner_id=False):
+        return False
 
 
 class StockQuantPackage(models.Model):
