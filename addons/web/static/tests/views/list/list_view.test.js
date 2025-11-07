@@ -1,4 +1,4 @@
-import { expect, getFixture, test } from "@odoo/hoot";
+import { expect, getFixture, mockSendBeacon, test } from "@odoo/hoot";
 import {
     clear,
     click,
@@ -7903,7 +7903,7 @@ test(`edit button does not trigger fold group`, async () => {
                 </groupby>
             </list>
         `,
-        groupBy: ['currency_id']
+        groupBy: ["currency_id"],
     });
     expect(`.o_group_open`).toHaveCount(0);
     await contains(`.o_group_header:eq(0)`).click();
@@ -15809,9 +15809,17 @@ test(`Auto save: save on closing tab/browser`, async () => {
 });
 
 test(`Auto save: save on closing tab/browser (pending changes)`, async () => {
-    onRpc("foo", "web_save", ({ args }) => {
-        expect.step("web_save");
-        expect(args).toEqual([[1], { foo: "test" }]);
+    const sendBeaconDeferred = new Deferred();
+    mockSendBeacon((_, blob) => {
+        expect.step("sendBeacon");
+        blob.text().then((r) => {
+            const { params } = JSON.parse(r);
+            if (params.method === "web_save" && params.model === "foo") {
+                expect(params.args).toEqual([[1], { foo: "test" }]);
+            }
+            sendBeaconDeferred.resolve();
+        });
+        return true;
     });
 
     await mountView({
@@ -15822,12 +15830,16 @@ test(`Auto save: save on closing tab/browser (pending changes)`, async () => {
     await contains(`.o_data_cell`).click();
     await contains(`.o_data_cell [name=foo] input`).edit("test", { confirm: false });
 
-    await unload();
-    await animationFrame();
-    expect.verifySteps(["web_save"]);
+    const [event] = await unload();
+    await sendBeaconDeferred;
+    expect.verifySteps(["sendBeacon"]);
+    expect(event.defaultPrevented).toBe(false);
 });
 
 test(`Auto save: save on closing tab/browser (invalid field)`, async () => {
+    mockSendBeacon(() => {
+        expect.step("sendBeacon"); // should not be called
+    });
     onRpc("foo", "web_save", () => {
         expect.step("save"); // should not be called
     });
@@ -15856,9 +15868,18 @@ test(`Auto save: save on closing tab/browser (onchanges + pending changes)`, asy
 
     const deferred = new Deferred();
     onRpc("foo", "onchange", () => deferred);
-    onRpc("foo", "web_save", ({ args }) => {
-        expect.step("web_save");
-        expect(args).toEqual([[1], { int_field: 2021 }]);
+
+    const sendBeaconDeferred = new Deferred();
+    mockSendBeacon((_, blob) => {
+        expect.step("sendBeacon");
+        blob.text().then((r) => {
+            const { params } = JSON.parse(r);
+            if (params.method === "web_save" && params.model === "foo") {
+                expect(params.args).toEqual([[1], { int_field: 2021 }]);
+            }
+            sendBeaconDeferred.resolve();
+        });
+        return true;
     });
 
     await mountView({
@@ -15875,8 +15896,8 @@ test(`Auto save: save on closing tab/browser (onchanges + pending changes)`, asy
     await contains(`.o_data_cell [name="int_field"] input`).edit("2021", { confirm: "blur" });
 
     await unload();
-    await animationFrame();
-    expect.verifySteps(["web_save"]);
+    await sendBeaconDeferred;
+    expect.verifySteps(["sendBeacon"]);
 });
 
 test(`Auto save: save on closing tab/browser (onchanges)`, async () => {
@@ -15888,9 +15909,18 @@ test(`Auto save: save on closing tab/browser (onchanges)`, async () => {
 
     const deferred = new Deferred();
     onRpc("foo", "onchange", () => deferred);
-    onRpc("foo", "web_save", ({ args }) => {
-        expect.step("web_save");
-        expect(args).toEqual([[1], { foo: "test", int_field: 2021 }]);
+
+    const sendBeaconDeferred = new Deferred();
+    mockSendBeacon((_, blob) => {
+        expect.step("sendBeacon");
+        blob.text().then((r) => {
+            const { params } = JSON.parse(r);
+            if (params.method === "web_save" && params.model === "foo") {
+                expect(params.args).toEqual([[1], { foo: "test", int_field: 2021 }]);
+            }
+            sendBeaconDeferred.resolve();
+        });
+        return true;
     });
 
     await mountView({
@@ -15908,8 +15938,8 @@ test(`Auto save: save on closing tab/browser (onchanges)`, async () => {
     await contains(`.o_data_cell [name="foo"] input`).edit("test", { confirm: "blur" });
 
     await unload();
-    await animationFrame();
-    expect.verifySteps(["web_save"]);
+    await sendBeaconDeferred;
+    expect.verifySteps(["sendBeacon"]);
 });
 
 test.tags("desktop");
@@ -19297,6 +19327,42 @@ test(`multi edition: many2many_tags add few tags in one time`, async () => {
     expect(`.modal .o_field_many2many_tags .badge:eq(0)`).toHaveText("Value 3", {
         message: "should have display_name in badge",
     });
+});
+
+test.tags("desktop");
+test("multi_edit: must work for copy/paster or operation", async () => {
+    Foo._records[1].datetime = "1989-05-03 12:51:35";
+    Foo._records[2].datetime = "1987-11-13 12:12:34";
+    Foo._records[3].datetime = "2019-04-09 03:21:35";
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list multi_edit="1">
+                <field name="foo"/>
+                <field name="datetime"/>
+            </list>
+        `,
+    });
+
+    await contains(`.o_list_record_selector`).click();
+    await contains(`.o_data_cell[name=datetime]`).click();
+    await animationFrame();
+    await waitFor(`.o_datetime_picker`);
+    await contains(`input[data-field=datetime]`).edit("+125d", { confirm: "tab" });
+    expect(`tbody tr:eq(0) td[name=datetime]`).toHaveText("Jul 14, 11:30 AM");
+    await contains(`.modal button:contains(update)`).click();
+    expect(".modal").toHaveCount(0);
+    expect(queryAllTexts(`.o_data_cell`)).toEqual([
+        "yop",
+        "Jul 14, 11:30 AM",
+        "blip",
+        "Jul 14, 11:30 AM",
+        "gnap",
+        "Jul 14, 11:30 AM",
+        "blip",
+        "Jul 14, 11:30 AM",
+    ]);
 });
 
 test.tags("mobile");
