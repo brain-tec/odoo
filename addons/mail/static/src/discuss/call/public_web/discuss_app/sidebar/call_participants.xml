@@ -22,7 +22,7 @@
             'ps-3 pe-2': props.compact === undefined and !compact,
             'px-2': props.compact === false,
             'rounded-3': props.compact === undefined,
-            'opacity-75': props.thread.channel?.notEq(rtc.channel) and compact,
+            'opacity-75': props.channel.notEq(rtc.channel) and compact,
         }" style="margin: 1px;">
             <button class="o-mail-DiscussSidebarCallParticipants-expandBtn btn btn-link p-1 my-n1 ms-n1 me-0 align-self-start d-flex rounded-circle" t-if="!compact" t-on-click="() => state.expanded = !state.expanded">
                 <i class="oi o-xxsmaller text-muted text-dark" t-att-class="{'oi-chevron-right': !state.expanded, 'oi-chevron-down': state.expanded}" t-att-title="title"/>
@@ -78,8 +78,7 @@
                     <t t-set="session" t-value="session"/>
                 </t>
                 <t t-else="">
-                    <span t-if="session.is_muted" class="p-1 fa opacity-75" t-att-class="rtc.callActions.find(a => a.id === 'mute').icon"/>
-                    <span t-if="session.is_deaf" class="p-1 fa opacity-75" t-att-class="rtc.callActions.find(a => a.id === 'deafen').icon"/>
+                    <span t-if="session.is_muted or session.is_deaf" class="p-1 fa opacity-75" t-att-class="rtc.callActions.find(a => a.id === 'mute').icon"/>
                     <span t-if="session.is_screen_sharing_on" class="o-live bg-danger o-text-white rounded">LIVE</span>
                 </t>
             </div>
