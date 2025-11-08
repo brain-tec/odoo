@@ -37,7 +37,7 @@ export class Call extends Component {
         CallParticipantCard,
         PttAdBanner,
     };
-    static props = ["thread?", "compact?", "hasOverlay?", ...inDiscussCallViewProps];
+    static props = ["channel?", "compact?", "hasOverlay?", ...inDiscussCallViewProps];
     static defaultProps = { hasOverlay: true };
     static template = "discuss.Call";
 
@@ -61,7 +61,7 @@ export class Call extends Component {
             insetCard: undefined,
         });
         this.store = useService("mail.store");
-        this.callActions = useCallActions({ thread: () => this.channel?.thread });
+        this.callActions = useCallActions({ channel: () => this.channel });
         onMounted(() => {
             this.resizeObserver = new ResizeObserver(() => this.arrangeTiles());
             this.resizeObserver.observe(this.grid.el);
@@ -105,7 +105,7 @@ export class Call extends Component {
     }
 
     get channel() {
-        return this.props.thread?.channel || this.rtc.channel;
+        return this.props.channel || this.rtc.channel;
     }
 
     /** @returns {CardData[]} */

@@ -44,6 +44,20 @@ class MrpProduction(models.Model):
     _order = 'priority desc, date_start asc,id'
 
     @api.model
+    def default_get(self, fields):
+        context = dict(self.env.context)
+        product_qty = context.pop('bom_overview_product_qty', False)
+        picking_type_id = context.pop('bom_overview_picking_type_id', False)
+        defaults = super(MrpProduction, self.with_context(context)).default_get(fields)
+
+        if product_qty:
+            defaults['product_qty'] = product_qty
+        if picking_type_id:
+            defaults['picking_type_id'] = picking_type_id
+
+        return defaults
+
+    @api.model
     def _get_default_date_start(self):
         if self.env.context.get('default_date_deadline'):
             date_finished = fields.Datetime.to_datetime(self.env.context.get('default_date_deadline'))
@@ -1056,6 +1070,11 @@ class MrpProduction(models.Model):
             workorders_to_delete.unlink()
         return super(MrpProduction, self).unlink()
 
+    @api.ondelete(at_uninstall=True)
+    def _unlink_if_not_done(self):
+        if any(mo.state == 'done' for mo in self):
+            raise UserError(_("You cannot delete a manufacturing order that is already done."))
+
     def copy_data(self, default=None):
         default = dict(default or {})
         vals_list = super().copy_data(default=default)
@@ -1743,6 +1762,8 @@ class MrpProduction(models.Model):
     def action_cancel(self):
         """ Cancels production order, unfinished stock moves and set procurement
         orders in exception """
+        if any(mo.state == 'done' for mo in self):
+            raise UserError(_("You cannot cancel a manufacturing order that is already done."))
         self._action_cancel()
         return True
 
