@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
-from odoo.tools import SQL
+from odoo.tools import get_lang, Query, SQL
 
 
 class Im_LivechatReportChannel(models.Model):
@@ -119,7 +119,7 @@ class Im_LivechatReportChannel(models.Model):
                     ELSE C.livechat_failure
                 END AS session_outcome,
                 C.country_id,
-                C.rating_last_value AS rating,
+                NULLIF(C.rating_last_value, 0) AS rating,
                 CASE
                     WHEN C.rating_last_value = 1 THEN 'Unhappy'
                     WHEN C.rating_last_value = 5 THEN 'Happy'
@@ -257,6 +257,13 @@ class Im_LivechatReportChannel(models.Model):
                 for answer_id in id_list
             )
         return result
+
+    def _read_group_orderby(self, order: str, groupby_terms: dict[str, SQL], query: Query) -> SQL:
+        groupby_terms = dict(groupby_terms)
+        if "day_number" in groupby_terms:
+            first_week_day = int(get_lang(self.env, self.env.context.get('tz')).week_start)
+            groupby_terms["day_number"] = SQL("mod(7 - %s + (%s)::int, 7)", first_week_day, groupby_terms["day_number"])
+        return super()._read_group_orderby(order, groupby_terms, query)
 
     @api.model
     def action_open_discuss_channel_list_view(self, domain=()):
