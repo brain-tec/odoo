@@ -194,7 +194,11 @@ class HrEmployee(models.Model):
     structure_type_id = fields.Many2one(readonly=False, related='version_id.structure_type_id', inherited=True, groups="hr.group_hr_manager")
     contract_type_id = fields.Many2one(readonly=False, related='version_id.contract_type_id', inherited=True, groups="hr.group_hr_manager")
     hourly_cost = fields.Monetary('Hourly Cost', groups="hr.group_hr_user", tracking=True)
-
+    nationality_country_code = fields.Char(
+        string='Nationality',
+        related='version_id.country_id.code',
+        groups="hr.group_hr_user"
+    )
     # Direct subordinates
     parent_id = fields.Many2one('hr.employee', 'Manager', tracking=True, index=True,
                                 domain="['|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]")
@@ -266,6 +270,11 @@ class HrEmployee(models.Model):
     _user_uniq = models.Constraint(
         'unique (user_id, company_id)',
         'A user cannot be linked to multiple employees in the same company.',
+    )
+
+    has_country_contract_type = fields.Boolean(
+        compute='_compute_has_country_contract_type',
+        groups="hr.group_hr_user",
     )
 
     def _prepare_create_values(self, vals_list):
@@ -597,6 +606,18 @@ class HrEmployee(models.Model):
             # To not trigger computed properties if still the same version
             if employee.current_version_id != new_current_version:
                 employee.current_version_id = new_current_version
+
+    @api.depends('company_country_id')
+    def _compute_has_country_contract_type(self):
+        count_contract_type_by_country = dict(self.env['hr.contract.type']._read_group(
+            domain=[],
+            groupby=['country_id'],
+            aggregates=['__count']
+        ))
+        for employee in self:
+            employee.has_country_contract_type = bool(
+                count_contract_type_by_country.get(employee.company_country_id)
+            )
 
     def _cron_update_current_version_id(self):
         self.search([])._compute_current_version_id()
