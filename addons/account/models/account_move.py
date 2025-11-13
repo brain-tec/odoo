@@ -1176,6 +1176,15 @@ class AccountMove(models.Model):
         'line_ids.full_reconcile_id',
         'state')
     def _compute_amount(self):
+        self.line_ids.fetch([
+            'debit',
+            'balance',
+            'amount_currency',
+            'amount_residual',
+            'amount_residual_currency',
+            'display_type',
+            'tax_repartition_line_id'
+        ])
         for move in self:
             total_untaxed, total_untaxed_currency = 0.0, 0.0
             total_tax, total_tax_currency = 0.0, 0.0
@@ -3729,8 +3738,10 @@ class AccountMove(models.Model):
         return _('This entry has been reversed from %s', self._get_html_link()) if default.get('reversed_entry_id') else _('This entry has been duplicated from %s', self._get_html_link())
 
     def _check_user_access(self, vals_list):
-        is_user_able_to_review = self.env.user.has_group('account.group_account_user')
+        if self.env.su:
+            return
         is_user_able_to_supervise = self.env.user.has_group('account.group_account_manager')
+        is_user_able_to_review = self.env.user.has_group('account.group_account_user')
         for vals in vals_list:
             if (
                 ((vals.get('review_state') == 'reviewed' or not vals.get('review_state', True)) and not is_user_able_to_review)

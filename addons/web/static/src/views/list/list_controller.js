@@ -54,7 +54,6 @@ export class ListController extends Component {
         allowSelectors: { type: Boolean, optional: true },
         onSelectionChanged: { type: Function, optional: true },
         readonly: { type: Boolean, optional: true },
-        showButtons: { type: Boolean, optional: true },
         allowOpenAction: { type: Boolean, optional: true },
         Model: Function,
         Renderer: Function,
@@ -65,7 +64,6 @@ export class ListController extends Component {
         allowSelectors: true,
         createRecord: () => {},
         selectRecord: () => {},
-        showButtons: true,
         allowOpenAction: true,
     };
 
@@ -325,7 +323,7 @@ export class ListController extends Component {
         if (!this.model.isReady && !this.model.config.groupBy.length && this.editable) {
             // If the view isn't grouped and the list is editable, a new record row will be added,
             // in edition. In this situation, we must wait for the model to be ready.
-            await this.model.whenReady;
+            await this.model.whenReady.promise;
         }
         const list = (group && group.list) || this.model.root;
         if (this.editable && !list.isGrouped) {
@@ -501,7 +499,7 @@ export class ListController extends Component {
             ...this.props.display,
             controlPanel: {
                 ...controlPanel,
-                layoutActions: !this.hasSelectedRecords,
+                actions: !this.hasSelectedRecords,
             },
         };
     }
