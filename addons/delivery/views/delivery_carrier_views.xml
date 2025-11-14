@@ -5,7 +5,7 @@
         <field name="name">delivery.carrier.list</field>
         <field name="model">delivery.carrier</field>
         <field name="arch" type="xml">
-            <list string="Carrier">
+            <list string="Delivery Method">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="delivery_type"/>
@@ -23,8 +23,8 @@
         <field name="name">delivery.carrier.search</field>
         <field name="model">delivery.carrier</field>
         <field name="arch" type="xml">
-            <search string="Delivery Carrier">
-                <field name="name" string="Carrier" />
+            <search string="Delivery Method">
+                <field name="name" string="Delivery Method" />
                 <field name="delivery_type"/>
                 <separator/>
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
@@ -39,7 +39,7 @@
         <field name="name">delivery.carrier.form</field>
         <field name="model">delivery.carrier</field>
         <field name="arch" type="xml">
-            <form string="Carrier">
+            <form string="Delivery Method">
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="toggle_prod_environment"
@@ -148,7 +148,7 @@
                         <page string="Availability" name="destination">
                             <group col="1">
                                 <p name="availability_description">
-                                    Filling this form allows you to make the shipping method available according to the content of the order or its destination.
+                                    Filling this form allows you to make the delivery method available according to the content of the order or its destination.
                                 </p>
                                 <group>
                                     <group name="country_details" string="Destination">
@@ -192,7 +192,7 @@
                             </group>
                         </page>
                         <page string="Description" name="description">
-                            <field name="carrier_description" placeholder="Shipping method details to be included at bottom sales orders and their confirmation emails. E.g. Instructions for customers to follow."/>
+                            <field name="carrier_description" placeholder="Delivery method details to be included at bottom sales orders and their confirmation emails. E.g. Instructions for customers to follow."/>
                         </page>
                     </notebook>
                 </sheet>
