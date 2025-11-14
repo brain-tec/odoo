@@ -6,7 +6,7 @@ from odoo.exceptions import UserError
 
 class ChooseDeliveryCarrier(models.TransientModel):
     _name = 'choose.delivery.carrier'
-    _description = 'Delivery Carrier Selection Wizard'
+    _description = 'Delivery Method Selection Wizard'
 
     def _get_default_weight_uom(self):
         return self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
@@ -15,7 +15,7 @@ class ChooseDeliveryCarrier(models.TransientModel):
     partner_id = fields.Many2one('res.partner', related='order_id.partner_id', required=True)
     carrier_id = fields.Many2one(
         'delivery.carrier',
-        string="Shipping Method",
+        string="Delivery Method",
         required=True,
         domain="[('id', 'in', available_carrier_ids)]",
     )
@@ -79,7 +79,7 @@ class ChooseDeliveryCarrier(models.TransientModel):
         if vals.get('error_message'):
             raise UserError(vals.get('error_message'))
         return {
-            'name': _('Add a shipping method'),
+            'name': _('Add a delivery method'),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'choose.delivery.carrier',

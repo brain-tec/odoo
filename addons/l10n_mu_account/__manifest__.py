@@ -1,7 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     "name": "Mauritius - Accounting",
-    "version": "1.0",
     'countries': ['mu'],
     "category": "Accounting/Localizations/Account Charts",
     "description": """
@@ -12,7 +11,7 @@ This is the base module to manage the accounting chart for the Republic of Mauri
     - Fiscal positions
     - Default settings
     """,
-    "author": "Odoo SA",
+    "author": "Odoo S.A.",
     "depends": [
         "account",
     ],
