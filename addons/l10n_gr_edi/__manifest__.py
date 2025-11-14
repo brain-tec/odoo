@@ -1,8 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
-    'author': 'Odoo',
+    'author': 'Odoo S.A.',
     'name': 'Greece - myDATA',
-    'version': '1.0',
     'category': 'Accounting/Localizations',
     'summary': """Connect to myDATA API implementation for Greece""",
     'description': """
@@ -25,7 +24,6 @@
         'views/res_config_settings_views.xml',
         'views/res_partner_views.xml',
     ],
-    'installable': True,
     'auto_install': True,
     'license': 'LGPL-3',
 }

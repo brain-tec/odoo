@@ -3,7 +3,6 @@
     'version': '0.1',
     'category': 'Hidden/Tools',
     'summary': 'Manage certificate',
-    'installable': True,
     'data': [
         'security/ir.model.access.csv',
         'security/certificate_security.xml',
@@ -14,5 +13,5 @@
     ],
     'depends': ['base_setup'],
     'author': 'Odoo S.A.',
-    'license': 'OEEL-1',
+    'license': 'LGPL-3',
 }

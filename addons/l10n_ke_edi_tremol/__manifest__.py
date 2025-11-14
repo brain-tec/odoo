@@ -6,9 +6,8 @@
     'description': """
 This module integrates with the Kenyan G03 Tremol control unit device to the KRA through TIMS.
     """,
-    'author': 'Odoo',
+    'author': 'Odoo S.A.',
     'category': 'Accounting/Localizations/EDI',
-    'version': '1.0',
     'license': 'LGPL-3',
     'depends': ['l10n_ke'],
     'data': [

@@ -1,17 +1,13 @@
 {
     'name': "HTML Editor",
-    'summary': """
-        A Html Editor component and plugin system
-    """,
+    'summary': "A Html Editor component and plugin system.",
     'description': """
 Html Editor
 ==========================
 This addon provides an extensible, maintainable editor.
     """,
 
-    'author': "odoo",
-    'website': "https://www.odoo.com",
-    'version': '1.0',
+    'author': 'Odoo S.A.',
     'category': 'Hidden',
     'depends': ['base', 'bus', 'web'],
     'data': [
