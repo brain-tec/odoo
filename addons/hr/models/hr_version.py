@@ -318,6 +318,26 @@ class HrVersion(models.Model):
 
         return super().write(new_vals)
 
+    def get_formview_action(self, access_uid=None):
+        """
+        Override this method in order to redirect many2one towards the right model
+            - Contract template -> hr.version
+            - Employee record -> hr.employee(.public) with version_id in context
+        """
+        res = super().get_formview_action(access_uid=access_uid)
+        context = res.get('context', {})
+        if self.employee_id:
+            user = self.env.user
+            if access_uid:
+                user = self.env['res.users'].browse(access_uid)
+            res['res_model'] = 'hr.employee' if user.has_group('hr.group_hr_user') else 'hr.employee.public'
+            res['res_id'] = self.employee_id.id
+            res['context'] = dict(context, version_id=self.id)
+        else:
+            if not context.get('form_view_ref', False):
+                res['context'] = dict(context, form_view_ref='hr.hr_contract_template_form_view')
+        return res
+
     @api.depends_context('lang')
     @api.depends('date_version')
     def _compute_display_name(self):
@@ -357,7 +377,10 @@ class HrVersion(models.Model):
         """
         if not self.contract_date_start:
             return False
-        return self.date_start <= date_to and (not self.date_end or self.date_end >= date_from)
+        period_start = date_from or date.min
+        period_end = date_to or date.max
+        contract_end = self.date_end or date.max
+        return period_start <= contract_end and self.date_start <= period_end
 
     def _is_fully_flexible(self):
         """ return True if the version has a fully flexible working calendar """
