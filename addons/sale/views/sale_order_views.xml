@@ -358,7 +358,10 @@
                     string="Cancel"
                     name="action_cancel"
                     type="object"
-                    confirm="Are you sure you want to cancel this order? This may affect related documents or processes."
+                    confirm-title="Cancel Order"
+                    confirm="Cancelling this order will set its status to 'Cancelled' and will update related documents and processes. Are you sure?"
+                    confirm-label="Yes, cancel order"
+                    cancel-label="No, go back"
                     data-hotkey="x"
                     invisible="state not in ['draft', 'sent', 'sale'] or not id or locked"/>
                 <button
@@ -520,7 +523,10 @@
                                                 invisible="state not in ['draft', 'sent'] or not is_product_archived"
                                             />
                                             <field name="product_id"
-                                                context="{'default_uom_id': product_uom_id}"
+                                                context="{
+                                                    'default_uom_id': product_uom_id,
+                                                    'partner_id': parent.partner_id,
+                                                }"
                                                 readonly="not product_updatable"
                                                 required="not display_type and not is_downpayment"
                                                 force_save="1"
@@ -632,6 +638,7 @@
                                     context="{
                                         'default_lst_price': price_unit,
                                         'default_uom_id': product_uom_id,
+                                        'partner_id': parent.partner_id,
                                     }"
                                     options="{
                                         'show_label_warning': True
@@ -645,6 +652,7 @@
                                     context="{
                                         'default_list_price': price_unit,
                                         'default_uom_id': product_uom_id,
+                                        'partner_id': parent.partner_id,
                                     }"
                                     options="{
                                         'show_label_warning': True

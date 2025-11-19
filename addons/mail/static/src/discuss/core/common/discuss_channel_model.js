@@ -56,9 +56,14 @@ export class DiscussChannel extends Record {
         onDelete: (r) => r?.delete(),
         sort: (m1, m2) => m1.id - m2.id,
     });
+    /** @type {"chat"|"channel"|"group"|"livechat"|"whatsapp"|"ai_chat"|"ai_composer"} */
+    channel_type;
     chatWindow = fields.One("ChatWindow", {
         inverse: "channel",
     });
+    get chatChannelTypes() {
+        return ["chat", "group"];
+    }
     /** @type {"not_fetched"|"pending"|"fetched"} */
     fetchMembersState = "not_fetched";
     hasOtherMembersTyping = fields.Attr(false, {
@@ -87,6 +92,9 @@ export class DiscussChannel extends Record {
     }
     /** @type {Number|undefined} */
     member_count;
+    get isChatChannel() {
+        return this.chatChannelTypes.includes(this.channel?.channel_type);
+    }
     otherTypingMembers = fields.Many("discuss.channel.member", {
         /** @this {import("models").Thread} */
         compute() {

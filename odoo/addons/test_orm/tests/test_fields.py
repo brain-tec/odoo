@@ -5199,3 +5199,11 @@ class TestModifiedPerformance(TransactionCase):
         self.assertEqual(self.modified_line_a_child.total_price_quantity, 30)
         self.assertEqual(self.modified_line_a.total_price_quantity, 35)
         self.assertEqual(self.modified_line_a.total_price, 7)
+
+    def test_modified_create_no_inverse(self):
+        LinePositive = self.env['test_orm.modified.line.positive']
+        LinePositive.create({}).is_positive  # warmup + fill cache of is_positive
+
+        # One INSERT
+        with self.assertQueryCount(1):
+            self.ModifiedLine.create({})
