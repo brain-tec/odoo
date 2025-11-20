@@ -904,7 +904,9 @@ class AccountMove(models.Model):
     @api.depends('move_type')
     def _compute_is_storno(self):
         for move in self:
-            move.is_storno = move.is_storno or (move.move_type in ('out_refund', 'in_refund') and move.company_id.account_storno)
+            is_invoice = move.move_type in ('in_invoice', 'out_invoice')
+            is_refund = move.move_type in ('out_refund', 'in_refund')
+            move.is_storno = not is_invoice and (move.is_storno or (is_refund and move.company_id.account_storno))
 
     @api.depends('company_id', 'invoice_filter_type_domain')
     def _compute_suitable_journal_ids(self):
@@ -2535,7 +2537,8 @@ class AccountMove(models.Model):
             error_msg = _("The following entries are unbalanced:\n\n")
             for move in unbalanced_moves:
                 error_msg += f"  - {self.browse(move[0]).name}\n"
-                raise UserError(error_msg)
+
+            raise UserError(error_msg)
 
     def _get_unbalanced_moves(self, container):
         moves = container['records'].filtered(lambda move: move.line_ids)
