@@ -6,7 +6,7 @@ import random
 import re
 from urllib.parse import urlparse
 
-from odoo import api, Command, fields, models, _
+from odoo import api, Command, fields, models, release, _
 from odoo.exceptions import AccessError, ValidationError
 from odoo.fields import Domain
 from odoo.addons.bus.websocket import WebsocketConnectionHandler
@@ -168,7 +168,8 @@ class Im_LivechatChannel(models.Model):
 
         def is_available(user, channel):
             return (
-                ("online" in user.im_status or "busy" in user.im_status)
+                #  sudo - res.users: can access agent presence to determine if they are available.
+                user.sudo().presence_ids.status == "online"
                 and (
                     channel.max_sessions_mode == "unlimited"
                     or counts.get((user.partner_id, channel), 0) < channel.max_sessions
@@ -200,7 +201,8 @@ class Im_LivechatChannel(models.Model):
         for channel in self:
             active_users = users if users is not None else channel.user_ids
             if filter_online:
-                active_users = active_users.filtered(lambda u: "online" in u.im_status or "busy" in u.im_status)
+                # sudo - res.users: can access agent presence to determine if they are available.
+                active_users = active_users.filtered(lambda u: u.sudo().presence_ids.status == "online")
             user_domain |= Domain(
                 [
                     ("partner_id", "in", active_users.partner_id.ids),
@@ -577,13 +579,16 @@ class Im_LivechatChannel(models.Model):
 
     def get_livechat_info(self, username=None):
         self.ensure_one()
-
         if username is None:
             username = _('Visitor')
         info = {}
         info['available'] = self._is_livechat_available()
         info['server_url'] = self.get_base_url()
-        info["websocket_worker_version"] = WebsocketConnectionHandler._VERSION
+        info["session_info"] = {
+            "server_version": release.version,
+            "server_version_info": release.version_info,
+            "websocket_worker_version": WebsocketConnectionHandler._VERSION,
+        }
         if info['available']:
             info['options'] = self._get_channel_infos()
             info['options']["default_username"] = username
