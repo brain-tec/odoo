@@ -1,3 +1,4 @@
+import { reactive } from '@odoo/owl';
 import {
     ComboConfiguratorDialog
 } from '@sale/js/combo_configurator_dialog/combo_configurator_dialog';
@@ -12,8 +13,12 @@ import { rpc } from '@web/core/network/rpc';
 import { registry } from '@web/core/registry';
 import { redirect } from '@web/core/utils/urls';
 import { session } from '@web/session';
+import {
+    CartNotificationContainer
+} from '@website_sale/js/cart_notification/cart_notification_container/cart_notification_container';
 
 const { DateTime } = luxon;
+const AUTOCLOSE_NOTIFICATION_DELAY = 4000;
 
 /**
  * @typedef {Object} CustomAttributeValues
@@ -35,7 +40,7 @@ const { DateTime } = luxon;
  * provide relevant information when adding a product to the cart.
  */
 export class CartService {
-    static dependencies = ['cartNotificationService', 'dialog'];
+    static dependencies = ['dialog'];
 
     /**
      * Creates an instance of the service and initializes it using the {@link setup} method.
@@ -61,13 +66,22 @@ export class CartService {
      * @returns {Object} - An object exposing the public methods of the service.
      */
     setup(_env, services) {
-        this.cartNotificationService = services.cartNotificationService;
         this.dialog = services.dialog;
         this.rpc = rpc;  // To be overridable in tests.
+        this.notifications = reactive(new Set());
+
+        // Register the notification container
+        registry.category('main_components').add('CartNotificationContainer',
+            {
+                Component: CartNotificationContainer,
+                props: { notifications: this.notifications },
+            }
+        );
 
         // Only expose `add` in the service registry.
         return {
-            add: (...args) => this.add(...args)
+            add: (...args) => this.add(...args),
+            showWarning: (...args) => this.showWarning(...args),
         };
     }
 
@@ -78,7 +92,6 @@ export class CartService {
     /**
      * Asynchronously adds a product to the shopping cart.
      *
-     * @async
      * @param {Object} product - The product details to add to the cart.
      * @param {Number} product.productTemplateId - The product template's id, as a
      *      `product.template` id.
@@ -230,6 +243,20 @@ export class CartService {
         });
     }
 
+    /**
+     * Show a warning notification.
+     *
+     * @param {String} warningMessage
+     *
+     * @returns {void}
+     */
+    showWarning(warningMessage) {
+        this._showCartNotification({
+            type: 'warning',
+            data: { 'warning_message': warningMessage },
+        });
+    }
+
     //--------------------------------------------------------------------------
     // Configurators
     //--------------------------------------------------------------------------
@@ -237,7 +264,6 @@ export class CartService {
     /**
      * Opens the combo configurator dialog.
      *
-     * @private
      * @param {Number} productTemplateId - The product template id, as a `product.template` id.
      * @param {Number} productId - The product's id, as a `product.product` id.
      * @param {ProductCombo[]} combos - The combos of the product.
@@ -295,7 +321,6 @@ export class CartService {
     /**
      * Opens the product configurator dialog.
      *
-     * @private
      * @param {Number} productTemplateId - The product template id, as a `product.template` id.
      * @param {Number} quantity - The quantity to add to the cart.
      * @param {Number[]} combination - The combination of the product, as a list of
@@ -358,7 +383,6 @@ export class CartService {
     /**
      * Serialize a product into a format understandable by the server.
      *
-     * @private
      * @param {Object} product - The product to serialize.
      *
      * @returns {Object} - The serialized product.
@@ -399,7 +423,6 @@ export class CartService {
     /**
      * Serialize a combo item into a format understandable by the server.
      *
-     * @private
      * @param {ProductComboItem} comboItem - The combo item to serialize.
      * @param {Number} parentProductTemplateId - The parent's product template id, as a
      *      `product.template` id.
@@ -423,8 +446,6 @@ export class CartService {
     /**
      * Make a request to the server to add the product to the cart.
      *
-     * @async
-     * @private
      * @param {Object} data - Data containing product(s) to add to the cart and options for adding
      *      them.
      * @param {Number} data.productTemplateId - The product template's id, as a
@@ -471,7 +492,9 @@ export class CartService {
         )) {
             this._updateCartIcon(data.cart_quantity);
         };
-        this._showCartNotification(data.notification_info);
+        for (const notification of data.notifications) {
+            this._showCartNotification(notification);
+        }
         if (data.quantity) {
             this._trackProducts(data.tracking_info);
         }
@@ -481,7 +504,6 @@ export class CartService {
     /**
      * Update the quantity on the cart icon in the navbar.
      *
-     * @private
      * @param {Number} cartQuantity - The number of items currently in the cart.
      *
      * @returns {void}
@@ -509,32 +531,18 @@ export class CartService {
     /**
      * Show the notification about the cart.
      *
-     * @private
-     * @param {Object} props
-     * @param {Object} options
+     * @param {Object} notification
      *
      * @returns {void}
      */
-    _showCartNotification(props, options = {}) {
-        if (props.lines) {
-            this.cartNotificationService.add('', {
-                lines: props.lines,
-                currency_id: props.currency_id,
-                ...options,
-            });
-        }
-        if (props.warning) {
-            this.cartNotificationService.add('', {
-                warning: props.warning,
-                ...options,
-            });
-        }
+    _showCartNotification(notification) {
+        this.notifications.add(notification);
+        setTimeout( () => this.notifications.delete(notification), AUTOCLOSE_NOTIFICATION_DELAY );
     }
 
     /**
      * Track the products added to the cart.
      *
-     * @private
      * @param {Object[]} trackingInfo - A list of product tracking information.
      *
      * @returns {void}
