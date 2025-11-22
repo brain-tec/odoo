@@ -38,7 +38,10 @@ class StockPickingType(models.Model):
         'stock.location', 'Destination Location', compute='_compute_default_location_dest_id',
         check_company=True, store=True, readonly=False, precompute=True, required=True,
         help="This is the default destination location when this operation is manually created. However, it is possible to change it afterwards or that the routes use another one by default.")
-    code = fields.Selection([('incoming', 'Receipt'), ('outgoing', 'Delivery'), ('internal', 'Internal Transfer')], 'Type of Operation', default='incoming', required=True)
+    code = fields.Selection([
+        ('incoming', 'Receipt'),
+        ('outgoing', 'Delivery'),
+        ('internal', 'Internal Transfer')], 'Operation Category', default='incoming', required=True)
     return_picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type for Returns',
         index='btree_not_null',
@@ -549,9 +552,7 @@ class StockPicking(models.Model):
     name = fields.Char(
         'Reference', default='/',
         copy=False, index='trigram', readonly=True)
-    origin = fields.Char(
-        'Source Document', index='trigram',
-        help="Reference of the document")
+    origin = fields.Char('Source Document', index='trigram')
     note = fields.Html('Notes')
     backorder_id = fields.Many2one(
         'stock.picking', 'Back Order of',
@@ -1000,6 +1001,9 @@ class StockPicking(models.Model):
 
     @api.depends('partner_id.name', 'partner_id.parent_id.name')
     def _compute_picking_warning_text(self):
+        if not self.env.user.has_group('stock.group_warning_stock'):
+            self.picking_warning_text = ''
+            return
         for picking in self:
             text = ''
             if partner_msg := picking.partner_id.picking_warn_msg:

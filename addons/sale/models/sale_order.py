@@ -378,19 +378,21 @@ class SaleOrder(models.Model):
     def _compute_journal_id(self):
         self.journal_id = False
 
-    @api.depends('partner_id')
+    @api.depends('partner_id', 'company_id')
     def _compute_note(self):
         use_invoice_terms = self.env['ir.config_parameter'].sudo().get_bool('account.use_invoice_terms')
         if not use_invoice_terms:
             return
         for order in self:
+            if order.state != 'draft':
+                continue
             order = order.with_company(order.company_id)
-            if order.terms_type == 'html' and self.env.company.invoice_terms_html:
+            if order.terms_type == 'html' and order.env.company.invoice_terms_html:
                 baseurl = html_keep_url(order._get_note_url() + '/terms')
                 context = {'lang': order.partner_id.lang or self.env.user.lang}
                 order.note = _('Terms & Conditions: %s', baseurl)
                 del context
-            elif not is_html_empty(self.env.company.invoice_terms):
+            elif not is_html_empty(order.env.company.invoice_terms):
                 if order.partner_id.lang:
                     order = order.with_context(lang=order.partner_id.lang)
                 order.note = order.env.company.invoice_terms
@@ -819,6 +821,9 @@ class SaleOrder(models.Model):
 
     @api.depends('partner_id.name', 'partner_id.sale_warn_msg', 'order_line.sale_line_warn_msg')
     def _compute_sale_warning_text(self):
+        if not self.env.user.has_group('sale.group_warning_sale'):
+            self.sale_warning_text = ''
+            return
         for order in self:
             warnings = OrderedSet()
             if partner_msg := order.partner_id.sale_warn_msg:
@@ -1720,9 +1725,9 @@ class SaleOrder(models.Model):
                 if self._has_to_be_paid():
                     access_opt['title'] = _("View Quotation") if is_tx_pending else _("Sign & Pay Quotation")
                 else:
-                    access_opt['title'] = _("Accept & Sign Quotation")
+                    access_opt['title'] = _("Review & Sign Quotation")
             elif self._has_to_be_paid() and not is_tx_pending:
-                access_opt['title'] = _("Accept & Pay Quotation")
+                access_opt['title'] = _("Review & Pay Quotation")
             elif self.state in ('draft', 'sent'):
                 access_opt['title'] = _("View Quotation")
 
@@ -2127,9 +2132,10 @@ class SaleOrder(models.Model):
             **kwargs,
         )
         res = super()._get_product_catalog_order_data(products, **kwargs)
+        has_warning_group = self.env.user.has_group('sale.group_warning_sale')
         for product in products:
             res[product.id]['price'] = pricelist.get(product.id)
-            if product.sale_line_warn_msg:
+            if product.sale_line_warn_msg and has_warning_group:
                 res[product.id]['warning'] = product.sale_line_warn_msg
         return res
 

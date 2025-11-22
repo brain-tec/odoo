@@ -79,7 +79,7 @@ class PurchaseOrderLine(models.Model):
 
     partner_id = fields.Many2one('res.partner', related='order_id.partner_id', string='Partner', readonly=True, store=True, index='btree_not_null')
     currency_id = fields.Many2one(related='order_id.currency_id', string='Currency')
-    date_order = fields.Datetime(related='order_id.date_order', string='Order Date', readonly=True)
+    date_order = fields.Datetime(related='order_id.date_order', string='Order Deadline', readonly=True)
     date_approve = fields.Datetime(related="order_id.date_approve", string='Confirmation Date', readonly=True)
     tax_calculation_rounding_method = fields.Selection(
         related='company_id.tax_calculation_rounding_method',
@@ -101,7 +101,7 @@ class PurchaseOrderLine(models.Model):
     )
     product_template_attribute_value_ids = fields.Many2many(related='product_id.product_template_attribute_value_ids', readonly=True)
     product_no_variant_attribute_value_ids = fields.Many2many('product.template.attribute.value', string='Product attribute values that do not create variants', ondelete='restrict')
-    purchase_line_warn_msg = fields.Text(related='product_id.purchase_line_warn_msg')
+    purchase_line_warn_msg = fields.Text(compute='_compute_purchase_line_warn_msg')
     parent_id = fields.Many2one(
         'purchase.order.line',
         string="Parent Section Line",
@@ -198,6 +198,12 @@ class PurchaseOrderLine(models.Model):
             )
         else:
             return self.invoice_lines
+
+    @api.depends('product_id.purchase_line_warn_msg')
+    def _compute_purchase_line_warn_msg(self):
+        has_warning_group = self.env.user.has_group('purchase.group_warning_purchase')
+        for line in self:
+            line.purchase_line_warn_msg = line.product_id.purchase_line_warn_msg if has_warning_group else ""
 
     @api.depends('product_id', 'product_id.type')
     def _compute_qty_received_method(self):
