@@ -198,10 +198,25 @@ export class ListRenderer extends Component {
         this.multiCurrencyPopover = usePopover(MultiCurrencyPopover, {
             position: "right",
         });
-        this.state = useState({ groupInput: false, currencyRates: null });
+        this.state = useState({ showGroupInput: false });
+        this.currencyRates = null;
         onWillStart(async () => {
-            if (!this.isX2Many && this.hasMonetary) {
-                this.state.currencyRates = await getCurrencyRates();
+            const needsCurrencyRates = this.props.archInfo.columns.some((column) => {
+                if (column.type !== "field") {
+                    return false;
+                }
+                const field = this.props.list.fields[column.name];
+                if (field.type !== "monetary" && column.widget !== "monetary") {
+                    return false;
+                }
+                const currencyField = this.getCurrencyField(column);
+                if (!(currencyField in this.props.list.activeFields)) {
+                    return false;
+                }
+                return ["sum", "avg", "max", "min"].some((agg) => agg in column.attrs);
+            });
+            if (needsCurrencyRates) {
+                this.currencyRates = await getCurrencyRates();
             }
         });
         this.groupInputRef = useRef("groupInput");
@@ -345,18 +360,6 @@ export class ListRenderer extends Component {
             // spare some space to display the cog icon in group headers
             this.props.list.isGrouped
         );
-    }
-
-    get hasMonetary() {
-        return this.props.archInfo.columns.some((column) => {
-            if (column.type !== "field") {
-                return false;
-            }
-            const field = this.props.list.fields[column.name];
-            return (
-                (field.type === "monetary" && field.currency_field) || column.widget === "monetary"
-            );
-        });
     }
 
     add(params) {
@@ -723,7 +726,7 @@ export class ListRenderer extends Component {
                     } else {
                         currencyId = values[0][currencyField] && values[0][currencyField].id;
                     }
-                    if (currencyId && func) {
+                    if (func) {
                         const currencies = this.getFieldCurrencies(fieldName);
                         // in case of multiple currencies, convert values into default currency using conversion rates
                         if (currencies.size > 1) {
@@ -741,7 +744,9 @@ export class ListRenderer extends Component {
                                             : values[i][currencyField][0];
                                 }
                                 if (currency !== currencyId) {
-                                    fieldValues[i] *= this.state.currencyRates[currency].rate;
+                                    fieldValues[i] *= currency
+                                        ? this.currencyRates[currency].rate
+                                        : 1;
                                 }
                             }
                         }
@@ -788,7 +793,7 @@ export class ListRenderer extends Component {
                 return set;
             }, new Set());
         }
-        return values.reduce((set, value) => set.add(value[currencyField]?.id), new Set());
+        return values.reduce((set, value) => set.add(value[currencyField]?.id || false), new Set());
     }
 
     getCurrencyField(column) {

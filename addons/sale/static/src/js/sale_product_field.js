@@ -192,7 +192,7 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
             'get_single_product_variant',
             [this.props.record.data.product_template_id.id],
             {
-                context: this.context,
+                context: this.props.context,
             }
         );
         if (result && result.product_id) {
@@ -270,7 +270,8 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
                         const line = await saleOrderRecord.data.order_line.addNewRecord({
                             position: 'bottom', mode: 'readonly'
                         });
-                        await applyProduct(line, product);
+                        const productData = this._prepareNewLineData(line, product);
+                        await applyProduct(line, productData);
                     }),
                 ]);
                 this._onProductUpdate();
@@ -380,6 +381,13 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
      */
     _getAdditionalDialogProps() {
         return {};
+    }
+
+    /**
+     * Hook to append extra data in newly created optional product lines.
+     */
+    _prepareNewLineData(_line, product) {
+        return product;
     }
 
     /**
