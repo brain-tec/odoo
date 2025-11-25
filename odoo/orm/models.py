@@ -3566,7 +3566,7 @@ class BaseModel(metaclass=MetaModel):
         if any(self._ids):
             Rule = self.env['ir.rule']
             domain = Rule._compute_domain(self._name, operation)
-            if domain and (forbidden := self - self.sudo().filtered_domain(domain)):
+            if domain and (forbidden := self - self.sudo().with_context(active_test=False).filtered_domain(domain)):
                 return forbidden, functools.partial(Rule._make_access_error, operation, forbidden)
 
         return None
@@ -5416,12 +5416,6 @@ class BaseModel(metaclass=MetaModel):
             The returned recordset has the same prefetch object as ``self``.
         """  # noqa: RST210
         context = dict(ctx if ctx is not None else self.env.context, **overrides)
-        if 'force_company' in context:
-            warnings.warn(
-                "Since 19.0, context key 'force_company' is no longer supported. "
-                "Use with_company(company) instead.",
-                DeprecationWarning,
-            )
         if 'company' in context:
             warnings.warn(
                 "Context key 'company' is not recommended, because "
