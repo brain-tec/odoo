@@ -88,8 +88,22 @@ export class DiscussChannel extends Record {
     }
     /** @type {"not_fetched"|"pending"|"fetched"} */
     fetchMembersState = "not_fetched";
+    get memberListTypes() {
+        return ["channel", "group"];
+    }
+    get hasMemberList() {
+        return this.memberListTypes.includes(this.channel_type);
+    }
+    onlineMembers = fields.Many("discuss.channel.member", {
+        /** @this {import("models").DiscussChannel} */
+        compute() {
+            return this.channel_member_ids
+                .filter((member) => member.isOnline)
+                .sort((m1, m2) => this.store.sortMembers(m1, m2)); // FIXME: sort are prone to infinite loop (see test "Display livechat custom name in typing status")
+        },
+    });
     hasOtherMembersTyping = fields.Attr(false, {
-        /** @this {import("models").Thread} */
+        /** @this {import("models").DiscussChannel} */
         compute() {
             return this.otherTypingMembers.length > 0;
         },
@@ -125,9 +139,17 @@ export class DiscussChannel extends Record {
         return this.chatChannelTypes.includes(this.channel?.channel_type);
     }
     otherTypingMembers = fields.Many("discuss.channel.member", {
-        /** @this {import("models").Thread} */
+        /** @this {import("models").DiscussChannel} */
         compute() {
             return this.typingMembers.filter((member) => !member.persona?.eq(this.store.self));
+        },
+    });
+    offlineMembers = fields.Many("discuss.channel.member", {
+        /** @this {import("models").DiscussChannel} */
+        compute() {
+            return this._computeOfflineMembers().sort(
+                (m1, m2) => this.store.sortMembers(m1, m2) // FIXME: sort are prone to infinite loop (see test "Display livechat custom name in typing status")
+            );
         },
     });
     thread = fields.One("mail.thread", {
@@ -173,6 +195,11 @@ export class DiscussChannel extends Record {
      */
     openChannel() {
         return false;
+    }
+
+    /** @returns {import("models").ChannelMember[]} */
+    _computeOfflineMembers() {
+        return this.channel_member_ids.filter((member) => !member.isOnline);
     }
 }
 
