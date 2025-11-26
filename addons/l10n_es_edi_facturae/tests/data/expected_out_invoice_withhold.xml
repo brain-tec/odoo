@@ -5,16 +5,16 @@
     <Modality>I</Modality>
     <InvoiceIssuerType>EM</InvoiceIssuerType>
     <Batch>
-      <BatchIdentifier>RINV/2023/00001</BatchIdentifier>
+      <BatchIdentifier>INV/2023/00001</BatchIdentifier>
       <InvoicesCount>1</InvoicesCount>
       <TotalInvoicesAmount>
-        <TotalAmount>-242.00</TotalAmount>
+        <TotalAmount>85.00</TotalAmount>
       </TotalInvoicesAmount>
       <TotalOutstandingAmount>
-        <TotalAmount>-242.00</TotalAmount>
+        <TotalAmount>85.00</TotalAmount>
       </TotalOutstandingAmount>
       <TotalExecutableAmount>
-        <TotalAmount>-242.00</TotalAmount>
+        <TotalAmount>85.00</TotalAmount>
       </TotalExecutableAmount>
       <InvoiceCurrencyCode>EUR</InvoiceCurrencyCode>
     </Batch>
@@ -59,111 +59,71 @@
   <Invoices>
     <Invoice>
       <InvoiceHeader>
-        <InvoiceNumber>RINV/2023/00001</InvoiceNumber>
+        <InvoiceNumber>INV/2023/00001</InvoiceNumber>
         <InvoiceDocumentType>FC</InvoiceDocumentType>
-        <InvoiceClass>OR</InvoiceClass>
-        <Corrective>
-          <InvoiceNumber>INV/2023/00001</InvoiceNumber>
-          <ReasonCode>10</ReasonCode>
-          <ReasonDescription>Detalle Operación</ReasonDescription>
-          <TaxPeriod>
-            <StartDate>2023-01-01</StartDate>
-            <EndDate>2023-01-31</EndDate>
-          </TaxPeriod>
-          <CorrectionMethod>01</CorrectionMethod>
-          <CorrectionMethodDescription>Rectificación íntegra</CorrectionMethodDescription>
-        </Corrective>
+        <InvoiceClass>OO</InvoiceClass>
       </InvoiceHeader>
       <InvoiceIssueData>
         <IssueDate>2023-01-01</IssueDate>
         <InvoiceCurrencyCode>EUR</InvoiceCurrencyCode>
         <TaxCurrencyCode>EUR</TaxCurrencyCode>
         <LanguageName>en</LanguageName>
-        <ReceiverTransactionReference>ABCD-2023-001</ReceiverTransactionReference>
-        <FileReference>ABCD-2023-001</FileReference>
-        <ReceiverContractReference>ABCD-2023-001</ReceiverContractReference>
       </InvoiceIssueData>
-      <TaxesOutputs>
+      <TaxesWithheld>
         <Tax>
-          <TaxTypeCode>01</TaxTypeCode>
-          <TaxRate>21.000</TaxRate>
+          <TaxTypeCode>04</TaxTypeCode>
+          <TaxRate>15.000</TaxRate>
           <TaxableBase>
-            <TotalAmount>-100.00</TotalAmount>
+            <TotalAmount>100.00</TotalAmount>
           </TaxableBase>
           <TaxAmount>
-            <TotalAmount>-21.00</TotalAmount>
+            <TotalAmount>15.00</TotalAmount>
           </TaxAmount>
         </Tax>
-        <Tax>
-          <TaxTypeCode>01</TaxTypeCode>
-          <TaxRate>21.000</TaxRate>
-          <TaxableBase>
-            <TotalAmount>-100.00</TotalAmount>
-          </TaxableBase>
-          <TaxAmount>
-            <TotalAmount>-21.00</TotalAmount>
-          </TaxAmount>
-        </Tax>
-      </TaxesOutputs>
+      </TaxesWithheld>
       <InvoiceTotals>
-        <TotalGrossAmount>-200.00</TotalGrossAmount>
-        <TotalGrossAmountBeforeTaxes>-200.00</TotalGrossAmountBeforeTaxes>
-        <TotalTaxOutputs>-42.00</TotalTaxOutputs>
-        <TotalTaxesWithheld>0.00</TotalTaxesWithheld>
-        <InvoiceTotal>-242.00</InvoiceTotal>
-        <TotalOutstandingAmount>-242.00</TotalOutstandingAmount>
-        <TotalExecutableAmount>-242.00</TotalExecutableAmount>
+        <TotalGrossAmount>100.00</TotalGrossAmount>
+        <TotalGrossAmountBeforeTaxes>100.00</TotalGrossAmountBeforeTaxes>
+        <TotalTaxOutputs>0.00</TotalTaxOutputs>
+        <TotalTaxesWithheld>15.00</TotalTaxesWithheld>
+        <InvoiceTotal>85.00</InvoiceTotal>
+        <TotalOutstandingAmount>85.00</TotalOutstandingAmount>
+        <TotalExecutableAmount>85.00</TotalExecutableAmount>
       </InvoiceTotals>
       <Items>
         <InvoiceLine>
-          <ReceiverContractReference>ABCD-2023-001</ReceiverContractReference>
-          <ReceiverTransactionReference>ABCD-2023-001</ReceiverTransactionReference>
-          <FileReference>ABCD-2023-001</FileReference>
           <FileDate>2023-01-01</FileDate>
           <ItemDescription>product_a</ItemDescription>
           <Quantity>1.0</Quantity>
           <UnitOfMeasure>01</UnitOfMeasure>
-          <UnitPriceWithoutTax>-100.00000000</UnitPriceWithoutTax>
-          <TotalCost>-100.00000000</TotalCost>
-          <GrossAmount>-100.00000000</GrossAmount>
-          <TaxesOutputs>
+          <UnitPriceWithoutTax>100.00000000</UnitPriceWithoutTax>
+          <TotalCost>100.00000000</TotalCost>
+          <GrossAmount>100.00000000</GrossAmount>
+          <TaxesWithheld>
             <Tax>
-              <TaxTypeCode>01</TaxTypeCode>
-              <TaxRate>21.000</TaxRate>
+              <TaxTypeCode>04</TaxTypeCode>
+              <TaxRate>15.000</TaxRate>
               <TaxableBase>
-                <TotalAmount>-100.00</TotalAmount>
+                <TotalAmount>100.00</TotalAmount>
               </TaxableBase>
               <TaxAmount>
-                <TotalAmount>-21.00</TotalAmount>
+                <TotalAmount>15.00</TotalAmount>
               </TaxAmount>
             </Tax>
-          </TaxesOutputs>
-        </InvoiceLine>
-        <InvoiceLine>
-          <ReceiverContractReference>ABCD-2023-001</ReceiverContractReference>
-          <ReceiverTransactionReference>ABCD-2023-001</ReceiverTransactionReference>
-          <FileReference>ABCD-2023-001</FileReference>
-          <FileDate>2023-01-01</FileDate>
-          <ItemDescription>product_a</ItemDescription>
-          <Quantity>1.0</Quantity>
-          <UnitOfMeasure>01</UnitOfMeasure>
-          <UnitPriceWithoutTax>-100.00000000</UnitPriceWithoutTax>
-          <TotalCost>-100.00000000</TotalCost>
-          <GrossAmount>-100.00000000</GrossAmount>
-          <TaxesOutputs>
-            <Tax>
-              <TaxTypeCode>01</TaxTypeCode>
-              <TaxRate>21.000</TaxRate>
-              <TaxableBase>
-                <TotalAmount>-100.00</TotalAmount>
-              </TaxableBase>
-              <TaxAmount>
-                <TotalAmount>-21.00</TotalAmount>
-              </TaxAmount>
-            </Tax>
-          </TaxesOutputs>
+          </TaxesWithheld>
         </InvoiceLine>
       </Items>
+      <PaymentDetails>
+        <Installment>
+          <InstallmentDueDate>2023-01-01</InstallmentDueDate>
+          <InstallmentAmount>85.00</InstallmentAmount>
+          <PaymentMeans>04</PaymentMeans>
+          <AccountToBeCredited>
+            <IBAN>ES9121000418450200051332</IBAN>
+            <BIC>CAIXESBBXXX</BIC>
+          </AccountToBeCredited>
+        </Installment>
+      </PaymentDetails>
     </Invoice>
   </Invoices>
   <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="___ignore___">
