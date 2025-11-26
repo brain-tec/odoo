@@ -10,6 +10,11 @@ import uuid
 
 @tagged('post_install', '-at_install')
 class TestPoSSale(TestPointOfSaleHttpCommon):
+    @classmethod
+    def get_default_groups(cls):
+        groups = super().get_default_groups()
+        return groups | cls.quick_ref('sales_team.group_sale_manager')
+
     def test_settle_order_with_kit(self):
         if not self.env["ir.module.module"].search([("name", "=", "mrp"), ("state", "=", "installed")]):
             self.skipTest("mrp module is required for this test")
@@ -517,6 +522,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.open_ui()
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosSettleDraftOrder', login="accountman")
+        self.assertEqual(sale_order.state, 'sale')
 
     def test_settle_order_change_customer(self):
         """
@@ -646,6 +652,35 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         for order_line in sale_order.order_line.filtered(lambda l: l.product_id == self.downpayment_product):
             order_line = order_line.with_context(lang=partner_test.lang)
             self.assertIn(format_date(order_line.env, order_line.order_id.date_order), order_line.name)
+
+    def test_settle_so_with_non_pos_groupable_uom(self):
+        """
+        For products with a non-groupable PoS UoM (e.g., Kg), ensure that when a SO
+        uses another UoM (e.g., g), the PoS correctly displays the quantity converted
+        back to the original UoM.
+        """
+        self.component_kg = self.env['product.product'].create({
+            'name': 'Pomme de Terre',
+            'is_storable': True,
+            'available_in_pos': True,
+            'taxes_id': False,
+            'lst_price': 10.0,
+            'uom_id': self.env.ref('uom.product_uom_kgm').id,
+        })
+
+        sale_order = self.env['sale.order'].sudo().create({
+            'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
+            'order_line': [(0, 0, {
+                'product_id': self.component_kg.id,
+                'name': self.component_kg.name,
+                'product_uom_qty': 500,
+                'product_uom_id': self.env.ref('uom.product_uom_gram').id,
+                'price_unit': 0.01,
+            })],
+        })
+        sale_order.action_confirm()
+
+        self.start_pos_tour('test_settle_so_with_non_pos_groupable_uom')
 
     def test_settle_so_with_pos_downpayment(self):
         so = self.env['sale.order'].sudo().create({
@@ -948,7 +983,10 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosSettleOrderShipLater', login="accountman")
 
-        self.assertEqual(len(sale_order_single.picking_ids), 0)
+        self.assertEqual(len(sale_order_single.picking_ids), 1)
+        self.assertEqual(sale_order_single.picking_ids.state, "cancel")
+        self.assertEqual(len(sale_order_single.pos_order_line_ids.order_id.picking_ids), 1)
+        self.assertEqual(sale_order_single.pos_order_line_ids.order_id.picking_ids.state, "assigned")
 
         # The pos order is being shipped later so the qty_delivered should still be 0
         self.assertEqual(sale_order_single.order_line[0].qty_delivered, 0)
@@ -963,7 +1001,10 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.assertEqual(sale_order_multi.order_line[0].qty_delivered, 0)
         self.assertEqual(sale_order_multi.order_line[1].qty_delivered, 0)
 
-        self.assertEqual(len(sale_order_multi.picking_ids), 0)
+        self.assertEqual(len(sale_order_multi.picking_ids), 1)
+        self.assertEqual(sale_order_multi.picking_ids.state, "cancel")
+        self.assertEqual(len(sale_order_multi.pos_order_line_ids.order_id.picking_ids), 1)
+        self.assertEqual(sale_order_multi.pos_order_line_ids.order_id.picking_ids.state, "assigned")
 
     def test_draft_pos_order_linked_sale_order(self):
         """This test create an order and settle it in the PoS. It will let the PoS order in draft state.
