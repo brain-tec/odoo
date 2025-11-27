@@ -1,7 +1,7 @@
 import { fields, Record } from "@mail/model/export";
 import { Deferred } from "@web/core/utils/concurrency";
 import { rpc } from "@web/core/network/rpc";
-import { effectWithCleanup } from "@mail/utils/common/misc";
+import { compareDatetime, effectWithCleanup } from "@mail/utils/common/misc";
 
 export class DiscussChannel extends Record {
     static _name = "discuss.channel";
@@ -70,6 +70,13 @@ export class DiscussChannel extends Record {
         return def;
     }
 
+    /** Equivalent to DiscussChannel._allow_invite_by_email */
+    get allow_invite_by_email() {
+        return (
+            this.channel_type === "group" ||
+            (this.channel_type === "channel" && !this.group_public_id)
+        );
+    }
     get areAllMembersLoaded() {
         return this.member_count === this.channel_member_ids.length;
     }
@@ -88,12 +95,23 @@ export class DiscussChannel extends Record {
     }
     /** @type {"not_fetched"|"pending"|"fetched"} */
     fetchMembersState = "not_fetched";
+    /** @type {"not_fetched"|"fetching"|"fetched"} */
+    fetchChannelInfoState = "not_fetched";
     get memberListTypes() {
         return ["channel", "group"];
     }
     get hasMemberList() {
         return this.memberListTypes.includes(this.channel_type);
     }
+    last_interest_dt = fields.Datetime();
+    lastInterestDt = fields.Datetime({
+        /** @this {import("models").Thread} */
+        compute() {
+            return compareDatetime(this.self_member_id?.last_interest_dt, this.last_interest_dt) > 0
+                ? this.self_member_id?.last_interest_dt
+                : this.last_interest_dt;
+        },
+    });
     onlineMembers = fields.Many("discuss.channel.member", {
         /** @this {import("models").DiscussChannel} */
         compute() {
@@ -158,6 +176,17 @@ export class DiscussChannel extends Record {
         },
         inverse: "channel",
         onDelete: (r) => r?.delete(),
+    });
+    memberBusSubscription = fields.Attr(false, {
+        /** @this {import("models").Thread} */
+        compute() {
+            return (
+                this.self_member_id?.memberSince >= this.store.env.services.bus_service.startedAt
+            );
+        },
+        onUpdate() {
+            this.store.updateBusSubscription();
+        },
     });
     typingMembers = fields.Many("discuss.channel.member", { inverse: "channelAsTyping" });
     get unknownMembersCount() {

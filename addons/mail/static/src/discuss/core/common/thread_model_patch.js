@@ -1,7 +1,7 @@
 import { Thread } from "@mail/core/common/thread_model";
 import { fields } from "@mail/model/export";
 import { useSequential } from "@mail/utils/common/hooks";
-import { compareDatetime, nearestGreaterThanOrEqual } from "@mail/utils/common/misc";
+import { nearestGreaterThanOrEqual } from "@mail/utils/common/misc";
 import { _t } from "@web/core/l10n/translation";
 
 import { formatList } from "@web/core/l10n/utils";
@@ -40,10 +40,6 @@ const threadPatch = {
         });
         /** @type {"video_full_screen"|undefined} */
         this.default_display_mode = undefined;
-        /** @type {Deferred<Thread|undefined>} */
-        this.fetchChannelInfoDeferred = undefined;
-        /** @type {"not_fetched"|"fetching"|"fetched"} */
-        this.fetchChannelInfoState = "not_fetched";
         this.group_ids = fields.Many("res.groups");
         this.hasSeenFeature = fields.Attr(false, {
             /** @this {import("models").Thread} */
@@ -77,17 +73,6 @@ const threadPatch = {
             inverse: "threadAsFirstUnread",
         });
         this.invited_member_ids = fields.Many("discuss.channel.member");
-        this.last_interest_dt = fields.Datetime();
-        this.lastInterestDt = fields.Datetime({
-            /** @this {import("models").Thread} */
-            compute() {
-                const selfMemberLastInterestDt = this.self_member_id?.last_interest_dt;
-                const lastInterestDt = this.last_interest_dt;
-                return compareDatetime(selfMemberLastInterestDt, lastInterestDt) > 0
-                    ? selfMemberLastInterestDt
-                    : lastInterestDt;
-            },
-        });
         this.lastMessageSeenByAllId = fields.Attr(undefined, {
             /** @this {import("models").Thread} */
             compute() {
@@ -136,27 +121,6 @@ const threadPatch = {
             inverse: "threadAsSelf",
         });
         this.scrollUnread = true;
-        // memberBusSubscription
-        this.toggleBusSubscription = fields.Attr(false, {
-            /** @this {import("models").Thread} */
-            compute() {
-                return (
-                    this.model === "discuss.channel" &&
-                    this.self_member_id?.memberSince >=
-                        this.store.env.services.bus_service.startedAt
-                );
-            },
-            onUpdate() {
-                this.store.updateBusSubscription();
-            },
-        });
-    },
-    /** Equivalent to DiscussChannel._allow_invite_by_email */
-    get allow_invite_by_email() {
-        return (
-            this.channel.channel_type === "group" ||
-            (this.channel.channel_type === "channel" && !this.group_public_id)
-        );
     },
     get avatarUrl() {
         if (this.channel?.channel_type === "channel" || this.channel?.channel_type === "group") {
