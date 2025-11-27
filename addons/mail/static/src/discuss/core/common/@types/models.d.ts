@@ -36,7 +36,6 @@ declare module "models" {
         updateBusSubscription: (() => unknown) & { cancel: () => void };
     }
     export interface Thread {
-        allow_invite_by_email: Readonly<boolean>;
         allowCalls: Readonly<boolean>;
         allowDescription: Readonly<boolean>;
         allowedToLeaveChannelTypes: Readonly<string[]>;
@@ -52,16 +51,12 @@ declare module "models" {
         correspondents: Readonly<ChannelMember[]>;
         default_display_mode: "video_full_screen"|undefined;
         executeCommand: (command: unknown, body: string) => unknown;
-        fetchChannelInfoDeferred: Deferred<Thread|undefined>;
-        fetchChannelInfoState: "not_fetched"|"fetching"|"fetched";
         fetchMoreAttachments: (limit: number) => Promise<void>;
         firstUnreadMessage: Message;
         group_ids: ResGroups[];
         hasSeenFeature: boolean;
         invitationLink: Readonly<unknown|string>;
         invited_member_ids: ChannelMember[];
-        last_interest_dt: import("luxon").DateTime;
-        lastInterestDt: import("luxon").DateTime;
         lastMessageSeenByAllId: undefined|number;
         lastSelfMessageSeenByEveryone: Message;
         leaveChannel: () => Promise<void>;
@@ -78,7 +73,6 @@ declare module "models" {
         self_member_id: ChannelMember;
         showCorrespondentCountry: Readonly<boolean>;
         showUnreadBanner: Readonly<boolean>;
-        toggleBusSubscription: boolean;
         typesAllowingCalls: Readonly<string[]>;
     }
 
