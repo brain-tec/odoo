@@ -49,16 +49,12 @@ declare module "models" {
         correspondent: ChannelMember;
         correspondentCountry: Country;
         correspondents: Readonly<ChannelMember[]>;
-        default_display_mode: "video_full_screen"|undefined;
         executeCommand: (command: unknown, body: string) => unknown;
         fetchMoreAttachments: (limit: number) => Promise<void>;
         firstUnreadMessage: Message;
         group_ids: ResGroups[];
-        hasSeenFeature: boolean;
         invitationLink: Readonly<unknown|string>;
         invited_member_ids: ChannelMember[];
-        lastMessageSeenByAllId: undefined|number;
-        lastSelfMessageSeenByEveryone: Message;
         leaveChannel: () => Promise<void>;
         leaveChannelRpc: () => void;
         markAsFetched: () => Promise<void>;

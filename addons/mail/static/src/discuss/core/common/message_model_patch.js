@@ -44,22 +44,13 @@ const messagePatch = {
         this.isMessagePreviousToLastSelfMessageSeenByEveryone = fields.Attr(false, {
             /** @this {import("models").Message} */
             compute() {
-                if (!this.thread?.lastSelfMessageSeenByEveryone) {
+                if (!this.channel_id?.lastSelfMessageSeenByEveryone) {
                     return false;
                 }
-                return this.id < this.thread.lastSelfMessageSeenByEveryone.id;
+                return this.id < this.channel_id.lastSelfMessageSeenByEveryone.id;
             },
         });
         this.threadAsFirstUnread = fields.One("mail.thread", { inverse: "firstUnreadMessage" });
-    },
-    /**
-     * @override
-     */
-    get allowsEdition() {
-        return (
-            super.allowsEdition ||
-            ["owner", "admin"].includes(this.channel_id?.self_member_id?.channel_role)
-        );
     },
     /** @returns {import("models").ChannelMember[]} */
     get channelMemberHaveSeen() {
@@ -86,7 +77,7 @@ const messagePatch = {
      * @returns {boolean}
      */
     showSeenIndicator(thread) {
-        return this.isSelfAuthored && thread?.hasSeenFeature;
+        return this.isSelfAuthored && thread?.channel?.hasSeenFeature;
     },
 };
 patch(Message.prototype, messagePatch);
