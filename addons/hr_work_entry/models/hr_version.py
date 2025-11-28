@@ -318,6 +318,9 @@ class HrVersion(models.Model):
                 for leave_interval in [(l[0], l[1], interval[2]) for l in leaves_over_interval]:
                     leave_entry_type = version._get_interval_leave_work_entry_type(leave_interval, leaves, bypassing_work_entry_type_codes)
                     interval_leaves = [leave for leave in leaves if leave[2].work_entry_type_id.id == leave_entry_type.id]
+                    if not interval_leaves:
+                        # Maybe the computed leave type is not found. In that case, we use all leaves
+                        interval_leaves = leaves
                     interval_start = leave_interval[0].astimezone(pytz.utc).replace(tzinfo=None)
                     interval_stop = leave_interval[1].astimezone(pytz.utc).replace(tzinfo=None)
                     version_vals += [dict([
@@ -630,11 +633,12 @@ class HrVersion(models.Model):
 
     def write(self, vals):
         result = super().write(vals)
+        if self.env.context.get('salary_simulation'):
+            return result
         if vals.get('contract_date_end') or vals.get('contract_date_start') or vals.get('date_version'):
             self.sudo()._remove_work_entries()
         dependent_fields = self._get_fields_that_recompute_we()
-        salary_simulation = self.env.context.get('salary_simulation')
-        if not salary_simulation and any(key in dependent_fields for key in vals):
+        if any(key in dependent_fields for key in vals):
             for version_sudo in self.sudo():
                 date_from = max(version_sudo.date_start, version_sudo.date_generated_from.date())
                 date_to = min(version_sudo.date_end or date.max, version_sudo.date_generated_to.date())
