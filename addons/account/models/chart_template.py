@@ -547,13 +547,20 @@ class AccountChartTemplate(models.AbstractModel):
             if model in data:
                 data[model] = data.pop(model)
 
-        if data.get('res.company', {}).get(company.id):
-            # Filter out default values that we don't want to ignore if the field is not present, in any case.
-            company_data_to_filter = {'account_production_wip_account_id', 'account_production_wip_overhead_account_id'}
-            # Remove data of unknown fields present in the company template
-            for fname in list(data['res.company'][company.id]):
-                if fname not in company._fields and (not self.env.context.get('l10n_check_fields_complete') or fname in company_data_to_filter):
-                    del data['res.company'][company.id][fname]
+        # Exclude data of unknown fields present in the template
+        if not self.env.context.get('l10n_check_fields_complete'):
+            for model_name, records in data.items():
+                for record in records.values():
+                    keys_to_delete = []
+                    for key in record:
+                        if key == '__translation_module__':
+                            continue
+
+                        fname = key.split('@')[0] if '@' in key else key
+                        if fname not in self.env[model_name]._fields:
+                            keys_to_delete.append(key)
+                    for key in keys_to_delete:
+                        del record[key]
 
         # Translate the untranslatable fields we want to translate anyway
         untranslatable_model_fields = self._get_untranslatable_fields_to_translate()
@@ -822,6 +829,17 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_payable_id': 'res.partner',
             'property_stock_journal': 'product.category',
         }
+
+    def _get_chart_template_model_data(self, template_code, model, demo=False):
+        """Lightweight version of `_get_chart_template_data` targeting only one model."""
+        model_data = defaultdict(dict)
+        for code in [None] + self._get_parent_template(template_code):
+            for func in self._template_register[demo][code].get(model, []):
+                data = func(self, template_code)
+                if data is not None:
+                    for xmlid, values in data.items():
+                        model_data[xmlid].update(values)
+        return dict(model_data)
 
     def _get_chart_template_data(self, template_code, demo=False, module=None):
         template_data = defaultdict(lambda: defaultdict(dict))
@@ -1346,6 +1364,28 @@ class AccountChartTemplate(models.AbstractModel):
             except FileNotFoundError:
                 _logger.debug("No file %s found for template '%s'", model, module)
         return res
+
+    def _load_pre_defined_data(self, spec):
+        for company in self.env['res.company'].search([('chart_template', '!=', False)], order="parent_path"):
+            ChartTemplate = self.with_company(company)
+            pre_defined_data = {
+                model: {
+                    xmlid: filtered_vals
+                    for xmlid, vals in ChartTemplate._get_chart_template_model_data(company.chart_template, model).items()
+                    if (filtered_vals := {
+                        fname: value
+                        for fname, value in vals.items()
+                        if fname in fnames
+                    })
+                }
+                for model, fnames in spec.items()
+            }
+            ChartTemplate._pre_reload_data(company, {}, pre_defined_data, force_update=True)
+            ChartTemplate._load_data(pre_defined_data)
+
+    # --------------------------------------------------------------------------------
+    # Translation
+    # --------------------------------------------------------------------------------
 
     def _get_untranslatable_fields_target_language(self, template_code, company):
         """Return the code of the language we want to translate the untranslatable fields into.

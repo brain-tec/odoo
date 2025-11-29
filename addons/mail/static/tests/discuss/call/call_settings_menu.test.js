@@ -9,11 +9,10 @@ import {
     start,
     startServer,
 } from "@mail/../tests/mail_test_helpers";
-import { toRawValue } from "@mail/utils/common/local_storage";
+import { parseRawValue, toRawValue } from "@mail/utils/common/local_storage";
 import { Settings } from "@mail/core/common/settings_model";
 import { makeRecordFieldLocalId } from "@mail/model/misc";
 import { describe, test, expect } from "@odoo/hoot";
-import { advanceTime } from "@odoo/hoot-mock";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 
 import { browser } from "@web/core/browser/browser";
@@ -94,17 +93,35 @@ test("activate blur", async () => {
 test("local storage for call settings", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "test" });
-    localStorage.setItem("mail_user_setting_background_blur_amount", "3");
-    localStorage.setItem("mail_user_setting_edge_blur_amount", "5");
-    localStorage.setItem("mail_user_setting_show_only_video", "true");
+    const backgroundBlurAmountKey = makeRecordFieldLocalId(
+        Settings.localId(),
+        "backgroundBlurAmount"
+    );
+    localStorage.setItem(backgroundBlurAmountKey, toRawValue(3));
+    const edgeBlurAmountKey = makeRecordFieldLocalId(Settings.localId(), "edgeBlurAmount");
+    localStorage.setItem(edgeBlurAmountKey, toRawValue(5));
+    const showOnlyVideoKey = makeRecordFieldLocalId(Settings.localId(), "showOnlyVideo");
+    localStorage.setItem(showOnlyVideoKey, toRawValue(true));
     const useBlurLocalStorageKey = makeRecordFieldLocalId(Settings.localId(), "useBlur");
     localStorage.setItem(useBlurLocalStorageKey, toRawValue(true));
+    const callSettingsKeys = [
+        "Settings,undefined:backgroundBlurAmount",
+        "Settings,undefined:edgeBlurAmount",
+        "Settings,undefined:showOnlyVideo",
+        "Settings,undefined:voiceActivationThreshold",
+    ];
     patchWithCleanup(localStorage, {
         setItem(key, value) {
-            if (key.startsWith("mail_user_setting")) {
-                expect.step(`${key}: ${value}`);
+            if (callSettingsKeys.includes(key)) {
+                expect.step(`${key}: ${parseRawValue(value).value}`);
             }
             return super.setItem(key, value);
+        },
+        removeItem(key) {
+            if (callSettingsKeys.includes(key)) {
+                expect.step(`${key}: removed`);
+            }
+            return super.removeItem(key);
         },
     });
     patchUiSize({ size: SIZES.SM });
@@ -122,10 +139,9 @@ test("local storage for call settings", async () => {
 
     // testing save to local storage
     await click("input[title='Show video participants only']");
-    await expect.waitForSteps(["mail_user_setting_show_only_video: false"]);
+    await expect.waitForSteps(["Settings,undefined:showOnlyVideo: removed"]);
     await click("input[title='Blur video background']");
     expect(localStorage.getItem(useBlurLocalStorageKey)).toBe(null);
     await editInput(document.body, ".o-Discuss-CallSettings-thresholdInput", 0.3);
-    await advanceTime(2000); // threshold setting debounce timer
-    await expect.waitForSteps(["mail_user_setting_voice_threshold: 0.3"]);
+    await expect.waitForSteps(["Settings,undefined:voiceActivationThreshold: 0.3"]);
 });
