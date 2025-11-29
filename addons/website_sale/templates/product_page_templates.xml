@@ -24,7 +24,7 @@
 
         <t t-call="website.layout">
             <t t-set="additional_title" t-value="product.name" />
-            <div id="wrap" class="js_sale o_wsale_product_page">
+            <div id="wrap" class="o_wsale_product_page">
                 <div class="oe_structure oe_empty oe_structure_not_nearest" id="oe_structure_website_sale_product_1" data-editor-message.translate="DROP BUILDING BLOCKS HERE TO MAKE THEM AVAILABLE ACROSS ALL PRODUCTS"/>
                 <section id="product_detail"
                          t-attf-class="oe_website_sale mt-1 mt-lg-2 mb-5 #{'discount'
@@ -108,8 +108,10 @@
                             id="product_details"
                             t-attf-class="position-relative position-lg-sticky o_wsale_sticky_object col"
                         >
-                            <div id="o_wsale_product_details_content" t-attf-class="js_product js_main_product o_wsale_content_contained container">
-
+                            <div
+                                id="o_wsale_product_details_content"
+                                t-attf-class="js_product o_wsale_content_contained container"
+                            >
                                 <!-- Product title (purchase not available)-->
                                 <t t-set="is_add_to_cart_possible" t-value="product._is_add_to_cart_possible()"/>
                                 <t
@@ -117,7 +119,7 @@
                                     t-call="website_sale.product_title"
                                 />
 
-                                <form t-if="is_add_to_cart_possible">
+                                <article t-if="is_add_to_cart_possible">
                                     <!-- Product title (purchase available)-->
                                     <t t-call="website_sale.product_title"/>
 
@@ -137,37 +139,7 @@
                                         </small>
                                     </div>
 
-                                    <input
-                                        type="hidden"
-                                        name="csrf_token"
-                                        t-att-value="request.csrf_token()"
-                                    />
-
                                     <t name="variant_info">
-                                        <input
-                                            type="hidden"
-                                            class="o_not_editable product_id"
-                                            name="product_id"
-                                            t-att-value="product_variant.id"
-                                        />
-                                        <input
-                                            type="hidden"
-                                            class="o_not_editable product_template_id"
-                                            name="product_template_id"
-                                            t-att-value="product.id"
-                                        />
-                                        <input
-                                            t-if="product.public_categ_ids.ids"
-                                            type="hidden"
-                                            class="product_category_id"
-                                            name="product_category_id"
-                                            t-att-value="product.public_categ_ids.ids[0]"
-                                        />
-                                        <input
-                                            type="hidden"
-                                            name="product_type"
-                                            t-att-value="product.type"
-                                        />
                                         <div
                                             t-attf-class="o_wsale_product_details_content_section o_wsale_product_details_content_section_attributes mb-4 {{not (product.valid_product_template_attribute_line_ids or product._has_multiple_uoms()) and 'd-none' or ''}}"
                                         >
@@ -275,7 +247,7 @@
                                             </t>
                                         </div>
                                     </div>
-                                </form>
+                                </article>
                             </div>
                         </div>
                     </div>
@@ -616,17 +588,22 @@
                 id="add_to_cart_wrap"
                 t-attf-class="{{'d-none' if combination_info['prevent_zero_price_sale'] else 'd-flex'}} flex-grow-1 flex-lg-grow-0 flex-wrap align-items-center gap-2 {{'' if is_50_pc else ' w-100'}}"
             >
-                <a
-                    id="add_to_cart"
-                    role="button"
-                    href="#"
-                    t-attf-class="btn btn-primary js_check_product a-submit flex-grow-1"
-                    t-att-data-show-quantity="is_view_active('website_sale.product_quantity')"
+                <!-- data-action="add_to_cart" is the default, but it's needed to distinguish this
+                button from the "buy now" button in xpaths. -->
+                <button
+                    name="add_to_cart"
+                    t-attf-class="btn btn-primary flex-grow-1"
+                    data-action="add_to_cart"
                     data-animation-selector=".o_wsale_product_images"
+                    t-att-data-product-category-id="product.public_categ_ids.ids and product.public_categ_ids.ids[0]"
+                    t-att-data-product-id="product_variant.id"
+                    t-att-data-product-template-id="product.id"
+                    t-att-data-product-type="product.type"
+                    t-att-data-show-quantity="is_view_active('website_sale.product_quantity')"
                 >
                     <i class="fa fa-shopping-cart me-2"/>
                     Add to cart
-                </a>
+                </button>
             </div>
             <div
                 id="product_option_block"
@@ -677,13 +654,13 @@
         <xpath expr="//div[@id='product_option_block']" position="attributes">
             <attribute name="t-att-class" remove="flex-lg-grow-0" separator=" "/>
         </xpath>
-        <xpath expr="//a[@id='add_to_cart']" position="attributes">
+        <button name="add_to_cart" data-action="add_to_cart" position="attributes">
             <attribute
                 name="t-attf-class"
                 add="btn-lg {{('' if is_50_pc else ' px-xl-0')}}"
                 separator=" "
             />
-        </xpath>
+        </button>
     </template>
 
     <template
@@ -941,14 +918,18 @@
         name="Buy Now Button"
     >
         <xpath expr="//div[@id='add_to_cart_wrap']" position="inside">
-            <a
-                role="button"
-                t-attf-class="btn btn-outline-primary o_we_buy_now w-100 {{'' if is_view_active('website_sale.cta_wrapper_boxed') or is_view_active('website_sale.cta_wrapper_large') or not is_50_pc else 'w-sm-auto'}} {{'flex-grow-1' if not is_50_pc else ''}}"
-                href="#"
+            <button
+                name="add_to_cart"
+                t-attf-class="btn btn-outline-primary w-100 {{'' if is_view_active('website_sale.cta_wrapper_boxed') or is_view_active('website_sale.cta_wrapper_large') or not is_50_pc else 'w-sm-auto'}} {{'flex-grow-1' if not is_50_pc else ''}}"
+                data-action="buy_now"
+                t-att-data-product-id="product_variant.id"
+                t-att-data-product-template-id="product.id"
+                t-att-data-product-type="product.type"
+                t-att-data-show-quantity="is_view_active('website_sale.product_quantity')"
             >
                 <i class="fa fa-bolt me-2"/>
                 Buy now
-            </a>
+            </button>
         </xpath>
     </template>
 
@@ -958,9 +939,9 @@
         active="False"
         name="Large Buy Now Button"
     >
-        <xpath expr="//a[contains(@t-attf-class, 'o_we_buy_now')]" position="attributes">
+        <button name="add_to_cart" data-action="buy_now" position="attributes">
             <attribute name="t-attf-class" add="btn-lg" separator=" "/>
-        </xpath>
+        </button>
     </template>
 
     <template id="website_sale.tax_indication" active="False">

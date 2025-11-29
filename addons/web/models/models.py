@@ -1373,7 +1373,7 @@ class Base(models.AbstractModel):
 
         model_domain_image = self._search_panel_domain_image(field_name, model_domain,
                             enable_counters and no_extra,
-                            set_limit and limit,
+                            limit if set_limit else None,
                         )
         if enable_counters and not no_extra:
             count_domain_image = self._search_panel_domain_image(field_name, count_domain, True)
@@ -1909,12 +1909,7 @@ class Base(models.AbstractModel):
         env = self.env
         first_call = not field_names
 
-        if not (self and self._name == 'res.users'):
-            # res.users defines SELF_WRITEABLE_FIELDS to give access to the user
-            # to modify themselves, we skip the check in that case because the
-            # user does not have write permission on themselves
-            # TODO update res.users
-            self.check_access('write' if self else 'create')
+        self.check_access('write' if self else 'create')
 
         if any(fname not in self._fields for fname in field_names):
             return {}
