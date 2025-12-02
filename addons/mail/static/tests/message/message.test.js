@@ -2209,6 +2209,29 @@ test("Prettify message links", async () => {
     await contains(".o-mail-Message", { text: url(`/mail/message/100`) });
 });
 
+test("Clicking message link does not open a new tab", async () => {
+    patchWithCleanup(window, {
+        open() {
+            throw new Error("Clicking message link should not open a new tab");
+        },
+    });
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "Channel" });
+    const otherChannelId = pyEnv["discuss.channel"].create({ name: "Other Channel" });
+    const messageId = pyEnv["mail.message"].create({
+        body: "Message on other channel",
+        res_id: otherChannelId,
+        model: "discuss.channel",
+    });
+    await start();
+    await openDiscuss(channelId);
+    await insertText(".o-mail-Composer-input", `${url(`/mail/message/${messageId}`)}`);
+    await press("Enter");
+    await click(".o_message_redirect");
+    await contains(".o-mail-DiscussContent-threadName[title='Other Channel']");
+    await contains(".o-mail-Message", { text: "Message on other channel" });
+});
+
 test("should delete link preview along with message", async () => {
     const pyEnv = await startServer();
     const linkPreviewId = pyEnv["mail.link.preview"].create({

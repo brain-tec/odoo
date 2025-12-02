@@ -37,7 +37,6 @@ declare module "models" {
     }
     export interface Thread {
         allowCalls: Readonly<boolean>;
-        allowDescription: Readonly<boolean>;
         allowedToLeaveChannelTypes: Readonly<string[]>;
         allowedToUnpinChannelTypes: Readonly<string[]>;
         avatar_cache_key: string;
@@ -54,7 +53,6 @@ declare module "models" {
         firstUnreadMessage: Message;
         group_ids: ResGroups[];
         invitationLink: Readonly<unknown|string>;
-        invited_member_ids: ChannelMember[];
         leaveChannel: () => Promise<void>;
         leaveChannelRpc: () => void;
         markAsFetched: () => Promise<void>;
