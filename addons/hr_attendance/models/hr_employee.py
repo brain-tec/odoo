@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import datetime
+from zoneinfo import ZoneInfo
 
-import pytz
 from dateutil.relativedelta import relativedelta
 
 from odoo import models, fields, api, exceptions, _
@@ -94,14 +95,14 @@ class HrEmployee(models.Model):
         Compute hours and overtime hours in the current month, if we are the 15th of october, will compute from 1 oct to 15 oct
         """
         now = fields.Datetime.now()
-        now_utc = pytz.utc.localize(now)
+        now_utc = now.replace(tzinfo=datetime.UTC)
         for employee in self:
-            tz = pytz.timezone(employee.tz or 'UTC')
+            tz = ZoneInfo(employee.tz or 'UTC')
             now_tz = now_utc.astimezone(tz)
             start_tz = now_tz.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-            start_naive = start_tz.astimezone(pytz.utc).replace(tzinfo=None)
+            start_naive = start_tz.astimezone(datetime.UTC).replace(tzinfo=None)
             end_tz = now_tz
-            end_naive = end_tz.astimezone(pytz.utc).replace(tzinfo=None)
+            end_naive = end_tz.astimezone(datetime.UTC).replace(tzinfo=None)
 
             current_month_attendances = employee.attendance_ids.filtered(
                 lambda att: att.check_in >= start_naive and att.check_out and att.check_out <= end_naive
@@ -123,13 +124,13 @@ class HrEmployee(models.Model):
 
     def _compute_hours_today(self):
         now = fields.Datetime.now()
-        now_utc = pytz.utc.localize(now)
+        now_utc = now.replace(tzinfo=datetime.UTC)
         for employee in self:
             # start of day in the employee's timezone might be the previous day in utc
-            tz = pytz.timezone(employee.tz)
+            tz = ZoneInfo(employee.tz)
             now_tz = now_utc.astimezone(tz)
             start_tz = now_tz + relativedelta(hour=0, minute=0)  # day start in the employee's timezone
-            start_naive = start_tz.astimezone(pytz.utc).replace(tzinfo=None)
+            start_naive = start_tz.astimezone(datetime.UTC).replace(tzinfo=None)
 
             attendances = self.env['hr.attendance'].search([
                 ('employee_id', 'in', employee.ids),
@@ -162,6 +163,15 @@ class HrEmployee(models.Model):
             att = employee.last_attendance_id.sudo()
             employee.attendance_state = att and not att.check_out and 'checked_in' or 'checked_out'
 
+    def _notify_employee_presence_status(self):
+        self.ensure_one()
+        payload = {
+            "hr_presence_state": self.hr_presence_state,
+            "hr_icon_display": self.hr_icon_display,
+            "employee_id": self.id,
+        }
+        self._bus_send("hr.employee/presence", payload)
+
     def _attendance_action_change(self, geo_information=None):
         """ Check In/Check Out action
             Check In: create a new attendance record
@@ -182,7 +192,9 @@ class HrEmployee(models.Model):
                     'employee_id': self.id,
                     'check_in': action_date,
                 }
-            return self.env['hr.attendance'].create(vals)
+            res = self.env['hr.attendance'].create(vals)
+            self._notify_employee_presence_status()
+            return res
         attendance = self.env['hr.attendance'].search([('employee_id', '=', self.id), ('check_out', '=', False)], limit=1)
         if attendance:
             if geo_information:
@@ -194,6 +206,7 @@ class HrEmployee(models.Model):
                 attendance.write({
                     'check_out': action_date
                 })
+            self._notify_employee_presence_status()
         else:
             raise exceptions.UserError(_(
                 'Cannot perform check out on %(empl_name)s, could not find corresponding check in. '

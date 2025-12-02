@@ -1,11 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
-
+from ast import literal_eval
 from collections import defaultdict
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from dateutil.relativedelta import relativedelta
-from pytz import timezone
-from ast import literal_eval
 from markupsafe import escape, Markup
 from werkzeug.urls import url_encode
 
@@ -363,13 +363,22 @@ class PurchaseOrder(models.Model):
             self.order_line.filtered(lambda line: not line.display_type).date_planned = self.date_planned
 
     def _search_is_late(self, operator, value):
-        if operator != 'in':
-            return NotImplemented
-        purchase_domain = Domain('state', '=', 'purchase') & Domain('date_planned', '<=', fields.Datetime.now())
-        line_domain = Domain('order_id', 'any', purchase_domain) & Domain.custom(
-            to_sql=lambda table: SQL("%s < %s", table.qty_received, table.product_qty),
-        )
-        return Domain('order_line', 'any', line_domain)
+        if operator not in ["=", "!="]:
+            raise ValidationError(self.env._("Unsupported operator"))
+        purchase_domain = self._get_domain_is_late(operator, value)
+        if operator == "=" and value or operator == "!=" and not value:
+            purchase_lines_late = Domain('order_id', 'any', purchase_domain) & Domain.custom(
+                to_sql=lambda table: SQL("%s < %s", table.qty_received, table.product_qty),
+            )
+            return Domain('order_line', 'any', purchase_lines_late)
+        else:
+            purchase_lines_on_time = Domain('order_id', 'any', purchase_domain) & Domain.custom(
+                to_sql=lambda table: SQL("%s >= %s", table.qty_received, table.product_qty),
+            )
+            return Domain('order_line', 'any', purchase_lines_on_time)
+
+    def _get_domain_is_late(self, operator, value):
+        return Domain([('state', '=', 'purchase'), ('date_planned', '<=', fields.Datetime.now())])
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -1006,11 +1015,11 @@ class PurchaseOrder(models.Model):
         rfq_late_group = self.env['purchase.order']._read_group(rfq_late_domain, groupby, aggregate)
         _update('late', result, rfq_late_group)
 
-        rfq_not_acknowledge = [('state', '=', 'purchase'), ('acknowledged', '=', False)]
+        rfq_not_acknowledge = [('state', 'in', ['purchase', 'done']), ('acknowledged', '=', False)]
         rfq_not_acknowledge_group = self.env['purchase.order']._read_group(rfq_not_acknowledge, groupby, aggregate)
         _update('not_acknowledged', result, rfq_not_acknowledge_group)
 
-        rfq_late_receipt = [('is_late', '=', True)]
+        rfq_late_receipt = [('state', 'in', ['purchase', 'done']), ('is_late', '=', True)]
         rfq_late_receipt_group = self.env['purchase.order']._read_group(rfq_late_receipt, groupby, aggregate)
         _update('late_receipt', result, rfq_late_receipt_group)
 
@@ -1245,7 +1254,7 @@ class PurchaseOrder(models.Model):
         """ Returns the timezone of the order's user or the company's partner
         or UTC if none of them are set. """
         self.ensure_one()
-        return timezone(self.user_id.tz or self.company_id.partner_id.tz or 'UTC')
+        return ZoneInfo(self.user_id.tz or self.company_id.partner_id.tz or 'UTC')
 
     def _update_date_planned_for_lines(self, updated_dates):
         # create or update the activity

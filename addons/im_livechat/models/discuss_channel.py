@@ -1,14 +1,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import json
+from zoneinfo import ZoneInfo
+
+from markupsafe import Markup
+
 from odoo import api, fields, models, _, tools
 from odoo.addons.base.models.ir_qweb_fields import nl2br
 from odoo.addons.mail.tools.discuss import Store
 from odoo.tools import email_normalize, email_split, html2plaintext, plaintext2html
 from odoo.tools.mimetypes import get_extension
-
-import json
-from markupsafe import Markup
-from pytz import timezone
 
 
 def is_livechat_channel(channel):
@@ -44,7 +45,6 @@ class DiscussChannel(models.Model):
         "discuss_channel_im_livechat_expertise_rel",
         "discuss_channel_id",
         "im_livechat_expertise_id",
-        related="livechat_agent_history_ids.agent_expertise_ids",
         store=True,
     )
     livechat_agent_history_ids = fields.One2many(
@@ -560,7 +560,7 @@ class DiscussChannel(models.Model):
         render_context = {
             "company": company,
             "channel": self,
-            "tz": timezone(tz),
+            "tz": ZoneInfo(tz),
         }
         mail_body = self.env['ir.qweb']._render('im_livechat.livechat_email_template', render_context, minimal_qcontext=True)
         mail_body = self.env['mail.render.mixin']._replace_local_links(mail_body)
@@ -918,8 +918,9 @@ class DiscussChannel(models.Model):
 
             # next, add the human_operator to the channel and post a "Operator invited to the channel" notification
             create_member_params = {'livechat_member_type': 'agent'}
-            if chatbot_script_step:
+            if chatbot_script_step.operator_expertise_ids:
                 create_member_params['agent_expertise_ids'] = chatbot_script_step.operator_expertise_ids.ids
+                channel_sudo.livechat_expertise_ids |= chatbot_script_step.operator_expertise_ids
             channel_sudo._add_new_members_to_channel(
                 create_member_params=create_member_params,
                 inviting_partner=bot_partner_id,

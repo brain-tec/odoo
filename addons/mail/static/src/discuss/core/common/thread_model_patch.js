@@ -62,7 +62,6 @@ const threadPatch = {
             },
             inverse: "threadAsFirstUnread",
         });
-        this.invited_member_ids = fields.Many("discuss.channel.member");
         this.markReadSequential = useSequential();
         this.markedAsUnread = false;
         this.markingAsRead = false;
@@ -296,6 +295,9 @@ const threadPatch = {
             this.allowedToUnpinChannelTypes.includes(this.channel?.channel_type)
         );
     },
+    get allowDescription() {
+        return ["channel", "group"].includes(this.channel?.channel_type);
+    },
     get typesAllowingCalls() {
         return ["chat", "channel", "group"];
     },
@@ -305,9 +307,6 @@ const threadPatch = {
             this.typesAllowingCalls.includes(this.channel?.channel_type) &&
             !this.correspondent?.persona.eq(this.store.odoobot)
         );
-    },
-    get allowDescription() {
-        return ["channel", "group"].includes(this.channel?.channel_type);
     },
     get invitationLink() {
         if (!this.uuid || this.channel?.channel_type === "chat") {

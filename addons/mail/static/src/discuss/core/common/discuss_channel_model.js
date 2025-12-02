@@ -77,11 +77,27 @@ export class DiscussChannel extends Record {
             (this.channel_type === "channel" && !this.group_public_id)
         );
     }
+    get allowDescriptionsTypes() {
+        return ["channel", "group"];
+    }
+    get allowDescription() {
+        return this.allowDescriptionsTypes.includes(this.channel_type);
+    }
     get areAllMembersLoaded() {
         return this.member_count === this.channel_member_ids.length;
     }
     /** @type {"video_full_screen"|undefined} */
     default_display_mode;
+    get typesAllowingCalls() {
+        return ["chat", "channel", "group"];
+    }
+    get allowCalls() {
+        return (
+            !this.isTransient &&
+            this.typesAllowingCalls.includes(this.channel_type) &&
+            !this.correspondent?.persona.eq(this.store.odoobot)
+        );
+    }
     channel_member_ids = fields.Many("discuss.channel.member", {
         inverse: "channel_id",
         onDelete: (r) => r?.delete(),
@@ -143,6 +159,7 @@ export class DiscussChannel extends Record {
             }
         },
     });
+    invited_member_ids = fields.Many("discuss.channel.member");
     lastMessageSeenByAllId = fields.Attr(undefined, {
         /** @this {import("models").DiscussChannel} */
         compute() {
