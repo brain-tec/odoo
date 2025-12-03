@@ -142,11 +142,34 @@ class SaleOrderTemplate(models.Model):
         ).product_variant_id
         demo_template.sale_order_template_line_ids = [
             Command.create({
+                'name': self.env._("Regular Section"),
+                'display_type': 'line_section',
+                'product_uom_qty': 0,
+            }),
+            Command.create({
+                'product_id': self.env.ref('product.product_template_dining_table').id,
+            }),
+            Command.create({
+                'product_id': self.env.ref('product.monitor_stand').id,
+            }),
+            Command.create({
+                'name': self.env._("Hidden Composition Section"),
+                'display_type': 'line_section',
+                'collapse_composition': True,
+                'product_uom_qty': 0,
+            }),
+            Command.create({
                 'product_id': self.env.ref('product.consu_delivery_02').id,
             }),
             Command.create({
                 'product_id': self.env.ref('product.product_delivery_01').id,
                 'product_uom_qty': 8,
+            }),
+            Command.create({
+                'name': self.env._("Hidden Prices Section"),
+                'display_type': 'line_section',
+                'collapse_prices': True,
+                'product_uom_qty': 0,
             }),
             Command.create({
                 'product_id': acoustic_bloc_screen_product.id,
@@ -156,7 +179,7 @@ class SaleOrderTemplate(models.Model):
                 'product_uom_qty': 8,
             }),
             Command.create({
-                'name': "Optional Products Section",
+                'name': self.env._("Optional Section"),
                 'display_type': 'line_section',
                 'is_optional': True,
                 'product_uom_qty': 0,
@@ -166,7 +189,8 @@ class SaleOrderTemplate(models.Model):
                 'product_uom_qty': 0,
             }),
             Command.create({
-                'product_id': self.env.ref('product.product_product_7').id,
+                'name': self.env._("Subsection"),
+                'display_type': 'line_subsection',
                 'product_uom_qty': 0,
             }),
             Command.create({
