@@ -36,10 +36,10 @@ function findOEditable(containerEl) {
     const isOEditable = (node) => {
         // Ideally, we should entirely rely on the contenteditable mechanism.
         // The problem is that the translatable attributes are not branded DOM
-        // nodes hence the o_editable_attribute hack.
+        // nodes hence the o_savable_attribute hack.
         if (
             node.isContentEditable ||
-            (node.classList.contains("o_editable_attribute") &&
+            (node.classList.contains("o_savable_attribute") &&
                 (!node.closest(".o_not_editable") || node.classList.contains("o_editable_media")))
         ) {
             return true;
@@ -63,17 +63,17 @@ export class TranslationPlugin extends Plugin {
                 this.services.website.pageDocument
             );
             for (const translationSavableEl of translationSavableEls) {
-                translationSavableEl.classList.add("o_editable_attribute");
+                translationSavableEl.classList.add("o_savable_attribute");
             }
             // Apply data-oe-readonly on wrapping editor
-            const editableElSelector = ".o_editable, .o_editable_attribute";
+            const editableElSelector = ".o_savable, .o_savable_attribute";
             const editableEls = [
-                ...this.services.website.pageDocument.querySelectorAll(".o_editable"),
+                ...this.services.website.pageDocument.querySelectorAll(".o_savable"),
             ];
             for (const editableEl of editableEls) {
                 if (editableEl.querySelector(editableElSelector)) {
                     editableEl.setAttribute("data-oe-readonly", "true");
-                    editableEl.classList.remove("o_editable");
+                    editableEl.classList.remove("o_savable");
                 }
             }
             return true;
@@ -81,7 +81,7 @@ export class TranslationPlugin extends Plugin {
         start_edition_handlers: withSequence(5, () => {
             this.prepareTranslation();
         }),
-        system_classes: ["o_editable_attribute"],
+        system_classes: ["o_savable_attribute"],
     };
 
     setup() {
@@ -106,7 +106,7 @@ export class TranslationPlugin extends Plugin {
         const menuEls = this.websiteService.pageDocument.querySelectorAll(".dropdown-menu");
         for (const menuEl of menuEls) {
             this.addDomListener(menuEl, "click", (ev) => {
-                const editableEl = ev.target.closest(".o_editable");
+                const editableEl = ev.target.closest(".o_savable");
                 if (editableEl && menuEl.contains(editableEl)) {
                     ev.stopPropagation();
                     ev.preventDefault();
@@ -138,7 +138,7 @@ export class TranslationPlugin extends Plugin {
             this.handleToC(translateEl);
         }
         const savableInsideNotEditableEls = this.editable.querySelectorAll(
-            ".o_not_editable .o_editable, .o_not_editable .o_editable_attribute"
+            ".o_not_editable .o_savable, .o_not_editable .o_savable_attribute"
         );
         for (const savableInsideNotEditableEl of savableInsideNotEditableEls) {
             this.addDomListener(savableInsideNotEditableEl, "click", showNotification);
@@ -342,8 +342,8 @@ export class TranslationPlugin extends Plugin {
     }
 
     cleanForSave({ root }) {
-        root.querySelectorAll(".o_editable_attribute").forEach((el) => {
-            el.classList.remove("o_editable_attribute");
+        root.querySelectorAll(".o_savable_attribute").forEach((el) => {
+            el.classList.remove("o_savable_attribute");
         });
         // Remove the `.o_translation_select` temporary element
         const optionsEl = root.querySelector(".o_translation_select");

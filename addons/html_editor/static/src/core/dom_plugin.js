@@ -259,9 +259,9 @@ export class DomPlugin extends Plugin {
             }
         }
 
+        const textNode = this.document.createTextNode("");
         if (startNode.nodeType === Node.ELEMENT_NODE) {
             if (selection.anchorOffset === 0) {
-                const textNode = this.document.createTextNode("");
                 if (isSelfClosingElement(startNode)) {
                     startNode.parentNode.insertBefore(textNode, startNode);
                 } else {
@@ -399,6 +399,8 @@ export class DomPlugin extends Plugin {
             }
             currentNode = nodeToInsert;
         }
+        // Remove the empty text node created earlier
+        textNode.remove();
         allInsertedNodes.push(...lastInsertedNodes);
         this.getResource("after_insert_handlers").forEach((handler) => handler(allInsertedNodes));
         let insertedNodesParents = getConnectedParents(allInsertedNodes);
@@ -563,7 +565,7 @@ export class DomPlugin extends Plugin {
     /**
      * Determines if a block element can be safely retagged.
      *
-     * Certain blocks (like 'o_editable') should not be retagged because doing so
+     * Certain blocks (like 'o_savable') should not be retagged because doing so
      * will recreate the block, potentially causing issues. This function checks
      * if retagging a block is safe.
      *
