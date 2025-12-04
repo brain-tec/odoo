@@ -95,6 +95,35 @@ class TestQWebTField(TransactionCase):
         doc = etree.fromstring(rendered)
         self.assertEqual(len(doc.xpath('//script')), 1)
 
+    def test_url_xss(self):
+        # Fully static nodes allow for javascript scheme
+        rendered = self.env['ir.qweb']._render(etree.fromstring('''<a href="javascript:alert('Hello World!')"/>'''))
+        self.assertIn('href="javascript:', rendered)
+
+        # Dynamic nodes DO NOT allow for javascript scheme
+        rendered = self.env['ir.qweb']._render(etree.fromstring('''<a href="javascript:alert('Hello World!')" t-out="name"/>'''), values={"name": "Hello"})
+        self.assertNotIn('href="javascript:', rendered)
+        rendered = self.env['ir.qweb']._render(etree.fromstring('<a t-att-href="url"/>'), values={"url": "javascript:alert('Hello World!')"})
+        self.assertNotIn('href="javascript:', rendered)
+        rendered = self.env['ir.qweb']._render(etree.fromstring('<a t-att-href="url"/>'), values={"url": " javascript:alert('Hello World!')"})
+        self.assertNotIn('href="javascript:', rendered)
+        rendered = self.env['ir.qweb']._render(etree.fromstring('<a t-attf-href="#{url}"/>'), values={"url": "javascript:alert('Hello World!')"})
+        self.assertNotIn('href="javascript:', rendered)
+
+        # history.back() exception
+        rendered = self.env['ir.qweb']._render(etree.fromstring('<a t-att-href="url"/>'), values={"url": "javascript:window.history.back()"})
+        self.assertIn('href="javascript:', rendered)
+        rendered = self.env['ir.qweb']._render(etree.fromstring('<a t-att-href="url"/>'), values={"url": "javascript: window.history.back()"})
+        self.assertIn('href="javascript:', rendered)
+        rendered = self.env['ir.qweb']._render(etree.fromstring('<a t-att-href="url"/>'), values={"url": "javascript:history.back()"})
+        self.assertIn('href="javascript:', rendered)
+        rendered = self.env['ir.qweb']._render(etree.fromstring('<a t-att-href="url"/>'), values={"url": "javascript: history.back()"})
+        self.assertIn('href="javascript:', rendered)
+        rendered = self.env['ir.qweb']._render(etree.fromstring('<a t-att-href="url"/>'), values={"url": "javascript:alert('Hello World!');window.history.back()"})
+        self.assertNotIn('href="javascript:', rendered)
+        rendered = self.env['ir.qweb']._render(etree.fromstring('<a t-att-href="url"/>'), values={"url": "javascript:window.history.back();alert('Hello World!')"})
+        self.assertNotIn('href="javascript:', rendered)
+
     def test_default_value(self):
         Partner = self.env['res.partner']
         t = self.env['ir.ui.view'].create({
@@ -1672,7 +1701,7 @@ class TestQWebBasic(TransactionCase):
             'name': 'test',
             'type': 'qweb',
             'key': 'base.test_qweb_error',
-            'arch_db': '''<t t-name="test"><section><div t-out="0"/></section></t>'''
+            'arch_db': '''<t t-name="test"><section><div t-out="0"/><t t-if="useless">NO</t></section></t>'''
         })
         wrap = self.env['ir.ui.view'].create({
             'name': "other",
@@ -1859,6 +1888,47 @@ class TestQWebBasic(TransactionCase):
             self.assertIn("TypeError", err)
             self.assertIn("indices must be integers", err)
 
+    def test_error_message_15(self):
+        a = self.env['ir.ui.view'].create({
+            'name': 'test',
+            'type': 'qweb',
+            'key': 'base.test_qweb_error',
+            'arch_db': '''<t t-name="test"><section><div t-out="0"/><t t-if="useless">NO</t></section></t>'''
+        })
+        wrap = self.env['ir.ui.view'].create({
+            'name': "other",
+            'type': 'qweb',
+            'key': 'base.test_qweb_wrap',
+            'arch': """<div><t t-call="base.test_qweb_error"><article t-out="0"/></t></div>"""
+        })
+        t = self.env['ir.ui.view'].create({
+            'name': "other",
+            'type': 'qweb',
+            'arch': """<body><t t-call="base.test_qweb_wrap"><span t-if="1/0">FAIL</span></t></body>"""
+        })
+
+        try:
+            self.env['ir.qweb']._render(t.id)
+        except QWebError as e:
+            self.assertEqual(str(e),
+                "Error while rendering the template:\n"
+                "    ZeroDivisionError: division by zero\n"
+               f"    Template: {t.key}\n"
+               f"    Reference: {t.id}\n"
+                "    Path: /body/t/span\n"
+                "    Element: <span t-if=\"1/0\"/>\n"
+               f"    From: ({t.id}, '/body/t', '<t t-call=\"base.test_qweb_wrap\"/>')\n"
+               f"          ({wrap.id}, '/div/t', '<t t-call=\"base.test_qweb_error\"/>')\n"
+               f"          ({a.id}, '/t/section/div', '<div t-out=\"0\"/>')\n"
+               f"          ({wrap.id}, '/div/t', '<t t-call=\"base.test_qweb_error\"/>')\n"
+               f"          ({wrap.id}, '/div/t/article', '<article t-out=\"0\"/>')\n"
+               f"          ({t.id}, '/body/t', '<t t-call=\"base.test_qweb_wrap\"/>')\n"
+               f"          ({t.id}, '/body/t/span', '<span t-if=\"1/0\"/>')"
+            )
+
+        with self.assertRaises(QWebError):
+            self.env['ir.qweb']._render(t.id)
+
     def test_call_set(self):
         view0 = self.env['ir.ui.view'].create({
             'name': "dummy",
@@ -1883,9 +1953,7 @@ class TestQWebBasic(TransactionCase):
                     <div>
                         <t t-set="a">1</t>
                         <t t-set="b">1</t>
-                        <t t-call="base.dummy">
-                            <t t-set="b">2</t>
-                        </t>
+                        <t t-call="base.dummy" b="2"/>
                         <span t-out="a"/>
                         <span t-out="b"/>
                     </div>

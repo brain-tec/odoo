@@ -12,9 +12,11 @@ from odoo.exceptions import AccessError
 from odoo.fields import Domain
 from odoo.tools import is_html_empty
 from odoo.tools.misc import clean_context, get_lang, groupby
+from odoo.tools.translate import LazyTranslate
 from odoo.addons.mail.tools.discuss import Store
 
 _logger = logging.getLogger(__name__)
+_lt = LazyTranslate(__name__)
 
 
 class MailActivity(models.Model):
@@ -450,7 +452,10 @@ class MailActivity(models.Model):
             )
             record = activity.env[activity.res_model].browse(activity.res_id)
             if activity.user_id:
-                record.message_notify(
+                record.with_context(
+                    email_notification_force_header=True,
+                    email_notification_force_footer=True,
+                ).message_notify(
                     partner_ids=activity.user_id.partner_id.ids,
                     body=body,
                     model_description=model_description,
@@ -458,8 +463,10 @@ class MailActivity(models.Model):
                     subject=_('"%(activity_name)s: %(summary)s" assigned to you',
                               activity_name=activity.res_name,
                               summary=activity.summary or activity.activity_type_id.name or ''),
-                    subtitles=[_('Activity: %s', activity.activity_type_id.name or _('Todo')),
-                               _('Deadline: %s', activity.date_deadline.strftime(get_lang(activity.env).date_format))],
+                    subtitles=[
+                        _lt('Activity: %s', activity.activity_type_id.name) if activity.activity_type_id.name
+                        else _lt('Activity: Todo'),
+                        _lt('Deadline: %s', activity.date_deadline.strftime(get_lang(activity.env).date_format))],
                 )
 
     def action_done(self):
@@ -645,28 +652,18 @@ class MailActivity(models.Model):
 
     @api.readonly
     def activity_format(self):
-        return Store().add(self).get_result()
+        return Store().add(self, "_store_activity_fields").get_result()
 
-    def _to_store_defaults(self, target):
-        return [
-            "activity_category",
-            Store.One("activity_type_id", "name"),
-            "can_write",
-            "chaining_type",
-            "create_date",
-            Store.One("create_uid", Store.One("partner_id", "name")),
-            "date_deadline",
-            "date_done",
-            "icon",
-            "note",
-            "res_id",
-            "res_model",
-            "state",
-            "summary",
-            Store.One("user_id", Store.One("partner_id")),
-            Store.Many("attachment_ids", ["name"]),
-            Store.Many("mail_template_ids", ["name"]),
-        ]
+    def _store_activity_fields(self, res: Store.FieldList):
+        res.attr("activity_category")
+        res.one("activity_type_id", ["name"])
+        res.extend(["can_write", "chaining_type", "create_date"])
+        res.one("create_uid", lambda res: res.one("partner_id", ["name"]))
+        res.extend(["date_deadline", "date_done", "icon", "note"])
+        res.extend(["res_id", "res_model", "state", "summary"])
+        res.one("user_id", lambda res: res.one("partner_id", "_store_partner_fields"))
+        res.many("attachment_ids", ["name"])
+        res.many("mail_template_ids", ["name"])
 
     @api.readonly
     @api.model

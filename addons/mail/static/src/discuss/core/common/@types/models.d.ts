@@ -51,17 +51,14 @@ declare module "models" {
         fetchMoreAttachments: (limit: number) => Promise<void>;
         firstUnreadMessage: Message;
         group_ids: ResGroups[];
-        invitationLink: Readonly<unknown|string>;
         leaveChannel: () => Promise<void>;
         leaveChannelRpc: () => void;
-        markAsFetched: () => Promise<void>;
         markedAsUnread: boolean;
         markingAsRead: boolean;
         markReadSequential: () => Promise<any>;
         name: string;
         notifyAvatarToServer: (data: string) => Promise<void>;
         notifyDescriptionToServer: (description: unknown) => Promise<unknown>;
-        rename: (name: string) => Promise<void>;
         scrollUnread: boolean;
         self_member_id: ChannelMember;
         showCorrespondentCountry: Readonly<boolean>;
