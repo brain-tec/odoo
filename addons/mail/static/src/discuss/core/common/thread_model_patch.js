@@ -295,12 +295,6 @@ const threadPatch = {
             this.allowedToUnpinChannelTypes.includes(this.channel?.channel_type)
         );
     },
-    get invitationLink() {
-        if (!this.uuid || this.channel?.channel_type === "chat") {
-            return undefined;
-        }
-        return `${window.location.origin}/chat/${this.id}/${this.uuid}`;
-    },
     executeCommand(command, body = "") {
         return this.store.env.services.orm.call(
             "discuss.channel",
@@ -308,11 +302,6 @@ const threadPatch = {
             [[this.id]],
             { body }
         );
-    },
-    async markAsFetched() {
-        await this.store.env.services.orm.silent.call("discuss.channel", "channel_fetched", [
-            [this.id],
-        ]);
     },
     /** @param {string} data base64 representation of the binary */
     async notifyAvatarToServer(data) {
@@ -348,37 +337,6 @@ const threadPatch = {
     },
     leaveChannelRpc() {
         this.store.env.services.orm.silent.call("discuss.channel", "action_unfollow", [this.id]);
-    },
-    /** @param {string} name */
-    async rename(name) {
-        const newName = name.trim();
-        if (
-            newName !== this.displayName &&
-            ((newName && this.channel?.channel_type === "channel") || this.channel?.isChatChannel)
-        ) {
-            if (
-                this.channel?.channel_type === "channel" ||
-                this.channel?.channel_type === "group"
-            ) {
-                this.name = newName;
-                await this.store.env.services.orm.call(
-                    "discuss.channel",
-                    "channel_rename",
-                    [[this.id]],
-                    { name: newName }
-                );
-            } else if (this.supportsCustomChannelName) {
-                if (this.self_member_id) {
-                    this.self_member_id.custom_channel_name = newName;
-                }
-                await this.store.env.services.orm.call(
-                    "discuss.channel",
-                    "channel_set_custom_name",
-                    [[this.id]],
-                    { name: newName }
-                );
-            }
-        }
     },
 };
 patch(Thread.prototype, threadPatch);
