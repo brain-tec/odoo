@@ -61,13 +61,13 @@ This module also uses analytic accounting and is compatible with the invoice on 
             'hr_expense/static/src/mixins/*.js',
             'hr_expense/static/src/views/*.js',
             'hr_expense/static/src/views/*.xml',
+            'hr_expense/static/src/webclient/**/*',
             'hr_expense/static/src/scss/hr_expense.scss',
             'hr_expense/static/src/js/tours/*.js',
             'hr_expense/static/src/js/web/*.js',
         ],
         'web.assets_tests': [
-            'hr_expense/static/tests/tours/expense_upload_tours.js',
-            'hr_expense/static/tests/tours/expense_form_tours.js',
+            'hr_expense/static/tests/tours/*.js',
         ],
         'web.report_assets_common': [
             'hr_expense/static/src/scss/hr_expense.scss',

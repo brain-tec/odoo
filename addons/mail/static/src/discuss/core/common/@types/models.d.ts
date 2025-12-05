@@ -36,11 +36,7 @@ declare module "models" {
         updateBusSubscription: (() => unknown) & { cancel: () => void };
     }
     export interface Thread {
-        allowedToLeaveChannelTypes: Readonly<string[]>;
-        allowedToUnpinChannelTypes: Readonly<string[]>;
         avatar_cache_key: string;
-        canLeave: Readonly<boolean>;
-        canUnpin: Readonly<boolean>;
         channel: DiscussChannel;
         channel_name_member_ids: ChannelMember[];
         computeCorrespondent: () => ChannelMember;
@@ -58,7 +54,6 @@ declare module "models" {
         markReadSequential: () => Promise<any>;
         name: string;
         notifyAvatarToServer: (data: string) => Promise<void>;
-        notifyDescriptionToServer: (description: unknown) => Promise<unknown>;
         scrollUnread: boolean;
         self_member_id: ChannelMember;
         showCorrespondentCountry: Readonly<boolean>;

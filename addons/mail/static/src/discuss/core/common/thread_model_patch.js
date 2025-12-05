@@ -276,25 +276,6 @@ const threadPatch = {
     get showUnreadBanner() {
         return this.self_member_id?.message_unread_counter_ui > 0;
     },
-    get allowedToLeaveChannelTypes() {
-        return ["channel", "group"];
-    },
-    get canLeave() {
-        return (
-            this.allowedToLeaveChannelTypes.includes(this.channel?.channel_type) &&
-            this.group_ids.length === 0 &&
-            this.store.self_user
-        );
-    },
-    get allowedToUnpinChannelTypes() {
-        return ["chat"];
-    },
-    get canUnpin() {
-        return (
-            this.parent_channel_id ||
-            this.allowedToUnpinChannelTypes.includes(this.channel?.channel_type)
-        );
-    },
     executeCommand(command, body = "") {
         return this.store.env.services.orm.call(
             "discuss.channel",
@@ -309,15 +290,6 @@ const threadPatch = {
             channel_id: this.id,
             data,
         });
-    },
-    async notifyDescriptionToServer(description) {
-        this.description = description;
-        return this.store.env.services.orm.call(
-            "discuss.channel",
-            "channel_change_description",
-            [[this.id]],
-            { description }
-        );
     },
     async leaveChannel() {
         if (this.channel?.channel_type !== "group" && this.create_uid?.eq(this.store.self_user)) {
