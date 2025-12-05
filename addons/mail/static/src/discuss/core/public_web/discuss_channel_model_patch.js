@@ -10,6 +10,19 @@ const discussChannelPatch = {
         this.discuss_category_id = fields.One("discuss.category", {
             inverse: "channel_ids",
         });
+        this.displayToSelf = fields.Attr(false, {
+            compute() {
+                return (
+                    this.self_member_id?.is_pinned ||
+                    (["channel", "group"].includes(this.channel_type) &&
+                        this.self_member_id &&
+                        !this.parent_channel_id)
+                );
+            },
+            onUpdate() {
+                this.onPinStateUpdated();
+            },
+        });
         this.isDisplayInSidebar = fields.Attr(false, {
             compute() {
                 return (
@@ -31,6 +44,35 @@ const discussChannelPatch = {
     },
     get allowCalls() {
         return super.allowCalls && !this.parent_channel_id;
+    },
+    /** @param {string} description */
+    async notifyDescriptionToServer(description) {
+        this.description = description;
+        return this.store.env.services.orm.call(
+            "discuss.channel",
+            "channel_change_description",
+            [[this.id]],
+            { description }
+        );
+    },
+    get allowedToLeaveChannelTypes() {
+        return ["channel", "group"];
+    },
+    get allowedToUnpinChannelTypes() {
+        return ["chat"];
+    },
+    get canLeave() {
+        return (
+            !this.parent_channel_id &&
+            this.allowedToLeaveChannelTypes.includes(this.channel_type) &&
+            this.group_ids.length === 0 &&
+            this.store.self_user
+        );
+    },
+    get canUnpin() {
+        return (
+            this.parent_channel_id || this.allowedToUnpinChannelTypes.includes(this.channel_type)
+        );
     },
     /**
      * Handle the notification of a new message based on the notification setting of the user.
@@ -71,6 +113,15 @@ const discussChannelPatch = {
                 }
             }
             this.store.env.services["mail.out_of_focus"].notify(message, this.thread);
+        }
+    },
+    onPinStateUpdated() {
+        super.onPinStateUpdated();
+        if (this.self_member_id?.is_pinned) {
+            this.isLocallyPinned = false;
+        }
+        if (!this.self_member_id?.is_pinned && !this.isLocallyPinned) {
+            this.sub_channel_ids.forEach((c) => (c.isLocallyPinned = false));
         }
     },
     /** @override */

@@ -206,6 +206,7 @@ class ResUsers(models.Model):
         help="If specified, this action will be opened at log on for this user, in addition to the standard menu.")
     log_ids = fields.One2many('res.users.log', 'create_uid', string='User log entries')
     device_ids = fields.One2many('res.device', 'user_id', string='User devices')
+    session_ids = fields.One2many('res.session', 'user_id', string='User sessions')
     login_date = fields.Datetime(related='log_ids.create_date', string='Latest Login', readonly=False)
     share = fields.Boolean(compute='_compute_share', compute_sudo=True, string='Share User', store=True,
          help="External user with limited access, created only for the purpose of sharing data.")
@@ -956,12 +957,15 @@ class ResUsers(models.Model):
             'tag': 'reload_context',
         }
 
+    @check_identity
     def action_change_password_wizard(self):
         return {
             'type': 'ir.actions.act_window',
             'target': 'new',
             'res_model': 'change.password.wizard',
             'view_mode': 'form',
+            'name': 'Change Password',
+            'context': {'active_ids': self.ids, 'active_model': 'res.users'}
         }
 
     @check_identity
@@ -990,8 +994,8 @@ class ResUsers(models.Model):
         return (self.env.user if self.id == self.env.uid else self)._action_revoke_all_devices()
 
     def _action_revoke_all_devices(self):
-        devices = self.env["res.device"].search([("user_id", "=", self.id)])
-        devices.filtered(lambda d: not d.is_current)._revoke()
+        sessions = self.env["res.session"].search([("user_id", "=", self.id)])
+        sessions.filtered(lambda d: not d.is_current)._revoke()
         return {'type': 'ir.actions.client', 'tag': 'reload'}
 
     @api.readonly
@@ -1394,10 +1398,7 @@ class ChangePasswordWizard(models.TransientModel):
 
     def change_password_button(self):
         self.ensure_one()
-        self.user_ids.change_password_button()
-        if self.env.user in self.user_ids.user_id:
-            return {'type': 'ir.actions.client', 'tag': 'reload'}
-        return {'type': 'ir.actions.act_window_close'}
+        return self.user_ids.change_password_button()
 
 
 class ChangePasswordUser(models.TransientModel):
@@ -1409,12 +1410,16 @@ class ChangePasswordUser(models.TransientModel):
     user_login = fields.Char(string='User Login', readonly=True)
     new_passwd = fields.Char(string='New Password', default='')
 
+    @check_identity
     def change_password_button(self):
         for line in self:
             if line.new_passwd:
                 line.user_id._change_password(line.new_passwd)
         # don't keep temporary passwords in the database longer than necessary
         self.write({'new_passwd': False})
+        if self.env.user in self.user_id:
+            return {'type': 'ir.actions.client', 'tag': 'reload'}
+        return {'type': 'ir.actions.act_window_close'}
 
 
 class ChangePasswordOwn(models.TransientModel):
