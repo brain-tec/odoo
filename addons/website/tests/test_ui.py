@@ -752,6 +752,9 @@ class TestUi(HttpCaseWithWebsiteUser):
     def test_website_add_snippet_dialog(self):
         self.start_tour("/", "website_add_snippet_dialog", login="admin")
 
+    def test_media_iframe_video_options(self):
+        self.start_tour("/", "website_media_iframe_video_options", login="admin")
+
     def test_popup_visibility_option(self):
         self.start_tour("/", "website_popup_visibility_option", login="admin")
 
@@ -767,3 +770,6 @@ class TestUi(HttpCaseWithWebsiteUser):
 
     def test_website_custom_colors_picking(self):
         self.start_tour('/', 'website_custom_colors_picking', login='admin')
+
+    def test_header_color_and_undo_redo_issue(self):
+        self.start_tour("/", "undo_redo_header_oriented_issue", login="admin")
