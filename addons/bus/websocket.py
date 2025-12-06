@@ -5,35 +5,36 @@ import hashlib
 import json
 import logging
 import os
-import psycopg2
 import random
+import selectors
 import socket
 import struct
-import selectors
 import threading
 import time
 from collections import defaultdict, deque
 from contextlib import closing, suppress
 from enum import IntEnum
 from itertools import count
-from psycopg2.pool import PoolError
 from queue import PriorityQueue
 from urllib.parse import urlparse
 from weakref import WeakSet
 
-from werkzeug.local import LocalStack
+import psycopg2
+from psycopg2.pool import PoolError
 from werkzeug.datastructures import ImmutableMultiDict, MultiDict
 from werkzeug.exceptions import BadRequest, HTTPException, ServiceUnavailable
+from werkzeug.local import LocalStack
 
 import odoo
-from odoo import api, modules
-from .models.bus import dispatch
-from odoo.http import root, Request, Response, SessionExpiredException, get_default_session
+from odoo import modules
+from odoo.http import Request, Response, SessionExpiredException, get_default_session, root
 from odoo.modules.registry import Registry
 from odoo.service import model as service_model
 from odoo.service.server import CommonServer
-from odoo.service.security import check_session
 from odoo.tools import config
+
+from .models.bus import dispatch, fetch_bus_notifications
+from .session_helpers import check_session, new_env
 
 _logger = logging.getLogger(__name__)
 
@@ -620,7 +621,7 @@ class Websocket:
         dispatch.unsubscribe(self)
         self._trigger_lifecycle_event(LifecycleEvent.CLOSE)
         with acquire_cursor(self._db) as cr:
-            env = self.new_env(cr, self._session)
+            env = new_env(cr, self._session)
             env["ir.websocket"]._on_websocket_closed(self._cookies)
 
     def _handle_control_frame(self, frame):
@@ -697,7 +698,7 @@ class Websocket:
         if not self.__event_callbacks[event_type]:
             return
         with closing(acquire_cursor(self._db)) as cr:
-            env = self.new_env(cr, self._session, set_lang=True)
+            env = new_env(cr, self._session, set_lang=True)
             for callback in self.__event_callbacks[event_type]:
                 try:
                     service_model.retrying(functools.partial(callback, env, self), env)
@@ -707,6 +708,27 @@ class Websocket:
                         LifecycleEvent(event_type).name,
                         exc_info=True
                     )
+
+    def _assert_session_validity(self):
+        """Ensure the current session exists and validate it using
+        `check_session`.
+
+        :raises: SessionExpiredException if the session does not exist or fails
+          validation.
+
+        """
+        session = root.session_store.get(self._session.sid)
+        if not session:
+            raise SessionExpiredException()
+        if 'next_sid' in session:
+            self._session = root.session_store.get(session['next_sid'])
+            self._assert_session_validity()
+            return
+        if session.uid is None:
+            return
+        with acquire_cursor(session.db) as cr:
+            if not check_session(cr, session):
+                raise SessionExpiredException()
 
     def _send_control_command(self, command, data=None):
         """Send a command to the websocket event loop.
@@ -724,74 +746,42 @@ class Websocket:
         """
         match command:
             case ControlCommand.DISPATCH:
+                self._assert_session_validity()
                 self._dispatch_bus_notifications()
             case ControlCommand.CLOSE:
                 self._disconnect(data['code'], data.get('reason'))
 
     def _dispatch_bus_notifications(self):
-        """
-        Dispatch notifications related to the registered channels. If
-        the session is expired, close the connection with the
-        `SESSION_EXPIRED` close code. If no cursor can be acquired,
-        close the connection with the `TRY_LATER` close code.
-        """
-        session = root.session_store.get(self._session.sid)
-        if not session:
-            raise SessionExpiredException()
-        if 'next_sid' in session:
-            self._session = root.session_store.get(session['next_sid'])
-            return self._dispatch_bus_notifications()
-         # Mark the notification request as processed.
         self._waiting_for_dispatch = False
-        with acquire_cursor(session.db) as cr:
-            env = self.new_env(cr, session)
-            if session.uid is not None and not check_session(session, env):
-                raise SessionExpiredException()
-            notifications = env["bus.bus"]._poll(
-                self._channels, self._last_notif_sent_id, [n[0] for n in self._notif_history]
+        with acquire_cursor(self._session.db) as cr:
+            notifications = fetch_bus_notifications(
+                cr, self._channels, self._last_notif_sent_id, [n[0] for n in self._notif_history]
             )
-        if not notifications:
-            return
-        for notif in notifications:
-            bisect.insort(self._notif_history, (notif["id"], time.time()), key=lambda x: x[0])
-        # Discard all the smallest notification ids that have expired and
-        # increment the last id accordingly. History can only be trimmed of ids
-        # that are below the new last id otherwise some notifications might be
-        # dispatched again.
-        # For example, if the theshold is 10s, and the state is:
-        # last id 2, history [(3, 8s), (6, 10s), (7, 7s)]
-        # If 6 is removed because it is above the threshold, the next query will
-        # be (id > 2 AND id NOT IN (3, 7)) which will fetch 6 again.
-        # 6 can only be removed after 3 reaches the threshold and is removed as
-        # well, and if 4 appears in the meantime, 3 can be removed but 6 will
-        # have to wait for 4 to reach the threshold as well.
-        last_index = -1
-        for i, notif in enumerate(self._notif_history):
-            if time.time() - notif[1] > self.MAX_NOTIFICATION_HISTORY_SEC:
-                last_index = i
-            else:
-                break
-        if last_index != -1:
-            self._last_notif_sent_id = self._notif_history[last_index][0]
-            self._notif_history = self._notif_history[last_index + 1 :]
-        self._send(notifications)
-
-    def new_env(self, cr, session, *, set_lang=False):
-        """
-        Create a new environment.
-        Make sure the transaction has a `default_env` and if requested, set the
-        language of the user in the context.
-        """
-        uid = session.uid
-        # lang is not guaranteed to be correct, set None
-        ctx = dict(session.context, lang=None)
-        env = api.Environment(cr, uid, ctx)
-        if set_lang:
-            lang = env['res.lang']._get_code(ctx['lang'])
-            env = env(context=dict(ctx, lang=lang))
-        if not env.transaction.default_env:
-            env.transaction.default_env = env
-        return env
+            if not notifications:
+                return
+            for notif in notifications:
+                bisect.insort(self._notif_history, (notif['id'], time.time()), key=lambda x: x[0])
+            # Discard all the smallest notification ids that have expired and
+            # increment the last id accordingly. History can only be trimmed of ids
+            # that are below the new last id otherwise some notifications might be
+            # dispatched again.
+            # For example, if the theshold is 10s, and the state is:
+            # last id 2, history [(3, 8s), (6, 10s), (7, 7s)]
+            # If 6 is removed because it is above the threshold, the next query will
+            # be (id > 2 AND id NOT IN (3, 7)) which will fetch 6 again.
+            # 6 can only be removed after 3 reaches the threshold and is removed as
+            # well, and if 4 appears in the meantime, 3 can be removed but 6 will
+            # have to wait for 4 to reach the threshold as well.
+            last_index = -1
+            for i, notif in enumerate(self._notif_history):
+                if time.time() - notif[1] > self.MAX_NOTIFICATION_HISTORY_SEC:
+                    last_index = i
+                else:
+                    break
+            if last_index != -1:
+                self._last_notif_sent_id = self._notif_history[last_index][0]
+                self._notif_history = self._notif_history[last_index + 1 :]
+            self._send(notifications)
 
 
 class TimeoutManager:
@@ -905,7 +895,7 @@ class WebsocketRequest:
             raise InvalidDatabaseException() from exc
 
         with closing(acquire_cursor(self.db)) as cr:
-            self.env = self.ws.new_env(cr, self.session, set_lang=True)
+            self.env = new_env(cr, self.session, set_lang=True)
             service_model.retrying(
                 functools.partial(self._serve_ir_websocket, event_name, data),
                 self.env,
