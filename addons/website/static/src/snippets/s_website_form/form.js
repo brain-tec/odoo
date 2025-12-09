@@ -245,6 +245,9 @@ export class Form extends Interaction {
                     })
                     .enable()
             );
+            // Disable virtual keyboard to fix popover display issues on small
+            // screens
+            inputEl.setAttribute("inputmode", "none");
         }
         this.datepickerInitialized = true;
     }
@@ -504,7 +507,9 @@ export class Form extends Interaction {
                 this.updateStatus(
                     "error",
                     error.message && error.message === "Content too large"
-                        ? _t("Uploaded file is too large.")
+                        ? _t(
+                              "Your upload is too large for the server to accept. Please choose smaller files."
+                          )
                         : ""
                 );
             });

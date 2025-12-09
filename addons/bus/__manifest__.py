@@ -29,6 +29,7 @@
         ],
         'bus.websocket_worker_assets': [
             'web/static/src/module_loader.js',
+            'web/static/src/polyfills/promise.js',
             'bus/static/src/workers/*',
         ],
     },

@@ -188,8 +188,9 @@ test("call auto focus is 'off", async () => {
     await start();
     await openDiscuss(channelId);
     await click("[title='Start Call']");
-    await click(".o-discuss-CallActionList [title='More']");
-    await contains(".o-dropdown-item:contains('Autofocus speaker')");
+    await click("button[aria-label='Video Settings']");
+    await click(".o-discuss-QuickVideoSettings button:has(:text('Advanced Settings'))");
+    await contains("input[title='Auto-focus speaker']:not(:checked)");
     // correct local storage values
     const useCallAutoFocusKey = makeRecordFieldLocalId(Settings.localId(), "useCallAutoFocus");
     expect(localStorage.getItem(useCallAutoFocusKey)).toBe(toRawValue(false));
@@ -263,9 +264,15 @@ test("device input/output id", async () => {
     await click("[title='Open Actions Menu']");
     await click(".o-dropdown-item:text('Call Settings')");
     await contains(".o-discuss-CallSettings");
-    await contains("label[title='Microphone'] option[value=audio_input_2_id]");
-    await contains("label[title='Speakers'] option[value=audio_output_2_id]");
-    await contains("label[title='Camera'] option[value=video_input_2_id]");
+    await contains(
+        "label[title='Microphone'] .o-mail-DeviceSelect-button[data-kind='audioinput']:text('audio_input_2_label')"
+    );
+    await contains(
+        "label[title='Speakers'] .o-mail-DeviceSelect-button[data-kind='audiooutput']:text('audio_output_2_label')"
+    );
+    await contains(
+        "label[title='Camera'] .o-mail-DeviceSelect-button[data-kind='videoinput']:text('video_input_2_label')"
+    );
     // correct local storage values
     const audioInputDeviceIdKey = makeRecordFieldLocalId(Settings.localId(), "audioInputDeviceId");
     expect(localStorage.getItem(audioInputDeviceIdKey)).toBe(toRawValue("audio_input_2_id"));

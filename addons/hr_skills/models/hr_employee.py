@@ -9,6 +9,7 @@ from odoo import api, fields, models
 from odoo.exceptions import AccessError
 from odoo.fields import Domain
 from odoo.tools import convert
+from odoo.addons.mail.tools.discuss import Store
 
 
 class HrEmployee(models.Model):
@@ -160,6 +161,8 @@ class HrEmployee(models.Model):
             raise AccessError(self.env._("You cannot access the resume of this employee."))
         res = []
         employee_versions = self.env['hr.employee'].sudo().browse(res_id).version_ids
+        if not employee_versions:
+            return res
         interval_date_start = False
         for i in range(len(employee_versions) - 1):
             current_version = employee_versions[i]
@@ -205,3 +208,7 @@ class HrEmployee(models.Model):
                 'date_end': current_date_start + relativedelta(days=-1),
             })
         return res[::-1]
+
+    def _store_avatar_card_fields(self, res: Store.FieldList):
+        super()._store_avatar_card_fields(res)
+        res.many("employee_skill_ids", ["color", "display_name"])
