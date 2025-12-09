@@ -1802,21 +1802,14 @@ class HrEmployee(models.Model):
 
     def _get_calendar_periods(self, start, stop):
         """
-        :param datetime start: the start of the period
-        :param datetime stop: the stop of the period
+        :param date start: the start of the period
+        :param date stop: the stop of the period
         """
         calendar_periods_by_employee = defaultdict(list)
-        versions = self.sudo()._get_versions_with_contract_overlap_with_period(start.date(), stop.date())
+        versions = self.sudo()._get_versions_with_contract_overlap_with_period(start, stop)
         for version in versions:
-            # if employee is under fully flexible contract, use timezone of the employee
-            calendar_tz = ZoneInfo(version.resource_calendar_id.tz) if version.resource_calendar_id else ZoneInfo(version.employee_id.resource_id.tz)
-            date_start = datetime.combine(version.contract_date_start, time(0, 0, 0), tzinfo=calendar_tz).astimezone(UTC)
-            if version.date_end:
-                date_end = datetime.combine(version.date_end + relativedelta(days=1), time(0, 0, 0), tzinfo=calendar_tz).astimezone(UTC)
-            else:
-                date_end = stop
             calendar_periods_by_employee[version.employee_id].append(
-                (max(date_start, start), min(date_end, stop), version.resource_calendar_id))
+                (max(version.contract_date_start, start), min(version.date_end or stop, stop), version.resource_calendar_id))
         return calendar_periods_by_employee
 
     @api.model
@@ -1971,8 +1964,6 @@ class HrEmployee(models.Model):
             '|', ('contract_date_end', '>=', date_from), ('contract_date_end', '=', False),
         ])
 
-    def get_avatar_card_data(self, fields):
-        return self.read(fields)
     # ---------------------------------------------------------
     # Messaging
     # ---------------------------------------------------------
@@ -1997,16 +1988,11 @@ class HrEmployee(models.Model):
         }
 
     def _store_avatar_card_fields(self, res: Store.FieldList):
-        res.attr("company_id")
         res.one("department_id", ["name"])
-        res.attr("work_email")
+        res.one("user_id", lambda res: (res.attr("share"), res.one("partner_id", ["im_status"])))
         res.one("work_location_id", ["location_type", "name"])
-        res.attr("work_phone")
-        if res.target_user().has_group("hr.group_hr_user"):
-            # job_title is not a field of hr.employee.public, but it is a field of hr.employee
-            res.attr("job_title")
-        # HACK: fetch the employee fields from employees to retrieve hr.employee.public fields if no access to hr.employee
-        self.fetch(map(Store.get_field_name, res))
+        res.extend(["company_id", "hr_icon_display", "job_title", "name", "show_hr_icon_display"])
+        res.extend(["work_email", "work_phone"])
 
     @api.depends('bank_account_ids')
     def _compute_primary_bank_account_id(self):

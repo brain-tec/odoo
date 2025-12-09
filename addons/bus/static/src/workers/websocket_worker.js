@@ -1,4 +1,4 @@
-import { debounce, Deferred, Logger } from "@bus/workers/bus_worker_utils";
+import { debounce, Logger } from "@bus/workers/bus_worker_utils";
 
 /**
  * Type of events that can be sent from the worker to its clients.
@@ -54,30 +54,27 @@ export class WebsocketWorker {
     CONNECTION_CHECK_DELAY = 60_000;
 
     constructor(name) {
-        this.name = name;
-        // Timestamp of start of most recent bus service sender
-        this.newestStartTs = undefined;
-        this.websocketURL = "";
-        this.currentUID = null;
-        this.currentDB = null;
-        this.isWaitingForNewUID = true;
+        this.active = true;
         this.channelsByClient = new Map();
         this.connectRetryDelay = this.INITIAL_RECONNECT_DELAY;
         this.connectTimeout = null;
-        this.debugModeByClient = new Map();
-        this.isDebug = false;
-        this.active = true;
-        this.state = WORKER_STATE.IDLE;
+        this.currentDB = null;
+        this.currentUID = null;
+        this.firstSubscribeResolver = Promise.withResolvers();
         this.isReconnecting = false;
+        this.isWaitingForNewUID = true;
         this.lastChannelSubscription = null;
-        this.loggingEnabled = null;
-        this.firstSubscribeDeferred = new Deferred();
         this.lastNotificationId = 0;
+        this.loggingEnabled = null;
         this.messageWaitQueue = [];
-        this._forceUpdateChannels = debounce(this._forceUpdateChannels, 300);
-        this._debouncedUpdateChannels = debounce(this._updateChannels, 300);
-        this._debouncedSendToServer = debounce(this._sendToServer, 300);
+        this.name = name;
+        this.newestStartTs = undefined;
+        this.state = WORKER_STATE.IDLE;
+        this.websocketURL = "";
 
+        this._debouncedSendToServer = debounce(this._sendToServer, 300);
+        this._debouncedUpdateChannels = debounce(this._updateChannels, 300);
+        this._forceUpdateChannels = debounce(this._forceUpdateChannels, 300);
         this._onWebsocketClose = this._onWebsocketClose.bind(this);
         this._onWebsocketError = this._onWebsocketError.bind(this);
         this._onWebsocketMessage = this._onWebsocketMessage.bind(this);
@@ -253,8 +250,6 @@ export class WebsocketWorker {
      */
     _unregisterClient(client) {
         this.channelsByClient.delete(client);
-        this.debugModeByClient.delete(client);
-        this.isDebug = [...this.debugModeByClient.values()].some(Boolean);
         this._debouncedUpdateChannels();
     }
 
@@ -263,8 +258,6 @@ export class WebsocketWorker {
      *
      * @param {Object} param0
      * @param {string} [param0.db] Database name.
-     * @param {String} [param0.debug] Current debugging mode for the
-     * given client.
      * @param {Number} [param0.lastNotificationId] Last notification id
      * known by the client.
      * @param {String} [param0.websocketURL] URL of the websocket endpoint.
@@ -276,8 +269,6 @@ export class WebsocketWorker {
      */
     _initializeConnection(client, { db, debug, lastNotificationId, uid, websocketURL, startTs }) {
         if (this.newestStartTs && this.newestStartTs > startTs) {
-            this.debugModeByClient.set(client, debug);
-            this.isDebug = [...this.debugModeByClient.values()].some(Boolean);
             this.sendToClient(client, "BUS:WORKER_STATE_UPDATED", this.state);
             this.sendToClient(client, "BUS:INITIALIZED");
             return;
@@ -285,8 +276,6 @@ export class WebsocketWorker {
         this.newestStartTs = startTs;
         this.websocketURL = websocketURL;
         this.lastNotificationId = lastNotificationId;
-        this.debugModeByClient.set(client, debug);
-        this.isDebug = [...this.debugModeByClient.values()].some(Boolean);
         const isCurrentUserKnown = uid !== undefined;
         if (this.isWaitingForNewUID && isCurrentUserKnown) {
             this.isWaitingForNewUID = false;
@@ -309,36 +298,6 @@ export class WebsocketWorker {
     }
 
     /**
-     * Determine whether or not the websocket associated to this worker
-     * is connected.
-     *
-     * @returns {boolean}
-     */
-    _isWebsocketConnected() {
-        return this.websocket && this.websocket.readyState === 1;
-    }
-
-    /**
-     * Determine whether or not the websocket associated to this worker
-     * is connecting.
-     *
-     * @returns {boolean}
-     */
-    _isWebsocketConnecting() {
-        return this.websocket && this.websocket.readyState === 0;
-    }
-
-    /**
-     * Determine whether or not the websocket associated to this worker
-     * is in the closing state.
-     *
-     * @returns {boolean}
-     */
-    _isWebsocketClosing() {
-        return this.websocket && this.websocket.readyState === 2;
-    }
-
-    /**
      * Triggered when a connection is closed. If closure was not clean ,
      * try to reconnect after indicating to the clients that the
      * connection was closed.
@@ -354,7 +313,7 @@ export class WebsocketWorker {
         this._logDebug("_onWebsocketClose", code, reason);
         this._updateState(WORKER_STATE.DISCONNECTED);
         this.lastChannelSubscription = null;
-        this.firstSubscribeDeferred = new Deferred();
+        this.firstSubscribeResolver = Promise.withResolvers();
         if (this.isReconnecting) {
             // Connection was not established but the close event was
             // triggered anyway. Let the onWebsocketError method handle
@@ -439,7 +398,7 @@ export class WebsocketWorker {
         this.connectRetryDelay = this.INITIAL_RECONNECT_DELAY;
         this.connectTimeout = null;
         this.isReconnecting = false;
-        this.firstSubscribeDeferred.then(() => {
+        this.firstSubscribeResolver.promise.then(() => {
             if (!this.websocket) {
                 return;
             }
@@ -462,7 +421,7 @@ export class WebsocketWorker {
     _restartConnectionCheckInterval() {
         clearInterval(this._connectionCheckInterval);
         this._connectionCheckInterval = setInterval(() => {
-            if (this._isWebsocketConnected()) {
+            if (this.websocket?.readyState === WebSocket.OPEN) {
                 this.websocket.send(new Uint8Array([0x00]));
                 this._logDebug("connection_checked");
             }
@@ -491,7 +450,7 @@ export class WebsocketWorker {
     _sendToServer(message) {
         this._logDebug("_sendToServer", message);
         const payload = JSON.stringify(message);
-        if (!this._isWebsocketConnected()) {
+        if (this.websocket?.readyState !== WebSocket.OPEN) {
             if (message["event_name"] === "subscribe") {
                 this.messageWaitQueue = this.messageWaitQueue.filter(
                     (msg) => JSON.parse(msg).event_name !== "subscribe"
@@ -504,7 +463,7 @@ export class WebsocketWorker {
             if (message["event_name"] === "subscribe") {
                 this.websocket.send(payload);
             } else {
-                this.firstSubscribeDeferred.then(() => this.websocket.send(payload));
+                this.firstSubscribeResolver.promise.then(() => this.websocket.send(payload));
             }
             this._restartConnectionCheckInterval();
         }
@@ -522,11 +481,14 @@ export class WebsocketWorker {
      */
     _start() {
         this._logDebug("_start");
-        if (!this.active || this._isWebsocketConnected() || this._isWebsocketConnecting()) {
+        if (
+            !this.active ||
+            [WebSocket.CONNECTING, WebSocket.OPEN].includes(this.websocket?.readyState)
+        ) {
             return;
         }
         this._removeWebsocketListeners();
-        if (this._isWebsocketClosing()) {
+        if (this.websocket?.readyState === WebSocket.CLOSING) {
             // The close event didn’t trigger. Trigger manually to maintain
             // correct state and lifecycle handling.
             this._onWebsocketClose(
@@ -582,7 +544,7 @@ export class WebsocketWorker {
                 event_name: "subscribe",
                 data: { channels: allTabsChannels, last: this.lastNotificationId },
             });
-            this.firstSubscribeDeferred.resolve();
+            this.firstSubscribeResolver.resolve();
         }
     }
     /**
