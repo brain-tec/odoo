@@ -214,6 +214,9 @@ export class Form extends Interaction {
                     value: defaultValue && DateTime.fromSeconds(parseInt(defaultValue)),
                 },
             }).enable());
+            // Disable virtual keyboard to fix popover display issues on small
+            // screens
+            inputEl.setAttribute("inputmode", "none");
         }
         this.datepickerInitialized = true;
     }
@@ -304,6 +307,14 @@ export class Form extends Interaction {
         }
 
         // Prepare form inputs
+        // Set a placeholder name to input fields without
+        // a label to allow FormData to function correctly
+        for (const [i, inputEl] of this.el
+            .querySelectorAll(".s_website_form_input:is(:not([name]), [name=''])")
+            .entries()) {
+            inputEl.setAttribute("name", "unknown_field_" + (i + 1));
+        }
+
         const formFields = [];
         new FormData(this.el).forEach((value, key) => {
             const inputElement = this.el.querySelector(`[name="${CSS.escape(key)}"]`);
