@@ -81,27 +81,17 @@ class ChangeProductionQty(models.TransientModel):
                 production._set_qty_producing()
 
             for wo in production.workorder_ids:
-                operation = wo.operation_id
-                wo.duration_expected = wo._get_duration_expected(ratio=new_production_qty / old_production_qty)
                 quantity = wo.qty_production - wo.qty_produced
                 if production.product_id.tracking == 'serial':
                     quantity = 1.0 if not float_is_zero(quantity, precision_digits=precision) else 0.0
                 else:
                     quantity = quantity if (quantity > 0 and not float_is_zero(quantity, precision_digits=precision)) else 0
                 wo._update_qty_producing(quantity)
+                wo.duration_expected = wo._get_duration_expected(ratio=new_production_qty / old_production_qty)
                 if wo.qty_produced < wo.qty_production and wo.state == 'done':
                     wo.state = 'progress'
                 if wo.qty_produced == wo.qty_production and wo.state == 'progress':
                     wo.state = 'done'
-                # assign moves; last operation receive all unassigned moves
-                # TODO: following could be put in a function as it is similar as code in _workorders_create
-                # TODO: only needed when creating new moves
-                moves_raw = production.move_raw_ids.filtered(lambda move: move.operation_id == operation and move.state not in ('done', 'cancel'))
-                if wo == production.workorder_ids[-1]:
-                    moves_raw |= production.move_raw_ids.filtered(lambda move: not move.operation_id)
-                moves_finished = production.move_finished_ids.filtered(lambda move: move.operation_id == operation) #TODO: code does nothing, unless maybe by_products?
-                moves_raw.mapped('move_line_ids').write({'workorder_id': wo.id})
-                (moves_finished + moves_raw).write({'workorder_id': wo.id})
 
             # replan production based on new workorder durations
             if factor != 1.0 and production.is_planned and (production.state == 'confirmed'
@@ -112,3 +102,14 @@ class ChangeProductionQty(models.TransientModel):
         self.mo_id.filtered(lambda mo: mo.state in ['confirmed', 'progress']).move_raw_ids._trigger_scheduler()
 
         return {}
+
+    def action_split_mo(self):
+        for wizard in self:
+            if wizard.product_qty <= 0:
+                raise UserError(_("Please specify a quantity bigger than 0."))
+            if wizard.product_qty >= wizard.mo_id.product_qty:
+                raise UserError(_("Set a quantity that is smaller than the intial demand to split the manufacturing order."))
+            new_product_qty = wizard.mo_id.product_qty - wizard.product_qty
+            new_mo = wizard.mo_id._split_productions(amounts={wizard.mo_id: [wizard.product_qty, new_product_qty]}, skip_workorder_quantity=True)
+            wizard.change_prod_qty()
+            wizard.mo_id.message_post(body=wizard.env._("The backorder %s has been created.", new_mo[-1]._get_html_link()))

@@ -27,9 +27,15 @@ from werkzeug.local import LocalStack
 
 import odoo
 from odoo import modules
-from odoo.http import Request, Response, SessionExpiredException, get_default_session, root
+from odoo.http import (
+    Request,
+    Response,
+    SessionExpiredException,
+    get_default_session,
+    retrying,
+    root,
+)
 from odoo.modules.registry import Registry
-from odoo.service import model as service_model
 from odoo.service.server import CommonServer
 from odoo.tools import config
 
@@ -701,7 +707,7 @@ class Websocket:
             env = new_env(cr, self._session, set_lang=True)
             for callback in self.__event_callbacks[event_type]:
                 try:
-                    service_model.retrying(functools.partial(callback, env, self), env)
+                    retrying(functools.partial(callback, env, self), env)
                 except Exception:
                     _logger.warning(
                         'Error during Websocket %s callback',
@@ -719,7 +725,8 @@ class Websocket:
         """
         session = root.session_store.get(self._session.sid)
         if not session:
-            raise SessionExpiredException()
+            e = "session non longer exists"
+            raise SessionExpiredException(e)
         if 'next_sid' in session:
             self._session = root.session_store.get(session['next_sid'])
             self._assert_session_validity()
@@ -727,8 +734,7 @@ class Websocket:
         if session.uid is None:
             return
         with acquire_cursor(session.db) as cr:
-            if not check_session(cr, session):
-                raise SessionExpiredException()
+            check_session(cr, session)
 
     def _send_control_command(self, command, data=None):
         """Send a command to the websocket event loop.
@@ -896,7 +902,7 @@ class WebsocketRequest:
 
         with closing(acquire_cursor(self.db)) as cr:
             self.env = new_env(cr, self.session, set_lang=True)
-            service_model.retrying(
+            retrying(
                 functools.partial(self._serve_ir_websocket, event_name, data),
                 self.env,
             )
