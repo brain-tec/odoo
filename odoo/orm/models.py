@@ -198,6 +198,32 @@ def check_companies_domain_parent_of(self, companies):
     ])]
 
 
+def get_public_method(model: BaseModel, name: str) -> callable:
+    """ Get the public unbound method from a model.
+
+    When the method does not exist or is inaccessible, raise appropriate errors.
+    Accessible methods are public (in sense that python defined it:
+    not prefixed with "_") and are not decorated with `@api.private`.
+    """
+    assert isinstance(model, BaseModel)
+    e = f"Private methods (such as '{model._name}.{name}') cannot be called remotely."
+    if name.startswith('_'):
+        raise AccessError(e)
+
+    cls = type(model)
+    method = getattr(cls, name, None)
+    if not callable(method):
+        raise AttributeError(f"The method '{model._name}.{name}' does not exist")  # noqa: TRY004
+
+    for mro_cls in cls.mro():
+        if not (cla_method := getattr(mro_cls, name, None)):
+            continue
+        if getattr(cla_method, '_api_private', False):
+            raise AccessError(e)
+
+    return method
+
+
 class MetaModel(type):
     """ The metaclass of all model classes.
         Its main purpose is to register the models per module.
@@ -507,8 +533,7 @@ class BaseModel(metaclass=MetaModel):
                 models.append(model)
                 fields_to_flush.extend(model._fields[fname] for fname in field_names)
 
-        code, params, to_flush = table_sql._sql_tuple
-        return SQL(code, *params, to_flush=(*to_flush, *fields_to_flush))
+        return SQL("%s", table_sql, to_flush=fields_to_flush)
 
     @property
     def _constraint_methods(self):
@@ -4607,7 +4632,9 @@ class BaseModel(metaclass=MetaModel):
             and self.env.context.get('active_test', True)
             and not any(leaf.field_expr == self._active_name for leaf in domain.iter_conditions())
         ):
-            domain &= Domain(self._active_name, '=', True)
+            # try to create the domain close to what it will look like after optimization
+            # to avoid reoptimizing it
+            domain = Domain(self._active_name, 'in', OrderedSet((True,))) & domain
 
         # build the query
         domain = domain.optimize_full(self)
