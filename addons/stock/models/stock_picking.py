@@ -124,7 +124,6 @@ class StockPickingType(models.Model):
     count_picking_waiting = fields.Integer(compute='_compute_picking_count')
     count_picking_late = fields.Integer(compute='_compute_picking_count')
     count_picking_backorders = fields.Integer(compute='_compute_picking_count')
-    count_move_ready = fields.Integer(compute='_compute_move_count')
     hide_reservation_method = fields.Boolean(compute='_compute_hide_reservation_method')
     barcode = fields.Char('Barcode', copy=False)
     company_id = fields.Many2one(
@@ -150,8 +149,8 @@ class StockPickingType(models.Model):
     )
     kanban_dashboard_graph = fields.Text(compute='_compute_kanban_dashboard_graph')
     move_type = fields.Selection([
-        ('direct', 'As soon as possible'), ('one', 'When all products are ready')],
-        'Shipping Policy', default='direct', required=True,
+        ('direct', 'As soon as possible, with back orders'), ('one', 'When all products are ready')], 'Shipping Policy',
+        default=lambda self: self.env.company.picking_policy, required=True,
         help="It specifies goods to be transferred partially or all at once")
 
     @api.model_create_multi
@@ -267,15 +266,6 @@ class StockPickingType(models.Model):
             count = {picking_type.id: count for picking_type, count in data}
             for record in self:
                 record[field_name] = count.get(record.id, 0)
-
-    def _compute_move_count(self):
-        data = self.env['stock.move']._read_group(
-            [('state', '=', 'assigned'), ('picking_type_id', 'in', self.ids)],
-            ['picking_type_id'], ['__count']
-        )
-        count = {picking_type.id: count for picking_type, count in data}
-        for record in self:
-            record['count_move_ready'] = count.get(record.id, 0)
 
     @api.depends('warehouse_id')
     def _compute_display_name(self):
@@ -468,9 +458,6 @@ class StockPickingType(models.Model):
             return self._get_action('stock.action_picking_tree_internal')
         return self._get_action('stock.stock_picking_action_picking_type')
 
-    def get_action_picking_type_ready_moves(self):
-        return self._get_action('stock.action_get_picking_type_ready_moves')
-
     def _get_aggregated_records_by_date(self):
         """
         Returns a list, each element containing 3 values:
@@ -566,7 +553,7 @@ class StockPicking(models.Model):
     return_count = fields.Integer('# Returns', compute='_compute_return_count', compute_sudo=False)
 
     move_type = fields.Selection([
-        ('direct', 'As soon as possible'), ('one', 'When all products are ready')], 'Shipping Policy',
+        ('direct', 'As soon as possible, with back orders'), ('one', 'When all products are ready')], 'Shipping Policy',
         compute='_compute_move_type', store=True, required=True, readonly=False, precompute=True,
         help="It specifies goods to be deliver partially or all at once")
     state = fields.Selection([

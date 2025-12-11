@@ -104,7 +104,7 @@
                                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
                                     <field invisible="code not in ['incoming', 'outgoing', 'internal']" name="return_picking_type_id" string="Returns Type"/>
                                     <field name="create_backorder"/>
-                                    <field name="move_type" help="Unless previously specified by the source document, this will be the default picking policy for this operation type." invisible="code != 'internal'"/>
+                                    <field name="move_type" help="Unless previously specified by the source document, this will be the default shipping policy for this operation type." invisible="code != 'internal'"/>
                                 </group>
                             </group>
                             <group name="second">
@@ -181,7 +181,6 @@
             <kanban highlight_color="color" class="o_stock_kanban" js_class="stock_dashboard_kanban" records_draggable="0" create="0" group_create="false" can_open="0">
                 <field name="color"/>
                 <field name="code" readonly="1"/>
-                <field name="count_move_ready"/>
                 <field name="show_picking_type" invisible="1"/>
                 <templates>
                     <t t-name="menu" t-if="!selection_mode">
@@ -269,15 +268,6 @@
                                             <div class="row">
                                                 <span class="col-6">Back Orders</span>
                                                 <field class="col-2 text-end" name="count_picking_backorders"/>
-                                            </div>
-                                        </a>
-                                    </div>
-
-                                    <div t-if="record.count_move_ready.raw_value > 0" class="row">
-                                        <a class="col-8 offset-4 pe-0 text-truncate" name="get_action_picking_type_ready_moves" type="object">
-                                            <div class="row">
-                                                <span class="col-6">Operations</span>
-                                                <field class="col-2 text-end" name="count_move_ready"/>
                                             </div>
                                         </a>
                                     </div>
