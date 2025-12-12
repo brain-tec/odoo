@@ -1522,6 +1522,7 @@ class AccountMove(models.Model):
             rate=rate,
             sign=sign,
             special_mode=False if is_invoice else 'total_excluded',
+            name=product_line.name,
         )
 
     def _prepare_epd_base_line_for_taxes_computation(self, epd_line):
@@ -5342,7 +5343,10 @@ class AccountMove(models.Model):
             # Handle case when the invoice_date is not set. In that case, the invoice_date is set at today and then,
             # lines are recomputed accordingly.
             if not invoice.invoice_date and invoice.is_invoice(include_receipts=True):
+                invoice_currency_rate_inserted = invoice.invoice_currency_rate
                 invoice.invoice_date = fields.Date.context_today(self)
+                if invoice_currency_rate_inserted != invoice.expected_currency_rate:
+                    invoice.invoice_currency_rate = invoice_currency_rate_inserted
 
         for move in self:
             if move.state in ['posted', 'cancel']:
