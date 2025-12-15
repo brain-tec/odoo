@@ -305,11 +305,13 @@ class AccountTestInvoicingCommon(ProductCommon):
             'default_account_revenue': AccountAccount.search([
                     *account_company_domain,
                     ('account_type', '=', 'income'),
+                    ('deprecated', '=', False),
                     ('id', '!=', company.account_journal_early_pay_discount_gain_account_id.id)
                 ], limit=1),
             'default_account_expense': AccountAccount.search([
                     *account_company_domain,
                     ('account_type', '=', 'expense'),
+                    ('deprecated', '=', False),
                     ('id', '!=', company.account_journal_early_pay_discount_loss_account_id.id)
                 ], limit=1),
             'default_account_receivable': cls.env['res.partner']._fields['property_account_receivable_id'].get_company_dependent_fallback(
@@ -317,21 +319,25 @@ class AccountTestInvoicingCommon(ProductCommon):
             ),
             'default_account_payable': AccountAccount.search([
                     *account_company_domain,
-                    ('account_type', '=', 'liability_payable')
+                    ('account_type', '=', 'liability_payable'),
+                    ('deprecated', '=', False),
                 ], limit=1),
             'default_tax_account_receivable': company.account_purchase_tax_id.tax_group_id.tax_receivable_account_id,
             'default_tax_account_payable': company.account_sale_tax_id.tax_group_id.tax_payable_account_id,
             'default_account_assets': AccountAccount.search([
                     *account_company_domain,
-                    ('account_type', '=', 'asset_fixed')
+                    ('account_type', '=', 'asset_fixed'),
+                    ('deprecated', '=', False),
                 ], limit=1),
             'default_account_deferred_expense': AccountAccount.search([
                     *account_company_domain,
-                    ('account_type', '=', 'asset_current')
+                    ('account_type', '=', 'asset_current'),
+                    ('deprecated', '=', False),
                 ], limit=1),
             'default_account_deferred_revenue': AccountAccount.search([
                     *account_company_domain,
-                    ('account_type', '=', 'liability_current')
+                    ('account_type', '=', 'liability_current'),
+                    ('deprecated', '=', False),
                 ], limit=1),
             'default_account_tax_sale': company.account_sale_tax_id.mapped('invoice_repartition_line_ids.account_id'),
             'default_account_tax_purchase': company.account_purchase_tax_id.mapped('invoice_repartition_line_ids.account_id'),
@@ -759,9 +765,41 @@ class AccountTestInvoicingCommon(ProductCommon):
             ._create_payments()
         )
 
+    @contextmanager
+    def mocked_get_payment_method_information(self, code='none'):
+        self.ensure_installed('account_payment')
+
+        Method_get_payment_method_information = self.env['account.payment.method']._get_payment_method_information
+
+        def _get_payment_method_information(*args, **kwargs):
+            res = Method_get_payment_method_information()
+            res[code] = {'mode': 'electronic', 'type': ('bank',)}
+            return res
+
+        with patch.object(self.env.registry['account.payment.method'], '_get_payment_method_information', _get_payment_method_information):
+            yield
+
+    @classmethod
+    def _create_dummy_payment_method_for_provider(cls, provider, journal, **kwargs):
+        cls.ensure_installed('account_payment')
+
+        code = kwargs.get('code', 'none')
+
+        with cls.mocked_get_payment_method_information(cls, code):
+            payment_method = cls.env['account.payment.method'].sudo().create({
+                'name': 'Dummy method',
+                'code': code,
+                'payment_type': 'inbound',
+                **kwargs,
+            })
+            provider.journal_id = journal
+            return payment_method
+
     @classmethod
     def _create_sale_order(cls, confirm=True, **values):
         cls.ensure_installed('sale')
+
+        cls._prepare_record_kwargs('sale.order', values)
 
         sale_order = cls.env['sale.order'].create([{
             'partner_id': cls.partner_a.id,
