@@ -774,6 +774,7 @@ class AccountMove(models.Model):
 
     display_send_button = fields.Boolean(compute='_compute_display_send_button')
     highlight_send_button = fields.Boolean(compute='_compute_highlight_send_button')
+    is_sale_installed = fields.Boolean(compute='_compute_is_sale_installed')
 
     _checked_idx = models.Index("(journal_id) WHERE (review_state IN ('todo', 'anomaly'))")
     _payment_idx = models.Index("(journal_id, state, payment_state, move_type, date)")
@@ -1053,14 +1054,10 @@ class AccountMove(models.Model):
             return (currency_priority, not bank.allow_out_payment)
 
         for move in self:
-            if (
+            if move.is_inbound() and (
                 payment_method := (
                     move.preferred_payment_method_line_id
-                    or (
-                        move.bank_partner_id.property_inbound_payment_method_line_id
-                        if move.is_inbound()
-                        else move.bank_partner_id.property_outbound_payment_method_line_id
-                    )
+                    or move.bank_partner_id.property_inbound_payment_method_line_id
                 )
             ) and payment_method.journal_id:
                 move.partner_bank_id = payment_method.journal_id.bank_account_id
@@ -2324,6 +2321,9 @@ class AccountMove(models.Model):
     def _compute_highlight_send_button(self):
         for move in self:
             move.highlight_send_button = not move.is_being_sent and not move.invoice_pdf_report_id
+
+    def _compute_is_sale_installed(self):
+        self.is_sale_installed = 'sale_management' in self.env['ir.module.module']._installed()
 
     @api.depends('line_ids.matched_debit_ids', 'line_ids.matched_credit_ids', 'matched_payment_ids', 'matched_payment_ids.state')
     def _compute_reconciled_payment_ids(self):
@@ -4806,6 +4806,24 @@ class AccountMove(models.Model):
             if not existing_lines:
                 self.with_context(default_move_type=self.move_type)._link_bill_origin_to_purchase_orders(timeout=4)
 
+        if new and res:
+            try:
+                attachments = self._from_files_data(files_data + self._unwrap_attachments(files_data))
+                self.journal_id._notify_invoice_subscribers(
+                    invoice=self,
+                    mail_params={
+                        'attachment_ids': [
+                            Command.create({
+                                'name': f"MAIL_{attachment['name']}",
+                                'mimetype': attachment['mimetype'],
+                                'raw': attachment['raw'],
+                            }) for attachment in attachments
+                        ]
+                    },
+                )
+            except Exception:
+                _logger.exception("Failed to notify invoice subscribers after EDI import.")
+
         return res
 
     @contextmanager
@@ -6604,13 +6622,15 @@ class AccountMove(models.Model):
         self.ensure_one()
         if filetype == 'pdf':
             if invoice_pdf := self.invoice_pdf_report_id:
-                return {
+                return [{
                     'filename': invoice_pdf.name,
                     'filetype': invoice_pdf.mimetype,
                     'content': invoice_pdf.raw,
-                }
+                }]
             elif allow_fallback:
-                return self._get_invoice_pdf_proforma()
+                return [self._get_invoice_pdf_proforma()]
+
+        return []
 
     def _get_invoice_legal_documents_all(self, allow_fallback=False):
         """ Retrieve the invoice legal attachments: PDF, XML, ...
@@ -6851,8 +6871,6 @@ class AccountMove(models.Model):
         )
         move = super(AccountMove, move_ctx).message_new(msg_dict, custom_values=values)
         move._compute_name()  # because the name is given, we need to recompute in case it is the first invoice of the journal
-
-        move.journal_id._notify_einvoices_received(move)
 
         return move
 
