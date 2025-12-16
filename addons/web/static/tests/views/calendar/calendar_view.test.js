@@ -1156,7 +1156,7 @@ test(`create and change events on desktop`, async () => {
     await contains(`.o_cw_popover_delete`).click();
     expect(`.modal-title`).toHaveText("Bye-bye, record!");
 
-    await contains(`.modal-footer button.btn-primary`).click();
+    await contains(`.modal-footer button.btn-danger`).click();
     expect(`.o_event[data-event-id="4"]`).toHaveCount(0);
     expect(`.o_event`).toHaveCount(10);
 
@@ -1271,7 +1271,7 @@ test(`create and change events on mobile`, async () => {
     await contains(`.o_cw_popover_delete`).click();
     expect(`.modal-title`).toHaveText("Bye-bye, record!");
 
-    await contains(`.modal-footer button.btn-primary`).click();
+    await contains(`.modal-footer button.btn-danger`).click();
     expect(`.o_event[data-event-id="4"]`).toHaveCount(0);
     expect(`.o_event`).toHaveCount(10);
 
@@ -1419,7 +1419,7 @@ test(`create event with timezone in week mode European locale`, async () => {
 
     await clickEvent(1);
     await contains(`.o_cw_popover_delete`).click();
-    await contains(`.modal button.btn-primary`).click();
+    await contains(`.modal button.btn-danger`).click();
     expect(`.fc-event-main`).toHaveCount(0);
 });
 
@@ -1541,6 +1541,29 @@ test(`render popover`, async () => {
     expect(
         `.o_cw_popover .o_cw_popover_fields_secondary .list-group-item:eq(1) span.fw-bold`
     ).toHaveText("Partner");
+
+    await animationFrame();
+    await runAllTimers(); // Wait for popover reposition by position hook
+    // Fully visible
+    const popover = document.querySelector(`.o_cw_popover`).getBoundingClientRect();
+    expect(
+        popover.top >= 0 &&
+            popover.left >= 0 &&
+            popover.bottom <= window.innerHeight &&
+            popover.right <= window.innerWidth
+    ).toBe(true);
+    // Displayed nearby its targeted full calendar event
+    const popoverTarget = document
+        .querySelector(`.fc-event[data-event-id='2']`)
+        .getBoundingClientRect();
+    expect(
+        Math.min(
+            Math.abs(popover.top - popoverTarget.bottom),
+            Math.abs(popover.bottom - popoverTarget.top),
+            Math.abs(popover.left - popoverTarget.right),
+            Math.abs(popover.right - popoverTarget.left)
+        ) < 30
+    ).toBe(true);
 
     await contains(`.o_cw_popover .o_cw_popover_close`).click();
     expect(`.o_cw_popover`).toHaveCount(0);
@@ -1763,7 +1786,7 @@ test(`create event with timezone in week mode American locale`, async () => {
     // delete record
     await clickEvent(1);
     await contains(`.o_cw_popover_delete`).click();
-    await contains(`.modal button.btn-primary`).click();
+    await contains(`.modal button.btn-danger`).click();
     expect(`.fc-event-main`).toHaveCount(0);
 });
 
@@ -5537,7 +5560,7 @@ test("calendar: popover is rendered as dialog in mobile", async () => {
 
     expect(".modal-footer .btn").toHaveCount(2);
     expect(".modal-footer .btn.btn-primary.o_cw_popover_edit").toHaveCount(1);
-    expect(".modal-footer .btn.btn-secondary.o_cw_popover_delete").toHaveCount(1);
+    expect(".modal-footer .btn.btn-danger.o_cw_popover_delete").toHaveCount(1);
 });
 
 test.tags("mobile");
