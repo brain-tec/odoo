@@ -1,5 +1,6 @@
 import { closestElement } from "@html_editor/utils/dom_traversal";
-import { Component } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, useExternalListener, useRef } from "@odoo/owl";
+import { getColumnIndex, getRowIndex } from "@html_editor/utils/table";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
@@ -23,8 +24,11 @@ export class TableMenu extends Component {
         clearRowContent: Function,
         toggleAlternatingRows: Function,
         overlay: Object,
+        tableDragDropOverlay: Object,
         dropdownState: Object,
         target: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
+        document: { validate: (p) => p.nodeType === Node.DOCUMENT_NODE },
+        editable: { validate: (p) => p.nodeType === Node.ELEMENT_NODE },
         direction: { type: String, optional: true },
     };
     static defaultProps = { direction: "ltr" };
@@ -41,6 +45,19 @@ export class TableMenu extends Component {
             this.isTableHeader = [...tr.children][0].nodeName === "TH";
         }
         this.items = this.props.type === "column" ? this.colItems() : this.rowItems();
+        this.menuRef = useRef("menuRef");
+        const onPointerDown = (ev) => this.onPointerDown(ev);
+        onMounted(() => {
+            this.menuRef?.el.addEventListener("pointerdown", onPointerDown);
+        });
+        onWillUnmount(() => {
+            this.menuRef?.el.removeEventListener("pointerdown", onPointerDown);
+        });
+        useExternalListener(this.props.document, "pointerup", this.onPointerUp);
+        if (this.props.document !== document) {
+            // Listen outside the iframe.
+            useExternalListener(document, "pointerup", this.onPointerUp);
+        }
     }
 
     get hasCustomTableSize() {
@@ -71,6 +88,32 @@ export class TableMenu extends Component {
         this.props.overlay.close();
     }
 
+    onPointerDown(ev) {
+        this.longPressTimer = setTimeout(() => {
+            this.props.overlay.close();
+            // Open the TableDragDrop overlay.
+            this.props.tableDragDropOverlay.open({
+                target: this.props.target,
+                props: {
+                    type: this.props.type,
+                    pointerPos: { x: ev.clientX, y: ev.clientY },
+                    target: this.props.target,
+                    document: this.props.document,
+                    editable: this.props.editable,
+                    close: () => this.props.tableDragDropOverlay.close(),
+                    moveRow: this.props.moveRow,
+                    moveColumn: this.props.moveColumn,
+                },
+            });
+        }, 200); // long press threshold
+    }
+
+    onPointerUp() {
+        // Cancel long-press to prevent tableDragDropOverlay.
+        clearTimeout(this.longPressTimer);
+        delete this.longPressTimer;
+    }
+
     colItems() {
         const ltr = this.props.direction === "ltr";
         return [
@@ -78,13 +121,13 @@ export class TableMenu extends Component {
                 name: "move_left",
                 icon: "fa-chevron-left disabled",
                 text: ltr ? _t("Move left") : _t("Move right"),
-                action: this.props.moveColumn.bind(this, "left"),
+                action: (target) => this.props.moveColumn(getColumnIndex(target) - 1, target),
             },
             !this.isLast && {
                 name: "move_right",
                 icon: "fa-chevron-right",
                 text: ltr ? _t("Move right") : _t("Move left"),
-                action: this.props.moveColumn.bind(this, "right"),
+                action: (target) => this.props.moveColumn(getColumnIndex(target) + 1, target),
             },
             {
                 name: "insert_left",
@@ -147,13 +190,15 @@ export class TableMenu extends Component {
                 name: "move_up",
                 icon: "fa-chevron-up",
                 text: _t("Move up"),
-                action: (target) => this.props.moveRow("up", target.parentElement),
+                action: (target) =>
+                    this.props.moveRow(getRowIndex(target.parentElement) - 1, target.parentElement),
             },
             !this.isLast && {
                 name: "move_down",
                 icon: "fa-chevron-down",
                 text: _t("Move down"),
-                action: (target) => this.props.moveRow("down", target.parentElement),
+                action: (target) =>
+                    this.props.moveRow(getRowIndex(target.parentElement) + 1, target.parentElement),
             },
             !this.isTableHeader && {
                 name: "insert_above",

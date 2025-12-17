@@ -119,6 +119,7 @@ export class DiscussChannel extends Record {
     fetchMembersState = "not_fetched";
     /** @type {"not_fetched"|"fetching"|"fetched"} */
     fetchChannelInfoState = "not_fetched";
+    from_message_id = fields.One("mail.message", { inverse: "linkedSubChannel" });
     get memberListTypes() {
         return ["channel", "group"];
     }
@@ -142,6 +143,9 @@ export class DiscussChannel extends Record {
                 .sort((m1, m2) => this.store.sortMembers(m1, m2)); // FIXME: sort are prone to infinite loop (see test "Display livechat custom name in typing status")
         },
     });
+    get hasAttachmentPanel() {
+        return true;
+    }
     hasOtherMembersTyping = fields.Attr(false, {
         /** @this {import("models").DiscussChannel} */
         compute() {
@@ -244,8 +248,18 @@ export class DiscussChannel extends Record {
             );
         },
     });
+    parent_channel_id = fields.One("discuss.channel", {
+        inverse: "sub_channel_ids",
+        onDelete() {
+            this.delete();
+        },
+    });
     /** @type {"loaded"|"loading"|"error"|undefined} */
     pinnedMessagesState = undefined;
+    sub_channel_ids = fields.Many("discuss.channel", {
+        inverse: "parent_channel_id",
+        sort: (a, b) => compareDatetime(b.lastInterestDt, a.lastInterestDt) || b.id - a.id,
+    });
     thread = fields.One("mail.thread", {
         compute() {
             return { id: this.id, model: "discuss.channel" };
@@ -307,6 +321,26 @@ export class DiscussChannel extends Record {
             throw e;
         }
         this.pinnedMessagesState = "loaded";
+    }
+
+    async fetchMoreAttachments(limit = 30) {
+        if (this.isLoadingAttachments || this.areAttachmentsLoaded) {
+            return;
+        }
+        this.isLoadingAttachments = true;
+        try {
+            const data = await rpc("/discuss/channel/attachments", {
+                before: Math.min(...this.attachments.map(({ id }) => id)),
+                channel_id: this.id,
+                limit,
+            });
+            this.store.insert(data.store_data);
+            if (data.count < limit) {
+                this.areAttachmentsLoaded = true;
+            }
+        } finally {
+            this.isLoadingAttachments = false;
+        }
     }
 
     async markAsFetched() {
