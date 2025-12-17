@@ -140,9 +140,9 @@ registerThreadAction("notification-settings", {
 });
 registerThreadAction("attachments", {
     actionPanelComponent: AttachmentPanel,
-    actionPanelComponentProps: ({ thread }) => ({ thread }),
-    condition: ({ owner, thread }) =>
-        thread?.hasAttachmentPanel &&
+    actionPanelComponentProps: ({ channel }) => ({ channel }),
+    condition: ({ owner, channel }) =>
+        channel?.hasAttachmentPanel &&
         (!owner.props.chatWindow || owner.props.chatWindow.isOpen) &&
         !owner.isDiscussSidebarChannelActions,
     icon: "fa fa-fw fa-paperclip",
@@ -243,10 +243,10 @@ registerThreadAction("delete-thread", {
         return { channel, close: () => action.actionPanelClose() };
     },
     actionPanelOuterClass: "bg-100",
-    condition({ owner, store, thread }) {
+    condition({ channel, owner, store }) {
         return (
-            thread?.parent_channel_id &&
-            store.self_user?.eq(thread.create_uid) &&
+            channel?.parent_channel_id &&
+            store.self_user?.eq(channel.create_uid) &&
             !owner.isDiscussContent
         );
     },

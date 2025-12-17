@@ -68,7 +68,6 @@ export class Thread extends Record {
     allMessages = fields.Many("mail.message", {
         inverse: "thread",
     });
-    /** @type {boolean} */
     areAttachmentsLoaded = false;
     group_public_id = fields.One("res.groups");
     attachments = fields.Many("ir.attachment", {
@@ -302,10 +301,6 @@ export class Thread extends Record {
         return persona?.displayName || persona?.name;
     }
 
-    get hasAttachmentPanel() {
-        return Boolean(this.channel);
-    }
-
     get supportsCustomChannelName() {
         return this.channel?.isChatChannel && this.channel?.channel_type !== "group";
     }
@@ -323,8 +318,8 @@ export class Thread extends Record {
     }
 
     get fullNameWithParent() {
-        const text = this.parent_channel_id
-            ? `${this.parent_channel_id.displayName} > ${this.displayName}`
+        const text = this.channel?.parent_channel_id
+            ? `${this.channel.parent_channel_id.displayName} > ${this.displayName}`
             : this.displayName;
         return text;
     }

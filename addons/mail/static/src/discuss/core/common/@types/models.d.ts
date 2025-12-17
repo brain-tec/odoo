@@ -16,6 +16,7 @@ declare module "models" {
         hasSomeoneFetched: boolean|undefined;
         hasSomeoneSeen: boolean|undefined;
         isMessagePreviousToLastSelfMessageSeenByEveryone: boolean;
+        linkedSubChannel: DiscussChannel;
         showSeenIndicator: (thread: Thread) => boolean;
         threadAsFirstUnread: Thread;
     }
@@ -44,7 +45,6 @@ declare module "models" {
         correspondentCountry: Country;
         correspondents: Readonly<ChannelMember[]>;
         executeCommand: (command: unknown, body: string) => unknown;
-        fetchMoreAttachments: (limit: number) => Promise<void>;
         firstUnreadMessage: Message;
         group_ids: ResGroups[];
         leaveChannel: () => Promise<void>;
