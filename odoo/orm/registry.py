@@ -58,7 +58,7 @@ _REGISTRY_CACHES = {
     'routing': 1024,  # 2 entries per website
     'routing.rewrites': 8192,  # url_rewrite entries
     'templates.cached_values': 2048, # arbitrary
-    'groups': 8,  # see res.groups
+    'groups': 64,  # see res.groups
 }
 
 # cache invalidation dependencies, as follows:
@@ -801,12 +801,14 @@ class Registry(Mapping[str, type["BaseModel"]]):
                 for field_name, field in Model._fields.items():
                     if field_name == 'id':
                         self.not_null_fields.add(field)
-                        continue
-                    if field.column_type and field.store and field.required:
-                        if (Model._table, field_name) in not_null_columns:
+                    elif field.required and field.column_type:
+                        if field.store:
+                            if (Model._table, field_name) in not_null_columns:
+                                self.not_null_fields.add(field)
+                            else:
+                                _schema.warning("Missing not-null constraint on %s", field)
+                        elif field.compute_sql:
                             self.not_null_fields.add(field)
-                        else:
-                            _schema.warning("Missing not-null constraint on %s", field)
 
     def check_indexes(self, cr: Cursor, model_names: Iterable[str]) -> None:
         """ Create or drop column indexes for the given models. """

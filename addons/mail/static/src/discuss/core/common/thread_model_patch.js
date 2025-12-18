@@ -258,19 +258,13 @@ const threadPatch = {
         return this.self_member_id?.message_unread_counter_ui > 0;
     },
     executeCommand(command, body = "") {
+        command.onExecute?.(this.channel);
         return this.store.env.services.orm.call(
             "discuss.channel",
             command.methodName,
             [[this.id]],
             { body }
         );
-    },
-    /** @param {string} data base64 representation of the binary */
-    async notifyAvatarToServer(data) {
-        await rpc("/discuss/channel/update_avatar", {
-            channel_id: this.id,
-            data,
-        });
     },
     async leaveChannel() {
         if (this.channel?.channel_type !== "group" && this.create_uid?.eq(this.store.self_user)) {
