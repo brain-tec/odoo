@@ -124,6 +124,12 @@ class DiscussChannel(models.Model):
         readonly=False,
         store=True,
     )
+    livechat_looking_for_help_since_dt = fields.Datetime(
+        compute="_compute_livechat_looking_for_help_since_dt",
+        help="Datetime when the chat entered the 'Looking for help' status.",
+        string="Requested At",
+        store=True
+    )
     livechat_outcome = fields.Selection(
         [
             ("no_answer", "Never Answered"),
@@ -181,6 +187,17 @@ class DiscussChannel(models.Model):
         "CHECK(livechat_end_dt IS NULL or livechat_status IS NULL)",
         "Closed Live Chat session should not have a status.",
     )
+    _livechat_looking_for_help_since_dt_constraint = models.Constraint(
+        """
+        CHECK (
+            CASE
+                WHEN livechat_status = 'need_help' THEN livechat_looking_for_help_since_dt IS NOT NULL
+                ELSE livechat_looking_for_help_since_dt IS NULL
+            END
+        )
+        """,
+        "Looking for help date should only be set if the channel is looking for help and must be empty otherwise.",
+    )
     _livechat_end_dt_idx = models.Index("(livechat_end_dt) WHERE livechat_end_dt IS NULL")
     _livechat_failure_idx = models.Index(
         "(livechat_failure) WHERE livechat_failure IN ('no_answer', 'no_agent')"
@@ -205,7 +222,7 @@ class DiscussChannel(models.Model):
         store.add(added_need_help, "_store_channel_fields")
         store.add(removed_need_help, ["livechat_status"])
         if "livechat_expertise_ids" in vals:
-            store.add(need_help_after, [Store.Many("livechat_expertise_ids", ["name"])])
+            store.add(need_help_after, lambda res: res.many("livechat_expertise_ids", ["name"]))
         store.bus_send()
         if added_need_help or removed_need_help:
             group_livechat_user._bus_send(
@@ -402,8 +419,16 @@ class DiscussChannel(models.Model):
         for channel in self:
             channel.livechat_week_day = str(channel.create_date.weekday())
 
+    @api.depends("livechat_status")
+    def _compute_livechat_looking_for_help_since_dt(self):
+        for channel in self:
+            channel.livechat_looking_for_help_since_dt = (
+                fields.Datetime.now() if channel.livechat_status == "need_help" else None
+            )
+
     def _sync_field_names(self, res):
         super()._sync_field_names(res)
+        res[None].attr("livechat_end_dt", predicate=is_livechat_channel)
         res[None].one(
             "livechat_operator_id",
             "_store_livechat_agent_fields",
@@ -412,15 +437,12 @@ class DiscussChannel(models.Model):
         res["internal_users"].attr("description", predicate=is_livechat_channel)
         res["internal_users"].attr("livechat_note", predicate=is_livechat_channel)
         res["internal_users"].attr("livechat_status", predicate=is_livechat_channel)
+        res["internal_users"].attr("livechat_looking_for_help_since_dt", predicate=is_livechat_channel)
         res["internal_users"].many(
             "livechat_expertise_ids",
             ["name"],
             predicate=is_livechat_channel,
         )
-
-    def _store_open_chat_window_fields(self, res: Store.FieldList):
-        self._store_channel_fields(res)
-        res.attr("open_chat_window", True)
 
     def _store_channel_fields(self, res: Store.FieldList):
         super()._store_channel_fields(res)
@@ -447,6 +469,7 @@ class DiscussChannel(models.Model):
             res.attr("livechat_note", predicate=is_livechat_channel)
             res.attr("livechat_outcome", predicate=is_livechat_channel)
             res.attr("livechat_status", predicate=is_livechat_channel)
+            res.attr("livechat_looking_for_help_since_dt", predicate=is_livechat_channel)
             res.many("livechat_expertise_ids", ["name"], predicate=is_livechat_channel)
 
     def _to_store(self, store: Store, res: Store.FieldList):
@@ -528,7 +551,6 @@ class DiscussChannel(models.Model):
                 member.sudo()._rtc_leave_call()
             # sudo: discuss.channel - visitor left the conversation, state must be updated
             self.sudo().livechat_end_dt = fields.Datetime.now()
-            Store(bus_channel=self).add(self, ["livechat_end_dt"]).bus_send()
             # avoid useless notification if the channel is empty
             if not self.message_ids:
                 return
@@ -879,7 +901,6 @@ class DiscussChannel(models.Model):
         ):
             # sudo: discuss.channel - last operator left the conversation, state must be updated.
             channel_sudo.livechat_end_dt = fields.Datetime.now()
-            Store(bus_channel=self).add(channel_sudo, ["livechat_end_dt"]).bus_send()
 
     def livechat_join_channel_needing_help(self):
         """Join a live chat for which help was requested.
@@ -948,7 +969,7 @@ class DiscussChannel(models.Model):
             )
             channel_sudo._add_next_step_message_to_store(chatbot_script_step)
             channel_sudo._broadcast(human_operator.partner_id.ids)
-            self.channel_pin(pinned=True)
+            self.self_member_id.last_interest_dt = fields.Datetime.now()
         else:
             # sudo: discuss.channel - visitor tried getting operator, outcome must be updated
             self.sudo().livechat_failure = "no_agent"

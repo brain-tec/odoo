@@ -380,6 +380,11 @@ export class DiscussChannel extends Record {
         });
     }
 
+    /** @param {string} data base64 representation of the binary */
+    async notifyAvatarToServer(data) {
+        await rpc("/discuss/channel/update_avatar", { channel_id: this.id, data });
+    }
+
     onPinStateUpdated() {}
 
     /**
@@ -387,6 +392,14 @@ export class DiscussChannel extends Record {
      */
     openChannel() {
         return false;
+    }
+
+    pinRpc({ pinned = true } = {}) {
+        return this.store.fetchStoreData(
+            "/discuss/channel/pin",
+            { channel_id: this.id, pinned },
+            { readonly: false }
+        );
     }
 
     /** @param {string} name */
