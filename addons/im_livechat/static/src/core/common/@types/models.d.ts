@@ -19,6 +19,9 @@ declare module "models" {
     export interface LivechatChannelRule extends LivechatChannelRuleClass {}
     export interface LivechatExpertise extends LivechatExpertiseClass {}
 
+    export interface ChannelMember {
+        livechat_member_type: "agent"|"bot"|"visitor";
+    }
     export interface ChatWindow {
         livechatStep: undefined|"CONFIRM_CLOSE"|"FEEDBACK";
     }
@@ -62,7 +65,6 @@ declare module "models" {
         livechat_end_dt: import("luxon").DateTime;
         livechat_operator_id: ResPartner;
         livechatVisitorMember: ChannelMember;
-        open_chat_window: true|undefined;
         transcriptUrl: Readonly<string>;
     }
 

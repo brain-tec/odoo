@@ -30,6 +30,21 @@ body {
 
     .footer > .o_footer_content {
         padding-bottom: $o-default-report-margins;
+
+        .o_footer_pager, p {
+            // Condensed footer spacing
+            margin-bottom: map-get($spacers, 1);
+        }
+    }
+}
+
+.o_body_html {
+    .header {
+        min-height: 52mm + $o-default-report-margins;
+    }
+
+    .o_footer_content {
+        max-height: 38mm;
     }
 }
 
@@ -101,12 +116,6 @@ li.oe-nested {
     }
 }
 
-.o_report_layout_background {
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
 .o_company_logo {
     max-height: 6rem;
     max-width: 12rem;
@@ -115,9 +124,19 @@ li.oe-nested {
         max-height: 4rem;
     }
 
+    &_mid {
+        max-height: 7rem;
+        max-width: 14rem;
+    }
+
     &_big {
         max-height: 8rem;
         max-width: 16rem;
+    }
+
+    &_giant {
+        max-height: 10rem;
+        max-width: 18rem;
     }
 }
 
@@ -139,7 +158,7 @@ div[name=comment] p, div[name=address] p {
         padding-top: $o-snailmail-address-padding-top;
 
         div[name="address"] > address {
-            margin-bottom: $spacer !important;
+            margin-bottom: 28px !important;
         }
     }
 

@@ -67,74 +67,77 @@ div#total {
 
 .o_table_bold {
     table:not(.o_ignore_layout_styling) {
-        thead th {
-            border-top: $border-width * 3 solid $o-default-report-secondary-color;
-            text-transform: uppercase;
+
+        td:first-child, th:first-child {
+            padding-left: 0;
         }
 
-        tbody {
-            tr:last-child td {
-                border-bottom: $border-width * 3 solid $o-default-report-secondary-color;
+        td:last-child, th:last-child {
+            padding-right: 0;
+        }
+
+        &:not(.o_total_table) {
+            th:first-child {
+                padding-left: map-get($spacers, 1);
             }
 
-            tr td {
-                padding: $table-cell-padding-y * 2 $table-cell-padding-x;
+            th:last-child {
+                padding-right: map-get($spacers, 1);
             }
         }
-    }
 
-    .o_total_table:not(.o_ignore_layout_styling) {
-        & .o_total, & .o_price_total {
-            border-top: $border-width solid $gray-200;
+        th {
+            font-weight: bold;
+            border-top: $border-width * 2 solid;
+            border-bottom: $border-width * 2 solid;
+        }
+
+        tr td {
+            border-bottom: $border-width solid;
+        }
+
+        .o_line_section, .o_line_subsection {
+            border-top: $border-width solid;
+
+            .o_price_subtotal_section {
+                padding-right: map-get($spacers, 1);
+            }
         }
     }
 }
 
 .o_table_striped {
     table:not(.o_ignore_layout_styling) {
-        tr:not(:first-child) {
-            // Using border-top not bottom, to manage a different border on line sections
-            border-top: $border-width solid $gray-200;
-        }
-
         tbody tr {
+            &.o_line_section, &.o_line_subsection {
+                border: none;
+            }
+
             &:first-child {
-                border-top: $border-width solid $gray-600;
-            }
-
-            &.o_line_section {
-                border-top: $border-width solid $gray-800;
-                & td {
-                    background-color: rgba($gray-800, 1) !important;
-                    color: $white;
-                }
-            }
-
-            &.o_line_subsection td {
-                background-color: $gray-300 !important;
+                border-top: $border-width solid;
             }
 
             &:last-child {
-                border-bottom: $border-width solid $gray-200;
-            }
-
-            &:nth-child(odd) td {
-                background-color: rgba($gray-200, .5);
+                border-bottom: $border-width solid;
             }
 
             &.is-subtotal {
-                border-bottom: $border-width solid $gray-400;
+                border-bottom: $border-width solid;
+            }
+
+            &.o_total strong {
+                color: $body-color;
             }
         }
     }
+}
 
-    .o_total_table:not(.o_ignore_layout_styling) {
-        tr:first-child {
-            border-top: none;
-        }
+.o_table_boxed table:not(.o_ignore_layout_styling) {
+    thead {
+        text-transform: uppercase;
 
-        tr:nth-child(odd) td {
-            background-color: rgba($gray-200, .5);
+        th:not(:last-child) {
+            border-right: $border-width solid $gray-700;
         }
     }
 }
@@ -154,16 +157,8 @@ div#total {
             border: $border-width solid $gray-700;
         }
 
-        thead {
-            text-transform: uppercase;
-
-            th:not(:last-child) {
-                border-right: $border-width solid $gray-700;
-            }
-
-            th {
-                border-bottom: $border-width solid $border-color;
-            }
+        thead th {
+            border-bottom: $border-width solid $border-color;
         }
 
         tbody {
@@ -191,7 +186,7 @@ div#total {
 
     .o_total_table:not(.o_ignore_layout_styling) {
         td {
-            border-right: none;
+            border-right: none !important;
         }
 
         &::before {
@@ -241,6 +236,44 @@ div#total {
 
             td:last-child {
                 border-radius: 0 0 $border-radius-lg 0;
+            }
+        }
+    }
+}
+
+.o_table_column {
+    table:not(.o_ignore_layout_styling) {
+
+        td:first-child, th:first-child {
+            padding-left: 0;
+        }
+
+        td:last-child, th:last-child {
+            padding-right: 0;
+        }
+
+        &:not(.o_total_table) {
+            th:first-child {
+                padding-left: map-get($spacers, 1);
+            }
+
+            th:last-child {
+                padding-right: map-get($spacers, 1);
+            }
+
+            td:not(:last-child) {
+                border-right: $border-width solid $o-gray-400;
+            }
+        }
+
+        border-bottom: $border-width solid $o-gray-400;
+
+        .o_line_section, .o_line_subsection {
+            border-bottom: $border-width solid $o-gray-400;
+            border-top: $border-width solid $o-gray-400;
+
+            .o_price_subtotal_section {
+                padding-right: map-get($spacers, 1);
             }
         }
     }
