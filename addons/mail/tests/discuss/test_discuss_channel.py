@@ -150,7 +150,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                             "discuss.channel": [{"id": test_group.id, "member_count": 2}],
                             "discuss.channel.member": [
                                 {
-                                    "channel_id": {"id": test_group.id, "model": "discuss.channel"},
+                                    "channel_id": test_group.id,
                                     "channel_role": False,
                                     "create_date": fields.Datetime.to_string(member.create_date),
                                     "fetched_message_id": False,
@@ -205,8 +205,8 @@ class TestChannelInternals(MailCommon, HttpCase):
                                     "last_seen_dt": False,
                                     "partner_id": self.test_partner.id,
                                     "seen_message_id": False,
-                                    "channel_id": {"id": test_group.id, "model": "discuss.channel"},
-                                }
+                                    "channel_id": test_group.id,
+                                },
                             ],
                             "res.partner": self._filter_partners_fields(
                                 {
@@ -435,7 +435,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                 "payload": {
                     "discuss.channel.member": [
                         {
-                            "channel_id": {"id": chat.id, "model": "discuss.channel"},
+                            "channel_id": chat.id,
                             "id": member.id,
                             "message_unread_counter": 0,
                             "message_unread_counter_bus_id": 0,
@@ -453,7 +453,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                             "id": member.id,
                             "partner_id": self.user_admin.partner_id.id,
                             "seen_message_id": msg_1.id,
-                            "channel_id": {"id": chat.id, "model": "discuss.channel"},
+                            "channel_id": chat.id,
                         },
                     ],
                     "res.partner": self._filter_partners_fields(
@@ -544,7 +544,7 @@ class TestChannelInternals(MailCommon, HttpCase):
     @users('employee')
     @mute_logger('odoo.models.unlink')
     def test_channel_private_unfollow(self):
-        """ Test that a partner can leave (unfollow) a channel/group/chat. """
+        """ Test that a partner can leave a channel/group but not a chat."""
         group_restricted_channel = self.env['discuss.channel']._create_channel(name='Channel for Groups', group_id=self.env.ref('base.group_user').id)
         public_channel = self.env['discuss.channel']._create_channel(name='Channel for Everyone', group_id=None)
         private_group = self.env['discuss.channel']._create_group(partners_to=self.user_employee.partner_id.ids, name="Group")
@@ -553,6 +553,7 @@ class TestChannelInternals(MailCommon, HttpCase):
         self.assertEqual(len(public_channel.channel_member_ids), 1)
         self.assertEqual(len(private_group.sudo().channel_member_ids), 1)
         self.assertEqual(len(chat_user_current.sudo().channel_member_ids), 1)
+        self.assertTrue(chat_user_current.self_member_id.is_pinned)
         group_restricted_channel.action_unfollow()
         public_channel.action_unfollow()
         private_group.action_unfollow()
@@ -561,8 +562,8 @@ class TestChannelInternals(MailCommon, HttpCase):
         self.assertEqual(len(public_channel.channel_member_ids), 0)
         # sudo: discuss.channel - reading members of non-accessible channel for testing purposes
         self.assertEqual(len(private_group.sudo().channel_member_ids), 0)
-        # sudo: discuss.channel - reading members of non-accessible channel for testing purposes
-        self.assertEqual(len(chat_user_current.sudo().channel_member_ids), 0)
+        self.assertEqual(len(chat_user_current.channel_member_ids), 1)
+        self.assertFalse(chat_user_current.self_member_id.is_pinned)
 
     def test_group_unfollow_should_not_post_message_if_the_partner_has_been_removed(self):
         '''

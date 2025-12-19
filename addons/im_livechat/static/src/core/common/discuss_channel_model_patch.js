@@ -4,7 +4,7 @@ import { fields } from "@mail/model/misc";
 
 import { patch } from "@web/core/utils/patch";
 
-/** @type {import("@models").DiscussChannel} */
+/** @type {import("models").DiscussChannel} */
 const discussChannelPatch = {
     setup() {
         super.setup(...arguments);
@@ -24,6 +24,22 @@ const discussChannelPatch = {
     },
     get allowDescriptionTypes() {
         return [...super.allowDescriptionTypes, "livechat"];
+    },
+    get allowedToLeaveChannelTypes() {
+        return [...super.allowedToLeaveChannelTypes, "livechat"];
+    },
+    /** @override */
+    _computeCanHide() {
+        if (this.channel_type === "livechat") {
+            return false;
+        }
+        return super._computeCanHide(...arguments);
+    },
+    get isHideUntilNewMessageSupported() {
+        if (this.livechat_end_dt) {
+            return false;
+        }
+        return super.isHideUntilNewMessageSupported;
     },
     get typesAllowingCalls() {
         return [...super.typesAllowingCalls, "livechat"];

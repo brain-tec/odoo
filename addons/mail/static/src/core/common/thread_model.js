@@ -215,12 +215,6 @@ export class Thread extends Record {
     canPostOnReadonly;
     /** @type {Boolean} */
     is_editable;
-    /** @type {Boolean} */
-    isLocallyPinned = fields.Attr(false, {
-        onUpdate() {
-            this.channel?.onPinStateUpdated();
-        },
-    });
     /** @type {integer|null} */
     highlightMessage = fields.One("mail.message");
     /** @type {String|undefined} */
@@ -710,7 +704,7 @@ export class Thread extends Record {
 
     async closeChatWindow(options = {}) {
         await this.store.chatHub.initPromise;
-        await this.channel?.chatWindow?.close({ notifyState: false, ...options });
+        await this.channel?.chatWindow?.close(options);
     }
 
     addOrReplaceMessage(message, tmpMsg) {
