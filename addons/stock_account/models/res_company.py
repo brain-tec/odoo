@@ -48,6 +48,11 @@ class ResCompany(models.Model):
 
     def action_close_stock_valuation(self, at_date=None, auto_post=False):
         self.ensure_one()
+        if at_date and isinstance(at_date, str):
+            at_date = fields.Date.from_string(at_date)
+        last_closing_date = self._get_last_closing_date()
+        if at_date and last_closing_date and at_date < last_closing_date:
+            raise UserError(self.env._('It exists closing entries after the selected date. Cancel them before generate an entry prior to them'))
         aml_vals_list = self._action_close_stock_valuation(at_date=at_date)
 
         if not aml_vals_list:
@@ -60,12 +65,12 @@ class ResCompany(models.Model):
 
         moves_vals = {
             'journal_id': self.account_stock_journal_id.id,
-            'date': fields.Date.today(),
+            'date': at_date or fields.Date.today(),
             'ref': _('Stock Closing'),
+            'inventory_closing': True,
             'line_ids': [Command.create(aml_vals) for aml_vals in aml_vals_list],
         }
         account_move = self.env['account.move'].create(moves_vals)
-
         if auto_post:
             account_move._post()
 
@@ -164,7 +169,13 @@ class ResCompany(models.Model):
         location_domain = (location_domain or []) + [('valuation_account_id', '!=', False)]
         amls_vals_list = []
         valued_location = self.env['stock.location'].search(location_domain)
-        moves_base_domain = Domain([('product_id.is_storable', '=', True)])
+        last_closing_date = self._get_last_closing_date()
+        moves_base_domain = Domain([
+            ('product_id.is_storable', '=', True),
+            ('product_id.valuation', '=', 'periodic')
+        ])
+        if last_closing_date:
+            moves_base_domain &= Domain([('date', '>', last_closing_date)])
         if at_date:
             moves_base_domain &= Domain([('date', '<=', at_date)])
         moves_in_domain = Domain([
@@ -193,20 +204,7 @@ class ResCompany(models.Model):
             # TODO: It would be better to replay the period to get the exact correct value.
             inventory_value = incoming_value_by_location.get(location, 0.0) - outgoing_value_by_location.get(location, 0.0)
             account_balance[location.valuation_account_id] += inventory_value
-        amls_domain = Domain([
-            ('account_id', 'in', valued_location.valuation_account_id.ids),
-            ('company_id', '=', self.id),
-            ('parent_state', '=', 'posted'),
-        ])
-        if at_date:
-            amls_domain &= Domain([('date', '<=', at_date)])
-        current_valuation = self.env['account.move.line']._read_group(
-            amls_domain,
-            groupby=['account_id'],
-            aggregates=['balance:sum'],
-        )
-        for account, balance in current_valuation:
-            account_balance[account] -= balance
+
         for account, balance in account_balance.items():
             if balance == 0:
                 continue
@@ -326,6 +324,15 @@ class ResCompany(models.Model):
             'credit': 0,
             'product_id': product_id,
         }]
+
+    def _get_last_closing_date(self):
+        self.ensure_one()
+        closing = self.env['account.move'].search_fetch([
+            ('inventory_closing', '=', True),
+            ('state', '=', 'posted'),
+            ('company_id', '=', self.id),
+        ], ['date'], limit=1, order='date desc, id desc')
+        return closing.date if closing else False
 
     def _set_category_defaults(self):
         for company in self:

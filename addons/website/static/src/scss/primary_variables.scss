@@ -21,6 +21,10 @@ $o-base-color-palette: map-merge($o-base-color-palette, (
     'footer-custom': null,
     'copyright': null,
     'copyright-custom': null,
+    'portal-card': null,
+    "portal-card-custom":null,
+    'portal-gradient': null,
+    'portal-card-border-color': null,
     'breadcrumb': 1, // o_cc1
     'breadcrumb-custom': null,
 ));
@@ -38,25 +42,6 @@ $o-user-gray-color-palette: () !default;
 // is automatically replaced with corresponsing color of chosen theme color
 // palette.
 $o-user-theme-color-palette: () !default;
-
-$o-social-colors: (
-    'facebook': #3B5999,
-    'twitter': #000000,
-    'linkedin': #0077B5,
-    'google-plus': #DD4B39,
-    'youtube': #ff0000,
-    'github': #1a1e22,
-    'instagram': #cf2872,
-    'whatsapp': #25d366,
-    'pinterest': #C8232C,
-    'tiktok': #000000,
-    'discord':#5865f2,
-    "kickstarter":#0f2105,
-    "google-play": #4285F4,
-    "strava": #fc4c02,
-    "bluesky": #1185FE,
-    "threads": #000000,
-);
 
 $o-theme-figcaption-opacity: 0.6;
 
@@ -2191,6 +2176,10 @@ $o-base-website-values-palette: (
     'menu-border-radius': null, // Default to classes used on the template
     'menu-box-shadow': null, // Default to classes used on the template
     'sidebar-width': 18.75rem, // 300px
+
+    'portal-card-border-width': null,  // Portal width
+    'portal-card-border-radius': null,  // Portal Radius
+    'portal-card-border-style': solid,  // portal style
 
     'footer-template': 'default',
     'footer-effect': null, // null / 'slideout_slide_hover' / 'slideout_shadow'

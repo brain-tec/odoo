@@ -44,7 +44,6 @@ class L10nHuEdiTestCommon(AccountTestInvoicingCommon):
         # Partners
         cls.partner_company = cls.env['res.partner'].create({
             'name': 'Magyar Vevő Kft.',
-            'is_company': True,
             'street': 'Alkotmány utca 11.',
             'city': 'Debrecen',
             'zip': '4000',
@@ -54,7 +53,6 @@ class L10nHuEdiTestCommon(AccountTestInvoicingCommon):
         })
         cls.partner_group_company_1 = cls.env['res.partner'].create({
             'name': 'MOL Nyrt.',
-            'is_company': True,
             'street': 'Dombóvári út 28.',
             'city': 'Budapest',
             'zip': '1117',
@@ -64,7 +62,6 @@ class L10nHuEdiTestCommon(AccountTestInvoicingCommon):
         })
         cls.partner_group_company_2 = cls.env['res.partner'].create({
             'name': 'MOL Petrolkémia Zrt.',
-            'is_company': True,
             'street': 'TVK-Ipartelep, TVK Központi Irodaház 2119/3hrsz. 136. ép.',
             'city': 'Tiszaújváros',
             'zip': '3581',
@@ -278,7 +275,7 @@ class L10nHuEdiTestCommon(AccountTestInvoicingCommon):
             'invoice_date': self.today,
             'delivery_date': self.today,
             'l10n_hu_payment_mode': 'TRANSFER',
-            'invoice_cash_rounding_id': self.env.ref('l10n_hu_edi.cash_rounding_1_huf').id,
+            'invoice_cash_rounding_id': self.env['account.chart.template'].with_company(self.company).ref('cash_rounding_1_huf').id,
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.product_a.id,

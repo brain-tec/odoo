@@ -41,6 +41,7 @@ class TestSnippets(HttpCase):
             's_icon',  # Avoid specific case where the media dialog opens on drop
             's_snippet_group',  # Snippet groups are not snippets
             's_inline_text',
+            's_drag_image_preview_test',
         ]
         snippets_names = ','.join({
             f"{el.attrib['data-oe-snippet-key']}:{el.attrib.get('data-o-group', '')}"
@@ -104,8 +105,8 @@ class TestSnippets(HttpCase):
         admin = self.env.ref('base.user_admin')
         admin.write({
             'parent_id': self.env['res.partner'].create({
-                'is_company': True,
                 'name': 'yourcompany',
+                'vat': 'BE0477472701',
             }).id
         })
         self.start_tour(self.env['website'].get_client_action_url('/'), 'snippet_popup_display_on_click', login='admin')
@@ -152,3 +153,9 @@ class TestSnippets(HttpCase):
 
     def test_tabs_snippet(self):
         self.start_tour(self.env["website"].get_client_action_url("/"), "snippet_tabs", login="admin")
+
+    def test_cookie_bar_updates_gtag_consent(self):
+        website = self.env.ref('website.default_website')
+        website.google_analytics_key = 'G-XXXXXXXXXXX'
+        website.cookies_bar = True
+        self.start_tour(website.get_client_action_url('/'), 'cookie_bar_updates_gtag_consent')

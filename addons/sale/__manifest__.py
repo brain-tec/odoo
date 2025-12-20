@@ -27,6 +27,7 @@ This module contains all the common features of Sales Management and eCommerce.
         'data/ir_sequence_data.xml',
         'data/mail_message_subtype_data.xml',
         'data/mail_template_data.xml',
+        'data/portal_entry_data.xml',
         'data/sale_tour.xml',
         'data/ir_config_parameter.xml', # Needs mail_template_data
 
@@ -72,6 +73,7 @@ This module contains all the common features of Sales Management and eCommerce.
             'sale/static/src/js/product_configurator_dialog/*',
             'sale/static/src/js/product_list/*',
             'sale/static/src/js/product_template_attribute_line/*',
+            'sale/static/src/js/quantity_availability/*',
             'sale/static/src/js/quantity_buttons/*',
             'sale/static/src/js/sale_order_line_field/*',
             'sale/static/src/js/sale_progressbar_field.js',

@@ -67,7 +67,6 @@ class TestStructure(TransactionCase):
             "name": "World Company",
             "country_id": self.env.ref("base.be").id,
             "vat": "ATU12345675",
-            "company_type": "company",
         })
 
         # reactivate it and correct the vat number
@@ -140,7 +139,6 @@ class TestStructure(TransactionCase):
         with patch('odoo.addons.base_vat.models.res_partner.check_vies', type(self)._vies_check_func):
             partner = self.env["res.partner"].create({
                 'name': 'Dummy Partner',
-                'company_name': 'My Company',
                 'vat': 'BE0477472701',
                 'country_id': self.env.ref("base.be").id,
             })
@@ -148,7 +146,7 @@ class TestStructure(TransactionCase):
 
         with patch('odoo.addons.base_vat.models.res_partner.check_vies',
                    side_effect=Exception('should not call check_vies()')):
-            partner.create_company()
+            partner._create_parent_from_name('My Company')
             self.assertEqual(partner.vies_valid, True)
             self.assertEqual(partner.parent_id.name, 'My Company')
             self.assertEqual(partner.parent_id.vies_valid, True)
@@ -245,6 +243,19 @@ class TestStructure(TransactionCase):
             test_partner.write({"vat": "83914571673"})
         test_partner.write({"vat": "BE0477.47.27.01"})
         self.assertEqual(test_partner.vat, 'BE0477472701')
+
+    def test_vat_th(self):
+        test_partner = self.env["res.partner"].create({
+            "name": "TH Company",
+            "country_id": self.env.ref("base.th").id,
+        })
+
+        for tin in ['1234545678781', '1-2345-45678-78-1', '0-99-4-000-61772-1']:
+            test_partner.vat = tin
+
+        for tin in ['1234545678782', '1-2345-45678-78-2', '0-99-4-000-61772-2', 'X-99-4-000-61772-1']:
+            with self.assertRaises(ValidationError):
+                test_partner.vat = tin
 
     def test_vat_do(self):
         test_partner = self.env["res.partner"].create({"name": "DO Company", "country_id": self.env.ref("base.do").id})

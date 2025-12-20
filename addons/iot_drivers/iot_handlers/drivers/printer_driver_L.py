@@ -59,7 +59,6 @@ class PrinterDriver(PrinterDriverBase):
             return
         try:
             self.escpos_device.open()
-            self.escpos_device.set_with_default(align='center')
             self.escpos_device.close()
         except escpos.exceptions.Error as e:
             _logger.info("%s - Could not initialize escpos class: %s", self.device_name, e)
@@ -135,17 +134,19 @@ class PrinterDriver(PrinterDriverBase):
         if not self.connected_by_usb and not data:
             return
         if self.device_subtype == "receipt_printer":
-            self.print_status_receipt()
+            self.print_status_receipt(data)
         elif self.device_subtype == "label_printer":
             self.print_status_zpl()
         else:
             title, body = self._printer_status_content()
             self.print_raw(title + b'\r\n' + body.decode().replace('\n', '\r\n').encode())
 
-    def print_status_receipt(self):
+    def print_status_receipt(self, data=None):
         """Prints the status ticket of the IoT Box on the current printer."""
         title, body = self._printer_status_content()
-
+        if data and data.get('printer_name'):
+            title = b""
+            body = b"Test print for " + data['printer_name'].encode()
         commands = self.RECEIPT_PRINTER_COMMANDS[self.receipt_protocol]
         if self.escpos_device:
             if not self.check_printer_status():
@@ -156,10 +157,16 @@ class PrinterDriver(PrinterDriverBase):
                     dev.printer.textln(title.decode())
                     dev.printer.set_with_default(align='center', double_height=False, double_width=False)
                     dev.writelines(body.decode())
-                    dev.printer.qr(f"http://{system.get_ip()}", size=6)
+                    ip = system.get_ip()
+                    if ip:
+                        dev.printer.qr(f"http://{ip}", size=6)
+                    else:
+                        wifi_qr = wifi.get_qr_data_for_wifi()
+                        if wifi_qr:
+                            dev.printer.qr(wifi_qr, size=6)
                 self.send_status(status='success')
                 return
-            except (escpos.exceptions.Error, OSError, AssertionError):
+            except (escpos.exceptions.Error, OSError, AssertionError, AttributeError):
                 _logger.warning("Failed to print QR status receipt, falling back to simple receipt")
 
         title = commands['title'] % title
@@ -223,11 +230,14 @@ class PrinterDriver(PrinterDriverBase):
         else:
             ip = '\nIoT Box IP Addresses:\n%s\n' % '\n'.join(ips)
 
-        network_quality = "\nNetwork quality:\n - To Odoo server: %s\n" % wan_quality
-        if to_gateway_quality:
-            network_quality += " - To Modem: %s\n" % to_gateway_quality
-        if to_printer_quality:
-            network_quality += " - To Printer (%s): %s\n" % (self.ip, to_printer_quality)
+        if len(ips) == 0:
+            network_quality = ""
+        else:
+            network_quality = "\nNetwork quality:\n - To Odoo server: %s\n" % wan_quality
+            if to_gateway_quality:
+                network_quality += " - To Modem: %s\n" % to_gateway_quality
+            if to_printer_quality:
+                network_quality += " - To Printer (%s): %s\n" % (self.ip, to_printer_quality)
 
         if len(ips) >= 1:
             identifier = '\nIdentifier:\n%s\n' % iot_status["identifier"]

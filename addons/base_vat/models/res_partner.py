@@ -74,6 +74,7 @@ _ref_vat = {
     'si': 'SI12345679',
     'sk': 'SK2022749619',
     'sm': 'SM24165',
+    'th': '1234545678781',
     'tr': _lt('17291716060 (NIN) or 1729171602 (VKN)'),
     'uy': _lt("Example: '219999830019' (format: 12 digits, all numbers, valid check digit)"),
     've': 'V-12345678-1, V123456781, V-12.345.678-1',
@@ -102,13 +103,13 @@ class ResPartner(models.Model):
         """ OVERRIDE """
         if not country or not vat:
             return vat, False
-        if len(vat) == 1:
-            if vat == '/' or not validation:
+        if 1 <= len(vat) <= 2:
+            if self._is_vat_void(vat) or not validation:
                 return vat, False
             if validation == 'setnull':
                 return '', False
             if validation == 'error':
-                raise ValidationError(_("To explicitly indicate no (valid) VAT, use '/' instead. "))
+                raise ValidationError(_("To explicitly indicate no (valid) VAT, use '/', 'na' or 'NA' instead. "))
         vat_prefix, vat_number = self._split_vat(vat)
 
         if vat_prefix == 'EU' and country not in self.env.ref('base.europe').country_ids:
@@ -191,22 +192,26 @@ class ResPartner(models.Model):
             if partner.parent_id and partner.parent_id.vat == partner.vat:
                 partner.vies_valid = partner.parent_id.vies_valid
                 continue
+
             from odoo.tools import zeep  # noqa: PLC0415
+
+            msg, exc = "", None
+
             try:
                 vies_valid = check_vies(partner.vat, timeout=10)
                 partner.vies_valid = vies_valid['valid']
-            except (OSError, InvalidComponent, zeep.exceptions.Fault) as e:
+            except OSError as e:
+                msg, exc = "Connection with the VIES server failed.", e
+            except InvalidComponent as e:
+                msg, exc = "Could not be interpreted by the VIES server.", e
+            except zeep.exceptions.Fault as e:
+                msg, exc = "The request for VAT validation was not processed.", e
+
+            if exc:
                 if partner._origin.id:
-                    msg = ""
-                    if isinstance(e, OSError):
-                        msg = _("Connection with the VIES server failed. The VAT number %s could not be validated.", partner.vat)
-                    elif isinstance(e, InvalidComponent):
-                        msg = _("The VAT number %s could not be interpreted by the VIES server.", partner.vat)
-                    elif isinstance(e, zeep.exceptions.Fault):
-                        msg = _('The request for VAT validation was not processed. VIES service has responded with the following error: %s', e.message)
-                    partner._origin.message_post(body=msg)
-                _logger.warning("The VAT number %s failed VIES check.", partner.vat)
-                partner.vies_valid = False
+                    partner_msg = self.env._("Error while checking the VAT number '%s' against the VIES service.", partner.vat)
+                    partner._origin.message_post(body=partner_msg)
+                _logger.warning("Error while checking the VAT number '%s' against the VIES service: %s - %s", partner.vat, msg, exc)
 
     def _split_vat(self, vat):
         vat_prefix, vat_number = vat[:2].upper(), vat[2:].replace(' ', '')
@@ -741,6 +746,10 @@ class ResPartner(models.Model):
 
         return True
 
+    def check_vat_th(self, vat):
+        check_func = stdnum.util.get_cc_module('th', 'tin').is_valid
+        return check_func(vat)
+
     def check_vat_de(self, vat):
         is_valid_vat = stdnum.util.get_cc_module("de", "vat").is_valid
         is_valid_stnr = stdnum.util.get_cc_module("de", "stnr").is_valid
@@ -830,8 +839,8 @@ class ResPartner(models.Model):
             self.env.remove_to_compute(self._fields['vies_valid'], self)
         return res
 
-    def _create_contact_parent_company(self):
-        new_company = super()._create_contact_parent_company()
+    def _create_contact_parent_company(self, values):
+        new_company = super()._create_contact_parent_company(values)
         if new_company and self.vies_valid:
             new_company.env.remove_to_compute(self._fields['vies_valid'], new_company)
             new_company.vies_valid = self.vies_valid
