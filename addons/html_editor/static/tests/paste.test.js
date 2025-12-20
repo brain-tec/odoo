@@ -9,6 +9,7 @@ import { getContent, setSelection } from "./_helpers/selection";
 import { pasteHtml, pasteOdooEditorHtml, pasteText, undo } from "./_helpers/user_actions";
 import { createBaseContainer } from "@html_editor/utils/base_container";
 import { expectElementCount } from "./_helpers/ui_expectations";
+import { nodeSize } from "@html_editor/utils/position";
 
 function isInline(node) {
     return ["I", "B", "U", "S", "EM", "STRONG", "IMG", "BR", "A", "FONT"].includes(node);
@@ -4322,9 +4323,9 @@ describe("onDrop", () => {
         const dragdata = new DataTransfer();
         await dispatch(imgElement, "dragstart", { dataTransfer: dragdata });
         await animationFrame();
-        const imageHTML = dragdata.getData("application/vnd.odoo.odoo-editor-node");
+        const imageHTML = dragdata.getData("application/vnd.odoo.odoo-editor");
         expect(imageHTML).toBe(
-            `<img class="img-fluid" data-file-name="image.png" src="${base64Image}">`
+            `<p><img class="img-fluid" data-file-name="image.png" src="${base64Image}"></p>`
         );
 
         const dropData = new DataTransfer();
@@ -4332,13 +4333,212 @@ describe("onDrop", () => {
             "text/html",
             `<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"><img src="${base64Image}">`
         );
-        // Simulate the application/vnd.odoo.odoo-editor-node data that the browser would do.
-        dropData.setData("application/vnd.odoo.odoo-editor-node", imageHTML);
+        // Simulate the application/vnd.odoo.odoo-editor data that the browser would do.
+        dropData.setData("application/vnd.odoo.odoo-editor", imageHTML);
         await dispatch(pElement, "drop", { dataTransfer: dropData });
         await animationFrame();
 
         expect(getContent(el)).toBe(
             `<p>ab<img class="img-fluid" data-file-name="image.png" src="${base64Image}">[]c</p>`
+        );
+    });
+    test("should drag and drop an image after another image", async () => {
+        const base64Image =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII=";
+        const base64Image2 =
+            "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA\n        AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\n            9TXL0Y4OHwAAAABJRU5ErkJggg==";
+
+        const { el } = await setupEditor(
+            `<p>[<img class="img-fluid" data-file-name="image.png" src="${base64Image}">]<img class="img-fluid" data-file-name="image.png" src="${base64Image2}"></p>`
+        );
+        const pElement = el.firstChild;
+        const firstImage = pElement.childNodes[0];
+
+        patchWithCleanup(document, {
+            caretPositionFromPoint: () => ({
+                offsetNode: pElement,
+                offset: pElement.childNodes.length,
+            }),
+        });
+
+        const dragdata = new DataTransfer();
+        await dispatch(firstImage, "dragstart", { dataTransfer: dragdata });
+        await animationFrame();
+        const imageHTML = dragdata.getData("application/vnd.odoo.odoo-editor");
+        expect(imageHTML).toBe(
+            `<p><img class="img-fluid" data-file-name="image.png" src="${base64Image}"></p>`
+        );
+
+        const dropData = new DataTransfer();
+        dropData.setData(
+            "text/html",
+            `<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"><img src="${base64Image}">`
+        );
+        // Simulate the application/vnd.odoo.odoo-editor data that the browser would do.
+        dropData.setData("application/vnd.odoo.odoo-editor", imageHTML);
+        await dispatch(pElement, "drop", { dataTransfer: dropData });
+        await animationFrame();
+
+        expect(getContent(el)).toBe(
+            `<p><img class="img-fluid" data-file-name="image.png" src="${base64Image2}"><img class="img-fluid" data-file-name="image.png" src="${base64Image}">[]</p>`
+        );
+    });
+    test("should drag and drop third image after first image", async () => {
+        const base64Image1 =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mP8z8BQz0AEYBxVSF+FABJADveWkH6oAAAAAElFTkSuQmCC";
+        const base64Image2 =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII=";
+        const base64Image3 =
+            "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA\n        AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\n            9TXL0Y4OHwAAAABJRU5ErkJggg==";
+
+        const { el } = await setupEditor(
+            `<p><img class="img-fluid" data-file-name="image.png" src="${base64Image1}"><img class="img-fluid" data-file-name="image.png" src="${base64Image2}">[<img class="img-fluid" data-file-name="image.png" src="${base64Image3}">]</p>`
+        );
+        const pElement = el.firstChild;
+        const firstImage = pElement.childNodes[0];
+
+        patchWithCleanup(document, {
+            caretPositionFromPoint: () => ({ offsetNode: pElement, offset: 1 }),
+        });
+
+        const dragdata = new DataTransfer();
+        await dispatch(firstImage, "dragstart", { dataTransfer: dragdata });
+        await animationFrame();
+        const imageHTML = dragdata.getData("application/vnd.odoo.odoo-editor");
+        expect(imageHTML).toBe(
+            `<p><img class="img-fluid" data-file-name="image.png" src="${base64Image3}"></p>`
+        );
+
+        const dropData = new DataTransfer();
+        dropData.setData(
+            "text/html",
+            `<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"><img src="${base64Image3}">`
+        );
+        // Simulate the application/vnd.odoo.odoo-editor data that the browser would do.
+        dropData.setData("application/vnd.odoo.odoo-editor", imageHTML);
+        await dispatch(pElement, "drop", { dataTransfer: dropData });
+        await animationFrame();
+
+        expect(getContent(el)).toBe(
+            `<p><img class="img-fluid" data-file-name="image.png" src="${base64Image1}"><img class="img-fluid" data-file-name="image.png" src="${base64Image3}">[]<img class="img-fluid" data-file-name="image.png" src="${base64Image2}"></p>`
+        );
+    });
+    test("should drag and drop multiple images after another image", async () => {
+        const base64Image1 =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mP8z8BQz0AEYBxVSF+FABJADveWkH6oAAAAAElFTkSuQmCC";
+        const base64Image2 =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII=";
+        const base64Image3 =
+            "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA\n        AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\n            9TXL0Y4OHwAAAABJRU5ErkJggg==";
+
+        const { el } = await setupEditor(
+            `<p>[<img class="img-fluid" data-file-name="image.png" src="${base64Image1}"><img class="img-fluid" data-file-name="image.png" src="${base64Image2}">]<img class="img-fluid" data-file-name="image.png" src="${base64Image3}"></p>`
+        );
+        const pElement = el.firstChild;
+        const firstImage = pElement.childNodes[0];
+
+        patchWithCleanup(document, {
+            caretPositionFromPoint: () => ({
+                offsetNode: pElement,
+                offset: pElement.childNodes.length,
+            }),
+        });
+
+        const dragdata = new DataTransfer();
+        await dispatch(firstImage, "dragstart", { dataTransfer: dragdata });
+        await animationFrame();
+        const imageHTML = dragdata.getData("application/vnd.odoo.odoo-editor");
+        expect(imageHTML).toBe(
+            `<p><img class="img-fluid" data-file-name="image.png" src="${base64Image1}"><img class="img-fluid" data-file-name="image.png" src="${base64Image2}"></p>`
+        );
+
+        const dropData = new DataTransfer();
+        dropData.setData(
+            "text/html",
+            `<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"><img src="${base64Image1}"><img src="${base64Image2}">`
+        );
+        // Simulate the application/vnd.odoo.odoo-editor data that the browser would do.
+        dropData.setData("application/vnd.odoo.odoo-editor", imageHTML);
+        await dispatch(pElement, "drop", { dataTransfer: dropData });
+        await animationFrame();
+
+        expect(getContent(el)).toBe(
+            `<p><img class="img-fluid" data-file-name="image.png" src="${base64Image3}"><img class="img-fluid" data-file-name="image.png" src="${base64Image1}"><img class="img-fluid" data-file-name="image.png" src="${base64Image2}">[]</p>`
+        );
+    });
+    test("should drag and drop banner", async () => {
+        const { el } = await setupEditor(
+            `<p>[a</p>
+            <div class="o_editor_banner user-select-none o-contenteditable-false lh-1 d-flex align-items-center alert alert-info pb-0 pt-3" data-oe-role="status" contenteditable="false" role="status">
+                <i class="o_editor_banner_icon mb-3 fst-normal" data-oe-aria-label="Banner Info" aria-label="Banner Info">💡</i>
+                <div class="o_editor_banner_content o-contenteditable-true w-100 px-3" contenteditable="true">
+                    <p>Test</p>
+                </div>
+            </div>
+            <p>b]</p>
+            <p>c</p>`
+        );
+
+        const bannerElement = el.querySelector(".o_editor_banner");
+        const targetNodeForDrop = el.lastChild;
+        patchWithCleanup(document, {
+            caretPositionFromPoint: () => ({
+                offsetNode: targetNodeForDrop,
+                offset: nodeSize(targetNodeForDrop),
+            }),
+        });
+
+        const dragdata = new DataTransfer();
+        await dispatch(bannerElement, "dragstart", { dataTransfer: dragdata });
+        await animationFrame();
+        const odooEditorData = dragdata.getData("application/vnd.odoo.odoo-editor");
+        const textHtml = dragdata.getData("text/html");
+        const dropData = new DataTransfer();
+        dropData.setData("text/html", textHtml);
+        // Simulate the application/vnd.odoo.odoo-editor data that the browser would do.
+        dropData.setData("application/vnd.odoo.odoo-editor", odooEditorData);
+        await dispatch(targetNodeForDrop, "drop", { dataTransfer: dropData });
+        await animationFrame();
+
+        expect(getContent(el)).toBe(
+            `<p><br></p><p>ca
+            </p><div class="o_editor_banner user-select-none o-contenteditable-false lh-1 d-flex align-items-center alert alert-info pb-0 pt-3" data-oe-role="status" contenteditable="false" role="status">
+                <i class="o_editor_banner_icon mb-3 fst-normal" data-oe-aria-label="Banner Info" aria-label="Banner Info">💡</i>
+                <div class="o_editor_banner_content o-contenteditable-true w-100 px-3" contenteditable="true">
+                    <p>Test</p>
+                </div>
+            </div><p>b[]</p>`
+        );
+    });
+    test("should drag and drop icon", async () => {
+        const { el } = await setupEditor(
+            `<p>[a</p><p><span class="fa fa-heart"></span>b]</p><p>c</p>`
+        );
+        const iconElement = el.querySelector(".fa");
+        const targetNodeForDrop = el.lastChild;
+
+        patchWithCleanup(document, {
+            caretPositionFromPoint: () => ({
+                offsetNode: targetNodeForDrop,
+                offset: nodeSize(targetNodeForDrop),
+            }),
+        });
+
+        const dragdata = new DataTransfer();
+        await dispatch(iconElement, "dragstart", { dataTransfer: dragdata });
+        await animationFrame();
+
+        const odooEditorData = dragdata.getData("application/vnd.odoo.odoo-editor");
+        const textHtml = dragdata.getData("text/html");
+        const dropData = new DataTransfer();
+        dropData.setData("text/html", textHtml);
+        // Simulate the application/vnd.odoo.odoo-editor-node data that the browser would do.
+        dropData.setData("application/vnd.odoo.odoo-editor-node", odooEditorData);
+        await dispatch(targetNodeForDrop, "drop", { dataTransfer: dropData });
+        await animationFrame();
+
+        expect(getContent(el)).toBe(
+            '<p><br></p><p>ca</p><p>\ufeff<span class="fa fa-heart" contenteditable="false">\u200b</span>\ufeffb[]</p>'
         );
     });
 });
