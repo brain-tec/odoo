@@ -231,8 +231,8 @@
         <attribute name="class" add="o_not_editable small" separator=" "/>
         <attribute name="t-if">not editable</attribute>
     </xpath>
-    <xpath expr="//div[hasclass('o_footer_copyright')]//div[hasclass('col-sm')][2]" position="attributes">
-        <attribute name="class" remove="col-sm text-sm-end" add="col-md mt-auto mb-0 text-md-end" separator=" "/>
+    <xpath expr="//t[@t-call='web.brand_promotion']/.." position="attributes">
+        <attribute name="class" remove="text-sm-end" add="mt-auto mb-0 text-md-end" separator=" "/>
     </xpath>
 
     <xpath expr="//head" position="inside">
@@ -249,23 +249,22 @@
                 });
                 gtag('js', new Date());
                 gtag('config', '<t t-out="website.google_analytics_key"/>');
-                function allConsentsGranted() {
-                    gtag('consent', 'update', {
-                        'ad_storage': 'granted',
-                        'ad_user_data': 'granted',
-                        'ad_personalization': 'granted',
-                        'analytics_storage': 'granted',
+                function updateConsents(consentState) {
+                    gtag("consent", "update", {
+                        "ad_storage": consentState,
+                        "ad_user_data": consentState,
+                        "ad_personalization": consentState,
+                        "analytics_storage": consentState,
                     });
                 }
+                document.addEventListener("optionalCookiesAccepted", () => {
+                    updateConsents("granted");
+                });
+                document.addEventListener("optionalCookiesDenied", () => {
+                    updateConsents("denied");
+                });
                 <t t-if="website._allConsentsGranted()">
-                    allConsentsGranted();
-                </t>
-                <t t-else="">
-                    document.addEventListener(
-                        "optionalCookiesAccepted",
-                        allConsentsGranted,
-                        {once: true}
-                    );
+                    updateConsents("granted");
                 </t>
             </script>
         </t>
@@ -2170,10 +2169,10 @@
             </section>
         </div>
     </xpath>
-    <xpath expr="//div[hasclass('o_footer_copyright')]//div[hasclass('col-md')]" position="attributes">
+    <xpath expr="//footer//span[hasclass('o_footer_copyright_name')]/.." position="attributes">
         <attribute name="class" remove="text-center" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('o_footer_copyright')]//div[hasclass('col-md')][2]" position="attributes">
+    <xpath expr="//t[@t-call='web.brand_promotion']/.." position="attributes">
         <attribute name="class" remove="text-center" separator=" "/>
     </xpath>
 </template>
@@ -2298,10 +2297,10 @@
             </section>
         </div>
     </xpath>
-    <xpath expr="//div[hasclass('o_footer_copyright')]//div[hasclass('col-md')]" position="attributes">
+    <xpath expr="//footer//span[hasclass('o_footer_copyright_name')]/.." position="attributes">
         <attribute name="class" remove="text-center" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('o_footer_copyright')]//div[hasclass('col-md')][2]" position="attributes">
+    <xpath expr="//t[@t-call='web.brand_promotion']/.." position="attributes">
         <attribute name="class" remove="text-center" separator=" "/>
     </xpath>
 </template>
@@ -2408,10 +2407,10 @@
             </section>
         </div>
     </xpath>
-    <xpath expr="//div[hasclass('o_footer_copyright')]//div[hasclass('col-md')]" position="attributes">
+    <xpath expr="//footer//span[hasclass('o_footer_copyright_name')]/.." position="attributes">
         <attribute name="class" remove="text-center" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('o_footer_copyright')]//div[hasclass('col-md')][2]" position="attributes">
+    <xpath expr="//t[@t-call='web.brand_promotion']/.." position="attributes">
         <attribute name="class" remove="text-center" separator=" "/>
     </xpath>
 </template>
@@ -2523,8 +2522,19 @@
     <xpath expr="//footer//span[hasclass('o_footer_copyright_name')]" position="replace">
         <span class="o_footer_copyright_name me-2 small">Copyright &amp;copy; Company name</span>
     </xpath>
-    <xpath expr="//div[hasclass('o_footer_copyright')]//div[hasclass('col-sm')]" position="attributes">
-        <attribute name="class" remove="col-sm text-sm-start" add="col-md d-flex flex-column-reverse gap-2 text-md-start" separator=" "/>
+    <xpath expr="//footer//span[hasclass('o_footer_copyright_name')]/.." position="attributes">
+        <attribute name="class" remove="text-sm-start" add="d-flex flex-column-reverse gap-2 text-md-start" separator=" "/>
+    </xpath>
+</template>
+
+<!-- Cookie Policy Link -->
+<template id="footer_cookie_policy_link" inherit_id="website.layout" name="Footer Cookie Policy Link">
+    <xpath expr="//div[@id='footer']" position="after">
+        <div t-if="website.cookies_bar" class="o_cookie_policy_link_container container text-center text-md-start">
+            <p class="m-0">
+                <a href="/cookie-policy" class="oe_unremovable btn btn-link btn-sm px-0 o_translate_inline">Cookie Policy</a>
+            </p>
+        </div>
     </xpath>
 </template>
 

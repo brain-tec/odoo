@@ -35,7 +35,7 @@ import { normalize } from "@web/core/l10n/utils";
 import { WithLazyGetterTrap } from "@point_of_sale/lazy_getter";
 import { debounce } from "@web/core/utils/timing";
 import DevicesSynchronisation from "../utils/devices_synchronisation";
-import { formatDate } from "@web/core/l10n/dates";
+import { formatDate, deserializeDateTime } from "@web/core/l10n/dates";
 import { ProductInfoPopup } from "@point_of_sale/app/components/popups/product_info_popup/product_info_popup";
 import { RetryPrintPopup } from "@point_of_sale/app/components/popups/retry_print_popup/retry_print_popup";
 import { PresetSlotsPopup } from "@point_of_sale/app/components/popups/preset_slots_popup/preset_slots_popup";
@@ -58,7 +58,6 @@ export class PosStore extends WithLazyGetterTrap {
         "bus_service",
         "number_buffer",
         "barcode_reader",
-        "hardware_proxy",
         "ui",
         "pos_data",
         "dialog",
@@ -80,7 +79,6 @@ export class PosStore extends WithLazyGetterTrap {
         env,
         {
             number_buffer,
-            hardware_proxy,
             barcode_reader,
             ui,
             dialog,
@@ -135,7 +133,6 @@ export class PosStore extends WithLazyGetterTrap {
             create: new Set(),
         };
 
-        this.hardwareProxy = hardware_proxy;
         this.selectedOrderUuid = null;
         this.selectedPartner = null;
         this.selectedCategory = null;
@@ -146,15 +143,9 @@ export class PosStore extends WithLazyGetterTrap {
 
         this.orderCounter = new Counter(0);
 
-        // FIXME POSREF: the hardwareProxy needs the pos and the pos needs the hardwareProxy. Maybe
-        // the hardware proxy should just be part of the pos service?
-        this.hardwareProxy.pos = this;
         this.syncingOrders = new Set();
         await this.initServerData();
 
-        if (this.config.useProxy) {
-            await this.connectToProxy();
-        }
         this.closeOtherTabs();
         this.syncAllOrdersDebounced = debounce(this.syncAllOrders, 100);
         this._searchTriggered = false;
@@ -424,7 +415,7 @@ export class PosStore extends WithLazyGetterTrap {
         }
 
         // Create preparation/kitchen printers
-        for (const printerConfig of this.models["pos.printer"].getAll()) {
+        for (const printerConfig of this.config.preparation_printer_ids) {
             const printer = this.createPrinter(printerConfig);
             if (printer) {
                 printer.config = printerConfig.raw;
@@ -432,6 +423,14 @@ export class PosStore extends WithLazyGetterTrap {
             }
         }
         this.config.iface_printers = !!this.kitchenPrinters.length;
+
+        for (const printer of this.config.receipt_printer_ids) {
+            const printerDevice = this.createPrinter(printer);
+            this.printer.setFallbackPrinter(printerDevice);
+            if (printer == this.config.default_receipt_printer_id) {
+                this.printer.setPrinter(printerDevice);
+            }
+        }
 
         this.models["product.pricelist.item"].addEventListener("create", () => {
             const order = this.getOrder();
@@ -450,8 +449,8 @@ export class PosStore extends WithLazyGetterTrap {
         return makeAwaitable(this.dialog, CashMovePopup);
     }
     async openCashbox(action = undefined) {
-        if (this.config.iface_cashdrawer && this.receiptPrinter) {
-            this.receiptPrinter.openCashbox();
+        if (this.config.iface_cashdrawer && this.printer.device) {
+            this.printer.device.openCashbox();
             if (action) {
                 await this.logEmployeeMessage(action, "CASH_DRAWER_ACTION");
             }
@@ -708,11 +707,6 @@ export class PosStore extends WithLazyGetterTrap {
 
         this.markReady();
         await this.deviceSync.readDataFromServer();
-
-        if (this.config.other_devices && this.config.epson_printer_ip) {
-            this.receiptPrinter = new EpsonPrinter(this.config);
-            this.printer.setPrinter(this.receiptPrinter);
-        }
     }
 
     get productViewMode() {
@@ -1196,7 +1190,7 @@ export class PosStore extends WithLazyGetterTrap {
 
     createPrinter(config) {
         if (config.printer_type === "epson_epos") {
-            return new EpsonPrinter(config);
+            return new EpsonPrinter({ printer: config });
         }
     }
     async _loadFonts() {
@@ -2037,38 +2031,6 @@ export class PosStore extends WithLazyGetterTrap {
         return await printer.printReceipt(receipt, actionId);
     }
 
-    connectToProxy() {
-        return new Promise((resolve, reject) => {
-            this.barcodeReader?.disconnectFromProxy();
-            this.loadingSkipButtonIsShown = true;
-            this.hardwareProxy.autoConnect({ force_ip: this.config.proxy_ip }).then(
-                () => {
-                    if (this.config.iface_scan_via_proxy) {
-                        this.barcodeReader?.connectToProxy();
-                    }
-                    resolve();
-                },
-                (statusText, url) => {
-                    // this should reject so that it can be captured when we wait for pos.ready
-                    // in the chrome component.
-                    // then, if it got really rejected, we can show the error.
-                    if (statusText == "error" && window.location.protocol == "https:") {
-                        // FIXME POSREF this looks like it's dead code.
-                        reject({
-                            title: _t("HTTPS connection to IoT Box failed"),
-                            body: _t(
-                                "Make sure you are using IoT Box v18.12 or higher. Navigate to %s to accept the certificate of your IoT Box.",
-                                url
-                            ),
-                            popup: "alert",
-                        });
-                    } else {
-                        resolve();
-                    }
-                }
-            );
-        });
-    }
     editPartnerContext(partner) {
         return {};
     }
@@ -2324,6 +2286,12 @@ export class PosStore extends WithLazyGetterTrap {
         }
     }
 
+    showNotificationIfLotExpired(lotName, lotExpDate = null) {
+        const lotExpDateTime = deserializeDateTime(lotExpDate);
+        if (lotExpDateTime.isValid && lotExpDateTime.ts <= DateTime.now().ts) {
+            this.notification.add(_t("Lot/Serial %s is expired", lotName));
+        }
+    }
     async editLots(product, packLotLinesToEdit) {
         const isAllowOnlyOneLot = product.isAllowOnlyOneLot();
         let canCreateLots = this.pickingType.use_create_lots || !this.pickingType.use_existing_lots;
@@ -2396,6 +2364,12 @@ export class PosStore extends WithLazyGetterTrap {
 
         const existingLotsName = existingLots.map((l) => l.name);
         if (!packLotLinesToEdit.length && existingLotsName.length === 1) {
+            if (existingLots[0].expiration_date) {
+                this.showNotificationIfLotExpired(
+                    existingLots[0].name,
+                    existingLots[0].expiration_date
+                );
+            }
             // If there's only one existing lot/serial number, automatically assign it to the order line
             return { newPackLotLines: [{ lot_name: existingLotsName[0] }] };
         }
@@ -2410,6 +2384,12 @@ export class PosStore extends WithLazyGetterTrap {
             isLotNameUsed: isLotNameUsed,
         });
         if (payload) {
+            for (const item of payload) {
+                if (!item.expiration_date) {
+                    continue;
+                }
+                this.showNotificationIfLotExpired(item.text, item.expiration_date);
+            }
             // Segregate the old and new packlot lines
             const modifiedPackLotLines = Object.fromEntries(
                 payload.filter((item) => item.id).map((item) => [item.id, item.text])

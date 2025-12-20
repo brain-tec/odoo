@@ -37,6 +37,9 @@ class PurchaseOrderLine(models.Model):
     price_unit = fields.Float(
         string='Unit Price', required=True, digits='Product Price', aggregator='avg',
         compute="_compute_price_unit_and_date_planned_and_name", readonly=False, store=True)
+    price_unit_product_uom = fields.Float(
+        string='Unit Price Product UoM', digits='Product Price', compute="_compute_price_unit_product_uom",
+        help="The Price of one unit of the product's Unit of Measure", aggregator='avg', store=True)
     price_unit_discounted = fields.Float('Unit Price (Discounted)', compute='_compute_price_unit_discounted')
 
     price_subtotal = fields.Monetary(compute='_compute_amount', string='Subtotal', store=True)
@@ -150,6 +153,14 @@ class PurchaseOrderLine(models.Model):
     def _compute_price_unit_discounted(self):
         for line in self:
             line.price_unit_discounted = line.price_unit * (1 - line.discount / 100)
+
+    @api.depends('product_uom_id', 'price_unit')
+    def _compute_price_unit_product_uom(self):
+        for line in self:
+            if line.product_uom_id:
+                line.price_unit_product_uom = line.product_uom_id._compute_price(line.price_unit, line.product_id.uom_id)
+            else:
+                line.price_unit_product_uom = line.price_unit
 
     @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity', 'qty_received', 'product_uom_qty', 'order_id.state')
     def _compute_qty_invoiced(self):
@@ -285,6 +296,9 @@ class PurchaseOrderLine(models.Model):
 
         lines = super().create(vals_list)
         for line in lines:
+            if line.qty_received_method == 'manual' and line.product_id.is_storable:
+                qty_received = line.product_uom_id._compute_quantity(line.qty_received, line.product_id.uom_id)
+                line.product_id.with_context(skip_qty_available_update=True).qty_available += qty_received
             if line.product_id and line.order_id.state == 'purchase':
                 msg = _("Extra line with %s ", line.product_id.display_name)
                 line.order_id.message_post(body=msg)
@@ -310,6 +324,10 @@ class PurchaseOrderLine(models.Model):
 
         if 'qty_received' in values:
             for line in self:
+                if line.qty_received_method == 'manual' and line.product_id.is_storable:
+                    delta_qty_received = values['qty_received'] - line.qty_received
+                    delta_qty_received = line.product_uom_id._compute_quantity(delta_qty_received, line.product_id.uom_id)
+                    line.product_id.with_context(skip_qty_available_update=True).qty_available += delta_qty_received
                 line._track_qty_received(values['qty_received'])
         return super().write(values)
 

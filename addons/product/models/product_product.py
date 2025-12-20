@@ -1,7 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import re
-
 from collections import defaultdict
 
 from odoo import _, api, fields, models, tools
@@ -30,11 +29,14 @@ class ProductProduct(models.Model):
         'Variant Price Extra', compute='_compute_product_price_extra',
         digits='Product Price',
         help="This is the sum of the extra price of all attributes")
-    # lst_price: catalog value + extra, context dependent (uom)
+    # lst_price: catalog value + extra, or custom value
     lst_price = fields.Float(
-        'Sales Price', compute='_compute_product_lst_price',
-        digits='Product Price', inverse='_set_product_lst_price',
-        help="The sale price is managed from the product template. Click on the 'Configure Variants' button to set the extra attribute prices.")
+        'Sales Price',
+        compute='_compute_product_lst_price',
+        digits='Product Price',
+        readonly=False,
+        store=True,
+        help="The sale price can be set manually or computed from the product template. Click on the 'Configure Variants' button to set the extra attribute prices.")
 
     default_code = fields.Char('Internal Reference', index=True)
     code = fields.Char('Reference', compute='_compute_product_code')
@@ -72,7 +74,16 @@ class ProductProduct(models.Model):
         Used to compute margins on sale orders.""")
     volume = fields.Float('Volume', digits='Volume')
     weight = fields.Float('Weight', digits='Stock Weight')
-
+    qty_available = fields.Float('Quantity On Hand', company_dependent=True, digits='Product Unit')
+    virtual_available = fields.Float(
+        'Forecasted Quantity', compute='_compute_quantities', compute_sudo=False, search='_search_virtual_available',
+        digits='Product Unit', help="Forecasted quantity if all confirmed sales and purchase orders were delivered.")
+    incoming_qty = fields.Float(
+        'Incoming', compute='_compute_quantities', compute_sudo=False, search='_search_incoming_qty', digits='Product Unit',
+        help="Quantity of planned incoming quantities from all confirmed purchase orders not received.")
+    outgoing_qty = fields.Float(
+        'Outgoing', compute='_compute_quantities', compute_sudo=False, search='_search_outgoing_qty', digits='Product Unit',
+        help="Quantity of planned outgoing quantities from all confirmed sale orders not delivered.")
     pricelist_rule_ids = fields.One2many(
         string="Pricelist Rules",
         comodel_name='product.pricelist.item',
@@ -308,34 +319,15 @@ class ProductProduct(models.Model):
     def _compute_is_product_variant(self):
         self.is_product_variant = True
 
-    @api.onchange('lst_price')
-    def _set_product_lst_price(self):
-        for product in self:
-            if self.env.context.get('uom'):
-                value = self.env['uom.uom'].browse(self.env.context['uom'])._compute_price(product.lst_price, product.uom_id)
-            else:
-                value = product.lst_price
-            value -= product.price_extra
-            product.write({'list_price': value})
-
     @api.depends("product_template_attribute_value_ids.price_extra")
     def _compute_product_price_extra(self):
         for product in self:
             product.price_extra = sum(product.product_template_attribute_value_ids.mapped('price_extra'))
 
     @api.depends('list_price', 'price_extra')
-    @api.depends_context('uom')
     def _compute_product_lst_price(self):
-        to_uom = None
-        if 'uom' in self.env.context:
-            to_uom = self.env['uom.uom'].browse(self.env.context['uom'])
-
         for product in self:
-            if to_uom:
-                list_price = product.uom_id._compute_price(product.list_price, to_uom)
-            else:
-                list_price = product.list_price
-            product.lst_price = list_price + product.price_extra
+            product.lst_price = product.list_price + product.price_extra
 
     @api.depends_context('partner_id')
     def _compute_product_code(self):
@@ -363,6 +355,46 @@ class ProductProduct(models.Model):
                     break
             else:
                 product.partner_ref = product.display_name
+
+    @api.depends_context('to_date')
+    def _compute_quantities(self):
+        """ Simple per company compute overriden by Stock._compute_quantities """
+        self.virtual_available = 0
+        self.incoming_qty = 0
+        self.outgoing_qty = 0
+
+        products = self.filtered(lambda p: p.type != 'service' and p.is_storable)
+        forecasted = products._compute_forecasted_without_stock()
+        for product in products:
+            vals = forecasted.get(product.id)
+            if not vals:
+                continue
+            product.virtual_available = vals['virtual_available']
+            product.incoming_qty = vals['incoming_qty']
+            product.outgoing_qty = vals['outgoing_qty']
+
+    def _compute_forecasted_without_stock(self):
+        """ Forecast = qty_available + qty purchased not received - qty sold not delivered"""
+        forecast = defaultdict(dict)
+        for product in self:
+            forecast[product.id]['virtual_available'] = product.qty_available
+            forecast[product.id]['incoming_qty'] = 0
+            forecast[product.id]['outgoing_qty'] = 0
+        return forecast
+
+    def _search_virtual_available(self, operator, value):
+        return self._search_product_quantity(operator, value, 'virtual_available')
+
+    def _search_incoming_qty(self, operator, value):
+        return self._search_product_quantity(operator, value, 'incoming_qty')
+
+    def _search_outgoing_qty(self, operator, value):
+        return self._search_product_quantity(operator, value, 'outgoing_qty')
+
+    def _search_product_quantity(self, operator, value, field):
+        # Order the search on `id` to prevent the default order on the product name which slows down the search.
+        ids = self.with_context(prefetch_fields=False).search_fetch([], [field], order='id').filtered_domain([(field, operator, value)]).ids
+        return [('id', 'in', ids)]
 
     def _compute_product_document_count(self):
         for product in self:
@@ -1064,8 +1096,8 @@ class ProductProduct(models.Model):
 
     def _get_attributes_extra_price(self):
         self.ensure_one()
-
-        return self.price_extra + self.env.context.get('no_variant_attributes_price_extra', 0)
+        price_extra = self.lst_price - self.list_price
+        return price_extra + self.env.context.get('no_variant_attributes_price_extra', 0)
 
     def _price_compute(self, price_type, uom=None, currency=None, company=None, date=False):
         company = company or self.env.company

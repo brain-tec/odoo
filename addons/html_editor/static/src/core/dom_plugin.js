@@ -13,7 +13,6 @@ import {
 } from "../utils/dom";
 import {
     allowsParagraphRelatedElements,
-    getDeepestPosition,
     isContentEditable,
     isContentEditableAncestor,
     isEmptyBlock,
@@ -29,6 +28,7 @@ import {
     listElementSelector,
     isEditorTab,
     isPhrasingContent,
+    getDeepestEditablePosition,
 } from "../utils/dom_info";
 import {
     childNodes,
@@ -209,12 +209,19 @@ export class DomPlugin extends Plugin {
             !this.isEditionBoundary(selection.anchorNode);
 
         // Empty block must contain a br element to allow cursor placement.
+        const firstLeafNode = firstLeaf(container);
         if (
-            container.lastElementChild &&
-            isBlock(container.lastElementChild) &&
-            !container.lastElementChild.hasChildNodes()
+            isBlock(firstLeafNode) &&
+            !(closestElement(firstLeafNode, "[contenteditable]")?.contentEditable === "false")
         ) {
-            fillEmpty(container.lastElementChild);
+            fillEmpty(firstLeafNode);
+        }
+        const lastLeafNode = lastLeaf(container);
+        if (
+            isBlock(lastLeafNode) &&
+            !(closestElement(lastLeafNode, "[contenteditable]")?.contentEditable === "false")
+        ) {
+            fillEmpty(lastLeafNode);
         }
 
         // In case the html inserted is all contained in a single root <p> or <li>
@@ -453,7 +460,7 @@ export class DomPlugin extends Plugin {
 
         if (!this.config.allowInlineAtRoot && this.isEditionBoundary(lastPosition[0])) {
             // Correct the position if it happens to be in the editable root.
-            lastPosition = getDeepestPosition(...lastPosition);
+            lastPosition = getDeepestEditablePosition(...lastPosition);
         }
         this.dependencies.selection.setSelection(
             { anchorNode: lastPosition[0], anchorOffset: lastPosition[1] },

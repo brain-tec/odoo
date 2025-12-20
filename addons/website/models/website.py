@@ -11,6 +11,7 @@ import re
 import requests
 import threading
 import types
+import werkzeug.routing
 
 from collections import defaultdict
 from lxml import etree, html
@@ -22,7 +23,7 @@ from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo.addons.website.tools import similarity_score, text_from_html, get_base_domain
 from odoo.addons.portal.controllers.portal import pager
 from odoo.addons.iap.tools import iap_tools
-from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
 from odoo.fields import Domain
 from odoo.http import request
 from odoo.models import Query
@@ -1642,6 +1643,18 @@ class Website(models.CachedModel):
             if sitemap_func is False:
                 continue
 
+            if rule.endpoint.routing.get('sitemap') is True:
+                source = inspect.getsource(rule.endpoint.func)
+                if ('return request.redirect' in source or 'return redirect(' in source):
+                    logger.warning(
+                        "Sitemap for controller %s (%s) is set to True, but the endpoint performs a redirect. "
+                        "Even if the redirect occurs only under specific conditions, you must provide a sitemap "
+                        "function and replicate the redirect logic there (returning the final intended URL). "
+                        "This ensures the sitemap lists only reachable URLs and suppresses this warning.",
+                        rule.endpoint.original_endpoint,
+                        ', '.join(rule.endpoint.routing['routes']),
+                    )
+
             if callable(sitemap_func):
                 func_key = _unwrap_callable(sitemap_func)
                 if func_key in sitemap_endpoint_done:
@@ -1756,6 +1769,53 @@ class Website(models.CachedModel):
             if len(res) == limit:
                 break
         return res
+
+    def check_existing_page(self, page):
+        """
+            Returns a boolean, whether the page is considered to exist for the
+            current website. This is a heuristic and is not perfectly reliable.
+        """
+        # The page exists if there is a 'website.page' record with this url
+        if len(self._get_website_pages(domain=[('url', '=', page), ('view_id', '!=', False)], limit=1)) > 0:
+            return True
+
+        # The page is considered to exist if there is a 'website.rewrite' record
+        # that does a redirect 301 or 302, for simplicity we do not check
+        # further whether the redirection points to an existing url.
+        redirects_domain = self.get_current_website().website_domain() & Domain(
+            [('url_from', '=', page), ('redirect_type', 'in', ('301', '302'))]
+        )
+        if len(self.env['website.rewrite'].search(redirects_domain, limit=1)) > 0:
+            return True
+
+        router = request.env['ir.http'].routing_map().bind_to_environ(request.httprequest.environ)
+        # If there is no rules matching this page, it does not exists
+        if not router.test(path_info=page, method='GET'):
+            return False
+
+        try:
+            rule, args = router.match(page, method='GET', return_rule=True)
+        except werkzeug.routing.RequestRedirect:
+            # The page is considered to exist if it redirects (this happens if
+            # there is a 'website.rewrite' 308), for simplicity we do not check
+            # further whether the redirection points to an existing url.
+            return True
+
+        try:
+            # The rule may have restriction for some records that appear in its
+            # url, these are checked by `rule.build`.
+            for arg in args:
+                if isinstance(args[arg], models.BaseModel):
+                    # Models from `router.match` are missing users in their env
+                    args[arg] = args[arg].with_user(self.env.uid)
+                    # For record that may be related to a website, we skip them
+                    # if they are for a different website than the current one
+                    if hasattr(args[arg], 'website_id') and args[arg].website_id and args[arg].website_id != self:
+                        return False
+            rule.build(args, append_unknown=False)
+        except MissingError:
+            return False
+        return True
 
     def get_suggested_controllers(self):
         """
@@ -2327,3 +2387,11 @@ class Website(models.CachedModel):
         """
         self.ensure_one()
         return not self.cookies_bar or self.env['ir.http']._is_allowed_cookie('optional')
+
+    @staticmethod
+    def is_reachable(menu):
+        return (
+            menu.is_visible
+            and menu.url not in ('/', '', '#')
+            and not menu.url.startswith(('/?', '/#', ' '))
+        )

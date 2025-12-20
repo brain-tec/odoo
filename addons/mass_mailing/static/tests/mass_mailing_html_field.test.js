@@ -1,4 +1,4 @@
-import { expect, test, describe, beforeEach, getFixture } from "@odoo/hoot";
+import { expect, test, describe, beforeEach, getFixture, before } from "@odoo/hoot";
 import {
     defineModels,
     fields,
@@ -17,6 +17,7 @@ import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { unmockedOrm } from "@web/../tests/_framework/module_set.hoot";
 import { MassMailingIframe } from "../src/iframe/mass_mailing_iframe";
 import { MassMailingHtmlField } from "../src/fields/html_field/mass_mailing_html_field";
+import { user } from "@web/core/user";
 
 class Mailing extends models.Model {
     _name = "mailing.mailing";
@@ -227,7 +228,8 @@ describe("field HTML", () => {
         expect(queryOne(".o_mass_mailing_iframe_wrapper iframe")).toHaveClass("d-none");
         await click(
             waitFor(
-                ".o_mailing_template_preview_wrapper div[role='menuitem']:contains(Start From Scratch)"
+                ":iframe .o_mailing_template_preview_wrapper div[role='menuitem']:contains(Start From Scratch)",
+                { timeout: 1000 }
             )
         );
         await waitFor(".o_mass_mailing_iframe_wrapper iframe:not(.d-none)");
@@ -258,6 +260,13 @@ describe("field HTML", () => {
         // When those popovers are killed, OWL tries to reconcile its element List
         // in OverlayContainer, displaces the node that contains the iframe
         // and the editor subsequently crashes
+        before(() => {
+            patchWithCleanup(user, {
+                checkAccessRight() {
+                    return true;
+                },
+            });
+        });
         const base64Img =
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII=";
         onRpc("/html_editor/get_image_info", () => ({
@@ -286,9 +295,9 @@ describe("field HTML", () => {
         });
         await contains(".o_data_cell").click();
         await waitFor(".o_dialog");
-        await contains(".o_dialog [data-name='event']").click();
+        await contains(".o_dialog :iframe [data-name='event']", { timeout: 1000 }).click();
         await waitFor(".o_dialog .o_mass_mailing-builder_sidebar", { timeout: 1000 });
-        await contains(".o_dialog :iframe p", { timeout: 1000 }).click();
+        await contains(".o_dialog :iframe .s_text_block", { timeout: 1000 }).click();
         await waitFor(
             ".o_dialog .o_mass_mailing-builder_sidebar .options-container-header:contains(Text)"
         );
@@ -305,7 +314,7 @@ describe("field HTML", () => {
             resId: 1,
             arch: mailViewArch,
         });
-        await click(waitFor(".o_mailing_template_preview_wrapper [data-name='default']"));
+        await click(waitFor(":iframe .o_mailing_template_preview_wrapper [data-name='default']"));
         await waitFor(".o_mass_mailing_iframe_wrapper iframe:not(.d-none)");
         expect(await waitFor(":iframe .o_layout", { timeout: 3000 })).toHaveClass(
             "o_default_theme"
@@ -383,7 +392,7 @@ describe("field HTML: with loaded assets", () => {
             resId: 1,
             arch: mailViewArch,
         });
-        await click(waitFor(".o_mailing_template_preview_wrapper [data-name='default']"));
+        await click(waitFor(":iframe .o_mailing_template_preview_wrapper [data-name='default']"));
         await waitFor(".o_mass_mailing_iframe_wrapper iframe:not(.d-none)");
         const { bundleControls } = await htmlField.ensureIframeLoaded();
 
