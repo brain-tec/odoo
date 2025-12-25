@@ -203,6 +203,7 @@ class PosConfig(models.Model):
         'pos.payment.method', string='Fast Payment Methods', compute="_compute_fast_payment_method_ids", relation='pos_payment_method_config_fast_validation_relation',
         store=True, help="These payment methods will be available for fast payment", readonly=False)
     statistics_for_current_session = fields.Json(string="Session Statistics", compute="_compute_statistics_for_session")
+    iface_printbill = fields.Boolean(string='Bill Printing', help="Allows to print the Bill before payment.")
 
     pos_snooze_ids = fields.One2many('pos.product.template.snooze', 'pos_config_id', string='Snoozed Products')
 
@@ -616,6 +617,9 @@ class PosConfig(models.Model):
         if 'iface_tipproduct' in vals and not vals['iface_tipproduct']:
             vals['tip_product_id'] = False
             vals['set_tip_after_payment'] = False
+        else:
+            if 'tip_product_id' not in vals and (default_tip := self._get_default_tip_product()):
+                vals['tip_product_id'] = default_tip.id
 
         self._check_header_footer(vals)
         self._reset_default_on_vals(vals)
