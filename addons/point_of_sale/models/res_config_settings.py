@@ -118,6 +118,7 @@ class ResConfigSettings(models.TransientModel):
     group_pos_preset = fields.Boolean(string="Presets", implied_group="point_of_sale.group_pos_preset", help="Hide or show the Presets menu in the Point of Sale configuration.")
     pos_use_fast_payment = fields.Boolean(related='pos_config_id.use_fast_payment', readonly=False)
     pos_fast_payment_method_ids = fields.Many2many(related='pos_config_id.fast_payment_method_ids', readonly=False)
+    pos_iface_printbill = fields.Boolean(related='pos_config_id.iface_printbill', readonly=False)
 
     def open_payment_method_form(self):
         bank_journal = self.env['account.journal'].search([('type', '=', 'bank'), ('company_id', 'in', self.env.company.parent_ids.ids)], limit=1)
@@ -134,6 +135,16 @@ class ResConfigSettings(models.TransientModel):
                 'default_name': f"Bank {self.env.context.get('provider_name', False)}",
             }
         }
+
+    @api.onchange('pos_iface_tipproduct')
+    def _onchange_iface_tipproduct(self):
+        for res_config in self:
+            if not res_config.pos_iface_tipproduct:
+                res_config.pos_tip_product_id = False
+                res_config.pos_set_tip_after_payment = False
+            else:
+                if not res_config.pos_tip_product_id:
+                    res_config.pos_tip_product_id = res_config.pos_config_id._get_default_tip_product()
 
     @api.model_create_multi
     def create(self, vals_list):

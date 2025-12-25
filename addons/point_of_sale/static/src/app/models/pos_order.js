@@ -16,10 +16,6 @@ export class PosOrder extends PosOrderAccounting {
 
         if (!this.session_id?.id && (!this.finalized || !this.isSynced)) {
             this.session_id = this.session;
-
-            if (this.state === "draft" && this.lines.length == 0 && this.payment_ids.length == 0) {
-                this._isResidual = true;
-            }
         }
 
         // Data present in python model
@@ -275,7 +271,7 @@ export class PosOrder extends PosOrderAccounting {
     }
 
     assertEditable() {
-        if (this.finalized) {
+        if (this.finalized && (this.nb_print || this.state == "done")) {
             throw new Error("Finalized Order cannot be modified");
         }
         return true;
