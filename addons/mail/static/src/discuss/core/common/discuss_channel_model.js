@@ -4,7 +4,13 @@ import { fields, Record } from "@mail/model/export";
 import { _t } from "@web/core/l10n/translation";
 import { Deferred } from "@web/core/utils/concurrency";
 import { rpc } from "@web/core/network/rpc";
-import { compareDatetime, effectWithCleanup } from "@mail/utils/common/misc";
+import {
+    compareDatetime,
+    effectWithCleanup,
+    nearestGreaterThanOrEqual,
+} from "@mail/utils/common/misc";
+import { formatList } from "@web/core/l10n/utils";
+import { imageUrl } from "@web/core/utils/urls";
 
 /** @import { AwaitChatHubInit } from "@mail/core/common/chat_hub_model" */
 
@@ -98,6 +104,16 @@ export class DiscussChannel extends Record {
     get areAllMembersLoaded() {
         return this.member_count === this.channel_member_ids.length;
     }
+    /** @type {string} */
+    avatar_cache_key;
+    get avatarUrl() {
+        if (["channel", "group"].includes(this.channel_type)) {
+            return imageUrl("discuss.channel", this.id, "avatar_128", {
+                unique: this.avatar_cache_key,
+            });
+        }
+        return this.correspondent?.avatarUrl;
+    }
     /** @type {"video_full_screen"|undefined} */
     default_display_mode;
     get typesAllowingCalls() {
@@ -135,11 +151,72 @@ export class DiscussChannel extends Record {
     get chatChannelTypes() {
         return ["chat", "group"];
     }
+    correspondent = fields.One("discuss.channel.member", {
+        /** @this {import("models").Thread} */
+        compute() {
+            return this.computeCorrespondent();
+        },
+    });
+    correspondentCountry = fields.One("res.country", {
+        /** @this {import("models").Thread} */
+        compute() {
+            return this.correspondent?.persona?.country_id ?? this.country_id;
+        },
+    });
+    /** @returns {import("models").ChannelMember} */
+    computeCorrespondent() {
+        if (this.channel_type === "channel") {
+            return undefined;
+        }
+        const correspondents = this.correspondents;
+        if (correspondents.length === 1) {
+            // 2 members chat.
+            return correspondents[0];
+        }
+        if (correspondents.length === 0 && this.channel_member_ids.length === 1) {
+            // Self-chat.
+            return this.channel_member_ids[0] ?? [];
+        }
+        return undefined;
+    }
+    /** @returns {import("models").ChannelMember[]} */
+    get correspondents() {
+        if (!this.channel) {
+            return [];
+        }
+        return this.channel_member_ids.filter(({ persona }) => persona?.notEq(this.store.self));
+    }
+    get displayName() {
+        if (this.supportsCustomChannelName && this.self_member_id?.custom_channel_name) {
+            return this.self_member_id.custom_channel_name;
+        }
+        if (this.channel_type === "chat" && this.correspondent) {
+            return this.correspondent.name;
+        }
+        if (this.channel_name_member_ids.length && !this.name) {
+            const nameParts = this.channel_name_member_ids
+                .sort((m1, m2) => m1.id - m2.id)
+                .slice(0, 3)
+                .map((member) => member.name);
+            if (this.member_count > 3) {
+                const remaining = this.member_count - 3;
+                nameParts.push(remaining === 1 ? _t("1 other") : _t("%s others", remaining));
+            }
+            return formatList(nameParts);
+        }
+        return this.name;
+    }
     /** @type {"not_fetched"|"pending"|"fetched"} */
     fetchMembersState = "not_fetched";
     /** @type {"not_fetched"|"fetching"|"fetched"} */
     fetchChannelInfoState = "not_fetched";
     from_message_id = fields.One("mail.message", { inverse: "linkedSubChannel" });
+    get fullNameWithParent() {
+        const text = this.parent_channel_id
+            ? `${this.parent_channel_id.displayName} > ${this.displayName}`
+            : this.displayName;
+        return text;
+    }
     get memberListTypes() {
         return ["channel", "group"];
     }
@@ -169,6 +246,28 @@ export class DiscussChannel extends Record {
     get hasAttachmentPanel() {
         return true;
     }
+    firstUnreadMessage = fields.One("mail.message", {
+        /** @this {import("models").DiscussChannel} */
+        compute() {
+            if (!this.self_member_id) {
+                return null;
+            }
+            const messages = this.messages.filter((m) => !m.isNotification);
+            const separator = this.self_member_id.new_message_separator_ui;
+            if (separator === 0 && !this.loadOlder) {
+                return messages[0];
+            }
+            if (!separator || messages.length === 0 || messages.at(-1).id < separator) {
+                return null;
+            }
+            // try to find a perfect match according to the member's separator
+            let message = this.store["mail.message"].get({ id: separator });
+            if (!message || this.notEq(message.channel_id)) {
+                message = nearestGreaterThanOrEqual(messages, separator, (msg) => msg.id);
+            }
+            return message;
+        },
+    });
     hasOtherMembersTyping = fields.Attr(false, {
         /** @this {import("models").DiscussChannel} */
         compute() {
@@ -247,6 +346,8 @@ export class DiscussChannel extends Record {
     }
     /** @type {Number|undefined} */
     member_count;
+    /** @type {string} */
+    name;
     /** ⚠️ {@link AwaitChatHubInit} */
     get shouldSubscribeToBusChannel() {
         return this.chatWindow?.isOpen;
@@ -295,6 +396,12 @@ export class DiscussChannel extends Record {
     sub_channel_ids = fields.Many("discuss.channel", {
         inverse: "parent_channel_id",
         sort: (a, b) => compareDatetime(b.lastInterestDt, a.lastInterestDt) || b.id - a.id,
+    });
+    self_member_id = fields.One("discuss.channel.member", {
+        inverse: "channelAsSelf",
+        onDelete() {
+            this.onPinStateUpdated();
+        },
     });
     thread = fields.One("mail.thread", {
         compute() {
@@ -379,6 +486,35 @@ export class DiscussChannel extends Record {
         } finally {
             this.isLoadingAttachments = false;
         }
+    }
+
+    async leaveChannel() {
+        if (this.channel_type === "channel" && this.create_uid?.eq(this.store.self_user)) {
+            await this.askLeaveConfirmation(
+                _t("You are the administrator of this channel. Are you sure you want to leave?")
+            );
+        }
+        if (this.channel_type === "group") {
+            await this.askLeaveConfirmation(
+                _t(
+                    "You are about to leave this group conversation and will no longer have access to it unless you are invited again. Are you sure you want to continue?"
+                )
+            );
+        }
+        await this.leaveChannelProcess();
+    }
+
+    async leaveChannelProcess() {
+        await this.closeChatWindow();
+        if (this.exists()) {
+            await this.leaveChannelRpc();
+        }
+    }
+
+    async leaveChannelRpc() {
+        await this.store.env.services.orm.silent.call("discuss.channel", "action_unfollow", [
+            this.id,
+        ]);
     }
 
     async markAsFetched() {
