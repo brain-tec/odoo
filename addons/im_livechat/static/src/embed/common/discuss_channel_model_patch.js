@@ -32,6 +32,18 @@ const discussChannelPatch = {
             inverse: "activeLivechats",
         });
     },
+    get displayName() {
+        if (this.channel_type === "livechat" && this.isTransient && this.livechat_operator_id) {
+            return this.getPersonaName(this.livechat_operator_id);
+        }
+        return super.displayName;
+    },
+    get avatarUrl() {
+        if (this.channel_type === "livechat") {
+            return this.livechat_operator_id.avatarUrl;
+        }
+        return super.avatarUrl;
+    },
     get hasAttachmentPanel() {
         return this.channel_type !== "livechat" && super.hasAttachmentPanel;
     },
