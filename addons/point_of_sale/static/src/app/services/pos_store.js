@@ -582,12 +582,25 @@ export class PosStore extends WithLazyGetterTrap {
                 return false;
             }
         }
+        const refundedOrderLines = order.lines
+            .filter((line) => line.refunded_orderline_id?.order_id)
+            .map((line) => ({
+                order: line.refunded_orderline_id.order_id,
+                uuid: line.refunded_orderline_id.uuid,
+            }));
+
         const orderIsDeleted = await this.deleteOrders([order]);
-        if (orderIsDeleted) {
-            order.uiState.displayed = false;
-            await this.afterOrderDeletion();
+        if (!orderIsDeleted) {
+            return false;
         }
-        return orderIsDeleted;
+        order.uiState.displayed = false;
+        // Delete refunded lines linked to the current order
+        for (const refundedLine of refundedOrderLines) {
+            delete refundedLine.order?.uiState?.lineToRefund[refundedLine.uuid];
+        }
+
+        await this.afterOrderDeletion();
+        return true;
     }
     async afterOrderDeletion() {
         this.setOrder(this.getOpenOrders().at(-1) || this.addNewOrder());
@@ -916,7 +929,7 @@ export class PosStore extends WithLazyGetterTrap {
         if (configure) {
             this.numberBuffer.reset();
         }
-        const selectedOrderline = order.getSelectedOrderline();
+        let selectedOrderline = order.getSelectedOrderline();
         if (options.draftPackLotLines && configure) {
             selectedOrderline.setPackLotLines({
                 ...options.draftPackLotLines,
@@ -927,6 +940,7 @@ export class PosStore extends WithLazyGetterTrap {
         // Merge orderline if needed
         this.tryMergeOrderline(order, line, merge, selectedOrderline);
 
+        selectedOrderline = order.getSelectedOrderline();
         if (values.product_id.tracking === "lot") {
             const productTemplate = values.product_id.product_tmpl_id;
             const related_lines = [];
@@ -936,7 +950,7 @@ export class PosStore extends WithLazyGetterTrap {
                 values.price_extra,
                 false,
                 values.product_id,
-                line,
+                selectedOrderline,
                 related_lines
             );
             related_lines.forEach((line) => line.setUnitPrice(price));
