@@ -632,6 +632,27 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
 @tagged('post_install', '-at_install')
 class TestUi(TestPointOfSaleHttpCommon):
     def test_01_pos_basic_order(self):
+        self.start_pos_tour('pos_pricelist')
+
+    def test_pos_basic_order_02_decimal_order_quantity(self):
+        self.start_pos_tour('pos_basic_order_02_decimal_order_quantity')
+
+    def test_pos_basic_order_03_tax_position(self):
+        self.start_pos_tour('pos_basic_order_03_tax_position')
+
+    def test_floating_order_tour(self):
+        self.start_pos_tour('FloatingOrderTour')
+
+    def test_product_screen_tour(self):
+        self.whiteboard_pen.write({
+            'is_favorite': True
+        })
+        self.start_pos_tour('ProductScreenTour')
+
+    def test_payment_screen_tour(self):
+        self.start_pos_tour('PaymentScreenTour')
+
+    def test_receipt_screen_tour(self):
         self.tip.write({
             'taxes_id': False
         })
@@ -640,29 +661,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'tip_product_id': self.tip.id,
             'ship_later': True
         })
-
-        # Mark a product as favorite to check if it is displayed in first position
-        self.whiteboard_pen.write({
-            'is_favorite': True
-        })
-
-        # open a session, the /pos/ui controller will redirect to it
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-
-        # needed because tests are run before the module is marked as
-        # installed. In js web will only load qweb coming from modules
-        # that are returned by the backend in module_boot. Without
-        # this you end up with js, css but no qweb.
-        self.env['ir.module.module'].search([('name', '=', 'point_of_sale')], limit=1).state = 'installed'
-
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'pos_pricelist', login="pos_user")
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'pos_basic_order_02_decimal_order_quantity', login="pos_user")
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'pos_basic_order_03_tax_position', login="pos_user")
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'FloatingOrderTour', login="pos_user")
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'ProductScreenTour', login="pos_user")
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PaymentScreenTour', login="pos_user")
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'FeedbackScreenTour', login="pos_user")
-
+        self.start_pos_tour('FeedbackScreenTour')
         for order in self.env['pos.order'].search([]):
             self.assertEqual(order.state, 'paid', "Validated order has payment of " + str(order.amount_paid) + " and total of " + str(order.amount_total))
 
@@ -1590,6 +1589,10 @@ class TestUi(TestPointOfSaleHttpCommon):
     def test_customer_display_with_qr(self):
         self.start_tour(f"/pos_customer_display/{self.main_pos_config.id}/{self.main_pos_config.access_token}", 'CustomerDisplayTourWithQr', login="pos_user")
 
+    def test_order_refund_flow(self):
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('test_order_refund_flow')
+
     def test_refund_few_quantities(self):
         """ Test to check that refund works with quantities of less than 0.5 """
         self.env['product.product'].create({
@@ -2415,6 +2418,8 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_zero_decimal_places_currency', login="pos_user")
+        order = self.env['pos.order'].search([], limit=1)
+        self.assertEqual(order.payment_ids[0].payment_method_id.name, "Bank")
 
     def test_barcode_search_attributes_preset(self):
         product = self.env['product.template'].create({
@@ -3509,6 +3514,22 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour("test_lot_refund_lower_qty")
+
+    def test_lot_tracking_without_lot_creation(self):
+        pricelist = self.env['product.pricelist'].create({
+            'name': 'Test Pricelist',
+        })
+        self.main_pos_config.write({
+            'available_pricelist_ids': [(6, 0, [pricelist.id])],
+            'pricelist_id': pricelist.id,
+        })
+        self.main_pos_config.picking_type_id.write({
+            "use_create_lots": False,
+            "use_existing_lots": False,
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.monitor_stand.tracking = 'lot'
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_lot_tracking_without_lot_creation', login="pos_user")
 
 
 # This class just runs the same tests as above but with mobile emulation
