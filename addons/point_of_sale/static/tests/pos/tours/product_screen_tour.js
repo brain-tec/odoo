@@ -26,6 +26,7 @@ registry.category("web_tour.tours").add("ProductScreenTour", {
             // Go by default to home category
 
             Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
             OfflineUtil.setOfflineMode(),
             ProductScreen.firstProductIsFavorite("Whiteboard Pen"),
             // Make sure we don't have any scroll bar on the product list
@@ -183,6 +184,7 @@ registry.category("web_tour.tours").add("FloatingOrderTour", {
     steps: () =>
         [
             Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
             ProductScreen.orderIsEmpty(),
             ProductScreen.clickDisplayedProduct("Desk Organizer", true, "1.0", "5.10"),
             ProductScreen.clickDisplayedProduct("Desk Organizer", true, "2.0", "10.20"),
@@ -836,8 +838,10 @@ registry.category("web_tour.tours").add("test_product_create_update_from_fronten
                 ),
             ]),
             ProductScreen.longPressProduct("Test Frontend Product Edited"),
-            // Edit button should be disabled (cause we cannot edit a product which is in the cart)
-            Dialog.footerBtnIsDisabled("Edit"),
+            Dialog.confirm("Edit", ".btn-secondary"),
+            Dialog.is({ title: "Edit Product" }),
+            // Product 'taxes_id' field should be reaonly (cause already in the cart)
+            ProductScreen.ensureTaxesInputIsReadonly(),
             Chrome.endTour(),
         ].flat(),
 });
