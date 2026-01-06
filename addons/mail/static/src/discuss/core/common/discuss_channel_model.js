@@ -139,6 +139,7 @@ export class DiscussChannel extends Record {
         onDelete: (r) => r?.delete(),
         sort: (m1, m2) => m1.id - m2.id,
     });
+    channel_name_member_ids = fields.Many("discuss.channel.member");
     /** @type {"chat"|"channel"|"group"|"livechat"|"whatsapp"|"ai_chat"|"ai_composer"} */
     channel_type;
     /** ⚠️ {@link AwaitChatHubInit} */
@@ -393,11 +394,17 @@ export class DiscussChannel extends Record {
     });
     /** @type {"loaded"|"loading"|"error"|undefined} */
     pinnedMessagesState = undefined;
+    get showCorrespondentCountry() {
+        return false;
+    }
     get showImStatus() {
         return (
             (this.channel_type === "chat" && this.correspondent) ||
             (this.channel_type === "group" && this.hasOtherMembersTyping)
         );
+    }
+    get showUnreadBanner() {
+        return this.self_member_id?.message_unread_counter_ui > 0;
     }
     sub_channel_ids = fields.Many("discuss.channel", {
         inverse: "parent_channel_id",
