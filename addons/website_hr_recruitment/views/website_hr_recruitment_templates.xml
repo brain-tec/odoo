@@ -161,6 +161,21 @@
                     </div>
                 </section>
                 <!-- Job Description -->
+                <section class="pt32">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-8 pb32" itemprop="description">
+                                <t t-set="job_desc_edition_placeholder">Insert a Job Description...</t>
+                                <div class="lead"
+                                    t-field="job.description"
+                                    t-att-data-editor-message="job_desc_edition_placeholder"/>
+                            </div>
+                            <div class="col-lg-3 offset-lg-1 pb32">
+                                <div t-field="job.website_rating"/>
+                            </div>
+                        </div>
+                    </div>
+                </section>
                 <div t-field="job.website_description"/>
                 <div class="oe_structure">
                     <section class="o_job_bottom_bar mt24 mb48">
@@ -367,99 +382,83 @@
     </t>
 </template>
 
-<template id="default_website_description">
-    <!-- Description text and ratings -->
-    <section class="pt32">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8 pb32" itemprop="description">
-                    <p class="lead">
-                        As an employee of our company, you will <b>collaborate with each department
-                        to create and deploy disruptive products.</b> Come work at a growing company
-                        that offers great benefits with opportunities to moving forward and learn
-                        alongside accomplished leaders. We're seeking an experienced and outstanding
-                        member of staff.
-                        <br/><br/>
-                        This position is both <b>creative and rigorous</b> by nature you need to think
-                        outside the box. We expect the candidate to be proactive and have a "get it done"
-                        spirit. To be successful, you will have solid solving problem skills.
-                    </p>
-                </div>
-                <div class="col-lg-3 offset-lg-1 pb32">
-                    <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
-                        <strong class="s_rating_title">Customer Relationship</strong>
-                        <div class="s_rating_icons o_not_editable">
-                            <span class="s_rating_active_icons text-primary">
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                            </span>
-                            <span class="s_rating_inactive_icons text-primary">
-                            </span>
-                        </div>
-                    </div>
-                    <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
-                        <strong class="s_rating_title">Personal Evolution</strong>
-                        <div class="s_rating_icons o_not_editable">
-                            <span class="s_rating_active_icons text-primary">
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                            </span>
-                            <span class="s_rating_inactive_icons text-primary">
-                            </span>
-                        </div>
-                    </div>
-                    <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
-                        <strong class="s_rating_title">Autonomy</strong>
-                        <div class="s_rating_icons o_not_editable">
-                            <span class="s_rating_active_icons text-primary">
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                            </span>
-                            <span class="s_rating_inactive_icons text-primary">
-                                <i class="fa fa-star-o"/>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
-                        <strong class="s_rating_title">Administrative Work</strong>
-                        <div class="s_rating_icons o_not_editable">
-                            <span class="s_rating_active_icons text-primary">
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                            </span>
-                            <span class="s_rating_inactive_icons text-primary">
-                                <i class="fa fa-star-o"/>
-                                <i class="fa fa-star-o"/>
-                                <i class="fa fa-star-o"/>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
-                        <strong class="s_rating_title">Technical Expertise</strong>
-                        <div class="s_rating_icons o_not_editable">
-                            <span class="s_rating_active_icons text-primary">
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                                <i class="fa fa-star"/>
-                            </span>
-                            <span class="s_rating_inactive_icons text-primary">
-                            </span>
-                        </div>
-                    </div>
-                </div>
+<template id="default_website_rating">
+    <!-- ratings -->
+    <div>
+        <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+            <strong class="s_rating_title">Customer Relationship</strong>
+            <div class="s_rating_icons o_not_editable">
+                <span class="s_rating_active_icons text-primary">
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                </span>
+                <span class="s_rating_inactive_icons text-primary">
+                </span>
             </div>
         </div>
-    </section>
+        <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+            <strong class="s_rating_title">Personal Evolution</strong>
+            <div class="s_rating_icons o_not_editable">
+                <span class="s_rating_active_icons text-primary">
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                </span>
+                <span class="s_rating_inactive_icons text-primary">
+                </span>
+            </div>
+        </div>
+        <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+            <strong class="s_rating_title">Autonomy</strong>
+            <div class="s_rating_icons o_not_editable">
+                <span class="s_rating_active_icons text-primary">
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                </span>
+                <span class="s_rating_inactive_icons text-primary">
+                    <i class="fa fa-star-o"/>
+                </span>
+            </div>
+        </div>
+        <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+            <strong class="s_rating_title">Administrative Work</strong>
+            <div class="s_rating_icons o_not_editable">
+                <span class="s_rating_active_icons text-primary">
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                </span>
+                <span class="s_rating_inactive_icons text-primary">
+                    <i class="fa fa-star-o"/>
+                    <i class="fa fa-star-o"/>
+                    <i class="fa fa-star-o"/>
+                </span>
+            </div>
+        </div>
+        <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+            <strong class="s_rating_title">Technical Expertise</strong>
+            <div class="s_rating_icons o_not_editable">
+                <span class="s_rating_active_icons text-primary">
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                    <i class="fa fa-star"/>
+                </span>
+                <span class="s_rating_inactive_icons text-primary">
+                </span>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="default_website_description">
     <!-- Responsabilities, Must Have and Nice to have -->
     <section class="s_comparisons pt24 pb24 bg-200" data-snippet="s_comparisons">
         <div class="container">
@@ -630,7 +629,7 @@
                                     Your application has been posted successfully,<br class="mb-2"/>
                                     We usually respond within 3 days...
                                 </p>
-                                <img class="img-fluid o_we_custom_image" t-attf-style="width:{{ '50%' if (job_sudo and job_sudo.user_id) else '25%' }} !important;" src="/website_hr_recruitment/static/src/img/job_congratulations.svg" alt="Congratulations!"/>
+                                <img class="img-fluid o_we_custom_image" t-attf-style="width:{{ '50%' if (job_sudo and job_sudo.recruiter_id) else '25%' }} !important;" src="/website_hr_recruitment/static/src/img/job_congratulations.svg" alt="Congratulations!"/>
                                 <div class="row" id="o_recruitment_thank_cta">
                                     <div class="col-lg-12 text-center mt32 mb48">
                                         <p>
@@ -642,7 +641,7 @@
                                 </div>
                             </div>
                             <!-- HR Recruiter Block -->
-                            <t t-if="job_sudo and job_sudo.user_id">
+                            <t t-if="job_sudo and job_sudo.recruiter_id">
                                 <div class="col-lg-4 align-self-center ps-4 o_cc o_cc2 rounded">
                                     <section class="s_text_block pt24" data-snippet="s_text_block" data-name="Text">
                                         <div class="container">
@@ -655,17 +654,17 @@
                                                 <div class="o_jobs_hr_recruiter col-10 o_cc o_cc1 mt24 p-4 border border-primary rounded shadow">
                                                     <div class="row align-items-center">
                                                         <div class="col-lg-5 pb16 o_not_editable">
-                                                            <img t-att-src="image_data_uri(job_sudo.user_id.avatar_256)" class="img-fluid" loading="lazy"/>
+                                                            <img t-att-src="image_data_uri(job_sudo.recruiter_id.avatar_256)" class="img-fluid" loading="lazy"/>
                                                         </div>
                                                         <div class="col-lg-7 px-1">
-                                                            <h2 class="text-truncate" t-field="job_sudo.user_id.name"/>
-                                                            <p class="fw-light text-truncate" t-field="job_sudo.user_id.job_title"/>
+                                                            <h2 class="text-truncate" t-field="job_sudo.recruiter_id.name"/>
+                                                            <p class="fw-light text-truncate" t-field="job_sudo.recruiter_id.job_title"/>
                                                         </div>
                                                     </div>
                                                     <div class="row">
                                                         <ul class="list-unstyled mb-0">
-                                                            <li t-if="job_sudo.user_id.work_phone"><i class="fa fa-phone fa-fw me-2"></i><span class="o_force_ltr" t-field="job_sudo.user_id.work_phone"/></li>
-                                                            <li class="d-inline-flex align-items-baseline"><i class="fa fa-envelope fa-fw me-2"></i><span><a class="text-break" t-attf-href="mailto:#{job_sudo.user_id.email}" t-field="job_sudo.user_id.email"/></span></li>
+                                                            <li t-if="job_sudo.recruiter_id.work_phone"><i class="fa fa-phone fa-fw me-2"></i><span class="o_force_ltr" t-field="job_sudo.recruiter_id.work_phone"/></li>
+                                                            <li class="d-inline-flex align-items-baseline"><i class="fa fa-envelope fa-fw me-2"></i><span><a class="text-break" t-attf-href="mailto:#{job_sudo.recruiter_id.work_email}" t-field="job_sudo.recruiter_id.work_email"/></span></li>
                                                         </ul>
                                                     </div>
                                                 </div>

@@ -725,13 +725,7 @@ export class PosStore extends WithLazyGetterTrap {
      * @returns {Promise<Object>}
      */
     async loadNewProducts(domain, offset = 0, limit = 0) {
-        const result = await this.data.callRelated(
-            "product.template",
-            "load_product_from_pos",
-            [odoo.pos_config_id, domain, offset, limit],
-            {},
-            false
-        );
+        const result = await this.data.loadProductFromPos(domain, offset, limit);
         this.productAttributesExclusion = this.computeProductAttributesExclusion(
             result["product.template.attribute.value"]
         );
@@ -2135,11 +2129,8 @@ export class PosStore extends WithLazyGetterTrap {
             {
                 props: {
                     resId: product?.id,
-                    onSave: (record) => {
-                        this.data.read("product.template", [record.evalContext.id]);
-                        this.data.searchRead("product.product", [
-                            ["product_tmpl_id", "=", record.evalContext.id],
-                        ]);
+                    onSave: async (record) => {
+                        await this.loadNewProducts([["id", "=", record.evalContext.id]]);
                         this.action.doAction({
                             type: "ir.actions.act_window_close",
                         });
@@ -2147,6 +2138,7 @@ export class PosStore extends WithLazyGetterTrap {
                 },
                 additionalContext: {
                     taxes_readonly: orderContainsProduct,
+                    pos_session_id: this.session.id,
                 },
             }
         );
@@ -2271,6 +2263,8 @@ export class PosStore extends WithLazyGetterTrap {
         }
 
         if (preset) {
+            order.setPreset(preset);
+
             if (preset.needsPartner) {
                 const partner = order.partner_id || (await this.selectPartner(order));
                 if (!partner) {
@@ -2284,7 +2278,7 @@ export class PosStore extends WithLazyGetterTrap {
                     }
                 }
             }
-            order.setPreset(preset);
+
             if (preset.identification === "name") {
                 await this.handleSelectNamePreset(order);
             }
