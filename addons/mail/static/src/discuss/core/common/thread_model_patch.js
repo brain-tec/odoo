@@ -62,17 +62,6 @@ const threadPatch = {
         return super.importantCounter;
     },
     /** @override */
-    isDisplayedOnUpdate() {
-        super.isDisplayedOnUpdate(...arguments);
-        if (!this.channel?.self_member_id) {
-            return;
-        }
-        if (!this.isDisplayed) {
-            this.channel.self_member_id.new_message_separator_ui =
-                this.channel?.self_member_id.new_message_separator;
-            this.markedAsUnread = false;
-        }
-    },
     get isUnread() {
         return this.channel?.self_member_id?.message_unread_counter > 0 || super.isUnread;
     },
@@ -151,22 +140,11 @@ const threadPatch = {
                 (!command.channel_types ||
                     command.channel_types.includes(this.channel?.channel_type))
             ) {
-                await this.executeCommand(command, textContent);
+                await this.channel.executeCommand(command, textContent);
                 return;
             }
         }
         return super.post(...arguments);
-    },
-    async executeCommand(command, body = "") {
-        await command.onExecute?.(this.channel);
-        if (command.methodName) {
-            await this.store.env.services.orm.call(
-                "discuss.channel",
-                command.methodName,
-                [[this.id]],
-                { body }
-            );
-        }
     },
 };
 patch(Thread.prototype, threadPatch);

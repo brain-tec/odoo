@@ -1,5 +1,4 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-import base64
 import logging
 import json
 from datetime import datetime, UTC
@@ -298,7 +297,7 @@ class PosOrder(models.Model):
     def _get_pos_anglo_saxon_price_unit(self, product, partner_id, quantity):
         moves = self.filtered(lambda o: o.partner_id.id == partner_id)\
             .mapped('picking_ids.move_ids')\
-            .filtered(lambda m: m.is_valued and m.product_id.valuation == 'real_time')\
+            .filtered(lambda m: m.is_valued and m.product_id.valuation == 'real_time' and m.product_id.id == product.id)\
             .sorted(lambda x: x.date)
         return moves._get_price_unit()
 
@@ -1423,7 +1422,7 @@ class PosOrder(models.Model):
             invoice = self.env['ir.attachment'].create({
                 'name': name + '.pdf',
                 'type': 'binary',
-                'datas': base64.b64encode(report[0]),
+                'raw': report[0],
                 'res_model': 'pos.order',
                 'res_id': self.ids[0],
                 'mimetype': 'application/pdf'

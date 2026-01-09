@@ -304,6 +304,22 @@ export class DiscussChannel extends Record {
         return `${window.location.origin}/chat/${this.id}/${this.uuid}`;
     }
     invited_member_ids = fields.Many("discuss.channel.member");
+    /** ⚠️ {@link AwaitChatHubInit} */
+    isDisplayed = fields.Attr(false, {
+        compute() {
+            return this.computeIsDisplayed();
+        },
+        onUpdate() {
+            if (!this.self_member_id) {
+                return;
+            }
+            if (!this.isDisplayed) {
+                this.self_member_id.new_message_separator_ui =
+                    this.self_member_id.new_message_separator;
+                this.markedAsUnread = false;
+            }
+        },
+    });
     lastMessageSeenByAllId = fields.Attr(undefined, {
         /** @this {import("models").DiscussChannel} */
         compute() {
@@ -442,9 +458,25 @@ export class DiscussChannel extends Record {
 
     _onDeleteChatWindow() {}
 
+    computeIsDisplayed() {
+        return this.chatWindow?.isOpen;
+    }
+
     delete() {
         this.chatWindow?.close();
         super.delete(...arguments);
+    }
+
+    async executeCommand(command, body = "") {
+        await command.onExecute?.(this);
+        if (command.methodName) {
+            await this.store.env.services.orm.call(
+                "discuss.channel",
+                command.methodName,
+                [[this.id]],
+                { body }
+            );
+        }
     }
 
     async fetchChannelMembers() {
