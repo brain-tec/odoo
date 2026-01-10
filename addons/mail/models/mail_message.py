@@ -8,6 +8,7 @@ import textwrap
 from binascii import Error as binascii_error
 from collections import defaultdict
 from lxml import html
+from typing import Self
 
 from odoo import _, api, fields, models, modules, tools
 from odoo.exceptions import AccessError, MissingError
@@ -477,7 +478,7 @@ class MailMessage(models.Model):
                 result = (forbidden, lambda: forbidden._make_access_error(operation))
         return result
 
-    def _get_forbidden_access(self, operation: str) -> api.Self:
+    def _get_forbidden_access(self, operation: str) -> Self:
         """ Return the subset of ``self`` that does not satisfy the specific
         conditions for messages.
         """
@@ -677,7 +678,7 @@ class MailMessage(models.Model):
     def create(self, vals_list):
         tracking_values_list = []
         for values in vals_list:
-            if not (self.env.user.has_group('base.group_user') or self.env.su):
+            if not (self.env.su or self.env.user.has_group('base.group_user')):
                 values.pop('author_id', None)
                 values.pop('email_from', None)
                 self = self.with_context({k: v for k, v in self.env.context.items() if k not in ['default_author_id', 'default_email_from']})  # noqa: PLW0642
@@ -791,7 +792,7 @@ class MailMessage(models.Model):
         return super().fetch(field_names)
 
     def write(self, vals):
-        if not (self.env.user.has_group('base.group_user') or self.env.su):
+        if not (self.env.su or self.env.user.has_group('base.group_user')):
             vals.pop('author_id', None)
             vals.pop('email_from', None)
         record_changed = 'model' in vals or 'res_id' in vals

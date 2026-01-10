@@ -73,12 +73,11 @@ from .utils import (
 if typing.TYPE_CHECKING:
     from collections.abc import Collection, Iterable, Iterator, Reversible, Sequence
     from types import MappingProxyType
+    from typing import Self
     from .table_objects import TableObject
     from .environments import Environment
     from .registry import Registry, TriggerTree
-    from .types import Self, DomainType, IdType, ModelType, ValuesType
-
-    T = typing.TypeVar('T')
+    from .types import DomainType, IdType, ModelType, ValuesType
 
 
 _lt = LazyTranslate('base')
@@ -5414,11 +5413,11 @@ class BaseModel(metaclass=MetaModel):
         ...
 
     @typing.overload
-    def mapped(self, func: Callable[[Self], T]) -> list[T] | BaseModel:
+    def mapped[T](self, func: Callable[[Self], T]) -> list[T] | BaseModel:
         ...
 
     @api.private
-    def mapped(self, func: str | Callable[[Self], T]) -> list | BaseModel:
+    def mapped[T](self, func: str | Callable[[Self], T]) -> list | BaseModel:
         """Apply ``func`` on all records in ``self``, and return the result as a
         list or a recordset (if ``func`` return recordsets). In the latter
         case, the order of the returned recordset is arbitrary.
@@ -5517,11 +5516,11 @@ class BaseModel(metaclass=MetaModel):
         ...
 
     @typing.overload
-    def grouped(self, key: Callable[[Self], T]) -> dict[T, Self]:
+    def grouped[T](self, key: Callable[[Self], T]) -> dict[T, Self]:
         ...
 
     @api.private
-    def grouped(self, key: str | Callable[[Self], T]) -> dict[typing.Any, Self]:
+    def grouped[T](self, key: str | Callable[[Self], T]) -> dict[typing.Any, Self]:
         """Eagerly groups the records of ``self`` by the ``key``, returning a
         dict from the ``key``'s result to recordsets. All the resulting
         recordsets are guaranteed to be part of the same prefetch-set.

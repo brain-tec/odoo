@@ -232,18 +232,6 @@
     </record>
 
 <!-- SA : Saudi Arabia -->
-    <record id="hr_holidays.l10n_sa_leave_type_sick_leave_100" model="hr.leave.type">
-        <field name="work_entry_type_id" ref="hr_work_entry.l10n_sa_work_entry_type_sick_leave_100"/>
-    </record>
-
-    <record id="hr_holidays.l10n_sa_leave_type_sick_leave_75" model="hr.leave.type">
-        <field name="work_entry_type_id" ref="hr_work_entry.l10n_sa_work_entry_type_sick_leave_75"/>
-    </record>
-
-    <record id="hr_holidays.l10n_sa_leave_type_sick_leave_0" model="hr.leave.type">
-        <field name="work_entry_type_id" ref="hr_work_entry.l10n_sa_work_entry_type_sick_leave_0"/>
-    </record>
-
     <record id="hr_holidays.l10n_sa_leave_type_maternity" model="hr.leave.type">
         <field name="work_entry_type_id" ref="hr_work_entry.l10n_sa_work_entry_type_maternity"/>
     </record>
@@ -261,4 +249,22 @@
     <record id="hr_holidays.l10n_pl_leave_type_sick_leave" model="hr.leave.type">
         <field name="work_entry_type_id" ref="hr_work_entry.l10n_pl_work_entry_type_sick_leave"/>
     </record>
+
+<!--TR : Turkey-->
+    <record id="hr_holidays.l10n_tr_leave_type_maternity_leave" model="hr.leave.type">
+        <field name="work_entry_type_id" ref="hr_work_entry.work_entry_type_legal_leave"/>
+    </record>
+
+    <record id="hr_holidays.l10n_tr_leave_type_paternity_leave" model="hr.leave.type">
+        <field name="work_entry_type_id" ref="hr_work_entry.work_entry_type_legal_leave"/>
+    </record>
+
+    <record id="hr_holidays.l10n_tr_leave_type_bereavement_leave" model="hr.leave.type">
+        <field name="work_entry_type_id" ref="hr_work_entry.work_entry_type_legal_leave"/>
+    </record>
+
+    <record id="hr_holidays.l10n_tr_leave_type_excuse_leave" model="hr.leave.type">
+        <field name="work_entry_type_id" ref="hr_work_entry.work_entry_type_legal_leave"/>
+    </record>
+
 </odoo>

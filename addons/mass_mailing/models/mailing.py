@@ -172,7 +172,8 @@ class MailingMailing(models.Model):
         help="Use a specific mail server in priority. Otherwise Odoo relies on the first outgoing mail server available (based on their sequencing) as it does for normal mails.")
     contact_list_ids = fields.Many2many('mailing.list', 'mail_mass_mailing_list_rel', string='Mailing Lists')
     use_exclusion_list = fields.Boolean(
-        'Use Exclusion List', default=True, copy=False,
+        'Use Exclusion List', default=True, copy=False, store=True,
+        readonly=False, compute='_compute_use_exclusion_list',
         help='Prevent sending messages to blacklisted contacts. Disable only when absolutely necessary.')
     # Mailing Filter
     mailing_filter_id = fields.Many2one(
@@ -446,6 +447,15 @@ class MailingMailing(models.Model):
                 mailing.mailing_domain = mailing.mailing_filter_id.mailing_domain
             else:
                 mailing.mailing_domain = repr(mailing._get_default_mailing_domain() or [])
+
+    @api.depends('mailing_model_id')
+    def _compute_use_exclusion_list(self):
+        """Always reset to using exclusion list for mailing lists and contacts."""
+        mailing_list_model_id = self.env['ir.model']._get('mailing.list')
+        mailing_contact_model_id = self.env['ir.model']._get('mailing.contact')
+        self.filtered(
+            lambda m: m.mailing_model_id in (mailing_list_model_id, mailing_contact_model_id)
+        ).use_exclusion_list = True
 
     @api.depends('mailing_model_name')
     def _compute_mailing_filter_id(self):
@@ -824,10 +834,12 @@ class MailingMailing(models.Model):
     def action_send_winner_mailing(self):
         """Send the winner mailing based on the winner selection field.
         This action is used in 2 cases:
-            - When the user clicks on a button to send the winner mailing. There is only one mailing in self
-            - When the cron is executed to send winner mailing based on the A/B testing schedule datetime. In this
-            case 'self' contains all the mailing for the campaigns so we just need to take the first to determine the
-            winner.
+
+        - When the user clicks on a button to send the winner mailing. There is only one mailing in self
+        - When the cron is executed to send winner mailing based on the A/B testing schedule datetime. In this
+          case 'self' contains all the mailing for the campaigns so we just need to take the first to determine the
+          winner.
+
         If the winner mailing is computed automatically, we sudo the mailings of the campaign in order to sort correctly
         the mailings based on the selection that can be used with sub-modules like CRM and Sales
         """
@@ -1386,7 +1398,8 @@ class MailingMailing(models.Model):
         checksums_set, checksum_original_id, new_attachment_by_checksum = set(), {}, {}
         next_img_id = len(existing_attachments)
         for (b64image, original_id) in b64images:
-            checksum = IrAttachment._compute_checksum(base64.b64decode(b64image))
+            image_raw = base64.b64decode(b64image)
+            checksum = IrAttachment._compute_checksum(image_raw)
             checksums.append(checksum)
             existing_attach = existing_attachments.get(checksum)
             # Existing_attach can be None, in which case it acts as placeholder
@@ -1397,7 +1410,7 @@ class MailingMailing(models.Model):
             if not existing_attach and not checksum in checksums_set:
                 # We create only one attachment per checksum
                 vals_for_attachs.append({
-                    'datas': b64image,
+                    'raw': image_raw,
                     'name': f"image_mailing_{self.id}_{next_img_id}",
                     'type': 'binary',
                     'res_id': self.id,

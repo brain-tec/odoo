@@ -42,7 +42,13 @@ import { delay } from "@web/core/utils/concurrency";
 import { FormController } from "@web/views/form/form_controller";
 import { Counter, EmbeddedWrapperMixin } from "./_helpers/embedded_component";
 import { moveSelectionOutsideEditor, setSelection } from "./_helpers/selection";
-import { insertText, pasteOdooEditorHtml, pasteText, undo } from "./_helpers/user_actions";
+import {
+    ensureDistinctHistoryStep,
+    insertText,
+    pasteOdooEditorHtml,
+    pasteText,
+    undo,
+} from "./_helpers/user_actions";
 import { unformat } from "./_helpers/format";
 import { expandToolbar } from "./_helpers/toolbar";
 import { expectElementCount } from "./_helpers/ui_expectations";
@@ -834,7 +840,9 @@ test("undo after discard html field changes in form", async () => {
     // move the hoot focus in the editor
     await click(".odoo-editor-editable");
     setSelectionInHtmlField();
-    await insertText(htmlEditor, "test");
+    await insertText(htmlEditor, "tes");
+    await ensureDistinctHistoryStep();
+    await insertText(htmlEditor, "t");
     await animationFrame();
     expect(".odoo-editor-editable p").toHaveText("testfirst");
     expect(`.o_form_button_cancel`).toBeVisible();
@@ -933,13 +941,52 @@ test("Embed video by pasting video URL", async () => {
     // trigger another selectionchange that removes selection placeholder.
     // So we must wait for the o-we-hint.
     await waitFor(".o-we-hint");
-    const videoIframe = queryOne("div.media_iframe_video");
+    await animationFrame();
+    const videoIframe = queryOne("div[data-embedded='video']");
     expect(videoIframe.nextElementSibling).toHaveOuterHTML(
         `<div class="o-paragraph o-we-hint" o-we-hint-text="Type &quot;/&quot; for commands"><br></div>`
     );
     expect(
-        `div.media_iframe_video iframe[data-src="https://www.youtube.com/embed/${videoId}"]`
+        `div[data-embedded='video'] iframe[data-src="https://www.youtube.com/embed/${videoId}"]`
     ).toHaveCount(1);
+});
+
+test("Embedded video shouldn't have the 'media_iframe_video' class", async () => {
+    const videoId = "qxb74CMR748";
+    const videoURL = `https://www.youtube.com/watch?v=${videoId}`;
+
+    onRpc("/html_editor/video_url/data", async () => ({
+        platform: "youtube",
+        video_id: videoId,
+        embed_url: `https://www.youtube.com/embed/${videoId}`,
+    }));
+
+    await mountView({
+        type: "form",
+        resId: 1,
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+
+    setSelectionInHtmlField();
+
+    // Open the video tab of the media dialog
+    await insertText(htmlEditor, "/video");
+    await waitFor(".o-we-powerbox");
+    await press("Enter");
+    await waitFor(".o_select_media_dialog");
+    expect(".o_select_media_dialog .nav-link:contains('Videos')").toHaveClass("active");
+    await animationFrame();
+
+    await contains(".o_video_dialog_form textarea").edit(videoURL);
+    await waitFor(".modal-dialog .modal-footer .btn-primary:not(:disabled)", { timeout: 2000 });
+    await contains(".modal-dialog .modal-footer .btn-primary").click();
+    await animationFrame();
+
+    expect("div[data-embedded='video']").not.toHaveClass(".media_iframe_video");
 });
 
 test("isDirty should be false when the content is being transformed by the editor", async () => {
@@ -1529,7 +1576,10 @@ test("edit and enable/disable codeview with editor toolbar", async () => {
     });
 
     setSelectionInHtmlField();
-    await insertText(htmlEditor, "Hello ");
+    await insertText(htmlEditor, "Hello");
+    await ensureDistinctHistoryStep();
+    await insertText(htmlEditor, " ");
+    await ensureDistinctHistoryStep();
     expect("[name='txt'] .odoo-editor-editable").toHaveInnerHTML("<p>Hello first </p>");
 
     // Switch to code view

@@ -1,18 +1,15 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
-import io
 
 from PIL import Image, ImageDraw, PngImagePlugin
 
 from odoo.tools import image as tools
 from odoo.exceptions import UserError
 from odoo.tests.common import tagged, TransactionCase
+from .files import PNG_RAW
 
-
-def img_open(data):
-    return Image.open(io.BytesIO(data))
+img_open = tools.binary_to_image
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
@@ -23,7 +20,7 @@ class TestImage(TransactionCase):
         self.bg_color = (135, 90, 123)
         self.fill_color = (0, 160, 157)
 
-        self.img_1x1_png = base64.b64decode(b'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNgYGAAAAAEAAH2FzhVAAAAAElFTkSuQmCC')
+        self.img_1x1_png = PNG_RAW
         self.img_svg = b'<svg></svg>'
         self.img_1920x1080_jpeg = tools.image_apply_opt(Image.new('RGB', (1920, 1080)), 'JPEG')
         # The following image contains a tag `Lens Info` with a value of `3.99mm f/1.8`
@@ -67,24 +64,6 @@ class TestImage(TransactionCase):
             (image.size[0], image.size[1] - offset)
         ], fill=self.fill_color)
         self.img_1080x1920_png = tools.image_apply_opt(image, 'PNG')
-
-    def test_00_base64_to_image(self):
-        """Test that base64 is correctly opened as a PIL image."""
-        image = img_open(self.img_1x1_png)
-        self.assertEqual(type(image), PngImagePlugin.PngImageFile, "base64 as bytes, correct format")
-        self.assertEqual(image.size, (1, 1), "base64 as bytes, correct size")
-
-        with self.assertRaises(UserError, msg="This file could not be decoded as an image file. Please try with a different file."):
-            image = tools.base64_to_image(b'oazdazpodazdpok')
-
-        with self.assertRaises(UserError, msg="This file could not be decoded as an image file. Please try with a different file."):
-            image = tools.base64_to_image(b'oazdazpodazdpokd')
-
-    def test_01_image_to_base64(self):
-        """Test that a PIL image is correctly saved as base64."""
-        image = Image.new('RGB', (1, 1))
-        image_base64 = tools.image_to_base64(image, 'PNG')
-        self.assertEqual(image_base64, base64.b64encode(self.img_1x1_png))
 
     def test_02_image_fix_orientation(self):
         """Test that the orientation of images is correct."""

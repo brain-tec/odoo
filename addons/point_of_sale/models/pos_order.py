@@ -1,5 +1,4 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-import base64
 import logging
 import json
 from datetime import datetime, UTC
@@ -298,7 +297,7 @@ class PosOrder(models.Model):
     def _get_pos_anglo_saxon_price_unit(self, product, partner_id, quantity):
         moves = self.filtered(lambda o: o.partner_id.id == partner_id)\
             .mapped('picking_ids.move_ids')\
-            .filtered(lambda m: m.is_valued and m.product_id.valuation == 'real_time')\
+            .filtered(lambda m: m.is_valued and m.product_id.valuation == 'real_time' and m.product_id.id == product.id)\
             .sorted(lambda x: x.date)
         return moves._get_price_unit()
 
@@ -1256,7 +1255,7 @@ class PosOrder(models.Model):
         account_moves = self.sudo().account_move | self.sudo().payment_ids.account_move_id
         return {
             'pos.order': self._load_pos_data_read(self, config) if config else [],
-            'pos.session': self.env['pos.session']._load_pos_data_read(self.session_id, config) if config else [],
+            'pos.session': [],
             'pos.payment': self.env['pos.payment']._load_pos_data_read(self.payment_ids, config) if config else [],
             'pos.order.line': self.env['pos.order.line']._load_pos_data_read(self.lines, config) if config else [],
             'pos.pack.operation.lot': self.env['pos.pack.operation.lot']._load_pos_data_read(self.lines.pack_lot_ids, config) if config else [],
@@ -1423,7 +1422,7 @@ class PosOrder(models.Model):
             invoice = self.env['ir.attachment'].create({
                 'name': name + '.pdf',
                 'type': 'binary',
-                'datas': base64.b64encode(report[0]),
+                'raw': report[0],
                 'res_model': 'pos.order',
                 'res_id': self.ids[0],
                 'mimetype': 'application/pdf'

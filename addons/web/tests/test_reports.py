@@ -2,13 +2,13 @@ import os
 from unittest.mock import Mock, patch
 
 import odoo.tests
-
-from odoo.addons.http_routing.tests.common import MockRequest
 from odoo.exceptions import UserError
-from odoo.http import root
+from odoo.http.router import root
 from odoo.tests import tagged
-
 from odoo.tools import mute_logger
+
+from odoo.addons.base.tests.files import PNG_B64, PNG_RAW
+from odoo.addons.http_routing.tests.common import MockRequest
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
@@ -18,12 +18,11 @@ class TestReports(odoo.tests.HttpCase):
         and that the resource is correctly returned as expected.
         """
         partner_id = self.env.user.partner_id.id
-        img = b'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4//8/AAX+Av4N70a4AAAAAElFTkSuQmCC'
         image = self.env['ir.attachment'].create({
             'name': 'foo',
             'res_model': 'res.partner',
             'res_id': partner_id,
-            'datas': img,
+            'raw': PNG_RAW,
         })
         report = self.env['ir.actions.report'].create({
             'name': 'test report',
@@ -72,7 +71,7 @@ class TestReports(odoo.tests.HttpCase):
             result.get('uid'), admin.id, 'wkhtmltopdf is not fetching the image as the user printing the report'
         )
         self.assertEqual(result.get('record_id'), image.id, 'wkhtmltopdf did not fetch the expected record')
-        self.assertEqual(result.get('data'), img, 'wkhtmltopdf did not fetch the right image content')
+        self.assertEqual(result.get('data'), PNG_B64, 'wkhtmltopdf did not fetch the right image content')
 
         # 2. Request the report as public, who has no acess to the image
         self.logout()

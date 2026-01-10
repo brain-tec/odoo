@@ -19,6 +19,8 @@ class HrVersion(models.Model):
     _inherit = 'hr.version'
     _description = 'Employee Contract'
 
+    departure_do_cancel_time_off_requests = fields.Boolean(related='departure_id.do_cancel_time_off_requests')
+
     @api.constrains('contract_date_start', 'contract_date_end')
     def _check_contracts(self):
         self._get_leaves()._check_contracts()
@@ -29,27 +31,27 @@ class HrVersion(models.Model):
         all_new_leave_vals = []
         leaves_state = {}
         created_versions = self.env['hr.version']
-        try:
-            for vals in vals_list:
-                if not 'employee_id' in vals or not 'resource_calendar_id' in vals:
-                    created_versions |= super().create(vals)
-                    continue
-                leaves = self._get_leaves_from_vals(vals)
-                is_created = False
-                for leave in leaves:
-                    leaves_state = self._refuse_leave(leave, leaves_state)
-                    if not is_created:
-                        created_versions |= super().create([vals])
-                        is_created = True
-                    overlapping_contracts = self._check_overlapping_contract(leave)
-                    if not overlapping_contracts:
-                        continue
-                    all_new_leave_origin, all_new_leave_vals = self._populate_all_new_leave_vals_from_split_leave(
-                        all_new_leave_origin, all_new_leave_vals, overlapping_contracts, leave, leaves_state)
-                # TODO FIXME
-                # to keep creation order, not ideal but ok for now.
+        for vals in vals_list:
+            if not 'employee_id' in vals or not 'resource_calendar_id' in vals:
+                created_versions |= super().create(vals)
+                continue
+            leaves = self._get_leaves_from_vals(vals)
+            is_created = False
+            for leave in leaves:
+                leaves_state = self._refuse_leave(leave, leaves_state)
                 if not is_created:
                     created_versions |= super().create([vals])
+                    is_created = True
+                overlapping_contracts = self._check_overlapping_contract(leave)
+                if not overlapping_contracts:
+                    continue
+                all_new_leave_origin, all_new_leave_vals = self._populate_all_new_leave_vals_from_split_leave(
+                    all_new_leave_origin, all_new_leave_vals, overlapping_contracts, leave, leaves_state)
+            # TODO FIXME
+            # to keep creation order, not ideal but ok for now.
+            if not is_created:
+                created_versions |= super().create([vals])
+        try:
             if all_new_leave_vals:
                 self._create_all_new_leave(all_new_leave_origin, all_new_leave_vals)
         except ValidationError:

@@ -7,6 +7,8 @@ import { Thread } from "@mail/core/common/thread";
 import { ThreadIcon } from "@mail/core/common/thread_icon";
 import { Composer } from "@mail/core/common/composer";
 import { ImStatus } from "@mail/core/common/im_status";
+import { useDynamicInterval } from "@mail/utils/common/misc";
+import { formatLocalDateTime } from "@mail/utils/common/dates";
 
 import { _t } from "@web/core/l10n/translation";
 import { FileUploader } from "@web/views/fields/file_handler";
@@ -38,6 +40,19 @@ export class DiscussContent extends Component {
             () => this.actionPanelAutoOpenFn(),
             () => [this.thread]
         );
+        useDynamicInterval(
+            (partnerTz, currentUserTz) => {
+                this.state.correspondentLocalDateTimeFormatted = formatLocalDateTime(
+                    partnerTz,
+                    currentUserTz
+                );
+                if (!this.state.correspondentLocalDateTimeFormatted) {
+                    return;
+                }
+                return 60000 - (Date.now() % 60000);
+            },
+            () => [this.thread?.correspondent?.persona?.tz, this.store.self?.tz]
+        );
     }
 
     actionPanelAutoOpenFn() {
@@ -58,6 +73,13 @@ export class DiscussContent extends Component {
 
     get thread() {
         return this.props.thread || this.store.discuss.thread;
+    }
+
+    get showsChatLocalDateTime() {
+        return (
+            this.thread.channel?.channel_type === "chat" &&
+            this.state.correspondentLocalDateTimeFormatted
+        );
     }
 
     get showThreadAvatar() {

@@ -1,16 +1,16 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-#----------------------------------------------------------
+# ----------------------------------------------------------
 # ir_http modular http routing
-#----------------------------------------------------------
+# ----------------------------------------------------------
 import hashlib
 import json
 import logging
 import os
 import re
 import threading
+import time
 import unicodedata
 
-import werkzeug
 import werkzeug.exceptions
 import werkzeug.routing
 import werkzeug.utils
@@ -29,10 +29,19 @@ except ImportError:
     slugify_lib = None
 
 import odoo
-from odoo import api, http, models, tools
+from odoo import api, models, tools
 from odoo.api import SUPERUSER_ID
 from odoo.exceptions import AccessDenied
-from odoo.http import ROUTING_KEYS, SAFE_HTTP_METHODS, Response, request
+from odoo.http import Response, request
+from odoo.http.dispatcher import SAFE_HTTP_METHODS
+from odoo.http.requestlib import is_cors_preflight
+from odoo.http.router import root
+from odoo.http.routing_map import ROUTING_KEYS
+from odoo.http.session import (
+    CheckIdentityException,
+    SessionExpiredException,
+    get_session_max_inactivity,
+)
 from odoo.modules.registry import Registry
 from odoo.tools.json import json_default
 from odoo.tools.misc import get_lang, submap
@@ -52,7 +61,7 @@ EXTENSION_TO_WEB_MIMETYPES = {
 }
 
 
-class RequestUID(object):
+class RequestUID:
     def __init__(self, **kw):
         self.__dict__.update(kw)
 
@@ -69,8 +78,8 @@ class ModelConverter(werkzeug.routing.BaseConverter):
         self.unslug = IrHttp._unslug
 
     def to_python(self, value: str) -> models.BaseModel:
-        _uid = RequestUID(value=value, converter=self)
-        env = api.Environment(request.env.cr, _uid, request.env.context)
+        uid = RequestUID(value=value, converter=self)
+        env = api.Environment(request.env.cr, uid, request.env.context)
         return env[self.model].browse(self.unslug(value)[1])
 
     def to_url(self, value: models.BaseModel) -> str:
@@ -85,8 +94,8 @@ class ModelsConverter(werkzeug.routing.BaseConverter):
         self.model = model
 
     def to_python(self, value: str) -> models.BaseModel:
-        _uid = RequestUID(value=value, converter=self)
-        env = api.Environment(request.env.cr, _uid, request.env.context)
+        uid = RequestUID(value=value, converter=self)
+        env = api.Environment(request.env.cr, uid, request.env.context)
         return env[self.model].browse(int(v) for v in value.split(','))
 
     def to_url(self, value: models.BaseModel) -> str:
@@ -139,7 +148,7 @@ class IrHttp(models.AbstractModel):
     _description = "HTTP Routing"
 
     @classmethod
-    def _slugify_one(cls, value: str, max_length: int = None) -> str:
+    def _slugify_one(cls, value: str, max_length: int | None = None) -> str:
         """ Transform a string to a slug that can be used in a url path.
             This method will first try to do the job with python-slugify if present.
             Otherwise it will process string by replacing spaces and underscores with
@@ -156,7 +165,7 @@ class IrHttp(models.AbstractModel):
                 pass
         uni = unicodedata.normalize('NFKD', value)
         slugified_segments = []
-        for slug in re.split('-|_| ', uni):
+        for slug in re.split(r'-|_| ', uni):
             slug = re.sub(r'([^\w])+', '', slug)
             if slug:
                 slugified_segments.append(slug.lower())
@@ -164,20 +173,20 @@ class IrHttp(models.AbstractModel):
         return slugified_str[:max_length]
 
     @classmethod
-    def _slugify(cls, value: str, max_length: int = None, path: bool = False) -> str:
+    def _slugify(cls, value: str, max_length: int | None = None, path: bool = False) -> str:
         if not path:
             return cls._slugify_one(value, max_length=max_length)
-        else:
-            res = []
-            for u in value.split('/'):
-                s = cls._slugify_one(u, max_length=max_length)
-                if s:
-                    res.append(s)
-            # check if supported extension
-            path_no_ext, ext = os.path.splitext(value)
-            if ext in EXTENSION_TO_WEB_MIMETYPES:
-                res[-1] = cls._slugify_one(path_no_ext) + ext
-            return '/'.join(res)
+
+        res = []
+        for u in value.split('/'):
+            s = cls._slugify_one(u, max_length=max_length)
+            if s:
+                res.append(s)
+        # check if supported extension
+        path_no_ext, ext = os.path.splitext(value)
+        if ext in EXTENSION_TO_WEB_MIMETYPES:
+            res[-1] = cls._slugify_one(path_no_ext) + ext
+        return '/'.join(res)
 
     @classmethod
     def _slug(cls, value: models.BaseModel | tuple[int, str]) -> str:
@@ -192,9 +201,9 @@ class IrHttp(models.AbstractModel):
         except ValueError:
             return None, None
 
-    #------------------------------------------------------
+    # ------------------------------------------------------
     # Routing map
-    #------------------------------------------------------
+    # ------------------------------------------------------
 
     @classmethod
     def _get_converters(cls) -> dict[str, type]:
@@ -250,12 +259,13 @@ class IrHttp(models.AbstractModel):
         elif not check_sec_headers():
             e = 'Missing "Authorization" or Sec-headers for interactive usage.'
             raise werkzeug.exceptions.Unauthorized(e, www_authenticate=WWWAuthenticate('bearer'))
-        cls._auth_method_user()
+        cls._authenticate_explicit('user')
 
     @classmethod
     def _auth_method_user(cls):
         if request.env.uid in [None] + cls._get_public_users():
-            raise http.SessionExpiredException("user is not connected")
+            e = "user is not connected"
+            raise SessionExpiredException(e)
 
     @classmethod
     def _auth_method_none(cls):
@@ -270,29 +280,35 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _authenticate(cls, endpoint):
-        auth = 'none' if http.is_cors_preflight(request, endpoint) else endpoint.routing['auth']
-        cls._authenticate_explicit(auth)
+        auth = 'none' if is_cors_preflight(request, endpoint) else endpoint.routing['auth']
+        cls._authenticate_explicit(auth, check_identity=endpoint.routing.get('check_identity', True))
 
     @classmethod
-    def _authenticate_explicit(cls, auth):
+    def _authenticate_explicit(cls, auth, **extra):
         session_expired_exc = None
         try:
             if request.session.uid is not None:
                 try:
                     request.session._check(request)
-                except http.SessionExpiredException as exc:
+                except SessionExpiredException as exc:
                     session_expired_exc = exc  # save the traceback
                     request.env = api.Environment(request.env.cr, None, request.session.context)
             getattr(cls, f'_auth_method_{auth}')()
-        except http.SessionExpiredException as exc:
+        except SessionExpiredException as exc:
             if session_expired_exc:
                 raise exc from session_expired_exc
             raise
         except (AccessDenied, werkzeug.exceptions.HTTPException):
             raise
-        except Exception:
-            _logger.info("Exception during request Authentication.", exc_info=True)
+        except Exception:  # noqa: BLE001
+            _logger.warning("Exception during request Authentication.", exc_info=True)
             raise AccessDenied()
+
+        if auth == 'user' and request.session.uid is not None and (must_check_identity := cls._must_check_identity()):
+            if must_check_identity.get('logout'):
+                raise SessionExpiredException(f'User {request.session.uid} needs to login again')
+            if must_check_identity.get('check_identity') and extra.get('check_identity', True):
+                raise CheckIdentityException(f'User {request.session.uid} needs to confirm his identity')
 
     @classmethod
     def _geoip_resolve(cls):
@@ -377,17 +393,19 @@ class IrHttp(models.AbstractModel):
         attach = model.sudo()._get_serve_attachment(request.httprequest.path)
         if attach and (attach.store_fname or attach.db_datas):
             return attach._to_http_stream().get_response()
+        return None
 
     @classmethod
     def _redirect(cls, location, code=303):
         return werkzeug.utils.redirect(location, code=code, Response=Response)
 
     def _generate_routing_rules(self, modules, converters):
-        return http._generate_routing_rules(modules, False, converters)
+        from odoo.http.routing_map import _generate_routing_rules  # noqa: PLC0415
+        return _generate_routing_rules(modules, False, converters)
 
     @tools.ormcache('key', cache='routing')
     def routing_map(self, key=None):
-        _logger.info("Generating routing map for key %s", str(key))
+        _logger.info("Generating routing map for key %s", key)
         registry = Registry(threading.current_thread().dbname)
         installed = registry._init_modules.union(odoo.tools.config['server_wide_modules'])
         mods = sorted(installed)
@@ -409,7 +427,7 @@ class IrHttp(models.AbstractModel):
     def _gc_sessions(self):
         if os.getenv("ODOO_SKIP_GC_SESSIONS"):
             return
-        http.root.session_store.vacuum(max_lifetime=http.get_session_max_inactivity(self.env))
+        root.session_store.vacuum(max_lifetime=get_session_max_inactivity(self.env))
 
     @api.model
     def _get_translations_for_webclient(self, modules, lang):
@@ -458,3 +476,66 @@ class IrHttp(models.AbstractModel):
     @api.model
     def _verify_request_recaptcha_token(self, action: str):
         return
+
+    @classmethod
+    def _must_check_identity(cls):
+        """
+        Determine whether the current user session requires identity confirmation.
+        :return: A dictionary describing the re-authentication requirement.
+        Possible keys:
+        - `logout` [bool]: True if a full login is required
+        - `check_identity` [bool]: True if an identity check is required
+        - `mfa` [bool]: True if multi-factor authentication is required
+        - `1fa_method` [str]: previously used auth method, to avoid reuse as second factor
+        """
+        return {}
+
+    @classmethod
+    def _check_identity(cls, credential):
+        """
+        Verify the user's identity using the given credentials.
+        Handles both single and multi-factor authentication flows depending on the
+        current session state and configured timeout rules.
+
+        :param dict credential: A dictionary containing authentication data. Must include
+            a "type" key (e.g., "password", "totp", "webauthn"). If empty, the method
+            returns the list of available authentication methods.
+
+        :return: A dictionary indicating the outcome of the identity check:
+
+            - {"auth_methods": [...]} if no credential is provided,
+            - {"mfa": True, "auth_methods": [...]} if a second factor is required,
+            - None if re-authentication is complete.
+
+        :rtype: dict or None
+        """
+        user = request.env.user
+        auth_methods = user._get_auth_methods()
+
+        reauth_requirements = cls._must_check_identity()
+        assert set(reauth_requirements).issubset(('logout', 'check_identity', 'mfa', '1fa_method')), reauth_requirements
+
+        first_fa_method = reauth_requirements.get('1fa_method')
+
+        if not credential:
+            if first_fa_method in auth_methods:
+                auth_methods.remove(first_fa_method)
+            return {'user_id': user.id, 'login': user.login, 'auth_methods': auth_methods}
+
+        auth = user._check_credentials(credential, {"interactive": True})
+
+        session = request.session
+
+        if first_fa_method and first_fa_method != auth['auth_method']:  # User checked with the 2fa
+            session.pop("identity-check-1fa")
+
+        # User checked with the 1fa
+        elif reauth_requirements.get('mfa') and auth['mfa'] != 'skip' and len(auth_methods) > 1:
+            session['identity-check-1fa'] = (time.time(), credential['type'])
+            auth_methods.remove(credential['type'])
+            return {'mfa': True, 'auth_methods': auth_methods}
+
+        # Use the same key as the one used for the `check_identity` wrapper
+        session['identity-check-last'] = time.time()
+
+        return None

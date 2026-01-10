@@ -133,10 +133,18 @@ class HrVersion(models.Model):
     work_location_id = fields.Many2one('hr.work.location', 'Work Location',
                                        domain="[('address_id', '=', address_id)]", tracking=1)
 
-    departure_reason_id = fields.Many2one("hr.departure.reason", string="Departure Reason",
-                                          groups="hr.group_hr_user", copy=False, ondelete='restrict', tracking=1)
-    departure_description = fields.Html(string="Additional Information", groups="hr.group_hr_user", copy=False)
-    departure_date = fields.Date(string="Departure Date", groups="hr.group_hr_user", copy=False, tracking=1)
+    departure_id = fields.Many2one('hr.employee.departure', string="Departure", copy=False)
+    departure_reason_id = fields.Many2one(related='departure_id.departure_reason_id', readonly=False, groups="hr.group_hr_user", tracking=1)
+    departure_description = fields.Html(related='departure_id.departure_description', readonly=False, groups="hr.group_hr_user")
+    departure_date = fields.Date(related='departure_id.departure_date', readonly=False, groups="hr.group_hr_user", tracking=1)
+    departure_action_at_departure = fields.Boolean(related='departure_id.action_at_departure', readonly=False, groups="hr.group_hr_user")
+    departure_action_other_date = fields.Date(related='departure_id.action_other_date', readonly=False, groups="hr.group_hr_user")
+    departure_do_archive_employee = fields.Boolean(related='departure_id.do_archive_employee', readonly=False, groups="hr.group_hr_user")
+    departure_do_archive_user = fields.Boolean(related='departure_id.do_archive_user', readonly=False, groups="hr.group_hr_user")
+    departure_do_set_date_end = fields.Boolean(related='departure_id.do_set_date_end', readonly=False, groups="hr.group_hr_user")
+    departure_has_selected_actions = fields.Boolean(related='departure_id.has_selected_actions', groups="hr.group_hr_user")
+    departure_apply_immediately = fields.Boolean(related='departure_id.apply_immediately', groups="hr.group_hr_user")
+    departure_apply_date = fields.Date(related='departure_id.apply_date', groups="hr.group_hr_user")
 
     resource_calendar_id = fields.Many2one('resource.calendar', inverse='_inverse_resource_calendar_id', check_company=True, string="Working Hours", tracking=1)
     is_flexible = fields.Boolean(compute='_compute_is_flexible', store=True, groups="hr.group_hr_user")
@@ -296,11 +304,11 @@ class HrVersion(models.Model):
     def write(self, vals):
         # Employee Versions Validation
         if 'employee_id' in vals:
-            if self.filtered(lambda v: len(v.employee_id.version_ids) == 1 and vals['employee_id'] != v.employee_id.id):
-                raise ValidationError(self.env._("Cannot unassign the only active record of an employee."))
+            if self.filtered(lambda v: v.employee_id and v.employee_id.version_ids <= self and vals['employee_id'] != v.employee_id.id):
+                raise ValidationError(self.env._("Cannot unassign all the active versions of an employee."))
         if 'active' in vals and not vals['active']:
-            if self.filtered(lambda v: len(v.employee_id.version_ids) == 1):
-                raise ValidationError(self.env._("Cannot archive the only active record of an employee."))
+            if self.filtered(lambda v: v.employee_id and v.employee_id.version_ids <= self):
+                raise ValidationError(self.env._("Cannot archive all the active versions of an employee."))
 
         if self.env.context.get('sync_contract_dates') or ("contract_date_start" not in vals and "contract_date_end" not in vals):
             return super().write(vals)
@@ -618,4 +626,17 @@ class HrVersion(models.Model):
             'context': {
                 'version_id': self.id,
             },
+        }
+
+    def action_open_version_form_view(self):
+        self.ensure_one()
+        view_id = self.env.ref('hr.hr_contract_template_form_view').id
+
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'hr.version',
+            'res_id': self.id,
+            'views': [[view_id, "form"]],
+            'target': 'current',
+            'context': self.env.context
         }

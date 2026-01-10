@@ -43,17 +43,23 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'name': 'NotLimitedHR',
             'requires_allocation': False,
             'leave_validation_type': 'hr',
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
         cls.holidays_type_2 = LeaveType.create({
             'name': 'Limited',
             'requires_allocation': True,
             'employee_requests': True,
             'leave_validation_type': 'hr',
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
         cls.holidays_type_3 = LeaveType.create({
             'name': 'TimeNotLimited',
             'requires_allocation': False,
             'leave_validation_type': 'manager',
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
 
         cls.holidays_type_4 = LeaveType.create({
@@ -61,24 +67,30 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'requires_allocation': True,
             'employee_requests': True,
             'leave_validation_type': 'both',
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
         cls.holidays_support_document = LeaveType.create({
             'name': 'Time off with support document',
             'support_document': True,
             'requires_allocation': False,
             'leave_validation_type': 'no_validation',
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
         cls.holidays_type_half = LeaveType.create({
             'name': 'Time off in half-days',
             'requires_allocation': False,
             'leave_validation_type': 'no_validation',
             'request_unit': 'half_day',
+            'unit_of_measure': 'day',
         })
         cls.holidays_type_hours = LeaveType.create({
             'name': 'Time off in hours',
             'requires_allocation': False,
             'leave_validation_type': 'no_validation',
             'request_unit': 'hour',
+            'unit_of_measure': 'hour',
         })
         cls.holidays_type_half_with_alloc = LeaveType.create({
             'name': 'Limited time off in half-days',
@@ -254,22 +266,6 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'request_date_to': fields.Date.from_string('2017-03-11'),
         })
 
-    @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
-    def test_department_leave(self):
-        """ Create a department leave """
-        self.employee_hrmanager.write({'department_id': self.hr_dept.id})
-        self.assertFalse(self.env['hr.leave'].search([('employee_id', 'in', self.hr_dept.member_ids.ids)]))
-        leave_wizard_form = Form(self.env['hr.leave.generate.multi.wizard'].with_user(self.user_hrmanager))
-        leave_wizard_form.allocation_mode = 'department'
-        leave_wizard_form.department_id = self.hr_dept
-        leave_wizard_form.holiday_status_id = self.holidays_type_1
-        leave_wizard_form.date_from = date(2019, 5, 6)
-        leave_wizard_form.date_to = date(2019, 5, 6)
-        leave_wizard = leave_wizard_form.save()
-        leave_wizard.action_generate_time_off()
-        member_ids = self.hr_dept.member_ids.ids
-        self.assertEqual(self.env['hr.leave'].search_count([('employee_id', 'in', member_ids)]), len(member_ids), "Time Off should be created for members of department")
-
     @users('Titus')
     def test_create_group_leave_without_hr_right(self):
         employee_1, employee_2 = self.env['hr.employee'].sudo().create([
@@ -332,7 +328,6 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'holiday_status_id': self.holidays_type_1.id,
             'date_from': date(2019, 5, 6),
             'date_to': date(2019, 5, 6),
-            'allocation_mode': 'employee',
         })
         leave_wizard.action_generate_time_off()
         generated_leaves = self.env['hr.leave'].search([
@@ -448,12 +443,11 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         company = self.env['res.company'].create({'name': "Hergé"})
         employee = self.env['hr.employee'].create({'name': "Remi", 'company_id': company.id})
         leave_wizard_form = Form(self.env['hr.leave.generate.multi.wizard'])
-        leave_wizard_form.allocation_mode = 'company'
-        leave_wizard_form.company_id = company
         leave_wizard_form.holiday_status_id = self.holidays_type_1
         leave_wizard_form.date_from = date(2019, 5, 6)
         leave_wizard_form.date_to = date(2019, 5, 6)
         leave_wizard = leave_wizard_form.save()
+        leave_wizard.company_id = company
         leave_wizard.action_generate_time_off()
         employee_leave = self.env['hr.leave'].search([('employee_id', '=', employee.id)])
         self.assertEqual(
@@ -490,6 +484,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         leave_type = self.env['hr.leave.type'].create({
             'name': 'Paid Time Off',
             'request_unit': 'hour',
+            'unit_of_measure': 'hour',
             'leave_validation_type': 'both',
         })
         self.env['hr.leave.allocation'].create({
@@ -554,6 +549,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         leave_type = self.env['hr.leave.type'].create({
             'name': 'Paid Time Off',
             'request_unit': 'hour',
+            'unit_of_measure': 'hour',
             'leave_validation_type': 'both',
         })
         self.env['hr.leave.allocation'].create({
@@ -603,6 +599,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         self.assertEqual(leave2.number_of_hours, 8)
 
         leave_type.request_unit = 'half_day'
+        leave_type.unit_of_measure = 'day'
         leave3 = self.env['hr.leave'].create({
             'name': 'Holiday 1/2 Day',
             'employee_id': employee.id,
@@ -616,6 +613,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         self.assertEqual(leave3.number_of_hours, 4)
 
         leave_type.request_unit = 'hour'
+        leave_type.unit_of_measure = 'hour'
         leave4 = self.env['hr.leave'].create({
             'name': 'Holiday 3 Hours',
             'employee_id': employee.id,
@@ -678,6 +676,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         leave_type = self.env['hr.leave.type'].create({
             'name': 'Sick',
             'request_unit': 'hour',
+            'unit_of_measure': 'hour',
             'leave_validation_type': 'both',
             'requires_allocation': False,
         })
@@ -879,6 +878,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
 
         for unit in ['hour', 'day']:
             self.holidays_type_2.request_unit = unit
+            self.holidays_type_2.unit_of_measure = unit
 
             allocation_vals.update({'number_of_days': 4})
             allocation_4days = Allocation.create(allocation_vals)
@@ -1176,6 +1176,23 @@ class TestLeaveRequests(TestHrHolidaysCommon):
                 'supported_attachment_ids': [(6, 0, [])],  # Sent by webclient
             })
 
+    def test_create_supported_attachments_link_attachment_ids(self):
+        with freeze_time('2025-10-21'):
+            attachment = self.env['ir.attachment'].create({
+                'name': "an attachment",
+                'datas': 'My attachment',
+                'res_model': 'hr.leave',
+            })
+            leave = self.env['hr.leave'].create({
+                'employee_id': self.employee_emp_id,
+                'state': 'confirm',
+                'holiday_status_id': self.holidays_support_document.id,
+                'request_date_from': '2025-10-24',
+                'request_date_to': '2025-10-24',
+                'supported_attachment_ids': [[4, attachment.id]],
+            })
+            self.assertTrue(leave.attachment_ids)
+
     def test_prevent_misplacement_of_allocations_without_end_date(self):
         """
             The objective is to check that it is not possible to place leaves
@@ -1186,6 +1203,8 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'requires_allocation': True,
             'employee_requests': True,
             'leave_validation_type': 'hr',
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
 
         # Create allocations with no end date
@@ -1233,6 +1252,8 @@ class TestLeaveRequests(TestHrHolidaysCommon):
                 'leave_validation_type': leave_validation_type,
                 'requires_allocation': False,
                 'responsible_ids': [Command.link(self.env.ref('base.user_admin').id)],
+                'request_unit': 'day',
+                'unit_of_measure': 'day',
             })
             current_leave = self.env['hr.leave'].with_user(self.user_employee_id).create({
                 'name': 'Holiday Request',
@@ -1275,6 +1296,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         sick_leave_type = self.env['hr.leave.type'].create({
             'name': 'Sick Leave (days)',
             'request_unit': 'day',
+            'unit_of_measure': 'day',
             'leave_validation_type': 'hr',
             'requires_allocation': False,
         })
@@ -1288,6 +1310,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         comp_leave_type = self.env['hr.leave.type'].create({
             'name': 'OT Compensation (hours)',
             'request_unit': 'hour',
+            'unit_of_measure': 'hour',
             'leave_validation_type': 'manager',
             'requires_allocation': False,
         })
@@ -1326,6 +1349,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         sick_leave_type = self.env['hr.leave.type'].create({
             'name': 'Sick Leave (days)',
             'request_unit': 'day',
+            'unit_of_measure': 'day',
             'leave_validation_type': 'hr',
             'requires_allocation': False,
         })
@@ -1676,6 +1700,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'name': 'Test half day Leave Type',
             'requires_allocation': False,
             'request_unit': 'half_day',
+            'unit_of_measure': 'day',
             'company_id': self.company.id,
             'sequence': 10,
         })
@@ -1683,6 +1708,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'name': 'Test hour Leave Type',
             'requires_allocation': False,
             'request_unit': 'hour',
+            'unit_of_measure': 'hour',
             'company_id': self.company.id,
         })
 
@@ -1790,6 +1816,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         sick_leave_type = self.env['hr.leave.type'].create({
             'name': 'leave in days',
             'request_unit': 'day',
+            'unit_of_measure': 'day',
             'leave_validation_type': 'both',
             'requires_allocation': False,
         })
@@ -2012,6 +2039,8 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'name': 'Smart Leave',
             'requires_allocation': True,
             'leave_validation_type': 'hr',
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
         with self.assertRaises(ValidationError):
             self.env['hr.leave'].create({
@@ -2365,6 +2394,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         sick_leave_type = self.env['hr.leave.type'].create({
             'name': 'Sick Leave (days)',
             'request_unit': 'day',
+            'unit_of_measure': 'day',
             'leave_validation_type': 'hr',
             'requires_allocation': False,
         })
@@ -2372,6 +2402,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         sick_leave_type_paid = self.env['hr.leave.type'].create({
             'name': 'Paid Leave (days)',
             'request_unit': 'day',
+            'unit_of_measure': 'day',
             'leave_validation_type': 'hr',
             'requires_allocation': False,
         })

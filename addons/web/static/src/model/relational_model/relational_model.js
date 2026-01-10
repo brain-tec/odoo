@@ -59,6 +59,7 @@ import { FetchRecordError } from "./errors";
  *  groups?: Record<string, unknown>;
  *  currentGroups?: Record<string, unknown>; // FIXME: could be cleaned: Object
  *  openGroupsByDefault?: boolean;
+ *  sendOpeningInfo?: boolean;
  * }} RelationalModelConfig
  *
  * @typedef {{
@@ -342,9 +343,6 @@ export class RelationalModel extends Model {
                         // in case there're less groups, we don't want to keep displaying groups
                         // that are no longer there => forget previous groups
                         delete this.root.config.currentGroups;
-                        // in case that the config of the groups changed (e.g. group is now folded)
-                        // we want to update the groups.
-                        this.root.config.groups = [];
                         result = await this._postprocessReadGroup(root.config, result);
                     }
                     root._setData(result);
@@ -405,6 +403,7 @@ export class RelationalModel extends Model {
             // keep current root config if any, if the groupBy parameter is the same
             if (!shallowEqual(config.groupBy || [], currentGroupBy || [])) {
                 delete config.groups;
+                delete config.sendOpeningInfo;
             }
             if (!config.groupBy.length) {
                 config.orderBy = config.orderBy.filter((order) => order.name !== "__count");
@@ -528,13 +527,9 @@ export class RelationalModel extends Model {
                     currentConfig.domain
                 );
                 if (!currentConfig.groups[group.value]) {
-                    const isFolded =
-                        !Object.hasOwn(groupData, "__records") &&
-                        !Object.hasOwn(groupData, "__groups");
                     currentConfig.groups[group.value] = {
                         ...commonConfig,
                         groupByFieldName,
-                        isFolded: isFolded,
                         extraDomain: false,
                         value: group.value,
                         list: {
@@ -568,6 +563,7 @@ export class RelationalModel extends Model {
                 groupConfig.list.context = context;
                 groupConfig.context = context;
                 if (nextLevelGroupBy.length) {
+                    groupConfig.isFolded = !("__groups" in groupData);
                     if (!groupConfig.isFolded) {
                         const { groups, length } = groupData.__groups;
                         group.groups = await extractGroups(groupConfig.list, groups);
@@ -576,6 +572,7 @@ export class RelationalModel extends Model {
                         group.groups = [];
                     }
                 } else {
+                    groupConfig.isFolded = !("__records" in groupData);
                     if (!groupConfig.isFolded) {
                         group.records = groupData.__records;
                         group.length = groupData.__count;
@@ -755,11 +752,19 @@ export class RelationalModel extends Model {
             if (tmpConfig.isRoot) {
                 this.hooks.onWillLoadRoot(tmpConfig);
             }
+            if (tmpConfig.groupBy?.length && "groups" in patch) {
+                // usecase: @_toggleAllGroups
+                tmpConfig.sendOpeningInfo = true;
+            }
             data = await this._loadData(tmpConfig);
         }
         Object.assign(config, tmpConfig);
         if (data && commit) {
             commit(data);
+        }
+        if (!tmpConfig.isRoot && this.root && this.root.config.groupBy?.length) {
+            // usecase: toggle a group, use pager inside a group or filter with progressbar
+            this.root.config.sendOpeningInfo = true;
         }
         if (reload && config.isRoot) {
             await this.hooks.onRootLoaded(this.root);
@@ -832,7 +837,10 @@ export class RelationalModel extends Model {
         const aggregates = getAggregateSpecifications(
             pick(config.fields, ...config.fieldsToAggregate)
         );
-        const currentGroupInfos = getGroupInfo(config.groups);
+        let currentGroupInfos;
+        if (config.sendOpeningInfo) {
+            currentGroupInfos = getGroupInfo(config.groups);
+        }
         const { activeFields, fields } = config;
         const evalContext = getBasicEvalContext(config);
         const unfoldReadSpecification = getFieldsSpec(activeFields, fields, evalContext);

@@ -13,7 +13,8 @@ class TestHolidaysFlow(TestHrHolidaysCommon):
     def setUpClass(cls):
         super().setUpClass()
         cls.employee = cls.env['hr.employee'].create({
-            'name': 'Sky'
+            'name': 'Sky',
+            'date_version': date(2022, 1, 1),
         })
         cls.departure_date = date.today()
         departure_reason = cls.env['hr.departure.reason'].create({'name': "Fired"})
@@ -26,6 +27,8 @@ class TestHolidaysFlow(TestHrHolidaysCommon):
             'name': 'Paid Time Off',
             'time_type': 'leave',
             'requires_allocation': False,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
 
     def test_departure_without_leave_and_allocation_employee(self):
