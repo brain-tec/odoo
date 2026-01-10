@@ -6,12 +6,52 @@
         <field name="inherit_id" ref="hr.view_employee_filter"/>
         <field name="arch" type="xml">
             <filter name="at_work" position="after">
-                <filter name="absent" string="Absent" domain="[('hr_presence_state', '=', 'absent')]"/>
-                <filter name="out_of_working_hours" string="Off-Hours" domain="[('hr_presence_state', '=', 'out_of_working_hour')]"/>
+                <filter name="absent" string="Absent" domain="[('is_absent', '=', True)]"/>
             </filter>
-            <filter name="group_birthday" position="before">
-                <filter name="group_hr_presence_state" string="Presence/Absence" domain="[]" context="{'group_by':'hr_presence_state'}" groups="hr.group_hr_manager"/>
-            </filter>
+        </field>
+    </record>
+
+    <record id="hr_employee_view_kanban" model="ir.ui.view">
+        <field name="name">hr.employee.view.kanban</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.hr_kanban_view_employees"/>
+        <field name="arch" type="xml">
+            <kanban position="attributes">
+                <attribute name="js_class">hr_employee_kanban</attribute>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_employee_tree" model="ir.ui.view">
+        <field name="name">hr.employee.list</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="js_class">hr_employee_list</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_employee_list_view" model="ir.ui.view">
+        <field name="name">hr.employee.list</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.hr_employee_list_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="js_class">hr_employee_list</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_employee_list_activites_view" model="ir.ui.view">
+        <field name="name">hr.employee.list</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.hr_employee_list_activites_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="js_class">hr_employee_list</attribute>
+            </xpath>
         </field>
     </record>
 

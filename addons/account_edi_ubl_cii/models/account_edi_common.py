@@ -1,6 +1,6 @@
 from markupsafe import Markup
 
-from odoo import _, models
+from odoo import _, api, models
 from odoo.addons.base.models.res_partner_bank import sanitize_account_number
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_is_zero, float_repr
@@ -8,6 +8,7 @@ from odoo.tools.float_utils import float_round
 from odoo.tools.misc import clean_context, formatLang, html_escape
 from odoo.tools.xml_utils import find_xml_value
 from datetime import datetime
+from copy import deepcopy
 
 # -------------------------------------------------------------------------
 # UNIT OF MEASURE
@@ -66,7 +67,7 @@ EAS_MAPPING = {
     'SG': {'0195': 'l10n_sg_unique_entity_number'},
     'GB': {'9932': 'vat'},
     'GR': {'9933': 'vat'},
-    'HR': {'9934': 'vat'},
+    'HR': {'9934': 'vat', '0088': 'company_registry'},
     'HU': {'9910': 'l10n_hu_eu_vat'},
     'IE': {'9935': 'vat'},
     'IS': {'0196': 'vat'},
@@ -357,7 +358,7 @@ class AccountEdiCommon(models.AbstractModel):
         if tax and (code := tax.ubl_cii_tax_exemption_reason_code):
             return {
                 'tax_exemption_reason_code': code,
-                'tax_exemption_reason': TAX_EXEMPTION_MAPPING.get(code),
+                'tax_exemption_reason': TAX_EXEMPTION_MAPPING.get(code, _("Exempt from tax") if tax.ubl_cii_requires_exemption_reason else None),
             }
 
         tax_category_code = self._get_tax_category_code(customer, supplier, tax)
@@ -429,6 +430,140 @@ class AccountEdiCommon(models.AbstractModel):
             if not line.tax_ids:
                 return {'tax_on_line': _("Each invoice line should have at least one tax.")}
         return {}
+
+    @api.model
+    def _flatten_multilevel_constraints(self, constraints: dict):
+        """Flatten multilevel dict constraints
+
+        see `_get_flatten_multilevel_constraints_config` for config values.
+
+        Args:
+            constraints:
+                Arbitrary nested dict of simple constraints.
+
+                Special keys:
+                - ``_title``: title for this group (ignored in root)
+                - ``_config``: config dict (only applicable in root)
+                        Defaults to {
+                            'residual_title': _("Other Errors:"),
+                            'residual_key': 'other',
+                            'indent_suffix': '',
+                            'indent_suffix_on_root_titles': True,
+                        }
+                - Any key starting with ``_`` (except the above) is ignored
+
+                Example:
+                    {
+                        '_title': "Custom title for residual errors",
+                        'oth_err_1': "Some random error",
+                        '_ubl_20': {
+                            '_title': "UBL 2.0 Errors",
+                            'ubl20_supplier_name_required': "The field 'name' is required...",
+                        },
+                        'other_err_2': "Something is wrong",
+                        'important': {
+                            '_title': "Important Errors",
+                            'some_subtitle': {
+                                '_title': "Some Subtitle",
+                                'error_1': "Something is wrong with the thing",
+                            },
+                            'some_other_subtitle': {
+                                '_title': "Some Other Subtitle",
+                                'error_2': "Something is wrong with the other thing",
+                            },
+                        },
+                    }
+
+        Returns:
+            dict: Flattened dict where keys are group identifiers and values are formatted strings
+                  with titles and bullet-pointed messages, properly indented for nested groups.
+        """
+        def remove_non_flattable(dct: dict):
+            to_remove = []
+            for key, value in dct.items():
+                if not value or not isinstance(value, (str, dict)):
+                    to_remove.append(key)
+                elif isinstance(value, dict):
+                    remove_non_flattable(value)
+                    if not value or all(k.startswith('_') for k in value):
+                        to_remove.append(key)
+
+            for key in to_remove:
+                del dct[key]
+
+        def flatten_dict(dct: dict, level=0) -> str | None:
+            if '_title' not in dct:
+                raise UserError(_("Missing '_title' for multi-level constraints."))
+
+            title = dct.pop('_title')
+            simple_strings = []
+            children_strings = []
+
+            for v in dct.values():
+                if isinstance(v, str):
+                    simple_strings.append(v)
+                elif flattened_dict := flatten_dict(v, level + 1):
+                    children_strings.append(flattened_dict)
+
+            if not simple_strings and not children_strings:
+                return None
+
+            indent_suffix = config['indent_suffix']
+            indent = '\t' * (level + 1) + indent_suffix
+            if level == 0 and not config['indent_suffix_on_root_titles']:
+                strings = [f'{'\t' * level}{title}']
+            else:
+                strings = [f'{'\t' * level}{indent_suffix}{title}']
+
+            for string in simple_strings:
+                strings.append(f'{indent}{string}')
+
+            for string in children_strings:
+                strings.append(string)
+
+            return '\n'.join(strings)
+
+        new_constraints = deepcopy(constraints)
+
+        config = {
+            'residual_title': _("Other Errors:"),
+            'residual_key': 'other',
+            'indent_suffix': '',
+            'indent_suffix_on_root_titles': True,
+        }
+        custom_config = new_constraints.pop('_config', dict())
+        config.update(custom_config)
+
+        residuals = new_constraints.pop(config['residual_key'], dict())
+
+        # Remove values we can not flatten
+        remove_non_flattable(new_constraints)
+
+        if not residuals and all(isinstance(value, str) for value in new_constraints.values()):
+            # All values are strings
+            return new_constraints
+
+        # Aggregate residuals
+        to_remove = []
+        for key, value in new_constraints.items():
+            if isinstance(value, str):
+                residuals[key] = value
+                to_remove.append(key)
+
+        # Remove aggregated residuals from root dict
+        for key in to_remove:
+            del new_constraints[key]
+
+        # Add residuals to new constraints
+        if residuals:
+            if not new_constraints:
+                return residuals
+            else:
+                residuals['_title'] = config['residual_title']
+                new_constraints[config['residual_key']] = residuals
+
+        # Flatten children dicts
+        return {k: flattened for k, v in new_constraints.items() if (flattened := flatten_dict(v))}
 
     # -------------------------------------------------------------------------
     # Import invoice
@@ -677,7 +812,7 @@ class AccountEdiCommon(models.AbstractModel):
         logs = []
         lines_values = []
         for line_tree in tree.iterfind(xpath):
-            line_values = self.with_company(record.company_id)._retrieve_invoice_line_vals(line_tree, document_type, qty_factor)
+            line_values = self.with_company(record.company_id)._retrieve_invoice_line_vals(record, line_tree, document_type, qty_factor)
             line_values['tax_ids'], tax_logs = self._retrieve_taxes(record, line_values, tax_type)
             logs += tax_logs
             if not line_values['product_uom_id']:
@@ -721,7 +856,7 @@ class AccountEdiCommon(models.AbstractModel):
 
         return lines_values, logs
 
-    def _retrieve_invoice_line_vals(self, tree, document_type=False, qty_factor=1):
+    def _retrieve_invoice_line_vals(self, record, tree, document_type=False, qty_factor=1):
         # Start and End date (enterprise fields)
         xpath_dict = self._get_invoice_line_xpaths(document_type, qty_factor)
         deferred_values = {}
@@ -738,11 +873,11 @@ class AccountEdiCommon(models.AbstractModel):
             }
 
         return {
-            **self._retrieve_line_vals(tree, document_type, qty_factor),
+            **self._retrieve_line_vals(record, tree, document_type, qty_factor),
             **deferred_values,
         }
 
-    def _retrieve_line_vals(self, tree, document_type=False, qty_factor=1):
+    def _retrieve_line_vals(self, record, tree, document_type=False, qty_factor=1):
         """
         Read the xml invoice, extract the invoice line values, compute the odoo values
         to fill an invoice line form: quantity, price_unit, discount, product_uom_id.
@@ -811,7 +946,7 @@ class AccountEdiCommon(models.AbstractModel):
         # delivered_qty (mandatory)
         delivered_qty = 1
         product_vals = {k: self._find_value(v, tree) for k, v in xpath_dict['product'].items()}
-        product = self._import_product(**product_vals)
+        product = self._import_product(record.partner_id, **product_vals)
         product_uom = self.env['uom.uom']
         quantity_node = tree.find(xpath_dict['delivered_qty'])
         if quantity_node is not None:
@@ -900,7 +1035,7 @@ class AccountEdiCommon(models.AbstractModel):
             'charges': charges,  # see `_retrieve_line_charges`
         }
 
-    def _import_product(self, **product_vals):
+    def _import_product(self, partner, **product_vals):
         return self.env['product.product']._retrieve_product(**product_vals)
 
     def _retrieve_fixed_tax(self, company_id, fixed_tax_vals):
@@ -925,7 +1060,7 @@ class AccountEdiCommon(models.AbstractModel):
                     return tax
         return self.env['account.tax']
 
-    def _retrieve_taxes(self, record, line_values, tax_type):
+    def _retrieve_taxes(self, record, line_values, tax_type, tax_exigibility=False):
         """
         Retrieve the taxes on the document line at import.
 
@@ -947,6 +1082,17 @@ class AccountEdiCommon(models.AbstractModel):
             tax = self.env['account.tax']
             if hasattr(record, '_get_specific_tax'):
                 tax = record._get_specific_tax(line_values['name'], 'percent', amount, tax_type)
+            if tax_exigibility:
+                if not tax and tax_exigibility:
+                    tax = self.env['account.tax'].search(domain + [('price_include', '=', False), ('tax_exigibility', '=', tax_exigibility)], limit=1)
+                if not tax and tax_exigibility:
+                    tax = self.env['account.tax'].search(domain + [('price_include', '=', True), ('tax_exigibility', '=', tax_exigibility)], limit=1)
+                if not tax:
+                    logs.append(
+                        _("Tax with matching exigibility could not be retrieved: '%(exigibility)s' for line '%(line)s'.",
+                        exigibility=tax_exigibility,
+                        line=line_values['name']),
+                    )
             if not tax:
                 tax = self.env['account.tax'].search(domain + [('price_include', '=', False)], limit=1)
             if not tax:

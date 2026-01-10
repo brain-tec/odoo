@@ -118,22 +118,6 @@ export class Thread extends Record {
     followersCount;
     loadOlder = false;
     loadNewer = false;
-    get importantCounter() {
-        if (this.model === "mail.box") {
-            return this.counter;
-        }
-        return this.message_needaction_counter;
-    }
-    /** ⚠️ {@link AwaitChatHubInit} */
-    isDisplayed = fields.Attr(false, {
-        compute() {
-            return this.computeIsDisplayed();
-        },
-        onUpdate() {
-            this.isDisplayedOnUpdate();
-        },
-    });
-    isDisplayedOnUpdate() {}
     get isFocused() {
         return this.isFocusedCounter !== 0;
     }
@@ -304,10 +288,6 @@ export class Thread extends Record {
 
     get displayName() {
         return this.channel?.displayName ?? this.display_name;
-    }
-
-    computeIsDisplayed() {
-        return this.channel?.chatWindow?.isOpen;
     }
 
     get avatarUrl() {

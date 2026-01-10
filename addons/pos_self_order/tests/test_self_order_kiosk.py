@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import base64
 import random
 
 import odoo.tests
@@ -53,7 +51,7 @@ class TestSelfOrderKiosk(SelfOrderCommonTest):
         })
 
         # With preset location choices
-        self.start_tour(self_route, "self_kiosk_each_counter_takeaway_in")
+        self.start_tour(self.pos_config._get_self_order_route(), "self_kiosk_each_counter_takeaway_in")
         self.start_tour(self_route, "self_kiosk_each_counter_takeaway_out")
 
         self.pos_config.write({
@@ -222,7 +220,7 @@ class TestSelfOrderKiosk(SelfOrderCommonTest):
             return self.env["ir.attachment"].create(
                 {
                     "name": f"test_{random.randint(1000, 9999)}",
-                    "datas": base64.b64encode(b"test"),
+                    "raw": b"test",
                 },
             )
 
@@ -248,7 +246,7 @@ class TestSelfOrderKiosk(SelfOrderCommonTest):
                         Command.create(
                             {
                                 "name": f"test_{field}",
-                                "datas": base64.b64encode(b"test"),
+                                "raw": b"test",
                             },
                         ),
                     ],

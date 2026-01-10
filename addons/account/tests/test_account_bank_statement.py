@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
 from odoo.exceptions import ValidationError, UserError
 from odoo import fields, Command
 
-import base64
 
 @tagged('post_install', '-at_install')
 class TestAccountBankStatementLine(AccountTestInvoicingCommon):
@@ -690,6 +688,18 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
             {'is_valid': True, 'balance_start': False, 'balance_end_real': 100, 'date': False},
             {'is_valid': True, 'balance_start': -5, 'balance_end_real': -15,
              'date': fields.Date.from_string('2020-01-13')},
+        ])
+
+        # computing validity of non-consecutive statement shouldn't affect validity
+        line5 = self.create_bank_transaction(-10, '2020-01-13')
+        statement4 = self.env['account.bank.statement'].create({
+            'line_ids': [Command.set(line5.ids)],
+            'balance_start': -15,
+        })
+        (statement1 + statement4).invalidate_recordset(['is_valid'])
+        self.assertRecordValues(statement1 + statement4, [
+            {'is_valid': True},
+            {'is_valid': True},
         ])
 
         # adding a statement to the first line should make statement1 invalid
@@ -1408,7 +1418,7 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
         ''' Ensure that attachments are properly linked to bank statements '''
 
         attachment_vals = {
-            'datas': base64.b64encode(b'My attachment'),
+            'raw': b'My attachment',
             'name': 'doc.txt',
         }
 

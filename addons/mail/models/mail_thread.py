@@ -1,7 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import ast
-import base64
 import datetime
 import dateutil
 import email
@@ -588,9 +587,6 @@ class MailThread(models.AbstractModel):
         for record in records:
             changes, _tracking_value_ids = tracking.get(record.id, (None, None))
             record._message_track_post_template(changes)
-        # this method is called after the main flush() and just before commit();
-        # we have to flush() again in case we triggered some recomputations
-        self.env.flush_all()
 
     def _track_set_author(self, author):
         """ Set the author of the tracking message. """
@@ -603,7 +599,6 @@ class MailThread(models.AbstractModel):
     def _track_post_template_finalize(self):
         """Call the tracking template method with right values from precommit."""
         self._message_track_post_template(self.env.cr.precommit.data.pop(f'mail.tracking.create.{self._name}.{self.id}', []))
-        self.env.flush_all()
 
     def _track_set_log_message(self, message):
         """ Link tracking to a message logged as body, in addition to subtype
@@ -2468,7 +2463,7 @@ class MailThread(models.AbstractModel):
                     continue
                 attachement_values = {
                     'name': name,
-                    'datas': base64.b64encode(content),
+                    'raw': content,
                     'type': 'binary',
                     'description': name,
                     'res_model': model,

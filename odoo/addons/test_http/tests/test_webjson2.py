@@ -196,9 +196,24 @@ class TestHttpWebJson_2(TestHttpBase):
             '/json/2/res.users/search',
             data=r'{"domain": [["id","=",%d]]}' % self.jackoneill.id,
             headers=CT_JSON | self.bearer_header,
-        )
+        ).raise_for_status()
         self.assertEqual(res.text, f"[{self.jackoneill.id}]")
-        self.assertEqual(res.status_code, HTTPStatus.OK)
+        self.assertEqual(res.headers.get('Content-Type'), 'application/json; charset=utf-8')
+
+        res = self.db_url_open(
+            '/json/2/res.users/read',
+            data=r'{"ids": [%d], "fields": ["display_name"]}' % self.jackoneill.id,
+            headers=CT_JSON | self.bearer_header,
+        ).raise_for_status()
+        self.assertEqual(res.text, f'[{{"id": {self.jackoneill.id}, "display_name": "jackoneill (base.group_user)"}}]')
+        self.assertEqual(res.headers.get('Content-Type'), 'application/json; charset=utf-8')
+
+        res = self.db_url_open(
+            '/json/2/res.users/read',
+            data=r'{"ids": %d, "fields": ["display_name"]}' % self.jackoneill.id,
+            headers=CT_JSON | self.bearer_header,
+        ).raise_for_status()
+        self.assertEqual(res.text, f'[{{"id": {self.jackoneill.id}, "display_name": "jackoneill (base.group_user)"}}]')
         self.assertEqual(res.headers.get('Content-Type'), 'application/json; charset=utf-8')
 
     def test_webjson2_api_model(self):
@@ -214,6 +229,30 @@ class TestHttpWebJson_2(TestHttpBase):
             'arguments': [m, HTTPStatus.UNPROCESSABLE_ENTITY],
         })
         self.assertEqual(res.status_code, HTTPStatus.UNPROCESSABLE_ENTITY)
+        self.assertEqual(res.headers.get('Content-Type'), 'application/json; charset=utf-8')
+
+    def test_webjson2_binary_fields(self):
+        # reading an image on the user
+        res = self.db_url_open(
+            '/json/2/res.users/read',
+            data=r'{"ids": [%d], "fields": ["image_128"]}' % self.jackoneill.id,
+            headers=CT_JSON | self.bearer_header,
+        ).raise_for_status()
+        self.assertIn('"image_128": "PD94bWw', res.text, "Base64 encoded SVG missing")  # starts with b'<?xml version...'
+        self.assertEqual(res.headers.get('Content-Type'), 'application/json; charset=utf-8')
+
+        attachment = self.env['ir.attachment'].with_user(self.jackoneill).create({
+            'name': 'test',
+            'raw': b'x  \x01-',
+        })
+        expected_datas = 'eCAgAS0='  # base64-encoded raw value
+        values = (attachment.id, expected_datas, expected_datas)
+        res = self.db_url_open(
+            '/json/2/ir.attachment/search_read',
+            data=r'{"domain": [["id", "=", %d]], "fields": ["datas", "raw"], "limit": 1}' % attachment.id,
+            headers=CT_JSON | self.bearer_header,
+        ).raise_for_status()
+        self.assertEqual(res.text, '[{"id": %d, "datas": "%s", "raw": "%s"}]' % values)
         self.assertEqual(res.headers.get('Content-Type'), 'application/json; charset=utf-8')
 
     def test_webjson2_missing_method(self):

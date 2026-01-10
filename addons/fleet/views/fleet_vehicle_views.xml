@@ -89,8 +89,8 @@
                         <group string="Driver">
                             <field name="active" invisible="1"/>
                             <field name="vehicle_type" invisible="1"/>
-                            <field name="driver_id" domain="['|', ('company_id', '=', False ), ('company_id', '=', company_id)]" widget="many2one_avatar"/>
-                            <field name="future_driver_id" widget="many2one_avatar"/>
+                            <field name="driver_id" domain="['|', ('company_id', '=', False ), ('company_id', '=', company_id)]" widget="many2one_avatar_user"/>
+                            <field name="future_driver_id" widget="many2one_avatar_user"/>
                             <field name="next_assignation_date"/>
                             <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
                         </group>
@@ -108,11 +108,8 @@
                             </div>
                             <field name="manager_id" widget="many2one_avatar_user"/>
                             <field name="location"/>
-                            <label string="Make Vehicle Available" for="plan_to_change_car" class="text-nowrap" invisible="vehicle_type != 'car'"/>
-                            <field name="plan_to_change_car" groups="fleet.fleet_group_manager" invisible="vehicle_type != 'car'" nolabel="1"
-                                help="This will allow this vehicle to be selectable for the Salary Configurator" class="text-nowrap"/>
-                            <label string="Make Vehicle Available" for="plan_to_change_bike" class="text-nowrap" invisible="vehicle_type != 'bike'"/>
-                            <field name="plan_to_change_bike" groups="fleet.fleet_group_manager"  invisible="vehicle_type != 'bike'" nolabel="1"
+                            <label string="Make Vehicle Available" for="plan_to_change_vehicle" class="text-nowrap"/>
+                            <field name="plan_to_change_vehicle" groups="fleet.fleet_group_manager" nolabel="1"
                                 help="This will allow this vehicle to be selectable for the Salary Configurator"/>
                         </group>
                     </group>
@@ -199,8 +196,8 @@
                 <field name="model_id" widget="many2one_avatar" readonly="1"/>
                 <field name="category_id"/>
                 <field name="manager_id" optional="hide" widget="many2one_avatar_user"/>
-                <field name="driver_id" widget="many2one_avatar" readonly="1" optional="show"/>
-                <field name="future_driver_id"  widget="many2one_avatar" readonly="1" optional="show"/>
+                <field name="driver_id" widget="many2one_avatar_user" readonly="1" optional="show"/>
+                <field name="future_driver_id"  widget="many2one_avatar_user" readonly="1" optional="show"/>
                 <field name="log_drivers" column_invisible="True"/>
                 <field name="vin_sn" readonly="1" optional="hide"/>
                 <field name="co2" string="CO2 Emissions" optional="hide" readonly="1"/>
@@ -235,11 +232,11 @@
                 <field string="Status" name="state_id"/>
                 <field string="Properties" name="vehicle_properties"/>
                 <filter string="Available" name="available"
-                    domain="['&amp;', ('future_driver_id', '=', False), '|', ('driver_id', '=', False), '|', '&amp;', ('plan_to_change_car', '=', True), ('vehicle_type', '=', 'car'), '&amp;', ('plan_to_change_bike', '=', True), ('vehicle_type', '=', 'bike')]"/>
+                    domain="['&amp;', ('future_driver_id', '=', False), '|', ('driver_id', '=', False), '|', ('plan_to_change_vehicle', '=', True)]"/>
                 <filter string="Bikes" name="bikes" domain="[('vehicle_type', '=', 'bike')]"/>
                 <filter string="Cars" name="cars" domain="[('vehicle_type', '=', 'car')]"/>
                 <filter string="Trailer Hook" name="trailer_hook" domain="[('trailer_hook', '=', True)]"/>
-                <filter name="planned" string="Planned for Change" domain="['|', '&amp;', ('vehicle_type', '=', 'bike'), ('plan_to_change_bike', '=', True), '&amp;', ('vehicle_type', '=', 'car'), ('plan_to_change_car', '=', True)]"/>
+                <filter name="planned" string="Planned for Change" domain="[('plan_to_change_vehicle', '=', True)]"/>
                 <separator/>
                 <filter string="Need Action" name="alert_true" domain="['|', ('contract_renewal_due_soon', '=', True), ('contract_renewal_overdue', '=', True)]"/>
                 <separator/>
@@ -304,7 +301,7 @@
                             </div>
                             <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'on_tag_click': 'edit_color'}"/>
                             <div class="d-flex gap-1" t-if="record.driver_id.raw_value">
-                                <field name="driver_id" widget="many2one_avatar"/>
+                                <field name="driver_id" widget="many2one_avatar_user"/>
                                 <field name="driver_id" class="small pt-1 pb-1"/>
                             </div>
                             <div class="small">
@@ -414,7 +411,7 @@
             <list string="Odometer Logs" editable="top">
                 <field name="date" />
                 <field name="vehicle_id" widget="many2one_avatar"/>
-                <field name="driver_id" widget="many2one_avatar"/>
+                <field name="driver_id" widget="many2one_avatar_user"/>
                 <field name="value" />
                 <field name="unit" />
             </list>
@@ -594,7 +591,7 @@
         <field name="arch" type="xml">
             <list default_order="date_start desc, id desc" string="Assignment Logs" editable="bottom">
                 <field name="vehicle_id" />
-                <field name="driver_id" widget="many2one_avatar" string="Current Driver" />
+                <field name="driver_id" widget="many2one_avatar_user" string="Current Driver" />
                 <field name="date_start"/>
                 <field name="date_end"/>
             </list>

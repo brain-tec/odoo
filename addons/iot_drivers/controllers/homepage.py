@@ -2,21 +2,36 @@
 
 import json
 import logging
-import netifaces
 import subprocess
 import threading
 import time
-
 from itertools import groupby
 from pathlib import Path
 
-from odoo import http
-from odoo.addons.iot_drivers.tools import certificate, helpers, route, system, upgrade, wifi
-from odoo.addons.iot_drivers.tools.system import IS_RPI, IOT_IDENTIFIER, IOT_SYSTEM, ODOO_START_TIME, SYSTEM_START_TIME
-from odoo.addons.iot_drivers.main import iot_devices, unsupported_devices
-from odoo.addons.iot_drivers.connection_manager import connection_manager
+import netifaces
+
+from odoo.http import Controller
+from odoo.http.stream import Stream
 from odoo.tools.misc import file_path
+
+from odoo.addons.iot_drivers.connection_manager import connection_manager
+from odoo.addons.iot_drivers.main import iot_devices, unsupported_devices
 from odoo.addons.iot_drivers.server_logger import server_logger
+from odoo.addons.iot_drivers.tools import (
+    certificate,
+    helpers,
+    route,
+    system,
+    upgrade,
+    wifi,
+)
+from odoo.addons.iot_drivers.tools.system import (
+    IOT_IDENTIFIER,
+    IOT_SYSTEM,
+    IS_RPI,
+    ODOO_START_TIME,
+    SYSTEM_START_TIME,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -36,22 +51,22 @@ CONTENT_SECURITY_POLICY = (
 )
 
 
-class IotBoxOwlHomePage(http.Controller):
+class IotBoxOwlHomePage(Controller):
     def __init__(self):
         super().__init__()
         self.updating = threading.Lock()
 
     @route.iot_route('/', type='http')
     def index(self):
-        return http.Stream.from_path("iot_drivers/views/index.html").get_response(content_security_policy=CONTENT_SECURITY_POLICY)
+        return Stream.from_path("iot_drivers/views/index.html").get_response(content_security_policy=CONTENT_SECURITY_POLICY)
 
     @route.iot_route('/logs', type='http')
     def logs_page(self):
-        return http.Stream.from_path("iot_drivers/views/logs.html").get_response(content_security_policy=CONTENT_SECURITY_POLICY)
+        return Stream.from_path("iot_drivers/views/logs.html").get_response(content_security_policy=CONTENT_SECURITY_POLICY)
 
     @route.iot_route('/status', type='http')
     def status_page(self):
-        return http.Stream.from_path("iot_drivers/views/status_display.html").get_response(content_security_policy=CONTENT_SECURITY_POLICY)
+        return Stream.from_path("iot_drivers/views/status_display.html").get_response(content_security_policy=CONTENT_SECURITY_POLICY)
 
     # ---------------------------------------------------------- #
     # GET methods                                                #
@@ -188,34 +203,6 @@ class IotBoxOwlHomePage(http.Controller):
         return json.dumps({
             'currentWiFi': wifi.get_current(),
             'availableWiFi': wifi.get_available_ssids(),
-        })
-
-    @route.iot_route('/iot_drivers/version_info', type="http", cors='*', linux_only=True)
-    def get_version_info(self):
-        # Check branch name and last commit hash on IoT Box
-        current_commit = system.git("rev-parse", "HEAD")
-        current_branch = system.git("rev-parse", "--abbrev-ref", "HEAD")
-        if not current_commit or not current_branch:
-            return json.dumps({
-                'status': 'error',
-                'message': 'Failed to retrieve current commit or branch',
-            })
-
-        last_available_commit = system.git("ls-remote", "origin", current_branch)
-        if not last_available_commit:
-            _logger.error("Failed to retrieve last commit available for branch origin/%s", current_branch)
-            return json.dumps({
-                'status': 'error',
-                'message': 'Failed to retrieve last commit available for branch origin/' + current_branch,
-            })
-        last_available_commit = last_available_commit.split()[0].strip()
-
-        return json.dumps({
-            'status': 'success',
-            # Checkout requires db to align with its version (=branch)
-            'odooIsUpToDate': current_commit == last_available_commit or not bool(helpers.get_odoo_server_url()),
-            'imageIsUpToDate': IS_RPI and not bool(system.check_image()),
-            'currentCommitHash': current_commit,
         })
 
     @route.iot_route('/iot_drivers/log_levels', type="http", cors='*')

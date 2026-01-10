@@ -19,13 +19,13 @@
                 <attribute name="t-if">not invoice_gcc_title</attribute>
             </t>
             <t name="invoice_title" position="after">
-                <t t-else="" name="invoice_gcc_title" t-out="invoice_gcc_title"></t>
+                <t t-else="" name="invoice_gcc_title" t-out="invoice_gcc_title"/>
             </t>
             <span t-field='o.name' position="after">
                 <t t-if="display_in_ar and not proforma" t-translation="off">
                     <span t-if="o.move_type == 'out_invoice' and o.state == 'posted'">
                         <t t-if="not invoice_gcc_title_sec" name="invoice_title_ar">فاتورة</t>
-                        <t t-else="" name="invoice_gcc_title_ar" t-out="invoice_gcc_title_sec"></t>
+                        <t t-else="" name="invoice_gcc_title_ar" t-out="invoice_gcc_title_sec"/>
                     </span>
                     <span t-elif="o.move_type == 'out_invoice' and o.state == 'draft'">
                         <t name="draft_invoice_title_ar">مسودة فاتورة</t>
@@ -52,7 +52,7 @@
                 <t t-elif="display_in_en and not proforma" t-translation="off">
                     <span t-if="o.move_type == 'out_invoice' and o.state == 'posted'" dir="rtl">
                         <t t-if="not invoice_gcc_title_sec" name="invoice_title_en">Invoice</t>
-                        <t t-else="" name="invoice_gcc_title_en" t-out="invoice_gcc_title_sec"></t>
+                        <t t-else="" name="invoice_gcc_title_en" t-out="invoice_gcc_title_sec"/>
                     </span>
                     <span t-elif="o.move_type == 'out_invoice' and o.state == 'draft'" dir="rtl">
                         <t name="draft_invoice_title_en">Draft Invoice</t>
@@ -229,17 +229,13 @@
             </p>
             <!-- End Arabic & English amount in words -->
             <!-- Call custom tax totals templates -->
-            <t t-set="tax_totals" position="after">
-                <t t-set="tax_totals_sec" t-value="o_sec.tax_totals"/>
-            </t>
             <t t-call="account.document_tax_totals" position="attributes">
+                <attribute name="tax_totals_sec">o_sec.tax_totals</attribute>
                 <attribute name="t-call">l10n_gcc_invoice.l10n_gcc_document_tax_totals</attribute>
             </t>
-            <xpath expr="(//t[@t-set='tax_totals'])[2]" position="after">
-                <t t-set="tax_totals_sec" t-value="o_sec.tax_totals"/>
-                <t t-set="show_exchange_rate" t-value="0"/>
-            </xpath>
             <t t-call="account.document_tax_totals_company_currency_template" position="attributes">
+                <attribute name="tax_totals_sec">o_sec.tax_totals</attribute>
+                <attribute name="show_exchange_rate">0</attribute>
                 <attribute name="t-call">l10n_gcc_invoice.l10n_gcc_document_tax_totals_company_currency_template</attribute>
             </t>
             <!-- End Call custom tax totals templates -->

@@ -4,6 +4,7 @@ import datetime
 import logging
 import os
 import re
+import urllib.parse
 import zipfile
 from hashlib import md5, sha256
 from io import BytesIO
@@ -12,19 +13,18 @@ from textwrap import shorten
 from xml.etree import ElementTree as ET
 
 import requests
-import urllib.parse
 import werkzeug.urls
-import werkzeug.utils
 import werkzeug.wrappers
 from lxml import etree, html
 from markupsafe import escape as markup_escape
 from werkzeug.exceptions import NotFound
 
-import odoo
 from odoo import _, fields, http, models, release, tools
 from odoo.exceptions import AccessError, UserError
 from odoo.fields import Domain
-from odoo.http import SessionExpiredException, request
+from odoo.http import request
+from odoo.http.session import SessionExpiredException
+from odoo.http.stream import STATIC_CACHE_LONG
 from odoo.tools import OrderedSet, escape_psql, py_to_js_locale
 from odoo.tools import html_escape as escape
 from odoo.tools.json import scriptsafe as json
@@ -93,9 +93,6 @@ class Website(Home):
         def match(loc):
             return not qs or qs.lower() in loc.lower()
 
-        if homepage_url and homepage_url != '/' and match(homepage_url):
-            yield {'loc': homepage_url}
-            return
         website_page = env['website.page'].sudo().search([
             ('url', '=', '/'),
             ('is_published', '=', True),
@@ -302,7 +299,7 @@ class Website(Home):
             sitemaps.unlink()
 
             pages = 0
-            locs = request.website.with_user(request.website.user_id)._enumerate_pages()
+            locs = request.website.with_user(request.website.user_id)._enumerate_pages(ignore_custom_homepage=True)
             while True:
                 values = {
                     'locs': islice(locs, 0, LOC_PER_SITEMAP),
@@ -345,7 +342,7 @@ class Website(Home):
     def favicon(self, **kw):
         website = request.website
         response = request.redirect(website.image_url(website, 'favicon'), code=301)
-        response.headers['Cache-Control'] = 'public, max-age=%s' % http.STATIC_CACHE_LONG
+        response.headers['Cache-Control'] = f'public, max-age={STATIC_CACHE_LONG}'
         return response
 
     @http.route('/website/info', type='http', auth="public", website=True, sitemap=False, readonly=True, list_as_website_content=_lt("Website Information"))
@@ -1484,6 +1481,10 @@ class WebsiteSession(Session):
     @http.route(auth="public")
     def logout(self, *args, **kw):
         return super().logout(*args, **kw)
+
+    @http.route(website=True)
+    def session_identity(self, redirect=None):
+        return super().session_identity(redirect)
 
 
 class WebsiteBinary(Binary):

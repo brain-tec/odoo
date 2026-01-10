@@ -1,7 +1,7 @@
 import { beforeEach, expect, test } from "@odoo/hoot";
 import { getContent } from "./_helpers/selection";
 import { animationFrame, click, press, queryOne, waitFor } from "@odoo/hoot-dom";
-import { insertText, splitBlock } from "./_helpers/user_actions";
+import { ensureDistinctHistoryStep, insertText, splitBlock } from "./_helpers/user_actions";
 import {
     compareHighlightedContent,
     highlightedPre,
@@ -20,6 +20,7 @@ import { parseHTML } from "@html_editor/utils/html";
 const pressAndWait = async (...args) => {
     await press(...args);
     await animationFrame(); // wait for effect
+    await ensureDistinctHistoryStep();
 };
 
 const insertPre = async (editor) => {
@@ -472,6 +473,7 @@ test("can switch between code blocks without issues", async () => {
     editor.shared.selection.setCursorEnd(p1);
     // Action 3: insert "c" in first paragraph.
     await insertText(editor, "c");
+    await ensureDistinctHistoryStep();
     await compareHighlightedContent(
         getContent(editor.editable),
         unformat(
@@ -756,7 +758,10 @@ test("multiple ctrl+z in a highlighted code block undo changes in the block and 
 
     // Write in the P.
     actions.push("type: insert 'o' into the paragraph", "type: insert '!' into the paragraph");
-    await insertText(editor, "o!"); // <wrapper><pre>some code</pre></wrapper><p>hello![]</p>
+    await insertText(editor, "o"); // <wrapper><pre>some code</pre></wrapper><p>hello[]</p>
+    await ensureDistinctHistoryStep();
+    await insertText(editor, "!"); // <wrapper><pre>some code</pre></wrapper><p>hello![]</p>
+    await ensureDistinctHistoryStep();
     await compareHighlightedContent(
         getContent(editor.editable),
         unformat(`
@@ -823,7 +828,10 @@ test("multiple ctrl+z in a highlighted code block undo changes in the block and 
     const p = queryOne("p:not([data-selection-placeholder])");
     await click(p);
     editor.shared.selection.setCursorEnd(p);
-    await insertText(editor, "ok"); // <wrapper><highlight><pre>some codeyes</pre></highlight></wrapper><p>hello!ok[]</p>
+    await insertText(editor, "o"); // <wrapper><highlight><pre>some codeyes</pre></highlight></wrapper><p>hello!o[]</p>
+    await ensureDistinctHistoryStep();
+    await insertText(editor, "k"); // <wrapper><highlight><pre>some codeyes</pre></highlight></wrapper><p>hello!ok[]</p>
+    await ensureDistinctHistoryStep();
     await compareHighlightedContent(
         getContent(editor.editable),
         unformat(`
@@ -1132,5 +1140,17 @@ test("can write in a highlighted code block within a nested list", async () => {
             </ul>
             <p>b</p>`
         ),
+    });
+});
+
+test("restore paragraph from code block", async () => {
+    await testEditor({
+        contentBefore: "<pre>[]abc</pre>",
+        stepFunction: async () => {
+            await click(".o_code_toolbar span.fa-paragraph");
+        },
+        contentAfterEdit: '<div class="o-paragraph">[]abc</div>',
+        contentAfter: `<div>[]abc</div>`,
+        config: configWithEmbeddings,
     });
 });

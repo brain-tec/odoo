@@ -92,11 +92,11 @@ export class DiscussChannel extends Record {
             (this.channel_type === "channel" && !this.group_public_id)
         );
     }
-    get allowDescriptionsTypes() {
+    get allowDescriptionTypes() {
         return ["channel", "group"];
     }
     get allowDescription() {
-        return this.allowDescriptionsTypes.includes(this.channel_type);
+        return this.allowDescriptionTypes.includes(this.channel_type);
     }
     get allowedToLeaveChannelTypes() {
         return ["channel", "group"];
@@ -224,6 +224,7 @@ export class DiscussChannel extends Record {
             : this.displayName;
         return text;
     }
+    group_ids = fields.Many("res.groups");
     get memberListTypes() {
         return ["channel", "group"];
     }
@@ -296,6 +297,23 @@ export class DiscussChannel extends Record {
             }
         },
     });
+    get importantCounter() {
+        if (this.isChatChannel && this.self_member_id?.message_unread_counter_ui) {
+            return this.self_member_id.message_unread_counter_ui;
+        }
+        if (this.discussAppCategory?.id === "channels") {
+            if (this.store.settings.channel_notifications === "no_notif") {
+                return 0;
+            }
+            if (
+                this.store.settings.channel_notifications === "all" &&
+                !this.self_member_id?.mute_until_dt
+            ) {
+                return this.self_member_id?.message_unread_counter_ui;
+            }
+        }
+        return this.message_needaction_counter;
+    }
     get invitationLink() {
         if (!this.uuid || this.channel_type === "chat") {
             return undefined;
@@ -303,6 +321,22 @@ export class DiscussChannel extends Record {
         return `${window.location.origin}/chat/${this.id}/${this.uuid}`;
     }
     invited_member_ids = fields.Many("discuss.channel.member");
+    /** ⚠️ {@link AwaitChatHubInit} */
+    isDisplayed = fields.Attr(false, {
+        compute() {
+            return this.computeIsDisplayed();
+        },
+        onUpdate() {
+            if (!this.self_member_id) {
+                return;
+            }
+            if (!this.isDisplayed) {
+                this.self_member_id.new_message_separator_ui =
+                    this.self_member_id.new_message_separator;
+                this.markedAsUnread = false;
+            }
+        },
+    });
     lastMessageSeenByAllId = fields.Attr(undefined, {
         /** @this {import("models").DiscussChannel} */
         compute() {
@@ -441,9 +475,25 @@ export class DiscussChannel extends Record {
 
     _onDeleteChatWindow() {}
 
+    computeIsDisplayed() {
+        return this.chatWindow?.isOpen;
+    }
+
     delete() {
         this.chatWindow?.close();
         super.delete(...arguments);
+    }
+
+    async executeCommand(command, body = "") {
+        await command.onExecute?.(this);
+        if (command.methodName) {
+            await this.store.env.services.orm.call(
+                "discuss.channel",
+                command.methodName,
+                [[this.id]],
+                { body }
+            );
+        }
     }
 
     async fetchChannelMembers() {

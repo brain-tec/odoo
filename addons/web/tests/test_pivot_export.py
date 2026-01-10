@@ -1,10 +1,11 @@
 import io
 import json
-from lxml import etree
+from http import HTTPStatus
 from zipfile import ZipFile
 
-from odoo import http
-from odoo.tests.common import tagged, HttpCase
+from lxml import etree
+
+from odoo.tests.common import HttpCase, tagged
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
@@ -31,7 +32,7 @@ class TestPivotExport(HttpCase):
             '/web/pivot/export_xlsx',
             data={
                 'data': json.dumps(jdata),
-                'csrf_token': http.Request.csrf_token(self),
+                'csrf_token': self.csrf_token(),
             },
         )
         response.raise_for_status()
@@ -49,3 +50,17 @@ class TestPivotExport(HttpCase):
         self.assertEqual(xml_data['B1'], '500')
         self.assertEqual(xml_data['A2'], '0')
         self.assertEqual(xml_data['B2'], '42')
+
+    def test_export_xlsx_with_empty_data(self):
+        """ Test the export_xlsx method of the pivot controller without jdata """
+        self.authenticate('admin', 'admin')
+
+        response = self.url_open(
+            '/web/pivot/export_xlsx',
+            data={
+                'data': json.dumps({}),
+                'csrf_token': self.csrf_token(),
+            },
+        )
+        self.assertEqual(response.status_code, HTTPStatus.UNPROCESSABLE_ENTITY)
+        self.assertIn('No data to export', response.text)

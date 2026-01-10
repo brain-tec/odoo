@@ -1,15 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import base64
-
 from odoo import Command
 from odoo.fields import Domain
+from odoo.addons.mail.tests.common import MailCase
 from odoo.tests import tagged, TransactionCase, Form
 
 
 @tagged('recruitment')
 @tagged('at_install', '-post_install')  # LEGACY at_install
-class TestRecruitment(TransactionCase):
+class TestRecruitment(MailCase, TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -21,7 +20,6 @@ class TestRecruitment(TransactionCase):
         cls.env.user.company_id = cls.company
         cls.env.user.company_ids = [Command.set(cls.company.ids)]
 
-        cls.TEXT = base64.b64encode(bytes("hr_recruitment", 'utf-8'))
         cls.Attachment = cls.env['ir.attachment']
 
     def test_infer_applicant_lang_from_context(self):
@@ -349,7 +347,7 @@ class TestRecruitment(TransactionCase):
             'email_from': 'test_applicant@example.com'
         })
         applicant_attachment = self.Attachment.create({
-            'datas': self.TEXT,
+            'raw': b'hr_recuritment',
             'name': 'textFile.txt',
             'mimetype': 'text/plain',
             'res_model': applicant_1._name,
@@ -362,7 +360,7 @@ class TestRecruitment(TransactionCase):
             ('res_model', '=', employee_applicant['res_model']),
             ('res_id', '=', employee_applicant['res_id']),
         ])
-        self.assertEqual(applicant_attachment['datas'], attachment_employee_applicant['datas'])
+        self.assertEqual(applicant_attachment['raw'], attachment_employee_applicant['raw'])
 
     def test_other_applications_count(self):
         """
@@ -438,3 +436,23 @@ class TestRecruitment(TransactionCase):
         self.assertEqual(applicant.partner_id.email, 'applicant_diff@example.com', "Email should have been updated on the partner.")
         applicant.partner_phone = '987654321'
         self.assertEqual(applicant.partner_id.phone, '987654321', "Phone should have been updated on the partner.")
+
+    def test_stage_email_header_uses_application_label(self):
+        recipient = self.env['res.partner'].create({
+            'name': 'Recipient',
+            'email': 'recipient@example.com',
+            'lang': 'en_US',
+        })
+        applicant = self.env['hr.applicant'].with_context(lang='en_US').create({
+            'partner_name': 'Test Applicant',
+            'email_from': 'applicant@example.com',
+        })
+        with self.mock_mail_gateway():
+            applicant.message_post(
+                body='Test body',
+                partner_ids=[recipient.id],
+                email_layout_xmlid='hr_recruitment.mail_notification_light_without_background',
+            )
+
+        mail = self.assertMailMailWRecord(applicant, recipient, status=None)
+        self.assertIn('Your Application', mail.body_html)
