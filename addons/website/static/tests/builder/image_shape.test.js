@@ -1,8 +1,7 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { queryFirst, waitFor, advanceTime, animationFrame } from "@odoo/hoot-dom";
+import { queryFirst, advanceTime, animationFrame, setInputRange } from "@odoo/hoot-dom";
 import { contains } from "@web/../tests/web_test_helpers";
 import { defineWebsiteModels, setupWebsiteBuilder } from "./website_helpers";
-import { delay } from "@web/core/utils/concurrency";
 import { testImg } from "./image_test_helpers";
 
 defineWebsiteModels();
@@ -124,8 +123,6 @@ test("Should change the shape color of an image", async () => {
     await selectImageShape("html_builder/pattern/pattern_wave_4");
     await waitSidebarUpdated();
 
-    await waitFor(`[data-label="Colors"] .o_we_color_preview`);
-
     expect(`[data-label="Colors"] .o_we_color_preview`).toHaveCount(4);
 
     expect(`[data-label="Colors"] .o_we_color_preview:nth-child(1)`).toHaveAttribute(
@@ -182,8 +179,6 @@ test("Should change the shape color of an image with a class color", async () =>
 
     await selectImageShape("html_builder/pattern/pattern_wave_4");
     await waitSidebarUpdated();
-
-    await waitFor(`[data-label="Colors"] .o_we_color_preview`);
 
     expect(`[data-label="Colors"] .o_we_color_preview`).toHaveCount(4);
 
@@ -254,7 +249,6 @@ describe("flip shape axis", () => {
 
         await selectImageShape("html_builder/geometric/geo_tetris");
         await waitSidebarUpdated();
-        await waitFor(`[data-action-id="flipImageShape"]`);
 
         expect(`:iframe .test-options-target img`).toHaveAttribute(
             "data-shape",
@@ -279,7 +273,6 @@ describe("flip shape axis", () => {
 
         await selectImageShape("html_builder/geometric/geo_tetris");
         await waitSidebarUpdated();
-        await waitFor(`[data-action-id="flipImageShape"]`);
 
         expect(`:iframe .test-options-target img`).toHaveAttribute(
             "data-shape",
@@ -305,7 +298,6 @@ describe("flip shape axis", () => {
 
         await selectImageShape("html_builder/geometric/geo_tetris");
         await waitSidebarUpdated();
-        await waitFor(`[data-action-id="flipImageShape"]`);
 
         expect(`:iframe .test-options-target img`).toHaveAttribute(
             "data-shape",
@@ -330,7 +322,6 @@ describe("flip shape axis", () => {
 
         await selectImageShape("html_builder/geometric/geo_tetris");
         await waitSidebarUpdated();
-        await waitFor(`[data-action-id="flipImageShape"]`);
 
         expect(`:iframe .test-options-target img`).toHaveAttribute(
             "data-shape",
@@ -358,7 +349,6 @@ describe("rotate shape", () => {
         await selectImageShape("html_builder/geometric/geo_tetris");
         // ensure the shape action has been applied
         await waitSidebarUpdated();
-        await waitFor(`[data-action-id="rotateImageShape"]`);
 
         expect(`:iframe .test-options-target img`).toHaveAttribute(
             "data-shape",
@@ -382,7 +372,6 @@ describe("rotate shape", () => {
 
         await selectImageShape("html_builder/geometric/geo_tetris");
         await waitSidebarUpdated();
-        await waitFor(`[data-action-id="rotateImageShape"]`);
 
         expect(`:iframe .test-options-target img`).toHaveAttribute(
             "data-shape",
@@ -409,8 +398,6 @@ describe("rotate shape", () => {
         await selectImageShape("html_builder/geometric/geo_tetris");
         // ensure the shape action has been applied
         await waitSidebarUpdated();
-
-        await waitFor(`[data-action-id="rotateImageShape"]`);
 
         expect(`:iframe .test-options-target img`).toHaveAttribute(
             "data-shape",
@@ -453,13 +440,7 @@ test("Should change the speed of an animated shape", async () => {
 
     const originalSrc = queryFirst(":iframe .test-options-target img").src;
 
-    await waitFor(`[data-action-id="setImageShapeSpeed"]`);
-    const rangeInput = queryFirst(`[data-action-id="setImageShapeSpeed"] input`);
-    rangeInput.value = 2;
-    rangeInput.dispatchEvent(new Event("input"));
-    await delay();
-    rangeInput.dispatchEvent(new Event("change"));
-    await delay();
+    await setInputRange(`[data-action-id="setImageShapeSpeed"] input`, 2);
 
     // ensure the shape action has been applied
     await editor.shared.operation.next(() => {});
@@ -538,4 +519,74 @@ test("Should have the correct active shape in the image shape selector", async (
     await contains("[data-label='Media'] ~ [data-label='Shape'] button.o-hb-btn").click();
     await waitSidebarUpdated();
     expect("[data-action-value='html_builder/geometric/geo_tetris']").toHaveClass("active");
+});
+
+test("Should keep colors when changing speed and vice versa", async () => {
+    const { getEditor, waitSidebarUpdated } = await setupWebsiteBuilder(
+        `<div class="test-options-target">
+            ${testImg}
+        </div>`,
+        {
+            loadIframeBundles: true,
+        }
+    );
+    const editor = getEditor();
+
+    // Select image and apply shape
+    await contains(":iframe .test-options-target img").click();
+    await waitSidebarUpdated();
+
+    await selectImageShape("html_builder/pattern/pattern_wave_4");
+    await waitSidebarUpdated();
+
+    const imgSelector = ":iframe .test-options-target img";
+    const initialColors = [
+        queryFirst(`[data-label="Colors"] .o_we_color_preview:nth-child(1)`).style.backgroundColor,
+        queryFirst(`[data-label="Colors"] .o_we_color_preview:nth-child(2)`).style.backgroundColor,
+        queryFirst(`[data-label="Colors"] .o_we_color_preview:nth-child(3)`).style.backgroundColor,
+        queryFirst(`[data-label="Colors"] .o_we_color_preview:nth-child(4)`).style.backgroundColor,
+    ];
+
+    // Change speed
+    await setInputRange(`[data-action-id="setImageShapeSpeed"] input`, -1);
+    await editor.shared.operation.next(() => {});
+
+    // Change first color and verify speed unchanged
+    await contains(`[data-label="Colors"] .o_we_color_preview:nth-child(1)`).click();
+    await contains(`.o_font_color_selector [data-color="#FF0000"]`).click();
+    await waitSidebarUpdated();
+
+    expect(`[data-label="Colors"] .o_we_color_preview:nth-child(1)`).toHaveStyle({
+        backgroundColor: "rgb(255, 0, 0)",
+    });
+    expect(`[data-label="Colors"] .o_we_color_preview:nth-child(2)`).toHaveStyle({
+        backgroundColor: initialColors[1],
+    });
+    expect(`[data-label="Colors"] .o_we_color_preview:nth-child(3)`).toHaveStyle({
+        backgroundColor: initialColors[2],
+    });
+    expect(`[data-label="Colors"] .o_we_color_preview:nth-child(4)`).toHaveStyle({
+        backgroundColor: initialColors[3],
+    });
+
+    expect(imgSelector).toHaveAttribute("data-shape-animation-speed", "-1");
+
+    // Change speed and verify colors unchanged
+    await setInputRange(`[data-action-id="setImageShapeSpeed"] input`, 2);
+    await editor.shared.operation.next(() => {});
+
+    expect(`[data-label="Colors"] .o_we_color_preview:nth-child(1)`).toHaveStyle({
+        backgroundColor: "rgb(255, 0, 0)",
+    });
+    expect(`[data-label="Colors"] .o_we_color_preview:nth-child(2)`).toHaveStyle({
+        backgroundColor: initialColors[1],
+    });
+    expect(`[data-label="Colors"] .o_we_color_preview:nth-child(3)`).toHaveStyle({
+        backgroundColor: initialColors[2],
+    });
+    expect(`[data-label="Colors"] .o_we_color_preview:nth-child(4)`).toHaveStyle({
+        backgroundColor: initialColors[3],
+    });
+
+    expect(imgSelector).toHaveAttribute("data-shape-animation-speed", "2");
 });
