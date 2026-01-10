@@ -435,7 +435,7 @@ class DiscussChannel(models.Model):
                         "partner_id": pid,
                         "channel_role": (
                             "owner"
-                            if vals.get("channel_type") in ["channel", "group"]
+                            if vals.get("channel_type", "channel") in ["channel", "group"]
                             and pid == self.env.user.partner_id.id
                             and not self.env.user._is_public()
                             else None
@@ -513,7 +513,7 @@ class DiscussChannel(models.Model):
         super()._sync_field_names(res)
         res[None].attr("avatar_cache_key", predicate=is_channel_or_group)
         # sudo: discuss.category - guests can read categories of accessible channels
-        res[None].one("discuss_category_id", ["name", "sequence"], sudo=True)
+        res[None].one("discuss_category_id", "_store_category_fields", sudo=True)
         res[None].extend(["channel_type", "create_uid", "default_display_mode"])
         res[None].attr("description", predicate=is_channel_or_group)
         res[None].many("group_ids", [], predicate=is_channel)
@@ -1137,13 +1137,14 @@ class DiscussChannel(models.Model):
         post_joined_message=True,
     ):
         """
-        :param channel: channel to add the persona to
         :param guest_name: name of the persona
         :param post_joined_message: whether to post a message to the channel
             to notify that the persona joined
-        :param create_member_params dict: optional parameters to pass to the
+
+        :param dict create_member_params: optional parameters to pass to the
             channel member create function.
-        :return tuple(partner, guest):
+
+        :rtype: tuple[partner, guest]
         """
         self.ensure_one()
         guest = self.env["mail.guest"]
@@ -1206,7 +1207,7 @@ class DiscussChannel(models.Model):
         bus_last_id = self.env["bus.bus"].sudo()._bus_last_id()
         res.attr("avatar_cache_key", predicate=is_channel_or_group)
         # sudo: discuss.category - guests can read categories of accessible channels
-        res.one("discuss_category_id", ["name", "sequence"], sudo=True)
+        res.one("discuss_category_id", "_store_category_fields", sudo=True)
         res.attr("channel_type")
         res.attr("create_uid")
         res.many(

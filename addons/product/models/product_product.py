@@ -137,7 +137,10 @@ class ProductProduct(models.Model):
 
     is_favorite = fields.Boolean(related='product_tmpl_id.is_favorite', readonly=False, store=True)
     _is_favorite_index = models.Index("(is_favorite) WHERE is_favorite IS TRUE")
-    is_in_selected_section_of_order = fields.Boolean(search='_search_is_in_selected_section_of_order')
+    is_in_selected_section_of_order = fields.Boolean(
+        search='_search_is_in_selected_section_of_order',
+        store=False,
+    )
 
     @api.depends('image_variant_1920', 'image_variant_1024')
     def _compute_can_image_variant_1024_be_zoomed(self):
@@ -1140,8 +1143,8 @@ class ProductProduct(models.Model):
 
     def get_product_multiline_description_sale(self):
         """ Compute a multiline description of this product, in the context of sales
-                (do not use for purchases or other display reasons that don't intend to use "description_sale").
-            It will often be used as the default description of a sale order line referencing this product.
+        (do not use for purchases or other display reasons that don't intend to use "description_sale").
+        It will often be used as the default description of a sale order line referencing this product.
         """
         name = self.display_name
         if self.description_sale:
