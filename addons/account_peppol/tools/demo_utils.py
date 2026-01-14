@@ -70,6 +70,22 @@ def _mock_call_peppol_proxy(func, self, *args, **kwargs):
             } for i in args[1]['documents']],
         }
 
+    def _mock_unregister_to_sender(user, args, kwargs):
+        user.company_id.account_peppol_proxy_state = 'sender'
+        return True
+
+    def _mock_participant_status(user, args, kwargs):
+        company = user.company_id
+        if (
+            company != company.peppol_parent_company_id
+            and company.peppol_can_send
+            and company.peppol_parent_company_id.peppol_can_send
+        ):
+            # Connected as a branch.
+            return {'peppol_state': 'sender'}
+        else:
+            return {'peppol_state': 'receiver'}
+
     endpoint = args[0].split('/')[-1]
     return {
         # participant routes
@@ -78,8 +94,9 @@ def _mock_call_peppol_proxy(func, self, *args, **kwargs):
         'register_sender_as_receiver': lambda _user, _args, _kwargs: {},
         'update_user': lambda _user, _args, _kwargs: {},
         'cancel_peppol_registration': lambda _user, _args, _kwargs: {},
+        'unregister_to_sender': _mock_unregister_to_sender,
         'migrate_peppol_registration': lambda _user, _args, _kwargs: {'migration_key': 'demo_migration_key'},
-        'participant_status': lambda _user, _args, _kwargs: {'peppol_state': 'receiver'},
+        'participant_status': _mock_participant_status,
         'set_webhook': lambda _user, _args, _kwargs: {},
         # document routes
         'get_all_documents': _mock_get_all_documents,
