@@ -1,7 +1,7 @@
 export function clickProduct(productName) {
     return {
         content: `Click on product '${productName}'`,
-        trigger: `.o_self_product_box span:contains('${productName}')`,
+        trigger: `.product_list .o_self_product_box span:contains('${productName}')`,
         run: "click",
     };
 }
@@ -56,6 +56,20 @@ export function clickCancel() {
             run: "click",
         },
     ];
+}
+
+export function checkOrderTotal(amount) {
+    return {
+        content: `Confirm '${amount}' is displayed correctly`,
+        trigger: `.o_self_product_list_page .o_self_shadow_bottom .o-so-tabular-nums:contains('${amount}')`,
+    };
+}
+
+export function checkProductQty(productName, qty) {
+    return {
+        content: `Confirm product '${qty}' is displayed correctly`,
+        trigger: `.o_self_product_list_page .o_self_product_box:has(.self_order_product_name:contains('${productName}')) .badge:contains('${qty}')`,
+    };
 }
 
 export function clickDiscard() {
