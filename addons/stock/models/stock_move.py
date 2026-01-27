@@ -551,7 +551,7 @@ Please change the quantity done or the rounding precision in your settings.""",
                     continue
                 if move_update.date_deadline and delta:
                     move_update.date_deadline -= delta
-                else:
+                elif not move_update.date_deadline or move_update.date_deadline != new_deadline:
                     move_update.date_deadline = new_deadline
 
     @api.depends('move_line_ids.lot_id', 'move_line_ids.quantity')
@@ -681,8 +681,10 @@ Please change the quantity done or the rounding precision in your settings.""",
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if (vals.get('quantity') or vals.get('move_line_ids')) and 'lot_ids' in vals:
+            if vals.get('move_line_ids') and vals.get('lot_ids'):
                 vals.pop('lot_ids')
+            if vals.get('quantity') and vals.get('lot_ids'):
+                vals.pop('quantity')
             picking_id = self.env['stock.picking'].browse(vals.get('picking_id'))
             if picking_id.group_id and 'group_id' not in vals:
                 vals['group_id'] = picking_id.group_id.id
