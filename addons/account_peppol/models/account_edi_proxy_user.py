@@ -261,12 +261,15 @@ class Account_Edi_Proxy_ClientUser(models.Model):
     def _peppol_get_participant_status(self):
         for edi_user in self:
             edi_user = edi_user.with_company(edi_user.company_id)
+            if edi_user.proxy_type != 'peppol':
+                continue
             try:
-                proxy_user = self._make_request(f"{self._get_server_url()}/api/peppol/2/participant_status")
+                proxy_user = edi_user._make_request(f"{edi_user._get_server_url()}/api/peppol/2/participant_status")
             except AccountEdiProxyError as e:
                 if e.code == 'client_gone':
                     # reset the connection if it was archived/deleted on IAP side
                     edi_user.sudo().company_id._reset_peppol_configuration()
+                    edi_user.action_archive()
                 else:
                     # don't auto-deregister users on any other errors to avoid settings client-side to states
                     # that are not recoverable without user action if an error on IAP side ever occurs
