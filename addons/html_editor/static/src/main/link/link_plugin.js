@@ -444,6 +444,10 @@ export class LinkPlugin extends Plugin {
             description: _t("Create an URL."),
             icon: "fa-link",
             run: () => {
+                this.dispatchTo(
+                    "before_paste_handlers",
+                    this.dependencies.selection.getEditableSelection()
+                );
                 this.dependencies.dom.insert(this.createLink(url, text));
                 this.dependencies.history.addStep();
             },
@@ -1008,7 +1012,10 @@ export class LinkPlugin extends Plugin {
             !this.dependencies.delete.isUnremovable(endLink) &&
             multipleLinks
         ) {
-            focusNode = this.dependencies.split.splitAroundUntil(focusNode, endLink);
+            focusNode = this.dependencies.split.splitAroundUntil(
+                focusNode,
+                closestElement(focusNode, "a")
+            );
             focusOffset = direction === DIRECTIONS.RIGHT ? nodeSize(focusNode) : 0;
             this.dependencies.selection.setSelection(
                 { anchorNode, anchorOffset, focusNode, focusOffset },
