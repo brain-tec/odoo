@@ -222,7 +222,7 @@ class AccountTax(models.Model):
                         ('country_id', '=', tax.country_id.id),
                         ('id', '!=', tax.id),
                     ])
-            if duplicates := self.search(Domain.OR(domains)):
+            if duplicates := self.sudo().search(Domain.OR(domains)):
                 raise ValidationError(
                     self.env._(
                         "Tax names must be unique!\n%(taxes)s",
@@ -4596,6 +4596,8 @@ class AccountTax(models.Model):
                         raw_gross_price_unit /= base_line['rate']
                     else:
                         raw_gross_price_unit = 0.0
+            elif not base_line['quantity']:
+                raw_gross_price_unit = raw_gross_total_excluded
             else:
                 raw_gross_price_unit = raw_gross_total_excluded / base_line['quantity']
             tax_details[f'raw_gross_price_unit{suffix}'] = float_round(raw_gross_price_unit, precision_digits=precision_digits)
