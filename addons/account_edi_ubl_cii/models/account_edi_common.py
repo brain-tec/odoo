@@ -5,7 +5,7 @@ from odoo.addons.base.models.res_bank import sanitize_account_number
 from odoo.tools import float_repr
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.float_utils import float_round
-from odoo.tools.misc import formatLang
+from odoo.tools.misc import clean_context, formatLang
 
 from odoo.tools.zeep import Client
 
@@ -335,14 +335,14 @@ class AccountEdiCommon(models.AbstractModel):
 
         return invoice
 
-    def _import_retrieve_and_fill_partner(self, invoice, name, phone, mail, vat, country_code=False):
+    def _import_retrieve_and_fill_partner(self, invoice, name, phone, mail, vat, country_code=False, street=False, street2=False, city=False, zip_code=False):
         """ Retrieve the partner, if no matching partner is found, create it (only if he has a vat and a name)
         """
         invoice.partner_id = self.env['account.edi.format'] \
             .with_company(invoice.company_id) \
             ._retrieve_partner(name=name, phone=phone, mail=mail, vat=vat)
         if not invoice.partner_id and name and vat:
-            partner_vals = {'name': name, 'email': mail, 'phone': phone}
+            partner_vals = {'name': name, 'email': mail, 'phone': phone, 'street': street, 'street2': street2, 'zip': zip_code, 'city': city}
             country = self.env.ref(f'base.{country_code.lower()}', raise_if_not_found=False) if country_code else False
             if country:
                 partner_vals['country_id'] = country.id
@@ -351,40 +351,9 @@ class AccountEdiCommon(models.AbstractModel):
                 invoice.partner_id.vat = vat
 
     def _import_retrieve_and_fill_partner_bank_details(self, invoice, bank_details):
-        """ Retrieve the bank account, if no matching bank account is found, create it
-        """
-
-        bank_details = map(sanitize_account_number, bank_details)
-
-        if invoice.move_type in ('out_refund', 'in_invoice'):
-            partner = invoice.partner_id
-        elif invoice.move_type in ('out_invoice', 'in_refund'):
-            partner = self.env.company.partner_id
-        else:
-            return
-
-        banks_to_create = []
-        acc_number_partner_bank_dict = {
-            bank.sanitized_acc_number: bank
-            for bank in self.env['res.partner.bank'].search(
-                [('company_id', 'in', [False, invoice.company_id.id]), ('acc_number', 'in', bank_details)]
-            )
-        }
-
-        for account_number in bank_details:
-            partner_bank = acc_number_partner_bank_dict.get(account_number, self.env['res.partner.bank'])
-
-            if partner_bank.partner_id == partner:
-                invoice.partner_bank_id = partner_bank
-                return
-            elif not partner_bank and account_number:
-                banks_to_create.append({
-                    'acc_number': account_number,
-                    'partner_id': partner.id,
-                })
-
-        if banks_to_create:
-            invoice.partner_bank_id = self.env['res.partner.bank'].create(banks_to_create)[0]
+        """ Log the bank account numbers"""
+        body = _("The following bank account numbers got retrieved during the import : %s", ", ".join(bank_details))
+        invoice.with_context(no_new_invoice=True).message_post(body=body)
 
     def _import_fill_invoice_allowance_charge(self, tree, invoice, journal, qty_factor):
         logs = []
@@ -748,7 +717,7 @@ class AccountEdiCommon(models.AbstractModel):
 
         invoice_line_form.price_unit = inv_line_vals['price_unit']
         invoice_line_form.discount = inv_line_vals['discount']
-        invoice_line_form.tax_ids = inv_line_vals['taxes']
+        invoice_line_form.tax_ids = inv_line_vals['taxes'] or False
         return logs
 
     def _correct_invoice_tax_amount(self, tree, invoice):
