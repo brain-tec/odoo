@@ -353,6 +353,11 @@ class AccountEdiCommon(models.AbstractModel):
             if vat and self.env['res.partner']._run_vat_test(vat, country, invoice.partner_id.is_company):
                 invoice.partner_id.vat = vat
 
+    def _import_retrieve_and_fill_partner_bank_details(self, invoice, bank_details):
+        """ Log the bank account numbers"""
+        body = _("The following bank account numbers got retrieved during the import : %s", ", ".join(bank_details))
+        invoice.with_context(no_new_invoice=True).message_post(body=body)
+
     def _import_fill_invoice_allowance_charge(self, tree, invoice, journal, qty_factor):
         logs = []
         if '{urn:oasis:names:specification:ubl:schema:xsd' in tree.tag:
