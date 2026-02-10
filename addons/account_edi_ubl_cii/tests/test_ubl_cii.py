@@ -347,3 +347,184 @@ class TestAccountEdiUblCii(AccountTestInvoicingCommon):
         imported_invoice = self.import_attachment(xml_attachment, self.company_data["default_journal_sale"])
         for line in imported_invoice.invoice_line_ids:
             self.assertFalse(line.discount, "A discount on the imported lines signals a rounding error in the discount computation")
+
+    def test_payment_means_code_in_facturx_xml(self):
+        bank_ing = self.env['res.bank'].create({'name': 'ING', 'bic': 'BBRUBEBB'})
+        partner_bank = self.env['res.partner.bank'].create({
+                'acc_number': 'BE15001559627230',
+                'partner_id': self.partner_a.id,
+                'bank_id': bank_ing.id,
+                'company_id': self.env.company.id,
+            })
+        invoice = self.env['account.move'].create({
+            'partner_id': self.partner_a.id,
+            'move_type': 'out_invoice',
+            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
+            'delivery_date': "2024-12-31",
+            'partner_bank_id': partner_bank.id,
+        })
+        invoice.action_post()
+
+        xml_attachment = self.env['ir.attachment'].create({
+            'raw': self.env['account.edi.xml.cii']._export_invoice(invoice)[0],
+            'name': 'test_invoice.xml',
+        })
+        xml_tree = etree.fromstring(xml_attachment.raw)
+        code = xml_tree.find('.//ram:SpecifiedTradeSettlementPaymentMeans/ram:TypeCode', self.namespaces)
+        self.assertEqual(code.text, '42')
+
+        if self.env['ir.module.module']._get('account_sepa_direct_debit').state == 'installed':
+            company = self.env.company
+            company.sdd_creditor_identifier = 'BE30ZZZ300D000000042'
+            company_bank_journal = self.company_data['default_journal_bank']
+            company_bank_journal.bank_acc_number = 'CH9300762011623852957'
+            company_bank_journal.bank_account_id.bank_id = bank_ing
+            self.partner_a.country_id = self.env.ref('base.nl').id
+
+            mandate = self.env['sdd.mandate'].create({
+                'name': 'mandate ' + (self.partner_a.name or ''),
+                'partner_bank_id': partner_bank.id,
+                'one_off': True,
+                'start_date': fields.Date.today(),
+                'partner_id': self.partner_a.id,
+                'company_id': company.id,
+            })
+            mandate.action_validate_mandate()
+            invoice = self.env['account.move'].create({
+                'partner_id': self.partner_a.id,
+                'move_type': 'out_invoice',
+                'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
+                'delivery_date': "2024-12-31",
+            })
+            invoice.action_post()
+            sdd_method_line = company_bank_journal.inbound_payment_method_line_ids.filtered(lambda l: l.code == 'sdd')
+            sdd_method_line.payment_account_id = self.inbound_payment_method_line.payment_account_id
+            self.env['account.payment.register'].with_context(active_model='account.move', active_ids=invoice.ids).create({
+                'payment_date': invoice.invoice_date,
+                'journal_id': company_bank_journal.id,
+                'payment_method_line_id': sdd_method_line.id,
+            })._create_payments()
+
+            xml_attachment = self.env['ir.attachment'].create({
+                'raw': self.env['account.edi.xml.cii']._export_invoice(invoice)[0],
+                'name': 'test_invoice.xml',
+            })
+            xml_tree = etree.fromstring(xml_attachment.raw)
+            code = xml_tree.find('.//ram:SpecifiedTradeSettlementPaymentMeans/ram:TypeCode', self.namespaces)
+            self.assertEqual(code.text, '59')
+
+    def test_oin_code(self):
+        partner = self.partner_a
+        partner.peppol_endpoint = '00000000001020304050'
+        partner.country_id = self.env.ref('base.nl').id
+        partner.bank_ids = [Command.create({'acc_number': "0123456789"})]
+        invoice = self.env['account.move'].create({
+            'partner_id': partner.id,
+            'move_type': 'out_invoice',
+            'invoice_date': "2024-12-01",
+            'invoice_date_due': "2024-12-31",
+            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
+        })
+
+        invoice.partner_id.commercial_partner_id.invoice_edi_format = 'ubl_bis3'
+        invoice.action_post()
+        invoice.invoice_date_due = fields.Date.from_string('2024-12-31')
+        builder = invoice.partner_id.commercial_partner_id._get_edi_builder('ubl_bis3')
+        xml_content = builder._export_invoice(invoice)[0]
+        xml_tree = etree.fromstring(xml_content)
+        scheme_ID = xml_tree.find('.//cac:PartyLegalEntity/cbc:CompanyID[@schemeID]', self.ubl_namespaces)
+        self.assertEqual(scheme_ID.attrib.get("schemeID"), "0190")
+
+    def test_facturx_use_correct_vat(self):
+        """Test that Factur-X uses the foreign VAT when available, else the company VAT."""
+        germany = self.env.ref("base.de")
+
+        self.company.vat = '931736581'
+        self.partner_a.country_id = germany.id
+        self.partner_a.invoice_edi_format = 'facturx'
+        self.partner_b.country_id = self.company.country_id.id
+        self.partner_b.invoice_edi_format = 'facturx'
+
+        tax_group = self.env['account.tax.group'].create({
+            'name': 'German Taxes',
+            'company_id': self.company.id,
+            'country_id': germany.id,
+        })
+        tax = self.env['account.tax'].create({
+            'name': 'DE VAT 19%',
+            'amount': 19,
+            'amount_type': 'percent',
+            'type_tax_use': 'sale',
+            'country_id': germany.id,
+            'tax_group_id': tax_group.id,
+        })
+
+        fiscal_position = self.env['account.fiscal.position'].create({
+            'name': 'German FP',
+            'vat_required': True,
+            'foreign_vat': 'DE123456788',
+            'country_id': germany.id,
+        })
+
+        invoice_with_fp = self.env['account.move'].create({
+            'partner_id': self.partner_a.id,
+            'move_type': 'out_invoice',
+            'fiscal_position_id': fiscal_position.id,
+            'invoice_date': fields.Date.from_string('2025-12-22'),
+            'invoice_line_ids': [Command.create({
+                'product_id': self.product_a.id,
+                'tax_ids': [Command.set(tax.ids)],
+            })],
+        })
+        local_invoice = self.env['account.move'].create({
+            'partner_id': self.partner_b.id,
+            'move_type': 'out_invoice',
+            'invoice_date': fields.Date.from_string('2025-12-22'),
+            'invoice_line_ids': [Command.create({
+                'product_id': self.product_a.id,
+            })],
+        })
+        invoice_with_fp.action_post()
+        local_invoice.action_post()
+
+        # Check XML for foreign VAT
+        xml_bytes = self.env["account.edi.xml.cii"]._export_invoice(invoice_with_fp)[0]
+        xml_tree = etree.fromstring(xml_bytes)
+        node = xml_tree.xpath("//ram:ID[@schemeID='VA']", namespaces={
+            "ram": "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
+            "rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
+        })
+        self.assertEqual(node[0].text, fiscal_position.foreign_vat, "Foreign Fiscal Position VAT")
+
+        # Check XML for company VAT fallback
+        xml_bytes = self.env["account.edi.xml.cii"]._export_invoice(local_invoice)[0]
+        xml_tree = etree.fromstring(xml_bytes)
+        node = xml_tree.xpath("//ram:ID[@schemeID='VA']", namespaces={
+            "ram": "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
+            "rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
+        })
+        self.assertEqual(node[0].text, self.company.vat, "Company VAT fallback")
+
+    def test_partner_name_in_xml(self):
+        """
+        Test that invoice contacts without specific names use their parent partner's
+        name in the XML output, avoiding the 'Invoice address' suffix from display_name.
+        """
+        self.env['ir.config_parameter'].set_param('account_edi_ubl_cii.use_new_dict_to_xml_helpers', True)
+        partner = self.env['res.partner'].create({
+            'parent_id': self.partner_a.id,
+            'type': 'invoice'
+        })
+        invoice = self.env['account.move'].create({
+            'partner_id': partner.id,
+            'move_type': 'out_invoice',
+            'invoice_date': "2025-12-23",
+            'invoice_date_due': "2025-12-31",
+            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
+        })
+        invoice.action_post()
+
+        xml_content = self.env['account.edi.xml.ubl_bis3']._export_invoice(invoice)[0]
+        xml_tree = etree.fromstring(xml_content)
+        partner_name = xml_tree.find('.//cac:AccountingCustomerParty/cac:Party/cac:PartyName/cbc:Name', self.ubl_namespaces)
+        self.assertEqual(partner_name.text, 'partner_a')
