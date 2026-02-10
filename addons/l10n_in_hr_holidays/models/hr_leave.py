@@ -215,12 +215,11 @@ class HrLeave(models.Model):
             )
         return total_leaves
 
-    def _get_durations(self, check_leave_type=True, resource_calendar=None):
-        result = super()._get_durations(check_leave_type, resource_calendar)
+    def _get_durations(self, check_leave_type=True, resource_calendar=None, additional_domain=[]):
+        result = super()._get_durations(check_leave_type, resource_calendar, additional_domain)
 
         indian_leaves, leaves_dates_by_employee, public_holidays_date_by_company = self._l10n_in_prepare_sandwich_context()
         if not indian_leaves:
-            self.l10n_in_contains_sandwich_leaves = False
             return result
 
         for leave in indian_leaves:
