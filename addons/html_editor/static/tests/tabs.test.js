@@ -1,5 +1,5 @@
-import { describe, test } from "@odoo/hoot";
-import { testEditor } from "./_helpers/editor";
+import { describe, expect, test } from "@odoo/hoot";
+import { setupEditor, testEditor } from "./_helpers/editor";
 import { TAB_WIDTH, getCharWidth, getIndentWidth, oeTab, testTabulation } from "./_helpers/tabs";
 import {
     deleteBackward,
@@ -983,6 +983,32 @@ describe("insert tabulation", () => {
                 `<blockquote>${oeTab(tabInBlockquote)}[g</blockquote>`,
         });
     });
+
+    test("should indent only contenteditable paragraph-related blocks", async () => {
+        const tabInBlockquote = TAB_WIDTH - getIndentWidth("blockquote");
+
+        await testTabulation({
+            contentBefore:
+                `<p>[xxx</p>` +
+                `<div class="o-paragraph">ab</div>` +
+                `<div contenteditable="false">cd</div>` +
+                `<h1>ef</h1>` +
+                `<blockquote>gh]</blockquote>`,
+            stepFunction: keydownTab,
+            contentAfterEdit:
+                `<p>${oeTab(TAB_WIDTH, false)}[xxx</p>` +
+                `<div class="o-paragraph">${oeTab(TAB_WIDTH, false)}ab</div>` +
+                `<div contenteditable="false">cd</div>` +
+                `<h1>${oeTab(TAB_WIDTH, false)}ef</h1>` +
+                `<blockquote>${oeTab(tabInBlockquote, false)}gh]</blockquote>`,
+            contentAfter:
+                `<p>${oeTab(TAB_WIDTH)}[xxx</p>` +
+                `<div>${oeTab(TAB_WIDTH)}ab</div>` +
+                `<div contenteditable="false">cd</div>` +
+                `<h1>${oeTab(TAB_WIDTH)}ef</h1>` +
+                `<blockquote>${oeTab(tabInBlockquote)}gh]</blockquote>`,
+        });
+    });
 });
 
 describe("delete backward tabulation", () => {
@@ -1408,6 +1434,16 @@ describe("remove tabulation with shift+tab", () => {
     });
 });
 
+function checkTabsAlignment(el, isRtl = true) {
+    const referenceRect = el.firstElementChild?.getBoundingClientRect();
+    for (const tab of el.querySelectorAll("span.oe-tabs")) {
+        const r = tab.getBoundingClientRect();
+        const rel = Math.abs(isRtl ? r.left - referenceRect.right : r.right - referenceRect.left);
+        const mismatch = (rel + 0.5) % 40; // GRID_COLUMN_WIDTH
+        expect(Math.abs(mismatch)).toBeCloseTo(0.5);
+    }
+}
+
 describe("update tab width", () => {
     test("should update tab width on content change", async () => {
         const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
@@ -1419,5 +1455,74 @@ describe("update tab width", () => {
             },
             contentAfter: `<p><span>aa[]</span>${oeTab(tabAfterAA)}</p>`,
         });
+    });
+
+    test("should update tab width on content change (RTL)", async () => {
+        const tabAfterA = TAB_WIDTH - getCharWidth("p", "a");
+        const tabAfterAA = TAB_WIDTH - 2 * getCharWidth("p", "a");
+        await testEditor({
+            direction: "rtl",
+            contentBefore: `<p><span>a[]</span>${oeTab(tabAfterA)}</p>`,
+            stepFunction: async (editor) => {
+                await insertText(editor, "a");
+            },
+            contentAfter: `<p><span>aa[]</span>${oeTab(tabAfterAA)}</p>`,
+        });
+    });
+
+    test("should update multiple tab widths on multiple lines (RTL)", async () => {
+        const test = "امتحان";
+        // Nine times the test string separated by tabs, with the cursor at the middle test,
+        // width allowing for max 3 tabs in one line.
+        const fourTimes = `${test}${oeTab()}${test}${oeTab()}${test}${oeTab()}${test}${oeTab()}`;
+        const content = `<p style="width: 121px;">${fourTimes}${test}[]${oeTab()}${fourTimes}</p>`;
+        const { el, editor } = await setupEditor(content, {
+            config: {
+                direction: "rtl",
+            },
+        });
+        expect(".odoo-editor-editable").toHaveAttribute("dir", "rtl");
+        checkTabsAlignment(el);
+        for (const char of test) {
+            await insertText(editor, char);
+            checkTabsAlignment(el);
+        }
+    });
+
+    test("should update multiple tab widths on multiple lines with alphabet (RTL)", async () => {
+        const test = "امتحان";
+        // Like above, but with "abc" + "def" in the middle.
+        const fourTimes = `${test}${oeTab()}${test}${oeTab()}${test}${oeTab()}${test}${oeTab()}`;
+        const content = `<p style="width: 121px;">${fourTimes}abc[]${oeTab()}${fourTimes}</p>`;
+        const { el, editor } = await setupEditor(content, {
+            config: {
+                direction: "rtl",
+            },
+        });
+        expect(".odoo-editor-editable").toHaveAttribute("dir", "rtl");
+        checkTabsAlignment(el);
+        for (const char of "def") {
+            await insertText(editor, char);
+            checkTabsAlignment(el);
+        }
+    });
+
+    test("should update multiple tab widths on multiple lines (LTR)", async () => {
+        const test = "abc";
+        // Nine times the test string separated by tabs, with the cursor at the middle test,
+        // width allowing for max 3 tabs in one line.
+        const fourTimes = `${test}${oeTab()}${test}${oeTab()}${test}${oeTab()}${test}${oeTab()}`;
+        const content = `<p style="width: 121px;">${fourTimes}${test}[]${oeTab()}${fourTimes}</p>`;
+        const { el, editor } = await setupEditor(content, {
+            config: {
+                direction: "ltr",
+            },
+        });
+        expect(".odoo-editor-editable").toHaveAttribute("dir", "ltr");
+        checkTabsAlignment(el, false);
+        for (const char of test) {
+            await insertText(editor, char);
+            checkTabsAlignment(el, false);
+        }
     });
 });

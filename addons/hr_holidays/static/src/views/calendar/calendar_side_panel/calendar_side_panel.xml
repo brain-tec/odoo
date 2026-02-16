@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="hr_holidays.TimeOffCalendarSidePanel" t-inherit="web.CalendarSidePanel" t-inherit-mode="primary">
-        <xpath expr="//div[hasclass('o_calendar_sidebar')]" position="inside">
+        <xpath expr="//div[hasclass('o_calendar_sidepanel_content')]" position="inside">
             <div class="o_calendar_filter mt-4">
                 <h5>Legend</h5>
                 <div class="d-flex flex-column">
@@ -16,7 +16,7 @@
                         <li t-foreach="leaveState.holidays" t-as="holiday" t-key="holiday[3]" class="mt-2 list-unstyled">
                             <strong t-esc="holiday[0]"/>
                             : <span class="o_timeoff_green text-success" t-esc="holiday[2] ? holiday[1].virtual_remaining_leaves : holiday[1].virtual_leaves_taken"/>
-                                <t t-if="holiday[2]"> / <span t-esc="holiday[1].max_leaves"/> <t t-if="holiday[1].request_unit == 'hour'">Hours</t><t t-else="">Days</t> <span class="o_timeoff_green text-success">Available</span></t>
+                                <t t-if="holiday[2]"> / <span t-esc="holiday[1].max_leaves"/> <t t-if="holiday[1].unit_of_measure == 'hour'">Hours</t><t t-else="">Days</t> <span class="o_timeoff_green text-success">Available</span></t>
                         </li>
                     </ul>
                 </div>

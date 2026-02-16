@@ -3,7 +3,6 @@ import * as Utils from "@pos_self_order/../tests/tours/utils/common";
 import * as CartPage from "@pos_self_order/../tests/tours/utils/cart_page_util";
 import * as LandingPage from "@pos_self_order/../tests/tours/utils/landing_page_util";
 import * as ProductPage from "@pos_self_order/../tests/tours/utils/product_page_util";
-const { DateTime } = luxon;
 
 registry.category("web_tour.tours").add("self_order_preset_dine_in_tour", {
     steps: () => [
@@ -15,7 +14,6 @@ registry.category("web_tour.tours").add("self_order_preset_dine_in_tour", {
         Utils.clickBtn("Checkout"),
         CartPage.checkProduct("Coca-Cola", "2.53", "1"),
         Utils.clickBtn("Order"),
-        ...CartPage.selectTable("1"),
         Utils.clickBtn("Ok"),
     ],
 });
@@ -46,7 +44,7 @@ registry.category("web_tour.tours").add("self_order_preset_delivery_tour", {
         Utils.clickBtn("Order"),
         CartPage.fillInput("Name", "Dr Dre"),
         CartPage.fillInput("Email", "dre@dr.com"),
-        CartPage.fillInput("Phone", "0490 90 43 90"),
+        CartPage.fillInput("Phone", "+32490904390"),
         CartPage.fillInput("Street and Number", "Rue du Bronx 90"),
         CartPage.fillInput("Zip", "9999"),
         CartPage.fillInput("City", "New York"),
@@ -78,18 +76,7 @@ registry.category("web_tour.tours").add("self_order_preset_slot_tour", {
         Utils.clickBtn("Checkout"),
         CartPage.checkProduct("Coca-Cola", "2.53", "1"),
         Utils.clickBtn("Order"),
-        CartPage.selectRandomValueInInput(".slot-select"), // Selects the first available slot
-        {
-            content: `Select value should be a future slot`,
-            trigger: ".slot-select",
-            run: ({ anchor }) => {
-                const slotTs = DateTime.fromFormat(anchor.value, "yyyy-MM-dd HH:mm:ss").ts;
-                // Only future slots should be available for selection
-                if (slotTs < DateTime.now().ts) {
-                    throw new Error(`The selected slot ${anchor.value} is in the past!`);
-                }
-            },
-        },
+        ...CartPage.selectTimeSlot(),
         CartPage.fillInput("Name", "Dr Dre"),
         Utils.clickBtn("Continue"),
         Utils.checkConfirmationString(true),
@@ -105,8 +92,7 @@ registry.category("web_tour.tours").add("test_slot_limit_orders", {
         ProductPage.clickProduct("Free"),
         Utils.clickBtn("Checkout"),
         Utils.clickBtn("Order"),
-        // Will always pick the first available: 00:00
-        CartPage.selectRandomValueInInput(".slot-select"),
+        ...CartPage.selectTimeSlot(),
         CartPage.fillInput("Name", "Dr Dre"),
         Utils.clickBtn("Continue"),
         Utils.clickBtn("Ok"),
@@ -115,7 +101,19 @@ registry.category("web_tour.tours").add("test_slot_limit_orders", {
         ProductPage.clickProduct("Free"),
         Utils.clickBtn("Checkout"),
         Utils.clickBtn("Order"),
-        CartPage.checkSlotUnavailable("00:00"),
+        {
+            content: `Check that the 00:00 slot is not available`,
+            trigger: `.self_order_pills_selection_popup`,
+            run: () => {
+                const slots = Array.from(
+                    document.querySelectorAll(".self_order_pills_selection_popup .option-item")
+                );
+                const firstSlotText = slots[0]?.textContent.trim();
+                if (firstSlotText === "00:00") {
+                    throw new Error(`00:00 should not be available`);
+                }
+            },
+        },
     ],
 });
 

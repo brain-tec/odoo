@@ -32,7 +32,7 @@ class TestImLivechatSessionViews(TestImLivechatCommon):
 
     @users("admin")
     def test_form_view_embed_thread(self):
-        operator = new_test_user(
+        new_test_user(
             self.env,
             login="operator",
             groups="base.group_user,im_livechat.im_livechat_group_manager",
@@ -44,14 +44,12 @@ class TestImLivechatSessionViews(TestImLivechatCommon):
                     "name": "test 1",
                     "channel_type": "livechat",
                     "livechat_channel_id": self.livechat_channel.id,
-                    "livechat_operator_id": operator.partner_id.id,
                     "channel_member_ids": [Command.create({"partner_id": user_1.id})],
                 },
                 {
                     "name": "test 2",
                     "channel_type": "livechat",
                     "livechat_channel_id": self.livechat_channel.id,
-                    "livechat_operator_id": operator.partner_id.id,
                     "channel_member_ids": [Command.create({"partner_id": user_2.id})],
                 },
             ]
@@ -120,8 +118,10 @@ class TestImLivechatLookingForHelpViews(TestImLivechatSessionViews):
         agent.livechat_expertise_ids = sales_expertise
         accounting_chat = self.start_needhelp_session(guest_name="Visitor Accounting")
         accounting_chat.livechat_expertise_ids = accounting_expertise
+        accounting_chat.description = "Invoice SO0042 not received"
         sales_chat = self.start_needhelp_session(guest_name="Visitor Sales")
         sales_chat.livechat_expertise_ids = sales_expertise
+        sales_chat.description = "Delivery delayed for PO0099"
         self._reset_bus()
         self.start_tour(
             "/odoo/discuss",

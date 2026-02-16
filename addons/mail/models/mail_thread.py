@@ -1,7 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import ast
-import base64
 import datetime
 import dateutil
 import email
@@ -12,6 +11,7 @@ import hmac
 import json
 import lxml
 import logging
+import textwrap
 import time
 from collections import defaultdict, namedtuple
 from collections.abc import Iterable
@@ -35,7 +35,7 @@ from odoo.fields import Domain
 from odoo.tools import (
     is_html_empty, html_escape, html2plaintext,
     clean_context, split_every, SQL,
-    ormcache, is_list_of,
+    OrderedSet, ormcache, is_list_of,
 )
 from odoo.tools.mail import (
     append_content_to_html, decode_message_header,
@@ -588,9 +588,6 @@ class MailThread(models.AbstractModel):
         for record in records:
             changes, _tracking_value_ids = tracking.get(record.id, (None, None))
             record._message_track_post_template(changes)
-        # this method is called after the main flush() and just before commit();
-        # we have to flush() again in case we triggered some recomputations
-        self.env.flush_all()
 
     def _track_set_author(self, author):
         """ Set the author of the tracking message. """
@@ -603,7 +600,6 @@ class MailThread(models.AbstractModel):
     def _track_post_template_finalize(self):
         """Call the tracking template method with right values from precommit."""
         self._message_track_post_template(self.env.cr.precommit.data.pop(f'mail.tracking.create.{self._name}.{self.id}', []))
-        self.env.flush_all()
 
     def _track_set_log_message(self, message):
         """ Link tracking to a message logged as body, in addition to subtype
@@ -834,13 +830,13 @@ class MailThread(models.AbstractModel):
                 bounced_record._message_receive_bounce(bounced_email, bounced_partner)
 
             if bounced_message and (bounced_email or bounced_partner):
-                self.env['mail.notification'].sudo().search(Domain(
-                    'mail_message_id', '=', bounced_message.id
-                ) & Domain.OR([
-                    Domain('res_partner_id', 'in', bounced_partner.ids) if bounced_partner else [],
-                    Domain('mail_email_address', '=', bounced_email) if bounced_email else [],
-                ]),
-                ).write({
+                domain = Domain('mail_message_id', '=', bounced_message.id)
+                sub_domains = []
+                if bounced_partner:
+                    sub_domains.append(Domain('res_partner_id', 'in', bounced_partner.ids))
+                if bounced_email:
+                    sub_domains.append(Domain('mail_email_address', '=', bounced_email))
+                self.env['mail.notification'].sudo().search(domain & Domain.OR(sub_domains)).write({
                     'failure_reason': html2plaintext(message_dict.get('body') or ''),
                     'failure_type': 'mail_bounce',
                     'notification_status': 'bounce',
@@ -1650,6 +1646,9 @@ class MailThread(models.AbstractModel):
                     break
                 if part.get_content_type() == 'binary/octet-stream':
                     _logger.warning("Message containing an unexpected Content-Type 'binary/octet-stream', assuming 'application/octet-stream'")
+                    part.replace_header('Content-Type', 'application/octet-stream')
+                if part.get_content_type() == '*/*':
+                    _logger.warning("Message containing an unexpected Content-Type '*/*', assuming 'application/octet-stream'")
                     part.replace_header('Content-Type', 'application/octet-stream')
                 if part.get_content_type() == 'multipart/alternative':
                     alternative = True
@@ -2468,7 +2467,7 @@ class MailThread(models.AbstractModel):
                     continue
                 attachement_values = {
                     'name': name,
-                    'datas': base64.b64encode(content),
+                    'raw': content,
                     'type': 'binary',
                     'description': name,
                     'res_model': model,
@@ -3053,7 +3052,7 @@ class MailThread(models.AbstractModel):
         :rtype: str
         """
         self.ensure_one()
-        return self.display_name
+        return textwrap.shorten(self.display_name or '', width=100, placeholder="...")
 
     def _message_create(self, values_list):
         """ Low-level helper to create mail.message records. It is mainly used
@@ -3192,6 +3191,8 @@ class MailThread(models.AbstractModel):
         valid = {
             'force_email_company',
             'force_email_lang',
+            'force_footer',
+            'force_header',
             'force_record_name',
             'force_send',
             'mail_auto_delete',
@@ -3392,7 +3393,7 @@ class MailThread(models.AbstractModel):
                     ("partner_id", "in", users.partner_id.ids),
                 ]
             )
-            batch_vals = {"msg_vals": msg_vals, "add_followers": True, "followers": followers}
+            batch_vals = {"msg_vals": msg_vals, "inbox_fields": True, "followers": followers}
             for user in users:
                 store = Store(bus_channel=user).add(
                     message.with_user(user).with_context(allowed_company_ids=[]),
@@ -3467,6 +3468,8 @@ class MailThread(models.AbstractModel):
             model_description=model_description,
             force_email_company=force_email_company,
             force_email_lang=force_email_lang,
+            force_header=kwargs.get('force_header', False),
+            force_footer=kwargs.get('force_footer', False),
             force_record_name=force_record_name,
             subtitles=subtitles,
         ):
@@ -3481,36 +3484,72 @@ class MailThread(models.AbstractModel):
             recipients_ids = recipients_group['recipients_ids']
             recipients_to_emails = {r['id']: r['email_normalized'] for r in recipients_group['recipients_data']}
 
+            # Only keep one recipient per email address to avoid sending the exact
+            # same email to the same address in a row. Recipients not in "deduplicated"
+            # list will have a canceled notification.
+            # If a chunk only contains canceled notifications, no MailMail is created
+            # to avoid pointless work.
+            email_to_deduplicated_recipient_id = {
+                email_address: recipient_id for recipient_id, email_address in reversed(recipients_to_emails.items())
+                if recipient_id
+            }
+            deduplicated_recipient_ids = set(email_to_deduplicated_recipient_id.values())
+
             # create MailMail for partners
             for recipients_ids_chunk in split_every(gen_batch_size, recipients_ids):
-                mail_values = self._notify_by_email_get_final_mail_values(
-                    recipients_ids_chunk,
-                    base_mail_values,
-                    additional_values={'body_html': mail_body}
-                )
-                new_email = SafeMail.create(mail_values)
-
-                if new_email and recipients_ids_chunk:
-                    notif_create_values += [{
+                deduplicated_recipient_ids_chunk = [pid for pid in recipients_ids_chunk if pid in deduplicated_recipient_ids]
+                if deduplicated_recipient_ids_chunk:
+                    mail_values = self._notify_by_email_get_final_mail_values(
+                        deduplicated_recipient_ids_chunk,
+                        base_mail_values,
+                        additional_values={'body_html': mail_body}
+                    )
+                    new_email = SafeMail.create(mail_values)
+                else:
+                    new_email = SafeMail.browse()
+                notif_create_values += [
+                    {
                         'mail_mail_id': new_email.id,
                         'res_partner_id': recipient_id,
                         'mail_email_address': recipients_to_emails.get(recipient_id),
                         **base_notification_values,
-                    } for recipient_id in recipients_ids_chunk]
+                    } | (
+                        {
+                            'failure_type': 'mail_dup',
+                            'notification_status': 'canceled',
+                        }
+                        if recipient_id not in deduplicated_recipient_ids_chunk
+                        else {}
+                    )
+                    for recipient_id in recipients_ids_chunk
+                ]
                 emails += new_email
             # create MailMail for email-only recipients
             if recipients_emails:
-                mail_values = self._notify_by_email_get_final_mail_values(
-                    [], base_mail_values,
-                    additional_values={'body_html': mail_body},
-                )
-                mail_values['email_to'] = ','.join(recipients_emails)
-                new_email = SafeMail.create(mail_values)
-                notif_create_values += [{
+                deduplicated_email_addresses = OrderedSet(recipients_emails) - email_to_deduplicated_recipient_id.keys()
+                if deduplicated_email_addresses:
+                    mail_values = self._notify_by_email_get_final_mail_values(
+                        [], base_mail_values,
+                        additional_values={'body_html': mail_body},
+                    )
+                    mail_values['email_to'] = ','.join(deduplicated_email_addresses)
+                    new_email = SafeMail.create(mail_values)
+                else:
+                    new_email = SafeMail.browse()
+                new_notif_create_values = [{
                     'mail_email_address': email,
                     'mail_mail_id': new_email.id,
                     **base_notification_values,
                 } for email in recipients_emails]
+                # mark all but the first occurrence of a given normalized email as cancelled (duplicate)
+                success_notif_emails = set(email_to_deduplicated_recipient_id.keys())
+                for notif in new_notif_create_values:
+                    if (email := notif['mail_email_address']) not in success_notif_emails:
+                        success_notif_emails.add(email)
+                    else:
+                        notif['notification_status'] = 'canceled'
+                        notif['failure_type'] = 'mail_dup'
+                notif_create_values += new_notif_create_values
                 emails += new_email
 
         if notif_create_values:
@@ -3538,7 +3577,7 @@ class MailThread(models.AbstractModel):
             self, message, recipients_data, msg_vals=False,
             model_description=False, force_email_company=False, force_email_lang=False,  # rendering
             force_record_name=False,  # rendering
-            subtitles=None):
+            force_header=False, force_footer=False, subtitles=None):
         """ Make groups of recipients, based on 'recipients_data' which is a list
         of recipients informations. Purpose of this method is to group them by
         main usage ('user', 'portal_user', 'follower', 'customer', ... see
@@ -3561,6 +3600,8 @@ class MailThread(models.AbstractModel):
           buttons;
         :param str force_record_name: record_name to use instead of being
           related record's display_name;
+        :param bool force_header: force showing header in the notification layout;
+        :param bool force_footer: force showing footer in the notification layout;
         :param list subtitles: optional list set as template value "subtitles";
 
         :return: iterator based on recipients classified by lang, with their
@@ -3617,6 +3658,8 @@ class MailThread(models.AbstractModel):
                 model_description=lang_model_description,
                 force_email_company=force_email_company,
                 force_email_lang=lang,
+                force_header=force_header,
+                force_footer=force_footer,
                 force_record_name=force_record_name,
             )
             if subtitles:
@@ -3635,6 +3678,8 @@ class MailThread(models.AbstractModel):
                                                    model_description=False,
                                                    force_email_company=False,
                                                    force_email_lang=False,
+                                                   force_header=False,
+                                                   force_footer=False,
                                                    force_record_name=False):
         """ Prepare rendering context for notification email.
 
@@ -3663,6 +3708,8 @@ class MailThread(models.AbstractModel):
           notification layout. Otherwise computed based on current record;
         :param str force_email_lang: lang used when rendering content, used
           notably to compute model name or translate access buttons;
+        :param bool force_header: force showing header in the notification layout;
+        :param bool force_footer: force showing footer in the notification layout;
         :param str force_record_name: record_name to use instead of being
           related record's display_name;
 
@@ -3696,7 +3743,7 @@ class MailThread(models.AbstractModel):
         # record, model
         if not model_description:
             model_description = record_wlang._get_model_description(msg_vals['model'] if 'model' in msg_vals else message.model)
-        record_name = force_record_name or message.with_context(lang=lang).record_name
+        record_name = textwrap.shorten(force_record_name or message.with_context(lang=lang).record_name or '', width=100, placeholder='...')
 
         # tracking: in case of missing value, perform search (skip only if sure we don't have any)
         check_tracking = msg_vals.get('tracking_value_ids', True) if msg_vals else bool(self)
@@ -3740,8 +3787,8 @@ class MailThread(models.AbstractModel):
             # tools
             'is_html_empty': is_html_empty,
             # display
-            'email_notification_force_header': self.env.context.get('email_notification_force_header', False),  # force displaying the email header
-            'email_notification_force_footer': self.env.context.get('email_notification_force_footer', False),  # force displaying the email footer
+            'email_notification_force_header': self.env.context.get('email_notification_force_header') or force_header,  # force displaying the email header
+            'email_notification_force_footer': self.env.context.get('email_notification_force_footer') or force_footer,  # force displaying the email footer
             'email_notification_allow_header': self.env.context.get('email_notification_allow_header', True),
             'email_notification_allow_footer': self.env.context.get('email_notification_allow_footer', False),
             'subtitles_highlight_index': self.env.context.get('email_notification_subtitles_highlight_index', 0),
@@ -4972,14 +5019,14 @@ class MailThread(models.AbstractModel):
                         children[-1] if children[-1].tag in ["div", "p"] else tree
                     )
                     last_div_element.text = (last_div_element.text or '') + (' ' if last_div_element.text else '')
-                    etree.SubElement(last_div_element, "span", attrib={"class": "o-mail-Message-edited"})
+                    etree.SubElement(last_div_element, "span", attrib={"class": "o-mail-Message-edited", "data-o-datetime": fields.Datetime.to_string(fields.Datetime.now())})
                     msg_values["body"] = (
                         # markup: it is considered safe, as coming from html.fragment_fromstring
                         (tree.text or "") + Markup("".join(etree.tostring(child, encoding="unicode") for child in tree))
                     )
                 else:  # body is plain text
                     # keep html if already Markup, otherwise escape
-                    msg_values["body"] = escape(body) + Markup("<span class='o-mail-Message-edited'/>")
+                    msg_values["body"] = escape(body) + Markup("<span class='o-mail-Message-edited' data-o-datetime='%s'/>") % fields.Datetime.to_string(fields.Datetime.now())
             else:
                 msg_values["body"] = ""
         if attachment_ids:
@@ -5046,7 +5093,12 @@ class MailThread(models.AbstractModel):
         if res.is_for_current_user():
             res.attr("hasReadAccess", lambda t: t.sudo(False).has_access("read"))
             res.attr("hasWriteAccess", lambda t: t.sudo(False).has_access("write"))
-            res.attr("canPostOnReadonly", self._mail_post_access == "read")
+            can_post = False
+            for domain, operation in self._mail_get_operation_for_mail_message_operation('create'):
+                if self.sudo().filtered_domain(domain):
+                    can_post = operation == "read"
+                    break
+            res.attr("canPostOnReadonly", can_post)
         if "activities" in request_list and isinstance(self, self.env.registry["mail.activity.mixin"]):
             res.many(
                 "activities",
@@ -5063,6 +5115,8 @@ class MailThread(models.AbstractModel):
         if "contact_fields" in request_list:
             res.attr("primary_email_field", lambda t: t._mail_get_primary_email_field())
             res.attr("partner_fields", lambda t: t._mail_get_partner_fields())
+        if "defaultSubject" in request_list:
+            res.attr("defaultSubject", lambda t: t._message_compute_subject())
         if "followers" in request_list:
             count_by_tid = {"groupby": ["res_id"], "aggregates": ["__count"]}
             domain = Domain("res_id", "in", self.ids) & Domain("res_model", "=", self._name)
@@ -5166,7 +5220,7 @@ class MailThread(models.AbstractModel):
         sudo()._message_update_content(), which means these parameters should be either inoffensive
         or safely handled by these methods. Parameters requiring special processing need to be
         manually handled in _prepare_message_data."""
-        return {"email_add_signature", "message_type", "subtype_xmlid"}
+        return {"email_add_signature", "message_type", "subject", "subtype_xmlid"}
 
     @api.model
     def _get_allowed_access_params(self):

@@ -25,7 +25,6 @@ import { discussComponentRegistry } from "./discuss_component_registry";
 const { DateTime } = luxon;
 export class Message extends Record {
     static _name = "mail.message";
-    static id = "id";
 
     /** @param {Object} data */
     update(data) {
@@ -73,6 +72,24 @@ export class Message extends Record {
                 // when the message is edited
                 createDocumentFragmentFromContent(this.body).querySelector(".o-mail-Message-edited")
             );
+        },
+    });
+    editedDate = fields.Datetime({
+        compute() {
+            return createDocumentFragmentFromContent(this.body).querySelector(
+                ".o-mail-Message-edited"
+            )?.dataset.oDatetime;
+        },
+    });
+    /** attachments not already clearly visible in the body, unlike inlined images */
+    extra_body_attachment_ids = fields.Attr("ir.attachment", {
+        compute() {
+            const parsedBody = new DOMParser().parseFromString(this.body, "text/html");
+            const inlinedImageAttachmentIds = [
+                ...parsedBody.querySelectorAll("img[data-attachment-id]"),
+            ].map((img) => parseInt(img.dataset.attachmentId));
+
+            return this.attachment_ids.filter((a) => !inlinedImageAttachmentIds.includes(a.id));
         },
     });
     hasLink = fields.Attr(false, {
@@ -134,6 +151,8 @@ export class Message extends Record {
         },
     });
     partner_ids = fields.Many("res.partner");
+    /** @type {string} */
+    reply_to;
     subtype_id = fields.One("mail.message.subtype");
     thread = fields.One("mail.thread");
     threadAsNeedaction = fields.One("mail.thread", {
@@ -275,6 +294,10 @@ export class Message extends Record {
         return this.date || DateTime.now();
     }
 
+    get editedDatetimeMedium() {
+        return this.editedDate?.toLocaleString({ ...DateTime.DATETIME_MED }, { locale: user.lang });
+    }
+
     /**
      * Get the effective persona performing actions on this message.
      * Priority order: logged-in user, portal partner (token-authenticated), guest.
@@ -285,8 +308,8 @@ export class Message extends Record {
         return this.thread?.effectiveSelf ?? this.store.self;
     }
 
-    get datetimeShort() {
-        return this.datetime.toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS);
+    get datetimeMedium() {
+        return this.datetime.toLocaleString({ ...DateTime.DATETIME_MED }, { locale: user.lang });
     }
 
     get isSelfMentioned() {
@@ -327,7 +350,11 @@ export class Message extends Record {
         const name = this.thread?.display_name;
         const threadName = name ? name.trim().toLowerCase() : "";
         const defaultSubject = this.default_subject ? this.default_subject.toLowerCase() : "";
-        const candidates = new Set([defaultSubject, threadName]);
+        // suggested is expected to not change much so it's best to consider it the default for display purposes
+        const suggestedSubject = this.thread?.suggestedSubject
+            ? this.thread.suggestedSubject.toLowerCase()
+            : "";
+        const candidates = new Set([defaultSubject, threadName, suggestedSubject]);
         return candidates.has(this.subject?.toLowerCase());
     }
 
@@ -468,7 +495,6 @@ export class Message extends Record {
         return Boolean(
             !this.is_transient &&
                 !this.isPending &&
-                this.thread &&
                 this.store.self_user?.share === false &&
                 this.persistent
         );
@@ -582,12 +608,12 @@ export class Message extends Record {
     }
 
     async copyLink() {
-        let notification = _t("Message Link Copied!");
-        let type = "info";
+        let notification = _t("Message Link Copied");
+        let type = "success";
         try {
             await browser.navigator.clipboard.writeText(url(`/mail/message/${this.id}`));
         } catch {
-            notification = _t("Message Link Copy Failed (Permission denied?)!");
+            notification = _t("Message Link Copy Failed (Permission denied?)");
             type = "danger";
         }
         this.store.env.services.notification.add(notification, { type });
@@ -598,12 +624,11 @@ export class Message extends Record {
         try {
             await browser.navigator.clipboard.writeText(messageBody);
         } catch {
-            this.store.env.services.notification.add(
-                _t("Message Copy Failed (Permission denied?)!"),
-                { type: "danger" }
-            );
+            this.store.env.services.notification.add(_t("Text Copy Failed (Permission denied?)"), {
+                type: "danger",
+            });
         }
-        this.store.env.services.notification.add(_t("Message Copied!"), { type: "info" });
+        this.store.env.services.notification.add(_t("Text copied"), { type: "success" });
     }
 
     async edit(
@@ -611,12 +636,11 @@ export class Message extends Record {
         attachments = [],
         { mentionedChannels = [], mentionedPartners = [], mentionedRoles = [] } = {}
     ) {
-        const bodyEl = createElementWithContent("div", this.body);
-        bodyEl.querySelector("span.o-mail-Message-edited")?.remove();
-        if (
-            createElementWithContent("div", body).innerHTML === bodyEl.innerHTML &&
-            attachments.length === 0
-        ) {
+        const messageBodyEl = createElementWithContent("div", this.body);
+        const updatedBodyEl = createElementWithContent("div", body);
+        messageBodyEl.querySelector("span.o-mail-Message-edited")?.remove();
+        updatedBodyEl.querySelector("span.o-mail-Message-edited")?.remove();
+        if (updatedBodyEl.innerHTML === messageBodyEl.innerHTML && attachments.length === 0) {
             return;
         }
         const validMentions = this.store.getMentionsFromText(body, {
@@ -657,14 +681,12 @@ export class Message extends Record {
             await Promise.all(
                 Array.from(
                     doc.querySelectorAll(".o_channel_redirect[data-oe-model='discuss.channel']")
-                ).map(async (el) =>
-                    this.store["mail.thread"].getOrFetch({
-                        id: el.dataset.oeId,
-                        model: "discuss.channel",
-                    })
-                )
+                ).map(async (el) => this.store["discuss.channel"].getOrFetch(el.dataset.oeId))
             )
         ).filter((channel) => channel?.exists());
+        const validRoles = Array.from(
+            doc.querySelectorAll(".o-discuss-mention[data-oe-model='res.role']")
+        ).map((el) => this.store["res.role"].get(el.dataset.oeId));
         const text = convertBrToLineBreak(this.body);
         if (thread?.messageInEdition) {
             thread.messageInEdition.composer = undefined;
@@ -673,6 +695,7 @@ export class Message extends Record {
             composerHtml: getNonEditableMentions(this.body),
             mentionedChannels: validChannels,
             mentionedPartners: this.partner_ids,
+            mentionedRoles: validRoles,
             selection: {
                 start: text.length,
                 end: text.length,

@@ -895,7 +895,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             'country_id': self.env.ref('base.nl').id,
             'zip': '1105AA',
             'state_id': False,
-            'email': 'deco.addict82@example.com',
+            'email': 'acme.corp82@example.com',
             'phone': '(603)-996-3829',
         })
 
@@ -984,6 +984,66 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         downpayment_invoice.action_post()
         self.user.group_ids = selected_groups
         self.assertEqual(downpayment_line.price_unit, 100)
+
+    def test_downpayment_invoice_link(self):
+        # Test to check if the final invoice generated from an SO is correctly linked to the downpayment invoice.
+
+        tax = self.env['account.tax'].create({
+            'name': 'Base Tax',
+            'amount': 15,
+        })
+        customer = self.env['res.partner'].create({'name': 'Test Partner A'})
+        sale_orders = self.env['sale.order'].create([{
+            'partner_id': customer.id,
+            'order_line': [Command.create({
+                'product_id': self.product_a.id,
+                'name': self.product_a.name,
+                'product_uom_qty': 1,
+                'price_unit': 100,
+                'tax_ids': [tax.id],
+            })],
+        } for _ in range(2)])
+
+        sale_orders.action_confirm()
+
+        # CASE 1: downpayment generated in POS, invoice settled in backend
+        sale_order = sale_orders[1]
+        self.main_pos_config.open_ui()
+        self.main_pos_config.down_payment_product_id = self.env.ref("pos_sale.default_downpayment_product")
+        self.start_pos_tour('PoSApplyDownpaymentInvoice')
+
+        downpayment_invoice = sale_order.pos_order_line_ids.order_id.account_move
+        self.assertTrue(downpayment_invoice._is_downpayment())
+
+        self.env['sale.advance.payment.inv'].with_context({
+            'active_model': 'sale.order',
+            'active_ids': [sale_order.id],
+            'active_id': sale_order.id,
+            'default_journal_id': self.company_data['default_journal_sale'].id,
+        }).create({}).create_invoices()
+
+        final_invoice_downpayment_line = sale_order.invoice_ids.invoice_line_ids.filtered(lambda r: r.quantity < 0)
+
+        self.assertEqual(
+            final_invoice_downpayment_line._get_downpayment_lines(),
+            downpayment_invoice.invoice_line_ids,
+        )
+
+        # CASE 2: downpayment generated in POS, invoice settled in POS
+        sale_order = sale_orders[0]
+        self.start_pos_tour('PoSApplyDownpaymentInvoice2')
+
+        downpayment_invoice = sale_order.pos_order_line_ids.order_id.account_move
+        self.assertTrue(downpayment_invoice._is_downpayment())
+
+        self.start_pos_tour('PosSettleAndInvoiceOrder2')
+
+        final_invoice_downpayment_line = sale_order.pos_order_line_ids[-1].order_id.account_move.invoice_line_ids.filtered(lambda r: r.quantity < 0)
+
+        self.assertEqual(
+            final_invoice_downpayment_line._get_downpayment_lines(),
+            downpayment_invoice.invoice_line_ids,
+        )
 
     def test_settle_order_ship_later_effect_on_so(self):
         """This test create an order, settle it in the PoS and ship it later.
@@ -1660,6 +1720,74 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         })
         self.main_pos_config.open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_selected_partner_quotation_loading', login="accountman")
+
+    def test_ecommerce_paid_order_is_hidden_in_pos(self):
+        """
+        Tests that a Sale Order fully paid via a payment.transaction (eCommerce)
+        does not appear in the list of orders fetched by the Point of Sale.
+        """
+        self.env.user.group_ids += self.quick_ref('sales_team.group_sale_salesman')
+        partner_1 = self.env['res.partner'].create({'name': 'A Test Partner 1'})
+        product_a = self.env['product.product'].create({
+            'name': 'Product A',
+            'available_in_pos': True,
+            'lst_price': 10.0,
+        })
+        sale_order = self.env['sale.order'].create({
+            'partner_id': partner_1.id,
+            'order_line': [(0, 0, {
+                'product_id': product_a.id,
+                'product_uom_qty': 2,
+                'price_unit': product_a.lst_price
+            })]
+        })
+        provider = self.env['payment.provider'].create({
+            'name': 'Test',
+            'code': 'none',
+        })
+        transaction = self.env['payment.transaction'].create({
+            'provider_id': provider.id,
+            'payment_method_id': self.env.ref('payment.payment_method_unknown').id,
+            'amount': sale_order.amount_total,
+            'currency_id': sale_order.currency_id.id,
+            'partner_id': sale_order.partner_id.id,
+            'sale_order_ids': [(6, 0, [sale_order.id])],
+        })
+        transaction._set_done()
+        sale_order.invalidate_recordset(['transaction_ids'])
+
+        self.assertEqual(
+            sale_order.amount_unpaid, 0.0,
+            "The amount_unpaid for the SO should be 0 after a successful transaction."
+        )
+        self.main_pos_config.open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_ecommerce_paid_order_is_hidden_in_pos', login="accountman")
+
+    def test_ecommerce_unpaid_order_is_shown_in_pos(self):
+        """
+        Tests that a Sale Order fully paid via a payment.transaction (eCommerce)
+        does not appear in the list of orders fetched by the Point of Sale.
+        """
+        self.env.user.group_ids += self.quick_ref('sales_team.group_sale_salesman')
+        partner_1 = self.env['res.partner'].create({'name': 'A Test Partner 1'})
+        product_a = self.env['product.product'].create({
+            'name': 'Product A',
+            'available_in_pos': True,
+            'lst_price': 10.0,
+        })
+        sale_order = self.env['sale.order'].create({
+            'partner_id': partner_1.id,
+            'order_line': [(0, 0, {
+                'product_id': product_a.id,
+                'product_uom_qty': 2,
+                'price_unit': product_a.lst_price
+            })]
+        })
+        self.assertEqual(
+            sale_order.amount_unpaid, sale_order.amount_total,
+            "The amount_unpaid for the SO should not be 0 if there are no transactions."
+        )
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_ecommerce_unpaid_order_is_shown_in_pos', login="accountman")
 
     def test_backend_settle_refund(self):
         """Make sure that sale orders settled in PoS and refunded in the backend get their invoiced quantity updated correctly."""

@@ -59,12 +59,20 @@ class MailingMailing(models.Model):
 
     @api.depends('mailing_type')
     def _compute_medium_id(self):
-        super()._compute_medium_id()
         for mailing in self:
-            if mailing.mailing_type == 'sms' and (not mailing.medium_id or mailing.medium_id == self.env['utm.medium']._fetch_or_create_utm_medium('email')):
-                mailing.medium_id = self.env['utm.medium']._fetch_or_create_utm_medium("sms", module="mass_mailing_sms").id
-            elif mailing.mailing_type == 'mail' and (not mailing.medium_id or mailing.medium_id == self.env['utm.medium']._fetch_or_create_utm_medium("sms", module="mass_mailing_sms")):
-                mailing.medium_id = self.env['utm.medium']._fetch_or_create_utm_medium('email').id
+            if mailing.mailing_type == 'mail':
+                if not mailing.medium_id or mailing.medium_id == self.env['utm.mixin']._utm_ref('mass_mailing_sms.utm_medium_sms'):
+                    mailing.medium_id = self.env['utm.mixin']._utm_ref('utm.utm_medium_email').id
+            if mailing.mailing_type == 'sms':
+                if not mailing.medium_id or mailing.medium_id == self.env['utm.mixin']._utm_ref('utm.utm_medium_email'):
+                    mailing.medium_id = self.env['utm.mixin']._utm_ref('mass_mailing_sms.utm_medium_sms').id
+
+    @api.depends('mailing_type')
+    def _compute_source_id(self):
+        super()._compute_source_id()
+        for mailing in self:
+            if mailing.mailing_type == 'sms' and not mailing.source_id:
+                mailing.source_id = self.env['utm.mixin']._utm_ref('mass_mailing_sms.utm_source_mass_sms').id
 
     @api.depends('sms_template_id', 'mailing_type')
     def _compute_body_plaintext(self):
@@ -104,11 +112,11 @@ class MailingMailing(models.Model):
     # BUSINESS / VIEWS ACTIONS
     # --------------------------------------------------
 
-    def action_retry_failed(self):
+    def action_retry_failed(self, extra_domain=None):
         mass_sms = self.filtered(lambda m: m.mailing_type == 'sms')
         if mass_sms:
             mass_sms.action_retry_failed_sms()
-        return super(MailingMailing, self - mass_sms).action_retry_failed()
+        return super(MailingMailing, self - mass_sms).action_retry_failed(extra_domain=extra_domain)
 
     def action_retry_failed_sms(self):
         failed_sms = self.env['sms.sms'].sudo().search([
@@ -317,10 +325,11 @@ class MailingMailing(models.Model):
         """Get placeholders for replaced links in sms widget for accurate computation of sms counts.
 
         Reminders and assumptions:
-          * Links wille be transformed to the format "[base_url]/r/[link_tracker_code]/s/[sms_id]".
-          * unsubscribe is formatted as: "\nSTOP SMS : [base_url]/sms/[mailing_id]/[trace_code]".
 
-        :return: Character counts used for links, formatted as `{link: str, unsubscribe: str}`.
+        * Links wille be transformed to the format ``"[base_url]/r/[link_tracker_code]/s/[sms_id]"``.
+        * unsubscribe is formatted as: ``"STOP SMS : [base_url]/sms/[mailing_id]/[trace_code]"``.
+
+        :returns: Character counts used for links, formatted as ``{link: str, unsubscribe: str}``.
         """
         if self:
             self.ensure_one()

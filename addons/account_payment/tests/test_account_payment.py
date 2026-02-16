@@ -7,6 +7,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.tests import tagged
 
 from odoo.addons.account_payment.tests.common import AccountPaymentCommon
+from odoo.addons.base.models.ir_qweb import QWebError
 
 
 @tagged('-at_install', 'post_install')
@@ -357,8 +358,8 @@ class TestAccountPayment(AccountPaymentCommon):
         # Now try to change the journal, and check if the name is now updated
         payment.move_id.button_draft()
         new_journal = journal.copy()
-        new_payment_method_line = new_journal.inbound_payment_method_line_ids[0]
-        new_payment_method_line.write({'payment_account_id': self.company_data['default_account_receivable'].id})
+        new_payment_method_line = new_journal.outbound_payment_method_line_ids[0]
+        new_payment_method_line.write({'payment_account_id': payment.payment_method_line_id.payment_account_id.id})
         payment.write({
             'journal_id': new_journal.id,
             'payment_method_line_id': new_payment_method_line.id,
@@ -393,7 +394,7 @@ class TestAccountPayment(AccountPaymentCommon):
         tx._set_done()
         # _post_process() shouldn't raise an error even though the invoice is cancelled
         tx._post_process()
-        self.assertEqual(tx.payment_id.state, 'in_process')
+        self.assertEqual(tx.payment_id.state, 'paid')
 
     def test_payment_token_for_invoice_partner_is_available(self):
         """Test that the payment token of the invoice partner is available"""
@@ -440,3 +441,22 @@ class TestAccountPayment(AccountPaymentCommon):
         invoice_2.action_post()
         wizard = payment_register_wizard(invoice_1 + invoice_2)
         self.assertEqual(wizard.suitable_payment_token_ids, parent_token)
+
+    def test_generate_and_send_invoice_with_qr_code(self):
+        """Test generating & sending invoices with QR codes enabled."""
+        self.env.company.link_qr_code = True
+        move = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner.id,
+            'invoice_line_ids': [Command.create({'name': "$100", 'price_unit': 100.0})],
+        })
+        move.action_post()
+
+        with patch.object(
+            move.__class__, '_generate_portal_payment_qr', wraps=move._generate_portal_payment_qr,
+        ) as payment_qr_mock:
+            self._assert_does_not_raise(
+                QWebError,
+                self.env['account.move.send']._generate_and_send_invoices(move),
+            )
+            self.assertTrue(payment_qr_mock.called)

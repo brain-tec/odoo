@@ -1,4 +1,4 @@
-from odoo import models, fields, _
+from odoo import _, fields, models, modules, tools
 from odoo.exceptions import UserError
 
 
@@ -18,16 +18,11 @@ class PosMakeInvoice(models.TransientModel):
 
     def action_create_invoices(self):
         self.ensure_one()
-        selected_orders = self.env['pos.order'].browse(self.env.context.get('active_ids'))
-        is_single_order = len(selected_orders) == 1
+        selected_orders = self.env['pos.order'].browse(self.env.context.get('active_ids')).filtered(lambda o: o.invoice_status == 'to_invoice' and o.state != 'draft' and o.state != 'cancel')
+        if not selected_orders:
+            raise UserError(_("No valid orders were selected. No new invoices could be generated"))
 
-        uninvoiceable_orders = selected_orders.filtered(lambda o: o.invoice_status != 'to_invoice' or o.state == 'draft' or o.state == 'cancel' )
-        if uninvoiceable_orders:
-            order_names = "\n".join(uninvoiceable_orders.mapped('pos_reference'))
-            raise UserError(_(
-                "Unable to create consolidated invoice/s because the following orders can't be invoiced.\n\n%s",
-                order_names
-            ))
+        is_single_order = len(selected_orders) == 1
 
         invalid_refund_orders = selected_orders.filtered(lambda o: o.refunded_order_id.account_move)
         if (not is_single_order) and invalid_refund_orders:
@@ -41,6 +36,11 @@ class PosMakeInvoice(models.TransientModel):
         if not self.consolidated_billing or len(selected_orders) == 1:
             for order in selected_orders:
                 invoices |= order._generate_pos_order_invoice()
+                # Commit after each invoice because a failure on one POS Order would rollback all previously created invoices,
+                # which is not desirable since some of the invoice send & print web services may already be triggered, and those are already committing.
+                if not tools.config['test_enable'] and not modules.module.current_test:
+                    self.env.cr.commit()
+
         else:
             configs = selected_orders.config_id
             partners = selected_orders.partner_id
@@ -70,6 +70,10 @@ class PosMakeInvoice(models.TransientModel):
 
             for _key, orders in grouped_orders:
                 invoices |= orders._generate_pos_order_invoice()
+                # Commit after each invoice because a failure on one group of POS Orders would rollback all previously created invoices,
+                # which is not desirable since some of the invoice send & print web services may already be triggered, and those are already committing.
+                if not tools.config['test_enable'] and not modules.module.current_test:
+                    self.env.cr.commit()
 
         if invoices:
             return selected_orders.action_view_invoice()

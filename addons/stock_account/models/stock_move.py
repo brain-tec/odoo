@@ -183,7 +183,7 @@ class StockMove(models.Model):
                 move_to_link.add(move.id)
         if not aml_vals_list:
             return self.env['account.move']
-        account_move = self.env['account.move'].create({
+        account_move = self.env['account.move'].sudo().create({
             'journal_id': self.company_id.account_stock_journal_id.id,
             'line_ids': [Command.create(aml_vals) for aml_vals in aml_vals_list],
             'date': self.env.context.get('force_period_date') or fields.Date.context_today(self),
@@ -205,19 +205,24 @@ class StockMove(models.Model):
         else:
             debit_acc = self.location_dest_id.valuation_account_id
             credit_acc = self.product_id._get_product_accounts()['stock_valuation']
+        value = self._get_aml_value()
         return [{
             'account_id': credit_acc.id,
-            'name': self.reference,
+            'name': self.reference + ' - ' + self.product_id.name,
             'debit': 0,
-            'credit': self.value,
+            'credit': value,
             'product_id': self.product_id.id,
         }, {
             'account_id': debit_acc.id,
-            'name': self.reference,
-            'debit': self.value,
+            'name': self.reference + ' - ' + self.product_id.name,
+            'debit': value,
             'credit': 0,
             'product_id': self.product_id.id,
         }]
+
+    def _get_aml_value(self):
+        self.ensure_one()
+        return self.value
 
     def _get_analytic_distribution(self):
         return {}
@@ -273,7 +278,7 @@ class StockMove(models.Model):
             if move.product_id.cost_method == 'fifo':
                 move.value = move.product_id._run_fifo(move._get_valued_qty())
             else:
-                qty = move.product_uom._compute_quantity(move.quantity, move.product_id.uom_id, rounding_method='HALF-UP')
+                qty = move.uom_id._compute_quantity(move.quantity, move.product_id.uom_id, rounding_method='HALF-UP')
                 move.value = move.product_id.standard_price * qty
 
         # Recompute the standard price
@@ -379,7 +384,7 @@ class StockMove(models.Model):
         if self.is_dropship:
             if lot:
                 return sum(self.move_line_ids.filtered(lambda ml: ml.lot_id == lot).mapped('quantity_product_uom'))
-            return self.product_uom._compute_quantity(self.quantity, self.product_id.uom_id)
+            return self.uom_id._compute_quantity(self.quantity, self.product_id.uom_id)
         return 0
 
     def _get_manual_value(self, quantity, at_date=None):
@@ -387,7 +392,7 @@ class StockMove(models.Model):
         domain = Domain([('move_id', '=', self.id)])
         if at_date:
             domain &= Domain([('date', '<=', at_date)])
-        manual_value = self.env['product.value'].search(domain, order="date desc, id desc", limit=1)
+        manual_value = self.env['product.value'].sudo().search(domain, order="date desc, id desc", limit=1)
         if manual_value:
             valuation_data['value'] = manual_value.value
             valuation_data['quantity'] = quantity
@@ -423,6 +428,9 @@ class StockMove(models.Model):
         std_price = std_price if std_price else self.product_id.standard_price
         if at_date and self.product_id.cost_method == 'standard':
             std_price = std_price or self.product_id._get_standard_price_at_date(at_date)
+        # If multiple lots keep standard_price from product
+        elif self.product_id.lot_valuated and len(self.lot_ids) == 1:
+            std_price = self.lot_ids.standard_price
         return {
             'value': std_price * quantity,
             'quantity': quantity,
@@ -551,7 +559,7 @@ class StockMove(models.Model):
 
         if self.state != 'done':
             if self.picked:
-                unit_amount = self.product_uom._compute_quantity(
+                unit_amount = self.uom_id._compute_quantity(
                     self.quantity, self.product_id.uom_id)
                 # Falsy in FIFO but since it's an estimation we don't require exact correct cost. Otherwise
                 # we would have to recompute all the analytic estimation at each out.

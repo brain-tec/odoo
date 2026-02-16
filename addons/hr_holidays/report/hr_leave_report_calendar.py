@@ -31,9 +31,9 @@ class HrLeaveReportCalendar(models.Model):
         ('validate', 'Approved')
     ], readonly=True)
     description = fields.Char("Description", readonly=True, groups='hr_holidays.group_hr_holidays_user')
-    holiday_status_id = fields.Many2one('hr.leave.type', readonly=True, string="Time Off Type",
+    work_entry_type_id = fields.Many2one('hr.work.entry.type', readonly=True, string="Time Off Type",
         groups='hr_holidays.group_hr_holidays_user')
-    color = fields.Integer("Color", related='holiday_status_id.color')
+    color = fields.Integer("Color", related='work_entry_type_id.color')
 
     is_hatched = fields.Boolean('Hatched', readonly=True)
     is_striked = fields.Boolean('Striked', readonly=True)
@@ -57,14 +57,13 @@ class HrLeaveReportCalendar(models.Model):
             hl.department_id AS department_id,
             hl.number_of_days as duration,
             hl.private_name AS description,
-            hl.holiday_status_id AS holiday_status_id,
+            hl.work_entry_type_id AS work_entry_type_id,
             em.company_id AS company_id,
             v.job_id AS job_id,
             em.user_id AS user_id,
             COALESCE(
                 rr.tz,
-                rc.tz,
-                cc.tz,
+                p.tz,
                 'UTC'
             ) AS tz,
             hl.state = 'refuse' as is_striked,
@@ -75,12 +74,10 @@ class HrLeaveReportCalendar(models.Model):
             LEFT JOIN hr_version v ON v.id = em.current_version_id
             LEFT JOIN resource_resource rr
                 ON rr.id = em.resource_id
-            LEFT JOIN resource_calendar rc
-                ON rc.id = v.resource_calendar_id
-            LEFT JOIN res_company co
-                ON co.id = em.company_id
-            LEFT JOIN resource_calendar cc
-                ON cc.id = co.resource_calendar_id
+            LEFT JOIN res_users u
+                ON u.id = em.user_id
+            LEFT JOIN res_partner p
+                ON p.id = u.partner_id
         WHERE
             hl.state IN ('confirm', 'validate', 'validate1', 'refuse')
         );
@@ -103,7 +100,7 @@ class HrLeaveReportCalendar(models.Model):
             leave.name = leave.employee_id.name
             if self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
                 # Include the time off type name
-                leave.name += f" {leave.leave_id.holiday_status_id.name}"
+                leave.name += f" {leave.leave_id.work_entry_type_id.name}"
             # Include the time off duration.
             leave.name += f": {leave.sudo().leave_id.duration_display}"
 
@@ -117,7 +114,7 @@ class HrLeaveReportCalendar(models.Model):
         if current_user.has_group('hr_holidays.group_hr_holidays_user'):
             # If the user is a leave manager, approve the leave
             self.leave_id.action_approve()
-        elif self.leave_manager_id == current_user and self.sudo().holiday_status_id.leave_validation_type in ('manager', 'both'):
+        elif self.leave_manager_id == current_user and self.sudo().work_entry_type_id.leave_validation_type in ('manager', 'both'):
             # If the user is the employee's time off approver, approve the leave
             self.sudo().leave_id.sudo(False).action_approve()
         else:
@@ -129,7 +126,7 @@ class HrLeaveReportCalendar(models.Model):
         if current_user.has_group('hr_holidays.group_hr_holidays_user'):
             # If the user is a leave manager, refuse the leave
             self.leave_id.action_refuse()
-        elif self.leave_manager_id == current_user and self.sudo().holiday_status_id.leave_validation_type in ('manager', 'both'):
+        elif self.leave_manager_id == current_user and self.sudo().work_entry_type_id.leave_validation_type in ('manager', 'both'):
             # If the user is the employee's time off approver, refuse the leave
             self.sudo().leave_id.sudo(False).action_refuse()
         else:

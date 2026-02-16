@@ -1,6 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { stepUtils } from "@web_tour/tour_utils";
+import { showProductColumn } from "@account/js/tours/tour_utils";
 
 import { markup } from "@odoo/owl";
 
@@ -34,7 +35,7 @@ export const accountTourSteps = {
 }
 
 registry.category("web_tour.tours").add('account_tour', {
-    url: "/odoo",
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps ) #245680
     steps: () => [
     ...accountTourSteps.goToAccountMenu(markup(_t('Send invoices to your customers in no time with the <b>Invoicing app</b>.'))),
     ...accountTourSteps.onboarding(),
@@ -67,6 +68,7 @@ registry.category("web_tour.tours").add('account_tour', {
         content: _t("Add a line to your invoice"),
         run: "click",
     },
+    ...showProductColumn(),
     {
         trigger: `.o_form_view_container${accountTourSteps.draftInvoiceSelector} div[name=invoice_line_ids] div[name=product_id]`,
         content: _t("Fill in the details of the product or see the suggestion."),

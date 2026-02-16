@@ -1,3 +1,4 @@
+import { MessageConfirmDialog } from "@mail/core/common/message_confirm_dialog";
 import { DiscussChannel } from "@mail/discuss/core/common/discuss_channel_model";
 import { fields } from "@mail/model/misc";
 
@@ -14,26 +15,7 @@ const discussChannelPatch = {
                 return this.channel_type === "livechat" ? this.store.discuss : null;
             },
         });
-        this.livechat_expertise_ids = fields.Many("im_livechat.expertise");
-        /** @type {"in_progress"|"waiting"|"need_help"|undefined} */
-        this.livechat_status = fields.Attr(undefined, {
-            onUpdate() {
-                if (this.livechat_status === "need_help") {
-                    this.wasLookingForHelp = true;
-                    this.unpinOnThreadSwitch = false;
-                    return;
-                }
-                if (this.wasLookingForHelp) {
-                    this.wasLookingForHelp = false;
-                    // Still the active thread; keep it pinned after leaving "need help" status.
-                    // The agent may interact with the thread, keeping it pinned, or it will be
-                    // unpinned on the next thread switch to avoid bloating the sidebar.
-                    this.unpinOnThreadSwitch = this.eq(this.store.discuss?.thread?.channel);
-                }
-            },
-        });
         this.shadowedBySelf = 0;
-        this.unpinOnThreadSwitch = false;
     },
     _computeIsDisplayInSidebar() {
         return (
@@ -55,14 +37,20 @@ const discussChannelPatch = {
             this.livechat_channel_id?.appCategory ?? this.appAsLivechats?.defaultLivechatCategory
         );
     },
+    get autoOpenChatWindowOnNewMessage() {
+        return (
+            (this.channel_type === "livechat" &&
+                !this.store.chatHub.compact &&
+                this.self_member_id) ||
+            super.autoOpenChatWindowOnNewMessage
+        );
+    },
+
     get livechatStatusLabel() {
         if (this.livechat_end_dt) {
             return _t("Conversation has ended");
         }
-        const status = this.livechat_status;
-        if (status === "waiting") {
-            return _t("Waiting for customer");
-        } else if (status === "need_help") {
+        if (this.livechat_status === "need_help") {
             return _t("Looking for help");
         }
         return _t("In progress");
@@ -78,7 +66,7 @@ const discussChannelPatch = {
     get shouldSubscribeToBusChannel() {
         return super.shouldSubscribeToBusChannel || Boolean(this.shadowedBySelf);
     },
-    /** @param {"in_progress"|"waiting"|"need_help"} status */
+    /** @param {"in_progress"|"need_help"} status */
     updateLivechatStatus(status) {
         if (this.livechat_status === status) {
             return;
@@ -102,11 +90,29 @@ const discussChannelPatch = {
     },
     async leaveChannel() {
         if (this.livechatShouldAskLeaveConfirmation) {
-            await this.askLeaveConfirmation(
-                _t("Leaving will end the live chat. Do you want to proceed?")
-            );
+            this.store.env.services.dialog.add(MessageConfirmDialog, {
+                message: this.newestPersistentOfAllMessage,
+                confirmText: _t("Leave Conversation"),
+                onConfirm: async () => await super.leaveChannel(...arguments),
+                prompt: _t("Here's the most recent message:"),
+                size: "xl",
+                title: _t(
+                    "Leaving will end the live chat with %(channel_name)s. Are you sure you want to continue?",
+                    { channel_name: this.displayName }
+                ),
+            });
+        } else {
+            await super.leaveChannel(...arguments);
         }
-        super.leaveChannel(...arguments);
+    },
+    showThreadIcon(...args) {
+        if (this.self_member_id?.livechat_member_type === "visitor") {
+            return false;
+        }
+        return (
+            (this.channel_type === "livechat" && this.correspondent) ||
+            super.showThreadIcon(...args)
+        );
     },
 };
 patch(DiscussChannel.prototype, discussChannelPatch);

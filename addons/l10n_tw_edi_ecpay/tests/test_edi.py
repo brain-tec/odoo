@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import patch
 from urllib.parse import urljoin
 
@@ -31,16 +31,22 @@ class L10nTWITestEdi(TestAccountMoveSendCommon, HttpCase):
         })
         cls.partner_a.write({
             'phone': '+886 123 456 789',
-            'contact_address': 'test address',
+            'street': 'street七美',
+            'city': '中正區',
+            'state_id': cls.env.ref('base.state_tw_tpc').id,
+            'country_id': cls.env.ref('base.tw').id,
         })
         cls.partner_b.write({
             'phone': '+886 123 456 789',
-            'contact_address': 'test address',
-            'vat': '12345678',
+            'vat': '24153791',
+            'street': 'street七美',
+            'city': '信義區',
+            'state_id': cls.env.ref('base.state_tw_klc').id,
+            'country_id': cls.env.ref('base.tw').id,
         })
         # We can reuse this invoice for the flow tests.
         cls.basic_invoice = cls.init_invoice(
-            'out_invoice', partner=cls.partner_a, products=cls.product_a,
+            'out_invoice', partner=cls.partner_a, products=cls.product_a, taxes=cls.tax_sale_a,
         )
         cls.basic_invoice.action_post()
         cls.basic_invoice_b2b = cls.init_invoice(
@@ -55,6 +61,7 @@ class L10nTWITestEdi(TestAccountMoveSendCommon, HttpCase):
         with patch(CALL_API_METHOD, new=self._test_01_mock):
             json_data = self.basic_invoice._l10n_tw_edi_generate_invoice_json()
         self.assertTrue(json_data)
+        self.assertNotIn("InvoiceRemark", json_data)
 
         # Validate the customer data
         self.assertEqual(json_data.get("MerchantID"), "1234")
@@ -62,6 +69,11 @@ class L10nTWITestEdi(TestAccountMoveSendCommon, HttpCase):
         self.assertEqual(json_data.get("CustomerEmail"), "partner_a@tsointsoin")
         self.assertEqual(json_data.get("CustomerPhone"), "0123456789")
         self.assertEqual(json_data.get("SalesAmount"), 1050.0)
+        self.assertEqual(json_data.get("CustomerAddr"), "street七美, 中正區 TPC, Taiwan")
+
+        self.basic_invoice.write({'ref': 'Test Reference'})
+        json_data_with_ref = self.basic_invoice._l10n_tw_edi_generate_invoice_json()
+        self.assertEqual(json_data_with_ref.get("InvoiceRemark"), "Test Reference")
 
     @freeze_time("2025-01-06 15:00:00")
     def test_02_basic_submission(self):
@@ -202,7 +214,9 @@ class L10nTWITestEdi(TestAccountMoveSendCommon, HttpCase):
         test_partner = self.env['res.partner'].create({
             'name': 'Test Partner',
             'phone': '+886 123 456 789',
-            'contact_address': 'test address',
+            'street': 'street七美',
+            'city': '中正區',
+            'state_id': self.env.ref('base.state_tw_tpc').id,
             'vat': '00501503',
             'country_id': self.env.ref('base.tw').id,
         })
@@ -210,7 +224,7 @@ class L10nTWITestEdi(TestAccountMoveSendCommon, HttpCase):
         # the partner's phone number is invalid
         test_partner.phone = '123+456+789'
         invoice_c = self.init_invoice(
-            'out_invoice', partner=test_partner, products=self.product_a,
+            'out_invoice', partner=test_partner, products=self.product_a, taxes=self.tax_sale_a,
         )
         invoice_c.action_post()
         send_and_print = self.create_send_and_print(invoice_c)
@@ -219,7 +233,7 @@ class L10nTWITestEdi(TestAccountMoveSendCommon, HttpCase):
         # the invoice type is invalid
         test_partner.phone = '+886 123 456 789'
         invoice_d = self.init_invoice(
-            'out_invoice', partner=test_partner, products=self.product_a,
+            'out_invoice', partner=test_partner, products=self.product_a, taxes=self.tax_sale_a,
         )
         invoice_d.l10n_tw_edi_invoice_type = '08'
         invoice_d.action_post()
@@ -230,7 +244,7 @@ class L10nTWITestEdi(TestAccountMoveSendCommon, HttpCase):
     def test_08_invoice_with_downpayment(self):
         """Ensure downpayment with -ve quantity is normalized for ECPay JSON."""
         invoice = self.init_invoice(
-            'out_invoice', partner=self.partner_a, products=self.product_a,
+            'out_invoice', partner=self.partner_a, products=self.product_a, taxes=self.tax_sale_a,
         )
         invoice.write({
             "invoice_line_ids": [
@@ -366,6 +380,81 @@ class L10nTWITestEdi(TestAccountMoveSendCommon, HttpCase):
         with patch(CALL_API_METHOD, new=self._test_12_mock):
             with self.assertRaises(UserError):
                 send_and_print.action_send_and_print()
+
+    @freeze_time("2025-01-13 15:00:00")
+    def test_13_b2b_refund_upload_deadline_restriction(self):
+        """Test B2B Refund compliance with ECPay's upload deadline restriction.
+
+        Context:
+        - Government Rule: Allowances must be uploaded within 7 days of creation.
+        - ECPay Restriction: The API rejects allowances where 'AllowanceDate' is older
+          than 6 days from the current upload time.
+
+        Scenario:
+        We simulate a refund for an ECPay-submitted invoice created 7 days ago.
+        We verify that 'AllowanceDate' is OMITTED from the JSON payload.
+        By omitting it, ECPay defaults the date to 'Now', ensuring the request
+        passes validation regardless of the gap. (not covered here)
+        """
+        seven_days_ago = datetime.now() - timedelta(days=7)
+        invoice = self.init_invoice("out_invoice", partner=self.partner_b, products=self.product_a, taxes=self.tax_sale_a)
+        invoice.write({
+            "invoice_date": seven_days_ago.date(),
+            "l10n_tw_edi_invoice_create_date": seven_days_ago,
+            "l10n_tw_edi_ecpay_invoice_id": "AB11100099"  # simulate it was already sent
+        })
+        invoice.action_post()
+
+        wizard_vals = {
+            "journal_id": invoice.journal_id.id,
+            "reason": "Refund 7 days later",
+            "l10n_tw_edi_refund_agreement_type": "offline",
+        }
+        wizard = self.env["account.move.reversal"].with_context(
+            active_ids=invoice.ids,
+            active_model="account.move"
+        ).create(wizard_vals)
+        wizard.reverse_moves()
+        credit_note = wizard.new_move_ids
+        credit_note.action_post()
+
+        json_data = credit_note._l10n_tw_edi_generate_issue_allowance_json()
+        self.assertNotIn("AllowanceDate", json_data,
+            "B2B Allowances should not include AllowanceDate to avoid >6 day limit errors."
+        )
+
+    @freeze_time("2026-01-05 18:00:00")
+    def test_14_tw_datetime_conversion(self):
+        """Test that datetime conversion to TW timezone works correctly.
+
+        Scenario:
+        An invoice is created and send to ecpay at "2026-01-05 18:00:00" UTC.
+        In TW timezone, this corresponds to "2026-01-06 02:00:00" (UTC+8).
+
+        Ensure the convert_utc_time_to_tw_time function works to convert the 'InvoiceDate' in the allowance JSON to TW date
+        """
+        invoice = self.init_invoice("out_invoice", partner=self.partner_a, products=self.product_a, taxes=self.tax_sale_a)
+        invoice.write({
+            "l10n_tw_edi_invoice_create_date": datetime(2026, 1, 5, 18, 0, 0),
+            "l10n_tw_edi_ecpay_invoice_id": "AB11100099"  # simulate it was already sent
+        })
+        invoice.action_post()
+
+        wizard_vals = {
+            "journal_id": invoice.journal_id.id,
+            "reason": "Refund",
+            "l10n_tw_edi_refund_agreement_type": "offline",
+        }
+        wizard = self.env["account.move.reversal"].with_context(
+            active_ids=invoice.ids,
+            active_model="account.move"
+        ).create(wizard_vals)
+        wizard.reverse_moves()
+        credit_note = wizard.new_move_ids
+        credit_note.action_post()
+
+        json_data = credit_note._l10n_tw_edi_generate_issue_allowance_json()
+        self.assertEqual(json_data.get("InvoiceDate"), "2026-01-06")
 
     # -------------------------------------------------------------------------
     # Patched methods

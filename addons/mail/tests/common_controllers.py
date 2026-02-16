@@ -2,15 +2,16 @@
 
 import json
 
+from freezegun import freeze_time
 from markupsafe import Markup
 from requests.exceptions import HTTPError
 
 from odoo import fields
-from odoo.addons.base.tests.common import HttpCase
-from odoo.addons.mail.tests.common import mail_new_test_user, MailCommon
-from odoo.http import Request
 from odoo.tests import JsonRpcException
 from odoo.tools import file_open, mute_logger
+
+from odoo.addons.base.tests.common import HttpCase
+from odoo.addons.mail.tests.common import MailCommon, mail_new_test_user
 
 
 class MessagePostSubTestData:
@@ -139,7 +140,7 @@ class MailControllerAttachmentCommon(MailControllerCommon):
             res = self.url_open(
                 url="/mail/attachment/upload",
                 data={
-                    "csrf_token": Request.csrf_token(self),
+                    "csrf_token": self.csrf_token(),
                     "is_pending": True,
                     "thread_id": document.id,
                     "thread_model": document._name,
@@ -303,9 +304,10 @@ class MailControllerUpdateCommon(MailControllerCommon):
             user, guest = self._authenticate_pseudo_user(data_user)
             with self.subTest(user=user.name, guest=guest.name, route_kw=route_kw):
                 if allowed:
-                    self._update_content(message.id, self.alter_message_body, route_kw)
+                    with freeze_time('2025-04-08 12:00:00'):
+                        self._update_content(message.id, self.alter_message_body, route_kw)
                     self.assertEqual(message.body,
-                                     Markup('<p>Altered message body<span class="o-mail-Message-edited"></span></p>'))
+                                     Markup('<p>Altered message body<span class="o-mail-Message-edited" data-o-datetime="2025-04-08 12:00:00"></span></p>'))
                 else:
                     with self.assertRaises(
                         JsonRpcException,

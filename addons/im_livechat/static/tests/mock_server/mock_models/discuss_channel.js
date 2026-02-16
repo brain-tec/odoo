@@ -7,16 +7,12 @@ import { ensureArray } from "@web/core/utils/arrays";
 
 export class DiscussChannel extends mailModels.DiscussChannel {
     livechat_channel_id = fields.Many2one({ relation: "im_livechat.channel", string: "Channel" }); // FIXME: somehow not fetched properly
-    livechat_channel_member_history_ids = fields.Many2many({
+    livechat_channel_member_history_ids = fields.One2many({
         relation: "im_livechat.channel.member.history",
     });
     livechat_note = fields.Html({ sanitize: true });
     livechat_status = fields.Selection({
-        selection: [
-            ("in_progress", "In progress"),
-            ("waiting", "Waiting for customer"),
-            ("need_help", "Looking for help"),
-        ],
+        selection: [("in_progress", "In progress"), ("need_help", "Looking for help")],
     });
     livechat_expertise_ids = fields.Many2many({
         relation: "im_livechat.expertise",
@@ -82,8 +78,6 @@ export class DiscussChannel extends mailModels.DiscussChannel {
     _to_store(store) {
         /** @type {import("mock_models").ResCountry} */
         const ResCountry = this.env["res.country"];
-        /** @type {import("mock_models").ResPartner} */
-        const ResPartner = this.env["res.partner"];
 
         super._to_store(...arguments);
         for (const channel of this) {
@@ -111,24 +105,18 @@ export class DiscussChannel extends mailModels.DiscussChannel {
             );
             // add the last message date
             if (channel.channel_type === "livechat") {
-                // add the operator id
-                if (channel.livechat_operator_id) {
-                    // livechat_username ignored for simplicity
-                    channelInfo.livechat_operator_id = mailDataHelpers.Store.one(
-                        ResPartner.browse(channel.livechat_operator_id),
-                        makeKwArgs({ fields: ["avatar_128", "user_livechat_username"] })
-                    );
-                } else {
-                    channelInfo.livechat_operator_id = false;
-                }
                 channelInfo["livechat_looking_for_help_since_dt"] =
                     channel.livechat_looking_for_help_since_dt;
                 channelInfo["livechat_end_dt"] = channel.livechat_end_dt;
+                channelInfo["livechat_lang_id"] = mailDataHelpers.Store.one(
+                    this.env["res.lang"].browse(channel.livechat_lang_id),
+                    makeKwArgs({ fields: ["name", "code"] })
+                );
                 channelInfo["livechat_note"] = ["markup", channel.livechat_note];
                 channelInfo["livechat_status"] = channel.livechat_status;
                 channelInfo["livechat_expertise_ids"] = mailDataHelpers.Store.many(
                     this.env["im_livechat.expertise"].browse(channel.livechat_expertise_ids),
-                    makeKwArgs({ fields: ["name"] })
+                    makeKwArgs({ fields: ["name", "color"] })
                 );
                 channelInfo.livechat_channel_id = mailDataHelpers.Store.one(
                     this.env["im_livechat.channel"].browse(channel.livechat_channel_id),

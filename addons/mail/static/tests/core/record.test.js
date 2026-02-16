@@ -1,14 +1,15 @@
 import { toRawValue } from "@mail/utils/common/local_storage";
 import { defineMailModels, start as start2 } from "@mail/../tests/mail_test_helpers";
-import { afterEach, beforeEach, describe, expect, test } from "@odoo/hoot";
+import { afterEach, beforeEach, describe, expect, test, tick } from "@odoo/hoot";
 import { markup, reactive, toRaw } from "@odoo/owl";
-import { mockService } from "@web/../tests/web_test_helpers";
+import { mockService, patchWithCleanup } from "@web/../tests/web_test_helpers";
 
 import { Record, Store, makeStore } from "@mail/model/export";
-import { AND, fields, makeRecordFieldLocalId } from "@mail/model/misc";
+import { AND, fields, makeRecordFieldLocalId, normalizeManyCommands } from "@mail/model/misc";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
 import { effect } from "@web/core/utils/reactive";
+import { browser } from "@web/core/browser/browser";
 
 const Markup = markup().constructor;
 
@@ -253,6 +254,43 @@ test("Assign & Delete on fields with inverses", async () => {
     expectRecord(hello).not.toBeIn(thread.messages);
     expectRecord(thread).not.toBeIn(hello.threads);
     expect(thread.messages).toBeEmpty();
+});
+
+test("Assign & Delete on _inherits fields", async () => {
+    (class Thread extends Record {
+        static id = "name";
+        name;
+        channel = fields.One("Channel", { inverse: "thread" });
+        pluriChannels = fields.Many("PluriChannel", { inverse: "thread" });
+    }).register(localRegistry);
+    (class Channel extends Record {
+        static id = "id";
+        static _inherits = { Thread: "thread" };
+        id;
+        thread = fields.One("Thread", { inverse: "channel" });
+    }).register(localRegistry);
+    (class PluriChannel extends Record {
+        static id = "id";
+        static _inherits = { Thread: "thread" };
+        id;
+        thread = fields.One("Thread", { inverse: "pluriChannels" });
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert("General");
+    const channel = store.Channel.insert({ id: 1, thread: thread });
+    const [pluriChannel1, pluriChannel2] = store.PluriChannel.insert([
+        { id: 1, thread },
+        { id: 2, thread },
+    ]);
+    expectRecord(channel).toEqual(thread.channel);
+    expectRecord(pluriChannel1).toBeIn(thread.pluriChannels);
+    expectRecord(pluriChannel2).toBeIn(thread.pluriChannels);
+    thread.delete();
+    expect(thread.pluriChannels).toBeEmpty();
+    expect(pluriChannel1.exists()).toBe(false);
+    expect(pluriChannel2.exists()).toBe(false);
+    expect(Boolean(thread.channel)).toBe(false);
+    expect(channel.exists()).toBe(false);
 });
 
 test("onAdd/onDelete hooks on relational with inverse", async () => {
@@ -835,7 +873,7 @@ test("onAdd/onDelete hooks on many without inverse", async () => {
     general.members = [["ADD", john]];
     await expect.waitForSteps(["members.onAdd(John)"]);
     general.members = undefined;
-    await expect.waitForSteps(["members.onDelete(John)", "members.onDelete(Jane)"]);
+    await expect.waitForSteps(["members.onDelete(Jane)", "members.onDelete(John)"]);
 });
 
 test("record list assign should update inverse fields", async () => {
@@ -1498,6 +1536,38 @@ test("Fields with { localStorage: true } are restored from local storage", async
     expect(message.body).toBe("test");
 });
 
+test("Fields updated from the local storage do not trigger another storage event", async () => {
+    class Message extends Record {
+        static id = "id";
+        id;
+        body = fields.Attr("", { localStorage: true });
+    }
+    Message.register(localRegistry);
+    const bodyLocalId = makeRecordFieldLocalId(Message.localId(1), "body");
+    patchWithCleanup(browser.localStorage, {
+        setItem(key, value) {
+            if (key === bodyLocalId) {
+                expect.step(`setItem ${JSON.parse(value).value}`);
+            }
+            return super.setItem(key, value);
+        },
+    });
+    localStorage.setItem(bodyLocalId, toRawValue("1"));
+    await expect.waitForSteps(["setItem 1"]);
+    const store = await start();
+    const message = store.Message.insert(1);
+    expect(message.body).toBe("1");
+    message.body = "2";
+    expect(message.body).toBe("2");
+    await expect.waitForSteps(["setItem 2"]);
+    browser.dispatchEvent(
+        new StorageEvent("storage", { key: bodyLocalId, newValue: toRawValue("3") })
+    );
+    await tick();
+    expect(message.body).toBe("3");
+    await expect.waitForSteps([]);
+});
+
 test("Record exists is reactive", async () => {
     (class Thread extends Record {
         static id = "name";
@@ -1518,4 +1588,33 @@ test("Record exists is reactive", async () => {
     await expect.waitForSteps(["thread exists"]);
     thread.delete();
     await expect.waitForSteps(["thread does not exist"]);
+});
+
+test("Normalize many commands", () => {
+    // Falsy values or empty array are interpreted as clear.
+    for (const clearValues of [null, undefined, false, []]) {
+        expect(normalizeManyCommands(clearValues)).toEqual([["REPLACE", []]]);
+    }
+    // Raw values are interpreted as "REPLACE".
+    expect(normalizeManyCommands({ id: 1, name: "Test" })).toEqual([
+        ["REPLACE", [{ id: 1, name: "Test" }]],
+    ]);
+    expect(normalizeManyCommands([1, 2, 3])).toEqual([["REPLACE", [1, 2, 3]]]);
+    // Commands with non array value should normalize to array.
+    expect(normalizeManyCommands(["ADD", { id: 10 }])).toEqual([["ADD", [{ id: 10 }]]]);
+    const cmdList = [
+        ["ADD", { id: 1 }],
+        ["DELETE", { id: 2 }],
+    ];
+    expect(normalizeManyCommands(cmdList)).toEqual([
+        ["ADD", [{ id: 1 }]],
+        ["DELETE", [{ id: 2 }]],
+    ]);
+    // Single command should normalize to command list including the command.
+    expect(normalizeManyCommands(["DELETE", [10, 20]])).toEqual([["DELETE", [10, 20]]]);
+    // Mixed of raw values and commands should throw error.
+    const mixed = [1, ["ADD", 2]];
+    expect(() => normalizeManyCommands(mixed)).toThrow(
+        "Many commands cannot mix raw values and commands"
+    );
 });

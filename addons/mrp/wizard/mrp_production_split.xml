@@ -13,12 +13,12 @@
                             <field name="product_id"/>
                             <field name="product_qty"/>
                             <field name="production_capacity"/>
-                            <field name="product_uom_id" groups="uom.group_uom" widget="many2one_uom"/>
+                            <field name="uom_id" groups="uom.group_uom" widget="many2one_uom"/>
                             <button name="action_prepare_split" type="object" icon="fa-scissors" title="Split Production"/>
                         </list>
                     </field>
                     <footer>
-                        <button string="Discard" class="btn-secondary" special="cancel" data-hotkey="x"/>
+                        <button class="btn-secondary" special="cancel" data-hotkey="x"/>
                     </footer>
                 </form>
             </field>
@@ -38,14 +38,14 @@
                             <label for="product_qty"/>
                             <div class="o_row">
                                 <span><field name="product_qty"/></span>
-                                <span><field name="product_uom_id" groups="uom.group_uom" widget="many2one_uom"/></span>
+                                <span><field name="uom_id" groups="uom.group_uom" widget="many2one_uom"/></span>
                             </div>
                         </group>
                         <group>
                             <label for="max_batch_size"/>
                             <div class="d-flex">
                                 <field name="max_batch_size" class="w-50"/>
-                                <field name="product_uom_id" groups="uom.group_uom"/>
+                                <field name="uom_id" groups="uom.group_uom"/>
                             </div>
                             <field name="num_splits"/>
                         </group>
@@ -64,7 +64,7 @@
                     </div>
                     <footer>
                         <button string="Split" class="btn-primary" type="object" name="action_split" data-hotkey="q" invisible="not valid_details"/>
-                        <button string="Discard" class="btn-secondary" special="cancel" data-hotkey="x" invisible="production_split_multi_id"/>
+                        <button class="btn-secondary" special="cancel" data-hotkey="x" invisible="production_split_multi_id"/>
                         <button string="Discard" class="btn-secondary" type="object" name="action_return_to_list" data-hotkey="x" invisible="not production_split_multi_id"/>
                     </footer>
                 </form>

@@ -53,10 +53,14 @@ class AccountMove(models.Model):
         self.env['res.company'].flush_model(['invoice_terms'])
         self.env.cr.execute('SELECT "id","invoice_terms" FROM "res_company" WHERE id = any(%s)', [moves_to_fix.company_id.ids])
         translation_by_company_id = {company_id: narration for company_id, narration in self.env.cr.fetchall()}
-        self.env.cache.update_raw(moves_to_fix, self._fields['narration'], [
-            translation_by_company_id[move.company_id.id]
-            for move in moves_to_fix
-        ], dirty=True)
+        narration_field = self._fields['narration']
+        assert narration_field.translate
+        for move in moves_to_fix:
+            narration_field._update_cache(
+                move,
+                translation_by_company_id[move.company_id.id],
+                dirty=True,
+            )
         moves_to_fix.modified(['narration'])
 
     @api.model_create_multi
@@ -74,7 +78,7 @@ class AccountMove(models.Model):
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
-    l10n_gcc_invoice_tax_amount = fields.Float(string='Tax Amount', compute='_compute_tax_amount', digits='Product Price')
+    l10n_gcc_invoice_tax_amount = fields.Float(string='Tax Amount', compute='_compute_tax_amount', min_display_digits='Product Price')
     l10n_gcc_line_name = fields.Char(compute='_compute_l10n_gcc_line_name')
 
     @api.depends('price_subtotal', 'price_total')

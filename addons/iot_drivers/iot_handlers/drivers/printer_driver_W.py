@@ -5,13 +5,11 @@ from base64 import b64decode
 from datetime import datetime, timezone
 from escpos import printer
 import escpos.exceptions
-import io
+import subprocess
 import win32print
 import pywintypes
-import ghostscript
 
-from odoo.addons.iot_drivers.controllers.proxy import proxy_drivers
-from odoo.addons.iot_drivers.iot_handlers.drivers.printer_driver_base import PrinterDriverBase
+from odoo.addons.iot_drivers.iot_handlers.drivers.printer_driver_base import EscposNotAvailableError, PrinterDriverBase
 from odoo.addons.iot_drivers.tools import system
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.addons.iot_drivers.iot_handlers.interfaces.printer_interface_W import win32print_lock
@@ -62,60 +60,82 @@ class PrinterDriver(PrinterDriverBase):
         self.send_status('disconnected', 'Printer was disconnected')
         super().disconnect()
 
-    def print_raw(self, data):
-        if not self.check_printer_status():
-            return
+    def print_raw(self, data, action_unique_id=None):
+        if self.escpos_device:
+            try:
+                return self.print_raw_escpos(data, action_unique_id)
+            except EscposNotAvailableError:
+                _logger.warning("Failed to print via python-escpos, falling back to Windows printing")
 
-        with win32print_lock:
-            job_id = win32print.StartDocPrinter(self.printer_handle, 1, ('', None, "RAW"))
-            win32print.StartPagePrinter(self.printer_handle)
-            win32print.WritePrinter(self.printer_handle, data)
-            win32print.EndPagePrinter(self.printer_handle)
-            win32print.EndDocPrinter(self.printer_handle)
-        self.job_ids.append(job_id)
+        job_id = False
+        page_started = False
+        try:
+            with win32print_lock:
+                job_id = win32print.StartDocPrinter(self.printer_handle, 1, ('', None, "RAW"))
+                win32print.StartPagePrinter(self.printer_handle)
+                page_started = True
+                win32print.WritePrinter(self.printer_handle, data)
+                win32print.EndPagePrinter(self.printer_handle)
+                win32print.EndDocPrinter(self.printer_handle)
+                self.job_ids.append(job_id)
+                if action_unique_id:
+                    self.job_action_ids[job_id] = action_unique_id
+        except pywintypes.error as error:
+            _logger.error("Error while printing raw data to printer %s: %s", self.device_name, error)
+            if job_id or page_started:
+                try:
+                    with win32print_lock:
+                        if page_started:
+                            win32print.EndPagePrinter(self.printer_handle)
+                        if job_id:
+                            win32print.EndDocPrinter(self.printer_handle)
+                            self.job_ids.append(job_id)
+                            if action_unique_id:
+                                self.job_action_ids[job_id] = action_unique_id
+                except pywintypes.error as err:
+                    _logger.error("Error while finalizing print job to printer %s after failure: %s", self.device_name, err)
+                    self.send_status(status='error', message='ERROR_FAILED')
+                    raise
 
     def print_report(self, data):
         with win32print_lock:
             file_name = system.path_file('document.pdf')
             file_name.write_bytes(data)
-            printer = self.device_name
+            sumatra_pdf_path = system.path_file("SumatraPDF") / "SumatraPDF.exe"
 
             args = [
-                "-dPrinted", "-dBATCH", "-dNOPAUSE", "-dNOPROMPT",
-                "-q",
-                "-sDEVICE#mswinpr2",
-                f'-sOutputFile#%printer%{printer}',
-                f'{file_name}'
+                str(sumatra_pdf_path),
+                "-print-to",
+                self.device_name,
+                str(file_name),
+                "-silent",
+                "-print-settings",
+                "duplex"
             ]
 
-            _logger.debug("Printing report with ghostscript using %s", args)
-            stderr_buf = io.BytesIO()
-            stdout_buf = io.BytesIO()
-            stdout_log_level = logging.DEBUG
+            _logger.debug("Printing report with SumatraPDF using %s", args)
+
             try:
-                ghostscript.Ghostscript(*args, stdout=stdout_buf, stderr=stderr_buf)
+                subprocess.run(args, check=True)
                 self.send_status(status='success')
-            except Exception:
-                _logger.exception("Error while printing report, ghostscript args: %s, error buffer: %s", args, stderr_buf.getvalue())
-                stdout_log_level = logging.ERROR  # some stdout value might contains relevant error information
+            except subprocess.CalledProcessError as error:
+                _logger.exception("Error while printing report, SumatraPDF args: %s, exit code: %s", args, error.returncode)
                 self.send_status(status='error', message='ERROR_FAILED')
-                raise
-            finally:
-                _logger.log(stdout_log_level, "Ghostscript stdout: %s", stdout_buf.getvalue())
 
     def _action_default(self, data):
         _logger.debug("_action_default called for printer %s", self.device_name)
 
         document = b64decode(data['document'])
         mimetype = guess_mimetype(document)
+        action_unique_id = data.get('action_unique_id')
         if mimetype == 'application/pdf':
             self.print_report(document)
         else:
-            self.print_raw(document)
+            self.print_raw(document, action_unique_id=action_unique_id)
         _logger.debug("_action_default finished with mimetype %s for printer %s", mimetype, self.device_name)
         return {'print_id': data['print_id']} if 'print_id' in data else {}
 
-    def print_status(self, _data=None):
+    def status(self, _data=None):
         """Prints the status ticket of the IoT Box on the current printer.
 
         :param _data: dict provided by the action route
@@ -131,7 +151,9 @@ class PrinterDriver(PrinterDriverBase):
     def _cancel_job_with_error(self, job_id, error_message):
         self.job_ids.remove(job_id)
         win32print.SetJob(self.printer_handle, job_id, 0, None, win32print.JOB_CONTROL_DELETE)
-        self.send_status(status='error', message=error_message)
+        self.send_status(
+            status='error', message=error_message, action_unique_id=self.job_action_ids.pop(job_id, None)
+        )
 
     def _check_job_status(self, job_id):
         try:
@@ -140,6 +162,7 @@ class PrinterDriver(PrinterDriverBase):
             _logger.debug('job details for job id #%d: %s', job_id, job)
             if job['Status'] & win32print.JOB_STATUS_PRINTED:
                 self.job_ids.remove(job_id)
+                self.job_action_ids.pop(job_id, None)
                 self.send_status(status='success')
             # Print timeout, e.g. network printer is disconnected
             if elapsed_time.seconds > self.job_timeout_seconds:
@@ -156,6 +179,4 @@ class PrinterDriver(PrinterDriverBase):
             else:
                 _logger.exception('Win32 error occurred while querying print job')
             self.job_ids.remove(job_id)
-
-
-proxy_drivers['printer'] = PrinterDriver
+            self._recent_action_ids.pop(self.job_action_ids.pop(job_id, None), None)

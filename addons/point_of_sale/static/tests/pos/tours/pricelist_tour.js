@@ -23,7 +23,7 @@ registry.category("web_tour.tours").add("pos_pricelist", {
             OfflineUtil.setOfflineMode(),
             ProductScreen.clickPriceList("Fixed", true, "Public Pricelist"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Deco Addict"),
+            ProductScreen.clickCustomer("Acme Corporation"),
             ProductScreen.clickPriceList("Public Pricelist", true),
             ProductScreen.clickPartnerButton(),
             ProductScreen.clickCustomer("Lumber Inc"),
@@ -149,6 +149,7 @@ const test_pricelists_in_pos_steps = [
 ];
 
 registry.category("web_tour.tours").add("test_pricelists_in_pos", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),

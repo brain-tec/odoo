@@ -292,7 +292,7 @@ class AccountEdiXmlUbl_21Zatca(models.AbstractModel):
                 'cac:TaxScheme': {
                     'cbc:ID': {'_text': 'VAT'}
                 }
-            } if role != 'customer' or partner.country_id.code == 'SA' else None,  # BR-KSA-46
+            } if (role != 'customer' or partner.country_id.code == 'SA') and commercial_partner.vat and commercial_partner.vat != '/' else None,  # BR-KSA-46
             'cac:PartyLegalEntity': {
                 'cbc:RegistrationName': {'_text': commercial_partner.name},
                 'cbc:CompanyID': {'_text': commercial_partner.vat} if commercial_partner.country_code == 'SA' else None,
@@ -439,7 +439,12 @@ class AccountEdiXmlUbl_21Zatca(models.AbstractModel):
             for grouping_key, values in aggregated_tax_details.items()
             if grouping_key
         )
-        total_amount = base_line['tax_details']['total_excluded_currency'] + total_tax_amount
+        total_base_amount = sum(
+            values['base_amount_currency']
+            for grouping_key, values in aggregated_tax_details.items()
+            if grouping_key
+        )
+        total_amount = total_base_amount + total_tax_amount
 
         line_node['cac:TaxTotal'] = {
             'cbc:TaxAmount': {

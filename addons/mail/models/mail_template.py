@@ -64,7 +64,7 @@ class MailTemplate(models.Model):
     partner_to = fields.Char('To (Partners)',
                              help="Comma-separated ids of recipient partners (placeholders may be used here)")
     email_cc = fields.Char('Cc', help="Carbon copy recipients (placeholders may be used here)")
-    reply_to = fields.Char('Reply To', help="Email address to which replies will be redirected when sending emails in mass; only used when the reply is not logged in the original discussion thread.")
+    reply_to = fields.Char('Reply To Address')
     # content
     body_html = fields.Html(
         'Body', render_engine='qweb', render_options={'post_process': True},
@@ -83,6 +83,12 @@ class MailTemplate(models.Model):
         string='Dynamic Reports',
         domain="[('model', '=', model)]")
     email_layout_xmlid = fields.Char('Email Notification Layout', copy=False)
+    email_layout_force_header = fields.Boolean('Force Header', default=False,
+        help="If checked, the header will be always shown in the email body when this template is used with"
+        "notification layout.")
+    email_layout_force_footer = fields.Boolean('Force Footer', default=False,
+        help="If checked, the footer will be always shown in the email body when this template is used with"
+        "notification layout.")
     # options
     mail_server_id = fields.Many2one('ir.mail_server', 'Outgoing Mail Server', readonly=False, index='btree_not_null',
                                      help="Optional preferred server for outgoing mails. If not set, the highest "

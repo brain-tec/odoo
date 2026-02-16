@@ -492,7 +492,7 @@ test("toolbar works: show the correct text alignment", async () => {
     await click("button[name='text_align']");
     await contains(".o-we-toolbar-dropdown .btn.fa-align-right").click();
     expect(getContent(el)).toBe(
-        `<p style="text-align: right;">[test</p><p style="text-align: right;"><br>]</p>`
+        `<p style="text-align: end;">[test</p><p style="text-align: end;"><br>]</p>`
     );
     expect("button[name='text_align'] span").toHaveInnerHTML(`<i class="fa fa-align-right"> </i>`);
 });
@@ -1812,7 +1812,7 @@ test("toolbar update should be run only once", async () => {
     await waitFor(".o-we-toolbar");
     counter = 0;
     click(".o-we-toolbar .btn[name='bold']");
-    await animationFrame();
+    await waitFor(".btn[name='bold'].active");
     expect(getContent(el)).toBe("<p><strong>[test]</strong></p>");
     expect(counter).toBe(1);
 });

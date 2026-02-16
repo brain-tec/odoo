@@ -1074,13 +1074,6 @@ class TestOrmModel_Binary(models.Model):
     binary_x_filename2 = fields.Char()
     binary_related_store = fields.Binary("Binary Related Store", related='binary', store=True, readonly=False)
     binary_related_no_store = fields.Binary("Binary Related No Store", related='binary', store=False, readonly=False)
-    binary_computed = fields.Binary(compute='_compute_binary')
-
-    @api.depends('binary')
-    def _compute_binary(self):
-        # arbitrary value: 'bin_size' must have no effect
-        for record in self:
-            record.binary_computed = [(record.id, bool(record.binary))]
 
 
 class TestOrmModel_Image(models.Model):
@@ -1622,6 +1615,26 @@ class TestOrmModel_Selection_Required_For_Write_Override(models.Model):  # noqa:
             msg = "No... no no no"
             raise ValueError(msg)
         return super().write(vals)
+
+
+class SelectionCompanyDependent(models.Model):
+    _name = 'test_orm.model_selection_company_dependent'
+    _description = "Model with a company dependent selection field"
+
+    my_selection = fields.Selection([
+        ('manual', "Manual"),
+        ('auto', "Automatic"),
+    ], company_dependent=True)
+
+
+# pylint: disable=E0102
+class SelectionCompanyDependent(models.Model):  # noqa: F811
+    _inherit = 'test_orm.model_selection_company_dependent'
+    _description = "Model with a company dependent selection field extension without ondelete"
+
+    my_selection = fields.Selection(selection_add=[
+        ('semi_auto', "Semi-Automatic"),
+    ])
 
 
 # Special classes to ensure the correct usage of a shared cache amongst users.
@@ -2500,10 +2513,6 @@ class BinaryTest(models.Model):
 
     img = fields.Image()
     bin1 = fields.Binary()
-    bin2 = fields.Binary(compute="_compute_bin2")
-
-    def _compute_bin2(self):
-        self.bin2 = {}
 
 
 class CalendarTest(models.Model):

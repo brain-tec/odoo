@@ -34,6 +34,7 @@ function checkButtonIsDisabled() {
 registerWebsitePreviewTour(
     'website_sale.add_to_cart_snippet',
     {
+        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: '/',
         edition: true,
     },
@@ -42,7 +43,7 @@ registerWebsitePreviewTour(
 
         // Basic product with no variants
         ...clickOnSnippet({ id: 's_add_to_cart' }),
-        ...changeOptionInPopover("Add to Cart Button", "Product", "Product No Variant", true),
+        ...changeOptionInPopover("Add to Cart Button", "Product", "Product No Variant"),
         ...clickOnSave(),
         clickOnElement("add to cart button", ":iframe .s_add_to_cart_btn"),
         checkButtonIsDisabled(),
@@ -50,7 +51,7 @@ registerWebsitePreviewTour(
 
         // Product with 2 variants with visitor choice (will open modal)
         ...editAddToCartSnippet(),
-        ...changeOptionInPopover("Add to Cart Button", "Product", "Product Yes Variant 1", true),
+        ...changeOptionInPopover("Add to Cart Button", "Product", "Product Yes Variant 1"),
         ...clickOnSave(),
         clickOnElement("add to cart button", ":iframe .s_add_to_cart_btn"),
         checkButtonIsDisabled(),
@@ -95,7 +96,7 @@ registerWebsitePreviewTour(
             content: "Check if action option is visible",
             trigger: "[data-container-title='Add to Cart Button'] [data-label='Action']"
         },
-        ...changeOptionInPopover("Add to Cart Button", "Action", "Buy Now", false),
+        ...changeOptionInPopover("Add to Cart Button", "Action", "Buy Now"),
         // At this point the "Add to cart" button was changed to a "Buy Now" button
         ...clickOnSave(),
         clickOnElement('"Buy Now" button', ':iframe .s_add_to_cart_btn'),

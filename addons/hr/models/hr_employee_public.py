@@ -52,6 +52,9 @@ class HrEmployeePublic(models.Model):
     last_activity = fields.Date(compute="_compute_last_activity")
     last_activity_time = fields.Char(compute="_compute_last_activity")
     resource_calendar_id = fields.Many2one('resource.calendar', readonly=True)
+    hours_per_week = fields.Float(compute="_compute_hours_per_week")
+    hours_per_day = fields.Float(compute="_compute_hours_per_day")
+
     country_code = fields.Char(compute='_compute_country_code')
 
     # Manager-only fields
@@ -196,6 +199,12 @@ class HrEmployeePublic(models.Model):
         ])
         return [('id', operator, new_hires.ids)]
 
+    def _compute_hours_per_week(self):
+        self._compute_from_employee('hours_per_week')
+
+    def _compute_hours_per_day(self):
+        self._compute_from_employee('hours_per_day')
+
     @api.model
     def _get_fields(self):
         base_fields = ('id', 'employee_id', 'name', 'active')
@@ -218,7 +227,7 @@ class HrEmployeePublic(models.Model):
 
     def _store_avatar_card_fields(self, res: Store.FieldList):
         res.one("department_id", ["name"])
-        res.one("user_id", lambda res: (res.attr("share"), res.one("partner_id", ["im_status"])))
+        res.one("user_id", lambda res: (res.attr("share"), res.one("partner_id", ["im_status", "tz"])))
         res.one("work_location_id", ["location_type", "name"])
         res.extend(["company_id", "hr_icon_display", "job_title", "name", "show_hr_icon_display"])
         res.extend(["work_email", "work_phone"])

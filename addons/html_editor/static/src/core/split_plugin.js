@@ -264,7 +264,7 @@ export class SplitPlugin extends Plugin {
      * @param {HTMLElement} limitAncestor
      * @returns { Node }
      */
-    splitAroundUntil(elements, limitAncestor, cursors = null) {
+    splitAroundUntil(elements, limitAncestor) {
         elements = Array.isArray(elements) ? elements : [elements];
         const firstNode = elements[0];
         const lastNode = elements[elements.length - 1];
@@ -282,21 +282,12 @@ export class SplitPlugin extends Plugin {
         ) {
             return this.splitAroundUntil(
                 [firstNode.parentElement, lastNode.parentElement],
-                limitAncestor,
-                cursors
+                limitAncestor
             );
         } else if (!after && lastNode.parentElement !== limitAncestor) {
-            return this.splitAroundUntil(
-                [firstNode, lastNode.parentElement],
-                limitAncestor,
-                cursors
-            );
+            return this.splitAroundUntil([firstNode, lastNode.parentElement], limitAncestor);
         } else if (!before && firstNode.parentElement !== limitAncestor) {
-            return this.splitAroundUntil(
-                [firstNode.parentElement, lastNode],
-                limitAncestor,
-                cursors
-            );
+            return this.splitAroundUntil([firstNode.parentElement, lastNode], limitAncestor);
         }
         // Split up ancestors up to font
         while (after && after.parentElement !== limitAncestor) {
@@ -314,9 +305,7 @@ export class SplitPlugin extends Plugin {
         if (before) {
             beforeSplit = this.splitElement(limitAncestor, childNodeIndex(before) + 1)[1];
         }
-        const result = beforeSplit || afterSplit || limitAncestor;
-        this.fixSplitAroundUntilEmptyNodes(result.parentElement, cursors);
-        return result;
+        return beforeSplit || afterSplit || limitAncestor;
     }
 
     /**

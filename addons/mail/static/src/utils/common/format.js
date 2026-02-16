@@ -190,7 +190,6 @@ function generateMentionElement({ className, id, model, text }) {
         class: className,
         "data-oe-id": id,
         "data-oe-model": model,
-        "data-oe-protected": "true",
         target: "_blank",
         contenteditable: "false",
     });
@@ -226,22 +225,21 @@ export function generateSpecialMentionElement(label) {
     const link = document.createElement("a");
     setAttributes(link, {
         class: "o-discuss-mention",
-        "data-oe-protected": "true",
         contenteditable: "false",
     });
     link.textContent = `@${label}`;
     return link;
 }
 
-/** @param {import("models").Thread} thread */
-export function generateThreadMentionElement(thread) {
+/** @param {import("models").DiscussChannel} channel */
+export function generateChannelMentionElement(channel) {
     return generateMentionElement({
         className: `o_channel_redirect${
-            thread.channel?.parent_channel_id ? " o_channel_redirect_asThread" : ""
+            channel.parent_channel_id ? " o_channel_redirect_asThread" : ""
         }`,
-        id: thread.id,
+        id: channel.id,
         model: "discuss.channel",
-        text: `#${thread.channel?.fullNameWithParent}`,
+        text: `#${channel.fullNameWithParent}`,
     });
 }
 
@@ -257,7 +255,7 @@ export function generateThreadMentionElement(thread) {
  */
 function generateMentionsLinks(
     body,
-    { partners = [], roles = [], threads = [], specialMentions = [], thread }
+    { channels = [], partners = [], roles = [], specialMentions = [], thread }
 ) {
     const mentions = [];
     for (const partner of partners) {
@@ -269,11 +267,11 @@ function generateMentionsLinks(
         });
         body = htmlReplace(body, text, placeholder);
     }
-    for (const thread of threads) {
-        const placeholder = `#-mention-channel-${thread.id}`;
-        const text = `#${thread.channel?.fullNameWithParent}`;
+    for (const channel of channels) {
+        const placeholder = `#-mention-channel-${channel.id}`;
+        const text = `#${channel.fullNameWithParent}`;
         mentions.push({
-            link: generateThreadMentionElement(thread),
+            link: generateChannelMentionElement(channel),
             placeholder,
         });
         body = htmlReplace(body, text, placeholder);

@@ -6,7 +6,10 @@ const { DateTime } = luxon;
 
 patch(ProductCard.prototype, {
     get displayRemainingSeats() {
-        return Boolean(this.props.product.event_id);
+        return (
+            Boolean(this.props.product.event_id) &&
+            (this.isEventMultiSlot || this.totalTicketSeats > 0)
+        );
     },
     get isEventMultiSlot() {
         return Boolean(this.props.product.event_id) && this.props.product.event_id.is_multi_slots;
@@ -22,11 +25,14 @@ patch(ProductCard.prototype, {
         const event = this.props.product.event_id;
         const eventTickets = event?.event_ticket_ids;
 
-        if (
-            !eventTickets?.length ||
-            (!event.seats_limited && eventTickets?.some((ticket) => ticket.seats_max === 0))
-        ) {
+        if (!eventTickets?.length) {
             return 0;
+        }
+        if (eventTickets?.some((ticket) => ticket.seats_max === 0)) {
+            if (!event.seats_limited) {
+                return 0;
+            }
+            return event.seats_available > 0 ? event.seats_available : -1;
         }
         if (event.seats_limited && !event.seats_max) {
             return -1;

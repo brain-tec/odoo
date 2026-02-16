@@ -4,7 +4,7 @@ import { EventBus, markRaw, toRaw } from "@odoo/owl";
 import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
-import { rpcBus } from "@web/core/network/rpc";
+import { ConnectionLostError, rpcBus } from "@web/core/network/rpc";
 import { shallowEqual } from "@web/core/utils/arrays";
 import { deepCopy, pick } from "@web/core/utils/objects";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
@@ -59,6 +59,8 @@ import { FetchRecordError } from "./errors";
  *  groups?: Record<string, unknown>;
  *  currentGroups?: Record<string, unknown>; // FIXME: could be cleaned: Object
  *  openGroupsByDefault?: boolean;
+ *  sendOpeningInfo?: boolean;
+ *  noCache?: boolean;
  * }} RelationalModelConfig
  *
  * @typedef {{
@@ -164,6 +166,7 @@ export class RelationalModel extends Model {
         this.initialSampleGroups = undefined; // real groups to populate with sample records
 
         this._urgentSave = false;
+        this.couldNotLoadRootOffline = false;
     }
 
     // -------------------------------------------------------------------------
@@ -208,7 +211,17 @@ export class RelationalModel extends Model {
         this.hooks.onWillLoadRoot(config);
         const { promise, resolve } = Promise.withResolvers();
         const cache = this._getCacheParams(config, promise);
-        const data = await this.keepLast.add(this._loadData(config, cache));
+        let data;
+        try {
+            data = await this.keepLast.add(this._loadData(config, cache));
+        } catch (e) {
+            if (e instanceof ConnectionLostError) {
+                this.couldNotLoadRootOffline = true;
+                this.notify();
+            }
+            throw e;
+        }
+        this.couldNotLoadRootOffline = false;
         this.root = this._createRoot(config, data);
         resolve({ root: this.root, loadId: config.loadId });
         this.config = config;
@@ -287,70 +300,72 @@ export class RelationalModel extends Model {
         if (!this.withCache) {
             return;
         }
-        if (
-            !this.isReady || // first load of the model
-            this.offline.status.offline || // use the cache if we are offline
-            // monorecord, loading a different id, or creating a new record (onchange)
-            (config.isMonoRecord && (this.root.config.resId !== config.resId || !config.resId))
-        ) {
-            return {
-                type: "disk",
-                update: "always",
-                callback: async (result, hasChanged) => {
-                    if (!hasChanged) {
-                        return;
-                    }
-                    const { root, loadId } = await rootLoadProm;
-                    if (root.id !== this.root.id) {
-                        // The root id might have changed, either because:
-                        //  1) the user already changed the domain and a second load has been done
-                        //  2) there was no data, so we reloaded directly with the sample orm
-                        // In the first case, there's nothing to do, we can ignore this update. We
-                        // have to deal with the second case:
-                        if (this.useSampleModel) {
-                            // We displayed sample data from the cache, but the rpc returned records
-                            // or groups => leave sample mode, forget previous groups and update
-                            this.useSampleModel = false;
-                            if (this.root.config.groupBy.length) {
-                                delete this.root.config.currentGroups;
-                                result = await this._postprocessReadGroup(this.root.config, result);
-                            }
-                            this.root._setData(result);
+        const firstLoad = !this.isReady;
+        // Do not use a cached result if we're online and this isn't the first load of the model,
+        // except if we're loading another record (form view) or creating a new record (onchange).
+        const noCache =
+            !this.offline.offline &&
+            !firstLoad &&
+            (!config.isMonoRecord || (this.root.config.resId === config.resId && config.resId));
+        return {
+            type: "disk",
+            update: "always",
+            noCache,
+            callback: async (result, hasChanged) => {
+                this._setAvailableOffline(config, result);
+                if (!hasChanged) {
+                    return;
+                }
+                const { root, loadId } = await rootLoadProm;
+                if (root.id !== this.root.id) {
+                    // The root id might have changed, either because:
+                    //  1) the user already changed the domain and a second load has been done
+                    //  2) there was no data, so we reloaded directly with the sample orm
+                    // In the first case, there's nothing to do, we can ignore this update. We
+                    // have to deal with the second case:
+                    if (this.useSampleModel) {
+                        // We displayed sample data from the cache, but the rpc returned records
+                        // or groups => leave sample mode, forget previous groups and update
+                        this.useSampleModel = false;
+                        if (this.root.config.groupBy.length) {
+                            delete this.root.config.currentGroups;
+                            result = await this._postprocessReadGroup(this.root.config, result);
                         }
-                        return;
+                        this.root._setData(result);
                     }
-                    if (loadId !== this.root.config.loadId) {
-                        // Avoid updating if another load was already done (e.g. a sort in a list)
-                        return;
+                    return;
+                }
+                if (loadId !== root.config.loadId) {
+                    // Avoid updating if another load was already done (e.g. a sort in a list)
+                    return;
+                }
+                if (root.config.isMonoRecord) {
+                    if (!root.config.resId) {
+                        // result is the response of the onchange rpc
+                        return root._setData(result.value, { keepChanges: true });
                     }
-                    if (root.config.isMonoRecord) {
-                        if (!root.config.resId) {
-                            // result is the response of the onchange rpc
-                            return root._setData(result.value, { keepChanges: true });
-                        }
-                        // result is the response of a web_read rpc
-                        if (!result.length) {
-                            // we read a record that no longer exists
-                            throw new FetchRecordError([root.config.resId]);
-                        }
-                        return root._setData(result[0], { keepChanges: true });
+                    // result is the response of a web_read rpc
+                    if (!result.length) {
+                        // we read a record that no longer exists
+                        throw new FetchRecordError([root.config.resId]);
                     }
+                    return root._setData(result[0], { keepChanges: true });
+                }
 
-                    // multi record case: either grouped or ungrouped
-                    if (root.config.groupBy.length) {
+                // multi record case: either grouped or ungrouped
+                if (root.config.groupBy.length) {
+                    if (firstLoad) {
                         // result is the response of a web_read_group rpc
                         // in case there're less groups, we don't want to keep displaying groups
                         // that are no longer there => forget previous groups
-                        delete this.root.config.currentGroups;
-                        // in case that the config of the groups changed (e.g. group is now folded)
-                        // we want to update the groups.
-                        this.root.config.groups = [];
-                        result = await this._postprocessReadGroup(root.config, result);
+                        // only delete if it's the first load of the model
+                        delete root.config.currentGroups;
                     }
-                    root._setData(result);
-                },
-            };
-        }
+                    result = await this._postprocessReadGroup(root.config, result);
+                }
+                root._setData(result);
+            },
+        };
     }
 
     /**
@@ -405,6 +420,7 @@ export class RelationalModel extends Model {
             // keep current root config if any, if the groupBy parameter is the same
             if (!shallowEqual(config.groupBy || [], currentGroupBy || [])) {
                 delete config.groups;
+                delete config.sendOpeningInfo;
             }
             if (!config.groupBy.length) {
                 config.orderBy = config.orderBy.filter((order) => order.name !== "__count");
@@ -528,13 +544,9 @@ export class RelationalModel extends Model {
                     currentConfig.domain
                 );
                 if (!currentConfig.groups[group.value]) {
-                    const isFolded =
-                        !Object.hasOwn(groupData, "__records") &&
-                        !Object.hasOwn(groupData, "__groups");
                     currentConfig.groups[group.value] = {
                         ...commonConfig,
                         groupByFieldName,
-                        isFolded: isFolded,
                         extraDomain: false,
                         value: group.value,
                         list: {
@@ -568,6 +580,7 @@ export class RelationalModel extends Model {
                 groupConfig.list.context = context;
                 groupConfig.context = context;
                 if (nextLevelGroupBy.length) {
+                    groupConfig.isFolded = !("__groups" in groupData);
                     if (!groupConfig.isFolded) {
                         const { groups, length } = groupData.__groups;
                         group.groups = await extractGroups(groupConfig.list, groups);
@@ -576,6 +589,7 @@ export class RelationalModel extends Model {
                         group.groups = [];
                     }
                 } else {
+                    groupConfig.isFolded = !("__records" in groupData);
                     if (!groupConfig.isFolded) {
                         group.records = groupData.__records;
                         group.length = groupData.__count;
@@ -693,6 +707,31 @@ export class RelationalModel extends Model {
     }
 
     /**
+     * Marks the current config as available offline.
+     *
+     * @param {RelationalModelConfig} config
+     * @param {Object} result the data loaded with the given config (rpc result)
+     */
+    _setAvailableOffline(config, result) {
+        const { actionId, viewType } = this.env.config;
+        let markAsAvailableOffline = actionId;
+        if (config.isMonoRecord) {
+            markAsAvailableOffline = markAsAvailableOffline && config.resId;
+        } else {
+            const hasRecords = config.groupBy.length
+                ? result.groups.some((group) => group.__count > 0)
+                : result.length > 0;
+            markAsAvailableOffline = markAsAvailableOffline && hasRecords;
+        }
+        if (markAsAvailableOffline) {
+            const params = config.isMonoRecord
+                ? { resId: config.resId }
+                : { search: this.env.searchModel.getCurrentSearch() };
+            this.offline.setAvailableOffline(actionId, viewType, params);
+        }
+    }
+
+    /**
      * @param {RelationalModelConfig} config
      * @param {OnChangeParams} params
      * @returns {Promise<Record<string, unknown>>}
@@ -751,17 +790,31 @@ export class RelationalModel extends Model {
         markRaw(tmpConfig.fields);
 
         let data;
+        let rootLoadProm;
+        let rootLoadResolve;
         if (reload) {
+            let cache;
             if (tmpConfig.isRoot) {
                 this.hooks.onWillLoadRoot(tmpConfig);
+                ({ promise: rootLoadProm, resolve: rootLoadResolve } = Promise.withResolvers());
+                cache = this._getCacheParams(tmpConfig, rootLoadProm);
             }
-            data = await this._loadData(tmpConfig);
+            if (tmpConfig.groupBy?.length && "groups" in patch) {
+                // usecase: @_toggleAllGroups
+                tmpConfig.sendOpeningInfo = true;
+            }
+            data = await this._loadData(tmpConfig, cache);
         }
         Object.assign(config, tmpConfig);
         if (data && commit) {
             commit(data);
         }
+        if (!tmpConfig.isRoot && this.root && this.root.config.groupBy?.length) {
+            // usecase: toggle a group, use pager inside a group or filter with progressbar
+            this.root.config.sendOpeningInfo = true;
+        }
         if (reload && config.isRoot) {
+            rootLoadResolve({ root: this.root, loadId: config.loadId });
             await this.hooks.onRootLoaded(this.root);
         }
     }
@@ -832,7 +885,10 @@ export class RelationalModel extends Model {
         const aggregates = getAggregateSpecifications(
             pick(config.fields, ...config.fieldsToAggregate)
         );
-        const currentGroupInfos = getGroupInfo(config.groups);
+        let currentGroupInfos;
+        if (config.sendOpeningInfo) {
+            currentGroupInfos = getGroupInfo(config.groups);
+        }
         const { activeFields, fields } = config;
         const evalContext = getBasicEvalContext(config);
         const unfoldReadSpecification = getFieldsSpec(activeFields, fields, evalContext);

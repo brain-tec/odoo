@@ -9,6 +9,9 @@
         'l10n_sa_pos',
         'l10n_sa_edi',
     ],
+    'data': [
+        'receipt/pos_order_receipt.xml',
+    ],
     'summary': "ZATCA E-Invoicing, support for PoS",
     'description': """
 E-invoice implementation for Saudi Arabia; Integration with ZATCA (POS)
@@ -18,6 +21,9 @@ E-invoice implementation for Saudi Arabia; Integration with ZATCA (POS)
     'assets': {
         'point_of_sale._assets_pos': [
             'l10n_sa_edi_pos/static/src/**/*',
+        ],
+        'web.assets_tests': [
+            'l10n_sa_edi_pos/static/tests/tours/**/*',
         ],
     }
 }

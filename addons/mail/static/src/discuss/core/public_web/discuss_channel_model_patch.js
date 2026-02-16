@@ -35,9 +35,6 @@ const discussChannelPatch = {
                 return this._computeDiscussAppCategory();
             },
         });
-        this.discuss_category_id = fields.One("discuss.category", {
-            inverse: "channel_ids",
-        });
         this.isDisplayInSidebar = fields.Attr(false, {
             compute() {
                 return this._computeIsDisplayInSidebar();
@@ -81,6 +78,9 @@ const discussChannelPatch = {
     },
     get allowCalls() {
         return super.allowCalls && !this.parent_channel_id;
+    },
+    get autoOpenChatWindowOnNewMessage() {
+        return false;
     },
     /** @param {string} description */
     async notifyDescriptionToServer(description) {
@@ -159,7 +159,7 @@ const discussChannelPatch = {
             this.self_member_id?.custom_notifications || this.store.settings.channel_notifications;
         if (
             !this.self_member_id?.mute_until_dt &&
-            !this.store.self.im_status.includes("busy") &&
+            this.store.self.im_status !== "busy" &&
             (this.channel_type !== "channel" ||
                 (this.channel_type === "channel" &&
                     (channel_notifications === "all" ||

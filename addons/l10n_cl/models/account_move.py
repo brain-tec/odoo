@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import re
+
 from odoo.exceptions import ValidationError
 from odoo import models, fields, api, _
 from odoo.tools.misc import formatLang
@@ -14,6 +16,18 @@ class AccountMove(models.Model):
     partner_id_vat = fields.Char(related='partner_id.vat', string='VAT No')
     l10n_latam_internal_type = fields.Selection(
         related='l10n_latam_document_type_id.internal_type', string='L10n Latam Internal Type')
+
+    @api.constrains("l10n_latam_document_number")
+    def _check_l10n_latam_document_number_is_numeric(self):
+        for move in self:
+            if (
+                move.company_id.country_id.code == "CL"
+                and move.l10n_latam_document_number
+                and not re.fullmatch(r"[0-9]+", move.l10n_latam_document_number)
+            ):
+                raise ValidationError(self.env._(
+                    "The DTE document number (folio) must contain only digits."
+                ))
 
     def _get_l10n_latam_documents_domain(self):
         self.ensure_one()
@@ -272,7 +286,8 @@ class AccountMove(models.Model):
         # OVERRIDE 'account'
         super()._compute_tax_totals()
         for move in self:
-            if move.tax_totals and move._get_name_invoice_report() == 'l10n_cl.report_invoice_document':
+            if (tax_totals := move.tax_totals) and move._get_name_invoice_report() == 'l10n_cl.report_invoice_document':
                 # Disable the recap of tax totals in company currency at the bottom right of the invoice,
                 # since this info is already present in our custom tax totals grid.
-                move.tax_totals['display_in_company_currency'] = False
+                tax_totals['display_in_company_currency'] = False
+                move.tax_totals = tax_totals

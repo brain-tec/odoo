@@ -274,7 +274,7 @@ class configmanager:
                          help="Launch a python test file.")
         group.add_option("--test-enable", dest='test_enable', action="store_true", file_loadable=False,
                          help="Enable unit tests. Implies --stop-after-init")
-        group.add_option("--test-tags", dest="test_tags", file_loadable=False,
+        group.add_option("-t", "--test-tags", dest="test_tags", file_loadable=False,
                          help="Comma-separated list of specs to filter which tests to execute. Enable unit tests if set. "
                          "A filter spec has the format: [-][tag][/module][:class][.method][[params]] "
                          "The '-' specifies if we want to include or exclude tests matching this spec. "
@@ -420,7 +420,7 @@ class configmanager:
                               "- replica: simulate a deployment with readonly replica "
                               "- werkzeug: open a html debugger on http request error "
                               "- xml: read views from the source code, and not the db ")
-        group.add_option("--stop-after-init", action="store_true", dest="stop_after_init", my_default=False, file_exportable=False, file_loadable=False,
+        group.add_option("--stop", "--stop-after-init", action="store_true", dest="stop_after_init", my_default=False, file_exportable=False, file_loadable=False,
                          help="stop the server after its initialization")
         group.add_option("--osv-memory-count-limit", dest="osv_memory_count_limit", my_default=0,
                          help="Force a limit on the maximum number of records kept in the virtual "
@@ -450,6 +450,10 @@ class configmanager:
         group.add_option(PosixOnlyOption(
                          "--workers", dest="workers", my_default=0,
                          help="Specify the number of workers, 0 disable prefork mode.",
+                         type="int"))
+        group.add_option(PosixOnlyOption(
+                         "--gevent-workers", dest="gevent_workers", my_default=1,
+                         help="Specify the number of gevent workers in prefork mode. (requires SO_REUSEPORT)",
                          type="int"))
         group.add_option("--limit-memory-soft", dest="limit_memory_soft", my_default=2048 * 1024 * 1024,
                          help="Maximum allowed virtual memory per worker (in bytes), when reached the worker be "

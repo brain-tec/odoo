@@ -41,12 +41,13 @@ these accounts will be automatically downloaded into your Odoo system. All
 POP3/IMAP-compatible servers are supported, included those that require an
 encrypted SSL/TLS connection.
 This can be used to easily create email-based workflows for many email-enabled Odoo documents, such as:
-----------------------------------------------------------------------------------------------------------
-    * CRM Leads/Opportunities
-    * CRM Claims
-    * Project Issues
-    * Project Tasks
-    * Human Resource Recruitment (Applicants)
+
+* CRM Leads/Opportunities
+* CRM Claims
+* Project Issues
+* Project Tasks
+* Human Resource Recruitment (Applicants)
+
 Just install the relevant application, and you can assign any of these document
 types (Leads, Project Issues) to your incoming email accounts. New emails will
 automatically spawn new documents of the chosen type, so it's a snap to create a
@@ -150,11 +151,11 @@ For more specific needs, you may also assign custom-defined actions
             'mail/static/src/model/**/*',
             'mail/static/src/core/common/**/*',
             'mail/static/src/core/public_web/**/*',
-            'mail/static/src/core/web_portal/**/*',
+            'mail/static/src/core/web_portal_project/**/*',
             'mail/static/src/core/web/**/*',
             'mail/static/src/**/common/**/*',
             'mail/static/src/**/public_web/**/*',
-            'mail/static/src/**/web_portal/**/*',
+            'mail/static/src/**/web_portal_project/**/*',
             'mail/static/src/**/web/**/*',
             ('remove', 'mail/static/src/**/*.dark.scss'),
             # discuss (loaded last to fix dependencies)

@@ -13,6 +13,7 @@
             <field name="use_default_to" eval="True"/>
             <field name="subject">{{ object.company_id.name }} Invoice (Ref {{ object.name or 'n/a' }})</field>
             <field name="description">Sent to customers with their invoices in attachment</field>
+            <field name="email_layout_xmlid">mail.mail_notification_layout_with_responsible_signature</field>
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
     <p style="margin: 0px; padding: 0px; font-size: 13px;">
@@ -79,6 +80,7 @@
             <field name="partner_to" eval="False"/>
             <field name="use_default_to" eval="True"/>
             <field name="description">Sent manually to customer when clicking on 'Send receipt by email' in payment action</field>
+            <field name="email_layout_xmlid">mail.mail_notification_light</field>
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
     <p style="margin: 0px; padding: 0px; font-size: 13px;">
@@ -109,6 +111,7 @@
             <field name="use_default_to" eval="True"/>
             <field name="subject">{{ object.company_id.name }} Credit Note (Ref {{ object.name or 'n/a' }})</field>
             <field name="description">Sent to customers with the credit note in attachment</field>
+            <field name="email_layout_xmlid">mail.mail_notification_layout_with_responsible_signature</field>
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
     <p style="margin: 0px; padding: 0px; font-size: 13px;">
@@ -496,7 +499,7 @@
                                 <strong style="color:#2c2431;">Files included:</strong> the original document(s) are attached for your convenience.
                             </div>
 
-                            <div style="margin-top:32px; text-align:center;">
+                            <div style="margin-top:32px; text-align:center;" t-if="object.move_type != 'in_invoice'">
                                 <a t-if="portal_url" t-attf-href="{{ portal_url }}"
                                    style="display:inline-block; margin:0 10px 14px; padding:13px 30px; min-width:210px; background:linear-gradient(135deg,#714B67 0%,#9b77a3 100%); color:#FFFFFF; text-decoration:none; border-radius:12px; font-weight:600; font-size:14px;"
                                    target="_blank">

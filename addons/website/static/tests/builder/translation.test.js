@@ -1,13 +1,8 @@
 import { EditWebsiteSystrayItem } from "@website/client_actions/website_preview/edit_website_systray_item";
 import { setContent, setSelection } from "@html_editor/../tests/_helpers/selection";
 import { insertText, pasteHtml, pasteText } from "@html_editor/../tests/_helpers/user_actions";
-import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import {
-    animationFrame,
-    manuallyDispatchProgrammaticEvent,
-    queryAllTexts,
-    queryOne,
-} from "@odoo/hoot-dom";
+import { beforeEach, delay, describe, expect, globals, press, test } from "@odoo/hoot";
+import { animationFrame, manuallyDispatchProgrammaticEvent, queryOne } from "@odoo/hoot-dom";
 import { contains, mockService, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import {
     defineWebsiteModels,
@@ -235,39 +230,43 @@ test("translate attribute history", async () => {
     expect(".modal .modal-body input").toHaveValue("title");
 });
 
-test("translate select", async () => {
+test("undo shortcut in translate", async () => {
+    const { getEditor } = await setupSidebarBuilderForTranslation({
+        websiteContent: `<h1>Homepage</h1>`,
+    });
+    await contains(".modal .btn:contains(Ok, never show me this again)").click();
+    setSelection({ anchorNode: queryOne(":iframe h1"), anchorOffset: 0 });
+    await insertText(getEditor(), "New ");
+    expect(":iframe h1").toHaveText("New Homepage");
+    await press(["ctrl", "z"]);
+    await getEditor().shared.operation.next();
+    expect(":iframe h1").not.toHaveText("New Homepage");
+});
+
+test("translation span wrapper for <option>", async () => {
     await setupSidebarBuilderForTranslation({
         websiteContent: `
-            <div class="row s_col_no_resize s_col_no_bgcolor">
-                <label class="col-form-label col-sm-auto s_website_form_label">
-                    <span data-oe-model="ir.ui.view" data-oe-id="544" data-oe-field="arch_db" data-oe-translation-state="to_translate" data-oe-translation-source-sha="sourceSha">
-                        <span class="s_website_form_label_content">Custom Text</span>
-                    </span>
-                    </label>
-                <div class="col-sm">
-                    <span data-oe-model="ir.ui.view" data-oe-id="544" data-oe-field="arch_db" data-oe-translation-state="to_translate" data-oe-translation-source-sha="sourceSha">
-                        <select class="form-select s_website_form_input" name="Custom Text" id="oojm1tjo6m19">
-                            <option id="optionId1" value="Option 1">Option 1</option>
-                            <option id="optionId2" value="Option 2">Option 2</option>
-                        </select>
-                    </span>
-                </div>
-            </div>
-        `,
+            <select class="form-select s_website_form_input" id="orcye1cjptbg">
+                <option id="orcye1cjptbg1" value="Option 1" selected="selected"
+                    data-oe-translation-span-wrapper="&lt;span data-oe-model=&quot;ir.ui.view&quot; data-oe-id=&quot;567&quot; data-oe-field=&quot;arch_db&quot; data-oe-translation-state=&quot;translated&quot; data-oe-translation-source-sha=&quot;fae2db093e1dd31042e8ab9427e8673a70c43f4bc519235d9a232efad60769aa&quot;&gt;Première option&lt;/span&gt;">
+                    Option 1</option>
+                <option id="orcye1cjptbg2" value="Option 2">
+                    Option 2</option>
+            </select>`,
     });
     await contains(".modal .btn:contains(Ok, never show me this again)").click();
     expect(":iframe .form-select.s_website_form_input option").toHaveCount(2);
-    await contains(":iframe [data-initial-translation-value='Option 1']").click();
-    expect(".modal .modal-body input").toHaveCount(2);
-    await contains(".modal .modal-body > :nth-child(1)").edit("Option fr 1");
-    await contains(".modal .modal-body > :nth-child(2)").edit("Option fr 2");
-    await contains(".modal .btn:contains('Save')").click();
-    expect(queryAllTexts(":iframe [data-initial-translation-value='Option 1']")).toEqual([
-        "Option fr 1",
-    ]);
-    expect(queryAllTexts(":iframe [data-initial-translation-value='Option 2']")).toEqual([
-        "Option fr 2",
-    ]);
+    // Only the first option has the translation span wrapper. This should not
+    // happen in practice, but we ensure it does not cause a crash if the number
+    // of options differs between the original and translated versions.
+    expect(
+        ":iframe .o_translation_select > div > span[data-oe-translation-source-sha]"
+    ).toHaveCount(1, {
+        message: "Only the first option has the translation span wrapper",
+    });
+    expect(":iframe .o_translation_select > div > span[data-oe-translation-source-sha]").toHaveText(
+        "Première option"
+    );
 });
 
 describe("paste in translate", () => {
@@ -308,11 +307,25 @@ test("test that powerbox should not open in translate mode", async () => {
     const textNode = editor.editable.querySelector("span").firstChild;
     expect(textNode.nodeType).toBe(Node.TEXT_NODE);
     setSelection({ anchorNode: textNode, anchorOffset: 0 });
-    await animationFrame();
     // Simulate typing `/`
     await insertText(editor, "/");
     await animationFrame();
     await expectElementCount(".o-we-powerbox", 0);
+});
+
+test("copy of a translated span should not copy branding attributes", async () => {
+    const { getEditor } = await setupSidebarBuilderForTranslation({
+        websiteContent: getTranslateEditable({ inWrap: "a<b>c</b>a" }),
+    });
+    await contains(":iframe [contenteditable=true]").focus();
+    const editor = getEditor();
+    const textNode = editor.editable.querySelector("b").firstChild;
+    expect(textNode.nodeType).toBe(Node.TEXT_NODE);
+    setSelection({ anchorNode: textNode, anchorOffset: 0, focusNode: textNode, focusOffset: 1 });
+    const clipboardData = new DataTransfer();
+    await press(["ctrl", "c"], { dataTransfer: clipboardData });
+    expect(clipboardData.getData("text/plain")).toBe("c");
+    expect(clipboardData.getData("text/html")).toBe(`<b>c</b>`);
 });
 
 describe("save translation", () => {
@@ -459,6 +472,23 @@ test("Ensure the contenteditable attributes have been set before the Translation
     await setupSidebarBuilderForTranslation({
         websiteContent: getTranslateEditable({ inWrap: "Hello" }),
     });
+});
+
+test("sidebar should open even when translated elements fetch is slow", async () => {
+    const originalFetch = globals.fetch;
+
+    patchWithCleanup(globals, {
+        async fetch(url, options) {
+            if (url === "/website/get_translated_elements") {
+                await delay(100);
+            }
+            return originalFetch.call(this, url, options);
+        },
+    });
+    await setupSidebarBuilderForTranslation({
+        websiteContent: getTranslateEditable({ inWrap: "Hello" }),
+    });
+    expect(".o_builder_sidebar_open").toHaveCount(1);
 });
 
 function getTranslateEditable({

@@ -1,7 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
-from base64 import b64encode
 from functools import partial
 from unittest.mock import patch
 
@@ -9,6 +8,7 @@ from werkzeug.datastructures import FileStorage
 
 from odoo.exceptions import ValidationError
 from odoo.fields import Command
+from odoo.http import Response
 from odoo.tests import Form, tagged
 from odoo.tools.misc import file_open
 
@@ -34,20 +34,20 @@ class TestPDFQuoteBuilder(SaleManagementCommon):
         cls.env['quotation.document'].search([]).action_archive()
 
         with file_open(forms_pdf, 'rb') as file:
-            forms_pdf_data = b64encode(file.read())
+            forms_pdf_data = file.read()
 
         with file_open(plain_pdf, 'rb') as file:
-            plain_pdf_data = b64encode(file.read())
+            plain_pdf_data = file.read()
 
         att_header, att_footer, att_prod_doc = cls.env['ir.attachment'].create([{
             'name': "Header",
-            'datas': plain_pdf_data,
+            'raw': plain_pdf_data,
         }, {
             'name': "Footer",
-            'datas': forms_pdf_data,
+            'raw': forms_pdf_data,
         }, {
             'name': "Product Document",
-            'datas': forms_pdf_data,
+            'raw': forms_pdf_data,
         }])
         cls.header, cls.footer = cls.env['quotation.document'].create([{
             'name': "Header",
@@ -197,7 +197,7 @@ class TestPDFQuoteBuilder(SaleManagementCommon):
     def test_non_pdf_attachment_inside_quote_form_save(self):
         non_pdf_att = self.env['ir.attachment'].create({
             'name': 'Not a PDF',
-            'datas': b64encode(b"hello"),
+            'raw': b"hello",
             'mimetype': 'text/plain',
         })
 
@@ -296,6 +296,14 @@ class TestPDFQuoteBuilder(SaleManagementCommon):
             MockRequest(self.env) as request,
             file_open(plain_pdf, 'rb') as file,
             patch.object(request.httprequest.files, 'getlist', lambda _key: [FileStorage(file)]),
+            patch.object(request, 'make_json_response',
+                lambda data, status=200, headers=None: Response(
+                    json.dumps(data),
+                    status=status,
+                    headers=headers,
+                    mimetype='application/json',
+                ),
+            ),
         ):
             res = self.QuotationDocumentController.upload_document(
                 ufile=FileStorage(file),
@@ -326,6 +334,14 @@ class TestPDFQuoteBuilder(SaleManagementCommon):
             MockRequest(self.env) as request,
             file_open(forms_pdf, 'rb') as file,
             patch.object(request.httprequest.files, 'getlist', lambda _key: [FileStorage(file)]),
+            patch.object(request, 'make_json_response',
+                lambda data, status=200, headers=None: Response(
+                    json.dumps(data),
+                    status=status,
+                    headers=headers,
+                    mimetype='application/json',
+                ),
+            ),
         ):
             res = self.QuotationDocumentController.upload_document(
                 ufile=FileStorage(file),

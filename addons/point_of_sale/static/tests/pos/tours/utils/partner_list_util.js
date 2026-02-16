@@ -121,12 +121,12 @@ export function searchCustomerValue(val, pressEnter = false) {
         {
             isActive: ["mobile"],
             content: `Click search field`,
-            trigger: `.fa-search.undefined`,
+            trigger: `.modal-dialog .fa-search.undefined`,
             run: `click`,
         },
         {
             content: `Search customer with "${val}"`,
-            trigger: `.modal-dialog .input-group input`,
+            trigger: `.modal-header:has(.modal-title:contains(choose customer)) .input-group input`,
             run: `edit ${val}`,
         },
     ];
@@ -134,7 +134,7 @@ export function searchCustomerValue(val, pressEnter = false) {
     if (pressEnter) {
         steps.push({
             content: `Manually trigger keyup event`,
-            trigger: ".modal-header .input-group input",
+            trigger: ".modal-header:has(.modal-title:contains(choose customer)) .input-group input",
             run: function () {
                 document
                     .querySelector(".modal-header .input-group input")
@@ -143,7 +143,7 @@ export function searchCustomerValue(val, pressEnter = false) {
         });
         steps.push({
             content: `Press Enter to trigger "search more"`,
-            trigger: `.modal-dialog .input-group input`,
+            trigger: `.modal-header:has(.modal-title:contains(choose customer)) .input-group input`,
             run: function () {
                 document
                     .querySelector(".modal-dialog .input-group input")
@@ -164,4 +164,13 @@ export function scrollBottom() {
             partnerList.scrollTop = partnerList.scrollHeight;
         },
     };
+}
+
+export function isShown() {
+    return [
+        {
+            content: "partner list screen is shown",
+            trigger: ".modal .partner-list",
+        },
+    ];
 }

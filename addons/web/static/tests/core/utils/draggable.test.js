@@ -1,5 +1,12 @@
-import { expect, test } from "@odoo/hoot";
-import { queryRect } from "@odoo/hoot-dom";
+import {
+    expect,
+    manuallyDispatchProgrammaticEvent,
+    press,
+    queryOne,
+    test,
+    waitFor,
+} from "@odoo/hoot";
+import { queryFirst, queryRect } from "@odoo/hoot-dom";
 import { animationFrame, mockTouch } from "@odoo/hoot-mock";
 import { Component, reactive, useRef, useState, xml } from "@odoo/owl";
 import { contains, mountWithCleanup } from "@web/../tests/web_test_helpers";
@@ -468,4 +475,132 @@ test("allowDisconnected option", async () => {
     await moveTo(".item:nth-child(2)");
     await drop();
     expect.verifySteps(["drop", "end"]);
+});
+
+test("draggable in iframe", async () => {
+    class List extends Component {
+        static template = xml`
+        <div t-ref="root" class="root">
+            <iframe class="mydroppable" t-att-srcdoc="srcdoc" />
+        </div>`;
+        static props = ["*"];
+        setup() {
+            useDraggable({
+                iframeSelector: ".mydroppable",
+                ref: useRef("root"),
+                elements: ".item",
+                onDrop: ({ element, getRect }) => {
+                    const rect = getRect(element);
+                    for (const el of element.ownerDocument.querySelectorAll(".item")) {
+                        if (el === element) {
+                            continue;
+                        }
+                        const _rect = getRect(el);
+                        if (_rect.y < rect.y) {
+                            el.append(element);
+                            break;
+                        }
+                    }
+                },
+            });
+            this.srcdoc = `<html><body>
+            <div class="item">Content 1</div>
+            <div class="item">Content 2</div>
+            <body></html>`;
+        }
+    }
+    await mountWithCleanup(List);
+
+    await contains(":iframe .item:contains(Content 2)").dragAndDrop(
+        ":iframe .item:contains(Content 1)",
+        { position: "bottom-left" }
+    );
+    await animationFrame();
+    const iframeBody = queryFirst(".mydroppable").contentDocument.body.cloneNode(true);
+    iframeBody.querySelectorAll(".item").forEach((el) => el.removeAttribute("style"));
+    expect(iframeBody).toHaveInnerHTML(`
+    <div class="item">
+        Content 1
+        <div class="item">
+            Content 2
+        </div>
+    </div>`);
+});
+
+test.tags("desktop");
+test("dragging element in iframe offset", async () => {
+    /*
+     * This test presents as a bit artificial but represents a real situation
+     * in touch mode, browsers (chrome and firefox) make it so to capture the pointer
+     * (https://developer.mozilla.org/en-US/docs/Web/API/Element/setPointerCapture)
+     * The draggable code releases that pointer
+     * In practice, this means that the position of the pointer in the element
+     * is computed while the two are in different referentials (element in its iframe, pointer in the main window)
+     *
+     * Secondly, when moving the pointer in the main window, the position of the element in its iframe
+     * should be adapted taking into account the offset position of the iframe
+     */
+    const IDENTITY_MATRIX = new DOMMatrixReadOnly();
+    class List extends Component {
+        static template = xml`
+        <div t-ref="root" class="root">
+            <div class="p" />
+            <div style="width: 50px;height:500px;"/>
+            <div class="d-flex flex-row">
+                <div style="width: 500px;height:50px;"/>
+                <iframe class="mydroppable" t-att-srcdoc="srcdoc"/>
+            </div>
+        </div>`;
+        static props = ["*"];
+        setup() {
+            useDraggable({
+                iframeSelector: ".mydroppable",
+                ref: useRef("root"),
+                elements: ".item",
+                onDrag: (ctx) => {
+                    expect.step("drag");
+                },
+            });
+            this.srcdoc = `<html><body>
+            <div class="item" style="touch-action: none;">Content 1</div>
+            <div class="item" style="touch-action: none;">Content 2</div>
+            <body></html>`;
+        }
+    }
+    await mountWithCleanup(List);
+    await waitFor(":iframe .item");
+    const item = queryOne(":iframe .item:eq(1)");
+    let itemRect = item.getBoundingClientRect();
+    const frameRect = item.ownerDocument.defaultView.frameElement.getBoundingClientRect();
+    expect(frameRect.x).toBe(500);
+    expect(frameRect.y).toBe(500);
+
+    const itemRectInMain = IDENTITY_MATRIX.translate(frameRect.x, frameRect.y).transformPoint(
+        itemRect
+    );
+
+    // start dragging by being 1 pixel in x and y inside the element
+    manuallyDispatchProgrammaticEvent(item, "pointerdown", {
+        button: 0,
+        view: window, // Crucial part: the pointer and element are in two different referntials
+        clientX: itemRectInMain.x + 1,
+        clientY: itemRectInMain.y + 1,
+    });
+    await animationFrame();
+    // Drag by moving the cursor 10px in each direction
+    manuallyDispatchProgrammaticEvent(item, "pointermove", {
+        button: 0,
+        view: window,
+        clientX: itemRectInMain.x + 11,
+        clientY: itemRectInMain.y + 11,
+    });
+    await animationFrame();
+    expect.verifySteps(["drag"]);
+    const prevItemRect = itemRect;
+    itemRect = item.getBoundingClientRect();
+
+    // Assert the element followed the cursor
+    expect(itemRect.x).toBe(prevItemRect.x + 10);
+    expect(itemRect.y).toBe(prevItemRect.y + 10);
+    await press("Escape");
 });

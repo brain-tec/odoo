@@ -165,16 +165,14 @@ export class Checkout extends Interaction {
      * @return {void}
      */
     async selectPickupLocation(ev) {
-        const { zipCode, locationId } = ev.currentTarget.dataset;
         const deliveryMethodContainer = this._getDeliveryMethodContainer(ev.currentTarget);
         this.services.dialog.add(LocationSelectorDialog, {
-            zipCode: zipCode,
-            selectedLocationId: locationId,
-            isFrontend: true,
+            ...this._prepareLocationDialogData(ev.currentTarget.dataset),
             save: async locationData => {
                 const jsonLocation = JSON.stringify(locationData);
                 // Assign the selected pickup location to the order.
-                await this.waitFor(this._setPickupLocation(jsonLocation));
+                const updatedCartData = await this.waitFor(this._setPickupLocation(jsonLocation));
+                this._updateCartSummaries(updatedCartData);
 
                 //  Show and set the order location details.
                 this._updatePickupLocation(deliveryMethodContainer, locationData, jsonLocation);
@@ -182,6 +180,21 @@ export class Checkout extends Interaction {
                 this._enableMainButton();
             },
         });
+    }
+
+    /**
+     * Get the data needed by the location dialog.
+     *
+     * @param {*} dataset
+     * @returns {Object}
+     */
+    _prepareLocationDialogData(dataset) {
+        const { zipCode, locationId } = dataset;
+        return {
+            zipCode: zipCode,
+            selectedLocationId: locationId,
+            isFrontend: true,
+        };
     }
 
     // #=== DOM MANIPULATION ===#
@@ -204,6 +217,7 @@ export class Checkout extends Interaction {
         const editPickupLocationButton = pickupLocation.querySelector(
             'span[name="o_pickup_location_selector"]'
         );
+        editPickupLocationButton.dataset.countryCode = location.country_code;
         editPickupLocationButton.dataset.locationId = location.id;
         editPickupLocationButton.dataset.zipCode = location.zip_code;
         editPickupLocationButton.dataset.pickupLocationData = jsonLocation;
@@ -357,20 +371,21 @@ export class Checkout extends Interaction {
         const amountUntaxed = targetEl.querySelector(
             'tr[name="o_order_total_untaxed"] .monetary_field'
         );
-        const amountTax = targetEl.querySelector('tr[name="o_order_total_taxes"] .monetary_field');
+        const amountTax = targetEl.querySelector('#order_tax_lines_container');
         const amountTotal = targetEl.parentElement.querySelectorAll(
             'tr[name="o_order_total"] .monetary_field, #amount_total_summary.monetary_field'
         );
 
         // When no dm is set and a price span is hidden, hide the message and show the price span.
         if (amountDelivery.classList.contains('d-none')) {
-            amountDelivery.querySelector('span[name="o_message_no_dm_set"]').classList.add('d-none');
+            amountDelivery.querySelector('span[name="o_message_no_dm_set"]')?.classList.add('d-none');
             amountDelivery.classList.remove('d-none');
         }
 
         amountDelivery.innerHTML = result.amount_delivery;
         amountUntaxed.innerHTML = result.amount_untaxed;
-        amountTax.innerHTML = result.amount_tax;
+
+        amountTax.outerHTML = result.amount_tax_lines;
         amountTotal.forEach(total => total.innerHTML = result.amount_total);
     }
 
@@ -464,7 +479,7 @@ export class Checkout extends Interaction {
         // Load the radios from the DOM here to update them if the template is re-rendered.
         this.dmRadios = Array.from(document.querySelectorAll('input[name="o_delivery_radio"]'));
         if (this.dmRadios.length > 0) {
-            const checkedRadio = document.querySelector('input[name="o_delivery_radio"]:checked');
+            const checkedRadio = this._getSelectedDeliveryRadio();
             this._disableMainButton();
             if (checkedRadio) {
                 await this.waitFor(this._updateDeliveryMethod(checkedRadio));
@@ -490,7 +505,7 @@ export class Checkout extends Interaction {
         if (this.dmRadios.length === 0) { // No delivery method is available.
             return true; // Ignore the check.
         }
-        const checkedRadio = document.querySelector('input[name="o_delivery_radio"]:checked');
+        const checkedRadio = this._getSelectedDeliveryRadio();
         return checkedRadio
             && !checkedRadio.disabled
             && !this._isPickupLocationMissing(checkedRadio);
@@ -536,9 +551,10 @@ export class Checkout extends Interaction {
             'span[name="o_pickup_location_selector"]'
         );
         if (editPickupLocationButton.dataset.pickupLocationData) {
-            await this.waitFor(
+            const updatedCart = await this.waitFor(
                 this._setPickupLocation(editPickupLocationButton.dataset.pickupLocationData)
             );
+            this._updateCartSummaries(updatedCart);
         }
 
         pickupLocation.classList.remove('d-none'); // Show the whole div.
@@ -549,10 +565,12 @@ export class Checkout extends Interaction {
      *
      * @private
      * @param {String} pickupLocationData - The pickup location's data to set.
-     * @return {void}
+     * @return {Dict} - Updated cart summary.
      */
     async _setPickupLocation(pickupLocationData) {
-        await rpc('/website_sale/set_pickup_location', {pickup_location_data: pickupLocationData});
+        return await rpc('/website_sale/set_pickup_location',
+            { pickup_location_data: pickupLocationData }
+        );
     }
 
     // #=== GETTERS & SETTERS ===#
@@ -614,6 +632,15 @@ export class Checkout extends Interaction {
      */
     _getDeliveryMethodContainer(el) {
         return el.closest('[name="o_delivery_method"]');
+    }
+
+    /**
+     * Returns the selected delivery method radio element.
+     *
+     * @returns {Element} The selected radio button element.
+     */
+    _getSelectedDeliveryRadio(){
+        return this.el.querySelector('input[name="o_delivery_radio"]:checked');
     }
 
     /**

@@ -9,7 +9,7 @@ from odoo.addons.stock.tests.common import TestStockCommon
 class TestMrpCommon(TestStockCommon):
 
     @classmethod
-    def generate_mo(cls, tracking_final='none', tracking_base_1='none', tracking_base_2='none', qty_final=5, qty_base_1=4, qty_base_2=1, picking_type_id=False, consumption=False):
+    def generate_mo(cls, tracking_final='none', tracking_base_1='none', tracking_base_2='none', qty_final=5, qty_base_1=4, qty_base_2=1, picking_type_id=False):
         """ This function generate a manufacturing order with one final
         product and two consumed product. Arguments allows to choose
         the tracking/qty for each different products. It returns the
@@ -36,10 +36,9 @@ class TestMrpCommon(TestStockCommon):
         bom_1 = cls.env['mrp.bom'].create({
             'product_id': product_to_build.id,
             'product_tmpl_id': product_to_build.product_tmpl_id.id,
-            'product_uom_id': cls.uom_unit.id,
+            'uom_id': cls.uom_unit.id,
             'product_qty': 1.0,
             'type': 'normal',
-            'consumption': consumption if consumption else 'flexible',
             'bom_line_ids': [
                 Command.create({'product_id': product_to_use_2.id, 'product_qty': qty_base_2}),
                 Command.create({'product_id': product_to_use_1.id, 'product_qty': qty_base_1}),
@@ -117,9 +116,9 @@ class TestMrpCommon(TestStockCommon):
             notification_type='inbox',
             groups='mrp.group_mrp_manager, stock.group_stock_user, mrp.group_mrp_byproducts, uom.group_uom',
         )
-        # Both groups below are required to make fields `product_uom_id` and
+        # Both groups below are required to make fields `uom_id` and
         # `workorder_ids` to be visible in the view of `mrp.production`. The
-        # field `product_uom_id` must be set by many tests, and subviews of
+        # field `uom_id` must be set by many tests, and subviews of
         # `workorder_ids` must be present in many tests to create records.
         cls.env.user.group_ids += cls.group_uom + cls.group_mrp_routings
         cls.picking_type_manu = cls.warehouse_1.manu_type_id
@@ -147,7 +146,7 @@ class TestMrpCommon(TestStockCommon):
         for (workcenter, default_capacity) in [(cls.workcenter_1, 2), (cls.workcenter_2, 1), (cls.workcenter_3, 2)]:
             cls.env['mrp.workcenter.capacity'].create({
                 'workcenter_id': workcenter.id,
-                'product_uom_id': cls.uom_unit.id,
+                'uom_id': cls.uom_unit.id,
                 'capacity': default_capacity,
                 'time_start': workcenter.time_start,
                 'time_stop': workcenter.time_stop,
@@ -155,9 +154,8 @@ class TestMrpCommon(TestStockCommon):
         cls.bom_1 = cls.env['mrp.bom'].create({
             'product_id': cls.product_4.id,
             'product_tmpl_id': cls.product_4.product_tmpl_id.id,
-            'product_uom_id': cls.uom_unit.id,
+            'uom_id': cls.uom_unit.id,
             'product_qty': 4.0,
-            'consumption': 'flexible',
             'operation_ids': [
             ],
             'type': 'normal',
@@ -168,8 +166,7 @@ class TestMrpCommon(TestStockCommon):
         cls.bom_2 = cls.env['mrp.bom'].create({
             'product_id': cls.product_5.id,
             'product_tmpl_id': cls.product_5.product_tmpl_id.id,
-            'product_uom_id': cls.product_5.uom_id.id,
-            'consumption': 'flexible',
+            'uom_id': cls.product_5.uom_id.id,
             'product_qty': 1.0,
             'operation_ids': [
                 Command.create({'name': 'Gift Wrap Maching', 'workcenter_id': cls.workcenter_1.id, 'time_cycle': 15, 'sequence': 1}),
@@ -183,9 +180,8 @@ class TestMrpCommon(TestStockCommon):
         cls.bom_3 = cls.env['mrp.bom'].create({
             'product_id': cls.product_6.id,
             'product_tmpl_id': cls.product_6.product_tmpl_id.id,
-            'product_uom_id': cls.uom_dozen.id,
+            'uom_id': cls.uom_dozen.id,
             'ready_to_produce': 'asap',
-            'consumption': 'flexible',
             'product_qty': 2.0,
             'operation_ids': [
                 Command.create({'name': 'Cutting Machine', 'workcenter_id': cls.workcenter_1.id, 'time_cycle': 12, 'sequence': 1}),
@@ -200,7 +196,6 @@ class TestMrpCommon(TestStockCommon):
         cls.bom_4 = cls.env['mrp.bom'].create({
             'product_id': cls.product_6.id,
             'product_tmpl_id': cls.product_6.product_tmpl_id.id,
-            'consumption': 'flexible',
             'product_qty': 1.0,
             'operation_ids': [Command.create({
                 'name': 'Rub it gently with a cloth',
@@ -216,7 +211,6 @@ class TestMrpCommon(TestStockCommon):
         cls.bom_5 = cls.env['mrp.bom'].create({
             'product_id': cls.product_6.id,
             'product_tmpl_id': cls.product_6.product_tmpl_id.id,
-            'consumption': 'flexible',
             'product_qty': 1.0,
             'operation_ids': [Command.create({
                 'name': 'Rub it gently with a cloth two at once',
@@ -232,7 +226,6 @@ class TestMrpCommon(TestStockCommon):
         cls.bom_6 = cls.env['mrp.bom'].create({
             'product_id': cls.product_6.id,
             'product_tmpl_id': cls.product_6.product_tmpl_id.id,
-            'consumption': 'flexible',
             'product_qty': 1.0,
             'operation_ids': [Command.create({
                 'name': 'Rub it gently with a cloth two at once',
@@ -256,14 +249,28 @@ class TestMrpCommon(TestStockCommon):
                 "product_id": p.id,
                 "product_qty": 1,
                 "type": "phantom",
-                "product_uom_id": cls.uom_unit.id,
+                "uom_id": cls.uom_unit.id,
                 "bom_line_ids": [
                     Command.create({
                         "product_id": c.id,
                         "product_qty": 1,
-                        "product_uom_id": cls.uom_unit.id
+                        "uom_id": cls.uom_unit.id
                     })
                     for c in cs
                 ],
             }
         )
+
+    def full_availability(self):
+        """set full availability for all calendars"""
+        calendar = self.env['resource.calendar'].search([])
+        calendar.write({'attendance_ids': [(5, 0, 0)]})
+        calendar.write({'attendance_ids': [
+            (0, 0, {'dayofweek': '0', 'hour_from': 0, 'hour_to': 24}),
+            (0, 0, {'dayofweek': '1', 'hour_from': 0, 'hour_to': 24}),
+            (0, 0, {'dayofweek': '2', 'hour_from': 0, 'hour_to': 24}),
+            (0, 0, {'dayofweek': '3', 'hour_from': 0, 'hour_to': 24}),
+            (0, 0, {'dayofweek': '4', 'hour_from': 0, 'hour_to': 24}),
+            (0, 0, {'dayofweek': '5', 'hour_from': 0, 'hour_to': 24}),
+            (0, 0, {'dayofweek': '6', 'hour_from': 0, 'hour_to': 24}),
+        ]})

@@ -1,4 +1,8 @@
-import { insertSnippet, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import {
+    insertSnippet,
+    registerWebsitePreviewTour,
+    unfoldOptionsGroup,
+} from "@website/js/tours/tour_utils";
 
 import { FileSelectorControlPanel } from "@html_editor/main/media/media_dialog/file_selector";
 import { patch } from "@web/core/utils/patch";
@@ -81,6 +85,7 @@ const formatErrorMsg =
 registerWebsitePreviewTour(
     "test_image_upload_progress",
     {
+        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/test_image_progress",
         edition: true,
     },
@@ -92,6 +97,7 @@ registerWebsitePreviewTour(
             trigger: ":iframe #wrap .s_image_gallery .img",
             run: "click",
         },
+        ...unfoldOptionsGroup("Image Gallery"),
         {
             content: "click on add images to open image dialog (in multi mode)",
             trigger: "button[data-action-id='addImage']",
@@ -129,15 +135,7 @@ registerWebsitePreviewTour(
         },
         {
             content: "there should only have one notification toaster",
-            trigger: "body",
-            run() {
-                const notificationCount = document.querySelectorAll(".o_notification").length;
-                if (notificationCount !== 1) {
-                    throw new Error(
-                        `There should be one notification toaster opened, and only one, found ${notificationCount}.`
-                    );
-                }
-            },
+            trigger: ".o_notification:count(1)",
         },
         {
             content: "close media dialog",
@@ -172,15 +170,7 @@ registerWebsitePreviewTour(
         },
         {
             content: "there should only have one notification toaster",
-            trigger: ".o_notification",
-            run() {
-                const notificationCount = document.querySelectorAll(".o_notification").length;
-                if (notificationCount !== 1) {
-                    throw new Error(
-                        `There should be one notification toaster opened, and only one, found ${notificationCount}.`
-                    );
-                }
-            },
+            trigger: ".o_notification:count(1)",
         },
         {
             content: "media dialog has closed after the upload",
@@ -221,20 +211,17 @@ registerWebsitePreviewTour(
         {
             content: "check upload progress bar is correctly shown",
             trigger: `.o_we_progressbar:contains('icon.ico'):contains('${formatErrorMsg}')`,
+        },
+        {
+            trigger: "body",
             run() {
                 patchWithError = false;
             },
         },
         {
             content: "there should only have one notification toaster",
-            trigger: ".o_notification",
+            trigger: ".o_notification:count(1)",
             run() {
-                const notificationCount = document.querySelectorAll(".o_notification").length;
-                if (notificationCount !== 1) {
-                    throw new Error(
-                        `There should be one noficiation toaster opened, and only one, found ${notificationCount}.`
-                    );
-                }
                 unpatchMediaDialog();
             },
         },

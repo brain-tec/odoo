@@ -7,9 +7,12 @@ import {
     convertCSSColorToRgba,
 } from "@web/core/utils/colors";
 import { CheckBox } from "@web/core/checkbox/checkbox";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { isMobileOS } from "@web/core/browser/feature_detection";
 
 export class GradientPicker extends Component {
-    static components = { ColorPicker, CheckBox };
+    static components = { ColorPicker, CheckBox, Dropdown, DropdownItem };
     static template = "html_editor.GradientPicker";
     static props = {
         onGradientChange: { type: Function, optional: true },
@@ -39,13 +42,29 @@ export class GradientPicker extends Component {
         this.knobRef = useRef("gradientAngleKnob");
 
         this.onToggleRepeatingBound = this.onToggleRepeating.bind(this);
+        this.isMobileOS = isMobileOS();
+
+        // Apply the previewed custom color when the popover is closed.
+        this.props.setOnCloseCallback?.(() => {
+            this.onColorGradientChange();
+        });
+
+        this.props.setOperationCallbacks?.({
+            onApplyCallback: () => {
+                this.props.setOnCloseCallback(() => {});
+            },
+            getPreviewColor: () => this.cssGradients[this.state.type],
+            onPreviewRevertCallback: () => {
+                this.onColorGradientPreview();
+            },
+        });
 
         if (this.props.selectedGradient && isColorGradient(this.props.selectedGradient)) {
             // initialization of the gradient with the selected value
             this.setGradientFromString(this.props.selectedGradient);
         } else {
             // initialization of the gradient with default value
-            this.onColorGradientChange();
+            this.onColorGradientPreview();
         }
     }
 
@@ -91,12 +110,12 @@ export class GradientPicker extends Component {
 
     selectType(type) {
         this.state.type = type;
-        this.onColorGradientChange();
+        this.onColorGradientPreview();
     }
 
     onToggleRepeating() {
         this.state.repeating = !this.state.repeating;
-        this.onColorGradientChange();
+        this.onColorGradientPreview();
     }
 
     onAngleChange(ev) {
@@ -105,7 +124,7 @@ export class GradientPicker extends Component {
             const clampedAngle = Math.min(Math.max(angle, -360), 360);
             ev.target.value = clampedAngle;
             this.state.angle = clampedAngle;
-            this.onColorGradientChange();
+            this.onColorGradientPreview();
         }
     }
 
@@ -115,7 +134,7 @@ export class GradientPicker extends Component {
             const clampedValue = Math.min(Math.max(inputValue, -100), 200);
             ev.target.value = clampedValue;
             this.positions[position] = clampedValue;
-            this.onColorGradientChange();
+            this.onColorGradientPreview();
         }
     }
 
@@ -133,7 +152,7 @@ export class GradientPicker extends Component {
 
     onSizeChange(size) {
         this.state.size = size;
-        this.onColorGradientChange();
+        this.onColorGradientPreview();
     }
 
     getRadialGradient(size) {
@@ -148,7 +167,7 @@ export class GradientPicker extends Component {
         this.colors[colorIndex].percentage = ev.target.value;
         const newIndex = this.sortColors(colorIndex);
         this.state.currentColorIndex = newIndex;
-        this.onColorGradientChange();
+        this.onColorGradientPreview();
     }
 
     onGradientPreviewClick(ev) {
@@ -195,7 +214,7 @@ export class GradientPicker extends Component {
         this.state.currentColorIndex = this.colors.findIndex(
             (color) => color.percentage === percentage
         );
-        this.onColorGradientChange();
+        this.onColorGradientPreview();
     }
 
     removeColor(colorIndex) {
@@ -204,7 +223,7 @@ export class GradientPicker extends Component {
         }
         this.colors.splice(colorIndex, 1);
         this.state.currentColorIndex = 0;
-        this.onColorGradientChange();
+        this.onColorGradientPreview();
     }
 
     sortColors(index) {
@@ -274,15 +293,26 @@ export class GradientPicker extends Component {
         };
 
         updateAngle(ev);
-        this.onColorGradientChange();
+        this.onColorGradientPreview();
 
         const onKnobMouseMove = (ev) => {
             updateAngle(ev);
-            this.onColorGradientChange();
+            this.onColorGradientPreview();
         };
         const onKnobMouseUp = () => document.removeEventListener("mousemove", onKnobMouseMove);
 
         document.addEventListener("mousemove", onKnobMouseMove);
         document.addEventListener("mouseup", onKnobMouseUp, { once: true });
+    }
+
+    onKeydown(ev) {
+        if (ev.key === "Enter") {
+            if (ev.target.tagName === "INPUT") {
+                // we dispatch 'change' event here to trigger values updates
+                // so we have updated values before we call onColorGradientChange
+                ev.target.dispatchEvent(new Event("change"));
+                this.onColorGradientChange();
+            }
+        }
     }
 }

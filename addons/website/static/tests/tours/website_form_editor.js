@@ -6,6 +6,7 @@ import {
     goBackToBlocks,
     registerWebsitePreviewTour,
     changeOptionInPopover,
+    unfoldOptionsGroup,
 } from "@website/js/tours/tour_utils";
 import { stepUtils } from "@web_tour/tour_utils";
 import { editorsWeakMap } from "@html_editor/../tests/tours/helpers/editor";
@@ -169,6 +170,7 @@ const compareIds = ({ content, firstElSelector, secondElSelector, errorMessage }
 registerWebsitePreviewTour(
     "website_form_editor_tour",
     {
+        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/",
         edition: true,
     },
@@ -545,30 +547,29 @@ registerWebsitePreviewTour(
             run: "click",
         },
         {
-            content: "Click on Edit Link in Popover",
-            trigger: ".o-we-linkpopover .o_we_edit_link",
-            run: "click",
-        },
-        {
-            content: "Click on link type dropdown",
-            trigger: ".o-we-linkpopover button[name='link_type']",
+            content: "Click on button type dropdown",
+            trigger: "[data-label=Type] .o-hb-select-toggle",
             run: "click",
         },
         {
             content: "Change button's style",
-            trigger: ".o-we-link-type-dropdown .dropdown-item:contains('Custom')",
+            trigger: ".o_popover .dropdown-item:contains('Custom')",
             run: "click",
         },
         {
-            trigger: ".o-we-linkpopover select[name=link_style_shape]",
-            run: "select rounded-circle",
+            trigger: "[data-label=Shape] .o-hb-select-toggle",
+            run: "click",
         },
         {
-            trigger: ".o-we-linkpopover select[name='link_style_size']",
-            run: "select sm",
+            trigger: ".o_popover [data-action-value='rounded-circle']",
+            run: "click",
         },
         {
-            trigger: ".o-we-linkpopover .o_we_apply_link",
+            trigger: "[data-label=Size] .o-hb-select-toggle",
+            run: "click",
+        },
+        {
+            trigger: ".o_popover [data-action-value='sm']",
             run: "click",
         },
         {
@@ -686,6 +687,7 @@ registerWebsitePreviewTour(
         // while field B's visibility is also tied to another field.
         ...clickOnEditAndWaitEditMode(),
         ...selectFieldByLabel("field A"),
+        ...unfoldOptionsGroup("Form"),
         {
             content: "Verify that the form editor appeared",
             trigger: ".o_customize_tab div[data-container-title='Form'] .we-bg-options-container",
@@ -800,6 +802,7 @@ registerWebsitePreviewTour(
             trigger: ":iframe .s_website_form_send",
             run: "click",
         },
+        ...unfoldOptionsGroup("Form"),
         {
             content: "Change the Recipient Email",
             trigger: '[data-label="Recipient Email"] input',
@@ -918,6 +921,7 @@ registerWebsitePreviewTour(
     },
     () =>
         editContactUs([
+            ...unfoldOptionsGroup("Form"),
             {
                 content: "Change the Recipient Email",
                 trigger: "div[data-label='Recipient Email'] input",
@@ -933,6 +937,7 @@ registerWebsitePreviewTour(
     },
     () =>
         editContactUs([
+            ...unfoldOptionsGroup("Form"),
             {
                 content: "Change a random option",
                 trigger: "[data-action-id='setMark'] input",
@@ -949,6 +954,7 @@ registerWebsitePreviewTour(
 registerWebsitePreviewTour(
     "website_form_conditional_required_checkboxes",
     {
+        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/",
         edition: true,
     },
@@ -1014,7 +1020,7 @@ registerWebsitePreviewTour(
         },
         {
             content: "Open condition comparator select",
-            trigger: "[data-container-title='Field'] #hidden_condition_no_text_opt",
+            trigger: "[data-container-title='Field'] #hidden_condition_record_opt",
             run: "click",
         },
         {
@@ -1110,6 +1116,7 @@ registerWebsitePreviewTour(
     },
     () =>
         editContactUs([
+            ...unfoldOptionsGroup("Form"),
             {
                 content: "Change a random option",
                 trigger: "[data-action-id='setMark'] input",
@@ -1216,6 +1223,7 @@ registerWebsitePreviewTour(
 registerWebsitePreviewTour(
     "website_form_special_characters",
     {
+        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/",
         edition: true,
     },

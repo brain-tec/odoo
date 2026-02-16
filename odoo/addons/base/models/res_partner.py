@@ -207,7 +207,7 @@ class ResPartner(models.Model):
     parent_id: ResPartner = fields.Many2one('res.partner', string='Related Company', index=True)
     # It's Stored intentionally and will act in place of `company_name`
     parent_name = fields.Char(related='parent_id.name', readonly=True, store=False, string='Parent name')
-    child_ids: ResPartner = fields.One2many('res.partner', 'parent_id', string='Contact', domain=[('active', '=', True)], context={'active_test': False})
+    child_ids: ResPartner = fields.One2many('res.partner', 'parent_id', string='Related Contacts', domain=[('active', '=', True)], context={'active_test': False})
     ref = fields.Char(string='Reference', index=True)
     lang = fields.Selection(_lang_get, string='Language',
                             compute='_compute_lang', readonly=False, store=True,
@@ -881,7 +881,7 @@ class ResPartner(models.Model):
         for partner, pre_values in zip(self, pre_values_list, strict=True):
             if internal_users := partner.user_ids.filtered(lambda u: u._is_internal() and u != self.env.user):
                 internal_users.check_access('write')
-            updated = {fname: fvalue for fname, fvalue in vals.items() if partner[fname] != pre_values[fname]}
+            updated = {fname: fvalue for fname, fvalue in vals.items() if partner[fname] != pre_values.get(fname)}
             if updated:
                 partner._fields_sync(updated)
         return result
@@ -910,6 +910,7 @@ class ResPartner(models.Model):
             return partners
 
         for partner, vals in zip(partners, vals_list):
+            vals = self.env['res.partner']._add_missing_default_values(vals)
             partner._fields_sync(vals)
         return partners
 

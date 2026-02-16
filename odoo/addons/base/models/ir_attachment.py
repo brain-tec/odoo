@@ -7,22 +7,37 @@ import hashlib
 import logging
 import mimetypes
 import os
-import psycopg2
 import re
 import uuid
 import warnings
-import werkzeug
-
 from collections import defaultdict
 from collections.abc import Collection
 
-from odoo import api, fields, models, _
-from odoo.exceptions import AccessError, MissingError, ValidationError, UserError
+import psycopg2
+import werkzeug.security
+
+from odoo import _, api, fields, models
+from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
 from odoo.fields import Domain
-from odoo.http import Stream, root, request
-from odoo.tools import config, consteq, human_size, image, split_every, str2bool, OrderedSet
+from odoo.http import request
+from odoo.http.router import root
+from odoo.http.stream import Stream
+from odoo.tools import (
+    OrderedSet,
+    config,
+    consteq,
+    human_size,
+    image,
+    split_every,
+    str2bool,
+)
 from odoo.tools.constants import PREFETCH_MAX
-from odoo.tools.mimetypes import guess_mimetype, fix_filename_extension, _olecf_mimetypes
+from odoo.tools.mimetypes import (
+    MIMETYPE_HEAD_SIZE,
+    _olecf_mimetypes,
+    fix_filename_extension,
+    guess_mimetype,
+)
 from odoo.tools.misc import limited_field_access_token
 
 _logger = logging.getLogger(__name__)
@@ -343,6 +358,7 @@ class IrAttachment(models.Model):
             mimetype = mimetypes.guess_type(values['url'].split('?')[0])[0]
         if not mimetype or mimetype == 'application/octet-stream':
             if raw := values.get('raw'):
+                assert isinstance(raw, bytes), f"Expecting raw bytes, got {type(raw)}"
                 mimetype = guess_mimetype(raw)
         return mimetype.lower() if mimetype else 'application/octet-stream'
 
@@ -600,6 +616,8 @@ class IrAttachment(models.Model):
         domain = domain.optimize(self)
         if self.env.su or bypass_access or domain.is_false():
             return super()._search(domain, offset, limit, order, active_test=active_test, bypass_access=bypass_access)
+        if self.env.context.get('_read_groupby'):
+            raise ValueError("Cannot group by ir.attachment")
 
         # General access rules
         # - public == True are always accessible
@@ -737,7 +755,7 @@ class IrAttachment(models.Model):
         for values in vals_list:
             # needs to be popped in all cases to bypass `_inverse_datas`
             datas = values.pop('datas', None)
-            if raw := values.get('raw'):
+            if raw := (values.get('raw') or values.get('db_datas')):
                 if isinstance(raw, str):
                     values['raw'] = raw.encode()
             elif datas:
@@ -862,7 +880,7 @@ class IrAttachment(models.Model):
             mimetype = file.content_type
             filename = file.filename
         elif mimetype == 'GUESS':
-            head = file.read(1024)
+            head = file.read(MIMETYPE_HEAD_SIZE)
             file.seek(-len(head), 1)  # rewind
             mimetype = guess_mimetype(head)
             filename = fix_filename_extension(file.filename, mimetype)
@@ -885,7 +903,7 @@ class IrAttachment(models.Model):
         """ Create a :class:`~Stream`: from an ir.attachment record. """
         self.ensure_one()
 
-        stream = Stream(
+        kw = dict(
             mimetype=self.mimetype,
             download_name=self.name,
             etag=self.checksum,
@@ -893,20 +911,17 @@ class IrAttachment(models.Model):
         )
 
         if self.store_fname:
-            stream.type = 'path'
-            stream.path = werkzeug.security.safe_join(
+            path = werkzeug.security.safe_join(
                 os.path.abspath(config.filestore(request.db)),
                 self.store_fname
             )
-            stat = os.stat(stream.path)
-            stream.last_modified = stat.st_mtime
-            stream.size = stat.st_size
-
-        elif self.db_datas:
-            stream.type = 'data'
-            stream.data = self.raw
-            stream.last_modified = self.write_date
-            stream.size = len(stream.data)
+            stat = os.stat(path)
+            kw.update(
+                type='path',
+                path=path,
+                last_modified=stat.st_mtime,
+                size=stat.st_size,
+            )
 
         elif self.url:
             # When the URL targets a file located in an addon, assume it
@@ -917,17 +932,20 @@ class IrAttachment(models.Model):
                 host=request.httprequest.environ.get('HTTP_HOST', '')
             )
             if static_path:
-                stream = Stream.from_path(static_path, public=True)
+                return Stream.from_path(static_path, public=True)
             else:
-                stream.type = 'url'
-                stream.url = self.url
+                kw.update(type='url', url=self.url)
 
         else:
-            stream.type = 'data'
-            stream.data = b''
-            stream.size = 0
+            data = self.raw or b''
+            kw.update(
+                type='data',
+                data=data,
+                last_modified=self.write_date,
+                size=len(data),
+            )
 
-        return stream
+        return Stream(**kw)
 
     def _is_remote_source(self):
         self.ensure_one()

@@ -26,11 +26,11 @@ class ProductTemplate(models.Model):
     def default_get(self, fields):
         res = super().default_get(fields)
         if ('uom_id' in fields and not res.get('uom_id')) or self.env.context.get('default_uom_id') is False:
-            res['uom_id'] = self._get_default_uom_id().id
+            res['uom_id'] = self._default_uom_id().id
         return res
 
     @tools.ormcache()
-    def _get_default_uom_id(self):
+    def _default_uom_id(self):
         # Deletion forbidden (at least through unlink)
         return self.env.ref('uom.product_uom_unit')
 
@@ -39,6 +39,13 @@ class ProductTemplate(models.Model):
         if not category_ids and self.env.context.get('group_expand'):
             category_ids = categories.sudo()._search([], order=categories._order)
         return categories.browse(category_ids)
+
+    def _domain_pricelist_rule_ids(self):
+        return Domain('pricelist_id', '=', False) | Domain('pricelist_id.active', '=', True)
+
+    @api.model
+    def _domain_fixed_pricelist_rule_ids(self):
+        return self._domain_pricelist_rule_ids() & Domain('compute_price', '=', 'fixed')
 
     name = fields.Char('Name', index='trigram', required=True, translate=True)
     sequence = fields.Integer('Sequence', default=1, help='Gives the sequence order when displaying a product list')
@@ -92,14 +99,14 @@ class ProductTemplate(models.Model):
     # list_price: catalog price, user defined
     list_price = fields.Float(
         'Sales Price', default=1.0,
-        digits='Product Price',
+        min_display_digits='Product Price',
         tracking=True,
         help="Price at which the product is sold to customers.",
     )
     standard_price = fields.Float(
         'Cost', compute='_compute_standard_price',
         inverse='_set_standard_price', search='_search_standard_price',
-        digits='Product Price', groups="base.group_user",
+        min_display_digits='Product Price', groups="base.group_user",
         help="""Value of the product (automatically computed in AVCO).
         Used to value the product when the purchase cost is not known (e.g. inventory adjustment).
         Used to compute margins on sale orders.""")
@@ -132,7 +139,7 @@ class ProductTemplate(models.Model):
     purchase_ok = fields.Boolean('Purchase', default=True, compute='_compute_purchase_ok', store=True, readonly=False)
     uom_id = fields.Many2one(
         'uom.uom', 'Unit', tracking=True,
-        default=_get_default_uom_id, required=True,
+        default=_default_uom_id, required=True,
         help="Default unit of measure used for all stock operations.")
     uom_ids = fields.Many2many('uom.uom', string='Packagings', help="Additional packagings for this product which can be used for sales", domain="[('id', '!=', uom_id)]")
     uom_name = fields.Char(string='Unit Name', related='uom_id.name', readonly=True)
@@ -173,9 +180,15 @@ class ProductTemplate(models.Model):
 
     pricelist_rule_ids = fields.One2many(
         string="Pricelist Rules",
-        comodel_name='product.pricelist.item',
-        inverse_name='product_tmpl_id',
-        domain=lambda self: self._domain_pricelist_rule_ids(),
+        comodel_name="product.pricelist.item",
+        inverse_name="product_tmpl_id",
+        domain=_domain_pricelist_rule_ids,
+    )
+    fixed_pricelist_rule_ids = fields.One2many(
+        comodel_name="product.pricelist.item",
+        inverse_name="product_tmpl_id",
+        domain=_domain_fixed_pricelist_rule_ids,
+        copy=False,
     )
 
     product_document_ids = fields.One2many(
@@ -202,15 +215,8 @@ class ProductTemplate(models.Model):
     # Properties
     product_properties = fields.Properties('Properties', definition='categ_id.product_properties_definition', copy=True)
 
-    def _base_domain_item_ids(self):
-        return [
-            '|',
-            ('pricelist_id', '=', False),
-            ('pricelist_id.active', '=', True),
-        ]
-
-    def _domain_pricelist_rule_ids(self):
-        return self._base_domain_item_ids()
+    # UI
+    show_sales_price_page = fields.Boolean(compute='_compute_show_sales_price_page')
 
     @api.depends('type')
     def _compute_service_tracking(self):
@@ -415,6 +421,12 @@ class ProductTemplate(models.Model):
 
     def _set_barcode(self):
         self._set_product_variant_field('barcode')
+
+    @api.depends('sale_ok')
+    def _compute_show_sales_price_page(self):
+        pricelist_active = self.env.user._has_group('product.group_product_pricelist')
+        for template in self:
+            template.show_sales_price_page = pricelist_active and template.sale_ok
 
     @api.model
     def _get_weight_uom_id_from_ir_config_parameter(self):
@@ -680,28 +692,90 @@ class ProductTemplate(models.Model):
         return vals_list
 
     def copy(self, default=None):
-        res = super().copy(default=default)
-        # Since we don't copy the product template attribute values, we need to match the extra prices.
-        for ptal, copied_ptal in zip(self.attribute_line_ids, res.attribute_line_ids):
-            for ptav, copied_ptav in zip(ptal.product_template_value_ids, copied_ptal.product_template_value_ids):
+        copied_tmpls = super().copy(default)
+        for template, template_copy in zip(self, copied_tmpls, strict=True):
+            # Since we don't copy the product template attribute values, we need to match the extra
+            # prices.
+            for ptav, copied_ptav in zip(
+                template.attribute_line_ids.product_template_value_ids,
+                template_copy.attribute_line_ids.product_template_value_ids,
+            ):
                 if not ptav.price_extra:
                     continue
                 # security check
-                if ptav.attribute_id == copied_ptav.attribute_id and ptav.product_attribute_value_id == copied_ptav.product_attribute_value_id:
+                if (
+                    ptav.attribute_id == copied_ptav.attribute_id
+                    and ptav.product_attribute_value_id == copied_ptav.product_attribute_value_id
+                ):
                     copied_ptav.price_extra = ptav.price_extra
-        return res
+
+            if template.company_id != template_copy.company_id:
+                # Don't duplicate pricings when the copy belongs to another company to
+                # avoid multi-company issues.
+                continue
+
+            # User duplicating the template might not have access to pricings
+            template_sudo = template.sudo()
+
+            if not template_sudo._duplicate_pricelist_rules_on_copy():
+                continue
+
+            # Force the order to be on id, since the others keys will have the same value/order
+            # This guarantees the order of the copied pricings is the same as the original ones
+            # regardless of the 'id desc' in the _order of product.pricelist.item model.
+            # Do not rely on the x2m field to pricelist rules as it only holds fixed rules.
+            template_pricings = self.env['product.pricelist.item'].search(
+                [('product_tmpl_id', '=', template.id)], order="id"
+            )
+
+            # Duplicate template rules
+            variant_specific_pricings = template_pricings.filtered('product_id')
+            (template_pricings - variant_specific_pricings).copy({
+                'product_tmpl_id': template_copy.id
+            })
+
+            # Duplicate variant-specific rules
+            if variant_specific_pricings:
+                variant_mapping = dict(
+                    zip(
+                        template_sudo.product_variant_ids.ids,
+                        template_copy.product_variant_ids.ids,
+                        strict=True,
+                    )
+                )
+
+                for product_id, pricings in variant_specific_pricings.grouped(
+                    lambda pricing: pricing.product_id.id
+                ).items():
+                    if product_id not in variant_mapping:
+                        # Pricings of inactive variants should not be copied
+                        # (removed combinations, archived products ...)
+                        continue
+                    pricings.sudo().copy({
+                        'product_tmpl_id': template_copy.id,
+                        'product_id': variant_mapping.get(product_id),
+                    })
+        return copied_tmpls
+
+    def _duplicate_pricelist_rules_on_copy(self):
+        # Safety net, the current heuristic/approach might not be safe enough
+        # to be applied by default on all products (inactive variants, exclusions, ...)
+        return False
 
     @api.depends('name', 'default_code')
-    @api.depends_context('formatted_display_name')
+    @api.depends_context('formatted_display_name', 'display_default_code')
     def _compute_display_name(self):
+        display_default_code = self.env.context.get('display_default_code', True)
         for template in self:
             if not template.name:
                 template.display_name = False
+            elif not (display_default_code and template.default_code):
+                template.display_name = template.name
             elif self.env.context.get('formatted_display_name'):
-                code_prefix = f'\t--{template.default_code}--' if template.default_code else ''
+                code_prefix = f'\t--{template.default_code}--'
                 template.display_name = f'{template.name}{code_prefix}'
             else:
-                code_prefix = f'[{template.default_code}] ' if template.default_code else ''
+                code_prefix = f'[{template.default_code}] '
                 template.display_name = f'{code_prefix}{template.name}'
 
     @api.model
@@ -1283,6 +1357,11 @@ class ProductTemplate(models.Model):
         if not product_template_attribute_values_per_line:
             return
 
+        product_template_attribute_values_per_line = [ptav for ptav in product_template_attribute_values_per_line if len(ptav)]
+        if not product_template_attribute_values_per_line:
+            yield self.env['product.template.attribute.value']
+            return
+
         all_exclusions = {self.env['product.template.attribute.value'].browse(k):
                           self.env['product.template.attribute.value'].browse(v) for k, v in
                           self._get_own_attribute_exclusions().items()}
@@ -1487,7 +1566,7 @@ class ProductTemplate(models.Model):
     def get_import_templates(self):
         return [{
             'label': _('Import Template for Products'),
-            'template': '/product/static/xls/product_product.xls'
+            'template': '/product/static/xls/products_import_template.xlsx'
         }]
 
     def get_contextual_price(self, product=None):
@@ -1535,6 +1614,8 @@ class ProductTemplate(models.Model):
         ) > 1
 
     def _get_available_uoms(self):
+        if not self:
+            return self.env['uom.uom']
         self.ensure_one()
         return self.uom_id | self.uom_ids
 

@@ -101,6 +101,12 @@ class AccountReport(models.Model):
         precompute=True,
         readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
+    use_fiscal_periods = fields.Boolean(
+        string="Fiscal Periods",
+        compute=lambda x: x._compute_report_option_filter('use_fiscal_periods', True),
+        precompute=True, readonly=False, store=True,
+        depends=['root_report_id', 'section_main_report_ids'],
+    )
 
     currency_translation = fields.Selection(
         string="Currency Translation",
@@ -638,7 +644,7 @@ class AccountReportExpression(models.Model):
     @api.constrains('formula')
     def _check_formula(self):
         def raise_formula_error(expression):
-            raise ValidationError(_("Invalid formula for expression '%(label)s' of line '%(line)s': %(formula)s",
+            raise ValidationError(self.env._("Invalid formula for expression '%(label)s' of line '%(line)s': %(formula)s",
                                     label=expression.label, line=expression.report_line_name,
                                     formula=expression.formula))
 
@@ -655,7 +661,7 @@ class AccountReportExpression(models.Model):
             for token in ACCOUNT_CODES_ENGINE_SPLIT_REGEX.split(cleaned_formula):
                 if token:  # e.g. if the first character of the formula is "-", the first token is ''
                     token_match = ACCOUNT_CODES_ENGINE_TERM_REGEX.match(token)
-                    prefix = token_match['prefix']
+                    prefix = token_match and token_match['prefix']
                     if not prefix:
                         raise_formula_error(expression)
 

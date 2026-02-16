@@ -3,8 +3,9 @@ import { fields, Record } from "@mail/model/export";
 
 import { Deferred, Mutex } from "@web/core/utils/concurrency";
 
+export const CHAT_HUB_DEFAULT_BUBBLE_START = 15;
 export const CHAT_HUB_KEY = "mail.ChatHub";
-const CHAT_HUB_COMPACT_LS = "mail.user_setting.chathub_compact";
+export const CHAT_HUB_COMPACT_LS = "mail.user_setting.chathub_compact";
 
 /**
  * @typedef AwaitChatHubInit
@@ -14,8 +15,20 @@ const CHAT_HUB_COMPACT_LS = "mail.user_setting.chathub_compact";
  */
 
 export class ChatHub extends Record {
+    static singleton = true;
+
     BUBBLE = 56; // same value as $o-mail-ChatHub-bubblesWidth
-    BUBBLE_START = 15; // same value as $o-mail-ChatHub-bubblesStart
+    recomputeBubbleStart = 0;
+    BUBBLE_START = fields.Attr(CHAT_HUB_DEFAULT_BUBBLE_START, {
+        /** @this {import("models").Chathub} */
+        compute() {
+            void this.recomputeBubbleStart;
+            return this.computeBubbleStart();
+        },
+    });
+    computeBubbleStart() {
+        return CHAT_HUB_DEFAULT_BUBBLE_START;
+    }
     BUBBLE_LIMIT = 7;
     BUBBLE_OUTER = 10; // same value as $o-mail-ChatHub-bubblesMargin
     WINDOW_GAP = 10; // for a single end, multiply by 2 for left and right together.
@@ -33,7 +46,7 @@ export class ChatHub extends Record {
                 chatHub.load();
             }
             if (ev.key === CHAT_HUB_COMPACT_LS) {
-                chatHub.compact = ev.newValue === "true";
+                chatHub._recomputeCompact++;
             }
         });
         chatHub
@@ -42,17 +55,11 @@ export class ChatHub extends Record {
         return chatHub;
     }
 
+    _recomputeCompact = 0;
     compact = fields.Attr(false, {
         compute() {
+            void this._recomputeCompact;
             return browser.localStorage.getItem(CHAT_HUB_COMPACT_LS) === "true";
-        },
-        /** @this {import("models").Chathub} */
-        onUpdate() {
-            if (this.compact) {
-                browser.localStorage.setItem(CHAT_HUB_COMPACT_LS, this.compact.toString());
-            } else {
-                browser.localStorage.removeItem(CHAT_HUB_COMPACT_LS);
-            }
         },
     });
     canShowOpened = fields.Many("ChatWindow");
@@ -85,7 +92,8 @@ export class ChatHub extends Record {
         for (const chatWindow of this.opened) {
             chatWindow.bypassCompact = false;
         }
-        this.compact = true;
+        browser.localStorage.setItem(CHAT_HUB_COMPACT_LS, true);
+        this._recomputeCompact++;
     }
 
     onRecompute() {

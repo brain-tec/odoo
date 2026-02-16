@@ -7,17 +7,17 @@ from odoo.tools import mute_logger
 from odoo.tools.json import scriptsafe as json_safe
 
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo, HttpCaseWithUserPortal
+from odoo.addons.base.tests.files import GIF_B64, GIF_RAW
 
 
 @tests.tagged('-at_install', 'post_install')
 class TestWebEditorController(HttpCaseWithUserDemo, HttpCaseWithUserPortal):
 
     def test_modify_image(self):
-        gif_base64 = b"R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs="
         attachment = self.env['ir.attachment'].create({
             'name': 'test.gif',
             'mimetype': 'image/gif',
-            'datas': gif_base64,
+            'raw': GIF_RAW,
             'public': True,
             'res_model': 'ir.ui.view',
             'res_id': 0,
@@ -25,7 +25,7 @@ class TestWebEditorController(HttpCaseWithUserDemo, HttpCaseWithUserPortal):
 
         def modify(login, name, expect_fail=False):
             self.authenticate(login, login)
-            svg = b'<svg viewBox="0 0 400 400"><!-- %s --><image url="data:image/gif;base64,%s" /></svg>' % (name.encode('ascii'), gif_base64)
+            svg = b'<svg viewBox="0 0 400 400"><!-- %s --><image url="data:image/gif;base64,%s" /></svg>' % (name.encode('ascii'), GIF_B64)
             params = {
                 'name': name,
                 'mimetype': 'image/svg+xml',
@@ -44,9 +44,12 @@ class TestWebEditorController(HttpCaseWithUserDemo, HttpCaseWithUserPortal):
             self.assertEqual(200, response.status_code, "Expect response")
             if expect_fail:
                 return json_safe.loads(response.content)
-            url = json_safe.loads(response.content).get('result')
-            self.assertTrue(url.endswith(name), "Expect name in URL")
-            response = self.url_open(url)
+            content = json_safe.loads(response.content)
+            self.assertFalse(content.get('error'), "An error should not happen")
+            url = content.get('result')
+            url_path = url['original'].partition('?unique=')[0]
+            self.assertTrue(url_path.endswith(name), "Expect name in URL")
+            response = self.url_open(url['original'])
             self.assertEqual(200, response.status_code, "Expect response")
             self.assertTrue('image/svg+xml' in response.headers.get('Content-Type'), "Expect SVG mimetype")
             self.assertEqual(svg, response.content, "Expect unchanged SVG")
@@ -88,6 +91,11 @@ class TestWebEditorController(HttpCaseWithUserDemo, HttpCaseWithUserPortal):
             ],
         })
         modify('demo', 'page-demo.gif')
+
+        # Website designer can modify url attachment (for e.g. unsplash)
+        attachment.url = '/page-logo-unique.gif'
+        modify('demo', 'page-logo-unique.gif')
+        attachment.url = False  # Reset previous value
 
         event = self.env['event.event'].create({'name': 'test event'})
         attachment.res_model = 'event.event'

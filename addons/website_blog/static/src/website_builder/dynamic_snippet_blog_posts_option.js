@@ -9,7 +9,8 @@ export class DynamicSnippetBlogPostsOption extends BaseOptionComponent {
     setup() {
         super.setup();
         const { fetchBlogs, getModelNameFilter } = this.dependencies.dynamicSnippetBlogPostsOption;
-        this.dynamicOptionParams = useDynamicSnippetOption(getModelNameFilter());
+        this.modelNameFilter = getModelNameFilter();
+        this.dynamicOptionParams = useDynamicSnippetOption(this.modelNameFilter);
         this.blogState = useState({
             blogs: [],
         });
@@ -65,5 +66,11 @@ export class DynamicSnippetBlogPostsOption extends BaseOptionComponent {
             this.templateKeyState.templateKey ===
             "website_blog.dynamic_filter_template_blog_post_big_picture"
         );
+    }
+    showCoverImageOption() {
+        return [
+            "website_blog.dynamic_filter_template_blog_post_single_aside",
+            "website_blog.dynamic_filter_template_blog_post_single_circle",
+        ].includes(this.templateKeyState.templateKey);
     }
 }

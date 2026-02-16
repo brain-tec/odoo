@@ -44,7 +44,7 @@ def get_twilio_credentials(env) -> tuple[str | None, str | None]:
     :return: tuple(account_sid: str, auth_token: str) or (None, None) if Twilio is disabled
     """
     params = env["ir.config_parameter"].sudo()
-    if not params.get_bool("mail.use_twilio_rtc_servers"):
+    if not params.get_bool("mail.use_call_server") or not params.get_bool("mail.use_twilio_rtc_servers"):
         return None, None
     account_sid = params.get_str("mail.twilio_account_sid")
     auth_token = params.get_str("mail.twilio_account_token")
@@ -53,7 +53,8 @@ def get_twilio_credentials(env) -> tuple[str | None, str | None]:
 
 def get_sfu_url(env) -> str | None:
     params = env["ir.config_parameter"].sudo()
-    sfu_url = params.get_str("mail.sfu_server_url") if params.get_bool("mail.use_sfu_server") else None
+    use_sfu_setting = params.get_bool("mail.use_call_server") and params.get_bool("mail.use_sfu_server")
+    sfu_url = params.get_str("mail.sfu_server_url") if use_sfu_setting else None
     if not sfu_url:
         sfu_url = os.getenv("ODOO_SFU_URL")
     if sfu_url:
@@ -191,10 +192,13 @@ class Store:
             self.data[model_name][index]["_DELETE"] = True
         return self
 
-    def get_client_action(self):
+    def get_client_action(self, next_action=None):
         """Gets client action to insert this store in the client."""
         return {
-            "params": self.get_result(),
+            "params": {
+                "store_values": self.get_result(),
+                "next_action": next_action,
+            },
             "tag": "mail.store_insert",
             "type": "ir.actions.client",
         }
@@ -527,9 +531,12 @@ class Store:
             super()._add_to_store(store, target, key)
             if not self.only_data and (self.records or self.mode == "REPLACE"):
                 rel_val = self._get_id()
-                target[key] = (
-                    target[key] + rel_val if key in target and self.mode != "REPLACE" else rel_val
-                )
+                if self.mode == "REPLACE" or key not in target:
+                    target[key] = rel_val
+                    return
+                if target[key] and not isinstance(target[key][0], tuple):
+                    target[key] = [("REPLACE", target[key])]
+                target[key] += rel_val
 
         def _get_id(self):
             """Return the ids that can be used to insert the current relation in the store."""

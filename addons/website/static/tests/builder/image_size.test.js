@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { animationFrame, clear, edit, press, waitFor } from "@odoo/hoot-dom";
+import { animationFrame, clear, edit, press } from "@odoo/hoot-dom";
 import { contains } from "@web/../tests/web_test_helpers";
 import { defineWebsiteModels, setupWebsiteBuilder } from "./website_helpers";
 import { testImg, testImgSrc, testGifImg, testGifImgSrc } from "./image_test_helpers";
@@ -15,7 +15,6 @@ test("the image should show its size", async () => {
     await contains(":iframe .test-options-target img").click();
     await waitSidebarUpdated();
     const selector = `[data-container-title="Image"] [title="Size"]`;
-    await waitFor(selector);
     const size = parseFloat(document.querySelector(selector).innerHTML);
     expectAround(size, 22.8);
 });
@@ -29,7 +28,6 @@ test("the background image should show its size", async () => {
     await contains(":iframe .test-options-target section").click();
     await waitSidebarUpdated();
     const selector = `[data-label="Image"] [title="Size"]`;
-    await waitFor(selector);
     const size = parseFloat(document.querySelector(selector).innerHTML);
     expectAround(size, 22.8);
 });
@@ -48,7 +46,6 @@ test("the GIF image should show its size", async () => {
     await contains(":iframe .test-options-target img").click();
     await waitSidebarUpdated();
     const selector = `[data-container-title="Image"] [title="Size"]`;
-    await waitFor(selector);
     const size = parseFloat(document.querySelector(selector).innerHTML);
     expectAround(size, 325.2);
 });
@@ -62,7 +59,6 @@ test("the GIF background image should show its size", async () => {
     await contains(":iframe .test-options-target section").click();
     await waitSidebarUpdated();
     const selector = `[data-label="Image"] [title="Size"]`;
-    await waitFor(selector);
     const size = parseFloat(document.querySelector(selector).innerHTML);
     expectAround(size, 325.2);
 });
@@ -105,7 +101,7 @@ test("images can be resized by slider, text input and button", async () => {
     await contains(".options-container [data-action-id='mediaSizeText'] input").click();
     await edit("50");
     await press("Enter");
-    await animationFrame();
+    await waitSidebarUpdated();
     expect(":iframe .test-options-target img").toHaveStyle(
         { width: "50% !important" },
         { inline: true }
@@ -114,7 +110,7 @@ test("images can be resized by slider, text input and button", async () => {
     await contains(":iframe .test-options-target img").click();
     await waitSidebarUpdated();
     await contains(".options-container button[data-action-id='setMediaSizeAuto']").click();
-    await animationFrame();
+    await waitSidebarUpdated();
     expect(":iframe .test-options-target img").toHaveStyle(
         { width: "auto !important" },
         { inline: true }
@@ -177,13 +173,13 @@ test("videos can be resized by slider, text input and button", async () => {
     expect(".options-container button[data-action-id='setMediaSizeAuto']").toHaveClass("active");
 
     await contains(".options-container [data-action-id='mediaSizeText'] input").click();
-    await edit("3");
+    await edit("3"); // preview
     await animationFrame();
     //min width is clipped to 5%
     expect(":iframe .media_iframe_video").toHaveStyle({ width: "5% !important" }, { inline: true });
 
     await contains(".options-container [data-action-id='mediaSizeText'] input").click();
-    await edit("110");
+    await edit("110"); // preview
     await animationFrame();
     //max width is clipped to 100%
     expect(":iframe .media_iframe_video").toHaveStyle(
@@ -196,7 +192,7 @@ test("videos can be resized by slider, text input and button", async () => {
     await contains(".options-container [data-action-id='mediaSizeText'] input").click();
     await edit("50");
     await press("Enter");
-    await animationFrame();
+    await waitSidebarUpdated();
     expect(":iframe .media_iframe_video").toHaveStyle(
         { width: "50% !important" },
         { inline: true }
@@ -205,7 +201,7 @@ test("videos can be resized by slider, text input and button", async () => {
     await contains(":iframe .media_iframe_video").click();
     await waitSidebarUpdated();
     await contains(".options-container button[data-action-id='setMediaSizeAuto']").click();
-    await animationFrame();
+    await waitSidebarUpdated();
     expect(":iframe .media_iframe_video").toHaveStyle(
         { width: "auto !important" },
         { inline: true }

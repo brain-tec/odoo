@@ -11,7 +11,7 @@ class ProductPublicCategory(models.Model):
     _name = 'product.public.category'
     _inherit = [
         'website.seo.metadata',
-        'website.multi.mixin',
+        'website.published.multi.mixin',
         'website.located.mixin',
         'website.searchable.mixin',
         'image.mixin',
@@ -29,6 +29,15 @@ class ProductPublicCategory(models.Model):
     name = fields.Char(required=True, translate=True)
     cover_image = fields.Image(
         string="Cover Image", help="Displayed only in the Category List Snippet.",
+    )
+    is_published = fields.Boolean(compute='_compute_is_published')
+    not_in_shop = fields.Boolean(
+        string="Not in Shop",
+        help="If checked, the category will not be displayed in the main catalog page",
+        compute='_compute_not_in_shop',
+        store=True,
+        readonly=False,
+        recursive=True,
     )
     sequence = fields.Integer(default=_default_sequence, index=True)
 
@@ -95,6 +104,17 @@ class ProductPublicCategory(models.Model):
 
     # === COMPUTE METHODS === #
 
+    @api.depends('has_published_products')
+    def _compute_is_published(self):
+        for category in self:
+            category.is_published = category.has_published_products
+
+    @api.depends('parent_id.not_in_shop')
+    def _compute_not_in_shop(self):
+        for category in self:
+            if category.parent_id:
+                category.not_in_shop = category.parent_id.not_in_shop
+
     @api.depends('parent_path')
     def _compute_parents_and_self(self):
         for category in self:
@@ -118,10 +138,15 @@ class ProductPublicCategory(models.Model):
 
     @api.depends('product_tmpl_ids.is_published', 'child_id.has_published_products')
     def _compute_has_published_products(self):
+        grouped_product_templates = self.env['product.template']._read_group(
+            domain=[('public_categ_ids', 'in', self.ids), ('is_published', '=', True), ('active', '=', True)],
+            groupby=['public_categ_ids']
+        )
+        published_category_ids = {group[0].id for group in grouped_product_templates}
         for category in self:
+            has_published = category.id in published_category_ids
             category.has_published_products = (
-                any(p.is_published for p in category.product_tmpl_ids)
-                or any(c.has_published_products for c in category.child_id)
+                has_published or any(c.has_published_products for c in category.child_id)
             )
 
     # === SEARCH METHODS === #
@@ -131,7 +156,8 @@ class ProductPublicCategory(models.Model):
         if operator != 'in':
             return NotImplemented
         published_categ_ids = self.search_fetch(
-            [('product_tmpl_ids.is_published', 'in', True)], ['parent_path']
+            [('product_tmpl_ids', 'any', [('is_published', '=', True), ('active', '=', True)])],
+            ['parent_path'],
         ).ids
         # Note that if the `value` is False, the ORM will invert the domain below
         return [

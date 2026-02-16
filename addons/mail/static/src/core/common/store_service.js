@@ -1,5 +1,9 @@
 import { Store as BaseStore, fields, makeStore } from "@mail/model/export";
-import { generateEmojisOnHtml, prettifyMessageText } from "@mail/utils/common/format";
+import {
+    attClassObjectToString,
+    generateEmojisOnHtml,
+    prettifyMessageText,
+} from "@mail/utils/common/format";
 import { compareDatetime } from "@mail/utils/common/misc";
 
 import { reactive } from "@odoo/owl";
@@ -12,10 +16,10 @@ import { Deferred, Mutex } from "@web/core/utils/concurrency";
 import { renderToElement } from "@web/core/utils/render";
 import { debounce } from "@web/core/utils/timing";
 import { session } from "@web/session";
-import { browser } from "@web/core/browser/browser";
 import { loader } from "@web/core/emoji_picker/emoji_picker";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { getOrigin } from "@web/core/utils/urls";
+import { browser } from "@web/core/browser/browser";
 import { cookie } from "@web/core/browser/cookie";
 
 /**
@@ -88,25 +92,7 @@ export class Store extends BaseStore {
         },
     ];
 
-    isNotificationPermissionDismissed = fields.Attr(false, {
-        compute() {
-            return (
-                browser.localStorage.getItem("mail.user_setting.push_notification_dismissed") ===
-                "true"
-            );
-        },
-        /** @this {import("models").DiscussApp} */
-        onUpdate() {
-            if (this.isNotificationPermissionDismissed) {
-                browser.localStorage.setItem(
-                    "mail.user_setting.push_notification_dismissed",
-                    "true"
-                );
-            } else {
-                browser.localStorage.removeItem("mail.user_setting.push_notification_dismissed");
-            }
-        },
-    });
+    isNotificationPermissionDismissed = fields.Attr(false, { localStorage: true });
 
     messagePostMutex = new Mutex();
 
@@ -117,17 +103,17 @@ export class Store extends BaseStore {
                 ctx?.env.isDiscussPipBanner ||
                 ctx?.env?.inWelcomePage) &&
             this.isOdooWhiteTheme &&
-            !ctx?.env.inMeetingSideActions &&
             !ctx?.env.inDiscussActionPanel
         );
     }
 
     discussDropdownMenuClass(ctx) {
-        const res = ["o-discuss-dropdownMenu", "d-flex", "flex-column", "border-secondary"];
-        if (this.shouldSimulateDarkTheme(ctx)) {
-            res.push("o-simulateDarkTheme");
-        }
-        return res.join(" ");
+        const simulateDarkTheme = this.shouldSimulateDarkTheme(ctx);
+        return attClassObjectToString({
+            "o-discuss-dropdownMenu d-flex flex-column border-secondary": true,
+            "o-simulateDarkTheme": simulateDarkTheme,
+            "bg-view": !simulateDarkTheme,
+        });
     }
 
     standaloneInboxMessages = fields.Many("mail.message", {
@@ -362,6 +348,25 @@ export class Store extends BaseStore {
                 ev.preventDefault();
                 return true;
             }
+        } else if (
+            this.env.services.ui.isSmall &&
+            ev.target.closest(".o-mail-ChatWindow") &&
+            link.href &&
+            !link.href.startsWith("#")
+        ) {
+            let url;
+            try {
+                url = new URL(link.href);
+            } catch {
+                // Ignore invalid URLs
+                return false;
+            }
+            if (
+                browser.location.host === url.host &&
+                browser.location.pathname.startsWith("/odoo")
+            ) {
+                this.ChatWindow.get({ channel: thread.channel })?.fold();
+            }
         }
         return false;
     }
@@ -394,7 +399,7 @@ export class Store extends BaseStore {
                 const isInbox =
                     this.store.self.main_user_id?.notification_type === "inbox" &&
                     model !== "discuss.channel";
-                if ((isTabFocused && thread?.isDisplayed) || isInbox) {
+                if ((isTabFocused && thread?.channel?.isDisplayed) || isInbox) {
                     navigator.serviceWorker.controller?.postMessage({
                         type: "notification-display-response",
                         payload: { correlationId },
@@ -475,13 +480,11 @@ export class Store extends BaseStore {
         { mentionedChannels = [], mentionedPartners = [], mentionedRoles = [], thread } = {}
     ) {
         const validMentions = {};
-        validMentions.threads = mentionedChannels.filter((thread) => {
-            if (thread.channel?.parent_channel_id) {
-                return body.includes(
-                    `#${thread.channel.parent_channel_id.channel.fullNameWithParent}`
-                );
+        validMentions.channels = mentionedChannels.filter((channel) => {
+            if (channel.parent_channel_id) {
+                return body.includes(`#${channel.parent_channel_id.fullNameWithParent}`);
             }
-            return body.includes(`#${thread.channel?.displayName}`);
+            return body.includes(`#${channel.displayName}`);
         });
         validMentions.partners = mentionedPartners.filter((partner) =>
             body.includes(`@${thread?.getPersonaName(partner) ?? partner.name}`)
@@ -505,6 +508,7 @@ export class Store extends BaseStore {
             mentionedChannels,
             mentionedPartners,
             mentionedRoles,
+            subject,
         } = postData;
         const subtype = isNote ? "mail.mt_note" : "mail.mt_comment";
         const validMentions = this.getMentionsFromText(body, {
@@ -533,6 +537,7 @@ export class Store extends BaseStore {
             email_add_signature: emailAddSignature,
             message_type: "comment",
             subtype_xmlid: subtype,
+            subject,
         };
         if (attachments.length) {
             postData.attachment_ids = attachments.map(({ id }) => id);
@@ -675,19 +680,22 @@ export class Store extends BaseStore {
      * @param {true|false|undefined} is_notification
      */
     async searchMessagesInThread(searchTerm, thread, before, is_notification) {
-        const { count, data, messages } = await rpc(thread.getFetchRoute(), {
-            ...thread.getFetchParams(),
-            fetch_params: {
-                is_notification,
-                search_term: await prettifyMessageText(searchTerm), // formatted like message_post
-                before,
+        const { count, messages } = await this.fetchStoreData(
+            thread.getFetchRoute(),
+            {
+                ...thread.getFetchParams(),
+                fetch_params: {
+                    is_notification,
+                    search_term: await prettifyMessageText(searchTerm), // formatted like message_post
+                    before,
+                },
             },
-        });
-        this.insert(data);
+            { readonly: thread.model === "mail.box", requestData: true }
+        );
         return {
             count,
             loadMore: messages.length === this.FETCH_LIMIT,
-            messages: this["mail.message"].insert(messages),
+            messages,
         };
     }
 }

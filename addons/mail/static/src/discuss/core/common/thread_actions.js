@@ -1,27 +1,17 @@
 import { ACTION_TAGS } from "@mail/core/common/action";
 import { registerThreadAction } from "@mail/core/common/thread_actions";
 import { AttachmentPanel } from "@mail/discuss/core/common/attachment_panel";
+import { ChannelActionDialog } from "@mail/discuss/core/common/channel_action_dialog";
 import { ChannelInvitation } from "@mail/discuss/core/common/channel_invitation";
 import { ChannelMemberList } from "@mail/discuss/core/common/channel_member_list";
 import { DeleteThreadDialog } from "@mail/discuss/core/common/delete_thread_dialog";
 import { NotificationSettings } from "@mail/discuss/core/common/notification_settings";
 import { PinnedMessagesPanel } from "@mail/discuss/core/common/pinned_messages_panel";
 
-import { Component, useChildSubEnv, xml } from "@odoo/owl";
+import { useChildSubEnv } from "@odoo/owl";
 
-import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
-
-class ChannelActionDialog extends Component {
-    static props = ["title", "contentComponent", "contentProps", "close?"];
-    static components = { Dialog };
-    static template = xml`
-        <Dialog size="'md'" title="props.title" footer="false" contentClass="'o-bg-body'" bodyClass="'p-1'">
-            <t t-component="props.contentComponent" t-props="props.contentProps"/>
-        </Dialog>
-    `;
-}
 
 registerThreadAction("pinned-messages", {
     actionPanelComponent: PinnedMessagesPanel,
@@ -53,7 +43,8 @@ registerThreadAction("add-to-favorites", {
      * @param {Object} param0
      * @param {import("models").DiscussChannel} param0.channel
      */
-    condition: ({ channel, owner }) =>
+    condition: ({ channel, store, owner }) =>
+        store.self_user?.share === false &&
         channel &&
         channel.self_member_id &&
         !channel.self_member_id.is_favorite &&
@@ -106,7 +97,7 @@ registerThreadAction("notification-settings", {
     actionPanelOpen({ channel, owner, store }) {
         if (owner.isDiscussSidebarChannelActions || owner.env.inMeetingView) {
             store.env.services.dialog?.add(ChannelActionDialog, {
-                title: channel.name,
+                title: channel.displayName,
                 contentComponent: NotificationSettings,
                 contentProps: { channel },
             });
@@ -180,11 +171,13 @@ registerThreadAction("invite-people", {
             owner.props.chatWindow ? "bg-inherit" : ""
         } bg-100 border border-secondary`,
     condition: ({ channel, owner }) =>
-        channel && (!owner.props.chatWindow || owner.props.chatWindow.isOpen),
+        channel &&
+        (!owner.props.chatWindow || owner.props.chatWindow.isOpen) &&
+        !(owner.isDiscussContent && channel?.hasMemberList),
     icon: "oi oi-fw oi-user-plus",
     name: _t("Invite People"),
-    sequence: ({ owner }) => (owner.isDiscussSidebarChannelActions ? 20 : 10),
-    sequenceGroup: 20,
+    sequence: 20,
+    sequenceGroup: ({ owner }) => (owner.isDiscussContent ? 10 : 20),
     setup({ owner }) {
         if (!owner.props.chatWindow && !owner.env.inMeetingView) {
             this.popover = usePopover(ChannelInvitation, {
@@ -195,13 +188,18 @@ registerThreadAction("invite-people", {
     },
 });
 registerThreadAction("member-list", {
-    actionPanelClose: ({ owner, store }) => {
-        if (owner.env.inDiscussApp) {
+    actionPanelClose: ({ action, owner, store, nextActiveAction }) => {
+        if (
+            action.condition &&
+            owner.env.inDiscussApp &&
+            store.discuss?.shouldDisableMemberPanelAutoOpenFromClose(nextActiveAction)
+        ) {
             store.discuss.isMemberPanelOpenByDefault = false;
         }
     },
     actionPanelComponent: ChannelMemberList,
     actionPanelComponentProps: ({ actions, channel }) => ({
+        /** @deprecated */
         openChannelInvitePanel({ keepPrevious } = {}) {
             actions.actions
                 .find(({ id }) => id === "invite-people")
@@ -241,8 +239,10 @@ registerThreadAction("hide", {
      * @param {Object} param0
      * @param {import("models").DiscussChannel} param0.channel
      */
-    condition: ({ channel, owner }) =>
+    condition: ({ channel, store, owner }) =>
+        store.self_user?.share === false &&
         (channel?.canHide || channel?.sub_channel_ids.some((subChannel) => subChannel.canHide)) &&
+        !channel?.isSelfInCall &&
         !owner.isDiscussContent,
     icon: "fa fa-fw fa-eye-slash",
     /**

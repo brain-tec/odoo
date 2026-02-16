@@ -1,10 +1,10 @@
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { computeComboItems } from "./utils/compute_combo_items";
-import { localization } from "@web/core/l10n/localization";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { getStrNotes } from "./utils/order_change";
 import { PosOrderAccounting } from "./accounting/pos_order_accounting";
+import { getTimeUtil } from "@point_of_sale/utils";
 
 const { DateTime } = luxon;
 
@@ -113,7 +113,7 @@ export class PosOrder extends PosOrderAccounting {
     }
 
     get presetDate() {
-        return this.preset_time?.toFormat(localization.dateFormat) || "";
+        return this.formatDateOrTime("preset_time", "date");
     }
 
     get isFutureDate() {
@@ -122,7 +122,7 @@ export class PosOrder extends PosOrderAccounting {
 
     get presetTime() {
         return this.preset_time && this.preset_time.isValid
-            ? this.preset_time.toFormat("HH:mm")
+            ? this.formatDateOrTime("preset_time", "time")
             : false;
     }
 
@@ -133,8 +133,8 @@ export class PosOrder extends PosOrderAccounting {
     get presetDateTime() {
         return this.preset_time?.isValid
             ? this.preset_time.hasSame(this.date_order, "day")
-                ? this.preset_time.toFormat(localization.timeFormat)
-                : this.preset_time.toFormat(`${localization.dateFormat} ${localization.timeFormat}`)
+                ? this.formatDateOrTime("preset_time", "time")
+                : this.formatDateOrTime("preset_time")
             : false;
     }
 
@@ -349,38 +349,57 @@ export class PosOrder extends PosOrderAccounting {
             (line) => line.price_type === "original" && line.combo_line_ids?.length
         );
         for (const pLine of combo_parent_lines) {
+            const { childLineFree, childLineExtra } = this.getFreeAndExtraChildLines(pLine);
             attributes_prices[pLine.id] = computeComboItems(
                 pLine.product_id,
-                pLine.combo_line_ids.map((cLine) => {
-                    if (cLine.attribute_value_ids) {
-                        return {
-                            combo_item_id: cLine.combo_item_id,
-                            configuration: {
-                                attribute_value_ids: cLine.attribute_value_ids,
-                            },
-                            qty: pLine.qty,
-                        };
-                    } else {
-                        return { combo_item_id: cLine.combo_item_id, qty: pLine.qty };
-                    }
-                }),
+                childLineFree,
                 pricelist,
                 this.models["decimal.precision"].getAll(),
                 this.models["product.template.attribute.value"].getAllBy("id"),
-                [],
+                childLineExtra,
                 this.config_id.currency_id
             );
         }
         const combo_children_lines = this.lines.filter(
-            (line) => line.price_type === "automatic" && line.combo_parent_id
+            (line) => line.price_type === "original" && line.combo_parent_id
         );
         combo_children_lines.forEach((line) => {
-            line.setUnitPrice(
-                attributes_prices[line.combo_parent_id.id].find(
-                    (item) => item.combo_item_id.id === line.combo_item_id.id
-                ).price_unit
+            const currentItem = attributes_prices[line.combo_parent_id.id].find(
+                (item) => item.combo_item_id.id === line.combo_item_id.id
+            );
+            line.setUnitPrice(currentItem.price_unit);
+            // Removing to be able to have extras that are the same as free products
+            attributes_prices[line.combo_parent_id.id].splice(
+                attributes_prices[line.combo_parent_id.id].indexOf(currentItem),
+                1
             );
         });
+    }
+
+    getFreeAndExtraChildLines(pLine) {
+        const childLineFree = [];
+        const childLineExtra = [];
+        const comboRemainingFree = {};
+        for (const cLine of pLine.combo_line_ids) {
+            if (!(cLine.combo_item_id.combo_id.id in comboRemainingFree)) {
+                comboRemainingFree[cLine.combo_item_id.combo_id.id] =
+                    cLine.combo_item_id.combo_id.qty_free;
+            }
+            const newQty = comboRemainingFree[cLine.combo_item_id.combo_id.id] - cLine.qty;
+            const baseData = { combo_item_id: cLine.combo_item_id };
+            if (cLine.attribute_value_ids) {
+                baseData.configuration = { attribute_value_ids: cLine.attribute_value_ids };
+            }
+            if (cLine.qty) {
+                if (newQty >= 0) {
+                    comboRemainingFree[cLine.combo_item_id.combo_id.id] = newQty;
+                    childLineFree.push({ ...baseData, qty: cLine.qty });
+                } else {
+                    childLineExtra.push({ ...baseData, qty: cLine.qty });
+                }
+            }
+        }
+        return { childLineFree, childLineExtra };
     }
 
     /**
@@ -532,8 +551,7 @@ export class PosOrder extends PosOrderAccounting {
                         orderLine.discount == 0
                     ) {
                         sum +=
-                            (orderLine.currencyDisplayPriceUnit -
-                                orderLine.unitPrices.no_discount_total_included) *
+                            (orderLine.displayPriceUnit - orderLine.displayPriceUnitNoDiscount) *
                             orderLine.getQuantity();
                     }
                 }
@@ -758,7 +776,7 @@ export class PosOrder extends PosOrderAccounting {
             reprint: reprint,
             pos_reference: this.getName(),
             config_name: this.config_id?.name || this.config.name,
-            time: luxon.DateTime.now().toFormat("HH:mm"),
+            time: getTimeUtil(luxon.DateTime.now()),
             tracking_number: this.tracking_number,
             preset_name: this.preset_id?.name || "",
             preset_time: this.presetDateTime,

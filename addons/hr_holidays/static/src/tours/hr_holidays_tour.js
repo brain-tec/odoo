@@ -4,7 +4,6 @@ import { registry } from "@web/core/registry";
 import { stepUtils } from "@web_tour/tour_utils";
 
 registry.category("web_tour.tours").add("hr_holidays_tour", {
-    url: "/odoo",
     steps: () => [
         stepUtils.showAppsMenuItem(),
         {
@@ -20,7 +19,7 @@ registry.category("web_tour.tours").add("hr_holidays_tour", {
             run: "click",
         },
         {
-            trigger: 'div[name="holiday_status_id"] input',
+            trigger: 'div[name="work_entry_type_id"] input',
             content: _t("Let's try to create a Sick Time Off, select it in the list"),
             run: "click",
         },

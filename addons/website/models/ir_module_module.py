@@ -1,15 +1,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+from collections import OrderedDict, defaultdict
+
 import werkzeug
-from collections import defaultdict, OrderedDict
 
 from odoo import api, fields, models
-from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import MissingError
 from odoo.http import request
 from odoo.modules import Manifest
-from odoo.tools import escape_psql, split_every, SQL
+from odoo.tools import SQL, split_every
 from odoo.tools.constants import PREFETCH_MAX
 
 _logger = logging.getLogger(__name__)
@@ -115,7 +115,11 @@ class IrModuleModule(models.Model):
         records = self_sudo.env[theme_model_name]
 
         for module in self_sudo:
-            imd_ids = IrModelData.search([('module', '=', module.name), ('model', '=', theme_model_name)]).mapped('res_id')
+            imd_ids = IrModelData.search([
+                ('module', '=', module.name),
+                ('model', '=', theme_model_name),
+                ('res_id', '!=', False),
+            ]).mapped('res_id')
             records |= self_sudo.env[theme_model_name].with_context(active_test=False).browse(imd_ids)
         return records
 
@@ -267,8 +271,8 @@ class IrModuleModule(models.Model):
 
             for model_name in module._theme_model_names:
                 template = module._get_module_data(model_name)
-                models = template.with_context(**{'active_test': False, MODULE_UNINSTALL_FLAG: True}).mapped('copy_ids').filtered(lambda m: m.website_id == website)
-                models.unlink()
+                models_ = template.with_context(active_test=False, force_delete=True).mapped('copy_ids').filtered(lambda m: m.website_id == website)
+                models_.unlink()
                 module._theme_cleanup(model_name, website)
 
     def _theme_cleanup(self, model_name, website):
@@ -299,8 +303,8 @@ class IrModuleModule(models.Model):
         if model_name in ('website.page', 'website.menu'):
             return model_sudo
         # use active_test to also unlink archived models
-        # and use MODULE_UNINSTALL_FLAG to also unlink inherited models
-        orphans = model_sudo.with_context(**{'active_test': False, MODULE_UNINSTALL_FLAG: True}).search([
+        # and use 'force_delete' to also unlink inherited models
+        orphans = model_sudo.with_context(active_test=False, force_delete=True).search([
             ('key', '=like', self.name + '.%'),
             ('website_id', '=', website.id),
             ('theme_template_id', '=', False),
@@ -314,7 +318,7 @@ class IrModuleModule(models.Model):
             :return: recordset of themes ``ir.module.module``
         """
         self.ensure_one()
-        return self.upstream_dependencies(exclude_states=('',)).filtered(lambda x: x.name.startswith('theme_'))
+        return self.upstream_dependencies(exclude_states=()).filtered(lambda x: x.name.startswith('theme_'))
 
     def _theme_get_downstream(self):
         """
@@ -522,10 +526,10 @@ class IrModuleModule(models.Model):
                 if not langs_update:
                     continue
                 # get dictionaries limited to the requested languages
-                generic_arch_db_en = generic_arch_db.get('en_US')
-                specific_arch_db_en = specific_arch_db.get('en_US')
-                generic_arch_db_update = {k: generic_arch_db[k] for k in langs_update}
-                specific_arch_db_update = {k: specific_arch_db.get(k, specific_arch_db_en) for k in langs_update}
+                generic_arch_db_en = generic_arch_db.get('_en_US', generic_arch_db.get('en_US'))
+                specific_arch_db_en = specific_arch_db.get('_en_US', specific_arch_db.get('en_US'))
+                generic_arch_db_update = {k: generic_arch_db.get('_' + k, generic_arch_db[k]) for k in langs_update}
+                specific_arch_db_update = {k: specific_arch_db.get('_' + k, specific_arch_db.get(k, specific_arch_db_en)) for k in langs_update}
                 generic_translation_dictionary = field.get_translation_dictionary(generic_arch_db_en, generic_arch_db_update)
                 specific_translation_dictionary = field.get_translation_dictionary(specific_arch_db_en, specific_arch_db_update)
                 # update specific_translation_dictionary
@@ -536,7 +540,9 @@ class IrModuleModule(models.Model):
                         if overwrite or term_en == specific_term_langs[lang]:
                             specific_term_langs[lang] = generic_term_lang
                 for lang in langs_update:
-                    specific_arch_db[lang] = field.translate(
+                    if specific_arch_db.get('_' + lang) == specific_arch_db.get(lang):
+                        specific_arch_db.pop('_' + lang, None)
+                    specific_arch_db[('_' + lang) if ('_' + lang) in specific_arch_db else lang] = field.translate(
                         lambda term: specific_translation_dictionary.get(term, {lang: None})[lang], specific_arch_db_en)
                 field._update_cache(View.with_context(prefetch_langs=True).browse(specific_id), specific_arch_db, dirty=True)
         default_menu = self.env.ref('website.main_menu', raise_if_not_found=False)

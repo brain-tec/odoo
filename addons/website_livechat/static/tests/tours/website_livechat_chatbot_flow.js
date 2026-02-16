@@ -7,6 +7,7 @@ const messagesContain = (text) => `.o-livechat-root:shadow .o-mail-Message:conta
 let chatbotDelayProcessingDef;
 
 registry.category("web_tour.tours").add("website_livechat_chatbot_flow_tour", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () => {
         patchWithCleanup(Chatbot.prototype, {
             // Count the number of times this method is called to check whether the chatbot is regularly
@@ -28,19 +29,10 @@ registry.category("web_tour.tours").add("website_livechat_chatbot_flow_tour", {
             },
             {
                 trigger: messagesContain("How can I help you?"),
-                // check question_selection message is posted and reactions are not
-                // available since the thread is not yet persisted
-                run() {
-                    if (
-                        this.anchor.querySelector(
-                            ".o-mail-Message-actions [title='Add a Reaction']"
-                        )
-                    ) {
-                        console.error(
-                            "Reactions should not be available before thread is persisted."
-                        );
-                    }
-                },
+            },
+            {
+                content: "Reactions should not be available before thread is persisted.",
+                trigger: `body:not(:has(.o-mail-Message-actions [title='Add a Reaction']))`,
             },
             {
                 trigger: '.o-livechat-root:shadow button:contains("I\'d like to buy the software")',
@@ -81,6 +73,33 @@ registry.category("web_tour.tours").add("website_livechat_chatbot_flow_tour", {
             {
                 // check that this time the email goes through and we proceed to next step
                 trigger: messagesContain("Your email is validated, thank you!"),
+            },
+            {
+                trigger: messagesContain("Can you give us your phone number please?"),
+            },
+            {
+                trigger: ".o-livechat-root:shadow .o-mail-Composer-input",
+                run: "edit 123456",
+            },
+            {
+                trigger: ".o-livechat-root:shadow .o-mail-Composer-input",
+                run: "press Enter",
+            },
+            {
+                trigger: messagesContain(
+                    "'123456' does not look like a valid phone number. Can you please try again?"
+                ),
+            },
+            {
+                trigger: ".o-livechat-root:shadow .o-mail-Composer-input",
+                run: "edit +919876543210",
+            },
+            {
+                trigger: ".o-livechat-root:shadow .o-mail-Composer-input",
+                run: "press Enter",
+            },
+            {
+                trigger: messagesContain("Your phone number is validated. thank you!"),
             },
             {
                 // should ask for website now

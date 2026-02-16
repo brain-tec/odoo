@@ -2,7 +2,6 @@ import base64
 import bisect
 import functools
 import hashlib
-import json
 import logging
 import os
 import random
@@ -12,7 +11,7 @@ import struct
 import threading
 import time
 from collections import defaultdict, deque
-from contextlib import closing, suppress
+from contextlib import contextmanager, suppress
 from enum import IntEnum
 from itertools import count
 from queue import PriorityQueue
@@ -27,13 +26,13 @@ from werkzeug.local import LocalStack
 
 import odoo
 from odoo import modules
-from odoo.http import (
-    Request,
-    Response,
+from odoo.http.requestlib import Request
+from odoo.http.response import Response
+from odoo.http.retrying import retrying
+from odoo.http.session import (
     SessionExpiredException,
     get_default_session,
-    retrying,
-    root,
+    session_store,
 )
 from odoo.modules.registry import Registry
 from odoo.service.server import CommonServer
@@ -41,22 +40,35 @@ from odoo.tools import config
 
 from .models.bus import dispatch, fetch_bus_notifications
 from .session_helpers import check_session, new_env
+from .tools import orjson
 
 _logger = logging.getLogger(__name__)
 
 
 MAX_TRY_ON_POOL_ERROR = 10
-DELAY_ON_POOL_ERROR = 0.03
+DELAY_ON_POOL_ERROR = 0.15
+JITTER_ON_POOL_ERROR = 0.3
 
 
+@contextmanager
 def acquire_cursor(db):
     """ Try to acquire a cursor up to `MAX_TRY_ON_POOL_ERROR` """
-    for tryno in range(1, MAX_TRY_ON_POOL_ERROR + 1):
-        with suppress(PoolError):
-            return Registry(db).cursor()
-        time.sleep(random.uniform(DELAY_ON_POOL_ERROR, DELAY_ON_POOL_ERROR * tryno))
-    raise PoolError('Failed to acquire cursor after %s retries' % MAX_TRY_ON_POOL_ERROR)
-
+    delay = DELAY_ON_POOL_ERROR
+    try:
+        for _ in range(MAX_TRY_ON_POOL_ERROR):
+            # Yield before trying to acquire the cursor to let other
+            # greenlets release their cursor.
+            time.sleep(0)
+            with suppress(PoolError), Registry(db).cursor() as cr:
+                yield cr
+                return
+            time.sleep(delay + random.uniform(0, JITTER_ON_POOL_ERROR))
+            delay *= 1.5
+        raise PoolError('Failed to acquire cursor after %s retries' % MAX_TRY_ON_POOL_ERROR)
+    finally:
+        # Yield after releasing the cursor to let waiting greenlets
+        # immediately pick up the freed connection.
+        time.sleep(0)
 
 # ------------------------------------------------------
 # EXCEPTIONS
@@ -149,6 +161,10 @@ class PollablePriorityQueue(PriorityQueue):
     def get(self, *args, **kwargs):
         self._getsocket.recv(1)
         return super().get(*args, **kwargs)
+
+    def close(self):
+        self._putsocket.close()
+        self._getsocket.close()
 
 
 # ------------------------------------------------------
@@ -397,7 +413,9 @@ class Websocket:
         if self.state is not ConnectionState.OPEN or self._waiting_for_dispatch:
             return
         self._waiting_for_dispatch = True
-        self._send_control_command(ControlCommand.DISPATCH)
+        # Ignore if the socket was closed in the meantime.
+        with suppress(OSError):
+            self._send_control_command(ControlCommand.DISPATCH)
 
     # ------------------------------------------------------
     # PRIVATE METHODS
@@ -543,7 +561,7 @@ class Websocket:
         if isinstance(frame.payload, str):
             frame.payload = frame.payload.encode('utf-8')
         elif not isinstance(frame.payload, (bytes, bytearray)):
-            frame.payload = json.dumps(frame.payload).encode('utf-8')
+            frame.payload = orjson.dumps(frame.payload)
 
         output = bytearray()
         first_byte = (
@@ -610,6 +628,9 @@ class Websocket:
 
     def _terminate(self):
         """ Close the underlying TCP socket. """
+        if self.state == ConnectionState.CLOSED:
+            return
+        self.state = ConnectionState.CLOSED
         with suppress(OSError, TimeoutError):
             self.__socket.shutdown(socket.SHUT_WR)
             # Call recv until obtaining a return value of 0 indicating
@@ -623,7 +644,7 @@ class Websocket:
             self.__selector.unregister(self.__socket)
         self.__selector.close()
         self.__socket.close()
-        self.state = ConnectionState.CLOSED
+        self.__cmd_queue.close()
         dispatch.unsubscribe(self)
         self._trigger_lifecycle_event(LifecycleEvent.CLOSE)
         with acquire_cursor(self._db) as cr:
@@ -703,7 +724,7 @@ class Websocket:
         """
         if not self.__event_callbacks[event_type]:
             return
-        with closing(acquire_cursor(self._db)) as cr:
+        with acquire_cursor(self._db) as cr:
             env = new_env(cr, self._session, set_lang=True)
             for callback in self.__event_callbacks[event_type]:
                 try:
@@ -723,12 +744,12 @@ class Websocket:
           validation.
 
         """
-        session = root.session_store.get(self._session.sid)
+        session = session_store().get(self._session.sid)
         if not session:
             e = "session non longer exists"
             raise SessionExpiredException(e)
         if 'next_sid' in session:
-            self._session = root.session_store.get(session['next_sid'])
+            self._session = session_store().get(session['next_sid'])
             self._assert_session_validity()
             return
         if session.uid is None:
@@ -880,7 +901,7 @@ class WebsocketRequest:
 
     def serve_websocket_message(self, message):
         try:
-            jsonrequest = json.loads(message)
+            jsonrequest = orjson.loads(message)
             event_name = jsonrequest['event_name']  # mandatory
         except KeyError as exc:
             raise InvalidWebsocketRequest(
@@ -900,7 +921,7 @@ class WebsocketRequest:
         ) as exc:
             raise InvalidDatabaseException() from exc
 
-        with closing(acquire_cursor(self.db)) as cr:
+        with acquire_cursor(self.db) as cr:
             self.env = new_env(cr, self.session, set_lang=True)
             retrying(
                 functools.partial(self._serve_ir_websocket, event_name, data),
@@ -916,9 +937,9 @@ class WebsocketRequest:
         self.env["ir.websocket"]._serve_ir_websocket(event_name, data)
 
     def _get_session(self):
-        session = root.session_store.get(self.ws._session.sid)
+        session = session_store().get(self.ws._session.sid)
         if 'next_sid' in session:
-            self.ws._session = root.session_store.get(session['next_sid'])
+            self.ws._session = session_store().get(session['next_sid'])
             return self._get_session()
         if not session:
             raise SessionExpiredException()
@@ -1043,9 +1064,9 @@ class WebsocketConnectionHandler:
                     'scheme': request.httprequest.scheme,
                 },
             )
-            session = root.session_store.new()
+            session = session_store().new()
             session.update(get_default_session(), db=request.session.db)
-            root.session_store.save(session)
+            session_store().save(session)
             return session
         return None
 
@@ -1117,9 +1138,17 @@ class WebsocketConnectionHandler:
 
 def _kick_all(code=CloseCode.GOING_AWAY):
     """ Disconnect all the websocket instances. """
+    _logger.info('disconnecting %s websockets', len(_websocket_instances))
+    count = 0
+    wait_threshold = max(odoo.sql_db._Pool._maxconn // 8, 8) if odoo.sql_db._Pool else 32
     for websocket in _websocket_instances:
         if websocket.state is ConnectionState.OPEN:
             websocket.close(code)
+            count += 1
+            if count % wait_threshold == 0:
+                time.sleep(0.5)
+                _logger.debug('kicking websockets %s/%s ...', count, len(_websocket_instances))
+    _logger.debug('kicking websockets %s/%s done', count, len(_websocket_instances))
 
 
 CommonServer.on_stop(_kick_all)

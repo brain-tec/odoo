@@ -14,6 +14,7 @@ from odoo.addons.iot_drivers.tools.system import (
     git,
     pip,
     path_file,
+    update_conf,
 )
 
 _logger = logging.getLogger(__name__)
@@ -75,44 +76,43 @@ def check_git_branch():
         _logger.exception('An error occurred while trying to update the code with git')
 
 
-def _ensure_production_remote(local_remote):
+def _ensure_production_remote():
     """Ensure that the remote repository is the production one
     (https://github.com/odoo/odoo.git).
-
-    :param local_remote: The name of the remote repository.
     """
     production_remote = "https://github.com/odoo/odoo.git"
-    if git('remote', 'get-url', local_remote) != production_remote:
+    if git("remote", "get-url", "origin") != production_remote:
         _logger.info("Setting remote repository to production: %s", production_remote)
-        git('remote', 'set-url', local_remote, production_remote)
+        git("remote", "set-url", "origin", production_remote)
 
 
-def checkout(branch, remote=None):
+def checkout(branch):
     """Checkout to the given branch of the given git remote.
 
     :param branch: The name of the branch to check out.
-    :param remote: The name of the local git remote to use (usually ``origin`` but computed if not provided).
     """
     _logger.info("Preparing local repository for checkout")
-    git('branch', '-m', branch)  # Rename the current branch to the target branch name
+    _ensure_production_remote()
 
-    remote = remote or git('config', f'branch.{branch}.remote') or 'origin'
-    _ensure_production_remote(remote)
-
-    _logger.info("Checking out %s/%s", remote, branch)
-    git('remote', 'set-branches', remote, branch)
-    git('fetch', remote, branch, '--depth=1', '--prune')  # refs/remotes to avoid 'unknown revision'
-    git('reset', 'FETCH_HEAD', '--hard')
+    _logger.info("Checking out origin/%s", branch)
+    if git("fetch", "origin", branch, "--depth=1", "--prune") is None:
+        _logger.error("Failed to fetch origin/%", branch)
+        return
+    if git("reset", "FETCH_HEAD", "--hard") is None:
+        _logger.error("Failed to reset on FETCH_HEAD")
+        return
+    git("branch", "-m", branch)  # Rename the current branch to the target branch name
 
     _logger.info("Cleaning the working directory")
-    git('clean', '-dfx')
+    git("clean", "-dfx")
+    update_conf({"iot_handlers_etag": ""})  # Reset to trigger handlers re-download as `clean -dfx` deletes custom one
 
 
 def update_requirements():
     """Update the Python requirements of the IoT Box, installing the ones
     listed in the requirements.txt file.
     """
-    requirements_file = path_file('odoo', 'addons', 'iot_box_image', 'configuration', 'requirements.txt')
+    requirements_file = path_file('odoo', 'setup', 'iot_box_builder', 'configuration', 'requirements.txt')
     if not requirements_file.exists():
         _logger.info("No requirements file found, not updating.")
         return
@@ -127,7 +127,7 @@ def update_packages():
     the packages.txt file.
     Requires ``writable`` context manager.
     """
-    packages_file = path_file('odoo', 'addons', 'iot_box_image', 'configuration', 'packages.txt')
+    packages_file = path_file('odoo', 'setup', 'iot_box_builder', 'configuration', 'packages.txt')
     if not packages_file.exists():
         _logger.info("No packages file found, not updating.")
         return

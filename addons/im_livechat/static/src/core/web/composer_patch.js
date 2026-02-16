@@ -9,7 +9,7 @@ const composerPatch = {
         super.onKeydown(ev);
         if (
             ev.key === "Tab" &&
-            this.thread?.channel.channel_type === "livechat" &&
+            this.thread?.channel?.channel_type === "livechat" &&
             !this.props.composer.composerText
         ) {
             const threadChanged = this.store.goToOldestUnreadLivechatThread();
@@ -23,7 +23,7 @@ const composerPatch = {
     },
     get placeholder() {
         if (this.displayNextLivechatHint() && this.props.composer.isFocused) {
-            return _t("Tab to next livechat");
+            return _t("Tab to next live chat");
         }
         return super.placeholder;
     },

@@ -12,6 +12,7 @@ import { ConnectionLostError, rpc, RPCError } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 import DeviceIdentifierSequence from "../utils/devices_identifier_sequence";
 import { logPosMessage } from "../utils/pretty_console_log";
+import { registerPythonTemplate } from "../utils/convert_python_template";
 
 const { DateTime } = luxon;
 const CONSOLE_COLOR = "#28ffeb";
@@ -94,6 +95,13 @@ export class PosData extends Reactive {
                     );
                 }
             }
+        }
+    }
+
+    async fetchReceiptTemplate() {
+        const data = await this.orm.call("pos.order", "get_receipt_template_for_pos_frontend");
+        for (const [name, string] of data) {
+            registerPythonTemplate(name, "", string);
         }
     }
 
@@ -268,6 +276,7 @@ export class PosData extends Reactive {
     async loadInitialData() {
         let localData = await this.getCachedServerDataFromIndexedDB();
         const session = localData?.["pos.session"]?.[0];
+        await this.fetchReceiptTemplate();
 
         if (
             (!this.network.offline && session?.state !== "opened") ||
@@ -733,16 +742,7 @@ export class PosData extends Reactive {
             try {
                 if (["product.product", "product.template"].includes(model)) {
                     const domain = model === "product.product" ? "product_variant_ids.id" : "id";
-                    await this.callRelated(
-                        "product.template",
-                        "load_product_from_pos",
-                        [odoo.pos_config_id, [[domain, "in", Array.from(ids)]], 0, 0],
-                        {
-                            context: {
-                                load_archived: true,
-                            },
-                        }
-                    );
+                    await this.loadProductFromPos([[domain, "in", Array.from(ids)]]);
                     continue;
                 }
 
@@ -760,6 +760,42 @@ export class PosData extends Reactive {
         } else {
             return acc;
         }
+    }
+
+    async loadProductFromPos(domain, offset = 0, limit = 0) {
+        const result = {};
+        const data = await this.call(
+            "product.template",
+            "load_product_from_pos",
+            [odoo.pos_config_id, domain, offset, limit],
+            {
+                context: {
+                    load_archived: true,
+                },
+            }
+        );
+
+        // In case of scan unknown barcode, the backend may return an empty list
+        this.synchronizeServerDataInIndexedDB(data);
+        if (!data["product.template"][0]) {
+            return this.models.loadConnectedData(data);
+        }
+
+        const categoryIds = data["product.template"][0].pos_categ_ids;
+        const loadedCategs = new Set(this.models["pos.category"].map((c) => c.id));
+        const notLoaded = categoryIds.filter((categId) => !loadedCategs.has(categId));
+        const config = this.models["pos.config"].get(odoo.pos_config_id);
+
+        if (notLoaded.length) {
+            result["pos.category"] = await this.read("pos.category", Array.from(notLoaded));
+        }
+
+        if (notLoaded.length && config.limit_categories) {
+            await this.read("pos.config", [config.id], ["iface_available_categ_ids"]);
+        }
+
+        const productData = this.models.loadConnectedData(data); // Need to be loaded after categories for indexes computations
+        return Object.assign(result, productData);
     }
 
     async syncData() {

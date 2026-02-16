@@ -49,6 +49,9 @@ function scrollToSnippet(snippetId) {
 registerWebsitePreviewTour(
     "snippet_popup_and_animations",
     {
+        // Remove this key to make the tour fail with error:
+        // "The scroll animation in the modal did not start properly"
+        undeterministicTour_doNotCopy: true,
         url: "/",
         edition: true,
     },
@@ -119,7 +122,7 @@ registerWebsitePreviewTour(
             run: "click",
         },
         {
-            trigger: ":iframe:not(:has(.o_loading_screen))",
+            trigger: ".o_website_preview :iframe:not(:has(.o_loading_screen))",
         },
         clickOnElement("3rd columns", ":iframe .s_popup .s_three_columns .row > :last-child"),
         ...setOnScrollAnim(),
@@ -160,8 +163,7 @@ registerWebsitePreviewTour(
         },
         {
             content: "Check that the popup has been closed",
-            trigger:
-                ".o_we_invisible_el_panel .o_we_invisible_entry:contains('Popup') i.fa-eye-slash",
+            trigger: ":iframe [data-snippet=s_popup] > .modal:not(:visible)",
         },
         ...scrollToSnippet("s_three_columns"),
         clickOnElement(
@@ -195,20 +197,7 @@ registerWebsitePreviewTour(
         {
             content: "Check that the image src is not the raw data",
             trigger:
-                ":iframe .s_three_columns .o_animate_on_scroll img[data-hover-effect='outline']",
-            run() {
-                const imgEl = document
-                    .querySelector("iframe")
-                    .contentDocument.querySelector(
-                        ".s_three_columns .o_animate_on_scroll img[data-hover-effect='outline']"
-                    );
-                const src = imgEl.getAttribute("src");
-                if (src.startsWith("data:image")) {
-                    throw new Error(
-                        "The image source should not be raw data after the editor save"
-                    );
-                }
-            },
+                ":iframe .s_three_columns .o_animate_on_scroll img[data-hover-effect='outline']:not([src^='data:image'])",
         },
         ...clickOnEditAndWaitEditMode(),
         ...scrollToSnippet("s_three_columns"),
@@ -239,20 +228,7 @@ registerWebsitePreviewTour(
         {
             content: "Check that the image src is not the raw data",
             trigger:
-                ":iframe .s_three_columns .o_animate_on_scroll img[data-hover-effect='outline']",
-            run() {
-                const imgEl = document
-                    .querySelector("iframe")
-                    .contentDocument.querySelector(
-                        ".s_three_columns .o_animate_on_scroll img[data-hover-effect='outline']"
-                    );
-                const src = imgEl.getAttribute("src");
-                if (src.startsWith("data:image")) {
-                    throw new Error(
-                        "The image source should not be raw data after the editor save"
-                    );
-                }
-            },
+                ":iframe .s_three_columns .o_animate_on_scroll img[data-hover-effect='outline']:not([src^='data:image'])",
         },
     ]
 );

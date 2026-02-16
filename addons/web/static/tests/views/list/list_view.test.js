@@ -52,6 +52,7 @@ import {
     makeServerError,
     MockServer,
     mockService,
+    mockOffline,
     models,
     mountView,
     mountViewInDialog,
@@ -554,6 +555,7 @@ test(`editable list with edit="0"`, async () => {
 
 test.tags("desktop");
 test(`[Offline] editable list`, async () => {
+    const setOffline = mockOffline();
     await mountView({
         resModel: "foo",
         type: "list",
@@ -561,19 +563,17 @@ test(`[Offline] editable list`, async () => {
     });
     expect(`tbody tr.o_data_row[data-id]`).toHaveCount(4);
 
-    expect(`.o_searchview`).toHaveCount(1);
     await contains(`.o_data_cell`).click();
     expect(`tbody tr.o_selected_row`).toHaveCount(1, { message: "should have editable row" });
 
-    getService("offline").status.offline = true;
-    await animationFrame();
-    expect(`.o_searchview`).toHaveCount(0);
+    await setOffline(true);
     await contains(`.o_data_cell`).click();
     expect(`tbody tr.o_selected_row`).toHaveCount(0, { message: "should not have editable row" });
 });
 
 test.tags("desktop");
 test(`[Offline] list with priority widget`, async () => {
+    const setOffline = mockOffline();
     Foo._fields.priority = fields.Selection({
         selection: [
             [0, "Not Prioritary"],
@@ -594,13 +594,39 @@ test(`[Offline] list with priority widget`, async () => {
 
     expect(".o_field_widget[name=priority] .o_priority_star").not.toHaveClass("o_disabled");
 
-    getService("offline").status.offline = true;
-    await animationFrame();
+    await setOffline(true);
     expect(".o_field_widget[name=priority] .o_priority_star").toHaveClass("o_disabled");
 
-    getService("offline").status.offline = false;
-    await animationFrame();
+    await setOffline(false);
     expect(".o_field_widget[name=priority] .o_priority_star").not.toHaveClass("o_disabled");
+});
+
+test.tags("desktop");
+test(`[Offline] disable unavailable records when offline`, async () => {
+    const setOffline = mockOffline();
+    mockService("offline", {
+        isAvailableOffline(actionId, viewType, resId) {
+            if (actionId === 234 && viewType === "form") {
+                return [2, 3].includes(resId);
+            }
+            return actionId === 123;
+        },
+    });
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list><field name="foo"/></list>`,
+        config: { actionId: 234 },
+    });
+
+    expect(".o_data_row").toHaveCount(4);
+
+    await setOffline(true);
+    expect(".o_data_row").toHaveCount(4);
+    expect(".o_data_row:eq(0)").toHaveClass("o_disabled_offline");
+    expect(".o_data_row:eq(1)").not.toHaveClass("o_disabled_offline");
+    expect(".o_data_row:eq(2)").not.toHaveClass("o_disabled_offline");
+    expect(".o_data_row:eq(3)").toHaveClass("o_disabled_offline");
 });
 
 test(`non-editable list with open_form_view`, async () => {
@@ -4970,6 +4996,22 @@ test(`aggregates are formatted according to field widget`, async () => {
     });
 });
 
+test(`aggregates of monetary widget with no currency data in grouped list`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        groupBy: ["bar"],
+        arch: `
+            <list>
+                <field name="qux" widget="monetary" options="{'currency_field': 'currency_id'}" sum="Sum"/>
+                <field name="currency_id" column_invisible="True"/>
+            </list>`,
+    });
+    expect(`tfoot`).toHaveText("19.40", {
+        message: "aggregates monetary should still be displayed without currency",
+    });
+});
+
 test(`aggregates of monetary field with no currency field`, async () => {
     await mountView({
         resModel: "foo",
@@ -5801,7 +5843,7 @@ test(`duplicate all records`, async () => {
     // A confirmation dialog should appear when duplicating multiple records.
     expect(`.modal`).toHaveCount(1);
     expect(`.modal-body`).toHaveText(
-        "Are you sure that you want to duplicate all the selected records?"
+        "You are about to create a copy of every selected record.\nAre you sure you want to proceed?"
     );
     await contains(`.modal footer button.btn-primary`).click();
 
@@ -8218,9 +8260,9 @@ test(`list view, editable, without data`, async () => {
         type: "list",
         arch: `
             <list editable="top">
+                <field name="foo"/>
                 <field name="date"/>
                 <field name="m2o"/>
-                <field name="foo"/>
                 <button type="object" icon="fa-plus-square" name="method"/>
             </list>
         `,
@@ -8242,7 +8284,7 @@ test(`list view, editable, without data`, async () => {
     expect(`tbody tr:eq(0)`).toHaveClass("o_selected_row", {
         message: "the date field td should be in edit mode",
     });
-    expect(`tbody tr:eq(0) td:eq(1)`).toHaveText("Feb 10, 2017", {
+    expect(`tbody tr:eq(0) td:eq(2)`).toHaveText("Feb 10, 2017", {
         message: "the date field td should have the default value",
     });
     expect(`tr.o_selected_row .o_list_record_selector input`).toHaveProperty("disabled", true, {
@@ -8394,6 +8436,10 @@ test(`editable list view, should refocus date field`, async () => {
 
     await contains(getPickerCell("15")).click();
     expect(`.o_datetime_picker`).toHaveCount(0);
+
+    // the datetime field is rendered multiple times before `picker.activeInput`
+    // is reset, and so before the field displays a button instead of the input
+    await waitFor(`.o_field_widget[name=date] button`);
     expect(`.o_field_widget[name=date] button`).toHaveValue("02/15/2017");
     expect(`.o_field_widget[name=date] button`).toBeFocused();
 });
@@ -11990,7 +12036,7 @@ test(`editable list view: clicking on "Discard changes" in multi edition`, async
     await contains(`.o_data_row:eq(0) .o_data_cell:eq(0)`).click();
     await contains(`.o_data_row [name=foo] input`).edit("oof", { confirm: "blur" });
 
-    await clickModalButton({ text: "Cancel" });
+    await clickModalButton({ text: "Discard" });
 
     expect(`.modal`).toHaveCount(0, { message: "should not open modal" });
     expect(`.o_data_row:eq(0) .o_data_cell:eq(0)`).toHaveText("yop");
@@ -18334,13 +18380,13 @@ test(`monetary field display for rtl languages`, async () => {
     expect(`thead th:not(.o_list_record_selector):eq(1)`).toHaveStyle(
         { "text-align": "right" },
         {
-            message: "header cells of monetary fields should be right alined",
+            message: "header cells of monetary fields should be right aligned",
         }
     );
     expect(`tbody tr:eq(0) td:not(.o_list_record_selector):eq(1)`).toHaveStyle(
         { "text-align": "right" },
         {
-            message: "Monetary cells should be right alined",
+            message: "Monetary cells should be right aligned",
         }
     );
     expect(`tbody tr:eq(0) td:not(.o_list_record_selector):eq(1)`).toHaveStyle(
@@ -18349,36 +18395,6 @@ test(`monetary field display for rtl languages`, async () => {
             message: "Monetary cells should have ltr direction",
         }
     );
-});
-
-test(`add record in editable list view with sample data`, async () => {
-    Foo._records = [];
-
-    let deferred = null;
-    onRpc("web_search_read", () => deferred);
-
-    await mountView({
-        resModel: "foo",
-        type: "list",
-        arch: `<list sample="1" editable="top"><field name="int_field"/></list>`,
-        noContentHelp: "click to add a record",
-    });
-    expect(`.o_view_sample_data`).toHaveCount(1);
-    expect(`.o_view_nocontent`).toHaveCount(1);
-    expect(`.o_data_row`).toHaveCount(10);
-
-    deferred = new Deferred();
-    await contains(`.o_list_button_add`).click();
-    expect(`.o_view_sample_data`).toHaveCount(1);
-    expect(`.o_view_nocontent`).toHaveCount(1);
-    expect(`.o_data_row`).toHaveCount(10);
-
-    deferred.resolve();
-    await animationFrame();
-    expect(`.o_view_sample_data`).toHaveCount(0);
-    expect(`.o_view_nocontent`).toHaveCount(0);
-    expect(`.o_data_row`).toHaveCount(1);
-    expect(`.o_data_row.o_selected_row`).toHaveCount(1);
 });
 
 test(`Adding new record in list view with open form view button`, async () => {
@@ -19249,7 +19265,7 @@ test(`cache web_search_read (onUpdate called after another load)`, async () => {
     expect(`.o_data_row`).toHaveCount(4);
     expect(queryAllTexts(`.o_list_char`)).toEqual(["yop", "blip", "gnap", "blip"]);
 
-    // create a record and go back to the form => will display data from the cache
+    // create a record and go back to the list => will display data from the cache
     await contains(`.o_list_button_add`).click();
     await contains(`.o_field_widget[name=foo] input`).edit("new record");
     await contains(`.breadcrumb-item a, .o_back_button`).click();
@@ -19527,6 +19543,236 @@ test(`cache web_read_group (with sample data, change)`, async () => {
 });
 
 test.tags("desktop");
+test(`cache web_read_group (switch view, go back)`, async () => {
+    // This test ensures that the params of the web_read_group don't change between the first load
+    // and a reload, s.t. we reload does a cache hit
+    let def;
+    onRpc("web_read_group", () => {
+        expect.step("web_read_group");
+        return def;
+    });
+
+    Foo._views = {
+        "list,false": `<list default_group_by="int_field"><field name="foo"/></list>`,
+        "kanban,false": `
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="foo"/>
+                    </t>
+                </templates>
+            </kanban>`,
+        "search,false": `<search/>`,
+    };
+
+    defineActions([
+        {
+            id: 1,
+            name: "Partners Action",
+            res_model: "foo",
+            views: [
+                [false, "list"],
+                [false, "kanban"],
+            ],
+            search_view_id: [false, "search"],
+        },
+    ]);
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+    expect(`.o_list_view`).toHaveCount(1);
+    expect(`.o_group_header`).toHaveCount(4);
+    expect.verifySteps(["web_read_group"]);
+
+    await getService("action").switchView("kanban");
+    expect(`.o_kanban_view`).toHaveCount(1);
+    expect.verifySteps([]);
+
+    // go back to list, but slow down the web_read_group
+    def = new Deferred();
+    await getService("action").switchView("list");
+    expect(`.o_list_view`).toHaveCount(1);
+    expect(`.o_group_header`).toHaveCount(4);
+    expect.verifySteps(["web_read_group"]);
+
+    def.resolve();
+    await animationFrame();
+    expect(`.o_list_view`).toHaveCount(1);
+    expect(`.o_group_header`).toHaveCount(4);
+});
+
+test(`cache web_read_group: do not send opening_info if not necessary`, async () => {
+    // This test ensures that the params of the web_read_group aren't polluted by the opening_info
+    // kwargs when successively toggling different filters
+    expect.errors(2);
+    const setOffline = mockOffline();
+    onRpc("web_read_group", async () => {
+        expect.step("web_read_group");
+    });
+
+    Foo._views = {
+        "list,false": `<list default_group_by="int_field"><field name="foo"/></list>`,
+        "search,false": `
+            <search>
+                <filter name="filter_1" string="First filter" domain="[('int_field', '>', 10)]"/>
+                <filter name="filter_2" string="Second filter" domain="[('int_field', '>', 0)]"/>
+            </search>`,
+    };
+
+    defineActions([
+        {
+            id: 1,
+            name: "Partners Action",
+            res_model: "foo",
+            views: [[false, "list"]],
+            search_view_id: [false, "search"],
+            context: {
+                search_default_filter_1: true,
+            },
+        },
+    ]);
+
+    await mountWithCleanup(WebClient);
+    // Populate the cache for action 1 with several filters
+    await getService("action").doAction(1);
+    expect(`.o_group_header`).toHaveCount(1);
+
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Second filter");
+    expect(`.o_group_header`).toHaveCount(3);
+
+    await removeFacet("First filter or Second filter");
+    expect(`.o_group_header`).toHaveCount(4);
+
+    expect.verifySteps(["web_read_group", "web_read_group", "web_read_group"]);
+
+    // Switch offline and execute action 1 again (rely on the cache)
+    await setOffline(true);
+    await getService("action").doAction(1);
+    expect(`.o_group_header`).toHaveCount(1);
+
+    // Do not follow the same steps as earlier, directly remove the filter
+    if (getMockEnv().isSmall) {
+        // Toggle searchbar in mobile
+        await contains(`.o_control_panel_navigation .fa-search`).click();
+    }
+    await contains(".o_searchview_facet .oi-close").click();
+    expect(`.o_group_header`).toHaveCount(4);
+
+    expect.verifyErrors([
+        `Connection to "/web/dataset/call_kw/foo/web_read_group" couldn't be established`,
+        `Connection to "/web/dataset/call_kw/foo/web_read_group" couldn't be established`,
+    ]);
+});
+
+test(`[Offline] cache web_search_read: browsing with pager online/offline`, async () => {
+    expect.errors(2);
+    const setOffline = mockOffline();
+
+    let searchReadDef;
+    onRpc("web_search_read", () => {
+        expect.step("web_search_read");
+        return searchReadDef;
+    });
+
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list limit="2"><field name="foo"/></list>`,
+    });
+
+    // put data in cache
+    expect(queryAllTexts(`.o_list_char`)).toEqual(["yop", "blip"]); // page 1
+    await contains(".o_pager_next").click();
+    expect(queryAllTexts(`.o_list_char`)).toEqual(["gnap", "blip"]); // page 2
+    expect.verifySteps(["web_search_read", "web_search_read"]);
+
+    // simulate a slow network => do not use data from cache
+    searchReadDef = new Deferred();
+    await contains(".o_pager_next").click();
+    expect(queryAllTexts(`.o_list_char`)).toEqual(["gnap", "blip"]); // still display page 2
+    expect.verifySteps(["web_search_read"]);
+
+    // unblock web_search_read rpc
+    searchReadDef.resolve();
+    await animationFrame();
+    expect(queryAllTexts(`.o_list_char`)).toEqual(["yop", "blip"]); // display page 1
+
+    expect.verifyErrors([]);
+
+    // switch offline => use data from cache
+    await setOffline(true);
+
+    await contains(".o_pager_next").click();
+    expect(queryAllTexts(`.o_list_char`)).toEqual(["gnap", "blip"]); // page 1
+    await contains(".o_pager_next").click();
+    expect(queryAllTexts(`.o_list_char`)).toEqual(["yop", "blip"]); // page 2
+
+    expect.verifyErrors([
+        `Connection to "/web/dataset/call_kw/foo/web_search_read" couldn't be established`,
+        `Connection to "/web/dataset/call_kw/foo/web_search_read" couldn't be established`,
+    ]);
+});
+
+test(`[Offline] cache web_search_read: enable filter online/offline`, async () => {
+    expect.errors(2);
+    const setOffline = mockOffline();
+
+    let searchReadDef;
+    onRpc("web_search_read", () => {
+        expect.step("web_search_read");
+        return searchReadDef;
+    });
+
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list><field name="foo"/></list>`,
+        searchViewArch: `
+            <search>
+                <filter string="My filter" name="my_filter" domain="[['foo', '=', 'blip']]"/>
+            </search>`,
+        config: { actionId: 234 },
+    });
+
+    // put data in cache
+    expect(queryAllTexts(`.o_list_char`)).toEqual(["yop", "blip", "gnap", "blip"]);
+    await toggleSearchBarMenu();
+    await toggleMenuItem("My filter");
+    expect(queryAllTexts(`.o_list_char`)).toEqual(["blip", "blip"]);
+    expect.verifySteps(["web_search_read", "web_search_read"]);
+
+    // simulate a slow network => do not use data from cache
+    searchReadDef = new Deferred();
+    await toggleMenuItem("My filter");
+    expect(queryAllTexts(`.o_list_char`)).toEqual(["blip", "blip"]); // still display filtered records
+    expect.verifySteps(["web_search_read"]);
+
+    // unblock web_search_read rpc
+    searchReadDef.resolve();
+    await animationFrame();
+    expect(queryAllTexts(`.o_list_char`)).toEqual(["yop", "blip", "gnap", "blip"]);
+
+    expect.verifyErrors([]);
+
+    // switch offline => use data from cache
+    await setOffline(true);
+
+    expect(".o_offline_search_bar").toHaveCount(1);
+    await contains(".o_offline_search_bar .dropdown-toggle").click();
+    expect(".o_search_bar_menu_offline .o-dropdown-item").toHaveCount(1);
+    await contains(".o_search_bar_menu_offline .o-dropdown-item").click();
+    expect(queryAllTexts(`.o_list_char`)).toEqual(["blip", "blip"]);
+    await contains(".o_searchview_facet .oi-close").click();
+    expect(queryAllTexts(`.o_list_char`)).toEqual(["yop", "blip", "gnap", "blip"]);
+
+    expect.verifyErrors([
+        `Connection to "/web/dataset/call_kw/foo/web_search_read" couldn't be established`,
+        `Connection to "/web/dataset/call_kw/foo/web_search_read" couldn't be established`,
+    ]);
+});
+
+test.tags("desktop");
 test(`multi_edit: edit field with operator with localization`, async () => {
     await mountView({
         resModel: "foo",
@@ -19547,7 +19793,7 @@ test(`multi_edit: edit field with operator with localization`, async () => {
         await waitFor(`.modal table [name=${field}]`);
         expect(`.modal table [name=${field}]`).toHaveText(text);
         expect(`.modal .alert`).toHaveCount(1);
-        await contains(".modal footer button:contains(cancel)").click();
+        await contains(".modal footer button:contains(Discard)").click();
     }
     await checkFieldValue("int_field", "+=100", "Int field + 100");
     await checkFieldValue("int_field", "-=00100", "Int field - 100");
@@ -19801,7 +20047,7 @@ test(`multi edition: edit date with operation`, async () => {
         await animationFrame();
         expect(`.modal .o_modal_changes [name=datetime]`).toHaveText(`Datetime ${operation.text}`);
         expect(`.modal .alert`).toHaveCount(1);
-        await contains(`.modal-dialog button:contains(cancel)`).click();
+        await contains(`.modal-dialog button:contains(Discard)`).click();
     }
 
     await contains(`th .o-checkbox`).click();

@@ -32,7 +32,14 @@ SALE_ORDER_STATE = [
 
 class SaleOrder(models.Model):
     _name = 'sale.order'
-    _inherit = ['portal.mixin', 'product.catalog.mixin', 'mail.thread', 'mail.activity.mixin', 'utm.mixin', 'account.document.import.mixin']
+    _inherit = [
+        'account.document.import.mixin',
+        'mail.activity.mixin',
+        'mail.thread.subject.suggested',
+        'portal.mixin',
+        'product.catalog.mixin',
+        'utm.mixin',
+    ]
     _description = "Sales Order"
     _order = 'date_order desc, id desc'
     _check_company_auto = True
@@ -332,7 +339,11 @@ class SaleOrder(models.Model):
         string="Expected Date",
         compute='_compute_expected_date', store=False,  # Note: can not be stored since depends on today()
         help="Delivery date you can promise to the customer, computed from the minimum lead time of the order lines.")
-    is_expired = fields.Boolean(string="Is Expired", compute='_compute_is_expired')
+    is_expired = fields.Boolean(
+        string="Is Expired",
+        compute='_compute_is_expired',
+        search='_search_is_expired',
+    )
     partner_credit_warning = fields.Text(
         compute='_compute_partner_credit_warning')
     show_deliver_button = fields.Boolean(compute='_compute_show_deliver_button')
@@ -344,7 +355,7 @@ class SaleOrder(models.Model):
         compute='_compute_tax_country_id',
         # Avoid access error on fiscal position when reading a sale order with company != user.company_ids
         compute_sudo=True)  # used to filter available taxes depending on the fiscal country and position
-    tax_totals = fields.Binary(compute='_compute_tax_totals', exportable=False)
+    tax_totals = fields.Json(compute='_compute_tax_totals', exportable=False)
     terms_type = fields.Selection(related='company_id.terms_type')
     type_name = fields.Char(string="Type Name", compute='_compute_type_name')
 
@@ -356,6 +367,8 @@ class SaleOrder(models.Model):
         compute='_compute_has_active_pricelist')
     show_update_pricelist = fields.Boolean(
         string="Has Pricelist Changed", store=False)  # True if the pricelist was changed
+
+    analytic_account_id = fields.Many2one(string="Analytic Account", comodel_name='account.analytic.account')
 
     _date_order_id_idx = models.Index("(date_order desc, id desc)")
 
@@ -822,6 +835,13 @@ class SaleOrder(models.Model):
                 and order.validity_date < today
             )
 
+    def _search_is_expired(self, operator, value):
+        today = fields.Date.today()
+        expired_domain = [('state', 'in', ('draft', 'sent')), ('validity_date', '<', today)]
+        if operator == "in":
+            return expired_domain
+        return ['!', '&'] + expired_domain
+
     @api.depends('order_line.qty_delivered')
     def _compute_show_deliver_button(self):
         for order in self:
@@ -901,6 +921,9 @@ class SaleOrder(models.Model):
             warnings = OrderedSet()
             if partner_msg := order.partner_id.sale_warn_msg:
                 warnings.add((order.partner_id.name or order.partner_id.display_name) + ' - ' + partner_msg)
+            if partner_parent_msg := order.partner_id.parent_id.sale_warn_msg:
+                parent = order.partner_id.parent_id
+                warnings.add((parent.name or parent.display_name) + ' - ' + partner_parent_msg)
             for line in order.order_line:
                 if product_msg := line.sale_line_warn_msg:
                     warnings.add(line.product_id.display_name + ' - ' + product_msg)
@@ -994,7 +1017,7 @@ class SaleOrder(models.Model):
 
     @api.onchange('pricelist_id')
     def _onchange_pricelist_id_show_update_prices(self):
-        self.show_update_pricelist = bool(self.order_line)
+        self.show_update_pricelist = bool(self.order_line and self._origin.pricelist_id != self.pricelist_id)
 
     @api.onchange('prepayment_percent')
     def _onchange_prepayment_percent(self):
@@ -1004,6 +1027,8 @@ class SaleOrder(models.Model):
     @api.onchange('order_line')
     def _onchange_order_line(self):
         for index, line in enumerate(self.order_line):
+            if line.display_type == 'line_subsection' and not line.parent_id:
+                line.display_type = 'line_section'
             combo_item_lines = line._get_linked_lines().filtered('combo_item_id')
             if line.product_template_id.type != 'combo':
                 if combo_item_lines:
@@ -1138,7 +1163,6 @@ class SaleOrder(models.Model):
             'default_model': 'sale.order',
             'default_res_ids': self.ids,
             'default_composition_mode': 'comment',
-            'default_email_layout_xmlid': 'mail.mail_notification_layout_with_responsible_signature',
             'email_notification_allow_footer': True,
             'hide_mail_template_management_options': True,
             'proforma': self.env.context.get('proforma', False),
@@ -1481,6 +1505,7 @@ class SaleOrder(models.Model):
     def _get_action_add_from_catalog_extra_context(self):
         return {
             **super()._get_action_add_from_catalog_extra_context(),
+            'order_customer_id': self.partner_id.id,
             'product_catalog_currency_id': self.currency_id.id,
             'product_catalog_digits': self.order_line._fields['price_unit'].get_digits(self.env),
             'show_sections': bool(self.id),
@@ -1525,6 +1550,7 @@ class SaleOrder(models.Model):
             'campaign_id': self.campaign_id.id,
             'medium_id': self.medium_id.id,
             'source_id': self.source_id.id,
+            'utm_reference': f'{self.utm_reference._name},{self.utm_reference.id}' if self.utm_reference else False,
             'team_id': self.team_id.id,
             'partner_id': self.partner_invoice_id.id,
             'partner_shipping_id': self.partner_shipping_id.id,
@@ -1570,7 +1596,6 @@ class SaleOrder(models.Model):
                 'default_partner_id': self.partner_id.id,
                 'default_partner_shipping_id': self.partner_shipping_id.id,
                 'default_invoice_payment_term_id': self.payment_term_id.id or self.partner_id.property_payment_term_id.id or self.env['account.move'].default_get(['invoice_payment_term_id']).get('invoice_payment_term_id'),
-                'default_invoice_origin': self.name,
             })
         action['context'] = context
         return action
@@ -1788,6 +1813,8 @@ class SaleOrder(models.Model):
                 moves_to_switch.action_switch_move_type()
                 self.invoice_ids._set_reversed_entry(moves_to_switch)
 
+        moves._link_analytic_lines_to_invoice()
+
         for move in moves:
             move.message_post_with_source(
                 'mail.message_origin_link',
@@ -1810,7 +1837,8 @@ class SaleOrder(models.Model):
         if (len(self) == 1
             # The method _track_finalize is sometimes called too early or too late and it
             # might cause a desynchronization with the cache, thus this condition is needed.
-            and self.env.cache.contains(self, self._fields['state']) and self._discard_tracking()):
+            and self.id in self._fields['state']._get_cache(self.env)
+            and self._discard_tracking()):
             self.env.cr.precommit.data.pop(f'mail.tracking.{self._name}', {})
             self.env.flush_all()
             return
@@ -1846,26 +1874,19 @@ class SaleOrder(models.Model):
             pass
         else:
             access_opt = customer_portal_group[2].setdefault('button_access', {})
-            is_tx_pending = self.get_portal_last_transaction().state == 'pending'
-            if self._has_to_be_signed():
-                if self._has_to_be_paid():
-                    access_opt['title'] = _("View Quotation") if is_tx_pending else _("Sign & Pay Quotation")
-                else:
-                    access_opt['title'] = _("Review & Sign Quotation")
-            elif self._has_to_be_paid() and not is_tx_pending:
-                access_opt['title'] = _("Review & Pay Quotation")
-            elif self.state in ('draft', 'sent'):
+            if self.state in ('draft', 'sent'):
                 access_opt['title'] = _("View Quotation")
 
         return groups
 
     def _notify_by_email_prepare_rendering_context(self, message, msg_vals=False, model_description=False,
                                                    force_email_company=False, force_email_lang=False,
-                                                   force_record_name=False):
+                                                   force_record_name=False, force_header=False, force_footer=False):
         render_context = super()._notify_by_email_prepare_rendering_context(
             message, msg_vals=msg_vals, model_description=model_description,
             force_email_company=force_email_company, force_email_lang=force_email_lang,
-            force_record_name=force_record_name,
+            force_record_name=force_record_name, force_header=force_header,
+            force_footer=force_footer,
         )
         lang_code = render_context.get('lang')
         record = render_context['record']
@@ -2089,7 +2110,7 @@ class SaleOrder(models.Model):
                 user_id=order.user_id.id or order.partner_id.user_id.id,
                 note=_("Upsell %(order)s for customer %(customer)s", order=order_ref, customer=customer_ref))
 
-    def _prepare_analytic_account_data(self, prefix=None):
+    def _prepare_analytic_account_data(self, prefix=None, plan_id=None):
         """ Prepare SO analytic account creation values.
 
         :return: `account.analytic.account` creation values
@@ -2099,12 +2120,13 @@ class SaleOrder(models.Model):
         name = self.name
         if prefix:
             name = prefix + ": " + self.name
-        project_plan, _other_plans = self.env['account.analytic.plan']._get_all_plans()
+        if not plan_id:
+            plan_id, _other_plans = self.env['account.analytic.plan']._get_all_plans()
         return {
             'name': name,
             'code': self.client_order_ref,
             'company_id': self.company_id.id,
-            'plan_id': project_plan.id,
+            'plan_id': plan_id.id,
             'partner_id': self.partner_id.id,
         }
 
@@ -2259,6 +2281,15 @@ class SaleOrder(models.Model):
         for order in self:
             for line in order.order_line:
                 line.qty_delivered = line.product_uom_qty
+
+    def _get_or_create_analytic_account(self, plan_id):
+        self.ensure_one()
+
+        if not self.analytic_account_id:
+            self.analytic_account_id = self.env['account.analytic.account'].create(
+                self._prepare_analytic_account_data(plan_id=plan_id)
+            )
+        return self.analytic_account_id
 
     # === CATALOG === #
 

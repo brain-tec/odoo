@@ -14,7 +14,7 @@ import {
 registerWebsitePreviewTour(
     "course_publisher_standard",
     {
-        url: "/slides",
+        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps ) #245680
     },
     () =>
         [
@@ -60,6 +60,10 @@ registerWebsitePreviewTour(
             },
             {
                 trigger: "body:not(:has(.modal))",
+            },
+            {
+                content: "wait the slide course main is in body before edition",
+                trigger: ":iframe main .o_wslides_course_main",
             },
             ...clickOnEditAndWaitEditMode(),
             {

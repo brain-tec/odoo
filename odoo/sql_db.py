@@ -43,8 +43,6 @@ if typing.TYPE_CHECKING:
 
     from odoo.orm.environments import Transaction
 
-    T = typing.TypeVar('T')
-
     # when type checking, the BaseCursor exposes methods of the psycopg cursor
     _CursorProtocol = psycopg2.extensions.cursor
 else:
@@ -144,8 +142,10 @@ class _FlushingSavepoint(Savepoint):
         super().__init__(cr)
 
     def rollback(self):
-        assert isinstance(self._cr, BaseCursor)
-        self._cr.clear()
+        cr = self._cr
+        assert isinstance(cr, BaseCursor)
+        if cr.transaction is not None:
+            cr.transaction.clear()
         super().rollback()
 
     def _close(self, rollback: bool):
@@ -184,23 +184,16 @@ class BaseCursor(_CursorProtocol):
 
     def flush(self) -> None:
         """ Flush the current transaction, and run precommit hooks. """
-        if self.transaction is not None:
-            self.transaction.flush()
-        self.precommit.run()
-
-    def clear(self) -> None:
-        """ Clear the current transaction, and clear precommit hooks. """
-        if self.transaction is not None:
-            self.transaction.clear()
-        self.precommit.clear()
-
-    def reset(self) -> None:
-        """ Reset the current transaction (this invalidates more than `clear()`).
-            This method should be called only right after commit() or rollback().
-        """
-        if self.transaction is not None:
-            self.transaction.default_env = None  # break the cyclic reference
-            self.transaction.reset()
+        # In case some pre-commit added another pre-commit or triggered changes
+        # in the ORM, we must flush and run it again.
+        for _ in range(10):  # limit number of iterations
+            if self.transaction is not None:
+                self.transaction.flush()
+            if not self.precommit:
+                break
+            self.precommit.run()
+        else:
+            _logger.warning("Too many iterations for flushing the cursor!")
 
     def execute(self, query, params=None, log_exceptions: bool = True) -> None:
         """ Execute a query inside the current transaction.
@@ -532,7 +525,9 @@ class Cursor(BaseCursor):
 
         # Clean the underlying connection, and run rollback hooks.
         self.rollback()
-        self.reset()
+        if self.transaction is not None:
+            self.transaction.default_env = None  # break the cyclic reference
+            self.transaction.reset()
 
         self._closed = True
 
@@ -547,7 +542,8 @@ class Cursor(BaseCursor):
         """ Perform an SQL `COMMIT` """
         self.flush()
         self._cnx.commit()
-        self.clear()
+        if self.transaction is not None:
+            self.transaction.clear()
         self._now = None
         self.prerollback.clear()
         self.postrollback.clear()
@@ -555,10 +551,12 @@ class Cursor(BaseCursor):
 
     def rollback(self) -> None:
         """ Perform an SQL `ROLLBACK` """
-        self.clear()
+        self.precommit.clear()
         self.postcommit.clear()
         self.prerollback.run()
         self._cnx.rollback()
+        if self.transaction is not None:
+            self.transaction.clear()
         self._now = None
         self.postrollback.run()
 

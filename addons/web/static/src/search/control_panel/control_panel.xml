@@ -4,7 +4,7 @@
     <t t-name="web.ControlPanel">
         <div class="o_control_panel d-flex flex-column gap-3 px-3 pt-2 pb-3" t-ref="root" data-command-category="actions">
             <Transition t-if="!env.isSmall" visible="state.embeddedInfos.showEmbedded" name="'o-fade'" t-slot-scope="transition" leaveDuration="500">
-                <div class="o_embedded_actions overflow-hidden d-flex flex-wrap w-100 align-items-center justify-content-center gap-2" t-att-class="transition.className">
+                <div class="o_embedded_actions d-flex flex-wrap w-100 align-items-center justify-content-center gap-2" t-att-class="transition.className">
                     <t t-foreach="state.embeddedInfos.embeddedActions" t-as="action" t-key="action.id">
                         <t t-if="_isEmbeddedActionVisible(action)">
                             <button class="btn btn-secondary o_draggable"
@@ -97,9 +97,9 @@
                                     <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
                                         <DropdownItem 
                                             tag="'button'"
-                                            attrs="{ 'data-available-offline': view.availableOffline}"
+                                            attrs="{ 'data-available-offline': this.isViewAvailable(view)}"
                                             onSelected="() => this.switchView(view.type)"
-                                            class="view.active ? 'selected' : ''">
+                                            class="{ 'selected': view.active }">
                                                 <i class="oi-fw" t-att-class="view.icon"/>
                                                 <span class="ms-1" t-out="view.name"/>
                                         </DropdownItem>
@@ -110,8 +110,9 @@
                         <nav t-else="" class="o_cp_switch_buttons d-print-none d-inline-flex btn-group">
                             <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
                                 <button class="btn btn-secondary o_switch_view "
-                                    t-attf-class="o_{{view.type}} {{view.active ? 'active' : ''}}"
-                                    t-att-data-available-offline="view.availableOffline"
+                                    t-att-class="{ 'active': view.active }"
+                                    t-attf-class="o_{{view.type}}"
+                                    t-att-data-available-offline="this.isViewAvailable(view)"
                                     t-att-data-tooltip="view.name"
                                     t-custom-click="(ev, isMiddleClick) => this.switchView(view.type, isMiddleClick)"
                                     t-att-aria-label="view.name + ' View'"

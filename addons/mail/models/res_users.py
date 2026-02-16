@@ -393,7 +393,7 @@ class ResUsers(models.Model):
         res.one(
             "partner_id",
             lambda res: (
-                res.extend(["active", "main_user_id", "name"]),
+                res.extend(["active", "main_user_id", "name", "tz"]),
                 res.from_method("_store_avatar_fields"),
                 res.from_method("_store_im_status_fields"),
             ),
@@ -403,6 +403,9 @@ class ResUsers(models.Model):
 
     def _store_main_user_fields(self, res: Store.FieldList):
         res.attr("share")
+
+    def _store_im_status_fields(self, res: Store.FieldList):
+        res.attr("id")
 
     @api.model
     def _get_activity_groups(self):
@@ -430,14 +433,16 @@ class ResUsers(models.Model):
             res_ids = [id_ for id_ in activities_by_record if id_]
             Model = self.env[model_name]
             has_model_access_right = Model.has_access('read')
+            # also filters out non existing records (db cascade)
+            existing = Model.browse(res_ids).exists()
             if has_model_access_right:
-                allowed_records = Model.browse(res_ids)._filtered_access('read')
+                allowed_records = existing._filtered_access('read')
             else:
                 allowed_records = Model
             unallowed_records = Model.browse(res_ids) - allowed_records
             # We remove from not allowed records, records that the user has access to through others of his companies
             if has_model_access_right and unallowed_records and not is_all_user_companies_allowed:
-                unallowed_records -= unallowed_records.with_context(
+                unallowed_records -= (unallowed_records & existing).with_context(
                     allowed_company_ids=user_company_ids)._filtered_access('read')
             model_activity_states[model_name] = {'overdue_count': 0, 'today_count': 0, 'planned_count': 0, 'total_count': 0}
             for record_id, activities in activities_by_record.items():

@@ -542,7 +542,7 @@ test('O2M with buttons with attr "special" in dialog close the dialog', async ()
                         <form>
                             <field name="bar"/>
                             <footer>
-                                <button special="cancel" data-hotkey="x" string="Cancel" class="btn-secondary"/>
+                                <button special="cancel" data-hotkey="x" class="btn-secondary"/>
                             </footer>
                         </form>
                     </field>
@@ -552,7 +552,7 @@ test('O2M with buttons with attr "special" in dialog close the dialog', async ()
     await contains(".o_field_x2many_list_row_add button").click();
     expect(".o_dialog").toHaveCount(1);
 
-    expect(".modal .btn").toHaveText("Cancel");
+    expect(".modal .btn").toHaveText("Discard");
 
     await contains(".modal .btn").click();
     expect(".o_dialog").toHaveCount(0);
@@ -2418,6 +2418,33 @@ test("one2many kanban order with handle widget", async () => {
         resId: 1,
     });
     expect.verifySteps(["web_read"]);
+});
+
+test("press Enter in a form with a one2many kanban", async () => {
+    Partner._records[0].p = [2, 4];
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="p">
+                    <kanban>
+                        <templates>
+                            <t t-name="card">
+                                <field name="foo"/>
+                            </t>
+                        </templates>
+                    </kanban>
+                </field>
+            </form>`,
+        resId: 1,
+    });
+
+    await press("Enter");
+
+    expect(".o_kanban_renderer").toHaveCount(1);
+    expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(2);
 });
 
 test("one2many field when using the pager", async () => {
@@ -4327,6 +4354,35 @@ test("unselecting a line with missing required data", async () => {
     await contains(".o_form_button_cancel").click();
     expect(".modal").toHaveCount(0);
     expect("tr.o_data_row").toHaveCount(0);
+});
+
+test("keep focus when click must be ignored", async () => {
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="turtles">
+                    <list editable="top">
+                        <field name="turtle_int"/>
+                    </list>
+                </field>
+                <div data-list-ignore-click="">
+                    Click me
+                </div>
+            </form>`,
+        resId: 1,
+    });
+
+    // edit the first row
+    await contains(".o_data_cell").click();
+    expect(".o_data_row").toHaveClass("o_selected_row");
+
+    // click on the element on which clicks should be ignored
+    await contains("div[data-list-ignore-click]").click();
+
+    // the line should still be selected
+    expect("tr.o_data_row.o_selected_row").toHaveCount(1);
 });
 
 test("pressing enter in a o2m with a required empty field", async () => {

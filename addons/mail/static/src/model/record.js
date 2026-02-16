@@ -2,7 +2,7 @@ import { markup, toRaw } from "@odoo/owl";
 import {
     IS_DELETED_SYM,
     OR_SYM,
-    isCommand,
+    isCommandList,
     isMany,
     isOne,
     isRecord,
@@ -29,7 +29,7 @@ export class Record {
     static _;
     /** @type {import("./record_internal").RecordInternal} */
     _;
-    static id;
+    static id = "id";
     /** @type {import("@web/env").OdooEnv} */
     static env;
     /** @type {import("@web/env").OdooEnv} */
@@ -63,6 +63,9 @@ export class Record {
     static localId(data) {
         const Model = toRaw(this);
         let idStr;
+        if (Model.singleton) {
+            return Model.getName();
+        }
         if (typeof data === "object" && data !== null) {
             idStr = Model._localId(Model.id, data);
         } else {
@@ -72,6 +75,9 @@ export class Record {
     }
     static _localId(expr, data, { brackets = false } = {}) {
         const Model = toRaw(this);
+        if (Model.singleton) {
+            return Model.name;
+        }
         if (!Array.isArray(expr)) {
             if (Model._.fields.get(expr)) {
                 if (Model._.fieldsMany.get(expr)) {
@@ -80,7 +86,7 @@ export class Record {
                 if (!isRelation(Model, expr)) {
                     return data[expr];
                 }
-                if (isCommand(data[expr])) {
+                if (isCommandList(data[expr])) {
                     // Note: only fields.One is supported
                     const [cmd, data2] = data[expr].at(-1);
                     if (cmd === "DELETE") {
@@ -111,9 +117,12 @@ export class Record {
     static _retrieveIdFromData(data) {
         const Model = toRaw(this);
         const res = {};
+        if (Model.singleton) {
+            return {};
+        }
         function _deepRetrieve(expr2) {
             if (typeof expr2 === "string") {
-                if (isCommand(data[expr2])) {
+                if (isCommandList(data[expr2])) {
                     // Note: only fields.One() is supported
                     const [cmd, data2] = data[expr2].at(-1);
                     return Object.assign(res, {
@@ -145,7 +154,7 @@ export class Record {
             if (typeof data !== "object" || data === null) {
                 return { [Model.id]: data }; // non-object data => single id
             }
-            if (isCommand(data[Model.id])) {
+            if (isCommandList(data[Model.id])) {
                 // Note: only fields.One is supported
                 const [cmd, data2] = data[Model.id].at(-1);
                 return Object.assign(res, {
@@ -248,18 +257,20 @@ export class Record {
         const ModelFullProxy = this;
         const Model = toRaw(ModelFullProxy);
         const ids = Model._retrieveIdFromData(data);
-        for (const name in ids) {
-            if (
-                ids[name] &&
-                !isRecord(ids[name]) &&
-                !isCommand(ids[name]) &&
-                isRelation(Model, name)
-            ) {
-                // preinsert that record in relational field,
-                // as it is required to make current local id
-                ids[name] = Model._rawStore[Model._.fieldsTargetModel.get(name)].preinsert(
-                    ids[name]
-                );
+        if (!Model.singleton) {
+            for (const name in ids) {
+                if (
+                    ids[name] &&
+                    !isRecord(ids[name]) &&
+                    !isCommandList(ids[name]) &&
+                    isRelation(Model, name)
+                ) {
+                    // preinsert that record in relational field,
+                    // as it is required to make current local id
+                    ids[name] = Model._rawStore[Model._.fieldsTargetModel.get(name)].preinsert(
+                        ids[name]
+                    );
+                }
             }
         }
         return Model.get.call(ModelFullProxy, data) ?? Model.new(data, ids);
@@ -328,9 +339,16 @@ export class Record {
         return store.MAKE_UPDATE(function recordDelete() {
             // delete records inheriting the current record before deleting the current record
             for (const fieldName of record.Model._.inheritsInverseFields) {
-                const dependentRecordProxy = record._proxyInternal[fieldName];
-                if (dependentRecordProxy) {
-                    store._.ADD_QUEUE("delete", toRaw(dependentRecordProxy)._raw);
+                if (record.Model._.fieldsMany.get(fieldName)) {
+                    const dependentRecordListProxy = record._proxyInternal[fieldName];
+                    for (const dependentRecordProxy of dependentRecordListProxy) {
+                        store._.ADD_QUEUE("delete", toRaw(dependentRecordProxy)._raw);
+                    }
+                } else {
+                    const dependentRecordProxy = record._proxyInternal[fieldName];
+                    if (dependentRecordProxy) {
+                        store._.ADD_QUEUE("delete", toRaw(dependentRecordProxy)._raw);
+                    }
                 }
             }
             store._.ADD_QUEUE("delete", record);

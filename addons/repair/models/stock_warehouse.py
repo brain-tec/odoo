@@ -27,7 +27,7 @@ class StockWarehouse(models.Model):
     def _get_picking_type_create_values(self, max_sequence):
         data, next_sequence = super(StockWarehouse, self)._get_picking_type_create_values(max_sequence)
         prod_location = self._get_production_location()
-        scrap_location_id = self.env['stock.location'].search_read([('usage', '=', 'inventory'), ('company_id', 'in', [self.company_id.id, False])], fields=['id'], limit=1)[0].get('id')
+        scrap_location_id = self.company_id.scrap_location_id.id
         data.update({
             'repair_type_id': {
                 'name': _('Repairs'),
@@ -60,6 +60,13 @@ class StockWarehouse(models.Model):
         if not location:
             raise UserError(_("Can't find any production location."))
         return location
+
+    def _create_missing_locations(self, vals):
+        super()._create_missing_locations(vals)
+        for company_id in self.company_id:
+            location = self.env['stock.location'].search([('usage', '=', 'production'), ('company_id', '=', company_id.id)], limit=1)
+            if not location:
+                company_id._create_production_location()
 
     def _generate_global_route_rules_values(self):
         rules = super()._generate_global_route_rules_values()

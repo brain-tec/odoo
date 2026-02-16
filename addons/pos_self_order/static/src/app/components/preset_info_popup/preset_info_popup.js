@@ -1,21 +1,26 @@
 import { Component, onWillStart, useState } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
 import { rpc } from "@web/core/network/rpc";
 import { isValidEmail } from "@point_of_sale/utils";
+import { Dialog } from "@web/core/dialog/dialog";
+import { useService } from "@web/core/utils/hooks";
 
 const { DateTime } = luxon;
 export class PresetInfoPopup extends Component {
     static template = "pos_self_order.PresetInfoPopup";
-    static props = { callback: Function };
+    static components = { Dialog };
+    static props = {
+        close: Function,
+        getPayload: Function,
+    };
 
     setup() {
-        this.selfOrder = useSelfOrder();
+        this.selfOrder = useService("self_order");
         this.state = useState({
-            selectedSlot: null,
             selectedPartnerId: null,
             name: "",
             email: "",
             phone: "",
+            phoneError: "",
             street: "",
             countryId: this.selfOrder.config.company_id.country_id.id,
             stateId: this.selfOrder.config.company_id.country_id.state_ids[0]?.id || null,
@@ -29,7 +34,11 @@ export class PresetInfoPopup extends Component {
     }
 
     async setInformations() {
-        if (this.preset.needsPartner) {
+        if (!this.checkPhoneFormat()) {
+            return;
+        }
+
+        if (this.preset.needsPartner || this.state.phone) {
             const result = await rpc(`/pos-self-order/validate-partner`, {
                 access_token: this.selfOrder.access_token,
                 partner_id: this.state.selectedPartnerId,
@@ -48,14 +57,8 @@ export class PresetInfoPopup extends Component {
         } else {
             this.selfOrder.currentOrder.floating_order_name = this.state.name;
         }
-
-        if (this.preset.needsSlot && this.state.selectedSlot) {
-            this.selfOrder.currentOrder.preset_time = DateTime.fromSQL(this.state.selectedSlot)
-                .toUTC()
-                .toFormat("yyyy-MM-dd HH:mm:ss");
-        }
-
-        this.props.callback(this.state);
+        this.props.getPayload(this.state);
+        this.props.close();
     }
 
     selectExistingPartner(event) {
@@ -79,7 +82,7 @@ export class PresetInfoPopup extends Component {
     }
 
     close() {
-        this.props.callback(false);
+        this.props.close();
     }
 
     get preset() {
@@ -111,15 +114,24 @@ export class PresetInfoPopup extends Component {
             (this.state.stateId || !this.states.length) &&
             this.state.zip;
         return (
-            (!this.preset.needsSlot || DateTime.fromSQL(this.state.selectedSlot).isValid) &&
             (!this.preset.needsName || this.state.name) &&
             (!this.preset.needsEmail || isValidEmail(this.state.email)) &&
-            (!this.preset.needsPartner || partnerInfo)
+            (!this.preset.needsPartner || partnerInfo) &&
+            this.checkPhoneFormat()
         );
     }
 
     formatDate(date) {
         const dateObj = DateTime.fromFormat(date, "yyyy-MM-dd");
         return this.preset.formatDate(dateObj);
+    }
+
+    checkPhoneFormat() {
+        if (!this.state.phone) {
+            return true;
+        }
+        const phone = this.state.phone.replace(/[\s.\-()]/g, "");
+        const pattern = /^\+\d{8,18}$/;
+        return pattern.test(phone);
     }
 }

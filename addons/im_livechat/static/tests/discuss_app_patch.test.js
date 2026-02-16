@@ -40,7 +40,6 @@ test("add livechat in the sidebar on visitor sending first message", async () =>
         channel_type: "livechat",
         country_id: countryId,
         livechat_channel_id: livechatChannelId,
-        livechat_operator_id: serverState.partnerId,
     });
     await start();
     await openDiscuss();
@@ -71,11 +70,12 @@ test("invite button should be present on livechat", async () => {
             Command.create({ guest_id: guestId, livechat_member_type: "visitor" }),
         ],
         channel_type: "livechat",
-        livechat_operator_id: serverState.partnerId,
     });
     await start();
     await openDiscuss(channelId);
-    await contains(".o-mail-Discuss button[title='Invite People']");
+    await contains(".o-livechat-ChannelInfoList"); // wait for auto-open of this panel
+    await click("button[title='Members']");
+    await contains("button[title='Invite People']");
 });
 
 test("livechats are sorted by last activity time in the sidebar: most recent at the top", async () => {
@@ -94,7 +94,6 @@ test("livechats are sorted by last activity time in the sidebar: most recent at 
                 Command.create({ guest_id: guestId_1, livechat_member_type: "visitor" }),
             ],
             channel_type: "livechat",
-            livechat_operator_id: serverState.partnerId,
         },
         {
             channel_member_ids: [
@@ -106,7 +105,6 @@ test("livechats are sorted by last activity time in the sidebar: most recent at 
                 Command.create({ guest_id: guestId_2, livechat_member_type: "visitor" }),
             ],
             channel_type: "livechat",
-            livechat_operator_id: serverState.partnerId,
         },
     ]);
     await start();
@@ -135,7 +133,6 @@ test("sidebar search finds livechats", async () => {
             Command.create({ guest_id: guestId, livechat_member_type: "visitor" }),
         ],
         channel_type: "livechat",
-        livechat_operator_id: serverState.partnerId,
     });
     await start();
     await openDiscuss();
@@ -153,10 +150,28 @@ test("open visitor's partner profile if visitor has one", async () => {
             Command.create({ partner_id: livechatPartner, livechat_member_type: "visitor" }),
         ],
         channel_type: "livechat",
-        livechat_operator_id: serverState.partnerId,
     });
     await start();
     await openDiscuss(channel);
     await click("a[title='View Contact']");
     await contains("div.o_field_widget > input:value(Joel Willis)");
+});
+
+test("Conversation description works in livechat", async () => {
+    const pyEnv = await startServer();
+    const livechatPartner = pyEnv["res.partner"].create({ name: "Joel Willis" });
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId, livechat_member_type: "agent" }),
+            Command.create({ partner_id: livechatPartner, livechat_member_type: "visitor" }),
+        ],
+        channel_type: "livechat",
+        description: "Yup, that customer again...",
+    });
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-mail-Composer-input:focus");
+    await contains(
+        "input.o-mail-DiscussContent-threadDescription:value(Yup, that customer again...)"
+    );
 });

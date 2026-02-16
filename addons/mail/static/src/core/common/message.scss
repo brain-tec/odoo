@@ -35,7 +35,9 @@
         max-width: $o-mail-Message-sidebarSmallWidth;
     }
 }
-
+.o-mail-priority-star {
+    color: $o-main-favorite-color;
+}
 .o-mail-Message-avatarContainer {
     width: $o-mail-Avatar-size;
     height: $o-mail-Avatar-size;
@@ -58,7 +60,7 @@
         }
     }
 
-    & > p {
+    & > p:last-child, .o-mail-Message-richBody > p:last-child {
         margin-bottom: 0 !important;
     }
 
@@ -74,7 +76,7 @@
     border-color: var(--o-message-bubble-border-color) !important;
 
     &.o-muted {
-        background-color: $o-view-background-color !important;
+        background-color: var(--o-message-bubble-bg-muted) !important;
     }
 }
 
@@ -103,6 +105,7 @@
         &.#{$_type} {
             $_border-base: mix($_color, $body-color, 75%);
             --o-message-bubble-bg: #{mix($o-view-background-color, $_color, 90%)};
+            --o-message-bubble-bg-muted: #{$o-view-background-color};
             --o-message-bubble-border-color: #{mix($o-view-background-color, $_border-base, 80%)};
             --o-message-bubble-color-base: #{$_color};
         }
@@ -139,6 +142,10 @@
     --o-mail-ActionList-Button-opacity: .35;
     --o-mail-ActionList-Button-opacity--hover: 1;
     --o-mail-ActionList-Button-color--hover: var(--mail-Message-actionIconHoveredColor, black);
+
+    .btn-danger, .btn-success {
+        --o-mail-ActionList-Button-opacity: .5;
+    }
 
     i {
         font-size: 1rem;

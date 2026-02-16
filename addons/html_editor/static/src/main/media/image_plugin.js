@@ -214,6 +214,13 @@ export class ImagePlugin extends Plugin {
         selectionchange_handlers: this.updateImageParams.bind(this),
         post_undo_handlers: this.updateImageParams.bind(this),
         post_redo_handlers: this.updateImageParams.bind(this),
+        on_media_dialog_saved_handlers: async (elements) => {
+            for (const element of elements) {
+                if (element && element.tagName === "IMG") {
+                    this.resetImageTransformation(element, { addStep: false });
+                }
+            }
+        },
 
         /** Providers */
         paste_media_url_command_providers: this.getCommandForImageUrlPaste.bind(this),
@@ -221,16 +228,15 @@ export class ImagePlugin extends Plugin {
 
     setup() {
         this.imageSize = reactive({ displayName: "Default" });
+        this.addDomListener(this.editable, "pointerdown", (e) => {
+            const selection = this.dependencies.selection.getEditableSelection();
+            if (selection.isCollapsed && e.target.tagName === "IMG") {
+                this.setSelectionAroundImage(e.target);
+            }
+        });
         this.addDomListener(this.editable, "pointerup", (e) => {
             if (e.target.tagName === "IMG") {
-                const [anchorNode, anchorOffset, focusNode, focusOffset] = boundariesOut(e.target);
-                this.dependencies.selection.setSelection({
-                    anchorNode,
-                    anchorOffset,
-                    focusNode,
-                    focusOffset,
-                });
-                this.dependencies.selection.focusEditable();
+                this.setSelectionAroundImage(e.target);
             }
         });
         this.fileViewer = createFileViewer();
@@ -358,6 +364,10 @@ export class ImagePlugin extends Plugin {
                 description: _t("Embed the image in the document."),
                 icon: "fa-image",
                 run: () => {
+                    this.dispatchTo(
+                        "before_paste_handlers",
+                        this.dependencies.selection.getEditableSelection()
+                    );
                     const img = this.document.createElement("IMG");
                     img.setAttribute("src", url);
                     this.dependencies.dom.insert(img);
@@ -377,14 +387,16 @@ export class ImagePlugin extends Plugin {
         this.dependencies.history.addStep();
     }
 
-    resetImageTransformation(image) {
+    resetImageTransformation(image, { addStep = true } = {}) {
         image.setAttribute(
             "style",
             (image.getAttribute("style") || "").replace(/[^;]*transform[\w:]*;?/g, "")
         );
         image.style.removeProperty("width");
         image.style.removeProperty("height");
-        this.dependencies.history.addStep();
+        if (addStep) {
+            this.dependencies.history.addStep();
+        }
     }
 
     getImageTransformProps() {
@@ -420,5 +432,16 @@ export class ImagePlugin extends Plugin {
                 },
             });
         }
+    }
+
+    setSelectionAroundImage(img) {
+        const [anchorNode, anchorOffset, focusNode, focusOffset] = boundariesOut(img);
+        this.dependencies.selection.setSelection({
+            anchorNode,
+            anchorOffset,
+            focusNode,
+            focusOffset,
+        });
+        this.dependencies.selection.focusEditable();
     }
 }

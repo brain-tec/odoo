@@ -2,6 +2,7 @@ import { Plugin } from "@html_editor/plugin";
 import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
 import { withSequence } from "@html_editor/utils/resource";
 import { ThemeAdvancedOption } from "./theme_advanced_option";
+import { ThemeShadowOption } from "./theme_shadow_option";
 import { ThemeButtonOption } from "./theme_button_option";
 import { ThemeColorsOption } from "./theme_colors_option";
 import { ThemeHeadingsOption } from "./theme_headings_option";
@@ -47,7 +48,8 @@ export const OPTION_POSITIONS = {
     BUTTON: 50,
     LINK: 60,
     INPUT: 70,
-    ADVANCED: 80,
+    SHADOW: 80,
+    ADVANCED: 90,
 };
 
 export class ThemeTabPlugin extends Plugin {
@@ -66,18 +68,13 @@ export class ThemeTabPlugin extends Plugin {
         },
         theme_options: [
             withSequence(
-                OPTION_POSITIONS.COLORS,
-                this.getThemeOptionBlock("theme-colors", _t("Colors"), ThemeColorsOption)
-            ),
-            withSequence(
                 OPTION_POSITIONS.SETTINGS,
-                this.getThemeOptionBlock(
-                    "website-settings",
-                    _t("Website"),
+                this.getThemeOptionBlock("website-settings", _t("Website"), [
+                    ThemeColorsOption,
                     class ThemeWebsiteSettingsOption extends BaseOptionComponent {
                         static template = "website.ThemeWebsiteSettingsOption";
-                    }
-                )
+                    },
+                ])
             ),
             withSequence(
                 OPTION_POSITIONS.PARAGRAPH,
@@ -116,6 +113,10 @@ export class ThemeTabPlugin extends Plugin {
                         static template = "website.ThemeInputOption";
                     }
                 )
+            ),
+            withSequence(
+                OPTION_POSITIONS.SHADOW,
+                this.getThemeOptionBlock("theme-shadow", _t("Shadow"), ThemeShadowOption)
             ),
             withSequence(
                 OPTION_POSITIONS.ADVANCED,
@@ -232,7 +233,10 @@ export class ThemeTabPlugin extends Plugin {
         el.dataset.name = name;
         this.document.body.appendChild(el); // Currently editingElement needs to be isConnected
 
-        options.selector = "*";
+        const optionsArray = Array.isArray(options) ? options : [options];
+        optionsArray.forEach((option) => {
+            option.selector = "*";
+        });
 
         return {
             id: id,
@@ -241,7 +245,7 @@ export class ThemeTabPlugin extends Plugin {
             headerMiddleButton: false,
             isClonable: false,
             isRemovable: false,
-            options: [options],
+            options: optionsArray,
             optionsContainerTopButtons: [],
             snippetModel: {},
         };
@@ -280,6 +284,7 @@ export class CustomizeGrayAction extends BuilderAction {
                 colorType: "gray",
             }
         );
+        setBuilderCSSVariables(getHtmlStyle(this.document));
     }
 }
 export class ChangeColorPaletteAction extends CustomizeWebsiteVariableAction {
@@ -316,6 +321,9 @@ export class ChangeColorPaletteAction extends CustomizeWebsiteVariableAction {
 
 export class EditCustomCodeAction extends BuilderAction {
     static id = "editCustomCode";
+    setup() {
+        this.canTimeout = false;
+    }
     apply() {
         this.services.dialog.add(EditHeadBodyDialog);
     }
@@ -324,6 +332,9 @@ export class EditCustomCodeAction extends BuilderAction {
 export class ConfigureApiKeyAction extends BuilderAction {
     static id = "configureApiKey";
     static dependencies = ["googleMapsOption"];
+    setup() {
+        this.canTimeout = false;
+    }
     apply() {
         this.dependencies.googleMapsOption.configureGMapsAPI("", true);
     }

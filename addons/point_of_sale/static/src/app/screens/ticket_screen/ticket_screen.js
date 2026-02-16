@@ -1,6 +1,6 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { parseDateTime } from "@web/core/l10n/dates";
+import { parseDate, parseDateTime, serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { parseFloat } from "@web/views/fields/parsers";
 import { _t } from "@web/core/l10n/translation";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -84,20 +84,21 @@ export class TicketScreen extends Component {
         Object.assign(this.state, this.props.stateOverride || {});
 
         onMounted(this.onMounted);
-        onWillStart(async () => {
+        onWillStart(() => {
             if (!this.pos.loadingOrderState) {
-                try {
-                    this.pos.loadingOrderState = true;
-                    await this.pos.getServerOrders();
-                } catch (error) {
-                    if (error instanceof ConnectionLostError) {
-                        Promise.reject(error);
-                        return error;
-                    }
-                    throw error;
-                } finally {
-                    this.pos.loadingOrderState = false;
-                }
+                this.pos.loadingOrderState = true;
+                // Start fetching orders without blocking screen rendering
+                this.pos
+                    .getServerOrders()
+                    .catch((error) => {
+                        if (error instanceof ConnectionLostError) {
+                            return;
+                        }
+                        throw error;
+                    })
+                    .finally(() => {
+                        this.pos.loadingOrderState = false;
+                    });
             }
         });
     }
@@ -187,8 +188,10 @@ export class TicketScreen extends Component {
         this.setSelectedOrder(clickedOrder);
         this.numberBuffer.reset();
         if ((!clickedOrder || clickedOrder.finalized) && !this.getSelectedOrderlineId()) {
-            // Automatically select the first orderline of the selected order.
-            const firstLine = this.getSelectedOrder().getOrderlines()[0];
+            // Automatically select the first refundable orderline of the selected order.
+            const firstLine = this.getSelectedOrder()
+                .getOrderlines()
+                .find((line) => line.isValidForRefund);
             if (firstLine) {
                 this.state.selectedOrderlineIds[clickedOrder.id] = firstLine.id;
             }
@@ -278,6 +281,22 @@ export class TicketScreen extends Component {
                     }
                 } else {
                     toRefundDetail.qty = quantity;
+                    // Automatically select the next orderline if the refund quantity equals the refundable quantity
+                    if (quantity === refundableQty) {
+                        const orderlines = order.getOrderlines();
+                        const currentIndex = orderlines.findIndex(
+                            (line) => line.id === selectedOrderlineId
+                        );
+                        if (currentIndex !== -1) {
+                            const nextLine = orderlines
+                                .slice(currentIndex + 1)
+                                .find((line) => line.isValidForRefund);
+                            if (nextLine) {
+                                this.state.selectedOrderlineIds[order.id] = nextLine.id;
+                                this.numberBuffer.reset();
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -335,6 +354,7 @@ export class TicketScreen extends Component {
                     .slice(0, refundDetail.qty)
                     .map((lotName) => ["create", { lot_name: lotName }]),
                 price_type: "automatic",
+                attribute_value_ids: refundLine.attribute_value_ids.map((attr) => ["link", attr]),
             });
             lines.push(line);
             refundDetail.destination_order_uuid = destinationOrder.uuid;
@@ -705,16 +725,14 @@ export class TicketScreen extends Component {
                 modelFields: ["date_order"],
                 formatSearch: (searchTerm) => {
                     const includesTime = searchTerm.includes(":");
-                    let parsedDateTime;
                     try {
-                        parsedDateTime = parseDateTime(searchTerm);
+                        if (includesTime) {
+                            return serializeDateTime(parseDateTime(searchTerm));
+                        } else {
+                            return serializeDate(parseDate(searchTerm));
+                        }
                     } catch {
                         return searchTerm;
-                    }
-                    if (includesTime) {
-                        return parsedDateTime.toUTC().toFormat("yyyy-MM-dd HH:mm:ss");
-                    } else {
-                        return parsedDateTime.toFormat("yyyy-MM-dd");
                     }
                 },
             },

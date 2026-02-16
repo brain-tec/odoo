@@ -38,22 +38,25 @@ export class BuilderList extends Component {
         defaultNewValue: { type: Object, optional: true },
         columnWidth: { optional: true },
         forbidLastItemRemoval: { type: Boolean, optional: true },
+        isEditable: { type: Boolean, optional: true },
     };
     static defaultProps = {
         addItemTitle: _t("Add"),
         itemShape: { value: "text" },
-        default: { value: _t("Item") },
         sortable: true,
         hiddenProperties: [],
         mode: "button",
         defaultNewValue: {},
         columnWidth: {},
         forbidLastItemRemoval: false,
+        isEditable: true,
     };
     static components = { BuilderComponent, SelectMenu };
 
     setup() {
-        this.validateProps();
+        if (this.props.default) {
+            this.validateProps();
+        }
         this.dialog = useService("dialog");
         useBuilderComponent();
         const { state, commit, preview } = useInputBuilderComponent({

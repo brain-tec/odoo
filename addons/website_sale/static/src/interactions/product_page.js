@@ -1,5 +1,6 @@
 import { Interaction } from '@web/public/interaction';
 import { registry } from '@web/core/registry';
+import { router } from '@web/core/browser/router';
 import { localization } from '@web/core/l10n/localization';
 import { _t } from '@web/core/l10n/translation';
 import { rpc } from '@web/core/network/rpc';
@@ -30,6 +31,7 @@ export class ProductPage extends Interaction {
         this._applySearchParams();
         this._triggerVariantChange(this.el);
         this._startZoom();
+        this._highlightReviewMessage();
     }
 
     destroy() {
@@ -98,13 +100,20 @@ export class ProductPage extends Interaction {
         this._throttledGetCombinationInfo(parent.dataset.uniqueId)(ev);
     }
 
+    _highlightReviewMessage() {
+        if (router.current.highlight_message_id) {
+            this.onClickReviewsLink();
+        }
+    }
+
     /**
      * Uncollapse the reviews.
      */
     onClickReviewsLink() {
-        window.Collapse.getOrCreateInstance(
-            document.querySelector('#o_product_page_reviews_content')
-        ).show();
+        const reviewsContent = document.querySelector('#o_product_page_reviews_content');
+        if (reviewsContent) {
+            window.Collapse.getOrCreateInstance(reviewsContent).show();
+        }
     }
 
     /**
@@ -284,7 +293,7 @@ export class ProductPage extends Interaction {
         // Don't update the images when using the web editor. Otherwise, the images may not be
         // editable (depending on whether the images are updated before or after the editor is
         // ready).
-        if (images && !isEditorEnabled) {
+        if (images && !isEditorEnabled && newImages) {
             images.insertAdjacentHTML('beforebegin', markup(newImages));
             images.remove();
 
@@ -573,24 +582,28 @@ export class ProductPage extends Interaction {
         const contactUsButton = parent.closest('#product_details')
             ?.querySelector('#contact_us_wrapper');
         const quantity = parent.querySelector('.css_quantity');
-        const productUnavailable = parent.querySelector('#product_unavailable');
+        const boxedPriceWrapper = parent.querySelector('#o_wsale_cta_wrapper_boxed_price');
 
-        const preventSale = combination.prevent_zero_price_sale;
-        productPrice?.classList?.toggle('d-inline-block', !preventSale);
-        productPrice?.classList?.toggle('d-none', preventSale);
+        const preventSale = combination.prevent_sale;
+        const hidePrice = combination.hide_price;
+        productPrice?.classList.toggle('d-inline-block', !hidePrice);
+        productPrice?.classList.toggle('d-none', hidePrice);
+        boxedPriceWrapper?.classList.toggle('d-flex', !hidePrice);
+        boxedPriceWrapper?.classList.toggle('d-none', hidePrice);
         quantity?.classList?.toggle('d-inline-flex', !preventSale);
         quantity?.classList?.toggle('d-none', preventSale);
-        addToCart?.classList?.toggle('d-inline-flex', !preventSale);
-        addToCart?.classList?.toggle('d-none', preventSale);
+        addToCart?.classList.toggle('d-inline-flex', !preventSale);
+        addToCart?.classList.toggle('d-none', preventSale);
         contactUsButton?.classList?.toggle('d-none', !preventSale);
         contactUsButton?.classList?.toggle('d-flex', preventSale);
-        productUnavailable?.classList?.toggle('d-none', !preventSale);
-        productUnavailable?.classList?.toggle('d-flex', preventSale);
 
         if (contactUsButton) {
-            const contactUsButtonLink = contactUsButton.querySelector('a');
-            const url = contactUsButtonLink.getAttribute('data-url');
-            contactUsButtonLink.setAttribute('href', `${url}?subject=${combination.display_name}`);
+            const link = contactUsButton.querySelector('a');
+            if (link && combination.display_name) {
+                const linkUrl = new URL(link.href, window.location.origin);
+                linkUrl.searchParams.set('subject', combination.display_name);
+                link.href = linkUrl.toString();
+            }
         }
 
         const price = parent.querySelector('.oe_price')?.querySelector('.oe_currency_value');

@@ -37,16 +37,32 @@ export class CustomerDisplayPosAdapter {
             });
     }
 
+    displayScreenSaver() {
+        this.data.displayScreenSaver = true;
+    }
+
+    setExtraData(data) {
+        if (data) {
+            Object.assign(this.data, data);
+        }
+    }
+
     formatOrderData(order) {
         this.currency = order.currency;
         this.data = {
             finalized: order.finalized,
             general_customer_note: order.general_customer_note,
-            amount: order.currencyDisplayPrice,
+            amount: order.currencyDisplayPriceIncl,
+            subtotal:
+                order.config_id.iface_tax_included !== "total" &&
+                order.prices.taxDetails.has_tax_groups &&
+                order.currencyDisplayPriceExcl,
+            amountTaxes: order.prices.taxDetails.has_tax_groups && order.currencyAmountTaxes,
             change: order.change && formatCurrency(order.change, order.currency),
             paymentLines: order.payment_ids.map((pl) => this.getPaymentData(pl)),
             lines: order.lines.map((l) => this.getOrderlineData(l)),
             qrPaymentData: this.getQrPaymentData(order),
+            displayScreenSaver: false,
         };
     }
 

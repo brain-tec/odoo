@@ -11,26 +11,27 @@ declare module "plugins" {
     import { after_replication_handlers } from "@html_builder/core/field_change_replication_plugin";
     import { MediaWebsiteShared } from "@html_builder/core/media_website_plugin";
     import { OperationShared } from "@html_builder/core/operation_plugin";
-    import { get_overlay_buttons, OverlayButtonsShared } from "@html_builder/core/overlay_buttons/overlay_buttons_plugin";
+    import { get_overlay_buttons, OverlayButtonsShared, show_overlay_buttons_of_ancestor_predicates } from "@html_builder/core/overlay_buttons/overlay_buttons_plugin";
     import { empty_node_predicates, is_unremovable_selector, on_removed_handlers, on_will_remove_handlers, RemoveShared } from "@html_builder/core/remove_plugin";
     import { after_save_handlers, before_save_handlers, get_dirty_els, save_element_handlers, save_elements_overrides, save_handlers, SaveShared } from "@html_builder/core/save_plugin";
     import { after_setup_editor_handlers, before_setup_editor_handlers, savable_selectors, SetupEditorShared } from "@html_builder/core/setup_editor_plugin";
     import { target_hide, target_show, VisibilityShared } from "@html_builder/core/visibility_plugin";
-    import { default_shape_handlers, post_compute_shape_listeners } from "@html_builder/plugins/image/image_shape_option_plugin";
+    import { default_shape_handlers, image_shape_groups_providers, post_compute_shape_listeners } from "@html_builder/plugins/image/image_shape_option_plugin";
     import { background_filter_target_providers, get_target_element_providers, on_bg_image_hide_handlers } from "@html_builder/plugins/background_option/background_image_option_plugin";
     import { is_draggable_handlers, on_element_dragged_handlers, on_element_dropped_handlers, on_element_dropped_near_handlers, on_element_dropped_over_handlers, on_element_move_handlers, on_element_out_dropzone_handlers, on_element_over_dropzone_handlers, on_prepare_drag_handlers } from "@html_builder/core/drag_and_drop_plugin";
     import { lower_panel_entries, on_mobile_preview_clicked, trigger_dom_updated } from "@html_builder/builder";
     import { on_reveal_target_handlers } from "@html_builder/sidebar/invisible_elements_panel";
     import { on_snippet_dragged_handlers, on_snippet_dropped_handlers, on_snippet_dropped_near_handlers, on_snippet_dropped_over_handlers, on_snippet_move_handlers, on_snippet_out_dropzone_handlers, on_snippet_over_dropzone_handlers } from "@html_builder/sidebar/block_tab";
     import { snippet_preview_dialog_bundles, snippet_preview_dialog_stylesheets_handlers } from "@html_builder/snippets/add_snippet_dialog";
-    import { background_shape_target_providers } from "@html_builder/plugins/background_option/background_shape_option_plugin";
+    import { background_shape_groups_providers, background_shape_target_providers } from "@html_builder/plugins/background_option/background_shape_option_plugin";
     import { mark_color_level_selector_params } from "@html_builder/plugins/background_option/background_option_plugin";
-    import { is_movable_selector } from "@html_builder/core/move_plugin";
+    import { is_movable_selector, on_element_arrow_moved_handlers } from "@html_builder/core/move_plugin";
     import { content_editable_selectors, content_not_editable_selectors } from "@html_builder/core/builder_content_editable_plugin";
     import { builder_actions, BuilderActionsShared } from "@html_builder/core/builder_actions_plugin";
     import { so_content_addition_selector, so_snippet_addition_selector } from "@html_builder/core/dropzone_selector_plugin";
     import { fontCssVariables } from "@html_builder/plugins/font/font_plugin";
     import { apply_custom_css_style } from "@html_builder/core/core_builder_action_plugin";
+    import { on_bg_color_updated_handlers } from "@html_builder/core/color_style_plugin";
 
     interface SharedMethods {
         // Main
@@ -65,12 +66,16 @@ declare module "plugins" {
         after_replication_handlers: after_replication_handlers;
         after_save_handlers: after_save_handlers;
         after_setup_editor_handlers: after_setup_editor_handlers;
+        background_shape_groups_providers: background_shape_groups_providers;
         before_save_handlers: before_save_handlers;
         before_setup_editor_handlers: before_setup_editor_handlers;
         change_current_options_containers_listeners: change_current_options_containers_listeners;
         default_shape_handlers: default_shape_handlers;
+        image_shape_groups_providers: image_shape_groups_providers;
+        on_bg_color_updated_handlers: on_bg_color_updated_handlers;
         on_bg_image_hide_handlers: on_bg_image_hide_handlers;
         on_cloned_handlers: on_cloned_handlers;
+        on_element_arrow_moved_handlers: on_element_arrow_moved_handlers;
         on_element_dragged_handlers: on_element_dragged_handlers;
         on_element_dropped_handlers: on_element_dropped_handlers;
         on_element_dropped_near_handlers: on_element_dropped_near_handlers;
@@ -109,6 +114,7 @@ declare module "plugins" {
         filter_for_sibling_dropzone_predicates: filter_for_sibling_dropzone_predicates;
         is_draggable_handlers: is_draggable_handlers;
         keep_overlay_options: keep_overlay_options;
+        show_overlay_buttons_of_ancestor_predicates: show_overlay_buttons_of_ancestor_predicates;
 
         // Processors
 

@@ -1,12 +1,11 @@
 import { AND, fields, Record } from "@mail/model/export";
 import { generateEmojisOnHtml } from "@mail/utils/common/format";
-import { rpc } from "@web/core/network/rpc";
+import { compareDatetime } from "@mail/utils/common/misc";
 
+import { rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
 import { Deferred } from "@web/core/utils/concurrency";
-
-/** @import { AwaitChatHubInit } from "@mail/core/common/chat_hub_model" */
 
 /**
  * @typedef SuggestedRecipient
@@ -54,6 +53,10 @@ export class Thread extends Record {
     }
 
     autofocus = 0;
+    activities = fields.Many("mail.activity", {
+        sort: (a, b) => compareDatetime(a.date_deadline, b.date_deadline) || a.id - b.id,
+        onDelete: (r) => r?.remove(),
+    });
     create_uid = fields.One("res.users");
     /**
      * Server-side value used in chatter to determine if the thread has pinned messages without
@@ -97,6 +100,8 @@ export class Thread extends Record {
     counter = 0;
     counter_bus_id = 0;
     /** @type {string} */
+    defaultSubject;
+    /** @type {string} */
     description;
     /** @type {string} */
     display_name;
@@ -118,22 +123,6 @@ export class Thread extends Record {
     followersCount;
     loadOlder = false;
     loadNewer = false;
-    get importantCounter() {
-        if (this.model === "mail.box") {
-            return this.counter;
-        }
-        return this.message_needaction_counter;
-    }
-    /** ⚠️ {@link AwaitChatHubInit} */
-    isDisplayed = fields.Attr(false, {
-        compute() {
-            return this.computeIsDisplayed();
-        },
-        onUpdate() {
-            this.isDisplayedOnUpdate();
-        },
-    });
-    isDisplayedOnUpdate() {}
     get isFocused() {
         return this.isFocusedCounter !== 0;
     }
@@ -188,6 +177,10 @@ export class Thread extends Record {
      * when fetching newer messages.
      */
     pendingNewMessages = fields.Many("mail.message");
+    /** @type {'0'|'1'|'2'|'3'} */
+    priority;
+    /** @type {Array<[string,string]>} */
+    priority_definition;
     needactionMessages = fields.Many("mail.message", {
         inverse: "threadAsNeedaction",
         sort: (message1, message2) => message1.id - message2.id,
@@ -206,15 +199,28 @@ export class Thread extends Record {
     /* The additional recipients are the recipients that are manually added
      * by the user by using the "To" field of the Chatter. */
     additionalRecipients = fields.Attr([]);
+    /** @type {number|undefined} */
+    recipients = fields.Many("mail.followers");
+    recipientsCount = undefined;
     /* The suggested recipients are the recipients that are suggested by the
      * current model and includes the recipients of the last message. (e.g: for
      * a crm lead, the model will suggest the customer associated to the lead). */
     suggestedRecipients = fields.Attr([]);
+    /** @type {Boolean|undefined} */
+    showSubjectInSmallComposer;
+    /** 
+     * similar to suggested recipients, except for the subject and optional per model.
+    @type {String|undefined} */
+    suggestedSubject;
     /** @type {String[]|undefined} */
     partner_fields;
     /** @type {String|undefined} */
     primary_email_field;
     hasLoadingFailed = false;
+    /** @type {Error} */
+    hasLoadingFailedError;
+    /** @type {boolean|undefined} */
+    hasReadAccess;
     canPostOnReadonly;
     /** @type {Boolean} */
     is_editable;
@@ -256,8 +262,11 @@ export class Thread extends Record {
     }
 
     get accessRestrictedToGroupText() {
-        if (!this.group_public_id?.full_name) {
+        if (this.channel?.channel_type === "chat") {
             return false;
+        }
+        if (!this.group_public_id?.full_name) {
+            return _t("Accessible to anyone with the link");
         }
         return _t('Access restricted to group "%(groupFullName)s"', {
             groupFullName: this.group_public_id.full_name,
@@ -283,6 +292,10 @@ export class Thread extends Record {
         return attachments;
     }
 
+    get canPostMessage() {
+        return this.hasWriteAccess || (this.hasReadAccess && this.canPostOnReadonly);
+    }
+
     get isUnread() {
         return this.needactionMessages.length > 0;
     }
@@ -298,16 +311,8 @@ export class Thread extends Record {
         return persona?.displayName || persona?.name;
     }
 
-    get supportsCustomChannelName() {
-        return this.channel?.isChatChannel && this.channel?.channel_type !== "group";
-    }
-
     get displayName() {
         return this.channel?.displayName ?? this.display_name;
-    }
-
-    computeIsDisplayed() {
-        return this.channel?.chatWindow?.isOpen;
     }
 
     get avatarUrl() {
@@ -399,36 +404,43 @@ export class Thread extends Record {
             this.isLoaded = true;
             return [];
         }
-        let res;
         try {
-            res = await this.fetchMessagesData({ after, around, before });
+            const { messages } = await this.fetchMessagesData({ after, around, before });
+            this.hasLoadingFailedError = undefined;
             this.hasLoadingFailed = false;
+            return messages.reverse();
         } catch (e) {
             this.hasLoadingFailed = true;
+            this.hasLoadingFailedError = e;
+            throw e;
+        } finally {
             this.isLoaded = true;
             this.status = "ready";
-            throw e;
         }
-        this.store.insert(res.data);
-        const msgs = this.store["mail.message"].insert(res.messages.reverse());
-        this.isLoaded = true;
-        this.status = "ready";
-        return msgs;
     }
 
-    /** @param {{after: Number, before: Number}} */
+    /**
+     * @param {{after: Number, before: Number}}
+     * @returns {Promise<{messages: number[]}>}
+     */
     async fetchMessagesData({ after, around, before } = {}) {
         // ordered messages received: newest to oldest
-        return await rpc(this.getFetchRoute(), {
-            ...this.getFetchParams(),
-            fetch_params: {
-                limit:
-                    !around && around !== 0 ? this.store.FETCH_LIMIT : this.store.FETCH_LIMIT * 2,
-                after,
-                around,
-                before,
+        return await this.store.fetchStoreData(
+            this.getFetchRoute(),
+            {
+                ...this.getFetchParams(),
+                fetch_params: {
+                    limit:
+                        !around && around !== 0
+                            ? this.store.FETCH_LIMIT
+                            : this.store.FETCH_LIMIT * 2,
+                    after,
+                    around,
+                    before,
+                },
             },
-        });
+            { readonly: this.model === "mail.box", requestData: true }
+        );
     }
 
     /** @param {"older"|"newer"} epoch */
@@ -677,7 +689,9 @@ export class Thread extends Record {
     }
 
     /** @param {import("models").Message} message */
-    onNewSelfMessage(message) {}
+    onNewSelfMessage(message) {
+        this.channel?.onNewSelfMessage(message);
+    }
 
     /**
      * @param {Object} [options]
@@ -785,6 +799,10 @@ export class Thread extends Record {
             message_id: message.id,
             pinned,
         });
+    }
+
+    get shouldMarkAsReadOnFocus() {
+        return this.scrollTop === "bottom" && !this.scrollUnread && !this.channel?.markedAsUnread;
     }
 
     /**

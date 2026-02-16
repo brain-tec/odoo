@@ -58,6 +58,7 @@ export class FormFieldOption extends BaseOptionComponent {
                     isFormDate: false,
                     isFormDateTime: false,
                     hasDateTimePicker: false,
+                    isMultipleInputs: false,
                 };
             }
 
@@ -69,6 +70,7 @@ export class FormFieldOption extends BaseOptionComponent {
                 isFormDate: !!dependencyEl.closest(".s_website_form_date"),
                 isFormDateTime: !!dependencyEl.closest(".s_website_form_datetime"),
                 hasDateTimePicker: dependencyEl.classList.contains("datetimepicker-input"),
+                isMultipleInputs: !!dependencyEl.closest(".s_website_form_multiple"),
             };
         });
 
@@ -199,6 +201,10 @@ export class FormFieldOption extends BaseOptionComponent {
         const el = this.env.getEditingElement();
         return !isFieldCustom(el) && this.state.fields[getFieldName(el)].type === "many2many";
     }
+    get isOtherOptionSupported() {
+        const el = this.env.getEditingElement();
+        return isFieldCustom(el) && ["selection", "many2one"].includes(el.dataset.type);
+    }
     get isMultipleInputs() {
         const el = this.env.getEditingElement();
         return !!getMultipleInputs(el);
@@ -211,6 +217,15 @@ export class FormFieldOption extends BaseOptionComponent {
         return (
             fieldEl.classList.contains("s_website_form_custom") ||
             ["one2many", "many2many"].includes(fieldEl.dataset.type)
+        );
+    }
+    get isMultiSelectVisible() {
+        const el = this.env.getEditingElement();
+        const dependencyEl = getDependencyEl(el);
+        return (
+            (["checkbox", "radio"].includes(dependencyEl.type) ||
+                dependencyEl.nodeName === "SELECT") &&
+            ["contains", "!contains"].includes(el.dataset.visibilityComparator)
         );
     }
 }

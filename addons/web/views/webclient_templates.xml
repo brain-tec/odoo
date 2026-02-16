@@ -27,7 +27,7 @@
                 debug: "<t t-out="debug"/>",
             };
         </script>
-        <t t-out="head or ''"/>
+        <t t-out="head"/>
     </head>
     <body t-att-class="body_classname">
         <t t-out="0"/>
@@ -131,6 +131,7 @@
 
     <template id="web.login" name="Login">
         <t t-call="web.login_layout">
+            <h1 class="visually-hidden">Login</h1>
             <div class="oe_structure" id="oe_structure_login_top"/>
             <owl-component t-if="not login" name="web.user_switch" />
             <form t-attf-class="oe_login_form #{'' if login else 'd-none'}" role="form" t-attf-action="/web/login" method="post" onsubmit="this.action = '/web/login' + location.hash" data-captcha="login">
@@ -216,6 +217,18 @@
         </div>
     </template>
 
+    <template id="web.check_identity" name="Check Identity">
+        <t t-call="web.login_layout">
+            <div class="oe_check_identity_form">
+                <div class="text-center">
+                    <img t-attf-src="/logo.png?company={{ request.env.company.id }}" style="padding: 0px; margin: 0px; height: auto; height: 48px;" t-att-alt="request.env.company.name"/>
+                    <h3>Confirm access</h3>
+                </div>
+                <owl-component name="web.check_identity_form" t-att-props="json.dumps({'redirect': redirect})"/>
+            </div>
+        </t>
+    </template>
+
     <template id="web.test_helpers">
         <t t-call-assets="web.tests_assets" t-js="False"/>
         <style>
@@ -275,7 +288,7 @@
     </template>
 
     <template id="web.webclient_bootstrap">
-        <t t-set="head_web">
+        <t t-set="head">
             <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
             <meta name="theme-color" content="#71639e"/>
             <link rel="manifest" href="/web/manifest.webmanifest" crossorigin="use-credentials"/>
@@ -305,10 +318,10 @@
                 <t t-call-assets="web.assets_web" media="screen" t-js="false"/>
             </t>
             <t t-call="web.conditional_assets_tests"/>
+            <t t-out="head"/>
         </t>
         <t t-call="web.layout"
-            head_web="head_web"
-            head="head_web + (head or '')"
+            head="head"
             body_classname.f="o_web_client"/>
     </template>
 

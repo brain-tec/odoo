@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 The module :mod:`odoo.tests.common` provides unittest test cases and a few
 helpers and classes to write tests.
@@ -20,7 +19,6 @@ import os
 import pathlib
 import platform
 import pprint
-import psutil
 import re
 import shutil
 import signal
@@ -30,48 +28,64 @@ import tempfile
 import threading
 import time
 import traceback
+import typing
 import unittest
 import warnings
 from collections import defaultdict, deque
 from concurrent.futures import CancelledError, Future, InvalidStateError, wait
-from contextlib import contextmanager, ExitStack
+from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from datetime import datetime
 from functools import lru_cache, partial, wraps
 from itertools import islice, zip_longest
 from textwrap import shorten
-from typing import Optional, Iterable, cast
+from typing import TYPE_CHECKING
 from unittest import TestResult
-from unittest.mock import patch, _patch, Mock
+from unittest.mock import Mock, _patch, patch
 from urllib.parse import parse_qsl, urlencode, urljoin, urlsplit, urlunsplit
-from xmlrpc import client as xmlrpclib
 from uuid import uuid4
-from werkzeug.exceptions import BadRequest
+from xmlrpc import client as xmlrpclib
 
 import freezegun
+import psutil
 import requests
 from lxml import etree, html
 from passlib.context import CryptContext
 from requests import PreparedRequest, Session
+from werkzeug.exceptions import BadRequest
 
-import odoo.addons.base
 import odoo.cli
-import odoo.http
 import odoo.models
 import odoo.orm.registry
 from odoo import api
 from odoo.exceptions import AccessError
 from odoo.fields import Command
+from odoo.http.requestlib import Request, _request_stack, request
+from odoo.http.session import (
+    DEFAULT_LANG,
+    get_default_session,
+    logout,
+    update_session_token,
+    session_store,
+)
+from odoo.http.session import Session as OdooHttpSession
 from odoo.modules.registry import Registry
 from odoo.sql_db import Cursor, Savepoint
-from odoo.tools import config, float_compare, mute_logger, profiler, SQL, DotDict
+from odoo.tools import SQL, DotDict, config, float_compare, mute_logger, profiler
 from odoo.tools.mail import single_email_re
-from odoo.tools.misc import find_in_path, lower_logging
+from odoo.tools.misc import diff_zip, find_in_path, lower_logging
 from odoo.tools.xml_utils import _validate_xml
+
+import odoo.addons.base
+from . import case, test_cursor
 from odoo.addons.base.models import ir_actions_report
 
-from . import case, test_cursor
-from .result import OdooTestResult
+if typing.TYPE_CHECKING:
+    from collections.abc import Iterable
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from .result import OdooTestResult
 
 try:
     import websocket
@@ -376,11 +390,11 @@ class BaseCase(case.TestCase):
                 with warnings.catch_warnings(), \
                         result.soft_fail(), \
                         lower_logging(25, logging.INFO) as quiet_log:
-                    super().run(cast(TestResult, result))
+                    super().run(typing.cast('TestResult', result))
                 if not (result.had_failure or quiet_log.had_error_log):
                     break
             else:  # last try
-                super().run(cast(TestResult, result))
+                super().run(typing.cast('TestResult', result))
                 if not result.wasSuccessful() and BaseCase._tests_run_count != 1:
                     _logger.runbot('Disabling auto-retry after a failed test')
                     BaseCase._tests_run_count = 1
@@ -402,7 +416,7 @@ class BaseCase(case.TestCase):
                 patcher.stop()
         cls.addClassCleanup(check_remaining_patchers)
         super().setUpClass()
-        if 'standard' in cls.test_tags:
+        if 'standard' in cls.test_tags or 'click_all' in cls.test_tags:
             # if the method is passed directly `patch` discards the session
             # object which we need
             # pylint: disable=unnecessary-lambda
@@ -518,17 +532,17 @@ class BaseCase(case.TestCase):
             httprequest=Mock(host='localhost'),
             db=self.env.cr.dbname,
             env=self.env,
-            session=DotDict(odoo.http.get_default_session(), debug='1', sid=''),
+            session=DotDict(get_default_session(), debug='1', sid=''),
         )
         try:
             self.env.flush_all()
             self.env.invalidate_all()
-            odoo.http._request_stack.push(request)
+            _request_stack.push(request)
             yield
             self.env.flush_all()
             self.env.invalidate_all()
         finally:
-            popped_request = odoo.http._request_stack.pop()
+            popped_request = _request_stack.pop()
             if popped_request is not request:
                 raise Exception('Wrong request stack cleanup.')
 
@@ -542,7 +556,7 @@ class BaseCase(case.TestCase):
                     # When checking for an `AccessError`, the cache is cleared
                     # before executing the code. This avoids cache pollution issues and
                     # ensures that access are re-evaluated correctly.
-                    self.env.cr.clear()
+                    self.env.transaction.clear()
 
             with ExitStack() as inner:
                 cm = inner.enter_context(method(expected_exception, *args, **kwargs))
@@ -595,7 +609,9 @@ class BaseCase(case.TestCase):
     def assertQueries(self, expected, flush=True):
         """ Check the queries made by the current cursor. ``expected`` is a list
         of strings representing the expected queries being made. Query strings
-        are matched against each other, ignoring case and whitespaces.
+        are matched against each other, ignoring case and whitespaces. Moreover,
+        the substring ``"..."`` can be used as a wildcard to match anything in
+        the corresponding actual query.
         """
         actual_queries = []
 
@@ -604,44 +620,19 @@ class BaseCase(case.TestCase):
         if not self.warm:
             return
 
-        self.assertEqual(
-            len(actual_queries), len(expected),
-            "\n---- actual queries:\n%s\n---- expected queries:\n%s" % (
-                "\n".join(actual_queries), "\n".join(expected),
-            )
-        )
-        for actual_query, expect_query in zip(actual_queries, expected):
-            self.assertEqual(
-                "".join(actual_query.lower().split()),
-                "".join(expect_query.lower().split()),
-                "\n---- actual query:\n%s\n---- not like:\n%s" % (actual_query, expect_query),
-            )
-
-    @contextmanager
-    def assertQueriesContain(self, expected, flush=True):
-        """ Check the queries made by the current cursor. ``expected`` is a list
-        of strings representing the expected queries being made. Query strings
-        are matched against each other, ignoring case and whitespaces.
-        """
-        actual_queries = []
-
-        yield from self._patchExecute(actual_queries, flush)
-
-        if not self.warm:
+        # diff lists of queries 'expected' and 'actual_queries'
+        queries1 = [QueryLike(query) for query in expected]
+        queries2 = [QueryLike(query) for query in actual_queries]
+        if queries1 == queries2:
             return
 
-        self.assertEqual(
-            len(actual_queries), len(expected),
-            "\n---- actual queries:\n%s\n---- expected queries:\n%s" % (
-                "\n".join(actual_queries), "\n".join(expected),
-            )
+        diff = "\n".join(
+            (f"--- {query1}" if query2 is None else
+             f"+++ {query2}" if query1 is None else
+             f"=== {query2}")
+            for query1, query2 in diff_zip(queries1, queries2)
         )
-        for actual_query, expect_query in zip(actual_queries, expected):
-            self.assertIn(
-                "".join(expect_query.lower().split()),
-                "".join(actual_query.lower().split()),
-                "\n---- actual query:\n%s\n---- doesn't contain:\n%s" % (actual_query, expect_query),
-            )
+        self.fail(self._formatMessage("\n" + diff, "Not the expected queries"))
 
     @contextmanager
     def assertQueryCount(self, default=0, flush=True, **counters):
@@ -701,7 +692,7 @@ class BaseCase(case.TestCase):
             records: odoo.models.BaseModel,
             expected_values: list[dict],
             *,
-            field_names: Optional[Iterable[str]] = None,
+            field_names: Iterable[str] | None = None,
     ) -> None:
         ''' Compare a recordset with a list of dictionaries representing the expected results.
         This method performs a comparison element by element based on their index.
@@ -917,7 +908,6 @@ class BaseCase(case.TestCase):
             message = f"Trying to open a test cursor for {self.canonical_tag} while already in a test {odoo.modules.module.current_test.canonical_tag}"
             _logger.runbot(message)
             raise BadRequest(message)
-        request = odoo.http.request
         if not request or self.http_request_allow_all:
             return
         http_request_required_key = self.http_request_key
@@ -1001,6 +991,28 @@ class Like:
 
     def __repr__(self):
         return repr(self.pattern)
+
+
+class QueryLike(str):
+    """ Wrapper for comparing query strings. The comparison ignores case and
+    spaces, and the substring ``"..."`` can match anything on the right-hand
+    side of operator `==`.
+    """
+    __slots__ = ('_regex', '_stripped')
+
+    def __init__(self, value):
+        # ignore case and spaces when comparing
+        self._stripped = "".join(value.lower().split())
+        # "..." matches anything
+        self._regex = ".*".join(re.escape(part) for part in self._stripped.split('...'))
+
+    def __hash__(self):
+        return hash(self._stripped)
+
+    def __eq__(self, other):
+        if not isinstance(other, QueryLike):
+            return NotImplemented
+        return re.fullmatch(self._regex, other._stripped, re.DOTALL)
 
 
 class WhitespaceInsensitive(str):
@@ -1110,7 +1122,7 @@ class TransactionCase(BaseCase):
         cls.startClassPatcher(cls._signal_changes_patcher)
 
         cls.cr = cls.registry.cursor()
-        cls.addClassCleanup(cast(Cursor, cls.cr).close)
+        cls.addClassCleanup(typing.cast('Cursor', cls.cr).close)
 
         def check_cursor_stack():
             for cursor in test_cursor.TestCursor._cursors_stack:
@@ -1248,7 +1260,7 @@ class SingleTransactionCase(BaseCase):
         cls.addClassCleanup(cls.registry.clear_all_caches)
 
         cls.cr = cls.registry.cursor()
-        cls.addClassCleanup(cast(Cursor, cls.cr).close)
+        cls.addClassCleanup(typing.cast('Cursor', cls.cr).close)
 
         cls.env = api.Environment(cls.cr, api.SUPERUSER_ID, {})
 
@@ -1490,6 +1502,7 @@ class ChromeBrowser:
             '--disable-translate': '',
             '--no-sandbox': '',
             '--disable-gpu': '',
+            '--enable-unsafe-swiftshader': '',
             '--mute-audio': '',
         }
         switches = {
@@ -2160,7 +2173,8 @@ class Opener(requests.Session):
     def request(self, *args, **kwargs):
         assert self.test_case.opener == self
         self.cr.flush()
-        self.cr.clear()
+        if transaction := self.cr.transaction:
+            transaction.clear()
         with self.test_case.allow_requests():
             res = super().request(*args, **kwargs)
             res.__class__ = Response
@@ -2168,6 +2182,31 @@ class Opener(requests.Session):
 
 
 class Response(requests.Response):
+    @property
+    def session(self) -> Session:
+        """
+        Get the session attached to the response.
+
+        There are three cases:
+
+        1. The session exists and was persisted on disk, you get the
+           entire session and ``session.is_new`` is ``False``.
+        2. The session exists but was not persisted on disk (because it
+           only contained default values), you get an *empty* session
+           but ``session.is_new`` is ``False``. This session is **not**
+           populated with :func:`odoo.http.session.get_default_session`
+           as the ``db`` and ``context['lang']`` cannot be set. Please
+           adapt your test in this regard.
+        3. The session doesn't exist, you get an empty session and
+           ``session.is_new`` is ``True``.
+        """
+        session_id = (
+            self.cookies.get('session_id')
+            or self.request._cookies.get('session_id')
+            or ''
+        )
+        return session_store().get(session_id, keep_sid=True)
+
     def raise_for_status(self) -> Response:
         try:
             super().raise_for_status()
@@ -2197,7 +2236,8 @@ class Transport(xmlrpclib.Transport):
 
     def request(self, *args, **kwargs):
         self.cr.flush()
-        self.cr.clear()
+        if transaction := self.cr.transaction:
+            transaction.clear()
         with self.test_case.allow_requests(all_requests=True):
             return super().request(*args, **kwargs)
 
@@ -2214,7 +2254,7 @@ class HttpCase(TransactionCase):
     browser = None
     browser_size = '1366x768'
     touch_enabled = False
-    session: odoo.http.Session = None
+    session: OdooHttpSession = None
 
     _logger: logging.Logger = None
 
@@ -2334,6 +2374,9 @@ class HttpCase(TransactionCase):
             "params": params or {},
         }
 
+    def csrf_token(self):
+        return Request.csrf_token(self)  # noqa: F821
+
     def url_open(self, url, data=None, files=None, timeout=12, headers=None, json=None, params=None, allow_redirects=True, cookies=None, method: str | None = None):
         if not method and (data or files or json):
             method = 'POST'
@@ -2364,23 +2407,41 @@ class HttpCase(TransactionCase):
             odoo.tools.misc.dumpstacks()
 
     def logout(self, keep_db=True):
-        self.session.logout(keep_db=keep_db)
-        odoo.http.root.session_store.save(self.session)
+        logout(self.session, keep_db=keep_db)
+        session_store().save(self.session)
 
-    def authenticate(self, user, password, browser: ChromeBrowser = None):
+    def update_session(self, **items):
+        self.session.update(**items)
+        session_store().save(self.session)
+
+    def update_session_context(self, **items):
+        self.session['context'].update(**items)
+        session_store().save(self.session)
+
+    def authenticate(self, user, password, *, browser: ChromeBrowser = None, session_extra=()):
         if getattr(self, 'session', None):
-            odoo.http.root.session_store.delete(self.session)
+            session_store().delete(self.session)
 
-        self.session = session = odoo.http.root.session_store.new()
-        session.update(odoo.http.get_default_session(), db=get_db_name())
-        session.context['lang'] = odoo.http.DEFAULT_LANG
+        self.session = session_store().new()
+        self.session.update(
+            get_default_session(),
+            db=get_db_name(),
+            _trace_disable=True,  # saves a query on all requests
+        )
+        self.session.context['lang'] = DEFAULT_LANG
+
+        if session_extra:
+            if extra_ctx := session_extra.pop('context', None):
+                self.session.context.update(extra_ctx)
+            self.session.update(session_extra)
 
         if user: # if authenticated
             # Flush and clear the current transaction.  This is useful, because
             # the call below opens a test cursor, which uses a different cache
             # than this transaction.
             self.cr.flush()
-            self.cr.clear()
+            if transaction := self.cr.transaction:
+                transaction.clear()
 
             def patched_check_credentials(self, credential, env):
                 return {'uid': self.id, 'auth_method': 'password', 'mfa': 'default'}
@@ -2391,14 +2452,16 @@ class HttpCase(TransactionCase):
                 auth_info = self.env['res.users'].authenticate(credential, {'interactive': False})
             uid = auth_info['uid']
             env = api.Environment(self.cr, uid, {})
-            session['uid'] = uid
-            session['login'] = user
-            session['session_token'] = None
+            self.session['uid'] = uid
+            self.session['login'] = user
+            self.session['session_token'] = None
             if uid:
-                session._update_session_token(env)
-            session['context'] = dict(env['res.users'].context_get())
+                update_session_token(self.session, env)
+            self.session['context'] = dict(env['res.users'].context_get())
+            if session_extra and (ctx := session_extra.get('context')):
+                self.session['context'].update(ctx)
 
-        odoo.http.root.session_store.save(session)
+        session_store().save(self.session)
         # Reset the opener: turns out when we set cookies['foo'] we're really
         # setting a cookie on domain='' path='/'.
         #
@@ -2413,12 +2476,12 @@ class HttpCase(TransactionCase):
         # An alternative would be to set the cookie to None (unsetting it
         # completely) or clear-ing session.cookies.
         self.opener = Opener(self)
-        self.opener.cookies.set("session_id", session.sid, domain=HOST)
+        self.opener.cookies.set("session_id", self.session.sid, domain=HOST)
         if browser:
             self._logger.info('Setting session cookie in browser')
-            browser.set_cookie('session_id', session.sid, '/', HOST)
+            browser.set_cookie('session_id', self.session.sid, '/', HOST)
 
-        return session
+        return self.session
 
     def fetch_proxy(self, url):
         """
@@ -2509,7 +2572,8 @@ class HttpCase(TransactionCase):
             # we make requests to the server, as these requests are made with
             # test cursors, which uses different caches than this transaction.
             self.cr.flush()
-            self.cr.clear()
+            if transaction := self.cr.transaction:
+                transaction.clear()
             url = urljoin(self.base_url(), url_path)
             if watch:
                 parsed = urlsplit(url)
@@ -2559,7 +2623,6 @@ class HttpCase(TransactionCase):
             'keepWatchBrowser': kwargs.get('watch', False),
             'debug': kwargs.get('debug', False),
             'startUrl': url_path,
-            'delayToCheckUndeterminisms': kwargs.pop('delay_to_check_undeterminisms', int(os.getenv("ODOO_TOUR_DELAY_TO_CHECK_UNDETERMINISMS", "0")) or 0),
         }
         code = kwargs.pop('code', f"odoo.startTour({tour_name!r}, {json.dumps(options)})")
         ready = kwargs.pop('ready', f"odoo.isTourReady({tour_name!r})")
@@ -2567,9 +2630,6 @@ class HttpCase(TransactionCase):
 
         if step_delay is not None:
             self._logger.warning('step_delay is only suitable for local testing')
-        if options["delayToCheckUndeterminisms"] > 0:
-            timeout = timeout + 1000 * options["delayToCheckUndeterminisms"]
-            _logger.runbot("Tour %s is launched with mode: check for undeterminisms.", tour_name)
         Users = self.registry['res.users']
 
         def setup(_):
@@ -2590,7 +2650,7 @@ class HttpCase(TransactionCase):
             _route_profiler = sup.profile(description=request.httprequest.full_path, db=_profiler.db)
             _profiler.sub_profilers.append(_route_profiler)
             return _route_profiler
-        return profiler.Nested(_profiler, patch('odoo.http.Request._get_profiler_context_manager', route_profiler))
+        return profiler.Nested(_profiler, patch('odoo.http.requestlib.Request._get_profiler_context_manager', route_profiler))
 
     def get_method_additional_tags(self, test_method):
         """

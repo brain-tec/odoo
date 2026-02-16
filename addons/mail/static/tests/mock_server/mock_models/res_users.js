@@ -52,15 +52,17 @@ export class ResUsers extends webModels.ResUsers {
                                     fields: [
                                         "active",
                                         "avatar_128",
-                                        "im_status",
                                         "is_admin",
                                         mailDataHelpers.Store.one("main_user_id", []),
                                         "name",
+                                        "tz",
                                         "user",
+                                        ...ResPartner._get_store_im_status_fields(),
                                     ],
                                 })
                             ),
                             "notification_type",
+                            "signature",
                         ],
                     })
                 ),

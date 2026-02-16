@@ -53,6 +53,7 @@ export function useErrorHandlers() {
             await dialog.add(AlertDialog, {
                 title: _t("Unknown Error"),
                 body: _t("The order could not be sent to the server due to an unknown error"),
+                showReloadButton: true,
             });
         }
     };
@@ -176,7 +177,6 @@ export function useIsChildLarger(container) {
         let acc = 0;
         let nbrItems = 0;
         let isLarger = false;
-        const oldLargerState = state.isLarger;
         const containerWidth = container.el.clientWidth - 10;
 
         for (const child of container.el.children) {
@@ -191,8 +191,8 @@ export function useIsChildLarger(container) {
 
         state.isLarger = isLarger;
         state.maxItems = nbrItems;
-        if (!oldLargerState && state.isLarger) {
-            state.maxItems--;
+        if (state.isLarger) {
+            state.maxItems = Math.max(0, state.maxItems - 1);
         }
     };
 

@@ -57,11 +57,11 @@ class MrpRoutingWorkcenter(models.Model):
     cycle_number = fields.Integer("Repetitions", compute="_compute_time_cycle")
     time_total = fields.Float('Total Duration', compute="_compute_time_cycle")
     show_time_total = fields.Boolean('Show Total Duration?', compute="_compute_time_cycle")
-    cost_mode = fields.Selection([('actual', 'Actual time'), ('estimated', 'Theorical time')],
+    cost_mode = fields.Selection([('actual', 'Actual time'), ('estimated', 'Theoretical time')],
                                  string='Cost based on', default='actual', tracking=True,
                                  help="Determines the way Odoo calculates the cost of the operation:\n"
                                  "- Based on Actual time: the cost will be calculated based on tracked time and real employee costs.\n"
-                                 "- Based on Estimated time: the cost will be calculated based on estimated time and costs.")
+                                 "- Based on Theoretical time: the cost will be calculated based on estimated time and costs.")
     cost = fields.Float('Cost', compute="_compute_cost")
 
     @api.depends('time_mode', 'time_mode_batch')
@@ -94,7 +94,7 @@ class MrpRoutingWorkcenter(models.Model):
             cycle_number = 0  # Never 0 unless infinite item['workcenter_id'].capacity
             for item in data:
                 total_duration += item['duration']
-                (capacity, _setup, _cleanup) = item['workcenter_id']._get_capacity(item.product_id, item.product_uom_id, operation.bom_id.product_qty or 1)
+                (capacity, _setup, _cleanup) = item['workcenter_id']._get_capacity(item.product_id, item.uom_id, operation.bom_id.product_qty or 1)
                 cycle_number += float_round((item['qty_produced'] / capacity), precision_digits=0, rounding_method='UP')
             if cycle_number:
                 operation.time_cycle = total_duration / cycle_number
@@ -110,7 +110,7 @@ class MrpRoutingWorkcenter(models.Model):
                 operation.show_time_total = False
                 continue
             quantity = self.env.context.get('quantity', operation.bom_id.product_qty or 1)
-            unit = self.env.context.get('unit', operation.bom_id.product_uom_id)
+            unit = self.env.context.get('unit', operation.bom_id.uom_id)
             (capacity, setup, cleanup) = workcenter._get_capacity(product, unit, operation.bom_id.product_qty or 1)
             operation.cycle_number = float_round(quantity / capacity, precision_digits=0, rounding_method="UP")
             operation.time_total = setup + cleanup + operation.cycle_number * operation.time_cycle * 100.0 / (workcenter.time_efficiency or 100.0)

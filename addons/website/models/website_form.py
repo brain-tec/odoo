@@ -151,6 +151,8 @@ class IrModelFields(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _check_if_used_in_website_form(self):
+        if self.env.context.get('force_delete'):
+            return
         """Prevent field deletion if used in a website form."""
         for field in self:
             for model_name, field_name in self.env['website']._get_html_fields():

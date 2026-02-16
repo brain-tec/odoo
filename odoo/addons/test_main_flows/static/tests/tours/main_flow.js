@@ -5,6 +5,7 @@ import { stepUtils } from "@web_tour/tour_utils";
 import { markup } from "@odoo/owl";
 
 registry.category("web_tour.tours").add('main_flow_tour', {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     url: "/odoo",
     steps: () => [
 ...stepUtils.toggleHomeMenu().map(step => {
@@ -266,7 +267,7 @@ stepUtils.autoExpandMoreButtons(),
 },
 {
     isActive: ["mobile"],
-    trigger: ".o_field_widget[name=min_qty] + .o_field_widget[name=product_uom_id] input",
+    trigger: ".o_field_widget[name=min_qty] + .o_field_widget[name=uom_id] input",
     run: "click",
 },
 {
@@ -433,7 +434,7 @@ stepUtils.autoExpandMoreButtons(),
 },
 {
     isActive: ["mobile"],
-    trigger: ".o_field_widget[name=min_qty] + .o_field_widget[name=product_uom_id] input",
+    trigger: ".o_field_widget[name=min_qty] + .o_field_widget[name=uom_id] input",
     run: "click",
 },
 {
@@ -1094,7 +1095,7 @@ stepUtils.autoExpandMoreButtons(true),
     trigger: '.o_form_view div.o_notebook_headers',
 },
 {
-    trigger: 'a.nav-link:contains(Timesheets)',
+    trigger: 'button.nav-link:contains(Timesheets)',
     content: 'Click on Timesheets page to log a timesheet',
     run: "click",
 }, {

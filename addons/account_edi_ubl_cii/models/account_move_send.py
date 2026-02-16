@@ -191,6 +191,8 @@ class AccountMoveSend(models.AbstractModel):
                     'date': fields.Date.context_today(self),
                 },
             )
+            if "<pdfaid:conformance>B</pdfaid:conformance>" in content:
+                content.replace("<pdfaid:conformance>B</pdfaid:conformance>", "<pdfaid:conformance>A</pdfaid:conformance>")
             writer.add_file_metadata(content.encode())
 
         # Replace the current content.
@@ -284,5 +286,5 @@ class AccountMoveSend(models.AbstractModel):
         ]
         if attachments_vals:
             attachments = self.env['ir.attachment'].with_user(SUPERUSER_ID).create(attachments_vals)
-            res_ids = attachments.mapped('res_id')
+            res_ids = [a.res_id for a in attachments if a.res_id]
             self.env['account.move'].browse(res_ids).invalidate_recordset(fnames=['ubl_cii_xml_id', 'ubl_cii_xml_file'])

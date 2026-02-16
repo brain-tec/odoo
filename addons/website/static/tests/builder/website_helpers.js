@@ -39,6 +39,7 @@ import { BorderConfigurator } from "@html_builder/plugins/border_configurator_op
 import { WebsiteBuilder } from "@website/builder/website_builder";
 import { session } from "@web/session";
 import { getTranslatedElements } from "./translated_elements_getter.hoot";
+import { BackgroundShapeOptionPlugin } from "@html_builder/plugins/background_option/background_shape_option_plugin";
 
 class Website extends models.Model {
     _name = "website";
@@ -112,8 +113,10 @@ export async function setupWebsiteBuilder(
         hasToCreateWebsite = true,
         styleContent,
         headerContent = "",
+        footerContent = "",
         beforeWrapwrapContent = "",
         translateMode = false,
+        enableIframeTransitions = false,
         onIframeLoaded = () => {},
         delayReload = async () => {},
     } = {}
@@ -129,18 +132,20 @@ export async function setupWebsiteBuilder(
     let editableContent;
     const comp = await mountWithCleanup(WebClient);
     let originalIframeLoaded;
-    let resolveIframeLoaded = () => {};
+    let resolveIframeLoaded = async () => {};
     const bodyHTML = `${beforeWrapwrapContent}
         <div id="wrapwrap">${headerContent} <div id="wrap" class="oe_structure oe_empty" ${
         translateMode
             ? ""
             : `data-oe-model="ir.ui.view" data-oe-id="${setupWebsiteBuilderOeId}" data-oe-field="arch"`
-    }>${websiteContent}</div></div>`;
+    }>${websiteContent}</div> ${footerContent}</div>`;
     const iframeLoaded = new Promise((resolve) => {
-        resolveIframeLoaded = (el) => {
+        resolveIframeLoaded = async (el) => {
             const iframe = el;
             const styleEl = iframe.contentDocument.createElement("style");
-            styleEl.textContent = /*css*/ `* { transition: none !important; } `;
+            if (!enableIframeTransitions) {
+                styleEl.textContent = /*css*/ `* { transition: none !important; }`;
+            }
             if (styleContent) {
                 styleEl.textContent += styleContent;
             }
@@ -150,10 +155,17 @@ export async function setupWebsiteBuilder(
                 "website.page(4,)"
             );
             iframe.contentDocument.body.innerHTML = bodyHTML;
-            // we artificially set the is-ready attribute to trick the rest of
-            // the code into thinking that the js inside the iframe is properly
-            // loaded
-            iframe.contentDocument.body.setAttribute("is-ready", "true");
+            if (loadIframeBundles && loadAssetsFrontendJS) {
+                await waitFor("body[is-ready=true]", {
+                    timeout: 1000,
+                    root: iframe.contentDocument,
+                });
+            } else {
+                // If we don't include the iframe JS, we artificially set the
+                // is-ready attribute to trick the rest of the code into
+                // thinking that it has been loaded.
+                iframe.contentDocument.body.setAttribute("is-ready", "true");
+            }
 
             onIframeLoaded(iframe);
             resolve(el);
@@ -271,6 +283,23 @@ export async function setupWebsiteBuilder(
         },
     });
 
+    // Remove as soon as the background shape are not always instantiated when
+    // entering in edit mode.
+    patchWithCleanup(BackgroundShapeOptionPlugin.prototype, {
+        getShapeStylePosition(shapeId, flip) {
+            if (!this.shapeStyles[this.convertShapeIdForStyleSearch(shapeId)]) {
+                return [50, 50];
+            }
+            return super.getShapeStylePosition(shapeId, flip);
+        },
+        getShapeStyleUrl(shapeId) {
+            if (!this.shapeStyles[this.convertShapeIdForStyleSearch(shapeId)]) {
+                return "";
+            }
+            return super.getShapeStyleUrl(shapeId);
+        },
+    });
+
     if (snippets) {
         patchWithCleanup(IrUiView.prototype, {
             render_public_asset: () => getSnippetView(snippets),
@@ -297,7 +326,7 @@ export async function setupWebsiteBuilder(
             js: loadAssetsFrontendJS,
         });
     }
-    resolveIframeLoaded(iframe);
+    await resolveIframeLoaded(iframe);
     await animationFrame();
     if (openEditor) {
         await openBuilderSidebar(editAssetsLoaded);
@@ -508,6 +537,7 @@ export async function setupSidebarBuilderForTranslation(options) {
             },
         }
     );
+    await getTranslatedElements();
     await openBuilderSidebar();
     return { getEditor, getEditableContent };
 }

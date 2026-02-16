@@ -11,7 +11,7 @@ import {
 import { describe, expect, test } from "@odoo/hoot";
 import { Deferred, advanceTime } from "@odoo/hoot-mock";
 
-import { DELAY_FOR_SPINNER } from "@mail/chatter/web_portal/chatter";
+import { DELAY_FOR_SPINNER } from "@mail/chatter/web_portal_project/chatter";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -225,4 +225,18 @@ test("composer state conserved when clicking on another topbar button", async ()
     await click(".o-mail-Chatter-topbar button[aria-label='Attach files']");
     await contains("button.active:text('Log note')");
     await contains("button:not(.active):text('Send message')");
+});
+
+test("full message composer dialog size expand/collapse", async () => {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({});
+    await start();
+    await openFormView("res.partner", partnerId);
+    await click("button:text('Log note')");
+    await click("button[aria-label='Open Full Composer']");
+    await contains("div.modal-lg");
+    await click("button[title='Expand']");
+    await contains("div.modal-fs");
+    await click("button[title='Compress']");
+    await contains("div.modal-lg");
 });

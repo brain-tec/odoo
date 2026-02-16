@@ -1,6 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import base64
 import freezegun
 
 from datetime import datetime, timedelta
@@ -118,6 +117,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
         f.name = 'test'
         f.start = '2022-07-07 01:00:00'  # This is in UTC. In NY, it corresponds to the 6th of july at 9pm.
         f.recurrency = True
+        f.end_type = 'count'
         self.assertEqual(f.weekday, 'WED')
         self.assertEqual(f.event_tz, 'America/New_York', "The value should correspond to the user tz")
         self.assertEqual(f.count, 1, "The default value should be displayed")
@@ -154,11 +154,11 @@ class TestCalendar(SavepointCaseWithUserDemo):
                 self.assertEqual(len(extra_attachments), len(attachments_names))
 
         attachments = self.env['ir.attachment'].create([{
-            'datas': base64.b64encode(bytes("Event Attachment", 'utf-8')),
+            'raw': b"Event Attachment",
             'name': 'fileText_attachment.txt',
             'mimetype': 'text/plain'
         }, {
-            'datas': base64.b64encode(bytes("Event Attachment 2", 'utf-8')),
+            'raw': b"Event Attachment 2",
             'name': 'fileText_attachment_2.txt',
             'mimetype': 'text/plain'
         }])

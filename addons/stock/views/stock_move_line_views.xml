@@ -14,7 +14,7 @@
                        decoration-info="picking_code == 'outgoing'"
                        decoration-success="picking_code == 'incoming'"
                        decoration-warning="is_inventory"
-                       decoration-danger="scrap_id"/>
+                       decoration-danger="is_scrap"/>
                 <field name="product_id"/>
                 <field name="lot_id" optional="show" groups="stock.group_production_lot"/>
                 <field name="package_id" optional="hide" groups="stock.group_tracking_lot"/>
@@ -26,7 +26,7 @@
                 <field name="quantity" string="Quantity" class="fw-bolder"
                     decoration-danger="(location_usage in ('internal','transit')) and (location_dest_usage not in ('internal','transit')) and quantity != 0"
                     decoration-success="(location_usage not in ('internal','transit')) and (location_dest_usage in ('internal','transit')) and quantity != 0"/>
-                <field name="product_uom_id" options="{'no_open': True, 'no_create': True}" widget="many2one_uom" groups="uom.group_uom"/>
+                <field name="uom_id" options="{'no_open': True, 'no_create': True}" widget="many2one_uom" groups="uom.group_uom"/>
                 <field name="state" widget='badge' optional="show"
                        decoration-danger="state=='cancel'"
                        decoration-info="state== 'assigned'"
@@ -52,7 +52,7 @@
                 <field name="location_dest_id" groups="stock.group_stock_multi_locations" />
                 <field name="package_id" groups="stock.group_tracking_lot"/>
                 <field name="quantity" string="Quantity" optional="show"/>
-                <field name="product_uom_id" options="{'no_open': True, 'no_create': True}" widget="many2one_uom" optional="show" groups="uom.group_uom"/>
+                <field name="uom_id" options="{'no_open': True, 'no_create': True}" widget="many2one_uom" optional="show" groups="uom.group_uom"/>
                 <field name="company_id" groups="base.group_multi_company" force_save="1" optional="hide"/>
                 <field name="state" widget='badge' optional="show"
                        decoration-danger="state=='cancel'"
@@ -93,7 +93,7 @@
                             <label for="quantity" string="Quantity"/>
                             <div class="o_row">
                                 <field name="quantity"/>
-                                <field name="product_uom_id" options="{'no_create': True}" widget="many2one_uom" groups="uom.group_uom"/>
+                                <field name="uom_id" options="{'no_create': True}" widget="many2one_uom" groups="uom.group_uom"/>
                             </div>
                             <field name="lot_id" groups="stock.group_production_lot" context="{'default_product_id': product_id, 'active_picking_id': picking_id}"
                                    invisible="tracking == 'none' or not lot_id and lot_name"/>
@@ -131,7 +131,7 @@
                 <field name="product_id"/>
                 <field name="picking_id" string="Transfer"/>
                 <field name="reference" string="Reference"/>
-                <field name="product_category_name" string="Category"/>
+                <field name="product_category_id" string="Category"/>
                 <field name="lot_id" string="Lot/Serial Number" groups="stock.group_production_lot"/>
                 <field name="package_id" string="Source Package" groups="stock.group_tracking_lot"/>
                 <field name="result_package_id" string="Destination Package" groups="stock.group_tracking_lot"/>
@@ -145,6 +145,8 @@
                 <filter string="Internal" name="internal" domain="[('picking_id.picking_type_id.code', '=', 'internal')]"/>
                 <filter string="Manufacturing" name="manufacturing" domain="[('picking_id.picking_type_id.code', '=', 'mrp_operation')]" invisible="1"/>
                 <separator/>
+                <filter string="Scrapped" name="scrapped" domain="[('is_scrap', '=', True)]"/>
+                <separator/>
                 <filter name="date" date="date" default_period="month"/>
                 <filter string="Last 30 Days" name="filter_last_30_days" domain="[('date','&gt;=', 'today -30d')]"/>
                 <filter string="Last 3 Months" name="filter_last_3_months" domain="[('date','&gt;=', 'today -3m')]"/>
@@ -157,7 +159,7 @@
                     <filter string="Date" name="by_date" domain="[]" context="{'group_by': 'date'}"/>
                     <filter string="Transfers" name="by_picking" domain="[]" context="{'group_by': 'picking_id'}"/>
                     <filter string="Location" name="by_location" domain="[]" context="{'group_by': 'location_id'}"/>
-                    <filter string="Category" name="by_category" domain="[]" context="{'group_by': 'product_category_name'}"/>
+                    <filter string="Category" name="by_category" domain="[]" context="{'group_by': 'product_category_id'}"/>
                 </group>
             </search>
         </field>
@@ -190,7 +192,7 @@
                         <div class="row">
                             <div class="col-6">
                                 <field name="quantity" string="Quantity"/>
-                                <field name="product_uom_id" groups="uom.group_uom" widget="many2one_uom"/>
+                                <field name="uom_id" groups="uom.group_uom" widget="many2one_uom"/>
                             </div>
                             <field class="col-6 text-end" name="state" widget="label_selection" options="{'classes': {'draft': 'default', 'cancel': 'danger', 'waiting': 'warning', 'confirmed': 'warning', 'done': 'success'}}"/>
                         </div>
@@ -205,19 +207,19 @@
         <field name="model">stock.move.line</field>
         <field name="arch" type="xml">
             <pivot string="Moves History">
-                <field name="product_category_name" type="col"/>
+                <field name="product_category_id" type="col"/>
                 <field name="date" interval="month" type="row"/>
             </pivot>
         </field>
     </record>
 
-    <record id="action_revert_inventory_adjustment" model="ir.actions.server">
-        <field name="name">Revert Inventory Adjustment</field>
+    <record id="action_revert_move_line" model="ir.actions.server">
+        <field name="name">Revert</field>
         <field name="model_id" ref="stock.model_stock_move_line"/>
         <field name="binding_model_id" ref="stock.model_stock_move_line"/>
         <field name="state">code</field>
         <field name="code">
-            action = records.action_revert_inventory()
+            action = records.action_revert()
         </field>
     </record>
 

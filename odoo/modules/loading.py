@@ -529,6 +529,7 @@ def load_modules(
             cr.execute("SELECT name, id FROM ir_module_module WHERE state=%s", ('to remove',))
             modules_to_remove = dict(cr.fetchall())
             if modules_to_remove:
+                registry.uninstalling_modules = set(modules_to_remove)
                 pkgs = reversed([p for p in graph if p.name in modules_to_remove])
                 for pkg in pkgs:
                     uninstall_hook = pkg.manifest.get('uninstall_hook')
@@ -613,8 +614,7 @@ def reset_modules_state(db_name: str) -> None:
     # of time
     db = odoo.sql_db.db_connect(db_name)
     with db.cursor() as cr:
-        cr.execute("SELECT 1 FROM information_schema.tables WHERE table_name='ir_module_module'")
-        if not cr.fetchall():
+        if not odoo.tools.sql.table_exists(cr, 'ir_module_module'):
             _logger.info('skipping reset_modules_state, ir_module_module table does not exists')
             return
         cr.execute(

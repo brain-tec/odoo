@@ -43,6 +43,11 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
             'xsi': "http://www.w3.org/2001/XMLSchema-instance",
         }
 
+        cls.ubl_namespaces = {
+            'cbc': "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
+            'cac': "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2",
+        }
+
         cls.reverse_charge_tax = cls.company_data['default_tax_sale'].copy({
             'name': 'Reverse charge tax',
             'ubl_cii_tax_category_code': 'AE',
@@ -253,6 +258,21 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
             'peppol_eas': '0208',
             'peppol_endpoint': '0477472701',
         }])
+
+    def test_export_company_registry_in_party_nodes(self):
+        """Check that company_registry is used for PartyIdentification and CompanyID."""
+        self.partner_be.company_registry = '1234567890'
+        invoice = self.env['account.move'].create({
+            'partner_id': self.partner_be.id,
+            'move_type': 'out_invoice',
+            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})]
+        })
+        invoice.action_post()
+
+        xml_tree = etree.fromstring(self.env['account.edi.xml.ubl_bis3']._export_invoice(invoice)[0])
+        customer_nodes = xml_tree.xpath('//cac:AccountingCustomerParty/cac:Party', namespaces=self.ubl_namespaces)
+        self.assertEqual(customer_nodes[0].find('.//{*}PartyIdentification/{*}ID').text, '1234567890')
+        self.assertEqual(customer_nodes[0].find('.//{*}PartyLegalEntity/{*}CompanyID').text, '1234567890')
 
     def test_import_partner_peppol_fields(self):
         """ Check that the peppol fields are used to retrieve the partner when importing a Bis 3 xml. """
@@ -474,6 +494,32 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
             'zip': '8010',
         }])
 
+    def test_import_bill(self):
+        partner = self.env['res.partner'].create({
+            'name': "My Belgian Partner",
+            'vat': "BE0477472701",
+            'email': "mypartner@email.com",
+        })
+        invoice = self.env['account.move'].create({
+            'partner_id': partner.id,
+            'move_type': 'out_invoice',
+            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})]
+        })
+        invoice.action_post()
+        my_invoice_raw = self.env['account.edi.xml.ubl_bis3']._export_invoice(invoice)[0]
+        my_invoice_root = etree.fromstring(my_invoice_raw)
+        modifying_xpath = """<xpath expr="(//*[local-name()='LegalMonetaryTotal']/*[local-name()='TaxExclusiveAmount'])" position="replace">
+        <TaxExclusiveAmount currencyID="EUR"><!--Some valid XML
+comment-->1000.0</TaxExclusiveAmount></xpath>"""
+        xml_attachment = self.env['ir.attachment'].create({
+            'raw': etree.tostring(self.with_applied_xpath(my_invoice_root, modifying_xpath)),
+            'name': 'test_invoice.xml',
+        })
+        imported_invoice = self._import_as_attachment_on(attachment=xml_attachment, journal=self.company_data["default_journal_purchase"])
+        self.assertRecordValues(imported_invoice.invoice_line_ids, [{
+            'amount_currency': 1000.00,
+            'quantity': 1.0}])
+
     def test_import_discount(self):
         invoice = self.env['account.move'].create({
             'partner_id': self.partner_a.id,
@@ -637,34 +683,6 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
             self.assertEqual(node.findtext('.//{*}TaxExemptionReason') or False, tax.ubl_cii_tax_exemption_reason)
             self.assertEqual(node.findtext('.//{*}TaxExemptionReasonCode') or False, tax.ubl_cii_tax_exemption_reason_code)
 
-    def test_bank_details_import(self):
-        account_number = '1234567890'
-        partner_bank = self.env['res.partner.bank'].create({
-            'active': False,
-            'account_number': account_number,
-            'partner_id': self.partner_a.id
-        })
-        invoice = self.env['account.move'].create({
-            'partner_id': self.partner_a.id,
-            'move_type': 'in_invoice',
-            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
-        })
-        # will not raise sql constraint because the sql is not commited yet
-        self.env['account.edi.common']._import_partner_bank(invoice, [account_number])
-        self.assertEqual(invoice.partner_bank_id, partner_bank, "Partner bank must be the same")
-        self.assertTrue(partner_bank.active, "Partner bank must be the activated")
-
-    def test_bank_details_import_duplicate(self):
-        account_number = '1234567890'
-        invoice = self.env['account.move'].create({
-            'partner_id': self.partner_a.id,
-            'move_type': 'in_invoice',
-            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
-        })
-        # Importing should not try to create multiple partner bank records with the same account number.
-        # It would cause a traceback due to a unique constraint on the (sanitized) account number, partner pair.
-        self.env['account.edi.common']._import_partner_bank(invoice, [account_number, account_number])
-
     def test_oin_code(self):
         partner = self.partner_a
         partner.peppol_endpoint = '00000000001020304050'
@@ -684,9 +702,7 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
         builder = invoice.partner_id.commercial_partner_id._get_edi_builder('nlcius')
         xml_content = builder._export_invoice(invoice)[0]
         xml_tree = etree.fromstring(xml_content)
-        scheme_ID = xml_tree.find('.//cac:PartyLegalEntity/cbc:CompanyID[@schemeID]', {
-            'cbc': "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
-            'cac': "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"})
+        scheme_ID = xml_tree.find('.//cac:PartyLegalEntity/cbc:CompanyID[@schemeID]', self.ubl_namespaces)
         self.assertEqual(scheme_ID.attrib.get("schemeID"), "0190")
 
     def test_facturx_use_correct_vat(self):
@@ -758,3 +774,79 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
             "rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
         })
         self.assertEqual(node[0].text, self.company.vat, "Company VAT fallback")
+
+    def test_vehicle_import(self):
+        """
+        Test that vehicle id is set on invoice lines if fleet is installed
+        """
+        self.ensure_installed('fleet')
+        self.env.user.group_ids |= self.env.ref('fleet.fleet_group_manager')
+        # create car datas
+        brand = self.env['fleet.vehicle.model.brand'].create({
+            'name': 'Test Brand',
+        })
+        model = self.env['fleet.vehicle.model'].create({
+            'name': 'Test Model',
+            'brand_id': brand.id,
+        })
+        car = self.env['fleet.vehicle'].create({
+            'model_id': model.id,
+            'vin_sn': 'ABCDEF012345GHJKL',
+        })
+        car2 = self.env['fleet.vehicle'].create({
+            'model_id': model.id,
+            'vin_sn': 'ABCDEF012346GHJKL',
+        })
+        car3 = self.env['fleet.vehicle'].create({
+            'model_id': model.id,
+            'vin_sn': 'ABCDEF012347GHJKL',
+        })
+
+        self.env.ref('base.EUR').active = True  # EUR might not be active and is used in the xml testing file
+
+        def create_attachment(file_name):
+            file_path = f"{self.test_module}/tests/test_files/{file_name}"
+            with file_open(file_path, 'rb') as file:
+                xml_attachment = self.env['ir.attachment'].create({
+                    'mimetype': 'application/xml',
+                    'name': file_name,
+                    'raw': file.read(),
+                })
+            return xml_attachment
+
+        # One VIN SN for the move, all lines should link the vehicle
+        xml_attachment_invoice = create_attachment("bis3_bill_vehicle_invoice.xml")
+        bill_invoice = self._import_as_attachment_on(attachment=xml_attachment_invoice)
+        self.assertRecordValues(bill_invoice.invoice_line_ids, [{'vehicle_id': car.id} for _ in range(3)])
+
+        # Multiple VIN SN, every line should link its own vehicle
+        xml_attachment_line = create_attachment("bis3_bill_vehicle_line.xml")
+        bill_line = self._import_as_attachment_on(attachment=xml_attachment_line)
+        self.assertRecordValues(bill_line.invoice_line_ids, [
+            {'vehicle_id': car2.id},
+            {'vehicle_id': car3.id},
+            {'vehicle_id': False},
+        ])
+
+    def test_partner_name_in_xml(self):
+        """
+        Test that invoice contacts without specific names use their parent partner's
+        name in the XML output, avoiding the 'Invoice address' suffix from display_name.
+        """
+        partner = self.env['res.partner'].create({
+            'parent_id': self.partner_a.id,
+            'type': 'invoice'
+        })
+        invoice = self.env['account.move'].create({
+            'partner_id': partner.id,
+            'move_type': 'out_invoice',
+            'invoice_date': "2025-12-23",
+            'invoice_date_due': "2025-12-31",
+            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})],
+        })
+        invoice.action_post()
+
+        xml_content = self.env['account.edi.xml.ubl_20']._export_invoice(invoice)[0]
+        xml_tree = etree.fromstring(xml_content)
+        partner_name = xml_tree.find('.//cac:AccountingCustomerParty/cac:Party/cac:PartyName/cbc:Name', self.ubl_namespaces)
+        self.assertEqual(partner_name.text, 'partner_a')

@@ -15,7 +15,6 @@ const snippet = {
 registerWebsitePreviewTour(
     "website_replace_grid_image",
     {
-        url: "/",
         edition: true,
     },
     () => [
@@ -40,6 +39,11 @@ registerWebsitePreviewTour(
             content: "Pick new image",
             trigger:
                 '.o_select_media_dialog .o_button_area[aria-label="s_banner_default_image.jpg"]',
+            run: "click",
+        },
+        {
+            content: `Target the "Text - Image" group`,
+            trigger: `.options-container[data-container-title="Text - Image"]:has(.options-container-label i.fa-caret-right) button[title="Select only this block"]`,
             run: "click",
         },
         {

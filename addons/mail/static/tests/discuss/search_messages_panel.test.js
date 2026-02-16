@@ -3,7 +3,7 @@ import {
     contains,
     defineMailModels,
     insertText,
-    onRpcBefore,
+    listenStoreFetch,
     openDiscuss,
     patchUiSize,
     scroll,
@@ -11,6 +11,7 @@ import {
     start,
     startServer,
     triggerHotkey,
+    waitStoreFetch,
 } from "@mail/../tests/mail_test_helpers";
 import { expect, mockTouch, mockUserAgent, test } from "@odoo/hoot";
 import { press } from "@odoo/hoot-dom";
@@ -36,6 +37,7 @@ test("Should open the search panel when search button is clicked", async () => {
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
     await start();
     await openDiscuss(channelId);
+    await contains(".o-discuss-ChannelMemberList"); // wait for auto-open of this panel
     await click("[title='Search Messages']");
     await contains(".o-mail-SearchMessagesPanel");
     await contains(".o_searchview");
@@ -80,6 +82,10 @@ test("Search a message", async () => {
     await insertText(".o_searchview_input", "message");
     triggerHotkey("Enter");
     await contains(".o-mail-SearchMessagesPanel .o-mail-Message");
+    expect(".o_searchview_input").toHaveValue("message");
+    await click("i[aria-label='Clear Search']");
+    await contains(".o-mail-SearchMessagesPanel:not(:has(.o-mail-Message))");
+    expect(".o_searchview_input").toHaveValue("");
 });
 
 test.tags("desktop");
@@ -220,6 +226,7 @@ test("Should close the search panel when search button is clicked again", async 
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
     await start();
     await openDiscuss(channelId);
+    await contains(".o-discuss-ChannelMemberList"); // wait for auto-open of this panel
     await click("[title='Search Messages']");
     await click("[title='Close Search']");
     await contains(".o-mail-SearchMessagesPanel");
@@ -293,19 +300,33 @@ test("Editing the searched term should not edit the current searched term", asyn
             res_id: channelId,
         });
     }
-    onRpcBefore("/discuss/channel/messages", (args) => {
-        if (args.search_term) {
-            const { search_term } = args;
-            expect(search_term).toBe("message");
-        }
-    });
+    listenStoreFetch("/discuss/channel/messages", { logParams: ["/discuss/channel/messages"] });
     await start();
     await openDiscuss(channelId);
+    await waitStoreFetch([
+        [
+            "/discuss/channel/messages",
+            { channel_id: channelId, fetch_params: { limit: 60, around: 0 } },
+        ],
+    ]);
+    await contains(".o-discuss-ChannelMemberList"); // wait for auto-open of this panel
     await click("[title='Search Messages']");
     await insertText(".o_searchview_input", "message");
     triggerHotkey("Enter");
+    await waitStoreFetch([
+        [
+            "/discuss/channel/messages",
+            { channel_id: channelId, fetch_params: { search_term: "message", before: false } },
+        ],
+    ]);
     await insertText(".o_searchview_input", "test");
     await scroll(".o-mail-SearchMessagesPanel .o-mail-ActionPanel", "bottom");
+    await waitStoreFetch([
+        [
+            "/discuss/channel/messages",
+            { channel_id: channelId, fetch_params: { search_term: "message", before: 31 } },
+        ],
+    ]);
 });
 
 test.tags("desktop");

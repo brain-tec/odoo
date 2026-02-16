@@ -195,7 +195,7 @@ class DigestDigest(models.Model):
                 'user': user,
                 'unsubscribe_token': unsubscribe_token,
                 'tips_count': tips_count,
-                'formatted_date': datetime.today().strftime('%B %d, %Y'),
+                'formatted_date': tools.format_date(self.env, datetime.today(), date_format='MMMM dd, yyyy'),
                 'display_mobile_banner': True,
                 'kpi_data': self._compute_kpis(user.company_id, user),
                 'tips': self._compute_tips(user.company_id, user, tips_count=tips_count, consumed=consume_tips),
@@ -425,7 +425,7 @@ class DigestDigest(models.Model):
 
     def _compute_timeframes(self, company):
         start_datetime = datetime.now(UTC)
-        tz_name = company.resource_calendar_id.tz
+        tz_name = company.tz
         if tz_name:
             start_datetime = start_datetime.replace(tzinfo=ZoneInfo(tz_name))
         return [

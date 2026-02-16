@@ -13,6 +13,7 @@ import {
 } from "@website/js/tours/tour_utils";
 
 registry.category("web_tour.tours").add("parent_child_menu", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     url: "/odoo/action-website.action_website_menu",
     steps: () => [
         {
@@ -74,6 +75,7 @@ registry.category("web_tour.tours").add("parent_child_menu", {
 registerWebsitePreviewTour(
     "edit_menus",
     {
+        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/",
     },
     () => [

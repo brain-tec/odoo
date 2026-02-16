@@ -2,6 +2,7 @@ import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import { findInSelection } from "@html_editor/utils/selection";
 import {
     animationFrame,
+    advanceTime,
     click,
     manuallyDispatchProgrammaticEvent,
     press,
@@ -13,8 +14,17 @@ import { execCommand } from "./userCommands";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { isTextNode } from "@html_editor/utils/dom_info";
 import { closestElement } from "@html_editor/utils/dom_traversal";
+import { STEP_DEBOUNCE_DELAY } from "@html_editor/core/history_plugin";
 
 /** @typedef {import("@html_editor/plugin").Editor} Editor */
+
+/**
+ * Makes enough time pass to ensure that undo/redo will not collapse
+ * steps before and after this call.
+ */
+export async function ensureDistinctHistoryStep() {
+    await advanceTime(STEP_DEBOUNCE_DELAY + 1);
+}
 
 /**
  * Simulates text insertion in the editor by dispatching keyboard/input events
@@ -299,8 +309,12 @@ export function splitBlock(editor) {
 }
 
 export async function simulateArrowKeyPress(editor, keys) {
-    await press(keys);
+    const events = await press(keys);
     const keysArray = Array.isArray(keys) ? keys : [keys];
+    if (events.some((event) => event.defaultPrevented)) {
+        // Selection change was already handled.
+        return;
+    }
     const alter = keysArray.includes("Shift") ? "extend" : "move";
     const direction =
         keysArray.includes("ArrowLeft") || keysArray.includes("ArrowUp") ? "left" : "right";
@@ -349,16 +363,16 @@ export function resetSize(editor) {
     editor.shared.table.resetTableSize(findInSelection(selection, "table"));
 }
 /** @param {Editor} editor */
-export function alignLeft(editor) {
-    execCommand(editor, "alignLeft");
+export function alignStart(editor) {
+    execCommand(editor, "alignStart");
 }
 /** @param {Editor} editor */
 export function alignCenter(editor) {
     execCommand(editor, "alignCenter");
 }
 /** @param {Editor} editor */
-export function alignRight(editor) {
-    execCommand(editor, "alignRight");
+export function alignEnd(editor) {
+    execCommand(editor, "alignEnd");
 }
 /** @param {Editor} editor */
 export function justify(editor) {

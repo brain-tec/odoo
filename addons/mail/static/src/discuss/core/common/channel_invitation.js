@@ -1,15 +1,15 @@
-import { ImStatus } from "@mail/core/common/im_status";
+import { DiscussAvatar } from "@mail/core/common/discuss_avatar";
 import { ActionPanel } from "@mail/discuss/core/common/action_panel";
 
-import { Component, onMounted, onWillStart, useEffect, useRef, useState } from "@odoo/owl";
+import { Component, onWillStart, useState } from "@odoo/owl";
 
 import { useSequential } from "@mail/utils/common/hooks";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
+import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { useDebounced } from "@web/core/utils/timing";
 
 export class ChannelInvitation extends Component {
-    static components = { ImStatus, ActionPanel };
+    static components = { ActionPanel, DiscussAvatar };
     static defaultProps = { hasSizeConstraints: false };
     static props = [
         "autofocus?",
@@ -28,8 +28,6 @@ export class ChannelInvitation extends Component {
         this.rtc = useService("discuss.rtc");
         this.notification = useService("notification");
         this.suggestionService = useService("mail.suggestion");
-        this.ui = useService("ui");
-        this.inputRef = useRef("input");
         this.sequential = useSequential();
         this.state = useState({
             searchResultCount: 0,
@@ -44,24 +42,12 @@ export class ChannelInvitation extends Component {
             this.fetchPartnersToInvite.bind(this),
             250
         );
+        this.inputRef = useAutofocus({ refName: "input" });
         onWillStart(() => {
             if (this.store.self_user) {
                 this.fetchPartnersToInvite();
             }
         });
-        onMounted(() => {
-            if (this.store.self_user && this.props.channel) {
-                this.inputRef.el.focus();
-            }
-        });
-        useEffect(
-            () => {
-                if (this.props.autofocus) {
-                    this.inputRef.el?.focus();
-                }
-            },
-            () => [this.props.autofocus]
-        );
     }
 
     get selectablePartners() {
@@ -112,7 +98,7 @@ export class ChannelInvitation extends Component {
 
     get searchPlaceholder() {
         if (this.props.channel?.allow_invite_by_email) {
-            return _t("Invite people or email");
+            return _t("Enter name or email");
         }
         return _t("Search people to invite");
     }
@@ -204,19 +190,22 @@ export class ChannelInvitation extends Component {
     }
 
     async onClickInvite() {
+        let channelId = this.props.channel.id;
+        const invitePromises = [];
         if (this.props.channel?.channel_type === "chat") {
             const partnerIds = this.selectedPartners.map((partner) => partner.id);
             if (this.props.channel.correspondent?.partner_id) {
                 partnerIds.unshift(this.props.channel.correspondent.partner_id.id);
             }
-            await this.store.startChat(partnerIds);
-            this.props.close?.();
-            return;
-        }
-        const invitePromises = [];
-        if (this.selectedPartners.length) {
+            if (this.state.selectedEmails.length) {
+                const group = await this.store.createGroupChat({ partners_to: partnerIds });
+                channelId = group.id;
+            } else {
+                await this.store.startChat(partnerIds);
+            }
+        } else if (this.selectedPartners.length) {
             invitePromises.push(
-                this.orm.call("discuss.channel", "add_members", [[this.props.channel.id]], {
+                this.orm.call("discuss.channel", "add_members", [[channelId]], {
                     partner_ids: this.selectedPartners.map((partner) => partner.id),
                     invite_to_rtc_call: this.rtc.localChannel?.eq(this.props.channel),
                 })
@@ -224,7 +213,7 @@ export class ChannelInvitation extends Component {
         }
         if (this.state.selectedEmails.length) {
             invitePromises.push(
-                this.orm.call("discuss.channel", "invite_by_email", [this.props.channel.id], {
+                this.orm.call("discuss.channel", "invite_by_email", [channelId], {
                     emails: this.state.selectedEmails,
                 })
             );

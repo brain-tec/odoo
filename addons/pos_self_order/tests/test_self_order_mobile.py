@@ -22,10 +22,6 @@ class TestSelfOrderMobile(SelfOrderCommonTest):
             "name": 'Main Floor',
             "table_ids": [(0, 0, {
                 "table_number": 1,
-            }), (0, 0, {
-                "table_number": 2,
-            }), (0, 0, {
-                "table_number": 3,
             })],
         })
 
@@ -37,7 +33,7 @@ class TestSelfOrderMobile(SelfOrderCommonTest):
 
         self.pos_config.with_user(self.pos_user).open_ui()
         self.pos_config.current_session_id.set_opening_control(0, "")
-        self_route = self.pos_config._get_self_order_route()
+        self_route = self.pos_config._get_self_order_route(table_id=floor.table_ids[0].id)
 
         # Test selection of different presets
         self.start_tour(self_route, "self_mobile_each_table_takeaway_in")
@@ -62,6 +58,10 @@ class TestSelfOrderMobile(SelfOrderCommonTest):
 
         # Mobile, meal, table
         self.start_tour(self_route, "self_mobile_meal_table_takeaway_in")
+        last_order = self.env['pos.order'].search([], order="id desc", limit=1)
+        html = last_order.order_receipt_generate_html()
+        self.assertTrue("Service at Table" in html)
+
         self.start_tour(self_route, "self_mobile_meal_table_takeaway_out")
 
         self.env['pos.order'].search([('state', '=', 'draft')]).write({'state': 'cancel'})
@@ -72,6 +72,10 @@ class TestSelfOrderMobile(SelfOrderCommonTest):
         # Mobile, meal, counter
         self.start_tour(self_route, "self_mobile_meal_counter_takeaway_in")
         self.start_tour(self_route, "self_mobile_meal_counter_takeaway_out")
+
+        last_order = self.env['pos.order'].search([], order="id desc", limit=1)
+        html = last_order.order_receipt_generate_html()
+        self.assertTrue("Pickup At Counter" in html)
 
         # Cancel in meal
         self.start_tour(self_route, "self_order_mobile_meal_cancel")
@@ -170,7 +174,7 @@ class TestSelfOrderMobile(SelfOrderCommonTest):
 
         self.pos_config.with_user(self.pos_user).open_ui()
         self.pos_config.current_session_id.set_opening_control(0, "")
-        self_route = self.pos_config._get_self_order_route()
+        self_route = self.pos_config._get_self_order_route(floor.table_ids[0].id)
 
         # Zero priced order
         self.start_tour(self_route, "self_order_mobile_0_price_order")

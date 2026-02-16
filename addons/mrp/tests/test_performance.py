@@ -43,10 +43,9 @@ class TestMrpSerialMassProducePerformance(common.TransactionCase):
         bom = self.env['mrp.bom'].create({
             'product_id': finished.id,
             'product_tmpl_id': finished.product_tmpl_id.id,
-            'product_uom_id': finished.uom_id.id,
+            'uom_id': finished.uom_id.id,
             'product_qty': 1.0,
             'type': 'normal',
-            'consumption': 'flexible',
             'bom_line_ids': [(0, 0, {'product_id': p[0]['id'], 'product_qty': 1}) for p in raw_materials]
         })
 

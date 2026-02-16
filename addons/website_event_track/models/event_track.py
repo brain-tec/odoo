@@ -365,15 +365,20 @@ class EventTrack(models.Model):
 
     @api.depends('event_track_visitor_ids.visitor_id', 'event_track_visitor_ids.is_wishlisted')
     def _compute_wishlist_visitor_ids(self):
+        """Compute the number of track visitors, and the associated website visitors.
+
+        Note that there may be more track visitors than visitors, as some may be linked to partners.
+        """
         results = self.env['event.track.visitor']._read_group(
             [('track_id', 'in', self.ids), ('is_wishlisted', '=', True)],
             ['track_id'],
-            ['visitor_id:array_agg'],
+            ['visitor_id:recordset', '__count'],
         )
-        visitor_ids_map = {track.id: visitor_ids for track, visitor_ids in results}
+        track_visitor_data = {track.id: (visitors, visitor_count) for track, visitors, visitor_count in results}
         for track in self:
-            track.wishlist_visitor_ids = visitor_ids_map.get(track.id, [])
-            track.wishlist_visitor_count = len(visitor_ids_map.get(track.id, []))
+            visitors, visitor_count = track_visitor_data.get(track.id, (self.env['website.visitor'], 0))
+            track.wishlist_visitor_ids = visitors
+            track.wishlist_visitor_count = visitor_count
 
     def _search_wishlist_visitor_ids(self, operator, operand):
         if operator in ('not in', 'not any'):
@@ -561,7 +566,6 @@ class EventTrack(models.Model):
             res['stage_id'] = (track.stage_id.mail_template_id, {
                 'auto_delete_keep_log': False,
                 'composition_mode': 'comment',
-                'email_layout_xmlid': 'mail.mail_notification_light',
                 'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
             })
         return res

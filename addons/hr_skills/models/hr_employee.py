@@ -86,7 +86,7 @@ class HrEmployee(models.Model):
                     [
                         Domain("user_id", "!=", False),
                         Domain("parent_id.user_id", "!=", False),
-                        Domain("job_id.user_id", "!=", False),
+                        Domain("job_id.recruiter_id.user_id", "!=", False),
                     ],
                 ),
             ],
@@ -120,7 +120,7 @@ class HrEmployee(models.Model):
 
         for employee in employees:
             job_id = employee.job_id
-            responsible = employee.user_id or employee.parent_id.user_id or job_id.user_id
+            responsible = employee.user_id or employee.parent_id.user_id or job_id.recruiter_id.user_id
             if job_id not in job_skill_level_mapping or not responsible:
                 continue
 
@@ -133,8 +133,8 @@ class HrEmployee(models.Model):
                     continue
 
                 activity = employee.activity_schedule(
-                    act_type_xmlid="hr_skills.mail_activity_data_upload_certification",
-                    summary=summary,
+                    act_type_xmlid="mail.mail_activity_data_upload_document",
+                    summary=summary or self.env._("Upload a document for a missing certification"),
                     note="Certification missing or expiring soon",
                     date_deadline=valid_to_date or today,
                     user_id=responsible.id,

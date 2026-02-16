@@ -751,8 +751,8 @@ function orderByField(model, orderBy, records) {
                 break;
             }
             case "many2one": {
-                v1 &&= valuesMap.get(v1[0]);
-                v2 &&= valuesMap.get(v2[0]);
+                v1 &&= valuesMap.get(v1[0] ?? v1);
+                v2 &&= valuesMap.get(v2[0] ?? v2);
                 break;
             }
             case "many2many":
@@ -771,7 +771,9 @@ function orderByField(model, orderBy, records) {
             }
         }
         let result;
-        if (v1 === false) {
+        if (v1 === v2) {
+            result = 0;
+        } else if (v1 === false) {
             result = 1;
         } else if (v2 === false) {
             result = -1;
@@ -783,7 +785,7 @@ function orderByField(model, orderBy, records) {
                     }": values must be of the same primitive type (got ${typeof v1} and ${typeof v2})`
                 );
             }
-            result = v1 > v2 ? 1 : v1 < v2 ? -1 : 0;
+            result = v1 > v2 ? 1 : -1;
         }
         return direction === "DESC" ? -result : result;
     });
@@ -3248,7 +3250,9 @@ export class Model extends Array {
                 criterion = [criterion[0], "in", childIds];
             }
             // In case of many2many field, if domain operator is '=' generally change it to 'in' operator
-            const field = this._fields[criterion[0]] || {};
+            const splitCriterion0 = safeSplit(criterion[0], ".");
+            const field = this._fields[splitCriterion0[0]] || {};
+
             if (isX2MField(field) && criterion[1] === "=") {
                 if (criterion[2] === false) {
                     // if undefined value asked, domain.js require equality with empty array
@@ -3256,6 +3260,21 @@ export class Model extends Array {
                 } else {
                     criterion = [criterion[0], "in", [criterion[2]]];
                 }
+            }
+
+            if (splitCriterion0.length > 1 && isX2MField(field)) {
+                const inverse = {
+                    "not in": "in",
+                    "!=": "=",
+                };
+                const result = this.env[field.relation]._filter([
+                    [splitCriterion0[1], inverse[criterion[1]] ?? criterion[1], criterion[2]],
+                ]);
+                criterion = [
+                    splitCriterion0[0],
+                    inverse[criterion[1]] ? "not in" : "in",
+                    [...result].map((r) => r.id),
+                ];
             }
             return criterion;
         });

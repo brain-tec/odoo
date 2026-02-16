@@ -44,6 +44,7 @@ import {
     getService,
     installLanguages,
     makeServerError,
+    mockOffline,
     MockServer,
     mockService,
     models,
@@ -70,6 +71,7 @@ import { CharField } from "@web/views/fields/char/char_field";
 import { DateTimeField } from "@web/views/fields/datetime/datetime_field";
 import { Field } from "@web/views/fields/field";
 import { IntegerField } from "@web/views/fields/integer/integer_field";
+import { buildM2OFieldDescription, Many2OneField } from "@web/views/fields/many2one/many2one_field";
 import { useSpecialData } from "@web/views/fields/relational_utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
@@ -256,6 +258,7 @@ test(`simple form rendering`, async () => {
 });
 
 test(`[Offline] form switches to readonly in offline mode`, async () => {
+    const setOffline = mockOffline();
     await mountView({
         resModel: "partner",
         type: "form",
@@ -281,16 +284,14 @@ test(`[Offline] form switches to readonly in offline mode`, async () => {
     expect(`.o_field_float[name="float_field"] input`).toHaveCount(1);
     expect(`.o_field_x2many_list_row_add`).toHaveCount(1);
 
-    getService("offline").status.offline = true;
-    await animationFrame();
+    await setOffline(true);
     expect(`.o_field_char[name="foo"] input`).toHaveCount(0);
     expect(`.o_field_boolean[name="bar"] .o-checkbox input`).toHaveAttribute("disabled");
     expect(`.o_field_integer[name="int_field"] input`).toHaveCount(0);
     expect(`.o_field_float[name="float_field"] input`).toHaveCount(0);
     expect(`.o_field_x2many_list_row_add`).toHaveCount(0);
 
-    getService("offline").status.offline = false;
-    await animationFrame();
+    await setOffline(false);
     expect(`.o_field_char[name="foo"] input`).toHaveCount(1);
     expect(`.o_field_boolean[name="bar"] .o-checkbox input`).not.toHaveAttribute("disabled");
     expect(`.o_field_integer[name="int_field"] input`).toHaveCount(1);
@@ -300,16 +301,15 @@ test(`[Offline] form switches to readonly in offline mode`, async () => {
 
 test(`[Offline] save a form view offline (click save icon)`, async () => {
     let offline = false;
-    onRpc(
-        "/web/dataset/call_kw/partner/web_save",
-        () => {
+    onRpc("/*", (request) => {
+        const route = new URL(request.url).pathname;
+        if (route === "/web/dataset/call_kw/partner/web_save") {
             expect.step("web_save");
-            if (offline) {
-                return new Response("", { status: 502 });
-            }
-        },
-        { pure: true }
-    );
+        }
+        if (offline) {
+            return new Response("", { status: 502 });
+        }
+    });
 
     Partner._views = {
         form: `<form><field name="foo"/></form>`,
@@ -340,11 +340,11 @@ test(`[Offline] save a form view offline (click save icon)`, async () => {
     await contains(".o_form_button_save").click();
     expect(".o_form_renderer").toHaveClass("o_form_readonly");
     expect(".o_field_widget[name=foo]").toHaveText("new foo");
-    expect(getService("offline").status.offline).toBe(true);
+    expect(getService("offline").offline).toBe(true);
     expect.verifySteps(["web_save"]);
 
     offline = false;
-    getService("offline").status.offline = false;
+    await runAllTimers(); // execute checkConnection
     await animationFrame();
     expect(".o_form_renderer").toHaveClass("o_form_editable");
     await contains(".o_form_button_save").click();
@@ -358,16 +358,15 @@ test(`[Offline] save a form view offline (autosave when leaving)`, async () => {
     // this test is the same as above, but in this one we don't manually save
     // the record before leaving
     let offline = false;
-    onRpc(
-        "/web/dataset/call_kw/partner/web_save",
-        () => {
+    onRpc("/*", (request) => {
+        const route = new URL(request.url).pathname;
+        if (route === "/web/dataset/call_kw/partner/web_save") {
             expect.step("web_save");
-            if (offline) {
-                return new Response("", { status: 502 });
-            }
-        },
-        { pure: true }
-    );
+        }
+        if (offline) {
+            return new Response("", { status: 502 });
+        }
+    });
 
     Partner._views = {
         form: `<form><field name="foo"/></form>`,
@@ -398,11 +397,11 @@ test(`[Offline] save a form view offline (autosave when leaving)`, async () => {
     await contains(".o_breadcrumb .o_back_button").click();
     expect(".o_form_renderer").toHaveClass("o_form_readonly");
     expect(".o_field_widget[name=foo]").toHaveText("new foo");
-    expect(getService("offline").status.offline).toBe(true);
+    expect(getService("offline").offline).toBe(true);
     expect.verifySteps(["web_save"]);
 
     offline = false;
-    getService("offline").status.offline = false;
+    await runAllTimers(); // execute checkConnection
     await animationFrame();
     expect(".o_form_renderer").toHaveClass("o_form_editable");
 
@@ -1431,8 +1430,8 @@ test(`invisible elements are properly hidden`, async () => {
         resId: 1,
     });
     expect(`.o_form_statusbar button:contains(coucou)`).toHaveCount(0);
-    expect(`.o_notebook li a:contains(visible)`).toHaveCount(1);
-    expect(`.o_notebook li a:contains(invisible)`).toHaveCount(0);
+    expect(`.o_notebook li button:contains(visible)`).toHaveCount(1);
+    expect(`.o_notebook li button:contains(invisible)`).toHaveCount(0);
     expect(`div.o_inner_group:contains(visgroup)`).toHaveCount(1);
     expect(`div.o_inner_group:contains(invgroup)`).toHaveCount(0);
 });
@@ -9279,6 +9278,7 @@ test(`form view is not broken if save operation fails with redirect warning`, as
 
 test.tags("desktop");
 test("Redirect Warning full feature: additional context, action_id, leaving while dirty", async function () {
+    expect.errors(1);
     defineActions([
         {
             id: 1,
@@ -12956,6 +12956,33 @@ test(`cog menu action is executed with up to date context`, async () => {
     expect.verifySteps(["doAction y", "doAction z"]);
 });
 
+test("CogMenu receives the model in env", async () => {
+    class CogItem extends Component {
+        static props = ["*"];
+        static template = xml`<button class="test-cog" t-on-click="onClick">Test</button>`;
+        onClick() {
+            expect.step([`cog clicked`, this.env.model.root.resModel, this.env.model.root.resId]);
+        }
+    }
+    registry.category("cogMenu").add("test-cog", {
+        Component: CogItem,
+        isDisplayed: (env) => {
+            expect.step([`cog displayed`, env.model.root.resModel, env.model.root.resId]);
+            return true;
+        },
+    });
+    await mountView({
+        resModel: "partner",
+        type: "form",
+        resId: 5,
+        arch: `<form><field name="display_name"/></form>`,
+    });
+    expect.verifySteps([["cog displayed", "partner", 5]]);
+    await contains(".o_cp_action_menus button").click();
+    await contains("button.test-cog").click();
+    expect.verifySteps([["cog clicked", "partner", 5]]);
+});
+
 test.tags("mobile");
 test(`preserve current scroll position on form view while closing dialog`, async () => {
     Partner._views = {
@@ -13478,4 +13505,39 @@ test(`cached onchange - don't loose changes`, async () => {
     expect(`.o_field_char input`).toHaveValue("This is yop");
     expect(`.o_last_breadcrumb_item`).toHaveText("New");
     expect.verifySteps(["onchange", "onchange"]);
+});
+
+test("twice same many2one, one invisible, one with widget with related field", async () => {
+    Product._records[0].write_date = "2023-02-13 10:00:00";
+    class MyM2O extends Component {
+        static props = ["*"];
+        static components = { Many2OneField };
+        static template = xml`
+            <div>
+                <Many2OneField t-props="this.props"/>
+                <span class="date" t-esc="this.writeDate"/>
+            </div>`;
+        get writeDate() {
+            return this.props.record.data[this.props.name].write_date.toFormat("dd/MM/y");
+        }
+    }
+    const myM2O = {
+        ...buildM2OFieldDescription(MyM2O),
+        relatedFields: [{ name: "write_date", type: "datetime" }],
+    };
+    registry.category("fields").add("my_m2o", myM2O);
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: `
+            <form>
+                <field name="product_id" invisible="1"/>
+                <field name="product_id" widget="my_m2o"/>
+            </form>`,
+        resId: 1,
+    });
+
+    expect(".o_field_widget[name=product_id] input").toHaveValue("xphone");
+    expect(".o_field_widget[name=product_id] .date").toHaveText("13/02/2023");
 });

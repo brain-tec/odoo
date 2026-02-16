@@ -25,6 +25,21 @@ partnerCompareRegistry.add(
 );
 
 partnerCompareRegistry.add(
+    "mail.self-last",
+    (p1, p2, { store }) => {
+        const isSelf1 = p1.eq(store.self);
+        const isSelf2 = p2.eq(store.self);
+        if (isSelf1 && !isSelf2) {
+            return 1;
+        }
+        if (!isSelf1 && isSelf2) {
+            return -1;
+        }
+    },
+    { sequence: 7 }
+);
+
+partnerCompareRegistry.add(
     "mail.internal-users",
     (p1, p2) => {
         const isAInternalUser = p1.main_user_id?.share === false;
@@ -57,7 +72,7 @@ partnerCompareRegistry.add(
             }
         }
     },
-    { sequence: 45 }
+    { sequence: 25 }
 );
 
 partnerCompareRegistry.add(

@@ -406,6 +406,7 @@ export class SwitchThemeAction extends BuilderAction {
     static dependencies = ["savePlugin"];
     setup() {
         this.preview = false;
+        this.canTimeout = false;
     }
     async apply() {
         const save = await new Promise((resolve) => {
@@ -432,6 +433,7 @@ export class AddLanguageAction extends BuilderAction {
     static dependencies = ["savePlugin"];
     setup() {
         this.preview = false;
+        this.canTimeout = false;
     }
     async apply() {
         const def = Promise.withResolvers();
@@ -828,12 +830,7 @@ class TemplatePreviewableWebsiteConfigAction extends WebsiteConfigAction {
         // The promise ensures this completes before continuing, avoiding a race
         // that could mark the element o_dirty and trigger an unnecessary save.
         if (params.previewClass) {
-            await new Promise((resolve) => {
-                requestAnimationFrame(() => {
-                    params.previewClass.split(/\s+/).forEach((cls) => el.classList.add(cls));
-                    resolve();
-                });
-            });
+            params.previewClass.split(/\s+/).forEach((cls) => el.classList.add(cls));
         }
     }
 }

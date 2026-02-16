@@ -13,7 +13,6 @@ const snippets = [
 registerWebsitePreviewTour(
     "custom_popup_snippet",
     {
-        url: "/",
         edition: true,
     },
     () => [

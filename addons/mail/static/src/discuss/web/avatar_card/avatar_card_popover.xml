@@ -22,19 +22,7 @@
                                     <i class="oi oi-ellipsis-v"/>
                                 </button>
                                 <t t-set-slot="content">
-                                    <DropdownItem t-if="canSetAdmin" onSelected="() => this.setChannelRole('admin')">
-                                        Set Channel Admin
-                                    </DropdownItem>
-                                    <DropdownItem t-if="canRemoveAdmin or canRemoveOwner" onSelected="() => this.setChannelRole(false)">
-                                        <t t-if="canRemoveOwner">Remove Channel Owner</t>
-                                        <t t-if="canRemoveAdmin">Remove Channel Admin</t>
-                                    </DropdownItem>
-                                    <DropdownItem t-if="canSetOwner" onSelected="() => this.setChannelRole('owner')">
-                                        Set Channel Owner
-                                    </DropdownItem>
-                                    <DropdownItem t-if="canRemoveMember" onSelected.bind="onClickRemove">
-                                        <span class="text-danger">Remove from Channel</span>
-                                    </DropdownItem>
+                                    <ActionList actions="chanelMemberActions.actions" dropdown="true"/>
                                 </t>
                             </Dropdown>
                         </div>
@@ -45,6 +33,9 @@
                         <a t-if="phone" class="o-mail-avatar-card-tel text-truncate" t-att-title="phone" t-att-href="'tel:'+phone">
                             <i class="fa fa-fw fa-phone me-1"/><t t-esc="phone"/>
                         </a>
+                        <div t-if="state.partnerLocalDateTimeFormatted" class="o-mail-avatar-card-localtime text-muted">
+                            <i class="fa fa-fw fa-clock-o me-1"/><t t-out="state.partnerLocalDateTimeFormatted"/>
+                        </div>
                         <div class="o_avatar_card_buttons d-flex gap-2 mt-2">
                             <button t-if="(user?.share ?? partner?.partner_share) === false" class="btn btn-secondary btn-sm" t-on-click.stop="onSendClick">Send message</button>
                             <button t-if="showViewProfileBtn" class="btn btn-secondary btn-sm" t-custom-click.stop="(ev, isMiddleClick) => this.onClickViewProfile(isMiddleClick)" t-ref="viewProfileBtn">View Profile</button>

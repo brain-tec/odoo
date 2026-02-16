@@ -252,28 +252,6 @@ class AccountAccount(models.Model):
         if self.env.cr.fetchone():
             raise ValidationError(_("The account is already in use in a 'sale' or 'purchase' journal. This means that the account's type couldn't be 'receivable' or 'payable'."))
 
-    @api.constrains('reconcile')
-    def _check_used_as_journal_default_debit_credit_account(self):
-        accounts = self.filtered(lambda a: not a.reconcile)
-        if not accounts:
-            return
-
-        query = self.env['account.payment.method.line'].sudo()._search(
-            Domain('payment_account_id', 'in', accounts.ids))
-        apml = query.table
-        journal_t = apml._join('journal_id', kind='JOIN')
-        query.add_where(SQL("%s <> %s", apml.payment_account_id, journal_t.default_account_id))
-
-        journals = self.env['account.journal'].browse(
-            id_ for id_, in self.env.execute_query(query.select(SQL("DISTINCT %s", journal_t.id))))
-
-        if journals:
-            raise ValidationError(_(
-                "This account is configured in %(journal_names)s journal(s) (ids %(journal_ids)s) as payment debit or credit account. This means that this account's type should be reconcilable.",
-                journal_names=journals.mapped('display_name'),
-                journal_ids=journals.ids
-            ))
-
     @api.constrains('code')
     def _check_account_code(self):
         for account in self:
@@ -402,11 +380,17 @@ class AccountAccount(models.Model):
         )
 
     def _search_account_root(self, operator, value):
-        if operator not in ('in', 'child_of'):
+        if operator not in ('in', 'child_of', 'any'):
             return NotImplemented
-        roots = self.env['account.root'].browse(value)
+        if operator == 'any':
+            if isinstance(value, Domain) and value.field_expr == 'display_name' and value.operator == 'in':
+                roots = self.env['account.root'].browse(value.value)
+            else:
+                return NotImplemented
+        else:
+            roots = self.env['account.root'].browse(value)
         return Domain.OR(
-            Domain('placeholder_code', '=ilike', root.name + ('' if operator == 'in' and not root.parent_id else '%'))
+            Domain('placeholder_code', '=ilike', root.name + ('' if operator in ['in', 'any'] and not root.parent_id else '%'))
             for root in roots
         )
 
@@ -556,8 +540,7 @@ class AccountAccount(models.Model):
         balances = {
             account.id: balance
             for account, balance in self.env['account.move.line']._read_group(
-                domain=[('account_id', 'in', self.ids), ('parent_state', '=', 'posted'), ('company_id', '=', self.env.company.id)],
-                groupby=['account_id'],
+                domain=[('account_id', 'in', self.ids), ('parent_state', '=', 'posted'), ('company_id', 'child_of', self.env.company.id)], groupby=['account_id'],
                 aggregates=['balance:sum'],
             )
         }
@@ -582,9 +565,6 @@ class AccountAccount(models.Model):
 
     @api.depends_context('company')
     def _compute_opening_debit_credit(self):
-        self.opening_debit = 0
-        self.opening_credit = 0
-        self.opening_balance = 0
         opening_move = self.env.company.account_opening_move_id
         if not self.ids or not opening_move:
             return
@@ -605,9 +585,9 @@ class AccountAccount(models.Model):
         result = {r['account_id']: r for r in self.env.cr.dictfetchall()}
         for record in self:
             res = result.get(record.id) or {'debit': 0, 'credit': 0, 'balance': 0}
-            record.opening_debit = res['debit']
-            record.opening_credit = res['credit']
-            record.opening_balance = res['balance']
+            record.opening_debit = record.opening_debit or res['debit']
+            record.opening_credit = record.opening_credit or res['credit']
+            record.opening_balance = record.opening_balance or res['balance']
 
     @api.depends('code')
     def _compute_account_type(self):
@@ -941,10 +921,11 @@ class AccountAccount(models.Model):
         super().copy_translations(new, excluded=tuple(excluded)+('name',))
         if new.name == self.env._('%s (copy)', self.name):
             name_field = self._fields['name']
-            self.env.cache.update_raw(new, name_field, [{
+            assert name_field.translate
+            name_field._update_cache(new.with_context(prefetch_langs=True), {
                 lang: self.env._('%s (copy)', tr)
                 for lang, tr in name_field._get_stored_translations(self).items()
-            }], dirty=True)
+            }, dirty=True)
 
     @api.model
     def _load_precommit_update_opening_move(self):
@@ -1125,7 +1106,7 @@ class AccountAccount(models.Model):
                 duplicate_codes = [code for code, accounts in accounts_by_code.items() if len(accounts) > 1]
 
             # Check 2.2: Check that there are no duplicates in database
-            elif duplicates := self.with_company(company).sudo().search_fetch(
+            elif duplicates := self.with_company(company).sudo().with_context(active_test=False).search_fetch(
                 [
                     ('code', 'in', list(accounts_by_code)),
                     ('id', 'not in', self.ids),
@@ -1172,6 +1153,23 @@ class AccountAccount(models.Model):
             'res_model': 'account.tax',
             'views': [[False, 'list'], [False, 'form']],
             'domain': [('id', 'in', related_taxes_ids)],
+        }
+
+    def action_validate_opening_move(self):
+        if self.env.context.get('company_id') != self.env.company.id:
+            raise UserError(self.env._("You are attempting to validate opening entries belonging to another company. Please switch to the correct company."))
+
+        opening_move = self.env.company.account_opening_move_id
+        if not opening_move:
+            raise UserError(self.env._("Even magicians can't post nothing!"))
+
+        opening_move.action_post()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': self.env._("Chart of Accounts"),
+            'res_model': 'account.account',
+            'view_mode': 'list',
+            'context': {'no_breadcrumbs': True},
         }
 
     @api.model

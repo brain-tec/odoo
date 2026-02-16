@@ -7,6 +7,7 @@ class AccountMove(models.Model):
 
     stock_move_ids = fields.One2many('stock.move', 'account_move_id', string='Stock Move')
     inventory_closing = fields.Boolean(string='Inventory Closing', default=False)
+    closing_datetime = fields.Datetime(string='Closing Date')
 
     # -------------------------------------------------------------------------
     # OVERRIDE METHODS
@@ -168,3 +169,12 @@ class AccountMove(models.Model):
 
     def _get_invoiced_lot_values(self):
         return []
+
+    def _extract_extra_invoiced_lot_values(self, lot):
+        lot.ensure_one()
+        # Compute lot properties
+        lot_properties = lot.product_id.lot_properties_definition
+        # Store the value of each property
+        for prop in lot_properties:
+            prop['value'] = lot.lot_properties.get(prop['name'])
+        return {'lot_properties': lot_properties}

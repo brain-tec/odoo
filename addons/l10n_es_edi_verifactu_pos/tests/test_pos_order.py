@@ -240,6 +240,12 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuPosCommon):
             'l10n_es_edi_verifactu_document_ids': [],
             'l10n_es_edi_verifactu_qr_code': invoice.l10n_es_edi_verifactu_qr_code,
         }])
+
+        # Test receipt generation
+        html = order.order_receipt_generate_html()
+        self.assertTrue("QR tributario:" in html)
+        self.assertTrue("VERI*FACTU" in html)
+
         self.assertRecordValues(invoice.l10n_es_edi_verifactu_document_ids, [{
             'pos_order_id': False,
             'move_id': invoice.id,
@@ -248,3 +254,22 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuPosCommon):
             'state': 'accepted',
             'errors': False,
         }])
+
+    def test_consolidated_invoice_for_multiple_orders(self):
+        with self.with_pos_session():
+            data = {
+                'is_invoiced': False,
+                'customer': self.partner_b,
+                'pos_order_lines_ui_args': [(self.product, 1.0)],
+                'payments': [(self.bank_pm1, 121.0)],
+            }
+            orders = self.env['pos.order']
+            for _ in range(2):
+                with self._mock_zeep_registration_operation_single_accept_no_wait():
+                    orders |= self._create_order(data)
+
+        wizard = self.env['pos.make.invoice'] \
+            .create({'consolidated_billing': True}) \
+            .with_context({'active_ids': orders.ids})
+        with self.assertRaises(UserError, msg="With Veri*Factu enabled, POS orders cannot be consolidated into one invoice."):
+            wizard.action_create_invoices()

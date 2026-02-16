@@ -72,7 +72,7 @@ safe_attrs = defs.safe_attrs | frozenset(
      'data-oe-model', 'data-oe-id', 'data-oe-field', 'data-oe-type', 'data-oe-expression', 'data-oe-translation-source-sha', 'data-oe-nodeid',
      'data-last-history-steps', 'data-oe-protected', 'data-embedded', 'data-embedded-editable', 'data-embedded-props', 'data-oe-version',
      'data-oe-transient-content', 'data-behavior-props', 'data-prop-name', 'data-width', 'data-height', 'data-scale-x', 'data-scale-y', 'data-x', 'data-y',  # legacy editor
-     'data-oe-role', 'data-oe-aria-label',
+     'data-oe-role', 'data-oe-aria-label', 'data-o-datetime',
      'data-publish', 'data-id', 'data-res_id', 'data-interval', 'data-member_id', 'data-scroll-background-ratio', 'data-view-id',
      'data-class', 'data-mimetype', 'data-original-src', 'data-original-id', 'data-gl-filter', 'data-quality', 'data-resize-width',
      'data-shape', 'data-shape-colors', 'data-file-name', 'data-original-mimetype',
@@ -80,7 +80,8 @@ safe_attrs = defs.safe_attrs | frozenset(
      'data-ai-field', 'data-ai-record-id',
      'data-heading-link-id',
      'data-mimetype-before-conversion',
-     'data-language-id'
+     'data-language-id',
+     'data-bs-toggle',  # support nav-tabs
      ])
 SANITIZE_TAGS = {
     # allow new semantic HTML5 tags
@@ -468,12 +469,38 @@ def html_sanitize(src, silent=True, sanitize_tags=True, sanitize_attributes=Fals
     return markupsafe.Markup(sanitized)
 
 # ----------------------------------------------------------
+# lxml manipulation helpers
+# ----------------------------------------------------------
+
+
+def lxml_remove_element_preserve_tail(element, tail_separator='\n'):
+    """Remove an lxml element, mutating its parent tree and preserving its tail."""
+    parent_element = element.getparent()
+    if parent_element is None:
+        return False
+    # combine element tail with sibling tail or parent text
+    # this is safe as both are escaped xml text and will again be serialized as such
+    if element.tail:
+        tail = element.tail and element.tail.strip()
+        if tail:
+            previous_sibling = element.getprevious()
+            if previous_sibling is not None:
+                previous_sibling.tail = (previous_sibling.tail or '') + tail_separator + tail
+            else:
+                parent_element.text = (parent_element.text or '') + tail_separator + tail
+    parent_element.remove(element)
+    return True
+
+# ----------------------------------------------------------
 # HTML/Text management
 # ----------------------------------------------------------
 
 URL_SKIP_PROTOCOL_REGEX = r'mailto:|tel:|sms:'
 URL_REGEX = rf'''(\bhref=['"](?!{URL_SKIP_PROTOCOL_REGEX})([^'"]+)['"])'''
-TEXT_URL_REGEX = r'https?://[\w@:%.+&~#=/-]+(?:\?\S+)?'
+TEXT_URL_ALLOWED_GROUP = r'[\w@:%+&~#=/-]|[.,][^\s](?!$)'  # defines what characters can be inside a URL
+TEXT_URL_REGEX = r'https?://'  # scheme
+TEXT_URL_REGEX += rf'(?:{TEXT_URL_ALLOWED_GROUP})+'  # domain + path
+TEXT_URL_REGEX += r'(?:\?(?:[^\s.,]|[.,][^\s](?!$))+)?'  # query parameters
 # retrieve inner content of the link
 HTML_TAG_URL_REGEX = URL_REGEX + r'([^<>]*>([^<>]+)<\/)?'
 HTML_TAGS_REGEX = re.compile('<.*?>')
@@ -514,6 +541,22 @@ def html_keep_url(text):
         idx = item.end()
     final += text[idx:]
     return final
+
+
+def html_remove_xpath(body, xpath_expression):
+    """Remove all elements matching some xpath."""
+    BodyClass = type(body)
+    parsed_body_root = html.fragment_fromstring(body, create_parent='div')
+    xpath_elements = parsed_body_root.xpath(xpath_expression)
+    for element in xpath_elements:
+        if element != parsed_body_root:
+            lxml_remove_element_preserve_tail(element)
+    # if the input body was already a single node with no trailing string, avoid adding wrapper div
+    root_children = parsed_body_root.getchildren()
+    if len(root_children) == 1 and not root_children[0].tail:
+        parsed_body_root = root_children[0]
+    final_body = html.tostring(parsed_body_root, encoding='unicode')
+    return BodyClass(final_body)
 
 
 def html_to_inner_content(html):
@@ -949,6 +992,11 @@ def url_domain_extract(url):
     if company_hostname and '.' in company_hostname:
         return '.'.join(company_hostname.split('.')[-2:])  # remove subdomains
     return False
+
+
+def text_url_replace(original_url, new_url, text):
+    """Replace an url with another inside some arbitrary text. Avoids matching sub-urls."""
+    return re.sub(re.escape(original_url) + rf'(?!{TEXT_URL_ALLOWED_GROUP})', new_url, text)
 
 def email_escape_char(email_address):
     """ Escape problematic characters in the given email address string"""

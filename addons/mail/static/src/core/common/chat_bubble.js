@@ -1,4 +1,4 @@
-import { ImStatus } from "@mail/core/common/im_status";
+import { DiscussAvatar } from "@mail/core/common/discuss_avatar";
 import { MessageSeenIndicator } from "@mail/discuss/core/common/message_seen_indicator";
 
 import { Component, useEffect, useRef, useState, useSubEnv } from "@odoo/owl";
@@ -33,7 +33,7 @@ class ChatBubblePreview extends Component {
  * @extends {Component<Props, Env>}
  */
 export class ChatBubble extends Component {
-    static components = { CountryFlag, ImStatus };
+    static components = { CountryFlag, DiscussAvatar };
     static props = ["chatWindow"];
     static template = "mail.ChatBubble";
 

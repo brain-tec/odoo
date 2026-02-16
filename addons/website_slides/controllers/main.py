@@ -17,6 +17,7 @@ from odoo.addons.website_profile.controllers.main import WebsiteProfile
 from odoo.exceptions import AccessError, ValidationError, UserError, MissingError
 from odoo.fields import Domain
 from odoo.http import request, Response
+from odoo.http.session import touch
 from odoo.tools import consteq, email_normalize_all
 from odoo.tools.translate import LazyTranslate
 
@@ -86,7 +87,7 @@ class WebsiteSlides(WebsiteProfile):
             if slide_id not in viewed_slides:
                 if tools.sql.increment_fields_skiplock(slide, 'public_views', 'total_views'):
                     viewed_slides[slide_id] = 1
-                    request.session.touch()
+                    touch(request.session)
         else:
             slide.action_set_viewed(quiz_attempts_inc=quiz_attempts_inc)
         return True
@@ -1405,7 +1406,6 @@ class WebsiteSlides(WebsiteProfile):
             })
 
             if not slide.video_source_type:
-                slide.unlink()
                 return {'error': _("Could not find your video. Please check if your link is correct and if the video can be accessed.")}
 
             if slide.video_source_type == 'youtube':

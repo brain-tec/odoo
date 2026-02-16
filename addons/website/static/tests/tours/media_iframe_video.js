@@ -3,6 +3,7 @@ import { insertSnippet, registerWebsitePreviewTour } from "@website/js/tours/tou
 registerWebsitePreviewTour(
     "website_media_iframe_video",
     {
+        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/",
         edition: true,
     },
@@ -35,7 +36,7 @@ registerWebsitePreviewTour(
         },
         {
             content: "Click on video button",
-            trigger: "a:contains('Videos')",
+            trigger: "button:contains('Videos')",
             run: "click",
         },
         {
@@ -98,12 +99,7 @@ registerWebsitePreviewTour(
         },
         {
             content: "Check that video url has protocol",
-            trigger: "#o_video_text",
-            run() {
-                if (!this.anchor.value.startsWith("https")) {
-                    console.error("Video Url is missing protocol");
-                }
-            },
+            trigger: "#o_video_text:value(/^https/)",
         },
         {
             content: "Close the dialog",

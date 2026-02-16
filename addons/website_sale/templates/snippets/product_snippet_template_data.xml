@@ -20,6 +20,7 @@
                     role="article"
                     t-att-aria-label="product.display_name"
                     t-att-data-add2cart-rerender="data.get('_add2cart_rerender')"
+                    t-att-data-publish="product.website_published and 'on' or 'off'"
                 >
                     <!-- Image -->
                     <div t-attf-class="oe_product_image position-relative flex-grow-0 overflow-hidden">
@@ -78,17 +79,16 @@
                                     t-if="is_view_active('website_sale.product_comment')"
                                     class="o_wsale_product_rating_wrapper"
                                 >
-                                    <t t-call="portal_rating.rating_widget_stars_static">
-                                        <t t-set="rating_avg" t-value="record.rating_avg"/>
-                                        <t t-set="rating_count" t-value="record.rating_count"/>
-                                    </t>
+                                    <t t-call="portal_rating.rating_widget_stars_static"
+                                        rating_avg="record.rating_avg"
+                                        rating_count="record.rating_count"/>
                                 </div>
                             </div>
                         </div>
                         <div class="o_wsale_product_sub justify-content-between gap-2">
                             <!-- Price(s) -->
                             <div class="product_price" aria-label="Price information">
-                                <t t-call="website_sale.price_dynamic_filter_template_product_product"></t>
+                                <t t-call="website_sale.price_dynamic_filter_template_product_product"/>
                             </div>
                             <!-- Actions -->
                             <div class="o_wsale_product_btn">
@@ -108,6 +108,17 @@
                                             <i class="fa fa-shopping-cart fa-fw" role="presentation"/><span class="o_label small ms-1">Add to Cart</span>
                                         </button>
                                     </t>
+                                    <t t-elif="data.get('prevent_sale')">
+                                        <a
+                                            title="Contact us"
+                                            aria-label="Contact us"
+                                            t-att-href="website._get_contact_us_url(product.display_name)"
+                                            class="o_wsale_product_btn_primary btn btn-outline-primary"
+                                        >
+                                            <i class="fa fa-envelope fa-fw" role="presentation"/>
+                                            <span class="o_label small ms-1">Contact Us</span>
+                                        </a>
+                                    </t>
                                 </div>
                             </div>
                         </div>
@@ -117,7 +128,7 @@
         </template>
 
         <template id="website_sale.price_dynamic_filter_template_product_product" name="Dynamic Product Filter Price">
-            <t t-if="not data.get('prevent_zero_price_sale') and not data.get('is_sample')">
+            <t t-if="not data.get('hide_price') and not data.get('is_sample')">
                 <span t-out="data['price']"
                       class="mb-0 fw-bold"
                       name="product_price"

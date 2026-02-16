@@ -28,6 +28,7 @@ class TestUi(HttpCase):
             'phone': '+886 123 456 781',
         })
         website.company_id.account_fiscal_country_id = website.company_id.country_id = self.env.ref('base.tw')
+        website.company_id.country_id.enforce_cities = False
         self.env.ref('l10n_tw_edi_ecpay_website_sale.checkout_step_invoicing').website_id = website
         self.env.ref('l10n_tw_edi_ecpay_website_sale.checkout_step_invoicing').is_published = True
 
@@ -63,6 +64,16 @@ class TestUi(HttpCase):
             'l10n_tw_edi_is_print': True,
         }])
 
+    def test_checkout_b2c_mobile_barcode(self):
+        with patch(CALL_API_METHOD, new=self._test_checkout_b2c_mobile_barcode_mock):
+            self.start_tour("/shop", "test_checkout_b2c_mobile_barcode")
+        # Check the invoice info is updated on the sale order
+        sale_order = self.env['sale.order'].search([], limit=1, order="create_date desc")
+        self.assertRecordValues(sale_order, [{
+            'l10n_tw_edi_carrier_type': "3",
+            'l10n_tw_edi_carrier_number': "/1234567",
+        }])
+
     # -------------------------------------------------------------------------
     # Patched methods
     # -------------------------------------------------------------------------
@@ -89,6 +100,15 @@ class TestUi(HttpCase):
             return {
                 "RtnCode": 1,
                 "CompanyName": "Test Company",
+            }
+        else:
+            raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))
+
+    def _test_checkout_b2c_mobile_barcode_mock(self, endpoint, params, company_id, is_b2b=False):
+        if endpoint == "/CheckBarcode":
+            return {
+                "RtnCode": 1,
+                "IsExist": "Y",
             }
         else:
             raise UserError('Unexpected endpoint called during a test: %s with params %s.' % (endpoint, params))

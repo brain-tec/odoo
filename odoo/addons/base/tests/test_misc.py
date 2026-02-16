@@ -5,7 +5,7 @@ import datetime
 import os.path
 from zoneinfo import ZoneInfo
 
-from odoo.tests.common import tagged, BaseCase, TransactionCase
+from odoo.tests.common import tagged, BaseCase, TransactionCase, freeze_time
 from odoo.tools import config, misc, urls
 from odoo.tools.mail import validate_url
 from odoo.tools.misc import file_open, file_path, merge_sequences, remove_accents
@@ -70,6 +70,7 @@ class TestFormatLangDate(TransactionCase):
         self.assertEqual(misc.format_time(self.env, False, time_format=t_medium), '')
         self.assertEqual(misc.format_time(self.env, None, time_format=t_medium), '')
 
+    @freeze_time('2017-01-31')
     def test_01_code_and_format(self):
         date_str = '2017-01-31'
         lang = self.env['res.lang']
@@ -348,6 +349,35 @@ class TestDictTools(BaseCase):
             d.update({'baz': 'xyz'})
         with self.assertRaises(TypeError):
             dict.update(d, {'baz': 'xyz'})
+
+
+@tagged('at_install', '-post_install')  # LEGACY at_install
+class TestDiffTools(BaseCase):
+    def test_diff_zip(self):
+        self.assertEqual(
+            list(misc.diff_zip(['a', 'b', 'c'], ['a', 'b', 'c'])),
+            [('a', 'a'), ('b', 'b'), ('c', 'c')],
+        )
+        self.assertEqual(
+            list(misc.diff_zip(['a', 'b', 'x', 'c'], ['a', 'b', 'c'])),
+            [('a', 'a'), ('b', 'b'), ('x', None), ('c', 'c')],
+        )
+        self.assertEqual(
+            list(misc.diff_zip(['a', 'b', 'c'], ['a', 'x', 'b', 'c'])),
+            [('a', 'a'), (None, 'x'), ('b', 'b'), ('c', 'c')],
+        )
+        self.assertEqual(
+            list(misc.diff_zip(['a', 'b', 'c'], ['x', 'y', 'z', 'c'])),
+            [('a', None), ('b', None), (None, 'x'), (None, 'y'), (None, 'z'), ('c', 'c')],
+        )
+        self.assertEqual(
+            list(misc.diff_zip(['w', 'a', 'x', 'b', 'c', 'z'], ['a', 'b', 'y', 'c'])),
+            [('w', None), ('a', 'a'), ('x', None), ('b', 'b'), (None, 'y'), ('c', 'c'), ('z', None)],
+        )
+        self.assertEqual(
+            list(misc.diff_zip(['a', 'b', 'y', 'c'], ['w', 'a', 'x', 'b', 'c', 'z'])),
+            [(None, 'w'), ('a', 'a'), (None, 'x'), ('b', 'b'), ('y', None), ('c', 'c'), (None, 'z')],
+        )
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install

@@ -119,7 +119,7 @@ export class BlockTab extends Component {
                 });
 
                 if (snippetEl) {
-                    await scrollTo(snippetEl, { extraOffset: 50 });
+                    await this.scrollToDroppedSnippet(snippetEl);
                     await this.processDroppedSnippet(snippetEl);
                 }
                 this.state.ongoingInsertion = false;
@@ -128,6 +128,7 @@ export class BlockTab extends Component {
             {
                 withLoadingEffect: false,
                 shouldInterceptClick: true,
+                canTimeout: false,
             }
         );
     }
@@ -176,7 +177,7 @@ export class BlockTab extends Component {
         });
 
         if (selectedSnippetEl) {
-            await scrollTo(selectedSnippetEl, { extraOffset: 50 });
+            await this.scrollToDroppedSnippet(selectedSnippetEl);
             await this.processDroppedSnippet(selectedSnippetEl);
         } else {
             this.cancelDragAndDrop();
@@ -258,6 +259,7 @@ export class BlockTab extends Component {
                 );
                 this.shared.operation.next(async () => await dragAndDropProm, {
                     withLoadingEffect: false,
+                    canTimeout: false,
                 });
                 const restoreDragSavePoint = this.shared.history.makeSavePoint();
                 this.cancelDragAndDrop = () => {
@@ -466,6 +468,7 @@ export class BlockTab extends Component {
                             {
                                 withLoadingEffect: false,
                                 shouldInterceptClick: true,
+                                canTimeout: false,
                             }
                         );
                     }
@@ -483,6 +486,18 @@ export class BlockTab extends Component {
     }
 
     /**
+     * Scroll to the dropped snippet and leave a space of 50px above to show
+     * what is above. If the snippet takes 100% of the screen height, we show it
+     * by not having an extra offset above it.
+     *
+     * @param {HTMLElement} snippetEl
+     */
+    async scrollToDroppedSnippet(snippetEl) {
+        const isFullScreenHeight = snippetEl.matches(".o_full_screen_height");
+        await scrollTo(snippetEl, { extraOffset: isFullScreenHeight ? 0 : 50 });
+    }
+
+    /**
      *
      * @param {HTMLElement} snippetEl
      */
@@ -495,6 +510,15 @@ export class BlockTab extends Component {
             if (cancel) {
                 this.cancelDragAndDrop();
                 return;
+            }
+            // Update `snippetEl` (and `draggedEl` of `dragState`) if it was
+            // replaced in the handler.
+            if (this.dragState.replacedSnippetEl) {
+                if (this.dragState.draggedEl === snippetEl) {
+                    this.dragState.draggedEl = this.dragState.replacedSnippetEl;
+                }
+                snippetEl = this.dragState.replacedSnippetEl;
+                delete this.dragState.replacedSnippetEl;
             }
         }
         this.env.editor.config.updateInvisibleElementsPanel();

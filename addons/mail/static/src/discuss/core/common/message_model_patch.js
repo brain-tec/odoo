@@ -25,14 +25,6 @@ const messagePatch = {
                 return this.channel_id?.self_member_id?.new_message_separator === this.id;
             },
         });
-        this.hasSomeoneFetched = fields.Attr(false, {
-            /** @this {import("models").Message} */
-            compute() {
-                return this.thread?.channel?.channel_member_ids.some(
-                    (m) => m.persona.notEq(this.author) && m.fetched_message_id?.id >= this.id
-                );
-            },
-        });
         this.hasSomeoneSeen = fields.Attr(false, {
             /** @this {import("models").Message} */
             compute() {
@@ -60,25 +52,16 @@ const messagePatch = {
         );
     },
     /**
-     * @override
-     */
-    async edit(
-        body,
-        attachments = [],
-        { mentionedChannels = [], mentionedPartners = [], mentionedRoles = [] } = {}
-    ) {
-        return await super.edit(body, attachments, {
-            mentionedChannels,
-            mentionedPartners,
-            mentionedRoles,
-        });
-    },
-    /**
      * @param {Thread} thread the thread being viewed
      * @returns {boolean}
      */
     showSeenIndicator(thread) {
-        return this.isSelfAuthored && thread?.channel?.hasSeenFeature;
+        return (
+            this.isSelfAuthored &&
+            thread?.channel?.hasSeenFeature &&
+            !this.isMessagePreviousToLastSelfMessageSeenByEveryone &&
+            this.hasSomeoneSeen
+        );
     },
 };
 patch(Message.prototype, messagePatch);

@@ -9,26 +9,21 @@ from odoo.tests.common import new_test_user
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestWarehouse(TestStockCommon):
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.partner = cls.env['res.partner'].create({'name': 'Deco Addict'})
-
     def test_inventory_product(self):
         self.product_1.is_storable = True
+
         product_1_quant = self.env['stock.quant'].with_context(inventory_mode=True).create({
             'product_id': self.product_1.id,
             'inventory_quantity': 50.0,
             'location_id': self.warehouse_1.lot_stock_id.id,
         })
         product_1_quant.action_apply_inventory()
-
         # Make sure the inventory was successful
         move_in_id = self.env['stock.move'].search([('is_inventory', '=', True), ('product_id', '=', self.product_1.id)])
         self.assertEqual(len(move_in_id), 1)
         self.assertEqual(move_in_id.product_qty, 50.0)
         self.assertEqual(product_1_quant.quantity, 50.0)
-        self.assertEqual(move_in_id.product_uom, self.product_1.uom_id)
+        self.assertEqual(move_in_id.uom_id, self.product_1.uom_id)
         self.assertEqual(move_in_id.state, 'done')
 
         # Update the inventory, set to 35
@@ -81,7 +76,7 @@ class TestWarehouse(TestStockCommon):
         product = self.product_3.with_user(self.user_stock_manager)
         product.is_storable = True
         picking_out = self.env['stock.picking'].create({
-            'partner_id': self.partner.id,
+            'partner_id': self.partner_1.id,
             'picking_type_id': self.picking_type_out.id,
             'location_id': self.warehouse_1.lot_stock_id.id,
             'location_dest_id': self.customer_location.id,
@@ -89,14 +84,14 @@ class TestWarehouse(TestStockCommon):
         customer_move = self.env['stock.move'].create({
             'product_id': product.id,
             'product_uom_qty': 5,
-            'product_uom': product.uom_id.id,
+            'uom_id': product.uom_id.id,
             'picking_id': picking_out.id,
             'location_id': self.warehouse_1.lot_stock_id.id,
             'location_dest_id': self.customer_location.id,
         })
         # simulate create + onchange
         # test move values
-        self.assertEqual(customer_move.product_uom, product.uom_id)
+        self.assertEqual(customer_move.uom_id, product.uom_id)
         self.assertEqual(customer_move.location_id, self.warehouse_1.lot_stock_id)
         self.assertEqual(customer_move.location_dest_id, self.customer_location)
 
@@ -142,7 +137,7 @@ class TestWarehouse(TestStockCommon):
 
         # Create a picking out and force availability
         picking_out = self.env['stock.picking'].create({
-            'partner_id': self.partner.id,
+            'partner_id': self.partner_1.id,
             'picking_type_id': self.picking_type_out.id,
             'location_id': self.stock_location.id,
             'location_dest_id': self.customer_location.id,
@@ -150,7 +145,7 @@ class TestWarehouse(TestStockCommon):
         self.env['stock.move'].create({
             'product_id': productA.id,
             'product_uom_qty': 1,
-            'product_uom': productA.uom_id.id,
+            'uom_id': productA.uom_id.id,
             'picking_id': picking_out.id,
             'location_id': self.stock_location.id,
             'location_dest_id': self.customer_location.id,
@@ -184,7 +179,7 @@ class TestWarehouse(TestStockCommon):
 
         # Create a picking out and force availability
         picking_out = self.env['stock.picking'].create({
-            'partner_id': self.partner.id,
+            'partner_id': self.partner_1.id,
             'picking_type_id': self.picking_type_out.id,
             'location_id': self.stock_location.id,
             'location_dest_id': self.customer_location.id,
@@ -192,7 +187,7 @@ class TestWarehouse(TestStockCommon):
         self.env['stock.move'].create({
             'product_id': productA.id,
             'product_uom_qty': 1,
-            'product_uom': productA.uom_id.id,
+            'uom_id': productA.uom_id.id,
             'picking_id': picking_out.id,
             'location_id': self.stock_location.id,
             'location_dest_id': self.customer_location.id,
@@ -271,7 +266,7 @@ class TestWarehouse(TestStockCommon):
         })
 
         picking_out = self.env['stock.picking'].create({
-            'partner_id': self.partner.id,
+            'partner_id': self.partner_1.id,
             'picking_type_id': self.picking_type_out.id,
             'location_id': warehouse_shop.lot_stock_id.id,
             'location_dest_id': self.customer_location.id,
@@ -279,7 +274,7 @@ class TestWarehouse(TestStockCommon):
         self.env['stock.move'].create({
             'product_id': product.id,
             'product_uom_qty': 1,
-            'product_uom': product.uom_id.id,
+            'uom_id': product.uom_id.id,
             'picking_id': picking_out.id,
             'location_id': warehouse_shop.lot_stock_id.id,
             'location_dest_id': self.customer_location.id,
@@ -357,7 +352,7 @@ class TestWarehouse(TestStockCommon):
         # Create the move for the shop Namur. Should create a resupply from
         # distribution warehouse Namur.
         picking_out_namur = self.env['stock.picking'].create({
-            'partner_id': self.partner.id,
+            'partner_id': self.partner_1.id,
             'picking_type_id': self.picking_type_out.id,
             'location_id': warehouse_shop_namur.lot_stock_id.id,
             'location_dest_id': customer_location.id,
@@ -366,7 +361,7 @@ class TestWarehouse(TestStockCommon):
         self.env['stock.move'].create({
             'product_id': product.id,
             'product_uom_qty': 1,
-            'product_uom': product.uom_id.id,
+            'uom_id': product.uom_id.id,
             'picking_id': picking_out_namur.id,
             'location_id': warehouse_shop_namur.lot_stock_id.id,
             'location_dest_id': customer_location.id,
@@ -404,7 +399,7 @@ class TestWarehouse(TestStockCommon):
         # Create the move for the shop Wavre. Should create a resupply from
         # distribution warehouse Wavre.
         picking_out_wavre = self.env['stock.picking'].create({
-            'partner_id': self.partner.id,
+            'partner_id': self.partner_1.id,
             'picking_type_id': self.picking_type_out.id,
             'location_id': warehouse_shop_wavre.lot_stock_id.id,
             'location_dest_id': customer_location.id,
@@ -413,7 +408,7 @@ class TestWarehouse(TestStockCommon):
         self.env['stock.move'].create({
             'product_id': product.id,
             'product_uom_qty': 1,
-            'product_uom': product.uom_id.id,
+            'uom_id': product.uom_id.id,
             'picking_id': picking_out_wavre.id,
             'location_id': warehouse_shop_wavre.lot_stock_id.id,
             'location_dest_id': customer_location.id,
@@ -810,7 +805,7 @@ class TestWarehouse(TestStockCommon):
             'delivery_steps': 'pick_pack_ship'
         })
         picking_out = self.env['stock.picking'].create({
-            'partner_id': self.partner.id,
+            'partner_id': self.partner_1.id,
             'picking_type_id': warehouse_A.pick_type_id.id,
             'location_id': warehouse_A.lot_stock_id.id,
             'location_dest_id': self.customer_location.id,
@@ -818,7 +813,7 @@ class TestWarehouse(TestStockCommon):
         customer_move = self.env['stock.move'].create({
             'product_id': self.product.id,
             'product_uom_qty': 1,
-            'product_uom': self.product.uom_id.id,
+            'uom_id': self.product.uom_id.id,
             'picking_id': picking_out.id,
             'location_id': warehouse_A.lot_stock_id.id,
             'location_dest_id': self.customer_location.id,
@@ -855,8 +850,8 @@ class TestWarehouse(TestStockCommon):
         warehouse = warehouses[0]
         warehouse.delivery_steps = 'pick_ship'
         user = new_test_user(self.env, login='bub', groups='stock.group_stock_user', company_id=companies.ids[1], company_ids=[Command.set(companies.ids)])
-        pick = self.env['stock.picking'].with_user(user).create({
-            'partner_id': self.partner.id,
+        pick = self.env['stock.picking'].with_context(allowed_company_ids=companies.ids).with_user(user).create({
+            'partner_id': self.partner_1.id,
             'picking_type_id': warehouse.pick_type_id.id,
             'location_id': warehouse.lot_stock_id.id,
             'location_dest_id': warehouse.wh_output_stock_loc_id.id,
@@ -864,7 +859,7 @@ class TestWarehouse(TestStockCommon):
             'move_ids': [Command.create({
                 'product_id': self.product.id,
                 'product_uom_qty': 1,
-                'product_uom': self.product.uom_id.id,
+                'uom_id': self.product.uom_id.id,
                 'company_id': companies.ids[0],
                 'location_id': warehouse.lot_stock_id.id,
                 'location_dest_id': warehouse.wh_output_stock_loc_id.id,

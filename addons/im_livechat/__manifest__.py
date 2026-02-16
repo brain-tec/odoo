@@ -22,6 +22,7 @@ Help your customers with this chat, and analyse their feedback.
         "data/im_livechat_channel_data.xml",
         "data/im_livechat_chatbot_data.xml",
         'data/digest_data.xml',
+        'data/utm_data.xml',
         'views/chatbot_script_answer_views.xml',
         'views/chatbot_script_step_views.xml',
         'views/chatbot_script_views.xml',
@@ -69,7 +70,7 @@ Help your customers with this chat, and analyse their feedback.
         "demo/im_livechat_channel/im_livechat_support_bot_session_6.xml",
         "demo/im_livechat_channel/im_livechat_support_bot_session_7.xml",
     ],
-    'depends': ["mail", "rating", "digest", "utm"],
+    'depends': ["mail", "rating", "digest", "utm", "phone_validation"],
     'application': True,
     'assets': {
         'web.assets_frontend': [
@@ -81,7 +82,6 @@ Help your customers with this chat, and analyse their feedback.
         'web.assets_backend': [
             'im_livechat/static/src/js/colors_reset_button/*',
             'im_livechat/static/src/js/im_livechat_chatbot_steps_one2many.js',
-            'im_livechat/static/src/js/im_livechat_chatbot_script_answers_m2m.js',
             'im_livechat/static/src/views/**/*',
             ('remove', 'im_livechat/static/src/views/lazy/**/*'),
             'im_livechat/static/src/scss/im_livechat_history.scss',
@@ -183,6 +183,10 @@ Help your customers with this chat, and analyse their feedback.
         "mail.assets_public": [
             "im_livechat/static/src/core/common/**/*",
             "im_livechat/static/src/core/public_web/**/*",
+        ],
+        "portal.assets_chatter_helpers": [
+            "im_livechat/static/src/core/common/**/*",
+            ("remove", "im_livechat/static/src/core/common/**/*.scss"),
         ],
     },
     'author': 'Odoo S.A.',

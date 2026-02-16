@@ -39,8 +39,10 @@ class ThreadController(http.Controller):
         behavior is to rely on _mail_post_access but it might be customized.
         See '_mail_get_operation_for_mail_message_operation'. """
         thread_su = request.env[thread_model].sudo().browse(int(thread_id))
-        access_mode = thread_su._mail_get_operation_for_mail_message_operation('create')[thread_su]
-        if not access_mode:
+        for document_domain, access_mode in thread_su._mail_get_operation_for_mail_message_operation('create'):
+            if thread_su.filtered_domain(document_domain):
+                break
+        else:
             return request.env[thread_model]  # match _get_thread_with_access void result
         return cls._get_thread_with_access(thread_model, thread_id, mode=access_mode, **kwargs)
 
@@ -57,16 +59,6 @@ class ThreadController(http.Controller):
 
     # main routes
     # ------------------------------------------------------------
-
-    @http.route("/mail/thread/messages", methods=["POST"], type="jsonrpc", auth="user")
-    def mail_thread_messages(self, thread_model, thread_id, fetch_params=None):
-        thread = self._get_thread_with_access(thread_model, thread_id, mode="read")
-        res = request.env["mail.message"]._message_fetch(domain=None, thread=thread, **(fetch_params or {}))
-        messages = res.pop("messages")
-        if not request.env.user._is_public():
-            messages.set_message_done()
-        store = Store().add(messages, "_store_message_fields")
-        return {**res, "data": store.get_result(), "messages": messages.ids}
 
     @http.route("/mail/thread/recipients", methods=["POST"], type="jsonrpc", auth="user")
     def mail_thread_recipients(self, thread_model, thread_id, message_id=None):
@@ -184,6 +176,7 @@ class ThreadController(http.Controller):
                     )
                 ),
             ).ids
+        res.setdefault("message_type", "comment")
         return res
 
     @http.route("/mail/message/post", methods=["POST"], type="jsonrpc", auth="public")

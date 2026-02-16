@@ -28,9 +28,11 @@ registry.category("web_tour.tours").add("PosLoyaltyLoyaltyProgram1", {
             ProductScreen.clickDisplayedProduct("Whiteboard Pen", true, "1"),
             ProductScreen.clickDisplayedProduct("Whiteboard Pen", true, "2"),
             // At this point, AAA Test Partner has 4 points.
+            PosLoyalty.isMoreControlButtonActive(true),
             PosLoyalty.isRewardButtonHighlighted(true),
             ProductScreen.clickDisplayedProduct("Whiteboard Pen", true, "3"),
             PosLoyalty.hasRewardLine("Free Product - Whiteboard Pen", "-3.20", "1"),
+            PosLoyalty.isMoreControlButtonActive(false),
             PosLoyalty.isRewardButtonHighlighted(false),
             PosLoyalty.orderTotalIs("6.40"),
             PosLoyalty.finalizeOrder("Cash", "10"),
@@ -53,12 +55,12 @@ registry.category("web_tour.tours").add("PosLoyaltyLoyaltyProgram1", {
             // because there is not enough points to purchase it. Unfortunately, we
             // can't check that here.
             PosLoyalty.orderTotalIs("0.00"),
-            ProductScreen.clickDisplayedProduct("Whiteboard Pen", true, "1"),
-            ProductScreen.clickDisplayedProduct("Whiteboard Pen", true, "2"),
-            ProductScreen.clickDisplayedProduct("Whiteboard Pen", true, "3"),
-            ProductScreen.clickDisplayedProduct("Whiteboard Pen"),
+            ProductScreen.clickDisplayedProduct("Whiteboard Pen", true, "1.00"),
+            ProductScreen.clickDisplayedProduct("Whiteboard Pen", true, "2.00"),
+            ProductScreen.clickDisplayedProduct("Whiteboard Pen", true, "3.00"),
             PosLoyalty.isRewardButtonHighlighted(false),
-            ProductScreen.selectedOrderlineHas("Whiteboard Pen", "4"),
+            ProductScreen.clickDisplayedProduct("Whiteboard Pen"),
+            ProductScreen.selectedOrderlineHas("Whiteboard Pen", "4.00"),
             PosLoyalty.isRewardButtonHighlighted(true),
 
             PosLoyalty.orderTotalIs("12.80"),
@@ -67,6 +69,7 @@ registry.category("web_tour.tours").add("PosLoyaltyLoyaltyProgram1", {
 });
 
 registry.category("web_tour.tours").add("PosLoyaltyLoyaltyProgram2", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             // Order1: Immediately set the customer to Test Partner AAA which has 4 points.
@@ -136,6 +139,7 @@ registry.category("web_tour.tours").add("PosLoyaltyLoyaltyProgram2", {
 });
 
 registry.category("web_tour.tours").add("PosLoyaltyChangeRewardQty", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -276,7 +280,7 @@ registry.category("web_tour.tours").add("test_not_create_loyalty_card_expired_pr
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Test Partner"),
+            ProductScreen.clickCustomer("Test Partner", true),
             ProductScreen.addOrderline("Desk Organizer", "3"),
             PosLoyalty.finalizeOrder("Cash", "15.3"),
         ].flat(),
@@ -288,7 +292,7 @@ registry.category("web_tour.tours").add("PosOrderClaimReward", {
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Test Partner"),
+            ProductScreen.clickCustomer("Test Partner", true),
             ProductScreen.addOrderline("Desk Organizer", "3"),
             PosLoyalty.isPointsDisplayed(true),
             PosLoyalty.claimReward("Free Product - Whiteboard Pen"),
@@ -302,7 +306,7 @@ registry.category("web_tour.tours").add("PosOrderNoPoints", {
         [
             Chrome.startPoS(),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Test Partner 2"),
+            ProductScreen.clickCustomer("Test Partner 2", true),
             ProductScreen.addOrderline("Desk Organizer", "3"),
             PosLoyalty.isPointsDisplayed(false),
             PosLoyalty.finalizeOrder("Cash", "15.3"),

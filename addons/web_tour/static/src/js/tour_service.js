@@ -43,9 +43,13 @@ const stepSchema = {
     },
     trigger: { type: String },
     expectUnloadPage: { type: Boolean, optional: true },
-    //ONLY IN DEBUG MODE
+};
+
+const stepSchemaDebug = {
+    ...stepSchema,
     pause: { type: Boolean, optional: true },
     break: { type: Boolean, optional: true },
+    observe: { type: Boolean, optional: true },
 };
 
 const tourSchema = {
@@ -53,6 +57,7 @@ const tourSchema = {
     steps: Function,
     url: { type: String, optional: true },
     wait_for: { type: [Function, Object], optional: true },
+    undeterministicTour_doNotCopy: { type: Boolean, optional: true },
 };
 
 const tourRegistry = registry.category("web_tour.tours");
@@ -270,7 +275,7 @@ export class TourService {
      * @param {boolean} [options.fromDB=false] - Whether the tour should be loaded from the database.
      * @param {string} [options.url] - URL to start the tour.
      * @param {"auto"|"manual"} [options.mode="auto"] - Tour start mode ("auto" or "manual").
-     * @param {number} [options.delayToCheckUndeterminisms=0] - Delay to check for indeterminisms in steps.
+     * @param {number} [options.observeDelay=3000] - Delay to check for indeterminisms in steps.
      * @param {number} [options.stepDelay=0] - Delay between each tour step.
      * @param {boolean} [options.keepWatchBrowser=false] - Whether to keep watching the browser continuously.
      * @param {number} [options.showPointerDuration=0] - Duration to show the pointer on each step.
@@ -291,13 +296,14 @@ export class TourService {
         }
 
         const tourConfig = {
-            delayToCheckUndeterminisms: 0,
             stepDelay: 0,
             keepWatchBrowser: false,
             mode: "auto",
             showPointerDuration: 0,
             debug: false,
             redirect: true,
+            observeDelay: 3000,
+            allowDelayToRemove: tour.undeterministicTour_doNotCopy,
             ...options,
         };
 
@@ -324,8 +330,9 @@ export class TourService {
      * @param {Object} step - The step object to validate.
      */
     validateStep(step) {
+        const tourConfig = tourState.getCurrentConfig();
         try {
-            validate(step, stepSchema);
+            validate(step, tourConfig.debug ? stepSchemaDebug : stepSchema);
         } catch (error) {
             console.error(
                 `Error in schema for TourStep ${JSON.stringify(step, null, 4)}\n${error.message}`

@@ -10,7 +10,6 @@ from functools import partial
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command, Domain
-from odoo.tools import float_is_zero
 from odoo.tools.misc import split_every
 
 _logger = logging.getLogger(__name__)
@@ -31,7 +30,7 @@ class ProcurementException(Exception):
 class Procurement(NamedTuple):
     product_id: fields.Many2one
     product_qty: fields.Float
-    product_uom: fields.Many2one
+    uom_id: fields.Many2one
     location_id: fields.Many2one
     name: fields.Char
     origin: fields.Char
@@ -257,9 +256,12 @@ class StockRule(models.Model):
         company_id = self.company_id.id
         copied_quantity = move_to_copy.quantity
         final_location_id = False
+        location_dest_id = self.location_dest_id.id
         if move_to_copy.location_final_id and not move_to_copy.location_dest_id._child_of(move_to_copy.location_final_id):
             final_location_id = move_to_copy.location_final_id.id
-        if move_to_copy.product_uom.compare(move_to_copy.product_uom_qty, 0) < 0:
+        if move_to_copy.location_final_id and move_to_copy.location_final_id._child_of(self.location_dest_id):
+            location_dest_id = move_to_copy.location_final_id.id
+        if move_to_copy.uom_id.compare(move_to_copy.product_uom_qty, 0) < 0:
             copied_quantity = move_to_copy.product_uom_qty
         if not company_id:
             company_id = self.sudo().warehouse_id and self.sudo().warehouse_id.company_id.id or self.sudo().picking_type_id.warehouse_id.company_id.id
@@ -267,7 +269,7 @@ class StockRule(models.Model):
             'product_uom_qty': copied_quantity,
             'origin': move_to_copy.origin or move_to_copy.picking_id.name or "/",
             'location_id': move_to_copy.location_dest_id.id,
-            'location_dest_id': self.location_dest_id.id,
+            'location_dest_id': location_dest_id,
             'location_final_id': final_location_id,
             'rule_id': self.id,
             'date': new_date,
@@ -295,7 +297,7 @@ class StockRule(models.Model):
                 raise ProcurementException([(procurement, msg)])
 
         # Prepare the move values, adapt the `procure_method` if needed.
-        procurements = sorted(procurements, key=lambda proc: proc[0].product_uom.compare(proc[0].product_qty, 0.0) > 0)
+        procurements = sorted(procurements, key=lambda proc: proc[0].uom_id.compare(proc[0].product_qty, 0.0) > 0)
         for procurement, rule in procurements:
             procure_method = rule.procure_method
             if rule.procure_method == 'mts_else_mto':
@@ -318,7 +320,7 @@ class StockRule(models.Model):
         """
         return []
 
-    def _get_stock_move_values(self, product_id, product_qty, product_uom, location_dest_id, name, origin, company_id, values):
+    def _get_stock_move_values(self, product_id, product_qty, uom_id, location_dest_id, name, origin, company_id, values):
         ''' Returns a dictionary of values that will be used to create a stock move from a procurement.
         This function assumes that the given procurement has a rule (action == 'pull' or 'pull_push') set on it.
 
@@ -329,7 +331,7 @@ class StockRule(models.Model):
             fields.Datetime.from_string(values['date_planned']) - relativedelta(days=self.delay or 0)
         )
         date_deadline = values.get('date_deadline') and (fields.Datetime.to_datetime(values['date_deadline']) - relativedelta(days=self.delay or 0)) or False
-        partner = self.partner_address_id or values.get('partner', False)
+        partner = self.partner_address_id.id or values.get('partner_id', False)
         # it is possible that we've already got some move done, so check for the done qty and create
         # a new move with the correct qty
         qty_left = product_qty
@@ -342,19 +344,19 @@ class StockRule(models.Model):
             if location_dest_id == company_id.internal_transit_location_id:
                 partners = move_dest.location_dest_id.warehouse_id.partner_id
                 if len(partners) == 1:
-                    partner = partners
+                    partner = partners.id
                 move_dest.partner_id = self.location_src_id.warehouse_id.partner_id or self.company_id.partner_id
 
         # If the quantity is negative the move should be considered as a refund
-        if product_uom.compare(product_qty, 0.0) < 0:
+        if uom_id.compare(product_qty, 0.0) < 0:
             values['to_refund'] = True
 
         move_values = {
             'company_id': self.company_id.id or self.location_src_id.company_id.id or self.location_dest_id.company_id.id or company_id.id,
             'product_id': product_id.id,
-            'product_uom': product_uom.id,
+            'uom_id': uom_id.id,
             'product_uom_qty': qty_left,
-            'partner_id': partner.id if partner else False,
+            'partner_id': partner,
             'location_id': self.location_src_id.id,
             'location_final_id': location_dest_id.id,
             'move_dest_ids': move_dest_ids,
@@ -440,9 +442,7 @@ class StockRule(models.Model):
 
     @api.model
     def _skip_procurement(self, procurement):
-        return procurement.product_id.type != "consu" or float_is_zero(
-            procurement.product_qty, precision_rounding=procurement.product_uom.rounding
-        )
+        return procurement.product_id.type != "consu" or procurement.uom_id.is_zero(procurement.product_qty)
 
     @api.model
     def run(self, procurements, raise_user_error=True):

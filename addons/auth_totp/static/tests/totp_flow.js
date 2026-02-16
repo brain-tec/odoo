@@ -4,20 +4,6 @@ import { registry } from "@web/core/registry";
 import { stepUtils } from "@web_tour/tour_utils";
 import { whenReady } from "@odoo/owl";
 
-function openRoot() {
-    return [{
-        content: "return to client root to avoid race condition",
-        trigger: 'body',
-        run() {
-            document.querySelector("body").classList.add("wait");
-            window.location = '/odoo';
-        },
-        expectUnloadPage: true,
-    }, {
-        content: "wait for client reload",
-        trigger: 'body:not(.wait)',
-    }];
-}
 function openUserPreferencesAtSecurityTab() {
     return [{
         content: 'Open user account menu',
@@ -29,10 +15,10 @@ function openUserPreferencesAtSecurityTab() {
         run: 'click',
     }, {
         content: "wait for security tab",
-        trigger: 'a[role=tab]:contains("Security")',
+        trigger: 'button[role=tab]:contains("Security")',
     }, {
         content: "Switch to security tab",
-        trigger: 'a[role=tab]:contains("Security")',
+        trigger: 'button[role=tab]:contains("Security")',
         run: 'click',
     }];
 }
@@ -55,7 +41,7 @@ function closePreferencesDialog({content, totp_state}) {
 
     return [{
         content,
-        trigger: 'a[role=tab]:contains("Security").active',
+        trigger: 'button[role=tab]:contains("Security").active',
     }, 
     {
         trigger,
@@ -72,12 +58,12 @@ function closePreferencesDialog({content, totp_state}) {
 }
 
 registry.category("web_tour.tours").add('totp_tour_setup', {
-    url: '/odoo',
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps ) #245680
     steps: () => [
 ...openUserPreferencesAtSecurityTab(),
 {
     content: "Open totp wizard",
-    trigger: 'a[role=tab]:contains("Security").active',
+    trigger: 'button[role=tab]:contains("Security").active',
 },
 {
     trigger: "button[name=action_totp_enable_wizard]",
@@ -121,8 +107,11 @@ registry.category("web_tour.tours").add('totp_tour_setup', {
 },
 {
     trigger: ".o_notification_content:contains(2-Factor authentication is now enabled)",
+    run() {
+        window.location = '/odoo';
+    },
+    expectUnloadPage: true,
 },
-...openRoot(),
 ...openUserPreferencesAtSecurityTab(),
 ...closePreferencesDialog({
     content: "Check that the button has changed",
@@ -131,6 +120,7 @@ registry.category("web_tour.tours").add('totp_tour_setup', {
 ]});
 
 registry.category("web_tour.tours").add('totp_login_enabled', {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     url: '/',
     steps: () => [{
     content: "check that we're on the login page or go to it",
@@ -203,6 +193,7 @@ registry.category("web_tour.tours").add('totp_login_enabled', {
 }]});
 
 registry.category("web_tour.tours").add('totp_login_device', {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     url: '/',
     steps: () => [{
     content: "check that we're on the login page or go to it",
@@ -298,7 +289,7 @@ registry.category("web_tour.tours").add('totp_login_device', {
 ...openUserPreferencesAtSecurityTab(),
 {
     content: "Open totp wizard",
-    trigger: 'a[role=tab]:contains("Security").active',
+    trigger: 'button[role=tab]:contains("Security").active',
 },
 {
     trigger: "button[name=action_totp_disable]",
@@ -318,8 +309,11 @@ registry.category("web_tour.tours").add('totp_login_device', {
 },
 {
     trigger:".o_notification_content:contains(Two-factor authentication disabled)",
+    run() {
+        window.location = '/odoo';
+    },
+    expectUnloadPage: true,
 },
-...openRoot(),
 ...openUserPreferencesAtSecurityTab(),
 ...closePreferencesDialog({
     content: "Check that the button has changed",
@@ -328,7 +322,6 @@ registry.category("web_tour.tours").add('totp_login_device', {
 ]});
 
 registry.category("web_tour.tours").add('totp_login_disabled', {
-    url: '/',
     steps: () => [{
     content: "check that we're on the login page or go to it",
     isActive: ["body:not(:has(input#login))"],
@@ -412,10 +405,10 @@ registry.category("web_tour.tours").add('totp_admin_disables', {
     run: "click",
 }, {
     content: "wait for Security Tab to appear",
-    trigger: "a.nav-link:contains(Security)",
+    trigger: "button.nav-link:contains(Security)",
 },{
     content: "go to Security Tab",
-    trigger: "a.nav-link:contains(Security)",
+    trigger: "button.nav-link:contains(Security)",
     run: "click",
 }, {
     content: "check 2FA button: should be disabled",

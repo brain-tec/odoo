@@ -19,6 +19,7 @@ export class ResPartner extends webModels.ResPartner {
         string: "Main attachment",
     });
     is_in_call = fields.Boolean({ compute: "_compute_is_in_call" });
+    tz = fields.Char();
 
     _views = {
         form: /* xml */ `
@@ -196,7 +197,7 @@ export class ResPartner extends webModels.ResPartner {
             return "bot";
         }
         if (!partner.user_ids.length) {
-            return "im_status";
+            return "im_partner";
         }
         return "offline";
     }
@@ -270,6 +271,7 @@ export class ResPartner extends webModels.ResPartner {
                         "display_name",
                         "is_admin",
                         "notification_type",
+                        "signature",
                         "user",
                     ].includes(field)
             )
@@ -286,10 +288,6 @@ export class ResPartner extends webModels.ResPartner {
             }
             if (fields.includes("display_name")) {
                 data.displayName = partner.display_name || partner.name;
-            }
-            if (fields.includes("im_status")) {
-                data.im_status = this.compute_im_status(partner);
-                data.im_status_access_token = partner.id;
             }
             if (fields.includes("user")) {
                 data.main_user_id = partner.main_user_id;
@@ -311,6 +309,12 @@ export class ResPartner extends webModels.ResPartner {
                         makeKwArgs({ fields: ["notification_type"] })
                     );
                 }
+                if (partner.main_user_id && fields.includes("signature")) {
+                    store._add_record_fields(
+                        ResUsers.browse(partner.main_user_id),
+                        makeKwArgs({ fields: ["signature"] })
+                    );
+                }
             }
             if (Object.keys(data).length) {
                 store._add_record_fields(this.browse(partner.id), data);
@@ -324,9 +328,9 @@ export class ResPartner extends webModels.ResPartner {
             "name",
             "email",
             "active",
-            "im_status",
             "is_company",
             mailDataHelpers.Store.one("main_user_id", ["share"]),
+            ...this._get_store_im_status_fields(),
         ];
     }
 
@@ -445,6 +449,20 @@ export class ResPartner extends webModels.ResPartner {
     }
 
     _get_store_avatar_card_fields() {
-        return ["email", "partner_share", "name", "phone"];
+        return [
+            "email",
+            "partner_share",
+            "name",
+            "phone",
+            "tz",
+            ...this._get_store_im_status_fields(),
+        ];
+    }
+
+    _get_store_im_status_fields() {
+        return [
+            mailDataHelpers.Store.attr("im_status", (p) => this.compute_im_status(p)),
+            mailDataHelpers.Store.attr("im_status_access_token", (p) => p.id),
+        ];
     }
 }

@@ -134,7 +134,8 @@ class MrpWorkcenter(models.Model):
     def _get_workcenter_load_per_week(self, week_range, date_start, date_stop):
         load_data = {rec: {} for rec in self}
         # demo data
-        if not self.order_ids:
+        has_workorder = self.env['mrp.workorder'].search_count([('workcenter_id', 'in', self.ids)], limit=1)
+        if not has_workorder:
             for wc in self:
                 load_limit = 40     # default max load per week is 40 hours on a new workcenter
                 load_data[wc] = {week_start: randint(0, int(load_limit * 2)) for week_start in week_range}
@@ -151,9 +152,10 @@ class MrpWorkcenter(models.Model):
 
     def _prepare_graph_data(self, load_data, week_range):
         graph_data = {wid: [] for wid in self._ids}
+        has_workorder = self.env['mrp.workorder'].search_count([('workcenter_id', 'in', self.ids)], limit=1)
         for workcenter in self:
             load_limit = sum(workcenter.resource_calendar_id.attendance_ids.mapped('duration_hours'))
-            wc_data = {'is_sample_data': not self.order_ids, 'labels': list(week_range.values())}
+            wc_data = {'is_sample_data': not has_workorder, 'labels': list(week_range.values())}
             load_bar = []
             excess_bar = []
             for week_start in week_range:
@@ -350,21 +352,24 @@ class MrpWorkcenter(models.Model):
         :rtype: tuple
         """
         self.ensure_one()
+        ICP = self.env['ir.config_parameter'].sudo()
+        max_planning_iterations = max(ICP.get_int('mrp.workcenter_max_planning_iterations', 50), 1)
         resource = self.resource_id
         revert = to_timezone(start_datetime.tzinfo)
-        start_datetime = localized(start_datetime)
-        get_available_intervals = partial(self.resource_calendar_id._work_intervals_batch, resources=resource, tz=ZoneInfo(self.resource_calendar_id.tz))
-        workorder_intervals_leaves_domain = [('time_type', '=', 'other')]
+        start_datetime = start_datetime.astimezone(ZoneInfo(resource.tz or self.env.company.tz))
+        resources_per_tz = resource._get_resources_per_tz()
+        get_available_intervals = partial(self.resource_calendar_id._work_intervals_batch, resources_per_tz=resources_per_tz)
+        workorder_intervals_leaves_domain = [('count_as', '=', 'working_time')]
         if leaves_to_ignore:
             workorder_intervals_leaves_domain.append(('id', 'not in', leaves_to_ignore.ids))
-        get_workorder_intervals = partial(self.resource_calendar_id._leave_intervals_batch, domain=workorder_intervals_leaves_domain, resources=resource, tz=ZoneInfo(self.resource_calendar_id.tz))
+        get_workorder_intervals = partial(self.resource_calendar_id._leave_intervals_batch, domain=workorder_intervals_leaves_domain, resources_per_tz=resources_per_tz)
         extra_leaves_slots_intervals = Intervals([(localized(start), localized(stop), self.env['resource.calendar.attendance']) for start, stop in extra_leaves_slots])
 
         remaining = duration = max(duration, 1 / 60)
         now = localized(datetime.now())
         delta = timedelta(days=14)
         start_interval, stop_interval = None, None
-        for n in range(50):  # 50 * 14 = 700 days in advance (hardcoded)
+        for n in range(max_planning_iterations):  # 50 * 14 = 700 days in advance
             if forward:
                 date_start = start_datetime + delta * n
                 date_stop = date_start + delta
@@ -422,14 +427,14 @@ class MrpWorkcenter(models.Model):
 
     def _get_capacity(self, product, unit, default_capacity=1):
         capacity = self.capacity_ids.sorted(lambda c: (
-            not (c.product_id == product and c.product_uom_id == product.uom_id),
-            not (not c.product_id and c.product_uom_id == unit),
-            not (not c.product_id and c.product_uom_id == product.uom_id),
+            not (c.product_id == product and c.uom_id == product.uom_id),
+            not (not c.product_id and c.uom_id == unit),
+            not (not c.product_id and c.uom_id == product.uom_id),
         ))[:1]
-        if capacity and capacity.product_id in [product, self.env['product.product']] and capacity.product_uom_id in [product.uom_id, unit]:
+        if capacity and capacity.product_id in [product, self.env['product.product']] and capacity.uom_id in [product.uom_id, unit]:
             if float_is_zero(capacity.capacity, 0):
                 return (default_capacity, capacity.time_start, capacity.time_stop)
-            return (capacity.product_uom_id._compute_quantity(capacity.capacity, unit), capacity.time_start, capacity.time_stop)
+            return (capacity.uom_id._compute_quantity(capacity.capacity, unit), capacity.time_start, capacity.time_stop)
         return (default_capacity, self.time_start, self.time_stop)
 
 
@@ -621,8 +626,8 @@ class MrpWorkcenterCapacity(models.Model):
 
     workcenter_id = fields.Many2one('mrp.workcenter', string='Work Center', required=True, index=True)
     product_id = fields.Many2one('product.product', string='Product')
-    product_uom_id = fields.Many2one('uom.uom', string='Unit',
-        compute="_compute_product_uom_id", precompute=True, store=True, readonly=False, required=True)
+    uom_id = fields.Many2one('uom.uom', string='Unit',
+        compute="_compute_uom_id", precompute=True, store=True, readonly=False, required=True)
     capacity = fields.Float('Capacity', help="Number of pieces that can be produced in parallel for this product or for all, depending on the unit.")
     time_start = fields.Float('Setup Time (minutes)', default=_default_time_start, help="Time in minutes for the setup.")
     time_stop = fields.Float('Cleanup Time (minutes)', default=_default_time_stop, help="Time in minutes for the cleaning.")
@@ -632,11 +637,11 @@ class MrpWorkcenterCapacity(models.Model):
         'Capacity should be a non-negative number.',
     )
     _workcenter_product_product_uom_unique = models.UniqueIndex(
-        '(workcenter_id, COALESCE(product_id, 0), product_uom_id)',
+        '(workcenter_id, COALESCE(product_id, 0), uom_id)',
         'Product/Unit capacity should be unique for each workcenter.'
     )
 
     @api.depends('product_id')
-    def _compute_product_uom_id(self):
+    def _compute_uom_id(self):
         for capacity in self:
-            capacity.product_uom_id = capacity.product_id.uom_id or self.env.ref('uom.product_uom_unit')
+            capacity.uom_id = capacity.product_id.uom_id or self.env.ref('uom.product_uom_unit')

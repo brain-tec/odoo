@@ -1,6 +1,8 @@
 import { fields, Record } from "@mail/model/export";
 
 export class DiscussApp extends Record {
+    static singleton = true;
+
     INSPECTOR_WIDTH = 300;
     COMPACT_SIDEBAR_WIDTH = 60;
     /** @type {'notification'|'channel'|'chat'|'livechat'|'inbox'} */
@@ -18,6 +20,11 @@ export class DiscussApp extends Record {
         },
     });
     hasRestoredThread = false;
+
+    /** @param {import("@mail/core/common/action").Action} [nextActiveAction] */
+    shouldDisableMemberPanelAutoOpenFromClose(nextActiveAction) {
+        return true;
+    }
 
     _threadOnUpdate() {
         this.lastActiveId = this.store["mail.thread"].localIdToActiveId(this.thread?.localId);

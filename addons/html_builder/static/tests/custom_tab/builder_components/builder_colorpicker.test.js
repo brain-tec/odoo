@@ -2,6 +2,7 @@ import {
     addBuilderAction,
     addBuilderOption,
     setupHTMLBuilder,
+    waitForEndOfOperation,
 } from "@html_builder/../tests/helpers";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import { BaseOptionComponent } from "@html_builder/core/utils";
@@ -387,4 +388,90 @@ test("should open the last used tab", async () => {
     await animationFrame();
     await contains(".we-bg-options-container .o_we_color_preview").click();
     expect(".theme-tab.active").toHaveCount(1);
+});
+
+test("the color picker opens on click after it has been remounted", async () => {
+    addBuilderAction({
+        toggleTarget: class extends BuilderAction {
+            static id = "toggleTarget";
+            isApplied({ editingElement }) {
+                return !!editingElement.querySelector(".target");
+            }
+            apply({ editingElement }) {
+                const target = document.createElement("div");
+                target.textContent = "Target";
+                target.classList.add("target");
+                editingElement.appendChild(target);
+            }
+            clean({ editingElement }) {
+                editingElement.querySelector(".target").remove();
+            }
+        },
+    });
+    addBuilderOption(
+        class extends BaseOptionComponent {
+            static selector = ".test-options-target";
+            static template = xml`
+                <BuilderColorPicker styleAction="'background-color'" applyTo="'.target'"/>
+                <BuilderRow label="'Target'">
+                    <BuilderCheckbox action="'toggleTarget'" />
+                </BuilderRow>
+            `;
+        }
+    );
+    const { waitSidebarUpdated } = await setupHTMLBuilder(
+        `<div class="test-options-target"><div class="target">Target</div></div>`
+    );
+    await contains(":iframe .test-options-target").click();
+    expect(".o_we_color_preview").toHaveCount(1);
+    await contains(".o_we_color_preview").click();
+    await animationFrame();
+    expect(".o-hb-colorpicker-popover").toHaveCount(1);
+    await contains(".o_we_color_preview").click();
+
+    await contains("[data-action-id='toggleTarget'] input").click();
+    await waitSidebarUpdated();
+
+    expect(":iframe .target").toHaveCount(0);
+    expect(".o_we_color_preview").toHaveCount(0);
+
+    await contains("[data-action-id='toggleTarget'] input").click();
+    await waitSidebarUpdated();
+    expect(":iframe .target").toHaveCount(1);
+    expect(".o_we_color_preview").toHaveCount(1);
+
+    await contains(".o_we_color_preview").click();
+    await waitSidebarUpdated();
+    expect(".o-hb-colorpicker-popover").toHaveCount(1);
+});
+
+test("should work with force and allowImportant params", async () => {
+    addBuilderOption(
+        class extends BaseOptionComponent {
+            static selector = ".test-options-target";
+            static template = xml`<BuilderColorPicker styleAction="{ mainParam: 'color', force: true, allowImportant: false }" enabledTabs="['custom']"/>`;
+        }
+    );
+    addBuilderOption(
+        class extends BaseOptionComponent {
+            static selector = ".test-options-target";
+            static template = xml`<BuilderColorPicker styleAction="{ mainParam: 'background-color', force: true, allowImportant: true }" enabledTabs="['custom']"/>`;
+        }
+    );
+    await setupHTMLBuilder(`<div class="test-options-target">b</div>`);
+
+    await contains(":iframe .test-options-target").click();
+
+    await contains(".we-bg-options-container .o_we_color_preview:nth-child(1)").click();
+    await contains(".o_colorpicker_widget .o_hex_input").edit("#0000FF");
+    await waitForEndOfOperation();
+    expect(":iframe .test-options-target").toHaveStyle("color: rgb(0, 0, 255)", { inline: true });
+
+    await contains(".we-bg-options-container .o_we_color_preview:nth-child(2)").click();
+    await contains(".o_colorpicker_widget .o_hex_input").edit("#0000FF");
+    await waitForEndOfOperation();
+    expect(":iframe .test-options-target").toHaveStyle(
+        "background-color: rgb(0, 0, 255) !important",
+        { inline: true }
+    );
 });

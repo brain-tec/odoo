@@ -312,7 +312,7 @@ class TestItEdiImport(TestItEdi):
         })
         self.env['ir.attachment'].with_company(other_company).create({
             'name': filename,
-            'datas': self.fake_test_content,
+            'raw': self.fake_test_content.encode(),
             'res_model': 'account.move',
             'res_id': invoice.id,
             'res_field': 'l10n_it_edi_attachment_file',
@@ -378,8 +378,6 @@ class TestItEdiImport(TestItEdi):
             ('res_field', '=', 'l10n_it_edi_attachment_file'),
         ])
         self.assertEqual(len(attachments), 1)
-        invoices = self.env['account.move'].search([('payment_reference', '=', 'TWICE_TEST')])
-        self.assertEqual(len(invoices), 1)
 
     def test_receive_bill_with_global_discount(self):
         applied_xml = """

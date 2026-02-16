@@ -5,7 +5,6 @@ from odoo.tests.common import tagged
 
 import json
 
-from odoo import http
 from odoo.tools import file_open, mute_logger
 
 
@@ -42,7 +41,7 @@ class TestPortalAttachment(AccountTestInvoicingHttpCommon):
             res = self.url_open(
                 url=f"{self.invoice_base_url}/mail/attachment/upload",
                 data={
-                    "csrf_token": http.Request.csrf_token(self),
+                    "csrf_token": self.csrf_token(),
                     "thread_id": self.out_invoice.id,
                     "thread_model": self.out_invoice._name,
                 },
@@ -56,7 +55,7 @@ class TestPortalAttachment(AccountTestInvoicingHttpCommon):
             res = self.url_open(
                 url=f"{self.invoice_base_url}/mail/attachment/upload",
                 data={
-                    "csrf_token": http.Request.csrf_token(self),
+                    "csrf_token": self.csrf_token(),
                     "thread_id": self.out_invoice.id,
                     "thread_model": self.out_invoice._name,
                     "token": self.out_invoice._portal_ensure_token(),
@@ -85,7 +84,7 @@ class TestPortalAttachment(AccountTestInvoicingHttpCommon):
         res = self.url_open(
             url=f"{self.invoice_base_url}/mail/attachment/upload",
             data={
-                "csrf_token": http.Request.csrf_token(self),
+                "csrf_token": self.csrf_token(),
                 "is_pending": True,
                 "thread_id": self.out_invoice.id,
                 "thread_model": self.out_invoice._name,
@@ -166,6 +165,8 @@ class TestPortalAttachment(AccountTestInvoicingHttpCommon):
         attachment.flush_recordset()
         message = self.env['mail.message'].create({
             'attachment_ids': [(6, 0, attachment.ids)],
+            "model": "res.partner",
+            "res_id": self.partner_a.id,
         })
         res = self.url_open(
             url=f'{self.invoice_base_url}/mail/attachment/delete',
@@ -178,6 +179,7 @@ class TestPortalAttachment(AccountTestInvoicingHttpCommon):
         )
         self.assertEqual(res.status_code, 200)
         self.assertFalse(attachment.exists())
+        self.assertIn("o-mail-Message-edited", message.body)
         message.sudo().unlink()
 
         # Test attachment can't be associated if no attachment token.
@@ -284,7 +286,7 @@ class TestPortalAttachment(AccountTestInvoicingHttpCommon):
         res = self.url_open(
             url=f"{self.invoice_base_url}/mail/attachment/upload",
             data={
-                "csrf_token": http.Request.csrf_token(self),
+                "csrf_token": self.csrf_token(),
                 "is_pending": True,
                 "thread_id": self.out_invoice.id,
                 "thread_model": self.out_invoice._name,

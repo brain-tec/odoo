@@ -87,6 +87,8 @@ const providers = [
     ["tyro", "pos_tyro", "Tyro"],
     ["pine_labs", "pos_pine_labs", "Pine Labs"],
     ["qfpay", "pos_qfpay", "QFPay"],
+    ["dpopay", "pos_dpopay", "DPO Pay"],
+    ["mollie", "pos_mollie", "Mollie"],
 ];
 
 export const PosPaymentProviderCardsParams = {

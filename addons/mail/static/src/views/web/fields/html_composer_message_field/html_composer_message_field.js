@@ -5,6 +5,7 @@ import { useBus } from "@web/core/utils/hooks";
 import { HtmlMailField, htmlMailField } from "../html_mail_field/html_mail_field";
 import { MailFullComposerSuggestionPlugin } from "./mail_full_composer_suggestion_plugin";
 import { ContentExpandablePlugin } from "./content_expandable_plugin";
+import { DisableBannerCommandsPlugin } from "./disable_banner_commands_plugin";
 import { fillEmpty } from "@html_editor/utils/dom";
 import { markup } from "@odoo/owl";
 
@@ -39,7 +40,10 @@ export class HtmlComposerMessageField extends HtmlMailField {
 
     getConfig() {
         const config = super.getConfig(...arguments);
-        config.Plugins = [...config.Plugins, MailFullComposerSuggestionPlugin];
+        config.Plugins = config.Plugins.filter((plugin) => plugin.id !== "video").concat([
+            DisableBannerCommandsPlugin,
+            MailFullComposerSuggestionPlugin,
+        ]);
         if (this.props.record.data.composition_comment_option === "reply_all") {
             config.Plugins.push(ContentExpandablePlugin);
         }
@@ -60,6 +64,10 @@ export class HtmlComposerMessageField extends HtmlMailField {
             }
             this.props.record.data.attachment_ids.linkTo(attachment.id, attachment);
         };
+        config.thread = this.env.services["mail.store"]?.["mail.thread"].get({
+            model: this.props.record.data.model,
+            id: JSON.parse(this.props.record.data.res_ids || "[]")[0],
+        });
         return config;
     }
 

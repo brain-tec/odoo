@@ -4,6 +4,7 @@ import {
     insertSnippet,
     goBackToBlocks,
     registerWebsitePreviewTour,
+    unfoldOptionsGroup,
 } from "@website/js/tours/tour_utils";
 
 const scrollToHeading = function (position) {
@@ -25,6 +26,7 @@ const checkTOCNavBar = function (tocPosition, activeHeaderPosition) {
 registerWebsitePreviewTour(
     "snippet_table_of_content",
     {
+        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/",
         edition: true,
     },
@@ -70,6 +72,7 @@ registerWebsitePreviewTour(
             trigger: ":iframe .s_table_of_content:eq(0) h2",
             run: "click",
         },
+        ...unfoldOptionsGroup("Table of Content"),
         {
             content: "Hide the first TOC on mobile",
             trigger: '[data-action-param="no_mobile"]',
@@ -82,6 +85,7 @@ registerWebsitePreviewTour(
             trigger: ":iframe .s_table_of_content:eq(1) h2",
             run: "click",
         },
+        ...unfoldOptionsGroup("Table of Content"),
         {
             content: "Hide the second TOC on desktop",
             trigger: '[data-action-param="no_desktop"]',

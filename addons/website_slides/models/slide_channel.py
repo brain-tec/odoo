@@ -612,6 +612,16 @@ class SlideChannel(models.Model):
     def _mail_get_partner_fields(self, introspect_fields=False):
         return []
 
+    def _mail_get_operation_for_mail_message_operation(self, message_operation):
+        # posting messages on channels user is a member requires only read access
+        operations = super()._mail_get_operation_for_mail_message_operation(message_operation)
+        if message_operation == 'create':
+            return (
+                (Domain('is_member', '=', True), 'read'),
+                *operations,
+            )
+        return operations
+
     # ---------------------------------------------------------
     # Business / Actions
     # ---------------------------------------------------------

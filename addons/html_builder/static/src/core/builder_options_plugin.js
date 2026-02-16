@@ -1,10 +1,13 @@
 import { Plugin } from "@html_editor/plugin";
+import { reactive } from "@odoo/owl";
 import { uniqueId } from "@web/core/utils/functions";
 import { isRemovable } from "./remove_plugin";
 import { isClonable } from "./clone_plugin";
 import { getElementsWithOption, isElementInViewport } from "@html_builder/utils/utils";
 import { OptionsContainer } from "@html_builder/sidebar/option_container";
 import { shouldEditableMediaBeEditable } from "@html_builder/utils/utils_css";
+import { _t } from "@web/core/l10n/translation";
+import { closestElement } from "@html_editor/utils/dom_traversal";
 
 /** @typedef {import("@html_builder/core/utils").BaseOptionComponent} BaseOptionComponent */
 /** @typedef {import("@odoo/owl").Component} Component */
@@ -42,6 +45,7 @@ import { shouldEditableMediaBeEditable } from "@html_builder/utils/utils_css";
 /**
  * @typedef { Object } BuilderOptionsShared
  * @property { BuilderOptionsPlugin['checkElement'] } checkElement
+ * @property { BuilderOptionsPlugin['closestWithOption'] } closestWithOption
  * @property { BuilderOptionsPlugin['computeContainers'] } computeContainers
  * @property { BuilderOptionsPlugin['findOption'] } findOption
  * @property { BuilderOptionsPlugin['getContainers'] } getContainers
@@ -114,6 +118,7 @@ export class BuilderOptionsPlugin extends Plugin {
     static dependencies = ["operation", "history"];
     static shared = [
         "checkElement",
+        "closestWithOption",
         "computeContainers",
         "findOption",
         "getContainers",
@@ -139,6 +144,17 @@ export class BuilderOptionsPlugin extends Plugin {
                 const el = this.editable.querySelector(this.config.initialTarget);
                 this.updateContainers(el);
             }
+        },
+        get_options_container_top_buttons: (el) => {
+            const buttons = [];
+            if (el.matches("section")) {
+                buttons.push({
+                    class: "fa fa-fw fa-crosshairs btn o-hb-btn btn-accent-color-hover",
+                    title: _t("Select only this block"),
+                    handler: (el) => this.updateContainers(el),
+                });
+            }
+            return buttons;
         },
     };
 
@@ -282,22 +298,11 @@ export class BuilderOptionsPlugin extends Plugin {
             const newOverlays = newContainers.map((c) => c.hasOverlayOptions);
             const areSameOverlays = previousOverlays.every((check, i) => check === newOverlays[i]);
             if (areSameElements && areSameOverlays) {
-                const previousOptions = this.lastContainers.flatMap((c) => [
-                    ...c.options,
-                    ...c.headerMiddleButtons,
-                    c.containerTitle,
-                ]);
-                const newOptions = newContainers.flatMap((c) => [
-                    ...c.options,
-                    ...c.headerMiddleButtons,
-                    c.containerTitle,
-                ]);
-                const areSameOptions =
-                    newOptions.length === previousOptions.length &&
-                    newOptions.every((option, i) => option.id === previousOptions[i].id);
-                if (areSameOptions) {
-                    return;
+                for (let i = 0; i < this.lastContainers.length; i++) {
+                    Object.assign(this.lastContainers[i], newContainers[i]);
                 }
+                // Skip full dispatch as reactivity handles the updates
+                return;
             }
         }
 
@@ -313,6 +318,14 @@ export class BuilderOptionsPlugin extends Plugin {
         this.target = null;
         this.lastContainers = [];
         this.dispatchTo("change_current_options_containers_listeners", this.lastContainers);
+    }
+
+    closestWithOption(el) {
+        return closestElement(el, (el) =>
+            this.builderOptions.some(
+                (Option) => el.matches(Option.selector) && this.checkElement(el, Option)
+            )
+        );
     }
 
     computeContainers(target) {
@@ -353,31 +366,43 @@ export class BuilderOptionsPlugin extends Plugin {
             element = element.parentElement;
         }
 
-        const previousElementToIdMap = new Map(this.lastContainers.map((c) => [c.element, c.id]));
-        let containers = [...elementToOptions]
-            .sort(([a], [b]) => (b.contains(a) ? 1 : -1))
-            .map(([element, Options]) => ({
-                id: previousElementToIdMap.get(element) || uniqueId(),
-                element,
-                options: Options,
-                optionTitleComponents: elementToOptionTitleComponents.get(element) || [],
-                headerMiddleButtons: elementToHeaderMiddleButtons.get(element) || [],
-                containerTitle: elementToContainerTitle.get(element)
-                    ? elementToContainerTitle.get(element)[0]
-                    : {},
-                hideOverlay: Options.every((Option) => Option.hideOverlay),
-                hasOverlayOptions: this.hasOverlayOptions(element),
-                isRemovable: isRemovable(element),
-                removeDisabledReason: this.getRemoveDisabledReason(element),
-                isClonable: isClonable(element),
-                cloneDisabledReason: this.getCloneDisabledReason(element),
-                optionsContainerTopButtons: this.getOptionsContainerTopButtons(element),
-            }));
+        const previousElementToIdAndStateMap = new Map(
+            this.lastContainers.map((c) => [c.element, { id: c.id, folded: c.folded }])
+        );
+        const keepUnfolded = this.lastContainers.some((c) => c.element === element);
+        let containers = reactive(
+            [...elementToOptions]
+                .sort(([a], [b]) => (b.contains(a) ? 1 : -1))
+                .map(([element, Options]) => ({
+                    id: previousElementToIdAndStateMap.get(element)?.id || uniqueId(),
+                    folded: keepUnfolded
+                        ? previousElementToIdAndStateMap.get(element)?.folded ?? true
+                        : true,
+                    element,
+                    options: Options,
+                    optionTitleComponents: elementToOptionTitleComponents.get(element) || [],
+                    headerMiddleButtons: elementToHeaderMiddleButtons.get(element) || [],
+                    containerTitle: elementToContainerTitle.get(element)
+                        ? elementToContainerTitle.get(element)[0]
+                        : {},
+                    hideOverlay: Options.every((Option) => Option.hideOverlay),
+                    hasOverlayOptions: this.hasOverlayOptions(element),
+                    isRemovable: isRemovable(element),
+                    removeDisabledReason: this.getRemoveDisabledReason(element),
+                    isClonable: isClonable(element),
+                    cloneDisabledReason: this.getCloneDisabledReason(element),
+                    optionsContainerTopButtons: this.getOptionsContainerTopButtons(element),
+                }))
+        );
         const lastValidContainerIdx = containers.findLastIndex((c) =>
             this.getResource("no_parent_containers").some((selector) => c.element.matches(selector))
         );
         if (lastValidContainerIdx > 0) {
             containers = containers.slice(lastValidContainerIdx);
+        }
+        const lastContainerWthOptions = containers.findLast((c) => c.options.length);
+        if (lastContainerWthOptions) {
+            lastContainerWthOptions.folded = false;
         }
         return containers;
     }
@@ -490,7 +515,8 @@ export class BuilderOptionsPlugin extends Plugin {
                 this.updateContainers(targetEl, { forceUpdate: true });
                 // Scroll to the target if not visible.
                 if (!isElementInViewport(targetEl)) {
-                    targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                    // Firefox mis-scrolls with block "center" on tall snippets; keep "start".
+                    targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
                 }
             } else {
                 this.deactivateContainers();

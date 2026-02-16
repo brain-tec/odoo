@@ -183,10 +183,11 @@ class MaintenanceEquipment(models.Model):
 
 class MaintenanceRequest(models.Model):
     _name = 'maintenance.request'
-    _inherit = ['mail.thread.cc', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Maintenance Request'
     _order = "id desc"
     _check_company_auto = True
+    _priority_field = 'priority'
 
     def _default_stage(self):
         return self.env['maintenance.stage'].search([], limit=1)
@@ -447,7 +448,7 @@ class MaintenanceTeam(models.Model):
             )
             team.todo_request_count = sum(count for (_, _, _, count) in data)
             team.todo_request_count_date = sum(count for (schedule_date, _, _, count) in data if schedule_date)
-            team.todo_request_count_high_priority = sum(count for (_, priority, _, count) in data if priority == 3)
+            team.todo_request_count_high_priority = sum(count for (_, priority, _, count) in data if priority == '3')
             team.todo_request_count_block = sum(count for (_, _, kanban_state, count) in data if kanban_state == 'blocked')
             team.todo_request_count_unscheduled = team.todo_request_count - team.todo_request_count_date
 

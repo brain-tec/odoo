@@ -32,29 +32,6 @@ export function assertCssVariable(variableName, variableValue, trigger = ":ifram
         },
     };
 }
-export function assertPathName(pathname, trigger) {
-    return {
-        content: `Check if we have been redirected to ${pathname}`,
-        trigger: trigger,
-        async run() {
-            await new Promise((resolve) => {
-                let elapsedTime = 0;
-                const intervalTime = 100;
-                const interval = setInterval(() => {
-                    if (window.location.pathname.startsWith(pathname)) {
-                        clearInterval(interval);
-                        resolve();
-                    }
-                    elapsedTime += intervalTime;
-                    if (elapsedTime >= 5000) {
-                        clearInterval(interval);
-                        console.error(`The pathname ${pathname} has not been found`);
-                    }
-                }, intervalTime);
-            });
-        },
-    };
-}
 
 export function changeBackground(snippet, position = "bottom") {
     return [
@@ -161,35 +138,31 @@ export function changeOption(
  * @param {string} optionName - The name of the option (e.g., "Visibility").
  * @param {string} elementName - The name of the element to be clicked inside
  *                               the popover (e.g., "Conditionally").
- * @param {Boolean} searchNeeded - If the widget is a m2o widget and a search is needed.
  *
  * Example:
  *      ...changeOptionInPopover("Text - Image", "Visibility", "Conditionally")
  */
-export function changeOptionInPopover(blockName, optionName, elementName, searchNeeded = false) {
-    const steps = [changeOption(blockName, `[data-label='${optionName}'] .dropdown-toggle`)];
-
-    if (searchNeeded) {
-        steps.push({
-            content: `Inputing ${elementName} in toogle option search`,
-            trigger: `.o_popover input`,
-            run: `edit ${elementName}`,
-        });
-    }
-
-    steps.push(
-        clickOnElement(
-            `${elementName} in the ${optionName} option`,
-            [
-                `.o_popover div.o-dropdown-item:contains("${elementName}")`,
-                `.o_popover span.o-dropdown-item:contains("${elementName}")`,
-                `.o_popover div.o-dropdown-item[title="${elementName}"]`,
-                `.o_popover span.o-dropdown-item[title="${elementName}"]`,
-                `.o_popover ${elementName}`,
-            ].join(", ")
-        )
-    );
-    return steps;
+export function changeOptionInPopover(blockName, optionName, elementName) {
+    const itemSelector = [
+        `.o_popover div.o-dropdown-item:contains("${elementName}")`,
+        `.o_popover span.o-dropdown-item:contains("${elementName}")`,
+        `.o_popover div.o-dropdown-item[title="${elementName}"]`,
+        `.o_popover span.o-dropdown-item[title="${elementName}"]`,
+        `.o_popover ${elementName}`,
+    ].join(", ");
+    return [
+        changeOption(blockName, `[data-label='${optionName}'] .dropdown-toggle`),
+        {
+            content: `Check if "${elementName}" option is shown. If not, search for it.`,
+            trigger: ".o_popover .o-dropdown-item",
+            async run(helpers) {
+                if (!helpers.queryFirst(itemSelector)) {
+                    await helpers.edit(elementName, ".o_popover input");
+                }
+            },
+        },
+        clickOnElement(`${elementName} in the ${optionName} option`, itemSelector),
+    ];
 }
 
 export function selectNested(
@@ -434,7 +407,7 @@ export function insertSnippet(snippet, { position = "bottom", ignoreLoading = fa
 
     if (!ignoreLoading) {
         insertSnippetSteps.push({
-            trigger: ":iframe:not(:has(.o_loading_screen))",
+            trigger: ".o_website_preview :iframe:not(:has(.o_loading_screen))",
         });
     }
 
@@ -484,6 +457,16 @@ export function selectSnippetColumn(snippet, index = 0, position = "bottom") {
         tooltipPosition: position,
         run: "click",
     };
+}
+
+export function unfoldOptionsGroup(name) {
+    return [
+        {
+            content: `Unfold the "${name}" group`,
+            trigger: `.options-container[data-container-title="${name}"] .options-container-label i.fa-caret-right`,
+            run: "click",
+        },
+    ];
 }
 
 export function prepend_trigger(steps, prepend_text = "") {
@@ -603,7 +586,7 @@ export function registerBackendAndFrontendTour(name, options, steps) {
     }
 
     return registry.category("web_tour.tours").add(name, {
-        url: options.url,
+        ...options,
         steps: () => steps(),
     });
 }
@@ -733,6 +716,12 @@ export function selectFullText(elementName, selector) {
             range.selectNodeContents(this.anchor);
             selection.removeAllRanges();
             selection.addRange(range);
+            this.anchor.closest(".odoo-editor-editable").dispatchEvent(
+                new MouseEvent("pointerup", {
+                    bubbles: true,
+                    cancelable: true,
+                })
+            );
         },
     };
 }

@@ -9,7 +9,6 @@ import { imageUrl, url } from "@web/core/utils/urls";
 
 export class Attachment extends FileModelMixin(Record) {
     static _name = "ir.attachment";
-    static id = "id";
     static new() {
         /** @type {import("models").Attachment} */
         const attachment = super.new(...arguments);
@@ -37,7 +36,10 @@ export class Attachment extends FileModelMixin(Record) {
             if (
                 this.isPdf &&
                 !this.has_thumbnail &&
-                (this.store.self_user?.share === false || this.ownership_token)
+                (this.ownership_token ||
+                    // If related to a record, must have write access to it
+                    ((!this.thread || this.thread.hasWriteAccess) &&
+                        this.store.self_user?.share === false))
             ) {
                 this.setPdfThumbnail();
             }
@@ -117,7 +119,7 @@ export class Attachment extends FileModelMixin(Record) {
                 assignDefined({}, { access_token: this.ownership_token })
             )
         );
-        if (isPdfValid !== undefined) {
+        if (isPdfValid) {
             rpc(
                 `/mail/attachment/update_thumbnail`,
                 assignDefined(

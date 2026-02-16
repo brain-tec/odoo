@@ -8,7 +8,6 @@ import {
 registerWebsitePreviewTour(
     "snippet_popup_add_remove",
     {
-        url: "/",
         edition: true,
     },
     () => [

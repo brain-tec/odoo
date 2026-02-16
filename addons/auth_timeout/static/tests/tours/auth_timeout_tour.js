@@ -67,7 +67,7 @@ const assertNoRPC = {
     trigger: "body",
     run: async function () {
         await retryUntil(
-            (result) => result?.error?.data?.name === "odoo.addons.auth_timeout.models.ir_http.CheckIdentityException",
+            (result) => result?.error?.data?.name === "odoo.http.session.CheckIdentityException",
             "RPC was allowed unexpectedly",
         );
     },
@@ -75,6 +75,7 @@ const assertNoRPC = {
 
 registry.category("web_tour.tours").add("auth_timeout_tour_lock_timeout_inactivity", {
     url: "/odoo",
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () => [
         {
             trigger: "body",
@@ -82,7 +83,7 @@ registry.category("web_tour.tours").add("auth_timeout_tour_lock_timeout_inactivi
                 const oldRpc = rpc._rpc;
                 rpc._rpc = function (...args) {
                     return oldRpc(...args).catch((err) => {
-                        if (err.data?.name === "odoo.addons.auth_timeout.models.ir_http.CheckIdentityException") {
+                        if (err.data?.name === "odoo.http.session.CheckIdentityException") {
                             return new Promise(() => {});
                         } else {
                             throw err;
@@ -147,6 +148,7 @@ registry.category("web_tour.tours").add("auth_timeout_tour_lock_timeout_inactivi
 
 registry.category("web_tour.tours").add("auth_timeout_tour_lock_timeout_inactivity_2fa", {
     url: "/odoo",
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () => [
         // Check identity using a passkey, which is 2FA by itself, and check an RPC call works
         assertCheckIdentityForm,

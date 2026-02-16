@@ -4,6 +4,7 @@
 import datetime
 from freezegun import freeze_time
 
+from odoo import Command
 from odoo.addons.stock.tests.common import TestStockCommon
 from odoo.exceptions import UserError
 from odoo.tests import tagged, Form
@@ -52,7 +53,7 @@ class TestStockMoveLine(TestStockCommon):
         """ Create a move line from a quant"""
         move = self.env['stock.move'].create({
             'product_id': self.product.id,
-            'product_uom': self.product.uom_id.id,
+            'uom_id': self.product.uom_id.id,
             'location_id': self.stock_location.id,
             'location_dest_id': self.stock_location.id,
         })
@@ -72,7 +73,7 @@ class TestStockMoveLine(TestStockCommon):
         """ check the quantity done is added up to the initial demand"""
         move = self.env['stock.move'].create({
             'product_id': self.product.id,
-            'product_uom': self.product.uom_id.id,
+            'uom_id': self.product.uom_id.id,
             'location_id': self.stock_location.id,
             'location_dest_id': self.stock_location.id,
             'picking_type_id': self.picking_type_int.id,
@@ -95,7 +96,7 @@ class TestStockMoveLine(TestStockCommon):
         self.assertEqual(self.quant.quantity, -10)
         move = self.env['stock.move'].create({
             'product_id': self.product.id,
-            'product_uom': self.product.uom_id.id,
+            'uom_id': self.product.uom_id.id,
             'location_id': self.stock_location.id,
             'location_dest_id': self.stock_location.id,
         })
@@ -182,7 +183,7 @@ class TestStockMoveLine(TestStockCommon):
                 'location_id': self.stock_location.id,
                 'location_dest_id': self.customer_location.id,
                 'product_id': self.productA.id,
-                'product_uom': self.uom_unit.id,
+                'uom_id': self.uom_unit.id,
                 'product_uom_qty': 10.0,
             })
             move.quantity = 1
@@ -202,7 +203,7 @@ class TestStockMoveLine(TestStockCommon):
             update_date_2 = ml.date
             self.assertTrue(update_date_2 > update_date_1, "Increasing a ml's quantity should update its date")
             freeze.tick(delta=datetime.timedelta(seconds=2))
-            ml.product_uom_id = self.uom_dozen
+            ml.uom_id = self.uom_dozen
             update_date_3 = ml.date
             self.assertTrue(update_date_3 > update_date_2, "Increasing a ml's quantity (via UoM type) should update its date")
             freeze.tick(delta=datetime.timedelta(seconds=2))
@@ -210,15 +211,47 @@ class TestStockMoveLine(TestStockCommon):
             self.assertEqual(update_date_3, ml.date, "Decreasing a ml's quantity shouldn't update its date")
             freeze.tick(delta=datetime.timedelta(seconds=2))
             ml.write({
-                'product_uom_id': self.uom_unit.id,
+                'uom_id': self.uom_unit.id,
                 'quantity': 24
             })
             # 2 dozen = 24 units
             self.assertEqual(update_date_3, ml.date, "Quantity change check for date should take into account UoM conversion")
             freeze.tick(delta=datetime.timedelta(seconds=2))
             ml.write({
-                'product_uom_id': self.uom_dozen.id,
+                'uom_id': self.uom_dozen.id,
                 'quantity': 3
             })
             # 36 units > 24 units
             self.assertTrue(ml.date > update_date_3, "Quantity change check for date should take into account UoM conversion")
+
+    def test_lot_creation_from_move_line_with_generic_stock(self):
+        """
+        Test that if the product already have quantities and after that tracking is set to serial,
+        we can create a lot and assign it to the move.
+        """
+        self.productA.tracking = "none"
+
+        self.env["stock.quant"]._update_available_quantity(self.productA, self.stock_location, 100)
+
+        self.productA.tracking = "serial"
+
+        serial_lot = self.env["stock.lot"].create(
+            {
+                "name": "SN001",
+                "product_id": self.productA.id,
+                "company_id": self.env.company.id,
+            }
+        )
+
+        move = self.env["stock.move"].create(
+            {
+                "product_id": self.productA.id,
+                "product_uom_qty": 1.0,
+                "location_id": self.stock_location.id,
+                "location_dest_id": self.customer_location.id,
+                "lot_ids": [Command.link(serial_lot.id)],
+            }
+        )
+
+        line = move.move_line_ids[0]
+        self.assertEqual(line.lot_id, serial_lot)

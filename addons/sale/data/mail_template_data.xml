@@ -9,6 +9,7 @@
             <field name="partner_to" eval="False"/>
             <field name="use_default_to" eval="True"/>
             <field name="description">Used by salespeople when they send quotations or proforma to prospects</field>
+            <field name="email_layout_xmlid">mail.mail_notification_layout_with_responsible_signature</field>
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
     <p style="margin: 0px; padding: 0px; font-size: 13px;">
@@ -60,6 +61,7 @@
             <field name="partner_to" eval="False"/>
             <field name="use_default_to" eval="True"/>
             <field name="description">Used by salespeople when they send pro forma to prospects</field>
+            <field name="email_layout_xmlid">mail.mail_notification_layout_with_responsible_signature</field>
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
     <p style="margin: 0px; padding: 0px; font-size: 13px;">
@@ -91,6 +93,7 @@
             <field name="partner_to" eval="False"/>
             <field name="use_default_to" eval="True"/>
             <field name="description">Sent to customers on order confirmation</field>
+            <field name="email_layout_xmlid">mail.mail_notification_layout_with_responsible_signature</field>
             <field name="body_html" type="html">
                 <div style="margin: 0px; padding: 0px;">
                     <t t-set="color" t-value="object.company_id.email_secondary_color or '#875A7B'"/>
@@ -256,7 +259,7 @@
                                                 </t>
                                                 <t t-else="">
                                                     <span style="white-space: nowrap;">
-                                                        <t t-if="object.website_id.show_line_subtotals_tax_selection == 'tax_excluded'">
+                                                        <t t-if="hasattr(object, 'website_id') and object.website_id.show_line_subtotals_tax_selection == 'tax_excluded'">
                                                             <t t-out="format_amount(line.price_subtotal, object.currency_id) or ''">$ 10.00</t>
                                                         </t>
                                                         <t t-else="">
@@ -293,8 +296,16 @@
                             </table>
                             <table width="100%" style="max-width: 590px; font-size: 14px; border-spacing: 0px; white-space: nowrap;" role="presentation">
                                 <tr>
-                                    <td style="width: 20%; padding-bottom: 8px;" align="left">Taxes:</td>
-                                    <td style="width: 80%; padding-bottom: 8px;" align="right" t-out="format_amount(object.amount_tax, object.currency_id) or ''">$ 0.00</td>
+                                    <t t-if="object.tax_totals and object.tax_totals['subtotals']">
+                                        <t t-foreach="object.tax_totals['subtotals']" t-as="line">
+                                            <t t-foreach="line['tax_groups']" t-as="tax_line">
+                                                <tr>
+                                                    <td style="width: 20%; padding-bottom: 8px;" align="left"><span t-out="tax_line['group_name']"/></td>
+                                                    <td style="width: 80%;" align="right" t-out="format_amount(tax_line['tax_amount_currency'], object.currency_id) or ''">$ 0.00</td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </t>
                                 </tr>
                                 <tr>
                                     <td style="width: 20%; padding-top: 4px; border-top: 1px solid #343a40; opacity: 0.9;" align="left"><strong>Total</strong></td>
@@ -358,6 +369,7 @@
             <field name="partner_to" eval="False"/>
             <field name="use_default_to" eval="True"/>
             <field name="description">Sent to customers when a payment is received but doesn't immediately confirm their order</field>
+            <field name="email_layout_xmlid">mail.mail_notification_layout_with_responsible_signature</field>
             <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px;">
     <p style="margin: 0px; padding: 0px; font-size: 12px;">

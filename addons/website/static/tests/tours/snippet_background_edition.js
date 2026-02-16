@@ -95,6 +95,10 @@ function checkAndUpdateBackgroundColor({
             run: "click",
         });
         steps.push({
+            content: "Wait the style is applied",
+            trigger: "body:not(:has(.o_popover))",
+        });
+        steps.push({
             trigger: finalSelector,
             content: "The selected colors have been applied (CC AND (BG or GRADIENT))",
             tooltipPosition: "bottom",
@@ -120,6 +124,7 @@ function updateAndCheckCustomGradient({ updateStep, checkGradient }) {
 registerWebsitePreviewTour(
     "snippet_background_edition",
     {
+        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/",
         edition: true,
     },
@@ -237,18 +242,21 @@ registerWebsitePreviewTour(
         },
         {
             trigger: `:iframe .${snippets[0].id}.o_cc1`,
-            run: function () {
-                const parts = backgroundImageCssToParts(
-                    getComputedStyle(this.anchor)["background-image"]
+            async run({ waitUntil }) {
+                await waitUntil(
+                    () => {
+                        const parts = backgroundImageCssToParts(
+                            getComputedStyle(this.anchor)["background-image"]
+                        );
+                        return parts.url?.startsWith("url(") && parts.gradient === gradients[1];
+                    },
+                    {
+                        timeout: 9000,
+                        message: `An image should have been added as background.
+                            The gradient should have been kept when adding the background image
+                        `,
+                    }
                 );
-                if (!parts.url || !parts.url.startsWith("url(")) {
-                    throw new Error("An image should have been added as background.");
-                }
-                if (parts.gradient !== gradients[1]) {
-                    throw new Error(
-                        "The gradient should have been kept when adding the background image"
-                    );
-                }
             },
         },
 
@@ -259,16 +267,21 @@ registerWebsitePreviewTour(
             changeType: "gradient",
             change: gradients[0],
             finalSelector: `:iframe .${snippets[0].id}.o_cc1:not([style*="${gradients[1]}"])`,
-            finalRun: function () {
-                const parts = backgroundImageCssToParts(
-                    getComputedStyle(this.anchor)["background-image"]
+            async finalRun({ waitUntil }) {
+                await waitUntil(
+                    () => {
+                        const parts = backgroundImageCssToParts(
+                            getComputedStyle(this.anchor)["background-image"]
+                        );
+                        return parts.url?.startsWith("url(") && parts.gradient === gradients[0];
+                    },
+                    {
+                        timeout: 9000,
+                        message: `The image should have been kept when changing the gradient.
+                            TThe gradient should have been changed.
+                        `,
+                    }
                 );
-                if (!parts.url || !parts.url.startsWith("url(")) {
-                    throw new Error("The image should have been kept when changing the gradient");
-                }
-                if (parts.gradient !== gradients[0]) {
-                    throw new Error("The gradient should have been changed");
-                }
             },
         }),
 
@@ -289,7 +302,7 @@ registerWebsitePreviewTour(
                 run: "click",
             },
             checkGradient:
-                "linear-gradient(135deg, rgb(203, 94, 238) 0%, rgb(139, 160, 237) 50%, rgb(75, 225, 236) 100%)",
+                "linear-gradient(135deg, #cb5eee 0%, rgba(139, 160, 237, 1) 50%, #4be1ec 100%)",
         }),
         ...updateAndCheckCustomGradient({
             updateStep: {
@@ -298,7 +311,7 @@ registerWebsitePreviewTour(
                 run: "range 45",
             },
             checkGradient:
-                "linear-gradient(135deg, rgb(203, 94, 238) 0%, rgb(139, 160, 237) 45%, rgb(75, 225, 236) 100%)",
+                "linear-gradient(135deg, #cb5eee 0%, rgba(139, 160, 237, 1) 45%, #4be1ec 100%)",
         }),
         ...updateAndCheckCustomGradient({
             updateStep: {
@@ -306,8 +319,7 @@ registerWebsitePreviewTour(
                 content: "Pick step color",
                 run: "edit #FF0000",
             },
-            checkGradient:
-                "linear-gradient(135deg, rgb(203, 94, 238) 0%, rgb(255, 0, 0) 45%, rgb(75, 225, 236) 100%)",
+            checkGradient: "linear-gradient(135deg, #cb5eee 0%, #FF0000 45%, #4be1ec 100%)",
         }),
         ...updateAndCheckCustomGradient({
             updateStep: {
@@ -315,7 +327,7 @@ registerWebsitePreviewTour(
                 content: "Delete step",
                 run: "click",
             },
-            checkGradient: "linear-gradient(135deg, rgb(203, 94, 238) 0%, rgb(75, 225, 236) 100%)",
+            checkGradient: "linear-gradient(135deg, #cb5eee 0%, #4be1ec 100%)",
         }),
         // Linear
         ...updateAndCheckCustomGradient({
@@ -324,7 +336,7 @@ registerWebsitePreviewTour(
                 content: "Change angle",
                 run: "edit 50 && click .o_color_picker_inputs",
             },
-            checkGradient: "linear-gradient(50deg, rgb(203, 94, 238) 0%, rgb(75, 225, 236) 100%)",
+            checkGradient: "linear-gradient(50deg, #cb5eee 0%, #4be1ec 100%)",
         }),
         // Radial
         ...updateAndCheckCustomGradient({
@@ -334,7 +346,7 @@ registerWebsitePreviewTour(
                 run: "click",
             },
             checkGradient:
-                "radial-gradient(circle closest-side at 25% 25%, rgb(203, 94, 238) 0%, rgb(75, 225, 236) 100%)",
+                "radial-gradient(circle closest-side at 25% 25%, #cb5eee 0%, #4be1ec 100%)",
         }),
         ...updateAndCheckCustomGradient({
             updateStep: {
@@ -343,7 +355,7 @@ registerWebsitePreviewTour(
                 run: "edit 33 && click .o_color_picker_inputs",
             },
             checkGradient:
-                "radial-gradient(circle closest-side at 33% 25%, rgb(203, 94, 238) 0%, rgb(75, 225, 236) 100%)",
+                "radial-gradient(circle closest-side at 33% 25%, #cb5eee 0%, #4be1ec 100%)",
         }),
         ...updateAndCheckCustomGradient({
             updateStep: {
@@ -352,7 +364,7 @@ registerWebsitePreviewTour(
                 run: "edit 75 && click .o_color_picker_inputs",
             },
             checkGradient:
-                "radial-gradient(circle closest-side at 33% 75%, rgb(203, 94, 238) 0%, rgb(75, 225, 236) 100%)",
+                "radial-gradient(circle closest-side at 33% 75%, #cb5eee 0%, #4be1ec 100%)",
         }),
         ...updateAndCheckCustomGradient({
             updateStep: {
@@ -361,13 +373,17 @@ registerWebsitePreviewTour(
                 run: "click",
             },
             checkGradient:
-                "radial-gradient(circle farthest-side at 33% 75%, rgb(203, 94, 238) 0%, rgb(75, 225, 236) 100%)",
+                "radial-gradient(circle farthest-side at 33% 75%, #cb5eee 0%, #4be1ec 100%)",
         }),
         // Revert to predefined gradient
         {
             trigger: `.o_colorpicker_sections button[data-color="${gradients[0]}"]`,
             content: `Revert to predefiend gradient ${gradients[0]}`,
             run: "click",
+        },
+        {
+            content: "Wait the style is applied",
+            trigger: "body:not(:has(.o_popover))",
         },
 
         // Replace the gradient by a bg color
@@ -377,7 +393,20 @@ registerWebsitePreviewTour(
             checkNoGradient: gradients[1],
             changeType: "bg",
             change: backgroundColors[1].code,
-            finalSelector: `:iframe .${snippets[0].id}.o_cc1.bg-${backgroundColors[1].code}[style^="background-image: url("]:not([style*="${gradients[0]}"])`,
+            finalSelector: `:iframe .${snippets[0].id}.o_cc1.bg-${backgroundColors[1].code}`,
+            async finalRun({ waitUntil }) {
+                await waitUntil(
+                    () => {
+                        const parts = backgroundImageCssToParts(
+                            getComputedStyle(this.anchor)["background-image"]
+                        );
+                        return parts.url?.startsWith("url(") && !parts.gradient;
+                    },
+                    {
+                        timeout: 9000,
+                    }
+                );
+            },
         }),
 
         // Re-add a gradient
@@ -388,16 +417,22 @@ registerWebsitePreviewTour(
             changeType: "gradient",
             change: gradients[1],
             finalSelector: `:iframe .${snippets[0].id}.o_cc1:not(.bg-${backgroundColors[1].code})`,
-            finalRun() {
-                const parts = backgroundImageCssToParts(
-                    getComputedStyle(this.anchor)["background-image"]
+            async finalRun({ waitUntil }) {
+                await waitUntil(
+                    () => {
+                        const parts = backgroundImageCssToParts(
+                            getComputedStyle(this.anchor)["background-image"]
+                        );
+                        return parts.url?.startsWith("url(") && parts.gradient === gradients[1];
+                    },
+                    {
+                        timeout: 9000,
+                        message: `
+                        The image should have been kept when re-adding the gradient.
+                        The gradient should have been re-added.
+                        `,
+                    }
                 );
-                if (!parts.url || !parts.url.startsWith("url(")) {
-                    throw new Error("The image should have been kept when re-adding the gradient");
-                }
-                if (parts.gradient !== gradients[1]) {
-                    throw new Error("The gradient should have been re-added");
-                }
             },
         }),
 

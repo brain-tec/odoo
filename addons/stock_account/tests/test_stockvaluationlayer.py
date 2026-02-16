@@ -48,7 +48,7 @@ class TestStockValuationStandard(TestStockValuationCommon):
             'move_id': move1.id,
             'product_id': move1.product_id.id,
             'quantity': 5,
-            'product_uom_id': move1.product_uom.id,
+            'uom_id': move1.uom_id.id,
             'location_id': move1.location_id.id,
             'location_dest_id': move1.location_dest_id.id,
         })
@@ -91,7 +91,7 @@ class TestStockValuationStandard(TestStockValuationCommon):
             'move_id': move1.id,
             'product_id': move1.product_id.id,
             'quantity': 10,
-            'product_uom_id': move1.product_uom.id,
+            'uom_id': move1.uom_id.id,
             'location_id': move1.location_id.id,
             'location_dest_id': move1.location_dest_id.id,
         })
@@ -134,7 +134,7 @@ class TestStockValuationStandard(TestStockValuationCommon):
                 'product_id': product.id,
                 'location_id': self.supplier_location.id,
                 'location_dest_id': self.stock_location.id,
-                'product_uom': self.uom.id,
+                'uom_id': self.uom.id,
                 'product_uom_qty': 2,
                 'price_unit': 10,
                 'picking_type_id': self.picking_type_in.id,
@@ -356,7 +356,7 @@ class TestStockValuationAVCO(TestStockValuationCommon):
 
         self.assertEqual(self.product.total_value, 0)
         self.assertEqual(self.product.qty_available, 0)
-        self.assertEqual(self.product.standard_price, 1.00)
+        self.assertAlmostEqual(self.product.standard_price, 1.0033333)
 
     def test_rounding_2(self):
         self._make_in_move(self.product, 1, unit_cost=1.02)
@@ -369,13 +369,13 @@ class TestStockValuationAVCO(TestStockValuationCommon):
 
         self.assertEqual(self.product.total_value, 0)
         self.assertEqual(self.product.qty_available, 0)
-        self.assertEqual(self.product.standard_price, 1.01)
+        self.assertAlmostEqual(self.product.standard_price, 1.00666666)
 
     def test_rounding_3(self):
         self._make_in_move(self.product, 1000, unit_cost=0.17)
         self._make_in_move(self.product, 800, unit_cost=0.23)
 
-        self.assertEqual(self.product.standard_price, 0.20)
+        self.assertAlmostEqual(self.product.standard_price, 0.19666666)
 
         self._make_out_move(self.product, 1000, create_picking=True)
         self._make_out_move(self.product, 800, create_picking=True)
@@ -389,7 +389,7 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         """
         self._make_in_move(self.product, 2, unit_cost=4.63)
         self._make_in_move(self.product, 5, unit_cost=3.04)
-        self.assertEqual(self.product.standard_price, 3.49)
+        self.assertAlmostEqual(self.product.standard_price, 3.49428571)
 
         for _ in range(70):
             self._make_out_move(self.product, 0.1)
@@ -400,11 +400,11 @@ class TestStockValuationAVCO(TestStockValuationCommon):
     def test_rounding_5(self):
         self._make_in_move(self.product, 10, unit_cost=16.83)
         self._make_in_move(self.product, 10, unit_cost=20)
-        self.assertEqual(self.product.standard_price, 18.42)
+        self.assertEqual(self.product.standard_price, 18.415)
 
         self._make_out_move(self.product, 10)
         out_move = self._make_out_move(self.product, 9)
-        self.assertEqual(out_move.value, 165.78)
+        self.assertEqual(out_move.value, 165.74)
 
         self.assertEqual(self.product.total_value, 18.42)
         self.assertEqual(self.product.qty_available, 1)
@@ -430,7 +430,7 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         move4 = self._make_return(move3, 2)
 
         self.assertAlmostEqual(abs(move3.value), abs(move4.value))
-        self.assertAlmostEqual(self.product.total_value, 25.34)
+        self.assertAlmostEqual(self.product.total_value, 25.33)
         self.assertEqual(self.product.qty_available, 2)
 
 
@@ -689,8 +689,7 @@ class TestStockValuationChangeCostMethod(TestStockValuationCommon):
         self._make_out_move(self.product, 1)
 
         self.product.product_tmpl_id.categ_id.property_cost_method = 'standard'
-        # last std price = 15.26 (290/19). Due to rounding, 15.26 * 19 = 289.94
-        self.assertEqual(self.product.total_value, 289.94)
+        self.assertEqual(self.product.total_value, 290.0)
         self.assertEqual(self.product.qty_available, 19)
 
     def test_fifo_to_avco(self):

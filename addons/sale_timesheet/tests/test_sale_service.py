@@ -650,11 +650,11 @@ class TestSaleService(TestCommonSaleTimesheet):
             'employee_id': self.employee_manager.id,
         })
 
-        self.assertFalse(timesheet.timesheet_invoice_id)
+        self.assertFalse(timesheet.reinvoice_move_id)
         invoice = self.sale_order._create_invoices()
         invoice.action_post()
 
-        self.assertEqual(invoice, timesheet.timesheet_invoice_id)
+        self.assertEqual(invoice, timesheet.reinvoice_move_id)
 
     def test_prevent_update_project_allocated_hours_after_confirming_quotation(self):
         """ Test allocated hours in the project linked to a SO is not automatically updated
@@ -817,7 +817,6 @@ class TestSaleService(TestCommonSaleTimesheet):
         Ensure hours are rounded consistently on SO & invoice.
         """
         self.env['decimal.precision'].search([('name', '=', 'Product Unit')]).digits = 0
-        self.env['uom.uom'].invalidate_model(['rounding'])  # rounding depends on precision
         self.env['sale.order.line'].create({
             'name': self.product_delivery_timesheet3.name,
             'product_id': self.product_delivery_timesheet3.id,
@@ -852,3 +851,38 @@ class TestSaleService(TestCommonSaleTimesheet):
                 hours_delivered,
                 f"{amount} hours delivered should round the same for invoice & timesheet",
             )
+
+    def test_prepaid_pack_remaining_hours_rounding(self):
+        """Avoid double rounding with pack UoM"""
+        uom_hour = self.env.ref('uom.product_uom_hour')
+        pack20 = self.env['uom.uom'].create({
+            'name': 'Pack of 20 Hours',
+            'relative_factor': 20.0,
+            'relative_uom_id': uom_hour.id,
+        })
+        product = self.env['product.product'].create({
+            'name': 'Prepaid Pack 20h',
+            'type': 'service',
+            'uom_id': pack20.id,
+            'service_type': 'timesheet',
+            'service_policy': 'ordered_prepaid',
+            'service_tracking': 'task_in_project',
+        })
+        order = self.env['sale.order'].create({'partner_id': self.partner_a.id})
+        sol = self.env['sale.order.line'].create({
+            'order_id': order.id,
+            'product_id': product.id,
+            'product_uom_qty': 1.0,
+            'product_uom_id': pack20.id,
+        })
+        order.action_confirm()
+        self.env['account.analytic.line'].create({
+            'name': 'Over-consumed timesheet',
+            'project_id': sol.project_id.id,
+            'task_id': sol.task_id.id,
+            'unit_amount': 22.0,
+            'employee_id': self.employee_user.id,
+        })
+        sol.invalidate_recordset()
+        self.assertAlmostEqual(sol.remaining_hours, -2.0, places=6)
+        self.assertIn('-02:00', sol.with_context(with_remaining_hours=True).display_name)

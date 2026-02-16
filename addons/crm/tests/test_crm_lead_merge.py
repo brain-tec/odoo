@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import base64
 from datetime import timedelta
 
 from odoo.addons.crm.tests.common import TestLeadConvertMassCommon
@@ -38,15 +36,14 @@ class TestLeadMergeCommon(TestLeadConvertMassCommon):
 class TestLeadMerge(TestLeadMergeCommon):
 
     def _run_merge_wizard(self, leads):
-        res = self.env['crm.merge.opportunity'].with_context({
+        return self.env['crm.merge.opportunity'].with_context({
             'active_model': 'crm.lead',
             'active_ids': leads.ids,
             'active_id': False,
         }).create({
             'team_id': False,
             'user_id': False,
-        }).action_merge()
-        return self.env['crm.lead'].browse(res['res_id'])
+        })._action_merge_to_opportunity()
 
     def test_initial_data(self):
         """ Ensure initial data to avoid spaghetti test update afterwards
@@ -183,8 +180,7 @@ class TestLeadMerge(TestLeadMergeCommon):
 
         # merged opportunity: in this test, all input are leads. Confidence is based on stage
         # sequence -> lead_w_contact has a stage sequence of 3 and probability is greater
-        result = merge.action_merge()
-        merge_opportunity = self.env['crm.lead'].browse(result['res_id'])
+        merge_opportunity = merge._action_merge_to_opportunity()
         self.assertFalse((ordered_merge - merge_opportunity).exists())
         self.assertEqual(merge_opportunity, self.lead_w_contact)
         self.assertEqual(merge_opportunity.type, 'lead')
@@ -229,8 +225,7 @@ class TestLeadMerge(TestLeadMergeCommon):
         self.assertEqual(merge.opportunity_ids, self.leads - self.lead_w_email_lost)
         ordered_merge = self.lead_w_partner_company + self.lead_w_contact + self.lead_w_email + self.lead_w_partner
 
-        result = merge.action_merge()
-        merge_opportunity = self.env['crm.lead'].browse(result['res_id'])
+        merge_opportunity = merge._action_merge_to_opportunity()
         self.assertFalse((ordered_merge - merge_opportunity).exists())
         self.assertEqual(merge_opportunity, self.lead_1)
         self.assertEqual(merge_opportunity.type, 'opportunity')
@@ -444,7 +439,7 @@ class TestLeadMerge(TestLeadMergeCommon):
         # create side documents
         attachments = self.env['ir.attachment'].create([
             {'name': '%02d.txt' % idx,
-             'datas': base64.b64encode(b'Att%02d' % idx),
+             'raw': b'Att%02d' % idx,
              'res_model': 'crm.lead',
              'res_id': self.lead_w_email.id,
             } for idx in range(4)
@@ -453,7 +448,7 @@ class TestLeadMerge(TestLeadMergeCommon):
         activity = lead_1.activity_schedule('crm.lead_test_activity_1', user_id=self.user_sales_manager.id)
         calendar_event = self.env['calendar.event'].create({
             'name': 'Meeting with partner',
-            'activity_ids': [(4, activity.id)],
+            'meeting_activity_ids': [(4, activity.id)],
             'start': '2021-06-12 21:00:00',
             'stop': '2021-06-13 00:00:00',
             'res_model_id': self.env['ir.model']._get('crm.crm_lead').id,
@@ -472,9 +467,7 @@ class TestLeadMerge(TestLeadMergeCommon):
             'team_id': self.sales_team_convert.id,
             'user_id': False,
         })
-        result = merge.action_merge()
-        master_lead = self.leads.filtered(lambda lead: lead.id == result['res_id'])
-
+        master_lead = merge._action_merge_to_opportunity()
         # check result of merge process
         self.assertEqual(master_lead, self.lead_w_partner_company)
         # records updated

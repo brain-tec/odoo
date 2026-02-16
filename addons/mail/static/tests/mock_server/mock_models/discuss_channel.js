@@ -258,6 +258,7 @@ export class DiscussChannel extends models.ServerModel {
         return [
             "avatar_cache_key",
             "channel_type",
+            "create_date",
             "create_uid",
             "default_display_mode",
             "description",
@@ -295,60 +296,6 @@ export class DiscussChannel extends models.ServerModel {
             member_count: DiscussChannelMember.search_count([["channel_id", "=", channel.id]]),
         });
         return data;
-    }
-
-    /** @param {number[]} ids */
-    channel_fetched(ids) {
-        const kwargs = getKwArgs(arguments, "ids");
-        ids = kwargs.ids;
-        delete kwargs.ids;
-
-        /** @type {import("mock_models").BusBus} */
-        const BusBus = this.env["bus.bus"];
-        /** @type {import("mock_models").DiscussChannelMember} */
-        const DiscussChannelMember = this.env["discuss.channel.member"];
-        /** @type {import("mock_models").MailMessage} */
-        const MailMessage = this.env["mail.message"];
-
-        const channels = this.browse(ids);
-        for (const channel of channels) {
-            if (!["chat", "whatsapp"].includes(channel.channel_type)) {
-                continue;
-            }
-            const channelMessages = MailMessage._filter([
-                ["model", "=", "discuss.channel"],
-                ["res_id", "=", channel.id],
-            ]);
-            const lastMessage = channelMessages.reduce((lastMessage, message) => {
-                if (message.id > lastMessage.id) {
-                    return message;
-                }
-                return lastMessage;
-            }, channelMessages[0]);
-            if (!lastMessage) {
-                continue;
-            }
-            const memberOfCurrentUser = this._find_or_create_member_for_self(channel.id);
-            DiscussChannelMember.write([memberOfCurrentUser.id], {
-                fetched_message_id: lastMessage.id,
-            });
-            BusBus._sendone(
-                channel,
-                "mail.record/insert",
-                new mailDataHelpers.Store()
-                    .add(
-                        DiscussChannelMember.browse(memberOfCurrentUser.id),
-                        makeKwArgs({
-                            fields: [
-                                "channel_id",
-                                "fetched_message_id",
-                                ...DiscussChannelMember._to_store_persona([]),
-                            ],
-                        })
-                    )
-                    .get_result()
-            );
-        }
     }
 
     /**
@@ -468,7 +415,6 @@ export class DiscussChannel extends models.ServerModel {
                         DiscussChannelMember.browse(memberOfCurrentUser.id),
                         makeKwArgs({
                             extra_fields: [
-                                "custom_channel_name",
                                 "last_interest_dt",
                                 "message_unread_counter",
                                 mailDataHelpers.Store.one("rtc_inviting_session_id"),
@@ -527,46 +473,15 @@ export class DiscussChannel extends models.ServerModel {
      * @param {number[]} ids
      * @param {string} name
      */
-    channel_set_custom_name(ids, name) {
-        const kwargs = getKwArgs(arguments, "ids", "name");
-        ids = kwargs.ids;
-        delete kwargs.ids;
-        name = kwargs.name || "";
-
-        /** @type {import("mock_models").BusBus} */
-        const BusBus = this.env["bus.bus"];
-        /** @type {import("mock_models").DiscussChannelMember} */
-        const DiscussChannelMember = this.env["discuss.channel.member"];
-        /** @type {import("mock_models").ResPartner} */
-        const ResPartner = this.env["res.partner"];
-
-        const channelId = ids[0]; // simulate ensure_one.
-        const [memberIdOfCurrentUser] = DiscussChannelMember.search([
-            ["partner_id", "=", this.env.user.partner_id],
-            ["channel_id", "=", channelId],
-        ]);
-        DiscussChannelMember.write([memberIdOfCurrentUser], {
-            custom_channel_name: name,
-        });
-        const [partner] = ResPartner.read(this.env.user.partner_id);
-        BusBus._sendone(
-            partner,
-            "mail.record/insert",
-            new mailDataHelpers.Store(DiscussChannelMember.browse(memberIdOfCurrentUser), {
-                custom_channel_name: name,
-            }).get_result()
-        );
-    }
-
     /**
      * @param {number[]} partners_to
-     * @param {boolean} default_display_mode
+     * @param {string} [default_display_mode=undefined]
      * @param {string} name
      * */
     _create_group(partners_to, default_display_mode, name) {
         const kwargs = getKwArgs(arguments, "partners_to", "default_display_mode", "name");
         partners_to = kwargs.partners_to || [];
-        default_display_mode = kwargs.default_display_mode || false;
+        default_display_mode = kwargs.default_display_mode;
         name = kwargs.name || "";
 
         /** @type {import("mock_models").DiscussChannel} */
@@ -655,7 +570,7 @@ export class DiscussChannel extends models.ServerModel {
         const [channel] = this.search_read([["id", "=", id]]);
         const notifBody = /* html */ `
             <span class="o_mail_notification">You are in ${
-                channel.channel_type === "channel" ? "channel" : "a private conversation with"
+                channel.channel_type === "channel" ? "" : "a private conversation with"
             }
             <b>${
                 channel.channel_type === "channel"
@@ -665,9 +580,12 @@ export class DiscussChannel extends models.ServerModel {
                       )
             }</b>.<br><br>
 
-            Type <b>@username</b> to mention someone, and grab their attention.<br>
-            Type <b>#channel</b> to mention a channel.<br>
-            Type <b>/command</b> to execute a command.<br></span>
+            <b>@username</b> to mention someone<br>
+            <b>@role</b> to notify multiple people<br>
+            <b>#channel</b> to link a channel<br>
+            <b>/command</b> to run a command<br>
+            <b>::shortcut</b> to insert a canned response<br>
+            <b>:emoji:</b> to insert an emoji</span>
         `;
         const [partner] = ResPartner.read(this.env.user.partner_id);
         BusBus._sendone(partner, "discuss.channel/transient_message", {

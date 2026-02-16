@@ -292,12 +292,8 @@ class AccountBankStatementLine(models.Model):
             _liquidity_lines, suspense_lines, _other_lines = st_line._seek_for_lines()
 
             # Compute residual amount
-            if st_line.review_state in ('todo', 'anomaly'):
-                st_line.amount_residual = -st_line.amount_currency if st_line.foreign_currency_id else -st_line.amount
-            elif suspense_lines.account_id.reconcile:
-                st_line.amount_residual = sum(suspense_lines.mapped('amount_residual_currency'))
-            else:
-                st_line.amount_residual = sum(suspense_lines.mapped('amount_currency'))
+            transaction_amount_residual, _company_amount_residual = st_line._get_statement_line_residual_amounts()
+            st_line.amount_residual = transaction_amount_residual
 
             # Compute is_reconciled
             if not st_line.id:
@@ -492,13 +488,28 @@ class AccountBankStatementLine(models.Model):
             ('account_number', '=', self.account_number),
             ('partner_id', '=', self.partner_id.id),
         ])
-        if not bank_account and not self.env['ir.config_parameter'].sudo().get_bool("account.skip_create_bank_account_on_reconcile"):
+
+        if bank_account:
+            return bank_account.filtered(lambda x: x.company_id.id in (False, self.company_id.id)).sudo(False)
+
+        # Avoid creating a bank account during reconciliation if it already exists on another active partner
+        bank_account_on_other_partner = self.env['res.partner.bank'].sudo().search([
+            ('account_number', '=', self.account_number),
+            ('partner_id', '!=', self.partner_id.id),
+            ('partner_id.active', '=', True),
+        ], limit=1)
+
+        if bank_account_on_other_partner:
+            return self.env['res.partner.bank']
+
+        if not self.env['ir.config_parameter'].sudo().get_bool("account.skip_create_bank_account_on_reconcile"):
             bank_account = self.env['res.partner.bank'].create({
                 'account_number': self.account_number,
                 'partner_id': self.partner_id.id,
                 'journal_id': None,
             })
-        return bank_account.filtered(lambda x: x.company_id.id in (False, self.company_id.id))
+
+        return bank_account
 
     def _get_default_amls_matching_domain(self, allow_draft=False):
         self.ensure_one()
@@ -547,6 +558,29 @@ class AccountBankStatementLine(models.Model):
         ).statement_id
         if not statement.is_complete:
             return statement
+
+    def _get_statement_line_residual_amounts(self):
+        """Retrieve the residual amount for this line in terms of the transaction and company currency,
+
+        :return: (
+            transaction_amount_residual,
+            company_amount_residual,
+        )
+        """
+        self.ensure_one()
+        liquidity_lines, suspense_lines, _other_lines = self._seek_for_lines()
+
+        if self.review_state in ('todo', 'anomaly'):
+            transaction_amount_residual = -self.amount_currency if self.foreign_currency_id else -self.amount
+            company_amount_residual = -sum(liquidity_lines.mapped('balance'))
+        elif suspense_lines.account_id.reconcile:
+            transaction_amount_residual = sum(suspense_lines.mapped('amount_residual_currency'))
+            company_amount_residual = sum(suspense_lines.mapped('amount_residual'))
+        else:
+            transaction_amount_residual = sum(suspense_lines.mapped('amount_currency'))
+            company_amount_residual = sum(suspense_lines.mapped('balance'))
+
+        return (transaction_amount_residual, company_amount_residual)
 
     def _get_accounting_amounts_and_currencies(self):
         """ Retrieve the transaction amount, journal amount and the company amount with their corresponding currencies

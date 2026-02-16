@@ -9,7 +9,7 @@ class AccountMoveReversal(models.TransientModel):
     Account move reversal wizard, it cancel an account move by reversing it.
     """
     _name = 'account.move.reversal'
-    _description = 'Account Move Reversal'
+    _description = 'Journal Entry Reversal'
     _check_company_auto = True
 
     move_ids = fields.Many2many('account.move', 'account_move_reversal_move', 'reversal_id', 'move_id', domain=[('state', '=', 'posted')])
@@ -87,7 +87,12 @@ class AccountMoveReversal(models.TransientModel):
             move_ids = record.move_ids._origin
             record.residual = len(move_ids) == 1 and move_ids.amount_residual or 0
             record.currency_id = len(move_ids.currency_id) == 1 and move_ids.currency_id or False
-            record.move_type = move_ids.move_type if len(move_ids) == 1 else (any(move.move_type in ('in_invoice', 'out_invoice') for move in move_ids) and 'some_invoice' or False)
+            record.move_type = (
+                move_ids.move_type if len(move_ids) == 1
+                else 'entry' if all(m.move_type == 'entry' for m in move_ids)
+                else 'some_invoice' if any(m.move_type in ('in_invoice', 'out_invoice') for m in move_ids)
+                else False
+            )
 
     def _prepare_default_reversal(self, move):
         reverse_date = self.date
@@ -104,6 +109,7 @@ class AccountMoveReversal(models.TransientModel):
             'invoice_payment_term_id': mixed_payment_term,
             'invoice_user_id': move.invoice_user_id.id,
             'auto_post': 'at_date' if reverse_date > fields.Date.context_today(self) else 'no',
+            'invoice_origin': move.invoice_origin,
         }
 
     def reverse_moves(self, is_modify=False):

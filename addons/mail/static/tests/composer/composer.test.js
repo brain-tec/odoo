@@ -52,6 +52,13 @@ beforeEach(() => {
     });
 });
 
+function cut(editor) {
+    const clipboardData = new DataTransfer();
+    const cutEvent = new ClipboardEvent("cut", { clipboardData });
+    editor.editable.dispatchEvent(cutEvent);
+    return clipboardData;
+}
+
 test("composer text input: basic rendering when posting a message", async () => {
     await startServer();
     await start();
@@ -160,7 +167,7 @@ test("add an emoji", async () => {
     await contains(".o-mail-Composer-html.odoo-editor-editable:text('😤')");
 });
 
-test("emojis are auto-substituted from text", async () => {
+test("[text composer] emojis are auto-substituted from text", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "swamp-safari" });
     await start();
@@ -172,6 +179,33 @@ test("emojis are auto-substituted from text", async () => {
     await press("Enter");
     await contains(".o-mail-Message-body:text('😂')");
     await insertText(".o-mail-Composer-input", ">:)");
+    await press("Enter");
+    await contains(".o-mail-Message-body:text('😈')");
+});
+
+test.tags("html composer");
+test("emojis are auto-substituted from text", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "" });
+    await start();
+    await openDiscuss(channelId);
+    const composerService = getService("mail.composer");
+    composerService.setHtmlComposer();
+    await focus(".o-mail-Composer-html.odoo-editor-editable");
+    const editor = {
+        document,
+        editable: document.querySelector(".o-mail-Composer-html.odoo-editor-editable"),
+    };
+    await htmlInsertText(editor, ":)");
+    await contains(".o-mail-Composer-html.odoo-editor-editable:text('😊')");
+    await press("Enter");
+    await contains(".o-mail-Message-body:text('😊')");
+    await htmlInsertText(editor, "x'D");
+    await contains(".o-mail-Composer-html.odoo-editor-editable:text('😂')");
+    await press("Enter");
+    await contains(".o-mail-Message-body:text('😂')");
+    await htmlInsertText(editor, ">:)");
+    await contains(".o-mail-Composer-html.odoo-editor-editable:text('😈')");
     await press("Enter");
     await contains(".o-mail-Message-body:text('😈')");
 });
@@ -1353,32 +1387,6 @@ test("Canned response last used changes on posting", async () => {
     expect(cannedResponse.last_used).not.toBeEmpty();
 });
 
-test("Does not auto-select 1st canned response suggestion", async () => {
-    const pyEnv = await startServer();
-    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
-    pyEnv["mail.canned.response"].create({ source: "Hello", substitution: "Hello! How are you?" });
-    await start();
-    await openDiscuss(channelId);
-    await insertText(".o-mail-Composer-input", "@");
-    await contains(".o-mail-NavigableList-active:text('Mitchell Admin')");
-    await insertText(".o-mail-Composer-input", "::", { replace: true });
-    await contains(".o-mail-NavigableList-item:text('Hello Hello! How are you?')");
-    await contains(".o-mail-NavigableList-active", { count: 0 });
-});
-
-test("ENTER closes canned response suggestions", async () => {
-    const pyEnv = await startServer();
-    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
-    pyEnv["mail.canned.response"].create({ source: "Hello", substitution: "Hello! How are you?" });
-    await start();
-    await openDiscuss(channelId);
-    await insertText(".o-mail-Composer-input", "::");
-    await contains(".o-mail-NavigableList-item:text('Hello Hello! How are you?')");
-    await contains(".o-mail-NavigableList-active", { count: 0 });
-    await triggerHotkey("Enter");
-    await contains(".o-mail-NavigableList-item", { count: 0 });
-});
-
 test("Tab to select of canned response suggestion works in chat window", async () => {
     // This might conflict with focusing next chat window
     const pyEnv = await startServer();
@@ -1761,6 +1769,91 @@ test("mentions can be correctly selected with ctrl+A and deleted", async () => {
     await focus(editor.editable);
     await press("Control+a");
     await press("Backspace");
+    await contains(editor.editable.querySelector("i.fa-hashtag"), { count: 0 });
+    await contains(editor.editable, { textContent: "" });
+});
+
+test.tags("html composer");
+test("mentions can be correctly cut with ctrl+A and ctrl+X", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_type: "channel",
+        name: "General",
+    });
+    await start();
+    await openDiscuss(channelId);
+    const composerService = getService("mail.composer");
+    composerService.setHtmlComposer();
+    await focus(".o-mail-Composer-html.odoo-editor-editable");
+    const editor = {
+        document,
+        editable: document.querySelector(".o-mail-Composer-html.odoo-editor-editable"),
+    };
+    // partner beginning of the message
+    await htmlInsertText(editor, "@admin");
+    await click(".o-mail-NavigableList-item:text('Mitchell Admin')");
+    await contains(".o-mail-Composer-html.odoo-editor-editable:text('@Mitchell Admin')");
+    await htmlInsertText(editor, "Hello");
+    await contains(".o-mail-Composer-html.odoo-editor-editable:text('@Mitchell Admin Hello')");
+    await focus(editor.editable);
+    await press("Control+a");
+    cut(editor);
+    await contains(editor.editable, { textContent: "" });
+
+    // thread with an icon beginning of the message
+    await htmlInsertText(editor, "#general");
+    await click(".o-mail-NavigableList-item:text('General')");
+    await contains(".o-mail-Composer-html.odoo-editor-editable:text('General')");
+    await contains(editor.editable.querySelector("i.fa-hashtag"));
+    await htmlInsertText(editor, "Hello");
+    await contains(".o-mail-Composer-html.odoo-editor-editable:text('General Hello')");
+    await focus(editor.editable);
+    await press("Control+a");
+    cut(editor);
+    await contains(editor.editable.querySelector("i.fa-hashtag"), { count: 0 });
+    await contains(editor.editable, { textContent: "" });
+
+    // partner in the middle of the message
+    await htmlInsertText(editor, "Hello @admin");
+    await click(".o-mail-NavigableList-item:text('Mitchell Admin')");
+    await contains(".o-mail-Composer-html.odoo-editor-editable:text('Hello @Mitchell Admin')");
+    await htmlInsertText(editor, "nice to meet you!");
+    await contains(".o-mail-Composer-html.odoo-editor-editable:text('Hello @Mitchell Admin nice to meet you!')");
+    await focus(editor.editable);
+    await press("Control+a");
+    cut(editor);
+    await contains(editor.editable, { textContent: "" });
+
+    // thread with an icon in the middle of the message
+    await htmlInsertText(editor, "Hello #general");
+    await click(".o-mail-NavigableList-item:text('General')");
+    await contains(".o-mail-Composer-html.odoo-editor-editable:text('Hello General')");
+    await contains(editor.editable.querySelector("i.fa-hashtag"));
+    await htmlInsertText(editor, "nice to meet you!");
+    await contains(".o-mail-Composer-html.odoo-editor-editable:text('Hello General nice to meet you!')");
+    await focus(editor.editable);
+    await press("Control+a");
+    cut(editor);
+    await contains(editor.editable.querySelector("i.fa-hashtag"), { count: 0 });
+    await contains(editor.editable, { textContent: "" });
+
+    // partner at the end of the message
+    await htmlInsertText(editor, "Hello @admin");
+    await click(".o-mail-NavigableList-item:text('Mitchell Admin')");
+    await contains(".o-mail-Composer-html.odoo-editor-editable:text('Hello @Mitchell Admin')");
+    await focus(editor.editable);
+    await press("Control+a");
+    cut(editor);
+    await contains(editor.editable, { textContent: "" });
+
+    // thread with an icon at the end of the message
+    await htmlInsertText(editor, "Hello #general");
+    await click(".o-mail-NavigableList-item:text('General')");
+    await contains(".o-mail-Composer-html.odoo-editor-editable:text('Hello General')");
+    await contains(editor.editable.querySelector("i.fa-hashtag"));
+    await focus(editor.editable);
+    await press("Control+a");
+    cut(editor);
     await contains(editor.editable.querySelector("i.fa-hashtag"), { count: 0 });
     await contains(editor.editable, { textContent: "" });
 });

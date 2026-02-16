@@ -59,7 +59,7 @@ patch(DiscussApp.prototype, {
                     hideWhenEmpty: true,
                     icon: "fa fa-commenting-o",
                     id: `im_livechat.category_default`,
-                    name: _t("Livechat"),
+                    name: _t("Live Chat"),
                     sequence: 21,
                 };
             },
@@ -82,6 +82,14 @@ patch(DiscussApp.prototype, {
         });
         this.lastThread = fields.One("mail.thread");
         this.livechats = fields.Many("discuss.channel", { inverse: "appAsLivechats" });
+        this.isLivechatInfoPanelOpenByDefault = fields.Attr(true, { localStorage: true });
+    },
+
+    shouldDisableMemberPanelAutoOpenFromClose(nextActiveAction) {
+        if (nextActiveAction?.id === "livechat-info") {
+            return false;
+        }
+        return super.shouldDisableMemberPanelAutoOpenFromClose(...arguments);
     },
 
     _threadOnUpdate() {

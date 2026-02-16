@@ -5,6 +5,7 @@ import unittest
 
 from datetime import date
 from dateutil.relativedelta import relativedelta
+from freezegun import freeze_time
 
 from odoo import tests
 from odoo.addons.hr_holidays.tests.common import TestHrHolidaysCommon
@@ -20,10 +21,13 @@ class TestHrHolidaysAccessRightsCommon(TestHrHolidaysCommon):
     @classmethod
     def setUpClass(cls):
         super(TestHrHolidaysAccessRightsCommon, cls).setUpClass()
-        cls.leave_type = cls.env['hr.leave.type'].create({
+        cls.work_entry_type = cls.env['hr.work.entry.type'].create({
             'name': 'Unlimited',
+            'code': 'Unlimited',
             'leave_validation_type': 'hr',
             'requires_allocation': False,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
         cls.rd_dept.manager_id = False
         cls.hr_dept.manager_id = False
@@ -33,35 +37,47 @@ class TestHrHolidaysAccessRightsCommon(TestHrHolidaysCommon):
 
         cls.employee_leave = cls.env['hr.leave'].with_user(cls.user_employee_id).create({
             'name': 'Test',
-            'holiday_status_id': cls.leave_type.id,
+            'work_entry_type_id': cls.work_entry_type.id,
             'department_id': cls.employee_emp.department_id.id,
             'employee_id': cls.employee_emp.id,
             'request_date_from': leave_day,
             'request_date_to': leave_day,
         })
 
-        cls.lt_no_validation = cls.env['hr.leave.type'].create({
+        cls.lt_no_validation = cls.env['hr.work.entry.type'].create({
             'name': 'Validation = no_validation',
+            'code': 'Validation = no_validation',
             'leave_validation_type': 'hr',
             'requires_allocation': False,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
 
-        cls.lt_validation_hr = cls.env['hr.leave.type'].create({
+        cls.lt_validation_hr = cls.env['hr.work.entry.type'].create({
             'name': 'Validation = HR',
+            'code': 'Validation = HR',
             'leave_validation_type': 'hr',
             'requires_allocation': False,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
 
-        cls.lt_validation_manager = cls.env['hr.leave.type'].create({
+        cls.lt_validation_manager = cls.env['hr.work.entry.type'].create({
             'name': 'Validation = manager',
+            'code': 'Validation = manager',
             'leave_validation_type': 'hr',
             'requires_allocation': False,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
 
-        cls.lt_validation_both = cls.env['hr.leave.type'].create({
+        cls.lt_validation_both = cls.env['hr.work.entry.type'].create({
             'name': 'Validation = both',
+            'code': 'Validation = both',
             'leave_validation_type': 'hr',
             'requires_allocation': False,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
 
         cls.confirm_status = [
@@ -90,7 +106,7 @@ class TestAccessRightsCreate(TestHrHolidaysAccessRightsCommon):
         values = {
             'name': 'Hol10',
             'employee_id': self.employee_emp_id,
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
         }
         self.request_leave(self.user_employee_id, date.today() + relativedelta(days=5), 1, values)
 
@@ -100,7 +116,7 @@ class TestAccessRightsCreate(TestHrHolidaysAccessRightsCommon):
         values = {
             'name': 'Hol10',
             'employee_id': self.employee_hruser_id,
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
         }
         with self.assertRaises(AccessError):
             self.request_leave(self.user_employee_id, date.today() + relativedelta(days=5), 1, values)
@@ -114,7 +130,7 @@ class TestAccessRightsCreate(TestHrHolidaysAccessRightsCommon):
         values = {
             'name': 'Hol10',
             'employee_id': self.employee_hruser_id,
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
         }
         self.request_leave(self.user_hruser_id, date.today() + relativedelta(days=5), 1, values)
 
@@ -124,7 +140,7 @@ class TestAccessRightsCreate(TestHrHolidaysAccessRightsCommon):
         values = {
             'name': 'Hol10',
             'employee_id': self.employee_emp_id,
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
         }
         self.request_leave(self.user_hruser_id, date.today() + relativedelta(days=5), 1, values)
 
@@ -136,7 +152,7 @@ class TestAccessRightsCreate(TestHrHolidaysAccessRightsCommon):
         values = {
             'name': 'Hol10',
             'employee_id': self.employee_hrmanager_id,
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
         }
         self.request_leave(self.user_hrmanager_id, date.today() + relativedelta(days=5), 1, values)
 
@@ -146,7 +162,7 @@ class TestAccessRightsCreate(TestHrHolidaysAccessRightsCommon):
         values = {
             'name': 'Hol10',
             'employee_id': self.employee_emp_id,
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
         }
         self.request_leave(self.user_hrmanager_id, date.today() + relativedelta(days=5), 1, values)
 
@@ -160,7 +176,7 @@ class TestAccessRightsRead(TestHrHolidaysAccessRightsCommon):
         """ Users should not be able to read other people requests """
         other_leave = self.env['hr.leave'].with_user(self.user_hruser).create({
             'name': 'Test',
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
             'department_id': self.employee_hruser.department_id.id,
             'employee_id': self.employee_hruser.id,
             'request_date_from': date.today(),
@@ -174,7 +190,7 @@ class TestAccessRightsRead(TestHrHolidaysAccessRightsCommon):
         """ Users should not be able to browse other people requests """
         other_leave = self.env['hr.leave'].with_user(self.user_hruser).create({
             'name': 'Test',
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
             'department_id': self.employee_hruser.department_id.id,
             'employee_id': self.employee_hruser.id,
             'request_date_from': date.today(),
@@ -205,7 +221,7 @@ class TestAccessRightsWrite(TestHrHolidaysAccessRightsCommon):
         """ User cannot update other people leaves """
         other_leave = self.env['hr.leave'].with_user(self.user_hruser).create({
             'name': 'Test',
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
             'department_id': self.employee_hruser.department_id.id,
             'employee_id': self.employee_hruser.id,
             'request_date_from': date.today(),
@@ -222,7 +238,7 @@ class TestAccessRightsWrite(TestHrHolidaysAccessRightsCommon):
             HolidaysEmployeeGroup.create({
                 'name': 'Hol10',
                 'employee_id': self.employee_hruser_id,
-                'holiday_status_id': self.leave_type.id,
+                'work_entry_type_id': self.work_entry_type.id,
                 'request_date_from': (date.today() - relativedelta(days=1)),
                 'request_date_to': date.today(),
             })
@@ -276,7 +292,7 @@ class TestAccessRightsWrite(TestHrHolidaysAccessRightsCommon):
         leave_start = date_utils.start_of(date.today() + relativedelta(days=15), 'week')
         manager_leave = self.env['hr.leave'].with_user(self.user_hrmanager_id).create({
             'name': 'Hol manager',
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
             'employee_id': self.employee_hrmanager_id,
             'request_date_from': leave_start,
             'request_date_to': leave_start + relativedelta(days=1),
@@ -294,11 +310,11 @@ class TestAccessRightsWrite(TestHrHolidaysAccessRightsCommon):
     @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
     def test_leave_manager_to_validate_by_user(self):
         """ A simple user can validate in manager mode if he is leave_manager_id """
-        self.leave_type.write({'leave_validation_type': 'manager'})
+        self.work_entry_type.write({'leave_validation_type': 'manager'})
         values = {
             'name': 'Hol HrUser',
             'employee_id': self.employee_hruser_id,
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
             'state': 'confirm',
         }
         hr_leave = self.request_leave(self.user_hruser_id, date_utils.start_of(date.today() + relativedelta(days=7), 'week'), 1, values)
@@ -312,11 +328,11 @@ class TestAccessRightsWrite(TestHrHolidaysAccessRightsCommon):
     @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
     def test_leave_manager_to_validate_by_holiday_user(self):
         """ A holiday user can validate in manager mode """
-        self.leave_type.write({'leave_validation_type': 'manager'})
+        self.work_entry_type.write({'leave_validation_type': 'manager'})
         values = {
             'name': 'Hol HrUser',
             'employee_id': self.employee_emp_id,
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
             'state': 'confirm',
         }
         hr_leave = self.request_leave(self.user_hruser_id, date_utils.start_of(date.today() + relativedelta(days=7), 'week'), 1, values)
@@ -328,11 +344,11 @@ class TestAccessRightsWrite(TestHrHolidaysAccessRightsCommon):
 
     @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
     def test_leave_double_validate(self):
-        self.leave_type.write({'leave_validation_type': 'both'})
+        self.work_entry_type.write({'leave_validation_type': 'both'})
         values = {
             'name': 'double HrManager',
             'employee_id': self.employee_hrmanager_id,
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
             'state': 'confirm',
         }
         self.employee_hrmanager.leave_manager_id = self.env['res.users'].browse(1)
@@ -352,11 +368,11 @@ class TestAccessRightsWrite(TestHrHolidaysAccessRightsCommon):
 
     @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
     def test_leave_double_validate_holiday_manager(self):
-        self.leave_type.write({'leave_validation_type': 'both'})
+        self.work_entry_type.write({'leave_validation_type': 'both'})
         values = {
             'name': 'double HrManager',
             'employee_id': self.employee_emp_id,
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
             'state': 'confirm',
         }
         leave_start = date_utils.start_of(date.today() + relativedelta(days=15), 'week')
@@ -376,6 +392,32 @@ class TestAccessRightsWrite(TestHrHolidaysAccessRightsCommon):
     # hr_holidays.group_hr_holidays_manager
 
     # TODO Can refuse
+
+    # hr_holidays.group_hr_holidays_responsible
+
+    @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
+    @freeze_time('2026-01-23 10:00:00')
+    def test_holiday_responsible_refuse_leave(self):
+        """
+            The holiday responsible should be able to accept and refuse correct type leaves of users they are responsible for
+        """
+        respo_user = self.user_responsible
+        self.employee_emp.leave_manager_id = respo_user
+
+        for validatation_type in ['manager', 'both']:
+            self.work_entry_type.write({'leave_validation_type': validatation_type})
+            values = {
+                'name': 'Random Time Off',
+                'employee_id': self.employee_emp.id,
+                'work_entry_type_id': self.work_entry_type.id,
+                'state': 'confirm',
+            }
+            leave = self.request_leave(self.user_employee, date.today(), 1, values)
+            leave.with_user(respo_user).action_refuse()
+            # Check that refusing after first approval also works
+            leave = self.request_leave(self.user_employee, date.today(), 1, values)
+            leave.with_user(respo_user).action_approve()
+            leave.with_user(respo_user).action_refuse()
 
     # ----------------------------------------
     # State = Cancel
@@ -403,7 +445,7 @@ class TestAccessRightsUnlink(TestHrHolidaysAccessRightsCommon):
         values = {
             'name': 'Random Time Off',
             'employee_id': self.employee_emp.id,
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
             'state': 'confirm',
         }
         leave = self.request_leave(self.user_employee_id, date.today() + relativedelta(days=6), 1, values)
@@ -414,7 +456,7 @@ class TestAccessRightsUnlink(TestHrHolidaysAccessRightsCommon):
         values = {
             'name': 'Random Time Off',
             'employee_id': self.employee_emp.id,
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
             'state': 'confirm',
         }
         leave = self.request_leave(self.user_employee_id, date.today() + relativedelta(days=-4), 1, values)
@@ -426,101 +468,9 @@ class TestAccessRightsUnlink(TestHrHolidaysAccessRightsCommon):
         values = {
             'name': 'Random Time Off',
             'employee_id': self.employee_emp.id,
-            'holiday_status_id': self.leave_type.id,
+            'work_entry_type_id': self.work_entry_type.id,
         }
         leave = self.request_leave(self.user_employee_id, date.today() + relativedelta(days=6), 1, values)
         leave.with_user(self.user_hrmanager_id).write({'state': 'validate'})
         with self.assertRaises(UserError):
             leave.with_user(self.user_employee.id).unlink()
-
-
-@tagged('at_install', '-post_install')  # LEGACY at_install
-class TestMultiCompany(TestHrHolidaysCommon):
-
-    @classmethod
-    def setUpClass(cls):
-        super(TestMultiCompany, cls).setUpClass()
-        cls.new_company = cls.env['res.company'].create({
-            'name': 'Crocodile Dundee Company',
-        })
-        cls.leave_type = cls.env['hr.leave.type'].create({
-            'name': 'Unlimited - Company New',
-            'company_id': cls.new_company.id,
-            'leave_validation_type': 'hr',
-            'requires_allocation': False,
-        })
-        cls.employee_emp.company_id = cls.new_company
-        cls.rd_dept.manager_id = False
-        cls.hr_dept.manager_id = False
-
-        cls.employee_leave = cls.env['hr.leave'].create({
-            'name': 'Test',
-            'holiday_status_id': cls.leave_type.id,
-            'department_id': cls.employee_emp.department_id.id,
-            'employee_id': cls.employee_emp.id,
-            'request_date_from': date.today(),
-            'request_date_to': date.today() + relativedelta(days=1),
-        })
-
-    @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
-    def test_leave_access_other_company_user(self):
-        employee_leave = self.employee_leave.with_user(self.user_employee)
-        employee_leave.invalidate_model(['name'])
-        with self.assertRaises(AccessError):
-            employee_leave.name
-
-        with self.assertRaises(UserError):
-            employee_leave.action_approve()
-
-    @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
-    def test_leave_access_other_company_officer(self):
-        employee_leave_hruser = self.employee_leave.with_user(self.user_hruser)
-        employee_leave_hruser.invalidate_model(['name'])
-        with self.assertRaises(AccessError):
-            employee_leave_hruser.name
-
-        with self.assertRaises(UserError):
-            employee_leave_hruser.action_approve()
-
-    @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
-    def test_leave_access_other_company_manager(self):
-        employee_leave_hrmanager = self.employee_leave.with_user(self.user_hrmanager)
-        employee_leave_hrmanager.invalidate_model(['name'])
-        with self.assertRaises(AccessError):
-            employee_leave_hrmanager.name
-
-        with self.assertRaises(UserError):
-            employee_leave_hrmanager.action_approve()
-
-    @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
-    def test_leave_access_no_company_user(self):
-        self.employee_emp.company_id = self.user_employee.company_id
-        self.leave_type.write({'company_id': False})
-        employee_leave = self.employee_leave.with_user(self.user_employee)
-
-        employee_leave.name
-        with self.assertRaises(UserError):
-            employee_leave.action_approve()
-        self.assertEqual(employee_leave.state, 'confirm')
-
-    @unittest.skip
-    @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
-    def test_leave_access_no_company_officer(self):
-        self.employee_emp.company_id = self.user_employee.company_id
-        self.leave_type.write({'company_id': False})
-        employee_leave_hruser = self.employee_leave.with_user(self.user_hruser)
-
-        employee_leave_hruser.name
-        employee_leave_hruser.action_approve()
-        self.assertEqual(employee_leave_hruser.state, 'validate')
-
-    @unittest.skip
-    @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
-    def test_leave_access_no_company_manager(self):
-        self.employee_emp.company_id = self.user_employee.company_id
-        self.leave_type.write({'company_id': False})
-        employee_leave_hrmanager = self.employee_leave.with_user(self.user_hrmanager)
-
-        employee_leave_hrmanager.name
-        employee_leave_hrmanager.action_approve()
-        self.assertEqual(employee_leave_hrmanager.state, 'validate')

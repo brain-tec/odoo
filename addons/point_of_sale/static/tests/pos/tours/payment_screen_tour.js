@@ -11,6 +11,7 @@ import { negateStep } from "@point_of_sale/../tests/generic_helpers/utils";
 import { inLeftSide } from "./utils/common";
 
 registry.category("web_tour.tours").add("PaymentScreenTour", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -110,6 +111,7 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingUp", {
             PaymentScreen.clickValidate(),
 
             Chrome.clickOrders(),
+            TicketScreen.isReady(),
             TicketScreen.selectFilter("Paid"),
             TicketScreen.selectOrder("001"),
             inLeftSide([
@@ -138,6 +140,7 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingDown", {
             PaymentScreen.clickValidate(),
 
             Chrome.clickOrders(),
+            TicketScreen.isReady(),
             TicketScreen.selectFilter("Paid"),
             TicketScreen.selectOrder("001"),
             inLeftSide([
@@ -154,6 +157,7 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingDown", {
 });
 
 registry.category("web_tour.tours").add("PaymentScreenTotalDueWithOverPayment", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -176,7 +180,7 @@ registry.category("web_tour.tours").add("InvoiceShipLaterAccessRight", {
             ProductScreen.clickHomeCategory(),
             ProductScreen.addOrderline("Whiteboard Pen", "1"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Deco Addict"),
+            ProductScreen.clickCustomer("Acme Corporation"),
             ProductScreen.clickPayButton(),
 
             PaymentScreen.clickPaymentMethod("Cash"),
@@ -204,6 +208,7 @@ registry.category("web_tour.tours").add("PaymentScreenInvoiceOrder", {
 });
 
 registry.category("web_tour.tours").add("test_pos_large_amount_confirmation_dialog", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -222,6 +227,7 @@ registry.category("web_tour.tours").add("test_pos_large_amount_confirmation_dial
 });
 
 registry.category("web_tour.tours").add("test_add_money_button_with_different_decimal_separator", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),

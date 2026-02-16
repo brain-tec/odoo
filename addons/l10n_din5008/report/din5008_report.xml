@@ -184,7 +184,7 @@
         </template>
 
         <template id="report_invoice_document" inherit_id="account.report_invoice_document">
-            <xpath expr="//t[@t-set='forced_vat']" position="after">
+            <t t-call="web.external_layout" position="before">
                 <t t-set="din5008_document_information">
                     <div class="information_block" t-if="o and o._name=='account.move'">
                         <table>
@@ -203,6 +203,13 @@
                             <tr t-if="o.delivery_date">
                                 <td>Delivery Date</td>
                                 <td><t t-out="o.delivery_date" t-options="{'widget': 'date'}"/></td>
+                            </tr>
+                            <tr t-if="o.invoice_incoterm_id">
+                                <td>Incoterm</td>
+                                <td t-if="o.incoterm_location">
+                                    <span t-out="o.invoice_incoterm_id.code"/> - <span t-out="o.incoterm_location"/>
+                                </td>
+                                <td t-else="" t-out="o.invoice_incoterm_id.code"/>
                             </tr>
                             <tr t-if="o.invoice_origin">
                                 <td>Source</td>
@@ -263,7 +270,12 @@
                         <t t-if="o.move_type == 'in_invoice'">Vendor Bill</t>
                     </span>
                 </t>
-            </xpath>
+            </t>
+            <t t-call="web.external_layout" position="attributes">
+                <attribute name="din5008_document_information">din5008_document_information</attribute>
+                <attribute name="din5008_address_block">din5008_address_block</attribute>
+                <attribute name="din5008_document_title">din5008_document_title</attribute>
+            </t>
             <!-- Insert Position Column as the First Column in the Table Header -->
             <xpath expr="//table[@name='invoice_line_table']/thead/tr/th[1]" position="before">
                 <t t-if="o.company_id.has_position_column">

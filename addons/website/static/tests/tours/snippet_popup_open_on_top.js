@@ -4,11 +4,13 @@ import {
     clickOnSave,
     insertSnippet,
     registerWebsitePreviewTour,
+    unfoldOptionsGroup,
 } from "@website/js/tours/tour_utils";
 
 registerWebsitePreviewTour(
     "snippet_popup_open_on_top",
     {
+        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/",
         edition: true,
     },
@@ -23,6 +25,7 @@ registerWebsitePreviewTour(
             trigger: ":iframe .s_popup p.lead",
             run: "editor " + " hello world".repeat(300),
         },
+        ...unfoldOptionsGroup("Popup"),
         {
             content: "Set delay to 0 second",
             trigger: '[data-action-id="setPopupDelay"] input',

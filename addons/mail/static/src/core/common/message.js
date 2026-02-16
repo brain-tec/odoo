@@ -12,6 +12,7 @@ import { RelativeTime } from "@mail/core/common/relative_time";
 import { htmlToTextContentInline } from "@mail/utils/common/format";
 import { isEventHandled, markEventHandled } from "@web/core/utils/misc";
 import { renderToElement } from "@web/core/utils/render";
+import { nbsp } from "@web/core/utils/strings";
 
 import {
     Component,
@@ -39,7 +40,8 @@ import { NotificationMessage } from "./notification_message";
 import { useForwardRefsToParent, useLongPress } from "@mail/utils/common/hooks";
 import { ActionList } from "@mail/core/common/action_list";
 import { loadCssFromBundle } from "@mail/utils/common/misc";
-import { MessageContextMenu } from "./message_context_menu";
+import { MessageContextMenu } from "@mail/core/common/message_context_menu";
+import { Priority } from "@mail/core/common/priority";
 
 /**
  * @typedef {Object} Props
@@ -75,6 +77,7 @@ export class Message extends Component {
         PollResult,
         RelativeTime,
         NotificationMessage,
+        Priority,
     };
     static defaultProps = {
         hasActions: true,
@@ -100,6 +103,7 @@ export class Message extends Component {
 
     setup() {
         super.setup();
+        this.nbsp = nbsp;
         this.store = useService("mail.store");
         this.popover = usePopover(this.constructor.components.Popover, { position: "top" });
         this.state = useState({
@@ -467,6 +471,13 @@ export class Message extends Component {
             // Mobile OS long press is handled with useLongPress()
             return;
         }
+        if (ev.target.tagName === "A") {
+            return;
+        }
+        this.showRightClickMessageActions(ev);
+    }
+
+    showRightClickMessageActions(ev) {
         const el = this.rightClickAnchor.el;
         el.style.left = ev.clientX + "px";
         el.style.top = ev.clientY + "px";
@@ -481,7 +492,9 @@ export class Message extends Component {
             return;
         }
         const editedEl = bodyEl.querySelector(".o-mail-Message-edited");
-        editedEl?.replaceChildren(renderToElement("mail.Message.edited"));
+        editedEl?.replaceChildren(
+            renderToElement("mail.Message.edited", { message: this.message })
+        );
         const channelLinks = bodyEl.querySelectorAll("a.o_channel_redirect");
         this.store.handleValidChannelMention(Array.from(channelLinks));
         for (const el of bodyEl.querySelectorAll(".o_message_redirect")) {
@@ -529,10 +542,9 @@ export class Message extends Component {
     }
 
     openReactionMenu(reaction) {
-        const message = toRaw(this.props.message);
         this.dialog.add(
             MessageReactionMenu,
-            { message, initialReaction: reaction },
+            { message: this.props.message, initialReaction: reaction },
             { context: this }
         );
     }

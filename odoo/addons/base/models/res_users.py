@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import binascii
-import contextlib
 import collections
+import contextlib
 import datetime
 import hmac
 import ipaddress
@@ -16,19 +16,26 @@ from hashlib import sha256
 from itertools import chain
 from zoneinfo import ZoneInfo
 
-from lxml import etree
 from markupsafe import Markup
 from passlib.context import CryptContext as _CryptContext
 
-from odoo import api, fields, models, tools, _
+from odoo import _, api, fields, models, tools
 from odoo.api import SUPERUSER_ID
 from odoo.exceptions import AccessDenied, AccessError, UserError, ValidationError
 from odoo.fields import Command, Domain
-from odoo.http import request, DEFAULT_LANG
-from odoo.tools import email_domain_extract, is_html_empty, frozendict, reset_cached_properties, SQL
+from odoo.http import request
+from odoo.http.session import DEFAULT_LANG
+from odoo.tools import (
+    SQL,
+    email_domain_extract,
+    frozendict,
+    is_html_empty,
+    reset_cached_properties,
+)
 from odoo.tools.date_utils import all_timezones
 
 _logger = logging.getLogger(__name__)
+
 
 class CryptContext:
     def __init__(self, *args, **kwargs):
@@ -290,6 +297,15 @@ class ResUsers(models.Model):
     def _rpc_api_keys_only(self):
         """ To be overridden if RPC access needs to be restricted to API keys, e.g. for 2FA """
         return False
+
+    def _get_auth_methods(self):
+        """ Return a list of authentication methods available to the user. """
+        self.ensure_one()
+        auth_methods = []
+        if mfa_type := self._mfa_type():
+            auth_methods.append(mfa_type)
+        auth_methods.append('password')
+        return auth_methods
 
     def _check_credentials(self, credential, env):
         """ Validates the current user's password.
@@ -1300,9 +1316,10 @@ class UsersMultiCompany(models.Model):
             'base.group_multi_company', raise_if_not_found=False)
         if group_multi_company_id:
             for user in users:
-                if len(user.company_ids) <= 1 and group_multi_company_id in user.group_ids.ids:
+                company_count = len(user.sudo().company_ids)
+                if company_count <= 1 and group_multi_company_id in user.group_ids.ids:
                     user.write({'group_ids': [Command.unlink(group_multi_company_id)]})
-                elif len(user.company_ids) > 1 and group_multi_company_id not in user.group_ids.ids:
+                elif company_count > 1 and group_multi_company_id not in user.group_ids.ids:
                     user.write({'group_ids': [Command.link(group_multi_company_id)]})
         return users
 
@@ -1314,9 +1331,10 @@ class UsersMultiCompany(models.Model):
             'base.group_multi_company', raise_if_not_found=False)
         if group_multi_company_id:
             for user in self:
-                if len(user.company_ids) <= 1 and group_multi_company_id in user.group_ids.ids:
+                company_count = len(user.sudo().company_ids)
+                if company_count <= 1 and group_multi_company_id in user.group_ids.ids:
                     user.write({'group_ids': [Command.unlink(group_multi_company_id)]})
-                elif len(user.company_ids) > 1 and group_multi_company_id not in user.group_ids.ids:
+                elif company_count > 1 and group_multi_company_id not in user.group_ids.ids:
                     user.write({'group_ids': [Command.link(group_multi_company_id)]})
         return res
 
@@ -1328,9 +1346,10 @@ class UsersMultiCompany(models.Model):
         group_multi_company_id = self.env['ir.model.data']._xmlid_to_res_id(
             'base.group_multi_company', raise_if_not_found=False)
         if group_multi_company_id:
-            if len(user.company_ids) <= 1 and group_multi_company_id in user.group_ids.ids:
+            company_count = len(user.sudo().company_ids)
+            if company_count <= 1 and group_multi_company_id in user.group_ids.ids:
                 user.update({'group_ids': [Command.unlink(group_multi_company_id)]})
-            elif len(user.company_ids) > 1 and group_multi_company_id not in user.group_ids.ids:
+            elif company_count > 1 and group_multi_company_id not in user.group_ids.ids:
                 user.update({'group_ids': [Command.link(group_multi_company_id)]})
         return user
 

@@ -9,7 +9,9 @@ import { evaluateExpr } from "@web/core/py_js/py";
 import { domainFromTree } from "@web/core/tree_editor/domain_from_tree";
 import { user } from "@web/core/user";
 import { groupBy, sortBy } from "@web/core/utils/arrays";
+import { useService } from "@web/core/utils/hooks";
 import { deepCopy } from "@web/core/utils/objects";
+import { router } from "@web/core/browser/router";
 import { SearchArchParser } from "./search_arch_parser";
 import {
     constructDateDomain,
@@ -21,6 +23,7 @@ import {
     yearSelected,
 } from "./utils/dates";
 import { FACET_COLORS, FACET_ICONS } from "./utils/misc";
+import { hashCode } from "@web/core/utils/strings";
 
 const { DateTime } = luxon;
 
@@ -54,9 +57,16 @@ const { DateTime } = luxon;
  *  resId?: number | false;
  *  useSampleModel?: boolean;
  * }} SearchParams
+ *
+ * @typedef {{
+ *  key: string,
+ *  facets: Object[];
+ *  domain: string;
+ *  groupBys: string[];
+ * }} Search
  */
 
-const SPECIAL = Symbol("special");
+const DEFAULT_GROUPBY_ID = -1;
 
 /** @todo rework doc */
 // interface SectionCommon { // check optional keys
@@ -135,12 +145,21 @@ function arraytoMap(array) {
  * @param {Object} target
  */
 function execute(op, source, target) {
-    const { query, nextId, nextGroupId, nextGroupNumber, searchItems, searchPanelInfo, sections } =
-        source;
+    const {
+        query,
+        nextId,
+        nextGroupId,
+        nextGroupNumber,
+        searchItems,
+        searchPanelInfo,
+        sections,
+        _appliedSearch,
+    } = source;
 
     target.nextGroupId = nextGroupId;
     target.nextGroupNumber = nextGroupNumber;
     target.nextId = nextId;
+    target._appliedSearch = _appliedSearch;
 
     target.query = query;
     target.searchItems = searchItems;
@@ -175,13 +194,15 @@ export class SearchModel extends EventBus {
 
     setup(services) {
         // services
-        const { field: fieldService, orm, view, dialog, treeProcessor } = services;
+        const { field: fieldService, offline, orm, view, dialog, treeProcessor } = services;
         this.orm = orm;
         this.fieldService = fieldService;
+        this.offlineService = toRaw(offline);
         this.viewService = view;
         this.treeProcessor = treeProcessor;
         this.dialog = dialog;
         this.orderByCount = false;
+        this.notificationService = useService("notification");
 
         // used to manage search items related to date/datetime fields
         this.referenceMoment = DateTime.local();
@@ -320,11 +341,17 @@ export class SearchModel extends EventBus {
             this._createGroupOfDynamicFilters(dynamicFilters);
         }
 
-        const defaultFavoriteId = this._createGroupOfFavorites(this.irFilters || []);
-        const activateFavorite = "activateFavorite" in config ? config.activateFavorite : true;
-
-        // activate default search items (populate this.query)
-        this._activateDefaultSearchItems(activateFavorite ? defaultFavoriteId : null);
+        // Activate filters if necessary (from url or saved filters)
+        const { domain: urlDomain, groupBy: urlGroupBy, orderBy: urlOrderBy } = router.current;
+        let useUrl = urlDomain || urlGroupBy || urlOrderBy;
+        if (useUrl) {
+            useUrl = this._tryApplySharedFilters(urlDomain, urlGroupBy, urlOrderBy); // Returns False if no filters could be activated
+        }
+        if (!useUrl) {
+            const defaultFavoriteId = this._createGroupOfFavorites(this.irFilters || []);
+            const activateFavorite = "activateFavorite" in config ? config.activateFavorite : true;
+            this._activateDefaultSearchItems(activateFavorite ? defaultFavoriteId : null);
+        }
 
         // prepare search panel sections
 
@@ -493,6 +520,26 @@ export class SearchModel extends EventBus {
     }
 
     /**
+     * Apply the given search. Typically called offline, with a Search that has
+     * been previously obtained through @getCurrentSearch.
+     *
+     * @param {Search} search
+     */
+    applySearch(search) {
+        this.query = []; // remove everything
+        this._appliedSearch = search;
+        const { domain, groupBys } = search;
+        if (domain !== "[]") {
+            const description = _t("Custom filter");
+            this.createNewFilters([
+                { description, domain, name: "custom filter", invisible: "True" },
+            ]);
+        }
+        this._toggleGroupBys(groupBys);
+        this._notify();
+    }
+
+    /**
      * Remove all the query elements from query.
      */
     clearQuery() {
@@ -622,7 +669,7 @@ export class SearchModel extends EventBus {
      * with given groupId.
      */
     deactivateGroup(groupId) {
-        if (groupId === SPECIAL) {
+        if (groupId === DEFAULT_GROUPBY_ID) {
             delete this.defaultGroupBy;
             this._notify();
             return;
@@ -642,6 +689,29 @@ export class SearchModel extends EventBus {
         const state = {};
         execute(mapToArray, this, state);
         return state;
+    }
+
+    /**
+     * Returns the current search, which can then be re-applied in the future,
+     * when being offline, with @applySearch.
+     *
+     * @returns Search
+     */
+    getCurrentSearch() {
+        if (!this.offlineService.offline) {
+            delete this._appliedSearch;
+        } else if (this._appliedSearch) {
+            return this._appliedSearch;
+        }
+        const { preFavorite } = this._getIrFilterDescription();
+        const { domain, groupBys } = preFavorite; // TODO: handle orderBy ?
+        const key = hashCode(`${JSON.stringify(domain)},${JSON.stringify(groupBys)}}`);
+        return {
+            key,
+            facets: this.facets,
+            domain,
+            groupBys,
+        };
     }
 
     getIrFilterValues(params) {
@@ -854,6 +924,7 @@ export class SearchModel extends EventBus {
         switch (searchItem.type) {
             case "dateFilter":
             case "dateGroupBy":
+            case "parentFilter":
             case "field_property":
             case "field": {
                 return;
@@ -877,9 +948,9 @@ export class SearchModel extends EventBus {
      * This can impact the query in various form, e.g. add/remove other query elements
      * in case the filter is of type 'filter'.
      */
-    toggleDateFilter(searchItemId, generatorId) {
+    toggleParentFilter(searchItemId, generatorId) {
         const searchItem = this.searchItems[searchItemId];
-        if (searchItem.type !== "dateFilter") {
+        if (searchItem.type !== "dateFilter" && searchItem.type !== "parentFilter") {
             return;
         }
         const generatorIds = generatorId ? [generatorId] : searchItem.defaultGeneratorIds;
@@ -892,6 +963,9 @@ export class SearchModel extends EventBus {
             );
             if (index >= 0) {
                 this.query.splice(index, 1);
+                if (searchItem.type === "parentFilter") {
+                    continue;
+                }
                 if (!yearSelected(this._getSelectedGeneratorIds(searchItemId))) {
                     // This is the case where generatorId was the last option
                     // of type 'year' to be there before being removed above.
@@ -903,9 +977,11 @@ export class SearchModel extends EventBus {
                 }
             } else {
                 if (generatorId.startsWith("custom")) {
-                    this.query = this.query.filter(
-                        (queryElem) => searchItemId !== queryElem.searchItemId
-                    );
+                    if (searchItem.type !== "parentFilter") {
+                        this.query = this.query.filter(
+                            (queryElem) => searchItemId !== queryElem.searchItemId
+                        );
+                    }
                     this.query.push({ searchItemId, generatorId });
                     continue;
                 }
@@ -1156,6 +1232,116 @@ export class SearchModel extends EventBus {
     }
 
     /**
+     * Creates 1 "Shared" filter from encoded domain, and 1 grouped filter from groupby +orderBy.
+     * Raises notification warning in case of partial or total filter activation error(s).
+     * @return {boolean} Success - False if 0 filter activated successfully from url
+     */
+    _tryApplySharedFilters(urlDomain, urlGroupBy, urlOrderBy) {
+        const urlApplyStatus = { anyErrors: false, anySuccess: false };
+
+        this._createUrlFilter(urlDomain, urlApplyStatus);
+        this._createUrlGroupBy(urlGroupBy, urlApplyStatus);
+        this._createUrlOrderBy(urlOrderBy, urlApplyStatus);
+
+        if (!urlApplyStatus.anySuccess) {
+            this.notificationService.add(_t("Shared filters couldn't be applied"), {
+                type: "danger",
+            });
+            return false; // Default back to favorite / default filters
+        } else if (urlApplyStatus.anyErrors) {
+            this.notificationService.add(_t("Warning: Not all shared filters applied"), {
+                type: "warning",
+            });
+            return true;
+        }
+        return true;
+    }
+
+    /**
+     * Creates 1 "Shared" filter from URl encoded domain.
+     * @param {string} urlDomain - Uri encoded domain
+     * @param {{ anyErrors: boolean, anySuccess: boolean }} urlApplyStatus
+     */
+    _createUrlFilter(urlDomain, urlApplyStatus) {
+        if (!urlDomain) {
+            return;
+        }
+        try {
+            const decodedDomain = decodeURIComponent(urlDomain);
+            this.createNewFilters([
+                {
+                    description: "Shared",
+                    domain: new Domain(decodedDomain).toString(),
+                    name: "sharedDomainFromUrl",
+                },
+            ]);
+            urlApplyStatus.anySuccess = true;
+        } catch {
+            urlApplyStatus.anyErrors = true; // Continue trying to parse other search param
+        }
+    }
+
+    /**
+     * Recreates GroupBys (including sub items and order) filter from encoded parameters
+     * @param {string} urlGroupBy - encoded list of fields to group by
+     * @param {{ anyErrors: boolean, anySuccess: boolean }} urlApplyStatus
+     */
+    _createUrlGroupBy(urlGroupBy, urlApplyStatus) {
+        try {
+            const decodedGroupBys = urlGroupBy ? JSON.parse(decodeURIComponent(urlGroupBy)) : [];
+            if (decodedGroupBys.length === 0) {
+                return;
+            }
+            this._toggleGroupBys(decodedGroupBys);
+            urlApplyStatus.anySuccess = true;
+        } catch {
+            urlApplyStatus.anyErrors = true; // Continue trying to parse other search param
+        }
+    }
+
+    /**
+     * Recreates ordering logic (either from fields or groupBy)
+     * @param {Object} urlOrderBy - encoded orderBy (can be multiple)
+     * @param {{ anyErrors: boolean, anySuccess: boolean }} urlApplyStatus
+     */
+    _createUrlOrderBy(urlOrderBy, urlApplyStatus) {
+        if (!urlOrderBy) {
+            return;
+        }
+        try {
+            this.globalOrderBy = JSON.parse(decodeURIComponent(urlOrderBy));
+            const orderByCount = this.globalOrderBy.find((o) => o.name == "__count");
+            if (orderByCount) {
+                this.orderByCount = orderByCount.asc ? "Asc" : "Desc";
+            }
+            urlApplyStatus.anySuccess = true;
+        } catch {
+            urlApplyStatus.anyErrors = true; // Continue trying to parse other search param
+        }
+    }
+
+    /**
+     * Encodes search model parameters (domain, groupBys & orderBy) into query string
+     * @return {string} eg. "domain=...,&orderBy=...". Can be empty and never start with "?".
+     */
+    generateQueryString() {
+        const { preFavorite } = this._getIrFilterDescription();
+        const { domain, groupBys, orderBy } = preFavorite; // No need for context, as its only used for groupBys
+
+        const queryParts = [];
+        if (domain !== "[]") {
+            queryParts.push(`domain=${encodeURIComponent(domain)}`);
+        }
+        if (groupBys.length > 0) {
+            queryParts.push(`groupBy=${encodeURIComponent(JSON.stringify(groupBys))}`);
+        }
+        if (orderBy.length > 0) {
+            queryParts.push(`orderBy=${encodeURIComponent(JSON.stringify(orderBy))}`);
+        }
+        return queryParts.join("&");
+    }
+
+    /**
      * Activate the default favorite (if any) or all default filters.
      */
     _activateDefaultSearchItems(defaultFavoriteId) {
@@ -1168,8 +1354,8 @@ export class SearchModel extends EventBus {
                 .filter((f) => f.isDefault && f.type !== "favorite")
                 .sort((f1, f2) => (f1.defaultRank || 100) - (f2.defaultRank || 100))
                 .forEach((f) => {
-                    if (f.type === "dateFilter") {
-                        this.toggleDateFilter(f.id);
+                    if (f.type === "dateFilter" || f.type === "parentFilter") {
+                        this.toggleParentFilter(f.id);
                     } else if (f.type === "dateGroupBy") {
                         this.toggleDateGroupBy(f.id);
                     } else if (f.type === "field") {
@@ -1372,8 +1558,14 @@ export class SearchModel extends EventBus {
                 break;
             case "dateGroupBy":
                 enrichSearchItem.options = _enrichOptions(
-                    this.intervalOptions,
+                    this._getIntervalOptions(searchItem),
                     queryElements.map((queryElem) => queryElem.intervalId)
+                );
+                break;
+            case "parentFilter":
+                enrichSearchItem.options = _enrichOptions(
+                    searchItem.optionsParams.customOptions,
+                    queryElements.map((queryElem) => queryElem.generatorId)
                 );
                 break;
             case "field":
@@ -1559,11 +1751,22 @@ export class SearchModel extends EventBus {
 
     /**
      * Compute the string representation or the description of the current domain associated
-     * with a date filter starting from its corresponding query elements.
+     * with a parent filter (such as a date filter) starting from its corresponding query elements.
      */
-    _getDateFilterDomain(dateFilter, generatorIds, key = "domain") {
-        const dateFilterRange = constructDateDomain(this.referenceMoment, dateFilter, generatorIds);
-        return dateFilterRange[key];
+    _getParentFilterDomain(searchItem, generatorIds, key = "domain") {
+        if (searchItem.type === "dateFilter") {
+            const dateFilterRange = constructDateDomain(
+                this.referenceMoment,
+                searchItem,
+                generatorIds
+            );
+            return dateFilterRange[key];
+        }
+        const options = searchItem.optionsParams.customOptions
+            .filter((item) => generatorIds.includes(item.id))
+            .map((o) => o[key]);
+
+        return key === "domain" ? Domain.or(options) : options;
     }
 
     /**
@@ -1662,20 +1865,29 @@ export class SearchModel extends EventBus {
                     case "dateGroupBy": {
                         type = "groupBy";
                         for (const intervalId of activeItem.intervalIds) {
-                            const { description } = INTERVAL_OPTIONS[intervalId];
+                            const { description } = this._getIntervalOptionByIntervalId(intervalId);
                             values.push(`${searchItem.description}: ${description}`);
                         }
                         break;
                     }
                     case "dateFilter": {
                         type = "filter";
-                        const periodDescription = this._getDateFilterDomain(
+                        const innerFilterDescription = this._getParentFilterDomain(
                             searchItem,
                             activeItem.generatorIds,
                             "description"
                         );
-                        values.push(`${searchItem.description}: ${periodDescription}`);
-
+                        values.push(`${searchItem.description}: ${innerFilterDescription}`);
+                        break;
+                    }
+                    case "parentFilter": {
+                        type = "filter";
+                        const innerFilterDescription = this._getParentFilterDomain(
+                            searchItem,
+                            activeItem.generatorIds,
+                            "description"
+                        );
+                        innerFilterDescription.forEach((filter) => values.push(filter));
                         break;
                     }
                     default: {
@@ -1717,13 +1929,13 @@ export class SearchModel extends EventBus {
             this.env.config.viewType !== "kanban"
         ) {
             facets.unshift({
-                groupId: SPECIAL,
+                groupId: DEFAULT_GROUPBY_ID,
                 type: "groupBy",
                 values: this.defaultGroupBy.map((gb) => {
                     const [fieldName, interval] = gb.split(":");
                     const { string } = this.searchViewFields[fieldName];
                     if (interval) {
-                        const { description } = INTERVAL_OPTIONS[interval];
+                        const { description } = this._getIntervalOptionByIntervalId(interval);
                         return `${string}:${description}`;
                     }
                     return string;
@@ -1957,7 +2169,9 @@ export class SearchModel extends EventBus {
             }
             for (const activeItem of activeItems) {
                 if ("intervalIds" in activeItem) {
-                    activeItem.intervalIds.sort((g1, g2) => rankInterval(g1) - rankInterval(g2));
+                    activeItem.intervalIds.sort(
+                        (g1, g2) => this._rankInterval(g1) - this._rankInterval(g2)
+                    );
                 }
             }
             groups.push({ id, activeItems });
@@ -1965,6 +2179,17 @@ export class SearchModel extends EventBus {
         return groups;
     }
 
+    _getIntervalOptions(searchItem) {
+        return this.intervalOptions;
+    }
+
+    _getIntervalOptionByIntervalId(intervalId) {
+        return INTERVAL_OPTIONS[intervalId];
+    }
+
+    _rankInterval(intervalOptionId) {
+        return rankInterval(intervalOptionId);
+    }
     /**
      *
      * @private
@@ -2097,8 +2322,9 @@ export class SearchModel extends EventBus {
             case "field": {
                 return this._getFieldDomain(searchItem, activeItem.autocompleteValues);
             }
-            case "dateFilter": {
-                return this._getDateFilterDomain(searchItem, activeItem.generatorIds);
+            case "dateFilter":
+            case "parentFilter": {
+                return this._getParentFilterDomain(searchItem, activeItem.generatorIds);
             }
             case "filter":
             case "favorite": {
@@ -2319,6 +2545,24 @@ export class SearchModel extends EventBus {
         return [...this.sections.values()].some(
             (section) => !section.expand && searchDomainChanged
         );
+    }
+
+    _toggleGroupBys(groupBys) {
+        for (const raw of groupBys) {
+            const [field, interval] = raw.split(":"); // eg. grouping on "dateorder:quarter"
+            const found = Object.values(this.searchItems).find(
+                (f) => ["groupBy", "dateGroupBy"].includes(f.type) && f.fieldName === field
+            );
+            if (found) {
+                if (interval) {
+                    this.toggleDateGroupBy(found.id, interval);
+                } else {
+                    this.toggleSearchItem(found.id);
+                }
+            } else {
+                this.createNewGroupBy(field, { interval });
+            }
+        }
     }
 
     /**

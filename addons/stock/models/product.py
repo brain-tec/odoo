@@ -11,7 +11,6 @@ from odoo.exceptions import UserError
 from odoo.fields import Domain
 from odoo.tools import SQL
 from odoo.tools.barcode import check_barcode_encoding
-from odoo.tools.float_utils import float_compare
 from odoo.tools.mail import html2plaintext, is_html_empty
 
 PY_OPERATORS = {
@@ -155,7 +154,7 @@ class ProductProduct(models.Model):
             product.with_context(skip_qty_available_update=True).update({key: val for key, val in res[product.id].items() if val})
 
     def _compute_quantities_dict(self, lot_id, owner_id, package_id, from_date=False, to_date=False):
-        domain_quant_loc, domain_move_in_loc, domain_move_out_loc = self._get_domain_locations()
+        domain_quant_loc, domain_move_in_loc, domain_move_out_loc, domain_move_in_loc_done, domain_move_out_loc_done = self._get_domain_locations()
         domain_quant = [('product_id', 'in', self.ids)] + domain_quant_loc
         dates_in_the_past = False
         # only to_date as to_date will correspond to qty_available
@@ -180,8 +179,12 @@ class ProductProduct(models.Model):
         if package_id is not None:
             domain_quant += [('package_id', '=', package_id)]
         if dates_in_the_past:
-            domain_move_in_done = list(domain_move_in)
-            domain_move_out_done = list(domain_move_out)
+            # Use the done location domains (simple location_dest_id) for move lines
+            domain_move_in_done = [('product_id', 'in', self.ids)] + domain_move_in_loc_done
+            domain_move_out_done = [('product_id', 'in', self.ids)] + domain_move_out_loc_done
+            if owner_id is not None:
+                domain_move_in_done += [('owner_id', '=', owner_id)]
+                domain_move_out_done += [('owner_id', '=', owner_id)]
         if from_date:
             date_date_expected_domain_from = [('date', '>=', from_date)]
             domain_move_in += date_date_expected_domain_from
@@ -191,6 +194,7 @@ class ProductProduct(models.Model):
             domain_move_in += date_date_expected_domain_to
             domain_move_out += date_date_expected_domain_to
         Move = self.env['stock.move'].with_context(active_test=False)
+        MoveLine = self.env['stock.move.line']
         Quant = self.env['stock.quant'].with_context(active_test=False)
         domain_move_in_todo = [('state', 'in', ('waiting', 'confirmed', 'assigned', 'partially_available'))] + domain_move_in
         domain_move_out_todo = [('state', 'in', ('waiting', 'confirmed', 'assigned', 'partially_available'))] + domain_move_out
@@ -199,7 +203,8 @@ class ProductProduct(models.Model):
         quants_res = {product.id: (quantity, reserved_quantity) for product, quantity, reserved_quantity in Quant._read_group(domain_quant, ['product_id'], ['quantity:sum', 'reserved_quantity:sum'])}
         expired_unreserved_quants_res = {}
         if self.env.context.get('with_expiration'):
-            domain_quant += [('removal_date', '<=', self.env.context['with_expiration'])]
+            max_date = self.env.context['to_date'] if self.env.context.get('to_date') else self.env.context['with_expiration']
+            domain_quant += [('removal_date', '<=', max_date)]
             expired_unreserved_quants_res = {product.id: quantity - reserved_quantity for product, quantity, reserved_quantity in Quant._read_group(domain_quant, ['product_id'], ['quantity:sum', 'reserved_quantity:sum'])}
         moves_in_res_past = defaultdict(float)
         moves_out_res_past = defaultdict(float)
@@ -208,12 +213,11 @@ class ProductProduct(models.Model):
             domain_move_in_done = [('state', '=', 'done'), ('date', '>', to_date)] + domain_move_in_done
             domain_move_out_done = [('state', '=', 'done'), ('date', '>', to_date)] + domain_move_out_done
 
-            groupby = ['product_id', 'product_uom']
-            for product, uom, quantity in Move._read_group(domain_move_in_done, groupby, ['quantity:sum']):
-                moves_in_res_past[product.id] += uom._compute_quantity(quantity, product.uom_id)
+            for product, quantity in MoveLine._read_group(domain_move_in_done, ['product_id'], ['quantity_product_uom:sum']):
+                moves_in_res_past[product.id] += quantity
 
-            for product, uom, quantity in Move._read_group(domain_move_out_done, groupby, ['quantity:sum']):
-                moves_out_res_past[product.id] += uom._compute_quantity(quantity, product.uom_id)
+            for product, quantity in MoveLine._read_group(domain_move_out_done, ['product_id'], ['quantity_product_uom:sum']):
+                moves_out_res_past[product.id] += quantity
 
         res = dict()
         for product in self.with_context(prefetch_fields=False):
@@ -259,8 +263,8 @@ class ProductProduct(models.Model):
             return
         for product in self:
             if (
-                product.type == "consu" and product.is_storable and float_compare(product.qty_available,
-                     0.0, precision_rounding=product.uom_id.rounding) >= 0
+                product.type == "consu" and product.is_storable and product.uom_id.compare(product.qty_available,
+                     0.0) >= 0
             ):
                 warehouse = self.env['stock.warehouse'].search(
                     [('company_id', '=', self.env.company.id)], limit=1
@@ -373,9 +377,9 @@ class ProductProduct(models.Model):
 
         return self._get_domain_locations_new(location_ids)
 
-    def _get_domain_locations_new(self, location_ids) -> tuple[Domain, Domain, Domain]:
+    def _get_domain_locations_new(self, location_ids) -> tuple[Domain, Domain, Domain, Domain, Domain]:
         if not location_ids:
-            return (Domain.FALSE,) * 3
+            return (Domain.FALSE,) * 5
         locations = self.env['stock.location'].browse(location_ids)
         # TDE FIXME: should move the support of child_of + bypass_search_access directly in expression
         # this optimizes [('location_id', 'child_of', locations.ids)]
@@ -385,9 +389,19 @@ class ProductProduct(models.Model):
             loc_domain = Domain('location_id', 'in', locations.ids)
             dest_loc_domain = Domain('location_dest_id', 'in', locations.ids)
             dest_loc_domain_out = Domain('location_dest_id', 'not in', locations.ids)
+            dest_loc_domain_done = dest_loc_domain
         elif locations:
             paths_query = models.Query(locations)
-            paths_query.add_where(SQL('%s LIKE ANY(%s)', paths_query.table.parent_path, [[loc.parent_path + '%' for loc in locations]]))
+            paths_query.add_where(SQL(
+                """EXISTS (
+                    SELECT 1
+                      FROM stock_location parent
+                     WHERE parent.id IN %s
+                       AND %s LIKE parent.parent_path || '%%'
+                )""",
+                tuple(locations.ids),
+                paths_query.table.parent_path,
+            ))
             loc_domain = Domain('location_id', 'in', paths_query)
             # The condition should be split for done and not-done moves as the final_dest_id only make sense
             # for the part of the move chain that is not done yet.
@@ -408,11 +422,14 @@ class ProductProduct(models.Model):
                     '&', ('state', '!=', 'done'), ~dest_loc_domain_in_progress,
             ])
 
-        # returns: (domain_quant_loc, domain_move_in_loc, domain_move_out_loc)
+        # returns: (domain_quant_loc, domain_move_in_loc, domain_move_out_loc,
+        #           domain_move_in_loc_done, domain_move_out_loc_done)
         return (
             loc_domain,
             dest_loc_domain & ~loc_domain,
             loc_domain & dest_loc_domain_out,
+            dest_loc_domain_done & ~loc_domain,
+            loc_domain & ~dest_loc_domain_done,
         )
 
     def _search_qty_available(self, operator, value):
@@ -706,7 +723,7 @@ class ProductProduct(models.Model):
     def _update_uom(self, to_uom_id):
         for uom, product, moves in self.env['stock.move']._read_group(
             [('product_id', 'in', self.ids)],
-            ['product_uom', 'product_id'],
+            ['uom_id', 'product_id'],
             ['id:recordset'],
         ):
             if uom != product.product_tmpl_id.uom_id:
@@ -714,11 +731,11 @@ class ProductProduct(models.Model):
                 'than %(uom)s have already been used for this product, the change of unit of measure can not be done.'
                 'If you want to change it, please archive the product and create a new one.',
                 problem_uom=uom.name, uom=product.product_tmpl_id.uom_id.name))
-            moves.product_uom = to_uom_id
+            moves.uom_id = to_uom_id
 
         for uom, product, move_lines in self.env['stock.move.line']._read_group(
             [('product_id', 'in', self.ids)],
-            ['product_uom_id', 'product_id'],
+            ['uom_id', 'product_id'],
             ['id:recordset'],
         ):
             if uom != product.product_tmpl_id.uom_id:
@@ -726,7 +743,7 @@ class ProductProduct(models.Model):
                 'than %(uom)s have already been used for this product, the change of unit of measure can not be done.'
                 'If you want to change it, please archive the product and create a new one.',
                 problem_uom=uom.name, uom=product.product_tmpl_id.uom_id.name))
-            move_lines.product_uom_id = to_uom_id
+            move_lines.uom_id = to_uom_id
         return super()._update_uom(to_uom_id)
 
     def filter_has_routes(self):
@@ -770,7 +787,7 @@ class ProductTemplate(models.Model):
         company_dependent=True, check_company=True, domain="[('usage', '=', 'inventory'), '|', ('company_id', '=', False), ('company_id', '=', allowed_company_ids[0])]",
         help="This location will be used as the source location for stock moves generated by an inventory adjustment.")
     sale_delay = fields.Integer(
-        'Customer Lead Time', default=0,
+        'Customer Lead Time', default=0, company_dependent=True,
         help="Delivery lead time, in days. It's the number of days, promised to the customer, between the confirmation of the sales order and the delivery.")
     tracking = fields.Selection([
         ('serial', 'By Unique Serial Number'),
@@ -1218,12 +1235,12 @@ class UomUom(models.Model):
                     " or are currently reserved."
                 )
                 if self.env['stock.move'].sudo().search_count([
-                    ('product_uom', 'in', changed.ids),
+                    ('uom_id', 'in', changed.ids),
                     ('state', 'not in', ('cancel', 'done'))
                 ]):
                     raise UserError(error_msg)
                 if self.env['stock.move.line'].sudo().search_count([
-                    ('product_uom_id', 'in', changed.ids),
+                    ('uom_id', 'in', changed.ids),
                     ('state', 'not in', ('cancel', 'done')),
                 ]):
                     raise UserError(error_msg)

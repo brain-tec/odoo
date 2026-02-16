@@ -1,11 +1,11 @@
 import { uuidv4 } from "@point_of_sale/utils";
 import {
     getService,
-    makeMockEnv,
     onRpc,
     patchWithCleanup,
     MockServer,
     mountWithCleanup,
+    makeDialogMockEnv,
 } from "@web/../tests/web_test_helpers";
 import { session } from "@web/session";
 import { registry } from "@web/core/registry";
@@ -20,6 +20,7 @@ export function initMockRpc() {
     onRpc("/pos-self/data/1", () =>
         MockServer.env["pos.session"].load_data({ self_ordering: true })
     );
+    onRpc("/pos-self/receipt-template/1", () => []);
 
     const mockProcssOrder = async (request) => {
         const { params } = await request.json();
@@ -39,7 +40,11 @@ export const setupPoSEnvForSelfOrder = async () => {
     return await setupPosEnv();
 };
 
-export const setupSelfPosEnv = async (mode = "kiosk") => {
+export const setupSelfPosEnv = async (
+    mode = "kiosk",
+    service_mode = "counter",
+    pay_after = "each"
+) => {
     // Do not change these variables, they are in accordance with the setup data
     odoo.access_token = uuidv4();
     odoo.info = {
@@ -49,7 +54,6 @@ export const setupSelfPosEnv = async (mode = "kiosk") => {
         db: "test",
         data: {
             config_id: 1,
-            self_ordering_mode: mode,
         },
     });
 
@@ -60,8 +64,13 @@ export const setupSelfPosEnv = async (mode = "kiosk") => {
     serviceNames.forEach((serviceName) => registry.category("services").remove(serviceName));
 
     initMockRpc();
-    await makeMockEnv();
+    await makeDialogMockEnv();
     const store = getService("self_order");
+
+    store.config.self_ordering_mode = mode;
+    store.config.self_ordering_service_mode = service_mode;
+    store.config.self_ordering_pay_after = pay_after;
+
     await mountWithCleanup(selfOrderIndex);
     return store;
 };

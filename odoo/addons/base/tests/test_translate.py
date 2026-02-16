@@ -597,6 +597,49 @@ class TestTranslation(TransactionCase):
             self.assertEqual(category_nl.name, 'Klanten')
             self.assertEqual(category_en.name, 'Customers')
 
+    def test_get_stored_translations(self):
+        self.env.ref('base.lang_nl').active = True
+
+        industries = self.env['res.partner.industry'].create([
+            {'name': 'Industry1'},
+            {'name': 'Industry2'},
+            {'name': 'Industry3'},
+        ])
+        industries[0].with_context(lang='nl_NL').name = 'Industry1_NL'
+        industries[1].with_context(lang='nl_NL').name = None
+        field = industries._fields['name']
+
+        industries.invalidate_recordset()
+        self.assertEqual(
+            industries.with_context(lang='nl_NL').mapped('name'),
+            ['Industry1_NL', False, 'Industry3']
+        )
+
+        with self.assertQueryCount(0):
+            # None value in cache means no translation and should not trigger a query
+            self.assertEqual(
+                field._get_stored_translations(industries[1]),
+                None
+            )
+
+        with self.assertQueryCount(1):
+            # prefetch all translaitons for all industries
+            self.assertEqual(
+                field._get_stored_translations(industries[0]),
+                {
+                    'en_US': 'Industry1',
+                    'nl_NL': 'Industry1_NL',
+                }
+            )
+
+        with self.assertQueryCount(0):
+            # no extra query is needed since all translaitons are cached
+            self.assertEqual(
+                field._get_stored_translations(industries[2]),
+                {
+                    'en_US': 'Industry3',
+                }
+            )
 
     # TODO Currently, the unique constraint doesn't work for translatable field
     # def test_111_unique_en(self):
@@ -1531,27 +1574,77 @@ class TestXMLTranslation(TransactionCase):
                 f'arch_db for {lang} should be {archf2} when check_translations'
             )
 
+    def test_translate_xml_select(self):
+        # Ensure the translation <span> wrapper is inserted inside an attribute
+        # of the <option> elements in 'edit_translations' context.
+        view = self.env['ir.ui.view'].create({
+            'type': 'qweb',
+            'key': 'test',
+            'arch': '<select><option>A</option><option>B</option></select>',
+        })
+        self.assertEqual(
+            view.with_context(lang='fr_FR', edit_translations=True).arch_db,
+                '<select>'
+                    '<option data-oe-translation-span-wrapper="&lt;span '
+                        'data-oe-model=&quot;ir.ui.view&quot; '
+                        f'data-oe-id=&quot;{view.id}&quot; '
+                        'data-oe-field=&quot;arch_db&quot; '
+                        'data-oe-translation-state=&quot;to_translate&quot; '
+                        f'data-oe-translation-source-sha=&quot;559aead08264d5795d3909718cdd05abd49572e84fe55590eef31a88a08fdffd&quot;'
+                        '&gt;A&lt;/span&gt;">A</option>'
+                    '<option data-oe-translation-span-wrapper="&lt;span '
+                        'data-oe-model=&quot;ir.ui.view&quot; '
+                        f'data-oe-id=&quot;{view.id}&quot; '
+                        'data-oe-field=&quot;arch_db&quot; '
+                        'data-oe-translation-state=&quot;to_translate&quot; '
+                        f'data-oe-translation-source-sha=&quot;df7e70e5021544f4834bbee64a9e3789febc4be81470df629cad6ddb03320a5c&quot;'
+                        '&gt;B&lt;/span&gt;">B</option>'
+                '</select>',
+        )
+
+        view.update_field_translations('arch_db', {'fr_FR': {'A': 'A_fr', 'B': 'B_fr'}})
+        self.assertEqual(
+            view.with_context(lang='fr_FR', edit_translations=True).arch_db,
+                '<select>'
+                    '<option data-oe-translation-span-wrapper="&lt;span '
+                        'data-oe-model=&quot;ir.ui.view&quot; '
+                        f'data-oe-id=&quot;{view.id}&quot; '
+                        'data-oe-field=&quot;arch_db&quot; '
+                        'data-oe-translation-state=&quot;translated&quot; '
+                        f'data-oe-translation-source-sha=&quot;559aead08264d5795d3909718cdd05abd49572e84fe55590eef31a88a08fdffd&quot;'
+                        '&gt;A_fr&lt;/span&gt;">A_fr</option>'
+                    '<option data-oe-translation-span-wrapper="&lt;span '
+                        'data-oe-model=&quot;ir.ui.view&quot; '
+                        f'data-oe-id=&quot;{view.id}&quot; '
+                        'data-oe-field=&quot;arch_db&quot; '
+                        'data-oe-translation-state=&quot;translated&quot; '
+                        f'data-oe-translation-source-sha=&quot;df7e70e5021544f4834bbee64a9e3789febc4be81470df629cad6ddb03320a5c&quot;'
+                        '&gt;B_fr&lt;/span&gt;">B_fr</option>'
+                '</select>',
+        )
+
     def test_t_call_no_normal_attribute_translation(self):
         self.env['ir.ui.view'].create({
             'type': 'qweb',
             'key': 'test',
-            'arch': '<t t-out="placeholder"/>',
+            'arch': '<button><t t-out="placeholder"/></button>',
         })
         view0 = self.env['ir.ui.view'].with_context(lang='fr_FR', edit_translations=True).create({
             'type': 'qweb',
             'arch': '<t t-call="test" placeholder="hello"/>',
         })
-        self.assertEqual(view0._render_template(view0.id, {'hello': 'world'}), 'world')
+        self.assertEqual(view0._render_template(view0.id, {'hello': 'world'}), '<button>world</button>')
         self.assertEqual(view0.arch_db, '<t t-call="test" placeholder="hello"/>')
 
         view0.arch = '<t t-call="test" placeholder.translate="hello"/>'
         translate_node = (
-            f'&lt;span data-oe-model=&#34;ir.ui.view&#34; data-oe-id=&#34;{view0.id}&#34;'
-            ' data-oe-field=&#34;arch_db&#34; data-oe-translation-state=&#34;to_translate&#34;'
-            ' data-oe-translation-source-sha=&#34;2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824&#34;&gt;hello&lt;/span&gt;'
+            f'<span data-oe-model="ir.ui.view" data-oe-id="{view0.id}"'
+            ' data-oe-field="arch_db" data-oe-translation-state="to_translate"'
+            ' data-oe-translation-source-sha="2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824">hello</span>'
         )
-        self.assertEqual(view0._render_template(view0.id), translate_node)
-        self.assertEqual(view0.arch_db, f'<t t-call="test" placeholder.translate="{translate_node.replace("&#34;", "&quot;")}"/>')
+        self.assertEqual(view0._render_template(view0.id), f'<button>{translate_node}</button>')
+        translate_attr = translate_node.replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+        self.assertEqual(view0.arch_db, f'<t t-call="test" placeholder.translate="{translate_attr}"/>')
 
     def test_update_field_translations_source_lang(self):
         """ call update_field_translations with source_lang """

@@ -33,13 +33,14 @@ export function registerCallAction(id, definition) {
 export const muteAction = {
     badge: ({ owner, store }) => store.rtc.microphonePermission !== "granted",
     badgeIcon: "fa fa-exclamation",
-    condition: ({ channel }) => channel?.isSelfInCall,
+    condition: ({ owner, store, channel }) =>
+        channel?.isSelfInCall && (owner.env.inCallMenu || !store.rtc.selfSession?.is_deaf),
     name: ({ store }) => (store.rtc.selfSession.isMute ? _t("Unmute") : _t("Mute")),
     isActive: ({ store }) => store.rtc.selfSession?.isMute,
     isTracked: true,
-    icon: ({ action, store }) =>
+    icon: ({ action, owner, store }) =>
         action.isActive
-            ? store.rtc.selfSession?.is_deaf
+            ? store.rtc.selfSession?.is_deaf && !owner.env.inCallMenu
                 ? CALL_ICON_DEAFEN
                 : CALL_ICON_MUTED
             : "fa fa-microphone",
@@ -72,7 +73,8 @@ export const quickActionSettings = {
 };
 registerCallAction("quick-voice-settings", quickActionSettings);
 registerCallAction("deafen", {
-    condition: ({ owner, channel }) => owner.env.inCallMenu && channel?.isSelfInCall,
+    condition: ({ owner, store, channel }) =>
+        channel?.isSelfInCall && (owner.env.inCallMenu || store.rtc.selfSession?.is_deaf),
     name: ({ store }) => (store.rtc.selfSession.is_deaf ? _t("Undeafen") : _t("Deafen")),
     isActive: ({ store }) => store.rtc.selfSession?.is_deaf,
     isTracked: true,
@@ -80,11 +82,11 @@ registerCallAction("deafen", {
     hotkey: "shift+d",
     onSelected: ({ store }) => store.rtc.toggleDeafen(),
     sequence: 10,
-    sequenceGroup: 110,
+    sequenceGroup: 100,
     tags: ({ action }) => (action.isActive ? ACTION_TAGS.DANGER : undefined),
 });
 export const cameraOnAction = {
-    badge: ({ owner, store }) => !owner.env.inCallMenu && store.rtc.cameraPermission !== "granted",
+    badge: ({ owner, store, channel }) => !owner.env.inCallMenu && channel?.default_display_mode === "video_full_screen" && store.rtc.cameraPermission !== "granted",
     badgeIcon: "fa fa-exclamation",
     condition: ({ channel }) => channel?.isSelfInCall,
     disabledCondition: ({ store }) => store.rtc?.isRemote,
@@ -100,12 +102,15 @@ export const cameraOnAction = {
     onSelected: ({ owner, store }) => store.rtc.toggleVideo("camera", { env: owner.env }),
     sequence: 10,
     sequenceGroup: 120,
-    tags: ({ action, store }) => {
+    tags: ({ action, store, channel }) => {
         const tags = [];
         if (action.isActive) {
             tags.push(ACTION_TAGS.SUCCESS);
         }
-        if (store.rtc.cameraPermission !== "granted") {
+        if (
+            channel?.default_display_mode === "video_full_screen" &&
+            store.rtc.cameraPermission !== "granted"
+        ) {
             tags.push(ACTION_TAGS.DANGER, ACTION_TAGS.WARNING_BADGE);
         }
         return tags;
@@ -141,6 +146,7 @@ registerCallAction("raise-hand", {
     isActive: ({ store }) => store.rtc.selfSession?.raisingHand,
     isTracked: true,
     icon: "fa fa-hand-paper-o",
+    hotkey: "shift+h",
     onSelected: ({ store }) => store.rtc.raiseHand(!store.rtc.selfSession.raisingHand),
     sequence: 50,
     sequenceGroup: 200,
@@ -163,17 +169,18 @@ registerCallAction("share-screen", {
     tags: ({ action }) => (action.isActive ? ACTION_TAGS.SUCCESS : undefined),
 });
 registerCallAction("fullscreen", {
-    btnClass: ({ owner, channel }) =>
+    btnClass: ({ channel }) =>
         attClassObjectToString({
             "o-discuss-CallActionList-pulse": Boolean(
-                !owner.env.pipWindow && channel.promoteFullscreen === CALL_PROMOTE_FULLSCREEN.ACTIVE
+                channel.promoteFullscreen === CALL_PROMOTE_FULLSCREEN.ACTIVE
             ),
         }),
     condition: ({ channel }) => channel?.isSelfInCall,
     name: ({ store }) => (store.rtc.isFullscreen ? _t("Exit Fullscreen") : _t("Fullscreen")),
     isActive: ({ store }) => store.rtc.isFullscreen,
     icon: ({ action }) => (action.isActive ? "fa fa-compress" : "fa fa-expand"),
-    onSelected: ({ store }) => {
+    onSelected: ({ channel, store }) => {
+        channel.promoteFullscreen = CALL_PROMOTE_FULLSCREEN.DISCARDED;
         if (store.rtc.isFullscreen) {
             store.rtc.exitFullscreen();
         } else {
@@ -195,7 +202,8 @@ registerCallAction("picture-in-picture", {
         store.rtc?.isPipMode ? _t("Exit Picture in Picture") : _t("Picture in Picture"),
     isActive: ({ store }) => store.rtc?.isPipMode,
     icon: "oi oi-launch",
-    onSelected: ({ owner, store }) => {
+    onSelected: ({ owner, channel, store }) => {
+        channel.promoteFullscreen = CALL_PROMOTE_FULLSCREEN.DISCARDED;
         const isPipMode = store.rtc?.isPipMode;
         if (isPipMode) {
             store.rtc.closePip();

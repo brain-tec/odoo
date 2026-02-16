@@ -14,6 +14,7 @@ import { inLeftSide } from "@point_of_sale/../tests/pos/tours/utils/common";
 import { negateStep } from "@point_of_sale/../tests/generic_helpers/utils";
 
 registry.category("web_tour.tours").add("FeedbackScreenTour", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -178,7 +179,7 @@ registry.category("web_tour.tours").add("FeedbackScreenTour", {
                 orderlines: [
                     {
                         name: "Desk Pad",
-                        price_unit: "20",
+                        price_unit: "19", // use baseprice with discount
                     },
                 ],
                 total_amount: "19.00",

@@ -5,6 +5,8 @@ import { fields, Record } from "@mail/model/export";
 import { rpc } from "@web/core/network/rpc";
 
 export class Settings extends Record {
+    static singleton = true;
+
     id;
 
     setup() {

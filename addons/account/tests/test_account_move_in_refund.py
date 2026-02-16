@@ -703,7 +703,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             {
                 **self.product_line_vals_1,
                 'quantity': 0.1,
-                'price_unit': 0.05,
+                'price_unit': 0.045,
                 'price_subtotal': 0.005,
                 'price_total': 0.006,
                 'currency_id': self.other_currency.id,
@@ -714,7 +714,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
                 **self.product_line_vals_2,
                 'currency_id': self.other_currency.id,
                 'amount_currency': -160.0,
-                'credit': 53.34,
+                'credit': 53.33,
             },
             {
                 **self.tax_line_vals_1,
@@ -732,7 +732,7 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
                 **self.term_line_vals_1,
                 'currency_id': self.other_currency.id,
                 'amount_currency': 208.006,
-                'debit': 69.34,
+                'debit': 69.33,
                 'date_maturity': fields.Date.from_string('2016-01-01'),
             },
         ], {
@@ -754,11 +754,11 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             {
                 **self.product_line_vals_1,
                 'quantity': 0.1,
-                'price_unit': 0.05,
-                'price_subtotal': 0.01,
-                'price_total': 0.01,
-                'amount_currency': -0.01,
-                'credit': 0.01,
+                'price_unit': 0.045,
+                'price_subtotal': 0.0,
+                'price_total': 0.0,
+                'amount_currency': -0.0,
+                'credit': 0.0,
             },
             self.product_line_vals_2,
             {
@@ -769,8 +769,8 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             self.tax_line_vals_2,
             {
                 **self.term_line_vals_1,
-                'amount_currency': 208.01,
-                'debit': 208.01,
+                'amount_currency': 208.0,
+                'debit': 208.0,
                 'date_maturity': fields.Date.from_string('2016-01-01'),
             },
         ], {
@@ -778,41 +778,10 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             'currency_id': self.company_data['currency'].id,
             'date': fields.Date.from_string('2016-01-01'),
             'invoice_date': fields.Date.from_string('2016-01-01'),
-            'amount_untaxed': 160.01,
+            'amount_untaxed': 160.0,
             'amount_tax': 48.0,
-            'amount_total': 208.01,
+            'amount_total': 208.0,
         })
-
-    def test_in_refund_onchange_past_invoice_1(self):
-        copy_invoice = self.invoice.copy()
-        if self.env.ref('purchase.group_purchase_manager', raise_if_not_found=False):
-            # `purchase` adds a view which makes `invoice_vendor_bill_id` invisible
-            # for purchase users
-            # https://github.com/odoo/odoo/blob/385884afd31f25d61e99d139ecd4c574d99a1863/addons/purchase/views/account_move_views.xml#L26
-            self.env.user.group_ids -= self.env.ref('purchase.group_purchase_manager')
-            self.env.user.group_ids -= self.env.ref('purchase.group_purchase_user')
-        # invisible="state != 'draft' or move_type != 'in_invoice'"
-        # This is an in_refund invoice, `invoice_vendor_bill_id` is not supposed to be visible
-        # and therefore not supposed to be changed.
-        view = self.env.ref('account.view_move_form')
-        tree = etree.fromstring(view.arch)
-        for node in tree.xpath('//field[@name="invoice_vendor_bill_id"]'):
-            del node.attrib['invisible']
-        view.arch = etree.tostring(tree)
-
-        move_form = Form(self.invoice)
-        move_form.invoice_line_ids.remove(0)
-        move_form.invoice_line_ids.remove(0)
-        move_form.invoice_vendor_bill_id = copy_invoice
-        move_form.save()
-
-        self.assertInvoiceValues(self.invoice, [
-            self.product_line_vals_1,
-            self.product_line_vals_2,
-            self.tax_line_vals_1,
-            self.tax_line_vals_2,
-            self.term_line_vals_1,
-        ], self.move_vals)
 
     def test_in_refund_create_1(self):
         # Test creating an account_move with the least information.

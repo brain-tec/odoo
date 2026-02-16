@@ -52,6 +52,7 @@ from odoo.tools import (
 from odoo.tools.constants import PREFETCH_MAX
 from odoo.tools.lru import LRU
 from odoo.tools.misc import ReversedIterable, exception_to_unicode, unquote
+from odoo.tools.safe_eval import _UNSAFE_ATTRIBUTES
 from odoo.tools.translate import _, LazyTranslate
 
 from . import decorators as api
@@ -60,7 +61,7 @@ from .domains import Domain
 from .fields import Field, determine
 from .fields_misc import Id
 from .fields_temporal import Date, Datetime
-from .fields_textual import Char
+from .fields_textual import Char, StoredTranslations
 
 from .identifiers import NewId
 from .query import Query, TableSQL
@@ -73,12 +74,11 @@ from .utils import (
 if typing.TYPE_CHECKING:
     from collections.abc import Collection, Iterable, Iterator, Reversible, Sequence
     from types import MappingProxyType
+    from typing import Self
     from .table_objects import TableObject
     from .environments import Environment
     from .registry import Registry, TriggerTree
-    from .types import Self, DomainType, IdType, ModelType, ValuesType
-
-    T = typing.TypeVar('T')
+    from .types import DomainType, IdType, ModelType, ValuesType
 
 
 _lt = LazyTranslate('base')
@@ -207,7 +207,7 @@ def get_public_method(model: BaseModel, name: str) -> callable:
     """
     assert isinstance(model, BaseModel)
     e = f"Private methods (such as '{model._name}.{name}') cannot be called remotely."
-    if name.startswith('_'):
+    if name.startswith('_') or name in _UNSAFE_ATTRIBUTES:
         raise AccessError(e)
 
     cls = type(model)
@@ -1996,6 +1996,7 @@ class BaseModel(metaclass=MetaModel):
         if not func:
             raise ValueError(f"Aggregate method is mandatory for {fname!r}")
 
+        table = table._with_model(table._model.with_context(_read_groupby=True))
         field = self._fields[fname]
         if func == 'sum_currency':
             if field.type != 'monetary':
@@ -2036,6 +2037,7 @@ class BaseModel(metaclass=MetaModel):
         if fname not in self._fields:
             raise ValueError(f"Invalid field {fname!r} on model {self._name!r}")
         field = self._fields[fname]
+        table = table._with_model(table._model.with_context(_read_groupby=True))
 
         if field.type == 'properties':
             sql_expr = table[fname][seq_fnames]
@@ -2364,6 +2366,7 @@ class BaseModel(metaclass=MetaModel):
             """ SELECT a.attname, a.attnotnull
                   FROM pg_class c, pg_attribute a
                  WHERE c.relname=%s
+                   AND c.relnamespace = current_schema::regnamespace
                    AND c.oid=a.attrelid
                    AND a.attisdropped=%s
                    AND pg_catalog.format_type(a.atttypid, a.atttypmod) NOT IN ('cid', 'tid', 'oid', 'xid')
@@ -2848,7 +2851,6 @@ class BaseModel(metaclass=MetaModel):
                 value=Json(translations),
                 id=self.id,
             ))
-            self.modified([field_name])
         else:
             old_values = field._get_stored_translations(self)
             if not old_values:
@@ -2891,7 +2893,7 @@ class BaseModel(metaclass=MetaModel):
                 _old_translations = {src: values[lang] for src, values in old_translation_dictionary.items() if lang in values}
                 _new_translations = {**_old_translations, **_translations}
                 new_values[lang] = field.convert_to_cache(field.translate(_new_translations.get, old_source_lang_value), self)
-            field._update_cache(self.with_context(prefetch_langs=True), new_values, dirty=True)
+            field._update_cache(self.with_context(prefetch_langs=True), StoredTranslations(new_values), dirty=True)
 
         # the following write is incharge of
         # 1. mark field as modified
@@ -3497,10 +3499,14 @@ class BaseModel(metaclass=MetaModel):
 
         self.check_access('unlink')
 
-        from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
         for func in self._ondelete_methods:
-            # func._ondelete is True if it should be called during uninstallation
-            if func._ondelete or not self.env.context.get(MODULE_UNINSTALL_FLAG):
+            # func._ondelete is True => should be called during uninstallation
+            # func._ondelete is False => should be called unless its module is being uninstalled
+            if (
+                func._ondelete
+                or not self.pool.uninstalling_modules
+                or func.__module__.split('.')[2] not in self.pool.uninstalling_modules
+            ):
                 func(self)
 
         # TOFIX: this avoids an infinite loop when trying to recompute a
@@ -3553,8 +3559,8 @@ class BaseModel(metaclass=MetaModel):
             ir_attachment_unlink |= Attachment.browse(row[0] for row in cr.fetchall())
 
             # don't allow fallback value in ir.default for many2one company dependent fields to be deleted
-            # Exception: when MODULE_UNINSTALL_FLAG, these fallbacks can be deleted by Defaults.discard_records(records)
-            if (many2one_fields := self.env.registry.many2one_company_dependents[self._name]) and not self.env.context.get(MODULE_UNINSTALL_FLAG):
+            # Exception: when 'force_delete', these fallbacks can be deleted by Defaults.discard_records(records)
+            if (many2one_fields := self.env.registry.many2one_company_dependents[self._name]) and not self.env.context.get('force_delete'):
                 IrModelFields = self.env["ir.model.fields"]
                 field_ids = tuple(IrModelFields._get_ids(field.model_name).get(field.name) for field in many2one_fields)
                 sub_ids_json_text = tuple(json.dumps(id_) for id_ in sub_ids)
@@ -3567,7 +3573,7 @@ class BaseModel(metaclass=MetaModel):
             # on delete set null/restrict for jsonb company dependent many2one
             for field in many2one_fields:
                 model = self.env[field.model_name]
-                if field.ondelete == 'restrict' and not self.env.context.get(MODULE_UNINSTALL_FLAG):
+                if field.ondelete == 'restrict' and not self.env.context.get('force_delete'):
                     if res := self.env.execute_query(SQL(
                         """
                         SELECT id, %(field)s
@@ -4702,7 +4708,10 @@ class BaseModel(metaclass=MetaModel):
         # add order and limits
         if order:
             query.order = self._order_to_sql(query.table, order)
-        if limit is not None:
+
+        # In RPC, None is not available; False is used instead to mean "no limit"
+        # Note: True is kept for backward-compatibility (treated as 1)
+        if limit is not None and limit is not False:
             query.limit = limit
         if offset is not None:
             query.offset = offset
@@ -5414,11 +5423,11 @@ class BaseModel(metaclass=MetaModel):
         ...
 
     @typing.overload
-    def mapped(self, func: Callable[[Self], T]) -> list[T] | BaseModel:
+    def mapped[T](self, func: Callable[[Self], T]) -> list[T] | BaseModel:
         ...
 
     @api.private
-    def mapped(self, func: str | Callable[[Self], T]) -> list | BaseModel:
+    def mapped[T](self, func: str | Callable[[Self], T]) -> list | BaseModel:
         """Apply ``func`` on all records in ``self``, and return the result as a
         list or a recordset (if ``func`` return recordsets). In the latter
         case, the order of the returned recordset is arbitrary.
@@ -5517,11 +5526,11 @@ class BaseModel(metaclass=MetaModel):
         ...
 
     @typing.overload
-    def grouped(self, key: Callable[[Self], T]) -> dict[T, Self]:
+    def grouped[T](self, key: Callable[[Self], T]) -> dict[T, Self]:
         ...
 
     @api.private
-    def grouped(self, key: str | Callable[[Self], T]) -> dict[typing.Any, Self]:
+    def grouped[T](self, key: str | Callable[[Self], T]) -> dict[typing.Any, Self]:
         """Eagerly groups the records of ``self`` by the ``key``, returning a
         dict from the ``key``'s result to recordsets. All the resulting
         recordsets are guaranteed to be part of the same prefetch-set.
@@ -5726,7 +5735,7 @@ class BaseModel(metaclass=MetaModel):
                 raise AssertionError(
                     f"Could not find all values of {record} to flush them\n"
                     f"    Context: {self.env.context}\n"
-                    f"    Cache: {self.env.cache!r}"
+                    f"    Cache: {dict(record._cache)!r}"
                 )
             model.browse(some_ids)._write_multi(vals_list)
 
@@ -6438,6 +6447,7 @@ def get_columns_from_sql_diagnostics(cr, diagnostics, *, check_registry=False) -
         JOIN pg_class t ON t.oid = conrelid
         WHERE conname = %s
             AND t.relname = %s
+            AND t.relnamespace = current_schema::regnamespace
     """, diagnostics.constraint_name, diagnostics.table_name))
     columns = cr.fetchone()
     return columns[0] if columns else []

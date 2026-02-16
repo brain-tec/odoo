@@ -124,6 +124,12 @@ class AccountMove(models.Model):
         copy=False,
     )
 
+    l10n_it_convention_code = fields.Char(
+        string="Order/Convention Code",
+        size=100,
+        help=" Used to connect an individual invoice to a broader framework agreement, a specific project, or a long-term convention."
+    )
+
     def _auto_init(self):
         # Create compute stored field l10n_it_document_type and l10n_it_payment_method
         # here to avoid timeout error on large databases.
@@ -766,7 +772,7 @@ class AccountMove(models.Model):
         # Reference line for finding the conversion rate used in the document
         conversion_rate = float_repr(
             abs(self.amount_total / self.amount_total_signed), precision_digits=5,
-        ) if convert_to_euros and self.invoice_line_ids else None
+        ) if convert_to_euros and self.invoice_line_ids and not self.currency_id.is_zero(self.amount_total_signed) else None
 
         # Aggregated linked invoices
         linked_moves = (self._get_reconciled_invoices() | self.reversed_entry_id).filtered(lambda move: move.date <= self.date)
@@ -865,6 +871,7 @@ class AccountMove(models.Model):
             'origin_document_date': self.l10n_it_origin_document_date,
             'cig': self.l10n_it_cig,
             'cup': self.l10n_it_cup,
+            'convention_code': self.l10n_it_convention_code,
             'currency': self.currency_id or self.company_currency_id if not convert_to_euros else self.env.ref('base.EUR'),
             'regime_fiscale': company.l10n_it_tax_system if not is_self_invoice else 'RF18',
             'is_self_invoice': is_self_invoice,
@@ -1139,8 +1146,7 @@ class AccountMove(models.Model):
         # Download invoices
         invoices_data = {}
         try:
-            invoices_data = proxy_user._make_request(f'{server_url}/api/l10n_it_edi/1/in/RicezioneInvoice',
-                params={'recipient_codice_fiscale': proxy_user.company_id.l10n_it_codice_fiscale})
+            invoices_data = proxy_user._make_request(f'{server_url}/api/l10n_it_edi/1/in/RicezioneInvoice')
         except AccountEdiProxyError as e:
             _logger.error('Error while receiving invoices from the SdI: %s', e)
             return False
@@ -1445,9 +1451,9 @@ class AccountMove(models.Model):
                 ))
                 message_to_log.append(message)
 
-            # Numbering attributed by the transmitter
-            if progressive_id := get_text(tree, '//ProgressivoInvio'):
-                self.payment_reference = progressive_id
+            # Payment code
+            if payment_code := get_text(tree, './/DettaglioPagamento[1]/CodicePagamento'):
+                self.payment_reference = payment_code
 
             # Document Number
             if number := get_text(tree, './/DatiGeneraliDocumento//Numero'):
@@ -1555,11 +1561,13 @@ class AccountMove(models.Model):
                     message_to_log += self._l10n_it_edi_import_line(element, move_line, extra_info)
 
             for element in tree.xpath('.//Allegati'):
-                self.l10n_it_edi_attachment_name = get_text(element, './/NomeAttachment')
-                self.l10n_it_edi_attachment_file = b64decode(get_text(element, './/Attachment'))
+                raw_name = get_text(element, './/NomeAttachment') or ''
+                raw_ext = get_text(element, './/FormatoAttachment') or ''
+                self.l10n_it_edi_attachment_name = f"{raw_name}.{raw_ext}" if raw_ext else raw_name
+                self.l10n_it_edi_attachment_file = get_text(element, './/Attachment')
                 self.sudo().message_post(
                     body=(_("Attachment from XML")),
-                    attachments=[(self.l10n_it_edi_attachment_name, self.l10n_it_edi_attachment_file)],
+                    attachments=[(self.l10n_it_edi_attachment_name, b64decode(self.l10n_it_edi_attachment_file))],
                 )
 
             global_enasarco_lines = []

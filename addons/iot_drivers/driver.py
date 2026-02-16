@@ -25,7 +25,7 @@ class Driver(Thread):
         self.device_type = ''
         self.device_manufacturer = ''
         self.data = {'value': '', 'result': ''}  # TODO: deprecate "value"?
-        self._actions = {}
+        self._actions = {"status": self.status}
         self._stopped = Event()
         self._recent_action_ids = LRU(256)
 
@@ -49,22 +49,31 @@ class Driver(Thread):
         :param dict data: the action method name and the parameters to be passed to it
         :return: the result of the action method
         """
-        if self._check_if_action_is_duplicate(data.get('action_unique_id')):
-            return {'status': 'duplicate'}
-
         action = data.get('action', '')
+        action_unique_id = data.get('action_unique_id')
+        if action_unique_id:
+            if action_unique_id in self._recent_action_ids:
+                _logger.warning("Duplicate action %s id %s received, ignoring", action, action_unique_id)
+                return {'status': 'duplicate'}
+            self._recent_action_ids[action_unique_id] = action_unique_id
+
         session_id = data.get('session_id')
         if session_id:
             self.data["owner"] = session_id
+            self.data["session_id"] = session_id
+
         try:
-            response = {'status': 'success', 'result': self._actions[action](data)}
+            response = {'status': 'success', 'result': self._actions[action](data), 'session_id': session_id}
             # printers and payment terminals handle their own events (low on paper, waiting for card, etc.)
             # we don't return `True` for them not to trigger `onSuccess` on the db: to let it wait for events
             if self.device_type in ["printer", "payment"]:
                 response['result'] = "pending"
         except Exception as e:
+            if action_unique_id:
+                self._recent_action_ids.pop(action_unique_id, None)
+            data.pop('receipt', None)  # avoid logging potentially large receipt
             _logger.exception("Error while executing action %s with params %s", action, data)
-            response = {'status': 'error', 'result': str(e)}
+            response = {'status': 'error', 'result': str(e), 'session_id': session_id}
 
         # Make response available to /event route or websocket
         # printers and payment terminals handle their own events (low on paper, waiting for card, etc.)
@@ -74,15 +83,9 @@ class Driver(Thread):
 
         return response
 
-    def _check_if_action_is_duplicate(self, action_unique_id):
-        if not action_unique_id:
-            return False
-        if action_unique_id in self._recent_action_ids:
-            _logger.warning("Duplicate action %s received, ignoring", action_unique_id)
-            return True
-        self._recent_action_ids[action_unique_id] = action_unique_id
-        return False
-
     def disconnect(self):
         self._stopped.set()
         del iot_devices[self.device_identifier]
+
+    def status(self, _):
+        return self.supported(self.dev)

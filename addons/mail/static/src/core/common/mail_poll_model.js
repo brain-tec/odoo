@@ -7,7 +7,6 @@ import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 
 export class MailPollModel extends Record {
-    static id = "id";
     static _name = "mail.poll";
 
     /** @type {boolean|undefined} */
@@ -26,6 +25,18 @@ export class MailPollModel extends Record {
 
     get createdBySelf() {
         return this.store.self_user?.eq(this.create_uid);
+    }
+
+    async fetchPollOptionsCached() {
+        if (!this.optionsFetched) {
+            try {
+                this.optionsFetched = true;
+                await this.store.fetchStoreData("/mail/poll/options", { poll_id: this.id });
+            } catch (e) {
+                this.optionsFetched = false;
+                throw e;
+            }
+        }
     }
 
     get numberOfVotes() {
@@ -54,6 +65,17 @@ export class MailPollModel extends Record {
 
     async vote(optionIds) {
         await rpc("/mail/poll/vote", { poll_id: this.id, option_ids: optionIds });
+    }
+
+    voteCountText(numberOfVotes) {
+        switch (numberOfVotes) {
+            case 0:
+                return _t("0 votes");
+            case 1:
+                return _t("1 vote");
+            default:
+                return _t("%(count)s votes", { count: numberOfVotes });
+        }
     }
 }
 MailPollModel.register();

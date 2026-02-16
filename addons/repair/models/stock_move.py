@@ -13,7 +13,7 @@ MAP_REPAIR_LINE_TYPE_TO_MOVE_LOCATIONS_FROM_REPAIR = {
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
-    repair_id = fields.Many2one('repair.order', check_company=True, index='btree_not_null', copy=False)
+    repair_id = fields.Many2one('repair.order', check_company=True, index='btree_not_null', copy=False, ondelete='cascade')
     repair_line_type = fields.Selection([
         ('add', 'Add'),
         ('remove', 'Remove'),
@@ -151,7 +151,7 @@ class StockMove(models.Model):
                 'order_id': move.repair_id.sale_order_id.id,
                 'product_id': move.product_id.id,
                 'product_uom_qty': product_qty, # When relying only on so_line compute method, the sol quantity is only updated on next sol creation
-                'product_uom_id': move.product_uom.id,
+                'product_uom_id': move.uom_id.id,
                 'move_ids': [Command.link(move.id)],
                 'qty_delivered': move.quantity if move.state == 'done' else 0.0,
             })

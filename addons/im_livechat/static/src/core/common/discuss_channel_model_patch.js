@@ -21,7 +21,27 @@ const discussChannelPatch = {
         this.livechat_customer_history_ids = fields.Many("im_livechat.channel.member.history", {
             inverse: "channelAsCustomerHistory",
         });
+        this.livechat_expertise_ids = fields.Many("im_livechat.expertise");
+        this.livechat_lang_id = fields.One("res.lang");
         this.livechat_looking_for_help_since_dt = fields.Datetime();
+        /** @type {"in_progress"|"need_help"|undefined} */
+        this.livechat_status = fields.Attr(undefined, {
+            onUpdate() {
+                if (this.livechat_status === "need_help") {
+                    this.wasLookingForHelp = true;
+                    this.unpinOnThreadSwitch = false;
+                    return;
+                }
+                if (this.wasLookingForHelp) {
+                    this.wasLookingForHelp = false;
+                    // Still the active thread; keep it pinned after leaving "need help" status.
+                    // The agent may interact with the thread, keeping it pinned, or it will be
+                    // unpinned on the next thread switch to avoid bloating the sidebar.
+                    this.unpinOnThreadSwitch = this.eq(this.store.discuss?.thread?.channel);
+                }
+            },
+        });
+        this.unpinOnThreadSwitch = false;
     },
     get allowDescriptionTypes() {
         return [...super.allowDescriptionTypes, "livechat"];
@@ -37,10 +57,12 @@ const discussChannelPatch = {
         return super._computeCanHide(...arguments);
     },
     get displayName() {
-        if (this.channel_type !== "livechat" || this.self_member_id?.custom_channel_name) {
+        if (this.channel_type !== "livechat") {
             return super.displayName;
         }
-        const selfMemberType = this.self_member_id?.livechat_member_type;
+        const selfMemberType = this.isTransient
+            ? "visitor"
+            : this.self_member_id?.livechat_member_type;
         let memberNames = this.correspondents
             .filter((m) => {
                 if (selfMemberType === "visitor") {
@@ -107,7 +129,10 @@ const discussChannelPatch = {
         if (this.self_member_id?.livechat_member_type === "visitor") {
             return false;
         }
-        return super.showImStatus;
+        return (this.channel_type === "livechat" && this.correspondent) || super.showImStatus;
+    },
+    get allow_invite_by_email() {
+        return this.channel_type === "livechat" || super.allow_invite_by_email;
     },
 };
 patch(DiscussChannel.prototype, discussChannelPatch);

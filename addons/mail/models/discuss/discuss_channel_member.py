@@ -41,8 +41,6 @@ class DiscussChannelMember(models.Model):
         groups="base.group_system",
     )
     # state
-    custom_channel_name = fields.Char('Custom channel name')
-    fetched_message_id = fields.Many2one('mail.message', string='Last Fetched', index="btree_not_null")
     is_favorite = fields.Boolean("Favorite")
     seen_message_id = fields.Many2one('mail.message', string='Last Seen', index="btree_not_null")
     new_message_separator = fields.Integer(help="Message id before which the separator should be displayed", default=0, required=True)
@@ -276,7 +274,7 @@ class DiscussChannelMember(models.Model):
         super()._sync_field_names(res)
         # sudo: discuss.channel.member - reading channel ownership related to a member is considered acceptable
         res["channel_id", None].attr("channel_role", sudo=True)
-        res[None].extend(["custom_channel_name", "custom_notifications", "is_favorite"])
+        res[None].extend(["custom_notifications", "is_favorite"])
         res[None].extend(["is_pinned", "last_interest_dt", "message_unread_counter"])
         res[None].extend(["mute_until_dt", "new_message_separator"])
         # sudo: discuss.channel.rtc.session - each member can see who is inviting them
@@ -422,7 +420,7 @@ class DiscussChannelMember(models.Model):
     def _store_member_fields(self, res: Store.FieldList):
         # sudo: discuss.channel.member - reading channel ownership related to a member is considered acceptable
         res.attr("channel_role", sudo=True)
-        res.extend(["create_date", "fetched_message_id", "last_seen_dt", "seen_message_id"])
+        res.extend(["create_date", "last_seen_dt", "seen_message_id"])
         self._store_persona_default_fields(res)
 
     # --------------------------------------------------------------------------
@@ -657,7 +655,6 @@ class DiscussChannelMember(models.Model):
         bus_channel = self._bus_channel()
         if self.seen_message_id.id < message.id:
             self.write({
-                "fetched_message_id": max(self.fetched_message_id.id, message.id),
                 "seen_message_id": message.id,
                 "last_seen_dt": fields.Datetime.now(),
             })

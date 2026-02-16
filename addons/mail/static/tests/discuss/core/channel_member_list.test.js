@@ -2,12 +2,23 @@ import {
     click,
     contains,
     defineMailModels,
+    listenStoreFetch,
     openDiscuss,
     start,
     startServer,
+    waitStoreFetch,
 } from "@mail/../tests/mail_test_helpers";
-import { describe, test } from "@odoo/hoot";
-import { Command, getService, serverState, withUser } from "@web/../tests/web_test_helpers";
+import { AvatarCardPopover } from "@mail/discuss/web/avatar_card/avatar_card_popover";
+import { animationFrame, describe, test } from "@odoo/hoot";
+import { mockDate } from "@odoo/hoot-mock";
+
+import {
+    Command,
+    getService,
+    patchWithCleanup,
+    serverState,
+    withUser,
+} from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -109,6 +120,67 @@ test("chat with member should be opened after clicking on channel member", async
     await contains(".o-mail-AutoresizeInput[title='Demo']");
 });
 
+test("Avatar card shows local timezone", async () => {
+    mockDate("2026-01-01 12:00:00");
+    const pyEnv = await startServer();
+    pyEnv["res.partner"].write([serverState.partnerId], { tz: "Europe/Brussels" });
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo", tz: "Asia/Kolkata" });
+    pyEnv["res.users"].create({ partner_id: partnerId });
+    const channelId = pyEnv["discuss.channel"].create({
+        name: "TestChannel",
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: partnerId }),
+        ],
+        channel_type: "channel",
+    });
+    listenStoreFetch(["avatar_card"]);
+    let changeTzResolver = Promise.withResolvers();
+    patchWithCleanup(AvatarCardPopover.prototype, {
+        /**
+         * This assumes this is internal code to compute formatting of tz,
+         * and next animation frame implies showing or not of timezone on the card
+         */
+        onChangeTz(...args) {
+            changeTzResolver?.resolve();
+            return super.onChangeTz(...args);
+        },
+    });
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-discuss-ChannelMemberList");
+    // Case 1: correspondent tz !== self tz
+    await click(".o-discuss-ChannelMember:has(:text('Demo'))");
+    changeTzResolver = Promise.withResolvers();
+    await waitStoreFetch(["avatar_card"]);
+    await changeTzResolver.promise;
+    await animationFrame();
+    await contains(".o-mail-avatar-card-name:text('Demo')");
+    await contains(".o-mail-avatar-card-localtime:contains('17:30 local time')");
+    await click(".o-mail-Thread");
+    await contains(".o-mail-avatar-card-name:text('Demo')", { count: 0 });
+    // Case 2: correspondent tz === self tz ('localtime' tz)
+    pyEnv["res.partner"].write([partnerId], { tz: "localtime" });
+    await click(".o-discuss-ChannelMember:has(:text('Demo'))");
+    changeTzResolver = Promise.withResolvers();
+    await waitStoreFetch(["avatar_card"]);
+    await changeTzResolver.promise;
+    await animationFrame();
+    await contains(".o-mail-avatar-card-name:text('Demo')");
+    await contains(".o-mail-avatar-card-localtime", { count: 0 });
+    await click(".o-mail-Thread");
+    await contains(".o-mail-avatar-card-name:text('Demo')", { count: 0 });
+    // Case 3: correspondent tz === self tz (explicit tz)
+    pyEnv["res.partner"].write([partnerId], { tz: "Europe/Brussels" });
+    await click(".o-discuss-ChannelMember:has(:text('Demo'))");
+    changeTzResolver = Promise.withResolvers();
+    await waitStoreFetch(["avatar_card"]);
+    await changeTzResolver.promise;
+    await animationFrame();
+    await contains(".o-mail-avatar-card-name:text('Demo')");
+    await contains(".o-mail-avatar-card-localtime", { count: 0 });
+});
+
 test("should show a button to load more members if they are not all loaded", async () => {
     // Test assumes at most 100 members are loaded at once.
     const pyEnv = await startServer();
@@ -157,12 +229,12 @@ test("Channel member count update after user joined", async () => {
     pyEnv["res.partner"].create({ name: "Harry", user_ids: [userId] });
     await start();
     await openDiscuss(channelId);
+    await contains(".o-discuss-ChannelMemberList"); // wait for auto-open of this panel
     await contains(".o-discuss-ChannelMemberList h6:text('Offline - 1')");
     await click("[title='Invite People']");
     await click(".o-discuss-ChannelInvitation-selectable:has(:text('Harry'))");
     await click(".o-discuss-ChannelInvitation [title='Invite']:enabled");
     await contains(".o-discuss-ChannelInvitation", { count: 0 });
-    await click("[title='Members']");
     await contains(".o-discuss-ChannelMemberList h6:text('Offline - 2')");
 });
 
@@ -226,4 +298,59 @@ test("Members are partitioned by online/offline", async () => {
     await contains(".o-discuss-ChannelMember:text('Dobby')", {
         after: ["h6:text('Offline - 1')"],
     });
+});
+
+test("Shows owner / admin in members panel + member actions", async () => {
+    const pyEnv = await startServer();
+    const [demoPid, johnPid] = pyEnv["res.partner"].create([{ name: "Demo" }, { name: "John" }]);
+    const marioGid = pyEnv["mail.guest"].create({ name: "Mario" });
+    const channelId = pyEnv["discuss.channel"].create({
+        name: "TestChannel",
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId, channel_role: "owner" }),
+            Command.create({ partner_id: demoPid, channel_role: "admin" }),
+            Command.create({ partner_id: johnPid }),
+            Command.create({ guest_id: marioGid }),
+        ],
+        channel_type: "channel",
+    });
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-discuss-ChannelMember", { count: 4 });
+    await contains(`.o-discuss-ChannelMember:has(:text(${serverState.partnerName}))`);
+    await contains(".o-discuss-ChannelMember:has(:text(Demo))");
+    await contains(".o-discuss-ChannelMember:has(:text(John))");
+    await contains(".o-discuss-ChannelMember:has(:text(Mario))");
+    await contains(
+        ".o-discuss-ChannelMember:text('" +
+            serverState.partnerName +
+            "') .fa-star.text-warning[title='Channel Owner']"
+    );
+    await contains(
+        ".o-discuss-ChannelMember:text('Demo') .fa-star.text-primary[title='Channel Admin']"
+    );
+    await click(
+        ".o-discuss-ChannelMember:text('" + serverState.partnerName + "') [title='Member Actions']"
+    );
+    await contains(".o-dropdown-item", { count: 3 });
+    await contains(".o-dropdown-item:eq(0):has(:text(Set Admin))");
+    await contains(".o-dropdown-item:eq(1):has(:text(Remove Owner))");
+    await contains(".o-dropdown-item:eq(2):has(:text(Remove Member))");
+    await click(".o-mail-Thread");
+    await contains(".o-dropdown-item", { count: 0 });
+    await click(".o-discuss-ChannelMember:text('Demo') [title='Member Actions']");
+    await contains(".o-dropdown-item", { count: 3 });
+    await contains(".o-dropdown-item:eq(0):has(:text(Remove Admin))");
+    await contains(".o-dropdown-item:eq(1):has(:text(Set Owner))");
+    await contains(".o-dropdown-item:eq(2):has(:text(Remove Member))");
+    await click(".o-mail-Thread");
+    await contains(".o-dropdown-item", { count: 0 });
+    await click(".o-discuss-ChannelMember:text('John') [title='Member Actions']");
+    await contains(".o-dropdown-item", { count: 3 });
+    await contains(".o-dropdown-item:eq(0):has(:text(Set Admin))");
+    await contains(".o-dropdown-item:eq(1):has(:text(Set Owner))");
+    await contains(".o-dropdown-item:eq(2):has(:text(Remove Member))");
+    await click(".o-discuss-ChannelMember:text('Mario') [title='Member Actions']");
+    await contains(".o-dropdown-item", { count: 1 });
+    await contains(".o-dropdown-item:has(:text(Remove Member))");
 });

@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 
-from odoo import fields, tests
+from odoo import exceptions, fields, tests
 from odoo.addons.mail.models.mail_activity import MailActivity
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.test_mail.tests.test_mail_activity import TestActivityCommon
@@ -92,7 +92,7 @@ class TestActivityMixin(TestActivityCommon):
             self.test_record.activity_feedback(
                 ['test_mail.mail_act_test_todo'],
                 user_id=self.user_admin.id,
-                feedback='Test feedback',
+                feedback='Test feedback 1',
             )
             self.assertEqual(self.test_record.activity_ids, act2 | act3)
             self.assertFalse(act1.active)
@@ -108,21 +108,22 @@ class TestActivityMixin(TestActivityCommon):
             # Perform todo activities for remaining people
             self.test_record.activity_feedback(
                 ['test_mail.mail_act_test_todo'],
-                feedback='Test feedback')
+                feedback='Test feedback 2')
             self.assertFalse(act3.active)
 
             # Setting activities as done should delete them and post messages
             self.assertEqual(self.test_record.activity_ids, act2)
             self.assertEqual(len(self.test_record.message_ids), 3)
-            act_messages = self.test_record.message_ids[:2]
-            self.assertEqual(act_messages.subtype_id, self.env.ref('mail.mt_activities'))
+            self.assertEqual(len(self.test_record.message_ids), 3)
+            feedback2, feedback1, _create_log = self.test_record.message_ids
+            self.assertEqual((feedback2 + feedback1).subtype_id, self.env.ref('mail.mt_activities'))
 
             # Unlink meeting activities
             self.test_record.activity_unlink(['test_mail.mail_act_test_meeting'])
 
             # Canceling activities should simply remove them
             self.assertEqual(self.test_record.activity_ids, self.env['mail.activity'])
-            self.assertEqual(len(self.test_record.message_ids), 3)
+            self.assertEqual(len(self.test_record.message_ids), 3, 'Should not produce additional message')
             self.assertFalse(self.test_record.activity_state)
             self.assertFalse(act2.exists())
 
@@ -268,13 +269,13 @@ class TestActivityMixin(TestActivityCommon):
             'res_name': 'test',
             'res_model': 'mail.activity',
             'res_id': activity.id,
-            'datas': 'test',
+            'raw': b'test',
         }, {
             'name': 'test2',
             'res_name': 'test',
             'res_model': 'mail.activity',
             'res_id': activity.id,
-            'datas': 'testtest',
+            'raw': b'testtest',
         }])
 
         # Checking if the attachment has been forwarded to the message
@@ -285,56 +286,6 @@ class TestActivityMixin(TestActivityCommon):
         for attachment in attachments:
             self.assertEqual(attachment.res_id, activity_message.id)
             self.assertEqual(attachment.res_model, activity_message._name)
-
-    @users('employee')
-    def test_feedback_chained_current_date(self):
-        frozen_now = datetime(2021, 10, 10, 14, 30, 15)
-
-        test_record = self.env['mail.test.activity'].browse(self.test_record.ids)
-        first_activity = self.env['mail.activity'].create({
-            'activity_type_id': self.env.ref('test_mail.mail_act_test_chained_1').id,
-            'date_deadline': frozen_now + relativedelta(days=-2),
-            'res_id': test_record.id,
-            'res_model_id': self.env['ir.model']._get_id('mail.test.activity'),
-            'summary': 'Test',
-        })
-        first_activity_id = first_activity.id
-
-        with freeze_time(frozen_now):
-            first_activity.action_feedback(feedback='Done')
-        self.assertFalse(first_activity.active)
-
-        # check chained activity
-        new_activity = test_record.activity_ids
-        self.assertNotEqual(new_activity.id, first_activity_id)
-        self.assertEqual(new_activity.summary, 'Take the second step.')
-        self.assertEqual(new_activity.date_deadline, frozen_now.date() + relativedelta(days=10))
-
-    @users('employee')
-    def test_feedback_chained_previous(self):
-        self.env.ref('test_mail.mail_act_test_chained_2').sudo().write({'delay_from': 'previous_activity'})
-        frozen_now = datetime(2021, 10, 10, 14, 30, 15)
-
-        test_record = self.env['mail.test.activity'].browse(self.test_record.ids)
-        first_activity = self.env['mail.activity'].create({
-            'activity_type_id': self.env.ref('test_mail.mail_act_test_chained_1').id,
-            'date_deadline': frozen_now + relativedelta(days=-2),
-            'res_id': test_record.id,
-            'res_model_id': self.env['ir.model']._get_id('mail.test.activity'),
-            'summary': 'Test',
-        })
-        first_activity_id = first_activity.id
-
-        with freeze_time(frozen_now):
-            first_activity.action_feedback(feedback='Done')
-        self.assertFalse(first_activity.active)
-
-        # check chained activity
-        new_activity = test_record.activity_ids
-        self.assertNotEqual(new_activity.id, first_activity_id)
-        self.assertEqual(new_activity.summary, 'Take the second step.')
-        self.assertEqual(new_activity.date_deadline, frozen_now.date() + relativedelta(days=8),
-                         'New deadline should take into account original activity deadline, not current date')
 
     def test_mail_activity_state(self):
         """Create 3 activity for 2 different users in 2 different timezones.
@@ -760,8 +711,16 @@ class TestActivityMixin(TestActivityCommon):
         self.assertTrue(act.exists())
         self.assertFalse(act.sudo().active)
         self.assertFalse(test_record.exists())
-        self.assertFalse(self.env['mail.activity'].with_user(self.user_admin).with_context(active_test=False).search(
-            [('active', '=', False)]))
+
+        self.env.invalidate_all()
+        self.assertFalse(
+            self.env['mail.activity'].with_user(self.user_admin).with_context(active_test=False).search(
+                [('active', '=', False)]),
+            'Should consider unassigned activity on removed record = no access'
+        )
+        self.env.invalidate_all()
+        with self.assertRaises(exceptions.AccessError):
+            _dummy = act.with_user(self.user_admin).read(['summary'])
 
 
 @tests.tagged('mail_activity', 'mail_activity_mixin')

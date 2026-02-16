@@ -14,8 +14,9 @@ import { getValueFromVar } from "@html_builder/utils/utils";
 /**
  * @typedef {((
  *      editingElement: HTMLElement,
- *      params: ActionParams,
+ *      styleName: string,
  *      value: ActionValue,
+ *      params?: ActionParams,
  * ) => boolean)[]} apply_custom_css_style
  */
 
@@ -301,21 +302,23 @@ export class StyleAction extends BuilderAction {
         return currentValue === value;
     }
     apply({ editingElement, params = {}, value }) {
-        if (!this.delegateTo("apply_custom_css_style", { editingElement, params, value })) {
-            this.applyCssStyle({ editingElement, params, value });
-        }
-    }
-    applyCssStyle({ editingElement, params = {}, value }) {
-        params = { ...params };
-        const styleName = params.mainParam;
-        delete params.mainParam;
         // Disable all transitions for the duration of the method as many
         // comparisons will be done on the element to know if applying a
         // property has an effect or not. Also, changing a css property via the
         // editor should not show any transition as previews would not be done
         // immediately, which is not good for the user experience.
         withoutTransition(editingElement, () => {
-            setStyle(editingElement, styleName, value, params);
+            const { mainParam: styleName, ...styleParams } = params;
+            if (
+                !this.delegateTo("apply_custom_css_style", {
+                    editingElement,
+                    styleName,
+                    value,
+                    params: styleParams,
+                })
+            ) {
+                setStyle(editingElement, styleName, value, styleParams);
+            }
         });
     }
     _getValueWithoutTransition(el, styleName) {

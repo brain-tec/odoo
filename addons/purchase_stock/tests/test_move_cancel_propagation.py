@@ -12,8 +12,6 @@ class TestMoveCancelPropagation(PurchaseTestCommon):
     def setUpClass(cls):
         super().setUpClass()
         cls.customer = cls.env['res.partner'].create({'name': 'abc'})
-        cls.warehouse = cls.env.ref('stock.warehouse0')
-        cls.cust_location = cls.env.ref('stock.stock_location_customers')
         product = cls.env['product.product'].create({
             'name': 'Geyser',
             'is_storable': True,
@@ -32,7 +30,7 @@ class TestMoveCancelPropagation(PurchaseTestCommon):
         cls.move = cls.env['stock.move'].create({
             'product_id': product.id,
             'product_uom_qty': 10,
-            'product_uom': product.uom_id.id,
+            'uom_id': product.uom_id.id,
             'picking_id': cls.picking_out.id,
             'location_id': cls.picking_type_out.default_location_src_id.id,
             'location_dest_id': cls.customer_location.id,
@@ -246,7 +244,7 @@ class TestMoveCancelPropagation(PurchaseTestCommon):
                 Command.link(self.route_buy.id),
             ],
             'seller_ids': [Command.create({
-                'product_uom_id': self.env.ref('uom.product_uom_unit').id,
+                'uom_id': self.env.ref('uom.product_uom_unit').id,
                 'partner_id': partner.id,
                 'price': 10.0,
             })],
@@ -261,7 +259,7 @@ class TestMoveCancelPropagation(PurchaseTestCommon):
             'location_id': self.stock_location.id,
             'location_dest_id': self.customer_location.id,
             'product_id': product_car.id,
-            'product_uom': product_car.uom_id.id,
+            'uom_id': product_car.uom_id.id,
             'product_uom_qty': 10.0,
             'procure_method': 'make_to_order',
             'picking_id': customer_picking.id,

@@ -32,7 +32,7 @@ registerWebsitePreviewTour(
             run: "click",
         },
         {
-            trigger: ":iframe:not(:has(.o_loading_screen))",
+            trigger: ".o_website_preview :iframe:not(:has(.o_loading_screen))",
         },
         {
             content: "Click on the product snippet to show its options",

@@ -20,7 +20,6 @@ const threadPatch = {
                 return this.model === "discuss.channel" ? this.id : undefined;
             },
         });
-        this.group_ids = fields.Many("res.groups");
         this.firstUnreadMessage = fields.One("mail.message", {
             compute() {
                 return this.channel?.firstUnreadMessage;
@@ -28,7 +27,6 @@ const threadPatch = {
             inverse: "threadAsFirstUnread",
         });
         this.markReadSequential = useSequential();
-        this.markedAsUnread = false;
         this.markingAsRead = false;
         this.scrollUnread = true;
     },
@@ -40,39 +38,6 @@ const threadPatch = {
             return this.channel.channel_type;
         }
         return res;
-    },
-    /** @override */
-    get importantCounter() {
-        if (
-            this.channel?.isChatChannel &&
-            this.channel?.self_member_id?.message_unread_counter_ui
-        ) {
-            return this.channel.self_member_id.message_unread_counter_ui;
-        }
-        if (this.channel.discussAppCategory?.id === "channels") {
-            if (this.store.settings.channel_notifications === "no_notif") {
-                return 0;
-            }
-            if (
-                this.store.settings.channel_notifications === "all" &&
-                !this.channel?.self_member_id?.mute_until_dt
-            ) {
-                return this.channel?.self_member_id?.message_unread_counter_ui;
-            }
-        }
-        return super.importantCounter;
-    },
-    /** @override */
-    isDisplayedOnUpdate() {
-        super.isDisplayedOnUpdate(...arguments);
-        if (!this.channel?.self_member_id) {
-            return;
-        }
-        if (!this.isDisplayed) {
-            this.channel.self_member_id.new_message_separator_ui =
-                this.channel?.self_member_id.new_message_separator;
-            this.markedAsUnread = false;
-        }
     },
     get isUnread() {
         return this.channel?.self_member_id?.message_unread_counter > 0 || super.isUnread;
@@ -116,20 +81,6 @@ const threadPatch = {
             : super.needactionCounter;
     },
     /** @override */
-    onNewSelfMessage(message) {
-        if (
-            !this.channel?.self_member_id ||
-            message.id < this.channel?.self_member_id.seen_message_id?.id
-        ) {
-            return;
-        }
-        this.channel.self_member_id.seen_message_id = message;
-        this.channel.self_member_id.new_message_separator = message.id + 1;
-        this.channel.self_member_id.new_message_separator_ui =
-            this.channel?.self_member_id.new_message_separator;
-        this.markedAsUnread = false;
-    },
-    /** @override */
     open(options) {
         if (this.channel) {
             const res = this.channel.openChannel();
@@ -149,25 +100,14 @@ const threadPatch = {
             const command = commandRegistry.get(firstWord, false);
             if (
                 command &&
-                (!command.channel_types ||
-                    command.channel_types.includes(this.channel?.channel_type))
+                (!command.condition ||
+                    command.condition({ store: this.store, channel: this.channel }))
             ) {
-                await this.executeCommand(command, textContent);
+                await this.channel.executeCommand(command, textContent);
                 return;
             }
         }
         return super.post(...arguments);
-    },
-    async executeCommand(command, body = "") {
-        await command.onExecute?.(this.channel);
-        if (command.methodName) {
-            await this.store.env.services.orm.call(
-                "discuss.channel",
-                command.methodName,
-                [[this.id]],
-                { body }
-            );
-        }
     },
 };
 patch(Thread.prototype, threadPatch);

@@ -6,6 +6,7 @@ import {
     goBackToBlocks,
     registerWebsitePreviewTour,
     selectFullText,
+    unfoldOptionsGroup,
 } from "@website/js/tours/tour_utils";
 import { browser } from "@web/core/browser/browser";
 import { delay } from "@web/core/utils/concurrency";
@@ -27,6 +28,8 @@ const checkIfTextToolbarVisible = {
     trigger: ".o-we-toolbar",
 };
 
+const oldWriteText = browser.navigator.clipboard.writeText;
+
 registerWebsitePreviewTour(
     "snippet_editor_panel_options",
     {
@@ -43,6 +46,7 @@ registerWebsitePreviewTour(
         selectFullText("first paragraph", ".s_text_image p:not([data-selection-placeholder])"),
         checkIfParagraphSelected(":iframe .s_text_image p:not([data-selection-placeholder])"),
         checkIfTextToolbarVisible,
+        ...unfoldOptionsGroup("Text - Image"),
         {
             content: "Click on the width option.",
             trigger: "[data-action-param='o_container_small']",
@@ -60,21 +64,19 @@ registerWebsitePreviewTour(
             async run(helpers) {
                 // Patch and ignore write on clipboard in tour as we don't have
                 // permissions.
-                const oldWriteText = browser.navigator.clipboard.writeText;
                 browser.navigator.clipboard.writeText = () => {
                     console.info("Copy in clipboard ignored!");
                 };
                 await helpers.click();
-                // Restore the writeText after a short delay to avoid reverting
-                // it before the plugin function has been completed.
-                await new Promise((resolve) => setTimeout(resolve, 100));
-                browser.navigator.clipboard.writeText = oldWriteText;
             },
         },
         {
             content: "Check the copied url from the notification toast",
             trigger: ".o_notification_manager .o_notification_content",
             run() {
+                // Cleanup the patched clipboard method
+                browser.navigator.clipboard.writeText = oldWriteText;
+
                 const { textContent } = this.anchor;
                 const url = textContent.substring(textContent.indexOf("/"));
 
@@ -114,20 +116,13 @@ registerWebsitePreviewTour(
         ...changeOptionInPopover("Text", "Layout", "[data-action-value='3']"),
         {
             content: "The snippet should have the correct number of columns.",
-            trigger: ":iframe .s_text_block .container > .row .col-lg-4:eq(3)",
-            run() {
-                if (
-                    [...this.anchor.children].filter(
-                        (child) => !child.hasAttribute("data-selection-placeholder")
-                    ).length !== 3
-                ) {
-                    console.error("The snippet does not have the correct number of columns");
-                }
-            },
+            trigger:
+                ":iframe .s_text_block .container > .row:has(.col-lg-4:not([data-selection-placeholder]):count(3))",
         },
         checkIfParagraphSelected(":iframe .s_text_block p:not([data-selection-placeholder])"),
         // Test keeping the text selection when removing all columns of a
         // snippet.
+        ...unfoldOptionsGroup("Text"),
         ...changeOptionInPopover("Text", "Layout", "[data-action-value='0']"),
         {
             content: "The snippet should have the correct number of columns.",

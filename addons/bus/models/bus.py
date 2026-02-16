@@ -8,12 +8,15 @@ import selectors
 import threading
 import time
 from psycopg2 import InterfaceError
+from psycopg2.pool import PoolError
 
 import odoo
 from odoo import api, fields, models
 from odoo.service.server import CommonServer
 from odoo.tools import config, json_default, SQL
 from odoo.tools.misc import OrderedSet
+
+from ..tools import orjson
 
 _logger = logging.getLogger(__name__)
 
@@ -60,7 +63,7 @@ def fetch_bus_notifications(cr, channels, last=0, ignore_ids=None):
         conditions.append(SQL("id NOT IN %s", tuple(ignore_ids)))
     where = SQL(" AND ").join(conditions)
     cr.execute(SQL("SELECT id, message FROM bus_bus WHERE %s ORDER BY id", where))
-    return [{"id": r[0], "message": json.loads(r[1])} for r in cr.fetchall()]
+    return [{"id": r[0], "message": orjson.loads(r[1])} for r in cr.fetchall()]
 
 
 # ---------------------------------------------------------
@@ -244,7 +247,7 @@ class ImDispatch(threading.Thread):
                     conn.poll()
                     channels = []
                     while conn.notifies:
-                        channels.extend(json.loads(conn.notifies.pop().payload))
+                        channels.extend(orjson.loads(conn.notifies.pop().payload))
                     # relay notifications to websockets that have
                     # subscribed to the corresponding channels.
                     websockets = set()
@@ -258,7 +261,7 @@ class ImDispatch(threading.Thread):
             try:
                 self.loop()
             except Exception as exc:
-                if isinstance(exc, InterfaceError) and stop_event.is_set():
+                if isinstance(exc, (InterfaceError, PoolError)) and stop_event.is_set():
                     continue
                 _logger.exception("Bus.loop error, sleep and retry")
                 time.sleep(TIMEOUT)

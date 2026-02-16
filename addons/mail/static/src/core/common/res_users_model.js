@@ -1,9 +1,10 @@
+import { createElementWithContent } from "@web/core/utils/html";
 import { fields, Record } from "@mail/model/export";
+import { getOuterHtml } from "@mail/utils/common/html";
 
 export class ResUsers extends Record {
     static _name = "res.users";
     static _inherits = { "res.partner": "partner_id" };
-    static id = "id";
 
     /** @type {number} */
     id;
@@ -19,6 +20,24 @@ export class ResUsers extends Record {
     share;
     /** @type {ReturnType<import("@odoo/owl").markup>|string|undefined} */
     signature = fields.Html(undefined);
+
+    /**
+     * Get the signature with its typical layout when inserted in html
+     */
+    getSignatureBlock() {
+        if (!this.signature) {
+            return "";
+        }
+        const divElement = document.createElement("div");
+        divElement.setAttribute("data-o-mail-quote", "1");
+        divElement.append(
+            document.createElement("br"),
+            document.createTextNode("-- "),
+            document.createElement("br"),
+            ...createElementWithContent("div", this.signature).childNodes
+        );
+        return getOuterHtml(divElement);
+    }
 }
 
 ResUsers.register();

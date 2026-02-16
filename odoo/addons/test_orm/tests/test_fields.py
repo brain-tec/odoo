@@ -1,9 +1,9 @@
 import base64
 import io
-import threading
 from collections import OrderedDict
 from datetime import date, datetime
 from unittest.mock import patch
+from contextlib import contextmanager
 
 import psycopg2
 from PIL import Image
@@ -967,6 +967,34 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         self.env.invalidate_all()
         self.assertEqual(record.created_id.value, 3)
 
+    def test_18_flush_precommit(self):
+        """ check that cr.flush() runs precommits as many times as needed. """
+        cr = self.env.cr
+        record = self.env['test_orm.compute.created'].create({'name': 'foo'})
+        # The hook triggers a compute of the value (stored-computed) field
+        # which triggers the hook again, limited to 4 calls.
+        # Choosing a number < 10 (which is the max number of iterations).
+        count = 4
+
+        def hook():
+            nonlocal count
+            if count <= 0:
+                return
+            count -= 1
+            record.name = 'x'
+
+        def compute_value(self):
+            self.value = 10 + count
+            self.env.cr.precommit.add(hook)
+
+        self.patch(self.registry[record._name], '_compute_value', compute_value)
+
+        # run the pre-commit hook
+        hook()
+        cr.flush()
+        self.assertEqual(count, 0, "Precommit not ran enough times")
+        self.assertEqual(record.value, 10, "Flush not triggered correctly")
+
     def test_20_float(self):
         """ test rounding of float fields """
         record = self.env['test_orm.mixed'].create({})
@@ -1695,24 +1723,10 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
             field = model._fields[field_name]
             field_fallback = field.get_company_dependent_fallback(model)
             record_fallback[field_name] = field_fallback
-            current_thread = threading.current_thread()
 
             for operator, values in operations.items():
                 for value in values:
                     domain = [(field_name, operator, value)]
-                    company_dependent_column_not_null = not record_fallback.filtered_domain(domain)
-                    if company_dependent_column_not_null:
-                        with self.subTest(domain=domain, default=default):
-                            Model.search([('id', 'in', records.ids)] + domain)
-                            current_thread.query_count = 0
-                            current_thread.query_time = 0
-                            Model.search([('id', 'in', records.ids)] + domain)  # warmup
-                            if current_thread.query_count:
-                                # parent_of and child_of may need extra queries
-                                expected_contained_sqls = [''] * (current_thread.query_count - 1) + [f'"test_orm_company"."{field_name}" IS NOT NULL']
-                                with self.assertQueriesContain(expected_contained_sqls):
-                                    Model.search([('id', 'in', records.ids)] + domain)
-
                     with self.subTest(domain=domain, default=default):
                         self._search(
                             Model,
@@ -1720,6 +1734,15 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
                             [('id', 'in', records.ids)],
                             test_complement=True,
                         )
+                    if record_fallback.filtered_domain(domain):
+                        continue
+                    with self.subTest(domain=domain, default=default, check_not_null=True):
+                        Model.search([('id', 'in', records.ids)] + domain)  # warmup
+                        queries = []
+                        with contextmanager(lambda: self._patchExecute(queries))():
+                            Model.search([('id', 'in', records.ids)] + domain)
+                        if queries:
+                            self.assertIn(f'"test_orm_company"."{field_name}" IS NOT NULL', queries[-1])
 
         # boolean fields
         test_field('truth', [True, True], {
@@ -2896,7 +2919,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         self.assertEqual(record_bin_size.image_256, b'424.00 bytes')
         # non-attachment binary fields: value returned as str in a different
         # form, because coming from PostgreSQL instead of filestore
-        self.assertEqual(record_bin_size.image_64, '148 bytes')
+        self.assertEqual(record_bin_size.image_64, '111 bytes')
 
         # ensure image_data_uri works (value must be bytes and not string)
         self.assertEqual(record.image_256[:8], b'iVBORw0K')
@@ -2963,16 +2986,6 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         assertBinaryValue(record, binary_value)
         assertBinaryValue(record_no_bin_size, binary_value)
         assertBinaryValue(record_bin_size, binary_size)
-
-        # check computed binary field with arbitrary Python value
-        record = self.env['test_orm.model_binary'].create({})
-        record_no_bin_size = record.with_context(bin_size=False)
-        record_bin_size = record.with_context(bin_size=True)
-
-        expected_value = [(record.id, False)]
-        self.assertEqual(record.binary_computed, expected_value)
-        self.assertEqual(record_no_bin_size.binary_computed, expected_value)
-        self.assertEqual(record_bin_size.binary_computed, expected_value)
 
     def test_95_binary_bin_size_write(self):
         binary_value = base64.b64encode(b'content')
@@ -4370,6 +4383,7 @@ class TestSelectionOndelete(TransactionCase):
     MODEL_REQUIRED = 'test_orm.model_selection_required'
     MODEL_NONSTORED = 'test_orm.model_selection_non_stored'
     MODEL_WRITE_OVERRIDE = 'test_orm.model_selection_required_for_write_override'
+    MODEL_COMPANY_DEPENDENT = 'test_orm.model_selection_company_dependent'
 
     def setUp(self):
         super().setUp()
@@ -4517,6 +4531,39 @@ class TestSelectionOndelete(TransactionCase):
 
         self._unlink_option(self.MODEL_WRITE_OVERRIDE, 'divinity')
         self.assertEqual(rec.my_selection, 'foo')
+
+    def test_ondelete_company_dependent_null_implicit_with_multicompany(self):
+        Model = self.env[self.MODEL_COMPANY_DEPENDENT]
+        company_2 = self.env['res.company'].create({'name': 'Test Company'})
+
+        # create records with the extended selection option
+        records = r1, r2, r3 = Model.create([
+            {'my_selection': 'manual'},
+            {'my_selection': 'auto'},
+            {'my_selection': 'semi_auto'},
+        ])
+
+        # set different values for company_2
+        r1.with_company(company_2).write({'my_selection': 'semi_auto'})
+        r2.with_company(company_2).write({'my_selection': 'semi_auto'})
+        r3.with_company(company_2).write({'my_selection': 'manual'})
+
+        # sanity checks before unlink
+        self.assertEqual(records.mapped("my_selection"), ["manual", "auto", "semi_auto"])
+        self.assertEqual(
+            records.with_company(company_2).mapped("my_selection"),
+            ["semi_auto", "semi_auto", "manual"],
+        )
+
+        # simulates a module uninstall
+        self._unlink_option(self.MODEL_COMPANY_DEPENDENT, 'semi_auto')
+
+        # test that values are removed from all the companies
+        self.assertEqual(records.mapped("my_selection"), ["manual", "auto", False])
+        self.assertEqual(
+            records.with_company(company_2).mapped("my_selection"),
+            [False, False, "manual"],
+        )
 
 
 @tagged('selection_ondelete_advanced')
@@ -4891,39 +4938,33 @@ class TestUnlinkConstraints(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         MODEL = cls.env['test_orm.model_constrained_unlinks']
-
-        cls.deletable_bar = MODEL.create({'bar': 5})
-        cls.undeletable_bar = MODEL.create({'bar': 6})
         cls.deletable_foo = MODEL.create({'foo': 'formaggio'})
         cls.undeletable_foo = MODEL.create({'foo': 'prosciutto'})
+        cls.deletable_bar = MODEL.create({'bar': 5})
+        cls.undeletable_bar = MODEL.create({'bar': 6})
 
-        from odoo.addons.base.models.ir_model import (  # noqa: PLC0415
-            MODULE_UNINSTALL_FLAG,
-        )
-        uninstall = {MODULE_UNINSTALL_FLAG: True}
-        cls.undeletable_bar_uninstall = cls.undeletable_bar.with_context(**uninstall)
-        cls.undeletable_foo_uninstall = cls.undeletable_foo.with_context(**uninstall)
-
-    def test_unlink_constraint_manual_bar(self):
+    def test_unlink_manual(self):
+        self.assertTrue(self.deletable_foo.unlink())
         self.assertTrue(self.deletable_bar.unlink())
+
+        # should both fail because of ondelete method
+        with self.assertRaises(ValueError, msg="You didn't say if you wanted it crudo or cotto..."):
+            self.undeletable_foo.unlink()
         with self.assertRaises(ValueError, msg="Nooooooooo bar can't be greater than five!!"):
             self.undeletable_bar.unlink()
 
-    def test_unlink_constraint_uninstall_bar(self):
-        self.assertTrue(self.deletable_bar.unlink())
-        # should succeed since it's at_uninstall=False
-        self.assertTrue(self.undeletable_bar_uninstall.unlink())
+    def test_unlink_uninstall(self):
+        self.patch(self.registry, 'uninstalling_modules', {'test_orm'})
 
-    def test_unlink_constraint_manual_foo(self):
         self.assertTrue(self.deletable_foo.unlink())
+        self.assertTrue(self.deletable_bar.unlink())
+
+        # should fail since it's at_uninstall=True
         with self.assertRaises(ValueError, msg="You didn't say if you wanted it crudo or cotto..."):
             self.undeletable_foo.unlink()
 
-    def test_unlink_constraint_uninstall_foo(self):
-        self.assertTrue(self.deletable_foo)
-        # should fail since it's at_uninstall=True
-        with self.assertRaises(ValueError, msg="You didn't say if you wanted it crudo or cotto..."):
-            self.undeletable_foo_uninstall.unlink()
+        # should succeed since it's at_uninstall=False
+        self.assertTrue(self.undeletable_bar.unlink())
 
 
 @tagged('wrong_related_path')

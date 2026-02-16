@@ -1,4 +1,5 @@
 import json
+import logging
 from base64 import b64decode, b64encode
 from datetime import datetime
 
@@ -35,6 +36,8 @@ SANDBOX_AUTH = {
 }
 
 ERROR_MESSAGE = _lt("Something went wrong. Please onboard the journal again.")
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountJournal(models.Model):
@@ -129,7 +132,7 @@ class AccountJournal(models.Model):
 
     def _l10n_sa_csr_required_fields(self):
         """ Return the list of fields required to generate a valid CSR as per ZATCA requirements """
-        return ['l10n_sa_private_key_id', 'vat', 'name', 'city', 'country_id', 'state_id']
+        return ['l10n_sa_private_key_id', 'vat', 'name', 'city', 'country_id', 'state_id', 'street']
 
     def _l10n_sa_generate_csr(self):
         """
@@ -152,6 +155,27 @@ class AccountJournal(models.Model):
         self.l10n_sa_csr = self.env['certificate.certificate'].sudo()._l10n_sa_get_csr_str(self)
 
     # ====== Certificate Methods =======
+
+    def _l10n_sa_get_csid_error(self, csid):
+        """
+            Return a formatted error string if the CSID response has an 'error' or 'errors'
+            key or doesn't have a 'binarySecurityToken'
+        """
+        error_msg = ""
+        unknown_error_msg = _("Unknown response returned from ZATCA. Please check the logs.")
+        if error := csid.get('error'):
+            error_msg = error
+        elif errors := csid.get('errors'):
+            error_msg = " <br/>" + " <br/>- ".join([err['message'] if isinstance(err, dict) else err for err in errors])
+        elif 'error' in [csid.get('type', "").lower(), csid.get('status', "").lower()]:
+            error_msg = csid.get('message') or unknown_error_msg
+        elif not csid.get('binarySecurityToken'):
+            error_msg = unknown_error_msg
+
+        if error_msg:
+            _logger.warning("Failed to obtain CSID: %s", csid)
+
+        return error_msg
 
     def _l10n_sa_reset_certificates(self):
         """
@@ -204,9 +228,9 @@ class AccountJournal(models.Model):
             Request a Compliance Cryptographic Stamp Identifier (CCSID) from ZATCA
         """
         CCSID_data = self._l10n_sa_api_get_compliance_CSID(otp)
-        if CCSID_data.get('errors') or CCSID_data.get('error'):
-            error = CCSID_data['errors'][0]['message'] if CCSID_data.get('errors') else CCSID_data['error']
-            raise UserError(Markup("%s<br/>%s") % (_("Please check the details below and onboard the journal again:"), error))
+        if error := self._l10n_sa_get_csid_error(CCSID_data):
+            raise UserError(_("Please check the details below and onboard the journal again: %s", error))
+
         cert_id = self.env['certificate.certificate'].sudo().create({
             'name': 'CCSID Certificate',
             'content': b64decode(CCSID_data['binarySecurityToken']),
@@ -243,8 +267,8 @@ class AccountJournal(models.Model):
 
         CCSID_data = json.loads(self_sudo.l10n_sa_compliance_csid_json)
         PCSID_data = self_sudo._l10n_sa_request_production_csid(CCSID_data, renew, OTP)
-        if PCSID_data.get('error'):
-            raise UserError(_("Could not obtain Production CSID: %s", PCSID_data['error']))
+        if error := self._l10n_sa_get_csid_error(PCSID_data):
+            raise UserError(_("Could not obtain Production CSID: %s", error))
         self_sudo.l10n_sa_production_csid_json = json.dumps(PCSID_data)
         pcsid_certificate = self_sudo.env['certificate.certificate'].create({
             'name': 'PCSID Certificate',
@@ -359,7 +383,7 @@ class AccountJournal(models.Model):
     def _l10n_sa_edi_create_new_chain(self):
         self.ensure_one()
         return self.env['ir.sequence'].create({
-            'name': f'ZATCA account move sequence for Journal {self.name} (id: {self.id})',
+            'name': f'ZATCA journal entry sequence for Journal {self.name} (id: {self.id})',
             'code': f'l10n_sa_edi.account.move.{self.id}',
             'implementation': 'no_gap',
             'company_id': self.company_id.id,
@@ -601,7 +625,14 @@ class AccountJournal(models.Model):
         auth_str = "%s:%s" % (auth_data['binarySecurityToken'], auth_data['secret'])
         return 'Basic ' + b64encode(auth_str.encode()).decode()
 
-    def _l10n_sa_load_edi_demo_data(self):
+    def _l10n_sa_load_edi_test_data(self):
+        """
+            Populate the journal and company with test EDI data for Saudi Arabia compliance.
+            This method is intended for use in tests and development environments where
+            external HTTP requests to ZATCA or other validation services are not allowed.
+            It generates a private key, sets a dummy CSR, and populates CSID JSON fields
+            with example data.
+        """
         self.ensure_one()
         self.company_id.l10n_sa_private_key_id = self.env['certificate.key']._generate_ec_private_key(self.company_id)
         self.write({

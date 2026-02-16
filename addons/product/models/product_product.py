@@ -27,13 +27,13 @@ class ProductProduct(models.Model):
     # price_extra: catalog extra value only, sum of variant extra attributes
     price_extra = fields.Float(
         'Variant Price Extra', compute='_compute_product_price_extra',
-        digits='Product Price',
+        min_display_digits='Product Price',
         help="This is the sum of the extra price of all attributes")
     # lst_price: catalog value + extra, or custom value
     lst_price = fields.Float(
         'Sales Price',
         compute='_compute_product_lst_price',
-        digits='Product Price',
+        min_display_digits='Product Price',
         readonly=False,
         store=True,
         help="The sale price can be set manually or computed from the product template. Click on the 'Configure Variants' button to set the extra attribute prices.")
@@ -67,7 +67,7 @@ class ProductProduct(models.Model):
 
     standard_price = fields.Float(
         'Cost', company_dependent=True,
-        digits='Product Price',
+        min_display_digits='Product Price',
         groups="base.group_user",
         help="""Value of the product (automatically computed in AVCO).
         Used to value the product when the purchase cost is not known (e.g. inventory adjustment).
@@ -137,7 +137,10 @@ class ProductProduct(models.Model):
 
     is_favorite = fields.Boolean(related='product_tmpl_id.is_favorite', readonly=False, store=True)
     _is_favorite_index = models.Index("(is_favorite) WHERE is_favorite IS TRUE")
-    is_in_selected_section_of_order = fields.Boolean(search='_search_is_in_selected_section_of_order')
+    is_in_selected_section_of_order = fields.Boolean(
+        search='_search_is_in_selected_section_of_order',
+        store=False,
+    )
 
     @api.depends('image_variant_1920', 'image_variant_1024')
     def _compute_can_image_variant_1024_be_zoomed(self):
@@ -837,7 +840,7 @@ class ProductProduct(models.Model):
         return super()._search(domain, *args, **kwargs)
 
     @api.depends('name', 'default_code', 'product_tmpl_id')
-    @api.depends_context('display_default_code', 'seller_id', 'company_id', 'partner_id', 'formatted_display_name')
+    @api.depends_context('display_default_code', 'seller_id', 'company_id', 'partner_id', 'formatted_display_name', 'lang')
     def _compute_display_name(self):
 
         def get_display_name(name, code):
@@ -1029,14 +1032,14 @@ class ProductProduct(models.Model):
         for seller in sellers_filtered:
             # Set quantity in UoM of seller
             quantity_uom_seller = quantity
-            if quantity_uom_seller and uom_id and uom_id != seller.product_uom_id:
-                quantity_uom_seller = uom_id._compute_quantity(quantity_uom_seller, seller.product_uom_id)
+            if quantity_uom_seller and uom_id and uom_id != seller.uom_id:
+                quantity_uom_seller = uom_id._compute_quantity(quantity_uom_seller, seller.uom_id)
 
             if seller.date_start and seller.date_start > date:
                 continue
             if seller.date_end and seller.date_end < date:
                 continue
-            if params and params.get('force_uom') and seller.product_uom_id != uom_id and seller.product_uom_id != self.uom_id:
+            if params and params.get('force_uom') and seller.uom_id != uom_id and seller.uom_id != self.uom_id:
                 continue
             if partner_id and seller.partner_id not in [partner_id, partner_id.parent_id]:
                 continue
@@ -1065,11 +1068,7 @@ class ProductProduct(models.Model):
             }
             return [vals.get(key, record[key]) for key in sort_key]
         sellers = self._get_filtered_sellers(partner_id=partner_id, quantity=quantity, date=date, uom_id=uom_id, params=params)
-        res = self.env['product.supplierinfo']
-        for seller in sellers:
-            if not res or res.partner_id == seller.partner_id:
-                res |= seller
-        return res and res.sorted(sort_function)[:1]
+        return sellers.sorted(sort_function)[:1]
 
     def _get_product_price_context(self, combination):
         self.ensure_one()
@@ -1140,8 +1139,8 @@ class ProductProduct(models.Model):
 
     def get_product_multiline_description_sale(self):
         """ Compute a multiline description of this product, in the context of sales
-                (do not use for purchases or other display reasons that don't intend to use "description_sale").
-            It will often be used as the default description of a sale order line referencing this product.
+        (do not use for purchases or other display reasons that don't intend to use "description_sale").
+        It will often be used as the default description of a sale order line referencing this product.
         """
         name = self.display_name
         if self.description_sale:

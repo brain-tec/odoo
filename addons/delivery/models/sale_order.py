@@ -103,8 +103,7 @@ class SaleOrder(models.Model):
         :rtype: dict
         """
         self.ensure_one()
-        if zip_code:
-            assert country  # country is required if zip_code is provided.
+        if country:
             partner_address = self.env['res.partner'].new({
                 'active': False,
                 'country_id': country.id,
@@ -128,8 +127,15 @@ class SaleOrder(models.Model):
         view_id = self.env.ref('delivery.choose_delivery_carrier_view_form').id
         if self.env.context.get('carrier_recompute'):
             name = _('Update shipping cost')
+            carrier = self.carrier_id
         else:
             name = _('Add a delivery method')
+            shipping_partner_id = self.with_company(self.company_id).partner_shipping_id
+            carrier_property = (
+                shipping_partner_id.property_delivery_carrier_id
+                or shipping_partner_id.commercial_partner_id.property_delivery_carrier_id
+            )
+            carrier = carrier_property.available_carriers(self.partner_shipping_id, self)
         return {
             'name': name,
             'type': 'ir.actions.act_window',
@@ -140,7 +146,7 @@ class SaleOrder(models.Model):
             'target': 'new',
             'context': {
                 'default_order_id': self.id,
-                'default_carrier_id': self.carrier_id,
+                'default_carrier_id': carrier.id,
                 'default_total_weight': self._get_estimated_weight()
             }
         }

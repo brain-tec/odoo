@@ -435,7 +435,7 @@ class DiscussChannel(models.Model):
                         "partner_id": pid,
                         "channel_role": (
                             "owner"
-                            if vals.get("channel_type") in ["channel", "group"]
+                            if vals.get("channel_type", "channel") in ["channel", "group"]
                             and pid == self.env.user.partner_id.id
                             and not self.env.user._is_public()
                             else None
@@ -493,7 +493,8 @@ class DiscussChannel(models.Model):
             if channels_to_check := self.filtered(lambda channel: channel.active != vals["active"]):
                 if failing_channels := channels_to_check.filtered(
                     lambda channel: channel.channel_type in ["channel", "group"]
-                    and channel.self_member_id.channel_role != "owner"
+                    # sudo: discuss.channel.member - allow reading channel_role for access checks
+                    and channel.self_member_id.sudo().channel_role != "owner"
                     and not self.env.user.has_group("base.group_system")
                 ):
                     raise UserError(
@@ -513,7 +514,7 @@ class DiscussChannel(models.Model):
         super()._sync_field_names(res)
         res[None].attr("avatar_cache_key", predicate=is_channel_or_group)
         # sudo: discuss.category - guests can read categories of accessible channels
-        res[None].one("discuss_category_id", ["name", "sequence"], sudo=True)
+        res[None].one("discuss_category_id", "_store_category_fields", sudo=True)
         res[None].extend(["channel_type", "create_uid", "default_display_mode"])
         res[None].attr("description", predicate=is_channel_or_group)
         res[None].many("group_ids", [], predicate=is_channel)
@@ -651,11 +652,7 @@ class DiscussChannel(models.Model):
                     payload["invited_by_user_id"] = self.env.user.id
                 member._bus_send("discuss.channel/joined", payload)
                 if channel.channel_type != "channel" and post_joined_message:
-                    notification = (
-                        _("joined the channel")
-                        if member.is_self
-                        else _("invited %s to the channel", member._get_html_link(for_persona=True))
-                    )
+                    notification = member.channel_id._get_member_join_notification(member)
                     member.channel_id.message_post(
                         author_id=inviting_partner.id or None,
                         body=Markup('<div class="o_mail_notification" data-oe-type="channel-joined">%s</div>') % notification,
@@ -681,6 +678,11 @@ class DiscussChannel(models.Model):
                     # sudo: discuss.channel.rtc.session - current user can invite new members in call
                     current_channel_member.sudo()._rtc_invite_members(member_ids=new_members.ids)
         return all_new_members
+
+    def _get_member_join_notification(self, member):
+        if member.is_self:
+            return self.env._("joined the channel")
+        return self.env._("invited %s to the channel", member._get_html_link(for_persona=True))
 
     def invite_by_email(self, emails):
         """
@@ -738,6 +740,7 @@ class DiscussChannel(models.Model):
                     "body_html": body,
                     "email_from": self.env.user.partner_id.email_formatted,
                     "email_to": addr,
+                    "message_type": "user_notification",
                     "model": "discuss.channel",
                     "res_id": self.id,
                     "subject": self.env._("%(author_name)s has invited you to a channel")
@@ -999,8 +1002,9 @@ class DiscussChannel(models.Model):
         return partners.ids
 
     def message_post(self, *, message_type="notification", partner_ids=None, **kwargs):
-        # sudo: discuss.channel - write to discuss.channel is not accessible for most users
-        self.sudo().last_interest_dt = fields.Datetime.now()
+        if message_type not in ["notification", "user_notification"]:
+            # sudo: discuss.channel - write to discuss.channel is not accessible for most users
+            self.sudo().last_interest_dt = fields.Datetime.now()
         if "everyone" in kwargs.pop("special_mentions", []):
             partner_ids = list(OrderedSet((partner_ids or []) + self.channel_member_ids.partner_id.ids))
         if partner_ids:
@@ -1022,6 +1026,21 @@ class DiscussChannel(models.Model):
         if self.self_member_id and message.is_current_user_or_guest_author:
             self.self_member_id._set_last_seen_message(message, notify=False)
             self.self_member_id._set_new_message_separator(message.id + 1)
+        # Invite mentioned partners to sub-channel.
+        if self.parent_channel_id and message.partner_ids:
+            members = self.env["discuss.channel.member"].search([
+                ("channel_id", "=", self.parent_channel_id.id),
+                ("partner_id", "in", message.partner_ids.ids),
+            ])
+            to_invite = members.filtered(lambda m:
+                m.custom_notifications != "no_notif" if m.custom_notifications
+                else m.partner_id.user_ids.res_users_settings_id.channel_notifications != "no_notif"
+            ).partner_id
+            if self.parent_channel_id.channel_type == "channel":
+                to_invite |= (message.partner_ids - members.partner_id).filtered(lambda p:
+                    p.user_ids.res_users_settings_id.channel_notifications != "no_notif"
+                )
+            self._add_members(partners=to_invite)
         return super()._message_post_after_hook(message, msg_vals)
 
     def _message_update_content(self, message, /, *, partner_ids=None, **kwargs):
@@ -1136,13 +1155,14 @@ class DiscussChannel(models.Model):
         post_joined_message=True,
     ):
         """
-        :param channel: channel to add the persona to
         :param guest_name: name of the persona
         :param post_joined_message: whether to post a message to the channel
             to notify that the persona joined
-        :param create_member_params dict: optional parameters to pass to the
+
+        :param dict create_member_params: optional parameters to pass to the
             channel member create function.
-        :return tuple(partner, guest):
+
+        :rtype: tuple[partner, guest]
         """
         self.ensure_one()
         guest = self.env["mail.guest"]
@@ -1205,9 +1225,10 @@ class DiscussChannel(models.Model):
         bus_last_id = self.env["bus.bus"].sudo()._bus_last_id()
         res.attr("avatar_cache_key", predicate=is_channel_or_group)
         # sudo: discuss.category - guests can read categories of accessible channels
-        res.one("discuss_category_id", ["name", "sequence"], sudo=True)
+        res.one("discuss_category_id", "_store_category_fields", sudo=True)
         res.attr("channel_type")
         res.attr("create_uid")
+        res.attr("create_date", predicate=lambda channel: channel.default_display_mode == "video_full_screen")
         res.many(
             "channel_member_ids",
             "_store_member_fields",
@@ -1245,7 +1266,7 @@ class DiscussChannel(models.Model):
                 "self_member_id",
                 lambda res: (
                     res.from_method("_store_member_fields"),
-                    res.extend(["custom_channel_name", "custom_notifications"]),
+                    res.extend(["custom_notifications"]),
                     res.extend(["last_interest_dt", "message_unread_counter"]),
                     res.attr("message_unread_counter_bus_id", bus_last_id),
                     res.extend(["mute_until_dt", "new_message_separator"]),
@@ -1337,7 +1358,7 @@ class DiscussChannel(models.Model):
         return channel
 
     def _allow_invite_by_email(self):
-        return self.channel_type == "group" or (
+        return self.channel_type in ("group", "chat") or (
             self.channel_type == "channel" and not self.group_public_id
         )
 
@@ -1360,46 +1381,6 @@ class DiscussChannel(models.Model):
     def _lazy_load_members_channel_types(self):
         """ Return the channel types that load members lazily. """
         return ["channel", "group"]
-
-    def channel_fetched(self):
-        """ Broadcast the channel_fetched notification to channel members
-        """
-        # Avoid serialization error when multiple tabs are opened.
-        # In order to completely avoid any issues with concurrency, the very first thing we do on
-        # the cursor needs to be a SELECT FOR UPDATE
-        fetchable = self.filtered(lambda c: c.channel_type in ('chat', 'whatsapp'))
-        member_query = self.env['discuss.channel.member']._search([('channel_id', 'in', fetchable.ids), ('is_self', '=', True)]).subselect()
-        with self.env.registry.cursor() as cr:
-            cursor_self = self.with_env(self.env(cr=cr))
-            to_update = cursor_self.env.execute_query(SQL("""
-                SELECT id
-                  FROM discuss_channel_member
-                 WHERE id IN (%s)
-                   FOR NO KEY UPDATE SKIP LOCKED
-            """, member_query))
-            members = cursor_self.env['discuss.channel.member'].browse([r[0] for r in to_update])
-            channel2message = members.channel_id._get_last_messages().grouped('channel_id')
-            updated_members_by_channel = defaultdict(cursor_self.env["discuss.channel.member"].browse)
-            for member in members:
-                last_message = channel2message[member.channel_id]
-                if member.fetched_message_id != last_message:
-                    member.fetched_message_id = last_message
-                    updated_members_by_channel[member.channel_id] |= member
-            for channel in updated_members_by_channel:
-                Store(bus_channel=channel).add(
-                    updated_members_by_channel[channel],
-                    lambda res: (
-                        res.attr("fetched_message_id"),
-                        res.from_method("_store_identifying_fields"),
-                    ),
-                ).bus_send()
-
-    def channel_set_custom_name(self, name):
-        self.ensure_one()
-        self.self_member_id.custom_channel_name = name
-        store = Store(bus_channel=self.self_member_id._bus_channel())
-        store.add(self.self_member_id, ["custom_channel_name"])
-        store.bus_send()
 
     def channel_rename(self, name):
         self.ensure_one()
@@ -1534,28 +1515,29 @@ class DiscussChannel(models.Model):
 
     def _get_last_messages(self):
         """ Return the last message for each of the given channels."""
+        messages = self.env["mail.message"]
         if not self.ids:
-            return self.env["mail.message"]
-        self.env['mail.message'].flush_model()
-        self.env.cr.execute(
+            return messages
+        # Build the subquery, we know the model and must inject the same
+        # security rules as in the `_search` method. The search is optimized to
+        # return a query without executing anything if the model is fixed.
+        domain = Domain('model', '=', self._name) & Domain.custom(
+            to_sql=lambda table: SQL("%s = discuss_channel.id", table.res_id),
+        )
+        messages_query = messages._search(domain, order='id desc', limit=1)
+        sql = SQL(
             """
                    SELECT last_message_id
                      FROM discuss_channel
-        LEFT JOIN LATERAL (
-                              SELECT id
-                                FROM mail_message
-                               WHERE mail_message.model = 'discuss.channel'
-                                 AND mail_message.res_id = discuss_channel.id
-                            ORDER BY id DESC
-                               LIMIT 1
-                          ) AS t(last_message_id) ON TRUE
-                    WHERE discuss_channel.id IN %(ids)s
+        LEFT JOIN LATERAL %s AS t(last_message_id) ON TRUE
+                    WHERE discuss_channel.id IN %s
                  GROUP BY discuss_channel.id, t.last_message_id
                  ORDER BY discuss_channel.id
             """,
-            {"ids": tuple(self.ids)},
+            messages_query.subselect(),
+            tuple(self.ids),
         )
-        return self.env["mail.message"].browse([mid for (mid,) in self.env.cr.fetchall() if mid])
+        return messages.browse(mid for mid, in self.env.execute_query(sql) if mid)
 
     def _clean_empty_message(self, message):
         super()._clean_empty_message(message)
@@ -1576,7 +1558,7 @@ class DiscussChannel(models.Model):
         self.ensure_one()
         if self.channel_type == 'channel':
             msg = _(
-                "You are in channel %(bold_start)s#%(channel_name)s%(bold_end)s.",
+                "You are in %(bold_start)s#%(channel_name)s%(bold_end)s.",
                 bold_start=Markup("<b>"),
                 bold_end=Markup("</b>"),
                 channel_name=self.name,
@@ -1599,11 +1581,12 @@ class DiscussChannel(models.Model):
     def _execute_command_help_message_extra(self):
         msg = _(
             "%(new_line)s"
-            "%(new_line)sType %(bold_start)s@username%(bold_end)s to mention someone, and grab their attention."
-            "%(new_line)sType %(bold_start)s#channel%(bold_end)s to mention a channel."
-            "%(new_line)sType %(bold_start)s/command%(bold_end)s to execute a command."
-            "%(new_line)sType %(bold_start)s::shortcut%(bold_end)s to insert a canned response in your message."
-            "%(new_line)sType %(bold_start)s:emoji:%(bold_end)s to insert an emoji in your message.",
+            "%(new_line)s%(bold_start)s@username%(bold_end)s to mention someone"
+            "%(new_line)s%(bold_start)s@role%(bold_end)s to notify multiple people"
+            "%(new_line)s%(bold_start)s#channel%(bold_end)s to link a channel"
+            "%(new_line)s%(bold_start)s/command%(bold_end)s to run a command"
+            "%(new_line)s%(bold_start)s::shortcut%(bold_end)s to insert a canned response"
+            "%(new_line)s%(bold_start)s:emoji:%(bold_end)s to insert an emoji",
             bold_start=Markup("<b>"),
             bold_end=Markup("</b>"),
             new_line=Markup("<br>"),

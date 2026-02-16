@@ -11,7 +11,6 @@ import logging
 import re
 
 from odoo import Command, api, models
-from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import AccessError, UserError
 from odoo.modules import get_resource_from_path
 from odoo.tools import file_open, float_compare, get_lang, groupby, SQL
@@ -113,15 +112,16 @@ class AccountChartTemplate(models.AbstractModel):
         """
         # This function is called many times. Avoid doing a search every time by using the ORM's cache.
         # We assume that the field is always computed for all the modules at once (by this function)
-        field = self.env['ir.module.module']._fields['account_templates']
+        modules = self.env['ir.module.module'].sudo()
         modules = (
-            self.env.cache.get_records(self.env['ir.module.module'], field)
-            or self.env['ir.module.module'].sudo().search([('state', '!=', 'uninstallable')])
+            modules.browse(modules._fields['account_templates']._get_cache(self.env))
+            or modules.search([('state', '!=', 'uninstallable')])
         )
 
         return {
             name: template
             for mapping in modules.mapped('account_templates')
+            if mapping
             for name, template in mapping.items()
             if get_all or template['visible']
         }
@@ -157,6 +157,9 @@ class AccountChartTemplate(models.AbstractModel):
         :param install_demo: whether or not we should load demo data right after loading the
             chart template.
         :type install_demo: bool
+        :param force_create: Determines the loading behavior. If True, forces the creation of new entries;
+            if False, prevents new creations and performs updates on existing data where applicable.
+        :type force_create: bool
         """
         if not company:
             return
@@ -227,7 +230,7 @@ class AccountChartTemplate(models.AbstractModel):
                         records -= records_to_keep
                         for records_for_companies in records_to_keep.grouped('company_ids').values():
                             records_for_companies.company_ids -= children_companies
-                    records.with_context({MODULE_UNINSTALL_FLAG: True}).unlink()
+                    records.with_context(force_delete=True).unlink()
 
         data = self._get_chart_template_data(template_code)
         template_data = data.pop('template_data')
@@ -312,7 +315,7 @@ class AccountChartTemplate(models.AbstractModel):
                 if journal:
                     del data['account.journal'][xmlid]
                     self.env['ir.model.data']._update_xmlids([{
-                        'xml_id': f"account.{company.id}_{xmlid}",
+                        'xml_id': self.company_xmlid(xmlid, company),
                         'record': journal,
                         'noupdate': True,
                     }])
@@ -452,7 +455,7 @@ class AccountChartTemplate(models.AbstractModel):
                             existing_account = accounts.sorted(key=lambda x: x.code != normalized_code)[0] if accounts else None
                             if existing_account:
                                 self.env['ir.model.data']._update_xmlids([{
-                                    'xml_id': f"account.{company.id}_{xmlid}",
+                                    'xml_id': self.company_xmlid(xmlid, company),
                                     'record': existing_account,
                                     'noupdate': True,
                                 }])
@@ -526,8 +529,9 @@ class AccountChartTemplate(models.AbstractModel):
         if not company.country_id:
             vals['country_id'] = fiscal_country.id
 
-        # Ensure that we write on 'anglo_saxon_accounting' when changing to a CoA that relies on the default of `False`.
-        vals.setdefault('anglo_saxon_accounting', False)
+        if template_data:
+            # Ensure that we write on 'anglo_saxon_accounting' when changing to a CoA that relies on the default of `False`.
+            vals.setdefault('anglo_saxon_accounting', False)
 
         # This write method is important because it's overridden and has additional triggers
         # e.g it activates the currency
@@ -713,11 +717,14 @@ class AccountChartTemplate(models.AbstractModel):
                         del record_vals[key]
 
                 # Manage ids given as database id or xml_id
+                if isinstance(xml_id, str) and (record := self.ref(xml_id, raise_if_not_found=False)):
+                    xml_id = record.id
+
                 if isinstance(xml_id, int):
                     record_vals['id'] = xml_id
                     xml_id = False
                 else:
-                    xml_id = f"{('account.' + str(self.env.company.id) + '_') if '.' not in xml_id else ''}{xml_id}"
+                    xml_id = self.company_xmlid(xml_id)
 
                 all_records_vals.append({
                     'xml_id': xml_id,
@@ -938,7 +945,7 @@ class AccountChartTemplate(models.AbstractModel):
         else:
             accounts = self.env['account.account']._load_records([
                 {
-                    'xml_id': f"account.{company.id}_{xml_id}",
+                    'xml_id': self.company_xmlid(xml_id, company),
                     'values': values,
                     'noupdate': True,
                 }
@@ -970,7 +977,7 @@ class AccountChartTemplate(models.AbstractModel):
         }
         self.env['account.account']._load_records([
             {
-                'xml_id': f"account.{company.id}_{xml_id}",
+                'xml_id': self.company_xmlid(xml_id, company),
                 'values': values,
                 'noupdate': True,
             }
@@ -1250,12 +1257,16 @@ class AccountChartTemplate(models.AbstractModel):
     # Tooling
     # --------------------------------------------------------------------------------
 
-    def ref(self, xmlid, raise_if_not_found=True):
+    def company_xmlid(self, xmlid, company=None):
         if '.' in xmlid:
-            return self.env.ref(xmlid, raise_if_not_found)
+            return xmlid
+        company = company or self.env.company
+        return f"account.{company.id}_{xmlid}"
+
+    def ref(self, xmlid, raise_if_not_found=True):
         return (
-            self.env.ref(f"account.{self.env.company.id}_{xmlid}", raise_if_not_found=False)
-            or self.env.ref(f"account.{self.env.company.parent_ids[0].id}_{xmlid}", raise_if_not_found)
+            self.env.ref(self.company_xmlid(xmlid), raise_if_not_found=False)
+            or self.env.ref(self.company_xmlid(xmlid, self.env.company.parent_ids[0]), raise_if_not_found)
         )
 
     def _get_parent_template(self, code):
@@ -1529,6 +1540,7 @@ class AccountChartTemplate(models.AbstractModel):
             chart_template_data = template_data or self.env['account.chart.template'] \
                 .with_context(ignore_missing_tags=True) \
                 .with_company(company) \
+                .sudo() \
                 ._get_chart_template_data(company.chart_template)
             chart_template_data.pop('template_data', None)
             for mname, data in chart_template_data.items():
@@ -1541,7 +1553,7 @@ class AccountChartTemplate(models.AbstractModel):
                                 continue
                             field_translation = self._get_field_translation(record, fname, lang)
                             if field_translation:
-                                xml_id = _xml_id if '.' in _xml_id else f"account.{company.id}_{_xml_id}"
+                                xml_id = _xml_id if '.' in _xml_id else self.company_xmlid(_xml_id, company)
                                 translation_importer.model_translations[mname][fname][xml_id][lang] = field_translation
 
         # Gather translations for the TEMPLATE_MODELS records that are not created from the chart_template data

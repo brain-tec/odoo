@@ -8,6 +8,7 @@ import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("SellingEventInPos", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -86,6 +87,77 @@ registry.category("web_tour.tours").add("test_orderline_price_remain_same_as_tic
             FeedbackScreen.isShown(),
             FeedbackScreen.printTicket("Full Page"),
             FeedbackScreen.printTicket("Badge"),
+            FeedbackScreen.clickNextOrder(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_pos_event_registration_not_mandatory", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            // No customer, all information filled
+            ProductScreen.clickDisplayedProduct("Event regitration not mandatory"),
+            EventTourUtils.increaseQuantityOfTicket("Ticket Basic"),
+            Dialog.confirm(),
+            {
+                trigger: ".ticket_question",
+            },
+            EventTourUtils.answerGlobalTextQuestion("Name", "Name 1"),
+            EventTourUtils.answerGlobalTextQuestion("Email", "1@test.com"),
+            Dialog.confirm(),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            FeedbackScreen.clickNextOrder(),
+
+            // Customer given, all information filled
+            ProductScreen.clickDisplayedProduct("Event regitration not mandatory"),
+            EventTourUtils.increaseQuantityOfTicket("Ticket Basic"),
+            Dialog.confirm(),
+            {
+                trigger: ".ticket_question",
+            },
+            EventTourUtils.answerGlobalTextQuestion("Name", "Name 2"),
+            EventTourUtils.answerGlobalTextQuestion("Email", "2@test.com"),
+            Dialog.confirm(),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("Event Parter"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            FeedbackScreen.clickNextOrder(),
+
+            // Customer given, partial information filled
+            ProductScreen.clickDisplayedProduct("Event regitration not mandatory"),
+            EventTourUtils.increaseQuantityOfTicket("Ticket Basic"),
+            Dialog.confirm(),
+            {
+                trigger: ".ticket_question",
+            },
+            EventTourUtils.answerGlobalTextQuestion("Name", "Name 3"),
+            Dialog.confirm(),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("Event Parter"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            FeedbackScreen.clickNextOrder(),
+
+            // Customer given, partial information filled
+            ProductScreen.clickDisplayedProduct("Event regitration not mandatory"),
+            EventTourUtils.increaseQuantityOfTicket("Ticket Basic"),
+            Dialog.confirm(),
+            {
+                trigger: ".ticket_question",
+            },
+            Dialog.confirm(),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("Event Parter"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
             FeedbackScreen.clickNextOrder(),
         ].flat(),
 });

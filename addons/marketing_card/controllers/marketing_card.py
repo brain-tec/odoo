@@ -1,8 +1,10 @@
 import base64
 from urllib.parse import quote
+
 from werkzeug.exceptions import BadRequest
 
-from odoo.http import Controller, content_disposition, request, route
+from odoo.http import Controller, request, route
+from odoo.http.stream import content_disposition
 
 # from https://github.com/monperrus/crawler-user-agents
 SOCIAL_NETWORK_USER_AGENTS = (
@@ -108,7 +110,7 @@ class MarketingCardController(Controller):
         if _is_crawler(request):
             return request.render('marketing_card.card_campaign_crawler', {
                 'image_url': card._get_card_url(),
-                'post_text': campaign_sudo.post_suggestion,
+                'post_suggestion': campaign_sudo.post_suggestion,
                 'target_name': card.display_name or '',
             })
 

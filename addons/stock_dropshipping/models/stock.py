@@ -14,12 +14,6 @@ class StockRule(models.Model):
         """
         return procurement.values.get('sale_line_id'), super(StockRule, self)._get_procurements_to_merge_groupby(procurement)
 
-    def _get_partner_id(self, values, rule):
-        route = self.env.ref('stock_dropshipping.route_drop_shipping', raise_if_not_found=False)
-        if route and rule.route_id == route:
-            return False
-        return super()._get_partner_id(values, rule)
-
     def _compute_picking_type_code_domain(self):
         super()._compute_picking_type_code_domain()
         for rule in self:
@@ -102,15 +96,3 @@ class StockLot(models.Model):
             ('location_dest_id.usage', '=', 'customer'),
             ('location_id.usage', '=', 'supplier'),
         ]])
-
-
-class StockMove(models.Model):
-    _inherit = 'stock.move'
-
-    def _get_layer_candidates(self):
-        layer_candidates = super()._get_layer_candidates()
-        if self._is_dropshipped():
-            layer_candidates = layer_candidates.filtered(lambda svl: svl.quantity < 0)
-        elif self._is_dropshipped_returned():
-            layer_candidates = layer_candidates.filtered(lambda svl: svl.quantity > 0)
-        return layer_candidates

@@ -1,17 +1,21 @@
 import {
     addBuilderAction,
     addBuilderOption,
+    addBuilderPlugin,
     setupHTMLBuilder,
+    unfoldAllOptionsGroups,
 } from "@html_builder/../tests/helpers";
+import { Builder } from "@html_builder/builder";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
 import { OptionsContainer } from "@html_builder/sidebar/option_container";
 import { setContent, setSelection } from "@html_editor/../tests/_helpers/selection";
 import { redo, undo } from "@html_editor/../tests/_helpers/user_actions";
+import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, queryAllTexts, queryFirst } from "@odoo/hoot-dom";
-import { onWillStart, xml } from "@odoo/owl";
+import { Component, onWillStart, xml } from "@odoo/owl";
 import { contains, patchWithCleanup } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
@@ -148,6 +152,11 @@ test("basic multi options containers", async () => {
     );
     await setupHTMLBuilder(`<div class="main"><p class="test-options-target a">b</p></div>`);
     await contains(":iframe .test-options-target").click();
+    expect(".options-container-header i.fa-caret-right").toHaveCount(1);
+    expect(".options-container-header i.fa-caret-down").toHaveCount(1);
+    await unfoldAllOptionsGroups();
+    expect(".options-container-header i.fa-caret-right").toHaveCount(0);
+    expect(".options-container-header i.fa-caret-down").toHaveCount(2);
     expect(".options-container").toHaveCount(2);
     expect(queryAllTexts(".options-container:first .we-bg-options-container > div > div")).toEqual([
         "Row 3",
@@ -156,6 +165,107 @@ test("basic multi options containers", async () => {
     expect(
         queryAllTexts(".options-container:nth-child(2) .we-bg-options-container > div > div")
     ).toEqual(["Row 1", "A", "Row 2", "B"]);
+});
+
+test("option group stay unfolded when clicking 'Select only this block'", async () => {
+    addBuilderOption(
+        class extends BaseOptionComponent {
+            static selector = ".test-options-parent";
+            static template = xml`<BuilderRow label="'Row 1'">A</BuilderRow>`;
+        }
+    );
+    addBuilderOption(
+        class extends BaseOptionComponent {
+            static selector = ".test-options-target";
+            static template = xml`<BuilderRow label="'Row 2'">B</BuilderRow>`;
+        }
+    );
+    addBuilderOption(
+        class extends BaseOptionComponent {
+            static selector = ".test-options-child";
+            static template = xml`<BuilderRow label="'Row 3'">C</BuilderRow>`;
+        }
+    );
+    await setupHTMLBuilder(
+        `<div class="test-options-parent" data-name="Parent">
+            <section class="test-options-target" data-name="Target">
+                <div class="test-options-child" data-name="Child">
+                    Text
+                </div>
+            </section>
+        </div>`
+    );
+    await contains(":iframe .test-options-child").click();
+    expect(".options-container-header i.fa-caret-right").toHaveCount(2);
+    expect(".options-container-header i.fa-caret-down").toHaveCount(1);
+    await contains(".options-container-header:contains('Parent') i.fa-caret-right").click();
+    expect(".options-container-header i.fa-caret-right").toHaveCount(1);
+    expect(".options-container-header i.fa-caret-down").toHaveCount(2);
+    await contains(
+        ".options-container-header:contains('Target') button[title='Select only this block']"
+    ).click();
+    expect(".options-container-header i.fa-caret-down").toHaveCount(2);
+});
+
+test("option group stay unfolded when changing an option", async () => {
+    addBuilderOption(
+        class extends BaseOptionComponent {
+            static selector = ".test-options-target";
+            static template = xml`<BuilderRow label="'Row 1'">
+                <BuilderButton classAction="'test-class'">A</BuilderButton>
+            </BuilderRow>`;
+        }
+    );
+    addBuilderOption(
+        class extends BaseOptionComponent {
+            static selector = ".test-options-child";
+            static template = xml`<BuilderRow label="'Row 2'">B</BuilderRow>`;
+        }
+    );
+    await setupHTMLBuilder(
+        `<section class="test-options-target" data-name="Target">
+            <div class="test-options-child" data-name="Child">
+                Text
+            </div>
+        </section>`
+    );
+    await contains(":iframe .test-options-child").click();
+    expect(".options-container-header i.fa-caret-right").toHaveCount(1);
+    expect(".options-container-header i.fa-caret-down").toHaveCount(1);
+    await contains(".options-container-header:contains('Target') i.fa-caret-right").click();
+    expect(".options-container-header i.fa-caret-right").toHaveCount(0);
+    expect(".options-container-header i.fa-caret-down").toHaveCount(2);
+    await contains("button[data-class-action='test-class']").click();
+    expect(".options-container-header i.fa-caret-down").toHaveCount(2);
+});
+
+test("last container with options is unfolded regardless of containers without options", async () => {
+    addBuilderOption(
+        class extends BaseOptionComponent {
+            static selector = ".test-options-target";
+            static template = xml`<BuilderRow label="'Row 1'">
+                <BuilderButton classAction="'test-class'">A</BuilderButton>
+            </BuilderRow>`;
+        }
+    );
+    addBuilderPlugin(
+        class extends Plugin {
+            static id = "testOverlayWithoutOptions";
+            resources = {
+                has_overlay_options: { hasOption: (el) => el.matches(".test-options-child") },
+            };
+        }
+    );
+    await setupHTMLBuilder(
+        `<section class="test-options-target" data-name="Target">
+            <div class="test-options-child" data-name="Child">
+                Text
+            </div>
+        </section>`
+    );
+    await contains(":iframe .test-options-child").click();
+    expect(".options-container-header i.fa-caret-right").toHaveCount(0);
+    expect(".options-container-header i.fa-caret-down").toHaveCount(1);
 });
 
 test("option that matches several elements", async () => {
@@ -170,6 +280,7 @@ test("option that matches several elements", async () => {
 
     await setupHTMLBuilder(`<div class="a"><div class="a test-target">b</div></div>`);
     await contains(":iframe .test-target").click();
+    await unfoldAllOptionsGroups();
     expect(".options-container:not(.d-none)").toHaveCount(2);
     expect(queryAllTexts(".options-container:not(.d-none)")).toEqual([
         "Block\nRow\nTest",
@@ -249,9 +360,11 @@ test("hide empty OptionContainer and display OptionContainer with content", asyn
     );
 
     await contains(":iframe .parent-target > div").click();
+    await unfoldAllOptionsGroups();
     expect(".options-container:not(.d-none)").toHaveCount(1);
 
     await contains("[data-class-action='my-custom-class']").click();
+    await unfoldAllOptionsGroups();
     expect(".options-container:not(.d-none)").toHaveCount(2);
 });
 
@@ -281,9 +394,11 @@ test("hide empty OptionContainer and display OptionContainer with content (with 
         `<div class="parent-target"><div><div class="child-target">b</div></div></div>`
     );
     await contains(":iframe .parent-target > div").click();
+    await unfoldAllOptionsGroups();
     expect(".options-container:not(.d-none)").toHaveCount(1);
 
     await contains("[data-class-action='my-custom-class']").click();
+    await unfoldAllOptionsGroups();
     expect(".options-container:not(.d-none)").toHaveCount(2);
     expect(".options-container:not(.d-none):nth-child(2)").toHaveText("Block\nRow 2\nTest");
 });
@@ -314,9 +429,11 @@ test("hide empty OptionContainer and display OptionContainer with content (with 
         `<div class="parent-target"><div><div class="child-target">b</div></div></div>`
     );
     await contains(":iframe .parent-target > div").click();
+    await unfoldAllOptionsGroups();
     expect(".options-container:not(.d-none)").toHaveCount(1);
 
     await contains("[data-class-action='my-custom-class']").click();
+    await unfoldAllOptionsGroups();
     expect(".options-container:not(.d-none)").toHaveCount(2);
     expect(".options-container:not(.d-none):nth-child(2)").toHaveText("Block\nRow 2\nTest");
 });
@@ -325,6 +442,49 @@ test("fallback on the 'Blocks' tab if no option match the selected element", asy
     await setupHTMLBuilder(`<div class="parent-target"><div class="child-target">b</div></div>`);
     await contains(":iframe .parent-target > div").click();
     expect(".o-snippets-tabs button:contains('Blocks')").toHaveClass("active");
+});
+
+test("move back on the 'Blocks' tab if no more option match the selected element", async () => {
+    addBuilderOption(
+        class extends BaseOptionComponent {
+            static selector = ".parent-target";
+            static template = xml`<BuilderRow label="'Row 1'">
+                <BuilderButton classAction="'my-custom-class'"/>
+            </BuilderRow>`;
+        }
+    );
+    await setupHTMLBuilder(`<div class="parent-target"><div class="child-target">b</div></div>`);
+    await contains(":iframe .parent-target > div").click();
+    expect(".o-snippets-tabs button[data-name=customize]").toHaveClass("active");
+    await contains("button.oe_snippet_remove").click();
+    expect(".o-snippets-tabs button[data-name=blocks]").toHaveClass("active");
+});
+
+test("stay on the 'Theme' tab if no more option match the selected element", async () => {
+    patchWithCleanup(Builder.prototype, {
+        setup() {
+            super.setup();
+            this.ThemeTab = class DummyThemeTab extends Component {
+                static template = xml`<div>Dummy Theme Tab</div>`;
+                static props = ["*"];
+            };
+        },
+    });
+    addBuilderOption(
+        class extends BaseOptionComponent {
+            static selector = ".parent-target";
+            static template = xml`<BuilderRow label="'Row 1'">
+                <BuilderButton classAction="'my-custom-class'"/>
+            </BuilderRow>`;
+        }
+    );
+    const { getEditor } = await setupHTMLBuilder(
+        `<div class="parent-target"><div class="child-target">b</div></div>`
+    );
+    await contains(".o-snippets-tabs button[data-name=theme]").click();
+    expect(".o-snippets-tabs button[data-name=theme]").toHaveClass("active");
+    getEditor().shared.builderOptions.deactivateContainers();
+    expect(".o-snippets-tabs button[data-name=theme]").toHaveClass("active");
 });
 
 test("display empty message if no option container is visible", async () => {
@@ -362,9 +522,11 @@ test("hide/display option base on selector", async () => {
 
     await setupHTMLBuilder(`<div class="parent-target"><div class="child-target">b</div></div>`);
     await contains(":iframe .parent-target").click();
+    await unfoldAllOptionsGroups();
     expect("[data-class-action='test']").not.toHaveCount();
 
     await contains("[data-class-action='my-custom-class']").click();
+    await unfoldAllOptionsGroups();
     expect("[data-class-action='test']").toBeVisible();
 });
 
@@ -402,11 +564,13 @@ test("hide/display option container base on selector", async () => {
             </div>
         </div>`);
     await contains(":iframe .sub-child-target").click();
+    await unfoldAllOptionsGroups();
     expect("[data-class-action='test']").not.toHaveCount();
     const selectorRowLabel = ".options-container .hb-row:not(.d-none) .hb-row-label";
     expect(queryAllTexts(selectorRowLabel)).toEqual(["Row 1", "Row 3"]);
 
     await contains("[data-class-action='my-custom-class']").click();
+    await unfoldAllOptionsGroups();
     expect("[data-class-action='test']").toBeVisible();
     expect(queryAllTexts(selectorRowLabel)).toEqual(["Row 1", "Row 2", "Row 3"]);
 });

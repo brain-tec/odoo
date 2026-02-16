@@ -53,7 +53,7 @@ class TestMrpCancelMO(TestMrpCommon):
         after post inventory.
         """
         # Create MO
-        manufacturing_order = self.generate_mo(consumption='strict')[0]
+        manufacturing_order = self.generate_mo()[0]
         # Produce some quantity (not all to avoid to done the MO when post inventory)
         mo_form = Form(manufacturing_order)
         mo_form.qty_producing = 2

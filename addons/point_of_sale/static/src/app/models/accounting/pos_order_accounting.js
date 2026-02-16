@@ -76,9 +76,12 @@ export class PosOrderAccounting extends Base {
             return 0;
         }
 
-        const tolerance = this.orderIsRounded ? this.config.rounding_method.rounding : 0;
-        const amount = Math.abs(remaining) <= tolerance ? 0 : remaining;
-        return this.currency.round(amount);
+        const amount =
+            this.orderIsRounded &&
+            this.config.rounding_method.asymmetricRound(isNegative ? -remaining : remaining) == 0
+                ? 0
+                : Math.abs(remaining);
+        return isNegative ? this.currency.round(-amount) : this.currency.round(amount);
     }
     get change() {
         const isNegative = this.totalDue < 0;
@@ -96,7 +99,9 @@ export class PosOrderAccounting extends Base {
             (isNegative ? -roundingSanatizer : roundingSanatizer);
 
         const amount = isNegative ? -this.currency.round(total) : this.currency.round(total);
-        return this.config.cash_rounding ? this.config.rounding_method.round(amount) : amount;
+        return this.config.cash_rounding
+            ? this.config.rounding_method.asymmetricRound(amount)
+            : amount;
     }
     get orderIsRounded() {
         const cashPm = this.payment_ids.some((p) => p.payment_method_id.is_cash_count);
@@ -106,8 +111,11 @@ export class PosOrderAccounting extends Base {
         const total = this.prices.taxDetails.total_amount_no_rounding;
         const isNegative = this.amountPaid > total;
         const remaining = total - this.amountPaid;
-        const tolerance = this.orderIsRounded ? this.config.rounding_method.rounding : 0;
-        const amount = Math.abs(total - this.amountPaid) <= tolerance ? Math.abs(remaining) : 0;
+        const amount =
+            this.orderIsRounded &&
+            this.config.rounding_method.asymmetricRound(total < 0 ? -remaining : remaining) == 0
+                ? Math.abs(remaining)
+                : 0;
         return isNegative ? this.currency.round(amount) : this.currency.round(-amount);
     }
 
@@ -229,6 +237,7 @@ export class PosOrderAccounting extends Base {
 
             Object.assign(data.baseLineByLineUuids[key].tax_details, {
                 discount_amount: currency.round(ndData.total_included - dData.total_included),
+                no_discount_price_unit: ndData.price_unit_currency,
                 no_discount_total_excluded: ndData.total_excluded,
                 no_discount_total_included: ndData.total_included,
                 no_discount_total_included_currency: ndData.total_included_currency,

@@ -239,6 +239,7 @@ registry.category("web_tour.tours").add("test_tax_control_button_visiblity", {
 });
 
 registry.category("web_tour.tours").add("test_reuse_empty_floating_order", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -559,8 +560,23 @@ registry.category("web_tour.tours").add("PosCustomerAllFieldsDisplayed", {
             ProductScreenPartnerList.searchCustomerValueAndClear("Acity"),
             ProductScreenPartnerList.searchCustomerValueAndClear("United States"),
             ProductScreenPartnerList.searchCustomerValueAndClear("9898989899"),
+            ProductScreenPartnerList.searchCustomerValueAndClear("john@doe.com"),
             ProductScreen.clickPartnerButton(),
-            PartnerList.searchCustomerValue("john@doe.com"),
+            {
+                isActive: ["mobile"],
+                content: `Click search field`,
+                trigger: `.fa-search.undefined`,
+                run: `click`,
+            },
+            {
+                content: `Search customer with "j%hn d%e"`,
+                trigger: `.modal-dialog .input-group input`,
+                run: `edit j%hn d%e`,
+            },
+            {
+                content: `Check "John Doe" is shown`,
+                trigger: `.partner-list .partner-info:nth-child(1):contains("John Doe")`,
+            },
         ].flat(),
 });
 
@@ -854,7 +870,7 @@ registry.category("web_tour.tours").add("test_draft_orders_not_syncing", {
             ProductScreen.orderIsEmpty(),
             ProductScreen.clickDisplayedProduct("Desk Pad"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Deco Addict"),
+            ProductScreen.clickCustomer("Acme Corporation"),
             Chrome.createFloatingOrder(),
             ProductScreen.clickDisplayedProduct("Desk Pad"),
             ProductScreen.clickPayButton(),
@@ -926,6 +942,14 @@ registry.category("web_tour.tours").add("test_product_long_press", {
             {
                 content: "Check On hand quantity is display on product info popup",
                 trigger: ".section-inventory-body div:contains('On hand: 0')",
+            },
+            {
+                content: "Check that VAT label is present in the product details popup",
+                trigger: ".section-financials .vat-label:contains('TIN')",
+            },
+            {
+                content: "Check that VAT value is correct in the product details popup",
+                trigger: ".section-financials .vat-value:contains('$ 15.00 (Parent Tax)')",
             },
             Chrome.endTour(),
         ].flat(),
@@ -1030,11 +1054,10 @@ registry.category("web_tour.tours").add("test_preset_timing_retail", {
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             ProductScreen.clickDisplayedProduct("Desk Organizer"),
-            ProductScreen.selectPreset("Dine in", "Delivery"),
+            ProductScreen.selectPreset("Dine in", "Delivery", false),
             PartnerList.clickPartner("A simple PoS man!"),
-            Chrome.presetTimingSlotHourNotExists("09:00"),
-            Chrome.selectPresetTimingSlotHour("15:00"),
-            Chrome.presetTimingSlotIs("15:00"),
+            Chrome.presetTimingSlotHourNotExists("9:00am"),
+            Chrome.selectPresetTimingSlotHour({ title: "delivery", hour: "3:00pm" }),
             Chrome.createFloatingOrder(),
             ProductScreen.clickDisplayedProduct("Desk Organizer"),
             Chrome.clickOrders(),
@@ -1052,15 +1075,21 @@ registry
             [
                 Chrome.startPoS(),
                 Dialog.confirm("Open Register"),
+                PartnerList.searchCustomerValue("Partner Full", true),
+                PartnerList.clickPartner("Partner Full"),
                 ProductScreen.clickDisplayedProduct("Desk Organizer"),
                 ProductScreen.clickFastPaymentButton("Bank"),
                 FeedbackScreen.isShown(),
+                PartnerList.isShown().map(negateStep),
                 FeedbackScreen.clickNextOrder(),
+                PartnerList.searchCustomerValue("Partner Full", true),
+                PartnerList.clickPartner("Partner Full"),
                 ProductScreen.clickDisplayedProduct("Desk Organizer"),
                 ProductScreen.clickPayButton(),
                 PaymentScreen.clickPaymentMethod("Bank"),
                 PaymentScreen.clickValidate(),
                 FeedbackScreen.isShown(),
+                PartnerList.isShown().map(negateStep),
             ].flat(),
     });
 
@@ -1104,6 +1133,7 @@ registry.category("web_tour.tours").add("test_only_existing_lots", {
 });
 
 registry.category("web_tour.tours").add("test_delete_line", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -1199,6 +1229,7 @@ registry.category("web_tour.tours").add("test_preset_customer_selection", {
         [
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
+            PartnerList.searchCustomerValue("Test Partner", true),
             PartnerList.clickPartner("Test Partner"),
             ProductScreen.customerIsSelected("Test Partner"),
             Chrome.endTour(),
@@ -1228,5 +1259,18 @@ registry.category("web_tour.tours").add("test_product_info_product_inventory", {
                 },
                 Dialog.confirm("Close"),
             ]),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_orderline_merge_with_higher_price_precision", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("High Precision Product"),
+            ProductScreen.selectedOrderlineHas("High Precision Product", "1.0", "8.25"),
+            ProductScreen.clickDisplayedProduct("High Precision Product"),
+            ProductScreen.selectedOrderlineHas("High Precision Product", "2.0", "16.49"), // 8.245 * 2 = 16.49
+            Chrome.endTour(),
         ].flat(),
 });

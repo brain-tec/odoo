@@ -3,7 +3,7 @@ import {
     parseRequestParams,
     registerRoute,
 } from "@mail/../tests/mock_server/mail_mock_server";
-import { Command, makeKwArgs } from "@web/../tests/web_test_helpers";
+import { Command, makeKwArgs, serverState } from "@web/../tests/web_test_helpers";
 import { loadBundle } from "@web/core/assets";
 import { patch } from "@web/core/utils/patch";
 
@@ -55,11 +55,17 @@ async function get_session(request) {
             fetchChannelInfoState: "fetched",
             id: -1,
             isLoaded: true,
-            livechat_operator_id: mailDataHelpers.Store.one(
+            livechat_channel_member_history_ids: [-1],
+            scrollUnread: false,
+        });
+        store.add("im_livechat.channel.member.history", {
+            id: -1,
+            channel_id: -1,
+            livechat_member_type: "agent",
+            partner_id: mailDataHelpers.Store.one(
                 ResPartner.browse(agent.partner_id),
                 makeKwArgs({ fields: ["avatar_128", "user_livechat_username"] })
             ),
-            scrollUnread: false,
         });
         return { store_data: store.get_result(), channel_id: -1 };
     }
@@ -256,6 +262,10 @@ patch(mailDataHelpers, {
                     DiscussChannel.search([["livechat_status", "=", "need_help"]])
                 )
             );
+        }
+        if (name === "/im_livechat/fetch_self_expertise") {
+            const ResUsers = this.env["res.users"];
+            store.add(ResUsers.browse(serverState.userId), ["livechat_expertise_ids"]);
         }
     },
 });

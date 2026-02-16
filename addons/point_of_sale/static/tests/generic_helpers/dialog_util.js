@@ -11,17 +11,21 @@ export function confirm(confirmationText, button = ".btn-primary") {
         run: "click",
     };
 }
-export function cancel() {
+export function cancel({ title } = {}) {
     return {
         content: "cancel dialog",
-        trigger: `.modal .modal-header button[aria-label="Close"]`,
+        trigger: `.modal .modal-header${
+            title ? `:contains(${title})` : ""
+        } button[aria-label="Close"]`,
         run: "click",
     };
 }
-export function discard() {
+export function discard({ title } = {}) {
     return {
         content: "discard dialog",
-        trigger: `.modal .modal-footer button:contains("Discard")`,
+        trigger: `.modal${
+            title ? `:has(.modal-title:contains(${title}))` : ``
+        } .modal-footer button:contains("Discard")`,
         run: "click",
     };
 }
@@ -35,10 +39,11 @@ export function is({ title } = {}) {
         trigger,
     };
 }
-export function isNot() {
+export function isNot(...args) {
+    const { trigger } = is(...args);
     return {
         content: "no dialog is open",
-        trigger: negate(".modal-open"),
+        trigger: negate(trigger),
     };
 }
 

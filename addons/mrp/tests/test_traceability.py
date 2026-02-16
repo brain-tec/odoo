@@ -73,7 +73,7 @@ class TestTraceability(TestMrpCommon):
             bom = self.env['mrp.bom'].create({
                 'product_id': finished_product.id,
                 'product_tmpl_id': finished_product.product_tmpl_id.id,
-                'product_uom_id': self.uom_unit.id,
+                'uom_id': self.uom_unit.id,
                 'product_qty': 1.0,
                 'type': 'normal',
                 'bom_line_ids': [
@@ -86,7 +86,7 @@ class TestTraceability(TestMrpCommon):
             mo_form = Form(self.env['mrp.production'])
             mo_form.product_id = finished_product
             mo_form.bom_id = bom
-            mo_form.product_uom_id = self.uom_unit
+            mo_form.uom_id = self.uom_unit
             mo_form.product_qty = 1
             mo = mo_form.save()
             mo.action_confirm()
@@ -170,17 +170,16 @@ class TestTraceability(TestMrpCommon):
         bom_1 = self.env['mrp.bom'].create({
             'product_id': product_final.id,
             'product_tmpl_id': product_final.product_tmpl_id.id,
-            'product_uom_id': self.uom_unit.id,
+            'uom_id': self.uom_unit.id,
             'product_qty': 1.0,
-            'consumption': 'flexible',
             'type': 'normal',
             'bom_line_ids': [
                 Command.create({'product_id': product_1.id, 'product_qty': 1}),
                 Command.create({'product_id': product_2.id, 'product_qty': 1}),
             ],
             'byproduct_ids': [
-                Command.create({'product_id': byproduct_1.id, 'product_qty': 1, 'product_uom_id': byproduct_1.uom_id.id}),
-                Command.create({'product_id': byproduct_2.id, 'product_qty': 1, 'product_uom_id': byproduct_2.uom_id.id}),
+                Command.create({'product_id': byproduct_1.id, 'product_qty': 1, 'uom_id': byproduct_1.uom_id.id}),
+                Command.create({'product_id': byproduct_2.id, 'product_qty': 1, 'uom_id': byproduct_2.uom_id.id}),
             ]})
         mo_form = Form(self.env['mrp.production'])
         mo_form.product_id = product_final
@@ -382,7 +381,7 @@ class TestTraceability(TestMrpCommon):
         self.env['mrp.bom'].create([{
             'product_id': finished.id,
             'product_tmpl_id': finished.product_tmpl_id.id,
-            'product_uom_id': self.uom_unit.id,
+            'uom_id': self.uom_unit.id,
             'product_qty': 1.0,
             'type': 'normal',
             'bom_line_ids': [Command.create({'product_id': component.id, 'product_qty': 1})],
@@ -440,7 +439,7 @@ class TestTraceability(TestMrpCommon):
         self.env['mrp.bom'].create([{
             'product_id': finished.id,
             'product_tmpl_id': finished.product_tmpl_id.id,
-            'product_uom_id': self.uom_unit.id,
+            'uom_id': self.uom_unit.id,
             'product_qty': 1.0,
             'type': 'normal',
             'bom_line_ids': [Command.create({'product_id': component.id, 'product_qty': 1})],
@@ -482,7 +481,7 @@ class TestTraceability(TestMrpCommon):
         moveA = self.env['stock.move'].create({
             'product_id': endproductA.id,
             'quantity': 1,
-            'product_uom': endproductA.uom_id.id,
+            'uom_id': endproductA.uom_id.id,
             'picking_id': pickingA_out.id,
             'location_id': self.stock_location.id,
             'location_dest_id': self.customer_location.id,
@@ -535,29 +534,31 @@ class TestTraceability(TestMrpCommon):
         Form.from_action(self.env, mo.button_unbuild()).save().action_validate()
 
         # scrap the component
-        scrap = self.env['stock.scrap'].create({
+        scrap = self.env['stock.move'].create({
+            'is_scrap': True,
             'product_id': component.id,
-            'product_uom_id': component.uom_id.id,
             'location_id': self.stock_location.id,
-            'scrap_qty': 1,
-            'lot_id': serial_number.id,
+            'location_dest_id': self.scrap_location.id,
+            'quantity': 1,
+            'lot_ids': serial_number.ids,
+            'company_id': self.env.company.id,
         })
-        scrap_location = scrap.scrap_location_id
-        scrap.do_scrap()
+        scrap_location = scrap.location_dest_id
+        scrap._action_scrap()
 
         # unscrap the component
         internal_move = self.env['stock.move'].create({
             'location_id': scrap_location.id,
             'location_dest_id': self.stock_location.id,
             'product_id': component.id,
-            'product_uom': component.uom_id.id,
+            'uom_id': component.uom_id.id,
             'product_uom_qty': 1.0,
             'picked': True,
             'move_line_ids': [Command.create({
                 'product_id': component.id,
                 'location_id': scrap_location.id,
                 'location_dest_id': self.stock_location.id,
-                'product_uom_id': component.uom_id.id,
+                'uom_id': component.uom_id.id,
                 'quantity': 1.0,
                 'lot_id': serial_number.id,
             })],
@@ -696,6 +697,36 @@ class TestTraceability(TestMrpCommon):
         third_serials_wizard = Form.from_action(self.env, third_mo.action_generate_serial())
         self.assertEqual(third_serials_wizard.lot_name, 'TEST0000006')
 
+    @freeze_time('2024-02-03')
+    def test_interpolation_in_batch_serials(self):
+        """
+        Test that prefixes are correctly interpolated when
+        generating multiple serial numbers in one MO
+        """
+        mo, _bom, final_product, _comp_1, _comp_2 = self.generate_mo(
+            tracking_final='serial',
+            qty_base_1=1,
+            qty_base_2=1,
+            qty_final=2,
+        )
+        final_product.lot_sequence_id.prefix = '%(day)s-%(month)s-'
+        final_product.lot_sequence_id.number_next_actual = 1
+        serials_wizard = Form.from_action(self.env, mo.action_generate_serial())
+        self.assertEqual(serials_wizard.lot_name, '03-02-0000001')
+        serials_wizard.save().action_generate_serial_numbers()
+        serials_wizard.save().action_apply()
+        self.assertRecordValues(mo.lot_producing_ids.sorted('name'), [
+            {'name': '03-02-0000001'},
+            {'name': '03-02-0000002'},
+        ])
+        mo.button_mark_done()
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(final_product, self.stock_location), 2)
+        self.assertRecordValues(self.env['stock.lot'].search([('product_id', '=', final_product.id)]).sorted('name'), [
+            {'name': '03-02-0000001'},
+            {'name': '03-02-0000002'},
+        ])
+        self.assertEqual(final_product.next_serial, '0000003')
+
     def test_assign_stock_move_date_on_mark_done(self):
         product_final = self.env['product.product'].create({
             'name': 'Finished Product',
@@ -735,7 +766,7 @@ class TestTraceability(TestMrpCommon):
         mo = self.env['mrp.production'].create({
             'product_id': component.id,
             'product_qty': 1,
-            'product_uom_id': component.uom_id.id,
+            'uom_id': component.uom_id.id,
             'company_id': self.env.company.id,
         })
         mo.action_confirm()
@@ -792,7 +823,7 @@ class TestTraceability(TestMrpCommon):
         mo_produce_sn = self.env['mrp.production'].create({
             'product_id': component.id,
             'product_qty': 1,
-            'product_uom_id': component.uom_id.id,
+            'uom_id': component.uom_id.id,
             'company_id': self.env.company.id,
         })
         mo_produce_sn.action_confirm()
@@ -854,7 +885,7 @@ class TestTraceability(TestMrpCommon):
         mo_produce_sn = self.env['mrp.production'].create({
             'product_id': component.id,
             'product_qty': 1,
-            'product_uom_id': component.uom_id.id,
+            'uom_id': component.uom_id.id,
             'company_id': self.env.company.id,
         })
         mo_produce_sn.action_confirm()

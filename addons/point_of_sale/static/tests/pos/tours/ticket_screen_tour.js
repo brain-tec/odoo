@@ -10,10 +10,13 @@ import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import { inLeftSide } from "@point_of_sale/../tests/pos/tours/utils/common";
 import { registry } from "@web/core/registry";
 import * as OfflineUtil from "@point_of_sale/../tests/generic_helpers/offline_util";
+import * as ProductConfiguratorPopup from "@point_of_sale/../tests/pos/tours/utils/product_configurator_util";
+import { formatDate, today } from "@web/core/l10n/dates";
 
 registry.category("web_tour.tours").add("TicketScreenTour", {
     steps: () =>
         [
+            Chrome.freezeDateTime(today().toMillis()),
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             OfflineUtil.setOfflineMode(),
@@ -164,6 +167,13 @@ registry.category("web_tour.tours").add("TicketScreenTour", {
             ...ProductScreen.clickRefund(),
             TicketScreen.selectOrder("003"),
             TicketScreen.refundedNoteContains("1.00 Refunded"),
+            // Check date search works with l10n format
+            TicketScreen.selectFilter("Paid"),
+            TicketScreen.search("Date", formatDate(today())),
+            TicketScreen.nthRowContains(2, formatDate(today())),
+            TicketScreen.nthRowContains(3, formatDate(today())),
+            TicketScreen.nthRowContains(4, formatDate(today())),
+            Chrome.endTour(),
         ].flat(),
 });
 
@@ -312,7 +322,23 @@ registry.category("web_tour.tours").add("test_order_refund_flow", {
         ].flat(),
 });
 
+registry.category("web_tour.tours").add("test_pay_unpaid_order_from_kiosk", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            Chrome.clickOrders(),
+            TicketScreen.selectOrder(2.53),
+            TicketScreen.loadSelectedOrder(),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            FeedbackScreen.isShown(),
+        ].flat(),
+});
+
 registry.category("web_tour.tours").add("refund_multiple_products_amounts_compliance", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -339,6 +365,7 @@ registry.category("web_tour.tours").add("refund_multiple_products_amounts_compli
 });
 
 registry.category("web_tour.tours").add("LotTour", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -393,9 +420,7 @@ registry.category("web_tour.tours").add("LotTour", {
             FeedbackScreen.clickNextOrder(),
             ...ProductScreen.clickRefund(),
             TicketScreen.selectOrder("002"),
-            inLeftSide(
-                [Numpad.click("1"), ProductScreen.clickLine("Product B"), Numpad.click("1")].flat()
-            ),
+            inLeftSide([Numpad.click("1"), Numpad.click("1")].flat()),
             TicketScreen.confirmRefund(),
             PaymentScreen.isShown(),
             PaymentScreen.clickPaymentMethod("Bank"),
@@ -506,6 +531,22 @@ registry.category("web_tour.tours").add("test_order_invoice_search", {
             TicketScreen.selectFilter("Paid"),
             TicketScreen.search("Invoice Number", "00001"),
             TicketScreen.nthRowContains(1, "001", false),
+            Chrome.clickMenuOption("Close Register"),
+            {
+                content: `Select button close register`,
+                trigger: `button:contains(close register)`,
+                run: "click",
+                expectUnloadPage: true,
+            },
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            Chrome.clickOrders(),
+            TicketScreen.selectFilter("Paid"),
+            {
+                content:
+                    "Verify that the order is paid; this ensures that the RPC process is complete.",
+                trigger: ".orders .order-row:eq(0):has(.badge.rounded:contains(Paid))",
+            },
         ].flat(),
 });
 
@@ -577,5 +618,30 @@ registry.category("web_tour.tours").add("test_lot_refund_lower_qty", {
             {
                 trigger: ".info-list:contains('SN SN2')",
             },
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_refund_line_keep_attributes", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Donut"),
+            ProductConfiguratorPopup.pickRadio("Sugar"),
+            Dialog.confirm(),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            FeedbackScreen.isShown(),
+            FeedbackScreen.clickNextOrder(),
+            ProductScreen.clickRefund(),
+            TicketScreen.selectOrder("001"),
+            ProductScreen.clickNumpad("1"),
+            TicketScreen.confirmRefund(),
+            PaymentScreen.clickBack(),
+            Order.hasLine({
+                productName: "Donut",
+                attributeLine: "Sugar",
+            }),
         ].flat(),
 });

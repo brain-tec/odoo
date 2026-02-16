@@ -3,13 +3,14 @@ import { CORE_PLUGINS } from "@html_builder/core/core_plugins";
 import { Image } from "@html_builder/core/img";
 import { SetupEditorPlugin } from "@html_builder/core/setup_editor_plugin";
 import { revertPreview } from "@html_builder/core/utils";
+import { BackgroundShapeOptionPlugin } from "@html_builder/plugins/background_option/background_shape_option_plugin";
 import { unformat } from "@html_editor/../tests/_helpers/format";
 import { setContent } from "@html_editor/../tests/_helpers/selection";
 import { insertText } from "@html_editor/../tests/_helpers/user_actions";
 import { LocalOverlayContainer } from "@html_editor/local_overlay_container";
 import { Plugin } from "@html_editor/plugin";
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
-import { after } from "@odoo/hoot";
+import { after, click, queryAll, queryFirst } from "@odoo/hoot";
 import { animationFrame, waitForNone, queryOne, waitFor, advanceTime, tick } from "@odoo/hoot-dom";
 import { Component, onMounted, useRef, useState, useSubEnv, xml } from "@odoo/owl";
 import {
@@ -24,6 +25,7 @@ import { loadBundle } from "@web/core/assets";
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
 import { uniqueId } from "@web/core/utils/functions";
+import { delay } from "@web/core/utils/concurrency";
 
 export function patchWithCleanupImg() {
     const defaultImg =
@@ -288,6 +290,23 @@ export async function setupHTMLBuilder(
         },
     });
 
+    // Remove as soon as the background shape are not always instantiated when
+    // entering in edit mode.
+    patchWithCleanup(BackgroundShapeOptionPlugin.prototype, {
+        getShapeStylePosition(shapeId, flip) {
+            if (!this.shapeStyles[this.convertShapeIdForStyleSearch(shapeId)]) {
+                return [50, 50];
+            }
+            return super.getShapeStylePosition(shapeId, flip);
+        },
+        getShapeStyleUrl(shapeId) {
+            if (!this.shapeStyles[this.convertShapeIdForStyleSearch(shapeId)]) {
+                return "";
+            }
+            return super.getShapeStyleUrl(shapeId);
+        },
+    });
+
     let attachedEditor;
     const comp = await mountWithCleanup(BuilderContainer, {
         props: {
@@ -522,4 +541,20 @@ export async function setupHTMLBuilderWithDummySnippet(content) {
     };
 
     return await setupHTMLBuilder(content || "", snippetsStructure);
+}
+
+export async function editBuilderRangeValue(selector, newValue) {
+    const input = queryFirst(selector);
+    input.value = newValue;
+    input.dispatchEvent(new Event("input"));
+    await delay();
+    input.dispatchEvent(new Event("change"));
+    await delay();
+}
+
+export async function unfoldAllOptionsGroups() {
+    for (const i of queryAll(".options-container-header i.fa-caret-right")) {
+        await click(i);
+    }
+    await animationFrame();
 }

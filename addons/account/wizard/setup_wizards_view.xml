@@ -14,7 +14,7 @@
                         <group>
                             <field name="company_id" invisible="1"/>  <!-- Otherwise not present in the vals in the create -->
                             <field name="opening_move_posted" invisible="1"/>
-                            <field name="opening_date" readonly="opening_move_posted"/>
+                            <field name="opening_date"/>
 
                             <label for="fiscalyear_last_month" string="Fiscal Year End"/>
                             <div>
@@ -26,7 +26,7 @@
                     <footer>
                         <button name="action_save_onboarding_fiscal_year" string="Apply"
                                class="oe_highlight" type="object" data-hotkey="q" />
-                        <button special="cancel" data-hotkey="x" string="Cancel" />
+                        <button special="cancel" data-hotkey="x"/>
                     </footer>
                 </form>
             </field>
@@ -51,7 +51,7 @@
                     </sheet>
                     <footer>
                         <button string="Create" class="oe_highlight" type="object" name="validate" data-hotkey="q"/>
-                        <button string="Cancel" special="cancel" data-hotkey="x"/>
+                        <button special="cancel" data-hotkey="x"/>
                     </footer>
                 </form>
             </field>
@@ -76,7 +76,7 @@
                     </sheet>
                     <footer>
                         <button string="Create" class="oe_highlight" type="object" name="validate" data-hotkey="q"/>
-                        <button string="Cancel" special="cancel" data-hotkey="x"/>
+                        <button special="cancel" data-hotkey="x"/>
                     </footer>
                 </form>
             </field>
@@ -87,6 +87,15 @@
             <field name="model">account.account</field>
             <field name="arch" type="xml">
                 <list editable="top" create="1" delete="1" decoration-muted="opening_debit == 0 and opening_credit == 0" open_form_view="True">
+                    <header>
+                        <button name="action_validate_opening_move"
+                                type="object"
+                                string="Validate and Post"
+                                display="always"
+                                confirm="This action is irreversible: the credit/debit cannot be modified again from this screen."
+                                confirm-label="Post"
+                                confirm-title="Post Entry?"/>
+                    </header>
                     <field name="code"/>
                     <field name="name"/>
                     <field name="company_ids" column_invisible="True"/>

@@ -1,6 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+import re
+from ast import literal_eval
 from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta, UTC
 from zoneinfo import ZoneInfo
@@ -26,8 +28,6 @@ CRM_LEAD_FIELDS_TO_MERGE = [
     'campaign_id',
     'medium_id',
     'source_id',
-    # Mail mixin
-    'email_cc',
     # description
     'name',
     'user_id',
@@ -85,7 +85,8 @@ class CrmLead(models.Model):
     _name = 'crm.lead'
     _description = "Lead"
     _order = "priority desc, id desc"
-    _inherit = ['mail.thread.cc',
+    _inherit = [
+                'mail.thread.subject.suggested',
                 'mail.thread.blacklist',
                 'mail.thread.phone',
                 'mail.activity.mixin',
@@ -96,6 +97,7 @@ class CrmLead(models.Model):
     _primary_email = 'email_from'
     _check_company_auto = True
     _track_duration_field = 'stage_id'
+    _priority_field = 'priority'
 
     # Description
     name = fields.Char(
@@ -717,6 +719,12 @@ class CrmLead(models.Model):
             partner_phone_formatted = self.partner_id._phone_format(fname='phone') or self.partner_id.phone or False
             return lead_phone_formatted != partner_phone_formatted
         return False
+
+    def _evaluate_context_from_action(self, action):
+        context_str = action.get('context', '{}')
+        context_str = re.sub(r'\buid\b', str(self.env.uid), context_str)
+        context_str = re.sub(r'\bactive_id\b', str(self.id), context_str)
+        return literal_eval(context_str)
 
     # ------------------------------------------------------------
     # ORM
@@ -1478,16 +1486,18 @@ class CrmLead(models.Model):
         return data
 
     def merge_opportunity(self, user_id=False, team_id=False, auto_unlink=True):
-        """ Merge opportunities in one. Different cases of merge:
-                - merge leads together = 1 new lead
-                - merge at least 1 opp with anything else (lead or opp) = 1 new opp
-            The resulting lead/opportunity will be the most important one (based on its confidence level)
-            updated with values from other opportunities to merge.
+        """
+        Merge opportunities in one. Different cases of merge:
 
-        :param user_id : the id of the saleperson. If not given, will be determined by `_merge_data`.
-        :param team : the id of the Sales Team. If not given, will be determined by `_merge_data`.
+        - merge leads together = 1 new lead
+        - merge at least 1 opp with anything else (lead or opp) = 1 new opp
 
-        :return crm.lead record resulting of th merge
+        The resulting lead/opportunity will be the most important one (based on its confidence level)
+        updated with values from other opportunities to merge.
+
+        :param user_id: the id of the saleperson. If not given, will be determined by :meth:`_merge_data`.
+        :param team_id: the id of the Sales Team. If not given, will be determined by :meth:`_merge_data`.
+        :returns: crm.lead record resulting of th merge
         """
         return self._merge_opportunity(user_id=user_id, team_id=team_id, auto_unlink=auto_unlink)
 
@@ -2059,11 +2069,11 @@ class CrmLead(models.Model):
 
     def _notify_by_email_prepare_rendering_context(self, message, msg_vals=False, model_description=False,
                                                    force_email_company=False, force_email_lang=False,
-                                                   force_record_name=False):
+                                                   force_record_name=False, force_header=False, force_footer=False):
         render_context = super()._notify_by_email_prepare_rendering_context(
             message, msg_vals=msg_vals, model_description=model_description,
             force_email_company=force_email_company, force_email_lang=force_email_lang,
-            force_record_name=force_record_name,
+            force_header=force_header, force_footer=force_footer, force_record_name=force_record_name,
         )
         if self.date_deadline:
             render_context['subtitles'].append(
@@ -2770,20 +2780,24 @@ class CrmLead(models.Model):
     # PLS Backend Tooltip
     # -------------------
     def prepare_pls_tooltip_data(self):
-        '''
-            Compute and return all necessary information to render CrmPlsTooltip, displayed when
-            pressing the small AI button, located next to the label of probability when automated,
-            in the crm.lead form view. This method first replaces ids with display names of relational
-            fields before returning data, then also recomputes probabilities and writes them on self.
+        """
+        Compute and return all necessary information to render CrmPlsTooltip, displayed when
+        pressing the small AI button, located next to the label of probability when automated,
+        in the crm.lead form view. This method first replaces ids with display names of relational
+        fields before returning data, then also recomputes probabilities and writes them on self.
 
-            :returns: {
-                low_3_data: list of field-value couples for lowest 3 criterions, lowest first
-                probability: numerical value, used for display on tooltip
-                team_name: string, name of lead team if any
-                top_3_data: list of field-value couples for top 3 criterions, highest first
-              }
-            :rtype: dict
-        '''
+        :returns:
+
+            ::
+                {
+                    low_3_data: list of field-value couples for lowest 3 criterions, lowest first
+                    probability: numerical value, used for display on tooltip
+                    team_name: string, name of lead team if any
+                    top_3_data: list of field-value couples for top 3 criterions, highest first
+                }
+
+        :rtype: dict
+        """
         self.ensure_one()
         _unused, tooltip_data = self._pls_get_naive_bayes_probabilities(is_tooltip=True)
         sorted_scores_with_name = []

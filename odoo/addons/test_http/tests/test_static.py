@@ -3,19 +3,20 @@
 import base64
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
-from os.path import basename, join as opj
+from os.path import basename
+from os.path import join as opj
 from unittest.mock import patch
 from urllib.parse import urlsplit
 
 from freezegun import freeze_time
 
-from odoo import api, http
-from odoo.tests import new_test_user, tagged, RecordCapturer
+from odoo import api
+from odoo.tests import RecordCapturer, new_test_user, tagged
 from odoo.tools import config, file_open
 from odoo.tools.image import image_process
 from odoo.tools.misc import submap
 
-from .test_common import TestHttpBase, HTTP_DATETIME_FORMAT
+from .test_common import HTTP_DATETIME_FORMAT, TestHttpBase
 
 
 class TestHttpStaticCommon(TestHttpBase):
@@ -83,15 +84,12 @@ class TestHttpStatic(TestHttpStaticCommon):
             self.assertCacheControl(res, 'public, max-age=604800')
 
     def test_static01_debug_assets(self):
-        session = self.authenticate(None, None)
-        session.debug = 'assets'
-
+        self.authenticate(None, None, session_extra={'debug': 'assets'})
         res = self.assertDownloadGizeh('/test_http/static/src/img/gizeh.png')
         self.assertCacheControl(res, 'no-cache, max-age=0')
 
     def test_static02_not_found(self):
-        session = self.authenticate(None, None)
-        session.db = None
+        self.authenticate(None, None, session_extra={'db': None})
         res = self.nodb_url_open("/test_http/static/i-dont-exist")
         self.assertEqual(res.status_code, 404)
 
@@ -257,7 +255,6 @@ class TestHttpStatic(TestHttpStaticCommon):
             # The file is outside of the filestore, X-Sendfile disabled
             self.assertDownloadPlaceholder(f'/web/image/{att.id}')
 
-
     def test_static14_download_not_found(self):
         res = self.url_open('/web/image/idontexist?download=True')
         self.assertEqual(res.status_code, 404)
@@ -293,13 +290,14 @@ class TestHttpStatic(TestHttpStaticCommon):
             res = self.url_open('/web/content/test_http.earth?field=galaxy_picture')
             self.assertEqual(res.status_code, 404)
 
-    def test_static17_content_missing_checksum(self):
+    def test_static17_content_from_db_datas(self):
+        self.env['ir.config_parameter'].set_str('ir_attachment.location', 'db')
         att = self.env['ir.attachment'].create({
             'name': 'testhttp.txt',
-            'db_datas': 'some data',
+            'raw': b'some data',
             'public': True,
         })
-        self.assertFalse(att.checksum)
+        self.assertFalse(att.store_fname)
         self.assertDownload(
             url=f'/web/content/{att.id}',
             headers={},
@@ -313,15 +311,16 @@ class TestHttpStatic(TestHttpStaticCommon):
             assert_content=b'some data',
         )
 
-    def test_static18_image_missing_checksum(self):
+    def test_static18_image_from_db_datas(self):
+        self.env['ir.config_parameter'].set_str('ir_attachment.location', 'db')
         with file_open('test_http/static/src/img/gizeh.png', 'rb') as file:
             att = self.env['ir.attachment'].create({
                 'name': 'gizeh.png',
-                'db_datas': file.read(),
+                'raw': file.read(),
                 'mimetype': 'image/png',
                 'public': True,
             })
-        self.assertFalse(att.checksum)
+        self.assertFalse(att.store_fname)
         self.assertDownloadGizeh(f'/web/image/{att.id}')
 
     def test_static19_fallback_redirection_loop(self):
@@ -429,10 +428,9 @@ class TestHttpStatic(TestHttpStaticCommon):
             self.assertEqual(res.headers['Content-Security-Policy'], "default-src 'none'")
 
     def test_static23_remove_cache_control_wkhmtltopdf(self):
-        session = self.authenticate(None, None)
+        self.authenticate(None, None)
         for debug in ('', 'assets'):
-            session.debug = debug
-            http.root.session_store.save(self.session)
+            self.update_session(debug=debug)
             with self.subTest(debug=debug):
                 res = self.db_url_open('/test_http/static/src/img/gizeh.png', headers={
                     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) '
@@ -451,6 +449,7 @@ class TestHttpStatic(TestHttpStaticCommon):
                     e = "wkhtmltopdf only works if it is allowed to cache everything"
                     raise AssertionError(e) from exc
                 self.assertEqual(res.content, self.gizeh_data)
+
 
 @tagged('post_install', '-at_install')
 class TestHttpStaticLogo(TestHttpStaticCommon):
@@ -672,7 +671,7 @@ class TestHttpStaticUpload(TestHttpStaticCommon):
                 f'{self.base_url()}/web/binary/upload_attachment',
                 files={'ufile': file},
                 data={
-                    'csrf_token': http.Request.csrf_token(self),
+                    'csrf_token': self.csrf_token(),
                     'model': 'test_http.stargate',
                     'id': self.env.ref('test_http.earth').id,
                 },
@@ -716,7 +715,7 @@ class TestHttpStaticUpload(TestHttpStaticCommon):
                 f'{self.base_url()}/web/binary/upload_attachment',
                 files={'ufile': file},
                 data={
-                    'csrf_token': http.Request.csrf_token(self),
+                    'csrf_token': self.csrf_token(),
                     'model': 'test_http.stargate',
                     'id': self.env.ref('test_http.earth').id,
                     'callback': 'callmemaybe',

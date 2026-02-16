@@ -121,6 +121,7 @@ $o-calendar-today-color: color-contrast($o-calendar-today-background-color);
 // by 5. This ratio has been chosen to have enough space for different language (e.g. Vietnamese)
 // Finally, we have to take into account the gaps.
 $o-datetime-picker-width: calc(5px * 7 * 8 + (2 * #{map-get($spacers, 2)}));
+$o-datetime-picker-reduced-width: calc(5px * 7 * 7 + (2 * #{map-get($spacers, 2)}));
 
 
 // Buttons
@@ -129,5 +130,18 @@ $o-datetime-picker-width: calc(5px * 7 * 8 + (2 * #{map-get($spacers, 2)}));
     &:focus-visible {
         // Make sure to have a fallback for :focus-visible state when the element use only the `.btn` class.
         box-shadow: var(--#{$prefix}btn-focus-box-shadow, 0 0 0 #{$btn-focus-width} RGBA(#{$btn-link-focus-shadow-rgb}, .5));
+    }
+
+    &.btn-link.btn-link-inline {
+        --#{$prefix}btn-font-family: var(--#{$prefix}body-font-family);
+        --#{$prefix}btn-font-size: var(--#{$prefix}body-font-size);
+        --#{$prefix}btn-font-weight: var(--#{$prefix}body-font-weight);
+        --#{$prefix}btn-line-height: var(--#{$prefix}body-line-height);
+        --#{$prefix}btn-padding-x: 0;
+        --#{$prefix}btn-padding-y: 0;
+        --#{$prefix}btn-border-width: 0;
+        display: inline;
+        vertical-align: baseline;
+        font-weight: var(--#{$prefix}btn-font-weight); /* TODO: remove when the crappy overrides in bootstrap_review_backend are gone */
     }
 }

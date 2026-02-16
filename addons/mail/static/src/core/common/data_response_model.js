@@ -18,7 +18,6 @@ import { fields, Record } from "@mail/model/export";
  * they are resolved with their data. This class should not be used directly under typical use.
  */
 export class DataResponse extends Record {
-    static id = "id";
     static _lastId = 0;
 
     /** @returns {import("models").DataResponse} */
@@ -66,6 +65,7 @@ export class DataResponse extends Record {
     /** @type {number} */
     count;
     message = fields.One("mail.message");
+    messages = fields.Many("mail.message");
     partners = fields.Many("res.partner");
 }
 

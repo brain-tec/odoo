@@ -101,10 +101,11 @@ const TOOLBAR = (language) =>
                 <span class="px-1">${language}</span>
                 <i class="fa fa-caret-down"></i>
             </button>
-            <button class="text-nowrap btn o_clipboard_button">
+            <button type="button" class="text-nowrap btn o_clipboard_button">
                 <span class="mx-1 fa fa-clipboard"></span>
                 <span>Copy</span>
             </button>
+            <button class="text-nowrap btn"><span class="mx-1 fa fa-paragraph" title="Convert to paragraph"></span></button>
         </div>
     </div>`
     );
@@ -193,7 +194,7 @@ export const highlightedPre = ({
             )}","languageId":"${language.toLowerCase()}"}'>
             ${TOOLBAR(LANGUAGES[language])}
             <pre>//PRE//</pre>${textareaRange === null ? "" : "[]"}
-            <textarea //TEXTAREA// class="o_prism_source" contenteditable="true"></textarea>
+            <textarea //TEXTAREA// class="o_prism_source" contenteditable="true"  placeholder="Code"></textarea>
         </div>`
     )
         // Do not trim spaces within the PRE and in the textarea data:

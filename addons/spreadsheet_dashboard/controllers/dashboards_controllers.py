@@ -1,15 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import http
-from odoo.http import request
+from odoo.http import Controller, request, route
 
 
-class DashboardDataRoute(http.Controller):
-    @http.route(
+class DashboardDataRoute(Controller):
+    @route(
         ['/spreadsheet/dashboard/data/<model("spreadsheet.dashboard"):dashboard>'],
         type='http',
         auth='user',
-        readonly=True
+        readonly=True,
     )
     def get_dashboard_data(self, dashboard):
         dashboard = dashboard.exists()

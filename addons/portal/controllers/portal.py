@@ -8,8 +8,16 @@ from werkzeug import urls
 from werkzeug.exceptions import Forbidden
 
 from odoo import SUPERUSER_ID, _, http
-from odoo.exceptions import AccessDenied, AccessError, MissingError, UserError, ValidationError
-from odoo.http import Controller, content_disposition, request, route
+from odoo.exceptions import (
+    AccessDenied,
+    AccessError,
+    MissingError,
+    UserError,
+    ValidationError,
+)
+from odoo.http import Controller, request, route
+from odoo.http.session import logout
+from odoo.http.stream import content_disposition
 from odoo.tools import clean_context, consteq, single_email_re, str2bool
 from odoo.tools.translate import LazyTranslate
 
@@ -926,7 +934,7 @@ class CustomerPortal(Controller):
             try:
                 request.env['res.users']._check_credentials(credential, {'interactive': True})
                 request.env.user.sudo()._deactivate_portal_user(**post)
-                request.session.logout()
+                logout(request.session)
                 return request.redirect('/web/login?message=%s' % urls.url_quote(_('Account deleted!')))
             except AccessDenied:
                 values['errors'] = {'deactivate': 'password'}

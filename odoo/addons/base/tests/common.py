@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from contextlib import contextmanager
 from unittest.mock import patch, Mock
 
-from odoo import Command, modules
+from odoo import Command
 from odoo.tests.common import new_test_user, TransactionCase, HttpCase
 from odoo.tools.mail import email_split_and_format
 
@@ -109,7 +108,7 @@ class BaseCommon(TransactionCase):
         # Enforce constant currency
         currency = cls._enable_currency(currency_code)
         if company.currency_id != currency:
-            cls.env.transaction.cache.set(cls.env.company, type(cls.env.company).currency_id, currency.id, dirty=True)
+            company.__class__.currency_id._update_cache(cls.env.company, currency.id, dirty=True)
             # this is equivalent to cls.env.company.currency_id = currency but without triggering buisness code checks.
             # The value is added in cache, and the cache value is set as dirty so that that
             # the value will be written to the database on next flush.
@@ -256,7 +255,7 @@ class SavepointCaseWithUserDemo(TransactionCase):
                     'name': 'Austin Kennedy', # Tom Ruiz
                 })],
             }, {
-                'name': 'Pepper Street', # 'Deco Addict',
+                'name': 'Pepper Street',  # 'Acme Corporation',
                 'state_id': cls.env.ref('base.state_us_2').id,
                 'child_ids': [Command.create({
                     'name': 'Liam King', # 'Douglas Fletcher',

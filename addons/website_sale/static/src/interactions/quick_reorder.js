@@ -1,3 +1,4 @@
+import { markup } from '@odoo/owl';
 import { ProductCombo } from '@sale/js/models/product_combo';
 import { serializeComboItem } from '@sale/js/sale_utils';
 import { serializeDateTime } from '@web/core/l10n/dates';
@@ -140,15 +141,23 @@ export class QuickReorder extends Interaction {
             ...(isCombo && { linked_products: linkedProducts }),
         }));
 
+        data['website_sale.shorter_cart_summary'] = markup(
+            data['website_sale.shorter_cart_summary']
+        );
+        data['website_sale.cart_lines'] = markup(data['website_sale.cart_lines']);
+
         // Add the product to the cart and update the DOM.
-        const websiteSale = document.querySelector('.oe_website_sale');
-        // `updateCartNavBar` regenerates the cart lines and `updateQuickReorderSidebar`
-        // regenerates the quick reorder products, so we need to stop and start interactions to
-        // make sure the regenerated reorder products and cart lines are properly handled.
-        this.services['public.interactions'].stopInteractions(websiteSale);
+        const cart = this.el.closest('#shop_cart');
+        const cartSummary = document.querySelector('.o_wsale_shorter_cart_summary');
+        // `updateCartNavBar` regenerates the cart lines and `updateQuickReorderSidebar` regenerates
+        // the quick reorder products, so we need to stop and start interactions to make sure the
+        // regenerated cart lines and reorder products are properly handled.
+        this.services['public.interactions'].stopInteractions(cart);
+        this.services['public.interactions'].stopInteractions(cartSummary);
         wSaleUtils.updateCartNavBar(data);
         wSaleUtils.updateQuickReorderSidebar(data);
-        this.services['public.interactions'].startInteractions(websiteSale);
+        this.services['public.interactions'].startInteractions(cart);
+        this.services['public.interactions'].startInteractions(cartSummary);
 
         // Move the focus to the next quantity input.
         this._focusNextQuantityInput(currentButtonIndex);

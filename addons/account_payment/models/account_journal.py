@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import _, api, models
@@ -15,6 +14,8 @@ class AccountJournal(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_linked_to_payment_provider(self):
+        if self.env.context.get('force_delete'):
+            return
         linked_providers = self.env['payment.provider'].sudo().search([]).filtered(
             lambda p: p.journal_id.id in self.ids and p.state != 'disabled'
         )

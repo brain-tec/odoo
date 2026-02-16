@@ -352,6 +352,8 @@ class TestCreateEvents(TestCommon):
         self.assertEqual(self.organizer_user.microsoft_last_sync_date, False,
                          "Variable last_sync_date must be False due to sync stop.")
 
+        # Avoid default alarm for the test event as self.call_post_commit_hooks never clear self.env.cr.postcommit._funcs.
+        self.simple_event_values.update(alarm_ids=False)
         # Create a not synced event (local).
         simple_event_values_updated = self.simple_event_values
         for date_field in ['start', 'stop']:
@@ -582,14 +584,17 @@ class TestCreateEvents(TestCommon):
             'user_id': self.user_employee.id,
             'department_id': self.rd_dept.id,
         })
-        self.hr_leave_type = self.env['hr.leave.type'].with_user(self.user_hrmanager).create({
+        self.hr_work_entry_type = self.env['hr.work.entry.type'].with_user(self.user_hrmanager).create({  # noqa: OLS03001
             'name': 'Time Off Type',
+            'code': 'Time Off Type',
             'requires_allocation': False,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
         self.holiday = self.env['hr.leave'].with_context(mail_create_nolog=True, mail_notrack=True).with_user(self.user_employee).create({
             'name': 'Time Off Employee',
             'employee_id': self.employee_emp.id,
-            'holiday_status_id': self.hr_leave_type.id,
+            'work_entry_type_id': self.hr_work_entry_type.id,
             'request_date_from': datetime(2020, 1, 15),
             'request_date_to': datetime(2020, 1, 15),
         })

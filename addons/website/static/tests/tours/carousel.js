@@ -9,6 +9,7 @@ import {
     clickOnSave,
     registerWebsitePreviewTour,
     goBackToBlocks,
+    unfoldOptionsGroup,
 } from "@website/js/tours/tour_utils";
 
 const carouselInnerSelector = ":iframe .carousel-inner";
@@ -104,6 +105,7 @@ registerWebsitePreviewTour(
         },
         checkSlides(3, 1),
         // Add a slide (with the "Carousel" option).
+        ...unfoldOptionsGroup("Carousel"),
         changeOption("Carousel", "[data-action-id='addSlide']"),
         checkSlides(4, 2),
         {
@@ -173,6 +175,7 @@ const checkSlideNotClickable = () => ({
 registerWebsitePreviewTour(
     "snippet_carousel_clickable_slides",
     {
+        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/",
         edition: true,
     },
@@ -214,9 +217,9 @@ registerWebsitePreviewTour(
             run: "edit ",
         },
         {
-            content: "Press Enter in the URL input",
+            content: "Press Tab in the URL input",
             trigger: "div[data-action-id='setSlideAnchorUrl'] input",
-            run: "press Enter",
+            run: "press Tab",
         },
         {
             content: "Check that the anchor tag is removed",

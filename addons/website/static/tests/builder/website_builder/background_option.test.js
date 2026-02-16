@@ -1,13 +1,21 @@
 import { BackgroundOption } from "@html_builder/plugins/background_option/background_option";
+import { Plugin } from "@html_editor/plugin";
 import { expect, test } from "@odoo/hoot";
 import { animationFrame, queryOne, scroll, waitFor } from "@odoo/hoot-dom";
 import { contains } from "@web/../tests/web_test_helpers";
 import {
+    addPlugin,
     addOption,
     defineWebsiteModels,
     setupWebsiteBuilder,
 } from "@website/../tests/builder/website_helpers";
 import { patchDragImage } from "@website/../tests/builder/image_test_helpers";
+
+const RGB_RED = "rgb(255, 0, 0)";
+const RGB_BLUE = "rgb(0, 0, 255)";
+const RGB_GREEN = "rgb(0, 255, 0)";
+const HEX_BLUE = "#0000ff";
+const HEX_GREEN = "#00ff00";
 
 defineWebsiteModels();
 
@@ -34,9 +42,11 @@ test("change the background shape of elements", async () => {
     await setupWebsiteBuilder(`
         <div class="selector">
             <div id="first" class="applyTo" data-oe-shape-data='{"shape":"html_builder/Connections/01","flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0"}'>
+                <div class="o_we_shape o_html_builder_Connections_01"></div>
                 AAAA
             </div>
             <div id="second" class="applyTo" data-oe-shape-data='{"shape":"html_builder/Connections/01","flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0"}'>
+                <div class="o_we_shape o_html_builder_Connections_01"></div>
                 BBBB
             </div>
         </div>`);
@@ -50,17 +60,18 @@ test("change the background shape of elements", async () => {
     ).click();
     expect(":iframe .selector div#first").toHaveAttribute(
         "data-oe-shape-data",
-        '{"shape":"html_builder/Connections/02","flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0"}'
+        '{"shape":"html_builder/Connections/02","flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":true}'
     );
     expect(":iframe .selector div#second").toHaveAttribute(
         "data-oe-shape-data",
-        '{"shape":"html_builder/Connections/02","flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0"}'
+        '{"shape":"html_builder/Connections/02","flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":true}'
     );
 });
 
 test("remove background shape", async () => {
     await setupWebsiteBuilder(`
         <section data-oe-shape-data='{"shape":"html_builder/Connections/01","flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0"}'>
+            <div class="o_we_shape o_html_builder_Connections_01"></div>
             AAAA
         </section>`);
     await contains(":iframe section").click();
@@ -290,13 +301,16 @@ async function openBgPositionOverlay(editingElement, waitSidebarUpdated) {
     await waitFor(".o-overlay-container .o_we_overlay_dragger", { timeout: 2000 });
 }
 
-async function dragAndDropBgImage() {
-    const { waitSidebarUpdated } = await setupWebsiteBuilder(`
+async function dragAndDropBgImage(builderOptions = {}) {
+    const { waitSidebarUpdated } = await setupWebsiteBuilder(
+        `
         <section style="background-image: url('/web/image/123/transparent.png'); width: 500px; height:500px">
             <div class="o_we_shape o_html_builder_Connections_01">
                 AAAA
             </div>
-        </section>`);
+        </section>`,
+        builderOptions
+    );
     await openBgPositionOverlay(":iframe section", waitSidebarUpdated);
     const { startDrag, endDrag } = patchDragImage(
         ".o-overlay-container .o_we_overlay_dragger",
@@ -308,7 +322,7 @@ async function dragAndDropBgImage() {
 }
 
 test("change the main color of a background image of type '/html_editor/shape'", async () => {
-    await setupWebsiteBuilder(
+    const { waitSidebarUpdated } = await setupWebsiteBuilder(
         `
             <section style="background-image: url('/html_editor/shape/http_routing/404.svg?c2=o-color-2');">
                 AAAA
@@ -319,6 +333,7 @@ test("change the main color of a background image of type '/html_editor/shape'",
         }
     );
     await contains(":iframe section").click();
+    await waitSidebarUpdated();
     await contains("[data-label='Main Color'] .o_we_color_preview").click();
     await contains(
         ".o-main-components-container .o_colorpicker_section [data-color='o-color-5']"
@@ -354,6 +369,7 @@ test("remove the background image of a snippet", async () => {
             </div>
         </section>`);
     await contains(":iframe section").click();
+    await waitSidebarUpdated();
     expect(":iframe section").toHaveStyle("backgroundImage");
     await contains("[data-action-id='toggleBgImage']").click();
     await waitSidebarUpdated();
@@ -361,7 +377,7 @@ test("remove the background image of a snippet", async () => {
 });
 
 test("changing shape's background color doesn't hide the shape itself", async () => {
-    await setupWebsiteBuilder(
+    const { waitSidebarUpdated } = await setupWebsiteBuilder(
         `<section style="background-image: url('/html_editor/shape/http_routing/404.svg?c2=o-color-2');">
             AAAA
         </section>`,
@@ -374,6 +390,7 @@ test("changing shape's background color doesn't hide the shape itself", async ()
     await contains(
         ".o_pager_container .o-hb-bg-shape-btn [data-action-value='html_builder/Connections/01'][data-action-id='setBackgroundShape']"
     ).click();
+    await waitSidebarUpdated();
     const backgroundImageValue = getComputedStyle(queryOne(":iframe .o_we_shape")).backgroundImage;
     expect(backgroundImageValue).toMatch(/Connections(\/|%2F)01/);
     await contains("[data-label='Colors'] button:nth-child(2)").click();
@@ -438,6 +455,7 @@ test("change background size", async () => {
 test("background shape detection is compatible with previous ones (web_editor)", async () => {
     await setupWebsiteBuilder(`
         <section data-oe-shape-data='{"shape":"web_editor/Connections/01","flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0"}'>
+            <div class="o_we_shape o_html_builder_Connections_01"></div>
             AAAA
         </section>`);
     await contains(":iframe section").click();
@@ -447,4 +465,225 @@ test("background shape detection is compatible with previous ones (web_editor)",
         "data-action-value",
         "html_builder/Connections/01"
     );
+});
+
+test("can customize background shape groups", async () => {
+    class CustomBackgroundShapeGroupsPlugin extends Plugin {
+        static id = "customBackgroundShapeGroups";
+        resources = {
+            background_shape_groups_providers: (shapeGroups) => {
+                const connections = shapeGroups.basic.subgroups.connections.shapes;
+                const customShapes = {
+                    "html_builder/Connections/01": {
+                        ...connections["html_builder/Connections/01"],
+                        selectLabel: "Custom 01",
+                    },
+                    "html_builder/Connections/02": {
+                        ...connections["html_builder/Connections/02"],
+                        selectLabel: "Custom 02",
+                    },
+                };
+                const extraShapes = {
+                    "html_builder/Connections/03": {
+                        ...connections["html_builder/Connections/03"],
+                        selectLabel: "Extra 03",
+                    },
+                };
+                delete connections["html_builder/Connections/01"];
+                delete connections["html_builder/Connections/02"];
+                return {
+                    basic: {
+                        subgroups: {
+                            custom: {
+                                label: "Custom",
+                                shapes: customShapes,
+                            },
+                        },
+                    },
+                    extra: {
+                        label: "Extra",
+                        subgroups: {
+                            extra: {
+                                label: "Extra",
+                                shapes: extraShapes,
+                            },
+                        },
+                    },
+                };
+            },
+        };
+    }
+    addPlugin(CustomBackgroundShapeGroupsPlugin);
+
+    await setupWebsiteBuilder(`<section>AAAA</section>`);
+    await contains(":iframe section").click();
+    await contains("div[data-label='Shape'] button.o-hb-btn").click();
+    expect(".o_pager_container").toHaveText(/Custom/);
+    expect("button.o-hb-select-pager-tab[data-group-id='extra']").toHaveCount(1);
+    expect("[data-action-value='html_builder/Connections/01']").toHaveCount(1);
+    expect("[data-action-value='html_builder/Connections/02']").toHaveCount(1);
+    await contains("[data-action-value='html_builder/Connections/01']").click();
+    expect(":iframe section").toHaveAttribute(
+        "data-oe-shape-data",
+        '{"shape":"html_builder/Connections/01","flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}'
+    );
+    expect("div[data-label='Shape'] button:not([data-action-id])").toHaveText("Custom 01");
+});
+
+test("Connections shape updates when neighbor snippet visibility updates", async () => {
+    const { waitSidebarUpdated } = await setupWebsiteBuilder(
+        `
+        <main>
+            <section id="section1" data-snippet="s_snippet"
+                    data-oe-shape-data='{"shape":"html_builder/Connections/01","colors":{"c5":"${RGB_RED}"},"flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0", "selectedColor":false}'>
+                <div class="o_we_shape o_html_builder_Connections_01"></div>
+                Section 1
+            </section>
+            <section id="section2" style="background-color: ${RGB_BLUE};" data-snippet="s_snippet">
+                Section 2
+            </section>
+            <section id="section3" style="background-color: ${RGB_GREEN};" data-snippet="s_snippet">
+                Section 3
+            </section>
+        </main>
+    `,
+        {
+            loadIframeBundles: true,
+        }
+    );
+    await contains(":iframe #section2").click();
+    await contains(
+        "[data-action-id='toggleDeviceVisibility'][data-action-param='no_desktop']"
+    ).click();
+    await waitSidebarUpdated();
+    const shapeData = JSON.parse(queryOne(":iframe #section1").dataset.oeShapeData);
+    expect(shapeData.colors.c5).toBe(HEX_GREEN);
+});
+
+test("Connections shape do not update when switching background color of neighbor invisible element", async () => {
+    const { waitSidebarUpdated } = await setupWebsiteBuilder(
+        `
+        <main>
+            <section id="section1" data-snippet="s_snippet"
+                    data-oe-shape-data='{"shape":"html_builder/Connections/01","colors":{"c5":"${RGB_BLUE}"},"flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0", "selectedColor":false}'>
+                <div class="o_we_shape o_html_builder_Connections_01"></div>
+                Section 1
+            </section>
+            <section id="section2" class="d-lg-none o_snippet_desktop_invisible o_snippet_override_invisible" style="background-color: ${RGB_BLUE};" data-snippet="s_snippet">
+                Section 2
+            </section>
+            <section id="section3" style="background-color: ${RGB_BLUE};" data-snippet="s_snippet">
+                Section 3
+            </section>
+        </main>
+    `,
+        {
+            loadIframeBundles: true,
+        }
+    );
+    await contains(":iframe #section2").click();
+    await contains(".o_we_color_preview").click();
+    await contains(`[data-color='o_cc4']`).click();
+    await waitSidebarUpdated();
+    const shapeData = JSON.parse(queryOne(":iframe #section1").dataset.oeShapeData);
+    expect(shapeData.colors.c5).toBe(HEX_BLUE);
+});
+
+test("Connections shape do not update if it is inside an invisible element", async () => {
+    const { waitSidebarUpdated } = await setupWebsiteBuilder(
+        `
+        <main>
+            <section id="section1" data-snippet="s_snippet"
+                    data-oe-shape-data='{"shape":"html_builder/Connections/01","colors":{"c5":"${RGB_BLUE}"},"flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0", "selectedColor":false}'>
+                <div class="o_we_shape o_html_builder_Connections_01"></div>
+                Section 1
+            </section>
+            <section id="section2" style="background-color: ${RGB_BLUE};" data-snippet="s_snippet">
+                Section 2
+            </section>
+            <section id="section3" style="background-color: ${RGB_GREEN};" data-snippet="s_snippet">
+                Section 3
+            </section>
+        </main>
+    `,
+        {
+            loadIframeBundles: true,
+        }
+    );
+    await contains(":iframe #section1").click();
+    await contains(".overlay .fa-angle-down").click();
+    let shapeData = JSON.parse(queryOne(":iframe #section1").dataset.oeShapeData);
+    expect(shapeData.colors.c5).toBe(HEX_GREEN);
+    await contains(
+        "[data-action-id='toggleDeviceVisibility'][data-action-param='no_desktop']"
+    ).click();
+    await waitSidebarUpdated();
+    await contains(".o_we_invisible_entry").click();
+    await contains(".overlay .fa-angle-up").click();
+    shapeData = JSON.parse(queryOne(":iframe #section1").dataset.oeShapeData);
+    expect(shapeData.colors.c5).toBe(HEX_GREEN);
+});
+
+test("Previewed shape has the correct color when no shape is applied", async () => {
+    const { waitSidebarUpdated } = await setupWebsiteBuilder(
+        `
+        <section id="section1" data-snippet="s_snippet">
+            Section 1
+        </section>
+        <section id="section2" style="background-color: ${RGB_BLUE};" data-snippet="s_snippet">
+            Section 2
+        </section>
+    `,
+        {
+            loadIframeBundles: true,
+        }
+    );
+    await contains(":iframe #section1").click();
+    await contains("[data-label='Shape'] button").click();
+    await waitSidebarUpdated();
+    expect(getComputedStyle(queryOne(".o_html_builder_Connections_01")).backgroundImage).toInclude(
+        encodeURIComponent(HEX_BLUE)
+    );
+});
+
+test("Previewed shape has the correct color and flip when a shape is applied", async () => {
+    const { waitSidebarUpdated } = await setupWebsiteBuilder(
+        `
+        <section id="section1" style="background-color: ${RGB_BLUE};" data-snippet="s_snippet">
+                Section 1
+            </section>
+        <section id="section2" data-snippet="s_snippet"
+                    data-oe-shape-data='{"shape":"html_builder/Connections/01","colors":{"c5":"${RGB_BLUE}"},"flip":["x", "y"],"showOnMobile":false,"shapeAnimationSpeed":"0", "selectedColor":false}'>
+                <div class="o_we_shape o_html_builder_Connections_01"></div>
+            Section 2
+        </section>
+    `,
+        {
+            loadIframeBundles: true,
+        }
+    );
+    await contains(":iframe #section2").click();
+    await contains("[data-label='Shape'] button").click();
+    await waitSidebarUpdated();
+    const shapePreviewStyle = getComputedStyle(
+        queryOne(".o_html_builder_Connections_01")
+    ).backgroundImage;
+    expect(shapePreviewStyle).toInclude(encodeURIComponent(HEX_BLUE));
+    expect(shapePreviewStyle).toInclude("flip=xy");
+});
+
+test("Change the background position when multiple background layer is applied", async () => {
+    await dragAndDropBgImage({ loadIframeBundles: true });
+    const section = await waitFor(":iframe section");
+    await contains(section).click();
+    expect(section).not.toHaveClass("o_bg_img_opt_repeat");
+    expect(section).toHaveStyle("background-size: cover");
+    await contains("[data-label='Background'] .o_we_color_preview").click();
+    await contains(".o_font_color_selector .gradient-tab").click();
+    await contains(".o_colorpicker_sections .o_gradient_color_button").click();
+    await contains("[data-label='Position'] .dropdown-toggle").click();
+    await contains("[data-action-value='repeat-pattern']").click();
+    expect(section).toHaveClass("o_bg_img_opt_repeat");
+    expect(section).toHaveStyle("background-size: 100px, cover");
+    expect("[data-action-value='repeat-pattern']").toHaveClass("active");
 });

@@ -128,12 +128,26 @@
         </record>
 
         <!-- Workcenter Kanban view-->
+
+        <record id="mrp_workcenter_workorders_kanban" model="ir.actions.act_window">
+            <field name="name">Work Orders</field>
+            <field name="res_model">mrp.workorder</field>
+            <field name="domain">[('state', 'not in', ('draft', 'done', 'cancel'))]</field>
+            <field name="views" eval="[(False, 'list')]"/>
+            <field name="search_view_id" ref="view_mrp_production_workorder_form_view_filter"/>
+            <field name="context">{'search_default_workcenter_id': active_id
+                                   'search_default_ready': True,
+                                   'search_default_blocked': True,
+                                   'search_default_filter_to_plan': True,
+                                   'workcenter_to_plan_on': active_id}</field>
+        </record>
+
         <record model="ir.ui.view" id="mrp_workcenter_kanban">
             <field name="name">mrp.workcenter.kanban</field>
             <field name="model">mrp.workcenter</field>
             <field name="arch" type="xml">
                 <kanban highlight_color="color" class="o_workcenter_kanban" create="0" can_open="0" sample="0">
-                    <field name="workorder_count"/>
+                    <field name="workorder_blocked_count"/>
                     <field name="working_state"/>
                     <field name="oee_target"/>
                     <templates>
@@ -145,7 +159,10 @@
                                             <span>Actions</span>
                                         </h5>
                                         <div role="menuitem" name="plan_order">
-                                            <a name="action_work_order" type="object">Plan Orders</a>
+                                            <a name="%(mrp_workcenter_workorders_kanban)d" type="action">Plan Orders</a>
+                                        </div>
+                                        <div role="menuitem" name="planning">
+                                            <a name="action_work_order" type="object" context="{'search_default_ready': 1, 'search_default_progress': 1, 'search_default_blocked': 1, 'desktop_list_view': 1, 'search_default_workcenter_id': id, 'view_mode':'gantt'}">Planning</a>
                                         </div>
                                     </div>
                                     <div class="col-6">
@@ -160,9 +177,6 @@
                                                 Performance
                                             </a>
                                         </div>
-                                        <div role="menuitem">
-                                            <a name="action_work_order" type="object" context="{'search_default_waiting': 1}">Waiting Availability</a>
-                                        </div>
                                     </div>
                                 </div>
 
@@ -171,7 +185,7 @@
                                         <field name="color" widget="kanban_color_picker"/>
                                     </div>
                                     <div role="menuitem" class="col-4">
-                                        <a type="open">Settings</a>
+                                        <a type="open">Configuration</a>
                                     </div>
                                 </div>
                             </div>
@@ -197,11 +211,11 @@
                             <div class="row mt-3 pb-3">
                                 <div class="col-6">
                                     <div class="btn-group p-1" name="o_wo">
-                                        <button t-if="record.workorder_count.raw_value &gt; 0" class="btn btn-primary" name="action_work_order" type="object" context="{'search_default_ready': 1, 'search_default_progress': 1, 'desktop_list_view': 1, 'search_default_workcenter_id': id}">
+                                        <button t-if="record.workorder_ready_count.raw_value + record.workorder_progress_count.raw_value + record.workorder_blocked_count.raw_value == 0" class="btn btn-secondary" name="action_work_order" type="object" context="{'search_default_ready': 1, 'search_default_progress': 1, 'search_default_blocked': 1, 'desktop_list_view': 1, 'search_default_workcenter_id': id}">
                                             <span>WORK ORDERS</span>
                                         </button>
-                                        <button t-if="record.workorder_count.raw_value &lt;= 0" class="btn btn-warning" name="action_work_order_alternatives" type="object">
-                                            <span>PLAN ORDERS</span>
+                                        <button t-else="" class="btn btn-primary" name="action_work_order" type="object" context="{'search_default_ready': 1, 'search_default_progress': 1, 'search_default_blocked': 1, 'desktop_list_view': 1, 'search_default_workcenter_id': id}">
+                                            <span>WORK ORDERS</span>
                                         </button>
                                     </div>
                                 </div>
@@ -346,7 +360,7 @@
                                     <list editable="bottom">
                                         <field name="product_id" widget="stock.forced_placeholder" placeholder="All Products" decoration-it="not product_id"/>
                                         <field name="capacity"/>
-                                        <field name="product_uom_id" groups="uom.group_uom" widget="many2one_uom" readonly="product_id != False"/>
+                                        <field name="uom_id" groups="uom.group_uom" widget="many2one_uom" readonly="product_id != False"/>
                                         <field name="time_start" widget="float_time"/>
                                         <field name="time_stop" widget="float_time"/>
                                     </list>

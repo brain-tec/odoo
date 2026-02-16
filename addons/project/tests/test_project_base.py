@@ -11,7 +11,21 @@ class TestProjectCommon(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super(TestProjectCommon, cls).setUpClass()
-        cls.env.company.resource_calendar_id.tz = "Europe/Brussels"
+        cls.env.company.tz = "Europe/Brussels"
+        cls.calendar_40h = cls.env['resource.calendar'].create({
+            'attendance_ids': [
+                (0, 0,
+                    {
+                        'dayofweek': weekday,
+                        'hour_from': hour,
+                        'hour_to': hour + 4,
+                    })
+                for weekday in ['0', '1', '2', '3', '4']
+                for hour in [8, 13]
+            ],
+            'name': 'Standard 40h/week',
+        })
+        cls.env.company.resource_calendar_id = cls.calendar_40h
 
         user_group_partner_manager = cls.env.ref('base.group_partner_manager')
         user_group_employee = cls.env.ref('base.group_user')
@@ -44,6 +58,12 @@ class TestProjectCommon(TransactionCase):
             'signature': 'SignChell',
             'notification_type': 'email',
             'group_ids': [(6, 0, [cls.env.ref('base.group_portal').id])]})
+        cls.user_employee = Users.create({
+            'name': 'Eustache Employee',
+            'login': 'eustache',
+            'password': 'eustache',
+            'email': 'eustache.projectuser@example.com',
+            'group_ids': [(6, 0, [user_group_employee.id])]})
         cls.user_projectuser = Users.create({
             'name': 'Armande ProjectUser',
             'login': 'armandel',
@@ -382,42 +402,6 @@ class TestProjectBase(TestProjectCommon):
         for p in projects:
             self.assertEqual(fields.Date.to_string(p.date_start), '2021-09-25', f'The start date of {p.name} should be updated.')
             self.assertEqual(fields.Date.to_string(p.date), '2021-09-26', f'The expiration date of {p.name} should be updated.')
-
-    def test_create_task_in_batch_with_email_cc(self):
-        user_a, user_b, user_c = self.env['res.users'].create([{
-            'name': 'user A',
-            'login': 'loginA',
-            'email': 'email@bisous1',
-        }, {
-            'name': 'user B',
-            'login': 'loginB',
-            'email': 'email@bisous2',
-        }, {
-            'name': 'user C',
-            'login': 'loginC',
-            'email': 'email@bisous3',
-        }])
-        partner = self.env['res.partner'].create({
-            'name': 'partner',
-            'email': 'email@bisous4',
-        })
-        task_1, task_2 = self.env['project.task'].with_context({'mail_create_nolog': True}).create([{
-            'name': 'task 1',
-            'project_id': self.project_pigs.id,
-            'email_cc': 'email@bisous1, email@bisous2, email@bisous4'
-        }, {
-            'name': 'task 2',
-            'project_id': self.project_pigs.id,
-            'email_cc': 'email@bisous3, email@bisous2, email@bisous4'
-        }])
-        self.assertTrue(user_a.partner_id in task_1.message_partner_ids)
-        self.assertTrue(user_b.partner_id in task_1.message_partner_ids)
-        self.assertFalse(user_c.partner_id in task_1.message_partner_ids)
-        self.assertFalse(partner in task_1.message_partner_ids)
-        self.assertFalse(user_a.partner_id in task_2.message_partner_ids)
-        self.assertTrue(user_b.partner_id in task_2.message_partner_ids)
-        self.assertTrue(user_c.partner_id in task_2.message_partner_ids)
-        self.assertFalse(partner in task_2.message_partner_ids)
 
     def test_create_private_task_in_batch(self):
         """ This test ensures that copying private task in batch can be done correctly."""

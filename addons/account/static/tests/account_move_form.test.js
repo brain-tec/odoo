@@ -33,7 +33,7 @@ test("When I switch tabs, it saves", async () => {
     });
     await insertText("[name='name'] input", "somebody save me!");
     triggerHotkey("Enter");
-    await click('a[name="aml_tab"]');
+    await click('button[name="aml_tab"]');
     await expect.waitForSteps(["tab saved"]);
 });
 
@@ -76,7 +76,7 @@ class AccountMoveLine extends models.Model {
         relation:"product",
     });
     move_id = fields.Many2one({
-        string: "Account Move",
+        string: "Journal Entry",
         relation: "account.move",
     })
 }

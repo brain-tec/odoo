@@ -169,8 +169,8 @@ class PosConfig(models.Model):
     current_user_id = fields.Many2one('res.users', string='Current Session Responsible', compute='_compute_current_session_user')
     other_devices = fields.Boolean(string="Other Devices", help="Connect devices to your PoS without an IoT Box.")
     preparation_devices = fields.Boolean(string="Preparation devices", help="Connect preparation printers to print to the bar, kitchen,...")
-    rounding_method = fields.Many2one('account.cash.rounding', string="Cash rounding")
-    cash_rounding = fields.Boolean(string="Cash Rounding")
+    rounding_method = fields.Many2one('account.cash.rounding', string="Rounding Method")
+    cash_rounding = fields.Boolean(string="Total Rounding")
     only_round_cash_method = fields.Boolean(string="Only apply rounding on cash")
     has_active_session = fields.Boolean(compute='_compute_current_session')
     manual_discount = fields.Boolean(string="Line Discounts", default=True)
@@ -206,6 +206,12 @@ class PosConfig(models.Model):
     iface_printbill = fields.Boolean(string='Bill Printing', help="Allows to print the Bill before payment.")
 
     pos_snooze_ids = fields.One2many('pos.product.template.snooze', 'pos_config_id', string='Snoozed Products')
+
+    @api.onchange('receipt_printer_ids')
+    def _onchange_receipt_printer_ids(self):
+        """Clear default_receipt_printer_id if it's removed from receipt_printer_ids"""
+        if self.default_receipt_printer_id.id not in self.receipt_printer_ids.ids:
+            self.default_receipt_printer_id = False
 
     def _get_next_order_refs(self, device_identifier='0'):
         next_number = self.order_backend_seq_id._next()
@@ -365,7 +371,7 @@ class PosConfig(models.Model):
             },
         }
 
-        all_paid_orders = session.order_ids.filtered(lambda o: o.state == 'paid')
+        all_paid_orders = session.order_ids.filtered(lambda o: o.state in ['paid', 'done'])
         refund_orders = all_paid_orders.filtered(lambda o: o.is_refund)
         draft_orders = session.order_ids.filtered(lambda o: o.state == 'draft')
         non_refund_orders = all_paid_orders - refund_orders
@@ -444,7 +450,7 @@ class PosConfig(models.Model):
                         selection_value = val
                         break
                 raise ValidationError(_(
-                    "The cash rounding strategy of the point of sale %(pos)s must be: '%(value)s'",
+                    "The rounding strategy of the point of sale %(pos)s must be: '%(value)s'",
                     pos=config.name,
                     value=selection_value,
                 ))
@@ -666,6 +672,18 @@ class PosConfig(models.Model):
             for config, vals in zip(self, vals_list):
                 vals['name'] = _("%s (copy)", config.name)
         return vals_list
+
+    def link_category_form_pos(self, category):
+        self.ensure_one()
+        category = self.env['pos.category'].browse(category.id).exists()
+        if not category:
+            return
+
+        if self.iface_available_categ_ids and category not in self.iface_available_categ_ids.ids:
+            self.sudo().write({
+                'iface_available_categ_ids': [(4, category.id)],
+            })
+            return
 
     def _preprocess_x2many_vals_from_settings_view(self, vals):
         """ From the res.config.settings view, changes in the x2many fields always result to an array of link commands or a single set command.

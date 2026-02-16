@@ -29,6 +29,13 @@
                             <group>
                                 <field name="matching_score" invisible="is_pool_applicant" nolabel="1" widget="skill_match_gauge_field" options="{'max_value': 100}" />
                             </group>
+                            <group>
+                                <!-- empty group to align matching and missing skills below the job position matching widget -->
+                            </group>
+                            <group>
+                                <field name="matching_skill_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                <field name="missing_skill_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            </group>
                         </group>
                     </div>
                 </page>
@@ -54,6 +61,9 @@
             <xpath expr="//field[@name='email_from']" position="after">
                 <field name="applicant_skill_ids"/>
             </xpath>
+            <xpath expr="//filter[@name='talent_pool']" position="after">
+                <filter string="Skills" name="skill_ids" context="{'group_by': 'skill_ids'}"/>
+            </xpath>
         </field>
     </record>
 
@@ -62,7 +72,7 @@
         <field name="model">hr.applicant</field>
         <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_search"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='user_id']" position="after">
+            <xpath expr="//field[@name='recruiter_id']" position="after">
                 <field name="applicant_skill_ids"/>
             </xpath>
             <filter name="stage" position="after">
@@ -78,7 +88,14 @@
         <field name="mode">extension</field>
         <field name="arch" type="xml">
             <field name="kanban_state" position="after">
-                <field name="matching_score" string="Matching" widget="progressbar" options="{'overflow_class': 'bg-success'}" invisible="not matching_score"/>
+                <field name="matching_score" string="Matching" widget="progressbar" options="{'overflow_class': 'bg-success'}" invisible="not matching_score" column_invisible="context.get('default_talent_pool_ids', False)"/>
+            </field>
+            <xpath expr="//list" position="inside">
+                <field name="current_applicant_skill_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide" string="Skills"/>
+            </xpath>
+            <field name="priority" position="after">
+                <field name="matching_skill_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
+                <field name="missing_skill_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
             </field>
         </field>
     </record>

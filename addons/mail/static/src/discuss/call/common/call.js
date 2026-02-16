@@ -1,5 +1,6 @@
 import { BlurPerformanceWarning } from "@mail/discuss/call/common/blur_performance_warning";
 import { CallActionList } from "@mail/discuss/call/common/call_action_list";
+import { CallPresentationBar } from "@mail/discuss/call/common/call_presentation_bar";
 import { CallParticipantCard } from "@mail/discuss/call/common/call_participant_card";
 import { PttAdBanner } from "@mail/discuss/call/common/ptt_ad_banner";
 
@@ -34,6 +35,7 @@ export class Call extends Component {
         ActionList,
         BlurPerformanceWarning,
         CallActionList,
+        CallPresentationBar,
         CallParticipantCard,
         PttAdBanner,
     };
@@ -74,6 +76,7 @@ export class Call extends Component {
         });
         useHotkey("shift+d", () => this.rtc.toggleDeafen());
         useHotkey("shift+m", () => this.rtc.toggleMicrophone());
+        useHotkey("shift+h", () => this.rtc.raiseHand(!this.rtc.selfSession.raisingHand));
         useInDiscussCallView();
     }
 
@@ -84,6 +87,10 @@ export class Call extends Component {
         return this.callActions.actions.filter((action) =>
             action.tags.includes(ACTION_TAGS.CALL_LAYOUT)
         );
+    }
+
+    get isAnyonePresenting() {
+        return this.channel.rtc_session_ids.some((s) => s.is_screen_sharing_on);
     }
 
     get isFullSize() {
@@ -220,7 +227,7 @@ export class Call extends Component {
         this.grid.el.style.setProperty("--width", "0");
         this.grid.el.style.setProperty("--height", "0");
         const { width, height } = this.grid.el.getBoundingClientRect();
-        const aspectRatio = this.minimized ? 1 : 16 / 9;
+        const aspectRatio = this.minimized && this.channel.videoCount === 0 ? 1 : 16 / 9;
         const tileCount = this.grid.el.children.length;
         let optimal = {
             area: 0,

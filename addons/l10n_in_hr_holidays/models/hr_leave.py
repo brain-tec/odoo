@@ -35,13 +35,18 @@ class HrLeave(models.Model):
         self.ensure_one()
         default_hours = default_hours or self._l10n_in_get_default_leave_hours()
         hours = hours if hours is not None else (self.number_of_hours or 0.0)
-        if self.leave_type_request_unit != 'hour' or not default_hours:
+        if self.work_entry_type_request_unit == 'hour':
+            return bool(default_hours) and float_compare(hours, default_hours, precision_digits=2) >= 0
+        if (
+            self.request_date_from_period != self.request_date_to_period
+            and (self.request_date_from_period != "pm" or self.request_date_to_period != "am")
+        ) or not default_hours:
             return True
         return float_compare(hours, default_hours, precision_digits=2) >= 0
 
-    @api.constrains("holiday_status_id", "request_date_from", "request_date_to")
+    @api.constrains("work_entry_type_id", "request_date_from", "request_date_to")
     def _l10n_in_check_optional_holiday_request_dates(self):
-        leaves_to_check = self.filtered(lambda leave: leave.holiday_status_id.l10n_in_is_limited_to_optional_days)
+        leaves_to_check = self.filtered(lambda leave: leave.work_entry_type_id.l10n_in_is_limited_to_optional_days)
         if not leaves_to_check:
             return
         date_from = min(leaves_to_check.mapped("request_date_from"))
@@ -93,7 +98,7 @@ class HrLeave(models.Model):
             if self._l10n_in_is_working(current_date, public_holiday_dates, resource_calendar):
                 break
         linked_leave = leaves_by_date.get(current_date, self.env["hr.leave"])
-        if linked_leave and linked_leave.leave_type_request_unit == 'half_day':
+        if linked_leave and not linked_leave._l10n_in_is_full_day_request():
             return self.env["hr.leave"]
         return linked_leave
 
@@ -121,8 +126,7 @@ class HrLeave(models.Model):
         """
         indian_leaves = self.filtered(
             lambda leave: leave.company_id.country_id.code == "IN"
-            and leave.holiday_status_id.l10n_in_is_sandwich_leave
-            and leave.leave_type_request_unit != 'half_day'
+            and leave.work_entry_type_id.l10n_in_is_sandwich_leave
         )
         if not indian_leaves:
             return (indian_leaves, {}, {})
@@ -133,8 +137,7 @@ class HrLeave(models.Model):
                 ('id', 'not in', self.ids),
                 ('employee_id', 'in', self.employee_id.ids),
                 ('state', 'not in', ['cancel', 'refuse']),
-                ('leave_type_request_unit', '!=', 'half_day'),
-                ('holiday_status_id.l10n_in_is_sandwich_leave', '=', True),
+                ('work_entry_type_id.l10n_in_is_sandwich_leave', '=', True),
             ],
             groupby=['employee_id'],
             aggregates=['id:recordset'],
@@ -212,12 +215,11 @@ class HrLeave(models.Model):
             )
         return total_leaves
 
-    def _get_durations(self, check_leave_type=True, resource_calendar=None):
-        result = super()._get_durations(check_leave_type, resource_calendar)
+    def _get_durations(self, check_work_entry_type=True, resource_calendar=None, additional_domain=None):
+        result = super()._get_durations(check_work_entry_type=check_work_entry_type, resource_calendar=resource_calendar, additional_domain=additional_domain)
 
         indian_leaves, leaves_dates_by_employee, public_holidays_date_by_company = self._l10n_in_prepare_sandwich_context()
         if not indian_leaves:
-            self.l10n_in_contains_sandwich_leaves = False
             return result
 
         for leave in indian_leaves:
@@ -255,7 +257,7 @@ class HrLeave(models.Model):
 
         # Recompute neighbor durations with the baseline (non-sandwich) logic.
         base_map = super(HrLeave, neighbors)._get_durations(
-            check_leave_type=True,
+            check_work_entry_type=True,
             resource_calendar=None,
         )
 

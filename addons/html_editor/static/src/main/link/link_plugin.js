@@ -6,7 +6,14 @@ import { _t } from "@web/core/l10n/translation";
 import { LinkPopover } from "./link_popover";
 import { DIRECTIONS, leftPos, nodeSize, rightPos } from "@html_editor/utils/position";
 import { EMAIL_REGEX, URL_REGEX, cleanZWChars, deduceURLfromText } from "./utils";
-import { isElement, isStylable, isVisible, isZwnbsp } from "@html_editor/utils/dom_info";
+import {
+    isElement,
+    isStylable,
+    isProtected,
+    isProtecting,
+    isVisible,
+    isZwnbsp,
+} from "@html_editor/utils/dom_info";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { rpc } from "@web/core/network/rpc";
 import { memoize } from "@web/core/utils/functions";
@@ -297,6 +304,7 @@ export class LinkPlugin extends Plugin {
         clean_for_save_handlers: ({ root }) => this.removeEmptyLinks(root),
         normalize_handlers: this.normalizeLink.bind(this),
         after_insert_handlers: this.handleAfterInsert.bind(this),
+        on_will_remove_handlers: () => this.closeLinkTools(),
 
         /** Overrides */
         split_element_block_overrides: this.handleSplitBlock.bind(this),
@@ -439,6 +447,10 @@ export class LinkPlugin extends Plugin {
             description: _t("Create an URL."),
             icon: "fa-link",
             run: () => {
+                this.dispatchTo(
+                    "before_paste_handlers",
+                    this.dependencies.selection.getEditableSelection()
+                );
                 this.dependencies.dom.insert(this.createLink(url, text));
                 this.dependencies.history.addStep();
             },
@@ -500,15 +512,7 @@ export class LinkPlugin extends Plugin {
         const selectionTextContent = selection?.textContent();
         const isImage = !!findInSelection(selection, "img");
 
-        const applyCallback = (
-            url,
-            label,
-            classes,
-            customStyle,
-            linkTarget,
-            attachmentId,
-            relValue
-        ) => {
+        const applyCallback = (url, label, classes, linkTarget, attachmentId, relValue) => {
             if (this.linkInDocument) {
                 if (url) {
                     this.linkInDocument.href = url;
@@ -530,11 +534,6 @@ export class LinkPlugin extends Plugin {
                         this.linkInDocument.className = classes;
                     } else {
                         this.linkInDocument.removeAttribute("class");
-                    }
-                    if (customStyle) {
-                        this.linkInDocument.setAttribute("style", customStyle);
-                    } else {
-                        this.linkInDocument.removeAttribute("style");
                     }
                     if (
                         this.linkInDocument.childElementCount == 0 &&
@@ -590,9 +589,6 @@ export class LinkPlugin extends Plugin {
                     if (classes) {
                         link.className = classes;
                     }
-                    if (customStyle) {
-                        link.setAttribute("style", customStyle);
-                    }
                     if (linkTarget) {
                         link.setAttribute("target", linkTarget);
                     }
@@ -611,7 +607,7 @@ export class LinkPlugin extends Plugin {
             document: this.document,
             linkElement,
             isImage: isImage,
-            containerElement: selection.anchorNode.parentElement,
+            containerElement: closestElement(selection.anchorNode),
             ignoreDOMMutations: this.dependencies.history.ignoreDOMMutations,
             onApply: (...args) => {
                 delete this._isNavigatingByMouse;
@@ -658,7 +654,7 @@ export class LinkPlugin extends Plugin {
             type: this.type || "",
             LinkPopoverState: this.LinkPopoverState,
             showReplaceTitleBanner: this.newlyInsertedLinks.has(linkElement),
-            allowCustomStyle: this.config.allowCustomStyle,
+            includeStyling: !this.config.hideStylingInLinkPopover,
             allowTargetBlank: this.config.allowTargetBlank,
             allowStripDomain: this.config.allowStripDomain,
         };
@@ -697,15 +693,9 @@ export class LinkPlugin extends Plugin {
                     focusNode: link,
                     focusOffset: nodeSize(link),
                 });
-                const saveCustomStyle = link.getAttribute("style");
-                link.removeAttribute("style");
-                this.dependencies.color.removeAllColor();
-                if (
-                    saveCustomStyle &&
-                    this.config.allowCustomStyle &&
-                    link.className.includes("custom")
-                ) {
-                    link.setAttribute("style", saveCustomStyle);
+                if (!this.config.hideStylingInLinkPopover) {
+                    link.removeAttribute("style");
+                    this.dependencies.color.removeAllColor();
                 }
                 // Remove the current link (linkInDocument) if it has no content
                 if (cleanZWChars(link.textContent) === "" && !link.querySelector("img")) {
@@ -806,7 +796,11 @@ export class LinkPlugin extends Plugin {
                 }
             }
         }
-        if (!selectionData.currentSelectionIsInEditable) {
+        const anchorNode = this.document.getSelection()?.anchorNode;
+        const isSelectionInProtected =
+            this.document.getSelection()?.isCollapsed &&
+            (isProtecting(anchorNode) || isProtected(anchorNode));
+        if (!selectionData.currentSelectionIsInEditable || isSelectionInProtected) {
             const popoverEl = document.querySelector(".o-we-linkpopover");
             const anchorNode = document.getSelection()?.anchorNode;
             if (

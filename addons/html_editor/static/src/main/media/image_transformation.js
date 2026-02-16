@@ -26,6 +26,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 import { Component, onMounted, useExternalListener, useRef } from "@odoo/owl";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { usePositionHook } from "@html_editor/position_hook";
+import { closestElement } from "@html_editor/utils/dom_traversal";
 
 const rad = Math.PI / 180;
 const MIN_IMAGE_SIZE = 20;
@@ -88,14 +89,15 @@ export class ImageTransformation extends Component {
     }
 
     mouseMove(ev) {
-        if (!this.transfo.active) {
+        if (!this.transfo.active?.type) {
             return;
         }
         ev.preventDefault();
+        const { pageX, pageY } = this.normalizeCoordinates(ev);
         const settings = this.transfo.settings;
         const center = this.transfo.active.center;
-        const cdx = center.left - ev.pageX;
-        const cdy = center.top - ev.pageY;
+        const cdx = center.left - pageX;
+        const cdy = center.top - pageY;
         if (this.transfo.active.type == "rotator") {
             let ang;
             const dang = Math.atan(settings.width / settings.height) / rad;
@@ -105,11 +107,11 @@ export class ImageTransformation extends Component {
             } else {
                 ang = 0;
             }
-            if (ev.pageY >= center.top && ev.pageX >= center.left) {
+            if (pageY >= center.top && pageX >= center.left) {
                 ang += 180;
-            } else if (ev.pageY >= center.top && ev.pageX < center.left) {
+            } else if (pageY >= center.top && pageX < center.left) {
                 ang += 180;
-            } else if (ev.pageY < center.top && ev.pageX < center.left) {
+            } else if (pageY < center.top && pageX < center.left) {
                 ang += 360;
             }
 
@@ -125,28 +127,11 @@ export class ImageTransformation extends Component {
 
             // reset position : don't move center
             this.positionTransfoContainer();
-            const new_center = this.getOffset(this.transfoCenter.el);
-            const x = center.left - new_center.left;
-            const y = center.top - new_center.top;
-            const angle = ang * rad;
-            settings.translatex += x * Math.cos(angle) - y * Math.sin(-angle);
-            settings.translatey += -x * Math.sin(angle) + y * Math.cos(-angle);
-        } else if (this.transfo.active.type == "position") {
-            const angle = settings.angle * rad;
-            const x = ev.pageX - this.transfo.active.pageX;
-            const y = ev.pageY - this.transfo.active.pageY;
-            this.transfo.active.pageX = ev.pageX;
-            this.transfo.active.pageY = ev.pageY;
-            const dx = x * Math.cos(angle) - y * Math.sin(-angle);
-            const dy = -x * Math.sin(angle) + y * Math.cos(-angle);
-
-            settings.translatex += dx;
-            settings.translatey += dy;
         } else if (this.transfo.active.type.length === 2) {
             const width = this.transfo.active.width;
             const height = this.transfo.active.height;
-            const deltaX = ev.pageX - this.transfo.active.pageX;
-            const deltaY = ev.pageY - this.transfo.active.pageY;
+            const deltaX = pageX - this.transfo.active.pageX;
+            const deltaY = pageY - this.transfo.active.pageY;
 
             let newWidth = width;
             let newHeight = height;
@@ -187,14 +172,11 @@ export class ImageTransformation extends Component {
                 }
             }
             this.image.style.width = newWidth + "px";
-            this.image.style.height = newHeight + "px";
+            this.image.style.height = "auto";
             settings.width = newWidth;
-            settings.height = newHeight;
         }
 
         settings.angle = Math.round(settings.angle);
-        settings.translatex = Math.round(settings.translatex);
-        settings.translatey = Math.round(settings.translatey);
 
         // When rotating, the offset used for the rotation center must be stable.
         // getOffset normally includes CSS transforms, which would move the
@@ -208,9 +190,20 @@ export class ImageTransformation extends Component {
         this.positionTransfoContainer();
     }
 
+    convertPixelWidthToPercentage() {
+        const currentPixelWidth = this.image.offsetWidth;
+        const container = closestElement(
+            this.image.parentElement,
+            (node) => node.offsetWidth > currentPixelWidth
+        );
+        const widthPercent = (currentPixelWidth / container.offsetWidth) * 100;
+        this.image.style.width = Math.min(100, widthPercent).toFixed(2) + "%";
+    }
+
     mouseUp() {
         this.isCurrentlyTransforming = false;
         this.transfo.active = null;
+        this.convertPixelWidthToPercentage();
         this.props.onApply?.();
         this.props.onChange();
     }
@@ -220,7 +213,7 @@ export class ImageTransformation extends Component {
             return;
         }
         this.isCurrentlyTransforming = true;
-        let type = "position";
+        let type;
         const target = ev.target.closest("div");
 
         if (target.classList.contains("transfo-rotator")) {
@@ -243,10 +236,11 @@ export class ImageTransformation extends Component {
             type = "mr";
         }
 
+        const { pageX, pageY } = this.normalizeCoordinates(ev);
         this.transfo.active = {
             type: type,
-            pageX: ev.pageX,
-            pageY: ev.pageY,
+            pageX: pageX,
+            pageY: pageY,
             width: parseFloat(getComputedStyle(this.image).width),
             height: parseFloat(getComputedStyle(this.image).height),
             center: this.getOffset(this.transfoCenter.el),
@@ -270,25 +264,6 @@ export class ImageTransformation extends Component {
         this.transfo.settings.width = parseFloat(getComputedStyle(this.image).width);
         this.transfo.settings.height = parseFloat(getComputedStyle(this.image).height);
 
-        const translatex = transform.match(/translateX\(([0-9.-]+)(%|px)\)/);
-        const translatey = transform.match(/translateY\(([0-9.-]+)(%|px)\)/);
-        this.transfo.settings.translate = "%";
-
-        if (translatex && translatex[2] === "%") {
-            this.transfo.settings.translatexp = parseFloat(translatex[1]);
-            this.transfo.settings.translatex =
-                (this.transfo.settings.translatexp / 100) * this.transfo.settings.width;
-        } else {
-            this.transfo.settings.translatex = translatex ? parseFloat(translatex[1]) : 0;
-        }
-        if (translatey && translatey[2] === "%") {
-            this.transfo.settings.translateyp = parseFloat(translatey[1]);
-            this.transfo.settings.translatey =
-                (this.transfo.settings.translateyp / 100) * this.transfo.settings.height;
-        } else {
-            this.transfo.settings.translatey = translatey ? parseFloat(translatey[1]) : 0;
-        }
-
         this.transfo.settings.css = window.getComputedStyle(this.image, null);
         this.transfo.settings.rotationStep = 5;
     }
@@ -297,8 +272,6 @@ export class ImageTransformation extends Component {
         const settings = this.transfo.settings;
         const width = parseFloat(getComputedStyle(this.image).width);
         const height = parseFloat(getComputedStyle(this.image).height);
-        settings.translatexp = Math.round((settings.translatex / width) * 1000) / 10;
-        settings.translateyp = Math.round((settings.translatey / height) * 1000) / 10;
 
         this.setImageTransformation(this.image);
 
@@ -313,7 +286,6 @@ export class ImageTransformation extends Component {
         this.setImageTransformation(controls);
         controls.style.width = width + "px";
         controls.style.height = height + "px";
-        controls.style.cursor = "move";
     }
 
     setImageTransformation(element) {
@@ -321,23 +293,21 @@ export class ImageTransformation extends Component {
         if (this.transfo.settings.angle !== 0) {
             transform += " rotate(" + this.transfo.settings.angle + "deg) ";
         }
-        if (this.transfo.settings.translatex) {
-            transform +=
-                " translateX(" +
-                (this.transfo.settings.translate === "%"
-                    ? this.transfo.settings.translatexp + "%"
-                    : this.transfo.settings.translatex + "px") +
-                ") ";
-        }
-        if (this.transfo.settings.translatey) {
-            transform +=
-                " translateY(" +
-                (this.transfo.settings.translate === "%"
-                    ? this.transfo.settings.translateyp + "%"
-                    : this.transfo.settings.translatey + "px") +
-                ") ";
-        }
         element.style.transform = transform;
+    }
+
+    normalizeCoordinates(ev) {
+        const evView = ev.view;
+        const iframeWindow = this.document.defaultView;
+        const frameElement = iframeWindow.frameElement;
+        if (evView === iframeWindow && frameElement) {
+            const frameRect = frameElement.getBoundingClientRect();
+            return {
+                pageX: ev.clientX + frameRect.left + frameElement.clientLeft + window.pageXOffset,
+                pageY: ev.clientY + frameRect.top + frameElement.clientTop + window.pageYOffset,
+            };
+        }
+        return { pageX: ev.pageX, pageY: ev.pageY };
     }
 
     getOffset(target) {
@@ -349,8 +319,8 @@ export class ImageTransformation extends Component {
             const offset = { top: 0, left: 0 };
             if (frameElement) {
                 const frameRect = frameElement.getBoundingClientRect();
-                offset.left += frameRect.left;
-                offset.top += frameRect.top;
+                offset.left += frameRect.left + frameElement.clientLeft;
+                offset.top += frameRect.top + frameElement.clientTop;
             }
             return {
                 top: rect.top + window.pageYOffset + offset.top,

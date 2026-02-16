@@ -77,7 +77,7 @@ patch(PosStore.prototype, {
             for (const order of orders) {
                 // Avoid to block others devices on register screen when no table and name is set.
                 if (!order.table_id && !order.floating_order_name) {
-                    order.floating_order_name = order.pos_reference;
+                    order.floating_order_name = order.floatingOrderName || order.pos_reference;
                 }
             }
         }
@@ -149,6 +149,11 @@ patch(PosStore.prototype, {
     async mergeOrders(sourceOrder, destOrder) {
         let whileGuard = 0;
         const mergedCourses = this.mergeCourses(sourceOrder, destOrder);
+
+        // Sum the guest counts from both orders
+        const totalGuests = sourceOrder.getCustomerCount() + destOrder.getCustomerCount();
+        destOrder.setCustomerCount(totalGuests);
+
         while (sourceOrder.lines.length) {
             const orphanLine = sourceOrder.lines[0];
             const destinationLine = destOrder?.lines?.find((l) => l.canBeMergedWith(orphanLine));
@@ -358,15 +363,21 @@ patch(PosStore.prototype, {
 
         return false;
     },
-    async onDeleteOrder(order) {
-        const orderIsDeleted = await super.onDeleteOrder(...arguments);
-        if (
-            orderIsDeleted &&
-            this.config.module_pos_restaurant &&
-            this.router.state.current !== "TicketScreen"
-        ) {
+    removeOrder(order) {
+        const orderRemoved = super.removeOrder(...arguments);
+        if (this.removeOrderShouldRedirect(order, orderRemoved)) {
             this.navigate("FloorScreen");
         }
+        return orderRemoved;
+    },
+    removeOrderShouldRedirect(order, hasBeenRemoved) {
+        const wasCurrentOrder = this.selectedOrderUuid === order?.uuid;
+        return (
+            hasBeenRemoved &&
+            wasCurrentOrder &&
+            this.config.module_pos_restaurant &&
+            this.router.state.current !== "TicketScreen"
+        );
     },
     async closingSessionNotification(data) {
         await super.closingSessionNotification(...arguments);
@@ -401,24 +412,26 @@ patch(PosStore.prototype, {
         const orderChanges = this.getOrderChanges(order);
         const linesChanges = orderChanges.orderlines;
 
-        const categories = Object.values(linesChanges).reduce((acc, curr) => {
-            const categories =
-                this.models["product.product"].get(curr.product_id)?.product_tmpl_id
-                    ?.pos_categ_ids || [];
+        const categories = Object.values(linesChanges)
+            .filter((l) => !l.isCombo)
+            .reduce((acc, curr) => {
+                const categories =
+                    this.models["product.product"].get(curr.product_id)?.product_tmpl_id
+                        ?.pos_categ_ids || [];
 
-            for (const category of categories.slice(0, 1)) {
-                if (!acc[category.id]) {
-                    acc[category.id] = {
-                        count: curr.quantity,
-                        name: category.name,
-                    };
-                } else {
-                    acc[category.id].count += curr.quantity;
+                for (const category of categories.slice(0, 1)) {
+                    if (!acc[category.id]) {
+                        acc[category.id] = {
+                            count: curr.quantity,
+                            name: category.name,
+                        };
+                    } else {
+                        acc[category.id].count += curr.quantity;
+                    }
                 }
-            }
 
-            return acc;
-        }, {});
+                return acc;
+            }, {});
         const noteCount = ["general_customer_note", "internal_note"].reduce(
             (count, note) => count + (note in orderChanges ? 1 : 0),
             0
@@ -447,18 +460,6 @@ patch(PosStore.prototype, {
     },
     get selectedTable() {
         return this.getOrder()?.table_id;
-    },
-    navigate(routeName, routeParams = {}) {
-        const order = this.getOrder();
-        if (
-            this.config.module_pos_restaurant &&
-            this.router.state.current === "ProductScreen" &&
-            order &&
-            !order.isBooked
-        ) {
-            this.removeOrder(order);
-        }
-        return super.navigate(routeName, routeParams);
     },
     showDefault() {
         const page = this.defaultPage;
@@ -534,6 +535,11 @@ patch(PosStore.prototype, {
         await this.ensureGuestCustomerCount(order);
         await this.sendOrderInPreparationUpdateLastChange(order);
         this.addPendingOrder([order.id]);
+        this.showDefault();
+    },
+    async reprintOrder() {
+        const order = this.getOrder();
+        await this.sendOrderInPreparation(order, { explicitReprint: true });
         this.showDefault();
     },
     async _askForPreparation() {

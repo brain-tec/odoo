@@ -264,15 +264,6 @@ export function getBgImageURLFromEl(el) {
     return getBgImageURLFromURL(string);
 }
 /**
- * Generates a string ID.
- *
- * @private
- * @returns {string}
- */
-export function generateHTMLId() {
-    return `o${Math.random().toString(36).substring(2, 15)}`;
-}
-/**
  * Returns the class of the element that matches the specified prefix.
  *
  * @private
@@ -409,31 +400,25 @@ export function applyNeededCss(
         el.style.setProperty(cssProp, cssValue, allowImportant ? "important" : "");
         return true;
     }
-    el.style.removeProperty(cssProp);
-    if (
+
+    const isChangeNeeded = () =>
         !areCssValuesEqual(
             computedStyle.getPropertyValue(cssProp),
             cssValue,
             cssProp,
             computedStyle
-        )
-    ) {
-        el.style.setProperty(cssProp, cssValue);
-        // If change had no effect then make it important.
-        if (
-            allowImportant &&
-            !areCssValuesEqual(
-                computedStyle.getPropertyValue(cssProp),
-                cssValue,
-                cssProp,
-                computedStyle
-            )
-        ) {
-            el.style.setProperty(cssProp, cssValue, "important");
-        }
-        return true;
+        );
+    el.style.removeProperty(cssProp);
+    if (!isChangeNeeded()) {
+        return false;
     }
-    return false;
+
+    el.style.setProperty(cssProp, cssValue);
+    // If change had no effect then make it important.
+    if (allowImportant && isChangeNeeded()) {
+        el.style.setProperty(cssProp, cssValue, "important");
+    }
+    return true;
 }
 
 const builderStylesheet = new CSSStyleSheet();
@@ -456,7 +441,7 @@ export function setBuilderCSSVariables(htmlStyle) {
 export function parseBoxShadow(value) {
     const regex =
         /(?<color>(rgb(a)?\([^)]*\))|(var\([^)]+\)))\s+(?<offsetX>-?\d+\.?\d*px)\s+(?<offsetY>-?\d+\.?\d*px)\s+(?<blur>-?\d+\.?\d*px)\s+(?<spread>-?\d+\.?\d*px)(?:\s+(?<mode>\w+))?/;
-    return value.match(regex).groups;
+    return value.match(regex)?.groups ?? {};
 }
 
 export function getAllUsedColors(el) {

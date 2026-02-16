@@ -255,8 +255,9 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self._reinit_modules: set[str] = set()  # modules to reinitialize
 
         # modules fully loaded (maintained during init phase by `loading` module)
-        self._init_modules: set[str] = set()       # modules have been initialized
-        self.updated_modules: list[str] = []       # installed/updated modules
+        self._init_modules: set[str] = set()         # modules have been initialized
+        self.updated_modules: list[str] = []         # installed/updated modules
+        self.uninstalling_modules: set[str] = set()  # modules being uninstalled
         self.loaded_xmlids: set[str] = set()
 
         self.db_name = db_name
@@ -786,8 +787,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
             SELECT c.relname, a.attname
             FROM pg_attribute a
             JOIN pg_class c ON a.attrelid = c.oid
-            JOIN pg_namespace n ON c.relnamespace = n.oid
-            WHERE n.nspname = 'public'
+            WHERE c.relnamespace = current_schema::regnamespace
             AND a.attnotnull = true
             AND a.attnum > 0
             AND a.attname != 'id';
@@ -824,7 +824,8 @@ class Registry(Mapping[str, type["BaseModel"]]):
             return
 
         # retrieve existing indexes with their corresponding table
-        cr.execute("SELECT indexname, tablename FROM pg_indexes WHERE indexname IN %s",
+        cr.execute("SELECT indexname, tablename FROM pg_indexes WHERE indexname IN %s"
+                   "   AND schemaname = current_schema",
                    [tuple(row[0] for row in expected)])
         existing = dict(cr.fetchall())
 
@@ -904,6 +905,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
             JOIN pg_attribute AS a1 ON a1.attrelid = c1.oid AND fk.conkey[1] = a1.attnum
             JOIN pg_attribute AS a2 ON a2.attrelid = c2.oid AND fk.confkey[1] = a2.attnum
             WHERE fk.contype = 'f' AND c1.relname IN %s
+            AND c1.relnamespace = current_schema::regnamespace
         """
         cr.execute(query, [tuple({table for table, column in self._foreign_keys})])
         existing = {
@@ -988,10 +990,9 @@ class Registry(Mapping[str, type["BaseModel"]]):
             query = """
                 SELECT c.relname
                   FROM pg_class c
-                  JOIN pg_namespace n ON (n.oid = c.relnamespace)
                  WHERE c.relname IN %s
                    AND c.relkind = 'r'
-                   AND n.nspname = 'public'
+                   AND c.relnamespace = current_schema::regnamespace
             """
             tables = tuple(m._table for m in self.models.values())
             cr.execute(query, [tables])
@@ -1025,7 +1026,8 @@ class Registry(Mapping[str, type["BaseModel"]]):
             # The `orm_signaling_...` sequences indicates when caches must
             # be invalidated (i.e. cleared).
             signaling_tables = tuple(f'orm_signaling_{cache_name}' for cache_name in ['registry', *_CACHES_BY_KEY])
-            cr.execute("SELECT table_name FROM information_schema.tables WHERE table_name IN %s", [signaling_tables])
+            cr.execute("SELECT table_name FROM information_schema.tables"
+                       " WHERE table_name IN %s AND table_schema = current_schema", [signaling_tables])
 
             existing_sig_tables = tuple(s[0] for s in cr.fetchall())  # could be a set but not efficient with such a little list
             # signaling was previously using sequence but this doesn't work with replication
@@ -1049,11 +1051,13 @@ class Registry(Mapping[str, type["BaseModel"]]):
     def get_sequences(self, cr: BaseCursor) -> tuple[int, dict[str, int]]:
         signaling_tables = tuple(f'orm_signaling_{cache_name}' for cache_name in ['registry', *_CACHES_BY_KEY])
         signaling_selects = SQL(', ').join([SQL('( SELECT max(id) FROM %s)', SQL.identifier(signaling_table)) for signaling_table in signaling_tables])
-        cr.execute(SQL("SELECT %s", signaling_selects))
+        cr.execute(SQL("SELECT (now() AT TIME ZONE 'UTC'), %s", signaling_selects))
         row = cr.fetchone()
         assert row is not None, "No result when reading signaling sequences"
-        registry_sequence, *cache_sequences_values = row
+        now, registry_sequence, *cache_sequences_values = row
         cache_sequences = dict(zip(_CACHES_BY_KEY, cache_sequences_values))
+        if cr._now is None:
+            cr._now = now
         return registry_sequence, cache_sequences
 
     def check_signaling(self, cr: BaseCursor | None = None) -> Registry:

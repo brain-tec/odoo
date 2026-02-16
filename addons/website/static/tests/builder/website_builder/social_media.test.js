@@ -4,7 +4,12 @@ import {
     setupWebsiteBuilderWithSnippet,
 } from "@website/../tests/builder/website_helpers";
 import { contains, onRpc } from "@web/../tests/web_test_helpers";
-import { getDragHelper, waitForEndOfOperation } from "@html_builder/../tests/helpers";
+import {
+    getDragHelper,
+    unfoldAllOptionsGroups,
+    waitForEndOfOperation,
+} from "@html_builder/../tests/helpers";
+import { ensureDistinctHistoryStep } from "@html_editor/../tests/_helpers/user_actions";
 import { click, queryOne, animationFrame, edit, waitFor } from "@odoo/hoot-dom";
 
 defineWebsiteModels();
@@ -49,7 +54,8 @@ async function testSocialSnippetOptions(snippetName, containerTitle, iconName) {
 
     expect(snippetSelector).toHaveCount(1);
     await click(`${snippetSelector} i:first-child`);
-    await animationFrame();
+    await core.waitSidebarUpdated();
+    await unfoldAllOptionsGroups();
     await click(
         `[data-container-title='${containerTitle}'] [data-label='Color'] input[type='checkbox']`
     );
@@ -215,6 +221,7 @@ test("reorder social medias", async () => {
 
     await contains("tr:nth-child(3) input[type=checkbox]").click();
     await contains("tr:nth-child(3) button.o_drag_handle").dragAndDrop("tr:nth-child(1)");
+    await ensureDistinctHistoryStep();
     await contains("tr:nth-child(3) button.o_drag_handle").dragAndDrop("tr:nth-child(1)");
 
     expect("tr:nth-child(1) input[type=text]").toHaveValue("https://www.example.com/first");

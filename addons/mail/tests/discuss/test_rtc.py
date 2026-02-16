@@ -29,6 +29,7 @@ class TestChannelRTC(MailCommon, HttpCase):
             "id": channel_member.partner_id.id,
             "im_status": channel_member.partner_id.im_status,
             "im_status_access_token": channel_member.partner_id._get_im_status_access_token(),
+            "main_user_id": self.user_employee.id,
             "mention_token": channel_member.partner_id._get_mention_token(),
             "name": channel_member.partner_id.name,
             "write_date": fields.Datetime.to_string(channel_member.partner_id.write_date),
@@ -94,6 +95,9 @@ class TestChannelRTC(MailCommon, HttpCase):
                             },
                         ],
                         "res.partner": self._filter_partners_fields(partner_data),
+                        "res.users": self._filter_users_fields(
+                            {"id": self.user_employee.id, "employee_ids": []},
+                        ),
                     },
                 },
                 {
@@ -129,6 +133,9 @@ class TestChannelRTC(MailCommon, HttpCase):
                     {"channel_member_id": channel_member.id, "id": last_rtc_session_id + 1},
                 ],
                 "res.partner": self._filter_partners_fields(partner_data),
+                "res.users": self._filter_users_fields(
+                    {"id": self.user_employee.id, "employee_ids": []},
+                ),
                 "Rtc": {
                     "iceServers": False,
                     "localSession": last_rtc_session_id + 1,
@@ -149,8 +156,6 @@ class TestChannelRTC(MailCommon, HttpCase):
         channel_member._rtc_leave_call()
         with self.assertBus(
             [
-                # update of last interest (message_post) (not asserted below)
-                (self.cr.dbname, "discuss.channel", channel.id),
                 # update new message separator (message_post) (not asserted below)
                 (self.cr.dbname, "res.partner", self.user_employee.partner_id.id),
                 # message_post "started a live conference" (not asserted below)
@@ -197,6 +202,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 "id": channel_member.partner_id.id,
                                 "im_status": channel_member.partner_id.im_status,
                                 "im_status_access_token": channel_member.partner_id._get_im_status_access_token(),
+                                "main_user_id": self.user_employee.id,
                                 "mention_token": channel_member.partner_id._get_mention_token(),
                                 "name": channel_member.partner_id.name,
                                 "write_date": fields.Datetime.to_string(
@@ -204,6 +210,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 ),
                             },
                         ),
+                        "res.users": [{"id": self.user_employee.id}],
                     },
                 },
                 {
@@ -228,6 +235,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 "id": channel_member_test_user.partner_id.id,
                                 "im_status": channel_member_test_user.partner_id.im_status,
                                 "im_status_access_token": channel_member_test_user.partner_id._get_im_status_access_token(),
+                                "main_user_id": test_user.id,
                                 "mention_token": channel_member_test_user.partner_id._get_mention_token(),
                                 "name": channel_member_test_user.partner_id.name,
                                 "write_date": fields.Datetime.to_string(
@@ -235,6 +243,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 ),
                             },
                         ),
+                        "res.users": [{"id": test_user.id}],
                     },
                 },
             ],
@@ -260,8 +269,6 @@ class TestChannelRTC(MailCommon, HttpCase):
 
         with self.assertBus(
             [
-                # update of last interest (not asserted below)
-                (self.cr.dbname, "discuss.channel", channel.id),
                 # update new message separator (not asserted below)
                 (self.cr.dbname, "res.partner", self.user_employee.partner_id.id),
                 # message_post "started a live conference" (not asserted below)
@@ -310,6 +317,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 "id": channel_member.partner_id.id,
                                 "im_status": channel_member.partner_id.im_status,
                                 "im_status_access_token": channel_member.partner_id._get_im_status_access_token(),
+                                "main_user_id": self.user_employee.id,
                                 "mention_token": channel_member.partner_id._get_mention_token(),
                                 "name": channel_member.partner_id.name,
                                 "write_date": fields.Datetime.to_string(
@@ -317,6 +325,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 ),
                             },
                         ),
+                        "res.users": [{"id": self.user_employee.id}],
                     },
                 },
                 {
@@ -353,6 +362,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 "id": channel_member.partner_id.id,
                                 "im_status": channel_member.partner_id.im_status,
                                 "im_status_access_token": channel_member.partner_id._get_im_status_access_token(),
+                                "main_user_id": self.user_employee.id,
                                 "mention_token": channel_member.partner_id._get_mention_token(),
                                 "name": channel_member.partner_id.name,
                                 "write_date": fields.Datetime.to_string(
@@ -360,6 +370,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 ),
                             },
                         ),
+                        "res.users": [{"id": self.user_employee.id}],
                     },
                 },
                 {
@@ -406,6 +417,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 "id": channel_member_test_user.partner_id.id,
                                 "im_status": channel_member_test_user.partner_id.im_status,
                                 "im_status_access_token": channel_member_test_user.partner_id._get_im_status_access_token(),
+                                "main_user_id": test_user.id,
                                 "mention_token": channel_member_test_user.partner_id._get_mention_token(),
                                 "name": channel_member_test_user.partner_id.name,
                                 "write_date": fields.Datetime.to_string(
@@ -413,6 +425,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 ),
                             },
                         ),
+                        "res.users": [{"id": test_user.id}],
                     },
                 },
             ],
@@ -478,6 +491,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 "id": channel_member_test_user.partner_id.id,
                                 "im_status": channel_member_test_user.partner_id.im_status,
                                 "im_status_access_token": channel_member_test_user.partner_id._get_im_status_access_token(),
+                                "main_user_id": test_user.id,
                                 "mention_token": channel_member_test_user.partner_id._get_mention_token(),
                                 "name": channel_member_test_user.partner_id.name,
                                 "write_date": fields.Datetime.to_string(
@@ -485,6 +499,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 ),
                             },
                         ),
+                        "res.users": [{"id": test_user.id}],
                     },
                 },
                 {
@@ -515,6 +530,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 "id": channel_member_test_user.partner_id.id,
                                 "im_status": channel_member_test_user.partner_id.im_status,
                                 "im_status_access_token": channel_member_test_user.partner_id._get_im_status_access_token(),
+                                "main_user_id": test_user.id,
                                 "mention_token": channel_member_test_user.partner_id._get_mention_token(),
                                 "name": channel_member_test_user.partner_id.name,
                                 "write_date": fields.Datetime.to_string(
@@ -522,6 +538,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 ),
                             },
                         ),
+                        "res.users": [{"id": test_user.id}],
                     },
                 },
             ],
@@ -677,6 +694,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 "id": channel_member_test_user.partner_id.id,
                                 "im_status": channel_member_test_user.partner_id.im_status,
                                 "im_status_access_token": channel_member_test_user.partner_id._get_im_status_access_token(),
+                                "main_user_id": test_user.id,
                                 "mention_token": channel_member_test_user.partner_id._get_mention_token(),
                                 "name": channel_member_test_user.partner_id.name,
                                 "write_date": fields.Datetime.to_string(
@@ -684,6 +702,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 ),
                             },
                         ),
+                        "res.users": [{"id": test_user.id}],
                     },
                 },
             ],
@@ -848,6 +867,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 "id": channel_member_test_user.partner_id.id,
                                 "im_status": channel_member_test_user.partner_id.im_status,
                                 "im_status_access_token": channel_member_test_user.partner_id._get_im_status_access_token(),
+                                "main_user_id": test_user.id,
                                 "mention_token": channel_member_test_user.partner_id._get_mention_token(),
                                 "name": channel_member_test_user.partner_id.name,
                                 "write_date": fields.Datetime.to_string(
@@ -855,6 +875,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 ),
                             },
                         ),
+                        "res.users": [{"id": test_user.id}],
                     },
                 },
                 {
@@ -905,8 +926,6 @@ class TestChannelRTC(MailCommon, HttpCase):
                 (self.cr.dbname, "discuss.channel", channel.id),
                 # discuss.channel/joined
                 (self.cr.dbname, "res.partner", test_user.partner_id.id),
-                # mail.record/insert - discuss.channel (last_interest_dt)
-                (self.cr.dbname, "discuss.channel", channel.id),
                 # mail.record/insert - discuss.channel.member (message_unread_counter, new_message_separator, …)
                 (self.cr.dbname, "res.partner", self.user_employee.partner_id.id),
                 # discuss.channel/new_message
@@ -959,12 +978,16 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 "id": channel_member.partner_id.id,
                                 "im_status": channel_member.partner_id.im_status,
                                 "im_status_access_token": channel_member.partner_id._get_im_status_access_token(),
+                                "main_user_id": self.user_employee.id,
                                 "mention_token": channel_member.partner_id._get_mention_token(),
                                 "name": channel_member.partner_id.name,
                                 "write_date": fields.Datetime.to_string(
                                     channel_member.partner_id.write_date
                                 ),
                             },
+                        ),
+                        "res.users": self._filter_users_fields(
+                            {"id": self.user_employee.id, "employee_ids": []},
                         ),
                     },
                 },
@@ -1000,6 +1023,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 "id": channel_member.partner_id.id,
                                 "im_status": channel_member.partner_id.im_status,
                                 "im_status_access_token": channel_member.partner_id._get_im_status_access_token(),
+                                "main_user_id": self.user_employee.id,
                                 "mention_token": channel_member.partner_id._get_mention_token(),
                                 "name": channel_member.partner_id.name,
                                 "write_date": fields.Datetime.to_string(
@@ -1007,6 +1031,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 ),
                             },
                         ),
+                        "res.users": [{"id": self.user_employee.id}],
                     },
                 },
                 {
@@ -1053,6 +1078,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 "id": channel_member_test_user.partner_id.id,
                                 "im_status": channel_member_test_user.partner_id.im_status,
                                 "im_status_access_token": channel_member_test_user.partner_id._get_im_status_access_token(),
+                                "main_user_id": test_user.id,
                                 "mention_token": channel_member_test_user.partner_id._get_mention_token(),
                                 "name": channel_member_test_user.partner_id.name,
                                 "write_date": fields.Datetime.to_string(
@@ -1060,6 +1086,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                                 ),
                             },
                         ),
+                        "res.users": [{"id": test_user.id}],
                     },
                 },
             ],

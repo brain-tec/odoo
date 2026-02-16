@@ -57,8 +57,21 @@ export function selectFloatingOrder(index) {
             run: "click",
         },
         {
-            trigger: `.list-container-items .btn:eq(${index})`,
+            isActive: ["mobile"],
+            trigger: `.modal-dialog .list-container-items .btn:eq(${index})`,
             run: "click",
+        },
+        {
+            isActive: ["desktop"],
+            trigger: `.list-container-items .floating-order-container`,
+            run: () => {
+                const btns = document.querySelectorAll(
+                    ".list-container-items .floating-order-container .btn"
+                );
+                if (btns[index]) {
+                    btns[index].click();
+                }
+            },
         },
     ];
 }
@@ -71,10 +84,26 @@ export function checkFloatingOrderCount(expectedCount) {
             run: "click",
         },
         {
+            isActive: ["mobile"],
             content: `check there are ${expectedCount} floating order`,
-            trigger: ".list-container-items .btn",
+            trigger: ".modal-dialog .list-container-items .btn",
             run: () => {
-                const btns = document.querySelectorAll(".list-container-items .btn");
+                const btns = document.querySelectorAll(".modal-dialog .list-container-items .btn");
+                if (btns.length !== expectedCount) {
+                    throw new Error(
+                        `Expected ${expectedCount} floating order buttons, found ${btns.length}`
+                    );
+                }
+            },
+        },
+        {
+            isActive: ["desktop"],
+            content: `check there are ${expectedCount} floating order`,
+            trigger: ".list-container-items",
+            run: () => {
+                const btns = document.querySelectorAll(
+                    ".list-container-items .floating-order-container .btn"
+                );
                 if (btns.length !== expectedCount) {
                     throw new Error(
                         `Expected ${expectedCount} floating order buttons, found ${btns.length}`
@@ -211,27 +240,30 @@ export function clickPartnerButton() {
         },
     ];
 }
-export function clickCustomer(name) {
+export function clickCustomer(name, pressEnter = false) {
     return [
-        ...PartnerList.searchCustomerValue(name),
+        ...PartnerList.searchCustomerValue(name, pressEnter),
         PartnerList.clickPartner(name),
         { ...back(), isActive: ["mobile"] },
     ];
 }
-export function selectPreset(selectedPreset, presetToSelect) {
-    return [
+export function selectPreset(selectedPreset, presetToSelect, presetPopup = true) {
+    const steps = [
         clickReview(),
         {
             content: "click preset button",
             trigger: `.product-screen button:contains("${selectedPreset}")`,
             run: "click",
         },
-        {
-            content: `click preset '${presetToSelect}' from preset modal`,
-            trigger: `.modal-body button:contains(${presetToSelect})`,
-            run: "click",
-        },
     ];
+    if (presetPopup) {
+        steps.push({
+            content: `click preset '${presetToSelect}' from preset modal`,
+            trigger: `.modal-body button:contains("${presetToSelect}")`,
+            run: "click",
+        });
+    }
+    return steps;
 }
 export function customerIsSelected(name) {
     return [

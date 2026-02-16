@@ -1,5 +1,10 @@
 import { setSelection } from "@html_editor/../tests/_helpers/selection";
-import { deleteBackward, insertText, undo } from "@html_editor/../tests/_helpers/user_actions";
+import {
+    deleteBackward,
+    ensureDistinctHistoryStep,
+    insertText,
+    undo,
+} from "@html_editor/../tests/_helpers/user_actions";
 import { expect, test } from "@odoo/hoot";
 import {
     animationFrame,
@@ -19,6 +24,7 @@ import {
     insertStructureSnippet,
     setupWebsiteBuilderWithSnippet,
 } from "@website/../tests/builder/website_helpers";
+import { unfoldAllOptionsGroups } from "@html_builder/../tests/helpers";
 
 defineWebsiteModels();
 
@@ -36,7 +42,10 @@ test("edit title in content with table of content", async () => {
 
     const h2 = queryAll(":iframe .s_table_of_content_main h2:contains('Intuitive system')")[0];
     setSelection({ anchorNode: h2, anchorOffset: 0 });
-    await insertText(editor, "New Title:");
+    await insertText(editor, "New Title");
+    await ensureDistinctHistoryStep();
+    await insertText(editor, ":");
+    await ensureDistinctHistoryStep();
     expect(
         queryAllTexts(":iframe .s_table_of_content_navbar a.table_of_content_link_depth_0")
     ).toEqual(["New Title:Intuitive system", "Design features"]);
@@ -67,6 +76,7 @@ test("click on addItem option button", async () => {
     ]);
 
     await contains(":iframe .s_table_of_content_main h2").click();
+    await unfoldAllOptionsGroups();
     await contains("[data-action-id='addItem']").click();
     expect(
         queryAllTexts(":iframe .s_table_of_content_vertical_navbar a.table_of_content_link_depth_0")

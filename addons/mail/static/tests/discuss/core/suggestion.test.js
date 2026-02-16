@@ -202,6 +202,9 @@ test("Sort partner suggestions by recent chats", async () => {
     await press("Enter");
     await contains(".o-mail-Message-content:text('This is a test')");
     await click(".o-mail-DiscussSidebarChannel-itemName:text('General')");
+    await contains(
+        ".o-mail-DiscussSidebarCategory-chat + .o-mail-DiscussSidebarCategory-channels .o-mail-DiscussSidebarChannel:eq(0):has(:text('User 2'))"
+    );
     await insertText(".o-mail-Composer-input[placeholder='Message #General…']", "@");
     await insertText(".o-mail-Composer-input", "User");
     await contains(".o-mail-Composer-suggestion strong", { count: 3 });
@@ -303,9 +306,9 @@ test("mention suggestion displays OdooBot before archived partners", async () =>
     await openDiscuss(channelId);
     await insertText(".o-mail-Composer-input", "@");
     await contains(".o-mail-Composer-suggestion", { count: 3 });
-    await contains(".o-mail-Composer-suggestion:has(:text('Mitchell Admin'))", {
+    await contains(".o-mail-Composer-suggestion:has(:text('OdooBot'))", {
         before: [
-            ".o-mail-Composer-suggestion:has(:text('OdooBot'))",
+            ".o-mail-Composer-suggestion:has(:text('Mitchell Admin'))",
             {
                 before: [".o-mail-Composer-suggestion:has(:text('Jane'))"],
             },

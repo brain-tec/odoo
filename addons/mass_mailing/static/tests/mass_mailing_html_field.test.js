@@ -1,4 +1,4 @@
-import { expect, test, describe, beforeEach, getFixture, before } from "@odoo/hoot";
+import { expect, test, describe, beforeEach, getFixture, before, waitUntil } from "@odoo/hoot";
 import {
     defineModels,
     fields,
@@ -17,6 +17,8 @@ import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { unmockedOrm } from "@web/../tests/_framework/module_set.hoot";
 import { MassMailingIframe } from "../src/iframe/mass_mailing_iframe";
 import { MassMailingHtmlField } from "../src/fields/html_field/mass_mailing_html_field";
+import { ThemeSelector } from "../src/themes/theme_selector/theme_selector";
+import { ThemeSelectorIframe } from "../src/themes/theme_selector/theme_selector_iframe";
 import { user } from "@web/core/user";
 
 class Mailing extends models.Model {
@@ -136,9 +138,21 @@ class Mailing extends models.Model {
     ];
 }
 
+const publicAssetsCache = new Map();
 class IrUiView extends models.Model {
     async render_public_asset(template, values) {
-        return unmockedOrm("ir.ui.view", "render_public_asset", [template, values], {});
+        const args = ["ir.ui.view", "render_public_asset", [template, values], {}];
+        if (
+            ["mass_mailing.email_designer_snippets", "mass_mailing.email_designer_themes"].includes(
+                template
+            )
+        ) {
+            if (!publicAssetsCache.has(template)) {
+                publicAssetsCache.set(template, unmockedOrm(...args));
+            }
+            return publicAssetsCache.get(template);
+        }
+        return unmockedOrm(...args);
     }
 }
 
@@ -177,7 +191,7 @@ const mailViewArch = `
     <field name="mailing_model_id" invisible="1"/>
     <field name="mailing_model_real" invisible="1"/>
     <field name="state" invisible="1"/>
-    <field name="body_html" class="o_mail_body_inline"/>
+    <field name="body_html" class="o_mail_body_inline" readonly="true"/>
     <field name="body_arch" class="o_mail_body_mailing" widget="mass_mailing_html"
         options="{
             'inline_field': 'body_html',
@@ -190,26 +204,60 @@ const mailViewArch = `
 /**
  * @type {MassMailingHtmlField}
  */
-let htmlField;
+let htmlField, themeSelector;
 describe.current.tags("desktop");
 beforeEach(() => {
+    htmlField = undefined;
+    themeSelector = undefined;
     patchWithCleanup(MassMailingHtmlField.prototype, {
         setup() {
             super.setup();
             htmlField = this;
         },
     });
+    patchWithCleanup(ThemeSelector.prototype, {
+        setup() {
+            super.setup();
+            themeSelector = this;
+        },
+    });
 });
+
+/**
+ * The ThemeSelector rendering is optimized to minimize UX transition delays
+ * for the user, but that makes it a bit tricky to wait for in tests. This
+ * function properly waits for everything required to select a theme/favorite
+ * by clicking on it.
+ */
+async function waitForThemeSelector() {
+    await waitFor(".o_mass_mailing_theme_selector_iframe_container iframe:not([hidden])", {
+        timeout: 3000,
+    });
+    await waitUntil(
+        () =>
+            themeSelector &&
+            themeSelector.props.favoriteThemes.promise &&
+            !themeSelector.state.loading,
+        { timeout: 3000 }
+    );
+}
+
 describe("field HTML", () => {
     beforeEach(() => {
+        // Css assets are not needed for these tests.
         patchWithCleanup(MassMailingIframe.prototype, {
-            // Css assets are not needed for these tests.
             loadIframeAssets() {
                 return {
                     "mass_mailing.assets_inside_builder_iframe": {
                         toggle: () => {},
                     },
                 };
+            },
+        });
+        patchWithCleanup(ThemeSelectorIframe.prototype, {
+            loadIframeAssets() {},
+            getStyleSheets() {
+                return Promise.resolve([]);
             },
         });
     });
@@ -226,12 +274,8 @@ describe("field HTML", () => {
             arch: mailViewArch,
         });
         expect(queryOne(".o_mass_mailing_iframe_wrapper iframe")).toHaveClass("d-none");
-        await click(
-            waitFor(
-                ":iframe .o_mailing_template_preview_wrapper div[role='menuitem']:contains(Start From Scratch)",
-                { timeout: 1000 }
-            )
-        );
+        await waitForThemeSelector();
+        await contains(":iframe .o_mailing_template_preview_wrapper [data-name='empty']").click();
         await waitFor(".o_mass_mailing_iframe_wrapper iframe:not(.d-none)");
         expect(await waitFor(":iframe .o_layout", { timeout: 3000 })).toHaveClass("o_empty_theme");
         await clickSave();
@@ -295,11 +339,17 @@ describe("field HTML", () => {
         });
         await contains(".o_data_cell").click();
         await waitFor(".o_dialog");
-        await contains(".o_dialog :iframe [data-name='event']", { timeout: 1000 }).click();
-        await waitFor(".o_dialog .o_mass_mailing-builder_sidebar", { timeout: 1000 });
-        await contains(".o_dialog :iframe .s_text_block", { timeout: 1000 }).click();
+        await waitForThemeSelector();
+        await contains(
+            ".o_dialog :iframe .o_mailing_template_preview_wrapper [data-name='event']"
+        ).click();
+        await waitFor(".o_dialog .o_mass_mailing-builder_sidebar .o_snippet_thumbnail", {
+            timeout: 3000,
+        });
+        await contains(".o_dialog :iframe .s_text_block", { timeout: 3000 }).click();
         await waitFor(
-            ".o_dialog .o_mass_mailing-builder_sidebar .options-container-header:contains(Text)"
+            ".o_dialog .o_mass_mailing-builder_sidebar .options-container-header:contains(Text)",
+            { timeout: 3000 }
         );
         const overlayOptionsSelect =
             ".o-main-components-container .o-overlay-container .o_overlay_options";
@@ -314,7 +364,8 @@ describe("field HTML", () => {
             resId: 1,
             arch: mailViewArch,
         });
-        await click(waitFor(":iframe .o_mailing_template_preview_wrapper [data-name='default']"));
+        await waitForThemeSelector();
+        await contains(":iframe .o_mailing_template_preview_wrapper [data-name='default']").click();
         await waitFor(".o_mass_mailing_iframe_wrapper iframe:not(.d-none)");
         expect(await waitFor(":iframe .o_layout", { timeout: 3000 })).toHaveClass(
             "o_default_theme"
@@ -327,21 +378,11 @@ describe("field HTML", () => {
         await waitFor(".hb-row .hb-row-label span:contains(Domain)");
         expect(queryOne(".hb-row span.fa-filter + span").textContent.toLowerCase()).toBe("id = 1");
         await clickSave();
-        await waitFor("table[t-if]");
-        expect(queryOne("table[t-if]")).toHaveAttribute(
-            "t-if",
-            'object.filtered_domain([("id", "=", 1)])'
-        );
+        const table = await waitFor(".o_mail_body_inline table[t-if]", { timeout: 3000 });
+        expect(table).toHaveAttribute("t-if", 'object.filtered_domain([("id", "=", 1)])');
     });
     test(`Switching mailing records in the Form view properly switches between basic Editor, HtmlBuilder and readonly`, async () => {
         const fixture = getFixture();
-        let htmlField;
-        patchWithCleanup(MassMailingHtmlField.prototype, {
-            setup() {
-                super.setup();
-                htmlField = this;
-            },
-        });
         await mountView({
             resModel: "mailing.mailing",
             type: "form",
@@ -392,7 +433,8 @@ describe("field HTML: with loaded assets", () => {
             resId: 1,
             arch: mailViewArch,
         });
-        await click(waitFor(":iframe .o_mailing_template_preview_wrapper [data-name='default']"));
+        await waitForThemeSelector();
+        await contains(":iframe .o_mailing_template_preview_wrapper [data-name='default']").click();
         await waitFor(".o_mass_mailing_iframe_wrapper iframe:not(.d-none)");
         const { bundleControls } = await htmlField.ensureIframeLoaded();
 

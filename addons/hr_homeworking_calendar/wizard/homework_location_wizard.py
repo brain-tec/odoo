@@ -1,7 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api
-
+from odoo import api, fields, models, tools
 from odoo.addons.hr_homeworking.models.hr_homeworking import DAYS
 
 
@@ -21,20 +20,39 @@ class HomeworkLocationWizard(models.TransientModel):
     @api.depends('date')
     def _compute_day_week_string(self):
         for record in self:
-            record.day_week_string = record.date.strftime("%A") if record.date else ''
+            record.day_week_string = tools.format_date(record.env, record.date, date_format='EEEE') if record.date else ''
 
-    def set_employee_location(self):
-        self.ensure_one()
-        if not self.date:
-            return
+    def delete_employee_location(self):
+        employee_id, employee_location, default_location_for_current_date = self.get_employee_location_info()
+        # if any exception exists, remove it
+        if employee_location:
+            employee_location.unlink()
+        # otherwise delete the existing weekly location (and all recurrences)
+        else:
+            employee_id.sudo().user_id.write({
+                default_location_for_current_date: False,
+            })
+
+    def get_employee_location_info(self):
         default_employee_id = self.env.context.get('default_employee_id') or self.env.user.employee_id.id
         employee_id = self.env['hr.employee'].browse(self.employee_id.id or default_employee_id)
         employee_location = self.env['hr.employee.location'].search([
             ('date', '=', self.date),
             ('employee_id', '=', employee_id.id)
         ])
+
         weekday = self.date.weekday()
         default_location_for_current_date = DAYS[weekday]
+
+        return employee_id, employee_location, default_location_for_current_date
+
+    def set_employee_location(self):
+        self.ensure_one()
+        if not self.date:
+            return
+
+        employee_id, employee_location, default_location_for_current_date = self.get_employee_location_info()
+
         if self.weekly:
             # delete any exceptions on the current date
             if employee_location:

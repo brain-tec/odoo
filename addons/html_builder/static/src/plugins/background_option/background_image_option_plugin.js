@@ -62,6 +62,13 @@ export class BackgroundImageOptionPlugin extends Plugin {
         // It is important to delete ".o_modified_image_to_save" from the old
         // target as its image source will be deleted.
         oldEditingEl.classList.remove("o_modified_image_to_save");
+        const computedStyles = getComputedStyle(oldEditingEl);
+        // Transfer only image layer(1st) size when multiple backgrounds exist
+        const oldBgSize = computedStyles.getPropertyValue("background-size").split(",")[0].trim();
+        const isOldEditingElRepeated = oldEditingEl.classList.contains("o_bg_img_opt_repeat");
+        // Clean the old editing element before applying on the new one
+        oldEditingEl.classList.remove("o_bg_img_opt_repeat");
+        oldEditingEl.style.removeProperty("background-size");
         const filterColorAction = this.dependencies.builderActions.getAction("selectFilterColor");
         const editingElement = this.getResource("get_target_element_providers")[0](oldEditingEl);
         const filter = filterColorAction.getValue({ editingElement });
@@ -75,6 +82,16 @@ export class BackgroundImageOptionPlugin extends Plugin {
         // Apply the changes on the new editing element
         if (oldBgURL) {
             this.setImageBackground(newEditingEl, oldBgURL);
+            if (isOldEditingElRepeated) {
+                newEditingEl.classList.add("o_bg_img_opt_repeat");
+            }
+            // If the new target contains a gradient background, append "cover"
+            // to the background-size so the gradient doesn’t repeat.
+            const hasGradient = getComputedStyle(newEditingEl)
+                .getPropertyValue("background-image")
+                .includes("gradient");
+            const newBgSize = hasGradient ? `${oldBgSize}, cover` : oldBgSize;
+            newEditingEl.style.setProperty("background-size", newBgSize);
             for (const [key, value] of filteredOldDataset) {
                 newEditingEl.dataset[key] = value;
             }
@@ -153,6 +170,10 @@ export class BackgroundImageOptionPlugin extends Plugin {
             loadResult: "",
             params: { ...params, forceClean: true },
         });
+        // When background image with position "Repeat pattern" is removed,
+        // remove background size to avoid repeating gradient
+        editingElement.classList.remove("o_bg_img_opt_repeat");
+        editingElement.style.removeProperty("background-size");
         this.dispatchTo("on_bg_image_hide_handlers", editingElement);
     }
 }
@@ -164,6 +185,10 @@ export class SelectFilterColorAction extends StyleAction {
         // Find the filter element.
         let filterEl = editingElement.querySelector(":scope > .o_we_bg_filter");
 
+        // If no value is provided, use the current one if any.
+        if (filterEl && value === undefined) {
+            value = filterEl.style.backgroundImage;
+        }
         // If the filter would be transparent, remove it / don't create it.
         const rgba = value && convertCSSColorToRgba(value);
         if (!value || (rgba && rgba.opacity < 0.001)) {

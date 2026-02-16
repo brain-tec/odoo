@@ -4,10 +4,10 @@
 <t t-name="mail.DiscussContent">
     <t t-set="partitionedActions" t-value="threadActions.partition"/>
     <div class="o-mail-DiscussContent d-flex flex-column h-100 w-100 overflow-auto o-scrollbar-thin" t-ref="root">
-        <div class="o-mail-DiscussContent-header py-1 ps-3 d-flex flex-shrink-0 align-items-center border-bottom border-dark o-border-opacity-15 gap-1 z-1 flex-grow-0" t-ref="header">
+        <div class="o-mail-DiscussContent-header ps-3 d-flex flex-shrink-0 align-items-center border-bottom border-dark o-border-opacity-15 gap-1 z-1 flex-grow-0" t-ref="header" t-att-class="{ 'py-1': !state.correspondentLocalDateTimeFormatted }">
             <t t-if="thread">
                 <div t-if="showThreadAvatar" class="o-mail-DiscussContent-threadAvatar position-relative align-self-center align-items-center bg-inherit">
-                    <img class="rounded-2 object-fit-cover" t-att-src="thread.channel?.parent_channel_id?.avatarUrl ?? thread.channel?.avatarUrl" alt="Thread Image"/>
+                    <DiscussAvatar thread="thread" size="26"/>
                     <FileUploader t-if="isThreadAvatarEditable" acceptedFileExtensions="'.bmp, .jpg, .jpeg, .png, .svg'" showUploadingText="false" multiUpload="false" onUploaded.bind="(data) => this.onFileUploaded(data)">
                         <t t-set-slot="toggler">
                             <a href="#" class="position-absolute z-1 h-100 w-100 rounded-2 start-0 bottom-0" title="Upload Avatar">
@@ -15,50 +15,43 @@
                             </a>
                         </t>
                     </FileUploader>
-                    <ImStatus t-if="thread.channel?.showImStatus" className="'o-mail-DiscussContent-headerImStatus position-absolute'" member="thread.channel.correspondent"/>
                 </div>
                 <t t-else="">
                     <ThreadIcon className="'align-self-center fs-3 my-2 opacity-75'" size="'large'" thread="thread"/>
                 </t>
-                <div class="d-flex flex-grow-1 align-self-center align-items-center h-100 py-1">
-                    <div t-if="thread.channel?.parent_channel_id" class="d-flex align-items-center gap-1 ms-1">
-                        <span class="fw-bolder cursor-pointer opacity-75 opacity-100-hover o-hover-text-underline" t-esc="thread.channel.parent_channel_id.displayName" t-on-click="() => this.thread?.channel?.parent_channel_id?.open({ focus: true })"/>
-                        <i class="oi oi-chevron-right o-xsmaller mx-1"/>
-                    </div>
-                    <AutoresizeInput
-                        className="'o-mail-DiscussContent-threadName fw-bold flex-shrink-1 py-0 fs-4'"
-                        enabled="thread.is_editable or thread.channel?.channel_type === 'chat'"
-                        onValidate.bind="renameThread"
-                        value="thread.displayName || ''"
-                    />
-                    <t t-if="thread.channel?.allowDescription and (thread.is_editable or (!thread.is_editable and thread.description))">
-                        <div class="flex-shrink-0 mx-1 py-2 border-start"/>
-                        <t t-set="autogrowDescriptionPlaceholder">Add a description</t>
+                <div class="flex-grow-1 align-self-center align-items-center h-100 py-1" t-att-class="{ 'lh-sm': showsChatLocalDateTime }">
+                    <div class="d-flex">
+                        <div t-if="thread.channel?.parent_channel_id" class="d-flex align-items-center gap-1 ms-1">
+                            <span class="fw-bolder cursor-pointer opacity-75 opacity-100-hover o-hover-text-underline" t-esc="thread.channel.parent_channel_id.displayName" t-on-click="() => this.thread?.channel?.parent_channel_id?.open({ focus: true })"/>
+                            <i class="oi oi-chevron-right o-xsmaller mx-1"/>
+                        </div>
                         <AutoresizeInput
-                            className="'o-mail-DiscussContent-threadDescription flex-shrink-1 small pt-1'"
-                            enabled="thread.is_editable"
-                            onValidate.bind="updateThreadDescription"
-                            placeholder="thread.is_editable ? autogrowDescriptionPlaceholder : ''"
-                            value="thread.description or ''"
+                            className="'o-mail-DiscussContent-threadName fw-bold flex-shrink-1 py-0 ' + (showsChatLocalDateTime ? 'fs-5' : 'fs-4')"
+                            enabled="thread.channel?.isAllowedToRename"
+                            onValidate.bind="renameThread"
+                            value="thread.displayName || ''"
                         />
-                    </t>
-                    <div class="ms-1 flex-grow-1"/>
-                    <div class="pe-3">
-                        <ActionList actions="[partitionedActions.quick, partitionedActions.other, ...partitionedActions.group.slice().reverse()]" inline="true" odooControlPanelSwitchStyle="true"/>
-                    </div>
-                </div>
-                <div t-if="store.inPublicPage and !ui.isSmall" class="d-flex align-items-center">
-                    <img class="o-mail-DiscussContent-selfAvatar ms-3 me-1 rounded-3 object-fit-cover flex-shrink-0 smaller" alt="Avatar" t-att-src="store.self.avatarUrl"/>
-                    <div class="fw-bold flex-shrink-1 text-dark">
-                        <t t-if="store.self_user" t-esc="store.self_user.name"/>
-                        <t t-else="">
+                        <t t-if="thread.channel?.allowDescription and (thread.is_editable or (!thread.is_editable and thread.description))">
+                            <div class="flex-shrink-0 mx-1 py-2 border-start"/>
+                            <t t-set="autogrowDescriptionPlaceholder">Add a description</t>
                             <AutoresizeInput
-                                className="'py-1'"
-                                onValidate.bind="renameGuest"
-                                value="store.self_guest.name"
+                                className="attClassObjectToString(threadDescriptionAttClass)"
+                                enabled="thread.is_editable"
+                                onValidate.bind="updateThreadDescription"
+                                placeholder="thread.is_editable ? autogrowDescriptionPlaceholder : ''"
+                                value="thread.description or ''"
                             />
                         </t>
                     </div>
+                    <div t-if="showsChatLocalDateTime" class="text-muted smaller ms-1" t-out="state.correspondentLocalDateTimeFormatted"/>
+                </div>
+                <div class="pe-3">
+                    <ActionList actions="[partitionedActions.quick, partitionedActions.other, ...partitionedActions.group.slice().reverse()]" inline="true" odooControlPanelSwitchStyle="true"/>
+                </div>
+                <div t-if="store.inPublicPage and !ui.isSmall" class="d-flex align-items-center">
+                    <img class="o-mail-DiscussContent-selfAvatar me-1 rounded-3 object-fit-cover flex-shrink-0 smaller" alt="Avatar" t-att-src="store.self.avatarUrl"/>
+                    <div t-if="store.self_user" class="text-nowrap px-1 me-2" t-esc="store.self_user.name"/>
+                    <AutoresizeInput t-else="" className="'py-1'" onValidate.bind="renameGuest" value="store.self_guest.name"/>
                 </div>
             </t>
         </div>

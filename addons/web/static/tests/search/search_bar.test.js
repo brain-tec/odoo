@@ -180,6 +180,29 @@ test("navigation with facets", async () => {
 });
 
 test.tags("desktop");
+test("Inner filter: facets are 'or' separated", async () => {
+    await mountWithSearch(SearchBar, {
+        resModel: "partner",
+        searchMenuTypes: ["filter"],
+        searchViewId: false,
+        searchViewArch: `
+            <search>
+                <filter string="Garf">
+                    <filter string="Meow" name="meow" domain="[('garf', '=', 'meow')]"/>
+                    <filter string="Woof" name="woof" domain="[('garf', '=', 'woof')]"/>
+                </filter>
+            </search>
+        `,
+    });
+
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Garf");
+    await contains(`.o_item_option:eq(0)`).click();
+    await contains(`.o_item_option:eq(1)`).click();
+    expect(getFacetTexts().map((str) => str.replace(/\s+/g, " "))).toEqual(["Meow or Woof"]);
+});
+
+test.tags("desktop");
 test("navigation with facets (2)", async () => {
     await mountWithSearch(SearchBar, {
         resModel: "partner",
@@ -213,6 +236,45 @@ test("navigation with facets (2)", async () => {
     await keyDown("ArrowRight");
     await animationFrame();
     expect(queryFirst`.o_searchview .o_searchview_facet:nth-child(1)`).toBeFocused();
+});
+
+test.tags("desktop");
+test("navigation should move forward from search bar filter", async () => {
+    await mountWithSearch(SearchBar, {
+        resModel: "partner",
+        searchMenuTypes: ["groupBy"],
+        searchViewId: false,
+        context: { search_default_date_group_by: 1 },
+    });
+
+    expect(`.o_searchview .o_searchview_facet`).toHaveCount(1);
+    expect(queryFirst`.o_searchview input`).toBeFocused();
+
+    // press tab to navigate forward to the toggler
+    await keyDown("Tab");
+    await animationFrame();
+    expect(queryFirst`.o_searchview_dropdown_toggler`).toBeFocused();
+});
+
+test.tags("desktop");
+test("navigation should move backward from search bar filter", async () => {
+    await mountWithSearch(SearchBar, {
+        resModel: "partner",
+        searchMenuTypes: ["groupBy"],
+        searchViewId: false,
+        context: { search_default_date_group_by: 1 },
+    });
+
+    expect(`.o_searchview .o_searchview_facet`).toHaveCount(1);
+    expect(queryFirst`.o_searchview input`).toBeFocused();
+
+    // press shift+tab to navigate backward to the search icon button
+    await keyDown("Shift");
+    await press("Tab");
+    await animationFrame();
+    await press("Tab");
+    await animationFrame();
+    expect(queryFirst`.d-print-none.btn`).toBeFocused();
 });
 
 test.tags("mobile");

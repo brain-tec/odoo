@@ -622,7 +622,7 @@ class MyInvoisDocument(models.Model):
         :return: True if this document is linked to a single refund invoice.
         """
         has_single_document = self.invoice_ids and len(self.invoice_ids) == 1
-        return has_single_document and self.invoice_ids[0].move_type in ('out_refund', 'in_refund')
+        return has_single_document and self.invoice_ids[0].is_refund()
 
     def _get_rounded_base_lines(self):
         """
@@ -698,14 +698,19 @@ class MyInvoisDocument(models.Model):
                         base_line["price_unit"] * base_line["quantity"]
                     )
 
+                # Only compute discount if any base_line has an actual discount percentage
+                has_discount = any(base_line['discount'] for base_line in base_lines)
+                discount_amount = (total_amount - total_amount_discounted) if has_discount else 0.0
+                discount_amount_currency = (total_amount_currency - total_amount_discounted_currency) if has_discount else 0.0
+
                 # for the line name, when consolidating, we want to show first sequence - last sequence
                 sequenced_records = records.sorted(key=lambda r: r.name)
                 new_base_line = AccountTax._prepare_base_line_for_taxes_computation(
                     {},
                     tax_ids=taxes,
                     price_unit=total_amount_currency,
-                    discount_amount=total_amount - total_amount_discounted,
-                    discount_amount_currency=total_amount_currency - total_amount_discounted_currency,
+                    discount_amount=discount_amount,
+                    discount_amount_currency=discount_amount_currency,
                     quantity=1.0,
                     currency_id=self.currency_id,
                     tax_details={

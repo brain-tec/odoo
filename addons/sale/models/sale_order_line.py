@@ -182,7 +182,7 @@ class SaleOrderLine(models.Model):
     price_unit = fields.Float(
         string="Unit Price",
         compute='_compute_price_unit',
-        digits='Product Price',
+        min_display_digits='Product Price',
         store=True, readonly=False, required=True, precompute=True)
     technical_price_unit = fields.Float()
 
@@ -904,7 +904,7 @@ class SaleOrderLine(models.Model):
     def _compute_customer_lead(self):
         self.customer_lead = 0.0
 
-    @api.depends('is_expense')
+    @api.depends('is_expense', 'product_id')
     def _compute_qty_delivered_method(self):
         """ Sale module compute delivered qty for product [('type', 'in', ['consu']), ('service_type', '=', 'manual')]
                 - consu + expense_policy : analytic (sum of analytic unit_amount)
@@ -914,17 +914,34 @@ class SaleOrderLine(models.Model):
             This is true when only sale is installed: sale_stock redifine the behavior for 'consu' type,
             and sale_timesheet implements the behavior of 'service' + service_type=timesheet.
         """
+        self.qty_delivered_method = 'manual'
         for line in self:
             if line.is_expense:
                 line.qty_delivered_method = 'analytic'
-            else:  # service and consu
-                line.qty_delivered_method = 'manual'
+            elif line.product_id.type == 'service':
+                line.qty_delivered_method = line.product_id.service_type
+            elif line.product_id.type == 'consu':
+                line.qty_delivered_method = line._get_consu_qty_delivered_method()
+
+            # If product has a reinvoice policy and no specific delivered method, its delivered
+            # quantities should still be computed through analytic lines.
+            # For other delivery methods, they are expected to add their own quantities to the
+            # quantities already provided by the `_prepare_qty_delivered` method, including
+            # analytic lines quantities for reinvoiceable products.
+            if line.qty_delivered_method == 'manual' and line.product_id.expense_policy != 'no':
+                line.qty_delivered_method = 'analytic'
+
+    def _get_consu_qty_delivered_method(self):
+        return 'manual'
 
     @api.depends(
         'qty_delivered_method',
+        'analytic_line_ids',
         'analytic_line_ids.so_line',
         'analytic_line_ids.unit_amount',
-        'analytic_line_ids.product_uom_id')
+        'analytic_line_ids.product_uom_id',
+        'analytic_line_ids.product_id',
+    )
     def _compute_qty_delivered(self):
         """ This method compute the delivered quantity of the SO lines: it covers the case provide by sale module, aka
             expense/vendor bills (sum of unit_amount of AAL), and manual case.
@@ -952,11 +969,18 @@ class SaleOrderLine(models.Model):
     def _prepare_qty_delivered(self):
         # compute for analytic lines
         delivered_qties = defaultdict(float)
-        lines_by_analytic = self.filtered(lambda sol: sol.qty_delivered_method == 'analytic')
-        mapping = lines_by_analytic._get_delivered_quantity_by_analytic([('amount', '<=', 0.0)])
+        lines_by_analytic = self.filtered(
+            lambda sol: sol.qty_delivered_method == 'analytic' or sol._is_reinvoicing_line()
+        )
+        domain = lines_by_analytic._get_delivered_quantity_by_analytic_domain()
+        mapping = lines_by_analytic._get_delivered_quantity_by_analytic(domain)
         for so_line in lines_by_analytic:
             delivered_qties[so_line] = mapping.get(so_line.id or so_line._origin.id, 0.0)
         return delivered_qties
+
+    @api.model
+    def _get_delivered_quantity_by_analytic_domain(self):
+        return Domain('amount', '<=', 0.0)
 
     def _get_downpayment_state(self):
         self.ensure_one()
@@ -1364,8 +1388,18 @@ class SaleOrderLine(models.Model):
 
     def write(self, vals):
         values = vals
-        if 'display_type' in values and self.filtered(lambda line: line.display_type != values.get('display_type')):
-            raise UserError(_("You cannot change the type of a sale order line. Instead you should delete the current line and create a new line of the proper type."))
+        if 'display_type' in values:
+            new_type = values.get('display_type')
+            invalid_lines = self.filtered(
+                lambda line:
+                    line.display_type != new_type
+                    and not (line.display_type == 'line_subsection' and new_type == 'line_section')
+            )
+            if invalid_lines:
+                raise UserError(_(
+                    "You cannot change the type of a sale order line. Instead you should "
+                    "delete the current line and create a new line of the proper type."
+                ))
 
         if 'product_id' in values and any(
             sol.product_id.id != values['product_id']
@@ -1454,6 +1488,8 @@ class SaleOrderLine(models.Model):
         * Lines cannot be deleted if the order is confirmed.
         * Down payment lines who have not yet been invoiced bypass that exception.
         * Sections and Notes can always be deleted.
+        * Lines with expense policy `cost` and an ordered quantity 0 bypass this restriction
+          when deleted from the services and material view.
 
         :returns: Sales Order Lines that cannot be deleted
         :rtype: `sale.order.line` recordset
@@ -1463,6 +1499,12 @@ class SaleOrderLine(models.Model):
                 line.state == 'sale'
                 and (line.invoice_lines or not line.is_downpayment)
                 and not line.display_type
+                and not (
+                    self.env.context.get('from_services_and_material')
+                    and not line.product_uom_qty
+                    and len(line.analytic_line_ids) == 1
+                    and line.analytic_line_ids.unit_amount == line.qty_delivered
+                )
         )
 
     @api.ondelete(at_uninstall=False)
@@ -1489,7 +1531,7 @@ class SaleOrderLine(models.Model):
         return order_date + timedelta(days=self.customer_lead or 0.0)
 
     def compute_uom_qty(self, new_qty, stock_move, rounding=True):
-        return self.product_uom_id._compute_quantity(new_qty, stock_move.product_uom, rounding)
+        return self.product_uom_id._compute_quantity(new_qty, stock_move.uom_id, rounding)
 
     def _get_invoice_line_sequence(self, new=0, old=0):
         """
@@ -1824,3 +1866,29 @@ class SaleOrderLine(models.Model):
     def _can_be_edited_on_portal(self):
         self.ensure_one()
         return self.order_id._can_be_edited_on_portal() and not self.combo_item_id
+
+    def _get_rounding(self):
+        self.ensure_one()
+        return self.product_uom_id.rounding
+
+    def _is_reinvoicing_line(self):
+        self.ensure_one()
+        return (
+            not self.is_expense
+            and self.product_id.expense_policy != 'no'
+            and self.qty_delivered_method != 'manual'
+        )
+
+    def _is_line_reinvoicable(self):
+        """Determine whether this sale order line should be used to retrieve analytic lines
+        to be linked to the generated invoice.
+
+        Only non-expense lines invoiced based on delivered quantities are considered
+        valid sources for analytic line reinvoicing.
+        """
+        self.ensure_one()
+        return (
+            not self.is_expense
+            and self.product_id.invoice_policy == 'delivery'
+            and self.product_id.expense_policy != 'no'
+        )

@@ -2,6 +2,7 @@
 
 from . import test_access_rights
 from . import test_accrued_sale_orders
+from . import test_analytic_to_sale_to_invoice
 from . import test_common
 from . import test_controllers
 from . import test_credit_limit
@@ -22,6 +23,7 @@ from . import test_sale_product_template
 from . import test_sale_refund
 from . import test_sale_to_invoice
 from . import test_sale_report
+from . import test_sale_sections
 from . import test_taxes_downpayment
 from . import test_taxes_global_discount
 from . import test_taxes_tax_totals_summary

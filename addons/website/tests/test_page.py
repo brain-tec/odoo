@@ -1,21 +1,22 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from lxml import html
 from unittest.mock import patch
 
-from odoo.addons.website.controllers.main import Website
-from odoo.addons.http_routing.tests.common import MockRequest
+from lxml import html
+
 from odoo.fields import Command
-from odoo.http import root
-from odoo.tests import common, HttpCase, tagged
-from odoo.tests.common import HOST
-from odoo.tools import config, mute_logger
+from odoo.http.session import session_store
+from odoo.tests import HttpCase, common, tagged
+from odoo.tools import mute_logger
+
+from odoo.addons.http_routing.tests.common import MockRequest
+from odoo.addons.website.controllers.main import Website
 
 
 @tagged('-at_install', 'post_install')
 class TestPage(common.TransactionCase):
     def setUp(self):
-        super(TestPage, self).setUp()
+        super().setUp()
         View = self.env['ir.ui.view']
         Page = self.env['website.page']
         Menu = self.env['website.menu']
@@ -278,7 +279,7 @@ class WithContext(HttpCase):
             self.assertIn('ZeroDivisionError: division by zero', r.text, "Error should be shown in debug.")
 
     def test_04_visitor_no_session(self):
-        with patch.object(root.session_store, 'save') as session_save,\
+        with patch.object(session_store(), 'save') as session_save,\
              MockRequest(self.env, website=self.env['website'].browse(1)):
             # no session should be saved for website visitor
             self.url_open(self.page.url).raise_for_status()
@@ -300,6 +301,19 @@ class WithContext(HttpCase):
         root_html = html.fromstring(r.content)
         canonical_url = root_html.xpath('//link[@rel="canonical"]')[0].attrib['href']
         self.assertIn(canonical_url, [f"{website.domain}/", f"{website.domain}/page_1"])
+
+    def test_opengraph_image_with_absolute_url(self):
+        base_url = self.base_url()
+        with MockRequest(self.env, website=self.env['website'].browse(1)):
+            self.page.website_meta_og_img = 'http://wrong.example.com/favicon.ico'
+            r = self.url_open(self.page.url)
+            self.assertEqual(r.status_code, 200)
+            self.assertIn(f'"og:image" content="{base_url}/favicon.ico"', r.text)
+
+            self.page.website_meta_og_img = '/logo'
+            r = self.url_open(self.page.url)
+            self.assertEqual(r.status_code, 200)
+            self.assertIn(f'"og:image" content="{base_url}/logo"', r.text)
 
     def test_website_homepage_url_change(self):
         website = self.env['website'].browse([1])

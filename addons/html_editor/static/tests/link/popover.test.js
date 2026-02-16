@@ -972,59 +972,6 @@ describe("Link formatting in the popover", () => {
             '<p><a href="http://test.com/" class="btn btn-secondary">link2[]</a></p>'
         );
     });
-    const styleForceColor = `p > a.btn { color: black !important; border-color: gray !important }`;
-    test("custom link format fill with solid color should be stored as background-color", async () => {
-        const { el } = await setupEditor(
-            '<p><a href="http://test.com/" class="btn btn-secondary">link2[]</a></p>',
-            {
-                config: {
-                    allowCustomStyle: true,
-                },
-                styleContent: styleForceColor,
-            }
-        );
-        await waitFor(".o-we-linkpopover");
-        await click(".o_we_edit_link");
-        await animationFrame();
-
-        await click("button[name='link_type']");
-        await animationFrame();
-        await click(".o-we-link-type-dropdown .dropdown-item:contains('Custom')");
-        await animationFrame();
-        await click(".o_we_color_preview.custom-fill-picker");
-        await animationFrame();
-        await click('[data-color="#FF9C00"]');
-        expect(cleanLinkArtifacts(getContent(el))).toBe(
-            '<p><a href="http://test.com/" class="btn btn-custom" style="color: rgb(0, 0, 0); background-color: #FF9C00; border-width: 1px; border-color: rgb(128, 128, 128); border-style: solid; ">link2</a></p>'
-        );
-    });
-    test("custom link format fill with gradient should be stored as background-image", async () => {
-        const { el } = await setupEditor(
-            '<p><a href="http://test.com/" class="btn btn-secondary">link2[]</a></p>',
-            {
-                config: {
-                    allowCustomStyle: true,
-                },
-                styleContent: styleForceColor,
-            }
-        );
-        await waitFor(".o-we-linkpopover");
-        await click(".o_we_edit_link");
-        await animationFrame();
-
-        await click("button[name='link_type']");
-        await animationFrame();
-        await click(".o-we-link-type-dropdown .dropdown-item:contains('Custom')");
-        await animationFrame();
-        await click(".o_we_color_preview.custom-fill-picker");
-        await animationFrame();
-        await click(".gradient-tab");
-        await animationFrame();
-        await click(".o_gradient_color_button");
-        expect(cleanLinkArtifacts(getContent(el))).toBe(
-            '<p><a href="http://test.com/" class="btn btn-custom" style="color: rgb(0, 0, 0); background-image: linear-gradient(135deg, rgb(255, 204, 51) 0%, rgb(226, 51, 255) 100%); border-width: 1px; border-color: rgb(128, 128, 128); border-style: solid; ">link2</a></p>'
-        );
-    });
     test("clicking the discard button should revert the link format", async () => {
         const { el } = await setupEditor('<p><a href="http://test.com/">link1[]</a></p>');
         await waitFor(".o-we-linkpopover");
@@ -1111,7 +1058,7 @@ describe("Link formatting in the popover", () => {
         await animationFrame();
         expect("button[name='link_type'] span").toHaveClass("btn btn-primary btn-sm");
         expect(cleanLinkArtifacts(getContent(el))).toBe(
-            `<p><a href="http://test.com/" class="o_link_in_selection btn btn-primary">link1</a></p>`
+            `<p><a href="http://test.com/" class="btn btn-primary">link1</a></p>`
         );
     });
 });
@@ -1806,6 +1753,17 @@ describe("hidden label field", () => {
     });
 });
 
+describe("Selection in input/textarea", () => {
+    test("Should not show link preview", async () => {
+        await setupEditor(
+            `<p><a href="http://test.com/">a[]b</a><span contenteditable="false" data-oe-protected="true"><input></span></p>`
+        );
+        await waitFor(".o-we-linkpopover");
+        queryOne("input").focus();
+        await expectElementCount(".o-we-linkpopover", 0);
+    });
+});
+
 describe("link popover with empty URL", () => {
     test("should not close the popover when pressing Enter with an empty URL", async () => {
         const { editor } = await setupEditor("<p>ab[]</p>");
@@ -2008,4 +1966,21 @@ describe("label is a valid URL", () => {
             message: "should focus label input by default, when we don't have a label",
         });
     });
+});
+
+test("Should properly show the preview if fetching metadata fails", async () => {
+    const id = Math.random().toString();
+    onRpc("/html_editor/link_preview_internal", () => Promise.reject(new Error(`No data ${id}`)));
+    onRpc("/contactus", () => ({}));
+    const originalConsoleWarn = console.warn.bind(console);
+    patchWithCleanup(console, {
+        warn: (msg, error, ...args) => {
+            if (!error?.message?.includes?.(id)) {
+                originalConsoleWarn(msg, error, ...args);
+            }
+        },
+    });
+    const { el } = await setupEditor('<p><a href="/contactus">a[]b</a></p>');
+    await waitFor(".o-we-linkpopover");
+    expect(cleanLinkArtifacts(getContent(el))).toBe('<p><a href="/contactus">a[]b</a></p>');
 });

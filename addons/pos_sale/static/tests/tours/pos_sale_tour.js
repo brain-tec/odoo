@@ -64,6 +64,7 @@ registry.category("web_tour.tours").add("PosSettleOrder2", {
 });
 
 registry.category("web_tour.tours").add("PosRefundDownpayment", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -190,6 +191,19 @@ registry.category("web_tour.tours").add("PosSettleAndInvoiceOrder", {
         ].flat(),
 });
 
+registry.category("web_tour.tours").add("PosSettleAndInvoiceOrder2", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            PosSale.settleNthOrder(1),
+            Order.hasLine({}),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickInvoiceButton(),
+            PaymentScreen.clickValidate(),
+        ].flat(),
+});
+
 registry.category("web_tour.tours").add("PosOrderDoesNotRemainInList", {
     steps: () =>
         [
@@ -253,6 +267,7 @@ registry.category("web_tour.tours").add("test_settle_so_with_non_pos_groupable_u
 });
 
 registry.category("web_tour.tours").add("PoSDownPaymentLinesPerTax", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -282,6 +297,7 @@ registry.category("web_tour.tours").add("PoSDownPaymentLinesPerTax", {
 });
 
 registry.category("web_tour.tours").add("PoSApplyDownpayment", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -289,6 +305,33 @@ registry.category("web_tour.tours").add("PoSApplyDownpayment", {
             PosSale.downPaymentFirstOrder("+10"),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("PoSApplyDownpaymentInvoice", {
+    undeterministicTour_doNotCopy: true,
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            PosSale.downPaymentFirstOrder("+10"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickInvoiceButton(),
+            PaymentScreen.clickValidate(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("PoSApplyDownpaymentInvoice2", {
+    undeterministicTour_doNotCopy: true,
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            PosSale.downPaymentFirstOrder("+10"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickInvoiceButton(),
             PaymentScreen.clickValidate(),
         ].flat(),
 });
@@ -332,6 +375,7 @@ registry.category("web_tour.tours").add("PosOrdersListDifferentCurrency", {
 });
 
 registry.category("web_tour.tours").add("PoSDownPaymentAmount", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -480,6 +524,7 @@ registry.category("web_tour.tours").add("test_settle_order_with_lot", {
 });
 
 registry.category("web_tour.tours").add("test_down_payment_displayed", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -609,5 +654,27 @@ registry.category("web_tour.tours").add("test_settle_groupable_lot_total_amount"
             Dialog.confirm("Open Register"),
             PosSale.settleNthOrder(1, { loadSN: true }),
             Order.hasTotal("12.00"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_ecommerce_paid_order_is_hidden_in_pos", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("A Test Partner 1"),
+            PosSale.checkOrdersListEmpty(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_ecommerce_unpaid_order_is_shown_in_pos", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("A Test Partner 1"),
+            PosSale.checkOrdersListNotEmpty(),
         ].flat(),
 });

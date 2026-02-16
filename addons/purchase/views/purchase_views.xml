@@ -139,14 +139,14 @@
                     <button name="action_receive" class="btn-primary" type="object" string="Receive" data-hotkey="e" invisible="not show_receive_button"/>
                     <widget name="purchase_file_uploader" invisible="state != 'purchase'"/>
                     <button name="action_rfq_send" invisible="state != 'purchase'" string="Send PO" type="object" context="{'send_rfq':False}" data-hotkey="g"/>
-                    <button name="action_acknowledge" string="Acknowledge" type="object" invisible="acknowledged or state != 'purchase'"/>
+                    <button name="action_acknowledge" string="Acknowledge" type="object" invisible="acknowledged or state != 'purchase'" data-hotkey="a"/>
                     <button name="button_draft" invisible="state != 'cancel'" string="Set to Draft" type="object" data-hotkey="o"/>
                     <button name="print_quotation" string="Print" type="object" groups="base.group_user" data-hotkey="k" invisible="state == 'purchase'"/>
                     <button name="%(purchase.action_report_purchase_order)d" string="Print" type="action" groups="base.group_user" data-hotkey="k" invisible="state != 'purchase'"/>
                     <button name="button_cancel" invisible="state not in ('draft', 'to approve', 'sent', 'purchase') or locked" string="Cancel" type="object" data-hotkey="x"/>
                     <button name="button_lock" type="object" string="Lock" invisible="locked or state != 'purchase' or not lock_confirmed_po == 'lock'" data-hotkey="l"/>
                     <button name="button_unlock" type="object" string="Unlock" invisible="not locked" groups="purchase.group_purchase_manager" data-hotkey="l"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,sent,purchase" readonly="1"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,purchase" readonly="1"/>
                 </header>
                 <div class="alert alert-warning" role="alert" invisible="not purchase_warning_text">
                     <field name="purchase_warning_text" class="fw-bold"/>
@@ -219,7 +219,7 @@
                         <group>
                             <field name="date_order" invisible="state  == 'purchase'" readonly="state in ['cancel', 'purchase']"/>
                             <label for="date_planned"/>
-                            <div name="date_planned_div" class="o_row">
+                            <div name="date_planned_div">
                                 <field name="date_planned" readonly="state not in ('draft', 'sent', 'to approve', 'purchase')"/>
                             </div>
                             <label for="receipt_reminder_email" class="d-none" groups="purchase.group_send_reminder"/>
@@ -290,7 +290,7 @@
                                     <field name="qty_received_method" column_invisible="True"/>
                                     <field name="qty_received" string="Received" column_invisible="parent.state != 'purchase'" readonly="qty_received_method != 'manual' or is_downpayment" optional="show"/>
                                     <field name="qty_invoiced" string="Billed" column_invisible="parent.state != 'purchase'" optional="show"/>
-                                    <field name="product_uom_id" groups="uom.group_uom"
+                                    <field name="uom_id" groups="uom.group_uom"
                                         readonly="state in ('purchase', 'cancel') or is_downpayment"
                                         required="not display_type and not is_downpayment"
                                         options="{'no_create': True, 'no_open': True, 'quantity_field': 'product_qty'}"
@@ -317,7 +317,7 @@
                                                 <label for="product_qty"/>
                                                 <div class="o_row">
                                                     <field name="product_qty"/>
-                                                    <field name="product_uom_id" groups="uom.group_uom" required="not display_type and not is_downpayment" widget="many2one_uom"/>
+                                                    <field name="uom_id" groups="uom.group_uom" required="not display_type and not is_downpayment" widget="many2one_uom"/>
                                                 </div>
                                                 <field name="qty_received_method" invisible="1"/>
                                                 <field name="qty_received" string="Received Quantity" invisible="parent.state != 'purchase'" readonly="qty_received_method != 'manual'"/>
@@ -364,7 +364,7 @@
                                                     <span class="col-8 text-muted">
                                                         Quantity:
                                                         <field name="product_qty" />
-                                                        <field name="product_uom_id" groups="uom.group_uom" class="small"/>
+                                                        <field name="uom_id" groups="uom.group_uom" class="small"/>
                                                     </span>
                                                     <span class="fw-bold col-4" t-if="record.tax_calculation_rounding_method.raw_value === 'round_per_line'">
                                                         Tax incl.: <field name="price_total" />
@@ -406,15 +406,14 @@
                                 <group name="purchase_info" string="purchase">
                                     <field name="user_id" domain="[('share', '=', False)]" widget="many2one_avatar_user"/>
                                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" readonly="state in ['cancel', 'purchase']"/>
+                                    <field name="date_approve" invisible="state not in ('purchase', 'cancel')"/>
                                 </group>
                                 <group name="billing_info" string="billing">
-                                    <field name="date_approve"/>
                                     <field name="invoice_status" invisible="state in ('draft', 'sent', 'to approve', 'cancel')"/>
                                     <field name="fiscal_position_id" options="{'no_create': True}" readonly="invoice_status == 'invoiced' or locked"/>
                                 </group>
                                 <group name="tracking_info" string="tracking">
                                     <field name="origin"/>
-                                    <field name="receipt_status" invisible="state != 'purchase'"/>
                                 </group>
                             </group>
                         </page>
@@ -630,7 +629,7 @@
                     <field name="company_currency_id" column_invisible="True"/>
                     <field name="state" optional="show" widget="badge" decoration-success="state == 'purchase'"
                         decoration-warning="state == 'to approve'" decoration-info="state == 'draft' or state == 'sent'"/>
-                    <field name="invoice_status" optional="hide"/>
+                    <field name="invoice_status" widget="badge" decoration-success="invoice_status == 'invoiced'" decoration-info="invoice_status == 'to invoice'" optional="hide"/>
                 </list>
             </field>
         </record>
@@ -761,7 +760,7 @@
                     <field name="product_id"/>
                     <field name="price_unit"/>
                     <field name="product_qty"/>
-                    <field name="product_uom_id" groups="uom.group_uom" widget="many2one_uom"/>
+                    <field name="uom_id" groups="uom.group_uom" widget="many2one_uom"/>
                     <field name="price_subtotal" widget="monetary"/>
                     <field name="currency_id" column_invisible="True"/>
                     <field name="date_planned"/>
@@ -790,7 +789,7 @@
                                 <label for="product_qty"/>
                                 <div class="o_row">
                                     <field name="product_qty" readonly="1"/>
-                                    <field name="product_uom_id" readonly="1" groups="uom.group_uom"/>
+                                    <field name="uom_id" readonly="1" groups="uom.group_uom"/>
                                 </div>
                                 <field name="price_unit"/>
                             </group>

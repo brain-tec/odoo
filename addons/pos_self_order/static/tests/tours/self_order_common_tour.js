@@ -15,7 +15,7 @@ registry.category("web_tour.tours").add("self_order_is_close", {
 registry.category("web_tour.tours").add("self_order_is_open_consultation", {
     steps: () => [
         Utils.clickBtn("Order Now"),
-        LandingPage.selectLocation("Test-In"),
+        LandingPage.selectLocation("Test-Takeout"),
         LandingPage.isOpened(),
         ProductPage.clickProduct("Coca-Cola"),
         Utils.checkIsNoBtn("Order"),
@@ -27,11 +27,12 @@ registry.category("web_tour.tours").add("self_order_landing_page_carousel", {
 });
 
 registry.category("web_tour.tours").add("self_order_pos_closed", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () => [
         LandingPage.isClosed(),
         // Normal product
         Utils.clickBtn("Order Now"),
-        LandingPage.selectLocation("Test-In"),
+        LandingPage.selectLocation("Test-Takeout"),
         ProductPage.clickProduct("Coca-Cola"),
         Utils.checkIsNoBtn("Checkout"),
         // Product with attributes
@@ -72,6 +73,7 @@ registry.category("web_tour.tours").add("self_order_pos_closed", {
 });
 
 registry.category("web_tour.tours").add("kiosk_order_pos_closed", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () => [
         LandingPage.isClosed(),
         Utils.clickBtn("Order Now"),
@@ -116,5 +118,18 @@ registry.category("web_tour.tours").add("kiosk_order_pos_closed", {
             false
         ),
         Utils.checkIsNoBtn("Add to cart"),
+    ],
+});
+
+registry.category("web_tour.tours").add("test_self_order_products_sorting_order", {
+    steps: () => [
+        LandingPage.isClosed(),
+        Utils.clickBtn("Order Now"),
+        LandingPage.selectLocation("Test-Takeout"),
+        ProductPage.checkNthProduct(1, "Free"),
+        ProductPage.checkNthProduct(2, "Desk Organizer"),
+        ProductPage.checkNthProduct(3, "Ketchup"),
+        ProductPage.checkNthProduct(4, "Fanta"),
+        ProductPage.checkNthProduct(5, "Coca-Cola"),
     ],
 });

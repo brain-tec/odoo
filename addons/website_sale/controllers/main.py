@@ -14,6 +14,7 @@ from odoo import fields
 from odoo.exceptions import ValidationError
 from odoo.fields import Command, Domain
 from odoo.http import request, route
+from odoo.http.stream import content_disposition
 from odoo.tools import SQL, clean_context, float_round, lazy, str2bool
 from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo.tools.translate import LazyTranslate, _
@@ -239,6 +240,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             'max_price': max_price / conversion_rate,
             'attribute_value_dict': attribute_value_dict,
             'display_currency': post.get('display_currency'),
+            'extra_domain': post.get('extra_domain'),
         }
 
     def _shop_lookup_products(self, options, post, search, website):
@@ -266,7 +268,10 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     def _get_additional_shop_values(self, values, **kwargs):
         """ Hook to update values used for rendering website_sale.products template """
-        return {}
+        return {
+            # TODO lazy to avoid queries when wishlist disabled on shop page ?
+            'products_in_wishlist': request.env['product.wishlist'].current().product_id.product_tmpl_id,
+        }
 
     def _get_product_query_params(self, **kwargs):
         """Allow to configure the product page URL's query string."""
@@ -325,6 +330,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         attribute_value_ids = set(itertools.chain.from_iterable(attribute_value_dict.values()))
         if attribute_values:
             request.session['attribute_values'] = attribute_values
+            post['attribute_values'] = attribute_values
         else:
             request.session.pop('attribute_values', None)
 
@@ -369,7 +375,13 @@ class WebsiteSale(payment_portal.PaymentPortal):
             max_price=max_price,
             conversion_rate=conversion_rate,
             display_currency=website.currency_id,
-            **post
+            extra_domain=Domain.OR([
+                Domain('public_categ_ids', '=', False),
+                Domain('public_categ_ids.not_in_shop', '=', False),
+            ])
+            if not (category or search)
+            else None,
+            **post,
         )
         fuzzy_search_term, product_count, search_product = self._shop_lookup_products(
             options, post, search, website
@@ -422,7 +434,11 @@ class WebsiteSale(payment_portal.PaymentPortal):
         # categories
 
         Category = request.env['product.public.category']
-        categs_domain = Domain('parent_id', '=', False) & website_domain
+        categs_domain = (
+            Domain('parent_id', '=', False)
+            & Domain('not_in_shop', '=', False)
+            & website_domain
+        )
         if not self.env.user._is_internal():
             categs_domain &= Domain('has_published_products', '=', True)
         if search:
@@ -453,9 +469,12 @@ class WebsiteSale(payment_portal.PaymentPortal):
         products.fetch()
 
         # map each product to its variant, and prefetch the variants
-        variants = request.env['product.product'].sudo().browse(product._get_first_possible_variant_id() for product in products)
+        Product = request.env['product.product']
+        product_variant_ids = [product._get_first_possible_variant_id() for product in products]
+        variants = Product.sudo().browse(vid for vid in product_variant_ids if vid)
         variants.fetch()
-        product_variants = dict(zip(products, variants))
+        variant_by_id = {v.id: v for v in variants}
+        product_variants = dict(zip(products, (variant_by_id.get(vid, Product) for vid in product_variant_ids)))
 
         ProductAttribute = request.env['product.attribute']
         if products:
@@ -520,6 +539,10 @@ class WebsiteSale(payment_portal.PaymentPortal):
             values.update({'all_tags': all_tags, 'tags': tags})
         if category:
             values['main_object'] = category
+            values['markup_data_json'] = json_scriptsafe.dumps([
+                website._prepare_ecommerce_store_markup_data(),
+                self._prepare_breadcrumb_markup_data(website.get_base_url(), category)
+            ], indent=2)
         values.update(self._get_additional_shop_values(values, **post))
         return request.render("website_sale.products", values)
 
@@ -548,6 +571,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             if not self._apply_selectable_pricelist(pricelist_id):
                 return request.redirect(self._get_shop_path(category))
 
+        request.update_context(website_sale_product_page=True)
         is_category_in_query = category and isinstance(category, str)
         category = self._validate_and_get_category(category)
         query = self._get_filtered_query_string(
@@ -784,16 +808,19 @@ class WebsiteSale(payment_portal.PaymentPortal):
         return product.sudo()._is_add_to_cart_allowed()
 
     def _prepare_product_values(self, product, category, **kwargs):
+        website = request.website
         ProductCategory = request.env['product.public.category']
-        product_markup_data = [product._to_markup_data(request.website)]
         category = (
             (category and ProductCategory.browse(int(category)).exists())
             or product.public_categ_ids[:1]
         )
+        markup_data = [
+            website._prepare_ecommerce_store_markup_data(), product._to_markup_data(website)
+        ]
         if category:
             # Add breadcrumb's SEO data.
-            product_markup_data.append(self._prepare_breadcrumb_markup_data(
-                request.website.get_base_url(), category, product.name
+            markup_data.append(self._prepare_breadcrumb_markup_data(
+                website.get_base_url(), category
             ))
 
         if (last_attributes_search := request.session.get('attribute_values', [])):
@@ -814,7 +841,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
                             and ptav.product_attribute_value_id.id in attribute_value_ids
                         )
                     )[:1]
-                ) or ptal.product_template_value_ids[:1]
+                ) or ptal.product_template_value_ids.filtered('ptav_active')[:1]
             )
             combination_info = product._get_combination_info(
                 combination=request.env['product.template.attribute.value'].concat(combination)
@@ -823,7 +850,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             combination_info = product._get_combination_info()
 
         # Needed to trigger the recently viewed product rpc
-        view_track = request.website.viewref("website_sale.product").track
+        view_track = website.viewref("website_sale.product").track
 
         return {
             'categories': ProductCategory.search([('parent_id', '=', False)]),
@@ -834,43 +861,29 @@ class WebsiteSale(payment_portal.PaymentPortal):
             'product': product,
             'product_variant': request.env['product.product'].browse(combination_info['product_id']),
             'view_track': view_track,
-            'product_markup_data': json_scriptsafe.dumps(product_markup_data, indent=2),
+            'markup_data_json': json_scriptsafe.dumps(markup_data, indent=2),
             'shop_path': SHOP_PATH,
         }
 
-    def _prepare_breadcrumb_markup_data(self, base_url, category, product_name):
-        """ Generate JSON-LD markup data for the given product category.
+    def _prepare_breadcrumb_markup_data(self, base_url, category):
+        """Generate JSON-LD breadcrumb markup data for the given category.
 
         See https://schema.org/BreadcrumbList.
 
         :param str base_url: The base URL of the current website.
         :param product.public.category category: The current product category.
-        :param str product_name: The name of the current product.
         :return: The JSON-LD markup data.
         :rtype: dict
         """
         return {
             '@context': 'https://schema.org',
             '@type': 'BreadcrumbList',
-            'itemListElement': [
-                {
-                    '@type': 'ListItem',
-                    'position': 1,
-                    'name': 'All Products',
-                    'item': f'{base_url}{self._get_shop_path()}',
-                },
-                {
-                    '@type': 'ListItem',
-                    'position': 2,
-                    'name': category.name,
-                    'item': f'{base_url}{self._get_shop_path(category)}',
-                },
-                {
-                    '@type': 'ListItem',
-                    'position': 3,
-                    'name': product_name,
-                }
-            ]
+            'itemListElement': [{
+                '@type': 'ListItem',
+                'position': i,
+                'name': cat.name,
+                'item': f'{base_url}{self._get_shop_path(cat)}',
+            } for i, cat in enumerate(category.parents_and_self, start=1)],
         }
 
     @route(
@@ -1416,10 +1429,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 )
             # Process the delivery method.
             if shipping_option:
-                delivery_method_sudo = request.env['delivery.carrier'].sudo().browse(
-                    int(shipping_option['id'])
-                ).exists()
-                order_sudo._set_delivery_method(delivery_method_sudo)
+                dm_id = int(shipping_option['id'])
+                available_dms = order_sudo._get_delivery_methods()
+                order_sudo._set_delivery_method(available_dms.filtered(lambda dm: dm.id == dm_id))
 
         return order_sudo.partner_id.id
 
@@ -1672,7 +1684,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
             rendering_values['signup_url'] = signup_url._replace(
                 query=urlencode(
-                    dict(parse_qs(signup_url.query), redirect='/shop/unarchive_user_addresses')
+                    dict(parse_qs(signup_url.query), redirect='/shop/unarchive_user_addresses'),
+                    doseq=True,
                 )
             ).geturl()
 
@@ -1691,9 +1704,36 @@ class WebsiteSale(payment_portal.PaymentPortal):
     def print_saleorder(self, **kwargs):
         sale_order_id = request.session.get('sale_last_order_id')
         if sale_order_id:
+            sale_order = request.env['sale.order'].sudo().browse(sale_order_id)
+            filename = "%s.pdf" % (f'Order - {sale_order.name}' or 'Order')
             pdf, _ = request.env['ir.actions.report'].sudo()._render_qweb_pdf('sale.action_report_saleorder', [sale_order_id])
-            pdfhttpheaders = [('Content-Type', 'application/pdf'), ('Content-Length', '%s' % len(pdf))]
+            pdfhttpheaders = [
+                ('Content-Type', 'application/pdf'),
+                ('Content-Length', '%s' % len(pdf)),
+                ('Content-Disposition', content_disposition(filename, 'inline')),
+            ]
             return request.make_response(pdf, headers=pdfhttpheaders)
+        return request.redirect(self._get_shop_path())
+
+    @route(['/shop/print/invoice'], type='http', auth="public", website=True, sitemap=False)
+    def print_invoice(self, **kwargs):
+        sale_order_id = request.session.get('sale_last_order_id')
+        if sale_order_id:
+            sale_order = request.env['sale.order'].sudo().browse(sale_order_id)
+            invoice = sale_order.invoice_ids and sale_order.invoice_ids[0]
+            if invoice:
+                pdf, _ = (
+                    request.env['ir.actions.report']
+                    .sudo()
+                    ._render_qweb_pdf('account.account_invoices', [invoice.id])
+                )
+                filename = "%s.pdf" % (invoice.name or 'Invoice')
+                pdfhttpheaders = [
+                    ('Content-Type', 'application/pdf'),
+                    ('Content-Length', '%s' % len(pdf)),
+                    ('Content-Disposition', content_disposition(filename, 'inline')),
+                ]
+                return request.make_response(pdf, headers=pdfhttpheaders)
         return request.redirect(self._get_shop_path())
 
     # === CHECK METHODS === #
@@ -1822,7 +1862,10 @@ class WebsiteSale(payment_portal.PaymentPortal):
             'product_page_image_layout', 'product_page_image_width', 'product_page_grid_columns',
             'product_page_image_spacing', 'product_page_image_ratio',
             'product_page_image_ratio_mobile', 'product_page_cols_order',
-            'product_page_image_roundness', 'product_page_cta_design'
+            'product_page_image_roundness', 'product_page_cta_design',
+            # wishlist
+            'wishlist_opt_products_design_classes', 'wishlist_grid_columns',
+            'wishlist_mobile_columns', 'wishlist_gap',
         }
         # Default ppg to 1.
         if 'ppg' in options and not options['ppg']:

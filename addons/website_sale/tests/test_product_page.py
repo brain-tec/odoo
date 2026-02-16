@@ -22,7 +22,7 @@ class TestWebsiteSaleProductPage(HttpCase, ProductVariantsCommon, WebsiteSaleCom
         - is hidden for other products
         - is not displayed at the same time as the "Add to Cart" button
         """
-        self.website.prevent_zero_price_sale = True
+        self.website.prevent_sale = True
 
         self.product_template_sofa.list_price = 0
         red_sofa, blue_sofa = self.product_template_sofa.product_variant_ids[:2]
@@ -83,3 +83,24 @@ class TestWebsiteSaleProductPage(HttpCase, ProductVariantsCommon, WebsiteSaleCom
             }),
         ]
         self.start_tour(self.product.website_url, 'website_sale.product_pricelist_qty_change')
+
+    def test_product_unpublished_without_category(self):
+        """Test that products created from frontend are unpublished without category"""
+        self.start_tour("/", 'product_unpublished_without_category', login="admin")
+        product = self.env['product.product'].search(
+            [('name', '=', 'Product Without Category')],
+            limit=1,
+        )
+        self.assertTrue(product)
+        self.assertFalse(product.website_published)
+
+    def test_product_published_with_category(self):
+        """Test that products with category are published"""
+        self.env['product.public.category'].create({'name': 'Test Category'})
+        self.start_tour("/", 'product_published_with_category', login="admin")
+        product = self.env['product.product'].search(
+            [('name', '=', 'Product With Category')],
+            limit=1,
+        )
+        self.assertTrue(product)
+        self.assertTrue(product.website_published)

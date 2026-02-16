@@ -1,5 +1,6 @@
 import { fields } from "@mail/model/export";
 import { Thread } from "@mail/core/common/thread_model";
+import { convertBrToLineBreak } from "@mail/utils/common/format";
 
 import { patch } from "@web/core/utils/patch";
 import { url } from "@web/core/utils/urls";
@@ -7,37 +8,31 @@ import { url } from "@web/core/utils/urls";
 patch(Thread.prototype, {
     setup() {
         super.setup();
+        this.country_id = fields.One("res.country");
         this.livechat_end_dt = fields.Datetime();
-        this.livechat_operator_id = fields.One("res.partner");
+        this.livechat_note = fields.Html();
+        /** @type {string|undefined} */
+        this.livechatNoteText = fields.Attr(undefined, {
+            compute() {
+                if (this.livechat_note !== undefined) {
+                    return convertBrToLineBreak(this.livechat_note || "");
+                }
+                return this.livechatNoteText;
+            },
+        });
+        /** @type {"no_answer"|"no_agent"|"no_failure"|"escalated"|undefined} */
+        this.livechat_outcome = undefined;
         this.livechatVisitorMember = fields.One("discuss.channel.member", {
             compute() {
                 if (this.channel?.channel_type !== "livechat") {
                     return;
                 }
-                // For live chat conversation, the correspondent is the first
-                // channel member that is not the operator.
-                const orderedChannelMembers = [...this.channel.channel_member_ids].sort(
-                    (a, b) => a.id - b.id
-                );
-                const isFirstMemberOperator = orderedChannelMembers[0]?.partner_id?.eq(
-                    this.livechat_operator_id
-                );
-                const visitor = isFirstMemberOperator
-                    ? orderedChannelMembers[1]
-                    : orderedChannelMembers[0];
-                return visitor;
+                return [...this.channel.channel_member_ids]
+                    .sort((a, b) => a.id - b.id)
+                    .find((member) => member.livechat_member_type === "visitor");
             },
         });
     },
-    get autoOpenChatWindowOnNewMessage() {
-        return (
-            (this.channel?.channel_type === "livechat" &&
-                !this.store.chatHub.compact &&
-                this.channel.self_member_id) ||
-            super.autoOpenChatWindowOnNewMessage
-        );
-    },
-
     get composerHidden() {
         return this.channel?.channel_type === "livechat" && this.livechat_end_dt;
     },

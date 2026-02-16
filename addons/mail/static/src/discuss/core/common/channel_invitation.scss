@@ -31,12 +31,16 @@
     }
 }
 
-.o-discuss-ChannelInvitation-avatar {
-    width: 32px;
-    aspect-ratio: 1;
-}
-
 .o-discuss-ChannelInvitation-invitationBox {
     position: sticky;
     bottom: - map-get($spacers, 2); // Ignore p-2 class of ActionPanel
+}
+
+.o-discuss-ChannelInvitation-iconContainer {
+    margin-top: 1px;
+}
+
+.o-discuss-ChannelInvitation-iconPlus {
+    top: -4px;
+    right: -5px;
 }

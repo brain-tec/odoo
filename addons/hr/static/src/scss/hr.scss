@@ -49,7 +49,7 @@
     .o_employee_form_header_info{
         flex: 5;
     }
-    .o_presence_status_pill_wrapper{
+    .o_to_review_wrapper{
         flex: 3;
     }
 }
@@ -67,6 +67,13 @@
 .o_hr_narrow_field {
     width: 8rem!important;
     max-width: 8rem!important;
+    * {
+        max-width: 100%;
+    }
+}
+.o_hr_medium_field {
+    width: 25rem !important;
+    max-width: 25rem !important;
     * {
         max-width: 100%;
     }

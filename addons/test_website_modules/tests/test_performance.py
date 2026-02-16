@@ -301,9 +301,9 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
             'website': 1,
             'res_company': 2,
             'product_pricelist': 4,
-            'product_template': 6,
+            'product_template': 5,
             'product_tag': 1,
-            'product_public_category': 4,
+            'product_public_category': 5,
             'product_product': 1,
             'product_template_attribute_line': 3,
             'res_users': 1,
@@ -338,10 +338,11 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
             queries['account_tax_repartition_line'] = 2
 
         if self._has_demo_data():
-            query_count += 5
+            query_count += 6
             queries['product_template'] += 1
             queries['product_product'] += 2
             queries['ir_attachment'] += 1
+            queries['product_ribbon'] += 1
             queries['res_company'] += 1
         else:
             query_count += 3

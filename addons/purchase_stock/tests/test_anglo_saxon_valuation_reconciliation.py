@@ -47,7 +47,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
                         'name': product.name,
                         'product_id': product.id,
                         'product_qty': quantity,
-                        'product_uom_id': product.uom_id.id,
+                        'uom_id': product.uom_id.id,
                         'price_unit': price_unit,
                         'date_planned': date,
                         'tax_ids': [(6, 0, product.supplier_taxes_id.ids)] if set_tax else False,
@@ -63,7 +63,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
             move_form.invoice_date = date
             move_form.partner_id = self.partner_a
             move_form.currency_id = self.other_currency
-            move_form.purchase_vendor_bill_id = self.env['purchase.bill.union'].browse(-purchase_order.id)
+            move_form.purchase_id = purchase_order
             return move_form.save()
 
     def test_shipment_invoice(self):
@@ -509,7 +509,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
                         'name': self.product_a.name,
                         'product_id': self.product_a.id,
                         'product_qty': 1,
-                        'product_uom_id': self.product_a.uom_id.id,
+                        'uom_id': self.product_a.uom_id.id,
                         'price_unit': 29,
                         'date_planned': date_po_and_delivery,
                     })],

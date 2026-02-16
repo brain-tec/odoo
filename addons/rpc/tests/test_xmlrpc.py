@@ -4,12 +4,11 @@ import datetime
 import time
 
 import odoo
-import odoo.tools
 from odoo.exceptions import AccessDenied, AccessError
-from odoo.http import _request_stack
+from odoo.http.requestlib import _request_stack
 from odoo.service import common as auth
 from odoo.service import model
-from odoo.tests import tagged, common
+from odoo.tests import common, tagged
 from odoo.tools import DotDict, mute_logger
 
 from odoo.addons.base.tests.common import SavepointCaseWithUserDemo
@@ -174,9 +173,9 @@ class TestXMLRPC(common.HttpCase):
         ids = self.env['ir.attachment'].create({'name': 'n', 'raw': b'\x01\x09'}).ids
         [att] = self.xmlrpc_object.execute(
             common.get_db_name(), self.admin_uid, 'admin',
-            'ir.attachment', 'read', ids, ['raw'])
-        self.assertEqual(att['raw'], '\t',
-            "on read, binary data should be decoded as a string and stripped from control character")
+            'ir.attachment', 'read', ids, [])
+        self.assertEqual(att['raw'], 'AQk=',
+            "on read, binary data should be base64 encoded")
 
 # really just for the test cursor
 @common.tagged('post_install', '-at_install')

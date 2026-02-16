@@ -19,6 +19,7 @@ __all__ = [
 _logger = logging.getLogger(__name__)
 _logger_guess_mimetype = _logger.getChild('guess_mimetype')
 _olecf_mimetypes = {'application/x-ole-storage', 'application/CDFV2'}
+MIMETYPE_HEAD_SIZE = 4096
 
 
 class _Mimetype(typing.NamedTuple):
@@ -41,7 +42,8 @@ def _odoo_guess_mimetype(bin_data, default='application/octet-stream'):
 
 
 def _magic_guess_mimetype(bin_data):
-    mimetype = magic.from_buffer(bin_data, mime=True)
+    magic_data = bytes(bin_data)
+    mimetype = magic.from_buffer(magic_data, mime=True)
 
     # magic.from_buffer() doesn't properly detect DOC, XLS, and PPT documents.
     if mimetype in _olecf_mimetypes:
@@ -77,9 +79,9 @@ def guess_mimetype(bin_data, default='application/octet-stream'):
 
 def _odoo_guess_file_mimetype(path, default='application/octet-stream'):
     with open(path, 'rb') as file:
-        data = file.read(4096)  # Smallest power of 2 that works for all detection functions (except for zip).
+        data = file.read(MIMETYPE_HEAD_SIZE)
 
-        if len(data) == 4096 and is_zip(data):  # We need the whole file.
+        if len(data) == MIMETYPE_HEAD_SIZE and is_zip(data):  # We need the whole file.
             file.seek(0)
             data = file.read()
 

@@ -9,6 +9,7 @@ import {
     filterChangeByCategories,
 } from "@point_of_sale/app/models/utils/order_change";
 import { prepareRoundingVals } from "../accounting/utils";
+const { DateTime } = luxon;
 
 definePosModels();
 
@@ -56,6 +57,36 @@ describe("pos_store.js", () => {
         expect(updatedOrder.state).toBe("cancel");
         expect(isListenerCalled).toBe(true);
         listenerCleanup();
+    });
+
+    test("sendOrderInPreparation clears change state when no prep changes", async () => {
+        const store = await setupPosEnv();
+        const order = store.addNewOrder();
+        const productOutsidePrep = store.models["product.template"].get(14);
+        const date = DateTime.now();
+
+        await store.addLineToOrder(
+            {
+                product_tmpl_id: productOutsidePrep,
+                qty: 1,
+                write_date: date,
+                create_date: date,
+            },
+            order
+        );
+
+        expect(order.hasChange).toBe(true);
+
+        let printCalled = false;
+        store.printChanges = async () => {
+            printCalled = true;
+            return true;
+        };
+
+        await store.sendOrderInPreparation(order);
+
+        expect(printCalled).toBe(false);
+        expect(order.hasChange).toBe(false);
     });
 
     describe("syncAllOrders", () => {
@@ -367,7 +398,7 @@ describe("pos_store.js", () => {
         let grouped = store.productToDisplayByCateg;
         expect(grouped.length).toBe(1); // Only one group
         expect(grouped[0][0]).toBe("0");
-        expect(grouped[0][1].length).toBe(15); // 15 products in same group
+        expect(grouped[0][1].length).toBe(16); // 16 products in same group
 
         // Case 2: Grouping enabled
         store.config.iface_group_by_categ = true;
@@ -404,6 +435,15 @@ describe("pos_store.js", () => {
         expect(grouped[0][0]).toBe("1");
         expect(grouped[0][1][0].name).toBe("Multi Category Product");
         expect(grouped[0][1][1].name).toBe("TEST");
+
+        // Case 5: Grouping with category 'Food' selected (parent of 'Burger' & 'Pizza')
+        store.selectedCategory = store.models["pos.category"].get(3);
+        grouped = store.productToDisplayByCateg;
+        expect(grouped.length).toBe(3);
+        expect(grouped[0][0]).toBe("3");
+        expect(grouped[0][1][0].name).toBe("Club sandwich");
+        expect(grouped[1][1][0].name).toBe("Bacon burger");
+        expect(grouped[2][1][0].name).toBe("Pizza margarita");
     });
 
     test("onDeleteOrder", async () => {

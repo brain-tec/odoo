@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import base64
 import datetime
 
 from freezegun import freeze_time
@@ -25,12 +23,12 @@ class TestMailTemplateCommon(MailCommon, TestRecipients):
 
         cls._attachments = [{
             'name': 'first.txt',
-            'datas': base64.b64encode(b'My first attachment'),
+            'raw': b'My first attachment',
             'res_model': 'res.partner',
             'res_id': cls.user_admin.partner_id.id
         }, {
             'name': 'second.txt',
-            'datas': base64.b64encode(b'My second attachment'),
+            'raw': b'My second attachment',
             'res_model': 'res.partner',
             'res_id': cls.user_admin.partner_id.id
         }]
@@ -217,7 +215,7 @@ class TestMailTemplateLanguages(TestMailTemplateCommon):
         """ Test 'send_email' on template on a given record, used notably as
         contextual action. """
         self.env.invalidate_all()
-        with self.with_user(self.user_employee.login), self.assertQueryCount(15):
+        with self.with_user(self.user_employee.login), self.assertQueryCount(13):
             mail_id = self.test_template.with_env(self.env).send_mail(self.test_record.id)
             mail = self.env['mail.mail'].sudo().browse(mail_id)
 
@@ -235,7 +233,7 @@ class TestMailTemplateLanguages(TestMailTemplateCommon):
         """ Test without layout, just to check impact """
         self.test_template.email_layout_xmlid = False
         self.env.invalidate_all()
-        with self.with_user(self.user_employee.login), self.assertQueryCount(14):
+        with self.with_user(self.user_employee.login), self.assertQueryCount(12):
             mail_id = self.test_template.with_env(self.env).send_mail(self.test_record.id)
             mail = self.env['mail.mail'].sudo().browse(mail_id)
 
@@ -252,7 +250,7 @@ class TestMailTemplateLanguages(TestMailTemplateCommon):
     def test_template_send_email_batch(self):
         """ Test 'send_email' on template in batch """
         self.env.invalidate_all()
-        with self.with_user(self.user_employee.login), self.assertQueryCount(27):
+        with self.with_user(self.user_employee.login), self.assertQueryCount(25):
             template = self.test_template.with_env(self.env)
             mails_sudo = template.send_mail_batch(self.test_records_batch.ids)
 
@@ -275,8 +273,8 @@ class TestMailTemplateLanguages(TestMailTemplateCommon):
         """ Test 'send_email' on template on a given record, used notably as
         contextual action, with dynamic reports involved """
         self.env.invalidate_all()
-        # tm: 22, nightly: +1
-        with self.with_user(self.user_employee.login), self.assertQueryCount(24):
+        # tm: 20, nightly: +1
+        with self.with_user(self.user_employee.login), self.assertQueryCount(21):
             mail_id = self.test_template_wreports.with_env(self.env).send_mail(self.test_record.id)
             mail = self.env['mail.mail'].sudo().browse(mail_id)
 
@@ -292,8 +290,8 @@ class TestMailTemplateLanguages(TestMailTemplateCommon):
     def test_template_send_email_wreport_batch(self):
         """ Test 'send_email' on template in batch with dynamic reports """
         self.env.invalidate_all()
-        # tm: 233, nightly: +1
-        with self.with_user(self.user_employee.login), self.assertQueryCount(235):
+        # tm: 231, nightly: +1
+        with self.with_user(self.user_employee.login), self.assertQueryCount(232):
             template = self.test_template_wreports.with_env(self.env)
             mails_sudo = template.send_mail_batch(self.test_records_batch.ids)
 
@@ -404,7 +402,7 @@ class TestMailTemplateLanguages(TestMailTemplateCommon):
         test_records[1].write({'customer_id': customers[1].id})
 
         self.env.invalidate_all()
-        with self.with_user(self.user_employee.login), self.assertQueryCount(20):
+        with self.with_user(self.user_employee.login), self.assertQueryCount(18):
             template = self.test_template.with_env(self.env)
             mails_sudo = template.send_mail_batch(self.test_records.ids, email_layout_xmlid='mail.test_layout')
 

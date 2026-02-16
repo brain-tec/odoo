@@ -53,7 +53,7 @@ class PostgreSQLHandler(logging.Handler):
         self._support_metadata = False
         if tools.config['log_db'] != '%d':
             with contextlib.suppress(Exception), tools.mute_logger('odoo.sql_db'), sql_db.db_connect(tools.config['log_db'], allow_uri=True).cursor() as cr:
-                cr.execute("""SELECT 1 FROM information_schema.columns WHERE table_name='ir_logging' and column_name='metadata'""")
+                cr.execute("""SELECT 1 FROM information_schema.columns WHERE table_name='ir_logging' and column_name='metadata' AND table_schema = current_schema""")
                 self._support_metadata = bool(cr.fetchone())
 
     def emit(self, record):
@@ -102,6 +102,7 @@ RESET_SEQ = "\033[0m"
 COLOR_SEQ = "\033[1;%dm"
 BOLD_SEQ = "\033[1m"
 COLOR_PATTERN = f"{COLOR_SEQ}{COLOR_SEQ}%s{RESET_SEQ}"
+TRUE_COLOR_PATTERN = f"\033[38;5;%dm%s{RESET_SEQ}"
 LEVEL_COLOR_MAPPING = {
     logging.DEBUG: (BLUE, DEFAULT),
     logging.INFO: (GREEN, DEFAULT),
@@ -109,6 +110,8 @@ LEVEL_COLOR_MAPPING = {
     logging.ERROR: (RED, DEFAULT),
     logging.CRITICAL: (WHITE, RED),
 }
+# all colors but black, grey and silver; length must be prime.
+PID_COLORS = (1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15)
 
 class PerfFilter(logging.Filter):
 
@@ -163,6 +166,10 @@ class ColoredFormatter(logging.Formatter):
     def format(self, record):
         fg_color, bg_color = LEVEL_COLOR_MAPPING.get(record.levelno, (GREEN, DEFAULT))
         record.levelname = COLOR_PATTERN % (30 + fg_color, 40 + bg_color, record.levelname)
+        if tools.config['workers']:
+            record.process = TRUE_COLOR_PATTERN % (PID_COLORS[record.process % len(PID_COLORS)], record.process)
+        else:
+            record.process = TRUE_COLOR_PATTERN % (PID_COLORS[record.thread % len(PID_COLORS)], record.process)
         return super().format(record)
 
 
@@ -170,7 +177,6 @@ class LogRecord(logging.LogRecord):
     def __init__(self, name, level, pathname, lineno, msg, args, exc_info, func=None, sinfo=None, **kwargs):
         super().__init__(name, level, pathname, lineno, msg, args, exc_info, func=func, sinfo=sinfo, **kwargs)
         self.perf_info = ""
-        self.pid = os.getpid()
         self.dbname = getattr(threading.current_thread(), 'dbname', '?')
 
 
@@ -227,7 +233,7 @@ def init_logger():
     resetlocale()
 
     # create a format for log messages and dates
-    format = '%(asctime)s %(pid)s %(levelname)s %(dbname)s %(name)s: %(message)s %(perf_info)s'
+    format = '%(asctime)s %(process)s %(levelname)s %(dbname)s %(name)s: %(message)s %(perf_info)s'
     # Normal Handler on stderr
     handler = logging.StreamHandler()
 
@@ -303,13 +309,9 @@ def init_logger():
 
 
 DEFAULT_LOG_CONFIGURATION = [
-    'odoo.http.rpc.request:INFO',
-    'odoo.http.rpc.response:INFO',
     ':INFO',
 ]
 PSEUDOCONFIG_MAPPER = {
-    'debug_rpc_answer': ['odoo:DEBUG', 'odoo.sql_db:INFO', 'odoo.http.rpc:DEBUG'],
-    'debug_rpc': ['odoo:DEBUG', 'odoo.sql_db:INFO', 'odoo.http.rpc.request:DEBUG'],
     'debug': ['odoo:DEBUG', 'odoo.sql_db:INFO'],
     'debug_sql': ['odoo.sql_db:DEBUG'],
     'info': [],
@@ -331,7 +333,7 @@ def showwarning_with_traceback(message, category, filename, lineno, file=None, l
     # find the stack frame matching (filename, lineno)
     filtered = []
     for frame in traceback.extract_stack():
-        if frame.name == '__call__' and frame.filename.endswith('/odoo/http.py'):
+        if frame.name == '__call__' and frame.filename.endswith('/odoo/http/router.py'):
             # we don't care about the frames above our wsgi entrypoint
             filtered.clear()
         if 'importlib' not in frame.filename:

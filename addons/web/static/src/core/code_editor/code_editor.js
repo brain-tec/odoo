@@ -10,6 +10,7 @@ export class CodeEditor extends Component {
             optional: true,
             validate: (mode) => CodeEditor.MODES.includes(mode),
         },
+        modeOptions: { type: Object, optional: true },
         value: { validate: (v) => typeof v === "string", optional: true },
         readonly: { type: Boolean, optional: true },
         onChange: { type: Function, optional: true },
@@ -24,6 +25,7 @@ export class CodeEditor extends Component {
         sessionId: { type: [Number, String], optional: true },
         initialCursorPosition: { type: Object, optional: true },
         showLineNumbers: { type: Boolean, optional: true },
+        lineWrapping: { type: Boolean, optional: true },
     };
     static defaultProps = {
         readonly: false,
@@ -67,6 +69,7 @@ export class CodeEditor extends Component {
                     maxLines: this.props.maxLines,
                     showPrintMargin: false,
                     useWorker: false,
+                    wrap: this.props.lineWrapping,
                 });
                 this.aceEditor.$blockScrolling = true;
 
@@ -152,7 +155,7 @@ export class CodeEditor extends Component {
                     });
                     sessions[sessionId] = session;
                 }
-                session.setMode(mode ? `ace/mode/${mode}` : "");
+                session.setMode(this.aceMode);
                 this.aceEditor.setSession(session);
             },
             () => [this.props.sessionId, this.props.mode, this.props.value]
@@ -176,5 +179,16 @@ export class CodeEditor extends Component {
                 });
             });
         }
+    }
+
+    get aceMode() {
+        const mode = this.props.mode;
+        if (mode) {
+            return {
+                path: `ace/mode/${mode}`,
+                ...(this.props.modeOptions || {}),
+            };
+        }
+        return "";
     }
 }

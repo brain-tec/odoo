@@ -11,6 +11,7 @@ const todayDate = function () {
 };
 
 registry.category("web_tour.tours").add("calendar_appointments_hour_tour", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     url: "/odoo",
     steps: () => [
         stepUtils.showAppsMenuItem(),
@@ -67,7 +68,7 @@ registry.category("web_tour.tours").add("calendar_appointments_hour_tour", {
         {
             trigger: ".fc-col-header-cell.fc-day.fc-day-mon",
             content: "Check the day is properly displayed",
-            run: "click",
+            run: "hover",
         },
         {
             trigger: '.fc-time:contains("10:00")',

@@ -518,7 +518,7 @@ export class MailThread extends models.ServerModel {
                                 message_id: message.id,
                                 store_data: new mailDataHelpers.Store(
                                     MailMessage.browse(message.id),
-                                    makeKwArgs({ for_current_user: true, add_followers: true })
+                                    makeKwArgs({ for_current_user: true, inbox_fields: true })
                                 ).get_result(),
                             },
                         ]);
@@ -673,6 +673,9 @@ export class MailThread extends models.ServerModel {
         if (request_list.includes("contact_fields")) {
             res.primary_email_field = this.env[this._name]._primary_email;
             res.partner_fields = this.env[this._name]._mail_get_partner_fields?.();
+        }
+        if (request_list.includes("defaultSubject")) {
+            res.display_name = MailThread._message_compute_subject([thread.id])[thread.id];
         }
         if (request_list.includes("display_name")) {
             res.display_name = thread.display_name;

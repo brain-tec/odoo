@@ -17,7 +17,6 @@ if typing.TYPE_CHECKING:
     from .lru import LRU
     from collections.abc import Callable, Iterable
     from odoo.models import BaseModel
-    C = typing.TypeVar('C', bound=Callable)
 
 unsafe_eval = eval
 
@@ -76,7 +75,7 @@ class ormcache:
         self.args = args
         self.cache_name = cache
 
-    def __call__(self, method: C) -> C:
+    def __call__[C: Callable](self, method: C) -> C:
         assert not hasattr(self, 'method'), "ormcache is already bound to a method"
         self.method = method
         self.determine_key()
@@ -301,7 +300,7 @@ def get_cache_size(
         *,
         cache_info: str = '',
         seen_ids: set[int] | None = None,
-        class_slots: dict[type, Iterable[str]] | None = None
+        class_slots: dict[int, Iterable[str]] | None = None
     ) -> int:
     """ A non-thread-safe recursive object size estimator """
     from odoo.models import BaseModel  # noqa: PLC0415

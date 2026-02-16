@@ -37,7 +37,7 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
 
     def test_chatbot_is_forward_operator_child(self):
         self.assertEqual([step.is_forward_operator_child for step in self.chatbot_script.script_step_ids],
-                         [False, False, False, False, False, False, False, True, True, False, True, False, False, False, False],
+                         [False, False, False, False, False, False, False, False, False, True, True, False, True, False, False, False, False],
                          "Steps 'step_no_one_available', 'step_no_operator_dispatch', 'step_just_leaving'"
                          "should be flagged as forward operator child.")
 
@@ -45,7 +45,7 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
         self.chatbot_script.script_step_ids.invalidate_recordset(['is_forward_operator_child'])
 
         self.assertEqual([step.is_forward_operator_child for step in self.chatbot_script.script_step_ids],
-                         [False, False, False, False, False, False, False, True, False, False, False, False, False, False, False],
+                         [False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False],
                          "Only step 'step_no_one_available' should be flagged as forward operator child.")
 
     def test_chatbot_steps(self):
@@ -67,6 +67,13 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
 
         self._post_answer_and_trigger_next_step(discuss_channel, email="test@example.com")
         self.assertEqual(discuss_channel.chatbot_current_step_id, self.step_email_validated)
+
+        self.make_jsonrpc_request("/chatbot/step/trigger", {"channel_id": discuss_channel.id})
+        self.assertEqual(discuss_channel.chatbot_current_step_id, self.step_phone)
+        with self.assertRaises(JsonRpcException, msg="odoo.exceptions.ValidationError"), mute_logger("odoo.http"):
+            self._post_answer_and_trigger_next_step(discuss_channel, phone="123")
+        self._post_answer_and_trigger_next_step(discuss_channel, phone="+919876543210")
+        self.assertEqual(discuss_channel.chatbot_current_step_id, self.step_phone_validated)
 
     def test_chatbot_steps_sequence(self):
         """ Ensure sequence is correct when creating chatbots and adding steps to an existing one.
@@ -123,7 +130,12 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
             discuss_channel = (
                 self.env["discuss.channel"].sudo().browse(data["channel_id"])
             )
-            self.assertEqual(discuss_channel.livechat_operator_id, self.chatbot_script.operator_partner_id)
+            self.assertEqual(
+                discuss_channel.channel_member_ids.filtered(
+                    lambda m: m.livechat_member_type == "bot"
+                ).partner_id,
+                self.chatbot_script.operator_partner_id,
+            )
             discuss_channel._add_members(users=self.env.user)
             self_member = discuss_channel.channel_member_ids.filtered(lambda m: m.is_self)
             bot_member = discuss_channel.channel_member_ids.filtered(
@@ -150,7 +162,10 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
         )
         discuss_channel._forward_human_operator(self.step_forward_operator)
         self.assertEqual(
-            discuss_channel.livechat_operator_id, self.chatbot_script.operator_partner_id
+            discuss_channel.channel_member_ids.filtered(
+                lambda m: m.livechat_member_type == "bot"
+            ).partner_id,
+            self.chatbot_script.operator_partner_id,
         )
         self.assertEqual(discuss_channel.name, "Testing Bot")
 
@@ -160,7 +175,6 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
         member_bot_data = {
             "channel_role": False,
             "create_date": fields.Datetime.to_string(member_bot.create_date),
-            "fetched_message_id": False,
             "id": member_bot.id,
             "livechat_member_type": "bot",
             "last_seen_dt": False,
@@ -193,7 +207,7 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
                         "markup",
                         (
                             '<div class="o_mail_notification" data-oe-type="channel-joined">invited <a href="#" data-oe-model="res.partner" data-oe-id="'
-                            f'{self.partner_employee.id}">@Ernest Employee</a> to the channel</div>'
+                            f'{self.partner_employee.id}">@Ernest Employee</a> to the conversation</div>'
                         ),
                     ],
                     # thread not renamed yet at this step
@@ -212,18 +226,26 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
             channel_data_join["discuss.channel"][0]["livechat_outcome"] = "no_agent"
             channel_data_join["discuss.channel"][0]["chatbot"]["currentStep"]["message"] = messages[1].id
             channel_data_join["discuss.channel"][0]["chatbot"]["steps"][0]["message"] = messages[1].id
-            channel_data_join["discuss.channel"][0]["livechat_operator_id"] = self.chatbot_script.operator_partner_id.id
             channel_data_join["discuss.channel"][0]["member_count"] = 3
             channel_data_join["discuss.channel"][0]["name"] = "Testing Bot"
             channel_data_join["discuss.channel.member"].insert(0, member_bot_data)
-            channel_data_join["discuss.channel.member"][2]["fetched_message_id"] = False
             channel_data_join["discuss.channel.member"][2]["last_seen_dt"] = False
             channel_data_join["discuss.channel.member"][2]["seen_message_id"] = False
             channel_data_join["discuss.channel.member"][2]["unpin_dt"] = False
+            # adding member_id to livechat history
+            # since the joined message is calculated before removing the bot from members
+            member_bot_history = next(
+                filter(
+                    lambda h: h.get("partner_id", None)
+                    == self.chatbot_script.operator_partner_id.id,
+                    channel_data_join["im_livechat.channel.member.history"],
+                )
+            )
+            member_bot_history["member_id"] = member_bot_data["id"]
             del channel_data_join["res.partner"][1]
             channel_data_join["res.partner"].insert(
                 0,
-                {
+                self._filter_partners_fields({
                     "active": False,
                     "avatar_128_access_token": self.chatbot_script.operator_partner_id._get_avatar_128_access_token(),
                     "country_id": False,
@@ -231,13 +253,14 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
                     "im_status": "im_partner",
                     "im_status_access_token": self.chatbot_script.operator_partner_id._get_im_status_access_token(),
                     "is_public": False,
+                    "main_user_id": False,
                     "mention_token": self.chatbot_script.operator_partner_id._get_mention_token(),
                     "name": "Testing Bot",
                     "user_livechat_username": False,
                     "write_date": fields.Datetime.to_string(
                         self.chatbot_script.operator_partner_id.write_date
                     ),
-                },
+                })[0],
             )
             store_1 = Store().add(discuss_channel, "_store_channel_fields")
             channel_data = store_1.get_result()
@@ -290,7 +313,6 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
                                     "create_date": fields.Datetime.to_string(
                                         member_emp.create_date
                                     ),
-                                    "fetched_message_id": False,
                                     "id": member_emp.id,
                                     "livechat_member_type": "agent",
                                     "last_seen_dt": fields.Datetime.to_string(
@@ -338,13 +360,18 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
                                     "id": agent_history_id,
                                     "livechat_member_type": "agent",
                                     "partner_id": self.partner_employee.id,
+                                    "member_id": member_emp.id,
                                 }
                             ],
                             "res.partner": [
                                 {
+                                    "avatar_128_access_token": self.partner_employee._get_avatar_128_access_token(),
                                     "id": self.partner_employee.id,
                                     "name": "Ernest Employee",
                                     "user_livechat_username": False,
+                                    "write_date": fields.Datetime.to_string(
+                                        self.partner_employee.write_date
+                                    ),
                                 }
                             ],
                         },
@@ -362,21 +389,9 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
                             "discuss.channel": [
                                 {
                                     "id": discuss_channel.id,
-                                    "livechat_operator_id": self.partner_employee.id,
                                     "name": "OdooBot Ernest Employee",
                                 },
                             ],
-                            "res.partner": self._filter_partners_fields(
-                                {
-                                    "avatar_128_access_token": self.partner_employee._get_avatar_128_access_token(),
-                                    "id": self.partner_employee.id,
-                                    "name": "Ernest Employee",
-                                    "user_livechat_username": False,
-                                    "write_date": fields.Datetime.to_string(
-                                        self.partner_employee.write_date
-                                    ),
-                                }
-                            ),
                         },
                     },
                     {"type": "mail.record/insert", "payload": channel_data_emp},
@@ -387,7 +402,7 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
         with self.assertBus(get_params=get_forward_op_bus_params):
             discuss_channel._forward_human_operator(self.step_forward_operator, users=self.user_employee)
         self.assertEqual(discuss_channel.name, "OdooBot Ernest Employee")
-        self.assertEqual(discuss_channel.livechat_operator_id, self.partner_employee)
+        self.assertEqual(discuss_channel.livechat_agent_partner_ids, self.partner_employee)
         self.assertEqual(discuss_channel.livechat_outcome, "no_answer")
         self.assertTrue(
             discuss_channel.channel_member_ids.filtered(

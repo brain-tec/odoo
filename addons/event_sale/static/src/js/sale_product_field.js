@@ -45,8 +45,8 @@ patch(SaleOrderLineProductField.prototype, {
             {
                 additionalContext: actionContext,
                 onClose: async (closeInfo) => {
-                    if (!closeInfo || closeInfo.special) {
-                        // wizard popup closed or 'Cancel' button triggered
+                    if (!closeInfo?.eventConfiguration || closeInfo.special || closeInfo.dismiss) {
+                        // wizard popup closed or 'Discard' button triggered
                         if (!this.props.record.data.event_ticket_id) {
                             // remove product if event configuration was cancelled.
                             this.props.record.update({

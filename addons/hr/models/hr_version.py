@@ -4,8 +4,10 @@ from collections import defaultdict
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from babel.dates import format_date, get_date_format
+from zoneinfo import ZoneInfo
 
 from odoo import api, fields, models
+from odoo.addons.base.models.res_partner import _tz_get
 from odoo.exceptions import ValidationError
 from odoo.tools import get_lang, babel_locale_parse
 
@@ -71,7 +73,7 @@ class HrVersion(models.Model):
         ('male', 'Male'),
         ('female', 'Female'),
         ('other', 'Other'),
-    ], groups="hr.group_hr_user", tracking=1, help="This is the legal sex recognized by the state.", string='Gender')
+    ], groups="hr.group_hr_user", tracking=1, help="This is the legal sex as recognized by the state, used for official and statutory purposes.", string='Gender')
 
     private_street = fields.Char(string="Private Street", groups="hr.group_hr_user", tracking=1)
     private_street2 = fields.Char(string="Private Street2", groups="hr.group_hr_user", tracking=1)
@@ -133,15 +135,25 @@ class HrVersion(models.Model):
     work_location_id = fields.Many2one('hr.work.location', 'Work Location',
                                        domain="[('address_id', '=', address_id)]", tracking=1)
 
-    departure_reason_id = fields.Many2one("hr.departure.reason", string="Departure Reason",
-                                          groups="hr.group_hr_user", copy=False, ondelete='restrict', tracking=1)
-    departure_description = fields.Html(string="Additional Information", groups="hr.group_hr_user", copy=False)
-    departure_date = fields.Date(string="Departure Date", groups="hr.group_hr_user", copy=False, tracking=1)
+    departure_id = fields.Many2one('hr.employee.departure', string="Departure", copy=False)
+    departure_reason_id = fields.Many2one(related='departure_id.departure_reason_id', readonly=False, groups="hr.group_hr_user", tracking=1)
+    departure_description = fields.Html(related='departure_id.departure_description', readonly=False, groups="hr.group_hr_user")
+    departure_date = fields.Date(related='departure_id.departure_date', readonly=False, groups="hr.group_hr_user", tracking=1)
+    departure_action_at_departure = fields.Boolean(related='departure_id.action_at_departure', readonly=False, groups="hr.group_hr_user")
+    departure_action_other_date = fields.Date(related='departure_id.action_other_date', readonly=False, groups="hr.group_hr_user")
+    departure_do_archive_employee = fields.Boolean(related='departure_id.do_archive_employee', readonly=False, groups="hr.group_hr_user")
+    departure_do_archive_user = fields.Boolean(related='departure_id.do_archive_user', readonly=False, groups="hr.group_hr_user")
+    departure_do_set_date_end = fields.Boolean(related='departure_id.do_set_date_end', readonly=False, groups="hr.group_hr_user")
+    departure_has_selected_actions = fields.Boolean(related='departure_id.has_selected_actions', groups="hr.group_hr_user")
+    departure_apply_immediately = fields.Boolean(related='departure_id.apply_immediately', groups="hr.group_hr_user")
+    departure_apply_date = fields.Date(related='departure_id.apply_date', groups="hr.group_hr_user")
 
     resource_calendar_id = fields.Many2one('resource.calendar', inverse='_inverse_resource_calendar_id', check_company=True, string="Working Hours", tracking=1)
+    hours_per_week = fields.Float(string="Hours per Week", compute='_compute_hours_per_week', store=True, readonly=False)
+    hours_per_day = fields.Float(string="Hours per Day", compute='_compute_hours_per_day', store=True, readonly=False)
     is_flexible = fields.Boolean(compute='_compute_is_flexible', store=True, groups="hr.group_hr_user")
     is_fully_flexible = fields.Boolean(compute='_compute_is_flexible', store=True, groups="hr.group_hr_user")
-    tz = fields.Selection(related='employee_id.tz')
+    tz = fields.Selection(_tz_get, string='Timezone', required=True, default=lambda self: self.env.context.get('tz') or self.env.user.tz or 'UTC')
 
     # Contract Information
     contract_date_start = fields.Date('Contract Start Date', tracking=1, groups="hr.group_hr_manager")
@@ -296,11 +308,11 @@ class HrVersion(models.Model):
     def write(self, vals):
         # Employee Versions Validation
         if 'employee_id' in vals:
-            if self.filtered(lambda v: len(v.employee_id.version_ids) == 1 and vals['employee_id'] != v.employee_id.id):
-                raise ValidationError(self.env._("Cannot unassign the only active record of an employee."))
+            if self.filtered(lambda v: v.employee_id and v.employee_id.version_ids <= self and vals['employee_id'] != v.employee_id.id):
+                raise ValidationError(self.env._("Cannot unassign all the active versions of an employee."))
         if 'active' in vals and not vals['active']:
-            if self.filtered(lambda v: len(v.employee_id.version_ids) == 1):
-                raise ValidationError(self.env._("Cannot archive the only active record of an employee."))
+            if self.filtered(lambda v: v.employee_id and v.employee_id.version_ids <= self):
+                raise ValidationError(self.env._("Cannot archive all the active versions of an employee."))
 
         if self.env.context.get('sync_contract_dates') or ("contract_date_start" not in vals and "contract_date_end" not in vals):
             return super().write(vals)
@@ -425,13 +437,13 @@ class HrVersion(models.Model):
     def _is_fully_flexible(self):
         """ return True if the version has a fully flexible working calendar """
         self.ensure_one()
-        return not self.resource_calendar_id
+        return not self.resource_calendar_id and not self.hours_per_week and not self.hours_per_day
 
-    @api.depends('resource_calendar_id.flexible_hours')
+    @api.depends('resource_calendar_id', 'hours_per_week', 'hours_per_day')
     def _compute_is_flexible(self):
         for version in self:
             version.is_fully_flexible = version._is_fully_flexible()
-            version.is_flexible = version.is_fully_flexible or version.resource_calendar_id.flexible_hours
+            version.is_flexible = version._is_fully_flexible() or (not version.resource_calendar_id and (version.hours_per_week or version.hours_per_day))
 
     @api.model
     def _get_whitelist_fields_from_template(self):
@@ -556,10 +568,16 @@ class HrVersion(models.Model):
                 if version.contract_date_start \
                 else version.date_version
 
-            next_version = self.env['hr.version'].search([
-                ('employee_id', 'in', version.employee_id.ids),
-                ('date_version', '>', version.date_version)], limit=1)
-            date_version_end = next_version.date_version + relativedelta(days=-1) if next_version else False
+        all_versions = self.search_fetch([
+            ('employee_id', 'in', self.employee_id.ids),
+            ('date_version', '>', min(self.mapped('date_start'), default=date.today())),
+        ], ['employee_id', 'date_version'], order='date_version').grouped('employee_id')
+        for version in self:
+            date_version_end = False
+            if next_versions := all_versions.get(version.employee_id):
+                date_version_end = next((d for d in next_versions.mapped('date_version') if d > version.date_version), None)
+                if date_version_end:
+                    date_version_end -= relativedelta(days=1)
 
             if date_version_end and version.contract_date_end:
                 version.date_end = min(date_version_end, version.contract_date_end)
@@ -591,6 +609,17 @@ class HrVersion(models.Model):
                 if version == current_version and employee.resource_id.calendar_id != version.resource_calendar_id:
                     employee.resource_id.calendar_id = version.resource_calendar_id
 
+    @api.depends('hours_per_day')
+    def _compute_hours_per_week(self):
+        for resource in self:
+            if not resource.hours_per_week:
+                resource.hours_per_week = resource.hours_per_day * 7
+
+    @api.depends('hours_per_week')
+    def _compute_hours_per_day(self):
+        for resource in self:
+            resource.hours_per_day = resource.hours_per_week / 7
+
     def _get_salary_costs_factor(self):
         self.ensure_one()
         return 12.0
@@ -601,10 +630,14 @@ class HrVersion(models.Model):
         return self_sudo.structure_type_id and self_sudo.structure_type_id.country_id.code == country_code
 
     def _get_tz(self):
-        if self.resource_calendar_id and self.resource_calendar_id.tz:
-            return self.resource_calendar_id.tz
-        else:
-            return self.tz
+        self.ensure_one()
+        return self.tz or self.employee_id.user_partner_id.tz or self.employee_id.company_id.tz or 'UTC'
+
+    def _get_resources_per_tz(self):
+        resources_per_tz = defaultdict(lambda: self.env['resource.resource'])
+        for version in self:
+            resources_per_tz[ZoneInfo(version._get_tz())] |= version.employee_id.resource_id
+        return dict(resources_per_tz)
 
     def action_open_version(self):
         self.ensure_one()
@@ -618,4 +651,17 @@ class HrVersion(models.Model):
             'context': {
                 'version_id': self.id,
             },
+        }
+
+    def action_open_version_form_view(self):
+        self.ensure_one()
+        view_id = self.env.ref('hr.hr_contract_template_form_view').id
+
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'hr.version',
+            'res_id': self.id,
+            'views': [[view_id, "form"]],
+            'target': 'current',
+            'context': self.env.context
         }

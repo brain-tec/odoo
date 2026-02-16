@@ -3,7 +3,6 @@ import { patchTranslations } from "@web/../tests/web_test_helpers";
 
 import {
     capitalize,
-    escape,
     escapeRegExp,
     intersperse,
     isEmail,
@@ -20,19 +19,6 @@ function _t() {
 }
 
 describe.current.tags("headless");
-
-test("escape", () => {
-    expect(escape("<a>this is a link</a>")).toBe("&lt;a&gt;this is a link&lt;/a&gt;");
-    expect(escape(`<a href="https://www.odoo.com">odoo<a>`)).toBe(
-        `&lt;a href=&quot;https://www.odoo.com&quot;&gt;odoo&lt;a&gt;`
-    );
-    expect(escape(`<a href='https://www.odoo.com'>odoo<a>`)).toBe(
-        `&lt;a href=&#x27;https://www.odoo.com&#x27;&gt;odoo&lt;a&gt;`
-    );
-    expect(escape("<a href='https://www.odoo.com'>Odoo`s website<a>")).toBe(
-        `&lt;a href=&#x27;https://www.odoo.com&#x27;&gt;Odoo&#x60;s website&lt;a&gt;`
-    );
-});
 
 test("escapeRegExp", () => {
     expect(escapeRegExp("")).toBe("");
@@ -84,6 +70,7 @@ describe("sprintf", () => {
         expect(sprintf("Hello!")).toBe("Hello!");
         expect(sprintf("Hello %s!")).toBe("Hello %s!");
         expect(sprintf("Hello %(value)s!")).toBe("Hello %(value)s!");
+        expect(sprintf("Hello %(value)s!", {})).toBe("Hello !");
     });
 
     test("properly formats numbers", () => {
@@ -107,6 +94,16 @@ describe("sprintf", () => {
 
         const vals = { one: _t("one"), two: _t("two") };
         expect(sprintf("Hello %(two)s %(one)s", vals)).toBe("Hello två en");
+    });
+
+    test("supports escaped '%' signs", () => {
+        expect(sprintf("Escape %s", "%s")).toBe("Escape %s");
+        expect(sprintf("Escape %%s", "this!")).toBe("Escape %s");
+        expect(sprintf("Escape %%%s", "this!")).toBe("Escape %this!");
+        expect(sprintf("Escape %%%%s!", "this")).toBe("Escape %%s!");
+        expect(sprintf("Escape %s%s", "this!")).toBe("Escape this!");
+        expect(sprintf("Escape %%s%s", "this!")).toBe("Escape %sthis!");
+        expect(sprintf("Escape %foo!", "this")).toBe("Escape %foo!");
     });
 });
 

@@ -6,8 +6,17 @@ from unittest.mock import patch
 from odoo.api import SUPERUSER_ID
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Command
-from odoo.http import _request_stack
-from odoo.tests import Form, TransactionCase, new_test_user, tagged, HttpCase, users, warmup, freeze_time
+from odoo.http.requestlib import _request_stack
+from odoo.tests import (
+    Form,
+    HttpCase,
+    TransactionCase,
+    freeze_time,
+    new_test_user,
+    tagged,
+    users,
+    warmup,
+)
 from odoo.tools import mute_logger
 
 
@@ -685,10 +694,10 @@ class TestUsersIdentitycheck(HttpCase):
         self.env.user.password = "admin@odoo"
 
         # Create a first session that will be used to revoke other sessions
-        session = self.authenticate('admin', 'admin@odoo')
+        session = self.authenticate('admin', 'admin@odoo', session_extra={'_trace_disable': False})
 
         # Create a second session that will be used to check it has been revoked
-        self.authenticate('admin', 'admin@odoo')
+        self.authenticate('admin', 'admin@odoo', session_extra={'_trace_disable': False})
         # Test the session is valid
         # Valid session -> not redirected from /web to /web/login
         self.assertTrue(self.url_open('/web').url.endswith('/web'))

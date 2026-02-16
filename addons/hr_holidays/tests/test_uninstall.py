@@ -2,8 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import date
-from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
-from odoo.tests import tagged, TransactionCase
+
+from odoo.tests import TransactionCase, tagged
 
 
 @tagged('-at_install', 'post_install')
@@ -15,7 +15,7 @@ class TestHrLeaveUninstall(TransactionCase):
         holiday = self.env['hr.leave'].create({
             'name': 'Time Off',
             'employee_id': employee.id,
-            'holiday_status_id': self.env.ref('hr_holidays.leave_type_sick_time_off').id,
+            'work_entry_type_id': self.env.ref('hr_work_entry.generic_work_entry_type_sick_leave').id,
             'request_date_from': date(2020, 1, 7),
             'date_from': date(2020, 1, 7),
             'request_date_to': date(2020, 1, 9),
@@ -34,7 +34,7 @@ class TestHrLeaveUninstall(TransactionCase):
         self.assertTrue(activity_type)
         self.assertIn('hr.leave', activity_type.mapped('res_model'))
 
-        model.sudo().with_context(**{MODULE_UNINSTALL_FLAG: True}).unlink()
+        model.sudo().with_context(force_delete=True).unlink()
         self.assertFalse(model.exists())
 
         domain = [('res_model', '=', 'hr.leave')]

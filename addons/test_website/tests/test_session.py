@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from lxml import html
 from unittest.mock import patch
 
-from odoo import http
-from odoo.addons.website.models.website import Website
+from lxml import html
+
 import odoo.tests
 
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
+from odoo.addons.website.models.website import Website
 
 
 @odoo.tests.common.tagged('post_install', '-at_install')
@@ -17,10 +16,8 @@ class TestWebsiteSession(HttpCaseWithUserDemo):
         self.start_tour('/', 'test_json_auth')
 
     def test_02_inactive_session_lang(self):
-        session = self.authenticate(None, None)
+        self.authenticate(None, None, session_extra={'context': {'lang': 'fr_FR'}})
         self.env.ref('base.lang_fr').active = False
-        session.context['lang'] = 'fr_FR'
-        odoo.http.root.session_store.save(session)
 
         # ensure that _get_current_website_id will be able to match a website
         current_website_id = self.env["website"]._get_current_website_id(odoo.tests.HOST)
@@ -30,10 +27,8 @@ class TestWebsiteSession(HttpCaseWithUserDemo):
         res.raise_for_status()
 
     def test_03_totp_login_with_inactive_session_lang(self):
-        session = self.authenticate(None, None)
+        self.authenticate(None, None, session_extra={'context': {'lang': 'fr_FR'}})
         self.env.ref('base.lang_fr').active = False
-        session.context['lang'] = 'fr_FR'
-        odoo.http.root.session_store.save(session)
 
         # ensure that _get_current_website_id will be able to match a website
         current_website_id = self.env["website"]._get_current_website_id(odoo.tests.HOST)
@@ -43,18 +38,14 @@ class TestWebsiteSession(HttpCaseWithUserDemo):
             res = self.url_open('/web/login', allow_redirects=False, data={
                 'login': 'demo',
                 'password': 'demo',
-                'csrf_token': http.Request.csrf_token(self),
+                'csrf_token': self.csrf_token(),
             })
             res.raise_for_status()
         self.assertEqual(res.status_code, 303)
         self.assertTrue(res.next.path_url.startswith("/web/login/totp"))
 
     def test_04_ensure_website_cached_data_can_be_called(self):
-        session = self.authenticate('admin', 'admin')
-
-        # Force a browser language that is not installed
-        session.context['lang'] = 'fr_MC'
-        http.root.session_store.save(session)
+        self.authenticate('admin', 'admin', session_extra={'context': {'lang': 'fr_MC'}})
 
         # Disable cache in order to make sure that values would be fetched at any time
         get_cached_values_without_cache = Website._cached_data.__cache__.method
@@ -66,7 +57,7 @@ class TestWebsiteSession(HttpCaseWithUserDemo):
                 '/web/session/logout',
                 method='POST',
                 data={
-                    "csrf_token": http.Request.csrf_token(self),
+                    "csrf_token": self.csrf_token(),
                 },
             )
             self.assertEqual(res.status_code, 200)

@@ -138,6 +138,7 @@ export class ListRenderer extends Component {
 
     setup() {
         this.uiService = useService("ui");
+        this.offlineService = useService("offline");
         this.notificationService = useService("notification");
         this.orm = useService("orm");
         const key = this.createViewKey();
@@ -732,7 +733,7 @@ export class ListRenderer extends Component {
                     } else {
                         currencyId = values[0][currencyField] && values[0][currencyField].id;
                     }
-                    if (func) {
+                    if (func && type === "monetary") {
                         const currencies = this.getFieldCurrencies(fieldName);
                         // in case of multiple currencies, convert values into default currency using conversion rates
                         if (currencies.size > 1) {
@@ -751,7 +752,7 @@ export class ListRenderer extends Component {
                                 }
                                 if (currency !== currencyId) {
                                     fieldValues[i] *= currency
-                                        ? this.currencyRates[currency].rate
+                                        ? this.currencyRates[currency]?.rate
                                         : 1;
                                 }
                             }
@@ -902,6 +903,13 @@ export class ListRenderer extends Component {
         return ["float", "integer", "monetary"].includes(type);
     }
 
+    isRecordAvailable(record) {
+        return (
+            !this.offlineService.offline ||
+            this.offlineService.isAvailableOffline(this.env.config.actionId, "form", record.resId)
+        );
+    }
+
     isSortable(column) {
         const { hasLabel, name, options } = column;
         const { sortable } = this.fields[name];
@@ -946,6 +954,9 @@ export class ListRenderer extends Component {
         }
         if (this.canResequenceRows) {
             classNames.push("o_row_draggable");
+        }
+        if (!this.isRecordAvailable(record) && !this.props.list.model.useSampleModel) {
+            classNames.push("o_disabled_offline");
         }
         return classNames.join(" ");
     }
@@ -1008,7 +1019,7 @@ export class ListRenderer extends Component {
                 this.isCellReadonly(column, this.editedRecord)
             ) {
                 classNames.push("text-muted");
-            } else {
+            } else if (this.isRecordAvailable(record)) {
                 classNames.push("cursor-pointer");
             }
         }
@@ -2168,6 +2179,10 @@ export class ListRenderer extends Component {
         }
         // Overlay
         if (this.rootRef.el.closest(".o-overlay-item") !== target.closest(".o-overlay-item")) {
+            return;
+        }
+        // Specific data attribute to explicitly ignore clicks
+        if (target.closest("[data-list-ignore-click]")) {
             return;
         }
         this.props.list.leaveEditMode();

@@ -1,7 +1,7 @@
+from freezegun import freeze_time
 from markupsafe import Markup
 from unittest.mock import patch
 from unittest.mock import DEFAULT
-import base64
 
 from odoo import exceptions, tools
 from odoo.addons.mail.tests.common import mail_new_test_user, MailCommon
@@ -192,8 +192,9 @@ class TestAPI(ThreadRecipients):
             partner_ids=self.partner_1.ids,
         )
         self.assertEqual(message.body, expected)
-        ticket_record._message_update_content(message, body="Hello <R&D/>")
-        self.assertEqual(message.body, Markup('<p>Hello &lt;R&amp;D/&gt;<span class="o-mail-Message-edited"></span></p>'))
+        with freeze_time('2025-04-08 10:00:00'):
+            ticket_record._message_update_content(message, body="Hello <R&D/>")
+        self.assertEqual(message.body, Markup('<p>Hello &lt;R&amp;D/&gt;<span class="o-mail-Message-edited" data-o-datetime="2025-04-08 10:00:00"></span></p>'))
 
     @users('employee')
     def test_mail_partner_find_from_emails(self):
@@ -710,7 +711,6 @@ class TestAPI(ThreadRecipients):
         self.assertFalse(self.env['res.partner'].search([('email_normalized', 'in', test_emails)]))
 
         test_record = self.env['mail.test.recipients'].create({
-            'email_cc': tools.mail.formataddr(test_cc_tuples[0]),
             'name': 'Test Recipients',
         })
         messages = self.env['mail.message']
@@ -748,11 +748,6 @@ class TestAPI(ThreadRecipients):
                 'email': self.user_portal.email_normalized,
                 'name': self.user_portal.name,
                 'partner_id': self.user_portal.partner_id.id,
-            }, {  # override of model for email_cc
-                'create_values': {},
-                'email': test_cc_tuples[0][1],
-                'name': test_cc_tuples[0][0],
-                'partner_id': False,
             }, {  # replying message to
                 'create_values': {},
                 'email': test_to_tuples[0][1],
@@ -775,11 +770,6 @@ class TestAPI(ThreadRecipients):
                 'email': self.user_portal.email_normalized,
                 'name': self.user_portal.name,
                 'partner_id': self.user_portal.partner_id.id,
-            }, {  # override of model for email_cc
-                'create_values': {},
-                'email': test_cc_tuples[0][1],
-                'name': test_cc_tuples[0][0],
-                'partner_id': False,
             },  # and not author, as it is odoobot's email
         ], strict=True):
             with self.subTest():
@@ -788,12 +778,7 @@ class TestAPI(ThreadRecipients):
         # discussion: should be last message
         recipients = test_record._message_get_suggested_recipients(reply_discussion=True, no_create=True)
         for recipient, expected in zip(recipients, [
-            {  # override of model for email_cc
-                'create_values': {},
-                'email': test_cc_tuples[0][1],
-                'name': test_cc_tuples[0][0],
-                'partner_id': False,
-            }, {  # replying message to
+            {  # replying message to
                 'create_values': {},
                 'email': test_to_tuples[1][1],
                 'name': test_to_tuples[1][0],
@@ -811,28 +796,23 @@ class TestAPI(ThreadRecipients):
         # check with partner creation
         recipients = test_record._message_get_suggested_recipients(reply_message=messages[0], no_create=False)
         new_partners = self.env['res.partner'].search([('email_normalized', 'in', test_emails)], order='id ASC')
-        self.assertEqual(len(new_partners), 3, 'Find or create should have created 3 partners, one / email')
-        new_to, new_cc_0, new_cc_1 = new_partners
+        self.assertEqual(len(new_partners), 2, 'Find or create should have created 2 partners, one / email')
+        new_to, new_cc_0 = new_partners
         for recipient, expected in zip(recipients, [
             {  # partner first: author of message
                 'create_values': {},
                 'email': self.user_portal.email_normalized,
                 'name': self.user_portal.name,
                 'partner_id': self.user_portal.partner_id.id,
-            }, {  # override of model for email_cc
-                'email': test_cc_tuples[0][1],
-                'name': test_cc_tuples[0][0],
-                'partner_id': new_to.id,
-                'create_values': {},
             }, {  # replying message to
                 'email': test_to_tuples[0][1],
                 'name': test_to_tuples[0][0],
-                'partner_id': new_cc_0.id,
+                'partner_id': new_to.id,
                 'create_values': {},
             }, {  # replying message  cc
                 'email': test_cc_tuples[1][1],
                 'name': test_cc_tuples[1][0],
-                'partner_id': new_cc_1.id,
+                'partner_id': new_cc_0.id,
                 'create_values': {},
             },
         ], strict=True):
@@ -840,28 +820,24 @@ class TestAPI(ThreadRecipients):
                 self.assertDictEqual(recipient, expected)
 
     @users("employee")
-    def test_message_get_suggested_recipients_conversation_filter(self):
+    def test_message_get_suggested_recipients_and_subject_conversation_filter(self):
         """ Test sorting of messages when suggested is used in reply-all based
         on last message. """
         test_record = self.env['mail.test.recipients'].create({
             'email_cc': '"Test Cc" <test.cc.1@test.example.com>',
             'name': 'Test Recipients',
         })
-        base_expected = [{
-            'create_values': {},
-            'email': 'test.cc.1@test.example.com',
-            'name': 'Test Cc',
-            'partner_id': False,
-        }]
-        for user, post_values, expected_add in [
+        for user, post_values, expected_recipients, expected_subject in [
             (
                 self.user_employee,
                 {
                     'body': 'Note with pings, to ignore',
                     'message_type': 'comment',
                     'subtype_id': self.env.ref('mail.mt_note').id,
+                    'subject': 'Some internal comment',
                 },
-                []
+                [],
+                'Test Recipients',
             ), (
                 self.user_root,
                 {
@@ -870,6 +846,7 @@ class TestAPI(ThreadRecipients):
                     'body': 'Incoming (old) email',
                     'message_type': 'email',
                     'subtype_id': self.env.ref('mail.mt_comment').id,
+                    'subject': 'Increase order quantity',
                 },
                 [{
                     'create_values': {},
@@ -877,6 +854,7 @@ class TestAPI(ThreadRecipients):
                     'name': 'Outdated',
                     'partner_id': False,
                 }],
+                'Increase order quantity',
             ), (
                 self.user_employee,
                 {
@@ -884,6 +862,7 @@ class TestAPI(ThreadRecipients):
                     'message_type': 'comment',
                     'partner_ids': self.user_portal.partner_id.ids,
                     'subtype_id': self.env.ref('mail.mt_comment').id,
+                    'subject': 'Order for 100 chairs',
                 },
                 [{
                     'create_values': {},
@@ -896,6 +875,7 @@ class TestAPI(ThreadRecipients):
                     'name': self.user_employee.name,
                     'partner_id': self.user_employee.partner_id.id,
                 }],
+                'Order for 100 chairs',
             ), (
                 self.user_root,
                 {
@@ -903,6 +883,7 @@ class TestAPI(ThreadRecipients):
                     'body': 'Some marketing email',
                     'message_type': 'email_outgoing',
                     'subtype_id': self.env.ref('mail.mt_note').id,
+                    'subject': 'Promotion on tables!',
                 },
                 [{
                     'create_values': {},
@@ -915,16 +896,18 @@ class TestAPI(ThreadRecipients):
                     'name': self.user_employee.name,
                     'partner_id': self.user_employee.partner_id.id,
                 }],
+                'Order for 100 chairs',
             ),
         ]:
             test_record.with_user(user).message_post(**post_values)
             test_record.message_unsubscribe(partner_ids=test_record.message_partner_ids.ids)
-            suggested = test_record._message_get_suggested_recipients(reply_discussion=True, no_create=True)
-            expected = base_expected + expected_add
+            suggested_recipients = test_record._message_get_suggested_recipients(reply_discussion=True, no_create=True)
+            suggested_subject = test_record._message_get_suggested_subject()
             # as we can't use sorted directly, reorder manually, hey
-            expected.sort(key=lambda item: item['partner_id'], reverse=True)
+            expected_recipients.sort(key=lambda item: item['partner_id'], reverse=True)
             with self.subTest(message=post_values['body']):
-                for sugg, expected_sugg in zip(suggested, expected, strict=True):
+                self.assertEqual(suggested_subject, expected_subject)
+                for sugg, expected_sugg in zip(suggested_recipients, expected_recipients, strict=True):
                     self.assertDictEqual(sugg, expected_sugg)
 
     @mute_logger('openerp.addons.mail.models.mail_mail')
@@ -950,38 +933,42 @@ class TestAPI(ThreadRecipients):
         self.assertEqual(message.subtype_id, self.env.ref('mail.mt_note'))
 
         # clear the content when having attachments should show edit label
-        ticket_record._message_update_content(message, body="")
+        with freeze_time('2025-04-08 10:00:00'):
+            ticket_record._message_update_content(message, body="")
         self.assertEqual(message.attachment_ids, attachments)
-        self.assertEqual(message.body, Markup('<span class="o-mail-Message-edited"></span>'))
+        self.assertEqual(message.body, Markup('<span class="o-mail-Message-edited" data-o-datetime="2025-04-08 10:00:00"></span>'))
         # update the content with new attachments
         new_attachments = self.env['ir.attachment'].create(
             self._generate_attachments_data(2, 'mail.compose.message', 0)
         )
-        ticket_record._message_update_content(
-            message,
-            body=Markup("<div>New Body</div>"),
-            attachment_ids=new_attachments.ids,
-        )
+        with freeze_time('2025-04-08 11:00:00'):
+            ticket_record._message_update_content(
+                message,
+                body=Markup("<div>New Body</div>"),
+                attachment_ids=new_attachments.ids,
+            )
         self.assertEqual(message.attachment_ids, attachments + new_attachments)
         self.assertEqual(set(message.mapped('attachment_ids.res_id')), set(ticket_record.ids))
         self.assertEqual(set(message.mapped('attachment_ids.res_model')), set([ticket_record._name]))
-        self.assertEqual(message.body, Markup('<div>New Body <span class="o-mail-Message-edited"></span></div>'))
+        self.assertEqual(message.body, Markup('<div>New Body <span class="o-mail-Message-edited" data-o-datetime="2025-04-08 11:00:00"></span></div>'))
 
         # void attachments
-        ticket_record._message_update_content(
-            message,
-            body=Markup("<p>Another Body, void attachments</p>"),
-            attachment_ids=[],
-        )
+        with freeze_time('2025-04-08 12:00:00'):
+            ticket_record._message_update_content(
+                message,
+                body=Markup("<p>Another Body, void attachments</p>"),
+                attachment_ids=[],
+            )
         self.assertFalse(message.attachment_ids)
         self.assertFalse((attachments + new_attachments).exists())
-        self.assertEqual(message.body, Markup('<p>Another Body, void attachments <span class="o-mail-Message-edited"></span></p>'))
+        self.assertEqual(message.body, Markup('<p>Another Body, void attachments <span class="o-mail-Message-edited" data-o-datetime="2025-04-08 12:00:00"></span></p>'))
 
-        ticket_record._message_update_content(
-            message,
-            body=Markup("line1<br>edit<br>line2<br>line3"),
-        )
-        self.assertEqual(message.body, Markup('<p>line1 <br>edit<br>line2<br>line3<span class="o-mail-Message-edited"></span></p>'))
+        with freeze_time('2025-04-08 13:00:00'):
+            ticket_record._message_update_content(
+                message,
+                body=Markup("line1<br>edit<br>line2<br>line3"),
+            )
+        self.assertEqual(message.body, Markup('<p>line1 <br>edit<br>line2<br>line3<span class="o-mail-Message-edited" data-o-datetime="2025-04-08 13:00:00"></span></p>'))
 
     @mute_logger('openerp.addons.mail.models.mail_mail')
     @users('employee')
@@ -1111,8 +1098,7 @@ class TestChatterTweaks(ThreadRecipients):
         self.flush_tracking()
         self.assertEqual(len(rec.message_ids), 1,
                          "A creation message without tracking values should have been posted")
-        self.assertEqual(len(rec.message_ids.sudo().tracking_value_ids), 0,
-                         "A creation message without tracking values should have been posted")
+        self.assertMessageFields(rec.message_ids, {'tracking_values': []})
 
         rec.with_context({'mail_notrack': True}).write({'user_id': self.user_admin.id})
         self.flush_tracking()
@@ -1122,31 +1108,33 @@ class TestChatterTweaks(ThreadRecipients):
         rec.with_context({'mail_notrack': False}).write({'user_id': self.user_employee.id})
         self.flush_tracking()
         self.assertEqual(len(rec.message_ids), 2,
-                         "A tracking message should have been posted")
-        self.assertEqual(len(rec.message_ids.sudo().mapped('tracking_value_ids')), 1,
                          "New tracking message should have tracking values")
+        self.assertMessageFields(rec.message_ids[0], {
+            'tracking_values': [('user_id', 'many2one', self.user_admin, self.user_employee)],
+        })
 
     def test_chatter_tracking_disable(self):
         """ Test disable of all chatter features at create and write """
         rec = self.env['mail.test.track'].with_user(self.user_employee).with_context({'tracking_disable': True}).create({'name': 'Test', 'user_id': self.user_employee.id})
         self.flush_tracking()
         self.assertEqual(rec.sudo().message_ids, self.env['mail.message'])
-        self.assertEqual(rec.sudo().mapped('message_ids.tracking_value_ids'), self.env['mail.tracking.value'])
 
         rec.write({'user_id': self.user_admin.id})
         self.flush_tracking()
-        self.assertEqual(rec.sudo().mapped('message_ids.tracking_value_ids'), self.env['mail.tracking.value'])
+        self.assertEqual(rec.sudo().message_ids, self.env['mail.message'])
 
         rec.with_context({'tracking_disable': False}).write({'user_id': self.user_employee.id})
         self.flush_tracking()
-        self.assertEqual(len(rec.sudo().mapped('message_ids.tracking_value_ids')), 1)
+        self.assertEqual(len(rec.sudo().message_ids), 1)
+        self.assertMessageFields(rec.sudo().message_ids[0], {
+            'tracking_values': [('user_id', 'many2one', self.user_admin, self.user_employee)],
+        })
 
         rec = self.env['mail.test.track'].with_user(self.user_employee).with_context({'tracking_disable': False}).create({'name': 'Test', 'user_id': self.user_employee.id})
         self.flush_tracking()
         self.assertEqual(len(rec.sudo().message_ids), 1,
                          "Creation message without tracking values should have been posted")
-        self.assertEqual(len(rec.sudo().mapped('message_ids.tracking_value_ids')), 0,
-                         "Creation message without tracking values should have been posted")
+        self.assertMessageFields(rec.sudo().message_ids[0], {'tracking_values': []})
 
     def test_cache_invalidation(self):
         """ Test that creating a mail-thread record does not invalidate the whole cache. """
@@ -1328,7 +1316,7 @@ class TestNoThread(MailCommon, TestRecipients):
         })
         cls.test_attachment = cls.env['ir.attachment'].with_user(cls.user_employee).create({
             'name': 'Test Attachment',
-            'datas': base64.b64encode(b'This is test attachment content'),
+            'raw': b'This is test attachment content',
             'res_model': cls.test_record_nothread._name,
             'res_id': cls.test_record_nothread.id,
             'mimetype': 'text/plain',
@@ -1375,7 +1363,7 @@ class TestNoThread(MailCommon, TestRecipients):
         })
         with self.mock_mail_gateway():
             mail_compose_message.action_send_mail()
-        self.assertEqual(self._new_mails.attachment_ids['datas'], base64.b64encode(b'This is test attachment content'),
+        self.assertEqual(self._new_mails.attachment_ids.raw, b'This is test attachment content',
             "The attachment was not included correctly in the sent message")
 
     @users('employee')

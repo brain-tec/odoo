@@ -332,7 +332,12 @@ export class Form extends Interaction {
         }
 
         const formFields = [];
+        // List of placeholder values to ignore for submission
+        const valuesToIgnore = ["_other"];
         new FormData(this.el).forEach((value, key) => {
+            if (valuesToIgnore.includes(value)) {
+                return;
+            }
             const inputElement = this.el.querySelector(`[name="${CSS.escape(key)}"]`);
             if (inputElement && inputElement.type !== "file") {
                 formFields.push({ name: key, value: value });
@@ -545,6 +550,7 @@ export class Form extends Interaction {
 
     checkErrorFields(errorFields) {
         let formValid = true;
+        let firstInvalidInput = null;
         // Loop on all fields
         for (const fieldEl of this.el.querySelectorAll(".form-field, .s_website_form_field")) {
             // !compatibility
@@ -639,8 +645,16 @@ export class Form extends Interaction {
                     });
                     popover.show();
                 }
+                if (!firstInvalidInput) {
+                    firstInvalidInput = invalidInputs[0] || controlEls[0];
+                }
                 formValid = false;
             }
+        }
+        // Highlight the first invalid field
+        if (firstInvalidInput) {
+            firstInvalidInput.focus();
+            firstInvalidInput.scrollIntoView({ behavior: "smooth", block: "center" });
         }
         return formValid;
     }
@@ -772,12 +786,23 @@ export class Form extends Interaction {
         if (value === null) {
             value = "";
         }
+        const isContains = (comparable, value) => {
+            try {
+                comparable = JSON.parse(comparable);
+            } catch {
+                // not a JSON, keep original value
+            }
+            if (Array.isArray(comparable) && Array.isArray(value)) {
+                return comparable.some((comp) => value.includes(comp));
+            }
+            return value.includes(comparable);
+        };
 
         switch (comparator) {
             case "contains":
-                return value.includes(comparable);
+                return isContains(comparable, value);
             case "!contains":
-                return !value.includes(comparable);
+                return !isContains(comparable, value);
             case "substring":
                 return value.includes(comparable);
             case "!substring":
@@ -853,10 +878,19 @@ export class Form extends Interaction {
      *      recalculate the visibility of fieldEl
      */
     buildVisibilityFunction(fieldEl) {
-        const visibilityCondition = fieldEl.dataset.visibilityCondition;
         const dependencyName = fieldEl.dataset.visibilityDependency;
         const comparator = fieldEl.dataset.visibilityComparator;
         const between = fieldEl.dataset.visibilityBetween;
+        const dependencyEl = this.el.querySelector(
+            `.s_website_form_input[name="${dependencyName}"]`
+        );
+        const visibilityCondition = fieldEl.dataset.visibilityCondition;
+
+        const isMultiValueDependency =
+            ["contains", "!contains"].includes(comparator) &&
+            (["checkbox", "radio"].includes(dependencyEl.type) ||
+                dependencyEl.nodeName === "SELECT");
+
         return () => {
             // To be visible, at least one field with the dependency name must be visible.
             const dependencyVisibilityFunction =
@@ -867,8 +901,8 @@ export class Form extends Interaction {
                 return false;
             }
 
-            const currentValueOfDependency = ["contains", "!contains"].includes(comparator)
-                ? this.lastFormData.getAll(dependencyName).join()
+            const currentValueOfDependency = isMultiValueDependency
+                ? this.lastFormData.getAll(dependencyName)
                 : this.lastFormData.get(dependencyName);
             return this.compareTo(
                 comparator,

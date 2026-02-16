@@ -14,10 +14,10 @@ class HrLeave(models.Model):
     employee_overtime = fields.Float(compute='_compute_employee_overtime', groups='base.group_user')
     overtime_deductible = fields.Boolean(compute='_compute_overtime_deductible')
 
-    @api.depends('holiday_status_id')
+    @api.depends('work_entry_type_id')
     def _compute_overtime_deductible(self):
         for leave in self:
-            leave.overtime_deductible = leave.holiday_status_id.overtime_deductible and not leave.holiday_status_id.requires_allocation
+            leave.overtime_deductible = leave.work_entry_type_id.overtime_deductible and not leave.work_entry_type_id.requires_allocation
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -27,58 +27,21 @@ class HrLeave(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        fields_to_check = {'number_of_days', 'request_date_from', 'request_date_to', 'state', 'employee_id', 'holiday_status_id'}
+        fields_to_check = {'number_of_days', 'request_date_from', 'request_date_to', 'state', 'employee_id', 'work_entry_type_id'}
         if not any(field for field in fields_to_check if field in vals):
             return res
         self._check_overtime_deductible(self)
         return res
 
-    @api.model
-    def _get_deductible_employee_overtime(self, employees):
-        # return dict {employee: number of hours}
-        diff_by_employee = defaultdict(lambda: 0)
-        for employee, hours in self.env['hr.attendance.overtime.line'].sudo()._read_group(
-            domain=[
-                ('compensable_as_leave', '=', True),
-                ('employee_id', 'in', employees.ids),
-                ('status', '=', 'approved'),
-            ],
-            groupby=['employee_id'],
-            aggregates=['manual_duration:sum'],
-        ):
-            diff_by_employee[employee] += hours
-        for employee, hours in self._read_group(
-            domain=[
-                ('holiday_status_id.overtime_deductible', '=', True),
-                ('holiday_status_id.requires_allocation', '=', False),
-                ('employee_id', 'in', employees.ids),
-                ('state', 'not in', ['refuse', 'cancel']),
-            ],
-            groupby=['employee_id'],
-            aggregates=['number_of_hours:sum'],
-        ):
-            diff_by_employee[employee] -= hours
-        for employee, hours in self.env['hr.leave.allocation']._read_group(
-            domain=[
-                ('holiday_status_id.overtime_deductible', '=', True),
-                ('employee_id', 'in', employees.ids),
-                ('state', '=', 'confirm'),
-            ],
-            groupby=['employee_id'],
-            aggregates=['number_of_hours_display:sum'],
-        ):
-            diff_by_employee[employee] -= hours
-        return diff_by_employee
-
-    @api.depends('number_of_hours', 'employee_id', 'holiday_status_id')
+    @api.depends('number_of_hours', 'employee_id', 'work_entry_type_id')
     def _compute_employee_overtime(self):
-        diff_by_employee = self._get_deductible_employee_overtime(self.employee_id)
+        diff_by_employee = self.employee_id._get_deductible_employee_overtime()
         for leave in self:
             leave.employee_overtime = diff_by_employee[leave.employee_id]
 
     def _check_overtime_deductible(self, leaves):
         # If the type of leave is overtime deductible, we have to check that the employee has enough extra hours
-        hours = self._get_deductible_employee_overtime(leaves.employee_id)
+        hours = leaves.employee_id._get_deductible_employee_overtime()
         for leave in leaves.filtered('overtime_deductible'):
             if hours[leave.employee_id] < 0:
                 if leave.employee_id.user_id == self.env.user:

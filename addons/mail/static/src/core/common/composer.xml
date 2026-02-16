@@ -172,7 +172,7 @@
                 'id': 'more-actions',
                 'name': moreName,
                 'tags': [],
-            }]"/> 
+            }]"/>
         </div>
     </button>
 </t>
@@ -196,14 +196,16 @@
 
     <t t-name="mail.Composer.suggestionPartner">
         <t t-set="partner" t-value="option.partner"/>
-        <ImStatus t-if="partner" persona="partner"/>
-        <strong class="px-2 py-1 align-self-center flex-shrink-0 text-truncate">
+        <t t-set="title" t-value="partner.name"/>
+        <t t-if="partner.email" t-set="title" t-value="`${title} (${partner.email})`"/>
+        <DiscussAvatar t-if="partner" persona="partner" size="24"/>
+        <strong class="o-mail-Composer-suggestionPartner-name px-2 py-1 align-self-center flex-shrink-0 text-truncate" t-att-class="{'o-has-email': partner.email, 'mw-100': !partner.email}" t-att-title="title">
             <t t-esc="partner.name"/>
             <t t-if="option.thread and partner.name !== option.thread.getPersonaName(partner)">
                 "<t t-esc="option.thread.getPersonaName(partner)"/>"
             </t>
         </strong>
-        <span t-if="partner.email" class="text-600 text-truncate align-self-center">(<t t-esc="partner.email"/>)</span>
+        <span t-if="partner.email" class="text-600 text-truncate align-self-center" t-att-title="title">(<t t-esc="partner.email"/>)</span>
     </t>
 
     <t t-name="mail.Composer.suggestionRole">
@@ -214,14 +216,14 @@
         </em>
     </t>
 
-    <t t-name="mail.Composer.suggestionThread">
+    <t t-name="mail.Composer.suggestionChannel">
         <strong class="px-2 py-1 align-self-center flex-shrink-0 text-truncate">
-            <i t-attf-class="fa #{option.thread.channel?.parent_channel_id ? 'fa-comments-o' : 'fa-hashtag'} me-2"/>
-            <t t-if="option.thread.channel?.parent_channel_id">
-                <t t-esc="option.thread.channel.parent_channel_id.displayName"/>
+            <i t-attf-class="fa #{option.channel?.parent_channel_id ? 'fa-comments-o' : 'fa-hashtag'} me-2"/>
+            <t t-if="option.channel.parent_channel_id">
+                <t t-esc="option.channel.parent_channel_id.displayName"/>
                 <i class="oi oi-chevron-right o-xsmaller mx-1"/>
             </t>
-            <t t-esc="option.thread.channel?.displayName"/>
+            <t t-esc="option.channel.displayName"/>
         </strong>
     </t>
 
@@ -235,10 +237,10 @@
     </t>
 
     <t t-name="mail.Composer.suggestionCannedResponse">
-        <strong class="px-2 py-1 align-self-center flex-shrink-1 text-truncate">
+        <strong class="px-2 py-1 align-self-center flex-shrink-0 text-truncate mw-100">
             <t t-esc="option.source"/>
         </strong>
-        <span class="text-600 text-truncate align-self-center" style="flex-basis: 20%;">
+        <span class="text-600 text-truncate align-self-center">
             <t t-esc="option.label"/>
         </span>
     </t>

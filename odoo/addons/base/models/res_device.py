@@ -1,14 +1,21 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from contextlib import nullcontext
-from datetime import datetime, timedelta
 import logging
+from datetime import datetime, timedelta
 
 from odoo import api, fields, models, tools
-from odoo.http import get_session_max_inactivity, request, root, STORED_SESSION_BYTES
+from odoo.http import request
+from odoo.http.session import (
+    STORED_SESSION_BYTES,
+    get_session_max_inactivity,
+    logout,
+    session_store,
+    update_device,
+)
 from odoo.tools import SQL
-from odoo.tools.translate import _
 from odoo.tools._vendor.useragents import UserAgent
+from odoo.tools.translate import _
+
 from .res_users import check_identity
 
 _logger = logging.getLogger(__name__)
@@ -50,7 +57,7 @@ class ResDeviceLog(models.Model):
 
             :param request: Request or WebsocketRequest object
         """
-        device = request.session.update_device(request)
+        device = update_device(request.session, request)
         if not device:
             return
 
@@ -59,10 +66,8 @@ class ResDeviceLog(models.Model):
 
         if self.env.cr.readonly:
             self.env.cr.rollback()
-            cursor = self.env.registry.cursor(readonly=False)
-        else:
-            cursor = nullcontext(self.env.cr)
-        with cursor as cr:
+
+        with self.env.registry.cursor() as cr:
             cr.execute(SQL("""
                 INSERT INTO res_device_log (session_identifier, user_id, ip_address, user_agent, country, city, first_activity, last_activity, revoked)
                 VALUES (%(session_identifier)s, %(user_id)s, %(ip_address)s, %(user_agent)s, %(country)s, %(city)s, %(first_activity)s, %(last_activity)s, %(revoked)s)
@@ -77,7 +82,8 @@ class ResDeviceLog(models.Model):
                 last_activity=datetime.fromtimestamp(device['last_activity']),
                 revoked=False,
             ))
-        _logger.info('User %d inserts device log (%s)', user_id, session_identifier)
+            _logger.info('User %d inserts device log (%s)', user_id, session_identifier)
+            session_store().save(request.session)
 
     @api.autovacuum
     def _gc_device_log(self):
@@ -119,7 +125,7 @@ class ResDeviceLog(models.Model):
             if not candidate_device_log_ids:
                 break
             offset += batch_size
-            revoked_session_identifiers = root.session_store.get_missing_session_identifiers(
+            revoked_session_identifiers = session_store().get_missing_session_identifiers(
                 set(candidate_device_log_ids.mapped('session_identifier')),
             )
             if not revoked_session_identifiers:
@@ -187,11 +193,11 @@ class ResDevice(models.Model):
             SELECT
                 MAX(L.id) as id,
                 L.session_identifier as session_identifier,
-                MIN(L.user_id) as user_id,
+                L.user_id as user_id,
                 L.ip_address as ip_address,
                 L.user_agent as user_agent,
-                MAX(L.country) as country,
-                MAX(L.city) as city,
+                L.country as country,
+                L.city as city,
                 MIN(L.first_activity) as first_activity,
                 MAX(L.last_activity) as last_activity,
                 bool_and(L.revoked) as revoked
@@ -201,8 +207,11 @@ class ResDevice(models.Model):
                 L.revoked IS NOT TRUE
             GROUP BY
                 session_identifier,
+                user_id,
                 ip_address,
-                user_agent
+                user_agent,
+                country,
+                city
         """
 
     def init(self):
@@ -272,14 +281,15 @@ class ResSession(models.Model):
             SELECT
                 MAX(D.id) as id,
                 D.session_identifier as session_identifier,
-                MIN(D.user_id) as user_id,
+                D.user_id as user_id,
                 MIN(D.first_activity) as first_activity,
                 MAX(D.last_activity) as last_activity,
                 bool_and(D.revoked) as revoked
             FROM
                 res_device D
             GROUP BY
-                session_identifier
+                session_identifier,
+                user_id
         """
 
     @check_identity
@@ -289,7 +299,7 @@ class ResSession(models.Model):
     def _revoke(self):
         ResDeviceLog = self.env['res.device.log']
         session_identifiers = list(set(self.mapped('session_identifier')))
-        root.session_store.delete_from_identifiers(session_identifiers)
+        session_store().delete_from_identifiers(session_identifiers)
         revoked_devices = ResDeviceLog.sudo().search([
             ('session_identifier', 'in', session_identifiers),
             ('revoked', '=', False),
@@ -299,4 +309,4 @@ class ResSession(models.Model):
 
         must_logout = bool(self.filtered('is_current'))
         if must_logout:
-            request.session.logout()
+            logout(request.session)

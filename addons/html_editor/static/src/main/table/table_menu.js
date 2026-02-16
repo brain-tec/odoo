@@ -4,6 +4,8 @@ import { getColumnIndex, getRowIndex } from "@html_editor/utils/table";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
+import { isEmpty } from "@html_editor/utils/dom_info";
+import { getBaseContainerSelector } from "@html_editor/utils/base_container";
 
 export class TableMenu extends Component {
     static template = "html_editor.TableMenu";
@@ -72,15 +74,28 @@ export class TableMenu extends Component {
         return rowHasHeight || cellHasWidth;
     }
 
-    get hasCustomRowHeight() {
-        return !!this.props.target.closest("tr").style.height;
+    get hasCustomSize() {
+        return this.props.type === "row"
+            ? !!this.props.target.parentElement.style?.height
+            : !!this.props.target.style?.width;
     }
 
-    get hasCustomColumnWidth() {
-        return (
-            !!this.props.target.closest("td")?.style?.width ||
-            !!this.props.target.closest("th")?.style?.width
-        );
+    get hasContent() {
+        const baseContainerSelector = getBaseContainerSelector();
+        const cell = this.props.target;
+        const table = closestElement(cell, "table");
+        const targetCells =
+            this.props.type === "row"
+                ? [...cell.parentElement.children]
+                : [...table.rows].map((row) => row.cells[getColumnIndex(cell)]);
+        return targetCells.some((td) => {
+            const { children } = td;
+            return !(
+                children.length === 1 &&
+                children[0].matches(baseContainerSelector) &&
+                isEmpty(children[0])
+            );
+        });
     }
 
     onSelected(item) {
@@ -147,7 +162,7 @@ export class TableMenu extends Component {
                 text: _t("Delete"),
                 action: this.props.removeColumn.bind(this),
             },
-            this.hasCustomColumnWidth && {
+            this.hasCustomSize && {
                 name: "reset_column_size",
                 icon: "fa-table",
                 text: _t("Reset column size"),
@@ -159,7 +174,7 @@ export class TableMenu extends Component {
                 text: _t("Reset table size"),
                 action: (target) => this.props.resetTableSize(target.closest("table")),
             },
-            {
+            this.hasContent && {
                 name: "clear_content",
                 icon: "fa-times-circle",
                 text: _t("Clear content"),
@@ -226,7 +241,7 @@ export class TableMenu extends Component {
                 text: _t("Delete"),
                 action: (target) => this.props.removeRow(target.parentElement),
             },
-            this.hasCustomRowHeight && {
+            this.hasCustomSize && {
                 name: "reset_row_size",
                 icon: "fa-table",
                 text: _t("Reset row size"),
@@ -238,7 +253,7 @@ export class TableMenu extends Component {
                 text: _t("Reset table size"),
                 action: (target) => this.props.resetTableSize(target.closest("table")),
             },
-            {
+            this.hasContent && {
                 name: "clear_content",
                 icon: "fa-times-circle",
                 text: _t("Clear content"),

@@ -21,7 +21,8 @@ class TestDiscussChannel(TestImLivechatCommon, TestGetOperatorCommon, MailCase):
         self.assertFalse(chat.livechat_end_dt)
         chat.with_user(bob_user).action_unfollow()
         self.assertFalse(chat.livechat_end_dt)
-        chat.with_user(chat.livechat_operator_id.main_user_id).action_unfollow()
+        agent_user = chat.livechat_agent_partner_ids.mapped("main_user_id")
+        chat.with_user(agent_user).action_unfollow()
         self.assertTrue(chat.livechat_end_dt)
 
     def test_human_operator_failure_states(self):
@@ -31,7 +32,8 @@ class TestDiscussChannel(TestImLivechatCommon, TestGetOperatorCommon, MailCase):
         chat = self.env["discuss.channel"].browse(data["channel_id"])
         self.assertFalse(chat.chatbot_current_step_id)  # assert there is no chatbot
         self.assertEqual(chat.livechat_failure, "no_answer")
-        chat.with_user(chat.livechat_operator_id.main_user_id).message_post(
+        agent_user = chat.livechat_agent_partner_ids.mapped("main_user_id")
+        chat.with_user(agent_user).message_post(
             body="I am here to help!",
             message_type="comment",
             subtype_xmlid="mail.mt_comment",
@@ -62,7 +64,7 @@ class TestDiscussChannel(TestImLivechatCommon, TestGetOperatorCommon, MailCase):
         self.livechat_channel.user_ids += bob_operator
         self.assertTrue(self.livechat_channel.available_operator_ids)
         chat._forward_human_operator(chat.chatbot_current_step_id)
-        self.assertEqual(chat.livechat_operator_id, bob_operator.partner_id)
+        self.assertEqual(chat.livechat_agent_partner_ids, bob_operator.partner_id)
         self.assertEqual(chat.livechat_failure, "no_answer")
         chat.with_user(bob_operator).message_post(
             body="I am here to help!",
@@ -131,23 +133,14 @@ class TestDiscussChannel(TestImLivechatCommon, TestGetOperatorCommon, MailCase):
             {"channel_id": self.livechat_channel.id},
         )
         channel = self.env["discuss.channel"].browse(data["channel_id"])
+        group_id = self.env.ref("im_livechat.im_livechat_group_user").id
         with self.assertBus(
-            [(self.cr.dbname, "discuss.channel", channel.id, "internal_users")],
             [
-                {
-                    "type": "mail.record/insert",
-                    "payload": {
-                        "discuss.channel": [
-                            {
-                                "id": channel.id,
-                                "livechat_status": "waiting",
-                            }
-                        ]
-                    },
-                }
-            ],
+                (self.cr.dbname, "discuss.channel", channel.id, "internal_users"),
+                (self.cr.dbname, "res.groups", group_id, "LOOKING_FOR_HELP"),
+            ]
         ):
-            channel.livechat_status = "waiting"
+            channel.livechat_status = "need_help"
 
     def test_livechat_status_switch_on_operator_joined_batch(self):
         """Test that the livechat status switches to 'in_progress' when an operator joins multiple channels in a batch,
@@ -155,13 +148,13 @@ class TestDiscussChannel(TestImLivechatCommon, TestGetOperatorCommon, MailCase):
         channel_1 = self.env["discuss.channel"].create({
             "name": "Livechat Channel 1",
             "channel_type": "livechat",
-            "livechat_operator_id": self.operators[0].partner_id.id,
         })
+        channel_1._add_members(users=self.operators[0])
         channel_2 = self.env["discuss.channel"].create({
             "name": "Livechat Channel 2",
             "channel_type": "livechat",
-            "livechat_operator_id": self.operators[0].partner_id.id,
         })
+        channel_2._add_members(users=self.operators[0])
         bob_operator = new_test_user(self.env, "bob_user", groups="im_livechat.im_livechat_group_user")
         channel_1.livechat_status = "need_help"
         channel_2.livechat_status = "need_help"
@@ -171,7 +164,9 @@ class TestDiscussChannel(TestImLivechatCommon, TestGetOperatorCommon, MailCase):
         self.assertFalse(channel_2.livechat_end_dt)
 
         # Add the operator to both channels in a batch, which should switch their status to 'in_progress'
-        (channel_1 | channel_2).with_user(channel_1.livechat_operator_id.main_user_id).add_members(
+        self.assertEqual(channel_1.livechat_agent_partner_ids, self.operators[0].partner_id)
+        agent_user = channel_1.livechat_agent_partner_ids.mapped("main_user_id")
+        (channel_1 | channel_2).with_user(agent_user).add_members(
             partner_ids=bob_operator.partner_id.ids
         )
         self.assertEqual(channel_1.livechat_status, "in_progress")
@@ -180,7 +175,8 @@ class TestDiscussChannel(TestImLivechatCommon, TestGetOperatorCommon, MailCase):
         # Re-add the same operator and ensure the status does not change
         channel_1.livechat_status = "need_help"
         self.assertEqual(channel_1.livechat_status, "need_help")
-        channel_1.with_user(channel_1.livechat_operator_id.main_user_id).add_members(
+        self.assertEqual(channel_1.livechat_agent_partner_ids, bob_operator.partner_id | self.operators[0].partner_id)
+        channel_1.with_user(agent_user).add_members(
             partner_ids=bob_operator.partner_id.ids
         )
         self.assertEqual(channel_1.livechat_status, "need_help")
@@ -223,7 +219,6 @@ class TestDiscussChannel(TestImLivechatCommon, TestGetOperatorCommon, MailCase):
             {
                 "name": "test",
                 "channel_type": "livechat",
-                "livechat_operator_id": self.operators[0].partner_id.id,
                 "channel_member_ids": [
                     Command.create({"partner_id": self.operators[0].partner_id.id}),
                     Command.create({"partner_id": self.visitor_user.partner_id.id}),
@@ -232,10 +227,11 @@ class TestDiscussChannel(TestImLivechatCommon, TestGetOperatorCommon, MailCase):
         )
         attachment1 = self.env["ir.attachment"].create({"name": "test.txt"})
         attachment2 = self.env["ir.attachment"].with_user(self.visitor_user).create({"name": "test2.txt"})
-        channel.message_post(body="Operator Here")
-        channel.message_post(body="", attachment_ids=[attachment1.id])
-        channel.with_user(self.visitor_user).message_post(body="Visitor Here")
-        channel.with_user(self.visitor_user).message_post(body="", attachment_ids=[attachment2.id])
+        channel.message_post(body="Operator Here", message_type="comment")
+        channel.message_post(body="", message_type="comment", attachment_ids=[attachment1.id])
+        channel.with_user(self.visitor_user).message_post(body="Visitor Here", message_type="comment")
+        channel.with_user(self.visitor_user).message_post(body="", message_type="comment", attachment_ids=[attachment2.id])
+        channel.message_post(body="Some notification", message_type="notification")
         channel_history = channel.with_user(self.visitor_user)._get_channel_history()
         self.assertEqual(
             channel_history,

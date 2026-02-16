@@ -13,24 +13,23 @@ select > option {
     background: $light;
 }
 
-.navbar-menu {
-    :not(.btn-check) + .btn:active, .btn:first-child:active{
-        --btn-active-border-color: transparent;
-    }
-}
-
 .btn-light {
-    --btn-hover-bg: #{$o-gray-100};
-    --btn-hover-border-color: transparent;
+    --btn-border-color: #cccccc;
     --btn-active-bg: #{$o-gray-300};
     --btn-color: #{$o-gray-900};
-    --btn-active-border-color: transparent;
+    --btn-active-border-color: var(--btn-border-color);
 }
 
 .btn-secondary {
     --btn-bg: #F4F4F4;
-    --btn-border-color: #F4F4F4;
+    --btn-border-color: #cccccc;
     --btn-color: #{$o-gray-900};
+    --btn-disabled-bg: var(--btn-bg);
+    --btn-disabled-color: #{$o-gray-700};
+    --btn-disabled-border-color: var(--btn-border-color);
+    &:disabled, &.disabled {
+        filter: saturate(0);
+    }
 }
 
 .bg-secondary {
@@ -85,6 +84,10 @@ select > option {
 .pos .numpad {
     /*rtl:ignore*/
     direction: ltr;
+}
+
+.pos .modal-dialog.modal-sm:has(.pos-number-popup) {
+    --modal-width: 360px;
 }
 .o_mobile_overscroll {
     overscroll-behavior: none;
@@ -156,8 +159,7 @@ select > option {
 /* Debug */
 
 .drag-handle {
-    /* See o-grab-cursor mixin */
-    cursor: url(/web/static/img/openhand.cur), grab;
+    cursor: grab;
 }
 
 .drag-handle:active {

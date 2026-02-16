@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { makeServerError, mockService, serverState } from "@web/../tests/web_test_helpers";
+import { makeServerError, mockService, serverState, fields } from "@web/../tests/web_test_helpers";
 import { user } from "@web/core/user";
 
 import {
@@ -35,10 +35,11 @@ import {
     Product,
     ResUsers,
     ResGroup,
+    getBasicData,
 } from "@spreadsheet/../tests/helpers/data";
 
 import { waitForDataLoaded } from "@spreadsheet/helpers/model";
-const { DEFAULT_LOCALE, PIVOT_TABLE_CONFIG } = spreadsheet.constants;
+const { DEFAULT_LOCALE, PIVOT_STATIC_TABLE_CONFIG } = spreadsheet.constants;
 const { toZone } = spreadsheet.helpers;
 const { cellMenuRegistry } = spreadsheet.registries;
 
@@ -49,7 +50,7 @@ defineSpreadsheetActions();
 test("List export", async () => {
     const { model } = await createSpreadsheetWithList();
     const total = 4 + 10 * 4; // 4 Headers + 10 lines
-    expect(Object.values(getCells(model)).length).toBe(total);
+    expect(getCells(model).length).toBe(total);
     expect(getCellFormula(model, "A1")).toBe(`=ODOO.LIST.HEADER(1,"foo")`);
     expect(getCellFormula(model, "B1")).toBe(`=ODOO.LIST.HEADER(1,"bar")`);
     expect(getCellFormula(model, "C1")).toBe(`=ODOO.LIST.HEADER(1,"date")`);
@@ -112,7 +113,7 @@ test("Numeric/monetary fields are correctly loaded and displayed", async () => {
     expect(getFormattedValueGrid(model, "A2:C6")).toEqual({
         A2: "74.40€",    B2: "10.00",  C2: "1",
         A3: "$74.80",    B3: "11.00",  C3: "2",
-        A4: "4.00€",     B4: "95.00",  C4: "3",      
+        A4: "4.00€",     B4: "95.00",  C4: "3",
         A5: "$1,000.00", B5: "15.00",  C5: "4",
         A6: "$0.00",     B6: "0.00",   C6: "0",
     });
@@ -127,7 +128,7 @@ test("Text fields are correctly loaded and displayed", async () => {
     expect(getCellFormattedValue(model, "A3")).toBe("");
 });
 
-test("properties field displays property display names", async () => {
+test("cannot use property field without property name", async () => {
     Product._records = [
         {
             id: 1,
@@ -149,7 +150,133 @@ test("properties field displays property display names", async () => {
     const { model } = await createSpreadsheetWithList({
         columns: ["partner_properties"],
     });
-    expect(getCellValue(model, "A2")).toBe("prop 1, prop 2");
+    expect(getEvaluatedCell(model, "A2")).toMatchObject({
+        value: "#ERROR",
+        message: "Please specify the property field name",
+    });
+});
+
+test("Can use property fields", async () => {
+    const data = getBasicData();
+    data.product.records = [
+        {
+            id: 37,
+            name: "My Product",
+            properties_definitions: [
+                { name: "char_property", type: "char", string: "Text" },
+                { name: "date_property", type: "date", string: "Date" },
+                { name: "datetime_property", type: "datetime", string: "Datetime" },
+                { name: "text_property", type: "text", string: "Multiline text" },
+                { name: "boolean_property", type: "boolean", string: "Boolean" },
+                { name: "integer_property", type: "integer", string: "Number" },
+                { name: "float_property", type: "float", string: "Decimal" },
+                {
+                    name: "selection_property",
+                    type: "selection",
+                    string: "Selection",
+                    selection: [
+                        ["3de00497e096656b", "option1"],
+                        ["0ba4dd568840ecd5", "option2"],
+                    ],
+                },
+                {
+                    name: "tags_property",
+                    tags: [
+                        ["a", "A", 1],
+                        ["b", "B", 2],
+                        ["c", "C", 3],
+                    ],
+                    type: "tags",
+                    string: "Tags",
+                },
+                {
+                    name: "m2o_property",
+                    type: "many2one",
+                    domain: false,
+                    string: "Many2one",
+                    comodel: "res.currency",
+                },
+                {
+                    name: "m2m_property",
+                    type: "many2many",
+                    domain: false,
+                    string: "Many2many",
+                    comodel: "res.currency",
+                },
+                { name: "signature_property", type: "signature", string: "Signature" },
+                { name: "html_property", type: "html", string: "HTML" },
+                {
+                    name: "monetary_property",
+                    type: "monetary",
+                    string: "Monetary",
+                    currency_field: "currency_id",
+                },
+            ],
+        },
+    ];
+
+    const propertiesValues = {
+        char_property: "CHAR",
+        date_property: "2024-01-02",
+        datetime_property: "2026-02-03 11:00:00",
+        text_property: "LINE1\nLINE2",
+        boolean_property: true,
+        integer_property: 42,
+        float_property: 3.14,
+        selection_property: "0ba4dd568840ecd5",
+        tags_property: ["a", "c"],
+        m2o_property: [1, "EUR"],
+        m2m_property: [
+            [2, "USD"],
+            [1, "EUR"],
+        ],
+        signature_property: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgCAYAAAD1",
+        html_property: "<p>Some <strong>bold</strong> text</p>",
+        monetary_property: 99.99,
+    };
+
+    data.partner.records = [
+        {
+            id: 1,
+            product_id: 37,
+            partner_properties: { ...propertiesValues },
+            currency_id: 1,
+        },
+    ];
+    const propertyField = fields.Properties({
+        string: "Property char",
+        definition_record: "product_id",
+        definition_record_field: "properties_definitions",
+    });
+    Partner._fields.partner_properties = propertyField;
+    const { model } = await createSpreadsheetWithList({
+        serverData: { models: data },
+        columns: Object.keys(propertiesValues).map((key) => `partner_properties.${key}`),
+    });
+    await waitForDataLoaded(model);
+    expect(getEvaluatedGrid(model, "A1:A2").flat()).toEqual(["Text", "CHAR"]);
+    expect(getEvaluatedGrid(model, "B1:B2").flat()).toEqual(["Date", 45293]);
+    expect(getCellFormattedValue(model, "B2")).toBe("1/2/2024");
+    expect(getEvaluatedGrid(model, "C1:C2").flat()).toEqual(["Datetime", 46056.5]);
+    expect(getCellFormattedValue(model, "C2")).toBe("2/3/2026 12:00:00 PM");
+    expect(getEvaluatedGrid(model, "D1:D2").flat()).toEqual(["Multiline text", "LINE1\nLINE2"]);
+    expect(getEvaluatedGrid(model, "E1:E2").flat()).toEqual(["Boolean", true]);
+    expect(getEvaluatedGrid(model, "F1:F2").flat()).toEqual(["Number", 42]);
+    expect(getEvaluatedGrid(model, "G1:G2").flat()).toEqual(["Decimal", 3.14]);
+    expect(getEvaluatedGrid(model, "H1:H2").flat()).toEqual(["Selection", "option2"]);
+    expect(getEvaluatedGrid(model, "I1:I2").flat()).toEqual(["Tags", "A, C"]);
+    expect(getEvaluatedGrid(model, "J1:J2").flat()).toEqual(["Many2one", "EUR"]);
+    expect(getEvaluatedGrid(model, "K1:K2").flat()).toEqual(["Many2many", "USD, EUR"]);
+    expect(getEvaluatedGrid(model, "L1:L2").flat()).toEqual([
+        "Signature",
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgCAYAAAD1",
+    ]);
+    expect(getEvaluatedGrid(model, "M1:M2").flat()).toEqual([
+        "HTML",
+        "<p>Some <strong>bold</strong> text</p>",
+    ]);
+    expect(getEvaluatedGrid(model, "N1:N2").flat()).toEqual(["Monetary", 99.99]);
+    expect(getCellFormattedValue(model, "N2")).toBe("99.99€");
 });
 
 test("Can display a field which is not in the columns", async function () {
@@ -1166,7 +1293,7 @@ test("INSERT_ODOO_LIST_WITH_TABLE adds a table that maches the list dimension", 
     const table = model.getters.getTable({ sheetId, col, row });
     expect(table.range.zone).toEqual(toZone("A20:D25"));
     expect(table.type).toBe("static");
-    expect(table.config).toEqual({ ...PIVOT_TABLE_CONFIG, firstColumn: false });
+    expect(table.config).toEqual({ ...PIVOT_STATIC_TABLE_CONFIG, firstColumn: false });
 });
 
 test("An error is displayed if the list has invalid model", async function () {

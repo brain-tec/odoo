@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import itertools
 from unittest import mock, TestCase
@@ -170,11 +169,66 @@ First differing element 0:
             if next(call_count) == 0:
                 self.env.cr.execute('select nonsense')
 
-        with mock.patch.object(BaseCursor, 'clear', side_effect=clear),\
-             TestCase.assertRaises(self, psycopg2.Error):
+        from odoo.orm.environments import Transaction  # noqa: PLC0415
+        with (
+            mock.patch.object(Transaction, 'clear', side_effect=clear),
+            TestCase.assertRaises(self, psycopg2.Error),
+        ):
             with self.assertRaises(AccessError):
                 raise NotImplementedError
 
         # check that the transaction has been rolled back and we can perform
         # queries again
         self.env.cr.execute('select 1')
+
+    def test_assertQueries(self):
+        query = 'select f1 from "test_testing_utilities_a" where id=%s  order by id'
+        params = [42]
+
+        with self.assertQueries(["""
+            SELECT f1
+            FROM "test_testing_utilities_a"
+            WHERE id = %s
+            ORDER BY id
+        """, """
+            SELECT ... FROM "test_testing_utilities_a" WHERE ... ORDER BY id
+        """]):
+            self.env.cr.execute(query, params)
+            self.env.cr.execute(query, params)
+
+        # less queries than expected
+        expected = 'SELECT f1 FROM "test_testing_utilities_a" WHERE id = %s ORDER BY id'
+        msg = (
+            f"Not the expected queries : \n"
+            f"=== {query}\n"
+            f"--- {expected}"
+        )
+        with self.assertRaisesRegex(AssertionError, msg):
+            with self.assertQueries([expected, expected]):
+                self.env.cr.execute(query, params)
+
+        # more queries than expected
+        msg = (
+            f"Not the expected queries : \n"
+            f"=== {query}\n"
+            fr"\+\+\+ {query}"
+        )
+        with self.assertRaisesRegex(AssertionError, msg):
+            with self.assertQueries([expected]):
+                self.env.cr.execute(query, params)
+                self.env.cr.execute(query, params)
+
+        # non-matching queries
+        msg = (
+            f"Not the expected queries : \n"
+            f"=== {query}\n"
+            f'--- SELECT ... FROM "test_testing_utilities_a" ORDER BY id\n'
+            fr"\+\+\+ {query}"
+        )
+        with self.assertRaisesRegex(AssertionError, msg):
+            with self.assertQueries([
+                'SELECT ... FROM "test_testing_utilities_a" WHERE id = %s ORDER BY id',
+                'SELECT ... FROM "test_testing_utilities_a" ORDER BY id',
+            ]):
+                self.env.cr.execute(query, params)
+                self.env.cr.execute(query, params)

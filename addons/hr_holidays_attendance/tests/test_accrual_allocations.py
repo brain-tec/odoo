@@ -15,11 +15,14 @@ class TestAccrualAllocationsAttendance(TestHrHolidaysCommon):
     @classmethod
     def setUpClass(cls):
         super(TestAccrualAllocationsAttendance, cls).setUpClass()
-        cls.leave_type = cls.env['hr.leave.type'].create({
+        cls.work_entry_type = cls.env['hr.work.entry.type'].create({
             'name': 'Paid Time Off',
-            'time_type': 'leave',
+            'code': 'Paid Time Off',
+            'count_as': 'absence',
             'requires_allocation': True,
             'allocation_validation_type': 'hr',
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
         })
 
     def test_frequency_hourly_attendance(self):
@@ -43,7 +46,7 @@ class TestAccrualAllocationsAttendance(TestHrHolidaysCommon):
                 'name': 'Accrual allocation for employee',
                 'accrual_plan_id': accrual_plan.id,
                 'employee_id': self.employee_emp.id,
-                'holiday_status_id': self.leave_type.id,
+                'work_entry_type_id': self.work_entry_type.id,
                 'number_of_days': 0,
                 'allocation_type': 'accrual',
             })
@@ -57,7 +60,7 @@ class TestAccrualAllocationsAttendance(TestHrHolidaysCommon):
             self.env['hr.attendance'].create({
                 'employee_id': self.employee_emp.id,
                 'check_in': datetime.datetime(2017, 12, 6, 8, 0, 0),
-                'check_out': datetime.datetime(2017, 12, 6, 13, 22, 0),
+                'check_out': datetime.datetime(2017, 12, 6, 12, 22, 0),
             })
 
             with freeze_time(tomorrow):
@@ -86,19 +89,111 @@ class TestAccrualAllocationsAttendance(TestHrHolidaysCommon):
                 'action_with_unused_accruals': 'all',
             })],
         })
-        self.env['hr.attendance'].create({
+        self.env['hr.attendance'].create([
+            {
                 'employee_id': self.employee_emp.id,
                 'check_in': datetime.datetime(2024, 4, 1, 8, 0, 0),
+                'check_out': datetime.datetime(2024, 4, 1, 12, 0, 0),
+            },
+            {
+                'employee_id': self.employee_emp.id,
+                'check_in': datetime.datetime(2024, 4, 1, 13, 0, 0),
                 'check_out': datetime.datetime(2024, 4, 1, 17, 0, 0),
-            })
+            }
+        ])
         with Form(self.env['hr.leave.allocation'].with_user(self.user_hrmanager)) as allocation_form:
             allocation_form.allocation_type = 'accrual'
             allocation_form.employee_id = self.employee_emp
             allocation_form.accrual_plan_id = accrual_plan
-            allocation_form.holiday_status_id = self.leave_type
+            allocation_form.work_entry_type_id = self.work_entry_type
             allocation_form.date_from = datetime.date(2024, 3, 20)
             allocation_form.name = 'Accrual allocation for employee'
             self.assertEqual(allocation_form.number_of_hours_display, 8.0)
             allocation_form.date_from = datetime.date(2024, 3, 25)
             allocation_form.name = 'Accrual allocation for employee'
             self.assertEqual(allocation_form.number_of_hours_display, 8.0)
+
+    def test_accrual_allocation_with_overlapping_attendance(self):
+        accrual_plan = self.env['hr.leave.accrual.plan'].create({
+            'name': 'Accrual Plan For Test',
+            'is_based_on_worked_time': True,
+            'accrued_gain_time': 'end',
+            'carryover_date': 'year_start',
+            'level_ids': [(0, 0, {
+                'start_count': 0,
+                'added_value': 1,
+                'added_value_type': 'hour',
+                'cap_accrued_time': True,
+                'maximum_leave': 100,
+                'frequency': 'worked_hours'
+            })],
+        })
+        with freeze_time("2024-4-1"):
+            allocation = self.env['hr.leave.allocation'].create({
+                'name': 'Accrual allocation for employee',
+                'accrual_plan_id': accrual_plan.id,
+                'employee_id': self.employee_emp.id,
+                'work_entry_type_id': self.work_entry_type.id,
+                'number_of_days': 0,
+                'allocation_type': 'accrual',
+            })
+            allocation.action_approve()
+
+        self.env['hr.attendance'].create({
+            'employee_id': self.employee_emp.id,
+            'check_in': datetime.datetime(2024, 4, 1, 22, 0, 0),
+            'check_out': datetime.datetime(2024, 4, 2, 7, 0, 0),
+        })
+
+        with freeze_time(datetime.datetime(2024, 4, 2, 20, 0, 0)):
+            # Only counts the part of the attendance on the 01/04/2024: 2 hours
+            allocation._update_accrual()
+            self.assertEqual(allocation.number_of_days, 0.25)  # 2 / 8 = 0.25
+
+        with freeze_time(datetime.datetime(2024, 4, 3, 20, 0, 0)):
+            # Counts the whole attendance: 9 hours
+            allocation._update_accrual()
+            self.assertEqual(allocation.number_of_days, 1.125)  # 9 / 8 = 1.125
+
+    def test_accrual_allocation_with_overlapping_attendance_timezone(self):
+        self.employee_emp.tz = 'Asia/Tokyo'
+        accrual_plan = self.env['hr.leave.accrual.plan'].create({
+            'name': 'Accrual Plan For Test',
+            'is_based_on_worked_time': True,
+            'accrued_gain_time': 'end',
+            'carryover_date': 'year_start',
+            'level_ids': [(0, 0, {
+                'start_count': 0,
+                'added_value': 1,
+                'added_value_type': 'hour',
+                'cap_accrued_time': True,
+                'maximum_leave': 100,
+                'frequency': 'worked_hours'
+            })],
+        })
+        with freeze_time("2024-4-1"):
+            allocation = self.env['hr.leave.allocation'].create({
+                'name': 'Accrual allocation for employee',
+                'accrual_plan_id': accrual_plan.id,
+                'employee_id': self.employee_emp.id,
+                'work_entry_type_id': self.work_entry_type.id,
+                'number_of_days': 0,
+                'allocation_type': 'accrual',
+            })
+            allocation.action_approve()
+
+        self.env['hr.attendance'].create({
+            'employee_id': self.employee_emp.id,
+            'check_in': datetime.datetime(2024, 4, 1, 22, 0, 0),  # In Tokyo: 2024/04/02, 7h
+            'check_out': datetime.datetime(2024, 4, 2, 7, 0, 0),  # In Tokyo: 2024/04/02, 16h
+        })
+
+        with freeze_time(datetime.datetime(2024, 4, 2, 20, 0, 0)):
+            # Only counts the part of the attendance on the 01/04/2024 UTC: 2 hours
+            allocation._update_accrual()
+            self.assertEqual(allocation.number_of_days, 0.25)  # 2 / 8 = 0.25
+
+        with freeze_time(datetime.datetime(2024, 4, 3, 20, 0, 0)):
+            # Counts the whole attendance: 9 hours
+            allocation._update_accrual()
+            self.assertEqual(allocation.number_of_days, 1.125)  # 9 / 8 = 1.125

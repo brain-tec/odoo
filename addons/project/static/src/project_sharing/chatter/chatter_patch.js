@@ -1,4 +1,4 @@
-import { Chatter } from "@mail/chatter/web_portal/chatter";
+import { Chatter } from "@mail/chatter/web_portal_project/chatter";
 
 import { useSubEnv } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
@@ -12,6 +12,8 @@ patch(Chatter.prototype, {
         });
         this.orm = useService("orm");
         useSubEnv({
+            // 'inFrontendPortalChatter' is specific to the frontend portal chatters 
+            // and should not be set to 'true' in the project sharing chatter environment.
             projectSharingId: this.props.projectSharingId,
         });
     },

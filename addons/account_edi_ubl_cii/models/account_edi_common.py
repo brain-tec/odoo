@@ -1,6 +1,7 @@
+import re
 from markupsafe import Markup
 
-from odoo import _, models
+from odoo import _, api, models
 from odoo.addons.base.models.res_partner_bank import sanitize_account_number
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_is_zero, float_repr
@@ -8,6 +9,7 @@ from odoo.tools.float_utils import float_round
 from odoo.tools.misc import clean_context, formatLang, html_escape
 from odoo.tools.xml_utils import find_xml_value
 from datetime import datetime
+from copy import deepcopy
 
 # -------------------------------------------------------------------------
 # UNIT OF MEASURE
@@ -15,11 +17,11 @@ from datetime import datetime
 UOM_TO_UNECE_CODE = {
     'uom.product_uom_unit': 'C62',
     'uom.product_uom_dozen': 'DZN',
-    'uom.product_uom_pack_6': 'HD',
     'uom.product_uom_kgm': 'KGM',
     'uom.product_uom_gram': 'GRM',
     'uom.product_uom_day': 'DAY',
     'uom.product_uom_hour': 'HUR',
+    'uom.product_uom_minute': 'MIN',
     'uom.product_uom_ton': 'TNE',
     'uom.product_uom_meter': 'MTR',
     'uom.product_uom_km': 'KMT',
@@ -40,6 +42,7 @@ UOM_TO_UNECE_CODE = {
     'uom.product_uom_square_foot': 'FTK',
     'uom.product_uom_yard': 'YRD',
     'uom.product_uom_millimeter': 'MMT',
+    'uom.product_uom_kwh': 'KWH',
 }
 
 # -------------------------------------------------------------------------
@@ -66,7 +69,7 @@ EAS_MAPPING = {
     'SG': {'0195': 'l10n_sg_unique_entity_number'},
     'GB': {'9932': 'vat'},
     'GR': {'9933': 'vat'},
-    'HR': {'9934': 'vat'},
+    'HR': {'9934': 'vat', '0088': 'company_registry'},
     'HU': {'9910': 'l10n_hu_eu_vat'},
     'IE': {'9935': 'vat'},
     'IS': {'0196': 'vat'},
@@ -148,6 +151,8 @@ TAX_EXEMPTION_MAPPING = {
     'VATEX-EU-143-1J': 'Exempt based on article 143, section 1 (j) of Council Directive 2006/112/EC',
     'VATEX-EU-143-1K': 'Exempt based on article 143, section 1 (k) of Council Directive 2006/112/EC',
     'VATEX-EU-143-1L': 'Exempt based on article 143, section 1 (l) of Council Directive 2006/112/EC',
+    'VATEX-EU-144': 'Exempt based on article 144 of Council Directive 2006/112/EC',
+    'VATEX-EU-146-1E': 'Exempt based on article 146 section 1 (e) of Council Directive 2006/112/EC',
     'VATEX-EU-148': 'Exempt based on article 148 of Council Directive 2006/112/EC',
     'VATEX-EU-148-A': 'Exempt based on article 148, section (a) of Council Directive 2006/112/EC',
     'VATEX-EU-148-B': 'Exempt based on article 148, section (b) of Council Directive 2006/112/EC',
@@ -163,6 +168,8 @@ TAX_EXEMPTION_MAPPING = {
     'VATEX-EU-151-1C': 'Exempt based on article 151, section 1 (c) of Council Directive 2006/112/EC',
     'VATEX-EU-151-1D': 'Exempt based on article 151, section 1 (d) of Council Directive 2006/112/EC',
     'VATEX-EU-151-1E': 'Exempt based on article 151, section 1 (e) of Council Directive 2006/112/EC',
+    'VATEX-EU-153': 'Exempt based on article 153 of Council Directive 2006/112/EC',
+    'VATEX-EU-159': 'Exempt based on article 159 of Council Directive 2006/112/EC',
     'VATEX-EU-309': 'Exempt based on article 309 of Council Directive 2006/112/EC',
     'VATEX-EU-AE': 'Reverse charge',
     'VATEX-EU-D': 'Intra-Community acquisition from second hand means of transport',
@@ -174,6 +181,30 @@ TAX_EXEMPTION_MAPPING = {
     'VATEX-EU-J': 'Intra-Community acquisition of collectors items and antiques',
     'VATEX-FR-FRANCHISE': 'France domestic VAT franchise in base',
     'VATEX-FR-CNWVAT': 'France domestic Credit Notes without VAT, due to supplier forfeit of VAT for discount',
+    'VATEX-FR-CGI261-1': 'Exempt based on 1 of article 261 of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261-2': 'Exempt based on 2 of article 261 of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261-3': 'Exempt based on 3 of article 261 of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261-4': 'Exempt based on 4 of article 261 of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261-5': 'Exempt based on 5 of article 261 of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261-7': 'Exempt based on 7 of article 261 of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261-8': 'Exempt based on 8 of article 261 of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261A': 'Exempt based on article 261 A of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261B': 'Exempt based on article 261 B of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261C-1': 'Exempt based on 1° of article 261 C of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261C-2': 'Exempt based on 2° of article 261 C of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261C-3': 'Exempt based on 3° of article 261 C of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261D-1': 'Exempt based on 1° of article 261 D of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261D-1BIS': 'Exempt based on 1°bis of article 261 D of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261D-2': 'Exempt based on 2° of article 261 D of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261D-3': 'Exempt based on 3° of article 261 D of the Code Général des Impôts (CGI ; General tax code) Exonération de TVA - Article 261 D-3° du Code Général des Impôts',
+    'VATEX-FR-CGI261D-4': 'Exempt based on 4° of article 261 D of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261E-1': 'Exempt based on 1° of article 261 E of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI261E-2': 'Exempt based on 2° of article 261 E of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI277A': 'Exempt based on article 277 A of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI275': 'Exempt based on article 275 of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-298SEXDECIESA': 'Exempt based on article 298 sexdecies A of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-CGI295': 'Exempt based on article 295 of the Code Général des Impôts (CGI ; General tax code)',
+    'VATEX-FR-AE': 'Exempt based on 2 of article 283 of the Code Général des Impôts (CGI ; General tax code)',
 }
 
 # -------------------------------------------------------------------------
@@ -236,6 +267,9 @@ class AccountEdiCommon(models.AbstractModel):
     # HELPERS
     # -------------------------------------------------------------------------
 
+    def module_installed(self, module_name):
+        return self.env['ir.module.module']._get(module_name).state == 'installed'
+
     def format_float(self, amount, precision_digits):
         if amount is None:
             return None
@@ -265,6 +299,9 @@ class AccountEdiCommon(models.AbstractModel):
             val = find_xml_value(xpath, tree, nsmap)
             if val:
                 return val
+
+    def _can_export_selfbilling(self):
+        return False
 
     # -------------------------------------------------------------------------
     # TAXES
@@ -357,7 +394,7 @@ class AccountEdiCommon(models.AbstractModel):
         if tax and (code := tax.ubl_cii_tax_exemption_reason_code):
             return {
                 'tax_exemption_reason_code': code,
-                'tax_exemption_reason': TAX_EXEMPTION_MAPPING.get(code),
+                'tax_exemption_reason': TAX_EXEMPTION_MAPPING.get(code, _("Exempt from tax") if tax.ubl_cii_requires_exemption_reason else None),
             }
 
         tax_category_code = self._get_tax_category_code(customer, supplier, tax)
@@ -429,6 +466,140 @@ class AccountEdiCommon(models.AbstractModel):
             if not line.tax_ids:
                 return {'tax_on_line': _("Each invoice line should have at least one tax.")}
         return {}
+
+    @api.model
+    def _flatten_multilevel_constraints(self, constraints: dict):
+        """Flatten multilevel dict constraints
+
+        see `_get_flatten_multilevel_constraints_config` for config values.
+
+        Args:
+            constraints:
+                Arbitrary nested dict of simple constraints.
+
+                Special keys:
+                - ``_title``: title for this group (ignored in root)
+                - ``_config``: config dict (only applicable in root)
+                        Defaults to {
+                            'residual_title': _("Other Errors:"),
+                            'residual_key': 'other',
+                            'indent_suffix': '',
+                            'indent_suffix_on_root_titles': True,
+                        }
+                - Any key starting with ``_`` (except the above) is ignored
+
+                Example:
+                    {
+                        '_title': "Custom title for residual errors",
+                        'oth_err_1': "Some random error",
+                        '_ubl_20': {
+                            '_title': "UBL 2.0 Errors",
+                            'ubl20_supplier_name_required': "The field 'name' is required...",
+                        },
+                        'other_err_2': "Something is wrong",
+                        'important': {
+                            '_title': "Important Errors",
+                            'some_subtitle': {
+                                '_title': "Some Subtitle",
+                                'error_1': "Something is wrong with the thing",
+                            },
+                            'some_other_subtitle': {
+                                '_title': "Some Other Subtitle",
+                                'error_2': "Something is wrong with the other thing",
+                            },
+                        },
+                    }
+
+        Returns:
+            dict: Flattened dict where keys are group identifiers and values are formatted strings
+                  with titles and bullet-pointed messages, properly indented for nested groups.
+        """
+        def remove_non_flattable(dct: dict):
+            to_remove = []
+            for key, value in dct.items():
+                if not value or not isinstance(value, (str, dict)):
+                    to_remove.append(key)
+                elif isinstance(value, dict):
+                    remove_non_flattable(value)
+                    if not value or all(k.startswith('_') for k in value):
+                        to_remove.append(key)
+
+            for key in to_remove:
+                del dct[key]
+
+        def flatten_dict(dct: dict, level=0) -> str | None:
+            if '_title' not in dct:
+                raise UserError(_("Missing '_title' for multi-level constraints."))
+
+            title = dct.pop('_title')
+            simple_strings = []
+            children_strings = []
+
+            for v in dct.values():
+                if isinstance(v, str):
+                    simple_strings.append(v)
+                elif flattened_dict := flatten_dict(v, level + 1):
+                    children_strings.append(flattened_dict)
+
+            if not simple_strings and not children_strings:
+                return None
+
+            indent_suffix = config['indent_suffix']
+            indent = '\t' * (level + 1) + indent_suffix
+            if level == 0 and not config['indent_suffix_on_root_titles']:
+                strings = [f'{'\t' * level}{title}']
+            else:
+                strings = [f'{'\t' * level}{indent_suffix}{title}']
+
+            for string in simple_strings:
+                strings.append(f'{indent}{string}')
+
+            for string in children_strings:
+                strings.append(string)
+
+            return '\n'.join(strings)
+
+        new_constraints = deepcopy(constraints)
+
+        config = {
+            'residual_title': _("Other Errors:"),
+            'residual_key': 'other',
+            'indent_suffix': '',
+            'indent_suffix_on_root_titles': True,
+        }
+        custom_config = new_constraints.pop('_config', dict())
+        config.update(custom_config)
+
+        residuals = new_constraints.pop(config['residual_key'], dict())
+
+        # Remove values we can not flatten
+        remove_non_flattable(new_constraints)
+
+        if not residuals and all(isinstance(value, str) for value in new_constraints.values()):
+            # All values are strings
+            return new_constraints
+
+        # Aggregate residuals
+        to_remove = []
+        for key, value in new_constraints.items():
+            if isinstance(value, str):
+                residuals[key] = value
+                to_remove.append(key)
+
+        # Remove aggregated residuals from root dict
+        for key in to_remove:
+            del new_constraints[key]
+
+        # Add residuals to new constraints
+        if residuals:
+            if not new_constraints:
+                return residuals
+            else:
+                residuals['_title'] = config['residual_title']
+                new_constraints[config['residual_key']] = residuals
+
+        # Flatten children dicts
+        return {k: flattened for k, v in new_constraints.items() if (flattened := flatten_dict(v))}
 
     # -------------------------------------------------------------------------
     # Import invoice
@@ -572,30 +743,9 @@ class AccountEdiCommon(models.AbstractModel):
     def _import_partner_bank(self, invoice, bank_details):
         """ Retrieve the bank account, if no matching bank account is found, create it """
         # clear the context, because creation of partner when importing should not depend on the context default values
-        ResPartnerBank = self.env['res.partner.bank'].with_env(self.env(context=clean_context(self.env.context)))
         bank_details = list(set(map(sanitize_account_number, bank_details)))
-        partner = self.env.company.partner_id if invoice.is_inbound() else invoice.partner_id
-        banks_to_create = []
-        acc_number_partner_bank_dict = {
-            bank.sanitized_account_number: bank
-            for bank in ResPartnerBank.with_context(active_test=False).search(
-                [('company_id', 'in', [False, invoice.company_id.id]), ('account_number', 'in', bank_details)]
-            )
-        }
-        for account_number in bank_details:
-            partner_bank = acc_number_partner_bank_dict.get(account_number, ResPartnerBank)
-            if partner_bank.partner_id == partner:
-                if not partner_bank.active:
-                    partner_bank.active = True
-                invoice.partner_bank_id = partner_bank
-                return
-            elif not partner_bank and account_number:
-                banks_to_create.append({
-                    'account_number': account_number,
-                    'partner_id': partner.id,
-                })
-        if banks_to_create:
-            invoice.partner_bank_id = ResPartnerBank.create(banks_to_create)[0]
+        body = _("The following bank account numbers got retrieved during the import : %s", ", ".join(bank_details))
+        invoice.with_context(no_new_invoice=True).message_post(body=body)
 
     def _import_document_allowance_charges(self, tree, record, tax_type, qty_factor=1):
         logs = []
@@ -676,12 +826,18 @@ class AccountEdiCommon(models.AbstractModel):
     def _import_lines(self, record, tree, xpath, document_type=False, tax_type=False, qty_factor=1):
         logs = []
         lines_values = []
+        vehicle = self._import_vehicle(tree, 'move', document_type, record.company_id)
         for line_tree in tree.iterfind(xpath):
-            line_values = self.with_company(record.company_id)._retrieve_invoice_line_vals(line_tree, document_type, qty_factor)
+            line_values = self.with_company(record.company_id)._retrieve_invoice_line_vals(record, line_tree, document_type, qty_factor)
+            if line_values is None:
+                continue
+
             line_values['tax_ids'], tax_logs = self._retrieve_taxes(record, line_values, tax_type)
             logs += tax_logs
             if not line_values['product_uom_id']:
                 line_values.pop('product_uom_id')  # if no uom, pop it so it's inferred from the product_id
+            if self._need_vehicle_id(document_type):
+                line_values['vehicle_id'] = vehicle or self._import_vehicle(line_tree, 'line', document_type, record.company_id)
             lines_values.append(line_values)
             lines_values += self._retrieve_line_charges(record, line_values, line_values['tax_ids'])
         return lines_values, logs
@@ -721,7 +877,7 @@ class AccountEdiCommon(models.AbstractModel):
 
         return lines_values, logs
 
-    def _retrieve_invoice_line_vals(self, tree, document_type=False, qty_factor=1):
+    def _retrieve_invoice_line_vals(self, record, tree, document_type=False, qty_factor=1):
         # Start and End date (enterprise fields)
         xpath_dict = self._get_invoice_line_xpaths(document_type, qty_factor)
         deferred_values = {}
@@ -737,12 +893,50 @@ class AccountEdiCommon(models.AbstractModel):
                 'deferred_end_date': end_date,
             }
 
+        line_vals = self._retrieve_line_vals(record, tree, document_type, qty_factor)
+        if line_vals is None:
+            return None
+
         return {
-            **self._retrieve_line_vals(tree, document_type, qty_factor),
+            **line_vals,
             **deferred_values,
         }
 
-    def _retrieve_line_vals(self, tree, document_type=False, qty_factor=1):
+    @api.model
+    def _retrieve_rebate_val(self, tree, xpath_dict, quantity):
+        # Discount. /!\ as no percent discount can be set on a line, need to infer the percentage
+        # from the amount of the actual amount of the discount (the allowance charge)
+        rebate = 0
+        rebate_node = tree.find(xpath_dict['rebate'])
+        net_price_unit_node = tree.find(xpath_dict['net_price_unit'])
+        gross_price_unit_node = tree.find(xpath_dict['gross_price_unit'])
+        if rebate_node is not None:
+            rebate = float(rebate_node.text)
+        elif net_price_unit_node is not None and gross_price_unit_node is not None:
+            rebate = float(gross_price_unit_node.text) - float(net_price_unit_node.text)
+        return rebate
+
+    @api.model
+    def _retrieve_charge_allowance_vals(self, tree, xpath_dict, quantity):
+        charges = []
+        discount_amount = 0
+        for allowance_charge_node in tree.iterfind(xpath_dict['allowance_charge']):
+            charge_indicator = allowance_charge_node.findtext(xpath_dict['allowance_charge_indicator'])
+            amount = float(allowance_charge_node.findtext(xpath_dict['allowance_charge_amount'], default='0'))
+            reason_code = allowance_charge_node.findtext(xpath_dict['allowance_charge_reason_code'], default='')
+            reason = allowance_charge_node.findtext(xpath_dict['allowance_charge_reason'], default='')
+            if charge_indicator.lower() == 'true':
+                charges.append({
+                    'amount': amount,
+                    'line_quantity': quantity,
+                    'reason': reason,
+                    'reason_code': reason_code,
+                })
+            else:
+                discount_amount += amount
+        return discount_amount, charges
+
+    def _retrieve_line_vals(self, record, tree, document_type=False, qty_factor=1):
         """
         Read the xml invoice, extract the invoice line values, compute the odoo values
         to fill an invoice line form: quantity, price_unit, discount, product_uom_id.
@@ -792,26 +986,16 @@ class AccountEdiCommon(models.AbstractModel):
         if gross_price_unit_node is not None:
             gross_price_unit = float(gross_price_unit_node.text)
 
-        # rebate (optional)
-        # Discount. /!\ as no percent discount can be set on a line, need to infer the percentage
-        # from the amount of the actual amount of the discount (the allowance charge)
-        rebate = 0
-        rebate_node = tree.find(xpath_dict['rebate'])
-        net_price_unit_node = tree.find(xpath_dict['net_price_unit'])
-        if rebate_node is not None:
-            rebate = float(rebate_node.text)
-        elif net_price_unit_node is not None and gross_price_unit_node is not None:
-            rebate = float(gross_price_unit_node.text) - float(net_price_unit_node.text)
-
         # net_price_unit (mandatory)
         net_price_unit = None
+        net_price_unit_node = tree.find(xpath_dict['net_price_unit'])
         if net_price_unit_node is not None:
             net_price_unit = float(net_price_unit_node.text)
 
         # delivered_qty (mandatory)
         delivered_qty = 1
         product_vals = {k: self._find_value(v, tree) for k, v in xpath_dict['product'].items()}
-        product = self._import_product(**product_vals)
+        product = self._import_product(record.partner_id, **product_vals)
         product_uom = self.env['uom.uom']
         quantity_node = tree.find(xpath_dict['delivered_qty'])
         if quantity_node is not None:
@@ -830,29 +1014,20 @@ class AccountEdiCommon(models.AbstractModel):
         # line_net_subtotal (mandatory)
         price_subtotal = None
         line_total_amount_node = tree.find(xpath_dict['line_total_amount'])
-        if line_total_amount_node is not None:
-            price_subtotal = float(line_total_amount_node.text)
+        if line_total_amount_node is None or line_total_amount_node.text is None or not line_total_amount_node.text.strip():
+            return None
+        price_subtotal = float(line_total_amount_node.text)
+        if price_subtotal == 0:
+            return None
 
         # quantity
         quantity = delivered_qty * qty_factor
 
+        # rebate (optional)
+        rebate = self._retrieve_rebate_val(tree, xpath_dict, quantity)
+
         # Charges are collected (they are used to create new lines), Allowances are transformed into discounts
-        charges = []
-        discount_amount = 0
-        for allowance_charge_node in tree.iterfind(xpath_dict['allowance_charge']):
-            charge_indicator = allowance_charge_node.findtext(xpath_dict['allowance_charge_indicator'])
-            amount = float(allowance_charge_node.findtext(xpath_dict['allowance_charge_amount'], default='0'))
-            reason_code = allowance_charge_node.findtext(xpath_dict['allowance_charge_reason_code'], default='')
-            reason = allowance_charge_node.findtext(xpath_dict['allowance_charge_reason'], default='')
-            if charge_indicator.lower() == 'true':
-                charges.append({
-                    'amount': amount,
-                    'line_quantity': quantity,
-                    'reason': reason,
-                    'reason_code': reason_code,
-                })
-            else:
-                discount_amount += amount
+        discount_amount, charges = self._retrieve_charge_allowance_vals(tree, xpath_dict, quantity)
 
         # price_unit
         charge_amount = sum(d['amount'] for d in charges)
@@ -900,8 +1075,64 @@ class AccountEdiCommon(models.AbstractModel):
             'charges': charges,  # see `_retrieve_line_charges`
         }
 
-    def _import_product(self, **product_vals):
+    def _import_product(self, partner, **product_vals):
         return self.env['product.product']._retrieve_product(**product_vals)
+
+    def _import_vehicle(self, tree, tree_type, document_type, company):
+        """
+        For xmls where the VIN is located somewhere in a tag under Invoice or InvoiceLine
+        :param tree: etree object
+        :param tree_type: 'line' if the tree root element is <InvoiceLine> or 'move' if it's <Invoice>
+        """
+        if not self._need_vehicle_id(document_type):
+            return False
+        default_parent_node_path = './{*}Item/{*}AdditionalItemProperty'
+        default_value_path = './{*}Value'
+
+        def default_condition(parent_node, node, value):
+            return parent_node.findtext('./{*}Name') == value
+        paths = [
+            # {
+            #   'path_type': 'line' or 'move'
+            #   'parent_node_path': 'path to the parent node',
+            #   'condition': lambda prent_node, node, value: 'where parent_node = parent node, node = node containing VIN Number, value = vin_identifier',
+            #   'value_path': 'path to the node where the information is to be found',
+            #   'vin_identifier': 'to be used in condition, to perform a check',
+            # }
+            {'path_type': 'line', 'vin_identifier': 'SerialNumber'},  # BNP Leasing
+            {'path_type': 'line', 'vin_identifier': 'VIN'},  # BMW
+            {
+                # Tesla
+                'path_type': 'move',
+                'parent_node_path': './{*}AdditionalDocumentReference',
+                'condition': lambda parent_node, node, value: node.get('schemeID') == 'AKG',
+                'value_path': './{*}ID',
+            },
+        ]
+
+        chassis_numbers = []
+        for path in [p for p in paths if p.get('path_type') == tree_type]:
+            parent_nodes = tree.findall(path.get('parent_node_path', default_parent_node_path))
+            for parent_node in parent_nodes:
+                vin_node = parent_node.find(path.get('value_path', default_value_path))
+                if vin_node is not None and path.get('condition', default_condition)(parent_node, vin_node, path.get('vin_identifier', '')):
+                    vin_sn = vin_node.text
+                    if vin_sn and re.fullmatch(r'[A-Za-z0-9]{17}', vin_sn):  # applies to vin after 1981
+                        chassis_numbers.append(vin_sn)
+
+        if len(chassis_numbers) != 1:
+            return False
+
+        vehicles = self.env.get('fleet.vehicle').search([
+            ('vin_sn', 'in', chassis_numbers),
+            ('company_id', '=', company.id),
+        ], limit=2)
+        if len(vehicles) == 1:
+            return vehicles.id
+        return False
+
+    def _need_vehicle_id(self, document_type):
+        return document_type == 'in_invoice' and 'fleet.vehicle' in self.env
 
     def _retrieve_fixed_tax(self, company_id, fixed_tax_vals):
         """ Retrieve the fixed tax at import, iteratively search for a tax:
@@ -925,7 +1156,7 @@ class AccountEdiCommon(models.AbstractModel):
                     return tax
         return self.env['account.tax']
 
-    def _retrieve_taxes(self, record, line_values, tax_type):
+    def _retrieve_taxes(self, record, line_values, tax_type, tax_exigibility=False):
         """
         Retrieve the taxes on the document line at import.
 
@@ -947,6 +1178,17 @@ class AccountEdiCommon(models.AbstractModel):
             tax = self.env['account.tax']
             if hasattr(record, '_get_specific_tax'):
                 tax = record._get_specific_tax(line_values['name'], 'percent', amount, tax_type)
+            if tax_exigibility:
+                if not tax and tax_exigibility:
+                    tax = self.env['account.tax'].search(domain + [('price_include', '=', False), ('tax_exigibility', '=', tax_exigibility)], limit=1)
+                if not tax and tax_exigibility:
+                    tax = self.env['account.tax'].search(domain + [('price_include', '=', True), ('tax_exigibility', '=', tax_exigibility)], limit=1)
+                if not tax:
+                    logs.append(
+                        _("Tax with matching exigibility could not be retrieved: '%(exigibility)s' for line '%(line)s'.",
+                        exigibility=tax_exigibility,
+                        line=line_values['name']),
+                    )
             if not tax:
                 tax = self.env['account.tax'].search(domain + [('price_include', '=', False)], limit=1)
             if not tax:

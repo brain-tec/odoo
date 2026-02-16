@@ -86,3 +86,20 @@ html {
 .pos .o_error_detail {
     user-select: text;
 }
+
+// .o-default-button would be hidden with web assets, but the dialog css file excluded from pos
+// as o-default-button is used inside custom pos dialogs, only apply it to form dialogs
+.o_dialog:has(.o_form_view) {
+    button.o-default-button:not(:only-child) {
+        display: none;
+    }
+}
+
+.pos-logo {
+    height: $pos-navbar-height / 1.5;
+    min-width: $pos-navbar-height * 2;
+    background-image: var(--navbar-logo, url("/web/static/img/odoo_logo.svg"));
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}

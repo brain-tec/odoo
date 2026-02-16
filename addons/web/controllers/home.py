@@ -2,18 +2,20 @@
 
 import json
 import logging
+
 import psycopg2
 
 import odoo.exceptions
-from odoo import http
 from odoo.exceptions import AccessError
-from odoo.http import request
-from odoo.tools import config
-from odoo.tools.misc import hmac
-from odoo.tools.translate import _, LazyTranslate
+from odoo.http import Controller, request, route
+from odoo.http.router import db_list
+from odoo.http.session import authenticate, check, touch, update_session_token
+from odoo.http.stream import STATIC_CACHE_LONG
+from odoo.tools import LazyTranslate, _, config, hmac
+
 from .utils import (
-    ensure_db,
     _get_login_redirect_url,
+    ensure_db,
     is_user_internal,
 )
 
@@ -29,9 +31,9 @@ LOGIN_SUCCESSFUL_PARAMS = set()
 CREDENTIAL_PARAMS = ['login', 'password', 'type']
 
 
-class Home(http.Controller):
+class Home(Controller):
 
-    @http.route('/', type='http', auth="none")
+    @route('/', type='http', auth="none")
     def index(self, s_action=None, db=None, **kw):
         if request.db and request.session.uid and not is_user_internal(request.session.uid):
             return request.redirect_query('/web/login_successful', query=request.params)
@@ -41,7 +43,7 @@ class Home(http.Controller):
         return False
 
     # ideally, this route should be `auth="user"` but that don't work in non-monodb mode.
-    @http.route(['/web', '/odoo', '/odoo/<path:subpath>', '/scoped_app/<path:subpath>'], type='http', auth="none", readonly=_web_client_readonly)
+    @route(['/web', '/odoo', '/odoo/<path:subpath>', '/scoped_app/<path:subpath>'], type='http', auth="none", readonly=_web_client_readonly)
     def web_client(self, s_action=None, **kw):
 
         # Ensure we have both a database and a user
@@ -50,12 +52,12 @@ class Home(http.Controller):
             return request.redirect_query('/web/login', query={'redirect': request.httprequest.full_path}, code=303)
         if kw.get('redirect'):
             return request.redirect(kw.get('redirect'), 303)
-        request.session._check(request)
+        check(request.session, request)
         if not is_user_internal(request.session.uid):
             return request.redirect('/web/login_successful', 303)
 
         # Side-effect, refresh the session lifetime
-        request.session.touch()
+        touch(request.session)
 
         # Restore the user on the environment, it was lost due to auth="none"
         request.update_env(user=request.session.uid)
@@ -79,7 +81,12 @@ class Home(http.Controller):
         except AccessError:
             return request.redirect('/web/login?error=access')
 
-    @http.route('/web/webclient/load_menus', type='http', auth='user', methods=['GET'], readonly=True)
+    # `/web/webclient/load_menus` must be `check_identity=False`
+    # because it is called in Javascript using a simple `fetch` rather than a `rpc(...)`
+    # within a QWeb template (see `web.webclient_bootstrap` in `webclient_templates.xml`).
+    # Only `rpc` is overriden to catch `CheckIdentityException` to display the screen lock dialog.
+    # `fetch` isn't and therefore raises an error upon receiving a `CheckIdentityException`.
+    @route('/web/webclient/load_menus', type='http', auth='user', methods=['GET'], readonly=True, check_identity=False)
     def web_load_menus(self, lang=None):
         """
         Loads the menus for the webclient
@@ -91,18 +98,17 @@ class Home(http.Controller):
 
         menus = request.env["ir.ui.menu"].load_web_menus(request.session.debug)
         body = json.dumps(menus)
-        response = request.make_response(body, [
+        return request.make_response(body, [
             # this method must specify a content-type application/json instead of using the default text/html set because
             # the type of the route is set to HTTP, but the rpc is made with a get and expects JSON
             ('Content-Type', 'application/json'),
-            ('Cache-Control', 'public, max-age=' + str(http.STATIC_CACHE_LONG)),
+            ('Cache-Control', f'public, max-age={STATIC_CACHE_LONG}'),
         ])
-        return response
 
     def _login_redirect(self, uid, redirect=None):
         return _get_login_redirect_url(uid, redirect)
 
-    @http.route('/web/login', type='http', auth='none', readonly=False, list_as_website_content=_lt("Login"))
+    @route('/web/login', type='http', auth='none', readonly=False, list_as_website_content=_lt("Login"))
     def web_login(self, redirect=None, **kw):
         ensure_db()
         request.params['login_success'] = False
@@ -121,7 +127,7 @@ class Home(http.Controller):
 
         values = {k: v for k, v in request.params.items() if k in SIGN_UP_REQUEST_PARAMS}
         try:
-            values['databases'] = http.db_list()
+            values['databases'] = db_list()
         except odoo.exceptions.AccessDenied:
             values['databases'] = None
 
@@ -131,7 +137,7 @@ class Home(http.Controller):
                 credential.setdefault('type', 'password')
                 if request.env['res.users']._should_captcha_login(credential):
                     request.env['ir.http']._verify_request_recaptcha_token('login')
-                auth_info = request.session.authenticate(request.env, credential)
+                auth_info = authenticate(request.session, request.env, credential)
                 request.params['login_success'] = True
                 return request.redirect(self._login_redirect(auth_info['uid'], redirect=redirect))
             except odoo.exceptions.AccessDenied as e:
@@ -155,24 +161,24 @@ class Home(http.Controller):
         response.headers['Content-Security-Policy'] = "frame-ancestors 'self'"
         return response
 
-    @http.route('/web/login_successful', type='http', auth='user', website=True, sitemap=False)
+    @route('/web/login_successful', type='http', auth='user', website=True, sitemap=False)
     def login_successful_external_user(self, **kwargs):
         """Landing page after successful login for external users (unused when portal is installed)."""
         valid_values = {k: v for k, v in kwargs.items() if k in LOGIN_SUCCESSFUL_PARAMS}
         return request.render('web.login_successful', valid_values)
 
-    @http.route('/web/become', type='http', auth='user', sitemap=False, readonly=True)
+    @route('/web/become', type='http', auth='user', sitemap=False, readonly=True)
     def switch_to_admin(self):
         uid = request.env.user.id
         if request.env.user._is_system():
             uid = request.session.uid = odoo.SUPERUSER_ID
             # invalidate session token cache as we've changed the uid
             request.env.registry.clear_cache()
-            request.sesssion._update_session_token(request.env)
+            update_session_token(request.session, request.env)
 
         return request.redirect(self._login_redirect(uid))
 
-    @http.route('/web/health', type='http', auth='none', save_session=False)
+    @route('/web/health', type='http', auth='none', save_session=False)
     def health(self, db_server_status=False):
         health_info = {'status': 'pass'}
         status = 200
@@ -189,7 +195,7 @@ class Home(http.Controller):
                    ('Cache-Control', 'no-store')]
         return request.make_response(data, headers, status=status)
 
-    @http.route(['/robots.txt'], type='http', auth="none")
+    @route(['/robots.txt'], type='http', auth="none")
     def robots(self, **kwargs):
         allowed_routes = self._get_allowed_robots_routes()
         robots_content = ["User-agent: *", "Disallow: /"]

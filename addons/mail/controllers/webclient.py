@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
+
 from odoo import http
 from odoo.http import request
 from odoo.addons.mail.controllers.thread import ThreadController
@@ -35,6 +37,9 @@ class WebclientController(ThreadController):
 
     @classmethod
     def _process_request_loop(self, store: Store, fetch_params):
+        # aggregate of messages to return, to batch them in a single query when all the fetch params
+        # have been processed
+        request.update_context(messages=request.env["mail.message"], add_inbox_fields=False)
         for fetch_param in fetch_params:
             name, params, data_id = (
                 (fetch_param, None, None)
@@ -47,12 +52,20 @@ class WebclientController(ThreadController):
                 self._process_request_for_logged_in_user(store, name, params)
             if request.env.user._is_internal():
                 self._process_request_for_internal_user(store, name, params)
+        if messages := request.env.context["messages"]:
+            store.add(
+                messages,
+                "_store_message_fields",
+                fields_params={"inbox_fields": True}
+                if request.env.context["add_inbox_fields"]
+                else None,
+            )
         store.data_id = None
 
     @classmethod
     def _process_request_for_all(self, store: Store, name, params):
         if name == "init_messaging":
-            if not request.env.user._is_public():
+            if request.env.user._is_internal():
                 # sudo: bus.bus: reading non-sensitive last id
                 bus_last_id = request.env["bus.bus"].sudo()._bus_last_id()
                 store.add_global_values(
@@ -75,6 +88,20 @@ class WebclientController(ThreadController):
                     fields_params={"request_list": params["request_list"]},
                     as_thread=True,
                 )
+        if name == "/mail/poll/options":
+            poll_id = params.get("poll_id")
+            # sudo - mail.poll: validated by "_get_thread_with_access" afterwards.
+            if poll_sudo := request.env["mail.poll"].sudo().search([("id", "=", poll_id)]):
+                message = poll_sudo.start_message_id
+                if self._get_thread_with_access(message.model, message.res_id, mode="read"):
+                    store.add(poll_sudo.option_ids, ["number_of_votes", "option_label"])
+        if name == "/mail/poll_option/votes":
+            option_id = params.get("poll_option_id")
+            # sudo - mail.poll.option: validated by "_get_thread_with_access" afterwards.
+            if opt_sudo := request.env["mail.poll.option"].sudo().search([("id", "=", option_id)]):
+                message = opt_sudo.poll_id.start_message_id
+                if self._get_thread_with_access(message.model, message.res_id, mode="read"):
+                    store.add(opt_sudo.vote_ids, "_store_vote_fields")
 
     @classmethod
     def _process_request_for_logged_in_user(self, store: Store, name, params):
@@ -89,7 +116,35 @@ class WebclientController(ThreadController):
             # sudo as to not check ACL, which is far too costly
             # sudo: mail.notification - return only failures of current user as author
             notifications = request.env["mail.notification"].sudo().search(domain, limit=100)
-            store.add(notifications.mail_message_id, "_store_notification_fields")
+            found = defaultdict(list)
+            for message in notifications.mail_message_id:
+                found[message.model].append(message.res_id)
+            existing = {
+                model: set(request.env[model].browse(ids).exists().ids)
+                for model, ids in found.items()
+            }
+            valid = notifications.filtered(
+                lambda n: n.mail_message_id.res_id in existing[n.mail_message_id.model]
+            )
+            lost = notifications - valid
+            # might break readonly status of mail/data, but in really rare cases
+            # and solves it by removing useless notifications
+            if lost:
+                lost.sudo().unlink()  # no unlink right except admin, ok to remove as lost anyway
+            store.add(valid.mail_message_id, "_store_notification_fields")
+        if name == "/mail/thread/messages":
+            if thread := self._get_thread_with_access(
+                params["thread_model"],
+                params["thread_id"],
+                mode="read",
+            ):
+                messages = self._resolve_messages(
+                    store,
+                    thread=thread,
+                    fetch_params=params.get("fetch_params"),
+                )
+                if not request.env.user._is_public():
+                    messages.set_message_done()
 
     @classmethod
     def _process_request_for_internal_user(self, store: Store, name, params):
@@ -150,3 +205,31 @@ class WebclientController(ThreadController):
     @classmethod
     def _get_supported_avatar_card_models(self):
         return ["res.users", "res.partner"]
+
+    @classmethod
+    def _resolve_messages(
+        self,
+        store: Store,
+        /,
+        *,
+        domain=None,
+        thread=None,
+        fetch_params=None,
+        add_to_store=True,
+        sudo=False,
+    ):
+        fetch_res = (
+            request.env["mail.message"]
+            .sudo(sudo)
+            ._message_fetch(domain, thread=thread, **(fetch_params or {}))
+        )
+        messages = fetch_res.pop("messages")
+        if add_to_store:
+            request.update_context(messages=request.env.context["messages"] | messages)
+        store.resolve_data_request(
+            lambda res: (
+                [res.attr(k, v) for k, v in fetch_res.items()],
+                res.many("messages", [], value=messages),
+            ),
+        )
+        return messages

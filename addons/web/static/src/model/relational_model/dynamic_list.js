@@ -255,10 +255,13 @@ export class DynamicList extends DataPoint {
 
         if (resIds.length > 1) {
             this.model.dialog.add(ConfirmationDialog, {
-                body: _t("Are you sure that you want to duplicate all the selected records?"),
+                title: _t("Duplicate Records"),
+                body: _t(
+                    "You are about to create a copy of every selected record.\nAre you sure you want to proceed?"
+                ),
                 confirm: () => copy(resIds),
                 cancel: () => {},
-                confirmLabel: _t("Confirm"),
+                confirmLabel: _t("Duplicate"),
             });
         } else {
             await copy(resIds);
@@ -292,13 +295,6 @@ export class DynamicList extends DataPoint {
         }
         await this.model.load();
         return unlinked;
-    }
-
-    async _leaveSampleMode() {
-        if (this.model.useSampleModel) {
-            await this._load(this.offset, this.limit, this.orderBy, this.domain);
-            this.model.useSampleModel = false;
-        }
     }
 
     async _multiSave(editedRecord, changes) {

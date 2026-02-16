@@ -49,8 +49,8 @@ class AccountMoveLine(models.Model):
     journal_group_id = fields.Many2one(
         string='Ledger',
         comodel_name='account.journal.group',
+        related='journal_id.journal_group_id',
         store=False,
-        search='_search_journal_group_id',
     )
 
     company_id = fields.Many2one(
@@ -133,7 +133,7 @@ class AccountMoveLine(models.Model):
         compute='_compute_cumulated_balance',
         currency_field='company_currency_id',
         exportable=False,
-        help="Cumulated balance depending on the domain and the order chosen in the view.")
+        help="Cumulated balance for the account.")
     currency_rate = fields.Float(
         compute='_compute_currency_rate',
         help="Currency rate from company currency to document currency.",
@@ -398,7 +398,7 @@ class AccountMoveLine(models.Model):
     price_unit = fields.Float(
         string='Unit Price',
         compute="_compute_price_unit", store=True, readonly=False, precompute=True,
-        digits='Product Price',
+        min_display_digits='Product Price',
     )
     price_subtotal = fields.Monetary(
         string='Subtotal',
@@ -421,12 +421,12 @@ class AccountMoveLine(models.Model):
     deductible_amount = fields.Float("Deductibility", default=100)
 
     # === Invoice sync fields === #
-    term_key = fields.Binary(compute='_compute_term_key', exportable=False)
-    epd_key = fields.Binary(compute='_compute_epd_key', exportable=False)
-    epd_needed = fields.Binary(compute='_compute_epd_needed', exportable=False)
+    term_key = fields.Json(compute='_compute_term_key', exportable=False)
+    epd_key = fields.Json(compute='_compute_epd_key', exportable=False)
+    epd_needed = fields.Json(compute='_compute_epd_needed', exportable=False)
     epd_dirty = fields.Boolean(compute='_compute_epd_needed')
-    discount_allocation_key = fields.Binary(compute='_compute_discount_allocation_key', exportable=False)
-    discount_allocation_needed = fields.Binary(compute='_compute_discount_allocation_needed', exportable=False)
+    discount_allocation_key = fields.Json(compute='_compute_discount_allocation_key', exportable=False)
+    discount_allocation_needed = fields.Json(compute='_compute_discount_allocation_needed', exportable=False)
     discount_allocation_dirty = fields.Boolean(compute='_compute_discount_allocation_needed')
 
     # === Analytic fields === #
@@ -524,10 +524,13 @@ class AccountMoveLine(models.Model):
 
     @api.depends('move_id')
     def _compute_display_type(self):
+        account_cache = self._fields['account_id']._get_cache(self.env)
+        tax_line_cache = self._fields['tax_line_id']._get_cache(self.env)
+
         for line in self.filtered(lambda l: not l.display_type):
             # avoid cyclic dependencies with _compute_account_id
-            account_set = self.env.cache.contains(line, line._fields['account_id'])
-            tax_set = self.env.cache.contains(line, line._fields['tax_line_id'])
+            account_set = line.id in account_cache
+            tax_set = line.id in tax_line_cache
             line.display_type = (
                 'tax' if tax_set and line.tax_line_id else
                 'payment_term' if account_set and line.account_id.account_type in ['asset_receivable', 'liability_payable'] else
@@ -577,8 +580,12 @@ class AccountMoveLine(models.Model):
                 n_terms = len(line.move_id.invoice_payment_term_id.line_ids)
                 if line.move_id.payment_reference and line.move_id.ref and line.move_id.payment_reference != line.move_id.ref:
                     name = f'{line.move_id.ref} - {line.move_id.payment_reference}'
+                elif line.move_id.payment_reference:
+                    name = line.move_id.payment_reference
+                elif line.move_id.move_type in ['in_invoice', 'in_refund'] and line.move_id.ref:
+                    name = line.move_id.ref
                 else:
-                    name = line.move_id.payment_reference or False
+                    name = False
 
                 if n_terms > 1:
                     index = term_lines._ids.index(line.id) if line in term_lines else len(term_lines)
@@ -771,24 +778,104 @@ class AccountMoveLine(models.Model):
 
     @api.depends_context('order_cumulated_balance', 'domain_cumulated_balance')
     def _compute_cumulated_balance(self):
-        if not self.env.context.get('order_cumulated_balance'):
-            # We do not come from search_fetch, so we are not in a list view, so it doesn't make any sense to compute the cumulated balance
+        """ Compute the cumulated balance for each line in a list view.
+
+        This is limited to:
+        - only the view with the specific ordering of `date desc, move_name desc, id`
+        - a domain containing an account, and a few more conditions
+        - an account not shared by multiples companies with different currencies
+
+        We put those limits in place for the sake of simplicity, and because such computation is pretty heavy,
+        as it can require to sum every move lines of an account.
+
+        If the field is in the view and one of those conditions is not met, the cumulated balance will not be computed
+        and will be displayed as 0. This is expected and a limitation since parsing domains, consolidating and reordering
+        are making this too complex and expensive to compute.
+        """
+        def _get_domain_information(domain):
+            account_id = None
+            parent_state_domain = []
+            for domain_element in domain:
+                if isinstance(domain_element, (list, tuple)):
+                    field, operator, value = domain_element
+                    # If a single account_id is specified
+                    if (not account_id or account_id == value) and field == 'account_id' and operator == '=':
+                        account_id = value
+                        continue
+                    # If a single account_id is specified in a list/tuple
+                    if isinstance(value, (list, tuple)) and len(value) == 1 and (not account_id or account_id == value[0]) and field == 'account_id' and operator == 'in':
+                        account_id = value[0]
+                        continue
+                    # If a parent_state filter is specified
+                    if field == 'parent_state':
+                        parent_state_domain.append(domain_element)
+                        continue
+                    # Ignore date and display_type filters as they do not impact the cumulated balance
+                    if (
+                        (field == 'date' and operator in ('>=', '<=', '=', '>', '<'))
+                        or (
+                            field == 'display_type' and operator == 'not in' and isinstance(value, (set, list, tuple))
+                            and len(set(value) - {'line_section', 'line_subsection', 'line_note'}) == 0
+                        )
+                    ):
+                        continue
+                # Ignore AND operators
+                elif domain_element == '&':
+                    continue
+                # If anything else than the above is found, we invalidate the domain and dont calculate the cumulated balance.
+                # some valid condition might be ignored, but there's no way to easily handle it here as the domain can be modified by the user.
+                # And if the user filter the records to display too much, the cumulated balance will be wrong.
+                return None, []
+            return account_id, parent_state_domain
+
+        order = self.env.context.get('order_cumulated_balance')
+        domain = Domain(self.env.context.get('domain_cumulated_balance') or []).optimize_full(self)
+        account_id, parent_state_domain = _get_domain_information(domain)
+        if order != 'date desc, move_name desc, id' or not account_id or not self:
+            # Using a different order invalidates the cumulated balance as it means we are not summing by date, which
+            # means the cumulated balances of different fiscal years would be mixed together.
             self.cumulated_balance = 0
             return
 
-        # get the where clause
-        query = self._search(self.env.context.get('domain_cumulated_balance') or [], bypass_access=True)
-        sql_order = self._order_to_sql(query.table, self.env.context.get('order_cumulated_balance'), reverse=True)
-        result = dict(self.env.execute_query(query.select(
-            query.table.id,
-            SQL(
-                "SUM(%s) OVER (ORDER BY %s ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)",
-                query.table.balance,
-                sql_order,
-            ),
-        )))
-        for record in self:
-            record.cumulated_balance = result[record.id]
+        account = self.env['account.account'].browse(account_id)
+        if len(set(account.company_ids.mapped('currency_id'))) != 1:
+            # If the account is shared between multiple companies with different currencies,
+            # the balance won't make sense as we would be consolidating amounts in different currencies.
+            # This is a problem since the amounts would need to be converted and we dont know the conversion rate to use.
+            # As using the latest one available could be wrong for older entries.
+            self.cumulated_balance = 0
+            return
+
+        minimum_record = self.sorted(order)[-1]
+        fy_dates = None
+        if not account.include_initial_balance:
+            fy_dates = account.company_ids[0].compute_fiscalyear_dates(minimum_record.date)
+
+        initial_balance = self._read_group(
+            domain=[
+                ('account_id', '=', account_id),
+                *parent_state_domain,
+                *([('move_id.date', '>=', fy_dates['date_from'])] if fy_dates else []),
+                '|',
+                ('date', '<', minimum_record.date),
+                '&',
+                ('date', '=', minimum_record.date),
+                '|',
+                ('move_name', '<', minimum_record.move_name),
+                '&',
+                ('move_name', '=', minimum_record.move_name),
+                ('id', '>', minimum_record.id),
+            ],
+            aggregates=['balance:sum'],
+        )[0][0] or 0.0
+
+        for record in reversed(self):
+            if fy_dates and record.date > fy_dates['date_to']:
+                initial_balance = 0.0
+                fy_dates = account.company_ids[0].compute_fiscalyear_dates(record.date)
+
+            initial_balance += record.balance
+            record.cumulated_balance = initial_balance
 
     def _search_open_on_date(self, operator, value):
         return []
@@ -943,7 +1030,7 @@ class AccountMoveLine(models.Model):
             # vendor bills should have the product purchase UOM
             if line.move_id.is_purchase_document():
                 seller_ids = line.product_id.seller_ids._get_filtered_supplier(line.company_id, line.product_id, False)
-                line.product_uom_id = seller_ids[:1].product_uom_id or line.product_id.uom_id
+                line.product_uom_id = seller_ids[:1].uom_id or line.product_id.uom_id
             else:
                 line.product_uom_id = line.product_id.uom_id
 
@@ -1094,7 +1181,12 @@ class AccountMoveLine(models.Model):
                 })
                 dist = distribution_totals[key]
                 total = sum(dist.values()) or 1  # avoid division by zero
-                discount_allocation_needed[key] = frozendict({
+                key_needed = frozendict({
+                    'move_id': line.move_id._origin.id,
+                    'account_id': account._origin.id,
+                    'currency_rate': line.currency_rate,
+                }) if not line.move_id.id else key
+                discount_allocation_needed[key_needed] = frozendict({
                     'display_type': 'discount',
                     'name': _("Discount"),
                     'amount_currency': amount,
@@ -1103,7 +1195,7 @@ class AccountMoveLine(models.Model):
                         for account_id, value in dist.items()
                     }
                 })
-            line.discount_allocation_needed = discount_allocation_needed
+            line.discount_allocation_needed = list(discount_allocation_needed.items())
 
     @api.depends('tax_ids', 'account_id', 'company_id')
     def _compute_epd_key(self):
@@ -1141,8 +1233,8 @@ class AccountMoveLine(models.Model):
             taxes = line.tax_ids.filtered(lambda t: t.amount_type != 'fixed')
             epd_needed_vals = epd_needed.setdefault(
                 frozendict({
-                    'move_id': line.move_id.id,
-                    'account_id': line.account_id.id,
+                    'move_id': line.move_id._origin.id,
+                    'account_id': line.account_id._origin.id,
                     'analytic_distribution': line.analytic_distribution,
                     'tax_ids': [Command.set(taxes.ids)],
                     'display_type': 'epd',
@@ -1161,8 +1253,8 @@ class AccountMoveLine(models.Model):
             epd_needed_vals['balance'] -= balance
             epd_needed_vals = epd_needed.setdefault(
                 frozendict({
-                    'move_id': line.move_id.id,
-                    'account_id': line.account_id.id,
+                    'move_id': line.move_id._origin.id,
+                    'account_id': line.account_id._origin.id,
                     'display_type': 'epd',
                 }),
                 {
@@ -1174,13 +1266,13 @@ class AccountMoveLine(models.Model):
             )
             epd_needed_vals['amount_currency'] += amount_currency
             epd_needed_vals['balance'] += balance
-            line.epd_needed = {k: frozendict(v) for k, v in epd_needed.items()}
+            line.epd_needed = list(epd_needed.items())
 
     @api.depends('move_id.move_type', 'balance', 'tax_repartition_line_id', 'tax_ids')
     def _compute_is_refund(self):
         for line in self:
             is_refund = False
-            if line.move_id.move_type in ('out_refund', 'in_refund'):
+            if line.move_id.is_refund():
                 is_refund = True
             elif line.move_id.move_type == 'entry':
                 if line.tax_repartition_line_id:
@@ -1205,7 +1297,7 @@ class AccountMoveLine(models.Model):
         for line in self:
             if line.display_type == 'payment_term':
                 line.term_key = frozendict({
-                    'move_id': line.move_id.id,
+                    'move_id': line.move_id._origin.id,
                     'date_maturity': fields.Date.to_date(line.date_maturity),
                     'discount_date': line.discount_date,
                 })
@@ -1277,29 +1369,35 @@ class AccountMoveLine(models.Model):
             line.reconciled_lines_excluding_exchange_diff_ids = all_lines - excluded_ids
 
     def _compute_parent_id(self):
+        parent_id_vals_to_lines = defaultdict(list)
         for move, lines in self.grouped('move_id').items():
             if not move:
-                lines.parent_id = False
+                parent_id_vals_to_lines[False].extend(lines._ids)
                 continue
             last_section = False
             last_sub = False
             for line in move.line_ids.sorted('sequence'):
+                value = False
                 if line.display_type == 'line_section':
                     last_section = line
-                    line.parent_id = False
+                    value = False
                     last_sub = False
                 elif line.display_type == 'line_subsection':
-                    line.parent_id = last_section
+                    value = last_section
                     last_sub = line
                 elif line.display_type in {'line_note', 'product'}:
-                    line.parent_id = last_sub or last_section
+                    value = last_sub or last_section
                 else:
-                    line.parent_id = False
+                    value = False
+                parent_id_vals_to_lines[value].append(line.id)
 
-    @api.depends('move_id.move_type')
+        for val, record_ids in parent_id_vals_to_lines.items():
+            self.browse(record_ids).parent_id = val
+
+    @api.depends('journal_id.type')
     def _compute_no_followup(self):
         for aml in self:
-            aml.no_followup = aml.move_id.is_entry() and not aml.move_id.origin_payment_id
+            aml.no_followup = aml.journal_id.type == 'general'
 
     def _inverse_no_followup(self):
         # If one line of an invoice gets excluded from or included in the follow up report, we want all
@@ -1348,13 +1446,6 @@ class AccountMoveLine(models.Model):
             'target': 'new',
             'type': 'ir.actions.act_window',
         }
-
-    # -------------------------------------------------------------------------
-    # SEARCH METHODS
-    # -------------------------------------------------------------------------
-
-    def _search_journal_group_id(self, operator, value):
-        return self.env['account.move']._search_journal_group_id(operator, value)
 
     # -------------------------------------------------------------------------
     # INVERSE METHODS
@@ -1603,8 +1694,8 @@ class AccountMoveLine(models.Model):
         # Invalidate cache of related moves
         if fnames is None or 'move_id' in fnames:
             field = self._fields['move_id']
-            lines = self.env.cache.get_records(self, field)
-            move_ids = {id_ for id_ in self.env.cache.get_values(lines, field) if id_}
+            field_cache = field._get_cache(self.env)
+            move_ids = {id_ for id_ in field_cache.values() if id_}
             if move_ids:
                 self.env['account.move'].browse(move_ids).invalidate_recordset()
         return super().invalidate_model(fnames, flush)
@@ -1613,7 +1704,9 @@ class AccountMoveLine(models.Model):
         # Invalidate cache of related moves
         if fnames is None or 'move_id' in fnames:
             field = self._fields['move_id']
-            move_ids = {id_ for id_ in self.env.cache.get_values(self, field) if id_}
+            field_cache = field._get_cache(self.env)
+            line_ids = set(self._ids)
+            move_ids = {id_ for line_id, id_ in field_cache.items() if line_id in line_ids and id_}
             if move_ids:
                 self.env['account.move'].browse(move_ids).invalidate_recordset()
         return super().invalidate_recordset(fnames, flush)
@@ -1785,7 +1878,6 @@ class AccountMoveLine(models.Model):
                         )
 
         lines.move_id._synchronize_business_models(['line_ids'])
-        lines._check_constrains_account_id_journal_id()
         # Remove analytic lines created for draft AMLs, after analytic_distribution has been updated
         lines.filtered(lambda l: l.parent_state == 'draft').analytic_line_ids.with_context(skip_analytic_sync=True).unlink()
         return lines
@@ -2009,7 +2101,7 @@ class AccountMoveLine(models.Model):
             names.append(move_name)
         if move_ref and move_ref != '/':
             names.append(f"({move_ref})")
-        if line_name and line_name not in ['/', move_name, f"{move_ref} - {move_name}"]:
+        if line_name and line_name not in ['/', move_name, f"{move_ref} - {move_name}", move_ref]:
             names.append(line_name)
         name = ' '.join(names)
         return name or _('Draft Entry')
@@ -2466,6 +2558,8 @@ class AccountMoveLine(models.Model):
             'debit_move_id': debit_aml.id,
             'credit_move_id': credit_aml.id,
         }
+        res['debit_aml'] = debit_aml
+        res['credit_aml'] = credit_aml
 
         debit_values['amount_residual'] = remaining_debit_amount
         debit_values['amount_residual_currency'] = remaining_debit_amount_curr
@@ -2791,6 +2885,7 @@ class AccountMoveLine(models.Model):
         partials_values_list = []
         exchange_diff_values_list = []
         all_plan_results = []
+        exchange_account_per_move = {}
         for plan in plan_list:
             plan_results = self\
                 .with_context(
@@ -2801,8 +2896,12 @@ class AccountMoveLine(models.Model):
             all_plan_results.append(plan_results)
             for results in plan_results:
                 partials_values_list.append(results['partial_values'])
-                if results.get('exchange_values') and results['exchange_values']['move_values']['line_ids']:
-                    exchange_diff_values_list.append(results['exchange_values'])
+                exchange_values = results.get('exchange_values')
+                if exchange_values and exchange_values['move_values']['line_ids']:
+                    exchange_diff_values_list.append(exchange_values)
+                    exchange_account_id = exchange_values['move_values']['line_ids'][1][2]['account_id']
+                    for move in (results['debit_aml'] + results['credit_aml']).move_id:
+                        exchange_account_per_move[move] = exchange_account_id
 
         # ==== Create the partials ====
         # Link the newly created partials to the plan. There are needed later for caba exchange entries.
@@ -2841,7 +2940,9 @@ class AccountMoveLine(models.Model):
         if not self.env.context.get('move_reverse_cancel') and not self.env.context.get('no_cash_basis'):
             for plan in plan_list:
                 if is_cash_basis_needed(plan['amls']):
-                    plan['partials'].with_context(no_exchange_difference_no_recursive=False)._create_tax_cash_basis_moves()
+                    plan['partials']\
+                        .with_context(no_exchange_difference_no_recursive=False, exchange_account_per_move=exchange_account_per_move)\
+                        ._create_tax_cash_basis_moves()
                     plan['partials']._set_draft_caba_move_vals()
 
         # ==== Prepare full reconcile creation ====
@@ -2969,8 +3070,13 @@ class AccountMoveLine(models.Model):
             'line_ids': [],
             'always_tax_exigible': True,
         }
+
+        exchange_account_per_move = self.env.context.get('exchange_account_per_move', {})
         to_reconcile = []
+        refs = set()
         for line, amounts in zip(self, amounts_list):
+            if line.move_id.name:
+                refs.add(line.move_id.name)
 
             move_vals['date'] = max(move_vals['date'], line.date)
 
@@ -2991,7 +3097,10 @@ class AccountMoveLine(models.Model):
             else:
                 continue
 
-            exchange_line_account = self._get_exchange_account(company, amount_residual_to_fix)
+            exchange_line_account_id = (
+                exchange_account_per_move.get(line.move_id)
+                or self._get_exchange_account(company, amount_residual_to_fix).id
+            )
 
             sequence = len(move_vals['line_ids'])
             line_vals = [
@@ -3012,7 +3121,7 @@ class AccountMoveLine(models.Model):
                     'debit': amount_residual if amount_residual > 0.0 else 0.0,
                     'credit': -amount_residual if amount_residual < 0.0 else 0.0,
                     'amount_currency': amount_residual_currency,
-                    'account_id': exchange_line_account.id,
+                    'account_id': exchange_line_account_id,
                     'currency_id': line.currency_id.id,
                     'partner_id': line.partner_id.id,
                     'sequence': sequence + 1,
@@ -3024,6 +3133,8 @@ class AccountMoveLine(models.Model):
 
             move_vals['line_ids'] += [Command.create(vals) for vals in line_vals]
             to_reconcile.append((line, sequence))
+
+        move_vals['ref'] = ','.join(refs) or None
 
         return {'move_values': move_vals, 'to_reconcile': to_reconcile}
 

@@ -59,7 +59,8 @@
                                     <div class="col-lg-5">
                                         <field name="receipt_printer_ids"
                                             class="w-100 pt-1"
-                                            widget="many2many_tags"/>
+                                            widget="many2many_tags"
+                                            context="{'default_use_type': 'receipt'}"/>
                                     </div>
                                     <div class="col-lg-5">
                                         <widget name="point_of_sale_test_epos"/>
@@ -89,7 +90,8 @@
                                     <div class="col-lg-5">
                                         <field name="preparation_printer_ids"
                                             class="w-100 pt-1"
-                                            widget="many2many_tags"/>
+                                            widget="many2many_tags"
+                                            context="{'default_use_type': 'preparation'}"/>
                                     </div>
                                 </div>
                             </div>
@@ -105,7 +107,7 @@
                 <!-- Replace the default save/discard buttons so that when any of the buttons is clicked, the modal immediately closes. -->
                 <footer invisible="not context.get('pos_config_open_modal', False)">
                     <button string="Save" special="save" class="btn-primary"/>
-                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                    <button class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>
@@ -178,7 +180,5 @@
         parent="point_of_sale.pos_menu_products_configuration"  groups="product.group_product_variant" sequence="2"/>
 
     <menuitem id="menu_pos_dashboard" action="action_pos_config_kanban" parent="menu_point_root" name="Dashboard" sequence="1"/>
-    <menuitem id="menu_point_of_sale_list" name="Point of Sales" parent="menu_point_config_product"
-              action="action_pos_config_tree" sequence="10"/>
 
 </odoo>

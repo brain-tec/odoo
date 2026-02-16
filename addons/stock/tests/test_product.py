@@ -4,6 +4,9 @@
 # Author: Leonardo Pistone
 # Copyright 2015 Camptocamp SA
 
+from freezegun import freeze_time
+
+from odoo import Command
 from odoo.addons.stock.tests.common import TestStockCommon
 from odoo.exceptions import UserError
 from odoo.tests import tagged, Form
@@ -38,7 +41,7 @@ class TestVirtualAvailable(TestStockCommon):
         cls.env['stock.move'].create({
             'product_id': cls.product_3.id,
             'product_uom_qty': 3.0,
-            'product_uom': cls.product_3.uom_id.id,
+            'uom_id': cls.product_3.uom_id.id,
             'picking_id': cls.picking_out.id,
             'location_id': cls.stock_location.id,
             'location_dest_id': cls.customer_location.id})
@@ -50,7 +53,7 @@ class TestVirtualAvailable(TestStockCommon):
             'restrict_partner_id': cls.user_stock_user.partner_id.id,
             'product_id': cls.product_3.id,
             'product_uom_qty': 5.0,
-            'product_uom': cls.product_3.uom_id.id,
+            'uom_id': cls.product_3.uom_id.id,
             'picking_id': cls.picking_out_2.id,
             'location_id': cls.stock_location.id,
             'location_dest_id': cls.customer_location.id})
@@ -109,8 +112,7 @@ class TestVirtualAvailable(TestStockCommon):
     def test_change_product_company(self):
         """ Checks we can't change the product's company if this product has
         quant in another company. """
-        company1 = self.env.ref('base.main_company')
-        company2 = self.env['res.company'].create({'name': 'Second Company'})
+        another_company = self.env['res.company'].create({'name': 'Second Company'})
         product = self.env['product.product'].create({
             'name': 'Product [TEST - Change Company]',
             'is_storable': True,
@@ -118,26 +120,25 @@ class TestVirtualAvailable(TestStockCommon):
         # Creates a quant for productA in the first company.
         self.env['stock.quant'].create({
             'product_id': product.id,
-            'product_uom_id': self.uom_unit.id,
+            'uom_id': self.uom_unit.id,
             'location_id': self.shelf_1.id,
             'quantity': 7,
             'reserved_quantity': 0,
         })
-        # Assigns a company: should be OK for company1 but should raise an error for company2.
-        product.company_id = company1.id
+        # Assigns a company: should be OK for self.company but should raise an error for another_company.
+        product.company_id = self.company.id
         with self.assertRaises(UserError):
-            product.company_id = company2.id
-        # Checks we can assing company2 for the product once there is no more quant for it.
+            product.company_id = another_company.id
+        # Checks we can assing another_company for the product once there is no more quant for it.
         quant = self.env['stock.quant'].search([('product_id', '=', product.id)])
         quant.quantity = 0
         self.env['stock.quant']._unlink_zero_quants()
-        product.company_id = company2.id  # Should work this time.
+        product.company_id = another_company.id  # Should work this time.
 
     def test_change_product_company_02(self):
         """ Checks we can't change the product's company if this product has
         stock move line in another company. """
-        company1 = self.env.ref('base.main_company')
-        company2 = self.env['res.company'].create({'name': 'Second Company'})
+        another_company = self.env['res.company'].create({'name': 'Second Company'})
         product = self.env['product.product'].create({
             'name': 'Product [TEST - Change Company]',
             'type': 'consu',
@@ -152,21 +153,20 @@ class TestVirtualAvailable(TestStockCommon):
             'location_id': self.customer_location.id,
             'location_dest_id': self.stock_location.id,
             'product_id': product.id,
-            'product_uom': product.uom_id.id,
+            'uom_id': product.uom_id.id,
             'product_uom_qty': 1,
             'picking_id': picking.id,
         })
         picking.action_confirm()
         picking.button_validate()
 
-        product.company_id = company1.id
+        product.company_id = self.company.id
         with self.assertRaises(UserError):
-            product.company_id = company2.id
+            product.company_id = another_company.id
 
     def test_change_product_company_exclude_vendor_and_customer_location(self):
         """ Checks we can change product company where only exist single company
         and exist quant in vendor/customer location"""
-        company1 = self.env.ref('base.main_company')
         product = self.env['product.product'].create({
             'name': 'Product Single Company',
             'is_storable': True,
@@ -174,26 +174,26 @@ class TestVirtualAvailable(TestStockCommon):
         # Creates a quant for company 1.
         self.env['stock.quant'].create({
             'product_id': product.id,
-            'product_uom_id': self.uom_unit.id,
+            'uom_id': self.uom_unit.id,
             'location_id': self.shelf_1.id,
             'quantity': 5,
         })
         # Creates a quant for vendor location.
         self.env['stock.quant'].create({
             'product_id': product.id,
-            'product_uom_id': self.uom_unit.id,
+            'uom_id': self.uom_unit.id,
             'location_id': self.supplier_location.id,
             'quantity': -15,
         })
         # Creates a quant for customer location.
         self.env['stock.quant'].create({
             'product_id': product.id,
-            'product_uom_id': self.uom_unit.id,
+            'uom_id': self.uom_unit.id,
             'location_id': self.customer_location.id,
             'quantity': 10,
         })
         # Assigns a company: should be ok because only exist one company (exclude vendor and customer location)
-        product.company_id = company1.id
+        product.company_id = self.company
 
         # Reset product company to empty
         product.company_id = False
@@ -275,11 +275,13 @@ class TestVirtualAvailable(TestStockCommon):
 
     def test_product_qty_field_and_context(self):
         main_warehouse = self.warehouse_1
-        other_warehouse = self.env['stock.warehouse'].search([('id', '!=', main_warehouse.id)], limit=1)
+        other_warehouse = self.env['stock.warehouse'].create({
+            'name': 'Other Warehouse',
+            'code': 'OWH',
+        })
         warehouses = main_warehouse | other_warehouse
         main_loc = main_warehouse.lot_stock_id
         other_loc = other_warehouse.lot_stock_id
-        self.assertTrue(other_warehouse, 'The test needs another warehouse')
 
         (main_loc | other_loc).name = 'Stock'
         sub_loc01, sub_loc02, sub_loc03 = self.env['stock.location'].create([{
@@ -386,3 +388,62 @@ class TestVirtualAvailable(TestStockCommon):
         with Form(product) as product_form:
             product_form.qty_available = 0.0
         self.assertEqual(product.qty_available, 0.0)
+
+    @freeze_time("2025-12-16")
+    def test_product_quantities_in_sub_location_in_past_date(self):
+        """
+        Test that the quantities of a product in a sub location are correctly tracked in the past.
+        """
+        with freeze_time("2025-12-10"):
+            receipt = self.env['stock.picking'].create({
+                'picking_type_id': self.warehouse_1.in_type_id.id,
+                'move_ids': [Command.create({
+                    'product_id': self.productA.id,
+                    'product_uom_qty': 5,
+                    'location_id': self.env.ref('stock.stock_location_suppliers').id,
+                    'location_dest_id': self.warehouse_1.lot_stock_id.id,
+                })]
+            })
+            self.env['stock.move.line'].create([
+                {
+                    'product_id': self.productA.id,
+                    'move_id': receipt.move_ids.id,
+                    'picking_id': receipt.id,
+                    'quantity': 3,
+                },
+                {
+                    'product_id': self.productA.id,
+                    'move_id': receipt.move_ids.id,
+                    'picking_id': receipt.id,
+                    'quantity': 2,
+                }
+            ])
+            receipt.action_confirm()
+            receipt.action_assign()
+            receipt.move_line_ids[0].location_dest_id = self.shelf_1.id
+            receipt.move_line_ids[1].location_dest_id = self.shelf_2.id
+            receipt.button_validate()
+
+        # Query quantities at a date in the past (after the receipt was validated)
+        past_date = "2025-12-13"
+
+        # Verify qty_available at location_1 (should be 3, not 5)
+        qty_location_1 = self.productA.with_context(
+            to_date=past_date,
+            location=self.shelf_1.id,
+        ).qty_available
+        self.assertEqual(qty_location_1, 3, "Location 1 should have 3 units at past date")
+
+        # Verify qty_available at location_2 (should be 2, not 5)
+        qty_location_2 = self.productA.with_context(
+            to_date=past_date,
+            location=self.shelf_2.id,
+        ).qty_available
+        self.assertEqual(qty_location_2, 2, "Location 2 should have 2 units at past date")
+
+        # Verify total at parent location (should be 5)
+        qty_parent = self.productA.with_context(
+            to_date=past_date,
+            location=self.warehouse_1.lot_stock_id.id,
+        ).qty_available
+        self.assertEqual(qty_parent, 5, "Parent location should have 5 units total at past date")

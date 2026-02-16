@@ -1,10 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-import base64
 import importlib
 import io
 import re
 import unicodedata
-import sys
+import typing
 from datetime import datetime
 from hashlib import md5
 from logging import getLogger
@@ -12,7 +11,6 @@ from zlib import compress, decompress, decompressobj
 
 from PIL import Image, PdfImagePlugin
 
-from odoo import modules
 from odoo.tools.arabic_reshaper import reshape
 from odoo.tools.parse_version import parse_version
 from odoo.tools.misc import file_open, SENTINEL
@@ -35,20 +33,21 @@ try:
 except ImportError:
     pass  # no fix required
 
-
-# might be a good case for exception groups
-error = None
-# keep pypdf2 2.x first so noble uses that rather than pypdf 4.0
-for SUBMOD in ['._pypdf2_2', '._pypdf', '._pypdf2_1']:
-    try:
-        pypdf = importlib.import_module(SUBMOD, __spec__.name)
-        break
-    except ImportError as e:
-        if error is None:
-            error = e
+if typing.TYPE_CHECKING:
+    # for type checking, default to the newest version
+    from . import _pypdf2_2 as pypdf
 else:
-    raise ImportError("pypdf implementation not found") from error
-del error
+    errors = []
+    # keep pypdf2 2.x first so noble uses that rather than pypdf 4.0
+    for SUBMOD in ['._pypdf2_2', '._pypdf', '._pypdf2_1']:
+        try:
+            pypdf = importlib.import_module(SUBMOD, __spec__.name)
+            break
+        except ImportError as e:
+            errors.append(e)
+    else:
+        raise ImportError("pypdf implementation not found") from errors[0]
+    del errors
 
 PdfReaderBase, PdfWriter, filters, generic, errors, create_string_object =\
     pypdf.PdfReader, pypdf.PdfWriter, pypdf.filters, pypdf.generic, pypdf.errors, pypdf.create_string_object
@@ -223,7 +222,7 @@ def to_pdf_stream(attachment) -> io.BytesIO | None:
         _logger.warning("%s has no raw data.", attachment)
         return None
     stream = io.BytesIO(attachment.raw)
-    if attachment.mimetype == 'application/pdf':
+    if attachment.mimetype.startswith('application/pdf'):
         return stream
     elif attachment.mimetype.startswith('image'):
         output_stream = io.BytesIO()
@@ -397,8 +396,8 @@ class OdooPdfFileWriter(PdfFileWriter):
 
         adapted_subtype = subtype
         if REGEX_SUBTYPE_UNFORMATED.match(subtype):
-            # _pypdf2_2 does the formating when creating a NameObject
-            if SUBMOD == '._pypdf2_2':
+            # _pypdf2_2 and _pypdf does the formating when creating a NameObject
+            if SUBMOD in ('._pypdf2_2', '._pypdf'):
                 return '/' + subtype
             adapted_subtype = '/' + subtype.replace('/', '#2F')
 
@@ -502,16 +501,18 @@ class OdooPdfFileWriter(PdfFileWriter):
         """
         # Set the PDF version to 1.7 (as PDF/A-3 is based on version 1.7) and make it PDF/A compliant.
         # See https://github.com/veraPDF/veraPDF-validation-profiles/wiki/PDFA-Parts-2-and-3-rules#rule-612-1
+        self._header = b"%PDF-1.7"
 
         # " The file header shall begin at byte zero and shall consist of "%PDF-1.n" followed by a single EOL marker,
         # where 'n' is a single digit number between 0 (30h) and 7 (37h) "
         # " The aforementioned EOL marker shall be immediately followed by a % (25h) character followed by at least four
-        # bytes, each of whose encoded byte values shall have a decimal value greater than 127 "
-        self._header = b"%PDF-1.7"
-        if SUBMOD != '._pypdf2_2':
-            self._header += b"\n"
+        # bytes, each of whose encoded byte values shall have a decimal value greater than 127 ".
+        # PyPDF2 2.X+ already adds these 4 characters by default (so ._pypdf2_2 and ._pypdf don't need it).
+        # The injected character `\xc3\xa9` is equivalent to the character `é`.
+        # Therefore, on `_pypdf2_1`, the header will look like: `%PDF-1.7\n%éééé`,
+        # while on `_pypdf2_2` and `_pypdf`, it will look like: `%PDF-1.7\n%âãÏÓ`.
         if SUBMOD == '._pypdf2_1':
-            self._header += b"%\xDE\xAD\xBE\xEF"
+            self._header += b"\n%\xc3\xa9\xc3\xa9\xc3\xa9\xc3\xa9"
 
         # Add a document ID to the trailer. This is only needed when using encryption with regular PDF, but is required
         # when using PDF/A
@@ -585,6 +586,14 @@ class OdooPdfFileWriter(PdfFileWriter):
         outlines = self._root_object['/Outlines'].getObject()
         outlines[NameObject('/Count')] = NumberObject(1)
 
+        # [6.7.2.2-1] include a MarkInfo dictionary containing "Marked" with true value
+        mark_info = DictionaryObject({NameObject("/Marked"): BooleanObject(True)})
+        self._root_object[NameObject("/MarkInfo")] = mark_info
+
+        # [6.7.3.3-1] include minimal document structure in the catalog
+        struct_tree_root = DictionaryObject({NameObject("/Type"): NameObject("/StructTreeRoot")})
+        self._root_object[NameObject("/StructTreeRoot")] = struct_tree_root
+
         # Set odoo as producer
         self.addMetadata({
             '/Creator': "Odoo",
@@ -632,7 +641,7 @@ class OdooPdfFileWriter(PdfFileWriter):
                 DictionaryObject({
                     NameObject('/CheckSum'): createStringObject(md5(attachment['content']).hexdigest()),
                     NameObject('/ModDate'): createStringObject(datetime.now().strftime(DEFAULT_PDF_DATETIME_FORMAT)),
-                    NameObject('/Size'): NameObject(f"/{len(attachment['content'])}"),
+                    NameObject('/Size'): NumberObject(len(attachment['content'])),
                 }),
         })
         if attachment.get('subtype'):

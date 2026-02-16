@@ -1,6 +1,7 @@
 import {
     confirmAddSnippet,
     dummyBase64Img,
+    unfoldAllOptionsGroups,
     waitForEndOfOperation,
 } from "@html_builder/../tests/helpers";
 import { expect, test } from "@odoo/hoot";
@@ -40,7 +41,7 @@ test("Add image in gallery", async () => {
         return dataURItoBlob(base64Image);
     });
 
-    await setupWbsiteBuilderWithImageWall();
+    const { waitSidebarUpdated } = await setupWbsiteBuilderWithImageWall();
     onRpc("/html_editor/get_image_info", () => {
         expect.step("get_image_info");
         return {
@@ -55,7 +56,8 @@ test("Add image in gallery", async () => {
         };
     });
     await contains(":iframe .o_masonry_col img[data-index='1']").click();
-    await waitFor("[data-action-id='addImage']");
+    await waitSidebarUpdated();
+    await unfoldAllOptionsGroups();
     expect("[data-action-id='addImage']").toHaveCount(1);
     await contains("[data-action-id='addImage']").click();
     // We use "click" instead of contains.click because contains wait for the image to be visible.
@@ -108,10 +110,11 @@ test.skip("Remove all images in gallery", async () => {
 });
 
 test("Change gallery layout", async () => {
-    await setupWbsiteBuilderWithImageWall();
+    const { waitSidebarUpdated } = await setupWbsiteBuilderWithImageWall();
 
     await contains(":iframe img").click();
-    await waitFor("[data-label='Mode']");
+    await waitSidebarUpdated();
+    await unfoldAllOptionsGroups();
     expect("[data-label='Mode']").toHaveCount(1);
     expect(queryOne("[data-label='Mode'] .dropdown-toggle").textContent).toBe("Masonry");
     await contains("[data-label='Mode'] .dropdown-toggle").click();
@@ -135,6 +138,8 @@ test("Change gallery restore the container to the cloned equivalent image", asyn
     };
 
     await contains(":iframe img[data-index='1']").click();
+    await builder.waitSidebarUpdated();
+    await unfoldAllOptionsGroups();
     await contains("[data-label='Mode'] button").click();
 
     await contains("[data-action-param='grid']").click();
@@ -150,9 +155,11 @@ test("Change gallery restore the container to the cloned equivalent image", asyn
 });
 
 test("Change gallery layout when images have a link", async () => {
-    await setupWbsiteBuilderWithImageWall();
+    const { waitSidebarUpdated } = await setupWbsiteBuilderWithImageWall();
 
     await contains(":iframe img[data-index='1']").click();
+    await waitSidebarUpdated();
+    await unfoldAllOptionsGroups();
     await waitFor("[data-label='Mode']");
     await contains("[data-label='Media'] button[data-action-id='setLink']").click();
 
@@ -205,7 +212,7 @@ test("Cloning an image gallery should produce a unique ID", async () => {
 });
 
 test("Changing layout of an image gallery to grid should remove size option on images", async () => {
-    await setupWebsiteBuilder(
+    const { waitSidebarUpdated } = await setupWebsiteBuilder(
         `
         <section class="s_image_gallery o_masonry" data-columns="2" data-snippet="s_images_wall">
             <div class="container">
@@ -220,7 +227,8 @@ test("Changing layout of an image gallery to grid should remove size option on i
         `
     );
     await contains(":iframe .first_img").click();
-    await waitFor("[data-label='Mode']");
+    await waitSidebarUpdated();
+    await unfoldAllOptionsGroups();
     expect("[data-label='Mode']").toHaveCount(1);
     expect(queryOne("[data-label='Mode'] .dropdown-toggle").textContent).toBe("Masonry");
     expect("[data-label='Size']").toHaveCount(1);
@@ -231,7 +239,9 @@ test("Changing layout of an image gallery to grid should remove size option on i
     expect(":iframe .o_grid").toHaveCount(1);
     expect(":iframe .o_masonry_col").toHaveCount(0);
     expect(queryOne("[data-label='Mode'] .dropdown-toggle").textContent).toBe("Grid");
+
     await contains(":iframe .first_img").click();
+    await waitSidebarUpdated();
     expect("[data-label='Size']").toHaveCount(0);
 });
 
@@ -250,4 +260,31 @@ test("Click the outline option for the image gallery thumbnails", async () => {
         ".o-dropdown--menu [data-action-param='s_image_gallery_indicators_dots']"
     ).click();
     expect(":iframe section.o_slideshow").not.toHaveClass("s_image_gallery_indicators_outline");
+});
+
+test("Change gallery layout still works when img.decode() fails", async () => {
+    // to handle the Chrome bug where img.decode() can fail with "EncodingError:
+    // The source image cannot be decoded" when decoding many images simultaneously.
+    // See: https://bugs.chromium.org/p/chromium/issues/detail?id=1256288
+    // To reproduce the issue in the test we will set image src = "".
+    const builder = await setupWebsiteBuilderWithSnippet("s_images_wall");
+    // Change img source so decoding will fail
+    const images = queryAll(":iframe img");
+    images.forEach((imgEl) => {
+        imgEl.src = "";
+    });
+    await images.at(0).click();
+    await builder.waitSidebarUpdated();
+    await unfoldAllOptionsGroups();
+    await contains("[data-label='Mode'] .dropdown-toggle").click();
+
+    // This should NOT throw an error even img.decode() call will fail
+    await contains("[data-action-param='grid']").click();
+    await builder.waitSidebarUpdated();
+
+    // Verify the layout change worked despite decode failures
+    expect(":iframe .o_grid").toHaveCount(1);
+    expect(":iframe .o_masonry_col").toHaveCount(0);
+    await unfoldAllOptionsGroups();
+    expect("[data-label='Mode'] .dropdown-toggle").toHaveText("Grid");
 });

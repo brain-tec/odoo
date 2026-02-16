@@ -1,4 +1,3 @@
-import base64
 import uuid
 
 from lxml import etree
@@ -261,7 +260,7 @@ class StockPicking(models.Model):
         )
         attachment = self.env['ir.attachment'].create({
             'name': f"{self.name}_e_Dispatch.xml",
-            'datas': base64.b64encode(xml_string),
+            'raw': xml_string,
             'res_model': self._name,
             'res_id': self.id,
             'type': 'binary',
@@ -549,3 +548,12 @@ class StockPicking(models.Model):
         if files_with_errors:
             result['skipped_xmls'] = files_with_errors
         return result
+
+    def _get_nilvera_document_serial_number(self):
+        """
+        Returns the serial number for the e-Dispatch document in a format accepted by Nilvera.
+        The format is: '[Picking Type Code][Year (YYYY)][Sequence Number of 9 digits padded with 0]'
+        Example: 'OUT2025123456789'
+        """
+        sequence_number = self.name.removeprefix(self.picking_type_id.sequence_id.prefix or '').removesuffix(self.picking_type_id.sequence_id.suffix or '')
+        return f"{self.picking_type_id.sequence_code.upper()}{self.scheduled_date.year}{sequence_number.zfill(9)}"

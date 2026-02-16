@@ -1,13 +1,18 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import datetime
+from requests.exceptions import RequestException
+
 import odoo.release
-from odoo import http, _
-from odoo.http import content_disposition, request
+from odoo import _, http
+from odoo.exceptions import UserError
 from odoo.fields import Domain
-from odoo.tools import float_round, py_to_js_locale, SQL
+from odoo.http import request
+from odoo.http.session import logout, touch
+from odoo.http.stream import content_disposition
+from odoo.tools import SQL, float_round, py_to_js_locale
 from odoo.tools.image import image_data_uri
 
-import datetime
 
 class HrAttendance(http.Controller):
     @staticmethod
@@ -21,8 +26,10 @@ class HrAttendance(http.Controller):
         if employee:
             response = {
                 'id': employee.id,
+                'name': employee.name,
                 'hours_today': float_round(employee.hours_today, precision_digits=2),
                 'hours_previously_today': float_round(employee.hours_previously_today, precision_digits=2),
+                'today_attendance_ids': employee.today_attendance_ids.read(['check_in', 'check_out', 'worked_hours']),
                 'last_attendance_worked_hours': float_round(employee.last_attendance_worked_hours, precision_digits=2),
                 'last_check_in': employee.last_check_in,
                 'attendance_state': employee.attendance_state,
@@ -57,21 +64,10 @@ class HrAttendance(http.Controller):
 
         if not device_tracking_enabled:
             return response
-
-        if latitude and longitude:
-            geo_obj = request.env['base.geocoder']
-            location_request = geo_obj._call_openstreetmap_reverse(latitude, longitude)
-            if location_request and location_request.get('display_name'):
-                location = location_request.get('display_name')
-            else:
-                location = _('Unknown')
-        else:
-            city = request.geoip.city.name
-            country = request.geoip.country.name
-            if city and country:
-                location = f"{city}, {country}"
-            else:
-                location = _('Unknown')
+        try:
+            location = request.env['base.geocoder']._get_localisation(latitude, longitude)
+        except (UserError, RequestException):
+            location = _("Unknown")
 
         response.update({
             'location': location,
@@ -90,7 +86,7 @@ class HrAttendance(http.Controller):
             # before leaving the kiosk mode open to the public. This is a prevention security
             # measure.
             if self.has_password():
-                request.session.logout(keep_db=True)
+                logout(request.session, keep_db=True)
             return request.redirect(request.env['res.company'].browse(company_id).attendance_kiosk_url)
         else:
             return request.not_found()
@@ -162,7 +158,7 @@ class HrAttendance(http.Controller):
 
     @http.route('/hr_attendance/kiosk_keepalive', auth='user', type='jsonrpc')
     def kiosk_keepalive(self):
-        request.session.touch()
+        touch(request.session)
         return {}
 
     @http.route(["/hr_attendance/<token>"], type='http', auth='public', website=True, sitemap=True)
@@ -183,7 +179,7 @@ class HrAttendance(http.Controller):
             ]
             has_password = self.has_password()
             if not from_trial_mode and has_password:
-                request.session.logout(keep_db=True)
+                logout(request.session, keep_db=True)
             if (from_trial_mode or (not has_password and not request.env.user.is_public)):
                 kiosk_mode = "settings"
             else:

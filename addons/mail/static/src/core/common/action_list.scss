@@ -14,6 +14,10 @@
         &:not(.o-hasBtnBg) {
             background-color: inherit;
         }
+    
+        &.o-simulateDarkTheme.o-hasBtnBg:hover {
+            filter: brightness(1.3);
+        }
 
         &.o-inline {
             &:where(:has(i:first-child:last-child)) {
@@ -70,7 +74,7 @@
         }
         &.o-tag-JOIN_LEAVE_CALL.o-dropdown-item i {
             font-size: 0.7em !important;
-            &.fa-phone::before {
+            &:is(.fa-phone, .fa-video-camera)::before {
                 transform: translateY(1px);
             }
         }
@@ -80,24 +84,27 @@
                 transform: translateY(.5px);
             }
         }
-        &.o-dropdown-item {
 
-            &.btn-success:not(.o-tag-JOIN_LEAVE_CALL) {
+        @each $status, $color in (danger: $danger, success: $success, primary: $primary) {
+            &.o-dropdown-item.btn-#{$status}:not(.o-tag-JOIN_LEAVE_CALL) {
                 &.focus {
-                    background-color: rgba($success, 0.75);
+                    background-color: rgba($color, 0.75);
                     color: white;
+                    &.o-tag-PRIMARY {
+                        background-color: rgba($color, .9);
+                    }
                 }
                 &:not(.focus) {
-                    color: var(--o-mail-ActionList-dropdownSuccessUnfocusedColor, #{$success});
+                    color: var(--o-mail-ActionList-#{$status}NoBgColor, #{$color});
+                    &.o-tag-PRIMARY {
+                        background-color: rgba($color, .35);
+                    }
                 }
             }
-            &.btn-danger:not(.o-tag-JOIN_LEAVE_CALL) {
-                &.focus {
-                    background-color: rgba($danger, 0.75);
-                    color: white;
-                }
-                &:not(.focus) {
-                    color: var(--o-mail-ActionList-dropdownDangerUnfocusedColor, #{$danger});
+            &.o-inline.btn-#{$status}:not(.o-tag-JOIN_LEAVE_CALL):not(.o-hasBtnBg) {
+                color: var(--o-mail-ActionList-#{$status}NoBgColor, #{$color});
+                &:active {
+                    background-color: inherit;
                 }
             }
         }

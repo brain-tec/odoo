@@ -78,8 +78,14 @@ class ProductTemplate(models.Model):
 
     def action_used_in_bom(self):
         self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id("mrp.mrp_bom_form_action")
-        action['domain'] = [('bom_line_ids.product_tmpl_id', '=', self.id)]
+        action = self.env["ir.actions.actions"]._for_xml_id("mrp.mrp_bom_line_action_used_in_boms")
+        action['domain'] = [('product_tmpl_id', '=', self.id)]
+        action['context'] = {
+            'component_variant_count': len(
+                self.product_variant_ids.filtered(lambda variant: variant.bom_line_ids)
+            ),
+            'search_default_bom_active': True,
+        }
         return action
 
     def _compute_mrp_product_qty(self):
@@ -241,8 +247,14 @@ class ProductProduct(models.Model):
 
     def action_used_in_bom(self):
         self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id("mrp.mrp_bom_form_action")
-        action['domain'] = [('bom_line_ids.product_id', '=', self.id)]
+        action = self.env["ir.actions.actions"]._for_xml_id("mrp.mrp_bom_line_action_used_in_boms")
+        action['domain'] = [('product_id', '=', self.id)]
+        action['context'] = {
+            'component_variant_count': len(
+                self.product_tmpl_id.product_variant_ids.filtered(lambda variant: variant.bom_line_ids)
+            ),
+            'search_default_bom_active': True,
+        }
         return action
 
     def _compute_mrp_product_qty(self):
@@ -304,13 +316,13 @@ class ProductProduct(models.Model):
                 component = component.with_context(mrp_compute_quantities=qties).with_prefetch(prefetch_component_ids)
                 qty_per_kit = 0
                 for bom_line, bom_line_data in bom_sub_lines:
-                    if not component.is_storable or bom_line.product_uom_id.is_zero(bom_line_data['qty']):
+                    if not component.is_storable or bom_line.uom_id.is_zero(bom_line_data['qty']):
                         # As BoMs allow components with 0 qty, a.k.a. optionnal components, we simply skip those
                         # to avoid a division by zero. The same logic is applied to non-storable products as those
                         # products have 0 qty available.
                         continue
                     uom_qty_per_kit = bom_line_data['qty'] / bom_line_data['original_qty']
-                    qty_per_kit += bom_line.product_uom_id._compute_quantity(uom_qty_per_kit, bom_line.product_id.uom_id, round=False, raise_if_failure=False)
+                    qty_per_kit += bom_line.uom_id._compute_quantity(uom_qty_per_kit, bom_line.product_id.uom_id, round=False, raise_if_failure=False)
                 if not qty_per_kit:
                     continue
                 component_res = (
@@ -440,7 +452,7 @@ class ProductProduct(models.Model):
     def _update_uom(self, to_uom_id):
         for uom, product_template, boms in self.env['mrp.bom']._read_group(
             [('product_tmpl_id', 'in', self.product_tmpl_id.ids)],
-            ['product_uom_id', 'product_tmpl_id'],
+            ['uom_id', 'product_tmpl_id'],
             ['id:recordset'],
         ):
             if product_template.uom_id != uom:
@@ -448,11 +460,11 @@ class ProductProduct(models.Model):
                 'than %(uom)s have already been used for this product, the change of unit of measure can not be done.'
                 'If you want to change it, please archive the product and create a new one.',
                 problem_uom=uom.name, uom=product_template.uom_id.name))
-            boms.product_uom_id = to_uom_id
+            boms.uom_id = to_uom_id
 
         for uom, product, bom_lines in self.env['mrp.bom.line']._read_group(
             [('product_id', 'in', self.ids)],
-            ['product_uom_id', 'product_id'],
+            ['uom_id', 'product_id'],
             ['id:recordset'],
         ):
             if product.product_tmpl_id.uom_id != uom:
@@ -460,11 +472,11 @@ class ProductProduct(models.Model):
                 'than %(uom)s have already been used for this product, the change of unit of measure can not be done.'
                 'If you want to change it, please archive the product and create a new one.',
                 problem_uom=uom.name, uom=product.product_tmpl_id.uom_id.name))
-            bom_lines.product_uom_id = to_uom_id
+            bom_lines.uom_id = to_uom_id
 
         for uom, product, productions in self.env['mrp.production']._read_group(
             [('product_id', 'in', self.ids)],
-            ['product_uom_id', 'product_id'],
+            ['uom_id', 'product_id'],
             ['id:recordset'],
         ):
             if product.product_tmpl_id.uom_id != uom:
@@ -472,6 +484,6 @@ class ProductProduct(models.Model):
                 'than %(uom)s have already been used for this product, the change of unit of measure can not be done.'
                 'If you want to change it, please archive the product and create a new one.',
                 problem_uom=uom.name, uom=product.product_tmpl_id.uom_id.name))
-            productions.product_uom_id = to_uom_id
+            productions.uom_id = to_uom_id
 
         return super()._update_uom(to_uom_id)

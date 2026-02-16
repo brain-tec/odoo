@@ -28,7 +28,7 @@ import {
     serverState,
 } from "@web/../tests/web_test_helpers";
 
-import { DELAY_FOR_SPINNER } from "@mail/chatter/web_portal/chatter";
+import { DELAY_FOR_SPINNER } from "@mail/chatter/web_portal_project/chatter";
 import { queryFirst } from "@odoo/hoot-dom";
 
 describe.current.tags("desktop");
@@ -44,7 +44,7 @@ test("simple chatter on a record", async () => {
             expect.step(`${route} - ${JSON.stringify(args)}`);
         }
     });
-    listenStoreFetch(undefined, { logParams: ["mail.thread"] });
+    listenStoreFetch(undefined, { logParams: ["mail.thread", "/mail/thread/messages"] });
     await start();
     await waitStoreFetch(["failures", "systray_get_activities", "init_messaging"]);
     const partnerId = pyEnv["res.partner"].create({ name: "John Doe" });
@@ -61,22 +61,24 @@ test("simple chatter on a record", async () => {
                         "activities",
                         "attachments",
                         "contact_fields",
+                        "defaultSubject",
                         "followers",
                         "has_pinned_messages",
                         "scheduledMessages",
+                        "showSubjectInSmallComposer",
                         "suggestedRecipients",
+                        "suggestedSubject",
                     ],
                     thread_id: partnerId,
                     thread_model: "res.partner",
                 },
             ],
-        ],
-        {
-            ignoreOrder: true,
-            stepsAfter: [
-                `/mail/thread/messages - {"thread_id":${partnerId},"thread_model":"res.partner","fetch_params":{"limit":30}}`,
+            [
+                "/mail/thread/messages",
+                { thread_id: partnerId, thread_model: "res.partner", fetch_params: { limit: 30 } },
             ],
-        }
+        ],
+        { ignoreOrder: true }
     );
 });
 

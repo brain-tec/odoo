@@ -61,7 +61,7 @@ import typing
 import warnings
 from datetime import date, datetime, time, timedelta, timezone, UTC
 
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, MissingError, UserError
 from odoo.tools import SQL, OrderedSet, classproperty, partition, str2bool
 from odoo.tools.date_utils import parse_date, parse_iso_date
 from .identifiers import NewId
@@ -72,9 +72,6 @@ if typing.TYPE_CHECKING:
     from collections.abc import Callable, Collection, Iterable
     from .fields import Field
     from .models import BaseModel
-
-    M = typing.TypeVar('M', bound=BaseModel)
-
 
 _logger = logging.getLogger('odoo.domains')
 
@@ -407,7 +404,7 @@ class Domain:
         # just execute the optimization code that goes through all the fields
         self._optimize(model, OptimizationLevel.FULL)
 
-    def _as_predicate(self, records: M) -> Callable[[M], bool]:
+    def _as_predicate[M: BaseModel](self, records: M) -> Callable[[M], bool]:
         """Return a predicate function from the domain (bound to records).
         The predicate function return whether its argument (a single record)
         satisfies the domain.
@@ -541,7 +538,7 @@ _FALSE_DOMAIN = DomainBool(False)
 
 class DomainNot(Domain):
     """Negation domain, contains a single child"""
-    OPERATOR = '!'
+    OPERATOR: typing.ClassVar[str] = '!'
 
     __slots__ = ('child',)
     child: Domain
@@ -585,9 +582,9 @@ class DomainNot(Domain):
 
 class DomainNary(Domain):
     """Domain for a nary operator: AND or OR with multiple children"""
-    OPERATOR: str
-    OPERATOR_SQL: SQL = SQL(" ??? ")
-    ZERO: DomainBool = _FALSE_DOMAIN  # default for lint checks
+    OPERATOR: typing.ClassVar[str]
+    OPERATOR_SQL: typing.ClassVar[SQL] = SQL(" ??? ")
+    ZERO: typing.ClassVar[DomainBool] = _FALSE_DOMAIN  # default for lint checks
 
     __slots__ = ('children',)
     children: tuple[Domain, ...]
@@ -1746,9 +1743,13 @@ def _operator_hierarchy(condition, model):
 def _operator_child_of_domain(comodel: BaseModel, parent):
     """Return a set of ids or a domain to find all children of given model"""
     if comodel._parent_store and parent == comodel._parent_name:
+        try:
+            paths = comodel.mapped('parent_path')
+        except MissingError:
+            paths = comodel.exists().mapped('parent_path')
         domain = Domain.OR(
-            DomainCondition('parent_path', '=like', rec.parent_path + '%')  # type: ignore
-            for rec in comodel
+            DomainCondition('parent_path', '=like', path + '%')  # type: ignore
+            for path in paths
         )
         return domain
     else:
@@ -1769,16 +1770,24 @@ def _operator_parent_of_domain(comodel: BaseModel, parent):
     """Return a set of ids or a domain to find all parents of given model"""
     parent_ids: OrderedSet[int]
     if comodel._parent_store and parent == comodel._parent_name:
+        try:
+            paths = comodel.mapped('parent_path')
+        except MissingError:
+            paths = comodel.exists().mapped('parent_path')
         parent_ids = OrderedSet(
             int(label)
-            for rec in comodel
-            for label in rec.parent_path.split('/')[:-1]  # type: ignore
+            for path in paths
+            for label in path.split('/')[:-1]
         )
     else:
         # recursively retrieve all parent nodes with sudo() to avoid
         # access rights errors; the filtering of forbidden records is
         # done by the rest of the domain
         parent_ids = OrderedSet()
+        try:
+            comodel.mapped(parent)
+        except MissingError:
+            comodel = comodel.exists()
         while comodel:
             parent_ids.update(comodel._ids)
             comodel = comodel[parent].filtered(lambda p: p.id not in parent_ids)

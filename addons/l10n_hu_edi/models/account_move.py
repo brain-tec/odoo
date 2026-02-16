@@ -123,10 +123,6 @@ class AccountMove(models.Model):
                 raise ValidationError(_('Cannot reset to draft or cancel invoice %s because an electronic document was already sent to NAV!', move.name))
 
     # === Computes === #
-    @api.depends('delivery_date')
-    def _compute_invoice_currency_rate(self):
-        # In Hungary, the currency rate should be based on the delivery date.
-        super()._compute_invoice_currency_rate()
 
     @api.depends('delivery_date')
     def _compute_expected_currency_rate(self):
@@ -160,6 +156,12 @@ class AccountMove(models.Model):
     def _compute_l10n_hu_edi_attachment_filename(self):
         for move in self:
             move.l10n_hu_edi_attachment_filename = f'{move.name.replace("/", "_")}.xml' if move.name else 'nav30.xml'
+
+    # === Inverses === #
+
+    def _inverse_delivery_date(self):
+        super()._inverse_delivery_date()
+        self._conditional_add_to_compute('invoice_currency_rate', lambda m: m.country_code == 'HU')
 
     # === Overrides === #
 
@@ -1041,7 +1043,7 @@ class AccountMove(models.Model):
             'cash_rounding_base_amount_currency', 'cash_rounding_base_amount',
         )
 
-        if self.move_type in ('out_refund', 'in_refund'):
+        if self.is_refund():
             invert_dict(tax_totals, fields_to_reverse)
             for subtotal in tax_totals['subtotals']:
                 invert_dict(subtotal, fields_to_reverse)

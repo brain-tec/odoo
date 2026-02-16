@@ -113,7 +113,7 @@
             <field name="arch" type="xml">
                 <form string="Transfer">
                 <header>
-                    <button name="action_confirm" invisible="state != 'draft'" string="Mark as Todo" type="object" class="oe_highlight" groups="base.group_user" data-hotkey="q"/>
+                    <button name="action_confirm" invisible="state != 'draft'" string="Mark as To Do" type="object" class="oe_highlight" groups="base.group_user" data-hotkey="q"/>
                     <button name="action_assign" invisible="not show_check_availability" string="Check Availability" type="object" class="oe_highlight" groups="base.group_user" data-hotkey="w"/>
                     <button name="button_validate" invisible="state in ('draft', 'confirmed', 'done', 'cancel')" string="Validate" type="object" class="oe_highlight" groups="stock.group_stock_user" data-hotkey="v"/>
                     <button name="button_validate" invisible="state in ('waiting', 'assigned', 'done', 'cancel')" string="Validate" type="object" groups="stock.group_stock_user" class="o_btn_validate" data-hotkey="v"/>
@@ -268,7 +268,7 @@
                                 add-label="Add a Product"
                                 readonly="state == 'done' and is_locked"
                                 context="{'default_company_id': company_id, 'default_date': scheduled_date, 'default_date_deadline': date_deadline, 'picking_type_code': picking_type_code, 'default_picking_id': id, 'form_view_ref': 'stock.view_stock_move_operations', 'address_in_id': partner_id, 'default_picking_type_id': picking_type_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_partner_id': partner_id, 'picking_state': state}">
-                                <list decoration-muted="scrap_id or state == 'cancel' or (state == 'done' and is_locked == True)" string="Stock Moves" editable="bottom">
+                                <list decoration-muted="is_scrap or state == 'cancel' or (state == 'done' and is_locked == True)" string="Stock Moves" editable="bottom">
                                     <control>
                                         <create string="Add a Product"/>
                                     </control>
@@ -306,7 +306,7 @@
                                     <field name="forecast_expected_date" column_invisible="True"/>
                                     <field name="product_qty" readonly="1" column_invisible="True"/>
                                     <field name="quantity" string="Quantity" readonly="not is_quantity_done_editable" column_invisible="parent.state=='draft'" decoration-danger="product_uom_qty and quantity > product_uom_qty and parent.state not in ['done', 'cancel']"/>
-                                    <field name="product_uom" readonly="state != 'draft' and not additional" options="{'no_open': True, 'no_create': True}" widget="many2one_uom" groups="uom.group_uom"/>
+                                    <field name="uom_id" readonly="state != 'draft' and not additional" options="{'no_open': True, 'no_create': True}" widget="many2one_uom" groups="uom.group_uom"/>
                                     <field name="picked" optional="hide" column_invisible="parent.state=='draft'"/>
                                     <field name="lot_ids" widget="many2many_tags"
                                         column_invisible="parent.state == 'draft'"
@@ -488,7 +488,7 @@
             </field>
         </record>
 
-        <record id="action_scrap" model="ir.actions.server">
+        <record id="action_scrap_picking" model="ir.actions.server">
             <field name="name">Scrap</field>
             <field name="model_id" ref="stock.model_stock_picking"/>
             <field name="binding_model_id" ref="stock.model_stock_picking"/>
@@ -496,7 +496,7 @@
             <field name="state">code</field>
             <field name="code">
             if records:
-                action = records.button_scrap()</field>
+                action = records.action_scrap()</field>
         </record>
 
         <record id="action_lead_mass_mail" model="ir.actions.act_window">

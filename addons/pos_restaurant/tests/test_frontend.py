@@ -294,6 +294,13 @@ class TestFrontend(TestFrontendCommon):
         self.assertEqual(tip_line_order1.price_subtotal, 5.0)
         self.assertEqual(tip_line_order1.price_subtotal_incl, 5.0)
 
+        order5 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-000005')], limit=1, order='id desc')
+        html = order5.order_receipt_generate_html()
+        self.assertTrue(f"Table {order5.table_id.table_number}" in html)
+        self.assertTrue("15%" in html)
+        self.assertTrue("20%" in html)
+        self.assertTrue("25%" in html)
+
     def test_06_split_bill_screen(self):
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('SplitBillScreenTour2')
@@ -338,7 +345,7 @@ class TestFrontend(TestFrontendCommon):
 
     def test_14_change_synced_order(self):
         self.pos_config.with_user(self.pos_user).open_ui()
-        self.start_pos_tour('OrderChange')
+        self.start_pos_tour('OrderChangeTour')
 
     def test_13_crm_team(self):
         if self.env['ir.module.module']._get('pos_sale').state != 'installed':
@@ -372,6 +379,10 @@ class TestFrontend(TestFrontendCommon):
     def test_pos_restaurant_course(self):
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_pos_restaurant_course')
+        order = self.pos_config.current_session_id.order_ids
+        self.assertEqual(len(order), 1)
+        # Verify whether the two courses have different timestamps
+        self.assertNotEqual(order.course_ids[0].fired_date, order.course_ids[1].fired_date)
 
     def test_pos_restaurant_default_course(self):
         drinks_category = self.env['pos.category'].search([('name', '=', 'Drinks')], limit=1)
@@ -400,11 +411,9 @@ class TestFrontend(TestFrontendCommon):
         resource_calendar = self.env['resource.calendar'].create({
             'name': 'Takeaway',
             'attendance_ids': [(0, 0, {
-                'name': 'Takeaway',
                 'dayofweek': str(day),
                 'hour_from': 0,
                 'hour_to': 24,
-                'day_period': 'morning',
             }) for day in range(0, 7)],
         })
         self.preset_takeaway.write({
@@ -579,6 +588,11 @@ class TestFrontend(TestFrontendCommon):
         self.assertEqual(line_1.tax_ids, self.tax_sale_a)
         self.assertEqual(line_2.tax_ids, self.tax_sale_a)
 
+    def test_no_ghost_floor(self):
+        self.pos_config.use_order_printer = False
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('no_ghost_floor', login="pos_admin")
+
     def test_multiple_preparation_printer_different_categories(self):
         """This test make sure that no empty receipt are sent when using multiple printer with different categories
            The tour will check that we tried did not try to print two receipt. We can achieve that by checking the content
@@ -638,32 +652,40 @@ class TestFrontend(TestFrontendCommon):
             'name': 'Takeaway',
             'identification': 'name',
         })
+        self.preset_delivery = self.env['pos.preset'].create({
+            'name': 'Delivery',
+            'identification': 'address',
+        })
         self.main_pos_config.write({
             'use_presets': True,
-            'default_preset_id': self.preset_eat_in.id,
-            'available_preset_ids': [(6, 0, [self.preset_takeaway.id])],
+            'default_preset_id': self.preset_delivery.id,
+            'available_preset_ids': [(6, 0, [
+                self.preset_takeaway.id,
+                self.preset_eat_in.id,
+                self.preset_delivery.id,
+            ])],
         })
+        self.start_pos_tour('test_preset_delivery_restaurant')
         resource_calendar = self.env['resource.calendar'].create({
             'name': 'Takeaway',
             'attendance_ids': [(0, 0, {
-                'name': 'Takeaway',
                 'dayofweek': str(day),
                 'hour_from': 0,
                 'hour_to': 24,
-                'day_period': 'morning',
             }) for day in range(0, 7)],
         })
         self.preset_takeaway.write({
             'use_timing': True,
             'resource_calendar_id': resource_calendar
         })
+        self.main_pos_config.write({'default_preset_id': self.preset_takeaway.id})
+        self.start_pos_tour('test_open_register_with_preset_takeaway')
+        self.main_pos_config.write({'default_preset_id': self.preset_eat_in.id})
         self.start_pos_tour('test_preset_timing_restaurant')
         self.preset_eat_in.write({
             'use_guest': True,
         })
         self.start_pos_tour('test_guest_count_bank_payment')
-        self.main_pos_config.write({'default_preset_id': self.preset_takeaway.id})
-        self.start_pos_tour('test_open_register_with_preset_takeaway')
 
     def test_restaurant_preset_eatin_tour(self):
         self.pos_config.write({
@@ -789,7 +811,7 @@ class TestFrontend(TestFrontendCommon):
         """
         self.start_pos_tour('test_direct_sales', login="pos_user")
         orders = self.env['pos.order'].search([], limit=3, order='id desc')
-        self.assertEqual(orders[2].floating_order_name, orders[2].pos_reference)
+        self.assertEqual(orders[2].floating_order_name, orders[2].tracking_number)
         self.assertEqual(orders[1].floating_order_name, "Test")
         self.assertEqual(orders[0].floating_order_name, False)
         self.assertIsNotNone(orders[0].table_id)
@@ -810,7 +832,7 @@ class TestFrontend(TestFrontendCommon):
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_sync_set_partner')
         order = self.pos_config.current_session_id.order_ids[0]
-        self.assertEqual(order.partner_id.name, "Deco Addict")
+        self.assertEqual(order.partner_id.name, "Acme Corporation")
 
     def test_sync_set_note(self):
         self.pos_config.with_user(self.pos_user).open_ui()

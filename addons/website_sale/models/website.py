@@ -4,6 +4,7 @@ import base64
 import json
 import logging
 import re
+from urllib.parse import parse_qsl, urlencode, urlsplit
 
 from lxml import etree
 from werkzeug import urls
@@ -14,6 +15,7 @@ from odoo.exceptions import AccessError, MissingError
 from odoo.fields import Domain
 from odoo.http import request
 from odoo.tools import file_open, ormcache
+from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo.tools.translate import LazyTranslate, _
 
 from odoo.addons.website_sale import const
@@ -102,8 +104,8 @@ class Website(models.Model):
         domain=[('model', '=', 'sale.order')],
         default=_default_recovery_mail_template,
     )
-    contact_us_button_url = fields.Char(
-        string="Contact Us Button URL", translate=True, default="/contactus",
+    contact_us_link_url = fields.Char(
+        string="Link URL", translate=True, default='/contactus',
     )
     cart_abandoned_delay = fields.Float(string="Abandoned Delay", default=10.0)
     send_abandoned_cart_email = fields.Boolean(
@@ -246,7 +248,52 @@ class Website(models.Model):
     )
     product_page_grid_columns = fields.Integer(default=2)
 
-    prevent_zero_price_sale = fields.Boolean(string="Hide 'Add To Cart' when price = 0")
+    wishlist_opt_products_design_classes = fields.Char(
+        string="Wishlist Page Design Class",
+        help="CSS class for wishlist page design",
+        default=(
+            'o_wsale_products_opt_layout_catalog o_wsale_products_opt_design_thumbs '
+            'o_wsale_products_opt_name_color_regular '
+            'o_wsale_products_opt_thumb_cover o_wsale_products_opt_img_secondary_show '
+            'o_wsale_products_opt_img_hover_zoom_out_light o_wsale_products_opt_has_cta '
+            'o_wsale_products_opt_actions_inline o_wsale_products_opt_has_description '
+            'o_wsale_products_opt_actions_promote o_wsale_products_opt_cc1 '
+        ),
+    )
+
+    wishlist_grid_columns = fields.Integer(
+        string="Wishlist Grid Columns",
+        help="Number of columns to display on the wishlist page",
+        default=5,
+    )
+
+    wishlist_mobile_columns = fields.Integer(
+        string="Wishlist Mobile Columns",
+        help="Number of columns to display on mobile for the wishlist page (1 or 2)",
+        default=2,
+    )
+
+    wishlist_gap = fields.Char(
+        string="Wishlist Grid Gap",
+        help="Gap between products on the wishlist page",
+        default="16px",
+    )
+
+    prevent_sale = fields.Boolean(string="Hide Add To Cart")
+
+    prevent_sale_for = fields.Selection(
+        string="Prevent Sale For",
+        selection=[
+            ('zero_price', "0 price products"),
+            ('specific_categories', "Specific categories"),
+        ],
+        default='zero_price',
+    )
+
+    prevent_sale_for_categories = fields.Many2many(
+        string="Categories",
+        comodel_name='product.public.category',
+    )
 
     currency_id = fields.Many2one(
         string="Default Currency",
@@ -1031,6 +1078,42 @@ class Website(models.Model):
     def _get_snippet_defaults(self, snippet):
         return super()._get_snippet_defaults(snippet) | const.SNIPPET_DEFAULTS.get(snippet, {})
 
+    def _prevent_product_sale(self, product_or_template, is_zero_price_product):
+        """Return whether selling the provided product online should be prevented, depending on
+        price and categories.
+
+        :param product.product|product.template product_or_template: The product to check.
+        :param boolean is_zero_price_product: Whether the product price is zero or not.
+        :return: Whether selling the product online should be prevented.
+        :rtype: boolean
+        """
+        # If the sale of zero-priced products should be prevented.
+        if self.prevent_sale_for == 'zero_price':
+            return is_zero_price_product
+
+        # If the sale of products in specific categories should be prevented.
+        if self.prevent_sale_for == 'specific_categories' and self.prevent_sale_for_categories:
+            return bool(product_or_template.public_categ_ids.filtered_domain([
+                ('id', 'child_of', self.prevent_sale_for_categories.ids),
+            ]))
+
+        return False
+
+    def _get_contact_us_url(self, subject=''):
+        """Build the contact us URL with an optional subject parameter.
+
+        :param str subject: Optional subject to add as a query parameter.
+        :return: The contact us URL with properly encoded parameters.
+        :rtype: str
+        """
+        base_url = self.contact_us_link_url or '/contactus'
+        if not subject:
+            return base_url
+
+        parsed = urlsplit(base_url)
+        query = urlencode([*parse_qsl(parsed.query), ('subject', subject)])
+        return parsed._replace(query=query).geturl()
+
     def _get_product_image_ratio_classes(self):
         """ Return the classes defining the product image aspect ratio from the website's design
         classes.
@@ -1083,3 +1166,40 @@ class Website(models.Model):
                 'website_id': website.id,
             } for website in self.filtered(lambda w: w._default_feed_is_valid())
         ])
+
+    def _prepare_ecommerce_store_markup_data(self):
+        """Generate JSON-LD markup data for the website's eCommerce store.
+
+        See https://schema.org/OnlineStore
+
+        :return: The JSON-LD markup data.
+        :rtype: dict
+        """
+        self.ensure_one()
+        socials = [
+            self.social_twitter,
+            self.social_facebook,
+            self.social_github,
+            self.social_linkedin,
+            self.social_youtube,
+            self.social_instagram,
+            self.social_tiktok,
+        ]
+        base_url = self.get_base_url()
+
+        return {
+            '@context': 'https://schema.org',
+            '@type': 'OnlineStore',
+            'name': self.name,
+            'url': base_url,
+            'logo': f"{base_url}/logo.png?company={self.company_id.id}",
+            'sameAs': [social for social in socials if social],
+        }
+
+    def _get_ecommerce_store_markup_json(self):
+        """Generate JSON-LD markup data for the company of the website.
+
+        :return: The JSON-LD markup data.
+        :rtype: dict
+        """
+        return json_scriptsafe.dumps(self._prepare_ecommerce_store_markup_data(), indent=2)

@@ -46,13 +46,15 @@
     <t t-set="isInlineCircleButton" t-value="env.inComposer or (action.tags.includes('JOIN_LEAVE_CALL') and action.icon and !action.inlineName)"/>
     <!-- core-->
     <t t-set="btnClass" t-value="attClassObjectToString({
-        'o-mail-ActionList-button btn btn-secondary btn-group-item position-relative': true,
+        'o-mail-ActionList-button btn btn-group-item position-relative': true,
         'o-first': props.isFirstInGroup,
         'o-last': props.isLastInGroup,
         'active': action.isActive,
         'o-odooControlPanelSwitchStyle': props.odooControlPanelSwitchStyle,
         'o-hasBtnBg': hasBtnBg,
         'o-inline': props.inline,
+        'btn-secondary': !action.tags.includes('PRIMARY') and !action.tags.includes('DANGER') and !action.tags.includes('SUCCESS'),
+        'btn-primary': action.tags.includes('PRIMARY'),
         'btn-danger': action.tags.includes('DANGER'),
         'btn-success': action.tags.includes('SUCCESS'),
     })"/>
@@ -81,27 +83,28 @@
         'o-mx-0_5': props.inline and !hasBtnBg and !action.icon,
     })"/>
     <!-- padding -->
+    <t t-set="inMeetingViewCallButtonsFullscreen" t-value="props.inline and env.inMeetingView and !env.inComposer and !env.inDiscussActionPanel and store.rtc.isFullscreen"/>
     <t t-set="btnClass" t-value="attClassObjectToString({
         [btnClass]: true,
-        'px-2 o-py-1_5': props.inline   and   env.inMeetingView and !env.inComposer,
+        'px-2 o-py-2_5': inMeetingViewCallButtonsFullscreen,
         'o-px-1_5 py-1': props.inline   and  ((hasBtnBg and !isInlineCircleButton and !env.inMeetingView) or (!hasBtnBg and env.inComposer)),
         'o-p-1_5':       props.inline   and  !env.inMeetingView and hasBtnBg and isInlineCircleButton and !env.inChatWindow,
         'o-px-0_5':      props.inline   and  !env.inMeetingView and !hasBtnBg and !action.icon,
         'p-1':           props.inline   and  hasBtnBg and isInlineCircleButton and env.inChatWindow,
-        'o-p-0_5':       props.inline   and  !hasBtnBg and !env.inComposer,
+        'o-p-0_5':       props.inline   and  !env.inMeetingView and !hasBtnBg and !env.inComposer,
         'px-3 py-2':     props.dropdown and   ui.isSmall,
         'px-2 py-1':     props.dropdown and  !ui.isSmall,
     })"/>
     <!-- opacity -->
     <t t-set="btnClass" t-value="attClassObjectToString({
         [btnClass]: true,
-        'opacity-75 opacity-100-hover': action.tags.includes('CALL_LAYOUT'),
+        'opacity-75 opacity-100-hover': action.tags.includes('CALL_LAYOUT') or env.inMeetingSideActions,
     })"/>
     <!-- simulated dark theme -->
     <t t-set="btnClass" t-value="attClassObjectToString({
         [btnClass]: true,
         'o-text-white border-0 o-simulateDarkTheme': store.shouldSimulateDarkTheme(this),
-        'bg-700': store.shouldSimulateDarkTheme(this) and !action.tags.includes('DANGER') and !action.tags.includes('SUCCESS') and hasBtnBg,
+        'bg-700': store.shouldSimulateDarkTheme(this) and !action.tags.includes('DANGER') and !action.tags.includes('SUCCESS') and !action.tags.includes('PRIMARY') and hasBtnBg,
         'bg-transparent': store.shouldSimulateDarkTheme(this) and !hasBtnBg,
     })"/>
     <!-- dynamic classes-->
@@ -112,7 +115,7 @@
     })"/>
     <t t-set="attrs" t-value="{ 'aria-label': action.name, 'disabled': action.disabledCondition, 'name': action.id, 'data-sequence': action.sequence, 'data-sequence-group': action.sequenceGroup, 'data-sequence-quick': action.sequenceQuick }"/>
     <t t-if="action.component and action.componentCondition" t-component="action.component" t-props="action.componentProps"/>
-    <DropdownItem t-elif="props.dropdown" class="btnClass + ' d-flex align-items-center ' + (ui.isSmall ? 'gap-2' : 'gap-1')" tag="'button'" onSelected="(ev) => this.onSelected(action, ev)" attrs="attrs">
+    <DropdownItem t-elif="props.dropdown" class="btnClass + ' d-flex align-items-center dropdown-item_active_noarrow ' + (ui.isSmall ? 'gap-2' : 'gap-1')" tag="'button'" onSelected="(ev) => this.onSelected(action, ev)" attrs="attrs">
         <t t-call="mail.Action.content"/>
     </DropdownItem>
     <button t-else="" t-att-class="btnClass" t-att="Object.assign(attrs, { 'title': action.name })" t-on-click="(ev) => this.onSelected(action, ev)" t-att-data-hotkey="action.hotkey" t-att-style="props.style">
@@ -127,7 +130,7 @@
     <t t-if="action.icon?.template" t-call="{{ action.icon.template }}">
         <t t-set="templateParams" t-value="action.icon.params"/>
     </t>
-    <i t-elif="action.icon" t-attf-class="{{ action.icon }}" t-att-class="{ 'o-fs-small': props.dropdown, 'fa-fw': props.fw }"/>
+    <i t-elif="action.icon" t-attf-class="{{ action.icon }}" t-att-class="{ 'o-fs-small': props.dropdown, 'fa-fw': props.fw, 'fa-lg': inMeetingViewCallButtonsFullscreen }"/>
     <i t-elif="props.dropdown" class="fa-question fa-fw opacity-0" t-att-class="props.fw ? 'fa-fw' : ''"/>
     <span t-if="action.name and (props.dropdown or (props.inline and (!action.icon or action.inlineName)))" class="o-mail-ActionList-actionLabel" t-attf-class="{{ action.nameClass }}" t-att-class="{ 'mx-1': props.dropdown }" t-out="(props.inline and action.inlineName) or action.name"/>
     <t t-if="props.dropdown and action.badge" t-call="mail.Action.badge"/>

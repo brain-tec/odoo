@@ -103,6 +103,7 @@ class TestImLivechatMessage(ChatbotCase, MailCommon):
                     "rating_id": False,
                     "reactions": [],
                     "record_name": "Testing Bot",
+                    "reply_to": '"Testing Bot" <catchall.test@test.mycompany.com>',
                     "res_id": discuss_channel.id,
                     "scheduledDatetime": False,
                     "starred": False,
@@ -177,6 +178,7 @@ class TestImLivechatMessage(ChatbotCase, MailCommon):
                         "pinned_at": False,
                         "rating_id": record_rating.id,
                         "record_name": "test1 Ernest Employee",
+                        "reply_to": '"test1" <catchall.test@test.mycompany.com>',
                         "res_id": channel_livechat_1.id,
                         "scheduledDatetime": False,
                         "starred": False,
@@ -193,7 +195,6 @@ class TestImLivechatMessage(ChatbotCase, MailCommon):
                         "display_name": "test1 Ernest Employee",
                         "id": channel_livechat_1.id,
                         "model": "discuss.channel",
-                        "module_icon": "/mail/static/description/icon.png",
                         "rating_avg": 5.0,
                         "rating_count": 1,
                     },
@@ -248,8 +249,6 @@ class TestImLivechatMessage(ChatbotCase, MailCommon):
             rating = self.env["rating.rating"].sudo().search([], order="id desc", limit=1)
             return (
                 [
-                    # channel last interest (not asserted below)
-                    (self.env.cr.dbname, "discuss.channel", channel.id),
                     # unread counter/new message separator (not asserted below)
                     (self.env.cr.dbname, "res.partner", self.env.user.partner_id.id),
                     # new_message
@@ -302,7 +301,6 @@ class TestImLivechatMessage(ChatbotCase, MailCommon):
                                         "display_name": "Chell Gladys Ernest Employee",
                                         "id": channel.id,
                                         "model": "discuss.channel",
-                                        "module_icon": "/mail/static/description/icon.png",
                                         "rating_avg": 5.0,
                                         "rating_count": 1,
                                     },

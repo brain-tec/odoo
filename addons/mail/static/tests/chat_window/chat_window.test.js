@@ -494,7 +494,7 @@ test("chat window should open when receiving a new DM", async () => {
     );
     await contains(".o-mail-ChatBubble");
     await contains(".o-mail-ChatBubble-counter:text('1')");
-    await contains(".o-mail-ChatBubble .o-mail-ImStatus [title='Online']");
+    await contains(".o-mail-ChatBubble .o-mail-ImStatus[title='User is online']");
     await assertChatBubbleAndWindowImStatus("DemoUser", 1);
 });
 
@@ -727,17 +727,19 @@ test("folded chat window should hide member-list and settings buttons", async ()
     await contains(".o-dropdown-item:text('Call Settings')");
 });
 
-test("Chat window in mobile are not foldable", async () => {
+test("chat window: fold (mobile)", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({});
     patchUiSize({ size: SIZES.SM });
-    setupChatHub({ opened: [channelId] });
     await start();
     await openDiscuss(channelId);
     await contains(".o-mail-ChatWindow");
-    await contains(".o-mail-ChatWindow-header.cursor-pointer", { count: 0 });
-    await click(".o-mail-ChatWindow-header");
-    await contains(".o-mail-Thread"); // content => non-folded
+    await click(".o-mail-ChatWindow-header [title='Fold']");
+    await contains(".o-mail-ChatWindow", { count: 0 });
+    await contains(".o-mail-ChatBubble", { count: 0 });
+    await openListView("discuss.channel", { res_id: channelId });
+    await contains(".o-mail-ChatBubble");
+    assertChatHub({ folded: [channelId] });
 });
 
 test("Synced chat windows should open at page load on mobile", async () => {
@@ -775,7 +777,7 @@ test("Open chat window of new inviter", async () => {
     });
     await contains(".o-mail-ChatWindow:text('Newbie')");
     await contains(
-        ".o_notification:text('Newbie connected. This is their first connection. Wish them luck.')"
+        ".o_notification:text('Newbie just connected for the first time. Wish them luck!')"
     );
 });
 
@@ -833,9 +835,11 @@ test("mark as read when opening chat window", async () => {
             Command.create({ partner_id: bobPartnerId }),
         ],
     });
+    listenStoreFetch("/discuss/channel/messages");
     await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-NotificationItem-name:text('bob')");
+    await waitStoreFetch("/discuss/channel/messages"); // ensure messages are loaded before doing message post
     await contains(".o-mail-ChatWindow .o-mail-ChatWindow-header:text('bob')");
     // composer is focused by default, we remove that focus
     await contains(".o-mail-Composer-input:focus");

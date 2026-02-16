@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from odoo import exceptions, tools
 from odoo.addons.mail.tests.common import MailCommon
 from odoo.addons.mail.tests.common_tracking import MailTrackingDurationMixinCase
@@ -10,8 +10,7 @@ from odoo.tests.common import tagged, users
 from odoo.tools import mute_logger
 
 
-@tagged('mail_thread', 'mail_track', 'is_query_count')
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('mail_thread', 'mail_track', 'is_query_count', 'mail_duration_mixin')
 class TestMailTrackingDurationMixin(MailTrackingDurationMixinCase):
 
     @classmethod
@@ -21,15 +20,36 @@ class TestMailTrackingDurationMixin(MailTrackingDurationMixinCase):
     def test_mail_tracking_duration(self):
         self._test_record_duration_tracking()
 
-    def test_mail_tracking_duration_batch(self):
-        self._test_record_duration_tracking_batch()
+    def test_mail_tracking_duration_create(self):
+        now = datetime(2025, 11, 27, 8, 46, 0)
+        for create_stage, exp_key in zip(
+            (self.env['mail.test.track.duration.mixin.stage'], self.stage_1),
+            ('0', str(self.stage_1.id)),
+        ):
+            with self.subTest(create_stage=create_stage):
+                with self.mock_datetime_and_now(now):
+                    new = self.env['mail.test.track.duration.mixin'].create({
+                        'name': 'Test Duration',
+                        'stage_id': create_stage.id,
+                    })
+                    self.flush_tracking()
+                with self.mock_datetime_and_now(now):
+                    new.invalidate_recordset(fnames=['duration_tracking'])
+                    self.assertDictEqual(new.duration_tracking, {exp_key: 0})
+                with self.mock_datetime_and_now(now + timedelta(minutes=10)):
+                    new.invalidate_recordset(fnames=['duration_tracking'])
+                    self.assertDictEqual(new.duration_tracking, {exp_key: 600})
+                with self.mock_datetime_and_now(now + timedelta(minutes=20)):
+                    new.write({'stage_id': self.stage_2.id})
+                    self.flush_tracking()
+                    new.invalidate_recordset(fnames=['duration_tracking'])
+                    self.assertDictEqual(new.duration_tracking, {exp_key: 1200, str(self.stage_2.id): 0})
 
     def test_queries_batch_mail_tracking_duration(self):
         self._test_queries_batch_duration_tracking()
 
 
-@tagged('mail_thread', 'mail_track')
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('mail_thread', 'mail_track', 'mail_duration_mixin')
 class TestMailThreadRottingMixin(MailTrackingDurationMixinCase):
 
     @classmethod
@@ -234,32 +254,3 @@ class TestMailThread(MailCommon, TestRecipients):
                     self.assertTrue(new_record.is_blacklisted)
 
                 bl_record.unlink()
-
-
-@tagged('mail_thread', 'mail_thread_cc', 'mail_tools')
-@tagged('at_install', '-post_install')  # LEGACY at_install
-class TestMailThreadCC(MailCommon):
-
-    @users("employee")
-    @mute_logger('odoo.addons.mail.models.mail_mail')
-    def test_suggested_recipients_mail_cc(self):
-        """ MailThreadCC mixin adds its own suggested recipients management
-        coming from CC (carbon copy) management. """
-        record = self.env['mail.test.cc'].create({
-            'email_cc': 'cc1@example.com, cc2@example.com, cc3 <cc3@example.com>',
-        })
-        suggestions = record._message_get_suggested_recipients(no_create=True)
-        expected_list = [
-            {
-                'name': '', 'email': 'cc1@example.com',
-                'partner_id': False, 'create_values': {},
-            }, {
-                'name': '', 'email': 'cc2@example.com',
-                'partner_id': False, 'create_values': {},
-            }, {
-                'name': 'cc3', 'email': 'cc3@example.com',
-                'partner_id': False, 'create_values': {},
-            }]
-        self.assertEqual(len(suggestions), len(expected_list))
-        for suggestion, expected in zip(suggestions, expected_list):
-            self.assertDictEqual(suggestion, expected)

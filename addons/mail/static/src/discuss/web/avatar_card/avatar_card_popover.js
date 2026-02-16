@@ -1,16 +1,17 @@
 import { useService } from "@web/core/utils/hooks";
-import { _t } from "@web/core/l10n/translation";
-import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { rpc } from "@web/core/network/rpc";
-import { Component } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 import { useOpenChat } from "@mail/core/web/open_chat_hook";
 import { ImStatus } from "@mail/core/common/im_status";
+import { useDynamicInterval } from "@mail/utils/common/misc";
+import { formatLocalDateTime } from "@mail/utils/common/dates";
+import { useChannelMemberActions } from "@mail/discuss/core/common/channel_member_actions";
+import { ActionList } from "@mail/core/common/action_list";
 
 export class AvatarCardPopover extends Component {
     static template = "mail.AvatarCardPopover";
-    static components = { Dropdown, DropdownItem, ImStatus };
+    static components = { ActionList, Dropdown, DropdownItem, ImStatus };
     static props = {
         id: { type: Number, required: true },
         channelMember: { type: Object, optional: true },
@@ -30,10 +31,30 @@ export class AvatarCardPopover extends Component {
         this.store = useService("mail.store");
         this.dialog = useService("dialog");
         this.openChat = useOpenChat(this.openChatModel);
+        this.state = useState({ partnerLocalDateTimeFormatted: "" });
         this.store.fetchStoreData("avatar_card", {
             id: this.props.id,
             model: this.props.model,
         });
+        this.chanelMemberActions = useChannelMemberActions({
+            member: () => this.props.channelMember,
+        });
+        useDynamicInterval(
+            (...args) => this.onChangeTz(...args),
+            () => [this.partner?.tz, this.store.self?.tz]
+        );
+    }
+
+    /**
+     * @param {string} partnerTz
+     * @param {string} currentUserTz
+     */
+    onChangeTz(partnerTz, currentUserTz) {
+        this.state.partnerLocalDateTimeFormatted = formatLocalDateTime(partnerTz, currentUserTz);
+        if (!this.state.partnerLocalDateTimeFormatted) {
+            return;
+        }
+        return 60000 - (Date.now() % 60000);
     }
 
     get openChatModel() {
@@ -41,65 +62,8 @@ export class AvatarCardPopover extends Component {
     }
 
     get canOpenSettingMenu() {
-        return (
-            this.canSetAdmin ||
-            this.canRemoveAdmin ||
-            this.canSetOwner ||
-            this.canRemoveOwner ||
-            this.canRemoveMember
-        );
+        return this.props.channelMember && this.chanelMemberActions.actions.length;
     }
-
-    get selfChannelRole() {
-        return this.props.channelMember?.channel_id?.self_member_id?.channel_role;
-    }
-
-    get currentChannelRole() {
-        return this.props.channelMember?.channel_role;
-    }
-
-    get canSetAdmin() {
-        return (
-            this.props.channelMember &&
-            this.currentChannelRole !== "admin" &&
-            (this.store.self_user?.is_admin ||
-                (this.selfChannelRole === "owner" && this.currentChannelRole !== "owner") ||
-                (this.selfChannelRole === "owner" && this.props.channelMember?.channelAsSelf))
-        );
-    }
-
-    get canRemoveAdmin() {
-        return (
-            this.props.channelMember &&
-            this.currentChannelRole === "admin" &&
-            (this.store.self_user?.is_admin || this.selfChannelRole === "owner")
-        );
-    }
-
-    get canSetOwner() {
-        return (
-            this.props.channelMember &&
-            this.currentChannelRole !== "owner" &&
-            (this.store.self_user?.is_admin || this.selfChannelRole === "owner")
-        );
-    }
-
-    get canRemoveOwner() {
-        return (
-            this.props.channelMember &&
-            this.currentChannelRole === "owner" &&
-            (this.store.self_user?.is_admin || this.props.channelMember?.channelAsSelf)
-        );
-    }
-
-    get canRemoveMember() {
-        return (
-            this.props.channelMember &&
-            (this.store.self_user?.is_admin ||
-                (this.selfChannelRole && this.currentChannelRole !== "owner"))
-        );
-    }
-
     get user() {
         if (this.props.model === "res.users") {
             return this.store["res.users"].get(this.props.id);
@@ -146,43 +110,6 @@ export class AvatarCardPopover extends Component {
     onSendClick() {
         this.openChat(this.props.id);
         this.props.close();
-    }
-
-    onClickRemove() {
-        this.dialog.add(ConfirmationDialog, {
-            body: _t('Do you want to remove "%(member_name)s" from this channel?', {
-                member_name: this.props.channelMember.name,
-            }),
-            cancel: () => {},
-            confirm: () => {
-                rpc("/discuss/channel/remove_member", {
-                    member_id: this.props.channelMember.id,
-                });
-                this.props.close();
-            },
-        });
-    }
-
-    setChannelRole(role) {
-        if (
-            !this.store.self_user?.is_admin &&
-            (this.props.channelMember.channelAsSelf || role === "owner")
-        ) {
-            this.dialog.add(ConfirmationDialog, {
-                body: this.props.channelMember.channelAsSelf
-                    ? _t(
-                          "Do you want to remove owner from yourself? You will no longer have full control over the channel and its settings."
-                      )
-                    : _t(
-                          'Do you want to set "%(member_name)s" as the owner? This means that the member will have full control over the channel and its settings.\n\nThis action cannot be reverted.',
-                          { member_name: this.props.channelMember.name }
-                      ),
-                cancel: () => {},
-                confirm: () => this.props.channelMember.setChannelRole(role),
-            });
-        } else {
-            this.props.channelMember.setChannelRole(role);
-        }
     }
 
     async onClickViewProfile(newWindow) {

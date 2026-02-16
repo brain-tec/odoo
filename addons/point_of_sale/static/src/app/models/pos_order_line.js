@@ -24,6 +24,7 @@ export class PosOrderline extends PosOrderlineAccounting {
         this.uiState = {
             hasChange: true,
             savedQuantity: 0,
+            oldQty: this.qty,
         };
     }
 
@@ -70,12 +71,11 @@ export class PosOrderline extends PosOrderlineAccounting {
         const unit = this.product_id.uom_id;
         const decimalPoint = l10n.decimalPoint;
 
+        const ProductUnit = this.models["decimal.precision"].find(
+            (dp) => dp.name === "Product Unit"
+        );
         if (unit) {
-            if (unit.rounding) {
-                const ProductUnit = this.models["decimal.precision"].find(
-                    (dp) => dp.name === "Product Unit"
-                );
-
+            if (ProductUnit.digits) {
                 if (this.qty % 1 === 0) {
                     unitPart = this.qty.toFixed(0);
                 } else {
@@ -226,7 +226,7 @@ export class PosOrderline extends PosOrderlineAccounting {
     // product's unity of measure properties. Quantities greater than zero will not get
     // rounded to zero
     setQuantity(quantity, keep_price) {
-        const oldQty = this.qty;
+        this.uiState.oldQty = this.qty;
         if (this.order_id.preset_id?.is_return) {
             quantity = -Math.abs(quantity);
         }
@@ -264,9 +264,7 @@ export class PosOrderline extends PosOrderlineAccounting {
             }
         }
 
-        const rounder =
-            this.product_id.uom_id ||
-            this.models["decimal.precision"].find((dp) => dp.name === "Product Unit");
+        const rounder = this.models["decimal.precision"].find((dp) => dp.name === "Product Unit");
 
         this.qty = rounder.round(quant);
 
@@ -299,7 +297,7 @@ export class PosOrderline extends PosOrderlineAccounting {
         }
         for (const comboLine of this.combo_line_ids) {
             // If each combo contains 2 qty of a product, we wanna keep this ratio after setting the new quantity on the parent product.
-            comboLine.setQuantity((comboLine.qty / oldQty || 1) * quantity, true);
+            comboLine.setQuantity((comboLine.qty / this.uiState.oldQty || 1) * quantity, true);
         }
         return true;
     }
@@ -328,14 +326,13 @@ export class PosOrderline extends PosOrderlineAccounting {
         );
         const price = ProductPrice.round(this.price_unit || 0);
         const product = orderline.getProduct();
-        let order_line_price = product.getPrice(
+        const order_line_price = product.getPrice(
             orderline.order_id.pricelist_id,
             this.getQuantity(),
             0,
             false,
             product
         );
-        order_line_price = this.currency.round(order_line_price);
 
         const isSameCustomerNote =
             (Boolean(orderline.getCustomerNote()) === false &&
@@ -348,9 +345,13 @@ export class PosOrderline extends PosOrderlineAccounting {
             orderline.getNote() === this.getNote() &&
             this.getProduct().id === orderline.getProduct().id &&
             this.isPosGroupable() &&
-            // don't merge discounted orderlines
-            this.getDiscount() === 0 &&
-            this.currency.isZero(price - order_line_price - orderline.getPriceExtra()) &&
+            this.getDiscount() === orderline.getDiscount() &&
+            this.price_type === orderline.price_type &&
+            this.currency.isZero(
+                this.currency.round(price) -
+                    this.currency.round(order_line_price) -
+                    orderline.getPriceExtra()
+            ) &&
             (!this.isLotTracked() || getLotName(this) === getLotName(orderline)) &&
             this.full_product_name === orderline.full_product_name &&
             isSameCustomerNote &&
@@ -471,6 +472,10 @@ export class PosOrderline extends PosOrderlineAccounting {
 
     getDiscount() {
         return this.discount || 0;
+    }
+
+    get isValidForRefund() {
+        return this.qty - this.refundedQty > 0 && !this.combo_parent_id;
     }
 
     // FIXME all below should be removed

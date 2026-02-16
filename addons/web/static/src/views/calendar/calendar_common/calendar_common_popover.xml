@@ -60,7 +60,7 @@
                                 </t>
                             </span>
                             <div class="flex-grow-1 o_cw_popover_field overflow-hidden">
-                                <Field name="fieldInfo.name" record="slot.record" fieldInfo="fieldInfo" type="fieldInfo.widget" />
+                                <Field name="fieldInfo.name" record="slot.record" class="fieldInfo.attrs.class" fieldInfo="fieldInfo" type="fieldInfo.widget" />
                             </div>
                         </li>
                     </t>
@@ -78,7 +78,6 @@
         </t>
         <t t-if="isEventDeletable">
             <a href="#" class="btn btn-danger o_cw_popover_delete" t-on-click="onDeleteEvent">
-                <i class="fa fa-trash" role="presentation"/>
                 Delete
             </a>
         </t>

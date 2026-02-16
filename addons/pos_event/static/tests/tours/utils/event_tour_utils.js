@@ -39,6 +39,16 @@ export function answerGlobalSelectQuestion(question, answer) {
     ];
 }
 
+export function answerGlobalTextQuestion(question, answer) {
+    return [
+        {
+            content: `Answer question ${question} with ${answer} for global`,
+            trigger: `.global_question:contains('${question}') input`,
+            run: `edit ${answer}`,
+        },
+    ];
+}
+
 export function pickTicket(name) {
     return [
         {
@@ -53,7 +63,7 @@ export function eventRemainingSeat(name, seats) {
     return [
         {
             content: `check remaining seats for ${name}`,
-            trigger: `article:contains('${name}'):contains('${seats} left')`,
+            trigger: `article:contains('${name}'):contains('${seats} seats')`,
             run: "click",
         },
     ];

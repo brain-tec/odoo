@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { describe, test } from "@odoo/hoot";
 import { leave, runAllTimers } from "@odoo/hoot-dom";
 import { Command, serverState, withUser } from "@web/../tests/web_test_helpers";
 import {
@@ -8,7 +8,7 @@ import {
     defineMailModels,
     hover,
     insertText,
-    onRpcBefore,
+    listenStoreFetch,
     openDiscuss,
     openFormView,
     setupChatHub,
@@ -16,6 +16,7 @@ import {
     startServer,
     triggerEvents,
     triggerHotkey,
+    waitStoreFetch,
 } from "../mail_test_helpers";
 
 import { rpc } from "@web/core/network/rpc";
@@ -208,10 +209,7 @@ test("Hover on chat bubble shows message preview along with message seen indicat
         res_id: channelId,
     });
     const memberIds = pyEnv["discuss.channel.member"].search([["channel_id", "=", channelId]]);
-    pyEnv["discuss.channel.member"].write(memberIds, {
-        fetched_message_id: messageId,
-        seen_message_id: false,
-    });
+    pyEnv["discuss.channel.member"].write(memberIds, { seen_message_id: false });
     const [memberId_1] = pyEnv["discuss.channel.member"].search([
         ["channel_id", "=", channelId],
         ["partner_id", "=", partnerId_1],
@@ -295,16 +293,16 @@ test("Chat bubbles do not fetch messages until becoming open", async () => {
             model: "discuss.channel",
         },
     ]);
-    onRpcBefore("/discuss/channel/messages", () => expect.step("fetch_messages"));
+    listenStoreFetch("/discuss/channel/messages");
     setupChatHub({ folded: [channeId1, channelId2] });
     await start();
     await contains(".o-mail-ChatBubble[name='Orange']");
-    expect.verifySteps([]);
+    await waitStoreFetch();
     await click(".o-mail-ChatBubble[name='Orange']");
     await contains(".o-mail-ChatWindow");
     await contains(".o-mail-Message-content:text('Orange')");
     await contains(".o-mail-Message-content:text('Apple')", { count: 0 });
-    expect.verifySteps(["fetch_messages"]); // from "Orange" becoming open
+    await waitStoreFetch("/discuss/channel/messages"); // from "Orange" becoming open
 });
 
 test("More than 7 actually folded chat windows shows a 'hidden' chat bubble menu", async () => {
@@ -569,6 +567,7 @@ test("Open chat window from messaging menu with chat hub compact", async () => {
         channel_type: "chat",
     });
     setupChatHub({ folded: [chatId] });
+    listenStoreFetch("/discuss/channel/messages");
     await start();
     await openFormView("res.partner", serverState.partnerId);
     await click("button[title='Chat Options']");
@@ -576,6 +575,7 @@ test("Open chat window from messaging menu with chat hub compact", async () => {
     await contains(".o-mail-ChatHub-compact");
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-NotificationItem:text('John')");
+    await waitStoreFetch("/discuss/channel/messages"); // ensure messages are loaded before doing message post
     await contains(".o-mail-ChatWindow:text('John')");
     await triggerEvents(".o-mail-Composer-input", ["blur", "focusout"]); // FIXME: click fold doesn't focusout/blur the composer, thus marks as read
     await click(".o-mail-ChatWindow-header [title='Fold']");

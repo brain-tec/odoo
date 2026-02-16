@@ -87,7 +87,7 @@
                                 <setting string="Automatically validate order" help="Automatically validates orders paid with a payment terminal.">
                                     <field name="pos_auto_validate_terminal_payment"/>
                                 </setting>
-                                <setting string="Cash Rounding" invisible="use_kiosk_mode" documentation="/applications/sales/point_of_sale/pricing/cash_rounding.html" help="Define the smallest coinage of the currency used to pay by cash">
+                                <setting string="Total Rounding" invisible="use_kiosk_mode" documentation="/applications/sales/point_of_sale/pricing/cash_rounding.html" help="Define the smallest coinage of the currency used to pay by cash">
                                     <field name="pos_cash_rounding" readonly="pos_has_active_session"/>
                                     <div class="content-group mt16" invisible="not pos_cash_rounding">
                                         <div class="row mt16">
@@ -97,13 +97,13 @@
                                         <div class="row mt16">
                                             <div class="col">
                                                 <field name="pos_only_round_cash_method" readonly="pos_has_active_session"/>
-                                                <label string="Only on cash methods" for="pos_only_round_cash_method" class="o_light_label" />
+                                                <label string="Apply only on cash methods" for="pos_only_round_cash_method" class="o_light_label" />
                                             </div>
                                         </div>
                                     </div>
                                     <div class="mt8">
                                         <button name="%(account.rounding_list_action)d" icon="oi-arrow-right"
-                                                type="action" string="Cash Roundings" class="btn-link"
+                                                type="action" string="Roundings" class="btn-link"
                                                 invisible="not group_cash_rounding"/>
                                     </div>
                                 </setting>
@@ -405,11 +405,11 @@
                                     <div class="content-group" invisible="not pos_other_devices">
                                         <div class="mt16 mb-1">
                                             <label string="Printers" for="pos_receipt_printer_ids" class="o_light_label me-2"/>
-                                            <field name="pos_receipt_printer_ids" widget="many2many_tags"/>
+                                            <field name="pos_receipt_printer_ids" widget="many2many_tags" context="{'default_use_type': 'receipt'}"/>
                                         </div>
                                         <div class="mt16 mb-1">
                                             <label string="Default" for="pos_default_receipt_printer_id" class="o_light_label me-2"/>
-                                            <field name="pos_default_receipt_printer_id" domain="[('id', 'in', pos_receipt_printer_ids)]"/>
+                                            <field name="pos_default_receipt_printer_id" domain="[('id', 'in', pos_receipt_printer_ids)]" required="pos_other_devices"/>
                                         </div>
                                         <div class="mt16 mb-1">
                                             <label string="Link Cashdrawer" for="pos_iface_cashdrawer" class="o_light_label me-2"/>
@@ -440,7 +440,8 @@
                                             <div class="col-lg-5">
                                                 <field name="pos_preparation_printer_ids"
                                                     class="w-100 pt-1"
-                                                    widget="many2many_tags"/>
+                                                    widget="many2many_tags"
+                                                    context="{'default_use_type': 'preparation'}"/>
                                             </div>
                                             <div>
                                                 <button name="action_pos_printer_dialog"

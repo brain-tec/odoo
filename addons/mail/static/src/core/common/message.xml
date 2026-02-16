@@ -30,7 +30,7 @@
                         </t>
                         <t t-elif="message.isPending" t-call="mail.Message.pendingStatus"/>
                         <t t-elif="!message.is_transient">
-                            <small t-if="isActive and props.showDates" class="o-mail-Message-date o-xsmaller mt-2 text-center lh-1" t-att-title="message.datetimeShort">
+                            <small t-if="isActive and props.showDates" class="o-mail-Message-date o-xsmaller mt-2 text-center lh-1" t-att-title="message.datetimeMedium">
                                 <t t-esc="message.dateSimple"/>
                             </small>
                             <t t-elif="message.starred" t-call="mail.Message.sidebarStarred"/>
@@ -43,7 +43,7 @@
                             </span>
                             <t t-if="!isAlignedRight" t-call="mail.Message.notification"/>
                             <t t-if="isAlignedRight and !message.bubbleColor and !(props.asCard and isMobileOS)" t-call="mail.Message.actions"/>
-                            <small t-if="!message.is_transient" class="o-mail-Message-date o-xsmaller" t-att-title="message.datetimeShort">
+                            <small t-if="!message.is_transient" class="o-mail-Message-date o-xsmaller" t-att-title="message.datetimeMedium">
                                 <t t-if="message.isPending" t-call="mail.Message.pendingStatus"/>
                                 <t t-else="" t-out="message.dateSimpleWithDay"/>
                             </small>
@@ -52,7 +52,9 @@
                                     (from <a t-att-href="message.resUrl"><t t-esc="message.thread.prefix"/><t t-esc="message.channel_id.displayName or message.default_subject"/></a>)
                                 </t>
                                 <t t-else="">
-                                    on <a t-if="message.thread.displayName" t-att-href="message.resUrl" t-esc="message.thread.displayName"/><em class="pe-1 text-decoration-line-through" t-else="">Deleted document</em>
+                                    on
+                                    <Priority t-if="message.thread.priority" thread="message.thread"/>
+                                    <t t-out="nbsp"/><a t-if="message.thread.displayName" t-att-href="message.resUrl" t-esc="message.thread.displayName"/><em class="pe-1 text-decoration-line-through" t-else="">Deleted document</em>
                                 </t>
                             </small>
                             <div t-if="props.message.scheduledDatetime" t-att-class="{ 'ms-2': (env.inChatWindow and isAlignedRight) or (isPersistentMessageFromAnotherThread) }" t-att-title="props.message.scheduledDateSimple">
@@ -115,7 +117,7 @@
                                                         <em t-if="message.subject and !message.isSubjectSimilarToThreadName and !message.isSubjectDefault" class="d-block text-muted smaller">Subject: <t t-out="props.messageSearch?.highlight(message.subject) ?? message.subject"/></em>
                                                         <div class="overflow-x-auto" t-if="message.message_type and message.message_type.includes('email')" t-ref="shadowBody"/>
                                                         <t t-elif="message.showTranslation" t-out="message.richTranslationValue"/>
-                                                        <t t-elif="message.hasTextContent and message.richBody and !message.linkPreviewSquash" t-out="props.messageSearch?.highlight(message.richBody) ?? message.richBody"/>
+                                                        <div class="o-mail-Message-richBody overflow-x-auto" t-elif="message.hasTextContent and message.richBody and !message.linkPreviewSquash" t-out="props.messageSearch?.highlight(message.richBody) ?? message.richBody"/>
                                                         <p class="fst-italic text-muted small" t-if="message.showTranslation">
                                                             <t t-if="message.translationSource" t-esc="translatedFromText"/>
                                                         </p>
@@ -135,8 +137,8 @@
                                 </div>
                                 <div class="position-relative">
                                     <AttachmentList
-                                        t-if="message.attachment_ids.length > 0"
-                                        attachments="message.attachment_ids.map((a) => a)"
+                                        t-if="message.extra_body_attachment_ids.length > 0"
+                                        attachments="message.extra_body_attachment_ids"
                                         unlinkAttachment.bind="onClickAttachmentUnlink"
                                         messageSearch="props.messageSearch"/>
                                 </div>
@@ -153,7 +155,7 @@
     </t>
 
 <t t-name="mail.Message.edited">
-    <span class="o-xsmaller opacity-50"> (edited)</span>
+    <span class="o-xsmaller opacity-50" t-att-title="message.editedDatetimeMedium"> (edited)</span>
 </t>
 
 <t t-name="mail.Message.actions">

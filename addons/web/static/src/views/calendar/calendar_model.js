@@ -975,7 +975,8 @@ export class CalendarModel extends Model {
                 const records = await this.orm.searchRead(
                     field.relation,
                     [["id", "in", relatedIds]],
-                    fieldsToFetch
+                    fieldsToFetch,
+                    { context: { active_test: false } }
                 );
                 if (isX2Many) {
                     const nameById = Object.fromEntries(records.map((r) => [r.id, r.display_name]));
@@ -1064,11 +1065,11 @@ export class CalendarModel extends Model {
      * @protected
      */
     makeFilterRecord(filterInfo, previousFilter, rawRecord) {
-        const { colorFieldName, filterFieldName, writeFieldName } = filterInfo;
+        const { colorFieldName, filterFieldName, fieldName, writeFieldName } = filterInfo;
         const { fields, fieldMapping } = this.meta;
         const raw = rawRecord[writeFieldName];
         const value = Array.isArray(raw) ? raw[0] : raw;
-        const field = fields[writeFieldName];
+        const field = fields[fieldName];
         const isX2Many = ["many2many", "one2many"].includes(field.type);
         const formatter = registry.category("formatters").get(isX2Many ? "many2one" : field.type);
 
@@ -1078,7 +1079,7 @@ export class CalendarModel extends Model {
             (() => {
                 const sameRelatedModel = colorField.relation === field.relation;
                 const sameRelatedField =
-                    colorField.related === `${writeFieldName}.${colorFieldName}`;
+                    colorField.related === `${fieldName}.${colorFieldName}`;
                 const shouldHaveColor = sameRelatedModel || sameRelatedField;
                 const colorToUse = raw ? value : rawRecord[fieldMapping.color];
                 return shouldHaveColor ? colorToUse : null;

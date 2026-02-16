@@ -16,11 +16,15 @@ import {
     waitStoreFetch,
 } from "@mail/../tests/mail_test_helpers";
 import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
+import { makeRecordFieldLocalId } from "@mail/model/misc";
+import { Store } from "@mail/model/store";
+import { toRawValue } from "@mail/utils/common/local_storage";
 
 import { describe, expect, test } from "@odoo/hoot";
 import { Deferred, mockUserAgent } from "@odoo/hoot-mock";
 import {
     Command,
+    getService,
     makeKwArgs,
     mockService,
     patchWithCleanup,
@@ -98,14 +102,21 @@ test("rendering with chat push notification default permissions", async () => {
 
 test("can quickly dismiss 'Turn on notification' suggestion", async () => {
     patchBrowserNotification("default");
+    const IS_NOTIFICATION_PERMISSION_LS = makeRecordFieldLocalId(
+        Store.localId(),
+        "isNotificationPermissionDismissed"
+    );
     await start();
     await contains(".o-mail-MessagingMenu-counter:text('1')");
     await click(".o_menu_systray i[aria-label='Messages']");
-    await contains(".o-mail-NotificationItem");
-    await contains(".o-mail-NotificationItem-name:text('Turn on notifications')");
+    await contains(".o-mail-NotificationItem:has(:text('Turn on notifications'))");
+    expect(localStorage.getItem(IS_NOTIFICATION_PERMISSION_LS)).toBe(null);
+    expect(getService("mail.store").isNotificationPermissionDismissed).toBe(false);
     await click(".o-mail-NotificationItem:contains(Turn on notifications) [title='Dismiss']");
-    await contains(".o-mail-NotificationItem-name:text('Turn on notifications')", { count: 0 });
+    await contains(".o-mail-NotificationItem:has(:text('Turn on notifications'))", { count: 0 });
     await contains(".o-mail-MessagingMenu-counter", { count: 0 });
+    expect(localStorage.getItem(IS_NOTIFICATION_PERMISSION_LS)).toBe(toRawValue(true));
+    expect(getService("mail.store").isNotificationPermissionDismissed).toBe(true);
 });
 
 test("rendering with chat push notification permissions denied", async () => {
@@ -1030,10 +1041,7 @@ test("render message preview with message seen indicator in messaging menu", asy
         res_id: channelId,
     });
     const memberIds = pyEnv["discuss.channel.member"].search([["channel_id", "=", channelId]]);
-    pyEnv["discuss.channel.member"].write(memberIds, {
-        fetched_message_id: messageId,
-        seen_message_id: false,
-    });
+    pyEnv["discuss.channel.member"].write(memberIds, { seen_message_id: false });
     const [memberId_1] = pyEnv["discuss.channel.member"].search([
         ["channel_id", "=", channelId],
         ["partner_id", "=", thomas],
@@ -1207,7 +1215,7 @@ test("messaging menu should show new needaction messages from chatter", async ()
         message_id: messageId,
         store_data: new mailDataHelpers.Store(
             pyEnv["mail.message"].browse(messageId),
-            makeKwArgs({ for_current_user: true, add_followers: true })
+            makeKwArgs({ for_current_user: true, inbox_fields: true })
         ).get_result(),
     });
     await contains(".o-mail-NotificationItem-text:text('Frodo Baggins: @Mitchel Admin')");

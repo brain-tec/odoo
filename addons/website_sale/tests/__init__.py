@@ -19,6 +19,7 @@ from . import (
     test_fuzzy,
     test_google_merchant_center,
     test_mail,
+    test_main_controller,
     test_pricelist,
     test_product_attribute_value_config,
     test_product_configurator,
@@ -39,6 +40,9 @@ from . import (
     test_technical_page,
     test_website_editor,
     test_website_sale_checkout_steps,
+    test_website_sale_comparison,
+    test_website_sale_seo,
     test_website_sequence,
     test_website_visitor,
+    test_wishlist_ui,
 )

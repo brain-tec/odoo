@@ -111,7 +111,7 @@ class AccountPartialReconcile(models.Model):
             return True
 
         # Get the payments without journal entry to reset once the amount residual is reset
-        to_update_payments = self._get_to_update_payments(from_state='paid')
+        to_update_payments = self._get_to_update_payments(from_state='reconciled')
         # Retrieve the CABA entries to reverse.
         moves_to_reverse = self.env['account.move'].search([('tax_cash_basis_rec_id', 'in', self.ids)])
         # Same for the exchange difference entries.
@@ -142,13 +142,13 @@ class AccountPartialReconcile(models.Model):
 
         all_reconciled = all_reconciled.exists()
         self._update_matching_number(all_reconciled)
-        to_update_payments.state = 'in_process'
+        to_update_payments.state = 'paid'
         return res
 
     @api.model_create_multi
     def create(self, vals_list):
         partials = super().create(vals_list)
-        partials._get_to_update_payments(from_state='in_process').state = 'paid'
+        partials._get_to_update_payments(from_state='paid').state = 'reconciled'
         self._update_matching_number(partials.debit_move_id + partials.credit_move_id)
         return partials
 
@@ -514,6 +514,7 @@ class AccountPartialReconcile(models.Model):
         for move_values in tax_cash_basis_values_per_move.values():
             move = move_values['move']
             pending_cash_basis_lines = []
+            amount_residual_per_tax_line = {line.id: line.amount_residual_currency for line_type, line in move_values['to_process_lines'] if line_type == 'tax'}
 
             for partial_values in move_values['partials']:
                 partial = partial_values['partial']
@@ -553,8 +554,13 @@ class AccountPartialReconcile(models.Model):
                             move_values['is_fully_paid']
                             or line.currency_id.compare_amounts(abs(line.amount_residual_currency), abs(amount_currency)) < 0
                         )
+                        and partial_values == move_values['partials'][-1]
                     ):
-                        amount_currency = line.amount_residual_currency
+                        # If the move is supposed to be fully paid, and we're on the last partial for it,
+                        # put the remaining amount to avoid rounding issues
+                        amount_currency = amount_residual_per_tax_line[line.id]
+                    if caba_treatment == 'tax':
+                        amount_residual_per_tax_line[line.id] -= amount_currency
                     balance = partial_values['payment_rate'] and amount_currency / partial_values['payment_rate'] or 0.0
 
                     # ==========================================================================
@@ -654,6 +660,7 @@ class AccountPartialReconcile(models.Model):
 
         # Reconcile the tax lines being on a reconcile tax basis transfer account.
         reconciliation_plan = []
+        exchange_account_per_move = self.env.context.get('exchange_account_per_move', {})
         for lines, move_index, sequence in to_reconcile_after:
 
             # In expenses, all move lines are created manually without any grouping on tax lines.
@@ -669,6 +676,7 @@ class AccountPartialReconcile(models.Model):
                 continue
 
             reconciliation_plan.append(counterpart_line + lines)
+            exchange_account_per_move[moves[move_index]] = exchange_account_per_move.get(lines.move_id)
 
         # passing add_caba_vals in the context to make sure that any exchange diff that would be created for
         # this cash basis move would set the field draft_caba_move_vals accordingly on the partial

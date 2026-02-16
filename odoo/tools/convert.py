@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 __all__ = [
-    'convert_file', 'convert_sql_import',
-    'convert_csv_import', 'convert_xml_import'
+    'convert_csv_import',
+    'convert_file',
+    'convert_sql_import',
+    'convert_xml_import'
 ]
 import base64
 import csv
@@ -17,7 +18,6 @@ import typing
 import warnings
 import zoneinfo
 from datetime import datetime, timedelta, UTC, tzinfo
-from typing import Literal, Optional
 
 from dateutil.relativedelta import relativedelta
 from lxml import etree, builder
@@ -34,8 +34,8 @@ from .safe_eval import safe_eval, time
 
 _logger = logging.getLogger(__name__)
 
-ConvertMode = Literal['init', 'update']
-IdRef = dict[str, int | Literal[False]]
+ConvertMode = typing.Literal['init', 'update']
+IdRef = dict[str, int | typing.Literal[False]]
 
 
 class Pytz(typing.NamedTuple):
@@ -137,6 +137,9 @@ def _eval_xml(self, node, env):
             return _process("".join(etree.tostring(n, method='html', encoding='unicode') for n in node))
 
         if node.get('file'):
+            if t == 'bytes':
+                with file_open(node.get('file'), 'rb', env=env) as f:
+                    return f.read()
             if t == 'base64':
                 with file_open(node.get('file'), 'rb', env=env) as f:
                     return base64.b64encode(f.read())
@@ -169,6 +172,8 @@ def _eval_xml(self, node, env):
                 return [_eval_xml(self, n, env) for n in node.iterchildren('value')]
             case 'tuple':
                 return tuple(_eval_xml(self, n, env) for n in node.iterchildren('value'))
+            case 'bytes':
+                raise ValueError("bytes type is only compatible with file data")
             case 'base64':
                 raise ValueError("base64 type is only compatible with file data")
             case t:
@@ -655,7 +660,7 @@ form: module.record_id""" % (xml_id,)
             value = self._sequences[-1] = value + 10
         return value
 
-    def __init__(self, env, module, idref: Optional[IdRef], mode: ConvertMode, noupdate: bool = False, xml_filename: str = ''):
+    def __init__(self, env, module, idref: IdRef | None, mode: ConvertMode, noupdate: bool = False, xml_filename: str = ''):
         self.mode = mode
         self.module = module
         self.envs = [env(context=dict(env.context, lang=None))]
@@ -684,7 +689,7 @@ def convert_file(
         env,
         module,
         filename,
-        idref: Optional[IdRef],
+        idref: IdRef | None,
         mode: ConvertMode = 'update',
         noupdate=False,
         kind=None,
@@ -722,7 +727,7 @@ def convert_csv_import(
         module,
         fname,
         csvcontent,
-        idref: Optional[IdRef] = None,
+        idref: IdRef | None = None,
         mode: ConvertMode = 'init',
         noupdate=False,
 ):
@@ -779,7 +784,7 @@ def convert_xml_import(
         env,
         module,
         xmlfile,
-        idref: Optional[IdRef] = None,
+        idref: IdRef | None = None,
         mode: ConvertMode = 'init',
         noupdate=False,
         report=None,

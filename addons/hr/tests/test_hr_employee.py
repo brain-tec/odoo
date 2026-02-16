@@ -80,13 +80,13 @@ class TestHrEmployee(TestHrCommon):
 
     def test_employee_resource(self):
         _tz = 'Pacific/Apia'
-        self.res_users_hr_officer.company_id.resource_calendar_id.tz = _tz
-        Employee = self.env['hr.employee'].with_user(self.res_users_hr_officer)
+        self.res_users_hr_officer.company_id.tz = _tz
+        Employee = self.env['hr.employee'].with_user(self.res_users_hr_officer).with_context({'tz': 'Europe/Brussels'})
         employee_form = Form(Employee)
         employee_form.name = 'Raoul Grosbedon'
         employee_form.work_email = 'raoul@example.com'
         employee = employee_form.save()
-        self.assertEqual(employee.tz, _tz)
+        self.assertEqual(employee.tz, 'Europe/Brussels')
 
     def test_employee_timezone(self):
         self.res_users_hr_officer.tz = "Africa/Cairo"
@@ -116,14 +116,10 @@ class TestHrEmployee(TestHrCommon):
         with mute_logger('odoo.sql_db'), self.assertRaises(NotNullViolation):
             self.res_users_hr_officer.tz = False
 
-        # Check None value on user's calendar
-        with mute_logger('odoo.sql_db'), self.assertRaises(NotNullViolation):
-            self.res_users_hr_officer.company_id.resource_calendar_id.write({'tz': None})
-
     def test_employee_from_user(self):
         _tz = 'Pacific/Apia'
         _tz2 = 'America/Tijuana'
-        self.res_users_hr_officer.company_id.resource_calendar_id.tz = _tz
+        self.res_users_hr_officer.company_id.tz = _tz
         self.res_users_hr_officer.tz = _tz2
         Employee = self.env['hr.employee'].with_user(self.res_users_hr_officer)
         employee_form = Form(Employee)
@@ -506,26 +502,6 @@ class TestHrEmployee(TestHrCommon):
 
         self.assertEqual(employee_form.barcode, 'Testbadge2')
 
-    def test_departure_wizard(self):
-        """ Test the archiving wizard in the case of multiple employees """
-        employee_A, employee_B, employee_C = self.env['hr.employee'].create([
-            {
-                'name': f'Employee {code}',
-                'user_id': False,
-                'work_email': f'employee_{code}@example.com',
-            } for code in ['A', 'B', 'C']
-        ])
-        archiving_employees = [employee.id for employee in (employee_A, employee_C)]
-
-        wizard = self.env['hr.departure.wizard'].with_context(
-            employee_termination=True,
-            active_ids=archiving_employees,
-        ).create({})
-        wizard.action_register_departure()
-
-        all_employees = employee_A | employee_B | employee_C
-        self.assertEqual(all_employees.filtered(lambda e: e.active), employee_B, "Employees should have been archived")
-
     def test_search_hr_employee_no_access(self):
         new_user = new_test_user(self.env, 'employee')
         employee = self.env['hr.employee'].create({
@@ -544,23 +520,26 @@ class TestHrEmployee(TestHrCommon):
     def test_is_flexible(self):
         employee = self.env['hr.employee'].create({
             'name': 'Employee',
+            'tz': 'Asia/Tokyo',
         })
         self.assertTrue(employee.resource_calendar_id)
         self.assertFalse(employee.is_flexible)
         self.assertFalse(employee.is_fully_flexible)
 
-        employee.resource_calendar_id.flexible_hours = True
+        employee.resource_calendar_id = False
+        employee.hours_per_week = 40
+        employee.hours_per_day = 8
         self.assertTrue(employee.is_flexible)
         self.assertFalse(employee.is_fully_flexible)
 
-        employee.resource_calendar_id = False
+        employee.hours_per_week = 0
+        employee.hours_per_day = 0
         self.assertTrue(employee.is_flexible)
         self.assertTrue(employee.is_fully_flexible)
 
     def test_resource_calendar_sync_with_employee_one(self):
         calendar = self.env['resource.calendar'].create({
             'name': 'test calendar',
-            'flexible_hours': True,
         })
         self.assertTrue(self.employee.resource_id)
         self.assertTrue(self.employee.resource_calendar_id)
@@ -603,34 +582,6 @@ class TestHrEmployee(TestHrCommon):
             # Switch back to first job, job title should be first job name
             employee_form.job_id = first_job
             self.assertEqual(employee_form.job_title, first_job.name)
-
-    def test_flexible_working_hours(self):
-        """
-        Test to verifie that get_unusual_days() return false for flexible work schedule
-        """
-
-        # Creating a flexible working schedule
-        calendar_flex = self.env['resource.calendar'].create([
-            {
-                'tz': "Europe/Brussels",
-                'name': 'flexible hours',
-                'flexible_hours': "True",
-            },
-        ])
-        employeeA = self.env['hr.employee'].create({
-            'name': 'Employee',
-        })
-
-        # Testing employeA on regular working schedule
-        days = employeeA._get_unusual_days(str(datetime(2025, 1, 1)), str(datetime(2025, 12, 31)))
-        self.assertTrue(days)
-        self.assertTrue(days['2025-01-04'])
-
-        # Assigning flexible work hours to employeeA
-        employeeA.resource_calendar_id = calendar_flex.id
-        days = employeeA._get_unusual_days(str(datetime(2025, 1, 1)), str(datetime(2025, 12, 31)))
-        self.assertTrue(days)
-        self.assertFalse(days['2025-01-04'])
 
     def test_user_creation_from_employee_with_invalid_email(self):
         employee = self.env['hr.employee'].create({

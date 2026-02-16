@@ -23,15 +23,15 @@
                         <label for="quantity"/>
                         <div class="o_row">
                             <field name="quantity" />
-                            <field name="product_uom_id"
+                            <field name="uom_id"
                                 groups="uom.group_uom"
                                 widget="many2one_uom"
                                 options="{'no_open': 1, 'no_create': 1, 'quantity_field': 'quantity'}"/>
                         </div>
-                        <field name="date_planned"/>
                         <field name="warehouse_id"
                             groups="stock.group_stock_multi_warehouses"/>
                         <field name="route_id" domain="[('id', 'in', allowed_route_ids)]"/>
+                        <field name="date_planned"/>
                     </group>
                 </group>
                 <footer>
@@ -40,9 +40,9 @@
                         type="object"
                         data-hotkey="q"
                         class="btn-primary"/>
-                    <button string="Discard"
-                        class="btn-secondary"
-                        special="cancel" data-hotkey="x" />
+                    <button class="btn-secondary"
+                        special="cancel"
+                        data-hotkey="x"/>
                 </footer>
             </form>
         </field>

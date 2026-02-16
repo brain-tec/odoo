@@ -4,6 +4,7 @@ import { clickOnSave, goToTheme, registerWebsitePreviewTour } from "@website/js/
 registerWebsitePreviewTour(
     "hide_sidebar_header",
     {
+        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/",
         edition: true,
     },
@@ -27,7 +28,10 @@ registerWebsitePreviewTour(
             content: "Check that the loading screen has appeared",
             trigger: ":iframe .o_loading_screen",
         },
-        stepUtils.waitIframeIsReady(),
+        {
+            content: "Wait for the builder to mount after iframe reload",
+            trigger: ":iframe body.editor_enable",
+        },
         {
             content: "Check that the header changed to 'Sidebar'",
             trigger: ":iframe #wrapwrap>header.o_header_sidebar",

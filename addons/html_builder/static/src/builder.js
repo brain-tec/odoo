@@ -46,27 +46,30 @@ export class Builder extends Component {
         iframeLoaded: { type: Object },
         isMobile: { type: Boolean },
         Plugins: { type: Array, optional: true },
+        // This fragment of config will be passed to the Editor and be
+        // available to the plugins in `config`
         config: { type: Object, optional: true },
         getThemeTab: { type: Function, optional: true },
         editableSelector: { type: String },
         themeTabDisplayName: { type: String, optional: true },
         slots: { type: Object, optional: true },
-        getCustomizeTranslationTab: { type: Function, optional: true },
+        initialTab: { type: String, optional: true },
+        onlyCustomizeTab: { type: Boolean, optional: true },
     };
     static defaultProps = {
         config: {},
         themeTabDisplayName: _t("Theme"),
+        initialTab: "blocks",
+        onlyCustomizeTab: false,
     };
 
     setup() {
         this.ThemeTab = this.props.getThemeTab?.();
-        this.CustomizeTranslationTab = this.props.getCustomizeTranslationTab?.();
-        // const actionService = useService("action");
         this.builder_sidebarRef = useRef("builder_sidebar");
         this.state = useState({
             canUndo: false,
             canRedo: false,
-            activeTab: this.props.config.initialTab || "blocks",
+            activeTab: this.props.onlyCustomizeTab ? "customize" : this.props.initialTab,
             currentOptionsContainers: undefined,
         });
         this.invisibleElementsPanelState = useState({
@@ -85,6 +88,7 @@ export class Builder extends Component {
         this.lastTrigerUpdateId = 0;
         this.editorBus = new EventBus();
         this.colorPresetToShow = null;
+        this.shadowSizeToShow = null;
         this.activeTargetEl = null;
         const mobileBreakpoint = this.props.config.mobileBreakpoint ?? "lg";
 
@@ -158,14 +162,13 @@ export class Builder extends Component {
                     },
                     change_current_options_containers_listeners: (currentOptionsContainers) => {
                         this.state.currentOptionsContainers = currentOptionsContainers;
-                        if (!currentOptionsContainers.length) {
-                            // If there is no option, fallback on the current
-                            // fallback tab.
-                            this.setTab(this.noSelectionTab);
-                            return;
+                        if (currentOptionsContainers.length) {
+                            this.activeTargetEl = null;
+                            this.setTab("customize");
+                        } else if (this.state.activeTab === "customize") {
+                            // If there is no option, go to add blocks
+                            this.setTab("blocks");
                         }
-                        this.activeTargetEl = null;
-                        this.setTab("customize");
                     },
                     lower_panel_entries: withSequence(20, {
                         Component: InvisibleElementsPanel,
@@ -186,7 +189,7 @@ export class Builder extends Component {
                     ),
                 snippetModel: this.snippetModel,
                 updateInvisibleElementsPanel: () => this.updateInvisibleEls(),
-                allowCustomStyle: true,
+                hideStylingInLinkPopover: true,
                 allowTargetBlank: true,
                 dropImageAsAttachment: true,
                 getAnimateTextConfig: () => ({ editor: this.editor, editorBus: this.editorBus }),
@@ -232,6 +235,7 @@ export class Builder extends Component {
             editorBus: this.editorBus,
             triggerDomUpdated: this.triggerDomUpdated.bind(this),
             editColorCombination: this.editColorCombination.bind(this),
+            editShadow: this.editShadow.bind(this),
         });
         onWillDestroy(() => {
             this.editor.destroy();
@@ -255,8 +259,6 @@ export class Builder extends Component {
                 );
             }
         });
-        // Fallback tab when no option is active.
-        this.noSelectionTab = "blocks";
     }
     async triggerDomUpdated() {
         this.lastTrigerUpdateId++;
@@ -267,10 +269,6 @@ export class Builder extends Component {
         await Promise.all(getStatePromises);
         const isLastTriggerId = this.lastTrigerUpdateId === currentTriggerId;
         resolve(isLastTriggerId);
-    }
-
-    get displayOnlyCustomizeTab() {
-        return this.props.config.isTranslationMode;
     }
 
     getInvisibleSelector(isMobile = this.props.isMobile) {
@@ -286,7 +284,7 @@ export class Builder extends Component {
      * @param {Number | null} presetId the color preset expanding on "theme" tab
      * open.
      */
-    onTabClick(tab, presetId = null) {
+    onTabClick(tab, { presetId = null, shadowSize = null } = {}) {
         if (this.state.activeTab === tab) {
             // If the tab is already active, do nothing.
             return;
@@ -295,6 +293,7 @@ export class Builder extends Component {
         // Deactivate the options when clicking on the "BLOCKS" or "THEME" tabs.
         if (tab === "theme" || tab === "blocks") {
             this.colorPresetToShow = presetId;
+            this.shadowSizeToShow = shadowSize;
             this.activeTargetEl = this.activeTargetEl || this.getActiveTarget();
             this.editor.shared.builderOptions.deactivateContainers();
         } else if (this.activeTargetEl) {
@@ -308,16 +307,14 @@ export class Builder extends Component {
 
     setTab(tab) {
         this.state.activeTab = tab;
-        // Set the fallback tab on the "THEME" tab if it was selected.
-        this.noSelectionTab = tab === "theme" ? "theme" : "blocks";
     }
 
     undo() {
-        this.editor.shared.history.undo();
+        this.editor.shared.operation.next(() => this.editor.shared.history.undo());
     }
 
     redo() {
-        this.editor.shared.history.redo();
+        this.editor.shared.operation.next(() => this.editor.shared.history.redo());
     }
 
     onMobilePreviewClick() {
@@ -336,7 +333,11 @@ export class Builder extends Component {
     }
 
     editColorCombination(presetId) {
-        this.onTabClick("theme", presetId);
+        this.onTabClick("theme", { presetId });
+    }
+
+    editShadow(shadowSize) {
+        this.onTabClick("theme", { shadowSize });
     }
 
     getActiveTarget() {

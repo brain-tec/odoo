@@ -2,9 +2,7 @@
 <odoo>
 
     <template id="website_sale.wizard_checkout" name="Wizard Checkout">
-        <t t-call="website.step_wizard">
-            <t t-set="wizard_step" t-value="website._get_checkout_steps()"/>
-        </t>
+        <t t-call="website.step_wizard" wizard_step="website._get_checkout_steps()"/>
     </template>
 
     <!-- Called in `website_sale.reduction_code`. -->
@@ -56,9 +54,8 @@
                             <input type="hidden"
                                    name="csrf_token"
                                    t-att-value="request.csrf_token()"/>
-                            <t t-if="not hide_payment_button" t-call="payment.submit_button">
-                                <t t-set="submit_button_label">Confirm Order</t>
-                            </t>
+                            <t t-if="not hide_payment_button" t-call="payment.submit_button"
+                                submit_button_label.translate="Confirm Order"/>
                         </form>
                     </div>
                     <t t-elif="not hide_payment_button" t-call="payment.submit_button"/>
@@ -182,16 +179,16 @@
             - redirect: The route to redirect to when a customer enters a coupon; default: `None`.
             - website_sale_order: The current order.
         -->
-        <t t-call="website.layout">
-            <t t-set="no_footer" t-value="True if show_footer is None else not show_footer"/>
+        <t t-call="website.layout"
+            no_footer="True if show_footer is None else not show_footer"
+            expand_order_summary="not show_navigation_button"
+            body_classname.f="o_website_sale_checkout">
             <t t-set="show_navigation_button" t-value="True if show_navigation_button is None else show_navigation_button"/>
-            <t t-set="expand_order_summary" t-value="not show_navigation_button"/>
             <t t-set="show_wizard_checkout" t-value="True if show_wizard_checkout is None else show_wizard_checkout"/>
             <t
                 t-set="show_mobile_cart_summary"
                 t-value="True if show_mobile_cart_summary is None else show_mobile_cart_summary"
             />
-            <t t-set="body_classname" t-value="'o_website_sale_checkout'"/>
             <div id="wrap" class="d-flex flex-column flex-grow-1">
                 <div class="oe_website_sale o_website_sale_checkout_container container d-flex flex-column flex-grow-1 py-lg-2">
                     <div t-attf-class="row #{not show_wizard_checkout and 'mt32'} mb32">
@@ -199,20 +196,15 @@
                             <t t-call="website_sale.wizard_checkout"/>
                         </div>
                         <!-- Checkout Page Content | Left Column -->
-                        <div
-                            t-attf-class="oe_clear_stucture oe_cart col-12 #{'col-lg-7' if website_sale_order and website_sale_order.website_order_line else ''}"
-                        >
+                        <div t-attf-class="oe_clear_stucture oe_cart col">
                             <t t-out="0"/>
                         </div>
 
                         <!-- Short Checkout Summary displayed on /cart | Right Column -->
-                        <div
+                        <t
                             t-if="show_shorter_cart_summary"
-                            class="o_wsale_shorter_cart_summary offset-xxl-1 col-lg-5 col-xxl-4"
-                        >
-                            <!-- Parent element needed for proper JS side rendering -->
-                            <t t-call="website_sale.shorter_cart_summary"/>
-                        </div>
+                            t-call="website_sale.shorter_cart_summary"
+                        />
                         <!-- Full Checkout Summary displayed on all checkout pages | Right Column -->
                         <div
                             t-else=""
@@ -222,12 +214,7 @@
                                 <div class="card-body p-lg-4 pt-lg-3">
                                     <div class="d-none d-lg-block">
                                         <t t-call="website_sale.cart_summary_content"/>
-                                        <t t-call="website_sale.total">
-                                            <t
-                                                t-set="_cart_total_classes"
-                                                t-valuef="pt-2"
-                                            />
-                                        </t>
+                                        <t t-call="website_sale.total" _cart_total_classes.f="pt-2"/>
                                     </div>
                                     <div
                                         t-if="show_navigation_button"
@@ -285,13 +272,9 @@
                                 <a href="/shop/cart" class="btn btn-link w-100">
                                     Coupon, Gift card, Promo-code?
                                 </a>
-                                <t t-call="website_sale.total">
-                                    <t t-set="hide_promotions" t-value="True"/>
-                                    <t
-                                        t-set="_cart_total_classes"
-                                        t-valuef="border-top px-3 pt-2 mx-n3"
-                                    />
-                                </t>
+                                <t t-call="website_sale.total"
+                                    hide_promotions="True"
+                                    _cart_total_classes.f="border-top px-3 pt-2 mx-n3"/>
                                 <button
                                     class="btn btn-light w-100"
                                     type="button"
@@ -315,17 +298,20 @@
 
     <template id="website_sale.shorter_cart_summary">
         <div
-            t-if="website_sale_order and website_sale_order.website_order_line"
-            class="o_total_card card o_wsale_sticky_object sticky-lg-top"
+            t-attf-class="o_wsale_shorter_cart_summary #{
+                'offset-xxl-1 col-lg-5 col-xxl-4'
+                if website_sale_order and website_sale_order.website_order_line
+                else ''
+            }"
         >
-            <div class="card-body p-0 p-lg-4" name="o_cart_total_card_body">
-                <t t-call="website_sale.total">
-                    <t
-                        t-set="_cart_total_classes"
-                        t-valuef="o_checkout_cart_total pt-2 pt-lg-0"
-                    />
-                </t>
-                <t t-call="website_sale.navigation_buttons"/>
+            <div
+                t-if="website_sale_order and website_sale_order.website_order_line"
+                class="o_total_card card o_wsale_sticky_object sticky-lg-top"
+            >
+                <div class="card-body p-0 p-lg-4" name="o_cart_total_card_body">
+                    <t t-call="website_sale.total" _cart_total_classes.f="o_checkout_cart_total pt-2 pt-lg-0"/>
+                    <t t-call="website_sale.navigation_buttons"/>
+                </div>
             </div>
         </div>
     </template>
@@ -402,12 +388,7 @@
                             </td>
                             <td class="td-price pe-0 pt-3 text-end"
                                 name="website_sale_cart_summary_line_price">
-                                <t t-call="website_sale.cart_product_price">
-                                    <t
-                                        t-set="product_price"
-                                        t-value="line._get_cart_display_price()"
-                                    />
-                                </t>
+                                <t t-call="website_sale.cart_product_price" product_price="line._get_cart_display_price()"/>
                             </td>
                         </tr>
                     </tbody>
@@ -469,15 +450,7 @@
                               t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
                     </td>
                 </tr>
-                <tr name="o_order_total_taxes">
-                    <td colspan="2" class="text-muted border-0 p-0 pe-3 pb-2">Taxes</td>
-                    <td class="text-end border-0 p-0 ps-3 pb-2">
-                        <span t-field="website_sale_order.amount_tax"
-                              class="monetary_field"
-                              style="white-space: nowrap;"
-                              t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
-                    </td>
-                </tr>
+                <t t-call="website_sale.order_tax_lines"/>
                 <tr name="o_order_total" class="border-top">
                     <td colspan="2" class="border-0 ps-0 pt-2"><strong>Total</strong></td>
                     <td class="text-end border-0 px-0 pt-2">
@@ -509,6 +482,29 @@
                 </td>
             </tr>
         </xpath>
+    </template>
+
+    <template id="order_tax_lines">
+        <tbody id="order_tax_lines_container">
+            <t t-if="website_sale_order.tax_totals and website_sale_order.tax_totals['subtotals']">
+                <t t-foreach="website_sale_order.tax_totals['subtotals']" t-as="line">
+                    <t t-foreach="line['tax_groups']" t-as="tax_line">
+                        <tr name="o_order_total_taxes">
+                            <td colspan="2" class="text-muted border-0 p-0 pe-3 pb-2">
+                                <t t-out="tax_line['group_name']"/>
+                            </td>
+                            <td class="text-end border-0 p-0 ps-3 pb-2">
+                                <span t-out="tax_line['tax_amount_currency']"
+                                        class="monetary_field"
+                                        style="white-space: nowrap;"
+                                        t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"
+                                />
+                            </td>
+                        </tr>
+                    </t>
+                </t>
+            </t>
+        </tbody>
     </template>
 
 </odoo>

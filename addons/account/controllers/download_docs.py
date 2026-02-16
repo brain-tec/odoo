@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import io
 import zipfile
-
 from itertools import chain
 
-from odoo import http, _
+from odoo import _, http
 from odoo.exceptions import UserError
-from odoo.http import request, content_disposition
+from odoo.http import request
+from odoo.http.stream import content_disposition
+from odoo.tools import OrderedSet
 
 
 def _get_headers(filename, filetype, content):
@@ -37,9 +37,9 @@ class AccountDocumentDownloadController(http.Controller):
             headers = _get_headers(attachments.name, attachments.mimetype, attachments.raw)
             return request.make_response(attachments.raw, headers)
         else:
-            inv_ids = attachments.mapped('res_id')
-            if len(set(inv_ids)) == 1:
-                invoice = request.env['account.move'].browse(inv_ids[0])
+            inv_ids = OrderedSet(a.res_id for a in attachments if a.res_id)
+            if len(inv_ids) == 1:
+                invoice = request.env['account.move'].browse(inv_ids)
                 filename = invoice._get_invoice_report_filename(extension='zip')
             else:
                 filename = _('invoices') + '.zip'
@@ -67,6 +67,7 @@ class AccountDocumentDownloadController(http.Controller):
             zip_content = _build_zip_from_data(docs_data)
             headers = _get_headers(_('invoices') + '.zip', 'zip', zip_content)
             return request.make_response(zip_content, headers)
+        return None
 
     @http.route('/account/download_move_attachments/<models("account.move"):moves>', type='http', auth='user')
     def download_move_attachments(self, moves):
@@ -90,3 +91,4 @@ class AccountDocumentDownloadController(http.Controller):
             zip_content = _build_zip_from_data(docs_data)
             headers = _get_headers(request.env._("Invoices") + '.zip', 'zip', zip_content)
             return request.make_response(zip_content, headers)
+        return None

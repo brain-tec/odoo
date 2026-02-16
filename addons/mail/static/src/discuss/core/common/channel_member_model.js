@@ -5,17 +5,16 @@ import { browser } from "@web/core/browser/browser";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { user } from "@web/core/user";
 import { rpc } from "@web/core/network/rpc";
+import { _t } from "@web/core/l10n/translation";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
 const { DateTime } = luxon;
 
 export class ChannelMember extends Record {
     static _name = "discuss.channel.member";
-    static id = "id";
 
     /** @type {string} */
     create_date;
-    /** @type {string} */
-    custom_channel_name;
     /**
      * false means using the custom_notifications from user settings.
      *
@@ -60,7 +59,6 @@ export class ChannelMember extends Record {
             }
         },
     });
-    fetched_message_id = fields.One("mail.message");
     seen_message_id = fields.One("mail.message");
     hideUnreadBanner = false;
     message_unread_counter = fields.Attr(0, {
@@ -100,13 +98,17 @@ export class ChannelMember extends Record {
                 this.isTyping = false;
             }
             if (this.isTyping) {
-                this.typingTimeoutId = browser.setTimeout(
-                    () => (this.isTyping = false),
-                    Store.OTHER_LONG_TYPING
-                );
+                this.registerTypingTimeout();
             }
         },
     });
+    /** To be patched in test, to detect when this timeout is registered. */
+    registerTypingTimeout() {
+        this.typingTimeoutId = browser.setTimeout(
+            () => (this.isTyping = false),
+            Store.OTHER_LONG_TYPING
+        );
+    }
     channelAsTyping = fields.One("discuss.channel", {
         compute() {
             return this.isTyping ? this.channel_id : undefined;
@@ -119,6 +121,44 @@ export class ChannelMember extends Record {
     /** @type {number} */
     typingTimeoutId;
     unpin_dt = fields.Datetime();
+
+    get canRemoveAdmin() {
+        return (
+            this.channel_role === "admin" &&
+            (this.store.self_user?.is_admin || this.selfChannelRole === "owner")
+        );
+    }
+
+    get canRemoveMember() {
+        return (
+            this.store.self_user?.is_admin ||
+            (this.selfChannelRole && this.channel_role !== "owner")
+        );
+    }
+
+    get canRemoveOwner() {
+        return (
+            this.channel_role === "owner" && (this.store.self_user?.is_admin || this.channelAsSelf)
+        );
+    }
+
+    get canSetAdmin() {
+        return (
+            this.partner_id &&
+            this.channel_role !== "admin" &&
+            (this.store.self_user?.is_admin ||
+                (this.channel_role === "owner" && this.channel_role !== "owner") ||
+                (this.channel_role === "owner" && this.channelAsSelf))
+        );
+    }
+
+    get canSetOwner() {
+        return (
+            this.partner_id &&
+            this.channel_role !== "owner" &&
+            (this.store.self_user?.is_admin || this.selfChannelRole === "owner")
+        );
+    }
 
     get name() {
         if (this.guest_id) {
@@ -164,7 +204,32 @@ export class ChannelMember extends Record {
             : undefined;
     }
 
-    async setChannelRole(channel_role) {
+    get selfChannelRole() {
+        return this.channel_id?.self_member_id?.channel_role;
+    }
+
+    /** @param {string} role */
+    setChannelRole(role) {
+        if (!this.store.self_user?.is_admin && (this.channelAsSelf || role === "owner")) {
+            this.store.env.services.dialog.add(ConfirmationDialog, {
+                body: this.channelAsSelf
+                    ? _t(
+                          "Do you want to remove owner from yourself? You will no longer have full control over the channel and its settings."
+                      )
+                    : _t(
+                          'Do you want to set "%(member_name)s" as the owner? This means that the member will have full control over the channel and its settings.\n\nThis action cannot be reverted.',
+                          { member_name: this.name }
+                      ),
+                cancel: () => {},
+                confirm: () => this.setChannelRoleRpc(role),
+            });
+        } else {
+            this.setChannelRoleRpc(role);
+        }
+    }
+
+    /** @param {string} role */
+    async setChannelRoleRpc(channel_role) {
         await rpc("/discuss/channel/member/set_role", {
             member_id: this.id,
             channel_role,

@@ -22,7 +22,7 @@ class TestUserLivechatUsername(TestGetOperatorCommon):
         channel._add_members(users=john)
         self.assertEqual(
             channel.message_ids[-1].body,
-            f'<div class="o_mail_notification" data-oe-type="channel-joined">invited <a href="#" data-oe-model="res.partner" data-oe-id="{john.partner_id.id}">@ELOPERADOR</a> to the channel</div>',
+            f'<div class="o_mail_notification" data-oe-type="channel-joined">invited <a href="#" data-oe-model="res.partner" data-oe-id="{john.partner_id.id}">@ELOPERADOR</a> to the conversation</div>',
         )
 
     def test_user_livechat_username_reactions(self):
@@ -69,7 +69,6 @@ class TestUserLivechatUsername(TestGetOperatorCommon):
             {
                 "name": "Livechat session",
                 "channel_type": "livechat",
-                "livechat_operator_id": operator.partner_id.id,
                 "livechat_channel_id": livechat_channel.id,
             }
         )

@@ -9,15 +9,12 @@
     <t t-set="img_class" t-valuef="col-md-4"/>
     <t t-set="content_class" t-valuef="col-md-8"/>
 
-    <t t-call="website.layout">
-        <t t-set="pageName" t-value="'website_forum'"/>
+    <t t-call="website.layout" pageName.f="website_forum">
         <div id="wrap">
             <div class="oe_structure oe_empty" id="oe_structure_forum_all_top"/>
             <div id="o_wforum_forums_index_list" class="container pt-lg-4 pb-5">
                 <div class="row justify-content-center">
-                    <t t-if="forums" t-call="website_forum.forum_all_all_entries">
-                        <t t-set="_forums" t-value="forums"/>
-                    </t>
+                    <t t-if="forums" t-call="website_forum.forum_all_all_entries" _forums="forums"/>
                     <div t-else="" class="alert alert-info">No forum is available yet.</div>
                 </div>
             </div>
@@ -42,7 +39,7 @@
                 <div class="o_we_bg_filter o_wforum_background_gradient"/>
                 <div t-if="forum_badge" class="badge position-absolute top-0 end-0 m-3 text-bg-secondary" t-out="forum_badge"></div>
                 <div class="mt-5 pt-5">
-                    <h3 class="mb-0 fw-bold" t-field="forum.name"/>
+                    <h2 class="mb-0 fw-bold h3" t-field="forum.name"/>
                     <t t-if="is_view_active('website_forum.opt_post_count')">
                         <span t-if="forum.total_posts > 0" class="badge text-bg-info">
                             <span t-out="forum.total_posts" class="me-1"/>

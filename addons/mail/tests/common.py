@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import base64
 import contextlib
 import email
 import email.policy
@@ -811,13 +809,6 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
                         sorted(tools.mail.email_split_and_format_normalize(fvalue)),
                         f'Message: expected {fvalue} for {fname}, got {message[fname]}',
                     )
-                # not really a field but hey, have to find shortcuts
-                elif fname == 'tracking_field_names':
-                    found = message.sudo().mapped('tracking_value_ids.field_id.name')
-                    self.assertEqual(
-                        sorted(found), sorted(fvalue),
-                        f'Message: expected {fvalue} for {fname}, got {found}',
-                    )
                 # tracking values themselves, a shortcut
                 elif fname == 'tracking_values':
                     self.assertTracking(message, fvalue, strict=True)
@@ -1034,11 +1025,67 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
     # ------------------------------------------------------------
 
     def assertTracking(self, message, data, strict=False):
-        tracking_values = message.sudo().tracking_value_ids
-        if strict:
-            self.assertEqual(len(tracking_values), len(data),
-                             'Tracking: tracking does not match')
+        """ Check generated tracking linked to a given message.
 
+        :param data: list of tracking values, a tuple containing
+            field_name: technical name of field (str). If properties: tuple().
+            field_type: type of field (boolean, many2one, ...)
+            old_value: value before change
+            new_value: value after change. If monetary: tuple (new_value, currency);
+        """
+        tracking_values = message.sudo().tracking_value_ids
+        tracking_info = '\n'.join(
+            f'{t.field_id.name} ({t.field_id.ttype}: char: {t.old_value_char} -> {t.new_value_char} / '
+            f'int: {t.old_value_integer}->{t.new_value_integer} '
+            f'dt: {t.old_value_datetime}->{t.new_value_datetime} '
+            f'fl: {t.old_value_float}->{t.new_value_float} '
+            f'({t.field_info})'
+            for t in tracking_values
+        )
+        if strict:
+            exp_fnames = sorted([i[0][0] if isinstance(i[0], tuple) else i[0] for i in data])
+            fnames = sorted([t.field_id.name or '' for t in tracking_values])
+            info = f'Field names: expected {exp_fnames}, received {fnames}'
+            self.assertEqual(len(tracking_values), len(data),
+                             f'Tracking: invalid number of tracking: {info}\n{tracking_info}')
+
+        for field_name, value_type, old_value, new_value in data:
+            # allow giving field_info in addition to field_name (a bit hackish but easier
+            # than updating all calls)
+            if isinstance(field_name, tuple):
+                field_name, field_info = field_name
+            else:
+                field_info = {}
+
+            # for property fields, value_type is a tuple for the embed property value
+            if isinstance(value_type, tuple):
+                value_type, prop_field_string, prop_type = value_type
+                tracking = tracking_values.filtered(lambda track: track.field_id.name == field_name and prop_field_string == (track.field_info or {}).get('desc'))
+                self.assertEqual(
+                    len(tracking), 1,
+                    f'Tracking: not found for {field_name}: sub-field {prop_field_string}\n{tracking_info}')
+            else:
+                prop_field_string, prop_type = False, False
+                if field_name:
+                    tracking = tracking_values.filtered(lambda track: track.field_id.name == field_name)
+                else:
+                    if field_info:
+                        tracking = tracking_values.filtered(lambda track: not track.field_id and track.field_info and track.field_info['name'] == field_info['name'])
+                    else:
+                        tracking = tracking_values.filtered(lambda track: not track.field_id and not track.field_info)
+                self.assertEqual(len(tracking), 1, f'Tracking: not found for {field_name}\n{tracking_info}')
+                if tracking.field_id and value_type != tracking.field_id.ttype:
+                    _logger.warning(
+                        'Invalid type given to tracking check for %s, received %s, expected %s',
+                        tracking.field_id.name, value_type, tracking.field_id.ttype
+                    )
+
+            self.assertTrackingValue(
+                tracking, prop_field_string or field_name, prop_type or value_type,
+                old_value, new_value,
+            )
+
+    def assertTrackingValue(self, tracking, field_name, value_type, old_value, new_value):
         suffix_mapping = {
             'boolean': 'integer',
             'char': 'char',
@@ -1049,31 +1096,29 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
             'many2many': 'char',
             'one2many': 'char',
             'selection': 'char',
+            'tags': 'char',
             'text': 'text',
         }
-        for field_name, value_type, old_value, new_value in data:
-            tracking = tracking_values.filtered(lambda track: track.field_id.name == field_name)
-            self.assertEqual(len(tracking), 1, f'Tracking: not found for {field_name}')
-            msg_base = f'Tracking: {field_name} ({value_type}: '
-            if value_type in suffix_mapping:
-                old_value_fname = f'old_value_{suffix_mapping[value_type]}'
-                new_value_fname = f'new_value_{suffix_mapping[value_type]}'
-                self.assertEqual(tracking[old_value_fname], old_value,
-                                 msg_base + f'expected {old_value}, received {tracking[old_value_fname]})')
-                self.assertEqual(tracking[new_value_fname], new_value,
-                                 msg_base + f'expected {new_value}, received {tracking[new_value_fname]})')
-            if value_type == 'many2one':
-                self.assertEqual(tracking.old_value_integer, old_value and old_value.id or False)
-                self.assertEqual(tracking.new_value_integer, new_value and new_value.id or False)
-                self.assertEqual(tracking.old_value_char, old_value and old_value.display_name or '')
-                self.assertEqual(tracking.new_value_char, new_value and new_value.display_name or '')
-            elif value_type == 'monetary':
-                new_value, currency = new_value
-                self.assertEqual(tracking.currency_id, currency)
-                self.assertEqual(tracking.old_value_float, old_value)
-                self.assertEqual(tracking.new_value_float, new_value)
-            if value_type not in suffix_mapping and value_type not in {'many2one', 'monetary'}:
-                self.assertEqual(1, 0, f'Tracking: unsupported tracking test on {value_type}')
+        msg_base = f'Tracking: {field_name} ({value_type}): '
+        if value_type in suffix_mapping:
+            old_value_fname = f'old_value_{suffix_mapping[value_type]}'
+            new_value_fname = f'new_value_{suffix_mapping[value_type]}'
+            self.assertEqual(tracking[old_value_fname], old_value,
+                             msg_base + f'expected `{old_value}`, received `{tracking[old_value_fname]}`)')
+            self.assertEqual(tracking[new_value_fname], new_value,
+                             msg_base + f'expected `{new_value}`, received `{tracking[new_value_fname]}`)')
+        elif value_type == 'many2one':
+            self.assertEqual(tracking.old_value_integer, (old_value and old_value.id) or False)
+            self.assertEqual(tracking.new_value_integer, (new_value and new_value.id) or False)
+            self.assertEqual(tracking.old_value_char, (old_value and old_value.display_name) or '')
+            self.assertEqual(tracking.new_value_char, (new_value and new_value.display_name) or '')
+        elif value_type == 'monetary':
+            new_value, currency = new_value
+            self.assertEqual(tracking.currency_id, currency)
+            self.assertEqual(tracking.old_value_float, old_value)
+            self.assertEqual(tracking.new_value_float, new_value)
+        else:
+            self.assertEqual(1, 0, f'Tracking: unsupported tracking test on {value_type}')
 
 
 class MailCase(common.TransactionCase, MockEmail, BusCase):
@@ -1251,7 +1296,7 @@ class MailCase(common.TransactionCase, MockEmail, BusCase):
         attach_values = attach_values or {}
         prefix = prefix or ''
         return [{
-            'datas': base64.b64encode(b'AttContent_%02d' % x),
+            'raw': b'AttContent_%02d' % x,
             'name': f'{prefix}AttFileName_{x:02d}.txt',
             'mimetype': 'text/plain',
             'res_model': res_model,
@@ -1512,13 +1557,18 @@ class MailCase(common.TransactionCase, MockEmail, BusCase):
                     mbody in message.body and message.message_type == mtype and
                     msubtype == message.subtype_id
                 ))
+                debug_info = '\n'.join(
+                    f'Msg: message_type {message.message_type}, subtype {message.subtype_id.name}, content {message.body}'
+                    for message in messages
+                )
             else:
                 message = self.env['mail.message'].sudo().search([
                     ('body', 'ilike', mbody),
                     ('message_type', '=', mtype),
                     ('subtype_id', '=', msubtype.id)
                 ], limit=1, order='id DESC')
-            self.assertTrue(message, 'Mail: not found message (content: %s, message_type: %s, subtype: %s)' % (mbody, mtype, msubtype and msubtype.name))
+                debug_info = ''
+            self.assertTrue(message, 'Mail: not found message (content: %s, message_type: %s, subtype: %s\n%s)' % (mbody, mtype, msubtype and msubtype.name, debug_info))
 
             # check message values
             if message_values:
@@ -1755,8 +1805,10 @@ class MailCase(common.TransactionCase, MockEmail, BusCase):
     def assertNotified(self, message, recipients_info, is_complete=False):
         """ Lightweight check for notifications (mail.notification).
 
+        All recipient info should define either a partner or an email.
         :param recipients_info: list notified recipients: [
-          {'partner': res.partner record (may be empty),
+          {'partner': res.partner record (may be empty or unset),
+           'email': single normalized email address as string (may be empty or unset),
            'type': notification_type to check,
            'is_read': is_read to check,
           }, {...}]
@@ -1768,9 +1820,15 @@ class MailCase(common.TransactionCase, MockEmail, BusCase):
             recipient_notif = next(
                 (notif
                  for notif in notifications
-                 if notif.res_partner_id == rinfo['partner']
-                ), False
+                 if (
+                     ('partner' not in rinfo or notif.res_partner_id == rinfo['partner'])
+                     and ('email' not in rinfo or notif.mail_email_address == rinfo['email'])
+                 )
+                ), self.env['mail.notification']
             )
+            # ensure we can only ever match a notification once
+            # in case multiple would match the same recipient
+            notifications -= recipient_notif
             self.assertTrue(recipient_notif)
             self.assertEqual(recipient_notif.is_read, rinfo['is_read'])
             self.assertEqual(recipient_notif.notification_type, rinfo['type'])
@@ -1830,6 +1888,44 @@ class MailCommon(MailCase):
         cls.partner_employee = cls.user_employee.partner_id
         cls.guest = cls.env['mail.guest'].create({'name': 'Guest Mario'})
         cls.subtitles = []
+        cls.default_arch_db_layout = """
+<body>
+    <t t-set="show_header" t-value="email_notification_force_header or (
+        email_notification_allow_header and has_button_access)"/>
+    <t t-set="show_footer" t-value="email_notification_force_footer or (
+        email_notification_allow_footer and show_header and author_user and author_user._is_internal())"/>
+    <p>English Layout for <t t-out="model_description"/></p>
+    <img t-att-src="'/logo.png?company=%s' % (company.id or 0)" t-att-alt="'%s' % company.name"/>
+    <div t-if="show_header">HEADER
+        <a t-if="has_button_access" t-att-href="button_access['url']">
+            <t t-out="button_access['title']"/>
+        </a>
+        <t t-if="actions" t-foreach="actions" t-as="action">
+            <a t-att-href="action['url']">
+                <t t-out="action['title']"/>
+            </a>
+        </t>
+        <t t-if="subtitles">
+            <t t-foreach="subtitles" t-as="subtitle">
+                <b t-if="subtitles_highlight_index == subtitle_index" t-out="subtitle"/>
+                <span t-else="" t-out="subtitle"/>
+            </t>
+        </t>
+    </div>
+    <t t-out="message.body"/>
+    <ul t-if="tracking_values">
+        <li t-foreach="tracking_values" t-as="tracking">
+            <t t-out="tracking[0]"/>: <t t-out="tracking[1]"/> -&gt; <t t-out="tracking[2]"/>
+        </li>
+    </ul>
+    <div t-if="signature" t-out="signature"/>
+    <div t-if="show_footer">
+        <p>Sent by <t t-out="company.name"/></p>
+        <span t-if="show_unfollow" id="mail_unfollow">
+            | <a href="/mail/unfollow" style="text-decoration:none; color:#555555;">Unfollow</a>
+        </span>
+    </div>
+</body>"""
 
     @classmethod
     def _activate_multi_company(cls):
@@ -1943,44 +2039,7 @@ class MailCommon(MailCase):
 
         # create a custom layout for email notification
         if not layout_arch_db:
-            layout_arch_db = """
-<body>
-    <t t-set="show_header" t-value="email_notification_force_header or (
-        email_notification_allow_header and has_button_access)"/>
-    <t t-set="show_footer" t-value="email_notification_force_footer or (
-        email_notification_allow_footer and show_header and author_user and author_user._is_internal())"/>
-    <p>English Layout for <t t-out="model_description"/></p>
-    <img t-att-src="'/logo.png?company=%s' % (company.id or 0)" t-att-alt="'%s' % company.name"/>
-    <div t-if="show_header">HEADER
-        <a t-if="has_button_access" t-att-href="button_access['url']">
-            <t t-out="button_access['title']"/>
-        </a>
-        <t t-if="actions" t-foreach="actions" t-as="action">
-            <a t-att-href="action['url']">
-                <t t-out="action['title']"/>
-            </a>
-        </t>
-        <t t-if="subtitles">
-            <t t-foreach="subtitles" t-as="subtitle">
-                <b t-if="subtitles_highlight_index == subtitle_index" t-out="subtitle"/>
-                <span t-else="" t-out="subtitle"/>
-            </t>
-        </t>
-    </div>
-    <t t-out="message.body"/>
-    <ul t-if="tracking_values">
-        <li t-foreach="tracking_values" t-as="tracking">
-            <t t-out="tracking[0]"/>: <t t-out="tracking[1]"/> -&gt; <t t-out="tracking[2]"/>
-        </li>
-    </ul>
-    <div t-if="signature" t-out="signature"/>
-    <div t-if="show_footer">
-        <p>Sent by <t t-out="company.name"/></p>
-        <span t-if="show_unfollow" id="mail_unfollow">
-            | <a href="/mail/unfollow" style="text-decoration:none; color:#555555;">Unfollow</a>
-        </span>
-    </div>
-</body>"""
+            layout_arch_db = cls.default_arch_db_layout
         view = cls.env['ir.ui.view'].create({
             'arch_db': layout_arch_db,
             'key': 'test_layout',
@@ -2028,9 +2087,8 @@ class MailCommon(MailCase):
         """ Remove store user data dependant on other modules if they are not not installed.
         Not written in a modular way to avoid complex override for a simple test tool.
         """
-        for data in users_data:
-            if "hr.leave" not in self.env:
-                data.pop("leave_date_to", None)
+        if "hr.employee" not in self.env:
+            for data in users_data:
                 data.pop("employee_ids", None)
         return list(users_data)
 

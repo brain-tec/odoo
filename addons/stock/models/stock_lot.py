@@ -46,7 +46,7 @@ class StockLot(models.Model):
         domain=("[('tracking', '!=', 'none'), ('is_storable', '=', True)] +"
             " ([('product_tmpl_id', '=', context['default_product_tmpl_id'])] if context.get('default_product_tmpl_id') else [])"),
         required=True, check_company=True, tracking=True)
-    product_uom_id = fields.Many2one(
+    uom_id = fields.Many2one(
         'uom.uom', 'Unit',
         related='product_id.uom_id')
     quant_ids = fields.One2many('stock.quant', 'lot_id', 'Quants', readonly=True)
@@ -61,6 +61,7 @@ class StockLot(models.Model):
     location_id = fields.Many2one(
         'stock.location', 'Location', compute='_compute_single_location', store=True, readonly=False,
         inverse='_set_single_location', domain="[('usage', '!=', 'view')]", group_expand='_read_group_location_id')
+    is_scrap = fields.Boolean('Is Scrapped', compute='_compute_is_scrap')
 
     @api.depends('product_id')
     def _compute_name(self):
@@ -108,7 +109,7 @@ class StockLot(models.Model):
         if any(not lot.company_id for lot in self):
             # We need to check across other companies to not have duplicates between 'no-company' and a company.
             self = self.sudo()
-        records = self._read_group(domain, groupby, ['__count'], order='company_id DESC')
+        records = self.with_context(skip_preprocess_gs1=True)._read_group(domain, groupby, ['__count'], order='company_id DESC')
         error_message_lines = set()
         cross_lots = {}
         for company, product, name, count in records:
@@ -177,6 +178,12 @@ class StockLot(models.Model):
             quants.move_quants(location_dest_id=self.location_id, message=_("Lot/Serial Number Relocated"), unpack=unpack)
         elif len(quants.location_id) > 1:
             raise UserError(_('You can only move a lot/serial to a new location if it exists in a single location.'))
+
+    def _compute_is_scrap(self):
+        grouped_move_lines = self.env['stock.move.line']._read_group([('lot_id', 'in', self.ids), ('is_scrap', '=', True)], ['lot_id'], ['id:recordset'])
+        move_lines_by_lot = dict(grouped_move_lines)
+        for lot in self:
+            lot.is_scrap = bool(move_lines_by_lot.get(lot))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -367,3 +374,34 @@ class StockLot(models.Model):
                     lots_to_propagate.add(parent_id)
 
         return {lot_id: list(delivery_by_lot[lot_id]) for lot_id in delivery_by_lot}
+
+    def action_open_scrap_moves(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Scraps of %s', self.name),
+            'res_model': 'stock.move',
+            'views': [(self.env.ref('stock.view_scrap_move_list').id, 'list'), (self.env.ref('stock.view_scrap_move_form').id, 'form')],
+            'domain': [('move_line_ids.lot_id', '=', self.id), ('is_scrap', '=', True)],
+        }
+
+    def action_scrap(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Scrap %(lot_name)s', lot_name=self.name),
+            'res_model': 'stock.move',
+            'views': [(self.env.ref('stock.view_scrap_move_form').id, 'form')],
+            'context': {
+                'default_is_scrap': True,
+                'default_product_id': self.product_id.id,
+                'default_quantity': self.product_qty,
+                'default_lot_ids': self.ids,
+                'default_location_id': self.location_id.id,
+                'default_location_dest_id': self.env.company.scrap_location_id.id,
+                'default_state': 'draft',
+                'default_company_id': self.company_id.id or self.env.company.id,
+                'product_ids': self.product_id.ids,
+                'lot_ids': self.ids,
+            }
+        }

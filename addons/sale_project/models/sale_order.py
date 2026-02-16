@@ -120,7 +120,11 @@ class SaleOrder(models.Model):
         for project in projects:
             projects_per_so[project.sale_order_id.id or project.reinvoiced_sale_order_id.id] |= project
         for order in self:
-            projects = order.order_line.mapped('product_id.project_id')
+            projects = order.order_line.filtered(
+                lambda sol:
+                    sol.is_service
+                    and not (sol._is_line_optional() and sol.product_uom_qty == 0)
+                ).mapped('product_id.project_id')
             projects |= order.project_id
             projects |= order.order_line.mapped('project_id')
             projects |= projects_per_so[order.id or order._origin.id]
@@ -300,3 +304,11 @@ class SaleOrder(models.Model):
         if not line:
             raise UserError(self.env._('The Sales Order must contain at least one service product.'))
         return line
+
+    def _get_or_create_analytic_account(self, plan_id):
+        self.ensure_one()
+
+        if self.project_id.account_id:
+            return self.project_id.account_id
+
+        return super()._get_or_create_analytic_account(plan_id)

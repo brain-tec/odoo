@@ -116,7 +116,7 @@ onRpc("get_state_selections", () => [
     ["tentative", "Maybe"],
     ["needsAction", "Needs Action"],
 ]);
-onRpc("res.users", "read", () => [{ user: serverState.userId }]);
+onRpc("res.users", "read", () => [{ user: serverState.userId, employee_id: [{ employee_id: 1 }] }]);
 
 beforeEach(() => {
     mockDate("2020-12-10 15:00:00");
@@ -206,11 +206,7 @@ test(`basic rendering`, async () => {
     expect(queryAllTexts(workLocations)).toEqual(["Office", "", "", "Home", "Set Location", "Set Location", "Office"]);
 
     await contains(`.o_worklocation_text`, { root: workLocations[0] }).click();
-    expect(`.o_cw_popover div[name="employee_name"]`).toHaveText("Aaron");
-    expect(`.o_cw_popover .o_cw_popover_edit`).toHaveCount(1);
-    expect(`.o_cw_popover .o_cw_popover_delete`).toHaveCount(1);
-
-    await contains(`.o_cw_popover_close`).click();
+    expect.verifySteps([["hr_homeworking_calendar.set_location_wizard_action", "2020-12-06"]]);
     await contains(`.o_worklocation_line`, { root: workLocations.at(-2), visible: false }).click();
     expect.verifySteps([["hr_homeworking_calendar.set_location_wizard_action", "2020-12-11"]]);
 });
@@ -226,18 +222,18 @@ test(`multicalendar`, async () => {
     const dataSetsByDates = intervals.map(({ start }) => queryAllProperties(`.fc-col-header-cell[data-date="${start.toISODate()}"] .o_worklocation_btn .o_homeworking_content`, "dataset"));
     const locations = dataSetsByDates.flatMap((dataSets) => dataSets.length ? dataSets.map((ds) => ds.location) : [false]);
     expect(locations).toEqual([
-        "office", // sunday
-        "home",   // sunday
-        "office", // monday
-        "home",   // monday
-        "office", // tuesday
-        "office", // tuesday
-        "home",   // wednesday
-        "home",   // wednesday
-        "home",   // thursday
+        "Office", // sunday
+        "Home",   // sunday
+        "Office", // monday
+        "Home",   // monday
+        "Office", // tuesday
+        "Office", // tuesday
+        "Home",   // wednesday
+        "Home",   // wednesday
+        "Home",   // thursday
         false,    // friday
-        "office", // saturday
-        "office", // saturday
+        "Office", // saturday
+        "Office", // saturday
     ]);
     expect(queryAll(`.fc-col-header-cell[data-date="2020-12-10"] .o_worklocation_text i.add_wl`, { visible: false })).toHaveCount(1);
     expect(queryAll(`.fc-col-header-cell[data-date="2020-12-12"] .o_worklocation_text i.add_wl`, { visible: false })).toHaveCount(0);

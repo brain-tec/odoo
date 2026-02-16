@@ -55,6 +55,7 @@
         'views/pos_session_sales_details.xml',
         'views/product_tag_views.xml',
         'views/stock_reference_views.xml',
+        'receipt/pos_order_receipt.xml',  # needed in the backend and frontend
     ],
     'demo': [
         'data/demo_data.xml',
@@ -81,10 +82,19 @@
             'point_of_sale/static/src/backend/pos_payment_provider_cards/*',
             'point_of_sale/static/src/app/hooks/hooks.js',
             'point_of_sale/static/src/backend/many2many_placeholder_list_view/*',
+            'point_of_sale/static/src/backend/views/**/*',
+            ('remove', 'point_of_sale/static/src/backend/views/pivot/*'),
+            ('remove', 'point_of_sale/static/src/backend/views/graph/*'),
             'point_of_sale/static/src/backend/test_epos/*',
+            'point_of_sale/static/src/app/utils/init_lna.js',
+        ],
+        'web.assets_backend_lazy': [
+            'point_of_sale/static/src/backend/views/pivot/*',
+            'point_of_sale/static/src/backend/views/graph/*',
         ],
         "web.assets_web_dark": [
             'point_of_sale/static/src/scss/pos_dashboard.dark.scss',
+            'point_of_sale/static/src/backend/pos_kanban_view/pos_kanban_view.dark.scss',
         ],
         'web.assets_tests': [
             'barcodes/static/tests/legacy/helpers.js',
@@ -104,6 +114,7 @@
             # Adding error handler back since they are removed in the prod bundle
             'web/static/src/core/errors/error_handlers.js',
             'web/static/src/core/dialog/dialog.scss',
+            'point_of_sale/static/src/backend/views/**/*',
         ],
         'web.assets_unit_tests': [
             'point_of_sale/static/tests/unit/**/*',
@@ -120,7 +131,6 @@
             ("include", "web._assets_bootstrap_backend"),
             ('include', 'web._assets_core'),
             "point_of_sale/static/src/app/services/offline_service.js",
-            ("remove", "web/static/src/core/browser/router.js"),
             ("remove", "web/static/src/core/debug/**/*"),
             ('include', 'web.icons_fonts'),
             "web/static/src/views/fields/formatters.js",
@@ -227,7 +237,11 @@
             "point_of_sale/static/src/app/utils/use_timed_press.js",
             "point_of_sale/static/src/app/components/popups/qr_code_popup/*",
             "point_of_sale/static/src/utils.js",
+            "point_of_sale/static/src/scss/pos_variables_extra.scss",
             "point_of_sale/static/src/customer_display/**/*",
+            "point_of_sale/static/src/app/hooks/time_hook.js",
+            "point_of_sale/static/src/app/pos_app.scss",
+            "point_of_sale/static/src/app/screens/login_screen/login_screen.scss",
         ],
         'point_of_sale.customer_display_assets_test': [
             ('include', 'point_of_sale.base_tests'),
