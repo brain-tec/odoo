@@ -125,11 +125,16 @@ export class KanbanMany2ManyTagsAvatarField extends Many2ManyTagsAvatarField {
     get popoverProps() {
         const props = { ...this.props };
         delete props.isEditable;
+        delete props.relation;
         return props;
     }
 
     get tags() {
         return super.tags.reverse();
+    }
+
+    get placeholder() {
+        return _t("Search users...");
     }
 
     openPopover(ev) {
@@ -139,7 +144,7 @@ export class KanbanMany2ManyTagsAvatarField extends Many2ManyTagsAvatarField {
             canCreate: false,
             canCreateEdit: false,
             canQuickCreate: false,
-            placeholder: _t("Search users..."),
+            placeholder: this.placeholder,
         });
     }
 }

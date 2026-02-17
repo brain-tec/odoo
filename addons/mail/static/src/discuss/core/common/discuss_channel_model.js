@@ -13,6 +13,8 @@ import {
 import { formatList } from "@web/core/l10n/utils";
 import { imageUrl } from "@web/core/utils/urls";
 
+const { DateTime } = luxon;
+
 /** @import { AwaitChatHubInit } from "@mail/core/common/chat_hub_model" */
 
 export class DiscussChannel extends Record {
@@ -132,7 +134,8 @@ export class DiscussChannel extends Record {
         return (
             !this.isTransient &&
             this.typesAllowingCalls.includes(this.channel_type) &&
-            !this.correspondent?.persona.eq(this.store.odoobot)
+            !this.correspondent?.persona.eq(this.store.odoobot) &&
+            !this.is_readonly
         );
     }
     canHide = fields.Attr(false, {
@@ -202,6 +205,11 @@ export class DiscussChannel extends Record {
         }
         return this.channel_member_ids.filter(({ persona }) => persona?.notEq(this.store.self));
     }
+    get createDateSimple() {
+        return this.create_date
+            ?.toLocaleString(DateTime.TIME_SIMPLE, { locale: user.lang })
+            .replace(" ", " "); // so that AM/PM are properly wrapped
+    }
     discuss_category_id = fields.One("discuss.category", {
         inverse: "channel_ids",
     });
@@ -232,6 +240,7 @@ export class DiscussChannel extends Record {
         return this.name;
     }
     create_date = fields.Datetime();
+    create_uid = fields.One("res.users");
     /** @type {"not_fetched"|"pending"|"fetched"} */
     fetchMembersState = "not_fetched";
     /** @type {"not_fetched"|"fetching"|"fetched"} */
@@ -250,6 +259,8 @@ export class DiscussChannel extends Record {
     get hasMemberList() {
         return this.memberListTypes.includes(this.channel_type);
     }
+    /** @type boolean */
+    is_readonly;
     get isHideUntilNewMessageSupported() {
         return Boolean(this.self_member_id);
     }
@@ -513,6 +524,18 @@ export class DiscussChannel extends Record {
     delete() {
         this.chatWindow?.close();
         super.delete(...arguments);
+    }
+
+    async copyInvitationLink({ clipboard = navigator.clipboard } = {}) {
+        const notification = this.store.env.services.notification;
+        try {
+            await clipboard.writeText(this.invitationLink);
+            notification.add(_t("Invitation link copied!"), { type: "success" });
+        } catch {
+            notification.add(_t("Permission denied: invitation link copy failed!"), {
+                type: "danger",
+            });
+        }
     }
 
     async executeCommand(command, body = "") {
@@ -780,10 +803,31 @@ export class DiscussChannel extends Record {
             undos.push(() => this.openChatWindow(chatWindowOptions));
         }
     }
+    get canSelfInteractWithChannel() {
+        return (
+            !this.is_readonly ||
+            ["owner", "admin"].includes(this.self_member_id?.channel_role) ||
+            this.store.self_user?.is_admin
+        );
+    }
 
     /** @returns {import("models").ChannelMember[]} */
     _computeOfflineMembers() {
         return this.channel_member_ids.filter((member) => !member.isOnline);
+    }
+    get composerHidden() {
+        return !this.canSelfInteractWithChannel;
+    }
+    get composerHiddenText() {
+        return _t("This channel is read-only.");
+    }
+    get canCreateSubChannels() {
+        const targetChannel = this.parent_channel_id || this;
+        return (
+            this.store.self_user?.share === false &&
+            targetChannel.hasSubChannelFeature &&
+            targetChannel.canSelfInteractWithChannel
+        );
     }
 }
 

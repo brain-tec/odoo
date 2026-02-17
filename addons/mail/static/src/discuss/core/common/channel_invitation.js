@@ -4,6 +4,7 @@ import { ActionPanel } from "@mail/discuss/core/common/action_panel";
 import { Component, onWillStart, useState } from "@odoo/owl";
 
 import { useSequential } from "@mail/utils/common/hooks";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { useDebounced } from "@web/core/utils/timing";
@@ -140,6 +141,21 @@ export class ChannelInvitation extends Component {
         this.debouncedFetchPartnersToInvite();
     }
 
+    onClickGenerateNewLink() {
+        this.env.services.dialog.add(ConfirmationDialog, {
+            title: _t("Warning"),
+            body: _t(
+                "You're about to create a new invite link. The current link will no longer grant guests access to the channel. Do you want to proceed?"
+            ),
+            cancel: () => {},
+            confirmLabel: _t("Generate"),
+            confirm: () =>
+                this.orm.call("discuss.channel", "action_reset_invitation_uuid", [
+                    [this.props.channel.id],
+                ]),
+        });
+    }
+
     onClickSelectablePartner(partner) {
         if (partner.in(this.selectedPartners)) {
             const index = this.selectedPartners.indexOf(partner);
@@ -172,21 +188,6 @@ export class ChannelInvitation extends Component {
 
     onFocusInvitationLinkInput(ev) {
         ev.target.select();
-    }
-
-    async onClickCopy(ev) {
-        let notification = _t("Invitation link copied!");
-        let type = "success";
-        const clipboard = this.env.inDiscussCallView?.isPip
-            ? this.rtc.pipService.pipWindow?.navigator.clipboard
-            : navigator.clipboard;
-        try {
-            await clipboard.writeText(this.props.channel.invitationLink);
-        } catch {
-            notification = _t("Invitation link copy failed (Permission denied?)!");
-            type = "danger";
-        }
-        this.notification.add(notification, { type });
     }
 
     async onClickInvite() {
