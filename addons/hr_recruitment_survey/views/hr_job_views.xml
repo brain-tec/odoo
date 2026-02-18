@@ -9,7 +9,7 @@
                 <label for="survey_id"/>
                 <div>
                     <field name="survey_id"
-                        context="{'default_access_mode': 'token'}"
+                        context="{'default_access_mode': 'token', 'form_view_ref': 'hr_recruitment_survey.survey_survey_view_form', 'default_survey_type': 'recruitment'}"
                         domain="[('survey_type', '=', 'recruitment')]"/>
                 </div>
             </field>
@@ -23,7 +23,7 @@
             <xpath expr="//field[@name='active']" position="after">
                 <field name="survey_id"/>
             </xpath>
-            <xpath expr="//div[@name='menu_view_applications']" position="after">
+            <xpath expr="//div[@name='menu_view_job_posts']" position="after">
                 <div role="menuitem" t-if="record.survey_id.raw_value">
                     <a name="action_test_survey" type="object" title="Display Interview Form">Interviews</a>
                 </div>

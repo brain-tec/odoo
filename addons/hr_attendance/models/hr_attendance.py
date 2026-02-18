@@ -33,7 +33,7 @@ class HrAttendance(models.Model):
         return self.env.user.employee_id
 
     employee_id = fields.Many2one('hr.employee', string="Employee", default=_default_employee, required=True,
-        ondelete='cascade', index=True, group_expand='_read_group_employee_id')
+        ondelete='cascade', index=True)
     department_id = fields.Many2one('hr.department', string="Department", related="employee_id.department_id",
         readonly=True)
     manager_id = fields.Many2one(comodel_name='hr.employee', related="employee_id.parent_id", readonly=True,
@@ -350,10 +350,11 @@ class HrAttendance(models.Model):
     def write(self, vals):
         if vals.get('employee_id') and \
             vals['employee_id'] not in self.env.user.employee_ids.ids and \
-            not self.env.user.has_group('hr_attendance.group_hr_attendance_officer'):
-            raise AccessError(_("Do not have access, user cannot edit the attendances that are not his own."))
+            not self.env.user.has_group('hr_attendance.group_hr_attendance_manager') and \
+            self.env['hr.employee'].sudo().browse(vals['employee_id']).attendance_manager_id.id != self.env.user.id:
+            raise AccessError(_("Do not have access, user cannot edit the attendances that are not their own or if they are not the attendance manager of the employee."))
         domain_pre = self._get_overtimes_to_update_domain()
-        result = super(HrAttendance, self).write(vals)
+        result = super().write(vals)
         if any(field in vals for field in ['employee_id', 'check_in', 'check_out']):
             # Merge attendance dates before and after write to recompute the
             # overtime if the attendances have been moved to another day
@@ -541,27 +542,6 @@ class HrAttendance(models.Model):
             'url': self.env.company.attendance_kiosk_url + '?from_trial_mode=True'
         }
 
-    def _read_group_employee_id(self, resources, domain):
-        user_domain = Domain(self.env.context.get('user_domain') or Domain.TRUE)
-        employee_domain = Domain('company_id', 'in', self.env.context.get('allowed_company_ids', []))
-        if self.env.user.has_group('hr_attendance.group_hr_attendance_officer') \
-            and not self.env.user.has_group('hr_attendance.group_hr_attendance_user'):
-            employee_domain &= Domain('attendance_manager_id', '=', self.env.user.id)
-        elif not self.env.user.has_group('hr_attendance.group_hr_attendance_officer'):
-            employee_domain &= Domain('user_id', '=', self.env.user.id)  # user can only see his own attendances
-        if user_domain.is_true():
-            # Workaround to make it work only for list view.
-            if 'gantt_start_date' in self.env.context:
-                return self.env['hr.employee'].search(employee_domain)
-            return resources & self.env['hr.employee'].search(employee_domain)
-        else:
-            employee_name_domain = Domain.OR(
-                Domain('name', condition.operator, condition.value)
-                for condition in user_domain.iter_conditions()
-                if condition.field_expr == 'employee_id'
-            )
-            return resources | self.env['hr.employee'].search(employee_name_domain & employee_domain)
-
     def _linked_overtimes(self):
         return self.env['hr.attendance.overtime.line'].search([
             ('time_start', 'in', self.mapped('check_in')),
@@ -614,9 +594,7 @@ class HrAttendance(models.Model):
                 previous_attendances_duration = mapped_previous_duration[att.employee_id][check_in_datetime.date()]
 
                 expected_worked_hours = sum(
-                    att.employee_id.resource_calendar_id.attendance_ids.filtered(
-                        lambda a: a.dayofweek == str(check_in_datetime.weekday())
-                    ).mapped("duration_hours")
+                    att.employee_id.resource_calendar_id.get_attendances(check_in_datetime).mapped("duration_hours")
                 )
 
                 # Attendances where Last open attendance time + previously worked time on that day + tolerance greater than the attendances hours (including lunch) in his calendar

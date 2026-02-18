@@ -126,6 +126,9 @@ class MrpWorkorder(models.Model):
     # Technical field to store the cost_mode of a workorder in case it is changed on the operation_id later on.
     # This field should only be changed once at MO confirmation and should reflect the cost_mode of the operation_id.
 
+    cost = fields.Float(
+        string='Cost', compute='_compute_cost', store=True, aggregator="sum",
+        help="Total real cost of the work order based on duration and hourly cost.")
     production_date = fields.Datetime('Production Date', compute='_compute_production_date', store=True)
     json_popover = fields.Char('Popover Data JSON', compute='_compute_json_popover')
     show_json_popover = fields.Boolean('Show Popover?', compute='_compute_json_popover')
@@ -365,6 +368,11 @@ class MrpWorkorder(models.Model):
             else:
                 order.duration_percent = 0
 
+    @api.depends('duration', 'costs_hour', 'workcenter_id.costs_hour')
+    def _compute_cost(self):
+        for order in self:
+            order.cost = order._compute_current_operation_cost()
+
     def _set_duration(self):
 
         def _float_duration_to_second(duration):
@@ -577,9 +585,6 @@ class MrpWorkorder(models.Model):
     def _action_confirm(self):
         for production in self.mapped("production_id"):
             production._link_workorders_and_moves()
-
-    def _get_byproduct_move_to_update(self):
-        return self.production_id.move_finished_ids.filtered(lambda x: (x.product_id.id != self.production_id.product_id.id) and (x.state not in ('done', 'cancel')))
 
     def _plan_workorders(self, from_date=False, alternative=True):
         """Plan or replan a set of manufacturing workorders

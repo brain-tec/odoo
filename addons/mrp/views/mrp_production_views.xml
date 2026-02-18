@@ -504,8 +504,8 @@
                                         create="parent.use_create_components_lots"
                                         context="{'default_product_id': product_id}"
                                         domain="[('product_id','=',product_id)]"/>
-                                    <button name="action_show_details" type="object" title="Show Details" string="Details" context="{'default_product_uom_qty': 0}" invisible="not show_details_visible or has_tracking == 'none'"/>
-                                    <button class="o_optional_button btn" name="action_show_details" type="object" title="Show Details" string="Details" context="{'default_product_uom_qty': 0}" invisible="has_tracking != 'none' or not show_details_visible"/>
+                                    <button name="action_show_details" type="object" title="Show Details" string="Details" context="{'default_product_uom_qty': 0}" invisible="not show_details_visible or has_tracking not in ['lot', 'serial']"/>
+                                    <button class="o_optional_button btn" name="action_show_details" type="object" title="Show Details" string="Details" context="{'default_product_uom_qty': 0}" invisible="(has_tracking in ['lot', 'serial']) or not show_details_visible"/>
                                 </list>
                             </field>
                         </page>
@@ -544,7 +544,7 @@
                                     <field name="move_lines_count" column_invisible="True"/>
                                     <field name="state" column_invisible="True" force_save="1"/>
                                     <field name="product_uom_qty" string="To Produce" force_save="1" readonly="parent.state != 'draft' and ((parent.state not in ('confirmed', 'progress', 'to_close') and not parent.is_planned) or parent.is_locked)"/>
-                                    <field name="quantity" column_invisible="parent.state == 'draft'" readonly="has_tracking != 'none'"/>
+                                    <field name="quantity" column_invisible="parent.state == 'draft'" readonly="has_tracking in ['lot', 'serial']"/>
                                     <field name="picked" string="Produced" column_invisible="parent.state == 'draft'" optional="show"/>
                                     <field name="uom_id" groups="uom.group_uom" widget="many2one_uom"/>
                                     <field name="cost_share" optional="hide"/>
@@ -560,8 +560,8 @@
                                         create="parent.use_create_components_lots"
                                         context="{'default_product_id': product_id}"
                                         domain="[('product_id','=',product_id)]"/>
-                                    <button name="action_show_details" type="object" title="Show Details" icon="fa-list" invisible="has_tracking == 'none' or not show_details_visible"/>
-                                    <button class="o_optional_button btn btn-light" name="action_show_details" type="object" title="Show Details" icon="fa-list" invisible="has_tracking != 'none' or not show_details_visible"/>
+                                    <button name="action_show_details" type="object" title="Show Details" icon="fa-list" invisible="has_tracking not in ['lot', 'serial'] or not show_details_visible"/>
+                                    <button class="o_optional_button btn btn-light" name="action_show_details" type="object" title="Show Details" icon="fa-list" invisible="has_tracking in ['lot', 'serial'] or not show_details_visible"/>
                                 </list>
                             </field>
                         </page>
@@ -643,6 +643,13 @@
             <field name="arch" type="xml">
                 <pivot string="Manufacturing Orders" sample="1">
                     <field name="date_start" type="row"/>
+                    <field name="duration_expected" type="measure" groups="!mrp.group_mrp_routings" invisible="1"/>
+                    <field name="duration_expected" type="measure" string="Expected Duration (minutes)" groups="mrp.group_mrp_routings"/>
+                    <field name="duration" type="measure" groups="!mrp.group_mrp_routings" invisible="1"/>
+                    <field name="duration" type="measure" string="Real Duration (minutes)" groups="mrp.group_mrp_routings"/>
+                    <field name="qty_producing" type="measure" string="Quantity Produced"/>
+                    <field name="backorder_sequence" invisible="1"/>
+                    <field name="product_uom_qty" invisible="1"/>
                 </pivot>
             </field>
         </record>
@@ -653,10 +660,13 @@
             <field name="arch" type="xml">
                 <graph string="Manufacturing Orders" stacked="0" sample="1">
                     <field name="date_finished"/>
-                    <field name="product_uom_qty" type="measure"/>
-                    <field name="backorder_sequence" invisible="1"/>
+                    <field name="duration_expected" type="measure" groups="!mrp.group_mrp_routings" invisible="1"/>
+                    <field name="duration_expected" type="measure" string="Expected Duration (minutes)" groups="mrp.group_mrp_routings"/>
+                    <field name="duration" type="measure" groups="!mrp.group_mrp_routings" invisible="1"/>
+                    <field name="duration" type="measure" string="Real Duration (minutes)" groups="mrp.group_mrp_routings"/>
                     <field name="qty_producing" string="Quantity Produced"/>
-                    <field name="product_uom_qty" string= "Product Quantity"/>
+                    <field name="backorder_sequence" invisible="1"/>
+                    <field name="product_uom_qty" invisible="1"/>
                 </graph>
             </field>
         </record>
