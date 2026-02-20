@@ -2921,7 +2921,6 @@ var SnippetsMenu = Widget.extend({
         this.templateOptions = [];
         var selectors = [];
         var $styles = $html.find('[data-selector]');
-        debugger;
         const snippetAdditionDropIn = $styles.filter('#so_snippet_addition').data('drop-in');
         const oldFooterSnippetsSelector = 'footer .oe_structure > *';
         const newFooterSnippetsSelector = 'footer #footer.oe_structure > *:not(.s_popup)';
@@ -3186,7 +3185,6 @@ var SnippetsMenu = Widget.extend({
             if (check) {
                 $icon.remove();
             } else if (!$icon.length) {
-                debugger
                 const imgEl = document.createElement('img');
                 imgEl.classList.add('o_snippet_undroppable');
                 imgEl.src = '/web_editor/static/src/img/snippet_disabled.svg';
