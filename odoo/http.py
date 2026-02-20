@@ -1184,6 +1184,9 @@ mimetypes.add_type('application/vnd.ms-fontobject', '.eot')
 mimetypes.add_type('application/x-font-ttf', '.ttf')
 # Add potentially missing (detected on windows) svg mime types
 mimetypes.add_type('image/svg+xml', '.svg')
+# this one can be present on windows with the value 'text/plain' which breaks
+# loading js files from an addon's static folder
+mimetypes.add_type('text/javascript', '.js')
 
 
 def make_request_wrap_methods(attr):
@@ -1204,10 +1207,10 @@ class HTTPRequest:
 
         self.__wrapped = httprequest
         self.__environ = self.__wrapped.environ
-        self.environ = {
+        self.environ = self.headers.environ = {
             key: value
             for key, value in self.__environ.items()
-            if not key.startswith(('werkzeug.', 'wsgi.')) or key in ['wsgi.url_scheme']
+            if not key.startswith(('werkzeug.', 'wsgi.')) or key in ['wsgi.url_scheme', 'werkzeug.proxy_fix.orig']
         }
 
     def __enter__(self):

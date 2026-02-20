@@ -3,20 +3,22 @@
 # 	* website_payment
 # 
 # Translators:
-# digitouch UAB <digitouchagencyeur@gmail.com>, 2022
 # Arunas V. <arunas@devoro.com>, 2022
 # Aleksandr Jadov <a.jadov@tata.lt>, 2022
 # Linas Versada <linaskrisiukenas@gmail.com>, 2022
 # Martin Trigaux, 2022
 # Jonas Zinkevicius <jozi@odoo.com>, 2022
+# Gailius Kazlauskas, 2024
+# Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2024
+# digitouch UAB <digitouchagencyeur@gmail.com>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.5\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-14 10:29+0000\n"
+"POT-Creation-Date: 2024-08-14 15:43+0000\n"
 "PO-Revision-Date: 2021-09-14 12:28+0000\n"
-"Last-Translator: Jonas Zinkevicius <jozi@odoo.com>, 2022\n"
+"Last-Translator: digitouch UAB <digitouchagencyeur@gmail.com>, 2024\n"
 "Language-Team: Lithuanian (https://app.transifex.com/odoo/teams/41243/lt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -37,7 +39,7 @@ msgstr ""
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
 msgid "<b>Comment:</b>"
-msgstr ""
+msgstr "<b>Komentaras:</b>"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
@@ -62,12 +64,12 @@ msgstr ""
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
 msgid "<b>Payment Method:</b>"
-msgstr ""
+msgstr "<b>Mokėjimo būdas:</b>"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "<option value=\"\">Country...</option>"
-msgstr ""
+msgstr "<option value=\"\">Šalis...</option>"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_pay
@@ -119,12 +121,12 @@ msgstr "Suma"
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "Amount ("
-msgstr ""
+msgstr "Suma ("
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
 msgid "Amount("
-msgstr ""
+msgstr "Suma("
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
@@ -136,7 +138,7 @@ msgstr ""
 #: code:addons/website_payment/static/src/snippets/s_donation/000.xml:0
 #, python-format
 msgid "Choose Your Amount"
-msgstr ""
+msgstr "Pasirinkite sumą"
 
 #. module: website_payment
 #. openerp-web
@@ -156,7 +158,7 @@ msgstr ""
 #: code:addons/website_payment/controllers/portal.py:0
 #, python-format
 msgid "Country is required."
-msgstr ""
+msgstr "Šalis yra privaloma"
 
 #. module: website_payment
 #. openerp-web
@@ -176,7 +178,7 @@ msgstr "Gerb."
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
 msgid "Default Amount"
-msgstr ""
+msgstr "Suma pagal nutylėjimą"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
@@ -291,7 +293,7 @@ msgstr ""
 #: code:addons/website_payment/controllers/portal.py:0
 #, python-format
 msgid "Name is required."
-msgstr ""
+msgstr "Vardas yra privalomas"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
@@ -309,6 +311,11 @@ msgid "One year in high school."
 msgstr ""
 
 #. module: website_payment
+#: model:ir.model,name:website_payment.model_website_page
+msgid "Page"
+msgstr "Puslapis"
+
+#. module: website_payment
 #: model:ir.model,name:website_payment.model_payment_acquirer
 msgid "Payment Acquirer"
 msgstr "Mokėjimo surinkėjas"
@@ -316,7 +323,7 @@ msgstr "Mokėjimo surinkėjas"
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "Payment Details"
-msgstr ""
+msgstr "Mokėjimo detalės"
 
 #. module: website_payment
 #: model:ir.model,name:website_payment.model_payment_transaction
@@ -339,7 +346,7 @@ msgstr "Mokėjimai"
 #: code:addons/website_payment/static/src/snippets/s_donation/000.js:0
 #, python-format
 msgid "Please select or enter an amount"
-msgstr ""
+msgstr "Prašau pasirinkti ar įvesti sumą"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_options
@@ -414,12 +421,12 @@ msgstr "Svetainė"
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "Write us a comment"
-msgstr ""
+msgstr "Įrašykite savo komentarą"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "Your comment"
-msgstr ""
+msgstr "Jūsų komentaras"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body

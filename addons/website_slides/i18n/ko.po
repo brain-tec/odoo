@@ -9,16 +9,17 @@
 # Linkup <link-up@naver.com>, 2021
 # Seongseok Shin <shinss61@hotmail.com>, 2021
 # Heesoo Choi, 2021
-# Sarah Park, 2023
-# Daye Jeong, 2023
+# Sarah Park, 2024
+# Daye Jeong, 2024
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-05 10:53+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:29+0000\n"
-"Last-Translator: Daye Jeong, 2023\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2672,7 +2673,7 @@ msgstr "인증 얻기"
 #: model:gamification.challenge.line,name:website_slides.badge_data_register_challenge_line_0
 #: model:gamification.goal.definition,name:website_slides.badge_data_register_goal
 msgid "Get started"
-msgstr "시작함"
+msgstr "시작하기"
 
 #. module: website_slides
 #. openerp-web
@@ -3775,6 +3776,12 @@ msgstr "작업이 완료되면 강좌를 <b>게시</b> 하는 것을 잊지 마�
 #, python-format
 msgid "Only JPG, PNG, PDF, files types are supported"
 msgstr ""
+
+#. module: website_slides
+#: code:addons/website_slides/controllers/mail.py:0
+#, python-format
+msgid "Only a single review can be posted per course."
+msgstr "강의 당 하나의 리뷰만 게시할 수 있습니다."
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel_invite__lang
@@ -5187,6 +5194,11 @@ msgid "Uploading document ..."
 msgstr "문서 올리는 중..."
 
 #. module: website_slides
+#: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_invite_view_form
+msgid "Use template"
+msgstr "서식 사용"
+
+#. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__tag_ids
 msgid "Used to categorize and filter displayed channels/courses"
 msgstr "표시된 채널/강좌를 분류하고 필터링하는 데 사용"
@@ -5711,6 +5723,13 @@ msgid "by email."
 msgstr "이메일로."
 
 #. module: website_slides
+#. openerp-web
+#: code:addons/website_slides/static/src/xml/website_slides_channel.xml:0
+#, python-format
+msgid "documentation"
+msgstr "관련 문서"
+
+#. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid "e.g. Computer Science for kids"
 msgstr "예. 어린이를 위한 컴퓨터 과학"
@@ -5833,6 +5852,13 @@ msgstr "등록하기."
 #, python-format
 msgid "to share this"
 msgstr "이것을 공유하기"
+
+#. module: website_slides
+#. openerp-web
+#: code:addons/website_slides/static/src/xml/website_slides_channel.xml:0
+#, python-format
+msgid "training"
+msgstr ""
 
 #. module: website_slides
 #. openerp-web

@@ -6,6 +6,7 @@
 # Benson <Benson.Dr@Gmail.com>, 2021
 # Martin Trigaux, 2021
 # 敬雲 林 <chingyun@yuanchih-consult.com>, 2021
+# Wil Odoo, 2024
 # Tony Ng, 2024
 # 
 msgid ""
@@ -148,6 +149,13 @@ msgstr "預付訂金產品"
 #, python-format
 msgid "E.g. customer: Steward, date: 2020-05-09"
 msgstr "例如. 客戶: 管家，日期: 2020-05-09"
+
+#. module: pos_sale
+#. openerp-web
+#: code:addons/pos_sale/static/src/js/OrderManagementScreen/SaleOrderManagementScreen.js:0
+#, python-format
+msgid "Error amount too high"
+msgstr "錯誤 金額太高"
 
 #. module: pos_sale
 #. openerp-web
@@ -502,6 +510,11 @@ msgstr "該產品將用作銷售訂單的預收訂金"
 #, python-format
 msgid "Total"
 msgstr "總計"
+
+#. module: pos_sale
+#: model:ir.model,name:pos_sale.model_stock_picking
+msgid "Transfer"
+msgstr "轉移"
 
 #. module: pos_sale
 #: model_terms:ir.ui.view,arch_db:pos_sale.view_pos_order_form_inherit_pos_sale

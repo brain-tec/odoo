@@ -13,6 +13,8 @@
 # Cécile Collart <cco@odoo.com>, 2022
 # Wil Odoo, 2023
 # Jolien De Paepe, 2023
+# Manon Rondou, 2024
+# Tiffany Chang, 2024
 # 
 msgid ""
 msgstr ""
@@ -20,7 +22,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-11-16 16:40+0000\n"
 "PO-Revision-Date: 2021-09-14 12:21+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"Last-Translator: Tiffany Chang, 2024\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1550,7 +1552,7 @@ msgstr "Société"
 #: code:addons/event/models/event_registration.py:0
 #, python-format
 msgid "Compose Email"
-msgstr "Rédiger un email"
+msgstr "Rédiger un e-mail"
 
 #. module: event
 #: model:event.tag,name:event.event_tag_category_3_tag_2
@@ -1684,7 +1686,7 @@ msgstr "Client"
 #: code:addons/event/models/event_registration.py:0
 #, python-format
 msgid "Customer Email"
-msgstr "Email Client"
+msgstr "E-mail Client"
 
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.event_event_view_form_quick_create
@@ -1789,7 +1791,7 @@ msgstr "Courriel"
 #. module: event
 #: model:ir.model,name:event.model_mail_template
 msgid "Email Templates"
-msgstr "Modèles d'email"
+msgstr "Modèles d'e-mail"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event__date_end
@@ -1917,7 +1919,7 @@ msgstr ""
 "Échec avec erreur :\n"
 "  - %(error)s\n"
 "\n"
-"Vous recevez cet email parce que vous êtes :\n"
+"Vous recevez cet e-mail parce que vous êtes :\n"
 "  - l'organisateur de l'événement,\n"
 "  - ou le responsable de l'événement,\n"
 "  - ou le dernier auteur du modèle.\n"
@@ -3330,7 +3332,7 @@ msgstr "Envoyer"
 #. module: event
 #: model_terms:ir.ui.view,arch_db:event.view_event_registration_form
 msgid "Send by Email"
-msgstr "Envoyer par email"
+msgstr "Envoyer par e-mail"
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_mail__mail_done

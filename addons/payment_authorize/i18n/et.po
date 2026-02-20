@@ -11,22 +11,31 @@
 # Piia Paurson <piia@avalah.ee>, 2022
 # Martin Trigaux, 2022
 # Eneli Õigus <enelioigus@gmail.com>, 2022
-# Anna, 2023
 # Leaanika Randmets, 2023
+# Anna, 2024
+# Stevin Lilla, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.5\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-14 10:28+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:24+0000\n"
-"Last-Translator: Leaanika Randmets, 2023\n"
+"Last-Translator: Stevin Lilla, 2024\n"
 "Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: et\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: payment_authorize
+#: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
+msgid ""
+"<option value=\"checking\">Personal Checking</option>\n"
+"                    <option value=\"savings\">Personal Savings</option>\n"
+"                    <option value=\"businessChecking\">Business Checking</option>"
+msgstr ""
 
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
@@ -41,17 +50,17 @@ msgstr ""
 #. module: payment_authorize
 #: model:ir.model.fields,field_description:payment_authorize.field_payment_acquirer__authorize_login
 msgid "API Login ID"
-msgstr ""
+msgstr "API sisselogimis ID"
 
 #. module: payment_authorize
 #: model:ir.model.fields,field_description:payment_authorize.field_payment_acquirer__authorize_signature_key
 msgid "API Signature Key"
-msgstr ""
+msgstr "API allkirjavõti"
 
 #. module: payment_authorize
 #: model:ir.model.fields,field_description:payment_authorize.field_payment_acquirer__authorize_transaction_key
 msgid "API Transaction Key"
-msgstr ""
+msgstr "API tehinguvõti"
 
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
@@ -79,7 +88,7 @@ msgstr ""
 #: model:account.payment.method,name:payment_authorize.payment_method_authorize
 #: model:ir.model.fields.selection,name:payment_authorize.selection__payment_acquirer__provider__authorize
 msgid "Authorize.Net"
-msgstr ""
+msgstr "Authorize.Net"
 
 #. module: payment_authorize
 #: model:ir.model.fields,field_description:payment_authorize.field_payment_token__authorize_payment_method_type
@@ -89,7 +98,7 @@ msgstr ""
 #. module: payment_authorize
 #: model:ir.model.fields,field_description:payment_authorize.field_payment_token__authorize_profile
 msgid "Authorize.Net Profile ID"
-msgstr ""
+msgstr "Authorize.Net profiili ID"
 
 #. module: payment_authorize
 #: code:addons/payment_authorize/models/payment_acquirer.py:0
@@ -106,7 +115,7 @@ msgstr ""
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
 msgid "Bank Account Type"
-msgstr ""
+msgstr "Panga konto tüüp"
 
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
@@ -115,13 +124,8 @@ msgstr "Panga nimi"
 
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
-msgid "Business Checking"
-msgstr ""
-
-#. module: payment_authorize
-#: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
 msgid "Card Code"
-msgstr ""
+msgstr "Kaardi kood"
 
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
@@ -174,7 +178,7 @@ msgstr ""
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.payment_acquirer_form
 msgid "Generate Client Key"
-msgstr ""
+msgstr "Genereeri kliendivõti"
 
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.payment_acquirer_form
@@ -184,18 +188,18 @@ msgstr ""
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
 msgid "MM"
-msgstr ""
+msgstr "kuu"
 
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
 msgid "Name On Account"
-msgstr ""
+msgstr "Konto nimi"
 
 #. module: payment_authorize
 #: code:addons/payment_authorize/models/payment_transaction.py:0
 #, python-format
 msgid "No transaction found matching reference %s."
-msgstr ""
+msgstr "Ühtegi tehingut ei leitud, mis on seotud viitega %s."
 
 #. module: payment_authorize
 #: model:ir.model,name:payment_authorize.model_payment_acquirer
@@ -218,16 +222,6 @@ msgid "Payment Transaction"
 msgstr "Maksetehing"
 
 #. module: payment_authorize
-#: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
-msgid "Personal Checking"
-msgstr ""
-
-#. module: payment_authorize
-#: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
-msgid "Personal Savings"
-msgstr ""
-
-#. module: payment_authorize
 #: model:ir.model.fields,field_description:payment_authorize.field_payment_acquirer__provider
 msgid "Provider"
 msgstr "Teenusepakkuja"
@@ -242,7 +236,7 @@ msgstr ""
 #: code:addons/payment_authorize/controllers/main.py:0
 #, python-format
 msgid "Received tampered payment request data."
-msgstr ""
+msgstr "Võltsitud makse vastu võetud andmed."
 
 #. module: payment_authorize
 #: code:addons/payment_authorize/models/payment_token.py:0
@@ -262,7 +256,7 @@ msgstr "Server Error"
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.payment_acquirer_form
 msgid "Set Account Currency"
-msgstr ""
+msgstr "Määra konto võti"
 
 #. module: payment_authorize
 #: model:ir.model.fields,help:payment_authorize.field_payment_acquirer__authorize_login
@@ -285,7 +279,7 @@ msgstr ""
 #: code:addons/payment_authorize/models/payment_transaction.py:0
 #, python-format
 msgid "The transaction is not linked to a token."
-msgstr ""
+msgstr "Tehing ei ole seotud tokeniga."
 
 #. module: payment_authorize
 #: model:ir.model.fields,help:payment_authorize.field_payment_token__authorize_payment_method_type
@@ -325,4 +319,4 @@ msgstr "Me ei saa teie makset töödelda."
 #. module: payment_authorize
 #: model_terms:ir.ui.view,arch_db:payment_authorize.inline_form
 msgid "YY"
-msgstr ""
+msgstr "aasta"

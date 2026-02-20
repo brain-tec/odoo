@@ -9,13 +9,14 @@ import re
 import socket
 import threading
 import time
-from email.utils import getaddresses
+import email.utils
+from email.utils import getaddresses as orig_getaddresses
 from urllib.parse import urlparse
 
 import idna
 import markupsafe
 from lxml import etree
-from lxml.html import clean
+from lxml.html import clean, defs
 from werkzeug import urls
 
 import odoo
@@ -23,6 +24,17 @@ from odoo.loglevels import ustr
 from odoo.tools import misc
 
 _logger = logging.getLogger(__name__)
+
+
+# disable strict mode when present: we rely on original non-strict
+# parsing, and we know that it isn't reliable, that ok.
+# cfr python/cpython@4a153a1d3b18803a684cd1bcc2cdf3ede3dbae19
+if hasattr(email.utils, 'supports_strict_parsing'):
+    def getaddresses(fieldvalues):
+        return orig_getaddresses(fieldvalues, strict=False)
+else:
+    getaddresses = orig_getaddresses
+
 
 #----------------------------------------------------------
 # HTML Sanitizer
@@ -34,8 +46,8 @@ tags_to_kill = ['base', 'embed', 'frame', 'head', 'iframe', 'link', 'meta',
 tags_to_remove = ['html', 'body']
 
 # allow new semantic HTML5 tags
-allowed_tags = clean.defs.tags | frozenset('article bdi section header footer hgroup nav aside figure main'.split() + [etree.Comment])
-safe_attrs = clean.defs.safe_attrs | frozenset(
+allowed_tags = defs.tags | frozenset('article bdi section header footer hgroup nav aside figure main'.split() + [etree.Comment])
+safe_attrs = defs.safe_attrs | frozenset(
     ['style',
      'data-o-mail-quote',  # quote detection
      'data-oe-model', 'data-oe-id', 'data-oe-field', 'data-oe-type', 'data-oe-expression', 'data-oe-translation-id', 'data-oe-nodeid',
@@ -297,6 +309,7 @@ def is_html_empty(html_content):
     tag_re = re.compile(r'\<\s*\/?(?:p|div|span|br|b|i|font)(?:(?=\s+\w*)[^/>]*|\s*)/?\s*\>')
     return not bool(re.sub(tag_re, '', html_content).strip())
 
+
 def html_keep_url(text):
     """ Transform the url into clickable link with <a/> tag """
     idx = 0
@@ -304,10 +317,14 @@ def html_keep_url(text):
     link_tags = re.compile(r"""(?<!["'])((ftp|http|https):\/\/(\w+:{0,1}\w*@)?([^\s<"']+)(:[0-9]+)?(\/|\/([^\s<"']))?)(?![^\s<"']*["']|[^\s<"']*</a>)""")
     for item in re.finditer(link_tags, text):
         final += text[idx:item.start()]
-        final += '<a href="%s" target="_blank" rel="noreferrer noopener">%s</a>' % (item.group(0), item.group(0))
+        final += create_link(item.group(0), item.group(0))
         idx = item.end()
     final += text[idx:]
     return final
+
+
+def create_link(url, label):
+    return f'<a href="{url}" target="_blank" rel="noreferrer noopener">{label}</a>'
 
 
 def html2plaintext(html, body_id=None, encoding='utf-8'):
@@ -355,7 +372,7 @@ def html2plaintext(html, body_id=None, encoding='utf-8'):
     html = html.replace('<em>', '/').replace('</em>', '/')
     html = html.replace('<tr>', '\n')
     html = html.replace('</p>', '\n')
-    html = re.sub('<br\s*/?>', '\n', html)
+    html = re.sub(r'<br\s*/?>', '\n', html)
     html = re.sub('<.*?>', ' ', html)
     html = html.replace(' ' * 2, ' ')
     html = html.replace('&gt;', '>')

@@ -1112,7 +1112,7 @@ msgstr "PDF datoteka"
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel__rating_percentage_satisfaction
 msgid "Percentage of happy ratings"
-msgstr ""
+msgstr "Odstotek zadovoljnih ocen"
 
 #. module: im_livechat
 #. openerp-web
@@ -1743,6 +1743,11 @@ msgstr ""
 #, python-format
 msgid "Yesterday"
 msgstr "Včeraj"
+
+#. module: im_livechat
+#: model_terms:ir.ui.view,arch_db:im_livechat.livechat_email_template
+msgid "You"
+msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.actions.act_window,help:im_livechat.im_livechat_channel_action

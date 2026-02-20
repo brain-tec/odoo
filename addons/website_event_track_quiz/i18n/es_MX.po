@@ -9,9 +9,9 @@
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.5\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-14 10:29+0000\n"
+"POT-Creation-Date: 2024-08-14 15:44+0000\n"
 "PO-Revision-Date: 2021-09-14 12:28+0000\n"
 "Last-Translator: Fernanda Alvarez, 2024\n"
 "Language-Team: Spanish (Mexico) (https://app.transifex.com/odoo/teams/41243/es_MX/)\n"
@@ -44,7 +44,7 @@ msgstr "<span class=\"text-muted\">Puntos</span>"
 #. module: website_event_track_quiz
 #: model_terms:ir.ui.view,arch_db:website_event_track_quiz.event_track_view_form
 msgid "Add Quiz"
-msgstr "Añadir prueba"
+msgstr "Agregar prueba"
 
 #. module: website_event_track_quiz
 #. openerp-web
@@ -172,7 +172,7 @@ msgstr "Pruebas del evento"
 #: model:ir.model,name:website_event_track_quiz.model_event_track
 #: model:ir.model.fields,field_description:website_event_track_quiz.field_event_quiz__event_track_id
 msgid "Event Track"
-msgstr "Grabación del evento"
+msgstr "Sesión del evento"
 
 #. module: website_event_track_quiz
 #: model:ir.model.fields,field_description:website_event_track_quiz.field_event_quiz_answer__comment
@@ -459,11 +459,6 @@ msgstr "Buscar asistentes"
 
 #. module: website_event_track_quiz
 #: model_terms:ir.ui.view,arch_db:website_event_track_quiz.leaderboard_search_bar
-msgid "Search courses"
-msgstr "Buscar cursos"
-
-#. module: website_event_track_quiz
-#: model_terms:ir.ui.view,arch_db:website_event_track_quiz.leaderboard_search_bar
 msgid "Search users"
 msgstr "Buscar usuarios"
 
@@ -536,7 +531,7 @@ msgstr "Correas de sujeción y otros bloques de madera"
 #. module: website_event_track_quiz
 #: model_terms:ir.ui.view,arch_db:website_event_track_quiz.event_quiz_view_search
 msgid "Track"
-msgstr "Grabación"
+msgstr "Sesión"
 
 #. module: website_event_track_quiz
 #: model:ir.model,name:website_event_track_quiz.model_event_track_visitor

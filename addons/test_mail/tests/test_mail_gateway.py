@@ -1093,6 +1093,18 @@ class TestMailgateway(TestMailCommon):
         # No bounce email
         self.assertNotSentEmail()
 
+    @mute_logger('odoo.addons.mail.models.mail_thread', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
+    def test_message_route_write_to_catchall_other_recipients_invalid(self):
+        """ Writing to catchall and other unroutable recipients should bounce. """
+        # Test: no group created, email bounced
+        with self.mock_mail_gateway():
+            record = self.format_and_process(
+                MAIL_TEMPLATE, self.partner_1.email_formatted,
+                '"My Super Catchall" <%s@%s>, Unroutable <unroutable@%s>' % (self.alias_catchall, self.alias_domain, self.alias_domain),
+                subject='Should Bounce')
+        self.assertFalse(record)
+        self.assertSentEmail('"MAILER-DAEMON" <bounce.test@test.com>', ['whatever-2a840@postmaster.twitter.com'], subject='Re: Should Bounce')
+
     @mute_logger('odoo.addons.mail.models.mail_thread')
     def test_message_process_bounce_alias(self):
         """ Writing to bounce alias is considered as a bounce even if not multipart/report bounce structure """
@@ -1762,13 +1774,33 @@ class TestMailgateway(TestMailCommon):
         # This explains the multiple "�" in the attachment.
         self.assertIn("Chauss������e de Bruxelles", record.message_main_attachment_id.raw.decode())
 
-    def test_message_process_file_omitted_charset(self):
+    def test_message_process_file_omitted_charset_xml(self):
         """ For incoming email containing an xml attachment with omitted charset and containing an UTF8 payload we
         should parse the attachment using UTF-8.
         """
-        record = self.format_and_process(test_mail_data.MAIL_MULTIPART_OMITTED_CHARSET, self.email_from, 'groups@test.com')
+        record = self.format_and_process(test_mail_data.MAIL_MULTIPART_OMITTED_CHARSET_XML, self.email_from, 'groups@test.com')
         self.assertEqual(record.message_main_attachment_id.name, 'bis3.xml')
         self.assertEqual("<Invoice>Chaussée de Bruxelles</Invoice>", record.message_main_attachment_id.raw.decode())
+
+    def test_message_process_file_omitted_charset_csv(self):
+        """ For incoming email containing a csv attachment with omitted charset and containing an UTF8 payload we
+        should parse the attachment using UTF-8.
+        """
+        record = self.format_and_process(test_mail_data.MAIL_MULTIPART_OMITTED_CHARSET_CSV, self.email_from, 'groups@test.com')
+        self.assertEqual(record.message_main_attachment_id.name, 'bis3.csv')
+        self.assertEqual("\ufeffAuftraggeber;LieferadresseStraße;", record.message_main_attachment_id.raw.decode())
+
+    def test_message_process_file_omitted_charset_txt(self):
+        """ For incoming email containing a txt attachment with omitted charset and containing an UTF8 payload we
+        should parse the attachment using UTF-8.
+        """
+        test_string = ("Äpfel und Birnen sind Früchte, die im Herbst geerntet werden. In der Nähe des Flusses steht ein großes, "
+            "altes Schloss. Über den Dächern sieht man oft Vögel fliegen. Müller und Schröder sind typische deutsche Nachnamen. "
+            "Die Straße, in der ich wohne, heißt „Bachstraße“ und ist sehr ruhig. Überall im Wald wachsen Bäume mit kräftigen Ästen. "
+            "Können wir uns über die Pläne für das nächste Wochenende unterhalten?")
+        record = self.format_and_process(test_mail_data.MAIL_MULTIPART_OMITTED_CHARSET_TXT, self.email_from, 'groups@test.com')
+        self.assertEqual(record.message_main_attachment_id.name, 'bis3.txt')
+        self.assertEqual(test_string, record.message_main_attachment_id.raw.decode())
 
     def test_message_route_reply_model_none(self):
         """

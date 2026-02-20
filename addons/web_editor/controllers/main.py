@@ -94,6 +94,12 @@ class Web_Editor(http.Controller):
         if icon.isdigit():
             if int(icon) == 57467:
                 font = "/web/static/fonts/tiktok_only.woff"
+            elif int(icon) == 61593:  # F099
+                icon = "59392"  # E800
+                font = "/web/static/fonts/twitter_x_only.woff"
+            elif int(icon) == 61569:  # F081
+                icon = "59395"  # E803
+                font = "/web/static/fonts/twitter_x_only.woff"
 
         size = max(width, height, 1) if width else size
         width = width or size
@@ -124,11 +130,17 @@ class Web_Editor(http.Controller):
         image = Image.new("RGBA", (width, height), color)
         draw = ImageDraw.Draw(image)
 
-        box = draw.textbbox((0, 0), icon, font=font_obj)
-        boxw = box[2] - box[0]
-        boxh = box[3] - box[1]
+        if hasattr(draw, 'textbbox'):
+            box = draw.textbbox((0, 0), icon, font=font_obj)
+            left = box[0]
+            top = box[1]
+            boxw = box[2] - box[0]
+            boxh = box[3] - box[1]
+        else:  # pillow < 8.00 (Focal)
+            left, top, _right, _bottom = image.getbbox()
+            boxw, boxh = draw.textsize(icon, font=font_obj)
+
         draw.text((0, 0), icon, font=font_obj)
-        left, top, right, bottom = image.getbbox()
 
         # Create an alpha mask
         imagemask = Image.new("L", (boxw, boxh), 0)
@@ -258,7 +270,7 @@ class Web_Editor(http.Controller):
         id_match = re.search('^/web/image/([^/?]+)', src)
         if id_match:
             url_segment = id_match.group(1)
-            number_match = re.match('^(\d+)', url_segment)
+            number_match = re.match(r'^(\d+)', url_segment)
             if '.' in url_segment: # xml-id
                 attachment = request.env['ir.http']._xmlid_to_obj(request.env, url_segment)
             elif number_match: # numeric id
@@ -381,7 +393,7 @@ class Web_Editor(http.Controller):
 
         # Compile regex outside of the loop
         # This will used to exclude library scss files from the result
-        excluded_url_matcher = re.compile("^(.+/lib/.+)|(.+import_bootstrap.+\.scss)$")
+        excluded_url_matcher = re.compile(r"^(.+/lib/.+)|(.+import_bootstrap.+\.scss)$")
 
         # First check the t-call-assets used in the related views
         url_infos = dict()
@@ -556,6 +568,17 @@ class Web_Editor(http.Controller):
         return '%s?access_token=%s' % (attachment.image_src, attachment.access_token)
 
     def _get_shape_svg(self, module, *segments):
+        Module = request.env['ir.module.module'].sudo()
+        # Avoid creating a bridge module just for this check.
+        if 'imported' in Module._fields and Module.search([('name', '=', module)]).imported:
+            attachment = request.env['ir.attachment'].sudo().search([
+                ('url', '=', f"/{module.replace('.', '_')}/static/{'/'.join(segments)}"),
+                ('public', '=', True),
+                ('type', '=', 'binary'),
+            ], limit=1)
+            if attachment:
+                return b64decode(attachment.datas)
+            raise werkzeug.exceptions.NotFound()
         shape_path = get_resource_path(module, 'static', *segments)
         if not shape_path:
             raise werkzeug.exceptions.NotFound()

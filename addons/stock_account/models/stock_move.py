@@ -77,7 +77,7 @@ class StockMove(models.Model):
         self.ensure_one()
         res = OrderedSet()
         for move_line in self.move_line_ids:
-            if move_line.owner_id and move_line.owner_id != move_line.company_id.partner_id:
+            if move_line._should_exclude_for_valuation():
                 continue
             if not move_line.location_id._should_be_valued() and move_line.location_dest_id._should_be_valued():
                 res.add(move_line.id)
@@ -105,7 +105,7 @@ class StockMove(models.Model):
         """
         res = self.env['stock.move.line']
         for move_line in self.move_line_ids:
-            if move_line.owner_id and move_line.owner_id != move_line.company_id.partner_id:
+            if move_line._should_exclude_for_valuation():
                 continue
             if move_line.location_id._should_be_valued() and not move_line.location_dest_id._should_be_valued():
                 res |= move_line
@@ -295,8 +295,7 @@ class StockMove(models.Model):
         # For every in move, run the vacuum for the linked product.
         products_to_vacuum = valued_moves['in'].mapped('product_id')
         company = valued_moves['in'].mapped('company_id') and valued_moves['in'].mapped('company_id')[0] or self.env.company
-        for product_to_vacuum in products_to_vacuum:
-            product_to_vacuum._run_fifo_vacuum(company)
+        products_to_vacuum._run_fifo_vacuum(company)
 
         return res
 
@@ -529,7 +528,7 @@ class StockMove(models.Model):
         analytic_lines_vals = []
         moves_to_link = []
         for move in self:
-            analytic_line_vals = move._prepare_analytic_line()
+            analytic_line_vals = move.sudo()._prepare_analytic_line()
             if not analytic_line_vals:
                 continue
             moves_to_link.append(move.id)
