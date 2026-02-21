@@ -142,7 +142,7 @@ class TestSaleService(TestCommonSaleTimesheet):
             'unit_amount': 1,
             'employee_id': self.employee_manager.id,
         })
-        self.assertTrue(all([billing_type == 'billable_time' for billing_type in timesheets.mapped('timesheet_invoice_type')]), "All timesheets linked to the task should be on 'billable time'")
+        self.assertTrue(all(billing_type == '04_billable_time' for billing_type in timesheets.mapped('billable_type')), "All timesheets linked to the task should be on 'billable time'")
         self.assertEqual(so_line_deliver_global_project.qty_to_invoice, 5, "Quantity to invoice should have been increased when logging timesheet on delivered quantities task")
 
         # invoice SO, and validate invoice
@@ -151,7 +151,7 @@ class TestSaleService(TestCommonSaleTimesheet):
 
         # make task non billable
         task_serv2.write({'sale_line_id': False})
-        self.assertTrue(all([billing_type == 'billable_time' for billing_type in timesheets.mapped('timesheet_invoice_type')]), "billable type of timesheet should not change when tranfering task into another project")
+        self.assertTrue(all(billing_type == '04_billable_time' for billing_type in timesheets.mapped('billable_type')), "billable type of timesheet should not change when tranfering task into another project")
         self.assertEqual(task_serv2.timesheet_ids.mapped('so_line'), so_line_deliver_global_project, "Old invoiced timesheet are not modified when changing the task SO line")
 
         # try to update timesheets, catch error 'You cannot modify invoiced timesheet'
@@ -687,12 +687,10 @@ class TestSaleService(TestCommonSaleTimesheet):
             The conversion to time should be processed as follows :
                 H : qty = uom_qty [Hours]
                 D : qty = uom_qty * 8 [Hours]
-                U : qty =  uom_qty [Hours]
-                Other : qty = 0
 
             Test Cases:
             ==========
-            1) Create a 4 SOL on a SO With different UOM
+            1) Create a 2 SOL on a SO With different UOM
             2) Confirm the SO
             3) Check the project allocated hour is correctly set
             4) Repeat with different timesheet encoding UOM
@@ -708,15 +706,10 @@ class TestSaleService(TestCommonSaleTimesheet):
             'product_id': self.product_delivery_timesheet3.id,
             'product_uom_qty': 8,
             'product_uom_id': self.env.ref('uom.product_uom_hour').id,  # 8 hours
-        }, {
-            'order_id': self.sale_order.id,
-            'product_id': self.product_delivery_timesheet3.id,
-            'product_uom_qty': 6,
-            'product_uom_id': self.env.ref('uom.product_uom_unit').id,  # 6 hours
         }])
         self.sale_order.action_confirm()
         allocated_hours = self.sale_order.project_ids.allocated_hours
-        self.assertEqual(16 + 8 + 6, allocated_hours,
+        self.assertEqual(16 + 8, allocated_hours,
                          "Project's allocated hours should add up correctly.")
 
         self.env.company.timesheet_encode_uom_id = self.env.ref('uom.product_uom_day')

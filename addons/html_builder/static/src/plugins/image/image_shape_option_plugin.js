@@ -37,7 +37,7 @@ import { deepCopy, deepMerge } from "@web/core/utils/objects";
  *   }>,
  * }>} ImageShapeGroups
  * @typedef {((shapeGroups: ImageShapeGroups) => ImageShapeGroups | void)[]} image_shape_groups_providers
- * @typedef {((dataset: DOMStringMap) => string)[]} default_shape_handlers
+ * @typedef {((dataset: DOMStringMap) => string)[]} default_shape_providers
  * @typedef {((
  *     svg: SVGElement,
  *     params: {
@@ -47,7 +47,7 @@ import { deepCopy, deepMerge } from "@web/core/utils/objects";
  *         shapeAnimationSpeed: number,
  *         shapeColors: string,
  *     }
- * ) => Promise<void>)[]} post_compute_shape_listeners
+ * ) => Promise<void>)[]} on_shape_computed_handlers
  */
 
 // Regex definitions to apply speed modification in SVG files
@@ -73,6 +73,7 @@ export class ImageShapeOptionPlugin extends Plugin {
         "isTechnicalShape",
         "isAnimableShape",
         "isTogglableRatioShape",
+        "aspectRatioShape",
         "getShapeLabel",
         "loadShape",
     ];
@@ -86,9 +87,9 @@ export class ImageShapeOptionPlugin extends Plugin {
             SetImageShapeSpeedAction,
             ToggleImageShapeRatioAction,
         },
-        process_image_warmup_handlers: this.processImageWarmup.bind(this),
-        process_image_post_handlers: this.processImagePost.bind(this),
-        hover_effect_allowed_predicates: (el) => this.canHaveHoverEffect(el),
+        on_will_process_image_handlers: this.processImageWarmup.bind(this),
+        on_image_processed_handlers: this.processImagePost.bind(this),
+        can_have_hover_effect_async_predicates: (el) => this.canHaveHoverEffect(el),
         image_shape_groups_providers: withSequence(0, () => deepCopy(imageShapeDefinitions)),
     };
     setup() {
@@ -186,14 +187,19 @@ export class ImageShapeOptionPlugin extends Plugin {
             parseInt(svg.getAttribute("width")) / parseInt(svg.getAttribute("height"));
         const imgAspectRatio = svg.dataset.imgAspectRatio;
 
-        if (isNewShape && !("aspectRatio" in newDataset)) {
+        const isNewImage = "originalSrc" in newDataset;
+        if ((isNewImage || isNewShape) && !("aspectRatio" in newDataset)) {
             const data = getImageTransformationData({ ...img.dataset, ...newDataset });
 
-            // The togglable ratio is squared by default.
-            const shouldBeSquared =
-                this.imageShapes[shapeId].togglableRatio && !img.dataset.aspectRatio;
-            if (shouldBeSquared && !shouldPreventGifTransformation(data)) {
-                newDataset.aspectRatio = "1/1";
+            // We consider the aspect ratio as default if it has not been set or
+            // if it has the aspect ratio of the current shape set on the image.
+            const isDefaultAspectRatio =
+                !img.dataset.aspectRatio ||
+                img.dataset.aspectRatio === this.aspectRatioShape(img.dataset.shape);
+            if (isDefaultAspectRatio && !shouldPreventGifTransformation(data)) {
+                newDataset.aspectRatio = this.isTogglableRatioShape(shapeId)
+                    ? this.aspectRatioShape(shapeId)
+                    : undefined;
             }
         }
 
@@ -298,7 +304,7 @@ export class ImageShapeOptionPlugin extends Plugin {
             );
         }
 
-        for (const cb of this.getResource("post_compute_shape_listeners")) {
+        for (const cb of this.getResource("on_shape_computed_handlers")) {
             await cb(svg, params);
         }
 
@@ -409,7 +415,13 @@ export class ImageShapeOptionPlugin extends Plugin {
         if (!shape) {
             return false;
         }
-        return this.imageShapes[shape].togglableRatio;
+        return this.imageShapes[shape].togglableRatio ?? false;
+    }
+    aspectRatioShape(shape) {
+        if (!shape || !this.isTogglableRatioShape(shape)) {
+            return undefined;
+        }
+        return this.imageShapes[shape].aspectRatio || "1/1";
     }
     getImageShapeGroups() {
         if (!this.imageShapeGroups) {
@@ -435,7 +447,7 @@ export class ImageShapeOptionPlugin extends Plugin {
         return Object.fromEntries(entries);
     }
     getDefaultShapeId(dataset) {
-        for (const fn of this.getResource("default_shape_handlers")) {
+        for (const fn of this.getResource("default_shape_providers")) {
             const shapeId = fn(dataset);
             if (shapeId) {
                 return shapeId;
@@ -551,12 +563,17 @@ export class ToggleImageShapeRatioAction extends BuilderAction {
     static dependencies = ["imageShapeOption"];
 
     isApplied({ editingElement: img }) {
-        return img.dataset.aspectRatio !== "1/1";
+        return (
+            img.dataset.aspectRatio !==
+            this.dependencies.imageShapeOption.aspectRatioShape(img.dataset.shape)
+        );
     }
     async load({ editingElement: img }) {
-        const isStretched = img.dataset.aspectRatio !== "1/1";
+        const unstretchedAspectRatio = this.dependencies.imageShapeOption.aspectRatioShape(
+            img.dataset.shape
+        );
         return this.dependencies.imageShapeOption.loadShape(img, {
-            aspectRatio: isStretched ? "1/1" : "0/0",
+            aspectRatio: this.isApplied({ editingElement: img }) ? unstretchedAspectRatio : "0/0",
             x: undefined,
             y: undefined,
             width: undefined,

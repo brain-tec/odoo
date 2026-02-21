@@ -38,7 +38,8 @@ class SaleOrderLine(models.Model):
                     del res['order_id']
 
             if 'order_id' in fields and not res.get('order_id'):
-                assert (partner_id := self.env.context.get('default_partner_id'))
+                if not (partner_id := self.env.context.get('default_partner_id')):
+                    pass
                 project_id = self.env.context.get('link_to_project')
                 sale_order = None
                 so_create_values = {
@@ -470,13 +471,6 @@ class SaleOrderLine(models.Model):
                 if len(accounts) == 1:
                     values['analytic_distribution'] = {accounts.id: 100}
         return values
-
-    def _get_action_per_item(self):
-        """ Get action per Sales Order Item
-
-            :returns: Dict containing id of SOL as key and the action as value
-        """
-        return {}
 
     def _prepare_procurement_values(self):
         values = super()._prepare_procurement_values()

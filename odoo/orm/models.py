@@ -50,6 +50,7 @@ from odoo.tools import (
     SQL, sql, groupby,
 )
 from odoo.tools.constants import PREFETCH_MAX
+from odoo.tools.func import deprecated
 from odoo.tools.lru import LRU
 from odoo.tools.misc import ReversedIterable, exception_to_unicode, unquote
 from odoo.tools.safe_eval import _UNSAFE_ATTRIBUTES
@@ -2703,7 +2704,7 @@ class BaseModel(metaclass=MetaModel):
         raise AccessError(error_msg)
 
     @api.model
-    @api.deprecated("Since 20.0, use check_field_access()")
+    @deprecated("Since 20.0, use check_field_access()")
     def _check_field_access(self, field: Field, operation: typing.Literal['read', 'write']) -> None:
         return self.check_field_access(field, operation)
 
@@ -5217,17 +5218,17 @@ class BaseModel(metaclass=MetaModel):
         return list(OriginIds(self._ids))
 
     @property
-    @api.deprecated("Deprecated since 19.0, use self.env.cr directly")
+    @deprecated("Deprecated since 19.0, use self.env.cr directly")
     def _cr(self):
         return self.env.cr
 
     @property
-    @api.deprecated("Deprecated since 19.0, use self.env.uid directly")
+    @deprecated("Deprecated since 19.0, use self.env.uid directly")
     def _uid(self):
         return self.env.uid
 
     @property
-    @api.deprecated("Deprecated since 19.0, use self.env.context directly")
+    @deprecated("Deprecated since 19.0, use self.env.context directly")
     def _context(self):
         return self.env.context
 
@@ -6002,8 +6003,13 @@ class BaseModel(metaclass=MetaModel):
         if isinstance(key, str):
             # important: one must call the field's getter
             return self._fields[key].__get__(self)
-        ids = self._ids[key] if isinstance(key, slice) else (self._ids[key],)
-        return self.__class__(self.env, ids, Prefetch.union(ids, self._prefetch_ids))
+        if isinstance(key, slice):
+            ids = self._ids[key]
+            prefetch_ids = Prefetch.union(ids, self._prefetch_ids)
+        else:
+            ids = (self._ids[key],)
+            prefetch_ids = self._prefetch_ids
+        return self.__class__(self.env, ids, prefetch_ids)
 
     def __setitem__(self, key: str, value: typing.Any):
         """ Assign the field ``key`` to ``value`` in record ``self``. """

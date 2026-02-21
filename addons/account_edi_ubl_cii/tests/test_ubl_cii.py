@@ -135,7 +135,8 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
         company.partner_id.bank_ids = [Command.create({
             'account_number': '999999',
             'partner_id': company.partner_id.id,
-            'holder_name': 'The Chosen One'
+            'holder_name': 'The Chosen One',
+            'allow_out_payment': True,
         })]
 
         for ubl_cii_format in ['facturx', 'ubl_bis3']:
@@ -554,10 +555,10 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
             self.assertFalse(line.discount, "A discount on the imported lines signals a rounding error in the discount computation")
 
     def test_export_xml_with_multiple_invoices(self):
-        partner = self.env['res.partner'].create({
-            'name': 'Test Partner',
-            'invoice_edi_format': 'ubl_bis3',
-            'country_id': self.env.ref('base.be').id,
+        partner = self._create_partner_be(invoice_edi_format='ubl_bis3')
+        self.company_data['company'].partner_id.write({
+            'peppol_eas': '0230',
+            'peppol_endpoint': 'C2584563200',
         })
         invoices = self.env['account.move'].create([
             {
@@ -597,6 +598,7 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
                 'bank_name': 'ING',
                 'bank_bic': 'BBRUBEBB',
                 'company_id': self.env.company.id,
+                'allow_out_payment': True,
             })
         invoice = self.env['account.move'].create({
             'partner_id': self.partner_a.id,
@@ -621,6 +623,7 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
             company_bank_journal = self.company_data['default_journal_bank']
             company_bank_journal.bank_account_number = 'CH9300762011623852957'
             self.partner_a.country_id = self.env.ref('base.nl').id
+            company_bank_journal.bank_account_id.allow_out_payment = True
 
             mandate = self.env['sdd.mandate'].create({
                 'name': 'mandate ' + (self.partner_a.name or ''),
@@ -695,7 +698,7 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
         partner = self.partner_a
         partner.peppol_endpoint = '00000000001020304050'
         partner.country_id = self.env.ref('base.nl').id
-        partner.bank_ids = [Command.create({'account_number': "0123456789"})]
+        partner.bank_ids = [Command.create({'account_number': "0123456789", 'allow_out_payment': True})]
         invoice = self.env['account.move'].create({
             'partner_id': partner.id,
             'move_type': 'out_invoice',

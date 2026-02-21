@@ -35,7 +35,8 @@ export class ControlButtons extends Component {
     }
     async clickPrintBill() {
         // Need to await to have the result in case of automatic skip screen.
-        await this.pos.printReceipt({
+        await this.pos.ticketPrinter.printOrderReceipt({
+            order: this.pos.getOrder(),
             printBillActionTriggered: true,
         });
     }
@@ -120,10 +121,6 @@ export class ControlButtons extends Component {
         if (payload) {
             this.pos.selectPricelist(payload);
         }
-    }
-
-    clickRefund() {
-        this.pos.openFinalizedOrders();
     }
 
     get buttonClass() {

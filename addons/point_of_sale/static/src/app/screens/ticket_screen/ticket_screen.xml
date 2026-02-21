@@ -149,7 +149,7 @@
                             t-on-click="() => this.setOrder(_selectedSyncedOrder)">
                             <span class="d-block">Load Order</span>
                         </button>
-                        <button class="btn-switchpane btn btn-lg lh-lg w-50 py-3 btn-secondary review-button" t-att-class="{'btn-primary': isOrderSynced, 'btn-light': !isOrderSynced}" t-on-click="switchPane">
+                        <button class="btn-switchpane btn btn-lg lh-lg py-3 btn-secondary review-button" t-att-class="isOrderSynced ? 'w-100 btn-primary' : 'w-50 btn-secondary'" t-on-click="switchPane">
                             <span class="d-block">Review</span>
                         </button>
                     </div>
@@ -164,25 +164,13 @@
                         </div>
                         <OrderDisplay order="_selectedSyncedOrder" t-if="_selectedSyncedOrder" t-slot-scope="scope">
                             <t t-set="line" t-value="scope.line" />
-                            <Orderline line="line" t-on-click="() => this.onClickOrderline(line)" class="{'selected': line.id === _selectedOrderlineId}">
+                            <t t-set="qty" t-value="line.order_id?.uiState?.lineToRefund?.[line.uuid]?.qty" />
+                            <Orderline line="line" t-on-click="() => this.onClickOrderline(line)" toRefund="qty" class="{'selected': line.id === _selectedOrderlineId}">
                                 <t t-set="toRefundDetail" t-value="line.order_id?.uiState?.lineToRefund?.[line.uuid]" />
                                 <li t-if="!pos.isProductQtyZero(line.refundedQty)"
                                     class="info refund-note mt-1">
-                                    <strong t-esc="env.utils.formatProductQty(line.refundedQty)" />
+                                    <strong t-esc="env.utils.formatProductQty(line.refundedQty, false)" />
                                     <span> Refunded</span>
-                                </li>
-                                <li t-if="!pos.isProductQtyZero(toRefundDetail?.qty)" class="info to-refund-highlight refund-note mt-1 fw-bold text-primary">
-                                    <t t-set="_destinationOrderUid" t-value="toRefundDetail.destinationOrder?.uuid"/>
-                                    <t t-set="refundQty" t-value="env.utils.formatProductQty(toRefundDetail.qty)"/>
-                                    <t t-if="_destinationOrderUid">
-                                        Refunding <t t-esc="refundQty" /> in
-                                        <span t-esc="_destinationOrderUid"
-                                            class="order-link ms-1 text-decoration-underline cursor-pointer"
-                                            t-on-click.stop="() => this.onClickRefundOrderUid(_destinationOrderUid)" />
-                                    </t>
-                                    <t t-else="">
-                                        To Refund: <t t-esc="refundQty" />
-                                    </t>
                                 </li>
                             </Orderline>
                         </OrderDisplay>
@@ -203,6 +191,7 @@
                                     <Numpad class="'pb-2'" buttons="getNumpadButtons()"/>
                                         <ActionpadWidget
                                             partner="getSelectedOrder()?.getPartner()"
+                                            buttonClasses="!getHasItemsToRefund() ? 'disabled' : ''"
                                             actionName.translate="Refund"
                                             actionToTrigger.bind="onDoRefund"
                                         />
@@ -212,7 +201,7 @@
                                 <BackButton t-if="ui.isSmall" onClick="() => pos.onClickBackButton()"/>
                                 <button class="button btn btn-secondary btn-lg d-flex flex-row align-items-center justify-content-center"
                                     t-on-click="() => this.onClickReprintAll(_selectedSyncedOrder)"
-                                    t-if="this.pos.kitchenPrinters.length and _selectedSyncedOrder.uiState.lastPrints.length">
+                                    t-if="this.pos.ticketPrinter.hasPreparationPrinters and _selectedSyncedOrder.uiState.lastPrints.length">
                                     <i class="fa fa-cutlery" aria-hidden="true"/>
                                 </button>
                                 <button class="button validation load-order-button w-100 btn btn-lg btn-primary py-3"

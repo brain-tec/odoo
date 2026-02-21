@@ -5,7 +5,6 @@ from urllib.parse import quote, urlencode, urlparse
 
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError
-from odoo.addons.l10n_tr_nilvera.const import NILVERA_ERROR_CODE_MESSAGES
 from odoo.addons.l10n_tr_nilvera.lib.nilvera_client import _get_nilvera_client
 
 MOVE_TYPE_CATEGORY_MAP = {
@@ -234,7 +233,7 @@ class AccountMove(models.Model):
                             indicates a client error (4xx), or if a server error occurs (500).
         :return: None
         """
-        with _get_nilvera_client(self.env.company) as client:
+        with _get_nilvera_client(self.env._, self.env.company) as client:
             response = client.request(
                 "POST",
                 endpoint,
@@ -248,7 +247,7 @@ class AccountMove(models.Model):
             elif response.status_code in {401, 403}:
                 raise UserError(_("Oops, seems like you're unauthorised to do this. Try another API key with more rights or contact Nilvera."))
             elif 400 <= response.status_code < 500:
-                error_message, error_codes = self._l10n_tr_nilvera_einvoice_get_error_messages_from_response(response)
+                error_message, error_codes = client._get_error_message_with_codes_from_response(response)
 
                 # If the sequence/series is not found on Nilvera, add it then retry.
                 if 3009 in error_codes and post_series:
@@ -288,7 +287,7 @@ class AccountMove(models.Model):
 
     def _l10n_tr_nilvera_get_submitted_document_status(self):
         for company, invoices in self.grouped("company_id").items():
-            with _get_nilvera_client(company) as client:
+            with _get_nilvera_client(self.env._, company) as client:
                 for invoice in invoices:
                     invoice_channel = invoice._l10n_tr_get_status_invoice_channel()
                     document_category = invoice._l10n_tr_get_document_category(invoice_channel)
@@ -317,7 +316,7 @@ class AccountMove(models.Model):
                         invoice.message_post(body=_("The invoice status couldn't be retrieved from Nilvera."))
 
     def _l10n_tr_nilvera_get_documents(self, invoice_channel="einvoice", document_category="Purchase", journal_type="purchase"):
-        with _get_nilvera_client(self.env.company) as client:
+        with _get_nilvera_client(self.env._, self.env.company) as client:
             endpoint = f"/{invoice_channel}/{quote(document_category)}"
             last_fetched_date_field_name = f"l10n_tr_{invoice_channel}_{journal_type}_last_fetched_date"
             start_date = self.env.company[last_fetched_date_field_name]
@@ -455,7 +454,7 @@ class AccountMove(models.Model):
         invoice.with_context(no_new_invoice=True).message_post(attachment_ids=attachment.ids)
 
     def l10n_tr_nilvera_get_pdf(self):
-        with _get_nilvera_client(self.env.company) as client:
+        with _get_nilvera_client(self.env._, self.env.company) as client:
             for invoice in self:
                 if (
                         invoice.l10n_tr_nilvera_customer_status not in {'einvoice', 'earchive'}
@@ -470,22 +469,6 @@ class AccountMove(models.Model):
                     document_category="Sale",
                     invoice_channel=invoice.l10n_tr_nilvera_customer_status,
                 )
-
-    def _l10n_tr_nilvera_einvoice_get_error_messages_from_response(self, response):
-        msg = ""
-        error_codes = []
-
-        response_json = response.json()
-        if errors := response_json.get('Errors'):
-            msg += _("The invoice couldn't be sent due to the following errors:\n")
-
-            for error in errors:
-                code = error.get('Code')
-                description = NILVERA_ERROR_CODE_MESSAGES.get(code, error.get('Description'))
-                msg += "\n%s - %s:\n%s\n" % (code, description, error.get('Detail'))
-                error_codes.append(code)
-
-        return msg, error_codes
 
     def _l10n_tr_nilvera_einvoice_check_negative_lines(self):
         return any(
@@ -542,7 +525,7 @@ class AccountMove(models.Model):
             ('l10n_tr_nilvera_pdf_file', '=', False),
         ], limit=batch_size)
         for company, invoices in invoices_to_fetch_pdf.grouped("company_id").items():
-            with _get_nilvera_client(company) as client:
+            with _get_nilvera_client(self.env._, company) as client:
                 for invoice in invoices:
                     self._l10n_tr_nilvera_add_pdf_to_invoice(
                         client,

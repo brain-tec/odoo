@@ -15,6 +15,11 @@ class BadgeOptionPlugin extends Plugin {
     resources = {
         builder_options: [withSequence(before(ANIMATE), BadgeOption)],
         so_content_addition_selector: [".s_badge"],
+        is_node_splittable_predicates: (node) => {
+            if (node.classList?.contains("s_badge")) {
+                return false;
+            }
+        },
     };
 }
 registry.category("builder-plugins").add(BadgeOptionPlugin.id, BadgeOptionPlugin);

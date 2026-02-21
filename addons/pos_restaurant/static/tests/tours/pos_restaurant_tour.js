@@ -19,7 +19,11 @@ import * as TextInputPopup from "@point_of_sale/../tests/generic_helpers/text_in
 import * as PreparationReceipt from "@point_of_sale/../tests/pos/tours/utils/preparation_receipt_util";
 import * as NumberPopup from "@point_of_sale/../tests/generic_helpers/number_popup_util";
 import { checkPreparationTicketData } from "@point_of_sale/../tests/pos/tours/utils/preparation_receipt_util";
-import { negateStep, assertCurrentOrderDirty } from "@point_of_sale/../tests/generic_helpers/utils";
+import {
+    negateStep,
+    assertCurrentOrderDirty,
+    refresh,
+} from "@point_of_sale/../tests/generic_helpers/utils";
 const ProductScreen = { ...ProductScreenPos, ...ProductScreenResto };
 
 registry.category("web_tour.tours").add("pos_restaurant_sync", {
@@ -456,7 +460,7 @@ registry.category("web_tour.tours").add("PreparationPrinterContent", {
                 visibleInDom: [
                     "10:00",
                     "Value 1",
-                    "Guest: 5",
+                    "Guest 5",
                     "Eat in",
                     "Test customer note - orderline",
                 ],
@@ -485,6 +489,7 @@ registry.category("web_tour.tours").add("PreparationPrinterContent", {
             ProductScreen.selectPreset("Eat in", "Takeaway", false),
             Chrome.presetTimingSlotHourNotExists("9:00am"),
             Chrome.selectPresetTimingSlotHour({ title: "takeaway", hour: "12:00pm" }),
+            Chrome.presetTimingSlotIs("12:00pm"),
             checkPreparationTicketData([{ name: "Water", qty: 1 }], {
                 visibleInDom: ["Takeaway"],
                 invisibleInDom: ["colorIndex"],
@@ -515,18 +520,25 @@ registry.category("web_tour.tours").add("test_course_restaurant_preparation_tour
                 }
             ),
             ProductScreen.clickOrderButton(),
+            Chrome.waitRequest(),
             Dialog.bodyIs("Preparation Printer: The printer is not reachable."),
             Dialog.confirm(),
             FloorScreen.clickTable("5"),
+            Chrome.waitRequest(),
+            ProductScreen.fireCourseButtonHighlighted("Course 2"),
             checkPreparationTicketData([], {
                 visibleInDom: ["Course 2"],
                 fireCourse: true,
             }),
+            Chrome.isSynced(),
             ProductScreen.fireCourseButton(),
+            Chrome.waitRequest(),
             Dialog.bodyIs("Printer: The printer is not reachable."),
             Dialog.confirm(),
             FloorScreen.clickTable("5"),
-            ProductScreen.selectCourseLine("Course 3"),
+            Chrome.waitRequest(),
+            Chrome.isSynced(),
+            ProductScreen.fireCourseButtonHighlighted("Course 3"),
             checkPreparationTicketData([{ name: "Product Test", qty: 1, attribute: ["Value 1"] }], {
                 visibleInDom: ["Course 3"],
                 invisibleInDom: ["DUPLICATA!"],
@@ -689,6 +701,7 @@ registry.category("web_tour.tours").add("test_preset_timing_restaurant", {
             Dialog.confirm("apply"),
             Chrome.presetTimingSlotHourNotExists("9:00am"),
             Chrome.selectPresetTimingSlotHour({ title: "takeaway", hour: "12:00pm" }),
+            Chrome.presetTimingSlotIs("12:00pm"),
             Chrome.clickPlanButton(),
             FloorScreen.clickTable("4"),
             ProductScreen.clickDisplayedProduct("Coca-Cola"),
@@ -720,6 +733,8 @@ registry.category("web_tour.tours").add("test_open_register_with_preset_takeaway
             FloorScreen.clickTable("5"),
             Chrome.presetTimingSlotHourNotExists("9:00am"),
             Chrome.selectPresetTimingSlotHour({ title: "takeaway", hour: "12:20pm" }),
+            Chrome.presetTimingSlotIs("12:20pm"),
+            Chrome.waitRequest(),
             ProductScreen.clickDisplayedProduct("Coca-Cola", true),
             ProductScreen.clickControlButton("Cancel Order"),
             Dialog.cancel({ title: "Existing orderlines" }),
@@ -732,6 +747,31 @@ registry.category("web_tour.tours").add("test_open_register_with_preset_takeaway
             {
                 trigger: ".orders:contains(no orders found)",
             },
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_cancel_future_order", {
+    steps: () =>
+        [
+            Chrome.freezeDateTime(1739370000000),
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            FloorScreen.clickNewOrder(),
+            ProductScreen.clickDisplayedProduct("Coca-Cola"),
+            ProductScreen.selectPreset("Eat in", "Takeaway", false),
+            TextInputPopup.inputText("John"),
+            Dialog.confirm(),
+            Chrome.selectPresetTimingSlot("02/13/2025"),
+            Chrome.selectPresetTimingSlot("3:00pm"),
+            Chrome.presetTimingSlotIs("3:00pm"),
+            Chrome.clickPlanButton(),
+            FloorScreen.clickTable("4"),
+            ProductScreen.clickDisplayedProduct("Coca-Cola"),
+            Chrome.clickOrders(),
+            TicketScreen.deleteOrder("001"),
+            Dialog.confirm(),
+            refresh(),
+            negateStep(...TicketScreen.selectOrder("001")),
         ].flat(),
 });
 
@@ -1094,14 +1134,12 @@ registry.category("web_tour.tours").add("test_sync_lines_qty_update", {
             Chrome.clickPlanButton(),
             FloorScreen.clickTable("5"),
             ProductScreen.clickLine("Coca-Cola"),
-            Chrome.waitRequest(), // Wait for sync request (the order is created)
             assertCurrentOrderDirty(false),
             Numpad.click("3"),
             Order.hasLine({ productName: "Coca-Cola", quantity: 3 }),
             assertCurrentOrderDirty(true),
             Chrome.clickPlanButton(),
             FloorScreen.isShown(),
-            Chrome.waitRequest(), // Wait for sync request
             FloorScreen.clickTable("5"),
             ProductScreen.isShown(),
             assertCurrentOrderDirty(false),
@@ -1118,14 +1156,12 @@ registry.category("web_tour.tours").add("test_sync_set_partner", {
             Order.hasLine({ productName: "Coca-Cola" }),
             Chrome.clickPlanButton(),
             FloorScreen.clickTable("5"),
-            Chrome.waitRequest(), // Wait for sync request
             assertCurrentOrderDirty(false),
             ProductScreen.clickPartnerButton(),
             ProductScreen.clickCustomer("Acme Corporation"),
             assertCurrentOrderDirty(true),
             Chrome.clickPlanButton(),
             FloorScreen.isShown(),
-            Chrome.waitRequest(), // Wait for sync request
         ].flat(),
 });
 
@@ -1139,14 +1175,12 @@ registry.category("web_tour.tours").add("test_sync_set_note", {
             Order.hasLine({ productName: "Coca-Cola" }),
             Chrome.clickPlanButton(),
             FloorScreen.clickTable("5"),
-            Chrome.waitRequest(), // Wait for sync request
             assertCurrentOrderDirty(false),
             ProductScreen.isShown(),
             ProductScreen.addInternalNote("Hello world"),
             assertCurrentOrderDirty(true),
             Chrome.clickPlanButton(),
             FloorScreen.isShown(),
-            Chrome.waitRequest(), // Wait for sync request
         ].flat(),
 });
 
@@ -1160,7 +1194,6 @@ registry.category("web_tour.tours").add("test_sync_set_line_note", {
             Order.hasLine({ productName: "Coca-Cola" }),
             Chrome.clickPlanButton(),
             FloorScreen.clickTable("5"),
-            Chrome.waitRequest(), // Wait for sync request
             assertCurrentOrderDirty(false),
             ProductScreen.isShown(),
             ProductScreen.clickLine("Coca-Cola"),
@@ -1168,7 +1201,6 @@ registry.category("web_tour.tours").add("test_sync_set_line_note", {
             assertCurrentOrderDirty(true),
             Chrome.clickPlanButton(),
             FloorScreen.isShown(),
-            Chrome.waitRequest(), // Wait for sync request
         ].flat(),
 });
 
@@ -1182,7 +1214,6 @@ registry.category("web_tour.tours").add("test_sync_set_pricelist", {
             Order.hasLine({ productName: "Coca-Cola" }),
             Chrome.clickPlanButton(),
             FloorScreen.clickTable("5"),
-            Chrome.waitRequest(), // Wait for sync request
             assertCurrentOrderDirty(false),
             ProductScreen.isShown(),
             ProductScreen.clickLine("Coca-Cola"),
@@ -1190,7 +1221,6 @@ registry.category("web_tour.tours").add("test_sync_set_pricelist", {
             assertCurrentOrderDirty(true),
             Chrome.clickPlanButton(),
             FloorScreen.isShown(),
-            Chrome.waitRequest(), // Wait for sync request
         ].flat(),
 });
 
@@ -1288,5 +1318,16 @@ registry.category("web_tour.tours").add("test_guest_count_bank_payment", {
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickBackToProductScreen(),
             ProductScreen.isShown(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_futur_orders_are_not_cancelled", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            Chrome.clickMenuOption("Close Register"),
+            Dialog.confirm("Close Register"),
+            Dialog.confirm("Cancel Orders", ".btn-secondary"),
         ].flat(),
 });

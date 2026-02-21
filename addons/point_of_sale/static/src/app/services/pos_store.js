@@ -1,8 +1,5 @@
-/* global waitForWebfonts */
-
 import { Mutex } from "@web/core/utils/concurrency";
 import { reactive } from "@odoo/owl";
-import { renderToElement } from "@web/core/utils/render";
 import { registry } from "@web/core/registry";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import {
@@ -26,11 +23,7 @@ import {
 } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { PartnerList } from "../screens/partner_list/partner_list";
 import { computeComboItems } from "../models/utils/compute_combo_items";
-import {
-    changesToOrder,
-    getOrderChanges,
-    filterChangeByCategories,
-} from "../models/utils/order_change";
+import { getOrderChanges } from "../models/utils/order_change";
 import { QRPopup } from "@point_of_sale/app/components/popups/qr_code_popup/qr_code_popup";
 import { CashMovePopup } from "@point_of_sale/app/components/popups/cash_move_popup/cash_move_popup";
 import { ClosePosPopup } from "@point_of_sale/app/components/popups/closing_popup/closing_popup";
@@ -42,14 +35,12 @@ import { debounce } from "@web/core/utils/timing";
 import DevicesSynchronisation from "../utils/devices_synchronisation";
 import { formatDate, deserializeDateTime } from "@web/core/l10n/dates";
 import { ProductInfoPopup } from "@point_of_sale/app/components/popups/product_info_popup/product_info_popup";
-import { RetryPrintPopup } from "@point_of_sale/app/components/popups/retry_print_popup/retry_print_popup";
 import { PresetSlotsPopup } from "@point_of_sale/app/components/popups/preset_slots_popup/preset_slots_popup";
 import { DebugWidget } from "../utils/debug/debug_widget";
-import { EpsonPrinter } from "@point_of_sale/app/utils/printer/epson_printer";
 import OrderPaymentValidation from "../utils/order_payment_validation";
 import { logPosMessage } from "../utils/pretty_console_log";
 import { initLNA } from "../utils/init_lna";
-import { GeneratePrinterData } from "../utils/generate_printer_data";
+import { accountTaxHelpers } from "@account/helpers/account_tax";
 
 const { DateTime } = luxon;
 export const CONSOLE_COLOR = "#F5B427";
@@ -57,7 +48,7 @@ export const CONSOLE_COLOR = "#F5B427";
 export class PosStore extends WithLazyGetterTrap {
     loadingSkipButtonIsShown = false;
     mainScreen = { name: null, component: null };
-    feedbackScreenAutoSkipDelay = 5000;
+    feedbackScreenAutoSkipDelay = 1000;
 
     static serviceDependencies = [
         "bus_service",
@@ -67,7 +58,7 @@ export class PosStore extends WithLazyGetterTrap {
         "pos_data",
         "dialog",
         "notification",
-        "printer",
+        "pos_ticket_printer",
         "action",
         "alert",
         "pos_router",
@@ -88,7 +79,7 @@ export class PosStore extends WithLazyGetterTrap {
             ui,
             dialog,
             notification,
-            printer,
+            pos_ticket_printer,
             bus_service,
             pos_data,
             action,
@@ -101,7 +92,7 @@ export class PosStore extends WithLazyGetterTrap {
         this.barcodeReader = barcode_reader;
         this.ui = ui;
         this.dialog = dialog;
-        this.printer = printer;
+        this.ticketPrinter = pos_ticket_printer;
         this.bus = bus_service;
         this.data = pos_data;
         this.action = action;
@@ -109,7 +100,6 @@ export class PosStore extends WithLazyGetterTrap {
         this.router = pos_router;
         this.sound = env.services["mail.sound_effects"];
         this.notification = notification;
-        this.kitchenPrinters = [];
         this.pushOrderMutex = new Mutex();
         this.router.popStateCallback = this.handleUrlParams.bind(this);
         this.searchProductDBState = null;
@@ -477,30 +467,7 @@ export class PosStore extends WithLazyGetterTrap {
             }
         }
 
-        // Create preparation/kitchen printers
-        let useLna = false;
-        for (const printerConfig of this.config.preparation_printer_ids) {
-            const printer = this.createPrinter(printerConfig);
-            if (printer) {
-                printer.config = printerConfig.raw;
-                this.kitchenPrinters.push(printer);
-            }
-
-            useLna = useLna || printerConfig.use_lna;
-        }
-        this.config.iface_printers = !!this.kitchenPrinters.length;
-
-        for (const printer of this.config.receipt_printer_ids) {
-            const printerDevice = this.createPrinter(printer);
-            this.printer.setFallbackPrinter(printerDevice);
-            if (printer == this.config.default_receipt_printer_id) {
-                this.printer.setPrinter(printerDevice);
-            }
-
-            useLna = useLna || printer.use_lna;
-        }
-
-        if (useLna) {
+        if (this.ticketPrinter.useLna) {
             initLNA(this.notification, (type, message) => {
                 this.lnaState = { type, message };
             });
@@ -527,8 +494,9 @@ export class PosStore extends WithLazyGetterTrap {
         return makeAwaitable(this.dialog, CashMovePopup);
     }
     async openCashbox(action = undefined) {
-        if (this.config.iface_cashdrawer && this.printer.device) {
-            this.printer.device.openCashbox();
+        if (this.config.iface_cashdrawer) {
+            await this.ticketPrinter.openCashbox();
+
             if (action) {
                 await this.logEmployeeMessage(action, "CASH_DRAWER_ACTION");
             }
@@ -1276,25 +1244,6 @@ export class PosStore extends WithLazyGetterTrap {
         }
     };
 
-    createPrinter(config) {
-        if (config.printer_type === "epson_epos") {
-            return new EpsonPrinter({ printer: config });
-        }
-    }
-    async _loadFonts() {
-        return new Promise(function (resolve, reject) {
-            // Waiting for fonts to be loaded to prevent receipt printing
-            // from printing empty receipt while loading Inconsolata
-            // ( The font used for the receipt )
-            waitForWebfonts(["Lato", "Inconsolata"], function () {
-                resolve();
-            });
-            // The JS used to detect font loading is not 100% robust, so
-            // do not wait more than 5sec
-            setTimeout(resolve, 5000);
-        });
-    }
-
     setSelectedCategory(categoryId) {
         if (categoryId === this.selectedCategory?.id) {
             if (this.selectedCategory.parent_id) {
@@ -1548,7 +1497,7 @@ export class PosStore extends WithLazyGetterTrap {
         for (const order of orders) {
             const context = this.getSyncAllOrdersContext([order], options);
             await this.preSyncAllOrders([order]);
-            this.syncingOrders.add(order.id);
+            this.syncingOrders.add(order.uuid);
 
             try {
                 const serialized = order.serializeForORM();
@@ -1850,47 +1799,11 @@ export class PosStore extends WithLazyGetterTrap {
             true
         );
     }
-    getOrderReceiptGenerator(order = this.getOrder(), basicReceipt = false) {
-        return new GeneratePrinterData(order, basicReceipt);
-    }
-    async printReceipt({
-        basic = false,
-        order = this.getOrder(),
-        printBillActionTriggered = false,
-    } = {}) {
-        const generator = this.getOrderReceiptGenerator(order, basic);
-        const data = generator.generateHtml();
-        const result = await this.printer.printHtml(data, this.printOptions);
-
-        if (!printBillActionTriggered) {
-            if (result) {
-                const count = order.nb_print ? order.nb_print + 1 : 1;
-                if (order.isSynced) {
-                    const wasDirty = order.isDirty();
-                    await this.data.write("pos.order", [order.id], { nb_print: count });
-                    if (!wasDirty) {
-                        order._dirty = false;
-                    }
-                } else {
-                    order.nb_print = count;
-                }
-            }
-        } else if (!order.nb_print) {
-            order.nb_print = 0;
-        }
-        if (result?.warningCode) {
-            this.displayPrinterWarning(result, _t("Receipt Printer"));
-        }
-        return result;
-    }
     get printOptions() {
         return { webPrintFallback: true };
     }
     getOrderChanges(order = this.getOrder()) {
         return getOrderChanges(order, this.config.preparationCategories);
-    }
-    changesToOrder(order, skipped = false, orderPreparationCategories, cancelled = false) {
-        return changesToOrder(order, skipped, orderPreparationCategories, cancelled);
     }
     async checkPreparationStateAndSentOrderInPreparation(order, opts = {}) {
         if (!order.isSynced) {
@@ -1929,40 +1842,7 @@ export class PosStore extends WithLazyGetterTrap {
 
         if (this.config.printerCategories.size && !opts.byPassPrint) {
             try {
-                let reprint = false;
-                let orderChange = changesToOrder(
-                    order,
-                    this.config.printerCategories,
-                    opts.cancelled
-                );
-
-                const hasChanges =
-                    orderChange.new.length ||
-                    orderChange.cancelled.length ||
-                    orderChange.noteUpdate.length ||
-                    orderChange.internal_note ||
-                    orderChange.general_customer_note;
-
-                let shouldPrint = true;
-                if (!hasChanges) {
-                    if (opts.explicitReprint && order.uiState.lastPrints) {
-                        orderChange = [order.uiState.lastPrints.at(-1)];
-                        reprint = true;
-                    } else {
-                        shouldPrint = false;
-                    }
-                } else {
-                    order.uiState.lastPrints.push(orderChange);
-                    orderChange = [orderChange];
-                }
-
-                if (reprint && opts.orderDone) {
-                    shouldPrint = false;
-                }
-
-                if (shouldPrint) {
-                    isPrinted = await this.printChanges(order, orderChange, reprint);
-                }
+                isPrinted = await this.ticketPrinter.printOrderChanges({ order, opts });
             } catch (e) {
                 logPosMessage(
                     "Store",
@@ -1987,142 +1867,6 @@ export class PosStore extends WithLazyGetterTrap {
             throw new ConnectionLostError();
         }
         await this.checkPreparationStateAndSentOrderInPreparation(o, opts);
-    }
-
-    generateOrderChange(order, orderChange, categories, reprint = false) {
-        const isPartOfCombo = (line) =>
-            line.isCombo ||
-            line.combo_parent_uuid ||
-            this.models["product.product"].get(line.product_id).type == "combo";
-        const comboChanges = orderChange.new.filter(isPartOfCombo);
-        const normalChanges = orderChange.new.filter((line) => !isPartOfCombo(line));
-        normalChanges.sort((a, b) => {
-            const sequenceA = a.pos_categ_sequence;
-            const sequenceB = b.pos_categ_sequence;
-            if (sequenceA === 0 && sequenceB === 0) {
-                return a.pos_categ_id - b.pos_categ_id;
-            }
-
-            return sequenceA - sequenceB;
-        });
-        orderChange.new = [...comboChanges, ...normalChanges];
-
-        const orderData = order.getOrderData(reprint);
-
-        const changes = filterChangeByCategories(categories, orderChange, this.models);
-        return { orderData, changes };
-    }
-
-    async generateReceiptsDataToPrint(orderData, changes, orderChange) {
-        const receiptsData = [];
-        if (changes.new.length) {
-            const orderDataNew = { ...orderData };
-            orderDataNew.changes = {
-                title: _t("NEW"),
-                data: changes.new,
-            };
-            receiptsData.push(await this.prepareReceiptGroupedData(orderDataNew));
-        }
-
-        if (changes.cancelled.length) {
-            const orderDataCancelled = { ...orderData };
-            orderDataCancelled.changes = {
-                title: _t("CANCELLED"),
-                data: changes.cancelled,
-            };
-            receiptsData.push(await this.prepareReceiptGroupedData(orderDataCancelled));
-        }
-
-        if (changes.noteUpdate.length) {
-            const orderDataNoteUpdate = { ...orderData };
-            const { noteUpdateTitle, printNoteUpdateData = true } = orderChange;
-            orderDataNoteUpdate.changes = {
-                title: noteUpdateTitle || _t("NOTE UPDATE"),
-                data: printNoteUpdateData ? changes.noteUpdate : [],
-            };
-            receiptsData.push(await this.prepareReceiptGroupedData(orderDataNoteUpdate));
-            orderData.changes.noteUpdate = [];
-        }
-
-        if (orderChange.internal_note || orderChange.general_customer_note) {
-            const orderDataNote = { ...orderData };
-            orderDataNote.changes = { title: "", data: [] };
-            receiptsData.push(await this.prepareReceiptGroupedData(orderDataNote));
-        }
-        return receiptsData;
-    }
-
-    async printChanges(order, orderChange, reprint = false, printers = this.kitchenPrinters) {
-        let isPrinted = false;
-        const unsuccessfulPrints = [];
-        const retryPrinters = new Set();
-
-        for (const printer of printers) {
-            for (const change of orderChange) {
-                const { orderData, changes } = this.generateOrderChange(
-                    order,
-                    change,
-                    printer.config.product_categories_ids,
-                    reprint
-                );
-                const receiptsData = await this.generateReceiptsDataToPrint(
-                    orderData,
-                    changes,
-                    change
-                );
-                let result = {};
-                for (const data of receiptsData) {
-                    result = await this.printOrderChanges(data, printer);
-                    if (result.successful) {
-                        isPrinted = true;
-                    }
-
-                    if (!result.successful) {
-                        retryPrinters.add(printer);
-                        unsuccessfulPrints.push(printer.config.name + ": " + result.message.body);
-                    } else if (result.warningCode) {
-                        this.displayPrinterWarning(result, printer.config.name);
-                    }
-                }
-            }
-        }
-
-        // printing errors
-        if (unsuccessfulPrints.length) {
-            const failedReceipts = unsuccessfulPrints.join("\n");
-            this.dialog.add(RetryPrintPopup, {
-                message: failedReceipts,
-                canRetry: true,
-                retry: () => {
-                    this.printChanges(order, orderChange, reprint, retryPrinters);
-                },
-            });
-        }
-
-        return isPrinted;
-    }
-
-    async prepareReceiptGroupedData(data) {
-        const dataChanges = data.changes?.data;
-        if (dataChanges && dataChanges.some((c) => c.group)) {
-            const groupedData = dataChanges.reduce((acc, c) => {
-                const { name = "", index = -1 } = c.group || {};
-                if (!acc[name]) {
-                    acc[name] = { name, index, data: [] };
-                }
-                acc[name].data.push(c);
-                return acc;
-            }, {});
-            data.changes.groupedData = Object.values(groupedData).sort((a, b) => a.index - b.index);
-        }
-        return data;
-    }
-
-    async printOrderChanges(data, printer) {
-        const receipt = renderToElement("point_of_sale.OrderChangeReceipt", {
-            data: data,
-        });
-        return await printer.printReceipt(receipt);
     }
 
     editPartnerContext(partner) {
@@ -2879,18 +2623,6 @@ export class PosStore extends WithLazyGetterTrap {
         this.navigate(nextPage.page, nextPage.params);
     }
 
-    displayPrinterWarning(printResult, printerName) {
-        let notification;
-        if (printResult.warningCode === "ROLL_PAPER_HAS_ALMOST_RUN_OUT") {
-            notification = _t("%s almost runs out of paper.", printerName);
-        }
-        if (notification) {
-            this.notification.add(notification, {
-                type: "warning",
-            });
-        }
-    }
-
     async isSessionDeleted() {
         return (
             (await this.data.orm.searchCount("pos.session", [["id", "=", this.session.id]])) === 0
@@ -2924,8 +2656,7 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     get isSelectedLineCombo() {
-        const selectedOrderline = this.selectedOrder.getSelectedOrderline();
-        return selectedOrderline && selectedOrderline.isPartOfCombo();
+        return Boolean(this.selectedOrder?.getSelectedOrderline()?.isPartOfCombo());
     }
 
     /**
@@ -3063,10 +2794,24 @@ export class PosStore extends WithLazyGetterTrap {
                             if (qtyNeeded === 0) {
                                 break;
                             }
+                            const line = this.selectedOrder.lines.filter(
+                                (l) => l.uuid === lUuid
+                            )[0];
                             const takeQty = Math.min(qty, qtyNeeded);
                             quantityTaken[comboId][lUuid] = {
                                 qty: takeQty,
                                 combo_item: item,
+                                line_price:
+                                    this.config.iface_tax_included == "total"
+                                        ? line.priceIncl
+                                        : line.priceExcl,
+                                attribute_value_ids: line.attribute_value_ids.map(
+                                    (value) => value.id
+                                ),
+                                attribute_value_extra_price: line.attribute_value_ids.reduce(
+                                    (sum, value) => sum + value.price_extra,
+                                    0
+                                ),
                             };
                             availableQty[productId].lines[lUuid] -= takeQty;
                             qtyNeeded -= takeQty;
@@ -3078,11 +2823,97 @@ export class PosStore extends WithLazyGetterTrap {
                 }
                 combinations.push(quantityTaken);
             }
+            let totalSplitedComboLinePrice = 0;
 
+            const itemLines = combinations
+                .flatMap((items) => Object.values(items))
+                .flatMap((item) => Object.values(item))
+                .filter((val) => val && typeof val === "object");
+
+            const remainingFreeByComboItem = new Map();
+            const childLineConf = [];
+            const comboExtraLines = [];
+            for (const item of itemLines) {
+                const combo = item.combo_item;
+                const comboItemId = combo.combo_id.id;
+                if (!remainingFreeByComboItem.has(comboItemId)) {
+                    remainingFreeByComboItem.set(comboItemId, combo.combo_id.qty_free);
+                }
+                const remainingFree = remainingFreeByComboItem.get(comboItemId);
+                const base = {
+                    combo_item_id: combo,
+                    configuration: {
+                        attribute_value_ids: item.attribute_value_ids,
+                        price_extra: item.attribute_value_extra_price,
+                    },
+                };
+                if (remainingFree > 0) {
+                    const freeQty = Math.min(item.qty, remainingFree);
+                    const extraQty = item.qty - freeQty;
+                    if (freeQty > 0) {
+                        childLineConf.push({
+                            ...base,
+                            qty: freeQty,
+                        });
+                    }
+                    if (extraQty > 0) {
+                        comboExtraLines.push({
+                            ...base,
+                            qty: extraQty,
+                        });
+                    }
+                    remainingFreeByComboItem.set(comboItemId, remainingFree - freeQty);
+                } else {
+                    comboExtraLines.push({
+                        ...base,
+                        qty: item.qty,
+                    });
+                }
+            }
+            const comboPrices = computeComboItems(
+                comboProduct,
+                childLineConf,
+                this.selectedOrder.pricelist_id,
+                this.data.models["decimal.precision"].getAll(),
+                this.data.models["product.template.attribute.value"].getAllBy("id"),
+                comboExtraLines,
+                this.currency
+            );
+            const baseLines = comboPrices.map((comboPrice) =>
+                accountTaxHelpers.prepare_base_line_for_taxes_computation(
+                    {},
+                    {
+                        currency_id: this.currency,
+                        quantity: comboPrice.qty,
+                        price_unit: comboPrice.price_unit,
+                        tax_ids: comboPrice.combo_item_id.product_id.taxes_id,
+                        product_id: comboPrice.combo_item_id.product_id,
+                    }
+                )
+            );
+            accountTaxHelpers.add_tax_details_in_base_lines(baseLines, this.company);
+            accountTaxHelpers.round_base_lines_tax_details(baseLines, this.company);
+            const cashRounding = this.config.cash_rounding ? this.config.rounding_method : null;
+            const taxDetails = accountTaxHelpers.get_tax_totals_summary(
+                baseLines,
+                this.currency,
+                this.company,
+                {
+                    cash_rounding: cashRounding,
+                }
+            );
+            totalSplitedComboLinePrice = this.currency.round(
+                itemLines.reduce((sum, line) => sum + line.line_price, 0)
+            );
             matchingCombos.push({
                 productTmpl: comboProduct,
                 combinations,
                 combinationsQty: comboQty,
+                totalComboPrice:
+                    this.config.iface_tax_included == "total"
+                        ? taxDetails.total_amount
+                        : taxDetails.base_amount,
+                totalSplitedComboLinePrice,
             });
         }
         return matchingCombos;

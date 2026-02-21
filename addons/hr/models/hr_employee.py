@@ -278,6 +278,8 @@ class HrEmployee(models.Model):
         readonly=False, groups="hr.group_hr_user")
     departure_description = fields.Html(related='version_id.departure_description', inherited=True,
         readonly=False, groups="hr.group_hr_user")
+    dismissal_date = fields.Date(related='version_id.dismissal_date', inherited=True,
+        readonly=False, groups="hr.group_hr_user")
     departure_date = fields.Date(related='version_id.departure_date', inherited=True,
         readonly=False, groups="hr.group_hr_user")
     departure_action_at_departure = fields.Boolean(related='version_id.departure_action_at_departure', inherited=True,
@@ -1819,10 +1821,11 @@ class HrEmployee(models.Model):
             employee.barcode = '041'+"".join(choice(digits) for i in range(9))
 
     def _get_resources_per_tz(self, date=None):
-        resources_per_tz = defaultdict(lambda: self.env['resource.resource'])
-        for employee in self:
-            resources_per_tz[ZoneInfo(employee._get_tz(date=date))] |= employee.resource_id
-        return dict(resources_per_tz)
+        employee_per_tz = self.grouped(lambda e: ZoneInfo(e._get_tz(date=date)))
+        return {
+            tz: employees.resource_id
+            for tz, employees in employee_per_tz.items()
+        }
 
     def _get_tz(self, date=None):
         self.ensure_one()
@@ -1929,9 +1932,13 @@ class HrEmployee(models.Model):
                     ('date_end', '>=', start),
             ])
         for version in versions:
-            date_end = version.date_end or stop
+            date_start = max(version.date_start, start)
+            date_end = min(version.date_end or stop, stop)
+            if date_end < start or date_start > stop or date_start > date_end:
+                # not overlapping, this can happen if we check contract versions
+                continue
             version_periods_by_employee[version.employee_id].append(
-                (max(version.date_start, start), min(date_end, stop), version[field] if field else version),
+                (date_start, date_end, version[field] if field else version),
             )
         return version_periods_by_employee
 
@@ -2152,6 +2159,16 @@ class HrEmployee(models.Model):
 
     def action_new_departure(self):
         self.ensure_one()
+        if self.departure_id:
+            if self.departure_id.apply_date:
+                raise UserError(self.env._("You can't modify the departure of an employee that has already departed."))
+            return {
+                'name': self.env._('End of collaboration'),
+                'res_model': 'hr.employee.departure',
+                'res_id': self.departure_id.id,
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+            }
         return {
             'name': self.env._('End of collaboration'),
             'res_model': 'hr.employee.departure',
@@ -2163,39 +2180,7 @@ class HrEmployee(models.Model):
             },
         }
 
-    def action_departure_multi(self):
-        return {
-            'name': self.env._('End of collaboration'),
-            'res_model': 'hr.departure.wizard',
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'target': 'new',
-            'context': {
-                'default_employee_ids': self.ids,
-            },
-        }
-
-    def action_reopen(self):
-        if any(not emp.departure_id for emp in self):
-            raise ValidationError(self.env._("You can't reopen employees that are still employed"))
-        today = fields.Date.context_today(self)
-        employees_to_edit = self.env['hr.employee']
-        for employee in self:
-            current_version = employee._get_version(today)
-            if current_version.date_version == today:
-                employees_to_edit += employee
-            else:
-                contract_end = current_version.contract_date_end
-                new_version_date = max(today, contract_end + relativedelta(days=1)) if contract_end else today
-                employee.create_version({
-                    'date_version': new_version_date,
-                    'departure_id': False,
-                    'contract_date_start': False,
-                    'contract_date_end': False,
-                })
-        employees_to_edit.write({'departure_id': False})
-        self.action_unarchive()
-
     def action_cancel_departure(self):
         self.ensure_one()
+        self.action_unarchive()
         self.departure_id.unlink()

@@ -66,7 +66,6 @@ class HrVersion(models.Model):
         help="Enter the employee's National Identification Number issued by the government (e.g., Aadhaar, SIN, NIN). This is used for official records and statutory compliance.",
         groups="hr.group_hr_user",
         tracking=1)
-    ssnid = fields.Char('Social Security No', groups="hr.group_hr_user", tracking=1)
     passport_id = fields.Char('Passport No', groups="hr.group_hr_user", tracking=1)
     passport_expiration_date = fields.Date('Passport Expiration Date', groups="hr.group_hr_user", tracking=1)
     sex = fields.Selection([
@@ -138,6 +137,7 @@ class HrVersion(models.Model):
     departure_id = fields.Many2one('hr.employee.departure', string="Departure", copy=False)
     departure_reason_id = fields.Many2one(related='departure_id.departure_reason_id', readonly=False, groups="hr.group_hr_user", tracking=1)
     departure_description = fields.Html(related='departure_id.departure_description', readonly=False, groups="hr.group_hr_user")
+    dismissal_date = fields.Date(related='departure_id.dismissal_date', readonly=False, groups="hr.group_hr_user", tracking=1)
     departure_date = fields.Date(related='departure_id.departure_date', readonly=False, groups="hr.group_hr_user", tracking=1)
     departure_action_at_departure = fields.Boolean(related='departure_id.action_at_departure', readonly=False, groups="hr.group_hr_user")
     departure_action_other_date = fields.Date(related='departure_id.action_other_date', readonly=False, groups="hr.group_hr_user")
@@ -499,12 +499,6 @@ class HrVersion(models.Model):
             employee = user_employees.filtered(lambda r: r.company_id == user.company_id) or user_employees[:1]
         return employee
 
-    @api.constrains('ssnid')
-    def _check_ssnid(self):
-        # By default, a Social Security Number is always valid, but each localization
-        # may want to add its own constraints
-        pass
-
     @api.depends_context('uid', 'company')
     @api.depends('department_id')
     def _compute_part_of_department(self):
@@ -561,7 +555,7 @@ class HrVersion(models.Model):
 
     @api.depends(
         'contract_date_start', 'contract_date_end', 'date_version', 'employee_id',
-        'employee_id.version_ids.date_version')
+        'employee_id.version_ids.date_version', 'departure_date')
     def _compute_dates(self):
         for version in self:
             version.date_start = max(version.date_version, version.contract_date_start) \
@@ -579,12 +573,12 @@ class HrVersion(models.Model):
                 if date_version_end:
                     date_version_end -= relativedelta(days=1)
 
-            if date_version_end and version.contract_date_end:
-                version.date_end = min(date_version_end, version.contract_date_end)
-            elif date_version_end:
-                version.date_end = date_version_end
-            else:
-                version.date_end = version.contract_date_end
+            date_version_end = date_version_end or date.max
+            date_contract_end = version.contract_date_end or date.max
+            date_departure = version.departure_date or date.max
+            version.date_end = False
+            if date_version_end != date.max or date_contract_end != date.max or date_departure != date.max:
+                version.date_end = min(date_version_end, date_contract_end, date_departure)
 
     def _search_start_date(self, operator, value):
         return [('contract_date_start', operator, value)]
@@ -634,10 +628,25 @@ class HrVersion(models.Model):
         return self.tz or self.employee_id.user_partner_id.tz or self.employee_id.company_id.tz or 'UTC'
 
     def _get_resources_per_tz(self):
-        resources_per_tz = defaultdict(lambda: self.env['resource.resource'])
-        for version in self:
-            resources_per_tz[ZoneInfo(version._get_tz())] |= version.employee_id.resource_id
-        return dict(resources_per_tz)
+        version_per_tz = self.grouped(lambda e: ZoneInfo(e._get_tz()))
+        return {
+            tz: versions.employee_id.resource_id
+            for tz, versions in version_per_tz.items()
+        }
+
+    def _get_days_per_week(self):
+        self.ensure_one()
+        if self.resource_calendar_id:
+            return self.resource_calendar_id._get_days_per_week()
+        return 5
+
+    def _get_hours_per_week(self):
+        self.ensure_one()
+        if self.resource_calendar_id:
+            return self.resource_calendar_id._get_hours_per_week()
+        elif self.is_flexible:
+            return self.hours_per_week
+        return self.company_id.resource_calendar_id._get_hours_per_week()
 
     def action_open_version(self):
         self.ensure_one()

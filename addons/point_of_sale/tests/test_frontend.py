@@ -588,7 +588,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
         cls.printer = cls.env['pos.printer'].create({
             'name': 'Printer',
             'printer_type': 'epson_epos',
-            'epson_printer_ip': '0.0.0.0',
+            'printer_ip': '0.0.0.0',
             'use_type': 'receipt',
         })
 
@@ -1548,7 +1548,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.env['pos.printer'].create({
             'name': 'Printer',
             'printer_type': 'epson_epos',
-            'epson_printer_ip': '0.0.0.0',
+            'printer_ip': '0.0.0.0',
             'use_type': 'preparation',
             'product_categories_ids': [Command.set(self.env['pos.category'].search([]).ids)],
         })
@@ -3045,7 +3045,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         pos_printer = self.env['pos.printer'].create({
             'name': 'Printer',
             'printer_type': 'epson_epos',
-            'epson_printer_ip': '0.0.0.0',
+            'printer_ip': '0.0.0.0',
             'use_type': 'receipt',
         })
         self.main_pos_config.write({
@@ -3175,6 +3175,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.write({
             'iface_print_auto': True,
             'iface_print_skip_screen': True,
+            'receipt_printer_ids': [self.printer.id],
+            'default_receipt_printer_id': self.printer.id,
         })
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
@@ -3610,6 +3612,32 @@ class TestUi(TestPointOfSaleHttpCommon):
             }
         )
 
+        third_combo_with_upsell = self.env["product.combo"].create(
+            {
+                "name": "Third Combo",
+                "is_upsell": True,
+                "qty_free": 0,
+                "combo_item_ids": [
+                    Command.create({
+                        "product_id": combo_product_6.id,
+                        "extra_price": 0,
+                    }),
+                    Command.create({
+                        "product_id": combo_product_7.id,
+                        "extra_price": 0,
+                    }),
+                    Command.create({
+                        "product_id": combo_product_8.id,
+                        "extra_price": 5,
+                    }),
+                    Command.create({
+                        "product_id": combo_product_9.id,
+                        "extra_price": 0,
+                    }),
+                ],
+            }
+        )
+
         # Create Office Combo
         self.office_combo = self.env["product.product"].create(
             {
@@ -3625,8 +3653,23 @@ class TestUi(TestPointOfSaleHttpCommon):
             }
         )
 
+        self.third_combo_product = self.env["product.product"].create(
+            {
+                "available_in_pos": True,
+                "list_price": 50,
+                "name": "Third Combo Product",
+                "type": "combo",
+                "uom_id": self.env.ref("uom.product_uom_unit").id,
+                "combo_ids": [
+                    (6, 0, [first_combo.id, second_combo.id, third_combo_with_upsell.id])
+                ],
+                "pos_categ_ids": [(6, 0, pos_category_ids)],
+            }
+        )
+
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_convert_orderlines_to_combo', login="pos_user")
+        self.start_pos_tour('test_convert_orderlines_to_combo_with_upsell', login="pos_user")
 
     def test_sync_from_ui_one_by_one(self):
         """

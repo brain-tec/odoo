@@ -1042,13 +1042,13 @@ class AccountMove(models.Model):
                     move.preferred_payment_method_line_id
                     or move.bank_partner_id.property_inbound_payment_method_line_id
                 )
-            ) and payment_method.journal_id:
+            ) and payment_method.journal_id and payment_method.journal_id.bank_account_id.allow_out_payment:
                 move.partner_bank_id = payment_method.journal_id.bank_account_id
                 continue
 
             move.partner_bank_id = move.bank_partner_id.bank_ids.filtered(
-                lambda bank: not bank.company_id or bank.company_id == move.company_id
-            ).sorted(key=lambda b: not b.allow_out_payment)[:1]
+                lambda bank: (not bank.company_id or bank.company_id == move.company_id) and bank.allow_out_payment
+            )[:1]
 
     @api.depends('partner_id')
     def _compute_invoice_payment_term_id(self):
@@ -5713,6 +5713,10 @@ class AccountMove(models.Model):
                     "The recipient bank account linked to this invoice is archived.\n"
                     "So you cannot confirm the invoice."
                 ))
+            if invoice.partner_bank_id and invoice.is_inbound() and not invoice.partner_bank_id.allow_out_payment:
+                raise UserError(_(
+                    "The company bank account linked to this invoice is not trusted, please double-check and trust it before confirming, or remove it"
+                ))
             if float_compare(invoice.amount_total, 0.0, precision_rounding=invoice.currency_id.rounding) < 0:
                 validation_msgs.add(_(
                     "You cannot validate an invoice with a negative total amount. "
@@ -7127,6 +7131,9 @@ class AccountMove(models.Model):
         move._compute_name()  # because the name is given, we need to recompute in case it is the first invoice of the journal
 
         return move
+
+    def _attachment_fields_to_clear(self):
+        return super()._attachment_fields_to_clear() + ['message_main_attachment_id']
 
     def _message_post_after_hook(self, new_message, message_values):
         """ This method processes the attachments of a new mail.message. It handles the 3 following situations:

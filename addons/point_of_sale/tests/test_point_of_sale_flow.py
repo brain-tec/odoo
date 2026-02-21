@@ -446,7 +446,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         # Making the invoice draft should send a warning notification to the user
         with patch.object(self.env.registry['bus.bus'], '_sendone') as mock_send:
             invoice.button_draft()
-            mock_send.assert_called_with(self.env.user.partner_id, 'simple_notification', {
+            mock_send.assert_called_with(self.env.user, 'simple_notification', {
                 'type': 'danger',
                 'message': "You can't reset this invoice to draft because the POS session is still open. Please close the ongoing session first, then try again.",
                 'sticky': True,
@@ -1681,6 +1681,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'account_number': 'FR7612345678901234567890123',
             'partner_id': self.company.partner_id.id,
             'bank_name': 'Test Bank',
+            'allow_out_payment': True,
         })
         current_session = self.pos_config_usd.current_session_id
         self.order = self.env['pos.order'].create({

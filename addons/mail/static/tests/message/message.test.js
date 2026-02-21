@@ -479,7 +479,7 @@ test("Edit and click save", async () => {
     await insertText(".o-mail-Message .o-mail-Composer-input", "Goodbye World", { replace: true });
     await click(".o-mail-Message button:text('save')");
     await contains(".o-mail-Message-body:text('Goodbye World (edited)')");
-    await contains("span[title='Jan 1, 2025, 1:00 PM']:contains('(edited)')");
+    await contains("span[title='Last edited Jan 1, 2025, 1:00 PM']:contains('(edited)')");
 });
 
 test("Do not call server on save if no changes", async () => {
@@ -1146,8 +1146,8 @@ test("add and remove bookmark from message", async () => {
     await contains("button:has(:text('Bookmarks'))", { contains: [".badge:text('1')"] });
     await waitStoreFetch([["add_bookmark", { message_id: messageId }]]);
     await contains(".o-mail-Message");
-    await contains(".o-mail-Message [title='Remove from bookmarks']" + " i.fa-bookmark");
-    await click(".o-mail-Message [title='Remove from bookmarks']");
+    await contains(".o-mail-Message [title='Remove from Bookmarks']" + " i.fa-bookmark");
+    await click(".o-mail-Message [title='Remove from Bookmarks']");
     await contains("button:has(:text('Bookmarks'))", { contains: [".badge", { count: 0 }] });
     await waitStoreFetch([["remove_bookmark", { message_id: messageId }]]);
     await contains(".o-mail-Message");

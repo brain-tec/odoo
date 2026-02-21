@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
-from datetime import date, datetime, time, timedelta, timezone, UTC
+from datetime import date, datetime, time, timedelta, UTC
 from zoneinfo import ZoneInfo
 
 from dateutil.relativedelta import relativedelta
@@ -9,8 +9,8 @@ from dateutil.relativedelta import relativedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.addons.resource.models.utils import HOURS_PER_DAY
-from odoo.tools.float_utils import float_round
 from odoo.addons.mail.tools.discuss import Store
+from odoo.tools import OrderedSet, float_round
 
 
 class HrEmployee(models.Model):
@@ -45,6 +45,7 @@ class HrEmployee(models.Model):
     hr_icon_display = fields.Selection(selection_add=[
         ('presence_holiday_absent', 'On leave'),
         ('presence_holiday_present', 'Present but on leave')])
+    member_of_department = fields.Boolean('Member of Department', compute='_compute_member_of_department', search='_search_part_of_department')
 
     departure_do_cancel_time_off_requests = fields.Boolean(related='version_id.departure_do_cancel_time_off_requests',
         inherited=True, readonly=False, groups="hr.group_hr_user")
@@ -118,31 +119,74 @@ class HrEmployee(models.Model):
                 employee.hr_icon_display = f'presence_{today_employee_location_id.location_type}'
             employee.show_hr_icon_display = True
 
-    def _get_first_working_interval(self, dt):
+    @api.model
+    def _get_first_working_interval_batch(self, min_dts):
         # find the first working interval after a given date
-        dt = dt.replace(tzinfo=timezone.utc)
+        if not min_dts:
+            return min_dts
+        min_dt = min(min_dts.values()).replace(tzinfo=UTC)
+        result = {}
+
+        def collect_employees(work_intervals):
+            for employee_id, interval in work_intervals.items():
+                if employee_id not in min_dts or not interval._items:
+                    continue
+                # start time of the earliest interval
+                d1 = interval._items[0][0].astimezone(UTC).replace(tzinfo=None)
+                d2 = result.get(employee_id)
+                if (not d2 or d1 < d2) and min_dts[employee_id] < d1:
+                    result[employee_id] = d1
+
+        remaining = self.browse(min_dts)
+        remaining.version_ids.fetch()  # prefetch data
         lookahead_days = [7, 30, 90, 180, 365, 730]
-        work_intervals = None
+
+        # get periods from calendar
         for lookahead_day in lookahead_days:
-            periods = self._get_calendar_periods(dt.date(), dt.date() + timedelta(days=lookahead_day))
-            if not periods:
-                calendar = self.resource_calendar_id or self.company_id.resource_calendar_id
-                resources_per_tz = self._get_resources_per_tz(dt)
-                work_intervals = calendar._work_intervals_batch(
-                    dt, dt + timedelta(days=lookahead_day), resources_per_tz=resources_per_tz)
-            else:
-                for start, end, calendar in periods[self]:
-                    calendar = calendar or self.company_id.resource_calendar_id
-                    ctz = ZoneInfo(self._get_tz(start))
-                    resources_per_tz = self._get_resources_per_tz(start)
+            for company, company_employees in remaining.grouped('company_id').items():
+                periods = company_employees._get_calendar_periods(min_dt.date(), min_dt.date() + timedelta(days=lookahead_day))
+                calendar_employee = defaultdict(OrderedSet)
+                max_end = None
+                for employee, intervals in periods.items():
+                    for (_start, end, calendar) in intervals:
+                        calendar_employee[calendar or company.resource_calendar_id].add(employee.id)
+                        if not max_end or end > max_end:
+                            max_end = end
+                for calendar, employee_ids in calendar_employee.items():
+                    employees = self.browse(employee_ids).with_prefetch(remaining._ids)
+                    resources_per_tz = employees._get_resources_per_tz(min_dt)
                     work_intervals = calendar._work_intervals_batch(
-                        datetime.combine(start, time.min, ctz),
-                        datetime.combine(end, time.max, ctz),
-                        resources_per_tz=resources_per_tz)
-            if work_intervals.get(self.resource_id.id) and work_intervals[self.resource_id.id]._items:
-                # return start time of the earliest interval
-                return work_intervals[self.resource_id.id]._items[0][0]
-        return None
+                        min_dt, datetime.combine(max_end, time.max, UTC) + timedelta(1), resources_per_tz=resources_per_tz)
+                    # intersect work intervals with periods
+                    for resource_id, work_interval in work_intervals.items():
+                        employee_id = self.env['resource.resource'].browse(resource_id).employee_id.id
+                        if not employee_id or not work_interval or not (period := periods.get(self.browse(employee_id))):
+                            continue
+                        ctz = next(tz for tz, resources in resources_per_tz.items() if resource_id in resources._ids)
+                        work_interval &= [(
+                            datetime.combine(p[0], time.min, ctz),
+                            datetime.combine(p[1], time.max, ctz),
+                            p[2],
+                        ) for p in period if p[2] == calendar]
+                        if work_interval:
+                            collect_employees({employee_id: work_interval})
+            remaining = self.filtered(lambda e: e.id not in result)
+            if not remaining:
+                return result
+
+        # get from the resource calendar
+        for lookahead_day in lookahead_days:
+            for calendar, employees in remaining.grouped(
+                lambda e: e.resource_calendar_id or e.company_id.resource_calendar_id
+            ).items():
+                resources_per_tz = employees._get_resources_per_tz(min_dt)
+                work_intervals = calendar._work_intervals_batch(
+                    min_dt, min_dt + timedelta(days=lookahead_day), resources_per_tz=resources_per_tz)
+                collect_employees(work_intervals)
+            remaining = self.filtered(lambda e: e.id not in result)
+            if not remaining:
+                return result
+        return result
 
     def _compute_leave_status(self):
         # Used SUPERUSER_ID to forcefully get status of other user's leave, to bypass record rule
@@ -152,20 +196,27 @@ class HrEmployee(models.Model):
             ('date_to', '>=', fields.Datetime.now()),
             ('work_entry_type_id.count_as', '=', 'absence'),
             ('state', '=', 'validate'),
-        ])
-        leave_data = {}
-        for holiday in holidays:
-            leave_data[holiday.employee_id.id] = {}
-            leave_data[holiday.employee_id.id]['leave_date_from'] = holiday.date_from.date()
-            back_on = holiday.employee_id._get_first_working_interval(holiday.date_to)
-            leave_data[holiday.employee_id.id]['leave_date_to'] = back_on.date() if back_on else None
-            leave_data[holiday.employee_id.id]['current_leave_state'] = holiday.state
+        ], order='date_to desc')
 
-        for employee in self:
-            employee.leave_date_from = leave_data.get(employee.id, {}).get('leave_date_from')
-            employee.leave_date_to = leave_data.get(employee.id, {}).get('leave_date_to')
-            employee.current_leave_state = leave_data.get(employee.id, {}).get('current_leave_state')
-            employee.is_absent = leave_data.get(employee.id) and leave_data.get(employee.id).get('current_leave_state') == 'validate'
+        employee_holidays = holidays.grouped('employee_id')
+        employee_back_on = holidays.employee_id._get_first_working_interval_batch({
+            employee.id: holiday[0].date_to
+            for employee, holiday in employee_holidays.items()
+        })
+        for employee, holiday in employee_holidays.items():
+            holiday = holiday[0]
+            employee.leave_date_from = holiday.date_from.date()
+            employee.leave_date_to = employee_back_on.get(employee.id, holiday.date_to).date()
+            employee.current_leave_state = holiday.state
+            employee.is_absent = holiday.state == 'validate'
+
+        no_data = self - holidays.employee_id
+        no_data.update({
+            'leave_date_from': False,
+            'leave_date_to': False,
+            'current_leave_state': False,
+            'is_absent': False,
+        })
 
     @api.depends('parent_id')
     def _compute_leave_manager(self):
@@ -185,6 +236,11 @@ class HrEmployee(models.Model):
             else:
                 employee.show_leaves = False
 
+    @api.depends('version_id.member_of_department')
+    def _compute_member_of_department(self):
+        for employee in self.sudo():
+            employee.member_of_department = employee.current_version_id.member_of_department
+
     def _search_absent_employee(self, operator, value):
         if operator != 'in':
             return NotImplemented
@@ -199,6 +255,10 @@ class HrEmployee(models.Model):
             ('date_to', '>=', today_start),
         ])
         return [('id', 'in', holidays.employee_id.ids)]
+
+    def _search_part_of_department(self, operator, value):
+        version_ids = self.env['hr.version'].sudo()._search([('member_of_department', operator, value)])
+        return [('version_ids', 'in', version_ids)]
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -247,10 +307,14 @@ class HrEmployee(models.Model):
         # 'no_leave_resource_calendar_update'
         if 'resource_calendar_id' in values and not self.env.context.get('no_leave_resource_calendar_update'):
             try:
-                self.env['hr.leave'].search([
+                leaves = self.env['hr.leave'].search([
                     ('employee_id', 'in', self.ids),
                     ('resource_calendar_id', '!=', int(values['resource_calendar_id'])),
-                    ('date_from', '>', fields.Datetime.now())]).write({'resource_calendar_id': values['resource_calendar_id']})
+                    ('date_from', '>', fields.Datetime.now())])
+                leaves.write({'resource_calendar_id': values['resource_calendar_id']})
+                non_hourly_leaves = leaves.filtered(lambda l: l.leave_type_request_unit != 'hour')
+                non_hourly_leaves.with_context(leave_skip_date_check=True, leave_skip_state_check=True)._compute_date_from_to()
+                non_hourly_leaves.filtered(lambda l: l.state == 'validate')._validate_leave_request()
             except ValidationError:
                 raise ValidationError(_("Changing this working schedule results in the affected employee(s) not having enough "
                                         "leaves allocated to accomodate for their leaves already taken in the future. Please "

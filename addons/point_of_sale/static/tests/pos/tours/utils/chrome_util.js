@@ -116,6 +116,7 @@ export function clickPlanButton() {
             run: "click",
         },
         ...waitRequest(),
+        ...waitForOrdersSync(),
     ];
 }
 export function startPoS() {
@@ -205,6 +206,12 @@ export function selectPresetTimingSlotHour({ title, hour } = {}) {
             trigger: `body:not(:has(.modal)):not(:has(.oe_status .fa-spin)) .pos-leftheader .preset-time-btn:contains(${hour})`,
         },
     ];
+}
+export function presetTimingSlotIs(hour) {
+    return { trigger: `.pos-leftheader .preset-time-btn:contains('${hour}')` };
+}
+export function selectPresetTimingSlot(slot) {
+    return { trigger: `.modal button:contains('${slot}')`, run: "click" };
 }
 export function presetTimingSlotHourNotExists(hour) {
     return { trigger: negate(`.modal button:visible:contains('${hour}')`) };
@@ -367,4 +374,18 @@ export function selectPresetDateButton(formattedDate) {
         trigger: `.modal-body button:contains("${formattedDate}")`,
         run: "click",
     };
+}
+
+export function waitForOrdersSync() {
+    return [
+        {
+            trigger: "body",
+            content: "Wait for the orders to be synced",
+            timeout: 15000,
+            async run({ waitUntil }) {
+                await waitUntil(() => !posmodel.syncingOrders.size, { timeout: 10000 });
+                await new Promise((resolve) => setTimeout(resolve));
+            },
+        },
+    ];
 }
