@@ -7,6 +7,15 @@ SG_TAX_CATEGORIES = {'SR', 'SRCA-S', 'SRCA-C', 'SROVR-RS', 'SRRC', 'SROVR-LVG', 
 SG_GST_CODES_REQUIRING_ADDRESS = {'SR', 'SRCA-S', 'SRCA-C', 'ZR', 'SRRC', 'SROVR-RS', 'SROVR-LVG', 'SRLVG', 'NA'}
 
 
+class AccountEdiXmlUBL21(models.AbstractModel):
+    _inherit = 'account.edi.xml.ubl_21'
+
+    def _get_customization_ids(self):
+        vals = super()._get_customization_ids()
+        vals['pint_sg'] = 'urn:peppol:pint:billing-1@sg-1'
+        return vals
+
+
 class AccountEdiXmlPint_Sg(models.AbstractModel):
     _name = 'account.edi.xml.pint_sg'
     _inherit = ["account.edi.xml.ubl_bis3"]
@@ -29,15 +38,6 @@ class AccountEdiXmlPint_Sg(models.AbstractModel):
     # -------------------------------------------------------------------------
     # EXPORT: Templates
     # -------------------------------------------------------------------------
-
-    def _ubl_default_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
-        # EXTENDS account.edi.xml.ubl_bis3
-        grouping_key = super()._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, currency)
-        if not grouping_key:
-            return
-
-        grouping_key['scheme_id'] = 'GST'
-        return grouping_key
 
     def _add_invoice_header_nodes(self, document_node, vals):
         # EXTENDS account.edi.xml.ubl_bis3
@@ -65,15 +65,6 @@ class AccountEdiXmlPint_Sg(models.AbstractModel):
                 }
                 for code, amount in amounts_in_accounting_currency
             ]
-
-    def _get_party_node(self, vals):
-        party_node = super()._get_party_node(vals)
-        party_node['cac:PartyTaxScheme'][0]['cac:TaxScheme']['cbc:ID']['_text'] = 'GST'
-        return party_node
-
-    # -------------------------------------------------------------------------
-    # EXPORT: Constraints
-    # -------------------------------------------------------------------------
 
     def _export_invoice_constraints(self, invoice, vals):
         # EXTENDS account_edi_ubl_cii
