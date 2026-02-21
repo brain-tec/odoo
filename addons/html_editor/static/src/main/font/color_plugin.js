@@ -5,7 +5,6 @@ import {
     hasAnyNodesColor,
     hasColor,
     TEXT_CLASSES_REGEX,
-    hasTextColorClass,
 } from "@html_editor/utils/color";
 import { fillEmpty, unwrapContents } from "@html_editor/utils/dom";
 import {
@@ -24,6 +23,7 @@ import { backgroundImageCssToParts, backgroundImagePartsToCss } from "@html_edit
 import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 import { isBlock } from "@html_editor/utils/blocks";
 import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
+import { READ, withSequence } from "@html_editor/utils/resource";
 
 const RGBA_OPACITY = 0.6;
 const HEX_OPACITY = "99";
@@ -84,7 +84,7 @@ export class ColorPlugin extends Plugin {
         ],
 
         /** Handlers */
-        selectionchange_handlers: this.updateSelectedColor.bind(this),
+        selectionchange_handlers: withSequence(READ, this.updateSelectedColor.bind(this)),
         remove_format_handlers: this.removeAllColor.bind(this),
         color_combination_getters: getColorCombinationFromClass,
 
@@ -349,11 +349,7 @@ export class ColorPlugin extends Plugin {
                         node,
                         '[style*="color"]:not(li), [style*="background-color"]:not(li), [style*="background-image"]:not(li)'
                     ) ||
-                    closestElement(node, "span") ||
-                    closestElement(
-                        node,
-                        (node) => node.nodeName !== "LI" && hasTextColorClass(node, mode)
-                    );
+                    closestElement(node, "span");
 
                 const faNodes = font?.querySelectorAll(".fa");
                 if (faNodes && Array.from(faNodes).some((faNode) => faNode.contains(node))) {
@@ -372,10 +368,7 @@ export class ColorPlugin extends Plugin {
                 if (
                     font &&
                     font.nodeName !== "T" &&
-                    (font.nodeName !== "SPAN" ||
-                        font.style[mode] ||
-                        font.style.backgroundImage ||
-                        hasTextColorClass(font, mode)) &&
+                    (font.nodeName !== "SPAN" || font.style[mode] || font.style.backgroundImage) &&
                     (isColorGradient(color) ||
                         color === "" ||
                         !hasInlineGradient ||

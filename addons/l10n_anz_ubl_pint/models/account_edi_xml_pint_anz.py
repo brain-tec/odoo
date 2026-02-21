@@ -5,6 +5,15 @@ from odoo.tools import float_is_zero
 ANZ_TAX_CATEGORIES = {'S', 'E', 'Z', 'G', 'O'}
 
 
+class AccountEdiXmlUBL21(models.AbstractModel):
+    _inherit = 'account.edi.xml.ubl_21'
+
+    def _get_customization_ids(self):
+        vals = super()._get_customization_ids()
+        vals['pint_anz'] = 'urn:peppol:pint:billing-1@aunz-1'
+        return vals
+
+
 class AccountEdiXmlPint_Anz(models.AbstractModel):
     _name = 'account.edi.xml.pint_anz'
     _inherit = ["account.edi.xml.ubl_bis3"]
@@ -25,9 +34,8 @@ class AccountEdiXmlPint_Anz(models.AbstractModel):
         return f"{invoice.name.replace('/', '_')}_pint_anz.xml"
 
     def _get_customization_ids(self):
-        vals = super()._get_customization_ids()
-        vals['pint_anz'] = 'urn:peppol:pint:billing-1@aunz-1'
-        return vals
+        # TODO remove in master: backward compatibility
+        return super()._get_customization_ids()
 
     # -------------------------------------------------------------------------
     # EXPORT: Templates
@@ -38,8 +46,6 @@ class AccountEdiXmlPint_Anz(models.AbstractModel):
         grouping_key = super()._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, currency)
         if not grouping_key:
             return
-
-        grouping_key['scheme_id'] = 'GST'
 
         # A business not registered for GST cannot issue tax invoices.
         # In this case, the tax category code should be O (Outside scope of tax).
@@ -66,18 +72,29 @@ class AccountEdiXmlPint_Anz(models.AbstractModel):
         document_node['cbc:CustomizationID'] = {'_text': self._get_customization_ids()['pint_anz']}
         document_node['cbc:ProfileID'] = {'_text': 'urn:peppol:bis:billing'}
 
-    def _get_party_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        party_node = super()._get_party_node(vals)
-        commercial_partner = vals['partner'].commercial_partner_id
+    def _ubl_add_party_legal_entity_nodes(self, vals):
+        # EXTENDS
+        super()._ubl_add_party_legal_entity_nodes(vals)
+        partner = vals['party_vals']['partner']
+        commercial_partner = partner.commercial_partner_id
 
-        party_node['cac:PartyTaxScheme'][0]['cac:TaxScheme']['cbc:ID']['_text'] = 'GST'
-
-        # In both cases the scheme must be set to a value that comes from the eas.
         if commercial_partner.country_code in ('AU', 'NZ'):
-            party_node['cac:PartyLegalEntity']['cbc:CompanyID']['schemeID'] = commercial_partner.peppol_eas
-
-        return party_node
+            if commercial_partner.vat and commercial_partner.vat != '/':
+                vals['party_node']['cac:PartyLegalEntity'] = [{
+                    'cbc:RegistrationName': {'_text': commercial_partner.name},
+                    'cbc:CompanyID': {
+                        '_text': commercial_partner.vat,
+                        'schemeID': '0151' if commercial_partner.country_code == 'AU' else '0088',
+                    },
+                }]
+            elif commercial_partner.peppol_eas and commercial_partner.peppol_endpoint:
+                vals['party_node']['cac:PartyLegalEntity'] = [{
+                    'cbc:RegistrationName': {'_text': commercial_partner.name},
+                    'cbc:CompanyID': {
+                        '_text': commercial_partner.peppol_endpoint,
+                        'schemeID': commercial_partner.peppol_eas,
+                    },
+                }]
 
     # -------------------------------------------------------------------------
     # EXPORT: Constraints
