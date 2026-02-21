@@ -2300,6 +2300,14 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_combo_disallowLineQuantityChange', login="pos_user")
         self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_combo_disallowLineQuantityChange_2', login="pos_user")
 
+    def test_set_opening_note_without_cash_method(self):
+        cash_method = self.main_pos_config.payment_method_ids.filtered(lambda pm: pm.is_cash_count)
+        self.main_pos_config.payment_method_ids -= cash_method
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        current_session = self.main_pos_config.current_session_id
+        self.start_pos_tour('test_set_opening_note_without_cash_method')
+        self.assertEqual(current_session.opening_notes, 'Opening Notes')
+
     def test_orderline_merge_with_higher_price_precision(self):
         """ Test that orderline merging works correctly when product price has a higher precision than the currency. """
         self.env['decimal.precision'].search([('name', '=', 'Product Price')]).digits = 3
@@ -2367,6 +2375,26 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         created_order = self.env['pos.order'].search([('partner_id', '=', partner.id)], limit=1)
         self.assertNotEqual(created_order.pricelist_id, not_available_pricelist)
+
+    def test_amount_total_is_rounded(self):
+        tax = self.env['account.tax'].create({
+            'name': 'Tax 18% Included',
+            'amount': 18,
+            'price_include_override': 'tax_included',
+        })
+
+        self.env['product.product'].create({
+            'name': 'Test Product',
+            'available_in_pos': True,
+            'list_price': 2.8,
+            'taxes_id': [(6, 0, [tax.id])],
+        })
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_amount_total_is_rounded', login="pos_user")
+        order = self.env['pos.order'].search([], limit=1)
+        self.assertEqual(order.amount_total, 2.80, "The total amount should be rounded to 2 decimals")
+        self.assertEqual(order.amount_return, 0, "The return amount should be rounded to 2 decimals")
 
 
 # This class just runs the same tests as above but with mobile emulation
