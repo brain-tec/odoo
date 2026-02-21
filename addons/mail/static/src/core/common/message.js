@@ -109,7 +109,7 @@ export class Message extends Component {
             emailHeaderOpen: false,
         });
         this.rightClickDropdownState = useDropdownState({
-            onClose: () => this.props.messageSelection.clearSelected(),
+            onClose: () => this.props.messageSelection?.clearSelected(),
         });
         this.rightClickAnchor = useChildRef("rightClickAnchor");
         /** @type {ShadowRoot} */
@@ -467,7 +467,7 @@ export class Message extends Component {
             // Mobile OS long press is handled with useLongPress()
             return;
         }
-        if (ev.target.tagName === "A") {
+        if (ev.target.tagName === "A" || !this.props.hasActions) {
             return;
         }
         this.showRightClickMessageActions(ev);
