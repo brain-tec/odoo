@@ -523,8 +523,15 @@ class PosOrder(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_draft_or_cancel(self):
-        if any(pos_order.state not in ['draft', 'cancel'] for pos_order in self):
-            raise UserError(_('In order to delete a sale, it must be new or cancelled.'))
+        order_to_cancel = self.env['pos.order']
+        for pos_order in self:
+            if pos_order.state not in ['draft', 'cancel']:
+                raise UserError(_('In order to delete a sale, it must be new or cancelled.'))
+            if pos_order.state == 'draft':
+                order_to_cancel |= pos_order
+        # Cancel orders before deletion to trigger notifications and keep the UI in sync
+        if order_to_cancel:
+            order_to_cancel.action_pos_order_cancel()
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -988,7 +995,7 @@ class PosOrder(models.Model):
                 ('product_id.valuation', '=', 'real_time'),
             ])
             for stock_move in stock_moves:
-                product_accounts = stock_move.product_id._get_product_accounts()
+                product_accounts = stock_move.with_company(stock_move.company_id).product_id._get_product_accounts()
                 expense_account = product_accounts['expense']
                 stock_account = product_accounts['stock_valuation']
                 balance = -sum(stock_move.mapped('value'))
