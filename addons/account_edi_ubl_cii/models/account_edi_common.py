@@ -113,6 +113,24 @@ EAS_MAPPING = {
 }
 
 # -------------------------------------------------------------------------
+# AREA of countries
+# -------------------------------------------------------------------------
+
+GST_COUNTRY_CODES = {
+    'AU', 'NZ', 'IN', 'SG', 'MY', 'PK', 'BD', 'LK', 'NP', 'BT', 'PG', 'SA',
+    'AG', 'BS', 'BB', 'DM', 'GD', 'JM', 'KN', 'LC', 'VC', 'TT',
+}
+
+EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES = {
+    # EU Member States
+    'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE',
+    'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'CH',
+
+    # EFTA Countries in the EEA
+    'IS', 'LI', 'NO',
+}
+
+# -------------------------------------------------------------------------
 # SUPPORTED FILE TYPES FOR IMPORT
 # -------------------------------------------------------------------------
 SUPPORTED_FILE_TYPES = {
@@ -242,8 +260,6 @@ class AccountEdiCommon(models.AbstractModel):
             }
 
         # add Norway, Iceland, Liechtenstein
-        european_economic_area = self.env.ref('base.europe').country_ids.mapped('code') + ['NO', 'IS', 'LI']
-
         if customer.country_id.code == 'ES' and customer.zip:
             if customer.zip[:2] in ('35', '38'):  # Canary
                 # [BR-IG-10]-A VAT breakdown (BG-23) with VAT Category code (BT-118) "IGIC" shall not have a VAT
@@ -268,19 +284,19 @@ class AccountEdiCommon(models.AbstractModel):
             else:
                 return create_dict(tax_category_code='S')  # standard VAT
 
-        if supplier.country_id.code in european_economic_area and supplier.vat:
+        if supplier.country_id.code in EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES and supplier.vat:
             if tax.amount != 0 and not tax.has_negative_factor:
                 # otherwise, the validator will complain because G and K code should be used with 0% tax
                 # For purchase reverse-charge taxes for self-billed invoices, we put the zero-percent tax
                 # with code 'G' or 'K' that the buyer would have used, see explanation above.
                 return create_dict(tax_category_code='S')
-            if customer.country_id.code not in european_economic_area:
+            if customer.country_id.code not in EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES:
                 return create_dict(
                     tax_category_code='G',
                     tax_exemption_reason_code='VATEX-EU-G',
                     tax_exemption_reason=_('Export outside the EU'),
                 )
-            if customer.country_id.code in european_economic_area:
+            if customer.country_id.code in EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES:
                 return create_dict(
                     tax_category_code='K',
                     tax_exemption_reason_code='VATEX-EU-IC',
@@ -411,9 +427,8 @@ class AccountEdiCommon(models.AbstractModel):
 
         # Update the invoice.
         invoice.move_type = move_type
-        with invoice._get_edi_creation() as invoice:
+        with invoice.with_context(disable_onchange_name_predictive=True)._get_edi_creation() as invoice:
             logs = self._import_fill_invoice(invoice, tree, qty_factor)
-
         if invoice:
             body = Markup("<strong>%s</strong>") % \
                 _("Format used to import the invoice: %s",
@@ -428,7 +443,7 @@ class AccountEdiCommon(models.AbstractModel):
         # For UBL, we should override the computed tax amount if it is less than 0.05 different of the one in the xml.
         # In order to support use case where the tax total is adapted for rounding purpose.
         # This has to be done after the first import in order to let Odoo compute the taxes before overriding if needed.
-        with invoice._get_edi_creation() as invoice:
+        with invoice.with_context(disable_onchange_name_predictive=True)._get_edi_creation() as invoice:
             self._correct_invoice_tax_amount(tree, invoice)
 
         attachments = self._import_attachments(invoice, tree)
@@ -874,7 +889,7 @@ class AccountEdiCommon(models.AbstractModel):
             ]
             tax = self.env['account.tax']
             if hasattr(record, '_get_specific_tax'):
-                tax = record._get_specific_tax(line_values['name'], 'percent', amount, tax_type)
+                tax = record._get_specific_tax(line_values['name'], 'percent', amount, tax_type).filtered_domain(domain)[:1]
             if tax_exigibility:
                 if not tax and tax_exigibility:
                     tax = self.env['account.tax'].search(domain + [('price_include', '=', False), ('tax_exigibility', '=', tax_exigibility)], limit=1)
