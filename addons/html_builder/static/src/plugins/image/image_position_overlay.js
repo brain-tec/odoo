@@ -1,12 +1,10 @@
+import { useExternalListener, useLayoutEffect, useRef } from "@web/owl2/utils";
 import { scrollTo } from "@html_builder/utils/scrolling";
 import {
     Component,
     onMounted,
     onWillStart,
     onWillUnmount,
-    useEffect,
-    useExternalListener,
-    useRef,
 } from "@odoo/owl";
 
 export class ImagePositionOverlay extends Component {
@@ -84,7 +82,7 @@ export class ImagePositionOverlay extends Component {
             this.props.targetEl.classList.add("o_we_image_positioning");
         });
 
-        useEffect(() => {
+        useLayoutEffect(() => {
             this.tooltip = window.Tooltip.getOrCreateInstance(this.draggerRef.el, {
                 trigger: "manual",
                 container: this.overlayRef.el,

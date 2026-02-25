@@ -1,4 +1,4 @@
-import { useComponent, useEffect } from "@odoo/owl";
+import { useComponent, useLayoutEffect } from "@web/owl2/utils";
 
 /**
  * Hook used to enrich html and provide automatic links to action.
@@ -11,7 +11,7 @@ import { useComponent, useEffect } from "@odoo/owl";
  */
 export function useEnrichWithActionLinks(ref, selector = null) {
     const comp = useComponent();
-    useEffect(
+    useLayoutEffect(
         (element) => {
             // If we get an iframe, we need to wait until everything is loaded
             if (element.matches("iframe")) {

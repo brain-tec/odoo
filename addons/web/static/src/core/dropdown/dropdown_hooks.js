@@ -1,4 +1,4 @@
-import { useEnv, useState } from "@odoo/owl";
+import { useEnv, useState } from "@web/owl2/utils";
 import { DROPDOWN_NESTING } from "@web/core/dropdown/_behaviours/dropdown_nesting";
 import { Reactive } from "@web/core/utils/reactive";
 

@@ -1,3 +1,4 @@
+import { reactive, useComponent, useEnv, useLayoutEffect, useRef, useState, useSubEnv } from "@web/owl2/utils";
 import { isElement, isTextNode } from "@html_editor/utils/dom_info";
 import {
     Component,
@@ -5,14 +6,7 @@ import {
     onWillDestroy,
     onWillStart,
     onWillUpdateProps,
-    reactive,
     toRaw,
-    useComponent,
-    useEffect,
-    useEnv,
-    useRef,
-    useState,
-    useSubEnv,
 } from "@odoo/owl";
 import { convertNumericToUnit, getHtmlStyle } from "@html_editor/utils/formatting";
 import { useBus } from "@web/core/utils/hooks";
@@ -914,7 +908,7 @@ export function useVisibilityObserver(contentName, callback) {
     };
 
     const observer = new MutationObserver(applyVisibility);
-    useEffect(
+    useLayoutEffect(
         (contentEl) => {
             if (!contentEl) {
                 return;
@@ -1178,8 +1172,14 @@ export class BaseOptionComponent extends Component {
         this.getResource = context.getResource;
         /** @type { EditorContext['trigger'] } **/
         this.trigger = context.trigger;
+        /** @type { EditorContext['triggerAsync'] } **/
+        this.triggerAsync = context.triggerAsync;
         /** @type { EditorContext['delegateTo'] } **/
         this.delegateTo = context.delegateTo;
+        /** @type { EditorContext['processThrough'] } **/
+        this.processThrough = context.processThrough;
+        /** @type { EditorContext['checkPredicates'] } **/
+        this.checkPredicates = context.checkPredicates;
 
         this.isActiveItem = useIsActiveItem();
         const comp = useComponent();

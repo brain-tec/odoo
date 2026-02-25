@@ -1,3 +1,4 @@
+import { reactive, useEnv, useExternalListener, useLayoutEffect, useRef, useState, useSubEnv } from "@web/owl2/utils";
 import { browser } from "@web/core/browser/browser";
 const sessionStorage = browser.sessionStorage;
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
@@ -16,14 +17,7 @@ import { router } from "@web/core/browser/router";
 import {
     Component,
     onMounted,
-    reactive,
-    useEffect,
-    useEnv,
-    useRef,
-    useState,
-    useSubEnv,
     onWillStart,
-    useExternalListener,
 } from "@odoo/owl";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
 import { fuzzyLevenshteinLookup } from "@web/core/utils/search";
@@ -173,7 +167,7 @@ export class DescriptionScreen extends Component {
         onMounted(() => this.onMounted());
 
         // Autofocus the next field once the current one is confirmed.
-        useEffect(
+        useLayoutEffect(
             (selectedType, selectedIndustry) => {
                 if (selectedType && !selectedIndustry) {
                     this.industrySelection.el.querySelector("input").focus();
@@ -658,7 +652,7 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
             this.blockUiDuringImageLoading(this.state.themes, this.themeSVGPreviews);
         });
 
-        useEffect(
+        useLayoutEffect(
             () =>
                 this.blockUiDuringImageLoading(this.state.extraThemes, this.extraThemeSVGPreviews),
             () => [this.state.extraThemes]

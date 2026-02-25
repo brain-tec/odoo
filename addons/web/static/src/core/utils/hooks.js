@@ -1,16 +1,7 @@
+import { useComponent, useLayoutEffect, useRef, useState } from "@web/owl2/utils";
 import { hasTouch, isMobileOS } from "@web/core/browser/feature_detection";
 
-import {
-    status,
-    useComponent,
-    useEffect,
-    useRef,
-    onWillUnmount,
-    useState,
-    toRaw,
-    onMounted,
-    onPatched,
-} from "@odoo/owl";
+import { status, onWillUnmount, toRaw, onMounted, onPatched } from "@odoo/owl";
 import { router } from "@web/core/browser/router";
 
 /**
@@ -69,7 +60,7 @@ export function useAutofocus({ refName, selectAll, mobile } = {}) {
         return rootNode instanceof ShadowRoot && uiService.activeElement.contains(rootNode.host);
     }
     // LEGACY
-    useEffect(
+    useLayoutEffect(
         (el) => {
             if (isFocusable(el)) {
                 el.focus();
@@ -97,7 +88,7 @@ export function useAutofocus({ refName, selectAll, mobile } = {}) {
  */
 export function useBus(bus, eventName, callback) {
     const component = useComponent();
-    useEffect(
+    useLayoutEffect(
         () => {
             const listener = callback.bind(component);
             bus.addEventListener(eventName, listener);
@@ -190,7 +181,7 @@ export function useSpellCheck({ refName } = {}) {
     function toggleSpellcheck(ev) {
         ev.target.spellcheck = document.activeElement === ev.target;
     }
-    useEffect(
+    useLayoutEffect(
         (el) => {
             if (el) {
                 const inputs =
@@ -288,7 +279,7 @@ export function useOwnedDialogs() {
  * @param {Parameters<typeof EventTarget.prototype.addEventListener>} listener
  */
 export function useRefListener(ref, ...listener) {
-    useEffect(
+    useLayoutEffect(
         (el) => {
             el?.addEventListener(...listener);
             return () => el?.removeEventListener(...listener);

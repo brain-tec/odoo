@@ -1,4 +1,5 @@
-import { Component, onMounted, useExternalListener, useRef, useState } from "@odoo/owl";
+import { useExternalListener, useRef, useState } from "@web/owl2/utils";
+import { Component, onMounted } from "@odoo/owl";
 
 export class ActivityMarkAsDone extends Component {
     static template = "mail.ActivityMarkAsDone";

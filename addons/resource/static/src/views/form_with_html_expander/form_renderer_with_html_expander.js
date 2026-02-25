@@ -1,6 +1,6 @@
+import { useLayoutEffect, useRef } from "@web/owl2/utils";
 import { useService } from "@web/core/utils/hooks";
 import { FormRenderer } from "@web/views/form/form_renderer";
-import { useRef, useEffect } from "@odoo/owl";
 
 export class FormRendererWithHtmlExpander extends FormRenderer {
     static props = {
@@ -21,7 +21,7 @@ export class FormRendererWithHtmlExpander extends FormRenderer {
             this.uiService = useService("ui");
         }
         const ref = useRef("compiled_view_root");
-        useEffect(
+        useLayoutEffect(
             (el, size) => {
                 if (el && this._canExpandHTMLField(size)) {
                     const descriptionField = el.querySelector(this.htmlFieldQuerySelector);

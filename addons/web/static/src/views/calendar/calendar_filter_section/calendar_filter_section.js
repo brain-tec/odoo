@@ -1,10 +1,11 @@
+import { render, useState } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { Transition } from "@web/core/transition";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import { getColor } from "../utils";
-import { Component, useState } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 
 let nextId = 1;
 
@@ -132,20 +133,20 @@ export class CalendarFilterSection extends Component {
 
     onFilterInputChange(filter, ev) {
         this.props.model.updateFilters(this.section.fieldName, [filter], ev.target.checked);
-        this.render();
+        render(this);
     }
 
     onAllFilterInputChange(ev) {
         const { fieldName, filters } = this.section;
         this.props.model.updateFilters(fieldName, filters, ev.target.checked);
-        this.render();
+        render(this);
     }
 
     onFilterRemoveBtnClick(filter, ev) {
         if (!ev.currentTarget.dataset.unlinked) {
             ev.currentTarget.dataset.unlinked = true;
             this.props.model.unlinkFilter(this.section.fieldName, filter.recordId);
-            this.render();
+            render(this);
         }
     }
 

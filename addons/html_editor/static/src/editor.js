@@ -56,8 +56,8 @@ import { isMobileOS } from "@web/core/browser/feature_detection";
  */
 
 /**
- * @typedef {((root HTMLElement = EditorContext["editable"]) => HTMLElement)[]} clean_for_save_processors
- * @typedef {(() => void)[]} start_edition_handlers
+ * @typedef {((root: HTMLElement = EditorContext["editable"]) => HTMLElement)[]} clean_for_save_processors
+ * @typedef {(() => void)[]} on_editor_started_handlers
  */
 
 /**
@@ -143,7 +143,10 @@ export class Editor {
         }
         editable.setAttribute("contenteditable", true);
         editable.setAttribute("translate", "no");
-        initElementForEdition(editable, { allowInlineAtRoot: !!this.config.allowInlineAtRoot });
+        initElementForEdition(editable, {
+            allowInlineAtRoot: !!this.config.allowInlineAtRoot,
+            wrapInlinesInBlocks: this.shared.dom.wrapInlinesInBlocks,
+        });
         editable.classList.add("odoo-editor-editable");
         if (this.config.classList) {
             editable.classList.add(...this.config.classList);

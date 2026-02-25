@@ -29,7 +29,6 @@ class TestActivityCommon(ActivityScheduleCase):
 
 
 @tests.tagged('mail_activity')
-@tagged('at_install', '-post_install')  # LEGACY at_install
 class TestActivityRights(TestActivityCommon):
 
     def test_activity_action_open_document_no_access(self):
@@ -123,11 +122,11 @@ class TestActivityRights(TestActivityCommon):
         with self.assertRaises(exceptions.AccessError):
             (access_ro + access_locked).with_user(self.user_employee).check_access('write')
 
-        # '_get_mail_message_access' allows to post, hence posting activities
-        access_open.with_user(self.user_employee).activity_schedule(
+        # '_mail_get_operation_for_mail_message_operation' allows to post, hence posting activities
+        emp_new_1 = access_open.with_user(self.user_employee).activity_schedule(
             'test_mail.mail_act_test_todo_generic',
         )
-        access_ro.with_user(self.user_employee).activity_schedule(
+        emp_new_2 = access_ro.with_user(self.user_employee).activity_schedule(
             'test_mail.mail_act_test_todo_generic',
         )
 
@@ -141,6 +140,12 @@ class TestActivityRights(TestActivityCommon):
         # check read access correctly uses '_mail_get_operation_for_mail_message_operation'
         admin_activities[0].with_user(self.user_employee).read(['summary'])
         admin_activities[1].with_user(self.user_employee).read(['summary'])
+
+        self.env.invalidate_all()
+        self.env.transaction.clear_access_cache()
+        # check search correctly uses '_mail_get_operation_for_mail_message_operation'
+        found = self.env['mail.activity'].with_user(self.user_employee).search([('res_model', '=', 'mail.test.access.custo')])
+        self.assertEqual(found, admin_activities[:2] + emp_new_1 + emp_new_2, 'Should respect _ge_mail_get_operation_for_mail_message_operationt_mail_message_access, reading non locked records')
 
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_activity_security_user_noaccess_automated(self):
@@ -254,7 +259,6 @@ class TestActivityRights(TestActivityCommon):
 
 
 @tests.tagged('mail_activity')
-@tagged('at_install', '-post_install')  # LEGACY at_install
 class TestActivityFlow(TestActivityCommon):
 
     def test_activity_flow_employee(self):
@@ -638,7 +642,6 @@ class TestActivitySystray(TestActivityCommon, HttpCase):
 
 @tests.tagged('mail_activity')
 @freeze_time("2024-01-01 09:00:00")
-@tagged('at_install', '-post_install')  # LEGACY at_install
 class TestActivitySystrayBusNotify(TestActivityCommon):
 
     @classmethod
@@ -760,7 +763,6 @@ class TestActivitySystrayBusNotify(TestActivityCommon):
 
 
 @tests.tagged('mail_activity')
-@tagged('at_install', '-post_install')  # LEGACY at_install
 class TestActivityViewHelpers(TestActivityCommon):
 
     @classmethod

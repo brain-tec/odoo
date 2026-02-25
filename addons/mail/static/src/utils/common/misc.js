@@ -1,4 +1,4 @@
-import { reactive, useEffect } from "@odoo/owl";
+import { reactive, useLayoutEffect } from "@web/owl2/utils";
 import { AssetsLoadingError, getBundle } from "@web/core/assets";
 import { memoize } from "@web/core/utils/functions";
 import { effect } from "@web/core/utils/reactive";
@@ -236,7 +236,7 @@ export const hasHardwareAcceleration = memoize(() => {
  * @param {() => D} dependencies Returns an array of dependencies.
  */
 export function useDynamicInterval(fn, dependencies) {
-    useEffect((...dependencies) => {
+    useLayoutEffect((...dependencies) => {
         let timer;
         function tick() {
             const nextDelay = fn(...dependencies);

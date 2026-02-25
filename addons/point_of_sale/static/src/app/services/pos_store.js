@@ -1,5 +1,5 @@
+import { reactive } from "@web/owl2/utils";
 import { Mutex } from "@web/core/utils/concurrency";
-import { reactive } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import {
@@ -2643,6 +2643,17 @@ export class PosStore extends WithLazyGetterTrap {
             fastPaymentMethod: paymentMethod,
         });
         await validation.validateOrder(false);
+    }
+
+    clickSaveOrder() {
+        this.syncAllOrders({ orders: [this.getOrder()] });
+        this.notification.add(_t("Order saved for later"), { type: "success" });
+        this.setOrder(this.getEmptyOrder());
+        this.mobile_pane = "right";
+    }
+
+    get showSaveOrderButton() {
+        return this.config.raw.trusted_config_ids.length > 0;
     }
 
     handlePreparationHistory(srcPrep, destPrep, srcLine, destLine, qty) {

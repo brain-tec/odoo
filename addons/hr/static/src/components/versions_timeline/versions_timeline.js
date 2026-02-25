@@ -1,4 +1,5 @@
-import { onWillUpdateProps, useComponent, useState } from "@odoo/owl";
+import { useComponent, useState } from "@web/owl2/utils";
+import { onWillUpdateProps } from "@odoo/owl";
 import { useDateTimePicker } from "@web/core/datetime/datetime_picker_hook";
 import { Domain } from "@web/core/domain";
 import { registry } from "@web/core/registry";

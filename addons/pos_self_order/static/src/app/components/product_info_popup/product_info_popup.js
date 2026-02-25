@@ -1,4 +1,5 @@
-import { Component, useExternalListener, useState, useRef } from "@odoo/owl";
+import { useExternalListener, useRef, useState } from "@web/owl2/utils";
+import { Component } from "@odoo/owl";
 import { useScrollShadow } from "../../utils/scroll_shadow_hook";
 export class ProductInfoPopup extends Component {
     static template = "pos_self_order.ProductInfoPopup";

@@ -1,4 +1,5 @@
-import { Component, onWillRender, toRaw, useRef } from "@odoo/owl";
+import { onWillRender, useRef } from "@web/owl2/utils";
+import { Component, toRaw } from "@odoo/owl";
 
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { _t } from "@web/core/l10n/translation";

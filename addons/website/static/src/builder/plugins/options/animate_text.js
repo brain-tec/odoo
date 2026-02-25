@@ -1,4 +1,5 @@
-import { Component, onMounted, onWillDestroy, useChildSubEnv, useRef, useState } from "@odoo/owl";
+import { useChildSubEnv, useRef, useState } from "@web/owl2/utils";
+import { Component, onMounted, onWillDestroy } from "@odoo/owl";
 import { toolbarButtonProps } from "@html_editor/main/toolbar/toolbar";
 import { AnimateOption } from "./animate_option";
 import { usePopover } from "@web/core/popover/popover_hook";

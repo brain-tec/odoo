@@ -1,4 +1,5 @@
-import { Component, useRef } from "@odoo/owl";
+import { render, useRef } from "@web/owl2/utils";
+import { Component } from "@odoo/owl";
 
 import { useBus } from "@web/core/utils/hooks";
 import { useModel } from "@web/model/model";
@@ -51,7 +52,7 @@ export class HierarchyController extends Component {
             this.model.bus,
             "update",
             () => {
-                this.render(true);
+                render(this, true);
             }
         );
         useViewButtons(this.rootRef, {

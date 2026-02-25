@@ -1,3 +1,4 @@
+import { render, useComponent, useEnv, useLayoutEffect, useState, useSubEnv } from "@web/owl2/utils";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { makeContext } from "@web/core/context";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -36,16 +37,7 @@ import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog
  * @typedef {import("services").ServiceFactories} Services
  */
 
-import {
-    Component,
-    onWillUpdateProps,
-    status,
-    useComponent,
-    useEffect,
-    useEnv,
-    useState,
-    useSubEnv,
-} from "@odoo/owl";
+import { Component, onWillUpdateProps, status } from "@odoo/owl";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { highlightText, odoomark } from "@web/core/utils/html";
 import { deepEqual } from "@web/core/utils/objects";
@@ -701,7 +693,7 @@ export class X2ManyFieldDialog extends Component {
         useSubEnv({ config: this.props.config });
         this.env.dialogData.dismiss = () => this.discard();
 
-        useBus(this.record.model.bus, "update", () => this.render(true));
+        useBus(this.record.model.bus, "update", () => render(this, true));
 
         this.modalRef = useChildRef();
 
@@ -729,7 +721,7 @@ export class X2ManyFieldDialog extends Component {
         const { autofocusFieldIds, disableAutofocus } = this.archInfo;
         if (!disableAutofocus) {
             // to simplify
-            useEffect(
+            useLayoutEffect(
                 (isInEdition) => {
                     let elementToFocus;
                     if (isInEdition) {
@@ -827,7 +819,7 @@ export class X2ManyFieldDialog extends Component {
             if (this.title) {
                 this.title = this.title.replace(_t("Open:"), _t("New:"));
             }
-            this.render(true);
+            render(this, true);
         }
     }
 }

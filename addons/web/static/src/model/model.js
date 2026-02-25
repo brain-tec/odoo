@@ -1,3 +1,4 @@
+import { render, useComponent } from "@web/owl2/utils";
 import { RPCError } from "@web/core/network/rpc";
 import { user } from "@web/core/user";
 import { Race } from "@web/core/utils/concurrency";
@@ -6,14 +7,7 @@ import { useSetupAction } from "@web/search/action_hook";
 import { SEARCH_KEYS } from "@web/search/with_search/with_search";
 import { buildSampleORM } from "./sample_server";
 
-import {
-    EventBus,
-    onWillStart,
-    onWillUnmount,
-    onWillUpdateProps,
-    status,
-    useComponent,
-} from "@odoo/owl";
+import { EventBus, onWillStart, onWillUnmount, onWillUpdateProps, status } from "@odoo/owl";
 
 /**
  * @typedef {import("@web/env").OdooEnv} OdooEnv
@@ -143,7 +137,7 @@ export function useModelWithSampleData(ModelClass, params, options = {}) {
 
     const model = new ModelClass(component.env, params, services);
 
-    const onUpdate = () => component.render(true);
+    const onUpdate = () => render(component, true);
     model.bus.addEventListener("update", onUpdate);
     onWillUnmount(() => model.bus.removeEventListener("update", onUpdate));
 

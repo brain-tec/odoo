@@ -1,7 +1,7 @@
+import { useLayoutEffect, useRef } from "@web/owl2/utils";
 import { FloatField, floatField } from "@web/views/fields/float/float_field";
 import { registry } from "@web/core/registry";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
-import { useEffect, useRef } from "@odoo/owl";
 
 export class CountedQuantityWidgetField extends FloatField {
     setup() {
@@ -10,7 +10,7 @@ export class CountedQuantityWidgetField extends FloatField {
 
         const inputRef = useRef("numpadDecimal");
 
-        useEffect(
+        useLayoutEffect(
             (inputEl) => {
                 if (inputEl) {
                     const boundOnInput = this.onInput.bind(this);
