@@ -1,11 +1,11 @@
-import { useEffect, useState } from "@odoo/owl";
+import { useLayoutEffect, useState } from "@web/owl2/utils";
 
 export function useDropdownAutoVisibility(overlayState, popoverRef) {
     if (!overlayState) {
         return;
     }
     const state = useState(overlayState);
-    useEffect(
+    useLayoutEffect(
         () => {
             if (popoverRef.el) {
                 if (!state.isOverlayVisible) {

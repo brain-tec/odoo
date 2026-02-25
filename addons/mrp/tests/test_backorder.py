@@ -8,7 +8,6 @@ from odoo.tests import tagged, Form
 from odoo.tests.common import TransactionCase, freeze_time
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
 class TestMrpProductionBackorder(TestMrpCommon):
 
     @classmethod
@@ -968,7 +967,7 @@ class TestMrpProductionBackorder(TestMrpCommon):
         self.assertFalse(mo.picking_ids.filtered(lambda p: p.state == 'cancel' and p.product_id == self.product_6))
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('-post_install', 'at_install')  # test_mrp_backorder_operations breaks post install
 class TestMrpWorkorderBackorder(TransactionCase):
     @classmethod
     def setUpClass(cls):

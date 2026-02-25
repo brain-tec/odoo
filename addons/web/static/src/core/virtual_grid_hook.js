@@ -1,4 +1,4 @@
-import { useComponent, useEffect, useExternalListener } from "@odoo/owl";
+import { render, useComponent, useExternalListener, useLayoutEffect } from "@web/owl2/utils";
 import { pick, shallowEqual } from "@web/core/utils/objects";
 import { useThrottleForAnimation } from "@web/core/utils/timing";
 
@@ -9,7 +9,7 @@ import { useThrottleForAnimation } from "@web/core/utils/timing";
  *  a ref to the scrollable element
  * @property {ScrollPosition} [initialScroll={ left: 0, top: 0 }]
  *  the initial scroll position of the scrollable element
- * @property {(changed: Partial<VirtualGridIndexes>) => void} [onChange=() => this.render()]
+ * @property {(changed: Partial<VirtualGridIndexes>) => void} [onChange=() => render(this)]
  *  a callback called when the visible items change, i.e. when on scroll or resize.
  *  the default implementation is to re-render the component.
  * @property {number} [bufferCoef=1]
@@ -107,27 +107,25 @@ function getIndexes({ sizes, start, span, prevStartIndex, bufferCoef = BUFFER_CO
  */
 export function useVirtualGrid({ scrollableRef, initialScroll, onChange, bufferCoef }) {
     const comp = useComponent();
-    onChange ||= () => comp.render();
+    onChange ||= () => render(comp);
 
     const current = { scroll: { left: 0, top: 0, ...initialScroll } };
-    const computeColumnsIndexes = () => {
-        return getIndexes({
+    const computeColumnsIndexes = () =>
+        getIndexes({
             sizes: current.summedColumnsWidths,
             start: Math.abs(current.scroll.left),
             span: window.innerWidth,
             prevStartIndex: current.columnsIndexes?.[0],
             bufferCoef,
         });
-    };
-    const computeRowsIndexes = () => {
-        return getIndexes({
+    const computeRowsIndexes = () =>
+        getIndexes({
             sizes: current.summedRowsHeights,
             start: current.scroll.top,
             span: window.innerHeight,
             prevStartIndex: current.rowsIndexes?.[0],
             bufferCoef,
         });
-    };
     const throttledCompute = useThrottleForAnimation(() => {
         const changed = [];
         const columnsVisibleIndexes = computeColumnsIndexes();
@@ -149,7 +147,7 @@ export function useVirtualGrid({ scrollableRef, initialScroll, onChange, bufferC
         current.scroll.top = ev.target.scrollTop;
         throttledCompute();
     };
-    useEffect(
+    useLayoutEffect(
         (el) => {
             el?.addEventListener("scroll", scrollListener);
             return () => el?.removeEventListener("scroll", scrollListener);

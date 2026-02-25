@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "@odoo/owl";
+import { useLayoutEffect, useRef } from "@web/owl2/utils";
 
 import { patch } from "@web/core/utils/patch";
 
@@ -15,7 +15,7 @@ patch(Composer.prototype, {
     setup() {
         this.subjectInputRef = useRef("subjectInput");
         // fill in the "suggested subject" only when it differs from the default
-        useEffect(
+        useLayoutEffect(
             (
                 withMessageFields,
                 defaultSubject,

@@ -1,6 +1,7 @@
+import { useComponent, useRef } from "@web/owl2/utils";
 import { loadBundle } from "@web/core/assets";
 
-import { onMounted, onPatched, onWillStart, onWillUnmount, useComponent, useRef } from "@odoo/owl";
+import { onMounted, onPatched, onWillStart, onWillUnmount } from "@odoo/owl";
 
 export function useFullCalendar(refName, params) {
     const component = useComponent();

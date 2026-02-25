@@ -1,4 +1,5 @@
-import { Component, useState, onWillRender } from "@odoo/owl";
+import { onWillRender, useState } from "@web/owl2/utils";
+import { Component } from "@odoo/owl";
 import { highlightText } from "@web/core/utils/html";
 
 export class HighlightText extends Component {

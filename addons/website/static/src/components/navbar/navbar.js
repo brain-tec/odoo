@@ -1,9 +1,9 @@
+import { render, useLayoutEffect } from "@web/owl2/utils";
 import { NavBar } from "@web/webclient/navbar/navbar";
 import { useService, useBus } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { patch } from "@web/core/utils/patch";
 import { UserMenu } from "@web/webclient/user_menu/user_menu";
-import { useEffect } from "@odoo/owl";
 
 const websiteSystrayRegistry = registry.category("website_systray");
 websiteSystrayRegistry.add("UserMenu", { Component: UserMenu }, { sequence: 14 });
@@ -17,7 +17,7 @@ patch(NavBar.prototype, {
         // The navbar is rerendered with an event, as it can not naturally be
         // with props/state (the WebsitePreview client action and the navbar
         // are not related).
-        useBus(websiteSystrayRegistry, "EDIT-WEBSITE", () => this.render(true));
+        useBus(websiteSystrayRegistry, "EDIT-WEBSITE", () => render(this, true));
 
         if (this.env.debug && !websiteSystrayRegistry.contains("web.debug_mode_menu")) {
             websiteSystrayRegistry.add(
@@ -31,10 +31,10 @@ patch(NavBar.prototype, {
         // can be computed.
         let adaptCounter = 0;
         const renderAndAdapt = () => {
-            this.render(true);
+            render(this, true);
             adaptCounter++;
         };
-        useEffect(
+        useLayoutEffect(
             (adaptCounter) => {
                 // We do not want to adapt on the first render
                 // as the super class already does it.

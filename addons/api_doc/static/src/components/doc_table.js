@@ -1,4 +1,5 @@
-import { Component, useState, useExternalListener, useRef, onWillRender } from "@odoo/owl";
+import { onWillRender, useExternalListener, useRef, useState } from "@web/owl2/utils";
+import { Component } from "@odoo/owl";
 
 export const TABLE_TYPES = {
     Id: "id",

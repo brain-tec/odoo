@@ -1,3 +1,4 @@
+import { render, onWillRender, useLayoutEffect, useRef, useState, useSubEnv } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { evaluateExpr, evaluateBooleanExpr } from "@web/core/py_js/py";
 import { user } from "@web/core/user";
@@ -26,16 +27,7 @@ import { OfflineActionHelper } from "@web/views/offline_action_helper";
 import { SelectionBox } from "@web/views/view_components/selection_box";
 import { useExportRecords, useDeleteRecords } from "@web/views/view_hook";
 
-import {
-    Component,
-    onWillPatch,
-    onWillRender,
-    onWillStart,
-    useEffect,
-    useRef,
-    useState,
-    useSubEnv,
-} from "@odoo/owl";
+import { Component, onWillPatch, onWillStart } from "@odoo/owl";
 
 // -----------------------------------------------------------------------------
 
@@ -137,7 +129,7 @@ export class ListController extends Component {
             getOrderBy: () => this.model.root.orderBy,
         });
 
-        useEffect(
+        useLayoutEffect(
             (isReady) => {
                 if (isReady) {
                     if (this.env.isSmall) {
@@ -180,7 +172,7 @@ export class ListController extends Component {
             };
         });
 
-        useEffect(
+        useLayoutEffect(
             () => {
                 this.onSelectionChanged();
             },
@@ -339,7 +331,7 @@ export class ListController extends Component {
             if (!list.editedRecord) {
                 await (group || list).addNewRecord(this.editable === "top");
             }
-            this.render();
+            render(this);
         } else {
             await this.props.createRecord();
         }

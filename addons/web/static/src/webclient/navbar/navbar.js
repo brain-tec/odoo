@@ -1,3 +1,4 @@
+import { render, useChildSubEnv, useExternalListener, useLayoutEffect, useRef, useState } from "@web/owl2/utils";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { DropdownGroup } from "@web/core/dropdown/dropdown_group";
@@ -10,12 +11,7 @@ import { ErrorHandler } from "@web/core/utils/components";
 import {
     Component,
     onWillDestroy,
-    useExternalListener,
-    useEffect,
-    useRef,
-    useState,
     onWillUnmount,
-    useChildSubEnv,
 } from "@odoo/owl";
 
 const systrayRegistry = registry.category("systray");
@@ -53,7 +49,7 @@ export class NavBar extends Component {
         let adaptCounter = 0;
         const renderAndAdapt = () => {
             adaptCounter++;
-            this.render();
+            render(this);
         };
 
         systrayRegistry.addEventListener("UPDATE", renderAndAdapt);
@@ -66,7 +62,7 @@ export class NavBar extends Component {
 
         // We don't want to adapt every time we are patched
         // rather, we adapt only when menus or systrays have changed.
-        useEffect(
+        useLayoutEffect(
             () => {
                 this.adapt();
             },
@@ -214,7 +210,11 @@ export class NavBar extends Component {
             // Do not render if more menu items stayed the same.
             return;
         }
-        return this.render();
+        this.render();
+    }
+
+    render() {
+        render(this);
     }
 
     onNavBarDropdownItemSelection(menu) {

@@ -1,13 +1,5 @@
-import {
-    Component,
-    onMounted,
-    onRendered,
-    onWillUpdateProps,
-    reactive,
-    status,
-    useEffect,
-    xml,
-} from "@odoo/owl";
+import { onRendered, reactive, useLayoutEffect } from "@web/owl2/utils";
+import { Component, onMounted, onWillUpdateProps, status, xml } from "@odoo/owl";
 import { useDropdownGroup } from "@web/core/dropdown/_behaviours/dropdown_group_hook";
 import { useDropdownNesting } from "@web/core/dropdown/_behaviours/dropdown_nesting";
 import { DropdownPopover } from "@web/core/dropdown/_behaviours/dropdown_popover";
@@ -184,7 +176,7 @@ export class Dropdown extends Component {
         onMounted(() => this.onStateChanged(this.state));
         effect((state) => this.onStateChanged(state), [this.state]);
 
-        useEffect(
+        useLayoutEffect(
             (target) => this.setTargetElement(target),
             () => [this.target]
         );

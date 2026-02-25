@@ -85,7 +85,7 @@ class TestProjectSharingCommon(TestProjectCommon):
 
 
 @tagged('project_sharing')
-@tagged('at_install', '-post_install')  # LEGACY at_install
+@tagged('-post_install', 'at_install')  # test_create_task_in_project_sharing breaks post install with AccessError
 class TestProjectSharing(TestProjectSharingCommon):
 
     def test_project_share_wizard(self):

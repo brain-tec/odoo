@@ -1,4 +1,5 @@
-import { Component, onMounted, onWillDestroy, useRef, useSubEnv } from "@odoo/owl";
+import { render, useRef, useSubEnv } from "@web/owl2/utils";
+import { Component, onMounted, onWillDestroy } from "@odoo/owl";
 import { Editor } from "./editor";
 import { Toolbar } from "./main/toolbar/toolbar";
 import { useChildRef, useSpellCheck } from "@web/core/utils/hooks";
@@ -85,7 +86,7 @@ export class Wysiwyg extends Component {
                         "load",
                         () => {
                             attachEditor();
-                            this.render();
+                            render(this);
                         },
                         { once: true }
                     );

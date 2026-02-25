@@ -1,5 +1,5 @@
+import { useEnv, useSubEnv } from "@web/owl2/utils";
 import { ProductCatalogKanbanController } from "@product/product_catalog/kanban_controller";
-import { useSubEnv, useEnv } from "@odoo/owl";
 import { useDebounced } from "@web/core/utils/timing";
 
 export class PurchaseSuggestCatalogKanbanController extends ProductCatalogKanbanController {

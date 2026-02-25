@@ -1,3 +1,4 @@
+import { useComponent, useLayoutEffect, useRef, useState, useSubEnv } from "@web/owl2/utils";
 import { LocalOverlayContainer } from "@html_editor/local_overlay_container";
 import {
     Component,
@@ -6,11 +7,6 @@ import {
     onWillStart,
     onWillUnmount,
     status,
-    useComponent,
-    useEffect,
-    useRef,
-    useState,
-    useSubEnv,
 } from "@odoo/owl";
 import { LazyComponent, loadBundle } from "@web/core/assets";
 import { browser } from "@web/core/browser/browser";
@@ -181,7 +177,7 @@ export class WebsiteBuilderClientAction extends Component {
             },
             [this.state]
         );
-        useEffect(
+        useLayoutEffect(
             (isEditing) => {
                 document.querySelector("body").classList.toggle("o_builder_open", isEditing);
                 if (isEditing) {

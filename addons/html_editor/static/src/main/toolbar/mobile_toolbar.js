@@ -1,4 +1,5 @@
-import { Component, onMounted, useExternalListener, useRef } from "@odoo/owl";
+import { useExternalListener, useRef } from "@web/owl2/utils";
+import { Component, onMounted } from "@odoo/owl";
 import { Toolbar } from "./toolbar";
 
 export class ToolbarMobile extends Component {

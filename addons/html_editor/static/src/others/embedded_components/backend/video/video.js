@@ -1,3 +1,4 @@
+import { useExternalListener, useRef } from "@web/owl2/utils";
 import {
     getEmbeddedProps,
     StateChangeManager,
@@ -9,8 +10,6 @@ import {
     onMounted,
     onWillDestroy,
     onWillUnmount,
-    useExternalListener,
-    useRef,
 } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";

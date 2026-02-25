@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from "@web/owl2/utils";
 import { getLocalYearAndWeek } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
 import { convertRecordToEvent, getColor } from "@web/views/calendar/utils";
@@ -7,7 +8,7 @@ import { makeWeekColumn } from "@web/views/calendar/calendar_common/calendar_com
 import { CalendarYearPopover } from "@web/views/calendar/calendar_year/calendar_year_popover";
 import { TOUCH_SELECTION_THRESHOLD } from "@web/views/utils";
 
-import { Component, useEffect, useRef } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 
 const { DateTime } = luxon;
 
@@ -38,7 +39,7 @@ export class CalendarYearRenderer extends Component {
         this.popover = useCalendarPopover(this.constructor.components.Popover);
         this.rootRef = useRef("root");
 
-        useEffect(() => {
+        useLayoutEffect(() => {
             this.updateSize();
         });
     }

@@ -1,3 +1,4 @@
+import { reactive, useExternalListener, useRef, useState, useSubEnv } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { parseXML } from "@web/core/utils/xml";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
@@ -8,11 +9,6 @@ import {
     EventBus,
     onMounted,
     onWillStart,
-    reactive,
-    useExternalListener,
-    useRef,
-    useState,
-    useSubEnv,
 } from "@odoo/owl";
 import { RPCError } from "@web/core/network/rpc";
 import { extractFieldsFromArchInfo } from "@web/model/relational_model/utils";

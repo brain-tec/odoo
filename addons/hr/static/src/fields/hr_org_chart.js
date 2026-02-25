@@ -1,10 +1,11 @@
+import { render, useState } from "@web/owl2/utils";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { user } from "@web/core/user";
 import { onEmployeeSubRedirect } from './hooks';
-import { Component, useState } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 
@@ -70,7 +71,7 @@ export class HrOrgChart extends Component {
             this.managers = [];
             this.children = [];
             if (this.view_employee_id) {
-                this.render(true);
+                render(this, true);
             }
             this.view_employee_id = null;
         } else if (employeeId !== this.view_employee_id || force) {
@@ -96,7 +97,7 @@ export class HrOrgChart extends Component {
             this.children = orgData.children;
             this.managers_more = orgData.managers_more;
             this.self = orgData.self;
-            this.render(true);
+            render(this, true);
         }
     }
 

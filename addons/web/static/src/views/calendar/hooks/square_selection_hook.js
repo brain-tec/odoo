@@ -1,4 +1,4 @@
-import { useComponent, useEffect, useExternalListener, useRef } from "@odoo/owl";
+import { useComponent, useExternalListener, useLayoutEffect, useRef } from "@web/owl2/utils";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
 import { shallowEqual } from "@web/core/utils/objects";
 import { closest } from "@web/core/utils/ui";
@@ -204,7 +204,7 @@ export function useSquareSelection() {
         component.props.onSquareSelection([...allSelectedCells]);
     };
 
-    useEffect(
+    useLayoutEffect(
         (el, hasMultiCreate) => {
             if (!hasMultiCreate) {
                 return;

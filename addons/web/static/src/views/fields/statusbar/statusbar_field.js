@@ -1,4 +1,5 @@
-import { Component, onWillRender, useEffect, useExternalListener, useRef } from "@odoo/owl";
+import { onWillRender, render, useExternalListener, useLayoutEffect, useRef } from "@web/owl2/utils";
+import { Component } from "@odoo/owl";
 import { useCommand } from "@web/core/commands/command_hook";
 import { Domain } from "@web/core/domain";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -71,10 +72,10 @@ export class StatusBarField extends Component {
         const adjust = () => {
             status = "adjusting";
             this.adjustVisibleItems();
-            this.render();
+            render(this);
         };
 
-        useEffect(() => {
+        useLayoutEffect(() => {
             if (status === "shouldAdjust") {
                 adjust();
             }
