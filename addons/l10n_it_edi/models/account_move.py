@@ -402,11 +402,11 @@ class AccountMove(models.Model):
         self.ensure_one()
         if filetype == 'fatturapa':
             if fatturapa_attachment := self.l10n_it_edi_attachment_file:
-                return {
+                return [{
                     'filename': self.l10n_it_edi_attachment_name,
                     'filetype': 'xml',
                     'content': b64decode(fatturapa_attachment),
-                }
+                }]
         return super()._get_invoice_legal_documents(filetype, allow_fallback=allow_fallback)
 
     def get_extra_print_items(self):
@@ -750,8 +750,8 @@ class AccountMove(models.Model):
             grouping_key = values['grouping_key']
             if grouping_key is False:
                 continue
-            importo_totale_documento += values['base_amount_currency']
-            importo_totale_documento += values['tax_amount_currency']
+            importo_totale_documento += values['base_amount']
+            importo_totale_documento += values['tax_amount']
 
         company = self.company_id._l10n_it_get_edi_company()
         partner = self.commercial_partner_id
