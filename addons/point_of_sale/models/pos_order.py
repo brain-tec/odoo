@@ -134,6 +134,17 @@ class PosOrder(models.Model):
         for field in fields:
             if order.get(field):
                 existing_ids = set(pos_order[field].ids)
+                existing_line_ids = {line.uuid: line.id for line in pos_order[field]}
+                for line in order[field]:
+                    if len(line) < 3:
+                        continue
+                    line_vals = line[2]
+                    if line[0] == Command.CREATE and line_vals.get('uuid') in existing_line_ids:
+                        # If we try to create (line[0] == Command.CREATE) a line with a uuid that already
+                        # exists on another line of the same order, we transform the creation
+                        # into an update (line[0] = Command.UPDATE) of the existing line.
+                        line[0] = Command.UPDATE
+                        line[1] = existing_line_ids[line_vals.get('uuid')]
                 pos_order.write({field: order[field]})
                 added_ids = set(pos_order[field].ids) - existing_ids
                 if added_ids:
@@ -1207,14 +1218,14 @@ class PosOrder(models.Model):
             if order_is_in_futur:
                 raise UserError(_('The order delivery / pickup date is in the future. You cannot cancel it.'))
 
-        today_orders = self.filtered(lambda order: order.state == 'draft' and (not order.preset_time or order.preset_time.date() <= fields.Date.today()))
-        next_days_orders = self.filtered(lambda order: order.preset_time and order.preset_time.date() > fields.Date.today() and order.state == 'draft')
-        next_days_orders.session_id = False
-        today_orders.write({'state': 'cancel'})
-        for config in today_orders.config_id:
-            config.notify_synchronisation(config.current_session_id.id, self.env.context.get('device_identifier', 0))
+        draft_orders = self.filtered(lambda o: o.state == 'draft')
+        if draft_orders:
+            draft_orders.write({'state': 'cancel'})
+            for config in draft_orders.mapped('config_id'):
+                config.notify_synchronisation(config.current_session_id.id, self.env.context.get('device_identifier', 0))
+
         return {
-            'pos.order': self._load_pos_data_read(today_orders, self.config_id)
+            'pos.order': self._load_pos_data_read(draft_orders, self.config_id)
         }
 
     def action_pos_order_cancel(self):
