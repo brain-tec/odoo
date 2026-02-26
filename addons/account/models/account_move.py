@@ -1024,8 +1024,8 @@ class AccountMove(models.Model):
         for move in self:
             # This will get the trusted bank accounts from the partner
             bank_ids = move.bank_partner_id.bank_ids.filtered(
-                lambda bank: (not bank.company_id or bank.company_id == move.company_id) and bank.allow_out_payment
-            )
+                lambda bank: (not bank.company_id or bank.company_id == move.company_id)
+            ).sorted(lambda bank: not bank.allow_out_payment)
             move.partner_bank_id = bank_ids[:1]
 
     @api.depends('partner_id')
@@ -5237,9 +5237,17 @@ class AccountMove(models.Model):
                     "So you cannot confirm the invoice."
                 ))
             if invoice.partner_bank_id and invoice.is_inbound() and not invoice.partner_bank_id.allow_out_payment:
-                raise UserError(_(
-                    "The company bank account linked to this invoice is not trusted, please double-check and trust it before confirming, or remove it"
-                ))
+                if invoice.partner_bank_id._user_can_trust():
+                    raise RedirectWarning(
+                        _(
+                            "The company bank account (%(account_number)s) linked to this invoice is not trusted. "
+                            "Go to the Bank Settings, double-check that it is yours or correct the number, and click on Send Money to trust it.",
+                            account_number=invoice.partner_bank_id.display_name,
+                        ),
+                        invoice.partner_bank_id._get_records_action(),
+                        _("Bank settings")
+                    )
+                raise UserError(_("The bank account of your company is not trusted. Please ask an admin or someone with approval rights to check it."))
             if float_compare(invoice.amount_total, 0.0, precision_rounding=invoice.currency_id.rounding) < 0:
                 validation_msgs.add(_(
                     "You cannot validate an invoice with a negative total amount. "
@@ -6588,7 +6596,7 @@ class AccountMove(models.Model):
             # Search for partners in the mail's body.
             body_mail_addresses = set(email_re.findall(msg_dict.get('body')))
             partners = self._partner_find_from_emails_single(
-                body_mail_addresses, filter_found=lambda p: is_right_company(p) or p.partner_share, no_create=True,
+                body_mail_addresses, filter_found=lambda p: is_right_company(p) and p.partner_share, no_create=True,
             ) if body_mail_addresses else self.env['res.partner']
 
         # Little hack: Inject the mail's subject in the body.
