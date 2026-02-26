@@ -555,6 +555,9 @@ class PosSession(models.Model):
             return check_closing_session
 
         self.config_id.close_session_snoozes()
+
+        future_orders = self.order_ids.filtered(lambda order: order.preset_time and order.preset_time.date() > fields.Date.today() and order.state == 'draft')
+        future_orders.session_id = False
         validate_result = self.action_pos_session_closing_control(bank_payment_method_diffs=bank_payment_method_diffs)
 
         # If an error is raised, the user will still be redirected to the back end to manually close the session.
@@ -969,7 +972,7 @@ class PosSession(models.Model):
                         product_accounts = move.with_company(move.company_id).product_id._get_product_accounts()
                         exp_key = product_accounts['expense']
                         stock_key = product_accounts['stock_valuation']
-                        signed_product_qty = move.quantity
+                        signed_product_qty = move.uom_id._compute_quantity(move.product_uom_qty, move.product_id.uom_id, round=False)
                         if move._is_in():
                             signed_product_qty *= -1
                         amount = signed_product_qty * move._get_price_unit()
