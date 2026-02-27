@@ -131,6 +131,12 @@ BROWSER_WAIT = CHECK_BROWSER_SLEEP * CHECK_BROWSER_ITERATIONS # seconds
 DEFAULT_SUCCESS_SIGNAL = 'test successful'
 TEST_CURSOR_COOKIE_NAME = 'test_request_key'
 
+IGNORED_MSGS = re.compile(r"""
+    failed\ to\ fetch  # base error
+  | connectionlosterror:  # conversion by offlineFailToFetchErrorHandler
+  | assetsloadingerror: # lazy loaded bundle
+""", flags=re.VERBOSE | re.IGNORECASE).search
+
 def get_db_name():
     dbnames = odoo.tools.config['db_name']
     # If the database name is not provided on the command-line,
@@ -939,6 +945,10 @@ class BaseCase(case.TestCase):
 # maps a function name to a file in which it can exist for the setattr it
 # triggers to be allowed
 SETATTR_SOURCES = {
+    # opt
+    '_setup_models__': ('/odoo/orm/registry.py',),
+    # mock `_setup_models__` installed by `start_tour`
+    'setup': ('/odoo/tests/common.py',),
     # model attributes being set from a patcher are fine
     '__enter__': ('/unittest/mock.py',),
     '__exit__': ('/unittest/mock.py',),
@@ -948,7 +958,7 @@ SETATTR_SOURCES = {
     '_instanciate': ('/mail/models/ir_model.py',),
     # account manipulates _template_register
     '_template_register': ('/account/models/chart_template.py',),
-    '_setup_complete': ('/account/models/chart_template.py',),
+    '_post_model_setup__': ('/account/models/chart_template.py',),
     # ...
     'patch': ('/base_automation/models/base_automation.py',),
     # .....
@@ -1158,7 +1168,7 @@ class TransactionCase(BaseCase):
         cls.classPatch(cls.cr, 'rollback', forbidden)
         cls.classPatch(cls.cr, 'close', forbidden)
 
-        cls.env = api.Environment(cls.cr, odoo.SUPERUSER_ID, {})
+        cls.env = api.Environment(cls.cr, api.SUPERUSER_ID, {})
 
         # speedup CryptContext. Many user an password are done during tests, avoid spending time hasing password with many rounds
         def _crypt_context(self):  # noqa: ARG001
@@ -1800,7 +1810,7 @@ class ChromeBrowser:
 
         log_type = type
         _logger = self._logger.getChild('browser')
-        if self._result.done() and 'failed to fetch' in message.casefold():
+        if self._result.done() and IGNORED_MSGS(message):
             log_type = 'dir'
         _logger.log(
             self._TO_LEVEL.get(log_type, logging.INFO),
@@ -1873,7 +1883,7 @@ which leads to stray network requests and inconsistencies."""
             message += '\n' + stack
 
         if self._result.done():
-            if 'failed to fetch' not in message.casefold():
+            if not IGNORED_MSGS(message):
                 self._logger.getChild('browser').error(
                     "Exception received after termination: %s", message)
             return
