@@ -79,6 +79,7 @@ class SaleOrder(models.Model):
         string="Status",
         readonly=True, copy=False, index=True,
         tracking=3,
+        group_expand=True,
         default='draft')
     locked = fields.Boolean(
         help="Locked orders cannot be modified.",
@@ -2435,7 +2436,7 @@ class SaleOrder(models.Model):
     @api.model
     def get_import_templates(self):
         return [{
-            'label': _('Import Template for Quotations'),
+            'label': _('Template for Quotations'),
             'template': '/sale/static/xls/quotations_import_template.xlsx',
         }]
 

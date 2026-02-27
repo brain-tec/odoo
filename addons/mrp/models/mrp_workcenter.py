@@ -78,7 +78,7 @@ class MrpWorkcenter(models.Model):
     capacity_ids = fields.One2many('mrp.workcenter.capacity', 'workcenter_id', string='Product Capacities',
         help="Specific number of pieces that can be produced in parallel per product.", copy=True)
     kanban_dashboard_graph = fields.Text(compute='_compute_kanban_dashboard_graph')
-    resource_calendar_id = fields.Many2one(check_company=True)
+    resource_calendar_id = fields.Many2one(check_company=True, default=lambda self: self.env.ref('mrp.mrp_workcenter_calendar', raise_if_not_found=False))
 
     def _compute_display_name(self):
         super()._compute_display_name()
@@ -631,8 +631,8 @@ class MrpWorkcenterCapacity(models.Model):
     uom_id = fields.Many2one('uom.uom', string='Unit',
         compute="_compute_uom_id", precompute=True, store=True, readonly=False, required=True)
     capacity = fields.Float('Capacity', help="Number of pieces that can be produced in parallel for this product or for all, depending on the unit.")
-    time_start = fields.Float('Setup Time (minutes)', default=_default_time_start, help="Time in minutes for the setup.")
-    time_stop = fields.Float('Cleanup Time (minutes)', default=_default_time_stop, help="Time in minutes for the cleaning.")
+    time_start = fields.Float('Setup Time', default=_default_time_start, help="Time in minutes for the setup.")
+    time_stop = fields.Float('Cleanup Time', default=_default_time_stop, help="Time in minutes for the cleaning.")
 
     _positive_capacity = models.Constraint(
         'CHECK(capacity >= 0)',
