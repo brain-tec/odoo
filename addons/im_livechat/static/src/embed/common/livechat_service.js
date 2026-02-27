@@ -124,6 +124,10 @@ export class LivechatService {
         if (this.thread && !this.thread.isTransient) {
             return this.thread;
         }
+        if (this._persistResolvers) {
+            return this._persistResolvers.promise;
+        }
+        this._persistResolvers = Promise.withResolvers();
         const temporaryThread = this.thread;
         await this._createThread({ persist: true });
         const deleteTemporary = async () => {
@@ -148,6 +152,8 @@ export class LivechatService {
             deleteTemporary();
             this.thread.openChatWindow({ focus: true });
         });
+        this._persistResolvers.resolve(this.thread);
+        this._persistResolvers = null;
         return this.thread;
     }
 
@@ -222,9 +228,7 @@ export class LivechatService {
             {
                 channel_id: this.options.channel_id,
                 anonymous_name: this.options.default_username ?? _t("Visitor"),
-                chatbot_script_id: this.savedState
-                    ? this.thread.chatbot?.script.id
-                    : this.rule.chatbotScript?.id,
+                chatbot_script_id: this.thread?.chatbot?.script.id ?? this.rule.chatbotScript?.id,
                 previous_operator_id: expirableStorage.getItem(OPERATOR_STORAGE_KEY),
                 persisted: persist,
             },
