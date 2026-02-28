@@ -85,6 +85,10 @@ class PosOrder(models.Model):
         if not order.get('company_id'):
             order['company_id'] = pos_session.config_id.company_id.id
 
+        if self.env.context.get('current_order_uuid') and order['uuid'] == self.env.context['current_order_uuid']:
+            # Prioritize the server date for the order that is currently being processed
+            order['date_order'] = fields.Datetime.now()
+
         pos_order = False
         record_uuid_mapping = order.pop('relations_uuid_mapping', {})
 
@@ -131,8 +135,8 @@ class PosOrder(models.Model):
 
         for model_name, mapping in record_uuid_mapping.items():
             owner_records = self.env[model_name].search([('uuid', 'in', mapping.keys())])
-            for uuid, fields in mapping.items():
-                for name, uuids in fields.items():
+            for uuid, field_names in mapping.items():
+                for name, uuids in field_names.items():
                     params = self.env[model_name]._fields[name]
                     if params.type in ['one2many', 'many2many']:
                         records = self.env[params.comodel_name].search([('uuid', 'in', uuids)])
@@ -1009,7 +1013,7 @@ class PosOrder(models.Model):
                 product_accounts = stock_move.with_company(stock_move.company_id).product_id._get_product_accounts()
                 expense_account = product_accounts['expense']
                 stock_account = product_accounts['stock_valuation']
-                balance = -sum(stock_move.mapped('value'))
+                balance = stock_move.value if stock_move.is_out else -stock_move.value
                 aml_vals_list_per_nature['stock'].append({
                     'name': _("Stock variation for %s", stock_move.product_id.name),
                     'account_id': expense_account.id,
@@ -1173,13 +1177,15 @@ class PosOrder(models.Model):
         (payment_receivable_lines | invoice_receivable_lines).sudo().with_company(invoice.company_id).reconcile()
 
     def cancel_order_from_pos(self):
+        draft_orders = self.filtered(lambda o: o.state == 'draft')
         if self.env.context.get('active_ids'):
             orders = self.browse(self.env.context.get('active_ids'))
             order_is_in_futur = any(order.preset_time and order.preset_time.date() > fields.Date.today() for order in orders)
             if order_is_in_futur:
                 raise UserError(_('The order delivery / pickup date is in the future. You cannot cancel it.'))
+            if not draft_orders:
+                raise UserError(_('This order has already been paid. You cannot set it back to draft or edit it.'))
 
-        draft_orders = self.filtered(lambda o: o.state == 'draft')
         if draft_orders:
             draft_orders.write({'state': 'cancel'})
             for config in draft_orders.mapped('config_id'):
