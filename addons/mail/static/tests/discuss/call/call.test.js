@@ -18,9 +18,17 @@ import {
     CROSS_TAB_HOST_MESSAGE,
 } from "@mail/discuss/call/common/rtc_service";
 
-import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import { advanceTime, hover, manuallyDispatchProgrammaticEvent, queryFirst } from "@odoo/hoot-dom";
-import { mockSendBeacon } from "@odoo/hoot-mock";
+import {
+    advanceTime,
+    beforeEach,
+    describe,
+    expect,
+    hover,
+    manuallyDispatchProgrammaticEvent,
+    mockSendBeacon,
+    queryFirst,
+    test,
+} from "@odoo/hoot";
 import {
     asyncStep,
     Command,
@@ -470,17 +478,12 @@ test("expand call participants when joining a call", async () => {
 });
 
 test("start call when accepting from push notification", async () => {
-    const serviceWorker = Object.assign(new EventTarget(), {
-        register: () => Promise.resolve(),
-        ready: Promise.resolve(),
-    });
-    patchWithCleanup(window.navigator, { serviceWorker });
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
     await start();
     await openDiscuss();
     await contains(".o-mail-Discuss-threadName[title=Inbox]");
-    serviceWorker.dispatchEvent(
+    navigator.serviceWorker.dispatchEvent(
         new MessageEvent("message", {
             data: { action: "OPEN_CHANNEL", data: { id: channelId, joinCall: true } },
         })
