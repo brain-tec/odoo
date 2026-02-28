@@ -1,4 +1,4 @@
-import { MessageConfirmDialog } from "@mail/core/common/message_confirm_dialog";
+import { MessagePinDialog } from "@mail/core/common/message_pin_dialog";
 import { fields, Record } from "@mail/model/export";
 
 import { _t } from "@web/core/l10n/translation";
@@ -541,9 +541,9 @@ export class DiscussChannel extends Record {
         const notification = this.store.env.services.notification;
         try {
             await clipboard.writeText(this.invitationLink);
-            notification.add(_t("Invitation link copied!"), { type: "success" });
+            notification.add(_t("Invitation link copied"), { type: "success" });
         } catch {
-            notification.add(_t("Permission denied: invitation link copy failed!"), {
+            notification.add(_t("Permission denied: invitation link copy failed"), {
                 type: "danger",
             });
         }
@@ -646,34 +646,11 @@ export class DiscussChannel extends Record {
     }
 
     messagePin(message) {
-        this.store.env.services.dialog.add(MessageConfirmDialog, {
-            confirmText: _t("Yeah, pin it!"),
-            message,
-            prompt: _t("You sure want this message pinned to %(conversation)s forever and ever?", {
-                conversation: this.prefix + this.displayName,
-            }),
-            size: "md",
-            title: _t("Pin It"),
-            onConfirm: () => {
-                this.setMessagePin(message, true);
-            },
-        });
+        this.store.env.services.dialog.add(MessagePinDialog, { message });
     }
 
     messageUnpin(message) {
-        this.store.env.services.dialog.add(MessageConfirmDialog, {
-            confirmColor: "btn-danger",
-            confirmText: _t("Yes, remove it please"),
-            message,
-            prompt: _t(
-                "Well, nothing lasts forever, but are you sure you want to unpin this message?"
-            ),
-            size: "md",
-            title: _t("Unpin Message"),
-            onConfirm: () => {
-                this.setMessagePin(message, false);
-            },
-        });
+        this.store.env.services.dialog.add(MessagePinDialog, { message, isUnpin: true });
     }
 
     /** @param {string} data base64 representation of the binary */

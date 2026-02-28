@@ -24,7 +24,7 @@ class TestUiSEPA(TestPosQrCommon):
         qr_payment = cls.env['pos.payment.method'].sudo().create({
             'name': 'QR Code',
             'journal_id': cls.company_data['default_journal_bank'].id,
-            'payment_method_type': "qr_code",
+            'payment_method_type': "bank_qr_code",
             'qr_code_method': "sct_qr"
         })
         cls.main_pos_config.write({
@@ -86,7 +86,7 @@ class TestUiCH(TestPosQrCommon):
         qr_payment = cls.env['pos.payment.method'].sudo().create({
             'name': 'QR Code',
             'journal_id': cls.company_data['default_journal_bank'].id,
-            'payment_method_type': "qr_code",
+            'payment_method_type': "bank_qr_code",
             'qr_code_method': "ch_qr"
         })
         cls.main_pos_config.write({
@@ -146,7 +146,7 @@ class TestUiHK(TestPosQrCommon):
         qr_payment = cls.env['pos.payment.method'].sudo().create({
             'name': 'QR Code',
             'journal_id': cls.company_data['default_journal_bank'].id,
-            'payment_method_type': "qr_code",
+            'payment_method_type': "bank_qr_code",
             'qr_code_method': "emv_qr"
         })
         cls.main_pos_config.write({
@@ -201,7 +201,7 @@ class TestUIBR(TestPosQrCommon):
         qr_payment = cls.env['pos.payment.method'].sudo().create({
             'name': 'QR Code',
             'journal_id': cls.company_data['default_journal_bank'].id,
-            'payment_method_type': "qr_code",
+            'payment_method_type': "bank_qr_code",
             'qr_code_method': "emv_qr"
         })
         cls.main_pos_config.write({

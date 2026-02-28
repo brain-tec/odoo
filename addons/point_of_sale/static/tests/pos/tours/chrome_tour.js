@@ -218,6 +218,13 @@ registry.category("web_tour.tours").add("test_edit_paid_order", {
             PaymentScreen.clickPartnerButton(),
             PaymentScreen.clickCustomer("Partner Test 1"),
             PaymentScreen.clickInvoiceButton(),
+            {
+                content: "wait for 200 ms",
+                trigger: "body",
+                run: async () => {
+                    await new Promise((resolve) => setTimeout(resolve, 200));
+                },
+            },
             PaymentScreen.clickValidate(),
             FeedbackScreen.isShown(),
             FeedbackScreen.clickNextOrder(),
@@ -388,5 +395,19 @@ registry.category("web_tour.tours").add("test_ctrl_number_ignored", {
                 { ...ProductScreen.clickLine("Whiteboard Pen")[0], isActive: ["mobile"] },
                 ...ProductScreen.selectedOrderlineHasDirect("Whiteboard Pen", "1", "6.0"),
             ]),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_set_opening_note_without_cash_method", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            {
+                content: "Add Opening Notes",
+                trigger: ".opening-notes",
+                run: "edit Opening Notes",
+            },
+            Dialog.confirm("Open Register"),
+            ProductScreen.addOrderline("Whiteboard Pen", "1", "6", "6.0"),
         ].flat(),
 });
