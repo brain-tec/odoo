@@ -91,7 +91,7 @@
         'o-p-1_5':       props.inline   and  !env.inMeetingView and hasBtnBg and isInlineCircleButton and !env.inChatWindow,
         'o-px-0_5':      props.inline   and  !env.inMeetingView and !hasBtnBg and !action.icon,
         'p-1':           props.inline   and  hasBtnBg and isInlineCircleButton and env.inChatWindow,
-        'o-p-0_5':       props.inline   and  (!env.inMeetingView and !hasBtnBg and !env.inComposer) or env.inMessage,
+        'o-p-0_5':       props.inline   and  ((!env.inMeetingView and !hasBtnBg and !env.inComposer) or env.inMessage),
         'px-3 py-2':     props.dropdown and   ui.isSmall,
         'px-2 py-1':     props.dropdown and  !ui.isSmall,
     })"/>
@@ -102,10 +102,9 @@
     })"/>
     <!-- simulated dark theme -->
     <t t-set="btnClass" t-value="attClassObjectToString({
-        [btnClass]: true,
-        'o-text-white border-0 o-simulateDarkTheme': store.shouldSimulateDarkTheme(this),
-        'bg-700': store.shouldSimulateDarkTheme(this) and !action.tags.includes('DANGER') and !action.tags.includes('SUCCESS') and !action.tags.includes('PRIMARY') and hasBtnBg,
-        'bg-transparent': store.shouldSimulateDarkTheme(this) and !hasBtnBg,
+       [btnClass]: true,
+        'o-text-white border-transparent o-simulateDarkTheme': store.shouldSimulateDarkTheme(this),
+       'bg-transparent': store.shouldSimulateDarkTheme(this) and !hasBtnBg,
     })"/>
     <!-- dynamic classes-->
     <t t-set="btnClass" t-value="attClassObjectToString({
