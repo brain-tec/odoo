@@ -263,9 +263,7 @@ test("default thread rendering", async () => {
     await contains("button:text('History')");
     await contains(".o-mail-DiscussSidebar-item:has(:text('General'))");
     await contains("button.o-active:text('Inbox')");
-    await contains(
-        ".o-mail-Thread:text('Congratulations, your inbox is empty New messages appear here.')"
-    );
+    await contains(".o-mail-Thread:text('You're all caught up!')");
     await click("button:text('Bookmarks')");
     await contains("button.o-active:text('Bookmarks')");
     await contains(
@@ -312,7 +310,7 @@ test("sidebar: basic chat rendering", async () => {
     await waitFor(`${group[1]} .o-dropdown-item:eq(0):text('Invite People')`);
     await waitFor(`${group[1]} .o-dropdown-item:eq(1):text('Add to Favorites')`);
     await waitFor(`${group[2]} .o-dropdown-item:count(2)`);
-    await waitFor(`${group[2]} .o-dropdown-item:eq(0):text('Notification Settings')`);
+    await waitFor(`${group[2]} .o-dropdown-item:eq(0):text('Mute Conversation')`);
     await waitFor(`${group[2]} .o-dropdown-item:eq(1):text('Advanced Settings')`);
     await waitFor(`${group[3]} .o-dropdown-item:count(1)`);
     await waitFor(`${group[3]} .o-dropdown-item:text('Hide Until New Message')`);
