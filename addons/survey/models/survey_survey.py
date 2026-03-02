@@ -9,7 +9,7 @@ import werkzeug
 from odoo import api, exceptions, fields, models, _
 from odoo.exceptions import AccessError, UserError
 from odoo.osv import expression
-from odoo.tools import is_html_empty
+from odoo.tools import clean_context, is_html_empty
 
 
 class Survey(models.Model):
@@ -225,12 +225,11 @@ class Survey(models.Model):
             survey.page_ids = survey.question_and_page_ids.filtered(lambda question: question.is_page)
             survey.question_ids = survey.question_and_page_ids - survey.page_ids
 
-    @api.depends('question_and_page_ids.is_conditional', 'users_login_required', 'access_mode')
+    @api.depends('users_login_required', 'access_mode')
     def _compute_is_attempts_limited(self):
         for survey in self:
             if not survey.is_attempts_limited or \
-               (survey.access_mode == 'public' and not survey.users_login_required) or \
-               any(question.is_conditional for question in survey.question_and_page_ids):
+               (survey.access_mode == 'public' and not survey.users_login_required):
                 survey.is_attempts_limited = False
 
     @api.depends('session_start_time', 'user_input_ids')
@@ -325,7 +324,7 @@ class Survey(models.Model):
     def write(self, vals):
         result = super(Survey, self).write(vals)
         if 'certification_give_badge' in vals:
-            return self.sudo()._handle_certification_badges(vals)
+            return self.sudo().with_context(clean_context(self._context))._handle_certification_badges(vals)
         return result
 
     def copy_data(self, default=None):

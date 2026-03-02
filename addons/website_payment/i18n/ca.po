@@ -3,24 +3,24 @@
 # 	* website_payment
 # 
 # Translators:
-# Martin Trigaux, 2021
 # RGB Consulting <odoo@rgbconsulting.com>, 2021
 # Quim - eccit <quim@eccit.com>, 2021
 # Manel Fernandez Ramirez <manelfera@outlook.com>, 2021
 # AncesLatino2004, 2022
 # marcescu, 2022
 # CristianCruzParra, 2022
-# Josep Anton Belchi, 2022
 # jabiri7, 2022
 # Ivan Espinola, 2022
+# Josep Anton Belchi, 2024
+# Martin Trigaux, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.5\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-14 10:29+0000\n"
+"POT-Creation-Date: 2024-08-14 15:43+0000\n"
 "PO-Revision-Date: 2021-09-14 12:28+0000\n"
-"Last-Translator: Ivan Espinola, 2022\n"
+"Last-Translator: Martin Trigaux, 2024\n"
 "Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -76,7 +76,7 @@ msgstr "<b>Mètode de pagament:</b>"
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "<option value=\"\">Country...</option>"
-msgstr ""
+msgstr "<option value=\"\">País...</option>"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_pay
@@ -322,6 +322,11 @@ msgstr "Un any a l'escola primària."
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
 msgid "One year in high school."
 msgstr "Un any a l'institut."
+
+#. module: website_payment
+#: model:ir.model,name:website_payment.model_website_page
+msgid "Page"
+msgstr "Pàgina"
 
 #. module: website_payment
 #: model:ir.model,name:website_payment.model_payment_acquirer

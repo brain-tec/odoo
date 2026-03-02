@@ -69,7 +69,7 @@ _logger = logging.getLogger(__name__)
 _schema = logging.getLogger(__name__ + '.schema')
 _unlink = logging.getLogger(__name__ + '.unlink')
 
-regex_order = re.compile('^(\s*([a-z0-9:_]+|"[a-z0-9:_]+")(\s+(desc|asc))?\s*(,|$))+(?<!,)$', re.I)
+regex_order = re.compile(r'^(\s*([a-z0-9:_]+|"[a-z0-9:_]+")(\s+(desc|asc))?\s*(,|$))+(?<!,)$', re.I)
 regex_object_name = re.compile(r'^[a-z0-9_.]+$')
 regex_pg_name = re.compile(r'^[a-z_][a-z0-9_$]*$', re.I)
 regex_field_agg = re.compile(r'(\w+)(?::(\w+)(?:\((\w+)\))?)?')
@@ -554,7 +554,7 @@ class BaseModel(metaclass=MetaModel):
     @api.model
     def _add_field(self, name, field):
         """ Add the given ``field`` under the given ``name`` in the class """
-        cls = type(self)
+        cls = self.env.registry[self._name]
         # add field as an attribute and in cls._fields (for reflection)
         if not isinstance(getattr(cls, name, field), Field):
             _logger.warning("In model %r, field %r overriding existing value", cls._name, name)
@@ -568,7 +568,7 @@ class BaseModel(metaclass=MetaModel):
         """ Remove the field with the given ``name`` from the model.
             This method should only be used for manual fields.
         """
-        cls = type(self)
+        cls = self.env.registry[self._name]
         field = cls._fields.pop(name, None)
         discardattr(cls, name)
         if cls._rec_name == name:
@@ -770,7 +770,7 @@ class BaseModel(metaclass=MetaModel):
                 return func(self)
             return wrapper
 
-        cls = type(self)
+        cls = self.env.registry[self._name]
         methods = []
         for attr, func in getmembers(cls, is_constraint):
             if callable(func._constrains):
@@ -793,7 +793,7 @@ class BaseModel(metaclass=MetaModel):
         def is_ondelete(func):
             return callable(func) and hasattr(func, '_ondelete')
 
-        cls = type(self)
+        cls = self.env.registry[self._name]
         methods = [func for _, func in getmembers(cls, is_ondelete)]
         # optimization: memoize results on cls, it will not be recomputed
         cls._ondelete_methods = methods
@@ -806,7 +806,7 @@ class BaseModel(metaclass=MetaModel):
             return callable(func) and hasattr(func, '_onchange')
 
         # collect onchange methods on the model's class
-        cls = type(self)
+        cls = self.env.registry[self._name]
         methods = defaultdict(list)
         for attr, func in getmembers(cls, is_onchange):
             missing = []
@@ -1029,7 +1029,7 @@ class BaseModel(metaclass=MetaModel):
             # collect all the tuples in "lines" (along with their coordinates)
             for i, line in enumerate(lines):
                 for j, cell in enumerate(line):
-                    if type(cell) is tuple:
+                    if isinstance(cell, tuple):
                         bymodels[cell[0]].add(cell[1])
                         xidmap[cell].append((i, j))
             # for each model, xid-export everything and inject in matrix
@@ -2006,7 +2006,7 @@ class BaseModel(metaclass=MetaModel):
         # columns should be displayed even if they don't contain any record.
         group_expand = field.group_expand
         if isinstance(group_expand, str):
-            group_expand = getattr(type(self), group_expand)
+            group_expand = getattr(self.env.registry[self._name], group_expand)
         assert callable(group_expand)
 
         # determine all groups that should be returned
@@ -2243,7 +2243,8 @@ class BaseModel(metaclass=MetaModel):
             order_split = order_part.split()
             order_field = order_split[0]
             if order_field == 'id' or order_field in groupby_fields:
-                if self._fields[order_field.split(':')[0]].type == 'many2one':
+                field = self._fields[order_field.split(':')[0]]
+                if field.type == 'many2one' and self.env[field.comodel_name]._order != 'id':
                     order_clause = self._generate_order_by(order_part, query).replace('ORDER BY ', '')
                     if order_clause:
                         orderby_terms.append(order_clause)
@@ -2968,13 +2969,13 @@ class BaseModel(metaclass=MetaModel):
                     field.required = True
                 if field.ondelete.lower() not in ('cascade', 'restrict'):
                     field.ondelete = 'cascade'
-                type(self)._inherits = {**self._inherits, field.comodel_name: field.name}
+                self.pool[self._name]._inherits = {**self._inherits, field.comodel_name: field.name}
                 self.pool[field.comodel_name]._inherits_children.add(self._name)
 
     @api.model
     def _prepare_setup(self):
         """ Prepare the setup of the model. """
-        cls = type(self)
+        cls = self.env.registry[self._name]
         cls._setup_done = False
 
         # changing base classes is costly, do it only when necessary
@@ -2988,7 +2989,7 @@ class BaseModel(metaclass=MetaModel):
     @api.model
     def _setup_base(self):
         """ Determine the inherited and custom fields of the model. """
-        cls = type(self)
+        cls = self.env.registry[self._name]
         if cls._setup_done:
             return
 
@@ -3055,7 +3056,7 @@ class BaseModel(metaclass=MetaModel):
     @api.model
     def _setup_fields(self):
         """ Setup the fields, except for recomputation triggers. """
-        cls = type(self)
+        cls = self.env.registry[self._name]
 
         # set up fields
         bad_fields = []
@@ -3078,7 +3079,7 @@ class BaseModel(metaclass=MetaModel):
     @api.model
     def _setup_complete(self):
         """ Setup recomputation triggers, and complete the model setup. """
-        cls = type(self)
+        cls = self.env.registry[self._name]
 
         # register constraints and onchange methods
         cls._init_constraints_onchanges()
@@ -4568,6 +4569,9 @@ Fields:
         # figure out the applicable order_by for the m2o
         dest_model = self.env[field.comodel_name]
         m2o_order = dest_model._order
+        if m2o_order == 'id':
+            order_direction = 'DESC' if reverse_direction else ''
+            return ['"%s"."%s" %s' % (alias, order_field, order_direction)]
         if not regex_order.match(m2o_order):
             # _order is complex, can't use it here, so we default to _rec_name
             m2o_order = dest_model._rec_name
@@ -4942,12 +4946,14 @@ Fields:
         query = 'SELECT "%s" FROM "%s" WHERE id = %%s' % (parent, self._table)
         for id in self.ids:
             current_id = id
+            seen_ids = {current_id}
             while current_id:
                 cr.execute(query, (current_id,))
                 result = cr.fetchone()
                 current_id = result[0] if result else None
-                if current_id == id:
+                if current_id in seen_ids:
                     return False
+                seen_ids.add(current_id)
         return True
 
     def _check_m2m_recursion(self, field_name):
@@ -5641,11 +5647,16 @@ Fields:
             records.sorted(key=lambda r: r.name)
         """
         if key is None:
-            recs = self.search([('id', 'in', self.ids)])
-            return self.browse(reversed(recs._ids)) if reverse else recs
-        if isinstance(key, str):
-            key = itemgetter(key)
-        return self.browse(item.id for item in sorted(self, key=key, reverse=reverse))
+            if any(self._ids):
+                ids = self.search([('id', 'in', self.ids)])._ids
+            else:  # Don't support new ids because search() doesn't work on new records
+                ids = self._ids
+            ids = tuple(reversed(ids)) if reverse else ids
+        else:
+            if isinstance(key, str):
+                key = itemgetter(key)
+            ids = tuple(item.id for item in sorted(self, key=key, reverse=reverse))
+        return self._browse(self.env, ids, self._prefetch_ids)
 
     def update(self, values):
         """ Update the records in ``self`` with ``values``. """
@@ -5922,7 +5933,7 @@ Fields:
         """
         if isinstance(key, str):
             # important: one must call the field's getter
-            return self._fields[key].__get__(self, type(self))
+            return self._fields[key].__get__(self, self.env.registry[self._name])
         elif isinstance(key, slice):
             return self.browse(self._ids[key])
         else:

@@ -1193,7 +1193,7 @@ var BasicModel = AbstractModel.extend({
 
                             // Erase changes as they have been applied
                             record._changes = {};
-                            var data = Object.assign({}, record.data, record._changes);
+                            var data = Object.assign({}, record.data, _changes);
                             for (var fieldName in record.fields) {
                                 var type = record.fields[fieldName].type;
                                 if (type === 'many2many' || type === 'one2many') {
@@ -2105,6 +2105,9 @@ var BasicModel = AbstractModel.extend({
                         // FIXME: hack for lunch widget, which does useless default_get and onchange
                         if (command.data) {
                             return self._applyChange(id, command.data);
+                        }
+                        if (command.isDirty) {
+                            self.setDirty(id);
                         }
                     });
                 });
@@ -4227,7 +4230,7 @@ var BasicModel = AbstractModel.extend({
         // fetch additional data (special data and many2one namegets for "always_reload" fields)
         await this._postprocess(record);
         // save initial changes, so they can be restored later, if we need to discard
-        this.save(record.id, { savePoint: true });
+        await this.executeDirectly(() => this.save(record.id, { savePoint: true }));
         return record.id;
     },
     /**
@@ -5190,10 +5193,14 @@ var BasicModel = AbstractModel.extend({
                 var orderData1 = data1[order.name];
                 var orderData2 = data2[order.name];
 
+                var type = list.fields[order.name].type;
                 // If the field is a relation, sort on the display_name of those records
-                if (list.fields[order.name].type === 'many2one') {
+                if (type === 'many2one') {
                     orderData1 = orderData1 ? self.localData[orderData1].data.display_name : "";
                     orderData2 = orderData2 ? self.localData[orderData2].data.display_name : "";
+                } else if (type === 'char' || type === 'text') {
+                    orderData1 = orderData1 || "";
+                    orderData2 = orderData2 || "";
                 }
                 if (orderData1 < orderData2) {
                     return order.asc ? -1 : 1;

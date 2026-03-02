@@ -25,7 +25,7 @@ class AccountMove(models.Model):
 
     @api.onchange('purchase_vendor_bill_id', 'purchase_id')
     def _onchange_purchase_auto_complete(self):
-        ''' Load from either an old purchase order, either an old vendor bill.
+        r''' Load from either an old purchase order, either an old vendor bill.
 
         When setting a 'purchase.bill.union' in 'purchase_vendor_bill_id':
         * If it's a vendor bill, 'invoice_vendor_bill_id' is set and the loading is done by '_onchange_invoice_vendor_bill'.
@@ -46,7 +46,7 @@ class AccountMove(models.Model):
         # Copy data from PO
         invoice_vals = self.purchase_id.with_company(self.purchase_id.company_id)._prepare_invoice()
         invoice_vals['currency_id'] = self.line_ids and self.currency_id or invoice_vals.get('currency_id')
-        del invoice_vals['ref']
+        del invoice_vals['ref'], invoice_vals['payment_reference']
         self.update(invoice_vals)
 
         # Copy purchase lines.
@@ -72,8 +72,11 @@ class AccountMove(models.Model):
         self.ref = ', '.join(refs)
 
         # Compute payment_reference.
-        if len(refs) == 1:
-            self.payment_reference = refs[0]
+        if not self.payment_reference:
+            if len(refs) == 1:
+                self.payment_reference = refs[0]
+            elif len(refs) > 1:
+                self.payment_reference = refs[-1]
 
         self.purchase_id = False
         self._onchange_currency()

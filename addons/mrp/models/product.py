@@ -5,7 +5,7 @@ import collections
 from datetime import timedelta
 from itertools import groupby
 import operator as py_operator
-from odoo import fields, models, _
+from odoo import api, fields, models, _
 from odoo.tools.float_utils import float_round, float_is_zero
 
 
@@ -32,14 +32,15 @@ class ProductTemplate(models.Model):
     produce_delay = fields.Float(
         'Manufacturing Lead Time', default=0.0,
         help="Average lead time in days to manufacture this product. In the case of multi-level BOM, the manufacturing lead times of the components will be added.")
-    is_kits = fields.Boolean(compute='_compute_is_kits', compute_sudo=False)
+    is_kits = fields.Boolean(compute='_compute_is_kits', compute_sudo=True)
 
     def _compute_bom_count(self):
         for product in self:
             product.bom_count = self.env['mrp.bom'].search_count(['|', ('product_tmpl_id', '=', product.id), ('byproduct_ids.product_id.product_tmpl_id', '=', product.id)])
 
+    @api.depends_context('company')
     def _compute_is_kits(self):
-        domain = [('product_tmpl_id', 'in', self.ids), ('type', '=', 'phantom')]
+        domain = [('product_tmpl_id', 'in', self.ids), ('type', '=', 'phantom'), '|', ('company_id', '=', False), ('company_id', '=', self.env.company.id)]
         bom_mapping = self.env['mrp.bom'].search_read(domain, ['product_tmpl_id'])
         kits_ids = set(b['product_tmpl_id'][0] for b in bom_mapping)
         for template in self:
@@ -112,14 +113,17 @@ class ProductProduct(models.Model):
         compute='_compute_used_in_bom_count', compute_sudo=False)
     mrp_product_qty = fields.Float('Manufactured',
         compute='_compute_mrp_product_qty', compute_sudo=False)
-    is_kits = fields.Boolean(compute="_compute_is_kits", compute_sudo=False)
+    is_kits = fields.Boolean(compute="_compute_is_kits", compute_sudo=True)
 
     def _compute_bom_count(self):
         for product in self:
             product.bom_count = self.env['mrp.bom'].search_count(['|', '|', ('byproduct_ids.product_id', '=', product.id), ('product_id', '=', product.id), '&', ('product_id', '=', False), ('product_tmpl_id', '=', product.product_tmpl_id.id)])
 
+    @api.depends_context('company')
     def _compute_is_kits(self):
-        domain = ['&', ('type', '=', 'phantom'),
+        domain = ['&', '&', ('type', '=', 'phantom'),
+                       '|', ('company_id', '=', False),
+                            ('company_id', '=', self.env.company.id),
                        '|', ('product_id', 'in', self.ids),
                             '&', ('product_id', '=', False),
                                  ('product_tmpl_id', 'in', self.product_tmpl_id.ids)]
@@ -279,7 +283,7 @@ class ProductProduct(models.Model):
         # bom specific to this variant or global to template or that contains the product as a byproduct
         action['context'] = {
             'default_product_tmpl_id': template_ids[0],
-            'default_product_id': self.ids[0],
+            'default_product_id': self.env.user.has_group('product.group_product_variant') and self.ids[0] or False,
         }
         action['domain'] = ['|', '|', ('byproduct_ids.product_id', 'in', self.ids), ('product_id', 'in', self.ids), '&', ('product_id', '=', False), ('product_tmpl_id', 'in', template_ids)]
         return action

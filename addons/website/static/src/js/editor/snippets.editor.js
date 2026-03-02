@@ -237,6 +237,9 @@ weSnippetEditor.SnippetsMenu.include({
      */
     _addToolbar() {
         this._super(...arguments);
+        if (this.options.enableTranslation) {
+            this._$toolbarContainer[0].querySelector(":scope .o_we_animate_text").classList.add("d-none");
+        }
         this.$('#o_we_editor_toolbar_container > we-title > span').after($(`
             <div class="btn fa fa-fw fa-2x o_we_highlight_animated_text d-none
                 ${$('body').hasClass('o_animated_text_highlighted') ? 'fa-eye text-success' : 'fa-eye-slash'}"
@@ -277,6 +280,18 @@ weSnippetEditor.SnippetsMenu.include({
      */
     _isValidSelection(sel) {
         return sel.rangeCount && [...this.getEditableArea()].some(el => el.contains(sel.anchorNode));
+    },
+
+    /**
+     * The goal here is to disable parents editors for `s_popup` snippets
+     * since they should not display their parents options.
+     * TODO: Update in master to set the `o_no_parent_editor` class in the
+     * snippet's XML.
+     *
+     * @override
+     */
+    _allowParentsEditors($snippet) {
+        return this._super(...arguments) && !$snippet[0].classList.contains("s_popup");
     },
 
     //--------------------------------------------------------------------------
@@ -434,25 +449,6 @@ weSnippetEditor.SnippetEditor.include({
 // Edit mode customizations of public widgets.
 
 publicWidget.registry.hoverableDropdown.include({
-    /**
-     * @override
-     */
-    start() {
-        if (this.editableMode) {
-            this._onPageClick = this._onPageClick.bind(this);
-            this.el.closest('#wrapwrap').addEventListener('click', this._onPageClick, {capture: true});
-        }
-        return this._super.apply(this, arguments);
-    },
-    /**
-     * @override
-     */
-    destroy() {
-        if (this.editableMode) {
-            this.el.closest('#wrapwrap').removeEventListener('click', this._onPageClick, {capture: true});
-        }
-        return this._super.apply(this, arguments);
-    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -461,6 +457,7 @@ publicWidget.registry.hoverableDropdown.include({
     /**
      * Hides all opened dropdowns.
      *
+     * TODO: Remove in master.
      * @private
      */
     _hideDropdowns() {
@@ -477,6 +474,7 @@ publicWidget.registry.hoverableDropdown.include({
      * Called when the page is clicked anywhere.
      * Closes the shown dropdown if the click is outside of it.
      *
+     * TODO: Remove in master.
      * @private
      * @param {Event} ev
      */

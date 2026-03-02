@@ -89,15 +89,25 @@ class SaleOrder(models.Model):
         total_qty = sum(self.order_line.filtered(lambda x: x.product_id == program.reward_product_id).mapped('product_uom_qty'))
         # Remove needed quantity from reward quantity if same reward and rule product
         if program._get_valid_products(program.reward_product_id):
-            # number of times the program should be applied
-            program_in_order = max_product_qty // (program.rule_min_quantity + program.reward_product_quantity)
-            # multipled by the reward qty
-            reward_product_qty = program.reward_product_quantity * program_in_order
+            # number of times the program could be applied by quantity
+            nbr_program_by_qtt = (
+                max_product_qty // (program.rule_min_quantity + program.reward_product_quantity)
+            )
             # do not give more free reward than products
-            reward_product_qty = min(reward_product_qty, total_qty)
+            nbr_program_less_than_products = total_qty // program.reward_product_quantity
+            program_in_order = min(nbr_program_by_qtt, nbr_program_less_than_products)
             if program.rule_minimum_amount:
-                order_total = sum(order_lines.mapped('price_total')) - (program.reward_product_quantity * program.reward_product_id.lst_price)
-                reward_product_qty = min(reward_product_qty, order_total // program.rule_minimum_amount)
+                # Ensure the minimum amount for the reward is met
+                min_amount_with_reward = (
+                    program.rule_minimum_amount
+                    + program.reward_product_quantity * program.reward_product_id.lst_price
+                )
+                nbr_program_by_amount = (
+                    sum(order_lines.mapped('price_total')) // min_amount_with_reward
+                )
+                program_in_order = min(program_in_order, nbr_program_by_amount)
+            # multiplied by the reward qty
+            reward_product_qty = program_in_order * program.reward_product_quantity
         else:
             program_in_order = max_product_qty // program.rule_min_quantity
             reward_product_qty = min(program.reward_product_quantity * program_in_order, total_qty)
@@ -232,9 +242,9 @@ class SaleOrder(models.Model):
             if line:
                 discount_line_amount = min(line.price_reduce * (program.discount_percentage / 100), amount_total)
                 if discount_line_amount:
-                    taxes = self.fiscal_position_id.map_tax(line.tax_id)
+                    taxes = self.fiscal_position_id.map_tax(line.tax_id).filtered(lambda t: t.amount_type != 'fixed')
 
-                    reward_dict[line.tax_id] = {
+                    reward_dict[taxes] = {
                         'name': _("Discount: %s", program.name),
                         'product_id': program.discount_line_product_id.id,
                         'price_unit': - discount_line_amount if discount_line_amount > 0 else 0,
@@ -256,12 +266,11 @@ class SaleOrder(models.Model):
 
                 if discount_line_amount:
 
-                    if line.tax_id in reward_dict:
-                        reward_dict[line.tax_id]['price_unit'] -= discount_line_amount
+                    taxes = self.fiscal_position_id.map_tax(line.tax_id).filtered(lambda t: t.amount_type != 'fixed')
+                    if taxes in reward_dict:
+                        reward_dict[taxes]['price_unit'] -= discount_line_amount
                     else:
-                        taxes = self.fiscal_position_id.map_tax(line.tax_id)
-
-                        reward_dict[line.tax_id] = {
+                        reward_dict[taxes] = {
                             'name': _(
                                 "Discount: %(program)s - On product with following taxes: %(taxes)s",
                                 program=program.name,

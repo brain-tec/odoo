@@ -119,6 +119,7 @@ class MailComposer(models.TransientModel):
     active_domain = fields.Text('Active domain', readonly=True)
     # characteristics
     message_type = fields.Selection([
+        ('auto_comment', 'Automated Targeted Notification'),
         ('comment', 'Comment'),
         ('notification', 'System notification')],
         'Type', required=True, default='comment',
@@ -539,7 +540,7 @@ class MailComposer(models.TransientModel):
             blacklist = {x[0] for x in self._cr.fetchall()}
             if not blacklist:
                 return blacklisted_rec_ids
-            if issubclass(type(self.env[self.model]), self.pool['mail.thread.blacklist']):
+            if isinstance(self.env[self.model], self.pool['mail.thread.blacklist']):
                 targets = self.env[self.model].browse(mail_values_dict.keys()).read(['email_normalized'])
                 # First extract email from recipient before comparing with blacklist
                 blacklisted_rec_ids.update(target['id'] for target in targets
@@ -558,7 +559,7 @@ class MailComposer(models.TransientModel):
         return []
 
     def _onchange_template_id(self, template_id, composition_mode, model, res_id):
-        """ - mass_mailing: we cannot render, so return the template values
+        r""" - mass_mailing: we cannot render, so return the template values
             - normal mode: return rendered values
             /!\ for x2many field, this onchange return command instead of ids
         """
@@ -593,6 +594,10 @@ class MailComposer(models.TransientModel):
         else:
             default_values = self.with_context(default_composition_mode=composition_mode, default_model=model, default_res_id=res_id).default_get(['composition_mode', 'model', 'res_id', 'parent_id', 'partner_ids', 'subject', 'body', 'email_from', 'reply_to', 'attachment_ids', 'mail_server_id'])
             values = dict((key, default_values[key]) for key in ['subject', 'body', 'partner_ids', 'email_from', 'reply_to', 'attachment_ids', 'mail_server_id'] if key in default_values)
+
+        if template_id:  # Restore default sender if not updated on template switch (for both "mass_mail" and "comment" modes)
+            if 'email_from' not in values:
+                values['email_from'] = self.default_get(['email_from']).get('email_from')
 
         if values.get('body_html'):
             values['body'] = values.pop('body_html')

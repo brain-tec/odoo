@@ -3,19 +3,21 @@
 # 	* web_editor
 # 
 # Translators:
+# Martin Trigaux, 2021
 # Khwunchai Jaengsawang <khwunchai.j@ku.th>, 2021
 # gsong <gsong2014@foxmail.com>, 2021
 # Odoo Thaidev <odoothaidev@gmail.com>, 2021
 # Wichanon Jamwutthipreecha, 2022
-# Martin Trigaux, 2023
+# Rasareeyar Lappiam, 2024
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-10 08:53+0000\n"
+"POT-Creation-Date: 2024-08-14 15:43+0000\n"
 "PO-Revision-Date: 2021-09-14 12:27+0000\n"
-"Last-Translator: Martin Trigaux, 2023\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Thai (https://app.transifex.com/odoo/teams/41243/th/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -235,6 +237,7 @@ msgstr "เพิ่มแถว"
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "Add URL"
 msgstr "เพิ่ม URL"
@@ -294,13 +297,6 @@ msgstr "เพิ่มแถวด้านบน"
 #, python-format
 msgid "Add a row below"
 msgstr "เพิ่มแถวด้านล่าง"
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-#, python-format
-msgid "Add document"
-msgstr "เพิ่มเอกสาร"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
@@ -459,10 +455,9 @@ msgstr "ตำแหน่งในพื้นหลัง"
 #. openerp-web
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
 #, python-format
 msgid "Basic blocks"
-msgstr ""
+msgstr "บล็อกพื้นฐาน"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
@@ -475,13 +470,6 @@ msgstr "พื้นฐาน"
 #, python-format
 msgid "Below"
 msgstr "ด้านล่าง"
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Big section heading."
-msgstr ""
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
@@ -543,13 +531,6 @@ msgstr "ความสว่าง"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Bulleted list"
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
@@ -585,13 +566,6 @@ msgstr "ตรงกลาง"
 #, python-format
 msgid "Change media description and tooltip"
 msgstr "เปลี่ยนคำอธิบายสื่อและคำแนะนำเครื่องมือ"
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Checklist"
-msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -701,27 +675,6 @@ msgstr "หน้าปก"
 #, python-format
 msgid "Create"
 msgstr "สร้าง"
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Create a list with numbering."
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Create a simple bulleted list."
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Create an URL."
-msgstr ""
 
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_web_editor_converter_test_sub__create_uid
@@ -929,41 +882,6 @@ msgstr ""
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Embed Image"
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Embed Youtube Video"
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Embed the image in the document."
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Embed the youtube video in the document."
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Empty quote"
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
 #: code:addons/web_editor/static/src/js/common/ace.js:0
 #, python-format
 msgid "Expected "
@@ -1091,7 +1009,7 @@ msgstr "ขนาดฟอนต์"
 #: code:addons/web_editor/static/src/js/editor/snippets.editor.js:0
 #, python-format
 msgid "For technical reasons, this block cannot be dropped here"
-msgstr ""
+msgstr "สำหรับเหตุผลทางเทคนิค บล็อกนี้ไม่สามารถถูกวางที่นี่ได้"
 
 #. module: web_editor
 #. openerp-web
@@ -1174,59 +1092,10 @@ msgstr "ส่วนหัว 6"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Heading 1"
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Heading 2"
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Heading 3"
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Heading 4"
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Heading 5"
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Heading 6"
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "Hide Dailymotion logo"
 msgstr "ซ่อนโลโก้ Dailymotion"
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
-#, python-format
-msgid "Hide Youtube logo"
-msgstr "ซ่อนโลโก้ Youtube"
 
 #. module: web_editor
 #. openerp-web
@@ -1392,23 +1261,9 @@ msgstr "ข้อความแบบอินไลน์"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Insert a table."
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 #, python-format
 msgid "Insert a video."
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Insert an horizontal rule separator."
 msgstr ""
 
 #. module: web_editor
@@ -1447,12 +1302,6 @@ msgid "Install"
 msgstr "ติดตั้ง"
 
 #. module: web_editor
-#: code:addons/web_editor/models/ir_ui_view.py:0
-#, python-format
-msgid "Invalid field value for %s: %s"
-msgstr ""
-
-#. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/editor/snippets.editor.js:0
 #, python-format
@@ -1465,6 +1314,12 @@ msgstr "ติดตั้ง %s"
 #, python-format
 msgid "Install in progress"
 msgstr "อยู่ระหว่างการติดตั้ง"
+
+#. module: web_editor
+#: code:addons/web_editor/models/ir_ui_view.py:0
+#, python-format
+msgid "Invalid field value for %s: %s"
+msgstr "ค่าฟิลด์ไม่ถูกต้องสำหรับ%s: %s"
 
 #. module: web_editor
 #. openerp-web
@@ -1567,13 +1422,6 @@ msgstr "ลิงก์ไป"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "List"
-msgstr "รายการ"
-
-#. module: web_editor
-#. openerp-web
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "Load more..."
@@ -1621,13 +1469,6 @@ msgstr "สื่อกลาง"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Medium section heading."
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
 #: code:addons/web_editor/static/src/js/editor/snippets.editor.js:0
 #, python-format
 msgid "More info about this app."
@@ -1651,7 +1492,7 @@ msgstr "ชื่อ"
 #: code:addons/web_editor/static/src/js/wysiwyg/wysiwyg.js:0
 #, python-format
 msgid "Navigation"
-msgstr ""
+msgstr "การนำทาง"
 
 #. module: web_editor
 #. openerp-web
@@ -1665,7 +1506,7 @@ msgstr "ไม่"
 #: code:addons/web_editor/static/src/js/wysiwyg/widgets/link_popover_widget.js:0
 #, python-format
 msgid "No URL specified"
-msgstr ""
+msgstr "ไม่ระบุ URL"
 
 #. module: web_editor
 #. openerp-web
@@ -1697,10 +1538,10 @@ msgstr "ไม่มีบันทึกเพิ่มเติม"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/powerbox/Powerbox.js:0
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
-msgid "No results"
-msgstr "ไม่มีผลลัพธ์"
+msgid "No pictograms found."
+msgstr "ไม่พบรูปภาพ"
 
 #. module: web_editor
 #. openerp-web
@@ -1720,13 +1561,6 @@ msgstr "ไม่มี"
 #, python-format
 msgid "Normal"
 msgstr "ปกติ"
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Numbered list"
-msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1803,20 +1637,6 @@ msgid "Padding"
 msgstr "แพดดิ้ง"
 
 #. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Paragraph block."
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Paste as URL"
-msgstr ""
-
-#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
 msgid "Patterns"
 msgstr "แบบแผน"
@@ -1832,6 +1652,13 @@ msgstr "รูปสัญลักษณ์"
 #: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
 msgid "Position"
 msgstr "ตำแหน่ง"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/snippets.xml:0
+#, python-format
+msgid "Preset #{number}"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -2287,13 +2114,6 @@ msgid "Select a block on your page to style it."
 msgstr "เลือกบล็อกบนเพจของคุณเพื่อจัดรูปแบบ"
 
 #. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Separator"
-msgstr "ตัวแบ่ง"
-
-#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "Sepia"
 msgstr "ซีเปีย"
@@ -2396,13 +2216,6 @@ msgstr "เล็ก"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Small section heading."
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
@@ -2437,27 +2250,6 @@ msgstr "ข้อเสนอ"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Switch direction"
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Switch the text's direction."
-msgstr ""
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Table"
-msgstr "โต๊ะ"
-
-#. module: web_editor
-#. openerp-web
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #, python-format
 msgid "Table Options"
@@ -2479,7 +2271,6 @@ msgstr "ไอดีเทมเพลต: %s"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
 #: code:addons/web_editor/static/src/xml/snippets.xml:0
 #, python-format
 msgid "Text"
@@ -2512,6 +2303,16 @@ msgstr "ดูเหมือนว่า URL จะไม่ทำงาน"
 #, python-format
 msgid "The URL seems valid."
 msgstr "URL ดูเหมือนถูกต้อง"
+
+#. module: web_editor
+#: code:addons/web_editor/controllers/main.py:0
+#, python-format
+msgid ""
+"The document was already saved from someone with a different history for "
+"model %r, field %r with id %r."
+msgstr ""
+"เอกสารได้รับการบันทึกแล้วจากบุคคลที่มีประวัติที่แตกต่างกันสำหรับรุ่น %r "
+"ฟิลด์ %r ด้วย id %r"
 
 #. module: web_editor
 #. openerp-web
@@ -2567,7 +2368,7 @@ msgstr "ธีมสี"
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #, python-format
 msgid "There is a conflict between your version and the one in the database."
-msgstr ""
+msgstr "มีข้อขัดแย้งระหว่างเวอร์ชันของคุณกับเวอร์ชันในฐานข้อมูล"
 
 #. module: web_editor
 #. openerp-web
@@ -2666,13 +2467,6 @@ msgstr ""
 "เราต้องบันทึกการแก้ไขก่อนหน้านี้ทั้งหมดของคุณและโหลดหน้านี้ซ้ำ"
 
 #. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "To-do"
-msgstr ""
-
-#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "Toaster"
 msgstr "Toaster"
@@ -2717,7 +2511,7 @@ msgstr "สลับรายการที่เรียงลำดับ"
 #: code:addons/web_editor/static/src/xml/editor.xml:0
 #, python-format
 msgid "Toggle strikethrough"
-msgstr ""
+msgstr "สลับขีดทับ"
 
 #. module: web_editor
 #. openerp-web
@@ -2740,13 +2534,6 @@ msgstr "สลับรายการที่ไม่เรียงลำด
 #, python-format
 msgid "Tooltip"
 msgstr "ทูลทิป"
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Track tasks with a checklist."
-msgstr ""
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options
@@ -2788,17 +2575,17 @@ msgstr "สีโปร่งแสง"
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
+#, python-format
+msgid "Try searching with other keywords."
+msgstr "ลองค้นหาด้วยคำอื่นๆ"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #: model_terms:ir.ui.view,arch_db:web_editor.colorpicker
 #, python-format
 msgid "Type"
 msgstr "ประเภท"
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/odoo-editor/src/OdooEditor.js:0
-#, python-format
-msgid "Type \"/\" for commands"
-msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -2913,6 +2700,8 @@ msgid ""
 "Warning: after closing this dialog, the version you were working on will be "
 "discarded and will never be available anymore."
 msgstr ""
+"คำเตือน: หลังจากปิดกล่องโต้ตอบนี้ "
+"เวอร์ชันที่คุณกำลังทำงานอยู่จะถูกละทิ้งและจะไม่สามารถใช้ได้อีกต่อไป"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
@@ -3029,6 +2818,13 @@ msgstr "เพิ่ม"
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
+msgid "all"
+msgstr "ทั้งหมด"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
+#, python-format
 msgid "and"
 msgstr "และ"
 
@@ -3041,6 +2837,13 @@ msgstr "ออโต้"
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "darken"
 msgstr "มืดลง"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
+#, python-format
+msgid "database"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -3058,6 +2861,27 @@ msgstr "การยกเว้น"
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
+msgid "fill"
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
+#, python-format
+msgid "fill,rounded-circle"
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
+#, python-format
+msgid "flat"
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
+#, python-format
 msgid "https://www.odoo.com/logo.png"
 msgstr "https://www.odoo.com/logo.png"
 
@@ -3069,14 +2893,42 @@ msgid "https://www.odoo.com/mydocument"
 msgstr "https://www.odoo.com/mydocument"
 
 #. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
+#, python-format
+msgid "lg"
+msgstr ""
+
+#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "lighten"
 msgstr "สว่างขึ้น"
 
 #. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
+#, python-format
+msgid "media-library"
+msgstr ""
+
+#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "multiply"
 msgstr "คูณ"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
+#, python-format
+msgid "outline"
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
+#, python-format
+msgid "outline,rounded-circle"
+msgstr ""
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
@@ -3091,9 +2943,23 @@ msgid "px"
 msgstr "px"
 
 #. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
+#, python-format
+msgid "rounded-circle"
+msgstr ""
+
+#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "screen"
 msgstr "หน้าจอ"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
+#, python-format
+msgid "sm"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web

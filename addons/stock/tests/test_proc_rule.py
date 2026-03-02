@@ -20,6 +20,17 @@ class TestProcRule(TransactionCase):
         })
         self.partner = self.env['res.partner'].create({'name': 'Partner'})
 
+    def test_qty_to_order_remainder_decimal(self):
+        """Test case for when remainder is decimal"""
+        orderpoint_form = Form(self.env['stock.warehouse.orderpoint'])
+        orderpoint_form.product_id = self.product
+        orderpoint_form.location_id = self.env.ref('stock.stock_location_stock')
+        orderpoint_form.product_min_qty = 4.0
+        orderpoint_form.product_max_qty = 5.1
+        orderpoint_form.qty_multiple = 0.1
+        orderpoint = orderpoint_form.save()
+        self.assertEqual(orderpoint.qty_to_order, orderpoint_form.product_max_qty)
+
     def test_endless_loop_rules_from_location(self):
         """ Creates and configure a rule the way, when trying to get rules from
         location, it goes in a state where the found rule tries to trigger another
@@ -40,18 +51,22 @@ class TestProcRule(TransactionCase):
 
         # Then, creates a rule and adds it into the route's rules.
         reception_route.rule_ids.action_archive()
-        self.env['stock.rule'].create({
-            'name': 'Looping Rule',
-            'route_id': reception_route.id,
-            'location_id': warehouse.lot_stock_id.id,
-            'location_src_id': warehouse.lot_stock_id.id,
-            'action': 'pull_push',
-            'procure_method': 'make_to_order',
-            'picking_type_id': warehouse.int_type_id.id,
-        })
 
-        # Tries to open the Replenishment view -> It should raise an UserError.
+        # Tries to create loop in rules -> It should raise an UserError.
+        # As assertRaises() creates a savepoint, resulting in a flush, the UserError would already be triggered on the 
+        # 'with self.assertRaises(UserError):' line when computing qty_to_order, failing the test.
+        # To avoid this, we move both the create() and the action_open_orderpoints() inside of the assertRaises.
         with self.assertRaises(UserError):
+            self.env['stock.rule'].create({
+                'name': 'Looping Rule',
+                'route_id': reception_route.id,
+                'location_id': warehouse.lot_stock_id.id,
+                'location_src_id': warehouse.lot_stock_id.id,
+                'action': 'pull_push',
+                'procure_method': 'make_to_order',
+                'picking_type_id': warehouse.int_type_id.id,
+            })
+            
             self.env['stock.warehouse.orderpoint'].action_open_orderpoints()
 
     def test_proc_rule(self):

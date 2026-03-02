@@ -83,7 +83,7 @@ class HrEmployeePrivate(models.Model):
         help='Employee bank salary account')
     permit_no = fields.Char('Work Permit No', groups="hr.group_hr_user", tracking=True)
     visa_no = fields.Char('Visa No', groups="hr.group_hr_user", tracking=True)
-    visa_expire = fields.Date('Visa Expire Date', groups="hr.group_hr_user", tracking=True)
+    visa_expire = fields.Date('Visa Expiration Date', groups="hr.group_hr_user", tracking=True)
     work_permit_expiration_date = fields.Date('Work Permit Expiration Date', groups="hr.group_hr_user", tracking=True)
     has_work_permit = fields.Binary(string="Work Permit", groups="hr.group_hr_user", tracking=True)
     work_permit_scheduled_activity = fields.Boolean(default=False, groups="hr.group_hr_user")
@@ -153,7 +153,7 @@ class HrEmployeePrivate(models.Model):
             avatar = employee._origin[image_field]
             if not avatar:
                 if employee.user_id:
-                    avatar = employee.user_id[avatar_field]
+                    avatar = employee.user_id.sudo()[avatar_field]
                 else:
                     avatar = employee._avatar_get_placeholder()
             employee[avatar_field] = avatar
@@ -306,12 +306,13 @@ class HrEmployeePrivate(models.Model):
 
     def write(self, vals):
         if 'address_home_id' in vals:
+            address_home_id = vals['address_home_id']
             account_ids = vals.get('bank_account_id') or self.bank_account_id.ids
-            if account_ids:
-                self.env['res.partner.bank'].browse(account_ids).partner_id = vals['address_home_id']
+            if account_ids and address_home_id:
+                self.env['res.partner.bank'].browse(account_ids).partner_id = address_home_id
             self.message_unsubscribe(self.address_home_id.ids)
-            if vals['address_home_id']:
-                self._message_subscribe([vals['address_home_id']])
+            if address_home_id:
+                self._message_subscribe([address_home_id])
         if vals.get('user_id'):
             # Update the profile pictures with user, except if provided 
             vals.update(self._sync_user(self.env['res.users'].browse(vals['user_id']),
@@ -453,6 +454,18 @@ class HrEmployeePrivate(models.Model):
 
         works = {d[0].date() for d in calendar._work_intervals_batch(dfrom, dto)[False]}
         return {fields.Date.to_string(day.date()): (day.date() not in works) for day in rrule(DAILY, dfrom, until=dto)}
+
+    def _get_expected_attendances(self, date_from, date_to, domain=None):
+        self.ensure_one()
+        employee_timezone = pytz.timezone(self.tz) if self.tz else None
+        calendar = self.resource_calendar_id or self.company_id.resource_calendar_id
+        calendar_intervals = calendar._work_intervals_batch(
+            date_from,
+            date_to,
+            tz=employee_timezone,
+            resources=self.resource_id,
+            domain=domain)[self.resource_id.id]
+        return calendar_intervals
 
     # ---------------------------------------------------------
     # Messaging

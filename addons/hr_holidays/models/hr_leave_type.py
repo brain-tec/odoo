@@ -77,7 +77,8 @@ class HolidaysType(models.Model):
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     responsible_id = fields.Many2one(
         'res.users', 'Responsible Time Off Officer',
-        domain=lambda self: [('groups_id', 'in', self.env.ref('hr_holidays.group_hr_holidays_user').id)],
+        domain=lambda self: [('groups_id', 'in', self.env.ref('hr_holidays.group_hr_holidays_user').id),
+                             ('share', '=', False)],
         help="Choose the Time Off Officer who will be notified to approve allocation or Time Off request")
     leave_validation_type = fields.Selection([
         ('no_validation', 'No Validation'),
@@ -115,8 +116,19 @@ class HolidaysType(models.Model):
             or that don't need an allocation
             return [('id', domain_operator, [x['id'] for x in res])]
         """
-        date_to = self._context.get('default_date_from') or fields.Date.today().strftime('%Y-1-1')
-        date_from = self._context.get('default_date_to') or fields.Date.today().strftime('%Y-12-31')
+
+        if {'default_date_from', 'default_date_to', 'tz'} <= set(self._context):
+            default_date_from_dt = fields.Datetime.to_datetime(self._context.get('default_date_from'))
+            default_date_to_dt = fields.Datetime.to_datetime(self._context.get('default_date_to'))
+
+            # Cast: Datetime -> Date using user's tz
+            date_to = fields.Date.context_today(self, default_date_from_dt)
+            date_from = fields.Date.context_today(self, default_date_to_dt)
+
+        else:
+            date_to = fields.Date.today().strftime('%Y-1-1')
+            date_from = fields.Date.today().strftime('%Y-12-31')
+
         employee_id = self._context.get('default_employee_id', self._context.get('employee_id')) or self.env.user.employee_id.id
 
         if not isinstance(value, bool):
@@ -427,7 +439,8 @@ class HolidaysType(models.Model):
         self.ensure_one()
         return (self.name, {
                 'remaining_leaves': ('%.2f' % self.remaining_leaves).rstrip('0').rstrip('.'),
-                'virtual_remaining_leaves': ('%.2f' % self.virtual_remaining_leaves).rstrip('0').rstrip('.'),
+                'usable_remaining_leaves': ('%.2f' % self.virtual_remaining_leaves).rstrip('0').rstrip('.'),
+                'virtual_remaining_leaves': ('%.2f' % (self.max_leaves - self.virtual_leaves_taken)).rstrip('0').rstrip('.'),
                 'max_leaves': ('%.2f' % self.max_leaves).rstrip('0').rstrip('.'),
                 'leaves_taken': ('%.2f' % self.leaves_taken).rstrip('0').rstrip('.'),
                 'virtual_leaves_taken': ('%.2f' % self.virtual_leaves_taken).rstrip('0').rstrip('.'),

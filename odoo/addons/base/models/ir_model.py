@@ -286,7 +286,9 @@ class IrModel(models.Model):
 
     def unlink(self):
         # prevent screwing up fields that depend on these models' fields
-        self.field_id._prepare_update()
+        manual_models = self.filtered(lambda model: model.state == 'manual')
+        manual_models.field_id.filtered(lambda f: f.state == 'manual')._prepare_update()
+        (self - manual_models).field_id._prepare_update()
 
         # delete fields whose comodel is being removed
         self.env['ir.model.fields'].search([('relation', 'in', self.mapped('model'))]).unlink()
@@ -354,7 +356,7 @@ class IrModel(models.Model):
             'model': model._name,
             'name': model._description,
             'order': model._order,
-            'info': next(cls.__doc__ for cls in type(model).mro() if cls.__doc__),
+            'info': next(cls.__doc__ for cls in self.env.registry[model._name].mro() if cls.__doc__),
             'state': 'manual' if model._custom else 'base',
             'transient': model._transient,
         }
@@ -1516,13 +1518,9 @@ class IrModelConstraint(models.Model):
          'Constraints with the same name are unique per module.'),
     ]
 
-    def _module_data_uninstall(self):
-        """
-        Delete PostgreSQL foreign keys and constraints tracked by this model.
-        """
-        if not self.env.is_system():
-            raise AccessError(_('Administrator access is required to uninstall a module'))
-
+    def unlink(self):
+        self.check_access_rights('unlink')
+        self.check_access_rule('unlink')
         ids_set = set(self.ids)
         for data in self.sorted(key='id', reverse=True):
             name = tools.ustr(data.name)
@@ -1566,7 +1564,7 @@ class IrModelConstraint(models.Model):
                         sql.Identifier(table), sql.Identifier(name[:63])))
                     _logger.info('Dropped CONSTRAINT %s@%s', name, data.model.model)
 
-        self.unlink()
+        return super().unlink()
 
     def copy(self, default=None):
         default = dict(default or {})
@@ -1627,7 +1625,7 @@ class IrModelConstraint(models.Model):
         # map each constraint on the name of the module where it is defined
         constraint_module = {
             constraint[0]: cls._module
-            for cls in reversed(type(model).mro())
+            for cls in reversed(self.env.registry[model._name].mro())
             if models.is_definition_class(cls)
             for constraint in getattr(cls, '_local_sql_constraints', ())
         }
@@ -2196,8 +2194,6 @@ class IrModelData(models.Model):
         modules._remove_copied_views()
 
         # remove constraints
-        constraints = self.env['ir.model.constraint'].search([('module', 'in', modules.ids)])
-        constraints._module_data_uninstall()
         delete(self.env['ir.model.constraint'].browse(unique(constraint_ids)))
 
         # If we delete a selection field, and some of its values have ondelete='cascade',

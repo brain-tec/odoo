@@ -385,7 +385,8 @@ body.editor_enable.editor_has_snippets {
                 @include o-grab-cursor;
 
                 .oe_snippet_thumbnail_title {
-                    display: block;
+                    @include o-text-overflow(block);
+                    white-space: normal;
                     padding: $o-we-sidebar-blocks-content-spacing / 2;
                     text-align: center;
                 }
@@ -427,7 +428,7 @@ body.editor_enable.editor_has_snippets {
                 min-width: 0; // Ensure text-overflow on flex children
             }
             .oe_snippet_thumbnail_title {
-                @include o-text-overflow(block);
+                white-space: nowrap;
             }
             .oe_snippet_thumbnail_img {
                 flex-shrink: 0;
@@ -765,6 +766,13 @@ body.editor_enable.editor_has_snippets {
 
         we-title {
             display: block;
+        }
+
+        // TODO in master, remove the text-transform rule entirely and rely on
+        // developers writing their label with the intended "design". The
+        // "where" change here was added as a way to minimize the impact of this
+        // fix in stable. That CSS style was breaking translations.
+        :where(html[lang^="en-"]) & we-title {
             text-transform: capitalize;
         }
 
@@ -2129,6 +2137,7 @@ body.editor_enable.editor_has_snippets {
 
                 &.readonly {
                     cursor: auto !important;
+                    pointer-events: none;
 
                     &:after {
                         display: none !important;

@@ -31,7 +31,10 @@ HTMLLIElement.prototype.oShiftTab = function () {
     }
 
     const restoreCursor = preserveCursor(this.ownerDocument);
-    if (li.parentNode.parentNode.tagName === 'LI') {
+    if (
+        li.parentNode.parentNode.tagName === 'LI' &&
+        !li.parentNode.parentNode.classList.contains('nav-item')
+    ) {
         const ul = li.parentNode;
         const shouldRemoveParentLi = !li.previousElementSibling && !ul.previousElementSibling;
         const toremove = shouldRemoveParentLi ? ul.parentNode : null;
@@ -59,7 +62,7 @@ HTMLLIElement.prototype.oShiftTab = function () {
                 p = p || document.createElement('P');
                 if (dir) {
                     p.setAttribute('dir', dir);
-                    p.style.setProperty('text-align', ul.style.getPropertyValue('text-align'));
+                    p.style.setProperty('text-align', getComputedStyle(ul).textAlign);
                 }
                 p.append(li.firstChild);
             }

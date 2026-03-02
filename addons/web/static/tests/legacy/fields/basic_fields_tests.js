@@ -662,7 +662,7 @@ QUnit.module('basic_fields', {
     });
 
     QUnit.test('toggle_button in form view with readonly modifiers', async function (assert) {
-        assert.expect(3);
+        assert.expect(4);
 
         const form = await createView({
             View: FormView,
@@ -671,12 +671,6 @@ QUnit.module('basic_fields', {
             arch: `<form>
                     <field name="bar" widget="toggle_button" options="{'active': 'Active value', 'inactive': 'Inactive value'}" readonly="True"/>
                 </form>`,
-            mockRPC: function (route, args) {
-                if (args.method === 'write') {
-                    throw new Error("Should not do a write RPC with readonly toggle_button");
-                }
-                return this._super.apply(this, arguments);
-            },
             res_id: 2,
         });
 
@@ -685,8 +679,8 @@ QUnit.module('basic_fields', {
         assert.ok(form.$('.o_field_widget[name=bar]').prop('disabled'),
             "button should be disabled when readonly attribute is given");
 
-        // click on the button to check click doesn't call write as we throw error in write call
-        await testUtils.dom.click(form.$('.o_field_widget[name=bar]'));
+        // assert that the button has properly been disabled
+        assert.ok(form.$('.o_field_widget[name=bar]').get(0).disabled);
 
         assert.strictEqual(form.$('.o_field_widget[name=bar] i.o_toggle_button_success:not(.text-muted)').length,
             1, "should be green even after click");
@@ -3224,17 +3218,13 @@ QUnit.module('basic_fields', {
         this.data.partner.records[0].__last_update = '2017-02-08 10:00:00';
         this.data.partner.records[0].document = 'incorrect_base64_value';
 
-        testUtils.mock.patch(basicFields.FieldBinaryImage, {
-            // Delay the _render function: this will ensure that the error triggered
-            // by the incorrect base64 value is dispatched before the src is replaced
-            // (see test_utils_mock.removeSrcAttribute), since that function is called
-            // when the element is inserted into the DOM.
-            async _render() {
-                const result = this._super.apply(this, arguments);
-                await concurrency.delay(100);
-                return result;
-            },
-        });
+        // In this tests, we throw an "error" event on the img to simulate that it is incorrect.
+        // However, QUnit will catch this error and make the test fail, se we have to prevent it
+        // from doing so
+        const onError = QUnit.onError;
+        QUnit.onError = (err) => {
+            return true;
+        };
 
         const form = await createView({
             View: FormView,
@@ -3245,19 +3235,27 @@ QUnit.module('basic_fields', {
                     <field name="document" widget="image" options="{'size': [90, 90]}"/>
                 </form>`,
             res_id: 1,
-            async mockRPC(route, args) {
-                const _super = this._super;
-                if (route === '/web/static/img/placeholder.png') {
-                    assert.step('call placeholder route');
-                }
-                return _super.apply(this, arguments);
-            },
         });
+
+        assert.strictEqual(form.$('div[name="document"] img').attr("data-src"),
+            "data:image/png;base64,incorrect_base64_value",
+            "the image should have the correct src"
+        );
+
+        // As GET requests can't occur in tests, we must generate an error
+        // on the img element to check whether the data-src is replaced with
+        // a placeholder, here knowing that the GET request would fail
+        form.$('div[name="document"] img').trigger("error");
+        await nextTick();
 
         assert.hasClass(form.$('div[name="document"]'),'o_field_image',
             "the widget should have the correct class");
         assert.containsOnce(form, 'div[name="document"] > img',
             "the widget should contain an image");
+        assert.strictEqual(form.$('div[name="document"] img').attr("src"),
+            "/web/static/img/placeholder.png",
+            "the image should have the correct src"
+        );
         assert.hasClass(form.$('div[name="document"] > img'), 'img-fluid',
             "the image should have the correct class");
         assert.hasAttrValue(form.$('div[name="document"] > img'), 'width', "90",
@@ -3265,10 +3263,8 @@ QUnit.module('basic_fields', {
         assert.strictEqual(form.$('div[name="document"] > img').css('max-width'), "90px",
             "the image should correctly set its attributes");
 
-        assert.verifySteps(['call placeholder route']);
-
         form.destroy();
-        testUtils.mock.unpatch(basicFields.FieldBinaryImage);
+        QUnit.onError = onError;
     });
 
     QUnit.test('image: option accepted_file_extensions', async function (assert) {
@@ -4219,6 +4215,50 @@ QUnit.module('basic_fields', {
             "the start date should be correctly displayed in readonly after manual update");
 
         form.destroy();
+    });
+
+    QUnit.test('Date field should be timezone agnostic', async function (assert) {
+        assert.expect(5);
+
+        const unpatchDate = patchDate(2017, 9, 8, 15, 35, 11); // October 8 2017, 15:35:11
+        this.data.partner.fields.date_end = { string: 'Date End', type: 'date' };
+        this.data.partner.records[0].date_end = '2017-02-08';
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <field name="date" widget="daterange" options="{'related_end_date': 'date_end'}"/>
+                    <field name="date_end" widget="daterange" options="{'related_start_date': 'date'}"/>
+                </form>`,
+            res_id: 1,
+            session: {
+                getTZOffset: function () {
+                    return -420;
+                },
+            },
+        });
+        assert.strictEqual(form.$('.o_field_date_range:first').text(), '02/03/2017',
+            "the start date should be correctly displayed in readonly");
+        assert.strictEqual(form.$('.o_field_date_range:last').text(), '02/08/2017',
+            "the end date should be correctly displayed in readonly");
+
+        // Open daterangepicker
+        await testUtils.form.clickEdit(form);
+        await testUtils.dom.click(form.$('.o_field_date_range:first'));
+
+        const activeDates = $('td.active');
+        assert.strictEqual(activeDates.length, 2,
+            "daterangepicker should open with two active dates");
+        assert.strictEqual(activeDates[0].textContent, '3',
+            "first active date should be on the correct day of the month");
+        assert.strictEqual(activeDates[1].textContent, '8',
+            "second active date should be on the correct day of the month");
+
+        form.destroy();
+        unpatchDate();
     });
 
     QUnit.test('Daterange field manually input wrong value should show toaster', async function (assert) {
@@ -5528,6 +5568,41 @@ QUnit.module('basic_fields', {
             "should have 'In 2 days' as date field value");
         assert.strictEqual(list.$('.o_data_row:nth(1) .o_data_cell').text(), "In 2 days",
             "should have 'In 2 days' as date field value");
+
+        list.destroy();
+        unpatchDate();
+    });
+
+    QUnit.test('remaining_days widget, enter empty value manually in edit list view', async function (assert) {
+        assert.expect(4);
+
+        const unpatchDate = patchDate(2017, 9, 8, 15, 35, 11); // October 8 2017, 15:35:11
+        this.data.partner.records = [
+            { id: 1, date: '2017-10-08' }, // today
+        ];
+
+        const list = await createView({
+            View: ListView,
+            model: 'partner',
+            data: this.data,
+            arch: '<tree multi_edit="1"><field name="date" widget="remaining_days"/></tree>',
+            translateParameters: { // Avoid issues due to localization formats
+                date_format: '%m/%d/%Y',
+            },
+        });
+
+        assert.strictEqual(list.$('.o_data_cell:nth(0)').text(), 'Today');
+
+        // select two records and edit them
+        await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_list_record_selector input'));
+
+        await testUtils.dom.click(list.$('.o_data_row:first .o_data_cell'));
+        assert.containsOnce(list, 'input.o_datepicker_input', 'should have date picker input');
+        await testUtils.fields.editAndTrigger(list.$('.o_datepicker_input'), '', ['input', 'change']);
+        await testUtils.dom.click(list.$el);
+
+        assert.containsNone(document.body, '.modal');
+        assert.strictEqual(list.$('.o_data_cell:nth(0)').text(), '');
 
         list.destroy();
         unpatchDate();

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError
 
 
 class AccountAccountTag(models.Model):
@@ -20,7 +20,7 @@ class AccountAccountTag(models.Model):
         """ Returns all the tax tags corresponding to the tag name given in parameter
         in the specified country.
         """
-        escaped_tag_name = tag_name.replace('\\', '\\\\').replace('%', '\%').replace('_', '\_')
+        escaped_tag_name = tag_name.replace('\\', '\\\\').replace('%', r'\%').replace('_', r'\_')
         domain = [('name', '=like', '_' + escaped_tag_name), ('country_id', '=', country_id), ('applicability', '=', 'taxes')]
         return self.env['account.account.tag'].with_context(active_test=False).search(domain)
 
@@ -36,3 +36,15 @@ class AccountAccountTag(models.Model):
             res.append((tag.id, name,))
 
         return res
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_master_tags(self):
+        master_xmlids = [
+            "account_tag_operating",
+            "account_tag_financing",
+            "account_tag_investing",
+        ]
+        for master_xmlid in master_xmlids:
+            master_tag = self.env.ref(f"account.{master_xmlid}", raise_if_not_found=False)
+            if master_tag and master_tag in self:
+                raise UserError(_("You cannot delete this account tag (%s), it is used on the chart of account definition.", master_tag.name))

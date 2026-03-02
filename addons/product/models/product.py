@@ -589,7 +589,7 @@ class ProductProduct(models.Model):
                 domain = expression.AND([args, domain])
                 product_ids = list(self._search(domain, limit=limit, access_rights_uid=name_get_uid))
             if not product_ids and operator in positive_operators:
-                ptrn = re.compile('(\[(.*?)\])')
+                ptrn = re.compile(r'(\[(.*?)\])')
                 res = ptrn.search(name)
                 if res:
                     product_ids = list(self._search([('default_code', '=', res.group(2))] + args, limit=limit, access_rights_uid=name_get_uid))
@@ -628,7 +628,7 @@ class ProductProduct(models.Model):
         return {
             'name': _('Price Rules'),
             'view_mode': 'tree,form',
-            'views': [(self.env.ref('product.product_pricelist_item_tree_view_from_product').id, 'tree'), (False, 'form')],
+            'views': [(self.env.ref('product.product_pricelist_item_tree_view_from_product').id, 'tree')],
             'res_model': 'product.pricelist.item',
             'type': 'ir.actions.act_window',
             'target': 'current',
@@ -880,3 +880,26 @@ class SupplierInfo(models.Model):
         for supplier in self:
             if supplier.product_id and supplier.product_tmpl_id and supplier.product_id.product_tmpl_id != supplier.product_tmpl_id:
                 raise ValidationError(_('The product variant must be a variant of the product template.'))
+
+    @api.onchange('product_tmpl_id')
+    def _onchange_product_tmpl_id(self):
+        """Clear product variant if it no longer matches the product template."""
+        if self.product_id and self.product_id not in self.product_tmpl_id.product_variant_ids:
+            self.product_id = False
+
+    def _sanitize_vals(self, vals):
+        """Sanitize vals to sync product variant & template on read/write."""
+        # add product's product_tmpl_id if none present in vals
+        if vals.get('product_id') and not vals.get('product_tmpl_id'):
+            product = self.env['product.product'].browse(vals['product_id'])
+            vals['product_tmpl_id'] = product.product_tmpl_id.id
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            self._sanitize_vals(vals)
+        return super().create(vals_list)
+
+    def write(self, vals):
+        self._sanitize_vals(vals)
+        return super().write(vals)

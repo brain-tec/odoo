@@ -110,7 +110,7 @@ class Product(models.Model):
     @api.depends('stock_move_ids.product_qty', 'stock_move_ids.state')
     @api.depends_context(
         'lot_id', 'owner_id', 'package_id', 'from_date', 'to_date',
-        'location', 'warehouse',
+        'location', 'warehouse', 'allowed_company_ids'
     )
     def _compute_quantities(self):
         products = self.filtered(lambda p: p.type != 'service')
@@ -292,7 +292,9 @@ class Product(models.Model):
             if location:
                 location_ids = _search_ids('stock.location', location)
             else:
-                location_ids = set(Warehouse.search([]).mapped('view_location_id').ids)
+                location_ids = set(Warehouse.search(
+                    [('company_id', 'in', self.env.companies.ids)]
+                ).mapped('view_location_id').ids)
 
         return self._get_domain_locations_new(location_ids, compute_child=self.env.context.get('compute_child', True))
 
@@ -360,7 +362,7 @@ class Product(models.Model):
         if operator not in ('<', '>', '=', '!=', '<=', '>='):
             raise UserError(_('Invalid domain operator %s', operator))
         if not isinstance(value, (float, int)):
-            raise UserError(_('Invalid domain right operand %s', value))
+            raise UserError(_("Invalid domain right operand '%s'. It must be of type Integer/Float", value))
 
         # TODO: Still optimization possible when searching virtual quantities
         ids = []
@@ -373,6 +375,11 @@ class Product(models.Model):
 
     def _search_qty_available_new(self, operator, value, lot_id=False, owner_id=False, package_id=False):
         ''' Optimized method which doesn't search on stock.moves, only on stock.quants. '''
+        if operator not in ('<', '>', '=', '!=', '<=', '>='):
+            raise UserError(_('Invalid domain operator %s', operator))
+        if not isinstance(value, (float, int)):
+            raise UserError(_("Invalid domain right operand '%s'. It must be of type Integer/Float", value))
+
         product_ids = set()
         domain_quant = self._get_domain_locations()[0]
         if lot_id:
@@ -668,7 +675,10 @@ class ProductTemplate(models.Model):
     tracking = fields.Selection([
         ('serial', 'By Unique Serial Number'),
         ('lot', 'By Lots'),
-        ('none', 'No Tracking')], string="Tracking", help="Ensure the traceability of a storable product in your warehouse.", default='none', required=True)
+        ('none', 'No Tracking')],
+        string="Tracking", required=True, default='none',
+        compute='_compute_tracking', store=True, readonly=False,
+        help="Ensure the traceability of a storable product in your warehouse.")
     description_picking = fields.Text('Description on Picking', translate=True)
     description_pickingout = fields.Text('Description on Delivery Orders', translate=True)
     description_pickingin = fields.Text('Description on Receptions', translate=True)
@@ -693,7 +703,7 @@ class ProductTemplate(models.Model):
         default=lambda self: self.env['stock.location.route'].search_count([('product_selectable', '=', True)]))
     route_ids = fields.Many2many(
         'stock.location.route', 'stock_route_product', 'product_id', 'route_id', 'Routes',
-        domain=[('product_selectable', '=', True)],
+        domain=[('product_selectable', '=', True)], depends_context=['company', 'allowed_companies'],
         help="Depending on the modules installed, this will allow you to define the route of the product: whether it will be bought, manufactured, replenished on order, etc.")
     nbr_moves_in = fields.Integer(compute='_compute_nbr_moves', compute_sudo=False, help="Number of incoming stock moves in the past 12 months")
     nbr_moves_out = fields.Integer(compute='_compute_nbr_moves', compute_sudo=False, help="Number of outgoing stock moves in the past 12 months")
@@ -782,6 +792,12 @@ class ProductTemplate(models.Model):
             template.nbr_moves_in = int(res[template.id]['moves_in'])
             template.nbr_moves_out = int(res[template.id]['moves_out'])
 
+    @api.depends('type')
+    def _compute_tracking(self):
+        self.filtered(
+            lambda t: not t.tracking or t.type in ('consu', 'service') and t.tracking != 'none'
+        ).tracking = 'none'
+
     @api.model
     def _get_action_view_related_putaway_rules(self, domain):
         return {
@@ -846,8 +862,6 @@ class ProductTemplate(models.Model):
     @api.onchange('type')
     def _onchange_type(self):
         res = super(ProductTemplate, self)._onchange_type() or {}
-        if self.type == 'consu' and self.tracking != 'none':
-            self.tracking = 'none'
 
         # Return a warning when trying to change the product type
         if self.ids and self.product_variant_ids.ids and self.env['stock.move.line'].sudo().search_count([
@@ -894,13 +908,13 @@ class ProductTemplate(models.Model):
             raise UserError(_('You still have some active reordering rules on this product. Please archive or delete them first.'))
         if any('type' in vals and vals['type'] != prod_tmpl.type for prod_tmpl in self):
             existing_done_move_lines = self.env['stock.move.line'].sudo().search([
-                ('product_id', 'in', self.mapped('product_variant_ids').ids),
+                ('product_id', 'in', self.with_context(active_test=False).mapped('product_variant_ids').ids),
                 ('state', '=', 'done'),
             ], limit=1)
             if existing_done_move_lines:
                 raise UserError(_("You can not change the type of a product that was already used."))
             existing_reserved_move_lines = self.env['stock.move.line'].search([
-                ('product_id', 'in', self.mapped('product_variant_ids').ids),
+                ('product_id', 'in', self.with_context(active_test=False).mapped('product_variant_ids').ids),
                 ('state', 'in', ['partially_available', 'assigned']),
             ])
             if existing_reserved_move_lines:

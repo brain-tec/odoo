@@ -615,7 +615,11 @@ class JsonRequest(WebRequest):
         request_id = args.get('id')
 
         # regular jsonrpc2
-        request = self.httprequest.get_data().decode(self.httprequest.charset)
+        if not hasattr(self.httprequest._HTTPRequest__wrapped, 'charset'):
+            # see https://github.com/pallets/werkzeug/pull/2768
+            request = self.httprequest.get_data().decode('utf-8')
+        else:
+            request = self.httprequest.get_data().decode(self.httprequest.charset)
 
         # Read POST content or POST Form Data named "request"
         try:
@@ -1180,6 +1184,52 @@ mimetypes.add_type('application/vnd.ms-fontobject', '.eot')
 mimetypes.add_type('application/x-font-ttf', '.ttf')
 # Add potentially missing (detected on windows) svg mime types
 mimetypes.add_type('image/svg+xml', '.svg')
+# this one can be present on windows with the value 'text/plain' which breaks
+# loading js files from an addon's static folder
+mimetypes.add_type('text/javascript', '.js')
+
+
+def make_request_wrap_methods(attr):
+    def getter(self):
+        return getattr(self._HTTPRequest__wrapped, attr)
+
+    def setter(self, value):
+        return setattr(self._HTTPRequest__wrapped, attr, value)
+
+    return getter, setter
+
+
+class HTTPRequest:
+    def __init__(self, environ):
+        httprequest = werkzeug.wrappers.Request(environ)
+        httprequest.user_agent_class = UserAgent  # use vendored userAgent since it will be removed in 2.1
+        httprequest.parameter_storage_class = werkzeug.datastructures.ImmutableOrderedMultiDict
+
+        self.__wrapped = httprequest
+        self.__environ = self.__wrapped.environ
+        self.environ = self.headers.environ = {
+            key: value
+            for key, value in self.__environ.items()
+            if not key.startswith(('werkzeug.', 'wsgi.')) or key in ['wsgi.url_scheme', 'werkzeug.proxy_fix.orig']
+        }
+
+    def __enter__(self):
+        return self
+
+
+HTTPREQUEST_ATTRIBUTES = [
+    '__str__', '__repr__', '__exit__',
+    'accept_charsets', 'accept_languages', 'accept_mimetypes', 'access_route', 'args', 'authorization', 'base_url',
+    'charset', 'content_encoding', 'content_length', 'content_md5', 'content_type', 'cookies', 'data', 'date',
+    'encoding_errors', 'files', 'form', 'full_path', 'get_data', 'get_json', 'headers', 'host', 'host_url', 'if_match',
+    'if_modified_since', 'if_none_match', 'if_range', 'if_unmodified_since', 'is_json', 'is_secure', 'json', 'method',
+    'mimetype', 'mimetype_params', 'origin', 'path', 'pragma', 'query_string', 'range', 'referrer', 'remote_addr',
+    'remote_user', 'root_path', 'root_url', 'scheme', 'script_root', 'server', 'session', 'trusted_hosts', 'url',
+    'url_charset', 'url_root', 'user_agent', 'values',
+]
+for attr in HTTPREQUEST_ATTRIBUTES:
+    setattr(HTTPRequest, attr, property(*make_request_wrap_methods(attr)))
+
 
 class Response(werkzeug.wrappers.Response):
     """ Response object passed through controller route chain.
@@ -1247,7 +1297,7 @@ class DisableCacheMiddleware(object):
 
     def __call__(self, environ, start_response):
         def start_wrapped(status, headers):
-            req = werkzeug.wrappers.Request(environ)
+            req = HTTPRequest(environ)
             root.setup_session(req)
             if req.session and req.session.debug and not 'wkhtmltopdf' in req.headers.get('User-Agent'):
 
@@ -1443,9 +1493,7 @@ class Root(object):
         Performs the actual WSGI dispatching for the application.
         """
         try:
-            httprequest = werkzeug.wrappers.Request(environ)
-            httprequest.user_agent_class = UserAgent  # use vendored userAgent since it will be removed in 2.1
-            httprequest.parameter_storage_class = werkzeug.datastructures.ImmutableOrderedMultiDict
+            httprequest = HTTPRequest(environ)
 
             current_thread = threading.current_thread()
             current_thread.url = httprequest.url
@@ -1689,7 +1737,7 @@ def send_file(filepath_or_fp, mimetype=None, as_attachment=False, filename=None,
 
 def content_disposition(filename):
     filename = odoo.tools.ustr(filename)
-    escaped = urls.url_quote(filename, safe='')
+    escaped = urls.url_quote(filename, safe='', unsafe='()<>@,;:"/[]?={}\\*\'%')  # RFC6266
 
     return "attachment; filename*=UTF-8''%s" % escaped
 

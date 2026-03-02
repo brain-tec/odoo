@@ -2277,3 +2277,55 @@ class TestStockFlow(TestStockCommon):
         receipt.button_validate()
 
         self.assertEqual(receipt.move_lines.move_line_ids.location_dest_id, sub_loc)
+
+    def test_several_sm_with_same_product_and_backorders(self):
+        picking = self.env['stock.picking'].create({
+            'picking_type_id': self.picking_type_in,
+            'location_id': self.supplier_location,
+            'location_dest_id': self.stock_location,
+        })
+        move01, move02 = self.env['stock.move'].create([{
+            'name': self.productA.name,
+            'product_id': self.productA.id,
+            'product_uom_qty': 10,
+            'product_uom': self.productA.uom_id.id,
+            'description_picking': desc,
+            'picking_id': picking.id,
+            'location_id': self.supplier_location,
+            'location_dest_id': self.stock_location,
+        } for desc in ['Lorem', 'Ipsum']])
+
+        picking.action_confirm()
+
+        move01.quantity_done = 12
+        move02.quantity_done = 8
+
+        res = picking.button_validate()
+        self.assertIsInstance(res, dict)
+        self.assertEqual(res.get('res_model'), 'stock.backorder.confirmation')
+
+        wizard = Form(self.env[res['res_model']].with_context(res['context'])).save()
+        wizard.process()
+
+        backorder = picking.backorder_ids
+        self.assertEqual(backorder.move_lines.product_uom_qty, 2)
+        self.assertEqual(backorder.move_lines.description_picking, 'Ipsum')
+
+    def test_name_create_location(self):
+        """
+        e.g., from .csv/.xlsx import:
+            If name str has a parent location prefix we try to create as child location
+            else ignore prefixes
+        """
+        parent_location = self.env['stock.location'].create({'name': 'ParentLocation', })
+        new_location_id = self.env['stock.location'].name_create('ParentLocation/TestLocation1')[0]
+        new_location = self.env['stock.location'].browse(new_location_id)
+        self.assertEqual(new_location.name, 'TestLocation1')
+        self.assertEqual(new_location.complete_name, 'ParentLocation/TestLocation1')
+        self.assertEqual(new_location.location_id, parent_location)
+
+        new_location_complete_name = self.env['stock.location'].name_create('FauxParentLocation/TestLocation2')[1]
+        self.assertEqual(new_location_complete_name, 'TestLocation2')
+
+        new_location_complete_name = self.env['stock.location'].name_create('NoPrefixLocation')[1]
+        self.assertEqual(new_location_complete_name, 'NoPrefixLocation')

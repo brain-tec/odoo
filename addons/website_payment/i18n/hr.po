@@ -5,18 +5,18 @@
 # Translators:
 # Vladimir Olujić <olujic.vladimir@storm.hr>, 2022
 # Ivica Dimjašević <ivica.dimjasevic@storm.hr>, 2022
-# Martin Trigaux, 2022
 # Karolina Tonković <karolina.tonkovic@storm.hr>, 2022
 # Bole <bole@dajmi5.com>, 2023
 # Antonijo Kovacevic, 2023
+# Martin Trigaux, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.5\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-14 10:29+0000\n"
+"POT-Creation-Date: 2024-08-14 15:43+0000\n"
 "PO-Revision-Date: 2021-09-14 12:28+0000\n"
-"Last-Translator: Antonijo Kovacevic, 2023\n"
+"Last-Translator: Martin Trigaux, 2024\n"
 "Language-Team: Croatian (https://app.transifex.com/odoo/teams/41243/hr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -37,17 +37,17 @@ msgstr ""
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
 msgid "<b>Comment:</b>"
-msgstr ""
+msgstr "<b>Komentar:</b>"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
 msgid "<b>Donation Date:</b>"
-msgstr ""
+msgstr "<b>Datum doniranja:</b>"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
 msgid "<b>Donor Email:</b>"
-msgstr ""
+msgstr "<b>Email donatora:</b>"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
@@ -62,12 +62,12 @@ msgstr ""
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
 msgid "<b>Payment Method:</b>"
-msgstr ""
+msgstr "<b>Način plaćanja:</b>"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "<option value=\"\">Country...</option>"
-msgstr ""
+msgstr "<option value=\"\">Država...</option>"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_pay
@@ -85,19 +85,19 @@ msgstr "<strong>Upozorenje</strong> Valuta nedostaje ili ne netočna."
 #: code:addons/website_payment/models/payment_transaction.py:0
 #, python-format
 msgid "A donation has been made on your website"
-msgstr ""
+msgstr "Donacija je uplaćena na vašoj web stranici"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
 msgid "A year of cultural awakening."
-msgstr ""
+msgstr "Godina kulturnog buđenja."
 
 #. module: website_payment
 #. openerp-web
 #: code:addons/website_payment/static/src/snippets/s_donation/options.js:0
 #, python-format
 msgid "Add a description here"
-msgstr ""
+msgstr "Dodaj opis ovdje"
 
 #. module: website_payment
 #. openerp-web
@@ -117,12 +117,12 @@ msgstr "Iznos"
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "Amount ("
-msgstr ""
+msgstr "Iznos ("
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
 msgid "Amount("
-msgstr ""
+msgstr "Iznos("
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
@@ -149,12 +149,14 @@ msgid ""
 "Country\n"
 "                            <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
+"Država\n"
+"                            <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_payment
 #: code:addons/website_payment/controllers/portal.py:0
 #, python-format
 msgid "Country is required."
-msgstr ""
+msgstr "Država je obavezna."
 
 #. module: website_payment
 #. openerp-web
@@ -209,7 +211,7 @@ msgstr ""
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body
 msgid "Donation notification"
-msgstr ""
+msgstr "Obavijest o donaciji"
 
 #. module: website_payment
 #. openerp-web
@@ -224,6 +226,8 @@ msgid ""
 "Email\n"
 "                            <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
+"E-pošta\n"
+"                            <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_payment
 #. openerp-web
@@ -304,7 +308,12 @@ msgstr ""
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.s_donation_button
 msgid "One year in high school."
-msgstr ""
+msgstr "Jedna godina u srednjoj školi."
+
+#. module: website_payment
+#: model:ir.model,name:website_payment.model_website_page
+msgid "Page"
+msgstr "Page"
 
 #. module: website_payment
 #: model:ir.model,name:website_payment.model_payment_acquirer
@@ -325,7 +334,7 @@ msgstr "Transakcija plaćanja"
 #: code:addons/website_payment/models/payment_transaction.py:0
 #, python-format
 msgid "Payment received from donation with following details:"
-msgstr ""
+msgstr "Uplata primljena iz donacije sa sljedećim podacima:"
 
 #. module: website_payment
 #: model:ir.model,name:website_payment.model_account_payment
@@ -412,12 +421,12 @@ msgstr "Web stranica"
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "Write us a comment"
-msgstr ""
+msgstr "Napišite nam komentar"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.payment_checkout
 msgid "Your comment"
-msgstr ""
+msgstr "Vaš komentar"
 
 #. module: website_payment
 #: model_terms:ir.ui.view,arch_db:website_payment.donation_mail_body

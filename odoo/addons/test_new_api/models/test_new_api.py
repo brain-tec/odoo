@@ -517,6 +517,13 @@ class OrderLine(models.Model):
     order_id = fields.Many2one('test_new_api.order', required=True, ondelete='cascade')
     product = fields.Char()
     reward = fields.Boolean()
+    has_been_rewarded = fields.Char(compute='_compute_has_been_rewarded', store=True)
+
+    @api.depends('reward')
+    def _compute_has_been_rewarded(self):
+        for rec in self:
+            if rec.reward:
+                rec.has_been_rewarded = 'Yes'
 
     def unlink(self):
         # also delete associated reward lines
@@ -1471,3 +1478,13 @@ class TeamMember(models.Model):
     name = fields.Char('Name')
     team_id = fields.Many2one('test_new_api.team')
     parent_id = fields.Many2one('test_new_api.team', related='team_id.parent_id')
+
+
+class ModelAutovacuumed(models.Model):
+    _name = _description = 'test_new_api.autovacuumed'
+
+    expire_at = fields.Datetime('Expires at')
+
+    @api.autovacuum
+    def _gc(self):
+        self.search([('expire_at', '<', datetime.datetime.now() - datetime.timedelta(days=1))]).unlink()

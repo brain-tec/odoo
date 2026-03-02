@@ -208,6 +208,7 @@ class MassMailing(models.Model):
             FROM mailing_trace AS stats
             LEFT OUTER JOIN link_tracker_click AS clicks ON clicks.mailing_trace_id = stats.id
             WHERE stats.mass_mailing_id IN %s
+            AND stats.trace_status != 'cancel'
             GROUP BY stats.mass_mailing_id
         """, [tuple(self.ids) or (None,)])
         mass_mailing_data = self.env.cr.dictfetchall()
@@ -438,7 +439,7 @@ class MassMailing(models.Model):
         return super(MassMailing, self).copy(default=default)
 
     def _group_expand_states(self, states, domain, order):
-        return [key for key, val in type(self).state.selection]
+        return [key for key, val in self._fields['state'].selection]
 
     # ------------------------------------------------------
     # ACTIONS
@@ -794,7 +795,7 @@ class MassMailing(models.Model):
             remaining = set(res_ids).difference(already_mailed)
             if topick > len(remaining) or (len(remaining) > 0 and topick == 0):
                 topick = len(remaining)
-            res_ids = random.sample(remaining, topick)
+            res_ids = random.sample(sorted(remaining), topick)
         return res_ids
 
     def _get_remaining_recipients(self):
@@ -810,6 +811,19 @@ class MassMailing(models.Model):
         already_mailed = self.env['mailing.trace'].search_read(trace_domain, ['res_id'])
         done_res_ids = {record['res_id'] for record in already_mailed}
         return [rid for rid in res_ids if rid not in done_res_ids]
+
+    def _get_unsubscribe_oneclick_url(self, email_to, res_id):
+        url = werkzeug.urls.url_join(
+            self.get_base_url(), 'mail/mailing/%(mailing_id)s/unsubscribe_oneclick?%(params)s' % {
+                'mailing_id': self.id,
+                'params': werkzeug.urls.url_encode({
+                    'res_id': res_id,
+                    'email': email_to,
+                    'token': self._unsubscribe_token(res_id, email_to),
+                }),
+            }
+        )
+        return url
 
     def _get_unsubscribe_url(self, email_to, res_id):
         url = werkzeug.urls.url_join(

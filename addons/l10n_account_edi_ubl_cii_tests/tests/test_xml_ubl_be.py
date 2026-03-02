@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+import base64
+from lxml import etree
+
 from odoo.addons.l10n_account_edi_ubl_cii_tests.tests.common import TestUBLCommon
 from odoo.tests import tagged
-import base64
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
 class TestUBLBE(TestUBLCommon):
@@ -66,6 +68,14 @@ class TestUBLBE(TestUBLCommon):
             'name': 'tax_12',
             'amount_type': 'percent',
             'amount': 12,
+            'type_tax_use': 'sale',
+            'country_id': cls.env.ref('base.be').id,
+        })
+
+        cls.tax_0 = cls.env['account.tax'].create({
+            'name': 'tax_0',
+            'amount_type': 'percent',
+            'amount': 0,
             'type_tax_use': 'sale',
             'country_id': cls.env.ref('base.be').id,
         })
@@ -343,6 +353,61 @@ class TestUBLBE(TestUBLCommon):
         self.assertEqual(invoice.amount_total, 121)
         self._assert_invoice_attachment(invoice, None, 'from_odoo/bis3_ecotaxes_case3.xml')
 
+    def test_export_with_fixed_taxes_case4(self):
+        """ CASE 4: simple invoice with a recupel tax + discount
+        1) Subtotal (price after discount, without taxes): 99 * 2 * (1-0.9) = 178.2
+        2) Taxes:
+            - recupel = 2
+            - VAT = (178.2 + 2) * 0.21 = 37.842
+        3) Total = 178.2 + 2 + 37.842 = 218.042
+        """
+        invoice = self._generate_move(
+            self.partner_1,
+            self.partner_2,
+            move_type='out_invoice',
+            invoice_line_ids=[
+                {
+                    'product_id': self.product_a.id,
+                    'quantity': 2,
+                    'discount': 10,
+                    'price_unit': 99,
+                    'tax_ids': [(6, 0, [self.recupel.id, self.tax_21.id])],
+                }
+            ],
+        )
+        self.assertEqual(invoice.amount_total, 218.042)
+        self._assert_invoice_attachment(invoice, None, 'from_odoo/bis3_ecotaxes_case4.xml')
+
+    def test_export_rounding_price_amount(self):
+        invoice = self._generate_move(
+            self.partner_1,
+            self.partner_2,
+            move_type='out_invoice',
+            invoice_line_ids=[
+                {'quantity': 3, 'price_unit': 102.15},
+                {'quantity': 3, 'price_unit': 83.60},
+            ],
+        )
+        attachment = invoice._get_edi_attachment(self.edi_format)
+        price_amounts = etree.fromstring(attachment.raw).findall('.//{*}InvoiceLine/{*}Price/{*}PriceAmount')
+        self.assertEqual(price_amounts[0].text, '102.15')
+        self.assertEqual(price_amounts[1].text, '83.6')
+
+    def test_export_tax_exempt(self):
+        invoice = self._generate_move(
+            self.partner_1,
+            self.partner_2,
+            move_type='out_invoice',
+            invoice_line_ids=[
+                {
+                    'product_id': self.product_a.id,
+                    'price_unit': 990.0,
+                    'tax_ids': [(6, 0, self.tax_0.ids)],
+                },
+            ],
+        )
+        self._assert_invoice_attachment(invoice, None, 'from_odoo/bis3_out_invoice_tax_exempt.xml')
+
     ####################################################
     # Test import
     ####################################################
@@ -489,3 +554,32 @@ class TestUBLBE(TestUBLCommon):
             list_line_subtotals=[99], currency_id=self.currency_data['currency'].id, list_line_price_unit=[99],
             list_line_discount=[0], list_line_taxes=[tax_21+self.recupel], move_type='out_invoice',
         )
+        self._assert_imported_invoice_from_file(
+            subfolder=subfolder, filename='bis3_ecotaxes_case4.xml', amount_total=218.042, amount_tax=39.842,
+            list_line_subtotals=[178.2], currency_id=self.currency_data['currency'].id, list_line_price_unit=[99],
+            list_line_discount=[10], list_line_taxes=[tax_21+self.recupel], move_type='out_invoice',
+        )
+
+    def test_inverting_negative_price_unit(self):
+        """ We can not have negative unit prices, so we try to invert the unit price and quantity.
+        """
+        invoice = self._generate_move(
+            self.partner_1,
+            self.partner_2,
+            move_type='out_invoice',
+            invoice_line_ids=[
+                {
+                    'product_id': self.product_a.id,
+                    'quantity': 1,
+                    'price_unit': 100.0,
+                    'tax_ids': [(6, 0, self.tax_21.ids)],
+                },
+                {
+                    'product_id': self.product_a.id,
+                    'quantity': 1,
+                    'price_unit': -25.0,
+                    'tax_ids': [(6, 0, self.tax_21.ids)],
+                }
+            ],
+        )
+        self._assert_invoice_attachment(invoice, None, 'from_odoo/bis3_out_invoice_negative_unit_price.xml')

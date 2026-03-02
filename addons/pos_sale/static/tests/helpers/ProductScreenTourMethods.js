@@ -47,6 +47,34 @@ odoo.define('pos_sale.tour.ProductScreenTourMethods', function (require) {
                 }
             ];
         }
+
+        acceptNewProduct() {
+            return [
+                {
+                    content: `click on accept button`,
+                    trigger: `.button.confirm`,
+                }
+            ];
+        }
     }
-    return createTourMethods('ProductScreen', DoExt, Check, Execute);
+
+    class CheckExt extends Check{
+        checkCustomerNotes(note) {
+            return [
+                {
+                    content: `check customer notes`,
+                    trigger: `.orderline-note:contains(${note})`,
+                }
+            ];
+        }
+        checkOrdersListEmpty() {
+            return [
+                {
+                    content: 'Check that the orders list is empty',
+                    trigger: '.order-list:not(:has(.order-row))',
+                }
+            ]
+        }
+    }
+    return createTourMethods('ProductScreen', DoExt, CheckExt, Execute);
 });

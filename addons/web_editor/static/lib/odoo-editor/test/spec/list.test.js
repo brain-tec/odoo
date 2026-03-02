@@ -13,6 +13,7 @@ import {
     toggleOrderedList,
     toggleUnorderedList,
     unformat,
+    switchDirection
 } from '../utils.js';
 
 describe('List', () => {
@@ -30,6 +31,20 @@ describe('List', () => {
                     it('should turn a paragraph into a list', async () => {
                         await testEditor(BasicEditor, {
                             contentBefore: '<p>ab[]cd</p>',
+                            stepFunction: toggleUnorderedList,
+                            contentAfter: '<ul><li>ab[]cd</li></ul>',
+                        });
+                    });
+                    it('should turn a ordered list into a unordered list', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<ol><li>ab[]cd</li></ol>',
+                            stepFunction: toggleUnorderedList,
+                            contentAfter: '<ul><li>ab[]cd</li></ul>',
+                        });
+                    });
+                    it('should turn a checked list into a unordered list', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
                             stepFunction: toggleUnorderedList,
                             contentAfter: '<ul><li>ab[]cd</li></ul>',
                         });
@@ -54,7 +69,7 @@ describe('List', () => {
                                 '<p><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</p>',
                             stepFunction: toggleUnorderedList,
                             contentAfter:
-                                '<ul><li><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</li></ul>',
+                                '<ul><li><b>ab</b> <i>cd</i> ef[]gh</li></ul>',
                         });
                     });
                     it('should turn an empty paragraph of multiple table cells into a list', async () => {
@@ -94,6 +109,34 @@ describe('List', () => {
                             `),
                         });
                     });
+                    it('should create a new unordered list if current node is inside a nav-item list', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<ul><li class="nav-item">a[]b</li></ul>',
+                            stepFunction: toggleUnorderedList,
+                            contentAfter: '<ul><li class="nav-item"><ul><li>a[]b</li></ul></li></ul>',
+                        });
+                    });
+                    it('should create a new unordered list if closestBlock is inside a nav-item list', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<ul><li class="nav-item"><div><p>a[]b</p></div></li></ul>',
+                            stepFunction: toggleUnorderedList,
+                            contentAfter: '<ul><li class="nav-item"><div><ul><li>a[]b</li></ul></div></li></ul>',
+                        });
+                    });
+                    it('should only keep dir attribute when converting a non Paragraph element', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<h1 dir="rtl" class="h1">a[]b</h1>',
+                            stepFunction: toggleUnorderedList,
+                            contentAfter: '<ul dir="rtl"><li><h1 dir="rtl" class="h1">a[]b</h1></li></ul>',
+                        });
+                    });
+                    it('should keep all attributes when converting a Paragraph element', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<p dir="rtl" class="text-uppercase">a[]b</p>',
+                            stepFunction: toggleUnorderedList,
+                            contentAfter: '<ul dir="rtl" class="text-uppercase"><li>a[]b</li></ul>',
+                        });
+                    });
                 });
                 describe('Remove', () => {
                     it('should turn an empty list into a paragraph', async () => {
@@ -130,7 +173,7 @@ describe('List', () => {
                                 '<ul><li><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</li></ul>',
                             stepFunction: toggleUnorderedList,
                             contentAfter:
-                                '<p><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</p>',
+                                '<p><b>ab</b> <i>cd</i> ef[]gh</p>',
                         });
                     });
                     it('should turn nested list items into paragraphs', async () => {
@@ -243,6 +286,20 @@ describe('List', () => {
                             contentAfter: '<ol><li>ab[]cd</li></ol>',
                         });
                     });
+                    it('should turn a unordered list into a ordered list', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<ul><li>ab[]cd</li></ul>',
+                            stepFunction: toggleOrderedList,
+                            contentAfter: '<ol><li>ab[]cd</li></ol>',
+                        });
+                    });
+                    it('should turn a checked list into a ordered list', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
+                            stepFunction: toggleOrderedList,
+                            contentAfter: '<ol><li>ab[]cd</li></ol>',
+                        });
+                    });
                     it('should turn a heading into a list', async () => {
                         await testEditor(BasicEditor, {
                             contentBefore: '<h1>ab[]cd</h1>',
@@ -263,7 +320,7 @@ describe('List', () => {
                                 '<p><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</p>',
                             stepFunction: toggleOrderedList,
                             contentAfter:
-                                '<ol><li><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</li></ol>',
+                                '<ol><li><b>ab</b> <i>cd</i> ef[]gh</li></ol>',
                         });
                     });
                     it('should turn an empty paragraph of multiple table cells into a list', async () => {
@@ -303,6 +360,34 @@ describe('List', () => {
                             `),
                         });
                     });
+                    it('should create a new ordered list if current node is inside a nav-item list', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<ul><li class="nav-item">a[]b</li></ul>',
+                            stepFunction: toggleOrderedList,
+                            contentAfter: '<ul><li class="nav-item"><ol><li>a[]b</li></ol></li></ul>',
+                        });
+                    });
+                    it('should create a new ordered list if closestBlock is inside a nav-item list', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<ul><li class="nav-item"><div><h1>a[]b</h1></div></li></ul>',
+                            stepFunction: toggleOrderedList,
+                            contentAfter: '<ul><li class="nav-item"><div><ol><li><h1>a[]b</h1></li></ol></div></li></ul>',
+                        });
+                    });
+                    it('should only keep dir attribute when converting a non Paragraph element', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<h1 dir="rtl" class="h1">a[]b</h1>',
+                            stepFunction: toggleOrderedList,
+                            contentAfter: '<ol dir="rtl"><li><h1 dir="rtl" class="h1">a[]b</h1></li></ol>',
+                        });
+                    });
+                    it('should keep all attributes when converting a Paragraph element', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore: '<p dir="rtl" class="text-uppercase">a[]b</p>',
+                            stepFunction: toggleOrderedList,
+                            contentAfter: '<ol dir="rtl" class="text-uppercase"><li>a[]b</li></ol>',
+                        });
+                    });
                 });
                 describe('Remove', () => {
                     it('should turn an empty list into a paragraph', async () => {
@@ -339,7 +424,7 @@ describe('List', () => {
                                 '<ol><li><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</li></ol>',
                             stepFunction: toggleOrderedList,
                             contentAfter:
-                                '<p><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</p>',
+                                '<p><b>ab</b> <i>cd</i> ef[]gh</p>',
                         });
                     });
                     it('should turn an list of multiple table cells into a empty paragraph', async () => {
@@ -401,6 +486,22 @@ describe('List', () => {
                             contentAfter: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
                         });
                     });
+                    it('should turn a ordered list into a checklist', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore: '<ol><li>ab[]cd</li></ol>',
+                            stepFunction: toggleCheckList,
+                            contentAfter: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
+                        });
+                    });
+                    it('should turn a unordered list into a checklist', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore: '<ul><li>ab[]cd</li></ul>',
+                            stepFunction: toggleCheckList,
+                            contentAfter: '<ul class="o_checklist"><li>ab[]cd</li></ul>',
+                        });
+                    });
                     it('should turn a heading into a checklist', async () => {
                             await testEditor(BasicEditor, {
                             removeCheckIds: true,
@@ -427,7 +528,7 @@ describe('List', () => {
                             stepFunction: toggleCheckList,
                             // JW cAfter: '<ul class="o_checklist"><li><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</li></ul>',
                             contentAfter:
-                                '<ul class="o_checklist"><li><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</li></ul>',
+                                '<ul class="o_checklist"><li><b>ab</b> <i>cd</i> ef[]gh</li></ul>',
                         });
                     });
                     it('should turn a paragraph between 2 checklist into a checklist item', async () => {
@@ -562,6 +663,38 @@ describe('List', () => {
                             `),
                         });
                     });
+                    it('should create a new checked list if current node is inside a nav-item list', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore: '<ul><li class="nav-item">a[]b</li></ul>',
+                            stepFunction: toggleCheckList,
+                            contentAfter: '<ul><li class="nav-item"><ul class="o_checklist"><li>a[]b</li></ul></li></ul>',
+                        });
+                    });
+                    it('should create a new checked list if closestBlock is inside a nav-item list', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore: '<ul><li class="nav-item"><div><p>a[]b</p></div></li></ul>',
+                            stepFunction: toggleCheckList,
+                            contentAfter: '<ul><li class="nav-item"><div><ul class="o_checklist"><li>a[]b</li></ul></div></li></ul>',
+                        });
+                    });
+                    it('should only keep dir attribute when converting a non Paragraph element', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore: '<h1 dir="rtl" class="h1">a[]b</h1>',
+                            stepFunction: toggleCheckList,
+                            contentAfter: '<ul class="o_checklist" dir="rtl"><li><h1 dir="rtl" class="h1">a[]b</h1></li></ul>',
+                        });
+                    });
+                    it('should keep all attributes when converting a Paragraph element', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore: '<p dir="rtl" class="text-uppercase">a[]b</p>',
+                            stepFunction: toggleCheckList,
+                            contentAfter: '<ul class="o_checklist text-uppercase" dir="rtl"><li>a[]b</li></ul>',
+                        });
+                    });
                 });
                 it('should add a unique id on a new checklist', async () => {
                     await testEditor(BasicEditor, {
@@ -613,7 +746,7 @@ describe('List', () => {
                                 '<ul class="o_checklist"><li><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</li></ul>',
                             stepFunction: toggleCheckList,
                             contentAfter:
-                                '<p><span><b>ab</b></span> <span><i>cd</i></span> ef[]gh</p>',
+                                '<p><b>ab</b> <i>cd</i> ef[]gh</p>',
                         });
                     });
                     it('should turn nested list items into paragraphs', async () => {
@@ -5351,6 +5484,15 @@ describe('List', () => {
                                 '<h1>a[]i</h1><custom-block style="display: block;"><ol><li>jk</li></ol></custom-block>',
                         });
                     });
+                    it('should not join the next list with the first one on delete range', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore:
+                                '<ol><li>ab</li><li>[cd</li><li>ef]</li><li>gh</li></ol>',
+                            stepFunction: deleteBackward,
+                            contentAfter:
+                                '<ol><li>ab</li><li>[]<br></li><li>gh</li></ol>',
+                        });
+                    });
                 });
                 describe('Unordered', () => {
                     it('should delete text within a list item', async () => {
@@ -5441,6 +5583,15 @@ describe('List', () => {
                             stepFunction: deleteBackward,
                             contentAfter:
                                 '<h1>a[]i</h1><custom-block style="display: block;"><ul><li>jk</li></ul></custom-block>',
+                        });
+                    });
+                    it('should not join the next list with the first one on delete range', async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore:
+                                '<ul><li>ab</li><li>[cd</li><li>ef]</li><li>gh</li></ul>',
+                            stepFunction: deleteBackward,
+                            contentAfter:
+                                '<ul><li>ab</li><li>[]<br></li><li>gh</li></ul>',
                         });
                     });
                 });
@@ -5601,6 +5752,38 @@ describe('List', () => {
                             stepFunction: deleteBackward,
                             contentAfter:
                                 '<h1>a[]i</h1><custom-block style="display:block;"><ul class="o_checklist"><li class="o_checked">jk</li></ul></custom-block>',
+                        });
+                    });
+                    it('should not join the next list with the first one on delete range', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore:
+                                '<ul class="o_checklist"><li>ab</li><li class="o_checked">[cd</li><li>ef]</li><li>gh</li></ul>',
+                            stepFunction: deleteBackward,
+                            contentAfter:
+                                '<ul class="o_checklist"><li>ab</li><li>[]<br></li><li>gh</li></ul>',
+                        });
+                    });
+                    it('should remove the o_checked class on delete range', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore:
+                                '<ul class="o_checklist"><li>ab</li><li class="o_checked"><a href="#">[cd</a></li><li>ef]</li><li>gh</li></ul>',
+                            stepFunction: deleteBackward,
+                            contentAfterEdit:
+                                '<ul class="o_checklist"><li>ab</li><li placeholder="List" class="oe-hint">[]<br></li><li>gh</li></ul>',
+                            contentAfter:
+                                '<ul class="o_checklist"><li>ab</li><li>[]<br></li><li>gh</li></ul>',
+                        });
+                    });
+                    it('should remove the o_checked class on delete range (2)', async () => {
+                        await testEditor(BasicEditor, {
+                            removeCheckIds: true,
+                            contentBefore:
+                                '<ul class="o_checklist"><li>ab</li><li class="o_checked"><h1>[cd</h1></li><li>ef]</li><li>gh</li></ul>',
+                            stepFunction: deleteBackward,
+                            contentAfter:
+                                '<ul class="o_checklist"><li>ab</li><li><h1>[]<br></h1></li><li>gh</li></ul>',
                         });
                     });
                 });
@@ -5880,6 +6063,52 @@ describe('List', () => {
                             <li>ghi</li>
                         </ol>`),
                 });
+            });
+            describe('empty list items, starting and ending with links', () => {
+                // Since we introduce \ufeff characters in and around links, we
+                // can enter situations where the links aren't technically fully
+                // selected but should be treated as if they were. These tests
+                // are there to ensure that is the case. They represent four
+                // variations of the same situation, and have the same expected
+                // result.
+                const tests = [
+                    // (1) <a>[...</a>...<a>...]</a>
+                    '<ul><li>ab</li><li><a href="#">[cd</a></li><li>ef</li><li><a href="#a">gh]</a></li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li><a href="#">[\ufeffcd</a></li><li>ef</li><li><a href="#a">gh\ufeff]</a></li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li><a href="#">\ufeff[cd</a></li><li>ef</li><li><a href="#a">gh\ufeff]</a></li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li><a href="#">[\ufeffcd</a></li><li>ef</li><li><a href="#a">gh]\ufeff</a></li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li><a href="#">\ufeff[cd</a></li><li>ef</li><li><a href="#a">gh]\ufeff</a></li><li>ij</li></ul>',
+                    // (2) [<a>...</a>...<a>...]</a>
+                    '<ul><li>ab</li><li>[<a href="#">cd</a></li><li>ef</li><li><a href="#a">gh]</a></li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li>[\ufeff<a href="#">cd</a></li><li>ef</li><li><a href="#a">gh\ufeff]</a></li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li>\ufeff[<a href="#">cd</a></li><li>ef</li><li><a href="#a">gh\ufeff]</a></li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li>[\ufeff<a href="#">cd</a></li><li>ef</li><li><a href="#a">gh]\ufeff</a></li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li>\ufeff[<a href="#">cd</a></li><li>ef</li><li><a href="#a">gh]\ufeff</a></li><li>ij</li></ul>',
+                    // (3) <a>[...</a>...<a>...</a>]
+                    '<ul><li>ab</li><li><a href="#">[cd</a></li><li>ef</li><li><a href="#a">gh</a>]</li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li><a href="#">[\ufeffcd</a></li><li>ef</li><li><a href="#a">gh</a>\ufeff]</li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li><a href="#">\ufeff[cd</a></li><li>ef</li><li><a href="#a">gh</a>\ufeff]</li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li><a href="#">[\ufeffcd</a></li><li>ef</li><li><a href="#a">gh</a>]\ufeff</li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li><a href="#">\ufeff[cd</a></li><li>ef</li><li><a href="#a">gh</a>]\ufeff</li><li>ij</li></ul>',
+                    // (4) [<a>...</a>...<a>...</a>]
+                    '<ul><li>ab</li><li>[<a href="#">cd</a></li><li>ef</li><li><a href="#a">gh</a>]</li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li>[\ufeff<a href="#">cd</a></li><li>ef</li><li><a href="#a">gh</a>\ufeff]</li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li>\ufeff[<a href="#">cd</a></li><li>ef</li><li><a href="#a">gh</a>\ufeff]</li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li>[\ufeff<a href="#">cd</a></li><li>ef</li><li><a href="#a">gh</a>]\ufeff</li><li>ij</li></ul>',
+                    '<ul><li>ab</li><li>\ufeff[<a href="#">cd</a></li><li>ef</li><li><a href="#a">gh</a>]\ufeff</li><li>ij</li></ul>',
+                ];
+                let testIndex = 1;
+                for (const contentBefore of tests) {
+                    it(`should empty list items, starting and ending with links (${testIndex})`, async () => {
+                        await testEditor(BasicEditor, {
+                            contentBefore,
+                            stepFunction: deleteBackward,
+                            contentAfterEdit: '<ul><li>ab</li><li placeholder="List" class="oe-hint">[]<br></li><li>ij</li></ul>',
+                            contentAfter: '<ul><li>ab</li><li>[]<br></li><li>ij</li></ul>',
+                        });
+                    });
+                    testIndex += 1;
+                }
             });
         });
         describe('insertParagraphBreak', () => {
@@ -7270,6 +7499,18 @@ describe('List', () => {
                 </ol>`),
                 });
             });
+            it('should not indent a nav-item list', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: '<ul><li class="nav-item">a[]</li></ul>',
+                    stepFunction: indentList,
+                    contentAfter: '<ul><li class="nav-item">a[]</li></ul>',
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: '<ul><li class="nav-item"><div><p>a[]</p></div></li></ul>',
+                    stepFunction: indentList,
+                    contentAfter: '<ul><li class="nav-item"><div><p>a[]</p></div></li></ul>',
+                });
+            });
         });
         describe('with selection', () => {
             it('should indent the first element of a list', async () => {
@@ -7794,6 +8035,136 @@ describe('List', () => {
                         </ul>`),
                 });
             });
+            it('should outdent a list inside a nav-item list', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <ul>
+                                    <li>a[]b</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    `),
+                    stepFunction: outdentList,
+                    contentAfter: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <p>a[]b</p>
+                            </li>
+                        </ul>
+                    `),
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <ol>
+                                    <li>a[]b</li>
+                                </ol>
+                            </li>
+                        </ul>
+                    `),
+                    stepFunction: outdentList,
+                    contentAfter: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <p>a[]b</p>
+                            </li>
+                        </ul>
+                    `),
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <ul class="o_checklist">
+                                    <li>a[]b</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    `),
+                    stepFunction: outdentList,
+                    contentAfter: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <p>a[]b</p>
+                            </li>
+                        </ul>
+                    `),
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <div>
+                                    <ul>
+                                        <li>a[]b</li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    `),
+                    stepFunction: outdentList,
+                    contentAfter: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <div>
+                                    <p>a[]b</p>
+                                </div>
+                            </li>
+                        </ul>
+                    `),
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <div>
+                                    <ol>
+                                        <li>
+                                            <h1>a[]b</h1>
+                                        </li>
+                                    </ol>
+                                </div>
+                            </li>
+                        </ul>
+                    `),
+                    stepFunction: outdentList,
+                    contentAfter: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <div>
+                                    <h1>a[]b</h1>
+                                </div>
+                            </li>
+                        </ul>
+                    `),
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <div>
+                                    <ul class="o_checklist">
+                                        <li>a[]b</li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    `),
+                    stepFunction: outdentList,
+                    contentAfter: unformat(`
+                        <ul>
+                            <li class="nav-item">
+                                <div>
+                                    <p>a[]b</p>
+                                </div>
+                            </li>
+                        </ul>
+                    `),
+                });
+            });
         });
         describe('with selection', () => {
             it('should outdent the middle element of a list', async () => {
@@ -7957,6 +8328,96 @@ describe('List', () => {
                             <li>h]</li>
                             <li>i</li>
                         </ul>`),
+                });
+            });
+        });
+    });
+    describe('switchDirection', () => {
+        describe('switch direction form left to right', () => {
+            it('should properly switch the direction of the single level list (ltr).', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: `<ul><li>a</li><li>b[]</li><li>c</li></ul>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ul dir="rtl"><li>a</li><li>b[]</li><li>c</li></ul>`,
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: `<ol><li>a</li><li>b[]</li><li>c</li></ol>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ol dir="rtl"><li>a</li><li>b[]</li><li>c</li></ol>`,
+                });
+                await testEditor(BasicEditor, {
+                    removeCheckIds: true,
+                    contentBefore: `<ul class="o_checklist"><li>a</li><li>b[]</li><li>c</li></ul>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ul class="o_checklist" dir="rtl"><li>a</li><li>b[]</li><li>c</li></ul>`,
+                });
+            });
+            it('should properly switch the direction of nested list (ltr).', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: `<ul><li>a[]</li><li class="oe-nested"><ul><li>b</li><li>c</li></ul></li><li>d</li></ul>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ul dir="rtl"><li>a[]</li><li class="oe-nested"><ul dir="rtl"><li>b</li><li>c</li></ul></li><li>d</li></ul>`,
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: `<ol><li>a[]</li><li class="oe-nested"><ol><li>b</li><li>c</li></ol></li><li>d</li></ol>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ol dir="rtl"><li>a[]</li><li class="oe-nested"><ol dir="rtl"><li>b</li><li>c</li></ol></li><li>d</li></ol>`,
+                });
+                await testEditor(BasicEditor, {
+                    removeCheckIds: true,
+                    contentBefore: `<ul class="o_checklist"><li>a[]</li><li class="oe-nested"><ul class="o_checklist"><li>b</li><li>c</li></ul></li><li>d</li></ul>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ul class="o_checklist" dir="rtl"><li>a[]</li><li class="oe-nested"><ul class="o_checklist" dir="rtl"><li>b</li><li>c</li></ul></li><li>d</li></ul>`,
+                });
+                await testEditor(BasicEditor, {
+                    removeCheckIds: true,
+                    contentBefore: `<ul><li>a[]</li><li class="oe-nested"><ul class="o_checklist"><li>b</li><li class="oe-nested"><ol><li>g</li><li>e</li></ol></li><li>c</li></ul></li><li>d</li></ul>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ul dir="rtl"><li>a[]</li><li class="oe-nested"><ul class="o_checklist" dir="rtl"><li>b</li><li class="oe-nested"><ol dir="rtl"><li>g</li><li>e</li></ol></li><li>c</li></ul></li><li>d</li></ul>`,
+                });
+            });
+        });
+        describe('switch direction form right to left', () => {
+            it('should properly switch the direction of the single level list (rtl).', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: `<ul dir="rtl"><li>a</li><li>b[]</li><li>c</li></ul>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ul><li>a</li><li>b[]</li><li>c</li></ul>`,
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: `<ol dir="rtl"><li>a</li><li>b[]</li><li>c</li></ol>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ol><li>a</li><li>b[]</li><li>c</li></ol>`,
+                });
+                await testEditor(BasicEditor, {
+                    removeCheckIds: true,
+                    contentBefore: `<ul class="o_checklist" dir="rtl"><li>a</li><li>b[]</li><li>c</li></ul>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ul class="o_checklist"><li>a</li><li>b[]</li><li>c</li></ul>`,
+                });
+            });
+            it('should properly switch the direction of nested list (rtl).', async () => {
+                await testEditor(BasicEditor, {
+                    contentBefore: `<ul dir="rtl"><li>a[]</li><li class="oe-nested"><ul dir="rtl"><li>b</li><li>c</li></ul></li><li>d</li></ul>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ul><li>a[]</li><li class="oe-nested"><ul><li>b</li><li>c</li></ul></li><li>d</li></ul>`,
+                });
+                await testEditor(BasicEditor, {
+                    contentBefore: `<ol dir="rtl"><li>a[]</li><li class="oe-nested"><ol dir="rtl"><li>b</li><li>c</li></ol></li><li>d</li></ol>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ol><li>a[]</li><li class="oe-nested"><ol><li>b</li><li>c</li></ol></li><li>d</li></ol>`,
+                });
+                await testEditor(BasicEditor, {
+                    removeCheckIds: true,
+                    contentBefore: `<ul class="o_checklist" dir="rtl"><li>a[]</li><li class="oe-nested"><ul class="o_checklist" dir="rtl"><li>b</li><li>c</li></ul></li><li>d</li></ul>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ul class="o_checklist"><li>a[]</li><li class="oe-nested"><ul class="o_checklist"><li>b</li><li>c</li></ul></li><li>d</li></ul>`,
+                });
+                await testEditor(BasicEditor, {
+                    removeCheckIds: true,
+                    contentBefore: `<ul dir="rtl"><li>a[]</li><li class="oe-nested"><ul class="o_checklist" dir="rtl"><li>b</li><li class="oe-nested"><ol dir="rtl"><li>g</li><li>e</li></ol></li><li>c</li></ul></li><li>d</li></ul>`,
+                    stepFunction: switchDirection,
+                    contentAfter: `<ul><li>a[]</li><li class="oe-nested"><ul class="o_checklist"><li>b</li><li class="oe-nested"><ol><li>g</li><li>e</li></ol></li><li>c</li></ul></li><li>d</li></ul>`,
                 });
             });
         });

@@ -3,11 +3,12 @@
 
 from unittest.mock import patch
 
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.addons.payment.tests.common import PaymentCommon
-from odoo.addons.website_sale_delivery.controllers.main import WebsiteSaleDelivery
+from odoo.addons.website_sale_delivery.controllers.main import WebsiteSaleDelivery, PaymentPortalDelivery
 from odoo.addons.website.tools import MockRequest
 from odoo.tests import tagged
+from odoo.fields import Command
 
 @tagged('post_install', '-at_install')
 class TestWebsiteSaleDeliveryController(PaymentCommon):
@@ -56,3 +57,42 @@ class TestWebsiteSaleDeliveryController(PaymentCommon):
 
         country_info = self.Controller.country_infos(country=US, mode="shipping")
         self.assertEqual(len(country_info['states']), 0)
+
+    def test_validate_payment_with_no_available_delivery_method(self):
+        """
+        An error should be raised if you try to validate an order with a storable
+        product without any delivery method available
+        """
+        storable_product = self.env['product.product'].create({
+            'name': 'Storable Product',
+            'sale_ok': True,
+            'type': 'product',
+            'website_published': True,
+        })
+        carriers = self.env['delivery.carrier'].search([])
+        carriers.write({'website_published': False})
+
+        with MockRequest(self.env, website=self.website):
+            self.website.sale_get_order(force_create=True)
+            self.Controller.cart_update_json(product_id=storable_product.id, add_qty=1)
+            with self.assertRaises(ValidationError):
+                self.Controller.shop_payment_validate()
+
+    def test_check_order_delivery_before_payment(self):
+        product = self.env['product.product'].create({
+            'name': 'Test Product',
+            'sale_ok': True,
+            'website_published': True,
+            'lst_price': 1000.0,
+            'standard_price': 800.0,
+        })
+        website = self.website.with_user(self.public_user)
+        with MockRequest(product.with_user(self.public_user).env, website=website):
+            sale_order = self.env['sale.order'].create({
+                'partner_id': self.public_user.id,
+                'order_line': [Command.create({'product_id': product.id})],
+                'access_token': 'test_token',
+            })
+            # Try processing payment with a storable product and no carrier_id
+            with self.assertRaises(ValidationError):
+                PaymentPortalDelivery().shop_payment_transaction(sale_order.id, sale_order.access_token)

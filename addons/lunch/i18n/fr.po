@@ -6,8 +6,8 @@
 # Martin Trigaux, 2021
 # Alexandra Jubert, 2021
 # Cécile Collart <cco@odoo.com>, 2022
-# Jonathan Quique <jqu@odoo.com>, 2022
 # Jolien De Paepe, 2023
+# Manon Rondou, 2024
 # 
 msgid ""
 msgstr ""
@@ -15,7 +15,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-24 08:19+0000\n"
 "PO-Revision-Date: 2021-09-14 12:23+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"Last-Translator: Manon Rondou, 2024\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -575,6 +575,12 @@ msgid "Cancelled"
 msgstr "Annulé"
 
 #. module: lunch
+#: code:addons/lunch/models/lunch_supplier.py:0
+#, python-format
+msgid "Cannot send an email to this supplier!"
+msgstr "Impossible d'envoyer un e-mail à ce fournisseur !"
+
+#. module: lunch
 #: model:ir.actions.act_window,name:lunch.lunch_cashmove_action_payment
 #: model:ir.ui.menu,name:lunch.lunch_cashmove_report_menu_payment
 msgid "Cash Moves"
@@ -940,7 +946,7 @@ msgstr "Icône Font Awesome e.g. fa-tasks"
 #. module: lunch
 #: model:ir.model.fields,help:lunch.field_lunch_supplier__email_formatted
 msgid "Format email address \"Name <email@domain>\""
-msgstr "Met en forme l'adresse email « Nom <email@domaine> »"
+msgstr "Met en forme l'adresse e-mail « Nom <e-mail@domaine> »"
 
 #. module: lunch
 #: model:ir.model.fields,field_description:lunch.field_lunch_supplier__email_formatted
@@ -1283,7 +1289,7 @@ msgstr "Déjeuner : recevoir des repas"
 #. module: lunch
 #: model:mail.template,name:lunch.lunch_order_mail_supplier
 msgid "Lunch: Send by email"
-msgstr "Lunch : Envoyer par email"
+msgstr "Lunch : Envoyer par e-mail"
 
 #. module: lunch
 #: model:ir.actions.server,name:lunch.lunch_alert_cron_sa_224
@@ -1293,27 +1299,27 @@ msgstr "Lunch : Alerte notification via Chat (Alerte pour le bureau 3)"
 #. module: lunch
 #: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_225
 msgid "Lunch: send automatic email to Coin gourmand"
-msgstr "Déjeuner : envoyer un email automatique à Coin gourmand"
+msgstr "Déjeuner : envoyer un e-mail automatique à Coin gourmand"
 
 #. module: lunch
 #: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_221
 msgid "Lunch: send automatic email to Lunch Supplier"
-msgstr "Lunch : Envoyer un email automatique au fournisseur de lunch"
+msgstr "Lunch : Envoyer un e-mail automatique au fournisseur de lunch"
 
 #. module: lunch
 #: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_226
 msgid "Lunch: send automatic email to Pizza Inn"
-msgstr "Déjeuner : envoyer un email automatique à Pizza Inn"
+msgstr "Déjeuner : envoyer un e-mail automatique à Pizza Inn"
 
 #. module: lunch
 #: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_228
 msgid "Lunch: send automatic email to Sushi Shop"
-msgstr "Déjeuner : envoyer un email automatique à Sushi Shop"
+msgstr "Déjeuner : envoyer un e-mail automatique à Sushi Shop"
 
 #. module: lunch
 #: model:ir.actions.server,name:lunch.lunch_supplier_cron_sa_227
 msgid "Lunch: send automatic email to The Corner"
-msgstr "Déjeuner : envoyer un email automatique à The Corner"
+msgstr "Déjeuner : envoyer un e-mail automatique à The Corner"
 
 #. module: lunch
 #: model:ir.model.fields,field_description:lunch.field_lunch_supplier__message_main_attachment_id

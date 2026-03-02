@@ -88,7 +88,7 @@ class HolidaysRequest(models.Model):
 
         if 'state' in fields_list and not defaults.get('state'):
             lt = self.env['hr.leave.type'].browse(defaults.get('holiday_status_id'))
-            defaults['state'] = 'confirm'
+            defaults['state'] = 'confirm' if lt and lt.leave_validation_type != 'no_validation' else 'draft'
 
         now = fields.Datetime.now()
         if 'date_from' not in defaults:
@@ -535,7 +535,7 @@ class HolidaysRequest(models.Model):
     def _compute_from_employee_id(self):
         for holiday in self:
             holiday.manager_id = holiday.employee_id.parent_id.id
-            if holiday.employee_id.user_id != self.env.user and self._origin.employee_id != holiday.employee_id:
+            if holiday.employee_id.user_id != self.env.user and holiday._origin.employee_id != holiday.employee_id:
                 holiday.holiday_status_id = False
 
     @api.depends('employee_id', 'holiday_type')
@@ -706,8 +706,8 @@ class HolidaysRequest(models.Model):
                 unallocated_employees = []
                 for employee in holiday.employee_ids:
                     leave_days = mapped_days[employee.id][holiday.holiday_status_id.id]
-                    if float_compare(leave_days['remaining_leaves'], self.number_of_days, precision_digits=2) == -1\
-                            or float_compare(leave_days['virtual_remaining_leaves'], self.number_of_days, precision_digits=2) == -1:
+                    if float_compare(leave_days['remaining_leaves'], holiday.number_of_days, precision_digits=2) == -1\
+                            or float_compare(leave_days['virtual_remaining_leaves'], holiday.number_of_days, precision_digits=2) == -1:
                         unallocated_employees.append(employee.name)
                 if unallocated_employees:
                     raise ValidationError(_('The number of remaining time off is not sufficient for this time off type.\n'
@@ -729,7 +729,7 @@ class HolidaysRequest(models.Model):
             employee = self.env['hr.employee'].browse(employee_id)
             # We force the company in the domain as we are more than likely in a compute_sudo
             domain = [('time_type', '=', 'leave'),
-                      ('company_id', 'in', self.env.company.ids + self.env.context.get('allowed_company_ids', []))]
+                      ('company_id', '=', employee.company_id.id)]
             result = employee._get_work_days_data_batch(date_from, date_to, domain=domain)[employee.id]
             if self.request_unit_half and result['hours'] > 0:
                 result['days'] = 0.5
@@ -751,7 +751,7 @@ class HolidaysRequest(models.Model):
         that happens it's possible we need to adjust one of the dates. This function adjust the
         date, so that it can be passed to datetime().
 
-        E.g. a leave in US/Pacific for one day:
+        E.g. a leave in America/Los_Angeles for one day:
         - request_date_from: 1st of Jan
         - request_date_to:   1st of Jan
         - hour_from:         15:00 (7:00 local)
@@ -903,7 +903,7 @@ class HolidaysRequest(models.Model):
                 # eg : holidays_user can create a leave request with validation_type = 'manager' for someone else
                 # but they can only write on it if they are leave_manager_id
                 holiday_sudo = holiday.sudo()
-                holiday_sudo.add_follower(employee_id)
+                holiday_sudo.add_follower(holiday.employee_id.id)
                 if holiday.validation_type == 'manager':
                     holiday_sudo.message_subscribe(partner_ids=holiday.employee_id.leave_manager_id.partner_id.ids)
                 if holiday.validation_type == 'no_validation':
@@ -970,6 +970,8 @@ class HolidaysRequest(models.Model):
         if default and 'date_from' in default and 'date_to' in default:
             default['request_date_from'] = default.get('date_from')
             default['request_date_to'] = default.get('date_to')
+            return super().copy_data(default)
+        elif self.state in {"cancel", "refuse"}:  # No overlap constraint in these cases
             return super().copy_data(default)
         raise UserError(_('A time off cannot be duplicated.'))
 

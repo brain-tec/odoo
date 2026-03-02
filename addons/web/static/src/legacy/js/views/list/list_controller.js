@@ -445,6 +445,7 @@ var ListController = BasicController.extend({
             method: 'search',
             args: [domain],
             kwargs: {
+                context: this.model.get(this.handle, { raw: true }).getContext(),
                 limit: limit,
             },
         });
@@ -725,6 +726,7 @@ var ListController = BasicController.extend({
                 isPageSelected: this.isPageSelected,
                 nbSelected: this.selectedRecords.length,
                 nbTotal: state.count,
+                isTotalTrustable: !state.groupedBy.length || state.groupsCount <= state.groupsLimit,
             }));
             this.$selectionBox.appendTo(this.$buttons);
         }

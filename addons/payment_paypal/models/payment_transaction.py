@@ -52,6 +52,7 @@ class PaymentTransaction(models.Model):
             'item_number': self.reference,
             'last_name': partner_last_name,
             'lc': self.partner_lang,
+            'no_shipping': '1',  # Do not prompt for a delivery address.
             'notify_url': notify_url,
             'return_url': urls.url_join(base_url, PaypalController._return_url),
             'state': self.partner_state_id.name,
@@ -93,6 +94,13 @@ class PaymentTransaction(models.Model):
         super()._process_feedback_data(data)
         if self.provider != 'paypal':
             return
+
+        amount = data.get('amt') or data.get('mc_gross')
+        currency_code = data.get('cc') or data.get('mc_currency')
+        assert amount and currency_code, 'PayPal: missing amount or currency'
+        assert self.currency_id.compare_amounts(float(amount), self.amount + self.fees) == 0, \
+            'PayPal: mismatching amounts'
+        assert currency_code == self.currency_id.name, 'PayPal: mismatching currency codes'
 
         txn_id = data.get('txn_id')
         txn_type = data.get('txn_type')

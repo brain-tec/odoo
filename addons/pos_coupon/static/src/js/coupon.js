@@ -362,7 +362,7 @@ odoo.define('pos_coupon.pos', function (require) {
                  */
                 this.bookedCouponCodes = {};
             }
-            if (!this.activePromoProgramIds) {
+            if (!(this.activePromoProgramIds && this.activePromoProgramIds.length)) {
                 /**
                  * This field contains the ids of automatically/manually activated
                  * promo programs.
@@ -1134,6 +1134,12 @@ odoo.define('pos_coupon.pos', function (require) {
                 if (reward.rewardedProductId && productIdsToAccount.has(reward.rewardedProductId)) {
                     const key = reward.tax_ids.join(',');
                     amountsToDiscount[key] += reward.quantity * reward.unit_price;
+                }
+            }
+            //Remove entries from amountsToDiscount that are 0
+            for (let key in amountsToDiscount) {
+                if (amountsToDiscount[key] === 0) {
+                    delete amountsToDiscount[key];
                 }
             }
         },

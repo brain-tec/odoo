@@ -14,14 +14,16 @@
 # ILMIR <karamov@it-projects.info>, 2022
 # Martin Trigaux, 2022
 # Alena Vlasova, 2023
+# Смородин Даниил, 2024
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-05 10:55+0000\n"
+"POT-Creation-Date: 2024-08-14 15:44+0000\n"
 "PO-Revision-Date: 2021-09-14 12:24+0000\n"
-"Last-Translator: Alena Vlasova, 2023\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -74,17 +76,17 @@ msgstr "<i class=\"fa fa-pencil\"/>Редактировать"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
-msgstr ""
+msgstr "<i title=\"Документация\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details
 msgid "<option value=\"\">Country...</option>"
-msgstr ""
+msgstr "<option value=\"\">Страна...</option>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details
 msgid "<option value=\"\">select...</option>"
-msgstr ""
+msgstr "<option value=\"\">выберите...</option>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details
@@ -93,6 +95,20 @@ msgid ""
 " not allowed once document(s) have been issued for your account. <br/>Please"
 " contact us directly for this operation.</small>"
 msgstr ""
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.pager
+msgid ""
+"<span class=\"fa fa-chevron-left\" role=\"img\" aria-label=\"Previous\" "
+"title=\"Previous\"/>"
+msgstr ""
+"<span class=\"fa fa-chevron-left\" role=\"img\" aria-label=\"Previous\" "
+"title=\"Previous\"/>"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.pager
+msgid "<span class=\"fa fa-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
+msgstr "<span class=\"fa fa-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_searchbar
@@ -202,7 +218,7 @@ msgstr ""
 #: code:addons/portal/static/src/js/portal.js:0
 #, python-format
 msgid "API Key Ready"
-msgstr ""
+msgstr "Готовность ключа API"
 
 #. module: portal
 #. openerp-web
@@ -247,13 +263,7 @@ msgstr "Добавьте еще содержимое для отображени
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Added On"
-msgstr ""
-
-#. module: portal
-#: code:addons/portal/controllers/mail.py:0
-#, python-format
-msgid "An access token must be provided for each attachment."
-msgstr ""
+msgstr "Добавлен"
 
 #. module: portal
 #. openerp-web
@@ -300,7 +310,7 @@ msgstr ""
 #: code:addons/portal/static/src/js/portal.js:0
 #, python-format
 msgid "Check failed"
-msgstr ""
+msgstr "Проверка не удалась"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details
@@ -377,7 +387,7 @@ msgstr "Контакты"
 #: code:addons/portal/static/src/js/portal_composer.js:0
 #, python-format
 msgid "Could not save file <strong>%s</strong>"
-msgstr ""
+msgstr "Не удалось сохранить файл <strong>%s</strong>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details
@@ -419,7 +429,7 @@ msgstr "Доступно только сотрудникам. Нажмите ч�
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_res_config_settings__portal_allow_api_keys
 msgid "Customer API Keys"
-msgstr ""
+msgstr "Ключи API клиента"
 
 #. module: portal
 #: model:ir.model.fields,help:portal.field_portal_mixin__access_url
@@ -478,7 +488,7 @@ msgstr "Документы"
 #: code:addons/portal/static/src/js/portal_sidebar.js:0
 #, python-format
 msgid "Due in %1d days"
-msgstr ""
+msgstr "Истекает через %1d дней"
 
 #. module: portal
 #. openerp-web
@@ -510,7 +520,7 @@ msgstr "Только сотрудники"
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 #, python-format
 msgid "Enter a description of and purpose for the key."
-msgstr ""
+msgstr "Введите описание и назначение ключа."
 
 #. module: portal
 #. openerp-web
@@ -522,7 +532,7 @@ msgstr "Забыли пароль?"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
 msgid "Grant Access"
-msgstr ""
+msgstr "Предоставить доступ"
 
 #. module: portal
 #: model:ir.model,name:portal.model_portal_wizard
@@ -533,7 +543,7 @@ msgstr "Предоставить доступ к порталу"
 #: model:ir.actions.act_window,name:portal.partner_wizard_action
 #: model:ir.actions.server,name:portal.partner_wizard_action_create_and_open
 msgid "Grant portal access"
-msgstr ""
+msgstr "Предоставление доступа к порталу"
 
 #. module: portal
 #: model:ir.model,name:portal.model_ir_http
@@ -548,6 +558,8 @@ msgid ""
 "Here is your new API key, use it instead of a password for RPC access.\n"
 "                Your login is still necessary for interactive usage."
 msgstr ""
+"Вот ваш новый API-ключ, используйте его вместо пароля для доступа к RPC.\n"
+"                Для интерактивного использования по-прежнему необходим ваш логин."
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_breadcrumbs
@@ -566,12 +578,7 @@ msgstr "Идентификатор"
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 #, python-format
 msgid "Important:"
-msgstr ""
-
-#. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.wizard_view
-msgid "Internal User"
-msgstr "внутренний пользователь"
+msgstr "Важно:"
 
 #. module: portal
 #. openerp-web
@@ -579,6 +586,11 @@ msgstr "внутренний пользователь"
 #, python-format
 msgid "Internal Note"
 msgstr "Внутреннее примечание"
+
+#. module: portal
+#: model_terms:ir.ui.view,arch_db:portal.wizard_view
+msgid "Internal User"
+msgstr "внутренний пользователь"
 
 #. module: portal
 #. openerp-web
@@ -608,12 +620,12 @@ msgstr "Приглашение"
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__is_internal
 msgid "Is Internal"
-msgstr ""
+msgstr "Внутренний"
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__is_portal
 msgid "Is Portal"
-msgstr ""
+msgstr "Портал"
 
 #. module: portal
 #. openerp-web
@@ -622,6 +634,15 @@ msgstr ""
 msgid ""
 "It is very important that this description be clear\n"
 "                and complete,"
+msgstr ""
+"Очень важно, чтобы это описание было четким\n"
+"                и полным,"
+
+#. module: portal
+#. openerp-web
+#: code:addons/portal/static/src/xml/portal_security.xml:0
+#, python-format
+msgid "Key Description"
 msgstr ""
 
 #. module: portal
@@ -648,7 +669,7 @@ msgstr "Последнее обновление"
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__login_date
 msgid "Latest Authentication"
-msgstr ""
+msgstr "Последняя аутентификация"
 
 #. module: portal
 #. openerp-web
@@ -660,7 +681,7 @@ msgstr "Оставьте комментарий"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.res_config_settings_view_form
 msgid "Let your customers create developer API keys"
-msgstr ""
+msgstr "Позвольте клиентам создавать ключи API разработчика"
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__share_link
@@ -684,6 +705,8 @@ msgid ""
 "Model %(model_name)s does not support token signature, as it does not have "
 "%(field_name)s field."
 msgstr ""
+"Модель %(model_name)s не поддерживает подпись токена, так как в ней нет поля"
+" %(field_name)s."
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.my_account_link
@@ -700,7 +723,7 @@ msgstr "Название"
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 #, python-format
 msgid "Name your key"
-msgstr ""
+msgstr "Назовите свой ключ"
 
 #. module: portal
 #. openerp-web
@@ -713,13 +736,12 @@ msgstr "Новый ключ API"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "New Password:"
-msgstr ""
+msgstr "Новый пароль:"
 
 #. module: portal
 #. openerp-web
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
 #: code:addons/portal/static/src/xml/portal_chatter.xml:0
-#: model_terms:ir.ui.view,arch_db:portal.pager
 #, python-format
 msgid "Next"
 msgstr "Далее"
@@ -739,6 +761,8 @@ msgstr "Логотип Odoo"
 #, python-format
 msgid "Only internal and portal users can create API keys"
 msgstr ""
+"Только внутренние пользователи и пользователи портала могут создавать ключи "
+"API"
 
 #. module: portal
 #. openerp-web
@@ -757,12 +781,12 @@ msgstr "Партнёры"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Password Updated!"
-msgstr ""
+msgstr "Пароль обновлен!"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Password:"
-msgstr ""
+msgstr "Пароль:"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_details
@@ -775,6 +799,8 @@ msgstr "Телефон"
 #, python-format
 msgid "Please enter your password to confirm you own this account"
 msgstr ""
+"Введите свой пароль, чтобы подтвердить, что вы являетесь владельцем этой "
+"учетной записи"
 
 #. module: portal
 #: code:addons/portal/wizard/portal_wizard.py:0
@@ -806,17 +832,12 @@ msgstr "Настройка пользователя портала"
 #. module: portal
 #: model:mail.template,name:portal.mail_template_data_portal_welcome
 msgid "Portal: User Invite"
-msgstr ""
+msgstr "Портал: Приглашение пользователя"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_record_sidebar
 msgid "Powered by"
 msgstr "На базе"
-
-#. module: portal
-#: model_terms:ir.ui.view,arch_db:portal.pager
-msgid "Prev"
-msgstr "Назад"
 
 #. module: portal
 #. openerp-web
@@ -836,7 +857,7 @@ msgstr "Опубликовано %s "
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
 msgid "Re-Invite"
-msgstr ""
+msgstr "Повторное приглашение"
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_share__partner_ids
@@ -861,7 +882,7 @@ msgstr "Модель связанного документа"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
 msgid "Revoke Access"
-msgstr ""
+msgstr "Отозвать доступ"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -881,6 +902,7 @@ msgstr "Права доступа"
 #. module: portal
 #. openerp-web
 #: code:addons/portal/static/src/js/portal.js:0
+#: code:addons/portal/static/src/xml/portal_security.xml:0
 #, python-format
 msgid "Security Control"
 msgstr "Контроль безопасности"
@@ -933,6 +955,8 @@ msgid ""
 "Some fields are required. Please make sure to write a message or attach a "
 "document"
 msgstr ""
+"Некоторые поля обязательны для заполнения. Пожалуйста, напишите сообщение "
+"или прикрепите документ"
 
 #. module: portal
 #: code:addons/portal/controllers/portal.py:0
@@ -955,13 +979,14 @@ msgstr "Адрес"
 #: code:addons/portal/static/src/xml/portal_signature.xml:0
 #, python-format
 msgid "Thank You!"
-msgstr ""
+msgstr "Спасибо!"
 
 #. module: portal
 #: code:addons/portal/controllers/portal.py:0
 #, python-format
 msgid "The attachment %s cannot be removed because it is linked to a message."
 msgstr ""
+"Вложение %s не может быть удалено, поскольку оно связано с сообщением."
 
 #. module: portal
 #: code:addons/portal/controllers/portal.py:0
@@ -969,26 +994,21 @@ msgstr ""
 msgid ""
 "The attachment %s cannot be removed because it is not in a pending state."
 msgstr ""
-
-#. module: portal
-#: code:addons/portal/controllers/mail.py:0
-#, python-format
-msgid ""
-"The attachment %s does not exist or you do not have the rights to access it."
-msgstr ""
+"Вложение %s не может быть удалено, поскольку оно не находится в состоянии "
+"ожидания."
 
 #. module: portal
 #: code:addons/portal/controllers/portal.py:0
 #, python-format
 msgid ""
 "The attachment does not exist or you do not have the rights to access it."
-msgstr ""
+msgstr "Вложение не существует или у вас нет прав на доступ к нему."
 
 #. module: portal
 #: code:addons/portal/wizard/portal_wizard.py:0
 #, python-format
 msgid "The contact \"%s\" does not have a valid email."
-msgstr ""
+msgstr "У контакта \"%s\" нет действительного адреса электронной почты."
 
 #. module: portal
 #: code:addons/portal/wizard/portal_wizard.py:0
@@ -1001,14 +1021,14 @@ msgstr ""
 #, python-format
 msgid ""
 "The document does not exist or you do not have the rights to access it."
-msgstr ""
+msgstr "Документ не существует или у вас нет прав на доступ к нему."
 
 #. module: portal
 #. openerp-web
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 #, python-format
 msgid "The key cannot be retrieved later and provides"
-msgstr ""
+msgstr "Ключ не может быть получен позже и обеспечивает"
 
 #. module: portal
 #: code:addons/portal/controllers/portal.py:0
@@ -1027,7 +1047,7 @@ msgstr "Старый пароль неверен, ваш пароль не бы�
 #: code:addons/portal/wizard/portal_wizard.py:0
 #, python-format
 msgid "The partner \"%s\" already has the portal access."
-msgstr ""
+msgstr "Партнер \"%s\" уже имеет доступ к порталу."
 
 #. module: portal
 #: code:addons/portal/wizard/portal_wizard.py:0
@@ -1042,6 +1062,8 @@ msgid ""
 "The template \"Portal: new user\" not found for sending email to the portal "
 "user."
 msgstr ""
+"Не найден шаблон \"Портал: новый пользователь\" для отправки электронной "
+"почты пользователю портала."
 
 #. module: portal
 #. openerp-web
@@ -1067,12 +1089,15 @@ msgid ""
 "This partner is linked to an internal User and already has access to the "
 "Portal."
 msgstr ""
+"Этот партнер связан с внутренним пользователем и уже имеет доступ к Порталу."
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
 msgid ""
 "This text is included at the end of the email sent to new portal users."
 msgstr ""
+"Этот текст содержится в конце письма, отправляемого новым пользователям "
+"портала."
 
 #. module: portal
 #: model:ir.model.fields,help:portal.field_portal_wizard__welcome_message
@@ -1104,7 +1129,7 @@ msgstr "ИНН"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "Verify New Password:"
-msgstr ""
+msgstr "Проверить новый пароль:"
 
 #. module: portal
 #: model:ir.model,name:portal.model_ir_ui_view
@@ -1193,7 +1218,7 @@ msgstr "История общения с сайтом"
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 #, python-format
 msgid "What's this key for?"
-msgstr ""
+msgstr "Для чего нужен этот ключ?"
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_wizard_user__wizard_id
@@ -1212,7 +1237,7 @@ msgstr "Напишите сообщение..."
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 #, python-format
 msgid "Write down your key"
-msgstr ""
+msgstr "Запишите свой ключ"
 
 #. module: portal
 #: code:addons/portal/wizard/portal_share.py:0
@@ -1243,12 +1268,12 @@ msgstr "Вы должны быть"
 #: code:addons/portal/wizard/portal_wizard.py:0
 #, python-format
 msgid "You should first grant the portal access to the partner \"%s\"."
-msgstr ""
+msgstr "Сначала необходимо предоставить доступ к порталу партнеру \"%s\"."
 
 #. module: portal
 #: model:mail.template,subject:portal.mail_template_data_portal_welcome
 msgid "Your account at {{ object.user_id.company_id.name }}"
-msgstr ""
+msgstr "Ваш счет в {{ object.user_id.company_id.name }}"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_contact
@@ -1286,7 +1311,7 @@ msgstr "комментарии"
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 #, python-format
 msgid "full access"
-msgstr ""
+msgstr "полный доступ"
 
 #. module: portal
 #. openerp-web
@@ -1296,6 +1321,8 @@ msgid ""
 "it will be the only way to\n"
 "                identify the key once created"
 msgstr ""
+"это будет единственным способом\n"
+"                идентифицировать ключ после его создания"
 
 #. module: portal
 #. openerp-web
@@ -1312,7 +1339,7 @@ msgstr "odoo"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "password"
-msgstr ""
+msgstr "пароль"
 
 #. module: portal
 #: model:ir.model,name:portal.model_res_users_apikeys_description
@@ -1331,4 +1358,4 @@ msgstr "чтобы отправить комментарий."
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 #, python-format
 msgid "to your user account, it is very important to store it securely."
-msgstr ""
+msgstr "к вашей учетной записи, очень важно хранить его в безопасности."

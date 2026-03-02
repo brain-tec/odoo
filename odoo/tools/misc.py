@@ -39,7 +39,7 @@ import markupsafe
 import passlib.utils
 import pytz
 import werkzeug.utils
-from lxml import etree
+from lxml import etree, objectify
 
 import odoo
 import odoo.addons
@@ -60,6 +60,9 @@ SKIPPED_ELEMENT_TYPES = (etree._Comment, etree._ProcessingInstruction, etree.Com
 
 # Configure default global parser
 etree.set_default_parser(etree.XMLParser(resolve_entities=False))
+default_parser = etree.XMLParser(resolve_entities=False, remove_blank_text=True)
+default_parser.set_element_class_lookup(objectify.ObjectifyElementClassLookup())
+objectify.set_default_parser(default_parser)
 
 NON_BREAKING_SPACE = u'\N{NO-BREAK SPACE}'
 
@@ -126,11 +129,10 @@ def exec_pg_environ():
 def exec_pg_command(name, *args):
     prog = find_pg_tool(name)
     env = exec_pg_environ()
-    with open(os.devnull) as dn:
-        args2 = (prog,) + args
-        rc = subprocess.call(args2, env=env, stdout=dn, stderr=subprocess.STDOUT)
-        if rc:
-            raise Exception('Postgres subprocess %s error %s' % (args2, rc))
+    args2 = (prog,) + args
+    rc = subprocess.call(args2, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    if rc:
+        raise Exception('Postgres subprocess %s error %s' % (args2, rc))
 
 def exec_pg_command_pipe(name, *args):
     prog = find_pg_tool(name)
@@ -1550,6 +1552,40 @@ pickle.dump = pickle_.dump
 pickle.dumps = pickle_.dumps
 
 
+class ReadonlyDict(Mapping):
+    """Helper for an unmodifiable dictionary, not even updatable using `dict.update`.
+
+    This is similar to a `frozendict`, with one drawback and one advantage:
+
+    - `dict.update` works for a `frozendict` but not for a `ReadonlyDict`.
+    - `json.dumps` works for a `frozendict` by default but not for a `ReadonlyDict`.
+
+    This comes from the fact `frozendict` inherits from `dict`
+    while `ReadonlyDict` inherits from `collections.abc.Mapping`.
+
+    So, depending on your needs,
+    whether you absolutely must prevent the dictionary from being updated (e.g., for security reasons)
+    or you require it to be supported by `json.dumps`, you can choose either option.
+
+        E.g.
+          data = ReadonlyDict({'foo': 'bar'})
+          data['baz'] = 'xyz' # raises exception
+          data.update({'baz', 'xyz'}) # raises exception
+          dict.update(data, {'baz': 'xyz'}) # raises exception
+    """
+    def __init__(self, data):
+        self.__data = dict(data)
+
+    def __getitem__(self, key):
+        return self.__data[key]
+
+    def __len__(self):
+        return len(self.__data)
+
+    def __iter__(self):
+        return iter(self.__data)
+
+
 class DotDict(dict):
     """Helper for dot.notation access to dictionary attributes
 
@@ -1559,7 +1595,7 @@ class DotDict(dict):
     """
     def __getattr__(self, attrib):
         val = self.get(attrib)
-        return DotDict(val) if type(val) is dict else val
+        return DotDict(val) if isinstance(val, dict) else val
 
 
 def get_diff(data_from, data_to, custom_style=False):
