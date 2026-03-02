@@ -41,7 +41,8 @@ class TestResourceCommon(TransactionCase):
         })
 
     def setUp(self):
-        super(TestResourceCommon, self).setUp()
+        super().setUp()
+        self.env.company.resource_calendar_id.tz = "Europe/Brussels"
 
         # UTC+1 winter, UTC+2 summer
         self.calendar_jean = self._define_calendar('40 Hours', [(8, 16, i) for i in range(5)], 'Europe/Brussels')
@@ -55,7 +56,7 @@ class TestResourceCommon(TransactionCase):
             (0, 0, 0, '1', 'line_section', 10), (8, 16, 0, '1', False, 11), (7, 15, 2, '1', False, 12),
             (8, 16, 3, '1', False, 13), (10, 16, 4, '1', False, 14)], 'Europe/Brussels')
 
-        self.calendar_paul = self._define_calendar('Morning and evening shifts', sum([((2, 7, i), (10, 16, i)) for i in range(5)], ()), 'Brazil/DeNoronha')
+        self.calendar_paul = self._define_calendar('Morning and evening shifts', sum([((2, 7, i), (10, 16, i)) for i in range(5)], ()), 'America/Noronha')
 
         # Employee is linked to a resource.resource via resource.mixin
         self.jean = self.env['resource.test'].create({

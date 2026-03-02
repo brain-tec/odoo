@@ -3,6 +3,7 @@ odoo.define('payment_adyen.payment_form', require => {
     'use strict';
 
     const core = require('web.core');
+    const { pyToJsLocale } = require('@web/core/l10n/utils');
     const checkoutForm = require('payment.checkout_form');
     const manageForm = require('payment.manage_form');
 
@@ -56,7 +57,7 @@ odoo.define('payment_adyen.payment_form', require => {
         _dropinOnError: function (error) {
             this._displayError(
                 _t("Incorrect Payment Details"),
-                _t("Please verify your payment details.")
+                _t("Please verify your payment details."),
             );
         },
 
@@ -156,9 +157,10 @@ odoo.define('payment_adyen.payment_form', require => {
                 }).then(paymentMethodsResult => {
                     // Instantiate the drop-in
                     const configuration = {
-                        paymentMethodsResponse: paymentMethodsResult,
+                        paymentMethodsResponse: paymentMethodsResult['payment_methods_data'],
+                        amount: paymentMethodsResult['amount_formatted'],
                         clientKey: acquirerInfo.client_key,
-                        locale: (this._getContext().lang || 'en-US').replace('_', '-'),
+                        locale: pyToJsLocale(this._getContext().lang || 'en-US'),
                         environment: acquirerInfo.state === 'enabled' ? 'live' : 'test',
                         onAdditionalDetails: this._dropinOnAdditionalDetails.bind(this),
                         onError: this._dropinOnError.bind(this),

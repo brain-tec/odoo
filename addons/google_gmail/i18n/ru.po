@@ -3,18 +3,18 @@
 # 	* google_gmail
 # 
 # Translators:
-# Irina Fedulova <istartlin@gmail.com>, 2022
 # Ivan Kropotkin <yelizariev@itpp.dev>, 2022
 # Martin Trigaux, 2022
 # ILMIR <karamov@it-projects.info>, 2023
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.0+e\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-25 14:36+0000\n"
+"POT-Creation-Date: 2024-08-14 15:43+0000\n"
 "PO-Revision-Date: 2022-03-03 13:58+0000\n"
-"Last-Translator: ILMIR <karamov@it-projects.info>, 2023\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -61,20 +61,20 @@ msgstr "Токен доступа"
 #: model:ir.model.fields,field_description:google_gmail.field_google_gmail_mixin__google_gmail_access_token_expiration
 #: model:ir.model.fields,field_description:google_gmail.field_ir_mail_server__google_gmail_access_token_expiration
 msgid "Access Token Expiration Timestamp"
-msgstr ""
+msgstr "Временная метка истечения срока действия токена доступа"
 
 #. module: google_gmail
 #: code:addons/google_gmail/controllers/main.py:0
 #: code:addons/google_gmail/controllers/main.py:0
 #, python-format
 msgid "An error occur during the authentication process."
-msgstr ""
+msgstr "В процессе аутентификации произошла ошибка."
 
 #. module: google_gmail
 #: code:addons/google_gmail/models/google_gmail_mixin.py:0
 #, python-format
 msgid "An error occurred when fetching the access token."
-msgstr ""
+msgstr "При получении маркера доступа произошла ошибка."
 
 #. module: google_gmail
 #: model:ir.model.fields,field_description:google_gmail.field_google_gmail_mixin__google_gmail_authorization_code
@@ -98,11 +98,6 @@ msgid "Config Settings"
 msgstr "Конфигурационные настройки"
 
 #. module: google_gmail
-#: model:ir.model.fields,field_description:google_gmail.field_google_gmail_mixin__display_name
-msgid "Display Name"
-msgstr "Отображаемое имя"
-
-#. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
 msgid "Gmail"
 msgstr ""
@@ -116,27 +111,17 @@ msgstr ""
 #. module: google_gmail
 #: model:ir.model.fields,field_description:google_gmail.field_res_config_settings__google_gmail_client_identifier
 msgid "Gmail Client Id"
-msgstr ""
+msgstr "Идентификатор клиента Gmail"
 
 #. module: google_gmail
 #: model:ir.model.fields,field_description:google_gmail.field_res_config_settings__google_gmail_client_secret
 msgid "Gmail Client Secret"
-msgstr ""
+msgstr "Секрет клиента Gmail"
 
 #. module: google_gmail
 #: model:ir.model,name:google_gmail.model_google_gmail_mixin
 msgid "Google Gmail Mixin"
-msgstr ""
-
-#. module: google_gmail
-#: model:ir.model.fields,field_description:google_gmail.field_google_gmail_mixin__id
-msgid "ID"
-msgstr "Идентификатор"
-
-#. module: google_gmail
-#: model:ir.model.fields,field_description:google_gmail.field_google_gmail_mixin____last_update
-msgid "Last Modified on"
-msgstr "Последнее изменение"
+msgstr "Миксин Google Gmail"
 
 #. module: google_gmail
 #: model:ir.model,name:google_gmail.model_ir_mail_server
@@ -147,13 +132,13 @@ msgstr "Почтовый сервер"
 #: code:addons/google_gmail/models/google_gmail_mixin.py:0
 #, python-format
 msgid "Only the administrator can link a Gmail mail server."
-msgstr ""
+msgstr "Только администратор может связать почтовый сервер Gmail."
 
 #. module: google_gmail
 #: code:addons/google_gmail/models/google_gmail_mixin.py:0
 #, python-format
 msgid "Please configure your Gmail credentials."
-msgstr ""
+msgstr "Пожалуйста, настройте учетные данные Gmail."
 
 #. module: google_gmail
 #: code:addons/google_gmail/models/ir_mail_server.py:0
@@ -163,6 +148,9 @@ msgid ""
 "address). This should be the same account as the one used for the Gmail "
 "OAuthentication Token."
 msgstr ""
+"В поле \"Имя пользователя\" укажите имя пользователя Gmail (адрес "
+"электронной почты). Это должна быть та же учетная запись, которая "
+"используется для получения Gmail OAuthentication Token."
 
 #. module: google_gmail
 #: model:ir.model.fields,field_description:google_gmail.field_google_gmail_mixin__google_gmail_refresh_token
@@ -181,6 +169,8 @@ msgid ""
 "Setup your Gmail API credentials in the general settings to link a Gmail "
 "account."
 msgstr ""
+"Установите учетные данные Gmail API в общих настройках, чтобы связать "
+"учетную запись Gmail."
 
 #. module: google_gmail
 #: model:ir.model.fields,help:google_gmail.field_google_gmail_mixin__google_gmail_uri

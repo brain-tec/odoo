@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import datetime as dt
+from datetime import datetime as dt, time
 from datetime import timedelta as td
 from freezegun import freeze_time
 
@@ -846,8 +846,9 @@ class TestReorderingRule(TransactionCase):
 
         moves = self.env['stock.move'].search([('product_id', '=', self.product_01.id)], order='id desc')
         self.assertRecordValues(moves, [
-            {'location_id': supplier_location_id, 'location_dest_id': input_location_id, 'product_qty': 1},
             {'location_id': input_location_id, 'location_dest_id': stock_location_id, 'product_qty': 1},
+            {'location_id': supplier_location_id, 'location_dest_id': input_location_id, 'product_qty': 1},
+            {'location_id': input_location_id, 'location_dest_id': stock_location_id, 'product_qty': 0},
         ])
 
     def test_add_line_to_existing_draft_po(self):
@@ -860,9 +861,8 @@ class TestReorderingRule(TransactionCase):
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
 
         self.env.company.days_to_purchase = 10
-        expected_order_date = dt.combine(dt.today() + td(days=10), dt.min.time())
+        expected_order_date = dt.combine(dt.today() + td(days=10), time(12))
         expected_delivery_date = expected_order_date + td(days=1.0)
-        # expected_delivery_date = expected_delivery_date.replace(hour=12, minute=0, second=0)
 
         product_02 = self.env['product.product'].create({
             'name': 'Super Product',
@@ -980,3 +980,77 @@ class TestReorderingRule(TransactionCase):
         picking.with_user(user).action_assign()
         # check that the PO line quantity has been updated
         self.assertEqual(po_line.product_qty, 6, 'The PO line quantity should be 6')
+
+    def test_set_supplier_in_orderpoint(self):
+        """
+        Test that qty_to_order is correctly computed when setting the supplier in an orderpoint
+        Have a product with a uom in Kg and a purchase uom in Tonne (the purchase UOM should be bigger that the UOM)
+        and a supplier with a min_qty of 6T
+        Create an orderpoint with a min_qty of 500Kg and a max_qty of 0Kg
+        Set the supplier in the orderpoint and check that the qty_to_order is correctly updated to 6000Kg
+        """
+        product = self.env['product.product'].create({
+            'name': 'Storable Product',
+            'type': 'product',
+            'uom_id': self.env.ref('uom.product_uom_categ_kgm').uom_ids[3].id,
+            'uom_po_id': self.env.ref('uom.product_uom_categ_kgm').uom_ids[4].id,
+            'seller_ids': [(0, 0, {'name': self.partner.id, 'min_qty': 6})],
+        })
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        orderpoint = self.env['stock.warehouse.orderpoint'].create({
+            'warehouse_id': warehouse.id,
+            'location_id': warehouse.lot_stock_id.id,
+            'product_id': product.id,
+            'product_min_qty': 500,
+            'product_max_qty': 0,
+        })
+        product.seller_ids.with_context(orderpoint_id=orderpoint.id).action_set_supplier()
+        self.assertEqual(orderpoint.supplier_id, product.seller_ids, 'The supplier should be set in the orderpoint')
+        self.assertEqual(orderpoint.product_uom, product.uom_id, 'The orderpoint uom should be the same as the product uom')
+        self.assertEqual(orderpoint.qty_to_order, 6000)
+
+    def test_supplierinfo_last_purchase_date(self):
+        """
+        Test that the last_purchase_date on the replenishment information is correctly computed
+        A user creates two purchase orders
+        The last_purchase_date on the supplier info should be computed as the most recent date_order from the purchase orders
+        """
+        res_partner = self.env['res.partner'].create({
+            'name': 'Test Partner',
+        })
+        product = self.env['product.product'].create({
+            'name': 'Storable Product',
+            'type': 'product',
+        })
+        orderpoint = self.env['stock.warehouse.orderpoint'].create({
+            'product_id': product.id,
+            'product_min_qty': 0,
+            'product_max_qty': 0,
+        })
+        po1_vals = {
+            'partner_id': res_partner.id,
+            'date_order': dt.today() - td(days=15),
+            'order_line': [
+                (0, 0, {
+                    'name': product.name,
+                    'product_id': product.id,
+                    'product_qty': 1.0,
+                })],
+        }
+        po2_vals = {
+            'partner_id': res_partner.id,
+            'date_order': dt.today(),
+            'order_line': [
+                (0, 0, {
+                    'name': product.name,
+                    'product_id': product.id,
+                    'product_qty': 1.0,
+                })],
+        }
+        po1 = self.env['purchase.order'].create(po1_vals)
+        po1.button_confirm()
+        po2 = self.env['purchase.order'].create(po2_vals)
+        po2.button_confirm()
+        replenishment_info = self.env['stock.replenishment.info'].create({'orderpoint_id': orderpoint.id})
+        supplier_info = replenishment_info.supplierinfo_ids
+        self.assertEqual(supplier_info.last_purchase_date, dt.today().date(), "The last_purhchase_date should be set to the most recent date_order from the purchase orders")

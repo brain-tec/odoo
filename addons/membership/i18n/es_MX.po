@@ -3,17 +3,17 @@
 # 	* membership
 # 
 # Translators:
-# Martin Trigaux, 2021
 # Braulio D. López Vázquez <bdl@odoo.com>, 2023
-# Fernanda Alvarez, 2023
+# Fernanda Alvarez, 2024
+# Martin Trigaux, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.5\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-14 10:28+0000\n"
+"POT-Creation-Date: 2024-08-14 15:43+0000\n"
 "PO-Revision-Date: 2021-09-14 12:24+0000\n"
-"Last-Translator: Fernanda Alvarez, 2023\n"
+"Last-Translator: Martin Trigaux, 2024\n"
 "Language-Team: Spanish (Mexico) (https://app.transifex.com/odoo/teams/41243/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -153,11 +153,6 @@ msgstr "Configuración"
 #: model:ir.model,name:membership.model_res_partner
 msgid "Contact"
 msgstr "Contacto"
-
-#. module: membership
-#: model_terms:ir.ui.view,arch_db:membership.view_partner_tree
-msgid "Contacts"
-msgstr "Contactos"
 
 #. module: membership
 #: model:ir.model.fields,field_description:membership.field_membership_invoice__create_uid
@@ -331,12 +326,12 @@ msgid ""
 "-Paying member: A member who has paid the membership fee."
 msgstr ""
 "Indica el estado de la membresía.\n"
-"- No es miembro: un contacto que no ha solicitado ninguna membresía.\n"
-"- Miembro cancelado: un miembro que ha cancelado su membresía.\n"
-"- Miembro antiguo: un miembro cuya membresía venció.\n"
-"- Miembro en espera: un miembro que ha solicitado la membresía y cuya factura debe crearse.\n"
-"- Miembro facturado: un miembro cuya factura ha sido creada.\n"
-"- Miembro pagado: un miembro que ha pagado la cuota de membresía."
+"- No es miembro: un contacto que no ha solicitado una membresía.\n"
+"- Miembro cancelado: un miembro que canceló su membresía.\n"
+"- Miembro antiguo: un miembro con membresía vencida.\n"
+"- Miembro en espera: un miembro que solicitó la membresía y para el que se creará una factura.\n"
+"- Miembro facturado: un miembro con una factura creada.\n"
+"- Miembro pagado: un miembro que pagó la cuota de membresía."
 
 #. module: membership
 #: model:ir.model.fields,help:membership.field_membership_membership_line__state
@@ -350,12 +345,12 @@ msgid ""
 "-Paid Member: A member who has paid the membership amount."
 msgstr ""
 "Indica el estado de la membresía.\n"
-"- No es miembro: un miembro que no ha solicitado ninguna membresía.\n"
-"- Miembro cancelado: un miembro que ha cancelado su membresía.\n"
-"- Miembro antiguo: un miembro cuya membresía venció.\n"
-"- Miembro en espera: un miembro que ha solicitado la membresía y cuya factura debe crearse.\n"
-"- Miembro facturado: un miembro cuya factura ha sido creada.\n"
-"- Miembro pagado: un miembro que ha pagado la cuota de membresía."
+"- No es miembro: un miembro que no ha solicitado una membresía.\n"
+"- Miembro cancelado: un miembro que canceló su membresía.\n"
+"- Miembro antiguo: un miembro con membresía vencida.\n"
+"- Miembro en espera: un miembro que solicitó la membresía y para el que se creará una factura.\n"
+"- Miembro facturado: un miembro con una factura creada.\n"
+"- Miembro pagado: un miembro que pagó el importe de la membresía."
 
 #. module: membership
 #: model:ir.model.fields,field_description:membership.field_membership_membership_line__date
@@ -540,7 +535,7 @@ msgstr "Mes"
 #. module: membership
 #: model_terms:ir.actions.act_window,help:membership.action_report_membership_tree
 msgid "No data yet!"
-msgstr "¡No hay datos aún!"
+msgstr "Todavía no hay información"
 
 #. module: membership
 #: model:ir.model.fields.selection,name:membership.selection__membership_membership_line__state__none
@@ -581,7 +576,7 @@ msgstr "Contacto"
 #: code:addons/membership/models/partner.py:0
 #, python-format
 msgid "Partner doesn't have an address to make the invoice."
-msgstr "El contacto no tiene una dirección para realizar la factura."
+msgstr "El contacto no tiene una dirección para facturar."
 
 #. module: membership
 #: code:addons/membership/models/partner.py:0
@@ -683,7 +678,7 @@ msgstr "El precio negociado por el contacto"
 #. module: membership
 #: model_terms:ir.ui.view,arch_db:membership.membership_products_form
 msgid "This note will be displayed on quotations..."
-msgstr "Esta nota se mostrará en las cotizaciones..."
+msgstr "Esta nota aparecerá en las cotizaciones..."
 
 #. module: membership
 #: model_terms:ir.ui.view,arch_db:membership.view_report_membership_search
@@ -716,4 +711,4 @@ msgstr "Miembro en espera"
 #: code:addons/membership/models/partner.py:0
 #, python-format
 msgid "You cannot create recursive associated members."
-msgstr "No puede crear miembros asociados recursivamente."
+msgstr "No puede crear miembros asociados recursivos."

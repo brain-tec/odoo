@@ -158,7 +158,7 @@ exports.PosModel = Backbone.Model.extend({
             if(this.config.product_load_background)
                 this.loadProductsBackground();
         }
-        if(this.config.partner_load_background )
+        if(this.config.limited_partners_loading && this.config.partner_load_background )
             this.loadPartnersBackground();
 
         if(this.config.use_proxy){
@@ -1214,6 +1214,40 @@ exports.PosModel = Backbone.Model.extend({
         });
     },
 
+    // To be used in the context of closing the POS
+    // Saves the order locally and try to send it to the backend.
+    // If there is an error show a popup and ask to continue the closing or not
+    // return a successful promise on sync or if user decides to contine else reject
+    push_orders_with_closing_popup: async function (order, opts) {
+        try {
+            return await this.push_orders(order, opts);
+        } catch (error) {
+            console.warn(error);
+            const reason = this.get('failed')
+                ? this.env._t(
+                      'Some orders could not be submitted to ' +
+                          'the server due to configuration errors. ' +
+                          'You can exit the Point of Sale, but do ' +
+                          'not close the session before the issue ' +
+                          'has been resolved.'
+                  )
+                : this.env._t(
+                      'Some orders could not be submitted to ' +
+                          'the server due to internet connection issues. ' +
+                          'You can exit the Point of Sale, but do ' +
+                          'not close the session before the issue ' +
+                          'has been resolved.'
+                  );
+            const { confirmed } =  await Gui.showPopup('ConfirmPopup', {
+                title: this.env._t('Offline Orders'),
+                body: reason,
+                confirmText: this.env._t('Close anyway'),
+                cancelText: this.env._t('Do not close'),
+            });
+            return confirmed ? Promise.resolve(true) : Promise.reject();
+        }
+    },
+
     // saves the order locally and try to send it to the backend.
     // it returns a promise that succeeds after having tried to send the order and all the other pending orders.
     push_orders: function (order, opts) {
@@ -1287,7 +1321,7 @@ exports.PosModel = Backbone.Model.extend({
                                     },
                                 })
                                 .catch(() => {
-                                    reject({ code: 401, message: 'Backend Invoice', data: { order: order } });
+                                    reject({ code: 401, message: 'Backend Invoice', data: { order: order }, server_ids: server_ids });
                                 });
                         } else {
                             reject({ code: 401, message: 'Backend Invoice', data: { order: order } });
@@ -2793,7 +2827,7 @@ exports.Orderline = Backbone.Model.extend({
         };
     },
     display_discount_policy: function(){
-        return this.order.pricelist.discount_policy;
+        return this.order.pricelist ? this.order.pricelist.discount_policy : "with_discount";
     },
     compute_fixed_price: function (price) {
         return this.pos.computePriceAfterFp(price, this.get_taxes());
@@ -3445,13 +3479,14 @@ exports.Order = Backbone.Model.extend({
     calculate_base_amount(tax_ids_array, lines) {
         // Consider price_include taxes use case
         let has_taxes_included_in_price = tax_ids_array.filter(tax_id =>
-            this.pos.taxes_by_id[tax_id].price_include
+            this.pos.taxes_by_id[tax_id].price_include ||
+            this.pos.taxes_by_id[tax_id].children_tax_ids.length > 0 &&
+            this.pos.taxes_by_id[tax_id].children_tax_ids.every(child_tax => child_tax.price_include)
         ).length;
 
         let base_amount = lines.reduce((sum, line) =>
                 sum +
-                line.get_price_without_tax() +
-                (has_taxes_included_in_price ? line.get_total_taxes_included_in_price() : 0),
+                (has_taxes_included_in_price ? line.get_price_with_tax() : line.get_price_without_tax()),
             0
         );
         return base_amount;
@@ -3906,6 +3941,8 @@ exports.Order = Backbone.Model.extend({
             const last_line = paymentlines ? paymentlines[paymentlines.length-1]: false;
             const last_line_is_cash = last_line ? last_line.payment_method.is_cash_count == true: false;
             if (!only_cash || (only_cash && last_line_is_cash)) {
+                var rounding_method = this.pos.cash_rounding[0].rounding_method;
+                var rounding = this.pos.cash_rounding[0].rounding;
                 var remaining = this.get_total_with_tax() - this.get_total_paid();
                 var total = round_pr(remaining, this.pos.cash_rounding[0].rounding);
                 var sign = remaining > 0 ? 1.0 : -1.0;
@@ -3916,19 +3953,19 @@ exports.Order = Backbone.Model.extend({
                 if (utils.float_is_zero(rounding_applied, this.pos.currency.decimals)){
                     // https://xkcd.com/217/
                     return 0;
-                } else if(Math.abs(this.get_total_with_tax()) < this.pos.cash_rounding[0].rounding) {
+                } else if(Math.abs(this.get_total_with_tax()) < rounding ) {
                     return 0;
-                } else if(this.pos.cash_rounding[0].rounding_method === "UP" && rounding_applied < 0 && remaining > 0) {
-                    rounding_applied += this.pos.cash_rounding[0].rounding;
+                } else if(rounding_method === "UP" && rounding_applied < 0 && remaining > 0) {
+                    rounding_applied += rounding;
                 }
-                else if(this.pos.cash_rounding[0].rounding_method === "UP" && rounding_applied > 0 && remaining < 0) {
-                    rounding_applied -= this.pos.cash_rounding[0].rounding;
+                else if(rounding_method === "UP" && rounding_applied > 0 && remaining < 0) {
+                    rounding_applied -= rounding;
                 }
-                else if(this.pos.cash_rounding[0].rounding_method === "DOWN" && rounding_applied > 0 && remaining > 0){
-                    rounding_applied -= this.pos.cash_rounding[0].rounding;
+                else if(rounding_method === "DOWN" && rounding_applied > 0 && remaining > 0){
+                    rounding_applied -= rounding;
                 }
-                else if(this.pos.cash_rounding[0].rounding_method === "DOWN" && rounding_applied < 0 && remaining < 0){
-                    rounding_applied += this.pos.cash_rounding[0].rounding;
+                else if(rounding_method === "DOWN" && rounding_applied < 0 && remaining < 0){
+                    rounding_applied += rounding;
                 }
                 return sign * rounding_applied;
             }

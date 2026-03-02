@@ -250,6 +250,25 @@ class TestMailAPIPerformance(BaseMailPerformance):
         with self.assertQueryCount(__system__=19, emp=21):  # tm 17/19 - com 18/20
             activity.action_feedback(feedback='Zizisse Done !')
 
+    @warmup
+    def test_adv_activity_mixin_batched(self):
+        records = self.env['mail.test.activity'].create([{'name': 'Test'}] * 10)
+        MailActivity = self.env['mail.activity'].with_context({
+            'default_res_model': 'mail.test.activity',
+        })
+        activity_type = self.env.ref('mail.mail_activity_data_todo')
+
+        MailActivity.create([{
+            'summary': 'Test Activity',
+            'res_id': record.id,
+            'activity_type_id': activity_type.id,
+        } for record in records])
+
+        records.flush()
+        records.invalidate_cache()
+        with self.assertQueryCount(3):
+            records.mapped('activity_date_deadline')
+
     @users('__system__', 'emp')
     @warmup
     @mute_logger('odoo.models.unlink')
@@ -457,10 +476,13 @@ class TestMailAPIPerformance(BaseMailPerformance):
     @users('__system__', 'emp')
     @warmup
     def test_notification_reply_to_batch(self):
+        # overwrite company name to keep it short/simple
+        # and not trigger the 68 character reply_to formatting
+        self.env.user.company_id.name = "Forced"
         test_records_sudo = self.env['mail.test.container'].sudo().create([
-            {'alias_name': 'alias.test.%s.%d' % (self.env.user.name, index),
+            {'alias_name': 'a.%s.%d' % (self.env.user.name, index),
              'customer_id': self.customer.id,
-             'name': 'Test_%d' % index,
+             'name': 'T_%d' % index,
             } for index in range(10)
         ])
 

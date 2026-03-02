@@ -180,7 +180,7 @@
         <t t-call="wysiwyg.widgets.file">
             <t t-set="uploadText">Upload a document</t>
             <t t-set="urlPlaceholder">https://www.odoo.com/mydocument</t>
-            <t t-set="addText">Add document</t>
+            <t t-set="addText">Add URL</t>
             <t t-set="searchPlaceholder">Search a document</t>
         </t>
     </t>
@@ -360,9 +360,6 @@
                     </div>
                     <div class="o_youtube_option">
                         <label class="o_switch mb0"><input id="o_video_hide_fullscreen" type="checkbox"/><span/>Hide fullscreen button</label>
-                    </div>
-                    <div class="o_youtube_option">
-                        <label class="o_switch mb0"><input id="o_video_hide_yt_logo" type="checkbox"/><span/>Hide Youtube logo</label>
                     </div>
                     <div class="o_dailymotion_option">
                         <label class="o_switch mb0"><input id="o_video_hide_dm_logo" type="checkbox"/><span/>Hide Dailymotion logo</label>

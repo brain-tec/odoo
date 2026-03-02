@@ -5,14 +5,15 @@
 # Translators:
 # 敬雲 林 <chingyun@yuanchih-consult.com>, 2021
 # Martin Trigaux, 2023
+# Tony Ng, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.0+e\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-31 17:26+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:24+0000\n"
-"Last-Translator: Martin Trigaux, 2023\n"
+"Last-Translator: Tony Ng, 2024\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,12 +31,6 @@ msgstr ""
 "<br><br>\n"
 "                謝謝<br>\n"
 "                <b>Odoo 團隊</b>"
-
-#. module: payment_paypal
-#: code:addons/payment_paypal/models/payment_acquirer.py:0
-#, python-format
-msgid "Add your PayPal account to Odoo"
-msgstr "將您的 PayPal 帳戶加入到 Odoo"
 
 #. module: payment_paypal
 #: model:ir.model.fields,field_description:payment_paypal.field_payment_acquirer__paypal_email_account
@@ -143,7 +138,7 @@ msgstr "收到無法識別的驗證檢查響應代碼：收到 %s，預期為 VE
 #. module: payment_paypal
 #: model_terms:ir.ui.view,arch_db:payment_paypal.mail_template_paypal_invite_user_to_configure
 msgid "Set Paypal credentials"
-msgstr "設置Paypal  credentials"
+msgstr "設置Paypal憑證"
 
 #. module: payment_paypal
 #: model:ir.model.fields,help:payment_paypal.field_payment_acquirer__provider
@@ -163,7 +158,7 @@ msgid ""
 "The status of transaction with reference %(ref)s was not synchronized "
 "because the 'Payment data transfer' option is not enabled on the PayPal "
 "dashboard."
-msgstr ""
+msgstr "由於 PayPal 儀表板上未啟用\"支付數據傳輸\" 選項，因此未同步包含參考編號%(ref)s 的交易狀態."
 
 #. module: payment_paypal
 #: code:addons/payment_paypal/controllers/main.py:0

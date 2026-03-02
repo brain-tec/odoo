@@ -6,15 +6,15 @@
 # Martin Trigaux, 2021
 # Talal Albahra <talal.albahra@outlook.com>, 2021
 # Paul Andrawes, 2021
-# Malaz Abuidris <msea@odoo.com>, 2023
+# Malaz Abuidris <msea@odoo.com>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.5\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-14 10:28+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:22+0000\n"
-"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2023\n"
+"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2024\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1824,7 +1824,7 @@ msgstr "نهاية الوقت المعين للنشاط"
 
 #. module: hr
 #. openerp-web
-#: code:addons/hr/static/src/xml/hr_templates.xml:0
+#: code:addons/hr/static/src/js/user_menu.js:0
 #, python-format
 msgid "My Profile"
 msgstr "ملف تعريفي "
@@ -2886,8 +2886,8 @@ msgstr "تصريح عمل صالح لبلجيكا "
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__visa_expire
 #: model:ir.model.fields,field_description:hr.field_res_users__visa_expire
-msgid "Visa Expire Date"
-msgstr "تاريخ انتهاء التأشيرة"
+msgid "Visa Expiration Date"
+msgstr "تاريخ انتهاء صلاحية التأشيرة "
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__visa_no

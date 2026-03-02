@@ -11,8 +11,19 @@ class CouponProgram(models.Model):
 
     # The api.depends is handled in `def modified` of `sale_coupon/models/sale_order.py`
     def _compute_order_count(self):
+        program_orders = self.env['sale.order.line'].read_group(
+            domain=[
+                ('product_id', 'in', self.discount_line_product_id.ids),
+            ],
+            fields=['order_id:count_distinct'],
+            groupby=['product_id'],
+        )
+        mapped_data = {
+            value['product_id'][0]: value['order_id']
+            for value in program_orders
+        }
         for program in self:
-            program.order_count = self.env['sale.order.line'].sudo().search_count([('product_id', '=', program.discount_line_product_id.id)])
+            program.order_count = mapped_data.get(program.discount_line_product_id.id, 0)
 
     def action_view_sales_orders(self):
         self.ensure_one()
@@ -118,7 +129,7 @@ class CouponProgram(models.Model):
         i.e Buy 1 imac + get 1 ipad mini free then check 1 imac is on cart or not
         or  Buy 1 coke + get 1 coke free then check 2 cokes are on cart or not
         """
-        order_lines = order.order_line.filtered(lambda line: line.product_id) - order._get_reward_lines()
+        order_lines = self._get_lines_suitable_for_program(order)
         products = order_lines.mapped('product_id')
         products_qties = dict.fromkeys(products, 0)
         for line in order_lines:
@@ -140,6 +151,9 @@ class CouponProgram(models.Model):
             if ordered_rule_products_qty >= program.rule_min_quantity:
                 valid_program_ids.append(program.id)
         return self.browse(valid_program_ids)
+
+    def _get_lines_suitable_for_program(self, order):
+        return order.order_line.filtered(lambda line: line.product_id) - order._get_reward_lines()
 
     def _filter_not_ordered_reward_programs(self, order):
         """

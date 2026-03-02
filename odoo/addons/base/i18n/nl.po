@@ -6,8 +6,9 @@
 # Martin Trigaux, 2021
 # Yenthe Van Ginneken <yenthespam@gmail.com>, 2021
 # Wil Odoo, 2023
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2023
-# Jolien De Paepe, 2023
+# Jolien De Paepe, 2024
+# Manon Rondou, 2024
+# Erwin van der Ploeg <erwin@odooexperts.nl>, 2024
 # 
 msgid ""
 msgstr ""
@@ -15,7 +16,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-24 09:03+0000\n"
 "PO-Revision-Date: 2021-09-14 12:18+0000\n"
-"Last-Translator: Jolien De Paepe, 2023\n"
+"Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2024\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -437,7 +438,7 @@ msgstr ""
 "---------------\n"
 "\n"
 "* Rekeningschema en btw-sjabloon voor bedrijven in Japan.\n"
-"* Dit sjabloon dekt vermoedelijk niet alle rekeningen voor een bedrijf. Je wordt verondersteld om zelf rekeningen toe te voegen, te verwijderen en/of te wijzigen gebaseerd op dit sjabloon.\n"
+"* Deze sjabloon dekt vermoedelijk niet alle rekeningen voor een bedrijf. Je wordt verondersteld om zelf rekeningen toe te voegen, te verwijderen en/of te wijzigen gebaseerd op deze sjabloon.\n"
 "\n"
 "Opmerking:\n"
 "-----------------\n"
@@ -1134,7 +1135,7 @@ msgid ""
 "        Make calls using a VOIP system"
 msgstr ""
 "\n"
-"Voer telefoongesprekken met behulp van een VOIP systeem"
+"Voer telefoongesprekken met behulp van een VoIP systeem"
 
 #. module: base
 #: model:ir.module.module,description:base.module_mail_group
@@ -2620,7 +2621,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Voeg een selectie van verzendwijzes toe aan je eCommerce-winkel.\n"
+"Voeg een selectie van verzendwijzes toe aan je E-commerce-winkel.\n"
 "Configureer je eigen methoden met een prijslijst of integreer met carriers voor een volledig geautomatiseerd verzendproces."
 
 #. module: base
@@ -2852,7 +2853,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Sta bestellers van je eCommerce-winkel toe gepersonaliseerde collecties van producten te maken die ze willen kopen en bewaar ze voor toekomstig gebruik."
+"Sta bestellers van je E-commerce-winkel toe gepersonaliseerde collecties van producten te maken die ze willen kopen en bewaar ze voor toekomstig gebruik."
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_stock_wishlist
@@ -4026,7 +4027,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Maak kortingsbonnen en promotiecodes om te delen om je verkoop te stimuleren (gratis producten, kortingen, etc.). Shoppers kunnen ze gebruiken in de eCommerce-checkout.\n"
+"Maak kortingsbonnen en promotiecodes om te delen om je verkoop te stimuleren (gratis producten, kortingen, etc.). Shoppers kunnen ze gebruiken in de E-commerce-checkout.\n"
 "\n"
 "Coupon- en promotieprogramma's kunnen worden bewerkt in het Catalogus-menu van de Website-app."
 
@@ -5265,7 +5266,7 @@ msgstr ""
 " - Maak een team en bepaal de leden ervan, gebruik een automatische toewijzingsmethode\n"
 " - Gebruik een mail alias om automatisch tickets te maken en te communiceren met je klanten\n"
 " - Voeg automatisch de deadlines van de Service Level Agreement toe aan je tickets\n"
-" - Krijg klant feedback door gebruik te maken van beoordelingen\n"
+" - Krijg klantfeedback door gebruik te maken van beoordelingen\n"
 " - Installeer extra functies eenvoudig met behulp van je teamformulier\n"
 "\n"
 "\n"
@@ -5944,7 +5945,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Beheer de voorraad van je producten en toon hun beschikbaarheidsstatus in je eCommerce-winkel.\n"
+"Beheer de voorraad van je producten en toon hun beschikbaarheidsstatus in je E-commerce-winkel.\n"
 "In geval van onvoldoende voorraad, kun je besluiten om verdere verkopen te blokkeren of om te blijven verkopen.\n"
 "Een standaardgedrag kan worden geselecteerd in de website-instellingen.\n"
 "Dan kan het specifiek op productniveau worden gemaakt."
@@ -7187,7 +7188,7 @@ msgstr ""
 "Verkoop abonnementen dashboard\n"
 "========================\n"
 "Het voegt dashboards toe aan:\n"
-"1) Analyseer de huidige omzet en andere kengetallen voor abonnementen\n"
+"1) Analyseer de huidige omzet en andere metrics voor abonnementen\n"
 "2) Analyseer de abonnementswijzigingen per verkoper en bereken hun waarde."
 
 #. module: base
@@ -7211,7 +7212,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Verkoop digitale producten in je eCommerce-winkel (bijvoorbeeld webinars, artikelen, e-books, video-tutorials).\n"
+"Verkoop digitale producten in je E-commerce-winkel (bijvoorbeeld webinars, artikelen, e-books, video-tutorials).\n"
 "Hiertoe maak je het product en voeg je het bestand toe om te delen via de knop * Bestanden * van het productformulier.\n"
 "Nadat de order is betaald, wordt het bestand beschikbaar gesteld op de orderbevestiging pagina in het klantenportaal."
 
@@ -8860,7 +8861,7 @@ msgid ""
 msgstr ""
 "\n"
 "Deze module brengt een nieuwe bouwsteen met een mailinglijst-widget om op elke pagina van je website te plaatsen.\n"
-"Met een simpele klik kunnen je bezoekers zich abonneren op mailinglijsten die worden beheerd in de E-mail Marketing App."
+"Met een simpele klik kunnen je bezoekers zich abonneren op mailinglijsten die worden beheerd in de E-mailmarketing App."
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_de_pos_cert
@@ -12003,7 +12004,7 @@ msgstr "Achter bedrag"
 #. module: base
 #: model:ir.module.category,description:base.module_category_services_helpdesk
 msgid "After-sales services"
-msgstr "Nazorg diensten"
+msgstr "Dienst na verkoop"
 
 #. module: base
 #: model:res.partner.industry,name:base.res_partner_industry_A
@@ -12156,7 +12157,7 @@ msgstr "Sta gratis verzending toe in coupon beloning"
 #: model:ir.module.module,description:base.module_website_sale_coupon_delivery
 #: model:ir.module.module,summary:base.module_website_sale_coupon_delivery
 msgid "Allows to offer free shippings in coupon reward on eCommerce"
-msgstr "Sta in eCommerce gratis verzending toe met een coupon"
+msgstr "Sta in E-commerce gratis verzending toe met een coupon"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sms
@@ -13657,7 +13658,7 @@ msgstr "Budgetbeheer"
 #. module: base
 #: model:ir.module.module,summary:base.module_marketing_automation
 msgid "Build automated mailing campaigns"
-msgstr "Bouw geautomatiseerde e-mail campagnes"
+msgstr "Bouw geautomatiseerde e-mailcampagnes"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sale_quotation_builder
@@ -15062,7 +15063,7 @@ msgstr "Kortingsbon"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_coupon
 msgid "Coupons & Promotions for eCommerce"
-msgstr "Kortingsbonnen & promoties voor eCommerce"
+msgstr "Kortingsbonnen & promoties voor E-commerce"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_slides_survey
@@ -16268,7 +16269,7 @@ msgstr "Discussieer"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_currency_form
 msgid "Display"
-msgstr "Tonen"
+msgstr "Weergave"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_enable_profiling_wizard__display_name
@@ -16599,7 +16600,7 @@ msgstr "Toon de font awesome marker niet"
 #: model:ir.model.fields.selection,name:base.selection__ir_actions_todo__state__done
 #: model:ir.model.fields.selection,name:base.selection__res_company__base_onboarding_company_state__done
 msgid "Done"
-msgstr "Gereed"
+msgstr "Afgehandeld"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.form_res_users_key_show
@@ -16963,7 +16964,7 @@ msgstr "E-mail Gateway"
 #: model:ir.module.category,name:base.module_category_marketing_email_marketing
 #: model:ir.module.module,shortdesc:base.module_mass_mailing
 msgid "Email Marketing"
-msgstr "E-mail marketing"
+msgstr "E-mailmarketing"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users__signature
@@ -17236,7 +17237,7 @@ msgstr "Beoordelingsoort"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mass_mailing_event_sms
 msgid "Event Attendees SMS Marketing"
-msgstr "Evenement deelnemers SMS marketing"
+msgstr "Evenement deelnemers SMS-Marketing"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_event_barcode
@@ -18370,6 +18371,12 @@ msgid "France - Accounting Reports"
 msgstr "Frankrijk - Boekhoudkundige rapporten"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_fr_invoice_addr
+msgid "France - Adding Mandatory Invoice Mentions (Decree no. 2022-1299)"
+msgstr ""
+"Frankrijk - Verplichte factuurvermeldingen toevoegen (Decreet nr. 2022-1299)"
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_fec
 msgid "France - FEC Export"
 msgstr "Frankrijk - FEC Export"
@@ -18931,7 +18938,7 @@ msgstr "Groep"
 #: model_terms:ir.ui.view,arch_db:base.view_server_action_search
 #: model_terms:ir.ui.view,arch_db:base.view_view_search
 msgid "Group By"
-msgstr "Groepeer op"
+msgstr "Groeperen op"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_groups__full_name
@@ -20355,7 +20362,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_marketing_automation_sms
 msgid "Integrate SMS Marketing in marketing campaigns"
-msgstr "Integreer SMS marketing in marketing campagnes"
+msgstr "Integreer SMS-Marketing in marketing campagnes"
 
 #. module: base
 #: model:ir.module.module,description:base.module_coupon
@@ -20512,6 +20519,12 @@ msgstr ""
 #, python-format
 msgid "Invalid 'group by' parameter"
 msgstr "Incorrecte 'groep door' instelling"
+
+#. module: base
+#: code:addons/template_inheritance.py:0
+#, python-format
+msgid "Invalid Expression while parsing xpath %r"
+msgstr "Ongeldige expressie bij het verwerken van xpath %r"
 
 #. module: base
 #: code:addons/base/models/ir_default.py:0
@@ -21587,7 +21600,7 @@ msgstr "Koppelingsveld"
 #: model:ir.module.module,shortdesc:base.module_link_tracker
 #: model:ir.module.module,shortdesc:base.module_website_links
 msgid "Link Tracker"
-msgstr "Opvolging links"
+msgstr "Link Tracker"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_timesheet_grid_holidays
@@ -21597,7 +21610,7 @@ msgstr "Koppeling tussen urenstaten en verlof"
 #. module: base
 #: model:ir.module.module,summary:base.module_voip_crm
 msgid "Link between voip and crm"
-msgstr "Link tussen VOIP en CRM"
+msgstr "Link tussen VoIP en CRM"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_hr
@@ -22297,12 +22310,12 @@ msgstr "Marketing"
 #: model:ir.module.category,name:base.module_category_marketing_marketing_automation
 #: model:ir.module.module,shortdesc:base.module_marketing_automation
 msgid "Marketing Automation"
-msgstr "Marketing"
+msgstr "Marketing Automation"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_marketing_automation
 msgid "Marketing Automation Tests"
-msgstr "Marketing geautomatiseerde testen"
+msgstr "Tests marketing automation"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ma
@@ -26213,7 +26226,7 @@ msgstr ""
 "\n"
 "Voeg sponsors toe aan je evenementen en publiceer sponsors per niveau (bijvoorbeeld brons, zilver, goud) onderaan elke pagina van het evenement.\n"
 "\n"
-"Verkoop sponsorpakketten online via de Odoo eCommerce voor een volledige verkoopcyclusintegratie.\n"
+"Verkoop sponsorpakketten online via de Odoo E-commerce voor een volledige verkoopcyclusintegratie.\n"
 "\n"
 "Efficiënt communiceren\n"
 "-----------------------\n"
@@ -26443,7 +26456,7 @@ msgstr ""
 "### Ontvang honderden gratis open source-apps\n"
 "\n"
 "\n"
-"### eCommerce\n"
+"### E-commerce\n"
 "\n"
 "Promoot producten, verkoop online, optimaliseer de winkelervaringen van bezoekers.\n"
 "\n"
@@ -28509,7 +28522,7 @@ msgstr "Relatietabel"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields__relation_field_id
 msgid "Relation field"
-msgstr "Gerelateerd veld"
+msgstr "Relatieveld"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_actions_report__attachment_use
@@ -28892,12 +28905,12 @@ msgstr "SEPA betalingen voor Loonadministratie"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mass_mailing_sms
 msgid "SMS Marketing"
-msgstr "SMS marketing"
+msgstr "SMS-Marketing"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_marketing_automation_sms
 msgid "SMS Marketing in Marketing Automation"
-msgstr "SMS marketing in marketing automatisering"
+msgstr "SMS-Marketing in Marketing Automation"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sms
@@ -29321,6 +29334,12 @@ msgid "Scheduled Actions Triggers"
 msgstr "Geplande acties Triggers"
 
 #. module: base
+#: code:addons/base/models/ir_cron.py:0
+#, python-format
+msgid "Scheduled action disabled"
+msgstr "Geplande actie uitgeschakeld"
+
+#. module: base
 #: model:ir.model.fields,field_description:base.field_ir_cron__user_id
 msgid "Scheduler User"
 msgstr "Geplande gebruiker"
@@ -29606,6 +29625,17 @@ msgstr "Verzend je verzendingen via Fedex en volg ze online"
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery_ups
+msgid ""
+"This is the legacy integration with UPS that is no longer supported. Please "
+"install the new \"UPS Shipping\" module and uninstall this one as soon as "
+"possible. This integration will stop working in 2024."
+msgstr ""
+"Dit is de oudere integratie met UPS die niet langer wordt ondersteund. "
+"Installeer de nieuwe \"UPS Shipping\" module en verwijder deze zo snel "
+"mogelijk. Deze integratie stopt met werken in 2024."
+
+#. module: base
+#: model:ir.module.module,summary:base.module_delivery_ups_rest
 msgid "Send your shippings through UPS and track them online"
 msgstr "Verzend je verzendingen via USPS en volg ze online"
 
@@ -30603,7 +30633,7 @@ msgstr "In Zweden geregistreerde kassa"
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_language_install
 msgid "Switch to"
-msgstr "Wissel naar"
+msgstr "Overschakelen naar"
 
 #. module: base
 #: model:res.country,name:base.ch
@@ -30648,7 +30678,7 @@ msgstr "Syrië"
 #. module: base
 #: model:ir.model,name:base.model_ir_config_parameter
 msgid "System Parameter"
-msgstr "Systeem parameter"
+msgstr "Systeemparameter"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.ir_config_list_action
@@ -30656,7 +30686,7 @@ msgstr "Systeem parameter"
 #: model_terms:ir.ui.view,arch_db:base.view_ir_config_form
 #: model_terms:ir.ui.view,arch_db:base.view_ir_config_list
 msgid "System Parameters"
-msgstr "Systeem parameters"
+msgstr "Systeemparameters"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_ir_config_search
@@ -32043,6 +32073,16 @@ msgstr ""
 "%s"
 
 #. module: base
+#: code:addons/base/models/ir_cron.py:0
+#, python-format
+msgid ""
+"This scheduled action has been disabled because its interval number is not a"
+" strictly positive value."
+msgstr ""
+"Deze geplande actie is uitgeschakeld omdat het intervalnummer geen strikt "
+"positieve waarde is."
+
+#. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang__thousands_sep
 msgid "Thousands Separator"
 msgstr "Duizend scheidingsteken"
@@ -32627,6 +32667,11 @@ msgstr "UNSPSC productcodes"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_delivery_ups
+msgid "UPS Shipping (Legacy)"
+msgstr "UPS Shipping (oud)"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_delivery_ups_rest
 msgid "UPS Shipping"
 msgstr "UPS verzending"
 
@@ -33059,7 +33104,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_coupon
 msgid "Use coupon & promotion programs in your eCommerce store"
-msgstr "Gebruik coupon- en promotieprogramma's in je eCommerce-winkel"
+msgstr "Gebruik coupon- en promotieprogramma's in je E-commerce-winkel"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_coupon
@@ -33084,7 +33129,7 @@ msgstr "Cadeaukaart gebruiken"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_gift_card
 msgid "Use gift card in eCommerce"
-msgstr "Cadeaukaart gebruiken in eCommerce"
+msgstr "Cadeaukaart gebruiken in E-commerce"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_gift_card
@@ -33343,17 +33388,17 @@ msgstr "BTW/Btw-nummer"
 #: model:ir.module.category,name:base.module_category_productivity_voip
 #: model:ir.module.module,shortdesc:base.module_voip
 msgid "VOIP"
-msgstr "VOIP"
+msgstr "VoIP"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_voip_onsip
 msgid "VOIP OnSIP"
-msgstr "VOIP OnSIP"
+msgstr "VoIP OnSIP"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_voip_crm
 msgid "VOIP for crm"
-msgstr "VOIP voor crm"
+msgstr "VoIP voor crm"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_phone_validation
@@ -34291,6 +34336,16 @@ msgstr ""
 "Gelinkte actieve gebruikers : %(names)s"
 
 #. module: base
+#: code:addons/base/models/res_lang.py:0
+#, python-format
+msgid ""
+"You cannot archive the language in which Odoo was setup as it is used by "
+"automated processes."
+msgstr ""
+"Je kan de taal waarin Odoo is ingesteld niet archiveren, omdat deze gebruikt"
+" wordt door geautomatiseerde processen."
+
+#. module: base
 #: code:addons/base/models/res_partner.py:0
 #, python-format
 msgid "You cannot create recursive Partner hierarchies."
@@ -34355,6 +34410,17 @@ msgstr ""
 #, python-format
 msgid "You cannot delete the %s record."
 msgstr "Je kan het record %s niet verwijderen."
+
+#. module: base
+#: code:addons/base/models/res_users.py:0
+#, python-format
+msgid ""
+"You cannot delete the admin user because it is utilized in various places "
+"(such as security configurations,...). Instead, archive it."
+msgstr ""
+"Je kunt de admin-gebruiker niet verwijderen omdat deze op verschillende "
+"plaatsen wordt gebruikt (zoals in beveiligingsconfiguraties,...). Archiveer "
+"het in plaats daarvan."
 
 #. module: base
 #: code:addons/base/models/res_lang.py:0
@@ -34648,7 +34714,7 @@ msgstr "documentatie"
 #: model:ir.model.fields.selection,name:base.selection__base_language_install__state__done
 #: model:ir.model.fields.selection,name:base.selection__base_module_update__state__done
 msgid "done"
-msgstr "gereed"
+msgstr "afgehandeld"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_partner_category_form
@@ -34745,12 +34811,12 @@ msgstr "e-Bay connector"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale
 msgid "eCommerce"
-msgstr "eCommerce"
+msgstr "E-commerce"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_delivery
 msgid "eCommerce Delivery"
-msgstr "eCommerce levering"
+msgstr "E-commerce levering"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_website_elearning

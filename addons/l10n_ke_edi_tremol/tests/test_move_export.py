@@ -3,6 +3,7 @@
 
 from odoo.tests import tagged
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from freezegun import freeze_time
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
 class TestKeMoveExport(AccountTestInvoicingCommon):
@@ -39,7 +40,7 @@ class TestKeMoveExport(AccountTestInvoicingCommon):
         msg = b'1' + b';'.join([                       # 0x31, command to add a line
             line_dict.get('name', b''.ljust(36)),      # 36 characters for the name
             line_dict.get('vat_class', b'A'),          # 1 symbol for vat class (a because the tax is 16.0%)
-            line_dict.get('price', b'1'),              # up to 13 symbols for the unit price, tax included
+            line_dict.get('price', b'1'),              # up to 15 symbols for the unit price, tax included (up to 5 decimal places)
             line_dict.get('uom', b'   '),              # 3 symbols for uom
             line_dict.get('item_code', b''.ljust(10)), # 10 symbols for item code (only reported when the tax is not 16.0%)
             line_dict.get('item_desc', b''.ljust(20)), # item description (only reported when the tex is not 16.0%)
@@ -51,6 +52,7 @@ class TestKeMoveExport(AccountTestInvoicingCommon):
             msg += b',' + line_dict.get('discount')    # 1 to 7 symbols for discount/addition
         return msg
 
+    @freeze_time('2023-01-01')
     def test_export_simple_invoice(self):
         """ The _l10n_ke_get_cu_messages function serialises the data from the invoice as a series
             of messages representing commands to the device. The proxy must only wrap these messages
@@ -111,6 +113,7 @@ class TestKeMoveExport(AccountTestInvoicingCommon):
         expected_messages = expected_credit_note_header + expected_messages[1:]
         self.assertEqual(generated_messages, expected_messages)
 
+    @freeze_time('2023-01-01')
     def test_export_global_discount_invoice(self):
         """ Negative lines can be used as global discounts, the function that serialises the invoice
             should recognise these discount lines, and subtract them from positive lines,

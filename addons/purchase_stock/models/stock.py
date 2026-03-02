@@ -31,7 +31,10 @@ class StockMove(models.Model):
 
     @api.model
     def _prepare_merge_negative_moves_excluded_distinct_fields(self):
-        return super()._prepare_merge_negative_moves_excluded_distinct_fields() + ['created_purchase_line_id']
+        excluded_fields = super()._prepare_merge_negative_moves_excluded_distinct_fields() + ['created_purchase_line_id']
+        if self.env['ir.config_parameter'].sudo().get_param('purchase_stock.merge_different_procurement'):
+            excluded_fields += ['procure_method']
+        return excluded_fields
 
     def _get_price_unit(self):
         """ Returns the unit price for the move"""
@@ -40,10 +43,10 @@ class StockMove(models.Model):
             price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')
             line = self.purchase_line_id
             order = line.order_id
-            price_unit = line.price_unit
+            price_unit = line._prepare_compute_all_values()['price_unit']
             if line.taxes_id:
                 qty = line.product_qty or 1
-                price_unit = line.taxes_id.with_context(round=False).compute_all(price_unit, currency=line.order_id.currency_id, quantity=qty)['total_void']
+                price_unit = line.taxes_id.with_context(round=False).compute_all(price_unit, currency=line.order_id.currency_id, quantity=qty, product=self.product_id)['total_void']
                 price_unit = float_round(price_unit / qty, precision_digits=price_unit_prec)
             if line.product_uom.id != line.product_id.uom_id.id:
                 price_unit *= line.product_uom.factor / line.product_id.uom_id.factor
@@ -146,12 +149,7 @@ class StockMove(models.Model):
 
     def _is_purchase_return(self):
         self.ensure_one()
-        return self.location_dest_id.usage == "supplier" or (
-                self.location_dest_id.usage == "internal"
-                and self.location_id.usage != "supplier"
-                and self.warehouse_id
-                and self.location_dest_id not in self.env["stock.location"].search([("id", "child_of", self.warehouse_id.view_location_id.id)])
-        )
+        return self.location_dest_id.usage == "supplier"
 
 
 class StockWarehouse(models.Model):
@@ -232,6 +230,11 @@ class Orderpoint(models.Model):
     def _compute_qty(self):
         """ Extend to add more depends values """
         return super()._compute_qty()
+
+    @api.depends('product_id.purchase_order_line_ids.product_qty', 'product_id.purchase_order_line_ids.state')
+    def _compute_qty_to_order(self):
+        """ Extend to add more depends values """
+        return super()._compute_qty_to_order()
 
     @api.depends('supplier_id')
     def _compute_lead_days(self):

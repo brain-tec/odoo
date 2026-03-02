@@ -659,6 +659,7 @@ class TestQWebNS(TransactionCase):
             """
         })
 
+        error_msg = ''
         try:
             "" + 0
         except TypeError as e:
@@ -759,7 +760,12 @@ class TestQWebBasic(TransactionCase):
             ("(lambda a: a + 5)(x)",                    {'x': 10},                      15),
             ("(lambda a: a + x)(5)",                    {'x': 10},                      15),
             ("sum(x for x in range(4)) + ((x))",        {'x': 10},                      16),
-            ("['test_' + x for x in ['a', 'b']]",       {},                             ['test_a', 'test_b'])
+            ("['test_' + x for x in ['a', 'b']]",       {},                             ['test_a', 'test_b']),
+            ('[x for x in (1,2)]',                      {},                             [1, 2]),  # LOAD_FAST_AND_CLEAR
+            ('list(x for x in (1,2))',                  {},                             [1, 2]),  # END_FOR, CALL_INTRINSIC_1
+            ('v if v is None else w',                   {'v': False, 'w': 'foo'},       'foo'),  # POP_JUMP_IF_NONE
+            ('v if v is not None else w',               {'v': None, 'w': 'foo'},        'foo'),  # POP_JUMP_IF_NOT_NONE
+            ('{a for a in (1, 2)}',                     {},                             {1, 2}),  # RERAISE
         ]
 
         IrQweb = self.env['ir.qweb']
@@ -1341,8 +1347,8 @@ class TestEmptyLines(TransactionCase):
             'arch_db': self.arch
         })
         rendered = self.env['ir.qweb']._render(t.id)
-        self.assertFalse(re.compile('^\s+\n').match(rendered))
-        self.assertFalse(re.compile('\n\s+\n').match(rendered))
+        self.assertFalse(re.compile('^\\s+\n').match(rendered))
+        self.assertFalse(re.compile('\n\\s+\n').match(rendered))
 
     def test_keep_empty_lines(self):
         t = self.env['ir.ui.view'].create({
@@ -1351,8 +1357,8 @@ class TestEmptyLines(TransactionCase):
             'arch_db': self.arch
         })
         rendered = self.env['ir.qweb']._render(t.id, {'__keep_empty_lines': True})
-        self.assertTrue(re.compile('^\s+\n').match(rendered))
-        self.assertTrue(re.compile('\n\s+\n').match(rendered))
+        self.assertTrue(re.compile('^\\s+\n').match(rendered))
+        self.assertTrue(re.compile('\n\\s+\n').match(rendered))
 
 
 class TestQWebMisc(TransactionCase):

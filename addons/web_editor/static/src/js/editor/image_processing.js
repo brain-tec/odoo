@@ -13,6 +13,7 @@ const modifierFields = [
     'originalSrc',
     'resizeWidth',
     'aspectRatio',
+    "bgSrc",
 ];
 
 // webgl color filters
@@ -263,12 +264,29 @@ async function applyModifications(img, dataOptions = {}) {
  * @param {String} src URL of the image to load
  * @param {HTMLImageElement} [img] img element in which to load the image
  * @returns {Promise<HTMLImageElement>} Promise that resolves to the loaded img
+ *     or a placeholder image if the src is not found.
  */
 function loadImage(src, img = new Image()) {
+    const handleImage = (source, resolve, reject) => {
+        img.addEventListener("load", () => resolve(img), {once: true});
+        img.addEventListener("error", reject, {once: true});
+        img.src = source;
+    };
+    // The server will return a placeholder image with the following src.
+    const placeholderHref = "/web/image/__odoo__unknown__src__/";
+
     return new Promise((resolve, reject) => {
-        img.addEventListener('load', () => resolve(img), {once: true});
-        img.addEventListener('error', reject, {once: true});
-        img.src = src;
+        fetch(src)
+            .then(response => {
+                if (!response.ok) {
+                    src = placeholderHref;
+                }
+                handleImage(src, resolve, reject);
+            })
+            .catch(error => {
+                src = placeholderHref;
+                handleImage(src, resolve, reject);
+            });
     });
 }
 
@@ -358,7 +376,7 @@ return {
     activateCropper,
     loadImageInfo,
     loadImage,
-    removeOnImageChangeAttrs: [...cropperDataFields, ...modifierFields, 'aspectRatio'],
+    removeOnImageChangeAttrs: [...cropperDataFields, ...modifierFields],
     isImageSupportedForProcessing,
     isImageSupportedForStyle,
 };

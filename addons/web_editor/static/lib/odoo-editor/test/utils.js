@@ -2,7 +2,8 @@ import { OdooEditor } from '../src/OdooEditor.js';
 import { sanitize } from '../src/utils/sanitize.js';
 import {
     closestElement,
-    insertText as insertTextSel,
+    makeZeroWidthCharactersVisible,
+    insertSelectionChars,
 } from '../src/utils/utils.js';
 
 export const Direction = {
@@ -147,7 +148,7 @@ export function parseMultipleTextualSelection(testContainer) {
  *
  * @param selection
  */
-export function setTestSelection(selection, doc = document) {
+export async function setTestSelection(selection, doc = document) {
     const domRange = doc.createRange();
     if (selection.direction === Direction.FORWARD) {
         domRange.setStart(selection.anchorNode, selection.anchorOffset);
@@ -166,33 +167,7 @@ export function setTestSelection(selection, doc = document) {
         // with contentEditable=false for no valid reason since non-editable
         // content are selectable by the user anyway.
     }
-}
-
-/**
- * Inserts the given characters at the given offset of the given node.
- *
- * @param {string} chars
- * @param {Node} node
- * @param {number} offset
- */
-export function insertCharsAt(chars, node, offset) {
-    if (node.nodeType === Node.TEXT_NODE) {
-        const startValue = node.nodeValue;
-        if (offset < 0 || offset > startValue.length) {
-            throw new Error(`Invalid ${chars} insertion in text node`);
-        }
-        node.nodeValue = startValue.slice(0, offset) + chars + startValue.slice(offset);
-    } else {
-        if (offset < 0 || offset > node.childNodes.length) {
-            throw new Error(`Invalid ${chars} insertion in non-text node`);
-        }
-        const textNode = document.createTextNode(chars);
-        if (offset < node.childNodes.length) {
-            node.insertBefore(textNode, node.childNodes[offset]);
-        } else {
-            node.appendChild(textNode);
-        }
-    }
+    await nextTick(); // Wait a tick for selectionchange events.
 }
 
 /**
@@ -249,32 +224,17 @@ export function renderTextualSelection() {
     if (selection.rangeCount === 0) {
         return;
     }
-
-    const anchor = targetDeepest(selection.anchorNode, selection.anchorOffset);
-    const focus = targetDeepest(selection.focusNode, selection.focusOffset);
-
-    // If the range characters have to be inserted within the same parent and
-    // the anchor range character has to be before the focus range character,
-    // the focus offset needs to be adapted to account for the first insertion.
-    const [anchorNode, anchorOffset] = anchor;
-    const [focusNode, baseFocusOffset] = focus;
-    let focusOffset = baseFocusOffset;
-    if (anchorNode === focusNode && anchorOffset <= focusOffset) {
-        focusOffset++;
-    }
-    insertCharsAt('[', ...anchor);
-    insertCharsAt(']', focusNode, focusOffset);
+    insertSelectionChars(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset);
 }
 
 /**
  * Return a more readable test error messages
  */
 export function customErrorMessage(assertLocation, value, expected) {
-    const zws = '//zws//';
-    value = value.replaceAll('\u200B', zws);
-    expected = expected.replaceAll('\u200B', zws);
+    value = makeZeroWidthCharactersVisible(value);
+    expected = makeZeroWidthCharactersVisible(expected);
 
-    return `[${assertLocation}]\nactual  : '${value}'\nexpected: '${expected}'\n\nStackTrace `;
+    return `${(isMobileTest ? '[MOBILE VERSION: ' : '[')}${assertLocation}]\nactual  : '${value}'\nexpected: '${expected}'\n\nStackTrace `;
 }
 
 export async function testEditor(Editor = OdooEditor, spec, options = {}) {
@@ -295,13 +255,19 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
     // the editor as otherwise those would genererate mutations the editor would
     // consider and the tests would make no sense.
     testNode.innerHTML = spec.contentBefore;
+    // Setting a selection in the DOM before initializing the editor to ensure
+    // every test is run with the same preconditions.
+    await setTestSelection({
+        anchorNode: testNode.parentElement, anchorOffset: 0,
+        focusNode: testNode.parentElement, focusOffset: 0,
+    });
     const selection = parseTextualSelection(testNode);
 
     const editor = new Editor(testNode, Object.assign({ toSanitize: false }, options));
     editor.keyboardType = 'PHYSICAL';
     editor.testMode = true;
     if (selection) {
-        setTestSelection(selection);
+        await setTestSelection(selection);
         editor._recordHistorySelection();
     } else {
         document.getSelection().removeAllRanges();
@@ -319,7 +285,7 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
             customErrorMessage('contentBeforeEdit', beforeEditValue, spec.contentBeforeEdit));
         const selection = parseTextualSelection(testNode);
         if (selection) {
-            setTestSelection(selection);
+            await setTestSelection(selection);
         }
     }
 
@@ -336,13 +302,19 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
 
     if (spec.contentAfterEdit) {
         renderTextualSelection();
+        // remove all check-ids (checklists, stars)
+        if (spec.removeCheckIds) {
+            for (const li of document.querySelectorAll('#editor-test-container li[id^=checklist-id-')) {
+                li.removeAttribute('id');
+            }
+        }
         const afterEditValue = testNode.innerHTML;
         window.chai.expect(afterEditValue).to.be.equal(
             spec.contentAfterEdit,
             customErrorMessage('contentAfterEdit', afterEditValue, spec.contentAfterEdit));
         const selection = parseTextualSelection(testNode);
         if (selection) {
-            setTestSelection(selection);
+            await setTestSelection(selection);
         }
     }
 
@@ -368,7 +340,19 @@ export async function testEditor(Editor = OdooEditor, spec, options = {}) {
     }
     await testNode.remove();
     if (hasMobileTest && !isMobileTest) {
-        await testEditor(Editor, spec, { ...options, isMobile: true });
+        const li = document.createElement('li');
+        li.classList.add('test', 'pass', 'pending');
+        const h2 = document.createElement('h2');
+        h2.textContent = 'FIXME: [Mobile Test] skipped';
+        li.append(h2);
+        const mochaSuite = [...document.querySelectorAll('#mocha-report li.suite > ul')].pop();
+        if (mochaSuite) {
+            mochaSuite.append(li);
+        }
+        // Mobile tests are temporarily disabled because they are not
+        // representative of reality. They will be re-enabled when the mobile
+        // editor will be ready.
+        // await testEditor(Editor, spec, { ...options, isMobile: true });
     }
 }
 
@@ -459,6 +443,10 @@ export async function deleteBackward(editor) {
 
 export async function insertParagraphBreak(editor) {
     editor.execCommand('oEnter');
+}
+
+export async function switchDirection(editor) {
+    editor.execCommand('switchDirection');
 }
 
 export async function insertLineBreak(editor) {

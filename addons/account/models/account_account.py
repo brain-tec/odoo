@@ -598,6 +598,9 @@ class AccountAccount(models.Model):
             'domain': [('id', 'in', related_taxes_ids)],
         }
 
+    def _merge_method(self, destination, source):
+        raise UserError(_("You cannot merge accounts."))
+
 
 class AccountGroup(models.Model):
     _name = "account.group"
@@ -670,6 +673,11 @@ class AccountGroup(models.Model):
         res = self.env.cr.fetchall()
         if res:
             raise ValidationError(_('Account Groups with the same granularity can\'t overlap'))
+
+    @api.constrains('parent_id')
+    def _check_parent_not_circular(self):
+        if not self._check_recursion():
+            raise ValidationError(_("You cannot create recursive groups."))
 
     @api.model_create_multi
     def create(self, vals_list):

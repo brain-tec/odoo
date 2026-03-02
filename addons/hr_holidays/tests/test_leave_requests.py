@@ -233,7 +233,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
     @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
     def test_timezone_employee_leave_request(self):
         """ Create a leave request for an employee in another timezone """
-        self.employee_emp.tz = 'NZ'  # GMT+12
+        self.employee_emp.tz = 'Pacific/Auckland'  # GMT+12
         leave = self.env['hr.leave'].new({
             'employee_id': self.employee_emp.id,
             'holiday_status_id': self.holidays_type_1.id,
@@ -250,7 +250,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
     def test_timezone_company_leave_request(self):
         """ Create a leave request for a company in another timezone """
         company = self.env['res.company'].create({'name': "Hergé"})
-        company.resource_calendar_id.tz = 'NZ'  # GMT+12
+        company.resource_calendar_id.tz = 'Pacific/Auckland'  # GMT+12
         leave = self.env['hr.leave'].new({
             'employee_id': self.employee_emp.id,
             'holiday_status_id': self.holidays_type_1.id,
@@ -268,7 +268,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
     @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
     def test_timezone_company_validated(self):
         """ Create a leave request for a company in another timezone and validate it """
-        self.env.user.tz = 'NZ' # GMT+12
+        self.env.user.tz = 'Pacific/Auckland' # GMT+12
         company = self.env['res.company'].create({'name': "Hergé"})
         employee = self.env['hr.employee'].create({'name': "Remi", 'company_id': company.id})
         leave_form = Form(self.env['hr.leave'], view='hr_holidays.hr_leave_view_form_manager')
@@ -290,7 +290,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
     def test_timezone_department_leave_request(self):
         """ Create a leave request for a department in another timezone """
         company = self.env['res.company'].create({'name': "Hergé"})
-        company.resource_calendar_id.tz = 'NZ'  # GMT+12
+        company.resource_calendar_id.tz = 'Pacific/Auckland'  # GMT+12
         department = self.env['hr.department'].create({'name': "Museum", 'company_id': company.id})
         leave = self.env['hr.leave'].new({
             'employee_id': self.employee_emp.id,
@@ -453,7 +453,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
     @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
     def test_leave_defaults_with_timezones(self):
         """ Make sure that leaves start with correct defaults for non-UTC timezones """
-        timezones_to_test = ('UTC', 'Pacific/Midway', 'US/Pacific', 'Asia/Taipei', 'Pacific/Kiritimati')  # UTC, UTC -11, UTC -8, UTC +8, UTC +14
+        timezones_to_test = ('UTC', 'Pacific/Midway', 'America/Los_Angeles', 'Asia/Taipei', 'Pacific/Kiritimati')  # UTC, UTC -11, UTC -8, UTC +8, UTC +14
 
         #     January 2020
         # Su Mo Tu We Th Fr Sa
@@ -586,16 +586,61 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'date_to': datetime(2022, 3, 11, 23, 59, 59),
         })
         p_leave.company_id = other_company
+        self.user_employee.company_ids = [
+            (4, other_company.id),
+            (4, self.env.company.id),]
+        leave = self.env['hr.leave'].with_user(self.user_employee_id)\
+                .with_context(allowed_company_ids=[other_company.id, self.env.company.id])\
+                .create({
+                    'name': 'Holiday Request',
+                    'holiday_type': 'employee',
+                    'employee_id': self.employee_emp.id,
+                    'holiday_status_id': self.holidays_type_1.id,
+                    'date_from': datetime(2022, 3, 11),
+                    'date_to': datetime(2022, 3, 11, 23, 59, 59),
+                })
+        self.assertEqual(leave.number_of_days, 1)
 
-        leave = self.env['hr.leave'].with_user(self.user_employee_id).create({
+    def test_leave_with_public_holiday_other_company_differents_hours_per_weekday(self):
+        other_company = self.env['res.company'].create({
+            'name': 'Test Company',
+        })
+        # hours per day : 7.2h
+        # hours per friday : 5h
+        res_calendar_test = self.env['resource.calendar'].create({
+            'name': '35h calendar',
+            'attendance_ids': [
+                (0, 0, {'name': 'Monday Morning', 'dayofweek': '0', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Monday Evening', 'dayofweek': '0', 'hour_from': 13, 'hour_to': 16, 'day_period': 'afternoon'}),
+                (0, 0, {'name': 'Tuesday Morning', 'dayofweek': '1', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Tuesday Evening', 'dayofweek': '1', 'hour_from': 13, 'hour_to': 16, 'day_period': 'afternoon'}),
+                (0, 0, {'name': 'Wednesday Morning', 'dayofweek': '2', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Wednesday Evening', 'dayofweek': '2', 'hour_from': 13, 'hour_to': 16, 'day_period': 'afternoon'}),
+                (0, 0, {'name': 'Thursday Morning', 'dayofweek': '3', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Thursday Evening', 'dayofweek': '3', 'hour_from': 13, 'hour_to': 16, 'day_period': 'afternoon'}),
+                (0, 0, {'name': 'Friday Morning', 'dayofweek': '4', 'hour_from': 7.5, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Friday Evening', 'dayofweek': '4', 'hour_from': 12.5, 'hour_to': 13, 'day_period': 'afternoon'})
+            ]
+        })
+        self.user_employee.resource_calendar_id = res_calendar_test
+        # Create a public holiday for the second company
+        p_leave = self.env['resource.calendar.leaves'].create({
+            'date_from': datetime(2022, 3, 11),
+            'date_to': datetime(2022, 3, 11, 23, 59, 59),
+        })
+        p_leave.company_id = other_company
+        self.user_employee.company_ids = [
+            (4, other_company.id),
+            (4, self.env.company.id),]
+        leave = self.env['hr.leave'].with_user(self.user_employee_id).with_context(allowed_company_ids=[other_company.id, self.env.company.id]).create({
             'name': 'Holiday Request',
             'holiday_type': 'employee',
-            'employee_id': self.employee_emp.id,
+            'employee_id': self.employee_emp_id,
             'holiday_status_id': self.holidays_type_1.id,
             'date_from': datetime(2022, 3, 11),
             'date_to': datetime(2022, 3, 11, 23, 59, 59),
         })
-        self.assertEqual(leave.number_of_days, 1)
+        self.assertEqual(leave.number_of_hours_display, 5)
 
     def test_several_allocations(self):
         allocation_vals = {

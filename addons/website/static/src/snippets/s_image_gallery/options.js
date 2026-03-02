@@ -59,7 +59,13 @@ options.registry.gallery = options.Class.extend({
             }
         });
 
-        return this._super.apply(this, arguments);
+        return this._super.apply(this, arguments).then(() => {
+            // Call specific mode's start if defined (e.g. _slideshowStart)
+            const startMode = this[`_${this.getMode()}Start`];
+            if (startMode) {
+                startMode.bind(this)();
+            }
+        });
     },
     /**
      * @override
@@ -166,7 +172,7 @@ options.registry.gallery = options.Class.extend({
      * Displays the images with the "grid" layout.
      */
     grid: function () {
-        var imgs = this._getImages();
+        const imgs = this._getImgHolderEls();
         var $row = $('<div/>', {class: 'row s_nb_column_fixed'});
         var columns = this._getColumns();
         var colClass = 'col-lg-' + (12 / columns);
@@ -188,7 +194,7 @@ options.registry.gallery = options.Class.extend({
      */
     masonry: function () {
         var self = this;
-        var imgs = this._getImages();
+        const imgs = this._getImgHolderEls();
         var columns = this._getColumns();
         var colClass = 'col-lg-' + (12 / columns);
         var cols = [];
@@ -266,15 +272,16 @@ options.registry.gallery = options.Class.extend({
     nomode: function () {
         var $row = $('<div/>', {class: 'row s_nb_column_fixed'});
         var imgs = this._getImages();
+        const imgHolderEls = this._getImgHolderEls();
 
         this._replaceContent($row);
 
-        _.each(imgs, function (img) {
+        _.each(imgs, function (img, index) {
             var wrapClass = 'col-lg-3';
             if (img.width >= img.height * 2 || img.width > 600) {
                 wrapClass = 'col-lg-6';
             }
-            var $wrap = $('<div/>', {class: wrapClass}).append(img);
+            var $wrap = $('<div/>', {class: wrapClass}).append(imgHolderEls[index]);
             $row.append($wrap);
         });
     },
@@ -303,10 +310,14 @@ options.registry.gallery = options.Class.extend({
      */
     slideshow: function () {
         const imageEls = this._getImages();
+        const imgHolderEls = this._getImgHolderEls();
         const images = _.map(imageEls, img => ({
             // Use getAttribute to get the attribute value otherwise .src
             // returns the absolute url.
             src: img.getAttribute('src'),
+            // TODO: remove me in master. This is not needed anymore as the
+            // images of the rendered `website.gallery.slideshow` are replaced
+            // by the elements of `imgHolderEls`.
             alt: img.getAttribute('alt'),
         }));
         var currentInterval = this.$target.find('.carousel:first').attr('data-interval');
@@ -316,10 +327,23 @@ options.registry.gallery = options.Class.extend({
             title: "",
             interval: currentInterval || 0,
             id: 'slideshow_' + new Date().getTime(),
+            // TODO: in master, remove `attrClass` and `attStyle` from `params`.
+            // This is not needed anymore as the images of the rendered
+            // `website.gallery.slideshow` are replaced by the elements of
+            // `imgHolderEls`.
             attrClass: imageEls.length > 0 ? imageEls[0].className : '',
             attrStyle: imageEls.length > 0 ? imageEls[0].style.cssText : '',
         },
         $slideshow = $(qweb.render('website.gallery.slideshow', params));
+        const imgSlideshowEls = $slideshow[0].querySelectorAll("img[data-o-main-image]");
+        imgSlideshowEls.forEach((imgSlideshowEl, index) => {
+            // Replace the template image by the original one. This is needed in
+            // order to keep the characteristics of the image such as the
+            // filter, the width, the quality, the link on which the users are
+            // redirected once they click on the image etc...
+            imgSlideshowEl.after(imgHolderEls[index]);
+            imgSlideshowEl.remove();
+        });
         this._replaceContent($slideshow);
         _.each(this.$('img'), function (img, index) {
             $(img).attr({contenteditable: true, 'data-index': index});
@@ -328,6 +352,7 @@ options.registry.gallery = options.Class.extend({
 
         // Apply layout animation
         this.$target.off('slide.bs.carousel').off('slid.bs.carousel');
+        this._slideshowStart();
         this.$('li.fa').off('click');
     },
 
@@ -472,6 +497,17 @@ options.registry.gallery = options.Class.extend({
         return imgs;
     },
     /**
+     * Returns the images, or the images holder if this holder is an anchor,
+     * sorted by index.
+     *
+     * @private
+     * @returns {Array.<HTMLImageElement|HTMLAnchorElement>}
+     */
+    _getImgHolderEls: function () {
+        const imgEls = this._getImages();
+        return imgEls.map(imgEl => imgEl.closest("a") || imgEl);
+    },
+    /**
      * Returns the index associated to a given image.
      *
      * @private
@@ -501,6 +537,50 @@ options.registry.gallery = options.Class.extend({
         var $container = this.$('> .container, > .container-fluid, > .o_container_small');
         $container.empty().append($content);
         return $container;
+    },
+    /**
+     * Sets up listeners on slideshow to activate selected image.
+     */
+    _slideshowStart() {
+        const $carousel = this.$target.find(".carousel:first");
+        let _previousEditor;
+        let _miniatureClicked;
+        const carouselIndicatorsEl = this.$target[0].querySelector(".carousel-indicators");
+        if (carouselIndicatorsEl) {
+            carouselIndicatorsEl.addEventListener("click", () => {
+                _miniatureClicked = true;
+            });
+        }
+        let lastSlideTimeStamp;
+        $carousel.on("slide.bs.carousel.image_gallery", (ev) => {
+            lastSlideTimeStamp = ev.timeStamp;
+            const activeImageEl = this.$target[0].querySelector(".carousel-item.active img");
+            for (const editor of this.options.wysiwyg.snippetsMenu.snippetEditors) {
+                if (editor.isShown() && editor.$target[0] === activeImageEl) {
+                    _previousEditor = editor;
+                    editor.toggleOverlay(false);
+                }
+            }
+        });
+        $carousel.on("slid.bs.carousel.image_gallery", (ev) => {
+            if (!_previousEditor && !_miniatureClicked) {
+                return;
+            }
+            _previousEditor = undefined;
+            _miniatureClicked = false;
+            // slid.bs.carousel is most of the time fired too soon by bootstrap
+            // since it emulates the transitionEnd with a setTimeout. We wait
+            // here an extra 20% of the time before retargeting edition, which
+            // should be enough...
+            const _slideDuration = new Date().getTime() - lastSlideTimeStamp;
+            setTimeout(() => {
+                const activeImageEl = this.$target[0].querySelector(".carousel-item.active img");
+                this.trigger_up("activate_snippet", {
+                    $snippet: $(activeImageEl),
+                    ifInactiveOptions: true,
+                });
+            }, 0.2 * _slideDuration);
+        });
     },
     /**
      * Call mode while ensuring that all images are loaded.

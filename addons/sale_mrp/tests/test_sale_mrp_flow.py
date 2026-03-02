@@ -9,8 +9,7 @@ from odoo.addons.stock_account.tests.test_stockvaluation import _create_accounti
 
 
 # these tests create accounting entries, and therefore need a chart of accounts
-@common.tagged('post_install', '-at_install')
-class TestSaleMrpFlow(ValuationReconciliationTestCommon):
+class TestSaleMrpFlowCommon(ValuationReconciliationTestCommon):
 
     @classmethod
     def setUpClass(cls, chart_template_ref=None):
@@ -232,6 +231,9 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
             move_line.qty_done = qty_to_process[comp][0]
             move._action_done()
 
+
+@common.tagged('post_install', '-at_install')
+class TestSaleMrpFlow(TestSaleMrpFlowCommon):
     def test_00_sale_mrp_flow(self):
         """ Test sale to mrp flow with diffrent unit of measure."""
 
@@ -1816,7 +1818,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
 
         # Create a SO for product Main Kit Product
         order_form = Form(self.env['sale.order'])
-        order_form.partner_id = self.env.ref('base.res_partner_2')
+        order_form.partner_id = self.env['res.partner'].create({'name': 'Test Partner'})
         with order_form.order_line.new() as line:
             line.product_id = main_kit_product
             line.product_uom_qty = 1
@@ -1921,7 +1923,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         # Create environment
         self.env.company.currency_id = self.env.ref('base.USD')
         self.env.company.anglo_saxon_accounting = True
-        self.partner = self.env.ref('base.res_partner_1')
+        self.partner = self.env['res.partner'].create({'name': 'Test Partner'})
         self.category = self.env.ref('product.product_category_1').copy({'name': 'Test category', 'property_valuation': 'real_time', 'property_cost_method': 'fifo'})
         account_type = self.env['account.account.type'].create({'name': 'RCV type', 'type': 'other', 'internal_group': 'asset'})
         account_receiv = self.env['account.account'].create({'name': 'Receivable', 'code': 'RCV00', 'user_type_id': account_type.id, 'reconcile': True})
@@ -2051,7 +2053,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
 
     def test_reconfirm_cancelled_kit(self):
         so = self.env['sale.order'].create({
-            'partner_id': self.env.ref('base.res_partner_1').id,
+            'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
             'order_line': [
                 (0, 0, {
                     'name': self.kit_1.name,
@@ -2124,7 +2126,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
 
         # Sell 3 kits
         so = self.env['sale.order'].create({
-            'partner_id': self.env.ref('base.res_partner_1').id,
+            'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
             'order_line': [
                 (0, 0, {
                     'name': kit.name,
@@ -2239,7 +2241,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
 
         # Sell 3 kits
         so = self.env['sale.order'].create({
-            'partner_id': self.env.ref('base.res_partner_1').id,
+            'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
             'order_line': [
                 (0, 0, {
                     'name': kit.name,
@@ -2553,7 +2555,7 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         in_moves._action_done()
 
         so = self.env['sale.order'].create({
-            'partner_id': self.env.ref('base.res_partner_1').id,
+            'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
             'order_line': [
                 (0, 0, {
                     'name': kit.name,
@@ -2776,6 +2778,8 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
 
         so.action_confirm()
         with self.assertRaises(UserError):
+            self.bom_kit_1.write({'type': 'normal'})
+        with self.assertRaises(UserError):
             self.bom_kit_1.toggle_active()
         with self.assertRaises(UserError):
             self.bom_kit_1.unlink()
@@ -2785,6 +2789,8 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         so.picking_ids.button_validate()
 
         self.assertEqual(so.picking_ids.state, 'done')
+        with self.assertRaises(UserError):
+            self.bom_kit_1.write({'type': 'normal'})
         with self.assertRaises(UserError):
             self.bom_kit_1.toggle_active()
         with self.assertRaises(UserError):
@@ -2796,4 +2802,6 @@ class TestSaleMrpFlow(ValuationReconciliationTestCommon):
         self.assertEqual(invoice.state, 'posted')
         self.bom_kit_1.toggle_active()
         self.bom_kit_1.toggle_active()
+        self.bom_kit_1.write({'type': 'normal'})
+        self.bom_kit_1.write({'type': 'phantom'})
         self.bom_kit_1.unlink()

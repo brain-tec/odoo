@@ -24,6 +24,7 @@ class AccountReconcileModelPartnerMapping(models.Model):
         for record in self:
             if not (record.narration_regex or record.payment_ref_regex):
                 raise ValidationError(_("Please set at least one of the match texts to create a partner mapping."))
+            current_regex = ''
             try:
                 if record.payment_ref_regex:
                     current_regex = record.payment_ref_regex
@@ -66,7 +67,7 @@ class AccountReconcileModelLine(models.Model):
     amount_string = fields.Char(string="Amount", default='100', required=True, help="""Value for the amount of the writeoff line
     * Percentage: Percentage of the balance, between 0 and 100.
     * Fixed: The fixed value of the writeoff. The amount will count as a debit if it is negative, as a credit if it is positive.
-    * From Label: There is no need for regex delimiter, only the regex is needed. For instance if you want to extract the amount from\nR:9672938 10/07 AX 9415126318 T:5L:NA BRT: 3358,07 C:\nYou could enter\nBRT: ([\d,]+)""")
+    * From Label: There is no need for regex delimiter, only the regex is needed. For instance if you want to extract the amount from\nR:9672938 10/07 AX 9415126318 T:5L:NA BRT: 3358,07 C:\nYou could enter\nBRT: ([\\d,]+)""")
     tax_ids = fields.Many2many('account.tax', string='Taxes', ondelete='restrict', check_company=True)
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', ondelete='set null', check_company=True)
     analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags', check_company=True,
@@ -90,7 +91,7 @@ class AccountReconcileModelLine(models.Model):
         if self.amount_type in ('percentage', 'percentage_st_line'):
             self.amount_string = '100'
         elif self.amount_type == 'regex':
-            self.amount_string = '([\d,]+)'
+            self.amount_string = r'([\d,]+)'
 
     @api.depends('amount_string')
     def _compute_float_amount(self):
@@ -670,7 +671,7 @@ class AccountReconcileModel(models.Model):
                 no_partner_query = " OR ".join([
                     r"""
                         (
-                            substring(REGEXP_REPLACE(""" + sql_field + """, '[^0-9\s]', '', 'g'), '\S(?:.*\S)*') != ''
+                            substring(REGEXP_REPLACE(""" + sql_field + r""", '[^0-9\s]', '', 'g'), '\S(?:.*\S)*') != ''
                             AND
                             (
                                 (""" + self._get_select_communication_flag() + """)
@@ -794,7 +795,11 @@ class AccountReconcileModel(models.Model):
 
         for partner_mapping in self.partner_mapping_line_ids:
             match_payment_ref = re.match(partner_mapping.payment_ref_regex, st_line.payment_ref) if partner_mapping.payment_ref_regex else True
-            match_narration = re.match(partner_mapping.narration_regex, tools.html2plaintext(st_line.narration or '').rstrip()) if partner_mapping.narration_regex else True
+            match_narration = re.match(
+                partner_mapping.narration_regex,
+                tools.html2plaintext(st_line.narration or '').rstrip(),
+                flags=re.DOTALL   # Ignore '/n' set by online sync.
+            ) if partner_mapping.narration_regex else True
 
             if match_payment_ref and match_narration:
                 return partner_mapping.partner_id
@@ -1011,7 +1016,9 @@ class AccountReconcileModel(models.Model):
             return {'rejected'}
 
         # The statement line will be fully reconciled.
-        residual_balance_after_rec = matched_candidates_values['residual_balance_curr'] + matched_candidates_values['candidates_balance_curr']
+        residual_balance_after_rec = currency.round(
+            matched_candidates_values['residual_balance_curr'] + matched_candidates_values['candidates_balance_curr']
+        )
         if currency.is_zero(residual_balance_after_rec):
             return {'allow_auto_reconcile'}
 
@@ -1026,12 +1033,12 @@ class AccountReconcileModel(models.Model):
 
         # If the tolerance is expressed as a fixed amount, check the residual payment amount doesn't exceed the
         # tolerance.
-        if self.payment_tolerance_type == 'fixed_amount' and -residual_balance_after_rec <= self.payment_tolerance_param:
+        if self.payment_tolerance_type == 'fixed_amount' and currency.compare_amounts(-residual_balance_after_rec, self.payment_tolerance_param) <= 0:
             return {'allow_write_off', 'allow_auto_reconcile'}
 
         # The tolerance is expressed as a percentage between 0 and 100.0.
         reconciled_percentage_left = (residual_balance_after_rec / matched_candidates_values['candidates_balance_curr']) * 100.0
-        if self.payment_tolerance_type == 'percentage' and reconciled_percentage_left <= self.payment_tolerance_param:
+        if self.payment_tolerance_type == 'percentage' and currency.compare_amounts(reconciled_percentage_left, self.payment_tolerance_param) <= 0:
             return {'allow_write_off', 'allow_auto_reconcile'}
 
         return {'rejected'}

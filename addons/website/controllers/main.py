@@ -619,6 +619,14 @@ class Website(Home):
         template = template and dict(template=template) or {}
         page = request.env['website'].new_page(path, add_menu=add_menu, **template)
         url = page['url']
+        # In case the page is created through the 404 "Create Page" button, the
+        # URL may use special characters which are slugified on page creation.
+        # If that URL is also a menu, we update it accordingly.
+        # NB: we don't want to slugify on menu creation as it could redirect
+        # towards files (with spaces, apostrophes, etc.).
+        menu = request.env['website.menu'].search([('url', '=', '/' + path)])
+        if menu:
+            menu.page_id = page['page_id']
         if noredirect:
             return werkzeug.wrappers.Response(url, mimetype='text/plain')
 
@@ -648,7 +656,11 @@ class Website(Home):
     @http.route('/website/toggle_switchable_view', type='json', auth='user', website=True)
     def toggle_switchable_view(self, view_key):
         if request.website.user_has_groups('website.group_website_designer'):
-            request.website.viewref(view_key).toggle_active()
+            view = request.website.viewref(view_key)
+            # TODO: In master, set the priority in XML directly.
+            if view_key == 'website_blog.opt_blog_cover_post':
+                view.priority = 17
+            view.toggle_active()
         else:
             return werkzeug.exceptions.Forbidden()
 

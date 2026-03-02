@@ -47,8 +47,22 @@ function addTables($editable) {
         const table = _createTable(snippet.attributes);
 
         const row = document.createElement('tr');
-        const col = document.createElement('td');
+        let col = document.createElement('td');
         row.appendChild(col);
+        if (snippet.classList.contains('o_basic_theme')) {
+            const div = document.createElement('div');
+            div.classList.add('o_apple_wrapper_padding');
+            col.appendChild(div);
+            col = div;
+            const style = document.createElement('style');
+            // We create a nested media query because it's only supported by a
+            // handful of clients, including Apple Mail, and we actually only
+            // want this for Apple Mail.
+            const padding = '34px'; // This is what's needed to align the content with Apple Mail's header.
+            style.textContent = `@media{@media{.o_basic_theme div.o_apple_wrapper_padding{padding:${snippet.style.padding};}}}` +
+                `@media(min-width:961px){@media{@media{.o_basic_theme div.o_apple_wrapper_padding{padding-left:${padding};}}}}`;
+            div.before(style);
+        }
         table.appendChild(row);
 
         for (const child of [...snippet.childNodes]) {
@@ -312,7 +326,7 @@ function cardToTable($editable) {
         for (const child of [...card.childNodes]) {
             const row = document.createElement('tr');
             const col = document.createElement('td');
-            if (isBlock(child)) {
+            if (!['IMG', 'A'].includes(child.nodeName) && isBlock(child)) {
                 for (const attr of child.attributes) {
                     col.setAttribute(attr.name, attr.value);
                 }
@@ -337,9 +351,14 @@ function cardToTable($editable) {
             superCol.append(subTable);
             superRow.append(superCol);
             table.append(superRow);
-            if (child.classList && child.classList.contains('card-img-top')) {
-                // Collect .card-img-top superRows to manipulate their heights.
-                cardImgTopSuperRows.push(superRow);
+            if (child.nodeType === Node.ELEMENT_NODE) {
+                const hasImgTop = [child, ...child.querySelectorAll('.card-img-top')].some(node => (
+                    node.classList && node.classList.contains('card-img-top') && node.closest && node.closest('.card') === table
+                ));
+                if (hasImgTop) {
+                    // Collect .card-img-top superRows to manipulate their heights.
+                    cardImgTopSuperRows.push(superRow);
+                }
             }
         }
         // We expect successive .card-img-top to have the same height so the

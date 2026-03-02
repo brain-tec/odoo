@@ -6,7 +6,7 @@ from datetime import timedelta
 from odoo import tools
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.fields import Date
-from odoo.tests import Form, tagged, users
+from odoo.tests import Form, tagged, users, loaded_demo_data
 from odoo.tests.common import TransactionCase
 
 
@@ -31,6 +31,11 @@ class TestCRMPLS(TransactionCase):
         cls.pls_team = cls.env['crm.team'].create({
             'name': 'PLS Team',
         })
+
+        # Ensure independance on demo data
+        cls.env['crm.lead'].with_context({'active_test': False}).search([]).unlink()
+        cls.env['crm.lead.scoring.frequency'].search([]).unlink()
+        cls.cr.flush()
 
     def _get_lead_values(self, team_id, name_suffix, country_id, state_id, email_state, phone_state, source_id, stage_id):
         return {
@@ -165,9 +170,14 @@ class TestCRMPLS(TransactionCase):
 
         leads = Lead.create(leads_to_create)
 
-        # assign team 3 to all leads with no teams (also take data into account).
-        leads_with_no_team = self.env['crm.lead'].sudo().search([('team_id', '=', False)])
-        leads_with_no_team.write({'team_id': team_ids[2]})
+        # Assert lead data.
+        existing_leads = Lead.with_context({'active_filter': False}).search([])
+        self.assertEqual(existing_leads, leads)
+        self.assertEqual(existing_leads.filtered(lambda lead: not lead.team_id), leads[-4::])
+
+        # Assign leads without team to team 3 to compare probability
+        # as a separate team and the one with no team set. See below (*)
+        leads[-4::].team_id = team_ids[2]
 
         # Set the PLS config
         self.env['ir.config_parameter'].sudo().set_param("crm.pls_start_date", "2000-01-01")
@@ -201,13 +211,15 @@ class TestCRMPLS(TransactionCase):
 
         # Probability for Lead with no teams should be based on all the leads no matter their team.
         # De-assign team 3 and rebuilt frequency table and recompute.
-        # Proba should be different as "no team" is not considered as a separated team.
-        leads_with_no_team.write({'team_id': False})
+        # Proba should be different as "no team" is not considered as a separated team. (*)
+        leads[-4::].write({'team_id': False})
+        leads[-4::].flush()
+
         Lead._cron_update_automated_probabilities()
         leads.invalidate_cache()
         lead_13_no_team_proba = leads[13].automated_probability
         self.assertTrue(lead_13_team_3_proba != leads[13].automated_probability, "Probability for leads with no team should be different than if they where in their own team.")
-        self.assertEqual(tools.float_compare(lead_13_no_team_proba, 36.65, 2), 0)
+        self.assertAlmostEqual(lead_13_no_team_proba, 35.19, places=2)
 
         # Test frequencies
         lead_4_stage_0_freq = LeadScoringFrequency.search([('team_id', '=', leads[4].team_id.id), ('variable', '=', 'stage_id'), ('value', '=', stage_ids[0])])

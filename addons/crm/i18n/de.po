@@ -7,15 +7,16 @@
 # Raymond Vetter, 2021
 # Friederike Fasterling-Nesselbosch, 2022
 # Martin Trigaux, 2023
-# Larissa Manderfeld, 2023
+# Larissa Manderfeld, 2024
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-05 10:53+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:21+0000\n"
-"Last-Translator: Larissa Manderfeld, 2023\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: German (https://app.transifex.com/odoo/teams/41243/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -103,7 +104,7 @@ msgstr "Verkaufschance von %s"
 #: code:addons/crm/static/src/js/tours/crm.js:0
 #, python-format
 msgid "<b>Create your first opportunity.</b>"
-msgstr "<b>Erstellen Sie Ihre erste Chance.</b>"
+msgstr "<b>Erstellen Sie Ihre erste Verkaufschance.</b>"
 
 #. module: crm
 #. openerp-web
@@ -166,9 +167,9 @@ msgid ""
 "    as a member of one of the Sales Team.\n"
 "</p>"
 msgstr ""
-"<p class='o_view_nocontent_smiling_face'>Füge eine neue Verkaufschance hinzu</p><p>\n"
-"    Scheinbar sind Sie kein Mitglied von diesem Vertriebskanal. Fügen Sie sich selbst\n"
-"    als ein Mitglied  dieses Vertriebskanals hinzu.\n"
+"<p class='o_view_nocontent_smiling_face'>Fügen Sie eine neue Verkaufschance hinzu</p><p>\n"
+"    Scheinbar sind Sie kein Mitglied dieses Verkaufsteams. Fügen Sie sich selbst\n"
+"    als ein Mitglied dieses Verkaufsteams hinzu.\n"
 "</p>"
 
 #. module: crm
@@ -279,10 +280,10 @@ msgid ""
 "                                    </span>"
 msgstr ""
 "<span>Weisen Sie regelmäßig Leads basierend auf Regeln zu</span><br/>\n"
-"                                    <span attrs=\"{'invisible': [('crm_use_auto_assignment', '=', False)]}\">\n"
-"                                        Alle Sales Teams werden diese Einstellung standardmäßig verwenden\n"
-"                                       sofern nicht anders angegeben.\n"
-"                                    </span>"
+"                                <span attrs=\"{'invisible': [('crm_use_auto_assignment', '=', False)]}\">\n"
+"                                    Alle Verkaufsteams werden diese Einstellung standardmäßig verwenden, sofern\n"
+"                                    nicht anders angegeben.\n"
+"                                </span>"
 
 #. module: crm
 #: model:mail.template,body_html:crm.mail_template_demo_crm_lead
@@ -1220,11 +1221,8 @@ msgstr "Beschreibung"
 
 #. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_0
-msgid ""
-"Did you know emails sent to  generate opportunities in your pipeline?<br>"
-msgstr ""
-"Wussten Sie, dass E-Mails, die an einen Alias gesendet werden, Opportunities"
-" in Ihrer Pipeline generieren?<br>"
+msgid "Did you know emails sent to"
+msgstr "Wussten Sie, dass E-Mails, die an"
 
 #. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_0
@@ -1317,7 +1315,7 @@ msgstr ""
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_case_kanban_view_leads
 msgid "Dropdown menu"
-msgstr "Dropdownmenu"
+msgstr "Drop-down-Menü"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
@@ -2997,7 +2995,7 @@ msgstr "Anteiliger Umsatz"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_tree_forecast
 msgid "Prorated Revenues"
-msgstr "Anteilige Einkünfte"
+msgstr "Anteilige Einnahmen"
 
 #. module: crm
 #: model:crm.stage,name:crm.stage_lead2
@@ -3348,7 +3346,7 @@ msgstr "Starten Sie die Planung von Aktivitäten auf Ihren Verkaufschancen"
 #: model:ir.model.fields,field_description:crm.field_crm_lead__state_id
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "State"
-msgstr "Status"
+msgstr "Bundesland"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__activity_state
@@ -3437,7 +3435,7 @@ msgid ""
 " email that does not reply to an existing record will cause the creation of "
 "a new record of this model (e.g. a Project Task)"
 msgstr ""
-"Das Model (Odoo-Dokumentart), auf das sich der Alias bezieht. Alle "
+"Das Modell (Odoo-Dokumentart), auf das sich der Alias bezieht. Alle "
 "eingehenden E-Mails ohne Bezug zu einer bereits vorhandenen E-Mail führen "
 "üblicherweise zur Erstellung eines neuen Datensatz dieses Modells (z. B. "
 "Projektaufgabe)."
@@ -3870,7 +3868,7 @@ msgstr "Wert"
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead_scoring_frequency__variable
 msgid "Variable"
-msgstr "Variabel"
+msgstr "Variable"
 
 #. module: crm
 #: model:ir.model.fields.selection,name:crm.selection__crm_lead__priority__3
@@ -4016,6 +4014,11 @@ msgstr "z. B. https://www.odoo.com"
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid "for the leads created as of the"
 msgstr "für Leads mit einem Erstellungsdatum ab dem"
+
+#. module: crm
+#: model_terms:digest.tip,tip_description:crm.digest_tip_crm_0
+msgid "generate opportunities in your pipeline?<br>"
+msgstr "gesendet werden, Verkaufschancen in Ihrer Pipeline generieren?<br>"
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_stage__team_count

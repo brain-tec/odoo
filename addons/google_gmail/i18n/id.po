@@ -4,7 +4,6 @@
 # 
 # Translators:
 # oon arfiandwi (OonID) <oon.arfiandwi@gmail.com>, 2022
-# Martin Trigaux, 2022
 # pnyet <david@zeromail.us>, 2022
 # Wahyu Setiawan <wahyusetiaaa@gmail.com>, 2022
 # Ryanto The <ry.the77@gmail.com>, 2022
@@ -12,9 +11,9 @@
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 15.0+e\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-25 14:36+0000\n"
+"POT-Creation-Date: 2024-08-14 15:43+0000\n"
 "PO-Revision-Date: 2022-03-03 13:58+0000\n"
 "Last-Translator: Abe Manyo, 2023\n"
 "Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
@@ -61,20 +60,20 @@ msgstr "Token Akses"
 #: model:ir.model.fields,field_description:google_gmail.field_google_gmail_mixin__google_gmail_access_token_expiration
 #: model:ir.model.fields,field_description:google_gmail.field_ir_mail_server__google_gmail_access_token_expiration
 msgid "Access Token Expiration Timestamp"
-msgstr ""
+msgstr "Timestamp Kadaluwarsa Token Akses"
 
 #. module: google_gmail
 #: code:addons/google_gmail/controllers/main.py:0
 #: code:addons/google_gmail/controllers/main.py:0
 #, python-format
 msgid "An error occur during the authentication process."
-msgstr ""
+msgstr "Error terjadi pada proses autentikasi."
 
 #. module: google_gmail
 #: code:addons/google_gmail/models/google_gmail_mixin.py:0
 #, python-format
 msgid "An error occurred when fetching the access token."
-msgstr ""
+msgstr "Error terjadi saat mengambil token akses."
 
 #. module: google_gmail
 #: model:ir.model.fields,field_description:google_gmail.field_google_gmail_mixin__google_gmail_authorization_code
@@ -98,11 +97,6 @@ msgid "Config Settings"
 msgstr "Pengaturan Konfigurasi"
 
 #. module: google_gmail
-#: model:ir.model.fields,field_description:google_gmail.field_google_gmail_mixin__display_name
-msgid "Display Name"
-msgstr "Nama Tampilan"
-
-#. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
 msgid "Gmail"
 msgstr ""
@@ -116,27 +110,17 @@ msgstr ""
 #. module: google_gmail
 #: model:ir.model.fields,field_description:google_gmail.field_res_config_settings__google_gmail_client_identifier
 msgid "Gmail Client Id"
-msgstr ""
+msgstr "ID Klien Gmail"
 
 #. module: google_gmail
 #: model:ir.model.fields,field_description:google_gmail.field_res_config_settings__google_gmail_client_secret
 msgid "Gmail Client Secret"
-msgstr ""
+msgstr "Gmail Client Secret"
 
 #. module: google_gmail
 #: model:ir.model,name:google_gmail.model_google_gmail_mixin
 msgid "Google Gmail Mixin"
-msgstr ""
-
-#. module: google_gmail
-#: model:ir.model.fields,field_description:google_gmail.field_google_gmail_mixin__id
-msgid "ID"
-msgstr "ID"
-
-#. module: google_gmail
-#: model:ir.model.fields,field_description:google_gmail.field_google_gmail_mixin____last_update
-msgid "Last Modified on"
-msgstr "Terakhir diubah pada"
+msgstr "Google Gmail Mixin"
 
 #. module: google_gmail
 #: model:ir.model,name:google_gmail.model_ir_mail_server
@@ -147,13 +131,13 @@ msgstr "Email Server"
 #: code:addons/google_gmail/models/google_gmail_mixin.py:0
 #, python-format
 msgid "Only the administrator can link a Gmail mail server."
-msgstr ""
+msgstr "Hanya administrator yang dapat menghubungkan server email Gmail."
 
 #. module: google_gmail
 #: code:addons/google_gmail/models/google_gmail_mixin.py:0
 #, python-format
 msgid "Please configure your Gmail credentials."
-msgstr ""
+msgstr "Mohon konfigurasikan credential Gmail Anda."
 
 #. module: google_gmail
 #: code:addons/google_gmail/models/ir_mail_server.py:0
@@ -163,6 +147,9 @@ msgid ""
 "address). This should be the same account as the one used for the Gmail "
 "OAuthentication Token."
 msgstr ""
+"Mohon isi field \"Username\" dengan username Gmail Anda (alamat email Anda)."
+" Ini harusnya merupakan akun yang sama dengan yang Anda gunakan untuk Token "
+"Gmail OAuthentication."
 
 #. module: google_gmail
 #: model:ir.model.fields,field_description:google_gmail.field_google_gmail_mixin__google_gmail_refresh_token
@@ -181,6 +168,8 @@ msgid ""
 "Setup your Gmail API credentials in the general settings to link a Gmail "
 "account."
 msgstr ""
+"Setup kredensial Gmail API Anda di pengaturan umum untuk menghubungkan akun "
+"Gmail Anda."
 
 #. module: google_gmail
 #: model:ir.model.fields,help:google_gmail.field_google_gmail_mixin__google_gmail_uri
