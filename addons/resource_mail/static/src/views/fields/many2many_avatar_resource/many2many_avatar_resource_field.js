@@ -25,7 +25,10 @@ export class AvatarResourceMany2XAutocomplete extends Many2XAutocomplete {
             "search_read",
             [this.getDomain(request), ["id", "display_name", "resource_type", "color"]],
             {
-                context: this.props.context,
+                context: {
+                    ...this.props.context,
+                    formatted_display_name: true,
+                },
                 limit: this.props.searchLimit + 1,
             }
         );
@@ -133,3 +136,4 @@ export const kanbanMany2ManyAvatarResourceField = {
     component: KanbanMany2ManyAvatarResourceField,
 };
 registry.category("fields").add("kanban.many2many_avatar_resource", kanbanMany2ManyAvatarResourceField);
+registry.category("fields").add("activity.many2many_avatar_resource", kanbanMany2ManyAvatarResourceField);

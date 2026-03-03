@@ -9,6 +9,7 @@
                 class="o-autocomplete--input o_input pe-3 text-truncate"
                 t-att-autocomplete="props.autocomplete"
                 t-att-placeholder="props.placeholder"
+                t-att-title="props.title"
                 role="combobox"
                 t-att-aria-activedescendant="activeSourceOptionId"
                 t-att-aria-expanded="displayOptions ? 'true' : 'false'"
@@ -43,7 +44,7 @@
                                     class="o_loading dropdown-item ui-menu-item-wrapper"
                                     aria-selected="true"
                                 >
-                                    <i class="fa fa-spin fa-circle-o-notch" /> <t t-esc="source.placeholder" />
+                                    <i class="fa fa-spin fa-circle-o-notch" /> <t t-out="source.placeholder" />
                                 </a>
                             </li>
                         </t>
@@ -69,8 +70,8 @@
                                             <t t-if="!option.labelTermOrder" t-out="option.label"/>
                                             <t t-else="">
                                                 <t t-foreach="option.labelTermOrder.labelBits" t-as="bit" t-key="bit.id">
-                                                    <t t-if="!option.labelTermOrder.searchTermIndexes.includes(bit.id)" t-esc="bit.bit"/>
-                                                    <mark t-else="" class="o-autocomplete--mark" t-esc="bit.bit"/>
+                                                    <t t-if="!option.labelTermOrder.searchTermIndexes.includes(bit.id)" t-out="bit.bit"/>
+                                                    <mark t-else="" class="o-autocomplete--mark" t-out="bit.bit"/>
                                                 </t>
                                             </t>
                                         </t>
