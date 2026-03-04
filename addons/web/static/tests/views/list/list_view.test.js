@@ -1998,7 +1998,7 @@ test(`basic grouped list rendering with widget="handle" col`, async () => {
     expect(`thead th[data-name=int_field]`).toHaveCount(1);
     expect(`tr.o_group_header`).toHaveCount(2);
     expect(`th.o_group_name`).toHaveCount(2);
-    expect(`.o_group_header:eq(0) th`).toHaveCount(3); // group name + colspan 2 + cog placeholder
+    expect(`.o_group_header:eq(0) th`).toHaveCount(2); // group name + cog placeholder
     expect(`.o_group_header:eq(0) .o_list_number`).toHaveCount(0);
 });
 
@@ -2086,8 +2086,8 @@ test(`basic grouped list rendering 2 cols without selector`, async () => {
         groupBy: ["bar"],
         allowSelectors: false,
     });
-    expect(`.o_group_header:eq(0) th`).toHaveCount(3);
-    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "1");
+    expect(`.o_group_header:eq(0) th`).toHaveCount(2);
+    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "2");
 });
 
 test(`basic grouped list rendering 3 cols without selector`, async () => {
@@ -2098,8 +2098,8 @@ test(`basic grouped list rendering 3 cols without selector`, async () => {
         groupBy: ["bar"],
         allowSelectors: false,
     });
-    expect(`.o_group_header:eq(0) th`).toHaveCount(3);
-    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "2");
+    expect(`.o_group_header:eq(0) th`).toHaveCount(2);
+    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "3");
 });
 
 test(`basic grouped list rendering 3 cols without selector and with optional fields`, async () => {
@@ -2117,8 +2117,8 @@ test(`basic grouped list rendering 3 cols without selector and with optional fie
         groupBy: ["bar"],
         allowSelectors: false,
     });
-    expect(`.o_group_header:eq(0) th`).toHaveCount(3);
-    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "2");
+    expect(`.o_group_header:eq(0) th`).toHaveCount(2);
+    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "3");
 });
 
 test.tags("desktop");
@@ -2130,8 +2130,8 @@ test(`basic grouped list rendering 2 col with selector on desktop`, async () => 
         groupBy: ["bar"],
         allowSelectors: true,
     });
-    expect(`.o_group_header:eq(0) th`).toHaveCount(3);
-    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "2");
+    expect(`.o_group_header:eq(0) th`).toHaveCount(2);
+    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "3");
 });
 
 test.tags("mobile");
@@ -2143,8 +2143,8 @@ test(`basic grouped list rendering 2 col with selector on mobile`, async () => {
         groupBy: ["bar"],
         allowSelectors: true,
     });
-    expect(`.o_group_header:eq(0) th`).toHaveCount(3);
-    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "1");
+    expect(`.o_group_header:eq(0) th`).toHaveCount(2);
+    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "2");
 });
 
 test.tags("desktop");
@@ -2157,8 +2157,8 @@ test(`basic grouped list rendering 3 cols with selector on desktop`, async () =>
         allowSelectors: true,
     });
 
-    expect(`.o_group_header:eq(0) th`).toHaveCount(3);
-    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "3");
+    expect(`.o_group_header:eq(0) th`).toHaveCount(2);
+    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "4");
 });
 
 test.tags("mobile");
@@ -2171,8 +2171,8 @@ test(`basic grouped list rendering 3 cols with selector on mobile`, async () => 
         allowSelectors: true,
     });
 
-    expect(`.o_group_header:eq(0) th`).toHaveCount(3);
-    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "2");
+    expect(`.o_group_header:eq(0) th`).toHaveCount(2);
+    expect(`.o_group_header th:eq(0)`).toHaveAttribute("colspan", "3");
 });
 
 test.tags("desktop");
@@ -20088,4 +20088,32 @@ For example, if the date is Mar 11 and you enter "+=2d", it will be updated to M
         "blip",
         "Dec 28, 2024, 1:00 AM",
     ]);
+});
+
+test(`custom button that creates record in list with sample data`, async () => {
+    Foo._records = [];
+    onRpc("custom_create", () => {
+        MockServer.env.foo.create({ foo: "new record" });
+        return false;
+    });
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list sample="1">
+                <header>
+                    <button class="custom_create" type="object" name="custom_create" string="Custom create" display="always"/>
+                </header>
+                <field name="foo"/>
+            </list>
+        `,
+    });
+    expect(`.o_list_view .o_content`).toHaveClass("o_view_sample_data");
+
+    if (getMockEnv().isSmall) {
+        await contains(".o_control_panel_main_buttons .btn.dropdown-toggle").click();
+    }
+    await contains(".custom_create").click();
+    expect(`.o_list_view .o_content`).not.toHaveClass("o_view_sample_data");
+    expect(`.o_data_row`).toHaveCount(1);
 });
