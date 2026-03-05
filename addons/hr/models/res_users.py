@@ -123,7 +123,7 @@ class ResUsers(models.Model):
     legal_name = field_employee(fields.Char, 'legal_name', user_writeable=True,
         help="The employee's official name as per government-issued or legal documents.")
     birthday = field_employee(fields.Date, 'birthday', user_writeable=True)
-    birthday_public_display = field_employee(fields.Boolean, 'birthday_public_display', string="Show to all employees", user_writeable=True)
+    birthday_public_display = field_employee(fields.Boolean, 'birthday_public_display', string="Show Birthday To Employees", user_writeable=True)
     place_of_birth = field_employee(fields.Char, 'place_of_birth', user_writeable=True)
     country_of_birth = field_employee(fields.Many2one, 'country_of_birth', comodel_name='res.country', user_writeable=True)
     sex = field_employee(fields.Selection, 'sex', user_writeable=True,
@@ -299,7 +299,7 @@ class ResUsers(models.Model):
         self.ensure_one()
         if self.env.company not in self.company_ids:
             raise AccessError(_("You are not allowed to create an employee because the user does not have access rights for %s", self.env.company.name))
-        self.env['hr.employee'].create(dict(
+        return self.env['hr.employee'].create(dict(
             name=self.name,
             company_id=self.env.company.id,
             **self.env['hr.employee']._sync_user(self)

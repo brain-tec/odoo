@@ -3566,12 +3566,16 @@ test(`edit field in editable field without editing the row`, async () => {
     expect(`.o_selected_row`).toHaveCount(0);
     expect.verifySteps(["web_save: false"]);
 
+    const cellRect = queryFirst(`.o_boolean_toggle_cell`);
+    const inputRect = queryFirst(`.o_data_row .o_field_boolean_toggle .form-check`);
+    const { paddingRight, paddingLeft } = getComputedStyle(cellRect);
+    const expectedSelectedWidth = cellRect.clientWidth - parseFloat(paddingRight) - parseFloat(paddingLeft);
+    expect(inputRect.clientWidth).not.toEqual(expectedSelectedWidth);
     // toggle the boolean value after switching the row in edition
     expect(`.o_selected_row`).toHaveCount(0);
-
-    await contains(`.o_data_row .o_data_cell .o_field_boolean_toggle div`).click();
+    await contains(`.o_data_row .o_data_cell .o_field_boolean_toggle`).click();
     expect(`.o_selected_row`).toHaveCount(1);
-
+    expect(inputRect.clientWidth).not.toEqual(expectedSelectedWidth);
     await contains(`.o_selected_row .o_field_boolean_toggle div`).click();
     expect.verifySteps(["web_save: true"]);
 });
@@ -20088,4 +20092,32 @@ For example, if the date is Mar 11 and you enter "+=2d", it will be updated to M
         "blip",
         "Dec 28, 2024, 1:00 AM",
     ]);
+});
+
+test(`custom button that creates record in list with sample data`, async () => {
+    Foo._records = [];
+    onRpc("custom_create", () => {
+        MockServer.env.foo.create({ foo: "new record" });
+        return false;
+    });
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list sample="1">
+                <header>
+                    <button class="custom_create" type="object" name="custom_create" string="Custom create" display="always"/>
+                </header>
+                <field name="foo"/>
+            </list>
+        `,
+    });
+    expect(`.o_list_view .o_content`).toHaveClass("o_view_sample_data");
+
+    if (getMockEnv().isSmall) {
+        await contains(".o_control_panel_main_buttons .btn.dropdown-toggle").click();
+    }
+    await contains(".custom_create").click();
+    expect(`.o_list_view .o_content`).not.toHaveClass("o_view_sample_data");
+    expect(`.o_data_row`).toHaveCount(1);
 });
