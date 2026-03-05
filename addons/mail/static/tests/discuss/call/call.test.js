@@ -3,9 +3,11 @@ import {
     contains,
     createVideoStream,
     defineMailModels,
+    dragenterFiles,
+    dropFiles,
     listenStoreFetch,
-    mockGetMedia,
     makeMockRtcNetwork,
+    mockGetMedia,
     openDiscuss,
     patchUiSize,
     setupChatHub,
@@ -15,19 +17,29 @@ import {
     triggerEvents,
     triggerHotkey,
     waitStoreFetch,
-    dragenterFiles,
-    dropFiles,
 } from "@mail/../tests/mail_test_helpers";
 import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
+import { SoundEffects } from "@mail/core/common/sound_effects_service";
 import {
     CROSS_TAB_CLIENT_MESSAGE,
     CROSS_TAB_HOST_MESSAGE,
 } from "@mail/discuss/call/common/rtc_service";
 import { ChannelMember } from "@mail/discuss/core/common/channel_member_model";
 
-import { beforeEach, describe, expect, getFixture, mockDate, test } from "@odoo/hoot";
-import { advanceTime, hover, manuallyDispatchProgrammaticEvent, queryFirst } from "@odoo/hoot-dom";
-import { mockSendBeacon, mockUserAgent } from "@odoo/hoot-mock";
+import {
+    advanceTime,
+    beforeEach,
+    describe,
+    expect,
+    getFixture,
+    hover,
+    manuallyDispatchProgrammaticEvent,
+    mockDate,
+    mockSendBeacon,
+    mockUserAgent,
+    queryFirst,
+    test,
+} from "@odoo/hoot";
 import {
     Command,
     mockService,
@@ -37,8 +49,8 @@ import {
 } from "@web/../tests/web_test_helpers";
 import { browser } from "@web/core/browser/browser";
 
-import { isMobileOS } from "@web/core/browser/feature_detection";
 import { waitNotifications } from "@bus/../tests/bus_test_helpers";
+import { isMobileOS } from "@web/core/browser/feature_detection";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -622,17 +634,12 @@ test("expand call participants when joining a call", async () => {
 });
 
 test("start call when accepting from push notification", async () => {
-    const serviceWorker = Object.assign(new EventTarget(), {
-        register: () => Promise.resolve(),
-        ready: Promise.resolve(),
-    });
-    patchWithCleanup(window.navigator, { serviceWorker });
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
     await start();
     await openDiscuss("mail.box_inbox");
     await contains(".o-mail-DiscussContent-threadName[title=Inbox]");
-    serviceWorker.dispatchEvent(
+    navigator.serviceWorker.dispatchEvent(
         new MessageEvent("message", {
             data: { action: "OPEN_CHANNEL", data: { id: channelId, joinCall: true } },
         })
@@ -1212,17 +1219,25 @@ test("auto-focus participant video in one-to-one call in chat window", async () 
         partner_id: pyEnv["res.partner"].create({ name: "Batman" }),
     });
     setupChatHub({ opened: [channelId] });
+    patchWithCleanup(SoundEffects.prototype, {
+        play(name) {
+            expect.step(`play - ${name}`);
+        },
+    });
     const env = await start();
     const network = await makeMockRtcNetwork({ env, channelId });
     const mockedRemote = network.makeMockRemote(channelMemberId);
     await click("[title='Join Call']");
     await contains(".o-discuss-CallParticipantCard", { count: 2 });
+    await expect.waitForSteps(["play - call-join"]);
     await mockedRemote.updateConnectionState("connected");
     await mockedRemote.updateUpload("camera", createVideoStream().getVideoTracks()[0]);
-    await contains(".o-discuss-CallParticipantCard[aria-label='Batman'] video");
+    await contains(".o-discuss-CallParticipantCard[aria-label='Batman']:has(video)");
     await contains(".o-discuss-CallParticipantCard");
     await mockedRemote.updateUpload("camera", null);
+    await contains(".o-discuss-CallParticipantCard[aria-label='Batman']:not(:has(video))");
     await click(".o-discuss-CallParticipantCard[aria-label='Batman']");
+    await contains(".o-discuss-CallParticipantCard", { count: 2 });
     await click("[title='Fullscreen']");
     await contains(".o-mail-Meeting[data-active]");
     await mockedRemote.updateUpload("camera", createVideoStream().getVideoTracks()[0]);
