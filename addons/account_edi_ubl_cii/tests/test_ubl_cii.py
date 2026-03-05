@@ -377,7 +377,7 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
         invoice_us = self.init_invoice('out_invoice', partner=us_partner, amounts=[100], taxes=[self.tax_sale_a], post=True)
         res = [document for invoice in (invoice_de + invoice_be + invoice_us) for document in invoice._get_invoice_legal_documents('ubl', allow_fallback=True)]
         self.assertEqual(len(res), 2)
-        self.assertEqual(res[0].get('filename'), 'INV_2019_00001_ubl_de.xml')
+        self.assertEqual(res[0].get('filename'), 'INV_2019_00001_zugferd.xml')
         self.assertEqual(res[1].get('filename'), 'INV_2019_00002_ubl_bis3.xml')
         invoice_be_failing = self.init_invoice('out_invoice', partner=belgian_partner, amounts=[100], post=True)
         legal_documents = invoice_be_failing._get_invoice_legal_documents('ubl', allow_fallback=True)
@@ -910,3 +910,86 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
         partner_bank.active = True
         self.env['account.edi.common']._import_partner_bank(invoice, [acc_number])
         self.assertEqual(invoice.partner_bank_id, partner_bank)
+
+    def test_import_and_group_lines_by_tax(self):
+        """
+        Test the group/ungroup lines action on account.move
+        """
+        self.env.ref('base.EUR').active = True
+        tax_16 = self.env["account.tax"].create({
+            'name': '16 %',
+            'amount_type': 'percent',
+            'type_tax_use': 'purchase',
+            'amount': 16.0,
+        })
+        tax_21 = self.env["account.tax"].create({
+            'name': '21 %',
+            'amount_type': 'percent',
+            'type_tax_use': 'purchase',
+            'amount': 21.0,
+        })
+
+        file_path = "bis3_bill_group_by_tax.xml"
+        file_path = f"{self.test_module}/tests/test_files/{file_path}"
+        with file_open(file_path, 'rb') as file:
+            xml_attachment = self.env['ir.attachment'].create({
+                'mimetype': 'application/xml',
+                'name': 'bis3_bill_group_by_tax.xml',
+                'raw': file.read(),
+            })
+        bill = self._import_as_attachment_on(attachment=xml_attachment, journal=self.company_data["default_journal_purchase"])
+
+        # Should group lines by tax
+        bill.action_group_ungroup_lines_by_tax()
+        self.assertRecordValues(bill.invoice_line_ids, [
+            {
+                'quantity': 1.0,
+                'price_unit': 600.0,
+                'price_subtotal': 600.0,
+                'price_total': 696.00,
+                'tax_ids': tax_16.ids,
+            },
+            {
+                'quantity': 1.0,
+                'price_unit': 1300.0,
+                'price_subtotal': 1300.0,
+                'price_total': 1573.00,
+                'tax_ids': tax_21.ids,
+            },
+        ])
+        self.assertRecordValues(bill, [{
+            'amount_untaxed': 1900.0,
+            'amount_tax': 369,
+            'amount_total': 2269.00,
+        }])
+
+        # Should ungroup lines from xml
+        bill.action_group_ungroup_lines_by_tax()
+        self.assertRecordValues(bill.invoice_line_ids, [
+            {
+                'quantity': 1.0,
+                'price_unit': 600.0,
+                'price_subtotal': 600.0,
+                'price_total': 696.00,
+                'tax_ids': tax_16.ids,
+            },
+            {
+                'quantity': 1.0,
+                'price_unit': 300.0,
+                'price_subtotal': 300.0,
+                'price_total': 363.00,
+                'tax_ids': tax_21.ids,
+            },
+            {
+                'quantity': 2.0,
+                'price_unit': 500.0,
+                'price_subtotal': 1000.0,
+                'price_total': 1210.00,
+                'tax_ids': tax_21.ids,
+            },
+        ])
+        self.assertRecordValues(bill, [{
+            'amount_untaxed': 1900.0,
+            'amount_tax': 369,
+            'amount_total': 2269.00,
+        }])
