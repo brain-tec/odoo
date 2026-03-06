@@ -44,7 +44,7 @@ export function selectOrderByPrice(price) {
 export function doubleClickOrder(orderName) {
     return [
         {
-            trigger: `.ticket-screen .order-row > .col:nth-child(2):contains("${orderName}")`,
+            trigger: `.ticket-screen .order-row:contains("${orderName}")`,
             run: "dblclick",
         },
     ];
@@ -215,9 +215,14 @@ export function invoicePrinted() {
         },
     ];
 }
-export function toRefundTextContains(text) {
+export function toRefundTextContains(text, product) {
+    if (!product) {
+        return inLeftSide({
+            trigger: `.ticket-screen .qty .refund:contains("${text}")`,
+        });
+    }
     return inLeftSide({
-        trigger: `.ticket-screen .qty .refund:contains("${text}")`,
+        trigger: `.ticket-screen .product-name:contains("${product}"):has(.refund:contains("${text}"))`,
     });
 }
 export function refundedNoteContains(text) {
@@ -273,4 +278,13 @@ export function isReady() {
         content: "Wait for the Ticket Screen to be ready",
         trigger: ".ticket-screen:not(.loading-orders)",
     };
+}
+
+export function isShown() {
+    return [
+        {
+            content: "ticket screen is shown",
+            trigger: ".pos .ticket-screen",
+        },
+    ];
 }
