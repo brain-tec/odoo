@@ -477,17 +477,12 @@ export class PosOrder extends PosOrderAccounting {
     /* ---- Payment Lines --- */
     addPaymentline(payment_method) {
         this.assertEditable();
-        const existingCash = this.payment_ids.find((pl) => pl.payment_method_id.is_cash_count);
 
         if (this.electronicPaymentInProgress()) {
             return {
                 status: false,
                 data: _t("There is already an electronic payment in progress."),
             };
-        }
-
-        if (existingCash && payment_method.is_cash_count) {
-            return { status: false, data: _t("There is already a cash payment line.") };
         }
 
         const totalAmountDue = this.getDefaultAmountDueToPayIn(payment_method);
@@ -750,10 +745,17 @@ export class PosOrder extends PosOrderAccounting {
         return pos_categ_id_A - pos_categ_id_B;
     }
 
-    getDiscountLine() {
-        return this.lines?.find(
+    get discountLines() {
+        return this.lines?.filter(
             (line) => line.product_id.id === this.config.discount_product_id?.id
         );
+    }
+
+    get globalDiscountPc() {
+        return {
+            value: this.discountLines?.[0]?.extra_tax_data?.discount_value || 0,
+            type: this.discountLines?.[0]?.extra_tax_data?.discount_type || "",
+        };
     }
 
     getName() {
