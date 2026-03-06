@@ -46,6 +46,7 @@ import OrderPaymentValidation from "../utils/order_payment_validation";
 import { logPosMessage } from "../utils/pretty_console_log";
 import { initLNA } from "../utils/init_lna";
 import { SnoozedProductTracker } from "@point_of_sale/app/models/utils/snooze_tracker";
+import { Domain } from "@web/core/domain";
 
 const { DateTime } = luxon;
 export const CONSOLE_COLOR = "#F5B427";
@@ -581,19 +582,25 @@ export class PosStore extends WithLazyGetterTrap {
         return false;
     }
 
-    async onDeleteOrder(order) {
+    async beforeDeleteOrder(order, { title, body } = {}) {
         if (order.getOrderlines().length > 0) {
-            const confirmed = await ask(this.dialog, {
-                title: _t("Existing orderlines"),
-                body: _t(
-                    "%s has a total amount of %s, are you sure you want to delete this order?",
-                    order.pos_reference,
-                    this.env.utils.formatCurrency(order.priceIncl)
-                ),
+            return await ask(this.dialog, {
+                title: title || _t("Existing orderlines"),
+                body:
+                    body ||
+                    _t(
+                        "%s has a total amount of %s, are you sure you want to delete this order?",
+                        order.pos_reference,
+                        this.env.utils.formatCurrency(order.priceIncl)
+                    ),
             });
-            if (!confirmed) {
-                return false;
-            }
+        }
+        return true;
+    }
+    async onDeleteOrder(order) {
+        const canDelete = await this.beforeDeleteOrder(order);
+        if (!canDelete) {
+            return false;
         }
         const refundedOrderLines = order.lines
             .filter((line) => line.refunded_orderline_id?.order_id)
@@ -899,15 +906,15 @@ export class PosStore extends WithLazyGetterTrap {
             price_type: "price_unit" in vals ? "manual" : "original",
             price_extra: 0,
             price_unit: 0,
-            order_id: this.getOrder(),
-            qty: this.getOrder().preset_id?.is_return ? -1 : 1,
+            order_id: order,
+            qty: order.preset_id?.is_return ? -1 : 1,
             tax_ids: productTemplate.taxes_id.map((tax) => ["link", tax]),
             product_id: productTemplate.product_variant_ids[0],
             ...vals,
         };
 
         // Handle refund constraints
-        if (order.isSaleDisallowed(values, options)) {
+        if (order.isSaleDisallowed(values, options) && !opts.force) {
             this.dialog.add(AlertDialog, {
                 title: _t("Oops.."),
                 body: _t("Ensure you validate the refund before taking another order."),
@@ -994,12 +1001,6 @@ export class PosStore extends WithLazyGetterTrap {
         if (configure) {
             this.numberBuffer.reset();
         }
-
-        this.hasJustAddedProduct = true;
-        clearTimeout(this.productReminderTimeout);
-        this.productReminderTimeout = setTimeout(() => {
-            this.hasJustAddedProduct = false;
-        }, 3000);
 
         return order.getSelectedOrderline();
     }
@@ -1622,10 +1623,15 @@ export class PosStore extends WithLazyGetterTrap {
     }
     async getServerOrders() {
         await this.syncAllOrders();
-        return await this.data.loadServerOrders([
+        const config_domain = new Domain([
             ["config_id", "in", [...this.config.raw.trusted_config_ids, this.config.id]],
-            ["state", "=", "draft"],
         ]);
+        return await this.data.loadServerOrders(
+            Domain.and([config_domain, this.getServerOrdersDomain()]).toList()
+        );
+    }
+    getServerOrdersDomain() {
+        return new Domain([["state", "=", "draft"]]);
     }
     async getProductInfo(productTemplate, quantity, priceExtra = 0, productProduct = false) {
         const order = this.getOrder();
