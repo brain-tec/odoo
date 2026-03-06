@@ -77,6 +77,7 @@ class IrAttachment(models.Model):
     _name = 'ir.attachment'
     _description = 'Attachment'
     _order = 'id desc'
+    _access_domain_heavy = True
 
     def _compute_res_name(self):
         for attachment in self:
@@ -616,8 +617,8 @@ class IrAttachment(models.Model):
         domain = domain.optimize(self)
         if self.env.su or bypass_access or domain.is_false():
             return super()._search(domain, offset, limit, order, active_test=active_test, bypass_access=bypass_access)
-        if self.env.context.get('_read_groupby'):
-            raise ValueError("Cannot group by ir.attachment")
+        if self.env.context.get('_generating_sql_for_fields'):
+            raise ValueError("Cannot generate SQL for whole ir.attachment")
 
         # General access rules
         # - public == True are always accessible
