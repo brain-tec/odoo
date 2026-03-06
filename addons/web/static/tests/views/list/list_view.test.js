@@ -1,12 +1,18 @@
-import { expect, getFixture, mockSendBeacon, test } from "@odoo/hoot";
 import {
+    animationFrame,
     clear,
     click,
+    Deferred,
     edit,
+    expect,
+    getFixture,
     hover,
     keyDown,
     keyUp,
     middleClick,
+    mockDate,
+    mockSendBeacon,
+    mockTimeZone,
     pointerDown,
     pointerUp,
     press,
@@ -17,17 +23,12 @@ import {
     queryOne,
     queryRect,
     queryText,
+    runAllTimers,
+    test,
+    tick,
     unload,
     waitFor,
-} from "@odoo/hoot-dom";
-import {
-    animationFrame,
-    Deferred,
-    mockDate,
-    mockTimeZone,
-    runAllTimers,
-    tick,
-} from "@odoo/hoot-mock";
+} from "@odoo/hoot";
 import { Component, markup, onRendered, onWillStart, useRef, xml } from "@odoo/owl";
 import { getPickerCell } from "@web/../tests/core/datetime/datetime_test_helpers";
 import {
@@ -76,10 +77,10 @@ import {
     webModels,
 } from "@web/../tests/web_test_helpers";
 
-import { localization } from "@web/core/l10n/localization";
 import { buildSelector } from "@web/../tests/_framework/view_test_helpers";
 import { currencies } from "@web/core/currency";
 import { Domain } from "@web/core/domain";
+import { localization } from "@web/core/l10n/localization";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { useBus } from "@web/core/utils/hooks";
@@ -3569,7 +3570,8 @@ test(`edit field in editable field without editing the row`, async () => {
     const cellRect = queryFirst(`.o_boolean_toggle_cell`);
     const inputRect = queryFirst(`.o_data_row .o_field_boolean_toggle .form-check`);
     const { paddingRight, paddingLeft } = getComputedStyle(cellRect);
-    const expectedSelectedWidth = cellRect.clientWidth - parseFloat(paddingRight) - parseFloat(paddingLeft);
+    const expectedSelectedWidth =
+        cellRect.clientWidth - parseFloat(paddingRight) - parseFloat(paddingLeft);
     expect(inputRect.clientWidth).not.toEqual(expectedSelectedWidth);
     // toggle the boolean value after switching the row in edition
     expect(`.o_selected_row`).toHaveCount(0);
@@ -4995,7 +4997,7 @@ test(`aggregates are formatted according to field widget`, async () => {
             </list>
         `,
     });
-    expect(`tfoot`).toHaveText("19:24", {
+    expect(`tfoot`).toHaveText("19h 24m", {
         message: "total should be formatted as a float_time",
     });
 });
@@ -11226,7 +11228,7 @@ test(`multi edit field with daterange widget (edition without using the picker)`
     await contains(
         `.o_data_row .o_data_cell .o_field_daterange[name='date_start'] input[data-field='date_start']`
     ).edit("2016-04-01 11:00:00", { confirm: "enter" });
-    expect(`.modal`).toHaveCount(1, {
+    expect(await waitFor(".modal")).toHaveCount(1, {
         message: "The confirm dialog should appear to confirm the multi edition.",
     });
     expect(queryAllTexts(`.modal-body .o_modal_changes td`)).toEqual([
@@ -16547,7 +16549,7 @@ test(`keep order after grouping`, async () => {
 
     await toggleSearchBarMenu();
     await toggleMenuItem("Foo");
-    expect(queryAllTexts`.o_group_name`, { inline: true }).toEqual(["yop 1", "gnap 1", "blip 2"]);
+    expect(queryAllTexts(".o_group_name", { inline: true })).toEqual(["yop 1", "gnap 1", "blip 2"]);
 
     await toggleMenuItem("Foo");
     expect(queryAllTexts`.o_data_row td[name=foo]`).toEqual(["yop", "gnap", "blip", "blip"]);
@@ -20120,4 +20122,48 @@ test(`custom button that creates record in list with sample data`, async () => {
     await contains(".custom_create").click();
     expect(`.o_list_view .o_content`).not.toHaveClass("o_view_sample_data");
     expect(`.o_data_row`).toHaveCount(1);
+});
+
+test(`widget visibility with invisible attribute`, async () => {
+    class TestWidget extends Component {
+        static template = xml`<div class="test_widget">Widget Content</div>`;
+        static props = ["*"];
+    }
+    registry.category("view_widgets").add("test_widget", { component: TestWidget });
+
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <field name="foo"/>
+                <widget name="test_widget" invisible="foo == 'yop'"/>
+            </list>
+        `,
+    });
+
+    expect(`.o_data_row`).toHaveCount(4);
+    expect(`.o_data_row .test_widget`).toHaveCount(3);
+});
+
+test(`widget column visibility with column_invisible attribute`, async () => {
+    class TestWidget extends Component {
+        static template = xml`<div class="test_widget">Widget Content</div>`;
+        static props = ["*"];
+    }
+    registry.category("view_widgets").add("test_widget", { component: TestWidget });
+
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <field name="foo"/>
+                <field name="bar"/>
+                <widget name="test_widget" column_invisible="1"/>
+            </list>
+        `,
+    });
+    expect(`thead th:not(.o_list_record_selector)`).toHaveCount(2);
+    expect(`.o_data_row .test_widget`).toHaveCount(0);
 });

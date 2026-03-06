@@ -24,7 +24,7 @@
                     <field name="partner_id"/>
                     <field name="chatbot_script_id"/>
                     <field name="guest_id"/>
-                    <field name="session_duration_hour" widget="float_time"/>
+                    <field name="session_duration_hour" widget="float_time" options="{'show_seconds': true}"/>
                     <field name="livechat_member_type" string="Member Type"/>
                 </list>
             </field>
@@ -110,17 +110,17 @@
                     <field name="session_start_hour" invisible="1"/>
                     <field name="session_week_day" invisible="1"/>
                     <field name="partner_id" type="row"/>
-                    <field name="call_duration_hour" type="measure" widget="float_time"/>
+                    <field name="call_duration_hour" type="measure" widget="float_time" options="{'show_seconds': true}"/>
                     <field name="call_percentage" type="measure" widget="percentage"/>
-                    <field name="response_time_hour" string="Response Time" type="measure" widget="float_time" />
-                    <field name="session_duration_hour" type="measure" widget="float_time"/>
+                    <field name="response_time_hour" string="Response Time" type="measure" widget="float_time" options="{'show_seconds': true}"/>
+                    <field name="session_duration_hour" type="measure" widget="float_time" options="{'show_seconds': true}"/>
                     <field name="rating" string="Rating (%)" type="measure" widget="im_livechat.rating_percentage"/>
                     <field name="call_count" type="measure" widget="integer"/>
                 </pivot>
             </field>
         </record>
         <record id="im_livechat_agent_history_action" model="ir.actions.act_window">
-            <field name="name">Agents</field>
+            <field name="name">Agents Performance</field>
             <field name="res_model">im_livechat.channel.member.history</field>
             <field name="view_mode">pivot,graph</field>
             <field name="domain">[('livechat_member_type', '=', 'agent')]</field>
@@ -141,7 +141,7 @@
         </record>
         <menuitem
             id="menu_reporting_livechat_agent"
-            name="Agents"
+            name="Agents Performance"
             parent="menu_reporting_livechat"
             sequence="10"
             action="im_livechat_agent_history_action"

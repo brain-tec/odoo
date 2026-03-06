@@ -616,10 +616,6 @@
         }
     }
 
-    .o_field_widget.o_field_empty.o_readonly_modifier {
-        display: none;
-    }
-
     .o_form_renderer:not(.o_field_highlight):not(.o_touch_device .o_field_highlight) {
         .o_field_widget {
             .o_dropdown_button {
@@ -1153,7 +1149,7 @@
     gap: map-get($spacers, 2);
 
     .o_form_header_details {
-        width: 100%;
+        flex-grow: 1;
     }
 
     > .o_field_widget:has(img) {
@@ -1174,10 +1170,6 @@
         flex-direction: row;
         gap: map-get($spacers, 3);
         margin-bottom: map-get($spacers, 3);
-
-        &:has(> .o_field_widget img) .o_form_header_details {
-            width: 50%;
-        }
     }
 
     @include media-breakpoint-down(md) {
