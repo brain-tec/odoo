@@ -328,6 +328,12 @@
         &:not(.o_input_box *) {
             margin-bottom: var(--fieldWidget-margin-bottom);
         }
+
+        .o_priority > .o_priority_star, 
+        .o_favorite, 
+        .o_favorite i.fa {
+            font-size: inherit;
+        }
     }
 
     // Title
@@ -355,7 +361,9 @@
 
     // Avatar
     .oe_avatar {
-        float: right;
+        @include media-breakpoint-up(sm) {
+            float: right;
+        }
         margin-bottom: 10px;
 
         .img {
@@ -448,7 +456,7 @@
     }
 
     
-    .o_form_sheet .o_field_widget:not(.o_input_box_overlay_start, .o_input_box_overlay_end), .o_input_box:not(.o_input_box .o_input_box) {
+    .o_form_sheet .o_field_widget:not(.o_input_box_overlay_start, .o_input_box_overlay_end, .o_field_event_state_selection, .o_field_state_selection, .oe_avatar), .o_input_box:not(.o_input_box .o_input_box) {
         width: 100%;
     }
 
@@ -611,9 +619,6 @@
             color: $text-muted;
         }
 
-        &.o_form_label_empty.o_form_label_readonly {
-            display: none;
-        }
     }
 
     .o_form_renderer:not(.o_field_highlight):not(.o_touch_device .o_field_highlight) {
@@ -1149,7 +1154,7 @@
     gap: map-get($spacers, 2);
 
     .o_form_header_details {
-        flex-grow: 1;
+        width: 100%;
     }
 
     > .o_field_widget:has(img) {
@@ -1170,6 +1175,10 @@
         flex-direction: row;
         gap: map-get($spacers, 3);
         margin-bottom: map-get($spacers, 3);
+
+        &:has(> .o_field_widget img) .o_form_header_details {
+            width: 50%;
+        }
     }
 
     @include media-breakpoint-down(md) {

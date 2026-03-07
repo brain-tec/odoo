@@ -858,16 +858,37 @@ export class Rtc extends Record {
         this.soundEffectsService.play("earphone-on");
     }
 
-    /** @param {"microphone" | "camera"} media */
-    showMediaPermissionDialog(media) {
+    /**
+     * @param {"microphone" | "camera"} media
+     * @param {Object} [configuration]
+     */
+    showMediaPermissionDialog(media, { props = {}, options = {} } = {}) {
+        const permission = media === "camera" ? this.cameraPermission : this.microphonePermission;
+        if (permission === "denied") {
+            // Bypass the permission dialog in this case: we still need to do
+            // the potential thing that was supposed to be done once it closes.
+            options.onClose?.();
+            this.showMediaUnavailableWarning({ [media]: true });
+            return;
+        }
         this.closeCallPermissionDialog = this.dialog.add(
             CallPermissionDialog,
             {
+                ...props,
                 media,
-                useMicrophone: () => this.unmute(),
-                useCamera: () => this.toggleVideo("camera", { force: true, refreshStream: true }),
+                useMicrophone: async () => {
+                    await this.unmute();
+                    await props.useMicrophone?.();
+                },
+                useCamera: async () => {
+                    await this.toggleVideo("camera", { force: true, refreshStream: true });
+                    await props.useCamera?.();
+                },
             },
-            { context: { root: { el: this.rootEl } } }
+            {
+                context: { root: { el: this.rootEl } },
+                ...options,
+            }
         );
     }
 

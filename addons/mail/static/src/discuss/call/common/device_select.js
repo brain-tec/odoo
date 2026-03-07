@@ -12,12 +12,20 @@ const deviceKind = new Set(["audioinput", "videoinput", "audiooutput"]);
 
 export class DeviceSelect extends Component {
     static props = {
+        menuClass: {
+            type: String,
+            optional: true,
+        },
         kind: {
             type: String,
             validate: (string) => deviceKind.has(string),
         },
         icon: {
             type: String,
+            optional: true,
+        },
+        permissionDialogConfiguration: {
+            type: Object,
             optional: true,
         },
     };
@@ -81,22 +89,11 @@ export class DeviceSelect extends Component {
         }
     }
 
-    async showPermissionDialog(kind) {
-        if (kind === "videoinput") {
-            if (this.store.rtc.cameraPermission === "denied") {
-                this.store.rtc.showMediaUnavailableWarning({ camera: true });
-            } else {
-                this.store.rtc.showMediaPermissionDialog("camera");
-                return;
-            }
-        } else {
-            if (this.store.rtc.microphonePermission === "denied") {
-                this.store.rtc.showMediaUnavailableWarning({ microphone: true });
-            } else {
-                this.store.rtc.showMediaPermissionDialog("microphone");
-                return;
-            }
-        }
+    showPermissionDialog(kind) {
+        this.store.rtc.showMediaPermissionDialog(
+            kind === "videoinput" ? "camera" : "microphone",
+            this.props.permissionDialogConfiguration
+        );
     }
 
     isSelected(id) {

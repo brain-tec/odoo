@@ -4,14 +4,13 @@ from datetime import timedelta
 from odoo import exceptions, fields
 from odoo.exceptions import UserError
 from odoo.fields import Command
-from odoo.tests import Form, HttpCase, freeze_time, tagged
+from odoo.tests import Form, HttpCase, freeze_time
 from odoo.tools import float_compare, float_repr, float_round, format_date
 
 from odoo.addons.mrp.tests.common import TestMrpCommon
 
 
 @freeze_time(fields.Date.today())
-@tagged('at_install', '-post_install')  # LEGACY at_install Access error in post install
 class TestBoM(TestMrpCommon):
 
     @classmethod
@@ -2287,12 +2286,25 @@ class TestBoM(TestMrpCommon):
     def test_update_operations(self):
         """Update the operations in BoM which reflects the changes in Manufacturing Order"""
 
+        # consume the first component in the operation
+        self.bom_2.bom_line_ids[0].operation_id = self.bom_2.operation_ids.id
         mo_form = Form(self.env['mrp.production'].with_user(self.user_mrp_user))
         mo_form.product_id = self.product_7_1
         mo_form.product_qty = 1.0
         mo_form.bom_id = self.bom_2
         mo = mo_form.save()
         mo.action_confirm()
+
+        move_consumed_in_op = mo.move_raw_ids.filtered(lambda m: m.bom_line_id == self.bom_2.bom_line_ids[0])
+        self.assertTrue(move_consumed_in_op.manual_consumption)
+        self.bom_2.write({
+            'bom_line_ids': [
+                Command.update(self.bom_2.bom_line_ids[0].id, {'operation_id': self.env['mrp.routing.workcenter'].id}),
+            ]
+        })
+        self.assertTrue(mo.is_outdated_bom)
+        mo.action_update_bom()
+        self.assertFalse(move_consumed_in_op.manual_consumption)
 
         self.bom_2.operation_ids.write({
             'name': 'Painting',
@@ -2898,7 +2910,6 @@ class TestBoM(TestMrpCommon):
         self.assertFalse(self.bom_1.show_copy_operations_button, "The copy operations button should be visible even if the current BoM is empty.")
 
 
-@tagged('-at_install', 'post_install')
 class TestTourBoM(HttpCase):
     @classmethod
     def setUpClass(cls):
