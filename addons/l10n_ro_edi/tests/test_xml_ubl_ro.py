@@ -16,10 +16,11 @@ from odoo.addons.l10n_ro_edi.models.account_move import HOLDING_DAYS
 
 
 def _patch_request_ciusro_download_answer(company, key_download, session):
+    # raw data is base64 encoded for signature and just XML for invoice
     answer_data = {
         '3029027561': {
             'signature': {
-                'attachment_raw': b'Y291Y291',
+                'attachment_raw': 'Y291Y291',  # coucou
                 'key_signature': 'KEY_SIG_1',
                 'key_certificate': 'KEY_CERT_1',
             },
@@ -29,7 +30,7 @@ def _patch_request_ciusro_download_answer(company, key_download, session):
         },
         '3029027562': {
             'signature': {
-                'attachment_raw': b'Y291Y291',
+                'attachment_raw': 'Y291Y291',
                 'key_signature': 'KEY_SIG_2',
                 'key_certificate': 'KEY_CERT_2',
             },
@@ -39,7 +40,7 @@ def _patch_request_ciusro_download_answer(company, key_download, session):
         },
         '3030159318': {
             'signature': {
-                'attachment_raw': b'Y291Y291',
+                'attachment_raw': 'Y291Y291',
                 'key_signature': 'KEY_SIG_3',
                 'key_certificate': 'KEY_CERT_3',
             },
@@ -49,7 +50,7 @@ def _patch_request_ciusro_download_answer(company, key_download, session):
         },
         '3030439533': {
             'signature': {
-                'attachment_raw': b'Y291Y291',
+                'attachment_raw': 'Y291Y291',
                 'key_signature': 'KEY_SIG_4',
                 'key_certificate': 'KEY_CERT_4',
             },
@@ -264,6 +265,13 @@ class TestUBLRO(TestUBLCommon):
         invoice = self.create_move("out_invoice", currency_id=self.company.currency_id.id)
         attachment = self.get_attachment(invoice)
         self._assert_invoice_attachment(attachment, xpaths=None, expected_file_path='from_odoo/ciusro_out_invoice_no_prefix_company_registry.xml')
+
+    def test_export_invoice_no_vat_prefix(self):
+        self.company_data['company'].vat = self.company_data['company'].vat[2:]
+        no_vat_partner = self.partner_a.copy({'name': 'Roasted Romanian Roller', 'vat': False, 'invoice_edi_format': 'ciusro'})
+        invoice = self.create_move("out_invoice", partner_id=no_vat_partner.id, currency_id=self.company.currency_id.id)
+        attachment = self.get_attachment(invoice)
+        self._assert_invoice_attachment(attachment, xpaths=None, expected_file_path='from_odoo/ciusro_out_invoice_defaults.xml')
 
     def test_export_no_vat_and_no_company_registry_raises_error(self):
         self.company_data['company'].write({'vat': False, 'company_registry': False})
