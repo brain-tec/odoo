@@ -28,7 +28,7 @@
                                 <t t-call="product_matrix.extra_price"/>
                             </div>
                         </th>
-                        <td t-else="" 
+                        <td t-else=""
                             class="o_matrix_input_td text-end"
                             t-attf-class="{{cell_last?'o_matrix_pe':''}}">
                             <div t-if="cell.is_possible_combination" class="input-group">

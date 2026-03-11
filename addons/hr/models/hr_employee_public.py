@@ -22,7 +22,7 @@ class HrEmployeePublic(models.Model):
     department_id = fields.Many2one('hr.department', readonly=True)
     member_of_department = fields.Boolean(compute='_compute_member_of_department', search='_search_part_of_department')
     job_id = fields.Many2one('hr.job', readonly=True)
-    job_title = fields.Char(related='employee_id.job_title')
+    job_title = fields.Char(readonly=True)
     company_id = fields.Many2one('res.company', readonly=True)
     address_id = fields.Many2one('res.partner', readonly=True)
     mobile_phone = fields.Char(readonly=True)
@@ -236,7 +236,16 @@ class HrEmployeePublic(models.Model):
 
     def _store_avatar_card_fields(self, res: Store.FieldList):
         res.one("department_id", ["name"])
-        res.one("user_id", lambda res: (res.attr("share"), res.one("partner_id", ["im_status", "tz"])))
+        res.one(
+            "user_id",
+            lambda res: (
+                res.attr("share"),
+                res.one(
+                    "partner_id",
+                    lambda res: (res.from_method("_store_im_status_fields"), res.attr("tz")),
+                ),
+            ),
+        )
         res.one("work_location_id", ["location_type", "name"])
         res.extend(["company_id", "hr_icon_display", "job_title", "name", "show_hr_icon_display"])
         res.extend(["work_email", "work_phone"])

@@ -15,8 +15,17 @@ class AccountChartTemplate(models.AbstractModel):
             'property_stock_valuation_account_id': 'ec110306',
             'loss_stock_valuation_account': 'ec510112',
             'production_stock_valuation_account': 'ec110302',
-            'code_digits': '0',
+            'code_digits': '4',
         }
+
+    def _get_account_parent_xmlid(self, code_prefix, template_code):
+        if template_code == 'ec':
+            return {
+                '11010201': 'ec110102',
+                '1101030': 'ec110103',
+            }.get(code_prefix)
+
+        return super()._get_account_parent_xmlid(code_prefix, template_code)
 
     @template('ec', 'res.company')
     def _get_ec_res_company(self):

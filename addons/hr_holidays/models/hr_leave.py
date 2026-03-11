@@ -827,7 +827,7 @@ class HrLeave(models.Model):
             user_tz = ZoneInfo(leave.tz)
             date_from_utc = leave.date_from and leave.date_from.astimezone(user_tz).date()
             date_to_utc = leave.date_to and leave.date_to.astimezone(user_tz).date()
-            time_off_type_display = leave.work_entry_type_id.name
+            time_off_type_display = leave.work_entry_type_id.display_code or leave.work_entry_type_id.name
             if self.env.context.get('short_name'):
                 short_leave_name = leave.name or time_off_type_display or _('Time Off')
                 leave.display_name = _("%(name)s: %(duration)s", name=short_leave_name, duration=leave.duration_display)
@@ -839,11 +839,17 @@ class HrLeave(models.Model):
                         date_to_utc=format_date(self.env, date_to_utc) or ""
                     )
                 if not target or self.env.context.get('hide_employee_name') and 'employee_id' in self.env.context.get('group_by', []):
-                    leave.display_name = _("%(work_entry_type)s: %(duration)s (%(start)s)",
-                        work_entry_type=time_off_type_display,
-                        duration=leave.duration_display,
-                        start=display_date,
-                    )
+                    if self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+                        leave.display_name = self.env._("%(work_entry_type)s: %(duration)s (%(start)s)",
+                            work_entry_type=time_off_type_display,
+                            duration=leave.duration_display,
+                            start=display_date,
+                        )
+                    else:
+                        leave.display_name = self.env._("%(duration)s (%(start)s)",
+                            duration=leave.duration_display,
+                            start=display_date,
+                        )
                 elif not time_off_type_display:
                     leave.display_name = _("%(person)s: %(duration)s (%(start)s)",
                         person=target,
@@ -1083,16 +1089,25 @@ class HrLeave(models.Model):
                 "%(employee)s on Time Off : %(duration)s",
                 employee=holiday.employee_id.name or holiday.category_id.name,
                 duration=holiday.duration_display)
-            allday_value = (holiday.work_entry_type_request_unit != 'half_day')
+            allday_value = (holiday.work_entry_type_request_unit != 'half_day' or holiday.request_date_from_period == 'am' and holiday.request_date_to_period == 'pm')
             if holiday.work_entry_type_request_unit == 'hour':
                 allday_value = float_compare(holiday.number_of_days, 1.0, 1) >= 0
+
+            if allday_value:
+                leave_tz = ZoneInfo(holiday.tz) if holiday.tz else UTC
+                start_value = holiday.date_from.replace(tzinfo=UTC).astimezone(leave_tz).replace(tzinfo=None)
+                stop_value = holiday.date_to.replace(tzinfo=UTC).astimezone(leave_tz).replace(tzinfo=None)
+            else:
+                start_value = holiday.date_from
+                stop_value = holiday.date_to
+
             meeting_values = {
                 'name': meeting_name,
                 'duration': holiday.number_of_days * (holiday.resource_calendar_id.hours_per_day or HOURS_PER_DAY),
                 'description': holiday.notes,
                 'user_id': user.id,
-                'start': holiday.date_from,
-                'stop': holiday.date_to,
+                'start': start_value,
+                'stop': stop_value,
                 'allday': allday_value,
                 'privacy': 'confidential',
                 'event_tz': user.tz,
@@ -1149,8 +1164,20 @@ class HrLeave(models.Model):
         self._post_leave_cancel()
 
     def _get_leaves_on_public_holiday(self):
+        bypass_work_entry_types = [
+            'LEAVE110',  # Sick Time Off
+            'LEAVE210',  # Maternity Time Off
+            'LEAVE280',  # Long Term Sick
+            'LEAVE264',  # Incapacity for work with guaranteed salary - 1st week
+            'LEAVE218',  # Incapacity for work with guaranteed salary system for workers - 2nd week
+            'LEAVE219',  # Incapacity for work with salary supplement for workers - after the 2nd week CCT 12bis/13bis
+            'LEAVE214',  # Sick Time Off (Without Guaranteed Salary)
+            'LEAVE227',  # Work accident or occupational illness with normal daily pay at 100% for the first week
+            'LEAVE229',  # Work accident or occupational illness with employer supplement from the 2nd week of CCT 12bis/13bis
+            'LEAVE117',  # Work Accident (Unpaid)
+        ]
         return self.filtered(
-            lambda l: l.employee_id and not l.number_of_days and l.work_entry_type_id.count_as == 'absence' and l.work_entry_type_id.code not in ['LEAVE110', 'LEAVE210', 'LEAVE280'])
+            lambda l: l.employee_id and not l.number_of_days and l.work_entry_type_id.count_as == 'absence' and l.work_entry_type_id.code not in bypass_work_entry_types)
 
     def _split_leaves(self, split_date_from, split_date_to=False):
         """

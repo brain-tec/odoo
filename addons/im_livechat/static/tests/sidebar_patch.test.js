@@ -289,12 +289,12 @@ test("Clicking on leave button leaves the channel", async () => {
     await openDiscuss();
     await contains(".o-mail-DiscussSidebarChannel", { text: "Visitor 11" });
     await click("[title='Chat Actions']");
-    await click(".o-dropdown-item:contains('Leave Channel')");
+    await click(".o-dropdown-item:contains('Close Conversation')");
     await contains(
-        ".modal-header:has(:text('Leaving will end the live chat with Visitor 11. Are you sure you want to continue?'))"
+        ".modal-header:has(:text('Closing this will end the live chat with Visitor 11. Are you sure you want to proceed?'))"
     );
     await contains(".modal-body .o-mail-Message-body:has(:text('Last message from Visitor'))");
-    await click("button:contains(Leave Conversation)");
+    await click("button:contains(Close Conversation)");
     await contains(".o-mail-DiscussSidebarChannel", { count: 0, text: "Visitor 11" });
 });
 
@@ -356,11 +356,11 @@ test("Local sidebar category state is shared between tabs", async () => {
     await contains(`${env2.selector} .o-mail-DiscussSidebarCategory-livechat .oi-chevron-right`);
 });
 
-test("live chat is displayed below its category", async () => {
+test("live chat is displayed in the Live Chat category", async () => {
     const pyEnv = await startServer();
     const livechatChannelId = pyEnv["im_livechat.channel"].create({ name: "Helpdesk" });
     browser.localStorage.setItem(
-        `discuss_sidebar_category_im_livechat.category_${livechatChannelId}_open`,
+        `discuss_sidebar_category_im_livechat.category_default_open`,
         false
     );
     pyEnv["discuss.channel"].create({
@@ -376,9 +376,9 @@ test("live chat is displayed below its category", async () => {
     });
     await start();
     await openDiscuss();
-    await click(".o-mail-DiscussSidebarCategory .btn", { text: "Helpdesk" });
+    await contains(".o-mail-DiscussSidebarCategory .btn", { text: "Live Chat" });
     await contains(
-        ".o-mail-DiscussSidebarCategory:contains(Helpdesk) + .o-mail-DiscussSidebarCategory-channels:contains(Visitor #12)"
+        ".o-mail-DiscussSidebarCategory-livechat + .o-mail-DiscussSidebarCategory-channels:contains(Visitor #12)"
     );
 });
 

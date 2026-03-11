@@ -437,7 +437,8 @@ class AccountChartTemplate(models.AbstractModel):
                     # Point or create xmlid to existing record to avoid duplicate code
                     account = self.ref(xmlid, raise_if_not_found=False)
                     if 'code' in values:
-                        normalized_code = f'{values["code"]:<0{int(template_data.get("code_digits", 6))}}'
+                        # Inactive accounts are typically parents — skip padding to avoid code collisions
+                        normalized_code = f'{values["code"]:<0{int(template_data.get("code_digits", 6))}}' if values.get("active", True) else values["code"]
                         if not account or not re.match(f'^{values["code"]}0*$', account.code):
                             query = self.env['account.account'].with_context(active_test=False)._search(
                                 self.env['account.account']._check_company_domain(company)
@@ -534,7 +535,8 @@ class AccountChartTemplate(models.AbstractModel):
         code_digits = int(template_data.get('code_digits', 6))
         for key, account_data in data.get('account.account', {}).items():
             if 'code' in account_data:
-                data['account.account'][key]['code'] = f'{account_data["code"]:<0{code_digits}}'
+                # Inactive accounts are typically parents — skip padding to avoid code collisions
+                data['account.account'][key]['code'] = f'{account_data["code"]:<0{code_digits}}' if account_data.get("active", True) else account_data["code"]
 
         for model in ('account.fiscal.position', 'account.reconcile.model'):
             if model in data:
@@ -873,12 +875,22 @@ class AccountChartTemplate(models.AbstractModel):
             del template_data['res.company']
         return template_data
 
+    def _get_account_parent_xmlid(self, code_prefix, template_code):
+        return None
+
+    @api.model
+    def _get_account_parent_id(self, code_prefix):
+        template_code = self.env.company.chart_template
+        xmlid = self._get_account_parent_xmlid(code_prefix, template_code)
+        return xmlid and (parent := self.ref(xmlid, raise_if_not_found=False)) and parent.id
+
     def _get_accounts_data_values(self, company, template_data, bank_prefix='', code_digits=0):
         bank_prefix = bank_prefix or company.bank_account_code_prefix
         code_digits = code_digits or int(template_data.get('code_digits', 6))
         return {
             'account_journal_suspense_account_id': {
                 'name': _("Bank Suspense Account"),
+                'parent_id': self._get_account_parent_id(bank_prefix),
                 'prefix': bank_prefix,
                 'code_digits': code_digits,
                 'account_type': 'asset_current',
@@ -909,6 +921,7 @@ class AccountChartTemplate(models.AbstractModel):
             },
             'transfer_account_id': {
                 'name': _("Funds in Transit"),
+                'parent_id': self._get_account_parent_id(company.transfer_account_code_prefix),
                 'prefix': company.transfer_account_code_prefix,
                 'code_digits': code_digits,
                 'account_type': 'asset_current',
@@ -957,6 +970,7 @@ class AccountChartTemplate(models.AbstractModel):
         accounts_data_no_fields = {
             'account_journal_payment_debit_account_id': {
                 'name': _("Outstanding Receipts"),
+                'parent_id': self._get_account_parent_id(bank_prefix),
                 'prefix': bank_prefix,
                 'code_digits': code_digits,
                 'account_type': 'asset_current',
@@ -964,6 +978,7 @@ class AccountChartTemplate(models.AbstractModel):
             },
             'account_journal_payment_credit_account_id': {
                 'name': _("Outstanding Payments"),
+                'parent_id': self._get_account_parent_id(bank_prefix),
                 'prefix': bank_prefix,
                 'code_digits': code_digits,
                 'account_type': 'asset_current',
