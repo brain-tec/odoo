@@ -8,7 +8,7 @@ import * as Chrome from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
 import * as Utils from "@point_of_sale/../tests/pos/tours/utils/common";
 import { refresh } from "@point_of_sale/../tests/generic_helpers/utils";
 import { registry } from "@web/core/registry";
-import { inLeftSide } from "@point_of_sale/../tests/pos/tours/utils/common";
+import { inLeftSide, expectActionTarget } from "@point_of_sale/../tests/pos/tours/utils/common";
 import * as PartnerList from "@point_of_sale/../tests/pos/tours/utils/partner_list_util";
 
 registry.category("web_tour.tours").add("ChromeTour", {
@@ -281,6 +281,10 @@ registry.category("web_tour.tours").add("test_cash_in_out", {
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             Chrome.freezeDateTime(1749965940000),
+            Chrome.clickMenuButton(),
+            Chrome.clickMenuDropdownOption("Cash In/Out"),
+            Chrome.checkButtonDisabled("Details"),
+            Utils.selectButton("Discard"),
             Chrome.doCashMove("10", "MOBT in"),
             Chrome.doCashMove("5", "MOBT out"),
             Chrome.clickMenuOption("Close Register"),
@@ -409,5 +413,41 @@ registry.category("web_tour.tours").add("test_set_opening_note_without_cash_meth
             },
             Dialog.confirm("Open Register"),
             ProductScreen.addOrderline("Whiteboard Pen", "1", "6", "6.0"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_pos_open_ui_button", {
+    steps: () =>
+        [
+            {
+                content: "Ctrl/Cmd click Open Register should open in new tab",
+                trigger: "button:contains('Open Register')",
+                run: async (el) => {
+                    const actionTargetPromise = expectActionTarget("new");
+                    el.anchor.dispatchEvent(
+                        new MouseEvent("click", { ctrlKey: true, metaKey: true })
+                    );
+                    await actionTargetPromise;
+                },
+            },
+            {
+                content: "Middle click Open Register should open in new tab",
+                trigger: "button:contains('Open Register')",
+                run: async (el) => {
+                    const actionTargetPromise = expectActionTarget("new");
+                    el.anchor.dispatchEvent(new MouseEvent("click", { button: 1 }));
+                    await actionTargetPromise;
+                },
+            },
+            {
+                content: "Normal click opens Open Register in the same tab",
+                trigger: "button:contains('Open Register')",
+                run: async (el) => {
+                    const actionTargetPromise = expectActionTarget("self");
+                    el.anchor.dispatchEvent(new MouseEvent("click", {}));
+                    await actionTargetPromise;
+                },
+                expectUnloadPage: true,
+            },
         ].flat(),
 });

@@ -5,9 +5,8 @@ from odoo.tests import tagged
 from odoo.addons.sale.tests.common import SaleCommon
 
 
-@tagged('post_install', '-at_install')
+@tagged("post_install", "-at_install")
 class TestSaleCommon(SaleCommon):
-
     def test_common(self):
         empty_order = self._create_so(order_line=[])
         self.assertFalse(empty_order.order_line)
@@ -19,7 +18,7 @@ class TestSaleCommon(SaleCommon):
         self.assertFalse(empty_order.pricelist_id)
         self.assertEqual(empty_order.currency_id.name, self.currency.name)
         self.assertEqual(empty_order.team_id, self.sale_team)
-        self.assertEqual(empty_order.state, 'draft')
+        self.assertEqual(empty_order.state, "draft")
 
         self.assertEqual(self.sale_order.partner_id, self.partner)
         self.assertEqual(self.sale_order.partner_invoice_id, self.partner)
@@ -27,7 +26,7 @@ class TestSaleCommon(SaleCommon):
         self.assertFalse(self.sale_order.pricelist_id)
         self.assertEqual(self.sale_order.currency_id.name, self.currency.name)
         self.assertEqual(self.sale_order.team_id, self.sale_team)
-        self.assertEqual(self.sale_order.state, 'draft')
+        self.assertEqual(self.sale_order.state, "draft")
 
         consumable_line, service_line = self.sale_order.order_line
 

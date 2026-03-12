@@ -13,15 +13,14 @@ from odoo.http import request
 
 from odoo.addons.payment.logging import get_payment_logger
 
-
 _logger = get_payment_logger(__name__)
 
 
 class WorldlineController(http.Controller):
-    _return_url = '/payment/worldline/return'
-    _webhook_url = '/payment/worldline/webhook'
+    _return_url = "/payment/worldline/return"
+    _webhook_url = "/payment/worldline/webhook"
 
-    @http.route(_return_url, type='http', auth='public', methods=['GET'])
+    @http.route(_return_url, type="http", auth="public", methods=["GET"])
     def worldline_return_from_checkout(self, **data):
         """Process the payment data sent by Worldline after redirection.
 
@@ -30,27 +29,25 @@ class WorldlineController(http.Controller):
         """
         _logger.info("Handling redirection from Worldline with data:\n%s", pprint.pformat(data))
 
-        provider_id = int(data['provider_id'])
-        provider_sudo = request.env['payment.provider'].sudo().browse(provider_id).exists()
-        if not provider_sudo or provider_sudo.code != 'worldline':
+        provider_id = int(data["provider_id"])
+        provider_sudo = request.env["payment.provider"].sudo().browse(provider_id).exists()
+        if not provider_sudo or provider_sudo.code != "worldline":
             _logger.warning("Received payment data with invalid provider id.")
-            raise Forbidden()
+            raise Forbidden
 
         try:
             # Fetch the checkout session data from Worldline.
             checkout_session_data = provider_sudo._send_api_request(
-                'GET', f'hostedcheckouts/{data["hostedCheckoutId"]}'
+                "GET", f"hostedcheckouts/{data['hostedCheckoutId']}"
             )
         except ValidationError:
             _logger.error("Unable to process the payment data")
         else:
-            payment_data = checkout_session_data.get('createdPaymentOutput', {})
-            request.env['payment.transaction'].sudo()._process(
-                'worldline', payment_data
-            )
-        return request.redirect('/payment/status')
+            payment_data = checkout_session_data.get("createdPaymentOutput", {})
+            request.env["payment.transaction"].sudo()._process("worldline", payment_data)
+        return request.redirect("/payment/status")
 
-    @http.route(_webhook_url, type='http', auth='public', methods=['POST'], csrf=False)
+    @http.route(_webhook_url, type="http", auth="public", methods=["POST"], csrf=False)
     def worldline_webhook(self):
         """Process the payment data sent by Worldline to the webhook.
 
@@ -60,18 +57,16 @@ class WorldlineController(http.Controller):
         :rtype: str
         """
         data = request.get_json_data()
-        _logger.info(
-            "Notification received from Worldline with data:\n%s", pprint.pformat(data)
-        )
+        _logger.info("Notification received from Worldline with data:\n%s", pprint.pformat(data))
 
         # Check the integrity of the notification.
-        tx_sudo = request.env['payment.transaction'].sudo()._search_by_reference('worldline', data)
+        tx_sudo = request.env["payment.transaction"].sudo()._search_by_reference("worldline", data)
         if tx_sudo:
-            received_signature = request.httprequest.headers.get('X-GCS-Signature')
+            received_signature = request.httprequest.headers.get("X-GCS-Signature")
             request_data = request.httprequest.data
             self._verify_signature(request_data, received_signature, tx_sudo)
-            tx_sudo._process('worldline', data)
-        return request.make_json_response('')  # Acknowledge the notification.
+            tx_sudo._process("worldline", data)
+        return request.make_json_response("")  # Acknowledge the notification.
 
     @staticmethod
     def _verify_signature(request_data, received_signature, tx_sudo):
@@ -86,7 +81,7 @@ class WorldlineController(http.Controller):
         # Retrieve the received signature from the payload.
         if not received_signature:
             _logger.warning("Received payment data with missing signature.")
-            raise Forbidden()
+            raise Forbidden
 
         # Compare the received signature with the expected signature computed from the payload.
         webhook_secret = tx_sudo.provider_id.worldline_webhook_secret
@@ -95,4 +90,4 @@ class WorldlineController(http.Controller):
         )
         if not hmac.compare_digest(received_signature.encode(), expected_signature):
             _logger.warning("Received payment data with invalid signature.")
-            raise Forbidden()
+            raise Forbidden

@@ -209,6 +209,8 @@ class Registry(Mapping[str, type["BaseModel"]]):
                             update_module = True
                 if update_module:
                     cr.execute("SELECT pg_advisory_lock(hashtext('registry_loading'))")
+                # commit after acquiring the lock to re-start the transaction
+                cr.commit()
 
                 # now load modules
                 if new_db_demo is None:
@@ -239,6 +241,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
                     registry = object.__new__(cls)
                     registry.init(db_name, models_to_check=models_to_check)
                     cls.registries[db_name] = registry  # pylint: disable=unsupported-assignment-operation
+                    cr.transaction.reset()  # rebind the transaction to the new registry
                     upgrade_modules = install_modules = reinit_modules = ()
                 else:
                     raise Exception(f'Failed to load registry after {retries} attempts')  # noqa: TRY301

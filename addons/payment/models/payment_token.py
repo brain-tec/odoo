@@ -5,40 +5,42 @@ from odoo.exceptions import UserError, ValidationError
 
 
 class PaymentToken(models.Model):
-    _name = 'payment.token'
-    _order = 'partner_id, id desc'
-    _description = 'Payment Token'
+    _name = "payment.token"
+    _order = "partner_id, id desc"
+    _description = "Payment Token"
     _check_company_auto = True
-    _rec_names_search = ['payment_details', 'partner_id', 'provider_id']
+    _rec_names_search = ["payment_details", "partner_id", "provider_id"]
 
-    provider_id = fields.Many2one(string="Provider", comodel_name='payment.provider', required=True)
-    provider_code = fields.Selection(string="Provider Code", related='provider_id.code')
+    provider_id = fields.Many2one(string="Provider", comodel_name="payment.provider", required=True)
+    provider_code = fields.Selection(string="Provider Code", related="provider_id.code")
     company_id = fields.Many2one(
-        related='provider_id.company_id', store=True, index=True
+        related="provider_id.company_id", store=True, index=True
     )  # Indexed to speed-up ORM searches (from ir_rule or others).
     payment_method_id = fields.Many2one(
-        string="Payment Method", comodel_name='payment.method', readonly=True, required=True
+        string="Payment Method", comodel_name="payment.method", readonly=True, required=True
     )
     payment_method_code = fields.Char(
-        string="Payment Method Code", related='payment_method_id.code'
+        string="Payment Method Code", related="payment_method_id.code"
     )
     payment_details = fields.Char(
-        string="Payment Details", help="The clear part of the payment method's payment details.",
+        string="Payment Details", help="The clear part of the payment method's payment details."
     )
-    partner_id = fields.Many2one(string="Partner", comodel_name='res.partner', required=True, index=True)
+    partner_id = fields.Many2one(
+        string="Partner", comodel_name="res.partner", required=True, index=True
+    )
     provider_ref = fields.Char(
         string="Provider Reference",
         help="The provider reference of the token of the transaction.",
         required=True,
     )  # This is not the same thing as the provider reference of the transaction.
     transaction_ids = fields.One2many(
-        string="Payment Transactions", comodel_name='payment.transaction', inverse_name='token_id'
+        string="Payment Transactions", comodel_name="payment.transaction", inverse_name="token_id"
     )
     active = fields.Boolean(string="Active", default=True)
 
     # === COMPUTE METHODS === #
 
-    @api.depends('payment_details', 'create_date')
+    @api.depends("payment_details", "create_date")
     def _compute_display_name(self):
         for token in self:
             # Need to compute it as sudo, in case some provider's override need info.
@@ -50,8 +52,8 @@ class PaymentToken(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for values in vals_list:
-            if 'provider_id' in values:
-                provider = self.env['payment.provider'].browse(values['provider_id'])
+            if "provider_id" in values:
+                provider = self.env["payment.provider"].browse(values["provider_id"])
 
                 # Include provider-specific create values
                 values.update(self._get_specific_create_values(provider.code, values))
@@ -61,8 +63,8 @@ class PaymentToken(models.Model):
         return super().create(vals_list)
 
     @api.model
-    def _get_specific_create_values(self, provider_code, values):
-        """ Complete the values of the `create` method with provider-specific values.
+    def _get_specific_create_values(self, provider_code, values):  # noqa: ARG002
+        """Complete the values of the `create` method with provider-specific values.
 
         For a provider to add its own create values, it must overwrite this method and return a
         dict of values. Provider-specific values take precedence over those of the dict of generic
@@ -76,38 +78,39 @@ class PaymentToken(models.Model):
         return dict()
 
     def write(self, vals):
-        """ Prevent unarchiving tokens and handle their archiving.
+        """Prevent unarchiving tokens and handle their archiving.
 
         :return: The result of the call to the parent method.
         :rtype: bool
         :raise UserError: If at least one token is being unarchived.
         """
-        if 'active' in vals:
-            if vals['active']:
+        if "active" in vals:
+            if vals["active"]:
                 if any(
-                    not token.payment_method_id.active
-                    or token.provider_id.state == 'disabled'
+                    not token.payment_method_id.active or token.provider_id.state == "disabled"
                     for token in self
                 ):
-                    raise UserError(_(
-                        "You can't unarchive tokens linked to inactive payment methods or disabled"
-                        " providers."
-                    ))
+                    raise UserError(
+                        _(
+                            "You can't unarchive tokens linked to inactive payment methods or"
+                            " disabled providers."
+                        )
+                    )
             else:
                 # Call the handlers in sudo mode because this method might have been called by RPC.
-                self.filtered('active').sudo()._handle_archiving()
+                self.filtered("active").sudo()._handle_archiving()
 
         return super().write(vals)
 
-    @api.constrains('partner_id')
+    @api.constrains("partner_id")
     def _check_partner_is_never_public(self):
-        """ Check that the partner associated with the token is never public. """
+        """Check that the partner associated with the token is never public."""
         for token in self:
             if token.partner_id.is_public:
                 raise ValidationError(_("No token can be assigned to the public partner."))
 
     def _handle_archiving(self):
-        """ Handle the archiving of tokens.
+        """Handle the archiving of tokens.
 
         For a module to perform additional operations when a token is archived, it must override
         this method.
@@ -118,8 +121,8 @@ class PaymentToken(models.Model):
 
     # === BUSINESS METHODS === #
 
-    def _get_available_tokens(self, providers_ids, partner_id, is_validation=False, **kwargs):
-        """ Return the available tokens linked to the given providers and partner.
+    def _get_available_tokens(self, providers_ids, partner_id, is_validation=False, **_kwargs):
+        """Return the available tokens linked to the given providers and partner.
 
         For a module to retrieve the available tokens, it must override this method and add
         information in the kwargs to define the context of the request.
@@ -127,24 +130,25 @@ class PaymentToken(models.Model):
         :param list providers_ids: The ids of the providers available for the transaction.
         :param int partner_id: The id of the partner.
         :param bool is_validation: Whether the transaction is a validation operation.
-        :param dict kwargs: Locally unused keywords arguments.
+        :param dict _kwargs: Locally unused keywords arguments.
         :return: The available tokens.
         :rtype: payment.token
         """
         if not is_validation:
-            return self.env['payment.token'].search(
-                [('provider_id', 'in', providers_ids), ('partner_id', '=', partner_id)]
-            )
-        else:
-            # Get all the tokens of the partner and of their commercial partner, regardless of
-            # whether the providers are available.
-            partner = self.env['res.partner'].browse(partner_id)
-            return self.env['payment.token'].search(
-                [('partner_id', 'in', [partner.id, partner.commercial_partner_id.id])]
-            )
+            return self.env["payment.token"].search([
+                ("provider_id", "in", providers_ids),
+                ("partner_id", "=", partner_id),
+            ])
 
-    def _build_display_name(self, *args, max_length=34, should_pad=True, **kwargs):
-        """ Build a token name of the desired maximum length with the format `•••• 1234`.
+        # Get all the tokens of the partner and of their commercial partner, regardless of
+        # whether the providers are available.
+        partner = self.env["res.partner"].browse(partner_id)
+        return self.env["payment.token"].search([
+            ("partner_id", "in", [partner.id, partner.commercial_partner_id.id])
+        ])
+
+    def _build_display_name(self, *_args, max_length=34, should_pad=True, **_kwargs):
+        """Build a token name of the desired maximum length with the format `•••• 1234`.
 
         The payment details are padded on the left with up to four padding characters. The padding
         is only added if there is enough room for it. If not, it is either reduced or not added at
@@ -156,34 +160,34 @@ class PaymentToken(models.Model):
 
         Note: `self.ensure_one()`
 
-        :param list args: The arguments passed by QWeb when calling this method.
+        :param list _args: The arguments passed by QWeb when calling this method.
         :param int max_length: The desired maximum length of the token name. The default is `34` to
                                fit the largest IBANs.
         :param bool should_pad: Whether the token should be padded.
-        :param dict kwargs: Optional data used in overrides of this method.
+        :param dict _kwargs: Optional data used in overrides of this method.
         :return: The padded token name.
         :rtype: str
         """
         self.ensure_one()
 
         if not self.create_date:
-            return ''
+            return ""
 
-        padding_length = max_length - len(self.payment_details or '')
+        padding_length = max_length - len(self.payment_details or "")
         if not self.payment_details:
-            create_date_str = self.create_date.strftime('%Y/%m/%d')
+            create_date_str = self.create_date.strftime("%Y/%m/%d")
             display_name = _("Payment details saved on %(date)s", date=create_date_str)
         elif padding_length >= 2:  # Enough room for padding.
-            padding = '•' * min(padding_length - 1, 4) + ' ' if should_pad else ''
-            display_name = ''.join([padding, self.payment_details])
+            padding = "•" * min(padding_length - 1, 4) + " " if should_pad else ""
+            display_name = f"{padding}{self.payment_details}"
         elif padding_length > 0:  # Not enough room for padding.
             display_name = self.payment_details
         else:  # Not enough room for neither padding nor the payment details.
-            display_name = self.payment_details[-max_length:] if max_length > 0 else ''
+            display_name = self.payment_details[-max_length:] if max_length > 0 else ""
         return display_name
 
     def get_linked_records_info(self):
-        """ Return a list of information about records linked to the current token.
+        """Return a list of information about records linked to the current token.
 
         For a module to implement payments and link documents to a token, it must override this
         method and add information about linked document records to the returned list.

@@ -4,16 +4,16 @@ from odoo import api, fields, models
 
 
 class ResCompany(models.Model):
-    _inherit = 'res.company'
+    _inherit = "res.company"
 
     onboarding_payment_module = fields.Selection(
         string="Onboarding Payment Module",
         selection=[
-            ('mercado_pago', "Mercado Pago"),
-            ('razorpay', "Razorpay"),
-            ('stripe', "Stripe"),
+            ("mercado_pago", "Mercado Pago"),
+            ("razorpay", "Razorpay"),
+            ("stripe", "Stripe"),
         ],
-        compute='_compute_onboarding_payment_module',
+        compute="_compute_onboarding_payment_module",
     )
     # Labels to be displayed on the payment buttons
     pay_now_label = fields.Char(
@@ -29,15 +29,15 @@ class ResCompany(models.Model):
         translate=True,
     )
 
-    @api.depends('currency_id', 'country_id')
+    @api.depends("currency_id", "country_id")
     def _compute_onboarding_payment_module(self):
         for company in self:
-            if company.currency_id.name == 'INR':
-                company.onboarding_payment_module = 'razorpay'
+            if company.currency_id.name == "INR":
+                company.onboarding_payment_module = "razorpay"
             elif company.country_id.is_stripe_supported_country:
-                company.onboarding_payment_module = 'stripe'
+                company.onboarding_payment_module = "stripe"
             elif company.country_id.is_mercado_pago_supported_country:
-                company.onboarding_payment_module = 'mercado_pago'
+                company.onboarding_payment_module = "mercado_pago"
             else:
                 company.onboarding_payment_module = None
 
@@ -46,15 +46,21 @@ class ResCompany(models.Model):
         companies = super().create(vals_list)
 
         # Duplicate installed providers in the new companies.
-        providers_sudo = self.env['payment.provider'].sudo().search(
-            [('company_id', '=', self.env.user.company_id.id), ('module_state', '=', 'installed')]
+        providers_sudo = (
+            self
+            .env["payment.provider"]
+            .sudo()
+            .search([
+                ("company_id", "=", self.env.user.company_id.id),
+                ("module_state", "=", "installed"),
+            ])
         )
         for company in companies:
             if company.parent_id:  # The company is a branch.
                 continue  # Only consider top-level companies for provider duplication.
 
             for provider_sudo in providers_sudo:
-                provider_sudo.copy({'company_id': company.id})
+                provider_sudo.copy({"company_id": company.id})
 
         return companies
 
@@ -72,20 +78,26 @@ class ResCompany(models.Model):
             return False
 
         # Install the onboarding module if needed.
-        onboarding_module = self.env['ir.module.module'].sudo().search(
-            [('name', '=', f'payment_{self.onboarding_payment_module}')]
-        )  # In sudo mode to search the onboarding module
-        onboarding_module.filtered(lambda m: m.state == 'uninstalled').button_immediate_install()
+        onboarding_module = (
+            self
+            .env["ir.module.module"]
+            .sudo()  # In sudo mode to search the onboarding module.
+            .search([("name", "=", f"payment_{self.onboarding_payment_module}")])
+        )
+        onboarding_module.filtered(lambda m: m.state == "uninstalled").button_immediate_install()
 
         # Create a new env including the freshly installed module.
         new_env = api.Environment(self.env.cr, self.env.uid, self.env.context)
 
         # Configure the provider.
         provider_code = self.onboarding_payment_module
-        provider = new_env['payment.provider'].search([
-            ('code', '=', provider_code),
-            *self.env['payment.provider']._check_company_domain(self),
-        ], limit=1)
+        provider = new_env["payment.provider"].search(
+            [
+                ("code", "=", provider_code),
+                *self.env["payment.provider"]._check_company_domain(self),
+            ],
+            limit=1,
+        )
         if not provider:
             return False
 

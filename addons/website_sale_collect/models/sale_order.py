@@ -7,27 +7,25 @@ from odoo.exceptions import ValidationError
 
 
 class SaleOrder(models.Model):
-    _inherit = 'sale.order'
+    _inherit = "sale.order"
 
     def _compute_warehouse_id(self):
         """Override of `website_sale_stock` to avoid recomputations for in_store orders
         when the warehouse was set by the pickup_location_data."""
         in_store_orders_with_pickup_data = self.filtered(
-            lambda so: (
-                so.carrier_id.delivery_type == 'in_store' and so.pickup_location_data
-            )
+            lambda so: so.carrier_id.delivery_type == "in_store" and so.pickup_location_data
         )
         super(SaleOrder, self - in_store_orders_with_pickup_data)._compute_warehouse_id()
         for order in in_store_orders_with_pickup_data:
-            order.warehouse_id = order.pickup_location_data['id']
+            order.warehouse_id = order.pickup_location_data["id"]
 
     def _compute_fiscal_position_id(self):
         """Override of `sale` to set the fiscal position matching the selected pickup location
         for pickup in-store orders."""
         in_store_orders = self.filtered(
-            lambda so: so.carrier_id.delivery_type == 'in_store' and so.pickup_location_data
+            lambda so: so.carrier_id.delivery_type == "in_store" and so.pickup_location_data
         )
-        AccountFiscalPosition = self.env['account.fiscal.position'].sudo()
+        AccountFiscalPosition = self.env["account.fiscal.position"].sudo()
         for order in in_store_orders:
             order.fiscal_position_id = AccountFiscalPosition._get_fiscal_position(
                 order.partner_id, delivery=order.warehouse_id.partner_id
@@ -37,21 +35,17 @@ class SaleOrder(models.Model):
     def _get_free_qty(self, product):
         """Override of `website_sale_stock` to consider the maximum available quantity across
         all in-store warehouses when no delivery method is set on the order yet."""
-        if (
-            self.website_id.warehouse_id
-            and self.website_id.in_store_dm_id
-            and not self.carrier_id
-        ):
+        if self.website_id.warehouse_id and self.website_id.in_store_dm_id and not self.carrier_id:
             return self.website_id.sudo()._get_max_in_store_product_available_qty(product)
         return super()._get_free_qty(product)
 
     def _set_delivery_method(self, delivery_method, rate=None):
         """Override of `website_sale` to recompute warehouse and fiscal position when a new
-        delivery method is not in-store anymore. """
+        delivery method is not in-store anymore."""
         self.ensure_one()
         was_in_store_order = (
-            self.carrier_id.delivery_type == 'in_store'
-            and delivery_method.delivery_type != 'in_store'
+            self.carrier_id.delivery_type == "in_store"
+            and delivery_method.delivery_type != "in_store"
         )
         super()._set_delivery_method(delivery_method, rate=rate)
         if was_in_store_order:
@@ -67,13 +61,13 @@ class SaleOrder(models.Model):
         taxes.
         """
         super()._set_pickup_location(pickup_location_data)
-        if self.carrier_id.delivery_type != 'in_store':
+        if self.carrier_id.delivery_type != "in_store":
             return
 
         self.pickup_location_data = json.loads(pickup_location_data)
         fpos_before = self.fiscal_position_id
         if self.pickup_location_data:
-            self.warehouse_id = self.pickup_location_data['id']
+            self.warehouse_id = self.pickup_location_data["id"]
             self._compute_fiscal_position_id()
         else:
             self._compute_warehouse_id()
@@ -89,51 +83,51 @@ class SaleOrder(models.Model):
         :rtype: res.partner
         """
         if country_code:
-            country = self.env['res.country'].search([('code', '=', country_code)], limit=1)
+            country = self.env["res.country"].search([("code", "=", country_code)], limit=1)
         return super()._get_pickup_locations(country=country, **kwargs)
 
     def _get_shop_warehouse_id(self):
         """Override of `website_sale_stock` to consider the chosen warehouse."""
         self.ensure_one()
-        if self.carrier_id.delivery_type == 'in_store':
+        if self.carrier_id.delivery_type == "in_store":
             return self.warehouse_id.id
         return super()._get_shop_warehouse_id()
 
     def _check_cart_is_ready_to_be_paid(self):
         """Override of `website_sale` to check if all products are in stock in the selected
-        warehouse. """
+        warehouse."""
         if (
             self._has_deliverable_products()
-            and self.carrier_id.delivery_type == 'in_store'
+            and self.carrier_id.delivery_type == "in_store"
             and not self._is_in_stock(self.warehouse_id.id)
         ):
-            raise ValidationError(self.env._(
-                "Some products are not available in the selected store."
-            ))
+            raise ValidationError(
+                self.env._("Some products are not available in the selected store.")
+            )
         return super()._check_cart_is_ready_to_be_paid()
 
     # === TOOLING ===#
 
     def _prepare_in_store_default_location_data(self):
         """Prepare the default pickup location values for each in-store delivery method available
-        for the order. """
+        for the order."""
         default_pickup_locations = {}
         for dm in self._get_delivery_methods():
             if (
-                dm.delivery_type == 'in_store'
+                dm.delivery_type == "in_store"
                 and dm.id != self.carrier_id.id
                 and len(dm.warehouse_ids) == 1
             ):
                 pickup_location_data = dm.warehouse_ids[0]._prepare_pickup_location_data()
                 if pickup_location_data:
                     default_pickup_locations[dm.id] = {
-                        'pickup_location_data': pickup_location_data,
-                        'insufficient_stock_data': self._get_insufficient_stock_data(
-                            pickup_location_data['id']
+                        "pickup_location_data": pickup_location_data,
+                        "insufficient_stock_data": self._get_insufficient_stock_data(
+                            pickup_location_data["id"]
                         ),
                     }
 
-        return {'default_pickup_locations': default_pickup_locations}
+        return {"default_pickup_locations": default_pickup_locations}
 
     def _is_in_stock(self, wh_id):
         """Check whether all storable products of the cart are in stock in the given warehouse.
@@ -155,21 +149,24 @@ class SaleOrder(models.Model):
         :rtype: dict
         """
         insufficient_stock_data = {}
-        for product, ols in self.order_line.grouped('product_id').items():
+        for product, ols in self.order_line.grouped("product_id").items():
             if not product.is_storable or product.allow_out_of_stock_order:
                 continue
             free_qty = product.with_context(warehouse_id=wh_id).free_qty
             for ol in ols:
-                free_qty_in_uom = max(int(product.uom_id._compute_quantity(
-                    free_qty, ol.product_uom_id, rounding_method='DOWN'
-                )), 0)  # Round down as only integer quantities can be sold.
+                free_qty_in_uom = product.uom_id._compute_quantity(
+                    free_qty, ol.product_uom_id, rounding_method="DOWN"
+                )
+                # Round down as only integer quantities can be sold.
+                free_qty_in_uom = max(int(free_qty_in_uom), 0)
                 line_qty_in_uom = ol.product_uom_qty
                 if line_qty_in_uom > free_qty_in_uom:  # Not enough stock.
                     # Set a warning on the order line.
                     insufficient_stock_data[ol] = free_qty_in_uom
                     ol.shop_warning = self.env._(
                         "%(available_qty)s/%(line_qty)s available at this location",
-                        available_qty=free_qty_in_uom, line_qty=int(line_qty_in_uom),
+                        available_qty=free_qty_in_uom,
+                        line_qty=int(line_qty_in_uom),
                     )
                 free_qty -= ol.product_uom_id._compute_quantity(line_qty_in_uom, product.uom_id)
         return insufficient_stock_data
