@@ -426,6 +426,10 @@ class AccountEdiCommon(models.AbstractModel):
         with invoice._get_edi_creation() as invoice:
             self._correct_invoice_tax_amount(tree, invoice)
 
+        # Set XML as ubl_cii_xml_file (XML used to import)
+        if file_data['attachment']:
+            file_data['attachment'].res_field = 'ubl_cii_xml_file'
+
         attachments = self._import_attachments(invoice, tree)
         if attachments:
             invoice.message_post(attachment_ids=attachments.ids)
