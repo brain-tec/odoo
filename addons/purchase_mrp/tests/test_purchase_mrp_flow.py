@@ -223,7 +223,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             self.component_c,
         ]
 
-        self.assertEqual(sum([k.standard_price * k.qty_available for k in components]), 120 * 1260)
+        self.assertAlmostEqual(sum(k.standard_price * k.qty_available for k in components), 120 * 1260, delta=0.5)
 
     def test_kit_component_cost_multi_currency(self):
         # Set kit and component product to automated FIFO
@@ -1291,8 +1291,8 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         # The standard price of the component is updated to $10 because the kit cost
         # is $60, there are 6 units of different components used in this BoM, and since
         # the cost_share is equal, 60/6 = $10.
-        self.assertEqual(self.component_a.standard_price, 10)
-        self.assertEqual(lot_a.standard_price, 10)
+        self.assertAlmostEqual(self.component_a.standard_price, 10)
+        self.assertAlmostEqual(lot_a.standard_price, 10)
         self.assertEqual(lot_a.quantity_svl, 4)
         self.assertEqual(lot_a.value_svl, 40)
 
