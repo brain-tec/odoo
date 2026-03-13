@@ -154,7 +154,7 @@ from http import HTTPStatus
 from io import BytesIO
 from os.path import join as opj
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlsplit
 from zlib import adler32
 
 import babel.core
@@ -313,6 +313,7 @@ SESSION_ROTATION_INTERVAL = 60 * 60 * 3
 
 # URL paths for which automatic session rotation is disabled.
 SESSION_ROTATION_EXCLUDED_PATHS = (
+    '/websocket/on_closed',
     '/websocket/peek_notifications',
     '/websocket/update_bus_presence',
 )
@@ -2058,7 +2059,8 @@ class Request:
         if isinstance(location, URL):
             location = location.to_url()
         if local:
-            location = '/' + url_parse(location).replace(scheme='', netloc='').to_url().lstrip('/\\')
+            location = url_parse(location).replace(scheme='', netloc='').to_url().lstrip('/\\')
+            location = '/' + urlsplit(location).geturl().lstrip('/\\')
         if self.db:
             return self.env['ir.http']._redirect(location, code)
         return werkzeug.utils.redirect(location, code, Response=Response)
