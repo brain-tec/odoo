@@ -64,11 +64,22 @@ class TestHttpMisc(TestHttpBase):
             fake_req = DotDict(db=False)
             return Request.redirect(fake_req, path, local=True).headers['Location']
         self.assertEqual(local_redirect('https://www.example.com/hello?a=b'), '/hello?a=b')
+        self.assertEqual(local_redirect('http://user:pass@www.example.com/hello?a=b'), '/hello?a=b')
         self.assertEqual(local_redirect('/hello?a=b'), '/hello?a=b')
         self.assertEqual(local_redirect('hello?a=b'), '/hello?a=b')
         self.assertEqual(local_redirect('www.example.com/hello?a=b'), '/www.example.com/hello?a=b')
         self.assertEqual(local_redirect('https://www.example.comhttps://www.example2.com/hello?a=b'), '/www.example2.com/hello?a=b')
         self.assertEqual(local_redirect('https://https://www.example.com/hello?a=b'), '/www.example.com/hello?a=b')
+        # https://infra.spec.whatwg.org/#c0-control
+        cO_control = [chr(i) for i in range(0x20)]
+        for char in cO_control:
+            with self.subTest(f"Redirect with control character {char.encode()}"):
+                self.assertEqual(local_redirect(f'{char}/hello?a=b'), '/hello?a=b')
+
+        # https://infra.spec.whatwg.org/#ascii-tab-or-newline
+        for char in "\t\n\r":
+            with self.subTest(f"Redirect with control character {char.encode()}"):
+                self.assertEqual(local_redirect(f'/{char}/hello?a=b'), '/hello?a=b')
 
     def test_misc3_is_static_file(self):
         uri = 'test_http/static/src/img/gizeh.png'

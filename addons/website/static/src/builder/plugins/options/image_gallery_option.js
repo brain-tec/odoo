@@ -1,11 +1,10 @@
-import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
-import { BorderConfigurator } from "@html_builder/plugins/border_configurator_option";
+import { BaseOptionComponent } from "@html_builder/core/base_option_component";
+import { useDomState } from "@html_builder/core/utils";
+import { registry } from "@web/core/registry";
 
-export class ImageGalleryComponent extends BaseOptionComponent {
+export class ImageGalleryOption extends BaseOptionComponent {
+    static id = "image_gallery_option";
     static template = "website.ImageGalleryOption";
-    static selector = ".s_image_gallery";
-
-    static components = { BorderConfigurator };
 
     setup() {
         super.setup();
@@ -14,3 +13,5 @@ export class ImageGalleryComponent extends BaseOptionComponent {
         }));
     }
 }
+
+registry.category("website-options").add(ImageGalleryOption.id, ImageGalleryOption);

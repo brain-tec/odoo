@@ -1,9 +1,12 @@
-import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
+import { BaseOptionComponent } from "@html_builder/core/base_option_component";
+import { useDomState } from "@html_builder/core/utils";
 import { BackgroundOption } from "@html_builder/plugins/background_option/background_option";
 import { ParallaxOption } from "./parallax_option";
 import { useBackgroundOption } from "@html_builder/plugins/background_option/background_hook";
+import { registry } from "@web/core/registry";
 
-export class BaseWebsiteBackgroundOption extends BaseOptionComponent {
+export class WebsiteBackgroundOption extends BaseOptionComponent {
+    static id = "website_background_option";
     static template = "website.WebsiteBackgroundOption";
     static components = {
         ...BackgroundOption.components,
@@ -36,3 +39,5 @@ export class BaseWebsiteBackgroundOption extends BaseOptionComponent {
         }));
     }
 }
+
+registry.category("website-options").add(WebsiteBackgroundOption.id, WebsiteBackgroundOption);

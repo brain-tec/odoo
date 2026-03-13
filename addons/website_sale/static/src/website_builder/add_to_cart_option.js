@@ -1,5 +1,7 @@
-import { BaseOptionComponent, useDomState, useGetItemValue } from "@html_builder/core/utils";
+import { BaseOptionComponent } from "@html_builder/core/base_option_component";
+import { useDomState, useGetItemValue } from "@html_builder/core/utils";
 import { _t } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
 
 export const addToCartValues = {
     addToCart: { action: "add_to_cart", icon: "fa-cart-plus", label: _t("Add to Cart") },
@@ -7,9 +9,9 @@ export const addToCartValues = {
 };
 
 export class AddToCartOption extends BaseOptionComponent {
+    static id = "add_to_cart_option";
     static template = "website_sale.AddToCartOption";
-    static selector = ".s_add_to_cart";
-    static props = [];
+
     setup() {
         super.setup();
         this.getItemValue = useGetItemValue();
@@ -26,3 +28,5 @@ export class AddToCartOption extends BaseOptionComponent {
         return value && JSON.parse(value);
     }
 }
+
+registry.category("website-options").add(AddToCartOption.id, AddToCartOption);

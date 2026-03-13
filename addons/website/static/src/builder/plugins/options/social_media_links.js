@@ -1,12 +1,14 @@
 import { useRef, useState } from "@web/owl2/utils";
-import { useDomState, BaseOptionComponent } from "@html_builder/core/utils";
+import { BaseOptionComponent } from "@html_builder/core/base_option_component";
+import { useDomState } from "@html_builder/core/utils";
 import { onWillStart } from "@odoo/owl";
+import { registry } from "@web/core/registry";
 import { useSortable } from "@web/core/utils/sortable_owl";
 
 export class SocialMediaLinks extends BaseOptionComponent {
+    static id = "social_media_links";
     static template = "website.SocialMediaLinks";
     static dependencies = ["socialMediaOptionPlugin", "history"];
-    static selector = ".s_social_media";
 
     setup() {
         super.setup();
@@ -167,3 +169,5 @@ export class SocialMediaLinks extends BaseOptionComponent {
         return items;
     }
 }
+
+registry.category("website-options").add(SocialMediaLinks.id, SocialMediaLinks);

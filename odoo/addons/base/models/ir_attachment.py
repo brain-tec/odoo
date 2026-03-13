@@ -19,8 +19,6 @@ import werkzeug.security
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
 from odoo.fields import Domain
-from odoo.http import request
-from odoo.http.router import root
 from odoo.http.stream import Stream
 from odoo.tools import (
     OrderedSet,
@@ -316,6 +314,7 @@ class IrAttachment(models.Model):
             values['db_datas'] = False
         return values
 
+    @api.model
     def _compute_checksum(self, bin_data):
         """ compute the checksum for the given bytes
             :param bin_data : data in its binary form
@@ -891,42 +890,31 @@ class IrAttachment(models.Model):
             public=self.public,
         )
 
-        if self.store_fname:
-            path = werkzeug.security.safe_join(
-                os.path.abspath(config.filestore(request.db)),
-                self.store_fname
-            )
-            stat = os.stat(path)
-            kw.update(
-                type='path',
-                path=path,
-                last_modified=stat.st_mtime,
-                size=stat.st_size,
-            )
+        if self.store_fname and (path := self._full_path(self.store_fname)):
+            # Try to read directly from the file system without reading the file
+            try:
+                stat = os.stat(path)
+                return Stream(
+                    **kw,
+                    type='path',
+                    path=path,
+                    last_modified=stat.st_mtime,
+                    size=stat.st_size,
+                )
+            except OSError:
+                pass
 
         elif self.url:
-            # When the URL targets a file located in an addon, assume it
-            # is a path to the resource. It saves an indirection and
-            # stream the file right away.
-            static_path = root.get_static_file(
-                self.url,
-                host=request.httprequest.environ.get('HTTP_HOST', '')
-            )
-            if static_path:
-                return Stream.from_path(static_path, public=True)
-            else:
-                kw.update(type='url', url=self.url)
+            return Stream(type='url', url=self.url, **kw)
 
-        else:
-            data = self.raw.content
-            kw.update(
-                type='data',
-                data=data,
-                last_modified=self.write_date,
-                size=len(data),
-            )
-
-        return Stream(**kw)
+        data = self.raw.content
+        return Stream(
+            type='data',
+            data=data,
+            last_modified=self.write_date,
+            size=len(data),
+            **kw,
+        )
 
     def _is_remote_source(self):
         self.ensure_one()

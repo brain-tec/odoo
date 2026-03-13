@@ -7,12 +7,12 @@ import {
 } from "@html_builder/../tests/helpers";
 import { Builder } from "@html_builder/builder";
 import { BuilderAction } from "@html_builder/core/builder_action";
-import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
+import { BaseOptionComponent } from "@html_builder/core/base_option_component";
+import { useDomState } from "@html_builder/core/utils";
 import { OptionsContainer } from "@html_builder/sidebar/option_container";
 import { setContent, setSelection } from "@html_editor/../tests/_helpers/selection";
 import { redo, undo } from "@html_editor/../tests/_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
-import { withSequence } from "@html_editor/utils/resource";
 import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, queryAllTexts, queryFirst } from "@odoo/hoot-dom";
 import { Component, onWillStart, xml } from "@odoo/owl";
@@ -285,56 +285,6 @@ test("option that matches several elements", async () => {
     expect(queryAllTexts(".options-container:not(.d-none)")).toEqual([
         "Block\nRow\nTest",
         "Block\nRow\nTest",
-    ]);
-});
-
-test("Snippets options respect sequencing", async () => {
-    addBuilderOption(
-        withSequence(
-            2,
-            class extends BaseOptionComponent {
-                static selector = ".test-options-target";
-                static template = xml`
-                <BuilderRow label="'Row 2'">
-                    Test
-                </BuilderRow>`;
-            }
-        )
-    );
-    addBuilderOption(
-        withSequence(
-            1,
-            class extends BaseOptionComponent {
-                static selector = ".test-options-target";
-                static template = xml`
-                <BuilderRow label="'Row 1'">
-                    Test
-                </BuilderRow>`;
-            }
-        )
-    );
-    addBuilderOption(
-        withSequence(
-            3,
-            class extends BaseOptionComponent {
-                static selector = ".test-options-target";
-                static template = xml`
-                <BuilderRow label="'Row 3'">
-                    Test
-                </BuilderRow>`;
-            }
-        )
-    );
-    await setupHTMLBuilder(`<div class="test-options-target" data-name="Yop">b</div>`);
-    await contains(":iframe .test-options-target").click();
-    expect(".options-container").toBeVisible();
-    expect(queryAllTexts(".options-container .we-bg-options-container > div > div")).toEqual([
-        "Row 1",
-        "Test",
-        "Row 2",
-        "Test",
-        "Row 3",
-        "Test",
     ]);
 });
 

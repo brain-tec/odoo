@@ -1,6 +1,8 @@
-import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
+import { BaseOptionComponent } from "@html_builder/core/base_option_component";
+import { useDomState } from "@html_builder/core/utils";
 import { Domain } from "@web/core/domain";
 import { DomainSelectorDialog } from "@web/core/domain_selector_dialog/domain_selector_dialog";
+import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 /**
@@ -8,8 +10,8 @@ import { useService } from "@web/core/utils/hooks";
  * a domain.
  */
 export class SnippetVisibilityOption extends BaseOptionComponent {
+    static id = "snippet_visibility_option";
     static template = "mass_mailing.VisibilityOption";
-    static selector = "section";
     static dependencies = ["mass_mailing.SnippetVisibility"];
 
     setup() {
@@ -77,3 +79,5 @@ export class SnippetVisibilityOption extends BaseOptionComponent {
         );
     }
 }
+
+registry.category("mass_mailing-options").add(SnippetVisibilityOption.id, SnippetVisibilityOption);

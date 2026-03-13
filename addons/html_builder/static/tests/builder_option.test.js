@@ -5,7 +5,7 @@ import {
     setupHTMLBuilder,
 } from "@html_builder/../tests/helpers";
 import { BuilderAction } from "@html_builder/core/builder_action";
-import { BaseOptionComponent } from "@html_builder/core/utils";
+import { BaseOptionComponent } from "@html_builder/core/base_option_component";
 import { Plugin } from "@html_editor/plugin";
 import { expect, test, describe } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-dom";
@@ -311,7 +311,6 @@ test("Option containers should update reactively", async () => {
     class TestPlugin extends Plugin {
         static id = "test";
         resources = {
-            builder_options: [Option],
             clone_disabled_reason_providers: (el) => {
                 if (el.classList.contains("disabled_clone")) {
                     return "Test reason";
@@ -326,6 +325,7 @@ test("Option containers should update reactively", async () => {
     }
 
     addBuilderPlugin(TestPlugin);
+    addBuilderOption(Option);
     await setupHTMLBuilder(`
         <div data-name="Target" class="test-options-target target1">
             Homepage
@@ -355,7 +355,6 @@ test("Option containers dispatched to plugins are updated reactively", async () 
         static shared = ["isRemoveDisabled"];
 
         resources = {
-            builder_options: [Option],
             builder_actions: { TestAction },
             remove_disabled_reason_providers: (el) => {
                 if (el.classList.contains("not_removable")) {
@@ -384,6 +383,7 @@ test("Option containers dispatched to plugins are updated reactively", async () 
     }
 
     addBuilderPlugin(TestPlugin);
+    addBuilderOption(Option);
     await setupHTMLBuilder(`
         <div data-name="Target">
             <div> Is removable? <p class="target">-</p></div>
