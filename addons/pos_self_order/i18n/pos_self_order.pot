@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.2a1\n"
+"Project-Id-Version: Odoo Server 19.3a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 18:36+0000\n"
-"PO-Revision-Date: 2026-02-04 18:36+0000\n"
+"POT-Creation-Date: 2026-03-12 18:37+0000\n"
+"PO-Revision-Date: 2026-03-12 18:37+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -51,7 +51,7 @@ msgid ""
 "                        <t t-else=\"\">Hello,</t>\n"
 "                    </div>\n"
 "                    <br/>\n"
-"                    <div>Your order <t t-out=\"object.tracking_number\">...</t> amounting in <t t-out=\"object.amount_total\">$xx.xx</t> has been confirmed. <span t-if=\"object.preset_time or client.street\">It will be ready</span> <span t-if=\"object.preset_time\">at <t t-out=\"format_time(time=object.preset_time, tz=tz, time_format='short', lang_code=lg)\">12:00 pm</t></span> <span t-if=\"client.street\">at <t t-out=\"street\">street</t>, <t t-out=\"state\">state</t>, <t t-out=\"client.zip or ''\">zip</t>, <t t-out=\"city\">city</t>, <t t-out=\"country\">country</t></span></div>\n"
+"                    <div>Your order <t t-out=\"object.tracking_number\">...</t> amounting in <t t-out=\"format_amount(object.amount_total,object.currency_id)\">$xx.xx</t> has been confirmed. <span t-if=\"object.preset_time or client.street\">It will be ready</span> <span t-if=\"object.preset_time\">at <t t-out=\"format_time(time=object.preset_time, tz=tz, time_format='short', lang_code=lg)\">12:00 pm</t></span> <span t-if=\"client.street\">at <t t-out=\"street\">street</t>, <t t-out=\"state\">state</t>, <t t-out=\"client.zip or ''\">zip</t>, <t t-out=\"city\">city</t>, <t t-out=\"country\">country</t></span></div>\n"
 "                    <br/>\n"
 "                    <div>Thank you,</div>\n"
 "                    <br/>\n"
@@ -76,7 +76,7 @@ msgid ""
 "                        <t t-else=\"\">Hello,</t>\n"
 "                    </div>\n"
 "                    <br/>\n"
-"                    <div>Your order <t t-out=\"object.tracking_number\">...</t> amounting in <t t-out=\"object.amount_total\">$xx.xx</t> has been confirmed. <span t-if=\"object.preset_time\">It will be ready at <t t-out=\"format_time(time=object.preset_time, tz=tz, time_format='short', lang_code=lg)\">12:00 pm</t></span></div>\n"
+"                    <div>Your order <t t-out=\"object.tracking_number\">...</t> amounting in <t t-out=\"format_amount(object.amount_total,object.currency_id)\">$xx.xx</t> has been confirmed. <span t-if=\"object.preset_time\">It will be ready at <t t-out=\"format_time(time=object.preset_time, tz=tz, time_format='short', lang_code=lg)\">12:00 pm</t></span></div>\n"
 "                    <br/>\n"
 "                    <div>Thank you,</div>\n"
 "                    <br/>\n"
@@ -124,6 +124,12 @@ msgstr ""
 #: code:addons/pos_self_order/static/src/app/pages/combo_page/combo_page.xml:0
 #: code:addons/pos_self_order/static/src/app/pages/product_page/product_page.xml:0
 msgid "Add to cart"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.js:0
+msgid "Afternoon"
 msgstr ""
 
 #. module: pos_self_order
@@ -185,6 +191,7 @@ msgstr ""
 #: code:addons/pos_self_order/static/src/app/pages/eating_location_page/eating_location_page.xml:0
 #: code:addons/pos_self_order/static/src/app/pages/order_history_page/order_history_page.xml:0
 #: code:addons/pos_self_order/static/src/app/pages/payment_page/payment_page.xml:0
+#: code:addons/pos_self_order/static/src/app/pages/product_page/product_page.xml:0
 #: code:addons/pos_self_order/static/src/app/pages/stand_number_page/stand_number_page.xml:0
 msgid "Back"
 msgstr ""
@@ -196,6 +203,8 @@ msgstr ""
 
 #. module: pos_self_order
 #. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/components/pills_selection_popup/pills_selection_popup.xml:0
+#: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.xml:0
 #: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.xml:0
 msgid "Cancel"
 msgstr ""
@@ -257,18 +266,6 @@ msgstr ""
 
 #. module: pos_self_order
 #. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.xml:0
-msgid "Choose your time"
-msgstr ""
-
-#. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.xml:0
-msgid "City"
-msgstr ""
-
-#. module: pos_self_order
-#. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/category_list_popup/category_list_popup.xml:0
 #: code:addons/pos_self_order/static/src/app/components/network_connectionLost_popup/network_connectionLost_popup.xml:0
 #: code:addons/pos_self_order/static/src/app/components/product_info_popup/product_info_popup.xml:0
@@ -307,6 +304,12 @@ msgstr ""
 
 #. module: pos_self_order
 #. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/components/pills_selection_popup/pills_selection_popup.xml:0
+msgid "Confirm"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/network_connectionLost_popup/network_connectionLost_popup.xml:0
 msgid "Connection restored"
 msgstr ""
@@ -323,18 +326,6 @@ msgstr ""
 #: code:addons/pos_self_order/static/src/app/components/slots_popup/slots_popup.xml:0
 #: code:addons/pos_self_order/static/src/app/components/timeout_popup/timeout_popup.xml:0
 msgid "Continue"
-msgstr ""
-
-#. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/popup_table/popup_table.xml:0
-msgid "Continue with table"
-msgstr ""
-
-#. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/popup_table/popup_table.xml:0
-msgid "Could you please confirm your table number?"
 msgstr ""
 
 #. module: pos_self_order
@@ -501,12 +492,6 @@ msgid "Easily load a set of configuration options"
 msgstr ""
 
 #. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.xml:0
-msgid "Email"
-msgstr ""
-
-#. module: pos_self_order
 #: model:ir.model.fields,field_description:pos_self_order.field_pos_preset__mail_template_id
 msgid "Email Confirmation"
 msgstr ""
@@ -543,6 +528,12 @@ msgid "Enter your tracker number"
 msgstr ""
 
 #. module: pos_self_order
+#. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.js:0
+msgid "Evening"
+msgstr ""
+
+#. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.qr_codes_page
 msgid ""
 "Feel free to use and print this QR code as many times as needed according to"
@@ -558,6 +549,12 @@ msgstr ""
 #. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.res_config_settings_view_form_menu
 msgid "Free Metal / Wood Stands"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.js:0
+msgid "Full Day"
 msgstr ""
 
 #. module: pos_self_order
@@ -694,6 +691,12 @@ msgid "Internet Connection Lost"
 msgstr ""
 
 #. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/models/pos_order.py:0
+msgid "Invalid preset"
+msgstr ""
+
+#. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/overrides/screens/ticket_screen/ticket_screen.js:0
 msgid "Invoiced"
@@ -801,6 +804,12 @@ msgstr ""
 
 #. module: pos_self_order
 #. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.js:0
+msgid "Morning"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/landing_page/landing_page.xml:0
 msgid "My Order"
 msgstr ""
@@ -810,18 +819,6 @@ msgstr ""
 #: code:addons/pos_self_order/static/src/app/pages/landing_page/landing_page.xml:0
 #: code:addons/pos_self_order/static/src/app/pages/order_history_page/order_history_page.xml:0
 msgid "My Orders"
-msgstr ""
-
-#. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/services/self_order_service.js:0
-msgid "NEW"
-msgstr ""
-
-#. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.xml:0
-msgid "Name"
 msgstr ""
 
 #. module: pos_self_order
@@ -979,12 +976,6 @@ msgid ""
 msgstr ""
 
 #. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.xml:0
-msgid "Phone"
-msgstr ""
-
-#. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.pos_order_receipt_header
 msgid "Pickup At Counter"
 msgstr ""
@@ -993,6 +984,18 @@ msgstr ""
 #: model:ir.model.fields.selection,name:pos_self_order.selection__pos_config__self_ordering_service_mode__counter
 #: model:ir.model.fields.selection,name:pos_self_order.selection__pos_preset__service_at__counter
 msgid "Pickup zone"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.js:0
+msgid "Please choose a table for your order."
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.js:0
+msgid "Please choose a time slot for your order."
 msgstr ""
 
 #. module: pos_self_order
@@ -1199,18 +1202,13 @@ msgstr ""
 #. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.xml:0
-msgid "Select"
-msgstr ""
-
-#. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.xml:0
 msgid "Select a country"
 msgstr ""
 
 #. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/slots_popup/slots_popup.xml:0
+#: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.js:0
 msgid "Select a hour"
 msgstr ""
 
@@ -1222,7 +1220,7 @@ msgstr ""
 
 #. module: pos_self_order
 #. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/popup_table/popup_table.xml:0
+#: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.js:0
 msgid "Select a table"
 msgstr ""
 
@@ -1247,10 +1245,8 @@ msgid "Selection"
 msgstr ""
 
 #. module: pos_self_order
-#. odoo-javascript
 #. odoo-python
 #: code:addons/pos_self_order/models/pos_config.py:0
-#: code:addons/pos_self_order/static/src/app/models/pos_order.js:0
 msgid "Self Order"
 msgstr ""
 
@@ -1372,12 +1368,6 @@ msgid "Status"
 msgstr ""
 
 #. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.xml:0
-msgid "Street and Number"
-msgstr ""
-
-#. module: pos_self_order
 #: model:ir.model.fields,field_description:pos_self_order.field_pos_self_order_custom_link__style
 msgid "Style"
 msgstr ""
@@ -1399,6 +1389,7 @@ msgid "Table Stand Number"
 msgstr ""
 
 #. module: pos_self_order
+#: model_terms:ir.ui.view,arch_db:pos_self_order.pos_order_change_receipt
 #: model_terms:ir.ui.view,arch_db:pos_self_order.pos_order_receipt_header
 msgid "Table Tracker:"
 msgstr ""
@@ -1406,12 +1397,6 @@ msgstr ""
 #. module: pos_self_order
 #: model:ir.model.fields,field_description:pos_self_order.field_pos_order__self_ordering_table_id
 msgid "Table reference"
-msgstr ""
-
-#. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/popup_table/popup_table.xml:0
-msgid "Table selection"
 msgstr ""
 
 #. module: pos_self_order
@@ -1438,7 +1423,6 @@ msgstr ""
 
 #. module: pos_self_order
 #. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/popup_table/popup_table.xml:0
 #: code:addons/pos_self_order/static/src/app/components/slots_popup/slots_popup.xml:0
 msgid "Thanks a lot!"
 msgstr ""
@@ -1470,6 +1454,7 @@ msgstr ""
 
 #. module: pos_self_order
 #. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/components/pills_selection_popup/pills_selection_popup.js:0
 #: code:addons/pos_self_order/static/src/app/models/pos_preset.js:0
 msgid "Today"
 msgstr ""
@@ -1478,6 +1463,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/models/pos_preset.js:0
 msgid "Tommorrow"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/components/pills_selection_popup/pills_selection_popup.js:0
+msgid "Tomorrow"
 msgstr ""
 
 #. module: pos_self_order
@@ -1494,12 +1485,6 @@ msgid "Total:"
 msgstr ""
 
 #. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/store/order_change_receipt_template.xml:0
-msgid "Tracker number:"
-msgstr ""
-
-#. module: pos_self_order
 #: model:ir.model.fields,field_description:pos_self_order.field_pos_self_order_custom_link__url
 msgid "URL"
 msgstr ""
@@ -1507,6 +1492,12 @@ msgstr ""
 #. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.qr_codes_page
 msgid "URL:"
+msgstr ""
+
+#. module: pos_self_order
+#. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/pages/product_list_page/product_list_page.xml:0
+msgid "Unavailable"
 msgstr ""
 
 #. module: pos_self_order
@@ -1640,12 +1631,6 @@ msgstr ""
 #: model:mail.template,subject:pos_self_order.delivery_email_template
 #: model:mail.template,subject:pos_self_order.takeout_email_template
 msgid "Your {{ object.config_id.name }} receipt"
-msgstr ""
-
-#. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/preset_info_popup/preset_info_popup.xml:0
-msgid "Zip"
 msgstr ""
 
 #. module: pos_self_order

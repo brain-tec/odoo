@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.2a1\n"
+"Project-Id-Version: Odoo Server 19.3a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 18:36+0000\n"
-"PO-Revision-Date: 2026-02-04 18:36+0000\n"
+"POT-Creation-Date: 2026-03-12 18:37+0000\n"
+"PO-Revision-Date: 2026-03-12 18:37+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -222,11 +222,6 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #: model_terms:ir.ui.view,arch_db:sale_pdf_quote_builder.quotation_document_kanban
 msgid "Edit"
-msgstr ""
-
-#. module: sale_pdf_quote_builder
-#: model:ir.model.fields,field_description:sale_pdf_quote_builder.field_quotation_document__datas
-msgid "File Content (base64)"
 msgstr ""
 
 #. module: sale_pdf_quote_builder
@@ -477,7 +472,7 @@ msgstr ""
 #. module: sale_pdf_quote_builder
 #. odoo-python
 #: code:addons/sale_pdf_quote_builder/models/sale_order.py:0
-msgid "Product"
+msgid "Product > %s"
 msgstr ""
 
 #. module: sale_pdf_quote_builder

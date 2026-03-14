@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.1a1+e\n"
+"Project-Id-Version: Odoo Server 19.3a1+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-16 19:05+0000\n"
-"PO-Revision-Date: 2025-12-16 19:05+0000\n"
+"POT-Creation-Date: 2026-03-12 19:16+0000\n"
+"PO-Revision-Date: 2026-03-12 19:16+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -141,6 +141,16 @@ msgid ""
 msgstr ""
 
 #. module: l10n_rw
+#: model:res.company,pay_later_label:l10n_rw.demo_company_rw
+msgid "Confirm"
+msgstr ""
+
+#. module: l10n_rw
+#: model:res.company,free_order_label:l10n_rw.demo_company_rw
+msgid "Confirm Order"
+msgstr ""
+
+#. module: l10n_rw
 #: model:ir.model.fields,field_description:l10n_rw.field_account_chart_template__display_name
 msgid "Display Name"
 msgstr ""
@@ -175,6 +185,11 @@ msgid ""
 "fixed interest payment amounting to 10% of the sum remaining due. RW Company"
 " will be authorized to suspend any provision of services without prior "
 "warning in the event of late payment."
+msgstr ""
+
+#. module: l10n_rw
+#: model:res.company,pay_now_label:l10n_rw.demo_company_rw
+msgid "Pay now"
 msgstr ""
 
 #. module: l10n_rw

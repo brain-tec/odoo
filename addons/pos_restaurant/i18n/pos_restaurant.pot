@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.2a1\n"
+"Project-Id-Version: Odoo Server 19.3a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 18:35+0000\n"
-"PO-Revision-Date: 2026-02-04 18:35+0000\n"
+"POT-Creation-Date: 2026-03-12 18:36+0000\n"
+"PO-Revision-Date: 2026-03-12 18:36+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,12 +19,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/services/pos_store.js:0
 msgid " and $1"
-msgstr ""
-
-#. module: pos_restaurant
-#. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/screens/split_bill_screen/split_bill_screen.xml:0
-msgid "% discount"
 msgstr ""
 
 #. module: pos_restaurant
@@ -123,6 +117,11 @@ msgid "Add a new restaurant floor"
 msgstr ""
 
 #. module: pos_restaurant
+#: model_terms:ir.actions.act_window,help:pos_restaurant.action_pos_course
+msgid "Add courses"
+msgstr ""
+
+#. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/floor_screen/floor_plan_editor/toolbar/toolbar.xml:0
 msgid "Add decor"
@@ -136,7 +135,7 @@ msgstr ""
 
 #. module: pos_restaurant
 #. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/screens/payment_screen/payment_screen_payment_lines/payment_screen_payment_lines.xml:0
+#: code:addons/pos_restaurant/static/src/app/screens/payment_screen/payment_screen_payment_lines/payment_screen_payment_lines.js:0
 msgid "Adjust Amount"
 msgstr ""
 
@@ -182,6 +181,13 @@ msgstr ""
 #. module: pos_restaurant
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.res_config_settings_view_form
 msgid "Assign categories to default course"
+msgstr ""
+
+#. module: pos_restaurant
+#: model_terms:ir.actions.act_window,help:pos_restaurant.action_pos_course
+msgid ""
+"Assign products to courses like starter, main or dessert to ensure dishes "
+"are prepared and served in the correct order."
 msgstr ""
 
 #. module: pos_restaurant
@@ -452,7 +458,6 @@ msgstr ""
 #. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/floor_screen/floor_plan_editor/navbar/navbar.xml:0
-#: code:addons/pos_restaurant/static/src/app/services/pos_store.js:0
 msgid "Discard"
 msgstr ""
 
@@ -471,6 +476,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_order_receipt__display_name
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_preset__display_name
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_session__display_name
+#: model:ir.model.fields,field_description:pos_restaurant.field_product_template__display_name
 #: model:ir.model.fields,field_description:pos_restaurant.field_res_config_settings__display_name
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_floor__display_name
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_order_course__display_name
@@ -486,6 +492,7 @@ msgstr ""
 
 #. module: pos_restaurant
 #: model:pos.category,name:pos_restaurant.drinks
+#: model:product.category,name:pos_restaurant.product_category_drinks
 #: model:product.combo,name:pos_restaurant.drink_combo
 msgid "Drinks"
 msgstr ""
@@ -511,13 +518,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/floor_screen/floor_screen.xml:0
 msgid "Edit Floor Plan"
-msgstr ""
-
-#. module: pos_restaurant
-#. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/screens/product_screen/control_buttons/control_buttons.xml:0
-#: code:addons/pos_restaurant/static/src/app/services/pos_store.js:0
-msgid "Edit Order Name"
 msgstr ""
 
 #. module: pos_restaurant
@@ -701,6 +701,7 @@ msgstr ""
 
 #. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_preset__use_guest
+#: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_change_receipt
 msgid "Guest"
 msgstr ""
 
@@ -721,6 +722,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_order_receipt__id
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_preset__id
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_session__id
+#: model:ir.model.fields,field_description:pos_restaurant.field_product_template__id
 #: model:ir.model.fields,field_description:pos_restaurant.field_res_config_settings__id
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_floor__id
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_order_course__id
@@ -750,14 +752,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/floor_screen/floor_plan_editor/add_decor_popup/add_decor_popup.xml:0
 msgid "Images"
-msgstr ""
-
-#. module: pos_restaurant
-#. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/services/pos_store.js:0
-msgid ""
-"It seems that the order has not been sent. Would you like to send it to "
-"preparation?"
 msgstr ""
 
 #. module: pos_restaurant
@@ -936,12 +930,6 @@ msgid "Options"
 msgstr ""
 
 #. module: pos_restaurant
-#. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/services/pos_store.js:0
-msgid "Order"
-msgstr ""
-
-#. module: pos_restaurant
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_order_course__line_ids
 msgid "Order Lines"
 msgstr ""
@@ -1091,6 +1079,11 @@ msgid "Potatoes with thyme"
 msgstr ""
 
 #. module: pos_restaurant
+#: model:ir.model,name:pos_restaurant.model_product_template
+msgid "Product"
+msgstr ""
+
+#. module: pos_restaurant
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/screens/floor_screen/floor_plan_editor/floor_plan_editor.xml:0
 msgid "Properties"
@@ -1160,18 +1153,6 @@ msgstr ""
 #: model:ir.model,name:pos_restaurant.model_restaurant_table
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.view_restaurant_table_form
 msgid "Restaurant Table"
-msgstr ""
-
-#. module: pos_restaurant
-#. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/screens/payment_screen/payment_screen_payment_lines/payment_screen_payment_lines.xml:0
-msgid "Reverse"
-msgstr ""
-
-#. module: pos_restaurant
-#. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/screens/payment_screen/payment_screen_payment_lines/payment_screen_payment_lines.xml:0
-msgid "Reverse Payment"
 msgstr ""
 
 #. module: pos_restaurant
@@ -1275,6 +1256,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_course__sequence
 #: model:ir.model.fields,field_description:pos_restaurant.field_restaurant_floor__sequence
 msgid "Sequence"
+msgstr ""
+
+#. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/app/screens/product_screen/control_buttons/control_buttons.xml:0
+#: code:addons/pos_restaurant/static/src/app/services/pos_store.js:0
+msgid "Set Order Name"
 msgstr ""
 
 #. module: pos_restaurant
@@ -1394,6 +1382,7 @@ msgstr ""
 #: code:addons/pos_restaurant/static/src/app/screens/payment_screen/order_details_dialog.js:0
 #: code:addons/pos_restaurant/static/src/app/screens/ticket_screen/ticket_screen.xml:0
 #: model:ir.model.fields,field_description:pos_restaurant.field_pos_order__table_id
+#: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_change_receipt
 #: model_terms:ir.ui.view,arch_db:pos_restaurant.pos_order_receipt_header
 msgid "Table"
 msgstr ""
@@ -1555,12 +1544,6 @@ msgid "Warning"
 msgstr ""
 
 #. module: pos_restaurant
-#. odoo-javascript
-#: code:addons/pos_restaurant/static/src/app/services/pos_store.js:0
-msgid "Warning !"
-msgstr ""
-
-#. module: pos_restaurant
 #: model:product.template,name:pos_restaurant.water_product_template
 msgid "Water"
 msgstr ""
@@ -1649,6 +1632,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/pos_restaurant/static/src/app/services/pos_store.js:0
 msgid "You cannot transfer an order to itself"
+msgstr ""
+
+#. module: pos_restaurant
+#. odoo-javascript
+#: code:addons/pos_restaurant/static/src/app/screens/split_bill_screen/split_bill_screen.xml:0
+msgid "discount"
 msgstr ""
 
 #. module: pos_restaurant

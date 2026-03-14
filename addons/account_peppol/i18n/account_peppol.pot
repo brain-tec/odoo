@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.2a1\n"
+"Project-Id-Version: Odoo Server 19.3a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 18:35+0000\n"
-"PO-Revision-Date: 2026-02-04 18:35+0000\n"
+"POT-Creation-Date: 2026-03-12 18:36+0000\n"
+"PO-Revision-Date: 2026-03-12 18:36+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -245,28 +245,11 @@ msgid "Account EDI proxy user"
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model,name:account_peppol.model_account_move_send
-msgid "Account Move Send"
-msgstr ""
-
-#. module: account_peppol
-#: model:ir.model,name:account_peppol.model_account_move_send_batch_wizard
-msgid "Account Move Send Batch Wizard"
-msgstr ""
-
-#. module: account_peppol
-#: model:ir.model,name:account_peppol.model_account_move_send_wizard
-msgid "Account Move Send Wizard"
-msgstr ""
-
-#. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__account_peppol_contact_email
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__account_peppol_contact_email
 msgid "Account Peppol Contact Email"
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__account_peppol_edi_user
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__account_peppol_edi_user
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__account_peppol_edi_user
 msgid "Account Peppol Edi User"
@@ -307,21 +290,6 @@ msgstr ""
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
 msgid "Activate Peppol (Test)"
-msgstr ""
-
-#. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__peppol_activate_self_billing
-msgid "Activate self-billing"
-msgstr ""
-
-#. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_res_company__peppol_activate_self_billing_sending
-msgid "Activate self-billing sending"
-msgstr ""
-
-#. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
-msgid "Advanced Configuration"
 msgstr ""
 
 #. module: account_peppol
@@ -437,14 +405,6 @@ msgid "An internal error occurred"
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model.fields,help:account_peppol.field_peppol_config_wizard__peppol_self_billing_reception_journal_id
-#: model:ir.model.fields,help:account_peppol.field_res_company__peppol_self_billing_reception_journal_id
-msgid ""
-"Any self-billed invoices / credit notes received via Peppol will be created "
-"in draft in this journal. Defaults to the first sale journal."
-msgstr ""
-
-#. module: account_peppol
 #. odoo-javascript
 #: code:addons/account_peppol/static/src/components/peppol_auth/peppol_auth_service.js:0
 msgid "Authentication failed"
@@ -531,7 +491,6 @@ msgstr ""
 
 #. module: account_peppol
 #: model:ir.model,name:account_peppol.model_res_company
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__company_id
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__company_id
 msgid "Company"
 msgstr ""
@@ -539,11 +498,6 @@ msgstr ""
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__parent_company_name
 msgid "Company Name"
-msgstr ""
-
-#. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
-msgid "Company information"
 msgstr ""
 
 #. module: account_peppol
@@ -588,15 +542,11 @@ msgid "Create, send and receive e-invoices for free."
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_account_peppol_service__create_uid
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__create_uid
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__create_uid
 msgid "Created by"
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_account_peppol_service__create_date
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__create_date
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__create_date
 msgid "Created on"
 msgstr ""
@@ -608,18 +558,8 @@ msgid "Customer is on Peppol but did not enable receiving documents."
 msgstr ""
 
 #. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
-msgid "Danger zone"
-msgstr ""
-
-#. module: account_peppol
 #: model:ir.model.fields.selection,name:account_peppol.selection__peppol_registration__edi_mode__demo
 msgid "Demo"
-msgstr ""
-
-#. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
-msgid "Disable the reception."
 msgstr ""
 
 #. module: account_peppol
@@ -652,13 +592,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_peppol.field_account_edi_common__display_name
 #: model:ir.model.fields,field_description:account_peppol.field_account_edi_proxy_client_user__display_name
 #: model:ir.model.fields,field_description:account_peppol.field_account_edi_xml_ubl_20__display_name
+#: model:ir.model.fields,field_description:account_peppol.field_account_edi_xml_ubl_bis3__display_name
 #: model:ir.model.fields,field_description:account_peppol.field_account_journal__display_name
 #: model:ir.model.fields,field_description:account_peppol.field_account_move__display_name
 #: model:ir.model.fields,field_description:account_peppol.field_account_move_send__display_name
 #: model:ir.model.fields,field_description:account_peppol.field_account_move_send_batch_wizard__display_name
 #: model:ir.model.fields,field_description:account_peppol.field_account_move_send_wizard__display_name
-#: model:ir.model.fields,field_description:account_peppol.field_account_peppol_service__display_name
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__display_name
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__display_name
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__display_name
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__display_name
@@ -674,16 +613,6 @@ msgstr ""
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__display_use_parent_connection_selection
 msgid "Display Use Parent Connection Selection"
-msgstr ""
-
-#. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_account_peppol_service__document_identifier
-msgid "Document Identifier"
-msgstr ""
-
-#. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_account_peppol_service__document_name
-msgid "Document Name"
 msgstr ""
 
 #. module: account_peppol
@@ -719,7 +648,6 @@ msgid "EDI user should be of type Peppol"
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__account_peppol_edi_identification
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__account_peppol_edi_identification
 msgid "Edi Identification"
 msgstr ""
@@ -727,16 +655,6 @@ msgstr ""
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
 msgid "Email"
-msgstr ""
-
-#. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
-msgid "Enable reception"
-msgstr ""
-
-#. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_account_peppol_service__enabled
-msgid "Enabled"
 msgstr ""
 
 #. module: account_peppol
@@ -798,33 +716,17 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_peppol.field_account_edi_common__id
 #: model:ir.model.fields,field_description:account_peppol.field_account_edi_proxy_client_user__id
 #: model:ir.model.fields,field_description:account_peppol.field_account_edi_xml_ubl_20__id
+#: model:ir.model.fields,field_description:account_peppol.field_account_edi_xml_ubl_bis3__id
 #: model:ir.model.fields,field_description:account_peppol.field_account_journal__id
 #: model:ir.model.fields,field_description:account_peppol.field_account_move__id
 #: model:ir.model.fields,field_description:account_peppol.field_account_move_send__id
 #: model:ir.model.fields,field_description:account_peppol.field_account_move_send_batch_wizard__id
 #: model:ir.model.fields,field_description:account_peppol.field_account_move_send_wizard__id
-#: model:ir.model.fields,field_description:account_peppol.field_account_peppol_service__id
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__id
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__id
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__id
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__id
 #: model:ir.model.fields,field_description:account_peppol.field_res_partner__id
 msgid "ID"
-msgstr ""
-
-#. module: account_peppol
-#: model:ir.model.fields,help:account_peppol.field_peppol_config_wizard__peppol_activate_self_billing
-msgid ""
-"If activated, you will be able to send and receive self-billed invoices via "
-"Peppol.You can still disable reception by disabling the self-billing "
-"document types below."
-msgstr ""
-
-#. module: account_peppol
-#: model:ir.model.fields,help:account_peppol.field_res_company__peppol_activate_self_billing_sending
-msgid ""
-"If activated, you will be able to send vendor bills as self-billed invoices "
-"via Peppol."
 msgstr ""
 
 #. module: account_peppol
@@ -862,12 +764,6 @@ msgid "Itsme"
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model.fields,help:account_peppol.field_peppol_config_wizard__service_json
-msgid ""
-"JSON representation of peppol services as retrieved from the peppol server."
-msgstr ""
-
-#. module: account_peppol
 #: model:ir.model,name:account_peppol.model_account_journal
 msgid "Journal"
 msgstr ""
@@ -878,15 +774,11 @@ msgid "Journal Entry"
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_account_peppol_service__write_uid
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__write_uid
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__write_uid
 msgid "Last Updated by"
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_account_peppol_service__write_date
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__write_date
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__write_date
 msgid "Last Updated on"
 msgstr ""
@@ -905,7 +797,6 @@ msgid ""
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__account_peppol_migration_key
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__account_peppol_migration_key
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__account_peppol_migration_key
 msgid "Migration Key"
@@ -980,7 +871,6 @@ msgstr ""
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_account_journal__account_peppol_proxy_state
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__account_peppol_proxy_state
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__account_peppol_proxy_state
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__account_peppol_proxy_state
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__account_peppol_proxy_state
@@ -1045,11 +935,6 @@ msgid "Peppol Can Send"
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model,name:account_peppol.model_peppol_config_wizard
-msgid "Peppol Configuration Wizard"
-msgstr ""
-
-#. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "Peppol Contact Email"
 msgstr ""
@@ -1078,6 +963,11 @@ msgid "Peppol External Provider"
 msgstr ""
 
 #. module: account_peppol
+#: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__peppol_eas
+#: model:ir.model.fields,field_description:account_peppol.field_res_company__peppol_eas
+#: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__account_peppol_eas
+#: model:ir.model.fields,field_description:account_peppol.field_res_partner__peppol_eas
+#: model:ir.model.fields,field_description:account_peppol.field_res_users__peppol_eas
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
 msgid "Peppol ID"
 msgstr ""
@@ -1126,11 +1016,6 @@ msgid "Peppol Registration"
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model,name:account_peppol.model_account_peppol_service
-msgid "Peppol Service"
-msgstr ""
-
-#. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__peppol_use_parent_company
 msgid "Peppol Use Parent Company"
 msgstr ""
@@ -1151,15 +1036,6 @@ msgstr ""
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.portal_my_details
 msgid "Peppol e-Address (EAS)"
-msgstr ""
-
-#. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__peppol_eas
-#: model:ir.model.fields,field_description:account_peppol.field_res_company__peppol_eas
-#: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__account_peppol_eas
-#: model:ir.model.fields,field_description:account_peppol.field_res_partner__peppol_eas
-#: model:ir.model.fields,field_description:account_peppol.field_res_users__peppol_eas
-msgid "Peppol e-address (EAS)"
 msgstr ""
 
 #. module: account_peppol
@@ -1330,17 +1206,6 @@ msgid "Register this company on peppol"
 msgstr ""
 
 #. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
-msgid "Register with Odoo"
-msgstr ""
-
-#. module: account_peppol
-#. odoo-python
-#: code:addons/account_peppol/wizard/peppol_config_wizard.py:0
-msgid "Registered to receive documents via Peppol."
-msgstr ""
-
-#. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/wizard/peppol_registration.py:0
 msgid "Registration rejected."
@@ -1349,16 +1214,6 @@ msgstr ""
 #. module: account_peppol
 #: model:ir.model.fields.selection,name:account_peppol.selection__res_company__account_peppol_proxy_state__rejected
 msgid "Rejected"
-msgstr ""
-
-#. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
-msgid "Remove from Peppol"
-msgstr ""
-
-#. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
-msgid "Save"
 msgstr ""
 
 #. module: account_peppol
@@ -1373,15 +1228,19 @@ msgid "Selected authentication method is not available."
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__peppol_self_billing_reception_journal_id
-#: model:ir.model.fields,field_description:account_peppol.field_res_company__peppol_self_billing_reception_journal_id
-msgid "Self-Billing reception journal"
-msgstr ""
-
-#. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/models/account_move_send.py:0
 msgid "Send"
+msgstr ""
+
+#. module: account_peppol
+#: model:ir.model,name:account_peppol.model_account_move_send_batch_wizard
+msgid "Send Invoice Batch Wizard"
+msgstr ""
+
+#. module: account_peppol
+#: model:ir.model,name:account_peppol.model_account_move_send_wizard
+msgid "Send Invoice Wizard"
 msgstr ""
 
 #. module: account_peppol
@@ -1405,18 +1264,8 @@ msgid "Sending Only"
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__service_ids
-msgid "Service"
-msgstr ""
-
-#. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__service_info
-msgid "Service Info"
-msgstr ""
-
-#. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__service_json
-msgid "Service Json"
+#: model:ir.model,name:account_peppol.model_account_move_send
+msgid "Shared Send Invoice Wizard Functions"
 msgstr ""
 
 #. module: account_peppol
@@ -1620,15 +1469,6 @@ msgstr ""
 
 #. module: account_peppol
 #. odoo-python
-#: code:addons/account_peppol/wizard/peppol_config_wizard.py:0
-msgid ""
-"The following services are listed on your participant but cannot be "
-"configured here. If you wish to configure them differently, please contact "
-"support."
-msgstr ""
-
-#. module: account_peppol
-#. odoo-python
 #: code:addons/account_peppol/exceptions.py:0
 msgid ""
 "The href attribute does not reference a valid MIME data part, MIME parts "
@@ -1688,7 +1528,6 @@ msgid ""
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model.fields,help:account_peppol.field_peppol_config_wizard__account_peppol_edi_identification
 #: model:ir.model.fields,help:account_peppol.field_res_config_settings__account_peppol_edi_identification
 msgid "The unique id that identifies this user, typically the vat"
 msgstr ""
@@ -1786,11 +1625,6 @@ msgid ""
 msgstr ""
 
 #. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
-msgid "This will delete your Peppol registration."
-msgstr ""
-
-#. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_partner_form_account_peppol
 msgid ""
 "To generate complete electronic invoices, also set a country for this "
@@ -1805,6 +1639,11 @@ msgstr ""
 #. module: account_peppol
 #: model:ir.model,name:account_peppol.model_account_edi_xml_ubl_20
 msgid "UBL 2.0"
+msgstr ""
+
+#. module: account_peppol
+#: model:ir.model,name:account_peppol.model_account_edi_xml_ubl_bis3
+msgid "UBL BIS Billing 3.0.12"
 msgstr ""
 
 #. module: account_peppol
@@ -1902,11 +1741,6 @@ msgid "Why should you use it ?"
 msgstr ""
 
 #. module: account_peppol
-#: model:ir.model.fields,field_description:account_peppol.field_account_peppol_service__wizard_id
-msgid "Wizard"
-msgstr ""
-
-#. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/wizard/peppol_registration.py:0
 msgid ""
@@ -1928,19 +1762,8 @@ msgid "You are not authorized to change the contact email."
 msgstr ""
 
 #. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
-msgid ""
-"You are sending and receiving your e-invoices via Odoo with this Peppol ID"
-msgstr ""
-
-#. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "You are sending from"
-msgstr ""
-
-#. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
-msgid "You are sending your e-invoices via Odoo with this Peppol ID"
 msgstr ""
 
 #. module: account_peppol
@@ -1999,13 +1822,6 @@ msgid "Your Peppol identification is:"
 msgstr ""
 
 #. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
-msgid ""
-"Your Peppol registration is being processed, it should be active within a "
-"day."
-msgstr ""
-
-#. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/wizard/peppol_registration.py:0
 msgid ""
@@ -2061,14 +1877,6 @@ msgid ""
 msgstr ""
 
 #. module: account_peppol
-#. odoo-python
-#: code:addons/account_peppol/wizard/peppol_config_wizard.py:0
-msgid ""
-"Your registration on Peppol network should be activated within a day. The "
-"updated status will be visible in Settings."
-msgstr ""
-
-#. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "Your registration should be activated within a day."
 msgstr ""
@@ -2077,6 +1885,22 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_peppol/exceptions.py:0
 msgid "Your request is still being processed."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/models/account_edi_xml_ubl_bis3.py:0
+msgid ""
+"[PEPPOL-EN16931-R010] An electronic address (EAS) must be provided on the "
+"customer '%s'."
+msgstr ""
+
+#. module: account_peppol
+#. odoo-python
+#: code:addons/account_peppol/models/account_edi_xml_ubl_bis3.py:0
+msgid ""
+"[PEPPOL-EN16931-R020] An electronic address (EAS) must be provided on the "
+"company '%s'."
 msgstr ""
 
 #. module: account_peppol

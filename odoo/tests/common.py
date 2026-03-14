@@ -2637,9 +2637,7 @@ class HttpCase(TransactionCase):
         `browser_js` can be passed as keyword arguments."""
         options = {
             'stepDelay': step_delay or 0,
-            'keepWatchBrowser': kwargs.get('watch', False),
             'debug': kwargs.get('debug', False),
-            'startUrl': url_path,
         }
         code = kwargs.pop('code', f"odoo.startTour({tour_name!r}, {json.dumps(options)})")
         ready = kwargs.pop('ready', f"odoo.isTourReady({tour_name!r})")
@@ -2699,10 +2697,9 @@ class HttpCase(TransactionCase):
         if 'error' in decoded_response:
             raise JsonRpcException(
                 code=decoded_response['error']['code'],
-                message=decoded_response['error']['data']['name']
+                message=decoded_response['error']['data']['name'],
             )
-        # workaround: JsonRPCDispatcher is broken and may send neither result nor error
-        return decoded_response.get('result')
+        return decoded_response['result']
 
 
 def no_retry(arg):

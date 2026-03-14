@@ -33,7 +33,7 @@ class DiscussChannel(models.Model):
     _name = 'discuss.channel'
     _inherit = ['rating.mixin', 'discuss.channel']
 
-    channel_type = fields.Selection(selection_add=[('livechat', 'Livechat Conversation')], ondelete={'livechat': 'cascade'})
+    channel_type = fields.Selection(selection_add=[("livechat", "Live Chat")], ondelete={"livechat": "cascade"})
     duration = fields.Float('Duration', compute='_compute_duration', help='Duration of the session in hours')
     livechat_lang_id = fields.Many2one("res.lang", string="Language", help="Lang of the visitor of the channel.")
     livechat_end_dt = fields.Datetime(
@@ -635,8 +635,10 @@ class DiscussChannel(models.Model):
             # sudo - res.partner: accessing livechat username or name is allowed to visitor
             message_author = message.author_id.sudo() or message.author_guest_id
             if previous_message_author != message_author:
+                if parts:
+                    parts.append(Markup("<br/>"))
                 parts.append(
-                    Markup("<br/><strong>%s:</strong><br/>")
+                    Markup("<strong>%s:</strong><br/>")
                     % (
                         (message_author.user_livechat_username if message_author._name == "res.partner" else None)
                         or message_author.name
