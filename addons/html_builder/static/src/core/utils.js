@@ -8,11 +8,12 @@ import {
     useSubEnv,
 } from "@web/owl2/utils";
 import { isElement, isTextNode } from "@html_editor/utils/dom_info";
-import { onMounted, onWillDestroy, onWillStart, onWillUpdateProps, toRaw } from "@odoo/owl";
+import { onMounted, onWillDestroy, onWillStart, onWillUpdateProps, status, toRaw } from "@odoo/owl";
 import { convertNumericToUnit, getHtmlStyle } from "@html_editor/utils/formatting";
 import { useBus } from "@web/core/utils/hooks";
 import { effect } from "@web/core/utils/reactive";
 import { useDebounced } from "@web/core/utils/timing";
+import { BuilderAction } from "./builder_action";
 
 // Selectors for special cases where snippet options are bound to parent
 // containers instead of the snippet itself.
@@ -29,21 +30,29 @@ function isConnectedElement(el) {
 }
 
 export function useDomState(getState, { checkEditingElement = true } = {}) {
+    const component = useComponent();
     const env = useEnv();
     const isValid = (el) => (!el && !checkEditingElement) || isConnectedElement(el);
     const handler = async (ev) => {
         const editingElement = env.getEditingElement();
         if (isValid(editingElement)) {
-            const newStatePromise = getState(editingElement);
-            if (ev) {
-                ev.detail.getStatePromises.push(newStatePromise);
-                const newState = await newStatePromise;
-                const shouldApply = await ev.detail.updatePromise;
-                if (shouldApply) {
-                    Object.assign(state, newState);
+            try {
+                const newStatePromise = getState(editingElement);
+                if (ev) {
+                    ev.detail.getStatePromises.push(newStatePromise);
+                    const newState = await newStatePromise;
+                    const shouldApply = await ev.detail.updatePromise;
+                    if (shouldApply) {
+                        Object.assign(state, newState);
+                    }
+                } else {
+                    Object.assign(state, await newStatePromise);
                 }
-            } else {
-                Object.assign(state, await newStatePromise);
+            } catch (e) {
+                if (!isValid(editingElement) || status(component) === "destroyed") {
+                    return;
+                }
+                throw e;
             }
         }
     };
@@ -584,7 +593,7 @@ export function useClickableBuilderComponent() {
                 );
             }
         }
-        await Promise.all(cleanOrApplyProms);
+        return await Promise.all(cleanOrApplyProms);
     }
     function getPriority() {
         return (
@@ -614,12 +623,14 @@ export function useOperationWithReload(callApply, reload) {
     return async (...args) => {
         const { editingElement } = args[0][0];
         env.services.ui.block();
-        await callApply(...args);
-        env.editor.shared.history.addStep();
-        await env.editor.shared.savePlugin.save();
-        const target = env.editor.shared.builderOptions.getReloadSelector(editingElement);
-        const url = reload.getReloadUrl?.();
-        await env.editor.config.reloadEditor({ target, url });
+        const applyResults = await callApply(...args);
+        if (!applyResults.includes(BuilderAction.cancelReload)) {
+            env.editor.shared.history.addStep();
+            await env.editor.shared.savePlugin.save();
+            const target = env.editor.shared.builderOptions.getReloadSelector(editingElement);
+            const url = reload.getReloadUrl?.();
+            await env.editor.config.reloadEditor({ target, url });
+        }
         env.services.ui.unblock();
     };
 }
@@ -767,7 +778,7 @@ export function useInputBuilderComponent({
                 })
             );
         }
-        await Promise.all(proms);
+        return await Promise.all(proms);
     }
 
     const applyOperation = comp.env.editor.shared.history.makePreviewableAsyncOperation(callApply);

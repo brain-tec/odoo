@@ -196,10 +196,11 @@ class PosOrderLine(models.Model):
 
     def _compute_amount_line_all(self, qty=None):
         self.ensure_one()
+        sign = -1 if self.order_id.is_refund else 1
         fpos = self.order_id.fiscal_position_id
         tax_ids_after_fiscal_position = fpos.map_tax(self.tax_ids)
         price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
-        line_qty = qty or self.qty
+        line_qty = qty or (self.qty * sign)
         taxes = tax_ids_after_fiscal_position.compute_all(price, self.order_id.currency_id, line_qty, product=self.product_id, partner=self.order_id.partner_id)
         return {
             'price_subtotal_incl': taxes['total_included'],
@@ -323,8 +324,11 @@ class PosOrderLine(models.Model):
             if line._is_product_storable_fifo_avco() and stock_moves:
                 moves = line._get_stock_moves_to_consider(stock_moves, product)
                 product_cost = moves._get_price_unit()
-                if (cost_currency.is_zero(product_cost) and line.order_id.shipping_date and line.refunded_orderline_id):
-                    product_cost = line.refunded_orderline_id.total_cost / line.refunded_orderline_id.qty
+                if cost_currency.is_zero(product_cost) and line.order_id.shipping_date:
+                    if line.refunded_orderline_id:
+                        product_cost = line.refunded_orderline_id.total_cost / line.refunded_orderline_id.qty
+                    else:
+                        product_cost = product.standard_price
             else:
                 product_cost = product.standard_price
             line.total_cost = line.qty * cost_currency._convert(

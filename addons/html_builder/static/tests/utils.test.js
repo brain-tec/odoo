@@ -3,13 +3,15 @@ import {
     addBuilderOption,
     setupHTMLBuilder,
 } from "@html_builder/../tests/helpers";
+import { Builder } from "@html_builder/builder";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import { BaseOptionComponent } from "@html_builder/core/base_option_component";
 import { useDomState } from "@html_builder/core/utils";
+import { SavePlugin } from "@html_builder/core/save_plugin";
 import { describe, expect, test } from "@odoo/hoot";
-import { animationFrame, delay } from "@odoo/hoot-dom";
+import { animationFrame, delay, queryOne } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
-import { contains, onRpc } from "@web/../tests/web_test_helpers";
+import { contains, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 
@@ -153,6 +155,67 @@ describe("waitSidebarUpdated", () => {
     });
 });
 
+test("Shouldn't reload(save, etc) when a reload is canceled", async () => {
+    const { promise, resolve } = Promise.withResolvers();
+
+    patchWithCleanup(SavePlugin.prototype, {
+        async save() {
+            expect.step("save");
+            await super.save();
+        },
+    });
+    patchWithCleanup(Builder.prototype, {
+        setup() {
+            super.setup();
+            this.editor.config.reloadEditor = async () => {
+                await promise;
+                expect.step("reload");
+            };
+        },
+    });
+
+    addBuilderAction({
+        TestCancelReloadAction: class extends BuilderAction {
+            static id = "testCancelReload";
+            setup() {
+                this.reload = {};
+            }
+            load({ editingElement }) {
+                return { shouldReload: editingElement.classList.contains("should_reload") };
+            }
+            async apply({ editingElement, loadResult }) {
+                editingElement.dataset.applied = "true";
+                if (!loadResult.shouldReload) {
+                    return BuilderAction.cancelReload;
+                }
+            }
+        },
+    });
+
+    addBuilderOption(
+        class extends BaseOptionComponent {
+            static selector = ".test-options-target";
+            static template = xml`<BuilderButton action="'testCancelReload'">Click</BuilderButton>`;
+        }
+    );
+
+    await setupHTMLBuilder(`<div class="test-options-target">Target</div>`);
+    await contains(":iframe .test-options-target").click();
+    await contains(".options-container [data-action-id='testCancelReload']").click();
+    expect(".o_blockUI").toHaveCount(0);
+    expect.verifySteps([]);
+
+    const editingEl = queryOne(":iframe .test-options-target");
+    editingEl.classList.add("should_reload");
+    await contains(":iframe .test-options-target").click();
+    await contains(".options-container [data-action-id='testCancelReload']").click();
+    expect(".o_blockUI").toHaveCount(1);
+    resolve();
+    await animationFrame();
+    expect(".o_blockUI").toHaveCount(0);
+    expect.verifySteps(["save", "reload"]);
+});
+
 test("UI is blocked when doing the reloadable operation", async () => {
     onRpc("ir.ui.view", "save", () => true);
     addBuilderAction({
@@ -189,4 +252,33 @@ test("UI is blocked when doing the reloadable operation", async () => {
     expect(".o_blockUI").toHaveCount(1);
     await waitSidebarUpdated();
     expect(".o_blockUI").toHaveCount(0);
+});
+
+test("System should not crash if an asynchronous useDomState is working with removed editing element", async () => {
+    let useDomStateStarted;
+    let editingElRemoved;
+    class TestOptionComponent extends BaseOptionComponent {
+        static template = xml`<BuilderButton t-if="state.showOption" classAction="'y'">Click</BuilderButton>`;
+        static selector = "div.test";
+        setup() {
+            super.setup();
+            this.state = useDomState(async (el) => {
+                if (useDomStateStarted) {
+                    useDomStateStarted.resolve();
+                }
+                await editingElRemoved?.promise;
+                return { showOption: !!el.parentElement.ownerDocument.defaultView };
+            });
+        }
+    }
+    addBuilderOption(TestOptionComponent);
+    const { waitSidebarUpdated } = await setupHTMLBuilder(`<div class="test">a</div>`);
+    await contains(":iframe .test").click();
+    await waitSidebarUpdated();
+    useDomStateStarted = Promise.withResolvers();
+    editingElRemoved = Promise.withResolvers();
+    await contains("[data-class-action='y']").click();
+    await useDomStateStarted.promise;
+    queryOne(":iframe .test").remove();
+    editingElRemoved.resolve();
 });
