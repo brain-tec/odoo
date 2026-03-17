@@ -1,0 +1,49 @@
+name: update_project_branch.yml
+on:
+  workflow_dispatch:
+    inputs:
+      project_branch:
+        description: "project branch to update"
+        required: true
+        type: string
+      latest_commit:
+        description: "update to this commit"
+        required: true
+        type: string
+
+jobs:
+  update_projec_branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Extract base branch"
+        id: extract
+        run: |
+          branch="${{ inputs.project_branch }}"
+          base="${branch%%.project*}"
+          echo "base_branch=$base" >> "$GITHUB_OUTPUT"
+          
+      - name: "Checkout odoo repository"
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.extract.outputs.base_branch }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 30
+          path: "main"
+      
+      - name: "Create Update branch PR"
+        env:
+          BASE_BRANCH: ${{ steps.extract.outputs.base_branch }}
+          COMMIT: ${{ inputs.latest_commit }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          cd main
+          git checkout -b ${{ inputs.project_branch }}_tmp $COMMIT
+          git push origin ${{ inputs.project_branch }}_tmp
+          gh pr create \
+            --repo brain-tec/odoo \
+            --base ${{ inputs.project_branch }} \
+            --head ${{ inputs.project_branch }}_tmp \
+            --title "Update ${{ inputs.branch }} from $BASE_BRANCH" \
+            --body "Automated PR from $BASE_BRANCH latest commit $COMMIT"
