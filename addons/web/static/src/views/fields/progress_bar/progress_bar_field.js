@@ -7,7 +7,7 @@ import { parseFloat } from "../parsers";
 import { useInputField } from "@web/views/fields/input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component, useEffect } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 const formatters = registry.category("formatters");
 
 export class ProgressBarField extends Component {
@@ -15,7 +15,6 @@ export class ProgressBarField extends Component {
     static props = {
         ...standardFieldProps,
         maxValueField: { type: [String, Number], optional: true },
-        isEditable: { type: Boolean, optional: true },
         title: { type: String, optional: true },
         decorations: { type: Object, optional: true },
     };
@@ -38,26 +37,10 @@ export class ProgressBarField extends Component {
         this.state = useState({
             isEditing: false,
         });
-
-        useEffect(
-            () => {
-                this.resizeInput();
-            },
-            () => [this.currentValue, this.state.isEditing]
-        );
-    }
-
-    resizeInput() {
-        const input = this.currentValueRef.el;
-        if (input) {
-            const displayValue = this.state.isEditing ? input.value : this.formatCurrentValue();
-            const charCount = Math.max(3, (displayValue?.toString().length || 0) + 1);
-            input.style.width = `${charCount}ch`;
-        }
     }
 
     get isEditable() {
-        return this.props.isEditable;
+        return !this.props.readonly;
     }
     get isPercentage() {
         return !this.props.maxValueField || !isNaN(this.props.maxValueField);
@@ -89,7 +72,9 @@ export class ProgressBarField extends Component {
     }
 
     formatMaxValue(humanReadable = !this.state.isEditing) {
-        const formatter = formatters.get(this.props.record.fields[this.props.maxValueField]?.type ?? "integer");
+        const formatter = formatters.get(
+            this.props.record.fields[this.props.maxValueField]?.type ?? "integer"
+        );
         return formatter(this.maxValue, { humanReadable });
     }
 
@@ -106,11 +91,6 @@ export class ProgressBarField extends Component {
     }
     onInputFocus() {
         this.state.isEditing = true;
-        this.resizeInput();
-    }
-
-    onInputChange() {
-        this.resizeInput();
     }
 
     onProgressClick() {
@@ -138,9 +118,8 @@ export const progressBarField = {
         },
     ],
     supportedTypes: ["integer", "float"],
-    extractProps: (fieldInfo, dynamicInfo) => ({
+    extractProps: (fieldInfo) => ({
         maxValueField: fieldInfo.options.max_value,
-        isEditable: !dynamicInfo.readonly,
         title: fieldInfo.attrs.title,
         decorations: fieldInfo.decorations,
     }),
