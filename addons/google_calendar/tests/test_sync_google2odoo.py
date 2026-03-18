@@ -1228,6 +1228,33 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             self.assertEqual(len(events.exists()), 2)
 
     @patch_api
+    def test_new_google_birthday_event(self):
+        """Birthday events are not supported, so they should not be synced in."""
+        birthday_google_id = "20260226"
+        values = [{
+            'id': birthday_google_id,
+            'kind': 'calendar#event',
+            'sequence': 0,
+            'status': 'confirmed',
+            'summary': "Bob's birthday",
+            'creator': {'email': self.organizer_user.partner_id.email, 'self': True},
+            'organizer': {'email': self.organizer_user.partner_id.email, 'self': True},
+            'originalStartTime': {'date': '2026-02-26'}, 'start': {'date': '2026-02-26'}, 'end': {'date': '2026-02-27'},
+            'recurringEventId': 'abc', 'iCalUID': 'abc@google.com',
+            'transparency': 'transparent', 'visibility': 'private',
+            'birthdayProperties': {'type': 'birthday'},
+            'eventType': 'birthday',
+        }]
+        with patch.object(GoogleCalendarService, 'get_events', return_value=(
+            GoogleEvent(values), None, [{'method': 'popup', 'minutes': 30}],
+        )):
+            self.organizer_user.sudo()._sync_google_calendar(self.google_service)
+        recurrences = self.env["calendar.recurrence"].search([('google_id', '=', birthday_google_id)])
+        events = self.env["calendar.recurrence"].search([('google_id', '=', birthday_google_id)])
+        self.assertFalse(recurrences, 'Birthday recurrent events should be ignored when syncing from google, as not supported.')
+        self.assertFalse(events, 'Birthday recurrent events should be ignored when syncing from google, as not supported.')
+
+    @patch_api
     def test_new_google_notifications(self):
         """ Event from Google should not create notifications and trigger. It ruins the perfs on large databases """
         cron_id = self.env.ref('calendar.ir_cron_scheduler_alarm').id
@@ -1508,8 +1535,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'allday': False,
             'google_id': google_id,
             'need_sync': False,
-            'user_id': self.env.user.partner_id.id,
-            'partner_ids': [(6, 0, [self.env.user.partner_id.id, partner1.id, partner2.id, partner3.id, partner4.id],)]
+            'user_id': self.env.user.id,
+            'partner_ids': [(6, 0, [self.env.user.partner_id.id, partner1.id, partner2.id, partner3.id, partner4.id])]
             # current user is attendee
         })
         recurrence = self.env['calendar.recurrence'].create({
@@ -1548,7 +1575,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.sync(gevent)
         # User attendee removed but gevent owner might be added after synch.
         mails = event.attendee_ids.mapped('email')
-        self.assertFalse(mails)
+        self.assertEqual(mails, ['odoobot@example.com'])
 
         self.assertGoogleAPINotCalled()
 

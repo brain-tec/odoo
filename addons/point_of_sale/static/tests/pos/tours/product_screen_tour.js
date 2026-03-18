@@ -249,7 +249,6 @@ registry.category("web_tour.tours").add("test_tax_control_button_visiblity", {
 });
 
 registry.category("web_tour.tours").add("test_reuse_empty_floating_order", {
-    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -1170,7 +1169,6 @@ registry.category("web_tour.tours").add("test_only_existing_lots", {
 });
 
 registry.category("web_tour.tours").add("test_delete_line", {
-    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
@@ -1191,6 +1189,9 @@ registry.category("web_tour.tours").add("test_delete_line", {
                     content: "Click 0",
                     trigger: ".modal " + Numpad.buttonTriger("0"),
                     run: "click",
+                },
+                {
+                    trigger: ".modal .popup-input .input-value:contains(0)",
                 },
                 ...Chrome.confirmPopup(),
             ]),

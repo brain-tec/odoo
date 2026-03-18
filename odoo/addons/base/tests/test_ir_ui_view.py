@@ -3954,11 +3954,12 @@ class TestViewTranslations(common.TransactionCase):
             "mode": "extension",
         })
 
+        group_id = self.ref('base.group_user')
         with self.assertRaises(ValidationError):
-            view.write({'group_ids': [1]})
+            view.write({'group_ids': [group_id]})
 
         view.write({'mode': 'primary'})
-        view.write({'group_ids': [1]})
+        view.write({'group_ids': [group_id]})
 
         with self.assertRaises(ValidationError):
             view.write({'mode': 'extension'})
@@ -5039,7 +5040,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'l10n_mx_edi_stock',
             'l10n_mx_hr_payroll',
             'l10n_mx_reports',
-            'l10n_mx_xml_polizas',
             'l10n_my_edi',
             'l10n_my_edi_pos',
             'l10n_nl_reports',

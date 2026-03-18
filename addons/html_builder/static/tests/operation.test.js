@@ -5,12 +5,11 @@ import {
 } from "@html_builder/../tests/helpers";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import { Operation } from "@html_builder/core/operation";
-import { BaseOptionComponent } from "@html_builder/core/base_option_component";
 import { HistoryPlugin } from "@html_editor/core/history_plugin";
-import { beforeEach, describe, expect, test } from "@odoo/hoot";
+import { animationFrame, beforeEach, describe, expect, test } from "@odoo/hoot";
 import { advanceTime, delay, hover, press, tick } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
-import { contains, patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { contains, getService, patchWithCleanup } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 
@@ -133,16 +132,13 @@ describe("Block editable", () => {
                 }
             },
         });
-        addBuilderOption(
-            class extends BaseOptionComponent {
-                static selector = ".test-options-target";
-                static template = xml`<BuilderButton action="'customAction'"/>`;
-            }
-        );
+        addBuilderOption({
+            selector: ".test-options-target",
+            template: xml`<BuilderButton action="'customAction'"/>`,
+        });
         await setupHTMLBuilder(`<div class="test-options-target">TEST</div>`, {
             loadIframeBundles: true,
         });
-
         await contains(":iframe .test-options-target").click();
         await contains("[data-action-id='customAction']").click();
         expect(":iframe .o_loading_screen:not(.o_we_ui_loading)").toHaveCount(1);
@@ -154,6 +150,49 @@ describe("Block editable", () => {
         await tick();
         expect(":iframe .o_loading_screen.o_we_ui_loading").toHaveCount(0);
         expect(":iframe .test-options-target").toHaveClass("custom-action");
+    });
+
+    test("Loading screen hides when ui is blocked", async () => {
+        const customActionDef = Promise.withResolvers();
+        addBuilderAction({
+            customAction: class extends BuilderAction {
+                static id = "customAction";
+                load() {
+                    return customActionDef.promise;
+                }
+                apply({ editingElement }) {
+                    editingElement.classList.add("custom-action");
+                }
+            },
+        });
+        addBuilderOption({
+            selector: ".test-options-target",
+            template: xml`<BuilderButton action="'customAction'"/>`,
+        });
+        await setupHTMLBuilder(`<div class="test-options-target">TEST</div>`, {
+            loadIframeBundles: true,
+        });
+        await contains(":iframe .test-options-target").click();
+        await contains("[data-action-id='customAction']").click();
+        expect(":iframe .o_loading_screen:not(.o_we_ui_loading)").toHaveCount(1);
+        await advanceTime(50); // cancelTime=50 trigger by the preview
+        await advanceTime(500); // setTimeout in addLoadingElement
+        expect(":iframe .o_loading_screen.o_we_ui_loading").toHaveCount(1);
+        const ui = getService("ui");
+        ui.block();
+
+        await animationFrame();
+        expect(".o_blockUI").toHaveCount(1);
+        expect(":iframe .o_loading_screen.o_we_ui_loading").toHaveClass("d-none");
+
+        ui.unblock();
+        await animationFrame();
+        expect(".o_blockUI").toHaveCount(0);
+        expect(":iframe .o_loading_screen.o_we_ui_loading").not.toHaveClass("d-none");
+
+        customActionDef.resolve();
+        await tick();
+        expect(":iframe .o_loading_screen.o_we_ui_loading").toHaveCount(0);
     });
 });
 
@@ -191,19 +230,17 @@ describe("Async operations", () => {
                 }
             },
         });
-        addBuilderOption(
-            class extends BaseOptionComponent {
-                static selector = ".test-options-target";
-                static template = xml`
-                    <BuilderRow label.translate="Type">
-                        <BuilderSelect>
-                            <BuilderSelectItem action="'customAction'" actionValue="'first'">first</BuilderSelectItem>
-                            <BuilderSelectItem action="'customAction2'" actionValue="'second'">second</BuilderSelectItem>
-                        </BuilderSelect>
-                    </BuilderRow>
-                `;
-            }
-        );
+        addBuilderOption({
+            selector: ".test-options-target",
+            template: xml`
+                <BuilderRow label.translate="Type">
+                    <BuilderSelect>
+                        <BuilderSelectItem action="'customAction'" actionValue="'first'">first</BuilderSelectItem>
+                        <BuilderSelectItem action="'customAction2'" actionValue="'second'">second</BuilderSelectItem>
+                    </BuilderSelect>
+                </BuilderRow>
+            `,
+        });
 
         await setupHTMLBuilder(`<div class="test-options-target">TEST</div>`);
         await contains(":iframe .test-options-target").click();
@@ -239,14 +276,14 @@ describe("Async operations", () => {
                 }
             },
         });
-        addBuilderOption(
-            class extends BaseOptionComponent {
-                static selector = ".test-options-target";
-                static template = xml`<BuilderRow>
+        addBuilderOption({
+            selector: ".test-options-target",
+            template: xml`
+                <BuilderRow>
                     <BuilderColorPicker enabledTabs="['solid']" styleAction="'background-color'" action="'customAction'"/>
-                </BuilderRow>`;
-            }
-        );
+                </BuilderRow>
+            `,
+        });
 
         await setupHTMLBuilder(`<div class="test-options-target">TEST</div>`);
         await contains(":iframe .test-options-target").click();
@@ -278,14 +315,13 @@ describe("Operation that will fail", () => {
         addBuilderAction({
             TestAction,
         });
-        addBuilderOption(
-            class extends BaseOptionComponent {
-                static selector = ".test-options-target";
-                static template = xml`
-                    <BuilderButton action="'testAction'"/>
-                    <BuilderButton classAction="'test'"/>`;
-            }
-        );
+        addBuilderOption({
+            selector: ".test-options-target",
+            template: xml`
+                <BuilderButton action="'testAction'"/>
+                <BuilderButton classAction="'test'"/>
+            `,
+        });
         await setupHTMLBuilder(`<div class="test-options-target">b</div>`);
         await contains(":iframe .test-options-target").click();
         await contains("[data-action-id='testAction']").hover();
@@ -308,14 +344,13 @@ describe("Operation that will fail", () => {
         addBuilderAction({
             TestAction,
         });
-        addBuilderOption(
-            class extends BaseOptionComponent {
-                static selector = ".test-options-target";
-                static template = xml`
-                    <BuilderButton action="'testAction'"/>
-                    <BuilderButton classAction="'test'"/>`;
-            }
-        );
+        addBuilderOption({
+            selector: ".test-options-target",
+            template: xml`
+                <BuilderButton action="'testAction'"/>
+                <BuilderButton classAction="'test'"/>
+            `,
+        });
         await setupHTMLBuilder(`<div class="test-options-target">b</div>`);
         await contains(":iframe .test-options-target").click();
         await contains("[data-action-id='testAction']").click();

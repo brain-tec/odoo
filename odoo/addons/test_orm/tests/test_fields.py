@@ -314,6 +314,28 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         record = self.env['test_orm.mixed'].create({})
         self.assertTrue(record.now)
 
+    def test_10_non_stored_cache_only(self):
+        """Test create and write behavior for fields.Char(store=False).
+
+        cache_only fields are non-stored, non-computed fields, whose values
+        are lost after invalidation. Usually they are used as a hack.
+        """
+        Category = self.env['test_orm.category']
+        self.assertFalse(Category._fields['dummy'].store)
+        self.assertFalse(Category._fields['dummy'].compute)
+
+        # Create: cache_only field value should be in cache
+        cat = Category.create({'name': 'CacheOnlyTest', 'dummy': 'create_value'})
+        self.assertEqual(cat.dummy, 'create_value')
+        cat.invalidate_recordset()
+        self.assertFalse(cat.dummy)
+
+        # Write: cache_only field value should be updated in cache
+        cat.write({'dummy': 'write_value'})
+        self.assertEqual(cat.dummy, 'write_value')
+        cat.invalidate_recordset()
+        self.assertFalse(cat.dummy)
+
     def test_11_stored(self):
         """ test stored fields """
         def check_stored(disc):
@@ -4206,7 +4228,7 @@ class TestMany2oneReference(TransactionExpressionCase):
         reference.res_model = record._name
 
         # the model field 'res_model' is not in database yet
-        self.assertIn(record.id, self.env._field_dirty[reference._fields['res_model']])
+        self.assertIn(reference.id, self.env._field_dirty[reference._fields['res_model']])
 
         # searching on the one2many should flush the field 'res_model'
         records = record.search([('model_ids.create_date', '!=', False)])
@@ -5126,6 +5148,7 @@ class TestPrecompute(TransactionCase):
 
         fnames = [fname for fname, field in currency._fields.items() if field.prefetch]
         QUERIES = [
+            'SELECT "res_currency"."id" FROM "res_currency" WHERE "res_currency"."id" IN %s',  # env.ref for currency
             select(currency, *fnames),
             insert(model, 'amount', 'currency_id'),
             select(model, 'currency_id'),

@@ -23,11 +23,11 @@ class TestWebsiteBlogUi(odoo.tests.HttpCase, TestWebsiteBlogCommon):
         blog_tag = cls.env.ref('website_blog.blog_tag_2', raise_if_not_found=False)
         if not blog_tag:
             blog_tag = cls.env['blog.tag'].create({'name': 'adventure'})
-        cls.env['blog.post'].create({
+        cls.blog_post = cls.env['blog.post'].create({
             "name": "Post Test",
             "subtitle": "Subtitle Test",
             "blog_id": blog.id,
-            "author_id": cls.env.user.id,
+            "author_id": cls.env.user.partner_id.id,
             "tag_ids": [(4, blog_tag.id)],
             "is_published": True,
             "cover_properties": """{"background-image": "url('/website_blog/static/src/img/cover_1.jpg')", "resize_class": "o_record_has_cover o_half_screen_height", "opacity": "0"}""",
@@ -73,6 +73,17 @@ class TestWebsiteBlogUi(odoo.tests.HttpCase, TestWebsiteBlogCommon):
         self.env.ref('website_blog.opt_blog_sidebar_show').active = True
         self.start_tour(self.env["website"].get_client_action_url("/blog"), "blog_context_and_social_media", login="admin")
 
+    def test_blog_social_image(self):
+        with MockRequest(self.env, website=self.env.ref('website.default_website'), url_root='http://example.com'):
+            meta = self.blog_post.get_website_meta()
+            self.assertEqual(meta['opengraph_meta']['og:image'], 'http://example.com/website_blog/static/src/img/cover_1.jpg')
+            self.blog_post.cover_properties = """{"background-image": "url(\\"/2.jpg\\")"}"""
+            meta = self.blog_post.get_website_meta()
+            self.assertEqual(meta['opengraph_meta']['og:image'], 'http://example.com/2.jpg')
+            self.blog_post.cover_properties = """{"background-image": "url(/3.jpg)"}"""
+            meta = self.blog_post.get_website_meta()
+            self.assertEqual(meta['opengraph_meta']['og:image'], 'http://example.com/3.jpg')
+
     def test_avatar_comment(self):
         mail_message = self.env['mail.message'].create({
             'author_id': self.user_public.partner_id.id,
@@ -100,7 +111,7 @@ class TestWebsiteBlogUi(odoo.tests.HttpCase, TestWebsiteBlogCommon):
         blog_post_1 = Post.create({
             'name': 'First Blog Post',
             'blog_id': Blog1.id,
-            'author_id': self.env.user.id,
+            'author_id': self.env.user.partner_id.id,
             'is_published': True,
             'published_date': datetime(2025, 2, 10, 12, 0, 0),
         })
@@ -109,7 +120,7 @@ class TestWebsiteBlogUi(odoo.tests.HttpCase, TestWebsiteBlogCommon):
         blog_post_2 = Post.create({
             'name': 'Second Blog Post',
             'blog_id': Blog2.id,
-            'author_id': self.env.user.id,
+            'author_id': self.env.user.partner_id.id,
             'is_published': True,
             'published_date': datetime(2025, 1, 15, 14, 30, 0),
         })
