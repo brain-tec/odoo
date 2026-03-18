@@ -4870,6 +4870,8 @@ class AccountMove(models.Model):
             except Exception:
                 _logger.exception("Failed to notify invoice subscribers after EDI import.")
 
+        self._post_process_link_to_purchase_order(self)
+
         return res
 
     @contextmanager
@@ -4903,6 +4905,11 @@ class AccountMove(models.Model):
         """ Helper to get a reason why an invoice cannot be decoded if it has invoice lines. """
         if self.invoice_line_ids:
             return self.env._("The invoice already contains lines.")
+
+    @api.model
+    def _post_process_link_to_purchase_order(self, invoice):
+        # To be implemented in modules needing to process the invoice after it was linked (or not) to a PO
+        pass
 
     # -------------------------------------------------------------------------
     # BUSINESS METHODS
@@ -5789,6 +5796,12 @@ class AccountMove(models.Model):
         if validation_msgs:
             msg = "\n".join([line for line in validation_msgs])
             raise UserError(msg)
+
+        if inactive_analytic_ids := self.line_ids.sudo().with_context(active_test=False).distribution_analytic_account_ids.filtered(lambda a: not a.active):
+            raise UserError(_(
+                "You cannot post an entry with an archived analytic account: %s",
+                ', '.join(inactive_analytic_ids.mapped('name')),
+            ))
 
         if soft:
             future_moves = self.filtered(lambda move: move.date > fields.Date.context_today(self))
