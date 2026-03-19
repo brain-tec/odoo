@@ -707,7 +707,9 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.assertEqual(invoice_pdf_content.count('Product B'), 1)
         self.assertEqual(invoice_pdf_content.count('Product C'), 1)
 
-        for order_line in sale_order.order_line.filtered(lambda l: l.product_id == self.downpayment_product):
+        downpayment_lines = sale_order.order_line.filtered(lambda l: l.product_id == self.downpayment_product)
+        self.assertEqual(len(downpayment_lines), 3)
+        for order_line in downpayment_lines:
             order_line = order_line.with_context(lang=partner_test.lang)
             self.assertIn(format_date(order_line.env, order_line.order_id.date_order), order_line.name)
 
@@ -2126,3 +2128,33 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         invoice.action_post()
 
         self.assertEqual(sale_order.amount_unpaid, 0.0)
+
+    def test_settle_changed_price_with_lots(self):
+        """
+        Tests that when we change the price of a line in the quotation, it will not be reverted when
+        settling it through the PoS
+        """
+        partner = self.env['res.partner'].create({'name': 'Test Partner'})
+        product_lot_tracked = self.env['product.product'].create({
+            'name': 'Settle Lots',
+            'available_in_pos': True,
+            'lst_price': 100.0,
+            'taxes_id': False,
+            'tracking': 'lot',
+        })
+        self.env['sale.order'].create({
+            'partner_id': partner.id,
+            'order_line': [
+                (0, 0, {
+                    'product_id': product_lot_tracked.id,
+                    'product_uom_qty': 1,
+                    'price_unit': 120.0,
+                }),
+                (0, 0, {
+                    'product_id': product_lot_tracked.id,
+                    'product_uom_qty': 1,
+                    'price_unit': 60.0,
+                })
+            ]
+        })
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_settle_changed_price_with_lots', login="accountman")
