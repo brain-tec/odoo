@@ -1948,9 +1948,9 @@ class AccountMove(models.Model):
         self.fetch(['fiscal_position_id', 'company_id'])
         foreign_vat_records = self.filtered(lambda r: r.fiscal_position_id.foreign_vat)
         for fiscal_position_id, record_group in groupby(foreign_vat_records, key=lambda r: r.fiscal_position_id):
-            self.env['account.move'].concat(*record_group).tax_country_id = fiscal_position_id.country_id
+            self.env['account.move'].concat(record_group).tax_country_id = fiscal_position_id.country_id
         for company_id, record_group in groupby((self-foreign_vat_records), key=lambda r: r.company_id):
-            self.env['account.move'].concat(*record_group).tax_country_id = company_id.account_fiscal_country_id
+            self.env['account.move'].concat(record_group).tax_country_id = company_id.account_fiscal_country_id
 
     @api.depends('tax_country_id')
     def _compute_tax_country_code(self):
@@ -4875,6 +4875,8 @@ class AccountMove(models.Model):
             except Exception:
                 _logger.exception("Failed to notify invoice subscribers after EDI import.")
 
+        self._post_process_link_to_purchase_order(self)
+
         return res
 
     @contextmanager
@@ -4908,6 +4910,11 @@ class AccountMove(models.Model):
         """ Helper to get a reason why an invoice cannot be decoded if it has invoice lines. """
         if self.invoice_line_ids:
             return self.env._("The invoice already contains lines.")
+
+    @api.model
+    def _post_process_link_to_purchase_order(self, invoice):
+        # To be implemented in modules needing to process the invoice after it was linked (or not) to a PO
+        pass
 
     # -------------------------------------------------------------------------
     # BUSINESS METHODS

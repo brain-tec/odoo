@@ -55,7 +55,7 @@
                             widget="image"
                             options="{'convert_to_webp': True, 'preview_image': 'image_128'}"
                         />
-                        <group class="o_form_header_details" col="2">
+                        <group class="o_form_header_details flex-grow-1">
                             <h1 class="o_input_box" colspan="2">
                                 <field name="is_favorite" widget="boolean_favorite" nolabel="1" class="o_input_box_overlay_start"/>
                                 <field class="text-break" name="name" options="{'line_breaks': False}" widget="text" placeholder="e.g. Cheese Burger"/>
@@ -96,17 +96,18 @@
                                         invisible="not product_tooltip"
                                     />
                                     <field name="show_qty_update_button" invisible="1"/>
-                                    <div name="tracking_and_qty_no_stock" class="o_row w-100" invisible="type != 'consu'">
-                                        <label for="is_storable" invisible="type != 'consu'"/>
-                                        <field name="is_storable"/>
-                                        <div name="product_template_qty_field" class="o_input_box" invisible="is_product_variant or not is_storable">
-                                            <a type="action" name="%(product_variant_edit_qty_action)d" invisible="not show_qty_update_button" class="o_input_box_overlay_start">
+                                    <field name="is_storable" invisible="type != 'consu' or is_storable"/>
+                                    <label for="is_storable" invisible="type != 'consu'  or not is_storable"/>
+                                    <div name="tracking_and_qty_no_stock" class="o_input_box" invisible="type != 'consu' or not is_storable">
+                                        <field name="is_storable" class="o_input_box_overlay_start"/>
+                                        <div name="product_template_qty_field" invisible="is_product_variant">
+                                            <a type="action" name="%(product_variant_edit_qty_action)d" invisible="not show_qty_update_button">
                                                 <field name="qty_available" readonly="True"/>
                                             </a>
                                             <field name="qty_available" invisible="show_qty_update_button"/>
                                             <field name="uom_name" class="o_input_box_overlay_end" groups="uom.group_uom"/>
                                         </div>
-                                        <div name="product_product_qty_field" class="o_input_box" invisible="not is_product_variant or not is_storable">
+                                        <div name="product_product_qty_field" invisible="not is_product_variant">
                                             <field name="qty_available"/>
                                             <field name="uom_name" class="o_input_box_overlay_end" groups="uom.group_uom"/>
                                         </div>
@@ -124,31 +125,26 @@
                                             options="{'no_quick_create': True}"
                                         />
                                     </div>
-                                    <div colspan="2" class="o_row" name="standard_price_uom" invisible="type == 'combo'
+                                    <div colspan="2" class="d-flex align-items-baseline gap-2" name="standard_price_uom" invisible="type == 'combo'
                                         or (not is_product_variant and (
                                             product_variant_count &gt; 1
                                             or (product_variant_count == 0 and is_dynamically_created)
                                         ))"
                                     >
-                                        <div class="o_cell d-flex">
-                                            <label for="standard_price" class="o_form_label"/>
-                                            <field
-                                                name="standard_price"
-                                                widget="monetary"
-                                                options="{
-                                                    'currency_field': 'cost_currency_id',
-                                                    'field_digits': True,
-                                                }"
-                                            />
-                                        </div>
-                                        <div class="o_cell  d-flex" groups="uom.group_uom">
-                                            <label for="uom_id" string="Per" class="o_form_label"/>
-                                            <field
-                                                name="uom_id" widget="many2one_uom"
-                                                options="{'no_quick_create': True}"
-                                                nolabel="1"
-                                            />
-                                        </div>
+                                        <label for="standard_price" class="o_form_label"/>
+                                        <field
+                                            name="standard_price"
+                                            widget="monetary"
+                                            options="{
+                                                'currency_field': 'cost_currency_id',
+                                                'field_digits': True,
+                                            }"
+                                        />
+                                        <span groups="uom.group_uom">per</span>
+                                        <field
+                                            groups="uom.group_uom" name="uom_id" widget="many2one_uom"
+                                            options="{'no_quick_create': True}"
+                                        />
                                     </div>
                                     <field name="categ_id" string="Category"/>
                                     <field name="company_id"
@@ -379,10 +375,10 @@
                         <field name="active" invisible="1"/>
                         <field name="id" invisible="1"/>
                         <field name="company_id" invisible="1"/>
-                        <group class="o_form_header_group flex-md-row-reverse">
+                        <div class="o_form_header_group flex-md-row-reverse">
                             <field name="image_1920" widget="image" options="{'convert_to_webp': True,'preview_image': 'image_128'}"/>
-                            <group class="o_form_header_details" col="2">
-                                <h1 colspan="2">
+                            <div class="o_form_header_details flex-grow-1">
+                                <h1>
                                     <field name="name" readonly="1" placeholder="e.g. Odoo Enterprise Subscription"/>
                                 </h1>
                                 <field name="product_template_attribute_value_ids" widget="many2many_tags" readonly="1"/>
@@ -390,8 +386,8 @@
                                     <span>All general settings about this product are managed on</span>
                                     <button name="open_product_template" type="object" string="the product template." class="oe_link oe_link_product ps-0 ms-1 mb-1"/>
                                 </p>
-                            </group>
-                        </group>
+                            </div>
+                        </div>
                         <group>
                             <group name="codes" string="Codes">
                                 <field name="default_code"/>

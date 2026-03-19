@@ -2190,6 +2190,9 @@ class Screencaster:
 
 @cache
 def _find_executable():
+    browser_bin_path = os.environ.get('ODOO_BROWSER_BIN')  # used for testing specific Chrome builds
+    if browser_bin_path and os.path.exists(browser_bin_path):
+        return browser_bin_path
     system = platform.system()
     if system == 'Linux':
         for bin_ in ['google-chrome', 'chromium', 'chromium-browser', 'google-chrome-stable']:
@@ -2335,9 +2338,7 @@ class HttpCase(TransactionCase):
 
     @classmethod
     def http_port(cls):
-        if odoo.service.server.server is None:
-            return None
-        return odoo.service.server.server.httpd.server_port
+        return config['http_port']
 
     def setUp(self):
         super().setUp()

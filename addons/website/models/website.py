@@ -348,7 +348,7 @@ class Website(models.CachedModel):
 
         if not self.env.user.has_group('website.group_multi_website') and self.search_count([]) > 1:
             all_user_groups = 'base.group_portal,base.group_user,base.group_public'
-            groups = self.env['res.groups'].concat(*(self.env.ref(it) for it in all_user_groups.split(',')))
+            groups = self.env['res.groups'].concat(self.env.ref(it) for it in all_user_groups.split(','))
             groups.write({'implied_ids': [(4, self.env.ref('website.group_multi_website').id)]})
 
         return websites
@@ -1385,14 +1385,14 @@ class Website(models.CachedModel):
             if model_name == 'ir.ui.view':
                 dependency_records = _handle_views_and_pages(dependency_records)
             if dependency_records:
-                model_name = self.env['ir.model']._display_name_for([model_name])[0]['display_name']
+                model_display_name = self.env['ir.model']._display_name_for([model_name])[0]['display_name']
                 field_string = Model.fields_get()[field_name]['string']
-                dependencies.setdefault(model_name, [])
-                dependencies[model_name] += [{
+                dependencies.setdefault(model_display_name, [])
+                dependencies[model_display_name] += [{
                     'field_name': field_string,
                     'record_name': rec.display_name,
                     'link': 'website_url' in rec and rec.website_url or f'/odoo/{model_name}/{rec.id}',
-                    'model_name': model_name,
+                    'model_name': model_display_name,
                 } for rec in dependency_records]
 
         return dependencies
