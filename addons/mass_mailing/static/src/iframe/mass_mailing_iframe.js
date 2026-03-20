@@ -10,7 +10,8 @@ import {
     useState,
     useSubEnv,
 } from "@odoo/owl";
-import { LazyComponent, loadBundle } from "@web/core/assets";
+import { loadBundle } from "@web/core/assets";
+import { LazyComponent } from "@web/core/lazy_component";
 import { Deferred } from "@web/core/utils/concurrency";
 import { uniqueId } from "@web/core/utils/functions";
 import { useChildRef, useForwardRefToParent } from "@web/core/utils/hooks";
@@ -329,13 +330,11 @@ export class MassMailingIframe extends Component {
      */
     async loadIframeAssets() {
         const bundleEntryPromises = this.getIframeBundles().map(async (bundle) => {
-            const targets = (
-                await loadBundle(bundle, {
-                    targetDoc: this.iframeRef.el.contentDocument,
-                    css: true,
-                    js: false,
-                })
-            ).map((bundleEvent) => bundleEvent.target);
+            const targets = await loadBundle(bundle, {
+                targetDoc: this.iframeRef.el.contentDocument,
+                css: true,
+                js: false,
+            });
             const iframe = this.iframeRef.el;
             return [
                 bundle,
