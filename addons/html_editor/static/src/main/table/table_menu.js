@@ -1,5 +1,12 @@
 import { closestElement } from "@html_editor/utils/dom_traversal";
-import { Component, onMounted, onWillUnmount, useExternalListener, useRef } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillUpdateProps,
+    onWillUnmount,
+    useExternalListener,
+    useRef,
+} from "@odoo/owl";
 import { getColumnIndex, getRowIndex } from "@html_editor/utils/table";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -23,7 +30,7 @@ export class TableMenu extends Component {
         clearColumnContent: Function,
         clearRowContent: Function,
         toggleAlternatingRows: Function,
-        overlay: Object,
+        close: Function,
         tableDragDropOverlay: Object,
         dropdownState: Object,
         target: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
@@ -48,7 +55,9 @@ export class TableMenu extends Component {
         this.menuRef = useRef("menuRef");
         const onPointerDown = (ev) => this.onPointerDown(ev);
         onMounted(() => {
-            this.menuRef?.el.addEventListener("pointerdown", onPointerDown);
+            this.overlayEl = this.menuRef.el;
+            this.overlayEl.addEventListener("pointerdown", onPointerDown);
+            this.updatePosition(this.props);
         });
         onWillUnmount(() => {
             this.menuRef?.el.removeEventListener("pointerdown", onPointerDown);
@@ -57,6 +66,14 @@ export class TableMenu extends Component {
         if (this.props.document !== document) {
             // Listen outside the iframe.
             useExternalListener(document, "pointerup", this.onPointerUp);
+        }
+        onWillUpdateProps((newProps) => {
+            this.updatePosition(newProps);
+        });
+        if (this.props.document.defaultView.frameElement) {
+            useExternalListener(this.props.document, "scroll", () => {
+                this.updatePosition(this.props);
+            });
         }
     }
 
@@ -83,14 +100,58 @@ export class TableMenu extends Component {
         );
     }
 
+    updatePosition({ target, type, direction }) {
+        if (!this.overlayEl || !target) {
+            return;
+        }
+        let frameRect = { top: 0, left: 0 };
+        let frameElement;
+        try {
+            frameElement = this.props.document.defaultView.frameElement;
+        } catch {
+            // We don't access the frameElement if we don't have access to it.
+            // (i.e. iframe origin or sandbox restriction)
+        }
+        if (frameElement) {
+            frameRect = frameElement.getBoundingClientRect();
+        }
+        const targetRect = target.getBoundingClientRect();
+        const container = this.overlayEl.parentElement;
+        const containerRect = container.getBoundingClientRect();
+        const top = frameRect.top + targetRect.top - containerRect.top;
+        const left = frameRect.left + targetRect.left - containerRect.left;
+        this.overlayEl.classList.remove("h-100", "w-100");
+        if (type === "column") {
+            Object.assign(this.overlayEl.style, {
+                position: "absolute",
+                top: `${top - this.overlayEl.offsetHeight}px`,
+                left: `${left}px`,
+                width: `${targetRect.width}px`,
+            });
+        } else {
+            const isLTR = direction === "ltr";
+            const inlineStartOffset = isLTR
+                ? left
+                : containerRect.right - (frameRect.left + targetRect.right);
+            Object.assign(this.overlayEl.style, {
+                position: "absolute",
+                top: `${top}px`,
+                insetInlineStart: `${inlineStartOffset - this.overlayEl.offsetWidth}px`,
+                height: `${targetRect.height}px`,
+            });
+        }
+    }
     onSelected(item) {
         item.action(this.props.target);
-        this.props.overlay.close();
+        this.props.close();
     }
 
     onPointerDown(ev) {
+        if (!this.overlayEl.contains(ev.target) && this.props.document.defaultView.frameElement) {
+            this.props.close();
+        }
         this.longPressTimer = setTimeout(() => {
-            this.props.overlay.close();
+            this.props.close();
             // Open the TableDragDrop overlay.
             this.props.tableDragDropOverlay.open({
                 target: this.props.target,
