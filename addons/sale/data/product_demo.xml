@@ -103,7 +103,7 @@
 
     <record id="product.product_product_3" model="product.product">
         <field name="invoice_policy">delivery</field>
-        <field name="expense_policy">cost</field>
+        <field name="reinvoice_policy">cost</field>
     </record>
 
     <record id="product.product_product_2" model="product.product">
@@ -117,12 +117,12 @@
     <!-- Expensable products -->
     <record id="product.expense_product" model="product.product">
         <field name="invoice_policy">order</field>
-        <field name="expense_policy">sales_price</field>
+        <field name="reinvoice_policy">sales_price</field>
     </record>
 
     <record id="product.expense_hotel" model="product.product">
         <field name="invoice_policy">delivery</field>
-        <field name="expense_policy">cost</field>
+        <field name="reinvoice_policy">cost</field>
     </record>
 
     <record id="product.product_product_4e" model="product.product">
@@ -144,7 +144,7 @@
         <field name="standard_price">100.0</field>
         <field name="uom_id" ref="uom.product_uom_unit"/>
         <field name="company_id" eval="[]"/>
-        <field name="image_1920" type="base64" file="sale/static/img/advance_product_0-image.jpg"/>
+        <field name="image_1920" type="bytes" file="sale/static/img/advance_product_0-image.jpg"/>
         <field name="taxes_id" eval="[]"/>
         <field name="supplier_taxes_id" eval="[]"/>
     </record>
@@ -156,7 +156,7 @@
         <field name="weight">0.01</field>
         <field name="uom_id" ref="uom.product_uom_unit"/>
         <field name="description_sale">Office chairs can harm your floor: protect it</field>
-        <field name="image_1920" type="base64" file="sale/static/img/floor_protection-image.jpg"/>
+        <field name="image_1920" type="bytes" file="sale/static/img/floor_protection-image.jpg"/>
     </record>
 
     <record id="product.product_product_4_product_template" model="product.template">

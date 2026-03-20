@@ -4,7 +4,7 @@
 <t t-name="website.AutoCompleteInLinkPopover" t-inherit="web.AutoComplete">
     <xpath expr="//input[@t-custom-ref='input']" position="attributes">
         <attribute name="class" remove="o_input pe-3" separator=" "/>
-        <attribute name="t-attf-class" add="{{inputClass}}" separator=" "/>
+        <attribute name="t-attf-class" add="{{this.inputClass}}" separator=" "/>
     </xpath>
 </t>
 

@@ -3049,6 +3049,54 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.assertNotIn(children_categs[0].id, category_id, "Child category is unavailable and shouldn't appear in the POS")
         self.assertIn(children_categs[1].id, category_id, "Child category is available and should appear in the POS")
 
+    def test_available_product_uom_ids(self):
+        # Making sure that all of the non-special products that are included in the `load_data` are the ones created in this method.
+        self.env['product.template'].search([]).write({'is_favorite': False})
+
+        self.env['ir.config_parameter'].sudo().set_str('point_of_sale.limited_product_count', '2')
+        uom = self.env['uom.uom'].create({
+            'name': 'Random UOM',
+            'relative_uom_id': self.env.ref('uom.product_uom_unit').id,
+        })
+        product_one, product_two, product_three = self.env['product.product'].create([{
+            'name': "product_one",
+            'available_in_pos': True,
+            'is_favorite': True,
+        },
+        {
+            'name': "product_two",
+            'available_in_pos': True,
+            'is_favorite': True,
+        },
+        {
+            'name': "product_three",
+            'available_in_pos': True,
+        }])
+
+        _, _, product_uom_three = self.env['product.uom'].create([{
+            'barcode': "product_one_barcode",
+            'uom_id': uom.id,
+            'product_id': product_one.id,
+        },
+        {
+            'barcode': "product_two_barcode",
+            'uom_id': uom.id,
+            'product_id': product_two.id,
+        },
+        {
+            'barcode': "product_three_barcode",
+            'uom_id': uom.id,
+            'product_id': product_three.id,
+        },
+        ])
+
+        self.env['product.template'].flush_model()
+        self.main_pos_config.open_ui()
+        loaded_data = self.main_pos_config.current_session_id.load_data([])
+        loaded_product_uoms = [loaded_product_uom['id'] for loaded_product_uom in loaded_data['product.uom']]
+
+        self.assertNotIn(product_uom_three.id, loaded_product_uoms, f"Product UOM {product_uom_three} shouldn't be loaded as its product {product_three} is not included in the results")
+
     def test_pos_order_shipping_date(self):
         self.env['res.partner'].create({
             'name': 'Partner Test with Address',
@@ -3993,6 +4041,33 @@ class TestUi(TestPointOfSaleHttpCommon):
     def test_customer_search_prefilled_on_create(self):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_customer_search_prefilled_on_create')
+
+    def test_combo_price_unchanged_with_lot_tracked_product(self):
+        """Test that assigning a lot to a combo item does not affect the combo price."""
+        lot_product = self.env['product.product'].create({
+            'name': 'Product A',
+            'is_storable': True,
+            'tracking': 'lot',
+            'available_in_pos': True,
+        })
+        combo = self.env["product.combo"].create({
+            "name": lot_product.name + " combo",
+            "combo_item_ids": [Command.create({"product_id": lot_product.id, "extra_price": 0})]
+        })
+        self.env["product.product"].create(
+            {
+                "available_in_pos": True,
+                "list_price": 7,
+                "name": "Test Combo",
+                "type": "combo",
+                "taxes_id": False,
+                "combo_ids": [
+                    (6, 0, [combo.id])
+                ],
+            }
+        )
+        self.main_pos_config.with_user(self.pos_admin).open_ui()
+        self.start_pos_tour('test_combo_price_unchanged_with_lot_tracked_product', login="pos_admin")
 
 
 # This class just runs the same tests as above but with mobile emulation
