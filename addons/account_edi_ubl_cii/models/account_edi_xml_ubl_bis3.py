@@ -258,9 +258,22 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
     def _ubl_add_legal_monetary_total_payable_rounding_amount_node(self, vals):
         # EXTENDS account.edi.xml.ubl
         super()._ubl_add_legal_monetary_total_payable_rounding_amount_node(vals)
-
-        # Cash rounding lines should not appear as lines but in PayableRoundingAmount.
-        self._ubl_add_legal_monetary_total_payable_rounding_amount_node_from_cash_rounding(vals)
+        tax_withholding_amount = vals['_ubl_values'].get('tax_withholding_amount')
+        node = vals['legal_monetary_total_node']
+        payable_rounding_amount = node['cbc:PayableRoundingAmount']['_text']
+        if tax_withholding_amount and payable_rounding_amount is not None:
+            currency = vals['currency_id']
+            payable_rounding_amount += tax_withholding_amount
+            if currency.is_zero(payable_rounding_amount):
+                node['cbc:PayableRoundingAmount'] = {
+                    '_text': None,
+                    'currencyID': None,
+                }
+            else:
+                node['cbc:PayableRoundingAmount'] = {
+                    '_text': FloatFmt(payable_rounding_amount, min_dp=currency.decimal_places),
+                    'currencyID': currency.name,
+                }
 
     def _ubl_add_legal_monetary_total_prepaid_payable_amount_node(self, vals, in_foreign_currency=True):
         # EXTENDS account.edi.xml.ubl
@@ -662,14 +675,18 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
         commercial_partner = partner.commercial_partner_id
 
         if commercial_partner.vat and commercial_partner.vat != '/':
+            vat = commercial_partner.vat
             country_code = commercial_partner.country_id.code
             if country_code in GST_COUNTRY_CODES:
                 tax_scheme_id = 'GST'
             else:
                 tax_scheme_id = 'VAT'
 
+            if country_code == 'HU' and not vat.upper().startswith('HU'):
+                vat = 'HU' + vat[:8]
+
             nodes.append({
-                'cbc:CompanyID': {'_text': commercial_partner.vat},
+                'cbc:CompanyID': {'_text': vat},
                 'cac:TaxScheme': {
                     'cbc:ID': {'_text': tax_scheme_id},
                 },
@@ -768,6 +785,14 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
         if commercial_partner.country_code == 'NO':
             nodes.append({
                 'cbc:CompanyID': {'_text': "Foretaksregisteret"},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': "TAX"},
+                },
+            })
+
+        if commercial_partner.country_code == 'SE':
+            nodes.append({
+                'cbc:CompanyID': {'_text': "GODKÄND FÖR F-SKATT"},
                 'cac:TaxScheme': {
                     'cbc:ID': {'_text': "TAX"},
                 },
@@ -955,6 +980,13 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
         if tax_total_keys['tax_total_key'] and tax_total_keys['tax_total_key']['is_withholding']:
             tax_total_keys['tax_total_key'] = None
 
+        tax_category_key = tax_total_keys['tax_category_key']
+        if (
+            tax_category_key
+            and tax_category_key['tax_category_code'] == 'E'
+            and not tax_category_key.get('tax_exemption_reason')
+            ):
+            tax_category_key['tax_exemption_reason'] = _("Exempt from tax")
         # In case of multi-currencies, there will be 2 TaxTotals but the one expressed in
         # foreign currency must not have any TaxSubtotal.
         company_currency = vals['company'].currency_id
