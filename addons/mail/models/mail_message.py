@@ -5,6 +5,7 @@ import contextlib
 import logging
 import re
 import textwrap
+import typing
 from binascii import Error as binascii_error
 from collections import defaultdict
 from lxml import html
@@ -12,11 +13,15 @@ from typing import Self
 
 from odoo import _, api, fields, models, modules, tools
 from odoo.exceptions import AccessError, MissingError
-from odoo.fields import Command, Domain
+from odoo.fields import Domain
 from odoo.tools import clean_context, groupby, SQL
 from odoo.tools.misc import OrderedSet
 from odoo.addons.base.models.ir_attachment import condition_values
 from odoo.addons.mail.tools.discuss import Store
+
+if typing.TYPE_CHECKING:
+    from odoo.models import BaseModel
+
 
 _logger = logging.getLogger(__name__)
 _image_dataurl = re.compile(r'(data:image/[a-z]+?);base64,([a-z0-9+/\n]{3,}=*)\n*([\'"])(?: data-filename="([^"]*)")?', re.I)
@@ -774,18 +779,30 @@ class MailMessage(models.Model):
         if attachments_tocheck:
             attachments_tocheck.check_access('read')
 
-        for message, values, tracking_values_cmd in zip(messages, vals_list, tracking_values_list):
-            if tracking_values_cmd:
-                vals_lst = [dict(cmd[2], mail_message_id=message.id) for cmd in tracking_values_cmd if len(cmd) == 3 and cmd[0] == 0]
-                other_cmd = [cmd for cmd in tracking_values_cmd if len(cmd) != 3 or cmd[0] != 0]
-                if vals_lst:
-                    self.env['mail.tracking.value'].sudo().create(vals_lst)
-                if other_cmd:
-                    message.sudo().write({'tracking_value_ids': tracking_values_cmd})
+        # from tracking commands, create relevant tracking information (protected model)
+        messages._create_tracking_data(tracking_values_list)
 
         messages.filtered(lambda msg: msg._is_thread_message() and msg.message_type != 'user_notification')._invalidate_documents()
 
         return messages
+
+    def _create_tracking_data(self, tracking_values_ids_list):
+        for message, tracking_values_cmd in zip(self, tracking_values_ids_list):
+            if not tracking_values_cmd:
+                continue
+            track_vals_lst = []
+            for cmd in tracking_values_cmd:
+                if len(cmd) == 3 and cmd[0] == 0:
+                    track_values = dict(cmd[2])  # copy to avoid altering original dict
+                    for key in (k for k in ('field_name', 'field_type', 'new_value', 'old_value') if k in cmd[2]):
+                        track_values.pop(key)
+                    track_values['mail_message_id'] = message.id
+                    track_vals_lst.append(track_values)
+            other_cmd = [cmd for cmd in tracking_values_cmd if len(cmd) != 3 or cmd[0] != 0]
+            if track_vals_lst:
+                self.env['mail.tracking.value'].sudo().create(track_vals_lst)
+            if other_cmd:
+                message.sudo().write({'tracking_value_ids': tracking_values_cmd})
 
     def write(self, vals):
         if not (self.env.su or self.env.user.has_group('base.group_user')):
@@ -1249,7 +1266,7 @@ class MailMessage(models.Model):
                 record = record_by_message.get(message)
                 if record and hasattr(record, "_track_filter_for_display"):
                     trackings = record._track_filter_for_display(trackings)
-                return trackings._tracking_value_format()
+                return message._message_tracking_value_format(trackings)
 
             res.attr("trackingValues", tracking_values)
         # Add extras at the end to guarantee order in result. In particular, the parent message
@@ -1378,6 +1395,25 @@ class MailMessage(models.Model):
             )
             and not self.has_poll
         )
+
+    @api.model
+    def _message_tracking_value_format(self, tracking_values: BaseModel):
+        """ Return structured formatted data to be used by chatter to display
+        tracking values. It is organized by model.
+
+        :return: for each tracking value in self, their formatted display
+          values given as a dict;
+        :rtype: list[ValuesType]
+        """
+        model_map = {}
+        for tracking in tracking_values:
+            model = tracking.field_id.model or tracking.mail_message_id.model
+            model_map.setdefault(model, tracking_values.browse())
+            model_map[model] += tracking
+        formatted = []
+        for model, trackings in model_map.items():
+            formatted += trackings.env[model]._tracking_value_format_model(trackings)
+        return formatted
 
     @api.model
     def _get_reply_to(self, values):

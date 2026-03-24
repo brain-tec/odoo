@@ -226,11 +226,12 @@ class HrVersion(models.Model):
 
     @api.depends("private_country_id")
     def _compute_allowed_country_state_ids(self):
-        states = self.env["res.country.state"].search([])
-        for version in self:
-            if version.private_country_id:
-                version.allowed_country_state_ids = version.private_country_id.state_ids
-            else:
+        versions_with_countries = self.filtered("private_country_id")
+        for version in versions_with_countries:
+            version.allowed_country_state_ids = version.private_country_id.state_ids
+        if versions_without_countries := (self - versions_with_countries):
+            states = self.env["res.country.state"].search([])
+            for version in versions_without_countries:
                 version.allowed_country_state_ids = states
 
     @api.constrains('employee_id', 'contract_date_start', 'contract_date_end')
@@ -638,6 +639,14 @@ class HrVersion(models.Model):
         elif self.is_flexible:
             return self.hours_per_week
         return self.company_id.resource_calendar_id._get_hours_per_week()
+
+    def _get_hours_per_day(self):
+        self.ensure_one()
+        if self.resource_calendar_id:
+            return self.resource_calendar_id._get_hours_per_day()
+        if self.is_flexible:
+            return self.hours_per_day
+        return self.company_id.resource_calendar_id._get_hours_per_day()
 
     def action_open_version(self):
         self.ensure_one()

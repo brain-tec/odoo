@@ -241,7 +241,8 @@ class TestBaseMailPerformance(BaseMailPerformance):
         records = self.env['mail.performance.thread'].search([])
         self.assertEqual(len(records), 5)
 
-        with self.assertQueryCount(admin=2, demo=2):
+        profile = self.profile() if self.warm else nullcontext()
+        with profile, self.assertQueryCount(admin=3, demo=3):
             records.write({'name': 'X'})
 
     @users('admin', 'demo')
@@ -251,7 +252,7 @@ class TestBaseMailPerformance(BaseMailPerformance):
         records = self.env['mail.performance.thread'].search([])
         self.assertEqual(len(records), 5)
 
-        with self.assertQueryCount(admin=2, demo=2):
+        with self.assertQueryCount(admin=3, demo=3):
             records.write({'value': 42})
 
     @users('admin', 'demo')
@@ -1159,7 +1160,8 @@ class TestMailAPIPerformance(BaseMailPerformance):
         rec1 = rec.with_context(active_test=False)      # to see inactive records
         self.assertEqual(rec1.message_partner_ids, self.partners | self.env.user.partner_id)
 
-        with self.assertQueryCount(admin=43, employee=43):
+        profile = self.profile() if self.warm else nullcontext()
+        with self.assertQueryCount(admin=46, employee=46), profile:
             rec.write({'user_id': self.user_portal.id})
         self.assertEqual(rec1.message_partner_ids, self.partners | self.env.user.partner_id | self.user_portal.partner_id)
         # write tracking message
@@ -1279,7 +1281,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
         rec1 = rec.with_context(active_test=False)      # to see inactive records
         self.assertEqual(rec1.message_partner_ids, self.partners | self.env.user.partner_id | self.user_portal.partner_id)
 
-        with self.assertQueryCount(admin=34, employee=34):
+        with self.assertQueryCount(admin=35, employee=35):
             rec.write({
                 'name': 'Test2',
                 'customer_id': customer_id,

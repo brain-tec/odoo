@@ -329,6 +329,7 @@ class OfflineManager extends Reactive {
 
             for (const [index, { key, value }] of Object.values(this._ormToSync)
                 .filter(({ value }) => !value.extras.error)
+                .sort((s1, s2) => s1.value.extras.timeStamp - s2.value.extras.timeStamp)
                 .entries()) {
                 if (index !== 0) {
                     await new Promise((r) => browser.setTimeout(r, 1000)); // Waits 1 second
@@ -336,7 +337,10 @@ class OfflineManager extends Reactive {
                 try {
                     await this.orm.silent.call(value.model, value.method, value.args, value.kwargs);
                     this.removeScheduledORM(key);
-                } catch {
+                } catch (e) {
+                    if (e instanceof ConnectionLostError) {
+                        break;
+                    }
                     this.scheduleORM(value.model, value.method, value.args, value.kwargs, {
                         id: key,
                         extras: { ...value.extras, error: true },

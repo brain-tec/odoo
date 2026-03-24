@@ -1024,17 +1024,11 @@ class MrpProduction(models.Model):
         if vals.get('state') == 'progress' and 'date_start' not in vals:
             vals['date_start'] = fields.Datetime.now()
 
-        initial_date_finished_mo_values = {}
         if 'date_finished' in vals and 'state' not in vals:
-            date_finished_field_definition = self.fields_get(['date_finished'])
-            for production in self.filtered(lambda p: p.state == 'done'):
-                initial_date_finished_mo_values[production] = {'date_finished': production.date_finished}
+            to_update = self.filtered(lambda p: p.state == 'done')
+            to_update._track_add({production.id: {'date_finished': production.date_finished} for production in to_update})
 
         res = super(MrpProduction, self).write(vals)
-
-        for production, initial_value in initial_date_finished_mo_values.items():
-            if tracking_values := production._mail_track(date_finished_field_definition, initial_value)[1]:
-                production._message_log(tracking_value_ids=tracking_values)
 
         for production in self:
             if 'date_start' in vals and not self.env.context.get('force_date', False):
@@ -1717,8 +1711,8 @@ class MrpProduction(models.Model):
         for order in self:
             previous_date_start = None
             for message in order.message_ids:
-                if message.tracking_value_ids.field_id.mapped('name') == ['date_start']:
-                    previous_date_start = message.tracking_value_ids.old_value_datetime
+                if message.sudo().tracking_value_ids.field_id.mapped('name') == ['date_start']:
+                    previous_date_start = message.sudo().tracking_value_ids.old_value_datetime
                     break
                 if message.subtype_id.id == self.env.ref('mrp.mrp_mo_planned').id:
                     break
@@ -3068,19 +3062,19 @@ class MrpProduction(models.Model):
         self.qty_producing = 0
         self._set_qty_producing(False)
 
-    def _track_subtype(self, init_values):
+    def _track_log_get_default_subtype(self, track_init_values):
         self.ensure_one()
-        if 'state' in init_values and self.state == 'confirmed':
+        if 'state' in track_init_values and self.state == 'confirmed':
             return self.env.ref('mrp.mrp_mo_in_confirmed')
-        elif 'state' in init_values and self.state == 'progress':
+        elif 'state' in track_init_values and self.state == 'progress':
             return self.env.ref('mrp.mrp_mo_in_progress')
-        elif 'state' in init_values and self.state == 'to_close':
+        elif 'state' in track_init_values and self.state == 'to_close':
             return self.env.ref('mrp.mrp_mo_in_to_close')
-        elif 'state' in init_values and self.state == 'done':
+        elif 'state' in track_init_values and self.state == 'done':
             return self.env.ref('mrp.mrp_mo_in_done')
-        elif 'state' in init_values and self.state == 'cancel':
+        elif 'state' in track_init_values and self.state == 'cancel':
             return self.env.ref('mrp.mrp_mo_in_cancelled')
-        return super()._track_subtype(init_values)
+        return super()._track_log_get_default_subtype(track_init_values)
 
     # -------------------------------------------------------------------------
     # CATALOG

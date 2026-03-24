@@ -139,11 +139,24 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
         move = self.create_move(self.invalid_partner)
         self.invalid_partner.invoice_edi_format = 'ubl_bis3'
         move.action_post()
-        with (
-            mock_lookup_not_found('0208:3141592654'),
-            mock_lookup_not_found('9925:be3141592654'),
-        ):
-            wizard = self.create_send_and_print(move, default=True)
+
+        with self.mock_mail_gateway(), self.mock_mail_app():
+            with (
+                mock_lookup_not_found('0208:3141592654'),
+                mock_lookup_not_found('9925:be3141592654'),
+            ):
+                wizard = self.create_send_and_print(move, default=True)
+            self.flush_tracking()
+        # check manual tracking
+        peppol_track_msg = self._new_msgs
+        self.assertEqual(len(peppol_track_msg), 1)
+        self.assertMessageFields(peppol_track_msg, {
+            'body': '',
+            'model': self.invalid_partner._name,
+            'res_id': self.invalid_partner.id,
+            'subtype_id': self.env.ref('mail.mt_note'),
+            'tracking_values': [('peppol_verification_state', 'selection', 'Unchecked', 'Partner is not on Peppol', {'company': self.env.company})],
+        })
 
         self.assertEqual(wizard.invoice_edi_format, 'ubl_bis3')
         self.assertEqual(self.invalid_partner.peppol_verification_state, 'not_valid')  # not on peppol at all

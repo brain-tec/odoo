@@ -1214,10 +1214,10 @@
                                        options="{'hide_composition': True, 'hide_prices': True, 'subsections': True}">
                                     <list name="journal_items" editable="bottom" string="Journal Items" default_order="sequence, id">
                                         <control>
-                                            <create name="add_line_control" string="Add a line"/>
-                                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
-                                            <create name="add_note_control" string="Add a note" context="{'default_display_type': 'line_note'}"/>
-                                            <button name="action_add_from_catalog" string="Catalog" type="object" class="btn-link" context="{'order_id': parent.id}"/>
+                                            <create name="add_line_control" string="Add a line" data-hotkey="l"/>
+                                            <create name="add_section_control" string="Add a section" data-hotkey="shift+h" context="{'default_display_type': 'line_section'}"/>
+                                            <create name="add_note_control" string="Add a note" data-hotkey="shift+n" context="{'default_display_type': 'line_note'}"/>
+                                            <button name="action_add_from_catalog" string="Catalog" data-hotkey="shift+k" type="object" class="btn-link" context="{'order_id': parent.id}"/>
                                         </control>
 
                                         <!-- Displayed fields -->
@@ -1556,6 +1556,12 @@
                                                widget="many2one_bank"
                                                context="{'default_partner_id': bank_partner_id}"
                                                domain="[('partner_id.ref_company_ids', 'parent_of', company_id)]"
+                                               invisible="move_type != 'out_invoice'"
+                                               readonly="is_move_sent and state != 'draft'"/>
+                                        <field name="partner_bank_id"
+                                               context="{'default_partner_id': bank_partner_id, 'display_account_trust': True}"
+                                               domain="[('partner_id', '=', bank_partner_id)]"
+                                               invisible="move_type != 'out_refund'"
                                                readonly="is_move_sent and state != 'draft'"/>
                                         <field name="payment_reference"
                                             invisible="move_type not in ('out_invoice', 'out_refund')"

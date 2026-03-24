@@ -438,46 +438,6 @@ test(`[Offline] save a form view offline (autosave when leaving)`, async () => {
     await expect.waitForSteps(["web_save"]);
 });
 
-test(`[Offline] open form with offline changes`, async () => {
-    Partner._views = {
-        form: `<form><field name="foo"/></form>`,
-    };
-    defineActions([
-        {
-            id: 1,
-            name: "Partner",
-            res_model: "partner",
-            views: [[false, "form"]],
-        },
-    ]);
-
-    await mountWithCleanup(WebClient);
-    // Open record 2, blip is the value stored
-    await getService("action").doAction(1, { props: { resId: 2 } });
-    expect(`.o_field_widget[name=foo] input`).toHaveValue("blip");
-
-    // Open record 2, with the offline modifications (blip is change to Harlod Bohy)
-    getService("offline").scheduleORM(
-        "lead",
-        "web_save",
-        [[]],
-        {},
-        {
-            id: "881ba65a",
-            extras: {
-                actionId: 33,
-                actionName: "CRM",
-                viewType: "form",
-                changes: { foo: "Harold Bohy" },
-                displayName: "Display Name",
-                timeStamp: 30,
-            },
-        }
-    );
-    await getService("action").doAction(1, { props: { offlineId: "881ba65a", resId: 2 } });
-    expect(`.o_field_widget[name=foo] input`).toHaveValue("Harold Bohy");
-});
-
 test(`form rendering with class and style attributes`, async () => {
     await mountView({
         resModel: "partner",
@@ -4257,6 +4217,106 @@ test(`archive/unarchive a record`, async () => {
     ]);
 });
 
+test(`[Offline] archiving a record`, async () => {
+    onRpc("action_archive", () => expect.step(`action_archive`));
+    // add active field on partner model to have archive option
+    Partner._fields.active = fields.Boolean();
+    Partner._views = {
+        "form,false": `<form><field name="active"/><field name="foo"/></form>`,
+        "search,false": `<search/>`,
+    };
+    defineActions([
+        {
+            id: 1,
+            name: "Action 1",
+            res_model: "partner",
+            res_id: 1,
+            views: [[false, "form"]],
+            search_view_id: [false, "search"],
+        },
+    ]);
+
+    const setOffline = mockOffline();
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+
+    expect(`.o_breadcrumb`).toHaveText("first record");
+    await setOffline(true);
+    expect(getService("offline").offline).toBe(true);
+
+    // open action menu and delete
+    await toggleActionMenu();
+    await toggleMenuItem("Archive");
+    expect(`.modal`).toHaveCount(1);
+
+    await contains(`.modal-footer .btn-primary`).click();
+
+    // The edited record will be saved the next time we are online
+    await contains(`.o_menu_systray .o_nav_entry .fa-chain-broken`).click();
+    expect(queryAllTexts`.o-dropdown--menu .o_offline_systray_content div`).toEqual([
+        "ACTION 1",
+        "first record",
+        "Archived",
+        "",
+    ]);
+
+    expect.verifySteps([]);
+
+    await setOffline(false);
+
+    expect(getService("offline").offline).toBe(false);
+    await expect.waitForSteps(["action_archive"]);
+});
+
+test(`[Offline] Unarchiving a record`, async () => {
+    onRpc("action_unarchive", () => expect.step(`action_unarchive`));
+    // add active field on partner model to have archive option
+    Partner._fields.active = fields.Boolean();
+    Partner._records[0].active = false;
+    Partner._views = {
+        "form,false": `<form><field name="active"/><field name="foo"/></form>`,
+        "search,false": `<search/>`,
+    };
+    defineActions([
+        {
+            id: 1,
+            name: "Action 1",
+            res_model: "partner",
+            res_id: 1,
+            views: [[false, "form"]],
+            search_view_id: [false, "search"],
+        },
+    ]);
+
+    const setOffline = mockOffline();
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+
+    expect(`.o_breadcrumb`).toHaveText("first record");
+    await setOffline(true);
+    expect(getService("offline").offline).toBe(true);
+
+    // open action menu and delete
+    await toggleActionMenu();
+    await toggleMenuItem("Unarchive");
+
+    // The edited record will be saved the next time we are online
+    await contains(`.o_menu_systray .o_nav_entry .fa-chain-broken`).click();
+    expect(queryAllTexts`.o-dropdown--menu .o_offline_systray_content div`).toEqual([
+        "ACTION 1",
+        "first record",
+        "Unarchived",
+        "",
+    ]);
+
+    expect.verifySteps([]);
+
+    await setOffline(false);
+
+    expect(getService("offline").offline).toBe(false);
+    await expect.waitForSteps(["action_unarchive"]);
+});
+
 test(`apply custom standard action menu (archive)`, async () => {
     // add active field on partner model to have archive option
     Partner._fields.active = fields.Boolean();
@@ -6248,6 +6308,55 @@ test(`deleting a record`, async () => {
     await contains(`.modal-footer button.btn-danger`).click();
     expect(`.o_breadcrumb`).toHaveText("second record");
     expect(`.o_field_widget[name=foo] input`).toHaveValue("blip");
+});
+
+test(`[Offline] deleting a record`, async () => {
+    onRpc("unlink", () => expect.step(`unlink`));
+    Partner._views = {
+        "form,false": `<form><field name="foo"/></form>`,
+        "search,false": `<search/>`,
+    };
+    defineActions([
+        {
+            id: 1,
+            name: "Action 1",
+            res_model: "partner",
+            res_id: 1,
+            views: [[false, "form"]],
+            search_view_id: [false, "search"],
+        },
+    ]);
+
+    const setOffline = mockOffline();
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+
+    expect(`.o_breadcrumb`).toHaveText("first record");
+    await setOffline(true);
+    expect(getService("offline").offline).toBe(true);
+
+    // open action menu and delete
+    await toggleActionMenu();
+    await toggleMenuItem("Delete");
+    expect(`.modal`).toHaveCount(1);
+
+    await contains(`.modal-footer button.btn-danger`).click();
+
+    // The edited record will be saved the next time we are online
+    await contains(`.o_menu_systray .o_nav_entry .fa-chain-broken`).click();
+    expect(queryAllTexts`.o-dropdown--menu .o_offline_systray_content div`).toEqual([
+        "ACTION 1",
+        "first record",
+        "Deleted",
+        "",
+    ]);
+
+    expect.verifySteps([]);
+
+    await setOffline(false);
+
+    expect(getService("offline").offline).toBe(false);
+    await expect.waitForSteps(["unlink"]);
 });
 
 test.tags("desktop");
@@ -10004,7 +10113,7 @@ test("support header button as widgets in submenu on form statusbar on mobile", 
                 <t t-set-slot="toggler">
                     <button>Upload Test</button>
                 </t>
-            </FileUploader>`
+            </FileUploader>`;
         static components = { FileUploader };
 
         onUploaded(ev) {

@@ -144,6 +144,7 @@ class HrLeave(models.Model):
         ]""",
         tracking=True)
     work_entry_type_requires_allocation = fields.Boolean(related="work_entry_type_id.requires_allocation")
+    work_entry_type_filter_domain = fields.Json(compute="_compute_work_entry_type_filter_domain")
     color = fields.Integer("Color", related='work_entry_type_id.color')
     validation_type = fields.Selection(string='Validation Type', related='work_entry_type_id.leave_validation_type', readonly=False)
     # HR data
@@ -492,6 +493,26 @@ class HrLeave(models.Model):
                     holiday.work_entry_type_id = no_allocation_required_work_entry_types[0] if no_allocation_required_work_entry_types else None
                 else:
                     holiday.work_entry_type_id = valid_types[0]
+
+    @api.depends('company_id', 'company_id.country_id')
+    def _compute_work_entry_type_filter_domain(self):
+        for record in self:
+            country_id = record.company_id.country_id.id
+            has_system_types = False
+            if country_id:
+                has_system_types = self.env['hr.work.entry.type'].sudo().search_count([
+                    ('country_id', '=', country_id),
+                    ('create_uid', '=', 1)
+                ]) > 0
+            if not country_id:
+                domain = [('country_id', '=', False)]
+            elif has_system_types:
+                domain = [('country_id', '=', country_id)]
+            else:
+                domain = ['|', ('country_id', '=', False), ('country_id', '=', country_id)]
+
+        matching_types = self.env['hr.work.entry.type'].sudo().search(domain)
+        record.work_entry_type_filter_domain = matching_types.ids
 
     @api.depends('employee_id')
     def _compute_department_id(self):
@@ -961,9 +982,11 @@ class HrLeave(models.Model):
             if any(leave.state == 'cancel' for leave in self):
                 raise UserError(_('Only a manager can modify a canceled leave.'))
 
-        # Unlink existing resource.calendar.leaves for validated time off
-        if 'state' in values and values['state'] != 'validate':
-            validated_leaves = self.filtered(lambda l: l.state == 'validate')
+        # If a leave changes state from validated or if the dates of a validated leave change
+        # unlink the corresponding resource calendar leave
+        date_fields = {'date_from', 'date_to', 'request_date_from', 'request_date_to'}
+        validated_leaves = self.filtered(lambda l: l.state == 'validate')
+        if validated_leaves and (('state' in values and values['state'] != 'validate') or date_fields.intersection(values)):
             validated_leaves._remove_resource_leave()
 
         employee_id = values.get('employee_id', False)
@@ -1615,11 +1638,11 @@ class HrLeave(models.Model):
                     subject=_('Your Time Off'),
                 )
 
-    def _track_subtype(self, init_values):
-        if 'state' in init_values and self.state == 'validate':
+    def _track_log_get_default_subtype(self, track_init_values):
+        if 'state' in track_init_values and self.state == 'validate':
             leave_notif_subtype = self.work_entry_type_id.leave_notif_subtype_id
             return leave_notif_subtype or self.env.ref('hr_holidays.mt_leave')
-        return super()._track_subtype(init_values)
+        return super()._track_log_get_default_subtype(track_init_values)
 
     def message_subscribe(self, partner_ids=None, subtype_ids=None):
         # due to record rule can not allow to add follower and mention on validated leave so subscribe through sudo
