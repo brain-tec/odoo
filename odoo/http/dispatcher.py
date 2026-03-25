@@ -125,7 +125,7 @@ class Dispatcher(ABC):
         if cors and self.request.httprequest.method == 'OPTIONS':
             set_header('Access-Control-Max-Age', str(CORS_MAX_AGE))
             set_header('Access-Control-Allow-Headers',
-                       'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+                'Origin, X-Requested-With, Content-Type, Accept, Authorization, Range')
             abort(Response(status=204))
 
         if 'max_content_length' in routing:
@@ -148,8 +148,8 @@ class Dispatcher(ABC):
         Manipulate the HTTP response to inject various headers, also
         save the session when it is dirty.
         """
-        self.request._save_session()
-        self.request._inject_future_response(response)
+        save_session(self.request)
+        response.headers.extend(self.request.future_response.headers)
         root.set_csp(response)
 
     @abstractmethod
@@ -413,5 +413,6 @@ from .session import (
     SessionExpiredException,
     get_session_max_inactivity,
     logout,
+    save_session,
     session_store,
 )

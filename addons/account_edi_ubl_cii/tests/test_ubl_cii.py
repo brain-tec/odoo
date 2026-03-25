@@ -915,6 +915,7 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
         car = self.env['fleet.vehicle'].create({
             'model_id': model.id,
             'vin_sn': 'ABCDEF012345GHJKL',
+            'license_plate': '1-ABC-123',
         })
         car2 = self.env['fleet.vehicle'].create({
             'model_id': model.id,
@@ -944,9 +945,12 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
         xml_attachment_line = create_attachment("bis3_bill_vehicle_line.xml")
         bill_line = self._import_as_attachment_on(attachment=xml_attachment_line)
         self.assertRecordValues(bill_line.invoice_line_ids, [
-            {'vehicle_id': car2.id},
-            {'vehicle_id': car3.id},
-            {'vehicle_id': False},
+            {'vehicle_id': car.id},  # match VIN in AdditionalItemProperty/Value where AdditionalItemProperty/Name == 'SerialNumber'
+            {'vehicle_id': car2.id},  # match VIN in AdditionalItemProperty/Value where AdditionalItemProperty/Name == 'VIN'
+            {'vehicle_id': car3.id},  # search VIN in Item/Description
+            {'vehicle_id': car.id},  # search License Plate in Item/Description
+            {'vehicle_id': car.id},  # search combined License Plate and VIN in Item/Description
+            {'vehicle_id': False},  # Double vin -> no vehicle linked
         ])
 
     def test_generate_pdf_when_xml_does_not_provide_one(self):
@@ -1077,8 +1081,6 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
             ("x_studio_peppol_accounting_cost", "char"),
             ("x_studio_peppol_project_reference_id", "char"),
             ("x_studio_peppol_order_reference_id", "char"),
-            ("x_studio_peppol_invoice_period_start_date", "date"),
-            ("x_studio_peppol_invoice_period_end_date", "date"),
         ]
 
         self.env["ir.model.fields"].create([{
@@ -1128,8 +1130,6 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
             'x_studio_peppol_accounting_cost': "88.5",
             'x_studio_peppol_project_reference_id': "project-1234",
             'x_studio_peppol_order_reference_id': "order-1234",
-            'x_studio_peppol_invoice_period_start_date': "2028-01-01",
-            'x_studio_peppol_invoice_period_end_date': "2028-02-01",
         })
 
         invoice.action_post()
@@ -1155,12 +1155,6 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
         order_reference_id = xml_tree.find('.//cac:OrderReference/cbc:ID', self.ubl_namespaces)
         self.assertEqual(order_reference_id.text, 'order-1234')
 
-        invoice_period_start_date = xml_tree.find('.//cac:InvoicePeriod/cbc:StartDate', self.ubl_namespaces)
-        self.assertEqual(invoice_period_start_date.text, '2028-01-01')
-
-        invoice_period_end_date = xml_tree.find('.//cac:InvoicePeriod/cbc:EndDate', self.ubl_namespaces)
-        self.assertEqual(invoice_period_end_date.text, '2028-02-01')
-
         order_line_reference_id = xml_tree.findall('.//cac:InvoiceLine/cac:OrderLineReference/cbc:LineID', self.ubl_namespaces)
         self.assertEqual(order_line_reference_id[0].text, 'order_line1-1234')
         self.assertEqual(order_line_reference_id[1].text, 'order_line2-1234')
@@ -1179,8 +1173,6 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
             ("x_studio_peppol_despatch_document_reference_id", "char"),
             ("x_studio_peppol_accounting_cost", "char"),
             ("x_studio_peppol_order_reference_id", "char"),
-            ("x_studio_peppol_invoice_period_start_date", "date"),
-            ("x_studio_peppol_invoice_period_end_date", "date"),
         ]
 
         self.env["ir.model.fields"].create([{
@@ -1228,8 +1220,6 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
             'x_studio_peppol_despatch_document_reference_id': "despatch-1234",
             'x_studio_peppol_accounting_cost': "88.5",
             'x_studio_peppol_order_reference_id': "order-1234",
-            'x_studio_peppol_invoice_period_start_date': "2028-01-01",
-            'x_studio_peppol_invoice_period_end_date': "2028-02-01",
         })
 
         credit_note.action_post()
@@ -1251,12 +1241,6 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
 
         order_reference_id = xml_tree.find('.//cac:OrderReference/cbc:ID', self.ubl_namespaces)
         self.assertEqual(order_reference_id.text, 'order-1234')
-
-        invoice_period_start_date = xml_tree.find('.//cac:InvoicePeriod/cbc:StartDate', self.ubl_namespaces)
-        self.assertEqual(invoice_period_start_date.text, '2028-01-01')
-
-        invoice_period_end_date = xml_tree.find('.//cac:InvoicePeriod/cbc:EndDate', self.ubl_namespaces)
-        self.assertEqual(invoice_period_end_date.text, '2028-02-01')
 
         order_line_reference_id = xml_tree.findall('.//cac:CreditNoteLine/cac:OrderLineReference/cbc:LineID', self.ubl_namespaces)
         self.assertEqual(order_line_reference_id[0].text, 'order_line1-1234')

@@ -9,8 +9,7 @@ import threading
 import time
 import typing
 import warnings
-from contextlib import contextmanager, nullcontext
-from datetime import datetime
+from contextlib import contextmanager
 from urllib.parse import urlsplit
 
 import babel.core
@@ -19,28 +18,24 @@ from werkzeug.datastructures import (
     ImmutableMultiDict,
     MultiDict,
 )
-from werkzeug.exceptions import (
-    Forbidden,
-    NotFound,
-    UnsupportedMediaType,
-)
+from werkzeug.exceptions import NotFound
 from werkzeug.local import LocalStack
 from werkzeug.urls import URL, url_encode, url_parse
 from werkzeug.utils import redirect
 
-import odoo
-from odoo.tools import consteq, json_default, profiler
+from odoo.tools import consteq, json_default
 
 if typing.TYPE_CHECKING:
-    from collections.abc import Mapping, Iterable
+    from collections.abc import Iterable, Mapping
+
     import werkzeug.routing
 
     from odoo.api import Environment
     from odoo.models import BaseModel
     from odoo.modules.registry import Registry
+
     from .response import Response
     from .routing_map import Endpoint
-    from .session import Session
 
     HeaderType = Mapping[str, str | Iterable[str]] | Iterable[tuple[str, str]]
 
@@ -88,46 +83,6 @@ class Request:
         self.env: Environment | None = None
         # set by the Dispatcher
         self.params: Mapping | None = None
-
-    def _post_init(self) -> None:
-        self.session, self.db = self._get_session_and_dbname()
-        self._post_init = None
-
-    def _get_session_and_dbname(self) -> tuple[Session, str | None]:
-        sid = self.httprequest._session_id__
-        session = session_store().get(sid, keep_sid=True)
-
-        for key, val in get_default_session().items():
-            session.setdefault(key, val)
-        if not session.context.get('lang'):
-            session.context['lang'] = self.default_lang()
-
-        dbname = None
-        host = self.httprequest.environ['HTTP_HOST']
-        header_dbname = self.httprequest.headers.get('X-Odoo-Database')
-        if session.db and router.db_filter([session.db], host=host):
-            dbname = session.db
-            if header_dbname and header_dbname != dbname:
-                e = ("Cannot use both the session_id cookie and the "
-                     "x-odoo-database header.")
-                raise Forbidden(e)
-        elif header_dbname:
-            session.can_save = False  # stateless
-            if router.db_filter([header_dbname], host=host):
-                dbname = header_dbname
-        else:
-            all_dbs = router.db_list(force=True, host=host)
-            if len(all_dbs) == 1:
-                dbname = all_dbs[0]  # monodb
-
-        if session.db != dbname:
-            if session.db:
-                _logger.warning("Logged into database %r, but dbfilter rejects it; logging session out.", session.db)
-                logout(session, keep_db=False)
-            session.db = dbname
-
-        session.is_dirty = False
-        return session, dbname
 
     # =====================================================
     # Getters and setters
@@ -291,43 +246,6 @@ class Request:
     def get_json_data(self):
         return json.loads(self.httprequest.get_data(as_text=True))
 
-    def _get_profiler_context_manager(self):
-        """
-        Get a profiler when the profiling is enabled and the requested
-        URL is profile-safe. Otherwise, get a context-manager that does
-        nothing.
-        """
-        if self.session.get('profile_session') and self.db:
-            if self.session['profile_expiration'] < str(datetime.now()):
-                # avoid having session profiling for too long if user forgets to disable profiling
-                self.session['profile_session'] = None
-                _logger.warning("Profiling expiration reached, disabling profiling")
-            elif 'set_profiling' in self.httprequest.path:
-                _logger.debug("Profiling disabled on set_profiling route")
-            elif self.httprequest.path.startswith('/websocket'):
-                _logger.debug("Profiling disabled for websocket")
-            elif odoo.evented:
-                # only longpolling should be in a evented server, but this is an additional safety
-                _logger.debug("Profiling disabled for evented server")
-            else:
-                try:
-                    return profiler.Profiler(
-                        db=self.db,
-                        description=self.httprequest.full_path,
-                        profile_session=self.session['profile_session'],
-                        collectors=self.session['profile_collectors'],
-                        params=self.session['profile_params'],
-                    )._get_cm_proxy()
-                except Exception:
-                    _logger.exception("Failure during Profiler creation")
-                    self.session['profile_session'] = None
-
-        return nullcontext()
-
-    def _inject_future_response(self, response: Response):
-        response.headers.extend(self.future_response.headers)
-        return response
-
     def make_response(self,
         data: str,
         headers: HeaderType | None = None,
@@ -445,62 +363,6 @@ class Request:
         threading.current_thread().url = httprequest.url
         self.httprequest = httprequest
 
-    def _save_session(self, env: Environment | None = None):
-        """
-        Save a modified session on disk.
-
-        :param env: an environment to compute the session token.
-            MUST be left ``None`` (in which case it uses the request's
-            env) UNLESS the database changed.
-        """
-        sess = self.session
-        if env is None:
-            env = self.env
-
-        if not sess.can_save:
-            return
-
-        if sess.should_rotate:
-            session_store().rotate(sess, env)  # it saves
-        elif (
-            sess.uid
-            and time.time() >= sess['create_time'] + SESSION_ROTATION_INTERVAL
-            and request.httprequest.path not in SESSION_ROTATION_EXCLUDED_PATHS
-        ):
-            session_store().rotate(sess, env, soft=True)
-        elif sess.is_dirty:
-            session_store().save(sess)
-
-        cookie_sid = self.cookies.get('session_id')
-        if sess.is_dirty or cookie_sid != sess.sid:
-            self.future_response.set_cookie(
-                'session_id',
-                sess.sid,
-                max_age=get_session_max_inactivity(env),
-                httponly=True
-            )
-
-    def _set_request_dispatcher(self, rule: werkzeug.routing.Rule):
-        endpoint: Endpoint = rule.endpoint  # type: ignore
-        routing = endpoint.routing
-        dispatcher_cls = _dispatchers[routing['type']]
-        if (not is_cors_preflight(self, endpoint)
-            and not dispatcher_cls.is_compatible_with(self)):
-            compatible_dispatchers = [
-                disp.routing_type
-                for disp in _dispatchers.values()
-                if disp.is_compatible_with(self)
-            ]
-            e = (f"Request inferred type is compatible with {compatible_dispatchers} "
-                 f"but {routing['routes'][0]!r} is type={routing['type']!r}.\n\n"
-                 "Please verify the Content-Type request header and try again.")
-            # werkzeug doesn't let us add headers to UnsupportedMediaType
-            # so use the following (ugly) to still achieve what we want
-            res = UnsupportedMediaType(e).get_response()
-            res.headers['Accept'] = ', '.join(dispatcher_cls.mimetypes)
-            raise UnsupportedMediaType(response=res)
-        self.dispatcher = dispatcher_cls(self)
-
 
 # ruff: noqa: E402
 if typing.TYPE_CHECKING:
@@ -508,19 +370,7 @@ if typing.TYPE_CHECKING:
     from ._facade import DEFAULT_MAX_CONTENT_LENGTH
 else:
     from ._facade import DEFAULT_MAX_CONTENT_LENGTH, HTTPRequest  # noqa: F401
-from .dispatcher import HttpDispatcher, _dispatchers
+from .dispatcher import HttpDispatcher
 from .geoip import GeoIP
 from .response import FutureResponse, Response
-from .session import (
-    DEFAULT_LANG,
-    SESSION_ROTATION_EXCLUDED_PATHS,
-    SESSION_ROTATION_INTERVAL,
-    STORED_SESSION_BYTES,
-    get_default_session,
-    get_session_max_inactivity,
-    logout,
-    session_store,
-)
-
-# ruff: noqa: I001
-from . import router  # db_list, db_filter
+from .session import DEFAULT_LANG, STORED_SESSION_BYTES, get_default_session

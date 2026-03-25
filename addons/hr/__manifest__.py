@@ -60,6 +60,8 @@
             'hr/static/src/scss/variables.scss',
         ],
         'web.assets_backend': [
+            "hr/static/src/core/common/**/*",
+            "hr/static/src/core/web/**/*",
             'hr/static/src/**/*',
             ('remove', 'hr/static/src/views/hr_employee_hierarchy/*'),
         ],
@@ -68,6 +70,10 @@
         ],
         'im_livechat.assets_embed_core': [
             'hr/static/src/core/common/**/*',
+        ],
+        'im_livechat.embed_assets_unit_tests_setup': [
+            "hr/static/tests/hr_test_helpers.js",
+            "hr/static/tests/mock_server/**/*",
         ],
         'mail.assets_public': [
             'hr/static/src/core/common/**/*',

@@ -272,6 +272,8 @@ class HrEmployee(models.Model):
     message_main_attachment_id = fields.Many2one(groups="hr.group_hr_user")
     id_card = fields.Binary(string="ID Card Copy", groups="hr.group_hr_user")
     driving_license = fields.Binary(string="Driving License", groups="hr.group_hr_user")
+    id_card_name = fields.Char(groups="hr.group_hr_user")
+    driving_license_name = fields.Char(groups="hr.group_hr_user")
     currency_id = fields.Many2one('res.currency', related='company_id.currency_id', readonly=True, groups="hr.group_hr_user")
     related_partners_count = fields.Integer(compute="_compute_related_partners_count", groups="hr.group_hr_user")
     # properties
@@ -2132,14 +2134,8 @@ class HrEmployee(models.Model):
 
     def _store_avatar_card_fields(self, res: Store.FieldList):
         res.one("department_id", ["name"])
-        res.one(
-            "user_id",
-            lambda res: (
-                res.attr("share"),
-                res.one("partner_id", ["tz"]),
-                res.from_method("_store_im_status_fields"),
-            ),
-        )
+        res.attr("resource_id", "_store_avatar_card_fields")
+        res.one("user_id", "_store_avatar_card_fields")
         res.one("work_location_id", ["location_type", "name"])
         res.extend(["company_id", "hr_icon_display", "job_title", "name", "show_hr_icon_display"])
         res.extend(["work_email", "work_phone"])
