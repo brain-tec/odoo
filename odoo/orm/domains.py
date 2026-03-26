@@ -282,16 +282,19 @@ class Domain:
     @staticmethod
     def custom(
         *,
-        to_sql: Callable[[TableSQL], SQL],
+        to_sql: Callable[[TableSQL], SQL] | None = None,
         predicate: Callable[[BaseModel], bool] | None = None,
+        optimize: Callable[[DomainCustom, BaseModel], Domain] | None = None,
     ) -> DomainCustom:
         """Create a custom domain.
 
         :param to_sql: callable(model, alias, query) that returns the SQL
+        :param optimize: callable(custom_domain, model) that runs for full
+                         optimization in order to translate to a normal domain
         :param predicate: callable(record) that checks whether a record is kept
                           when filtering
         """
-        return DomainCustom(to_sql, predicate)
+        return DomainCustom(to_sql, predicate, optimize)
 
     @staticmethod
     def AND(items: Iterable) -> Domain:
@@ -389,6 +392,17 @@ class Domain:
 
     def is_false(self) -> bool:
         """Return whether self is FALSE"""
+        return False
+
+    def is_condition(self,
+        field_expr: str = '',
+        operator: str | tuple[str] = (),
+        value: type | tuple[type] = (),
+    ) -> bool:
+        """Return whether this domain is a simple condition, and whether it
+        matches the ``field_expr`` (if given), the ``operator`` (if given), and
+        the ``value`` type (if given).
+        """
         return False
 
     def iter_conditions(self) -> Iterable[DomainCondition]:
@@ -752,15 +766,17 @@ class DomainOr(DomainNary):
 
 class DomainCustom(Domain):
     """Domain condition that generates directly SQL and possibly a ``filtered`` predicate."""
-    __slots__ = ('_filtered', '_sql')
+    __slots__ = ('_filtered', '_optimize_func', '_sql')
 
     _filtered: Callable[[BaseModel], bool] | None
-    _sql: Callable[[BaseModel, str, Query], SQL]
+    _optimize_func: Callable[[DomainCustom, BaseModel], Domain] | None
+    _sql: Callable[[BaseModel, str, Query], SQL] | None
 
     def __new__(
         cls,
-        sql: Callable[[TableSQL], SQL],
+        sql: Callable[[TableSQL], SQL] | None = None,
         filtered: Callable[[BaseModel], bool] | None = None,
+        optimize_func: Callable[[DomainCustom, BaseModel], Domain] | None = None,
     ):
         """Create a new domain.
 
@@ -768,11 +784,21 @@ class DomainCustom(Domain):
                        which is used to generate the query for searching
         :param predicate: callable(record) that checks whether a record is kept
                           when filtering (``Model.filtered``)
+        :param optimize_func: callable(custom_domain, model) when set this
+                              domain is at dynamic level and can be fully
+                              optimized by that function
         """
+        assert sql or optimize_func, "Need optimization or sql function"
         self = object.__new__(cls)
         object.__setattr__(self, '_sql', sql)
         object.__setattr__(self, '_filtered', filtered)
-        object.__setattr__(self, '_opt_level', OptimizationLevel.FULL)
+        object.__setattr__(self, '_optimize_func', optimize_func)
+        object.__setattr__(self, '_opt_level', OptimizationLevel.FULL if optimize_func is None else OptimizationLevel.DYNAMIC_VALUES)
+        return self
+
+    def _optimize_step(self, model, level):
+        if level == OptimizationLevel.FULL and self._optimize_func:
+            return self._optimize_func(self, model)
         return self
 
     def _as_predicate(self, records):
@@ -790,10 +816,11 @@ class DomainCustom(Domain):
             isinstance(other, DomainCustom)
             and self._sql == other._sql
             and self._filtered == other._filtered
+            and self._optimize_func == other._optimize_func
         )
 
     def __hash__(self):
-        return hash(self._sql)
+        return hash(self._sql or self._optimize_func)
 
     def __iter__(self):
         yield self
@@ -802,6 +829,8 @@ class DomainCustom(Domain):
         return object.__repr__(self)
 
     def _to_sql(self, table: TableSQL) -> SQL:
+        assert self._sql is not None, \
+            f"Must fully optimize before generating the query {self}"
         return self._sql(table)
 
 
@@ -905,6 +934,19 @@ class DomainCondition(Domain):
 
     def __hash__(self):
         return hash(self.field_expr) ^ hash(self.operator) ^ hash(self.value)
+
+    def is_condition(self,
+        field_expr: str = '',
+        operator: str | tuple[str] = (),
+        value: type | tuple[type] = (),
+    ) -> bool:
+        return (
+            not field_expr or self.field_expr == field_expr
+        ) and (
+            not operator or self.operator in ((operator,) if isinstance(operator, str) else operator)
+        ) and (
+            not value or isinstance(self.value, value)
+        )
 
     def iter_conditions(self):
         yield self
@@ -1373,13 +1415,29 @@ def _optimize_any_domain_at_level(level: OptimizationLevel, condition, model):
     domain = condition.value
     if not isinstance(domain, Domain):
         return condition
+
     field = condition._field(model)
     if not field.relational:
         condition._raise("Cannot use 'any' with non-relational fields")
+
     try:
         comodel = model.env[field.comodel_name]
     except KeyError:
         condition._raise("Cannot determine the comodel relation")
+
+    if isinstance(search_domain := model.env.context.get('search_domain'), Domain):
+        # model with search_domain like (field, 'any', comodel_domain)
+        # => comodel with comodel_domain
+        comodel_domain = Domain.OR(
+            c.value
+            for c in search_domain.iter_conditions()
+            if c.is_condition(condition.field_expr, value=Domain)
+        )
+        if comodel_domain.is_false():
+            # we don't know the condition, accept all
+            comodel_domain = Domain.TRUE
+        comodel = comodel.with_context(search_domain=comodel_domain)
+
     domain = domain._optimize(comodel, level)
     # const if the domain is empty, the result is a constant
     # if the domain is True, we keep it as is
@@ -1650,6 +1708,36 @@ def _optimize_type_datetime_relative(condition, model):
     ):
         return condition
     value, _ = _value_to_datetime(condition.value, model.env)
+    return DomainCondition(condition.field_expr, operator, value)
+
+
+@field_type_optimization(['properties'], level=OptimizationLevel.DYNAMIC_VALUES)
+def _optimize_properties_date_datetime(condition, model):
+    operator = condition.operator
+    if (
+        operator not in ('in', 'not in', '>', '<', '<=', '>=')
+        or condition.field_expr.count('.') != 1
+        or not isinstance(condition.value, (str, OrderedSet))
+    ):
+        return condition
+    definition = model.get_property_definition(condition.field_expr)
+    property_type = definition.get("type")
+
+    if property_type == 'date':
+        value = _value_to_date(condition.value, model.env)
+    elif property_type == 'datetime':
+        value, _ = _value_to_datetime(condition.value, model.env)
+    else:
+        return condition
+    # we need to serialize the value as a string to be able to use with properties
+    if isinstance(value, COLLECTION_TYPES):
+        value = OrderedSet(
+            str(item) if isinstance(item, (date, datetime)) else item
+            for item in value
+        )
+    elif isinstance(value, (date, datetime)):
+        value = str(value)
+
     return DomainCondition(condition.field_expr, operator, value)
 
 

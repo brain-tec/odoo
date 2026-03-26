@@ -164,11 +164,12 @@ class TestHttpStatic(TestHttpStaticCommon):
             ('glyph_inline', False),
             ('glyph_related', True),
             ('glyph_compute', False),
+            ('glyph_binary_inline', False),
         ):
             with self.subTest(x_sendfile=False):
                 self.assertDownloadGizeh(
                     f'/web/content/test_http.earth?field={field}',
-                    assert_filename='Earth.png'
+                    assert_filename='Earth.png',
                 )
 
             if is_attachment:
@@ -177,7 +178,7 @@ class TestHttpStatic(TestHttpStaticCommon):
                     self.assertDownloadGizeh(
                         f'/web/content/test_http.earth?field={field}',
                         x_sendfile=is_attachment and attachment_path,
-                        assert_filename='Earth.png'
+                        assert_filename='Earth.png',
                     )
 
     def test_static10_filename(self):
@@ -450,6 +451,13 @@ class TestHttpStatic(TestHttpStaticCommon):
                     e = "wkhtmltopdf only works if it is allowed to cache everything"
                     raise AssertionError(e) from exc
                 self.assertEqual(res.content, self.gizeh_data)
+
+    def test_static24_only_one_date_header(self):
+        res = self.assertDownloadPlaceholder('/web/image')
+        # requests merge multiple headers with a same key together, it
+        # concatenates the values, hence .count(' GMT')
+        self.assertEqual(res.headers['Date'].count(' GMT'), 1,
+            "There must be only 1 Date header, not 2")
 
 
 @tagged('post_install', '-at_install')

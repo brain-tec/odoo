@@ -70,8 +70,8 @@ class IrRule(models.Model):
                     domain = safe_eval(rule.domain_force, eval_context)
                     model = self.env[rule.model_id.model].sudo()
                     Domain(domain).validate(model)
-                except Exception as e:
-                    raise ValidationError(_('Invalid domain: %s', e))
+                except Exception as e:  # noqa: BLE001
+                    raise ValidationError(_('Invalid domain %(domain)s: %(error)s', domain=rule.domain_force, error=e))
 
     def _compute_domain_keys(self):
         """ Return the list of context keys to use for caching ``_compute_domain``. """
@@ -134,19 +134,20 @@ class IrRule(models.Model):
     @api.model
     @tools.conditional(
         'xml' not in config['dev_mode'],
-        tools.ormcache('self.env.uid', 'self.env.su', 'model_name', 'mode',
+        tools.ormcache('self.env.uid', 'self.env.su', 'model_name', 'mode', 'include_inherits',
                        'tuple(self._compute_domain_context_values())'),
     )
-    def _compute_domain(self, model_name: str, mode: str = "read") -> Domain:
+    def _compute_domain(self, model_name: str, mode: str = "read", *, include_inherits=True) -> Domain:
         model = self.env[model_name]
 
         # add rules for parent models
         global_domains: list[Domain] = []
-        for parent_model_name, parent_field_name in model._inherits.items():
-            if not model._fields[parent_field_name].store:
-                continue
-            if domain := self._compute_domain(parent_model_name, mode):
-                global_domains.append(Domain(parent_field_name, 'any', domain))
+        if include_inherits:
+            for parent_model_name, parent_field_name in model._inherits.items():
+                if not model._fields[parent_field_name].store:
+                    continue
+                if domain := self._compute_domain(parent_model_name, mode):
+                    global_domains.append(Domain(parent_field_name, 'any', domain))
 
         rules = self._get_rules(model_name, mode=mode)
         if not rules:
