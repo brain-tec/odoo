@@ -307,6 +307,38 @@ class TestUblExportBis3BE(TestUblBis3Common, TestUblCiiBECommon):
         self._generate_invoice_ubl_file(invoice)
         self._assert_invoice_ubl_file(invoice, 'test_invoice_multiple_fixed_tax_emptying_turned_as_extra_invoice_lines')
 
+    def test_invoice_with_fixed_tax_on_negative_line(self):
+        """ CASE 5: simple invoice with a recupel tax, with one negative line.
+        1) Subtotal (price without taxes): (10+1) * 5 + (10+1) * -3 = 22.00
+        2) Taxes:
+            - recupel = 5 - 3 = 2
+            - VAT = (20 + 2) * 0.21 = 4.62
+        3) Total = 20 + 2 + 4.62 = 26.62
+        """
+        tax_emptying = self.fixed_tax(1.0, name="RECUPEL", include_base_amount=True)
+        tax_21 = self.percent_tax(21.0)
+        invoice = self._create_invoice(
+            partner_id=self.partner_be,
+            invoice_line_ids=[
+                self._prepare_invoice_line(
+                    product_id=self.product_a,
+                    price_unit=10.0,
+                    quantity=5.0,
+                    tax_ids=tax_emptying + tax_21,
+                ),
+                self._prepare_invoice_line(
+                    product_id=self.product_a,
+                    price_unit=10.0,
+                    quantity=-3.0,
+                    tax_ids=tax_emptying + tax_21,
+                ),
+            ],
+            post=True,
+        )
+        self.assertEqual(invoice.amount_total, 26.62)
+        self._generate_invoice_ubl_file(invoice)
+        self._assert_invoice_ubl_file(invoice, 'test_invoice_with_fixed_tax_on_negative_line')
+
     def test_invoice_custom_tax_emptying_turned_as_extra_invoice_lines(self):
         """ Ensure the emptying taxes (a.k.a 'vidange') are turned into extra invoice lines inside the xml. """
         tax_emptying = self.python_tax("quantity * 0.10", name="Vidange")
@@ -799,3 +831,27 @@ class TestUblExportBis3BE(TestUblBis3Common, TestUblCiiBECommon):
             partner=self.partner_nl,
             test_file='test_invoice_customer_party_identifiers_partner_nl_vat_eas_oin_company_registry',
         )
+
+    def test_invoice_BR_E_08_line_extension_amount(self):
+        """ [BR-E-08] In a VAT breakdown (BG-23) where the VAT category code (BT-118) is "Exempt from VAT"
+            the VAT category taxable amount (BT-116) shall equal the sum of Invoice line net amounts (BT-131)
+            minus the sum of Document level allowance amounts (BT-92) plus the sum of Document level charge
+            amounts (BT-99) where the VAT category codes (BT-151, BT-95, BT-102) are "Exempt from VAT".
+        """
+        tax_0 = self.percent_tax(0.0)
+        tax_6 = self.percent_tax(6.0)
+        product_1 = self._create_product(lst_price=90.30, taxes_id=tax_0)
+        product_2 = self._create_product(lst_price=2.54, taxes_id=tax_6)
+        product_3 = self._create_product(lst_price=6.87, taxes_id=tax_6)
+        invoice = self._create_invoice(
+            partner_id=self.partner_be,
+            invoice_line_ids=[
+                self._prepare_invoice_line(product_id=product_1),
+                self._prepare_invoice_line(product_id=product_2, quantity=0.45),
+                self._prepare_invoice_line(product_id=product_3, quantity=0.28),
+            ],
+            post=True,
+        )
+
+        self._generate_invoice_ubl_file(invoice)
+        self._assert_invoice_ubl_file(invoice, 'test_invoice_BR_E_08_line_extension_amount')
