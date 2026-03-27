@@ -480,7 +480,7 @@ class MrpWorkorder(models.Model):
             return (date_start or self.date_start) + timedelta(seconds=duration_in_seconds)
         return workcenter.resource_calendar_id.plan_hours(
             self.duration_expected / 60.0, date_start or self.date_start,
-            compute_leaves=compute_leaves, domain=[('count_as', 'in', ['absence', 'working_time'])]
+            compute_leaves=True, domain=[('count_as', 'in', ['absence', 'working_time'])]
         )
 
     @api.onchange('date_finished')
@@ -604,14 +604,9 @@ class MrpWorkorder(models.Model):
         if not workorders_to_plan:
             return
         # we need to keep the order of the workorder before removing the start date
-        wo_list = list(workorders_to_plan)
         done_wo = set()
-        workorders_to_plan.leave_id.unlink()
-        workorders_to_plan.write({
-            'date_start': False,
-            'date_finished': False,
-        })
-        for wo in wo_list:
+        workorders_to_plan.action_unplan()
+        for wo in workorders_to_plan:
             if wo.id in done_wo:
                 continue
             date_start = max(from_date or datetime.now(), datetime.now())
@@ -630,8 +625,6 @@ class MrpWorkorder(models.Model):
             best_date_finished = datetime.max
             vals = {}
             for workcenter in workcenters:
-                if not alternative and workcenter != wo.workcenter_id:
-                    continue
                 if not workcenter.resource_calendar_id:
                     raise UserError(self.env._('There is no defined calendar on workcenter %s.', workcenter.name))
                 # Compute theoretical duration
@@ -648,10 +641,7 @@ class MrpWorkorder(models.Model):
                     best_date_start = from_date
                     best_date_finished = to_date
                     best_workcenter = workcenter
-                    vals = {
-                        'workcenter_id': workcenter.id,
-                        'duration_expected': duration_expected,
-                    }
+                    best_duration = duration_expected
             # If none of the workcenter are available, raise
             if best_date_finished == datetime.max:
                 raise UserError(_('Impossible to plan the workorder. Please check the workcenter availabilities.'))
@@ -661,6 +651,8 @@ class MrpWorkorder(models.Model):
                 **vals,
                 'date_start': best_date_start,
                 'date_finished': best_date_finished,
+                'workcenter_id': best_workcenter.id,
+                'duration_expected': best_duration,
                 'leave_id': [Command.create({
                     'name': wo.display_name,
                     'calendar_id': best_workcenter.resource_calendar_id.id,
