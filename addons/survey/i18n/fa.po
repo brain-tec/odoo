@@ -9,24 +9,24 @@
 # Hamid Darabi, 2022
 # Faraz Sadri Alamdari <ifarazir@gmail.com>, 2022
 # M.Hossein S.Farvashani <Farvashani@gmail.com>, 2022
-# Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2022
 # Martin Trigaux, 2022
 # Sepehr Khoshnood <sepehr.kho@gmail.com>, 2022
-# Hamed Mohammadi <hamed@dehongi.com>, 2022
 # Mohsen Seifmohammadi, 2022
-# Hanna Kheradroosta, 2022
 # Mohammad Tahmasebi <hit.tah75@gmail.com>, 2022
 # Mohsen Mohammadi <iammohsen.123@gmail.com>, 2022
 # F Hariri <fhari1234@gmail.com>, 2023
 # Abbas Ebadian, 2024
+# Hanna Kheradroosta, 2024
+# Hamed Mohammadi <hamed@dehongi.com>, 2024
+# Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-16 13:18+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:26+0000\n"
-"Last-Translator: Abbas Ebadian, 2024\n"
+"Last-Translator: Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2024\n"
 "Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -193,7 +193,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:survey.certification_report_view_classic
 #: model_terms:ir.ui.view,arch_db:survey.certification_report_view_modern
 msgid "<br/>by"
-msgstr ""
+msgstr "<br/>توسط"
 
 #. module: survey
 #: model:survey.question,description:survey.survey_demo_quiz_p4_q6
@@ -2285,7 +2285,7 @@ msgstr "فقط افراد را دعوت کن"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__is_mail_template_editor
 msgid "Is Editor"
-msgstr ""
+msgstr "ویرایشگر است"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__message_is_follower
@@ -2910,6 +2910,9 @@ msgid ""
 "a placeholder expression that provides the appropriate language, e.g. {{ "
 "object.partner_id.lang }}."
 msgstr ""
+"زبان ترجمه اختیاری (کد ISO) برای انتخاب هنگام ارسال ایمیل. اگر تنظیم نشود، "
+"از نسخه انگلیسی استفاده خواهد شد. این معمولاً باید یک عبارت نگهدارنده باشد "
+"که زبان مناسب را ارائه می دهد، به عنوان مثال. {{ object.partner_id.lang }}."
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_invite__null_value
@@ -3094,7 +3097,7 @@ msgstr "پیش نمایش"
 #. module: survey
 #: model:survey.question,title:survey.vendor_certification_page_2
 msgid "Prices"
-msgstr ""
+msgstr "قیمت ها"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_form
@@ -3111,6 +3114,11 @@ msgstr "محصولات"
 #: model:ir.model.fields,field_description:survey.field_survey_survey__progression_mode
 msgid "Progression Mode"
 msgstr "حالت پیشرفت"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
+msgid "Public share URL"
+msgstr ""
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question_answer__question_id
@@ -3205,7 +3213,7 @@ msgstr "ثبت شده"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_invite__render_model
 msgid "Rendering Model"
-msgstr ""
+msgstr "مدل رندرینگ"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_form
@@ -4334,6 +4342,11 @@ msgstr "شمارنده پیام‌های خوانده‌نشده"
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
 msgid "Upcoming Activities"
 msgstr "فعالیتهای پیش رو"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
+msgid "Use template"
+msgstr "استفاده از قالب"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_question__description

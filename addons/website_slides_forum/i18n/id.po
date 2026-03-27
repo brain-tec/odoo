@@ -7,15 +7,16 @@
 # Muftiara Syuhada <muftiara.syuhada@gmail.com>, 2022
 # whenwesober, 2022
 # Wahyu Setiawan <wahyusetiaaa@gmail.com>, 2022
-# Abe Manyo, 2023
+# Abe Manyo, 2024
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.5\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-14 10:29+0000\n"
+"POT-Creation-Date: 2024-08-14 15:43+0000\n"
 "PO-Revision-Date: 2021-09-14 12:29+0000\n"
-"Last-Translator: Abe Manyo, 2023\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Indonesian (https://app.transifex.com/odoo/teams/41243/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -43,11 +44,11 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"<b>Answers should not add or expand questions</b>. Insteadeither edit the "
+"<b>Answers should not add or expand questions</b>. Instead, either edit the "
 "question or add a comment."
 msgstr ""
-"<b>Jawaban tidak boleh menambahkan atau mengembangkan pertanyaan</b>. Baik "
-"edit pertanyaan atau tambahkan komentar pertanyaan."
+"<b>Jawaban tidak boleh menambahkan atau mengembangkan pertanyaan</b>. Alih-"
+"alih, edit pertanyaan atau tambahkan komentar."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -181,7 +182,7 @@ msgstr "Basics of Gardening"
 #. module: website_slides_forum
 #: model_terms:ir.ui.view,arch_db:website_slides_forum.website_slides_forum_index
 msgid "Check our Courses <i class=\"fa fa-chevron-right\"/>"
-msgstr ""
+msgstr "Lihat Kursus-Kursus Kami <i class=\"fa fa-chevron-right\"/>"
 
 #. module: website_slides_forum
 #. openerp-web
@@ -209,7 +210,7 @@ msgstr "Kursus-kursus"
 #. module: website_slides_forum
 #: model_terms:ir.ui.view,arch_db:website_slides_forum.website_slides_forum_index
 msgid "Courses Discussions"
-msgstr ""
+msgstr "Diskusi Kursus-Kursus"
 
 #. module: website_slides_forum
 #. openerp-web
@@ -353,7 +354,7 @@ msgstr "Tinjauan"
 #. module: website_slides_forum
 #: model_terms:ir.ui.view,arch_db:website_slides_forum.website_slides_forum_index
 msgid "See all Courses"
-msgstr ""
+msgstr "Lihat semua Kursus"
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0

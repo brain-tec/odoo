@@ -4,6 +4,7 @@ odoo.define('web_editor.field_html_tests', function (require) {
 var ajax = require('web.ajax');
 var FormController = require('web.FormController');
 var FormView = require('web.FormView');
+const ListView = require('web.ListView');
 var testUtils = require('web.test_utils');
 var weTestUtils = require('web_editor.test_utils');
 var core = require('web.core');
@@ -609,6 +610,67 @@ QUnit.module('web_editor', {}, function () {
             form.destroy();
         });
 
+        QUnit.test('media dialog: undo icon to icon change', async function (assert) {
+            assert.expect(2);
+
+            this.data['note.note'].records[0].body ='<p><span class="fa fa-3x rounded bg-primary m-3 fa-times-circle"></span></p>'
+
+            var form = await testUtils.createView({
+                View: FormView,
+                model: 'note.note',
+                data: this.data,
+                arch: '<form>' +
+                    '<field name="body" widget="html" style="height: 100px"/>' +
+                    '</form>',
+                res_id: 1,
+                mockRPC: function (route, args) {
+                    if (args.model === 'ir.attachment') {
+                        return Promise.resolve([]);
+                    }
+                    if (route.indexOf('/web_unsplash/fetch_images') === 0) {
+                        return Promise.resolve();
+                    }
+                    return this._super(route, args);
+                },
+            });
+            const promise = new Promise((resolve) => _formResolveTestPromise = resolve);
+            await testUtils.form.clickEdit(form);
+            await promise;
+
+            // the dialog load some xml assets
+            var defMediaDialog = testUtils.makeTestPromise();
+            testUtils.mock.patch(MediaDialog, {
+                init: function () {
+                    this._super.apply(this, arguments);
+                    this.opened(defMediaDialog.resolve.bind(defMediaDialog));
+                }
+            });
+
+            var pText = document.querySelector('.note-editable p span');
+            Wysiwyg.setRange(pText, 0, pText, 0);
+            const wysiwyg = $('.note-editable').data('wysiwyg');
+            defMediaDialog = testUtils.makeTestPromise();
+            wysiwyg.openMediaDialog();
+
+            // load static xml file (dialog, media dialog, unsplash image widget)
+            await defMediaDialog;
+            document.querySelector('.modal .tab-content .tab-pane').classList.remove('fade'); // to be sync in test
+            await testUtils.dom.click(document.querySelector('.modal a[aria-controls="editor-media-icon"]'));
+            await testUtils.dom.click(document.querySelector('.modal #editor-media-icon .font-icons-icon.fa-glass'));
+
+            assert.strictEqual(wysiwyg.getValue(),
+                '<p><span class="fa fa-3x rounded bg-primary m-3 fa-glass"></span></p>',
+                "should have the new icon in the dom.");
+
+            await wysiwyg.odooEditor.execCommand('undo');
+            assert.strictEqual(wysiwyg.getValue(),
+                '<p><span class="fa fa-3x rounded bg-primary m-3 fa-times-circle"></span></p>',
+                "should have the first icon in the dom.");
+            
+            testUtils.mock.unpatch(MediaDialog);
+            form.destroy();
+        });
+
         QUnit.test('link dialog - external link - no edit', async function (assert) {
             assert.expect(2);
 
@@ -1037,6 +1099,40 @@ QUnit.module('web_editor', {}, function () {
             assert.equal(form.$('.a').attr('contenteditable'), undefined);
 
             form.destroy();
+        });
+
+        QUnit.test("use the toolbar in a list view", async function (assert) {
+            const expectedValue = `<p>t<span style="font-size: 9px;">oto toto </span>toto</p><p>tata</p>`;
+            const list = await testUtils.createView({
+                View: ListView,
+                model: 'note.note',
+                data: this.data,
+                arch: `<tree editable="top">
+                    <field name="body" widget="html"/>
+                </tree>`,
+                mockRPC: function (route, args) {
+                    if (args.method === "write") {
+                        assert.step("write");
+                        assert.strictEqual(args.args[1].body, expectedValue, "should save the content");
+                    }
+                    return this._super.apply(this, arguments);
+                },
+            });
+            await testUtils.dom.click(".o_data_row:first [name=body]");
+            await legacyExtraNextTick();
+            await new Promise(resolve => setTimeout(resolve, 50));
+            const $field = $('.oe_form_field[name="body"]');
+            const pText = $field.find('.note-editable p').first().contents()[0];
+            Wysiwyg.setRange(pText, 1, pText, 10);
+            await testUtils.dom.click("#font-size button");
+            await testUtils.dom.click("#font-size a[data-arg1=9px]");
+            await testUtils.dom.click(".o_list_button_save");
+            assert.strictEqual(
+                $(".o_data_row:first [name=body] .o_readonly").html(),
+                expectedValue,
+            );
+            assert.verifySteps(["write"]);
+            list.destroy();
         });
 
 

@@ -137,7 +137,7 @@ def ensure_db(redirect='/web/database/selector'):
         url_redirect = werkzeug.urls.url_parse(r.base_url)
         if r.query_string:
             # in P3, request.query_string is bytes, the rest is text, can't mix them
-            query_string = iri_to_uri(r.query_string)
+            query_string = iri_to_uri(r.query_string.decode())
             url_redirect = url_redirect.replace(query=query_string)
         request.session.db = db
         abort_and_redirect(url_redirect.to_url())
@@ -367,7 +367,7 @@ def xml2json_from_elementtree(el, preserve_whitespaces=False):
     return res
 
 class HomeStaticTemplateHelpers(object):
-    """
+    r"""
     Helper Class that wraps the reading of static qweb templates files
     and xpath inheritance applied to those templates
     /!\ Template inheritance order is defined by ir.module.module natural order
@@ -1809,7 +1809,7 @@ class ExportFormat(object):
         if not import_compat and groupby:
             groupby_type = [Model._fields[x.split(':')[0]].type for x in groupby]
             domain = [('id', 'in', ids)] if ids else domain
-            groups_data = Model.read_group(domain, [x if x != '.id' else 'id' for x in field_names], groupby, lazy=False)
+            groups_data = Model.with_context(active_test=False).read_group(domain, [x if x != '.id' else 'id' for x in field_names], groupby, lazy=False)
 
             # read_group(lazy=False) returns a dict only for final groups (with actual data),
             # not for intermediary groups. The full group tree must be re-constructed.

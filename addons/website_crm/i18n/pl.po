@@ -13,14 +13,15 @@
 # Maksym <ms@myodoo.pl>, 2023
 # Tadeusz Karpiński <tadeuszkarpinski@gmail.com>, 2023
 # Wil Odoo, 2023
+# Damian Ratus, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.4\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-12 07:50+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:27+0000\n"
-"Last-Translator: Wil Odoo, 2023\n"
+"Last-Translator: Damian Ratus, 2024\n"
 "Language-Team: Polish (https://app.transifex.com/odoo/teams/41243/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -42,52 +43,6 @@ msgstr "# Widoki strony"
 #: model_terms:ir.ui.view,arch_db:website_crm.res_config_settings_view_form
 msgid "<span class=\"o_form_label\">Contact Form</span>"
 msgstr "<span class=\"o_form_label\">Formularz kontaktowy</span>"
-
-#. module: website_crm
-#: model_terms:ir.ui.view,arch_db:website_crm.contactus_form
-msgid ""
-"<span class=\"s_website_form_label_content\">Email</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
-msgstr ""
-"<span class=\"s_website_form_label_content\">E-mail</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
-
-#. module: website_crm
-#: model_terms:ir.ui.view,arch_db:website_crm.contactus_form
-msgid "<span class=\"s_website_form_label_content\">Phone Number</span>"
-msgstr "<span class=\"s_website_form_label_content\">Numer telefonu</span>"
-
-#. module: website_crm
-#: model_terms:ir.ui.view,arch_db:website_crm.contactus_form
-msgid ""
-"<span class=\"s_website_form_label_content\">Subject</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
-msgstr ""
-"<span class=\"s_website_form_label_content\">Temat</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
-
-#. module: website_crm
-#: model_terms:ir.ui.view,arch_db:website_crm.contactus_form
-msgid "<span class=\"s_website_form_label_content\">Your Company</span>"
-msgstr "<span class=\"s_website_form_label_content\">Twoja firma</span>"
-
-#. module: website_crm
-#: model_terms:ir.ui.view,arch_db:website_crm.contactus_form
-msgid ""
-"<span class=\"s_website_form_label_content\">Your Name</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
-msgstr ""
-"<span class=\"s_website_form_label_content\">Twoja nazwa</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
-
-#. module: website_crm
-#: model_terms:ir.ui.view,arch_db:website_crm.contactus_form
-msgid ""
-"<span class=\"s_website_form_label_content\">Your Question</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
-msgstr ""
-"<span class=\"s_website_form_label_content\">Twoje pytanie</span>\n"
-"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_crm
 #: model_terms:ir.ui.view,arch_db:website_crm.res_config_settings_view_form
@@ -161,7 +116,7 @@ msgid "Lead/Opportunity"
 msgstr "Sygnał/Szansa"
 
 #. module: website_crm
-#: model:ir.actions.act_window,name:website_crm.website_visitor_crm_lead_action
+#: model:ir.actions.act_window,name:website_crm.crm_lead_action_from_visitor
 #: model:ir.model.fields,field_description:website_crm.field_website_visitor__lead_ids
 #: model_terms:ir.ui.view,arch_db:website_crm.website_visitor_view_form
 #: model_terms:ir.ui.view,arch_db:website_crm.website_visitor_view_search
@@ -181,7 +136,7 @@ msgstr ""
 "Twojej aplikacji CRM."
 
 #. module: website_crm
-#: model_terms:ir.actions.act_window,help:website_crm.website_visitor_crm_lead_action
+#: model_terms:ir.actions.act_window,help:website_crm.crm_lead_action_from_visitor
 msgid "No lead linked for this visitor"
 msgstr "Brak sygnału powiązanego z tym odwiedzającym."
 
@@ -252,7 +207,7 @@ msgstr "Odwiedzający stronę"
 #: code:addons/website_crm/static/src/js/website_crm_editor.js:0
 #, python-format
 msgid "Your Company"
-msgstr ""
+msgstr "Twoja firma"
 
 #. module: website_crm
 #. openerp-web
@@ -273,7 +228,7 @@ msgstr "Twoja nazwa"
 #: code:addons/website_crm/static/src/js/website_crm_editor.js:0
 #, python-format
 msgid "Your Question"
-msgstr ""
+msgstr "Twoje pytanie"
 
 #. module: website_crm
 #: model_terms:ir.ui.view,arch_db:website_crm.res_config_settings_view_form

@@ -13,9 +13,9 @@
 # karolína schusterová <karolina.schusterova@vdp.sk>, 2021
 # Rastislav Brencic <rastislav.brencic@azet.sk>, 2022
 # Jakub Smolka, 2023
-# Jiří Podhorecký, 2023
-# Aleš Fiala <f.ales1@seznam.cz>, 2024
 # Tomáš Píšek, 2024
+# Aleš Fiala <f.ales1@seznam.cz>, 2024
+# Jiří Podhorecký <jirka.p@volny.cz>, 2024
 # 
 msgid ""
 msgstr ""
@@ -23,7 +23,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-01-24 09:03+0000\n"
 "PO-Revision-Date: 2021-09-14 12:18+0000\n"
-"Last-Translator: Tomáš Píšek, 2024\n"
+"Last-Translator: Jiří Podhorecký <jirka.p@volny.cz>, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1818,6 +1818,13 @@ msgid ""
 "    guide.\n"
 "    "
 msgstr ""
+"\n"
+"    Průvodce doručením (Complemento XML Carta de Porte) je potřeba jako důkaz,\n"
+"    že posíláte zboží mezi A a B.\n"
+"\n"
+"    Průvodce doručením můžete vytvořit pouze tehdy, když je objednávka dodávky\n"
+"    ověřena.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_cl_edi_stock
@@ -2327,6 +2334,10 @@ msgid ""
 "\n"
 "    "
 msgstr ""
+"\n"
+"Účetní výkazy pro Itálii\n"
+"==============================\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_lu_reports
@@ -3362,6 +3373,9 @@ msgid ""
 "Bridge module for project_enterprise and hr\n"
 "    "
 msgstr ""
+"\n"
+"Spojovací modul pro project_enterprise a hr\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_project_enterprise_hr_contract
@@ -3370,6 +3384,9 @@ msgid ""
 "Bridge module for project_enterprise and hr_contract\n"
 "    "
 msgstr ""
+"\n"
+"Spojovací modul pro project_enterprise a hr_contract\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_project_timesheet_holidays
@@ -4188,6 +4205,13 @@ msgid ""
 "\n"
 "    "
 msgstr ""
+"\n"
+"EU One Stop Shop (OSS) DPH Výkazy\n"
+"=============================================================================================\n"
+"\n"
+"Poskytuje výkazy pro OSS spolu exportními soubory pro země EU.\n"
+"\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_documents_hr
@@ -4873,6 +4897,8 @@ msgid ""
 "\n"
 "Germany TSS Regulation\n"
 msgstr ""
+"\n"
+"Německé nařízení TSS\n"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_de_pos_res_cert
@@ -4880,6 +4906,8 @@ msgid ""
 "\n"
 "Germany TSS Regulation for restaurant\n"
 msgstr ""
+"\n"
+"Německé nařízení TSS pro restaurace\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hw_drivers
@@ -5205,6 +5233,10 @@ msgid ""
 "\n"
 "    "
 msgstr ""
+"\n"
+"Mzdová pravidla a pravidla ukončení služby pro Království saudské Arábie.\n"
+"====================================================================\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_stock_landed_costs
@@ -6165,6 +6197,11 @@ msgid ""
 "\n"
 "    "
 msgstr ""
+"\n"
+"Zobrazení Ganttova diagramu aplikace Odoo Web.\n"
+"=============================\n"
+"\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_web
@@ -6241,6 +6278,10 @@ msgid ""
 "=================================================\n"
 "    "
 msgstr ""
+"\n"
+"PLM pro pracovní objednávku.\n"
+"=================================================\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_pa
@@ -6374,6 +6415,11 @@ msgid ""
 "With this module, planning take into account employee's contracts for\n"
 "slots planification and allocated hours.\n"
 msgstr ""
+"\n"
+"Plánování integrace se smlouvou o lidských zdrojích\n"
+"\n"
+"S tímto modulem plánování zohledňuje zaměstnanecké smlouvy na\n"
+"plánování slotů a přidělené hodiny.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_planning_holidays
@@ -6420,6 +6466,9 @@ msgid ""
 "Project and task integration with holidays\n"
 "    "
 msgstr ""
+"\n"
+"Integrace projektů a úloh s dovolenou\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_http_routing
@@ -6710,6 +6759,9 @@ msgid ""
 "Search planning slots by skill\n"
 "    "
 msgstr ""
+"\n"
+"Vyhledat plánovací sloty podle dovedností\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_digital
@@ -17044,6 +17096,8 @@ msgid ""
 "Field %s is not a stored field, only stored fields (regular or many2many) "
 "are valid for the 'groupby' parameter"
 msgstr ""
+"Pole %s není uložené pole, pro parametr 'groupby' jsou platná pouze uložená "
+"pole (běžná nebo many2many)"
 
 #. module: base
 #: code:addons/base/models/ir_ui_view.py:0
@@ -17585,6 +17639,11 @@ msgstr "Francie - účetnictví"
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_reports
 msgid "France - Accounting Reports"
 msgstr "Francie - účetní zprávy"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_fr_invoice_addr
+msgid "France - Adding Mandatory Invoice Mentions (Decree no. 2022-1299)"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_fec
@@ -26795,7 +26854,7 @@ msgstr "Účetní aktiva projektu"
 #. module: base
 #: model:ir.module.module,summary:base.module_project_holidays
 msgid "Project and task integration with holidays"
-msgstr "Integrace projektů a úloh se svátky"
+msgstr "Integrace projektů a úloh s dovolenou"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_project_hr_expense
@@ -28344,6 +28403,12 @@ msgstr "Plánované akce"
 #: model:ir.ui.menu,name:base.ir_cron_trigger_menu
 msgid "Scheduled Actions Triggers"
 msgstr "Spouštěče pravidelných akcí"
+
+#. module: base
+#: code:addons/base/models/ir_cron.py:0
+#, python-format
+msgid "Scheduled action disabled"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_cron__user_id
@@ -31049,6 +31114,14 @@ msgstr ""
 "%s"
 
 #. module: base
+#: code:addons/base/models/ir_cron.py:0
+#, python-format
+msgid ""
+"This scheduled action has been disabled because its interval number is not a"
+" strictly positive value."
+msgstr ""
+
+#. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang__thousands_sep
 msgid "Thousands Separator"
 msgstr "Oddělovač tisíců"
@@ -33279,6 +33352,8 @@ msgid ""
 "You cannot archive the language in which Odoo was setup as it is used by "
 "automated processes."
 msgstr ""
+"Jazyk, ve kterém bylo Odoo nastaveno, nemůžete archivovat, protože jej "
+"používají automatizované procesy."
 
 #. module: base
 #: code:addons/base/models/res_partner.py:0
@@ -33345,6 +33420,16 @@ msgstr ""
 #, python-format
 msgid "You cannot delete the %s record."
 msgstr "Nemůžete smazat %s záznam."
+
+#. module: base
+#: code:addons/base/models/res_users.py:0
+#, python-format
+msgid ""
+"You cannot delete the admin user because it is utilized in various places "
+"(such as security configurations,...). Instead, archive it."
+msgstr ""
+"Uživatele admin nelze smazat, protože se používá na různých místech (jako "
+"jsou konfigurace zabezpečení,...). Místo toho jej archivujte."
 
 #. module: base
 #: code:addons/base/models/res_lang.py:0

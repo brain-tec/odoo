@@ -19,14 +19,15 @@
 # JanaAvalah, 2022
 # Leaanika Randmets, 2023
 # Anna, 2023
+# Stevin Lilla, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.5\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-14 10:28+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:28+0000\n"
-"Last-Translator: Anna, 2023\n"
+"Last-Translator: Stevin Lilla, 2024\n"
 "Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2535,7 +2536,7 @@ msgstr "Meie foorumid"
 #: model:gamification.challenge.line,name:website_forum.line_peer_pressure
 #: model:gamification.goal.definition,name:website_forum.definition_peer_pressure
 msgid "Peer Pressure"
-msgstr ""
+msgstr "Ühiskondlik surve"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_nav_header
@@ -3043,6 +3044,16 @@ msgstr "Järjestus"
 #. module: website_forum
 #. openerp-web
 #: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:0
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:0
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:0
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:0
+#, python-format
+msgid "Share on #{media}"
+msgstr ""
+
+#. module: website_forum
+#. openerp-web
+#: code:addons/website_forum/static/src/xml/website_forum_share_templates.xml:0
 #, python-format
 msgid ""
 "Share this content to increase your chances to be featured on the front page"
@@ -3164,7 +3175,7 @@ msgstr "Staatus"
 #: model:gamification.badge,name:website_forum.badge_q_6
 #: model:gamification.challenge,name:website_forum.challenge_stellar_question_25
 msgid "Stellar Question"
-msgstr ""
+msgstr "Imeline küsimus"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_q_7
@@ -3790,6 +3801,13 @@ msgid "close any posts"
 msgstr "sulge kõik postitused"
 
 #. module: website_forum
+#. openerp-web
+#: code:addons/website_forum/static/src/xml/website_forum_templates.xml:0
+#, python-format
+msgid "connected"
+msgstr ""
+
+#. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
 msgid "delete any comment"
 msgstr "kustuta kõik kommentaarid"
@@ -3803,6 +3821,13 @@ msgstr "kustuta kõik küsimused või vastused"
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
 msgid "delete own comment"
 msgstr "kustuta enda kommentaar"
+
+#. module: website_forum
+#. openerp-web
+#: code:addons/website_forum/static/src/xml/website_forum_templates.xml:0
+#, python-format
+msgid "discussions"
+msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
@@ -3974,6 +3999,27 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.tag
 msgid "post"
 msgstr "postitus"
+
+#. module: website_forum
+#. openerp-web
+#: code:addons/website_forum/static/src/xml/website_forum_templates.xml:0
+#, python-format
+msgid "private"
+msgstr ""
+
+#. module: website_forum
+#. openerp-web
+#: code:addons/website_forum/static/src/xml/website_forum_templates.xml:0
+#, python-format
+msgid "public"
+msgstr ""
+
+#. module: website_forum
+#. openerp-web
+#: code:addons/website_forum/static/src/xml/website_forum_templates.xml:0
+#, python-format
+msgid "questions"
+msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_index

@@ -9,9 +9,9 @@
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.4\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-12 07:50+0000\n"
+"POT-Creation-Date: 2024-08-14 15:43+0000\n"
 "PO-Revision-Date: 2021-09-14 12:23+0000\n"
 "Last-Translator: Maksym <ms@myodoo.pl>, 2023\n"
 "Language-Team: Polish (https://app.transifex.com/odoo/teams/41243/pl/)\n"
@@ -26,12 +26,10 @@ msgstr ""
 #, python-format
 msgid ""
 "Good, you can customize canned responses in the live chat "
-"application.<br/><br/><b>It's the end of this overview</b>, enjoy "
-"discovering Odoo!"
+"application.<br/><br/><b>It's the end of this overview</b>, you can now "
+"<b>close this conversation</b> or start the tour again with typing <span "
+"class=\"o_odoobot_command\">start the tour</span>. Enjoy discovering Odoo!"
 msgstr ""
-"Świetnie, potrafisz dostosowywać gotowe odpowiedzi w aplikacji "
-"czatu.<br/><br/><b>To koniec tego omówienia</b>, przyjemnego odkrywania "
-"Odoo!"
 
 #. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_mail_bot
@@ -61,16 +59,14 @@ msgid "Onboarding canned"
 msgstr "Wdrażanie gotowców"
 
 #. module: im_livechat_mail_bot
-#: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
-#, python-format
-msgid ""
-"That's me! 🎉<br/>Try typing <span class=\"o_odoobot_command\">:</span> to "
-"use canned responses."
-msgstr ""
-"To ja! 🎉<br/>Spróbuj wpisać <span class=\"o_odoobot_command\">:</span>, aby "
-"użyć gotowych odpowiedzi."
-
-#. module: im_livechat_mail_bot
 #: model:ir.model,name:im_livechat_mail_bot.model_res_users
 msgid "Users"
 msgstr "Użytkownicy"
+
+#. module: im_livechat_mail_bot
+#: code:addons/im_livechat_mail_bot/models/mail_bot.py:0
+#, python-format
+msgid ""
+"Wonderful! 😇<br/>Try typing <span class=\"o_odoobot_command\">:</span> to "
+"use canned responses."
+msgstr ""

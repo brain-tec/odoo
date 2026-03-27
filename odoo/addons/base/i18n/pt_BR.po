@@ -14682,7 +14682,7 @@ msgstr "Conexão teste bem sucedida!"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_consolidation
 msgid "Consolidation"
-msgstr "Consolidação"
+msgstr "Consolidação"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_constraint__name
@@ -18274,6 +18274,12 @@ msgstr "Contabilidade - Francesa"
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_reports
 msgid "France - Accounting Reports"
 msgstr "Contabilidade - Francesa"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_fr_invoice_addr
+msgid "France - Adding Mandatory Invoice Mentions (Decree no. 2022-1299)"
+msgstr ""
+"França - Adição de menções obrigatórias na fatura (Decreto nº 2022-1299)"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_fec
@@ -27502,7 +27508,7 @@ msgstr "Porto Rico"
 #: model:ir.module.module,shortdesc:base.module_purchase
 #: model_terms:ir.ui.view,arch_db:base.view_partner_form
 msgid "Purchase"
-msgstr "Compra"
+msgstr "Compras"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_purchase_requisition
@@ -33676,18 +33682,18 @@ msgstr "Você gostaria de salvar suas alterações?"
 #: model:ir.model.fields,field_description:base.field_ir_model_access__perm_write
 #: model_terms:ir.ui.view,arch_db:base.ir_access_view_search
 msgid "Write Access"
-msgstr "Permissão de gravação"
+msgstr "Acesso de edição"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_rule_search
 msgid "Write Access Right"
-msgstr "Permissão de Escrita"
+msgstr "Permissão de edição"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_constraint__write_date
 #: model:ir.model.fields,field_description:base.field_ir_model_relation__write_date
 msgid "Write Date"
-msgstr "Data de Escrita"
+msgstr "Data de gravação"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_server__code

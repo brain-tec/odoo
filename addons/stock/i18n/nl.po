@@ -9,16 +9,17 @@
 # Martin Trigaux, 2022
 # Pauline Thiry <pth@odoo.com>, 2022
 # Jolien De Paepe, 2023
-# Wil Odoo, 2024
 # Erwin van der Ploeg <erwin@odooexperts.nl>, 2024
+# Manon Rondou, 2024
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-16 13:18+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:26+0000\n"
-"Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2024\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -231,6 +232,7 @@ msgstr ""
 "                      "
 
 #. module: stock
+#: code:addons/stock/models/stock_rule.py:0
 #: code:addons/stock/models/stock_rule.py:0
 #, python-format
 msgid "+ %d day(s)"
@@ -553,11 +555,6 @@ msgstr "<span>Producten waaraan geen pakket is toegewezen</span>"
 #: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
 msgid "<span>Remaining quantities not yet delivered:</span>"
 msgstr "<span>Resterende hoeveelheden nog niet geleverd:</span>"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.stock_storage_category_form
-msgid "<span>kg</span>"
-msgstr "<span>kg</span>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.stock_package_type_form
@@ -1138,6 +1135,7 @@ msgstr "Beschikbare producten"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_quant__available_quantity
+#: model_terms:ir.ui.view,arch_db:stock.view_stock_quant_form_editable
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_quant_tree_inventory_editable
 msgid "Available Quantity"
 msgstr "Beschikbare hoeveelheid"
@@ -1688,6 +1686,11 @@ msgid ""
 msgstr ""
 "Conversie tussen maateenheden kan alleen plaatsvinden als deze behoren tot "
 "dezelfde categorie. De conversie wordt gemaakt op basis van ratio's."
+
+#. module: stock
+#: model:ir.actions.server,name:stock.stock_quant_stock_move_line_desynchronization
+msgid "Correct inconsistencies for reservation"
+msgstr "Inconsistenties corrigeren voor reservering"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_location__posx
@@ -2578,7 +2581,7 @@ msgstr "Documentatie"
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_move_tree
 msgid "Done"
-msgstr "Gereed"
+msgstr "Afgehandeld"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_package_level__state__draft
@@ -2784,6 +2787,12 @@ msgstr "Filters"
 #: model:ir.model.fields,field_description:stock.field_stock_move__next_serial
 msgid "First SN"
 msgstr "Eerste SN"
+
+#. module: stock
+#: code:addons/stock/models/stock_quant.py:0
+#, python-format
+msgid "Fix discrepancies"
+msgstr "Discrepanties oplossen"
 
 #. module: stock
 #: model:ir.model.fields.selection,name:stock.selection__stock_rule__group_propagation_option__fixed
@@ -3560,12 +3569,14 @@ msgstr "Ongeldige linker operand %s"
 
 #. module: stock
 #: code:addons/stock/models/product.py:0 code:addons/stock/models/product.py:0
+#: code:addons/stock/models/stock_production_lot.py:0
 #, python-format
 msgid "Invalid domain operator %s"
 msgstr "Ongeldige domein operator %s"
 
 #. module: stock
 #: code:addons/stock/models/product.py:0 code:addons/stock/models/product.py:0
+#: code:addons/stock/models/stock_production_lot.py:0
 #, python-format
 msgid "Invalid domain right operand '%s'. It must be of type Integer/Float"
 msgstr "Ongeldige rechter operand '%s'. Het moet een geheel getal/float zijn"
@@ -3788,6 +3799,11 @@ msgid ""
 "The correction will remove the reservation of the impacted operations on all companies.\n"
 "If the error persists, or you see this message appear often, please submit a Support Ticket at https://www.odoo.com/help"
 msgstr ""
+"Je kan niet meer producten %s reserveren dan er op voorraad zijn.\n"
+"\n"
+"Je kunt de fouten corrigeren door op de knop hieronder te klikken.\n"
+"De wijziging zal de reservering van de getroffen bewerkingen op alle bedrijven verwijderen.\n"
+"Gelieve een supportticket in te dienen op https://www.odoo.com/help als de fout zich blijft voordoen of als dit bericht vaak optreedt."
 
 #. module: stock
 #: code:addons/stock/models/stock_quant.py:0
@@ -3796,6 +3812,8 @@ msgid ""
 "It is not possible to unreserve more products of %s than you have in stock.\n"
 "Please contact your system administrator to rectify this issue."
 msgstr ""
+"Je kunt de reservatie van de producten %s niet ongedaan maken voor meer producten dan je op voorraad hebt.\n"
+"Gelieve contact op te nemen met de systeembeheerder om dit probleem op te lossen."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking__move_type
@@ -4132,7 +4150,6 @@ msgstr "Lijstweergave van bewerkingen"
 #: model_terms:ir.ui.view,arch_db:stock.stock_reorder_report_search
 #: model_terms:ir.ui.view,arch_db:stock.stock_scrap_search_view
 #: model_terms:ir.ui.view,arch_db:stock.view_location_tree2
-#: model_terms:ir.ui.view,arch_db:stock.view_move_search
 #: model_terms:ir.ui.view,arch_db:stock.view_production_lot_form
 #: model_terms:ir.ui.view,arch_db:stock.warehouse_orderpoint_search
 msgid "Location"
@@ -4201,6 +4218,11 @@ msgstr "Logistiek"
 #: model:ir.model.fields.selection,name:stock.selection__barcode_rule__type__lot
 msgid "Lot"
 msgstr "Partij"
+
+#. module: stock
+#: model:ir.model,name:stock.model_report_stock_label_lot_template_view
+msgid "Lot Label Report"
+msgstr "Partijlabelrapportage"
 
 #. module: stock
 #: model:ir.model,name:stock.model_stock_production_lot
@@ -4396,13 +4418,9 @@ msgstr "Max hoeveelheid"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_package_type__max_weight
 #: model:ir.model.fields,field_description:stock.field_stock_storage_category__max_weight
+#: model_terms:ir.ui.view,arch_db:stock.stock_storage_category_tree
 msgid "Max Weight"
 msgstr "Max. gewicht"
-
-#. module: stock
-#: model_terms:ir.ui.view,arch_db:stock.stock_storage_category_tree
-msgid "Max Weight (kg)"
-msgstr "Maximaal gewicht (kg)"
 
 #. module: stock
 #: model:ir.model.constraint,message:stock.constraint_stock_package_type_positive_max_weight
@@ -4483,7 +4501,6 @@ msgid "Minimum Stock Rules"
 msgstr "Minimale voorraadregels"
 
 #. module: stock
-#: model:ir.model.fields,field_description:stock.field_report_stock_quantity__move_ids
 #: model:ir.model.fields,field_description:stock.field_stock_assign_serial__move_id
 #: model:ir.model.fields,field_description:stock.field_stock_package_level__move_ids
 #: model:ir.model.fields,field_description:stock.field_stock_return_picking_line__move_id
@@ -7398,7 +7415,6 @@ msgstr "Voorraadverplaatsingsanalyse"
 
 #. module: stock
 #: code:addons/stock/models/stock_quant.py:0
-#: model:ir.actions.act_window,name:stock.dashboard_open_quants
 #, python-format
 msgid "Stock On Hand"
 msgstr " Beschikbare voorraad"
@@ -8538,6 +8554,7 @@ msgstr "USPS connector"
 #. module: stock
 #. openerp-web
 #: code:addons/stock/static/src/js/report_stock_reception.js:0
+#: code:addons/stock/static/src/js/report_stock_reception.js:0
 #: model_terms:ir.ui.view,arch_db:stock.report_reception_body
 #, python-format
 msgid "Unassign"
@@ -8677,6 +8694,7 @@ msgstr "Producthoeveelheid bijwerken"
 
 #. module: stock
 #: code:addons/stock/models/product.py:0
+#: model:ir.actions.act_window,name:stock.dashboard_open_quants
 #: model_terms:ir.ui.view,arch_db:stock.product_form_view_procurement_button
 #: model_terms:ir.ui.view,arch_db:stock.product_product_view_form_easy_inherit_stock
 #: model_terms:ir.ui.view,arch_db:stock.product_template_form_view_procurement_button
@@ -9376,6 +9394,8 @@ msgid ""
 "You cannot pack products into the same package when they are from both "
 "immediate and planned transfers."
 msgstr ""
+"Je kunt producten niet in hetzelfde pakket verpakken als ze afkomstig zijn "
+"van zowel onmiddellijke als geplande transfers."
 
 #. module: stock
 #: code:addons/stock/models/stock_picking.py:0

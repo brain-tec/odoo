@@ -102,8 +102,8 @@ class AssetNotFound(AssetError):
 
 class AssetsBundle(object):
     rx_css_import = re.compile("(@import[^;{]+;?)", re.M)
-    rx_preprocess_imports = re.compile("""(@import\s?['"]([^'"]+)['"](;?))""")
-    rx_css_split = re.compile("\/\*\! ([a-f0-9-]+) \*\/")
+    rx_preprocess_imports = re.compile(r"""(@import\s?['"]([^'"]+)['"](;?))""")
+    rx_css_split = re.compile(r"\/\*\! ([a-f0-9-]+) \*\/")
 
     TRACKED_BUNDLES = ['web.assets_common', 'web.assets_backend']
 
@@ -296,6 +296,9 @@ class AssetsBundle(object):
                FROM ir_attachment
               WHERE create_uid = %s
                 AND url like %s
+                AND res_model = 'ir.ui.view'
+                AND res_id = 0
+                AND public = true
            GROUP BY name
            ORDER BY name
          """, [SUPERUSER_ID, url_pattern])
@@ -689,16 +692,18 @@ class AssetsBundle(object):
             self.css_errors.append(msg)
             return ''
 
-        result = rtlcss.communicate(input=source.encode('utf-8'))
-        if rtlcss.returncode:
-            cmd_output = ''.join(misc.ustr(result))
-            if not cmd_output:
+        stdout, stderr = rtlcss.communicate(input=source.encode('utf-8'))
+        if rtlcss.returncode or (source and not stdout):
+            cmd_output = ''.join(misc.ustr(stderr))
+            if not cmd_output and rtlcss.returncode:
                 cmd_output = "Process exited with return code %d\n" % rtlcss.returncode
+            elif not cmd_output:
+                cmd_output = "rtlcss: error processing payload\n"
             error = self.get_rtlcss_error(cmd_output, source=source)
             _logger.warning(error)
             self.css_errors.append(error)
             return ''
-        rtlcss_result = result[0].strip().decode('utf8')
+        rtlcss_result = stdout.strip().decode('utf8')
         return rtlcss_result
 
     def get_preprocessor_error(self, stderr, source=None):

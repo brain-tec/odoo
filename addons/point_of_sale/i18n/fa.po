@@ -4,7 +4,6 @@
 # 
 # Translators:
 # Maziar Niaki <maziarmn@gmail.com>, 2022
-# Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2022
 # M.Hossein S.Farvashani <Farvashani@gmail.com>, 2022
 # Faraz Sadri Alamdari <ifarazir@gmail.com>, 2022
 # Hamid Reza Kaveh <hamidrkp@riseup.net>, 2022
@@ -17,14 +16,15 @@
 # Hamed Mohammadi <hamed@dehongi.com>, 2023
 # Hamid Darabi, 2023
 # Hanna Kheradroosta, 2023
+# Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-05 14:42+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:24+0000\n"
-"Last-Translator: Hanna Kheradroosta, 2023\n"
+"Last-Translator: Mostafa Barmshory <mostafa.barmshory@gmail.com>, 2024\n"
 "Language-Team: Persian (https://app.transifex.com/odoo/teams/41243/fa/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1238,16 +1238,16 @@ msgid "Close Session Wizard"
 msgstr "ویزارد بستن جلسه"
 
 #. module: point_of_sale
+#. openerp-web
+#: code:addons/point_of_sale/static/src/js/models.js:0
+#, python-format
+msgid "Close anyway"
+msgstr ""
+
+#. module: point_of_sale
 #: model:ir.model.fields.selection,name:point_of_sale.selection__pos_session__state__closed
 msgid "Closed & Posted"
 msgstr "بسته و پست شده"
-
-#. module: point_of_sale
-#. openerp-web
-#: code:addons/point_of_sale/static/src/js/Chrome.js:0
-#, python-format
-msgid "Closing ..."
-msgstr "در حال بستن ..."
 
 #. module: point_of_sale
 #: model:ir.model.fields.selection,name:point_of_sale.selection__pos_session__state__closing_control
@@ -2003,6 +2003,13 @@ msgstr "نام نمایشی"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_config_view_form
 msgid "Display pictures of product categories"
+msgstr ""
+
+#. module: point_of_sale
+#. openerp-web
+#: code:addons/point_of_sale/static/src/js/models.js:0
+#, python-format
+msgid "Do not close"
 msgstr ""
 
 #. module: point_of_sale
@@ -3557,7 +3564,7 @@ msgstr "خطا آفلاین"
 
 #. module: point_of_sale
 #. openerp-web
-#: code:addons/point_of_sale/static/src/js/Chrome.js:0
+#: code:addons/point_of_sale/static/src/js/models.js:0
 #, python-format
 msgid "Offline Orders"
 msgstr "سفارشات آفلاین"
@@ -5629,7 +5636,7 @@ msgstr "برخی از شماره‌های سریال/سری ساخت گم شده
 
 #. module: point_of_sale
 #. openerp-web
-#: code:addons/point_of_sale/static/src/js/Chrome.js:0
+#: code:addons/point_of_sale/static/src/js/models.js:0
 #, python-format
 msgid ""
 "Some orders could not be submitted to the server due to configuration "
@@ -5641,7 +5648,7 @@ msgstr ""
 
 #. module: point_of_sale
 #. openerp-web
-#: code:addons/point_of_sale/static/src/js/Chrome.js:0
+#: code:addons/point_of_sale/static/src/js/models.js:0
 #, python-format
 msgid ""
 "Some orders could not be submitted to the server due to internet connection "
@@ -7298,7 +7305,7 @@ msgstr "تخفیف"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_payment_method_view_form
 msgid "e.g. Cash"
-msgstr ""
+msgstr "به طور مثال نقدی"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_config_view_form

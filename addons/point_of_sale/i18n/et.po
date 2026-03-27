@@ -24,14 +24,15 @@
 # JanaAvalah, 2023
 # Martin Trigaux, 2023
 # Leaanika Randmets, 2023
+# Siim Raasuke, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-05 14:42+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:24+0000\n"
-"Last-Translator: Leaanika Randmets, 2023\n"
+"Last-Translator: Siim Raasuke, 2024\n"
 "Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1240,16 +1241,16 @@ msgid "Close Session Wizard"
 msgstr "Close Session Wizard"
 
 #. module: point_of_sale
+#. openerp-web
+#: code:addons/point_of_sale/static/src/js/models.js:0
+#, python-format
+msgid "Close anyway"
+msgstr ""
+
+#. module: point_of_sale
 #: model:ir.model.fields.selection,name:point_of_sale.selection__pos_session__state__closed
 msgid "Closed & Posted"
 msgstr "Suletud ja Postitatud"
-
-#. module: point_of_sale
-#. openerp-web
-#: code:addons/point_of_sale/static/src/js/Chrome.js:0
-#, python-format
-msgid "Closing ..."
-msgstr "Sulgemine..."
 
 #. module: point_of_sale
 #: model:ir.model.fields.selection,name:point_of_sale.selection__pos_session__state__closing_control
@@ -2001,6 +2002,13 @@ msgstr "Näidatav nimi"
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_config_view_form
 msgid "Display pictures of product categories"
 msgstr "Kuva tootekategooriate pilte"
+
+#. module: point_of_sale
+#. openerp-web
+#: code:addons/point_of_sale/static/src/js/models.js:0
+#, python-format
+msgid "Do not close"
+msgstr ""
 
 #. module: point_of_sale
 #: code:addons/point_of_sale/models/digest.py:0
@@ -3558,7 +3566,7 @@ msgstr "Võrguühenduseta viga"
 
 #. module: point_of_sale
 #. openerp-web
-#: code:addons/point_of_sale/static/src/js/Chrome.js:0
+#: code:addons/point_of_sale/static/src/js/models.js:0
 #, python-format
 msgid "Offline Orders"
 msgstr "Võrguühenduseta tellimused"
@@ -3605,6 +3613,7 @@ msgstr ""
 #, python-format
 msgid "Only administrators can edit receipt headers and footers"
 msgstr ""
+"Ainult administraatorid saavad arvepealkirju ja -jaluseid redigeerida."
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__only_round_cash_method
@@ -5632,7 +5641,7 @@ msgstr "Mõned seeria-/partiinumbrid on puudu"
 
 #. module: point_of_sale
 #. openerp-web
-#: code:addons/point_of_sale/static/src/js/Chrome.js:0
+#: code:addons/point_of_sale/static/src/js/models.js:0
 #, python-format
 msgid ""
 "Some orders could not be submitted to the server due to configuration "
@@ -5645,7 +5654,7 @@ msgstr ""
 
 #. module: point_of_sale
 #. openerp-web
-#: code:addons/point_of_sale/static/src/js/Chrome.js:0
+#: code:addons/point_of_sale/static/src/js/models.js:0
 #, python-format
 msgid ""
 "Some orders could not be submitted to the server due to internet connection "
@@ -7162,6 +7171,8 @@ msgid ""
 "You don't have the access rights to get the point of sale closing control "
 "data."
 msgstr ""
+"Teil puuduvad juurdepääsuõigused müügipunkti sulgemise kontrollandmete "
+"saamiseks."
 
 #. module: point_of_sale
 #: code:addons/point_of_sale/models/pos_session.py:0

@@ -107,7 +107,7 @@ class TestUiHtmlEditor(HttpCaseWithUserDemo):
         })
         self.start_tour("/", 'test_html_editor_scss', login='admin', timeout=120)
 
-    def media_dialog_undraw(self):
+    def test_media_dialog_undraw(self):
         self.start_tour("/", 'website_media_dialog_undraw', login='admin')
 
 @odoo.tests.tagged('-at_install', 'post_install')
@@ -362,3 +362,6 @@ class TestUi(odoo.tests.HttpCase):
         website.menu_id.child_id[1:].unlink()
 
         self.start_tour('/', 'website_no_dirty_page', login='admin')
+
+    def test_snippet_carousel(self):
+        self.start_tour('/', 'snippet_carousel', login='admin')

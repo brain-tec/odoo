@@ -5,6 +5,8 @@
 from collections import defaultdict
 from datetime import timedelta
 from itertools import groupby
+
+from odoo.osv.expression import OR
 from odoo.tools import groupby as groupbyelem
 from operator import itemgetter
 
@@ -464,7 +466,8 @@ class StockMove(models.Model):
 
     def _set_date_deadline(self, new_deadline):
         # Handle the propagation of `date_deadline` fields (up and down stream - only update by up/downstream documents)
-        already_propagate_ids = self.env.context.get('date_deadline_propagate_ids', set()) | set(self.ids)
+        already_propagate_ids = self.env.context.get('date_deadline_propagate_ids', set())
+        already_propagate_ids.update(self.ids)
         self = self.with_context(date_deadline_propagate_ids=already_propagate_ids)
         for move in self:
             moves_to_update = (move.move_dest_ids | move.move_orig_ids)
@@ -569,7 +572,7 @@ class StockMove(models.Model):
 
     def name_get(self):
         res = []
-        for move in self:
+        for move in self.with_context(prefetch_fields=False):
             res.append((move.id, '%s%s%s>%s' % (
                 move.picking_id.origin and '%s/' % move.picking_id.origin or '',
                 move.product_id.code and '%s: ' % move.product_id.code or '',
@@ -583,7 +586,9 @@ class StockMove(models.Model):
                 picking = self.env['stock.picking'].browse(vals['picking_id'])
                 if picking.group_id:
                     vals['group_id'] = picking.group_id.id
-        return super().create(vals_list)
+        res = super().create(vals_list)
+        res._update_orderpoints()
+        return res
 
     def write(self, vals):
         # Handle the write on the initial demand by updating the reserved quantity and logging
@@ -618,11 +623,16 @@ class StockMove(models.Model):
             picking = self.env['stock.picking'].browse(vals['picking_id'])
             if picking.group_id:
                 vals['group_id'] = picking.group_id.id
+        if 'product_id' in vals or 'location_id' in vals or 'location_dest_id' in vals:
+            self._update_orderpoints()
         res = super(StockMove, self).write(vals)
         if move_to_recompute_state:
             move_to_recompute_state._recompute_state()
         if receipt_moves_to_reassign:
             receipt_moves_to_reassign._action_assign()
+        if ('product_id' in vals or 'state' in vals or 'date' in vals or 'product_uom_qty' in vals or
+                'location_id' in vals or 'location_dest_id' in vals):
+            self._update_orderpoints()
         return res
 
     def _propagate_product_packaging(self, product_package_id):
@@ -2195,3 +2205,36 @@ class StockMove(models.Model):
         for move in self.move_orig_ids:
             moves |= move._get_moves_orig(moves)
         return moves
+
+    def _update_orderpoints(self):
+        """
+            Manually mark the relevant orderpoints for re-computation.
+            This allows us to only recompute the qty_to_order for the orderpoints in the relevant warehouse(s),
+            instead of all the orderpoints linked to the product.
+        """
+        prods_by_wh = defaultdict(set)
+        prods_no_wh = set()
+        for move in self:
+            source_wh = move.location_id.warehouse_id.id
+            dest_wh = move.location_dest_id.warehouse_id.id
+            if source_wh:
+                prods_by_wh[source_wh].add(move.product_id.id)
+            if dest_wh:
+                prods_by_wh[dest_wh].add(move.product_id.id)
+            if not source_wh and not dest_wh:
+                prods_no_wh.add(move.product_id.id)
+
+        orderpoint_domain = []
+        for wh_id, prod_ids in prods_by_wh.items():
+            orderpoint_domain = OR([orderpoint_domain, [
+                ('warehouse_id', '=', wh_id),
+                ('product_id', 'in', list(prod_ids - prods_no_wh))
+            ]])
+        if prods_no_wh:
+            orderpoint_domain = OR([orderpoint_domain, [('product_id', 'in', list(prods_no_wh))]])
+
+        if orderpoint_domain:
+            self.env.add_to_compute(
+                self.env['stock.warehouse.orderpoint']._fields['qty_to_order'],
+                self.env['stock.warehouse.orderpoint'].sudo().search(orderpoint_domain, order='id')
+            )

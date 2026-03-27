@@ -3,19 +3,19 @@
 # 	* survey
 # 
 # Translators:
-# Martin Trigaux, 2021
 # Braulio D. López Vázquez <bdl@odoo.com>, 2022
 # Lucia Pacheco, 2022
-# Fernanda Alvarez, 2024
 # Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2024
+# Martin Trigaux, 2024
+# Fernanda Alvarez, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-16 13:18+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:26+0000\n"
-"Last-Translator: Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2024\n"
+"Last-Translator: Fernanda Alvarez, 2024\n"
 "Language-Team: Spanish (Mexico) (https://app.transifex.com/odoo/teams/41243/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -830,7 +830,7 @@ msgstr "Actividades"
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Decoración de actividad de excepción"
+msgstr "Decoración de la actividad de excepción"
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_survey__activity_state
@@ -1158,7 +1158,7 @@ msgstr "Ladrillos"
 #. module: survey
 #: model:survey.survey,title:survey.survey_demo_burger_quiz
 msgid "Burger Quiz"
-msgstr "Prueba sobre hamburguesas"
+msgstr "Saber y ganar"
 
 #. module: survey
 #: model:survey.question.answer,value:survey.vendor_certification_page_2_question_2_choice_3
@@ -2119,7 +2119,7 @@ msgstr "Icono"
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_survey__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr "Icono para indicar una actividad de excepción."
+msgstr "Icono que indica una actividad de excepción."
 
 #. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_user_input__access_token
@@ -3218,6 +3218,11 @@ msgid "Progression Mode"
 msgstr "Progreso"
 
 #. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
+msgid "Public share URL"
+msgstr "URL para compartir"
+
+#. module: survey
 #: model:ir.model.fields,field_description:survey.field_survey_question_answer__question_id
 #: model:ir.model.fields,field_description:survey.field_survey_user_input_line__question_id
 #: model_terms:ir.ui.view,arch_db:survey.survey_question_answer_view_search
@@ -3890,7 +3895,7 @@ msgstr "Takaaki Kajita"
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_form
 msgid "Test"
-msgstr "Prueba"
+msgstr "Probar"
 
 #. module: survey
 #: model_terms:ir.ui.view,arch_db:survey.survey_user_input_view_search
@@ -4458,6 +4463,11 @@ msgstr "Número de mensajes sin leer"
 #: model_terms:ir.ui.view,arch_db:survey.survey_survey_view_search
 msgid "Upcoming Activities"
 msgstr "Próximas actividades"
+
+#. module: survey
+#: model_terms:ir.ui.view,arch_db:survey.survey_invite_view_form
+msgid "Use template"
+msgstr "Usar plantilla"
 
 #. module: survey
 #: model:ir.model.fields,help:survey.field_survey_question__description

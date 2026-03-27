@@ -6,15 +6,15 @@
 # Martin Trigaux, 2021
 # Christelle Wehbe <libanon_cristelle@hotmail.com>, 2021
 # lasch a <bmail440@gmail.com>, 2021
-# Jakob Krabbe <jakob.krabbe@vertel.se>, 2021
 # Chrille Hedberg <hedberg.chrille@gmail.com>, 2021
+# Jakob Krabbe <jakob.krabbe@vertel.se>, 2024
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2024
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~14.5\n"
+"Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-14 10:29+0000\n"
+"POT-Creation-Date: 2024-08-14 15:43+0000\n"
 "PO-Revision-Date: 2021-09-14 12:29+0000\n"
 "Last-Translator: Anders Wallenquist <anders.wallenquist@vertel.se>, 2024\n"
 "Language-Team: Swedish (https://app.transifex.com/odoo/teams/41243/sv/)\n"
@@ -44,9 +44,11 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"<b>Answers should not add or expand questions</b>. Insteadeither edit the "
+"<b>Answers should not add or expand questions</b>. Instead, either edit the "
 "question or add a comment."
 msgstr ""
+"<b>Svar bör inte lägga till eller utöka frågor</b>. Istället kan du antingen"
+" redigera frågan eller lägga till en kommentar."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -217,7 +219,7 @@ msgstr ""
 #: code:addons/website_slides_forum/static/src/xml/website_slides_forum_channel.xml:0
 #, python-format
 msgid "Create a Forum"
-msgstr ""
+msgstr "Skapa ett forum"
 
 #. module: website_slides_forum
 #: model_terms:ir.actions.act_window,help:website_slides_forum.forum_post_action_channel
@@ -232,7 +234,7 @@ msgstr "Beskrivning"
 #. module: website_slides_forum
 #: model:ir.model.fields,help:website_slides_forum.field_forum_forum__slide_channel_ids
 msgid "Edit the course linked to this forum on the course form."
-msgstr ""
+msgstr "Redigera den kurs som är länkad till detta forum i kursformuläret."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -266,6 +268,8 @@ msgstr "Inlägg i forumet"
 msgid ""
 "Forum linked to a Course, the visibility is the one applied on the course."
 msgstr ""
+"Forum som är länkat till en kurs, är synligheten den som tillämpas på "
+"kursen."
 
 #. module: website_slides_forum
 #: model:ir.ui.menu,name:website_slides_forum.website_slides_menu_forum_forum
@@ -320,12 +324,12 @@ msgstr "Ingen data ännu!"
 #. module: website_slides_forum
 #: model:ir.model.fields,field_description:website_slides_forum.field_slide_channel__forum_total_posts
 msgid "Number of active forum posts"
-msgstr ""
+msgstr "Antal aktiva inlägg i forumet"
 
 #. module: website_slides_forum
 #: model:ir.model.constraint,message:website_slides_forum.constraint_slide_channel_forum_uniq
 msgid "Only one course per forum!"
-msgstr ""
+msgstr "Endast en kurs per forum!"
 
 #. module: website_slides_forum
 #: model:ir.ui.menu,name:website_slides_forum.website_slides_menu_forum_post
@@ -406,7 +410,7 @@ msgstr ""
 #. module: website_slides_forum
 #: model:forum.forum,name:website_slides_forum.forum_forum_demo_channel_2
 msgid "Trees, Wood and Gardens"
-msgstr ""
+msgstr "Träd, trä och trädgårdar"
 
 #. module: website_slides_forum
 #: model:ir.model.fields,field_description:website_slides_forum.field_forum_forum__visibility
@@ -455,7 +459,7 @@ msgstr "eLearning"
 #: model:ir.actions.act_window,name:website_slides_forum.forum_post_action_report
 #: model_terms:ir.ui.view,arch_db:website_slides_forum.forum_post_view_graph_slides
 msgid "eLearning Forum Posts"
-msgstr ""
+msgstr "Foruminlägg för eLearning"
 
 #. module: website_slides_forum
 #: model:ir.actions.act_window,name:website_slides_forum.forum_forum_action_channel

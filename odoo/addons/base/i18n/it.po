@@ -18576,6 +18576,13 @@ msgid "France - Accounting Reports"
 msgstr "Francia - Rendiconti contabili"
 
 #. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_fr_invoice_addr
+msgid "France - Adding Mandatory Invoice Mentions (Decree no. 2022-1299)"
+msgstr ""
+"Francia - Aggiunta di menzioni obbligatorie sulle fatture (Decreto n. "
+"2022-1299)"
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_fec
 msgid "France - FEC Export"
 msgstr "Francia - Esportazione FEC"
@@ -31083,7 +31090,7 @@ msgstr "Dati tecnici"
 #. module: base
 #: model:res.groups,name:base.group_no_one
 msgid "Technical Features"
-msgstr "Specifiche tecniche"
+msgstr "Funzionalità tecniche"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module__name

@@ -69,6 +69,9 @@ Wysiwyg.include({
      * @override
      */
     start: async function () {
+        // Bind the _onPageClick handler to click event: to close the dropdown if clicked outside.
+        this.__onPageClick = this._onPageClick.bind(this);
+        this.el.addEventListener("click", this.__onPageClick, { capture: true });
         this.options.toolbarHandler = $('#web_editor-top-edit');
 
         // Dropdown menu initialization: handle dropdown openings by hand
@@ -124,6 +127,9 @@ Wysiwyg.include({
                 const collapseTogglerAttributes = ["aria-expanded"];
                 // Extra menu attributes to ignore.
                 const extraMenuClasses = ["nav-item", "nav-link", "dropdown-item", "active"];
+                // Carousel attributes to ignore.
+                const carouselSlidingClasses = ["carousel-item-left", "carousel-item-right",
+                    "carousel-item-next", "carousel-item-prev", "active"];
 
                 return filteredRecords.filter(record => {
                     if (record.type === "attributes") {
@@ -164,6 +170,16 @@ Wysiwyg.include({
                                 }
                             }
                         }
+
+                        // Do not record some carousel attributes changes.
+                        if (record.target.closest(":not(section) > .carousel")) {
+                            if (record.target.matches(".carousel-item, .carousel-indicators > li")
+                                    && record.attributeName === "class") {
+                                if (checkForExcludedClasses(record, carouselSlidingClasses)) {
+                                    return false;
+                                }
+                            }
+                        }
                     } else if (record.type === "childList") {
                         const addedOrRemovedNode = record.addedNodes[0] || record.removedNodes[0];
                         // Do not record the addition/removal of the extra menu
@@ -185,6 +201,7 @@ Wysiwyg.include({
      * @returns {Promise}
      */
     _saveViewBlocks: async function () {
+        this._restoreCarousels();
         await this._super.apply(this, arguments);
         if (this.isDirty()) {
             return this._restoreMegaMenus();
@@ -195,6 +212,7 @@ Wysiwyg.include({
      */
     destroy: function () {
         this._restoreMegaMenus();
+        this.el.removeEventListener("click", this.__onPageClick, { capture: true });
         this._super.apply(this, arguments);
     },
 
@@ -334,6 +352,53 @@ Wysiwyg.include({
         megaMenuEl.classList.add('o_no_parent_editor');
         this.odooEditor.observerActive("toggleMegaMenu");
         return this.snippetsMenu.activateSnippet($(megaMenuEl));
+    },
+    /**
+     * Restores all the carousels so their first slide is the active one.
+     *
+     * @private
+     */
+    _restoreCarousels() {
+        this.$editable[0].querySelectorAll(".carousel").forEach(carouselEl => {
+            // Set the first slide as the active one.
+            carouselEl.querySelectorAll(".carousel-item").forEach((itemEl, i) => {
+                itemEl.classList.remove("next", "prev", "left", "right");
+                itemEl.classList.toggle("active", i === 0);
+            });
+            carouselEl.querySelectorAll(".carousel-indicators li[data-slide-to]").forEach((indicatorEl, i) => {
+                indicatorEl.classList.toggle("active", i === 0);
+            });
+        });
+    },
+    /**
+     * Hides all opened dropdowns.
+     *
+     * @private
+     */
+    _hideDropdowns() {
+        for (const toggleEl of this.el.querySelectorAll(
+            ".o_mega_menu_toggle, #top_menu_container .dropdown-toggle"
+        )) {
+            $(toggleEl).dropdown("hide");
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * Called when the page is clicked anywhere.
+     * Closes the shown dropdown if the click is outside of it.
+     *
+     * @private
+     * @param {Event} ev
+     */
+    _onPageClick(ev) {
+        if (ev.target.closest(".dropdown.show")) {
+            return;
+        }
+        this._hideDropdowns();
     },
 });
 

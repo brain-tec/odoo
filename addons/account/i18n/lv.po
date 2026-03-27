@@ -11,17 +11,17 @@
 # Martin Trigaux, 2022
 # Konstantins Zabogonskis <inculin4ik@gmail.com>, 2022
 # Anzelika Adejanova, 2022
-# Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2024
 # ievaputnina <ievai.putninai@gmail.com>, 2024
 # Will Sensors, 2024
+# Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-18 09:52+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:18+0000\n"
-"Last-Translator: Will Sensors, 2024\n"
+"Last-Translator: Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2024\n"
 "Language-Team: Latvian (https://app.transifex.com/odoo/teams/41243/lv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -106,6 +106,12 @@ msgstr "%<span class=\"px-3\"/>("
 #, python-format
 msgid "%d moves"
 msgstr "%d virzās"
+
+#. module: account
+#: code:addons/account/models/account_account_tag.py:0
+#, python-format
+msgid "%s (%s)"
+msgstr "%s (%s)"
 
 #. module: account
 #: code:addons/account/models/account_tax.py:0
@@ -243,6 +249,13 @@ msgstr "30% tagad, atlikums 60 dienu laikā"
 #: model:account.payment.term,name:account.account_payment_term_45days
 msgid "45 Days"
 msgstr "45 Dienas"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
+msgid ""
+"<br/>\n"
+"                            on this account:"
+msgstr ""
 
 #. module: account
 #: model:mail.template,body_html:account.email_template_edi_credit_note
@@ -945,11 +958,6 @@ msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "<strong>Amount Due</strong>"
-msgstr "<strong>Summa samaksai</strong>"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<strong>Credit Note Date:</strong>"
 msgstr "<strong>Kredītrēķina datums:</strong>"
 
@@ -1165,14 +1173,6 @@ msgid "A tax fiscal position could be defined only one time on same taxes."
 msgstr ""
 "Nodokļu fiskālo pozīciju var noteikt tikai vienu reizi attiecībā uz vieniem "
 "un tiem pašiem nodokļiem."
-
-#. module: account
-#: code:addons/account/models/account_tax.py:0
-#, python-format
-msgid ""
-"A tax should only use tags from its country. You should use another tax and "
-"a fiscal position if you wish to uses the tags from foreign tax reports."
-msgstr ""
 
 #. module: account
 #: code:addons/account/models/res_users.py:0
@@ -1737,6 +1737,7 @@ msgstr "Aktivizē, lai izveidotu pārdošanas čeku"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account_tag__active
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__active
+#: model:ir.model.fields,field_description:account.field_account_fiscal_position_tax__tax_dest_active
 #: model:ir.model.fields,field_description:account.field_account_incoterms__active
 #: model:ir.model.fields,field_description:account.field_account_journal__active
 #: model:ir.model.fields,field_description:account.field_account_payment_term__active
@@ -2085,7 +2086,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_template__allow_payment_tolerance
 msgid "Allow Payment Gap"
-msgstr ""
+msgstr "Atbilstošā summa"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__module_product_margin
@@ -2551,14 +2552,6 @@ msgid "Associated Account Templates"
 msgstr ""
 
 #. module: account
-#: code:addons/account/populate/res_company.py:0
-#, python-format
-msgid ""
-"At least one localization is needed to be installed in order to populate the"
-" database with accounting"
-msgstr ""
-
-#. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_invoice_send_wizard_form
 #: model_terms:ir.ui.view,arch_db:account.account_tour_upload_bill
 msgid "Attach a file"
@@ -2842,7 +2835,7 @@ msgstr "Bankas izraksta rindas"
 #: code:addons/account/models/account_bank_statement.py:0
 #, python-format
 msgid "Bank Statement.pdf"
-msgstr ""
+msgstr "Bankas konta izraksts.pdf"
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_bank_statement_tree
@@ -3801,6 +3794,7 @@ msgstr "Partnera uzņēmumi"
 #: model:ir.model.fields,field_description:account.field_account_tax_carryover_line__company_id
 #: model:ir.model.fields,field_description:account.field_account_tax_repartition_line__company_id
 #: model_terms:ir.ui.view,arch_db:account.view_account_analytic_default_form_search
+#: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_search
@@ -4035,6 +4029,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
 msgid "Counterpart Entries"
 msgstr "Attiecīgi ieraksti"
+
+#. module: account
+#: model:ir.model.fields,help:account.field_res_company__multi_vat_foreign_country_ids
+msgid "Countries for which the company has a VAT number"
+msgstr "Valstis, kurās uzņēmumam ir PVN maksātāja numurs"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account_tag__country_id
@@ -4404,6 +4403,7 @@ msgstr "Izveidots"
 #. module: account
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #: code:addons/account/wizard/accrued_orders.py:0
+#: model:ir.model.fields,field_description:account.field_account_analytic_account__credit
 #: model:ir.model.fields,field_description:account.field_account_move_line__credit
 #: model_terms:ir.ui.view,arch_db:account.report_journal
 #, python-format
@@ -4480,6 +4480,8 @@ msgid ""
 "Credit_note_{{ (object.name or '').replace('/','_') }}{{ object.state == "
 "'draft' and '_draft' or '' }}"
 msgstr ""
+"Credit_note_{{ (object.name or '').replace('/','_') }}{{ object.state == "
+"'draft' and '_draft' or '' }}"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__cumulated_balance
@@ -4771,6 +4773,7 @@ msgstr "Datu konsekvences pārbaude"
 #: model:ir.model.fields,field_description:account.field_tax_adjustments_wizard__date
 #: model:ir.model.fields.selection,name:account.selection__account_print_journal__sort_selection__date
 #: model_terms:ir.ui.view,arch_db:account.report_journal
+#: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
@@ -4839,6 +4842,7 @@ msgstr ""
 #. module: account
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #: code:addons/account/wizard/accrued_orders.py:0
+#: model:ir.model.fields,field_description:account.field_account_analytic_account__debit
 #: model:ir.model.fields,field_description:account.field_account_move_line__debit
 #: model_terms:ir.ui.view,arch_db:account.report_journal
 #, python-format
@@ -5062,6 +5066,26 @@ msgstr "Izdzēst e-pastus"
 #: model:ir.model.fields,field_description:account.field_account_invoice_send__auto_delete_message
 msgid "Delete Message Copy"
 msgstr "Izdzēst ziņojumu kopijas"
+
+#. module: account
+#: model:account.account.tag,name:account.demo_ceo_wages_account
+msgid "Demo CEO Wages Account"
+msgstr "Demo izpilddirektora algu konts"
+
+#. module: account
+#: model:account.account.tag,name:account.demo_capital_account
+msgid "Demo Capital Account"
+msgstr "Demo kapitāla konts"
+
+#. module: account
+#: model:account.account.tag,name:account.demo_sale_of_land_account
+msgid "Demo Sale of Land Account"
+msgstr "Demo Zemes pārdošanas konts"
+
+#. module: account
+#: model:account.account.tag,name:account.demo_stock_account
+msgid "Demo Stock Account"
+msgstr "Demo akciju konts"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__deprecated
@@ -5499,6 +5523,11 @@ msgid "Dynamic Reports"
 msgstr "Dinamiskie pārskati"
 
 #. module: account
+#: model:ir.model.fields,help:account.field_account_tax_repartition_line__tag_ids_domain
+msgid "Dynamic domain used for the tag that can be set on tax"
+msgstr "Dinamiskais domēns, ko izmanto tagam, ko var iestatīt nodokļiem"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__module_l10n_eu_oss
 msgid "EU Intra-community Distance Selling"
 msgstr "ES tirdzniecības nosacījumi"
@@ -5845,6 +5874,11 @@ msgid "Financial Tags"
 msgstr ""
 
 #. module: account
+#: model:account.account.tag,name:account.account_tag_financing
+msgid "Financing Activities"
+msgstr "Finansēšanas darbības"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_partner_mapping__payment_ref_regex
 msgid "Find Text in Label"
 msgstr "Teksta atrašana etiķetē"
@@ -5919,6 +5953,7 @@ msgstr "Fiskālie Periodi"
 #: model:ir.model.fields,field_description:account.field_account_invoice_report__fiscal_position_id
 #: model:ir.model.fields,field_description:account.field_account_move__fiscal_position_id
 #: model:ir.model.fields,field_description:account.field_account_payment__fiscal_position_id
+#: model:ir.model.fields,field_description:account.field_res_company__fiscal_position_ids
 #: model:ir.model.fields,field_description:account.field_res_partner__property_account_position_id
 #: model:ir.model.fields,field_description:account.field_res_users__property_account_position_id
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_filter
@@ -6083,6 +6118,11 @@ msgstr "Ārzemju valūta"
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__foreign_vat
 msgid "Foreign Tax ID"
 msgstr "Ārvalstu nodokļu maksātāja reģistrācijas numurs"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_res_company__multi_vat_foreign_country_ids
+msgid "Foreign VAT countries"
+msgstr "Ārvalstu PVN valstis"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__foreign_vat_header_mode
@@ -7043,8 +7083,10 @@ msgstr "Intrastat"
 #. module: account
 #: code:addons/account/models/partner.py:0
 #, python-format
-msgid "Invalid \"Zip Range\", please configure it properly."
-msgstr "Nederīgs \"Zip\", lūdzu, konfigurējiet to pareizi."
+msgid ""
+"Invalid \"Zip Range\", You have to configure both \"From\" and \"To\" values"
+" for the zip range and \"To\" should be greater than \"From\"."
+msgstr ""
 
 #. module: account
 #: code:addons/account/models/company.py:0
@@ -7056,6 +7098,11 @@ msgstr "Nederīga fiskālā gada pēdējā diena"
 #: model:ir.model.fields,field_description:account.field_account_move_line__tax_tag_invert
 msgid "Invert Tags"
 msgstr "Invertēt birkas"
+
+#. module: account
+#: model:account.account.tag,name:account.account_tag_investing
+msgid "Investing & Extraordinary Activities"
+msgstr "Ieguldījumi un ārkārtas darbības"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -7505,6 +7552,7 @@ msgstr "Janvāris"
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
 #: model_terms:ir.ui.view,arch_db:account.report_journal
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
@@ -8502,6 +8550,11 @@ msgid "Memo:"
 msgstr "Memo:"
 
 #. module: account
+#: model:ir.model,name:account.model_base_partner_merge_automatic_wizard
+msgid "Merge Partner Wizard"
+msgstr "Kontaktpersonu apvienošanas vednis"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__message_has_error
 #: model:ir.model.fields,field_description:account.field_account_account_template__message_has_error
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__message_has_error
@@ -8711,6 +8764,12 @@ msgstr "Nodokļu bilances noliegšana"
 msgid "Negative value of amount field if payment_type is outbound"
 msgstr ""
 "Summas lauka negatīvā vērtība, ja maksājuma_tips ir izejošais maksājums"
+
+#. module: account
+#: code:addons/account/models/account_tax.py:0
+#, python-format
+msgid "Nested group of taxes are not allowed."
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_bank_statement__state__open
@@ -9128,6 +9187,11 @@ msgid "Off-Balance Sheet"
 msgstr "Ārpusbilances lapa"
 
 #. module: account
+#: model:account.account.tag,name:account.demo_office_furniture_account
+msgid "Office Furniture"
+msgstr "Biroja mēbeles"
+
+#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_reconcile_model__matching_order__old_first
 #: model:ir.model.fields.selection,name:account.selection__account_reconcile_model_template__matching_order__old_first
 msgid "Oldest first"
@@ -9326,6 +9390,11 @@ msgstr ""
 #: model:ir.model.fields,help:account.field_account_account__opening_debit
 msgid "Opening debit value for this account."
 msgstr ""
+
+#. module: account
+#: model:account.account.tag,name:account.account_tag_operating
+msgid "Operating Activities"
+msgstr "Pamatdarbība"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
@@ -9678,6 +9747,7 @@ msgstr "Daļēji apmaksāts"
 #: model_terms:ir.ui.view,arch_db:account.report_journal
 #: model_terms:ir.ui.view,arch_db:account.view_account_analytic_default_form_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_analytic_line_filter_inherit_account
+#: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
@@ -9738,6 +9808,12 @@ msgstr "Partneru kartēšana saskaņošanas modeļiem"
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__match_partner
 msgid "Partner should be set"
 msgstr ""
+
+#. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid "Partners that are used in hashed entries cannot be merged."
+msgstr "Partnerus, kas tiek izmantoti šifrētos ierakstos, nevar apvienot."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -10115,14 +10191,6 @@ msgstr ""
 #, python-format
 msgid "Please define a payment method line on your payment."
 msgstr "Lūdzu, norādiet maksājuma metodes rindu savā maksājumā."
-
-#. module: account
-#: code:addons/account/models/account_payment.py:0
-#, python-format
-msgid ""
-"The selected payment method is not available for this payment, please select"
-" the payment method again."
-msgstr ""
 
 #. module: account
 #: code:addons/account/models/chart_template.py:0
@@ -11751,6 +11819,7 @@ msgid "Set active to false to hide the Journal without removing it."
 msgstr "Iestatiet aktīvo uz false, lai paslēptu žurnālu, bet to neizdzēstu."
 
 #. module: account
+#: model:ir.model.fields,help:account.field_account_fiscal_position_tax__tax_dest_active
 #: model:ir.model.fields,help:account.field_account_tax__active
 #: model:ir.model.fields,help:account.field_account_tax_template__active
 msgid "Set active to false to hide the tax without removing it."
@@ -13362,6 +13431,14 @@ msgid "The company this distribution line belongs to."
 msgstr "Uzņēmums, kuram pieder šī sadales līnija."
 
 #. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
+"The country code of the foreign VAT number does not match any country in the"
+" group."
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_tax_group__country_id
 msgid "The country for which this tax group is applicable."
 msgstr "Valsts, kurai piemērojama šī nodokļu grupa."
@@ -13973,6 +14050,14 @@ msgstr ""
 "                        tiek zaudētas visas iepriekš esošās summas ārvalstu valūtā."
 
 #. module: account
+#: code:addons/account/models/account_payment.py:0
+#, python-format
+msgid ""
+"The selected payment method is not available for this payment, please select"
+" the payment method again."
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
 msgid "The selected payment method requires a bank account but none is set on"
 msgstr ""
@@ -14447,7 +14532,7 @@ msgid ""
 "This option permanently removes any track of email after it's been sent, "
 "including from the Technical menu in the Settings, in order to preserve "
 "storage space of your Odoo database."
-msgstr ""
+msgstr "Izdzēst nosūtītos e-pastus (tikai masveida sūtīšanas)"
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_account_template__chart_template_id
@@ -15655,7 +15740,7 @@ msgstr ""
 "Nevarat izveidot maksājumus ierakstiem, kas pieder dažādiem uzņēmumiem."
 
 #. module: account
-#: code:addons/account/models/account_payment_method.py:0
+#: code:addons/account/models/account_journal.py:0
 #, python-format
 msgid ""
 "You can't have two payment method lines of the same payment type (%s) and "
@@ -15704,11 +15789,9 @@ msgstr ""
 #: code:addons/account/wizard/account_payment_register.py:0
 #, python-format
 msgid ""
-"You can't register payments for journal items being either all inbound, "
-"either all outbound."
+"You can't register payments for both inbound and outbound moves at the same "
+"time."
 msgstr ""
-"Jūs nevarat reģistrēt maksājumus par žurnāla vienībām, kas ir vai nu visas "
-"ienākošās, vai visas izejošās."
 
 #. module: account
 #: code:addons/account/models/account_analytic_line.py:0
@@ -15766,6 +15849,14 @@ msgstr ""
 #: code:addons/account/models/partner.py:0
 #, python-format
 msgid ""
+"You cannot create a fiscal position with a country outside of the selected "
+"country group."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
 "You cannot create a fiscal position with a foreign VAT within your fiscal "
 "country without assigning it a state."
 msgstr ""
@@ -15803,9 +15894,23 @@ msgstr ""
 "kustības projektu un pēc tam to publicējiet."
 
 #. module: account
+#: code:addons/account/models/account_account.py:0
+#, python-format
+msgid "You cannot create recursive groups."
+msgstr ""
+
+#. module: account
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "You cannot delete an item linked to a posted entry."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_account_tag.py:0
+#, python-format
+msgid ""
+"You cannot delete this account tag (%s), it is used on the chart of account "
+"definition."
 msgstr ""
 
 #. module: account
@@ -15817,6 +15922,14 @@ msgid ""
 msgstr ""
 "Šo ierakstu nevar dzēst, jo tam jau ir piešķirts kārtas numurs un tas nav "
 "pēdējais ieraksts ķēdē. Tā vietā, iespējams, vajadzētu to atgriezt."
+
+#. module: account
+#: code:addons/account/models/ir_actions_report.py:0
+#, python-format
+msgid ""
+"You cannot delete this report (%s), it is used by the accounting PDF "
+"generation engine."
+msgstr ""
 
 #. module: account
 #: code:addons/account/models/res_config_settings.py:0
@@ -15896,6 +16009,12 @@ msgid ""
 msgstr ""
 "Jums nevar būt vairāk nekā viens konts, kura tips ir \"Esošā gada peļņa\". "
 "(konti: %s)"
+
+#. module: account
+#: code:addons/account/models/account_account.py:0
+#, python-format
+msgid "You cannot merge accounts."
+msgstr "Kontus apvienot nevar."
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -16013,7 +16132,7 @@ msgstr ""
 "daļēja saskaņošana."
 
 #. module: account
-#: code:addons/account/models/account_account.py:0
+#: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "You cannot switch the type of a posted document."
 msgstr "Nav iespējams pārslēgt nosūtītā dokumenta veidu."
@@ -16438,6 +16557,11 @@ msgid ""
 msgstr ""
 "patur tiesības pieprasīt fiksētu procentu maksājumu 10% o% apmērā no "
 "atlikušās maksājamās summas."
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_tax_repartition_line__tag_ids_domain
+msgid "tag domain"
+msgstr "tagu domēns"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0

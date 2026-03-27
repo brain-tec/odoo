@@ -33,19 +33,19 @@
 # Alena Vlasova, 2023
 # Elena Da, 2023
 # Martin Trigaux, 2023
-# Сергей Шебанин <sergey@shebanin.ru>, 2023
 # alenafairy, 2023
-# Wil Odoo, 2024
 # Смородин Даниил, 2024
 # Collex100, 2024
+# Сергей Шебанин <sergey@shebanin.ru>, 2024
+# Wil Odoo, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-18 09:52+0000\n"
+"POT-Creation-Date: 2024-08-14 15:42+0000\n"
 "PO-Revision-Date: 2021-09-14 12:18+0000\n"
-"Last-Translator: Collex100, 2024\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Russian (https://app.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -130,6 +130,12 @@ msgstr "%<span class=\"px-3\"/>("
 #, python-format
 msgid "%d moves"
 msgstr "%d движется"
+
+#. module: account
+#: code:addons/account/models/account_account_tag.py:0
+#, python-format
+msgid "%s (%s)"
+msgstr "%s (%s)"
 
 #. module: account
 #: code:addons/account/models/account_tax.py:0
@@ -267,6 +273,13 @@ msgstr "30% Сейчас, баланс 60 дней"
 #: model:account.payment.term,name:account.account_payment_term_45days
 msgid "45 Days"
 msgstr "45 дней"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
+msgid ""
+"<br/>\n"
+"                            on this account:"
+msgstr ""
 
 #. module: account
 #: model:mail.template,body_html:account.email_template_edi_credit_note
@@ -986,11 +999,6 @@ msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
-msgid "<strong>Amount Due</strong>"
-msgstr "<strong>Сумма задолженности</strong>"
-
-#. module: account
-#: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<strong>Credit Note Date:</strong>"
 msgstr "<strong>Кредитная нота Дата:</strong>"
 
@@ -1218,14 +1226,6 @@ msgid "A tax fiscal position could be defined only one time on same taxes."
 msgstr ""
 "Схема налогообложения может быть определена только один раз на одинаковые "
 "налоги."
-
-#. module: account
-#: code:addons/account/models/account_tax.py:0
-#, python-format
-msgid ""
-"A tax should only use tags from its country. You should use another tax and "
-"a fiscal position if you wish to uses the tags from foreign tax reports."
-msgstr ""
 
 #. module: account
 #: code:addons/account/models/res_users.py:0
@@ -1793,6 +1793,7 @@ msgstr "Активируйте, чтобы создать товарный че�
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account_tag__active
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__active
+#: model:ir.model.fields,field_description:account.field_account_fiscal_position_tax__tax_dest_active
 #: model:ir.model.fields,field_description:account.field_account_incoterms__active
 #: model:ir.model.fields,field_description:account.field_account_journal__active
 #: model:ir.model.fields,field_description:account.field_account_payment_term__active
@@ -2608,14 +2609,6 @@ msgstr "Основные средства"
 #: model:ir.model.fields,field_description:account.field_account_chart_template__account_ids
 msgid "Associated Account Templates"
 msgstr "Связанные шаблоны счёта"
-
-#. module: account
-#: code:addons/account/populate/res_company.py:0
-#, python-format
-msgid ""
-"At least one localization is needed to be installed in order to populate the"
-" database with accounting"
-msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_invoice_send_wizard_form
@@ -3866,6 +3859,7 @@ msgstr "Связанные с партнёром организации"
 #: model:ir.model.fields,field_description:account.field_account_tax_carryover_line__company_id
 #: model:ir.model.fields,field_description:account.field_account_tax_repartition_line__company_id
 #: model_terms:ir.ui.view,arch_db:account.view_account_analytic_default_form_search
+#: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_search
@@ -4103,6 +4097,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
 msgid "Counterpart Entries"
 msgstr "Записи контрагентов"
+
+#. module: account
+#: model:ir.model.fields,help:account.field_res_company__multi_vat_foreign_country_ids
+msgid "Countries for which the company has a VAT number"
+msgstr "Страны, для которых компания имеет номер НДС"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account_tag__country_id
@@ -4470,6 +4469,7 @@ msgstr "Создан"
 #. module: account
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #: code:addons/account/wizard/accrued_orders.py:0
+#: model:ir.model.fields,field_description:account.field_account_analytic_account__credit
 #: model:ir.model.fields,field_description:account.field_account_move_line__credit
 #: model_terms:ir.ui.view,arch_db:account.report_journal
 #, python-format
@@ -4838,6 +4838,7 @@ msgstr "Проверка согласованности данных"
 #: model:ir.model.fields,field_description:account.field_tax_adjustments_wizard__date
 #: model:ir.model.fields.selection,name:account.selection__account_print_journal__sort_selection__date
 #: model_terms:ir.ui.view,arch_db:account.report_journal
+#: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
@@ -4910,6 +4911,7 @@ msgstr ""
 #. module: account
 #: code:addons/account/wizard/account_automatic_entry_wizard.py:0
 #: code:addons/account/wizard/accrued_orders.py:0
+#: model:ir.model.fields,field_description:account.field_account_analytic_account__debit
 #: model:ir.model.fields,field_description:account.field_account_move_line__debit
 #: model_terms:ir.ui.view,arch_db:account.report_journal
 #, python-format
@@ -5134,6 +5136,26 @@ msgstr "Удалить письма"
 #: model:ir.model.fields,field_description:account.field_account_invoice_send__auto_delete_message
 msgid "Delete Message Copy"
 msgstr "Удалить копию сообщения"
+
+#. module: account
+#: model:account.account.tag,name:account.demo_ceo_wages_account
+msgid "Demo CEO Wages Account"
+msgstr "Демо-счет заработной платы генерального директора"
+
+#. module: account
+#: model:account.account.tag,name:account.demo_capital_account
+msgid "Demo Capital Account"
+msgstr "Демо-счет капитала"
+
+#. module: account
+#: model:account.account.tag,name:account.demo_sale_of_land_account
+msgid "Demo Sale of Land Account"
+msgstr "Демонстрационный счет продажи земли"
+
+#. module: account
+#: model:account.account.tag,name:account.demo_stock_account
+msgid "Demo Stock Account"
+msgstr "Демо-счет (Стоимость заказов на складе)"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__deprecated
@@ -5581,6 +5603,13 @@ msgid "Dynamic Reports"
 msgstr "динамические отчеты"
 
 #. module: account
+#: model:ir.model.fields,help:account.field_account_tax_repartition_line__tag_ids_domain
+msgid "Dynamic domain used for the tag that can be set on tax"
+msgstr ""
+"Динамический домен, используемый для тега, который может быть установлен на "
+"налог"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_res_config_settings__module_l10n_eu_oss
 msgid "EU Intra-community Distance Selling"
 msgstr "ЕС Внутриобщинные дистанционные продажи"
@@ -5928,6 +5957,11 @@ msgid "Financial Tags"
 msgstr ""
 
 #. module: account
+#: model:account.account.tag,name:account.account_tag_financing
+msgid "Financing Activities"
+msgstr "Финансовая деятельность"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model_partner_mapping__payment_ref_regex
 msgid "Find Text in Label"
 msgstr "Найти текст в метке"
@@ -6002,6 +6036,7 @@ msgstr "финансовые периоды"
 #: model:ir.model.fields,field_description:account.field_account_invoice_report__fiscal_position_id
 #: model:ir.model.fields,field_description:account.field_account_move__fiscal_position_id
 #: model:ir.model.fields,field_description:account.field_account_payment__fiscal_position_id
+#: model:ir.model.fields,field_description:account.field_res_company__fiscal_position_ids
 #: model:ir.model.fields,field_description:account.field_res_partner__property_account_position_id
 #: model:ir.model.fields,field_description:account.field_res_users__property_account_position_id
 #: model_terms:ir.ui.view,arch_db:account.view_account_position_filter
@@ -6167,6 +6202,11 @@ msgstr "Иностранная валюта "
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__foreign_vat
 msgid "Foreign Tax ID"
 msgstr "Иностранный налоговый идентификатор"
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_res_company__multi_vat_foreign_country_ids
+msgid "Foreign VAT countries"
+msgstr "Иностранные страны с НДС"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__foreign_vat_header_mode
@@ -7136,10 +7176,10 @@ msgstr "Интрастат"
 #. module: account
 #: code:addons/account/models/partner.py:0
 #, python-format
-msgid "Invalid \"Zip Range\", please configure it properly."
+msgid ""
+"Invalid \"Zip Range\", You have to configure both \"From\" and \"To\" values"
+" for the zip range and \"To\" should be greater than \"From\"."
 msgstr ""
-"Недействительный \"Диапазон Почтового индекса\", пожалуйста, настройте его "
-"должным образом."
 
 #. module: account
 #: code:addons/account/models/company.py:0
@@ -7151,6 +7191,11 @@ msgstr "Недействителен последний день отчетно�
 #: model:ir.model.fields,field_description:account.field_account_move_line__tax_tag_invert
 msgid "Invert Tags"
 msgstr "Теги Инвертировать"
+
+#. module: account
+#: model:account.account.tag,name:account.account_tag_investing
+msgid "Investing & Extraordinary Activities"
+msgstr "Инвестиционная и чрезвычайная деятельность"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -7604,6 +7649,7 @@ msgstr "Январь"
 #: model_terms:ir.ui.view,arch_db:account.report_hash_integrity
 #: model_terms:ir.ui.view,arch_db:account.report_journal
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
@@ -8602,6 +8648,11 @@ msgid "Memo:"
 msgstr "Памятка:"
 
 #. module: account
+#: model:ir.model,name:account.model_base_partner_merge_automatic_wizard
+msgid "Merge Partner Wizard"
+msgstr "Мастер слияния партнеров"
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__message_has_error
 #: model:ir.model.fields,field_description:account.field_account_account_template__message_has_error
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__message_has_error
@@ -8810,6 +8861,12 @@ msgstr "Отрицательный налоговый баланс"
 #: model:ir.model.fields,help:account.field_account_payment__amount_signed
 msgid "Negative value of amount field if payment_type is outbound"
 msgstr "Отрицательное значение поля суммы, если payment_type исходящий"
+
+#. module: account
+#: code:addons/account/models/account_tax.py:0
+#, python-format
+msgid "Nested group of taxes are not allowed."
+msgstr ""
 
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_bank_statement__state__open
@@ -9232,6 +9289,11 @@ msgid "Off-Balance Sheet"
 msgstr "Забалансовый счёт"
 
 #. module: account
+#: model:account.account.tag,name:account.demo_office_furniture_account
+msgid "Office Furniture"
+msgstr "Принадлежности офисные"
+
+#. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_reconcile_model__matching_order__old_first
 #: model:ir.model.fields.selection,name:account.selection__account_reconcile_model_template__matching_order__old_first
 msgid "Oldest first"
@@ -9430,6 +9492,11 @@ msgstr "Начальный кредит для этого счета."
 #: model:ir.model.fields,help:account.field_account_account__opening_debit
 msgid "Opening debit value for this account."
 msgstr "Начальный дебет для этого счета."
+
+#. module: account
+#: model:account.account.tag,name:account.account_tag_operating
+msgid "Operating Activities"
+msgstr "Операционная деятельность"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_reconcile_model_form
@@ -9784,6 +9851,7 @@ msgstr "Частично оплачено"
 #: model_terms:ir.ui.view,arch_db:account.report_journal
 #: model_terms:ir.ui.view,arch_db:account.view_account_analytic_default_form_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_analytic_line_filter_inherit_account
+#: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_report_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
@@ -9844,6 +9912,13 @@ msgstr "Сопоставление партнеров для моделей пр
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__match_partner
 msgid "Partner should be set"
 msgstr ""
+
+#. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid "Partners that are used in hashed entries cannot be merged."
+msgstr ""
+"Партнеры, используемые в хэшированных записях, не могут быть объединены."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
@@ -10225,16 +10300,6 @@ msgid "Please define a payment method line on your payment."
 msgstr "Пожалуйста, укажите способ оплаты в строке платежа."
 
 #. module: account
-#: code:addons/account/models/account_payment.py:0
-#, python-format
-msgid ""
-"The selected payment method is not available for this payment, please select"
-" the payment method again."
-msgstr ""
-"Выбранный способ оплаты недоступен для данного платежа, пожалуйста, выберите"
-" способ оплаты еще раз."
-
-#. module: account
 #: code:addons/account/models/chart_template.py:0
 #, python-format
 msgid "Please first define a fiscal country for company %s."
@@ -10371,7 +10436,7 @@ msgstr "Опубликовано ранее"
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_journal
 msgid "Posted Entries only"
-msgstr ""
+msgstr "Только проведенные записи"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
@@ -11881,6 +11946,7 @@ msgid "Set active to false to hide the Journal without removing it."
 msgstr "Переключите \"активный\" в \"ЛОЖЬ\", для сокрытия Журнала без его удаления"
 
 #. module: account
+#: model:ir.model.fields,help:account.field_account_fiscal_position_tax__tax_dest_active
 #: model:ir.model.fields,help:account.field_account_tax__active
 #: model:ir.model.fields,help:account.field_account_tax_template__active
 msgid "Set active to false to hide the tax without removing it."
@@ -13528,6 +13594,14 @@ msgid "The company this distribution line belongs to."
 msgstr "Компания, которой принадлежит эта линия распределения."
 
 #. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
+"The country code of the foreign VAT number does not match any country in the"
+" group."
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_tax_group__country_id
 msgid "The country for which this tax group is applicable."
 msgstr "Страна, для которой применима данная налоговая группа."
@@ -14152,6 +14226,16 @@ msgid ""
 msgstr ""
 "Выбранный счет назначения настроен на использование определенной валюты. Каждая запись, переведенная на него, будет конвертироваться в эту валюту, что приведет к\n"
 "                        потеря любой ранее существовавшей суммы в иностранной валюте."
+
+#. module: account
+#: code:addons/account/models/account_payment.py:0
+#, python-format
+msgid ""
+"The selected payment method is not available for this payment, please select"
+" the payment method again."
+msgstr ""
+"Выбранный способ оплаты недоступен для данного платежа, пожалуйста, выберите"
+" способ оплаты еще раз."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
@@ -15876,7 +15960,7 @@ msgstr ""
 "Вы не можете создавать платежи для записей, принадлежащих разным компаниям."
 
 #. module: account
-#: code:addons/account/models/account_payment_method.py:0
+#: code:addons/account/models/account_journal.py:0
 #, python-format
 msgid ""
 "You can't have two payment method lines of the same payment type (%s) and "
@@ -15927,11 +16011,9 @@ msgstr ""
 #: code:addons/account/wizard/account_payment_register.py:0
 #, python-format
 msgid ""
-"You can't register payments for journal items being either all inbound, "
-"either all outbound."
+"You can't register payments for both inbound and outbound moves at the same "
+"time."
 msgstr ""
-"Вы не можете зарегистрировать платежи для статей журнала, которые являются "
-"либо полностью входящими, либо полностью исходящими."
 
 #. module: account
 #: code:addons/account/models/account_analytic_line.py:0
@@ -15987,6 +16069,14 @@ msgid ""
 msgstr ""
 "Вы не можете изменить компанию владельца счета, который уже содержит пункты "
 "журнала."
+
+#. module: account
+#: code:addons/account/models/partner.py:0
+#, python-format
+msgid ""
+"You cannot create a fiscal position with a country outside of the selected "
+"country group."
+msgstr ""
 
 #. module: account
 #: code:addons/account/models/partner.py:0
@@ -16152,6 +16242,12 @@ msgstr ""
 "(Счета:%s )"
 
 #. module: account
+#: code:addons/account/models/account_account.py:0
+#, python-format
+msgid "You cannot merge accounts."
+msgstr "Вы не можете объединять счета."
+
+#. module: account
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid ""
@@ -16271,7 +16367,7 @@ msgstr ""
 " частичные согласования все еще находятся на рассмотрении."
 
 #. module: account
-#: code:addons/account/models/account_account.py:0
+#: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "You cannot switch the type of a posted document."
 msgstr "Вы не можете изменить тип размещенного документа."
@@ -16700,6 +16796,11 @@ msgid ""
 msgstr ""
 "оставляет за собой право потребовать выплаты фиксированных процентов в "
 "размере 10% oот суммы, оставшейся к оплате."
+
+#. module: account
+#: model:ir.model.fields,field_description:account.field_account_tax_repartition_line__tag_ids_domain
+msgid "tag domain"
+msgstr "домен тегов"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0

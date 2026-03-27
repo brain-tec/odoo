@@ -34,21 +34,27 @@ QUnit.module("ActionManager", (hooks) => {
         assert.strictEqual(webClient.el.querySelector(".modal-title").textContent, "Dialog Test");
     });
 
-    QUnit.test("can display client actions in Dialog and close the dialog", async function (assert) {
-        assert.expect(3);
-        const webClient = await createWebClient({ serverData });
-        await doAction(webClient, {
-            name: "Dialog Test",
-            target: "new",
-            tag: "__test__client__action__",
-            type: "ir.actions.client",
-        });
-        assert.containsOnce(webClient, ".modal .test_client_action");
-        assert.strictEqual(webClient.el.querySelector(".modal-title").textContent, "Dialog Test");
-        webClient.el.querySelector('.modal footer .btn.btn-primary').click()
-        await nextTick();
-        assert.containsNone(webClient, ".modal .test_client_action");
-    });
+    QUnit.test(
+        "can display client actions in Dialog and close the dialog",
+        async function (assert) {
+            assert.expect(3);
+            const webClient = await createWebClient({ serverData });
+            await doAction(webClient, {
+                name: "Dialog Test",
+                target: "new",
+                tag: "__test__client__action__",
+                type: "ir.actions.client",
+            });
+            assert.containsOnce(webClient, ".modal .test_client_action");
+            assert.strictEqual(
+                webClient.el.querySelector(".modal-title").textContent,
+                "Dialog Test"
+            );
+            webClient.el.querySelector(".modal footer .btn.btn-primary").click();
+            await nextTick();
+            assert.containsNone(webClient, ".modal .test_client_action");
+        }
+    );
 
     QUnit.test("can display client actions as main, then in Dialog", async function (assert) {
         assert.expect(3);
