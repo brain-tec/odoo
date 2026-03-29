@@ -307,12 +307,14 @@ class AccountMove(models.Model):
         }, ""
 
     def _l10n_vn_edi_fetch_invoice_files(self):
+        """
+        Fetches the SInvoice XML and PDF data from the SInvoice server if self is a sent invoice.
+        The files are saved in the l10n_vn_edi_sinvoice_pdf_file_id and l10n_vn_edi_sinvoice_xml_file_id.
+        """
 
         if self.l10n_vn_edi_invoice_state != 'sent':
             raise UserError(_("Please send the invoice to SInvoice before fetching the tax invoice files."))
 
-        # Download SInvoice documents in order to attach them to the email we sent to the customer.
-        # If the email is not being sent, we will still get the files and attach them to the invoice.
         xml_data, xml_error_message = self._l10n_vn_edi_fetch_invoice_xml_file_data()
         pdf_data, pdf_error_message = self._l10n_vn_edi_fetch_invoice_pdf_file_data()
 
@@ -749,7 +751,7 @@ class AccountMove(models.Model):
                 'itemCode': line.product_id.code or '',
                 'itemName': textwrap.shorten(item_name, width=500, placeholder='...'),
                 'unitName': line.product_uom_id.name or 'Units',
-                'unitPrice': line.price_unit * sign,
+                'unitPrice': line.currency_id.round(line.price_unit * sign),
                 'quantity': line.quantity,
                 # This amount should be without discount applied.
                 'itemTotalAmountWithoutTax': line.currency_id.round(line.price_unit * line.quantity),

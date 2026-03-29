@@ -74,6 +74,7 @@ export class Many2ManyTagsAvatarFieldPopover extends Many2ManyTagsAvatarField {
     static template = "web.Many2ManyTagsAvatarFieldPopover";
     static props = {
         ...Many2ManyTagsAvatarField.props,
+        specification: Object,
         close: { type: Function },
     };
 
@@ -109,11 +110,12 @@ export class KanbanMany2ManyTagsAvatarField extends Many2ManyTagsAvatarField {
         ...super.props,
         isEditable: { type: Boolean, optional: true },
     };
+    static PopoverClass = Many2ManyTagsAvatarFieldPopover;
     visibleItemsLimit = 3;
 
     setup() {
         super.setup();
-        this.popover = usePopover(Many2ManyTagsAvatarFieldPopover, {
+        this.popover = usePopover(this.constructor.PopoverClass, {
             popoverClass: "o_m2m_tags_avatar_field_popover",
             closeOnClickAway: (target) => !target.closest(".modal"),
         });
@@ -124,7 +126,7 @@ export class KanbanMany2ManyTagsAvatarField extends Many2ManyTagsAvatarField {
     }
 
     get popoverProps() {
-        const props = { ...this.props };
+        const props = { ...this.props, specification: this.specification };
         delete props.isEditable;
         delete props.relation;
         return props;

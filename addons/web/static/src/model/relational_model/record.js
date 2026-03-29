@@ -13,7 +13,7 @@ import {
     getScheduleORMExtras,
     parseServerValue,
 } from "./utils";
-import { ConnectionLostError } from "@web/core/network/rpc";
+import { RPCError, ConnectionLostError } from "@web/core/network/rpc";
 import { pick } from "@web/core/utils/objects";
 
 /**
@@ -1247,7 +1247,7 @@ export class Record extends DataPoint {
             if (e instanceof ConnectionLostError) {
                 return this._offlineSave();
             }
-            if (onError) {
+            if (onError && e instanceof RPCError) {
                 return onError(e, {
                     discard: () => this._discard(),
                     retry: () => this._save(...arguments),

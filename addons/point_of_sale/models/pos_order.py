@@ -306,9 +306,8 @@ class PosOrder(models.Model):
                 }))
         return invoice_lines
 
-    def _get_pos_anglo_saxon_price_unit(self, product, partner_id, quantity):
-        moves = self.filtered(lambda o: o.partner_id.id == partner_id)\
-            .mapped('picking_ids.move_ids')\
+    def _get_pos_anglo_saxon_price_unit(self, product, quantity):
+        moves = self.mapped('picking_ids.move_ids')\
             .filtered(lambda m: m.is_valued and m.product_id.valuation == 'real_time' and m.product_id.id == product.id)\
             .sorted(lambda x: x.date)
         return moves._get_price_unit()
@@ -598,6 +597,8 @@ class PosOrder(models.Model):
         values.setdefault('pricelist_id', session.config_id.pricelist_id.id)
         values.setdefault('fiscal_position_id', session.config_id.default_fiscal_position_id.id)
         values.setdefault('company_id', session.config_id.company_id.id)
+        if session.config_id.use_presets and session.config_id.default_preset_id:
+            values.setdefault('preset_id', session.config_id.default_preset_id.id)
 
         if not values.get('pos_reference'):
             reference, tracking_number = session.config_id._get_next_order_refs()
