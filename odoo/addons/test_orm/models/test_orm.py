@@ -1247,15 +1247,6 @@ class TestOrmAttachmentHost(models.Model):
     )
 
 
-class DecimalPrecisionTest(models.Model):
-    _name = 'decimal.precision.test'
-    _description = 'Decimal Precision Test'
-
-    float = fields.Float()
-    float_2 = fields.Float(digits=(16, 2))
-    float_4 = fields.Float(digits=(16, 4))
-
-
 class TestOrmModel_A(models.Model):
     _name = 'test_orm.model_a'
     _description = 'Model A'
@@ -2257,6 +2248,16 @@ class TestOrmRelated_Translation_3(models.Model):
     related_id = fields.Many2one('test_orm.related_translation_2', string='Parent Model')
     name = fields.Char('Name Related', related='related_id.name', readonly=False)
     html = fields.Html('HTML Related', related='related_id.html', readonly=False)
+
+
+class TestOrmRelated_Translation_4(models.Model):
+    _name = 'test_orm.related_translation_4'
+    _description = 'A model to test translation for inherited translated fields'
+    _inherits = {
+        'test_orm.related_translation_1': 'related_id',
+    }
+
+    related_id = fields.Many2one('test_orm.related_translation_1', string='Parent Model', required=True, ondelete='cascade')
 
 
 class TestOrmIndexed_Translation(models.Model):
