@@ -746,7 +746,7 @@ class PosOrder(models.Model):
                 partner_bank_id = journal_bank
 
         # Case 3: fallback → company bank
-        elif amount_total >= 0 and self.company_id.partner_id.bank_ids:
+        if not partner_bank_id and amount_total >= 0 and self.company_id.partner_id.bank_ids:
             partner_bank_id = _first_allowed(self.company_id.partner_id.bank_ids)
 
         return partner_bank_id.id if partner_bank_id else False
@@ -1849,7 +1849,7 @@ class PosOrderLine(models.Model):
 
     def _get_discount_amount(self):
         self.ensure_one()
-        original_price = self.tax_ids.compute_all(self.price_unit, self.currency_id, self.qty, product=self.product_id, partner=self.order_id.partner_id)['total_included']
+        original_price = self.tax_ids_after_fiscal_position.compute_all(self.price_unit, self.currency_id, self.qty, product=self.product_id, partner=self.order_id.partner_id)['total_included']
         return original_price - self.price_subtotal_incl
 
 
