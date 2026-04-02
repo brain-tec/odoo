@@ -224,14 +224,18 @@ export class FormatPlugin extends Plugin {
      * @returns {boolean}
      */
     isSelectionFormat(format, targetedNodes = this.dependencies.selection.getTargetedNodes()) {
+        const isFormatted = formatsSpecs[format].isFormatted;
+        const isNonFormattedWhiteSpaces = (node) =>
+            /^(\s|\n)+$/.test(node.nodeValue) && !isFormatted(node, { editable: this.editable });
         const targetedTextNodes = targetedNodes.filter(
             (node) =>
                 isTextNode(node) &&
                 !isZwnbsp(node) &&
                 !isEmptyTextNode(node) &&
-                (!/^\n+$/.test(node.nodeValue) || !isBlock(closestElement(node)))
+                !isNonFormattedWhiteSpaces(node) &&
+                (!/^\n+$/.test(node.nodeValue) || !isBlock(closestElement(node))) &&
+                this.dependencies.selection.isNodeEditable(node)
         );
-        const isFormatted = formatsSpecs[format].isFormatted;
         return (
             targetedTextNodes.length &&
             targetedTextNodes.every((node) => isFormatted(node, { editable: this.editable }))
@@ -428,7 +432,7 @@ export class FormatPlugin extends Plugin {
             unformattedTextNodes[0] &&
             unformattedTextNodes[0].textContent === "\u200B"
         ) {
-            this.dependencies.selection.setCursorStart(unformattedTextNodes[0]);
+            this.dependencies.selection.setCursorEnd(unformattedTextNodes[0]);
         } else if (selectedTextNodes.length) {
             const firstNode = selectedTextNodes[0];
             const lastNode = selectedTextNodes[selectedTextNodes.length - 1];
