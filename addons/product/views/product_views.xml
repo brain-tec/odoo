@@ -72,7 +72,7 @@
                         <field
                             name="image_1920"
                             widget="image_with_media_dialog"
-                            options="{'convert_to_webp': True, 'preview_image': 'image_128', 'size': [90, 90] }"
+                            options="{'convert_to_webp': True, 'preview_image': 'image_128', 'size': [90, 90], 'zoom': True}"
                         />
                     </div>
                     
@@ -165,7 +165,7 @@
                         </page>
                         <page string="Sales" name="sales" invisible="1 or not sale_ok">
                             <group name="sale" class="o_label_nowrap">
-                                <group string="Upsell &amp; Cross-Sell" name="upsell" invisible="1">
+                                <group string="Upsell &amp; Cross-Sell" name="upsell" invisible="product_variant_count != 1">
                                     <field
                                         name="uom_ids"
                                         widget="many2many_uom_tags"
@@ -443,6 +443,12 @@
                                     force_save="1"
                                     readonly="1"
                                     context="{'product_id': id}"/>
+                                <field
+                                    name="extra_uom_ids"
+                                    widget="many2many_uom_tags"
+                                    options="{'no_quick_create': True, 'on_tag_click': 'open_form'}"
+                                    groups="uom.group_uom"
+                                    context="{'product_id': id}"/>
                                 <field name="product_tag_ids" widget="many2many_tags" readonly="1"/>
                                 <field name="additional_product_tag_ids" widget="many2many_tags" context="{'product_variant_id': id}"/>
                             </group>
@@ -567,6 +573,9 @@
                    <attribute name="invisible">1</attribute>
                    <attribute name="readonly">product_variant_count &gt; 1</attribute>
                 </field>
+                <label for="list_price" position="replace">
+                    <label for="lst_price"/>
+                </label>
                 <field name="list_price" position="after">
                    <field name="lst_price" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}"/>
                 </field>
@@ -598,7 +607,17 @@
                     />
                 </field>
                 <field name="uom_ids" position="attributes">
+                    <attribute name="readonly">product_variant_count != 1</attribute>
                     <attribute name="context">{'product_id': id}</attribute>
+                </field>
+                <field name="uom_ids" position="after">
+                    <field
+                        name="extra_uom_ids"
+                        widget="many2many_uom_tags"
+                        options="{'no_quick_create': True, 'on_tag_click': 'open_form'}"
+                        groups="uom.group_uom"
+                        invisible="product_variant_count == 1"
+                        context="{'product_id': id}"/>
                 </field>
             </field>
         </record>
@@ -610,7 +629,7 @@
                 <form>
                     <sheet>
                         <div class="d-flex flex-column flex-md-row align-items-center gap-3">
-                            <field name="image_1920" widget="image" options="{'convert_to_webp': True,'preview_image': 'image_128'}"/>
+                            <field name="image_1920" widget="image" options="{'convert_to_webp': True,'preview_image': 'image_128', 'zoom': True}"/>
                             <group name="name" class="d-flex flex-column gap-md-0 w-100">
                                 <field name="company_id" invisible="1"/>
                                 <field name="currency_id" invisible="1"/>

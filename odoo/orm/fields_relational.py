@@ -94,6 +94,11 @@ class _Relational(Field[BaseModel]):
         assert self.comodel_name in model.pool, \
             f"Field {self} with unknown comodel_name {self.comodel_name or '???'!r}"
 
+    def _compute_related(self, records):
+        # Related fields for x2m must be computed in sudo to ensure cache
+        # consistency with the related field which is fetched in sudo.
+        return super()._compute_related(records.sudo())
+
     def setup_inverses(self, registry: Registry, inverses: Collector[Field, Field]):
         """ Populate ``inverses`` with ``self`` and its inverse fields. """
 
@@ -827,9 +832,6 @@ class _RelationalMulti(_Relational):
         if not self.store:
             raise ValueError(f"Cannot convert {self} to SQL because it is not stored")
 
-        # update the operator to 'any'
-        if operator in ('in', 'not in'):
-            operator = 'any' if operator == 'in' else 'not any'
         assert operator in ('any', 'not any', 'any!', 'not any!'), \
             f"Relational field {self} expects 'any' operator"
         exists = operator in ('any', 'any!')
@@ -867,9 +869,13 @@ class _RelationalMulti(_Relational):
         field_domain = self.get_comodel_domain(model)
         if isinstance(value, Domain):
             domain = value & field_domain
-            comodel = comodel.with_context(**self.context)
             bypass_access = self.bypass_search_access or operator in ('any!', 'not any!')
-            query = comodel._search(domain, bypass_access=bypass_access)
+            if bypass_access and domain.is_condition('id', value=Query):
+                # ('id', 'any!', Query), so we can just use the query
+                query = domain.value
+            else:
+                comodel = comodel.with_context(**self.context)
+                query = comodel._search(domain, bypass_access=bypass_access)
             assert isinstance(query, Query)
             return query
         if isinstance(value, Query):
