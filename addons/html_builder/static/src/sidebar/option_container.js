@@ -1,16 +1,18 @@
 import { getSnippetName, useOptionsSubEnv } from "@html_builder/utils/utils";
-import { onWillStart, onWillUpdateProps } from "@odoo/owl";
+import { onWillStart, onWillUpdateProps, useExternalListener, useRef } from "@odoo/owl";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { useOperation } from "../core/operation_plugin";
 import { BaseOptionComponent } from "../core/base_option_component";
 import { useApplyVisibility, useGetItemValue, useVisibilityObserver } from "../core/utils";
+import { uniqueId } from "@web/core/utils/functions";
+import { browser } from "@web/core/browser/browser";
 
 export class OptionsContainer extends BaseOptionComponent {
     static template = "html_builder.OptionsContainer";
-    static dependencies = ["builderOptions", "overlayButtons", "builderOverlay", "remove", "clone"];
+    static dependencies = ["builderOptions", "remove", "clone"];
     static props = {
-        snippetModel: { type: Object },
+        toggleOverlayPreview: { type: Function, optional: true },
         options: { type: Array },
         editingElement: true, // HTMLElement from iframe
         isRemovable: { type: Boolean, optional: true },
@@ -25,6 +27,7 @@ export class OptionsContainer extends BaseOptionComponent {
         headerMiddleButtons: { type: Array, optional: true },
     };
     static defaultProps = {
+        toggleOverlayPreview: () => {},
         containerTitle: {},
         headerMiddleButtons: [],
         optionTitleComponents: [],
@@ -35,9 +38,16 @@ export class OptionsContainer extends BaseOptionComponent {
     setup() {
         useOptionsSubEnv(() => [this.props.editingElement]);
         super.setup();
+        this.containerId = uniqueId("option-container-");
         this.notification = useService("notification");
         this.getItemValue = useGetItemValue();
         useVisibilityObserver("content", useApplyVisibility("root"));
+
+        this.rootRef = useRef("root");
+        useExternalListener(browser, "focusin", this.updateOverlayPreview);
+        useExternalListener(browser, "pointermove", this.updateOverlayPreview);
+        useExternalListener(this.document, "pointermove", this.updateOverlayPreview);
+        this.showingOverlayPreview = false;
 
         this.callOperation = useOperation();
 
@@ -84,22 +94,14 @@ export class OptionsContainer extends BaseOptionComponent {
         return (title || getSnippetName(this.env.getEditingElement())) + titleExtraInfo;
     }
 
-    toggleOverlayPreview(el, show) {
-        if (show) {
-            this.dependencies.overlayButtons.hideOverlayButtons();
-            this.dependencies.builderOverlay.showOverlayPreview(el);
-        } else {
-            this.dependencies.overlayButtons.showOverlayButtons();
-            this.dependencies.builderOverlay.hideOverlayPreview(el);
+    /** @param {PointerEvent | FocusEvent} ev */
+    updateOverlayPreview(ev) {
+        const shouldShow = this.rootRef.el?.contains(ev.target);
+        if (shouldShow === this.showingOverlayPreview) {
+            return;
         }
-    }
-
-    onPointerEnter() {
-        this.toggleOverlayPreview(this.props.editingElement, true);
-    }
-
-    onPointerLeave() {
-        this.toggleOverlayPreview(this.props.editingElement, false);
+        this.props.toggleOverlayPreview(this.props.editingElement, shouldShow);
+        this.showingOverlayPreview = shouldShow;
     }
 
     // Actions of the buttons in the title bar.

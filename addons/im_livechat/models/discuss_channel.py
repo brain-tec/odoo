@@ -9,7 +9,7 @@ from odoo import api, fields, models, _, tools
 from odoo.addons.base.models.ir_qweb_fields import nl2br
 from odoo.addons.mail.tools.discuss import Store
 from odoo.exceptions import UserError
-from odoo.tools import email_split, format_list, html2plaintext
+from odoo.tools import email_split, format_list, html2plaintext, is_html_empty
 from odoo.tools.mimetypes import get_extension
 from odoo.tools.sql import SQL
 from odoo.tools.translate import LazyTranslate
@@ -594,10 +594,9 @@ class DiscussChannel(models.Model):
         """ Set deactivate the livechat channel and notify (the operator) the reason of closing the session."""
         self.ensure_one()
         if not self.livechat_end_dt:
-            member = self.channel_member_ids.filtered(lambda m: m.is_self)
-            if member:
+            if self.self_member_id:
                 # sudo: discuss.channel.rtc.session - member of current user can leave call
-                member.sudo()._rtc_leave_call()
+                self.self_member_id.sudo()._rtc_leave_call()
             # sudo: discuss.channel - visitor left the conversation, state must be updated
             self.sudo().livechat_end_dt = fields.Datetime.now()
             # avoid useless notification if the channel is empty
@@ -631,6 +630,7 @@ class DiscussChannel(models.Model):
         render_context = {
             "company": company,
             "channel": self,
+            "is_html_empty": is_html_empty,
             "tz": ZoneInfo(tz),
             "correspondent_names": correspondent_names,
         }
@@ -685,12 +685,14 @@ class DiscussChannel(models.Model):
         self.ensure_one()
         parts = []
         previous_message_author = None
+        # sudo - mail.message: visitors can access messages on chats they have access to
+        messages = self.sudo().chatbot_message_ids.mail_message_id or self.message_ids
         # sudo - mail.message: getting empty/notification messages to exclude them is allowed.
-        messages = (
-            self.message_ids.sudo().filtered(lambda m: m.message_type != "notification")
-            - self.message_ids.sudo()._filter_empty()
+        filtered_messages = (
+            messages.sudo().filtered(lambda m: m.message_type != "notification")
+            - messages.sudo()._filter_empty()
         )
-        for message in messages.sorted("id"):
+        for message in filtered_messages.sorted("id"):
             # sudo - res.partner: accessing livechat username or name is allowed to visitor
             message_author = message.author_id.sudo() or message.author_guest_id
             if previous_message_author != message_author:
@@ -989,7 +991,7 @@ class DiscussChannel(models.Model):
             if chatbot_script_step.operator_expertise_ids:
                 create_member_params['agent_expertise_ids'] = chatbot_script_step.operator_expertise_ids.ids
                 channel_sudo.livechat_expertise_ids |= chatbot_script_step.operator_expertise_ids
-            channel_sudo._add_new_members_to_channel(
+            channel_sudo._add_members(
                 create_member_params=create_member_params,
                 inviting_partner=bot_partner_id,
                 users=human_operator,
@@ -1027,17 +1029,6 @@ class DiscussChannel(models.Model):
         if chatbot_script_step and chatbot_script_step.message:
             posted_message = self._chatbot_post_message(chatbot_script_step.chatbot_script_id, chatbot_script_step.message)
         return posted_message
-
-    def _add_new_members_to_channel(self, create_member_params, inviting_partner, users=None, partners=None):
-        member_params = {
-            'create_member_params': create_member_params,
-            'inviting_partner': inviting_partner
-        }
-        if users:
-            member_params['users'] = users
-        if partners:
-            member_params['partners'] = partners
-        self._add_members(**member_params)
 
     def _update_forwarded_channel_data(self, /, *, livechat_failure, operator_name):
         self.write(
