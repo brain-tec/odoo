@@ -2,6 +2,7 @@
 
 from odoo import api, fields, models
 from odoo.fields import Domain
+from odoo.tools.sql import SQL
 from odoo.tools.translate import html_translate
 
 from odoo.addons.website_sale.const import SHOP_PATH
@@ -61,7 +62,6 @@ class ProductPublicCategory(models.Model):
         compute="_compute_has_published_products",
         search="_search_has_published_products",
         compute_sudo=True,
-        recursive=True,
     )
 
     website_description = fields.Html(
@@ -138,56 +138,51 @@ class ProductPublicCategory(models.Model):
                     category
                 )
 
-    @api.depends("product_tmpl_ids.is_published", "child_id.has_published_products")
+    @api.depends_context("company", "website_id")
     def _compute_has_published_products(self):
-        grouped_product_templates = self.env["product.template"]._read_group(
-            domain=[
-                ("public_categ_ids", "in", self.ids),
-                ("is_published", "=", True),
-                ("active", "=", True),
-            ],
-            groupby=["public_categ_ids"],
+        has_published_products = self.search(
+            # See also :meth:`_search_has_published_products`
+            Domain([("has_published_products", "=", True), ("id", "in", self.ids)]),
+            order="id",
         )
-        published_category_ids = {group[0].id for group in grouped_product_templates}
-        for category in self:
-            has_published = category.id in published_category_ids
-            category.has_published_products = has_published or any(
-                c.has_published_products for c in category.child_id
-            )
+        has_published_products.has_published_products = True
+        (self - has_published_products).has_published_products = False
 
     # === SEARCH METHODS === #
 
     @api.model
-    def _search_has_published_products(self, operator, _value):
-        if operator != "in":
+    def _search_has_published_products(self, operator, value):
+        if not (operator == "in" and True in value):
             return NotImplemented
-        published_categ_ids = self.search_fetch(
-            [("product_tmpl_ids", "any", [("is_published", "=", True), ("active", "=", True)])],
-            ["parent_path"],
-        ).ids
-        # Note that if the `value` is False, the ORM will invert the domain below
-        return ["|", ("id", "in", published_categ_ids), ("id", "parent_of", published_categ_ids)]
+
+        published_products_domain = (
+            Domain([("active", "=", True), ("is_published", "=", True)])
+            & self.env["website"].sale_product_domain()
+        )
+        # Bypass access rules in the subquery to avoid adding `has_published_products = True` twice.
+        subquery = self._search(
+            Domain("product_tmpl_ids", "any", published_products_domain), bypass_access=True
+        )
+        parents_and_self_have_published_products = SQL(
+            "SELECT unnest(string_to_array(left(c.parent_path, -1), '/'))::integer FROM %s c",
+            subquery.subselect(subquery.table.parent_path),
+        )
+
+        return Domain("id", "any", parents_and_self_have_published_products)
 
     # === BUSINESS METHODS === #
 
     @api.model
-    def _search_get_detail(self, website, order, options):  # noqa: PLR6301
-        with_description = options["displayDescription"]
-        search_fields = ["name"]
-        fetch_fields = ["id", "name"]
+    def _search_get_detail(self, website, order, options):
+        search_fields = ["name", "website_description"]
+        fetch_fields = ["id", "name", "parents_and_self", "website_description"]
         mapping = {
             "name": {"name": "name", "type": "text", "match": True},
             "website_url": {"name": "url", "type": "text", "truncate": False},
+            "search_item_metadata": {"name": "breadcrumb", "type": "text", "truncate": False, "match": True},
+            "image_url": {"name": "image_url", "type": "html"},
+            "description": {"name": "website_description", "type": "text", "html": True, "match": True},
         }
-        if with_description:
-            search_fields.append("website_description")
-            fetch_fields.append("website_description")
-            mapping["description"] = {
-                "name": "website_description",
-                "type": "text",
-                "match": True,
-                "html": True,
-            }
         return {
             "model": "product.public.category",
             "base_domain": [website.website_domain()],
@@ -196,12 +191,19 @@ class ProductPublicCategory(models.Model):
             "mapping": mapping,
             "icon": "fa-folder-o",
             "order": "name desc, id desc" if "name desc" in order else "name asc, id desc",
+            "group_name": self.env._("Categories"),
+            "sequence": 30,
         }
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):
         results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
+        product_category_model = self.env["product.public.category"]
         for data in results_data:
             data["url"] = "/shop/category/%s" % data["id"]
+            data["image_url"] = "/web/image/product.public.category/%s/image_128" % data["id"]
+            category_ids = data.get("parents_and_self", [])
+            category_names = product_category_model.browse(category_ids[:-1]).mapped("name")
+            data["breadcrumb"] = " / ".join(category_names)
         return results_data
 
     @api.model

@@ -16,9 +16,9 @@ import {
     isListElement,
     isListItemElement,
     isParagraphRelatedElement,
+    isPhrasingContent,
     isProtected,
     isProtecting,
-    isShrunkBlock,
     isVisibleTextNode,
     listElementSelector,
 } from "@html_editor/utils/dom_info";
@@ -507,15 +507,14 @@ export class ListPlugin extends Plugin {
         if (!isOrphan) {
             return;
         }
-        if (element.children.length && [...element.children].every(isBlock)) {
-            // Unwrap <li> if each of its children is a block element.
-            unwrapContents(element);
-        } else {
-            // Otherwise, wrap its content in a new <p> element.
-            const paragraph = this.dependencies.baseContainer.createBaseContainer();
-            element.replaceWith(paragraph);
-            paragraph.replaceChildren(...element.childNodes);
-        }
+        const cursors = this.dependencies.selection.preserveSelection();
+        this.dependencies.dom.wrapInlinesInBlocks(element, {
+            baseContainerNodeName: this.dependencies.baseContainer.getDefaultNodeName(),
+            cursors,
+        });
+        callbacksForCursorUpdate.unwrap(element);
+        unwrapContents(element);
+        cursors.restore();
     }
 
     mergeSimilarLists(element) {
@@ -563,7 +562,8 @@ export class ListPlugin extends Plugin {
 
         if (
             [...element.children].some(
-                (child) => isBlock(child) && !this.dependencies.split.isUnsplittable(child)
+                (child) =>
+                    !isPhrasingContent(child) && !this.dependencies.split.isUnsplittable(child)
             )
         ) {
             const cursors = this.dependencies.selection.preserveSelection();
@@ -735,14 +735,9 @@ export class ListPlugin extends Plugin {
         const ul = li.parentNode;
         const children = childNodes(li);
         if (!children.every(isBlock)) {
-            const baseContainer = this.dependencies.baseContainer.createBaseContainer();
-            for (const child of children) {
-                cursors.update(callbacksForCursorUpdate.append(baseContainer, child));
-                baseContainer.append(child);
-            }
-            if (isShrunkBlock(baseContainer)) {
-                baseContainer.append(this.document.createElement("br"));
-            }
+            const baseContainer = this.dependencies.baseContainer.createBaseContainer({
+                children: [...children],
+            });
             li.append(baseContainer);
             cursors.remapNode(li, baseContainer);
         }
@@ -1261,7 +1256,7 @@ export class ListPlugin extends Plugin {
      * @param {HTMLElement} list - The `<ul>` element used to determine the parent list and marker width.
      */
     adjustListPadding(list) {
-        if (!isListElement(list)) {
+        if (!isListElement(list) || ![...list.children].some(getFontSizeOrClass)) {
             return;
         }
         list.style.removeProperty("padding-inline-start");

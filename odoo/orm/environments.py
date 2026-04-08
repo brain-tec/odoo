@@ -705,7 +705,11 @@ class Transaction:
                 Environment(env.cr, public_user.id, {}).flush_all()
                 break
 
+    @deprecated("Since 20.0, renamed to invalidate_access_cache")
     def clear_access_cache(self, model_name: str = '') -> None:
+        self.invalidate_access_cache(model_name)
+
+    def invalidate_access_cache(self, model_name: str = '') -> None:
         """ Clear the access cache for record rule checks. """
         # clear each context separately because it is cached in Environment
         for context_dict in self.access_read.values():
@@ -714,9 +718,21 @@ class Transaction:
             else:
                 context_dict.clear()
 
+    def invalidate_field_data(self) -> None:
+        """ Invalidate the cache of all the fields.
+
+        This operation is unsafe by default, and must be used with care.
+        Indeed, invalidating a dirty field on a record may lead to an error,
+        because doing so drops the value to be written in database.
+        """
+        self.field_data.clear()
+        # reset Field._get_cache()
+        for env in self.envs:
+            env.__dict__.pop('_field_cache_memo', None)
+
     def clear(self):
         """ Clear the caches and pending computations and updates in the transactions. """
-        self.clear_access_cache()
+        self.invalidate_access_cache()
         self.invalidate_field_data()
         self.field_data_patches.clear()
         self.field_dirty.clear()
@@ -788,18 +804,6 @@ class Transaction:
         self.clear()
         for env in self.envs:
             reset_cached_properties(env)
-
-    def invalidate_field_data(self) -> None:
-        """ Invalidate the cache of all the fields.
-
-        This operation is unsafe by default, and must be used with care.
-        Indeed, invalidating a dirty field on a record may lead to an error,
-        because doing so drops the value to be written in database.
-        """
-        self.field_data.clear()
-        # reset Field._get_cache()
-        for env in self.envs:
-            env.__dict__.pop('_field_cache_memo', None)
 
 
 class TransactionState(typing.NamedTuple):

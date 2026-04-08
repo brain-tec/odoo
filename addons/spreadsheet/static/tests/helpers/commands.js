@@ -149,6 +149,7 @@ export function addColumns(
         position,
         base: lettersToNumber(column),
         quantity,
+        sheetName: model.getters.getSheetName(sheetId),
     });
 }
 
@@ -165,6 +166,7 @@ export function addRows(
         position,
         base: row,
         quantity,
+        sheetName: model.getters.getSheetName(sheetId),
     });
 }
 
@@ -179,6 +181,7 @@ export function deleteColumns(model, columns, sheetId = model.getters.getActiveS
         sheetId,
         dimension: "COL",
         elements: columns.map(lettersToNumber),
+        sheetName: model.getters.getSheetName(sheetId),
     });
 }
 
@@ -202,12 +205,16 @@ export function createBasicChart(
         sheetId: sheetId,
         definition: {
             title: { text: "test" },
-            dataSets: [{ dataRange: "A1" }],
+            dataSource: {
+                type: "range",
+                dataSets: [{ dataRange: "A1" }],
+            },
             type: "bar",
             background: "#fff",
             verticalAxisPosition: "left",
             legendPosition: "top",
             stackedBar: false,
+            dataSetStyles: {},
             ...definition,
         },
     });
@@ -342,7 +349,7 @@ export function createSheet(model, data = {}) {
         sheetId,
         cols: data.cols,
         rows: data.rows,
-        name: data.name,
+        name: data.name || sheetId.toString(),
     });
 }
 

@@ -345,9 +345,9 @@ class ResourceCalendar(models.Model):
                     # For flexible Calendars, we create intervals to fill in the weekly intervals with the average daily hours
                     # until the full time required hours are met. This gives us the most correct approximation when looking at a daily
                     # and weekly range for time offs and overtime calculations and work entry generation
-                    start_date = start_datetime.date()
+                    start_date = start_datetime
                     end_datetime_adjusted = end_datetime - relativedelta(seconds=1)
-                    end_date = end_datetime_adjusted.date()
+                    end_date = end_datetime_adjusted
 
                     full_time_required_hours = hours_per_week
                     max_hours_per_day = hours_per_day
@@ -570,6 +570,8 @@ class ResourceCalendar(models.Model):
         with them so this method merely calculates the proportion that is
         covered by the intervals.
         """
+        if self:
+            self.ensure_one()
         day_hours = defaultdict(float)
         day_days = defaultdict(float)
         for start, stop, _ in attendance_intervals:
@@ -750,6 +752,7 @@ class ResourceCalendar(models.Model):
             Returns a dict {'days': n, 'hours': h} containing the
             quantity of working time expressed as days and as hours.
         """
+        self.ensure_one()
         # naive datetimes are made explicit in UTC
         from_datetime = localized(from_datetime)
         to_datetime = localized(to_datetime)

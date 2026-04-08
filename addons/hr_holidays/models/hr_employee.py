@@ -131,11 +131,13 @@ class HrEmployee(models.Model):
             for employee_id, interval in work_intervals.items():
                 if employee_id not in min_dts or not interval._items:
                     continue
-                # start time of the earliest interval
-                d1 = interval._items[0][0].astimezone(UTC).replace(tzinfo=None)
-                d2 = result.get(employee_id)
-                if (not d2 or d1 < d2) and min_dts[employee_id] < d1:
-                    result[employee_id] = d1
+                for start, _stop, _meta in interval._items:
+                    d1 = start.astimezone(UTC).replace(tzinfo=None)
+                    if min_dts[employee_id] < d1:
+                        d2 = result.get(employee_id)
+                        if not d2 or d1 < d2:
+                            result[employee_id] = d1
+                        break
 
         remaining = self.browse(min_dts)
         remaining.version_ids.fetch()  # prefetch data
@@ -207,12 +209,12 @@ class HrEmployee(models.Model):
             for employee, holiday in employee_holidays.items()
         })
 
-        for employee, holidays in employee_holidays.items():
-            latest_holiday = holidays[0]
-            employee.leave_date_from = min(holidays.mapped('date_from')).date()
-            employee.leave_date_to = employee_back_on.get(employee.id, latest_holiday.date_to).date()
-            employee.current_leave_state = latest_holiday.state
-            employee.is_absent = any(h.work_entry_type_id.count_as == 'absence' for h in holidays)
+        for employee, emp_holidays in employee_holidays.items():
+            latest_emp_holiday = emp_holidays[0]
+            employee.leave_date_from = min(emp_holidays.mapped('date_from')).date()
+            employee.leave_date_to = employee_back_on.get(employee.id, latest_emp_holiday.date_to).date()
+            employee.current_leave_state = latest_emp_holiday.state
+            employee.is_absent = any(e_h.work_entry_type_id.count_as == 'absence' for e_h in emp_holidays)
 
         no_data = self - holidays.employee_id
         no_data.update({

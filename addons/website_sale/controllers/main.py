@@ -226,11 +226,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
         **post,
     ):
         return {
-            "displayDescription": True,
-            "displayDetail": True,
-            "displayExtraDetail": True,
-            "displayExtraLink": True,
-            "displayImage": True,
             "allowFuzzy": not post.get("noFuzzy"),
             "category": str(category.id) if category else None,
             "tags": tags,
@@ -243,10 +238,12 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     def _shop_lookup_products(self, options, post, search, website):
         # No limit because attributes are obtained from complete product list
-        product_count, details, fuzzy_search_term = website._search_with_fuzzy(
-            "products_only", search, limit=None, order=self._get_search_order(post), options=options
-        )
-        search_result = details[0].get("results", request.env["product.template"])
+        product_count, details, fuzzy_search_term = website._search_with_fuzzy("product_template", search,
+                                                                               offset=0,
+                                                                               limit=None,
+                                                                               order=self._get_search_order(post),
+                                                                               options=options)
+        search_result = details[0].get("results", request.env["product.template"]).with_context(bin_size=True)
 
         return fuzzy_search_term, product_count, search_result
 
@@ -448,8 +445,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
         categs_domain = (
             Domain("parent_id", "=", False) & Domain("not_in_shop", "=", False) & website_domain
         )
-        if not self.env.user._is_internal():
-            categs_domain &= Domain("has_published_products", "=", True)
         if search:
             search_categories = Category.search(
                 Domain("product_tmpl_ids", "in", search_product.ids) & website_domain
@@ -469,10 +464,13 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 category_entries = (not search and parent.child_id) or parent.child_id.filtered(
                     lambda c: c.id in search_categories.ids
                 )
+            if not search and not request.env.user._is_internal():
+                # We know the user has access to `categs` and `search_categories` because they come
+                # from a regular `search`, but we have not checked access to `category`'s children,
+                # nor its siblings or itself.
+                category_entries = category_entries.filtered("has_published_products")
         else:
             category_entries = categs
-        if not request.env.user._is_internal():
-            category_entries = category_entries.filtered("has_published_products")
 
         # products for current pager
 
@@ -497,7 +495,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         pavs_per_attribute = {}
         if products:
             search_term = fuzzy_search_term if fuzzy_search_term else search
-            product_query = request.env['product.template']._search(
+            product_query = request.env["product.template"]._search(
                 self._get_shop_domain(search_term, category, attribute_value_dict)
             )
             grouped_pavs = request.env["product.attribute.value"]._read_group(
