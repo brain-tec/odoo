@@ -1841,7 +1841,9 @@ test("properties: suffix", async () => {
     await animationFrame();
     await closePopover();
 
-    expect(".o_field_properties .o_property_field:last .o_input_box_overlay_end").toHaveText("kg");
+    expect(".o_field_properties .o_property_field:last .o_property_field_value_suffix").toHaveText(
+        "kg"
+    );
 });
 
 /**
@@ -2848,7 +2850,7 @@ test("properties: signature", async () => {
     await closePopover();
     expect(".o_field_property_definition").toHaveCount(0);
     expect(".o_signature").toHaveCount(1);
-    expect(".o_property_field:eq(0) .o_input_box_overlay_end").toHaveCount(0, {
+    expect(".o_property_field:eq(0) .o_property_field_value_suffix").toHaveCount(0, {
         message: "suffix should be removed",
     });
 });
@@ -2998,4 +3000,49 @@ test("many2one property in list view", async () => {
     expect(".o_list_table thead th").toHaveCount(4);
     expect(queryAllTexts(".o_data_row:eq(0) .o_data_cell")).toEqual(["first partner", "Alice"]);
     expect(".o_data_row:eq(0) .o_m2o_avatar img").toHaveCount(1);
+});
+
+test("properties: no parent document set", async () => {
+    onRpc("has_access", () => true);
+
+    const formView = await mountView({
+        type: "form",
+        resModel: "partner",
+        arch: /* xml */ `
+            <form>
+                <sheet>
+                    <group>
+                        <field name="company_id"/>
+                        <field name="properties"/>
+                    </group>
+                </sheet>
+            </form>`,
+        actionMenus: {},
+    });
+
+    patchWithCleanup(formView.env.services.notification, {
+        add: (message, options) => {
+            expect.step("notification");
+            expect(message).toBe(
+                "Oops! A Company is needed to add property fields."
+            );
+            expect(options.type).toBe("warning");
+        },
+    });
+
+    expect(".o_field_properties").toHaveCount(1, { message: "The field must be in the view" });
+
+    await toggleActionMenu();
+
+    expect(".o-dropdown--menu span:contains(Edit Properties)").toHaveCount(1, {
+        message: "Show Edit Properties btn in cog menu",
+    });
+
+    await toggleMenuItem("Edit Properties");
+
+    expect.verifySteps(["notification"]);
+
+    expect(".o_field_properties:first-child .o_field_property_open_popover").toHaveCount(0, {
+        message: "The edit definition button must not be in the view",
+    });
 });

@@ -1,11 +1,20 @@
 <templates id="template" xml:space="preserve">
 
+    <t t-name="html_editor.TextFieldsIcon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="oe_link_label_icon" height="18px" width="18px" viewBox="0 -960 960 960">
+            <path d="M280-160v-520H80v-120h520v120H400v520H280Zm360 0v-320H520v-120h360v120H760v320H640Z"/>
+        </svg>
+    </t>
+
     <t t-name="html_editor.linkPopover">
         <div class="o-we-linkpopover d-flex bg-light overflow-auto shadow" t-on-keydown="this.onKeydown" role="dialog" aria-modal="true" aria-label="Link Popover">
             <div t-if="this.state.editing" class="container-fluid d-flex vertical-center p-2" t-custom-ref="editing-wrapper">
                 <div t-if="this.state.isImage" class="col p-2 o_link_popover_container">
                     <div class="input-group mb-1">
-                        <input name="o_linkpopover_url_img" t-custom-ref="url" class="o_we_href_input_link border-dark-subtle form-control form-control-sm" t-custom-model="this.state.url" title="URL" placeholder="Type your URL"
+                        <label for="o_linkpopover_url_img" class="o_we_input_label">
+                            <span class="fa fa-link"></span>
+                        </label>
+                        <input id="o_linkpopover_url_img" name="o_linkpopover_url_img" t-custom-ref="url" class="o_we_href_input_link border-dark-subtle form-control form-control-sm" t-custom-model="this.state.url" title="URL" placeholder="Type your URL"
                             t-on-keydown="this.onKeydownEnter"/>
                         <button class="o_we_apply_link btn btn-sm btn-primary" t-att-class="{'mx-1': this.state.type ===  ''}" t-on-click="this.onClickApply">Apply</button>
                     </div>
@@ -14,31 +23,14 @@
                     <t t-if="this.state.showAdvancedOptions">
                         <div class="o_advance_option_panel">
                             <div class="o_advance_options_grid" style="width: 200px;">
-                                <button t-if="this.state.showAdvancedOptions" class="fa fa-angle-left btn btn-secondary border-10" t-on-click="this.toggleAdvancedOptions"/>
-                                    <t t-foreach="Object.values(this.state.relAttributeOptions)" t-as="opt" t-key="opt.label">
-                                        <t t-if="opt.label !== 'noopener'">
-                                            <div class="o_seo_option_row d-flex justify-content-between align-items-center py-1 gap-2">
-                                                <span t-att-title="opt.description"><t t-out="opt.label"/></span>
-                                                <CheckBox
-                                                    value="opt.isChecked"
-                                                    onChange="this.toggleRelAttr.bind(this, opt.label)"/>
-                                            </div>
-                                        </t>
+                                <button class="fa fa-angle-left btn btn-secondary border-10" t-on-click="this.toggleAdvancedOptions"/>
+                                <t t-foreach="Object.values(this.state.advancedAttributeOptions)" t-as="opt" t-key="opt.label">
+                                    <t t-if="!opt.requires or this.state.advancedAttributeOptions[opt.requires].isChecked">
+                                        <div class="o_seo_option_row d-flex justify-content-between align-items-center py-1 gap-2">
+                                            <span t-att-title="opt.description"><t t-out="opt.label"/></span>
+                                            <CheckBox value="opt.isChecked" onChange="this.toggleAdvancedAttr.bind(this, opt.id)"/>
+                                        </div>
                                     </t>
-                                <div class="o_seo_option_row d-flex justify-content-between align-items-center py-1 gap-2">
-                                    <span>Open in new tab</span>
-                                    <CheckBox
-                                        value="this.state.linkTarget === '_blank'"
-                                        onChange="this.onClickNewWindow.bind(this)"
-                                        className="'target-blank-option'"/>
-                                </div>
-                                <t t-if="this.state.linkTarget === '_blank'">
-                                    <div class="o_seo_option_row o_seo_option_child d-flex justify-content-between align-items-center py-1 gap-2 ps-4">
-                                        <span>noopener</span>
-                                        <CheckBox
-                                            value="this.state.relAttributeOptions.noopener.isChecked"
-                                            onChange="this.toggleRelAttr.bind(this, 'noopener')"/>
-                                    </div>
                                 </t>
                             </div>
                         </div>
@@ -46,7 +38,11 @@
                 <t t-else="">
                     <div class="col p-2 o_link_popover_container">
                         <div class="input-group mb-2" t-att-class="{'d-none': !this.state.showLabel}">
+                            <label for="o_we_label_link" class="o_we_input_label">
+                                <t t-call="html_editor.TextFieldsIcon"/>
+                            </label>
                             <input t-custom-ref="label"
+                                id="o_we_label_link"
                                 class="o_we_label_link border-dark-subtle form-control form-control-sm"
                                 t-custom-model="this.state.label"
                                 title="Label"
@@ -54,7 +50,11 @@
                                 t-on-input="this.onChange"/>
                         </div>
                         <div class="input-group mb-2">
+                            <label for="o_linkpopover_url" class="o_we_input_label">
+                                <span class="fa fa-link"></span>
+                            </label>
                             <input t-custom-ref="url"
+                                id="o_linkpopover_url"
                                 name="o_linkpopover_url"
                                 class="o_we_href_input_link border-dark-subtle form-control form-control-sm"
                                 t-custom-model="this.state.url"
@@ -131,7 +131,11 @@
                                 <a t-if="this.props.canRemove and this.state.url" href="#" class="o_we_remove_link text-dark d-flex me-1" t-on-click.prevent="this.onClickRemove" title="Remove Link">
                                     <i class="fa fa-chain-broken"></i>
                                 </a>
-                                <button class="btn btn-sm btn-secondary" title="Advanced mode" t-att-disabled="!this.state.url" t-on-click="this.toggleAdvancedOptions">
+                                <button t-if="Object.keys(this.state.advancedAttributeOptions).length"
+                                    class="btn btn-sm btn-secondary"
+                                    title="Advanced mode"
+                                    t-att-disabled="!this.state.url"
+                                    t-on-click="this.toggleAdvancedOptions">
                                     <i class="fa fa-gear"/>
                                 </button>
                             </div>
