@@ -664,7 +664,7 @@ export class ListPlugin extends Plugin {
     splitList(node) {
         const cursors = this.dependencies.selection.preserveSelection();
         // Create new list
-        const currentList = closestElement(node, "ul, ol");
+        const currentList = closestElement(node.parentElement, "ul, ol");
         const newList = currentList.cloneNode(false);
         const isList = isListElement(node);
         const wrapperLi = isList ? this.document.createElement("li") : node;
@@ -1264,14 +1264,18 @@ export class ListPlugin extends Plugin {
             return;
         }
 
-        const largestMarker = list.children[Symbol.iterator]()
+        const largestMarkerPadding = list.children[Symbol.iterator]()
             .map((li) => {
-                const markerWidth = parseFloat(this.window.getComputedStyle(li, "::marker").width);
-                return isNaN(markerWidth) ? 0 : markerWidth;
+                const beforeMargin = Math.abs(
+                    parseFloat(this.window.getComputedStyle(li, "::before").marginInlineStart) || 0
+                );
+                const markerWidth =
+                    parseFloat(this.window.getComputedStyle(li, "::marker").width) || 0;
+                // For `UL` with large font size the marker width is so big that more padding is needed.
+                const markerPadding = Math.round(markerWidth) * (list.nodeName === "UL" ? 2 : 1);
+                return Math.max(markerPadding, beforeMargin);
             })
             .reduce((accumulator, currentValue) => Math.max(accumulator, currentValue));
-        // For `UL` with large font size the marker width is so big that more padding is needed.
-        const largestMarkerPadding = Math.round(largestMarker) * (list.nodeName === "UL" ? 2 : 1);
 
         // bootstrap sets ul { padding-left: 2rem; }
         const defaultPadding = parseFloat(getHtmlStyle(this.document).fontSize) * 2;

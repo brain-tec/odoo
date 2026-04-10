@@ -817,7 +817,7 @@ class PosOrder(models.Model):
                 partner_bank_id = journal_bank
 
         # Case 3: fallback → company bank
-        elif amount_total >= 0 and self.company_id.partner_id.bank_ids:
+        if not partner_bank_id and amount_total >= 0 and self.company_id.partner_id.bank_ids:
             partner_bank_id = _first_allowed(self.company_id.partner_id.bank_ids)
 
         return partner_bank_id.id if partner_bank_id else False
@@ -1357,6 +1357,8 @@ class PosOrder(models.Model):
 
     def _create_order_picking(self):
         self.ensure_one()
+        if self.picking_ids:
+            return
         if self.shipping_date:
             self.sudo().lines._launch_stock_rule_from_pos_order_lines()
         else:
