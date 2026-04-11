@@ -3,6 +3,7 @@
 from itertools import chain
 
 from odoo.addons.mail.tests.common import MailCommon
+from odoo.exceptions import AccessError
 from odoo.tests.common import HttpCase, tagged, warmup
 
 
@@ -16,17 +17,15 @@ class TestInboxPerformance(HttpCase, MailCommon):
         # Queries (in order):
         #   - search website (get_current_website by domain)
         #   - search website (get_current_website default)
-        #   - search website_rewrite (_get_rewrites) sometimes occurs depending on the routing cache
-        #   - _get ir_config_parameter (web.max_file_upload_size) sometimes occurs depending on the routing cache
-        #   - fetch ir_attachment (res.lang flag_image) sometimes occurs depending on the routing cache
+        #   - sometimes could occur depending on the routing cache (website_rewrite, ir_config_parameter, res.lang flag_image)
         #   4 _message_fetch:
         #       2 _search_needaction:
         #           - fetch res_users (current user)
         #           - search ir_rule (_get_rules for mail.notification)
         #       - search ir_rule (_get_rules)
         #       - search mail_message
-        #   - fetch bus_bus (_bus_last_id)
-        #   30 store add message:
+        #   - search bus_bus (_bus_last_id)
+        #   32 store add message:
         #       - search mail_message
         #       - fetch mail_message
         #       - search mail_message_schedule
@@ -34,7 +33,8 @@ class TestInboxPerformance(HttpCase, MailCommon):
         #       - search ir_rule (_get_rules for rating.rating)
         #       - read group rating_rating (_rating_get_stats_per_record for slide.channel)
         #       - read group rating_rating (_rating_get_stats_per_record for product.template)
-        #       2 thread:
+        #       3 thread:
+        #           - fetch hr_employee
         #           - fetch slide_channel
         #           - fetch product_template
         #       - search mail_message_res_partner_bookmarked_rel (_compute_is_bookmarked)
@@ -56,18 +56,24 @@ class TestInboxPerformance(HttpCase, MailCommon):
         #           - fetch res_users
         #           - fetch res_partner
         #       - fetch mail_message_subtype
-        #       6 rating stats computation:
-        #           - read group rating_rating (_rating_get_stats_per_record for slide.channel)
-        #           - read group rating_rating (_rating_get_stats_per_record for product.template)
-        #           - compute message_needaction for slide.channel
-        #           - compute message_needaction for product.template
+        #       - read group rating_rating (_compute_rating_stats for slide.channel)
+        #       - read group rating_rating (_compute_rating_stats for product.template)
+        #       - compute message_needaction for hr.employee
+        #       - compute message_needaction for slide.channel
+        #       - compute message_needaction for product.template
+
+        # rating stats enabled
         first_model_records = self.env["product.template"].create(
             [{"name": "Product A1"}, {"name": "Product A2"}]
         )
         second_model_records = self.env["slide.channel"].create(
             [{"name": "Course B1"}, {"name": "Course B2"}]
         )
-        for record in chain(first_model_records, second_model_records):
+        # group restricted fields
+        third_model_record = self.env["hr.employee"].create({"name": "Employee"})
+        with self.assertRaises(AccessError):
+            third_model_record.with_user(self.user_employee).read("message_needaction_counter")
+        for record in chain(first_model_records, second_model_records, third_model_record):
             record.message_post(
                 body=f"<p>Test message for {record.name}</p>",
                 message_type="comment",
