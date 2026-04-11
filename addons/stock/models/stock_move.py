@@ -2654,17 +2654,10 @@ Please change the quantity done or the rounding precision in your settings.""",
             }
         self.product_id.ensure_one()
         return {
-            **parent_record._get_product_price_and_data(self.product_id),
-            'quantity': sum(
-                self.mapped(
-                    lambda line: line.uom_id._compute_quantity(
-                        qty=line.product_qty,
-                        to_unit=line.uom_id,
-                    ),
-                ),
-            ),
+            'price': self.product_id.standard_price,
+            'quantity': self[0].product_uom_qty,
             'readOnly': len(self) > 1,
-            'uomDisplayName': len(self) == 1 and self.uom_id.display_name or self.product_id.uom_id.display_name,
+            **parent_record._get_product_catalog_uom_data(self.product_id, self[0].uom_id),
         }
 
     def _visible_quantity(self):

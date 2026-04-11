@@ -33,7 +33,7 @@ class RepairOrder(models.Model):
     # Common Fields
     name = fields.Char(
         'Repair Reference',
-        default='New', index='trigram',
+        default=lambda self: _('New'), index='trigram',
         copy=False, required=True,
         readonly=True)
     company_id = fields.Many2one(
@@ -92,10 +92,10 @@ class RepairOrder(models.Model):
     allowed_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_uom_ids')
     uom_id = fields.Many2one(
         'uom.uom', 'Unit', domain="[('id', 'in', allowed_uom_ids)]",
-        compute='compute_uom_id', store=True, precompute=True, readonly=False)
+        compute='_compute_uom_id', store=True, precompute=True, readonly=False)
     lot_id = fields.Many2one(
         'stock.lot', 'Lot/Serial',
-        compute="compute_lot_id", store=True,
+        compute="_compute_lot_id", store=True,
         domain="[('id', 'in', allowed_lot_ids)]", check_company=True,
         help="Products repaired are all belonging to this lot")
     tracking = fields.Selection(string='Product Tracking', related="product_id.tracking", readonly=False)
@@ -261,7 +261,7 @@ class RepairOrder(models.Model):
             )
 
     @api.depends('product_id', 'product_id.uom_id')
-    def compute_uom_id(self):
+    def _compute_uom_id(self):
         for repair in self:
             if not repair.product_id:
                 repair.uom_id = False
@@ -269,7 +269,7 @@ class RepairOrder(models.Model):
                 repair.uom_id = repair.product_id.uom_id
 
     @api.depends('product_id', 'lot_id', 'lot_id.product_id', 'picking_id')
-    def compute_lot_id(self):
+    def _compute_lot_id(self):
         for repair in self:
             if (repair.product_id and repair.lot_id and repair.lot_id.product_id != repair.product_id) or not repair.product_id:
                 repair.lot_id = False
@@ -405,7 +405,7 @@ class RepairOrder(models.Model):
             )
             if 'picking_type_id' not in vals:
                 vals['picking_type_id'] = picking_type.id
-            if not vals.get('name', False) or vals['name'] == 'New':
+            if not vals.get('name', False) or vals['name'] == _('New'):
                 vals['name'] = picking_type.sequence_id.next_by_id()
             if not vals.get('reference_ids'):
                 vals['reference_ids'] = [Command.link(self.env["stock.reference"].create({'name': vals['name']}).id)]
@@ -753,15 +753,10 @@ class RepairOrder(models.Model):
     def _get_product_catalog_domain(self):
         return super()._get_product_catalog_domain() & Domain('type', '=', 'consu')
 
-    def _get_product_catalog_order_data(self, products, **kwargs):
-        product_catalog = super()._get_product_catalog_order_data(products, **kwargs)
-        for product in products:
-            product_catalog[product.id] |= self._get_product_price_and_data(product)
-        return product_catalog
-
-    def _get_product_price_and_data(self, product):
-        self.ensure_one()
-        return {'price': product.list_price}
+    def _get_product_catalog_product_data(self, product, **kwargs):
+        product_data = super()._get_product_catalog_product_data(product)
+        product_data['price'] = product.list_price
+        return product_data
 
     def _get_product_catalog_record_lines(self, product_ids, **kwargs):
         grouped_lines = defaultdict(lambda: self.env['stock.move'])
@@ -775,8 +770,8 @@ class RepairOrder(models.Model):
     def _is_display_stock_in_catalog(self):
         return True
 
-    def _update_order_line_info(self, product_id, quantity, **kwargs):
-        move = self.move_ids.filtered(lambda e: e.product_id.id == product_id)
+    def _update_order_line_info(self, product, quantity, uom, **kwargs):
+        move = self.move_ids.filtered(lambda e: e.product_id.id == product.id)
         if move:
             if quantity != 0:
                 move.product_uom_qty = quantity
@@ -786,13 +781,14 @@ class RepairOrder(models.Model):
             move = self.env['stock.move'].create({
                 'repair_id': self.id,
                 'product_uom_qty': quantity,
-                'product_id': product_id,
+                'product_id': product.id,
                 'location_id': self.location_id.id,
                 'location_dest_id': self.location_dest_id.id,
-                'repair_line_type': 'add'
+                'repair_line_type': 'add',
+                'uom_id': uom.id,
             })
 
-        return self.env['product.product'].browse(product_id).list_price
+        return product.list_price
 
     # ------------------------------------------------------------
     # MAIL.THREAD

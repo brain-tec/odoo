@@ -2570,22 +2570,26 @@ class SaleOrder(models.Model):
     # === CATALOG === #
 
     def _get_product_catalog_order_data(self, products, **kwargs):
-        pricelist = self.pricelist_id._get_products_price(
+        res = super()._get_product_catalog_order_data(products, **kwargs)
+        prices = self.pricelist_id._get_products_price(
             quantity=1.0,
             products=products,
             currency=self.currency_id,
             date=self.date_order,
             **kwargs,
         )
-        res = super()._get_product_catalog_order_data(products, **kwargs)
-        has_warning_group = self.env.user.has_group("sale.group_warning_sale")
         for product in products:
-            res[product.id]["price"] = pricelist.get(product.id)
-            if product.sale_line_warn_msg and has_warning_group:
-                res[product.id]["warning"] = product.sale_line_warn_msg
+            res[product.id]["price"] = prices.get(product.id)
         return res
 
-    def _get_product_catalog_record_lines(self, product_ids, *, section_id=None, **kwargs):  # noqa: ARG002
+    def _get_product_catalog_product_data(self, product, **kwargs):
+        product_data = super()._get_product_catalog_product_data(product)
+        has_warning_group = self.env["res.groups"]._is_feature_enabled("sale.group_warning_sale")
+        if product.sale_line_warn_msg and has_warning_group:
+            product_data.update(warning=product.sale_line_warn_msg)
+        return product_data
+
+    def _get_product_catalog_record_lines(self, product_ids, *, section_id=None, **kwargs):
         grouped_lines = defaultdict(lambda: self.env["sale.order.line"])
         if section_id is None:
             section_id = (
@@ -2607,7 +2611,7 @@ class SaleOrder(models.Model):
         return "order_id"
 
     def _update_order_line_info(
-        self, product_id, quantity, *, section_id=False, child_field="order_line", **kwargs
+        self, product, quantity, uom, *, section_id=False, child_field="order_line", **kwargs
     ):
         """Update sale order line information for a given product or create a
         new one if none exists yet.
@@ -2622,7 +2626,7 @@ class SaleOrder(models.Model):
         request.update_context(catalog_skip_tracking=True)
         sol = self.order_line.filtered(
             lambda line: (
-                line.product_id.id == product_id and line.get_parent_section_line().id == section_id
+                line.product_id.id == product.id and line.get_parent_section_line().id == section_id
             )
         )
         if sol:
@@ -2633,6 +2637,7 @@ class SaleOrder(models.Model):
                     product=sol.product_id,
                     quantity=1.0,
                     currency=self.currency_id,
+                    uom=uom,
                     date=self.date_order,
                     **kwargs,
                 )
@@ -2643,15 +2648,17 @@ class SaleOrder(models.Model):
         elif quantity > 0:
             sol = self.env["sale.order.line"].create({
                 "order_id": self.id,
-                "product_id": product_id,
+                "product_id": product.id,
                 "product_uom_qty": quantity,
                 "sequence": self._get_new_line_sequence(child_field, section_id),
+                "product_uom_id": uom.id,
             })
         else:  # quantity of 0, no line to update, return defaut pricelist price
             return self.pricelist_id._get_product_price(
-                product=self.env["product.product"].browse(product_id),
+                product=product,
                 quantity=1.0,
                 currency=self.currency_id,
+                uom=uom,
                 date=self.date_order,
                 **kwargs,
             )

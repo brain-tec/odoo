@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 """
 safe_eval module - methods intended to provide more restricted alternatives to
                    evaluate simple and/or untrusted code.
@@ -26,9 +23,9 @@ import sys
 import types
 import typing
 import zoneinfo
-from collections import defaultdict, OrderedDict
-from enum import auto, IntEnum
-from json.encoder import c_make_encoder
+from collections import OrderedDict, defaultdict
+from enum import IntEnum, auto
+from json.encoder import c_make_encoder  # noqa: OLS02001
 from opcode import opmap, opname
 from types import (
     BuiltinMethodType,
@@ -49,16 +46,47 @@ import werkzeug
 from psycopg2 import OperationalError
 
 import odoo.exceptions
-from .config import config
-from .func import lazy
-from .misc import OrderedSet
+from ..config import config
+from ..func import lazy
+from ..misc import OrderedSet
+
+_logger_runtime = logging.getLogger(f'{__name__}.runtime')
 
 unsafe_eval = eval
 
-__all__ = ['const_eval', 'safe_eval']
-
-_logger = logging.getLogger(__name__)
-_logger_runtime = logging.getLogger(f'{__name__}.runtime')
+__all__ = [
+    '_BLACKLIST',
+    '_BUBBLEUP_EXCEPTIONS',
+    '_BUILTINS',
+    '_CONST_OPCODES',
+    '_EXPR_OPCODES',
+    '_SAFE_OPCODES',
+    '_UNSAFE_ATTRIBUTES',
+    'UnsafeClassError',
+    'UnsafeFunctionError',
+    'UnsafeInstanceError',
+    'UnsafeModuleError',
+    'UnsafeObjectError',
+    'UnsafePolicy',
+    '_import',
+    'assert_valid_codeobj',
+    'check_values',
+    'const_eval',
+    'datetime',
+    'dateutil',
+    'json',
+    'safe_call',
+    'safe_checker',
+    'safe_eval',
+    'safe_transform',
+    'safe_whitelist',
+    'test_python_expr',
+    'time',
+    'to_opcodes',
+    'unsafe_eval',
+    'unsafe_policy',
+    'wrap_module'
+]
 
 
 class UnsafePolicy(IntEnum):
@@ -138,6 +166,7 @@ class UnsafeFunctionError(UnsafeObjectError):
 # lp:703841), does import time.
 _ALLOWED_MODULES = ['_strptime', 'math', 'time']
 
+
 # Mock __import__ function, as called by cpython's import emulator `PyImport_Import` inside
 # timemodule.c, _datetimemodule.c and others.
 # This function does not actually need to do anything, its expected side-effect is to make the
@@ -145,6 +174,7 @@ _ALLOWED_MODULES = ['_strptime', 'math', 'time']
 def _import(name, globals=None, locals=None, fromlist=None, level=-1):
     if name not in sys.modules:
         raise ImportError(f'module {name} should be imported before calling safe_eval()')
+
 
 for module in _ALLOWED_MODULES:
     __import__(module)
@@ -174,6 +204,8 @@ def to_opcodes(opnames, _opmap=opmap):
     for x in opnames:
         if x in _opmap:
             yield _opmap[x]
+
+
 # opcodes which absolutely positively must not be usable in safe_eval,
 # explicitly subtracted from all sets of valid opcodes just in case
 _BLACKLIST = set(to_opcodes([
@@ -318,6 +350,7 @@ def assert_no_dunder_name(code_obj, expr):
         if "__" in name or name in _UNSAFE_ATTRIBUTES:
             raise NameError('Access to forbidden name %r (%r)' % (name, expr))
 
+
 def assert_valid_codeobj(allowed_codes, code_obj, expr):
     """ Asserts that the provided code object validates against the bytecode
     and name constraints.
@@ -374,7 +407,7 @@ def compile_codeobj(expr: str, /, filename: str = '<unknown>', mode: typing.Lite
 
     except (SyntaxError, TypeError, ValueError):
         raise
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise ValueError('%r while compiling\n%r' % (e, expr))
 
 
@@ -400,27 +433,6 @@ def const_eval(expr):
     assert_valid_codeobj(_CONST_OPCODES, c, expr)
     return unsafe_eval(c)
 
-def expr_eval(expr):
-    """expr_eval(expression) -> value
-
-    Restricted Python expression evaluation
-
-    Evaluates a string that contains an expression that only
-    uses Python constants. This can be used to e.g. evaluate
-    a numerical expression from an untrusted source.
-
-    >>> expr_eval("1+2")
-    3
-    >>> expr_eval("[1,2]*2")
-    [1, 2, 1, 2]
-    >>> expr_eval("__import__('sys').modules")
-    Traceback (most recent call last):
-    ...
-    ValueError: opcode LOAD_NAME not allowed
-    """
-    c = compile_codeobj(expr)
-    assert_valid_codeobj(_EXPR_OPCODES, c, expr)
-    return unsafe_eval(c)
 
 _BUILTINS = {
     '__import__': _import,
@@ -566,6 +578,7 @@ Pre-wrapped modules are provided as attributes of `odoo.tools.safe_eval`.
 """)
     return d
 
+
 class wrap_module:
     def __init__(self, module, attributes):
         """Helper for wrapping a package/module to expose selected attributes
@@ -588,8 +601,9 @@ class wrap_module:
     def __repr__(self):
         return self._repr
 
+
 # dateutil submodules are lazy so need to import them for them to "exist"
-import dateutil
+import dateutil  # noqa: E402
 mods = ['parser', 'relativedelta', 'rrule', 'tz']
 for mod in mods:
     __import__('dateutil.%s' % mod)
@@ -930,7 +944,7 @@ class _SafeWhitelist:
         if module := getattr(cls_obj, '__module__', None):
             if (
                 module in sys.modules or
-                module == 'odoo.tools.safe_eval.<evaluated_code>'
+                module == 'odoo.tools.safe_eval.evaluation.<evaluated_code>'
             ):
                 return f'{module}.{qualname}'.strip('.')
 
@@ -1104,7 +1118,7 @@ def add_monitoring(code):
 @functools.cache
 def _initialize_safe_whitelist():
     # Custom functions
-    safe_whitelist.add_function('odoo.tools.safe_eval.<evaluated_code>.*')
+    safe_whitelist.add_function('odoo.tools.safe_eval.evaluation.<evaluated_code>.*')
     # Wrapped modules
     safe_whitelist.add_class('datetime.date')
     safe_whitelist.add_class('datetime.datetime')

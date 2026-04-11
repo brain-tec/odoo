@@ -964,7 +964,7 @@ class DomainCondition(Domain):
     def _field(self, model: BaseModel) -> Field:
         """Cached Field instance for the expression."""
         field = self._field_instance  # type: ignore[arg-type]
-        if field is None or field.model_name != model._name:
+        if field is None or field is not model._fields[field.name]:
             field, _ = self.__get_field(model)
         return field
 
@@ -1904,6 +1904,8 @@ def _operator_access_rule_domain(condition, model):
     access_domain = comodel._access_domain(operation)
     if access_domain.is_false():
         # no access to the comodel for any record
+        if operation not in model.env.registry['ir.rule']._MODES:
+            condition._raise("Invalid value for 'access' operator")
         return Domain.FALSE
     if access_domain.is_true() or comodel.env.su:
         # access to all or edge-case for super user

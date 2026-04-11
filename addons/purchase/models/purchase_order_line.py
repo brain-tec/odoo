@@ -318,16 +318,26 @@ class PurchaseOrderLine(models.Model):
         if 'display_type' in values and self.filtered(lambda line: line.display_type != values.get('display_type')):
             raise UserError(_("You cannot change the type of a purchase order line. Instead you should delete the current line and create a new line of the proper type."))
 
-        if 'product_qty' in values:
+        if any(field in values for field in ('product_qty', 'price_unit')):
             precision = self.env['decimal.precision'].precision_get('Product Unit')
             for line in self:
+                if line.order_id.state != 'purchase':
+                    continue
+                render_values = {}
                 if (
-                    line.order_id.state == "purchase"
-                    and float_compare(line.product_qty, values["product_qty"], precision_digits=precision) != 0
+                    'product_qty' in values
+                    and float_compare(line.product_qty, values['product_qty'], precision_digits=precision) != 0
                 ):
+                    render_values['product_qty'] = float_round(values['product_qty'], precision_digits=precision)
+                if (
+                    'price_unit' in values
+                    and float_compare(line.price_unit, values['price_unit'], precision_digits=precision) != 0
+                ):
+                    render_values['price_unit'] = values['price_unit']
+                if render_values:
                     line.order_id.message_post_with_source(
                         'purchase.track_po_line_template',
-                        render_values={'line': line, 'product_qty': values['product_qty']},
+                        render_values={**render_values, 'line': line},
                         subtype_xmlid='mail.mt_note',
                     )
 
@@ -473,7 +483,6 @@ class PurchaseOrderLine(models.Model):
             elif line.selected_seller_id:
                 price_unit = line.env['account.tax']._fix_tax_included_price_company(line.selected_seller_id.price, line.product_id.supplier_taxes_id, line.tax_ids, line.company_id) if line.selected_seller_id else 0.0
                 price_unit = line.selected_seller_id.currency_id._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
-                price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
                 line.price_unit = line.technical_price_unit = line.selected_seller_id.uom_id._compute_price(price_unit, line.uom_id)
                 line.discount = line.selected_seller_id.discount or 0.0
 
@@ -575,30 +584,22 @@ class PurchaseOrderLine(models.Model):
                 'price': float,
                 'readOnly': bool,
                 'uomDisplayName': String,
+                'uomId': int,
+                'productUomFactor': float (optional),
+                'productUomDisplayName': string (optional),
                 'packaging': dict,
                 'warning': String,
             }
         """
-        if len(self) == 1:
-            catalog_info = self.order_id._get_product_price_and_data(self.product_id)
-            catalog_info.update(
-                quantity=self.product_qty,
-                price=self.price_unit * (1 - self.discount / 100),
-                readOnly=self.order_id._is_readonly(),
-            )
-            if self.product_id.uom_id != self.uom_id:
-                catalog_info['uomDisplayName'] = self.uom_id.display_name
-            return catalog_info
-        elif self:
+        if self:
             self.product_id.ensure_one()
-            order_line = self[0]
-            catalog_info = order_line.order_id._get_product_price_and_data(order_line.product_id)
-            catalog_info['quantity'] = sum(self.mapped(
-                lambda line: line.uom_id._compute_quantity(
-                    qty=line.product_qty,
-                    to_unit=line.product_id.uom_id,
-            )))
-            catalog_info['readOnly'] = True
+            catalog_info = self[0].order_id._get_product_catalog_seller_data(self.product_id)
+            catalog_info.update(
+                quantity=self[0].product_qty,
+                price=self[0].price_unit_discounted,
+                readOnly=self[0].order_id._is_readonly() or len(self) > 1,
+                **self[0].order_id._get_product_catalog_uom_data(self.product_id, self[0].uom_id),
+            )
             return catalog_info
         return {'quantity': 0}
 
@@ -635,7 +636,7 @@ class PurchaseOrderLine(models.Model):
     def _prepare_add_missing_fields(self, values):
         """ Deduce missing required fields from the onchange """
         res = {}
-        onchange_fields = ['name', 'price_unit', 'product_qty', 'uom_id', 'tax_ids', 'date_planned']
+        onchange_fields = ['name', 'price_unit', 'product_qty', 'uom_id', 'tax_ids', 'date_planned', 'discount']
         if values.get('order_id') and values.get('product_id') and any(f not in values for f in onchange_fields):
             line = self.new(values)
             line.onchange_product_id()

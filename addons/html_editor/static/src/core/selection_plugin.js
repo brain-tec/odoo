@@ -223,6 +223,9 @@ export class SelectionPlugin extends Plugin {
             if (ev.detail && ev.detail % 3 === 0) {
                 this.onTripleClick(ev);
             }
+            if (!ev.detail || ev.detail === 1) {
+                this.onClick(ev);
+            }
         });
         this.addDomListener(this.editable, "keydown", (ev) => {
             const handled = [
@@ -264,6 +267,21 @@ export class SelectionPlugin extends Plugin {
             this.addDomListener(document, "pointerdown", unFocusEditable, { capture: true });
         }
         this.preservedCursors = [];
+        // Calling the native `focus` method of the editable element, even with
+        // `preventScroll: true`, would reset the selection at the start of the
+        // editable. This would, in turn, trigger a selectionchange event and,
+        // down the line, a scroll to the position of the selection, so to the
+        // top of the document. Calling focusEditable instead will restore the
+        // correct editable selection and prevent scrolling when not needed.
+        this.editableOriginalFocus = this.editable.focus;
+        this.editable.focus = () => this.focusEditable();
+    }
+
+    destroy() {
+        if (this.editableOriginalFocus) {
+            this.editable.focus = this.editableOriginalFocus;
+        }
+        super.destroy();
     }
     editableDocumentHasFocus() {
         return this.focusEditableDocument;
@@ -290,6 +308,12 @@ export class SelectionPlugin extends Plugin {
 
     resetSelection() {
         this.activeSelection = this.makeActiveSelection();
+    }
+
+    onClick(ev) {
+        if (this.delegateTo("click_overrides", ev)) {
+            return;
+        }
     }
 
     onDoubleClick(ev) {
@@ -1124,15 +1148,19 @@ export class SelectionPlugin extends Plugin {
     }
 
     focusEditable() {
-        const { editableSelection, documentSelectionIsInEditable } = this.getSelectionData();
-        if (
-            this.editable.contains(this.document.activeElement) &&
-            documentSelectionIsInEditable &&
-            this.editableDocumentHasFocus()
-        ) {
-            // Editor has focus — nothing to do.
+        const selection = this.document.getSelection();
+        const documentSelectionIsInEditable = selection && this.isSelectionInEditable(selection);
+        if (this.editable.contains(this.document.activeElement) && documentSelectionIsInEditable) {
+            // Editor has focus — nothing to do. Unless the current active
+            // element is a textarea, in which case we want to focus the
+            // editable to update the selection to the editable.
+            if (this.document.activeElement.tagName === "TEXTAREA") {
+                this.editableOriginalFocus.call(this.editable);
+            }
             return;
         }
+
+        const { editableSelection } = this.getSelectionData();
 
         // Focusing the closest editable element is required since, in the website
         // 'this.editable' itself is contenteditable="false`.
@@ -1140,7 +1168,11 @@ export class SelectionPlugin extends Plugin {
             editableSelection.commonAncestorContainer,
             (el) => el.getAttribute("contenteditable") === "true"
         );
-        closestEditable?.focus({ preventScroll: true });
+        if (closestEditable === this.editable) {
+            this.editableOriginalFocus.call(this.editable, { preventScroll: true });
+        } else {
+            closestEditable?.focus({ preventScroll: true });
+        }
 
         // If selection is inside a non-editable element, focusing editor might
         // move cursor to different position. so reapply the last selection.

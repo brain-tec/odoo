@@ -519,7 +519,7 @@ class Website(models.CachedModel):
         return self._api_rpc(route, params, 'website.olg_api_endpoint', DEFAULT_OLG_ENDPOINT, timeout=45)
 
     def get_cta_data(self, website_purpose, website_type):
-        return {'cta_btn_text': False, 'cta_btn_href': '/contactus'}
+        return {'cta_btn_text': False, 'cta_btn_href': '/contactus', 'shop_btn_href': '#'}
 
     def _get_snippet_defaults(self, snippet):
         """Retrieve the default configuration for a given dynamic snippet."""
@@ -655,8 +655,11 @@ class Website(models.CachedModel):
                     if snippet_name in snippet_list:
                         continue
                     try:
-                        snippet_idx = snippet_list.index(target) + (position == 'after')
-                        snippet_list.insert(snippet_idx, snippet_name)
+                        snippet_idx = snippet_list.index(target)
+                        if position == 'replace':
+                            snippet_list[snippet_idx] = snippet_name
+                        else:
+                            snippet_list.insert(snippet_idx + (position == 'after'), snippet_name)
                     except ValueError:
                         logger.error(
                             "Skipping snippet '%s' because the target snippet is misconfigured.",

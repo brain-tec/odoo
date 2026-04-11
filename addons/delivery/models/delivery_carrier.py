@@ -7,7 +7,7 @@ import psycopg2
 from odoo import SUPERUSER_ID, Command, _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.modules.registry import Registry
-from odoo.tools.safe_eval import safe_eval
+from odoo.tools.safe_eval import expr_eval
 
 
 class DeliveryCarrier(models.Model):
@@ -41,6 +41,7 @@ class DeliveryCarrier(models.Model):
         default="fixed",
         required=True,
     )
+    supports_cash_on_delivery = fields.Boolean(compute="_compute_supports_cash_on_delivery")
     allow_cash_on_delivery = fields.Boolean(
         string="Cash on Delivery",
         help="Allow customers to choose Cash on Delivery as their payment method.",
@@ -215,6 +216,11 @@ class DeliveryCarrier(models.Model):
             carrier.can_generate_return = False
 
     @api.depends("delivery_type")
+    def _compute_supports_cash_on_delivery(self):
+        for carrier in self:
+            carrier.supports_cash_on_delivery = carrier.delivery_type in {"base_on_rule", "fixed"}
+
+    @api.depends("delivery_type")
     def _compute_supports_shipping_insurance(self):
         for carrier in self:
             carrier.supports_shipping_insurance = False
@@ -354,6 +360,11 @@ class DeliveryCarrier(models.Model):
         )
         if not self.country_ids:
             self.zip_prefix_ids = [Command.clear()]
+
+    def write(self, vals):
+        if "delivery_type" in vals:
+            vals["allow_cash_on_delivery"] = False
+        return super().write(vals)
 
     def copy_data(self, default=None):
         vals_list = super().copy_data(default=default)
@@ -604,7 +615,7 @@ class DeliveryCarrier(models.Model):
         criteria_found = False
         price_dict = self._get_price_dict(total, weight, volume, quantity, wv=wv)
         for line in self.price_rule_ids:
-            test = safe_eval(line.variable + line.operator + str(line.max_value), price_dict)
+            test = expr_eval(line.variable + line.operator + str(line.max_value), price_dict)
             if test:
                 price = line.list_base_price + line.list_price * price_dict[line.variable_factor]
                 criteria_found = True

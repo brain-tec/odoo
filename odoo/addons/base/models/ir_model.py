@@ -16,7 +16,7 @@ from odoo import api, fields, models, tools
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Command, Domain
 from odoo.tools import BinaryBytes, frozendict, reset_cached_properties, split_every, sql, unique, OrderedSet, SQL
-from odoo.tools.safe_eval import safe_eval, datetime, dateutil, time
+from odoo.tools.safe_eval import expr_eval, safe_eval, datetime, dateutil, time
 from odoo.tools.translate import FIELD_TRANSLATE, LazyTranslate, _
 
 _lt = LazyTranslate(__name__)
@@ -424,11 +424,16 @@ class IrModel(models.Model):
         if 'field_id' in vals:
             vals['field_id'] = [op for op in vals['field_id'] if op[0] != 4]
         res = super().write(vals)
+        if not any(self._ids):
+            return res
         # ordering has been changed, reload registry to reflect update + signaling
         if 'order' in vals or 'fold_name' in vals:
             self.env.flush_all()  # _setup_models__ need to fetch the updated values from the db
             # incremental setup will reload custom models
             self.pool._setup_models__(self.env.cr, [])
+        if 'rule_ids' in vals or 'access_ids' in vals:
+            # for env['ir.model.access']._get_all_access_groups
+            self.env.registry.clear_cache('stable')
         return res
 
     @api.model_create_multi
@@ -444,6 +449,9 @@ class IrModel(models.Model):
             self.pool._setup_models__(self.env.cr, [])
             # update database schema
             self.pool.init_models(self.env.cr, manual_models, dict(self.env.context, update_custom_fields=True))
+        if res:
+            # for env['ir.model.access']._get_all_access_groups
+            self.env.registry.clear_cache('stable')
         return res
 
     @api.model
@@ -666,8 +674,8 @@ class IrModelFields(models.Model):
     def _check_domain(self):
         for field in self:
             try:
-                safe_eval(field.domain or '[]')
-            except ValueError as e:
+                expr_eval(field.domain or '[]')
+            except Exception as e:  # noqa: BLE001
                 raise ValidationError(
                     _("An error occurred while evaluating the domain:\n%(error)s", error=e)
                 ) from e
@@ -1350,7 +1358,7 @@ class IrModelFields(models.Model):
                 return
             attrs['comodel_name'] = field_data['relation']
             attrs['ondelete'] = field_data['on_delete']
-            attrs['domain'] = safe_eval(field_data['domain'] or '[]')
+            attrs['domain'] = expr_eval(field_data['domain'] or '[]')
             attrs['group_expand'] = '_read_group_expand_full' if field_data['group_expand'] else None
         elif field_data['ttype'] == 'one2many':
             if not self.pool.loaded and not (
@@ -1361,7 +1369,7 @@ class IrModelFields(models.Model):
                 return
             attrs['comodel_name'] = field_data['relation']
             attrs['inverse_name'] = field_data['relation_field']
-            attrs['domain'] = safe_eval(field_data['domain'] or '[]')
+            attrs['domain'] = expr_eval(field_data['domain'] or '[]')
         elif field_data['ttype'] == 'many2many':
             if not self.pool.loaded and field_data['relation'] not in self.env:
                 return
@@ -1370,7 +1378,7 @@ class IrModelFields(models.Model):
             attrs['relation'] = field_data['relation_table'] or rel
             attrs['column1'] = field_data['column1'] or col1
             attrs['column2'] = field_data['column2'] or col2
-            attrs['domain'] = safe_eval(field_data['domain'] or '[]')
+            attrs['domain'] = expr_eval(field_data['domain'] or '[]')
         elif field_data['ttype'] == 'monetary':
             # be sure that custom monetary field are always instanciated
             if not self.pool.loaded and \
@@ -2116,45 +2124,34 @@ class IrModelAccess(models.Model):
     perm_unlink = fields.Boolean(string='Delete Access')
 
     @api.model
-    def group_names_with_access(self, model_name, access_mode):
-        """ Return the names of visible groups which have been granted
-            ``access_mode`` on the model ``model_name``.
+    @tools.ormcache(cache='stable')
+    def _get_all_access_groups(self):
+        """ Return all active access permissions.
 
-           :rtype: list
+        :return: Dict {mode: {model_name: [group_ids]}}
         """
-        assert access_mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
-        lang = self.env.lang or 'en_US'
-        self.env.cr.execute(f"""
-            SELECT COALESCE(c.name->>%s, c.name->>'en_US'), COALESCE(g.name->>%s, g.name->>'en_US')
-              FROM ir_model_access a
-              JOIN ir_model m ON (a.model_id = m.id)
-              JOIN res_groups g ON (a.group_id = g.id)
-         LEFT JOIN res_groups_privilege c ON (c.id = g.privilege_id)
-             WHERE m.model = %s
-               AND a.active = TRUE
-               AND a.perm_{access_mode} = TRUE
-          ORDER BY c.name, g.name NULLS LAST
-        """, [lang, lang, model_name])
-        return [('%s/%s' % x) if x[0] else x[1] for x in self.env.cr.fetchall()]
-
-    @api.model
-    @tools.ormcache('model_name', 'access_mode', cache='stable')
-    def _get_access_groups(self, model_name, access_mode='read'):
-        """ Return the group expression object that represents the users who
-        have ``access_mode`` to the model ``model_name``.
-        """
-        assert access_mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
-        model = self.env['ir.model']._get(model_name)
-        accesses = self.sudo().search([
-            (f'perm_{access_mode}', '=', True), ('model_id', '=', model.id),
-        ])
-
-        group_definitions = self.env['res.groups']._get_group_definitions()
-        if not accesses:
-            return group_definitions.empty
-        if not all(access.group_id for access in accesses):  # there is some global access
-            return group_definitions.universe
-        return group_definitions.from_ids(accesses.group_id.ids)
+        modes = ('read', 'write', 'create', 'unlink')
+        self.flush_model()
+        all_access = self.env.execute_query_dict(SQL(
+            """
+            SELECT m.model, a.group_id, a.perm_read, a.perm_write, a.perm_create, a.perm_unlink
+            FROM ir_model_access a
+            LEFT JOIN ir_model m
+            ON m.id = a.model_id
+            WHERE a.active IS TRUE
+            """
+        ))
+        access_by_mode = {
+            mode: tools.groupby((a for a in all_access if a[f'perm_{mode}']), itemgetter('model'))
+            for mode in modes
+        }
+        return frozendict({
+            mode: frozendict({
+                model: frozenset(a['group_id'] or False for a in model_access)
+                for model, model_access in mode_access
+            })
+            for mode, mode_access in access_by_mode.items()
+        })
 
     # The context parameter is useful when the method translates error messages.
     # But as the method raises an exception in that case,  the key 'lang' might
@@ -2163,24 +2160,16 @@ class IrModelAccess(models.Model):
 
     @tools.ormcache('self.env.uid', 'mode')
     def _get_allowed_models(self, mode='read'):
-        assert mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
-
-        group_ids = self.env.user._get_group_ids()
-        self.flush_model()
-        rows = self.env.execute_query(SQL("""
-            SELECT m.model
-              FROM ir_model_access a
-              JOIN ir_model m ON (m.id = a.model_id)
-             WHERE a.perm_%s
-               AND a.active
-               AND (
-                    a.group_id IS NULL OR
-                    a.group_id IN %s
-                )
-            GROUP BY m.model
-        """, SQL(mode), tuple(group_ids) or (None,)))
-
-        return frozenset(v[0] for v in rows)
+        access_by_model = self._get_all_access_groups().get(mode)
+        if not access_by_model:
+            return frozenset()
+        # include False to catch global access rules
+        user_group_ids = {*self.env.user._get_group_ids(), False}
+        return frozenset(
+            model
+            for model, accesses in access_by_model.items()
+            if not user_group_ids.isdisjoint(accesses)
+        )
 
     @api.model
     def check(self, model, mode='read', raise_exception=True):
@@ -2207,7 +2196,20 @@ class IrModelAccess(models.Model):
             'document_model': model,
         }
 
-        groups = "\n".join(f"\t- {g}" for g in self.group_names_with_access(model, mode))
+        lang = self.env.lang or 'en_US'
+        self.env.cr.execute(f"""
+            SELECT COALESCE(COALESCE(c.name->>%s, c.name->>'en_US') || '/', '') || COALESCE(g.name->>%s, g.name->>'en_US')
+              FROM ir_model_access a
+              JOIN ir_model m ON (a.model_id = m.id)
+              JOIN res_groups g ON (a.group_id = g.id)
+         LEFT JOIN res_groups_privilege c ON (c.id = g.privilege_id)
+             WHERE m.model = %s
+               AND a.active = TRUE
+               AND a.perm_{mode} = TRUE
+          ORDER BY c.name, g.name NULLS LAST
+        """, [lang, lang, model])
+        rows = self.env.cr.fetchall()
+        groups = "\n".join(f"\t- {g}" for (g,) in rows)
         if groups:
             group_info = str(ACCESS_ERROR_GROUPS) % {'groups_list': groups}
         else:
