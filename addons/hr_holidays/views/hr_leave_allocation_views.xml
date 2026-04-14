@@ -113,11 +113,14 @@
                     <field name="state" widget="statusbar" statusbar_visible="confirm,validate,validate1" invisible="validation_type != 'both'"/>
                     <field name="state" widget="statusbar" statusbar_visible="confirm,validate" invisible="validation_type == 'both'"/>
                 </header>
+                <div class="alert alert-warning" role="alert" invisible="employee_id" name="warning_wrong_company">
+                    You are not assigned to any employee in the current company. Therefore, you can't request time off allocations for yourself.
+                </div>
                 <sheet>
                     <div class="oe_button_box" name="button_box"/>
                     <div id="title" class="oe_title">
                         <h2><field name="name" class="w-100"
-                            placeholder="e.g. Time Off type (From validity start to validity end / no limit)"
+                            placeholder="e.g. Time type (From validity start to validity end / no limit)"
                             invisible="state != 'confirm'" readonly="True" force_save="True"/>
                         <field name="name_validity" invisible="state == 'confirm'"/></h2>
                     </div>
@@ -157,6 +160,9 @@
                                 readonly="not is_officer or state in ['refuse', 'validate']"/>
                             <field name="work_entry_type_id"
                                 context="{'employee_id':employee_id, 'default_date_from':current_date, 'request_type':'allocation'}"
+                                domain="[
+                                    ('id','in', allowed_work_entry_type_ids),
+                                ]"
                                 readonly="state in ['refuse', 'validate']"/>
                             <field name="number_of_days" invisible="1"/>
                             <div class="o_td_label">
@@ -196,7 +202,7 @@
                 <div class="oe_title">
                     <h2>
                         <field name="name"
-                            placeholder="e.g. Time Off type (From validity start to validity end / no limit)"
+                            placeholder="e.g. Time Type (From validity start to validity end / no limit)"
                             required="1" readonly="state == 'refuse'"/>
                     </h2>
                 </div>
@@ -226,6 +232,7 @@
             <div id="no_limit_label" position="replace">
                 <div id="no_limit_label" class="oe_read_only" invisible="not id or date_to">No limit</div>
             </div>
+            <xpath expr="//div[@name='warning_wrong_company']" position="replace"/>
         </field>
     </record>
 

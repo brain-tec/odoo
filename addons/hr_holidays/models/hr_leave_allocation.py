@@ -24,10 +24,29 @@ class HrLeaveAllocation(models.Model):
 
     def _default_work_entry_type_id(self):
         if self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
-            domain = [('has_valid_allocation', '=', True), ('requires_allocation', '=', True)]
+            domain = [('id', 'in', self.allowed_work_entry_type_ids.ids), ('has_valid_allocation', '=', True), ('requires_allocation', '=', True)]
         else:
-            domain = [('has_valid_allocation', '=', True), ('requires_allocation', '=', True), ('employee_requests', '=', True)]
+            domain = [('id', 'in', self.allowed_work_entry_type_ids.ids), ('has_valid_allocation', '=', True), ('requires_allocation', '=', True), ('employee_requests', '=', True)]
         return self.env['hr.work.entry.type'].search(domain, limit=1)
+
+    @api.model
+    def default_get(self, fields):
+        defaults = super().default_get(fields)
+        employee = defaults.get('employee_id')
+        country = self.env['hr.employee'].browse(employee).company_id.country_id or self.env.company.country_id
+        domain = [
+                ('country_id', '=', country.id),
+                ('has_valid_allocation', '=', True),
+                ('requires_allocation', '=', True)
+            ]
+        if not self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+            domain = Domain.AND(
+                [domain, [('employee_requests', '=', True)]]
+            )
+        work_entry_type = self.env['hr.work.entry.type'].search(domain, limit=1)
+        if work_entry_type:
+            defaults['work_entry_type_id'] = work_entry_type.id
+        return defaults
 
     def _domain_work_entry_type_id(self):
         domain = [
@@ -66,9 +85,10 @@ class HrLeaveAllocation(models.Model):
         tracking=True, required=True)
     date_to = fields.Date('End Date', copy=False, tracking=True)
     work_entry_type_id = fields.Many2one(
-        "hr.work.entry.type", compute='_compute_work_entry_type_id', store=True, string="Time Off Type", required=True, readonly=False,
-        domain=_domain_work_entry_type_id,
-        default=_default_work_entry_type_id)
+        "hr.work.entry.type", compute='_compute_work_entry_type_id', store=True, string="Time Type", required=True, readonly=False,
+        domain=_domain_work_entry_type_id)
+    allowed_work_entry_type_ids = fields.Many2many(
+        'hr.work.entry.type', compute='_compute_allowed_work_entry_type_ids')
     employee_id = fields.Many2one(
         'hr.employee', string='Employee', default=lambda self: self.env.user.employee_id,
         index=True, ondelete="restrict", required=True, tracking=True, domain=_domain_employee_id)
@@ -95,7 +115,7 @@ class HrLeaveAllocation(models.Model):
         help='This area is automatically filled by the user who validates the allocation')
     second_approver_id = fields.Many2one(
         'hr.employee', string='Second Approval', readonly=True, copy=False,
-        help='This area is automatically filled by the user who validates the allocation with second level (If time off type need second validation)')
+        help='This area is automatically filled by the user who validates the allocation with second level (If time type need second validation)')
     validation_type = fields.Selection(string='Validation Type', related='work_entry_type_id.allocation_validation_type', readonly=True)
     can_approve = fields.Boolean('Can Approve', compute='_compute_can_approve')
     can_validate = fields.Boolean('Can Validate', compute='_compute_can_validate')
@@ -252,6 +272,17 @@ class HrLeaveAllocation(models.Model):
         for allocation in self:
             allocation.manager_id = allocation.employee_id and allocation.employee_id.parent_id
 
+    @api.depends('employee_company_id')
+    def _compute_allowed_work_entry_type_ids(self):
+        for allocation in self:
+            country = allocation.employee_company_id.country_id or self.env.company.country_id
+            if not country or not self.env['hr.work.entry.type'].search_count([('country_id', '=', country.id)], limit=1):
+                domain = [('country_id', '=', False)]
+            else:
+                domain = [('country_id', '=', country.id)]
+            domain = Domain.AND([allocation._domain_work_entry_type_id(), domain])
+            allocation.allowed_work_entry_type_ids = self.env['hr.work.entry.type'].search(domain)
+
     @api.depends('accrual_plan_id')
     def _compute_work_entry_type_id(self):
         default_work_entry_type_id = None
@@ -276,7 +307,7 @@ class HrLeaveAllocation(models.Model):
             if allocation.number_of_days >= 0:
                 continue
             if not allocation.work_entry_type_id.allows_negative:
-                raise ValidationError(self.env._("Negative allocations are not allowed for this time off type."))
+                raise ValidationError(self.env._("Negative allocations are not allowed for this time type."))
             allocation_unit = allocation.type_request_unit
             if allocation_unit != 'hour' and abs(allocation.number_of_days_display) > allocation.work_entry_type_id.max_allowed_negative:
                 raise ValidationError(self.env._("The negative allocation cannot exceed the maximum allowed negative value of %(max)s day(s).",

@@ -347,7 +347,6 @@
         <field name="arch" type="xml">
             <form string="Time Off Request" class="o_hr_leave_form" duplicate="false">
             <field name="employee_id" invisible="1"/> <!-- for the employee's default value-->
-            <field name="work_entry_type_filter_domain" invisible="1"/>
             <field name="user_id" invisible="1"/> <!-- for conditional rendering of buttons on card -->
             <header>
                 <button string="Approve" name="action_approve" type="object" class="oe_highlight" invisible="not can_approve or not id"/>
@@ -358,6 +357,12 @@
                 <field name="state" widget="statusbar" statusbar_visible="confirm,validate,validate1" invisible="validation_type != 'both'"/>
                 <field name="state" widget="statusbar" statusbar_visible="confirm,validate" invisible="validation_type == 'both'"/>
             </header>
+            <div class="alert alert-warning"
+                    name="warning_wrong_company"
+                    role="alert"
+                    invisible="employee_id">
+                You are not assigned to any employee in the current company. Therefore, you can't request time off for yourself.
+            </div>
             <sheet>
                 <field name="dashboard_warning_message" class="alert alert-danger d-flex mt-2" role="alert" style="white-space: pre-wrap;" invisible="not dashboard_warning_message"/>
                 <field name="work_entry_type_increases_duration" class="alert alert-info d-flex mt-2" role="alert" style="white-space: pre-wrap;" invisible="not work_entry_type_increases_duration"/>
@@ -406,8 +411,8 @@
                             </div>
                             <field name="work_entry_type_id" force_save="1"
                                 domain="[
+                                    ('id', 'in', allowed_work_entry_type_ids),
                                     ('time_off_selectable', '=', True),
-                                    ('id', 'in', work_entry_type_filter_domain or []),
                                     '|',
                                         ('requires_allocation', '=', False),
                                         '&amp;',
@@ -582,6 +587,7 @@
                                     ('allows_negative', '=', False),
                 ]</attribute>
             </xpath>
+            <xpath expr="//div[@name='warning_wrong_company']" position="replace"/>
         </field>
     </record>
 
