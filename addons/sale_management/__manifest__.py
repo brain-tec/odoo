@@ -39,7 +39,8 @@ The Dashboard for the Sales Manager will include
     "data": [
         "data/digest_data.xml",
         "security/ir.model.access.csv",
-        "security/sale_management_security.xml",
+        "security/res_groups.xml",
+        "security/ir_rules.xml",
         # Define SO template views & actions before their place of use
         "views/sale_order_template_views.xml",
         "views/digest_views.xml",
@@ -53,7 +54,11 @@ The Dashboard for the Sales Manager will include
         "web.assets_backend": ["sale_management/static/src/fields/**/*"],
         "web.assets_frontend": ["sale_management/static/src/interactions/**/*"],
         "web.assets_tests": ["sale_management/static/tests/tours/**/*"],
-        "web.assets_unit_tests": ["sale_management/static/tests/**/*.test.js"],
+        "web.assets_unit_tests": [
+            "sale_management/static/tests/mock_server/**/*",
+            "sale_management/static/tests/sale_management_test_helpers.js",
+            "sale_management/static/tests/**/*.test.js",
+        ],
     },
     "application": True,
     "pre_init_hook": "pre_init_hook",

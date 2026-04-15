@@ -18,6 +18,7 @@ class ProductTemplate(models.Model):
     _name = 'product.template'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'image.mixin']
     _description = "Product"
+    _explanation = "The abstract base representation of a product. It defines the generic properties (name, category, price) that apply to all its variants. If a product has no variations (like size/color), this acts as the main product record."
     _order = "is_favorite desc, name"
     _check_company_auto = True
     _check_company_domain = models.check_company_domain_parent_of
@@ -742,6 +743,17 @@ class ProductTemplate(models.Model):
             if "type" in vals and vals.get("type") != "combo":
                 product_template.combo_ids = False
         return res
+
+    def action_archive(self):
+        combo_items = self.env['product.combo.item'].search([('product_id', 'in', self.product_variant_ids.ids)])
+        if combo_items:
+            combo_names = ', '.join(combo_items.combo_id.mapped('name'))
+            raise UserError(_(
+                "You cannot archive a product that is part of a combo. "
+                "Please remove it from the following combos first: %s",
+                combo_names,
+            ))
+        return super().action_archive()
 
     def copy_data(self, default=None):
         default = dict(default or {})

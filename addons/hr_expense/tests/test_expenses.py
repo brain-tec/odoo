@@ -709,7 +709,7 @@ class TestExpenses(TestExpenseCommon):
     def test_update_expense_price_on_product_standard_price(self):
         """
         Tests that updating the standard price of a product will update all the un-submitted
-        expenses using that product as a category.
+        expenses using that product.
         """
         product = self.env['product.product'].create({
             'name': 'Product',
@@ -840,7 +840,6 @@ class TestExpenses(TestExpenseCommon):
             'name': 'Cash Basis Tax Transition Account',
             'account_type': 'asset_current',
             'code': '131001',
-            'reconcile': True,
         })
         caba_tax = self.env['account.tax'].create({
             'name': 'Cash Basis Tax',
@@ -942,7 +941,7 @@ class TestExpenses(TestExpenseCommon):
         })
         expense.action_submit()
         expense.action_approve()
-        expense._post_without_wizard()
+        self.post_expenses_with_wizard(expense)
         self.assertRecordValues(
             expense.account_move_id,
             [{'amount_total': 500.0, 'currency_id': expense.account_move_id.company_currency_id.id}],
@@ -1084,3 +1083,42 @@ class TestExpenses(TestExpenseCommon):
         expense_paid_by_employee.action_approve()
         self.post_expenses_with_wizard(expense_paid_by_employee)
         self.assertEqual(expense_paid_by_employee.account_move_id.company_id, branch_company)
+
+    def test_attachments_on_multiple_posting_from_own_expense(self):
+        """ Checks that attachments are not leaked between moves when posting expenses from different employees. """
+        employee_2 = self.env['hr.employee'].sudo().create({
+            'name': 'expense_employee_2',
+            'user_id': self.expense_user_manager_2.id,
+            'expense_manager_id': self.expense_user_manager.id,
+            'work_contact_id': self.expense_user_manager_2.partner_id.id,
+        })
+        expenses = expense_1, expense_2 = self.create_expenses([
+            {'name': 'Employee 1 expense'},
+            {'name': 'Employee 2 expense', 'employee_id': employee_2.id},
+        ])
+        self.env['ir.attachment'].create([{
+            'raw': b"R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs=",
+            'name': f'file_{index}.png',
+            'res_model': 'hr.expense',
+            'res_id': expense.id,
+        } for index, expense in enumerate([expense_1] * 2 + [expense_2] * 3)])
+
+        expenses.action_submit()
+        expenses.action_approve()
+        self.post_expenses_with_wizard(expenses)
+
+        self.assertRecordValues(
+            expense_1.account_move_id.attachment_ids.sorted('name'),
+            [
+                {'name': 'file_0.png', 'res_model': 'account.move', 'res_id': expense_1.account_move_id.id},
+                {'name': 'file_1.png', 'res_model': 'account.move', 'res_id': expense_1.account_move_id.id},
+            ]
+        )
+        self.assertRecordValues(
+            expense_2.account_move_id.attachment_ids.sorted('name'),
+            [
+                {'name': 'file_2.png', 'res_model': 'account.move', 'res_id': expense_2.account_move_id.id},
+                {'name': 'file_3.png', 'res_model': 'account.move', 'res_id': expense_2.account_move_id.id},
+                {'name': 'file_4.png', 'res_model': 'account.move', 'res_id': expense_2.account_move_id.id},
+            ]
+        )
