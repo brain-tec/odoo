@@ -19,6 +19,7 @@ import {
     defineModels,
     models,
     mountWithCleanup,
+    onRpc,
     patchWithCleanup,
     waitUntilIdle,
 } from "@web/../tests/web_test_helpers";
@@ -549,7 +550,7 @@ export async function confirmAddSnippet(snippetName) {
 }
 
 export const dummyBase64Img =
-    "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA\n        AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\n            9TXL0Y4OHwAAAABJRU5ErkJggg==";
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
 
 export const exampleContent = '<h1 class="title">Hello</h1>';
 
@@ -598,4 +599,19 @@ export async function unfoldAllOptionsGroups() {
         await click(i);
     }
     await animationFrame();
+}
+
+export const dummyCORSSrc = "/web/image/0-redirect/foo.jpg";
+
+export function setupCORSProtectedImg() {
+    onRpc("/html_editor/get_image_info", () => ({
+        original: {
+            id: 1,
+            image_src: dummyCORSSrc,
+            mimetype: "image/jpeg",
+        },
+    }));
+    onRpc(dummyCORSSrc, () => {
+        throw new Error("simulated cors error");
+    });
 }

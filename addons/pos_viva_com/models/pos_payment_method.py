@@ -66,7 +66,7 @@ class PosPaymentMethod(models.Model):
 
     @api.model
     def _allowed_actions_in_self_order(self):
-        return super()._allowed_actions_in_self_order() + ["viva_com_send_payment_request", "viva_com_get_payment_status", "get_latest_viva_com_status"]
+        return super()._allowed_actions_in_self_order() + ["viva_com_send_payment_request", "viva_com_get_payment_status"]
 
     def _bearer_token(self, session):
         self.ensure_one()
@@ -80,7 +80,7 @@ class PosPaymentMethod(models.Model):
 
         access_token = resp.json().get('access_token')
         if access_token:
-            self.viva_com_bearer_token = access_token
+            self.sudo().write({'viva_com_bearer_token': access_token})
             return {'Authorization': f"Bearer {access_token}"}
         else:
             raise UserError(_(

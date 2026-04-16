@@ -20,6 +20,8 @@ import {
     isNotSupportedPath,
     label,
     openModelFieldSelectorPopover,
+    pyDateStr as pyDate,
+    pyDatetimeStr as pyDatetime,
     Partner,
     Player,
     Product,
@@ -455,15 +457,7 @@ test(`"in range" operator`, async () => {
         },
     });
     await selectOperator("in range");
-    expect.verifySteps([
-        formatExpr(
-            `
-                date >= context_today().strftime("%Y-%m-%d")
-                    and
-                date < (context_today() + relativedelta(days = 1)).strftime("%Y-%m-%d")
-            `
-        ),
-    ]);
+    expect.verifySteps([formatExpr(`date >= ${pyDate("today")} and date < ${pyDate("days = 1")}`)]);
     expect(getTreeEditorContent()).toEqual([
         { level: 0, value: "all" },
         {
@@ -487,11 +481,7 @@ test(`date: "in range" operator`, async () => {
     ).click();
     expect(getCurrentOperator()).toBe(label("in range"));
     expect(getCurrentValue()).toBe("Today");
-    expect.verifySteps([
-        formatExpr(
-            `date >= context_today().strftime("%Y-%m-%d") and date < (context_today() + relativedelta(days = 1)).strftime("%Y-%m-%d")`
-        ),
-    ]);
+    expect.verifySteps([formatExpr(`date >= ${pyDate("today")} and date < ${pyDate("days = 1")}`)]);
 
     expect(getValueOptions()).toEqual([
         "Today",
@@ -500,57 +490,48 @@ test(`date: "in range" operator`, async () => {
         "Month to date",
         "Last month",
         "Year to date",
-        "Last 12 months",
+        "Last 365 days",
         "Custom range",
     ]);
 
-    await selectValue("last 7 days");
-    expect(getCurrentValue()).toBe("Last 7 days");
-    expect.verifySteps([
-        formatExpr(
-            `date >= (context_today() + relativedelta(days = -7)).strftime("%Y-%m-%d") and date < context_today().strftime("%Y-%m-%d")`
-        ),
-    ]);
+    const dateRangeTests = [
+        {
+            val: "last 7 days",
+            label: "Last 7 days",
+            expr: `date >= ${pyDate("days = -7")} and date < ${pyDate()}`,
+        },
+        {
+            val: "last 30 days",
+            label: "Last 30 days",
+            expr: `date >= ${pyDate("days = -30")} and date < ${pyDate()}`,
+        },
+        {
+            val: "month to date",
+            label: "Month to date",
+            expr: `date >= ${pyDate("day = 1")} and date < ${pyDate("days = 1")}`,
+        },
+        {
+            val: "last month",
+            label: "Last month",
+            expr: `date >= ${pyDate("day = 1, months = -1")} and date < ${pyDate("day = 1")}`,
+        },
+        {
+            val: "year to date",
+            label: "Year to date",
+            expr: `date >= ${pyDate("day = 1, month = 1")} and date < ${pyDate("days = 1")}`,
+        },
+        {
+            val: "last 365 days",
+            label: "Last 365 days",
+            expr: `date >= ${pyDate("days = -365")} and date < ${pyDate()}`,
+        },
+    ];
 
-    await selectValue("last 30 days");
-    expect(getCurrentValue()).toBe("Last 30 days");
-    expect.verifySteps([
-        formatExpr(
-            `date >= (context_today() + relativedelta(days = -30)).strftime("%Y-%m-%d") and date < context_today().strftime("%Y-%m-%d")`
-        ),
-    ]);
-
-    await selectValue("month to date");
-    expect(getCurrentValue()).toBe("Month to date");
-    expect.verifySteps([
-        formatExpr(
-            `date >= (context_today() + relativedelta(day = 1)).strftime("%Y-%m-%d") and date < (context_today() + relativedelta(days = 1)).strftime("%Y-%m-%d")`
-        ),
-    ]);
-
-    await selectValue("last month");
-    expect(getCurrentValue()).toBe("Last month");
-    expect.verifySteps([
-        formatExpr(
-            `date >= (context_today() + relativedelta(day = 1, months = -1)).strftime("%Y-%m-%d") and date < (context_today() + relativedelta(day = 1)).strftime("%Y-%m-%d")`
-        ),
-    ]);
-
-    await selectValue("year to date");
-    expect(getCurrentValue()).toBe("Year to date");
-    expect.verifySteps([
-        formatExpr(
-            `date >= (context_today() + relativedelta(day = 1, month = 1)).strftime("%Y-%m-%d") and date < (context_today() + relativedelta(days = 1)).strftime("%Y-%m-%d")`
-        ),
-    ]);
-
-    await selectValue("last 12 months");
-    expect(getCurrentValue()).toBe("Last 12 months");
-    expect.verifySteps([
-        formatExpr(
-            `date >= (context_today() + relativedelta(day = 1, months = -12)).strftime("%Y-%m-%d") and date < (context_today() + relativedelta(day = 1)).strftime("%Y-%m-%d")`
-        ),
-    ]);
+    for (const { val, label, expr } of dateRangeTests) {
+        await selectValue(val);
+        expect(getCurrentValue()).toBe(label);
+        expect.verifySteps([formatExpr(expr)]);
+    }
 
     await selectValue("custom range");
     expect(queryOne(`${SELECTORS.valueEditor} select`).value).toBe('"custom range"');
@@ -565,11 +546,7 @@ test(`date: "in range" operator`, async () => {
     await selectValue("today");
     expect(getCurrentOperator()).toBe(label("in range"));
     expect(getCurrentValue()).toBe("Today");
-    expect.verifySteps([
-        formatExpr(
-            `date >= context_today().strftime("%Y-%m-%d") and date < (context_today() + relativedelta(days = 1)).strftime("%Y-%m-%d")`
-        ),
-    ]);
+    expect.verifySteps([formatExpr(`date >= ${pyDate("today")} and date < ${pyDate("days = 1")}`)]);
 });
 
 test(`datetime: "in range" operator`, async () => {
@@ -587,13 +564,7 @@ test(`datetime: "in range" operator`, async () => {
     expect(getCurrentOperator()).toBe(label("in range"));
     expect(getCurrentValue()).toBe("Today");
     expect.verifySteps([
-        formatExpr(
-            `
-                datetime >= datetime.datetime.combine(context_today(), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-                    and
-                datetime < datetime.datetime.combine(context_today() + relativedelta(days = 1), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-            `
-        ),
+        formatExpr(`datetime >= ${pyDatetime()} and datetime < ${pyDatetime("days = 1")}`),
     ]);
 
     expect(getValueOptions()).toEqual([
@@ -603,81 +574,52 @@ test(`datetime: "in range" operator`, async () => {
         "Month to date",
         "Last month",
         "Year to date",
-        "Last 12 months",
+        "Last 365 days",
         "Custom range",
     ]);
 
-    await selectValue("last 7 days");
-    expect(getCurrentValue()).toBe("Last 7 days");
-    expect.verifySteps([
-        formatExpr(
-            `
-                datetime >= datetime.datetime.combine(context_today() + relativedelta(days = -7), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-                    and
-                datetime < datetime.datetime.combine(context_today(), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-            `
-        ),
-    ]);
+    const datetimeRangeTests = [
+        {
+            val: "last 7 days",
+            label: "Last 7 days",
+            expr: `datetime >= ${pyDatetime("days = -7")} and datetime < ${pyDatetime()}`,
+        },
+        {
+            val: "last 30 days",
+            label: "Last 30 days",
+            expr: `datetime >= ${pyDatetime("days = -30")} and datetime < ${pyDatetime()}`,
+        },
+        {
+            val: "month to date",
+            label: "Month to date",
+            expr: `datetime >= ${pyDatetime("day = 1")} and datetime < ${pyDatetime("days = 1")}`,
+        },
+        {
+            val: "last month",
+            label: "Last month",
+            expr: `datetime >= ${pyDatetime("day = 1, months = -1")} and datetime < ${pyDatetime(
+                "day = 1"
+            )}`,
+        },
+        {
+            val: "year to date",
+            label: "Year to date",
+            expr: `datetime >= ${pyDatetime("day = 1, month = 1")} and datetime < ${pyDatetime(
+                "days = 1"
+            )}`,
+        },
+        {
+            val: "last 365 days",
+            label: "Last 365 days",
+            expr: `datetime >= ${pyDatetime("days = -365")} and datetime < ${pyDatetime()}`,
+        },
+    ];
 
-    await selectValue("last 30 days");
-    expect(getCurrentValue()).toBe("Last 30 days");
-    expect.verifySteps([
-        formatExpr(
-            `
-                datetime >= datetime.datetime.combine(context_today() + relativedelta(days = -30), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-                    and
-                datetime < datetime.datetime.combine(context_today(), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-            `
-        ),
-    ]);
-
-    await selectValue("month to date");
-    expect(getCurrentValue()).toBe("Month to date");
-    expect.verifySteps([
-        formatExpr(
-            `
-                datetime >= datetime.datetime.combine(context_today() + relativedelta(day = 1), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-                    and
-                datetime < datetime.datetime.combine(context_today() + relativedelta(days = 1), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-            `
-        ),
-    ]);
-
-    await selectValue("last month");
-    expect(getCurrentValue()).toBe("Last month");
-    expect.verifySteps([
-        formatExpr(
-            `
-                datetime >= datetime.datetime.combine(context_today() + relativedelta(day = 1, months = -1), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-                    and
-                datetime < datetime.datetime.combine(context_today() + relativedelta(day = 1), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-            `
-        ),
-    ]);
-
-    await selectValue("year to date");
-    expect(getCurrentValue()).toBe("Year to date");
-    expect.verifySteps([
-        formatExpr(
-            `
-                datetime >= datetime.datetime.combine(context_today() + relativedelta(day = 1, month = 1), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-                    and
-                datetime < datetime.datetime.combine(context_today() + relativedelta(days = 1), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-            `
-        ),
-    ]);
-
-    await selectValue("last 12 months");
-    expect(getCurrentValue()).toBe("Last 12 months");
-    expect.verifySteps([
-        formatExpr(
-            `
-                datetime >= datetime.datetime.combine(context_today() + relativedelta(day = 1, months = -12), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-                    and
-                datetime < datetime.datetime.combine(context_today() + relativedelta(day = 1), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-            `
-        ),
-    ]);
+    for (const { val, label, expr } of datetimeRangeTests) {
+        await selectValue(val);
+        expect(getCurrentValue()).toBe(label);
+        expect.verifySteps([formatExpr(expr)]);
+    }
 
     await selectValue("custom range");
     expect(queryOne(`${SELECTORS.valueEditor} select`).value).toBe('"custom range"');
@@ -697,13 +639,7 @@ test(`datetime: "in range" operator`, async () => {
     expect(getCurrentOperator()).toBe(label("in range"));
     expect(getCurrentValue()).toBe("Today");
     expect.verifySteps([
-        formatExpr(
-            `
-                datetime >= datetime.datetime.combine(context_today(), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-                    and
-                datetime < datetime.datetime.combine(context_today() + relativedelta(days = 1), datetime.time(0, 0, 0)).to_utc().strftime("%Y-%m-%d %H:%M:%S")
-            `
-        ),
+        formatExpr(`datetime >= ${pyDatetime()} and datetime < ${pyDatetime("days = 1")}`),
     ]);
 });
 
