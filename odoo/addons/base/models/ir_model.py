@@ -3,9 +3,9 @@ import itertools
 import logging
 import random
 import re
-import textwrap
 import psycopg2
 import typing
+from inspect import cleandoc
 from ast import literal_eval
 from collections import defaultdict
 from collections.abc import Mapping
@@ -17,6 +17,7 @@ from odoo import api, fields, models, tools
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Command, Domain
 from odoo.tools import BinaryBytes, frozendict, reset_cached_properties, split_every, sql, unique, OrderedSet, SQL
+from odoo.tools.func import deprecated
 from odoo.tools.safe_eval import expr_eval, safe_eval, datetime, dateutil, time
 from odoo.tools.translate import FIELD_TRANSLATE, LazyTranslate, _
 
@@ -473,7 +474,7 @@ class IrModel(models.Model):
             explanation = cls.__dict__.get('_explanation')
             # Only include if it matches the target model's name (ignores mixins).
             if explanation and getattr(cls, '_name', None) == model._name:
-                explanations.append(textwrap.dedent(explanation).strip())
+                explanations.append(cleandoc(explanation or ''))
 
         return {
             'model': model._name,
@@ -2183,6 +2184,7 @@ class IrModelAccess(models.Model):
         )
 
     @api.model
+    @deprecated("Since 20.0, use Model.has_access")
     def check(self, model, mode='read', raise_exception=True):
         if self.env.su:
             # User root have all accesses

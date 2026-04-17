@@ -260,7 +260,9 @@ class HrEmployee(models.Model):
         return [('id', 'in', holidays.employee_id.ids)]
 
     def _search_part_of_department(self, operator, value):
-        versions = self.env['hr.version'].sudo().search([('member_of_department', operator, value)])
+        versions = self.env['hr.version'].sudo().search([
+            ('member_of_department', operator, value),
+        ]).filtered(lambda v: v.is_current)
         return [('id', 'in', versions.employee_id.ids)]
 
     @api.model_create_multi
@@ -398,6 +400,7 @@ class HrEmployee(models.Model):
     @api.model
     def get_time_off_dashboard_data(self, target_date=None):
         return {
+            'has_future_allocation': self.env['hr.work.entry.type'].has_future_allocation(),
             'has_accrual_allocation': self.env['hr.work.entry.type'].has_accrual_allocation(),
             'allocation_data': self.env['hr.work.entry.type'].get_allocation_data_request(target_date, False),
             'allocation_request_amount': self.get_allocation_requests_amount(),

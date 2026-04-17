@@ -8,14 +8,18 @@ from odoo.tools import mute_logger
 from odoo.tools.misc import OrderedSet
 from odoo.tools.safe_eval import (
     _BUILTINS,
+    const_eval,
+    safe_checker,
+    safe_eval,
+)
+from odoo.tools.safe_eval.runtime import (
+    _SafeGenerator,
+    UnsafePolicy,
     UnsafeClassError,
     UnsafeFunctionError,
     UnsafeInstanceError,
     UnsafeModuleError,
-    UnsafePolicy,
-    const_eval,
-    safe_checker,
-    safe_eval
+    safe_call,
 )
 
 
@@ -173,7 +177,10 @@ class TestSafeEval(BaseCase):
         safe_eval("res = tuple(val + 1 for val in (1, 2))", context=(ctx := {}), mode="exec")
         self.assertEqual(ctx["res"], (2, 3))
 
-        with self.assertRaises(ValueError):
+        with (
+            self.assertRaises(ValueError),
+            mute_logger('odoo.tools.safe_eval.runtime')  # Warning because of `async`
+        ):
             # async generator comprehension
             safe_eval("res = tuple(val + 1 async for val in (1, 2))", mode="exec")
 
@@ -192,20 +199,22 @@ class TestSafeEval(BaseCase):
 @tagged('at_install', '-post_install')
 class TestSafeEvalRuntime(TransactionCase):
 
+    class UnsafeClass:  # noqa: OLS03024
+        __module__ = 'odoo.unsafe_module'
+
+        def __init__(self, *args, **kwargs): ...
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.startClassPatcher(patch(
-            'odoo.tools.safe_eval.evaluation.unsafe_policy',
+            'odoo.tools.safe_eval.runtime.unsafe_policy',
             lambda: UnsafePolicy.RAISE
         ))
 
-        class UnsafeClass:
-            __module__ = 'odoo.unsafe_module'
-
-            def __init__(self, *args, **kwargs): ...
-
-        cls.unsafe_context = {'UnsafeClass': UnsafeClass}
+    def setUp(self):
+        super().setUp()
+        self.unsafe_context = {'UnsafeClass': self.UnsafeClass}
 
     def test_transform_decorators(self):
         steps = []
@@ -247,7 +256,50 @@ class TestSafeEvalRuntime(TransactionCase):
         with self.assertRaisesRegex(ValueError, '^NameError'):
             safe_eval(dedent(expr), {}, mode='exec')
 
-    @mute_logger('odoo.tools.safe_eval.evaluation.runtime')
+    def test_transform_generators(self):
+
+        def deco(func):
+
+            def wrapper(*args, **kwargs):
+                gen = func(*args, **kwargs)
+                self.assertTrue(isinstance(gen, _SafeGenerator))
+                return gen
+
+            return wrapper
+
+        expr = """
+            @deco
+            def func_gen(*args, **kwargs):
+                yield 1
+                yield 2
+
+                def other_gen():
+                    yield 3
+                    yield 4
+
+                for value in other_gen():
+                    yield value
+
+            res = list(func_gen())
+        """
+        safe_eval(dedent(expr), context := {'deco': deco}, mode='exec')
+        self.assertListEqual(context['res'], [1, 2, 3, 4])
+
+    def test_transform_generators_assert_number_safe_call(self):
+        expr = """
+            def func_gen(*args, **kwargs):
+                yield 1
+
+            res = list(func_gen())
+        """
+        with patch(
+            'odoo.tools.safe_eval.runtime.safe_call',
+            wraps=safe_call,
+        ) as mock_safe_call:
+            safe_eval(dedent(expr), {}, mode='exec')
+            self.assertEqual(mock_safe_call.call_count, 1)
+
+    @mute_logger('odoo.tools.safe_eval.runtime')
     def test_check_callee(self):
         expr = """
             UnsafeClass()
@@ -255,7 +307,7 @@ class TestSafeEvalRuntime(TransactionCase):
         with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
             safe_eval(dedent(expr), self.unsafe_context, mode='exec')
 
-    @mute_logger('odoo.tools.safe_eval.evaluation.runtime')
+    @mute_logger('odoo.tools.safe_eval.runtime')
     def test_check_args(self):
         expr = """
             callee = lambda *args, **kwargs: ...
@@ -264,7 +316,7 @@ class TestSafeEvalRuntime(TransactionCase):
         with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
             safe_eval(dedent(expr), self.unsafe_context, mode='exec')
 
-    @mute_logger('odoo.tools.safe_eval.evaluation.runtime')
+    @mute_logger('odoo.tools.safe_eval.runtime')
     def test_check_kwargs(self):
         expr = """
             callee = lambda *args, **kwargs: ...
@@ -273,7 +325,7 @@ class TestSafeEvalRuntime(TransactionCase):
         with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
             safe_eval(dedent(expr), self.unsafe_context, mode='exec')
 
-    @mute_logger('odoo.tools.safe_eval.evaluation.runtime')
+    @mute_logger('odoo.tools.safe_eval.runtime')
     def test_check_structure(self):
         expr = """
             callee = lambda *args, **kwargs: ...
@@ -291,7 +343,7 @@ class TestSafeEvalRuntime(TransactionCase):
         with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
             safe_eval(dedent(expr), self.unsafe_context, mode='exec')
 
-    @mute_logger('odoo.tools.safe_eval.evaluation.runtime')
+    @mute_logger('odoo.tools.safe_eval.runtime')
     def test_check_builtin_callee(self):
         expr = """
             map(UnsafeClass, ['foo'])
@@ -311,7 +363,7 @@ class TestSafeEvalRuntime(TransactionCase):
         with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
             safe_eval(dedent(expr), self.unsafe_context, mode='exec')
 
-    @mute_logger('odoo.tools.safe_eval.evaluation.runtime')
+    @mute_logger('odoo.tools.safe_eval.runtime')
     def test_check_callee_qweb(self):
         arch = '''
             <t t-name="template">
@@ -340,7 +392,7 @@ class TestSafeEvalRuntime(TransactionCase):
         # because after transformer, the code becomes:
         # `_safe_eval_call = lambda callee, *args, **kwargs: _safe_eval_call(callee, *args, **kwargs)`
 
-    @mute_logger('odoo.tools.safe_eval.evaluation.runtime')
+    @mute_logger('odoo.tools.safe_eval.runtime')
     def test_prevent_bare_except(self):
         expr = """
             try:
@@ -351,23 +403,49 @@ class TestSafeEvalRuntime(TransactionCase):
         with self.assertRaises(SyntaxError):
             safe_eval(dedent(expr), self.unsafe_context, mode='exec')
 
-    @mute_logger('odoo.tools.safe_eval.evaluation.runtime')
-    def test_check_generator(self):
-        # Not listen `YIELD` event for external generator
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_prevent_async_function(self):
         expr = """
-            gen = get_generator()
-            list(gen)
+            async def func(): ...
+        """
+        with self.assertRaises(SyntaxError):
+            safe_eval(dedent(expr), {}, mode='exec')
+
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_prevent_async_comprehension(self):
+        expr = """
+            (x async for x in [0])
+        """
+        with self.assertRaises(SyntaxError):
+            safe_eval(dedent(expr), {}, mode='exec')
+
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_prevent_async_for(self):
+        expr = """
+            async def bar():
+                async for x in [0]:
+                    pass
+        """
+        with self.assertRaises(SyntaxError):
+            safe_eval(dedent(expr), {}, mode='exec')
+
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_01(self):
+        # Not listen events for external generator
+        expr = """
+            g = get_generator()
         """
 
         def get_generator():
-            _local_var = self.unsafe_context['UnsafeClass']
-            yield self.unsafe_context['UnsafeClass']
+            _local_var = self.UnsafeClass
+            yield self.UnsafeClass
 
-        safe_ctx = {
-            'get_generator': get_generator,
-        }
+        safe_ctx = {'get_generator': get_generator}
         safe_eval(dedent(expr), safe_ctx, mode='exec')
+        list(safe_ctx['g'])
 
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_02(self):
         # Attempt to use a dangerous object (caught in `safe_call`)
         expr = """
             g = (UnsafeClass() for _ in [0])
@@ -376,7 +454,9 @@ class TestSafeEvalRuntime(TransactionCase):
         with self.assertRaises(UnsafeClassError):
             list(self.unsafe_context['g'])
 
-        # Attempt to hide a dangerous object (caught by the `YIELD` event)
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_03(self):
+        # Attempt to hide a dangerous object
         expr = """
             g = (UnsafeClass for _ in [0])
             use_generator(g)
@@ -389,66 +469,214 @@ class TestSafeEvalRuntime(TransactionCase):
         with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
             safe_eval(dedent(expr), self.unsafe_context, mode='exec')
 
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_04(self):
         # Attempt to alter the generator's context by modifying globals
-        # (caught by the `YIELD` event)
         expr = """
             d['g'] = (d['foo'] for _ in [0])
             use_generator(d)
         """
 
-        def use_generator_1(d):
-            # Make the generator's context unsafe
-            d['foo'] = self.unsafe_context['UnsafeClass']
-            # Attempt to consume the generator
-            list(d['g'])  # Triggers `UnsafeObjectError`
+        def use_generator(d):
+            d['foo'] = self.UnsafeClass
+            list(d['g'])
 
-        safe_ctx = {
-            'd': {},
-            'use_generator': use_generator_1,
-        }
+        safe_ctx = {'d': {}, 'use_generator': use_generator}
         with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
             safe_eval(dedent(expr), safe_ctx, mode='exec')
 
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_05(self):
         # Attempt to alter the generator's context by modifying locals
-        # (caught by the `YIELD` event)
         expr = """
-            d={}
+            d = {}
             g = (d['foo'] for d in [d])
             use_generator(g, d)
         """
 
-        def use_generator_2(g, d):
-            # Make the generator's context unsafe
+        def use_generator(g, d):
             d['foo'] = self.unsafe_context['UnsafeClass']
-            # Attempt to consume the generator
-            return list(g)  # Triggers `UnsafeObjectError`
+            return list(g)
 
-        safe_ctx = {
-            'use_generator': use_generator_2,
-        }
+        safe_ctx = {'use_generator': use_generator}
         with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
             safe_eval(dedent(expr), safe_ctx, mode='exec')
 
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_06(self):
         # Attempt to alter the generator's context by modifying builtins
-        # and shadow them in globals (caught by the `YIELD` event)
+        # and shadow them in globals
         expr = """
             g = (foo for _ in [0])
             use_generator(g)
         """
 
-        def use_generator_3(g):
-            # Make the generator's context unsafe
+        def use_generator(g):
             frame = inspect.currentframe()
             safe_call_frame = frame.f_back
             generator_frame = safe_call_frame.f_back
-            generator_frame.f_builtins['foo'] = self.unsafe_context['UnsafeClass']
-            # Attempt to consume the generator
-            list(g)  # Triggers `UnsafeObjectError`
+            generator_frame.f_builtins['foo'] = self.UnsafeClass
+            list(g)
 
         safe_ctx = {
             'foo': '',  # Shadow builtin
-            'use_generator': use_generator_3,
+            'use_generator': use_generator,
         }
+        with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
+            safe_eval(dedent(expr), safe_ctx, mode='exec')
+
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_07(self):
+        # Attempt to escape unsafe context using `StopIteration` (`return`)
+        expr = """
+            def gen():
+                return
+                yield d['foo']
+
+            d['g'] = gen()
+            use_generator(d)
+        """
+
+        def use_generator(d):
+            d['foo'] = self.UnsafeClass
+            list(d['g'])
+
+        safe_ctx = {'d': {}, 'use_generator': use_generator}
+        with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
+            safe_eval(dedent(expr), safe_ctx, mode='exec')
+
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_08(self):
+        # Attempt to escape unsafe context using exception
+        expr = """
+            def gen():
+                raise Exception
+                yield d['foo']
+
+            d['g'] = gen()
+            try:
+                use_generator(d)
+            except Exception:
+                pass
+        """
+
+        def use_generator(d):
+            d['foo'] = self.UnsafeClass
+            list(d['g'])
+
+        safe_ctx = {'d': {}, 'use_generator': use_generator}
+        with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
+            safe_eval(dedent(expr), safe_ctx, mode='exec')
+
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_09(self):
+        # Attempt to escape unsafe context using exception injection
+        expr = """
+            def gen():
+                try:
+                    yield
+                except Exception:
+                    yield d['foo']
+
+            d['g'] = gen()
+            use_generator(d)
+        """
+
+        def use_generator(d):
+            next(d['g'])
+            d['foo'] = self.UnsafeClass
+            d['g'].throw(Exception())
+
+        safe_ctx = {'d': {}, 'use_generator': use_generator}
+        with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
+            safe_eval(dedent(expr), safe_ctx, mode='exec')
+
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_10(self):
+        # Attempt to escape unsafe context using intermediate yield
+        expr = """
+            def gen():
+                yield
+                yield d['foo']
+
+            d['g'] = gen()
+            use_generator(d)
+        """
+
+        def use_generator(d):
+            next(d['g'])
+            d['foo'] = self.UnsafeClass
+            list(d['g'])
+
+        safe_ctx = {'d': {}, 'use_generator': use_generator}
+        with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
+            safe_eval(dedent(expr), safe_ctx, mode='exec')
+
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_11(self):
+        # Attempt to escape unsafe context using exceptions bypass
+        expr = """
+            def gen():
+                try:
+                    yield
+                except Exception:
+                    d['foo']  # Performs a variety of tasks
+                    raise Exception
+
+            d['g'] = gen()
+            use_generator(d)
+        """
+
+        def use_generator(d):
+            next(d['g'])
+            d['foo'] = self.UnsafeClass
+            d['g'].throw(Exception())
+
+        safe_ctx = {'d': {}, 'use_generator': use_generator}
+        with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
+            safe_eval(dedent(expr), safe_ctx, mode='exec')
+
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_12(self):
+        # Attempt to escape unsafe context using iterator
+        expr = """
+            def gen():
+                yield
+                yield d['foo']
+
+            d['g'] = gen()
+            use_generator(d)
+        """
+
+        def use_generator(d):
+            it = iter(d['g'])
+            next(it)
+            d['foo'] = self.UnsafeClass
+            next(it)
+
+        safe_ctx = {'d': {}, 'use_generator': use_generator}
+        with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
+            safe_eval(dedent(expr), safe_ctx, mode='exec')
+
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_13(self):
+        # Attempt to escape unsafe context without re-call the generator
+        expr = """
+            def gen():
+                manipulate(d)
+                yield d['foo']
+
+            d['g'] = gen()
+            use_generator(d)
+        """
+
+        def manipulate(d):
+            d['foo'] = self.UnsafeClass
+
+        def use_generator(d):
+            next(d['g'])  # Return value can be used in external logic
+
+        safe_ctx = {'d': {}, 'use_generator': use_generator, 'manipulate': manipulate}
         with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
             safe_eval(dedent(expr), safe_ctx, mode='exec')
 
