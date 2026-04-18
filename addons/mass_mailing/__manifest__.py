@@ -156,6 +156,8 @@
         'web.assets_backend': [
             'mass_mailing/static/src/components/**/*',
             'mass_mailing/static/src/views/mailing_preview_form_view.js',
+            'mass_mailing/static/src/views/format_utils.js',
+            'mass_mailing/static/src/views/fields/**/*',
             'mass_mailing/static/src/editor/**/*',
             'mass_mailing/static/src/fields/**/*',
             'mass_mailing/static/src/themes/*',
@@ -185,6 +187,7 @@
             ('include', 'mass_mailing.assets_builder'),
             'mass_mailing/static/tests/mass_mailing_favourite_filter.test.js',
             'mass_mailing/static/tests/mass_mailing_html_field.test.js',
+            'mass_mailing/static/tests/mass_mailing_link_plugin.test.js',
         ],
     },
     'author': 'Odoo S.A.',

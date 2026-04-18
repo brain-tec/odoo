@@ -560,7 +560,68 @@ test(`editable list with edit="0"`, async () => {
 });
 
 test.tags("desktop");
-test(`[Offline] editable list`, async () => {
+test(`[Offline] editable list (create)`, async () => {
+    expect.errors(2); // 2x ConnectionLostError
+    onRpc("web_save", () => expect.step(`web_save`));
+    Foo._views = {
+        "list,false": `<list editable="top"><field name="foo"/></list>`,
+        "search,false": `<search/>`,
+    };
+    defineActions([
+        {
+            id: 1,
+            name: "Action 1",
+            res_model: "foo",
+            views: [[false, "list"]],
+            search_view_id: [false, "search"],
+        },
+    ]);
+
+    const setOffline = mockOffline();
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+
+    expect(`tbody tr.o_data_row[data-id]`).toHaveCount(4);
+    expect(queryAllTexts(".o_data_cell")).toEqual(["yop", "blip", "gnap", "blip"]);
+
+    await contains(`.o_list_button_add`).click();
+    expect(`tbody tr.o_selected_row`).toHaveCount(1, { message: "should have editable row" });
+    await contains(`.o_list_renderer`).click();
+
+    await setOffline(true);
+
+    expect("button.o_list_button_add").not.toHaveClass("o_disabled_offline");
+    await contains(`.o_list_button_add`).click();
+
+    expect(`tbody tr.o_selected_row`).toHaveCount(1, { message: "should have editable row" });
+    await contains(`.o_field_widget[name=foo] input`).edit("Offline");
+
+    await contains(`.o_control_panel`).click();
+    expect(queryAllTexts(".o_data_cell")).toEqual(["Offline", "yop", "blip", "gnap", "blip"]);
+
+    // The edited record will be save the next time we are online
+    await contains(`.o_menu_systray .o_nav_entry .fa-chain-broken`).click();
+    expect(queryAllTexts(`.o-dropdown--menu .o_offline_systray_content div`)).toEqual([
+        "ACTION 1",
+        "Record",
+        "Created",
+        "",
+    ]);
+
+    expect.verifyErrors([
+        `Error: Connection to "/web/dataset/call_kw/foo/onchange" couldn't be established or was interrupted`,
+        `Error: Connection to "/web/dataset/call_kw/foo/onchange" couldn't be established or was interrupted`,
+    ]);
+    expect.verifySteps([]);
+
+    await setOffline(false);
+
+    expect(getService("offline").offline).toBe(false);
+    await expect.waitForSteps(["web_save"]);
+});
+
+test.tags("desktop");
+test(`[Offline] editable list (edit)`, async () => {
     onRpc("web_save", () => expect.step(`web_save`));
     Foo._views = {
         "list,false": `<list editable="top"><field name="foo"/></list>`,
@@ -16057,6 +16118,27 @@ test(`quickcreate in a many2one in a list`, async () => {
     await press("tab");
     await animationFrame();
     expect(`.o_data_cell:eq(0)`).toHaveText("aaa");
+});
+
+test.tags("desktop");
+test(`quickcreate (grouped) multiple records`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list editable="top"><field name="foo"/></list>`,
+        groupBy: ["bar"],
+    });
+
+    await contains(".o_group_header:eq(1)").click();
+
+    expect(queryAllTexts(`.o_data_cell`)).toEqual(["yop", "blip", "gnap"]);
+
+    await contains(".o_group_field_row_add a").click();
+    await contains(`.o_data_row .o_data_cell input`).edit("aaa");
+    await contains(`.o_data_row .o_data_cell input`).edit("ooo");
+    await contains(`.o_data_row .o_data_cell input`).edit("ttt");
+
+    expect(queryAllTexts(`.o_data_cell`)).toEqual(["", "ttt", "ooo", "aaa", "yop", "blip", "gnap"]);
 });
 
 test(`float field render with digits attribute on listview`, async () => {

@@ -13,7 +13,6 @@ import { registry } from "@web/core/registry";
 import { effect } from "@web/core/utils/reactive";
 import { useChildRef, useService } from "@web/core/utils/hooks";
 import { batched } from "@web/core/utils/timing";
-import { PowerButtonsPlugin } from "@html_editor/main/power_buttons_plugin";
 import { useEmailHtmlConverter } from "@mail/convert_inline/hooks";
 import { fixInvalidHTML } from "@html_editor/utils/sanitize";
 
@@ -241,12 +240,9 @@ export class MassMailingHtmlField extends HtmlField {
         return {
             ...config,
             onEditorReady: () => this.commitChanges(),
-            Plugins: [
-                ...MAIN_EDITOR_PLUGINS,
-                ...DYNAMIC_FIELD_PLUGINS,
-                ...registry.category("basic-editor-plugins").getAll(),
-                PowerButtonsPlugin,
-            ].filter((P) => !["banner", "prompt"].includes(P.id)),
+            Plugins: [...MAIN_EDITOR_PLUGINS, ...DYNAMIC_FIELD_PLUGINS]
+                .filter((P) => !["banner", "prompt", "link"].includes(P.id))
+                .concat(registry.category("basic-editor-plugins").getAll()),
         };
     }
 
