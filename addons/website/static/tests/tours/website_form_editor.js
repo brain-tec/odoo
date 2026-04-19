@@ -120,13 +120,22 @@ const addField = function (
             run: `edit ${display.condition} && press Tab`,
         });
     }
-    if (required) {
-        testText += ".s_website_form_required";
+    const addToggleRequiredStep = (required = true) =>
         ret.push({
-            content: "Mark the field as required",
+            content: `Mark the field as ${required ? "" : "non-"}required`,
             trigger: ".o_customize_tab div[data-action-id='toggleRequired'] input[type='checkbox']",
             run: "click",
         });
+    if (required) {
+        testText += ".s_website_form_required";
+        if (name !== "boolean") {
+            addToggleRequiredStep();
+        }
+    } else {
+        if (name === "boolean") {
+            // Checkbox fields are "required" by default.
+            addToggleRequiredStep(false);
+        }
     }
     if (label) {
         testText += `:has(label:contains(${label}))`;
@@ -239,10 +248,11 @@ registerWebsitePreviewTour(
             trigger: ':iframe input[name="phone"]',
             run: "click",
         },
+        ...unfoldOptionsGroup("Form"),
         {
-            content: "Change the label position of the phone field",
+            content: "Change the label position of all fields",
             trigger:
-                ".o_customize_tab div[data-label='Position'] button[data-action-value='right']",
+                ".o_customize_tab div[data-label='Labels Position'] button[data-action-value='right']",
             run: "click",
         },
         ...addCustomField("char", "text", "Conditional Visibility Check 1", false),
@@ -809,7 +819,7 @@ registerWebsitePreviewTour(
         ...unfoldOptionsGroup("Form"),
         {
             content: "Change the Recipient Email",
-            trigger: '[data-label="Recipient Email"] input',
+            trigger: '[data-label="Recipient Emails"] input',
             run: "edit test@test.test",
         },
         // Test a field visibility when it's tied to another Date [Time] field
@@ -886,7 +896,7 @@ registerWebsitePreviewTour(
 
         // Ensure that the description option is working as wanted.
         ...addCustomField("char", "text", "Check description option", false),
-        changeOption("Field", "[data-action-id='toggleDescription'] input"),
+        changeOption("Field", "[data-action-id='setDescription'] input"),
         {
             content: "Ensure that the description has correctly been added on the field",
             trigger:
@@ -927,7 +937,7 @@ registerWebsitePreviewTour(
             ...unfoldOptionsGroup("Form"),
             {
                 content: "Change the Recipient Email",
-                trigger: "div[data-label='Recipient Email'] input",
+                trigger: "div[data-label='Recipient Emails'] input",
                 run: "edit test@test.test",
             },
         ])
@@ -948,7 +958,7 @@ registerWebsitePreviewTour(
             {
                 content: "Check that the recipient email is correct",
                 trigger:
-                    "div[data-label='Recipient Email'] input:value('website_form_contactus_edition_no_email@mail.com')",
+                    "div[data-label='Recipient Emails'] input:value('website_form_contactus_edition_no_email@mail.com')",
             },
         ])
 );

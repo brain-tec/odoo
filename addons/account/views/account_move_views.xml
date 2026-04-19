@@ -1100,6 +1100,17 @@
                                 <field name="ref" default_focus="1" nolabel="1" invisible="move_type not in ('in_invoice', 'in_receipt', 'in_refund')"/>
                                 <field name="ref" default_focus="1" invisible="move_type != 'entry'"/>
                                 <field name="tax_cash_basis_origin_move_id" invisible="not tax_cash_basis_origin_move_id"/>
+                                <field name="invoice_vendor_bill_id"
+                                       string="Auto-Complete"
+                                       class="oe_edit_only"
+                                       invisible="state != 'draft' or move_type not in ('in_invoice', 'in_refund')"
+                                       domain="([('partner_id', 'child_of', [partner_id])] if partner_id else []) + [
+                                           ('company_id', '=', company_id),
+                                           ('move_type', '=', move_type)
+                                       ]"
+                                       placeholder="Select an old purchase document"
+                                       options="{'no_create': True}"
+                                       context="{'show_total_amount': True}"/>
                             </group>
                             <group id="header_right_group">
                                 <label for="invoice_date" string="Invoice Date" style="font-weight:bold;"
@@ -1139,7 +1150,8 @@
                                 <div class="d-flex" invisible="move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')" name="due_date">
                                     <field name="invoice_date_due" force_save="1"
                                            placeholder="Date"
-                                           invisible="invoice_payment_term_id"/>
+                                           invisible="invoice_payment_term_id"
+                                           decoration-danger="invoice_date_due and invoice_date_due &lt; context_today().strftime('%Y-%m-%d') and payment_state not in ('paid', 'in_payment', 'reversed')"/>
                                     <span class="o_form_label mx-3 oe_edit_only text-center" style="width: 6ch;"
                                           invisible="state != 'draft' or invoice_payment_term_id">or</span>
                                     <field name="invoice_payment_term_id"
@@ -1468,6 +1480,7 @@
                                                business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'invoice' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'bill' or 'general'"/>
                                         <field name="date_maturity"
                                                optional="hide"
+                                               decoration-danger="date_maturity and date_maturity &lt; context_today().strftime('%Y-%m-%d') and parent.payment_state not in ('paid', 'in_payment', 'reversed')"
                                                invisible="display_type in ('line_section', 'line_note')"
                                                column_invisible="context.get('view_no_maturity')"/>
                                         <field name="amount_currency"
