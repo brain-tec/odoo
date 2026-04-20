@@ -2,6 +2,7 @@
 from odoo.tests.common import TransactionCase, tagged
 from odoo._monkeypatches.stdnum import new_get_soap_client
 from odoo.exceptions import ValidationError
+from odoo.tools import mute_logger
 from unittest.mock import patch
 
 import stdnum.eu.vat
@@ -40,6 +41,7 @@ class TestStructure(TransactionCase):
         })
         self.assertEqual(partner.vat, 'RORO790707I47', "Partner VAT should not be altered")
 
+    @mute_logger('odoo.addons.account.models.partner')
     def test_missing_company_country(self):
         company = self.env['res.company'].create({
             'name': 'Test Company',
@@ -58,6 +60,7 @@ class TestStructure(TransactionCase):
         invalid = partner._get_vat_required_valid(company=company)
         self.assertEqual(invalid, False)
 
+    @mute_logger('odoo.addons.account.models.partner')
     def test_parent_validation(self):
         """Test the validation with company and contact"""
 
@@ -229,7 +232,7 @@ class TestStructure(TransactionCase):
         for ubn in ['88117254', '12345601', '90183275']:
             test_partner.vat = ubn
 
-        for ubn in ['88117250', '12345600', '90183272']:
+        for ubn in ['88117250', '12345600', '90183272', '1234567A']:
             with self.assertRaises(ValidationError):
                 test_partner.vat = ubn
 

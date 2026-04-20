@@ -100,8 +100,6 @@ class ResPartner(models.Model):
     # Field representing whether vies_valid is relevant for selecting a fiscal position on this partner
     perform_vies_validation = fields.Boolean(compute='_compute_perform_vies_validation')
     # We put on inverse because a compute with a dependency to itself is not well managed in the ORM (it should be triggered first)
-    country_id = fields.Many2one(inverse="_inverse_vat", store=True)
-    vat = fields.Char(inverse="_inverse_vat", store=True)
 
     @api.model
     def _run_vat_checks(self, country, vat, partner_name='', validation='error'):
@@ -162,13 +160,6 @@ class ResPartner(models.Model):
             else:
                 return '', code_to_check
         return vat_to_return, code_to_check
-
-    def _inverse_vat(self):
-        self._check_vat()
-
-    @api.onchange('vat', 'country_id')
-    def _onchange_vat(self):
-        self._check_vat(validation=False)
 
     @api.depends_context('company')
     @api.depends('vat')
@@ -852,7 +843,7 @@ class ResPartner(models.Model):
         own validation to support these new valid UBNs.
         """
         vat = stdnum.util.get_cc_module("tw", "vat").compact(vat)
-        if len(vat) != 8:
+        if len(vat) != 8 or not vat.isdigit():
             return False  # The length is fixed, and we will expect it to be 8 in the following checks.
 
         logic_multiplier = [1, 2, 1, 2, 1, 2, 4, 1]  # This multiplier is set by the official validation logic.

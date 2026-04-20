@@ -195,27 +195,6 @@ class IrHttp(models.AbstractModel):
             super()._auth_method_public()
 
     @classmethod
-    def _register_website_track(cls, response):
-        if request.env['ir.http'].is_a_bot():
-            return False
-        if getattr(response, 'status_code', 0) != 200 or request.httprequest.headers.get('X-Disable-Tracking') == '1':
-            return False
-        template = False
-        if hasattr(response, '_cached_page'):
-            website_page, template = response._cached_page, response._cached_view_id
-        elif hasattr(response, 'qcontext'):  # classic response
-            main_object = response.qcontext.get('main_object')
-            website_page = getattr(main_object, '_name', False) == 'website.page' and main_object
-            template = response.qcontext.get('response_template')
-            if isinstance(template, str) and '.' not in template:
-                template = 'website.%s' % template
-
-        if template and not request.env.cr.readonly and request.env['ir.ui.view']._get_cached_template_info(template)['track']:
-            request.env['website.visitor']._handle_webpage_dispatch(website_page)
-
-        return False
-
-    @classmethod
     def _match(cls, path):
         if not hasattr(request, 'website_routing'):
             website = request.env['website'].with_context(lang=None).get_current_website()
@@ -282,7 +261,6 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _post_dispatch(cls, response):
         super()._post_dispatch(response)
-        cls._register_website_track(response)
 
     @api.model
     def get_nearest_lang(self, lang_code):
@@ -455,6 +433,45 @@ class IrHttp(models.AbstractModel):
         # Pass-through if already forbidden for another reason or a type that
         # is not restricted by the website module.
         return result
+
+    def _get_visitor_from_request(self, force_create=False, force_track_values=None):
+        """ Return the visitor as sudo from the request.
+
+        :param force_create: force a visitor creation if no visitor exists
+        :param force_track_values: an optional dict to create a track at the
+            same time.
+        :return: the website visitor if exists or forced, empty recordset
+            otherwise.
+        """
+
+        # This function can be called in json with mobile app.
+        # In case of mobile app, no uid is set on the jsonRequest env.
+        # In case of multi db, _env is None on request, and request.env unbound.
+        if not (request and request.env and request.env.uid):
+            return None
+
+        access_token = self.env['website.visitor']._get_access_token()
+
+        if force_create:
+            force_track_values = force_track_values or {}
+            visitor_id, _ = self.env['website.visitor']._upsert_visitor(
+                token_or_partner_id=access_token,
+                website_id=request.website.id,
+                lang_id=request.lang.id,
+                country_code=request.geoip.country_code,  # GEOIP might return a country code unknown to odoo
+                timezone=self.env['website.visitor']._get_visitor_timezone(),
+                **force_track_values
+            )
+            return self.env['website.visitor'].sudo().browse(visitor_id)
+
+        visitor = self.env['website.visitor'].sudo().search_fetch([('access_token', '=', access_token)])
+
+        if not force_create and not self.env.cr.readonly and visitor and not visitor.timezone:
+            tz = self.env['website.visitor']._get_visitor_timezone()
+            if tz:
+                visitor._update_visitor_timezone(tz)
+
+        return visitor
 
 
 class ModelConverter(ir_http.ModelConverter):
