@@ -43,6 +43,7 @@ import {
     models,
     mountWithCleanup,
     onRpc,
+    serverState,
 } from "@web/../tests/web_test_helpers";
 import { SELECTORS } from "./domain_selector_helpers";
 
@@ -2086,8 +2087,31 @@ test("datetime domain in readonly mode (check localization)", async () => {
         readonly: true,
     });
     expect(".o_tree_editor_condition").toHaveText(
-        `Datetime\nbetween\n11.03.2023 13:41:23\nand\n11.13.2023 11:45:11`
+        `Datetime\nbetween\nNov 3, 2023, 1:41 PM\nand\nNov 13, 2023, 11:45 AM`
     );
+});
+
+test("relative date domain in readonly mode", async () => {
+    await makeDomainSelector({
+        domain: `["&", ("create_date", ">", "today +1d"), ("create_date", "<=", "today +6d")]`,
+        readonly: true,
+    });
+    await makeDomainSelector({
+        domain: `["&", ("create_date", ">=", "today -5d"), ("create_date", "<", "today")]`,
+        readonly: true,
+    });
+    await makeDomainSelector({
+        domain: `["&", ("create_date", "<=", "today +6d"), ("create_date", ">", "today +1d")]`,
+        readonly: true,
+    });
+    await makeDomainSelector({
+        domain: `["&", ("create_date", "<", "today"), ("create_date", ">=", "today -5d")]`,
+        readonly: true,
+    });
+    expect(".o_tree_editor_condition:eq(0)").toHaveText("Created on\nis in\nnext\n5\ndays");
+    expect(".o_tree_editor_condition:eq(1)").toHaveText("Created on\nis in\nlast\n5\ndays");
+    expect(".o_tree_editor_condition:eq(2)").toHaveText("Created on\nis in\nnext\n5\ndays");
+    expect(".o_tree_editor_condition:eq(3)").toHaveText("Created on\nis in\nlast\n5\ndays");
 });
 
 test("date domain in readonly mode (check localization)", async () => {
@@ -2531,6 +2555,7 @@ test("selection: placeholders for in operator", async () => {
 });
 
 test(`datetime: "in range" operator`, async () => {
+    serverState.debug = "1";
     mockDate("2023-04-20 17:00:00", 0);
     await makeDomainSelector({
         domain: `[("id", "=", 1)]`,
@@ -2554,39 +2579,56 @@ test(`datetime: "in range" operator`, async () => {
         "Last month",
         "Year to date",
         "Last 365 days",
-        "Custom range",
+        "Date range",
+        "Relative range",
     ]);
 
-    await selectValue("last 7 days");
+    await selectValue("last7Days");
     expect(getCurrentValue()).toBe("Last 7 days");
     expect.verifySteps([`["&", ("datetime", ">=", "today -7d"), ("datetime", "<", "today")]`]);
 
-    await selectValue("last 30 days");
+    await selectValue("last30Days");
     expect(getCurrentValue()).toBe("Last 30 days");
     expect.verifySteps([`["&", ("datetime", ">=", "today -30d"), ("datetime", "<", "today")]`]);
 
-    await selectValue("month to date");
+    await selectValue("monthToDate");
     expect(getCurrentValue()).toBe("Month to date");
     expect.verifySteps([`["&", ("datetime", ">=", "today =1d"), ("datetime", "<", "today +1d")]`]);
 
-    await selectValue("last month");
+    await selectValue("lastMonth");
     expect(getCurrentValue()).toBe("Last month");
     expect.verifySteps([
         `["&", ("datetime", ">=", "today =1d -1m"), ("datetime", "<", "today =1d")]`,
     ]);
 
-    await selectValue("year to date");
+    await selectValue("yearToDate");
     expect(getCurrentValue()).toBe("Year to date");
     expect.verifySteps([
         `["&", ("datetime", ">=", "today =1m =1d"), ("datetime", "<", "today +1d")]`,
     ]);
 
-    await selectValue("last 365 days");
+    await selectValue("last365Days");
     expect(getCurrentValue()).toBe("Last 365 days");
     expect.verifySteps([`["&", ("datetime", ">=", "today -365d"), ("datetime", "<", "today")]`]);
 
-    await selectValue("custom range");
-    expect(queryOne(`${SELECTORS.valueEditor} select`).value).toBe('"custom range"');
+    await selectValue("relativeRange");
+    expect(`${SELECTORS.valueEditor} select:first`).toHaveValue('"relativeRange"');
+    expect.verifySteps([`["&", ("datetime", ">=", "today -1d"), ("datetime", "<", "today")]`]);
+
+    await contains(`${SELECTORS.valueEditor} input[type="number"]`).edit(-5, { instantly: true });
+    await contains(`${SELECTORS.valueEditor} select:last`).select('"month"');
+    expect.verifySteps([
+        `["&", ("datetime", ">=", "today -5d"), ("datetime", "<", "today")]`,
+        `["&", ("datetime", ">=", "today -5m"), ("datetime", "<", "today")]`,
+    ]);
+
+    // Important that it stays a relative range with 0 to make key nav work on number input
+    await contains(`${SELECTORS.valueEditor} input[type="number"]`).edit("0");
+    await animationFrame();
+    expect.verifySteps([`["&", ("datetime", ">=", "today"), ("datetime", "<", "today +1d")]`]); // When input is 0 the expression should be the same as today smart date
+
+    await selectValue("dateRange");
+    expect(queryOne(`${SELECTORS.valueEditor} select`).value).toBe('"dateRange"');
     expect.verifySteps([
         `["&", ("datetime", ">=", "2023-04-20 00:00:00"), ("datetime", "<=", "2023-04-20 23:59:59")]`,
     ]);
@@ -2606,6 +2648,7 @@ test(`datetime: "in range" operator`, async () => {
 });
 
 test(`date: "in range" operator`, async () => {
+    serverState.debug = "1";
     mockDate("2023-04-20 17:00:00", 0);
     await makeDomainSelector({
         domain: `[("id", "=", 1)]`,
@@ -2629,35 +2672,52 @@ test(`date: "in range" operator`, async () => {
         "Last month",
         "Year to date",
         "Last 365 days",
-        "Custom range",
+        "Date range",
+        "Relative range",
     ]);
 
-    await selectValue("last 7 days");
+    await selectValue("last7Days");
     expect(getCurrentValue()).toBe("Last 7 days");
     expect.verifySteps([`["&", ("date", ">=", "today -7d"), ("date", "<", "today")]`]);
 
-    await selectValue("last 30 days");
+    await selectValue("last30Days");
     expect(getCurrentValue()).toBe("Last 30 days");
     expect.verifySteps([`["&", ("date", ">=", "today -30d"), ("date", "<", "today")]`]);
 
-    await selectValue("month to date");
+    await selectValue("monthToDate");
     expect(getCurrentValue()).toBe("Month to date");
     expect.verifySteps([`["&", ("date", ">=", "today =1d"), ("date", "<", "today +1d")]`]);
 
-    await selectValue("last month");
+    await selectValue("lastMonth");
     expect(getCurrentValue()).toBe("Last month");
     expect.verifySteps([`["&", ("date", ">=", "today =1d -1m"), ("date", "<", "today =1d")]`]);
 
-    await selectValue("year to date");
+    await selectValue("yearToDate");
     expect(getCurrentValue()).toBe("Year to date");
     expect.verifySteps([`["&", ("date", ">=", "today =1m =1d"), ("date", "<", "today +1d")]`]);
 
-    await selectValue("last 365 days");
+    await selectValue("last365Days");
     expect(getCurrentValue()).toBe("Last 365 days");
     expect.verifySteps([`["&", ("date", ">=", "today -365d"), ("date", "<", "today")]`]);
 
-    await selectValue("custom range");
-    expect(queryOne(`${SELECTORS.valueEditor} select`).value).toBe('"custom range"');
+    await selectValue("relativeRange");
+    expect(`${SELECTORS.valueEditor} select:first`).toHaveValue('"relativeRange"');
+    expect.verifySteps([`["&", ("date", ">=", "today -1d"), ("date", "<", "today")]`]);
+
+    await contains(`${SELECTORS.valueEditor} input[type="number"]`).edit(-5, { instantly: true });
+    await contains(`${SELECTORS.valueEditor} select:last`).select('"month"');
+    expect.verifySteps([
+        `["&", ("date", ">=", "today -5d"), ("date", "<", "today")]`,
+        `["&", ("date", ">=", "today -5m"), ("date", "<", "today")]`,
+    ]);
+
+    // Important that it stays a relative range with 0 to make key nav work on number input
+    await contains(`${SELECTORS.valueEditor} input[type="number"]`).edit("0");
+    await animationFrame();
+    expect.verifySteps([`["&", ("date", ">=", "today"), ("date", "<", "today +1d")]`]); // When input is 0 the expression should be the same as today smart date
+
+    await selectValue("dateRange");
+    expect(queryOne(`${SELECTORS.valueEditor} select`).value).toBe('"dateRange"');
     expect.verifySteps([`["&", ("date", ">=", "2023-04-20"), ("date", "<=", "2023-04-20")]`]);
 
     await contains(".o_datetime_input:last").click();
@@ -2733,6 +2793,7 @@ test(`swith from [(0, "=", 1)] to other condition`, async () => {
 
 test("properties field: date & datetime", async () => {
     mockDate("2077-01-02 10:00:00", 0);
+    serverState.debug = "1";
     Partner._fields.properties = fields.Properties({
         string: "partner_properties",
         definition_record: "product_id",
@@ -2843,15 +2904,21 @@ test("properties field: date & datetime", async () => {
         {
             fields: ["product", "product_properties", "datetime_properties"],
             operator: "in range",
-            treeValue: "last 365 days",
+            treeValue: "last365Days",
             expectedDomain:
                 '[("product_id", "any", ["&", ("properties.datetime_properties", ">=", "today -365d"), ("properties.datetime_properties", "<", "today")])]',
         },
         {
             fields: ["product", "product_properties", "date_properties"],
             operator: "in range",
-            treeValue: "year to date",
+            treeValue: "yearToDate",
             expectedDomain: `[("product_id", "any", ["&", ("properties.date_properties", ">=", "today =1m =1d"), ("properties.date_properties", "<", "today +1d")])]`,
+        },
+        {
+            fields: ["product", "product_properties", "date_properties"],
+            operator: "in range",
+            treeValue: "relativeRange",
+            expectedDomain: `[("product_id", "any", ["&", ("properties.date_properties", ">=", "today -1d"), ("properties.date_properties", "<", "today")])]`,
         },
     ];
     for (const value of values) {
