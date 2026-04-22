@@ -128,6 +128,9 @@ class ProductTemplate(models.Model):
     outgoing_qty = fields.Float(
         'Outgoing', compute='_compute_quantities', search='_search_outgoing_qty',
         compute_sudo=False, digits='Product Unit')
+    free_qty = fields.Float(
+        'Free To Use', compute='_compute_quantities', compute_sudo=False, digits='Product Unit',
+        help="Quantity on hand minus outgoing quantity.")
     volume = fields.Float(
         'Volume', compute='_compute_volume', inverse='_set_volume', digits='Volume', store=True)
     volume_uom_name = fields.Char(string='Volume unit of measure label', compute='_compute_volume_uom_name')
@@ -379,13 +382,13 @@ class ProductTemplate(models.Model):
 
     def _compute_quantities(self):
         res = self._compute_quantities_dict()
-        fields = ['qty_available', 'virtual_available', 'incoming_qty', 'outgoing_qty']
+        fields = ['qty_available', 'virtual_available', 'incoming_qty', 'outgoing_qty', 'free_qty']
         for template in self:
             for field in fields:
                 template[field] = res[template.id][field]
 
     def _compute_quantities_dict(self):
-        quantities_fields = ['qty_available', 'virtual_available', 'incoming_qty', 'outgoing_qty']
+        quantities_fields = ['qty_available', 'virtual_available', 'incoming_qty', 'outgoing_qty', 'free_qty']
         variants_available = {
             p['id']: p for p in self.product_variant_ids._origin.read(quantities_fields)
         }
@@ -903,16 +906,10 @@ class ProductTemplate(models.Model):
                     <br/>
                     %s
                 </p>
-                <p>
-                    <a class="oe_link" href="https://www.odoo.com/documentation/latest/_downloads/eaa2883bd361273b475c9765f64e3e0c/pdfquotebuilderexamples.zip">
-                    %s
-                    </a>
-                </p>
             """ % (
                 _("Upload files to your product"),
                 _("Use this feature to store any files you would like to share with your customers"),
                 _("(e.g: product description, ebook, legal notice, ...)."),
-                _("Download examples")
             )
         }
 

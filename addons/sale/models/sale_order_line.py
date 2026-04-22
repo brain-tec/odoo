@@ -713,7 +713,7 @@ class SaleOrderLine(models.Model):
             line.virtual_available_at_date = line.product_id.with_context(
                 to_date=schedule_date
             ).virtual_available
-            line.qty_available_today = line.product_id.qty_available
+            line.qty_available_today = line.product_id.free_qty
 
     def _reset_price_unit(self):
         self.ensure_one()
@@ -937,6 +937,11 @@ class SaleOrderLine(models.Model):
         base_values.update(kwargs)
         return self.env["account.tax"]._prepare_base_line_for_taxes_computation(self, **base_values)
 
+    def _is_line_excluded_from_totals(self):
+        """Exclude global discounts and down payments for the advantages computation."""
+        self.ensure_one()
+        return self._is_global_discount() or self.is_downpayment
+
     def _is_global_discount(self):
         self.ensure_one()
         return self.extra_tax_data and self.extra_tax_data.get("computation_key", "").startswith(
@@ -969,11 +974,10 @@ class SaleOrderLine(models.Model):
                 line.price_total / line.product_uom_qty if line.product_uom_qty else 0.0
             )
 
-    # This computed default is necessary to have a clean computation inheritance
-    # (cf sale_stock) instead of simply removing the default and specifying
-    # the compute attribute & method in sale_stock.
+    @api.depends('product_id', 'company_id')
     def _compute_customer_lead(self):
-        self.customer_lead = 0.0
+        for line in self:
+            line.customer_lead = line.product_id.with_company(line.company_id).sale_delay
 
     @api.depends("is_expense", "product_id")
     def _compute_qty_delivered_method(self):

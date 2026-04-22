@@ -90,6 +90,7 @@
                 <xpath expr="//field[@name='qty_available']" position='attributes'>
                     <attribute name="groups">stock.group_stock_user</attribute>
                 </xpath>
+                <xpath expr="//field[@name='free_qty']" position="replace"/>
                 <xpath expr="//field[@name='virtual_available']" position='attributes'>
                     <attribute name="groups">stock.group_stock_user</attribute>
                 </xpath>
@@ -122,6 +123,7 @@
                     <attribute name="invisible">not show_on_hand_qty_status_button</attribute>
                     <attribute name="groups">stock.group_stock_user</attribute>
                 </xpath>
+                <xpath expr="//field[@name='free_qty']" position="replace"/>
                 <xpath expr="//field[@name='virtual_available']" position="attributes">
                     <attribute name="invisible">not show_on_hand_qty_status_button</attribute>
                     <attribute name="groups">stock.group_stock_user</attribute>
@@ -175,7 +177,7 @@
         </record>
 
         <!-- view common to both template and product -->
-        <record id="view_template_property_form" model="ir.ui.view">
+        <record id="product_template_form_view_stock" model="ir.ui.view">
             <field name="name">product.template.stock.property.form.inherit</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
@@ -200,17 +202,13 @@
                         </span>
                     </div>
                 </xpath>
+                <xpath expr="//label[@id='free_qty_no_stock']" position="replace"/>
+                <xpath expr="//div[@name='free_qty_no_stock']" position="replace"/>
                 <xpath expr="//field[@name='is_storable']" position="attributes">
                     <attribute name="groups">!stock.group_production_lot</attribute>
                     <attribute name="widget">boolean_toggle</attribute>
                     <attribute name="options">{'autosave': False}</attribute>
                     <attribute name="invisible">type != 'consu'</attribute>
-                </xpath>
-                <xpath expr="//group[@name='group_lots_and_weight']" position="inside">
-                    <label for="sale_delay" invisible="not sale_ok"/>
-                    <div invisible="not sale_ok">
-                        <field name="sale_delay" class="oe_inline" style="vertical-align:baseline"/> days
-                    </div>
                 </xpath>
                 <xpath expr="//group[@name='group_lots_and_weight']" position="before">
                     <field name="has_available_route_ids" invisible="1"/>

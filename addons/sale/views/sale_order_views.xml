@@ -546,7 +546,7 @@
                         <label for="commitment_date" invisible="state == 'draft'"/>
                         <label for="commitment_date" string="Delivery Date" invisible="state != 'draft'"/>
                         <div name="commitment_date_div" class="o_row align-items-center">
-                            <field name="commitment_date" readonly="state == 'cancel' or locked"/>
+                            <field name="commitment_date" options="{'placeholder_field': 'expected_date'}" readonly="state == 'cancel' or locked"/>
                             <field
                                 name="delivery_status"
                                 widget="badge"
@@ -556,6 +556,7 @@
                                 invisible="state != 'sale'"
                             />
                         </div>
+                        <field name="expected_date" invisible="1"/>  <!-- Needed for the placeholder widget -->
                    </group>
                 </group>
                 <notebook>
@@ -1141,14 +1142,6 @@
             </h2><p>
             Boost sales with online payments or signatures, upsells, and a great customer portal.
             </p>
-            <a
-                role="button"
-                class="btn btn-secondary"
-                href="https://www.odoo.com/documentation/latest/_downloads/4c54b867f6472b9cbcc233b4821d5c7b/sample_quotation.pdf"
-                target="_blank"
-            >
-                Check a sample. It's clean!
-            </a>
         </field>
     </record>
 
@@ -1178,14 +1171,6 @@
             </p><p>
             Boost sales with online payments or signatures, upsells, and a great customer portal.
             </p>
-            <a
-                role="button"
-                class="btn btn-secondary"
-                href="https://www.odoo.com/documentation/latest/_downloads/4c54b867f6472b9cbcc233b4821d5c7b/sample_quotation.pdf"
-                target="_blank"
-            >
-                Check a sample. It's clean!
-            </a>
         </field>
     </record>
 

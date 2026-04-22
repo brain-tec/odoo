@@ -413,9 +413,6 @@ class SaleOrder(models.Model):
     )
 
     # Remaining non stored computed fields (hide/make fields readonly, ...)
-    amount_undiscounted = fields.Float(
-        string="Amount Before Discount", compute="_compute_amount_undiscounted", digits=0
-    )
     country_code = fields.Char(
         related="company_id.account_fiscal_country_id.code", string="Country code"
     )
@@ -894,24 +891,42 @@ class SaleOrder(models.Model):
                 tx.amount for tx in order.transaction_ids if tx.state in ("authorized", "done")
             )
 
-    def _compute_amount_undiscounted(self):
+    def _get_advantages(self):
+        """Compute advantages (tax included/excluded) for a sale order.
+
+        :return: Tuple of advantage tax excluded and advantage tax included
+        :rtype: tuple(float, float)
+        """
+        self.ensure_one()
         AccountTax = self.env["account.tax"]
-        for order in self:
-            subtotal = 0
-            for line in order.order_line:
-                base_line = line._prepare_base_line_for_taxes_computation(discount=0)
-                # Exclude global discounts and down payments
-                if not base_line.get("special_type"):
-                    AccountTax._add_tax_details_in_base_line(base_line, order.company_id)
-                    subtotal += base_line["tax_details"]["raw_total_excluded_currency"]
-            order.amount_undiscounted = subtotal
+        total_excluded = total_included = 0
+
+        for line in self.order_line:
+            # Exclude global discounts, down payments and coupons
+            if line._is_line_excluded_from_totals():
+                continue
+
+            # Calculate base_line without discount, except if negative (=surcharge)
+            discount = 0 if line.discount > 0 else line.discount
+            base_line = line._prepare_base_line_for_taxes_computation(discount=discount)
+            AccountTax._add_tax_details_in_base_line(base_line, self.company_id)
+            total_excluded += base_line["tax_details"]["raw_total_excluded_currency"]
+            total_included += base_line["tax_details"]["raw_total_included_currency"]
+
+        advantage_tax_excl = self.amount_untaxed - total_excluded
+        advantage_tax_incl = self.amount_total - total_included
+
+        if not float_is_zero(advantage_tax_incl, precision_rounding=self.currency_id.rounding):
+            return advantage_tax_excl, advantage_tax_incl
+
+        return 0, 0
 
     @api.depends("order_line.qty_delivered", "order_line.product_uom_qty", "state")
     def _compute_delivery_status(self):
         for order in self:
             if order.state != "sale" or not order.order_line:
                 order.delivery_status = False
-            elif all(line.qty_delivered >= line.product_uom_qty for line in order.order_line):
+            elif all(line.qty_delivered >= line.product_uom_qty if line.product_uom_qty > 0 else line.qty_delivered <= line.product_uom_qty for line in order.order_line):
                 order.delivery_status = "full"
             elif any(line.qty_delivered for line in order.order_line):
                 order.delivery_status = "partial"
@@ -1015,7 +1030,7 @@ class SaleOrder(models.Model):
         for order in self:
             order.show_deliver_button = (
                 order.state == "sale"
-                and any(line.qty_delivered < line.product_uom_qty for line in order.order_line)
+                and any(line.qty_delivered < line.product_uom_qty if line.product_uom_qty > 0 else line.qty_delivered > line.product_uom_qty for line in order.order_line)
                 and all(line.qty_delivered_method == "manual" for line in order.order_line)
             )
 
