@@ -1173,10 +1173,12 @@ export class ListRenderer extends Component {
 
     getGroupPagerProps(group) {
         const list = group.list;
+        // For a single leveled group with a countLimit, we already have the full count.
+        const total = list.isGrouped ? list.count : group.count;
         return {
             offset: list.offset,
             limit: list.limit,
-            total: list.count,
+            total,
             onUpdate: async ({ offset, limit }) => {
                 await list.load({ limit, offset });
                 render(this, true);
@@ -1443,6 +1445,9 @@ export class ListRenderer extends Component {
         }
 
         const closestCell = ev.target.closest("td, th");
+        if (closestCell.querySelector(".o_select_menu [aria-expanded=true]")) {
+            return;
+        }
 
         if (this.toggleFocusInsideCell(hotkey, closestCell)) {
             return;
