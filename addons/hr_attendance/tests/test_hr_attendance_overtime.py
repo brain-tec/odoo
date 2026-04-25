@@ -5,6 +5,7 @@ from freezegun import freeze_time
 from odoo import Command
 from odoo.tests import Form, HttpCase, new_test_user
 from odoo.tests.common import tagged
+from odoo.tools import float_compare
 
 
 @tagged('hr_attendance_overtime')
@@ -164,6 +165,57 @@ class TestHrAttendanceOvertime(HttpCase):
         self.assertAlmostEqual(afternoon_att.validated_overtime_hours, 3, 2)
         self.assertAlmostEqual(morning_att.employee_id.total_overtime, 3, 2)
 
+        # CASE 1: Daily Rule Only, Different Day
+        attendance_2 = self.env['hr.attendance'].create({
+            'employee_id': self.employee.id,
+            'check_in': datetime(2021, 1, 5, 8, 0),
+            'check_out': datetime(2021, 1, 5, 20, 0)
+        })
+        self.assertEqual(
+            afternoon_att.overtime_status, 'approved',
+            "Updating an attendance on a different day should NOT reset a previously approved overtime."
+        )
+
+        # CASE 2: Daily Rule Only, Same Day
+        attendance_2.action_approve_overtime()
+        self.assertEqual(attendance_2.overtime_status, 'approved')
+
+        self.env['hr.attendance'].create({
+            'employee_id': self.employee.id,
+            'check_in': datetime(2021, 1, 5, 21, 0),
+            'check_out': datetime(2021, 1, 5, 22, 0)
+        })
+        self.assertEqual(
+            attendance_2.overtime_status, 'to_approve',
+            "A second attendance on the same day MUST reset that day's approval."
+        )
+        self.assertEqual(
+            afternoon_att.overtime_status, 'approved',
+            "An attendance on a previous day should still remain unaffected."
+        )
+
+        # CASE 3: Weekly Rule Exists, Different Day
+        self.env['hr.attendance.overtime.rule'].create({
+            'name': 'Weekly Rule',
+            'base_off': 'quantity',
+            'quantity_period': 'week',
+            'expected_hours': 40,
+            'ruleset_id': self.ruleset.id,
+        })
+
+        self.env['hr.attendance'].create({
+            'employee_id': self.employee.id,
+            'check_in': datetime(2021, 1, 8, 8, 0),
+            'check_out': datetime(2021, 1, 8, 20, 0)
+        })
+
+        self.assertEqual(
+            afternoon_att.overtime_status, 'to_approve',
+            "Creating an attendance on another day of the week MUST reset the entire week's overtime approvals."
+        )
+
+        # Since the second and third days' overtimes are currently 'to_approve',
+        # refusing the first day's overtime will drop the employee's total validated overtime to 0.
         afternoon_att.action_refuse_overtime()
         self.assertEqual(morning_att.employee_id.total_overtime, 0, 0)
         self.assertEqual(afternoon_att.employee_id.total_overtime, 0, 0)
@@ -900,10 +952,10 @@ class TestHrAttendanceOvertime(HttpCase):
             'check_out': datetime(2023, 1, 4, 18, 0)
         })
         # The hours will now be recomputed
-        # But they should have the 'to_approve' status
-        self.assertEqual(attendance.linked_overtime_ids.status, 'to_approve', "Record should be flagged for approval")
+        # But they should have the 'approved' status since it is on a different day and there is only daily rules
+        self.assertEqual(attendance.overtime_status, 'approved')
         self.assertAlmostEqual(attendance.linked_overtime_ids.duration, 2.0, 2, "Math should be reset to 2.0")
-        self.assertEqual(attendance.validated_overtime_hours, 0.0, "Validated hours should be 0 until approved")
+        self.assertEqual(attendance.validated_overtime_hours, 0.5, "Validated hours should be 0.5 as it was already approved")
 
     def _check_overtimes(self, overtimes, vals_list):
         self.assertEqual(len(overtimes), len(vals_list), "Wrong number of overtimes")
@@ -1433,3 +1485,52 @@ class TestHrAttendanceOvertime(HttpCase):
         self.assertEqual(att.overtime_hours, -6)
         self.assertEqual(att.validated_overtime_hours, 10)
         self.assertEqual(att.expected_hours, 8)
+
+    def test_updating_overtimes_on_midnight_boundary(self):
+        """ Ensure that we can update overtimes for attendances that start
+            and/or stop on a midnight boundary in the user's TZ.
+
+            We'll do this with and without the ruleset's company's "Absence
+            Management" setting enabled.
+        """
+        EXPECTED_DAILY_WORKING_HOURS = 8
+        FLOAT_COMPARISON_PRECISION_DIGITS = 2
+        attendances = self.env['hr.attendance'].create([
+            {
+                "employee_id": self.europe_employee.id,
+                "check_in": datetime(2026, 4, 1, 22, 0, 0),   # Start at midnight in Brussels
+                "check_out": datetime(2026, 4, 2, 13, 0, 0),
+            },
+            {
+                "employee_id": self.europe_employee.id,
+                "check_in": datetime(2026, 4, 3, 6, 0, 0),
+                "check_out": datetime(2026, 4, 3, 22, 0, 0),  # End at midnight in Brussels
+            },
+        ])
+        # Add the overtime rule specifically after we create the attendance
+        # records so that we can test the update of overtimes for attendances
+        # that have already been made.
+        self.ruleset.write({
+            'rule_ids': [Command.create({
+                    'name': 'Rule with expected hours',
+                    'base_off': 'quantity',
+                    'expected_hours_from_contract': False,
+                    'expected_hours': EXPECTED_DAILY_WORKING_HOURS,
+                    'quantity_period': 'day',
+                })],
+        })
+
+        def assert_overtime_durations(attendances):
+            for attendance in attendances:
+                hours_after_daily_working_hours = attendance.worked_hours - EXPECTED_DAILY_WORKING_HOURS
+                result = float_compare(
+                    attendance.overtime_hours,
+                    hours_after_daily_working_hours,
+                    precision_digits=FLOAT_COMPARISON_PRECISION_DIGITS)
+                self.assertEqual(result, 0, "Overtime hours were not consistent with hours worked and the expected daily working hours.")
+
+        attendances._update_overtime()
+        assert_overtime_durations(attendances)
+        self.ruleset.company_id.absence_management = True
+        attendances._update_overtime()
+        assert_overtime_durations(attendances)
