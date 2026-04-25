@@ -16,9 +16,9 @@ const EPSON_ERRORS = {
     EPTR_CUTTER: _t("The cutter has a foreign matter, please check the cutter mechanism"),
     EPTR_MECHANICAL: _t("Mechanical error, please check the printer"),
     EPTR_REC_EMPTY: _t("The paper is empty, please load paper into the printer"),
-    EPTR_UNRECOVERABLE: _t("Low voltage unrecoverable error occured, please check the printer"),
+    EPTR_UNRECOVERABLE: _t("Low voltage unrecoverable error occurred, please check the printer"),
     EX_BADPORT: _t("The device is not connected, please check the printer power / connection"),
-    EX_TIMEOUT: _t("Timeout occured, please try again"),
+    EX_TIMEOUT: _t("Timeout occurred, please try again"),
 };
 
 export class TestEPos extends Component {
@@ -82,26 +82,15 @@ export class TestEPos extends Component {
     }
 
     async _testAllPrinters() {
-        const config_id = this.props.record.resId;
-
-        if (!config_id) {
-            this.notification.add(_t("Save the configuration before testing"), {
-                type: "warning",
-            });
-            return;
-        }
-        const config_data = await this.orm.read("pos.config", [config_id], ["receipt_printer_ids"]);
-
-        const printers_id = config_data[0].receipt_printer_ids;
-
-        if (!printers_id.length) {
+        const printersIds = this.props.record.data.receipt_printer_ids?._currentIds || [];
+        if (!printersIds.length) {
             this.notification.add(_t("No receipt printers configured for this POS."), {
                 type: "warning",
             });
             return;
         }
 
-        for (const p_id of printers_id) {
+        for (const p_id of printersIds) {
             await this._printTo(p_id);
         }
     }
