@@ -355,7 +355,7 @@ export function mapSuggestionsToOptions(type, suggestions, { thread } = {}) {
                     };
                 }),
             };
-        case "Thread":
+        case "discuss.channel":
             return {
                 optionTemplate: "mail.Composer.suggestionThread",
                 options: suggestions.map((suggestion) => ({

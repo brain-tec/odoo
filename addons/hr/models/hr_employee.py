@@ -1645,12 +1645,6 @@ class HrEmployee(models.Model):
                     users_to_update |= employee.user_id
             if users_to_update:
                 users_to_update.write({'tz': vals['tz']})
-        if vals.get('department_id') or vals.get('user_id'):
-            department_id = vals['department_id'] if vals.get('department_id') else self[:1].department_id.id
-            # When added to a department or changing user, subscribe to the channels auto-subscribed by department
-            self.env['discuss.channel'].sudo().search([
-                ('subscription_department_ids', 'in', department_id)
-            ])._subscribe_users_automatically()
         if vals.get('departure_description'):
             for employee in self:
                 employee.message_post(body=_(
@@ -1677,6 +1671,12 @@ class HrEmployee(models.Model):
 
             for employee in self:
                 employee._track_set_log_message(Markup("<b>%s</b>") % self.env._("Modified on the Employee Record '%s'") % employee.version_id.display_name)
+        if vals.get('department_id') or vals.get('user_id'):
+            department_id = vals['department_id'] if vals.get('department_id') else self[:1].department_id.id
+            # When added to a department or changing user, subscribe to the channels auto-subscribed by department
+            self.env['discuss.channel'].sudo().search([
+                ('subscription_department_ids', 'in', department_id)
+            ])._subscribe_users_automatically()
         if res and 'resource_calendar_id' in vals:
             resources_per_calendar_id = defaultdict(lambda: self.env['resource.resource'])
             for employee in self:
@@ -1800,10 +1800,11 @@ class HrEmployee(models.Model):
             return res
 
         date_from = fields.Date.to_date(date_from)
-        for employee in self:
-            employee_versions_sudo = employee.sudo().version_ids.filtered(lambda v: v._is_in_contract(date_from))
+        employees_sudo = self if self.env.su else self.sudo()
+        for employee in employees_sudo:
+            employee_versions_sudo = employee.version_ids.filtered(lambda v: v._is_in_contract(date_from))
             if employee_versions_sudo:
-                res[employee.id] = employee_versions_sudo[0].resource_calendar_id.sudo(False)
+                res[employee.id] = employee_versions_sudo[0].resource_calendar_id.sudo(self.env.su)
         return res
 
     def _get_version_periods(self, start, stop, field=None, check_contract=False):
