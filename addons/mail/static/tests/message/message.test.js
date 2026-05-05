@@ -719,9 +719,10 @@ test("Other messages are grayed out when replying to another one", async () => {
     await start();
     await openDiscuss(channelId);
     await contains(".o-mail-Message", { count: 2 });
-    await click(".o-mail-Message [title='Reply']", {
+    await rightClick(".o-mail-Message", {
         parent: [".o-mail-Message:has(:text('Hello world'))"],
     });
+    await click(".o-dropdown-item:contains('Reply')");
     await contains(".o-mail-Message.o-selected:has(:text('Hello world'))");
     expect(
         getComputedStyle(queryFirst(".o-mail-Message:has(:text('Goodbye world'))")).opacity
@@ -744,7 +745,9 @@ test("Parent message body is displayed on replies", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await click(".o-mail-Message [title='Reply']");
+    await contains(".o-mail-Message");
+    await rightClick(".o-mail-Message");
+    await click(".o-dropdown-item:contains('Reply')");
     await insertText(".o-mail-Composer-input", "FooBarFoo");
     await press("Enter");
     await contains(".o-mail-MessageInReply-message:text('Hello world')");
@@ -1160,19 +1163,22 @@ test("add and remove bookmark from message", async () => {
     await start();
     await openDiscuss(channelId);
     await contains(".o-mail-Message");
-    await contains(".o-mail-Message [title='Bookmark']");
-    await contains(".o-mail-Message [title='Bookmark']" + " i.fa-bookmark-o");
+    await rightClick(".o-mail-Message");
+    await contains(".o-dropdown-item:contains('Bookmark')");
+    await contains(".o-dropdown-item:contains('Bookmark')" + " i.fa-bookmark-o");
     await contains("button:has(:text('Bookmarks'))", { contains: [".badge", { count: 0 }] });
-    await click(".o-mail-Message [title='Bookmark']");
+    await click(".o-dropdown-item:contains('Bookmark')");
     await contains("button:has(:text('Bookmarks'))", { contains: [".badge:text('1')"] });
     await waitStoreFetch([["add_bookmark", { message_id: messageId }]]);
     await contains(".o-mail-Message");
-    await contains(".o-mail-Message [title='Remove from Bookmarks']" + " i.fa-bookmark");
-    await click(".o-mail-Message [title='Remove from Bookmarks']");
+    await rightClick(".o-mail-Message");
+    await contains(".o-dropdown-item:contains('Remove from Bookmarks')" + " i.fa-bookmark");
+    await click(".o-dropdown-item:contains('Remove from Bookmarks')");
     await contains("button:has(:text('Bookmarks'))", { contains: [".badge", { count: 0 }] });
     await waitStoreFetch([["remove_bookmark", { message_id: messageId }]]);
     await contains(".o-mail-Message");
-    await contains(".o-mail-Message [title='Bookmark']" + " i.fa-bookmark-o");
+    await rightClick(".o-mail-Message");
+    await contains(".o-dropdown-item:contains('Bookmark')" + " i.fa-bookmark-o");
 });
 
 test("can bookmark a persistent message without thread", async () => {
@@ -1384,7 +1390,7 @@ test("Editing a message to clear its composer opens message delete dialog.", asy
     triggerHotkey("Enter");
     await contains(".o-mail-Message:has(:text('not empty'))");
     await contains(
-        ".modal-body p:text('Are you sure you want to bid farewell to this message forever?')"
+        ".modal-body p:text('Are you sure you want to permanently delete this message?')"
     );
 });
 
@@ -1412,7 +1418,7 @@ test("Clear message body should not open message delete dialog if it has attachm
     await contains(".o-mail-Message-textContent:has(:text('not empty'))", { count: 0 });
     // weak test, no guarantee that we waited long enough for the potential dialog to show
     await contains(
-        ".modal-body p:text('Are you sure you want to bid farewell to this message forever?')",
+        ".modal-body p:text('Are you sure you want to permanently delete this message?')",
         {
             count: 0,
         }
@@ -1532,7 +1538,9 @@ test("Toggle bookmark should update bookmark counter on all tabs", async () => {
     const env2 = await start({ asTab: true });
     await openDiscuss(channelId, { target: env1 });
     await openDiscuss(undefined, { target: env2 });
-    await click(`${env1.selector} .o-mail-Message [title='Bookmark']`);
+    await contains(`${env1.selector} .o-mail-Message`);
+    await rightClick(`${env1.selector} .o-mail-Message`);
+    await click(`.o-dropdown-item:contains('Bookmark')`);
     await contains(`${env2.selector} button:has(:text('Bookmarks'))`, {
         contains: [".badge:text('1')"],
     });
@@ -1981,8 +1989,7 @@ test("Mark as unread", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await click(".o-mail-Message [title='Expand']");
-    await click(".o-dropdown-item:contains('Mark as Unread')");
+    await click(".o-mail-Message [title='Mark as Unread']");
     await contains(".o-mail-Thread-newMessage");
     await contains(".o-mail-DiscussSidebarChannel .badge:text('1')");
 });
@@ -2272,7 +2279,8 @@ test("deleted message should not have translate feature", async () => {
     await click(".modal button:contains('Delete')");
     await contains(".o-mail-Message:contains('This message has been removed')");
     await contains(".o-mail-Message [title='Add a Reaction']");
-    await contains(".o-mail-Message [title='Bookmark']");
+    await contains(".o-mail-Message [title*='Pin']");
+    await contains(".o-mail-Message [title*='Copy Link']");
     await contains(".o-mail-Message [title*='Translate']", { count: 0 });
     await animationFrame(); // in case some extra rendering for expand
     if (queryFirst(".o-mail-Message [title='Expand']")) {
@@ -2471,4 +2479,48 @@ test("context menu should not open on right-click when editing a message", async
     await expect.waitForSteps(["Message.onContextMenu"]);
     await animationFrame();
     expect.verifySteps([]);
+});
+
+test.tags("html composer");
+test("(edited) label is not included in editor when editing an already-edited message", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    pyEnv["mail.message"].create({
+        author_id: serverState.partnerId,
+        body: "Hello",
+        model: "discuss.channel",
+        res_id: channelId,
+        message_type: "comment",
+    });
+    await start();
+    const composerService = getService("mail.composer");
+    composerService.setHtmlComposer();
+    await openDiscuss(channelId);
+    // First edit to produce an "(edited)" label in the body
+    await click(".o-mail-Message [title='Edit']");
+    await focus(".o-mail-Message  .o-mail-Composer-html.odoo-editor-editable");
+    let editor = {
+        document,
+        editable: document.querySelector(".o-mail-Message .o-mail-Composer-html.odoo-editor-editable"),
+    };
+    await htmlInsertText(editor, " world");
+    await click(".o-mail-Message button:text('save')");
+    await contains(".o-mail-Message-content:text('Hello world (edited)')");
+    // Open editor again — assert (edited) is NOT inside the editable
+    await click(".o-mail-Message [title='Edit']");
+    await focus(".o-mail-Message .o-mail-Composer-html.odoo-editor-editable");
+    editor = {
+        document,
+        editable: document.querySelector(".o-mail-Message .o-mail-Composer-html.odoo-editor-editable"),
+    };
+    expect(editor.editable.querySelectorAll(".o-mail-Message-edited").length).toBe(0);
+    // CTRL+A selects all — then type replacement text
+    await press(["ctrl", "a"]);
+    await htmlInsertText(editor, "a");
+    await click(".o-mail-Message button:text('save')");
+    // New text should be the only content; "(edited)" must be at the very end
+    await contains(".o-mail-Message-content:text('a (edited)')");
 });
