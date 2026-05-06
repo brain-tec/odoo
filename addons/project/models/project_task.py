@@ -60,7 +60,6 @@ PROJECT_TASK_READABLE_FIELDS = {
     'is_template',
     'has_template_ancestor',
     'has_project_template',
-    'stage_id_color',
     'access_token',
     'access_url',
 }
@@ -164,7 +163,6 @@ class ProjectTask(models.Model):
        store=True, readonly=False, ondelete='restrict', tracking=True, index=True,
        default=_get_default_stage_id, group_expand='_read_group_stage_ids',
        domain="[('project_ids', '=', project_id)]")
-    stage_id_color = fields.Integer(string='Stage Color', related="stage_id.color", export_string_translation=False)
     tag_ids = fields.Many2many('project.tags', string='Tags')
 
     state = fields.Selection([
@@ -430,7 +428,7 @@ class ProjectTask(models.Model):
 
     @api.onchange('project_id')
     def _onchange_project_id(self):
-        if self.state != '04_waiting_normal' and self.stage_id != self._origin.stage_id:
+        if self.state != '04_waiting_normal' and self.stage_id != self._origin.stage_id and self.state not in CLOSED_STATES:
             self.state = '01_in_progress'
         if not self.project_id and not self.user_ids:
             self.user_ids = self.env.user
@@ -1364,6 +1362,7 @@ class ProjectTask(models.Model):
             tasks_to_check.filtered(
                 lambda t: (
                     t.state != '04_waiting_normal'
+                    and t.state not in CLOSED_STATES
                     and previous_stage_ids.get(t.id) != t.stage_id.id
                     and not (t.id in self.ids and 'state' in vals)
                 )
