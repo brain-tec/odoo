@@ -1428,6 +1428,39 @@ class StockQuant(TransactionCase):
             'lot_id': False,
         }])
 
+    def test_forced_full_packaging_reservation(self):
+        '''
+        Ensure reservations respect the setting set on the product's category.
+        '''
+        uom_dozen = self.env.ref('uom.product_uom_dozen')
+        self.product.categ_id = self.env.ref('product.product_category_goods')
+        self.product.categ_id.packaging_reserve_method = 'full'
+        # Delivery for 26 units
+        delivery = self.env['stock.picking'].create({
+            'picking_type_id': self.ref('stock.picking_type_out'),
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.ref('stock.stock_location_customers'),
+            'move_ids': [Command.create({
+                'product_id': self.product.id,
+                'location_id': self.stock_location.id,
+                'location_dest_id': self.ref('stock.stock_location_customers'),
+                'product_uom_qty': 26,
+                'product_uom': self.product.uom_id.id,
+            })],
+            'state': 'draft',
+        })
+        delivery.move_ids.packaging_uom_id = uom_dozen
+
+        # Only 1 full packaging in stock, so reservation should be 12
+        self.env['stock.quant']._update_available_quantity(self.product, self.stock_location, 15)
+        delivery.action_confirm()
+        self.assertEqual(delivery.move_ids.quantity, 12)
+
+        # Plenty in stock, reservation should be the max amount of full packagings so 24
+        self.env['stock.quant']._update_available_quantity(self.product, self.stock_location, 100)
+        delivery.action_assign()
+        self.assertEqual(delivery.move_ids.quantity, 24)
+
 
 class StockQuantRemovalStrategy(TransactionCase):
     def setUp(self):
@@ -1696,3 +1729,27 @@ class StockQuantRemovalStrategy(TransactionCase):
             {'product_id': products[0].id, 'location_id':  sublocation.id, 'package_id': packages[0].id, 'quantity': 1.0, 'reserved_quantity': 1.0},
             {'product_id': products[1].id, 'location_id':  sublocation.id, 'package_id': packages[0].id, 'quantity': 1.0, 'reserved_quantity': 1.0},
         ])
+
+    def test_least_package_removal_strategy_with_pack_and_reserve_mix(self):
+        '''
+        Ensure that reservations are correctly made when there are both packaged/unpackaged and
+        reserved/unreserved quants in stock.
+        '''
+        # 3 quants in stock: 3rd is in a pack, 2nd is reserved, 1st is neither
+        self._generate_data([(1, 3)])
+        quants = self.env['stock.quant'].search([('location_id', '=', self.stock_location.id)])
+        quants[0].package_id = quants[1].package_id = False
+        quants[1].reserved_quantity = 1
+        self.env.flush_all()
+        # Create a delivery for 2 units
+        move = self.env['stock.move'].create({
+            'product_id': self.product.id,
+            'product_uom': self.product.uom_id.id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.ref('stock.stock_location_customers'),
+            'product_uom_qty': 2,
+        })
+        move._action_confirm()
+        move._action_assign()
+        # There is enough in stock for reservation to match the demand
+        self.assertEqual(move.quantity, move.product_qty)
