@@ -688,7 +688,7 @@ class StockQuant(models.Model):
                 if pkg[0] is None:
                     # Lazily retrieve ids for single items
                     if not single_item_ids:
-                        single_item_ids = self.search(expression.AND([[('package_id', '=', None)], domain])).ids
+                        single_item_ids = self.search(expression.AND([[('package_id', '=', None)], domain])).filtered(lambda quant: quant.quantity > quant.reserved_quantity).ids
                     selected_single_items.append(single_item_ids.pop())
 
             expr = [('package_id', 'in', [elem[0] for elem in node.taken_packages if elem[0] is not None])]
@@ -855,7 +855,7 @@ class StockQuant(models.Model):
 
         # do full packaging reservation when it's needed
         if self.env.context.get('packaging_uom_id') and product_id.product_tmpl_id.categ_id.packaging_reserve_method == "full":
-            available_quantity = self.env.context.get('packaging_uom_id')._check_qty(available_quantity, product_id.uom_id, "DOWN")
+            available_quantity = self.env.context.get('packaging_uom_id')._check_qty(min(quantity, available_quantity), product_id.uom_id, "DOWN")
 
         quantity = min(quantity, available_quantity)
 
