@@ -43,7 +43,7 @@ import { weakMemoize } from "@html_editor/utils/functions";
  * @property { Node } commonAncestorContainer
  * @property { boolean } isCollapsed
  * @property { boolean } direction
- * @property { () => string } textContent
+ * @property { () => string } toString
  * @property { (node: Node) => boolean } intersectsNode
  */
 
@@ -293,16 +293,6 @@ export class SelectionPlugin extends Plugin {
         const container = selection && closestElement(selection.anchorNode, containerSelector);
         const [anchorNode, anchorOffset] = getDeepestEditablePosition(container, 0);
         const [focusNode, focusOffset] = getDeepestEditablePosition(container, nodeSize(container));
-        if (
-            this.delegateTo("select_all_overrides", {
-                anchorNode,
-                anchorOffset,
-                focusNode,
-                focusOffset,
-            })
-        ) {
-            return;
-        }
         this.setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
     }
 
@@ -379,7 +369,7 @@ export class SelectionPlugin extends Plugin {
                 commonAncestorContainer: targetNode,
                 isCollapsed: true,
                 direction: DIRECTIONS.RIGHT,
-                textContent: () => "",
+                toString: () => "",
                 intersectsNode: () => false,
             };
         } else {
@@ -435,7 +425,7 @@ export class SelectionPlugin extends Plugin {
                 commonAncestorContainer: range.commonAncestorContainer,
                 isCollapsed: range.collapsed,
                 direction,
-                textContent: () => (range.collapsed ? "" : selection.toString()),
+                toString: () => (range.collapsed ? "" : selection.toString()),
                 intersectsNode: (node) => range.intersectsNode(node),
             };
         }

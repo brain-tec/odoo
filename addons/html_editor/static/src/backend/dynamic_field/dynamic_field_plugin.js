@@ -148,6 +148,7 @@ export class DynamicFieldPlugin extends Plugin {
                 path: initialPath,
                 label: initialLabel,
                 filter: this.filter.bind(this),
+                followRelation: this.followRelation.bind(this),
                 close: () => this.fieldPopover.close(),
                 validate: async ({ path, label, fieldInfo }) => {
                     if (path !== initialPath) {
@@ -198,6 +199,7 @@ export class DynamicFieldPlugin extends Plugin {
             props: {
                 resModel,
                 filter: this.filter.bind(this),
+                followRelation: this.followRelation.bind(this),
                 close: () => this.fieldPopover.close(),
                 validate: async ({ path, label, fieldInfo }) => {
                     const doc = this.document;
@@ -209,7 +211,7 @@ export class DynamicFieldPlugin extends Plugin {
                     const fullPath = this.getFieldPath(target, path);
                     await this.setFieldAttributes(el, path, fullPath, fieldInfo);
                     el.setAttribute("data-oe-demo", label);
-                    el.innerText = label;
+                    el.textContent = label;
 
                     await this.config.dynamicFieldPostprocess?.({
                         path: fullPath,
@@ -226,6 +228,8 @@ export class DynamicFieldPlugin extends Plugin {
             },
         });
     }
+
+    followRelation({ fieldDef }) {}
 
     filter(fieldDef, path) {
         if (fieldDef.is_property && fieldDef.type === "separator") {

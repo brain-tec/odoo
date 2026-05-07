@@ -22,7 +22,7 @@ export class ModelFieldSelector extends Component {
         update: { type: Function, optional: true },
         filter: { type: Function, optional: true },
         sort: { type: Function, optional: true },
-        followRelations: { type: Boolean, optional: true },
+        followRelation: { type: [Boolean, Function], optional: true },
         showDebugInput: { type: Boolean, optional: true },
     };
     static defaultProps = {
@@ -31,7 +31,7 @@ export class ModelFieldSelector extends Component {
         isDebugMode: false,
         showSearchInput: true,
         update: () => {},
-        followRelations: true,
+        followRelation: true,
     };
 
     setup() {
@@ -52,7 +52,12 @@ export class ModelFieldSelector extends Component {
         this.keepLast = new KeepLast();
         this.state = useState({ isInvalid: false, displayNames: [] });
         onWillStart(() => this.updateState(this.props));
-        onWillUpdateProps((nextProps) => this.updateState(nextProps));
+        onWillUpdateProps((nextProps) => {
+            const modelPathKeys = ["resModel", "path", "allowEmpty"];
+            if (modelPathKeys.some((key) => this.props[key] !== nextProps[key])) {
+                this.updateState(nextProps);
+            }
+        });
     }
 
     get isBottomSheet() {
@@ -74,7 +79,7 @@ export class ModelFieldSelector extends Component {
             isDebugMode: this.props.isDebugMode,
             filter: this.props.filter,
             sort: this.props.sort,
-            followRelations: this.props.followRelations,
+            followRelation: this.props.followRelation,
             showDebugInput: this.props.showDebugInput,
         };
     }

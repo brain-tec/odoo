@@ -436,8 +436,8 @@ class AccountTax(models.Model):
             diff_keys = [key for key in old_value if old_value[key] != new_value[key]]
             if diff_keys:
                 self._track_add(
-                    {self.id: {fname: old_value[fname] for fname in diff_keys}},
-                    end_values={self.id: {fname: new_value[fname] for fname in diff_keys}},
+                    {self.id: {fname: str(old_value[fname]) for fname in diff_keys}},  # everything logged as pure char
+                    end_values={self.id: {fname: str(new_value[fname]) for fname in diff_keys}},  # everything logged as pure char
                     fields_info={fname: {'type': 'char', 'string': fname} for fname in diff_keys},
                     body=Markup("<b>{type}</b> {rep} {seq}").format(
                         type=document_type.capitalize(),
@@ -448,18 +448,20 @@ class AccountTax(models.Model):
                 self._track_finalize()
 
         for (document_type, sequence), operation, value in added_and_deleted_lines:
-            self._track_add(
-                {self.id: {fname: False for fname in value}},
-                end_values={self.id: {fname: value[fname] for fname in value}},
-                fields_info={fname: {'type': 'char', 'string': fname} for fname in value},
-                body=Markup("<b>{op} {type}</b> {rep} {seq}").format(
-                    op=operation,
-                    type=document_type.capitalize(),
-                    rep=_('repartition line'),
-                    seq=sequence,
+            changed = [key for key in value if value[key]]
+            if changed:
+                self._track_add(
+                    {self.id: {fname: False for fname in changed}},
+                    end_values={self.id: {fname: str(value[fname]) for fname in changed}},  # everything logged as pure char
+                    fields_info={fname: {'type': 'char', 'string': fname} for fname in changed},
+                    body=Markup("<b>{op} {type}</b> {rep} {seq}").format(
+                        op=operation,
+                        type=document_type.capitalize(),
+                        rep=_('repartition line'),
+                        seq=sequence,
+                    )
                 )
-            )
-            self._track_finalize()
+                self._track_finalize()
         return
 
     def _track_execute(self, track_init_values, trackings, track_records=None):
@@ -710,11 +712,6 @@ class AccountTax(models.Model):
                 for rep_line in tax.invoice_repartition_line_ids
                 if rep_line.repartition_type == 'tax' and not rep_line.use_in_tax_closing
             )
-
-    @api.onchange('amount')
-    def onchange_amount(self):
-        if self.amount_type in ('percent', 'division') and self.amount != 0.0 and not self.invoice_label:
-            self.invoice_label = "{0:.4g}%".format(self.amount)
 
     @api.onchange('amount_type')
     def onchange_amount_type(self):
