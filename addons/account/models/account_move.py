@@ -3364,6 +3364,7 @@ class AccountMove(models.Model):
 
         to_delete = []
         to_create = []
+        grouped_update = defaultdict(set)
         for move in container['records']:
             if move.state != 'draft':
                 continue
@@ -3469,7 +3470,7 @@ class AccountMove(models.Model):
             for base_line, to_update in tax_results['base_lines_to_update']:
                 line = base_line['record']
                 if is_write_needed(line, to_update):
-                    line.write(to_update)
+                    grouped_update[line.currency_id.id, frozendict(to_update)].add(line.id)
 
             for tax_line_vals in tax_results['tax_lines_to_delete']:
                 to_delete.append(tax_line_vals['record'].id)
@@ -3484,8 +3485,12 @@ class AccountMove(models.Model):
             for tax_line_vals, _grouping_key, to_update in tax_results['tax_lines_to_update']:
                 line = tax_line_vals['record']
                 if is_write_needed(line, to_update):
-                    line.write(to_update)
+                    grouped_update[line.currency_id.id, frozendict(to_update)].add(line.id)
 
+        if grouped_update:
+            # Need to use currency_id as a key to avoid writing with multiple currencies
+            for (currency_id, values), lines in grouped_update.items():
+                self.env['account.move.line'].browse(lines).write(dict(values))
         if to_delete:
             self.env['account.move.line'].browse(to_delete).with_context(dynamic_unlink=True).unlink()
         if to_create:
@@ -3701,9 +3706,13 @@ class AccountMove(models.Model):
         yield
         after = existing()
 
+        partner_id_to_update = defaultdict(set)
         for move in after:
             if changed('commercial_partner_id'):
-                move.line_ids.partner_id = after[move]['commercial_partner_id']
+                partner_id_to_update[after[move]['commercial_partner_id']].update(move.line_ids.ids)
+
+        for partner_id, line_ids in partner_id_to_update.items():
+            self.env['account.move.line'].browse(line_ids).partner_id = partner_id
 
     def _get_sync_stack(self, container):
         tax_container, invoice_container, misc_container = ({} for _ in range(3))
@@ -7285,7 +7294,7 @@ class AccountMove(models.Model):
                     attachment_records |= self._from_files_data(extra_files_data)
                     new_message.attachment_ids = [Command.set(attachment_records.ids)]
                     message_values['attachment_ids'] = [Command.link(attachment.id) for attachment in attachment_records]
-                    res = super()._message_post_after_hook(new_message, message_values)
+                    res = super(AccountMove, self.with_context(no_document=True))._message_post_after_hook(new_message, message_values)
                 else:
                     sub_new_message = new_message.copy({
                         'res_id': invoice.id,
@@ -7296,7 +7305,7 @@ class AccountMove(models.Model):
                         'res_id': invoice.id,
                         'attachment_ids': [Command.link(attachment.id) for attachment in attachment_records],
                     }
-                    super(AccountMove, invoice)._message_post_after_hook(sub_new_message, sub_message_values)
+                    super(AccountMove, invoice.with_context(no_document=True))._message_post_after_hook(sub_new_message, sub_message_values)
                 invoice._fix_attachments_on_record_from_files_data(file_data_group, extra_files_data)
 
             for invoice, file_data_group in zip(invoices, file_data_groups):
