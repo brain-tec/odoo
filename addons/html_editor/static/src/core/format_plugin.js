@@ -427,7 +427,8 @@ export class FormatPlugin extends Plugin {
             while (
                 parentNode &&
                 !isBlock(parentNode) &&
-                !this.dependencies.split.isUnsplittable(parentNode) &&
+                (!this.dependencies.split.isUnsplittable(parentNode) ||
+                    parentNode.dataset.textEffect) &&
                 (parentNode.classList.length === 0 || isClassListSplittable(parentNode.classList))
             ) {
                 const isUselessZws =
@@ -802,7 +803,10 @@ export class FormatPlugin extends Plugin {
 
 function getOrCreateSpan(node, ancestors) {
     const document = node.ownerDocument;
-    const span = ancestors.find((element) => element.tagName === "SPAN" && element.isConnected);
+    const span = ancestors.find(
+        (element) =>
+            element.tagName === "SPAN" && element.isConnected && !element.dataset.textEffect
+    );
     const lastInlineAncestor = ancestors.findLast(
         (element) => !isBlock(element) && element.isConnected
     );
