@@ -18,7 +18,7 @@ from odoo.tools.date_utils import float_to_time, sum_intervals
 from odoo.fields import Command, Date, Domain
 from odoo.tools.float_utils import float_round, float_compare, float_is_zero
 from odoo.tools.intervals import Intervals
-from odoo.tools.misc import clean_context, format_date
+from odoo.tools.misc import clean_context, format_date, format_duration
 from odoo.tools.translate import _
 
 _logger = logging.getLogger(__name__)
@@ -269,12 +269,12 @@ class HrLeave(models.Model):
         self.request_hour_from = min(max(self.request_hour_from, 0.0), 23.99)
         self.request_hour_to = min(max(self.request_hour_to, 0.0), 24)
 
-    @api.depends('employee_id', 'request_date_from', 'request_date_to', 'work_entry_type_request_unit')
+    @api.depends('employee_id', 'request_date_from', 'request_date_to')
     def _compute_request_hour_from_to(self):
         env_company_calendar = self.env.company.resource_calendar_id
         for leave in self:
             calendar = leave.resource_calendar_id or env_company_calendar
-            if (leave.work_entry_type_request_unit != 'hour'
+            if (leave.work_entry_type_id.request_unit != 'hour'
                     and leave.employee_id
                     and leave.request_date_from
                     and leave.request_date_to
@@ -283,18 +283,24 @@ class HrLeave(models.Model):
                 leave.request_hour_from = hour_from
                 leave.request_hour_to = hour_to
 
-    @api.depends('employee_id', 'work_entry_type_request_unit', 'request_date_from', 'request_date_to',
+    @api.depends('employee_id', 'state', 'request_date_from', 'request_date_to',
             'request_hour_from', 'request_hour_to', 'request_date_from_period', 'request_date_to_period')
     def _compute_dashboard_warning_message(self):
+        check_warning_leaves = self.filtered_domain([
+            ('state', 'not in', ('refuse', 'cancel')),
+            ('work_entry_type_id.allow_request_on_top', '=', False),
+        ])
+        (self - check_warning_leaves).dashboard_warning_message = False
+        if not check_warning_leaves:
+            return
         all_leaves = self.search([
-            ('date_from', '<', max(self.mapped('date_to'))),
-            ('date_to', '>', min(self.mapped('date_from'))),
-            ('employee_id', 'in', self.employee_id.ids),
+            ('date_from', '<', max(check_warning_leaves.mapped('date_to'))),
+            ('date_to', '>', min(check_warning_leaves.mapped('date_from'))),
+            ('employee_id', 'in', check_warning_leaves.employee_id.ids),
             ('work_entry_type_id.allow_request_on_top', '=', False),
             ('state', 'not in', ['cancel', 'refuse']),
         ])
-        self.filtered(lambda self: self.state in ['cancel', 'refuse']).dashboard_warning_message = False
-        for holiday in self.filtered(lambda self: self.state not in ['cancel', 'refuse']):
+        for holiday in check_warning_leaves:
             conflicting_holidays = all_leaves.filtered_domain([
                 ('employee_id', 'in', holiday.employee_id.ids),
                 ('date_from', '<', holiday.date_to),
@@ -444,7 +450,7 @@ class HrLeave(models.Model):
                       ) for version in versions)))
 
     @api.depends('request_date_from_period', 'request_date_to_period', 'request_hour_from', 'request_hour_to',
-                 'request_date_from', 'request_date_to', 'work_entry_type_request_unit', 'employee_id')
+                 'request_date_from', 'request_date_to', 'employee_id')
     def _compute_date_from_to(self):
         for holiday in self:
             is_calendar_leave = holiday.work_entry_type_id.count_days_as == 'calendar'
@@ -552,7 +558,7 @@ class HrLeave(models.Model):
         else:
             self.has_mandatory_day = False
 
-    @api.depends('work_entry_type_request_unit', 'number_of_days')
+    @api.depends('number_of_days')
     def _compute_work_entry_type_increases_duration(self):
         durations = self._get_durations(check_work_entry_type=False)
         for leave in self:
@@ -730,7 +736,7 @@ class HrLeave(models.Model):
             result[leave.id] = (days, hours)
         return result
 
-    @api.depends('date_from', 'date_to', 'resource_calendar_id', 'work_entry_type_id.request_unit')
+    @api.depends('date_from', 'date_to', 'resource_calendar_id')
     def _compute_duration(self):
         durations = self._get_durations()
         for leave in self:
@@ -762,7 +768,7 @@ class HrLeave(models.Model):
                 tz = leave.employee_id._get_tz(leave.date_from) or tz
             leave.tz = tz
 
-    @api.depends('number_of_hours', 'number_of_days', 'work_entry_type_request_unit')
+    @api.depends('number_of_hours', 'number_of_days')
     def _compute_duration_display(self):
         for leave in self:
             duration = leave.number_of_days
@@ -846,11 +852,13 @@ class HrLeave(models.Model):
             holiday.attachment_ids = holiday.supported_attachment_ids
         self.invalidate_recordset(['attachment_ids'])
 
-    @api.constrains('date_from', 'date_to', 'employee_id')
+    @api.constrains('date_from', 'date_to', 'employee_id', 'state')
     def _check_date(self):
         if self.env.context.get('leave_skip_date_check', False):
             return
         for holiday in self:
+            if holiday.state in ('refuse', 'cancel'):
+                continue
             if holiday.dashboard_warning_message:
                 raise ValidationError(holiday.dashboard_warning_message)
 
@@ -936,6 +944,18 @@ class HrLeave(models.Model):
             date_from_utc = leave.date_from and leave.date_from.astimezone(user_tz).date()
             date_to_utc = leave.date_to and leave.date_to.astimezone(user_tz).date()
             time_off_type_display = leave.work_entry_type_id.display_code or leave.work_entry_type_id.name
+            if leave.work_entry_type_request_unit == "hour":
+                base_duration = format_duration(leave.number_of_hours)
+                hours_str, minutes_str = base_duration.split(":")
+                hours = int(hours_str)
+                minutes = int(minutes_str)
+                if minutes > 0:
+                    custom_duration = self.env._("%(hours)dh%(minutes)02d", hours=hours, minutes=minutes)
+                else:
+                    custom_duration = self.env._("%(hours)dh", hours=hours)
+            else:
+                days = float_round(leave.number_of_days, precision_digits=2)
+                custom_duration = self.env._("%(days)gd", days=days)
             if self.env.context.get('short_name'):
                 short_leave_name = leave.name or time_off_type_display or _('Time Off')
                 leave.display_name = _("%(name)s: %(duration)s", name=short_leave_name, duration=leave.duration_display)
@@ -948,10 +968,9 @@ class HrLeave(models.Model):
                     )
                 if not target or self.env.context.get('hide_employee_name') and 'employee_id' in self.env.context.get('group_by', []):
                     if self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
-                        leave.display_name = self.env._("%(work_entry_type)s: %(duration)s (%(start)s)",
+                        leave.display_name = self.env._("%(work_entry_type)s %(duration)s",
                             work_entry_type=time_off_type_display,
-                            duration=leave.duration_display,
-                            start=display_date,
+                            duration=custom_duration,
                         )
                     else:
                         leave.display_name = self.env._("%(duration)s (%(start)s)",

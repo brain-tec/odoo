@@ -75,13 +75,6 @@
                     <field name="account_on_checkout" widget="radio"/>
                 </setting>
                 <setting
-                    string="Add to Cart"
-                    id="cart_redirect_setting"
-                    help="What should be done on &quot;Add to Cart&quot;?"
-                >
-                    <field name="add_to_cart_action" widget="radio"/>
-                </setting>
-                <setting
                     string="Invoicing Policy"
                     id="invoicing_policy_setting"
                     title="The mode selected here applies as invoicing policy of any new product
@@ -323,6 +316,22 @@
                     invisible="not group_uom"
                 >
                     <field name="restricted_uom_ids" widget="many2many_tags"/>
+                </setting>
+                <setting
+                    string="Invoicing Journal"
+                    help="Default accounting journal for online orders"
+                    groups="account.group_account_readonly,account.group_account_invoice"
+                >
+                    <label
+                        string="Journal"
+                        for="journal_id"
+                        class="o_light_label col-lg-3"
+                    />
+                    <field 
+                        name="journal_id"
+                        context="{'default_type': 'sale'}"
+                        domain="[('type', '=', 'sale')]"
+                    />
                 </setting>
             </block>
             <setting id="google_analytics_setting" position="after">

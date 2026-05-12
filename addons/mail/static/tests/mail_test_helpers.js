@@ -9,7 +9,7 @@ import {
     test,
 } from "@odoo/hoot";
 import { hover as hootHover, queryFirst, resize } from "@odoo/hoot-dom";
-import { Deferred, microTick } from "@odoo/hoot-mock";
+import { microTick } from "@odoo/hoot-mock";
 import {
     MockServer,
     authenticate,
@@ -81,6 +81,7 @@ import { MailPushDevice } from "./mock_server/mock_models/mail_push_device";
 import { MailScheduledMessage } from "./mock_server/mock_models/mail_scheduled_message";
 import { MailTemplate } from "./mock_server/mock_models/mail_template";
 import { MailThread } from "./mock_server/mock_models/mail_thread";
+import { MailTrackingValue } from "./mock_server/mock_models/mail_tracking_value";
 import { ResCountry } from "./mock_server/mock_models/res_country";
 import { ResFake } from "./mock_server/mock_models/res_fake";
 import { ResLang } from "./mock_server/mock_models/res_lang";
@@ -154,6 +155,7 @@ export const mailModels = {
     MailScheduledMessage,
     MailTemplate,
     MailThread,
+    MailTrackingValue,
     ResCountry,
     ResFake,
     ResLang,
@@ -565,11 +567,12 @@ export async function makeMockRtcNetwork({ env, channelId }) {
     const dispatchUpdate = (payload) => {
         mockNetwork.dispatchEvent(new CustomEvent("update", { detail: payload }));
     };
-    const rtcServiceIsListening = new Deferred();
+    const { promise: rtcServiceIsListening, resolve: resolveRtcServiceIsListening } =
+        Promise.withResolvers();
     patchWithCleanup(Network.prototype, {
         addEventListener(name, f) {
             if (name === "update") {
-                rtcServiceIsListening.resolve();
+                resolveRtcServiceIsListening();
                 // disabling the p2p network so that it does not try to send webRTC events like candidates and offers.
                 rtc.network.p2p.disconnect();
             }
@@ -731,7 +734,11 @@ export function observeRenders() {
 export async function isInViewportOf(childSelector, parentSelector) {
     await contains(parentSelector);
     await contains(childSelector);
-    const inViewportDeferred = new Deferred();
+    const {
+        promise: inViewportPromise,
+        reject: rejectInViewport,
+        resolve: resolveInViewport,
+    } = Promise.withResolvers();
     const failTimeout = setTimeout(() => check({ crashOnFail: true }), 3000);
     const check = ({ crashOnFail = false } = {}) => {
         const parent = queryFirst(parentSelector);
@@ -750,17 +757,17 @@ export async function isInViewportOf(childSelector, parentSelector) {
             expect(true).toBe(true, {
                 message: `Element ${childSelector} found in viewport of ${parentSelector}`,
             });
-            inViewportDeferred.resolve();
+            resolveInViewport();
         } else if (crashOnFail) {
             const failMsg = `Element ${childSelector} not found in viewport of ${parentSelector}`;
             expect(false).toBe(true, { message: failMsg });
-            inViewportDeferred.reject(new Error(failMsg));
+            rejectInViewport(new Error(failMsg));
         } else {
             parent.addEventListener("scrollend", check, { once: true });
         }
     };
     check();
-    return inViewportDeferred;
+    return inViewportPromise;
 }
 
 export async function hover(selector) {
