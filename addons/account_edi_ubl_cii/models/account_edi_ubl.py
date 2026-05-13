@@ -2079,7 +2079,7 @@ class AccountEdiUBL(models.AbstractModel):
         to_write['discount'] = discount
 
     def _import_ubl_invoice_line_add_vehicle_values(self, collected_values):
-        if not self.module_installed('account_fleet') or collected_values['odoo_document_type'] != 'sale':
+        if not self.module_installed('account_fleet'):
             return
 
         tree = collected_values['tree']
@@ -2104,6 +2104,8 @@ class AccountEdiUBL(models.AbstractModel):
             # }
             {'path_type': 'line', 'identifier': 'SerialNumber'},  # VIN in AdditionalItemProperty/Value with AdditionalItemProperty/Name == 'SerialNumber'
             {'path_type': 'line', 'identifier': 'VIN'},  # VIN in AdditionalItemProperty/Value with AdditionalItemProperty/Name == 'VIN'
+            {'path_type': 'line', 'identifier': 'PlateNumber', 'linked_field': 'license_plate'},  # LICENSE PLATE in AdditionalItemProperty/Value with AdditionalItemProperty/Name == 'PlateNumber'
+            {'path_type': 'line', 'identifier': 'LCPL-NO', 'linked_field': 'license_plate'},  # LICENSE PLATE in AdditionalItemProperty/Value with AdditionalItemProperty/Name == 'LCPL-NO'
             {
                 # VIN in Item/Description
                 'path_type': 'line',
@@ -2840,7 +2842,7 @@ class AccountEdiUBL(models.AbstractModel):
             "Format used to import the invoice: %s",
             self.env['ir.model']._get(self._name).name,
         )
-        if logs := collected_values['logs']:
+        if logs := dict.fromkeys(collected_values['logs']):
             body += Markup("<ul>%s</ul>") % Markup().join(Markup("<li>%s</li>") % l for l in logs)
         invoice.with_context(no_new_invoice=True).message_post(body=body, attachment_ids=attachments.ids)
 
