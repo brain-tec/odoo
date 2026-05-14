@@ -2,6 +2,7 @@ import { Plugin } from "@html_editor/plugin";
 import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import {
     removeClass,
+    removeEmptyTextNodes,
     toggleClass,
     unwrapContents,
     wrapInlinesInBlocks,
@@ -1065,6 +1066,11 @@ export class ListPlugin extends Plugin {
             return;
         }
         for (const list of targetedNodes) {
+            // Remove empty text nodes without breaking the current selection.
+            const cursors = this.dependencies.selection.preserveSelection();
+            removeEmptyTextNodes(list, cursors);
+            cursors.restore();
+
             if (this.dependencies.selection.areNodeContentsFullySelected(list)) {
                 for (const node of descendants(list)) {
                     if (node.nodeType === Node.ELEMENT_NODE && node.style.color) {
@@ -1093,10 +1099,16 @@ export class ListPlugin extends Plugin {
                 continue;
             }
 
+            // Remove empty text nodes without breaking the current selection.
+            const cursors = this.dependencies.selection.preserveSelection();
+            removeEmptyTextNodes(listItem, cursors);
+            cursors.restore();
+
             if (this.dependencies.selection.areNodeContentsFullySelected(listItem)) {
                 for (const node of [listItem, ...descendants(listItem)]) {
                     if (node.nodeType === Node.ELEMENT_NODE) {
                         removeClass(node, ...FONT_SIZE_CLASSES);
+                        node.style.fontSize = "";
                     }
                 }
 
