@@ -708,7 +708,13 @@ export class PosStore extends WithLazyGetterTrap {
         const orderPathUuid = this.router.state.params.orderUuid;
         const order = this.models["pos.order"].find((order) => order.uuid === orderPathUuid);
         if (orderPathUuid && !order) {
-            await this.data.loadServerOrders([["uuid", "=", orderPathUuid]]);
+            try {
+                await this.data.loadServerOrders([["uuid", "=", orderPathUuid]]);
+            } catch (error) {
+                if (!(error instanceof ConnectionLostError)) {
+                    throw error;
+                }
+            }
             const order = this.models["pos.order"].find((order) => order.uuid === orderPathUuid);
             if (order) {
                 this.setOrder(order);
@@ -1923,14 +1929,14 @@ export class PosStore extends WithLazyGetterTrap {
 
                 let shouldPrint = true;
                 if (!hasChanges) {
-                    if (opts.explicitReprint && order.uiState.lastPrints) {
-                        orderChange = [order.uiState.lastPrints.at(-1)];
+                    if (opts.explicitReprint && order.lastPrints.length) {
+                        orderChange = [order.lastPrints.at(-1)];
                         reprint = true;
                     } else {
                         shouldPrint = false;
                     }
                 } else {
-                    order.uiState.lastPrints.push(orderChange);
+                    order.pushLastPrints(orderChange);
                     orderChange = [orderChange];
                 }
 
