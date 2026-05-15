@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-12 18:36+0000\n"
+"POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-01-16 05:42+0000\n"
 "Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
 "Language-Team: Hungarian <https://translate.odoo.com/projects/odoo-s19-1/"
@@ -54,6 +54,12 @@ msgstr ""
 msgid "'Title tag' is shown as a tooltip when you hover the picture."
 msgstr ""
 "A 'Title tag' helyi súgóként jelenik meg, ha a kép fölé megyünk egérrel."
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/shape/shape_selector.xml:0
+msgid "A"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -260,8 +266,8 @@ msgstr "Alt elem"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/anchor/anchor_plugin.js:0
 msgid ""
-"Anchor copied to clipboard%(br)s%(open_span)sLink: "
-"%(anchor_link)s%(close_span)s"
+"Anchor copied to clipboard%(br)s%(open_span)sLink: %(anchor_link)s%"
+"(close_span)s"
 msgstr ""
 
 #. module: html_builder
@@ -1097,7 +1103,7 @@ msgstr "Borító"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/select_many2x.xml:0
 msgid "Create \""
-msgstr "Létrehozás: \""
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1143,12 +1149,6 @@ msgstr ""
 #: code:addons/html_builder/static/src/plugins/image/image_shapes_definition.js:0
 msgid "Cut Circle"
 msgstr ""
-
-#. module: html_builder
-#. odoo-javascript
-#: code:addons/html_builder/static/src/core/setup_editor_plugin.js:0
-msgid "DRAG BUILDING BLOCKS HERE"
-msgstr "HÚZZA IDE AZ ÉPÍTŐKOCKÁKAT"
 
 #. module: html_builder
 #. odoo-javascript
@@ -1337,6 +1337,12 @@ msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/core/setup_editor_plugin.js:0
+msgid "Drag blocks here"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/image/image_shapes_definition.js:0
 msgid "Duo"
 msgstr ""
@@ -1378,6 +1384,12 @@ msgstr ""
 #: code:addons/html_builder/static/src/plugins/shadow_option.xml:0
 msgid "Edit"
 msgstr "Szerkesztés"
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/button_style_option.xml:0
+msgid "Edit Color Combination"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1749,7 +1761,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/snippet.xml:0
 msgid "Install"
-msgstr "Telepítés"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1762,7 +1774,15 @@ msgstr "%s telepítése"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/invisible_elements_panel.xml:0
 msgid "Invisible Elements"
-msgstr "Láthatatlan elemek"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/core/version_error_plugin.js:0
+msgid ""
+"It might have caused problem during the editing. Please drag the new version "
+"from the snippet panel to update it."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2430,6 +2450,12 @@ msgstr "Képvágás visszaállítása"
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/image/image_shape_option.xml:0
+msgid "Reset shape transformation"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/image/image_transform_option.xml:0
 msgid "Reset transformation"
 msgstr "Átalakítások visszaállítása"
@@ -2438,6 +2464,7 @@ msgstr "Átalakítások visszaállítása"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/block_alignment_option.xml:0
 #: code:addons/html_builder/static/src/plugins/image/image_tool_option.xml:0
+#: code:addons/html_builder/static/src/plugins/rating_option.xml:0
 #: code:addons/html_builder/static/src/plugins/separator_option.xml:0
 #: code:addons/html_builder/static/src/plugins/text_alignment_option.xml:0
 msgid "Right"
@@ -2526,7 +2553,7 @@ msgstr "Rekordok keresése..."
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/select_many2x.xml:0
 msgid "Search more..."
-msgstr "További keresés..."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2545,7 +2572,7 @@ msgstr "Másodlagos"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/customize_tab.xml:0
 msgid "Select a block on your page to style it."
-msgstr "Válasszon ki egy blokkot az oldalon a stílus beállításához."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2931,6 +2958,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/builder_fontfamilypicker.xml:0
 msgid "This font is hosted and served to your visitors by Google servers"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/core/version_error_plugin.js:0
+msgid "This snippet is outdated"
 msgstr ""
 
 #. module: html_builder

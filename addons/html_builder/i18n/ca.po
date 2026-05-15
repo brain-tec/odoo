@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-12 18:36+0000\n"
+"POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-01-16 05:40+0000\n"
 "Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
 "Language-Team: Catalan <https://translate.odoo.com/projects/odoo-s19-1/"
@@ -59,6 +59,12 @@ msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/shape/shape_selector.xml:0
+msgid "A"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/core/operation_plugin.js:0
 msgid ""
 "A technical issue occurred in the builder, you should save or discard your "
@@ -88,7 +94,7 @@ msgstr "Afegeix un producte"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/builder_fontfamilypicker.xml:0
 msgid "Add a Custom Font"
-msgstr "Afegir-ne una font personalitzada"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -262,8 +268,8 @@ msgstr "etiqueta Alt"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/anchor/anchor_plugin.js:0
 msgid ""
-"Anchor copied to clipboard%(br)s%(open_span)sLink: "
-"%(anchor_link)s%(close_span)s"
+"Anchor copied to clipboard%(br)s%(open_span)sLink: %(anchor_link)s%"
+"(close_span)s"
 msgstr ""
 
 #. module: html_builder
@@ -573,7 +579,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_builder/static/src/builder.xml:0
 msgid "Blocks"
-msgstr "Blocs"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1099,7 +1105,7 @@ msgstr "Coberta"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/select_many2x.xml:0
 msgid "Create \""
-msgstr "Crea \""
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1145,12 +1151,6 @@ msgstr ""
 #: code:addons/html_builder/static/src/plugins/image/image_shapes_definition.js:0
 msgid "Cut Circle"
 msgstr ""
-
-#. module: html_builder
-#. odoo-javascript
-#: code:addons/html_builder/static/src/core/setup_editor_plugin.js:0
-msgid "DRAG BUILDING BLOCKS HERE"
-msgstr "ARROSSEGA ELS BLOCS DE CONSTRUCCIÓ AQUÍ"
 
 #. module: html_builder
 #. odoo-javascript
@@ -1339,6 +1339,12 @@ msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/core/setup_editor_plugin.js:0
+msgid "Drag blocks here"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/image/image_shapes_definition.js:0
 msgid "Duo"
 msgstr ""
@@ -1380,6 +1386,12 @@ msgstr "EarlyBird"
 #: code:addons/html_builder/static/src/plugins/shadow_option.xml:0
 msgid "Edit"
 msgstr "Modifica"
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/button_style_option.xml:0
+msgid "Edit Color Combination"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1751,7 +1763,7 @@ msgstr "Inserit"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/snippet.xml:0
 msgid "Install"
-msgstr "Instal·lar "
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1764,7 +1776,15 @@ msgstr "Instal·lar %s"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/invisible_elements_panel.xml:0
 msgid "Invisible Elements"
-msgstr "Elements invisibles"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/core/version_error_plugin.js:0
+msgid ""
+"It might have caused problem during the editing. Please drag the new version "
+"from the snippet panel to update it."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2433,6 +2453,12 @@ msgstr "Restablir retall"
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/image/image_shape_option.xml:0
+msgid "Reset shape transformation"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/image/image_transform_option.xml:0
 msgid "Reset transformation"
 msgstr "Restablir transformació"
@@ -2441,6 +2467,7 @@ msgstr "Restablir transformació"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/block_alignment_option.xml:0
 #: code:addons/html_builder/static/src/plugins/image/image_tool_option.xml:0
+#: code:addons/html_builder/static/src/plugins/rating_option.xml:0
 #: code:addons/html_builder/static/src/plugins/separator_option.xml:0
 #: code:addons/html_builder/static/src/plugins/text_alignment_option.xml:0
 msgid "Right"
@@ -2529,7 +2556,7 @@ msgstr "Cerca registres..."
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/select_many2x.xml:0
 msgid "Search more..."
-msgstr "Cerca més..."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2548,7 +2575,7 @@ msgstr "Secundari"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/customize_tab.xml:0
 msgid "Select a block on your page to style it."
-msgstr "Selecciona un bloc a la teva pàgina per donar-li estil."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2937,6 +2964,12 @@ msgid "This font is hosted and served to your visitors by Google servers"
 msgstr ""
 "Aquest tipus de lletra està allotjat i servit als vostres visitants pels "
 "servidors de Google"
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/core/version_error_plugin.js:0
+msgid "This snippet is outdated"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript

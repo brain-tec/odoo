@@ -97,7 +97,7 @@ class TestItEdiImport(TestItEdi, TestAccountEdiProxyUser):
             'move_type': 'in_invoice',
             'invoice_date': fields.Date.from_string('2014-12-18'),
             'amount_untaxed': 28.75,
-            'amount_tax': 6.32,
+            'amount_tax': 6.33,
             'invoice_line_ids': [{
                 'quantity': 5.0,
                 'price_unit': 1.0,
@@ -503,6 +503,40 @@ class TestItEdiImport(TestItEdi, TestAccountEdiProxyUser):
             ],
         }], applied_xml)
 
+    def test_receive_bill_with_discount_rounding_issue(self):
+        applied_xml = """
+            <xpath expr="//FatturaElettronicaBody/DatiBeniServizi/DettaglioLinee[1]" position="inside">
+                <ScontoMaggiorazione>
+                    <Tipo>SC</Tipo>
+                    <Percentuale>50.00</Percentuale>
+                </ScontoMaggiorazione>
+            </xpath>
+
+            <xpath expr="//FatturaElettronicaBody/DatiBeniServizi/DettaglioLinee[1]/PrezzoUnitario" position="replace">
+                <PrezzoUnitario>11.85</PrezzoUnitario>
+            </xpath>
+            <xpath expr="//FatturaElettronicaBody/DatiBeniServizi/DettaglioLinee[1]/Quantita" position="replace">
+                <Quantita>3</Quantita>
+            </xpath>
+            <xpath expr="//FatturaElettronicaBody/DatiBeniServizi/DettaglioLinee[1]/PrezzoTotale" position="replace">
+                <PrezzoTotale>17.78</PrezzoTotale>
+            </xpath>
+        """
+
+        self._assert_import_invoice('IT01234567890_FPR01.xml', [{
+            'invoice_date': fields.Date.from_string('2014-12-18'),
+            'amount_untaxed': 17.78,
+            'amount_tax': 3.91,
+            'invoice_line_ids': [
+                {
+                    'quantity': 3.0,
+                    'name': 'DESCRIZIONE DELLA FORNITURA',
+                    'price_unit': 11.85,
+                    'discount': 50.0,
+                },
+            ],
+        }], applied_xml)
+
     def test_invoice_user_can_compute_is_self_invoice(self):
         """Ensure that a user having only group_account_invoice can compute field l10n_it_edi_is_self_invoice"""
         user = new_test_user(self.env, login='jag', groups='account.group_account_invoice')
@@ -700,3 +734,56 @@ class TestItEdiImport(TestItEdi, TestAccountEdiProxyUser):
             ])
             self.assertEqual(len(chatter_attachments), 1)
             self.assertEqual(chatter_attachments.raw.decode(), raw)
+
+    def test_transaction_id_several_bills_in_fewer_files(self):
+        invoices_data = {}
+        transaction_ids = [f'{1:0>11}', f'{2:0>11}']
+        for filename, transaction_id in zip(('IT01234567890_FPR03.xml', 'IT01234567890_FPR02.xml.p7m'), transaction_ids):
+            invoices_data.update({
+                transaction_id: {
+                    'filename': filename,
+                    'file': '',
+                    'key': str(uuid.uuid4()),
+            }})
+
+        # import the xml
+        path = f'{self.module}/tests/import_xmls/IT01234567890_FPR03.xml'
+        with tools.file_open(path, mode='rb') as fd:
+            import_content = fd.read()
+
+        def mock_commit(self):
+            pass
+
+        super_create = self.env.registry['account.move'].create
+        created_moves = []
+
+        def mock_create(self, vals_list):
+            moves = super_create(self, vals_list)
+            created_moves.extend(moves)
+            return moves
+
+        with (patch.object(self.proxy_user.__class__, '_decrypt_data', return_value=import_content),
+              patch.object(sql_db.Cursor, "commit", mock_commit),
+              patch.object(self.env.registry['account.move'], 'create', mock_create),
+              freeze_time('2019-01-01')):
+            self.env['account.move'].with_company(self.company)._l10n_it_edi_process_downloads(
+                invoices_data,
+                self.proxy_user,
+            )
+        moves = self.env['account.move']
+        for m in created_moves:
+            moves |= m
+        self.assertRecordValues(moves, [
+            {'l10n_it_edi_attachment_name': 'IT01234567890_FPR03.xml',
+            'l10n_it_edi_transaction': f'{1:0>11}',
+            },
+            {'l10n_it_edi_attachment_name': 'IT01234567890_FPR02.xml.p7m',
+            'l10n_it_edi_transaction': f'{2:0>11}',
+            },
+            {'l10n_it_edi_attachment_name': 'IT01234567890_FPR03_2.xml',
+            'l10n_it_edi_transaction': f'{1:0>11}',
+            },
+            {'l10n_it_edi_attachment_name': 'IT01234567890_FPR02.xml_2.p7m',
+            'l10n_it_edi_transaction': f'{2:0>11}',
+            },
+        ])

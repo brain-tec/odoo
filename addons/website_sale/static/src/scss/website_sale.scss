@@ -60,6 +60,7 @@
         container-name: o-wsale-grid;
         grid-template-rows: minmax(auto, auto);
 
+        /*rtl:ignore*/
         border-left: var(--o-wsale-sidebar-border);
     }
 
@@ -158,11 +159,13 @@
 
         // Filmstrip design variations ->
         &.o_wsale_filmstrip_default {
+            --o-wsale-filmstrip-item-min-height: 3.5rem;
             --o-wsale-filmstrip-item-color: #{color-contrast($light)};
             --o-wsale-filmstrip-item-bg-hover: #{if(lightness($light) > .5, darken($light, 8%), lighten($light, 8%))};
         }
 
         &.o_wsale_filmstrip_bordered {
+            --o-wsale-filmstrip-item-min-height: 3.5rem;
             --o-wsale-filmstrip-item-border-width: #{$border-width};
             --o-wsale-filmstrip-item-bg: transparent;
             --o-wsale-filmstrip-item-image-bg: #{$gray-100};
@@ -255,7 +258,7 @@
             --o-wsale-filmstrip-item-direction: column;
             --o-wsale-filmstrip-item-justify: flex-start;
             --o-wsale-filmstrip-item-width: 18rem;
-            --o-wsale-filmstrip-item-border-width: 0 #{$border-width} 0 0;
+            --o-wsale-filmstrip-item-border-width: 0 #{$border-width} 0 0 #{"/*rtl: 0 0 0 " + $border-width + "*/"};
             --o-wsale-filmstrip-item-border-radius: 0;
             --o-wsale-filmstrip-item-padding-y: #{map-get($spacers, 3)};
             --o-wsale-filmstrip-item-padding-x: #{map-get($spacers, 3)};
@@ -616,12 +619,14 @@
                     --o-wsale-topbar-border-width: 0 #{$border-width} #{$border-width} 0;
 
                     #o_wsale_pager {
+                        /*rtl:ignore*/
                         border-left: 0;
                     }
                 }
             }
 
             #o_wsale_products_grid {
+                /*rtl:ignore*/
                 box-shadow: inset -1px -1px 0 0px var(--border-color);
             }
 
@@ -642,6 +647,7 @@
             }
             @include media-breakpoint-up(lg) {
                 #products_grid {
+                    /*rtl:ignore*/
                     padding-left: 0;
                 }
             }
@@ -2076,4 +2082,13 @@ body.modal-open:has(.o_wsale_product_page) {
 
 .o_wsale_alternative_products:not(:has(.s_dynamic_snippet_row)) {
     display: none;
+}
+
+div[name="order_confirmation"] {
+    .alert {
+        padding: #{$alert-padding-y} #{$alert-padding-x} !important; // TODO remove in master
+        p:last-child {
+            margin-bottom: 0;
+        }
+    }
 }

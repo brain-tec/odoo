@@ -257,7 +257,7 @@ class PurchaseOrder(models.Model):
         for order in self:
             if order.state != 'purchase' or not order.order_line:
                 order.receipt_status = False
-            elif all(line.qty_received >= line.product_uom_qty for line in order.order_line):
+            elif all(line.qty_received >= line.product_qty for line in order.order_line):
                 order.receipt_status = 'full'
             elif any(line.qty_received for line in order.order_line):
                 order.receipt_status = 'partial'
@@ -646,7 +646,7 @@ class PurchaseOrder(models.Model):
                 invalid_orders=invalid_targets)
         for order in self:
             for line in order.order_line:
-                line.qty_received = line.product_uom_qty
+                line.qty_received = line.product_qty
 
     def print_quotation(self):
         self._mark_rfqs_as_sent()
@@ -950,7 +950,7 @@ class PurchaseOrder(models.Model):
                 oldest_rfq.message_post(body=oldest_rfq_message)
 
                 rfqs.filtered(lambda r: r.state != 'cancel').button_cancel()
-                oldest_rfq._merge_alternative_po(rfqs)
+                oldest_rfq._merge_po_post_process(rfqs)
 
                 # Keep the oldest RFQ IDs
                 merged_rfq_ids.append(oldest_rfq.id)
@@ -968,6 +968,10 @@ class PurchaseOrder(models.Model):
             action['domain'] = [('id', 'in', merged_rfq_ids)]
         return action
 
+    def _merge_po_post_process(self, rfqs):
+        pass
+
+    # TODO: remove in master
     def _merge_alternative_po(self, rfqs):
         pass
 

@@ -71,6 +71,7 @@ class AccountMove(models.Model):
             ('accepted_by_pa_partner_after_expiry', 'SdI Accepted, PA Partner Expired Terms'),
         ],
         copy=False, tracking=True,
+        inverse="_inverse_l10n_it_edi_state",
         help="This state is updated by default, but you can force the value. ",
     )
     l10n_it_edi_header = fields.Html(
@@ -339,6 +340,11 @@ class AccountMove(models.Model):
         # EXTENDS 'account'
         self.with_context(skip_is_manually_modified=True).write({'l10n_it_edi_header': False})
         return super()._post(soft)
+
+    def _inverse_l10n_it_edi_state(self):
+        for move in self:
+            if move.is_move_sent and move.l10n_it_edi_state in ('rejected', 'rejected_by_pa_partner'):
+                move.is_move_sent = False
 
     def _get_fields_to_detach(self):
         # EXTENDS account
@@ -1260,7 +1266,14 @@ class AccountMove(models.Model):
             proxy_acks.append(id_transaction)
 
         if attachment_vals:
-            self._l10n_it_edi_process_downloads_attachments(proxy_user.company_id, attachment_vals)
+            moves = self._l10n_it_edi_process_downloads_attachments(proxy_user.company_id, attachment_vals)
+            file_name_to_transaction_id = {data['filename'].rsplit('.', 1)[0]: transaction_id for transaction_id, data in invoices_data.items()}
+            for move in moves:
+                # FatturaPA filenames follow FATTURAPA_FILENAME_RE:
+                #   <identifier>_<progressivo>.<ext>
+                # An extra suffix (e.g. '_2') might be added by _unwrap_attachments before the last '.'.
+                # Taking the first two components retrieves the original filename.
+                move.l10n_it_edi_transaction = file_name_to_transaction_id.get("_".join(move.l10n_it_edi_attachment_name.rsplit('.', 1)[0].split('_')[:2]))
 
         return {"retrigger": retrigger, "proxy_acks": proxy_acks}
 

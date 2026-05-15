@@ -168,7 +168,7 @@ class PosConfig(models.Model):
     )
     company_has_template = fields.Boolean(string="Company has chart of accounts", compute="_compute_company_has_template")
     current_user_id = fields.Many2one('res.users', string='Current Session Responsible', compute='_compute_current_session_user')
-    other_devices = fields.Boolean(string="Other Devices", help="Connect printer devices to your PoS.")
+    other_devices = fields.Boolean(string="Other Devices", help="Connect printers to your PoS.")
     preparation_devices = fields.Boolean(string="Preparation devices", help="Connect preparation printers to print to the bar, kitchen,...")
     rounding_method = fields.Many2one('account.cash.rounding', string="Rounding Method")
     cash_rounding = fields.Boolean(string="Total Rounding")
@@ -214,9 +214,14 @@ class PosConfig(models.Model):
 
     @api.onchange('receipt_printer_ids')
     def _onchange_receipt_printer_ids(self):
-        """Clear default_receipt_printer_id if it's removed from receipt_printer_ids"""
-        if self.default_receipt_printer_id.id not in self.receipt_printer_ids.ids:
-            self.default_receipt_printer_id = False
+        """Clear default_receipt_printer_id if it's removed from receipt_printer_ids
+        and also set first printer as default printer."""
+        for record in self:
+            printers = record.receipt_printer_ids
+            # Default is valid → KEEP IT
+            if record.default_receipt_printer_id and record.default_receipt_printer_id.id in printers.ids:
+                continue
+            record.default_receipt_printer_id = printers[0] if printers else False
 
     def _get_next_order_refs(self, device_identifier='0'):
         next_number = self.order_backend_seq_id._next()
@@ -300,8 +305,8 @@ class PosConfig(models.Model):
         }
         record['_base_url'] = config.get_base_url()
         record['_data_server_date'] = self.env.context.get('pos_last_server_date') or self.env.cr.now()
-        record['_has_cash_move_perm'] = self.env.user.has_group('account.group_account_invoice')
-        record['_has_cash_delete_perm'] = self.env.user.has_group('account.group_account_basic')
+        record['_has_cash_move_perm'] = self.env.user._has_cash_move_permission()
+        record['_has_cash_delete_perm'] = self.env.user._has_cash_delete_permission()
         record['_pos_special_products_ids'] = self.env['pos.config']._get_special_products().ids
 
         # Add custom fields for 'formula' taxes.
