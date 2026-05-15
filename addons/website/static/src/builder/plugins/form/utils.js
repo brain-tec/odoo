@@ -1,4 +1,5 @@
 import { _t } from "@web/core/l10n/translation";
+import { localeCompare } from "@web/core/l10n/utils";
 import { renderToElement } from "@web/core/utils/render";
 import { generateHTMLId } from "@web/core/utils/strings";
 import { isSmallInteger } from "@html_builder/utils/utils";
@@ -258,11 +259,20 @@ export function setActiveProperties(fieldEl, field) {
     if (input) {
         // textarea value has no attribute,  date/datetime timestamp property is formated
         field.value = input.getAttribute("value") || input.value;
+        if (input.hasAttribute("minLength")) {
+            field.minLength = parseInt(input.getAttribute("minLength"));
+        }
+        if (input.hasAttribute("maxLength")) {
+            field.maxLength = parseInt(input.getAttribute("maxLength"));
+        }
     } else if (field.type === "boolean") {
         field.value = !!fieldEl.querySelector('input[type="checkbox"][checked]');
     } else if (fileInputEl) {
         field.maxFilesNumber = fileInputEl.dataset.maxFilesNumber;
         field.maxFileSize = fileInputEl.dataset.maxFileSize;
+        if (fileInputEl.hasAttribute("accept")) {
+            field.accept = fileInputEl.getAttribute("accept");
+        }
     } else if (selectInputEl) {
         const emptyOptionEl = selectInputEl.querySelector(".s_website_form_empty_option");
         field.allowEmpty = !!emptyOptionEl;
@@ -514,7 +524,7 @@ export function getFormCacheKey(formEl) {
     const propertyOrigins = {};
     const parts = [model];
     for (const hiddenInputEl of [...formEl.querySelectorAll("input[type=hidden]")].sort(
-        (firstEl, secondEl) => firstEl.name.localeCompare(secondEl.name)
+        (firstEl, secondEl) => localeCompare(firstEl.name, secondEl.name)
     )) {
         // Pushing using the name order to avoid being impacted by the
         // order of hidden fields within the DOM.

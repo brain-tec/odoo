@@ -12,6 +12,7 @@ import {
     getModelName,
 } from "./utils";
 import { formatDate, formatDateTime } from "@web/core/l10n/dates";
+import { _t } from "@web/core/l10n/translation";
 
 const { DateTime } = luxon;
 
@@ -98,6 +99,8 @@ export class FormFieldOption extends BaseOptionComponent {
                 isFormDateTime: !!currentFieldInputEl.closest(".s_website_form_datetime"),
                 hasDateTimePicker: currentFieldInputEl.classList.contains("datetimepicker-input"),
                 isTextArea: currentFieldInputEl.nodeName === "TEXTAREA",
+                minLength: currentFieldInputEl.minLength,
+                maxLength: currentFieldInputEl.maxLength,
             };
         });
 
@@ -161,6 +164,53 @@ export class FormFieldOption extends BaseOptionComponent {
         );
     }
     /**
+     * Computes the configuration for the builder list input field used
+     * for validation based on the type of the current field input.
+     *
+     * @returns {Object} An object containing the title and default
+     * value for the builder list.
+     */
+    get multiTextRequirementConfig() {
+        const el = this.env.getEditingElement();
+        const isDomainComparator = el.dataset.requirementComparator === "domain";
+        const isEmail = el.dataset.type === "email";
+        let title = _t("Enter words");
+        if (isDomainComparator) {
+            title = _t("Enter email domains (e.g., gmail.com)");
+        } else if (isEmail) {
+            title = _t("Enter words for local part of the email");
+        }
+        return {
+            title,
+            defaultValue: isDomainComparator ? "example.com" : _t("example"),
+        };
+    }
+    /**
+     * Determines the visibility of the builder list input field used for
+     * validation.
+     *
+     * @returns {boolean} Whether the builder list input should be visible.
+     */
+    get isMultipleTextConditionForRequirementOptionVisible() {
+        const el = this.env.getEditingElement();
+        return el.dataset.requirementComparator && this.isTextField;
+    }
+    /**
+     * Determines the visibility of the character limit checkbox used for
+     * validation.
+     *
+     * @returns {boolean} Whether the character limit option should be visible.
+     */
+    get isTextField() {
+        return (
+            !this.domStateCurrentFieldInput.hasDateTimePicker &&
+            (this.domStateCurrentFieldInput.isTextArea ||
+                ["text", "email", "tel", "url", "search", "password"].includes(
+                    this.domStateCurrentFieldInput.type
+                ))
+        );
+    }
+    /**
      * Determines the visibility of the text condition input field used for
      * validation.
      *
@@ -168,12 +218,10 @@ export class FormFieldOption extends BaseOptionComponent {
      */
     get isTextConditionForRequirementOptionVisible() {
         const el = this.env.getEditingElement();
-        const currentFieldInputEl = getCurrentFieldInputEl(el);
         return (
             el.dataset.requirementComparator &&
             !this.domStateCurrentFieldInput.hasDateTimePicker &&
-            (this.domStateCurrentFieldInput.isTextArea ||
-                this.canHaveTextValidationCondition.includes(currentFieldInputEl.type))
+            this.domStateCurrentFieldInput.type === "number"
         );
     }
     get isTextConditionOperatorVisible() {

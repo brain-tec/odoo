@@ -75,7 +75,7 @@
                 <field name="product_id" optional="show"/>
                 <field name="qty_remaining" optional="show" string="Quantity"/>
                 <field name="qty_ready" optional="hide" groups="base.group_no_one"/>
-                <field name="date_start" optional="hide" readonly="state in ['progress', 'done', 'cancel']" decoration-danger="decoration_dates == 'danger'" decoration-warning="decoration_dates == 'warning'"/>
+                <field name="date_start" string="Start date" optional="hide" readonly="state in ['progress', 'done', 'cancel']" decoration-danger="decoration_dates == 'danger'" decoration-warning="decoration_dates == 'warning'"/>
                 <field name="date_finished" optional="hide" readonly="state in ['progress', 'done', 'cancel']"  decoration-danger="decoration_dates == 'danger'" decoration-warning="decoration_dates == 'warning'"/>
                 <field name="duration_expected" widget="float_time" options="{'unit': 'minutes', 'show_seconds': True}" sum="expected duration" readonly="state in ['cancel', 'done']"/>
                 <field name="duration" widget="mrp_timer"
@@ -91,8 +91,8 @@
                   options="{'no_open': True, 'display': 'badge'}"
                   column_invisible="parent and parent.state == 'draft'"
                   invisible="production_state == 'draft'"/>
-                <field name="has_planning_issues" nolabel="1" readonly="1" widget="mrp_boolean_icon" options="{'icon': 'fa-exclamation-triangle'}" class="text-warning" invisible="not has_planning_issues or has_conflicts"/>
-                <field name="has_conflicts" nolabel="1" readonly="1" widget="mrp_boolean_icon" options="{'icon': 'fa-exclamation-triangle'}" class="text-danger" invisible="not has_conflicts"/>
+                <field name="has_planning_issues" column_invisible="1"/>
+                <field name="has_conflicts" widget="workorder_planning_status" string="" readonly="1"/>
             </list>
         </field>
     </record>
@@ -173,11 +173,10 @@
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <search string="Search Work Orders">
+                <field name="production_id"/>
                 <field name="name" string="Work Order"/>
                 <field name="workcenter_id"/>
-                <field name="production_id"/>
                 <field name="product_id"/>
-                <field name="product_variant_attributes"/>
                 <field name="move_raw_ids" string="Component" filter_domain="[('move_raw_ids.product_id', 'ilike', self)]"/>
                 <filter string="To Do" name="ready" domain="[('state', '=', 'ready')]"/>
                 <filter string="Blocked" name="blocked" domain="[('state', '=', 'blocked')]"/>
@@ -266,35 +265,43 @@
                     <t t-name="card">
                         <div class="d-flex o_kanban_record_top">
                             <div class="o_kanban_workorder_title">
-                                <field name="product_id" class="h4"/>
+                                <field name="production_id"/>
+                                <field name="priority" invisible="priority == '0'" widget="priority" class="px-2 my-auto"/>
                                 <div class="ms-auto text-nowrap d-flex">
                                     <field name="qty_production" widget="float_without_trailing_zeros" class="ms-auto flex-shrink-0"/>
                                     <field name="uom_id" class="ms-1 flex-shrink-0"/>
                                 </div>
                             </div>
                         </div>
-                        <div class="o_kanban_workorder_production_name">
-                            <field name="priority" widget="priority" class="pe-2"/>
-                            <field name="production_id"/>
-                            <field name="name" class="ps-4"/>
+                        <div class="o_kanban_workorder_product_name">
+                            <field name="product_id"/>
                         </div>
-                        <t t-set="start_datetime" t-value="luxon.DateTime.fromISO(record.date_start.raw_value)"/>
-                        <div class="o_kanban_workorder_date"
-                            t-att-class="{'o_wo_orange': start_datetime.hasSame(luxon.DateTime.now(), 'day'),
-                                 'o_wo_red': start_datetime.toISODate() &lt; luxon.DateTime.now().toISODate(),
-                                 '': start_datetime.toISODate() &lt; luxon.DateTime.now().toISODate(),
-                             }">
-                            <field name="date_start" invisible="not date_start" class="pe-2"/> - <field name="date_finished" invisible="not date_start" class="ps-2"/>
+                        <div class="text-muted">
+                            <field name="name"/>
                         </div>
                         <footer>
-                            <div class="o_kanban_workorder_remaining" t-att-class="record.remaining_time.raw_value &lt; 0 ? 'o_wo_red' : ''">
+                            <i class="fa fa-hourglass-half me-1" title="time remaining"/>
+                            <div class="o_kanban_workorder_remaining" data-tooltip="Remaining Time" t-att-class="record.remaining_time.raw_value &lt; 0 ? 'o_wo_red' : ''">
                                 <field name="remaining_time" class="mx-1" widget="float_time" options="{'unit': 'minutes'}"/>
+                            </div>
+                            <t t-set="start_datetime" t-value="luxon.DateTime.fromISO(record.date_start.raw_value)"/>
+                            <div class="o_kanban_workorder_date" invisible="not date_start"
+                                t-att-class="{'o_wo_orange': start_datetime.hasSame(luxon.DateTime.now(), 'day'),
+                                     'o_wo_red': start_datetime.toISODate() &lt; luxon.DateTime.now().toISODate(),
+                                     '': start_datetime.toISODate() &lt; luxon.DateTime.now().toISODate(),
+                                 }">
+                                <i class="fa fa-clock-o me-1 my-auto" title="planned date start"></i>
+                                <div data-tooltip="Scheduled Date">
+                                    <field name="date_start" class="pe-2"/>
+                                </div>
                             </div>
                             <div class="d-flex ms-auto">
                                 <field name="last_working_user_id" widget="many2one_avatar_user"/>
-                                <field name="state" widget="mo_view_list_dropdown"
-                                    options="{'no_open': True, 'display': 'bubble'}"
-                                    invisible="production_state == 'draft'"/>
+                                <div data-tooltip="Status">
+                                    <field name="state" widget="mo_view_list_dropdown"
+                                        options="{'no_open': True, 'display': 'bubble'}"
+                                        invisible="production_state == 'draft'"/>
+                                </div>
                             </div>
                         </footer>
                     </t>
@@ -351,13 +358,14 @@
                         <field name="name" options="{'line_breaks': False}" widget="text" class="text-truncate w-md-75 w-100 pe-2" placeholder="Workorder Title..."/>
                     </h1>
                     <div class="d-flex justify-content-end align-items-center px-1">
-                        <field name="state" widget="mo_view_list_dropdown" options="{'display': 'badge'}"/>
+                        <field name="state" widget="mo_view_list_dropdown" invisible="production_state == 'draft'" options="{'display': 'badge'}"/>
                     </div>
                 </div>
                 <group>
                     <group>
                         <field name="product_id" readonly="1"/>
                         <field name="qty_remaining" string="Quantity" readonly="1" invisible="state == 'done'"/>
+                        <field name="qty_produced" string="Produced Quantity" groups="base.group_no_one" readonly="state == 'done' or product_tracking == 'serial'"/>
                         <field name="workcenter_id" readonly="state in ['cancel', 'done', 'progress']"/>
                         <field name="production_id" force_save="1"/>
                     </group>

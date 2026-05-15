@@ -3,12 +3,19 @@ import { Component, onWillStart, onWillDestroy } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { range } from "@web/core/utils/numbers";
 
+import { AttendanceVideoStream } from "@hr_attendance/components/attendance_video_stream/attendance_video_stream";
+
 export class KioskPinCode extends Component {
     static template = "hr_attendance.KioskPinConfirm";
     static props = {
         employeeData: { type: Object },
         onClickBack: { type: Function },
         onPinConfirm: { type: Function },
+        captureCheckInImage: { type: Boolean },
+        exposeCameraCapture: { type: Function },
+    };
+    static components = {
+        AttendanceVideoStream,
     };
 
     setup() {
@@ -20,9 +27,10 @@ export class KioskPinCode extends Component {
         ];
         this.state = useState({
             codePin: "",
+            streamAvailable: null,
         });
         this.lockPad = false;
-        this.checkedIn = this.props.employeeData.attendance_state === 'checked_in';
+        this.checkedIn = this.props.employeeData.attendance_state === "checked_in";
 
         const onKeyDown = async (ev) => {
             const allowedKeys = { Delete: "C", Enter: "OK", Backspace: null };
@@ -38,14 +46,13 @@ export class KioskPinCode extends Component {
 
             if (allowedKeys[key] !== null) {
                 await this.onClickPadButton(allowedKeys[key]);
-            }
-            else {
+            } else {
                 this.state.codePin = this.state.codePin.substring(0, this.state.codePin.length - 1);
             }
-        }
-        browser.addEventListener('keydown', onKeyDown);
-        onWillStart(() => browser.addEventListener('keydown', onKeyDown))
-        onWillDestroy(() => browser.removeEventListener('keydown', onKeyDown));
+        };
+        browser.addEventListener("keydown", onKeyDown);
+        onWillStart(() => browser.addEventListener("keydown", onKeyDown));
+        onWillDestroy(() => browser.removeEventListener("keydown", onKeyDown));
     }
 
     async onClickPadButton(value) {
@@ -56,11 +63,23 @@ export class KioskPinCode extends Component {
             this.state.codePin = "";
         } else if (value === "OK") {
             this.lockPad = true;
-            await this.props.onPinConfirm(this.props.employeeData.id, this.state.codePin)
+            await this.props.onPinConfirm(this.props.employeeData.id, this.state.codePin);
             this.state.codePin = "";
             this.lockPad = false;
         } else {
             this.state.codePin += value;
         }
+    }
+
+    get showVideoStream() {
+        return (
+            this.props.captureCheckInImage &&
+            !this.checkedIn &&
+            this.state.streamAvailable !== false
+        );
+    }
+
+    setStreamAvailable(isAvailable) {
+        this.state.streamAvailable = isAvailable;
     }
 }

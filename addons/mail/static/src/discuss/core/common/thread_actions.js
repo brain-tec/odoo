@@ -104,15 +104,14 @@ registerThreadAction("remove-from-favorites", {
     sequenceGroup: 20,
 });
 registerThreadAction("notification-settings", {
-    actionPanelClose: ({ action }) => action.popover?.close(),
     actionPanelComponent: NotificationSettings,
     actionPanelComponentProps: ({ channel }) => ({ channel }),
-    actionPanelOpen({ channel, owner, store }) {
+    actionPanelOpen({ owner }) {
         if (owner.isDiscussContent) {
-            this.popover?.open(owner.root.el.querySelector(`[name="${this.id}"]`), {
-                hasSizeConstraints: true,
-                channel,
-            });
+            this.popover?.open(
+                owner.root.el.querySelector(`[name="${this.id}"]`),
+                this.actionPanelComponentProps
+            );
         }
     },
     actionPanelOuterClass: ({ owner, store }) => store.discussDropdownMenuClass(owner),
@@ -153,7 +152,6 @@ registerThreadAction("attachments", {
     sequenceGroup: 10,
 });
 registerThreadAction("invite-people", {
-    actionPanelClose: ({ action }) => action.popover?.close(),
     actionPanelComponent: ChannelInvitation,
     actionPanelComponentProps: ({ channel }) => ({ channel }),
     actionPanelOpen({ owner, store, channel }) {
@@ -168,10 +166,10 @@ registerThreadAction("invite-people", {
                 },
             });
         } else if (!owner.env.inMeetingView) {
-            this.popover?.open(owner.root.el.querySelector(`[name="${this.id}"]`), {
-                hasSizeConstraints: true,
-                channel,
-            });
+            this.popover?.open(
+                owner.root.el.querySelector(`[name="${this.id}"]`),
+                this.actionPanelComponentProps
+            );
         }
     },
     actionPanelOuterClass: ({ owner, store }) =>
@@ -305,7 +303,6 @@ registerThreadAction("leave", {
 });
 
 registerThreadAction("delete-thread", {
-    actionPanelClose: ({ action }) => action.popover?.close(),
     actionPanelComponent: DeleteThreadDialog,
     actionPanelComponentProps: ({ channel }) => ({ channel }),
     actionPanelOuterClass: "bg-100",

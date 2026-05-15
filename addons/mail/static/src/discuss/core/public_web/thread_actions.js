@@ -6,13 +6,13 @@ import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 
 registerThreadAction("show-threads", {
-    actionPanelClose: ({ action }) => action.popover?.close(),
     actionPanelComponent: SubChannelList,
-    actionPanelComponentProps: ({ channel }) => ({ channel }),
-    actionPanelOpen({ channel, owner }) {
-        this.popover?.open(owner.root.el.querySelector(`[name="${this.id}"]`), {
-            channel: channel.parent_channel_id || channel,
-        });
+    actionPanelComponentProps: ({ channel }) => ({ channel: channel.parent_channel_id || channel }),
+    actionPanelOpen({ owner }) {
+        this.popover?.open(
+            owner.root.el.querySelector(`[name="${this.id}"]`),
+            this.actionPanelComponentProps
+        );
     },
     actionPanelOuterClass: ({ owner, store }) =>
         attClassObjectToString({

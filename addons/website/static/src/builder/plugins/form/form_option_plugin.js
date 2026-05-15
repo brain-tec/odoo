@@ -43,8 +43,6 @@ import { renderToElement } from "@web/core/utils/render";
 import { selectElements } from "@html_editor/utils/dom_traversal";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import { isSmallInteger } from "@html_builder/utils/utils";
-import { localization } from "@web/core/l10n/localization";
-import { formatDate } from "@web/core/l10n/dates";
 import { getParsedDataFor } from "@website/js/utils";
 import { isTargetVisible } from "@html_builder/core/visibility_plugin";
 import { nodeSize } from "@html_editor/utils/position";
@@ -63,11 +61,9 @@ import { nodeSize } from "@html_editor/utils/position";
  * @property { FormOptionPlugin['prepareConditionInputs'] } prepareConditionInputs
  * @property { FormOptionPlugin['setLabelsMark'] } setLabelsMark
  * @property { FormOptionPlugin['clearValidationDataset'] } clearValidationDataset
- * @property { FormOptionPlugin['defaultMessage'] } defaultMessage
  * @property { FormOptionPlugin['fetchModels'] } fetchModels
  */
 
-const { DateTime } = luxon;
 const DEFAULT_EMAIL_TO_VALUE = "info@yourcompany.example.com";
 export class FormOptionPlugin extends Plugin {
     static id = "websiteFormOption";
@@ -85,7 +81,6 @@ export class FormOptionPlugin extends Plugin {
         "prepareConditionInputs",
         "setLabelsMark",
         "clearValidationDataset",
-        "defaultMessage",
         "fetchModels",
     ];
     /** @type {import("plugins").WebsiteResources} */
@@ -169,12 +164,14 @@ export class FormOptionPlugin extends Plugin {
             PropertyAction,
             SetDependencyValueListAction,
             SetCustomErrorMessageAction,
-            SetDefaultErrorMessageAction,
             SetRequirementComparatorAction,
             SetMultipleFilesAction,
             ToggleAllowEmptyAction,
             SetEmptyPlaceholderAction,
             ToggleCheckboxLabel,
+            ToggleCharacterLimitAction,
+            SetAllowedFileTypesAction,
+            ToggleRestrictFileTypesAction,
         },
         content_not_editable_selectors: ".s_website_form form",
         content_editable_selectors: [
@@ -853,79 +850,6 @@ export class FormOptionPlugin extends Plugin {
         delete fieldEl.dataset.requirementBetween;
         delete fieldEl.dataset.requirementCondition;
     }
-
-    /**
-     * Generates an error message for requirement set on field if validation fails.
-     *
-     * @param {string} [comparator] The method used to form the error message.
-     * @param {string} [condition] The expected value of the field.
-     * @param {string} [between] The maximum date value if the comparator is
-     *      'between' or '!between'.
-     * @returns {string} The default error message.
-     */
-    defaultMessage(comparator, condition, between, type) {
-        const textMessages = {
-            contains: _t("This field must include keyword %s.", condition),
-            "!contains": _t("This field must not include keyword %s.", condition),
-            substring: _t("This field must include keyword %s.", condition),
-            "!substring": _t("This field must not include keyword %s.", condition),
-            greater: _t("Invalid: field is not greater than %s.", condition),
-            less: _t("Invalid: field is not less than %s.", condition),
-            "greater or equal": _t("Invalid: field is not greater than or equal to %s.", condition),
-            "less or equal": _t("Invalid: field is not less than or equal to %s.", condition),
-        };
-
-        if (condition && textMessages[comparator]) {
-            return textMessages[comparator];
-        }
-
-        if (["date", "datetime"].includes(type)) {
-            const format = type === "date" ? localization.dateFormat : localization.dateTimeFormat;
-            const start = formatDate(DateTime.fromSeconds(parseInt(condition)), { format });
-            const end = formatDate(DateTime.fromSeconds(parseInt(between)), { format });
-
-            const dateMessages = {
-                dateEqual: _t(
-                    "Entered date or time is not correct! It must be %(start)s (%(format)s).",
-                    { start, format }
-                ),
-                "date!equal": _t(
-                    "Entered date or time is not correct! It must not be %(start)s (%(format)s).",
-                    { start, format }
-                ),
-                before: _t(
-                    "Entered date or time is not correct! It must be before %(start)s (%(format)s).",
-                    { start, format }
-                ),
-                after: _t(
-                    "Entered date or time is not correct! It must be after %(start)s (%(format)s).",
-                    { start, format }
-                ),
-                "equal or before": _t(
-                    "Entered date or time is not correct! It must be before or equal to %(start)s (%(format)s).",
-                    { start, format }
-                ),
-                "equal or after": _t(
-                    "Entered date or time is not correct! It must be after or equal to %(start)s (%(format)s).",
-                    { start, format }
-                ),
-                between: _t(
-                    "Entered date or time is not correct! It must be within %(start)s and %(end)s (%(format)s).",
-                    { start, end, format }
-                ),
-                "!between": _t(
-                    "Entered date or time is not correct! It must not be within %(start)s and %(end)s (%(format)s).",
-                    { start, end, format }
-                ),
-            };
-
-            if (condition && dateMessages[comparator]) {
-                return dateMessages[comparator];
-            }
-        }
-
-        return _t("An error has occurred, the form has not been sent.");
-    }
 }
 
 // Form actions
@@ -1474,7 +1398,12 @@ export class SetRequirementComparatorAction extends BuilderAction {
     static id = "setRequirementComparator";
     static dependencies = ["websiteFormOption"];
     apply({ editingElement: fieldEl }) {
-        this.dependencies.websiteFormOption.clearValidationDataset(fieldEl);
+        if (!fieldEl.dataset.requirementComparator) {
+            this.dependencies.websiteFormOption.clearValidationDataset(fieldEl);
+        } else {
+            delete fieldEl.dataset.customError;
+            delete fieldEl.dataset.errorMessage;
+        }
     }
 }
 /**
@@ -1487,36 +1416,77 @@ export class SetRequirementComparatorAction extends BuilderAction {
 export class SetCustomErrorMessageAction extends BuilderAction {
     static id = "setCustomErrorMessage";
     apply({ editingElement: fieldEl }) {
-        if (!fieldEl.dataset.customError) {
-            fieldEl.dataset.customError = true;
-        } else {
-            delete fieldEl.dataset.customError;
-        }
+        fieldEl.dataset.customError = true;
+    }
+    clean({ editingElement: fieldEl }) {
+        delete fieldEl.dataset.customError;
     }
     isApplied({ editingElement: fieldEl }) {
         return fieldEl.dataset.customError;
     }
 }
 /**
- * Sets the default error message based on the requirement comparator,
- * condition and type of form fields.
+ * Toggles the character limit on input fields.
  */
-export class SetDefaultErrorMessageAction extends BuilderAction {
-    static id = "setDefaultErrorMessage";
-    static dependencies = ["websiteFormOption"];
-    apply({ editingElement: fieldEl }) {
-        const {
-            requirementComparator: comparator,
-            requirementCondition: condition,
-            requirementBetween: between,
-            type,
-        } = fieldEl.dataset;
-        fieldEl.dataset.errorMessage = this.dependencies.websiteFormOption.defaultMessage(
-            comparator,
-            condition,
-            between,
-            type
-        );
+export class ToggleCharacterLimitAction extends BuilderAction {
+    static id = "toggleCharacterLimit";
+    setup() {
+        this.preview = false;
+    }
+    apply({ editingElement: inputEl }) {
+        inputEl.setAttribute("maxlength", 100);
+        inputEl.setAttribute("minlength", 0);
+    }
+    clean({ editingElement: inputEl }) {
+        inputEl.removeAttribute("maxlength");
+        inputEl.removeAttribute("minlength");
+    }
+    isApplied({ editingElement: inputEl, params: { mainParam: activeValue } }) {
+        return inputEl.hasAttribute("maxlength") && inputEl.hasAttribute("minlength");
+    }
+}
+/**
+ * Toggles the restriction of file types on file input fields.
+ */
+export class ToggleRestrictFileTypesAction extends BuilderAction {
+    static id = "toggleRestrictFileTypes";
+    setup() {
+        this.preview = false;
+    }
+    apply({ editingElement: inputEl }) {
+        inputEl.toggleAttribute("accept");
+    }
+    isApplied({ editingElement: inputEl }) {
+        return inputEl.hasAttribute("accept");
+    }
+}
+/**
+ * Restricts to the allowed file types on file input fields.
+ */
+export class SetAllowedFileTypesAction extends BuilderAction {
+    static id = "setAllowedFileTypes";
+    setup() {
+        this.preview = false;
+    }
+    apply({ editingElement: inputEl, params: { mainParam: activeValue } }) {
+        if (activeValue === "application/pdf") {
+            inputEl.setAttribute("accept", activeValue);
+        } else {
+            let allowedMimeTypes = inputEl.accept ? inputEl.accept.split(",") : [];
+            allowedMimeTypes = allowedMimeTypes.filter((type) => type !== "application/pdf");
+            if (!allowedMimeTypes.includes(activeValue)) {
+                allowedMimeTypes.push(activeValue);
+            }
+            inputEl.setAttribute("accept", allowedMimeTypes.join(","));
+        }
+    }
+    clean({ editingElement: inputEl, params: { mainParam: activeValue } }) {
+        let allowedMimeTypes = inputEl.accept ? inputEl.accept.split(",") : [];
+        allowedMimeTypes = allowedMimeTypes.filter((mimeType) => mimeType !== activeValue);
+        inputEl.setAttribute("accept", allowedMimeTypes.join(","));
+    }
+    isApplied({ editingElement: inputEl, params: { mainParam: activeValue } }) {
+        return !!inputEl.accept?.includes(activeValue);
     }
 }
 

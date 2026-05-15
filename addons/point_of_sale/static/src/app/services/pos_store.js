@@ -29,7 +29,7 @@ import { CashMovePopup } from "@point_of_sale/app/components/popups/cash_move_po
 import { ClosePosPopup } from "@point_of_sale/app/components/popups/closing_popup/closing_popup";
 import { SelectionPopup } from "../components/popups/selection_popup/selection_popup";
 import { user } from "@web/core/user";
-import { normalize } from "@web/core/l10n/utils";
+import { localeCompare, normalize } from "@web/core/l10n/utils";
 import { WithLazyGetterTrap } from "@point_of_sale/lazy_getter";
 import { debounce } from "@web/core/utils/timing";
 import DevicesSynchronisation from "../utils/devices_synchronisation";
@@ -2252,7 +2252,7 @@ export class PosStore extends WithLazyGetterTrap {
                   } else if (a.pos_sequence !== b.pos_sequence) {
                       return a.pos_sequence - b.pos_sequence;
                   }
-                  return a.name.localeCompare(b.name);
+                  return localeCompare(a.name, b.name);
               });
     }
 
@@ -2282,13 +2282,26 @@ export class PosStore extends WithLazyGetterTrap {
             }
         }
 
+        const filteredList = this.filterExcludedProducts(recordIterator);
+
+        if (
+            !isSearchByWord &&
+            !this.selectedCategory?.id &&
+            this.areAllProductsSpecial(filteredList)
+        ) {
+            return [];
+        }
+
+        return this.orderProductBySequenceAndFav(filteredList);
+    }
+
+    filterExcludedProducts(products) {
         const filteredList = [];
         const excludedProductIds = new Set(this.getExcludedProductIds());
         const availableCateg = new Set(
             (this.config.iface_available_categ_ids || []).map((c) => c.id)
         );
-
-        for (const p of recordIterator) {
+        for (const p of products) {
             if (filteredList.length >= 100) {
                 break;
             }
@@ -2307,16 +2320,7 @@ export class PosStore extends WithLazyGetterTrap {
 
             filteredList.push(p);
         }
-
-        if (
-            !isSearchByWord &&
-            !this.selectedCategory?.id &&
-            this.areAllProductsSpecial(filteredList)
-        ) {
-            return [];
-        }
-
-        return this.orderProductBySequenceAndFav(filteredList);
+        return filteredList;
     }
 
     get productToDisplayByCateg() {
@@ -2359,19 +2363,22 @@ export class PosStore extends WithLazyGetterTrap {
 
         for (const catId of selectedCategoryIds) {
             const products = byCateg[catId] || [];
-            const filtered = searchWord
+
+            let filtered = searchWord
                 ? this.getProductsBySearchWord(searchWord, products)
                 : products;
 
+            // Its advised to not use group by categ with too much products in differents
+            // categories, but in case of we end up with too much products, we slice them in
+            // group of 100 to avoid freezing the browser tab.
+            // We cannot just slice the products to display and keep the same category, because
+            // we want to avoid having categories with only few products displayed and others
+            // with a lot of products not displayed.
+            filtered = this.orderProductBySequenceAndFav(filtered);
+            filtered = this.filterExcludedProducts(filtered);
+
             if (filtered.length) {
-                // Its advised to not use group by categ with too much products in differents
-                // categories, but in case of we end up with too much products, we slice them in
-                // group of 100 to avoid freezing the browser tab.
-                // We cannot just slice the products to display and keep the same category, because
-                // we want to avoid having categories with only few products displayed and others
-                // with a lot of products not displayed.
-                const sorted = this.orderProductBySequenceAndFav(filtered);
-                results.push([catId, sorted.splice(0, 100)]);
+                results.push([catId, filtered]);
             }
         }
 

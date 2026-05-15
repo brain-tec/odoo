@@ -249,8 +249,8 @@ class CalendarEvent(models.Model):
     # alarms
     alarm_ids = fields.Many2many(
         'calendar.alarm', 'calendar_alarm_calendar_event_rel',
+        compute="_compute_alarm_ids", store=True, readonly=False,
         string='Reminders', ondelete="restrict",
-        default=lambda self: self.env.ref('calendar.alarm_notif_1', raise_if_not_found=False),
         help="Notifications sent to all attendees to remind of the meeting.")
     # RECURRENCE FIELD
     recurrency = fields.Boolean('Recurrent')
@@ -331,6 +331,15 @@ class CalendarEvent(models.Model):
                 ('id', operator, value)
             ])
         ]
+
+    @api.depends('allday')
+    def _compute_alarm_ids(self):
+        """ Set a default alarm on the event if it's not all day. No default alarm if all day."""
+        default_alarm_id = self.env.ref('calendar.alarm_notif_1', raise_if_not_found=False)
+        for event in self:
+            if event.alarm_ids and event.alarm_ids._origin != default_alarm_id:
+                continue
+            event.alarm_ids = False if event.allday else default_alarm_id
 
     @api.depends('attendee_ids', 'attendee_ids.state', 'partner_ids')
     def _compute_attendees_count(self):
@@ -1245,7 +1254,7 @@ class CalendarEvent(models.Model):
 
     def action_open_calendar_event(self):
         if self.res_model and self.res_id:
-            return self.env[self.res_model].browse(self.res_id).get_formview_action()
+            return self.env[self.res_model].browse(self.res_id).get_record_default_action()
         return False
 
     def action_sendmail(self):

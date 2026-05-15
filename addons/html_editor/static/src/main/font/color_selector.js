@@ -1,4 +1,4 @@
-import { useState } from "@web/owl2/utils";
+import { useRef, useState } from "@web/owl2/utils";
 import { isColorGradient } from "@web/core/utils/colors";
 import { Component } from "@odoo/owl";
 import {
@@ -10,7 +10,7 @@ import { effect } from "@web/core/utils/reactive";
 import { toolbarButtonProps } from "../toolbar/toolbar";
 import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
 import { useChildRef } from "@web/core/utils/hooks";
-import { useDropdownAutoVisibility } from "@html_editor/dropdown_autovisibility_hook";
+import { useDropdownAutoVisibility } from "@html_editor/toolbar_dropdown_hook";
 
 export class ColorSelector extends Component {
     static template = "html_editor.ColorSelector";
@@ -61,6 +61,7 @@ export class ColorSelector extends Component {
         );
 
         const colorPickerRef = useChildRef();
+        this.colorSelectorBtn = useRef("root");
         this.colorPicker = useColorPicker(
             "root",
             {
@@ -73,12 +74,13 @@ export class ColorSelector extends Component {
                 enabledTabs: this.props.enabledTabs,
                 cssVarColorPrefix: this.props.cssVarColorPrefix,
                 useDefaultThemeColors: this.props.useDefaultThemeColors,
+                onEscape: () => this.colorSelectorBtn.el?.focus(),
             },
             {
                 env: this.__owl__.childEnv,
-                onClose: () => {
+                onClose: (...args) => {
                     this.props.applyColorResetPreview();
-                    this.props.onClose();
+                    this.props.onClose(...args);
                 },
                 ref: colorPickerRef,
             }

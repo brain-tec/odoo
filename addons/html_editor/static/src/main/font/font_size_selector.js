@@ -7,10 +7,13 @@ import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { useDebounced } from "@web/core/utils/timing";
 import { cookie } from "@web/core/browser/cookie";
 import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
-import { useDropdownAutoVisibility } from "@html_editor/dropdown_autovisibility_hook";
+import {
+    useDropdownAutoVisibility,
+    useToolbarDropdownFocus,
+} from "@html_editor/toolbar_dropdown_hook";
 import { useChildRef } from "@web/core/utils/hooks";
 
-export const MAX_FONT_SIZE = 400;
+export const MAX_FONT_SIZE = 144;
 
 export class FontSizeSelector extends Component {
     static template = "html_editor.FontSizeSelector";
@@ -21,18 +24,24 @@ export class FontSizeSelector extends Component {
         onSelected: Function,
         onBlur: { type: Function, optional: true },
         document: { validate: (p) => p.nodeType === Node.DOCUMENT_NODE },
+        maxFontSize: { type: Number, optional: true },
         ...toolbarButtonProps,
+    };
+    static defaultProps = {
+        maxFontSize: MAX_FONT_SIZE,
     };
     static components = { Dropdown, DropdownItem };
 
     setup() {
         this.items = this.props.getItems();
         this.state = useState(this.props.getDisplay());
+        this.fontSizeSelector = useRef("fontSizeSelector");
         this.dropdown = useDropdownState();
         this.menuRef = useChildRef();
         useDropdownAutoVisibility(this.env.overlayState, this.menuRef);
         this.iframeContentRef = useRef("iframeContent");
         this.debouncedCustomFontSizeInput = useDebounced(this.onCustomFontSizeInput, 200);
+        useToolbarDropdownFocus(this.dropdown, this.fontSizeSelector);
 
         onMounted(() => {
             const iframeEl = this.iframeContentRef.el;
@@ -57,21 +66,33 @@ export class FontSizeSelector extends Component {
                 );
                 const color = getCSSVariableValue("black", htmlStyle);
                 const fontFamily = getCSSVariableValue("o-system-fonts", htmlStyle);
-                Object.assign(iframeDoc.body.style, {
-                    padding: "0",
-                    margin: "0",
-                });
-                Object.assign(this.fontSizeInput.style, {
-                    width: "100%",
-                    height: "100%",
-                    border: "none",
-                    outline: "none",
-                    textAlign: "center",
-                    backgroundColor: backgroundColor,
-                    color: color,
-                    fontFamily: fontFamily,
-                });
-                this.fontSizeInput.type = "text";
+
+                const style = iframeDoc.createElement("style");
+                style.textContent = `
+                    body {
+                        padding: 0;
+                        margin: 0;
+                    }
+                    input::-webkit-outer-spin-button,
+                    input::-webkit-inner-spin-button {
+                        -webkit-appearance: none;
+                        margin: 0;
+                    }
+                    input[type=number] {
+                        -moz-appearance: textfield;
+                        width: 100%;
+                        height: 100%;
+                        border: none;
+                        outline: none;
+                        text-align: center;
+                        background-color: ${backgroundColor};
+                        color: ${color};
+                        font-family: ${fontFamily};
+                    }
+                `;
+                iframeDoc.head.appendChild(style);
+                this.fontSizeInput.type = "number";
+                this.fontSizeInput.min = 0;
                 this.fontSizeInput.name = "font-size-input";
                 this.fontSizeInput.autocomplete = "off";
                 this.fontSizeInput.value = this.state.displayName;
@@ -123,7 +144,7 @@ export class FontSizeSelector extends Component {
     onCustomFontSizeInput(ev) {
         let fontSize = parseInt(ev.target.value, 10);
         if (fontSize > 0) {
-            fontSize = Math.min(fontSize, MAX_FONT_SIZE);
+            fontSize = Math.min(fontSize, this.props.maxFontSize);
             if (this.state.displayName !== fontSize) {
                 this.props.onFontSizeInput(`${fontSize}px`);
             } else {
@@ -135,9 +156,10 @@ export class FontSizeSelector extends Component {
     }
 
     onKeyDownFontSizeInput(ev) {
-        if (["Enter", "Tab"].includes(ev.key) && this.dropdown.isOpen) {
+        if (["Enter", "Escape"].includes(ev.key) && this.dropdown.isOpen) {
             this.dropdown.close();
-        } else if (["ArrowUp", "ArrowDown"].includes(ev.key)) {
+        } else if (["ArrowUp", "ArrowDown", "Tab"].includes(ev.key)) {
+            ev.preventDefault();
             const fontSizeSelectorMenu = document.querySelector(".o_font_size_selector_menu div");
             if (!fontSizeSelectorMenu) {
                 return;

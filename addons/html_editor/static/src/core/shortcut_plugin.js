@@ -1,9 +1,7 @@
 import { Plugin, isValidTargetForDomListener } from "../plugin";
-import { fillEmpty } from "@html_editor/utils/dom";
 import { leftLeafOnlyNotBlockPath } from "@html_editor/utils/dom_state";
 import { omit } from "@web/core/utils/objects";
 import { escapeRegExp } from "@web/core/utils/strings";
-import { closestElement } from "@html_editor/utils/dom_traversal";
 
 /**
  * @typedef {Object} Shortcut
@@ -38,7 +36,7 @@ import { closestElement } from "@html_editor/utils/dom_traversal";
 
 export class ShortCutPlugin extends Plugin {
     static id = "shortcut";
-    static dependencies = ["userCommand", "selection", "split", "dom", "history"];
+    static dependencies = ["userCommand", "selection", "split", "dom", "history", "delete"];
 
     /** @type {import("plugins").EditorResources} */
     resources = {
@@ -130,13 +128,20 @@ export class ShortCutPlugin extends Plugin {
     addShortcut(hotkey, action, { isAvailable, global }) {
         this._cleanups.push(
             this.services.hotkey.add(hotkey, action, {
-                area: () => this.editable,
                 bypassEditableProtection: true,
                 allowRepeat: true,
-                isAvailable: (target) =>
-                    (!isAvailable ||
-                        isAvailable(this.dependencies.selection.getEditableSelection())) &&
-                    (global || isValidTargetForDomListener(target)),
+                isAvailable: (target) => {
+                    // Shortcuts are available when focus is in the editable or the toolbar
+                    const isFocusInAvailableArea =
+                        this.editable.contains(target) ||
+                        !!target?.closest(".o-we-toolbar[data-namespace], .o-we-toolbar-dropdown");
+                    return (
+                        isFocusInAvailableArea &&
+                        (!isAvailable ||
+                            isAvailable(this.dependencies.selection.getEditableSelection())) &&
+                        (global || isValidTargetForDomListener(target))
+                    );
+                },
             })
         );
     }
@@ -190,10 +195,7 @@ export class ShortCutPlugin extends Plugin {
                     this.dependencies.selection.modifySelection("extend", "backward", "character");
                     offset--;
                 }
-                this.dependencies.selection.extractContent(
-                    this.dependencies.selection.getEditableSelection()
-                );
-                fillEmpty(closestElement(selection.focusNode));
+                this.dependencies.delete.deleteSelection();
                 command.run(matchedShortcut.commandParams);
             }
         }
