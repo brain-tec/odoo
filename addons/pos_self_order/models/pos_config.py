@@ -62,8 +62,8 @@ class PosConfig(models.Model):
     )
     self_ordering_image_home_ids = fields.Many2many(
         'ir.attachment',
-        string="Add images",
-        help="Image to display on the self order screen",
+        string="Add Media",
+        help="Media items to display on the self order screen",
         bypass_search_access=True,
     )
     self_ordering_image_background_ids = fields.Many2many(
@@ -293,8 +293,8 @@ class PosConfig(models.Model):
 
     def _load_self_data_models(self):
         return ['pos.session', 'pos.preset', 'resource.calendar.attendance', 'pos.order', 'pos.order.line', 'pos.payment', 'pos.payment.method', 'res.partner',
-            'res.currency', 'pos.printer', 'pos.category', 'product.template', 'product.product', 'product.combo', 'product.combo.item', 'res.company', 'account.tax',
-            'account.tax.group', 'res.country', 'product.category', 'product.pricelist', 'product.pricelist.item', 'account.fiscal.position',
+            'pos.printer', 'pos.category', 'product.template', 'product.product', 'product.combo', 'product.combo.item', 'res.company', 'account.tax',
+            'account.tax.group', 'res.country', 'product.category', 'product.pricelist', 'product.pricelist.item', 'res.currency', 'account.fiscal.position',
             'res.lang', 'product.attribute', 'product.attribute.custom.value', 'product.template.attribute.line', 'product.template.attribute.value', 'product.tag',
             'decimal.precision', 'uom.uom', 'pos_self_order.custom_link', 'restaurant.floor', 'restaurant.table', 'account.cash.rounding',
             'res.country', 'res.country.state', 'mail.template', 'pos.product.template.snooze']
@@ -309,7 +309,7 @@ class PosConfig(models.Model):
         if not read_records:
             return read_records
         record = read_records[0]
-        record['_self_ordering_image_home_ids'] = config.self_ordering_image_home_ids.ids
+        record['_self_ordering_image_home_ids'] = config.self_ordering_image_home_ids.read(['mimetype'])
         record['_self_ordering_image_background_ids'] = config.self_ordering_image_background_ids.ids
         record['_pos_special_products_ids'] = config._get_special_products().ids
         record['_self_order_pos'] = True

@@ -9,10 +9,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-12 18:36+0000\n"
-"PO-Revision-Date: 2026-01-16 05:40+0000\n"
+"POT-Creation-Date: 2026-05-03 17:37+0000\n"
+"PO-Revision-Date: 2026-04-11 14:22+0000\n"
 "Last-Translator: \"Malaz Siddig Elsayed Abuidris (msea)\" <msea@odoo.com>\n"
-"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-s19-1/"
+"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-s19-2/"
 "html_builder/ar/>\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 5.16.2\n"
 
 #. module: html_builder
 #. odoo-javascript
@@ -58,6 +58,12 @@ msgstr "تُعرض 'علامة تصنيف العنوان' كتلميح عندم�
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/shape/shape_selector.xml:0
+msgid "A"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/core/operation_plugin.js:0
 msgid ""
 "A technical issue occurred in the builder, you should save or discard your "
@@ -87,7 +93,7 @@ msgstr "إضافة منتج"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/builder_fontfamilypicker.xml:0
 msgid "Add a Custom Font"
-msgstr "إضافة خط مخصص"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -249,7 +255,7 @@ msgstr "المحاذاة"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/snippets/add_snippet_dialog.xml:0
 msgid "Almost there! Snippets are incoming, grab a coffee and relax!"
-msgstr "أوشكنا على الانتهاء! القصاصات في طريقها إليك، استمتع بالقهوة واسترخي!"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -261,8 +267,8 @@ msgstr "علامة التصنيف البديلة"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/anchor/anchor_plugin.js:0
 msgid ""
-"Anchor copied to clipboard%(br)s%(open_span)sLink: "
-"%(anchor_link)s%(close_span)s"
+"Anchor copied to clipboard%(br)s%(open_span)sLink: %(anchor_link)s%"
+"(close_span)s"
 msgstr ""
 
 #. module: html_builder
@@ -572,7 +578,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_builder/static/src/builder.xml:0
 msgid "Blocks"
-msgstr "حجب"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1098,7 +1104,7 @@ msgstr "الغلاف"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/select_many2x.xml:0
 msgid "Create \""
-msgstr "إنشاء \""
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1144,12 +1150,6 @@ msgstr "المحتوى الداخلي المخصص"
 #: code:addons/html_builder/static/src/plugins/image/image_shapes_definition.js:0
 msgid "Cut Circle"
 msgstr "قص الدائرة"
-
-#. module: html_builder
-#. odoo-javascript
-#: code:addons/html_builder/static/src/core/setup_editor_plugin.js:0
-msgid "DRAG BUILDING BLOCKS HERE"
-msgstr "اسحب الكتل البرمجية الإنشائية إلى هنا"
 
 #. module: html_builder
 #. odoo-javascript
@@ -1338,6 +1338,12 @@ msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/core/setup_editor_plugin.js:0
+msgid "Drag blocks here"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/image/image_shapes_definition.js:0
 msgid "Duo"
 msgstr "ثنائي"
@@ -1379,6 +1385,12 @@ msgstr "المبكر"
 #: code:addons/html_builder/static/src/plugins/shadow_option.xml:0
 msgid "Edit"
 msgstr "تحرير"
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/button_style_option.xml:0
+msgid "Edit Color Combination"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1750,7 +1762,7 @@ msgstr "داخل مربع نص"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/snippet.xml:0
 msgid "Install"
-msgstr "تثبيت"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1763,7 +1775,15 @@ msgstr "تثبيت %s"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/invisible_elements_panel.xml:0
 msgid "Invisible Elements"
-msgstr "العناصر الخفية"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/core/version_error_plugin.js:0
+msgid ""
+"It might have caused problem during the editing. Please drag the new version "
+"from the snippet panel to update it."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2431,6 +2451,12 @@ msgstr "إعادة تعيين القص"
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/image/image_shape_option.xml:0
+msgid "Reset shape transformation"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/image/image_transform_option.xml:0
 msgid "Reset transformation"
 msgstr "إعادة تعيين التحويل"
@@ -2439,6 +2465,7 @@ msgstr "إعادة تعيين التحويل"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/block_alignment_option.xml:0
 #: code:addons/html_builder/static/src/plugins/image/image_tool_option.xml:0
+#: code:addons/html_builder/static/src/plugins/rating_option.xml:0
 #: code:addons/html_builder/static/src/plugins/separator_option.xml:0
 #: code:addons/html_builder/static/src/plugins/text_alignment_option.xml:0
 msgid "Right"
@@ -2527,7 +2554,7 @@ msgstr "البحث عن السجلات..."
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/select_many2x.xml:0
 msgid "Search more..."
-msgstr "البحث عن المزيد..."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2546,7 +2573,7 @@ msgstr "الثانوي"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/customize_tab.xml:0
 msgid "Select a block on your page to style it."
-msgstr "اختر كتلة بنائية في صفحتك لتزيينها."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2933,6 +2960,12 @@ msgstr ""
 #: code:addons/html_builder/static/src/core/building_blocks/builder_fontfamilypicker.xml:0
 msgid "This font is hosted and served to your visitors by Google servers"
 msgstr "هذا الخط مستضاف ويتم تقديمه إلى زائريك بواسطة خوادم Google"
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/core/version_error_plugin.js:0
+msgid "This snippet is outdated"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript

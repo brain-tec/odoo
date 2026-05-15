@@ -887,7 +887,7 @@ class SaleOrderLine(models.Model):
             if not line.product_id or line.display_type:
                 line.discount = 0.0
 
-            if not (line.order_id.pricelist_id and discount_enabled):
+            if not (line.order_id.pricelist_id and discount_enabled and line.product_uom_id):
                 continue
 
             if line.combo_item_id:
@@ -936,11 +936,6 @@ class SaleOrderLine(models.Model):
             base_values["special_type"] = "down_payment"
         base_values.update(kwargs)
         return self.env["account.tax"]._prepare_base_line_for_taxes_computation(self, **base_values)
-
-    def _is_line_excluded_from_totals(self):
-        """Exclude global discounts and down payments for the advantages computation."""
-        self.ensure_one()
-        return self._is_global_discount() or self.is_downpayment
 
     def _is_global_discount(self):
         self.ensure_one()

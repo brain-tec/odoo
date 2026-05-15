@@ -1,4 +1,4 @@
-import { contains, mockService, patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { contains, mockService } from "@web/../tests/web_test_helpers";
 import { defineSpreadsheetModels } from "@spreadsheet/../tests/helpers/data";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
 
@@ -9,7 +9,6 @@ import { freezeOdooData } from "@spreadsheet/helpers/model";
 import { createModelWithDataSource } from "@spreadsheet/../tests/helpers/model";
 import { browser } from "@web/core/browser/browser";
 import { setCellContent } from "../helpers/commands";
-
 defineSpreadsheetModels();
 
 let data;
@@ -20,6 +19,10 @@ mockService("http", {
         }
     },
 });
+
+function getHashParam(key) {
+    return new URLSearchParams(browser.location.hash.substring(1)).get(key);
+}
 
 test("show spreadsheet in readonly mode", async function () {
     const { model } = await createModelWithDataSource();
@@ -95,7 +98,7 @@ test("Disable copy button in public spreadsheets", async function () {
     expect(fixture.querySelector(".o-menu-item[data-name='copy']")).toHaveClass("disabled");
 });
 
-describe("sheet_id URL synchronization", () => {
+describe("sheetId URL synchronization", () => {
     beforeEach(async () => {
         const { model } = await createModelWithDataSource({
             spreadsheetData: {
@@ -109,26 +112,22 @@ describe("sheet_id URL synchronization", () => {
     });
 
     test("activates sheet from URL on initialization", async () => {
-        patchWithCleanup(browser.location, {
-            href: `${browser.location.href}?sheet_id=sheet2`,
-        });
+        browser.location.hash = "#sid=sheet2";
         const { model } = await mountPublicSpreadsheet("dashboardDataUrl", "spreadsheet");
         expect(model.getters.getActiveSheetId()).toBe("sheet2");
     });
 
-    test("falls back to the first sheet and syncs the URL when sheet_id is invalid", async () => {
-        patchWithCleanup(browser.location, {
-            href: `${browser.location.href}?sheet_id=unknown`,
-        });
+    test("falls back to the first sheet and syncs the URL when sid is invalid", async () => {
+        browser.location.hash = "#sid=unknown";
         const { model } = await mountPublicSpreadsheet("dashboardDataUrl", "spreadsheet");
-        expect(new URL(browser.location.href).searchParams.get("sheet_id")).toBe("sheet1");
+        expect(getHashParam("sid")).toBe("sheet1");
         expect(model.getters.getActiveSheetId()).toBe("sheet1");
     });
 
-    test("falls back to the first sheet and syncs the URL when sheet_id is absent", async () => {
+    test("falls back to the first sheet and syncs the URL when sid is absent", async () => {
         const { model } = await mountPublicSpreadsheet("dashboardDataUrl", "spreadsheet");
         expect(model.getters.getActiveSheetId()).toBe("sheet1");
-        expect(new URL(browser.location.href).searchParams.get("sheet_id")).toBe("sheet1");
+        expect(getHashParam("sid")).toBe("sheet1");
     });
 
     test("syncs the URL when the active sheet changes", async () => {
@@ -137,6 +136,6 @@ describe("sheet_id URL synchronization", () => {
             sheetIdFrom: "sheet1",
             sheetIdTo: "sheet2",
         });
-        expect(new URL(browser.location.href).searchParams.get("sheet_id")).toBe("sheet2");
+        expect(getHashParam("sid")).toBe("sheet2");
     });
 });

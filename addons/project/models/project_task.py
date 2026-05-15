@@ -426,10 +426,14 @@ class ProjectTask(models.Model):
 
     @api.onchange('project_id')
     def _onchange_project_id(self):
-        if self.state != '04_waiting_normal' and self.stage_id != self._origin.stage_id:
+        if self.state != '04_waiting_normal' and self.stage_id != self._origin.stage_id and self.state not in CLOSED_STATES:
             self.state = '01_in_progress'
         if not self.project_id and not self.user_ids:
             self.user_ids = self.env.user
+
+        if not self.project_id and self.parent_id and self.parent_id.project_id:
+            self.project_id = self.parent_id.project_id.id
+            self.display_in_project = False
 
     def is_blocked_by_dependences(self):
         return any(blocking_task.state not in CLOSED_STATES for blocking_task in self.depend_on_ids)
@@ -1341,6 +1345,7 @@ class ProjectTask(models.Model):
             tasks_to_check.filtered(
                 lambda t: (
                     t.state != '04_waiting_normal'
+                    and t.state not in CLOSED_STATES
                     and previous_stage_ids.get(t.id) != t.stage_id.id
                     and not (t.id in self.ids and 'state' in vals)
                 )

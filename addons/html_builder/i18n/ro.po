@@ -10,10 +10,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-12 18:36+0000\n"
-"PO-Revision-Date: 2026-01-15 23:10+0000\n"
+"POT-Creation-Date: 2026-05-03 17:37+0000\n"
+"PO-Revision-Date: 2026-04-11 14:23+0000\n"
 "Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
-"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-s19-1/"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-s19-2/"
 "html_builder/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 5.16.2\n"
 
 #. module: html_builder
 #. odoo-javascript
@@ -61,6 +61,12 @@ msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/shape/shape_selector.xml:0
+msgid "A"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/core/operation_plugin.js:0
 msgid ""
 "A technical issue occurred in the builder, you should save or discard your "
@@ -90,7 +96,7 @@ msgstr "Adaugă produs"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/builder_fontfamilypicker.xml:0
 msgid "Add a Custom Font"
-msgstr "Adaugă un font personalizat"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -252,7 +258,7 @@ msgstr "Aliniament"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/snippets/add_snippet_dialog.xml:0
 msgid "Almost there! Snippets are incoming, grab a coffee and relax!"
-msgstr "Aproape gata! Urmează să apară fragmente, ia o cafea și relaxează-te!"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -264,11 +270,11 @@ msgstr "Etichetă Alt"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/anchor/anchor_plugin.js:0
 msgid ""
-"Anchor copied to clipboard%(br)s%(open_span)sLink: "
-"%(anchor_link)s%(close_span)s"
+"Anchor copied to clipboard%(br)s%(open_span)sLink: %(anchor_link)s%"
+"(close_span)s"
 msgstr ""
-"Ancora copiată în clipboard%(br)s%(open_span)sLink: "
-"%(anchor_link)s%(close_span)s"
+"Ancora copiată în clipboard%(br)s%(open_span)sLink: %(anchor_link)s%"
+"(close_span)s"
 
 #. module: html_builder
 #. odoo-javascript
@@ -577,7 +583,7 @@ msgstr "Categorii de blocuri"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/builder.xml:0
 msgid "Blocks"
-msgstr "Blocuri"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1103,7 +1109,7 @@ msgstr "Copertă"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/select_many2x.xml:0
 msgid "Create \""
-msgstr "Creează \""
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1149,12 +1155,6 @@ msgstr "Conținut interior personalizat"
 #: code:addons/html_builder/static/src/plugins/image/image_shapes_definition.js:0
 msgid "Cut Circle"
 msgstr "Cerc tăiat"
-
-#. module: html_builder
-#. odoo-javascript
-#: code:addons/html_builder/static/src/core/setup_editor_plugin.js:0
-msgid "DRAG BUILDING BLOCKS HERE"
-msgstr "TRAGE BLOCURI DE CONSTRUCȚIE AICI"
 
 #. module: html_builder
 #. odoo-javascript
@@ -1343,6 +1343,12 @@ msgstr "Trage și sortează câmpul"
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/core/setup_editor_plugin.js:0
+msgid "Drag blocks here"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/image/image_shapes_definition.js:0
 msgid "Duo"
 msgstr "Pereche"
@@ -1384,6 +1390,12 @@ msgstr "EarlyBird"
 #: code:addons/html_builder/static/src/plugins/shadow_option.xml:0
 msgid "Edit"
 msgstr "Editare"
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/button_style_option.xml:0
+msgid "Edit Color Combination"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1755,7 +1767,7 @@ msgstr "Inset"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/snippet.xml:0
 msgid "Install"
-msgstr "Instalează"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1768,7 +1780,15 @@ msgstr "Instalare %s"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/invisible_elements_panel.xml:0
 msgid "Invisible Elements"
-msgstr "Elemente Invizibile"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/core/version_error_plugin.js:0
+msgid ""
+"It might have caused problem during the editing. Please drag the new version "
+"from the snippet panel to update it."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2437,6 +2457,12 @@ msgstr "Resetează decuparea"
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/image/image_shape_option.xml:0
+msgid "Reset shape transformation"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/image/image_transform_option.xml:0
 msgid "Reset transformation"
 msgstr "Resetează transformarea"
@@ -2445,6 +2471,7 @@ msgstr "Resetează transformarea"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/block_alignment_option.xml:0
 #: code:addons/html_builder/static/src/plugins/image/image_tool_option.xml:0
+#: code:addons/html_builder/static/src/plugins/rating_option.xml:0
 #: code:addons/html_builder/static/src/plugins/separator_option.xml:0
 #: code:addons/html_builder/static/src/plugins/text_alignment_option.xml:0
 msgid "Right"
@@ -2533,7 +2560,7 @@ msgstr "Caută înregistrări..."
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/select_many2x.xml:0
 msgid "Search more..."
-msgstr "Caută mai mult ..."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2552,7 +2579,7 @@ msgstr "Secundar"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/customize_tab.xml:0
 msgid "Select a block on your page to style it."
-msgstr "Selectează un bloc pe pagina ta pentru a-l stiliza."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2946,6 +2973,12 @@ msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/core/version_error_plugin.js:0
+msgid "This snippet is outdated"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/rating_option.xml:0
 msgid "Thumbs"
 msgstr "Degete"
@@ -3242,7 +3275,7 @@ msgstr "WebGL nu este activat pe browserul dvs."
 #. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/image/image_format_option.xml:0
 msgid "WebP compression not supported on this browser"
-msgstr "Compresia WebP nu este acceptată pe acest browser"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript

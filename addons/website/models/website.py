@@ -115,7 +115,7 @@ class Website(models.CachedModel):
     _clear_cache_name = 'default'
     _cached_data_fields = (
         'user_id', 'company_id', 'default_lang_id', 'homepage_url',
-        'domain', 'cookies_bar',
+        'domain', 'cookies_bar', 'sequence',
     )
 
     @tools.ormcache(cache='default')
@@ -1270,6 +1270,8 @@ class Website(models.CachedModel):
         return page_temp
 
     def _is_tracking_enabled(self, main_object):
+        if self.env['ir.http'].is_a_bot():
+            return False
         if main_object._name in ['ir.ui.view', 'website.page']:
             return main_object.track
         return True

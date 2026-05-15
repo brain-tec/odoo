@@ -24,7 +24,7 @@ class IrUiView(models.Model):
     page_ids = fields.One2many('website.page', 'view_id')
     controller_page_ids = fields.One2many('website.controller.page', 'view_id')
     first_page_id = fields.Many2one('website.page', string='Website Page', help='First page linked to this view', compute='_compute_first_page_id')
-    track = fields.Boolean(string='Track', default=True, help="Allow to specify for one page of the website to be trackable or not")
+    track = fields.Boolean(string='Track', default=False, help="Allow to specify for one page of the website to be trackable or not")
     visibility = fields.Selection(
         [
             ('public', 'Public'),
@@ -282,10 +282,10 @@ class IrUiView(models.Model):
         # get_related_views can be called through website=False routes
         # (e.g. /website/get_assets_editor_resources), so website
         # dispatch_parameters may not be added. Manually set
-        # website_id. (It will then always fallback on a website, this
-        # method should never be called in a generic context, even for
-        # tests)
-        current_website = self.env['website'].get_current_website()
+        # website_id. (In the website environment, this method should
+        # never be called in a generic context, even for tests)
+        is_customization_code = self.env.context.get('is_customization_code', True)
+        current_website = self.env['website'].get_current_website(fallback=is_customization_code)
         return super(IrUiView, self.with_context(
             website_id=current_website.id
         )).get_related_views(key, bundles=bundles).with_context(
