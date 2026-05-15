@@ -314,7 +314,13 @@ class PosOrder(models.Model):
                 if extra_qty > 0:
                     child_line_extra.append(line)
 
-        original_total = sum(line.combo_item_id.combo_id.base_price * line.qty for line in child_line_free if line.combo_item_id.combo_id.qty_free > 0)
+        original_total = sum(
+            line.combo_item_id.combo_id.base_price * (
+                line.qty / line.combo_parent_id.qty
+                if line.combo_parent_id.qty
+                else line.qty
+            ) for line in child_line_free if line.combo_item_id.combo_id.qty_free > 0
+        )
         remaining_total = parent_lst_price
 
         for index, child in enumerate(child_line_free):

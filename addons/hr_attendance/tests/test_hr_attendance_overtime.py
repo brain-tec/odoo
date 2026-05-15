@@ -3,7 +3,7 @@ from datetime import date, datetime
 from freezegun import freeze_time
 
 from odoo import Command
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests import Form, HttpCase, new_test_user
 from odoo.tests.common import tagged
 from odoo.tools import float_compare
@@ -165,6 +165,57 @@ class TestHrAttendanceOvertime(HttpCase):
         self.assertAlmostEqual(afternoon_att.validated_overtime_hours, 3, 2)
         self.assertAlmostEqual(morning_att.employee_id.total_overtime, 3, 2)
 
+        # CASE 1: Daily Rule Only, Different Day
+        attendance_2 = self.env['hr.attendance'].create({
+            'employee_id': self.employee.id,
+            'check_in': datetime(2021, 1, 5, 8, 0),
+            'check_out': datetime(2021, 1, 5, 20, 0)
+        })
+        self.assertEqual(
+            afternoon_att.overtime_status, 'approved',
+            "Updating an attendance on a different day should NOT reset a previously approved overtime."
+        )
+
+        # CASE 2: Daily Rule Only, Same Day
+        attendance_2.action_approve_overtime()
+        self.assertEqual(attendance_2.overtime_status, 'approved')
+
+        self.env['hr.attendance'].create({
+            'employee_id': self.employee.id,
+            'check_in': datetime(2021, 1, 5, 21, 0),
+            'check_out': datetime(2021, 1, 5, 22, 0)
+        })
+        self.assertEqual(
+            attendance_2.overtime_status, 'to_approve',
+            "A second attendance on the same day MUST reset that day's approval."
+        )
+        self.assertEqual(
+            afternoon_att.overtime_status, 'approved',
+            "An attendance on a previous day should still remain unaffected."
+        )
+
+        # CASE 3: Weekly Rule Exists, Different Day
+        self.env['hr.attendance.overtime.rule'].create({
+            'name': 'Weekly Rule',
+            'base_off': 'quantity',
+            'quantity_period': 'week',
+            'expected_hours': 40,
+            'ruleset_id': self.ruleset.id,
+        })
+
+        self.env['hr.attendance'].create({
+            'employee_id': self.employee.id,
+            'check_in': datetime(2021, 1, 8, 8, 0),
+            'check_out': datetime(2021, 1, 8, 20, 0)
+        })
+
+        self.assertEqual(
+            afternoon_att.overtime_status, 'to_approve',
+            "Creating an attendance on another day of the week MUST reset the entire week's overtime approvals."
+        )
+
+        # Since the second and third days' overtimes are currently 'to_approve',
+        # refusing the first day's overtime will drop the employee's total validated overtime to 0.
         afternoon_att.action_refuse_overtime()
         self.assertEqual(morning_att.employee_id.total_overtime, 0, 0)
         self.assertEqual(afternoon_att.employee_id.total_overtime, 0, 0)
@@ -901,10 +952,10 @@ class TestHrAttendanceOvertime(HttpCase):
             'check_out': datetime(2023, 1, 4, 18, 0)
         })
         # The hours will now be recomputed
-        # But they should have the 'to_approve' status
-        self.assertEqual(attendance.linked_overtime_ids.status, 'to_approve', "Record should be flagged for approval")
+        # But they should have the 'approved' status since it is on a different day and there is only daily rules
+        self.assertEqual(attendance.overtime_status, 'approved')
         self.assertAlmostEqual(attendance.linked_overtime_ids.duration, 2.0, 2, "Math should be reset to 2.0")
-        self.assertEqual(attendance.validated_overtime_hours, 0.0, "Validated hours should be 0 until approved")
+        self.assertEqual(attendance.validated_overtime_hours, 0.5, "Validated hours should be 0.5 as it was already approved")
 
     def _check_overtimes(self, overtimes, vals_list):
         self.assertEqual(len(overtimes), len(vals_list), "Wrong number of overtimes")
@@ -1478,7 +1529,7 @@ class TestHrAttendanceOvertime(HttpCase):
         self.assertEqual(overtime_attendance.worked_hours, 12.0)
         self.assertEqual(overtime_attendance.overtime_hours, 2.0)
 
-    def test_overtime_line_access_rules(self):
+    def test_overtime_access_rules(self):
         """Test ir.rules on hr.attendance.overtime.line per access level:
         - own_reader (base user): can only read their own overtime lines.
         - officer: can read overtime lines of managed employees and their own.
@@ -1509,30 +1560,64 @@ class TestHrAttendanceOvertime(HttpCase):
         self.env['hr.attendance'].create([{
             'employee_id': own_reader_employee.id,
             'check_in': datetime(2021, 1, 4, 8, 0),
-            'check_out': datetime(2021, 1, 4, 20, 0),
+            'check_out': datetime(2021, 1, 4, 19, 0),  # 3h overtime
         }, {
             'employee_id': officer_employee.id,
             'check_in': datetime(2021, 1, 4, 8, 0),
-            'check_out': datetime(2021, 1, 4, 20, 0),
+            'check_out': datetime(2021, 1, 4, 19, 0),
         }, {
             'employee_id': self.other_employee.id,
             'check_in': datetime(2021, 1, 4, 8, 0),
-            'check_out': datetime(2021, 1, 4, 20, 0),
+            'check_out': datetime(2021, 1, 4, 19, 0),
         }])
         overtime_line = self.env['hr.attendance.overtime.line']
         all_lines = overtime_line.search([('employee_id', 'in', (own_reader_employee | officer_employee | self.other_employee).ids)])
         self.assertEqual(len(all_lines.employee_id), 3)
+        self.assertEqual(own_reader_employee.total_overtime, 3)
+        self.assertEqual(self.other_employee.total_overtime, 3)
+        self.assertEqual(officer_employee.total_overtime, 3)
 
+        # Basic user: should only have access to his own overtime_ids and total_overtime
         own_reader_lines = overtime_line.with_user(own_reader_user).search([])
         self.assertEqual(own_reader_lines.employee_id, own_reader_employee)
+        with self.assertRaises(AccessError, msg="Simple user should not have access to others overtime lines"):
+            _ = self.other_employee.with_user(own_reader_user).overtime_ids
+        self.assertEqual(
+            own_reader_employee.with_user(own_reader_user).total_overtime, 3,
+            "Basic user should be able to access his own overtime hours",
+        )
+        self.assertEqual(
+            self.other_employee.with_user(own_reader_user).total_overtime, 0,
+            "Basic user should not have access to others overtime hours",
+        )  # access denied, _compute_total_overtime() silently fails and returns 0
 
+        # Officer: can access his managed employees overtime_ids and total_overtime
         officer_lines = overtime_line.with_user(officer_user).search([])
         self.assertEqual(officer_lines.mapped('employee_id'), officer_employee | self.other_employee)
+        with self.assertRaises(AccessError, msg="Officer user should not have access to non-managed employee overtime lines"):
+            _ = own_reader_employee.with_user(officer_user).overtime_ids
+        self.assertEqual(
+            self.other_employee.with_user(officer_user).total_overtime, 3,
+            "Officer user should be able to access his managed employee overtime hours",
+        )
+        self.assertEqual(
+            own_reader_employee.with_user(officer_user).total_overtime, 0,
+            "Officer user should not have access to non managed employee overtime hours",
+        )
 
+        # Admin: can access all employees overtime_ids and total_overtime
         admin_lines = overtime_line.with_user(self.user).search([])
         self.assertIn(own_reader_employee, admin_lines.employee_id)
         self.assertIn(officer_employee, admin_lines.employee_id)
         self.assertIn(self.other_employee, admin_lines.employee_id)
+        self.assertEqual(
+            self.other_employee.with_user(self.user).total_overtime, 3,
+            "Admin user should be able to access all overtime hours",
+        )
+        self.assertEqual(
+            officer_employee.with_user(self.user).total_overtime, 3,
+            "Admin user should be able to access all overtime hours",
+        )
 
     def test_attendance_expected_hours_compute(self):
         att = self.env['hr.attendance'].create({

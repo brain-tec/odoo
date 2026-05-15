@@ -106,7 +106,7 @@ class PosPaymentMethod(models.Model):
     @api.model
     def get_payment_providers(self):
         return [
-            {"type": "terminal", "provider": "axepta_bnpp", "module": "pos_iot_worldline", "name": "Axepta BNP Paribas"},
+            {"type": "terminal", "provider": "worldline", "module": "pos_iot_worldline", "name": "Axepta BNP Paribas"},
             {"type": "terminal", "provider": "six_iot", "module": "pos_iot_six", "name": "SIX"},
             {"type": "terminal", "provider": "adyen", "module": "pos_adyen", "name": "Adyen"},
             {"type": "terminal", "provider": "mercado_pago", "module": "pos_mercado_pago", "name": "Mercado Pago"},
@@ -337,6 +337,16 @@ class PosPaymentMethod(models.Model):
         for payment in self:
             if self.env['pos.config'].search_count([('id', 'in', payment.config_ids.ids), ('company_id', '!=', payment.company_id.id)]):
                 raise ValidationError(_("The points of sale for the payment method %s must belong to its company.", payment.name))
+
+    @api.constrains('config_ids', 'is_cash_count', 'journal_id')
+    def _check_cash_method_single_shop(self):
+        for method in self:
+            is_cash = method.is_cash_count or (method.journal_id and method.journal_id.type == 'cash')
+            if is_cash and len(method.config_ids) > 1:
+                raise ValidationError(_(
+                    "Validation Error: You cannot assign the same Cash payment method to multiple POS Shops. "
+                    "Please create a separate Cash payment method for each shop."
+                ))
 
     @api.depends('payment_method_type', 'journal_id')
     def _compute_qr(self):

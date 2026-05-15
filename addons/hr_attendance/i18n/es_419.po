@@ -9,17 +9,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-12 18:36+0000\n"
-"PO-Revision-Date: 2026-03-07 14:33+0000\n"
+"POT-Creation-Date: 2026-05-03 17:36+0000\n"
+"PO-Revision-Date: 2026-05-05 23:51+0000\n"
 "Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
-"odoo-s19-2/hr_attendance/es_419/>\n"
+"odoo-s19-3/hr_attendance/es_419/>\n"
 "Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.16.1\n"
+"X-Generator: Weblate 5.17\n"
 
 #. module: hr_attendance
 #. odoo-python
@@ -56,6 +56,21 @@ msgstr "Compra un dispositivo RFID"
 #: code:addons/hr_attendance/static/src/public_kiosk/public_kiosk_app.xml:0
 msgid "'Read the Documentation'"
 msgstr "Consulta la documentación"
+
+#. module: hr_attendance
+#: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
+msgid ""
+"<br/>\n"
+"                                        <span class=\"text-muted\">When "
+"enabled, only the first check-in within the scheduled working hours "
+"(Including tolerance) is recorded. Further check-ins are allowed only after "
+"an automatic check-out.</span>"
+msgstr ""
+"<br/>\n"
+"                                        <span class=\"text-muted\">Si esta "
+"opción está habilitada, solo se registra la primera entrada dentro del "
+"horario laboral programado (incluida la tolerancia). Las siguientes entradas "
+"solo se permiten después de registrar una salida de forma automática.</span>"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.view_hr_attendance_kanban
@@ -247,7 +262,7 @@ msgstr "Administrador"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/manual_selection/manual_selection.xml:0
 msgid "All"
-msgstr "Todos"
+msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
@@ -490,7 +505,7 @@ msgstr "Registro de salida en automático"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/manual_selection/manual_selection.xml:0
 msgid "Back"
-msgstr "Regresar"
+msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.fields.selection,name:hr_attendance.selection__res_company__attendance_barcode_source__back
@@ -666,7 +681,7 @@ msgstr "Entrada registrada"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/greetings/greetings.xml:0
 msgid "Checked in at"
-msgstr "Entrada registrada a las"
+msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.fields.selection,name:hr_attendance.selection__hr_employee__attendance_state__checked_out
@@ -677,7 +692,7 @@ msgstr "Salida registrada"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/greetings/greetings.xml:0
 msgid "Checked out at"
-msgstr "Salida registrada a las"
+msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
@@ -688,7 +703,7 @@ msgstr "Elija cuánto tiempo se mostrará el mensaje de saludo."
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/public_kiosk/public_kiosk_app.xml:0
 msgid "Choose how to record attendances"
-msgstr "Elija cómo registrar las asistencias"
+msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
@@ -740,7 +755,7 @@ msgstr "Confirmar"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/public_kiosk/public_kiosk_app.xml:0
 msgid "Connect an RFID reader, and scan a token."
-msgstr "Conecte un lector RFID y escanee un token."
+msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
@@ -1012,11 +1027,6 @@ msgid "Errors"
 msgstr "Errores"
 
 #. module: hr_attendance
-#: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance__expected_hours
-msgid "Expected Hours"
-msgstr "Horas esperadas"
-
-#. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance__validated_overtime_hours
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance_overtime_line__duration
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
@@ -1046,13 +1056,13 @@ msgstr "Validación de horas extra"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/attendance_calendar/attendance_calendar_overview.xml:0
 msgid "Extra Time"
-msgstr ""
+msgstr "Tiempo extra"
 
 #. module: hr_attendance
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/greetings/greetings.xml:0
 msgid "Extra hours"
-msgstr "Horas extra"
+msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
@@ -1080,7 +1090,7 @@ msgstr "Seguidores (contactos)"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/badge_scanner/badge_scanner.xml:0
 msgid "For"
-msgstr "Para"
+msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance_overtime_rule__timing_start
@@ -1157,7 +1167,7 @@ msgstr "Tiene un mensaje"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/attendance_calendar/attendance_calendar_overview.xml:0
 msgid "Hours"
-msgstr ""
+msgstr "Horas"
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_employee__hours_last_month
@@ -1185,7 +1195,7 @@ msgstr "Horas previas de hoy"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/greetings/greetings.xml:0
 msgid "Hours Previously Today:"
-msgstr "Horas previas de hoy:"
+msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_employee__hours_today
@@ -1197,7 +1207,7 @@ msgstr "Horas de hoy"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/greetings/greetings.xml:0
 msgid "Hours Today:"
-msgstr "Horas de hoy:"
+msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance_overtime_rule__expected_hours_from_contract
@@ -1293,6 +1303,16 @@ msgstr "Modo de entrada (salida)"
 #: code:addons/hr_attendance/static/src/public_kiosk/public_kiosk_app.xml:0
 msgid "Install"
 msgstr "Instalar"
+
+#. module: hr_attendance
+#. odoo-python
+#: code:addons/hr_attendance/controllers/main.py:0
+msgid ""
+"Invalid domain, use 'name' and/or 'department_id' fields with '=' and/or "
+"'ilike' operators."
+msgstr ""
+"El dominio no es válido, usa los campos 'name' o 'department_id' con los "
+"operadores '=' o 'ilike'."
 
 #. module: hr_attendance
 #. odoo-javascript
@@ -1399,17 +1419,17 @@ msgstr "Cargar datos de demostración"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/attendance_helper_view.xml:0
 msgid "Load sample data"
-msgstr "Cargar datos de muestra"
+msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.view_attendance_tree
 msgid "Location (In)"
-msgstr ""
+msgstr "Ubicación (entrada)"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.view_attendance_tree
 msgid "Location (Out)"
-msgstr ""
+msgstr "Ubicación (salida)"
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance__in_longitude
@@ -1563,14 +1583,14 @@ msgstr "No se recibió ningún código de barras"
 #: code:addons/hr_attendance/static/src/public_kiosk/public_kiosk_app.js:0
 msgid "No employee corresponding to Badge ID '%(barcode)s.'"
 msgstr ""
-"No se encontró ningún empleado correspondiente al número de identificación "
-"'%(barcode)s.'"
+"No se encontró ningún empleado correspondiente al número de identificación '%"
+"(barcode)s.'"
 
 #. module: hr_attendance
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/attendance_menu/attendance_menu.xml:0
 msgid "Now"
-msgstr "Ahora"
+msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance__message_needaction_counter
@@ -1596,7 +1616,7 @@ msgstr "Número de mensajes con error de envío"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/greetings/greetings.xml:0
 msgid "OK"
-msgstr "De acuerdo"
+msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
@@ -1623,7 +1643,7 @@ msgstr "Encargado: gestionar asistencias"
 #. module: hr_attendance
 #: model:ir.model.fields.selection,name:hr_attendance.selection__hr_attendance_overtime_rule__timing_type__public_leave
 msgid "On a Public holiday"
-msgstr ""
+msgstr "En un día festivo"
 
 #. module: hr_attendance
 #: model:ir.model.fields.selection,name:hr_attendance.selection__hr_attendance_overtime_rule__timing_type__non_work_days
@@ -1764,7 +1784,7 @@ msgstr "Pagar horas extra"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/pin_code/pin_code.xml:0
 msgid "Please enter your PIN to"
-msgstr "Ingrese su NIP para"
+msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
@@ -1783,7 +1803,7 @@ msgstr "Selecciona a un empleado e ingresa un número de identificación."
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/public_kiosk/public_kiosk_app.xml:0
 msgid "Powered by"
-msgstr "Con la tecnología de"
+msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
@@ -1801,13 +1821,13 @@ msgstr "Imprimir"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/new_employee_dialog/new_employee_dialog.xml:0
 msgid "Print It"
-msgstr "Imprimirlo"
+msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/attendance_menu/attendance_menu.js:0
 msgid "Proceed Anyway"
-msgstr ""
+msgstr "Continuar de todos modos"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_ruleset_view_form
@@ -1876,7 +1896,7 @@ msgstr "Leer una identificación"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/attendance_helper_view.xml:0
 msgid "Ready to track attendances ?"
-msgstr "¿Todo listo para registrar asistencias?"
+msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_form
@@ -2063,7 +2083,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/new_employee_dialog/new_employee_dialog.xml:0
 msgid "Set the Badge"
-msgstr "Asigna la identificación"
+msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
@@ -2082,6 +2102,13 @@ msgstr "Ajustes"
 #: code:addons/hr_attendance/static/src/components/pin_code/pin_code.xml:0
 msgid "Sign out"
 msgstr "Cerrar sesión"
+
+#. module: hr_attendance
+#: model:ir.model.fields,field_description:hr_attendance.field_res_company__single_check_in
+#: model:ir.model.fields,field_description:hr_attendance.field_res_config_settings__single_check_in
+#: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
+msgid "Single Check-In Attendance System"
+msgstr "Sistema de registro de entrada de asistencia único"
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance_overtime_line__time_start
@@ -2135,7 +2162,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/attendance_helper_view.xml:0
 msgid "The attendance records of your employees will be displayed here."
-msgstr "Los registros de asistencia de sus empleados aparecerán aquí."
+msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.actions.act_window,help:hr_attendance.hr_attendance_management_action
@@ -2185,6 +2212,11 @@ msgid ""
 msgstr ""
 "El usuario tendrá acceso a los registros de asistencia y reportes de los "
 "empleados donde esté establecido como administrador de asistencias"
+
+#. module: hr_attendance
+#: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance__expected_hours
+msgid "Theoretical Hours"
+msgstr "Horas teóricas"
 
 #. module: hr_attendance
 #: model_terms:ir.actions.act_window,help:hr_attendance.hr_version_list_view
@@ -2295,19 +2327,19 @@ msgstr "Pruebe con el quiosco"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/attendance_helper_view.xml:0
 msgid "Try the backend and reporting:"
-msgstr "Pruebe con el backend y los reportes:"
+msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/attendance_helper_view.xml:0
 msgid "Try the kiosk"
-msgstr "Pruebe con el quiosco"
+msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/attendance_helper_view.xml:0
 msgid "Try the top"
-msgstr "Pruebe con el icono"
+msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
@@ -2316,6 +2348,8 @@ msgid ""
 "Unable to get a valid location. Do you want to proceed with your check-in/"
 "out anyway?"
 msgstr ""
+"No fue posible obtener una ubicación válida. ¿Deseas continuar con tu "
+"registro de entrada o salida de todos modos?"
 
 #. module: hr_attendance
 #. odoo-python
@@ -2473,6 +2507,18 @@ msgid "You don't have the rights to execute that action."
 msgstr "No tiene los permisos suficientes para ejecutar esta acción."
 
 #. module: hr_attendance
+#. odoo-python
+#: code:addons/hr_attendance/models/hr_employee.py:0
+msgid "You've already checked in."
+msgstr "Ya registraste tu entrada."
+
+#. module: hr_attendance
+#. odoo-javascript
+#: code:addons/hr_attendance/static/src/components/greetings/greetings.xml:0
+msgid "You’ve already checked in."
+msgstr ""
+
+#. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_rule_view_form
 msgid "and"
 msgstr "y"
@@ -2527,6 +2573,12 @@ msgid "from the amount defined on the contract"
 msgstr "de la cantidad definida en el contrato"
 
 #. module: hr_attendance
+#. odoo-javascript
+#: code:addons/hr_attendance/static/src/components/attendance_menu/attendance_menu.xml:0
+msgid "h"
+msgstr "h"
+
+#. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_rule_view_form
 msgid "hours"
 msgstr "horas"
@@ -2535,13 +2587,13 @@ msgstr "horas"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/attendance_helper_view.xml:0
 msgid "icon (e.g for work from home)"
-msgstr "superior (por ejemplo, trabajo desde casa)"
+msgstr ""
 
 #. module: hr_attendance
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/attendance_helper_view.xml:0
 msgid "or"
-msgstr "o"
+msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model,name:hr_attendance.model_ir_websocket
@@ -2564,3 +2616,244 @@ msgstr "con una tasa de"
 #: code:addons/hr_attendance/static/src/public_kiosk/public_kiosk_app.xml:0
 msgid "with optional PIN code"
 msgstr "con código PIN opcional"
+
+#~ msgid ""
+#~ "\n"
+#~ "                                            Extra hours\n"
+#~ "                                        "
+#~ msgstr ""
+#~ "\n"
+#~ "                                            Horas extras\n"
+#~ "                                        "
+
+#~ msgid ""
+#~ "\n"
+#~ "                                            Hours Previously Today: "
+#~ msgstr ""
+#~ "\n"
+#~ "                                            Horas anteriores de hoy: "
+
+#~ msgid ""
+#~ "\n"
+#~ "                                            Hours Today: "
+#~ msgstr ""
+#~ "\n"
+#~ "                                            Horas de hoy: "
+
+#~ msgid ""
+#~ "\n"
+#~ "                                            Now\n"
+#~ "                                        "
+#~ msgstr ""
+#~ "\n"
+#~ "                                            Ahora\n"
+#~ "                                        "
+
+#~ msgid ""
+#~ "\n"
+#~ "                                            You’ve already checked in.\n"
+#~ "                                        "
+#~ msgstr ""
+#~ "\n"
+#~ "                                            Ya registraste tu entrada.\n"
+#~ "                                        "
+
+#~ msgid ""
+#~ "\n"
+#~ "                                        Checked in at "
+#~ msgstr ""
+#~ "\n"
+#~ "                                        Entrada registrada a las "
+
+#~ msgid ""
+#~ "\n"
+#~ "                                        Checked out at "
+#~ msgstr ""
+#~ "\n"
+#~ "                                        Salida registrada a las "
+
+#~ msgid ""
+#~ "\n"
+#~ "                                        Today\n"
+#~ "                                    "
+#~ msgstr ""
+#~ "\n"
+#~ "                                        Hoy\n"
+#~ "                                    "
+
+#~ msgid ""
+#~ "\n"
+#~ "                                All\n"
+#~ "                            "
+#~ msgstr ""
+#~ "\n"
+#~ "                                Todo\n"
+#~ "                            "
+
+#~ msgid ""
+#~ "\n"
+#~ "                                Print It\n"
+#~ "                            "
+#~ msgstr ""
+#~ "\n"
+#~ "                                Imprimir\n"
+#~ "                            "
+
+#~ msgid ""
+#~ "\n"
+#~ "                                Set the Badge\n"
+#~ "                            "
+#~ msgstr ""
+#~ "\n"
+#~ "                                Configurar la insignia\n"
+#~ "                            "
+
+#~ msgid ""
+#~ "\n"
+#~ "                            Connect an RFID reader, and scan a token.\n"
+#~ "                            "
+#~ msgstr ""
+#~ "\n"
+#~ "                            Conecta un lector RFID y escanea un token.\n"
+#~ "                            "
+
+#~ msgid ""
+#~ "\n"
+#~ "                            Load sample data\n"
+#~ "                        "
+#~ msgstr ""
+#~ "\n"
+#~ "                            Cargar datos de muestra\n"
+#~ "                        "
+
+#~ msgid ""
+#~ "\n"
+#~ "                            Try the backend and reporting:\n"
+#~ "                        "
+#~ msgstr ""
+#~ "\n"
+#~ "                            Prueba el backend y los reportes:\n"
+#~ "                        "
+
+#~ msgid ""
+#~ "\n"
+#~ "                            Try the kiosk\n"
+#~ "                        "
+#~ msgstr ""
+#~ "\n"
+#~ "                            Prueba el quiosco\n"
+#~ "                        "
+
+#~ msgid ""
+#~ "\n"
+#~ "                        Back\n"
+#~ "                    "
+#~ msgstr ""
+#~ "\n"
+#~ "                        Regresar\n"
+#~ "                    "
+
+#~ msgid ""
+#~ "\n"
+#~ "                        Load sample data\n"
+#~ "                    "
+#~ msgstr ""
+#~ "\n"
+#~ "                        Cargar datos de muestra\n"
+#~ "                    "
+
+#~ msgid ""
+#~ "\n"
+#~ "                        No attendance records found\n"
+#~ "                    "
+#~ msgstr ""
+#~ "\n"
+#~ "                        No encontramos registros de asistencia\n"
+#~ "                    "
+
+#~ msgid ""
+#~ "\n"
+#~ "                        Please enter your PIN to\n"
+#~ "                        "
+#~ msgstr ""
+#~ "\n"
+#~ "                        Escribe tu NIP para\n"
+#~ "                        "
+
+#~ msgid ""
+#~ "\n"
+#~ "                        Powered by "
+#~ msgstr ""
+#~ "\n"
+#~ "                        Con la tecnología de "
+
+#~ msgid ""
+#~ "\n"
+#~ "                        Try the kiosk\n"
+#~ "                    "
+#~ msgstr ""
+#~ "\n"
+#~ "                        Prueba el quiosco\n"
+#~ "                    "
+
+#~ msgid ""
+#~ "\n"
+#~ "                        or\n"
+#~ "                        "
+#~ msgstr ""
+#~ "\n"
+#~ "                        o\n"
+#~ "                        "
+
+#~ msgid ""
+#~ "\n"
+#~ "                    OK\n"
+#~ "                "
+#~ msgstr ""
+#~ "\n"
+#~ "                    De acuerdo\n"
+#~ "                "
+
+#~ msgid ""
+#~ "\n"
+#~ "                    icon (e.g for work from home)"
+#~ msgstr ""
+#~ "\n"
+#~ "                    icono (por ejemplo, para \"trabajo desde casa\")"
+
+#~ msgid ""
+#~ "\n"
+#~ "                    or\n"
+#~ "                    "
+#~ msgstr ""
+#~ "\n"
+#~ "                    o\n"
+#~ "                    "
+
+#~ msgid ""
+#~ "\n"
+#~ "                Ready to track attendances ?\n"
+#~ "            "
+#~ msgstr ""
+#~ "\n"
+#~ "                ¿Todo listo para llevar registro de las asistencias?\n"
+#~ "            "
+
+#~ msgid ""
+#~ "\n"
+#~ "        Choose how to record attendances\n"
+#~ "    "
+#~ msgstr ""
+#~ "\n"
+#~ "        Elige cómo registrar las asistencias\n"
+#~ "    "
+
+#~ msgid "For "
+#~ msgstr "Para "
+
+#~ msgid ""
+#~ "Try the top\n"
+#~ "                        "
+#~ msgstr ""
+#~ "Probar parte superior\n"
+#~ "                        "

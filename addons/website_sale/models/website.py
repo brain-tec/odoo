@@ -968,10 +968,10 @@ class Website(models.Model):
             (all_abandoned_carts - abandoned_carts).cart_recovery_email_sent = True
             for sale_order in abandoned_carts:
                 template = self.env.ref("website_sale.mail_template_sale_cart_recovery")
-                # fallback email_vals in case partner_to and email_to were emptied
+                # fallback email_vals in case partner_to,email_to were emptied or default recipients is false
                 email_vals = (
                     {}
-                    if template.email_to or template.partner_to
+                    if template.email_to or template.partner_to or template.use_default_to
                     else {"email_to": sale_order.partner_id.email_formatted}
                 )
                 template.send_mail(sale_order.id, email_values=email_vals)
@@ -1061,16 +1061,25 @@ class Website(models.Model):
         category.
         """
         canonical_url = urls.url_parse(super()._get_canonical_url())
+        path = canonical_url.path
+        url_lang_code = ""
 
+        current_lang_code = self.env["res.lang"]._get_data(code=self.env.lang).url_code
+        if self.env["ir.http"]._get_default_lang().url_code != current_lang_code:
+            _, url_lang_code, *rest = path.split("/", 2)
+            if current_lang_code == url_lang_code:
+                path = "/" + (rest[0] if rest else "")
         try:
-            rule = self.env["ir.http"]._match(canonical_url.path)[0].rule
+            rule = self.env["ir.http"]._match(path)[0].rule
         except NotFound:
             rule = None
         if rule == (
             '/shop/<model("product.public.category"):category>/<model("product.template"):product>'
         ):
-            path_parts = canonical_url.path.split("/")
+            path_parts = path.split("/")
             path_parts.pop(2)
+            if url_lang_code:
+                path_parts.insert(1, url_lang_code)
             canonical_url = canonical_url.replace(path="/".join(path_parts))
         return canonical_url.to_url()
 

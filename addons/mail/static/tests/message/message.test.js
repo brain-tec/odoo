@@ -340,6 +340,51 @@ test("Can edit message comment in chatter (MacOS)", async () => {
     await canEditMessageCommentInChatter({ isMacOS: true });
 });
 
+test("Reply to inbox message with full composer shows a notification", async () => {
+    const pyEnv = await startServer();
+    const messageId = pyEnv["mail.message"].create({
+        body: "Hello World!",
+        message_type: "comment",
+        model: "res.partner",
+        res_id: serverState.partnerId,
+    });
+    pyEnv["mail.notification"].create({
+        mail_message_id: messageId,
+        notification_type: "inbox",
+        is_read: true,
+        res_partner_id: serverState.partnerId,
+    });
+    mockService("action", {
+        doAction(action) {
+            if (action.res_model === "mail.compose.message") {
+                action.context.default_res_ids = JSON.stringify(action.context.default_res_ids);
+            }
+            return super.doAction(...arguments);
+        },
+    });
+    mockService("notification", {
+        add() {
+            expect.step("notification");
+            return super.add(...arguments);
+        },
+    });
+    await start();
+    await openDiscuss("mail.box_history");
+    await click(".o-mail-Message [title='Expand']");
+    await click(".o-dropdown-item:contains('Reply')");
+    await click(".o-mail-Composer button[title='More Actions']");
+    await click(".dropdown-item:contains('Open Full Composer')");
+    await click(".modal button:contains('Discard')"); // test no notification from discard (see waitForSteps)
+    await click(".o-mail-Message [title='Expand']");
+    await click(".o-dropdown-item:contains('Reply')");
+    await click(".o-mail-Composer button[title='More Actions']");
+    await click(".dropdown-item:contains('Open Full Composer')");
+    await contains(".o_notification", { count: 0 }); // none from 'Discard'
+    await click(".modal button:contains('Send')");
+    await contains(`.o_notification:has(:text('Message posted on "Mitchell Admin"'))`); // one from 'Send'
+    await expect.waitForSteps(["notification"]); // only notif from 'Send', not 'Discard'
+});
+
 test("Basic list of edit message actions in chatter", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "TestPartner" });
@@ -2471,4 +2516,66 @@ test("context menu should not open on right-click when editing a message", async
     await expect.waitForSteps(["Message.onContextMenu"]);
     await animationFrame();
     expect.verifySteps([]);
+});
+
+test.tags("html composer");
+test("(edited) label is not included in editor when editing an already-edited message", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({
+        name: "general",
+        channel_type: "channel",
+    });
+    pyEnv["mail.message"].create({
+        author_id: serverState.partnerId,
+        body: "Hello",
+        model: "discuss.channel",
+        res_id: channelId,
+        message_type: "comment",
+    });
+    await start();
+    const composerService = getService("mail.composer");
+    composerService.setHtmlComposer();
+    await openDiscuss(channelId);
+    // First edit to produce an "(edited)" label in the body
+    await click(".o-mail-Message [title='Edit']");
+    await focus(".o-mail-Message  .o-mail-Composer-html.odoo-editor-editable");
+    let editor = {
+        document,
+        editable: document.querySelector(
+            ".o-mail-Message .o-mail-Composer-html.odoo-editor-editable"
+        ),
+    };
+    await htmlInsertText(editor, " world");
+    await click(".o-mail-Message button:text('save')");
+    await contains(".o-mail-Message-content:text('Hello world (edited)')");
+    // Open editor again — assert (edited) is NOT inside the editable
+    await click(".o-mail-Message [title='Edit']");
+    await focus(".o-mail-Message .o-mail-Composer-html.odoo-editor-editable");
+    editor = {
+        document,
+        editable: document.querySelector(
+            ".o-mail-Message .o-mail-Composer-html.odoo-editor-editable"
+        ),
+    };
+    expect(editor.editable.querySelectorAll(".o-mail-Message-edited").length).toBe(0);
+    // CTRL+A selects all — then type replacement text
+    await press(["ctrl", "a"]);
+    await htmlInsertText(editor, "a");
+    await click(".o-mail-Message button:text('save')");
+    // New text should be the only content; "(edited)" must be at the very end
+    await contains(".o-mail-Message-content:text('a (edited)')");
+});
+
+test("show actions of 'tracking' in message header", async () => {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo" });
+    pyEnv["mail.message"].create({
+        body: "Stage changed",
+        message_type: "tracking",
+        model: "res.partner",
+        res_id: partnerId,
+    });
+    await start();
+    await openFormView("res.partner", partnerId);
+    await contains(".o-mail-Message-header .o-mail-Message-actions");
 });

@@ -20,6 +20,8 @@ from odoo.tools.misc import SENTINEL
 
 from odoo.addons.hr.models.hr_version import format_date_abbr
 from odoo.addons.mail.tools.discuss import Store
+from odoo.addons.resource.models.utils import extract_comodel_domain, filter_map_domain
+
 
 from .hr_employee_location import DAYS
 
@@ -180,6 +182,7 @@ class HrEmployee(models.Model):
         column2='bank_account_id',
         domain="[('partner_id', '=', work_contact_id), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         groups="hr.group_hr_user",
+        copy=False,
         tracking=True,
         string='Bank Accounts',
         help='Employee bank accounts to pay salaries')
@@ -724,9 +727,11 @@ class HrEmployee(models.Model):
         If no valid version is found, we return the very first version of the employee.
         """
         self.ensure_one()
-        active_versions = self.version_ids.filtered(lambda v: v.active)
-        versions = active_versions.filtered_domain([('date_version', '<=', date)])
-        return max(versions, key=lambda v: v.date_version) if versions else active_versions[0]
+        versions = self.version_ids.filtered(lambda v: v.active)
+        if not versions:
+            versions = self.with_context(active_test=False).version_ids
+        filtered_versions = versions.filtered_domain([('date_version', '<=', date)])
+        return max(filtered_versions, key=lambda v: v.date_version) if filtered_versions else versions[0]
 
     def create_version(self, values):
         self.ensure_one()
@@ -1287,7 +1292,7 @@ class HrEmployee(models.Model):
 
     @api.model
     def search_fetch(self, domain, field_names=None, offset=0, limit=None, order=None):
-        if self.browse().has_access('read'):
+        if self.has_access('read'):
             return super().search_fetch(domain, field_names, offset, limit, order)
 
         # HACK: retrieve publicly available values from hr.employee.public and
@@ -1298,6 +1303,21 @@ class HrEmployee(models.Model):
         field_names = [f_name for f_name in field_names if f_name != 'current_version_id']
         self._check_private_fields(field_names)
         self.flush_model(field_names)
+
+        def map_condition_to_public_employee(condition):
+            for field in ('version_id', 'current_version_id'):
+                if condition.field_expr == field and condition.operator == 'any!':
+                    condition = extract_comodel_domain(self.env['hr.employee'], Domain(condition.field_expr, condition.operator, condition.value), field)
+                if condition.field_expr == field:
+                    # field has not been explicitly declared in hr.employee.public
+                    return None
+            return condition
+
+        # fields on hr.employee's current_version_id are explicitly declared
+        # on hr.employee.public due to versions being absent on the public
+        # employee, we thus need to map it to avoid getting errors
+        domain = filter_map_domain(domain, map_condition_to_public_employee)
+
         public = self.env['hr.employee.public'].search_fetch(domain, field_names, offset, limit, order)
         employees = self.browse(public._ids)
         employees._copy_cache_from(public, field_names)
@@ -1721,12 +1741,6 @@ class HrEmployee(models.Model):
                     users_to_update |= employee.user_id
             if users_to_update:
                 users_to_update.write({'tz': vals['tz']})
-        if vals.get('department_id') or vals.get('user_id'):
-            department_id = vals['department_id'] if vals.get('department_id') else self[:1].department_id.id
-            # When added to a department or changing user, subscribe to the channels auto-subscribed by department
-            self.env['discuss.channel'].sudo().search([
-                ('subscription_department_ids', 'in', department_id)
-            ])._subscribe_users_automatically()
         if vals.get('departure_description'):
             for employee in self:
                 employee.message_post(body=_(
@@ -1762,6 +1776,12 @@ class HrEmployee(models.Model):
                 else:
                     msg = self.env._("Modified")
                 employee._track_set_log_message(Markup("<b>%s</b>") % msg)
+        if vals.get('department_id') or vals.get('user_id'):
+            department_id = vals['department_id'] if vals.get('department_id') else self[:1].department_id.id
+            # When added to a department or changing user, subscribe to the channels auto-subscribed by department
+            self.env['discuss.channel'].sudo().search([
+                ('subscription_department_ids', 'in', department_id)
+            ])._subscribe_users_automatically()
         if res and ('resource_calendar_id' in vals or 'hours_per_week' in vals or 'hours_per_day' in vals):
             resources = self.env['resource.resource']
             for employee in self:
@@ -1870,7 +1890,7 @@ class HrEmployee(models.Model):
         )
         for employee, versions in versions_by_employee:
             if versions:
-                res[employee.id] = versions[0].resource_calendar_id.sudo(False)
+                res[employee.id] = versions[0].resource_calendar_id.sudo(self.env.su)
         return res
 
     def _get_hours_per_week_batch(self, date_from=None):
@@ -2192,6 +2212,7 @@ class HrEmployee(models.Model):
             'name': self.env._('End of collaboration'),
             'res_model': 'hr.employee.departure',
             'type': 'ir.actions.act_window',
+            'views': [(self.env.ref('hr.hr_employee_departure_view_form').id, 'form')],
             'view_mode': 'form',
             'target': 'new',
             'context': {

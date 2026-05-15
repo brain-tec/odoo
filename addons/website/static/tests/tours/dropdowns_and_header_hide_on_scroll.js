@@ -24,9 +24,14 @@ const scrollDownToMediaList = function () {
     return {
         content: "Scroll down the page a little to leave the dropdown partially visible",
         trigger: ":iframe #wrapwrap .s_media_list",
-        run() {
+        async run() {
             // Scroll down to the media list snippet.
             this.anchor.scrollIntoView({ behavior: "instant" });
+            await new Promise((resolve) => {
+                this.anchor.ownerDocument.defaultView.addEventListener("scrollend", resolve, {
+                    once: true,
+                });
+            });
         },
     };
 };
@@ -34,7 +39,6 @@ const scrollDownToMediaList = function () {
 registerWebsitePreviewTour(
     "dropdowns_and_header_hide_on_scroll",
     {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         edition: true,
     },
     () => [
@@ -76,17 +80,12 @@ registerWebsitePreviewTour(
         // dropdown with the search results.
         scrollDownToMediaList(),
         {
-            content: "Open the searchbar by clicking on it",
-            trigger: ":iframe #wrapwrap header .s_searchbar_input input.search-query",
-            run: "click",
-        },
-        {
             content: "Type a search query into the searchbar input",
-            trigger: ":iframe #o_search_modal .o_searchbar_form input.search-query",
+            trigger: ":iframe #wrapwrap header .s_searchbar_input input.search-query",
             run: "edit a",
         },
         checkIfVisibleOnScreen(
-            ":iframe #o_search_modal .o_searchbar_form.show .o_dropdown_menu.show"
+            ":iframe #wrapwrap header .s_searchbar_input.show .o_dropdown_menu.show"
         ),
     ]
 );

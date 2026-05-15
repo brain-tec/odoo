@@ -12,7 +12,7 @@ import { useCustomDropzone } from "@web/core/dropzone/dropzone_hook";
 import { MailAttachmentDropzone } from "@mail/core/common/mail_attachment_dropzone";
 import { NavigableList } from "@mail/core/common/navigable_list";
 import { MAIL_PLUGINS, MAIL_SMALL_UI_PLUGINS } from "@mail/core/common/plugin/plugin_sets";
-import { useSuggestion } from "@mail/core/common/suggestion_hook";
+import { mapSuggestionsToOptions, useSuggestion } from "@mail/core/common/suggestion_hook";
 import { useSelection } from "@mail/utils/common/hooks";
 import { trimEmptyBlocksAround } from "@mail/utils/common/format";
 import { isDragSourceExternalFile } from "@mail/utils/common/misc";
@@ -51,6 +51,7 @@ import { rightPos } from "@html_editor/utils/position";
 import { syntaxHighlightingEmbedding } from "@html_editor/others/embedded_components/backend/syntax_highlighting/syntax_highlighting";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { usePopover } from "@web/core/popover/popover_hook";
+import { IndexedDB } from "@web/core/utils/indexed_db";
 
 const EDIT_CLICK_TYPE = {
     CANCEL: "cancel",
@@ -97,6 +98,7 @@ export class Composer extends Component {
         Wysiwyg,
     };
     static defaultProps = {
+        autofocus: 0,
         mode: "normal",
         className: "",
         sidebar: true,
@@ -507,82 +509,14 @@ export class Composer extends Component {
         if (!this.hasSuggestions) {
             return props;
         }
-        const suggestions = this.suggestion.state.items.suggestions;
-        switch (this.suggestion.state.items.type) {
-            case "Partner":
-                return {
-                    ...props,
-                    optionTemplate: "mail.Composer.suggestionPartner",
-                    options: suggestions.map((suggestion) => {
-                        if (suggestion.isSpecial) {
-                            return {
-                                ...suggestion,
-                                group: 1,
-                                optionTemplate: "mail.Composer.suggestionSpecial",
-                                classList: "o-mail-Composer-suggestion",
-                            };
-                        } else if (suggestion.Model.getName() === "res.role") {
-                            return {
-                                label: suggestion.name,
-                                role: suggestion,
-                                thread: this.thread,
-                                optionTemplate: "mail.Composer.suggestionRole",
-                                classList: "o-mail-Composer-suggestion",
-                            };
-                        } else {
-                            return {
-                                label: this.thread?.getPersonaName(suggestion) ?? suggestion.name,
-                                thread: this.thread,
-                                partner: suggestion,
-                                classList: "o-mail-Composer-suggestion",
-                            };
-                        }
-                    }),
-                };
-            case "discuss.channel":
-                return {
-                    ...props,
-                    optionTemplate: "mail.Composer.suggestionChannel",
-                    options: suggestions.map((suggestion) => ({
-                        label: suggestion.fullNameWithParent,
-                        channel: suggestion,
-                        classList: "o-mail-Composer-suggestion",
-                    })),
-                };
-            case "ChannelCommand":
-                return {
-                    ...props,
-                    optionTemplate: "mail.Composer.suggestionChannelCommand",
-                    options: suggestions.map((suggestion) => ({
-                        label: suggestion.name,
-                        help: suggestion.help,
-                        classList: "o-mail-Composer-suggestion",
-                    })),
-                };
-            case "mail.canned.response":
-                return {
-                    ...props,
-                    optionTemplate: "mail.Composer.suggestionCannedResponse",
-                    options: suggestions.map((suggestion) => ({
-                        cannedResponse: suggestion,
-                        label: suggestion.substitution,
-                        source: suggestion.source,
-                        title: suggestion.substitution,
-                        classList: "o-mail-Composer-suggestion",
-                    })),
-                };
-            case "emoji":
-                return {
-                    ...props,
-                    optionTemplate: "mail.Composer.suggestionEmoji",
-                    options: suggestions.map((suggestion) => ({
-                        emoji: suggestion,
-                        label: suggestion.codepoints,
-                    })),
-                };
-            default:
-                return props;
-        }
+        return {
+            ...props,
+            ...mapSuggestionsToOptions(
+                this.suggestion.state.items.type,
+                this.suggestion.state.items.suggestions,
+                { thread: this.thread }
+            ),
+        };
     }
 
     onDropFile(ev) {
@@ -638,7 +572,11 @@ export class Composer extends Component {
                 }
                 break;
             case "Enter": {
-                if (isEventHandled(ev, "NavigableList.select") || !this.state.active) {
+                if (
+                    isEventHandled(ev, "NavigableList.select") ||
+                    document.querySelector(".o-we-SuggestionList .o-navigable") ||
+                    !this.state.active
+                ) {
                     ev.preventDefault();
                     return;
                 }
@@ -725,6 +663,7 @@ export class Composer extends Component {
             default_res_ids: [this.thread.id],
             default_subtype_xmlid: this.props.type === "note" ? "mail.mt_note" : "mail.mt_comment",
             clicked_on_full_composer: true,
+            body_contains_signature_only: !this.props.composer.composerText || this.props.composer.composerText.trim().length === 0,
             // Changed in 18.2+: finally get rid of autofollow, following should be done manually
             ...this.fullComposerAdditionalContext,
         };
@@ -743,17 +682,13 @@ export class Composer extends Component {
                 // args === { special: true } : click on 'discard'
                 const accidentalDiscard = args?.dismiss;
                 const isDiscard = accidentalDiscard || args?.special;
-                // otherwise message is posted (args === [undefined])
-                if (!isDiscard && this.props.composer.thread.model === "mail.box") {
-                    this.notifySendFromMailbox();
-                }
                 if (accidentalDiscard) {
                     this.fullComposerBus.trigger("ACCIDENTAL_DISCARD", {
-                        onAccidentalDiscard: (isEmpty) => {
+                        onAccidentalDiscard: async (isEmpty) => {
                             if (!isEmpty) {
                                 this.state.isFullComposerOpen = true;
                                 this.saveContent();
-                                this.restoreContent();
+                                await this.restoreContent();
                                 this.state.isFullComposerOpen = false;
                             }
                         },
@@ -799,9 +734,7 @@ export class Composer extends Component {
     }
 
     notifySendFromMailbox() {
-        this.env.services.notification.add(_t('Message posted on "%s"', this.thread.displayName), {
-            type: "info",
-        });
+        this.store.notifySendFromMailbox(this.thread.displayName);
     }
 
     isEventTrusted(ev) {
@@ -939,6 +872,7 @@ export class Composer extends Component {
         this.props.composer.replyToMessage = undefined;
         this.props.composer.emailAddSignature = true;
         this.props.composer.thread.additionalRecipients = [];
+        this.deleteSavedContent();
         return message;
     }
 
@@ -1042,26 +976,22 @@ export class Composer extends Component {
         if (composer.restoredFromFullComposer && !this.state.isFullComposerOpen) {
             return;
         }
-        const saveContentToLocalStorage = ({
+        const saveContentToLocalStorage = async ({
             composerHtml,
             emailAddSignature,
             replyToMessageId,
             fromFullComposer = composer.restoredFromFullComposer,
         }) => {
             if (isHtmlEmpty(composerHtml)) {
-                browser.localStorage.removeItem(composer.localId);
+                await this.deleteSavedContent();
             } else {
-                browser.localStorage.setItem(
-                    composer.localId,
-                    JSON.stringify({
-                        emailAddSignature,
-                        replyToMessageId,
-                        composerHtml: isMarkup(composerHtml)
-                            ? ["markup", composerHtml]
-                            : composerHtml,
-                        fromFullComposer,
-                    })
-                );
+                const db = new IndexedDB("mail");
+                await db.write("composer", composer.localId, {
+                    emailAddSignature,
+                    replyToMessageId,
+                    composerHtml: isMarkup(composerHtml) ? ["markup", composerHtml] : composerHtml,
+                    fromFullComposer,
+                });
             }
         };
         if (this.state.isFullComposerOpen) {
@@ -1079,15 +1009,18 @@ export class Composer extends Component {
         }
     }
 
-    restoreContent() {
+    async deleteSavedContent() {
+        const db = new IndexedDB("mail");
         const composer = toRaw(this.props.composer);
-        let config;
-        try {
-            config = JSON.parse(browser.localStorage.getItem(composer.localId));
-        } catch {
-            browser.localStorage.removeItem(composer.localId);
-        }
+        await db.delete("composer", composer.localId);
+    }
+
+    async restoreContent() {
+        const db = new IndexedDB("mail");
+        const composer = toRaw(this.props.composer);
+        const config = await db.read("composer", composer.localId);
         if (!config) {
+            await this.deleteSavedContent();
             return;
         }
         if (!isHtmlEmpty(config.composerHtml)) {

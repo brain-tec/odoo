@@ -24,13 +24,13 @@ import { THIS_YEAR_GLOBAL_FILTER } from "@spreadsheet/../tests/helpers/global_fi
 import { createSpreadsheetWithList } from "@spreadsheet/../tests/helpers/list";
 import { createModelWithDataSource } from "@spreadsheet/../tests/helpers/model";
 import { CommandResult } from "@spreadsheet/o_spreadsheet/cancelled_reason";
+import { LoadingDataError } from "@spreadsheet/o_spreadsheet/errors";
 
 import { animationFrame } from "@odoo/hoot-mock";
 import * as spreadsheet from "@odoo/o-spreadsheet";
 import {
     defineSpreadsheetActions,
     defineSpreadsheetModels,
-    generateListDefinition,
     Partner,
     Product,
     ResUsers,
@@ -43,7 +43,7 @@ import { insertListInSpreadsheet } from "../helpers/list";
 
 import { createSheet, deleteSheet } from "../helpers/commands";
 const { DEFAULT_LOCALE, PIVOT_STATIC_TABLE_CONFIG } = spreadsheet.constants;
-const { toZone } = spreadsheet.helpers;
+const { deepCopy, toZone } = spreadsheet.helpers;
 const { cellMenuRegistry } = spreadsheet.registries;
 const Model = spreadsheet.Model;
 
@@ -68,6 +68,22 @@ test("List export", async () => {
     expect(getCellFormula(model, "A12")).toBe("");
 });
 
+test("List headers include an explicit label only when the column string is set", async () => {
+    const { model } = await createSpreadsheetWithList({
+        columns: [
+            { name: "foo" },
+            { name: "bar", string: "Bar" },
+            { name: "date", string: "Custom Date" },
+            { name: "product_id" },
+        ],
+    });
+
+    expect(getCellFormula(model, "A1")).toBe(`=ODOO.LIST.HEADER(1,"foo")`);
+    expect(getCellFormula(model, "B1")).toBe(`=ODOO.LIST.HEADER(1,"bar","Bar")`);
+    expect(getCellFormula(model, "C1")).toBe(`=ODOO.LIST.HEADER(1,"date","Custom Date")`);
+    expect(getCellFormula(model, "D1")).toBe(`=ODOO.LIST.HEADER(1,"product_id")`);
+});
+
 test("List field name should not be empty", async () => {
     const { model } = await createSpreadsheetWithList();
     setCellContent(model, "A1", `=ODOO.LIST.VALUE(1,1,"")`);
@@ -80,6 +96,26 @@ test("ODOO.LIST.HEADER with a custom header string", async () => {
     setCellContent(model, "A1", '=ODOO.LIST.HEADER(1,"foo","My custom header")');
     await waitForDataLoaded(model);
     expect(getCellValue(model, "A1")).toBe("My custom header");
+});
+
+test("ODOO.LIST.HEADER uses the column string when set, otherwise falls back to the field label", async () => {
+    const { model } = await createSpreadsheetWithList({
+        columns: [
+            { name: "foo" },
+            { name: "bar", string: "Fixed Bar" },
+            { name: "date", string: "Custom Date" },
+        ],
+    });
+
+    setCellContent(model, "A20", '=ODOO.LIST.HEADER(1,"foo")');
+    setCellContent(model, "A21", '=ODOO.LIST.HEADER(1,"bar")');
+    setCellContent(model, "A22", '=ODOO.LIST.HEADER(1,"date")');
+
+    await waitForDataLoaded(model);
+
+    expect(getCellValue(model, "A20")).toBe("Foo");
+    expect(getCellValue(model, "A21")).toBe("Fixed Bar");
+    expect(getCellValue(model, "A22")).toBe("Custom Date");
 });
 
 test("Return display name of selection field", async () => {
@@ -478,7 +514,11 @@ test("Referencing non-existing fields does not crash", async function () {
 
     await animationFrame();
     expect(model.getters.getListDataSource(listId).getFields()[forbiddenFieldName]).toBe(undefined);
-    expect(getCellValue(model, "A1")).toBe(forbiddenFieldName);
+    const A1 = getEvaluatedCell(model, "A2");
+    expect(A1.type).toBe("error");
+    expect(A1.message).toBe(
+        `The field ${forbiddenFieldName} does not exist or you do not have access to that field`
+    );
     const A2 = getEvaluatedCell(model, "A2");
     expect(A2.type).toBe("error");
     expect(A2.message).toBe(
@@ -1396,11 +1436,10 @@ test("INSERT_ODOO_LIST_WITH_TABLE adds a table that maches the list dimension", 
         linesNumber: 4,
     });
     const sheetId = model.getters.getActiveSheetId();
-    const { columns: currentColumns, model: resModel } = model.getters.getListDefinition("1");
+    const definition = deepCopy(model.getters.getListDefinition("1"));
     const col = 0;
     const row = 19;
     const threshold = 5;
-    const definition = generateListDefinition(resModel, currentColumns);
     const newListId = model.getters.getNextListId();
     model.dispatch("INSERT_ODOO_LIST_WITH_TABLE", {
         sheetId,
@@ -1581,7 +1620,7 @@ test("List header labels are loaded even if there are no corresponding list valu
     expect(getCellValue(model, "B1")).toBe("Product Name");
 });
 
-test("INSERT_ODOO_LIST should provide a list of columns with name and string at minimum", function () {
+test("INSERT_ODOO_LIST should provide a list of columns with name at minimum", function () {
     const model = new Model();
     const result = model.dispatch("INSERT_ODOO_LIST", {
         listId: "1",
@@ -1593,20 +1632,20 @@ test("INSERT_ODOO_LIST should provide a list of columns with name and string at 
             domain: [],
             model: "partner",
             orderBy: [],
-            columns: [{ name: "foo" }],
+            columns: [{ string: "Foo" }],
         },
     });
     expect(result.reasons).toEqual([CommandResult.InvalidListDefinition]);
 });
 
-test("UPDATE_ODOO_LIST should provide a list of columns with name and string at minimum", async () => {
+test("UPDATE_ODOO_LIST should provide a list of columns with name at minimum", async () => {
     const { model } = await createSpreadsheetWithList();
     const listId = model.getters.getListIds()[0];
     const definition = model.getters.getListDefinition(listId);
 
     const result = model.dispatch("UPDATE_ODOO_LIST", {
         listId,
-        list: { ...definition, columns: [{ name: "foo" }] },
+        list: { ...definition, columns: [{ string: "Foo" }] },
     });
     expect(result.reasons).toEqual([CommandResult.InvalidListDefinition]);
 });
@@ -1788,4 +1827,53 @@ test("fields added to the field definition are fetched only when needed", async 
     setCellContent(model, "A1", "=ODOO.LIST(1,1)");
     await waitForDataLoaded(model);
     expect.verifySteps(["id,foo,bar"]);
+});
+
+test("List Headers with invalid field names do not trigger infinite loops", async function () {
+    const { model } = await createSpreadsheetWithList();
+    const listId = model.getters.getListIds()[0];
+    setCellContent(model, "A1", `=ODOO.LIST.HEADER(${listId}, "")`);
+    setCellContent(model, "A2", `=ODOO.LIST.HEADER(${listId}, #REF)`);
+    setCellContent(model, "A3", `=ODOO.LIST.HEADER(${listId}, Z4)`); // Z4 is empty
+    setCellContent(model, "A4", `=ODOO.LIST.HEADER(${listId}, "notAField")`);
+    await animationFrame();
+    expect(getCellValue(model, "A1")).toBe("#ERROR");
+    expect(getCellValue(model, "A2")).toBe("#REF");
+    expect(getCellValue(model, "A3")).toBe("#ERROR");
+    expect(getCellValue(model, "A4")).toBe("#ERROR");
+});
+
+test("List with invalid field names do not trigger infinite loops", async function () {
+    const { model } = await createSpreadsheetWithList();
+    const listId = model.getters.getListIds()[0];
+    setCellContent(model, "A1", `=ODOO.LIST.VALUE(${listId}, 1, "")`);
+    setCellContent(model, "A2", `=ODOO.LIST.VALUE(${listId}, 1, #REF)`);
+    setCellContent(model, "A3", `=ODOO.LIST.VALUE(${listId}, 1, Z4)`); // Z4 is empty
+    setCellContent(model, "A4", `=ODOO.LIST.VALUE(${listId}, 1, "notAField")`);
+    await animationFrame();
+    expect(getCellValue(model, "A1")).toBe("#ERROR");
+    expect(getCellValue(model, "A2")).toBe("#REF");
+    expect(getCellValue(model, "A3")).toBe("#ERROR");
+    expect(getCellValue(model, "A4")).toBe("#ERROR");
+});
+
+test("Empty fieldPaths are treated as invalid fields in the datasource", async function () {
+    const { model } = await createSpreadsheetWithList();
+    const listId = model.getters.getListIds()[0];
+    const ds = model.getters.getListDataSource(listId);
+
+    for (const fieldPath of ["", "badField"]) {
+        expect(ds.getFieldFromFieldPath(fieldPath)).toBe(undefined);
+        expect(() => ds.getListCellValue(1, fieldPath)).toThrow(LoadingDataError);
+        expect(() => ds.getListHeaderValue(1, fieldPath)).toThrow(LoadingDataError);
+    }
+
+    await animationFrame();
+
+    // after the server call, the path were fetchd from the server but do not exist
+    for (const fieldPath of ["", "badField"]) {
+        expect(ds.getFieldFromFieldPath(fieldPath)).toBe(undefined);
+        expect(() => ds.getListCellValue(1, fieldPath)).toThrow(spreadsheet.EvaluationError);
+        expect(() => ds.getListHeaderValue(1, fieldPath)).toThrow(spreadsheet.EvaluationError);
+    }
 });

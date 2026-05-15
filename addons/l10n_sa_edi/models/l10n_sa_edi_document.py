@@ -1,3 +1,4 @@
+import logging
 from base64 import b64decode, b64encode
 from datetime import datetime
 from hashlib import sha256
@@ -18,6 +19,8 @@ L10N_SA_DOCUMENT_STATES = [
     ('error', "Error"),
     ('unknown', "Unknown"),
 ]
+
+_logger = logging.getLogger(__name__)
 
 
 class L10nSaEdiDocument(models.Model):
@@ -270,7 +273,10 @@ class L10nSaEdiDocument(models.Model):
     def _l10n_sa_apply_qr_code(self, xml_content):
         """Apply QR code on Invoice UBL content"""
         root = etree.fromstring(xml_content)
-        qr_code = self.resource.l10n_sa_qr_code_str
+        # Applying with_prefetch() to set the _prefetch_ids = _ids,
+        # preventing premature QR code computation for other invoices.
+        resource = self.resource.with_prefetch()
+        qr_code = resource.l10n_sa_qr_code_str
         qr_node = root.xpath('//*[local-name()="ID"][text()="QR"]/following-sibling::*/*')[0]
         qr_node.text = qr_code
         return etree.tostring(root, with_tail=False)
@@ -282,9 +288,6 @@ class L10nSaEdiDocument(models.Model):
         """
         signed_xml = self._l10n_sa_sign_xml(unsigned_xml, certificate, self.resource.l10n_sa_invoice_signature)
         if self.resource._l10n_sa_is_simplified():
-            # Applying with_prefetch() to set the _prefetch_ids = _ids,
-            # preventing premature QR code computation for other invoices.
-            self.resource.with_prefetch()
             return self._l10n_sa_apply_qr_code(signed_xml)
         return signed_xml
 
@@ -312,6 +315,15 @@ class L10nSaEdiDocument(models.Model):
         try:
             signed_xml = self._l10n_sa_get_signed_xml(unsigned_xml, certificate_sudo)
         except UserError:
+            _logger.warning(
+                "ZATCA_ERROR: ZATCA signing failed for %s=%s (id=%s, journal_id=%s, company_id=%s, api_mode=%s)",
+                self.res_model,
+                self.resource.display_name,
+                self.res_id,
+                self.journal_id.id,
+                self.company_id.id,
+                self.company_id.l10n_sa_api_mode,
+            )
             return ({
                 'error': self.env._("Something went wrong. Please retry, and if that does not work, then onboard the journal again."),
                 'blocking_level': 'error',

@@ -4,6 +4,8 @@ import { loadImageInfo } from "@html_editor/utils/image_processing";
 import { renderToElement } from "@web/core/utils/render";
 import { updateCarouselIndicators } from "../carousel_option_plugin";
 import { BuilderAction } from "@html_builder/core/builder_action";
+import { hasMediaOnly, isMediaElement } from "@html_editor/utils/dom_info";
+import { selectElements } from "@html_editor/utils/dom_traversal";
 import { forwardToThumbnail } from "@html_builder/utils/utils_css";
 import { ClassAction } from "@html_builder/core/core_builder_action_plugin";
 import { uuid } from "@web/core/utils/strings";
@@ -54,6 +56,16 @@ export class ImageGalleryOptionPlugin extends Plugin {
         on_cloned_handlers: ({ cloneEl }) => {
             const carousels = cloneEl.querySelectorAll(".s_image_gallery .carousel");
             this.addUniqueIds(carousels);
+        },
+        // Make sure s_image_gallery elements are not editable, while keeping
+        // the media they contain editable (+ compatibility with older
+        // versions).
+        content_editable_providers: this.getContentEditableEls.bind(this),
+        content_not_editable_providers: this.getContentNotEditableEls.bind(this),
+        dropzone_selectors: {
+            selector: ".s_image_gallery .row > div",
+            dropNear: ".s_image_gallery .row > div",
+            dropLockWithin: ".s_image_gallery",
         },
     };
 
@@ -450,11 +462,29 @@ export class ImageGalleryOptionPlugin extends Plugin {
     getImageElement(el) {
         return el.tagName === "IMG" ? el : el.querySelector("img");
     }
+
+    getContentEditableEls(rootEl) {
+        return [...selectElements(rootEl, ".s_image_gallery *")].filter(
+            (el) => isMediaElement(el) || el.tagName === "IMG"
+        );
+    }
+
+    getContentNotEditableEls(rootEl) {
+        return [
+            ...selectElements(
+                rootEl,
+                ".s_image_gallery .row > *, .s_image_gallery .carousel-inner > *"
+            ),
+        ].filter((el) => hasMediaOnly(el, !!el.closest(".o_grid, .o_nomode, .o_slideshow")));
+    }
 }
 
 export class AddImageAction extends BuilderAction {
     static id = "addImage";
     static dependencies = ["media", "imageGalleryOption"];
+    setup() {
+        this.canTimeout = false;
+    }
     async apply({ editingElement }) {
         await this.dependencies.media.openMediaDialog({
             onlyImages: true,

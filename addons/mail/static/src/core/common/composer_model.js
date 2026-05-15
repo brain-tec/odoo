@@ -1,11 +1,14 @@
 import { fields, OR, Record } from "@mail/model/export";
 import {
     convertBrToLineBreak,
-    getNonEditableMentions,
+    prepareBodyForEditing,
+    generatePartnerMentionElement,
     prettifyMessageText,
 } from "@mail/utils/common/format";
+import { getInnerHtml } from "@mail/utils/common/html";
 import { markup } from "@odoo/owl";
-import { isHtmlEmpty } from "@web/core/utils/html";
+import { createDocumentFragmentFromContent, isHtmlEmpty } from "@web/core/utils/html";
+import { nbsp } from "@web/core/utils/strings";
 
 export class Composer extends Record {
     static id = OR("thread", "message");
@@ -75,7 +78,7 @@ export class Composer extends Record {
         compute() {
             if (this.syncHtmlWithMessage) {
                 return (
-                    getNonEditableMentions(this.message.body) ||
+                    prepareBodyForEditing(this.message.body) ||
                     markup("<div class='o-paragraph'><br></div>")
                 );
             }
@@ -129,6 +132,31 @@ export class Composer extends Record {
 
     get targetThread() {
         return this.replyToMessage?.thread ?? this.thread ?? this.message?.thread ?? null;
+    }
+
+    /** @param {import("models").Message} message */
+    insertReplyFromNote(message) {
+        this.mentionedPartners.add(message.author);
+        if (!this.store.env.services["mail.composer"].htmlEnabled) {
+            const mentionText = `@${message.authorName} `;
+            if (!this.composerText.includes(mentionText)) {
+                this.insertText(mentionText, 0, { moveCursorToEnd: true });
+            }
+            return;
+        }
+        const composerBody = createDocumentFragmentFromContent(this.composerHtml).body;
+        if (
+            composerBody.querySelector(
+                `a.o_mail_redirect[data-oe-model="res.partner"][data-oe-id="${message.author.id}"]`
+            )
+        ) {
+            return;
+        }
+        composerBody.firstElementChild.prepend(
+            generatePartnerMentionElement(message.author, this.thread),
+            nbsp
+        );
+        this.composerHtml = getInnerHtml(composerBody);
     }
 }
 

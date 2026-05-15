@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-12 18:36+0000\n"
+"POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2025-10-08 18:38+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -67,6 +67,12 @@ msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/shape/shape_selector.xml:0
+msgid "A"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/core/operation_plugin.js:0
 msgid ""
 "A technical issue occurred in the builder, you should save or discard your "
@@ -97,9 +103,8 @@ msgstr "Mahsulot qo‘shish"
 #. module: html_builder
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/builder_fontfamilypicker.xml:0
-#, fuzzy
 msgid "Add a Custom Font"
-msgstr "Maxsus shrift qo‘shish"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -283,9 +288,8 @@ msgstr "Tekislash"
 #. module: html_builder
 #. odoo-javascript
 #: code:addons/html_builder/static/src/snippets/add_snippet_dialog.xml:0
-#, fuzzy
 msgid "Almost there! Snippets are incoming, grab a coffee and relax!"
-msgstr "Deyarli tayyor! Qisqa kodlar kelmoqda, qahva ichib, dam oling!"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -298,8 +302,8 @@ msgstr "Alt tegi"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/anchor/anchor_plugin.js:0
 msgid ""
-"Anchor copied to clipboard%(br)s%(open_span)sLink: "
-"%(anchor_link)s%(close_span)s"
+"Anchor copied to clipboard%(br)s%(open_span)sLink: %(anchor_link)s%"
+"(close_span)s"
 msgstr ""
 
 #. module: html_builder
@@ -655,9 +659,8 @@ msgstr "Blok toifalari"
 #. module: html_builder
 #. odoo-javascript
 #: code:addons/html_builder/static/src/builder.xml:0
-#, fuzzy
 msgid "Blocks"
-msgstr "Bloklar"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1266,9 +1269,8 @@ msgstr "Qoplama"
 #. module: html_builder
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/select_many2x.xml:0
-#, fuzzy
 msgid "Create \""
-msgstr "Yaratish \""
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -1321,13 +1323,6 @@ msgstr "Maxsus ichki mazmun"
 #, fuzzy
 msgid "Cut Circle"
 msgstr "Kesik doira"
-
-#. module: html_builder
-#. odoo-javascript
-#: code:addons/html_builder/static/src/core/setup_editor_plugin.js:0
-#, fuzzy
-msgid "DRAG BUILDING BLOCKS HERE"
-msgstr "QURILISH BLOKLARINI BU YERGA TORTING"
 
 #. module: html_builder
 #. odoo-javascript
@@ -1541,6 +1536,12 @@ msgstr "Maydonni sudrab saralang"
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/core/setup_editor_plugin.js:0
+msgid "Drag blocks here"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/image/image_shapes_definition.js:0
 #, fuzzy
 msgid "Duo"
@@ -1589,6 +1590,12 @@ msgstr "Erta qush"
 #, fuzzy
 msgid "Edit"
 msgstr "Tahrirlash"
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/button_style_option.xml:0
+msgid "Edit Color Combination"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2006,9 +2013,8 @@ msgstr "Tushirma"
 #. module: html_builder
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/snippet.xml:0
-#, fuzzy
 msgid "Install"
-msgstr "O‘rnatish"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2021,9 +2027,16 @@ msgstr "%sni o‘rnatish"
 #. module: html_builder
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/invisible_elements_panel.xml:0
-#, fuzzy
 msgid "Invisible Elements"
-msgstr "Ko‘rinmas elementlar"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
+#: code:addons/html_builder/static/src/core/version_error_plugin.js:0
+msgid ""
+"It might have caused problem during the editing. Please drag the new version "
+"from the snippet panel to update it."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2785,6 +2798,12 @@ msgstr "Kesishni bekor qilish"
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/plugins/image/image_shape_option.xml:0
+msgid "Reset shape transformation"
+msgstr ""
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/image/image_transform_option.xml:0
 #, fuzzy
 msgid "Reset transformation"
@@ -2794,6 +2813,7 @@ msgstr "O‘zgartirishni bekor qilish"
 #. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/block_alignment_option.xml:0
 #: code:addons/html_builder/static/src/plugins/image/image_tool_option.xml:0
+#: code:addons/html_builder/static/src/plugins/rating_option.xml:0
 #: code:addons/html_builder/static/src/plugins/separator_option.xml:0
 #: code:addons/html_builder/static/src/plugins/text_alignment_option.xml:0
 #, fuzzy
@@ -2893,9 +2913,8 @@ msgstr "Yozuvlarni qidirish..."
 #. module: html_builder
 #. odoo-javascript
 #: code:addons/html_builder/static/src/core/building_blocks/select_many2x.xml:0
-#, fuzzy
 msgid "Search more..."
-msgstr "Ko‘proq qidirish..."
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -2915,9 +2934,8 @@ msgstr "Ikkinchi darajali"
 #. module: html_builder
 #. odoo-javascript
 #: code:addons/html_builder/static/src/sidebar/customize_tab.xml:0
-#, fuzzy
 msgid "Select a block on your page to style it."
-msgstr "Uslubini o‘zgartirish uchun sahifangizdagi blokni tanlang"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
@@ -3369,6 +3387,13 @@ msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
+#: code:addons/html_builder/static/src/core/version_error_plugin.js:0
+#, fuzzy
+msgid "This snippet is outdated"
+msgstr "Hech qanday qism topilmadi"
+
+#. module: html_builder
+#. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/rating_option.xml:0
 #, fuzzy
 msgid "Thumbs"
@@ -3708,9 +3733,8 @@ msgstr ""
 #. module: html_builder
 #. odoo-javascript
 #: code:addons/html_builder/static/src/plugins/image/image_format_option.xml:0
-#, fuzzy
 msgid "WebP compression not supported on this browser"
-msgstr "Ushbu brauzer WebP siqishni qo‘llab-quvvatlamaydi"
+msgstr ""
 
 #. module: html_builder
 #. odoo-javascript
