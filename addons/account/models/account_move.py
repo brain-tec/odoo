@@ -3116,7 +3116,7 @@ class AccountMove(models.Model):
             rounding_line_vals = {
                 'balance': diff_balance,
                 'amount_currency': diff_amount_currency,
-                'partner_id': self.partner_id.id,
+                'partner_id': self.commercial_partner_id.id,
                 'move_id': self.id,
                 'currency_id': self.currency_id.id,
                 'company_id': self.company_id.id,
@@ -5873,7 +5873,8 @@ class AccountMove(models.Model):
         to_post.line_ids._create_analytic_lines()
 
         # Trigger copying for recurring invoices
-        to_post.filtered(lambda m: m.auto_post not in ('no', 'at_date'))._copy_recurring_entries()
+        if not self.env.context.get('skip_recurring_copy'):
+            to_post.filtered(lambda m: m.auto_post not in ('no', 'at_date'))._copy_recurring_entries()
 
         for invoice in to_post:
             # Fix inconsistencies that may occure if the OCR has been editing the invoice at the same time of a user. We force the
