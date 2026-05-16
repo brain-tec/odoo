@@ -5109,13 +5109,11 @@ class AccountMove(models.Model):
             return res
 
         # Get the current tax amounts in the current invoice.
-        tax_amounts = {
-            inverse_tax_rep(line.tax_repartition_line_id).id: {
-                'amount_currency': line.amount_currency,
-                'balance': line.balance,
-            }
-            for line in tax_lines
-        }
+        tax_amounts = defaultdict(lambda: {'amount_currency': 0.0, 'balance': 0.0})
+        for line in tax_lines:
+            tax_rep_id = inverse_tax_rep(line.tax_repartition_line_id).id
+            tax_amounts[tax_rep_id]['amount_currency'] += line.amount_currency
+            tax_amounts[tax_rep_id]['balance'] += line.balance
 
         base_lines = [
             {
@@ -5873,7 +5871,8 @@ class AccountMove(models.Model):
         to_post.line_ids._create_analytic_lines()
 
         # Trigger copying for recurring invoices
-        to_post.filtered(lambda m: m.auto_post not in ('no', 'at_date'))._copy_recurring_entries()
+        if not self.env.context.get('skip_recurring_copy'):
+            to_post.filtered(lambda m: m.auto_post not in ('no', 'at_date'))._copy_recurring_entries()
 
         for invoice in to_post:
             # Fix inconsistencies that may occure if the OCR has been editing the invoice at the same time of a user. We force the
