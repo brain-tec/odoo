@@ -6,7 +6,6 @@ from datetime import datetime
 import logging
 import unicodedata
 from lxml import etree
-import re
 import string
 import uuid
 
@@ -20,13 +19,14 @@ from odoo.addons.l10n_it_edi.tools.remove_signature import remove_signature
 from odoo.exceptions import LockError, UserError
 from odoo.osv import expression
 from odoo.tools import cleanup_xml_node, float_compare, float_is_zero, float_repr, float_round, html2plaintext
+from odoo.tools.mimetypes import guess_mimetype
 from odoo.tools.sql import column_exists, create_column
 
 _logger = logging.getLogger(__name__)
 
 
 WAITING_STATES = ('being_sent', 'processing', 'forward_attempt')
-FATTURAPA_FILENAME_RE = "[A-Z]{2}[A-Za-z0-9]{2,28}_[A-Za-z0-9]{0,5}.((?i:xml.p7m|xml))"
+FATTURAPA_FILENAME_RE = r"[A-Z]{2}[A-Za-z0-9]{2,28}_[A-Za-z0-9]{0,5}\.((?i:xml\.p7m|xml))"
 
 
 # -------------------------------------------------------------------------
@@ -270,48 +270,61 @@ class AccountMove(models.Model):
         for move in self:
             move.show_reset_to_draft_button = not move.l10n_it_edi_transaction and move.show_reset_to_draft_button
 
+    def _parse_xml_with_recovery(self, content, name=None):
+        def parse_xml(parser, content):
+            try:
+                return etree.fromstring(content, parser)
+            except (etree.ParseError, ValueError) as e:
+                _logger.info("XML parsing of %s failed: %s", name, e)
+
+        parser = etree.XMLParser(recover=True, resolve_entities=False)
+        xml_tree = parse_xml(parser, content)
+        if xml_tree is None:
+            cleaned = remove_signature(content)
+            if cleaned:
+                xml_tree = parse_xml(parser, cleaned)
+        return xml_tree
+
     def _get_xml_tree(self, file_data):
         """ Some FatturaPA XMLs need to be parsed with `recover=True`,
             and some have signatures that need to be removed prior to parsing.
         """
         # EXTENDS 'account'
         res = super()._get_xml_tree(file_data)
-
-        # If the file was not correctly parsed, retry parsing it.
-        if res is None and self._is_l10n_it_edi_import_file(file_data):
-            def parse_xml(parser, name, content):
-                try:
-                    return etree.fromstring(content, parser)
-                except (etree.ParseError, ValueError) as e:
-                    _logger.info("XML parsing of %s failed: %s", name, e)
-
-            parser = etree.XMLParser(recover=True, resolve_entities=False)
-            xml_tree = parse_xml(parser, file_data['name'], file_data['raw'])
-            xml_tree = (
-                xml_tree if xml_tree is not None else
-                # The file may have a Cades signature, so we try removing it.
-                parse_xml(parser, file_data['name'], remove_signature(file_data['raw']))
-            )
-            if xml_tree is None:
-                _logger.info("Italian EDI invoice file %s cannot be decoded.", file_data['name'])
-            return xml_tree
-
+        if res is None:
+            filename = file_data['name'].lower()
+            mimetype = file_data['mimetype']
+            if (
+                mimetype.endswith('/xml')
+                or 'application/pkcs7-mime' in mimetype
+                or 'text/plain' in mimetype
+                and (
+                    filename.endswith(('.xml', '.p7m'))
+                    or guess_mimetype(file_data['raw'] or b'').endswith('/xml')
+                )
+            ):
+                # We don't need to log the error here actually, let's remove the name
+                xml_tree = self._parse_xml_with_recovery(file_data['raw'])
+                if xml_tree is not None:
+                    return xml_tree
         return res
 
+    def _check_l10n_it_edi_xml_content(self, file_data):
+        """ Checks if the XML root tag starts with 'FatturaElettronica'. Handles both standard XML and signed p7m files."""
+        xml_tree = self._parse_xml_with_recovery(file_data['raw'], file_data['name'])
+        if xml_tree is None:
+            return False
+        tag_name = etree.QName(xml_tree).localname
+        return tag_name.startswith('FatturaElettronica')
+
     def _is_l10n_it_edi_import_file(self, file_data):
-        is_xml = (
-            file_data['name'].endswith('.xml')
-            or file_data['mimetype'].endswith('/xml')
-            or 'text/plain' in file_data['mimetype']
-            and file_data['raw']
-            and file_data['raw'].startswith(b'<?xml'))
-        is_p7m = file_data['mimetype'] == 'application/pkcs7-mime'
-        return (is_xml or is_p7m) and re.search(FATTURAPA_FILENAME_RE, file_data['name'])
+        xml_tree = file_data.get('xml_tree')
+        return (xml_tree is not None and etree.QName(file_data['xml_tree']).localname.startswith('FatturaElettronica'))
 
     def _get_import_file_type(self, file_data):
         """ Identify FatturaPA XML and P7M files. """
         # EXTENDS 'account'
-        if self._is_l10n_it_edi_import_file(file_data) and file_data['xml_tree'] is not None:
+        if self._is_l10n_it_edi_import_file(file_data):
             return 'l10n_it.fatturapa'
         return super()._get_import_file_type(file_data)
 
@@ -1218,6 +1231,71 @@ class AccountMove(models.Model):
                 return partner
         return self.env['res.partner']
 
+    def _l10n_it_edi_import_partner(self, company_id, name, phone, email, vat, peppol_eas=False, peppol_endpoint=False, postal_address={}):
+        """Retrieve the partner, create one when no match is found.
+
+        Local copy of account.edi.common._import_partner so l10n_it_edi does not
+        need to depend on account_edi_ubl_cii for the FatturaPA import flow.
+        """
+        logs = []
+        if peppol_eas and peppol_endpoint:
+            domain = [('peppol_eas', '=', peppol_eas), ('peppol_endpoint', '=', peppol_endpoint)]
+        else:
+            domain = False
+        partner = self.env['res.partner'] \
+            .with_company(company_id) \
+            ._retrieve_partner(name=name, phone=phone, email=email, vat=vat, domain=domain)
+        country_code = postal_address.get('country_code')
+        country = self.env['res.country'].search([('code', '=', country_code.upper())]) if country_code else self.env['res.country']
+        state_code = postal_address.get('state_code')
+        state = self.env['res.country.state'].search(
+            [('country_id', '=', country.id), ('code', '=', state_code)],
+            limit=1,
+        ) if state_code and country else self.env['res.country.state']
+        if not partner and name and vat:
+            partner_vals = {'name': name, 'email': email, 'phone': phone, 'is_company': True}
+            if peppol_eas and peppol_endpoint:
+                partner_vals.update({'peppol_eas': peppol_eas, 'peppol_endpoint': peppol_endpoint})
+            partner = self.env['res.partner'].create(partner_vals)
+            if vat:
+                partner.vat, _country_code = self.env['res.partner']._run_vat_checks(country, vat, validation='setnull')
+            logs.append(_("Could not retrieve a partner corresponding to '%s'. A new partner was created.", name))
+        if not partner.country_id and not partner.street and not partner.street2 and not partner.city and not partner.zip and not partner.state_id:
+            partner.write({
+                'country_id': country.id,
+                'street': postal_address.get('street'),
+                'street2': postal_address.get('additional_street'),
+                'city': postal_address.get('city'),
+                'zip': postal_address.get('zip'),
+                'state_id': state.id,
+            })
+        return partner, logs
+
+    def _l10n_it_edi_import_partner_bank(self, invoice, bank_details):
+        """Search or create the partner bank account for the imported invoice.
+
+        Local copy of account.edi.common._import_partner_bank so l10n_it_edi does
+        not need to depend on account_edi_ubl_cii for the FatturaPA import flow.
+        """
+        if invoice.move_type in ('out_refund', 'in_invoice'):
+            partner = invoice.partner_id
+        elif invoice.move_type in ('out_invoice', 'in_refund'):
+            partner = invoice.company_id.partner_id
+        else:
+            return
+        banks = self.env['res.partner.bank']
+        for account_number in bank_details:
+            try:
+                banks += self.env['res.partner.bank']._find_or_create_bank_account(
+                    account_number=account_number,
+                    partner=partner,
+                    company=invoice.company_id,
+                )
+            except UserError as e:
+                invoice._message_log(body=_("The bank account couldn't be fetched: %s", str(e)))
+        if banks:
+            invoice.partner_bank_id = banks[0]
+
     def _l10n_it_edi_search_tax_for_import(self, company, percentage, extra_domain=None, l10n_it_exempt_reason=None):
         """ Returns the VAT, Withholding or Pension Fund tax that suits the conditions given
             and matches the percentage found in the XML for the company. """
@@ -1433,7 +1511,7 @@ class AccountMove(models.Model):
             # If not found by Codice Fiscale, search for VAT or create, just like all other EDIs do
             if not self.partner_id:
                 import_partner_args = {k: v for k, v in partner_info.items() if k not in ('codice_fiscale', 'is_company')}
-                self.partner_id, logs = self.env['account.edi.common']._import_partner(company_id=company, **import_partner_args)
+                self.partner_id, logs = self._l10n_it_edi_import_partner(company_id=company, **import_partner_args)
                 if logs:
                     self.partner_id.is_company = partner_info.get('is_company')
                     self.partner_id.l10n_it_codice_fiscale = partner_info.get('codice_fiscale', False)
@@ -1493,7 +1571,7 @@ class AccountMove(models.Model):
                     for payment_info in payments_info['info']:
                         # Search / Create the bank account if iban is present
                         if iban := payment_info.get('acc_number'):
-                            self.env['account.edi.common'].with_company(company)._import_partner_bank(self, [iban])
+                            self.with_company(company)._l10n_it_edi_import_partner_bank(self, [iban])
                         # Set payment data on the bill
                         self.payment_reference = self.payment_reference or payment_info.get('payment_code', False)
                         payment_due_dates.append(payment_info.get('invoice_date_due'))
