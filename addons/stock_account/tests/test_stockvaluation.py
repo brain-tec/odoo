@@ -2168,6 +2168,42 @@ class TestStockValuation(TestStockValuationCommon):
         self.assertEqual(product.with_context(to_date=Datetime.to_string(date2)).qty_available, 5)
         self.assertEqual(product.with_context(to_date=Datetime.to_string(date2)).total_value, 50)
 
+    def test_at_date_average_2(self):
+        """ Make some operations at different dates and make sure that the results of the valuation at
+        date wizard are consistent.
+        """
+
+        now = Datetime.now()
+        date1 = now - timedelta(days=3)
+        date2 = now - timedelta(days=2)
+        date3 = now - timedelta(days=1)
+
+        product = self.product_avco
+        with freeze_time(date1):
+            product.standard_price = 10
+        inventory_location = product.property_stock_inventory
+        inventory_location.company_id = self.env.company.id
+
+        # First move is an inventory adjustment
+        with freeze_time(date2):
+            quant = self.env['stock.quant'].create({
+                'product_id': product.id,
+                'location_id': self.stock_location.id,
+                'inventory_quantity': 10,
+            })
+            quant.action_apply_inventory()
+
+        # Second move changes AVCO
+        with freeze_time(date3):
+            self._make_in_move(product=product, quantity=10, unit_cost=20)
+
+        self.assertEqual(product.with_context(to_date=Datetime.to_string(date2)).total_value, 100)
+        self.assertEqual(product.with_context(to_date=Datetime.to_string(date2)).avg_cost, 10)
+        self.assertEqual(product.with_context(to_date=Datetime.to_string(date3)).total_value, 300)
+        self.assertEqual(product.with_context(to_date=Datetime.to_string(date3)).avg_cost, 15)
+        self.assertEqual(product.with_context(to_date=Datetime.to_string(now)).total_value, 300)
+        self.assertEqual(product.with_context(to_date=Datetime.to_string(now)).avg_cost, 15)
+
     def test_forecast_report_value(self):
         """ Create a SVL for two companies using different currency, and open
         the forecast report. Checks the forecast report use the good currency to
@@ -3220,3 +3256,26 @@ class TestStockValuation(TestStockValuationCommon):
 
         # Old code would have set the standard price to the product's standard price (10)
         self.assertEqual(lot.standard_price, 5)
+
+    def test_generate_entry_multi_company(self):
+        """ Check that closing is correct (i.e. focuses only on main company) when multiple companies are selected
+        """
+        # 2 in @ 10 in main company
+        self._make_in_move(self.product_avco_auto, 2, unit_cost=10)
+
+        # 2 in @ 50 in other company
+        self.product_avco_auto.with_company(self.other_company).categ_id.property_cost_method = 'average'
+        self.product_avco_auto.with_company(self.other_company).categ_id.property_valuation = 'real_time'
+        self._make_in_move(self.product_avco_auto, 2, unit_cost=50, company=self.other_company)
+
+        # Bill 1 @ 10 in main company
+        self._create_bill(self.product_avco_auto, 1, 10, post=True)
+
+        # closing amount for self.company should be 20 (value in inventory in
+        # self.company) - 10 (amount in stock valuation account in self.company) = 10
+        closing = self.company.with_context(allowed_company_ids=[self.company.id, self.other_company.id]).action_close_stock_valuation()
+        closing_lines = self.env['account.move'].browse(closing['res_id']).line_ids
+        self.assertRecordValues(closing_lines.sorted('debit'), [
+            {'account_id': self.product_avco_auto.categ_id.account_stock_variation_id.id, 'debit': 0, 'credit': 10},
+            {'account_id': self.product_avco_auto.categ_id.property_stock_valuation_account_id.id, 'debit': 10, 'credit': 0}
+        ])
