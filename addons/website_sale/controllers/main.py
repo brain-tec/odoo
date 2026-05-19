@@ -375,11 +375,32 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if search:
             post["search"] = search
 
+        tax_display = website.show_line_subtotals_tax_selection
+        sale_tax = request.fiscal_position.map_tax(website.company_id.sudo().account_sale_tax_id)
+
+        if tax_display == "tax_included" and sale_tax:
+            # Convert the boundaried to tax-excluded for internal processing
+            min_price_tax_excluded = (
+                sale_tax.with_context(force_price_include=True).compute_all(
+                    min_price,
+                    website.currency_id,
+                )["total_excluded"]
+            )
+            max_price_tax_excluded = (
+                sale_tax.with_context(force_price_include=True).compute_all(
+                    max_price,
+                    website.currency_id,
+                )["total_excluded"]
+            )
+        else:
+            min_price_tax_excluded = min_price
+            max_price_tax_excluded = max_price
+
         options = self._get_search_options(
             category=category,
             attribute_value_dict=attribute_value_dict,
-            min_price=min_price,
-            max_price=max_price,
+            min_price=min_price_tax_excluded,
+            max_price=max_price_tax_excluded,
             conversion_rate=conversion_rate,
             display_currency=website.currency_id,
             extra_domain=Domain.OR([
@@ -411,6 +432,16 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 )
             )
             available_min_price, available_max_price = request.env.execute_query(sql)[0]
+
+            if tax_display == "tax_included" and sale_tax:
+                available_min_price = sale_tax.with_context(force_price_include=False).compute_all(
+                    available_min_price,
+                    website.currency_id,
+                )["total_included"]
+                available_max_price = sale_tax.with_context(force_price_include=False).compute_all(
+                    available_max_price,
+                    website.currency_id,
+                )["total_included"]
 
             if min_price or max_price:
                 # The if/else condition in the min_price / max_price value assignment
@@ -519,7 +550,12 @@ class WebsiteSale(payment_portal.PaymentPortal):
             attributes = ProductAttribute.union(pavs_per_attribute.keys())
         else:
             attributes = ProductAttribute.browse(attribute_ids).sorted()
-        products_prices = products._get_sales_prices(website)
+        products_prices = products._get_sales_prices(
+            # Make sure latest context is applied (see update_context calls in overrides)
+            request.pricelist.with_context(self.env.context),
+            request.fiscal_position.with_context(self.env.context),
+            website.with_context(self.env.context),
+        )
         product_query_params = self._get_product_query_params(**post)
 
         grouped_attributes_values = (

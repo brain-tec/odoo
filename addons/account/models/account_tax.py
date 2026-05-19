@@ -1446,6 +1446,7 @@ class AccountTax(models.Model):
             results['computation_key'] = extra_tax_data['computation_key']
 
         manual_tax_amounts = extra_tax_data.get('manual_tax_amounts') or {} if extra_tax_data else None
+        extra_tax_data_tax_ids = set(manual_tax_amounts or {})
         sorted_taxes = base_line['tax_ids']._flatten_taxes_and_sort_them()[0]
         if (
             extra_tax_data
@@ -1454,7 +1455,8 @@ class AccountTax(models.Model):
             and base_line['currency_id'].compare_amounts(base_line['price_unit'], extra_tax_data['price_unit']) == 0
             and base_line['currency_id'].compare_amounts(base_line['discount'], extra_tax_data['discount']) == 0
             and base_line['currency_id'].compare_amounts(base_line['quantity'], extra_tax_data['quantity']) == 0
-            and all(str(tax.id) in extra_tax_data['manual_tax_amounts'] for tax in sorted_taxes)
+            and len(sorted_taxes) == len(extra_tax_data_tax_ids)
+            and all(str(tax.id) in extra_tax_data_tax_ids for tax in sorted_taxes)
         ):
             results['price_unit'] = extra_tax_data['price_unit']
 
@@ -4857,13 +4859,15 @@ class AccountTax(models.Model):
             'total_void': total_void,
         }
 
-    def _filter_taxes_by_company(self, company_id):
+    def _filter_taxes_by_company(self, company=None):
         """ Filter taxes by the given company
             It goes through the company hierarchy until a tax is found
         """
         if not self:
             return self
-        taxes, company = self.env['account.tax'], company_id
+
+        company = company or self.env.company
+        taxes = self.env['account.tax']
         while not taxes and company:
             taxes = self.filtered(lambda t: t.company_id == company)
             company = company.sudo().parent_id

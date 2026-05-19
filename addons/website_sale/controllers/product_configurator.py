@@ -1,7 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.http import request, route
-from odoo.tools import float_is_zero
 
 from odoo.addons.sale.controllers.product_configurator import SaleProductConfiguratorController
 from odoo.addons.website_sale.controllers.main import WebsiteSale
@@ -129,12 +128,9 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
         )
 
         if request.is_frontend:
-            has_zero_price = float_is_zero(
-                basic_product_information["price"], precision_rounding=currency.rounding
-            )
-            basic_product_information["can_be_sold"] = not (
-                request.website.prevent_sale
-                and request.website._prevent_product_sale(product_or_template, has_zero_price)
+            has_zero_price = currency.is_zero(basic_product_information["price"])
+            basic_product_information["can_be_sold"] = not request.website._prevent_product_sale(
+                product_or_template, has_zero_price
             )
             # Don't compute the strikethrough price if there's a custom price (i.e. if `price_info`
             # is populated).
@@ -169,7 +165,9 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
         """
         price_extra = super()._get_ptav_price_extra(ptav, currency, date, product_or_template)
         if request.is_frontend:
-            return self._apply_taxes_to_price(price_extra, product_or_template, currency)
+            return product_or_template._apply_taxes_to_price(
+                price_extra, currency, website=request.website
+            )
         return price_extra
 
     def _get_strikethrough_price(
@@ -190,16 +188,16 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
         # First, try to use the base price as the strikethrough price.
         # Apply taxes before comparing it to the actual price.
         if pricelist_rule._show_discount_on_shop():
-            pricelist_base_price = self._apply_taxes_to_price(
+            pricelist_base_price = product_or_template._apply_taxes_to_price(
                 pricelist_rule._compute_price_before_discount(
                     product=product_or_template,
                     quantity=1.0,
-                    uom=product_or_template.uom_id,
+                    uom=product_or_template._get_main_uom(),
                     date=date,
                     currency=currency,
                 ),
-                product_or_template,
                 currency,
+                website=request.website,
             )
             # Only show the base price if it's greater than the actual price.
             if currency.compare_amounts(pricelist_base_price, price) == 1:
@@ -240,15 +238,3 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
                 and product_template.filtered_domain(request.website.website_domain())
             )
         return should_show_product
-
-    @staticmethod
-    def _apply_taxes_to_price(price, product_or_template, currency):
-        product_taxes = product_or_template.sudo().taxes_id._filter_taxes_by_company(
-            request.env.company
-        )
-        if product_taxes:
-            taxes = request.fiscal_position.map_tax(product_taxes)
-            return request.env["product.template"]._apply_taxes_to_price(
-                price, currency, product_taxes, taxes, product_or_template, website=request.website
-            )
-        return price
