@@ -160,7 +160,12 @@ class AccountTax(models.Model):
         "Based on Payment: the tax is due as soon as the payment of the invoice is received.")
     cash_basis_transition_account_id = fields.Many2one(string="Cash Basis Transition Account",
         check_company=True,
-        domain="[('deprecated', '=', False)]",
+        domain="""
+            [
+                ('deprecated', '=', False),
+                ('account_type', 'not in', ('asset_receivable', 'liability_payable'))
+            ]
+        """,
         comodel_name='account.account',
         help="Account used to transition the tax amount for cash basis taxes. It will contain the tax amount as long as the original invoice has not been reconciled ; at reconciliation, this amount cancelled on this account and put on the regular tax account.")
     invoice_repartition_line_ids = fields.One2many(
@@ -4449,7 +4454,8 @@ class AccountTax(models.Model):
             tax_domain = (
                Domain('amount_type', '=', tax_values['amount_type']) &
                Domain('type_tax_use', '=', tax_values['type_tax_use']) &
-               Domain('amount', '=', tax_values['amount'])
+               Domain('amount', '=', tax_values['amount']) &
+               Domain([*([('country_id', '=', tax_values['invoice_predictive']['invoice'].tax_country_id.id)] if 'invoice_predictive' in tax_values else [])])
             )
             orders = ['sequence', 'id']
             if name := tax_values.get('name'):
