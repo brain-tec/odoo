@@ -72,6 +72,7 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
                     "is_company": False,
                     "main_user_id": self.user_root.id,
                     "name": "OdooBot",
+                    "partner_share": False,
                     "write_date": fields.Datetime.to_string(self.user_root.partner_id.write_date),
                 },
                 {
@@ -129,6 +130,7 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
                     "is_company": False,
                     "main_user_id": self.user_root.id,
                     "name": "OdooBot",
+                    "partner_share": False,
                     "tz": "Europe/Brussels",
                     "user_ids": [],
                     "write_date": fields.Datetime.to_string(self.user_root.partner_id.write_date),
@@ -168,12 +170,14 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
             self._filter_users_fields(
                 {
                     "active": False,
+                    "all_employee_ids": [],
                     "id": self.user_root.id,
                     "employee_ids": [],
                     "partner_id": self.partner_root.id,
                     "share": False,
                 },
                 {
+                    "all_employee_ids": [],
                     "employee_ids": [],
                     "should_display_in_call_im_status": False,
                     "id": test_user.id,
@@ -188,6 +192,7 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
                     "share": False,
                 },
                 {
+                    "all_employee_ids": [],
                     "should_display_in_call_im_status": False,
                     "id": operator.id,
                     "im_status": "offline",
@@ -258,6 +263,7 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
                     "is_company": False,
                     "main_user_id": self.user_root.id,
                     "name": "OdooBot",
+                    "partner_share": False,
                     "tz": "Europe/Brussels",
                     "user_ids": [],
                     "write_date": fields.Datetime.to_string(self.user_root.partner_id.write_date),
@@ -308,12 +314,14 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
             self._filter_users_fields(
                 {
                     "active": False,
+                    "all_employee_ids": [],
                     "id": self.user_root.id,
                     "employee_ids": [],
                     "partner_id": self.partner_root.id,
                     "share": False,
                 },
                 {
+                    "all_employee_ids": [],
                     "employee_ids": [],
                     "should_display_in_call_im_status": False,
                     "id": operator.id,

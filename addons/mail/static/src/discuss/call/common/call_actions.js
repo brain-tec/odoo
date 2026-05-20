@@ -11,22 +11,29 @@ export const callActionsRegistry = registry.category("discuss.call/actions");
 export const CALL_ICON_DEAFEN = "fa fa-deaf";
 export const CALL_ICON_MUTED = "fa fa-microphone-slash";
 
-/** @typedef {import("@mail/core/common/action").ActionDefinition} ActionDefinition */
+/** @typedef {import("models").DiscussChannel} DiscussChannel */
+/**
+ * @typedef {Object} CallActionSpecificParams
+ * @property {DiscussChannel} channel
+ */
+/** @typedef {import("@mail/core/common/action").ActionParams<CallAction, UseCallActions_Def> & CallActionSpecificParams} CallActionParams */
+/** @typedef {import("@mail/core/common/action").ActionDefinition<CallActionParams, CallAction>} CallActionDefinition */
 
 /**
  * @param {string} id
- * @param {ActionDefinition} definition
+ * @param {CallActionDefinition} definition
  */
 export function registerCallAction(id, definition) {
     callActionsRegistry.add(id, definition);
 }
 
+/** @type {CallActionDefinition} */
 export const muteAction = {
     badge: ({ owner, store }) => store.rtc.microphonePermission !== "granted",
     badgeIcon: "fa fa-exclamation",
     condition: ({ owner, store, channel }) =>
         channel?.isSelfInCall && (owner.env.inCallMenu || !store.rtc.selfSession?.is_deaf),
-    name: ({ store }) => (store.rtc.selfSession.isMute ? _t("Unmute") : _t("Mute")),
+    name: ({ store }) => (store.rtc.selfSession?.isMute ? _t("Unmute") : _t("Mute")),
     isActive: ({ store }) => store.rtc.selfSession?.isMute,
     icon: ({ action, owner, store }) =>
         action.isActive
@@ -50,6 +57,7 @@ export const muteAction = {
     },
 };
 registerCallAction("mute", muteAction);
+/** @type {CallActionDefinition} */
 export const quickActionSettings = {
     condition: ({ owner, channel }) =>
         !owner.env.inCallMenu && channel?.isSelfInCall && !owner.env.pipWindow,
@@ -66,7 +74,7 @@ registerCallAction("quick-voice-settings", quickActionSettings);
 registerCallAction("deafen", {
     condition: ({ owner, store, channel }) =>
         channel?.isSelfInCall && (owner.env.inCallMenu || store.rtc.selfSession?.is_deaf),
-    name: ({ store }) => (store.rtc.selfSession.is_deaf ? _t("Undeafen") : _t("Deafen")),
+    name: ({ store }) => (store.rtc.selfSession?.is_deaf ? _t("Undeafen") : _t("Deafen")),
     isActive: ({ store }) => store.rtc.selfSession?.is_deaf,
     icon: ({ action }) => (action.isActive ? CALL_ICON_DEAFEN : "fa fa-headphones"),
     hotkey: "shift+d",
@@ -78,6 +86,7 @@ registerCallAction("deafen", {
         action.isActive ? ACTION_TAGS.DANGER : undefined,
     ],
 });
+/** @type {CallActionDefinition} */
 export const cameraOnAction = {
     badge: ({ owner, store, channel }) =>
         !owner.env.inCallMenu &&
@@ -89,7 +98,7 @@ export const cameraOnAction = {
     name: ({ store }) =>
         store.rtc?.isRemote
             ? _t("Camera is unavailable outside the call tab.")
-            : store.rtc.selfSession.is_camera_on
+            : store.rtc.selfSession?.is_camera_on
             ? _t("Stop camera")
             : _t("Turn camera on"),
     isActive: ({ store }) => store.rtc.selfSession?.is_camera_on,
@@ -112,6 +121,7 @@ export const cameraOnAction = {
     },
 };
 registerCallAction("camera-on", cameraOnAction);
+/** @type {CallActionDefinition} */
 export const quickVideoSettings = {
     condition: ({ owner, channel }) =>
         !owner.env.inCallMenu && channel?.isSelfInCall && !owner.env.pipWindow,
@@ -125,6 +135,7 @@ export const quickVideoSettings = {
     sequenceGroup: 120,
 };
 registerCallAction("quick-video-settings", quickVideoSettings);
+/** @type {CallActionDefinition} */
 export const switchCameraAction = {
     condition: ({ channel, store }) =>
         channel?.isSelfInCall && isMobileOS() && store.rtc.selfSession?.is_camera_on,
@@ -138,7 +149,7 @@ export const switchCameraAction = {
 registerCallAction("switch-camera", switchCameraAction);
 registerCallAction("raise-hand", {
     condition: ({ channel }) => channel?.isSelfInCall,
-    name: ({ store }) => (store.rtc.selfSession.raisingHand ? _t("Lower Hand") : _t("Raise Hand")),
+    name: ({ store }) => (store.rtc.selfSession?.raisingHand ? _t("Lower Hand") : _t("Raise Hand")),
     isActive: ({ store }) => store.rtc.selfSession?.raisingHand,
     icon: "fa fa-hand-paper-o",
     hotkey: "shift+h",
@@ -153,7 +164,7 @@ registerCallAction("share-screen", {
     name: ({ store }) =>
         store.rtc?.isRemote
             ? _t("Screen sharing is unavailable outside the call tab.")
-            : store.rtc.selfSession.is_screen_sharing_on
+            : store.rtc.selfSession?.is_screen_sharing_on
             ? _t("Stop Sharing Screen")
             : _t("Share Screen"),
     isActive: ({ store }) => store.rtc.selfSession?.is_screen_sharing_on,
@@ -170,7 +181,7 @@ registerCallAction("fullscreen", {
     btnClass: ({ channel }) =>
         attClassObjectToString({
             "o-discuss-CallActionList-pulse": Boolean(
-                channel.promoteFullscreen === CALL_PROMOTE_FULLSCREEN.ACTIVE
+                channel?.promoteFullscreen === CALL_PROMOTE_FULLSCREEN.ACTIVE
             ),
         }),
     condition: ({ channel, owner }) => channel?.isSelfInCall && !owner.env.pipWindow,
@@ -209,6 +220,7 @@ registerCallAction("picture-in-picture", {
     sequence: 70,
     tags: ACTION_TAGS.CALL_LAYOUT,
 });
+/** @type {CallActionDefinition} */
 export const acceptWithCamera = {
     condition: ({ channel }) =>
         channel?.self_member_id?.rtc_inviting_session_id?.is_camera_on &&
@@ -233,7 +245,7 @@ registerCallAction("join-back", {
     disabledCondition: ({ store }) => store.rtc?.hasPendingRequest,
     icon: ({ channel }) => (channel.useCameraByDefault ? "fa fa-video-camera" : "fa fa-phone"),
     inlineName: ({ owner }) => (owner.env.inCallInvitation ? undefined : _t("Join")),
-    name: ({ channel }) => (channel.useCameraByDefault ? _t("Join Video Call") : _t("Join Call")),
+    name: ({ channel }) => (channel?.useCameraByDefault ? _t("Join Video Call") : _t("Join Call")),
     onSelected: ({ channel, store }) =>
         store.rtc.toggleCall(channel, { camera: channel.useCameraByDefault }),
     sequence: 110,
@@ -254,6 +266,7 @@ registerCallAction("join-with-camera", {
     sequenceGroup: 300,
     tags: [ACTION_TAGS.JOIN_LEAVE_CALL, ACTION_TAGS.SUCCESS],
 });
+/** @type {CallActionDefinition} */
 export const joinAction = {
     condition: ({ channel }) =>
         !channel?.isSelfInCall && typeof channel?.useCameraByDefault !== "boolean",
@@ -266,6 +279,7 @@ export const joinAction = {
     tags: [ACTION_TAGS.JOIN_LEAVE_CALL, ACTION_TAGS.SUCCESS],
 };
 registerCallAction("join", joinAction);
+/** @type {CallActionDefinition} */
 export const rejectAction = {
     btnClass: ({ owner, channel }) =>
         attClassObjectToString({
@@ -322,13 +336,15 @@ export class CallAction extends Action {
     }
 }
 
+/** @typedef {UseActions<CallActionParams, CallAction>} UseCallActions_Def */
 class UseCallActions extends UseActions {
     ActionClass = CallAction;
 }
 
 /**
  * @param {Object} [params0={}]
- * @param {DiscussChannel|() => DiscussChannel} channel
+ * @param {DiscussChannel|() => DiscussChannel} params0.channel
+ * @return {UseCallActions_Def}
  */
 export function useCallActions({ channel } = {}) {
     return useAction(callActionsRegistry, UseCallActions, CallAction, { channel });

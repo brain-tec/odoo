@@ -139,7 +139,7 @@ export class Chatbot extends Record {
     }
 
     get canRestart() {
-        return this.completed && !this.currentStep?.operatorFound;
+        return this.currentStep?.isLast && !this.currentStep.operatorFound;
     }
 
     /**
@@ -258,12 +258,17 @@ export class Chatbot extends Record {
             ONE_DAY_TTL
         );
         if (!redirectionAlreadyDone) {
-            browser.location.assign(answer.redirect_link);
+            this.redirect(answer.redirect_link);
         } else if (this.store.env.services.ui.isSmall) {
             await this.store.chatHub.initPromise;
             this.channel_id.channel.chatWindow?.fold();
         }
         return redirectionAlreadyDone || !isRedirecting;
+    }
+
+    /** @param {string} url */
+    redirect(url) {
+        browser.open(url, "_blank");
     }
 
     /**

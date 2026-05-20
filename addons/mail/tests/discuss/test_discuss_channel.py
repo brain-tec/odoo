@@ -186,6 +186,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                                 "main_user_id": self.test_user.id,
                                 "mention_token": self.test_partner._get_mention_token(),
                                 "name": "Test Partner",
+                                "partner_share": False,
                                 "write_date": test_partner_write_date,
                             },
                         ),
@@ -214,6 +215,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                         ),
                         "res.users": self._filter_users_fields(
                             {
+                                "all_employee_ids": [],
                                 "should_display_in_call_im_status": False,
                                 "employee_ids": [],
                                 "id": self.test_user.id,
@@ -259,6 +261,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                                 "main_user_id": self.test_user.id,
                                 "mention_token": self.test_partner._get_mention_token(),
                                 "name": "Test Partner",
+                                "partner_share": False,
                                 "tz": False,
                                 "user_ids": self.test_user.ids,
                                 "write_date": test_partner_write_date,
@@ -267,6 +270,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                         "res.users": self._filter_users_fields(
                             {
                                 "active": True,
+                                "all_employee_ids": [],
                                 "should_display_in_call_im_status": False,
                                 "id": self.test_user.id,
                                 "im_status": "offline",
@@ -514,6 +518,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                         ),
                         "res.users": self._filter_users_fields(
                             {
+                                "all_employee_ids": [],
                                 "should_display_in_call_im_status": False,
                                 "employee_ids": [],
                                 "id": self.test_user.id,
@@ -570,6 +575,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                         ),
                         "res.users": self._filter_users_fields(
                             {
+                                "all_employee_ids": [],
                                 "should_display_in_call_im_status": False,
                                 "employee_ids": [],
                                 "id": self.test_user.id,
