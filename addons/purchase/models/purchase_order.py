@@ -316,7 +316,7 @@ class PurchaseOrder(models.Model):
         for order in self:
             order.show_receive_button = (
                 order.state == 'purchase'
-                and any(line.qty_received < line.product_uom_qty for line in order.order_line)
+                and any(line.qty_received < line.product_qty for line in order.order_line)
                 and all(line.qty_received_method == "manual" for line in order.order_line)
             )
 
@@ -642,8 +642,8 @@ class PurchaseOrder(models.Model):
         )
         if invalid_targets:
             raise UserError(
-                _("The following purchase orders %(invalid_orders) can't be received. Cancelled all receptions."),
-                invalid_orders=invalid_targets)
+                _("The following purchase orders %(invalid_orders)s can't be received. Cancelled all receptions.",
+                invalid_orders=invalid_targets))
         for order in self:
             for line in order.order_line:
                 line.qty_received = line.product_qty
