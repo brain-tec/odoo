@@ -6,7 +6,21 @@ export class CarouselSlider extends Interaction {
     static selector = ".carousel";
     dynamicContent = {
         _root: {
+            "t-on-slide.bs.carousel": this.onSlideCarousel,
             "t-on-slid.bs.carousel": this.onSlidCarousel,
+            "t-on-focusin": () => window.Carousel.getInstance(this.el)?.pause(),
+            "t-on-focusout": this.resumeCarouselCycling,
+            "t-on-keydown": (ev) => {
+                const hotkey = getActiveHotkey(ev);
+                if (/input|textarea/i.test(ev.target.tagName)) {
+                    return;
+                }
+                if (["home", "end"].includes(hotkey)) {
+                    const childToFocus = hotkey === "home" ? ":first-child" : ":last-child";
+                    ev.preventDefault();
+                    this.el.querySelector(`.carousel-indicators > ${childToFocus}`).click();
+                }
+            },
         },
         "img": {
             "t-on-load": this.computeMaxHeight,
@@ -19,6 +33,8 @@ export class CarouselSlider extends Interaction {
                 "min-height": this.maxHeight ? `${this.maxHeight}px` : "",
             }),
         },
+        // Stable-friendly fix.
+        ".carousel-indicators": { "t-att-tabindex": () => "-1" },
         ".carousel-indicators button, .carousel-indicators li": {
             "t-on-pointerdown": (ev) => {
                 const toLoadEl = this.carouselItemEls.at(ev.currentTarget.dataset.bsSlideTo);
@@ -31,6 +47,7 @@ export class CarouselSlider extends Interaction {
                     this.prefetchImages([toLoadEl]);
                 }
             },
+            "t-att-tabindex": (el) => (el.classList.contains("active") ? undefined : "-1"),
         },
     };
     carouselOptions = undefined;
@@ -39,6 +56,9 @@ export class CarouselSlider extends Interaction {
         this.maxHeight = undefined;
         this.carouselInnerEl = this.el.querySelector(".carousel-inner");
         this.carouselItemEls = [...this.carouselInnerEl.querySelectorAll(".carousel-item")];
+        this.carouselIndicatorEls = this.el.querySelectorAll(
+            ".carousel-indicators > :is(button, li)"
+        );
     }
 
     start() {
@@ -77,6 +97,26 @@ export class CarouselSlider extends Interaction {
     }
 
     /**
+     * Handles the 'slide' event of the carousel. Called *before* a slide
+     * transition.
+     *
+     * @param {Event} ev The Bootstrap Carousel slide event.
+     */
+    onSlideCarousel(ev) {
+        const nextActiveIndicatorEl = this.carouselIndicatorEls.item(ev.to);
+        // If before the slide, the focused element was another indicator, move
+        // the focus to the newly active indicator.
+        if (
+            this.el.contains(document.activeElement) &&
+            document.activeElement.matches(
+                `.carousel-indicators > :is(button, li):not([data-bs-slide-to="${ev.to}"])`
+            )
+        ) {
+            nextActiveIndicatorEl.focus();
+        }
+    }
+
+    /**
      * Handles the 'slid' event of the carousel. Called *after* a slide
      * transition.
      *
@@ -86,6 +126,15 @@ export class CarouselSlider extends Interaction {
         this.loadItemsToAppear(); // Preload future items after a slide
     }
 
+    /**
+     * If the carousel should auto-slide and it has been paused, resume it.
+     */
+    resumeCarouselCycling() {
+        if (["true", "carousel"].includes(this.el.dataset.bsRide)) {
+            const carouselBS = window.Carousel.getInstance(this.el);
+            carouselBS.cycle();
+        }
+    }
     /**
      * Loads images of the carousel-item necessary for both 'prev' and 'next'
      * animations. Loads images for items that are about to become visible.
