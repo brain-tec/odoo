@@ -1,6 +1,58 @@
 import { useLayoutEffect, useRef, useState } from "@web/owl2/utils";
-import { Component, onMounted, onWillStart, status } from "@odoo/owl";
+import { Component, onWillStart, markRaw, status } from "@odoo/owl";
 import { loadBundle } from "@web/core/assets";
+import { useDebounced } from "../utils/timing";
+import { Reactive } from "../utils/reactive";
+
+class CodeEditorState extends Reactive {
+    /**@protected*/
+    _session = null;
+    /**@protected*/
+    _canUndo = false;
+    /**@protected*/
+    _canRedo = false;
+
+    get canUndo() {
+        return this._session && this._canUndo;
+    }
+
+    get canRedo() {
+        return this._session && this._canRedo;
+    }
+
+    undo() {
+        this._session?.getUndoManager().undo();
+        this._update();
+    }
+
+    redo() {
+        this._session?.getUndoManager().redo();
+        this._update();
+    }
+
+    /** @protected */
+    _setSession(session) {
+        this._session = session ? markRaw(session) : null;
+        this._update();
+    }
+
+    /**@protected */
+    _update() {
+        if (this._session) {
+            const undoManager = this._session.getUndoManager();
+            this._canUndo = undoManager.canUndo();
+            this._canRedo = undoManager.canRedo();
+        }
+    }
+}
+
+/**
+ * Hook used to interact with the CodeEditor undo state and to subscribe to changes.
+ * @returns {CodeEditorState}
+ */
+export function useCodeEditorState() {
+    return useState(new CodeEditorState());
+}
 
 export class CodeEditor extends Component {
     static template = "web.CodeEditor";
@@ -16,6 +68,7 @@ export class CodeEditor extends Component {
         readonly: { type: Boolean, optional: true },
         onChange: { type: Function, optional: true },
         onBlur: { type: Function, optional: true },
+        onCursorPositionChange: { type: Function, optional: true },
         class: { type: String, optional: true },
         theme: {
             type: String,
@@ -24,9 +77,10 @@ export class CodeEditor extends Component {
         },
         maxLines: { type: Number, optional: true },
         sessionId: { type: [Number, String], optional: true },
-        initialCursorPosition: { type: Object, optional: true },
+        cursorPosition: { type: Object, optional: true },
         showLineNumbers: { type: Boolean, optional: true },
         lineWrapping: { type: Boolean, optional: true },
+        editorState: { type: CodeEditorState, optional: true },
     };
     static defaultProps = {
         readonly: false,
@@ -50,12 +104,31 @@ export class CodeEditor extends Component {
         onWillStart(async () => await loadBundle("web.ace_lib"));
 
         const sessions = {};
+
+        const onCursorChange = useDebounced(() => {
+            this.props.onCursorPositionChange?.(this.aceEditor.getCursorPosition());
+        }, "animationFrame");
+
         // The ace library triggers the "change" event even if the change is
         // programmatic. Even worse, it triggers 2 "change" events in that case,
         // one with the empty string, and one with the new value. We only want
         // to notify the parent of changes done by the user, in the UI, so we
         // use this flag to filter out noisy "change" events.
         let ignoredAceChange = false;
+        const onChange = () => {
+            if (this.props.editorState) {
+                const session = this.aceEditor.getSession();
+                this.props.editorState._canUndo = session.getUndoManager().canUndo();
+                this.props.editorState._canRedo = session.getUndoManager().canRedo();
+            }
+
+            if (this.props.onChange && !ignoredAceChange) {
+                this.props.onChange(this.aceEditor.getValue());
+            }
+
+            onCursorChange();
+        };
+
         useLayoutEffect(
             (el) => {
                 if (!el) {
@@ -83,21 +156,31 @@ export class CodeEditor extends Component {
                     sessions[this.props.sessionId] = session;
                 }
                 session.setValue(this.props.value);
-                session.on("change", () => {
-                    if (this.props.onChange && !ignoredAceChange) {
-                        this.props.onChange(
-                            this.aceEditor.getValue(),
-                            this.aceEditor.getCursorPosition()
-                        );
-                    }
-                });
+                session.on("change", onChange);
+
                 this.aceEditor.on("blur", () => {
                     if (this.props.onBlur) {
                         this.props.onBlur();
                     }
                 });
 
+                // Wait for ace to be fully operational
+                window.requestAnimationFrame(() => {
+                    if (status(this) != "destroyed") {
+                        this.setCursorPosition(this.props.cursorPosition);
+                    }
+                });
+
+                if (this.props.editorState) {
+                    this.props.editorState._setSession(session);
+                }
+
                 return () => {
+                    if (this.props.editorState) {
+                        this.props.editorState._setSession(null);
+                        this.props.editorState._canUndo = false;
+                        this.props.editorState._canRedo = false;
+                    }
                     aceEditor.destroy();
                 };
             },
@@ -146,40 +229,22 @@ export class CodeEditor extends Component {
                         tabSize: 2,
                         useSoftTabs: true,
                     });
-                    session.on("change", () => {
-                        if (this.props.onChange && !ignoredAceChange) {
-                            this.props.onChange(
-                                this.aceEditor.getValue(),
-                                this.aceEditor.getCursorPosition()
-                            );
-                        }
-                    });
+                    session.on("change", onChange);
                     sessions[sessionId] = session;
                 }
+
                 session.setMode(this.aceMode);
                 this.aceEditor.setSession(session);
             },
             () => [this.props.sessionId, this.props.mode, this.props.value]
         );
 
-        const initialCursorPosition = this.props.initialCursorPosition;
-        if (initialCursorPosition) {
-            onMounted(() => {
-                // Wait for ace to be fully operational
-                window.requestAnimationFrame(() => {
-                    if (status(this) != "destroyed" && this.aceEditor) {
-                        this.aceEditor.focus();
-                        const { row, column } = initialCursorPosition;
-                        const pos = {
-                            row: row || 0,
-                            column: column || 0,
-                        };
-                        this.aceEditor.selection.moveToPosition(pos);
-                        this.aceEditor.renderer.scrollCursorIntoView(pos, 0.5);
-                    }
-                });
-            });
-        }
+        useLayoutEffect(
+            (cursorPosition) => {
+                this.setCursorPosition(cursorPosition);
+            },
+            () => [this.props.cursorPosition]
+        );
     }
 
     get aceMode() {
@@ -191,5 +256,18 @@ export class CodeEditor extends Component {
             };
         }
         return "";
+    }
+
+    setCursorPosition(cursorPosition) {
+        if (cursorPosition && this.aceEditor) {
+            const pos = {
+                row: cursorPosition.row || 0,
+                column: cursorPosition.column || 0,
+            };
+
+            this.aceEditor.focus();
+            this.aceEditor.selection.moveToPosition(pos);
+            this.aceEditor.renderer.scrollCursorIntoView(pos, 0.5);
+        }
     }
 }
