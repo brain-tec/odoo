@@ -5,6 +5,7 @@ import {
     hasColor,
     TEXT_CLASSES_REGEX,
     hasTextColorClass,
+    computeBackgroundColorForElement,
 } from "@html_editor/utils/color";
 import { fillEmpty, unwrapContents } from "@html_editor/utils/dom";
 import {
@@ -19,13 +20,12 @@ import {
 import { closestElement, descendants, selectElements } from "@html_editor/utils/dom_traversal";
 import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
-import { isColorGradient, isCSSColor, RGBA_REGEX, rgbaToHex } from "@web/core/utils/colors";
+import { isColorGradient, isCSSColor, rgbaToHex } from "@web/core/utils/colors";
 import { ColorSelector } from "./color_selector";
 import { isBlock } from "@html_editor/utils/blocks";
 import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
-import { READ, withSequence } from "@html_editor/utils/resource";
+import { withSequence } from "@html_editor/utils/resource";
 
-const RGBA_OPACITY = 0.6;
 const HEX_OPACITY = "99";
 
 /**
@@ -62,7 +62,7 @@ export class ColorPlugin extends Plugin {
         ],
 
         /** Handlers */
-        selectionchange_handlers: withSequence(READ, this.updateSelectedColor.bind(this)),
+        selectionchange_handlers: withSequence(100, this.updateSelectedColor.bind(this)),
         remove_format_handlers: this.removeAllColor.bind(this),
 
         /** Predicates */
@@ -71,6 +71,11 @@ export class ColorPlugin extends Plugin {
             (node) => hasColor(closestElement(node), "backgroundColor"),
         ],
         normalize_handlers: this.normalize.bind(this),
+        /** Providers */
+        selected_background_color_providers: withSequence(
+            10,
+            this.computeBackgroundColorForTextNode.bind(this)
+        ),
     };
 
     setup() {
@@ -109,7 +114,7 @@ export class ColorPlugin extends Plugin {
         };
     }
 
-    updateSelectedColor() {
+    computeBackgroundColorForTextNode() {
         const nodes = this.dependencies.selection.getTargetedNodes().filter(isTextNode);
         if (nodes.length === 0) {
             return;
@@ -118,30 +123,40 @@ export class ColorPlugin extends Plugin {
         if (!el) {
             return;
         }
+        return computeBackgroundColorForElement(el);
+    }
+
+    updateSelectedColor() {
+        // Compute and update the background color.
+        let backgroundColor;
+        for (const provider of this.getResource("selected_background_color_providers")) {
+            const providedBackgroundColor = provider();
+            if (providedBackgroundColor) {
+                backgroundColor = providedBackgroundColor;
+                break;
+            }
+        }
+
+        this.selectedColors.backgroundColor = backgroundColor || "#00000000";
+
+        // Compute and update the text color.
+        const nodes = this.dependencies.selection.getTargetedNodes().filter(isTextNode);
+        if (nodes.length === 0) {
+            this.selectedColors.color = "";
+            return;
+        }
+        const el = closestElement(nodes[0]);
+        if (!el) {
+            this.selectedColors.color = "";
+            return;
+        }
         const elStyle = getComputedStyle(el);
         const backgroundImage = elStyle.backgroundImage;
         const hasGradient = isColorGradient(backgroundImage);
         const hasTextGradientClass = el.classList.contains("text-gradient");
 
-        let backgroundColor = elStyle.backgroundColor;
-        const activeTab = document
-            .querySelector(".o_font_color_selector button.active")
-            ?.innerHTML.trim();
-        if (backgroundColor.startsWith("rgba") && (!activeTab || activeTab === "Solid")) {
-            // Buttons in the solid tab of color selector have no
-            // opacity, hence to match selected color correctly,
-            // we need to remove applied 0.6 opacity.
-            const values = backgroundColor.match(RGBA_REGEX) || [];
-            const alpha = parseFloat(values.pop()); // Extract alpha value
-            if (alpha === RGBA_OPACITY) {
-                backgroundColor = `rgb(${values.slice(0, 3).join(", ")})`; // Remove alpha
-            }
-        }
-
         this.selectedColors.color =
             hasGradient && hasTextGradientClass ? backgroundImage : rgbaToHex(elStyle.color);
-        this.selectedColors.backgroundColor =
-            hasGradient && !hasTextGradientClass ? backgroundImage : rgbaToHex(backgroundColor);
     }
 
     /**
