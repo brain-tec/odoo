@@ -357,6 +357,13 @@ registry.category("web_tour.tours").add("OrderChangeTour", {
             ProductScreen.isShown(),
             ProductScreen.orderlinesHaveNoChange(),
             ProductScreen.orderLineHas("coca-cola", 1, 2.2),
+            ProductScreen.clickInternalNoteButton("Note"),
+            TextInputPopup.inputText("test note"),
+            Dialog.confirm(),
+            negateStep(...ProductScreen.OrderButtonNotContain("Message")),
+            ProductScreen.clickInternalNoteButton("Note"),
+            Dialog.cancel(),
+            negateStep(...ProductScreen.clickOrderButton()),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.checkPaymentLines([{ name: "cash", amount: "2.20", selected: true }]),
@@ -801,6 +808,12 @@ registry.category("web_tour.tours").add("RestaurantPresetEatInTour", {
             PaymentScreen.clickValidate(),
             FeedbackScreen.checkTicketData({
                 cashier_name: "test_user",
+                cssRules: [
+                    {
+                        css: ".preset-info",
+                        negation: true,
+                    },
+                ],
             }),
             Chrome.closePrintingWarning(),
             FeedbackScreen.clickNextOrder(),
