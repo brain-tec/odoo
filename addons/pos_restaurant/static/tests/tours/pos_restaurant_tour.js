@@ -353,6 +353,13 @@ registry.category("web_tour.tours").add("OrderChange", {
             Chrome.closePrintingWarning(),
             FloorScreen.clickTable("5"),
             ProductScreen.orderlinesHaveNoChange(),
+            ProductScreen.clickInternalNoteButton("Note"),
+            TextInputPopup.inputText("test note"),
+            Dialog.confirm(),
+            negateStep(...ProductScreen.OrderButtonNotContain("Message")),
+            ProductScreen.clickInternalNoteButton("Note"),
+            Dialog.cancel(),
+            negateStep(...ProductScreen.clickOrderButton()),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.clickNumpad("+10"),
@@ -1322,5 +1329,57 @@ registry.category("web_tour.tours").add("test_futur_orders_are_not_cancelled", {
             Chrome.clickMenuOption("Close Register"),
             Dialog.confirm("Close Register"),
             Dialog.confirm("Cancel Orders", ".btn-secondary"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_combo_apply_after_preparation", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            FloorScreen.clickTable("5"),
+            ProductScreen.clickDisplayedProduct("Combo Product 2"),
+            ProductScreen.clickDisplayedProduct("Combo Product 4"),
+            ProductScreen.clickDisplayedProduct("Combo Product 6"),
+
+            Chrome.clickPlanButton(),
+
+            FloorScreen.clickTable("5"),
+            ...ProductScreen.clickApplyCombo(),
+
+            inLeftSide([
+                ...Order.hasLine({ productName: "Office Combo", quantity: "1" }),
+                ...Order.doesNotHaveLine({
+                    productName: "Combo Product 2",
+                    withoutClass: ".orderline-combo",
+                }),
+                ...Order.doesNotHaveLine({
+                    productName: "Combo Product 4",
+                    withoutClass: ".orderline-combo",
+                }),
+                ...Order.doesNotHaveLine({
+                    productName: "Combo Product 6",
+                    withoutClass: ".orderline-combo",
+                }),
+            ]),
+
+            refresh(),
+
+            inLeftSide([
+                ...Order.hasLine({ productName: "Office Combo", quantity: "1" }),
+                ...Order.doesNotHaveLine({
+                    productName: "Combo Product 2",
+                    withoutClass: ".orderline-combo",
+                }),
+                ...Order.doesNotHaveLine({
+                    productName: "Combo Product 4",
+                    withoutClass: ".orderline-combo",
+                }),
+                ...Order.doesNotHaveLine({
+                    productName: "Combo Product 6",
+                    withoutClass: ".orderline-combo",
+                }),
+            ]),
         ].flat(),
 });
