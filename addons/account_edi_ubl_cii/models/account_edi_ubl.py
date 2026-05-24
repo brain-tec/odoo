@@ -195,6 +195,12 @@ class AccountEdiUBL(models.AbstractModel):
         tax_grouping_key = self._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, currency)
         if not tax_grouping_key or tax_grouping_key['is_withholding']:
             return
+
+        # We do not want to group the positive and negative lines together;
+        # the following changes the grouping key to be like in 18.0 to 18.3.
+        if tax_grouping_key['tax_category_code'] == 'E' and tax_data and tax_data['tax']:
+            tax_grouping_key['tax_exemption_reason'] = None
+
         return tax_grouping_key
 
     def _ubl_default_payable_amount_tax_withholding_grouping_key(self, base_line, tax_data, vals, currency):
@@ -1624,7 +1630,7 @@ class AccountEdiUBL(models.AbstractModel):
 
         # Peppol EAS/Endpoint.
         if (node := party_node.find(".//{*}EndpointID")) is not None:
-            customer_values['peppol_endpoint'] = node.text
+            customer_values['peppol_endpoint'] = node.text.strip()
             if peppol_eas := node.attrib.get('schemeID'):
                 customer_values['peppol_eas'] = peppol_eas
 
@@ -2681,11 +2687,11 @@ class AccountEdiUBL(models.AbstractModel):
                 if tax_data['tax'].price_include:
                     base_line['price_unit'] += tax_data['raw_tax_amount_currency']
 
-        # Remove lines having a zero amount.
+        # Remove lines having a zero amount except 100% discounts
         collected_values['base_lines'] = [
             base_line
             for base_line in collected_values['base_lines']
-            if not base_line['currency_id'].is_zero(base_line['tax_details']['total_included_currency'])
+            if (not base_line['currency_id'].is_zero(base_line['tax_details']['total_included_currency']) or base_line.get('discount'))
         ]
 
     def _import_ubl_invoice_write_collected_values(self, collected_values):
@@ -2900,7 +2906,8 @@ class AccountEdiUBL(models.AbstractModel):
 
         # Collect the embedded documents.
         invoice = collected_values['invoice']
-        attachments = self._import_attachments(invoice, collected_values['tree']) or self.env['ir.attachment']
+        source_attachment = collected_values['file_data']['attachment'] or self.env['ir.attachment']
+        attachments = source_attachment + self._import_attachments(invoice, collected_values['tree'])
 
         # Chatter.
         body = Markup("<strong>%s</strong>") % _(
