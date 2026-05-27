@@ -268,7 +268,8 @@ class AccountMove(models.Model):
         def parse_xml(parser, content):
             try:
                 return etree.fromstring(content, parser)
-            except (etree.ParseError, ValueError) as e:
+            except (etree.ParseError, ValueError, TypeError) as e:
+                # Note: lxml < 5.0 raises ValueError; lxml 5.0+ / libxml2 2.12+ raises TypeError
                 _logger.info("XML parsing of %s failed: %s", name, e)
 
         parser = etree.XMLParser(recover=True, resolve_entities=False)
@@ -2546,17 +2547,20 @@ class AccountMove(models.Model):
         if not extra_info.get('pension_fund_assosoftware_tags'):
             return pension_fund_tax
 
-        selector = ".//AltriDatiGestionali[TipoDato[contains(text(),'AswCassPre')]]/RiferimentoTesto"
-        reference_text = get_text(element, selector)
-        if not reference_text:
+        parent_selector = ".//AltriDatiGestionali[TipoDato[contains(text(),'AswCassPre')]]"
+        parent_tag = element.xpath(parent_selector)
+        if not parent_tag:
             return None
 
-        if match := re.match(r"(?P<kind>TC\d{2}) \((?P<tax_rate>\d+)%\)", reference_text):
+        reference_tag = parent_tag[0].xpath("./RiferimentoTesto")
+        if reference_tag and (match := re.match(r"(?P<kind>TC\d{2}) \((?P<tax_rate>\d+)%\)", reference_tag[0].text)):
             rate = float(match.group("tax_rate"))
             match_kind = (match.group("kind") == pension_fund_tax.l10n_it_pension_fund_type)
             match_rate = (float_compare(rate, pension_fund_tax.amount, precision_digits=2) == 0)
             if match_kind and match_rate:
                 return pension_fund_tax
+        elif not reference_tag:
+            return pension_fund_tax
 
         return None
 
