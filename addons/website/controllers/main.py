@@ -27,9 +27,10 @@ from odoo.http import request
 from odoo.http.router import serve_ir_http
 from odoo.http.session import SessionExpiredException
 from odoo.http.stream import STATIC_CACHE_LONG
-from odoo.tools import OrderedSet, escape_psql, py_to_js_locale
+from odoo.tools import OrderedSet, py_to_js_locale
 from odoo.tools import html_escape as escape
 from odoo.tools.json import scriptsafe as json
+from odoo.tools.sql import escape_like_value
 from odoo.tools.translate import LazyTranslate, TRANSLATED_ELEMENTS
 
 from odoo.addons.base.models.ir_http import EXTENSION_TO_WEB_MIMETYPES
@@ -494,7 +495,7 @@ class Website(Home):
     def get_dynamic_snippet_templates(self, filter_name=False):
         domain = [['key', 'ilike', '.dynamic_filter_template_'], ['type', '=', 'qweb']]
         if filter_name:
-            domain.append(['key', 'ilike', escape_psql('_%s_' % filter_name)])
+            domain.append(['key', 'ilike', escape_like_value('_%s_' % filter_name)])
         templates = request.env['ir.ui.view'].sudo().search_read(domain, ['key', 'name', 'arch_db'])
 
         for t in templates:
@@ -898,7 +899,7 @@ class Website(Home):
             for template in View.search([
                 ('mode', '=', 'primary'),
                 '|',
-                ('key', 'like', escape_psql(f'new_page_template_sections_{group["id"]}_')),
+                ('key', 'like', escape_like_value(f'new_page_template_sections_{group["id"]}_')),
                 ('key', 'like', f'configurator_pages_{group["id"]}'),
                 request.website.website_domain(),
             ], order='key'):
@@ -996,15 +997,18 @@ class Website(Home):
         pattern = r'^([a-zA-Z]+)(?:_(\w+))?(?:@(\w+))?$'
         match = re.match(pattern, lang)
         language = [match.group(1), match.group(2) or ''] if match else ['en', 'US']
-        url = "http://google.com/complete/search"
+        url = "https://google.com/complete/search"
         try:
             req = requests.get(url, params={
                 'ie': 'utf8', 'oe': 'utf8', 'output': 'toolbar', 'q': keywords, 'hl': language[0], 'gl': language[1]})
             req.raise_for_status()
             response = req.content
-        except OSError:
+        except (OSError, requests.RequestException):
             return json.dumps([])
-        xmlroot = ET.fromstring(response)
+        try:
+            xmlroot = ET.fromstring(response)
+        except ET.ParseError:
+            return json.dumps([])
         return json.dumps([sugg[0].attrib['data'] for sugg in xmlroot if len(sugg) and sugg[0].attrib['data']])
 
     @http.route(['/website/get_alt_images'], type='jsonrpc', auth="user", website=True)
@@ -1083,6 +1087,47 @@ class Website(Home):
 
     @http.route(['/website/get_seo_data'], type='jsonrpc', auth="user", website=True, readonly=True)
     def get_seo_data(self, res_id, res_model):
+        """
+        Fetch SEO metadata for a given record.
+
+        This endpoint is used by the website editor to retrieve meta fields
+        (title, description, keywords, OpenGraph image, etc.) in the context
+        of the current user and language. Access is granted if the user has
+        the `website.group_website_restricted_editor` group, or if they have
+        sufficient access rights on the record itself.
+
+        Args:
+            res_id (int): ID of the record to fetch metadata for.
+            res_model (str): Model name of the record (e.g. ``website.page``).
+
+        Returns:
+            dict: A mapping of SEO data including:
+                - `lang` (object): Current language (object with at least `code` and `name`).
+                - `multi_lang` (bool): Whether the website supports multiple languages.
+                - `can_edit_seo` (bool): Whether the current user can edit SEO fields.
+                - `website_is_published` (bool, optional): Page publication status (for website pages).
+                - `website_indexed` (bool, optional): Whether the page is indexed (for website pages).
+                - `website_id` (int, optional): ID of the related website (for website pages).
+                - `website_meta_title` (str): Title for SEO.
+                - `website_meta_description` (str): Description for SEO.
+                - `website_meta_keywords` (str): Keywords for SEO.
+                - `website_meta_og_img` (str): URL of the OpenGraph image.
+                - `has_social_default_image` (bool): Whether the site has a default social sharing image.
+                - `seo_name` (str, optional): Slugified custom SEO name (if supported).
+                - `seo_name_default` (str, optional): Default slugified name (fallback).
+
+        Raises:
+            werkzeug.exceptions.Forbidden: If the user lacks the required access rights.
+        """
+        def _get_translation(record, field_name, lang_code=None):
+            """ Return the translation for a field in the current language, or ''. """
+            field = record._fields.get(field_name)
+            if not field.store:
+                return record[field_name] or ''
+            translations = field._get_stored_translations(record) or {}
+            return translations.get(lang_code or request.lang.code, '')
+
+        # Access checks
         if not request.env.user.has_group('website.group_website_restricted_editor'):
             # Still ok if user can access the record anyway.
             try:
@@ -1091,11 +1136,14 @@ class Website(Home):
             except AccessError:
                 raise werkzeug.exceptions.Forbidden()
 
-        fields = ['website_meta_title', 'website_meta_description', 'website_meta_keywords', 'website_meta_og_img']
-        res = {'can_edit_seo': True}
         record = request.env[res_model].browse(res_id)
+        res = {
+            'lang': request.lang,
+            'multi_lang': request.website.language_count > 1,
+            'default_lang_code': request.website.default_lang_id.code,
+            'can_edit_seo': True,
+        }
         if res_model == 'website.page':
-            fields.extend(['website_indexed', 'website_id'])
             res["website_is_published"] = record.website_published
 
         try:
@@ -1105,12 +1153,34 @@ class Website(Home):
         if request.env.user.has_group('website.group_website_restricted_editor'):
             record = record.sudo()
 
-        res.update(record.read(fields)[0])
+        # Basic field values
+        base_fields = ['website_meta_og_img']
+        if res_model == "website.page":
+            base_fields.extend(['website_indexed', 'website_id'])
+        res.update(record.read(base_fields)[0])
+
+        # Translatable fields
+        # Use view_id for website.page translations
+        source_record = record.view_id if res_model == 'website.page' else record
+        for field_name in ['website_meta_title', 'website_meta_description', 'website_meta_keywords']:
+            res[field_name] = _get_translation(source_record, field_name)
+            # The client needs to know whether the default language is empty
+            # before writing from another language, otherwise the translated
+            # value may become the fallback/base value.
+            res[f'default_{field_name}'] = _get_translation(
+                source_record, field_name, request.website.default_lang_id.code
+            )
+
         res['has_social_default_image'] = request.website.has_social_default_image
 
-        if res_model not in ('website.page', 'ir.ui.view') and 'seo_name' in record:  # allow custom slugify
-            res['seo_name_default'] = request.env['ir.http']._slugify(record.display_name or '')  # default slug, if seo_name become empty
-            res['seo_name'] = record.seo_name and request.env['ir.http']._slugify(record.seo_name) or ''
+        # SEO name handling (custom slugify)
+        if res_model not in ('website.page', 'ir.ui.view') and 'seo_name' in record:
+            res['seo_name_default'] = request.env['ir.http']._slugify(record.display_name or '')
+            res['seo_name'] = (
+                request.env['ir.http']._slugify(record.seo_name)
+                if record.seo_name
+                else ''
+            )
 
         return res
 
