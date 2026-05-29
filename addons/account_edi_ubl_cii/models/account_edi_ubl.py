@@ -1926,9 +1926,11 @@ class AccountEdiUBL(models.AbstractModel):
 
     def _import_ubl_invoice_line_add_name(self, collected_values):
         line_tree = collected_values['line_tree']
+        item_ref = line_tree.findtext('.//{*}Item/{*}SellersItemIdentification/{*}ID')
+        item_name = line_tree.findtext('.//{*}Item/{*}Name')
         name = collected_values['name'] = (
             line_tree.findtext('.//{*}Item/{*}Description')
-            or line_tree.findtext('.//{*}Item/{*}Name')
+            or (f"[{item_ref}] {item_name}" if (item_ref and item_name) else item_name)
         )
         if name:
             collected_values['to_write']['name'] = name
@@ -2643,7 +2645,7 @@ class AccountEdiUBL(models.AbstractModel):
         for base_line in base_lines:
             for tax_data in base_line['tax_details']['taxes_data']:
                 if tax_data['tax'].price_include:
-                    base_line['price_unit'] += tax_data['raw_tax_amount_currency']
+                    base_line['price_unit'] += tax_data['raw_tax_amount_currency'] / (base_line['quantity'] if base_line['quantity'] else 1)
 
         # Remove lines having a zero amount except 100% discounts
         collected_values['base_lines'] = [
