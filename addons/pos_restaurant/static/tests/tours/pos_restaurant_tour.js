@@ -1260,6 +1260,7 @@ registry.category("web_tour.tours").add("test_delete_line_release_table", {
             Chrome.waitRequest(),
             negateStep(...Order.hasLine({ productName: "Coca-Cola" })),
             Chrome.flushPendingOrdersSync(),
+            Chrome.clickPlanButton(),
         ].flat(),
 });
 
@@ -1346,5 +1347,57 @@ registry.category("web_tour.tours").add("test_futur_orders_are_not_cancelled", {
             Chrome.clickMenuOption("Close Register"),
             Dialog.confirm("Close Register"),
             Dialog.confirm("Cancel Orders", ".btn-secondary"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_combo_apply_after_preparation", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+
+            FloorScreen.clickTable("5"),
+            ProductScreen.clickDisplayedProduct("Combo Product 2"),
+            ProductScreen.clickDisplayedProduct("Combo Product 4"),
+            ProductScreen.clickDisplayedProduct("Combo Product 6"),
+
+            Chrome.clickPlanButton(),
+
+            FloorScreen.clickTable("5"),
+            ...ProductScreen.clickApplyCombo(),
+
+            inLeftSide([
+                ...Order.hasLine({ productName: "Office Combo", quantity: "1" }),
+                ...Order.doesNotHaveLine({
+                    productName: "Combo Product 2",
+                    withoutClass: ".orderline-combo",
+                }),
+                ...Order.doesNotHaveLine({
+                    productName: "Combo Product 4",
+                    withoutClass: ".orderline-combo",
+                }),
+                ...Order.doesNotHaveLine({
+                    productName: "Combo Product 6",
+                    withoutClass: ".orderline-combo",
+                }),
+            ]),
+
+            refresh(),
+
+            inLeftSide([
+                ...Order.hasLine({ productName: "Office Combo", quantity: "1" }),
+                ...Order.doesNotHaveLine({
+                    productName: "Combo Product 2",
+                    withoutClass: ".orderline-combo",
+                }),
+                ...Order.doesNotHaveLine({
+                    productName: "Combo Product 4",
+                    withoutClass: ".orderline-combo",
+                }),
+                ...Order.doesNotHaveLine({
+                    productName: "Combo Product 6",
+                    withoutClass: ".orderline-combo",
+                }),
+            ]),
         ].flat(),
 });

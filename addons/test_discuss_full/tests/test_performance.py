@@ -559,7 +559,12 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                     "id": "bookmark",
                     "model": "mail.box",
                 },
-                "initChannelsUnreadCounter": 4,
+                "init_unread_channel_ids": (
+                    self.channel_general
+                    | self.channel_channel_public_1
+                    | self.channel_livechat_1
+                    | self.channel_livechat_2
+                ).ids,
             },
         }
 

@@ -21,7 +21,7 @@ beforeEach(() => {
 });
 defineModels([Partner]);
 
-test("RemainingDaysField on a date field in list view", async () => {
+test("RelativeDateField on a date field in list view", async () => {
     mockDate("2017-10-08 15:35:11");
 
     Partner._records = [
@@ -33,12 +33,16 @@ test("RemainingDaysField on a date field in list view", async () => {
         { id: 6, date: "2018-02-08" }, // + 4 months (diff >= 100 days)
         { id: 7, date: "2017-06-08" }, // - 4 months (diff >= 100 days)
         { id: 8, date: false },
+        { id: 9, date: "2017-11-01" }, // + 24 days
+        { id: 10, date: "2017-11-08" }, // + 31 days
+        { id: 11, date: "2017-09-15" }, // - 23 days
+        { id: 12, date: "2017-09-07" }, // - 31 days
     ];
 
     await mountView({
         type: "list",
         resModel: "partner",
-        arch: /* xml */ `<list><field name="date" widget="remaining_days" /></list>`,
+        arch: /* xml */ `<list><field name="date" widget="relative_date" /></list>`,
     });
 
     const cells = queryAll(".o_data_cell");
@@ -50,6 +54,10 @@ test("RemainingDaysField on a date field in list view", async () => {
     expect(cells[5]).toHaveText("Feb 8, 2018");
     expect(cells[6]).toHaveText("Jun 8");
     expect(cells[7]).toHaveText("");
+    expect(cells[8]).toHaveText("In 24 days");
+    expect(cells[9]).toHaveText("Next month");
+    expect(cells[10]).toHaveText("23 days ago");
+    expect(cells[11]).toHaveText("Last month");
 
     expect(queryOne(".o_field_widget > div", { root: cells[0] })).toHaveAttribute(
         "title",
@@ -86,10 +94,28 @@ test("RemainingDaysField on a date field in list view", async () => {
         "fw-bold",
         "text-danger",
     ]);
+    expect(queryOne(".o_field_widget > div", { root: cells[8] })).not.toHaveClass([
+        "fw-bold",
+        "text-warning",
+        "text-danger",
+    ]);
+    expect(queryOne(".o_field_widget > div", { root: cells[9] })).not.toHaveClass([
+        "fw-bold",
+        "text-warning",
+        "text-danger",
+    ]);
+    expect(queryOne(".o_field_widget > div", { root: cells[10] })).toHaveClass([
+        "fw-bold",
+        "text-danger",
+    ]);
+    expect(queryOne(".o_field_widget > div", { root: cells[11] })).toHaveClass([
+        "fw-bold",
+        "text-danger",
+    ]);
 });
 
 test.tags("desktop");
-test("RemainingDaysField on a date field in multi edit list view", async () => {
+test("RelativeDateField on a date field in multi edit list view", async () => {
     mockDate("2017-10-08 15:35:11"); // October 8 2017, 15:35:11
 
     Partner._records = [
@@ -101,7 +127,7 @@ test("RemainingDaysField on a date field in multi edit list view", async () => {
     await mountView({
         type: "list",
         resModel: "partner",
-        arch: /* xml */ `<list multi_edit="1"><field name="date" widget="remaining_days" /></list>`,
+        arch: /* xml */ `<list multi_edit="1"><field name="date" widget="relative_date" /></list>`,
     });
 
     expect(queryAllTexts(".o_data_cell").slice(0, 2)).toEqual(["Today", "Tomorrow"]);
@@ -115,9 +141,9 @@ test("RemainingDaysField on a date field in multi edit list view", async () => {
     await click(".o_data_row:eq(0) .o_data_cell:first");
     await animationFrame();
 
-    expect(".o_field_remaining_days button").toHaveCount(1);
+    expect(".o_field_relative_date button").toHaveCount(1);
 
-    await contains(".o_field_remaining_days button").click();
+    await contains(".o_field_relative_date button").click();
     await edit("10/10/2017", { confirm: "enter" });
     await waitFor(".modal");
     expect(".modal .o_field_widget").toHaveText("In 2 days", {
@@ -135,7 +161,7 @@ test("RemainingDaysField on a date field in multi edit list view", async () => {
 });
 
 test.tags("desktop");
-test("RemainingDaysField, enter wrong value manually in multi edit list view", async () => {
+test("RelativeDateField, enter wrong value manually in multi edit list view", async () => {
     mockDate("2017-10-08 15:35:11"); // October 8 2017, 15:35:11
     Partner._records = [
         { id: 1, date: "2017-10-08" }, // today
@@ -146,7 +172,7 @@ test("RemainingDaysField, enter wrong value manually in multi edit list view", a
     await mountView({
         type: "list",
         resModel: "partner",
-        arch: /* xml */ `<list multi_edit="1"><field name="date" widget="remaining_days" /></list>`,
+        arch: /* xml */ `<list multi_edit="1"><field name="date" widget="relative_date" /></list>`,
     });
 
     const cells = queryAll(".o_data_cell");
@@ -164,9 +190,9 @@ test("RemainingDaysField, enter wrong value manually in multi edit list view", a
     await click(".o_data_cell", { root: rows[0] });
     await animationFrame();
 
-    expect(".o_field_remaining_days button").toHaveCount(1);
+    expect(".o_field_relative_date button").toHaveCount(1);
 
-    await contains(".o_field_remaining_days button").click();
+    await contains(".o_field_relative_date button").click();
     await edit("blabla", { confirm: "enter" });
     await animationFrame();
     expect(".modal").toHaveCount(0);
@@ -174,7 +200,7 @@ test("RemainingDaysField, enter wrong value manually in multi edit list view", a
     expect(cells[1]).toHaveText("Tomorrow");
 });
 
-test("RemainingDaysField on a date field in form view", async () => {
+test("RelativeDateField on a date field in form view", async () => {
     mockDate("2017-10-08 15:35:11"); // October 8 2017, 15:35:11
     Partner._records = [
         { id: 1, date: "2017-10-08" }, // today
@@ -184,7 +210,7 @@ test("RemainingDaysField on a date field in form view", async () => {
         type: "form",
         resModel: "partner",
         resId: 1,
-        arch: /* xml */ `<form><field name="date" widget="remaining_days" /></form>`,
+        arch: /* xml */ `<form><field name="date" widget="relative_date" /></form>`,
     });
 
     expect(".o_field_widget button").toHaveValue("10/08/2017");
@@ -192,7 +218,7 @@ test("RemainingDaysField on a date field in form view", async () => {
     expect(".o_form_editable").toHaveCount(1);
     expect("div.o_field_widget[name='date'] button").toHaveCount(1);
 
-    await contains(".o_field_remaining_days button").click();
+    await contains(".o_field_relative_date button").click();
     await animationFrame();
     expect(".o_datetime_picker").toHaveCount(1, { message: "datepicker should be opened" });
 
@@ -203,13 +229,13 @@ test("RemainingDaysField on a date field in form view", async () => {
     expect(".o_field_widget button").toHaveValue("10/09/2017");
 });
 
-test("RemainingDaysField on a date field on a new record in form", async () => {
+test("RelativeDateField on a date field on a new record in form", async () => {
     await mountView({
         type: "form",
         resModel: "partner",
         arch: `
                 <form>
-                    <field name="date" widget="remaining_days" />
+                    <field name="date" widget="relative_date" />
                 </form>`,
     });
 
@@ -219,7 +245,7 @@ test("RemainingDaysField on a date field on a new record in form", async () => {
     expect(".o_datetime_picker").toHaveCount(1);
 });
 
-test("RemainingDaysField in form view (readonly)", async () => {
+test("RelativeDateField in form view (readonly)", async () => {
     mockDate("2017-10-08 15:35:11"); // October 8 2017, 15:35:11
     Partner._records = [
         { id: 1, date: "2017-10-08", datetime: "2017-10-08 10:00:00" }, // today
@@ -231,8 +257,8 @@ test("RemainingDaysField in form view (readonly)", async () => {
         resId: 1,
         arch: /* xml */ `
                 <form>
-                    <field name="date" widget="remaining_days" readonly="1" />
-                    <field name="datetime" widget="remaining_days" readonly="1" />
+                    <field name="date" widget="relative_date" readonly="1" />
+                    <field name="datetime" widget="relative_date" readonly="1" />
                 </form>`,
     });
 
@@ -242,7 +268,7 @@ test("RemainingDaysField in form view (readonly)", async () => {
     expect(".o_field_widget[name='datetime'] > div ").toHaveClass(["fw-bold", "text-warning"]);
 });
 
-test("RemainingDaysField on a datetime field in form view", async () => {
+test("RelativeDateField on a datetime field in form view", async () => {
     mockDate("2017-10-08 15:35:11"); // October 8 2017, 15:35:11
     Partner._records = [
         { id: 1, datetime: "2017-10-08 10:00:00" }, // today
@@ -252,7 +278,7 @@ test("RemainingDaysField on a datetime field in form view", async () => {
         type: "form",
         resModel: "partner",
         resId: 1,
-        arch: /* xml */ `<form><field name="datetime" widget="remaining_days" /></form>`,
+        arch: /* xml */ `<form><field name="datetime" widget="relative_date" /></form>`,
     });
     expect(".o_field_widget button").toHaveValue("10/08/2017 11:00:00");
     expect("div.o_field_widget[name='datetime'] button").toHaveCount(1);
@@ -272,7 +298,7 @@ test("RemainingDaysField on a datetime field in form view", async () => {
     expect(".o_field_widget button").toHaveValue("10/09/2017 11:00:00");
 });
 
-test("RemainingDaysField on a datetime field in list view in UTC", async () => {
+test("RelativeDateField on a datetime field in list view in UTC", async () => {
     mockDate("2017-10-08 15:35:11", 0); // October 8 2017, 15:35:11
     Partner._records = [
         { id: 1, datetime: "2017-10-08 20:00:00" }, // today
@@ -288,7 +314,7 @@ test("RemainingDaysField on a datetime field in list view in UTC", async () => {
     await mountView({
         type: "list",
         resModel: "partner",
-        arch: /* xml */ `<list><field name="datetime" widget="remaining_days" /></list>`,
+        arch: /* xml */ `<list><field name="datetime" widget="relative_date" /></list>`,
     });
 
     expect(queryAllTexts(".o_data_cell")).toEqual([
@@ -314,7 +340,7 @@ test("RemainingDaysField on a datetime field in list view in UTC", async () => {
     expect(cells[6]).toHaveClass(["fw-bold", "text-danger"]);
 });
 
-test("RemainingDaysField on a datetime field in list view in UTC+6", async () => {
+test("RelativeDateField on a datetime field in list view in UTC+6", async () => {
     mockDate("2017-10-08 15:35:11", +6); // October 8 2017, 15:35:11, UTC+6
 
     Partner._records = [
@@ -328,7 +354,7 @@ test("RemainingDaysField on a datetime field in list view in UTC+6", async () =>
     await mountView({
         type: "list",
         resModel: "partner",
-        arch: /* xml */ `<list><field name="datetime" widget="remaining_days" /></list>`,
+        arch: /* xml */ `<list><field name="datetime" widget="relative_date" /></list>`,
     });
 
     expect(queryAllTexts(".o_data_cell")).toEqual([
@@ -341,7 +367,7 @@ test("RemainingDaysField on a datetime field in list view in UTC+6", async () =>
     expect(".o_data_cell .o_field_widget div:first").toHaveAttribute("title", "10/09/2017");
 });
 
-test("RemainingDaysField on a date field in list view in UTC-6", async () => {
+test("RelativeDateField on a date field in list view in UTC-6", async () => {
     mockDate("2017-10-08 15:35:11", -6); // October 8 2017, 15:35:11, UTC-6
 
     Partner._records = [
@@ -355,7 +381,7 @@ test("RemainingDaysField on a date field in list view in UTC-6", async () => {
     await mountView({
         type: "list",
         resModel: "partner",
-        arch: /* xml */ `<list><field name="date" widget="remaining_days" /></list>`,
+        arch: /* xml */ `<list><field name="date" widget="relative_date" /></list>`,
     });
     expect(queryAllTexts(".o_data_cell")).toEqual([
         "Today",
@@ -367,7 +393,7 @@ test("RemainingDaysField on a date field in list view in UTC-6", async () => {
     expect(".o_data_cell .o_field_widget div:first").toHaveAttribute("title", "10/08/2017");
 });
 
-test("RemainingDaysField on a datetime field in list view in UTC-8", async () => {
+test("RelativeDateField on a datetime field in list view in UTC-8", async () => {
     mockDate("2017-10-08 15:35:11", -8); // October 8 2017, 15:35:11, UTC-8
 
     Partner._records = [
@@ -381,7 +407,7 @@ test("RemainingDaysField on a datetime field in list view in UTC-8", async () =>
     await mountView({
         type: "list",
         resModel: "partner",
-        arch: /* xml */ `<list><field name="datetime" widget="remaining_days" /></list>`,
+        arch: /* xml */ `<list><field name="datetime" widget="relative_date" /></list>`,
     });
 
     expect(queryAllTexts(".o_data_cell")).toEqual([
@@ -393,7 +419,7 @@ test("RemainingDaysField on a datetime field in list view in UTC-8", async () =>
     ]);
 });
 
-test("RemainingDaysField with custom decoration classes", async () => {
+test("RelativeDateField with custom decoration classes", async () => {
     mockDate("2017-10-08 15:35:11");
 
     Partner._records = [
@@ -414,7 +440,7 @@ test("RemainingDaysField with custom decoration classes", async () => {
                 <list>
                     <field
                         name="date"
-                        widget="remaining_days"
+                        widget="relative_date"
                         options="{
                             'classes': {
                                 'muted': 'days &lt; -30',

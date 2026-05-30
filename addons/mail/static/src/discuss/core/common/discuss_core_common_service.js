@@ -59,6 +59,7 @@ export class DiscussCoreCommon {
     async _handleNotificationChannelDelete(channel, metadata) {
         await channel.closeChatWindow();
         channel.messages.splice(0, channel.messages.length);
+        this.env.bus.trigger("discuss.channel/delete", { channel });
         channel.delete();
     }
 
