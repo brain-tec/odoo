@@ -895,6 +895,23 @@ class TestHrAttendanceOvertime(HttpCase):
         })
         self.assertEqual(attendance.overtime_hours, 0, 'There should be no overtime for the fully flexible resource.')
 
+    def test_overtime_flexible_non_consecutive_days(self):
+        """ A flexible hours employee working exactly their weekly budget
+        spread across non consecutive days must not generate overtime. """
+        self.flexible_employee.ruleset_id = self.ruleset
+        self.flexible_employee.tz = 'Europe/Brussels'
+        self.flexible_employee.write({
+            'hours_per_day': 8,
+            'hours_per_week': 16,
+        })
+        # Jan 6 2025 = Monday, Jan 11 = Saturday
+        attendances = self.env['hr.attendance'].create([
+            {'employee_id': self.flexible_employee.id, 'check_in': datetime(2025, 1, 6, 7, 0), 'check_out': datetime(2025, 1, 6, 15, 0)},
+            {'employee_id': self.flexible_employee.id, 'check_in': datetime(2025, 1, 11, 7, 0), 'check_out': datetime(2025, 1, 11, 15, 0)},
+        ])
+        for att in attendances:
+            self.assertEqual(att.overtime_hours, 0)
+
     def test_refuse_timeoff(self):
         self.company.write({
             "attendance_overtime_validation": "by_manager"
@@ -1755,3 +1772,51 @@ class TestHrAttendanceOvertime(HttpCase):
         ])
         self.ruleset.action_regenerate_overtimes()
         self.assertEqual(sum(attendances.mapped('overtime_hours')), 10)
+
+    def test_overtime_rule_timing_adjacent_intervals(self):
+        """ Test that adjacent overtime timing rules are not prematurely merged.
+            Daytime: 17:00 -> 21:00 (4h)
+            Nighttime: 21:00 -> 24:00 (3h)
+            Attendance: 17:00 -> 24:00
+            Expected: 4h Daytime, 3h Nighttime
+        """
+        ruleset = self.env['hr.attendance.overtime.ruleset'].create({
+            'name': 'Day and Night Ruleset',
+            'rule_ids': [
+                Command.create({
+                    'name': 'Daytime',
+                    'base_off': 'timing',
+                    'timing_type': 'work_days',
+                    'timing_start': 17.0,
+                    'timing_stop': 21.0,
+                }),
+                Command.create({
+                    'name': 'Nighttime',
+                    'base_off': 'timing',
+                    'timing_type': 'work_days',
+                    'timing_start': 21.0,
+                    'timing_stop': 24.0,
+                }),
+            ],
+        })
+        self.employee.ruleset_id = ruleset
+
+        # Create an attendance from 17:00 to midnight
+        self.env['hr.attendance'].create({
+            'employee_id': self.employee.id,
+            'check_in': datetime(2021, 1, 4, 17, 0, 0),
+            'check_out': datetime(2021, 1, 4, 23, 59, 59),
+        })
+
+        overtimes = self.env['hr.attendance.overtime.line'].search([
+            ('employee_id', '=', self.employee.id),
+            ('date', '=', date(2021, 1, 4))
+        ])
+
+        self.assertEqual(len(overtimes), 2, "There should be exactly two distinct overtime lines generated.")
+
+        daytime_ot = overtimes.filtered(lambda ot: 'Daytime' in ot.rule_ids.mapped('name'))
+        nighttime_ot = overtimes.filtered(lambda ot: 'Nighttime' in ot.rule_ids.mapped('name'))
+
+        self.assertAlmostEqual(daytime_ot.duration, 4.0, 2, "Daytime overtime should be exactly 4 hours.")
+        self.assertAlmostEqual(nighttime_ot.duration, 3.0, 2, "Nighttime overtime should be exactly 3 hours.")
