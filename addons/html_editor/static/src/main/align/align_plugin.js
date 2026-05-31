@@ -1,4 +1,4 @@
-import { reactive } from "@web/owl2/utils";
+import { proxy } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
 import { closestBlock } from "@html_editor/utils/blocks";
 import { isVisibleTextNode } from "@html_editor/utils/dom_info";
@@ -63,8 +63,8 @@ export class AlignPlugin extends Plugin {
 
         /** Handlers */
         on_selectionchange_handlers: withSequence(READ, this.updateAlignmentParams.bind(this)),
-        on_undone_handlers: this.updateAlignmentParams.bind(this),
-        on_redone_handlers: this.updateAlignmentParams.bind(this),
+        on_history_commit_undone_handlers: this.updateAlignmentParams.bind(this),
+        on_history_commit_redone_handlers: this.updateAlignmentParams.bind(this),
         on_all_formats_removed_handlers: this.setAlignment.bind(this),
 
         /** Predicates */
@@ -76,7 +76,7 @@ export class AlignPlugin extends Plugin {
     };
 
     setup() {
-        this.alignment = reactive({ displayName: "" });
+        this.alignment = proxy({ displayName: "" });
         this.canSetAlignmentMemoized = weakMemoize(
             (selection) => isHtmlContentSupported(selection) && this.getBlocksToAlign().length > 0
         );
@@ -150,7 +150,7 @@ export class AlignPlugin extends Plugin {
             }
         }
         if (mode && isAlignmentUpdated) {
-            this.dependencies.history.addStep();
+            this.dependencies.history.commit();
         }
         this.updateAlignmentParams();
     }

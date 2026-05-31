@@ -1,4 +1,4 @@
-import { reactive } from "@web/owl2/utils";
+import { proxy } from "@odoo/owl";
 import { Plugin } from "../../plugin";
 import { _t } from "@web/core/l10n/translation";
 import { isImageUrl } from "@html_editor/utils/url";
@@ -165,14 +165,14 @@ export class ImagePlugin extends Plugin {
     };
 
     setup() {
-        this.imageSize = reactive({ displayName: "Default" });
+        this.imageSize = proxy({ displayName: "Default" });
         this.addDomListener(this.editable, "pointerdown", (e) => {
             const selection = this.dependencies.selection.getEditableSelection();
             if (selection.isCollapsed && e.target.tagName === "IMG") {
                 this.setSelectionAroundImage(e.target);
             }
         });
-        this.imageAlignment = reactive({ displayIcon: "oi-text-inline" });
+        this.imageAlignment = proxy({ displayIcon: "oi-text-inline" });
         this.addDomListener(this.editable, "click", (e) => {
             if (e.target.tagName === "IMG") {
                 this.setSelectionAroundImage(e.target);
@@ -218,7 +218,7 @@ export class ImagePlugin extends Plugin {
             targetedImg.classList.add(alignment.value);
         }
         this.imageAlignment.displayIcon = alignment.icon;
-        this.dependencies.history.addStep();
+        this.dependencies.history.commit();
     }
 
     setImagePadding({ size } = {}) {
@@ -232,7 +232,7 @@ export class ImagePlugin extends Plugin {
             }
         }
         targetedImg.classList.add(`p-${size}`);
-        this.dependencies.history.addStep();
+        this.dependencies.history.commit();
     }
     resizeImage({ size } = {}) {
         const targetedImg = this.getTargetedImage();
@@ -240,7 +240,7 @@ export class ImagePlugin extends Plugin {
             return;
         }
         targetedImg.style.width = size || "";
-        this.dependencies.history.addStep();
+        this.dependencies.history.commit();
     }
 
     previewImage() {
@@ -277,7 +277,7 @@ export class ImagePlugin extends Plugin {
             targetedImg.remove();
             cursors.restore();
             fillEmpty(blockEl);
-            this.dependencies.history.addStep();
+            this.dependencies.history.commit();
         }
     }
 
@@ -315,7 +315,7 @@ export class ImagePlugin extends Plugin {
                     const img = this.document.createElement("IMG");
                     img.setAttribute("src", url);
                     this.dependencies.dom.insert(img);
-                    this.dependencies.history.addStep();
+                    this.dependencies.history.commit();
                 },
             };
         }

@@ -1,4 +1,4 @@
-import { reactive } from "@web/owl2/utils";
+import { proxy } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { _t } from "@web/core/l10n/translation";
@@ -62,8 +62,8 @@ export class TableAlignPlugin extends Plugin {
 
         /** Handlers */
         on_selectionchange_handlers: this.updateVerticalAlignParams.bind(this),
-        on_undone_handlers: this.updateVerticalAlignParams.bind(this),
-        on_redone_handlers: this.updateVerticalAlignParams.bind(this),
+        on_history_commit_undone_handlers: this.updateVerticalAlignParams.bind(this),
+        on_history_commit_redone_handlers: this.updateVerticalAlignParams.bind(this),
         on_all_formats_removed_handlers: this.setVerticalAlignment.bind(this),
 
         /** Predicates */
@@ -75,7 +75,7 @@ export class TableAlignPlugin extends Plugin {
     };
 
     setup() {
-        this.verticalAlignMode = reactive({ displayName: "" });
+        this.verticalAlignMode = proxy({ displayName: "" });
     }
 
     get currentVerticalAlign() {
@@ -112,7 +112,7 @@ export class TableAlignPlugin extends Plugin {
         }
 
         if (isAlignmentUpdated) {
-            this.dependencies.history.addStep();
+            this.dependencies.history.commit();
         }
         this.updateVerticalAlignParams();
     }

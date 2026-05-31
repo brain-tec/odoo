@@ -1,4 +1,4 @@
-import { reactive } from "@web/owl2/utils";
+import { proxy } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
 import { unwrapContents } from "@html_editor/utils/dom";
 import { isRedundantElement, isStylable } from "@html_editor/utils/dom_info";
@@ -89,8 +89,8 @@ export class FontSizePlugin extends Plugin {
             READ,
             this.updateFontSizeSelectorParams.bind(this)
         ),
-        on_undone_handlers: this.updateFontSizeSelectorParams.bind(this),
-        on_redone_handlers: this.updateFontSizeSelectorParams.bind(this),
+        on_history_commit_undone_handlers: this.updateFontSizeSelectorParams.bind(this),
+        on_history_commit_redone_handlers: this.updateFontSizeSelectorParams.bind(this),
         normalize_processors: this.normalize.bind(this),
 
         is_format_class_predicates: (className) => {
@@ -101,7 +101,7 @@ export class FontSizePlugin extends Plugin {
     };
 
     setup() {
-        this.fontSize = reactive({ displayName: "" });
+        this.fontSize = proxy({ displayName: "" });
         this.isTypingFontSize = false;
     }
 

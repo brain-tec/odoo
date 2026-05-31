@@ -148,7 +148,7 @@ export class ShortCutPlugin extends Plugin {
 
     replaceSymbol(symbol) {
         this.dependencies.dom.insert(symbol + "\u00A0");
-        this.dependencies.history.addStep();
+        this.dependencies.history.commit();
     }
 
     onInput(ev) {
@@ -185,7 +185,7 @@ export class ShortCutPlugin extends Plugin {
         if (matchedShortcut) {
             const command = this.dependencies.userCommand.getCommand(matchedShortcut.commandId);
             if (command && (!command.isAvailable || command.isAvailable(selection))) {
-                if (lineBreak) {
+                if (lineBreak && !matchedShortcut.inline) {
                     this.dependencies.split.splitBlockSegments();
                 }
                 // Set selection to the matched string with space
