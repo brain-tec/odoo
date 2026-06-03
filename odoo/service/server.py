@@ -930,7 +930,8 @@ class PreforkServer(CommonServer):
             for registry in registries.values():
                 try:
                     with contextlib.closing(registry.cursor()) as cr:
-                        registry.check_signaling(cr)
+                        # check signaling by instantiating an environment
+                        api.Environment(cr, api.SUPERUSER_ID, {})
                 except Exception as e:  # noqa: BLE001
                     _logger.info("Continue spawning, failed to check signaling on %s. Cause: %s", registry.db_name, e)
             registries.clear()
@@ -1526,6 +1527,7 @@ def preload_registries(dbnames):
                     if post_install_suite.has_http_case():
                         with registry.cursor() as cr:
                             env = api.Environment(cr, api.SUPERUSER_ID, {})
+                            env.registry._assertion_report = registry._assertion_report
                             env['ir.qweb']._pregenerate_assets_bundles()
                     result = loader.run_suite(post_install_suite, global_report=registry._assertion_report)
                     registry._assertion_report.update(result)

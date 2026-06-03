@@ -95,6 +95,7 @@
         --offcanvas-box-shadow: #{$box-shadow};
 
         margin: 0 auto;
+        max-width: 640px;
         min-height: var(--sheet-height);
         max-height: var(--sheet-max-height);
         border-radius: $border-radius-xl $border-radius-xl 0 0;
@@ -282,13 +283,19 @@
     }
 
     .o_kanban_card_manage_settings:has(.o_colorlist) {
+        &.row .o_colorlist {
+            --ColorListField-columns: 6;
+        }
+
         &, > div:last-child {
             padding: 0;
         }
     }
     .row.o_kanban_card_manage_settings:last-child {
         &:has(:not(.o_field_boolean_favorite)) {
-            flex-direction: column-reverse;
+            @include media-breakpoint-down(md) {
+                flex-direction: column-reverse;
+            }
 
             .o_field_kanban_color_picker {
                 padding: map-get($spacers, 3);

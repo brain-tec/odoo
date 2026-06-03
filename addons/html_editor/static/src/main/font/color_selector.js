@@ -1,6 +1,6 @@
-import { useChildEnv, useRef, useState } from "@web/owl2/utils";
+import { useChildEnv, useRef } from "@web/owl2/utils";
 import { isColorGradient } from "@web/core/utils/colors";
-import { Component, useEffect } from "@odoo/owl";
+import { Component, useEffect, proxy } from "@odoo/owl";
 import {
     useColorPicker,
     DEFAULT_COLORS,
@@ -36,7 +36,8 @@ export class ColorSelector extends Component {
     };
 
     setup() {
-        this.state = useState({});
+        this.state = proxy({});
+        this.colorSelectorState = proxy({ isOpen: false });
         const htmlStyle = getHtmlStyle(document);
         const defaultThemeColors = DEFAULT_THEME_COLOR_VARS.map((color) =>
             getCSSVariableValue(color, htmlStyle)
@@ -76,6 +77,10 @@ export class ColorSelector extends Component {
                 onClose: (...args) => {
                     this.props.applyColorResetPreview();
                     this.props.onClose(...args);
+                    this.colorSelectorState.isOpen = false;
+                },
+                onOpen: () => {
+                    this.colorSelectorState.isOpen = true;
                 },
                 ref: colorPickerRef,
             }
