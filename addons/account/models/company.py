@@ -52,7 +52,7 @@ PEPPOL_LIST = PEPPOL_DEFAULT_COUNTRIES + [
 ]
 
 STORNO_MANDATORY_COUNTRIES = {'BA', 'CN', 'CZ', 'HR', 'PL', 'RO', 'RS', 'RU', 'SI', 'SK', 'UA'}
-STORNO_OPTIONAL_COUNTRIES = {'AT', 'CH', 'DE', 'IT'}
+STORNO_OPTIONAL_COUNTRIES = {'AT', 'CH', 'DE', 'IT', 'MK'}
 
 INTEGRITY_HASH_BATCH_SIZE = 1000
 
@@ -846,7 +846,7 @@ class ResCompany(models.Model):
             'ref': _('Opening Journal Entry'),
             'company_id': self.id,
             'journal_id': default_journal.id,
-            'date': (self.account_opening_date or fields.Date.start_of(fields.Date.today(), 'year')) - timedelta(days=1),
+            'date': (self.account_opening_date or fields.Date.start_of(fields.Date.context_today(self), 'year')) - timedelta(days=1),
         }
 
     def opening_move_posted(self):

@@ -61,7 +61,7 @@ class PortalAccount(CustomerPortal):
             ('state', 'not in', ('cancel', 'draft')),
             ('move_type', 'in', ('out_invoice', 'out_receipt')),
             ('payment_state', 'not in', ('in_payment', 'paid', 'reversed', 'blocked', 'invoicing_legacy')),
-            ('invoice_date_due', '<', fields.Date.today()),
+            ('invoice_date_due', '<', fields.Date.context_today(request.env.user)),
             ('partner_id', '=', partner_id or request.env.user.partner_id.id),
         ]
 
@@ -70,7 +70,7 @@ class PortalAccount(CustomerPortal):
             'date': {'label': _('Date'), 'order': 'invoice_date desc'},
             'duedate': {'label': _('Due Date'), 'order': 'invoice_date_due desc'},
             'name': {'label': _('Reference'), 'order': 'name desc'},
-            'state': {'label': _('Status'), 'order': 'state'},
+            'state': {'label': _('Status'), 'order': 'payment_state'},
         }
 
     def _get_account_searchbar_filters(self):

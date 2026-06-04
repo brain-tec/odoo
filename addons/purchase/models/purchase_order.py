@@ -1304,7 +1304,7 @@ class PurchaseOrder(models.Model):
             seller = product._select_seller(
                 partner_id=self.partner_id,
                 quantity=None,
-                date=self.date_order and self.date_order.date(),
+                date=fields.Date.context_today(self, timestamp=self.date_order),
                 uom_id=uom_id,
                 ordered_by='min_qty',
                 params={'order_id': self, 'force_uom': kwargs.get('force_uom', False)}
@@ -1349,7 +1349,7 @@ class PurchaseOrder(models.Model):
             or (self.company_id.po_double_validation == 'two_step'
                 and self.amount_total < self.env.company.currency_id._convert(
                     self.company_id.po_double_validation_amount, self.currency_id, self.company_id,
-                    self.date_order or fields.Date.today()))
+                    self.date_order))
             or self.env.user.has_group('purchase.group_purchase_manager'))
 
     def get_localized_date_planned(self, date_planned=False):

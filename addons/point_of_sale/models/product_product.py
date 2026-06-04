@@ -1,5 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import api, models, fields, _
+from odoo import api, models, _
 from odoo.exceptions import UserError
 
 
@@ -65,10 +65,10 @@ class ProductProduct(models.Model):
             currency = self.env['res.currency'].browse(currency_id)
             for product in products:
                 product['lst_price'] = currency._convert(
-                    product['lst_price'], config.currency_id, self.env.company, fields.Date.today()
+                    product['lst_price'], config.currency_id, self.env.company,
                 )
                 product['standard_price'] = currency._convert(
-                    product['standard_price'], config.currency_id, self.env.company, fields.Date.today()
+                    product['standard_price'], config.currency_id, self.env.company,
                 )
         return read_records
 

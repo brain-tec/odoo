@@ -67,7 +67,7 @@ class ResCompany(models.Model):
         last_closing_date = self._get_last_closing_date()
         if at_date and last_closing_date and at_date < fields.Date.to_date(last_closing_date):
             raise UserError(self.env._('It exists closing entries after the selected date. Cancel them before generate an entry prior to them'))
-        aml_vals_list = self._action_close_stock_valuation(at_date=at_date)
+        aml_vals_list = self.with_context(allowed_company_ids=self.env.company.ids)._action_close_stock_valuation(at_date=at_date)
 
         if not aml_vals_list:
             # No account moves to create, so nothing to display.
@@ -79,7 +79,7 @@ class ResCompany(models.Model):
 
         moves_vals = {
             'journal_id': self.account_stock_journal_id.id,
-            'date': at_date or fields.Date.today(),
+            'date': at_date or fields.Date.context_today(self),
             'closing_datetime': datetime.combine(at_date, time.max) if at_date else fields.Datetime.now(),
             'ref': _('Stock Closing'),
             'inventory_closing': True,
@@ -283,7 +283,7 @@ class ResCompany(models.Model):
         """
         extra_balance = self._get_extra_balance(extra_aml_vals_list)
 
-        fiscal_year_date_from = self.compute_fiscalyear_dates(fields.Date.today())['date_from']
+        fiscal_year_date_from = self.compute_fiscalyear_dates(fields.Date.context_today(self))['date_from']
 
         amls_vals_list = []
         accounting_data_today = self.stock_accounting_value(accounts_by_product)
