@@ -1,5 +1,6 @@
-<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-	<cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>
+<?xml version='1.0' encoding='UTF-8'?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>
 	<cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
 	<cbc:ID>___ignore___</cbc:ID>
 	<cbc:IssueDate>___ignore___</cbc:IssueDate>
@@ -8,6 +9,7 @@
 	<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
 	<cac:OrderReference>
 		<cbc:ID>___ignore___</cbc:ID>
+		<cbc:SalesOrderID>___ignore___</cbc:SalesOrderID>
 	</cac:OrderReference>
 	<cac:AdditionalDocumentReference>
 		<cbc:ID>___ignore___</cbc:ID>
@@ -103,64 +105,48 @@
 			<cbc:ID>BE15001559627230</cbc:ID>
 		</cac:PayeeFinancialAccount>
 	</cac:PaymentMeans>
-	<cac:TaxTotal>
-		<cbc:TaxAmount currencyID="EUR">12.58</cbc:TaxAmount>
-		<cac:TaxSubtotal>
-			<cbc:TaxableAmount currencyID="EUR">0.00</cbc:TaxableAmount>
-			<cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
-			<cac:TaxCategory>
-				<cbc:ID>S</cbc:ID>
-				<cbc:Percent>6.0</cbc:Percent>
-				<cac:TaxScheme>
-					<cbc:ID>VAT</cbc:ID>
-				</cac:TaxScheme>
-			</cac:TaxCategory>
-		</cac:TaxSubtotal>
-		<cac:TaxSubtotal>
-			<cbc:TaxableAmount currencyID="EUR">59.92</cbc:TaxableAmount>
-			<cbc:TaxAmount currencyID="EUR">12.58</cbc:TaxAmount>
-			<cac:TaxCategory>
-				<cbc:ID>S</cbc:ID>
-				<cbc:Percent>21.0</cbc:Percent>
-				<cac:TaxScheme>
-					<cbc:ID>VAT</cbc:ID>
-				</cac:TaxScheme>
-			</cac:TaxCategory>
-		</cac:TaxSubtotal>
-	</cac:TaxTotal>
-	<cac:LegalMonetaryTotal>
-		<cbc:LineExtensionAmount currencyID="EUR">59.92</cbc:LineExtensionAmount>
-		<cbc:TaxExclusiveAmount currencyID="EUR">59.92</cbc:TaxExclusiveAmount>
-		<cbc:TaxInclusiveAmount currencyID="EUR">72.50</cbc:TaxInclusiveAmount>
-		<cbc:PrepaidAmount currencyID="EUR">0.00</cbc:PrepaidAmount>
-		<cbc:PayableAmount currencyID="EUR">72.50</cbc:PayableAmount>
-	</cac:LegalMonetaryTotal>
-	<cac:InvoiceLine>
+    <cac:AllowanceCharge>
+        <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+        <cbc:AllowanceChargeReasonCode>95</cbc:AllowanceChargeReasonCode>
+        <cbc:AllowanceChargeReason>General discount</cbc:AllowanceChargeReason>
+        <cbc:Amount currencyID="EUR">100.00</cbc:Amount>
+        <cac:TaxCategory>
+            <cbc:ID>S</cbc:ID>
+            <cbc:Percent>21.0</cbc:Percent>
+            <cac:TaxScheme>
+                <cbc:ID>VAT</cbc:ID>
+            </cac:TaxScheme>
+        </cac:TaxCategory>
+    </cac:AllowanceCharge>
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="EUR">189.00</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="EUR">900.00</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="EUR">189.00</cbc:TaxAmount>
+            <cac:TaxCategory>
+                <cbc:ID>S</cbc:ID>
+                <cbc:Percent>21.0</cbc:Percent>
+                <cac:TaxScheme>
+                    <cbc:ID>VAT</cbc:ID>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="EUR">1000.00</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="EUR">900.00</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="EUR">1089.00</cbc:TaxInclusiveAmount>
+        <cbc:AllowanceTotalAmount currencyID="EUR">100.00</cbc:AllowanceTotalAmount>
+        <cbc:PrepaidAmount currencyID="EUR">0.00</cbc:PrepaidAmount>
+        <cbc:PayableAmount currencyID="EUR">1089.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+    <cac:InvoiceLine>
 		<cbc:ID>___ignore___</cbc:ID>
-		<cbc:InvoicedQuantity unitCode="C62">20.0</cbc:InvoicedQuantity>
-		<cbc:LineExtensionAmount currencyID="EUR">0.00</cbc:LineExtensionAmount>
+		<cbc:InvoicedQuantity unitCode="C62">1.0</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="EUR">1000.00</cbc:LineExtensionAmount>
 		<cac:Item>
-			<cbc:Description>Miel des Cabanes - 250gr</cbc:Description>
-			<cbc:Name>Test Product</cbc:Name>
-			<cac:ClassifiedTaxCategory>
-				<cbc:ID>S</cbc:ID>
-				<cbc:Percent>6.0</cbc:Percent>
-				<cac:TaxScheme>
-					<cbc:ID>VAT</cbc:ID>
-				</cac:TaxScheme>
-			</cac:ClassifiedTaxCategory>
-		</cac:Item>
-		<cac:Price>
-			<cbc:PriceAmount currencyID="EUR">0.0</cbc:PriceAmount>
-		</cac:Price>
-	</cac:InvoiceLine>
-	<cac:InvoiceLine>
-		<cbc:ID>___ignore___</cbc:ID>
-		<cbc:InvoicedQuantity unitCode="C62">50.0</cbc:InvoicedQuantity>
-		<cbc:LineExtensionAmount currencyID="EUR">59.92</cbc:LineExtensionAmount>
-		<cac:Item>
-			<cbc:Description>Conditionnement spécial - pots de 50gr</cbc:Description>
-			<cbc:Name>Test Product</cbc:Name>
+			<cbc:Description>product_a</cbc:Description>
+			<cbc:Name>product_a</cbc:Name>
 			<cac:ClassifiedTaxCategory>
 				<cbc:ID>S</cbc:ID>
 				<cbc:Percent>21.0</cbc:Percent>
@@ -170,7 +156,7 @@
 			</cac:ClassifiedTaxCategory>
 		</cac:Item>
 		<cac:Price>
-			<cbc:PriceAmount currencyID="EUR">1.1983471</cbc:PriceAmount>
+			<cbc:PriceAmount currencyID="EUR">1000.0</cbc:PriceAmount>
 		</cac:Price>
 	</cac:InvoiceLine>
 </Invoice>
