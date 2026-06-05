@@ -371,7 +371,7 @@
                                                 nolabel="1"/>
                                             </div>
                                         <field name="employee_type_id" string="Employee Type" placeholder="Select employee type"
-                                                domain="[('country_id', 'in', [company_country_id, False])]"
+                                                domain="[('country_id', 'in', [company_country_id, False]), '|', ('company_id', 'in', [company_id, False]), ('company_id', '=', parent_company_id)]"
                                                 required="contract_date_start"/>
                                         <label for="contract_date_start" string="Contract"/>
                                         <div class="o_row" name="contract_dates">
@@ -388,8 +388,8 @@
                                         </div>
                                         <field name="structure_type_id" string="Pay Category" placeholder="Employee will be excluded from Pay Runs"
                                                 domain="['|', ('country_id', '=', False), ('country_id', '=', company_country_id)]"/>
-
-                                        <separator name="schedule" string="Schedule"/>
+                                    </group>
+                                    <group name="schedule" string="Schedule">
                                         <field name="resource_calendar_id" help="The default working hours are set in configuration." placeholder="Flexible"/>
                                         <label for="hours_per_week" string="Hours Per Week" invisible="resource_calendar_id"/>
                                         <div class="o_row" name="flexible_hours_per_week" invisible="resource_calendar_id">

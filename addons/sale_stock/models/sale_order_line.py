@@ -192,7 +192,7 @@ class SaleOrderLine(models.Model):
                         continue
                     qty += move.uom_id._compute_quantity(move.quantity, line.product_uom_id, rounding_method='HALF-UP')
                 for move in incoming_moves:
-                    if move.state != 'done':
+                    if move.state != 'done' or (not move.origin_returned_move_id and line.product_uom_qty > 0 and not move.picking_id.return_id):
                         continue
                     qty -= move.uom_id._compute_quantity(move.quantity, line.product_uom_id, rounding_method='HALF-UP')
 
@@ -433,6 +433,15 @@ class SaleOrderLine(models.Model):
             )
         )
         return res
+
+    def _is_returnable(self):
+        """Return whether this line contains a product eligible for return."""
+        self.ensure_one()
+        return (
+            self.product_type == "consu"
+            and self._is_product_line()
+            and self.has_valued_move_ids()
+        )
 
     def has_valued_move_ids(self):
         return any(move.state not in ('cancel', 'draft') for move in self.move_ids)

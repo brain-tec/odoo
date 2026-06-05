@@ -856,15 +856,20 @@ class SaleOrderLine(models.Model):
             for combo_id in combo_line.product_template_id.sudo().combo_ids
         }
         total_combo_base_price = sum(combo_base_prices.values())
-        # Compute the prorated combo prices.
-        combo_prices = {
-            combo_id: self.currency_id.round(
-                # Don't divide by total_combo_base_price if it's 0. This will make the prorating
-                # wrong, but the delta will be fixed by combo_price_delta below.
-                base_price * combo_product_price / (total_combo_base_price or 1)
-            )
-            for (combo_id, base_price) in combo_base_prices.items()
-        }
+        # Compute the prorated combo prices. When all combos have a zero base price, prorating by
+        # base price would assign the whole combo product's price to a single combo (via
+        # combo_price_delta below), making one combo item show the full price while the others
+        # show 0. Distribute the price evenly instead.
+        if total_combo_base_price:
+            combo_prices = {
+                combo_id: self.currency_id.round(
+                    base_price * combo_product_price / total_combo_base_price
+                )
+                for (combo_id, base_price) in combo_base_prices.items()
+            }
+        else:
+            even_share = self.currency_id.round(combo_product_price / len(combo_base_prices))
+            combo_prices = {combo_id: even_share for combo_id in combo_base_prices}
         # Compute the delta between the combo product's price and the sum of its combo prices.
         # Ideally, this should be 0, but division in python isn't perfect, so we may need to adjust
         # the combo prices to make the delta 0.
@@ -1923,6 +1928,14 @@ class SaleOrderLine(models.Model):
         return {so_line.id: so_line._get_partner_display() for so_line in self}
 
     # === HOOKS ===#
+
+    def _is_product_line(self):
+        """Return whether it is a product line.
+
+        A product line is not a section/note, not a combo sub-line , and not a delivery.
+        """
+        self.ensure_one()
+        return not self.display_type and not self.combo_item_id and not self._is_delivery()
 
     def _is_delivery(self):
         self.ensure_one()

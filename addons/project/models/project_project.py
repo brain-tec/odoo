@@ -169,7 +169,7 @@ class ProjectProject(models.Model):
 
     update_ids = fields.One2many('project.update', 'project_id', export_string_translation=False)
     update_count = fields.Integer(compute='_compute_total_update_ids', export_string_translation=False)
-    last_update_id = fields.Many2one('project.update', string='Last Update', copy=False, export_string_translation=False)
+    last_update_id = fields.Many2one('project.update', string='Last Update', copy=False, index='btree_not_null', export_string_translation=False)
     last_update_status = fields.Selection(selection=[
         ('on_track', 'On Track'),
         ('at_risk', 'At Risk'),
@@ -919,9 +919,9 @@ class ProjectProject(models.Model):
                 res -= waiting_subtype
         return res
 
-    def _notify_get_recipients_groups(self, message, model_description, msg_vals=False):
+    def _notify_get_recipients_groups(self, message, model_description):
         """ Give access to the portal user/customer if the project visibility is portal. """
-        groups = super()._notify_get_recipients_groups(message, model_description, msg_vals=msg_vals)
+        groups = super()._notify_get_recipients_groups(message, model_description)
         if not self:
             return groups
 
