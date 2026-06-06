@@ -308,7 +308,7 @@ class ResLang(models.CachedModel):
     @api.model
     def _get_active_langs(self):
         """ Return active languages. """
-        return self.browse(self._cached_data()['id'])
+        return self.get_all()
 
     def _get_data(self, **kwargs) -> LangData:
         """ Get the language data for the given field value in kwargs
@@ -350,7 +350,7 @@ class ResLang(models.CachedModel):
             for lang in self.sudo()._get_active_langs().sorted('name')
         ]
 
-    @tools.ormcache('field', cache='stable')
+    @api.ormcache('field', cache='stable')
     def _get_active_by(self, field: str) -> LangDataDict:
         """ Return a LangDataDict mapping active languages' **unique**
         **required** ``self._cached_data_fields`` values to their LangData.

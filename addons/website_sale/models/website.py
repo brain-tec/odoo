@@ -8,11 +8,11 @@ from urllib.parse import parse_qsl, urlencode, urlsplit
 from lxml import etree
 from requests import RequestException
 
-from odoo import SUPERUSER_ID, api, fields, models, tools
+from odoo import SUPERUSER_ID, api, fields, models
 from odoo.exceptions import MissingError
 from odoo.fields import Domain
 from odoo.http import request
-from odoo.tools import BinaryBytes, file_open, ormcache
+from odoo.tools import BinaryBytes, file_open
 from odoo.tools.json import scriptsafe as json_scriptsafe
 
 from odoo.addons.website_sale import const
@@ -263,7 +263,8 @@ class Website(models.Model):
     )
 
     currency_id = fields.Many2one(
-        string="Default Currency", comodel_name="res.currency",
+        string="Default Currency",
+        comodel_name="res.currency",
         compute="_compute_currency_id",
         compute_sql="_compute_sql_currency_id",
         compute_sudo=True,
@@ -303,8 +304,9 @@ class Website(models.Model):
                 request and hasattr(request, "pricelist") and request.pricelist.currency_id
             ) or website.company_id.sudo().currency_id
 
-    def _compute_sql_currency_id(self, table):
-        raise ValueError("website.currency_id is not searchable")  # depends on request
+    def _compute_sql_currency_id(self, table):  # noqa: ARG002
+        msg = "website.currency_id is not searchable"
+        raise ValueError(msg)  # depends on request
 
     @api.depends("send_abandoned_cart_email")
     def _compute_send_abandoned_cart_email_activation_time(self):
@@ -562,7 +564,7 @@ class Website(models.Model):
         return res
 
     # This method is cached, must not return records! See also #8795
-    @ormcache(
+    @api.ormcache(
         "country_code", "show_visible", "current_pl_id", "website_pricelist_ids", "partner_pl_id"
     )
     def _get_pl_partner_order(
@@ -699,7 +701,7 @@ class Website(models.Model):
                     self.env["product.template"]._get_saleable_tracking_types(),
                 ),
             ]
-        company_domain = [('company_id', 'in', [False, website.company_id.id])]
+        company_domain = [("company_id", "in", [False, website.company_id.id])]
         return Domain.AND([website._product_domain(), website_domain, user_domain, company_domain])
 
     def _product_domain(self):  # noqa: PLR6301
@@ -773,7 +775,9 @@ class Website(models.Model):
         else:
             pricelist_sudo = self.env.user.partner_id.property_product_pricelist
             available_pricelists = self.get_pricelist_available()
-            if available_pricelists and pricelist_sudo not in available_pricelists:
+            if not available_pricelists:
+                pricelist_sudo = available_pricelists
+            elif pricelist_sudo not in available_pricelists:
                 pricelist_sudo = available_pricelists[0].sudo()
 
         request.session[PRICELIST_SESSION_CACHE_KEY] = pricelist_sudo.id
@@ -869,9 +873,9 @@ class Website(models.Model):
             and self.env.user.partner_id.filtered_domain(
                 self.env["res.partner"]._check_company_domain(self.company_id.id)
             )
-        ):  # Search for abandonned cart.
+        ):  # Search for abandoned cart.
             partner_sudo = self.env.user.partner_id
-            abandonned_cart_sudo = SaleOrderSudo.search(
+            abandoned_cart_sudo = SaleOrderSudo.search(
                 [
                     ("partner_id", "=", partner_sudo.id),
                     ("website_id", "=", self.id),
@@ -879,13 +883,13 @@ class Website(models.Model):
                 ],
                 limit=1,
             )
-            if abandonned_cart_sudo:
+            if abandoned_cart_sudo:
                 if not self.env.cr.readonly:
                     # Force the recomputation of the pricelist and fiscal position when resurrecting
-                    # an abandonned cart
-                    abandonned_cart_sudo._update_address(partner_sudo.id, ["partner_id"])
-                    abandonned_cart_sudo._verify_cart()
-                sale_order_sudo = abandonned_cart_sudo
+                    # an abandoned cart
+                    abandoned_cart_sudo._update_address(partner_sudo.id, ["partner_id"])
+                    abandoned_cart_sudo._verify_cart()
+                sale_order_sudo = abandoned_cart_sudo
 
         if (
             sale_order_sudo or not self.env.user._is_public()
@@ -1029,19 +1033,19 @@ class Website(models.Model):
     def _get_checkout_step(self, href):
         return self.env["website.checkout.step"].sudo().browse(self._get_checkout_step_id(href))
 
-    @tools.ormcache("self.id", "href")
+    @api.ormcache("self.id", "href")
     def _get_checkout_step_id(self, href):
         self.ensure_one()
         return self.env["website.checkout.step"].sudo()._get_step_by_href(href, self).id
 
-    @tools.ormcache("self.id", "href")
+    @api.ormcache("self.id", "href")
     def _get_next_breadcrumb_step_id(self, href):
         current_step_sudo = self._get_checkout_step(href)
         return current_step_sudo._get_next_steps(
             additional_domain=self._get_breadcrumb_checkout_steps_domain(), limit=1
         ).id
 
-    @tools.ormcache("self.id", "href")
+    @api.ormcache("self.id", "href")
     def _get_previous_breadcrumb_step_id(self, href):
         current_step_sudo = self._get_checkout_step(href)
         return current_step_sudo._get_previous_steps(

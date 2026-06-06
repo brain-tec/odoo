@@ -33,7 +33,10 @@ class TestACL(TransactionCaseWithUserDemo):
         field = model._fields[field_name]
         self.patch(field, 'groups', groups)
         self.env.transaction.clear()
-        self.env.registry.clear_cache('templates')
+        # because of monkey patching, we clear everything including caches
+        self.env.transaction.invalidate_ormcache('stable')
+        self.env.transaction.invalidate_ormcache('groups')
+        self.env.transaction.invalidate_ormcache('templates')
 
     def test_field_visibility_restriction(self):
         """Check that model-level ``groups`` parameter effectively restricts access to that

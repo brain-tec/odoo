@@ -5,7 +5,6 @@ from random import randint
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.tools import ormcache
 from odoo.tools.sql import make_index_name, create_index
 
 
@@ -100,7 +99,7 @@ class AccountAnalyticPlan(models.Model):
             )
         self.env.cr.precommit.add(precommit)
 
-    @ormcache()
+    @api.ormcache()
     def __get_all_plans(self):
         project_plan = self.browse(self.env['ir.config_parameter'].sudo().get_int('analytic.project_plan'))
         if not project_plan and self.env.registry.ready:
@@ -264,7 +263,7 @@ class AccountAnalyticPlan(models.Model):
         related_fields = self._find_related_field()
         res = super().unlink()
         related_fields.filtered(lambda f: not self._is_subplan_field_used(f)).unlink()
-        self.env.registry.clear_cache('stable')
+        self.env.transaction.invalidate_ormcache('stable')
         return res
 
     def _hierarchy_name(self):

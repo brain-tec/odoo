@@ -833,7 +833,7 @@ test("should remove text color from empty element", async () => {
         contentBefore:
             '<p><font data-oe-zws-empty-inline="" style="color: rgb(255, 0, 0);">[]\u200B</font></p>',
         stepFunction: (editor) => execCommand(editor, "removeFormat"),
-        contentAfterEdit: `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]\u200b</p>`,
+        contentAfterEdit: `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">\u200b[]</p>`,
     });
 });
 
@@ -849,7 +849,7 @@ test("should remove text color from empty element in a single selected cell", as
         contentAfterEdit: unformat(`
             <p data-selection-placeholder=""><br></p>
             <table class="table table-bordered o_table o_selected_table"><tbody>
-                <tr><td class="o_selected_td"><p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]\u200b</p></td></tr>
+                <tr><td class="o_selected_td"><p o-we-hint-text='Type "/" for commands' class="o-we-hint">\u200b[]</p></td></tr>
                 <tr><td><p><br></p></td></tr>
             </tbody></table>
             <p data-selection-placeholder="" style="margin: -9px 0px 8px;"><br></p>
@@ -901,6 +901,14 @@ test("Remove format not remove text color if applied on .btn element", async () 
         stepFunction: (editor) => execCommand(editor, "removeFormat"),
         contentAfter:
             '<p><a href="#" class="btn btn-custom text-o-color-5" style="font-weight: 400;">T[es]t</a></p>',
+    });
+});
+
+test("should remove format of a editable text within contenteditable false block", async () => {
+    await testEditor({
+        contentBefore: `<div contenteditable="false"><div contenteditable="true"><p><font style="background-color: red;"><font style="background-color: blue;">ab[cd]ef</font></font></p></div></div>`,
+        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        contentAfter: `<div contenteditable="false"><div contenteditable="true"><p><font style="background-color: red;"><font style="background-color: blue;">ab</font></font>[cd]<font style="background-color: red;"><font style="background-color: blue;">ef</font></font></p></div></div>`,
     });
 });
 

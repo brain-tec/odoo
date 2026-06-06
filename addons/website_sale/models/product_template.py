@@ -12,7 +12,6 @@ from odoo.tools import float_round, is_html_empty, lazy
 from odoo.tools.sql import SQL, column_exists, create_column
 from odoo.tools.translate import adapt_translated_field_value, html_translate
 
-from odoo.addons.website.models import ir_http
 from odoo.addons.website.tools import text_from_html
 
 # A delimiter that users aren't likely to search for in product codes.
@@ -665,8 +664,10 @@ class ProductTemplate(models.Model):
                 )
 
             if uom_price_enabled:
-                template_price_vals["base_unit_price"] = template.product_variant_id._get_base_unit_price(
-                    template_price_vals["price_reduce"]
+                template_price_vals["base_unit_price"] = (
+                    template.product_variant_id._get_base_unit_price(
+                        template_price_vals["price_reduce"]
+                    )
                 )
 
             res[template.id] = template_price_vals
@@ -741,7 +742,7 @@ class ProductTemplate(models.Model):
         self.ensure_one()
 
         combination = combination or self.env["product.template.attribute.value"]
-        website = request.website.with_context(self.env.context)
+        website = self.env["website"].get_current_website()
         uom = self.env["uom.uom"].browse(uom_id) or self._get_main_uom()
 
         if not product_id and not combination and not only_template:
@@ -972,7 +973,7 @@ class ProductTemplate(models.Model):
 
         :param int | typing.Iterable[int | str] combination_ids: The IDs of the currently selected
             `product.template.attribute.value` records.
-        :param int website_id: The ID of the current website (request.website.id). Used
+        :param int website_id: The ID of the current website. Used
             to generate correct image URLs for the specific domain context.
 
         :return: A dictionary mapping attribute value IDs to their corresponding image
@@ -1216,7 +1217,7 @@ class ProductTemplate(models.Model):
         ]
 
     @api.model
-    def _search_get_detail(self, website, order, options):
+    def _search_get_detail(self, website, order, options):  # noqa: ARG002
         domains = [website.sale_product_domain()]
         category = options.get("category")
         tags = options.get("tags")
@@ -1381,7 +1382,7 @@ class ProductTemplate(models.Model):
             product_or_template, quantity, date, currency, pricelist, **kwargs
         )
 
-        if website := ir_http.get_request_website():
+        if website := self.env["website"].get_current_website(fallback=False):
             price = product_or_template._apply_taxes_to_price(price, currency, website=website)
 
         return price, pricelist_rule_id
@@ -1590,7 +1591,9 @@ class ProductTemplate(models.Model):
             product_or_template, date, currency, pricelist, **kwargs
         )
 
-        if (website := ir_http.get_request_website()) and product_or_template.is_product_variant:
+        if (
+            website := self.env["website"].get_current_website(fallback=False)
+        ) and product_or_template.is_product_variant:
             max_quantity = product_or_template._get_max_quantity(website, request.cart, **kwargs)
             if max_quantity is not None:
                 if uom:

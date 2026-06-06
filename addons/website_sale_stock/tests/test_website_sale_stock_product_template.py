@@ -28,8 +28,8 @@ class TestWebsiteSaleStockProductTemplate(HttpCase, WebsiteSaleStockCommon):
             "quantity": 10,
         })
 
-        with self.mock_request():
-            configurator_data = self.env["product.template"]._get_additional_configurator_data(
+        with self.mock_request() as request:
+            configurator_data = request.env["product.template"]._get_additional_configurator_data(
                 product_or_template=product,
                 date=datetime(2000, 1, 1),
                 currency=self.currency,
@@ -75,10 +75,7 @@ class TestWebsiteSaleStockProductTemplate(HttpCase, WebsiteSaleStockCommon):
                 .env["product.template"]
                 .with_context(website_sale_product_page=True)
                 ._get_additional_combination_info(
-                    combo_product,
-                    quantity=3,
-                    uom=combo_product.uom_id,
-                    website=self.website,
+                    combo_product, quantity=3, uom=combo_product.uom_id, website=self.website
                 )
             )
 
@@ -98,10 +95,7 @@ class TestWebsiteSaleStockProductTemplate(HttpCase, WebsiteSaleStockCommon):
                 .env["product.template"]
                 .with_context(website_sale_product_page=True)
                 ._get_additional_combination_info(
-                    combo_product,
-                    quantity=3,
-                    uom=combo_product.uom_id,
-                    website=self.website,
+                    combo_product, quantity=3, uom=combo_product.uom_id, website=self.website
                 )
             )
 

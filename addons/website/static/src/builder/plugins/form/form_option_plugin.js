@@ -39,6 +39,7 @@ import {
 } from "./utils";
 import { SyncCache } from "@html_builder/utils/sync_cache";
 import { _t } from "@web/core/l10n/translation";
+import { omit } from "@web/core/utils/objects";
 import { renderToElement } from "@web/core/utils/render";
 import { selectElements } from "@html_editor/utils/dom_traversal";
 import { BuilderAction } from "@html_builder/core/builder_action";
@@ -67,10 +68,11 @@ import { nodeSize } from "@html_editor/utils/position";
 const DEFAULT_EMAIL_TO_VALUE = "info@yourcompany.example.com";
 export class FormOptionPlugin extends Plugin {
     static id = "websiteFormOption";
-    static dependencies = ["builderActions", "builderOptions", "savePlugin"];
+    static dependencies = ["builderActions", "builderOptions", "savePlugin", "websiteBridge"];
     static shared = [
         "prepareFormModel",
         "getModelsCache",
+        "getVisibilityConditionCache",
         "applyFormModel",
         "addHiddenField",
         "fetchAuthorizedFields",
@@ -124,13 +126,13 @@ export class FormOptionPlugin extends Plugin {
                 const model = models?.find((model) => model.model === modelName);
                 const fieldName = getFieldName(el);
                 return model
-                        ? _t(
-                              'The field "%(fieldName)s" is mandatory for the action "%(actionName)s".',
-                              { fieldName, actionName: model.website_form_label }
-                          )
-                        : _t("The field “%(fieldName)s” is mandatory for the selected action.", {
-                              fieldName,
-                          });
+                    ? _t(
+                          'The field "%(fieldName)s" is mandatory for the action "%(actionName)s".',
+                          { fieldName, actionName: model.website_form_label }
+                      )
+                    : _t("The field “%(fieldName)s” is mandatory for the selected action.", {
+                          fieldName,
+                      });
             }
         },
         builder_actions: {
@@ -212,6 +214,8 @@ export class FormOptionPlugin extends Plugin {
             this._getVisibilityConditionCachedRecords.bind(this),
             JSON.stringify
         );
+        this.website_t = this.dependencies.websiteBridge._t;
+        this.website_registry = this.dependencies.websiteBridge.getRegistry();
     }
     destroy() {
         super.destroy();
@@ -219,6 +223,9 @@ export class FormOptionPlugin extends Plugin {
         this.fieldRecordsCache.invalidate();
         this.authorizedFieldsCache.invalidate();
         this.visibilityConditionCachedRecords.invalidate();
+    }
+    getVisibilityConditionCache() {
+        return this.visibilityConditionCachedRecords;
     }
     getModelsCache(formEl) {
         // Through a method so that it can be overridden.
@@ -281,7 +288,8 @@ export class FormOptionPlugin extends Plugin {
             field.records = await this.services.orm.searchRead(
                 field.relation,
                 field.domain || [],
-                fieldNames
+                fieldNames,
+                { context: this.dependencies.websiteBridge.getWebsiteContextLang() },
             );
             if (field.fieldName) {
                 field.records.forEach((r) => (r["display_name"] = r[field.fieldName]));
@@ -289,11 +297,21 @@ export class FormOptionPlugin extends Plugin {
         }
         return field.records;
     }
+    getRegistryFormInfo(formKey) {
+        const formInfo = this.website_registry
+            ?.category("website.form_editor_actions")
+            .get(formKey, null);
+        const builderFormInfo = registry.category("builder.form_editor_actions").get(formKey, {});
+        return {
+            ...formInfo,
+            ...omit(builderFormInfo, "formFields"),
+        };
+    }
     async prepareFormModel(el, activeForm) {
         const formEl = el.closest("form");
         const formKey = activeForm?.website_form_key;
-        const formInfo = registry.category("website.form_editor_actions").get(formKey, null);
-        if (formInfo) {
+        const formInfo = this.getRegistryFormInfo(formKey);
+        if (formInfo.formFields) {
             const formatInfo = getDefaultFormat(el);
             await Promise.all(
                 formInfo.formFields.map((field) => {
@@ -301,8 +319,8 @@ export class FormOptionPlugin extends Plugin {
                     return this.fetchFieldRecords(field, formEl);
                 })
             );
-            await this.fetchFormInfoFields(formInfo);
         }
+        await this.fetchFormInfoFields(formInfo);
         return formInfo;
     }
     /**
@@ -351,9 +369,7 @@ export class FormOptionPlugin extends Plugin {
         if (modelId) {
             const oldFormKey = activeForm.website_form_key;
             if (oldFormKey) {
-                oldFormInfo = registry
-                    .category("website.form_editor_actions")
-                    .get(oldFormKey, null);
+                oldFormInfo = this.getRegistryFormInfo(oldFormKey);
             }
             for (const fieldEl of el.querySelectorAll(".s_website_form_field")) {
                 fieldEl.remove();
@@ -382,7 +398,7 @@ export class FormOptionPlugin extends Plugin {
         // Load template
         if (formInfo) {
             const formatInfo = getDefaultFormat(el);
-            formInfo.formFields.forEach((field) => {
+            formInfo.formFields?.forEach((field) => {
                 // Create a shallow copy of field to prevent unintended
                 // mutations to the original field stored in the registry
                 const _field = { ...field };
@@ -417,10 +433,16 @@ export class FormOptionPlugin extends Plugin {
         return this.authorizedFieldsCache.read({ cacheKey, model, propertyOrigins });
     }
     async _fetchAuthorizedFields({ cacheKey, model, propertyOrigins }) {
-        return this.services.orm.call("ir.model", "get_authorized_fields", [
-            model,
-            propertyOrigins,
-        ]);
+        return this.services.orm.call(
+            "ir.model",
+            "get_authorized_fields",
+            [model, propertyOrigins],
+            {
+                context: {
+                    additional_lang: this.services.website.currentWebsite.default_lang_id.code,
+                },
+            }
+        );
     }
     async _getVisibilityConditionCachedRecords(model, domain, fields, kwargs = {}) {
         return this.services.orm.searchRead(model, domain, fields, {
@@ -461,7 +483,7 @@ export class FormOptionPlugin extends Plugin {
         });
     }
     addFieldToForm(formEl) {
-        const field = getCustomField("char", _t("Custom Text"));
+        const field = getCustomField("char", this.website_t("Custom Text"));
         field.formatInfo = getDefaultFormat(formEl);
         const fieldEl = renderField(field);
         let locationEl = formEl.querySelector(".s_website_form_submit, .s_website_form_recaptcha");
@@ -477,7 +499,7 @@ export class FormOptionPlugin extends Plugin {
         let newSnippetEl = null;
         const formEl = fieldEl.closest("form");
         if (snippet.id === "field") {
-            const field = getCustomField("char", _t("Custom Text"));
+            const field = getCustomField("char", this.website_t("Custom Text"));
             field.formatInfo = getFieldFormat(fieldEl);
             field.formatInfo.requiredMark = isRequiredMark(formEl);
             field.formatInfo.optionalMark = isOptionalMark(formEl);
@@ -1548,7 +1570,26 @@ export class SetFormCustomFieldValueListAction extends BuilderAction {
 
 export class SetDependencyValueListAction extends BuilderAction {
     static id = "setDependencyValueList";
+    static dependencies = ["websiteFormOption"];
 
+    setup() {
+        this.recordValue = [];
+    }
+    async prepare({ editingElement }) {
+        const dependencyEl = getDependencyEl(editingElement);
+        const containerEl = dependencyEl.closest(".s_website_form_field");
+        this.visibilityConditionCachedRecords =
+            this.dependencies.websiteFormOption.getVisibilityConditionCache();
+        if (containerEl?.dataset.type === "record") {
+            const model = containerEl.dataset.model;
+            const idField = containerEl.dataset.idField || "id";
+            const displayNameField = containerEl.dataset.displayNameField || "display_name";
+            this.recordValue = await this.visibilityConditionCachedRecords.read(model, [
+                idField,
+                displayNameField,
+            ]);
+        }
+    }
     apply({ editingElement: fieldEl, value }) {
         const values = JSON.parse(value);
         const selectedList = values.filter(({ selected }) => selected).map(({ name }) => name);
@@ -1561,40 +1602,58 @@ export class SetDependencyValueListAction extends BuilderAction {
         if (!dependencyEl) {
             return;
         }
+        const containerEl = dependencyEl.closest(".s_website_form_field");
         const isSelect = dependencyEl.nodeName === "SELECT";
         const multipleInputsWrapper = dependencyEl.closest(".s_website_form_multiple");
-        let optionEls = [];
-        if (isSelect) {
-            optionEls = Array.from(dependencyEl.querySelectorAll("option"));
-        } else if (multipleInputsWrapper) {
-            optionEls = Array.from(multipleInputsWrapper.querySelectorAll(".s_website_form_input"));
+        let visibilityCondition = fieldEl.dataset.visibilityCondition;
+        try {
+            const parsed = JSON.parse(visibilityCondition);
+            // Accept parsed result only when it's NOT a string
+            if (typeof parsed !== "string") {
+                visibilityCondition = parsed;
+            }
+        } catch {
+            // keep original value
         }
-
-        const isSelected = (el) => {
-            let visibilityCondition = fieldEl.dataset.visibilityCondition;
-            try {
-                const parsed = JSON.parse(visibilityCondition);
-                // Accept parsed result only when it's NOT a string
-                if (typeof parsed !== "string") {
-                    visibilityCondition = parsed;
-                }
-            } catch {
-                // keep original value
+        const isSelected = (value) => {
+            if (!visibilityCondition) {
+                return false;
             }
-            if (visibilityCondition) {
-                return Array.isArray(visibilityCondition)
-                    ? visibilityCondition?.includes(el.value)
-                    : visibilityCondition === el.value;
-            }
-            return false;
+            return Array.isArray(visibilityCondition)
+                ? visibilityCondition?.includes(value.toString())
+                : visibilityCondition.toString() === value.toString();
         };
-        const result = optionEls.map((el) => ({
-            id: el.value,
-            name: el.value,
-            display_name: isSelect ? el.textContent : el.labels[0]?.textContent || "",
-            undeletable: true,
-            selected: isSelected(el),
-        }));
+        let result = [];
+        if (isSelect || multipleInputsWrapper) {
+            let optionEls = [];
+            if (isSelect) {
+                optionEls = Array.from(dependencyEl.querySelectorAll("option"));
+            } else if (multipleInputsWrapper) {
+                optionEls = Array.from(
+                    multipleInputsWrapper.querySelectorAll(".s_website_form_input")
+                );
+            }
+            result = optionEls.map((el) => ({
+                id: el.value,
+                name: el.value,
+                display_name: isSelect ? el.textContent : el.labels[0]?.textContent || "",
+                undeletable: true,
+                selected: isSelected(el.value),
+            }));
+        } else if (containerEl?.dataset.type === "record") {
+            const idField = containerEl.dataset.idField || "id";
+            const displayNameField = containerEl.dataset.displayNameField || "display_name";
+            result = this.recordValue.map((record) => {
+                const id = String(record[idField]);
+                return {
+                    id,
+                    name: id,
+                    display_name: record[displayNameField],
+                    undeletable: true,
+                    selected: isSelected(id),
+                };
+            });
+        }
         return JSON.stringify(result);
     }
 }

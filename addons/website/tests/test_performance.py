@@ -80,7 +80,6 @@ class UtilPerf(HttpCaseWithUserPortal, HttpCaseWithUserDemo):
 
         sql_from_tables = {}
         sql_into_tables = {}
-
         query_separator = '\n' + '-' * 100 + '\n'
         queries = query_separator.join(sql_queries)
 
@@ -150,22 +149,22 @@ class TestStandardPerformance(UtilPerf):
 
     @mute_logger('odoo.http')
     def test_20_perf_sql_img_controller_bis(self):
-        website_id = self.ref('website.default_website')
+        website_id = self.ref('base.default_website')
         url = f'/web/image/website/{website_id}/favicon'
         select_tables_perf = {
-            'website': 2,
+            'website': 1,
             # 1. `_find_record()` performs an access right check through
             #    `exists()` which perform a request on the website.
             # 2. `_get_stream_from` ends up reading the requested record to
             #    give a name to the file (downloaded_name)
-            'ir_attachment': 2,
+            'ir_attachment': 1,
             # 1. `_record_to_stream()` does a `search()`..
             # 2. ..followed by a `_read()`
         }
-        self._check_url_hot_query(url, 4, select_tables_perf)
+        self._check_url_hot_query(url, 2, select_tables_perf)
 
         self.authenticate('portal', 'portal')
-        self._check_url_hot_query(url, 4, select_tables_perf)
+        self._check_url_hot_query(url, 2, select_tables_perf)
 
 
 class TestWebsitePerformanceCommon(UtilPerf):
@@ -176,7 +175,7 @@ class TestWebsitePerformanceCommon(UtilPerf):
 
     def _create_page_with_menu(self, url):
         name = url[1:]
-        website = self.env.ref('website.default_website')
+        website = self.env.ref('base.default_website')
         page = self.env['website.page'].create({
             'url': url,
             'name': name,
@@ -227,12 +226,11 @@ class TestWebsitePerformance(TestWebsitePerformanceCommon):
                     'website_page': 2,
                     # 1. `_serve_page` search page matching URL..
                     # 2. ..then reads it (`is_visible`)
-                    'website': 1,
                     # menu and layout
                     'website_menu': 1,
                     'ir_ui_view': 1,
                 }
-                expected_query_count = 6
+                expected_query_count = 5
                 self._check_url_hot_query(self.page.url, expected_query_count, select_tables_perf, nocache=True)
                 self.assertEqual(self._get_url_hot_query(self.page.url, nocache=True), expected_query_count)
 
@@ -250,12 +248,11 @@ class TestWebsitePerformance(TestWebsitePerformanceCommon):
                     'website_page': 2,
                     # 1. `_serve_page` search page matching URL..
                     # 2. ..then reads it (`is_visible`)
-                    'website': 1,
                     # menu and layout
                     'website_menu': 1,
                     'ir_ui_view': 1,
                 }
-                expected_query_count = 1 if cache else 6
+                expected_query_count = 1 if cache else 5
                 insert_tables_perf = {}
                 self.page.track = True
 
@@ -280,11 +277,10 @@ class TestWebsitePerformance(TestWebsitePerformanceCommon):
                     'website_page': 2,
                     # 1. the menu prefetching is also prefetching all menu's pages
                     # 2. find page matching the `/` url
-                    'website': 1,
                     # layout
                     'ir_ui_view': 1,
                 }
-                expected_query_count = 5
+                expected_query_count = 4
                 insert_tables_perf = {}
                 self._check_url_hot_query('/', expected_query_count, select_tables_perf, insert_tables_perf, nocache=True)
                 self.assertEqual(self._get_url_hot_query('/', nocache=True), expected_query_count)
@@ -335,12 +331,11 @@ class TestWebsitePerformance(TestWebsitePerformanceCommon):
             'website_page': 2,
             # 1. `_serve_page` search page matching URL..
             # 2. ..then reads it (`is_visible`)
-            'website': 1,
             'website_menu': 1,
             'ir_ui_view': 1,
         }
-        self._check_url_hot_query(self.page.url, 6, select_tables_perf, nocache=True)
-        self.assertEqual(self._get_url_hot_query(self.page.url, nocache=True), 6)
+        self._check_url_hot_query(self.page.url, 5, select_tables_perf, nocache=True)
+        self.assertEqual(self._get_url_hot_query(self.page.url, nocache=True), 5)
 
 
 @tagged('-at_install', 'post_install')

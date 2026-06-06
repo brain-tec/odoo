@@ -4,6 +4,7 @@ import math
 from ast import literal_eval
 from datetime import date, timedelta, UTC
 from collections import defaultdict
+from markupsafe import Markup
 
 from odoo import _, api, fields, models, modules
 from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
@@ -1184,6 +1185,11 @@ class StockPicking(models.Model):
         self.with_context(prefetch_fields=False).move_ids.unlink()  # Checks if moves are not done
         return super().unlink()
 
+    def _track_log_get_default_subtype(self, init_values):
+        if 'state' in init_values and self.state in ('done', 'cancel'):
+            return self.env.ref('stock.mt_picking_state')
+        return super()._track_log_get_default_subtype(init_values)
+
     def do_print_picking(self):
         self.write({'printed': True})
         return self.env.ref('stock.action_report_picking').report_action(self)
@@ -1426,6 +1432,27 @@ class StockPicking(models.Model):
         todo_moves._action_done(cancel_backorder=self.env.context.get('cancel_backorder'))
         self.write({'date_done': fields.Datetime.now(), 'priority': '0'})
 
+        # notify followers when no backorder was created but quantities are incomplete
+        if self.env.context.get('cancel_backorder'):
+            for picking in self:
+                prec = self.env['decimal.precision'].precision_get('Product Unit')
+                incomplete_moves = picking.move_ids.filtered(
+                    lambda m: float_compare(m.quantity, m.product_uom_qty, precision_digits=prec) < 0
+                )
+                if incomplete_moves:
+                    msg = self.env._(
+                        'No backorder has been planned for undelivered demanded quantities: %s',
+                        Markup('<ul>%s</ul>') % Markup().join(
+                            Markup('<li>%s</li>') % self.env._(
+                                'Only %(nbr_done)s %(uom)s of %(product)s delivered in contrast to the expected %(nbr_demanded)s %(uom)s',
+                                product=move.product_id.display_name,
+                                nbr_done=move.quantity,
+                                nbr_demanded=move.product_uom_qty,
+                                uom=move.uom_id.name,
+                            ) for move in incomplete_moves)
+                    )
+                    picking.message_post(body=msg, subtype_xmlid='stock.mt_picking_state')
+
         # if incoming/internal moves make other confirmed/partially_available moves available, assign them
         done_incoming_moves = self.filtered(lambda p: p.picking_type_id.code in ('incoming', 'internal')).move_ids.filtered(lambda m: m.state == 'done')
         done_incoming_moves._trigger_assign()
@@ -1460,10 +1487,12 @@ class StockPicking(models.Model):
 
     def _check_entire_pack(self):
         """ This function check if entire packs are moved in the picking"""
-        for package in self.move_line_ids.package_id:
-            pickings = self.move_line_ids.filtered(lambda ml: ml.package_id == package).picking_id
+        for package, package_move_lines in self.move_line_ids.grouped('package_id').items():
+            if not package:
+                continue
+            pickings = package_move_lines.picking_id
             if pickings._is_single_transfer() and pickings._check_move_lines_map_quant_package(package):
-                move_lines_to_pack = pickings.move_line_ids.filtered(lambda ml: ml.package_id == package and not ml.result_package_id and ml.state not in ('done', 'cancel'))
+                move_lines_to_pack = package_move_lines.filtered(lambda ml: not ml.result_package_id and ml.state not in ('done', 'cancel'))
                 if package.package_type_id.package_use != 'reusable':
                     move_lines_to_pack.write({
                         'result_package_id': package.id,
@@ -1773,7 +1802,9 @@ class StockPicking(models.Model):
                 backorders |= backorder_picking
                 backorder_picking.user_id = False
                 picking.message_post(
-                    body=self.env._('The backorder %(backorder_picking_link)s has been created.', backorder_picking_link=backorder_picking._get_html_link())
+                    body=self.env._('The backorder %(backorder_picking_link)s has been created.',
+                    backorder_picking_link=backorder_picking._get_html_link()),
+                    subtype_xmlid='stock.mt_picking_state',
                 )
                 if backorder_picking.picking_type_id.reservation_method == 'at_confirm':
                     bo_to_assign |= backorder_picking

@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, tools
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command, Domain
 from odoo.tools import SetDefinitions
@@ -82,7 +82,7 @@ class ResGroups(models.Model):
     @api.constrains('implied_ids', 'implied_by_ids')
     def _check_disjoint_groups(self):
         # check for users that might have two exclusive groups
-        self.env.registry.clear_cache('groups')
+        self.env.transaction.invalidate_ormcache('groups')
 
         try:
             if any(
@@ -106,7 +106,7 @@ class ResGroups(models.Model):
             self._check_user_disjoint_groups()
 
         except ValidationError:
-            self.env.registry.clear_cache('groups')
+            self.env.transaction.invalidate_ormcache('groups')
             raise
 
     @api.constrains('view_access')
@@ -351,7 +351,7 @@ class ResGroups(models.Model):
         self.view_group_hierarchy = self._get_view_group_hierarchy()
 
     @api.model
-    @tools.ormcache('self.env.lang', cache='groups')
+    @api.ormcache('self.env.lang', cache='groups')
     def _get_view_group_hierarchy(self):
         return {
             'groups': {
@@ -388,7 +388,7 @@ class ResGroups(models.Model):
         }
 
     @api.model
-    @tools.ormcache(cache='groups')
+    @api.ormcache(cache='groups')
     def _get_group_definitions(self):
         """ Return the definition of all the groups as a :class:`~odoo.tools.SetDefinitions`. """
         groups = self.sudo().search([], order='id')

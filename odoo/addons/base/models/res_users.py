@@ -372,7 +372,7 @@ class ResUsers(models.Model):
                 self._set_encrypted_password(self.env.user.id, replacement)
                 if request and self == self.env.user:
                     self.env.flush_all()
-                    self.env.registry.clear_cache()
+                    self.env.transaction.invalidate_ormcache()
                     # update session token so the user does not get logged out
                     new_token = self.env.user._compute_session_token(request.session.sid)
                     request.session.session_token = new_token
@@ -619,14 +619,14 @@ class ResUsers(models.Model):
         if 'group_ids' in vals and any(self._ids):
             # clear caches linked to the users
             self.env.invalidate_all()
-            self.env.registry.clear_cache()
+            self.env.transaction.invalidate_ormcache()
 
         # per-method / per-model caches have been removed so the various
         # clear_cache/clear_caches methods pretty much just end up calling
-        # Registry.clear_cache
+        # Transaction.invalidate_ormcache
         invalidation_fields = self._get_invalidation_fields()
         if not invalidation_fields.isdisjoint(vals) and any(self._ids):
-            self.env.registry.clear_cache()
+            self.env.transaction.invalidate_ormcache()
 
         return res
 
@@ -648,7 +648,7 @@ class ResUsers(models.Model):
         user_admin = self.env.ref('base.user_admin', raise_if_not_found=False)
         if user_admin and user_admin in self:
             raise UserError(_('You cannot delete the admin user because it is utilized in various places (such as security configurations,...). Instead, archive it.'))
-        self.env.registry.clear_cache()
+        self.env.transaction.invalidate_ormcache()
         if portal_user_template and portal_user_template in self:
             raise UserError(_('Deleting the template users is not allowed. Deleting this profile will compromise critical functionalities.'))
         if public_user and public_user in self:
@@ -687,7 +687,7 @@ class ResUsers(models.Model):
         return vals_list
 
     @api.model
-    @tools.ormcache('self.env.uid')
+    @api.ormcache('self.env.uid')
     def context_get(self):
         # use read() to not read other fields: this must work while modifying
         # the schema of models res.users or res.partner
@@ -717,7 +717,7 @@ class ResUsers(models.Model):
 
         return frozendict(context)
 
-    @tools.ormcache('self.id')
+    @api.ormcache('self.id')
     def _get_company_ids(self):
         # use search() instead of `self.company_ids` to avoid extra query for `active_test`
         domain = [('active', '=', True), ('user_ids', 'in', self.id)]
@@ -807,7 +807,7 @@ class ResUsers(models.Model):
         return auth_info
 
     @api.model
-    @tools.ormcache('uid', 'passwd')
+    @api.ormcache('uid', 'passwd')
     def _check_uid_passwd(self, uid, passwd):
         """Verifies that the given (uid, password) is authorized and
            raise an exception if it is not."""
@@ -844,7 +844,7 @@ class ResUsers(models.Model):
             "group_by": SQL("res_users.id"),
         }
 
-    @tools.ormcache('sid')
+    @api.ormcache('sid')
     def _compute_session_token(self, sid):
         """ Compute a session token given a session id and a user id """
         # retrieve the fields used to generate the session token
@@ -857,7 +857,7 @@ class ResUsers(models.Model):
             **self._get_session_token_query_params(),
         ))
         if self.env.cr.rowcount != 1:
-            self.env.registry.clear_cache()
+            self.env.transaction.invalidate_ormcache()
             return False
         data_fields = self.env.cr.fetchone()
         # create tuple with column name and value, allowing for overrides to manipulate the values
@@ -1100,7 +1100,7 @@ class ResUsers(models.Model):
         # for new record don't fill the ormcache
         return group_id in (self._get_group_ids() if self.id else self.all_group_ids._origin._ids)
 
-    @tools.ormcache('self.id')
+    @api.ormcache('self.id')
     def _get_group_ids(self):
         """ Return ``self``'s group ids (as a tuple)."""
         self.ensure_one()
@@ -1195,7 +1195,7 @@ class ResUsers(models.Model):
     def get_company_currency_id(self):
         return self.env.company.currency_id.id
 
-    @tools.ormcache(cache='stable')
+    @api.ormcache(cache='stable')
     def _crypt_context(self):
         """ Passlib CryptContext instance used to encrypt and verify
         passwords. Can be overridden if technical, legal or political matters
@@ -1546,7 +1546,7 @@ class ResUsersApikeys(models.Model):
             _logger.info("API key(s) removed: scope: <%s> for '%s' (#%s) from %s",
                self.mapped('scope'), self.env.user.login, self.env.uid, ip)
             self.sudo().unlink()
-            self.env.registry.clear_cache()
+            self.env.transaction.invalidate_ormcache()
             return {'type': 'ir.actions.act_window_close'}
         raise AccessError(_("You can not remove API keys unless they're yours or you are a system user"))
 

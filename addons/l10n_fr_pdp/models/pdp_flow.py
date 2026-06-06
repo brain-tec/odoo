@@ -124,7 +124,9 @@ class PdpFlow(models.Model):
         """Compute the current status of the reporting period."""
         today = fields.Date.context_today(self)
         for flow in self:
-            if today < flow.due_period_start:
+            if not flow.due_period_start or not flow.due_period_end:
+                flow.period_status = False
+            elif today < flow.due_period_start:
                 flow.period_status = 'open'
             elif today <= flow.due_period_end:
                 flow.period_status = 'grace'
@@ -262,7 +264,11 @@ class PdpFlow(models.Model):
 
     def action_send(self, check_totp=True):
         """Send flow payload to transport gateway."""
-        auth_totp_disabled = not self.env.user.totp_enabled and not bool(self.env['ir.config_parameter'].sudo().get_str('auth_totp.policy'))
+        auth_totp_disabled = (
+            not self.env.user.totp_enabled
+            and not bool(self.env['ir.config_parameter'].sudo().get_str('auth_totp.policy'))
+            and self.env.company._get_peppol_edi_mode() != 'demo'
+        )
         if check_totp and auth_totp_disabled:
             raise RedirectWarning(
                 message=self.env._("To be able to send the report, you need to enable the two-factor authentication."),

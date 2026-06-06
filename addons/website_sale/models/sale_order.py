@@ -396,7 +396,7 @@ class SaleOrder(models.Model):
         self.ensure_one()
         self = self.with_company(self.company_id)
 
-        product = self.env['product.product'].browse(product_id)
+        product = self.env["product.product"].browse(product_id)
         if not uom_id or not product._has_multiple_uoms():
             # Fall back on product uom if uom is not specified or if multi-uom is not
             # allowed/supported for that product.
@@ -1048,7 +1048,8 @@ class SaleOrder(models.Model):
         :rtype: bool
         """
         self.ensure_one()
-        return self.partner_id.id == request.website.user_id.sudo().partner_id.id
+        website = self.env["website"].get_current_website()
+        return self.partner_id.id == website.user_id.sudo().partner_id.id
 
     def _get_lang(self):
         res = super()._get_lang()

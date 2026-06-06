@@ -18,7 +18,7 @@ class TestWebsiteSequence(BaseCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.website = cls.env.ref("website.default_website")
+        cls.website = cls.env.ref("base.default_website")
         cls.public_user = cls.env.ref("base.public_user")
 
         ProductTemplate = cls.env["product.template"]
@@ -52,7 +52,7 @@ class TestWebsiteSequence(BaseCommon):
     def get_product_sort_mapping(self, label):
         context = dict(self.env.context, website_id=self.website.id, lang="en_US")
         env = Environment(self.env.cr, self.public_user.id, context)
-        with MockRequest(env, website=self.website.with_env(env)) as req:
+        with MockRequest(env, website=self.website) as req:
             product_sort_mapping = req.env["website"]._get_product_sort_mapping()
             return next(k for k, v in product_sort_mapping if str(v) == label)
 

@@ -30,7 +30,9 @@ class TestPerfSessionInfo(common.HttpCase):
 
     def _prepare(self):
         self.env.invalidate_all()
-        self.drop_ormcaches()
+        for cache_name in self.env.registry.registry_caches__:
+            if '.' not in cache_name:
+                self.env.transaction.invalidate_ormcache(cache_name)
 
     def test_performance_session_info(self):
         self.authenticate(self.user.login, "info")
@@ -91,8 +93,8 @@ class TestPerfSessionInfo(common.HttpCase):
     def test_visible_menu_ids(self):
         # cold ormcache:
         # - Only web 16
-        # - All modules: 27
-        with self.assertQueryCount(27):
+        # - All modules: 28
+        with self.assertQueryCount(28):
             self.env['ir.ui.menu']._visible_menu_ids()
 
         # cold fields cache - warm orm cache (only web: 0, all module: 0)

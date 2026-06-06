@@ -340,7 +340,7 @@ class IrModuleModule(models.Model):
     def unlink(self):
         res = super().unlink()
         if self:
-            self.env.registry.clear_cache('stable')
+            self.env.transaction.invalidate_ormcache('stable')
         return res
 
     def _get_modules_to_load_domain(self):
@@ -627,6 +627,7 @@ class IrModuleModule(models.Model):
             # raise error if another transaction is trying to schedule module operations concurrently
             self.env.cr.execute("LOCK ir_module_module IN EXCLUSIVE MODE")
         except psycopg2.OperationalError:
+            self.env.cr.rollback()
             raise UserError(_("Odoo is currently processing another module operation.\n"
                                "Please try again later or contact your system administrator."))
 
@@ -636,6 +637,7 @@ class IrModuleModule(models.Model):
             # during execution, the lock won't be released until timeout.
             self.env.cr.execute("SELECT FROM ir_cron FOR UPDATE")
         except psycopg2.OperationalError:
+            self.env.cr.rollback()
             raise UserError(_("Odoo is currently processing a scheduled action.\n"
                               "Module operations are not possible at this time, "
                               "please try again later or contact your system administrator."))
@@ -910,7 +912,7 @@ class IrModuleModule(models.Model):
         model_id = self._get_id(name) if name else False
         return self.browse(model_id).sudo()
 
-    @tools.ormcache('name', cache='stable')
+    @api.ormcache('name', cache='stable')
     def _get_id(self, name):
         self.flush_model(['name'])
         self.env.cr.execute("SELECT id FROM ir_module_module WHERE name=%s", (name,))
@@ -918,7 +920,7 @@ class IrModuleModule(models.Model):
         return result and result[0]
 
     @api.model
-    @tools.ormcache(cache='stable')
+    @api.ormcache(cache='stable')
     def _installed(self):
         """ Return the set of installed modules as a dictionary {name: id} """
         return {

@@ -260,7 +260,7 @@ class AccountMove(models.Model):
         # EXTENDS 'account'
         super()._compute_show_reset_to_draft_button()
         for move in self:
-            move.show_reset_to_draft_button = not move.l10n_it_edi_transaction and move.show_reset_to_draft_button
+            move.show_reset_to_draft_button = not (move.is_sale_document() and move.l10n_it_edi_transaction) and move.show_reset_to_draft_button
 
     def _parse_xml_with_recovery(self, content, name=None):
         def parse_xml(parser, content):
@@ -1455,14 +1455,17 @@ class AccountMove(models.Model):
             pension_fund_type = pension_fund.find("TipoCassa")
             tax_factor_percent = pension_fund.find("AlCassa")
             vat_tax_factor_percent = pension_fund.find("AliquotaIVA")
+            pension_fund_natura = pension_fund.find("Natura")
             pension_fund_type = pension_fund_type.text if pension_fund_type is not None else ""
             tax_factor_percent = float(tax_factor_percent.text or "0.0")
             vat_tax_factor_percent = float(vat_tax_factor_percent.text or "0.0")
+            pension_fund_natura = pension_fund_natura.text if pension_fund_natura is not None else False
             pension_fund_tax = self._l10n_it_edi_search_tax_for_import(
                 company,
                 tax_factor_percent,
                 ([('l10n_it_pension_fund_type', '=', pension_fund_type)]
-                 + type_tax_use_domain))
+                 + type_tax_use_domain),
+                l10n_it_exempt_reason=pension_fund_natura)
             if pension_fund_tax:
                 if vat_tax_factor_percent not in pension_fund_taxes:
                     pension_fund_taxes[vat_tax_factor_percent] = pension_fund_tax
@@ -2547,7 +2550,7 @@ class AccountMove(models.Model):
         if not pension_fund_tax_candidates:
             return None
 
-        if l10n_it_exemption_reason and len(pension_fund_tax_candidates) > 1:
+        if l10n_it_exemption_reason:
             pension_fund_tax_candidates = pension_fund_tax_candidates.filtered(lambda t: t.l10n_it_exempt_reason == l10n_it_exemption_reason)
         pension_fund_tax = pension_fund_tax_candidates[:1]
 
