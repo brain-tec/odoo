@@ -40,12 +40,23 @@ from odoo.modules.registry import Registry
 from odoo.tools import config, file_open, file_path, profiler
 from odoo.tools.misc import submap
 
+from . import request, request_var
+from .dispatcher import HttpDispatcher, JsonRPCDispatcher, _dispatchers
+from .response import Response
+from .retrying import retrying
+from .routing_map import ROUTING_KEYS, _generate_routing_rules
+from .stream import STATIC_CACHE, Stream
+from .requestlib import (
+    HTTPRequest,
+    Request,
+    is_cors_preflight,
+)
+from .session import SessionExpiredException, get_default_session, logout, session_store
+
 if typing.TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
     from wsgiref.types import StartResponse, WSGIEnvironment
 
-    from .requestlib import Request
-    from .response import Response
     from .routing_map import Endpoint
 
 _logger = logging.getLogger('odoo.http')
@@ -124,11 +135,14 @@ def dispatch_rpc(service_name: str, method: str, params: Mapping[str, typing.Any
     else:
         raise ValueError(f"Invalid service name: {service_name}")
 
-    with borrow_request():
+    # Remove the request to simulate that the call does not come from HTTP
+    request_reset = request_var.set(None)
+    try:
         threading.current_thread().uid = None
         threading.current_thread().dbname = None
-
         return dispatch(method, params)
+    finally:
+        request_var.reset(request_reset)
 
 
 class RegistryError(RuntimeError):
@@ -246,8 +260,7 @@ class Application:
 
         with HTTPRequest(environ) as httprequest:
             request = Request(httprequest)
-            _request_stack.push(request)
-
+            request_reset = request_var.set(request)
             try:
                 _set_session_and_dbname(request)
                 threading.current_thread().url = httprequest.url
@@ -300,7 +313,7 @@ class Application:
                 return exc.error_response(environ, start_response)
 
             finally:
-                _request_stack.pop()
+                request_var.reset(request_reset)
 
 
 root = Application()
@@ -579,20 +592,3 @@ def serve_ir_http(request: Request, rule: werkzeug.routing.Rule, args) -> Respon
     response = request.dispatcher.dispatch(rule.endpoint, args)
     request.registry['ir.http']._post_dispatch(response)
     return response
-
-
-# ruff: noqa: E402
-from .dispatcher import HttpDispatcher, JsonRPCDispatcher, _dispatchers
-from .requestlib import (
-    HTTPRequest,
-    Request,
-    _request_stack,
-    borrow_request,
-    is_cors_preflight,
-    request,
-)
-from .response import Response
-from .retrying import retrying
-from .routing_map import ROUTING_KEYS, _generate_routing_rules
-from .session import SessionExpiredException, get_default_session, logout, session_store
-from .stream import STATIC_CACHE, Stream
