@@ -1546,16 +1546,22 @@ class AccountMove(models.Model):
         is_invoice = self.is_invoice(include_receipts=True)
         sign = self.direction_sign if is_invoice else 1
 
-        return self.env['account.tax']._prepare_base_line_for_taxes_computation(
-            product_line,
-            price_unit=product_line.price_unit if is_invoice else product_line.amount_currency,
-            quantity=product_line.quantity if is_invoice else 1.0,
-            discount=product_line.discount if is_invoice else 0.0,
-            rate=self._get_product_base_line_currency_rate(product_line),
-            sign=sign,
-            special_mode=False if is_invoice else 'total_excluded',
-            name=product_line.name,
-        )
+        kwargs = {
+            'price_unit': product_line.price_unit if is_invoice else product_line.amount_currency,
+            'quantity': product_line.quantity if is_invoice else 1.0,
+            'discount': product_line.discount if is_invoice else 0.0,
+            'rate': self._get_product_base_line_currency_rate(product_line),
+            'sign': sign,
+            'special_mode': False if is_invoice else 'total_excluded',
+            'name': product_line.name,
+        }
+
+        if product_line in product_line._get_discount_lines():
+            kwargs['special_type'] = 'global_discount'
+        elif product_line in product_line._get_downpayment_lines():
+            kwargs['special_type'] = 'down_payment'
+
+        return self.env['account.tax']._prepare_base_line_for_taxes_computation(product_line, **kwargs)
 
     def _prepare_epd_base_line_for_taxes_computation(self, epd_line):
         """ Convert an account.move.line having display_type='epd' into a base line for the taxes computation.
@@ -3064,7 +3070,7 @@ class AccountMove(models.Model):
         def get_base_line_tracked_fields(line):
             grouping_key = AccountTax._prepare_base_line_grouping_key(fake_base_line)
             if line.move_id.is_invoice(include_receipts=True):
-                extra_fields = ['price_unit', 'quantity', 'discount']
+                extra_fields = ['price_unit', 'quantity', 'discount', 'deductible_amount']
             else:
                 extra_fields = ['amount_currency']
             return list(grouping_key.keys()) + extra_fields
@@ -3304,7 +3310,7 @@ class AccountMove(models.Model):
             rate = move.invoice_currency_rate
 
             for line in move.line_ids.filtered(lambda line: line.display_type == 'product'):
-                if float_compare(line.deductible_amount, 100, precision_rounding=2) == 0:
+                if float_compare(line.deductible_amount, 100, precision_digits=2) == 0:
                     continue
 
                 percentage = (1 - line.deductible_amount / 100)
