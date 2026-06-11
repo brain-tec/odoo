@@ -52,8 +52,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
                 raise ValidationError(_('Email is required.'))
             if not details.get('partner_country_id'):
                 raise ValidationError(_('Country is required.'))
-            website = request.env['website'].get_current_website()
-            partner_id = website.user_id.partner_id.id
+            partner_id = self.env.website.user_id.partner_id.id
             del kwargs['partner_details']
         else:
             partner_id = request.env.user.partner_id.id
@@ -64,18 +63,27 @@ class PaymentPortal(payment_portal.PaymentPortal):
         if use_public_partner:
             kwargs['custom_create_values'] = {'tokenize': False}
         tx_sudo = self._create_transaction(
-            amount=amount, currency_id=currency_id, partner_id=partner_id, **kwargs
+            amount=amount,
+            currency_id=currency_id,
+            partner_id=partner_id,
+            custom_create_values={"is_donation": True},
+            **kwargs,
         )
-        tx_sudo.is_donation = True
         if use_public_partner:
-            tx_sudo.update({
-                'partner_name': details['partner_name'],
-                'partner_email': details['partner_email'],
-                'partner_country_id': int(details['partner_country_id']),
-                'partner_lang': request.env.lang,
+            tx_sudo.with_context(
+                # The transaction was just created; no concurrent write is possible
+                payment_safe_write=True
+            ).update({
+                "partner_name": details["partner_name"],
+                "partner_email": details["partner_email"],
+                "partner_country_id": int(details["partner_country_id"]),
+                "partner_lang": request.env.lang,
             })
         elif not tx_sudo.partner_country_id:
-            tx_sudo.partner_country_id = int(kwargs['partner_details']['partner_country_id'])
+            tx_sudo.with_context(
+                # The transaction was just created; no concurrent write is possible
+                payment_safe_write=True
+            ).partner_country_id = int(kwargs["partner_details"]["partner_country_id"])
 
         tx_fields = tx_sudo._fields
         # Prepare donation log message once during transaction creation.
@@ -98,14 +106,23 @@ class PaymentPortal(payment_portal.PaymentPortal):
             if field and field.type == 'many2one':
                 value = self.env[field.comodel_name].browse(int(value)).display_name
             message_body += Markup('<br/>- %s: %s') % (label, value)
-        tx_sudo.donation_log_message = message_body
+        tx_sudo.with_context(
+            # The transaction was just created; no concurrent write is possible
+            payment_safe_write=True
+        ).donation_log_message = message_body
 
         # the user can change the donation amount on the payment page,
         # therefor we need to recompute the access_token
         access_token = payment_utils.generate_access_token(
             tx_sudo.partner_id.id, tx_sudo.amount, tx_sudo.currency_id.id
         )
-        self._update_landing_route(tx_sudo, access_token)
+        self._update_landing_route(
+            tx_sudo.with_context(
+                # The transaction has just been created; no concurrent write is possible
+                payment_safe_write=True
+            ),
+            access_token,
+        )
 
         # Send a notification to warn that a donation has been made
         recipient_email = kwargs['donation_recipient_email']
@@ -203,16 +220,15 @@ class PaymentPortal(payment_portal.PaymentPortal):
         :rtype: list[dict]
         """
         limit = self._cast_as_int(limit)
-        website = request.env['website'].get_current_website()
 
         # For any primary payment method with at least one compatible provider.
         compatible_providers_sudo = (
             request.env['payment.provider']
                 # Force the public user such that editors see what customers will see
-                .with_user(website.user_id)
+                .with_user(self.env.website.user_id)
                 .sudo()  # Needed to read providers' fields with public user
                 ._get_compatible_providers(
-                    website.company_id.id, None, 0, website_id=website.id
+                    self.env.website.company_id.id, None, 0, website_id=self.env.website.id
                 )
         )
         # Select the brands, i.e. non-primary payment methods. E.g., Amex for Card.
@@ -253,5 +269,4 @@ class PaymentPortal(payment_portal.PaymentPortal):
 class PortalAccount(account_payment_portal.PortalAccount):
     def _invoice_get_page_view_values(self, *args, **kwargs):
         """Override of `account_payment` to make the providers filtering website-aware."""
-        website = request.env['website'].get_current_website()
-        return super()._invoice_get_page_view_values(*args, website_id=website.id, **kwargs)
+        return super()._invoice_get_page_view_values(*args, website_id=self.env.website.id, **kwargs)

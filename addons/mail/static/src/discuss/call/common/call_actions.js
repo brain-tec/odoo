@@ -2,10 +2,14 @@ import { Action, ACTION_TAGS, useAction, UseActions } from "@mail/core/common/ac
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { ChangeLayoutDialog } from "@mail/discuss/call/common/change_layout_dialog";
 import { QuickVoiceSettings } from "@mail/discuss/call/common/quick_voice_settings";
 import { QuickVideoSettings } from "@mail/discuss/call/common/quick_video_settings";
 import { attClassObjectToString } from "@mail/utils/common/format";
 import { CALL_PROMOTE_FULLSCREEN } from "@mail/discuss/call/common/discuss_channel_model_patch";
+import { MicrophoneWarning } from "@mail/discuss/call/common/microphone_warning";
+import { Component, useEffect } from "@odoo/owl";
+import { usePopover } from "@web/core/popover/popover_hook";
 
 export const callActionsRegistry = registry.category("discuss.call/actions");
 export const CALL_ICON_DEAFEN = "fa fa-deaf";
@@ -29,10 +33,12 @@ export function registerCallAction(id, definition) {
 
 /** @type {CallActionDefinition} */
 export const muteAction = {
-    badge: ({ owner, store }) => store.rtc.microphonePermission !== "granted",
+    badge: ({ store }) =>
+        store.rtc.microphonePermission !== "granted" || store.rtc.showMicrophoneSilentWarning,
     badgeIcon: "fa fa-exclamation",
     condition: ({ owner, store, channel }) =>
         channel?.isSelfInCall && (owner.env.inCallMenu || !store.rtc.selfSession?.is_deaf),
+    disabledCondition: ({ store }) => store.rtc.showMicrophoneSilentWarning,
     name: ({ store }) => (store.rtc.selfSession?.isMute ? _t("Unmute") : _t("Mute")),
     isActive: ({ store }) => store.rtc.selfSession?.isMute,
     icon: ({ action, owner, store }) =>
@@ -45,12 +51,31 @@ export const muteAction = {
     onSelected: ({ store }) => store.rtc.toggleMicrophone(),
     sequence: 10,
     sequenceGroup: 100,
+    setup({ action, owner, store }) {
+        if (owner instanceof Component) {
+            this.popover = usePopover(MicrophoneWarning, {
+                closeOnClickAway: false,
+                closeOnEscape: false,
+                position: "top-middle",
+            });
+            useEffect(() => {
+                const hasWarning =
+                    store.rtc.showMicrophonePermissionWarning ||
+                    store.rtc.showMicrophoneSilentWarning;
+                if (!action.popover.isOpen && action.actionRef() && hasWarning) {
+                    action.popover.open(action.actionRef(), {});
+                } else {
+                    action.popover.close();
+                }
+            });
+        }
+    },
     tags: ({ action, store }) => {
         const tags = [ACTION_TAGS.CALL_ACTION_TRACKED];
         if (action.isActive) {
             tags.push(ACTION_TAGS.DANGER);
         }
-        if (store.rtc.microphonePermission !== "granted") {
+        if (store.rtc.microphonePermission !== "granted" || store.rtc.showMicrophoneSilentWarning) {
             tags.push(ACTION_TAGS.DANGER, ACTION_TAGS.WARNING_BADGE);
         }
         return tags;
@@ -178,23 +203,17 @@ registerCallAction("share-screen", {
     ],
 });
 registerCallAction("fullscreen", {
-    btnClass: ({ channel }) =>
-        attClassObjectToString({
-            "o-discuss-CallActionList-pulse": Boolean(
-                channel?.promoteFullscreen === CALL_PROMOTE_FULLSCREEN.ACTIVE
-            ),
-        }),
     condition: ({ channel, owner }) => channel?.isSelfInCall && !owner.env.pipWindow,
-    name: ({ store }) => (store.rtc.isFullscreen ? _t("Exit Fullscreen") : _t("Fullscreen")),
-    isActive: ({ store }) => store.rtc.isFullscreen,
+    name: ({ store }) => (store.rtc.isBrowserFullscreen ? _t("Exit Fullscreen") : _t("Fullscreen")),
+    isActive: ({ store }) => store.rtc.isBrowserFullscreen,
     icon: ({ action }) => (action.isActive ? "fa fa-compress" : "fa fa-expand"),
     onSelected: ({ channel, store }) => {
         channel.promoteFullscreen = CALL_PROMOTE_FULLSCREEN.DISCARDED;
-        if (store.rtc.isFullscreen) {
+        if (store.rtc.isBrowserFullscreen) {
             store.rtc.exitFullscreen();
         } else {
             store.rtc.closePip();
-            store.rtc.enterFullscreen();
+            store.rtc.enterFullscreen(undefined, { browserFullscreen: true });
         }
     },
     sequence: 80,
@@ -218,6 +237,16 @@ registerCallAction("picture-in-picture", {
         }
     },
     sequence: 70,
+    tags: ACTION_TAGS.CALL_LAYOUT,
+});
+registerCallAction("change-layout", {
+    condition: ({ channel, owner }) =>
+        channel?.isSelfInCall && !owner.env.inCallMenu && !owner.env.pipWindow,
+    name: _t("Change Layout"),
+    icon: "fa fa-fw fa-th-large",
+    onSelected: ({ channel, store }) =>
+        store.env.services.dialog.add(ChangeLayoutDialog, { channel }),
+    sequence: 60,
     tags: ACTION_TAGS.CALL_LAYOUT,
 });
 /** @type {CallActionDefinition} */
@@ -342,10 +371,9 @@ class UseCallActions extends UseActions {
 }
 
 /**
- * @param {Object} [params0={}]
- * @param {DiscussChannel|() => DiscussChannel} params0.channel
+ * @param {import("@mail/core/common/action").ActionRootRefParam & {channel?: DiscussChannel|() => DiscussChannel}} [params0={}]
  * @return {UseCallActions_Def}
  */
-export function useCallActions({ channel } = {}) {
-    return useAction(callActionsRegistry, UseCallActions, CallAction, { channel });
+export function useCallActions({ channel, rootRef } = {}) {
+    return useAction(callActionsRegistry, UseCallActions, CallAction, { channel, rootRef });
 }

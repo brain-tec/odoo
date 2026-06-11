@@ -1,7 +1,8 @@
 import { DiscussAvatar } from "@mail/core/common/discuss_avatar";
 import { ActionPanel } from "@mail/discuss/core/common/action_panel";
+import { ChannelActionDialog } from "@mail/discuss/core/common/channel_action_dialog";
 
-import { Component, onWillStart, proxy } from "@odoo/owl";
+import { Component, onWillStart, props, proxy, types } from "@odoo/owl";
 
 import { useSequential } from "@mail/utils/common/hooks";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -9,15 +10,40 @@ import { _t } from "@web/core/l10n/translation";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { useDebounced } from "@web/core/utils/timing";
 
+/**
+ * Open the channel invitation UI as a centered dialog, reusing {@link ChannelInvitation}.
+ *
+ * @param {import("@web/env").OdooEnv} env environment providing the dialog service.
+ * @param {import("models").DiscussChannel} channel channel to invite people to.
+ * @returns {void}
+ */
+export function openChannelInvitationDialog(env, channel) {
+    env.services.dialog.add(ChannelActionDialog, {
+        contentClass: "o-discuss-ChannelInvitation",
+        contentComponent: ChannelInvitation,
+        contentProps: {
+            channel,
+            close: () => env.services.dialog.closeAll(),
+        },
+        title: channel.displayName,
+    });
+}
+
 export class ChannelInvitation extends Component {
     static components = { ActionPanel, DiscussAvatar };
-    static props = ["autofocus?", "channel?", "className?", "close?", "state?"];
     static template = "discuss.ChannelInvitation";
 
     setup() {
         super.setup();
         this.orm = useService("orm");
         this.store = useService("mail.store");
+        this.props = props({
+            "autofocus?": types.or([types.boolean(), types.object()]),
+            "channel?": types.instanceOf(this.store["discuss.channel"].Class),
+            "className?": types.string(),
+            "close?": types.function([]),
+            "state?": types.object(),
+        });
         this.rtc = useService("discuss.rtc");
         this.notification = useService("notification");
         this.suggestionService = useService("mail.suggestion");

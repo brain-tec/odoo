@@ -14,7 +14,7 @@ from odoo.addons.mail.tools.web_push import PUSH_NOTIFICATION_TYPE
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools import BinaryBytes, format_list, email_normalize, html_escape
-from odoo.tools.misc import hash_sign, OrderedSet
+from odoo.tools.misc import hash_sign, limited_field_access_token, OrderedSet
 from odoo.tools.sql import SQL
 
 channel_avatar = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 530.06 530.06">
@@ -269,6 +269,15 @@ class DiscussChannel(models.Model):
             else:
                 channel.avatar_cache_key = sha512(channel.avatar_128).hexdigest()
 
+    def _get_avatar_128_access_token(self):
+        """Return a scoped access token for the `avatar_128` field so guests and
+        other portal users can fetch the channel avatar without read access.
+
+        :rtype: str
+        """
+        self.ensure_one()
+        return limited_field_access_token(self, "avatar_128", scope="binary")
+
     def _generate_avatar(self):
         if self.channel_type not in ('channel', 'group'):
             return False
@@ -482,14 +491,8 @@ class DiscussChannel(models.Model):
         self.uuid = self._generate_random_token()
 
     @api.ondelete(at_uninstall=False)
-    def _unlink_except_all_employee_channel(self):
+    def _unlink_channel(self):
         # Delete discuss.channel
-        try:
-            all_emp_group = self.env.ref('mail.channel_all_employees')
-        except ValueError:
-            all_emp_group = None
-        if all_emp_group and all_emp_group in self:
-            raise UserError(_('You cannot delete those groups, as the Whole Company group is required by other modules.'))
         for channel in self:
             channel._bus_send("discuss.channel/delete", {"id": channel.id})
 
@@ -555,6 +558,7 @@ class DiscussChannel(models.Model):
         # keys are bus subchannel names, values are lists of field names to sync
         super()._sync_field_names(res)
         res[None].attr("avatar_cache_key", predicate=is_channel_or_group)
+        res[None].attr("avatar_128_access_token", lambda c: c._get_avatar_128_access_token(), predicate=is_channel_or_group)
         # sudo: discuss.category - guests can read categories of accessible channels
         res[None].one("discuss_category_id", "_store_category_fields", sudo=True)
         res[None].extend(["channel_type", "create_uid", "default_display_mode"])
@@ -1296,6 +1300,7 @@ class DiscussChannel(models.Model):
             "_store_member_fields",
         )._build_result()
         res.attr("avatar_cache_key", predicate=is_channel_or_group)
+        res.attr("avatar_128_access_token", lambda c: c._get_avatar_128_access_token(), predicate=is_channel_or_group)
         # sudo: discuss.category - guests can read categories of accessible channels
         res.one("discuss_category_id", "_store_category_fields", sudo=True)
         res.attr("channel_type")
