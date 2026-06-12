@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, get_lang
-from odoo.tools.float_utils import float_compare, float_round
+from odoo.tools.float_utils import float_compare
 
 
 class PurchaseOrderLine(models.Model):
@@ -456,21 +456,28 @@ class PurchaseOrderLine(models.Model):
                     line.tax_ids,
                     line.company_id,
                 )
-                price_unit = line.product_id.cost_currency_id._convert(
-                    price_unit,
-                    line.currency_id,
-                    line.company_id,
-                    line.date_order or fields.Date.context_today(line),
-                    False
+                line._reset_price_unit(
+                    line.product_id.cost_currency_id._convert(
+                        price_unit,
+                        line.currency_id,
+                        line.company_id,
+                        line.date_order or fields.Date.context_today(line),
+                        False
+                    )
                 )
-                line.price_unit = line.technical_price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
 
             elif line.selected_seller_id:
                 price_unit = line.env['account.tax']._fix_tax_included_price_company(line.selected_seller_id.price, line.product_id.supplier_taxes_id, line.tax_ids, line.company_id) if line.selected_seller_id else 0.0
                 price_unit = line.selected_seller_id.currency_id._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
-                price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
-                line.price_unit = line.technical_price_unit = line.selected_seller_id.product_uom_id._compute_price(price_unit, line.product_uom_id)
+                line._reset_price_unit(line.selected_seller_id.product_uom_id._compute_price(price_unit, line.product_uom_id))
                 line.discount = line.selected_seller_id.discount or 0.0
+
+    def _reset_price_unit(self, price_unit):
+        self.ensure_one()
+        self.update({
+            'price_unit': price_unit,
+            'technical_price_unit': price_unit,
+        })
 
     @api.depends('product_id')
     def _compute_translated_product_name(self):
@@ -602,6 +609,9 @@ class PurchaseOrderLine(models.Model):
         name = product_lang.display_name
         if product_lang.description_purchase:
             name += '\n' + product_lang.description_purchase
+        product_lang_no_variant_attribute_value_ids = self.with_context(product_lang.env.context).product_no_variant_attribute_value_ids
+        for no_variant_attribute_value in product_lang_no_variant_attribute_value_ids:
+            name += "\n" + no_variant_attribute_value.attribute_id.name + ': ' + no_variant_attribute_value.name
 
         return name
 
@@ -704,7 +714,7 @@ class PurchaseOrderLine(models.Model):
         if not 'accrual_entry_date' in self.env.context:
             return False
         accrual_date = fields.Date.from_string(self.env.context['accrual_entry_date'])
-        return accrual_date < fields.Date.today()
+        return accrual_date and accrual_date < fields.Date.today()
 
     def _update_date_planned(self, updated_date):
         self.date_planned = updated_date

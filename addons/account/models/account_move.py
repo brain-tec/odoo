@@ -3272,7 +3272,7 @@ class AccountMove(models.Model):
         def get_base_line_tracked_fields(line):
             grouping_key = AccountTax._prepare_base_line_grouping_key(fake_base_line)
             if line.move_id.is_invoice(include_receipts=True):
-                extra_fields = ['price_unit', 'quantity', 'discount']
+                extra_fields = ['price_unit', 'quantity', 'discount', 'deductible_amount']
             else:
                 extra_fields = ['amount_currency']
             return list(grouping_key.keys()) + extra_fields
@@ -3512,7 +3512,7 @@ class AccountMove(models.Model):
             rate = move.invoice_currency_rate
 
             for line in move.line_ids.filtered(lambda line: line.display_type == 'product'):
-                if float_compare(line.deductible_amount, 100, precision_rounding=2) == 0:
+                if float_compare(line.deductible_amount, 100, precision_digits=2) == 0:
                     continue
 
                 percentage = (1 - line.deductible_amount / 100)
@@ -6116,7 +6116,7 @@ class AccountMove(models.Model):
     def action_print_pdf(self):
         self.ensure_one()
         invoice_template = self.env['account.move.send']._get_default_pdf_report_id(self)
-        report_action = invoice_template.with_context(proforma_invoice=not self.invoice_pdf_report_id).report_action(self.id, config=False)
+        report_action = invoice_template.report_action(self.id, config=False)
         return self._get_action_with_base_document_layout_configurator(report_action)
 
     def preview_invoice(self):
