@@ -49,6 +49,11 @@ class Foo extends models.Model {
                 </t></templates>
             </kanban>
         `,
+        form: /* xml */ `
+            <form>
+                <field name="foo" />
+            </form>
+        `,
     };
 }
 
@@ -66,6 +71,7 @@ beforeEach(() => {
             views: [
                 [false, "list"],
                 [false, "kanban"],
+                [false, "form"],
             ],
             xml_id: "app1",
         },
@@ -73,14 +79,20 @@ beforeEach(() => {
             id: 1002,
             name: "App2 Menu 1",
             res_model: "foo",
-            views: [[false, "kanban"]],
+            views: [
+                [false, "kanban"],
+                [false, "form"],
+            ],
             xml_id: "app2_menu1",
         },
         {
             id: 1022,
             name: "App2 Menu 2",
             res_model: "foo",
-            views: [[false, "list"]],
+            views: [
+                [false, "list"],
+                [false, "form"],
+            ],
             xml_id: "app2_menu2",
         },
     ]);
@@ -140,6 +152,8 @@ test("clickbot clickeverywhere test", async () => {
         "Starting ClickEverywhere test",
         "Testing app: App1 (app1)",
         "Testing menu App1 (app1)",
+        "Clicking on: open form view from list",
+        "Clicking on: go back to list view",
         "Testing 2 filters",
         'Clicking on: filter "Not Bar"',
         'Clicking on: filter "Date"',
@@ -152,21 +166,26 @@ test("clickbot clickeverywhere test", async () => {
         'Clicking on: filter option "October"',
         "Testing app: App2 (app2)",
         "Testing menu menu 1 (app2_menu1)",
+        "Clicking on: open form view from kanban",
+        "Clicking on: go back to kanban view",
         "Testing 2 filters",
         'Clicking on: filter "Not Bar"',
         'Clicking on: filter "Date"',
         'Clicking on: filter option "October"',
         "Testing menu menu 2 (app2_menu2)",
+        "Clicking on: open form view from list",
+        "Clicking on: go back to list view",
         "Testing 2 filters",
         'Clicking on: filter "Not Bar"',
         'Clicking on: filter "Date"',
         'Clicking on: filter option "October"',
         "Test took 0 seconds",
-        "Successfully tested 2 apps",
-        "Successfully tested 3 menus",
-        "Successfully tested 4 views",
-        "Successfully tested 0 modals",
-        "Successfully tested 8 filters",
+        "Tested 2 apps",
+        "Tested 3 menus",
+        "Tested 4 views",
+        "Tested 3 form views",
+        "Tested 0 modals",
+        "Tested 8 filters",
         SUCCESS_SIGNAL,
     ]);
 });
@@ -230,6 +249,8 @@ test("only one app", async () => {
         "Starting ClickEverywhere test",
         "Testing app: App1 (app1)",
         "Testing menu App1 (app1)",
+        "Clicking on: open form view from list",
+        "Clicking on: go back to list view",
         "Testing 2 filters",
         'Clicking on: filter "Not Bar"',
         'Clicking on: filter "Date"',
@@ -241,13 +262,14 @@ test("only one app", async () => {
         'Clicking on: filter "Date"',
         'Clicking on: filter option "October"',
         "Test took 0 seconds",
-        "Successfully tested 1 apps",
-        "Successfully tested 1 menus",
-        "Successfully tested 2 views",
-        "Successfully tested 0 modals",
-        "Successfully tested 4 filters",
+        "Tested 1 apps",
+        "Tested 1 menus",
+        "Tested 2 views",
+        "Tested 1 form views",
+        "Tested 0 modals",
+        "Tested 4 filters",
         SUCCESS_SIGNAL,
-        'savedState: {"studioCount":0,"testedApps":["app1"],"testedMenus":["app1"],"testedFilters":4,"testedModals":0,"testedViews":2,"appIndex":0,"menuIndex":0,"startTime":43554.39999999106,"xmlId":"app1"}',
+        'savedState: {"studioCount":0,"testedApps":["app1"],"testedMenus":["app1"],"testedFilters":4,"testedModals":0,"testedViews":2,"testedFormsViews":1,"appIndex":0,"menuIndex":0,"errorMenuCount":0,"startTime":43554.39999999106,"xmlId":"app1"}',
     ]);
 });
 
@@ -316,21 +338,26 @@ test("clickbot clickeverywhere test (with dropdown menu)", async () => {
         "Starting ClickEverywhere test",
         "Testing app: App2 (app2)",
         "Testing menu menu 1 (app2_menu1)",
+        "Clicking on: open form view from kanban",
+        "Clicking on: go back to kanban view",
         "Testing 2 filters",
         'Clicking on: filter "Not Bar"',
         'Clicking on: filter "Date"',
         'Clicking on: filter option "October"',
         "Testing menu menu 2 (app2_menu2)",
+        "Clicking on: open form view from list",
+        "Clicking on: go back to list view",
         "Testing 2 filters",
         'Clicking on: filter "Not Bar"',
         'Clicking on: filter "Date"',
         'Clicking on: filter option "October"',
         "Test took 0 seconds",
-        "Successfully tested 1 apps",
-        "Successfully tested 2 menus",
-        "Successfully tested 2 views",
-        "Successfully tested 0 modals",
-        "Successfully tested 4 filters",
+        "Tested 1 apps",
+        "Tested 2 menus",
+        "Tested 2 views",
+        "Tested 2 form views",
+        "Tested 0 modals",
+        "Tested 4 filters",
         SUCCESS_SIGNAL,
     ]);
 });
@@ -361,7 +388,10 @@ test("clickbot test waiting rpc after clicking filter", async () => {
             {
                 id: 1,
                 res_model: "foo",
-                views: [[false, "list"]],
+                views: [
+                    [false, "list"],
+                    [false, "form"],
+                ],
             },
         ],
         { mode: "replace" }
@@ -381,6 +411,8 @@ test("clickbot test waiting rpc after clicking filter", async () => {
     await promise;
     expect.verifySteps([
         "web_search_read called", // click on the App
+        "response",
+        "web_search_read called", // came back to the list view from the form view
         "response",
         "web_search_read called", // click on the Filter
         "response",
@@ -432,7 +464,8 @@ test("clickbot show rpc error when an error dialog is detected", async () => {
     });
     onRpc("web_search_read", () => {
         if (clickBotStarted) {
-            if (id === 3) {
+            if (id === 4) {
+                id++;
                 // click on the Second Filter
                 throw makeServerError({
                     message: "This is a server Error, it should be displayed in an error dialog",
@@ -442,14 +475,6 @@ test("clickbot show rpc error when an error dialog is detected", async () => {
             id++;
         }
     });
-    defineActions([
-        {
-            id: 1,
-            name: "App1",
-            res_model: "foo",
-            views: [[false, "list"]],
-        },
-    ]);
     defineMenus([
         {
             id: 1,
@@ -457,6 +482,13 @@ test("clickbot show rpc error when an error dialog is detected", async () => {
             appID: 1,
             actionID: 1001,
             xmlid: "app1",
+        },
+        {
+            id: 2,
+            name: "App2",
+            appID: 2,
+            actionID: 1002,
+            xmlid: "app2",
         },
     ]);
     const webClient = await mountWithCleanup(WebClient);
@@ -552,19 +584,30 @@ test("clickbot show rpc error when an error dialog is detected", async () => {
         "Starting ClickEverywhere test",
         "Testing app: App1 (app1)",
         "Testing menu App1 (app1)",
+        "Clicking on: open form view from list",
+        "Clicking on: go back to list view",
         "Testing 2 filters",
         'Clicking on: filter "Not Bar"',
         'Clicking on: filter "Date"',
         'Clicking on: filter option "April"',
         `A RPC in error was detected, maybe it's related to the error dialog : ${expectedRpcData}`,
-        "Error while testing App1 (app1)",
+        `Error dialog detected ${expectedModalHtml}\n on testing menu App1 (app1)`,
+        "Testing app: App2 (app2)",
+        "Testing menu App2 (app2)",
+        "Clicking on: open form view from kanban",
+        "Clicking on: go back to kanban view",
+        "Testing 2 filters",
+        'Clicking on: filter "Not Bar"',
+        'Clicking on: filter "Date"',
+        'Clicking on: filter option "April"',
         "Test took 0 seconds",
-        "Successfully tested 1 apps",
-        "Successfully tested 1 menus",
-        "Successfully tested 0 views",
-        "Successfully tested 0 modals",
-        "Successfully tested 2 filters",
-        `Error: Error dialog detected${expectedModalHtml}`,
+        "Tested 2 apps",
+        "Tested 2 menus",
+        "Error found while testing 1 menus",
+        "Tested 1 views",
+        "Tested 2 form views",
+        "Tested 0 modals",
+        "Tested 4 filters",
         FAILURE_SIGNAL,
     ]);
 });
@@ -626,6 +669,8 @@ test("clickbot test waiting render after clicking filter", async () => {
     expect.verifySteps([
         "onWillStart called", // click on APP
         "response",
+        "onWillStart called", // open Form View
+        "response",
         "onWillUpdateProps called", // click on filter
         "response",
         "onWillUpdateProps called", // click on second filter
@@ -637,11 +682,6 @@ test("clickbot test waiting render after clicking filter", async () => {
 test("clickbot clickeverywhere menu modal", async () => {
     onRpc("has_group", () => true);
     mockDate("2017-10-08T15:35:11.000");
-    Foo._views.form = /* xml */ `
-        <form>
-            <field name="foo"/>
-        </form>
-    `;
     const { promise, resolve } = Promise.withResolvers();
     patchWithCleanup(console, {
         log: (msg) => {
@@ -689,6 +729,8 @@ test("clickbot clickeverywhere menu modal", async () => {
         "Starting ClickEverywhere test",
         "Testing app: App1 (app1)",
         "Testing menu App1 (app1)",
+        "Clicking on: open form view from list",
+        "Clicking on: go back to list view",
         "Testing 2 filters",
         'Clicking on: filter "Not Bar"',
         'Clicking on: filter "Date"',
@@ -704,11 +746,12 @@ test("clickbot clickeverywhere menu modal", async () => {
         "Modal detected: App Modal (test.modal)",
         "Clicking on: modal close button",
         "Test took 0 seconds",
-        "Successfully tested 2 apps",
-        "Successfully tested 2 menus",
-        "Successfully tested 2 views",
-        "Successfully tested 1 modals",
-        "Successfully tested 4 filters",
+        "Tested 2 apps",
+        "Tested 2 menus",
+        "Tested 2 views",
+        "Tested 1 form views",
+        "Tested 1 modals",
+        "Tested 4 filters",
         SUCCESS_SIGNAL,
     ]);
 });
