@@ -569,6 +569,8 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         self.assertEqual(quant.quantity, 5)
 
     def test_po_edit_after_receive(self):
+        # Picking types can be detached from any warehouse; ensure PO confirmation still works.
+        self.company_data['default_warehouse'].in_type_id.warehouse_id = False
         self.po = self.env['purchase.order'].create(self.po_vals)
         self.po.button_confirm()
         self.po.picking_ids.move_ids.quantity = 5
@@ -577,6 +579,16 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         self.assertEqual(self.po.picking_ids.move_ids.mapped('product_uom_qty'), [5.0, 5.0])
         self.po.with_context(import_file=True).order_line[0].product_qty = 10
         self.assertEqual(self.po.picking_ids.move_ids.mapped('product_uom_qty'), [5.0, 5.0, 5.0])
+
+    def test_po_edit_after_receive_2_steps_route(self):
+        self.company_data['default_warehouse'].reception_steps = 'two_steps'
+        self.po = self.env['purchase.order'].create(self.po_vals)
+        self.po.button_confirm()
+        self.po.picking_ids.move_ids.quantity = 1
+        Form.from_action(self.env, self.po.picking_ids.button_validate()).save().process()
+        self.assertEqual(self.po.picking_ids.move_ids.mapped('product_uom_qty'), [1.0, 1.0, 4.0, 4.0])
+        self.po.order_line[0].product_qty = 3
+        self.assertEqual(self.po.picking_ids.move_ids.mapped('product_uom_qty'), [1.0, 1.0, 2.0, 4.0])
 
     def test_receive_returned_product_without_po_update(self):
         """
