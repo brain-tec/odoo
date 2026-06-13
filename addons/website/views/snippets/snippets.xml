@@ -51,6 +51,9 @@
             <t t-snippet="website.s_cover" string="Cover" group="intro">
                 <keywords>hero, jumbotron, headline, header, branding, intro, home, showcase, spotlight, main, landing, presentation, top, splash, parallax</keywords>
             </t>
+            <t t-snippet="website.s_animated_cover" string="Animated Cover" group="intro">
+                <keywords>hero, headline, header, intro, home, landing page, animated, movement, marquee, scrolling text, avatars, social proof, background image, immersive, cover</keywords>
+            </t>
             <t t-snippet="website.s_text_cover" string="Text Cover" group="intro">
                 <keywords>hero, jumbotron, headline, header, intro, home, content, description, primary, highlight, lead</keywords>
             </t>
@@ -68,6 +71,12 @@
             </t>
             <t t-snippet="website.s_motto" string="Motto" group="intro">
                 <keywords>cite, slogan, tagline, mantra, catchphrase, statements, sayings, comments, mission, citations, maxim, quotes, principle, ethos, values</keywords>
+            </t>
+            <t t-snippet="website.s_hero_about" string="Hero About" group="intro">
+                <keywords>hero, headline, header, introduction, home, picture, photo, about page, company, story, history, brand, mission, statement</keywords>
+            </t>
+            <t t-snippet="website.s_banner_contained" string="Banner Contained" group="intro">
+                <keywords>hero, banner, picture, photo, cover, shape, background image, fullscreen, headline, intro, landing page, impactful</keywords>
             </t>
             <t t-snippet="website.s_banner_connected" string="Banner connected" group="intro">
                 <keywords>content, picture, photo, connection, cover, shape, background, image, headings, hero, light, experience, parallax</keywords>
@@ -99,10 +108,22 @@
             <t t-snippet="website.s_split_intro" string="Split Intro" group="intro">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, network, relationships, interactions, connectivity, collaborations</keywords>
             </t>
+            <t t-snippet="website.s_hero_maintenance" string="Hero Maintenance" group="intro">
+                <keywords>hero, headline, header, centered, maintenance, under maintenance, coming soon, fullscreen, social media, status page, offline, temporary</keywords>
+            </t>
+            <t t-snippet="website.s_hero_minimalist" string="Hero Minimalist" group="intro">
+                <keywords>hero, minimalist, headline, header, introduction, home, picture, photo, split layout, two column, large image, tagline, landing page</keywords>
+            </t>
+            <t t-snippet="website.s_launch_countdown" string="Launch Countdown" group="intro">
+                <keywords>coming soon, countdown, launch, waitlist, timer, days hours minutes seconds, social media, teaser, pre-launch, fullscreen, dark</keywords>
+            </t>
 
             <!-- Columns group -->
             <t t-snippet="website.s_three_columns" string="Columns" group="columns">
                 <keywords>description, containers, layouts, structures, multi-columns, modules, boxes</keywords>
+            </t>
+            <t t-snippet="website.s_services_grid" string="Services Grid" group="columns">
+                <keywords>services, features, grid, images, three columns, overview</keywords>
             </t>
             <t t-snippet="website.s_features_wall" string="Features Wall" group="columns">
                 <keywords>reveal, showcase, launch, presentation, announcement, content, picture, photo, illustration, media, visual, combination</keywords>
@@ -127,6 +148,9 @@
             </t>
             <t t-snippet="website.s_cards_soft" string="Cards Soft" group="columns">
                 <keywords>description, containers, layouts, structures, multi-columns, modules, boxes, content, picture, photo, illustration, media, visual, article, story, combination, showcase, announcement, reveal</keywords>
+            </t>
+            <t t-snippet="website.s_achievements_list" string="Achievements List" group="columns">
+                <keywords>achievements, awards, recognitions, certifications, press, records, milestones, honors, two columns, list, stats, numbers, accomplishments, highlights</keywords>
             </t>
 
             <!-- Content group -->
@@ -160,6 +184,9 @@
             <t t-snippet="website.s_cta_box" string="Box Call to Action" group="content">
                 <keywords>CTA, button, btn, action, engagement, link, offer, appeal, call to action, prompt, interact, trigger</keywords>
             </t>
+            <t t-snippet="website.s_cta_centered" string="Centered Call to Action" group="content">
+                <keywords>CTA, button, call to action, offer, centered, minimal, conversion, signup, subscribe, join, card</keywords>
+            </t>
             <t t-snippet="website.s_striped" string="Striped section" group="content">
                 <keywords>hero, jumbotron, headline, header, introduction, home, content, picture, photo, illustration, media, visual, article, combination, trendy, pattern, design</keywords>
             </t>
@@ -176,6 +203,9 @@
             <t t-snippet="website.s_popup" string="Popup" group="content" label="Popup"/>
             <t t-snippet="website.s_countdown" string="Countdown" group="content">
                 <keywords>celebration, launch</keywords>
+            </t>
+            <t t-snippet="website.s_numbers_lite" string="Numbers Lite" group="content">
+                <keywords>statistics, stats, KPI, metrics, highlights, figures, achievements, milestones, data, results, trends, count, counter, compact, simple</keywords>
             </t>
             <t t-snippet="website.s_numbers_charts" string="Numbers Charts" group="content">
                 <keywords>graph, table, diagram, pie, plot, bar, metrics, figures, data-visualization, statistics, stats, analytics, infographic, skills, report</keywords>
@@ -201,11 +231,38 @@
             <t t-snippet="website.s_features" string="Features" group="content">
                 <keywords>promotion, characteristic, quality, highlights, specs, advantages, functionalities, exhibit, details, capabilities, attributes, promotion</keywords>
             </t>
+            <t t-snippet="website.s_manifesto" string="Manifesto" group="content">
+                <keywords>manifesto, mission, vision, values, principles, core values, core principles, numbered list, commitment, beliefs, statement</keywords>
+            </t>
+            <t t-snippet="website.s_bento_features" string="Bento Features" group="content">
+                <keywords>features, benefits, highlights, bento, bento grid, commitments, promises, values, goals, cards</keywords>
+            </t>
+            <t t-snippet="website.s_projects_list" string="Projects List" group="content">
+                <keywords>projects, list, portfolio, showcase, work, case studies, collection, typography, agency, creative, clients, work list</keywords>
+            </t>
             <t t-snippet="website.s_features_wave" string="Features Wave" group="content">
                 <keywords>promotion, characteristic, quality, highlights, specs, advantages, functionalities, exhibit, details, capabilities, attributes, promotion, headline, content, overview, spotlight</keywords>
             </t>
+            <t t-snippet="website.s_projects_grid" string="Projects Grid" group="content">
+                <keywords>projects, portfolio, showcase, gallery, images, images-grid, collection, visual-grid, work, case studies, mixed layout, creative</keywords>
+            </t>
+            <t t-snippet="website.s_projects_grid_minimal" string="Projects Grid Minimal" group="content">
+                <keywords>projects, portfolio, showcase, gallery, images, images-grid, collection, visual-grid, work, case studies, minimal, two columns, creative</keywords>
+            </t>
+            <t t-snippet="website.s_image_features" string="Image Features" group="content">
+                <keywords>features, highlights, image, showcase, split layout, icon list, checklist, bullet points, product features, benefits, description, photo, key features</keywords>
+            </t>
+            <t t-snippet="website.s_features_image" string="Features Image" group="content">
+                <keywords>features, highlights, image, showcase, split layout, icon list, checklist, bullet points, product features, benefits, description, photo, key features</keywords>
+            </t>
+            <t t-snippet="website.s_showcase_square" string="Showcase Square" group="content">
+                <keywords>features, icons, benefits, product features, split layout, image, icon list, advantages, highlights, product showcase, 4 features</keywords>
+            </t>
             <t t-snippet="website.s_media_list" string="Media List" group="content">
                 <keywords>block, blog, post, catalog, feed, items, entries, entry, collection</keywords>
+            </t>
+            <t t-snippet="website.s_services_pack" string="Services Pack" group="content">
+                <keywords>services, offer, package, features, list, catalog, agency, deliverables, skills, expertise</keywords>
             </t>
             <t t-snippet="website.s_showcase" string="Showcase" group="content">
                 <keywords>promotion, characteristic, quality, highlights, specs, advantages, functionalities, exhibit, details, capabilities, attributes, promotion, presentation, demo, feature</keywords>
@@ -218,6 +275,9 @@
             </t>
             <t t-snippet="website.s_features_grid" string="Features Grid" group="content">
                 <keywords>promotion, characteristic, quality, highlights, specs, advantages, functionalities, exhibit, details, capabilities, attributes, promotion</keywords>
+            </t>
+            <t t-snippet="website.s_features_cards" string="Features Cards" group="content">
+                <keywords>features, benefits, highlights, cards, photo cards, image cards, grid, two columns, product features, services, quality</keywords>
             </t>
             <t t-snippet="website.s_tabs" string="Tabs" group="content" label="Tab">
                 <keywords>navigation, sections, multi-tab, panel, toggle</keywords>
@@ -305,6 +365,9 @@
             <t t-snippet="website.s_images_constellation" string="Images Constellation" group="images">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, trendy, pattern, design, shape, geometric, patterned, contrast, collage, arrangement, gallery, creative, mosaic</keywords>
             </t>
+            <t t-snippet="website.s_duo_images" string="Duo Images" group="images">
+                <keywords>picture, photo, illustration, media, visual, two images, side by side, duo, gallery, photography, two columns, before after, comparison</keywords>
+            </t>
 
             <!-- People group -->
             <t t-snippet="website.s_company_team" string="Team" group="people">
@@ -331,6 +394,9 @@
             <t t-snippet="website.s_references" string="References" group="people">
                 <keywords>customers, clients, sponsors, partners, supporters, case-studies, collaborators, associations, associates, testimonials, endorsements</keywords>
             </t>
+            <t t-snippet="website.s_references_lite" string="References Lite" group="people">
+                <keywords>logos, brands, clients, partners, sponsors, customers, trust, social proof, trusted by</keywords>
+            </t>
             <t t-snippet="website.s_references_social" string="References Social" group="people">
                 <keywords>customers, clients, sponsors, partners, supporters, case-studies, collaborators, associations, associates, testimonials, endorsements, social</keywords>
             </t>
@@ -356,6 +422,15 @@
             </t>
             <t t-snippet="website.s_text_block" string="Text" group="text">
                 <keywords>content, paragraph, article, body, description, information</keywords>
+            </t>
+            <t t-snippet="website.s_text_block_split" string="Text Split" group="text">
+                <keywords>paragraph, description, information, split, split text, split content, story, typography, two columns, minimal, narrative, editorial</keywords>
+            </t>
+            <t t-snippet="website.s_title_split" string="Title Split" group="text">
+                <keywords>heading, headline, header, split, split text, split content, two columns, description, intro, section header, typography, large text</keywords>
+            </t>
+            <t t-snippet="website.s_text_bold" string="Text Bold" group="text">
+                <keywords>bold, bold text, paragraph, statement, large text, tagline, typography, impactful, mission statement, quote, big text</keywords>
             </t>
             <t t-snippet="website.s_faq_collapse" string="FAQ Block" group="text">
                 <keywords>common answers, common questions</keywords>
@@ -384,8 +459,14 @@
                 <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request</keywords>
             </t>
             <t t-snippet="website.s_opening_hours" string="Opening Hours" group="contact_and_forms"/>
+            <t t-snippet="website.s_hours_and_place" string="Hours and Place" group="contact_and_forms" label="Map">
+                <keywords>store, locator, map, address, hours, opening hours, directions, location, visit us, find us, contact</keywords>
+            </t>
             <t t-snippet="website.s_contact_info" string="Contact Info" group="contact_and_forms"/>
             <t t-snippet="website.s_website_form_overlay" string="Form Overlay" t-forbid-sanitize="form" group="contact_and_forms" label="Form">
+                <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request</keywords>
+            </t>
+            <t t-snippet="website.s_website_form_bold" string="Form Bold" t-forbid-sanitize="form" group="contact_and_forms" label="Form">
                 <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request</keywords>
             </t>
             <t t-snippet="website.s_website_form_info" string="Form Info" t-forbid-sanitize="form" group="contact_and_forms" label="Form">
@@ -458,6 +539,7 @@
             <t id="mass_mailing_newsletter_sms_notifications_hook"/>
             <t id="mass_mailing_newsletter_benefits_popup_hook"/>
             <t id="mass_mailing_newsletter_aside_hook"/>
+            <t id="mass_mailing_newsletter_waiting_list_hook"/>
 
             <!-- Social group -->
             <t t-snippet="website.s_instagram_page" string="Instagram Page" group="social" label="Instagram"
@@ -541,6 +623,8 @@
 
 <template id="external_snippets" inherit_id="website.snippets" priority="8">
     <xpath expr="//snippets[@id='snippet_structure']" position="inside">
+        <t t-install="mass_mailing" string="Waiting List" group="contact_and_forms"
+            t-image-preview="/website/static/src/img/snippets_previews/s_newsletter_waiting_list_preview.webp"/>
         <t t-install="mass_mailing" string="Newsletter Block" group="contact_and_forms"
             t-image-preview="/website/static/src/img/snippets_previews/s_newsletter_block_preview.png"/>
         <t t-install="mass_mailing" string="Newsletter Aside" group="contact_and_forms"
