@@ -56,7 +56,7 @@ class AccountEdiFormat(models.Model):
         if not request_response.ok:
             try:
                 response_data = request_response.json()
-            except JSONDecodeError as ex:
+            except (JSONDecodeError, json.JSONDecodeError) as ex:
                 return {
                     'error': str(ex),
                     'blocking_level': 'error'
@@ -69,7 +69,7 @@ class AccountEdiFormat(models.Model):
 
         try:
             response_data = request_response.json()
-        except requests.exceptions.JSONDecodeError:
+        except JSONDecodeError:
             response_data = {}
 
         return {
