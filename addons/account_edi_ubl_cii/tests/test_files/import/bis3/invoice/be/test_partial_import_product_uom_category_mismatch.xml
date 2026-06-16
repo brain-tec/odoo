@@ -4,12 +4,7 @@
 		 xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
 	<cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>
 	<cac:InvoiceLine>
-		<cbc:LineExtensionAmount currencyID="EUR">1.0</cbc:LineExtensionAmount>
-		<cac:Item>
-			<cbc:Name>important product</cbc:Name>
-		</cac:Item>
-	</cac:InvoiceLine>
-	<cac:InvoiceLine>
+		<cbc:InvoicedQuantity unitCode="MTK">1.0</cbc:InvoicedQuantity>
 		<cbc:LineExtensionAmount currencyID="EUR">1.0</cbc:LineExtensionAmount>
 		<cac:Item>
 			<cbc:Name>XYZ</cbc:Name>
