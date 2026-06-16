@@ -1495,7 +1495,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.env["pos.config"].with_company(branch).create({
             "name": "Branch Point of Sale"
         })
-        self.env['pos.config']._ensure_downpayment_product()
+        self.env['pos.config']._ensure_default_products()
 
     def test_amount_unpaid_with_refund_pos_order(self):
         product = self.env['product.product'].create({
@@ -1598,7 +1598,7 @@ class TestPoSSalePayment(TestPointOfSaleHttpCommon, PaymentCommon):
         via a payment transaction with the automatic invoicing setting enabled.
         """
         self.product_a.available_in_pos = True
-        self.env['ir.config_parameter'].sudo().set_bool('sale.automatic_invoice', 'True')
+        self.env.company.sale_automatic_invoice = True
         self.partner_a.email = "test.customer@example.com"
         sale_order = self.env['sale.order'].sudo().create({
             'partner_id': self.partner_a.id,

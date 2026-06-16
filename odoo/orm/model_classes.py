@@ -193,6 +193,7 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
             '_inherit_children': OrderedSet(),      # names of children models
             '_inherits_children': set(),            # names of children models
             '_fields__': {},                        # populated in _setup()
+            '_fields_update_order__': {},           # populated in _post_model_setup__()
             '_table_objects': frozendict(),         # populated in _setup()
         })
         model_cls._fields = MappingProxyType(model_cls._fields__)
@@ -241,6 +242,11 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
 
 def _check_model_extension(model_cls: type[BaseModel], model_def: type[BaseModel]):
     """ Check whether ``model_cls`` can be extended with ``model_def``. """
+    if model_def._table:
+        raise TypeError(
+            f"{model_def} cannot redefine _table while extending model {model_cls._name!r}. "
+            "That class should either remove '_table', or set a different '_name'."
+        )
     if model_cls._abstract and not model_def._abstract:
         raise TypeError(
             f"{model_def} transforms the abstract model {model_cls._name!r} into a non-abstract model. "
@@ -332,6 +338,10 @@ def setup_model_classes(env: Environment):
         _setup_fields(model_cls, env)
 
     for model_cls in models_classes:
+        model_cls._fields_update_order__ = {
+            field: (field.write_sequence, i)
+            for i, field in enumerate(model_cls._fields.values())
+        }
         model_cls(env, (), ())._post_model_setup__()
 
 
@@ -417,7 +427,7 @@ def _setup(model_cls: type[BaseModel], env: Environment):
                     # patch the field definition by adding an override
                     _logger.debug("Patching %s.%s with company_dependent=True", model_cls._name, name)
                     fields_.append(type(fields_[0])(company_dependent=True))
-        if len(fields_) == 1 and fields_[0]._direct and fields_[0].model_name == model_cls._name:
+        if len(fields_) == 1 and fields_[0]._shareable and fields_[0].model_name == model_cls._name:
             model_cls._fields__[name] = fields_[0]
         else:
             Field = type(fields_[-1])
@@ -622,7 +632,7 @@ def add_field(model_cls: type[BaseModel], name: str, field: Field):
     if not isinstance(getattr(model_cls, name, field), fields.Field):
         _logger.warning("In model %r, field %r overriding existing value", model_cls._name, name)
     setattr(model_cls, name, field)
-    field._toplevel = True
+    field._shareable = False
     field.__set_name__(model_cls, name)
     # add field as an attribute and in model_cls._fields__ (for reflection)
     model_cls._fields__[name] = field

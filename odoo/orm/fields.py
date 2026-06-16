@@ -87,9 +87,6 @@ def determine(needle, records: BaseModel, *args):
     raise TypeError("Determination requires a callable or method name")
 
 
-_global_seq = itertools.count()
-
-
 class Field[T]:
     """The field descriptor contains the field definition, and manages accesses
     and assignments of the corresponding field on records. The following
@@ -258,7 +255,8 @@ class Field[T]:
     is_text: bool = False               # whether the field is a text type in the database
     falsy_value: T | None = None        # falsy value for comparisons (optional)
 
-    write_sequence: int = 0             # field ordering for write()
+    # Used in _fields_update_order__ to order field updates and inverses.
+    write_sequence: int = 0
     # Database column type (ident, spec) for non-company-dependent fields.
     # Company-dependent fields are stored as jsonb (see column_type).
     _column_type: tuple[str, str] | None = None
@@ -267,11 +265,10 @@ class Field[T]:
     _module: str | None = None          # the field's module name
     _modules: tuple[str, ...] = ()      # modules that define this field
     _setup_done = True                  # whether the field is completely set up
-    _sequence: int                      # absolute ordering of the field
     _base_fields__: tuple[Self, ...] = ()  # the fields defining self, in override order
     _extra_keys__: tuple[str, ...] = ()  # unknown attributes set on the field
-    _direct: bool = False               # whether self may be used directly (shared)
-    _toplevel: bool = False             # whether self is on the model's registry class
+    _shareable: bool = True             # whether self can be shared across registries
+                                        # developers should never override a non shareable field to shareable
 
     inherited: bool = False             # whether the field is inherited (_inherits)
     inherited_field: Field | None = None  # the corresponding inherited field
@@ -319,7 +316,6 @@ class Field[T]:
 
     def __init__(self, string: str | Sentinel = SENTINEL, **kwargs):
         kwargs['string'] = string
-        self._sequence = next(_global_seq)
         self._args__ = frozendict({key: val for key, val in kwargs.items() if val is not SENTINEL})
 
     def __str__(self):
@@ -384,7 +380,7 @@ class Field[T]:
     # and are always recreated as toplevel fields.  On those fields, the base
     # setup is useless, because only field._args__ is used for setting up other
     # fields.  We therefore skip the base setup for those fields.  The only
-    # attributes of those fields are: '_sequence', '_args__', 'model_name', 'name'
+    # attributes of those fields are: '_args__', 'model_name', 'name'
     # and '_module', which makes their __dict__'s size minimal.
 
     def __set_name__(self, owner: type[BaseModel], name: str) -> None:
@@ -400,20 +396,22 @@ class Field[T]:
         self.model_name = owner._name
         self.name = name
         if getattr(owner, 'pool', None) is None:  # models.is_model_definition(owner)
-            # only for fields on definition classes, not registry classes
+            assert '_base_fields__' not in self._args__
             self._module = owner._module
             owner._field_definitions.append(self)
-
-        if not self._args__.get('related'):
-            self._direct = True
-        if self._direct or self._toplevel:
+            if self._shareable and (self._args__.get('related') or not self._args__.get('_shareable', True)):
+                self._shareable = False
+            if self._shareable:
+                # non shareable field objects in model definition classes won't be in a model registry class,
+                # skipping setting attributes for them to save memory
+                self._setup_attrs__(owner, name)
+        else:  # model registry class
             self._setup_attrs__(owner, name)
-            if self._toplevel:
-                # free memory from stuff that is no longer useful
-                self.__dict__.pop('_args__', None)
-                if not self.related:
-                    # keep _base_fields__ on related fields for incremental model setup
-                    self.__dict__.pop('_base_fields__', None)
+            # free memory from stuff that is no longer useful
+            self.__dict__.pop('_args__', None)
+            if not self.related:
+                # keep _base_fields__ on related fields for incremental model setup
+                self.__dict__.pop('_base_fields__', None)
 
     #
     # Setup field parameter attributes

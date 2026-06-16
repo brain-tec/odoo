@@ -45,6 +45,9 @@ export class TableOfContentOptionPlugin extends Plugin {
         },
         is_unremovable_selectors: ".s_table_of_content_navbar_wrap, .s_table_of_content_main",
         content_not_editable_selectors: ".s_table_of_content_navbar",
+        anchor_allowed_selectors: ".s_table_of_content_main > *",
+        anchor_excluded_selectors:
+            ".s_table_of_content, .s_table_of_content_navbar_wrap, .s_table_of_content_main",
     };
 
     normalize(root) {
@@ -157,9 +160,6 @@ export class TableOfContentOptionPlugin extends Plugin {
 
             itemEl.className = `table_of_content_link list-group-item list-group-item-action py-2 border-0 rounded-0 table_of_content_link_depth_${depthLevel}`;
             tableOfContentNavbar.appendChild(itemEl);
-            if (el.dataset.anchor === undefined) {
-                el.dataset.anchor = true;
-            }
             el.setAttribute("id", tocHeadingId);
         }
     }
