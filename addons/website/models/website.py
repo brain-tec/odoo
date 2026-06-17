@@ -690,7 +690,7 @@ class Website(models.CachedModel):
     @api.model
     def configurator_init(self):
         r = dict()
-        current_website = self.get_current_website(fallback=True)
+        current_website = self.env.website or self.env.website.browse(self.env.context.get('host_id')) or self.env.ref('base.default_website')
         company = current_website.company_id
         r['logo'] = False
         if not company.uses_default_logo:
@@ -839,7 +839,7 @@ class Website(models.CachedModel):
 
     @api.model
     def configurator_apply(self, **kwargs):
-        website = self.get_current_website(fallback=True)
+        website = self.env.website or self.env.website.browse(self.env.context.get('host_id')) or self.env.ref('base.default_website')
         self = self.with_context(website_id=website.id)  # noqa: PLW0642
         skip_ai = kwargs.get('skip_ai')  # Used by design-themes tooling
         theme_name = kwargs['theme_name']
@@ -1334,7 +1334,7 @@ class Website(models.CachedModel):
         # we only want a unique_path for website specific.
         # we need to be able to have /url for website=False, and /url for website=1
         # in case of duplicate, page manager will allow you to manage this case
-        website_id = self.env.context.get('website_id', False) or self.get_current_website().id
+        website_id = self.env.context.get('website_id') or self.env.context.get('host_id') or False
         domain_static = [('website_id', '=', website_id)]  # .website_domain()
         page_temp = page_url
         while self.env['website.page'].with_context(active_test=False).sudo().search([('url', '=', page_temp)] + domain_static):
