@@ -921,21 +921,15 @@ class AccountEdiUBL(models.AbstractModel):
     def _ubl_add_line_item_name_description_nodes(self, vals):
         item_node = vals['item_node']
         base_line = vals['line_vals']['base_line']
-        product = base_line['product_id']
 
-        if base_line.get('_removed_tax_data'):
+        line_name = name = base_line.get('name', '')  # Regular business line.
+        description = None
+        if product := base_line['product_id']:
+            name = product.display_name
+            description = line_name.replace(name, '').strip()  # Remove the redundant product's name from the description.
+        elif base_line.get('_removed_tax_data'):
             # Emptying tax extra line.
-            name = description = base_line['_removed_tax_data']['tax'].name
-        else:
-            name = product.name or ''
-            if line_name := base_line.get('name'):
-                # Regular business line.
-                description = line_name
-                if not name:
-                    name = line_name
-            else:
-                # Undefined line.
-                description = product.description_sale or ''
+            name = base_line['_removed_tax_data']['tax'].name
 
         if description:
             item_node['cbc:Description'] = {'_text': description}
@@ -3028,15 +3022,28 @@ class AccountEdiUBL(models.AbstractModel):
             taxes_values.append(tax_values)
 
     def _import_ubl_invoice_line_add_name(self, collected_values):
+        """
+        In UBL, both Name and Description elements are optional
+        An item may contain multiple Description elements
+        """
         line_tree = collected_values['line_tree']
         item_ref = line_tree.findtext('.//{*}Item/{*}SellersItemIdentification/{*}ID')
-        item_name = line_tree.findtext('.//{*}Item/{*}Name')
-        name = collected_values['name'] = (
-            line_tree.findtext('.//{*}Item/{*}Description')
-            or (f"[{item_ref}] {item_name}" if (item_ref and item_name) else item_name)
-        )
-        if name:
+        name = line_tree.findtext('.//{*}Item/{*}Name')
+        if item_ref and name and f'[{item_ref}]' not in name:
+            name = f"[{item_ref}] {name}"
+        collected_values['name'] = name
+
+        description = ''
+        for description_elem in line_tree.iterfind('.//{*}Item/{*}Description'):
+            if description_elem.text:
+                description += description_elem.text + '\n'
+
+        if name and description:
+            collected_values['to_write']['name'] = f'{name}\n{description.strip()}'
+        elif name:
             collected_values['to_write']['name'] = name
+        elif description:
+            collected_values['to_write']['name'] = description.strip()
 
     def _import_ubl_invoice_line_add_allowance_charges_values(self, collected_values):
         line_tree = collected_values['line_tree']
@@ -3505,10 +3512,13 @@ class AccountEdiUBL(models.AbstractModel):
             base_line_kwargs['product_id'] = product
         if uom := collected_values['product_uom_values'].get('uom'):
             base_line_kwargs['product_uom_id'] = uom
+        elif collected_values['product_uom_values'].get('force_empty'):
+            # Override the product_uom_id compute so the saved line keeps no UoM.
+            base_line_kwargs['_create_values']['product_uom_id'] = False
         if account := collected_values['account_values'].get('account'):
             base_line_kwargs['account_id'] = account
 
-        if name := collected_values.get('name'):
+        if name := to_write.get('name'):
             base_line_kwargs['_create_values']['name'] = name
         if deferred_start_date := to_write.get('deferred_start_date'):
             base_line_kwargs['_create_values']['deferred_start_date'] = deferred_start_date
@@ -3581,6 +3591,7 @@ class AccountEdiUBL(models.AbstractModel):
 
     def _import_ubl_invoice_retrieve_product_uoms(self, collected_values):
         lines_collected_values = collected_values['lines_collected_values']
+        logs = collected_values['logs']
         cache = {}
         for line_collected_values in lines_collected_values:
             product_uom_values = line_collected_values['product_uom_values']
@@ -3596,6 +3607,21 @@ class AccountEdiUBL(models.AbstractModel):
                     else:
                         uom = cache[matched_uom_xmlid] = self.env.ref(matched_uom_xmlid, raise_if_not_found=False)
                     if uom:
+                        product = line_collected_values['product_values'].get('product')
+                        product_uom = product.product_tmpl_id.uom_id if product else self.env['uom.uom']
+                        if product and not uom._has_common_reference(product_uom):
+                            logs.append(_(
+                                "The Unit of Measure '%(uom)s' (from unit code '%(code)s') was "
+                                "ignored on the line for product '%(product)s' because it is not "
+                                "compatible with the product's Unit of Measure '%(product_uom)s'. "
+                                "The UoM was left empty.",
+                                uom=uom.name,
+                                code=uom_code,
+                                product=product.display_name,
+                                product_uom=product_uom.name,
+                            ))
+                            product_uom_values['force_empty'] = True
+                            continue
                         to_write['product_uom_id'] = uom.id
                         product_uom_values['uom'] = uom
 
